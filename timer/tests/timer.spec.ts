@@ -345,3 +345,18 @@ test('timer edits save without Apply and do not reset a running timer', async ({
   await page.goto('/de/timer/');
   await expect(page.locator('#time')).toHaveText('17:00');
 });
+
+test('small screens keep the logo and header controls in one row', async ({ page }) => {
+  for (const width of [320, 375, 390, 680]) {
+    await page.setViewportSize({ width, height: 844 });
+    await page.goto('/fr/timer/');
+    await expect(page.locator('.brand-wordmark')).toBeHidden();
+    await expect(page.locator('.brand-icon')).toBeVisible();
+    const logo = await page.locator('.brand').boundingBox();
+    const controls = await page.locator('.header-tools').boundingBox();
+    expect(Math.abs(logo!.y + logo!.height / 2 - controls!.y - controls!.height / 2)).toBeLessThan(2);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
+  }
+  await page.setViewportSize({ width: 1024, height: 844 });
+  await expect(page.locator('.brand-wordmark')).toBeVisible();
+});
