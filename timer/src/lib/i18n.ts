@@ -2,8 +2,9 @@ export const languages = ['en', 'de', 'es', 'fr'] as const;
 export type Language = typeof languages[number];
 export const languageNames = { en: 'English', de: 'Deutsch', es: 'Español', fr: 'Français' };
 const en = {
+  menuSettings: 'Settings', appearance: 'Appearance', lightMode: 'Light', darkMode: 'Dark',
   autoSaved: 'Saved automatically. Apply duration changes when you are ready.',
-  styleLabel: 'Style', warm: 'Warm', minimal: 'Minimal', technical: 'Technical', soft: 'Soft', 
+  fontSize: 'Font size', styleLabel: 'Style', warm: 'Warm', minimal: 'Minimal', technical: 'Technical', soft: 'Soft', 
   colorScheme: 'Colour palette', colorHint: 'Preview instantly, without restarting the timer.', terracotta: 'Terracotta', blue: 'Blue', green: 'Green', orange: 'Warm orange', red: 'Warm red', violet: 'Violet', teal: 'Teal', rose: 'Rose',
   tagline: 'A little space for focus.',
   eyebrow: 'LESS DISTRACTION. MORE INTENTION.',
@@ -52,8 +53,9 @@ const en = {
 };
 type Dictionary = { [K in keyof typeof en]: string };
 const de: Dictionary = {
+  menuSettings: 'Einstellungen', appearance: 'Darstellung', lightMode: 'Hell', darkMode: 'Dunkel',
   autoSaved: 'Automatisch gespeichert. Geänderte Zeiten kannst du bei Bedarf übernehmen.',
-  styleLabel: 'Stil', warm: 'Warm', minimal: 'Minimal', technical: 'Technisch', soft: 'Soft', 
+  fontSize: 'Schriftgröße', styleLabel: 'Stil', warm: 'Warm', minimal: 'Minimal', technical: 'Technisch', soft: 'Soft', 
   colorScheme: 'Farbschema', colorHint: 'Sofort ansehen, ohne den Timer neu zu starten.', terracotta: 'Terrakotta', blue: 'Blau', green: 'Grün', orange: 'Warmes Orange', red: 'Warmes Rot', violet: 'Violett', teal: 'Türkis', rose: 'Rosé',
   tagline: 'Ein bisschen Raum für Fokus.',
   eyebrow: 'WENIGER ABLENKUNG. MEHR BEWUSSTE ZEIT.',
@@ -101,8 +103,9 @@ const de: Dictionary = {
   js: 'Aktiviere JavaScript, um den Timer zu nutzen. Die Anleitung ist auch ohne JavaScript verfügbar.',
 };
 const es: Dictionary = {
+  menuSettings: 'Ajustes', appearance: 'Apariencia', lightMode: 'Claro', darkMode: 'Oscuro',
   autoSaved: 'Guardado automáticamente. Aplica los cambios de duración cuando quieras.',
-  styleLabel: 'Estilo', warm: 'Cálido', minimal: 'Minimalista', technical: 'Técnico', soft: 'Suave', 
+  fontSize: 'Tamaño de letra', styleLabel: 'Estilo', warm: 'Cálido', minimal: 'Minimalista', technical: 'Técnico', soft: 'Suave', 
   colorScheme: 'Paleta de colores', colorHint: 'Vista previa instantánea sin reiniciar el temporizador.', terracotta: 'Terracota', blue: 'Azul', green: 'Verde', orange: 'Naranja cálido', red: 'Rojo cálido', violet: 'Violeta', teal: 'Turquesa', rose: 'Rosa',
   tagline: 'Un pequeño espacio para concentrarte.', eyebrow: 'MENOS DISTRACCIONES. MÁS INTENCIÓN.',
   heading: 'Tiempo para', headingAccent: 'lo que importa.',
@@ -143,8 +146,9 @@ const es: Dictionary = {
   js: 'Activa JavaScript para usar el temporizador. La guía está disponible sin JavaScript.',
 };
 const fr: Dictionary = {
+  menuSettings: 'Réglages', appearance: 'Apparence', lightMode: 'Clair', darkMode: 'Sombre',
   autoSaved: 'Enregistré automatiquement. Appliquez les nouvelles durées quand vous le souhaitez.',
-  styleLabel: 'Style', warm: 'Chaleureux', minimal: 'Minimaliste', technical: 'Technique', soft: 'Doux', 
+  fontSize: 'Taille du texte', styleLabel: 'Style', warm: 'Chaleureux', minimal: 'Minimaliste', technical: 'Technique', soft: 'Doux', 
   colorScheme: 'Palette de couleurs', colorHint: 'Aperçu immédiat sans redémarrer le minuteur.', terracotta: 'Terre cuite', blue: 'Bleu', green: 'Vert', orange: 'Orange chaud', red: 'Rouge chaud', violet: 'Violet', teal: 'Turquoise', rose: 'Rose',
   tagline: 'Un peu de place pour se concentrer.', eyebrow: 'MOINS DE DISTRACTIONS. PLUS DE SENS.',
   heading: 'Du temps pour', headingAccent: 'ce qui compte.',

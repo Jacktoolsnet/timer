@@ -49,7 +49,7 @@ anstelle von `npm install` verwenden.
 - Warmes responsives Design, optionaler Dark Mode, Fokusansicht (Escape beendet).
 - Acht Farbschemata: Terrakotta, Blau, Grün, warmes Orange, warmes Rot,
   Violett, Türkis und Rosé.
-  Farben-Dropdown im Header zwischen Sprache und Dark Mode, mit sofortiger Vorschau
+  Gemeinsames Einstellungen-Menü (Zahnrad) im Header, mit sofortiger Vorschau
   ohne Timer-Neustart. Jedes Schema hat passende helle und dunkle Farben.
 - Vier vollständig vorgerenderte Sprachversionen. Englisch ist die
   Wörterbuch-Fallbacksprache. Die Startseite `/` leitet anhand der bevorzugten
@@ -156,10 +156,18 @@ Der MessageDrop-spezifische DSA-Kontaktstellenabschnitt wurde nicht ungeprüft
 
 ## Design und automatische Wiederherstellung
 
-Im Farben-Dropdown stehen acht deutlich gesättigtere Paletten und die Stile
+Im Einstellungen-Menü stehen acht deutlich gesättigtere Paletten und die Stile
 **Warm**, **Minimal**, **Technisch** und **Soft** (vier Symbol-Buttons mit Tooltips) zur Auswahl. Stil, Farbe und Hell/Dunkel
 sind unabhängig kombinierbar. Sprache und Design werden bei Änderungen
 automatisch in `jacktools.timer.appearance.v1` gespeichert.
 Die Startseite `/` bevorzugt eine gespeicherte Sprache vor der Browsersprache;
 explizite Sprach-URLs bleiben unverändert. Auch Timerzeiten und Signalton werden automatisch gespeichert. Der Datenschutzdialog löscht beide Schlüssel.
 Bestehende gespeicherte Designwerte werden als Fallback weiterhin gelesen.
+
+Unter „Stil“ gibt es vier Schriftgrößen (100/110/120/130 %), die sofort wirken
+und im Appearance-Speicher wiederhergestellt werden. Große Timerziffern werden
+bei Platzmangel begrenzt, damit sie im Kreis bleiben.
+
+Das Zahnrad bündelt Sprache, Hell/Dunkel, Farben, Stil und Schriftgröße.
+Auf kleinen Bildschirmen öffnet sich ein breites, scrollbareres Panel.
+Escape, Schließen oder Klick außerhalb schließen das Menü.

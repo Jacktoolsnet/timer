@@ -1,5 +1,15 @@
 import { test, expect, type Page } from '@playwright/test';
 
+async function openPreferences(page: Page) {
+  if (await page.locator('#palette-dropdown').getAttribute('open') === null) {
+    await page.locator('#palette-dropdown summary').click();
+  }
+}
+async function toggleTheme(page: Page) {
+  await openPreferences(page);
+  const dark = await page.locator('html').getAttribute('data-theme') === 'dark';
+  await page.locator(dark ? '#theme-light' : '#theme').click();
+}
 async function selectPalette(page: Page, color: string) {
   const dropdown = page.locator('#palette-dropdown');
   if (await dropdown.getAttribute('open') === null) await dropdown.locator('summary').click();
@@ -35,7 +45,7 @@ test('countdown, pause, resume, completion, reset, presets and no horizontal ove
 });
 test('appearance persists automatically, timer preferences persist automatically and both can be removed', async ({ page }) => {
   await page.goto('/de/timer/');
-  await page.locator('#theme').click();
+  await toggleTheme(page);
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await page.locator('[name=minutes]').fill('12');
@@ -81,7 +91,7 @@ test('language routes, SEO, legal drafts and focus view', async ({ page, request
     expect(await page.locator('link[rel=alternate]').count()).toBe(5);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
   }
-  await page.locator('#language').click();
+  await openPreferences(page);
   await page.locator('.language-menu a[lang=de]').click();
   await expect(page).toHaveURL(/de\/pomodoro/);
   await page.locator('#focus-view').click();
@@ -111,9 +121,9 @@ test('works with corrupt or unavailable storage', async ({ page }) => {
 test('screenshots', async ({ page }, info) => {
   await page.goto('/de/timer/');
   await page.screenshot({ path: 'test-results/' + info.project.name + '-light.png', fullPage: true });
-  await page.locator('#theme').click();
+  await toggleTheme(page);
   await page.goto('/de/pomodoro/');
-  await page.locator('#theme').click();
+  await toggleTheme(page);
   await page.screenshot({ path: 'test-results/' + info.project.name + '-dark.png', fullPage: true });
 });
 
@@ -138,7 +148,7 @@ test('neutral entry selects the browser language, keeping explicit language URLs
     await page.goto('/en/pomodoro/');
     await expect(page.locator('#start')).toBeEnabled();
     await expect(page).toHaveURL(/\/en\/pomodoro\/$/);
-    await page.locator('#language').click();
+    await openPreferences(page);
     await page.locator('.language-menu a[lang=fr]').click();
     await expect(page).toHaveURL(/\/fr\/pomodoro\/$/);
     await expect(page.locator('html')).toHaveAttribute('lang', 'fr');
@@ -157,7 +167,7 @@ test('palettes preview without resetting, persist with opt-in and work in light 
   await expect(page.locator('#time')).toHaveText('04:59');
   const remaining = await page.locator('#time').textContent();
   for (const dark of [false, true]) {
-    if (dark) await page.locator('#theme').click();
+    if (dark) await toggleTheme(page);
     for (const palette of ['terracotta', 'blue', 'green', 'orange', 'red', 'violet', 'teal', 'rose']) {
       await selectPalette(page, palette);
       await expect(page.locator('html')).toHaveAttribute('data-palette', palette);
@@ -179,7 +189,7 @@ test('palettes preview without resetting, persist with opt-in and work in light 
     }
   }
   await page.reload();
-  await page.locator('#palette-dropdown summary').click();
+  await openPreferences(page);
   await expect(page.locator('[name=colorScheme][value=rose]')).toBeChecked();
   await selectPalette(page, 'blue');
   await page.locator('.apply-button').click();
@@ -201,82 +211,54 @@ test('palettes preview without resetting, persist with opt-in and work in light 
   await expect(page.locator('[name=colorScheme][value=terracotta]')).toBeChecked();
 });
 
-test('header palette dropdown supports keyboard, dismissal and legal pages', async ({ page }) => {
-  await page.goto('/de/legal/');
-  const picker = page.locator('#palette-dropdown');
-  const trigger = picker.locator('summary');
+test('unified preferences provide all controls and dismiss with Escape or outside click', async ({ page }) => {
+  await page.goto('/de/timer/');
+  const panel = page.locator('#palette-dropdown');
+  const trigger = panel.locator('summary');
+  await expect(page.locator('.header-tools > *')).toHaveCount(1);
   await trigger.focus();
   await page.keyboard.press('Enter');
-  await expect(picker).toHaveAttribute('open', '');
+  await expect(panel).toHaveAttribute('open', '');
+  await expect(page.locator('.language-menu a')).toHaveCount(4);
+  await expect(page.locator('#theme')).toBeVisible();
+  await expect(page.locator('[name=colorScheme]')).toHaveCount(8);
+  await expect(page.locator('[name=visualStyle]')).toHaveCount(4);
+  await expect(page.locator('#font-size')).toBeVisible();
   await page.keyboard.press('Tab');
-  await expect(page.locator('[name=colorScheme][value=terracotta]')).toBeFocused();
-  await page.keyboard.press('ArrowRight');
-  await expect(page.locator('html')).toHaveAttribute('data-palette', 'blue');
-  await expect(picker).toHaveAttribute('open', '');
+  await expect(page.locator('#preferences-close')).toBeFocused();
   await page.keyboard.press('Escape');
-  await expect(picker).not.toHaveAttribute('open', '');
+  await expect(panel).not.toHaveAttribute('open', '');
   await expect(trigger).toBeFocused();
-  await trigger.click();
-  await page.locator('.site-header').click({ position: { x: 2, y: 2 } });
-  await expect(picker).not.toHaveAttribute('open', '');
+  await openPreferences(page);
+  await page.locator('.site-header').click({position:{x:2,y:2}});
+  await expect(panel).not.toHaveAttribute('open', '');
   await selectPalette(page, 'rose');
-  await expect(picker).not.toHaveAttribute('open', '');
-  await expect(page.locator('#active-palette')).toHaveAttribute('data-color', 'rose');
-  await page.locator('#theme').click();
+  await expect(panel).toHaveAttribute('open', '');
   await expect(page.locator('html')).toHaveAttribute('data-palette', 'rose');
-  await page.setViewportSize({ width: 320, height: 800 });
-  await trigger.click();
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
-  const box = await picker.locator('.palette-menu').boundingBox();
-  expect(box!.x).toBeGreaterThanOrEqual(0);
-  expect(box!.x + box!.width).toBeLessThanOrEqual(320);
-});
-
-test('language menu supports keyboard navigation, dismissal, theme and small screens', async ({ page }) => {
-  await page.goto('/de/pomodoro/');
-  const dropdown = page.locator('#language-dropdown');
-  const trigger = page.locator('#language');
-  await trigger.focus();
-  await page.keyboard.press('Enter');
-  await expect(dropdown).toHaveAttribute('open', '');
-  await expect(page.locator('.language-menu a[lang=de]')).toHaveAttribute('aria-current', 'page');
-  await page.keyboard.press('ArrowDown');
-  await expect(page.locator('.language-menu a[lang=en]')).toBeFocused();
-  await page.keyboard.press('End');
-  await expect(page.locator('.language-menu a[lang=fr]')).toBeFocused();
-  await page.keyboard.press('Home');
-  await expect(page.locator('.language-menu a[lang=en]')).toBeFocused();
-  await page.keyboard.press('Escape');
-  await expect(dropdown).not.toHaveAttribute('open', '');
+  await toggleTheme(page);
+  await expect(panel).toHaveAttribute('open', '');
+  await page.locator('#preferences-close').click();
   await expect(trigger).toBeFocused();
-  await trigger.click();
-  await page.locator('.site-header').click({ position: { x: 2, y: 2 } });
-  await expect(dropdown).not.toHaveAttribute('open', '');
-  await trigger.click();
-  await page.locator('#palette-dropdown summary').click();
-  await expect(dropdown).not.toHaveAttribute('open', '');
-  await trigger.click();
-  await expect(page.locator('#palette-dropdown')).not.toHaveAttribute('open', '');
-  await page.locator('.language-menu a[lang=es]').click();
-  await expect(page).toHaveURL(/\/es\/pomodoro\/$/);
-  await page.locator('#theme').click();
-  await page.setViewportSize({ width: 320, height: 800 });
-  await trigger.click();
-  const box = await page.locator('.language-menu').boundingBox();
+  await page.setViewportSize({width:320,height:600});
+  await openPreferences(page);
+  const box = await page.locator('.preferences-panel').boundingBox();
   expect(box!.x).toBeGreaterThanOrEqual(0);
   expect(box!.x + box!.width).toBeLessThanOrEqual(320);
+  expect(box!.y + box!.height).toBeLessThanOrEqual(600);
+  await page.locator('.language-menu a[lang=es]').click();
+  await expect(page).toHaveURL(/\/es\/timer\/$/);
   await page.goto('/de/legal/');
-  await trigger.click();
+  await openPreferences(page);
   await expect(page.locator('.language-menu a')).toHaveCount(2);
 });
 
 test('style, appearance and manual language restore on the next visit without an opt-in switch', async ({ page }) => {
   await page.goto('/de/timer/');
   await selectPalette(page, 'teal');
-  await page.locator('#palette-dropdown summary').click();
+  await openPreferences(page);
   await page.locator('[name=visualStyle][value=technical]').check();
-  await page.locator('#theme').click();
-  await page.locator('#language').click();
+  await toggleTheme(page);
+  await openPreferences(page);
   await page.locator('.language-menu a[lang=fr]').click();
   await page.goto('/');
   await expect(page).toHaveURL(/\/fr\/timer\/$/);
@@ -287,9 +269,9 @@ test('style, appearance and manual language restore on the next visit without an
   await page.goto('/de/pomodoro/');
   await expect(page.locator('html')).toHaveAttribute('lang', 'de');
   for (const style of ['warm', 'minimal', 'technical', 'soft']) {
-    await page.locator('#palette-dropdown summary').click();
+    await openPreferences(page);
     await page.locator('[name=visualStyle][value=' + style + ']').check();
-    await page.locator('#theme').click();
+    await toggleTheme(page);
     await expect(page.locator('html')).toHaveAttribute('data-style', style);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
   }
@@ -305,7 +287,7 @@ test('style, appearance and manual language restore on the next visit without an
 
 test('four icon styles fit one row and keep accessible names', async ({ page }) => {
   await page.goto('/de/timer/');
-  await page.locator('#palette-dropdown summary').click();
+  await openPreferences(page);
   const inputs = page.locator('[name=visualStyle]');
   await expect(inputs).toHaveCount(4);
   const positions = await page.locator('.style-picker label').evaluateAll(labels => labels.map(label => label.getBoundingClientRect().top));
@@ -315,7 +297,7 @@ test('four icon styles fit one row and keep accessible names', async ({ page }) 
   }
   await expect(page.locator('.appearance-hint')).toHaveCount(0);
   await page.getByRole('radio', { name: 'Soft', exact: true }).check();
-  await page.locator('#theme').click();
+  await toggleTheme(page);
   await expect(page.locator('html')).toHaveAttribute('data-style', 'soft');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
 });
@@ -359,4 +341,33 @@ test('small screens keep the logo and header controls in one row', async ({ page
   }
   await page.setViewportSize({ width: 1024, height: 844 });
   await expect(page.locator('.brand-wordmark')).toBeVisible();
+});
+
+test('font size has four steps, grows text, restores and fits small screens', async ({ page }) => {
+  await page.goto('/de/timer/');
+  await openPreferences(page);
+  const slider = page.getByRole('slider', { name: 'Schriftgröße' });
+  await expect(slider).toHaveValue('0');
+  const initial = await page.locator('.intro-copy').evaluate(el => parseFloat(getComputedStyle(el).fontSize));
+  await slider.focus();
+  await page.keyboard.press('End');
+  await expect(slider).toHaveValue('3');
+  await expect(slider).toHaveAttribute('aria-valuetext', '130 %');
+  expect(await page.locator('.intro-copy').evaluate(el => parseFloat(getComputedStyle(el).fontSize))).toBeCloseTo(initial * 1.3, 1);
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('data-font-size', '3');
+  await page.setViewportSize({ width: 320, height: 720 });
+  for (const lang of ['de', 'en', 'es', 'fr']) {
+    await page.goto('/' + lang + '/pomodoro/');
+    for (const style of ['warm', 'minimal', 'technical', 'soft']) {
+      await openPreferences(page);
+      await page.locator('[name=visualStyle][value=' + style + ']').check();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
+      await page.keyboard.press('Escape');
+    }
+  }
+  await page.locator('#privacy-open').click();
+  await page.locator('#clear-storage').click();
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('data-font-size', '0');
 });
