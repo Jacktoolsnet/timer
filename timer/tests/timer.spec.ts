@@ -289,7 +289,7 @@ test('style, appearance and manual language restore on the next visit without ti
   await expect(page.locator('[name=remember]')).not.toBeChecked();
   await page.goto('/de/pomodoro/');
   await expect(page.locator('html')).toHaveAttribute('lang', 'de');
-  for (const style of ['warm', 'minimal', 'technical']) {
+  for (const style of ['warm', 'minimal', 'technical', 'soft']) {
     await page.locator('#palette-dropdown summary').click();
     await page.locator('[name=visualStyle][value=' + style + ']').check();
     await page.locator('#theme').click();
@@ -297,11 +297,28 @@ test('style, appearance and manual language restore on the next visit without ti
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
   }
   await page.reload();
-  await expect(page.locator('html')).toHaveAttribute('data-style', 'technical');
+  await expect(page.locator('html')).toHaveAttribute('data-style', 'soft');
   await page.locator('#privacy-open').click();
   await page.locator('#clear-storage').click();
   expect(await page.evaluate(() => localStorage.getItem('jacktools.timer.appearance.v1'))).toBeNull();
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-style', 'warm');
   await expect(page.locator('html')).toHaveAttribute('data-palette', 'terracotta');
+});
+
+test('four icon styles fit one row and keep accessible names', async ({ page }) => {
+  await page.goto('/de/timer/');
+  await page.locator('#palette-dropdown summary').click();
+  const inputs = page.locator('[name=visualStyle]');
+  await expect(inputs).toHaveCount(4);
+  const positions = await page.locator('.style-picker label').evaluateAll(labels => labels.map(label => label.getBoundingClientRect().top));
+  expect(new Set(positions).size).toBe(1);
+  for (const name of ['Warm', 'Minimal', 'Technisch', 'Soft']) {
+    await expect(page.getByRole('radio', { name, exact: true })).toBeVisible();
+  }
+  await expect(page.locator('.appearance-hint')).toHaveCount(0);
+  await page.getByRole('radio', { name: 'Soft', exact: true }).check();
+  await page.locator('#theme').click();
+  await expect(page.locator('html')).toHaveAttribute('data-style', 'soft');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
 });

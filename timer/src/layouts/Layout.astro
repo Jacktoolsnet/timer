@@ -54,7 +54,7 @@ const alternateLanguages = legal ? (['en', 'de'] as const) : languages;
         if (saved) {
           if (typeof saved.dark === 'boolean') document.documentElement.dataset.theme = saved.dark ? 'dark' : 'light';
           if (['terracotta', 'blue', 'green', 'orange', 'red', 'violet', 'teal', 'rose'].includes(saved.colorScheme)) document.documentElement.dataset.palette = saved.colorScheme;
-          if (['warm', 'minimal', 'technical'].includes(saved.style)) document.documentElement.dataset.style = saved.style;
+          if (['warm', 'minimal', 'technical', 'soft'].includes(saved.style)) document.documentElement.dataset.style = saved.style;
         }
       } catch {}
     </script>
@@ -97,12 +97,16 @@ const alternateLanguages = legal ? (['en', 'de'] as const) : languages;
             </fieldset>
             <fieldset class="style-picker">
               <legend>{t.styleLabel}</legend>
-              {(['warm', 'minimal', 'technical'] as const).map(style => <label>
-                <input type="radio" name="visualStyle" value={style} checked={style === 'warm'} />
-                <span data-style-preview={style}>{t[style]}</span>
+              {(['warm', 'minimal', 'technical', 'soft'] as const).map(style => <label title={t[style]}>
+                <input type="radio" name="visualStyle" aria-label={t[style]} value={style} checked={style === 'warm'} />
+                <span data-style-preview={style}>
+                  {style === 'warm' && <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19h5m-2.5 0 5-14 5 14M15 19h5M10 13h6"/></svg>}
+                  {style === 'minimal' && <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14M5 12h10M5 18h14"/></svg>}
+                  {style === 'technical' && <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 6-5 6 5 6m8-12 5 6-5 6M14 4l-4 16"/></svg>}
+                  {style === 'soft' && <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="7"/><path d="M8 9c0-1 1-2 2-2"/></svg>}
+                </span>
               </label>)}
             </fieldset>
-            <p class="appearance-hint">{t.appearanceHint}</p>
             </div>
           </details>
           <button class="theme-button" id="theme" aria-label={t.theme} aria-pressed="false" title={t.theme}><svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15.3A8.6 8.6 0 0 1 8.7 4 8.6 8.6 0 1 0 20 15.3Z"/></svg><svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg></button>

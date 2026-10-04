@@ -325,7 +325,7 @@
 [data-style-preview=warm] { font-family:Georgia,serif; font-style:italic; }
 [data-style-preview=minimal] { font-family:Arial,sans-serif; letter-spacing:.5px; }
 [data-style-preview=technical] { font-family:ui-monospace,monospace; text-transform:uppercase; letter-spacing:1px; }
-.appearance-hint { font-size:10px; line-height:1.6; color:var(--muted); margin:10px 4px 0; }
+
 
 /* Warm retains the original editorial serif and soft corners. */
 :root[data-style=minimal] { --bg:#f6f7f9; --surface:#fff; --text:#212832; --muted:#596474; --line:#dbe0e7; --track:#e4e8ee; --shadow:none; }
@@ -349,3 +349,29 @@
 [data-style=technical] .time.has-hours { font-size:42px; letter-spacing:-2px; }
 [data-style=technical] .site-header,[data-style=technical] .site-footer,[data-style=technical] .guide,[data-style=technical] .faq { background:var(--bg); }
 @media(max-width:680px) { .palette-menu { right:-20px; } }
+
+/* Four equally sized style icons, with names retained as accessible labels. */
+.style-picker { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:4px; }
+.style-picker label { min-width:0; margin-top:0; }
+.style-picker span { display:grid; place-items:center; min-height:44px; padding:8px; }
+.style-picker svg { width:22px; height:22px; }
+.style-picker input:checked + span { box-shadow:inset 0 0 0 1px var(--accent); }
+
+/* Soft: pill controls, generous rounded panels and diffuse shadows. */
+[data-style=soft] h1,[data-style=soft] .guide h2,[data-style=soft] .faq h2 {
+  font-family:ui-rounded,"Trebuchet MS",system-ui,sans-serif;
+  font-weight:600;
+  letter-spacing:-1.5px;
+}
+[data-style=soft] h1 em { font-style:normal; }
+[data-style=soft] .timer-card,[data-style=soft] .settings-card {
+  border-radius:36px;
+  background:linear-gradient(145deg,var(--surface),color-mix(in srgb,var(--accent-soft) 40%,var(--surface)));
+  box-shadow:0 16px 40px color-mix(in srgb,var(--accent) 12%,transparent);
+}
+[data-style=soft] .primary,[data-style=soft] .secondary,[data-style=soft] .apply-button,
+[data-style=soft] .mode-switch,[data-style=soft] .mode-switch a { border-radius:999px; }
+[data-style=soft] .primary { box-shadow:0 6px 16px color-mix(in srgb,var(--accent) 24%,transparent); }
+[data-style=soft] .progress-ring { stroke-width:7; }
+[data-style=soft] .time { font-weight:600; }
+[data-style=soft] input[type=number] { border-radius:15px; }

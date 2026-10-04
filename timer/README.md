@@ -155,7 +155,7 @@ Der MessageDrop-spezifische DSA-Kontaktstellenabschnitt wurde nicht ungeprüft
 ## Design und automatische Wiederherstellung
 
 Im Farben-Dropdown stehen acht deutlich gesättigtere Paletten und die Stile
-**Warm**, **Minimal** und **Technisch** zur Auswahl. Stil, Farbe und Hell/Dunkel
+**Warm**, **Minimal**, **Technisch** und **Soft** (vier Symbol-Buttons mit Tooltips) zur Auswahl. Stil, Farbe und Hell/Dunkel
 sind unabhängig kombinierbar. Sprache und Design werden bei Änderungen
 automatisch in `jacktools.timer.appearance.v1` gespeichert.
 Die Startseite `/` bevorzugt eine gespeicherte Sprache vor der Browsersprache;
