@@ -1,0 +1,36 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getDictionary } from '../lib/i18n';
+interface Props { lang: 'de' | 'en'; kind: 'legal' | 'privacy' }
+const { lang, kind } = Astro.props;
+const de = lang === 'de';
+const t = getDictionary(lang);
+const title = kind === 'legal' ? t.legal : t.privacy;
+---
+<Layout lang={lang} title={title} description={de ? 'Entwurf der rechtlichen Informationen für Jacktools Timer.' : 'Draft legal information for Jacktools Timer.'} route={kind} noindex legal>
+  <article class="legal-page">
+    <p class="eyebrow">JACKTOOLS / {de ? 'ENTWURF' : 'DRAFT'}</p><h1>{title}</h1>
+    <nav class="legal-nav"><a href={'/de/' + kind + '/'} lang="de">Deutsch · Original</a><a href={'/en/' + kind + '/'} lang="en">English · Translation</a></nav>
+    <p class="notice">{de ? 'Nicht veröffentlichungsfertig. Betreiber- und Hostingangaben fehlen. Dieser Entwurf muss vor einem öffentlichen Start vervollständigt und rechtlich geprüft werden. Deutsch ist die redaktionelle Originalfassung.' : 'Not ready for publication. Operator and hosting details are missing. Complete and legally review this draft before public launch. German is the editorial original; this is an English translation.'}</p>
+    {kind === 'legal' ? <>
+      <h2>{de ? 'Angaben zum Betreiber' : 'Operator information'}</h2>
+      <ul><li>{de ? 'Name / Firma: noch zu ergänzen' : 'Name / company: to be completed'}</li><li>{de ? 'Ladungsfähige Anschrift: noch zu ergänzen' : 'Postal address for service: to be completed'}</li><li>{de ? 'E-Mail und weitere erforderliche Kontaktangaben: noch zu ergänzen' : 'Email and further required contact information: to be completed'}</li></ul>
+      <h2>{de ? 'Weitere Angaben' : 'Additional information'}</h2>
+      <p>{de ? 'Je nach Betreiber sind unter anderem Vertretungsberechtigte, Registerangaben, Umsatzsteuer-ID und Angaben zu reglementierten Berufen auf Anwendbarkeit zu prüfen und gegebenenfalls zu ergänzen.' : 'Depending on the operator, check whether authorised representatives, registration details, VAT identification and regulated-profession information apply and add them where required.'}</p>
+    </> : <>
+      <h2>{de ? '1. Verantwortlicher und Kontakt' : '1. Controller and contact'}</h2>
+      <p>{de ? 'Name, Anschrift und Datenschutz-Kontakt des Verantwortlichen: noch zu ergänzen. Siehe auch den Impressumsentwurf.' : 'Name, address and privacy contact of the controller: to be completed. See also the legal-notice draft.'}</p>
+      <h2>{de ? '2. Funktionsweise dieser Vorschau' : '2. How this preview works'}</h2>
+      <p>{de ? 'Der Timer wird im Browser ausgeführt. Diese Version verwendet keine Konten, kein eigenes Backend, keine Analysewerkzeuge, keine externen Schriften und keine Werbeskripte. Timerwerte werden von der Anwendung nicht an einen Server übertragen.' : 'The timer runs in your browser. This version uses no accounts, custom backend, analytics, external fonts or advertising scripts. The application does not transmit timer values to a server.'}</p>
+      <h2>{de ? '3. Freiwillig gespeicherte Einstellungen' : '3. Optional saved preferences'}</h2>
+      <p>{de ? 'Mit „Einstellungen merken“ und „Einstellungen übernehmen“ speichert die Anwendung Zeiten, Rundenzahl, Signalton, Design und die Speicherentscheidung unter jacktools.timer.settings.v1 im Local Storage dieses Browsers. Die Daten bleiben bis zum Löschen erhalten. Bei aktivierter Speicherung werden auch Designwechsel und Countdown-Vorgaben gespeichert. Du kannst die Daten über „Datenschutz & Speicher“ oder die Browsereinstellungen löschen. Ohne diese Option gelten Einstellungen nur für die aktuelle Seite.' : 'Enabling “Remember my preferences” and applying settings stores durations, round count, sound, theme and the storage choice under jacktools.timer.settings.v1 in this browser’s local storage. Data remains until deleted. When enabled, theme changes and countdown presets are also saved. You can delete it using “Privacy & storage” or browser settings. Otherwise, settings apply only to the current page.'}</p>
+      <h2>{de ? '4. Hosting und technische Zugriffsdaten' : '4. Hosting and technical access data'}</h2>
+      <p>{de ? 'Beim Abruf einer Website werden technisch bedingt Daten wie die IP-Adresse an den Hostinganbieter übermittelt. Anbieter, Standort, tatsächlich verarbeitete Daten, Zwecke, Rechtsgrundlagen, Empfänger, Auftragsverarbeitung, mögliche Drittlandübermittlungen und Speicherfristen sind vor dem Start anhand des gewählten Hostings zu ergänzen.' : 'Loading a website technically requires sending data such as your IP address to the hosting provider. Before launch, specify the provider, location, actual data processed, purposes, legal bases, recipients, processing agreements, any international transfers and retention periods based on the selected hosting service.'}</p>
+      <h2>{de ? '5. Werbung' : '5. Advertising'}</h2>
+      <p>{de ? 'Werbung ist in dieser Version deaktiviert. Die sichtbare Fläche ist nur ein Platzhalter. Vor einer Aktivierung müssen die Datenschutzhinweise für die tatsächlichen Dienste ergänzt und eine geeignete zertifizierte Einwilligungsplattform integriert werden. Der Speicherdialog dieser Vorschau erteilt keine Werbeeinwilligung.' : 'Advertising is disabled in this version. The visible space is only a placeholder. Before enabling ads, update privacy information for the actual services and integrate an appropriate certified consent platform. This preview’s storage dialog does not grant advertising consent.'}</p>
+      <h2>{de ? '6. Vor Veröffentlichung zu vervollständigen' : '6. Complete before publication'}</h2>
+      <p>{de ? 'Die anwendbaren Rechtsgrundlagen sowie Informationen zu Auskunft, Berichtigung, Löschung, Einschränkung, Datenübertragbarkeit, Widerspruch, Widerruf und Beschwerde bei einer zuständigen Aufsichtsbehörde müssen passend zur tatsächlichen Verarbeitung geprüft und ergänzt werden. Dieser Entwurf ist keine abschließende Datenschutzerklärung.' : 'Review and complete applicable legal bases and information on access, rectification, erasure, restriction, portability, objection, withdrawal and complaints to a competent supervisory authority according to the actual processing. This draft is not a complete privacy notice.'}</p>
+    </>}
+    <p><a href={'/' + lang + '/timer/'}>← {t.countdown}</a></p>
+  </article>
+</Layout>

@@ -1,0 +1,61 @@
+---
+import '../styles/global.css';
+import { getDictionary, languages, languageNames, type Language } from '../lib/i18n';
+interface Props { lang: Language; title: string; description: string; route: string; noindex?: boolean; legal?: boolean }
+const { lang, title, description, route, noindex = false, legal = false } = Astro.props;
+const t = getDictionary(lang);
+const canonical = new URL(Astro.url.pathname === '/' ? '/en/timer/' : Astro.url.pathname, Astro.site);
+const alternateLanguages = legal ? (['en', 'de'] as const) : languages;
+---
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#f8f5ee" />
+    <meta name="color-scheme" content="light dark" />
+    {noindex && <meta name="robots" content="noindex, follow" />}
+    <title>{title} · Jacktools</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href={canonical} />
+    {alternateLanguages.map(l => <link rel="alternate" hreflang={l} href={new URL('/' + l + '/' + route + '/', Astro.site)} />)}
+    <link rel="alternate" hreflang="x-default" href={new URL('/en/' + route + '/', Astro.site)} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title + ' · Jacktools'} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <script is:inline>
+      try {
+        const s = JSON.parse(localStorage.getItem('jacktools.timer.settings.v1') || 'null');
+        if (s?.remember === true && s?.dark === true) document.documentElement.dataset.theme = 'dark';
+      } catch {}
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">{lang === 'de' ? 'Zum Inhalt' : lang === 'es' ? 'Ir al contenido' : lang === 'fr' ? 'Aller au contenu' : 'Skip to content'}</a>
+    <div class="site-shell">
+      <header class="site-header">
+        <a class="brand" href={'/' + lang + '/timer/'} aria-label="Jacktools Timer">
+          <span class="brand-icon"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="18" r="10"/><path d="M16 18v-6m-3-9h6m-3 0v5m9 2 3-3"/></svg></span>
+          <span>jacktools<span class="brand-dot">.</span> <span class="brand-product">/ timer</span></span>
+        </a>
+        <div class="header-tools">
+          <label class="language-control"><span class="sr-only">{t.language}</span>
+            <select id="language" aria-label={t.language}>{alternateLanguages.map(l => <option value={'/' + l + '/' + route + '/'} selected={l === lang}>{languageNames[l]}</option>)}</select>
+          </label>
+          <button class="theme-button" id="theme" aria-label={t.theme} aria-pressed="false" title={t.theme}><svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15.3A8.6 8.6 0 0 1 8.7 4 8.6 8.6 0 1 0 20 15.3Z"/></svg><svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg></button>
+        </div>
+      </header>
+      <main id="main"><slot /></main>
+      <footer class="site-footer">
+        <div><a class="footer-brand" href={'/' + lang + '/timer/'}>jacktools.</a><p>{t.footer}</p></div>
+        <nav aria-label={t.legal}><a href={'/' + (lang === 'de' ? 'de' : 'en') + '/legal/'}>{t.legal}{!['de','en'].includes(lang) && ' (EN)'}</a><a href={'/' + (lang === 'de' ? 'de' : 'en') + '/privacy/'}>{t.privacy}{!['de','en'].includes(lang) && ' (EN)'}</a><button id="privacy-open">{t.preferences}</button></nav>
+      </footer>
+    </div>
+    <dialog id="privacy-dialog" aria-labelledby="privacy-title">
+      <div class="dialog-inner"><span class="eyebrow">JACKTOOLS / PRIVACY</span><h2 id="privacy-title">{t.privacyTitle}</h2><p>{t.privacyBody}</p><p class="notice">{t.privacyNote}</p><p>{t.legalLanguage}</p><p id="privacy-status" role="status"></p><div class="dialog-actions"><button class="secondary" id="clear-storage" data-message={t.cleared} data-error={t.storageError}>{t.clear}</button><form method="dialog"><button class="primary">{t.close}</button></form></div></div>
+    </dialog>
+    <script src="../scripts/site.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,72 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getDictionary, type Language } from '../lib/i18n';
+import type { Mode } from '../lib/engine';
+interface Props { lang: Language; mode: Mode }
+const { lang, mode } = Astro.props;
+const t = getDictionary(lang);
+const isPomo = mode === 'pomodoro';
+---
+<Layout lang={lang} title={isPomo ? t.pomodoroTitle : t.timerTitle} description={isPomo ? t.pomodoroDescription : t.timerDescription} route={mode}>
+  <script type="application/ld+json" set:html={JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: (isPomo ? t.pomodoroTitle : t.timerTitle) + ' · Jacktools',
+    description: isPomo ? t.pomodoroDescription : t.timerDescription,
+    url: new URL('/' + lang + '/' + mode + '/', Astro.site).href,
+    inLanguage: lang,
+    applicationCategory: 'UtilitiesApplication',
+    operatingSystem: 'Any',
+    browserRequirements: 'Requires JavaScript',
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'EUR' }
+  })} />
+  <section class="intro">
+    <p class="eyebrow"><span class="little-line"></span>{t.eyebrow}</p>
+    <h1>{t.heading} <em>{t.headingAccent}</em></h1>
+    <p class="intro-copy">{t.intro}</p>
+  </section>
+  <div id="timer-app" data-mode={mode} data-translations={JSON.stringify(t)}>
+    <nav class="mode-switch" aria-label={lang === 'de' ? 'Timer-Auswahl' : 'Timer'}>
+      <a href={'/' + lang + '/timer/'} aria-current={!isPomo ? 'page' : undefined}><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 13V8M9 2h6"/></svg>{t.countdown}</a>
+      <a href={'/' + lang + '/pomodoro/'} aria-current={isPomo ? 'page' : undefined}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20C2 20 3 7 9 7c2 0 2 1 3 1s1-1 3-1c6 0 7 13-3 13Zm0-12V3m0 3c2-3 4-3 6-2"/></svg>{t.pomodoro}</a>
+    </nav>
+    <div class="workspace">
+      <section class="timer-card" aria-label={isPomo ? t.pomodoro : t.countdown}>
+        <div class="card-top"><span class="live-label"><span></span>{t.local}</span><button id="focus-view" class="icon-text" aria-label={t.focusMode} aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg><span>{t.focusMode}</span></button></div>
+        <div class="clock">
+          <svg class="progress-ring" viewBox="0 0 320 320" aria-hidden="true"><circle class="ring-track" cx="160" cy="160" r="146"/><circle id="ring-progress" cx="160" cy="160" r="146" pathLength="100"/></svg>
+          <div class="clock-content">
+            <p id="phase-label" class="phase-label">{isPomo ? t.focus : t.ready}</p>
+            <div id="time" class="time" role="timer" aria-live="off">{isPomo ? '25:00' : '05:00'}</div>
+            <div id="round-label" class="round-label">{isPomo ? t.round + ' 1 ' + t.of + ' 4' : t.countdown}</div>
+            {isPomo && <div class="round-dots" id="round-dots" aria-hidden="true"><i class="current"></i><i></i><i></i><i></i></div>}
+          </div>
+        </div>
+        <div class="timer-controls"><button id="reset" class="secondary" aria-label={t.reset} title={t.reset}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10a9 9 0 1 1 1 8M3 4v6h6"/></svg><span>{t.reset}</span></button><button id="start" class="primary" disabled>{t.start}</button>{isPomo && <button id="next" class="secondary" aria-label={t.next} title={t.next}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 5 9 7-9 7V5Zm11 0v14"/></svg></button>}</div>
+        <p id="timer-status" role="status" class="timer-status"></p>
+        {!isPomo ? <div class="presets">{[1,5,10,15,30].map(m => <button data-minutes={m} aria-pressed={m === 5}>{m} {t.minutes}</button>)}</div> : <div class="phase-summary"><span><i></i>{t.focus} <b id="summary-focus">25</b></span><span><i></i>{t.short} <b id="summary-short">5</b></span><span><i></i>{t.long} <b id="summary-long">15</b></span></div>}
+        <noscript><p class="notice">{t.js}</p></noscript>
+      </section>
+      <aside class="settings-card">
+        <div class="settings-heading"><span class="settings-icon">✳</span><h2>{t.settings}</h2><p>{t.settingsIntro}</p></div>
+        <form id="settings-form">
+          {!isPomo ? <fieldset><legend>{t.duration}</legend><div class="duration-inputs"><label>{t.hours}<input name="hours" type="number" value="0" min="0" max="99" step="1" required /></label><span>:</span><label>{t.mins}<input name="minutes" type="number" value="5" min="0" max="59" step="1" required /></label><span>:</span><label>{t.seconds}<input name="seconds" type="number" value="0" min="0" max="59" step="1" required /></label></div></fieldset> : <div class="pomo-inputs">{[['focus',t.focusMinutes,25,180],['short',t.shortMinutes,5,60],['long',t.longMinutes,15,120],['rounds',t.rounds,4,12]].map(([name,label,value,max]) => <label>{label}<input name={String(name)} type="number" min="1" max={max} step="1" value={value} required /></label>)}</div>}
+          <div class="settings-divider"></div>
+          <label class="toggle-row"><span><strong>{t.sound}</strong><small>{t.soundHint}</small></span><input name="sound" type="checkbox" checked /><span class="toggle" aria-hidden="true"></span></label>
+          <label class="toggle-row"><span><strong>{t.remember}</strong><small>{t.rememberHint}</small></span><input name="remember" type="checkbox" /><span class="toggle" aria-hidden="true"></span></label>
+          <button class="apply-button" type="submit">{t.apply}<span aria-hidden="true">↗</span></button>
+          <p class="form-hint">{t.settingsResetHint}</p>
+          <p id="settings-status" role="status" class="settings-status"></p>
+        </form>
+      </aside>
+    </div>
+    <p class="local-note"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Zm-4 9 3 3 5-6"/></svg>{t.localDetail}</p>
+  </div>
+  <aside class="ad-slot" aria-label={t.ad}><span>{t.ad}</span></aside>
+  <section class="guide">
+    <div class="guide-heading"><p class="eyebrow">THE JACKTOOLS WAY</p><h2>{isPomo ? t.guide : t.guideCountdown}</h2><p>{isPomo ? t.pomodoroBody : t.countdownBody}</p></div>
+    <div class="guide-grid">{[[t.step1,t.step1body],[t.step2,t.step2body],[t.step3,t.step3body]].map(([title,body],i) => <article><span class="step-number">0{i+1}</span><h3>{title}</h3><p>{body}</p></article>)}</div>
+  </section>
+  <section class="faq"><h2>{t.faq}</h2>{[[t.q1,t.a1],[t.q2,t.a2],[t.q3,t.a3]].map(([q,a]) => <details><summary>{q}<span aria-hidden="true">+</span></summary><p>{a}</p></details>)}</section>
+  <script src="../scripts/timer.ts"></script>
+</Layout>
