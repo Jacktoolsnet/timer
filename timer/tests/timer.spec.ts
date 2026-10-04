@@ -332,7 +332,8 @@ test('small screens keep the logo and header controls in one row', async ({ page
   for (const width of [320, 375, 390, 680]) {
     await page.setViewportSize({ width, height: 844 });
     await page.goto('/fr/timer/');
-    await expect(page.locator('.brand-wordmark')).toBeHidden();
+    await expect(page.locator('.brand-wordmark')).toBeVisible();
+    await expect(page.locator('.brand-product')).toBeVisible();
     await expect(page.locator('.brand-icon')).toBeVisible();
     const logo = await page.locator('.brand').boundingBox();
     const controls = await page.locator('.header-tools').boundingBox();
