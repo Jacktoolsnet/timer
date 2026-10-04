@@ -151,3 +151,14 @@ werden; Aktualität der Angaben ist daher vor Veröffentlichung zu bestätigen.
 Die juristische Firmenbezeichnung bleibt auch auf Englisch unverändert.
 Der MessageDrop-spezifische DSA-Kontaktstellenabschnitt wurde nicht ungeprüft
 übernommen. Anwendbare Pflichtangaben für den Timer rechtlich prüfen lassen.
+
+## Design und automatische Wiederherstellung
+
+Im Farben-Dropdown stehen acht deutlich gesättigtere Paletten und die Stile
+**Warm**, **Minimal** und **Technisch** zur Auswahl. Stil, Farbe und Hell/Dunkel
+sind unabhängig kombinierbar. Sprache und Design werden bei Änderungen
+automatisch in `jacktools.timer.appearance.v1` gespeichert.
+Die Startseite `/` bevorzugt eine gespeicherte Sprache vor der Browsersprache;
+explizite Sprach-URLs bleiben unverändert. Timerzeiten und Signalton benötigen
+weiterhin „Einstellungen merken“. Der Datenschutzdialog löscht beide Schlüssel.
+Bestehende gespeicherte Designwerte werden als Fallback weiterhin gelesen.

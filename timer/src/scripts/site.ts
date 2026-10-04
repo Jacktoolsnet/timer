@@ -1,4 +1,4 @@
-import { STORAGE_KEY, sanitizeSettings, type ColorScheme } from '../lib/engine';
+import { STORAGE_KEY, type ColorScheme } from '../lib/engine';
 const theme = document.querySelector<HTMLButtonElement>('#theme')!;
 function syncTheme() { theme.setAttribute('aria-pressed', String(document.documentElement.dataset.theme === 'dark')); }
 syncTheme();
@@ -6,20 +6,15 @@ theme.addEventListener('click', () => {
   const dark = document.documentElement.dataset.theme !== 'dark';
   document.documentElement.dataset.theme = dark ? 'dark' : 'light';
   syncTheme();
-  try {
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
-    if (saved?.remember === true) { saved.dark = dark; localStorage.setItem(STORAGE_KEY, JSON.stringify(saved)); }
-  } catch { /* Theme remains available without browser storage. */ }
+  persistAppearance();
   document.dispatchEvent(new CustomEvent('theme-change', { detail: dark }));
-});
-document.querySelector<HTMLSelectElement>('#language')?.addEventListener('change', e => {
-  window.location.assign((e.target as HTMLSelectElement).value);
 });
 const dialog = document.querySelector<HTMLDialogElement>('#privacy-dialog')!;
 document.querySelector('#privacy-open')?.addEventListener('click', () => dialog.showModal());
 document.querySelector('#clear-storage')?.addEventListener('click', e => {
   try {
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(APPEARANCE_KEY);
     document.querySelector('#privacy-status')!.textContent = (e.currentTarget as HTMLElement).dataset.message!;
     document.dispatchEvent(new Event('preferences-cleared'));
   } catch {
@@ -45,17 +40,7 @@ paletteInputs.forEach(input => {
     document.documentElement.dataset.palette = color;
     syncPalette();
     document.dispatchEvent(new CustomEvent('palette-change', { detail: color }));
-    try {
-      const saved = sanitizeSettings(JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'));
-      if (saved.remember) {
-        saved.colorScheme = color;
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
-      }
-    } catch {
-      const status = document.querySelector('#settings-status');
-      const clearButton = document.querySelector<HTMLElement>('#clear-storage');
-      if (status) status.textContent = clearButton?.dataset.error || '';
-    }
+    persistAppearance();
   });
 });
 paletteInputs.forEach(input => input.addEventListener('click', event => {
@@ -80,4 +65,61 @@ paletteDropdown.addEventListener('keydown', event => {
 });
 paletteDropdown.addEventListener('focusout', event => {
   if (!paletteDropdown.contains(event.relatedTarget as Node | null)) paletteDropdown.open = false;
+});
+
+const languageDropdown = document.querySelector<HTMLDetailsElement>('#language-dropdown')!;
+const languageTrigger = languageDropdown.querySelector('summary')!;
+const languageLinks = [...languageDropdown.querySelectorAll<HTMLAnchorElement>('.language-menu a')];
+document.addEventListener('click', event => {
+  if (!languageDropdown.contains(event.target as Node)) languageDropdown.open = false;
+});
+languageDropdown.addEventListener('focusout', event => {
+  if (!languageDropdown.contains(event.relatedTarget as Node | null)) languageDropdown.open = false;
+});
+languageDropdown.addEventListener('keydown', event => {
+  if (event.key === 'Escape') {
+    languageDropdown.open = false;
+    languageTrigger.focus();
+    event.preventDefault();
+  }
+  if (['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) {
+    event.preventDefault();
+    languageDropdown.open = true;
+    const current = languageLinks.indexOf(document.activeElement as HTMLAnchorElement);
+    let next = event.key === 'ArrowUp' ? (current <= 0 ? languageLinks.length - 1 : current - 1) : (current + 1) % languageLinks.length;
+    if (event.key === 'Home') next = 0;
+    if (event.key === 'End') next = languageLinks.length - 1;
+    languageLinks[next]?.focus();
+  }
+});
+for (const [dropdown, other] of [[languageDropdown, paletteDropdown], [paletteDropdown, languageDropdown]]) {
+  dropdown.addEventListener('toggle', () => {
+    if (dropdown.open) other.open = false;
+  });
+}
+
+const APPEARANCE_KEY = 'jacktools.timer.appearance.v1';
+function persistAppearance(language?: string) {
+  try {
+    const saved = JSON.parse(localStorage.getItem(APPEARANCE_KEY) || 'null');
+    localStorage.setItem(APPEARANCE_KEY, JSON.stringify({
+      language: language || (['en','de','es','fr'].includes(saved?.language) ? saved.language : document.documentElement.lang),
+      dark: document.documentElement.dataset.theme === 'dark',
+      colorScheme: document.documentElement.dataset.palette || 'terracotta',
+      style: document.documentElement.dataset.style || 'warm',
+    }));
+  } catch {
+    const status = document.querySelector('#settings-status') || document.querySelector('#privacy-status');
+    if (status) status.textContent = document.querySelector<HTMLElement>('#clear-storage')?.dataset.error || '';
+  }
+}
+languageLinks.forEach(link => link.addEventListener('click', () => persistAppearance(link.lang)));
+const styleInputs = paletteDropdown.querySelectorAll<HTMLInputElement>('[name=visualStyle]');
+styleInputs.forEach(input => {
+  input.checked = input.value === document.documentElement.dataset.style;
+  input.addEventListener('change', () => {
+    if (!input.checked) return;
+    document.documentElement.dataset.style = input.value;
+    persistAppearance();
+  });
 });
