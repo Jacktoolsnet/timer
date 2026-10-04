@@ -372,3 +372,41 @@ test('font size has four steps, grows text, restores and fits small screens', as
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-font-size', '0');
 });
+
+test('focus requests fullscreen, exits it and follows browser fullscreen exit', async ({ page }) => {
+  await page.addInitScript(() => {
+    let element: Element | null = null;
+    Object.defineProperty(document, 'fullscreenElement', { get: () => element });
+    Element.prototype.requestFullscreen = async function () {
+      element = this;
+      document.dispatchEvent(new Event('fullscreenchange'));
+    };
+    document.exitFullscreen = async () => {
+      element = null;
+      document.dispatchEvent(new Event('fullscreenchange'));
+    };
+  });
+  await page.goto('/de/timer/');
+  await page.locator('#focus-view').click();
+  await expect(page.locator('body')).toHaveClass(/focus-view/);
+  expect(await page.evaluate(() => !!document.fullscreenElement)).toBeTruthy();
+  await page.locator('#focus-view').click();
+  await expect(page.locator('body')).not.toHaveClass(/focus-view/);
+  expect(await page.evaluate(() => document.fullscreenElement)).toBeNull();
+  await page.locator('#focus-view').click();
+  await page.evaluate(() => document.exitFullscreen());
+  await expect(page.locator('#focus-view')).toHaveAttribute('aria-pressed', 'false');
+  await page.locator('#focus-view').click();
+  await page.keyboard.press('Escape');
+  expect(await page.evaluate(() => document.fullscreenElement)).toBeNull();
+});
+test('focus remains usable when fullscreen is denied', async ({ page }) => {
+  await page.addInitScript(() => {
+    Element.prototype.requestFullscreen = async () => { throw new Error('Denied'); };
+  });
+  await page.goto('/de/timer/');
+  await page.locator('#focus-view').click();
+  await expect(page.locator('body')).toHaveClass(/focus-view/);
+  await page.keyboard.press('Escape');
+  await expect(page.locator('body')).not.toHaveClass(/focus-view/);
+});

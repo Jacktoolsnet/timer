@@ -118,15 +118,48 @@ document.addEventListener('palette-change', ((e: CustomEvent<ColorScheme>) => {
 document.addEventListener('theme-change', ((e: CustomEvent<boolean>) => { settings.dark = e.detail; }) as EventListener);
 document.addEventListener('preferences-cleared', () => { status.textContent = ''; });
 const focusButton = $('focus-view');
-function toggleFocus() {
-  const focused = document.body.classList.toggle('focus-view');
+let ownsFullscreen = false;
+let requestingFullscreen = false;
+function setFocusView(focused: boolean) {
+  document.body.classList.toggle('focus-view', focused);
   focusButton.setAttribute('aria-pressed', String(focused));
   focusButton.setAttribute('aria-label', focused ? t.exitFocus : t.focusMode);
   focusButton.querySelector('span')!.textContent = focused ? t.exitFocus : t.focusMode;
 }
-focusButton.addEventListener('click', toggleFocus);
+async function leaveFocus() {
+  setFocusView(false);
+  if (ownsFullscreen && document.fullscreenElement) {
+    try { await document.exitFullscreen(); } catch { /* Browser controls can still exit fullscreen. */ }
+  }
+}
+async function toggleFocus() {
+  if (document.body.classList.contains('focus-view')) {
+    await leaveFocus();
+    return;
+  }
+  setFocusView(true);
+  // Keep pre-existing fullscreen (e.g. another browser control) untouched.
+  if (document.fullscreenElement || requestingFullscreen || !document.documentElement.requestFullscreen) return;
+  requestingFullscreen = true;
+  try {
+    await document.documentElement.requestFullscreen();
+    ownsFullscreen = document.fullscreenElement === document.documentElement;
+    // The user may already have left focus while the browser was responding.
+    if (!document.body.classList.contains('focus-view') && ownsFullscreen) await document.exitFullscreen();
+  } catch { /* Unsupported or denied: the in-page focus view still works. */ }
+  finally { requestingFullscreen = false; }
+}
+focusButton.addEventListener('click', () => { void toggleFocus(); });
+document.addEventListener('fullscreenchange', () => {
+  if (requestingFullscreen && document.fullscreenElement === document.documentElement) ownsFullscreen = true;
+  if (!document.fullscreenElement && ownsFullscreen) {
+    ownsFullscreen = false;
+    setFocusView(false);
+    focusButton.focus();
+  }
+});
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && document.body.classList.contains('focus-view')) toggleFocus();
+  if (e.key === 'Escape' && document.body.classList.contains('focus-view')) void leaveFocus();
 });
 function tick() { if (timer.tick(Date.now())) finish(); render(); }
 setInterval(() => { if (timer.deadline !== null) tick(); }, 200);
