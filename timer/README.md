@@ -47,9 +47,15 @@ anstelle von `npm install` verwenden.
 - Neue Pomodoro-Phasen beginnen bewusst manuell. „Nächste Phase“ überspringt
   die aktuelle Phase und wartet ebenfalls auf Start.
 - Warmes responsives Design, optionaler Dark Mode, Fokusansicht (Escape beendet).
+- Fünf Farbschemata: Terrakotta, Blau, Grün, warmes Orange und warmes Rot.
+  Auswahl unter „Dein eigener Rhythmus“ → „Farbschema“ mit sofortiger Vorschau
+  ohne Timer-Neustart. Jedes Schema hat passende helle und dunkle Farben.
 - Vier vollständig vorgerenderte Sprachversionen. Englisch ist die
-  Wörterbuch-Fallbacksprache und der Inhalt der Startseite. Kein Sprachzwang
-  durch Browser-Weiterleitungen.
+  Wörterbuch-Fallbacksprache. Die Startseite `/` leitet anhand der bevorzugten
+  unterstützten Browsersprache auf die passende Timer-Seite weiter (z. B.
+  `de-DE` → `/de/timer/`). Ohne passende Sprache wird Englisch verwendet.
+  Explizite Sprach-URLs und die manuelle Auswahl werden nicht überschrieben.
+  Ohne JavaScript bleibt die englische Startseite sichtbar.
 - Canonical, hreflang einschließlich x-default, sprachspezifische Metadaten,
   Open Graph, Sitemap, robots.txt, Favicon.
 - DE/EN-Rechtstextentwürfe, ausdrücklich nicht veröffentlichungsfertig.
@@ -60,9 +66,9 @@ anstelle von `npm install` verwenden.
 ## Einstellungen und Grenzen
 
 „Einstellungen merken“ aktivieren und „Einstellungen übernehmen“ drücken.
-Zeiten, Rundenanzahl, Signalton und Theme werden dann unter
+Zeiten, Rundenanzahl, Signalton, Farbschema und Theme werden dann unter
 `jacktools.timer.settings.v1` im Local Storage gespeichert. Bei aktivierter
-Speicherung werden Theme-Wechsel und Countdown-Schnellwahl ebenfalls gespeichert.
+Speicherung werden Theme-/Farbschema-Wechsel und Countdown-Schnellwahl ebenfalls gespeichert.
 Die Einstellungen bleiben bis zum Löschen bestehen. Deaktivieren + Übernehmen
 oder „Datenschutz & Speicher“ → „Gespeicherte Einstellungen löschen“ entfernt
 sie. Ohne Speicherung gelten Einstellungen nur auf der aktuellen Seite.

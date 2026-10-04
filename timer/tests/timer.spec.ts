@@ -112,3 +112,87 @@ test('screenshots', async ({ page }, info) => {
   await page.locator('#theme').click();
   await page.screenshot({ path: 'test-results/' + info.project.name + '-dark.png', fullPage: true });
 });
+
+test('neutral entry selects the browser language, keeping explicit language URLs unchanged', async ({ browser }) => {
+  for (const [languages, expected] of [
+    [['de-DE', 'en-US'], 'de'],
+    [['es-MX'], 'es'],
+    [['fr-CA'], 'fr'],
+    [['en-GB', 'de'], 'en'],
+    [['it-IT', 'de-AT'], 'de'],
+    [['ja-JP'], 'en'],
+    [[], 'de'],
+  ] as [string[], string][]) {
+    const context = await browser.newContext({ locale: 'de-DE' });
+    await context.addInitScript(languages => {
+      Object.defineProperty(navigator, 'languages', { get: () => languages });
+    }, languages);
+    const page = await context.newPage();
+    await page.goto('/?source=test#main');
+    await expect(page).toHaveURL(new RegExp('/' + expected + '/timer/\\?source=test#main$'));
+    await expect(page.locator('html')).toHaveAttribute('lang', expected);
+    await page.goto('/en/pomodoro/');
+    await expect(page.locator('#start')).toBeEnabled();
+    await expect(page).toHaveURL(/\/en\/pomodoro\/$/);
+    await page.locator('#language').selectOption('/fr/pomodoro/');
+    await expect(page).toHaveURL(/\/fr\/pomodoro\/$/);
+    await expect(page.locator('html')).toHaveAttribute('lang', 'fr');
+    await context.close();
+  }
+});
+
+test('palettes preview without resetting, persist with opt-in and work in light and dark mode', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  const now = new Date('2026-10-04T12:00:00Z');
+  await page.clock.install({ time: now });
+  await page.clock.pauseAt(now);
+  await page.goto('/de/timer/');
+  await page.locator('#start').click();
+  await page.clock.runFor(1000);
+  await expect(page.locator('#time')).toHaveText('04:59');
+  const remaining = await page.locator('#time').textContent();
+  for (const dark of [false, true]) {
+    if (dark) await page.locator('#theme').click();
+    for (const palette of ['terracotta', 'blue', 'green', 'orange', 'red']) {
+      await page.locator('[name=colorScheme][value=' + palette + ']').check();
+      await expect(page.locator('html')).toHaveAttribute('data-palette', palette);
+      await expect(page.locator('#start')).toHaveText('Pausieren');
+      await expect(page.locator('#time')).toHaveText(remaining!);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
+      const contrast = await page.evaluate(() => {
+        function luminance(color: string) {
+          const channels = color.match(/[\d.]+/g)!.slice(0, 3).map(Number).map(c => {
+            c /= 255; return c <= .04045 ? c / 12.92 : ((c + .055) / 1.055) ** 2.4;
+          });
+          return channels[0] * .2126 + channels[1] * .7152 + channels[2] * .0722;
+        }
+        const button = getComputedStyle(document.querySelector('#start')!);
+        const a = luminance(button.color), b = luminance(button.backgroundColor);
+        return (Math.max(a, b) + .05) / (Math.min(a, b) + .05);
+      });
+      expect(contrast).toBeGreaterThanOrEqual(4.5);
+    }
+  }
+  await page.reload();
+  await expect(page.locator('[name=colorScheme][value=terracotta]')).toBeChecked();
+  await page.locator('[name=colorScheme][value=blue]').check();
+  await page.locator('[name=remember]').check();
+  await page.locator('.apply-button').click();
+  await page.locator('#theme').click();
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('data-palette', 'blue');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await expect(page.locator('[name=colorScheme][value=blue]')).toBeChecked();
+  await page.locator('[name=colorScheme][value=orange]').check();
+  await page.goto('/de/pomodoro/');
+  await expect(page.locator('html')).toHaveAttribute('data-palette', 'orange');
+  await page.locator('#next').click();
+  await expect(page.locator('#phase-label')).toHaveText('Kurze Pause');
+  await page.locator('[name=colorScheme][value=red]').check();
+  await expect(page.locator('#phase-label')).toHaveText('Kurze Pause');
+  await expect(page.locator('html')).toHaveAttribute('data-palette', 'red');
+  await page.locator('#privacy-open').click();
+  await page.locator('#clear-storage').click();
+  await page.reload();
+  await expect(page.locator('[name=colorScheme][value=terracotta]')).toBeChecked();
+});

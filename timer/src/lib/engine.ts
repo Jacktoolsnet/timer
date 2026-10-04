@@ -1,7 +1,9 @@
 export type Mode = 'timer' | 'pomodoro';
 export type Phase = 'focus' | 'short' | 'long';
-export type Settings = { countdown: number; focus: number; short: number; long: number; rounds: number; sound: boolean; remember: boolean; dark: boolean };
-export const defaults: Settings = { countdown: 300, focus: 25, short: 5, long: 15, rounds: 4, sound: true, remember: false, dark: false };
+export const colorSchemes = ['terracotta', 'blue', 'green', 'orange', 'red'] as const;
+export type ColorScheme = typeof colorSchemes[number];
+export type Settings = { countdown: number; focus: number; short: number; long: number; rounds: number; sound: boolean; remember: boolean; dark: boolean; colorScheme: ColorScheme };
+export const defaults: Settings = { countdown: 300, focus: 25, short: 5, long: 15, rounds: 4, sound: true, remember: false, dark: false, colorScheme: 'terracotta' };
 export const STORAGE_KEY = 'jacktools.timer.settings.v1';
 export function sanitizeSettings(input: unknown): Settings {
   const value = (input && typeof input === 'object' ? input : {}) as Partial<Settings>;
@@ -14,6 +16,7 @@ export function sanitizeSettings(input: unknown): Settings {
     short: number('short', 1, 60), long: number('long', 1, 120), rounds: number('rounds', 1, 12),
     sound: typeof value.sound === 'boolean' ? value.sound : defaults.sound,
     remember: value.remember === true, dark: value.dark === true,
+    colorScheme: colorSchemes.includes(value.colorScheme as ColorScheme) ? value.colorScheme! : defaults.colorScheme,
   };
 }
 export function formatTime(ms: number): string {

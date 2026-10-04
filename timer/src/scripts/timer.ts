@@ -1,4 +1,4 @@
-import { Timer, defaults, sanitizeSettings, formatTime, STORAGE_KEY, type Settings, type Mode } from '../lib/engine';
+import { Timer, defaults, sanitizeSettings, formatTime, STORAGE_KEY, type Settings, type Mode, type ColorScheme } from '../lib/engine';
 const app = document.querySelector<HTMLElement>('#timer-app')!;
 const t = JSON.parse(app.dataset.translations!) as Record<string, string>;
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -34,6 +34,9 @@ function fillForm() {
     field('minutes').value = String(Math.floor(settings.countdown % 3600 / 60));
     field('seconds').value = String(settings.countdown % 60);
   } else for (const key of ['focus', 'short', 'long', 'rounds'] as const) field(key).value = String(settings[key]);
+  form.querySelectorAll<HTMLInputElement>('[name=colorScheme]').forEach(input => {
+    input.checked = input.value === settings.colorScheme;
+  });
   field('sound').checked = settings.sound;
   field('remember').checked = settings.remember;
 }
@@ -100,6 +103,15 @@ document.querySelectorAll<HTMLButtonElement>('[data-minutes]').forEach(button =>
   settings.countdown = Number(button.dataset.minutes) * 60;
   fillForm(); if (settings.remember) persist(); restartWithSettings();
 }));
+form.querySelectorAll<HTMLInputElement>('[name=colorScheme]').forEach(input => {
+  input.addEventListener('change', () => {
+    if (!input.checked) return;
+    settings.colorScheme = input.value as ColorScheme;
+    document.documentElement.dataset.palette = settings.colorScheme;
+    status.textContent = '';
+    if (settings.remember) persist();
+  });
+});
 document.addEventListener('theme-change', ((e: CustomEvent<boolean>) => { settings.dark = e.detail; }) as EventListener);
 document.addEventListener('preferences-cleared', () => { settings.remember = false; field('remember').checked = false; status.textContent = ''; });
 const focusButton = $('focus-view');

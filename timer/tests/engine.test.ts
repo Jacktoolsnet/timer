@@ -65,3 +65,12 @@ test('one-round pomodoro has a long break immediately', () => {
   timer.next();
   assert.equal(timer.round, 1);
 });
+
+test('palette settings accept supported values and migrate old preferences safely', () => {
+  for (const colorScheme of ['terracotta', 'blue', 'green', 'orange', 'red']) {
+    assert.equal(sanitizeSettings({ colorScheme }).colorScheme, colorScheme);
+  }
+  assert.equal(sanitizeSettings({ remember: true }).colorScheme, 'terracotta');
+  assert.equal(sanitizeSettings({ colorScheme: 'unknown' }).colorScheme, 'terracotta');
+  assert.equal(sanitizeSettings({ colorScheme: null }).colorScheme, 'terracotta');
+});

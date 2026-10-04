@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { getDictionary, type Language } from '../lib/i18n';
-import type { Mode } from '../lib/engine';
+import { colorSchemes, type Mode } from '../lib/engine';
 interface Props { lang: Language; mode: Mode }
 const { lang, mode } = Astro.props;
 const t = getDictionary(lang);
@@ -52,6 +52,16 @@ const isPomo = mode === 'pomodoro';
         <form id="settings-form">
           {!isPomo ? <fieldset><legend>{t.duration}</legend><div class="duration-inputs"><label>{t.hours}<input name="hours" type="number" value="0" min="0" max="99" step="1" required /></label><span>:</span><label>{t.mins}<input name="minutes" type="number" value="5" min="0" max="59" step="1" required /></label><span>:</span><label>{t.seconds}<input name="seconds" type="number" value="0" min="0" max="59" step="1" required /></label></div></fieldset> : <div class="pomo-inputs">{[['focus',t.focusMinutes,25,180],['short',t.shortMinutes,5,60],['long',t.longMinutes,15,120],['rounds',t.rounds,4,12]].map(([name,label,value,max]) => <label>{label}<input name={String(name)} type="number" min="1" max={max} step="1" value={value} required /></label>)}</div>}
           <div class="settings-divider"></div>
+          <fieldset class="palette-fieldset" aria-describedby="palette-hint">
+            <legend>{t.colorScheme}</legend>
+            <div class="palette-options">
+              {colorSchemes.map(color => <label class="palette-option">
+                <input type="radio" name="colorScheme" value={color} checked={color === 'terracotta'} />
+                <span class="palette-chip"><span class="palette-swatch" data-color={color} aria-hidden="true"></span><span>{t[color]}</span></span>
+              </label>)}
+            </div>
+            <p id="palette-hint" class="form-hint">{t.colorHint}</p>
+          </fieldset>
           <label class="toggle-row"><span><strong>{t.sound}</strong><small>{t.soundHint}</small></span><input name="sound" type="checkbox" checked /><span class="toggle" aria-hidden="true"></span></label>
           <label class="toggle-row"><span><strong>{t.remember}</strong><small>{t.rememberHint}</small></span><input name="remember" type="checkbox" /><span class="toggle" aria-hidden="true"></span></label>
           <button class="apply-button" type="submit">{t.apply}<span aria-hidden="true">↗</span></button>
