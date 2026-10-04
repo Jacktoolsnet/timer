@@ -1,4 +1,10 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
+
+async function selectPalette(page: Page, color: string) {
+  const dropdown = page.locator('#palette-dropdown');
+  if (await dropdown.getAttribute('open') === null) await dropdown.locator('summary').click();
+  await page.locator('[name=colorScheme][value=' + color + ']').check();
+}
 
 test('countdown, pause, resume, completion, reset, presets and no horizontal overflow', async ({ page }) => {
   const errors: string[] = [];
@@ -153,8 +159,8 @@ test('palettes preview without resetting, persist with opt-in and work in light 
   const remaining = await page.locator('#time').textContent();
   for (const dark of [false, true]) {
     if (dark) await page.locator('#theme').click();
-    for (const palette of ['terracotta', 'blue', 'green', 'orange', 'red']) {
-      await page.locator('[name=colorScheme][value=' + palette + ']').check();
+    for (const palette of ['terracotta', 'blue', 'green', 'orange', 'red', 'violet', 'teal', 'rose']) {
+      await selectPalette(page, palette);
       await expect(page.locator('html')).toHaveAttribute('data-palette', palette);
       await expect(page.locator('#start')).toHaveText('Pausieren');
       await expect(page.locator('#time')).toHaveText(remaining!);
@@ -175,7 +181,7 @@ test('palettes preview without resetting, persist with opt-in and work in light 
   }
   await page.reload();
   await expect(page.locator('[name=colorScheme][value=terracotta]')).toBeChecked();
-  await page.locator('[name=colorScheme][value=blue]').check();
+  await selectPalette(page, 'blue');
   await page.locator('[name=remember]').check();
   await page.locator('.apply-button').click();
   await page.locator('#theme').click();
@@ -183,16 +189,47 @@ test('palettes preview without resetting, persist with opt-in and work in light 
   await expect(page.locator('html')).toHaveAttribute('data-palette', 'blue');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await expect(page.locator('[name=colorScheme][value=blue]')).toBeChecked();
-  await page.locator('[name=colorScheme][value=orange]').check();
+  await selectPalette(page, 'orange');
   await page.goto('/de/pomodoro/');
   await expect(page.locator('html')).toHaveAttribute('data-palette', 'orange');
   await page.locator('#next').click();
   await expect(page.locator('#phase-label')).toHaveText('Kurze Pause');
-  await page.locator('[name=colorScheme][value=red]').check();
+  await selectPalette(page, 'red');
   await expect(page.locator('#phase-label')).toHaveText('Kurze Pause');
   await expect(page.locator('html')).toHaveAttribute('data-palette', 'red');
   await page.locator('#privacy-open').click();
   await page.locator('#clear-storage').click();
   await page.reload();
   await expect(page.locator('[name=colorScheme][value=terracotta]')).toBeChecked();
+});
+
+test('header palette dropdown supports keyboard, dismissal and legal pages', async ({ page }) => {
+  await page.goto('/de/legal/');
+  const picker = page.locator('#palette-dropdown');
+  const trigger = picker.locator('summary');
+  await trigger.focus();
+  await page.keyboard.press('Enter');
+  await expect(picker).toHaveAttribute('open', '');
+  await page.keyboard.press('Tab');
+  await expect(page.locator('[name=colorScheme][value=terracotta]')).toBeFocused();
+  await page.keyboard.press('ArrowRight');
+  await expect(page.locator('html')).toHaveAttribute('data-palette', 'blue');
+  await expect(picker).toHaveAttribute('open', '');
+  await page.keyboard.press('Escape');
+  await expect(picker).not.toHaveAttribute('open', '');
+  await expect(trigger).toBeFocused();
+  await trigger.click();
+  await page.locator('h1').click();
+  await expect(picker).not.toHaveAttribute('open', '');
+  await selectPalette(page, 'rose');
+  await expect(picker).not.toHaveAttribute('open', '');
+  await expect(page.locator('#active-palette')).toHaveAttribute('data-color', 'rose');
+  await page.locator('#theme').click();
+  await expect(page.locator('html')).toHaveAttribute('data-palette', 'rose');
+  await page.setViewportSize({ width: 320, height: 800 });
+  await trigger.click();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
+  const box = await picker.locator('.palette-menu').boundingBox();
+  expect(box!.x).toBeGreaterThanOrEqual(0);
+  expect(box!.x + box!.width).toBeLessThanOrEqual(320);
 });

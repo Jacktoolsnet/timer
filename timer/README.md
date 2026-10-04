@@ -47,8 +47,9 @@ anstelle von `npm install` verwenden.
 - Neue Pomodoro-Phasen beginnen bewusst manuell. „Nächste Phase“ überspringt
   die aktuelle Phase und wartet ebenfalls auf Start.
 - Warmes responsives Design, optionaler Dark Mode, Fokusansicht (Escape beendet).
-- Fünf Farbschemata: Terrakotta, Blau, Grün, warmes Orange und warmes Rot.
-  Auswahl unter „Dein eigener Rhythmus“ → „Farbschema“ mit sofortiger Vorschau
+- Acht Farbschemata: Terrakotta, Blau, Grün, warmes Orange, warmes Rot,
+  Violett, Türkis und Rosé.
+  Farben-Dropdown im Header zwischen Sprache und Dark Mode, mit sofortiger Vorschau
   ohne Timer-Neustart. Jedes Schema hat passende helle und dunkle Farben.
 - Vier vollständig vorgerenderte Sprachversionen. Englisch ist die
   Wörterbuch-Fallbacksprache. Die Startseite `/` leitet anhand der bevorzugten
@@ -98,7 +99,7 @@ Tests in `test-results/` (nicht versioniert).
 
 ## Vor dem öffentlichen Start
 
-1. Betreiberangaben eintragen und Rechtstexte fachlich prüfen lassen:
+1. Übernommene Betreiberangaben bestätigen und Rechtstexte fachlich prüfen lassen:
    `src/components/LegalPage.astro`. Hosting, tatsächliche Verarbeitung,
    Rechtsgrundlagen, Speicherfristen und Kontaktangaben ergänzen.
    Bis dahin sind die Rechtsseiten mit `noindex` versehen und nicht in der Sitemap.
@@ -137,3 +138,16 @@ https://support.google.com/adsense/answer/13554116?hl=de
 - `src/scripts/site.ts`: Theme, Sprache, Speicher-Dialog
 - `src/styles/global.css`: gemeinsame Design-Tokens und Responsive-Regeln
 - `src/pages/[lang]/`: sprachspezifische statische Routen
+
+## Quelle der Betreiberangaben
+
+Die DE/EN-Impressumsentwürfe übernehmen Betreiber, Anschrift, Kontakt,
+Geschäftsführer, Registerdaten, USt-ID, Inhaltsverantwortlichen und
+Streitbeilegungserklärung aus dem lokalen MessageDrop-Impressum
+(`frontend/src/assets/legal/legal-notice-de.txt`, Stand 1. Mai 2026).
+Referenz: https://messagedrop.de/de/rechtliches/?doc=impressum&docLang=de
+Die Live-Seite konnte bei der Übernahme nicht über das Webwerkzeug abgerufen
+werden; Aktualität der Angaben ist daher vor Veröffentlichung zu bestätigen.
+Die juristische Firmenbezeichnung bleibt auch auf Englisch unverändert.
+Der MessageDrop-spezifische DSA-Kontaktstellenabschnitt wurde nicht ungeprüft
+übernommen. Anwendbare Pflichtangaben für den Timer rechtlich prüfen lassen.

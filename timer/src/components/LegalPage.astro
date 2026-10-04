@@ -11,15 +11,30 @@ const title = kind === 'legal' ? t.legal : t.privacy;
   <article class="legal-page">
     <p class="eyebrow">JACKTOOLS / {de ? 'ENTWURF' : 'DRAFT'}</p><h1>{title}</h1>
     <nav class="legal-nav"><a href={'/de/' + kind + '/'} lang="de">Deutsch · Original</a><a href={'/en/' + kind + '/'} lang="en">English · Translation</a></nav>
-    <p class="notice">{de ? 'Nicht veröffentlichungsfertig. Betreiber- und Hostingangaben fehlen. Dieser Entwurf muss vor einem öffentlichen Start vervollständigt und rechtlich geprüft werden. Deutsch ist die redaktionelle Originalfassung.' : 'Not ready for publication. Operator and hosting details are missing. Complete and legally review this draft before public launch. German is the editorial original; this is an English translation.'}</p>
+    <p class="notice">{kind === 'legal'
+      ? (de ? 'Nicht veröffentlichungsfertig. Die Angaben wurden aus dem lokalen MessageDrop-Impressum (Stand: 1. Mai 2026) übernommen. Bitte Aktualität und Anwendbarkeit für den Timer vor Veröffentlichung bestätigen und rechtlich prüfen lassen. Deutsch ist die redaktionelle Originalfassung.'
+        : 'Not ready for publication. Details were adapted from the local MessageDrop legal notice dated May 1, 2026. Confirm that they are current and applicable to the timer and obtain legal review before publication. German is the editorial original; this is an English translation.')
+      : (de ? 'Nicht veröffentlichungsfertig. Hostingangaben und weitere Datenschutzinformationen fehlen. Dieser Entwurf muss vor einem öffentlichen Start vervollständigt und rechtlich geprüft werden. Deutsch ist die redaktionelle Originalfassung.'
+        : 'Not ready for publication. Hosting details and further privacy information are missing. Complete and legally review this draft before public launch. German is the editorial original; this is an English translation.')}</p>
     {kind === 'legal' ? <>
-      <h2>{de ? 'Angaben zum Betreiber' : 'Operator information'}</h2>
-      <ul><li>{de ? 'Name / Firma: noch zu ergänzen' : 'Name / company: to be completed'}</li><li>{de ? 'Ladungsfähige Anschrift: noch zu ergänzen' : 'Postal address for service: to be completed'}</li><li>{de ? 'E-Mail und weitere erforderliche Kontaktangaben: noch zu ergänzen' : 'Email and further required contact information: to be completed'}</li></ul>
-      <h2>{de ? 'Weitere Angaben' : 'Additional information'}</h2>
-      <p>{de ? 'Je nach Betreiber sind unter anderem Vertretungsberechtigte, Registerangaben, Umsatzsteuer-ID und Angaben zu reglementierten Berufen auf Anwendbarkeit zu prüfen und gegebenenfalls zu ergänzen.' : 'Depending on the operator, check whether authorised representatives, registration details, VAT identification and regulated-profession information apply and add them where required.'}</p>
+      <h2>{de ? 'Diensteanbieter' : 'Service provider'}</h2>
+      <p><strong>JackTools.Net UG (haftungsbeschränkt)</strong><br />Im Kirchfeld 27<br />38304 Wolfenbüttel<br />{de ? 'Deutschland' : 'Germany'}</p>
+      <h2>{de ? 'Kontakt' : 'Contact'}</h2>
+      <p>{de ? 'Telefon' : 'Phone'}: <a href="tel:+4917641235774">+49 (0) 176 / 41 23 57 74</a><br />{de ? 'E-Mail' : 'Email'}: <a href="mailto:jacktoolsnet@gmail.com">jacktoolsnet@gmail.com</a></p>
+      <h2>{de ? 'Vertretungsberechtigter Geschäftsführer' : 'Managing director authorised to represent the company'}</h2>
+      <p>Christian Wagner, Dipl.-Inform. (FH)</p>
+      <h2>{de ? 'Handelsregister' : 'Commercial register'}</h2>
+      <p>{de ? 'Registergericht' : 'Registry court'}: Ingolstadt<br />{de ? 'Registernummer' : 'Registration number'}: HRB 5933</p>
+      <h2>{de ? 'Umsatzsteuer-Identifikationsnummer' : 'VAT identification number'}</h2>
+      <p>DE277133529</p>
+      <h2>{de ? 'Verantwortlich für den Inhalt' : 'Responsible for content'}</h2>
+      <p>Christian Wagner<br />Im Kirchfeld 27<br />38304 Wolfenbüttel<br />{de ? 'Deutschland' : 'Germany'}</p>
+      <h2>{de ? 'Verbraucherstreitbeilegung' : 'Consumer dispute resolution'}</h2>
+      <p>{de ? 'Wir sind weder verpflichtet noch bereit, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.' : 'We are neither obliged nor willing to participate in dispute resolution proceedings before a consumer arbitration board.'}</p>
     </> : <>
       <h2>{de ? '1. Verantwortlicher und Kontakt' : '1. Controller and contact'}</h2>
-      <p>{de ? 'Name, Anschrift und Datenschutz-Kontakt des Verantwortlichen: noch zu ergänzen. Siehe auch den Impressumsentwurf.' : 'Name, address and privacy contact of the controller: to be completed. See also the legal-notice draft.'}</p>
+      <p>JackTools.Net UG (haftungsbeschränkt)<br />Im Kirchfeld 27<br />38304 Wolfenbüttel<br />{de ? 'Deutschland' : 'Germany'}<br /><a href="mailto:jacktoolsnet@gmail.com">jacktoolsnet@gmail.com</a></p>
+      <p>{de ? 'Weitere Kontaktdaten findest du im ' : 'Further contact details are available in the '}<a href={'/' + lang + '/legal/'}>{t.legal}</a>.</p>
       <h2>{de ? '2. Funktionsweise dieser Vorschau' : '2. How this preview works'}</h2>
       <p>{de ? 'Der Timer wird im Browser ausgeführt. Diese Version verwendet keine Konten, kein eigenes Backend, keine Analysewerkzeuge, keine externen Schriften und keine Werbeskripte. Timerwerte werden von der Anwendung nicht an einen Server übertragen.' : 'The timer runs in your browser. This version uses no accounts, custom backend, analytics, external fonts or advertising scripts. The application does not transmit timer values to a server.'}</p>
       <h2>{de ? '3. Freiwillig gespeicherte Einstellungen' : '3. Optional saved preferences'}</h2>

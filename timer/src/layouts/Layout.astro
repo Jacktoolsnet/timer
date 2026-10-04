@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import { colorSchemes } from '../lib/engine';
 import { getDictionary, languages, languageNames, type Language } from '../lib/i18n';
 interface Props { lang: Language; title: string; description: string; route: string; noindex?: boolean; legal?: boolean }
 const { lang, title, description, route, noindex = false, legal = false } = Astro.props;
@@ -39,7 +40,7 @@ const alternateLanguages = legal ? (['en', 'de'] as const) : languages;
         const s = JSON.parse(localStorage.getItem('jacktools.timer.settings.v1') || 'null');
         if (s?.remember === true) {
           if (s.dark === true) document.documentElement.dataset.theme = 'dark';
-          if (['terracotta', 'blue', 'green', 'orange', 'red'].includes(s.colorScheme)) {
+          if (['terracotta', 'blue', 'green', 'orange', 'red', 'violet', 'teal', 'rose'].includes(s.colorScheme)) {
             document.documentElement.dataset.palette = s.colorScheme;
           }
         }
@@ -56,14 +57,29 @@ const alternateLanguages = legal ? (['en', 'de'] as const) : languages;
         </a>
         <div class="header-tools">
           <label class="language-control"><span class="sr-only">{t.language}</span>
+            <svg class="language-globe" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c5 5 5 13 0 18M12 3c-5 5-5 13 0 18"/></svg>
             <select id="language" aria-label={t.language}>{alternateLanguages.map(l => <option value={'/' + l + '/' + route + '/'} selected={l === lang}>{languageNames[l]}</option>)}</select>
+            <svg class="language-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 10 4 4 4-4"/></svg>
           </label>
+          <details class="palette-dropdown" id="palette-dropdown">
+            <summary aria-label={t.colorScheme} title={t.colorScheme}>
+              <span id="active-palette" class="palette-swatch" data-color="terracotta" aria-hidden="true"></span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 10 4 4 4-4"/></svg>
+            </summary>
+            <fieldset class="palette-menu">
+              <legend class="sr-only">{t.colorScheme}</legend>
+              {colorSchemes.map(color => <label class="palette-option" title={t[color]}>
+                <input type="radio" name="colorScheme" value={color} aria-label={t[color]} checked={color === 'terracotta'} />
+                <span class="palette-chip"><span class="palette-swatch" data-color={color} aria-hidden="true"></span></span>
+              </label>)}
+            </fieldset>
+          </details>
           <button class="theme-button" id="theme" aria-label={t.theme} aria-pressed="false" title={t.theme}><svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15.3A8.6 8.6 0 0 1 8.7 4 8.6 8.6 0 1 0 20 15.3Z"/></svg><svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg></button>
         </div>
       </header>
       <main id="main"><slot /></main>
       <footer class="site-footer">
-        <div><a class="footer-brand" href={'/' + lang + '/timer/'}>jacktools.</a><p>{t.footer}</p></div>
+        <div><a class="footer-brand" href={'/' + lang + '/timer/'}>jacktools.net</a><p>{t.footer}</p></div>
         <nav aria-label={t.legal}><a href={'/' + (lang === 'de' ? 'de' : 'en') + '/legal/'}>{t.legal}{!['de','en'].includes(lang) && ' (EN)'}</a><a href={'/' + (lang === 'de' ? 'de' : 'en') + '/privacy/'}>{t.privacy}{!['de','en'].includes(lang) && ' (EN)'}</a><button id="privacy-open">{t.preferences}</button></nav>
       </footer>
     </div>

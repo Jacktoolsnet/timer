@@ -67,7 +67,7 @@ test('one-round pomodoro has a long break immediately', () => {
 });
 
 test('palette settings accept supported values and migrate old preferences safely', () => {
-  for (const colorScheme of ['terracotta', 'blue', 'green', 'orange', 'red']) {
+  for (const colorScheme of ['terracotta', 'blue', 'green', 'orange', 'red', 'violet', 'teal', 'rose']) {
     assert.equal(sanitizeSettings({ colorScheme }).colorScheme, colorScheme);
   }
   assert.equal(sanitizeSettings({ remember: true }).colorScheme, 'terracotta');
