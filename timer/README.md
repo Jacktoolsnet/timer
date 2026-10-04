@@ -66,14 +66,16 @@ anstelle von `npm install` verwenden.
 
 ## Einstellungen und Grenzen
 
-„Einstellungen merken“ aktivieren und „Einstellungen übernehmen“ drücken.
-Zeiten, Rundenanzahl, Signalton, Farbschema und Theme werden dann unter
-`jacktools.timer.settings.v1` im Local Storage gespeichert. Bei aktivierter
-Speicherung werden Theme-/Farbschema-Wechsel und Countdown-Schnellwahl ebenfalls gespeichert.
-Die Einstellungen bleiben bis zum Löschen bestehen. Deaktivieren + Übernehmen
-oder „Datenschutz & Speicher“ → „Gespeicherte Einstellungen löschen“ entfernt
-sie. Ohne Speicherung gelten Einstellungen nur auf der aktuellen Seite.
-Die Anwendung funktioniert auch bei gesperrtem Browser-Speicher.
+Gültige Timerzeiten, Rundenzahl und Signalton werden bei Änderungen automatisch
+unter `jacktools.timer.settings.v1` gespeichert, ohne Speicherschalter.
+Zeitänderungen gelten für den laufenden Timer erst nach „Einstellungen übernehmen“;
+der Signalton wird sofort geändert. Ungültige Eingaben überschreiben keine
+gespeicherten Werte. Einstellungen werden bei erneutem Aufruf wiederhergestellt.
+
+Sprache und Design werden unabhängig unter `jacktools.timer.appearance.v1`
+gespeichert. „Datenschutz & Speicher“ → „Gespeicherte Einstellungen löschen“
+entfernt beide Einträge. Bei gesperrtem Speicher funktioniert der Timer weiter,
+kann aber die Änderungen nicht dauerhaft speichern.
 
 - Übernehmen oder eine Schnellwahl setzt den aktuellen Timer zurück.
 - Ein laufender Timer wird beim Neuladen oder Seitenwechsel nicht fortgesetzt.
@@ -159,6 +161,5 @@ Im Farben-Dropdown stehen acht deutlich gesättigtere Paletten und die Stile
 sind unabhängig kombinierbar. Sprache und Design werden bei Änderungen
 automatisch in `jacktools.timer.appearance.v1` gespeichert.
 Die Startseite `/` bevorzugt eine gespeicherte Sprache vor der Browsersprache;
-explizite Sprach-URLs bleiben unverändert. Timerzeiten und Signalton benötigen
-weiterhin „Einstellungen merken“. Der Datenschutzdialog löscht beide Schlüssel.
+explizite Sprach-URLs bleiben unverändert. Auch Timerzeiten und Signalton werden automatisch gespeichert. Der Datenschutzdialog löscht beide Schlüssel.
 Bestehende gespeicherte Designwerte werden als Fallback weiterhin gelesen.

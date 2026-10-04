@@ -33,18 +33,17 @@ test('countdown, pause, resume, completion, reset, presets and no horizontal ove
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
   expect(errors).toEqual([]);
 });
-test('appearance persists automatically, timer preferences require opt-in and both can be removed', async ({ page }) => {
+test('appearance persists automatically, timer preferences persist automatically and both can be removed', async ({ page }) => {
   await page.goto('/de/timer/');
   await page.locator('#theme').click();
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await page.locator('[name=minutes]').fill('12');
-  await page.locator('[name=remember]').check();
   await page.locator('.apply-button').click();
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await expect(page.locator('#time')).toHaveText('12:00');
-  await expect(page.locator('[name=remember]')).toBeChecked();
+  await expect(page.locator('[name=remember]')).toHaveCount(0);
   await page.locator('#privacy-open').click();
   await expect(page.locator('#privacy-dialog')).toBeVisible();
   await page.locator('#clear-storage').click();
@@ -52,7 +51,7 @@ test('appearance persists automatically, timer preferences require opt-in and bo
   await page.locator('#privacy-dialog form button').click();
   await page.reload();
   await expect(page.locator('#time')).toHaveText('05:00');
-  await expect(page.locator('[name=remember]')).not.toBeChecked();
+  await expect(page.locator('[name=remember]')).toHaveCount(0);
 });
 test('pomodoro waits for the user and advances through breaks', async ({ page }) => {
   await page.goto('/en/pomodoro/');
@@ -104,7 +103,6 @@ test('works with corrupt or unavailable storage', async ({ page }) => {
     Storage.prototype.setItem = () => { throw new Error('blocked'); };
   });
   await page.reload();
-  await page.locator('[name=remember]').check();
   await page.locator('.apply-button').click();
   await expect(page.locator('#settings-status')).toContainText('unavailable');
   await page.locator('#start').click();
@@ -184,7 +182,6 @@ test('palettes preview without resetting, persist with opt-in and work in light 
   await page.locator('#palette-dropdown summary').click();
   await expect(page.locator('[name=colorScheme][value=rose]')).toBeChecked();
   await selectPalette(page, 'blue');
-  await page.locator('[name=remember]').check();
   await page.locator('.apply-button').click();
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-palette', 'blue');
@@ -273,7 +270,7 @@ test('language menu supports keyboard navigation, dismissal, theme and small scr
   await expect(page.locator('.language-menu a')).toHaveCount(2);
 });
 
-test('style, appearance and manual language restore on the next visit without timer opt-in', async ({ page }) => {
+test('style, appearance and manual language restore on the next visit without an opt-in switch', async ({ page }) => {
   await page.goto('/de/timer/');
   await selectPalette(page, 'teal');
   await page.locator('#palette-dropdown summary').click();
@@ -286,7 +283,7 @@ test('style, appearance and manual language restore on the next visit without ti
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await expect(page.locator('html')).toHaveAttribute('data-style', 'technical');
   await expect(page.locator('html')).toHaveAttribute('data-palette', 'teal');
-  await expect(page.locator('[name=remember]')).not.toBeChecked();
+  await expect(page.locator('[name=remember]')).toHaveCount(0);
   await page.goto('/de/pomodoro/');
   await expect(page.locator('html')).toHaveAttribute('lang', 'de');
   for (const style of ['warm', 'minimal', 'technical', 'soft']) {
@@ -321,4 +318,30 @@ test('four icon styles fit one row and keep accessible names', async ({ page }) 
   await page.locator('#theme').click();
   await expect(page.locator('html')).toHaveAttribute('data-style', 'soft');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
+});
+
+test('timer edits save without Apply and do not reset a running timer', async ({ page }) => {
+  await page.clock.install();
+  await page.goto('/de/timer/');
+  await page.locator('#start').click();
+  await page.locator('[name=minutes]').fill('17');
+  await page.locator('[name=sound]').uncheck();
+  await expect(page.locator('#start')).toHaveText('Pausieren');
+  await page.reload();
+  await expect(page.locator('#time')).toHaveText('17:00');
+  await expect(page.locator('[name=sound]')).not.toBeChecked();
+  await page.locator('[name=minutes]').fill('99');
+  await expect(page.locator('#settings-status')).toContainText('prüfe');
+  await page.reload();
+  await expect(page.locator('#time')).toHaveText('17:00');
+  await page.goto('/de/pomodoro/');
+  await page.locator('[name=focus]').fill('42');
+  await page.locator('[name=short]').fill('7');
+  await page.locator('[name=rounds]').fill('6');
+  await page.reload();
+  await expect(page.locator('#time')).toHaveText('42:00');
+  await expect(page.locator('[name=short]')).toHaveValue('7');
+  await expect(page.locator('[name=rounds]')).toHaveValue('6');
+  await page.goto('/de/timer/');
+  await expect(page.locator('#time')).toHaveText('17:00');
 });

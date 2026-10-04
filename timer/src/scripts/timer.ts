@@ -5,7 +5,7 @@ const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getEleme
 let settings: Settings = { ...defaults };
 try {
   const saved = sanitizeSettings(JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'));
-  if (saved.remember) settings = saved;
+  settings = saved;
 } catch { /* Storage is optional. */ }
 settings.dark = document.documentElement.dataset.theme === 'dark';
 settings.colorScheme = (document.documentElement.dataset.palette || 'terracotta') as ColorScheme;
@@ -36,12 +36,10 @@ function fillForm() {
     field('seconds').value = String(settings.countdown % 60);
   } else for (const key of ['focus', 'short', 'long', 'rounds'] as const) field(key).value = String(settings[key]);
   field('sound').checked = settings.sound;
-  field('remember').checked = settings.remember;
 }
-function persist() {
+function persist(value: Settings = settings) {
   try {
-    if (settings.remember) localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
-    else localStorage.removeItem(STORAGE_KEY);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
     return true;
   } catch { status.textContent = t.storageError; return false; }
 }
@@ -85,27 +83,40 @@ function restartWithSettings() {
   timer.settings = settings; timer.phase = 'focus'; timer.round = 1; timer.reset();
   $('timer-status').textContent = ''; render();
 }
+function readFormSettings(): Settings | null {
+  if (!form.checkValidity()) return null;
+  const next = { ...settings, sound: field('sound').checked };
+  if (timer.mode === 'timer') {
+    next.countdown = Number(field('hours').value) * 3600 + Number(field('minutes').value) * 60 + Number(field('seconds').value);
+    if (next.countdown < 1) return null;
+  } else for (const key of ['focus','short','long','rounds'] as const) next[key] = Number(field(key).value);
+  return sanitizeSettings(next);
+}
+form.addEventListener('input', () => {
+  // Sound applies immediately; edited durations only affect a timer after Apply.
+  settings.sound = field('sound').checked;
+  const next = readFormSettings();
+  if (!next) { status.textContent = t.invalid; return; }
+  if (persist(next)) status.textContent = t.autoSaved;
+});
 form.addEventListener('submit', e => {
   e.preventDefault();
   if (!form.reportValidity()) return;
-  const next = { ...settings, sound: field('sound').checked, remember: field('remember').checked };
-  if (timer.mode === 'timer') {
-    next.countdown = Number(field('hours').value) * 3600 + Number(field('minutes').value) * 60 + Number(field('seconds').value);
-    if (next.countdown < 1) { status.textContent = t.invalid; field('seconds').focus(); return; }
-  } else for (const key of ['focus','short','long','rounds'] as const) next[key] = Number(field(key).value);
-  settings = sanitizeSettings(next);
-  if (persist()) status.textContent = settings.remember ? t.saved : t.applied;
+  const next = readFormSettings();
+  if (!next) { status.textContent = t.invalid; field('seconds')?.focus(); return; }
+  settings = next;
+  if (persist()) status.textContent = t.saved;
   prepareAudio(); restartWithSettings();
 });
 document.querySelectorAll<HTMLButtonElement>('[data-minutes]').forEach(button => button.addEventListener('click', () => {
   settings.countdown = Number(button.dataset.minutes) * 60;
-  fillForm(); if (settings.remember) persist(); restartWithSettings();
+  fillForm(); persist(); restartWithSettings();
 }));
 document.addEventListener('palette-change', ((e: CustomEvent<ColorScheme>) => {
   settings.colorScheme = e.detail;
 }) as EventListener);
 document.addEventListener('theme-change', ((e: CustomEvent<boolean>) => { settings.dark = e.detail; }) as EventListener);
-document.addEventListener('preferences-cleared', () => { settings.remember = false; field('remember').checked = false; status.textContent = ''; });
+document.addEventListener('preferences-cleared', () => { status.textContent = ''; });
 const focusButton = $('focus-view');
 function toggleFocus() {
   const focused = document.body.classList.toggle('focus-view');
