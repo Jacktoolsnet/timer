@@ -471,3 +471,17 @@ test('training advances automatically and finishes without final rest', async ({
   await expect(page.locator('#training-time')).toHaveText('00:00');
   expect(await page.evaluate(() => localStorage.getItem('jacktools.timer.training.v1'))).toBeNull();
 });
+
+test('legal print layout hides chrome and ignores dark appearance', async ({ page }) => {
+  for (const route of ['privacy', 'usage', 'legal']) {
+    await page.goto('/de/' + route + '/');
+    await page.evaluate(() => { document.documentElement.dataset.theme = 'dark'; document.documentElement.dataset.style = 'technical'; document.documentElement.dataset.fontSize = '3'; });
+    await page.emulateMedia({ media: 'print' });
+    await expect(page.locator('.site-header')).toBeHidden();
+    await expect(page.locator('.site-footer')).toBeHidden();
+    await expect(page.locator('.legal-nav')).toBeHidden();
+    await expect(page.locator('.legal-back')).toBeHidden();
+    await expect(page.locator('.legal-page h1')).toBeVisible();
+    await expect(page.locator('.legal-page p').first()).toHaveCSS('color', 'rgb(0, 0, 0)');
+  }
+});

@@ -60,7 +60,7 @@ const alternateLanguages = legal ? (['en', 'de'] as const) : languages;
       } catch {}
     </script>
   </head>
-  <body>
+  <body class:list={{ "legal-document": legal }}>
     <a class="skip-link" href="#main">{lang === 'de' ? 'Zum Inhalt' : lang === 'es' ? 'Ir al contenido' : lang === 'fr' ? 'Aller au contenu' : 'Skip to content'}</a>
     <div class="site-shell">
       <header class="site-header">
