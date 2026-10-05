@@ -106,7 +106,7 @@ test('language routes, SEO, legal drafts and focus view', async ({ page, request
   await expect(page.locator('.legal-page .notice')).toHaveCount(0);
   await expect(page.locator('.legal-page')).toContainText('Amtsgericht Ingolstadt');
   await page.goto('/de/privacy/');
-  await expect(page.locator('.legal-page > .notice').first()).toContainText('Nicht veröffentlichungsfertig');
+  await expect(page.locator('.legal-page .notice')).toHaveCount(0);
   const sitemap = await request.get('/sitemap.xml');
   expect((await sitemap.text()).match(/<loc>/g)?.length).toBe(12);
 });

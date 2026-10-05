@@ -8,13 +8,10 @@ const de = lang === 'de';
 const t = getDictionary(lang);
 const title = kind === 'legal' ? t.legal : t.privacy;
 ---
-<Layout lang={lang} title={title} description={kind === 'legal' ? (de ? 'Impressum und Betreiberangaben für Jacktools Timer.' : 'Legal notice and operator information for Jacktools Timer.') : (de ? 'Entwurf der Datenschutzerklärung für Jacktools Timer.' : 'Draft privacy notice for Jacktools Timer.')} route={kind} noindex legal>
+<Layout lang={lang} title={title} description={kind === 'legal' ? (de ? 'Impressum und Betreiberangaben für Jacktools Timer.' : 'Legal notice and operator information for Jacktools Timer.') : (de ? 'Datenschutzerklärung für Jacktools Timer.' : 'Privacy notice for Jacktools Timer.')} route={kind} noindex legal>
   <article class="legal-page">
-    <p class="eyebrow">JACKTOOLS / {kind === 'legal' ? title.toUpperCase() : (de ? 'ENTWURF' : 'DRAFT')}</p><h1>{title}</h1>
+    <p class="eyebrow">JACKTOOLS / {title.toUpperCase()}</p><h1>{title}</h1>
     <nav class="legal-nav"><a href={'/de/' + kind + '/'} lang="de">Deutsch · Original</a><a href={'/en/' + kind + '/'} lang="en">English · Translation</a></nav>
-    {kind === 'privacy' && <p class="notice">{de
-      ? 'Nicht veröffentlichungsfertig. Speicherfristen und Statistik-Konfiguration sind noch zu bestätigen. Offene Punkte sind unten ausdrücklich gekennzeichnet. Dieser Entwurf muss vor einem öffentlichen Start vervollständigt und rechtlich geprüft werden. Deutsch ist die redaktionelle Originalfassung.'
-      : 'Not ready for publication. Retention periods and statistics configuration remain to be confirmed. Pending items are explicitly marked below. Complete and legally review this draft before public launch. German is the editorial original; this is an English translation.'}</p>}
     {kind === 'legal' ? <>
       <h2>{de ? 'Diensteanbieter' : 'Service provider'}</h2>
       <p><strong>JackTools.Net UG (haftungsbeschränkt)</strong><br />Im Kirchfeld 27<br />38304 Wolfenbüttel<br />{de ? 'Deutschland' : 'Germany'}</p>

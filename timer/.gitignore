@@ -3,3 +3,6 @@ dist/
 .astro/
 playwright-report/
 test-results/
+
+# Local legal review notes; never publish or commit
+/LEGAL-TODO.local.txt
