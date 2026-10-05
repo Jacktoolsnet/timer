@@ -5,7 +5,7 @@ import { getDictionary, languages, languageNames, type Language } from '../lib/i
 interface Props { lang: Language; title: string; description: string; route: string; noindex?: boolean; legal?: boolean }
 const { lang, title, description, route, noindex = false, legal = false } = Astro.props;
 const t = getDictionary(lang);
-const canonical = new URL(Astro.url.pathname === '/' ? '/en/timer/' : Astro.url.pathname, Astro.site);
+const canonical = new URL(Astro.url.pathname === '/' ? '/en/' : Astro.url.pathname, Astro.site);
 const alternateLanguages = legal ? (['en', 'de'] as const) : languages;
 ---
 <!doctype html>
@@ -23,7 +23,7 @@ const alternateLanguages = legal ? (['en', 'de'] as const) : languages;
         const saved = JSON.parse(localStorage.getItem('jacktools.timer.storage-consent.v1') === 'yes' ? localStorage.getItem('jacktools.timer.appearance.v1') || 'null' : 'null');
         if (supportedLanguages.includes(saved?.language)) preferredLanguage = saved.language;
       } catch {}
-      window.location.replace('/' + preferredLanguage + '/timer/' + window.location.search + window.location.hash);
+      window.location.replace('/' + preferredLanguage + '/' + window.location.search + window.location.hash);
     </script>}
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
@@ -33,8 +33,8 @@ const alternateLanguages = legal ? (['en', 'de'] as const) : languages;
     <title>{title} · Jacktools</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="canonical" href={canonical} />
-    {alternateLanguages.map(l => <link rel="alternate" hreflang={l} href={new URL('/' + l + '/' + route + '/', Astro.site)} />)}
-    <link rel="alternate" hreflang="x-default" href={new URL('/en/' + route + '/', Astro.site)} />
+    {alternateLanguages.map(l => <link rel="alternate" hreflang={l} href={new URL('/' + l + '/' + (route ? route + '/' : ''), Astro.site)} />)}
+    <link rel="alternate" hreflang="x-default" href={new URL('/en/' + (route ? route + '/' : ''), Astro.site)} />
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title + ' · Jacktools'} />
     <meta property="og:description" content={description} />
@@ -64,7 +64,7 @@ const alternateLanguages = legal ? (['en', 'de'] as const) : languages;
     <a class="skip-link" href="#main">{lang === 'de' ? 'Zum Inhalt' : lang === 'es' ? 'Ir al contenido' : lang === 'fr' ? 'Aller au contenu' : 'Skip to content'}</a>
     <div class="site-shell">
       <header class="site-header">
-        <a class="brand" href={'/' + lang + '/timer/'} aria-label="Jacktools Timer">
+        <a class="brand" href={'/' + lang + '/'} aria-label="Jacktools Timer">
           <span class="brand-icon"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="18" r="10"/><path d="M16 18v-6m-3-9h6m-3 0v5m9 2 3-3"/></svg></span>
           <span class="brand-wordmark">jacktools<span class="brand-dot">.</span>net<span class="brand-product">/timer</span></span>
         </a>
@@ -78,7 +78,7 @@ const alternateLanguages = legal ? (['en', 'de'] as const) : languages;
               <section class="preferences-language" aria-labelledby="language-heading">
                 <h3 id="language-heading">{t.language}</h3>
             <nav class="language-menu" aria-label={t.language}>
-              {alternateLanguages.map(l => <a href={'/' + l + '/' + route + '/'} lang={l} hreflang={l} aria-current={l === lang ? 'page' : undefined}>
+              {alternateLanguages.map(l => <a href={'/' + l + '/' + (route ? route + '/' : '')} lang={l} hreflang={l} aria-current={l === lang ? 'page' : undefined}>
                 <span class="language-code" aria-hidden="true">{l.toUpperCase()}</span>
                 <span>{languageNames[l]}</span>
                 {l === lang && <svg class="language-check" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4 10-10"/></svg>}
@@ -131,7 +131,7 @@ const alternateLanguages = legal ? (['en', 'de'] as const) : languages;
             <a href="https://app.messagedrop.de" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">{t.supportVisit}<span aria-hidden="true">↗</span></a>
           </div>
         </section>
-        <div><a class="footer-brand" href={'/' + lang + '/timer/'}>jacktools.net</a><p>{t.footer}</p></div>
+        <div><a class="footer-brand" href={'/' + lang + '/'}>jacktools.net</a><p>{t.footer}</p></div>
         <nav aria-label={t.legal}><a href={'/' + (lang === 'de' ? 'de' : 'en') + '/legal/'}>{t.legal}{!['de','en'].includes(lang) && ' (EN)'}</a><a href={'/' + (lang === 'de' ? 'de' : 'en') + '/privacy/'}>{t.privacy}{!['de','en'].includes(lang) && ' (EN)'}</a><a href={'/' + (lang === 'de' ? 'de' : 'en') + '/usage/'}>{t.usage}{!['de','en'].includes(lang) && ' (EN)'}</a><button id="privacy-open">{t.preferences}</button></nav>
         <p class="footer-credit">{t.creditBefore} ❤️ ☕ {t.creditAnd} 🍫 {t.creditAfter} <a href="https://jacktools.net" rel="noreferrer" referrerpolicy="no-referrer"><strong>jacktools.net</strong></a></p>
       </footer>

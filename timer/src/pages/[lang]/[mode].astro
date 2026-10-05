@@ -2,7 +2,7 @@
 import TimerPage from '../../components/TimerPage.astro';
 import { languages } from '../../lib/i18n';
 export function getStaticPaths() {
-  return languages.flatMap(lang => (['timer', 'pomodoro'] as const).map(mode => ({ params: { lang, mode }, props: { lang, mode } })));
+  return languages.flatMap(lang => (['pomodoro'] as const).map(mode => ({ params: { lang, mode }, props: { lang, mode } })));
 }
 const { lang, mode } = Astro.props;
 ---

@@ -8,13 +8,13 @@ const { lang, mode } = Astro.props;
 const t = getDictionary(lang);
 const isPomo = mode === 'pomodoro';
 ---
-<Layout lang={lang} title={isPomo ? t.pomodoroTitle : t.timerTitle} description={isPomo ? t.pomodoroDescription : t.timerDescription} route={mode}>
+<Layout lang={lang} title={isPomo ? t.pomodoroTitle : t.timerTitle} description={isPomo ? t.pomodoroDescription : t.timerDescription} route={mode === 'timer' ? '' : mode}>
   <script type="application/ld+json" set:html={JSON.stringify({
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
     name: (isPomo ? t.pomodoroTitle : t.timerTitle) + ' · Jacktools',
     description: isPomo ? t.pomodoroDescription : t.timerDescription,
-    url: new URL('/' + lang + '/' + mode + '/', Astro.site).href,
+    url: new URL('/' + lang + '/' + (mode === 'timer' ? '' : mode + '/'), Astro.site).href,
     inLanguage: lang,
     applicationCategory: 'UtilitiesApplication',
     operatingSystem: 'Any',
