@@ -1,3 +1,4 @@
+import { storageAllowed, CONSENT_KEY } from '../lib/storage';
 import { STORAGE_KEY, type ColorScheme } from '../lib/engine';
 const theme = document.querySelector<HTMLButtonElement>('#theme')!;
 const lightTheme = document.querySelector<HTMLButtonElement>('#theme-light')!;
@@ -19,6 +20,8 @@ const dialog = document.querySelector<HTMLDialogElement>('#privacy-dialog')!;
 document.querySelector('#privacy-open')?.addEventListener('click', () => dialog.showModal());
 document.querySelector('#clear-storage')?.addEventListener('click', e => {
   try {
+    localStorage.removeItem(CONSENT_KEY);
+    remember.checked = false;
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(APPEARANCE_KEY);
     document.querySelector('#privacy-status')!.textContent = (e.currentTarget as HTMLElement).dataset.message!;
@@ -74,6 +77,7 @@ document.querySelector('#preferences-close')?.addEventListener('click', () => {
 
 const APPEARANCE_KEY = 'jacktools.timer.appearance.v1';
 function persistAppearance(language?: string) {
+  if (!storageAllowed()) return;
   try {
     const saved = JSON.parse(localStorage.getItem(APPEARANCE_KEY) || 'null');
     localStorage.setItem(APPEARANCE_KEY, JSON.stringify({
@@ -113,4 +117,24 @@ fontSize.addEventListener('input', () => {
   document.documentElement.dataset.fontSize = fontSize.value;
   syncFontSize();
   persistAppearance();
+});
+
+const remember = document.querySelector<HTMLInputElement>('#remember-preferences')!;
+remember.checked = storageAllowed();
+remember.addEventListener('change', () => {
+  try {
+    if (remember.checked) {
+      localStorage.setItem(CONSENT_KEY, 'yes');
+      persistAppearance();
+      document.dispatchEvent(new Event('storage-enabled'));
+    } else {
+      localStorage.removeItem(CONSENT_KEY);
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(APPEARANCE_KEY);
+      document.dispatchEvent(new Event('preferences-cleared'));
+    }
+  } catch {
+    remember.checked = storageAllowed();
+    document.querySelector('#storage-status')!.textContent = document.querySelector<HTMLElement>('#clear-storage')!.dataset.error!;
+  }
 });

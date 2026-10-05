@@ -20,7 +20,7 @@ const alternateLanguages = legal ? (['en', 'de'] as const) : languages;
         .map(language => language.toLowerCase().split('-')[0])
         .find(language => supportedLanguages.includes(language)) || 'en';
       try {
-        const saved = JSON.parse(localStorage.getItem('jacktools.timer.appearance.v1') || 'null');
+        const saved = JSON.parse(localStorage.getItem('jacktools.timer.storage-consent.v1') === 'yes' ? localStorage.getItem('jacktools.timer.appearance.v1') || 'null' : 'null');
         if (supportedLanguages.includes(saved?.language)) preferredLanguage = saved.language;
       } catch {}
       window.location.replace('/' + preferredLanguage + '/timer/' + window.location.search + window.location.hash);
@@ -41,7 +41,7 @@ const alternateLanguages = legal ? (['en', 'de'] as const) : languages;
     <meta property="og:url" content={canonical} />
     <script is:inline>
       try {
-        const s = JSON.parse(localStorage.getItem('jacktools.timer.settings.v1') || 'null');
+        const s = JSON.parse(localStorage.getItem('jacktools.timer.storage-consent.v1') === 'yes' ? localStorage.getItem('jacktools.timer.settings.v1') || 'null' : 'null');
         if (s?.remember === true) {
           if (s.dark === true) document.documentElement.dataset.theme = 'dark';
           if (['terracotta', 'blue', 'green', 'orange', 'red', 'violet', 'teal', 'rose'].includes(s.colorScheme)) {
@@ -50,7 +50,7 @@ const alternateLanguages = legal ? (['en', 'de'] as const) : languages;
         }
       } catch {}
       try {
-        const saved = JSON.parse(localStorage.getItem('jacktools.timer.appearance.v1') || 'null');
+        const saved = JSON.parse(localStorage.getItem('jacktools.timer.storage-consent.v1') === 'yes' ? localStorage.getItem('jacktools.timer.appearance.v1') || 'null' : 'null');
         if (saved) {
           if (typeof saved.dark === 'boolean') document.documentElement.dataset.theme = saved.dark ? 'dark' : 'light';
           if (['terracotta', 'blue', 'green', 'orange', 'red', 'violet', 'teal', 'rose'].includes(saved.colorScheme)) document.documentElement.dataset.palette = saved.colorScheme;
@@ -116,6 +116,7 @@ const alternateLanguages = legal ? (['en', 'de'] as const) : languages;
               <input id="font-size" type="range" min="0" max="3" step="1" value="0" aria-valuetext="100 %" />
               <div class="font-size-steps" aria-hidden="true"><span>100 %</span><span>110 %</span><span>120 %</span><span>130 %</span></div>
             </div>
+            <div class="storage-choice"><label><span class="storage-switch"><input type="checkbox" role="switch" id="remember-preferences" aria-describedby="remember-hint" /><span class="storage-switch-track" aria-hidden="true"></span></span> <span>{t.rememberPreferences}</span></label><p id="remember-hint">{t.rememberHint}</p><p id="storage-status" role="status"></p></div>
             </div>
           </details>
 

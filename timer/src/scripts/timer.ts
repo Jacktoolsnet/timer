@@ -1,10 +1,11 @@
+import { storageAllowed } from '../lib/storage';
 import { Timer, defaults, sanitizeSettings, formatTime, STORAGE_KEY, type Settings, type Mode, type ColorScheme } from '../lib/engine';
 const app = document.querySelector<HTMLElement>('#timer-app')!;
 const t = JSON.parse(app.dataset.translations!) as Record<string, string>;
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 let settings: Settings = { ...defaults };
 try {
-  const saved = sanitizeSettings(JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'));
+  const saved = sanitizeSettings(JSON.parse(storageAllowed() ? localStorage.getItem(STORAGE_KEY) || 'null' : 'null'));
   settings = saved;
 } catch { /* Storage is optional. */ }
 settings.dark = document.documentElement.dataset.theme === 'dark';
@@ -38,6 +39,7 @@ function fillForm() {
   field('sound').checked = settings.sound;
 }
 function persist(value: Settings = settings) {
+  if (!storageAllowed()) { status.textContent = t.applied; return false; }
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
     return true;
@@ -165,3 +167,5 @@ function tick() { if (timer.tick(Date.now())) finish(); render(); }
 setInterval(() => { if (timer.deadline !== null) tick(); }, 200);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
 fillForm(); render();
+
+document.addEventListener('storage-enabled', () => persist(readFormSettings() || settings));

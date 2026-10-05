@@ -438,3 +438,23 @@ test('privacy-first footer has ordinary support links and loads no external reso
   await expect(page.locator('#privacy-dialog')).not.toContainText('zertifizierte');
   expect(externalRequests).toEqual([]);
 });
+
+test('persistent settings require opt-in and deletion revokes it', async ({ page }) => {
+  await page.goto('/de/timer/');
+  await page.locator('#palette-dropdown summary').click();
+  await page.locator('#theme').click();
+  expect(await page.evaluate(() => localStorage.getItem('jacktools.timer.appearance.v1'))).toBeNull();
+
+  await expect(page.locator('#remember-preferences')).not.toBeChecked();
+  await page.locator('#remember-preferences').check();
+  expect(await page.evaluate(() => localStorage.getItem('jacktools.timer.storage-consent.v1'))).toBe('yes');
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await page.locator('#palette-dropdown summary').click();
+  await expect(page.locator('#remember-preferences')).toBeChecked();
+  await page.locator('#remember-preferences').uncheck();
+  expect(await page.evaluate(() => Object.keys(localStorage).filter(k => k.startsWith('jacktools.timer.')))).toEqual([]);
+  await page.reload();
+  await page.locator('#palette-dropdown summary').click();
+  await expect(page.locator('#remember-preferences')).not.toBeChecked();
+});
