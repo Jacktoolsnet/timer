@@ -18,12 +18,13 @@ const {lang}=Astro.props; const t=getDictionary(lang);const c=clockText[lang];
 <g id="dial-numbers">{Array.from({length:12},(_,i)=>{const n=i+1,a=n*Math.PI/6;return <text x={160+116*Math.sin(a)} y={160-116*Math.cos(a)}>{n}</text>})}</g>
 <line id="hour-hand" x1="160" y1="170" x2="160" y2="83"/><line id="minute-hand" x1="160" y1="176" x2="160" y2="48"/><line id="second-hand" x1="160" y1="187" x2="160" y2="32"/><circle cx="160" cy="160" r="5" class="hub"/>
 </svg>
-<div class="clock-readout"><div id="flip-clock" aria-hidden="true"></div><p id="flip-context" aria-hidden="true"></p><time id="digital-clock" aria-live="off">--:--</time><p id="clock-date"></p><p id="clock-zone"></p></div>
+<div class="clock-readout"><div id="flip-clock" aria-hidden="true"></div><p id="flip-context" aria-hidden="true"></p><time id="digital-clock" aria-live="off">--:--</time><p id="clock-date"></p><div id="styled-date" hidden></div><p id="clock-zone"></p></div>
 </div>
 <p id="wake-status" class="timer-status" role="status"></p><noscript>{t.js}</noscript>
 </section>
 <aside class="settings-card"><h2>{t.settings}</h2><form id="clock-settings" class="clock-settings">
 <label>{t.appearance}<select name="view">{(['analog','digital','combined','flip','analogFlip'] as const).map(v=><option value={v} selected={v==='combined'}>{c[v]}</option>)}</select></label>
+<label>{c.dateAppearance}<select name="dateView">{(['textDate','calendarDate','elegantDate','flipDate'] as const).map(v=><option value={v}>{c[v]}</option>)}</select></label>
 <label>{c.date}<select name="date">{(['off','short','medium','long'] as const).map(v=><option value={v} selected={v==='long'}>{c[v]}</option>)}</select></label>
 <label>{c.time}<select name="format">{(['short','medium','long'] as const).map(v=><option value={v} selected={v==='medium'}>{c[v]}</option>)}</select></label>
 <label>12 / 24 h<select name="hourCycle"><option value="auto">{c.auto}</option><option value="12">12 h</option><option value="24">24 h</option></select></label>

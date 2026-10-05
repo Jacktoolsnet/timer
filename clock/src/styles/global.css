@@ -690,3 +690,18 @@ body.focus-view .card-top { position: absolute; top: 12px; right: 12px; z-index:
 @keyframes flip-down { to {transform:rotateX(0deg);} }
 .focus-view #flip-clock { --flip-size:min(calc(110px * var(--font-scale,1)),12cqw); }
 @media(prefers-reduced-motion:reduce) { .flip-moving { display:none; } }
+#styled-date { margin:20px auto 0; text-align:center; }
+#styled-date[hidden] { display:none; }
+#styled-date .date-calendar,#styled-date .date-weekday,#styled-date .date-elegant,#styled-date .date-flaps,#styled-date .date-flap-caption { display:none; }
+#styled-date[data-style=calendarDate] .date-calendar { display:inline-flex; flex-direction:column; min-width:170px; max-width:100%; overflow:hidden; border:1px solid var(--line); border-radius:14px; background:var(--surface); box-shadow:0 5px 15px #0001; }
+.date-month { padding:8px 20px; color:var(--bg); background:var(--accent); text-transform:uppercase; letter-spacing:.12em; font-size:calc(12px * var(--font-scale,1)); }
+.date-day { font-size:calc(48px * var(--font-scale,1)); line-height:1.2; padding:12px 20px 6px; font-variant-numeric:tabular-nums; }
+.date-footer { padding:0 14px 12px; color:var(--muted); font-size:calc(12px * var(--font-scale,1)); }
+#styled-date[data-style=elegantDate] .date-weekday { display:block; margin:0 0 8px; color:var(--accent); text-transform:uppercase; letter-spacing:.15em; font-size:calc(12px * var(--font-scale,1)); }
+#styled-date[data-style=elegantDate] .date-elegant { display:block; font-family:Georgia,serif; font-size:calc(22px * var(--font-scale,1)); margin:0; }
+#styled-date[data-style=flipDate] .date-flaps { display:flex; align-items:center; justify-content:center; gap:.08em; font:700 min(calc(40px * var(--font-scale,1)),10cqw)/1.35 ui-monospace,monospace; }
+#styled-date[data-style=flipDate] .date-flap-caption { display:block; margin:10px 0 0; font-size:calc(13px * var(--font-scale,1)); color:var(--muted); }
+.date-flaps .flip-separator { font-size:0; width:.22em; }
+.date-flaps .flip-separator::after { content:'/'; font-size:min(calc(28px * var(--font-scale,1)),7cqw); }
+@media(orientation:landscape) and (max-height:600px){.focus-view #styled-date{margin-top:12px}.focus-view .date-day{font-size:32px;padding:4px 12px}.focus-view .date-month{padding:4px 12px}.focus-view .date-footer{padding-bottom:6px}.focus-view #styled-date .date-calendar{min-width:150px}}
+.date-flaps .flip-separator { width:12px; flex:0 0 12px; }
