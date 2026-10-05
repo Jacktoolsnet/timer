@@ -137,7 +137,7 @@ const alternateLanguages = legal ? (['en', 'de'] as const) : languages;
       </footer>
     </div>
     <dialog id="privacy-dialog" aria-labelledby="privacy-title">
-      <div class="dialog-inner"><span class="eyebrow">JACKTOOLS / PRIVACY</span><h2 id="privacy-title">{t.privacyTitle}</h2><p>{t.privacyBody}</p><p class="notice">{t.privacyNote}</p><p>{t.legalLanguage}</p><p id="privacy-status" role="status"></p><div class="dialog-actions"><button class="secondary" id="clear-storage" data-message={t.cleared} data-error={t.storageError}>{t.clear}</button><form method="dialog"><button class="primary">{t.close}</button></form></div></div>
+      <div class="dialog-inner"><span class="eyebrow">JACKTOOLS / PRIVACY</span><h2 id="privacy-title">{t.privacyTitle}</h2><p>{t.privacyBody}</p><p class="notice">{t.privacyNote}</p><p id="privacy-status" role="status"></p><div class="dialog-actions"><button class="secondary" id="clear-storage" data-message={t.cleared} data-error={t.storageError}><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 6h18M9 6V4h6v2M5 6l1 14h12l1-14M10 10v6M14 10v6" /></svg><span>{t.clear}</span></button><form method="dialog"><button class="primary">{t.close}</button></form></div></div>
     </dialog>
     <script src="../scripts/site.ts"></script>
   </body>
