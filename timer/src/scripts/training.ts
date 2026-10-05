@@ -37,7 +37,10 @@ function render() {
   el('ring-progress').style.strokeDashoffset = String(100 * (1 - (phase ? Math.min(1, Math.max(0, remaining / (phase.seconds * 1000))) : 0)));
   el('training-time').classList.toggle('has-hours', formatTime(remaining).length > 5);
   el('training-round').textContent = `${t.round} ${phase?.round || settings.rounds} ${t.of} ${settings.rounds}`;
-  el('training-total').textContent = t.total + ': ' + formatTime(remaining + phases.slice(index+1).reduce((a,p)=>a+p.seconds*1000,0));
+  const totalRemaining = remaining + phases.slice(index+1).reduce((a,p)=>a+p.seconds*1000,0);
+  const totalDuration = phases.reduce((a,p)=>a+p.seconds*1000,0);
+  el('training-total-progress').style.strokeDashoffset = String(100 * (1 - Math.min(1, Math.max(0, totalRemaining / totalDuration))));
+  el('training-total').textContent = t.total + ': ' + formatTime(totalRemaining);
   renderPlayButton(el('training-start'), deadline !== null, deadline !== null ? t.pause : remaining < (phase?.seconds || 0) * 1000 ? t.resume : t.start);
   (el('training-next') as HTMLButtonElement).disabled = !phase;
   document.title = formatTime(remaining) + ' · ' + (phase ? t[phase.kind] : t.done) + ' · Jacktools';

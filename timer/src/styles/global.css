@@ -546,6 +546,9 @@
 #clear-storage { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; }
 #clear-storage svg { width: 1.15em; height: 1.15em; }
 .mode-switch { flex-wrap: wrap; justify-content: center; }
-#training-app .clock { min-height: 310px; }
+#training-app .clock { min-height: 0; }
 #training-app .clock-content { width: 100%; }
 #training-app .timer-controls { flex-wrap: wrap; }
+
+#training-total-progress { stroke: var(--accent); stroke-width: 2; stroke-dasharray: 100; stroke-dashoffset: 0; opacity: .65; }
+@media (prefers-reduced-motion: no-preference) { #training-total-progress { transition: stroke-dashoffset .2s linear; } }
