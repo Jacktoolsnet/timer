@@ -650,3 +650,20 @@ body.focus-view .card-top { position: absolute; top: 12px; right: 12px; z-index:
 @media(orientation:landscape) and (max-height:600px){body.focus-view .clock-card{display:flex;min-height:calc(100dvh - 16px);padding:48px 16px 16px}body.focus-view .clock-display{flex-direction:row;justify-content:center;gap:32px}body.focus-view #analog-clock{width:min(42vw,calc(100dvh - 100px));flex-shrink:0}body.focus-view .clock-readout{flex:1}body.focus-view #digital-clock{font-size:clamp(28px,5vw,60px)}body.focus-view #clock-date{margin:10px 0}body.focus-view .clock-display[data-view=digital]{justify-content:center}}
 
 #clock-app #wake-status:empty { display: none; }
+.clock-select-field { display:flex; flex-direction:column; gap:8px; margin:15px 0; font-size:14px; }
+.clock-select { position:relative; min-width:0; }
+.clock-select-trigger { display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%; padding:12px 14px; min-height:46px; text-align:left; background:var(--surface); color:var(--text); border:1px solid var(--line); border-radius:12px; }
+.clock-select-trigger[aria-expanded=true] { border-color:var(--accent); box-shadow:0 0 0 2px var(--accent-soft); }
+.clock-select-trigger>span:first-child { overflow-wrap:anywhere; }
+.clock-select-options { position:absolute; top:calc(100% + 6px); left:0; right:0; z-index:20; padding:6px; border:1px solid var(--line); border-radius:14px; background:var(--surface); box-shadow:0 12px 35px #0003; max-height:min(280px,45dvh); overflow-y:auto; overscroll-behavior:contain; }
+.clock-select-options[hidden] { display:none; }
+.clock-select-options button { display:flex; justify-content:space-between; align-items:center; gap:10px; width:100%; min-height:44px; padding:10px 12px; border-radius:9px; background:transparent; color:var(--text); text-align:left; overflow-wrap:anywhere; }
+.clock-select-options button:hover,.clock-select-options button:focus-visible { background:var(--accent-soft); outline:2px solid var(--accent); outline-offset:-2px; }
+.clock-select-options button[aria-selected=true] { background:var(--accent-soft); color:var(--accent); font-weight:650; }
+.clock-select-options .option-check { visibility:hidden; flex-shrink:0; }
+.clock-select-options [aria-selected=true] .option-check { visibility:visible; }
+[data-style=technical] .clock-select-trigger,[data-style=technical] .clock-select-options,[data-style=technical] .clock-select-options button { border-radius:4px; }
+
+.clock-select-trigger .clock-select-chevron { width: 18px; height: 18px; flex: 0 0 18px; color: var(--muted); stroke-width: 2; }
+.clock-select-trigger[aria-expanded=true] .clock-select-chevron { transform: rotate(180deg); color: var(--accent); }
+@media (prefers-reduced-motion: no-preference) { .clock-select-chevron { transition: transform .18s ease, color .18s ease; } }
