@@ -1,0 +1,12 @@
+---
+import { getDictionary, type Language } from '../lib/i18n';
+import { trainingText } from '../lib/training';
+interface Props { lang: Language; mode: 'timer' | 'pomodoro' | 'training' }
+const { lang, mode } = Astro.props;
+const t = getDictionary(lang);
+---
+<nav class="mode-switch" aria-label={lang === 'de' ? 'Timer-Auswahl' : 'Timer'}>
+  <a href={'/' + lang + '/timer/'} aria-current={mode === 'timer' ? 'page' : undefined}><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 13V8M9 2h6"/></svg>{t.countdown}</a>
+  <a href={'/' + lang + '/pomodoro/'} aria-current={mode === 'pomodoro' ? 'page' : undefined}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20C2 20 3 7 9 7c2 0 2 1 3 1s1-1 3-1c6 0 7 13-3 13Zm0-12V3m0 3c2-3 4-3 6-2"/></svg>{t.pomodoro}</a>
+  <a href={'/' + lang + '/training/'} aria-current={mode === 'training' ? 'page' : undefined}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 12h10M3 10v4M21 10v4"/><rect x="4" y="7" width="3" height="10" rx="1"/><rect x="17" y="7" width="3" height="10" rx="1"/></svg>{trainingText[lang].title}</a>
+</nav>

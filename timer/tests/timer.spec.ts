@@ -108,7 +108,7 @@ test('language routes, SEO, legal drafts and focus view', async ({ page, request
   await page.goto('/de/privacy/');
   await expect(page.locator('.legal-page > .notice').first()).toContainText('Nicht veröffentlichungsfertig');
   const sitemap = await request.get('/sitemap.xml');
-  expect((await sitemap.text()).match(/<loc>/g)?.length).toBe(8);
+  expect((await sitemap.text()).match(/<loc>/g)?.length).toBe(12);
 });
 test('works with corrupt or unavailable storage', async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('jacktools.timer.settings.v1', '{broken'));
@@ -457,4 +457,17 @@ test('persistent settings require opt-in and deletion revokes it', async ({ page
   await page.reload();
   await page.locator('#palette-dropdown summary').click();
   await expect(page.locator('#remember-preferences')).not.toBeChecked();
+});
+
+test('training advances automatically and finishes without final rest', async ({ page }) => {
+  await page.goto('/de/training/');
+  await page.locator('[name=preparation]').fill('0');
+  await page.locator('[name=work]').fill('1');
+  await page.locator('[name=rest]').fill('1');
+  await page.locator('[name=rounds]').fill('2');
+  await page.locator('#training-form button[type=submit]').click();
+  await page.locator('#training-start').click();
+  await expect(page.locator('#training-phase')).toHaveText('Training abgeschlossen!', { timeout: 7000 });
+  await expect(page.locator('#training-time')).toHaveText('00:00');
+  expect(await page.evaluate(() => localStorage.getItem('jacktools.timer.training.v1'))).toBeNull();
 });

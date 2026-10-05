@@ -1,7 +1,7 @@
 import { languages } from '../lib/i18n';
 export function GET({ site }: { site: URL | undefined }) {
   const base = site ?? new URL('https://timer.jacktools.net');
-  const urls = languages.flatMap(lang => ['timer','pomodoro'].map(mode => {
+  const urls = languages.flatMap(lang => ['timer','pomodoro','training'].map(mode => {
     const alternatives = languages.map(l => '<xhtml:link rel="alternate" hreflang="' + l + '" href="' + new URL('/' + l + '/' + mode + '/', base) + '"/>').join('');
     return '<url><loc>' + new URL('/' + lang + '/' + mode + '/', base) + '</loc>' + alternatives + '<xhtml:link rel="alternate" hreflang="x-default" href="' + new URL('/en/' + mode + '/', base) + '"/></url>';
   })).join('');

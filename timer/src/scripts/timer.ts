@@ -1,3 +1,4 @@
+import { renderPlayButton } from '../lib/play-button';
 import { storageAllowed } from '../lib/storage';
 import { Timer, defaults, sanitizeSettings, formatTime, STORAGE_KEY, type Settings, type Mode, type ColorScheme } from '../lib/engine';
 const app = document.querySelector<HTMLElement>('#timer-app')!;
@@ -50,11 +51,10 @@ function render() {
   const display = formatTime(timer.remaining);
   $('time').textContent = display;
   $('time').classList.toggle('has-hours', display.length > 5);
-  $('start').textContent = running ? t.pause : timer.remaining < timer.total && !timer.completed ? t.resume : t.start;
+  renderPlayButton($('start'), running, running ? t.pause : timer.remaining < timer.total && !timer.completed ? t.resume : t.start);
   $('phase-label').textContent = timer.mode === 'timer' ? t.ready : t[timer.phase];
   app.dataset.phase = timer.mode === 'pomodoro' ? timer.phase : 'focus';
   $('ring-progress').style.strokeDashoffset = String(100 * (1 - timer.remaining / timer.total));
-  $('start').setAttribute('aria-label', $('start').textContent!);
   if (timer.mode === 'pomodoro') {
     $('round-label').textContent = t.round + ' ' + timer.round + ' ' + t.of + ' ' + settings.rounds;
     $('round-dots').replaceChildren(...Array.from({ length: settings.rounds }, (_, i) => {

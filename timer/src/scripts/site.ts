@@ -23,6 +23,7 @@ document.querySelector('#clear-storage')?.addEventListener('click', e => {
     localStorage.removeItem(CONSENT_KEY);
     remember.checked = false;
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem('jacktools.timer.training.v1');
     localStorage.removeItem(APPEARANCE_KEY);
     document.querySelector('#privacy-status')!.textContent = (e.currentTarget as HTMLElement).dataset.message!;
     document.dispatchEvent(new Event('preferences-cleared'));
@@ -130,6 +131,7 @@ remember.addEventListener('change', () => {
     } else {
       localStorage.removeItem(CONSENT_KEY);
       localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem('jacktools.timer.training.v1');
       localStorage.removeItem(APPEARANCE_KEY);
       document.dispatchEvent(new Event('preferences-cleared'));
     }

@@ -545,3 +545,7 @@
 
 #clear-storage { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; }
 #clear-storage svg { width: 1.15em; height: 1.15em; }
+.mode-switch { flex-wrap: wrap; justify-content: center; }
+#training-app .clock { min-height: 310px; }
+#training-app .clock-content { width: 100%; }
+#training-app .timer-controls { flex-wrap: wrap; }
