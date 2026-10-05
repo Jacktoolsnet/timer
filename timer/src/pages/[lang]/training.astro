@@ -1,13 +1,18 @@
 ---
 import TimerNavigation from '../../components/TimerNavigation.astro';
+import { trainingGuide } from '../../lib/training-guide';
 import Layout from '../../layouts/Layout.astro';
 import { languages, getDictionary } from '../../lib/i18n';
 import { trainingText, trainingDefaults } from '../../lib/training';
 export function getStaticPaths() { return languages.map(lang => ({params:{lang},props:{lang}})); }
-const {lang} = Astro.props; const t = getDictionary(lang); const x = trainingText[lang];
+const {lang} = Astro.props; const t = getDictionary(lang); const x = trainingText[lang]; const guide = trainingGuide[lang];
 ---
 <Layout lang={lang} title={x.title} description={x.intro} route="training">
-<section class="intro"><h1>{x.title}</h1><p class="intro-copy">{x.intro}</p></section>
+<section class="intro">
+  <p class="eyebrow"><span class="little-line"></span>{t.eyebrow}</p>
+  <h1>{t.heading} <em>{t.headingAccent}</em></h1>
+  <p class="intro-copy">{t.intro}</p>
+</section>
 <TimerNavigation lang={lang} mode="training" />
 <div id="training-app" data-translations={JSON.stringify({...t,...x})}>
 <div class="workspace">
@@ -23,6 +28,14 @@ const {lang} = Astro.props; const t = getDictionary(lang); const x = trainingTex
 </div>
 {(['halfway','sound','awake'] as const).map(key => <label class="toggle-row"><span><strong>{x[key]}</strong></span><input name={key} type="checkbox" role="switch" checked /><span class="toggle" aria-hidden="true"></span></label>)}
 <button class="apply-button" type="submit">{t.apply}</button><p class="form-hint">{t.settingsResetHint}</p><p id="training-settings-status" role="status"></p></form></aside>
-</div><p class="local-note">{x.hint}</p></div>
+</div>
+<p class="local-note"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Zm-4 9 3 3 5-6"/></svg>{t.localDetail}</p>
+<p class="privacy-promise">{t.privacyPromise}</p>
+</div>
+<section class="guide">
+  <div class="guide-heading"><p class="eyebrow">THE JACKTOOLS WAY</p><h2>{guide.title}</h2><p>{guide.body}</p></div>
+  <div class="guide-grid">{guide.steps.map(([title,body],i) => <article><span class="step-number">0{i+1}</span><h3>{title}</h3><p>{body}</p></article>)}</div>
+</section>
+<section class="faq"><h2>{t.faq}</h2>{guide.faq.map(([question,answer]) => <details><summary>{question}<span aria-hidden="true">+</span></summary><p>{answer}</p></details>)}</section>
 <script src="../../scripts/training.ts"></script>
 </Layout>
