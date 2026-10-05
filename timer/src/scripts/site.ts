@@ -67,7 +67,11 @@ paletteDropdown.addEventListener('keydown', event => {
   }
 });
 paletteDropdown.addEventListener('focusout', event => {
-  if (!paletteDropdown.contains(event.relatedTarget as Node | null)) paletteDropdown.open = false;
+  // A pointer press on non-focusable menu space has relatedTarget=null.
+  // Keep the panel mounted so the following click cannot hit a link below it.
+  if (event.relatedTarget instanceof Node && !paletteDropdown.contains(event.relatedTarget)) {
+    paletteDropdown.open = false;
+  }
 });
 
 const languageLinks = [...document.querySelectorAll<HTMLAnchorElement>('.language-menu a')];
