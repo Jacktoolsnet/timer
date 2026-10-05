@@ -5,7 +5,7 @@ export function getStaticPaths(){return (['de','en'] as const).map(lang=>({param
 const {lang}=Astro.props; const de=lang==='de'; const t=getDictionary(lang);
 ---
 <Layout lang={lang} title={t.legal} description={de ? 'Impressum für jacktools.net Clock.' : 'Legal notice for jacktools.net Clock.'} route="legal" legal noindex>
-<article class="legal-page"><p class="eyebrow">JACKTOOLS / CLOCK</p><h1>{t.legal}</h1>
+<article class="legal-page"><p class="eyebrow">JACKTOOLS.NET / CLOCK</p><h1>{t.legal}</h1>
 <nav class="legal-nav"><a href="/de/legal/" lang="de">Deutsch · Original</a><a href="/en/legal/" lang="en">English · Translation</a></nav>
       <h2>{de ? 'Diensteanbieter' : 'Service provider'}</h2>
       <p><strong>JackTools.Net UG (haftungsbeschränkt)</strong><br />Im Kirchfeld 27<br />38304 Wolfenbüttel<br />{de ? 'Deutschland' : 'Germany'}</p>

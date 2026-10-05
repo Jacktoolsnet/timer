@@ -10,7 +10,7 @@ const title = kind === 'legal' ? t.legal : t.privacy;
 ---
 <Layout lang={lang} title={title} description={kind === 'legal' ? (de ? 'Impressum und Betreiberangaben für Jacktools Timer.' : 'Legal notice and operator information for Jacktools Timer.') : (de ? 'Datenschutzerklärung für Jacktools Timer.' : 'Privacy notice for Jacktools Timer.')} route={kind} noindex legal>
   <article class="legal-page">
-    <p class="eyebrow">JACKTOOLS / {title.toUpperCase()}</p><h1>{title}</h1>
+    <p class="eyebrow">JACKTOOLS.NET / {title.toUpperCase()}</p><h1>{title}</h1>
     <nav class="legal-nav"><a href={'/de/' + kind + '/'} lang="de">Deutsch · Original</a><a href={'/en/' + kind + '/'} lang="en">English · Translation</a></nav>
     {kind === 'legal' ? <>
       <h2>{de ? 'Diensteanbieter' : 'Service provider'}</h2>
