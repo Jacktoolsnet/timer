@@ -61,8 +61,8 @@ const isPomo = mode === 'pomodoro';
       </aside>
     </div>
     <p class="local-note"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Zm-4 9 3 3 5-6"/></svg>{t.localDetail}</p>
+    <p class="privacy-promise">{t.privacyPromise}</p>
   </div>
-  <aside class="ad-slot" aria-label={t.ad}><span>{t.ad}</span></aside>
   <section class="guide">
     <div class="guide-heading"><p class="eyebrow">THE JACKTOOLS WAY</p><h2>{isPomo ? t.guide : t.guideCountdown}</h2><p>{isPomo ? t.pomodoroBody : t.countdownBody}</p></div>
     <div class="guide-grid">{[[t.step1,t.step1body],[t.step2,t.step2body],[t.step3,t.step3body]].map(([title,body],i) => <article><span class="step-number">0{i+1}</span><h3>{title}</h3><p>{body}</p></article>)}</div>

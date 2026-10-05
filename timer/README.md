@@ -60,8 +60,7 @@ anstelle von `npm install` verwenden.
 - Canonical, hreflang einschließlich x-default, sprachspezifische Metadaten,
   Open Graph, Sitemap, robots.txt, Favicon.
 - DE/EN-Rechtstextentwürfe, ausdrücklich nicht veröffentlichungsfertig.
-- Datenschutz-/Speicherdialog. **Keine echte Werbe-CMP** und kein
-  irreführendes Cookie-Banner für die derzeit werbefreie Version.
+- Datenschutz-/Speicherdialog zum Löschen lokaler Einstellungen.
 - Keine Analysewerkzeuge, Werbeskripte oder externen Fonts.
 
 ## Einstellungen und Grenzen
@@ -73,7 +72,7 @@ der Signalton wird sofort geändert. Ungültige Eingaben überschreiben keine
 gespeicherten Werte. Einstellungen werden bei erneutem Aufruf wiederhergestellt.
 
 Sprache und Design werden unabhängig unter `jacktools.timer.appearance.v1`
-gespeichert. „Datenschutz & Speicher“ → „Gespeicherte Einstellungen löschen“
+gespeichert. „Lokale Einstellungen“ → „Gespeicherte Einstellungen löschen“
 entfernt beide Einträge. Bei gesperrtem Speicher funktioniert der Timer weiter,
 kann aber die Änderungen nicht dauerhaft speichern.
 
@@ -113,23 +112,20 @@ Tests in `test-results/` (nicht versioniert).
 4. Reale Geräte / Safari / Firefox testen und Barrierefreiheit prüfen.
 5. Sitemap bei Search Console einreichen und von jacktools.net verlinken.
 
-## Werbung: absichtlich noch deaktiviert
+## Werbe- und trackingfrei
 
-Der Werbeplatz ist ein reiner Platzhalter in `src/components/TimerPage.astro`.
-Es gibt noch **keine aktive AdSense-Integration**, keine Publisher-ID und keine
-Consent-Freigabe. Der Platz kann bis zur Aktivierung entfernt werden.
+Keine Werbeplätze, AdSense-Integration, Werbe-CMP, Analysewerkzeuge oder externen
+Widgets. Das öffentliche Tool bleibt kostenlos nutzbar. Im Footer führen normale
+Links ohne Trackingparameter zu:
+- https://buymeacoffee.com/jacktoolsnet (freiwillige Unterstützung)
+- https://app.messagedrop.de (unser anderes Projekt)
+- https://jacktools.net (Entwickler)
 
-Vor Einbindung:
-- AdSense-Konto/Site-Freigabe und echte Publisher-/Slot-IDs besorgen.
-- Geeignete Google-zertifizierte CMP mit unterstütztem TCF integrieren.
-- Ablehnen/Ändern/Widerrufen einschließlich neu geladener Seiten prüfen.
-- Werbeskripte erst nach der entsprechenden Einwilligung laden.
-- Rechtstexte aktualisieren, Layout-Verschiebungen vermeiden.
-- ads.txt gemäß AdSense-Vorgaben auf der relevanten Domain konfigurieren;
-  Subdomain-Konfiguration mit jacktools.net abstimmen.
-
-Google-Anforderungen:
-https://support.google.com/adsense/answer/13554116?hl=de
+Externe Ressourcen werden dadurch nicht eingebettet oder vorab geladen.
+Die verlinkten Dienste haben eigene Datenschutzbedingungen; der Timer behauptet
+nicht, dass Zahlungen oder die Nutzung anderer Dienste ohne Datenverarbeitung erfolgen.
+Der Datenschutz-/Speicherdialog dient der Information und dem Löschen lokaler
+Einstellungen, nicht der Einwilligung in Werbung.
 
 ## Struktur
 

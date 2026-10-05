@@ -100,7 +100,13 @@ test('language routes, SEO, legal drafts and focus view', async ({ page, request
   await expect(page.locator('.site-header')).toBeVisible();
   await page.goto('/de/legal/');
   await expect(page.locator('meta[name=robots]')).toHaveAttribute('content', 'noindex, follow');
-  await expect(page.locator('.legal-page .notice')).toContainText('Nicht veröffentlichungsfertig');
+  await expect(page.locator('.legal-page .notice')).toHaveCount(0);
+  await expect(page.locator('.legal-page')).toContainText('Amtsgericht Ingolstadt');
+  await page.goto('/en/legal/');
+  await expect(page.locator('.legal-page .notice')).toHaveCount(0);
+  await expect(page.locator('.legal-page')).toContainText('Amtsgericht Ingolstadt');
+  await page.goto('/de/privacy/');
+  await expect(page.locator('.legal-page > .notice').first()).toContainText('Nicht veröffentlichungsfertig');
   const sitemap = await request.get('/sitemap.xml');
   expect((await sitemap.text()).match(/<loc>/g)?.length).toBe(8);
 });
@@ -409,4 +415,26 @@ test('focus remains usable when fullscreen is denied', async ({ page }) => {
   await expect(page.locator('body')).toHaveClass(/focus-view/);
   await page.keyboard.press('Escape');
   await expect(page.locator('body')).not.toHaveClass(/focus-view/);
+});
+
+test('privacy-first footer has ordinary support links and loads no external resources', async ({ page }) => {
+  const externalRequests: string[] = [];
+  page.on('request', request => {
+    if (new URL(request.url()).hostname !== '127.0.0.1') externalRequests.push(request.url());
+  });
+  await page.goto('/de/timer/');
+  await expect(page.locator('.ad-slot')).toHaveCount(0);
+  await expect(page.locator('.privacy-promise')).toHaveText('Ohne Werbung. Ohne Tracking.');
+  await expect(page.locator('.footer-credit')).toContainText('Für Dich mit');
+  await expect(page.locator('.footer-credit')).toContainText('entwickelt von JackTools.Net');
+  for (const href of ['https://buymeacoffee.com/jacktoolsnet', 'https://app.messagedrop.de']) {
+    const link = page.locator('a[href="' + href + '"]');
+    await expect(link).toBeVisible();
+    await expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+    await expect(link).toHaveAttribute('referrerpolicy', 'no-referrer');
+  }
+  await page.locator('#privacy-open').click();
+  await expect(page.locator('#privacy-dialog')).toContainText('lokal gespeicherte Einstellungen löschen');
+  await expect(page.locator('#privacy-dialog')).not.toContainText('zertifizierte');
+  expect(externalRequests).toEqual([]);
 });

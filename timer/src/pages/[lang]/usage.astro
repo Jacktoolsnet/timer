@@ -1,0 +1,28 @@
+---
+import Layout from '../../layouts/Layout.astro';
+export function getStaticPaths() { return (['en', 'de'] as const).map(lang => ({ params: { lang }, props: { lang } })); }
+const { lang } = Astro.props;
+const de = lang === 'de';
+const title = de ? 'Nutzungshinweise' : 'Usage notes';
+---
+<Layout lang={lang} title={title} description={de ? 'Hinweise zur kostenlosen Nutzung und den technischen Grenzen des JackTools Timers.' : 'Information about free use and the technical limitations of JackTools Timer.'} route="usage" noindex legal>
+  <article class="legal-page">
+    <p class="eyebrow">JACKTOOLS / TIMER</p><h1>{title}</h1>
+    <nav class="legal-nav"><a href="/de/usage/" lang="de">Deutsch · Original</a><a href="/en/usage/" lang="en">English · Translation</a></nav>
+    <p>{de ? 'Diese Hinweise erklären die Nutzung und die technischen Grenzen unseres Timers. Sie enthalten keinen pauschalen Haftungsausschluss und schränken gesetzliche Rechte nicht ein.' : 'These notes explain how to use our timer and its technical limitations. They do not contain a blanket exclusion of liability or restrict statutory rights.'}</p>
+    <h2>{de ? 'Kostenlos und ohne Anmeldung' : 'Free, with no account needed'}</h2>
+    <p>{de ? 'Du kannst den Timer kostenlos und ohne Benutzerkonto nutzen. Eine Unterstützung über Buy Me a Coffee ist freiwillig und keine Voraussetzung für die Nutzung.' : 'You can use the timer free of charge without a user account. Support through Buy Me a Coffee is voluntary and is not required to use the timer.'}</p>
+    <h2>{de ? 'Für Alltag, Fokus und Pausen' : 'For everyday tasks, focus and breaks'}</h2>
+    <p>{de ? 'Der Countdown und der Pomodoro-Timer helfen dir, deinen Alltag zu strukturieren. Das Tool ist nicht für medizinische Anwendungen, Notfälle oder sicherheitskritische Zeitmessungen vorgesehen. Verwende dafür geeignete, zuverlässige Geräte oder Systeme.' : 'The countdown and Pomodoro timer help you organise everyday activities. This tool is not intended for medical applications, emergencies or safety-critical timing. Use appropriate, reliable devices or systems for those purposes.'}</p>
+    <h2>{de ? 'Technische Grenzen' : 'Technical limitations'}</h2>
+    <p>{de ? 'Der Timer läuft in deinem Browser. Ruhezustand, Energiesparfunktionen und Einschränkungen für Hintergrund-Tabs können die Anzeige und das Auslösen des Signaltons verzögern oder unterbrechen. Ein geschlossener oder neu geladener Tab beendet den laufenden Timer; er wird danach nicht automatisch fortgesetzt.' : 'The timer runs in your browser. Sleep mode, power-saving features and background-tab restrictions can delay or interrupt updates and sound alerts. Closing or reloading the tab ends the running timer; it does not automatically resume afterwards.'}</p>
+    <p>{de ? 'Ein Signalton ist nur hörbar, wenn er aktiviert ist und dein Browser sowie dein Gerät die Wiedergabe zulassen. Prüfe bei Bedarf die Lautstärke und lasse die Timerseite geöffnet. Verlasse dich bei wichtigen Terminen nicht allein auf diesen Timer.' : 'Sound alerts are audible only when enabled and permitted by your browser and device. Check the volume when needed and keep the timer page open. Do not rely solely on this timer for important appointments.'}</p>
+    <h2>{de ? 'Einstellungen bleiben im Browser' : 'Settings stay in your browser'}</h2>
+    <p>{de ? 'Timer- und Anzeigeeinstellungen werden automatisch lokal gespeichert, sofern dein Browser dies zulässt. Sie werden nicht zwischen Geräten synchronisiert. Beim Löschen der Browserdaten oder im privaten Modus können sie verloren gehen. Unter „Lokale Einstellungen“ kannst du die gespeicherten Einstellungen selbst löschen.' : 'Timer and display preferences are saved automatically on your device if your browser allows it. They are not synchronised between devices. Clearing browser data or using private browsing may cause them to be lost. You can delete saved preferences under “Local settings”.'}</p>
+    <p><a href={de ? '/de/privacy/' : '/en/privacy/'}>{de ? 'Mehr zur Datenverarbeitung in der Datenschutzerklärung' : 'Read more about data processing in our privacy notice'}</a></p>
+    <h2>{de ? 'Fehler oder Fragen?' : 'Problems or questions?'}</h2>
+    <p>{de ? 'Wenn etwas nicht funktioniert, schreibe uns gerne mit einer kurzen Beschreibung sowie Angaben zu Browser und Gerät: ' : 'If something does not work, please send a short description and details of your browser and device to: '}<a href="mailto:jacktoolsnet@gmail.com">jacktoolsnet@gmail.com</a>.</p>
+    <p>{de ? 'Die deutsche Fassung ist die redaktionelle Originalfassung; die englische Fassung ist eine Übersetzung.' : 'German is the editorial original; the English version is a translation.'}</p>
+    <p><a href={'/' + lang + '/timer/'}>← {de ? 'Zurück zum Timer' : 'Back to the timer'}</a></p>
+  </article>
+</Layout>

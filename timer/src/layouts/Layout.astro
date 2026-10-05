@@ -123,8 +123,16 @@ const alternateLanguages = legal ? (['en', 'de'] as const) : languages;
       </header>
       <main id="main"><slot /></main>
       <footer class="site-footer">
+        <section class="support-section" aria-labelledby="support-title">
+          <div><h2 id="support-title">{t.supportTitle}</h2><p>{t.supportBody}</p></div>
+          <div class="support-actions">
+            <a href="https://buymeacoffee.com/jacktoolsnet" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer"><span aria-hidden="true">☕</span>{t.supportCoffee}<span aria-hidden="true">↗</span></a>
+            <a href="https://app.messagedrop.de" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">{t.supportVisit}<span aria-hidden="true">↗</span></a>
+          </div>
+        </section>
         <div><a class="footer-brand" href={'/' + lang + '/timer/'}>jacktools.net</a><p>{t.footer}</p></div>
-        <nav aria-label={t.legal}><a href={'/' + (lang === 'de' ? 'de' : 'en') + '/legal/'}>{t.legal}{!['de','en'].includes(lang) && ' (EN)'}</a><a href={'/' + (lang === 'de' ? 'de' : 'en') + '/privacy/'}>{t.privacy}{!['de','en'].includes(lang) && ' (EN)'}</a><button id="privacy-open">{t.preferences}</button></nav>
+        <nav aria-label={t.legal}><a href={'/' + (lang === 'de' ? 'de' : 'en') + '/legal/'}>{t.legal}{!['de','en'].includes(lang) && ' (EN)'}</a><a href={'/' + (lang === 'de' ? 'de' : 'en') + '/privacy/'}>{t.privacy}{!['de','en'].includes(lang) && ' (EN)'}</a><a href={'/' + (lang === 'de' ? 'de' : 'en') + '/usage/'}>{t.usage}{!['de','en'].includes(lang) && ' (EN)'}</a><button id="privacy-open">{t.preferences}</button></nav>
+        <p class="footer-credit">{t.creditBefore} ❤️ ☕ {t.creditAnd} 🍫 {t.creditAfter} <a href="https://jacktools.net" rel="noreferrer" referrerpolicy="no-referrer"><strong>JackTools.Net</strong></a></p>
       </footer>
     </div>
     <dialog id="privacy-dialog" aria-labelledby="privacy-title">
