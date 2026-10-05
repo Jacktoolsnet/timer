@@ -485,3 +485,19 @@ test('legal print layout hides chrome and ignores dark appearance', async ({ pag
     await expect(page.locator('.legal-page p').first()).toHaveCSS('color', 'rgb(0, 0, 0)');
   }
 });
+
+test('all timers fit landscape focus view with controls beside the clock', async ({ page }) => {
+  await page.setViewportSize({ width: 800, height: 360 });
+  for (const route of ['/de/', '/de/pomodoro/', '/de/training/']) {
+    await page.goto(route);
+    // Keep the viewport deterministic; focus mode also works without fullscreen permission.
+    await page.evaluate(() => { document.documentElement.requestFullscreen = () => Promise.reject(new Error('test')); });
+    await page.locator('#focus-view, #training-focus').click();
+    const clock = await page.locator('.clock').boundingBox();
+    const controls = await page.locator('.timer-controls').boundingBox();
+    expect(clock!.x + clock!.width).toBeLessThanOrEqual(controls!.x);
+    expect(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight + 1)).toBeTruthy();
+    await page.locator('#focus-view, #training-focus').click();
+    await expect(page.locator('.site-header')).toBeVisible();
+  }
+});

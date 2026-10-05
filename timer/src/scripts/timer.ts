@@ -1,3 +1,4 @@
+import { screenWakeLock } from '../lib/wake-lock';
 import { renderPlayButton } from '../lib/play-button';
 import { storageAllowed } from '../lib/storage';
 import { Timer, defaults, sanitizeSettings, formatTime, STORAGE_KEY, type Settings, type Mode, type ColorScheme } from '../lib/engine';
@@ -16,6 +17,8 @@ const form = $<HTMLFormElement>('settings-form');
 const field = (name: string) => form.elements.namedItem(name) as HTMLInputElement;
 const status = $('settings-status');
 const originalTitle = document.title;
+const wakeStatus = $('wake-status');
+const setWake = screenWakeLock(wakeStatus, wakeStatus.dataset.active!, wakeStatus.dataset.unavailable!);
 let audio: AudioContext | undefined;
 function prepareAudio() {
   if (!settings.sound) return;
@@ -38,6 +41,7 @@ function fillForm() {
     field('seconds').value = String(settings.countdown % 60);
   } else for (const key of ['focus', 'short', 'long', 'rounds'] as const) field(key).value = String(settings[key]);
   field('sound').checked = settings.sound;
+  field('awake').checked = settings.awake;
 }
 function persist(value: Settings = settings) {
   if (!storageAllowed()) { status.textContent = t.applied; return false; }
@@ -48,6 +52,7 @@ function persist(value: Settings = settings) {
 }
 function render() {
   const running = timer.deadline !== null;
+  setWake(running && settings.awake);
   const display = formatTime(timer.remaining);
   $('time').textContent = display;
   $('time').classList.toggle('has-hours', display.length > 5);
@@ -87,7 +92,7 @@ function restartWithSettings() {
 }
 function readFormSettings(): Settings | null {
   if (!form.checkValidity()) return null;
-  const next = { ...settings, sound: field('sound').checked };
+  const next = { ...settings, sound: field('sound').checked, awake: field('awake').checked };
   if (timer.mode === 'timer') {
     next.countdown = Number(field('hours').value) * 3600 + Number(field('minutes').value) * 60 + Number(field('seconds').value);
     if (next.countdown < 1) return null;
@@ -169,3 +174,5 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden) tick
 fillForm(); render();
 
 document.addEventListener('storage-enabled', () => persist(readFormSettings() || settings));
+
+field('awake').addEventListener('change', () => { settings.awake = field('awake').checked; persist(); render(); });

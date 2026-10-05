@@ -1,0 +1,52 @@
+import { test, expect } from '@playwright/test';
+test('homepage, preferences, opt-in and legal links', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto('/');
+  await expect(page.locator('h1')).toContainText('Möglichkeiten');
+  await expect(page.locator('html')).toHaveAttribute('data-palette', 'green');
+  await expect(page.locator('html')).toHaveAttribute('data-style', 'technical');
+  await expect(page.locator('.message-art img')).toHaveAttribute('src', '/messagedrop-icon.png');
+  await expect(page.locator('.brand-icon img')).toHaveAttribute('src', '/jacktools-icon.png');
+  await expect(page.locator('link[rel=icon]')).toHaveAttribute('href', '/jacktools-icon.png');
+  await expect(page.getByRole('link', { name: 'Timer öffnen' })).toHaveAttribute('href', 'https://timer.jacktools.net/de/');
+  expect(await page.evaluate(() => localStorage.length)).toBe(0);
+  await page.getByLabel('Einstellungen', { exact: true }).click();
+  await page.locator('#theme').click();
+  await page.locator('[name=colorScheme][value=blue]').check();
+  await page.locator('[name=visualStyle][value=technical]').check();
+  await page.locator('#font-size').fill('3');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await expect(page.locator('html')).toHaveAttribute('data-palette', 'blue');
+  await expect(page.locator('html')).toHaveAttribute('data-style', 'technical');
+  await expect(page.locator('html')).toHaveAttribute('data-font-size', '3');
+  expect(await page.evaluate(() => localStorage.length)).toBe(0);
+  await page.locator('#remember-preferences').check();
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await expect(page.locator('html')).toHaveAttribute('data-font-size', '3');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  for (const [path, heading] of [['/impressum/', 'Impressum'], ['/datenschutz/', 'Datenschutz'], ['/nutzungshinweise/', 'Nutzungshinweise']]) {
+    await page.goto(path);
+    await expect(page.locator('h1')).toHaveText(heading);
+    await expect(page.locator('html')).toHaveAttribute('data-style', 'technical');
+  }
+  await page.locator('#privacy-open').click();
+  await page.locator('#clear-storage').click();
+  expect(await page.evaluate(() => localStorage.length)).toBe(0);
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('data-font-size', '0');
+  expect(errors).toEqual([]);
+});
+test('settings keyboard and non-persisted appearance', async ({ page }) => {
+  await page.goto('/');
+  await page.getByLabel('Einstellungen', { exact: true }).focus();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#palette-dropdown')).toHaveAttribute('open', '');
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#palette-dropdown')).not.toHaveAttribute('open');
+  await page.getByLabel('Einstellungen', { exact: true }).click();
+  await page.locator('#theme').click();
+  await page.reload();
+  await expect(page.locator('html')).not.toHaveAttribute('data-theme', 'dark');
+});
