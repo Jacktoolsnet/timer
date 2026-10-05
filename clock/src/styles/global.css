@@ -705,3 +705,82 @@ body.focus-view .card-top { position: absolute; top: 12px; right: 12px; z-index:
 .date-flaps .flip-separator::after { content:'/'; font-size:min(calc(28px * var(--font-scale,1)),7cqw); }
 @media(orientation:landscape) and (max-height:600px){.focus-view #styled-date{margin-top:12px}.focus-view .date-day{font-size:32px;padding:4px 12px}.focus-view .date-month{padding:4px 12px}.focus-view .date-footer{padding-bottom:6px}.focus-view #styled-date .date-calendar{min-width:150px}}
 .date-flaps .flip-separator { width:12px; flex:0 0 12px; }
+
+/* Fit landscape focus content inside the dynamic viewport, including browser UI. */
+@media screen and (orientation: landscape) and (max-height: 600px) {
+  body.focus-view .workspace { min-height: 100dvh; padding: 8px 0; }
+  body.focus-view .clock-card { min-height: calc(100dvh - 16px); padding: 42px 12px 10px; }
+  body.focus-view .clock-display { padding: 0; gap: clamp(12px, 3vw, 28px); min-height: 0; }
+  body.focus-view #analog-clock { width: min(40vw, calc(100dvh - 88px)); max-height: calc(100dvh - 88px); }
+  body.focus-view .clock-readout { min-width: 0; }
+  body.focus-view #clock-zone { margin: 6px 0 0; font-size: 12px; line-height: 1.2; }
+  body.focus-view #clock-date { margin: 6px 0; font-size: min(calc(17px * var(--font-scale, 1)), 5dvh); }
+  body.focus-view #styled-date { margin-top: 8px; }
+  body.focus-view .date-month { font-size: 11px; padding: 4px 10px; }
+  body.focus-view .date-day { font-size: min(32px, 9dvh); padding: 3px 10px; }
+  body.focus-view .date-footer { font-size: 11px; padding: 0 10px 5px; }
+  body.focus-view #flip-context { margin: 4px 0; font-size: 12px; }
+  body.focus-view #styled-date .date-elegant { font-size: min(calc(22px * var(--font-scale, 1)), 6dvh); }
+  body.focus-view #styled-date .date-weekday { font-size: 11px; margin-bottom: 4px; }
+  body.focus-view #styled-date .date-flap-caption { margin-top: 4px; font-size: 11px; }
+}
+
+@media screen and (orientation: landscape) and (max-height: 600px) {
+  body.focus-view .clock-display[data-view=analog] #styled-date[data-style=calendarDate] .date-calendar {
+    width: min(100%, 260px, 65dvh);
+  }
+  body.focus-view .clock-display[data-view=analog] .date-month {
+    font-size: clamp(12px, 3.8dvh, 19px);
+    padding: 2dvh 14px;
+  }
+  body.focus-view .clock-display[data-view=analog] .date-day {
+    font-size: clamp(44px, 21dvh, 100px);
+    padding: 1dvh 14px;
+  }
+  body.focus-view .clock-display[data-view=analog] .date-footer {
+    font-size: clamp(12px, 3.8dvh, 18px);
+    padding: 0 14px 2dvh;
+  }
+  body.focus-view .clock-display:not([data-view=analog]) #styled-date[data-style=calendarDate] .date-calendar {
+    width: min(100%, 220px, 55dvh);
+  }
+  body.focus-view .clock-display:not([data-view=analog]) .date-day { font-size: clamp(32px, 12dvh, 60px); }
+}
+
+/* Equal landscape columns keep the dial and date equally inset from the edges. */
+@media screen and (orientation: landscape) and (max-height: 600px) {
+  body.focus-view .clock-display:is([data-view=analog],[data-view=combined],[data-view=analogFlip]) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+    justify-items: center;
+    column-gap: clamp(12px, 3vw, 28px);
+  }
+  body.focus-view .clock-display:is([data-view=analog],[data-view=combined],[data-view=analogFlip]) #analog-clock {
+    width: min(100%, calc(100dvh - 88px));
+  }
+  body.focus-view .clock-display[data-view=analog] #styled-date[data-style=calendarDate] .date-calendar {
+    width: min(100%, calc(100dvh - 88px));
+  }
+}
+
+@media screen and (orientation: landscape) and (max-height: 600px) {
+  /* Reserve equal space above/below; the exit control remains independently positioned. */
+  body.focus-view .clock-card { padding-block: 32px; }
+  body.focus-view .clock-display[data-view=analog] .clock-readout { position: relative; }
+  body.focus-view .clock-display[data-view=analog] #styled-date { margin-top: 0; }
+  body.focus-view .clock-display[data-view=analog] #clock-date { margin-block: 0; }
+  body.focus-view .clock-display[data-view=analog] #clock-zone {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    margin: 6px 0 0;
+  }
+}
+
+@media screen and (orientation: landscape) and (max-height: 600px) {
+  body.focus-view .clock-display:is([data-view=flip],[data-view=analogFlip]) #styled-date[data-style=calendarDate] {
+    margin-top: clamp(16px, 5dvh, 26px);
+  }
+}
