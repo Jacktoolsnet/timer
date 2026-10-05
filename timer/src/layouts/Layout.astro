@@ -78,7 +78,7 @@ const alternateLanguages = legal ? (['en', 'de'] as const) : languages;
               <section class="preferences-language" aria-labelledby="language-heading">
                 <h3 id="language-heading">{t.language}</h3>
             <nav class="language-menu" aria-label={t.language}>
-              {alternateLanguages.map(l => <a href={'/' + l + '/' + (route ? route + '/' : '')} lang={l} hreflang={l} aria-current={l === lang ? 'page' : undefined}>
+              {languages.map(l => <a href={'/' + l + '/' + (legal && !['de', 'en'].includes(l) ? '' : (route ? route + '/' : ''))} lang={l} hreflang={l} aria-current={l === lang ? 'page' : undefined}>
                 <span class="language-code" aria-hidden="true">{l.toUpperCase()}</span>
                 <span>{languageNames[l]}</span>
                 {l === lang && <svg class="language-check" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4 10-10"/></svg>}
