@@ -1,0 +1,35 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getDictionary, type Language } from '../lib/i18n';
+import { clockText } from '../lib/clock-text';
+interface Props { lang: Language }
+const {lang}=Astro.props; const t=getDictionary(lang);const c=clockText[lang];
+---
+<Layout lang={lang} title={c.title} description={c.intro} route="">
+<section class="intro"><p class="eyebrow">JACKTOOLS / CLOCK</p><h1>{c.title}</h1><p class="intro-copy">{c.intro}</p></section>
+<div id="clock-app" data-text={JSON.stringify({...t,...c})}>
+<div class="workspace">
+<section class="timer-card clock-card">
+<div class="card-top"><button id="clock-focus" class="icon-text" aria-label={t.focusMode} aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg><span>{t.focusMode}</span></button></div>
+<div class="clock-display" data-view="combined">
+<svg id="analog-clock" viewBox="0 0 320 320" role="img" aria-label={c.analog}>
+<circle cx="160" cy="160" r="149" class="dial"/>
+{Array.from({length:60},(_,i)=><line x1="160" y1={i%5===0?22:17} x2="160" y2="12" transform={'rotate('+i*6+' 160 160)'} class={i%5===0?'hour-mark':'minute-mark'}/>)}
+<g id="dial-numbers">{Array.from({length:12},(_,i)=>{const n=i+1,a=n*Math.PI/6;return <text x={160+116*Math.sin(a)} y={160-116*Math.cos(a)}>{n}</text>})}</g>
+<line id="hour-hand" x1="160" y1="170" x2="160" y2="83"/><line id="minute-hand" x1="160" y1="176" x2="160" y2="48"/><line id="second-hand" x1="160" y1="187" x2="160" y2="32"/><circle cx="160" cy="160" r="5" class="hub"/>
+</svg>
+<div class="clock-readout"><time id="digital-clock" aria-live="off">--:--</time><p id="clock-date"></p><p id="clock-zone"></p></div>
+</div>
+<p id="wake-status" class="timer-status" role="status"></p><noscript>{t.js}</noscript>
+</section>
+<aside class="settings-card"><h2>{t.settings}</h2><form id="clock-settings" class="clock-settings">
+<label>{t.appearance}<select name="view">{(['analog','digital','combined'] as const).map(v=><option value={v} selected={v==='combined'}>{c[v]}</option>)}</select></label>
+<label>{c.date}<select name="date">{(['off','short','medium','long'] as const).map(v=><option value={v} selected={v==='long'}>{c[v]}</option>)}</select></label>
+<label>{c.time}<select name="format">{(['short','medium','long'] as const).map(v=><option value={v} selected={v==='medium'}>{c[v]}</option>)}</select></label>
+<label>12 / 24 h<select name="hourCycle"><option value="auto">{c.auto}</option><option value="12">12 h</option><option value="24">24 h</option></select></label>
+<label>{c.zone}<select name="zone"><option value="local">{c.local}</option>{['UTC','Europe/Berlin','Europe/London','Europe/Paris','Europe/Madrid','America/New_York','America/Los_Angeles','Asia/Tokyo','Asia/Kolkata','Australia/Sydney'].map(z=><option value={z}>{z.replaceAll('_',' ')}</option>)}</select></label>
+{(['seconds','numbers','smooth','awake'] as const).map(k=><label class="toggle-row"><span><strong>{c[k]}</strong></span><input type="checkbox" role="switch" name={k} checked={k==='seconds'||k==='numbers'} /><span class="toggle" aria-hidden="true"></span></label>)}
+<p id="clock-settings-status" role="status"></p>
+</form></aside></div><p class="local-note">{c.note}</p><p class="privacy-promise">{t.privacyPromise}</p></div>
+<script src="../scripts/clock.ts"></script>
+</Layout>
