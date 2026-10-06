@@ -44,4 +44,77 @@ const fr: typeof de = { ...en, title:'Un souffle. Un moment pour vous.', intro:'
  round:'Respiration', remaining:'Restant', chime:'Signal de changement de phase', sound:'Sons de respiration', volume:'Volume', awake:'Garder l’écran allumé', awakeOn:'Écran maintenu allumé', awakeOff:'Maintien de l’écran indisponible', motion:'Mouvement du cercle', hint:'Modifier les durées réinitialise la séance. Sauvegarde uniquement avec votre consentement.',
  safety:'Respirez doucement, sans forcer. Raccourcissez les durées ou évitez les retenues si cela est plus agréable. En cas de vertige ou de malaise, arrêtez et respirez normalement. Ce n’est pas un service médical.',
  guide:'Une petite pause pour vous.', steps:['Installez-vous.','Suivez votre souffle.','Emportez ce calme.'], tips:['Relâchez les épaules et la mâchoire.','Le cercle grandit à l’inspiration et rétrécit à l’expiration. Ne forcez pas.','Commencez par une courte séance. Vous pouvez arrêter à tout moment.'], audioError:'Son indisponible. Le guide visuel continue.', source:'Conseils de respiration douce (NHS)', local:'Sans compte. Sans suivi. Dans votre navigateur.' };
-export const dictionaries = {de,en,es,fr};
+const safetyMessages = {
+ de: {
+  safetyTitle:'Sanft atmen, in deinem Tempo', safetyLink:'Sicherheitshinweise', continueLabel:'Fortfahren', closeLabel:'Schließen', end:'Beenden', skipHold:'Haltephase überspringen',
+  firstHint:'Übe bequem sitzend oder liegend an einem sicheren Ort. Atme sanft und nur so tief, wie es angenehm ist. Der Rhythmus ist eine Orientierung – du musst den Countdown nicht einhalten. Verkürze oder überspringe Haltephasen, wenn sie unangenehm sind. Bei Schwindel, Atemnot oder Unwohlsein beende die Übung und atme in deinem normalen Rhythmus weiter.',
+  safePlace:'Nicht beim Fahren, Bedienen von Maschinen, Schwimmen oder Baden verwenden. Breathe ist ein Entspannungstool und ersetzt keine medizinische Beratung oder Behandlung.',
+  reminder:'Atme sanft. Beende die Übung, wenn du dich unwohl fühlst.',
+  holdsHint:'Haltephasen sind optional. Verkürze sie oder setze sie auf 0, wenn sie unangenehm sind. Beginne mit wenigen Atemzyklen.',
+  countHint:'Die Werte sind Zähleinheiten. Bei Standardtempo entspricht eine Zähleinheit einer Sekunde. Passe das Tempo so an, dass sich die Übung angenehm anfühlt.',
+  natural:'Atme in deinem normalen Rhythmus weiter.', ended:'Beendet', done:'Atme in deinem normalen Rhythmus weiter.',
+  safetyDetails:[
+   'Der Atemrhythmus soll sich angenehm anfühlen. Erzwinge nichts; der Countdown ist keine Vorgabe.',
+   'Bei Schwindel, Kribbeln, Benommenheit, Atemnot oder zunehmendem Unwohlsein beende die Übung und atme normal weiter.',
+   'Wenn Beschwerden anhalten oder wiederkehren, hole medizinischen Rat ein.',
+   'Bei bestehenden Herz- oder Lungenerkrankungen oder Unsicherheit zur Eignung kläre insbesondere Übungen mit Atempausen vorab ärztlich ab.',
+   'Starke oder plötzlich auftretende Atemnot, starke Brustschmerzen oder Bewusstlosigkeit sind mögliche Notfälle. Breathe ist dafür nicht geeignet. Kontaktiere den örtlichen Notruf; in Deutschland und der EU: 112. Die Sprache der Oberfläche bestimmt nicht deinen Aufenthaltsort.',
+   'Ersetze keine verordneten Medikamente oder Behandlungen durch Breathe.'
+  ],
+ },
+ en: {
+  safetyTitle:'Breathe gently, at your own pace', safetyLink:'Safety guidance', continueLabel:'Continue', closeLabel:'Close', end:'End session', skipHold:'Skip hold',
+  firstHint:'Practise sitting or lying comfortably in a safe place. Breathe gently and only as deeply as feels comfortable. The rhythm is a guide – you do not have to follow the countdown. Shorten or skip holds if they feel uncomfortable. If you feel dizzy, short of breath or unwell, end the exercise and return to your normal breathing rhythm.',
+  safePlace:'Do not use while driving, operating machinery, swimming or bathing. Breathe is a relaxation tool, not a replacement for medical advice or treatment.',
+  reminder:'Breathe gently. End the exercise if you feel unwell.',
+  holdsHint:'Holds are optional. Shorten them or set them to 0 if they feel uncomfortable. Start with just a few breathing cycles.',
+  countHint:'The values are counts. At the default pace, one count equals one second. Adjust the pace so the exercise feels comfortable.',
+  natural:'Return to your normal breathing rhythm.', ended:'Ended', done:'Return to your normal breathing rhythm.',
+  safetyDetails:[
+   'The breathing rhythm should feel comfortable. Do not force anything; the countdown is only a guide.',
+   'If you feel dizzy, tingly, lightheaded, short of breath or increasingly unwell, end the exercise and breathe normally.',
+   'Seek medical advice if symptoms persist or recur.',
+   'If you have a heart or lung condition, or are unsure whether the exercises are suitable, consult a doctor beforehand, particularly about exercises with breath holds.',
+   'Severe or sudden breathlessness, severe chest pain or loss of consciousness may be emergencies. Breathe is not suitable for these situations. Contact the local emergency services; in Germany and the EU, call 112. The interface language does not determine your location.',
+   'Do not replace prescribed medicines or treatments with Breathe.'
+  ],
+ },
+ es: {
+  safetyTitle:'Respira suavemente, a tu ritmo', safetyLink:'Consejos de seguridad', continueLabel:'Continuar', closeLabel:'Cerrar', end:'Terminar sesión', skipHold:'Omitir retención',
+  firstHint:'Practica sentado o tumbado cómodamente en un lugar seguro. Respira suavemente y solo tan profundo como te resulte cómodo. El ritmo es una guía: no tienes que seguir la cuenta atrás. Acorta u omite las retenciones si te resultan incómodas. Si sientes mareo, falta de aire o malestar, termina el ejercicio y vuelve a respirar a tu ritmo habitual.',
+  safePlace:'No lo uses mientras conduces, manejas maquinaria, nadas o te bañas. Breathe es una herramienta de relajación y no sustituye el asesoramiento ni el tratamiento médico.',
+  reminder:'Respira suavemente. Termina el ejercicio si te encuentras mal.',
+  holdsHint:'Las retenciones son opcionales. Acórtalas o ponlas a 0 si te resultan incómodas. Empieza con pocos ciclos de respiración.',
+  countHint:'Los valores son unidades de conteo. Al ritmo predeterminado, una unidad equivale a un segundo. Ajusta el ritmo para que el ejercicio te resulte cómodo.',
+  natural:'Vuelve a respirar a tu ritmo habitual.', ended:'Sesión terminada', done:'Vuelve a respirar a tu ritmo habitual.',
+  safetyDetails:[
+   'El ritmo debe resultarte cómodo. No fuerces nada; la cuenta atrás es solo una guía.',
+   'Si sientes mareo, hormigueo, aturdimiento, falta de aire o un malestar que aumenta, termina el ejercicio y respira normalmente.',
+   'Busca asesoramiento médico si las molestias persisten o se repiten.',
+   'Si tienes una enfermedad cardíaca o pulmonar, o dudas sobre si estos ejercicios son adecuados para ti, consulta antes con un médico, especialmente si incluyen retenciones.',
+   'La falta de aire intensa o repentina, el dolor fuerte en el pecho o la pérdida de conocimiento pueden ser emergencias. Breathe no es adecuado para estas situaciones. Contacta con los servicios de emergencia locales; en Alemania y la UE: 112. El idioma de la interfaz no determina tu ubicación.',
+   'No sustituyas medicamentos ni tratamientos prescritos por Breathe.'
+  ],
+ },
+ fr: {
+  safetyTitle:'Respirez doucement, à votre rythme', safetyLink:'Conseils de sécurité', continueLabel:'Continuer', closeLabel:'Fermer', end:'Terminer la séance', skipHold:'Passer la retenue',
+  firstHint:'Pratiquez confortablement assis ou allongé dans un endroit sûr. Respirez doucement et seulement aussi profondément que cela reste agréable. Le rythme est un repère : vous n’avez pas à suivre le compte à rebours. Raccourcissez ou passez les retenues si elles sont inconfortables. En cas de vertige, d’essoufflement ou de malaise, arrêtez l’exercice et retrouvez votre rythme respiratoire habituel.',
+  safePlace:'Ne l’utilisez pas en conduisant, en utilisant des machines, en nageant ou en prenant un bain. Breathe est un outil de relaxation et ne remplace ni un avis médical ni un traitement.',
+  reminder:'Respirez doucement. Arrêtez l’exercice si vous vous sentez mal.',
+  holdsHint:'Les retenues sont facultatives. Raccourcissez-les ou réglez-les sur 0 si elles sont inconfortables. Commencez par quelques cycles seulement.',
+  countHint:'Les valeurs sont des unités de comptage. Au rythme par défaut, une unité correspond à une seconde. Adaptez le rythme pour que l’exercice reste agréable.',
+  natural:'Retrouvez votre rythme respiratoire habituel.', ended:'Séance terminée', done:'Retrouvez votre rythme respiratoire habituel.',
+  safetyDetails:[
+   'Le rythme doit rester agréable. Ne forcez rien : le compte à rebours est seulement un repère.',
+   'En cas de vertige, de fourmillements, d’étourdissement, d’essoufflement ou de malaise croissant, arrêtez l’exercice et respirez normalement.',
+   'Demandez un avis médical si les symptômes persistent ou reviennent.',
+   'En cas de maladie cardiaque ou pulmonaire, ou de doute sur l’adéquation des exercices, consultez un médecin au préalable, notamment pour les exercices avec retenues.',
+   'Un essoufflement intense ou soudain, de fortes douleurs thoraciques ou une perte de connaissance peuvent être des urgences. Breathe n’est pas adapté à ces situations. Contactez les secours locaux ; en Allemagne et dans l’UE : 112. La langue de l’interface ne détermine pas votre localisation.',
+   'Ne remplacez pas les médicaments ou traitements prescrits par Breathe.'
+  ],
+ },
+};
+export const dictionaries = {
+ de:{...de,...safetyMessages.de}, en:{...en,...safetyMessages.en},
+ es:{...es,...safetyMessages.es}, fr:{...fr,...safetyMessages.fr},
+};

@@ -14,9 +14,11 @@ const t = dictionaries[lang];
    <div class="breath-stage"><svg id="session-progress" class="breath-progress-ring" viewBox="0 0 100 100" role="progressbar" aria-label={t.remaining} aria-valuemin="0" aria-valuemax="180" aria-valuenow="0"><circle class="ring-track" cx="50" cy="50" r="48"/><circle id="session-ring-progress" cx="50" cy="50" r="48" pathLength="100"/></svg><div id="breath-circle" aria-hidden="true"></div><div class="breath-caption" data-phase="ready"><span id="tile-phase">{t.phases[0]}</span><output id="count">4</output></div></div>
    <p id="phase" class="sr-only" role="status" aria-live="polite">{t.ready}</p>
    <p id="preset-description" class="breath-instruction">{t.descriptions[0]}</p>
-   <div class="timer-controls"><button id="start" class="primary" aria-label={t.start} title={t.start}><svg viewBox="0 0 24 24" aria-hidden="true"><path id="start-icon" d="m8 5 11 7-11 7Z" fill="currentColor" stroke="none"/></svg></button><button id="reset" class="secondary" aria-label={t.reset} title={t.reset}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10a9 9 0 1 1 1 8M3 4v6h6"/></svg></button></div>
+   <div class="timer-controls"><button id="start" class="primary" aria-label={t.start} title={t.start}><svg viewBox="0 0 24 24" aria-hidden="true"><path id="start-icon" d="m8 5 11 7-11 7Z" fill="currentColor" stroke="none"/></svg></button><button id="reset" class="secondary" aria-label={t.reset} title={t.reset}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10a9 9 0 1 1 1 8M3 4v6h6"/></svg></button><button id="end-session" class="secondary" aria-label={t.end} title={t.end} disabled><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="1" fill="currentColor" stroke="none"/></svg><span class="sr-only">{t.end}</span></button><button id="skip-hold" class="secondary" aria-label={t.skipHold} title={t.skipHold} hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 5 9 7-9 7V5Zm11 0v14"/></svg><span class="sr-only">{t.skipHold}</span></button></div>
+   <p id="session-status" class="session-status" role="status"></p>
    <p class="breath-meta"><span id="round">{t.round} 1</span><span id="session">{t.remaining} 3:00</span></p>
    <p id="wake-status" class="timer-status" role="status"></p><p id="audio-status" class="timer-status" role="status"></p>
+   <div class="breath-safety"><p>{t.reminder}</p><button id="safety-open" type="button" class="safety-link">{t.safetyLink}</button></div>
   </section>
   <section class="settings-card">
    <h2>{t.settings}</h2>
@@ -28,10 +30,11 @@ const t = dictionaries[lang];
      </details>
     </div>
     <fieldset class="breath-durations"><legend>{t.units}</legend>{t.phases.map((phase,i)=><label>{phase}<input id={'duration-'+i} type="number" min={i%2 === 0 ? 1 : 0} max="20" step="1" value="4" required /></label>)}</fieldset>
+    <p id="holds-hint" class="form-hint">{t.holdsHint}</p>
     <label class="breath-field">{t.countSeconds}<input id="count-seconds" type="number" min="0.5" max="3" step="0.1" value="1" required /><small>{t.countHint}</small></label>
     <label class="breath-field">{t.duration}<input id="minutes" type="number" min="0" max="30" step="1" value="3" required /><small>{t.unlimited}</small></label>
-    <label class="breath-check"><span>{t.sound}</span><span class="storage-switch"><input id="sound" type="checkbox" role="switch" /><span class="storage-switch-track" aria-hidden="true"></span></span></label>
-    <label class="breath-check"><span>{t.chime}</span><span class="storage-switch"><input id="chime" type="checkbox" role="switch" /><span class="storage-switch-track" aria-hidden="true"></span></span></label>
+    <label class="breath-check"><span>{t.sound}</span><span class="storage-switch"><input id="sound" type="checkbox" role="switch" checked /><span class="storage-switch-track" aria-hidden="true"></span></span></label>
+    <label class="breath-check"><span>{t.chime}</span><span class="storage-switch"><input id="chime" type="checkbox" role="switch" checked /><span class="storage-switch-track" aria-hidden="true"></span></span></label>
     <label class="breath-check"><span>{t.awake}</span><span class="storage-switch"><input id="awake" type="checkbox" role="switch" checked /><span class="storage-switch-track" aria-hidden="true"></span></span></label>
     <label class="breath-check"><span>{t.motion}</span><span class="storage-switch"><input id="motion" type="checkbox" role="switch" checked /><span class="storage-switch-track" aria-hidden="true"></span></span></label>
     <p class="form-hint">{t.hint}</p>
@@ -39,6 +42,17 @@ const t = dictionaries[lang];
   </section>
  </div>
  <p class="local-note">{t.local}</p>
- <section class="guide"><div class="guide-heading"><h2>{t.guide}</h2></div><div class="guide-grid">{t.steps.map((step,i)=><article><span class="step-number">0{i+1}</span><h3>{step}</h3><p>{t.tips[i]}</p></article>)}</div><p class="notice">{t.safety}</p><p class="breath-source"><a href="https://www.nhs.uk/mental-health/self-help/guides-tools-and-activities/breathing-exercises-for-stress/" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">{t.source} ↗</a></p></section>
+ <section class="guide"><div class="guide-heading"><h2>{t.guide}</h2></div><div class="guide-grid">{t.steps.map((step,i)=><article><span class="step-number">0{i+1}</span><h3>{step}</h3><p>{t.tips[i]}</p></article>)}</div><p class="breath-source"><a href="https://www.nhs.uk/mental-health/self-help/guides-tools-and-activities/breathing-exercises-for-stress/" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">{t.source} ↗</a></p></section>
+ <dialog id="first-start-dialog" aria-labelledby="first-safety-title">
+  <div class="dialog-inner"><h2 id="first-safety-title">{t.safetyTitle}</h2><p>{t.firstHint}</p><p class="notice">{t.safePlace}</p>
+   <div class="dialog-actions"><button id="safety-continue" class="primary" autofocus>{t.continueLabel}</button><form method="dialog"><button class="secondary">{t.closeLabel}</button></form></div>
+  </div>
+ </dialog>
+ <dialog id="safety-dialog" aria-labelledby="safety-title">
+  <div class="dialog-inner"><h2 id="safety-title">{t.safetyLink}</h2><p>{t.firstHint}</p><p>{t.safePlace}</p><ul>{t.safetyDetails.map(text=><li>{text}</li>)}</ul>
+   <p class="safety-sources"><a href="https://www.nhs.uk/mental-health/self-help/guides-tools-and-activities/breathing-exercises-for-stress/" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">NHS</a> · <a href="https://digital-strategy.ec.europa.eu/en/policies/112" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">112 · EU</a></p>
+   <form method="dialog" class="dialog-actions"><button class="primary" autofocus>{t.closeLabel}</button></form>
+  </div>
+ </dialog>
  <script src="../scripts/breathe.ts"></script>
 </Layout>

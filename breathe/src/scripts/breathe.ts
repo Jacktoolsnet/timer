@@ -8,6 +8,10 @@ const el = (id: string) => document.getElementById(id)!;
 const start = el('start') as HTMLButtonElement;
 const focus = el('focus') as HTMLButtonElement;
 const form = el('breath-form') as HTMLFormElement;
+const endButton = el('end-session') as HTMLButtonElement;
+const skipButton = el('skip-hold') as HTMLButtonElement;
+const firstDialog = el('first-start-dialog') as HTMLDialogElement;
+const safetyDialog = el('safety-dialog') as HTMLDialogElement;
 const progress = document.getElementById('session-progress') as unknown as SVGSVGElement;
 const ring = el('session-ring-progress');
 function sessionProgress(time: number, total: number) {
@@ -38,6 +42,7 @@ function syncForm() {
  input('count-seconds').value = String(settings.countSeconds);
  for (const key of ['sound','chime','awake','motion'] as const) input(key).checked = settings[key];
  el('preset-description').textContent = t.descriptions[Object.keys(presets).indexOf(settings.preset)]!;
+ el('holds-hint').hidden = settings.durations[1] === 0 && settings.durations[3] === 0;
  el('pattern-name').textContent = t.presets[Object.keys(presets).indexOf(settings.preset)]!;
 }
 async function prepareAudio() {
@@ -117,15 +122,16 @@ function render(time = elapsed) {
  const total = settings.minutes*60;
  const tile = document.querySelector<HTMLElement>('.breath-caption')!;
  tile.dataset.phase = running ? String(state.phase) : 'ready';
- el('tile-phase').textContent = finished ? '' : !running && elapsed ? t.paused : t.phases[state.phase]!.split(' · ')[0]!;
+ el('tile-phase').textContent = finished ? t.ended : !running && elapsed ? t.paused : t.phases[state.phase]!.split(' · ')[0]!;
 
  if (running && total && time >= total) {
-  elapsed = total; finished = true; stop();
-  el('tile-phase').textContent = '';
-  document.querySelector<HTMLElement>('.breath-caption')!.dataset.phase='ready';
-  el('phase').textContent = t.done; el('count').textContent = '✓'; sessionProgress(total,total);
-  el('session').textContent=t.remaining+' 0:00'; return;
+  endSession(total);
+  return;
  }
+ endButton.disabled = !running && !elapsed || finished;
+ (el('reset') as HTMLButtonElement).hidden = running;
+ skipButton.hidden = !running || (state.phase !== 1 && state.phase !== 3);
+ el('session-status').textContent = finished ? t.natural : '';
  if (state.phase !== lastPhase) {
   el('phase').textContent = finished ? t.done : running ? t.phases[state.phase]! : elapsed ? t.paused : t.ready;
   if (running && time > 0.05) {
@@ -134,8 +140,8 @@ function render(time = elapsed) {
   }
   lastPhase = state.phase;
  }
- el('count').textContent = finished ? '✓' : String(Math.ceil(state.remaining));
- el('breath-circle').style.transform = 'scale('+(settings.motion ? state.scale : .75)+')';
+ el('count').textContent = finished ? '–' : String(Math.ceil(state.remaining));
+ el('breath-circle').style.transform = 'scale('+(finished ? .48 : settings.motion ? state.scale : .75)+')';
  el('round').textContent = t.round+' '+state.round;
  const left = Math.max(0,Math.ceil(total-time));
  el('session').textContent = total ? t.remaining+' '+Math.floor(left/60)+':'+String(left%60).padStart(2,'0') : '∞';
@@ -151,14 +157,42 @@ function stop() {
  startLabel(elapsed && !finished ? t.resume : t.start);
 }
 function reset() { stop(); elapsed=0; finished=false; lastPhase=-1; startLabel(t.start); render(); }
-start.addEventListener('click',() => {
- if (running) { elapsed=nowElapsed(); stop(); lastPhase=-1; render(); return; }
- if (!form.reportValidity()) { if (document.body.classList.contains('focus-view')) setFocus(false); return; }
+function pauseSession() {
+ if (!running) return;
+ elapsed=nowElapsed(); stop(); lastPhase=-1; render();
+}
+function beginSession() {
+ if (!form.reportValidity() || document.hidden) return;
  if (finished) { elapsed=0; finished=false; }
  running=true; anchor=performance.now(); lastPhase=-1; startLabel(t.pause,true);
- wake(settings.awake);
- void playCurrentSound();
- tick();
+ wake(settings.awake); void playCurrentSound(); tick();
+}
+function endSession(time = nowElapsed()) {
+ elapsed=time; finished=true; stop(); lastPhase=-1; render();
+}
+start.addEventListener('click',() => {
+ if (running) { pauseSession(); return; }
+ if (!form.reportValidity()) { if (document.body.classList.contains('focus-view')) setFocus(false); return; }
+ if (!settings.safetySeen) { soundGeneration++; silence(); firstDialog.showModal(); return; }
+ beginSession();
+});
+el('safety-continue').addEventListener('click',() => {
+ settings.safetySeen=true; save(); firstDialog.close(); beginSession();
+});
+firstDialog.addEventListener('close',() => start.focus());
+el('safety-open').addEventListener('click',() => {
+ // Guidance never hides a running exercise; resuming always needs a user action.
+ pauseSession(); soundGeneration++; silence(); safetyDialog.showModal();
+});
+safetyDialog.addEventListener('close',() => el('safety-open').focus());
+endButton.addEventListener('click',() => { endSession(); start.focus(); });
+skipButton.addEventListener('click',() => {
+ if (!running) return;
+ const time=nowElapsed();
+ const state=breathAt(time,settings.durations,settings.countSeconds);
+ if(state.phase !== 1 && state.phase !== 3) return;
+ elapsed=time+state.remaining*settings.countSeconds+0.000001;
+ anchor=performance.now(); lastPhase=-1; render(elapsed); start.focus();
 });
 el('reset').addEventListener('click',reset);
 form.addEventListener('submit',e => e.preventDefault());
@@ -202,10 +236,10 @@ function setFocus(enabled: boolean) {
  focus.focus();
 }
 focus.addEventListener('click',() => setFocus(!document.body.classList.contains('focus-view')));
-document.addEventListener('keydown',e => { if (e.key==='Escape') setFocus(false); });
+document.addEventListener('keydown',e => { if (e.key==='Escape' && !firstDialog.open && !safetyDialog.open) setFocus(false); });
 // A hidden tab pauses the exercise: never jump ahead or replay missed signals.
 document.addEventListener('visibilitychange',() => {
- if (document.hidden && running) { elapsed=nowElapsed(); stop(); lastPhase=-1; render(); }
+ if (document.hidden) { pauseSession(); soundGeneration++; silence(); }
 });
 window.addEventListener('pagehide',() => { stop(); void audio?.close(); });
 document.addEventListener('storage-enabled',save);

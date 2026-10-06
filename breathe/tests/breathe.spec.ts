@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 test('session, focus, patterns and consent',async({page})=>{
  const errors:string[]=[]; page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/de/');
- await page.locator('#start').click(); await expect(page.locator('#phase')).toHaveText('Einatmen');
+ await page.locator('#start').click(); await page.locator('#safety-continue').click(); await expect(page.locator('#phase')).toHaveText('Einatmen');
  await page.locator('#start').click(); await expect(page.locator('#phase')).toHaveText('Pausiert');
  await page.locator('#reset').click(); await expect(page.locator('#start')).toHaveAttribute('aria-label','Starten');
  await page.locator('#focus').click(); await expect(page.locator('body')).toHaveClass(/focus-view/);
@@ -25,7 +25,7 @@ test('skips zero holds and pauses in background',async({page})=>{
  await page.locator('#preset-picker summary').click();
  await page.locator('[name=breathing-preset][value=balanced]').check();
  await page.locator('#duration-0').fill('1'); await page.locator('#duration-0').dispatchEvent('change');
- await page.locator('#start').click(); await expect(page.locator('#phase')).toHaveText('Breathe out',{timeout:4000});
+ await page.locator('#start').click(); await page.locator('#safety-continue').click(); await expect(page.locator('#phase')).toHaveText('Breathe out',{timeout:4000});
  await page.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,value:true});document.dispatchEvent(new Event('visibilitychange'));});
  await expect(page.locator('#phase')).toHaveText('Paused');
 });
@@ -41,6 +41,9 @@ test('sound switch plays an audible preview without a volume slider',async({page
  });
  await page.goto('/en/');
  await expect(page.locator('#volume')).toHaveCount(0);
+ await expect(page.locator('#sound')).toBeChecked();
+ await expect(page.locator('#chime')).toBeChecked();
+ await page.locator('#sound').uncheck();
  await page.locator('#sound').check();
  await expect.poll(()=>page.evaluate(()=>{
   const meters=(window as unknown as {soundMeters:AnalyserNode[]}).soundMeters;

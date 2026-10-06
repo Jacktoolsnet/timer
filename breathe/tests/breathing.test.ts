@@ -15,7 +15,7 @@ test('zero holds are skipped and animation follows breathing',()=>{
 });
 test('normalization rejects unsafe persisted data',()=>{
  const s=normalize({durations:[0,-5,Infinity,25],minutes:-1,volume:120,sound:'true',preset:'toString'});
- assert.deepEqual(s.durations,[1,0,4,20]); assert.equal(s.minutes,0); assert.equal(s.sound,false); assert.equal(s.preset,'box');
+ assert.deepEqual(s.durations,[1,0,4,20]); assert.equal(s.minutes,0); assert.equal(s.sound,true); assert.equal(s.preset,'box');
  assert.deepEqual(normalize(null),normalize({}));
 });
 test('invalid cycles are rejected',()=>assert.throws(()=>breathAt(1,[0,0,0,0])));
@@ -34,4 +34,13 @@ test('4–7–8 breathing skips the final hold',async()=>{
  assert.equal(breathAt(4,presets.fourSevenEight).phase,1);
  assert.equal(breathAt(11,presets.fourSevenEight).phase,2);
  assert.equal(breathAt(19,presets.fourSevenEight).phase,0);
+});
+test('first-use status is restored only as a boolean',()=>{
+ assert.equal(normalize({safetySeen:true}).safetySeen,true);
+ assert.equal(normalize({safetySeen:'true'}).safetySeen,false);
+});
+
+test("audio is enabled by default but saved opt-outs are respected",()=>{
+ assert.equal(normalize(null).sound,true); assert.equal(normalize(null).chime,true);
+ const saved=normalize({sound:false,chime:false}); assert.equal(saved.sound,false); assert.equal(saved.chime,false);
 });
