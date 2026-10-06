@@ -2,7 +2,7 @@ export const languages = ['en', 'de', 'es', 'fr'] as const;
 export type Language = typeof languages[number];
 export const languageNames = { en: 'English', de: 'Deutsch', es: 'Español', fr: 'Français' };
 const en = {
-  privacyPromise: 'No ads. No tracking.', supportTitle: 'No ads. No tracking. Made possible together.', supportBody: 'If this timer helps you, you can support our work with a coffee. Or take a look at our other project, MessageDrop.', supportCoffee: 'Support us on Buy Me a Coffee', supportVisit: 'Discover MessageDrop', externalNote: 'External links: the linked services process data under their own privacy policies.', creditBefore: 'Made for you with', creditAnd: 'and', creditAfter: 'by',
+  privacyPromise: 'No ads. No tracking.', supportTitle: 'No ads. No tracking. Made possible together.', supportBody: 'If this timer helps you, you can support our work with a coffee.', supportCoffee: 'Support us on Buy Me a Coffee', supportVisit: 'Discover MessageDrop', externalNote: 'External links: the linked services process data under their own privacy policies.', creditBefore: 'Made for you with', creditAnd: 'and', creditAfter: 'by',
   menuSettings: 'Settings', appearance: 'Appearance', lightMode: 'Light', darkMode: 'Dark',
   autoSaved: 'Saved automatically. Apply duration changes when you are ready.',
   fontSize: 'Font size', styleLabel: 'Style', warm: 'Warm', minimal: 'Minimal', technical: 'Technical', soft: 'Soft', 
@@ -53,7 +53,7 @@ const en = {
 };
 type Dictionary = { [K in keyof typeof en]: string };
 const de: Dictionary = {
-  privacyPromise: 'Ohne Werbung. Ohne Tracking.', supportTitle: 'Ohne Werbung. Ohne Tracking. Gemeinsam möglich.', supportBody: 'Wenn dir der Timer hilft, kannst du unsere Arbeit mit einem Kaffee unterstützen. Oder schau dir unser anderes Projekt MessageDrop an.', supportCoffee: 'Auf Buy Me a Coffee unterstützen', supportVisit: 'MessageDrop entdecken', externalNote: 'Externe Links: Auf den verlinkten Seiten gelten die jeweiligen Datenschutzhinweise.', creditBefore: 'Für Dich mit', creditAnd: 'und', creditAfter: 'entwickelt von',
+  privacyPromise: 'Ohne Werbung. Ohne Tracking.', supportTitle: 'Ohne Werbung. Ohne Tracking. Gemeinsam möglich.', supportBody: 'Wenn dir der Timer hilft, kannst du unsere Arbeit mit einem Kaffee unterstützen.', supportCoffee: 'Auf Buy Me a Coffee unterstützen', supportVisit: 'MessageDrop entdecken', externalNote: 'Externe Links: Auf den verlinkten Seiten gelten die jeweiligen Datenschutzhinweise.', creditBefore: 'Für Dich mit', creditAnd: 'und', creditAfter: 'entwickelt von',
   menuSettings: 'Einstellungen', appearance: 'Darstellung', lightMode: 'Hell', darkMode: 'Dunkel',
   autoSaved: 'Automatisch gespeichert. Geänderte Zeiten kannst du bei Bedarf übernehmen.',
   fontSize: 'Schriftgröße', styleLabel: 'Stil', warm: 'Warm', minimal: 'Minimal', technical: 'Technisch', soft: 'Soft', 
@@ -103,7 +103,7 @@ const de: Dictionary = {
   js: 'Aktiviere JavaScript, um den Timer zu nutzen. Die Anleitung ist auch ohne JavaScript verfügbar.',
 };
 const es: Dictionary = {
-  privacyPromise: 'Sin anuncios. Sin rastreo.', supportTitle: 'Sin anuncios. Sin rastreo. Posible gracias a todos.', supportBody: 'Si este temporizador te resulta útil, puedes apoyar nuestro trabajo con un café. O descubre nuestro otro proyecto, MessageDrop.', supportCoffee: 'Apóyanos en Buy Me a Coffee', supportVisit: 'Descubre MessageDrop', externalNote: 'Enlaces externos: los servicios enlazados tratan datos según sus propias políticas de privacidad.', creditBefore: 'Desarrollado para ti con', creditAnd: 'y', creditAfter: 'por',
+  privacyPromise: 'Sin anuncios. Sin rastreo.', supportTitle: 'Sin anuncios. Sin rastreo. Posible gracias a todos.', supportBody: 'Si este temporizador te resulta útil, puedes apoyar nuestro trabajo con un café.', supportCoffee: 'Apóyanos en Buy Me a Coffee', supportVisit: 'Descubre MessageDrop', externalNote: 'Enlaces externos: los servicios enlazados tratan datos según sus propias políticas de privacidad.', creditBefore: 'Desarrollado para ti con', creditAnd: 'y', creditAfter: 'por',
   menuSettings: 'Ajustes', appearance: 'Apariencia', lightMode: 'Claro', darkMode: 'Oscuro',
   autoSaved: 'Guardado automáticamente. Aplica los cambios de duración cuando quieras.',
   fontSize: 'Tamaño de letra', styleLabel: 'Estilo', warm: 'Cálido', minimal: 'Minimalista', technical: 'Técnico', soft: 'Suave', 
@@ -146,7 +146,7 @@ const es: Dictionary = {
   js: 'Activa JavaScript para usar el temporizador. La guía está disponible sin JavaScript.',
 };
 const fr: Dictionary = {
-  privacyPromise: 'Sans publicité. Sans suivi.', supportTitle: 'Sans publicité. Sans suivi. Ensemble, c’est possible.', supportBody: 'Si ce minuteur vous est utile, vous pouvez soutenir notre travail avec un café. Ou découvrez notre autre projet, MessageDrop.', supportCoffee: 'Nous soutenir sur Buy Me a Coffee', supportVisit: 'Découvrir MessageDrop', externalNote: 'Liens externes : les services liés traitent les données selon leurs propres politiques de confidentialité.', creditBefore: 'Développé pour vous avec', creditAnd: 'et', creditAfter: 'par',
+  privacyPromise: 'Sans publicité. Sans suivi.', supportTitle: 'Sans publicité. Sans suivi. Ensemble, c’est possible.', supportBody: 'Si ce minuteur vous est utile, vous pouvez soutenir notre travail avec un café.', supportCoffee: 'Nous soutenir sur Buy Me a Coffee', supportVisit: 'Découvrir MessageDrop', externalNote: 'Liens externes : les services liés traitent les données selon leurs propres politiques de confidentialité.', creditBefore: 'Développé pour vous avec', creditAnd: 'et', creditAfter: 'par',
   menuSettings: 'Réglages', appearance: 'Apparence', lightMode: 'Clair', darkMode: 'Sombre',
   autoSaved: 'Enregistré automatiquement. Appliquez les nouvelles durées quand vous le souhaitez.',
   fontSize: 'Taille du texte', styleLabel: 'Style', warm: 'Chaleureux', minimal: 'Minimaliste', technical: 'Technique', soft: 'Doux', 
