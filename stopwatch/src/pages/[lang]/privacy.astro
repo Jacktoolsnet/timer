@@ -1,0 +1,10 @@
+---
+import PrivacyContent from '../../components/PrivacyContent.astro';
+import Layout from '../../layouts/Layout.astro';
+import {getDictionary} from '../../lib/i18n';
+export function getStaticPaths(){return (['de','en'] as const).map(lang=>({params:{lang},props:{lang}}));}
+const {lang}=Astro.props;const t=getDictionary(lang);const de=lang==='de';
+---
+<Layout lang={lang} title={t.privacy} description={t.privacy} route="privacy" legal noindex><article class="legal-page"><p class="eyebrow">JACKTOOLS.NET / {t.privacy.toUpperCase()}</p><h1>{t.privacy}</h1><nav class="legal-nav"><a href="/de/privacy/">Deutsch · Original</a><a href="/en/privacy/">English</a></nav>
+<PrivacyContent de={de} />
+<p class="legal-back"><a href={'/'+lang+'/'}>← {de ? 'Zurück zur Stoppuhr' : 'Back to the stopwatch'}</a></p></article></Layout>

@@ -1,0 +1,23 @@
+---
+import Layout from '../layouts/Layout.astro';
+import {getDictionary, type Language} from '../lib/i18n';
+import {stopwatchText} from '../lib/stopwatch-text';
+interface Props {lang: Language}
+const {lang}=Astro.props; const t=getDictionary(lang); const c=stopwatchText[lang];
+---
+<Layout lang={lang} title={c.title} description={c.intro} route="">
+<section class="intro"><h1>{c.title}</h1><p class="intro-copy">{c.intro}</p></section>
+<div id="stopwatch-app" data-text={JSON.stringify({...t,...c})}>
+<div class="workspace stopwatch-workspace"><section class="timer-card stopwatch-card">
+<div class="card-top"><button id="stopwatch-focus" class="icon-text" aria-pressed="false">{t.focusMode}</button></div>
+<p id="measurement-status" class="timer-status" role="status">{c.ready}</p>
+<div id="elapsed" class="stopwatch-time" role="timer" aria-label={c.total} aria-live="off">00:00:00.00</div>
+<div class="timer-controls"><button id="toggle-timing" class="primary" disabled>{c.start}</button><button id="lap" class="secondary" disabled>{c.lap}</button><button id="reset-timing" class="secondary" disabled>{c.reset}</button></div>
+<label class="awake-choice"><input id="awake" type="checkbox" /> {c.awake}</label>
+<p id="wake-status" class="timer-status" role="status"></p><p class="keyboard-hint">{c.hint}</p><noscript>{t.js}</noscript>
+</section><aside class="settings-card lap-panel"><h2>{c.laps}</h2><p id="empty-laps">{c.empty}</p><div class="lap-scroll"><table id="laps-table" hidden><caption class="sr-only">{c.laps}</caption><thead><tr><th scope="col">{c.lap}</th><th scope="col">{c.duration}</th><th scope="col">{c.total}</th></tr></thead><tbody id="laps-body"></tbody></table></div><p id="lap-status" role="status" class="sr-only"></p></aside></div>
+<p class="local-note">{c.note}</p><p class="privacy-promise">{t.privacyPromise}</p></div>
+<section class="guide"><div class="guide-heading"><p class="eyebrow">THE JACKTOOLS.NET WAY</p><h2>{c.guide}</h2></div><div class="guide-grid">{c.steps.map(([title,body],i)=><article><span class="step-number">0{i+1}</span><h3>{title}</h3><p>{body}</p></article>)}</div></section>
+<section class="faq"><h2>{t.faq}</h2><details><summary>{c.question}<span aria-hidden="true">+</span></summary><p>{c.answer}</p></details></section>
+<script src="../scripts/stopwatch.ts"></script>
+</Layout>

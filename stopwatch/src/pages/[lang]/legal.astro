@@ -1,0 +1,24 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import {getDictionary} from '../../lib/i18n';
+export function getStaticPaths(){return (['de','en'] as const).map(lang=>({params:{lang},props:{lang}}));}
+const {lang}=Astro.props; const de=lang==='de'; const t=getDictionary(lang);
+---
+<Layout lang={lang} title={t.legal} description={de ? 'Impressum für jacktools.net Clock.' : 'Legal notice for jacktools.net Clock.'} route="legal" legal noindex>
+<article class="legal-page"><p class="eyebrow">JACKTOOLS.NET / {t.legal.toUpperCase()}</p><h1>{t.legal}</h1>
+<nav class="legal-nav"><a href="/de/legal/" lang="de">Deutsch · Original</a><a href="/en/legal/" lang="en">English · Translation</a></nav>
+      <h2>{de ? 'Diensteanbieter' : 'Service provider'}</h2>
+      <p><strong>JackTools.Net UG (haftungsbeschränkt)</strong><br />Im Kirchfeld 27<br />38304 Wolfenbüttel<br />{de ? 'Deutschland' : 'Germany'}</p>
+      <h2>{de ? 'Kontakt' : 'Contact'}</h2>
+      <p>{de ? 'Telefon' : 'Phone'}: <a href="tel:+4917641235774">+49 (0) 176 / 41 23 57 74</a><br />{de ? 'E-Mail' : 'Email'}: <a href="mailto:jacktoolsnet@gmail.com">jacktoolsnet@gmail.com</a></p>
+      <h2>{de ? 'Vertretungsberechtigter Geschäftsführer' : 'Managing director authorised to represent the company'}</h2>
+      <p>Christian Wagner, Dipl.-Inform. (FH)</p>
+      <h2>{de ? 'Handelsregister' : 'Commercial register'}</h2>
+      <p>{de ? 'Registergericht' : 'Registry court'}: {de ? 'Amtsgericht Ingolstadt' : 'Local Court of Ingolstadt (Amtsgericht Ingolstadt)'}<br />{de ? 'Registernummer' : 'Registration number'}: HRB 5933</p>
+      <h2>{de ? 'Umsatzsteuer-Identifikationsnummer' : 'VAT identification number'}</h2>
+      <p>DE277133529</p>
+      <h2>{de ? 'Verantwortlich für den Inhalt' : 'Responsible for content'}</h2>
+      <p>Christian Wagner<br />Im Kirchfeld 27<br />38304 Wolfenbüttel<br />{de ? 'Deutschland' : 'Germany'}</p>
+      <h2>{de ? 'Verbraucherstreitbeilegung' : 'Consumer dispute resolution'}</h2>
+      <p>{de ? 'Wir sind weder verpflichtet noch bereit, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.' : 'We are neither obliged nor willing to participate in dispute resolution proceedings before a consumer arbitration board.'}</p>
+<p class="legal-back"><a href={'/'+lang+'/'}>← {de ? 'Zurück zur Stoppuhr' : 'Back to the stopwatch'}</a></p></article></Layout>

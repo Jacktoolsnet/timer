@@ -1,0 +1,28 @@
+---
+import Layout from '../../layouts/Layout.astro';
+export function getStaticPaths() { return (['en', 'de'] as const).map(lang => ({ params: { lang }, props: { lang } })); }
+const { lang } = Astro.props;
+const de = lang === 'de';
+const title = de ? 'Nutzungshinweise' : 'Usage notes';
+---
+<Layout lang={lang} title={title} description={de ? 'Hinweise zur kostenlosen Nutzung und den technischen Grenzen von JackTools Stopwatch.' : 'Information about free use and the technical limitations of JackTools Stopwatch.'} route="usage" noindex legal>
+  <article class="legal-page">
+    <p class="eyebrow">JACKTOOLS.NET / {title.toUpperCase()}</p><h1>{title}</h1>
+    <nav class="legal-nav"><a href="/de/usage/" lang="de">Deutsch · Original</a><a href="/en/usage/" lang="en">English · Translation</a></nav>
+    <p>{de ? 'Diese Hinweise erklären die Nutzung und die technischen Grenzen unserer Stoppuhr. Sie enthalten keinen pauschalen Haftungsausschluss und schränken gesetzliche Rechte nicht ein.' : 'These notes explain how to use our stopwatch and its technical limitations. They do not contain a blanket exclusion of liability or restrict statutory rights.'}</p>
+    <h2>{de ? 'Kostenlos und ohne Anmeldung' : 'Free, with no account needed'}</h2>
+    <p>{de ? 'Du kannst die Stoppuhr kostenlos und ohne Benutzerkonto nutzen. Eine Unterstützung über Buy Me a Coffee ist freiwillig und keine Voraussetzung für die Nutzung.' : 'You can use the stopwatch free of charge without a user account. Support through Buy Me a Coffee is voluntary and is not required to use the stopwatch.'}</p>
+    <h2>{de ? 'Zeitmessung im Alltag' : 'Everyday timing'}</h2>
+    <p>{de ? 'Die Stoppuhr misst verstrichene Zeit und Rundenzeiten. Sie ist für den Alltag gedacht, nicht für medizinische Anwendungen, Notfälle, offizielle Wettkampfmessungen oder sicherheitskritische Aufgaben. Die Anzeige von Hundertstelsekunden garantiert keine entsprechende Messgenauigkeit.' : 'The stopwatch measures elapsed time and laps. It is intended for everyday use, not medical applications, emergencies, official competition timing or safety-critical tasks. Displaying hundredths of a second does not guarantee that level of accuracy.'}</p>
+    <h2>{de ? 'Technische Grenzen' : 'Technical limitations'}</h2>
+    <p>{de ? 'Die Messung basiert auf Zeitstempeln, nicht auf der Anzahl der Bildschirmaktualisierungen. Hintergrund-Tabs können die Anzeige verzögern. Änderungen der Gerätezeit können die Messung beeinflussen; Ruhezustand und Browser-Einschränkungen können sie beeinträchtigen. Beim Neuladen, Sprachwechsel oder Verlassen der Seite gehen Messung und Runden verloren. Es gibt keine Alarmfunktion.' : 'Timing is based on timestamps, not the number of screen updates. Background tabs may delay the display. Device clock changes can affect timing; sleep mode and browser restrictions may impair it. Reloading, changing language or leaving the page discards measurements and laps. There is no alarm function.'}</p>
+    <p>{de ? 'Die Fokusansicht funktioniert auch ohne Browser-Vollbild. Vollbild und „Bildschirm wach halten“ sind nur verfügbar, wenn Browser und Gerät dies zulassen. Das Wachhalten kann insbesondere bei Energiesparmodus oder einem Wechsel in den Hintergrund aufgehoben werden. Es verhindert keine manuelle Bildschirmsperre. Ein dauerhaft eingeschaltetes Display kann den Energieverbrauch erhöhen.' : 'Focus view also works without browser fullscreen. Fullscreen and “Keep screen awake” are available only where your browser and device allow them. Keeping the screen awake may be revoked, especially in power-saving mode or when the page moves to the background. It does not prevent manual screen locking. Keeping the display on may increase energy consumption.'}</p>
+    <h2>{de ? 'Einstellungen bleiben im Browser' : 'Settings stay in your browser'}</h2>
+    <p>{de ? 'Anzeige- und Anzeigeeinstellungen werden nur dauerhaft lokal gespeichert, wenn du „Einstellungen auf diesem Gerät merken“ aktivierst und dein Browser dies zulässt. Sie werden nicht zwischen Geräten synchronisiert. Beim Löschen der Browserdaten oder im privaten Modus können sie verloren gehen. Unter „Lokale Einstellungen“ kannst du die gespeicherten Einstellungen selbst löschen.' : 'Stopwatch and display preferences are saved persistently only if you enable “Remember settings on this device” and your browser allows it. They are not synchronised between devices. Clearing browser data or using private browsing may cause them to be lost. You can delete saved preferences under “Local settings”.'}</p>
+    <p><a href={de ? '/de/privacy/' : '/en/privacy/'}>{de ? 'Mehr zur Datenverarbeitung in der Datenschutzerklärung' : 'Read more about data processing in our privacy notice'}</a></p>
+    <h2>{de ? 'Fehler oder Fragen?' : 'Problems or questions?'}</h2>
+    <p>{de ? 'Wenn etwas nicht funktioniert, schreibe uns gerne mit einer kurzen Beschreibung sowie Angaben zu Browser und Gerät: ' : 'If something does not work, please send a short description and details of your browser and device to: '}<a href="mailto:jacktoolsnet@gmail.com">jacktoolsnet@gmail.com</a>.</p>
+    <p>{de ? 'Die deutsche Fassung ist die redaktionelle Originalfassung; die englische Fassung ist eine Übersetzung.' : 'German is the editorial original; the English version is a translation.'}</p>
+    <p class="legal-back"><a href={'/' + lang + '/'}>← {de ? 'Zurück zur Stoppuhr' : 'Back to the stopwatch'}</a></p>
+  </article>
+</Layout>

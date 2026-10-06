@@ -1,0 +1,7 @@
+---
+import StopwatchPage from '../../components/StopwatchPage.astro';
+import {languages} from '../../lib/i18n';
+export function getStaticPaths(){return languages.map(lang=>({params:{lang},props:{lang}}));}
+const {lang}=Astro.props;
+---
+<StopwatchPage lang={lang}/>
