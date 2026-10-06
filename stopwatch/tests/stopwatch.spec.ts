@@ -66,3 +66,9 @@ test('focus laps follow screen width and orientation',async({page})=>{
   }
  }
 });
+
+test('support highlights coffee without MessageDrop promotion in all languages',async({page})=>{
+ for(const lang of ['de','en','es','fr']){
+  await page.goto('/'+lang+'/');const support=page.locator('.support-section');await expect(support).not.toContainText('MessageDrop');await expect(support.locator('a')).toHaveCount(1);await expect(support.locator('a')).toHaveClass('support-coffee');await expect(support.locator('a')).toHaveAttribute('href','https://buymeacoffee.com/jacktoolsnet');
+ }
+});
