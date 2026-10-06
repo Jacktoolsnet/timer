@@ -9,7 +9,7 @@ const start = $('toggle-timing') as HTMLButtonElement;
 const lap = $('lap') as HTMLButtonElement;
 const reset = $('reset-timing') as HTMLButtonElement;
 const awake = $('awake') as HTMLInputElement;
-const wake = screenWakeLock($('wake-status'), t.wakeActive, t.unavailable);
+const wake = screenWakeLock($('wake-status'), '', t.unavailable);
 // Wall-clock timestamps include time spent in background tabs and device sleep.
 // Device clock adjustments remain a documented limitation.
 const now = () => Date.now();
@@ -21,7 +21,9 @@ function save() {
 }
 function render() {$('elapsed').textContent = formatElapsed(timer.elapsed(now()));}
 function sync() {
- start.textContent = timer.running ? t.pause : timer.elapsed(now()) > 0 ? t.resume : t.start;
+ const label = timer.running ? t.pause : timer.elapsed(now()) > 0 ? t.resume : t.start;
+ start.setAttribute('aria-label', label); start.title = label;
+ $('play-symbol').hidden = timer.running; $('pause-symbol').hidden = !timer.running;
  start.disabled = false; lap.disabled = !timer.running;
  reset.disabled = timer.running || (timer.elapsed(now()) === 0 && !timer.laps.length);
  $('measurement-status').textContent = timer.running ? t.running : timer.elapsed(now()) > 0 ? t.paused : t.ready;
@@ -38,9 +40,16 @@ function capture() {
  $('lap-status').textContent = `${t.lap} ${timer.laps.length}: ${formatElapsed(item.duration)}`;
 }
 start.addEventListener('click', toggle); lap.addEventListener('click', capture);
+const resetDialog = $('reset-dialog') as HTMLDialogElement;
 reset.addEventListener('click', () => {
- if (timer.running || !window.confirm(t.confirm)) return;
+ if (timer.running || reset.disabled || resetDialog.open) return;
+ resetDialog.returnValue = 'cancel'; resetDialog.showModal();
+});
+resetDialog.addEventListener('close', () => {
+ if (resetDialog.returnValue !== 'reset' || timer.running) return;
  timer.reset(); $('laps-body').replaceChildren(); $('laps-table').hidden = true; $('empty-laps').hidden = false; $('lap-status').textContent = ''; sync();
+ // The reset button is disabled after clearing; return focus to the next action.
+ start.focus();
 });
 awake.addEventListener('change', () => {wake(awake.checked && timer.running); save();});
 document.addEventListener('storage-enabled', save);
@@ -49,7 +58,8 @@ let ownsFullscreen = false;
 function focus(enabled: boolean) {
  document.body.classList.toggle('focus-view', enabled);
  $('stopwatch-focus').setAttribute('aria-pressed', String(enabled));
- $('stopwatch-focus').textContent = enabled ? t.exitFocus : t.focusMode;
+ $('stopwatch-focus').setAttribute('aria-label', enabled ? t.exitFocus : t.focusMode);
+ $('stopwatch-focus').querySelector('span')!.textContent = enabled ? t.exitFocus : t.focusMode;
 }
 async function leave() {focus(false); if (ownsFullscreen && document.fullscreenElement) {ownsFullscreen=false; await document.exitFullscreen().catch(()=>{});}}
 $('stopwatch-focus').addEventListener('click', async () => {
@@ -59,6 +69,7 @@ $('stopwatch-focus').addEventListener('click', async () => {
 });
 document.addEventListener('fullscreenchange', () => {if (!document.fullscreenElement) {ownsFullscreen=false; focus(false);}});
 document.addEventListener('keydown', e => {
+ if (document.querySelector('dialog[open]')) return;
  if (e.key === 'Escape') {void leave(); return;}
  if (e.repeat || e.ctrlKey || e.altKey || e.metaKey || document.querySelector('dialog[open]') || document.querySelector('details.palette-dropdown[open]')) return;
  if ((e.target as HTMLElement).closest('button,a,input,select,textarea,summary,[contenteditable]')) return;

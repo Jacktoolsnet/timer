@@ -6,18 +6,28 @@ interface Props {lang: Language}
 const {lang}=Astro.props; const t=getDictionary(lang); const c=stopwatchText[lang];
 ---
 <Layout lang={lang} title={c.title} description={c.intro} route="">
-<section class="intro"><h1>{c.title}</h1><p class="intro-copy">{c.intro}</p></section>
+<section class="intro"><h1>{c.heading} <em>{c.headingAccent}</em></h1><p class="intro-copy">{c.intro}</p></section>
 <div id="stopwatch-app" data-text={JSON.stringify({...t,...c})}>
 <div class="workspace stopwatch-workspace"><section class="timer-card stopwatch-card">
-<div class="card-top"><button id="stopwatch-focus" class="icon-text" aria-pressed="false">{t.focusMode}</button></div>
+<div class="card-top"><button id="stopwatch-focus" class="icon-text" aria-label={t.focusMode} aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg><span>{t.focusMode}</span></button></div>
 <p id="measurement-status" class="timer-status" role="status">{c.ready}</p>
 <div id="elapsed" class="stopwatch-time" role="timer" aria-label={c.total} aria-live="off">00:00:00.00</div>
-<div class="timer-controls"><button id="toggle-timing" class="primary" disabled>{c.start}</button><button id="lap" class="secondary" disabled>{c.lap}</button><button id="reset-timing" class="secondary" disabled>{c.reset}</button></div>
+<div class="timer-controls">
+<button id="reset-timing" class="secondary" aria-label={c.reset} title={c.reset} disabled><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 10a9 9 0 1 1 1 8M3 4v6h6"/></svg></button>
+<button id="toggle-timing" class="primary" aria-label={c.start} title={c.start} disabled><span id="play-symbol"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m8 5 11 7-11 7Z" fill="currentColor" stroke="none"/></svg></span><span id="pause-symbol" hidden><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 5v14M16 5v14" stroke-width="4"/></svg></span></button>
+<button id="lap" class="secondary" aria-label={c.lap} title={c.lap} disabled><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 21V3m0 1c5-4 9 4 14 0v10c-5 4-9-4-14 0"/></svg></button>
+</div>
 <label class="awake-choice"><input id="awake" type="checkbox" /> {c.awake}</label>
 <p id="wake-status" class="timer-status" role="status"></p><p class="keyboard-hint">{c.hint}</p><noscript>{t.js}</noscript>
 </section><aside class="settings-card lap-panel"><h2>{c.laps}</h2><p id="empty-laps">{c.empty}</p><div class="lap-scroll"><table id="laps-table" hidden><caption class="sr-only">{c.laps}</caption><thead><tr><th scope="col">{c.lap}</th><th scope="col">{c.duration}</th><th scope="col">{c.total}</th></tr></thead><tbody id="laps-body"></tbody></table></div><p id="lap-status" role="status" class="sr-only"></p></aside></div>
 <p class="local-note">{c.note}</p><p class="privacy-promise">{t.privacyPromise}</p></div>
 <section class="guide"><div class="guide-heading"><p class="eyebrow">THE JACKTOOLS.NET WAY</p><h2>{c.guide}</h2></div><div class="guide-grid">{c.steps.map(([title,body],i)=><article><span class="step-number">0{i+1}</span><h3>{title}</h3><p>{body}</p></article>)}</div></section>
 <section class="faq"><h2>{t.faq}</h2><details><summary>{c.question}<span aria-hidden="true">+</span></summary><p>{c.answer}</p></details></section>
+<dialog id="reset-dialog" class="reset-dialog" aria-labelledby="reset-title" aria-describedby="reset-description">
+<div class="dialog-inner">
+<div class="reset-dialog-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 10a9 9 0 1 1 1 8M3 4v6h6"/></svg></div>
+<h2 id="reset-title">{c.resetTitle}</h2><p id="reset-description">{c.resetBody}</p>
+<form method="dialog" class="dialog-actions"><button id="reset-cancel" class="secondary" value="cancel" autofocus>{c.cancel}</button><button id="reset-confirm" class="primary" value="reset">{c.reset}</button></form>
+</div></dialog>
 <script src="../scripts/stopwatch.ts"></script>
 </Layout>
