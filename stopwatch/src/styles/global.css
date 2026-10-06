@@ -793,9 +793,40 @@ body.focus-view #analog-clock { max-width:100%; min-width:0; }
 .stopwatch-time{font-variant-numeric:tabular-nums;font-size:clamp(30px,5vw,64px);letter-spacing:-2px;text-align:center;white-space:nowrap;margin:42px 0;line-height:1.2}
 .stopwatch-card .timer-controls{flex-wrap:wrap}.awake-choice{display:flex;justify-content:center;align-items:center;gap:8px;margin:26px 0 0;font-size:14px}.awake-choice input{accent-color:var(--accent);width:18px;height:18px}
 .keyboard-hint{color:var(--muted);font-size:12px;text-align:center;line-height:1.7}.lap-panel h2{font-size:20px;margin-top:0}.lap-panel p{color:var(--muted);font-size:14px;line-height:1.7}.lap-scroll{overflow:auto;max-height:420px}#laps-table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:12px}#laps-table th,#laps-table td{padding:12px 5px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line)}#laps-table th{color:var(--muted);font-weight:500}#laps-table th:first-child,#laps-table td:first-child{text-align:left}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-body.focus-view .stopwatch-time{font-size:clamp(30px,10vw,140px);margin:8vh 0}body.focus-view .lap-panel,body.focus-view .keyboard-hint{display:none}body.focus-view .stopwatch-workspace{display:block;width:100%;max-width:1100px}body.focus-view .stopwatch-card{width:100%;min-height:70vh;display:flex;flex-direction:column;justify-content:center}body.focus-view .stopwatch-card .card-top{display:flex}
+body.focus-view .stopwatch-time{font-size:clamp(30px,10vw,140px);margin:8vh 0}body.focus-view .keyboard-hint{display:none}body.focus-view .stopwatch-workspace{display:block;width:100%;max-width:1100px}body.focus-view .stopwatch-card{width:100%;min-height:70vh;display:flex;flex-direction:column;justify-content:center}body.focus-view .stopwatch-card .card-top{display:flex}
 @media(max-width:800px){.stopwatch-workspace{grid-template-columns:1fr}.stopwatch-time{font-size:clamp(29px,8vw,62px)}.stopwatch-card{padding:22px 14px}.stopwatch-card .timer-controls button{padding:12px 14px}.lap-scroll{max-height:320px}}
 
 .stopwatch-card .timer-controls button{width:48px;min-width:48px;padding:12px}.stopwatch-card .timer-controls span{display:flex}.stopwatch-card .timer-controls span[hidden]{display:none}
 
 .reset-dialog{width:min(440px,calc(100vw - 32px));max-height:calc(100dvh - 32px);overflow:auto}.reset-dialog .dialog-inner{padding:32px}.reset-dialog h2{margin:20px 0 12px}.reset-dialog-icon{display:grid;place-items:center;width:48px;height:48px;border-radius:14px;background:var(--accent-soft);color:var(--accent)}.reset-dialog-icon svg{width:25px;height:25px}.reset-dialog .dialog-actions{justify-content:flex-end;gap:10px}.reset-dialog .dialog-actions button{flex:1}.reset-dialog::backdrop{background:#151a1773;backdrop-filter:blur(5px)}
+
+.stopwatch-sidebar{display:grid;gap:24px;min-width:0}.stopwatch-options h2{font-size:20px;margin:0 0 20px}.stopwatch-view-choice{display:flex;flex-direction:column;gap:10px;font-size:14px}.stopwatch-view-choice select{width:100%;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--text);padding:12px}.stopwatch-options .toggle-row{margin-top:22px}.stopwatch-options .toggle-row strong{font-weight:550}.stopwatch-options .toggle-row small{display:block;margin-top:6px;line-height:1.6;color:var(--muted)}
+#analog-stopwatch{margin:24px auto 0;text-align:center}#analog-stopwatch[hidden]{display:none}#analog-stopwatch svg{display:block;width:min(320px,100%);height:auto;margin:auto;overflow:visible}.stopwatch-dial{fill:var(--surface);stroke:var(--accent);stroke-width:2}.stopwatch-major{stroke:var(--accent);stroke-width:3}.stopwatch-minor{stroke:var(--muted);stroke-width:1}.stopwatch-number{fill:var(--text);stroke:none;font:16px system-ui;text-anchor:middle;dominant-baseline:middle}.stopwatch-subdial{fill:none;stroke:var(--line);stroke-width:1}.stopwatch-subnumber{fill:var(--muted);stroke:none;font:8px system-ui;text-anchor:middle;dominant-baseline:middle}#stopwatch-second-hand{stroke:var(--accent);stroke-width:2}#stopwatch-minute-hand{stroke:var(--text);stroke-width:2}.stopwatch-hub{fill:var(--accent);stroke:none}.dial-hint{font-size:11px;color:var(--muted);margin:14px 0 0;line-height:1.6}#stopwatch-display[data-view=analog] .stopwatch-time{font-size:clamp(24px,4vw,36px);margin:18px 0 28px;letter-spacing:-1px}
+body.focus-view .stopwatch-sidebar{display:none}body.focus-view #analog-stopwatch svg{width:min(48dvh,400px)}body.focus-view #stopwatch-display[data-view=analog] .stopwatch-time{font-size:clamp(24px,5vw,46px);margin:12px 0 20px}body.focus-view .stopwatch-card{padding-top:48px}body.focus-view .dial-hint{display:none}
+
+.stopwatch-laps{border-top:1px solid var(--line);margin-top:24px;padding-top:24px;width:100%;text-align:left}.stopwatch-laps h2{font-size:18px;margin-bottom:12px}.stopwatch-laps .lap-scroll{max-height:260px}.stopwatch-laps #laps-table{font-size:14px}
+body.focus-view .stopwatch-laps{display:block;max-width:680px;margin:24px auto 0;padding-top:18px}body.focus-view .stopwatch-laps .lap-scroll{max-height:24dvh}body.focus-view .stopwatch-card{min-height:0;margin:auto}body.focus-view .stopwatch-time{margin:4dvh 0}body.focus-view #analog-stopwatch svg{width:min(36dvh,320px)}body.focus-view .stopwatch-workspace{align-content:safe center}
+@media(max-width:480px){.stopwatch-laps #laps-table{font-size:12px}body.focus-view .stopwatch-laps{margin-top:16px}body.focus-view .stopwatch-laps h2{font-size:16px}}
+
+/* Keep timing and laps together; split them only in the spacious focus view. */
+.stopwatch-main{min-width:0;width:100%}
+body.focus-view .stopwatch-main{container-type:inline-size}
+body.focus-view .stopwatch-main .stopwatch-time{font-size:clamp(28px,12cqw,100px)}
+body.focus-view .stopwatch-main #stopwatch-display[data-view=analog] .stopwatch-time{font-size:clamp(24px,8cqw,46px)}
+@media(min-width:900px),(min-width:600px) and (orientation:landscape){
+ body.focus-view .stopwatch-workspace{max-width:1400px}
+ body.focus-view .stopwatch-card{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(250px,1fr);gap:28px;align-items:center;padding:56px 28px 28px}
+ body.focus-view .stopwatch-card>.stopwatch-main{grid-column:1}
+ body.focus-view .stopwatch-card>.stopwatch-laps{grid-column:2;grid-row:1;border-top:0;border-left:1px solid var(--line);padding:0 0 0 28px;margin:0;max-width:none;align-self:center}
+ body.focus-view .stopwatch-laps .lap-scroll{max-height:65dvh}
+ body.focus-view #analog-stopwatch svg{width:min(48dvh,400px)}
+}
+@media(min-width:600px) and (orientation:landscape) and (max-height:600px){
+ body.focus-view .stopwatch-card{gap:18px;padding:40px 18px 16px}
+ body.focus-view .stopwatch-card>.stopwatch-laps{padding-left:18px}
+ body.focus-view #analog-stopwatch{margin-top:8px}
+ body.focus-view #analog-stopwatch svg{width:min(44dvh,240px)}
+ body.focus-view .stopwatch-main .stopwatch-time{margin:16px 0}
+ body.focus-view .stopwatch-main #stopwatch-display[data-view=analog] .stopwatch-time{font-size:clamp(20px,7cqw,30px);margin:8px 0 12px}
+ body.focus-view .stopwatch-laps .lap-scroll{max-height:60dvh}
+}

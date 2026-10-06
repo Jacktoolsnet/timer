@@ -18,6 +18,8 @@ Open http://localhost:4323/de/. `npm run build` checks types and builds `dist/`.
 No deployment has been performed. Deploy only `dist/` to the configured host.
 HTTPS is required for Screen Wake Lock; support depends on browser/device.
 
+Digital and analog views (60-second dial, 60-minute subdial, exact digital total).
+Options panel with view selector and keep-awake slide switch.
 Start, pause/resume, laps (individual and cumulative), confirmed reset while
 paused, focus/fullscreen and optional keep-awake while running. Timing uses
 wall-clock timestamps, not update counts; device clock changes can affect it.

@@ -1,3 +1,4 @@
+import {enhanceStopwatchSelects} from './stopwatch-selects';
 import {Stopwatch, formatElapsed} from '../lib/stopwatch';
 import {screenWakeLock} from '../lib/wake-lock';
 import {storageAllowed} from '../lib/storage';
@@ -9,17 +10,33 @@ const start = $('toggle-timing') as HTMLButtonElement;
 const lap = $('lap') as HTMLButtonElement;
 const reset = $('reset-timing') as HTMLButtonElement;
 const awake = $('awake') as HTMLInputElement;
+const view = $('stopwatch-view') as HTMLSelectElement;
 const wake = screenWakeLock($('wake-status'), '', t.unavailable);
 // Wall-clock timestamps include time spent in background tabs and device sleep.
 // Device clock adjustments remain a documented limitation.
 const now = () => Date.now();
-try { if (storageAllowed()) awake.checked = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null')?.awake === true; } catch {}
+try { if (storageAllowed()) {
+ const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+ awake.checked = saved?.awake === true;
+ if (saved?.view === 'analog') view.value = 'analog';
+} } catch {}
 function save() {
  if (!storageAllowed()) return;
- try {localStorage.setItem(STORAGE_KEY, JSON.stringify({awake: awake.checked}));}
+ try {localStorage.setItem(STORAGE_KEY, JSON.stringify({awake: awake.checked, view: view.value}));}
  catch {$('wake-status').textContent = t.storageError;}
 }
-function render() {$('elapsed').textContent = formatElapsed(timer.elapsed(now()));}
+function render() {
+ const elapsed = timer.elapsed(now()); $('elapsed').textContent = formatElapsed(elapsed);
+ if (view.value === 'analog') {
+ $('stopwatch-second-hand').setAttribute('transform', `rotate(${(elapsed % 60000) / 60000 * 360} 160 160)`);
+ $('stopwatch-minute-hand').setAttribute('transform', `rotate(${(elapsed % 3600000) / 3600000 * 360} 160 107)`);
+ }
+}
+function configureView() {
+ $('stopwatch-display').dataset.view = view.value;
+ $('analog-stopwatch').hidden = view.value !== 'analog'; render();
+}
+view.addEventListener('change', () => {configureView(); save();});
 function sync() {
  const label = timer.running ? t.pause : timer.elapsed(now()) > 0 ? t.resume : t.start;
  start.setAttribute('aria-label', label); start.title = label;
@@ -53,7 +70,7 @@ resetDialog.addEventListener('close', () => {
 });
 awake.addEventListener('change', () => {wake(awake.checked && timer.running); save();});
 document.addEventListener('storage-enabled', save);
-document.addEventListener('preferences-cleared', () => {awake.checked = false; wake(false);});
+document.addEventListener('preferences-cleared', () => {awake.checked = false; wake(false); view.value = 'digital'; view.dispatchEvent(new Event('change')); });
 let ownsFullscreen = false;
 function focus(enabled: boolean) {
  document.body.classList.toggle('focus-view', enabled);
@@ -78,5 +95,7 @@ document.addEventListener('keydown', e => {
 });
 window.addEventListener('beforeunload', e => {if (timer.running || timer.elapsed(now()) > 0 || timer.laps.length) {e.preventDefault();}});
 window.addEventListener('pageshow', sync);
-sync(); setInterval(() => {if (!document.hidden && timer.running) render();}, 30);
+configureView(); sync(); setInterval(() => {if (!document.hidden && timer.running) render();}, 30);
 document.addEventListener('visibilitychange', () => {if (!document.hidden) render();});
+
+enhanceStopwatchSelects(document.querySelector<HTMLElement>('.stopwatch-options')!);

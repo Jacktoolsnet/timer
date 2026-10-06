@@ -26,3 +26,43 @@ test('wake lock active only while running and privacy opt-in',async({page})=>{
  await page.locator('#palette-dropdown summary').click();await page.locator('#remember-preferences').check();expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('jacktools.stopwatch.settings.v1')!).awake)).toBe(true);
  await page.locator('#remember-preferences').uncheck();expect(await page.evaluate(()=>localStorage.length)).toBe(0);await expect(page.locator('#awake')).not.toBeChecked();
 });
+test('analog view keeps measurement and rounds, remembers view only with consent',async({page})=>{
+ await page.goto('/de/');await expect(page.locator('.stopwatch-options #awake')).toHaveAttribute('role','switch');
+ await page.locator('#stopwatch-view').selectOption('analog', {force:true});await expect(page.locator('#analog-stopwatch')).toBeVisible();
+ await page.locator('#toggle-timing').click();await page.waitForTimeout(200);await page.locator('#lap').click();await page.locator('#toggle-timing').click();
+ const elapsed=await page.locator('#elapsed').textContent();const hand=await page.locator('#stopwatch-second-hand').getAttribute('transform');expect(hand).not.toBe('rotate(0 160 160)');
+ await page.locator('#stopwatch-view').selectOption('digital', {force:true});await expect(page.locator('#analog-stopwatch')).toBeHidden();await expect(page.locator('#elapsed')).toHaveText(elapsed!);await expect(page.locator('#laps-body tr')).toHaveCount(1);
+ await page.locator('#stopwatch-view').selectOption('analog', {force:true});await expect(page.locator('#stopwatch-second-hand')).toHaveAttribute('transform',hand!);
+ await page.locator('#stopwatch-focus').click();await expect(page.locator('#analog-stopwatch')).toBeVisible();await expect(page.locator('.stopwatch-sidebar')).toBeHidden();await expect(page.locator('.stopwatch-card #laps-table')).toBeVisible();await expect(page.locator('#laps-body tr')).toHaveCount(1);await page.keyboard.press('Escape');
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ await page.locator('#palette-dropdown summary').click();await page.locator('#remember-preferences').check();expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('jacktools.stopwatch.settings.v1')!).view)).toBe('analog');
+ await page.locator('#remember-preferences').uncheck();await expect(page.locator('#stopwatch-view')).toHaveValue('digital');
+});
+
+test('styled view dropdown supports keyboard, selection and dismissal',async({page})=>{
+ await page.goto('/de/');const trigger=page.locator('#trigger-view');
+ await expect(trigger).toHaveAccessibleName('Ansicht Digital');await trigger.click();
+ await expect(page.getByRole('listbox')).toBeVisible();await expect(page.getByRole('option',{name:'Digital',exact:true})).toHaveAttribute('aria-selected','true');
+ await page.keyboard.press('ArrowDown');await page.keyboard.press('Enter');
+ await expect(trigger).toHaveAccessibleName('Ansicht Analog');await expect(trigger).toBeFocused();await expect(page.locator('#analog-stopwatch')).toBeVisible();await expect(page.getByRole('listbox')).toBeHidden();
+ await trigger.click();await page.keyboard.press('Escape');await expect(trigger).toBeFocused();await expect(trigger).toHaveAttribute('aria-expanded','false');
+ await trigger.click();await page.locator('h1').click();await expect(trigger).toHaveAttribute('aria-expanded','false');
+});
+
+test('focus laps follow screen width and orientation',async({page})=>{
+ await page.goto('/de/');await page.locator('#toggle-timing').click();await page.waitForTimeout(50);await page.locator('#lap').click();await page.locator('#toggle-timing').click();
+ // Focus layout also works without the optional fullscreen API.
+ await page.evaluate(()=>{document.documentElement.requestFullscreen=async()=>{throw new Error('not available');};});
+ await page.locator('#stopwatch-focus').click();
+ for(const [width,height,side] of [[1440,1000,true],[390,844,false],[844,390,true],[667,375,true]] as const){
+  await page.setViewportSize({width,height});
+  for(const view of ['digital','analog']){
+   await page.locator('#stopwatch-view').selectOption(view,{force:true});
+   const main=await page.locator('.stopwatch-main').boundingBox();const laps=await page.locator('.stopwatch-laps').boundingBox();
+   expect(main).not.toBeNull();expect(laps).not.toBeNull();
+   if(side)expect(laps!.x).toBeGreaterThanOrEqual(main!.x+main!.width);else expect(laps!.y).toBeGreaterThanOrEqual(main!.y+main!.height);
+   await expect(page.locator('#laps-table')).toBeVisible();
+   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  }
+ }
+});
