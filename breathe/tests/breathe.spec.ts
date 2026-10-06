@@ -55,3 +55,16 @@ test('sound switch plays an audible preview without a volume slider',async({page
  await page.locator('#sound').uncheck();
  await expect(page.locator('#audio-status')).toBeEmpty();
 });
+test('touch steppers support counts, decimal pace and zero holds',async({page})=>{
+ await page.goto('/de/');
+ const up=page.locator('[data-step-target="duration-0"][data-step-direction="1"]');
+ await up.click(); await expect(page.locator('#duration-0')).toHaveValue('5');
+ await page.locator('[data-step-target="count-seconds"][data-step-direction="1"]').click();
+ await expect(page.locator('#count-seconds')).toHaveValue('1.1');
+ await page.locator('#duration-1').fill('1'); await page.locator('#duration-1').dispatchEvent('change');
+ await page.locator('[data-step-target="duration-1"][data-step-direction="-1"]').click();
+ await expect(page.locator('#duration-1')).toHaveValue('0');
+ await page.locator('[data-step-target="duration-1"][data-step-direction="-1"]').click();
+ await expect(page.locator('#duration-1')).toHaveValue('0');
+ const box=await up.boundingBox(); expect(box!.width).toBeGreaterThanOrEqual(44); expect(box!.height).toBeGreaterThanOrEqual(44);
+});

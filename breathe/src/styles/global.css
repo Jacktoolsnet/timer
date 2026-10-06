@@ -791,3 +791,12 @@ body.focus-view .breath-instruction { margin-bottom:14px; }
 /* Long document headings must fit narrow screens and enlarged text. */
 .legal-page h1,.legal-page h2,.legal-page p,.legal-page li { overflow-wrap:anywhere; }
 .legal-page .legal-nav { flex-wrap:wrap; }
+
+/* Touch-friendly number controls; keep the native input for direct editing. */
+.number-stepper { display:grid; grid-template-columns:44px minmax(48px,1fr) 44px; gap:4px; align-items:center; min-width:0; }
+.number-stepper button { display:grid; place-items:center; min-width:44px; min-height:48px; padding:10px; border:1px solid var(--line); border-radius:10px; background:var(--accent-soft); color:var(--accent); }
+.number-stepper button svg { width:20px; height:20px; stroke-width:2; }
+#breath-form .number-stepper input { min-height:48px; padding:8px 2px; appearance:textfield; -moz-appearance:textfield; }
+.number-stepper input::-webkit-inner-spin-button,.number-stepper input::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
+.breath-duration-row { display:grid; gap:8px; margin:12px 0; }
+.breath-durations .breath-duration-row > label { display:block; margin:0; font-size:calc(12px * var(--font-scale)); }

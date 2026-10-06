@@ -46,7 +46,7 @@ const fr: typeof de = { ...en, title:'Un souffle. Un moment pour vous.', intro:'
  guide:'Une petite pause pour vous.', steps:['Installez-vous.','Suivez votre souffle.','Emportez ce calme.'], tips:['Relâchez les épaules et la mâchoire.','Le cercle grandit à l’inspiration et rétrécit à l’expiration. Ne forcez pas.','Commencez par une courte séance. Vous pouvez arrêter à tout moment.'], audioError:'Son indisponible. Le guide visuel continue.', source:'Conseils de respiration douce (NHS)', local:'Sans compte. Sans suivi. Dans votre navigateur.' };
 const safetyMessages = {
  de: {
-  safetyTitle:'Sanft atmen, in deinem Tempo', safetyLink:'Sicherheitshinweise', continueLabel:'Fortfahren', closeLabel:'Schließen', end:'Beenden', skipHold:'Haltephase überspringen',
+  decrease:'Verringern', increase:'Erhöhen', safetyTitle:'Sanft atmen, in deinem Tempo', safetyLink:'Sicherheitshinweise', continueLabel:'Fortfahren', closeLabel:'Schließen', end:'Beenden', skipHold:'Haltephase überspringen',
   firstHint:'Übe bequem sitzend oder liegend an einem sicheren Ort. Atme sanft und nur so tief, wie es angenehm ist. Der Rhythmus ist eine Orientierung – du musst den Countdown nicht einhalten. Verkürze oder überspringe Haltephasen, wenn sie unangenehm sind. Bei Schwindel, Atemnot oder Unwohlsein beende die Übung und atme in deinem normalen Rhythmus weiter.',
   safePlace:'Nicht beim Fahren, Bedienen von Maschinen, Schwimmen oder Baden verwenden. Breathe ist ein Entspannungstool und ersetzt keine medizinische Beratung oder Behandlung.',
   reminder:'Atme sanft. Beende die Übung, wenn du dich unwohl fühlst.',
@@ -63,7 +63,7 @@ const safetyMessages = {
   ],
  },
  en: {
-  safetyTitle:'Breathe gently, at your own pace', safetyLink:'Safety guidance', continueLabel:'Continue', closeLabel:'Close', end:'End session', skipHold:'Skip hold',
+  decrease:'Decrease', increase:'Increase', safetyTitle:'Breathe gently, at your own pace', safetyLink:'Safety guidance', continueLabel:'Continue', closeLabel:'Close', end:'End session', skipHold:'Skip hold',
   firstHint:'Practise sitting or lying comfortably in a safe place. Breathe gently and only as deeply as feels comfortable. The rhythm is a guide – you do not have to follow the countdown. Shorten or skip holds if they feel uncomfortable. If you feel dizzy, short of breath or unwell, end the exercise and return to your normal breathing rhythm.',
   safePlace:'Do not use while driving, operating machinery, swimming or bathing. Breathe is a relaxation tool, not a replacement for medical advice or treatment.',
   reminder:'Breathe gently. End the exercise if you feel unwell.',
@@ -80,7 +80,7 @@ const safetyMessages = {
   ],
  },
  es: {
-  safetyTitle:'Respira suavemente, a tu ritmo', safetyLink:'Consejos de seguridad', continueLabel:'Continuar', closeLabel:'Cerrar', end:'Terminar sesión', skipHold:'Omitir retención',
+  decrease:'Reducir', increase:'Aumentar', safetyTitle:'Respira suavemente, a tu ritmo', safetyLink:'Consejos de seguridad', continueLabel:'Continuar', closeLabel:'Cerrar', end:'Terminar sesión', skipHold:'Omitir retención',
   firstHint:'Practica sentado o tumbado cómodamente en un lugar seguro. Respira suavemente y solo tan profundo como te resulte cómodo. El ritmo es una guía: no tienes que seguir la cuenta atrás. Acorta u omite las retenciones si te resultan incómodas. Si sientes mareo, falta de aire o malestar, termina el ejercicio y vuelve a respirar a tu ritmo habitual.',
   safePlace:'No lo uses mientras conduces, manejas maquinaria, nadas o te bañas. Breathe es una herramienta de relajación y no sustituye el asesoramiento ni el tratamiento médico.',
   reminder:'Respira suavemente. Termina el ejercicio si te encuentras mal.',
@@ -97,7 +97,7 @@ const safetyMessages = {
   ],
  },
  fr: {
-  safetyTitle:'Respirez doucement, à votre rythme', safetyLink:'Conseils de sécurité', continueLabel:'Continuer', closeLabel:'Fermer', end:'Terminer la séance', skipHold:'Passer la retenue',
+  decrease:'Diminuer', increase:'Augmenter', safetyTitle:'Respirez doucement, à votre rythme', safetyLink:'Conseils de sécurité', continueLabel:'Continuer', closeLabel:'Fermer', end:'Terminer la séance', skipHold:'Passer la retenue',
   firstHint:'Pratiquez confortablement assis ou allongé dans un endroit sûr. Respirez doucement et seulement aussi profondément que cela reste agréable. Le rythme est un repère : vous n’avez pas à suivre le compte à rebours. Raccourcissez ou passez les retenues si elles sont inconfortables. En cas de vertige, d’essoufflement ou de malaise, arrêtez l’exercice et retrouvez votre rythme respiratoire habituel.',
   safePlace:'Ne l’utilisez pas en conduisant, en utilisant des machines, en nageant ou en prenant un bain. Breathe est un outil de relaxation et ne remplace ni un avis médical ni un traitement.',
   reminder:'Respirez doucement. Arrêtez l’exercice si vous vous sentez mal.',

@@ -292,3 +292,14 @@ document.addEventListener('storage-enabled',save);
 document.addEventListener('preferences-cleared',() => { try { localStorage.removeItem(KEY); } catch {} });
 reduced.addEventListener('change',e => { if (e.matches) { settings.motion=false; syncForm(); render(nowElapsed()); } });
 syncForm(); render();
+
+// Native stepping keeps min/max, decimal steps and keyboard editing consistent.
+document.querySelectorAll<HTMLButtonElement>('[data-step-target]').forEach(button => {
+ button.addEventListener('click',() => {
+  const field=input(button.dataset.stepTarget!);
+  if (!field.value || !Number.isFinite(field.valueAsNumber)) field.value=field.min || '0';
+  if(button.dataset.stepDirection === '1') field.stepUp(); else field.stepDown();
+  field.dispatchEvent(new Event('input',{bubbles:true}));
+  field.dispatchEvent(new Event('change',{bubbles:true}));
+ });
+});
