@@ -13,3 +13,11 @@ export function formatElapsed(ms: number) {
  const ticks = Math.floor(Math.max(0, ms) / 10);
  return [Math.floor(ticks / 360000), Math.floor(ticks / 6000) % 60, Math.floor(ticks / 100) % 60].map(n => String(n).padStart(2, '0')).join(':') + '.' + String(ticks % 100).padStart(2, '0');
 }
+
+/** Export captured laps oldest first, without changing or persisting measurements. */
+export function lapRows(laps: readonly {duration: number; elapsed: number}[], headings: readonly string[]): string[][] {
+ return [[...headings], ...laps.map((lap, index) => [String(index + 1), formatElapsed(lap.duration), formatElapsed(lap.elapsed)])];
+}
+export function lapsCsv(rows: readonly (readonly string[])[]): string {
+ return '\uFEFF' + rows.map(row => row.map(cell => '"' + cell.replaceAll('"', '""') + '"').join(',')).join('\r\n') + '\r\n';
+}

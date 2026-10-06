@@ -23,7 +23,9 @@ Options panel with view selector and keep-awake slide switch.
 Start, pause/resume, laps (individual and cumulative), confirmed reset while
 paused, focus/fullscreen and optional keep-awake while running. Timing uses
 wall-clock timestamps, not update counts; device clock changes can affect it.
-Measurements and laps are never persisted and are lost on navigation/reload.
+Captured laps can be copied as tab-separated text or downloaded as UTF-8 CSV
+(with BOM, quoted fields, chronological order and localized headings).
+Measurements and laps are never automatically persisted and are lost on navigation/reload.
 Appearance and wake preference are stored only with explicit storage consent.
 No backend, advertising, analytics, external fonts or external time service.
 Hosting/statistics/logging statements are copied from Clock unchanged.

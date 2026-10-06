@@ -1,5 +1,5 @@
 import {enhanceStopwatchSelects} from './stopwatch-selects';
-import {Stopwatch, formatElapsed} from '../lib/stopwatch';
+import {Stopwatch, formatElapsed, lapRows, lapsCsv} from '../lib/stopwatch';
 import {screenWakeLock} from '../lib/wake-lock';
 import {storageAllowed} from '../lib/storage';
 import {STORAGE_KEY} from '../lib/engine';
@@ -9,6 +9,8 @@ const timer = new Stopwatch();
 const start = $('toggle-timing') as HTMLButtonElement;
 const lap = $('lap') as HTMLButtonElement;
 const reset = $('reset-timing') as HTMLButtonElement;
+const copyLaps = $('copy-laps') as HTMLButtonElement;
+const exportLaps = $('export-laps') as HTMLButtonElement;
 const awake = $('awake') as HTMLInputElement;
 const view = $('stopwatch-view') as HTMLSelectElement;
 const wake = screenWakeLock($('wake-status'), '', t.unavailable);
@@ -18,7 +20,7 @@ const now = () => Date.now();
 try { if (storageAllowed()) {
  const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
  awake.checked = saved?.awake === true;
- if (saved?.view === 'analog') view.value = 'analog';
+ if (saved?.view === 'analog' || saved?.view === 'digital') view.value = saved.view;
 } } catch {}
 function save() {
  if (!storageAllowed()) return;
@@ -42,6 +44,7 @@ function sync() {
  start.setAttribute('aria-label', label); start.title = label;
  $('play-symbol').hidden = timer.running; $('pause-symbol').hidden = !timer.running;
  start.disabled = false; lap.disabled = !timer.running;
+ copyLaps.disabled = exportLaps.disabled = timer.laps.length === 0;
  reset.disabled = timer.running || (timer.elapsed(now()) === 0 && !timer.laps.length);
  $('measurement-status').textContent = timer.running ? t.running : timer.elapsed(now()) > 0 ? t.paused : t.ready;
  wake(awake.checked && timer.running); render();
@@ -54,6 +57,7 @@ function capture() {
  const cell = document.createElement('td'); cell.textContent = value; row.append(cell);
  }
  $('laps-body').prepend(row); $('laps-table').hidden = false; $('empty-laps').hidden = true;
+ copyLaps.disabled = exportLaps.disabled = false; $('export-status').textContent = '';
  $('lap-status').textContent = `${t.lap} ${timer.laps.length}: ${formatElapsed(item.duration)}`;
 }
 start.addEventListener('click', toggle); lap.addEventListener('click', capture);
@@ -64,13 +68,13 @@ reset.addEventListener('click', () => {
 });
 resetDialog.addEventListener('close', () => {
  if (resetDialog.returnValue !== 'reset' || timer.running) return;
- timer.reset(); $('laps-body').replaceChildren(); $('laps-table').hidden = true; $('empty-laps').hidden = false; $('lap-status').textContent = ''; sync();
+ timer.reset(); $('laps-body').replaceChildren(); $('laps-table').hidden = true; $('empty-laps').hidden = false; $('lap-status').textContent = ''; $('export-status').textContent = ''; sync();
  // The reset button is disabled after clearing; return focus to the next action.
  start.focus();
 });
 awake.addEventListener('change', () => {wake(awake.checked && timer.running); save();});
 document.addEventListener('storage-enabled', save);
-document.addEventListener('preferences-cleared', () => {awake.checked = false; wake(false); view.value = 'digital'; view.dispatchEvent(new Event('change')); });
+document.addEventListener('preferences-cleared', () => {awake.checked = false; wake(false); view.value = 'analog'; view.dispatchEvent(new Event('change')); });
 let ownsFullscreen = false;
 function focus(enabled: boolean) {
  document.body.classList.toggle('focus-view', enabled);
@@ -99,3 +103,22 @@ configureView(); sync(); setInterval(() => {if (!document.hidden && timer.runnin
 document.addEventListener('visibilitychange', () => {if (!document.hidden) render();});
 
 enhanceStopwatchSelects(document.querySelector<HTMLElement>('.stopwatch-options')!);
+
+function exportRows() {return lapRows(timer.laps, [t.lap, t.duration, t.total]);}
+copyLaps.addEventListener('click', async () => {
+ if (!timer.laps.length) return;
+ const snapshot = timer.laps;
+ try {
+ await navigator.clipboard.writeText(exportRows().map(row => row.join('\t')).join('\n'));
+ if (timer.laps === snapshot) $('export-status').textContent = t.copied;
+ } catch {if (timer.laps === snapshot) $('export-status').textContent = t.copyError;}
+});
+exportLaps.addEventListener('click', () => {
+ if (!timer.laps.length) return;
+ const blob = new Blob([lapsCsv(exportRows())], {type:'text/csv;charset=utf-8'});
+ const url = URL.createObjectURL(blob);
+ const link = document.createElement('a'); link.href = url; link.download = 'jacktools-stopwatch-' + new Date().toISOString().replaceAll(':','-').slice(0,19) + '.csv';
+ document.body.append(link); link.click(); link.remove();
+ setTimeout(() => URL.revokeObjectURL(url), 10000);
+ $('export-status').textContent = t.exported;
+});

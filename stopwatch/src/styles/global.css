@@ -832,3 +832,5 @@ body.focus-view .stopwatch-main #stopwatch-display[data-view=analog] .stopwatch-
 }
 
 .support-actions a.support-coffee{background:var(--accent);color:var(--surface);border-color:var(--accent);font-weight:650;min-height:50px;box-shadow:0 4px 14px color-mix(in srgb,var(--accent) 20%,transparent)}.support-actions a.support-coffee:hover{background:var(--accent);border-color:var(--accent);filter:brightness(.94)}[data-theme=dark] .support-actions a.support-coffee{color:#24241f}
+
+.laps-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.laps-heading h2{margin:0}.laps-actions{display:flex;gap:8px;flex-shrink:0}.laps-actions button{width:40px;min-height:40px;padding:8px}.laps-actions svg{width:18px;height:18px}.lap-panel .export-status{font-size:12px;color:var(--accent);line-height:1.5;margin:10px 0 0}.export-status:empty{display:none}
