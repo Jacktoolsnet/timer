@@ -508,7 +508,7 @@ test('training labels wrap while number fields stay in the right column', async 
   await page.evaluate(() => { document.documentElement.dataset.fontSize = '3'; });
   const countdown = page.locator('#training-form input[name=countdown]');
   const previous = page.locator('#training-form input[name=rounds]');
-  const text = page.locator('#training-form label').filter({ has:page.locator("input[name=countdown]") }).locator('.training-field-label');
+  const text = page.locator('#training-form .training-field-label[for="countdown"]');
   const inputBox = await countdown.boundingBox();
   const previousBox = await previous.boundingBox();
   const textBox = await text.boundingBox();

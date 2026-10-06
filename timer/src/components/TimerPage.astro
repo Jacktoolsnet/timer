@@ -3,6 +3,7 @@ import { trainingText } from '../lib/training';
 import Layout from '../layouts/Layout.astro';
 import { getDictionary, type Language } from '../lib/i18n';
 import TimerNavigation from './TimerNavigation.astro';
+import NumberStepper from './NumberStepper.astro';
 import type { Mode } from '../lib/engine';
 interface Props { lang: Language; mode: Mode }
 const { lang, mode } = Astro.props;
@@ -53,7 +54,7 @@ const isPomo = mode === 'pomodoro';
       <aside class="settings-card">
         <div class="settings-heading"><span class="settings-icon">✳</span><h2>{t.settings}</h2><p>{t.settingsIntro}</p></div>
         <form id="settings-form">
-          {!isPomo ? <fieldset><legend>{t.duration}</legend><div class="duration-inputs"><label>{t.hours}<input name="hours" type="number" value="0" min="0" max="99" step="1" required /></label><span>:</span><label>{t.mins}<input name="minutes" type="number" value="5" min="0" max="59" step="1" required /></label><span>:</span><label>{t.seconds}<input name="seconds" type="number" value="0" min="0" max="59" step="1" required /></label></div></fieldset> : <div class="pomo-inputs">{[['focus',t.focusMinutes,25,180],['short',t.shortMinutes,5,60],['long',t.longMinutes,15,120],['rounds',t.rounds,4,12]].map(([name,label,value,max]) => <label>{label}<input name={String(name)} type="number" min="1" max={max} step="1" value={value} required /></label>)}</div>}
+          {!isPomo ? <fieldset><legend>{t.duration}</legend><div class="duration-inputs"><div class="number-field"><label for="hours">{t.hours}</label><NumberStepper id="hours" name="hours" label={t.hours} min={0} max={99} step={1} value={0} lang={lang}/></div><span>:</span><div class="number-field"><label for="minutes">{t.mins}</label><NumberStepper id="minutes" name="minutes" label={t.mins} min={0} max={59} step={1} value={5} lang={lang}/></div><span>:</span><div class="number-field"><label for="seconds">{t.seconds}</label><NumberStepper id="seconds" name="seconds" label={t.seconds} min={0} max={59} step={1} value={0} lang={lang}/></div></div></fieldset> : <div class="pomo-inputs">{[['focus',t.focusMinutes,25,180],['short',t.shortMinutes,5,60],['long',t.longMinutes,15,120],['rounds',t.rounds,4,12]].map(([name,label,value,max]) => <div class="number-field"><label for={String(name)}>{label}</label><NumberStepper id={String(name)} name={String(name)} label={String(label)} min={1} max={Number(max)} step={1} value={Number(value)} lang={lang}/></div>)}</div>}
           <div class="settings-divider"></div>
 
           <label class="toggle-row"><span><strong>{t.sound}</strong><small>{t.soundHint}</small></span><input name="sound" type="checkbox" checked /><span class="toggle" aria-hidden="true"></span></label>

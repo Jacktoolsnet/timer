@@ -1,5 +1,6 @@
 ---
 import TimerNavigation from '../../components/TimerNavigation.astro';
+import NumberStepper from '../../components/NumberStepper.astro';
 import { trainingGuide } from '../../lib/training-guide';
 import Layout from '../../layouts/Layout.astro';
 import { languages, getDictionary } from '../../lib/i18n';
@@ -26,7 +27,7 @@ const {lang} = Astro.props; const t = getDictionary(lang); const x = trainingTex
 </div>
 </section>
 <aside class="settings-card"><h2>{t.settings}</h2><form id="training-form"><div class="pomo-inputs">
-{(['preparation','work','rest','rounds','countdown'] as const).map(key => <label><span class="training-field-label">{x[key]}</span><input name={key} type="number" required step="1" min={key === 'work' || key === 'rounds' ? 1 : 0} max={key === 'rounds' ? 100 : key === 'countdown' ? 10 : 3600} value={trainingDefaults[key]} /></label>)}
+{(['preparation','work','rest','rounds','countdown'] as const).map(key => <div class="number-field"><label class="training-field-label" for={key}>{x[key]}</label><NumberStepper id={key} name={key} label={x[key]} min={key === 'work' || key === 'rounds' ? 1 : 0} max={key === 'rounds' ? 100 : key === 'countdown' ? 10 : 3600} step={1} value={trainingDefaults[key]} lang={lang}/></div>)}
 </div>
 {(['halfway','sound','awake'] as const).map(key => <label class="toggle-row"><span><strong>{x[key]}</strong></span><input name={key} type="checkbox" role="switch" checked /><span class="toggle" aria-hidden="true"></span></label>)}
 <button class="apply-button" type="submit">{t.apply}</button><p class="form-hint">{t.settingsResetHint}</p><p id="training-settings-status" role="status"></p></form></aside>

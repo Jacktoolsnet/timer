@@ -144,3 +144,14 @@ remember.addEventListener('change', () => {
     document.querySelector('#storage-status')!.textContent = document.querySelector<HTMLElement>('#clear-storage')!.dataset.error!;
   }
 });
+
+// Keep native validation and stepping while providing larger touch targets.
+document.querySelectorAll<HTMLButtonElement>('[data-step-target]').forEach(button => {
+ button.addEventListener('click',() => {
+  const field=document.getElementById(button.dataset.stepTarget!) as HTMLInputElement;
+  if (!field.value || !Number.isFinite(field.valueAsNumber)) field.value=field.min || '0';
+  if(button.dataset.stepDirection === '1') field.stepUp(); else field.stepDown();
+  field.dispatchEvent(new Event('input',{bubbles:true}));
+  field.dispatchEvent(new Event('change',{bubbles:true}));
+ });
+});
