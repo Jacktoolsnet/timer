@@ -22,7 +22,7 @@ async function syncWake() {
     if (!navigator.wakeLock) throw new Error('unsupported');
     const lock = await navigator.wakeLock.request('screen');
     if (!settings.awake || deadline === null || document.visibilityState !== 'visible') { await lock.release(); return; }
-    wake = lock; el('wake-status').textContent = t.active;
+    wake = lock; el('wake-status').textContent = '';
     lock.addEventListener('release', () => { if (wake === lock) { wake = null; el('wake-status').textContent = deadline !== null ? t.unavailable : ''; } });
   } catch { el('wake-status').textContent = t.unavailable; } finally { requesting = false; }
 }

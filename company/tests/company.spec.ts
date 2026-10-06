@@ -6,7 +6,8 @@ test('homepage, preferences, opt-in and legal links', async ({ page }) => {
   await expect(page.locator('h1')).toContainText('Möglichkeiten');
   await expect(page.locator('html')).toHaveAttribute('data-palette', 'green');
   await expect(page.locator('html')).toHaveAttribute('data-style', 'technical');
-  await expect(page.locator('.message-art img')).toHaveAttribute('src', '/messagedrop-icon.png');
+  await expect(page.locator('.message-art .message-marker')).toHaveCount(3);
+  await expect(page.locator('.marker-message')).toHaveAttribute('src', '/markers/message-marker.svg');
   await expect(page.locator('.brand-icon img')).toHaveAttribute('src', '/jacktools-icon.png');
   await expect(page.locator('link[rel=icon]')).toHaveAttribute('href', '/jacktools-icon.png');
   await expect(page.getByRole('link', { name: 'Timer öffnen' })).toHaveAttribute('href', 'https://timer.jacktools.net/de/');
@@ -49,4 +50,27 @@ test('settings keyboard and non-persisted appearance', async ({ page }) => {
   await page.locator('#theme').click();
   await page.reload();
   await expect(page.locator('html')).not.toHaveAttribute('data-theme', 'dark');
+});
+
+ test('timer and clock cards stack preview above copy', async ({ page }) => {
+  await page.goto('/');
+  for (const card of await page.locator('.timer-feature').all()) {
+    const preview = await card.locator('.timer-preview').boundingBox();
+    const copy = await card.locator('.product-copy').boundingBox();
+    expect(preview).not.toBeNull();
+    expect(copy).not.toBeNull();
+    expect(preview!.y + preview!.height).toBeLessThanOrEqual(copy!.y + 1);
+  }
+});
+
+test('timer and clock are adjacent on desktop and stacked on mobile', async ({ page }) => {
+  await page.goto('/');
+  const timer = await page.locator('.time-tools-grid > .timer-feature').nth(0).boundingBox();
+  const clock = await page.locator('.clock-feature').boundingBox();
+  if (page.viewportSize()!.width > 760) {
+    expect(Math.abs(timer!.y - clock!.y)).toBeLessThan(1);
+    expect(clock!.x).toBeGreaterThanOrEqual(timer!.x + timer!.width);
+  } else {
+    expect(clock!.y).toBeGreaterThanOrEqual(timer!.y + timer!.height);
+  }
 });

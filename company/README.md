@@ -22,7 +22,7 @@ npm run dev
 - Deutschsprachige Startseite mit Timer, MessageDrop und einem Platzhalter für weitere Tools.
 - Acht Farben, vier Stile, Hell/Dunkel und Schriftgröße 100–130 %.
 - Standard: Grün und Technisch; gespeicherte Benutzereinstellungen haben Vorrang.
-- MessageDrop-Grafik von https://messagedrop.de/icons/icon-512x512.png lokal eingebunden.
+- Stilisierte SVG-Karte mit Designfarben und drei Original-Markern aus dem MessageDrop-Frontend (`public/markers/`).
 - Originales Jacktools-Icon von jacktools.net lokal als PNG eingebunden (Header und Favicon).
 - Speicherung nur nach aktiver Auswahl; eigene `jacktools.company.*`-Schlüssel.
 - Keine externen Fonts, eingebetteten Drittanbieterinhalte oder Analytics.

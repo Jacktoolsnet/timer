@@ -646,3 +646,9 @@ body.focus-view .card-top { position: absolute; top: 12px; right: 12px; z-index:
   body.focus-view .focus-details .phase-summary { justify-content: center; }
   body.focus-view .card-top { top: max(12px, env(safe-area-inset-top)); right: 12px; }
 }
+
+/* Wrap training labels without moving their right-aligned number fields. */
+#training-form .pomo-inputs label { display:grid; grid-template-columns:minmax(0,1fr) 67px; align-items:center; gap:12px; }
+#training-form .training-field-label { min-width:0; overflow-wrap:anywhere; }
+#training-form .pomo-inputs input { width:100%; min-width:0; }
+@media(max-width:680px) { #training-form .pomo-inputs label { grid-template-columns:minmax(0,1fr) 80px; } }

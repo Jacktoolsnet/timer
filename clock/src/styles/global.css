@@ -784,3 +784,6 @@ body.focus-view .card-top { position: absolute; top: 12px; right: 12px; z-index:
     margin-top: clamp(16px, 5dvh, 26px);
   }
 }
+
+/* Tall portrait screens must not grow the dial beyond its card's inner width. */
+body.focus-view #analog-clock { max-width:100%; min-width:0; }

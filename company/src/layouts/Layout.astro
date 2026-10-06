@@ -7,7 +7,7 @@ interface Props { lang: Language; title: string; description: string; route: str
 const { lang, title, description, noindex = false, legal = false } = Astro.props;
 const t = { ...getDictionary(lang),
   supportTitle: 'Kleine Tools. Gemeinsam möglich.',
-  supportBody: 'Du magst unsere Projekte? Mit einem Kaffee kannst du unsere Arbeit unterstützen. Oder entdecke MessageDrop.',
+  supportBody: 'Du magst unsere Projekte? Mit einem Kaffee kannst du unsere Arbeit unterstützen.',
   rememberHint: 'Optional: Farbe, Stil, Hell-/Dunkelmodus und Schriftgröße in diesem Browser für spätere Besuche speichern. Keine Übertragung an uns. Ausschalten oder lokale Einstellungen löschen entfernt die Daten. Ohne Auswahl gelten Änderungen nur auf der aktuellen Seite.',
   privacyBody: 'Diese Homepage verwendet keine Analyse- oder Trackingskripte. Dauerhaftes Speichern deiner Anzeigeeinstellungen ist optional und standardmäßig ausgeschaltet. Sie werden nicht an uns gesendet.',
   privacyNote: 'Hier kannst du die lokal gespeicherten Einstellungen dieser Homepage löschen. Die Einstellungen des Timers bleiben davon unberührt.',
@@ -100,8 +100,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
         <section class="support-section" aria-labelledby="support-title">
           <div><h2 id="support-title">{t.supportTitle}</h2><p>{t.supportBody}</p></div>
           <div class="support-actions">
-            <a href="https://buymeacoffee.com/jacktoolsnet" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer"><span aria-hidden="true">☕</span>{t.supportCoffee}<span aria-hidden="true">↗</span></a>
-            <a href="https://app.messagedrop.de" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">{t.supportVisit}<span aria-hidden="true">↗</span></a>
+            <a class="support-coffee" href="https://buymeacoffee.com/jacktoolsnet" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer"><span aria-hidden="true">☕</span>{t.supportCoffee}<span aria-hidden="true">↗</span></a>
           </div>
         </section>
         <div><a class="footer-brand" href={'/'}>jacktools.net</a><p>{t.footer}</p></div>

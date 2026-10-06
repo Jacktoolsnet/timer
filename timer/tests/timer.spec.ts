@@ -501,3 +501,18 @@ test('all timers fit landscape focus view with controls beside the clock', async
     await expect(page.locator('.site-header')).toBeVisible();
   }
 });
+
+test('training labels wrap while number fields stay in the right column', async ({ page }) => {
+  await page.setViewportSize({ width:320, height:740 });
+  await page.goto('/de/training/');
+  await page.evaluate(() => { document.documentElement.dataset.fontSize = '3'; });
+  const countdown = page.locator('#training-form input[name=countdown]');
+  const previous = page.locator('#training-form input[name=rounds]');
+  const text = page.locator('#training-form label').filter({ has:page.locator("input[name=countdown]") }).locator('.training-field-label');
+  const inputBox = await countdown.boundingBox();
+  const previousBox = await previous.boundingBox();
+  const textBox = await text.boundingBox();
+  expect(Math.abs(inputBox!.x - previousBox!.x)).toBeLessThan(1);
+  expect(inputBox!.x).toBeGreaterThanOrEqual(textBox!.x + textBox!.width);
+  expect(inputBox!.y).toBeLessThan(textBox!.y + textBox!.height);
+});
