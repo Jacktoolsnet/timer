@@ -1,11 +1,42 @@
 ---
 import Layout from '../layouts/Layout.astro';
+const spotlights = [
+ {id:'timer',name:'Timer',title:'Zeit für das Wesentliche.',lead:'Eine konzentrierte Arbeitseinheit, eine bewusste Pause oder dein nächstes Training: Der Timer hilft dir, deinen eigenen Rhythmus zu finden.',url:'https://timer.jacktools.net/de/',action:'Direkt zum Timer',caption:'Fokus und Pausen',value:'25:00',note:'Eine Sache nach der anderen.'},
+ {id:'clock',name:'Uhr',title:'Deine Zeit. Auf einen Blick.',lead:'Analog, digital oder mit Klappzahlen: Gestalte deine Uhr so, wie sie zu deinem Alltag passt – mit Datum, Zeitzonen und Fokusansicht.',url:'https://clock.jacktools.net/de/',action:'Direkt zur Uhr',caption:'Uhrzeit und Datum',value:'10:24',note:'Deine Uhr. Dein Stil.'},
+ {id:'stopwatch',name:'Stoppuhr',title:'Jeder Moment zählt.',lead:'Behalte verstrichene Zeit und Runden im Blick. Eine übersichtliche Stoppuhr für deine kleinen und großen Vorhaben, direkt im Browser.',url:'https://stopwatch.jacktools.net/de/',action:'Direkt zur Stoppuhr',caption:'Zeit im Blick',value:'01:24.36',note:'Starten. Stoppen. Überblick behalten.'},
+ {id:'breathe',name:'Breathe',title:'Ein Atemzug. Ein Moment für dich.',lead:'Nimm dir eine ruhige Pause. Breathe begleitet dich mit einstellbaren Atemmustern, einer sanften Kreisanimation und optionalen Atemgeräuschen – ohne Druck.',url:'https://breathe.jacktools.net/de/',action:'Direkt zu Breathe',caption:'Dein Atem. Dein Tempo.',value:'4',note:'Atme sanft und so, wie es angenehm ist.'},
+ {id:'message',name:'MessageDrop',title:'Die Welt hat etwas zu erzählen.',lead:'Hinterlasse Nachrichten an realen Orten auf einer globalen Karte und entdecke, was andere dort teilen. Raum für Nachrichten, Bilder und neue Perspektiven.',url:'https://app.messagedrop.de',action:'Direkt zu MessageDrop',caption:'Orte und Nachrichten',value:'MessageDrop',note:'Nachrichten, die ihren Platz finden.'},
+];
 ---
-<Layout lang="de" title="Kleine Tools. Mehr Möglichkeiten." description="Entdecke Jacktools: Timer für Fokus und Training, eine anpassbare Online-Uhr, MessageDrop für Nachrichten auf der Weltkarte und neue Ideen für deinen Alltag." route="">
-  <section class="company-hero">
+<Layout lang="de" title="Kleine Tools. Mehr Möglichkeiten." description="Entdecke Jacktools: Timer für Fokus und Training, eine anpassbare Online-Uhr, Breathe für ruhige Atempausen, MessageDrop für Nachrichten auf der Weltkarte und neue Ideen für deinen Alltag." route="">
+  <section class="company-hero" id="company-spotlight" data-tool="timer">
     <div class="hero-copy"><p class="eyebrow">KLEINE TOOLS. GROSSE IDEEN.</p><h1>Weniger Ablenkung.<br />Mehr <em>Möglichkeiten.</em></h1><p class="hero-lead">Ein guter Helfer muss nicht kompliziert sein. Entdecke Tools für konzentrierte Momente, neue Routinen und Nachrichten, die ihren Platz in der Welt finden.</p><div class="hero-actions"><a class="primary" href="#tools">Unsere Tools entdecken <span aria-hidden="true">↓</span></a><a class="text-link" href="https://timer.jacktools.net/de/" rel="noreferrer">Direkt zum Timer ↗</a></div><p class="hero-note">Für deinen Browser gemacht. In deinem Stil gestaltet.</p></div>
     <div class="hero-art" aria-label="Illustration: Zeit für das Wesentliche"><span class="orbit orbit-one"></span><span class="orbit orbit-two"></span><div class="art-label">EIN MOMENT FÜR DICH</div><div class="preview-clock"><span>FOKUS</span><strong>25:00</strong><span>Eine Sache nach der anderen.</span></div><span class="floating-label label-focus">◷ Zeit für Fokus</span><span class="floating-label label-message">↗ Raum für Ideen</span><p class="art-footnote">Weniger ist manchmal genau richtig.</p></div>
   </section>
+  {spotlights.map(tool=><template data-spotlight={tool.id}>
+    <div class="hero-copy"><p class="eyebrow">IM SPOTLIGHT · {tool.name.toUpperCase()}</p><h1>{tool.title}</h1><p class="hero-lead">{tool.lead}</p><div class="hero-actions"><a class="primary" href="#tools">Unsere Tools entdecken <span aria-hidden="true">↓</span></a><a class="text-link" href={tool.url} rel="noreferrer">{tool.action} ↗</a></div><p class="hero-note">Für deinen Browser gemacht. In deinem Stil gestaltet.</p></div>
+    <div class:list={['hero-art','spotlight-art','spotlight-'+tool.id]} role="img" aria-label={'Statische Vorschau: '+tool.name}>
+      <span class="orbit orbit-one" aria-hidden="true"></span><span class="orbit orbit-two" aria-hidden="true"></span>
+      <div class="art-label">{tool.caption}</div>
+      {tool.id === 'breathe' ? <div class="spotlight-breathe-scene" aria-hidden="true"><div class="company-breathe-scene"><svg viewBox="0 0 100 100" class="company-breathe-ring"><circle cx="50" cy="50" r="48"/><circle class="company-breathe-progress" cx="50" cy="50" r="48" pathLength="100"/></svg><div class="company-breathe-circle"></div><div class="company-breathe-tile"><span>Einatmen</span><strong>4</strong></div></div></div> : tool.id === 'clock' ? <div class="spotlight-clock-scene" aria-hidden="true"><svg viewBox="0 0 240 240" class="company-clock-dial"><circle cx="120" cy="120" r="110"/>{Array.from({length:60},(_,i)=><path d={i%5===0?'M120 20v10':'M120 16v4'} transform={'rotate('+i*6+' 120 120)'} class={i%5===0?'spotlight-hour-mark':'spotlight-minute-mark'}/>)}{Array.from({length:12},(_,i)=>{const n=i+1,a=n*Math.PI/6;return <text x={120+80*Math.sin(a)} y={120-80*Math.cos(a)} class="spotlight-clock-number">{n}</text>})}<path class="company-hour-hand" d="M120 120 78 87"/><path class="company-minute-hand" d="M120 120 163 179"/><circle class="company-clock-hub" cx="120" cy="120" r="4"/></svg></div> : tool.id === 'message' ? <div class="spotlight-message-scene" aria-hidden="true"><img src="/markers/message-marker.svg" width="64" height="80" alt=""/><strong>MessageDrop</strong><span>Ein Ort. Eine Nachricht.</span></div> : <div class="preview-clock" aria-hidden="true"><span>{tool.name}</span><strong>{tool.value}</strong><span>{tool.id === 'timer' ? 'Fokuszeit' : tool.id === 'clock' ? 'Deine Zeit. Dein Stil.' : 'Verstrichene Zeit'}</span></div>}
+      <p class="art-footnote">{tool.note}</p>
+    </div>
+  </template>)}
+  <script is:inline>
+    (() => {
+      const hero = document.getElementById('company-spotlight');
+      const variants = Array.from(document.querySelectorAll('template[data-spotlight]'));
+      function selectSpotlight() {
+        if (!hero || !variants.length) return;
+        const choice = variants[Math.floor(Math.random() * variants.length)];
+        hero.replaceChildren(choice.content.cloneNode(true));
+        hero.dataset.tool = choice.dataset.spotlight;
+      }
+      // Choose while parsing, before the hero is first painted. No persistent storage.
+      selectSpotlight();
+      window.addEventListener('pageshow', event => { if (event.persisted) selectSpotlight(); });
+    })();
+  </script>
   <section class="tools-section" id="tools" aria-labelledby="tools-heading"><div class="section-heading"><div><p class="eyebrow">DIE JACKTOOLS.NET-FAMILIE</p><h2 id="tools-heading">Dein Alltag. Deine Helfer.</h2></div><p>Eine kleine Sammlung mit Raum zum Wachsen.</p></div>
     <div class="product-grid time-tools-grid">
     <article class="product-card timer-feature"><div class="product-copy"><span class="product-tag">ZEIT & FOKUS</span><h3>Mach Zeit für das,<br />was dir wichtig ist.</h3><p>Ein Timer, der sich nach dir richtet. Für eine konzentrierte Arbeitseinheit, eine bewusste Pause oder dein nächstes Training.</p><ul class="feature-list"><li>Countdown für kleine und große Vorhaben</li><li>Pomodoro für Fokus und regelmäßige Pausen</li><li>Trainingstimer für deine Intervalle</li></ul><a class="primary tool-open" href="https://timer.jacktools.net/de/" rel="noreferrer">Timer öffnen <span aria-hidden="true">↗</span></a><p class="product-note">Kostenlos · ohne Benutzerkonto · direkt im Browser</p></div><div class="timer-preview" aria-label="Statische Vorschau des Timers"><div class="preview-tabs"><span>Countdown</span><span class="active">Pomodoro</span><span>Training</span></div><div class="small-clock"><span>FOKUSZEIT</span><strong>25:00</strong><span>Runde 1 von 4</span></div><span class="preview-action" aria-hidden="true">▷ Bereit, wenn du es bist.</span><p>Deine Zeit. Dein Rhythmus.</p></div></article>
@@ -15,6 +46,14 @@ import Layout from '../layouts/Layout.astro';
         <div class="preview-tabs" aria-hidden="true"><span class="active">Analog</span><span>Digital</span><span>Klappzahlen</span></div>
         <div class="company-clock-scene" aria-hidden="true"><svg viewBox="0 0 240 240" class="company-clock-dial"><circle cx="120" cy="120" r="110"/>{Array.from({length:12},(_,i)=><path d="M120 20v8" transform={'rotate('+i*30+' 120 120)'}/>)}<path class="company-hour-hand" d="M120 120 84 96"/><path class="company-minute-hand" d="M120 120 165 60"/><circle class="company-clock-hub" cx="120" cy="120" r="4"/></svg><div class="company-calendar"><span>OKTOBER</span><strong>05</strong><small>Montag · 2026</small></div></div>
         <p>Deine Uhr. Dein Stil.</p>
+      </div>
+    </article>
+    <article class="product-card timer-feature breathe-feature">
+      <div class="product-copy"><span class="product-tag">ATEM & RUHE</span><h3>Ein Atemzug.<br />Ein Moment für dich.</h3><p>Breathe begleitet deine ruhige Pause mit einem sanften Atemrhythmus. Folge dem wachsenden und schrumpfenden Kreis – in deinem Tempo und ohne Druck.</p><ul class="feature-list"><li>Quadratatmen, 4–7–8 und weitere einstellbare Atemmuster</li><li>Optionales Atemrauschen und sanfte Phasensignale</li><li>Fokusansicht, Vollbild und optionales Bildschirm-Wachhalten</li></ul><a class="primary tool-open" href="https://breathe.jacktools.net/de/" rel="noreferrer">Breathe öffnen <span aria-hidden="true">↗</span></a><p class="product-note">Kostenlos · ohne Benutzerkonto · direkt im Browser</p><p class="breathe-product-hint">Atme nur so, wie es angenehm ist. Ein Entspannungstool, kein medizinisches Angebot.</p></div>
+      <div class="timer-preview breathe-preview" role="img" aria-label="Statische Vorschau von Breathe: Verlaufskreis mit Atemphase und äußerem Fortschrittsring">
+        <div class="preview-tabs" aria-hidden="true"><span class="active">Quadratatmen</span><span>4–7–8</span><span>Dein Rhythmus</span></div>
+        <div class="company-breathe-scene" aria-hidden="true"><svg viewBox="0 0 100 100" class="company-breathe-ring"><circle cx="50" cy="50" r="48"/><circle class="company-breathe-progress" cx="50" cy="50" r="48" pathLength="100"/></svg><div class="company-breathe-circle"></div><div class="company-breathe-tile"><span>Einatmen</span><strong>4</strong></div></div>
+        <p>Dein Atem. Dein Tempo.</p>
       </div>
     </article>
     </div>

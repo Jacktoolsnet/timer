@@ -43,3 +43,38 @@ html{scroll-behavior:smooth;scroll-padding-top:30px}.header-tools{display:flex;a
 .support-actions .support-coffee { background:var(--accent); color:var(--bg); border-color:var(--accent); min-height:54px; padding:16px 24px; font-size:calc(14px * var(--font-scale)); font-weight:650; box-shadow:0 6px 18px color-mix(in srgb,var(--accent) 22%,transparent); }
 .support-actions .support-coffee:hover { background:var(--accent); border-color:var(--accent); filter:brightness(.92); }
 .support-coffee > span:first-child { font-size:22px; }
+
+/* Breathe gets a quiet, palette-aware preview alongside the time tools. */
+.time-tools-grid > .breathe-feature { grid-column:1 / -1; grid-template-columns:minmax(0,1fr) minmax(0,1fr); grid-template-rows:auto; }
+.breathe-feature > .timer-preview { grid-column:1; grid-row:1; }
+.breathe-feature > .product-copy { grid-column:2; grid-row:1; }
+.company-breathe-scene { width:min(100%,280px); aspect-ratio:1; position:relative; display:grid; place-items:center; }
+.company-breathe-ring { position:absolute; inset:0; width:100%; height:100%; transform:rotate(-90deg); fill:none; stroke:var(--track); stroke-width:1.5; }
+.company-breathe-progress { stroke:var(--accent); stroke-dasharray:100; stroke-dashoffset:72; }
+.company-breathe-circle { position:absolute; inset:16%; border-radius:50%; background:radial-gradient(circle at 30% 25%,var(--accent-soft),color-mix(in srgb,var(--accent) 65%,var(--surface)) 55%,var(--accent)); box-shadow:0 0 35px color-mix(in srgb,var(--accent) 12%,transparent); }
+.company-breathe-tile { z-index:1; width:80px; height:80px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; border-radius:16px; background:color-mix(in srgb,var(--surface) 88%,transparent); color:var(--text); }
+.company-breathe-tile span { font-size:11px; }
+.company-breathe-tile strong { font-size:34px; font-weight:500; line-height:1; }
+.product-copy .breathe-product-hint { font-size:calc(11px * var(--font-scale)); text-align:center; line-height:1.7; }
+@media(max-width:760px) {
+ .time-tools-grid > .breathe-feature { grid-template-columns:minmax(0,1fr); }
+ .breathe-feature > .timer-preview { grid-column:1; grid-row:1; }
+ .breathe-feature > .product-copy { grid-column:1; grid-row:2; }
+}
+@media(max-width:400px) { .hero-art .orbit { max-width:100%; height:auto; aspect-ratio:1; } }
+
+/* Random spotlights retain the same geometry and selected appearance. */
+.spotlight-art .art-label { max-width:90%; text-align:center; }
+.spotlight-art .preview-clock strong { font-size:calc(clamp(28px,4vw,48px) * var(--font-scale)); }
+.spotlight-message-scene { z-index:1; display:flex; flex-direction:column; align-items:center; gap:14px; text-align:center; }
+.spotlight-message-scene strong { font-size:calc(28px * var(--font-scale)); color:var(--accent); }
+.spotlight-message-scene span { font-size:calc(12px * var(--font-scale)); color:var(--muted); }
+.spotlight-breathe-scene { z-index:1; width:min(75%,280px); }
+.spotlight-art .art-footnote { max-width:95%; text-align:center; }
+.spotlight-breathe-scene .company-breathe-scene { width:100%; }
+
+.spotlight-clock-scene { position:relative; z-index:1; width:min(75%,280px); }
+.spotlight-clock-scene .company-clock-dial { display:block; width:100%; }
+.spotlight-clock-number { fill:var(--text); stroke:none; font-size:14px; font-family:inherit; text-anchor:middle; dominant-baseline:central; }
+.spotlight-minute-mark { stroke:var(--muted); stroke-width:1; }
+.spotlight-hour-mark { stroke:var(--accent); stroke-width:3; }
