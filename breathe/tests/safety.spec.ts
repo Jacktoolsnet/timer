@@ -125,3 +125,22 @@ test('automatic completion is neutral and stops the session',async({page})=>{
  await expect(page.locator('#end-session')).toBeDisabled();
  await expect(page.locator('#session-progress')).toHaveAttribute('aria-valuenow','60');
 });
+test('focus requests fullscreen and follows browser exit',async({page})=>{
+ await page.goto('/en/'); await page.locator('#focus').click();
+ await expect.poll(()=>page.evaluate(()=>document.fullscreenElement === document.documentElement)).toBe(true);
+ await page.locator('#focus').click();
+ await expect.poll(()=>page.evaluate(()=>document.fullscreenElement === null)).toBe(true);
+ await expect(page.locator('body')).not.toHaveClass(/focus-view/);
+ await page.locator('#focus').click();
+ await expect.poll(()=>page.evaluate(()=>!!document.fullscreenElement)).toBe(true);
+ await page.evaluate(()=>document.exitFullscreen());
+ await expect(page.locator('body')).not.toHaveClass(/focus-view/);
+});
+test('focus stays usable if fullscreen is denied',async({page})=>{
+ await page.addInitScript(()=>{document.documentElement.requestFullscreen=()=>Promise.reject(new Error('Denied'));});
+ await page.goto('/en/'); await page.locator('#focus').click();
+ await expect(page.locator('body')).toHaveClass(/focus-view/);
+ await page.locator('#safety-open').click(); await expect(page.locator('#safety-dialog')).toBeVisible();
+ await page.keyboard.press('Escape'); await expect(page.locator('body')).toHaveClass(/focus-view/);
+ await page.locator('#focus').click(); await expect(page.locator('body')).not.toHaveClass(/focus-view/);
+});

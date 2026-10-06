@@ -7,7 +7,7 @@ const { lang } = Astro.props;
 const t = dictionaries[lang];
 ---
 <Layout lang={lang} title={lang === 'de' ? 'Atemübungen für Ruhe und Fokus' : t.title} description={t.intro} route="">
- <section class="intro"><p class="eyebrow">JACKTOOLS / BREATHE</p><h1>{t.title}</h1><p class="intro-copy">{t.intro}</p></section>
+ <section class="intro"><h1>{t.title}</h1><p class="intro-copy">{t.intro}</p></section>
  <div class="workspace" id="breathe-app">
   <section class="timer-card breath-card" aria-label="Breathe">
    <div class="breath-top"><span id="pattern-name">{t.presets[0]}</span><button id="focus" class="icon-text" aria-pressed="false" aria-label={t.focus} title={t.focus}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg><span>{t.focus}</span></button></div>
@@ -42,7 +42,7 @@ const t = dictionaries[lang];
   </section>
  </div>
  <p class="local-note">{t.local}</p>
- <section class="guide"><div class="guide-heading"><h2>{t.guide}</h2></div><div class="guide-grid">{t.steps.map((step,i)=><article><span class="step-number">0{i+1}</span><h3>{step}</h3><p>{t.tips[i]}</p></article>)}</div><p class="breath-source"><a href="https://www.nhs.uk/mental-health/self-help/guides-tools-and-activities/breathing-exercises-for-stress/" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">{t.source} ↗</a></p></section>
+ <section class="guide"><div class="guide-heading"><h2>{t.guide}</h2></div><div class="guide-grid">{t.steps.map((step,i)=><article><span class="step-number">0{i+1}</span><h3>{step}</h3><p>{t.tips[i]}</p></article>)}</div></section>
  <dialog id="first-start-dialog" aria-labelledby="first-safety-title">
   <div class="dialog-inner"><h2 id="first-safety-title">{t.safetyTitle}</h2><p>{t.firstHint}</p><p class="notice">{t.safePlace}</p>
    <div class="dialog-actions"><button id="safety-continue" class="primary" autofocus>{t.continueLabel}</button><form method="dialog"><button class="secondary">{t.closeLabel}</button></form></div>

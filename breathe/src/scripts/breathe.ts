@@ -125,7 +125,7 @@ function render(time = elapsed) {
  el('tile-phase').textContent = finished ? t.ended : !running && elapsed ? t.paused : t.phases[state.phase]!.split(' · ')[0]!;
 
  if (running && total && time >= total) {
-  endSession(total);
+  endSession(total,true);
   return;
  }
  endButton.disabled = !running && !elapsed || finished;
@@ -167,12 +167,31 @@ function beginSession() {
  running=true; anchor=performance.now(); lastPhase=-1; startLabel(t.pause,true);
  wake(settings.awake); void playCurrentSound(); tick();
 }
-function endSession(time = nowElapsed()) {
+function completionTone() {
+ if (!settings.chime || !audio || audio.state !== 'running' || document.hidden) return;
+ try {
+  const now=audio.currentTime;
+  // A quiet resolving chord, not a reward or a prompt to continue.
+  for(const frequency of [261.63,392]) {
+   const oscillator=audio.createOscillator(), gain=audio.createGain();
+   oscillator.type='sine'; oscillator.frequency.value=frequency;
+   gain.gain.setValueAtTime(0,now);
+   gain.gain.linearRampToValueAtTime(.035,now+.12);
+   gain.gain.exponentialRampToValueAtTime(.0001,now+1.4);
+   oscillator.connect(gain); gain.connect(audio.destination);
+   activeSounds.add(oscillator);
+   oscillator.onended=()=>{oscillator.disconnect();gain.disconnect();activeSounds.delete(oscillator);};
+   oscillator.start(now); oscillator.stop(now+1.45);
+  }
+ } catch { el('audio-status').textContent=t.audioError; }
+}
+function endSession(time = nowElapsed(), completed = false) {
  elapsed=time; finished=true; stop(); lastPhase=-1; render();
+ if(completed) completionTone();
 }
 start.addEventListener('click',() => {
  if (running) { pauseSession(); return; }
- if (!form.reportValidity()) { if (document.body.classList.contains('focus-view')) setFocus(false); return; }
+ if (!form.reportValidity()) { if (document.body.classList.contains('focus-view')) void leaveFocus(); return; }
  if (!settings.safetySeen) { soundGeneration++; silence(); firstDialog.showModal(); return; }
  beginSession();
 });
@@ -235,8 +254,35 @@ function setFocus(enabled: boolean) {
  focus.setAttribute('aria-label',enabled?t.leave:t.focus); focus.title=enabled?t.leave:t.focus; focus.setAttribute('aria-pressed',String(enabled));
  focus.focus();
 }
-focus.addEventListener('click',() => setFocus(!document.body.classList.contains('focus-view')));
-document.addEventListener('keydown',e => { if (e.key==='Escape' && !firstDialog.open && !safetyDialog.open) setFocus(false); });
+let ownsFullscreen = false;
+let requestingFullscreen = false;
+async function leaveFocus() {
+ setFocus(false);
+ if (ownsFullscreen && document.fullscreenElement) {
+  try { await document.exitFullscreen(); } catch { /* Browser controls can still exit fullscreen. */ }
+ }
+}
+async function toggleFocus() {
+ if (document.body.classList.contains('focus-view')) { await leaveFocus(); return; }
+ setFocus(true);
+ // Do not take ownership of fullscreen entered through another browser control.
+ if (document.fullscreenElement || requestingFullscreen || !document.documentElement.requestFullscreen) return;
+ requestingFullscreen=true;
+ try {
+  await document.documentElement.requestFullscreen();
+  ownsFullscreen=document.fullscreenElement === document.documentElement;
+  if (!document.body.classList.contains('focus-view') && ownsFullscreen) await document.exitFullscreen();
+ } catch { /* Keep in-page focus usable when fullscreen is denied or unsupported. */ }
+ finally { requestingFullscreen=false; }
+}
+focus.addEventListener('click',() => { void toggleFocus(); });
+document.addEventListener('fullscreenchange',() => {
+ if (requestingFullscreen && document.fullscreenElement === document.documentElement) ownsFullscreen=true;
+ if (!document.fullscreenElement && ownsFullscreen) { ownsFullscreen=false; setFocus(false); }
+});
+document.addEventListener('keydown',e => {
+ if (e.key==='Escape' && !firstDialog.open && !safetyDialog.open) void leaveFocus();
+});
 // A hidden tab pauses the exercise: never jump ahead or replay missed signals.
 document.addEventListener('visibilitychange',() => {
  if (document.hidden) { pauseSession(); soundGeneration++; silence(); }

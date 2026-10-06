@@ -787,3 +787,7 @@ body.focus-view .breath-instruction { margin-bottom:14px; }
 #breathe-app #skip-hold[hidden] { display:none; }
 
 #breathe-app .timer-controls #end-session { width:48px; min-width:48px; height:48px; padding:12px; }
+
+/* Long document headings must fit narrow screens and enlarged text. */
+.legal-page h1,.legal-page h2,.legal-page p,.legal-page li { overflow-wrap:anywhere; }
+.legal-page .legal-nav { flex-wrap:wrap; }
