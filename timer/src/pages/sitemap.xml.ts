@@ -1,9 +1,15 @@
 import { languages } from '../lib/i18n';
+import { sitemapResponse } from '../lib/sitemap';
 export function GET({ site }: { site: URL | undefined }) {
-  const base = site ?? new URL('https://timer.jacktools.net');
-  const urls = languages.flatMap(lang => ['','pomodoro','training'].map(mode => {
-    const alternatives = languages.map(l => '<xhtml:link rel="alternate" hreflang="' + l + '" href="' + new URL('/' + l + '/' + (mode ? mode + '/' : ''), base) + '"/>').join('');
-    return '<url><loc>' + new URL('/' + lang + '/' + (mode ? mode + '/' : ''), base) + '</loc>' + alternatives + '<xhtml:link rel="alternate" hreflang="x-default" href="' + new URL('/en/' + (mode ? mode + '/' : ''), base) + '"/></url>';
-  })).join('');
-  return new Response('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">' + urls + '</urlset>', { headers: { 'Content-Type': 'application/xml' } });
+  if (!site) throw new Error('Configure astro.config.mjs site for the sitemap.');
+  // Include only canonical, indexable pages, not redirects or noindex legal pages.
+  const modes = ['', 'pomodoro', 'training'];
+  const url = (language: string, mode: string) => new URL('/' + language + '/' + (mode ? mode + '/' : ''), site);
+  return sitemapResponse(modes.flatMap(mode => languages.map(language => ({
+    url: url(language, mode),
+    alternatives: [
+      ...languages.map(alternative => ({ language: alternative, url: url(alternative, mode) })),
+      { language: 'x-default', url: url('en', mode) },
+    ],
+  }))));
 }

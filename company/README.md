@@ -39,10 +39,10 @@ Empfänger/Drittlandverarbeitung, Datenflüsse bei Buy Me a Coffee sowie eine
 etwaige Wirtschafts-Identifikationsnummer prüfen. Rechtstexte abschließend prüfen.
 Lokale, nicht veröffentlichbare Timer-Prüfnotizen wurden nicht kopiert.
 
-`public/robots.txt` sperrt derzeit das Crawling für den Entwurf. Dies ist keine
-Zugangssperre. Vor dem Livegang bewusst auf öffentliche Indexierung umstellen,
-Entwurfshinweise nach Abschluss der Prüfung entfernen und gegebenenfalls eine
-Sitemap ergänzen. Das Projekt wurde nicht veröffentlicht.
+`public/robots.txt` erlaubt auf ausdrücklichen Wunsch öffentliche Indexierung
+und verweist auf `/sitemap.xml`. Die Sitemap enthält nur die kanonische Startseite;
+Rechtstexte und die 404-Seite bleiben `noindex`. Entwurfshinweise nach Abschluss
+der Prüfung entfernen. Diese lokale Änderung wurde nicht veröffentlicht.
 
 Als Ausgangspunkte wurden https://jacktools.net und https://app.messagedrop.de
 sowie das lokale Timer-Projekt verwendet. Projekttexte sind keine Aussage über
