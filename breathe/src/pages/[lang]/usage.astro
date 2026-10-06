@@ -1,0 +1,16 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { dictionaries } from '../../lib/breathe-i18n';
+export function getStaticPaths() { return (['en','de'] as const).map(lang=>({params:{lang},props:{lang}})); }
+const { lang }=Astro.props;
+const de=lang==='de', t=dictionaries[lang];
+const title=de?'Nutzungshinweise':'Usage notes';
+---
+<Layout lang={lang} title={title} description={title} route="usage" noindex legal>
+ <article class="legal-page"><h1>{title}</h1><p>{t.safety}</p>
+ <h2>{de?'Technische Grenzen':'Technical limitations'}</h2>
+ <p>{de?'Breathe ist kostenlos und läuft lokal im Browser. Ein Wechsel in den Hintergrund pausiert die Sitzung. Neuladen oder Schließen beendet sie. Töne und Bildschirm-Wachhalten hängen von Browser, Geräteeinstellungen und Energiesparmodus ab. Die Fokusansicht funktioniert ohne Vollbild-Berechtigung.':'Breathe is free and runs locally in your browser. Moving to the background pauses the session. Reloading or closing ends it. Sound and screen wake lock depend on your browser, device settings and power-saving mode. Focus view works without fullscreen permission.'}</p>
+ <h2>{de?'Lokale Einstellungen':'Local preferences'}</h2><p>{de?'Einstellungen werden nur nach Aktivierung von „Einstellungen auf diesem Gerät merken“ gespeichert. Ausschalten oder Löschen entfernt die gespeicherten Werte. Es gibt keine Synchronisation zwischen Geräten.':'Settings are saved only after enabling “Remember settings on this device”. Disabling it or clearing preferences removes saved values. There is no cross-device synchronisation.'}</p>
+ <p><a href={'/'+lang+'/privacy/'}>{de?'Datenschutzerklärung':'Privacy notice'}</a></p><p><a href={'/'+lang+'/'}>← Breathe</a></p>
+ </article>
+</Layout>

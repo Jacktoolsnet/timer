@@ -1,0 +1,38 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { dictionaries } from '../lib/breathe-i18n';
+import type { Language } from '../lib/i18n';
+interface Props { lang: Language }
+const { lang } = Astro.props;
+const t = dictionaries[lang];
+---
+<Layout lang={lang} title={lang === 'de' ? 'Atemübungen für Ruhe und Fokus' : t.title} description={t.intro} route="">
+ <section class="intro"><p class="eyebrow">JACKTOOLS / BREATHE</p><h1>{t.title}</h1><p class="intro-copy">{t.intro}</p></section>
+ <div class="workspace" id="breathe-app">
+  <section class="timer-card breath-card" aria-label="Breathe">
+   <div class="breath-top"><span id="pattern-name">{t.presets[0]}</span><button id="focus" class="secondary" aria-pressed="false">{t.focus}</button></div>
+   <div class="breath-stage"><div id="breath-circle" aria-hidden="true"></div><div class="breath-caption"><p id="phase" role="status" aria-live="polite">{t.ready}</p><output id="count">4</output><span>{t.seconds}</span></div></div>
+   <div class="timer-controls"><button id="start" class="primary">{t.start}</button><button id="reset" class="secondary">{t.reset}</button></div>
+   <p class="breath-meta"><span id="round">{t.round} 1</span><span id="session">{t.remaining} 3:00</span></p>
+   <progress id="session-progress" max="180" value="0" aria-label={t.remaining}></progress>
+   <p id="wake-status" class="timer-status" role="status"></p><p id="audio-status" class="timer-status" role="status"></p>
+  </section>
+  <section class="settings-card">
+   <h2>{t.settings}</h2>
+   <form id="breath-form">
+    <label class="breath-field">{t.settings}<select id="preset">{(['box','balanced','gentle','custom'] as const).map((p,i)=><option value={p}>{t.presets[i]}</option>)}</select></label>
+    <p id="preset-description" class="form-hint">{t.descriptions[0]}</p>
+    <fieldset class="breath-durations"><legend>{t.seconds}</legend>{t.phases.map((phase,i)=><label>{phase}<input id={'duration-'+i} type="number" min={i%2 === 0 ? 1 : 0} max="20" step="1" value="4" required /></label>)}</fieldset>
+    <label class="breath-field">{t.duration}<input id="minutes" type="number" min="0" max="30" step="1" value="3" required /><small>{t.unlimited}</small></label>
+    <label class="breath-check"><input id="sound" type="checkbox" />{t.sound}</label>
+    <label class="breath-field">{t.volume}<input id="volume" type="range" min="0" max="100" value="25" /></label>
+    <label class="breath-check"><input id="awake" type="checkbox" checked />{t.awake}</label>
+    <label class="breath-check"><input id="motion" type="checkbox" checked />{t.motion}</label>
+    <p class="form-hint">{t.hint}</p>
+   </form>
+  </section>
+ </div>
+ <p class="local-note">{t.local}</p>
+ <section class="guide"><div class="guide-heading"><h2>{t.guide}</h2></div><div class="guide-grid">{t.steps.map((step,i)=><article><span class="step-number">0{i+1}</span><h3>{step}</h3><p>{t.tips[i]}</p></article>)}</div><p class="notice">{t.safety}</p><p class="breath-source"><a href="https://www.nhs.uk/mental-health/self-help/guides-tools-and-activities/breathing-exercises-for-stress/" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">{t.source} ↗</a></p></section>
+ <script src="../scripts/breathe.ts"></script>
+</Layout>
