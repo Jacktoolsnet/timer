@@ -15,7 +15,23 @@ test('zero holds are skipped and animation follows breathing',()=>{
 });
 test('normalization rejects unsafe persisted data',()=>{
  const s=normalize({durations:[0,-5,Infinity,25],minutes:-1,volume:120,sound:'true',preset:'toString'});
- assert.deepEqual(s.durations,[1,0,4,20]); assert.equal(s.minutes,0); assert.equal(s.volume,100); assert.equal(s.sound,false); assert.equal(s.preset,'box');
+ assert.deepEqual(s.durations,[1,0,4,20]); assert.equal(s.minutes,0); assert.equal(s.sound,false); assert.equal(s.preset,'box');
  assert.deepEqual(normalize(null),normalize({}));
 });
 test('invalid cycles are rejected',()=>assert.throws(()=>breathAt(1,[0,0,0,0])));
+test('count duration changes timing without changing displayed counts',()=>{
+ const state=breathAt(4,[4,4,4,4],2);
+ assert.equal(state.phase,0); assert.equal(state.remaining,2); assert.equal(state.scale,.74);
+ assert.equal(breathAt(8,[4,4,4,4],2).phase,1);
+ assert.equal(breathAt(32,[4,4,4,4],2).round,2);
+ assert.equal(normalize({countSeconds:1.5}).countSeconds,1.5);
+ assert.equal(normalize({countSeconds:Infinity}).countSeconds,1);
+ assert.throws(()=>breathAt(1,[4,4,4,4],0));
+});
+test('4–7–8 breathing skips the final hold',async()=>{
+ const {presets}=await import('../src/lib/breathing.ts');
+ assert.deepEqual(presets.fourSevenEight,[4,7,8,0]);
+ assert.equal(breathAt(4,presets.fourSevenEight).phase,1);
+ assert.equal(breathAt(11,presets.fourSevenEight).phase,2);
+ assert.equal(breathAt(19,presets.fourSevenEight).phase,0);
+});

@@ -657,7 +657,7 @@ body.focus-view .card-top { position: absolute; top: 12px; right: 12px; z-index:
 
 /* Breathing guide: transform-only animation, with a stationary readable caption. */
 .breath-top { display:flex; align-items:center; justify-content:space-between; gap:12px; color:var(--muted); font-size:.85rem; }
-.breath-top button { min-height:44px; padding:10px 14px; }
+
 .breath-stage { width:min(100%,350px); aspect-ratio:1; position:relative; margin:26px auto; display:grid; place-items:center; }
 #breath-circle { position:absolute; inset:0; border-radius:50%; background:radial-gradient(circle at 30% 25%,var(--accent-soft),color-mix(in srgb,var(--accent) 65%,var(--surface)) 55%,var(--accent)); box-shadow:0 0 55px color-mix(in srgb,var(--accent) 18%,transparent); transform:scale(.48); }
 .breath-caption { z-index:1; text-align:center; padding:15px; pointer-events:none; color:var(--text); background:color-mix(in srgb,var(--surface) 88%,transparent); border-radius:24px; min-width:145px; }
@@ -665,7 +665,7 @@ body.focus-view .card-top { position: absolute; top: 12px; right: 12px; z-index:
 .breath-caption output { display:block; font-size:calc(48px * var(--font-scale)); font-variant-numeric:tabular-nums; line-height:1.1; }
 .breath-caption span { color:var(--muted); font-size:.75rem; }
 .breath-meta { display:flex; justify-content:center; gap:25px; color:var(--muted); font-size:.8rem; }
-#session-progress { width:100%; height:6px; accent-color:var(--accent); }
+
 .breath-field { display:grid; gap:8px; margin:16px 0; font-size:calc(13px * var(--font-scale)); }
 .breath-field select,.breath-field input[type=number],.breath-durations input { min-height:44px; padding:10px; background:var(--bg); color:var(--text); border:1px solid var(--line); border-radius:8px; width:100%; }
 .breath-field small { color:var(--muted); }
@@ -684,3 +684,62 @@ body.focus-view .breath-stage { width:min(100%,45dvh,400px); }
  body.focus-view .breath-stage { grid-column:1; grid-row:1 / span 6; width:min(100%,75dvh); margin:0 auto; }
  body.focus-view .breath-card > :not(.breath-stage) { grid-column:2; }
 }
+
+/* Match the tool family's icon controls and slide switches. */
+#breathe-app .timer-controls button { min-width:48px; width:48px; height:48px; padding:12px; display:grid; place-items:center; }
+#breathe-app .timer-controls svg { width:24px; height:24px; }
+.breath-check { justify-content:space-between; gap:16px; }
+.breath-check .storage-switch input { position:absolute; inset:0; width:100%; height:100%; margin:0; opacity:0; z-index:1; cursor:pointer; }
+.breath-caption { background:none; border-radius:0; min-width:0; padding:0; }
+.breath-phase { min-height:2.6em; margin:0 0 16px; text-align:center; font-size:calc(14px * var(--font-scale)); line-height:1.4; color:var(--text); }
+.breath-picker { position:relative; }
+.breath-picker summary { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:48px; padding:12px 14px; list-style:none; background:var(--bg); border:1px solid var(--line); border-radius:12px; cursor:pointer; color:var(--text); }
+.breath-picker summary::-webkit-details-marker { display:none; }
+.breath-picker summary svg { width:18px; height:18px; flex-shrink:0; color:var(--muted); }
+.breath-picker[open] summary { border-color:var(--accent); }
+.breath-picker[open] summary svg { transform:rotate(180deg); }
+.breath-options { position:absolute; top:calc(100% + 6px); left:0; right:0; z-index:5; margin:0; padding:6px; border:1px solid var(--line); border-radius:14px; background:var(--surface); box-shadow:0 12px 30px #0002; max-height: min(420px,60dvh); overflow:auto; }
+.breath-options label { position:relative; display:flex; align-items:center; gap:10px; padding:12px; border-radius:9px; cursor:pointer; }
+.breath-options input { position:absolute; opacity:0; width:1px; height:1px; }
+.breath-options label>span { flex:1; min-width:0; }
+.breath-options strong { display:block; font-size:calc(13px * var(--font-scale)); font-weight:600; }
+.breath-options small { display:block; margin-top:5px; color:var(--muted); font-size:calc(11px * var(--font-scale)); line-height:1.5; }
+.breath-options svg { width:18px; height:18px; color:var(--accent); visibility:hidden; flex-shrink:0; }
+.breath-options label:has(input:checked) { background:var(--accent-soft); }
+.breath-options input:checked~svg { visibility:visible; }
+.breath-options label:hover { background:var(--track); }
+.breath-options label:has(input:focus-visible) { outline:2px solid var(--accent); outline-offset:-2px; }
+/* Keep the native value bridge out of layout and accessible picker interactions. */
+#breath-form #preset { position:absolute; width:1px; height:1px; min-height:0; padding:0; border:0; left:0; top:0; }
+
+/* A compact inset tile that always fits inside the smallest breathing circle. */
+.breath-stage { container-type:inline-size; }
+.breath-caption {
+ display:flex; flex-direction:column; align-items:center; justify-content:center;
+ width:30cqw; height:30cqw; padding:0; border-radius:18%;
+ background:color-mix(in srgb,var(--surface) 88%,transparent);
+ color:var(--text); box-shadow:0 2px 12px #00000008;
+}
+.breath-caption output { font-size:min(calc(48px * var(--font-scale)),14cqw); }
+.breath-caption span { font-size:min(calc(12px * var(--font-scale)),3.5cqw); }
+
+/* Session ring stays outside the breathing circle, even at full inhale. */
+#breath-circle { inset:8%; }
+.breath-caption { width:26cqw; height:26cqw; }
+#session-progress { position:absolute; inset:0; width:100%; height:100%; transform:rotate(-90deg); fill:none; stroke-width:1.5; pointer-events:none; }
+#session-ring-progress { stroke:var(--accent); stroke-dasharray:100; stroke-dashoffset:100; stroke-linecap:round; }
+
+#wake-status:empty { display:none; }
+
+/* Compact phase cue inside the translucent tile; text complements colour. */
+.breath-caption { width:28cqw; height:28cqw; --tile-tint:var(--surface); background:color-mix(in srgb,var(--tile-tint) 88%,transparent); }
+.breath-caption[data-phase="0"] { --tile-tint:color-mix(in srgb,var(--accent) 18%,var(--surface)); }
+.breath-caption[data-phase="1"],.breath-caption[data-phase="3"] { --tile-tint:color-mix(in srgb,var(--muted) 18%,var(--surface)); }
+.breath-caption[data-phase="2"] { --tile-tint:color-mix(in srgb,var(--green) 20%,var(--surface)); }
+.breath-caption #tile-phase { font-size:min(calc(12px * var(--font-scale)),3.2cqw); line-height:1.3; max-width:95%; margin-bottom:1cqw; }
+.breath-caption output { font-size:min(calc(40px * var(--font-scale)),10.5cqw); }
+
+@media (prefers-reduced-motion:no-preference) { .breath-caption { transition:background-color .3s; } }
+
+/* Keep the selected technique's guidance beside the simulation, also in focus. */
+.breath-instruction { max-width:420px; margin:0 auto 22px; padding:12px 16px; border-radius:12px; background:var(--accent-soft); color:var(--text); font-size:calc(13px * var(--font-scale)); line-height:1.65; text-align:center; }

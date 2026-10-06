@@ -8,7 +8,14 @@ const el = (id: string) => document.getElementById(id)!;
 const start = el('start') as HTMLButtonElement;
 const focus = el('focus') as HTMLButtonElement;
 const form = el('breath-form') as HTMLFormElement;
-const progress = el('session-progress') as HTMLProgressElement;
+const progress = document.getElementById('session-progress') as unknown as SVGSVGElement;
+const ring = el('session-ring-progress');
+function sessionProgress(time: number, total: number) {
+ progress.style.display = total ? '' : 'none';
+ progress.setAttribute('aria-valuemax',String(total || 1));
+ progress.setAttribute('aria-valuenow',String(Math.min(time,total)));
+ ring.style.strokeDashoffset = String(total ? 100*(1-Math.min(time/total,1)) : 100);
+}
 const KEY = 'jacktools.breathe.settings.v1';
 let settings: Settings = normalize(defaults);
 try { if (storageAllowed()) settings = normalize(JSON.parse(localStorage.getItem(KEY) || 'null')); } catch {}
@@ -17,55 +24,114 @@ if (reduced.matches) settings.motion = false;
 let running = false, elapsed = 0, anchor = 0, frame = 0, lastPhase = -1, finished = false;
 let audio: AudioContext | null = null;
 let soundGeneration = 0;
-const wake = screenWakeLock(el('wake-status'), t.awakeOn, t.awakeOff);
+const wake = screenWakeLock(el('wake-status'), '', t.awakeOff);
 function save() {
  if (!storageAllowed()) return;
  try { localStorage.setItem(KEY,JSON.stringify(settings)); } catch { el('storage-status').textContent = document.querySelector<HTMLElement>('#clear-storage')!.dataset.error!; }
 }
 function syncForm() {
  input('preset').value = settings.preset;
+ el('preset-selected').textContent = t.presets[Object.keys(presets).indexOf(settings.preset)]!;
+ document.querySelectorAll<HTMLInputElement>('[name="breathing-preset"]').forEach(radio => { radio.checked = radio.value === settings.preset; });
  settings.durations.forEach((n,i) => input('duration-'+i).value = String(n));
  input('minutes').value = String(settings.minutes);
- input('volume').value = String(settings.volume);
- for (const key of ['sound','awake','motion'] as const) input(key).checked = settings[key];
+ input('count-seconds').value = String(settings.countSeconds);
+ for (const key of ['sound','chime','awake','motion'] as const) input(key).checked = settings[key];
  el('preset-description').textContent = t.descriptions[Object.keys(presets).indexOf(settings.preset)]!;
  el('pattern-name').textContent = t.presets[Object.keys(presets).indexOf(settings.preset)]!;
 }
 async function prepareAudio() {
- if (!settings.sound) return;
+ if (!settings.sound && !settings.chime) return;
  try {
   audio ??= new AudioContext();
   if (audio.state === 'suspended') await audio.resume();
   el('audio-status').textContent = audio.state === 'running' ? '' : t.audioError;
  } catch { el('audio-status').textContent = t.audioError; }
 }
-function tone(phase: number) {
- if (!settings.sound || !audio || audio.state !== 'running' || document.hidden) return;
+const activeSounds = new Set<AudioScheduledSourceNode>();
+function silence() {
+ for(const source of activeSounds) { try { source.stop(); } catch {} }
+ activeSounds.clear();
+}
+function tone(phase: number, duration = settings.durations[phase]!*settings.countSeconds) {
+ if (!(phase === 0 || phase === 2 ? settings.sound : settings.chime) || !audio || audio.state !== 'running' || document.hidden) return;
  try {
-  const now = audio.currentTime;
-  const oscillator = audio.createOscillator(), gain = audio.createGain();
-  oscillator.type = 'sine';
-  oscillator.frequency.setValueAtTime([392,523.25,293.66,261.63][phase]!,now);
-  gain.gain.setValueAtTime(0,now);
-  gain.gain.linearRampToValueAtTime(settings.volume/100*.14,now+.06);
-  gain.gain.exponentialRampToValueAtTime(.0001,now+.7);
-  oscillator.connect(gain); gain.connect(audio.destination);
-  oscillator.start(now); oscillator.stop(now+.75);
-  oscillator.onended = () => { oscillator.disconnect(); gain.disconnect(); };
- } catch { el('audio-status').textContent = t.audioError; }
+  const now = audio.currentTime, gain = audio.createGain();
+  let source: AudioScheduledSourceNode;
+  let filter: BiquadFilterNode | null = null;
+  if (phase === 0 || phase === 2) {
+   // Filtered noise follows the whole inhale/exhale rather than a short beep.
+   const buffer = audio.createBuffer(1,audio.sampleRate*2,audio.sampleRate);
+   const data = buffer.getChannelData(0);
+   // Correlated noise softens the sharp, hissy high-frequency texture.
+   let previous=0;
+   for (let i=0;i<data.length;i++) {
+    previous=.55*previous+.45*(Math.random()*2-1);
+    data[i]=previous;
+   }
+   const noise = audio.createBufferSource(); noise.buffer=buffer; noise.loop=true;
+   filter=audio.createBiquadFilter(); filter.type='lowpass'; filter.Q.value=.5;
+   filter.frequency.setValueAtTime(phase===0?800:1150,now);
+   filter.frequency.linearRampToValueAtTime(phase===0?1150:700,now+duration);
+   noise.connect(filter); filter.connect(gain); source=noise;
+   // Softer overall level; volume follows the direction of the breath.
+   const peak = .16;
+   const edge = Math.min(.08,duration/10);
+   const release = Math.min(.35,duration*.3);
+   gain.gain.setValueAtTime(0,now);
+   if (phase === 0) {
+    gain.gain.linearRampToValueAtTime(.008,now+edge);
+    gain.gain.linearRampToValueAtTime(peak,now+duration-release);
+    gain.gain.linearRampToValueAtTime(0,now+duration);
+   } else {
+    gain.gain.linearRampToValueAtTime(peak,now+edge);
+    gain.gain.linearRampToValueAtTime(0,now+duration);
+   }
+  } else {
+   const oscillator=audio.createOscillator(); oscillator.type='sine';
+   oscillator.frequency.value=phase===1?523.25:261.63;
+   oscillator.connect(gain); source=oscillator; duration=.6;
+   gain.gain.setValueAtTime(0,now);
+   gain.gain.linearRampToValueAtTime(.08,now+.06);
+   gain.gain.exponentialRampToValueAtTime(.0001,now+duration);
+  }
+  gain.connect(audio.destination); activeSounds.add(source);
+  source.onended=()=>{ source.disconnect(); filter?.disconnect(); gain.disconnect(); activeSounds.delete(source); };
+  source.start(now); source.stop(now+duration);
+ } catch { el('audio-status').textContent=t.audioError; }
+}
+async function playCurrentSound(preview?: 'sound' | 'chime') {
+ const generation=++soundGeneration;
+ await prepareAudio();
+ if(generation!==soundGeneration) return;
+ silence();
+ if(running) {
+  const state=breathAt(nowElapsed(),settings.durations,settings.countSeconds);
+  tone(state.phase,state.remaining*settings.countSeconds);
+  if(state.phase === 0 || state.phase === 2) tone(1);
+ } else if(preview) tone(preview === 'sound' ? 0 : 1,1.2);
 }
 function nowElapsed() { return running ? elapsed+(performance.now()-anchor)/1000 : elapsed; }
 function render(time = elapsed) {
- const state = breathAt(time,settings.durations);
+ const state = breathAt(time,settings.durations,settings.countSeconds);
  const total = settings.minutes*60;
+ const tile = document.querySelector<HTMLElement>('.breath-caption')!;
+ tile.dataset.phase = running ? String(state.phase) : 'ready';
+ el('tile-phase').textContent = finished ? '' : !running && elapsed ? t.paused : t.phases[state.phase]!.split(' · ')[0]!;
+
  if (running && total && time >= total) {
   elapsed = total; finished = true; stop();
-  el('phase').textContent = t.done; el('count').textContent = '✓'; progress.value=total;
+  el('tile-phase').textContent = '';
+  document.querySelector<HTMLElement>('.breath-caption')!.dataset.phase='ready';
+  el('phase').textContent = t.done; el('count').textContent = '✓'; sessionProgress(total,total);
   el('session').textContent=t.remaining+' 0:00'; return;
  }
  if (state.phase !== lastPhase) {
   el('phase').textContent = finished ? t.done : running ? t.phases[state.phase]! : elapsed ? t.paused : t.ready;
-  if (running && time > 0.05) tone(state.phase);
+  if (running && time > 0.05) {
+   silence(); tone(state.phase);
+   if(state.phase === 0 || state.phase === 2) tone(1);
+  }
   lastPhase = state.phase;
  }
  el('count').textContent = finished ? '✓' : String(Math.ceil(state.remaining));
@@ -73,25 +139,37 @@ function render(time = elapsed) {
  el('round').textContent = t.round+' '+state.round;
  const left = Math.max(0,Math.ceil(total-time));
  el('session').textContent = total ? t.remaining+' '+Math.floor(left/60)+':'+String(left%60).padStart(2,'0') : '∞';
- progress.hidden = !total; progress.max = total || 1; progress.value = Math.min(time,total);
+ sessionProgress(time,total);
 }
 function tick() { render(nowElapsed()); if (running) frame=requestAnimationFrame(tick); }
-function stop() {
- running=false; soundGeneration++; cancelAnimationFrame(frame); wake(false);
- start.textContent = elapsed && !finished ? t.resume : t.start;
+function startLabel(label: string, paused = false) {
+ start.setAttribute('aria-label',label); start.title=label;
+ el('start-icon').setAttribute('d',paused ? 'M7 5h4v14H7Zm6 0h4v14h-4Z' : 'm8 5 11 7-11 7Z');
 }
-function reset() { stop(); elapsed=0; finished=false; lastPhase=-1; start.textContent=t.start; render(); }
+function stop() {
+ running=false; soundGeneration++; silence(); cancelAnimationFrame(frame); wake(false);
+ startLabel(elapsed && !finished ? t.resume : t.start);
+}
+function reset() { stop(); elapsed=0; finished=false; lastPhase=-1; startLabel(t.start); render(); }
 start.addEventListener('click',() => {
  if (running) { elapsed=nowElapsed(); stop(); lastPhase=-1; render(); return; }
  if (!form.reportValidity()) { if (document.body.classList.contains('focus-view')) setFocus(false); return; }
  if (finished) { elapsed=0; finished=false; }
- running=true; anchor=performance.now(); lastPhase=-1; start.textContent=t.pause;
- wake(settings.awake); const generation=++soundGeneration;
- void prepareAudio().then(() => { if (generation===soundGeneration && running) tone(breathAt(nowElapsed(),settings.durations).phase); });
+ running=true; anchor=performance.now(); lastPhase=-1; startLabel(t.pause,true);
+ wake(settings.awake);
+ void playCurrentSound();
  tick();
 });
 el('reset').addEventListener('click',reset);
 form.addEventListener('submit',e => e.preventDefault());
+const picker = el('preset-picker') as HTMLDetailsElement;
+document.querySelectorAll<HTMLInputElement>('[name="breathing-preset"]').forEach(radio => radio.addEventListener('change',() => {
+ input('preset').value=radio.value;
+ input('preset').dispatchEvent(new Event('change',{bubbles:true}));
+ picker.open=false; picker.querySelector('summary')!.focus();
+}));
+document.addEventListener('click',e => { if (!picker.contains(e.target as Node)) picker.open=false; });
+picker.addEventListener('keydown',e => { if (e.key==='Escape') { picker.open=false; picker.querySelector('summary')!.focus(); } });
 form.addEventListener('change',e => {
  const target=e.target as HTMLInputElement;
  if (!form.checkValidity()) return;
@@ -99,22 +177,28 @@ form.addEventListener('change',e => {
   settings.preset=input('preset').value as Preset;
   settings.durations=[...presets[settings.preset]] as Durations;
   reset();
- } else if (target.id.startsWith('duration-') || target.id==='minutes') {
+ } else if (target.id.startsWith('duration-') || target.id==='minutes' || target.id==='count-seconds') {
   settings.durations=[0,1,2,3].map(i=>Number(input('duration-'+i).value)) as Durations;
   settings.minutes=Number(input('minutes').value);
+  settings.countSeconds=Number(input('count-seconds').value);
   if (target.id.startsWith('duration-')) settings.preset='custom';
   settings=normalize(settings); reset();
  } else {
-  settings.sound=input('sound').checked; settings.awake=input('awake').checked;
-  settings.motion=input('motion').checked; settings.volume=Number(input('volume').value);
+  settings.sound=input('sound').checked; settings.chime=input('chime').checked; settings.awake=input('awake').checked;
+  settings.motion=input('motion').checked;
   wake(running && settings.awake);
-  if (settings.sound && target.id==='sound') void prepareAudio();
+  if (target.id==='sound' || target.id==='chime') {
+   soundGeneration++; silence();
+   if(settings.sound || settings.chime) void playCurrentSound(settings[target.id] ? target.id : undefined);
+   else el('audio-status').textContent='';
+  }
  }
  syncForm(); save(); render(nowElapsed());
 });
 function setFocus(enabled: boolean) {
  document.body.classList.toggle('focus-view',enabled);
- focus.textContent=enabled?t.leave:t.focus; focus.setAttribute('aria-pressed',String(enabled));
+ focus.querySelector('span')!.textContent=enabled?t.leave:t.focus;
+ focus.setAttribute('aria-label',enabled?t.leave:t.focus); focus.title=enabled?t.leave:t.focus; focus.setAttribute('aria-pressed',String(enabled));
  focus.focus();
 }
 focus.addEventListener('click',() => setFocus(!document.body.classList.contains('focus-view')));
