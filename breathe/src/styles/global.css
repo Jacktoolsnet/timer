@@ -841,3 +841,6 @@ body.focus-view .breath-caption output { font-size:min(calc(10.5cqw * var(--font
 body.focus-view .breath-caption #tile-phase { font-size:min(calc(3.2cqw * var(--font-scale,1)),28px); }
 
 body.focus-view .focus-details .timer-controls .primary { width:48px; min-width:48px; flex:none; }
+
+.brand-icon:has(img) {background:transparent;padding:0;}
+.brand-icon img {display:block;width:100%;height:100%;object-fit:contain;}
