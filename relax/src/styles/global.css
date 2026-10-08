@@ -883,3 +883,6 @@ body.focus-view #relax-app > .relax-card { margin-bottom:0; }
  70% {transform:translateX(-50%) scale(.9,1.02) rotate(-2deg);opacity:.68;}
 }
 @media(prefers-reduced-motion:reduce){.campfire-scene {display:none;}}
+
+.brand-icon:has(img) {background:transparent;padding:0;}
+.brand-icon img {display:block;width:100%;height:100%;object-fit:contain;}
