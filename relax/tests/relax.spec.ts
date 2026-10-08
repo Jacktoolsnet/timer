@@ -232,11 +232,11 @@ test('chimes follow wind gusts only when wind is enabled',async({page})=>{
  expect(result.quiet).toBe(0);expect(result.following).toBe(true);expect(result.independent).toBe(true);
 });
 
-for(const instrument of ['kalimba','handpan'] as const){
+for(const instrument of ['kalimba','handpan','bells','gong','harp'] as const){
  test(instrument+' plays, animates, retunes and persists',async({page})=>{
   const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto('/en/');await page.locator('#instrument-dropdown summary').click();
-  await expect(page.locator('[name=instrument][value='+instrument+']').locator('..')).toContainText(instrument==='kalimba'?'metal tines':'steel instrument');
+  await expect(page.locator('[name=instrument][value='+instrument+']').locator('..')).toContainText(({kalimba:'metal tines',handpan:'steel instrument',bells:'bright tones',gong:'long pauses',harp:'plucked string'} as const)[instrument]);
   await page.locator('[name=instrument][value='+instrument+']').check();
   await expect(page.locator('#instrument-description')).toHaveCount(0);
   await begin(page);await expect(page.locator('.instrument-'+instrument).first()).toBeVisible();

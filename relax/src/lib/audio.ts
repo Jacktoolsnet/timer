@@ -164,8 +164,9 @@ export class Soundscape {
      this.nextNote=now+.15;
     }
    }else{
-    this.nextNote=now+randomGap(this.settings.density);
-    this.strike(randomNote().index,selectedInstrument(this.settings),now,.85+Math.random()*.15);
+    const instrument=selectedInstrument(this.settings);
+    this.nextNote=now+(instrument==='gong'?12+randomGap(this.settings.density):randomGap(this.settings.density));
+    this.strike(randomNote().index,instrument,now,.85+Math.random()*.15);
    }
   }
   while(this.gust.length && this.gust[0]!.time<=now+.04){

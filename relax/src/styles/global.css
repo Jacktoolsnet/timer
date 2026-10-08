@@ -769,3 +769,7 @@ body.focus-view #sound-stage { max-height:55dvh; aspect-ratio:1.3; }
 .instrument-options { max-height:min(420px,55vh); overflow-y:auto; }
 .instrument-kalimba { border-radius:50%; filter:blur(1px); }
 .instrument-handpan { border-radius:50%; background:radial-gradient(circle,transparent 32%,color-mix(in srgb,var(--tone-colour) 45%,transparent) 55%,var(--tone-colour) 70%,transparent 74%); box-shadow:none; }
+
+.instrument-bells { border-radius:50%; background:radial-gradient(circle,transparent 45%,color-mix(in srgb,var(--tone-colour) 55%,transparent) 58%,var(--tone-colour) 65%,transparent 72%); box-shadow:none; }
+.instrument-gong { border-radius:50%; background:radial-gradient(circle,color-mix(in srgb,var(--tone-colour) 55%,var(--surface)),var(--tone-colour) 60%,transparent 74%); }
+.instrument-harp { aspect-ratio:1 / 4; border-radius:50%; background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--tone-colour) 80%,var(--surface)),transparent); box-shadow:none; }

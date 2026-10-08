@@ -1,5 +1,6 @@
 const de = {
- kalimba:'Kalimba',handpan:'Handpan',instrumentDescriptions:{chimes:'Windspiel: helle, metallische Töne in zufälligen Klanggruppen. Mit aktiviertem Wind folgen sie den Böen.',bowls:'Klangschalen: schwebende Töne mit langem Ausklang.',kalimba:'Kalimba: ein Zupfinstrument mit kleinen Metallzungen. Hier hörst du kurze, weich gezupfte Töne.',handpan:'Handpan: ein mit den Händen gespieltes Stahlinstrument. Hier hörst du runde, warme Töne mit sanftem Nachklang.'},
+ bells:'Sanfte Glocken',gong:'Gong',harp:'Harfe',
+ kalimba:'Kalimba',handpan:'Handpan',instrumentDescriptions:{bells:'Sanfte Glocken: einzelne helle Töne mit einem weichen, langen Nachklang.',gong:'Gong: tiefe, schwebende Klänge mit besonders langen Pausen zum Ausklingen.',harp:'Harfe: zarte, gezupfte Saitentöne in einer abgestimmten Tonpalette.',chimes:'Windspiel: helle, metallische Töne in zufälligen Klanggruppen. Mit aktiviertem Wind folgen sie den Böen.',bowls:'Klangschalen: schwebende Töne mit langem Ausklang.',kalimba:'Kalimba: ein Zupfinstrument mit kleinen Metallzungen. Hier hörst du kurze, weich gezupfte Töne.',handpan:'Handpan: ein mit den Händen gespieltes Stahlinstrument. Hier hörst du runde, warme Töne mit sanftem Nachklang.'},
  windAnimation:'Wind animieren',
  instrumentAnimation:'Instrumente animieren',
  rainAnimation:'Regen animieren',
@@ -20,7 +21,7 @@ const de = {
  noiseHint:'Weiß, Rosa und Braun beschreiben Klangfarben, keine besonderen Heilfrequenzen. Eine bestimmte Wirkung auf Schlaf oder Konzentration wird nicht versprochen.',
  local:'Ohne Werbung. Ohne Tracking. Direkt in deinem Browser.', guide:'Weniger müssen. Einfach zuhören.',
  steps:['Wähle deine Klänge.','Mach es dir bequem.','Lass den Moment ausklingen.'],
- tips:['Wähle Windspiel, Klangschalen, Kalimba oder Handpan. Ergänze Regen, Wind oder Rauschen nach deinem Geschmack.','Beginne leise. Du kannst die Animation abschalten und die Fokusansicht nutzen. Zuschauen ist optional.','Wähle eine Dauer oder höre ohne Zeitlimit. Am regulären Ende werden alle Klänge sanft ausgeblendet.'],
+ tips:['Wähle dein Instrument, zum Beispiel Windspiel, Kalimba oder Harfe. Ergänze Regen, Wind oder Rauschen nach deinem Geschmack.','Beginne leise. Du kannst die Animation abschalten und die Fokusansicht nutzen. Zuschauen ist optional.','Wähle eine Dauer oder höre ohne Zeitlimit. Am regulären Ende werden alle Klänge sanft ausgeblendet.'],
  safetyTitle:'Leise hören, entspannt bleiben',safetyLink:'Sicherheitshinweise',continueLabel:'Fortfahren',closeLabel:'Schließen',
  firstHint:'Nutze Relax an einem sicheren Ort und beginne mit niedriger Lautstärke, besonders mit Kopfhörern. Die Klänge sind eine Einladung, keine Aufgabe. Du kannst jederzeit pausieren oder beenden. Bei Ohrenschmerzen, Ohrgeräuschen, Schwindel oder Unwohlsein stoppe die Wiedergabe.',
  safePlace:'Nicht beim Fahren, Bedienen von Maschinen, Schwimmen oder Baden verwenden. Bleibe für wichtige Umgebungsgeräusche und Alarme erreichbar. Relax ist kein medizinisches Angebot und ersetzt keine Behandlung.',
@@ -37,7 +38,8 @@ const de = {
 };
 type Text = typeof de;
 const en:Text = {
- kalimba:'Kalimba',handpan:'Handpan',instrumentDescriptions:{chimes:'Wind chimes: bright metallic clusters. When wind is enabled, they follow its gusts.',bowls:'Singing bowls: floating tones with a long decay.',kalimba:'Kalimba: a plucked instrument with small metal tines. Here it plays short, soft plucked tones.',handpan:'Handpan: a steel instrument played by hand. Here it plays rounded, warm tones with a gentle decay.'},
+ bells:'Soft bells',gong:'Gong',harp:'Harp',
+ kalimba:'Kalimba',handpan:'Handpan',instrumentDescriptions:{bells:'Soft bells: individual bright tones with a soft, lingering decay.',gong:'Gong: deep, floating tones with especially long pauses to let them fade.',harp:'Harp: delicate plucked string tones from a harmonious note palette.',chimes:'Wind chimes: bright metallic clusters. When wind is enabled, they follow its gusts.',bowls:'Singing bowls: floating tones with a long decay.',kalimba:'Kalimba: a plucked instrument with small metal tines. Here it plays short, soft plucked tones.',handpan:'Handpan: a steel instrument played by hand. Here it plays rounded, warm tones with a gentle decay.'},
  windAnimation:'Animate wind',
  instrumentAnimation:'Animate instruments',
  rainAnimation:'Animate rain',
@@ -54,7 +56,7 @@ const en:Text = {
  hint:'Starts only after your click. Sounds are synthesised in your browser – no recordings or microphone. Duration changes apply to the next session.',
  noiseHint:'White, pink and brown describe sound colours, not special healing frequencies. No particular sleep or concentration benefit is promised.',
  local:'No ads. No tracking. Right in your browser.',guide:'Nothing to achieve. Just listen.',steps:['Choose your sounds.','Get comfortable.','Let the moment fade away.'],
- tips:['Choose wind chimes, singing bowls, kalimba or handpan. Add rain, wind or noise to suit your taste.','Start quietly. Turn animation off or use focus view. Watching is optional.','Choose a duration or listen without a time limit. All sounds gently fade out at the regular end.'],
+ tips:['Choose your instrument, such as wind chimes, kalimba or harp. Add rain, wind or noise to suit your taste.','Start quietly. Turn animation off or use focus view. Watching is optional.','Choose a duration or listen without a time limit. All sounds gently fade out at the regular end.'],
  safetyTitle:'Listen quietly, stay comfortable',safetyLink:'Safety guidance',continueLabel:'Continue',closeLabel:'Close',
  firstHint:'Use Relax in a safe place and start at a low volume, especially with headphones. The sounds are an invitation, not a task. You can pause or end at any time. Stop playback if you experience ear pain, ringing, dizziness or discomfort.',
  safePlace:'Do not use while driving, operating machinery, swimming or bathing. Stay aware of important surrounding sounds and alarms. Relax is not medical care and does not replace treatment.',
@@ -70,7 +72,8 @@ const en:Text = {
  privacyBody:'Sound choices, volumes, duration, density, display options and first-start guidance status are saved locally only with storage consent. Otherwise they stay in memory. Running sessions are not saved. Disabling storage or clearing preferences removes saved values. There is no cross-device synchronisation.',
 };
 const es:Text = {
- kalimba:'Kalimba',handpan:'Handpan',instrumentDescriptions:{chimes:'Campanas de viento: grupos de tonos metálicos claros que siguen las ráfagas cuando el viento está activo.',bowls:'Cuencos cantores: tonos flotantes con una resonancia larga.',kalimba:'Kalimba: instrumento de pequeñas lengüetas metálicas pulsadas. Aquí suena con notas suaves y breves.',handpan:'Handpan: instrumento de acero tocado con las manos. Aquí ofrece tonos cálidos y redondos con resonancia suave.'},
+ bells:'Campanas suaves',gong:'Gong',harp:'Arpa',
+ kalimba:'Kalimba',handpan:'Handpan',instrumentDescriptions:{bells:'Campanas suaves: notas claras individuales con una resonancia suave y prolongada.',gong:'Gong: sonidos graves y flotantes con pausas especialmente largas.',harp:'Arpa: delicadas notas de cuerdas pulsadas en una paleta armoniosa.',chimes:'Campanas de viento: grupos de tonos metálicos claros que siguen las ráfagas cuando el viento está activo.',bowls:'Cuencos cantores: tonos flotantes con una resonancia larga.',kalimba:'Kalimba: instrumento de pequeñas lengüetas metálicas pulsadas. Aquí suena con notas suaves y breves.',handpan:'Handpan: instrumento de acero tocado con las manos. Aquí ofrece tonos cálidos y redondos con resonancia suave.'},
  windAnimation:'Animar el viento',
  instrumentAnimation:'Animar los instrumentos',
  rainAnimation:'Animar la lluvia',
@@ -87,7 +90,7 @@ const es:Text = {
  hint:'Empieza solo tras tu clic. Sonidos sintetizados en el navegador, sin grabaciones ni micrófono. Cambiar la duración afecta a la próxima sesión.',
  noiseHint:'Blanco, rosa y marrón son colores sonoros, no frecuencias curativas. No se promete un efecto concreto sobre el sueño o la concentración.',
  local:'Sin publicidad. Sin seguimiento. En tu navegador.',guide:'Nada que lograr. Solo escuchar.',steps:['Elige tus sonidos.','Ponte cómodo.','Deja que el momento se desvanezca.'],
- tips:['Elige campanas de viento, cuencos cantores, kalimba o handpan. Añade lluvia, viento o ruido a tu gusto.','Empieza a volumen bajo. Puedes desactivar la animación o usar la vista de enfoque. Mirar es opcional.','Elige una duración o escucha sin límite. Los sonidos se desvanecen suavemente al terminar.'],
+ tips:['Elige tu instrumento, por ejemplo campanas de viento, kalimba o arpa. Añade lluvia, viento o ruido a tu gusto.','Empieza a volumen bajo. Puedes desactivar la animación o usar la vista de enfoque. Mirar es opcional.','Elige una duración o escucha sin límite. Los sonidos se desvanecen suavemente al terminar.'],
  safetyTitle:'Escucha a volumen bajo y con comodidad',safetyLink:'Consejos de seguridad',continueLabel:'Continuar',closeLabel:'Cerrar',
  firstHint:'Usa Relax en un lugar seguro y empieza a volumen bajo, especialmente con auriculares. Los sonidos son una invitación, no una tarea. Puedes pausar o terminar cuando quieras. Detén la reproducción si notas dolor de oído, pitidos, mareo o malestar.',
  safePlace:'No lo uses al conducir, manejar maquinaria, nadar o bañarte. Mantente atento a sonidos importantes y alarmas. Relax no es atención médica ni sustituye tratamientos.',
@@ -103,7 +106,8 @@ const es:Text = {
  privacyBody:'Solo con consentimiento se guardan localmente sonidos, volúmenes, duración, densidad, opciones visuales y el estado del aviso inicial. Sin consentimiento permanecen en memoria. No se guarda una sesión en curso. Desactivar el almacenamiento o borrar ajustes elimina los datos guardados. No hay sincronización entre dispositivos.',
 };
 const fr:Text = {
- kalimba:'Kalimba',handpan:'Handpan',instrumentDescriptions:{chimes:'Carillon : groupes de sons métalliques clairs, suivant les rafales si le vent est activé.',bowls:'Bols chantants : sons flottants avec une longue résonance.',kalimba:'Kalimba : instrument à petites lamelles métalliques pincées. Ici, des notes douces et brèves.',handpan:'Handpan : instrument en acier joué avec les mains. Ici, des sons ronds et chaleureux à la résonance douce.'},
+ bells:'Cloches douces',gong:'Gong',harp:'Harpe',
+ kalimba:'Kalimba',handpan:'Handpan',instrumentDescriptions:{bells:'Cloches douces : notes claires isolées avec une résonance douce et prolongée.',gong:'Gong : sons graves et flottants avec des pauses particulièrement longues.',harp:'Harpe : délicates notes de cordes pincées dans une palette harmonieuse.',chimes:'Carillon : groupes de sons métalliques clairs, suivant les rafales si le vent est activé.',bowls:'Bols chantants : sons flottants avec une longue résonance.',kalimba:'Kalimba : instrument à petites lamelles métalliques pincées. Ici, des notes douces et brèves.',handpan:'Handpan : instrument en acier joué avec les mains. Ici, des sons ronds et chaleureux à la résonance douce.'},
  windAnimation:'Animer le vent',
  instrumentAnimation:'Animer les instruments',
  rainAnimation:'Animer la pluie',
@@ -120,7 +124,7 @@ const fr:Text = {
  hint:'Démarre seulement après votre clic. Sons synthétisés dans le navigateur, sans enregistrements ni microphone. La durée modifiée s’applique à la prochaine séance.',
  noiseHint:'Blanc, rose et brun décrivent des couleurs sonores, pas des fréquences thérapeutiques. Aucun effet particulier sur le sommeil ou la concentration n’est promis.',
  local:'Sans publicité. Sans suivi. Dans votre navigateur.',guide:'Rien à réussir. Juste écouter.',steps:['Choisissez vos sons.','Installez-vous.','Laissez le moment s’éteindre.'],
- tips:['Choisissez un carillon, des bols chantants, une kalimba ou un handpan. Ajoutez pluie, vent ou bruit selon vos envies.','Commencez à faible volume. Désactivez l’animation ou utilisez la vue concentration. Regarder est facultatif.','Choisissez une durée ou écoutez sans limite. Tous les sons s’éteignent doucement à la fin prévue.'],
+ tips:['Choisissez votre instrument, par exemple carillon, kalimba ou harpe. Ajoutez pluie, vent ou bruit selon vos envies.','Commencez à faible volume. Désactivez l’animation ou utilisez la vue concentration. Regarder est facultatif.','Choisissez une durée ou écoutez sans limite. Tous les sons s’éteignent doucement à la fin prévue.'],
  safetyTitle:'Écoutez doucement, restez à l’aise',safetyLink:'Conseils de sécurité',continueLabel:'Continuer',closeLabel:'Fermer',
  firstHint:'Utilisez Relax dans un endroit sûr et commencez à faible volume, surtout avec un casque. Les sons sont une invitation, pas une consigne. Vous pouvez arrêter ou mettre en pause à tout moment. Arrêtez en cas de douleur aux oreilles, de sifflements, de vertiges ou de malaise.',
  safePlace:'Ne l’utilisez pas en conduisant, en utilisant des machines, en nageant ou en prenant un bain. Restez attentif aux sons importants et aux alarmes. Relax n’est pas un service médical et ne remplace pas un traitement.',

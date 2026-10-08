@@ -22,7 +22,7 @@ function shape(note:NoteEvent){
  node.style.setProperty('--tone-colour','var(--relax-tone-'+note.index+')');
  node.style.setProperty('--life',Math.max(2.8,note.duration)+'s');
  node.style.left=(12+Math.random()*58)+'%';node.style.top=(10+Math.random()*58)+'%';
- node.style.width=(note.instrument==='kalimba'?8+Math.random()*7:24+Math.random()*20)+'%';
+ node.style.width=(note.instrument==='kalimba'?8+Math.random()*7:note.instrument==='harp'?5+Math.random()*4:note.instrument==='gong'?38+Math.random()*12:24+Math.random()*20)+'%';
  node.dataset.note=String(note.index);stage.append(node);
  node.addEventListener('animationend',()=>node.remove(),{once:true});
  while(stage.querySelectorAll('.sound-shape').length>8)stage.querySelector('.sound-shape')?.remove();
@@ -106,7 +106,7 @@ safety.addEventListener('close',()=>el('safety-open').focus());
 form.addEventListener('submit',e=>e.preventDefault());
 function read(){
  const selected=document.querySelector<HTMLInputElement>('[name=instrument]:checked')!.value;
- for(const key of ['chimes','bowls','kalimba','handpan'] as const)settings[key]=key===selected;
+ for(const key of ['chimes','bowls','kalimba','handpan','bells','gong','harp'] as const)settings[key]=key===selected;
  for(const key of ['windAnimation','instrumentAnimation','rainAnimation','rain','wind','noise','motion','awake','background'] as const)settings[key]=input(key).checked;
  for(const key of ['windActivity','rainDensity','pitch','minutes','density','instrumentVolume','rainVolume','windVolume','noiseVolume'] as const)settings[key]=Number(input(key).value);
  settings.noiseType=document.querySelector<HTMLInputElement>('[name=noiseType]:checked')!.value as Settings['noiseType'];

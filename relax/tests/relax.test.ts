@@ -125,3 +125,15 @@ test('kalimba and handpan are exclusive and have distinct synthesis profiles',()
  assert(kalimba.duration<handpan.duration);assert(kalimba.frequency>handpan.frequency);
  assert.notDeepEqual(kalimba.partials,handpan.partials);
 });
+
+test('bells, gong and harp have exclusive selection and distinct profiles',()=>{
+ for(const instrument of ['bells','gong','harp'] as const){
+  const settings=normalize({[instrument]:true});
+  assert.equal(settings[instrument],true);
+  assert.equal(settings.chimes,false);assert.equal(settings.bowls,false);
+  const tone=instrumentTone(instrument,0);assert(tone.duration>0);assert(tone.peak<=.2);
+ }
+ assert(instrumentTone('gong',0).duration>instrumentTone('bells',0).duration);
+ assert(instrumentTone('gong',0).frequency<instrumentTone('harp',0).frequency);
+ assert.deepEqual(instrumentTone('harp',0).partials,[1,2,3,4,5]);
+});
