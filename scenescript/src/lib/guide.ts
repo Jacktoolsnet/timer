@@ -1,89 +1,295 @@
 import {demoProject,formats,fonts,animations} from './model';
+
+// Single source for the localized AI pages, /ai/ and /ai.txt.
 export const aiGuide = `# SceneScript format 1.0
 
-You create editable animated presentations for a browser-based scene editor.
-Return valid JSON only, without Markdown fences. Never include JavaScript, HTML,
-CSS, external URLs or invented Base64. Discuss the topic, audience, aspect ratio,
-style and length with the user first. Keep text short and readable on mobile.
+Create editable animated presentations for the browser-based SceneScript editor.
+This guide describes the existing format 1.0, not proposed features.
 
-## Root
-Required: version (exactly "1.0"), title (max 200 characters), format, scenes.
-assets is an object (default {}). Unknown fields are rejected at every level.
-Formats: ${Object.entries(formats).map(([k,v])=>`${k}: ${v[0]} × ${v[1]}`).join('; ')}.
-Project coordinates are independent of the editor UI's font size or theme.
-All times are seconds. All colors must be six-digit #RRGGBB strings.
-IDs: 1–100 ASCII letters, digits, underscores or hyphens. Scene IDs must be
-unique across scenes, element IDs must be unique throughout the project.
+## Workflow: conversation first, project output last
 
-## Assets
-assets maps an ID to {"name":"filename.png","data":"data:image/png;base64,..."}.
-Only PNG, JPEG and WebP Base64 data URLs are supported. Never use remote URLs,
-SVG, file paths or executable content. Every nonempty asset reference must
-resolve to a key in assets. Store an image once and reuse its ID.
-If you can access a generated image file and a file-encoding tool, encode the
-actual image bytes. Otherwise leave the asset reference empty and ask the user
-to import the image separately. Do NOT fabricate a Base64 payload.
+Before creating a project, establish the topic, audience, format/aspect ratio,
+visual style and desired total duration. Reuse information the user has already
+provided; do not ask for it again. Ask only about missing details that materially
+change the result. If the user explicitly requests no questions, proceed with
+reasonable default assumptions based on their request.
+Normal conversational replies are allowed during this planning phase. Resolve
+any missing-image arrangements before delivering the final project.
+For the final project output, return exactly one valid JSON object: no Markdown
+fences, introduction, explanation or other text outside the JSON.
+Do not generate executable code or additional fields to simulate unsupported
+features. Plain-text content is never interpreted as HTML.
 
-## Scenes
-scenes is an ordered array of 1–100 scenes. Required scene fields: id, elements.
-Other fields with defaults:
-name: "Scene" (max 200 characters)
-duration: 5 (0.1–3600 seconds)
-background: "#263b42"
-backgroundAsset: "" (asset ID, or empty for none; images cover the canvas)
-transition: "fade" ("none" or "fade")
-transitionDuration: 0.5 (0.01–3600 seconds)
-The fade is a fade-in of the new scene's content over its background color,
-not a crossfade with the previous scene. It occupies the beginning of the scene,
-not additional time. Scenes play sequentially; durations add up to project time.
-elements: ordered array of 0–100 elements. Later elements are drawn on top.
+## Reading this specification
 
-## Elements
-Required: id and type. type is "text", "image" or "shape" (rectangle).
-All other fields are optional. Defaults:
-text: "Your story starts here." for text, otherwise "" (max 10000 characters)
-asset: "" (asset ID; relevant for images; empty displays a placeholder)
-x: 10, y: 35 (top-left corner as percentage of canvas; range -100 to 100)
-width: 80, height: 30 (percentage of canvas; range 0.1 to 200)
-color: "#ffffff" for text/image, "#b86445" for shapes
-font: "Arial"; allowed fonts: ${fonts.join(', ')}
-fontSize: 90 (1–500 project pixels, NOT percentage or editor UI pixels)
-align: "center" ("left", "center", "right")
-bold: false (boolean)
-opacity: 1 (0–1)
-rotation: 0 (-360 to 360 degrees, around element center)
-radius: 0 (0–1000 project pixels)
-fit: "contain" ("contain" or "cover", relevant for images)
-animation: "fade"; allowed: ${animations.join(', ')}
-at: 0 (0 to scene duration, relative to scene start)
-animationDuration: 1 (0.01–3600 seconds)
-Element type-specific irrelevant fields are accepted and preserved.
-Text is plain text, vertically centered, wraps naturally and honors newlines.
-Overflow outside the element box or canvas is clipped; there is no auto-fit.
-Fonts are local system fonts and may fall back on another device.
+- Import requirements describe checks that reject invalid input. "Must" marks
+  binding requirements for a valid project.
+- Renderer behavior describes what actually happens, including accepted edge
+  cases. Acceptance does not guarantee a useful visual result.
+- Composition guidelines use "should" for recommendations, not import rules.
 
-## Animations
-none: appears immediately at 'at'.
-fade: opacity rises linearly from 0 to the configured opacity.
-slide-left: slides from 80 project pixels to the right into its final position.
-slide-up: slides from 80 project pixels below into its final position.
-zoom: scales from 70% to 100%.
-typewriter: reveals plain-text Unicode code points over animationDuration.
-pan: slowly scales from 100% to 110%; it does not repeat.
-Slide and zoom use cubic ease-out. Other animations use linear progress.
-Elements are hidden before 'at' and remain visible after their entrance animation.
-No exit animations, audio, arbitrary keyframes, loops or video assets in v1.0.
-Set at + animationDuration <= scene.duration to show the complete animation.
-For static scenes use animation "none" and transition "none".
+## Import requirements: structure, fields and defaults
 
-## Constraints and recording
-Maximum JSON size: 30 MiB of UTF-8, each image: 8 MiB of encoded source bytes
-and 40 megapixels; maximum 100 image assets. Base64 adds approximately 33% size.
-A safe text zone can be shown as a guideline (12% left/right, 10% top, 18% bottom).
-It is not a guarantee for any platform. Prefer generous margins and short text.
-The recording view preloads images/fonts, counts down 3 seconds and plays the
-entire project. Space pauses/resumes; Escape exits. Use a separate screen recorder.
-Save as exports a self-contained .scenescript.json. The UI edits the same data.
+The root must be a JSON object. Unknown fields are rejected at root, asset,
+scene and element levels. Do not put $schema in project data.
+Numbers must be finite JSON numbers, not numeric strings. Booleans must be
+true or false, not strings or numbers. Colors must be six-digit #RRGGBB strings
+(case-insensitive hex digits, no alpha channel or named colors).
+All time fields use seconds. Ranges below include both endpoints.
+String limits are measured with JavaScript string.length (UTF-16 code units);
+for example, a supplementary Unicode character generally consumes two units.
+
+### Root
+
+Required fields:
+- version: exactly "1.0".
+- title: string, maximum 200 UTF-16 code units (empty is accepted).
+- format: ${Object.entries(formats).map(([k,v])=>`"${k}" (${v[0]} × ${v[1]} project pixels)`).join('; ')}.
+- scenes: ordered array of 1–100 scenes.
+Optional: assets, an object mapping asset IDs to asset objects; default {}.
+Project coordinates and text sizes are independent of the editor UI's font-size
+and appearance settings. The stage is uniformly scaled to its displayed size;
+the logical resolution is not a guarantee of recorded video resolution.
+
+### IDs and references
+
+Asset keys, scene IDs and element IDs must contain 1–100 ASCII letters, digits,
+underscores or hyphens. Scene IDs must be unique across scenes. Element IDs must
+be unique throughout the project. These are separate ID namespaces.
+Every nonempty backgroundAsset or asset reference must resolve to an own key
+in assets, even if the reference is irrelevant to the element's type.
+Empty references must be "", not a URL, file path or an invented placeholder ID.
+
+### Assets and image limits
+
+Maximum 100 assets. Each asset must have exactly these required fields:
+- name: string, maximum 200 UTF-16 code units; a display name, not a path to load.
+- data: a nonempty Base64 data URL with one of these exact, lowercase prefixes:
+  data:image/png;base64, or data:image/jpeg;base64, or data:image/webp;base64,
+The Base64 payload must use the standard alphabet, complete four-character
+blocks and appropriate trailing padding; whitespace and Base64URL are rejected.
+External URLs, SVG data URLs and other MIME prefixes are rejected.
+
+Each image must be at most 8 MiB of decoded image-file bytes, measured before
+Base64 encoding. This means the bytes of the PNG/JPEG/WebP file, not the
+uncompressed pixel buffer. The validator computes that byte count from payload
+length and trailing padding; direct image upload also checks File.size.
+The complete input JSON must be at most 30 MiB as UTF-8, including Base64 data,
+all other fields and whitespace. File loading also checks the selected file's
+byte size. Export checks the size of its complete, pretty-printed JSON Blob;
+extra export indentation can make an otherwise near-limit project too large.
+1 MiB = 1,048,576 bytes. Base64 adds approximately one third to file-byte size,
+plus the data URL prefix, JSON and padding overhead.
+
+The browser import path decodes every asset using Image.decode(), rejects
+undecodable images and rejects naturalWidth × naturalHeight > 40,000,000 pixels
+(40 megapixels per image). Direct image upload and recording-view preload use
+this check too. parseProject itself checks structure, Base64 syntax and byte
+limits, but does not decode images or check dimensions.
+The file picker accepts exactly image/png, image/jpeg and image/webp MIME types;
+its upload handler rejects another or missing File.type.
+
+Encode actual image-file bytes only when you have access to both those bytes
+and an encoding tool. Base64 must never be invented. Store each image once and
+reuse its asset ID. If genuine image data is unavailable, do not create fake
+asset objects: use only the existing empty asset/backgroundAsset references
+and agree on later image import with the user before final JSON output.
+An image element with asset "" displays the editor's image placeholder; a scene
+with backgroundAsset "" uses only its background color. No additional placeholder
+fields exist. In the UI, import the image, then choose it in the image element's
+asset selector or the scene's background-image selector. Importing while an
+image element is selected also assigns the new image to that element.
+
+### Scenes
+
+Each scene must have id and elements (an ordered array of 0–100 elements).
+Later elements are painted on top of earlier elements.
+Optional fields and their defaults:
+- name: "Scene"; string, maximum 200 UTF-16 code units.
+- duration: 5; number, 0.1–3600 seconds.
+- background: "#263b42"; #RRGGBB color.
+- backgroundAsset: ""; empty or an existing asset ID, maximum 100 code units.
+- transition: "fade"; allowed "none" or "fade".
+- transitionDuration: 0.5; number, 0.01–3600 seconds.
+Scene durations add up to the total duration; transitions do not add time.
+
+### Elements
+
+Required: id and type. type must be "text", "image" or "shape" (a rectangle).
+Optional fields and their defaults:
+- text: "Your story starts here." for text, otherwise ""; string, max 10000
+  UTF-16 code units.
+- asset: ""; empty or an existing asset ID, max 100 code units.
+- x: 10; y: 35; each -100 to 100, percentages of canvas width/height.
+- width: 80; height: 30; each 0.1–200, percentages of canvas width/height.
+- color: "#ffffff" for text/image, "#b86445" for shape; #RRGGBB color.
+- font: "Arial"; allowed ${fonts.map(f=>`"${f}"`).join(', ')}.
+- fontSize: 90; number, 1–500 project pixels, not percentages or UI pixels.
+- align: "center"; allowed "left", "center", "right".
+- bold: false; boolean.
+- opacity: 1; number, 0–1.
+- rotation: 0; number, -360 to 360 degrees.
+- radius: 0; number, 0–1000 project pixels.
+- fit: "contain"; allowed "contain" or "cover".
+- animation: "fade"; allowed ${animations.map(a=>`"${a}"`).join(', ')}.
+- at: 0; number, 0 to the containing scene's duration, relative to scene start.
+- animationDuration: 1; number, 0.01–3600 seconds.
+Type-irrelevant fields are accepted, validated and preserved, but may have no
+visual effect. All omitted optional element fields use these defaults.
+
+### Omitted fields versus explicit null
+
+Authoring guidance: omit optional fields to request defaults; do not emit null.
+Actual validator behavior is asymmetric:
+- Missing required fields are rejected.
+- assets omitted OR assets: null is normalized to {}.
+- Each optional scene field listed above uses its default when omitted OR null.
+- Scene id/elements and asset name/data do not accept null.
+- Every element field rejects explicit null, including otherwise optional fields:
+  element defaults apply only to omitted fields, not explicit null.
+- Root version/title/format/scenes do not accept null.
+/schema.json describes the typed authoring structure, not every normalization
+exception. Runtime validation/import is authoritative; the schema alone does
+not enforce reference resolution, unique IDs, exact decoded image-byte limits,
+per-scene at bounds, file size, browser image decoding or image dimensions.
+
+## Renderer behavior: layout and appearance
+
+x/y locate the element box's untransformed top-left corner. Percentages use the
+canvas dimensions, not a parent element. width/height are box dimensions before
+rotation/scaling. The element's own overflow is hidden, and the stage clips
+anything extending beyond the canvas. Overlays/selection outlines are editor
+controls, not JSON content; selection outlines are hidden in recording view.
+
+### Text
+
+Text is rendered with textContent, not HTML. There is no internal padding or
+border on the text box. Line-height is the CSS/browser default "normal", not
+an explicitly fixed ratio or editable field. Font metrics may differ by device;
+fonts are local system fonts and can fall back when unavailable.
+The text span is full box width, vertically centered by flex layout. align sets
+horizontal text alignment. white-space: pre-wrap preserves explicit newlines
+and whitespace, with normal browser wrapping at available break opportunities.
+Long unbroken strings are not forcibly broken. Text too wide/tall is clipped to
+the element box (including rounded corners), then to the canvas. No auto-fit,
+automatic font-size reduction, overflow warning or padding/line-height field
+exists. color controls the text foreground; bold controls its font weight.
+
+### Images, backgrounds and shapes
+
+An image element fills its box with an img sized to 100% width/height:
+- contain preserves aspect ratio and shows the entire image, centered on both
+  axes; unused space is transparent, exposing lower layers/background.
+- cover preserves aspect ratio, fills the box, and centrally crops excess.
+No object-position field exists. Background images always use centered cover
+across the whole canvas, above the background color and below all elements.
+color does not tint an actual image. It is the container's foreground color
+and can affect the text of an empty-image placeholder, not image pixels.
+For shape, color is the rectangle's solid background color; text is not drawn.
+radius sets the element container's rounded corners for every type: it clips
+text and images and rounds shape fills. Large radii follow browser CSS border-
+radius normalization. A scene background image has no radius field.
+
+### Transforms and clipping
+
+Elements rotate and scale about their box center (the default 50% 50% origin).
+The actual CSS transform is rotate(...) translate(...) scale(...); with a
+nonzero rotation, slide translation follows the rotated coordinate system.
+zoom and pan scale the entire container, including its content, box and rounded
+clipping boundary; they do not move an image within a fixed-size crop box.
+Expanded elements may extend beyond their original layout boxes; the canvas
+still clips them. The stage's uniform display scaling has a top-left origin.
+
+## Renderer behavior: timing, animations and fades
+
+Let localTime be time since scene start. An element is hidden when localTime < at.
+Its animation progress is clamped to 0–1:
+  progress = clamp((localTime - at) / animationDuration, 0, 1)
+Slide/zoom easing is 1 - (1 - progress)^3 (cubic ease-out).
+
+- none: appears immediately at at with the configured opacity. animationDuration
+  has no visual effect here, but must still be within 0.01–3600 for validation.
+- fade: element opacity = configured opacity × progress (linear).
+- slide-left: translates from 80 project pixels to the right to zero, eased.
+- slide-up: translates from 80 project pixels below to zero, eased.
+- zoom: scales from 70% to 100%, eased.
+- typewriter: displays floor(codePointCount × progress) Unicode code points of
+  text. It uses Array.from, NOT grapheme clusters. Combining marks, flags and
+  joined emoji can therefore appear in parts; complete emoji/grapheme handling
+  is not guaranteed. The partially revealed text is laid out again as it grows.
+  This affects text elements only; it does not reveal image or shape pixels.
+- pan: a slow linear zoom from 100% to 110%, with NO sideways panning. It does
+  not repeat, and holds 110% after animationDuration.
+For animations other than fade, element opacity is the configured opacity.
+Elements remain until their scene ends; there are no exit animations.
+
+While playback is running and transition is "fade", the scene fade factor is
+min(1, localTime / transitionDuration). It multiplies each element's animated
+opacity and also the background image's opacity. With an element fade, the
+combined opacity is configured opacity × element progress × scene fade factor.
+The background COLOR is immediately present and does not fade. This is a fade-in
+of new-scene content over its own color, not a crossfade from the previous scene.
+The background image participates in this fade even when all elements use none.
+With transition "none", the scene factor is 1.
+Current preview behavior: scene fades apply only while playing. Pausing, seeking
+or displaying the stopped final frame sets the scene factor to 1; element
+animation progress still follows the selected time. This may change brightness
+when pausing a still-incomplete scene fade.
+
+### Accepted timing edge cases (not additional rejection rules)
+
+- at + animationDuration > scene.duration: accepted, not shortened by validation.
+  Progress remains below 1 at scene end; playback cuts to the next scene or
+  stops on the final scene's partial animation. There is no animation tail time.
+- transitionDuration > scene.duration: accepted, not shortened by validation.
+  The scene fade remains incomplete during playback. The next scene replaces it;
+  a stopped final frame removes the scene-fade factor as described above.
+- at == scene.duration: accepted. Non-final scenes switch to the next scene at
+  that boundary, so the element has no visible interval during normal playback.
+  On the final scene's stopped endpoint it is eligible to be shown at progress 0:
+  none/slides/zoom/pan can appear in their initial state; fade is transparent and
+  typewriter has revealed no text. Use at < scene.duration for visible content.
+- animationDuration with none: accepted and still range-checked, but ignored
+  visually. Zero is rejected even for none.
+At exact intermediate scene boundaries, the next scene is selected with local
+ time 0. At or beyond total duration, the last scene is displayed at its endpoint.
+No audio tracks, video assets, arbitrary code/keyframes, loops, new element types
+or exit animations are supported by this format.
+
+## Composition guidelines
+
+These are recommendations, not extra import requirements:
+- You should prefer one central message per scene and a clear visual hierarchy.
+- You should size element boxes and fonts for the chosen format, not assume that
+  a layout for landscape fits portrait unchanged.
+- Unless the user requests a different layout, important text should stay inside
+  the available safe-zone guideline: 12% left/right, 10% top, 18% bottom.
+  This is NOT a guaranteed platform-specific safe zone. The overlay is optional
+  in the editor and hidden in recording view; it does not change the project.
+- Text should be short; estimate whether it fits its box. If space is tight,
+  shorten the text or adjust the layout, rather than relying on automatic fit.
+- You should leave enough reading time after entrances finish. Normally choose
+  at + animationDuration <= scene.duration and transitionDuration <= duration
+  for completed entrances/fades, but these are recommendations, not hard limits.
+- Animation should support the message; do not automatically animate everything.
+  For static content, choose animation "none" and transition "none".
+No universal font size or reading speed is a technical requirement. Preview and
+check the project on the intended output size before recording.
+
+## Recording, editing and delivery
+
+The existing UI edits the same project data. JSON/file import normalizes omitted
+fields to defaults. Save as downloads a self-contained .scenescript.json file.
+The recording view preloads assets and waits for document.fonts.ready, counts
+down three seconds and plays the entire project. Space pauses/resumes; Escape
+exits. Mouse movement/tapping reveals an exit button. Fullscreen is requested
+when supported, with a CSS focus-view fallback. Use a separate screen recorder;
+SceneScript does not record or export a video file itself.
+
+This English specification has one shared source, served at /ai/, /de/ai/,
+/en/ai/, /es/ai/, /fr/ai/ and /ai.txt on the current server. /schema.json provides
+the structural schema; /example.scenescript.json provides the example below.
+These are existing static routes; no new API or hosting is required.
 
 ## Complete valid example (no images required)
 ${JSON.stringify(demoProject(),null,2)}
