@@ -78,7 +78,7 @@ function rainFrame(){
     node.style.left=(12+Math.random()*76)+'%';node.style.top='100%';
     const smokeSize=85+Math.random()*65+event.strength*70;
     // Carry the entire expanded plume past the top, not just its leading edge.
-    node.style.setProperty('--smoke-rise',(-stage.clientHeight-smokeSize*2.2*1.8)+'px');
+    node.style.setProperty('--smoke-rise',(-stage.clientHeight-smokeSize*3.2*1.8)+'px');
     node.style.setProperty('--smoke-drift',(Math.random()*100-50)+'px');
     node.style.setProperty('--smoke-sway',(12+Math.random()*18)+'px');
     node.style.setProperty('--smoke-life',(8+Math.random()*4)+'s');

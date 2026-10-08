@@ -813,7 +813,7 @@ body.focus-view.focus-cursor-hidden, body.focus-view.focus-cursor-hidden * { cur
 
 .nature-glimmer { position:absolute; width:var(--nature-size); height:var(--nature-size); border-radius:50%; pointer-events:none; opacity:0; animation:nature-glow 2.8s ease-in-out forwards; }
 /* Smoke always rises, independently of the selected ocean-wave direction. */
-.fire-glimmer { width:calc(var(--nature-size)*.65); height:calc(var(--nature-size)*2.2); border-radius:45% 55% 40% 60% / 65% 45% 55% 35%; background:radial-gradient(ellipse,color-mix(in srgb,var(--nature-colour) 35%,var(--muted)) 0%,transparent 70%); filter:blur(3px); animation:campfire-smoke var(--smoke-life,10s) linear forwards; }
+.fire-glimmer { width:calc(var(--nature-size)*.55); height:calc(var(--nature-size)*3.2); border-radius:45% 55% 40% 60% / 65% 45% 55% 35%; background:radial-gradient(ellipse,color-mix(in srgb,var(--nature-colour) 35%,var(--muted)) 0%,transparent 70%); filter:blur(3px); animation:campfire-smoke var(--smoke-life,10s) linear forwards; }
 .fire-glimmer::before,.fire-glimmer::after { content:'';position:absolute;inset:8% -12% 12% 28%;border-radius:40% 60% 55% 45% / 65% 40% 60% 35%;background:inherit; }
 .fire-glimmer::after { inset:-18% 24% 30% -8%; }
 @keyframes campfire-smoke {
