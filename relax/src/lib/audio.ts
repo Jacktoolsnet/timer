@@ -69,8 +69,8 @@ export class Soundscape {
   const ctx=this.context!;
   if(type==='fire'||type==='stream'){
    const activity=type==='fire'?this.settings.fireDensity:this.settings.streamFlow;
-   const events:NatureEvent[]=[],buffer=ctx.createBuffer(2,ctx.sampleRate*30,ctx.sampleRate);
-   for(let channel=0;channel<2;channel++){
+   const events:NatureEvent[]=[],channels=type==='stream'?1:2,buffer=ctx.createBuffer(channels,ctx.sampleRate*30,ctx.sampleRate);
+   for(let channel=0;channel<channels;channel++){
     buffer.getChannelData(channel).set(natureSound(type,ctx.sampleRate,30,Math.random,activity,event=>events.push(event)));
    }
    events.sort((a,b)=>a.time-b.time);this.natureEvents.set(type,events);

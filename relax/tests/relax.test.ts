@@ -1,3 +1,4 @@
+import {oceanSurf} from '../src/lib/ocean.ts';
 import {natureSound,type NatureEvent} from '../src/lib/nature.ts';
 import {applyPreset,matchingPreset,presetNames} from '../src/lib/presets.ts';
 import {instrumentTone} from '../src/lib/instruments.ts';
@@ -170,25 +171,34 @@ test('sleep mode preserves a useful fade for short and long sessions',()=>{
  assert.equal(applyPreset({...defaults,sleepMode:true},'summer').sleepMode,true);
 });
 
-test('fire and brook are bounded, varied textures with audio-timed events',()=>{
+test('fire and ocean surf are bounded, varied textures with audio-timed events',()=>{
  for(const layer of ['fire','stream'] as const){
   let seed=42;const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
   const events:NatureEvent[]=[];const sound=natureSound(layer,8000,3,random,5,e=>events.push(e));
-  assert.equal(sound.length,24000);assert(sound.every(Number.isFinite));assert(events.length>2);
+  assert.equal(sound.length,24000);assert(sound.every(Number.isFinite));assert(events.length>=(layer==='stream'?1:3));
   assert(sound.some(n=>Math.abs(n)>.02));assert(sound.every(n=>Math.abs(n)<.5));
   assert(sound[0]===0);assert(sound[sound.length-1]===0);
  }
  assert.equal(normalize({fireDensity:99,streamFlow:0}).fireDensity,10);
  assert.equal(normalize({streamFlow:0}).streamFlow,1);
 });
-test('new nature presets disable instruments and clear unrelated sounds',()=>{
+test('nature presets disable instruments and clear unrelated sounds',()=>{
  const fire=applyPreset(defaults,'fireside'),brook=applyPreset(defaults,'brook');
  assert(fire.fire&&fire.fireAnimation);assert(!fire.instrumentsEnabled&&!fire.stream&&!fire.rain);
  assert(brook.stream&&brook.streamAnimation);assert(!brook.instrumentsEnabled&&!brook.fire&&!brook.rain);
 });
 
-test('brook events represent broad water eddies instead of rapid isolated drops',()=>{
- const events:NatureEvent[]=[];natureSound('stream',8000,3,()=>.5,5,e=>events.push(e));
- assert(events.length>=3&&events.length<8);
- for(let i=1;i<events.length;i++)assert(events[i].time-events[i-1].time>.3);
+test('ocean surf has long swells, quiet gaps and stronger waves at higher activity',()=>{
+ const events:NatureEvent[]=[];
+ const sound=oceanSurf(8000,30,()=>.5,5,event=>events.push(event));
+ assert(events.length>=3&&events.length<=5);
+ assert(events.every(e=>e.duration!>4));
+ for(let i=1;i<events.length;i++)assert(events[i].time-events[i-1].time>5);
+ const wave=events[0],start=Math.floor(wave.time*8000);
+ assert(Math.abs(sound[start])<.0001);
+ const lull=Math.floor((wave.time+wave.duration!+.2)*8000);assert(sound[lull]===0);
+ const gentle:NatureEvent[]=[],strong:NatureEvent[]=[];
+ oceanSurf(8000,10,()=>.5,1,e=>gentle.push(e));
+ oceanSurf(8000,10,()=>.5,10,e=>strong.push(e));
+ assert(strong[0].strength>gentle[0].strength);
 });

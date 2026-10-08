@@ -42,7 +42,8 @@ function rainFrame(){
    for(const event of events){
     const node=document.createElement('span');node.className='nature-glimmer '+layer+'-glimmer';
     node.style.left=(10+Math.random()*80)+'%';node.style.top=(16+Math.random()*66)+'%';
-    node.style.setProperty('--nature-size',(layer==='fire'?18+event.strength*55:35+event.strength*100)+'px');
+    node.style.setProperty('--nature-size',(layer==='fire'?18+event.strength*55:110+event.strength*200)+'px');
+    if(layer==='stream'&&event.duration)node.style.setProperty('--nature-life',event.duration+'s');
     node.style.setProperty('--nature-colour','var(--relax-tone-'+(layer==='fire'?0:4)+')');
     stage.append(node);node.addEventListener('animationend',()=>node.remove(),{once:true});
    }

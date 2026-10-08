@@ -844,3 +844,10 @@ body.focus-view #relax-app > .relax-card { margin-bottom:0; }
  .instrument-tile-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; }
  .instrument-tile-grid > div > :first-child { margin-top:0; }
 }
+
+.stream-glimmer { height:calc(var(--nature-size) * .35); border-radius:50%; animation:surf-wave var(--nature-life,7s) ease-in-out forwards; }
+@keyframes surf-wave {
+ 0% { opacity:0; transform:translateX(-20px) scale(.65); }
+ 35% { opacity:.45; transform:translateX(0) scale(1.25); }
+ 100% { opacity:0; transform:translateX(24px) scale(.8); }
+}
