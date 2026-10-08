@@ -7,8 +7,8 @@ No deployment or hosting changes are made by a build.
 DE/EN/ES/FR, shared palette/style/font settings, bilingual legal documents.
 Locally synthesised wind chimes, singing bowls, kalimba, handpan, bells, gong and harp.
 Instrument playback can be disabled independently of the background layers.
-Optional synthesised rain, gusting wind, fireplace, ocean surf and white/pink/brown noise
-with individual volume controls. Fireplace crackle density and ocean surf wave intensity are adjustable
+Optional synthesised rain, gusting wind, campfire, ocean surf and white/pink/brown noise
+with individual volume controls. Campfire crackle density and ocean surf wave intensity are adjustable
 live, with independent optional audio-timed ember/water animations.
 Editable presets include Summer garden, Evening calm, Gentle companion, Nature only,
 By the fire and By the sea; they preserve session duration and general preferences.

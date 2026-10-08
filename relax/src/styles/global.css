@@ -812,7 +812,18 @@ body.focus-view .sound-shape { max-width: min(45dvh,45vw); }
 body.focus-view.focus-cursor-hidden, body.focus-view.focus-cursor-hidden * { cursor:none !important; }
 
 .nature-glimmer { position:absolute; width:var(--nature-size); height:var(--nature-size); border-radius:50%; pointer-events:none; opacity:0; animation:nature-glow 2.8s ease-in-out forwards; }
-.fire-glimmer { background:radial-gradient(circle,color-mix(in srgb,var(--nature-colour) 75%,#d88742),transparent 70%); filter:blur(3px); }
+/* Smoke always rises, independently of the selected ocean-wave direction. */
+.fire-glimmer { width:calc(var(--nature-size)*.65); height:calc(var(--nature-size)*2.2); border-radius:45% 55% 40% 60% / 65% 45% 55% 35%; background:radial-gradient(ellipse,color-mix(in srgb,var(--nature-colour) 35%,var(--muted)) 0%,transparent 70%); filter:blur(3px); animation:campfire-smoke var(--smoke-life,10s) linear forwards; }
+.fire-glimmer::before,.fire-glimmer::after { content:'';position:absolute;inset:8% -12% 12% 28%;border-radius:40% 60% 55% 45% / 65% 40% 60% 35%;background:inherit; }
+.fire-glimmer::after { inset:-18% 24% 30% -8%; }
+@keyframes campfire-smoke {
+ 0% { opacity:0;transform:translate(-50%,0) scale(.45); }
+ 15% { opacity:.25; }
+ 45% { opacity:.3; }
+ 80% { opacity:.25; }
+ 95% { opacity:.15; }
+ 100% { opacity:0;transform:translate(calc(-50% + var(--smoke-drift,0px)),var(--smoke-rise,-700px)) scale(1.8); }
+}
 .stream-glimmer { background:radial-gradient(ellipse,transparent 35%,color-mix(in srgb,var(--nature-colour) 70%,transparent) 60%,transparent 73%); animation-duration:3.8s; }
 @keyframes nature-glow { 0%{opacity:0;transform:translateY(8px) scale(.6)} 35%{opacity:.5;transform:translateY(0) scale(1)} 100%{opacity:0;transform:translateY(-12px) scale(1.4)} }
 @media(prefers-reduced-motion:reduce) { .nature-glimmer { display:none; animation:none; } }

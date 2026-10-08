@@ -73,13 +73,18 @@ function rainFrame(){
   if(state==='running'&&!document.hidden&&settings.motion&&!reduced.matches){
    for(const event of events){
     const node=document.createElement('span');node.className='nature-glimmer '+layer+'-glimmer';
-    node.style.left=(10+Math.random()*80)+'%';node.style.top=(16+Math.random()*66)+'%';
-    node.style.setProperty('--nature-size',(18+event.strength*55)+'px');
+    node.style.left=(12+Math.random()*76)+'%';node.style.top='100%';
+    const smokeSize=85+Math.random()*65+event.strength*70;
+    // Carry the entire expanded plume past the top, not just its leading edge.
+    node.style.setProperty('--smoke-rise',(-stage.clientHeight-smokeSize*2.2*1.8)+'px');
+    node.style.setProperty('--smoke-drift',(Math.random()*100-50)+'px');
+    node.style.setProperty('--smoke-life',(8+Math.random()*4)+'s');
+    node.style.setProperty('--nature-size',smokeSize+'px');
     node.style.setProperty('--nature-colour','var(--relax-tone-'+(layer==='fire'?0:4)+')');
     stage.append(node);node.addEventListener('animationend',()=>node.remove(),{once:true});
    }
   }
-  while(stage.querySelectorAll('.'+layer+'-glimmer').length>18)stage.querySelector('.'+layer+'-glimmer')?.remove();
+  while(stage.querySelectorAll('.'+layer+'-glimmer').length>64)stage.querySelector('.'+layer+'-glimmer')?.remove();
  }
  const drops=audio.takeRainDrops();
  if(state==='running'&&!document.hidden&&settings.motion&&settings.rainAnimation){

@@ -21,7 +21,7 @@ export function natureSound(type:NatureLayer,sampleRate:number,seconds=30,random
   onEvent?.({time:start/sampleRate,strength});
   let texture=0;
   const alpha=1-Math.exp(-2*Math.PI*(1400+random()*2200)/sampleRate);
-  random(); // Preserve the existing fireplace random sequence.
+  random(); // Preserve the existing campfire random sequence.
   for(let j=0;j<Math.floor(duration*sampleRate);j++){
    const t=j/sampleRate;
    const envelope=(1-Math.exp(-t/.0015))*Math.exp(-t/(duration*.23));
