@@ -33,10 +33,10 @@ Browsersprache, sonst Englisch. Explizite Sprach-URLs werden nicht umgeleitet.
   gespeichert. Mehrfach verwendete Bilder stehen nur einmal in `assets`.
 - JSON-Textimport mit Validierung, JSON kopieren, Datei laden und **Speichern
   unter** als Download einer selbstständigen `.scenescript.json`.
-- Wiedergabe, Pause und Zeitleiste; Aufnahmeansicht mit 3 Sekunden Countdown,
+- Wiedergabe, Pause und Zeitleiste; Aufnahmeansicht mit großem Play-Button zum manuellen Start des 3-Sekunden-Countdowns,
   Vorladen der Bilder, Vollbild wenn unterstützt und CSS-Fallback. Leertaste
   pausiert/setzt fort, Escape beendet. Der Mauszeiger ist schon während des
-  Countdowns ausgeblendet und wird beim Verlassen wiederhergestellt. Während
+  Countdowns (nicht auf dem Startbildschirm) ausgeblendet und wird beim Verlassen wiederhergestellt. Während
   Wiedergabe/Countdown wird ein Screen Wake Lock angefordert; Pause, Ende und
   Verlassen geben ihn frei. Bei Rückkehr in einen sichtbaren Tab wird er bei
   aktiver Wiedergabe erneut angefordert. Falls nicht verfügbar, weist der Editor

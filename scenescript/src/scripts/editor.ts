@@ -9,6 +9,8 @@ const t=(key:string)=>words[key as EditorKey]||key;
 const keepScreenAwake=screenWakeLock($('wake-status'),t('wakeActive'),t('wakeUnavailable'));
 let project:Project=demoProject(), sceneIndex=0, selectedId='',dirty=false,time=0,playing=false,recording=false;
 let revision=0, focusAttempt=0;
+// Recording uses its own playhead; returning must not discard the editor context.
+let recordingReturnState:{sceneIndex:number;selectedId:string;time:number}|undefined;
 let baseTime=0,started=0,frame=0,countdownTimer:ReturnType<typeof setTimeout>|undefined,draftTimer:ReturnType<typeof setTimeout>|undefined;
 const status=(message:string)=>{$('editor-status').textContent=message;};
 try{if(storageAllowed()){const saved=localStorage.getItem(STORAGE_KEY);if(saved){project=parseProject(saved);dirty=true;status(t('recovery'));}}}catch{status(t('storageError'));}
@@ -127,13 +129,51 @@ $('import-image').addEventListener('click',()=>($('image-file') as HTMLInputElem
 async function decodeImage(data:string){const image=new Image();image.src=data;await image.decode();if(image.naturalWidth*image.naturalHeight>40_000_000)throw new Error('Image: maximum 40 megapixels');}
 async function preload(p:Project){await Promise.all(Object.values(p.assets).map(a=>decodeImage(a.data)));}
 $('image-file').addEventListener('change',async()=>{const input=$('image-file') as HTMLInputElement,file=input.files?.[0];input.value='';if(!file)return;const target=project;try{if(Object.keys(project.assets).length>=100)throw new Error('assets: maximum 100');if(file.size>MAX_IMAGE_BYTES)throw new Error('Image: maximum 8 MiB');if(!['image/png','image/jpeg','image/webp'].includes(file.type))throw new Error('PNG / JPEG / WebP');const data=await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=()=>reject(new Error('Image read failed'));reader.readAsDataURL(file);});validateImage(data);await decodeImage(data);if(project!==target)return;const id=crypto.randomUUID();project.assets[id]={name:file.name.slice(0,200),data};try{parseProject(JSON.stringify(project));}catch(error){delete project.assets[id];throw error;}const e=selected();if(e?.type==='image')e.asset=id;changed();refresh();}catch(error){status(t('error')+' '+(error as Error).message);}});
-$('focus').addEventListener('click',async()=>{if(($('focus') as HTMLButtonElement).disabled||recording)return;const attempt=++focusAttempt;($('focus') as HTMLButtonElement).disabled=true;stop();try{await preload(project);await document.fonts.ready;}catch(error){status(t('error')+' '+(error as Error).message);return;}finally{($('focus') as HTMLButtonElement).disabled=false;}if(attempt!==focusAttempt)return;recording=true;document.body.classList.add('recording');keepScreenAwake(true);$('exit-focus').hidden=false;selectedId='';time=0;draw();try{await document.documentElement.requestFullscreen();}catch{/* CSS focus mode also works without fullscreen. */}let count=3;$('countdown').hidden=false;$('countdown').textContent=String(count);const step=()=>{count--;if(count>0){$('countdown').textContent=String(count);countdownTimer=setTimeout(step,1000);}else{$('countdown').hidden=true;countdownTimer=undefined;play();}};countdownTimer=setTimeout(step,1000);});
-function exit(){focusAttempt++;clearTimeout(countdownTimer);countdownTimer=undefined;$('countdown').hidden=true;stop();recording=false;document.body.classList.remove('recording','controls-visible');$('exit-focus').hidden=true;if(document.fullscreenElement)void document.exitFullscreen().catch(()=>{});refresh();}
+$('focus').addEventListener('click',async()=>{
+ if(($('focus') as HTMLButtonElement).disabled||recording)return;
+ const attempt=++focusAttempt;($('focus') as HTMLButtonElement).disabled=true;stop();
+ try{await preload(project);await document.fonts.ready;}
+ catch(error){status(t('error')+' '+(error as Error).message);return;}
+ finally{($('focus') as HTMLButtonElement).disabled=false;}
+ if(attempt!==focusAttempt)return;
+ recordingReturnState={sceneIndex,selectedId,time};recording=true;
+ document.body.classList.add('recording','recording-ready');
+ $('recording-start').hidden=false;($('start-recording') as HTMLButtonElement).disabled=true;
+ $('exit-focus').hidden=false;selectedId='';time=0;draw();
+ try{await document.documentElement.requestFullscreen();}catch{/* CSS fallback. */}
+ if(!recording||attempt!==focusAttempt)return;
+ ($('start-recording') as HTMLButtonElement).disabled=false;$('start-recording').focus();
+});
+function startCountdown(){
+ if(!recording||!document.body.classList.contains('recording-ready')||($('start-recording') as HTMLButtonElement).disabled)return;
+ document.body.classList.remove('recording-ready','controls-visible');clearTimeout(controlsTimer);
+ $('recording-start').hidden=true;$('start-recording').blur();keepScreenAwake(true);
+ let count=3;$('countdown').hidden=false;$('countdown').textContent=String(count);
+ const step=()=>{
+  count--;
+  if(count>0){$('countdown').textContent=String(count);countdownTimer=setTimeout(step,1000);}
+  else{$('countdown').hidden=true;countdownTimer=undefined;play();}
+ };
+ countdownTimer=setTimeout(step,1000);
+}
+$('start-recording').addEventListener('click',startCountdown);
+function exit(){
+ if(!recording)return;
+ focusAttempt++;
+ clearTimeout(countdownTimer);countdownTimer=undefined;$('countdown').hidden=true;
+ stop();recording=false;document.body.classList.remove('recording','recording-ready','controls-visible');$('recording-start').hidden=true;$('exit-focus').hidden=true;
+ if(recordingReturnState){
+  ({sceneIndex,selectedId,time}=recordingReturnState);
+  recordingReturnState=undefined;
+ }
+ if(document.fullscreenElement)void document.exitFullscreen().catch(()=>{});
+ refresh();$('focus').focus();
+}
 $('exit-focus').addEventListener('click',exit);
 let controlsTimer:ReturnType<typeof setTimeout>|undefined;
 function revealControls(){if(!recording)return;document.body.classList.add('controls-visible');clearTimeout(controlsTimer);controlsTimer=setTimeout(()=>document.body.classList.remove('controls-visible'),1500);}
 document.addEventListener('pointermove',revealControls);
 document.addEventListener('pointerdown',revealControls);
 document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&recording)exit();});
-document.addEventListener('keydown',event=>{if(event.key==='Escape'&&recording){exit();return;}if(event.code==='Space'&&recording){event.preventDefault();if(playing){stop();draw();}else play();}});
+document.addEventListener('keydown',event=>{if(event.key==='Escape'&&recording){exit();return;}if(event.code==='Space'&&recording){event.preventDefault();if(document.body.classList.contains('recording-ready')){startCountdown();return;}if(playing){stop();draw();}else play();}});
 refresh();
