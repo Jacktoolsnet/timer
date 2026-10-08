@@ -72,6 +72,13 @@ test('reduced motion and legal pages',async({page})=>{
  await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/en/');await expect(page.locator('#motion')).not.toBeChecked();
  await begin(page);await page.waitForTimeout(700);await expect(page.locator('.sound-shape')).toHaveCount(0);await page.locator('#end-session').click();
  await page.goto('/en/usage/');await expect(page.locator('.legal-page')).toContainText('not a reliable alarm');
+ await expect(page.getByRole('heading',{name:'Set up animations',exact:true})).toBeVisible();
+ await expect(page.getByRole('heading',{name:'Browser and background playback',exact:true})).toBeVisible();
+ await expect(page.locator('.legal-page')).not.toContainText('Technical limitations');
+ await page.goto('/de/usage/');
+ await expect(page.getByRole('heading',{name:'Sitzung starten, pausieren und beenden',exact:true})).toBeVisible();
+ await expect(page.getByRole('heading',{name:'Schlafmodus verwenden',exact:true})).toBeVisible();
+ await expect(page.locator('.legal-page')).not.toContainText('Technische Grenzen');
  await page.goto('/de/privacy/');await expect(page.locator('.legal-page')).toContainText('jacktools.relax.settings.v1');
 });
 test('stopping an active soundscape silences every layer',async({page})=>{
