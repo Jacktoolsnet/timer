@@ -14,7 +14,7 @@ export const usageSections = {
   ]},
   {title:'Animationen einstellen',items:[
    'Instrumente, Regen, Wind, Rauch und Wellen haben separate Animationsschalter. Du kannst die Klänge ohne ihre Animation hören. „Sanfte Animation“ schaltet die Bewegung insgesamt ein oder aus.',
-   'Instrumenttöne erzeugen farbige Formen. Regen zeigt kleine Tropfen, Wind einen größer und kleiner werdenden Hintergrundkreis. Die Rauchschwaden des Lagerfeuers steigen immer von unten nach oben und schwingen leicht seitlich.',
+   'Instrumenttöne erzeugen farbige Formen. Regen zeigt kleine Tropfen, Wind einen größer und kleiner werdenden Hintergrundkreis. Am unteren Rand flackern ruhige Flammen. Die Rauchschwaden steigen direkt aus ihnen nach oben und schwingen leicht seitlich. Feuer und Rauch werden gemeinsam geschaltet.',
    'Beim Meeresrauschen wählst du die Wellenrichtung: von unten, oben, links oder rechts. Jede Welle hat eine weiche Spitze an einer zufälligen Position. Während sie zurückfließt, kann die nächste bereits hineinlaufen. Die Bewegung folgt dem Wellensound.',
    'Die Animationsfarben passen sich dem gewählten Farbschema an. Wenn dein Gerät reduzierte Bewegung bevorzugt, ist die Bewegung zunächst ausgeschaltet.',
   ]},
@@ -49,7 +49,7 @@ export const usageSections = {
   ]},
   {title:'Set up animations',items:[
    'Instruments, rain, wind, smoke and waves have separate animation switches. You can listen without their animations. “Gentle animation” switches movement on or off globally.',
-   'Instrument notes create coloured shapes. Rain shows small drops, and wind expands and contracts a background circle. Campfire smoke always rises from bottom to top, swaying gently sideways.',
+   'Instrument notes create coloured shapes. Rain shows small drops, and wind expands and contracts a background circle. Gentle campfire flames flicker along the bottom edge. Smoke rises directly from them, swaying gently sideways. Fire and smoke share an animation switch.',
    'For ocean surf, choose waves arriving from below, above, left or right. Each wave has one soft crest at a random position. The next wave may arrive as the previous one retreats. Movement follows the surf sound.',
    'Animation colours follow the selected palette. Movement is initially disabled if your device prefers reduced motion.',
   ]},

@@ -870,3 +870,16 @@ body.focus-view #relax-app > .relax-card { margin-bottom:0; }
 #ocean-wave[data-hidden] {display:none;}
 .ocean-edge {stop-color:var(--relax-tone-4);stop-opacity:.9;}
 .ocean-base {stop-color:var(--relax-tone-6);stop-opacity:.18;}
+
+/* A quiet, layered flame band; smoke originates from these same flame positions. */
+.campfire-scene {position:absolute;inset:auto 0 0;height:min(32%,180px);pointer-events:none;}
+.campfire-scene[hidden] {display:none;}
+.campfire-scene::before {content:'';position:absolute;inset:30% 12% -35%;background:radial-gradient(ellipse at bottom,color-mix(in srgb,var(--relax-tone-0) 40%,#df7030),transparent 70%);filter:blur(12px);opacity:.45;}
+.campfire-flame {position:absolute;bottom:-8px;width:clamp(30px,8%,100px);border-radius:65% 35% 40% 45% / 95% 95% 10% 10%;transform-origin:50% 100%;background:linear-gradient(to top,#b8492380 0%,color-mix(in srgb,var(--relax-tone-0) 35%,#ed8a38) 45%,#f9d889b0 85%,#fff2c950);opacity:.72;filter:blur(1px);animation:campfire-flame var(--flame-time,4s) ease-in-out var(--flame-delay,0s) infinite;}
+.campfire-flame::after {content:'';position:absolute;inset:38% 26% -2%;border-radius:50% 50% 35% 35% / 85% 85% 15% 15%;background:linear-gradient(to top,#ffe4a9b0,#fff2ce80,transparent);}
+@keyframes campfire-flame {
+ 0%,100% {transform:translateX(-50%) scale(1.05,.8) rotate(calc(-1*var(--flame-lean,5deg)));opacity:.6;}
+ 35% {transform:translateX(-50%) scale(.72,1.25) rotate(var(--flame-lean,5deg));opacity:.8;}
+ 70% {transform:translateX(-50%) scale(.9,1.02) rotate(-2deg);opacity:.68;}
+}
+@media(prefers-reduced-motion:reduce){.campfire-scene {display:none;}}

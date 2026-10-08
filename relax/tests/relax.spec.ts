@@ -376,6 +376,7 @@ for(const layer of ['fire','stream'] as const){
   await page.goto('/en/');await page.locator('#instrumentsEnabled').uncheck();
   await page.locator('#'+layer).check();await page.locator('#'+layer+'Animation').check();await begin(page);
   await expect(page.locator(layer==='stream'?'#ocean-wave':'.fire-glimmer').first()).toBeVisible();
+  if(layer==='fire'){await expect(page.locator('.campfire-scene')).toBeVisible();await expect(page.locator('.campfire-flame')).toHaveCount(17);}
   if(layer==='stream'){
    await page.locator('#wave-direction-dropdown summary').click();await page.locator('[name=waveDirection][value=left]').check();
    await expect(page.locator('#ocean-direction')).toHaveAttribute('transform','rotate(90 500 500)');
@@ -384,8 +385,10 @@ for(const layer of ['fire','stream'] as const){
   await expect(page.locator('#'+(layer==='fire'?'fireDensity':'streamFlow')+'-value')).toHaveText('8 / 10');
   await page.locator('#start').click();if(layer==='fire')await expect(page.locator('.fire-glimmer').first()).toHaveCSS('animation-play-state','paused');
   else {const path=await page.locator('#ocean-surface').getAttribute('d');await page.waitForTimeout(250);expect(await page.locator('#ocean-surface').getAttribute('d')).toBe(path);}
+  if(layer==='fire')await expect(page.locator('.campfire-flame').first()).toHaveCSS('animation-play-state','paused');
   await page.locator('#start').click();
   await page.locator('#'+layer+'Animation').uncheck();if(layer==='stream')await expect(page.locator('#ocean-wave')).toBeHidden();else await expect(page.locator('.fire-glimmer')).toHaveCount(0);
+  if(layer==='fire')await expect(page.locator('.campfire-scene')).toBeHidden();
   await page.locator('#end-session').click();
   await page.locator('#palette-dropdown summary').click();await page.locator('#remember-preferences').check();await page.locator('#preferences-close').click();
   await page.reload();await expect(page.locator('#'+layer)).toBeChecked();

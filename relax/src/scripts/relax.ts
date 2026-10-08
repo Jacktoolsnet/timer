@@ -35,7 +35,28 @@ const glow=document.querySelector<HTMLElement>('.ambient-glow')!;
 const ocean=el('ocean-wave'),surface=el('ocean-surface');
 const nextWavePosition=wavePositionPicker();
 const waveProfiles=new Map<string,{peak:number;width:number;height:number}>();
+const fireScene=document.createElement('div');
+fireScene.className='campfire-scene';fireScene.setAttribute('aria-hidden','true');fireScene.hidden=true;
+el('sound-stage').insertBefore(fireScene,stage);
+const flameOrigins=Array.from({length:17},(_,i)=>{
+ const centre=1-Math.abs(i-8)/8;
+ return {x:18+i*4,height:.18+Math.pow(centre,.8)*(.85+Math.random()*.2)+.5*Math.pow(centre,3)};
+});
+for(const origin of flameOrigins){
+ const flame=document.createElement('span');flame.className='campfire-flame';
+ flame.style.left=origin.x+'%';flame.style.height=origin.height*100+'%';
+ flame.style.setProperty('--flame-time',(2.8+Math.random()*2.4)+'s');
+ flame.style.setProperty('--flame-delay',(-Math.random()*5)+'s');
+ flame.style.setProperty('--flame-lean',(3+Math.random()*6)+'deg');
+ fireScene.append(flame);
+}
 function rainFrame(){
+ const fireVisible=settings.fire&&settings.fireAnimation&&settings.motion&&!reduced.matches&&settings.fireVolume>0&&(state==='running'||state==='paused');
+ fireScene.hidden=!fireVisible;
+ fireScene.querySelectorAll<HTMLElement>('.campfire-flame').forEach(flame=>{
+  flame.style.animationPlayState=state==='running'&&!document.hidden?'running':'paused';
+ });
+
  const enabled=settings.stream&&settings.streamAnimation&&settings.motion&&!reduced.matches&&settings.streamVolume>0;
  if(!enabled||state==='ready'||state==='ended')ocean.setAttribute('data-hidden','true');
  else if(state==='running'&&!document.hidden){
@@ -75,7 +96,9 @@ function rainFrame(){
   if(state==='running'&&!document.hidden&&settings.motion&&!reduced.matches){
    for(const event of events){
     const node=document.createElement('span');node.className='nature-glimmer '+layer+'-glimmer';
-    node.style.left=(12+Math.random()*76)+'%';node.style.top='100%';
+    const origin=flameOrigins[Math.floor(Math.random()*flameOrigins.length)];
+    node.style.left=origin.x+'%';
+    node.style.top=(stage.clientHeight-Math.min(stage.clientHeight*.32,180)*origin.height*.7)+'px';
     const smokeSize=85+Math.random()*65+event.strength*70;
     // Carry the entire expanded plume past the top, not just its leading edge.
     node.style.setProperty('--smoke-rise',(-stage.clientHeight-smokeSize*3.2*1.8)+'px');
