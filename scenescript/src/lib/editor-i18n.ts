@@ -1,5 +1,9 @@
 import type { Language } from './i18n';
 const words = {
+ cancel:['Abbrechen','Cancel','Cancelar','Annuler'],
+ deleteTitle:['Wirklich löschen?','Delete this item?','¿Eliminar este elemento?','Supprimer cet élément ?'],
+ deleteSceneHint:['Diese Szene und alle enthaltenen Elemente werden aus dem Projekt entfernt.','This scene and all its elements will be removed from the project.','Se eliminarán esta escena y todos sus elementos del proyecto.','Cette scène et tous ses éléments seront retirés du projet.'],
+ deleteImageHint:['Dieses Bild wird aus dem Projekt entfernt. Verweise darauf werden in allen Szenen und Elementen entfernt.','This image will be removed from the project, along with its references in all scenes and elements.','Se eliminarán la imagen y sus referencias en todas las escenas y elementos.','Cette image et ses références dans toutes les scènes et tous les éléments seront retirées du projet.'],
  previousScene:['Vorherige Szene','Previous scene','Escena anterior','Scène précédente'],
  nextScene:['Nächste Szene','Next scene','Escena siguiente','Scène suivante'],
  appFullscreen:['App im Vollbild','App fullscreen','Aplicación en pantalla completa','Application en plein écran'],

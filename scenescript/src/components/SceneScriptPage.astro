@@ -35,9 +35,14 @@ const {lang}=Astro.props,t=editorDictionary(lang);
     </div>
    </section>
    <aside class="studio-panel scene-sidebar">
-    <div class="panel-heading"><h2>{t.scenes}</h2><button id="add-scene" title={t.addScene} aria-label={t.addScene}>＋</button></div>
-    <ol id="scene-list"></ol>
-    <div class="compact-actions"><button id="duplicate-scene">{t.duplicate}</button><button id="scene-up" aria-label={t.up}>↑</button><button id="scene-down" aria-label={t.down}>↓</button><button id="delete-scene">{t.remove}</button></div>
+    <nav class="scene-toolbar" aria-label={t.scenes}>
+     <button id="add-scene" type="button" title={t.addScene} aria-label={t.addScene}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg></button>
+     <button id="duplicate-scene" type="button" title={t.duplicate} aria-label={t.duplicate}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h13v13H8ZM3 16V3h13" /></svg></button>
+     <button id="scene-up" type="button" title={t.up} aria-label={t.up}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 14 7-7 7 7" /></svg></button>
+     <button id="scene-down" type="button" title={t.down} aria-label={t.down}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 10 7 7 7-7" /></svg></button>
+     <button id="delete-scene" type="button" title={t.remove} aria-label={t.remove}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7" /></svg></button>
+    </nav>
+    <div class="scene-list-content"><h2>{t.scenes}</h2><ol id="scene-list"></ol></div>
    </aside>
    <section class="studio-preview studio-panel" aria-label={t.preview}>
     <div class="panel-heading"><h2>{t.preview}</h2></div>
@@ -57,6 +62,7 @@ const {lang}=Astro.props,t=editorDictionary(lang);
  </div>
  <dialog id="preview-dialog" aria-labelledby="preview-title"><div class="preview-dialog-heading"><h2 id="preview-title">{t.preview}</h2><button id="close-preview" type="button" aria-label={t.close}>×</button></div><div id="preview-overlay-host"></div></dialog>
  <button id="exit-focus" hidden>{t.exit}</button>
+ <dialog id="delete-dialog" role="alertdialog" aria-labelledby="delete-title" aria-describedby="delete-description delete-name"><div class="dialog-inner"><div class="delete-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7" /></svg></div><h2 id="delete-title">{t.deleteTitle}</h2><p id="delete-name"></p><p id="delete-description"></p><div class="delete-actions"><button id="cancel-delete" type="button" autofocus>{t.cancel}</button><button id="confirm-delete" type="button">{t.remove}</button></div></div></dialog>
  <dialog id="json-dialog"><div class="dialog-inner"><h2>{t.json}</h2><p>{t.jsonHint}</p><label for="json-input">JSON</label><textarea id="json-input" spellcheck="false" rows="14"></textarea><p id="json-status" role="status"></p><div class="compact-actions"><button id="import-json" class="primary">{t.import}</button><button id="close-json">{t.close}</button></div></div></dialog>
  <noscript><p class="notice">JavaScript is required for the SceneScript editor.</p></noscript>
  <script src="../scripts/editor.ts"></script>

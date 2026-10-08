@@ -121,7 +121,7 @@ test('AI guide remains accessible on smartphone-sized windows',async({page})=>{
 test('project spans three columns and preview expands without losing state',async({page})=>{
  await page.goto('/en/');const projectBox=await page.locator('.project-panel').boundingBox(),previewBox=await page.locator('.studio-preview').boundingBox();expect(projectBox!.width).toBeGreaterThan(previewBox!.width*2.5);expect(Math.abs(projectBox!.y-previewBox!.y)).toBeLessThan(2);expect(Math.abs(projectBox!.height-previewBox!.height)).toBeLessThan(2);
  const smallWidth=(await page.locator('#stage-frame').boundingBox())!.width;
- await page.locator('#open-preview').click();await expect(page.locator('#preview-dialog')).toBeVisible();await expect(page.locator('#play .control-label')).toBeVisible();expect((await page.locator('#stage-frame').boundingBox())!.width).toBeGreaterThan(smallWidth*1.5);
+ await page.locator('#open-preview').click();await expect(page.locator('#preview-dialog')).toBeVisible();await expect(page.locator('#play .control-label')).not.toBeVisible();expect((await page.locator('#play').boundingBox())!.width).toBeGreaterThanOrEqual(48);expect((await page.locator('#stage-frame').boundingBox())!.width).toBeGreaterThan(smallWidth*1.5);
  await page.locator('#safe-toggle').check();await page.locator('#timeline').fill('2');await page.keyboard.press('Escape');await expect(page.locator('#preview-dialog')).not.toBeVisible();await expect(page.locator('#timeline')).toHaveValue('2');await expect(page.locator('#play .control-label')).not.toBeVisible();await expect(page.locator('#stage')).toHaveCount(1);
  await page.locator('#open-preview').click();await page.locator('#focus').click();await expect(page.locator('#preview-dialog')).not.toBeVisible();await expect(page.locator('#start-recording')).toBeVisible();await page.keyboard.press('Escape');await expect(page.locator('#timeline')).toHaveValue('2');await expect(page.locator('#stage-frame')).toBeVisible();
 });
@@ -148,7 +148,7 @@ test('project toolbar uses labeled icons and JSON is paste-only',async({page})=>
  for(const id of ['new-project','load-project','save-project','open-json','import-image']){const button=page.locator('#'+id);expect(await button.getAttribute('title')).toBeTruthy();expect(await button.getAttribute('aria-label')).toBeTruthy();expect((await button.textContent())!.trim()).toBe('');}
  await page.locator('#open-json').click();await expect(page.locator('#json-input')).toHaveValue('');await expect(page.locator('#copy-json')).toHaveCount(0);await page.locator('#close-json').click();
  await page.locator('#image-file').setInputFiles({name:'trash-test.png',mimeType:'image/png',buffer:Buffer.from(pixel.split(',')[1],'base64')});await expect(page.locator('#asset-list .asset-row button svg')).toHaveCount(1);
- page.once('dialog',d=>d.accept());await page.locator('#asset-list .asset-row button').click();await expect(page.locator('#asset-list img')).toHaveCount(0);
+ await page.locator('#asset-list .asset-row button').click();await page.locator('#confirm-delete').click();await expect(page.locator('#asset-list img')).toHaveCount(0);
 });
 
 test('app fullscreen hides surroundings and preserves edits and recording return',async({page})=>{
@@ -171,4 +171,14 @@ test('play toggles pause and scene navigation works in compact and overlay previ
  const paused=await page.locator('#timeline').inputValue();await page.waitForTimeout(100);await expect(page.locator('#timeline')).toHaveValue(paused);
  await page.locator('#next-scene').click();await expect(page.locator('#scene-list button').nth(1)).toHaveAttribute('aria-current','true');await expect(page.locator('#timeline')).toHaveValue('5');await expect(page.locator('#next-scene')).toBeDisabled();await page.locator('#previous-scene').click();await expect(page.locator('#timeline')).toHaveValue('0');
  await page.locator('#open-preview').click();await page.locator('#play').click();await page.locator('#next-scene').click();await expect(page.locator('#play')).toHaveAttribute('title','Pause');await expect.poll(async()=>Number(await page.locator('#timeline').inputValue())).toBeGreaterThan(5);await page.locator('#play').click();await expect(page.locator('#play')).toHaveAttribute('title','Play from here');await page.locator('#close-preview').click();
+});
+
+test('delete overlays support cancel, Escape and explicit scene/image confirmation',async({page})=>{
+ const dialogs:string[]=[];page.on('dialog',d=>{dialogs.push(d.type());void d.dismiss();});await page.goto('/en/');
+ await page.locator('#delete-scene').click();await expect(page.locator('#delete-dialog')).toBeVisible();await expect(page.locator('#delete-name')).toHaveText('A new idea');await expect(page.locator('#cancel-delete')).toBeFocused();await page.locator('#cancel-delete').click();await expect(page.locator('#scene-list li')).toHaveCount(2);
+ await page.locator('#editor-fullscreen').click();await page.locator('#delete-scene').click();await page.keyboard.press('Escape');await expect(page.locator('#delete-dialog')).not.toBeVisible();await expect(page.locator('body')).toHaveClass(/editor-fullscreen/);
+ await page.locator('#delete-scene').click();await page.locator('#confirm-delete').click();await expect(page.locator('#scene-list li')).toHaveCount(1);await expect(page.locator('#delete-scene')).toBeDisabled();
+ await page.locator('#image-file').setInputFiles({name:'delete-me.png',mimeType:'image/png',buffer:Buffer.from(pixel.split(',')[1],'base64')});await page.locator('#scene-form [name=backgroundAsset]').selectOption({label:'delete-me.png'});
+ await page.locator('#asset-list .asset-row button').click();await expect(page.locator('#delete-description')).toContainText('references');await page.locator('#cancel-delete').click();await expect(page.locator('#asset-list img')).toHaveCount(1);
+ await page.locator('#asset-list .asset-row button').click();await page.locator('#confirm-delete').click();await expect(page.locator('#asset-list img')).toHaveCount(0);await expect(page.locator('#scene-form [name=backgroundAsset]')).toHaveValue('');expect(dialogs).toEqual([]);
 });
