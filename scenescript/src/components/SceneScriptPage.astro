@@ -51,7 +51,11 @@ const {lang}=Astro.props,t=editorDictionary(lang);
     <div class="playback-controls"><div class="preview-transport"><button id="previous-scene" aria-label={t.previousScene} title={t.previousScene}><span aria-hidden="true">◀|</span><span class="control-label">{t.previousScene}</span></button><button id="play" class="primary" aria-label={t.play} title={t.play}><span aria-hidden="true">▶</span><span class="control-label">{t.play}</span></button><button id="next-scene" aria-label={t.nextScene} title={t.nextScene}><span aria-hidden="true">|▶</span><span class="control-label">{t.nextScene}</span></button></div><div class="preview-view-actions"><button id="focus" aria-label={t.focus} title={t.focus}><span aria-hidden="true">⛶</span><span class="control-label">{t.focus}</span></button><button id="open-preview" type="button" aria-label={t.expandPreview} title={t.expandPreview}><span aria-hidden="true">⤢</span><span class="control-label">{t.expandPreview}</span></button></div></div>
     <label class="timeline-label"><span id="time-label">0.0 / 10.0 s</span><input id="timeline" aria-label={t.preview} type="range" min="0" max="10" step="0.01" value="0" /></label>
     <p id="wake-status" class="small-hint" role="status" aria-live="polite"></p>
-    <label class="safe-toggle"><input id="safe-toggle" type="checkbox" /> {t.safe}</label>
+    <label class="safe-toggle" title={t.safe}>
+     <svg class="safe-toggle-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5" /><rect x="7" y="7" width="10" height="10" rx="1" /></svg>
+     <span class="safe-toggle-text">{t.safe}</span>
+     <span class="safe-switch"><input id="safe-toggle" type="checkbox" role="switch" aria-label={t.safe} /><span class="safe-switch-track" aria-hidden="true"></span></span>
+    </label>
 
     </div></div>
    </section>
@@ -60,10 +64,27 @@ const {lang}=Astro.props,t=editorDictionary(lang);
    <aside class="studio-panel element-inspector"><h2 id="element-heading">{t.elementSettings}</h2><form id="element-form"></form></aside>
   </div>
  </div>
- <dialog id="preview-dialog" aria-labelledby="preview-title"><div class="preview-dialog-heading"><h2 id="preview-title">{t.preview}</h2><button id="close-preview" type="button" aria-label={t.close}>×</button></div><div id="preview-overlay-host"></div></dialog>
+ <dialog id="preview-dialog" aria-labelledby="preview-title">
+  <header class="preview-dialog-heading"><div class="preview-header-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2" /><path d="M8 21h8m-4-4v4m-2-13 5 3-5 3Z" /></svg></div><h2 id="preview-title">{t.preview}</h2></header>
+  <div id="preview-overlay-host"></div>
+  <footer class="preview-dialog-footer"><button id="close-preview" type="button" title={t.close} aria-label={t.close}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg></button></footer>
+ </dialog>
  <button id="exit-focus" hidden>{t.exit}</button>
  <dialog id="delete-dialog" role="alertdialog" aria-labelledby="delete-title" aria-describedby="delete-description delete-name"><div class="dialog-inner"><div class="delete-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7" /></svg></div><h2 id="delete-title">{t.deleteTitle}</h2><p id="delete-name"></p><p id="delete-description"></p><div class="delete-actions"><button id="cancel-delete" type="button" autofocus>{t.cancel}</button><button id="confirm-delete" type="button">{t.remove}</button></div></div></dialog>
- <dialog id="json-dialog"><div class="dialog-inner"><h2>{t.json}</h2><p>{t.jsonHint}</p><label for="json-input">JSON</label><textarea id="json-input" spellcheck="false" rows="14"></textarea><p id="json-status" role="status"></p><div class="compact-actions"><button id="import-json" class="primary">{t.import}</button><button id="close-json">{t.close}</button></div></div></dialog>
+ <dialog id="json-dialog" aria-labelledby="json-title" aria-describedby="json-hint">
+  <header class="json-header">
+   <div class="json-header-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 4H7v6l-2 2 2 2v6h2M15 4h2v6l2 2-2 2v6h-2" /></svg></div>
+   <div><h2 id="json-title">{t.json}</h2><p id="json-hint">{t.jsonHint}</p></div>
+  </header>
+  <div class="dialog-inner"><textarea aria-label="JSON" id="json-input" spellcheck="false" rows="14"></textarea><p id="json-status" role="status"></p></div>
+  <footer class="json-footer">
+   <button id="paste-json" type="button" title={t.pasteClipboard} aria-label={t.pasteClipboard}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5H5v16h14V5h-4M9 3h6v4H9ZM8 12h8m-8 4h6" /></svg></button>
+   <div class="json-footer-actions">
+    <button id="import-json" class="json-apply" type="button" title={t.applyJson} aria-label={t.applyJson}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg></button>
+    <button id="close-json" type="button" title={t.cancel} aria-label={t.cancel}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg></button>
+   </div>
+  </footer>
+ </dialog>
  <noscript><p class="notice">JavaScript is required for the SceneScript editor.</p></noscript>
  <script src="../scripts/editor.ts"></script>
 </Layout>

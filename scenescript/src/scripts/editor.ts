@@ -59,7 +59,25 @@ function field(form:HTMLElement,key:string,value:string|number|boolean,kind:stri
   if(input instanceof HTMLInputElement&&!input.checkValidity()){input.reportValidity();return;}
   const value=kind==='checkbox'?(input as HTMLInputElement).checked:kind==='number'?(input as HTMLInputElement).valueAsNumber:input.value;
   action(value);
- });label.append(input);form.append(label);
+ });
+ if(kind==='number'){
+  const number=input as HTMLInputElement;
+  const wrapper=document.createElement('span');wrapper.className='number-stepper';
+  const step=key==='opacity'?0.05:['duration','transitionDuration','animationDuration','at'].includes(key)?0.1:1;
+  const controls=[-1,1].map(direction=>{
+   const control=button(direction<0?'−':'+',()=>{
+    if(!Number.isFinite(number.valueAsNumber))return;
+    const next=Math.max(min??-Infinity,Math.min(max??Infinity,Number((number.valueAsNumber+direction*step).toFixed(6))));
+    number.value=String(next);number.dispatchEvent(new Event('change',{bubbles:true}));sync();
+   });
+   control.title=`${t(direction<0?'decrease':'increase')}: ${t(key)}`;control.setAttribute('aria-label',control.title);
+   return control;
+  });
+  function sync(){controls[0].disabled=min!==undefined&&number.valueAsNumber<=min;controls[1].disabled=max!==undefined&&number.valueAsNumber>=max;}
+  number.addEventListener('input',sync);number.addEventListener('change',sync);sync();
+  wrapper.append(controls[0],number,controls[1]);label.append(wrapper);
+ }else label.append(input);
+ form.append(label);
 }
 function updateScene(key:keyof Scene,value:unknown){const previous=current()[key];(current() as unknown as Record<string,unknown>)[key]=value;try{parseProject(JSON.stringify(project));stop();time=offset(sceneIndex);changed();draw();if(key==='name'||key==='duration')renderSceneLabels();}catch(error){(current() as unknown as Record<string,unknown>)[key]=previous;status(t('error')+' '+(error as Error).message);renderForms();}}
 function renderSceneLabels(){const buttons=$('scene-list').querySelectorAll('button');project.scenes.forEach((s,i)=>{buttons[i].textContent=`${i+1}. ${s.name} · ${s.duration}s`;});}
@@ -82,8 +100,25 @@ function moveElement(delta:number){const s=current(),index=s.elements.findIndex(
 const stage=$('stage'),stageFrame=$('stage-frame');
 function resize(){const [w,h]=formats[project.format];stage.style.width=`${w}px`;stage.style.height=`${h}px`;stage.style.transform=`scale(${stageFrame.clientWidth/w})`;stageFrame.style.aspectRatio=`${w}/${h}`;document.documentElement.style.setProperty('--project-ratio',String(w/h));}
 new ResizeObserver(resize).observe(stageFrame);
+function fitPreview(){
+ if(!previewContent.classList.contains('preview-expanded'))return;
+ const host=$('preview-overlay-host');
+ const style=getComputedStyle(host);
+ let available=host.clientHeight-parseFloat(style.paddingTop)-parseFloat(style.paddingBottom);
+ for(const child of Array.from(previewContent.children)){
+  if(child===stageFrame)continue;
+  const css=getComputedStyle(child);
+  if(css.display==='none')continue;
+  available-=child.getBoundingClientRect().height+parseFloat(css.marginTop)+parseFloat(css.marginBottom);
+ }
+ previewContent.style.setProperty('--preview-stage-height',`${Math.max(0,available)}px`);
+}
+
 const previewDialog=$('preview-dialog') as HTMLDialogElement;
 const previewContent=$('preview-content');
+const previewSizeObserver=new ResizeObserver(fitPreview);
+previewSizeObserver.observe($('preview-overlay-host'));
+for(const child of Array.from(previewContent.children)){if(child!==stageFrame)previewSizeObserver.observe(child);}
 function closePreview(){
  $('preview-slot').append(previewContent);previewContent.classList.remove('preview-expanded');
  if(previewDialog.open)previewDialog.close();
@@ -91,7 +126,7 @@ function closePreview(){
 }
 $('open-preview').addEventListener('click',()=>{
  $('preview-overlay-host').append(previewContent);previewContent.classList.add('preview-expanded');
- previewDialog.showModal();resize();
+ previewDialog.showModal();fitPreview();resize();
 });
 $('close-preview').addEventListener('click',closePreview);
 previewDialog.addEventListener('close',()=>{if(previewContent.parentElement!==$('preview-slot'))closePreview();});
@@ -161,8 +196,21 @@ $('save-project').addEventListener('click',download);
 $('load-project').addEventListener('click',()=>($('project-file') as HTMLInputElement).click());
 $('project-file').addEventListener('change',async()=>{const input=$('project-file') as HTMLInputElement,file=input.files?.[0];input.value='';if(!file)return;try{if(file.size>MAX_FILE_BYTES)throw new Error('JSON: maximum 30 MiB');const next=parseProject(await file.text());await preload(next);if(canReplace())replace(next);}catch(error){status(t('error')+' '+(error as Error).message);}});
 const dialog=$('json-dialog') as HTMLDialogElement;
-$('open-json').addEventListener('click',()=>{($('json-input') as HTMLTextAreaElement).value='';$('json-status').textContent='';dialog.showModal();$('json-input').focus();});
+let jsonSession=0;
+dialog.addEventListener('close',()=>{jsonSession++;});
+$('open-json').addEventListener('click',()=>{jsonSession++;($('json-input') as HTMLTextAreaElement).value='';$('json-status').textContent='';dialog.showModal();$('json-input').focus();});
 $('close-json').addEventListener('click',()=>dialog.close());
+$('paste-json').addEventListener('click',async()=>{
+ const session=jsonSession,button=$('paste-json') as HTMLButtonElement;button.disabled=true;
+ try{
+  const text=await navigator.clipboard.readText();
+  if(!dialog.open||session!==jsonSession)return;
+  if(new TextEncoder().encode(text).length>MAX_FILE_BYTES){$('json-status').textContent=t('error')+' JSON: maximum 30 MiB';return;}
+  ($('json-input') as HTMLTextAreaElement).value=text;$('json-status').textContent='';$('json-input').focus();
+ }catch{
+  if(dialog.open&&session===jsonSession){$('json-status').textContent=t('clipboardDenied');$('json-input').focus();}
+ }finally{button.disabled=false;}
+});
 $('import-json').addEventListener('click',async()=>{try{const next=parseProject(($('json-input') as HTMLTextAreaElement).value);await preload(next);if(canReplace()){replace(next);dialog.close();}}catch(error){$('json-status').textContent=t('error')+' '+(error as Error).message;}});
 
 $('import-image').addEventListener('click',()=>($('image-file') as HTMLInputElement).click());

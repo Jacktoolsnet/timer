@@ -136,10 +136,15 @@ test('project images scroll horizontally without widening the page',async({page}
  await page.locator('#asset-list').evaluate(el=>{el.scrollLeft=0;});expect(await page.locator('#asset-list').evaluate(el=>el.scrollLeft)).toBe(0);
 });
 
-test('second row follows scenes, scene settings, elements, element settings',async({page})=>{
+test('scene settings span two columns and element settings fill the third row',async({page})=>{
  await page.goto('/en/');const panels=['.scene-sidebar','.scene-inspector','.elements-panel','.element-inspector'];
  const boxes=await Promise.all(panels.map(selector=>page.locator(selector).boundingBox()));
- for(let i=1;i<boxes.length;i++){expect(boxes[i]!.x).toBeGreaterThan(boxes[i-1]!.x);expect(Math.abs(boxes[i]!.y-boxes[0]!.y)).toBeLessThan(2);}
+ for(let i=1;i<3;i++){expect(boxes[i]!.x).toBeGreaterThan(boxes[i-1]!.x);expect(Math.abs(boxes[i]!.y-boxes[0]!.y)).toBeLessThan(2);}
+ expect(boxes[1]!.width).toBeGreaterThan(boxes[0]!.width*1.9);
+ for(let i=1;i<3;i++)expect(Math.abs(boxes[i]!.height-boxes[0]!.height)).toBeLessThan(2);
+ expect(Math.abs(boxes[3]!.x-boxes[0]!.x)).toBeLessThan(2);
+ expect(boxes[3]!.y).toBeGreaterThan(Math.max(...boxes.slice(0,3).map(b=>b!.y+b!.height)));
+ expect(Math.abs(boxes[3]!.x+boxes[3]!.width-boxes[2]!.x-boxes[2]!.width)).toBeLessThan(2);
  await page.locator('#element-list button').click();await expect(page.locator('.element-inspector [name=text]')).toBeVisible();await expect(page.locator('.scene-inspector [name=name]')).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();
 });
 
@@ -181,4 +186,39 @@ test('delete overlays support cancel, Escape and explicit scene/image confirmati
  await page.locator('#image-file').setInputFiles({name:'delete-me.png',mimeType:'image/png',buffer:Buffer.from(pixel.split(',')[1],'base64')});await page.locator('#scene-form [name=backgroundAsset]').selectOption({label:'delete-me.png'});
  await page.locator('#asset-list .asset-row button').click();await expect(page.locator('#delete-description')).toContainText('references');await page.locator('#cancel-delete').click();await expect(page.locator('#asset-list img')).toHaveCount(1);
  await page.locator('#asset-list .asset-row button').click();await page.locator('#confirm-delete').click();await expect(page.locator('#asset-list img')).toHaveCount(0);await expect(page.locator('#scene-form [name=backgroundAsset]')).toHaveValue('');expect(dialogs).toEqual([]);
+});
+
+test('JSON footer has three icons, clipboard paste and safe denial fallback',async({page})=>{
+ await page.addInitScript(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{readText:async()=>'{"version":"1.0"}'}}));
+ await page.goto('/en/');await page.locator('#open-json').click();await expect(page.locator('.json-footer button')).toHaveCount(3);
+ for(const id of ['paste-json','import-json','close-json']){await expect(page.locator('#'+id+' svg')).toHaveCount(1);expect(await page.locator('#'+id).getAttribute('title')).toBeTruthy();}
+ await page.locator('#paste-json').click();await expect(page.locator('#json-input')).toHaveValue('{"version":"1.0"}');await expect(page.locator('#json-dialog')).toBeVisible();
+ await page.evaluate(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{readText:async()=>{throw new Error('denied');}}}));await page.locator('#paste-json').click();await expect(page.locator('#json-status')).toContainText('Ctrl+V');await expect(page.locator('#json-input')).toHaveValue('{"version":"1.0"}');
+ await page.locator('#close-json').click();await expect(page.locator('#json-dialog')).not.toBeVisible();await expect(page.locator('#scene-list li')).toHaveCount(2);
+});
+
+test('preview overlay fits a short window without scrolling',async({page})=>{
+ await page.setViewportSize({width:1024,height:640});await page.goto('/en/');await page.locator('#open-preview').click();
+ await expect.poll(()=>page.locator('#preview-dialog').evaluate(el=>el.scrollHeight-el.clientHeight)).toBeLessThanOrEqual(1);
+ await expect.poll(()=>page.locator('#preview-overlay-host').evaluate(el=>el.scrollHeight-el.clientHeight)).toBeLessThanOrEqual(1);
+ const stage=await page.locator('#stage-frame').boundingBox(),footer=await page.locator('.preview-dialog-footer').boundingBox();
+ expect(stage!.height).toBeGreaterThan(0);expect(stage!.y+stage!.height).toBeLessThan(footer!.y);
+ await page.locator('#close-preview').click();await expect(page.locator('#preview-dialog')).not.toBeVisible();
+});
+
+test('number steppers change values and respect bounds',async({page})=>{
+ await page.goto('/en/');
+ const input=page.locator('#scene-form input[name=duration]'),stepper=input.locator('..');
+ const initial=Number(await input.inputValue());
+ await stepper.getByRole('button',{name:'Increase: Duration (seconds)',exact:true}).click();
+ await expect(input).toHaveValue(String(Number((initial+0.1).toFixed(6))));
+ await stepper.getByRole('button',{name:'Decrease: Duration (seconds)',exact:true}).click();await expect(input).toHaveValue(String(initial));
+ const minimum=await input.getAttribute('min');await input.fill(minimum!);await input.dispatchEvent('change');await expect(stepper.locator('button').first()).toBeDisabled();
+});
+
+test('safe-area switch is available in compact and expanded preview',async({page})=>{
+ await page.goto('/en/');const toggle=page.getByRole('switch',{name:'Show safe text areas'});
+ await expect(toggle).toBeVisible();await toggle.check();await expect(page.locator('#safe-overlay')).toBeVisible();
+ await page.locator('#open-preview').click();await expect(toggle).toBeChecked();await toggle.uncheck();await expect(page.locator('#safe-overlay')).not.toBeVisible();
+ await page.locator('#close-preview').click();await expect(toggle).toBeVisible();await expect(toggle).not.toBeChecked();
 });

@@ -1,5 +1,10 @@
 import type { Language } from './i18n';
 const words = {
+ decrease:['Verringern','Decrease','Disminuir','Diminuer'],
+ increase:['Erhöhen','Increase','Aumentar','Augmenter'],
+ pasteClipboard:['Aus Zwischenablage einfügen','Paste from clipboard','Pegar desde el portapapeles','Coller depuis le presse-papiers'],
+ applyJson:['Übernehmen','Apply','Aplicar','Appliquer'],
+ clipboardDenied:['Zugriff auf die Zwischenablage nicht möglich. Bitte mit Strg+V bzw. Cmd+V einfügen.','Clipboard access is unavailable. Please paste using Ctrl+V or Cmd+V.','No se puede acceder al portapapeles. Pega con Ctrl+V o Cmd+V.','Accès au presse-papiers indisponible. Collez avec Ctrl+V ou Cmd+V.'],
  cancel:['Abbrechen','Cancel','Cancelar','Annuler'],
  deleteTitle:['Wirklich löschen?','Delete this item?','¿Eliminar este elemento?','Supprimer cet élément ?'],
  deleteSceneHint:['Diese Szene und alle enthaltenen Elemente werden aus dem Projekt entfernt.','This scene and all its elements will be removed from the project.','Se eliminarán esta escena y todos sus elementos del proyecto.','Cette scène et tous ses éléments seront retirés du projet.'],
