@@ -810,3 +810,37 @@ body.focus-view .sound-shape { max-width: min(45dvh,45vw); }
 }
 
 body.focus-view.focus-cursor-hidden, body.focus-view.focus-cursor-hidden * { cursor:none !important; }
+
+.nature-glimmer { position:absolute; width:var(--nature-size); height:var(--nature-size); border-radius:50%; pointer-events:none; opacity:0; animation:nature-glow 2.8s ease-in-out forwards; }
+.fire-glimmer { background:radial-gradient(circle,color-mix(in srgb,var(--nature-colour) 75%,#d88742),transparent 70%); filter:blur(3px); }
+.stream-glimmer { background:radial-gradient(ellipse,transparent 35%,color-mix(in srgb,var(--nature-colour) 70%,transparent) 60%,transparent 73%); animation-duration:3.8s; }
+@keyframes nature-glow { 0%{opacity:0;transform:translateY(8px) scale(.6)} 35%{opacity:.5;transform:translateY(0) scale(1)} 100%{opacity:0;transform:translateY(-12px) scale(1.4)} }
+@media(prefers-reduced-motion:reduce) { .nature-glimmer { display:none; animation:none; } }
+
+/* Simulation first, followed by independently grouped responsive settings. */
+#relax-app { display:block; }
+#relax-app > .relax-card { width:100%; margin-bottom:28px; }
+body:not(.focus-view) #sound-stage { height:clamp(300px,42vw,560px); aspect-ratio:auto; }
+.relax-settings { background:transparent; border:0; box-shadow:none; padding:0; }
+.relax-settings-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; align-items:start; }
+.settings-tile { min-width:0; margin:0; padding:20px; border:1px solid var(--line); border-radius:18px; background:var(--surface); box-shadow:var(--shadow); }
+.settings-tile h3,.settings-tile > legend { font-size:1rem; font-weight:650; color:var(--text); margin:0 0 16px; padding:0; }
+fieldset.settings-tile > legend { float:left; width:100%; }
+fieldset.settings-tile > legend + * { clear:both; }
+.settings-tile .relax-check { gap:14px; }
+.settings-tile .relax-check > span:first-child { min-width:0; overflow-wrap:anywhere; }
+.settings-tile .storage-switch { flex-shrink:0; }
+.settings-tile .noise-picker { display:flex; flex-direction:column; gap:8px; }
+.settings-tile .noise-picker label { width:100%; }
+.settings-tile:has(details[open]) { position:relative; z-index:6; }
+body.focus-view #relax-app > .relax-card { margin-bottom:0; }
+@media(max-width:1050px) { .relax-settings-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:650px) { .relax-settings-grid { grid-template-columns:minmax(0,1fr); gap:16px; } .settings-tile { padding:18px; } }
+
+.instrument-tile-grid { display:grid; grid-template-columns:minmax(0,1fr); gap:0; }
+.instrument-tile-grid > div { min-width:0; }
+@media(min-width:651px) {
+ .instrument-tile { grid-column:span 2; }
+ .instrument-tile-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; }
+ .instrument-tile-grid > div > :first-child { margin-top:0; }
+}

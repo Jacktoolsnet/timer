@@ -1,9 +1,10 @@
 import {normalize,type Settings} from './relax.ts';
-export const presetNames=['summer','evening','focus','nature'] as const;
+export const presetNames=['summer','evening','focus','nature','fireside','brook'] as const;
 export type Preset=typeof presetNames[number];
 const base={
  instrumentsEnabled:true,chimes:false,bowls:false,kalimba:false,handpan:false,bells:false,gong:false,harp:false,
  instrumentVolume:35,pitch:0,density:4,
+ fire:false,stream:false,fireAnimation:false,streamAnimation:false,fireVolume:25,streamVolume:25,fireDensity:4,streamFlow:4,
  rain:false,wind:false,noise:false,rainVolume:35,windVolume:25,noiseVolume:20,
  rainDensity:4,windActivity:4,noiseType:'pink',
  instrumentAnimation:true,rainAnimation:false,windAnimation:false,
@@ -13,6 +14,8 @@ export const presets:Record<Preset,Partial<Settings>>={
  evening:{...base,handpan:true,instrumentVolume:30,density:2,pitch:-4,wind:true,windVolume:15,windActivity:2,noise:true,noiseType:'brown',noiseVolume:15,windAnimation:true},
  focus:{...base,kalimba:true,instrumentVolume:30,density:3,noise:true,noiseType:'brown',noiseVolume:10},
  nature:{...base,chimes:true,instrumentsEnabled:false,rain:true,wind:true,rainVolume:40,rainAnimation:true,windAnimation:true},
+ fireside:{...base,chimes:true,instrumentsEnabled:false,fire:true,fireVolume:35,fireDensity:4,fireAnimation:true},
+ brook:{...base,chimes:true,instrumentsEnabled:false,stream:true,streamVolume:35,streamFlow:4,streamAnimation:true,wind:true,windVolume:8,windActivity:2},
 };
 export function applyPreset(settings:Settings,preset:Preset):Settings {
  // Duration, safety acknowledgement, global motion, wake lock and consent stay untouched.

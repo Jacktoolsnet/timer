@@ -80,7 +80,7 @@ test('stopping an active soundscape silences every layer',async({page})=>{
   (window as unknown as {meters:AnalyserNode[]}).meters=meters;
   AudioContext.prototype.createGain=function(){const gain=original.call(this),meter=this.createAnalyser();gain.connect(meter);meters.push(meter);return gain;};
  });
- await page.goto('/en/');await page.locator('#rain').check();await page.locator('#wind').check();await page.locator('#noise').check();await begin(page);
+ await page.goto('/en/');await page.locator('#rain').check();await page.locator('#wind').check();await page.locator('#noise').check();await page.locator('#fire').check();await page.locator('#stream').check();await begin(page);
  await expect.poll(()=>page.evaluate(()=>(window as unknown as {meters:AnalyserNode[]}).meters.some(m=>{const a=new Float32Array(m.fftSize);m.getFloatTimeDomainData(a);return a.some(v=>Math.abs(v)>.001);}))).toBe(true);
  await page.locator('#end-session').click();
  await expect.poll(()=>page.evaluate(()=>(window as unknown as {meters:AnalyserNode[]}).meters.every(m=>{const a=new Float32Array(m.fftSize);m.getFloatTimeDomainData(a);return a.every(v=>Math.abs(v)<.0001);}))).toBe(true);
@@ -263,7 +263,7 @@ test('instrument switch leaves background audio and rain animation running',asyn
 });
 test('presets apply live, preserve duration and stay editable with consent persistence',async({page})=>{
  await page.goto('/en/');await page.locator('#minutes').fill('42');await begin(page);
- for(const name of ['summer','evening','focus','nature']){
+ for(const name of ['summer','evening','focus','fireside','brook','nature']){
   await page.locator('#preset-dropdown summary').click();await page.locator('[name=preset][value='+name+']').check();
   await expect(page.locator('[name=preset][value='+name+']')).toBeChecked();
   await expect(page.locator('#minutes')).toHaveValue('42');
@@ -361,4 +361,51 @@ test('focus cursor hides after inactivity and returns for movement, dialogs and 
  await expect(page.locator('body')).not.toHaveClass(/focus-cursor-hidden/);
  await page.locator('#focus').click();
  await expect(page.locator('body')).not.toHaveClass(/focus-view|focus-cursor-hidden/);
+});
+
+for(const layer of ['fire','stream'] as const){
+ test(layer+' sound controls, animation, persistence and stop',async({page})=>{
+  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.goto('/en/');await page.locator('#instrumentsEnabled').uncheck();
+  await page.locator('#'+layer).check();await page.locator('#'+layer+'Animation').check();await begin(page);
+  await expect(page.locator('.'+layer+'-glimmer').first()).toBeVisible();
+  await page.locator('#'+(layer==='fire'?'fireDensity':'streamFlow')).fill('8');
+  await expect(page.locator('#'+(layer==='fire'?'fireDensity':'streamFlow')+'-value')).toHaveText('8 / 10');
+  await page.locator('#start').click();await expect(page.locator('.'+layer+'-glimmer').first()).toHaveCSS('animation-play-state','paused');
+  await page.locator('#start').click();
+  await page.locator('#'+layer+'Animation').uncheck();await expect(page.locator('.'+layer+'-glimmer')).toHaveCount(0);
+  await page.locator('#end-session').click();
+  await page.locator('#palette-dropdown summary').click();await page.locator('#remember-preferences').check();await page.locator('#preferences-close').click();
+  await page.reload();await expect(page.locator('#'+layer)).toBeChecked();
+  await expect(page.locator('#'+(layer==='fire'?'fireDensity':'streamFlow'))).toHaveValue('8');
+  expect(errors).toEqual([]);
+ });
+}
+
+test('full width simulation and nine settings tiles respond to screen size',async({page})=>{
+ await page.goto('/en/');await expect(page.locator('.settings-tile')).toHaveCount(9);
+ for(const [width,columns] of [[1440,3],[900,2],[390,1],[320,1]]){
+  await page.setViewportSize({width,height:900});
+  const grid=page.locator('.relax-settings-grid');
+  expect(await grid.evaluate(n=>getComputedStyle(n).gridTemplateColumns.split(' ').length)).toBe(columns);
+  const stage=await page.locator('#sound-stage').boundingBox(),settings=await page.locator('.relax-settings').boundingBox();
+  expect(stage!.width).toBeGreaterThan(settings!.width*.85);
+  expect(stage!.y+stage!.height).toBeLessThan(settings!.y);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ }
+ await page.locator('#preset-dropdown summary').click();await page.locator('[name=preset][value=brook]').check();
+ await expect(page.locator('#stream')).toBeChecked();await expect(page.locator('#wind')).toBeChecked();
+ await expect(page.locator('#instrumentsEnabled')).not.toBeChecked();
+ await begin(page);await page.locator('#focus').click();await expect(page.locator('.relax-settings')).toBeHidden();
+});
+
+test('instrument tile uses two columns only when the settings grid does',async({page})=>{
+ await page.goto('/en/');
+ for(const [width,count] of [[1440,2],[900,2],[390,1]]){
+  await page.setViewportSize({width,height:900});
+  const tile=page.locator('.instrument-tile');
+  expect(await page.locator('.instrument-tile-grid').evaluate(n=>getComputedStyle(n).gridTemplateColumns.split(' ').length)).toBe(count);
+  expect(await tile.evaluate(n=>getComputedStyle(n).gridColumnStart)).toBe(count===2?'span 2':'auto');
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ }
 });

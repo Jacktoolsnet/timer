@@ -1,3 +1,4 @@
+import {natureSound,type NatureEvent} from '../src/lib/nature.ts';
 import {applyPreset,matchingPreset,presetNames} from '../src/lib/presets.ts';
 import {instrumentTone} from '../src/lib/instruments.ts';
 import {naturalWind,randomWindGust,windStrengthAt,type WindGust} from '../src/lib/wind.ts';
@@ -167,4 +168,27 @@ test('sleep mode preserves a useful fade for short and long sessions',()=>{
  assert.equal(fadeWindow(900,true),300);assert.equal(fadeWindow(60,true),30);
  assert.equal(fadeWindow(900,false),4);assert.equal(fadeWindow(0,true),0);
  assert.equal(applyPreset({...defaults,sleepMode:true},'summer').sleepMode,true);
+});
+
+test('fire and brook are bounded, varied textures with audio-timed events',()=>{
+ for(const layer of ['fire','stream'] as const){
+  let seed=42;const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
+  const events:NatureEvent[]=[];const sound=natureSound(layer,8000,3,random,5,e=>events.push(e));
+  assert.equal(sound.length,24000);assert(sound.every(Number.isFinite));assert(events.length>2);
+  assert(sound.some(n=>Math.abs(n)>.02));assert(sound.every(n=>Math.abs(n)<.5));
+  assert(sound[0]===0);assert(sound[sound.length-1]===0);
+ }
+ assert.equal(normalize({fireDensity:99,streamFlow:0}).fireDensity,10);
+ assert.equal(normalize({streamFlow:0}).streamFlow,1);
+});
+test('new nature presets disable instruments and clear unrelated sounds',()=>{
+ const fire=applyPreset(defaults,'fireside'),brook=applyPreset(defaults,'brook');
+ assert(fire.fire&&fire.fireAnimation);assert(!fire.instrumentsEnabled&&!fire.stream&&!fire.rain);
+ assert(brook.stream&&brook.streamAnimation);assert(!brook.instrumentsEnabled&&!brook.fire&&!brook.rain);
+});
+
+test('brook events represent broad water eddies instead of rapid isolated drops',()=>{
+ const events:NatureEvent[]=[];natureSound('stream',8000,3,()=>.5,5,e=>events.push(e));
+ assert(events.length>=3&&events.length<8);
+ for(let i=1;i<events.length;i++)assert(events[i].time-events[i-1].time>.3);
 });

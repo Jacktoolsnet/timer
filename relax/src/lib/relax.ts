@@ -1,24 +1,26 @@
 export const pitches = [220,246.94,277.18,329.63,369.99,440,493.88,554.37] as const;
 export const noiseTypes = ['pink','brown','white'] as const;
 export type NoiseType = typeof noiseTypes[number];
-export type Layer = 'rain' | 'wind' | 'noise';
+export type Layer = 'rain' | 'wind' | 'noise' | 'fire' | 'stream';
 export interface Settings {
  sleepMode:boolean; instrumentsEnabled:boolean; minutes:number; density:number; chimes:boolean; bowls:boolean; kalimba:boolean; handpan:boolean; bells:boolean; gong:boolean; harp:boolean; instrumentVolume:number; pitch:number;
  windAnimation:boolean; instrumentAnimation:boolean; rainAnimation:boolean; rain:boolean; wind:boolean; noise:boolean; windActivity:number; rainDensity:number; rainVolume:number; windVolume:number; noiseVolume:number;
+ fire:boolean; stream:boolean; fireAnimation:boolean; streamAnimation:boolean; fireVolume:number; streamVolume:number; fireDensity:number; streamFlow:number;
  noiseType:NoiseType; motion:boolean; awake:boolean; background:boolean; safetySeen:boolean;
 }
 export const defaults:Settings = {
  sleepMode:false,instrumentsEnabled:true,minutes:15,density:5,chimes:true,bowls:false,kalimba:false,handpan:false,bells:false,gong:false,harp:false,instrumentVolume:45,pitch:0,
  windAnimation:false,instrumentAnimation:true,rainAnimation:false,rain:false,wind:false,noise:false,windActivity:5,rainDensity:5,rainVolume:25,windVolume:20,noiseVolume:20,
+ fire:false,stream:false,fireAnimation:false,streamAnimation:false,fireVolume:25,streamVolume:25,fireDensity:5,streamFlow:5,
  noiseType:'pink',motion:true,awake:false,background:true,safetySeen:false,
 };
 export function normalize(value:unknown):Settings {
  const v=value && typeof value==='object'?value as Partial<Settings>:{};
  const result={...defaults};
- for(const key of ['sleepMode','instrumentsEnabled','windAnimation','instrumentAnimation','rainAnimation','chimes','bowls','kalimba','handpan','bells','gong','harp','rain','wind','noise','motion','awake','background','safetySeen'] as const) {
+ for(const key of ['fire','stream','fireAnimation','streamAnimation','sleepMode','instrumentsEnabled','windAnimation','instrumentAnimation','rainAnimation','chimes','bowls','kalimba','handpan','bells','gong','harp','rain','wind','noise','motion','awake','background','safetySeen'] as const) {
   if(typeof v[key]==='boolean') result[key]=v[key]!;
  }
- for(const [key,min,max] of [['windActivity',1,10],['rainDensity',1,10],['pitch',-12,12],['minutes',0,180],['density',1,10],['instrumentVolume',0,100],['rainVolume',0,100],['windVolume',0,100],['noiseVolume',0,100]] as const) {
+ for(const [key,min,max] of [['fireVolume',0,100],['streamVolume',0,100],['fireDensity',1,10],['streamFlow',1,10],['windActivity',1,10],['rainDensity',1,10],['pitch',-12,12],['minutes',0,180],['density',1,10],['instrumentVolume',0,100],['rainVolume',0,100],['windVolume',0,100],['noiseVolume',0,100]] as const) {
   const n=v[key];if(typeof n==='number' && Number.isFinite(n)) result[key]=Math.max(min,Math.min(max,Math.round(n)));
  }
  if(noiseTypes.includes(v.noiseType as NoiseType)) result.noiseType=v.noiseType!;

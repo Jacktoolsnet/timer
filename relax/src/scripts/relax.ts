@@ -36,6 +36,19 @@ function rainFrame(){
  glow.dataset.windAnimated=String(windAnimated);
  if(!windAnimated)glow.style.setProperty('--wind-level','0');
  else if(state==='running'&&!document.hidden)glow.style.setProperty('--wind-level',String(audio.windStrength()));
+ for(const layer of ['fire','stream'] as const){
+  const events=audio.takeNatureEvents(layer);
+  if(state==='running'&&!document.hidden&&settings.motion&&!reduced.matches){
+   for(const event of events){
+    const node=document.createElement('span');node.className='nature-glimmer '+layer+'-glimmer';
+    node.style.left=(10+Math.random()*80)+'%';node.style.top=(16+Math.random()*66)+'%';
+    node.style.setProperty('--nature-size',(layer==='fire'?18+event.strength*55:35+event.strength*100)+'px');
+    node.style.setProperty('--nature-colour','var(--relax-tone-'+(layer==='fire'?0:4)+')');
+    stage.append(node);node.addEventListener('animationend',()=>node.remove(),{once:true});
+   }
+  }
+  while(stage.querySelectorAll('.'+layer+'-glimmer').length>18)stage.querySelector('.'+layer+'-glimmer')?.remove();
+ }
  const drops=audio.takeRainDrops();
  if(state==='running'&&!document.hidden&&settings.motion&&settings.rainAnimation){
   for(const drop of drops){
@@ -57,9 +70,9 @@ function sync(){
  document.querySelectorAll<HTMLInputElement>('[name=preset]').forEach(r=>r.checked=r.value===preset);
  document.querySelectorAll<HTMLInputElement>('[name=instrument]').forEach(r=>r.checked=r.value===selectedInstrument(settings));
  el('instrument-value').textContent=t[selectedInstrument(settings)];
- for(const key of ['sleepMode','instrumentsEnabled','windAnimation','instrumentAnimation','rainAnimation','rain','wind','noise','motion','awake','background'] as const)input(key).checked=settings[key];
- for(const key of ['windActivity','rainDensity','pitch','minutes','density','instrumentVolume','rainVolume','windVolume','noiseVolume'] as const){
-  input(key).value=String(settings[key]);const output=document.getElementById(key+'-value');if(output)output.textContent=(key==='rainDensity'||key==='windActivity')?settings[key]+' / 10':key==='pitch'?(settings.pitch===0?t.pitchOriginal:(settings.pitch>0?'+':'')+settings.pitch+' '+t.semitones):settings[key]+' %';
+ for(const key of ['fire','stream','fireAnimation','streamAnimation','sleepMode','instrumentsEnabled','windAnimation','instrumentAnimation','rainAnimation','rain','wind','noise','motion','awake','background'] as const)input(key).checked=settings[key];
+ for(const key of ['fireVolume','streamVolume','fireDensity','streamFlow','windActivity','rainDensity','pitch','minutes','density','instrumentVolume','rainVolume','windVolume','noiseVolume'] as const){
+  input(key).value=String(settings[key]);const output=document.getElementById(key+'-value');if(output)output.textContent=(key==='rainDensity'||key==='windActivity'||key==='fireDensity'||key==='streamFlow')?settings[key]+' / 10':key==='pitch'?(settings.pitch===0?t.pitchOriginal:(settings.pitch>0?'+':'')+settings.pitch+' '+t.semitones):settings[key]+' %';
  }
  document.querySelectorAll<HTMLInputElement>('[name=noiseType]').forEach(r=>r.checked=r.value===settings.noiseType);
  document.documentElement.dataset.relaxMotion=settings.motion?'on':'off';
@@ -87,14 +100,14 @@ async function begin(){
  try{
   await audio.start(settings,total?Math.max(.01,total-elapsed):0,total);
   if(token!==generation){audio.stop();return;}
-  anchor=audio.time;state='running';el('audio-status').textContent='';wake(settings.awake&&!settings.sleepMode);stage.querySelectorAll<HTMLElement>('.sound-shape,.rain-drop').forEach(n=>n.style.animationPlayState='running');
+  anchor=audio.time;state='running';el('audio-status').textContent='';wake(settings.awake&&!settings.sleepMode);stage.querySelectorAll<HTMLElement>('.sound-shape,.rain-drop,.nature-glimmer').forEach(n=>n.style.animationPlayState='running');
  }catch{audio.stop();el('audio-status').textContent=t.audioError;}
  finally{pending=false;render();}
 }
 function pause(){
  if(state!=='running')return;
  elapsed=current();state='paused';generation++;audio.stop();wake(false);
- stage.querySelectorAll<HTMLElement>('.sound-shape,.rain-drop').forEach(n=>n.style.animationPlayState='paused');render();
+ stage.querySelectorAll<HTMLElement>('.sound-shape,.rain-drop,.nature-glimmer').forEach(n=>n.style.animationPlayState='paused');render();
 }
 function finish(){
  if(state==='running')elapsed=current();
@@ -117,8 +130,8 @@ form.addEventListener('submit',e=>e.preventDefault());
 function read(){
  const selected=document.querySelector<HTMLInputElement>('[name=instrument]:checked')!.value;
  for(const key of ['chimes','bowls','kalimba','handpan','bells','gong','harp'] as const)settings[key]=key===selected;
- for(const key of ['sleepMode','instrumentsEnabled','windAnimation','instrumentAnimation','rainAnimation','rain','wind','noise','motion','awake','background'] as const)settings[key]=input(key).checked;
- for(const key of ['windActivity','rainDensity','pitch','minutes','density','instrumentVolume','rainVolume','windVolume','noiseVolume'] as const)settings[key]=Number(input(key).value);
+ for(const key of ['fire','stream','fireAnimation','streamAnimation','sleepMode','instrumentsEnabled','windAnimation','instrumentAnimation','rainAnimation','rain','wind','noise','motion','awake','background'] as const)settings[key]=input(key).checked;
+ for(const key of ['fireVolume','streamVolume','fireDensity','streamFlow','windActivity','rainDensity','pitch','minutes','density','instrumentVolume','rainVolume','windVolume','noiseVolume'] as const)settings[key]=Number(input(key).value);
  settings.noiseType=document.querySelector<HTMLInputElement>('[name=noiseType]:checked')!.value as Settings['noiseType'];
  applySettings();
 }
@@ -126,6 +139,9 @@ function applySettings(){
  settings=normalize(settings);sync();save();audio.update(settings);wake(state==='running'&&settings.awake&&!settings.sleepMode);
  if(!settings.motion)stage.replaceChildren();
  if(!settings.instrumentsEnabled||!settings.instrumentAnimation)stage.querySelectorAll('.sound-shape').forEach(n=>n.remove());
+ for(const layer of ['fire','stream'] as const){
+  if(!settings[layer]||!settings[layer+'Animation' as 'fireAnimation'|'streamAnimation']||settings[layer+'Volume' as 'fireVolume'|'streamVolume']===0)stage.querySelectorAll('.'+layer+'-glimmer').forEach(n=>n.remove());
+ }
  if(!settings.rainAnimation||!settings.rain||settings.rainVolume===0)stage.querySelectorAll('.rain-drop').forEach(n=>n.remove());
  if(state==='ready'||state==='ended')total=settings.minutes*60;
  if(document.hidden&&!settings.background)pause();render();
@@ -192,7 +208,7 @@ focus.addEventListener('click',async()=>{
 document.addEventListener('fullscreenchange',()=>{if(requesting&&document.fullscreenElement===document.documentElement)owns=true;if(!document.fullscreenElement&&owns){owns=false;setFocus(false);}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!first.open&&!safety.open&&!sleepScreen.open)void leave();});
 document.addEventListener('visibilitychange',()=>{
- stage.querySelectorAll<HTMLElement>('.sound-shape,.rain-drop').forEach(n=>n.style.animationPlayState=document.hidden||state!=='running'?'paused':'running');
+ stage.querySelectorAll<HTMLElement>('.sound-shape,.rain-drop,.nature-glimmer').forEach(n=>n.style.animationPlayState=document.hidden||state!=='running'?'paused':'running');
  if(document.hidden&&!settings.background)pause();else render();
 });
 window.addEventListener('pagehide',()=>{generation++;audio.stop();state='paused';wake(false);});
