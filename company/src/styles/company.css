@@ -45,9 +45,9 @@ html{scroll-behavior:smooth;scroll-padding-top:30px}.header-tools{display:flex;a
 .support-coffee > span:first-child { font-size:22px; }
 
 /* Breathe gets a quiet, palette-aware preview alongside the time tools. */
-.time-tools-grid > .breathe-feature { grid-column:1 / -1; grid-template-columns:minmax(0,1fr) minmax(0,1fr); grid-template-rows:auto; }
+.time-tools-grid > .breathe-feature { grid-column:auto; grid-template-columns:minmax(0,1fr); grid-template-rows:auto 1fr; }
 .breathe-feature > .timer-preview { grid-column:1; grid-row:1; }
-.breathe-feature > .product-copy { grid-column:2; grid-row:1; }
+.breathe-feature > .product-copy { grid-column:1; grid-row:2; }
 .company-breathe-scene { width:min(100%,280px); aspect-ratio:1; position:relative; display:grid; place-items:center; }
 .company-breathe-ring { position:absolute; inset:0; width:100%; height:100%; transform:rotate(-90deg); fill:none; stroke:var(--track); stroke-width:1.5; }
 .company-breathe-progress { stroke:var(--accent); stroke-dasharray:100; stroke-dashoffset:72; }
@@ -83,3 +83,14 @@ html{scroll-behavior:smooth;scroll-padding-top:30px}.header-tools{display:flex;a
 .hero-actions .text-link { display:inline-flex; align-items:center; justify-content:center; min-height:50px; padding:13px 20px; border:1.5px solid var(--accent); border-radius:10px; background:var(--accent-soft); color:var(--accent); font-weight:650; text-decoration:none; text-align:center; box-shadow:0 3px 12px color-mix(in srgb,var(--accent) 12%,transparent); }
 .hero-actions .text-link:hover { background:color-mix(in srgb,var(--accent) 20%,var(--surface)); }
 .hero-actions .text-link:focus-visible { outline:3px solid var(--accent); outline-offset:4px; }
+
+/* Static Relax previews: no audio, motion or extra downloads on the company page. */
+.company-relax-scene {position:relative;width:min(100%,360px);aspect-ratio:1.5;overflow:hidden;border-radius:28px;background:radial-gradient(ellipse at 30% 30%,var(--accent-soft),var(--surface));isolation:isolate;}
+.company-relax-scene svg {position:absolute;inset:0;width:100%;height:100%;fill:var(--accent);opacity:.22;}
+.company-relax-scene svg path+path {fill:var(--green);opacity:.6;}
+.relax-preview-orb {position:absolute;border-radius:50%;background:radial-gradient(circle at 30% 25%,var(--accent-soft),var(--accent));opacity:.65;}
+.relax-preview-orb.orb-a {width:28%;aspect-ratio:1;left:12%;top:14%;}
+.relax-preview-orb.orb-b {width:18%;aspect-ratio:1;right:18%;top:24%;border-radius:35% 65% 55% 45%;background:linear-gradient(135deg,var(--accent-soft),var(--green));}
+.relax-preview-orb.orb-c {width:10%;aspect-ratio:1;left:48%;top:12%;opacity:.35;}
+.relax-preview-name {position:absolute;inset:0;display:grid;place-items:center;font-size:36px;font-weight:300;letter-spacing:.08em;color:var(--text);}
+.spotlight-relax .company-relax-scene {position:absolute;width:76%;left:12%;top:24%;}

@@ -74,3 +74,15 @@ test('timer and clock are adjacent on desktop and stacked on mobile', async ({ p
     expect(clock!.y).toBeGreaterThanOrEqual(timer!.y + timer!.height);
   }
 });
+
+test('Relax card and random spotlight link to the new tool',async({page})=>{
+ await page.addInitScript(()=>{Math.random=()=>.7;});
+ await page.goto('/');
+ await expect(page.locator('#company-spotlight')).toHaveAttribute('data-tool','relax');
+ await expect(page.locator('#company-spotlight .text-link')).toHaveAttribute('href','https://relax.jacktools.net/de/');
+ await expect(page.locator('#company-spotlight .company-relax-scene')).toBeVisible();
+ await expect(page.getByRole('link',{name:'Relax öffnen'})).toHaveAttribute('href','https://relax.jacktools.net/de/');
+ await expect(page.locator('.relax-feature .company-relax-scene')).toBeVisible();
+ await expect(page.locator('.relax-feature')).toContainText('Lagerfeuer');
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});
