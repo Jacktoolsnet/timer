@@ -323,3 +323,24 @@ test('sleep fade resumes at the remaining level rather than full volume',async({
  });
  expect(result).toEqual({soft:true,louder:true});
 });
+
+test('focus simulation fills the viewport with compact, accessible overlay controls',async({page})=>{
+ await page.goto('/en/');await begin(page);
+ // Exercise fallback focus layout so the browser window can be resized in this test.
+ await page.evaluate(()=>{Object.defineProperty(document.documentElement,'requestFullscreen',{value:undefined,configurable:true});});
+ await page.locator('#focus').click();
+ for(const size of [{width:390,height:844},{width:1440,height:900},{width:2560,height:1440},{width:740,height:360}]){
+  await page.setViewportSize(size);
+  const stage=await page.locator('#sound-stage').boundingBox();
+  expect(stage!.width).toBeGreaterThan(size.width*.9);expect(stage!.height).toBeGreaterThan(size.height*.9);
+  for(const selector of ['#focus','#start','#end-session','#safety-open']){
+   await expect(page.locator(selector)).toBeVisible();
+   const box=await page.locator(selector).boundingBox();
+   expect(box!.x).toBeGreaterThanOrEqual(0);expect(box!.y).toBeGreaterThanOrEqual(0);
+   expect(box!.x+box!.width).toBeLessThanOrEqual(size.width);
+   expect(box!.y+box!.height).toBeLessThanOrEqual(size.height);
+  }
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth&&document.documentElement.scrollHeight<=innerHeight)).toBe(true);
+ }
+ await page.locator('#safety-open').click();await expect(page.locator('#safety-dialog')).toBeVisible();
+});
