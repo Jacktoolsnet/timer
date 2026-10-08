@@ -26,12 +26,12 @@ const {lang}=Astro.props; const t=getDictionary(lang); const c=stopwatchText[lan
 <line id="stopwatch-second-hand" x1="160" y1="182" x2="160" y2="38"/><circle cx="160" cy="160" r="5" class="stopwatch-hub"/>
 </svg><p class="dial-hint">{c.dialHint}</p></div>
 <div id="elapsed" class="stopwatch-time" role="timer" aria-label={c.total} aria-live="off">00:00:00.00</div></div>
-<div class="timer-controls">
+<div class="focus-details stopwatch-focus-details"><div class="timer-controls">
 <button id="reset-timing" class="secondary" aria-label={c.reset} title={c.reset} disabled><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 10a9 9 0 1 1 1 8M3 4v6h6"/></svg></button>
 <button id="toggle-timing" class="primary" aria-label={c.start} title={c.start} disabled><span id="play-symbol"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m8 5 11 7-11 7Z" fill="currentColor" stroke="none"/></svg></span><span id="pause-symbol" hidden><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 5v14M16 5v14" stroke-width="4"/></svg></span></button>
 <button id="lap" class="secondary" aria-label={c.lap} title={c.lap} disabled><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 21V3m0 1c5-4 9 4 14 0v10c-5 4-9-4-14 0"/></svg></button>
 </div>
-<p id="wake-status" class="timer-status" role="status"></p><p class="keyboard-hint">{c.hint}</p><noscript>{t.js}</noscript>
+<p id="wake-status" class="timer-status" role="status"></p></div><p class="keyboard-hint">{c.hint}</p><noscript>{t.js}</noscript>
 </div>
 <section class="lap-panel stopwatch-laps" aria-labelledby="laps-title"><div class="laps-heading"><h2 id="laps-title">{c.laps}</h2><div class="laps-actions">
 <button id="copy-laps" class="secondary" aria-label={c.copyLaps} title={c.copyLaps} disabled><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V3H3v13h5"/></svg></button>

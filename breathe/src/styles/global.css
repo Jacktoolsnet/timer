@@ -800,3 +800,44 @@ body.focus-view .breath-instruction { margin-bottom:14px; }
 .number-stepper input::-webkit-inner-spin-button,.number-stepper input::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
 .breath-duration-row { display:grid; gap:8px; margin:12px 0; }
 .breath-durations .breath-duration-row > label { display:block; margin:0; font-size:calc(12px * var(--font-scale)); }
+
+body.focus-view.focus-cursor-hidden, body.focus-view.focus-cursor-hidden * { cursor:none !important; }
+
+/* Full-viewport focus display with a compact floating control bar. */
+body.focus-view { overflow:hidden; }
+body.focus-view .site-shell { width:100%; max-width:none; padding:0; }
+body.focus-view .workspace { display:block; width:100%; max-width:none; height:100dvh; min-height:0; margin:0; padding:8px; }
+body.focus-view .timer-card { position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; height:100%; min-height:0; max-width:none; margin:0; padding:64px 12px 100px; border:0; border-radius:20px; overflow:hidden; }
+body.focus-view .card-top { position:absolute; top:max(12px,env(safe-area-inset-top)); right:max(12px,env(safe-area-inset-right)); z-index:5; margin:0; }
+body.focus-view .card-top button { background:color-mix(in srgb,var(--surface) 90%,transparent); border:1px solid var(--line); border-radius:12px; min-height:44px; padding:8px 12px; }
+body.focus-view .timer-status:empty { display:none; }
+body.focus-view .focus-details, body.focus-view .timer-card > .focus-details { position:absolute; flex-direction:row; bottom:max(12px,env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%); z-index:3; display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:4px 12px; width:max-content; max-width:calc(100% - 24px); padding:8px 14px; margin:0; border:1px solid var(--line); border-radius:16px; background:color-mix(in srgb,var(--surface) 90%,transparent); backdrop-filter:blur(12px); }
+body.focus-view .focus-details .timer-controls { display:flex; justify-content:center; gap:8px; margin:0; }
+body.focus-view .focus-details .timer-status { margin:0; min-height:0; max-width:28rem; font-size:.75rem; }
+body.focus-view .focus-details .timer-controls button { min-width:44px; min-height:44px; padding:10px; }
+body.focus-view .focus-details .timer-controls #reset > span:not(.sr-only) { display:none; }
+@media(max-width:500px) {
+ body.focus-view .workspace { padding:0; }
+ body.focus-view .timer-card { border-radius:0; padding-left:8px; padding-right:8px; }
+ body.focus-view .card-top button { font-size:.75rem; }
+}
+
+.breath-focus-details { display:contents; }
+body.focus-view .breath-card { display:flex; padding:64px 12px 110px; }
+body.focus-view .breath-stage { flex:none; width:min(92vw,calc(100dvh - 170px)); max-width:none; margin:0; grid-row:auto; aspect-ratio:1; }
+body.focus-view .breath-top { position:absolute; top:12px; right:12px; z-index:4; }
+body.focus-view .breath-top #pattern-name { display:none; }
+body.focus-view .breath-top button { background:var(--surface); border:1px solid var(--line); border-radius:12px; min-height:44px; padding:8px 12px; }
+body.focus-view .breath-instruction { display:none; }
+body.focus-view .breath-meta { display:flex; gap:12px; margin:0; font-size:.75rem; }
+body.focus-view .session-status { margin:0; font-size:.75rem; }
+body.focus-view .session-status:empty { display:none; }
+body.focus-view .breath-safety { position:absolute; top:12px; left:12px; z-index:4; margin:0; max-width:45%; }
+body.focus-view .breath-safety p { display:none; }
+body.focus-view .breath-safety button { background:var(--surface); border:1px solid var(--line); border-radius:12px; min-height:44px; padding:8px 10px; font-size:.75rem; text-decoration:none; }
+body.focus-view #skip-hold { margin:0; }
+@media(max-height:450px) { body.focus-view .breath-card { padding-top:48px; padding-bottom:70px; } body.focus-view .breath-stage { width:min(90vw,calc(100dvh - 125px)); } }
+body.focus-view .breath-caption output { font-size:min(calc(10.5cqw * var(--font-scale,1)),120px); }
+body.focus-view .breath-caption #tile-phase { font-size:min(calc(3.2cqw * var(--font-scale,1)),28px); }
+
+body.focus-view .focus-details .timer-controls .primary { width:48px; min-width:48px; flex:none; }

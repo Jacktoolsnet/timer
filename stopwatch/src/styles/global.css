@@ -834,3 +834,46 @@ body.focus-view .stopwatch-main #stopwatch-display[data-view=analog] .stopwatch-
 .support-actions a.support-coffee{background:var(--accent);color:var(--surface);border-color:var(--accent);font-weight:650;min-height:50px;box-shadow:0 4px 14px color-mix(in srgb,var(--accent) 20%,transparent)}.support-actions a.support-coffee:hover{background:var(--accent);border-color:var(--accent);filter:brightness(.94)}[data-theme=dark] .support-actions a.support-coffee{color:#24241f}
 
 .laps-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.laps-heading h2{margin:0}.laps-actions{display:flex;gap:8px;flex-shrink:0}.laps-actions button{width:40px;min-height:40px;padding:8px}.laps-actions svg{width:18px;height:18px}.lap-panel .export-status{font-size:12px;color:var(--accent);line-height:1.5;margin:10px 0 0}.export-status:empty{display:none}
+
+body.focus-view.focus-cursor-hidden, body.focus-view.focus-cursor-hidden * { cursor:none !important; }
+
+/* Full-viewport focus display with a compact floating control bar. */
+body.focus-view { overflow:hidden; }
+body.focus-view .site-shell { width:100%; max-width:none; padding:0; }
+body.focus-view .workspace { display:block; width:100%; max-width:none; height:100dvh; min-height:0; margin:0; padding:8px; }
+body.focus-view .timer-card { position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; height:100%; min-height:0; max-width:none; margin:0; padding:64px 12px 100px; border:0; border-radius:20px; overflow:hidden; }
+body.focus-view .card-top { position:absolute; top:max(12px,env(safe-area-inset-top)); right:max(12px,env(safe-area-inset-right)); z-index:5; margin:0; }
+body.focus-view .card-top button { background:color-mix(in srgb,var(--surface) 90%,transparent); border:1px solid var(--line); border-radius:12px; min-height:44px; padding:8px 12px; }
+body.focus-view .timer-status:empty { display:none; }
+body.focus-view .focus-details, body.focus-view .timer-card > .focus-details { position:absolute; flex-direction:row; bottom:max(12px,env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%); z-index:3; display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:4px 12px; width:max-content; max-width:calc(100% - 24px); padding:8px 14px; margin:0; border:1px solid var(--line); border-radius:16px; background:color-mix(in srgb,var(--surface) 90%,transparent); backdrop-filter:blur(12px); }
+body.focus-view .focus-details .timer-controls { display:flex; justify-content:center; gap:8px; margin:0; }
+body.focus-view .focus-details .timer-status { margin:0; min-height:0; max-width:28rem; font-size:.75rem; }
+body.focus-view .focus-details .timer-controls button { min-width:44px; min-height:44px; padding:10px; }
+body.focus-view .focus-details .timer-controls #reset > span:not(.sr-only) { display:none; }
+@media(max-width:500px) {
+ body.focus-view .workspace { padding:0; }
+ body.focus-view .timer-card { border-radius:0; padding-left:8px; padding-right:8px; }
+ body.focus-view .card-top button { font-size:.75rem; }
+}
+
+.stopwatch-focus-details { display:contents; }
+body.focus-view .stopwatch-main { width:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+body.focus-view #measurement-status { position:absolute; top:18px; left:18px; margin:0; font-size:.75rem; }
+body.focus-view .keyboard-hint,body.focus-view .dial-hint { display:none; }
+body.focus-view #stopwatch-display { width:100%; margin:0; }
+body.focus-view #analog-stopwatch { margin:0; }
+body.focus-view #analog-stopwatch svg { width:min(90vw,calc(100dvh - 210px)); max-width:100%; }
+body.focus-view .stopwatch-main .stopwatch-time { font-size:min(11cqw,26dvh); margin:0; line-height:1.15; letter-spacing:-.025em; }
+body.focus-view .stopwatch-main #stopwatch-display[data-view=analog] .stopwatch-time { font-size:min(7cqw,6dvh); margin:8px 0 0; }
+body.focus-view .timer-card > .stopwatch-laps { position:absolute; top:70px; right:12px; z-index:2; width:min(280px,42vw); max-width:none; max-height:calc(100dvh - 170px); margin:0; padding:10px; border:1px solid var(--line); border-radius:12px; background:color-mix(in srgb,var(--surface) 94%,transparent); overflow:auto; }
+body.focus-view .stopwatch-laps:has(#laps-table[hidden]) { display:none; }
+body.focus-view .stopwatch-laps .lap-scroll { max-height:28dvh; }
+body.focus-view .stopwatch-laps h2 { font-size:.85rem; margin:0; }
+body.focus-view .stopwatch-laps .laps-heading { gap:8px; flex-wrap:wrap; }
+@media(min-width:1100px) {
+ body.focus-view .stopwatch-card:has(#laps-table:not([hidden])) .stopwatch-main { padding-right:300px; }
+ body.focus-view .stopwatch-laps .lap-scroll { max-height:calc(100dvh - 250px); }
+}
+@media(max-height:450px) { body.focus-view .stopwatch-card { padding-top:48px; padding-bottom:70px; } body.focus-view #analog-stopwatch svg { width:min(90vw,calc(100dvh - 155px)); } }
+
+body.focus-view .focus-details .timer-controls .primary { width:48px; min-width:48px; flex:none; }

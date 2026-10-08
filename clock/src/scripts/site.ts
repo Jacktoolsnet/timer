@@ -1,3 +1,4 @@
+import './focus-cursor';
 import { storageAllowed, CONSENT_KEY } from '../lib/storage';
 import { STORAGE_KEY, type ColorScheme } from '../lib/engine';
 const theme = document.querySelector<HTMLButtonElement>('#theme')!;
