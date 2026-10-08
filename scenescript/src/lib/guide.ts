@@ -282,7 +282,12 @@ The existing UI edits the same project data. JSON/file import normalizes omitted
 fields to defaults. Save as downloads a self-contained .scenescript.json file.
 The recording view preloads assets and waits for document.fonts.ready, counts
 down three seconds and plays the entire project. Space pauses/resumes; Escape
-exits. Mouse movement/tapping reveals an exit button. Fullscreen is requested
+exits. The mouse cursor is hidden throughout recording view, including the
+countdown, and restored on exit. Mouse movement/tapping reveals an exit button.
+A screen wake lock is requested during playback and the recording countdown,
+released on pause/end/exit, and reacquired when active playback returns to a
+visible tab. Browser support, permissions and system policy can prevent it;
+if unavailable, disable device screen sleep manually for recording. Fullscreen is requested
 when supported, with a CSS focus-view fallback. Use a separate screen recorder;
 SceneScript does not record or export a video file itself.
 

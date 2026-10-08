@@ -35,7 +35,13 @@ Browsersprache, sonst Englisch. Explizite Sprach-URLs werden nicht umgeleitet.
   unter** als Download einer selbstständigen `.scenescript.json`.
 - Wiedergabe, Pause und Zeitleiste; Aufnahmeansicht mit 3 Sekunden Countdown,
   Vorladen der Bilder, Vollbild wenn unterstützt und CSS-Fallback. Leertaste
-  pausiert/setzt fort, Escape beendet. Das Tool zeichnet selbst nichts auf.
+  pausiert/setzt fort, Escape beendet. Der Mauszeiger ist schon während des
+  Countdowns ausgeblendet und wird beim Verlassen wiederhergestellt. Während
+  Wiedergabe/Countdown wird ein Screen Wake Lock angefordert; Pause, Ende und
+  Verlassen geben ihn frei. Bei Rückkehr in einen sichtbaren Tab wird er bei
+  aktiver Wiedergabe erneut angefordert. Falls nicht verfügbar, weist der Editor
+  auf manuelles Abschalten des Bildschirm-Ruhezustands hin. Das Tool zeichnet
+  selbst nichts auf.
 - Unabhängige App-Darstellung: acht Paletten, Hell/Dunkel, vier Stile und vier
   UI-Schriftgrößen aus den anderen Jacktools-Tools.
 - KI-Dokumentation: `/de/ai/` (auch andere Sprachen), `/ai/`, `/ai.txt`,

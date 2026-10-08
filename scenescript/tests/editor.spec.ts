@@ -32,8 +32,42 @@ test('playback, focus countdown, pause and exit',async({page})=>{
 });
 test('language routes, AI instructions, schema and mobile layout',async({page,request})=>{
  for(const lang of ['de','en','es','fr']){await page.goto('/'+lang+'/');await expect(page.locator('html')).toHaveAttribute('lang',lang);await expect(page.locator('#scene-list li')).toHaveCount(2);}
- expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();await page.goto('/de/ai/');await expect(page.locator('#ai-guide')).toContainText('Never use remote URLs');expect((await request.get('/ai.txt')).ok()).toBeTruthy();expect((await (await request.get('/schema.json')).json()).properties.version.const).toBe('1.0');
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();await page.goto('/de/ai/');await expect(page.locator('#ai-guide')).toContainText('External URLs, SVG data URLs and other MIME prefixes are rejected.');expect((await request.get('/ai.txt')).ok()).toBeTruthy();expect((await (await request.get('/schema.json')).json()).properties.version.const).toBe('1.0');
 });
 test('blocked storage does not prevent editing',async({page})=>{
  await page.addInitScript(()=>{Storage.prototype.getItem=()=>{throw Error('blocked');};Storage.prototype.setItem=()=>{throw Error('blocked');};});await page.goto('/en/');await page.locator('[data-add=shape]').click();await expect(page.locator('#element-list li')).toHaveCount(2);
+});
+
+async function mockWakeLock(page:import('@playwright/test').Page){
+ await page.addInitScript(()=>{
+  const state={requests:0,releases:0};
+  (window as unknown as {wakeTest:typeof state}).wakeTest=state;
+  Object.defineProperty(navigator,'wakeLock',{configurable:true,value:{request:async()=>{
+   state.requests++;
+   const sentinel=new EventTarget() as EventTarget & {release:()=>Promise<void>};
+   sentinel.release=async()=>{state.releases++;sentinel.dispatchEvent(new Event('release'));};
+   return sentinel;
+  }}});
+ });
+}
+test('wake lock follows playback, pause and completion',async({page})=>{
+ await mockWakeLock(page);await page.goto('/en/');
+ const state=()=>page.evaluate(()=>(window as unknown as {wakeTest:{requests:number;releases:number}}).wakeTest);
+ await page.locator('#play').click();await expect.poll(async()=>(await state()).requests).toBe(1);
+ await expect(page.locator('#wake-status')).toContainText('Screen stays awake');
+ await page.locator('#pause').click();await expect.poll(async()=>(await state()).releases).toBe(1);
+ await page.locator('#play').click();await expect.poll(async()=>(await state()).requests).toBe(2);
+ await page.locator('#pause').click();await page.locator('#timeline').fill('9.9');await page.locator('#play').click();
+ await expect(page.locator('#play')).toBeEnabled();await expect.poll(async()=>(await state()).requests).toBe(3);await expect.poll(async()=>(await state()).releases).toBe(3);
+});
+test('recording hides pointer before playback and releases countdown wake lock on exit',async({page})=>{
+ await mockWakeLock(page);await page.goto('/en/');await page.locator('#focus').click();
+ await expect(page.locator('#countdown')).toBeVisible();await expect(page.locator('#stage-frame')).toHaveCSS('cursor','none');await expect(page.locator('#exit-focus')).toHaveCSS('cursor','none');
+ await expect.poll(()=>page.evaluate(()=>(window as unknown as {wakeTest:{requests:number}}).wakeTest.requests)).toBe(1);
+ await page.keyboard.press('Escape');await expect(page.locator('#stage-frame')).not.toHaveCSS('cursor','none');
+ await expect.poll(()=>page.evaluate(()=>(window as unknown as {wakeTest:{releases:number}}).wakeTest.releases)).toBe(1);
+});
+test('denied wake lock shows fallback and does not stop playback',async({page})=>{
+ await page.addInitScript(()=>Object.defineProperty(navigator,'wakeLock',{configurable:true,value:{request:async()=>{throw new Error('denied');}}}));
+ await page.goto('/en/');await page.locator('#play').click();await expect(page.locator('#wake-status')).toContainText('unavailable or was denied');await expect(page.locator('#play')).toBeDisabled();await page.locator('#pause').click();
 });

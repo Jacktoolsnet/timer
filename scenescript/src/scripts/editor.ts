@@ -1,10 +1,12 @@
 import {demoProject,newScene,newElement,parseProject,formats,fonts,animations,animationState,locateTime,MAX_FILE_BYTES,MAX_IMAGE_BYTES,validateImage,type Project,type Scene,type Element} from '../lib/model';
 import {storageAllowed} from '../lib/storage';
+import {screenWakeLock} from '../lib/wake-lock';
 import {STORAGE_KEY} from '../lib/engine';
 import type {EditorKey} from '../lib/editor-i18n';
 const $=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(id) as T;
 const words=JSON.parse($('editor').dataset.words!) as Record<EditorKey,string>;
 const t=(key:string)=>words[key as EditorKey]||key;
+const keepScreenAwake=screenWakeLock($('wake-status'),t('wakeActive'),t('wakeUnavailable'));
 let project:Project=demoProject(), sceneIndex=0, selectedId='',dirty=false,time=0,playing=false,recording=false;
 let revision=0, focusAttempt=0;
 let baseTime=0,started=0,frame=0,countdownTimer:ReturnType<typeof setTimeout>|undefined,draftTimer:ReturnType<typeof setTimeout>|undefined;
@@ -96,9 +98,9 @@ function draw(follow=true){
  ($('timeline') as HTMLInputElement).max=String(total());($('timeline') as HTMLInputElement).value=String(time);$('time-label').textContent=`${time.toFixed(1)} / ${total().toFixed(1)} s`;
  ($('play') as HTMLButtonElement).disabled=playing;($('pause') as HTMLButtonElement).disabled=!playing;
 }
-function stop(){playing=false;cancelAnimationFrame(frame);}
+function stop(){playing=false;cancelAnimationFrame(frame);keepScreenAwake(false);}
 function tick(now:number){time=Math.min(total(),baseTime+(now-started)/1000);draw();if(time>=total()){stop();draw();return;}frame=requestAnimationFrame(tick);}
-function play(){if(countdownTimer)return;if(time>=total())time=0;baseTime=time;started=performance.now();playing=true;frame=requestAnimationFrame(tick);}
+function play(){if(countdownTimer)return;if(time>=total())time=0;baseTime=time;started=performance.now();playing=true;keepScreenAwake(true);frame=requestAnimationFrame(tick);}
 $('play').addEventListener('click',play);$('pause').addEventListener('click',()=>{stop();draw();});$('reset').addEventListener('click',()=>{stop();time=offset(sceneIndex);draw();});
 $('timeline').addEventListener('input',()=>{stop();time=Number(($('timeline') as HTMLInputElement).value);draw();});
 $('safe-toggle').addEventListener('change',()=>{$('safe-overlay').hidden=!($('safe-toggle') as HTMLInputElement).checked;});
@@ -125,7 +127,7 @@ $('import-image').addEventListener('click',()=>($('image-file') as HTMLInputElem
 async function decodeImage(data:string){const image=new Image();image.src=data;await image.decode();if(image.naturalWidth*image.naturalHeight>40_000_000)throw new Error('Image: maximum 40 megapixels');}
 async function preload(p:Project){await Promise.all(Object.values(p.assets).map(a=>decodeImage(a.data)));}
 $('image-file').addEventListener('change',async()=>{const input=$('image-file') as HTMLInputElement,file=input.files?.[0];input.value='';if(!file)return;const target=project;try{if(Object.keys(project.assets).length>=100)throw new Error('assets: maximum 100');if(file.size>MAX_IMAGE_BYTES)throw new Error('Image: maximum 8 MiB');if(!['image/png','image/jpeg','image/webp'].includes(file.type))throw new Error('PNG / JPEG / WebP');const data=await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=()=>reject(new Error('Image read failed'));reader.readAsDataURL(file);});validateImage(data);await decodeImage(data);if(project!==target)return;const id=crypto.randomUUID();project.assets[id]={name:file.name.slice(0,200),data};try{parseProject(JSON.stringify(project));}catch(error){delete project.assets[id];throw error;}const e=selected();if(e?.type==='image')e.asset=id;changed();refresh();}catch(error){status(t('error')+' '+(error as Error).message);}});
-$('focus').addEventListener('click',async()=>{if(($('focus') as HTMLButtonElement).disabled||recording)return;const attempt=++focusAttempt;($('focus') as HTMLButtonElement).disabled=true;stop();try{await preload(project);await document.fonts.ready;}catch(error){status(t('error')+' '+(error as Error).message);return;}finally{($('focus') as HTMLButtonElement).disabled=false;}if(attempt!==focusAttempt)return;recording=true;document.body.classList.add('recording');$('exit-focus').hidden=false;selectedId='';time=0;draw();try{await document.documentElement.requestFullscreen();}catch{/* CSS focus mode also works without fullscreen. */}let count=3;$('countdown').hidden=false;$('countdown').textContent=String(count);const step=()=>{count--;if(count>0){$('countdown').textContent=String(count);countdownTimer=setTimeout(step,1000);}else{$('countdown').hidden=true;countdownTimer=undefined;play();}};countdownTimer=setTimeout(step,1000);});
+$('focus').addEventListener('click',async()=>{if(($('focus') as HTMLButtonElement).disabled||recording)return;const attempt=++focusAttempt;($('focus') as HTMLButtonElement).disabled=true;stop();try{await preload(project);await document.fonts.ready;}catch(error){status(t('error')+' '+(error as Error).message);return;}finally{($('focus') as HTMLButtonElement).disabled=false;}if(attempt!==focusAttempt)return;recording=true;document.body.classList.add('recording');keepScreenAwake(true);$('exit-focus').hidden=false;selectedId='';time=0;draw();try{await document.documentElement.requestFullscreen();}catch{/* CSS focus mode also works without fullscreen. */}let count=3;$('countdown').hidden=false;$('countdown').textContent=String(count);const step=()=>{count--;if(count>0){$('countdown').textContent=String(count);countdownTimer=setTimeout(step,1000);}else{$('countdown').hidden=true;countdownTimer=undefined;play();}};countdownTimer=setTimeout(step,1000);});
 function exit(){focusAttempt++;clearTimeout(countdownTimer);countdownTimer=undefined;$('countdown').hidden=true;stop();recording=false;document.body.classList.remove('recording','controls-visible');$('exit-focus').hidden=true;if(document.fullscreenElement)void document.exitFullscreen().catch(()=>{});refresh();}
 $('exit-focus').addEventListener('click',exit);
 let controlsTimer:ReturnType<typeof setTimeout>|undefined;
