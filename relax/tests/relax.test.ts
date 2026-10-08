@@ -1,3 +1,4 @@
+import {instrumentTone} from '../src/lib/instruments.ts';
 import {naturalWind,randomWindGust,windStrengthAt,type WindGust} from '../src/lib/wind.ts';
 import {summerRain,randomDrop,type RainDrop} from '../src/lib/rain.ts';
 import {test} from 'node:test';
@@ -112,4 +113,15 @@ test('wind animation uses actual gust envelopes and stays still in lulls',()=>{
  assert.equal(windStrengthAt(gust.time,gusts,40),0);
  assert(windStrengthAt(gust.time+gust.duration/2,gusts,40)>.2);
  assert.equal(windStrengthAt(gust.time+gust.duration+.1,gusts,40),0);
+});
+
+test('kalimba and handpan are exclusive and have distinct synthesis profiles',()=>{
+ for(const instrument of ['kalimba','handpan'] as const){
+  const settings=normalize({[instrument]:true,chimes:true,bowls:true});
+  assert.equal(settings[instrument],true);assert.equal(settings.chimes,false);assert.equal(settings.bowls,false);
+ }
+ assert.equal(normalize({chimes:false,bowls:true}).bowls,true);
+ const kalimba=instrumentTone('kalimba',0),handpan=instrumentTone('handpan',0);
+ assert(kalimba.duration<handpan.duration);assert(kalimba.frequency>handpan.frequency);
+ assert.notDeepEqual(kalimba.partials,handpan.partials);
 });

@@ -19,7 +19,7 @@ const {lang}=Astro.props,t=dictionaries[lang];
    <div class="relax-safety"><p>{t.reminder}</p><button id="safety-open" class="safety-link">{t.safetyLink}</button></div>
   </section>
   <section class="settings-card"><h2>{t.settings}</h2><form id="relax-form">
-   <div class="relax-field instrument-field"><span id="instrument-label">{lang==='de'?'Instrument':lang==='es'?'Instrumento':'Instrument'}</span><details id="instrument-dropdown"><summary aria-labelledby="instrument-label instrument-value"><span id="instrument-value">{t.chimes}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary><fieldset class="instrument-options" aria-labelledby="instrument-label">{(['chimes','bowls'] as const).map(key=><label><input type="radio" name="instrument" value={key} checked={key==='chimes'}/><span>{t[key]}</span><svg class="instrument-check" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></label>)}</fieldset></details></div>
+   <div class="relax-field instrument-field"><span id="instrument-label">{lang==='de'?'Instrument':lang==='es'?'Instrumento':'Instrument'}</span><details id="instrument-dropdown"><summary aria-labelledby="instrument-label instrument-value"><span id="instrument-value">{t.chimes}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary><fieldset class="instrument-options" aria-labelledby="instrument-label">{(['chimes','bowls','kalimba','handpan'] as const).map(key=><label><input type="radio" name="instrument" value={key} checked={key==='chimes'}/><span class="instrument-option-copy"><strong>{t[key]}</strong><small>{t.instrumentDescriptions[key]}</small></span><svg class="instrument-check" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></label>)}</fieldset></details></div>
    <label class="relax-check"><span>{t.instrumentAnimation}</span><span class="storage-switch"><input id="instrumentAnimation" type="checkbox" role="switch" checked/><span class="storage-switch-track" aria-hidden="true"></span></span></label>
    <label class="relax-field">{t.instrumentVolume}<input id="instrumentVolume" type="range" min="0" max="100" value="45"/><output id="instrumentVolume-value">45 %</output></label>
    <label class="relax-field">{t.pitch}<input id="pitch" type="range" min="-12" max="12" step="1" value="0" aria-describedby="pitch-hint"/><output id="pitch-value">{t.pitchOriginal}</output><span class="pitch-scale"><span>{t.pitchLow}</span><span>{t.pitchHigh}</span></span><small id="pitch-hint">{t.pitchHint}</small></label>
@@ -30,7 +30,7 @@ const {lang}=Astro.props,t=dictionaries[lang];
    <fieldset class="noise-picker"><legend>{t.noiseType}</legend>{(['pink','brown','white'] as const).map((key,i)=><label><input type="radio" name="noiseType" value={key} checked={i===0}/><span>{t.noiseNames[i]}</span></label>)}</fieldset><p class="form-hint">{t.noiseHint}</p>
    </fieldset>
    {(['motion','awake','background'] as const).map(key=><label class="relax-check"><span>{t[key]}</span><span class="storage-switch"><input id={key} type="checkbox" role="switch" checked={key!=='awake'}/><span class="storage-switch-track" aria-hidden="true"></span></span></label>)}
-   <p class="form-hint">{t.backgroundHint}</p><p class="form-hint">{t.hint}</p>
+   <p class="form-hint">{t.backgroundHint}</p>
   </form></section>
  </div>
  <p class="local-note">{t.local}</p>

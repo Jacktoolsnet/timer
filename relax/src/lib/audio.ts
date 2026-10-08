@@ -1,13 +1,14 @@
+import {instrumentTone,type Instrument} from './instruments';
 import {naturalWind,windStrengthAt,type WindGust} from './wind';
 import {summerRain,type RainDrop} from './rain';
-import {randomGap,randomNote,randomGust,pitches,type Settings,type Layer,type NoiseType} from './relax';
-export type NoteEvent={index:number;instrument:'chimes'|'bowls';duration:number};
+import {randomGap,randomNote,randomGust,selectedInstrument,type Settings,type Layer,type NoiseType} from './relax';
+export type NoteEvent={index:number;instrument:Instrument;duration:number};
 export class Soundscape {
  private context:AudioContext|null=null;
  private master:GainNode|null=null;
  private instruments:GainNode|null=null;
  private sources=new Set<AudioScheduledSourceNode>();
- private voices=new Map<OscillatorNode,{gain:GainNode;instrument:'chimes'|'bowls'}>();
+ private voices=new Map<OscillatorNode,{gain:GainNode;instrument:Instrument}>();
  private output:DynamicsCompressorNode|null=null;
  private layers=new Map<Layer,{source:AudioBufferSourceNode;gain:GainNode;filter:BiquadFilterNode;lfo?:OscillatorNode;mod?:GainNode}>();
  private settings:Settings;
@@ -164,7 +165,7 @@ export class Soundscape {
     }
    }else{
     this.nextNote=now+randomGap(this.settings.density);
-    if(this.settings.bowls)this.strike(randomNote().index,'bowls',now,1);
+    this.strike(randomNote().index,selectedInstrument(this.settings),now,.85+Math.random()*.15);
    }
   }
   while(this.gust.length && this.gust[0]!.time<=now+.04){
@@ -180,19 +181,18 @@ export class Soundscape {
   return entry?windStrengthAt(time-this.windStarted,this.windGusts,entry.source.buffer!.duration):0;
  }
 
- private strike(noteIndex:number,instrument:'chimes'|'bowls',now:number,strength:number){
-  const duration=Math.min(instrument==='bowls'?10:8+Math.random()*3,this.deadline-now);
+ private strike(noteIndex:number,instrument:Instrument,now:number,strength:number){
+  const tone=instrumentTone(instrument,noteIndex);
+  const duration=Math.min(tone.duration,this.deadline-now);
   if(duration<.3)return;
-  const frequency=pitches[noteIndex]!*(instrument==='chimes'?2:1);
-  // Inharmonic resonances of suspended metal tubes; upper modes decay faster.
-  const partials=instrument==='chimes'?[1,2.756,5.404,8.933]:[1,2.01,2.76,4.1];
+  const {frequency,partials}=tone;
   partials.forEach((partial,index)=>{
    const oscillator=this.context!.createOscillator(),gain=this.context!.createGain();
    oscillator.type='sine';oscillator.frequency.value=frequency*partial;
    oscillator.detune.value=this.settings.pitch*100;
-   const tail=instrument==='chimes'?duration/(1+index*.65):duration;
-   const attack=instrument==='chimes'?.008:.04;
-   const peak=(instrument==='chimes'?.11:.16)*strength/(1+index*2);
+   const tail=duration/(1+index*tone.decay);
+   const attack=tone.attack;
+   const peak=tone.peak*strength/(1+index*2);
    gain.gain.setValueAtTime(0,now);gain.gain.linearRampToValueAtTime(peak,now+attack);
    gain.gain.exponentialRampToValueAtTime(.0001,now+tail);
    oscillator.connect(gain);gain.connect(this.instruments!);this.sources.add(oscillator);

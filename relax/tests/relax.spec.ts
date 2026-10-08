@@ -231,3 +231,21 @@ test('chimes follow wind gusts only when wind is enabled',async({page})=>{
  expect(result.played).toBeGreaterThan(2);
  expect(result.quiet).toBe(0);expect(result.following).toBe(true);expect(result.independent).toBe(true);
 });
+
+for(const instrument of ['kalimba','handpan'] as const){
+ test(instrument+' plays, animates, retunes and persists',async({page})=>{
+  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.goto('/en/');await page.locator('#instrument-dropdown summary').click();
+  await expect(page.locator('[name=instrument][value='+instrument+']').locator('..')).toContainText(instrument==='kalimba'?'metal tines':'steel instrument');
+  await page.locator('[name=instrument][value='+instrument+']').check();
+  await expect(page.locator('#instrument-description')).toHaveCount(0);
+  await begin(page);await expect(page.locator('.instrument-'+instrument).first()).toBeVisible();
+  await page.locator('#pitch').fill('-6');
+  await page.locator('#instrumentAnimation').uncheck();
+  await expect(page.locator('.sound-shape')).toHaveCount(0);
+  await page.locator('#end-session').click();
+  await page.locator('#palette-dropdown summary').click();await page.locator('#remember-preferences').check();await page.locator('#preferences-close').click();
+  await page.reload();await expect(page.locator('[name=instrument][value='+instrument+']')).toBeChecked();
+  expect(errors).toEqual([]);
+ });
+}

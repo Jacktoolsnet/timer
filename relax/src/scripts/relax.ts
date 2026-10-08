@@ -1,4 +1,4 @@
-import {defaults,normalize,timeLabel,type Settings} from '../lib/relax';
+import {defaults,normalize,timeLabel,selectedInstrument,type Settings} from '../lib/relax';
 import {Soundscape,type NoteEvent} from '../lib/audio';
 import {dictionaries} from '../lib/relax-i18n';
 import {storageAllowed} from '../lib/storage';
@@ -18,11 +18,11 @@ const wake=screenWakeLock(el('wake-status'),'',t.awakeError);
 const stage=el('sound-shapes');
 function shape(note:NoteEvent){
  if(!settings.motion||!settings.instrumentAnimation||document.hidden||state!=='running')return;
- const node=document.createElement('div');node.className='sound-shape shape-'+note.index%4;
+ const node=document.createElement('div');node.className='sound-shape shape-'+note.index%4+' instrument-'+note.instrument;
  node.style.setProperty('--tone-colour','var(--relax-tone-'+note.index+')');
- node.style.setProperty('--life',Math.max(5,note.duration)+'s');
+ node.style.setProperty('--life',Math.max(2.8,note.duration)+'s');
  node.style.left=(12+Math.random()*58)+'%';node.style.top=(10+Math.random()*58)+'%';
- node.style.width=(24+Math.random()*20)+'%';
+ node.style.width=(note.instrument==='kalimba'?8+Math.random()*7:24+Math.random()*20)+'%';
  node.dataset.note=String(note.index);stage.append(node);
  node.addEventListener('animationend',()=>node.remove(),{once:true});
  while(stage.querySelectorAll('.sound-shape').length>8)stage.querySelector('.sound-shape')?.remove();
@@ -50,8 +50,8 @@ function rainFrame(){
 requestAnimationFrame(rainFrame);
 function save(){if(!storageAllowed())return;try{localStorage.setItem(KEY,JSON.stringify(settings));}catch{el('audio-status').textContent=document.querySelector<HTMLElement>('#clear-storage')!.dataset.error!;}}
 function sync(){
- document.querySelectorAll<HTMLInputElement>('[name=instrument]').forEach(r=>r.checked=r.value===(settings.bowls?'bowls':'chimes'));
- el('instrument-value').textContent=settings.bowls?t.bowls:t.chimes;
+ document.querySelectorAll<HTMLInputElement>('[name=instrument]').forEach(r=>r.checked=r.value===selectedInstrument(settings));
+ el('instrument-value').textContent=t[selectedInstrument(settings)];
  for(const key of ['windAnimation','instrumentAnimation','rainAnimation','rain','wind','noise','motion','awake','background'] as const)input(key).checked=settings[key];
  for(const key of ['windActivity','rainDensity','pitch','minutes','density','instrumentVolume','rainVolume','windVolume','noiseVolume'] as const){
   input(key).value=String(settings[key]);const output=document.getElementById(key+'-value');if(output)output.textContent=(key==='rainDensity'||key==='windActivity')?settings[key]+' / 10':key==='pitch'?(settings.pitch===0?t.pitchOriginal:(settings.pitch>0?'+':'')+settings.pitch+' '+t.semitones):settings[key]+' %';
@@ -105,7 +105,8 @@ el('safety-open').addEventListener('click',()=>{pause();safety.showModal();});
 safety.addEventListener('close',()=>el('safety-open').focus());
 form.addEventListener('submit',e=>e.preventDefault());
 function read(){
- settings.bowls=document.querySelector<HTMLInputElement>('[name=instrument]:checked')!.value==='bowls';settings.chimes=!settings.bowls;
+ const selected=document.querySelector<HTMLInputElement>('[name=instrument]:checked')!.value;
+ for(const key of ['chimes','bowls','kalimba','handpan'] as const)settings[key]=key===selected;
  for(const key of ['windAnimation','instrumentAnimation','rainAnimation','rain','wind','noise','motion','awake','background'] as const)settings[key]=input(key).checked;
  for(const key of ['windActivity','rainDensity','pitch','minutes','density','instrumentVolume','rainVolume','windVolume','noiseVolume'] as const)settings[key]=Number(input(key).value);
  settings.noiseType=document.querySelector<HTMLInputElement>('[name=noiseType]:checked')!.value as Settings['noiseType'];

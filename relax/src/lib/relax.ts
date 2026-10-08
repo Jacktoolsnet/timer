@@ -3,19 +3,19 @@ export const noiseTypes = ['pink','brown','white'] as const;
 export type NoiseType = typeof noiseTypes[number];
 export type Layer = 'rain' | 'wind' | 'noise';
 export interface Settings {
- minutes:number; density:number; chimes:boolean; bowls:boolean; instrumentVolume:number; pitch:number;
+ minutes:number; density:number; chimes:boolean; bowls:boolean; kalimba:boolean; handpan:boolean; instrumentVolume:number; pitch:number;
  windAnimation:boolean; instrumentAnimation:boolean; rainAnimation:boolean; rain:boolean; wind:boolean; noise:boolean; windActivity:number; rainDensity:number; rainVolume:number; windVolume:number; noiseVolume:number;
  noiseType:NoiseType; motion:boolean; awake:boolean; background:boolean; safetySeen:boolean;
 }
 export const defaults:Settings = {
- minutes:15,density:5,chimes:true,bowls:false,instrumentVolume:45,pitch:0,
+ minutes:15,density:5,chimes:true,bowls:false,kalimba:false,handpan:false,instrumentVolume:45,pitch:0,
  windAnimation:false,instrumentAnimation:true,rainAnimation:false,rain:false,wind:false,noise:false,windActivity:5,rainDensity:5,rainVolume:25,windVolume:20,noiseVolume:20,
  noiseType:'pink',motion:true,awake:false,background:true,safetySeen:false,
 };
 export function normalize(value:unknown):Settings {
  const v=value && typeof value==='object'?value as Partial<Settings>:{};
  const result={...defaults};
- for(const key of ['windAnimation','instrumentAnimation','rainAnimation','chimes','bowls','rain','wind','noise','motion','awake','background','safetySeen'] as const) {
+ for(const key of ['windAnimation','instrumentAnimation','rainAnimation','chimes','bowls','kalimba','handpan','rain','wind','noise','motion','awake','background','safetySeen'] as const) {
   if(typeof v[key]==='boolean') result[key]=v[key]!;
  }
  for(const [key,min,max] of [['windActivity',1,10],['rainDensity',1,10],['pitch',-12,12],['minutes',0,180],['density',1,10],['instrumentVolume',0,100],['rainVolume',0,100],['windVolume',0,100],['noiseVolume',0,100]] as const) {
@@ -23,7 +23,8 @@ export function normalize(value:unknown):Settings {
  }
  if(noiseTypes.includes(v.noiseType as NoiseType)) result.noiseType=v.noiseType!;
  // Migrate old combined or silent instrument settings to one selection.
- result.bowls=result.bowls&&!result.chimes;result.chimes=!result.bowls;
+ const instrument=result.kalimba?'kalimba':result.handpan?'handpan':result.bowls&&!result.chimes?'bowls':'chimes';
+ for(const key of ['chimes','bowls','kalimba','handpan'] as const)result[key]=key===instrument;
  return result;
 }
 export function randomNote(random=Math.random) {
@@ -49,4 +50,8 @@ export function randomGust(random=Math.random) {
   previous=index;offset+=.12+random()*.48;
  }
  return strikes;
+}
+
+export function selectedInstrument(settings:Settings){
+ return settings.kalimba?'kalimba':settings.handpan?'handpan':settings.bowls?'bowls':'chimes';
 }
