@@ -40,7 +40,7 @@ fireScene.className='campfire-scene';fireScene.setAttribute('aria-hidden','true'
 el('sound-stage').insertBefore(fireScene,stage);
 const flameOrigins=Array.from({length:17},(_,i)=>{
  const centre=1-Math.abs(i-8)/8;
- return {x:18+i*4,height:.18+Math.pow(centre,.8)*(.85+Math.random()*.2)+.5*Math.pow(centre,3)};
+ return {x:18+i*4,height:.18+.3*Math.pow(centre,1.5)+1.6*Math.pow(centre,3)*(.95+Math.random()*.1)};
 });
 for(const origin of flameOrigins){
  const flame=document.createElement('span');flame.className='campfire-flame';
