@@ -188,15 +188,15 @@ test('nature presets disable instruments and clear unrelated sounds',()=>{
  assert(brook.stream&&brook.streamAnimation);assert(!brook.instrumentsEnabled&&!brook.fire&&!brook.rain);
 });
 
-test('ocean surf has long swells, quiet gaps and stronger waves at higher activity',()=>{
+test('ocean surf has long overlapping swells and stronger waves at higher activity',()=>{
  const events:NatureEvent[]=[];
  const sound=oceanSurf(8000,30,()=>.5,5,event=>events.push(event));
- assert(events.length>=3&&events.length<=5);
+ assert(events.length>=5&&events.length<=8);
  assert(events.every(e=>e.duration!>4));
- for(let i=1;i<events.length;i++)assert(events[i].time-events[i-1].time>5);
+ for(let i=1;i<events.length;i++)assert(events[i].time-events[i-1].time<events[i-1].duration!);
  const wave=events[0],start=Math.floor(wave.time*8000);
  assert(Math.abs(sound[start])<.0001);
- const lull=Math.floor((wave.time+wave.duration!+.2)*8000);assert(sound[lull]===0);
+ assert(events[1].time>wave.time+wave.duration!*wave.crest!);
  const gentle:NatureEvent[]=[],strong:NatureEvent[]=[];
  oceanSurf(8000,10,()=>.5,1,e=>gentle.push(e));
  oceanSurf(8000,10,()=>.5,10,e=>strong.push(e));

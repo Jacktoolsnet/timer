@@ -176,6 +176,15 @@ export class Soundscape {
   }
   return events;
  }
+ oceanState(){
+  const entry=this.layers.get('stream');
+  if(!this.running||!entry||!this.settings.streamVolume)return null;
+  const elapsed=this.time-(this.natureStarted.get('stream')||0),duration=entry.source.buffer!.duration,time=elapsed%duration;
+  return (this.natureEvents.get('stream')||[]).filter(w=>time>=w.time&&time<w.time+(w.duration||0)).map(wave=>{
+   const p=(time-wave.time)/wave.duration!,crest=wave.crest!;
+   return {key:Math.floor(elapsed/duration)+':'+wave.time,progress:p,level:Math.sin(Math.PI*.5*(p<crest?p/crest:(1-p)/(1-crest)))**2*(time>duration-1.5?((duration-time)/1.5)**2:1)};
+  });
+ }
  windStrength(){
   const entry=this.layers.get('wind');
   if(!this.running||!entry||this.settings.windVolume===0)return 0;

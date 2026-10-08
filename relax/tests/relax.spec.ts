@@ -368,16 +368,22 @@ for(const layer of ['fire','stream'] as const){
   const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto('/en/');await page.locator('#instrumentsEnabled').uncheck();
   await page.locator('#'+layer).check();await page.locator('#'+layer+'Animation').check();await begin(page);
-  await expect(page.locator('.'+layer+'-glimmer').first()).toBeVisible();
+  await expect(page.locator(layer==='stream'?'#ocean-wave':'.fire-glimmer').first()).toBeVisible();
+  if(layer==='stream'){
+   await page.locator('#wave-direction-dropdown summary').click();await page.locator('[name=waveDirection][value=left]').check();
+   await expect(page.locator('#ocean-direction')).toHaveAttribute('transform','rotate(90 500 500)');
+  }
   await page.locator('#'+(layer==='fire'?'fireDensity':'streamFlow')).fill('8');
   await expect(page.locator('#'+(layer==='fire'?'fireDensity':'streamFlow')+'-value')).toHaveText('8 / 10');
-  await page.locator('#start').click();await expect(page.locator('.'+layer+'-glimmer').first()).toHaveCSS('animation-play-state','paused');
+  await page.locator('#start').click();if(layer==='fire')await expect(page.locator('.fire-glimmer').first()).toHaveCSS('animation-play-state','paused');
+  else {const path=await page.locator('#ocean-surface').getAttribute('d');await page.waitForTimeout(250);expect(await page.locator('#ocean-surface').getAttribute('d')).toBe(path);}
   await page.locator('#start').click();
-  await page.locator('#'+layer+'Animation').uncheck();await expect(page.locator('.'+layer+'-glimmer')).toHaveCount(0);
+  await page.locator('#'+layer+'Animation').uncheck();if(layer==='stream')await expect(page.locator('#ocean-wave')).toBeHidden();else await expect(page.locator('.fire-glimmer')).toHaveCount(0);
   await page.locator('#end-session').click();
   await page.locator('#palette-dropdown summary').click();await page.locator('#remember-preferences').check();await page.locator('#preferences-close').click();
   await page.reload();await expect(page.locator('#'+layer)).toBeChecked();
   await expect(page.locator('#'+(layer==='fire'?'fireDensity':'streamFlow'))).toHaveValue('8');
+  if(layer==='stream')await expect(page.locator('[name=waveDirection][value=left]')).toBeChecked();
   expect(errors).toEqual([]);
  });
 }

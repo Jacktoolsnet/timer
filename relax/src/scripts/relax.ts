@@ -1,5 +1,5 @@
 import {applyPreset,matchingPreset,presetNames,type Preset} from '../lib/presets';
-import {defaults,normalize,timeLabel,selectedInstrument,fadeWindow,type Settings} from '../lib/relax';
+import {waveDirections,defaults,normalize,timeLabel,selectedInstrument,fadeWindow,type Settings} from '../lib/relax';
 import {Soundscape,type NoteEvent} from '../lib/audio';
 import {dictionaries} from '../lib/relax-i18n';
 import {storageAllowed} from '../lib/storage';
@@ -31,19 +31,50 @@ function shape(note:NoteEvent){
 }
 const audio=new Soundscape(settings,shape);
 const glow=document.querySelector<HTMLElement>('.ambient-glow')!;
+const ocean=el('ocean-wave'),surface=el('ocean-surface');
+const waveProfiles=new Map<string,{peak:number;width:number}>();
 function rainFrame(){
+ const enabled=settings.stream&&settings.streamAnimation&&settings.motion&&!reduced.matches&&settings.streamVolume>0;
+ if(!enabled||state==='ready'||state==='ended')ocean.setAttribute('data-hidden','true');
+ else if(state==='running'&&!document.hidden){
+  const waves=audio.oceanState()||[];
+  if(!waves.length)ocean.setAttribute('data-hidden','true');
+  else{
+   ocean.removeAttribute('data-hidden');
+   const group=el('ocean-direction');
+   const keys=new Set(waves.map(w=>w.key));
+   for(const key of waveProfiles.keys())if(!keys.has(key))waveProfiles.delete(key);
+   group.querySelectorAll('[data-wave]').forEach(node=>{if(!keys.has((node as SVGElement).dataset.wave!))node.remove();});
+   for(const wave of waves){
+    if(!waveProfiles.has(wave.key))waveProfiles.set(wave.key,{peak:120+Math.random()*760,width:160+Math.random()*110});
+    const profile=waveProfiles.get(wave.key)!;
+    let node=Array.from(group.querySelectorAll<SVGPathElement>('[data-wave]')).find(n=>n.dataset.wave===wave.key);
+    if(!node){node=document.createElementNS('http://www.w3.org/2000/svg','path');node.dataset.wave=wave.key;node.setAttribute('fill','url(#ocean-gradient)');group.append(node);}
+    // A single smooth crest; its lateral position stays fixed during this wave.
+    const baseline=1040-wave.level*180;
+    const height=(x:number)=>baseline-wave.level*660*Math.exp(-(((x-profile.peak)/profile.width)**2));
+    let path='M -100 '+height(-100);
+    for(let x=-80;x<=1100;x+=20)path+=' L '+x+' '+height(x);
+    node.setAttribute('d',path+' L 1100 1200 L -100 1200 Z');
+   }
+   // Retain the inspection path without drawing a duplicate layer.
+   surface.setAttribute('d',group.querySelector('[data-wave]')?.getAttribute('d')||'');
+   surface.setAttribute('fill','none');
+  }
+ }
+ el('ocean-direction').setAttribute('transform','rotate('+({bottom:0,top:180,left:90,right:-90}[settings.waveDirection])+' 500 500)');
+
  const windAnimated=settings.windAnimation&&settings.wind&&settings.motion&&!reduced.matches&&(state==='running'||state==='paused');
  glow.dataset.windAnimated=String(windAnimated);
  if(!windAnimated)glow.style.setProperty('--wind-level','0');
  else if(state==='running'&&!document.hidden)glow.style.setProperty('--wind-level',String(audio.windStrength()));
- for(const layer of ['fire','stream'] as const){
+ for(const layer of ['fire'] as const){
   const events=audio.takeNatureEvents(layer);
   if(state==='running'&&!document.hidden&&settings.motion&&!reduced.matches){
    for(const event of events){
     const node=document.createElement('span');node.className='nature-glimmer '+layer+'-glimmer';
     node.style.left=(10+Math.random()*80)+'%';node.style.top=(16+Math.random()*66)+'%';
-    node.style.setProperty('--nature-size',(layer==='fire'?18+event.strength*55:110+event.strength*200)+'px');
-    if(layer==='stream'&&event.duration)node.style.setProperty('--nature-life',event.duration+'s');
+    node.style.setProperty('--nature-size',(18+event.strength*55)+'px');
     node.style.setProperty('--nature-colour','var(--relax-tone-'+(layer==='fire'?0:4)+')');
     stage.append(node);node.addEventListener('animationend',()=>node.remove(),{once:true});
    }
@@ -66,6 +97,8 @@ function rainFrame(){
 requestAnimationFrame(rainFrame);
 function save(){if(!storageAllowed())return;try{localStorage.setItem(KEY,JSON.stringify(settings));}catch{el('audio-status').textContent=document.querySelector<HTMLElement>('#clear-storage')!.dataset.error!;}}
 function sync(){
+ document.querySelectorAll<HTMLInputElement>('[name=waveDirection]').forEach(r=>r.checked=r.value===settings.waveDirection);
+ el('wave-direction-value').textContent=t.waveDirectionNames[waveDirections.indexOf(settings.waveDirection)]!;
  const preset=matchingPreset(settings);
  el('preset-value').textContent=preset==='custom'?t.customMix:t.presetTitles[presetNames.indexOf(preset)]!;
  document.querySelectorAll<HTMLInputElement>('[name=preset]').forEach(r=>r.checked=r.value===preset);
@@ -133,6 +166,7 @@ function read(){
  for(const key of ['chimes','bowls','kalimba','handpan','bells','gong','harp'] as const)settings[key]=key===selected;
  for(const key of ['fire','stream','fireAnimation','streamAnimation','sleepMode','instrumentsEnabled','windAnimation','instrumentAnimation','rainAnimation','rain','wind','noise','motion','awake','background'] as const)settings[key]=input(key).checked;
  for(const key of ['fireVolume','streamVolume','fireDensity','streamFlow','windActivity','rainDensity','pitch','minutes','density','instrumentVolume','rainVolume','windVolume','noiseVolume'] as const)settings[key]=Number(input(key).value);
+ settings.waveDirection=document.querySelector<HTMLInputElement>('[name=waveDirection]:checked')!.value as Settings['waveDirection'];
  settings.noiseType=document.querySelector<HTMLInputElement>('[name=noiseType]:checked')!.value as Settings['noiseType'];
  applySettings();
 }
@@ -218,3 +252,8 @@ document.addEventListener('preferences-cleared',()=>{try{localStorage.removeItem
 reduced.addEventListener('change',e=>{if(e.matches){settings.motion=false;stage.replaceChildren();sync();}});
 setInterval(()=>{if(state==='running'){if(!audio.running){pause();return;}render();}},250);
 sync();total=settings.minutes*60;render();
+
+const waveDropdown=el('wave-direction-dropdown') as HTMLDetailsElement;
+waveDropdown.addEventListener('change',()=>{waveDropdown.open=false;waveDropdown.querySelector('summary')!.focus();});
+document.addEventListener('click',e=>{if(!waveDropdown.contains(e.target as Node))waveDropdown.open=false;});
+waveDropdown.addEventListener('keydown',e=>{if(e.key==='Escape'){e.stopPropagation();waveDropdown.open=false;waveDropdown.querySelector('summary')!.focus();}});

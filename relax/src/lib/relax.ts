@@ -2,14 +2,16 @@ export const pitches = [220,246.94,277.18,329.63,369.99,440,493.88,554.37] as co
 export const noiseTypes = ['pink','brown','white'] as const;
 export type NoiseType = typeof noiseTypes[number];
 export type Layer = 'rain' | 'wind' | 'noise' | 'fire' | 'stream';
+export const waveDirections=['bottom','top','left','right'] as const;
 export interface Settings {
+ waveDirection:typeof waveDirections[number];
  sleepMode:boolean; instrumentsEnabled:boolean; minutes:number; density:number; chimes:boolean; bowls:boolean; kalimba:boolean; handpan:boolean; bells:boolean; gong:boolean; harp:boolean; instrumentVolume:number; pitch:number;
  windAnimation:boolean; instrumentAnimation:boolean; rainAnimation:boolean; rain:boolean; wind:boolean; noise:boolean; windActivity:number; rainDensity:number; rainVolume:number; windVolume:number; noiseVolume:number;
  fire:boolean; stream:boolean; fireAnimation:boolean; streamAnimation:boolean; fireVolume:number; streamVolume:number; fireDensity:number; streamFlow:number;
  noiseType:NoiseType; motion:boolean; awake:boolean; background:boolean; safetySeen:boolean;
 }
 export const defaults:Settings = {
- sleepMode:false,instrumentsEnabled:true,minutes:15,density:5,chimes:true,bowls:false,kalimba:false,handpan:false,bells:false,gong:false,harp:false,instrumentVolume:45,pitch:0,
+ waveDirection:'bottom',sleepMode:false,instrumentsEnabled:true,minutes:15,density:5,chimes:true,bowls:false,kalimba:false,handpan:false,bells:false,gong:false,harp:false,instrumentVolume:45,pitch:0,
  windAnimation:false,instrumentAnimation:true,rainAnimation:false,rain:false,wind:false,noise:false,windActivity:5,rainDensity:5,rainVolume:25,windVolume:20,noiseVolume:20,
  fire:false,stream:false,fireAnimation:false,streamAnimation:false,fireVolume:25,streamVolume:25,fireDensity:5,streamFlow:5,
  noiseType:'pink',motion:true,awake:false,background:true,safetySeen:false,
@@ -24,6 +26,7 @@ export function normalize(value:unknown):Settings {
   const n=v[key];if(typeof n==='number' && Number.isFinite(n)) result[key]=Math.max(min,Math.min(max,Math.round(n)));
  }
  if(noiseTypes.includes(v.noiseType as NoiseType)) result.noiseType=v.noiseType!;
+ if(waveDirections.includes(v.waveDirection!))result.waveDirection=v.waveDirection!;
  // Migrate old combined or silent instrument settings to one selection.
  const instrument=result.bells?'bells':result.gong?'gong':result.harp?'harp':result.kalimba?'kalimba':result.handpan?'handpan':result.bowls&&!result.chimes?'bowls':'chimes';
  for(const key of ['chimes','bowls','kalimba','handpan','bells','gong','harp'] as const)result[key]=key===instrument;

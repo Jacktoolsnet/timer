@@ -1,5 +1,5 @@
 import {oceanSurf} from './ocean.ts';
-export type NatureEvent={time:number;strength:number;duration?:number};
+export type NatureEvent={time:number;strength:number;duration?:number;crest?:number};
 export type NatureLayer='fire'|'stream';
 /** Locally generated textures, not field recordings. */
 export function natureSound(type:NatureLayer,sampleRate:number,seconds=30,random=Math.random,activity=5,onEvent?:(event:NatureEvent)=>void):Float32Array {
