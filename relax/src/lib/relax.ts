@@ -3,19 +3,19 @@ export const noiseTypes = ['pink','brown','white'] as const;
 export type NoiseType = typeof noiseTypes[number];
 export type Layer = 'rain' | 'wind' | 'noise';
 export interface Settings {
- instrumentsEnabled:boolean; minutes:number; density:number; chimes:boolean; bowls:boolean; kalimba:boolean; handpan:boolean; bells:boolean; gong:boolean; harp:boolean; instrumentVolume:number; pitch:number;
+ sleepMode:boolean; instrumentsEnabled:boolean; minutes:number; density:number; chimes:boolean; bowls:boolean; kalimba:boolean; handpan:boolean; bells:boolean; gong:boolean; harp:boolean; instrumentVolume:number; pitch:number;
  windAnimation:boolean; instrumentAnimation:boolean; rainAnimation:boolean; rain:boolean; wind:boolean; noise:boolean; windActivity:number; rainDensity:number; rainVolume:number; windVolume:number; noiseVolume:number;
  noiseType:NoiseType; motion:boolean; awake:boolean; background:boolean; safetySeen:boolean;
 }
 export const defaults:Settings = {
- instrumentsEnabled:true,minutes:15,density:5,chimes:true,bowls:false,kalimba:false,handpan:false,bells:false,gong:false,harp:false,instrumentVolume:45,pitch:0,
+ sleepMode:false,instrumentsEnabled:true,minutes:15,density:5,chimes:true,bowls:false,kalimba:false,handpan:false,bells:false,gong:false,harp:false,instrumentVolume:45,pitch:0,
  windAnimation:false,instrumentAnimation:true,rainAnimation:false,rain:false,wind:false,noise:false,windActivity:5,rainDensity:5,rainVolume:25,windVolume:20,noiseVolume:20,
  noiseType:'pink',motion:true,awake:false,background:true,safetySeen:false,
 };
 export function normalize(value:unknown):Settings {
  const v=value && typeof value==='object'?value as Partial<Settings>:{};
  const result={...defaults};
- for(const key of ['instrumentsEnabled','windAnimation','instrumentAnimation','rainAnimation','chimes','bowls','kalimba','handpan','bells','gong','harp','rain','wind','noise','motion','awake','background','safetySeen'] as const) {
+ for(const key of ['sleepMode','instrumentsEnabled','windAnimation','instrumentAnimation','rainAnimation','chimes','bowls','kalimba','handpan','bells','gong','harp','rain','wind','noise','motion','awake','background','safetySeen'] as const) {
   if(typeof v[key]==='boolean') result[key]=v[key]!;
  }
  for(const [key,min,max] of [['windActivity',1,10],['rainDensity',1,10],['pitch',-12,12],['minutes',0,180],['density',1,10],['instrumentVolume',0,100],['rainVolume',0,100],['windVolume',0,100],['noiseVolume',0,100]] as const) {
@@ -54,4 +54,8 @@ export function randomGust(random=Math.random) {
 
 export function selectedInstrument(settings:Settings){
  return settings.bells?'bells':settings.gong?'gong':settings.harp?'harp':settings.kalimba?'kalimba':settings.handpan?'handpan':settings.bowls?'bowls':'chimes';
+}
+
+export function fadeWindow(duration:number,sleepMode:boolean){
+ return sleepMode?Math.min(300,Math.max(0,duration)/2):Math.min(4,Math.max(0,duration));
 }

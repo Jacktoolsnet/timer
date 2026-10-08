@@ -1,5 +1,5 @@
 import {applyPreset,matchingPreset,presetNames,type Preset} from '../lib/presets';
-import {defaults,normalize,timeLabel,selectedInstrument,type Settings} from '../lib/relax';
+import {defaults,normalize,timeLabel,selectedInstrument,fadeWindow,type Settings} from '../lib/relax';
 import {Soundscape,type NoteEvent} from '../lib/audio';
 import {dictionaries} from '../lib/relax-i18n';
 import {storageAllowed} from '../lib/storage';
@@ -8,6 +8,7 @@ const t=dictionaries[document.documentElement.lang as keyof typeof dictionaries]
 const el=(id:string)=>document.getElementById(id)!;
 const input=(id:string)=>el(id) as HTMLInputElement;
 const form=el('relax-form') as HTMLFormElement,start=el('start') as HTMLButtonElement,end=el('end-session') as HTMLButtonElement;
+const sleepScreen=el('sleep-screen') as HTMLDialogElement;
 const first=el('first-start-dialog') as HTMLDialogElement,safety=el('safety-dialog') as HTMLDialogElement;
 const KEY='jacktools.relax.settings.v1';
 let settings:Settings=normalize(defaults);
@@ -56,7 +57,7 @@ function sync(){
  document.querySelectorAll<HTMLInputElement>('[name=preset]').forEach(r=>r.checked=r.value===preset);
  document.querySelectorAll<HTMLInputElement>('[name=instrument]').forEach(r=>r.checked=r.value===selectedInstrument(settings));
  el('instrument-value').textContent=t[selectedInstrument(settings)];
- for(const key of ['instrumentsEnabled','windAnimation','instrumentAnimation','rainAnimation','rain','wind','noise','motion','awake','background'] as const)input(key).checked=settings[key];
+ for(const key of ['sleepMode','instrumentsEnabled','windAnimation','instrumentAnimation','rainAnimation','rain','wind','noise','motion','awake','background'] as const)input(key).checked=settings[key];
  for(const key of ['windActivity','rainDensity','pitch','minutes','density','instrumentVolume','rainVolume','windVolume','noiseVolume'] as const){
   input(key).value=String(settings[key]);const output=document.getElementById(key+'-value');if(output)output.textContent=(key==='rainDensity'||key==='windActivity')?settings[key]+' / 10':key==='pitch'?(settings.pitch===0?t.pitchOriginal:(settings.pitch>0?'+':'')+settings.pitch+' '+t.semitones):settings[key]+' %';
  }
@@ -68,8 +69,11 @@ function render(){
  document.documentElement.dataset.relaxState=state;
  const time=current(),remaining=Math.max(0,total-time),progress=el('session-progress') as HTMLProgressElement;
  el('session').textContent=total?t.remaining+' '+timeLabel(remaining):'∞';
+ el('sleep-remaining').textContent=total?timeLabel(remaining):'∞';
+ el('dim-screen').hidden=!settings.sleepMode||state!=='running';
+ if(sleepScreen.open&&(!settings.sleepMode||state!=='running'))sleepScreen.close();
  progress.hidden=!total;progress.max=total||1;progress.value=Math.min(time,total);
- el('state').textContent=state==='running'?(total&&remaining<=4?t.fade:t.running):state==='paused'?t.paused:state==='ended'?t.done:t.ready;
+ el('state').textContent=state==='running'?(total&&remaining<=fadeWindow(total,settings.sleepMode)?t.fade:t.running):state==='paused'?t.paused:state==='ended'?t.done:t.ready;
  const label=state==='running'?t.pause:state==='paused'?t.resume:t.start;
  start.setAttribute('aria-label',label);start.title=label;start.disabled=pending;
  el('start-icon').setAttribute('d',state==='running'?'M7 5h4v14H7Zm6 0h4v14h-4Z':'m8 5 11 7-11 7Z');
@@ -81,9 +85,9 @@ async function begin(){
  const fresh=state!=='paused';if(fresh){elapsed=0;total=settings.minutes*60;}
  pending=true;const token=++generation;render();
  try{
-  await audio.start(settings,total?Math.max(.01,total-elapsed):0);
+  await audio.start(settings,total?Math.max(.01,total-elapsed):0,total);
   if(token!==generation){audio.stop();return;}
-  anchor=audio.time;state='running';el('audio-status').textContent='';wake(settings.awake);stage.querySelectorAll<HTMLElement>('.sound-shape,.rain-drop').forEach(n=>n.style.animationPlayState='running');
+  anchor=audio.time;state='running';el('audio-status').textContent='';wake(settings.awake&&!settings.sleepMode);stage.querySelectorAll<HTMLElement>('.sound-shape,.rain-drop').forEach(n=>n.style.animationPlayState='running');
  }catch{audio.stop();el('audio-status').textContent=t.audioError;}
  finally{pending=false;render();}
 }
@@ -96,6 +100,8 @@ function finish(){
  if(state==='running')elapsed=current();
  generation++;pending=false;state='ended';audio.stop();wake(false);stage.replaceChildren();render();
 }
+el('dim-screen').addEventListener('click',()=>{if(state==='running'&&settings.sleepMode)sleepScreen.showModal();});
+sleepScreen.addEventListener('close',()=>{if(!el('dim-screen').hidden)el('dim-screen').focus();});
 start.addEventListener('click',()=>{
  if(state==='running'){pause();return;}
  if(!form.reportValidity())return;
@@ -111,13 +117,13 @@ form.addEventListener('submit',e=>e.preventDefault());
 function read(){
  const selected=document.querySelector<HTMLInputElement>('[name=instrument]:checked')!.value;
  for(const key of ['chimes','bowls','kalimba','handpan','bells','gong','harp'] as const)settings[key]=key===selected;
- for(const key of ['instrumentsEnabled','windAnimation','instrumentAnimation','rainAnimation','rain','wind','noise','motion','awake','background'] as const)settings[key]=input(key).checked;
+ for(const key of ['sleepMode','instrumentsEnabled','windAnimation','instrumentAnimation','rainAnimation','rain','wind','noise','motion','awake','background'] as const)settings[key]=input(key).checked;
  for(const key of ['windActivity','rainDensity','pitch','minutes','density','instrumentVolume','rainVolume','windVolume','noiseVolume'] as const)settings[key]=Number(input(key).value);
  settings.noiseType=document.querySelector<HTMLInputElement>('[name=noiseType]:checked')!.value as Settings['noiseType'];
  applySettings();
 }
 function applySettings(){
- settings=normalize(settings);sync();save();audio.update(settings);wake(state==='running'&&settings.awake);
+ settings=normalize(settings);sync();save();audio.update(settings);wake(state==='running'&&settings.awake&&!settings.sleepMode);
  if(!settings.motion)stage.replaceChildren();
  if(!settings.instrumentsEnabled||!settings.instrumentAnimation)stage.querySelectorAll('.sound-shape').forEach(n=>n.remove());
  if(!settings.rainAnimation||!settings.rain||settings.rainVolume===0)stage.querySelectorAll('.rain-drop').forEach(n=>n.remove());
@@ -165,7 +171,7 @@ focus.addEventListener('click',async()=>{
  requesting=true;try{await document.documentElement.requestFullscreen();owns=document.fullscreenElement===document.documentElement;if(!document.body.classList.contains('focus-view')&&owns)await leave();}catch{}finally{requesting=false;}
 });
 document.addEventListener('fullscreenchange',()=>{if(requesting&&document.fullscreenElement===document.documentElement)owns=true;if(!document.fullscreenElement&&owns){owns=false;setFocus(false);}});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!first.open&&!safety.open)void leave();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!first.open&&!safety.open&&!sleepScreen.open)void leave();});
 document.addEventListener('visibilitychange',()=>{
  stage.querySelectorAll<HTMLElement>('.sound-shape,.rain-drop').forEach(n=>n.style.animationPlayState=document.hidden||state!=='running'?'paused':'running');
  if(document.hidden&&!settings.background)pause();else render();

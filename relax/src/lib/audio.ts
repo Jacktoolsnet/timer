@@ -1,7 +1,7 @@
 import {instrumentTone,type Instrument} from './instruments';
 import {naturalWind,windStrengthAt,type WindGust} from './wind';
 import {summerRain,type RainDrop} from './rain';
-import {randomGap,randomNote,randomGust,selectedInstrument,type Settings,type Layer,type NoiseType} from './relax';
+import {randomGap,randomNote,randomGust,selectedInstrument,fadeWindow,type Settings,type Layer,type NoiseType} from './relax';
 export type NoteEvent={index:number;instrument:Instrument;duration:number};
 export class Soundscape {
  private context:AudioContext|null=null;
@@ -25,27 +25,26 @@ export class Soundscape {
  private instrumentsWereEnabled=true;
  private gust:{index:number;time:number;strength:number}[]=[];
  private deadline=Infinity;
+ private sessionDuration=0;
+ private sleepModeScheduled:boolean|null=null;
  private active=false;
  private limit: number|null=null;
  constructor(settings:Settings,private onNote:(note:NoteEvent)=>void) {this.settings=settings;}
  get running(){return this.active && this.context?.state==='running';}
  get time(){return this.context?.currentTime || 0;}
- async start(settings:Settings,remaining:number) {
-  this.settings=settings;
+ async start(settings:Settings,remaining:number,sessionDuration=remaining) {
+  this.settings=settings;this.sessionDuration=sessionDuration;this.sleepModeScheduled=null;
   this.context??=new AudioContext();
   await this.context.resume();
   if(this.context.state!=='running') throw new Error('Audio unavailable');
   const ctx=this.context;
-  const master=ctx.createGain();master.gain.setValueAtTime(0,ctx.currentTime);master.gain.linearRampToValueAtTime(1,ctx.currentTime+.3);
+  const master=ctx.createGain();master.gain.setValueAtTime(0,ctx.currentTime);
   const compressor=ctx.createDynamicsCompressor();compressor.threshold.value=-12;compressor.ratio.value=4;
   master.connect(compressor);compressor.connect(ctx.destination);
   const instruments=ctx.createGain();instruments.connect(master);
   this.master=master;this.instruments=instruments;this.output=compressor;
   this.deadline=remaining>0?ctx.currentTime+remaining:Infinity;
   if(Number.isFinite(this.deadline)) {
-   const fade=Math.min(4,remaining);
-   master.gain.setValueAtTime(1,Math.max(ctx.currentTime+.3,this.deadline-fade));
-   master.gain.linearRampToValueAtTime(0,this.deadline);
    // The audio graph itself stops at the deadline, even if JS timers are throttled.
    const sentinel=ctx.createBufferSource();sentinel.buffer=ctx.createBuffer(1,1,ctx.sampleRate);sentinel.loop=true;sentinel.connect(master);
    sentinel.onended=()=>{master.disconnect();compressor.disconnect();};
@@ -95,6 +94,9 @@ export class Soundscape {
   if(!settings.chimes||!settings.instrumentsEnabled)this.gust=[];
   if(!this.active || !this.context || !this.master || !this.instruments)return;
   const ctx=this.context,now=ctx.currentTime;
+  if(this.sleepModeScheduled!==settings.sleepMode){
+   this.scheduleFade(settings.sleepMode);this.sleepModeScheduled=settings.sleepMode;
+  }
   for(const [source,voice] of this.voices) {
    source.detune.setTargetAtTime(settings.pitch*100,now,.12);
    if(!settings.instrumentsEnabled||!settings[voice.instrument]) {voice.gain.gain.cancelAndHoldAtTime(now);voice.gain.gain.linearRampToValueAtTime(0,now+.08);try{source.stop(now+.1);}catch{}}
@@ -126,6 +128,18 @@ export class Soundscape {
    const level=layer==='noise'?.055:.22;
    entry.gain.gain.setTargetAtTime(settings[layer+'Volume' as 'rainVolume'|'windVolume'|'noiseVolume']/100*level,now,.12);
   }
+ }
+ private scheduleFade(sleepMode:boolean){
+  const now=this.time,gain=this.master!.gain,remaining=this.deadline-now;
+  gain.cancelAndHoldAtTime(now);
+  if(!Number.isFinite(this.deadline)){gain.linearRampToValueAtTime(1,now+.3);return;}
+  if(remaining<=0){gain.setValueAtTime(0,now);return;}
+  const fade=fadeWindow(this.sessionDuration,sleepMode);
+  const rampEnd=Math.min(now+.3,this.deadline);
+  const level=fade>0?Math.min(1,Math.max(0,(this.deadline-rampEnd)/fade)):1;
+  gain.linearRampToValueAtTime(level,rampEnd);
+  if(this.deadline-fade>rampEnd)gain.setValueAtTime(1,this.deadline-fade);
+  gain.linearRampToValueAtTime(0,this.deadline);
  }
  windStrength(){
   const entry=this.layers.get('wind');

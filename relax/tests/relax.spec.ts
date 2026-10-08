@@ -293,3 +293,33 @@ test('disabled instruments produce no new notes, but re-enabling resumes them',a
  });
  expect(result).toEqual({silent:true,resumed:true,stopped:true});
 });
+
+test('sleep screen dims, keeps audio running and returns by tapping or Escape',async({page})=>{
+ await page.goto('/en/');await expect(page.locator('#sleepMode')).not.toBeChecked();
+ await page.locator('#sleepMode').check();await begin(page);
+ await page.locator('#dim-screen').click();await expect(page.locator('#sleep-screen')).toBeVisible();
+ await expect(page.locator('#start')).toHaveAttribute('aria-label','Pause');
+ await page.locator('.sleep-screen-surface').click();await expect(page.locator('#sleep-screen')).not.toBeVisible();
+ await page.locator('#dim-screen').click();await page.keyboard.press('Escape');
+ await expect(page.locator('#sleep-screen')).not.toBeVisible();
+ await page.locator('#sleepMode').uncheck();await expect(page.locator('#dim-screen')).toBeHidden();
+ await page.locator('#end-session').click();
+});
+test('sleep fade resumes at the remaining level rather than full volume',async({page})=>{
+ await page.goto('/en/');
+ const result=await page.evaluate(async()=>{
+  const path='/src/lib/audio.ts',settingsPath='/src/lib/relax.ts';
+  const {Soundscape}=await import(path),{defaults}=await import(settingsPath);
+  const original=AudioContext.prototype.createGain,gains:GainNode[]=[];
+  AudioContext.prototype.createGain=function(){const gain=original.call(this);gains.push(gain);return gain;};
+  const audio=new Soundscape(defaults,()=>{});
+  try{
+   await audio.start({...defaults,sleepMode:true,rain:true},2,20);
+   await new Promise(r=>setTimeout(r,500));const level=gains[0].gain.value;
+   audio.update({...defaults,sleepMode:false,rain:true});
+   await new Promise(r=>setTimeout(r,350));const normal=gains[0].gain.value;
+   return {soft:level>.05&&level<.25,louder:normal>level};
+  }finally{await audio.close();AudioContext.prototype.createGain=original;}
+ });
+ expect(result).toEqual({soft:true,louder:true});
+});

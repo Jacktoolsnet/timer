@@ -4,7 +4,7 @@ import {naturalWind,randomWindGust,windStrengthAt,type WindGust} from '../src/li
 import {summerRain,randomDrop,type RainDrop} from '../src/lib/rain.ts';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {normalize,defaults,randomGust,randomNote,randomGap,timeLabel} from '../src/lib/relax.ts';
+import {normalize,defaults,fadeWindow,randomGust,randomNote,randomGap,timeLabel} from '../src/lib/relax.ts';
 test('normalizes persisted values safely',()=>{
  assert.deepEqual(normalize(null),defaults);
  const s=normalize({minutes:Infinity,density:100,noiseType:'oops',instrumentVolume:-5,safetySeen:'yes',background:false});
@@ -160,4 +160,11 @@ test('gentle companion uses deep brown noise at ten percent',()=>{
 
 test('summer garden uses pitch minus seven',()=>{
  assert.equal(applyPreset(defaults,'summer').pitch,-7);
+});
+
+test('sleep mode preserves a useful fade for short and long sessions',()=>{
+ assert.equal(normalize({}).sleepMode,false);
+ assert.equal(fadeWindow(900,true),300);assert.equal(fadeWindow(60,true),30);
+ assert.equal(fadeWindow(900,false),4);assert.equal(fadeWindow(0,true),0);
+ assert.equal(applyPreset({...defaults,sleepMode:true},'summer').sleepMode,true);
 });
