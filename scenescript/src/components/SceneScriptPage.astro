@@ -8,6 +8,7 @@ const {lang}=Astro.props,t=editorDictionary(lang);
 <Layout lang={lang} title={"SceneScript — " + t.heading} description={t.intro} route="">
  <section class="scene-intro"><h1>{t.heading}</h1><p>{t.intro}</p></section>
  <div id="editor" class="app-shell" data-words={JSON.stringify(t)}>
+  <section class="small-screen-note" aria-labelledby="tablet-heading"><h2 id="tablet-heading">{t.tabletRequired}</h2><p>{t.tabletHint}</p><a href={'/'+lang+'/ai/'}>{t.ai} ↗</a></section>
   <nav class="editor-toolbar" aria-label={t.project}>
    <button id="new-project">{t.new}</button><button id="load-project">{t.load}</button><button id="save-project" class="primary">{t.save}</button><button id="open-json">{t.json}</button><a href={'/'+lang+'/ai/'} target="_blank" rel="noopener">{t.ai} ↗</a>
   </nav>

@@ -106,3 +106,12 @@ test('recording waits for manual start without a countdown or wake lock',async({
  await page.keyboard.press('Space');await expect(page.locator('#countdown')).toBeVisible();await expect(page.locator('#start-recording')).not.toBeVisible();await expect(page.locator('#stage-frame')).toHaveCSS('cursor','none');
  await page.keyboard.press('Escape');await expect(page.locator('body')).not.toHaveClass(/recording/);
 });
+
+test('small windows show notice; widening preserves the current project',async({page})=>{
+ await page.goto('/de/');await page.locator('#project-title').fill('Tablet project');
+ await page.setViewportSize({width:390,height:844});await expect(page.locator('.small-screen-note')).toBeVisible();await expect(page.locator('.small-screen-note')).toContainText('768');await expect(page.locator('.editor-toolbar')).not.toBeVisible();await expect(page.locator('.studio-grid')).not.toBeVisible();
+ await page.setViewportSize({width:768,height:1024});await expect(page.locator('.small-screen-note')).not.toBeVisible();await expect(page.locator('#project-title')).toHaveValue('Tablet project');await expect(page.locator('.studio-grid')).toBeVisible();
+});
+test('AI guide remains accessible on smartphone-sized windows',async({page})=>{
+ await page.setViewportSize({width:390,height:844});await page.goto('/en/');await page.locator('.small-screen-note a').click();await expect(page.locator('#ai-guide')).toBeVisible();
+});

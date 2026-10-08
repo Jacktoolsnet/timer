@@ -278,6 +278,10 @@ check the project on the intended output size before recording.
 
 ## Recording, editing and delivery
 
+The editor targets tablets and computers: at least 768 CSS pixels of browser
+viewport width. Below that width, a device-size notice replaces the editor;
+the AI documentation stays accessible. This does not restrict portrait projects
+or videos intended for smartphone audiences.
 The existing UI edits the same project data. JSON/file import normalizes omitted
 fields to defaults. Save as downloads a self-contained .scenescript.json file.
 The recording view preloads assets and waits for document.fonts.ready, shows a large Play button and waits for the user to start, allowing the browser

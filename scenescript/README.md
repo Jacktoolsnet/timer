@@ -20,6 +20,15 @@ Vier Sprachversionen: `/de/`, `/en/`, `/es/`, `/fr/`. Die neutrale Startseite
 bevorzugt mit Speicherzustimmung die gespeicherte Sprache, sonst die
 Browsersprache, sonst Englisch. Explizite Sprach-URLs werden nicht umgeleitet.
 
+## Mindestgröße
+
+Der Editor ist für Tablet und Computer vorgesehen: mindestens **768 CSS-Pixel
+Viewport-Breite**. Kleinere Fenster zeigen statt des Editors einen lokalisierten
+Hinweis; die KI-Anleitung bleibt zugänglich. Es findet keine Geräteerkennung
+per User-Agent statt. Bereits laufende Aufnahmen werden beim Verkleinern nicht
+abgebrochen, und Projekte bleiben im Arbeitsspeicher erhalten.
+Hochkant-Projekte für Smartphone-Zielgruppen sind weiterhin möglich.
+
 ## Erste Version
 
 - Szenen erstellen, duplizieren, umordnen, löschen und Dauer einstellen.
@@ -89,7 +98,7 @@ npm run preview
 
 Unit-Tests: Normalisierung, Schema-Feldabdeckung, Sicherheitsgrenzen,
 Bildverweise, Zeitberechnung und Unicode-Animation.
-Browser-Tests auf Desktop/Mobil: JSON-Import/-Export und Datei-Roundtrip,
+Browser-Tests auf Desktop/Tablet (768×1024), zusätzlich Smartphone-Hinweis: JSON-Import/-Export und Datei-Roundtrip,
 Bilder, Plain-Text-Sicherheit, Sprachseiten, lokale Speicherung/Löschung,
 gesperrter Speicher, unabhängige Darstellung und Fokuswiedergabe.
 Build landet in `dist/`; `node_modules`, Tests und Quellcode nicht hochladen.
