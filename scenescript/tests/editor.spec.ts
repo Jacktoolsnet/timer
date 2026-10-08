@@ -1,4 +1,6 @@
 import {test,expect} from '@playwright/test';
+import {readFile} from 'node:fs/promises';
+async function exportedJSON(page:import('@playwright/test').Page){const pending=page.waitForEvent('download');await page.locator('#save-project').click();const download=await pending;return readFile((await download.path())!,'utf8');}
 import {demoProject} from '../src/lib/model';
 const pixel='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aD1sAAAAASUVORK5CYII=';
 test('editor, image embedding and downloaded project round trip',async({page})=>{
@@ -12,7 +14,7 @@ test('editor, image embedding and downloaded project round trip',async({page})=>
  const downloadEvent=page.waitForEvent('download');await page.locator('#save-project').click();const download=await downloadEvent;expect(download.suggestedFilename()).toBe('Mein-Film.scenescript.json');
  const path=await download.path();expect(path).toBeTruthy();await page.locator('#project-file').setInputFiles(path!);
  await expect(page.locator('#project-title')).toHaveValue('Mein Film');await expect(page.locator('#asset-list img')).toHaveCount(1);
- await page.locator('#open-json').click();const json=JSON.parse(await page.locator('#json-input').inputValue());expect(json.assets[Object.keys(json.assets)[0]].data).toBe(pixel);expect(json.scenes[0].elements.at(-1).text).toBe('Hallo Welt');await page.locator('#close-json').click();expect(errors).toEqual([]);
+ const json=JSON.parse(await exportedJSON(page));expect(json.assets[Object.keys(json.assets)[0]].data).toBe(pixel);expect(json.scenes[0].elements.at(-1).text).toBe('Hallo Welt');expect(errors).toEqual([]);
 });
 test('invalid import leaves existing project untouched; plain text never executes',async({page})=>{
  await page.goto('/en/');await page.locator('#open-json').click();await page.locator('#json-input').fill('{"version":"wrong"}');await page.locator('#import-json').click();await expect(page.locator('#json-status')).toContainText('version');await page.locator('#close-json').click();await expect(page.locator('#scene-list li')).toHaveCount(2);
@@ -26,7 +28,7 @@ test('appearance independent from project; consent and deletion',async({page})=>
  await expect(page.locator('#stage')).toHaveCSS('background-color','rgb(38, 59, 66)');await page.locator('#privacy-open').click();await page.locator('#clear-storage').click();expect(await page.evaluate(()=>localStorage.getItem('jacktools.scenescript.project.v1'))).toBeNull();
 });
 test('playback, focus countdown, pause and exit',async({page})=>{
- await page.goto('/en/');await page.locator('#play').click();await page.waitForTimeout(150);await page.locator('#pause').click();expect(Number(await page.locator('#timeline').inputValue())).toBeGreaterThan(0);
+ await page.goto('/en/');await page.locator('#play').click();await page.waitForTimeout(150);await page.locator('#play').click();expect(Number(await page.locator('#timeline').inputValue())).toBeGreaterThan(0);
  await page.locator('#focus').click();await expect(page.locator('body')).toHaveClass(/recording/);await page.locator('#start-recording').click();await expect(page.locator('#countdown')).toBeVisible();await page.keyboard.press('Escape');await expect(page.locator('body')).not.toHaveClass(/recording/);
  await page.locator('#focus').click();await page.locator('#start-recording').click();await expect(page.locator('#countdown')).toBeVisible();await expect(page.locator('#countdown')).not.toBeVisible({timeout:6000});await page.keyboard.press('Space');const value=await page.locator('#timeline').inputValue();await page.waitForTimeout(100);expect(await page.locator('#timeline').inputValue()).toBe(value);await page.keyboard.press('Escape');await expect(page.locator('body')).not.toHaveClass(/recording/);
 });
@@ -55,10 +57,10 @@ test('wake lock follows playback, pause and completion',async({page})=>{
  const state=()=>page.evaluate(()=>(window as unknown as {wakeTest:{requests:number;releases:number}}).wakeTest);
  await page.locator('#play').click();await expect.poll(async()=>(await state()).requests).toBe(1);
  await expect(page.locator('#wake-status')).toBeEmpty();
- await page.locator('#pause').click();await expect.poll(async()=>(await state()).releases).toBe(1);
+ await page.locator('#play').click();await expect.poll(async()=>(await state()).releases).toBe(1);
  await page.locator('#play').click();await expect.poll(async()=>(await state()).requests).toBe(2);
- await page.locator('#pause').click();await page.locator('#timeline').fill('9.9');await page.locator('#play').click();
- await expect(page.locator('#play')).toBeEnabled();await expect.poll(async()=>(await state()).requests).toBe(3);await expect.poll(async()=>(await state()).releases).toBe(3);
+ await page.locator('#play').click();await page.locator('#timeline').fill('9.9');await page.locator('#play').click();
+ await expect(page.locator('#play')).toHaveAttribute('title','Play from here');await expect.poll(async()=>(await state()).requests).toBe(3);await expect.poll(async()=>(await state()).releases).toBe(3);
 });
 test('recording hides pointer before playback and releases countdown wake lock on exit',async({page})=>{
  await mockWakeLock(page);await page.goto('/en/');await page.locator('#focus').click();
@@ -69,7 +71,7 @@ test('recording hides pointer before playback and releases countdown wake lock o
 });
 test('denied wake lock shows fallback and does not stop playback',async({page})=>{
  await page.addInitScript(()=>Object.defineProperty(navigator,'wakeLock',{configurable:true,value:{request:async()=>{throw new Error('denied');}}}));
- await page.goto('/en/');await page.locator('#play').click();await expect(page.locator('#wake-status')).toContainText('unavailable or was denied');await expect(page.locator('#play')).toBeDisabled();await page.locator('#pause').click();
+ await page.goto('/en/');await page.locator('#play').click();await expect(page.locator('#wake-status')).toContainText('unavailable or was denied');await expect(page.locator('#play')).toHaveAttribute('title','Pause');await page.locator('#play').click();
 });
 
 test('custom project and unsaved edits survive recording exit',async({page})=>{
@@ -80,7 +82,7 @@ test('custom project and unsaved edits survive recording exit',async({page})=>{
  await page.locator('#project-title').fill('Unsaved imported project');
  await page.locator('#scene-list button').nth(2).click();await page.locator('#element-list button').click();await page.locator('#element-form [name=text]').fill('Unsaved third-scene text');
  const beforeTime=await page.locator('#timeline').inputValue();
- await page.locator('#open-json').click();const before=await page.locator('#json-input').inputValue();await page.locator('#close-json').click();
+ const before=await exportedJSON(page);await page.locator('#project-title').fill('Unsaved imported project');
  for(const mode of ['countdown-escape','playback-button','native-fullscreen-exit']){
   await page.locator('#focus').click();await page.locator('#start-recording').click();await expect(page.locator('#countdown')).toBeVisible();
   if(mode==='countdown-escape')await page.keyboard.press('Escape');
@@ -91,7 +93,7 @@ test('custom project and unsaved edits survive recording exit',async({page})=>{
    else await page.locator('#exit-focus').click({force:true});
   }
   await expect(page.locator('body')).not.toHaveClass(/recording/);
-  await page.locator('#open-json').click();expect(await page.locator('#json-input').inputValue()).toBe(before);await page.locator('#close-json').click();
+  await expect(page.locator('#editor-status')).toContainText('Unsaved changes');expect(await exportedJSON(page)).toBe(before);await page.locator('#project-title').fill('Unsaved imported project');
   await expect(page.locator('#scene-list button').nth(2)).toHaveAttribute('aria-current','true');await expect(page.locator('#element-form [name=text]')).toHaveValue('Unsaved third-scene text');expect(await page.locator('#timeline').inputValue()).toBe(beforeTime);
   await expect(page.locator('#editor-status')).toContainText('Unsaved changes');
  }
@@ -117,7 +119,7 @@ test('AI guide remains accessible on smartphone-sized windows',async({page})=>{
 });
 
 test('project spans three columns and preview expands without losing state',async({page})=>{
- await page.goto('/en/');const projectBox=await page.locator('.project-panel').boundingBox(),previewBox=await page.locator('.studio-preview').boundingBox();expect(projectBox!.width).toBeGreaterThan(previewBox!.width*2.5);expect(Math.abs(projectBox!.y-previewBox!.y)).toBeLessThan(2);
+ await page.goto('/en/');const projectBox=await page.locator('.project-panel').boundingBox(),previewBox=await page.locator('.studio-preview').boundingBox();expect(projectBox!.width).toBeGreaterThan(previewBox!.width*2.5);expect(Math.abs(projectBox!.y-previewBox!.y)).toBeLessThan(2);expect(Math.abs(projectBox!.height-previewBox!.height)).toBeLessThan(2);
  const smallWidth=(await page.locator('#stage-frame').boundingBox())!.width;
  await page.locator('#open-preview').click();await expect(page.locator('#preview-dialog')).toBeVisible();await expect(page.locator('#play .control-label')).toBeVisible();expect((await page.locator('#stage-frame').boundingBox())!.width).toBeGreaterThan(smallWidth*1.5);
  await page.locator('#safe-toggle').check();await page.locator('#timeline').fill('2');await page.keyboard.press('Escape');await expect(page.locator('#preview-dialog')).not.toBeVisible();await expect(page.locator('#timeline')).toHaveValue('2');await expect(page.locator('#play .control-label')).not.toBeVisible();await expect(page.locator('#stage')).toHaveCount(1);
@@ -139,4 +141,34 @@ test('second row follows scenes, scene settings, elements, element settings',asy
  const boxes=await Promise.all(panels.map(selector=>page.locator(selector).boundingBox()));
  for(let i=1;i<boxes.length;i++){expect(boxes[i]!.x).toBeGreaterThan(boxes[i-1]!.x);expect(Math.abs(boxes[i]!.y-boxes[0]!.y)).toBeLessThan(2);}
  await page.locator('#element-list button').click();await expect(page.locator('.element-inspector [name=text]')).toBeVisible();await expect(page.locator('.scene-inspector [name=name]')).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();
+});
+
+test('project toolbar uses labeled icons and JSON is paste-only',async({page})=>{
+ await page.goto('/en/');await expect(page.locator('.editor-toolbar #import-image svg')).toHaveCount(1);
+ for(const id of ['new-project','load-project','save-project','open-json','import-image']){const button=page.locator('#'+id);expect(await button.getAttribute('title')).toBeTruthy();expect(await button.getAttribute('aria-label')).toBeTruthy();expect((await button.textContent())!.trim()).toBe('');}
+ await page.locator('#open-json').click();await expect(page.locator('#json-input')).toHaveValue('');await expect(page.locator('#copy-json')).toHaveCount(0);await page.locator('#close-json').click();
+ await page.locator('#image-file').setInputFiles({name:'trash-test.png',mimeType:'image/png',buffer:Buffer.from(pixel.split(',')[1],'base64')});await expect(page.locator('#asset-list .asset-row button svg')).toHaveCount(1);
+ page.once('dialog',d=>d.accept());await page.locator('#asset-list .asset-row button').click();await expect(page.locator('#asset-list img')).toHaveCount(0);
+});
+
+test('app fullscreen hides surroundings and preserves edits and recording return',async({page})=>{
+ await page.goto('/en/');await page.locator('#project-title').fill('Fullscreen project');await page.locator('#editor-fullscreen').click();await expect(page.locator('body')).toHaveClass(/editor-fullscreen/);await expect(page.locator('.site-header')).not.toBeVisible();await expect(page.locator('.scene-intro')).not.toBeVisible();await expect(page.locator('.site-footer')).not.toBeVisible();await expect(page.locator('.studio-grid')).toBeVisible();
+ await page.locator('#open-json').click();await expect(page.locator('#json-dialog')).toBeVisible();await page.locator('#close-json').click();
+ await page.locator('#focus').click();await expect(page.locator('#start-recording')).toBeVisible();await page.locator('#exit-focus').click({force:true});await expect(page.locator('body')).not.toHaveClass(/recording/);await expect(page.locator('body')).toHaveClass(/editor-fullscreen/);
+ await page.locator('#editor-fullscreen').click();await expect(page.locator('.site-header')).toBeVisible();await expect(page.locator('#project-title')).toHaveValue('Fullscreen project');
+ await page.locator('#editor-fullscreen').click();await page.keyboard.press('Escape');await expect(page.locator('body')).not.toHaveClass(/editor-fullscreen/);await expect(page.locator('#project-title')).toHaveValue('Fullscreen project');
+});
+
+test('project toolbar is a vertical rail on the left',async({page})=>{
+ await page.goto('/en/');const rail=await page.locator('.editor-toolbar').boundingBox(),content=await page.locator('.project-content').boundingBox();expect(rail!.x+rail!.width).toBeLessThan(content!.x);
+ const controls=page.locator('.editor-toolbar > *');let previousY=-1;
+ for(let i=0;i<await controls.count();i++){const box=(await controls.nth(i).boundingBox())!;expect(box.y).toBeGreaterThan(previousY);previousY=box.y;}
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();
+});
+
+test('play toggles pause and scene navigation works in compact and overlay preview',async({page})=>{
+ await page.goto('/en/');await expect(page.locator('#previous-scene')).toBeDisabled();await page.locator('#play').click();await expect(page.locator('#play')).toHaveAttribute('title','Pause');await page.locator('#play').click();await expect(page.locator('#play')).toHaveAttribute('title','Play from here');
+ const paused=await page.locator('#timeline').inputValue();await page.waitForTimeout(100);await expect(page.locator('#timeline')).toHaveValue(paused);
+ await page.locator('#next-scene').click();await expect(page.locator('#scene-list button').nth(1)).toHaveAttribute('aria-current','true');await expect(page.locator('#timeline')).toHaveValue('5');await expect(page.locator('#next-scene')).toBeDisabled();await page.locator('#previous-scene').click();await expect(page.locator('#timeline')).toHaveValue('0');
+ await page.locator('#open-preview').click();await page.locator('#play').click();await page.locator('#next-scene').click();await expect(page.locator('#play')).toHaveAttribute('title','Pause');await expect.poll(async()=>Number(await page.locator('#timeline').inputValue())).toBeGreaterThan(5);await page.locator('#play').click();await expect(page.locator('#play')).toHaveAttribute('title','Play from here');await page.locator('#close-preview').click();
 });

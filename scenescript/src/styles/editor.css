@@ -113,3 +113,86 @@ body.recording .scene-inspector,body.recording .element-inspector,body.recording
 @media(min-width:768px) and (max-width:1100px) {
  .scene-inspector,.element-inspector { padding:12px; }
 }
+.project-panel .editor-toolbar { justify-content:flex-start; gap:8px; }
+.project-panel .editor-toolbar button,.project-panel .editor-toolbar a { display:grid; place-items:center; width:44px; height:44px; padding:10px; margin:0; flex:0 0 44px; color:var(--accent); background:var(--accent-soft); border:1px solid var(--line); border-radius:10px; }
+.project-panel .editor-toolbar button:hover,.project-panel .editor-toolbar a:hover { background:var(--surface); }
+.project-panel .editor-toolbar svg { width:22px; height:22px; }
+#asset-list .asset-row button { display:grid; place-items:center; width:34px; height:36px; border:1px solid var(--line); border-radius:8px; color:var(--accent); background:var(--surface); }
+#asset-list .asset-row button:hover { background:var(--accent-soft); }
+#asset-list .asset-row button svg { width:18px; height:18px; }
+
+/* Fullscreen editing is separate from fullscreen recording. */
+body.editor-fullscreen .site-header,body.editor-fullscreen .scene-intro,body.editor-fullscreen .site-footer { display:none; }
+body.editor-fullscreen .site-shell { max-width:none; padding:0; }
+body.editor-fullscreen:not(.recording) .app-shell { min-height:100dvh; margin:0; border:0; border-radius:0; }
+body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--accent); color:var(--surface); }
+
+/* Vertical project tool rail, visually distinct from the content area. */
+.project-panel { display:grid; grid-template-columns:64px minmax(0,1fr); gap:18px; }
+.project-content { min-width:0; }
+.project-content > label { display:inline-flex; width:calc(50% - 8px); vertical-align:top; }
+.project-content > label + label { margin-left:12px; }
+.project-panel .editor-toolbar {
+ display:flex; flex-direction:column; flex-wrap:nowrap; align-items:center;
+ justify-content:flex-start; gap:6px; margin:0; padding:9px;
+ align-self:start; border:1px solid var(--line); border-radius:16px;
+ background:var(--accent-soft);
+ background:color-mix(in srgb,var(--accent) 14%,var(--surface));
+ box-shadow:0 4px 14px #00000008;
+}
+.project-panel .editor-toolbar button,.project-panel .editor-toolbar a {
+ background:transparent; border-color:transparent; border-radius:11px;
+ transition:background .15s,box-shadow .15s;
+}
+.project-panel .editor-toolbar button:hover,.project-panel .editor-toolbar a:hover {
+ background:var(--surface); border-color:var(--line); box-shadow:0 3px 10px #00000010;
+}
+.project-panel .editor-toolbar a { border-top:1px solid var(--line); }
+@media(min-width:768px) and (max-width:1100px) {
+ .project-panel { gap:12px; }
+ .project-content > label { display:flex; width:100%; margin-left:0; }
+}
+@media(prefers-reduced-motion:reduce) {
+ .project-panel .editor-toolbar button,.project-panel .editor-toolbar a { transition:none; }
+}
+
+/* Both tiles in the first grid row share the height of the taller tile. */
+.project-panel,.studio-preview { align-self:stretch; }
+
+/* Larger asset previews with centered filename and delete action below. */
+#asset-list .asset-row {
+ flex:0 0 190px;
+ flex-direction:column;
+ align-items:center;
+ gap:10px;
+ padding:12px;
+ text-align:center;
+}
+#asset-list .asset-row img {
+ flex:0 0 auto;
+ width:164px;
+ height:120px;
+ object-fit:contain;
+ background:var(--surface);
+ border-radius:8px;
+}
+#asset-list .asset-row span {
+ flex:0 0 auto;
+ width:100%;
+ min-width:0;
+ text-align:center;
+}
+#asset-list .asset-row button { flex:0 0 auto; }
+
+.playback-controls { justify-content:space-between; flex-wrap:nowrap; }
+.preview-transport,.preview-view-actions { display:flex; align-items:center; gap:6px; }
+.preview-view-actions { margin-left:auto; }
+.preview-expanded #open-preview { display:none; }
+.preview-expanded .playback-controls { flex-wrap:wrap; }
+.preview-expanded .preview-transport { flex-wrap:wrap; }
+@media(min-width:768px) and (max-width:1100px) {
+ .preview-content:not(.preview-expanded) .playback-controls,
+ .preview-content:not(.preview-expanded) .preview-transport,
+ .preview-content:not(.preview-expanded) .preview-view-actions { gap:3px; }
+ .preview-content:not(.preview-expanded) .playback-controls button { min-width:24px; width:24px; padding:3px; }
+}

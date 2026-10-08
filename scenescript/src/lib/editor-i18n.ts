@@ -1,5 +1,10 @@
 import type { Language } from './i18n';
 const words = {
+ previousScene:['Vorherige Szene','Previous scene','Escena anterior','Scène précédente'],
+ nextScene:['Nächste Szene','Next scene','Escena siguiente','Scène suivante'],
+ appFullscreen:['App im Vollbild','App fullscreen','Aplicación en pantalla completa','Application en plein écran'],
+ exitAppFullscreen:['App-Vollbild beenden','Exit app fullscreen','Salir de pantalla completa','Quitter le plein écran'],
+ importProject:['Projektdatei importieren','Import project file','Importar archivo de proyecto','Importer un fichier projet'],
  sceneSettings:['Szeneneinstellungen','Scene settings','Ajustes de escena','Réglages de la scène'],
  elementSettings:['Elementeinstellungen','Element settings','Ajustes del elemento','Réglages de l’élément'],
  expandPreview:['Vorschau vergrößern','Expand preview','Ampliar vista previa','Agrandir l’aperçu'],
@@ -10,7 +15,7 @@ const words = {
  wakeUnavailable:['Bildschirm-Wachhalten ist nicht verfügbar oder wurde abgelehnt. Bitte den Ruhezustand für die Aufnahme in den Geräteeinstellungen deaktivieren.','Keeping the screen awake is unavailable or was denied. Please disable screen sleep in your device settings for recording.','No se puede mantener la pantalla activa. Desactiva el reposo en los ajustes del dispositivo para grabar.','Le maintien de l’écran éveillé est indisponible ou refusé. Désactivez la veille dans les réglages de l’appareil pour enregistrer.'],
  heading:['Deine Geschichte. Deine Bühne.','Your story. Your stage.','Tu historia. Tu escenario.','Votre histoire. Votre scène.'],
  intro:['Erstelle animierte Szenen, importiere KI-Entwürfe und nimm die Fokusansicht mit deinem Screenrecorder auf.','Create animated scenes, import AI drafts and record the focus view with your screen recorder.','Crea escenas animadas, importa borradores de IA y graba la vista de enfoque.','Créez des scènes animées, importez des brouillons IA et enregistrez la vue de présentation.'],
- new:['Neues Projekt','New project','Nuevo proyecto','Nouveau projet'],load:['Laden','Load','Cargar','Charger'],save:['Speichern unter','Save as','Guardar como','Enregistrer sous'],json:['JSON importieren / kopieren','Import / copy JSON','Importar / copiar JSON','Importer / copier JSON'],ai:['Anleitung für KI','AI guide','Guía para IA','Guide IA'],
+ new:['Neues Projekt','New project','Nuevo proyecto','Nouveau projet'],load:['Laden','Load','Cargar','Charger'],save:['Speichern unter','Save as','Guardar como','Enregistrer sous'],json:['JSON einfügen','Paste JSON','Pegar JSON','Coller du JSON'],ai:['Anleitung für KI','AI guide','Guía para IA','Guide IA'],
  project:['Projekt','Project','Proyecto','Projet'],title:['Titel','Title','Título','Titre'],format:['Format','Format','Formato','Format'],landscape:['Querformat · 16:9','Landscape · 16:9','Horizontal · 16:9','Paysage · 16:9'],portrait:['Hochkant · 9:16','Portrait · 9:16','Vertical · 9:16','Portrait · 9:16'],square:['Quadratisch · 1:1','Square · 1:1','Cuadrado · 1:1','Carré · 1:1'],
  scenes:['Szenen','Scenes','Escenas','Scènes'],addScene:['Szene hinzufügen','Add scene','Añadir escena','Ajouter une scène'],duplicate:['Duplizieren','Duplicate','Duplicar','Dupliquer'],remove:['Löschen','Delete','Eliminar','Supprimer'],up:['Nach oben','Move up','Subir','Monter'],down:['Nach unten','Move down','Bajar','Descendre'],
  preview:['Vorschau','Preview','Vista previa','Aperçu'],play:['Ab hier abspielen','Play from here','Reproducir desde aquí','Lire à partir d’ici'],pause:['Pause','Pause','Pausa','Pause'],reset:['Zurück zur Szene','Back to scene','Volver a la escena','Retour à la scène'],focus:['Aufnahmeansicht','Recording view','Vista de grabación','Vue d’enregistrement'],exit:['Beenden · Esc','Exit · Esc','Salir · Esc','Quitter · Échap'],

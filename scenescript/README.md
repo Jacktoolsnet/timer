@@ -40,7 +40,7 @@ Hochkant-Projekte für Smartphone-Zielgruppen sind weiterhin möglich.
 - Szenenhintergründe als Farbe/Bild und optionales Einblenden des Szeneninhalts.
 - PNG/JPEG/WebP-Import: Bilder werden als Base64-Data-URLs zentral im JSON
   gespeichert. Mehrfach verwendete Bilder stehen nur einmal in `assets`.
-- JSON-Textimport mit Validierung, JSON kopieren, Datei laden und **Speichern
+- JSON-Einfügen mit Validierung, Projektdatei importieren und **Speichern
   unter** als Download einer selbstständigen `.scenescript.json`.
 - Wiedergabe, Pause und Zeitleiste; Aufnahmeansicht mit großem Play-Button zum manuellen Start des 3-Sekunden-Countdowns,
   Vorladen der Bilder, Vollbild wenn unterstützt und CSS-Fallback. Leertaste
