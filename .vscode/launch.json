@@ -1,0 +1,54 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Build: Company",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm --prefix company run build",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Build: Timer",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm --prefix timer run build",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Build: Clock",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm --prefix clock run build",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Build: Stopwatch",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm --prefix stopwatch run build",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Build: Breathe",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm --prefix breathe run build",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Build: Relax",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm --prefix relax run build",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Build: Alle Seiten",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm --prefix company run build && npm --prefix timer run build && npm --prefix clock run build && npm --prefix stopwatch run build && npm --prefix breathe run build && npm --prefix relax run build",
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}
