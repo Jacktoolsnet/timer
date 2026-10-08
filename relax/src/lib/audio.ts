@@ -22,6 +22,7 @@ export class Soundscape {
  private windStarted=0;
  private nextNote=0;
  private windCoupled=false;
+ private instrumentsWereEnabled=true;
  private gust:{index:number;time:number;strength:number}[]=[];
  private deadline=Infinity;
  private active=false;
@@ -83,17 +84,20 @@ export class Soundscape {
   this.buffers.set(type,buffer);return buffer;
  }
  update(settings:Settings) {
-  const coupled=settings.wind&&settings.chimes;
+  const coupled=settings.instrumentsEnabled&&settings.wind&&settings.chimes;
   if(coupled!==this.windCoupled){
    this.gust=[];this.nextNote=this.time+.25;this.windCoupled=coupled;
   }
+  if(settings.instrumentsEnabled!==this.instrumentsWereEnabled){
+   this.gust=[];this.nextNote=this.time+.25;this.instrumentsWereEnabled=settings.instrumentsEnabled;
+  }
   this.settings=settings;
-  if(!settings.chimes)this.gust=[];
+  if(!settings.chimes||!settings.instrumentsEnabled)this.gust=[];
   if(!this.active || !this.context || !this.master || !this.instruments)return;
   const ctx=this.context,now=ctx.currentTime;
   for(const [source,voice] of this.voices) {
    source.detune.setTargetAtTime(settings.pitch*100,now,.12);
-   if(!settings[voice.instrument]) {voice.gain.gain.cancelAndHoldAtTime(now);voice.gain.gain.linearRampToValueAtTime(0,now+.08);try{source.stop(now+.1);}catch{}}
+   if(!settings.instrumentsEnabled||!settings[voice.instrument]) {voice.gain.gain.cancelAndHoldAtTime(now);voice.gain.gain.linearRampToValueAtTime(0,now+.08);try{source.stop(now+.1);}catch{}}
   }
   this.instruments.gain.setTargetAtTime(settings.instrumentVolume/100*.65,now,.08);
   for(const layer of ['rain','wind','noise'] as const) {
@@ -149,7 +153,7 @@ export class Soundscape {
  tick(){
   if(!this.active || !this.context || this.context.state!=='running')return;
   const now=this.time;
-  if(now>=this.deadline)return;
+  if(now>=this.deadline||!this.settings.instrumentsEnabled)return;
   if(now>=this.nextNote){
    if(this.settings.chimes){
     const wind=this.windCoupled?this.coupledWindStrength(now):1;

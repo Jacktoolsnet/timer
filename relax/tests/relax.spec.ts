@@ -249,3 +249,47 @@ for(const instrument of ['kalimba','handpan','bells','gong','harp'] as const){
   expect(errors).toEqual([]);
  });
 }
+
+test('instrument switch leaves background audio and rain animation running',async({page})=>{
+ await page.goto('/en/');await page.locator('#rain').check();await page.locator('#rainAnimation').check();await begin(page);
+ await expect(page.locator('.sound-shape').first()).toBeVisible();
+ await page.locator('#instrumentsEnabled').uncheck();
+ await expect(page.locator('.sound-shape')).toHaveCount(0);
+ await expect(page.locator('.rain-drop').first()).toBeVisible();
+ await expect(page.locator('#start')).toHaveAttribute('aria-label','Pause');
+ await page.locator('#instrumentsEnabled').check();
+ await expect(page.locator('.sound-shape').first()).toBeVisible({timeout:20000});
+ await page.locator('#end-session').click();
+});
+test('presets apply live, preserve duration and stay editable with consent persistence',async({page})=>{
+ await page.goto('/en/');await page.locator('#minutes').fill('42');await begin(page);
+ for(const name of ['summer','evening','focus','nature']){
+  await page.locator('#preset-dropdown summary').click();await page.locator('[name=preset][value='+name+']').check();
+  await expect(page.locator('[name=preset][value='+name+']')).toBeChecked();
+  await expect(page.locator('#minutes')).toHaveValue('42');
+  await expect(page.locator('#start')).toHaveAttribute('aria-label','Pause');
+ }
+ await expect(page.locator('#instrumentsEnabled')).not.toBeChecked();
+ await expect(page.locator('#rain')).toBeChecked();await expect(page.locator('#wind')).toBeChecked();
+ await expect(page.locator('.sound-shape')).toHaveCount(0);
+ await page.locator('#rainDensity').fill('10');await expect(page.locator('#preset-value')).toHaveText('Custom mix');
+ await page.locator('#end-session').click();
+ await page.locator('#palette-dropdown summary').click();await page.locator('#remember-preferences').check();await page.locator('#preferences-close').click();
+ await page.reload();await expect(page.locator('#instrumentsEnabled')).not.toBeChecked();await expect(page.locator('#rainDensity')).toHaveValue('10');
+});
+test('disabled instruments produce no new notes, but re-enabling resumes them',async({page})=>{
+ await page.goto('/en/');
+ const result=await page.evaluate(async()=>{
+  const path='/src/lib/audio.ts',settingsPath='/src/lib/relax.ts';
+  const {Soundscape}=await import(path),{defaults}=await import(settingsPath);
+  let count=0;const audio=new Soundscape(defaults,()=>count++);
+  await audio.start({...defaults,instrumentsEnabled:false,rain:true,density:10},0);
+  await new Promise(r=>setTimeout(r,700));const silent=count===0;
+  audio.update({...defaults,instrumentsEnabled:true,rain:true,density:10});
+  await new Promise(r=>setTimeout(r,600));const resumed=count>0;
+  audio.update({...defaults,instrumentsEnabled:false,rain:true,density:10});
+  const before=count;await new Promise(r=>setTimeout(r,800));
+  const stopped=count===before;await audio.close();return {silent,resumed,stopped};
+ });
+ expect(result).toEqual({silent:true,resumed:true,stopped:true});
+});

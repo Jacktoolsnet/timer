@@ -1,3 +1,4 @@
+import {applyPreset,matchingPreset,presetNames,type Preset} from '../lib/presets';
 import {defaults,normalize,timeLabel,selectedInstrument,type Settings} from '../lib/relax';
 import {Soundscape,type NoteEvent} from '../lib/audio';
 import {dictionaries} from '../lib/relax-i18n';
@@ -17,7 +18,7 @@ let state:'ready'|'running'|'paused'|'ended'='ready',elapsed=0,anchor=0,total=0,
 const wake=screenWakeLock(el('wake-status'),'',t.awakeError);
 const stage=el('sound-shapes');
 function shape(note:NoteEvent){
- if(!settings.motion||!settings.instrumentAnimation||document.hidden||state!=='running')return;
+ if(!settings.instrumentsEnabled||!settings.motion||!settings.instrumentAnimation||document.hidden||state!=='running')return;
  const node=document.createElement('div');node.className='sound-shape shape-'+note.index%4+' instrument-'+note.instrument;
  node.style.setProperty('--tone-colour','var(--relax-tone-'+note.index+')');
  node.style.setProperty('--life',Math.max(2.8,note.duration)+'s');
@@ -50,9 +51,12 @@ function rainFrame(){
 requestAnimationFrame(rainFrame);
 function save(){if(!storageAllowed())return;try{localStorage.setItem(KEY,JSON.stringify(settings));}catch{el('audio-status').textContent=document.querySelector<HTMLElement>('#clear-storage')!.dataset.error!;}}
 function sync(){
+ const preset=matchingPreset(settings);
+ el('preset-value').textContent=preset==='custom'?t.customMix:t.presetTitles[presetNames.indexOf(preset)]!;
+ document.querySelectorAll<HTMLInputElement>('[name=preset]').forEach(r=>r.checked=r.value===preset);
  document.querySelectorAll<HTMLInputElement>('[name=instrument]').forEach(r=>r.checked=r.value===selectedInstrument(settings));
  el('instrument-value').textContent=t[selectedInstrument(settings)];
- for(const key of ['windAnimation','instrumentAnimation','rainAnimation','rain','wind','noise','motion','awake','background'] as const)input(key).checked=settings[key];
+ for(const key of ['instrumentsEnabled','windAnimation','instrumentAnimation','rainAnimation','rain','wind','noise','motion','awake','background'] as const)input(key).checked=settings[key];
  for(const key of ['windActivity','rainDensity','pitch','minutes','density','instrumentVolume','rainVolume','windVolume','noiseVolume'] as const){
   input(key).value=String(settings[key]);const output=document.getElementById(key+'-value');if(output)output.textContent=(key==='rainDensity'||key==='windActivity')?settings[key]+' / 10':key==='pitch'?(settings.pitch===0?t.pitchOriginal:(settings.pitch>0?'+':'')+settings.pitch+' '+t.semitones):settings[key]+' %';
  }
@@ -107,17 +111,36 @@ form.addEventListener('submit',e=>e.preventDefault());
 function read(){
  const selected=document.querySelector<HTMLInputElement>('[name=instrument]:checked')!.value;
  for(const key of ['chimes','bowls','kalimba','handpan','bells','gong','harp'] as const)settings[key]=key===selected;
- for(const key of ['windAnimation','instrumentAnimation','rainAnimation','rain','wind','noise','motion','awake','background'] as const)settings[key]=input(key).checked;
+ for(const key of ['instrumentsEnabled','windAnimation','instrumentAnimation','rainAnimation','rain','wind','noise','motion','awake','background'] as const)settings[key]=input(key).checked;
  for(const key of ['windActivity','rainDensity','pitch','minutes','density','instrumentVolume','rainVolume','windVolume','noiseVolume'] as const)settings[key]=Number(input(key).value);
  settings.noiseType=document.querySelector<HTMLInputElement>('[name=noiseType]:checked')!.value as Settings['noiseType'];
+ applySettings();
+}
+function applySettings(){
  settings=normalize(settings);sync();save();audio.update(settings);wake(state==='running'&&settings.awake);
  if(!settings.motion)stage.replaceChildren();
- if(!settings.instrumentAnimation)stage.querySelectorAll('.sound-shape').forEach(n=>n.remove());
+ if(!settings.instrumentsEnabled||!settings.instrumentAnimation)stage.querySelectorAll('.sound-shape').forEach(n=>n.remove());
  if(!settings.rainAnimation||!settings.rain||settings.rainVolume===0)stage.querySelectorAll('.rain-drop').forEach(n=>n.remove());
  if(state==='ready'||state==='ended')total=settings.minutes*60;
  if(document.hidden&&!settings.background)pause();render();
 }
-form.addEventListener('input',()=>{if(form.checkValidity())read();});
+form.addEventListener('input',event=>{
+ if((event.target as HTMLInputElement).name==='preset')return;
+ if(form.checkValidity())read();
+});
+const presetDropdown=el('preset-dropdown') as HTMLDetailsElement;
+presetDropdown.addEventListener('change',event=>{
+ const selected=(event.target as HTMLInputElement).value;
+ if(!presetNames.includes(selected as Preset))return;
+ settings=applyPreset(settings,selected as Preset);applySettings();
+ presetDropdown.open=false;presetDropdown.querySelector('summary')!.focus();
+});
+document.addEventListener('click',event=>{
+ if(!presetDropdown.contains(event.target as Node))presetDropdown.open=false;
+});
+presetDropdown.addEventListener('keydown',event=>{
+ if(event.key==='Escape'){event.stopPropagation();presetDropdown.open=false;presetDropdown.querySelector('summary')!.focus();}
+});
 const instrumentDropdown=el('instrument-dropdown') as HTMLDetailsElement;
 instrumentDropdown.addEventListener('change',()=>{
  instrumentDropdown.open=false;instrumentDropdown.querySelector('summary')!.focus();

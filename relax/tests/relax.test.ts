@@ -1,3 +1,4 @@
+import {applyPreset,matchingPreset,presetNames} from '../src/lib/presets.ts';
 import {instrumentTone} from '../src/lib/instruments.ts';
 import {naturalWind,randomWindGust,windStrengthAt,type WindGust} from '../src/lib/wind.ts';
 import {summerRain,randomDrop,type RainDrop} from '../src/lib/rain.ts';
@@ -136,4 +137,27 @@ test('bells, gong and harp have exclusive selection and distinct profiles',()=>{
  assert(instrumentTone('gong',0).duration>instrumentTone('bells',0).duration);
  assert(instrumentTone('gong',0).frequency<instrumentTone('harp',0).frequency);
  assert.deepEqual(instrumentTone('harp',0).partials,[1,2,3,4,5]);
+});
+
+test('instruments can be off without losing selection and presets preserve general preferences',()=>{
+ const off=normalize({...defaults,instrumentsEnabled:false,harp:true});
+ assert.equal(off.instrumentsEnabled,false);assert.equal(off.harp,true);
+ for(const name of presetNames){
+  const original={...defaults,minutes:42,safetySeen:true,awake:true,motion:false};
+  const s=applyPreset(original,name);assert.equal(matchingPreset(s),name);
+  for(const key of ['minutes','safetySeen','awake','motion'] as const)assert.equal(s[key],original[key]);
+ }
+ const nature=applyPreset(defaults,'nature');
+ assert.equal(nature.instrumentsEnabled,false);assert(nature.rain&&nature.wind);
+ assert.equal(matchingPreset({...nature,rainDensity:10}),'custom');
+});
+
+test('gentle companion uses deep brown noise at ten percent',()=>{
+ const settings=applyPreset(defaults,'focus');
+ assert.equal(settings.noise,true);assert.equal(settings.noiseType,'brown');
+ assert.equal(settings.noiseVolume,10);assert.equal(settings.kalimba,true);
+});
+
+test('summer garden uses pitch minus seven',()=>{
+ assert.equal(applyPreset(defaults,'summer').pitch,-7);
 });
