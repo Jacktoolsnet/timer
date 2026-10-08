@@ -189,3 +189,45 @@ test('instrument animation can be disabled independently of rain and audio',asyn
  await page.locator('#palette-dropdown summary').click();await page.locator('#remember-preferences').check();await page.locator('#preferences-close').click();
  await page.reload();await expect(page.locator('#instrumentAnimation')).not.toBeChecked();
 });
+
+test('wind circle follows audio, pauses and can be switched off independently',async({page})=>{
+ await page.goto('/en/');await expect(page.locator('#windAnimation')).not.toBeChecked();
+ await page.locator('#wind').check();await page.locator('#windAnimation').check();
+ await page.locator('#instrumentAnimation').uncheck();await begin(page);
+ const glow=page.locator('.ambient-glow');
+ await expect(glow).toHaveAttribute('data-wind-animated','true');
+ await expect.poll(()=>glow.evaluate(n=>Number((n as HTMLElement).style.getPropertyValue('--wind-level')))).toBeGreaterThan(.01);
+ await page.locator('#start').click();
+ const paused=await glow.evaluate(n=>(n as HTMLElement).style.getPropertyValue('--wind-level'));
+ await page.waitForTimeout(150);
+ expect(await glow.evaluate(n=>(n as HTMLElement).style.getPropertyValue('--wind-level'))).toBe(paused);
+ await page.locator('#start').click();
+ await page.locator('#windAnimation').uncheck();await expect(glow).toHaveAttribute('data-wind-animated','false');
+ await expect(page.locator('#start')).toHaveAttribute('aria-label','Pause');
+ await page.locator('#end-session').click();
+});
+
+test('chimes follow wind gusts only when wind is enabled',async({page})=>{
+ await page.goto('/en/');
+ const result=await page.evaluate(async()=>{
+  const path='/src/lib/audio.ts',settingsPath='/src/lib/relax.ts';
+  const {Soundscape}=await import(path),{defaults}=await import(settingsPath);
+  let coupled=true;
+  const notes:{coupled:boolean;wind:number;time:number}[]=[];
+  const audio=new Soundscape({...defaults},()=>notes.push({coupled,wind:audio.windStrength(),time:audio.time}));
+  const random=Math.random;
+  // A five-second gust followed by a predictable lull.
+  Math.random=()=>0;
+  try{await audio.start({...defaults,wind:true,windActivity:1,density:10},0);}finally{Math.random=random;}
+  await new Promise(r=>setTimeout(r,6500));
+  const before=notes.length;
+  coupled=false;audio.update({...defaults,wind:false,density:10});
+  await new Promise(r=>setTimeout(r,1200));
+  const during=notes.filter(n=>n.coupled);
+  const quiet=notes.filter(n=>n.coupled&&n.time>5.15&&n.time<6.5);
+  await audio.close();
+  return {played:during.length,quiet:quiet.length,following:during.every(n=>n.wind>.05),independent:notes.length>before};
+ });
+ expect(result.played).toBeGreaterThan(2);
+ expect(result.quiet).toBe(0);expect(result.following).toBe(true);expect(result.independent).toBe(true);
+});

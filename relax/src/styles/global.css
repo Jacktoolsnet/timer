@@ -705,7 +705,12 @@ body.focus-view #sound-stage { max-height:55dvh; aspect-ratio:1.3; }
 @media(prefers-reduced-motion:reduce) { .sound-shape { animation:none; } }
 .legal-page h1,.legal-page h2,.legal-page p,.legal-page li { overflow-wrap:anywhere; }
 .legal-nav { flex-wrap:wrap; }
-[data-relax-state=running][data-relax-motion=on] .ambient-glow { animation:ambient-drift 24s ease-in-out infinite alternate; }
+/* This circle follows the audio envelope rather than an unrelated CSS loop. */
+.ambient-glow[data-wind-animated=true] {
+ background:radial-gradient(circle,color-mix(in srgb,var(--relax-tone-0) 60%,transparent),color-mix(in srgb,var(--relax-tone-3) 40%,transparent),transparent 70%);
+ transform:scale(calc(.7 + var(--wind-level,0) * .8));
+ opacity:calc(.12 + var(--wind-level,0) * .88);
+}
 @keyframes ambient-drift { from{transform:scale(.85) translate(-8%,-5%);opacity:.6} to{transform:scale(1.12) translate(8%,5%);opacity:.85} }
 @media(prefers-reduced-motion:reduce) { .ambient-glow { animation:none !important; } }
 

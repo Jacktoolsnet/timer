@@ -1,4 +1,5 @@
 const de = {
+ windAnimation:'Wind animieren',
  instrumentAnimation:'Instrumente animieren',
  rainAnimation:'Regen animieren',
  windActivity:'Windaktivität',windActivityHint:'Links: milde Böen und längere Pausen. Rechts: kräftigere Böen und kürzere Pausen. Auch während der Wiedergabe einstellbar.',
@@ -35,6 +36,7 @@ const de = {
 };
 type Text = typeof de;
 const en:Text = {
+ windAnimation:'Animate wind',
  instrumentAnimation:'Animate instruments',
  rainAnimation:'Animate rain',
  windActivity:'Wind activity',windActivityHint:'Left: gentle gusts and longer pauses. Right: stronger gusts and shorter pauses. Adjustable during playback.',
@@ -66,6 +68,7 @@ const en:Text = {
  privacyBody:'Sound choices, volumes, duration, density, display options and first-start guidance status are saved locally only with storage consent. Otherwise they stay in memory. Running sessions are not saved. Disabling storage or clearing preferences removes saved values. There is no cross-device synchronisation.',
 };
 const es:Text = {
+ windAnimation:'Animar el viento',
  instrumentAnimation:'Animar los instrumentos',
  rainAnimation:'Animar la lluvia',
  windActivity:'Actividad del viento',windActivityHint:'Izquierda: ráfagas suaves y pausas largas. Derecha: ráfagas más fuertes y pausas cortas. Ajustable durante la reproducción.',
@@ -97,6 +100,7 @@ const es:Text = {
  privacyBody:'Solo con consentimiento se guardan localmente sonidos, volúmenes, duración, densidad, opciones visuales y el estado del aviso inicial. Sin consentimiento permanecen en memoria. No se guarda una sesión en curso. Desactivar el almacenamiento o borrar ajustes elimina los datos guardados. No hay sincronización entre dispositivos.',
 };
 const fr:Text = {
+ windAnimation:'Animer le vent',
  instrumentAnimation:'Animer les instruments',
  rainAnimation:'Animer la pluie',
  windActivity:'Activité du vent',windActivityHint:'À gauche : brises douces et pauses longues. À droite : rafales plus fortes et pauses courtes. Réglable pendant la lecture.',

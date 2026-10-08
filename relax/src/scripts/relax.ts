@@ -28,7 +28,12 @@ function shape(note:NoteEvent){
  while(stage.querySelectorAll('.sound-shape').length>8)stage.querySelector('.sound-shape')?.remove();
 }
 const audio=new Soundscape(settings,shape);
+const glow=document.querySelector<HTMLElement>('.ambient-glow')!;
 function rainFrame(){
+ const windAnimated=settings.windAnimation&&settings.wind&&settings.motion&&!reduced.matches&&(state==='running'||state==='paused');
+ glow.dataset.windAnimated=String(windAnimated);
+ if(!windAnimated)glow.style.setProperty('--wind-level','0');
+ else if(state==='running'&&!document.hidden)glow.style.setProperty('--wind-level',String(audio.windStrength()));
  const drops=audio.takeRainDrops();
  if(state==='running'&&!document.hidden&&settings.motion&&settings.rainAnimation){
   for(const drop of drops){
@@ -47,7 +52,7 @@ function save(){if(!storageAllowed())return;try{localStorage.setItem(KEY,JSON.st
 function sync(){
  document.querySelectorAll<HTMLInputElement>('[name=instrument]').forEach(r=>r.checked=r.value===(settings.bowls?'bowls':'chimes'));
  el('instrument-value').textContent=settings.bowls?t.bowls:t.chimes;
- for(const key of ['instrumentAnimation','rainAnimation','rain','wind','noise','motion','awake','background'] as const)input(key).checked=settings[key];
+ for(const key of ['windAnimation','instrumentAnimation','rainAnimation','rain','wind','noise','motion','awake','background'] as const)input(key).checked=settings[key];
  for(const key of ['windActivity','rainDensity','pitch','minutes','density','instrumentVolume','rainVolume','windVolume','noiseVolume'] as const){
   input(key).value=String(settings[key]);const output=document.getElementById(key+'-value');if(output)output.textContent=(key==='rainDensity'||key==='windActivity')?settings[key]+' / 10':key==='pitch'?(settings.pitch===0?t.pitchOriginal:(settings.pitch>0?'+':'')+settings.pitch+' '+t.semitones):settings[key]+' %';
  }
@@ -101,7 +106,7 @@ safety.addEventListener('close',()=>el('safety-open').focus());
 form.addEventListener('submit',e=>e.preventDefault());
 function read(){
  settings.bowls=document.querySelector<HTMLInputElement>('[name=instrument]:checked')!.value==='bowls';settings.chimes=!settings.bowls;
- for(const key of ['instrumentAnimation','rainAnimation','rain','wind','noise','motion','awake','background'] as const)settings[key]=input(key).checked;
+ for(const key of ['windAnimation','instrumentAnimation','rainAnimation','rain','wind','noise','motion','awake','background'] as const)settings[key]=input(key).checked;
  for(const key of ['windActivity','rainDensity','pitch','minutes','density','instrumentVolume','rainVolume','windVolume','noiseVolume'] as const)settings[key]=Number(input(key).value);
  settings.noiseType=document.querySelector<HTMLInputElement>('[name=noiseType]:checked')!.value as Settings['noiseType'];
  settings=normalize(settings);sync();save();audio.update(settings);wake(state==='running'&&settings.awake);

@@ -1,4 +1,4 @@
-import {naturalWind,randomWindGust} from '../src/lib/wind.ts';
+import {naturalWind,randomWindGust,windStrengthAt,type WindGust} from '../src/lib/wind.ts';
 import {summerRain,randomDrop,type RainDrop} from '../src/lib/rain.ts';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
@@ -101,4 +101,15 @@ test('rain animation defaults off and events match generated audio timing',()=>{
 test('instrument animation defaults on and preserves an explicit off preference',()=>{
  assert.equal(normalize({}).instrumentAnimation,true);
  assert.equal(normalize({instrumentAnimation:false}).instrumentAnimation,false);
+});
+
+test('wind animation uses actual gust envelopes and stays still in lulls',()=>{
+ assert.equal(normalize({}).windAnimation,false);
+ assert.equal(normalize({windAnimation:true}).windAnimation,true);
+ const gusts:WindGust[]=[];
+ naturalWind(8000,40,()=>.5,5,g=>gusts.push(g));
+ const gust=gusts[0];
+ assert.equal(windStrengthAt(gust.time,gusts,40),0);
+ assert(windStrengthAt(gust.time+gust.duration/2,gusts,40)>.2);
+ assert.equal(windStrengthAt(gust.time+gust.duration+.1,gusts,40),0);
 });

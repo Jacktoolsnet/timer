@@ -8,13 +8,25 @@ export function randomWindGust(activity:number,random=Math.random){
   flutter:.04+random()*.10,
  };
 }
-export function naturalWind(sampleRate:number,seconds=60,random=Math.random,activity=5):Float32Array {
+export type WindGust=ReturnType<typeof randomWindGust>&{time:number;flutterRate:number;phase:number};
+export function windStrengthAt(time:number,gusts:WindGust[],duration=60){
+ const at=((time%duration)+duration)%duration;
+ const gust=gusts.find(g=>at>=g.time&&at<g.time+g.duration);
+ if(!gust)return 0;
+ const t=at-gust.time;
+ const envelope=Math.sin(Math.PI*t/gust.duration)**2;
+ const swell=1-gust.flutter+gust.flutter*Math.sin(t*gust.flutterRate*Math.PI*2+gust.phase);
+ const fade=at>duration-1.5?((duration-at)/1.5)**2:1;
+ return envelope*swell*gust.strength*fade;
+}
+export function naturalWind(sampleRate:number,seconds=60,random=Math.random,activity=5,onGust?:(gust:WindGust)=>void):Float32Array {
  const data=new Float32Array(Math.round(sampleRate*seconds));
  let time=0,soft=0;
  while(time<seconds){
   const gust=randomWindGust(activity,random),start=Math.floor(time*sampleRate);
   const count=Math.round(gust.duration*sampleRate);
   const flutterRate=.4+random()*.7,phase=random()*Math.PI*2;
+  onGust?.({...gust,time:start/sampleRate,flutterRate,phase});
   for(let j=0;j<count && start+j<data.length;j++){
    const position=j/count,t=j/sampleRate;
    // Rounded rise and fall, with smaller irregular swells inside each gust.

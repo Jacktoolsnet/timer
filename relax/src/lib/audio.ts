@@ -1,4 +1,4 @@
-import {naturalWind} from './wind';
+import {naturalWind,windStrengthAt,type WindGust} from './wind';
 import {summerRain,type RainDrop} from './rain';
 import {randomGap,randomNote,randomGust,pitches,type Settings,type Layer,type NoiseType} from './relax';
 export type NoteEvent={index:number;instrument:'chimes'|'bowls';duration:number};
@@ -17,7 +17,10 @@ export class Soundscape {
  private rainStarted=0;
  private rainCursor=0;
  private windBufferActivity=0;
+ private windGusts:WindGust[]=[];
+ private windStarted=0;
  private nextNote=0;
+ private windCoupled=false;
  private gust:{index:number;time:number;strength:number}[]=[];
  private deadline=Infinity;
  private active=false;
@@ -56,7 +59,8 @@ export class Soundscape {
   const ctx=this.context!;
   if(type==='wind'){
    const buffer=ctx.createBuffer(1,ctx.sampleRate*60,ctx.sampleRate);
-   buffer.getChannelData(0).set(naturalWind(ctx.sampleRate,60,Math.random,this.settings.windActivity));
+   this.windGusts=[];
+   buffer.getChannelData(0).set(naturalWind(ctx.sampleRate,60,Math.random,this.settings.windActivity,gust=>this.windGusts.push(gust)));
    this.windBufferActivity=this.settings.windActivity;this.buffers.set(type,buffer);return buffer;
   }
   if(type==='rain'){
@@ -78,6 +82,10 @@ export class Soundscape {
   this.buffers.set(type,buffer);return buffer;
  }
  update(settings:Settings) {
+  const coupled=settings.wind&&settings.chimes;
+  if(coupled!==this.windCoupled){
+   this.gust=[];this.nextNote=this.time+.25;this.windCoupled=coupled;
+  }
   this.settings=settings;
   if(!settings.chimes)this.gust=[];
   if(!this.active || !this.context || !this.master || !this.instruments)return;
@@ -96,6 +104,7 @@ export class Soundscape {
    const type=layer==='noise'?settings.noiseType:layer;
    if(old && (layer==='noise'||layer==='rain'||layer==='wind') && old.source.buffer!==this.noiseBuffer(type)){
     old.gain.gain.setTargetAtTime(0,now,.06);old.source.stop(now+.3);this.layers.delete(layer);
+    if(layer==='wind'&&this.windCoupled){this.gust=[];this.nextNote=now+.25;}
    }
    let entry=this.layers.get(layer);
    if(!entry){
@@ -105,13 +114,18 @@ export class Soundscape {
     source.connect(filter);filter.connect(gain);gain.connect(this.master);gain.gain.value=0;
     entry={source,gain,filter};
     source.onended=()=>{source.disconnect();filter.disconnect();gain.disconnect();entry?.mod?.disconnect();this.sources.delete(source);};
-    source.start();if(layer==='rain'){this.rainStarted=ctx.currentTime;this.rainCursor=0;}if(Number.isFinite(this.deadline))source.stop(this.deadline);
+    source.start();if(layer==='wind')this.windStarted=ctx.currentTime;if(layer==='rain'){this.rainStarted=ctx.currentTime;this.rainCursor=0;}if(Number.isFinite(this.deadline))source.stop(this.deadline);
     this.sources.add(source);this.layers.set(layer,entry);
    }
    // Keep white, pink and brown noise behind the instruments and nature sounds.
    const level=layer==='noise'?.055:.22;
    entry.gain.gain.setTargetAtTime(settings[layer+'Volume' as 'rainVolume'|'windVolume'|'noiseVolume']/100*level,now,.12);
   }
+ }
+ windStrength(){
+  const entry=this.layers.get('wind');
+  if(!this.running||!entry||this.settings.windVolume===0)return 0;
+  return windStrengthAt(this.time-this.windStarted,this.windGusts,entry.source.buffer!.duration);
  }
  /** Events from the actual looping rain buffer, driven by the audio clock. */
  takeRainDrops():RainDrop[]{
@@ -137,19 +151,35 @@ export class Soundscape {
   if(now>=this.deadline)return;
   if(now>=this.nextNote){
    if(this.settings.chimes){
-    const strikes=randomGust();
-    this.gust.push(...strikes.map(strike=>({...strike,time:now+strike.offset})));
-    this.nextNote=now+strikes[strikes.length-1]!.offset+3+randomGap(this.settings.density);
+    const wind=this.windCoupled?this.coupledWindStrength(now):1;
+    if(wind>.06){
+     const strikes=randomGust();
+     this.gust.push(...strikes.map(strike=>({...strike,time:now+strike.offset})));
+     this.nextNote=this.windCoupled
+      ?now+strikes[strikes.length-1]!.offset+(1.2-wind)*(1+randomGap(this.settings.density)*.4)
+      :now+strikes[strikes.length-1]!.offset+3+randomGap(this.settings.density);
+    }else{
+     // Wait for the actual audio envelope to rise, not an independent timer.
+     this.nextNote=now+.15;
+    }
    }else{
     this.nextNote=now+randomGap(this.settings.density);
     if(this.settings.bowls)this.strike(randomNote().index,'bowls',now,1);
    }
   }
   while(this.gust.length && this.gust[0]!.time<=now+.04){
-   const strike=this.gust.shift()!;
-   if(this.settings.chimes)this.strike(strike.index,'chimes',Math.max(now,strike.time),strike.strength);
+   const strike=this.gust.shift()!,at=Math.max(now,strike.time);
+   const wind=this.windCoupled?this.coupledWindStrength(at):1;
+   if(this.settings.chimes&&wind>.06){
+    this.strike(strike.index,'chimes',at,strike.strength*(this.windCoupled?.3+.7*wind:1));
+   }
   }
  }
+ private coupledWindStrength(time:number){
+  const entry=this.layers.get('wind');
+  return entry?windStrengthAt(time-this.windStarted,this.windGusts,entry.source.buffer!.duration):0;
+ }
+
  private strike(noteIndex:number,instrument:'chimes'|'bowls',now:number,strength:number){
   const duration=Math.min(instrument==='bowls'?10:8+Math.random()*3,this.deadline-now);
   if(duration<.3)return;
