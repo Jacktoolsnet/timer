@@ -222,3 +222,17 @@ test('safe-area switch is available in compact and expanded preview',async({page
  await page.locator('#open-preview').click();await expect(toggle).toBeChecked();await toggle.uncheck();await expect(page.locator('#safe-overlay')).not.toBeVisible();
  await page.locator('#close-preview').click();await expect(toggle).toBeVisible();await expect(toggle).not.toBeChecked();
 });
+
+test('element toolbar adds, duplicates, moves and deletes selected elements',async({page})=>{
+ await page.goto('/en/');const toolbar=page.locator('.element-toolbar');
+ expect(Math.abs((await toolbar.boundingBox())!.width-(await page.locator('.scene-toolbar').boundingBox())!.width)).toBeLessThan(1);
+ await expect(page.locator('#delete-element')).toBeDisabled();
+ await page.locator('#element-add-menu summary').click();await page.locator('[data-add=shape]').click();
+ await expect(page.locator('#element-add-menu')).not.toHaveAttribute('open','');
+ await expect(page.locator('#element-list button')).toHaveCount(2);
+ await page.locator('#element-up').click();await expect(page.locator('#element-list button').first()).toHaveAttribute('aria-current','true');
+ await page.locator('#element-down').click();await expect(page.locator('#element-list button').last()).toHaveAttribute('aria-current','true');
+ await page.locator('#duplicate-element').click();await expect(page.locator('#element-list button')).toHaveCount(3);
+ await page.locator('#delete-element').click();await expect(page.locator('#element-list button')).toHaveCount(2);
+ await expect(page.locator('#element-form .compact-actions')).toHaveCount(0);
+});

@@ -1,5 +1,6 @@
 import type { Language } from './i18n';
 const words = {
+ addElement:['Element hinzufügen','Add element','Añadir elemento','Ajouter un élément'],
  decrease:['Verringern','Decrease','Disminuir','Diminuer'],
  increase:['Erhöhen','Increase','Aumentar','Augmenter'],
  pasteClipboard:['Aus Zwischenablage einfügen','Paste from clipboard','Pegar desde el portapapeles','Coller depuis le presse-papiers'],

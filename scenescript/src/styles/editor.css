@@ -366,3 +366,23 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
 .safe-switch input:focus-visible + .safe-switch-track { outline:3px solid var(--accent); outline-offset:3px; }
 @media(prefers-reduced-motion:reduce) { .safe-switch-track,.safe-switch-track::after { transition:none; } }
 .preview-content:not(.preview-expanded) .safe-toggle { display:flex; }
+
+.elements-panel { display:grid; grid-template-columns:44px minmax(0,1fr); gap:10px; align-content:start; }
+.element-list-content { min-width:0; }
+.element-toolbar { display:flex; flex-direction:column; align-items:center; gap:6px; padding:4px 3px; align-self:start; border:1px solid var(--line); border-radius:12px; background:var(--accent-soft); background:color-mix(in srgb,var(--accent) 14%,var(--surface)); box-shadow:0 4px 14px #00000008; }
+.element-toolbar button,.element-toolbar summary { display:grid; place-items:center; width:36px; height:36px; padding:7px; border:1px solid transparent; border-radius:9px; background:transparent; color:var(--accent); cursor:pointer; list-style:none; }
+.element-toolbar summary::-webkit-details-marker { display:none; }
+.element-toolbar button:hover:not(:disabled),.element-toolbar summary:hover,.element-toolbar details[open] summary { border-color:var(--line); background:var(--surface); box-shadow:0 3px 10px #00000010; }
+.element-toolbar svg { width:20px; height:20px; }
+#element-add-menu { position:relative; }
+.element-add-options { position:absolute; left:calc(100% + 8px); top:0; display:flex; gap:4px; padding:6px; border:1px solid var(--line); border-radius:12px; background:var(--surface); box-shadow:0 8px 24px #0002; z-index:4; }
+.element-add-options { flex-direction:column; }
+
+/* Single-line text fields match selects and number steppers. */
+#editor input[type=text] { height:40px; min-height:40px; box-sizing:border-box; padding:9px 12px; border-radius:10px; }
+
+#editor input[type=color] { height:40px; min-height:40px; box-sizing:border-box; border-radius:10px; }
+
+#element-list button { display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+#scene-list button { display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
