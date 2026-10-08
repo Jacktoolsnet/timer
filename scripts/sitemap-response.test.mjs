@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-for (const project of ['timer','clock','stopwatch','company']) {
+for (const project of ['timer','clock','stopwatch','company','scenescript']) {
  test(`${project}: XML response escapes URLs and specifies UTF-8`, async () => {
   const {sitemapResponse} = await import(`../${project}/src/lib/sitemap.ts`);
   const response = sitemapResponse([{url:new URL('https://example.com/?a=1&b=2'),alternatives:[{language:'en',url:new URL('https://example.com/en/?a=1&b=2')}]}]);

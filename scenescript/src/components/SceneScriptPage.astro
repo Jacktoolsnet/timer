@@ -1,0 +1,40 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { editorDictionary } from '../lib/editor-i18n';
+import type {Language} from '../lib/i18n';
+interface Props {lang:Language}
+const {lang}=Astro.props,t=editorDictionary(lang);
+---
+<Layout lang={lang} title={"SceneScript — " + t.heading} description={t.intro} route="">
+ <section class="scene-intro"><p class="eyebrow">JACKTOOLS / SCENESCRIPT</p><h1>{t.heading}</h1><p>{t.intro}</p></section>
+ <div id="editor" data-words={JSON.stringify(t)}>
+  <nav class="editor-toolbar" aria-label={t.project}>
+   <button id="new-project">{t.new}</button><button id="load-project">{t.load}</button><button id="save-project" class="primary">{t.save}</button><button id="open-json">{t.json}</button><a href={'/'+lang+'/ai/'} target="_blank" rel="noopener">{t.ai} ↗</a>
+  </nav>
+  <input id="project-file" type="file" accept=".json,application/json" hidden />
+  <p id="editor-status" role="status" aria-live="polite"></p>
+  <div class="studio-grid">
+   <aside class="studio-panel scene-sidebar">
+    <h2>{t.project}</h2><label>{t.title}<input id="project-title" maxlength="200" /></label>
+    <label>{t.format}<select id="project-format"><option value="landscape">{t.landscape}</option><option value="portrait">{t.portrait}</option><option value="square">{t.square}</option></select></label>
+    <div class="panel-heading"><h2>{t.scenes}</h2><button id="add-scene" title={t.addScene} aria-label={t.addScene}>＋</button></div>
+    <ol id="scene-list"></ol>
+    <div class="compact-actions"><button id="duplicate-scene">{t.duplicate}</button><button id="scene-up" aria-label={t.up}>↑</button><button id="scene-down" aria-label={t.down}>↓</button><button id="delete-scene">{t.remove}</button></div>
+    <h2>{t.assets}</h2><button id="import-image">＋ {t.importImage}</button><p class="small-hint">{t.imageHint}</p><div id="asset-list"></div>
+    <input id="image-file" type="file" accept="image/png,image/jpeg,image/webp" hidden />
+   </aside>
+   <section class="studio-preview" aria-label={t.preview}>
+    <div id="stage-frame"><div id="stage"></div><div id="safe-overlay" hidden></div><div id="countdown" hidden aria-live="assertive"></div></div>
+    <div class="playback-controls"><button id="play" class="primary">▶ {t.play}</button><button id="pause">Ⅱ {t.pause}</button><button id="reset">↺ {t.reset}</button><button id="focus">⛶ {t.focus}</button></div>
+    <label class="timeline-label"><span id="time-label">0.0 / 10.0 s</span><input id="timeline" aria-label={t.preview} type="range" min="0" max="10" step="0.01" value="0" /></label>
+    <label class="safe-toggle"><input id="safe-toggle" type="checkbox" /> {t.safe}</label><p class="small-hint">{t.safeHint}</p><p class="small-hint">{t.recordHint}</p>
+    <section class="studio-panel"><h2>{t.elements}</h2><div class="compact-actions"><button data-add="text">＋ {t.text}</button><button data-add="image">＋ {t.image}</button><button data-add="shape">＋ {t.shape}</button></div><ol id="element-list"></ol></section>
+   </section>
+   <aside class="studio-panel inspector"><h2>{t.scene}</h2><form id="scene-form"></form><h2 id="element-heading">{t.elements}</h2><form id="element-form"></form></aside>
+  </div>
+ </div>
+ <button id="exit-focus" hidden>{t.exit}</button>
+ <dialog id="json-dialog"><div class="dialog-inner"><h2>{t.json}</h2><p>{t.jsonHint}</p><label for="json-input">JSON</label><textarea id="json-input" spellcheck="false" rows="14"></textarea><p id="json-status" role="status"></p><div class="compact-actions"><button id="import-json" class="primary">{t.import}</button><button id="copy-json">{t.copy}</button><button id="close-json">{t.close}</button></div></div></dialog>
+ <noscript><p class="notice">JavaScript is required for the SceneScript editor.</p></noscript>
+ <script src="../scripts/editor.ts"></script>
+</Layout>

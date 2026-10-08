@@ -1,0 +1,15 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import {languages} from '../../lib/i18n';
+import {editorDictionary} from '../../lib/editor-i18n';
+import {aiGuide} from '../../lib/guide';
+export function getStaticPaths(){return languages.map(lang=>({params:{lang},props:{lang}}));}
+const {lang}=Astro.props,t=editorDictionary(lang);
+const intro={de:'Gib deinem KI-Agenten diese URL oder kopiere die vollständige Anleitung. Die Formatspezifikation ist auf Englisch und ohne JavaScript lesbar.',en:'Give your AI agent this URL or copy the complete guide. The English specification is readable without JavaScript.',es:'Dale esta URL a tu agente IA o copia la guía. La especificación está en inglés y se lee sin JavaScript.',fr:'Donnez cette URL à votre agent IA ou copiez le guide. La spécification anglaise est lisible sans JavaScript.'};
+---
+<Layout lang={lang} title={t.ai+' — SceneScript'} description={t.ai+' · JSON 1.0'} route="ai">
+ <article class="legal-page ai-doc"><p class="eyebrow">SCENESCRIPT / FORMAT 1.0</p><h1>{t.ai}</h1><p>{intro[lang]}</p>
+ <div class="compact-actions"><button id="copy-guide" class="primary" data-copied={t.copied}>{t.copy}</button><a href="/ai.txt">Plain text</a><a href="/schema.json">JSON Schema</a><a href="/example.scenescript.json" download>{t.load} · example</a></div><p id="guide-status" role="status"></p>
+ <pre id="ai-guide">{aiGuide}</pre><p><a href={'/'+lang+'/'}>← SceneScript</a></p></article>
+ <script>document.getElementById('copy-guide')?.addEventListener('click',async()=>{const guide=document.getElementById('ai-guide')!;try{await navigator.clipboard.writeText(guide.textContent||'');document.getElementById('guide-status')!.textContent=document.getElementById('copy-guide')!.dataset.copied||'Copied.';}catch{const selection=window.getSelection();const range=document.createRange();range.selectNodeContents(guide);selection?.removeAllRanges();selection?.addRange(range);document.getElementById('guide-status')!.textContent='Ctrl+C / Cmd+C';}});</script>
+</Layout>

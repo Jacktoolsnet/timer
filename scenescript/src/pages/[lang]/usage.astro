@@ -1,0 +1,19 @@
+---
+import Layout from '../../layouts/Layout.astro';
+export function getStaticPaths(){return (['de','en'] as const).map(lang=>({params:{lang},props:{lang}}));}
+const {lang}=Astro.props,de=lang==='de';
+const title=de?'Nutzungshinweise':'Usage notes';
+---
+<Layout lang={lang} title={title} description={title} route="usage" noindex legal>
+ <article class="legal-page"><h1>{title}</h1>
+ <p>{de?'SceneScript erstellt animierte Szenen für Bildschirmaufnahmen. Das Tool ist kein Screenrecorder und exportiert noch keine Videodateien.':'SceneScript creates animated scenes for screen recordings. It is not a screen recorder and does not yet export video files.'}</p>
+ <h2>{de?'Projekt erstellen und sichern':'Create and save a project'}</h2>
+ <p>{de?'Importiere einen KI-Entwurf als JSON oder bearbeite Szenen, Texte, Bilder und Formen direkt im Editor. Speichern unter lädt eine vollständige .scenescript.json-Datei mit eingebetteten Bildern herunter. Laden öffnet sie wieder. Ohne optionale lokale Speicherung gehen ungesicherte Änderungen beim Schließen oder Neuladen verloren.':'Import an AI draft as JSON or edit scenes, text, images and shapes in the editor. Save as downloads a complete .scenescript.json file including embedded images. Load opens it again. Without optional local storage, unsaved changes are lost when closing or reloading.'}</p>
+ <h2>{de?'Bilddateien':'Image files'}</h2>
+ <p>{de?'Unterstützt werden PNG, JPEG und WebP (bis 8 MiB pro Bild, 40 Megapixel). Projekte sind auf 30 MiB, 100 Bilder, 100 Szenen und 100 Elemente je Szene begrenzt. Externe Bild-URLs, SVG, HTML und ausführbarer Code werden nicht importiert. Nutze nur Inhalte, für die du die erforderlichen Rechte hast.':'PNG, JPEG and WebP are supported (up to 8 MiB per image, 40 megapixels). Projects are limited to 30 MiB, 100 images, 100 scenes and 100 elements per scene. External image URLs, SVG, HTML and executable code are not imported. Only use content for which you have the necessary rights.'}</p>
+ <h2>{de?'Aufnehmen':'Recording'}</h2>
+ <p>{de?'Starte deinen separaten Screenrecorder und öffne die Aufnahmeansicht. Nach drei Sekunden startet das gesamte Projekt automatisch. Leertaste pausiert oder setzt fort, Escape beendet. Die Ansicht enthält keine dauerhaft sichtbaren Bedienelemente. Der Bildschirm bestimmt die tatsächliche Aufnahmeauflösung. Sichere Textbereiche sind nur eine Orientierung. Schriftarten können je nach Gerät durch lokale Ersatzschriften dargestellt werden.':'Start your separate screen recorder and open recording view. After three seconds, the entire project starts automatically. Space pauses or resumes, Escape exits. Controls are not permanently visible. Your screen determines the actual recording resolution. Safe text areas are guidelines only. Fonts may use local fallbacks depending on the device.'}</p>
+ <p>{de?'Teste die Wiedergabe vor der Aufnahme. Hintergrund-Tabs, schlafende Geräte und langsame Hardware können Animationen beeinträchtigen. Schnelle Bewegungen können unangenehm sein; verwende bei Bedarf keine Animationen.':'Test playback before recording. Background tabs, sleeping devices and slow hardware can affect animations. Fast movement can be uncomfortable; choose no animations when appropriate.'}</p>
+ <p><a href={'/'+lang+'/ai/'}>{de?'Formatanleitung für KI':'AI format guide'}</a> · <a href={'/'+lang+'/privacy/'}>{de?'Datenschutz':'Privacy'}</a></p>
+ </article>
+</Layout>
