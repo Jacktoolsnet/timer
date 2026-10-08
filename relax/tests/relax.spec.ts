@@ -159,3 +159,33 @@ test('wind activity is adjustable live and saved with consent',async({page})=>{
  await page.reload();await expect(page.locator('#windActivity')).toHaveValue('2');
  expect(errors).toEqual([]);
 });
+
+test('optional rain animation follows playback and respects motion',async({page})=>{
+ await page.goto('/en/');await expect(page.locator('#rainAnimation')).not.toBeChecked();
+ await page.locator('#rain').check();await begin(page);await expect(page.locator('.rain-drop')).toHaveCount(0);
+ await page.locator('#rainAnimation').check();await expect(page.locator('.rain-drop').first()).toBeVisible();
+ await page.locator('#start').click();
+ await expect(page.locator('.rain-drop').first()).toHaveCSS('animation-play-state','paused');
+ await page.locator('#start').click();await expect(page.locator('.rain-drop').first()).toBeVisible();
+ await page.locator('#rainAnimation').uncheck();await expect(page.locator('.rain-drop')).toHaveCount(0);
+ await page.locator('#rainAnimation').check();await expect(page.locator('.rain-drop').first()).toBeVisible();
+ await page.locator('#motion').uncheck();await expect(page.locator('.rain-drop')).toHaveCount(0);
+ await page.locator('#motion').check();await expect(page.locator('.rain-drop').first()).toBeVisible();
+ await page.locator('#rain').uncheck();await expect(page.locator('.rain-drop')).toHaveCount(0);
+ await page.locator('#end-session').click();await expect(page.locator('.rain-drop')).toHaveCount(0);
+});
+
+test('instrument animation can be disabled independently of rain and audio',async({page})=>{
+ await page.goto('/en/');await expect(page.locator('#instrumentAnimation')).toBeChecked();
+ await page.locator('#rain').check();await page.locator('#rainAnimation').check();await begin(page);
+ await expect(page.locator('.sound-shape').first()).toBeVisible();
+ await page.locator('#instrumentAnimation').uncheck();
+ await expect(page.locator('.sound-shape')).toHaveCount(0);
+ await expect(page.locator('.rain-drop').first()).toBeVisible();
+ await expect(page.locator('#start')).toHaveAttribute('aria-label','Pause');
+ await page.locator('#instrumentAnimation').check();
+ await expect(page.locator('.sound-shape').first()).toBeVisible({timeout:20000});
+ await page.locator('#instrumentAnimation').uncheck();await page.locator('#end-session').click();
+ await page.locator('#palette-dropdown summary').click();await page.locator('#remember-preferences').check();await page.locator('#preferences-close').click();
+ await page.reload();await expect(page.locator('#instrumentAnimation')).not.toBeChecked();
+});

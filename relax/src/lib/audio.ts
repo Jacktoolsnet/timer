@@ -1,5 +1,5 @@
 import {naturalWind} from './wind';
-import {summerRain} from './rain';
+import {summerRain,type RainDrop} from './rain';
 import {randomGap,randomNote,randomGust,pitches,type Settings,type Layer,type NoiseType} from './relax';
 export type NoteEvent={index:number;instrument:'chimes'|'bowls';duration:number};
 export class Soundscape {
@@ -13,6 +13,9 @@ export class Soundscape {
  private settings:Settings;
  private buffers=new Map<string,AudioBuffer>();
  private rainBufferDensity=0;
+ private rainDrops:RainDrop[]=[];
+ private rainStarted=0;
+ private rainCursor=0;
  private windBufferActivity=0;
  private nextNote=0;
  private gust:{index:number;time:number;strength:number}[]=[];
@@ -58,7 +61,9 @@ export class Soundscape {
   }
   if(type==='rain'){
    const buffer=ctx.createBuffer(2,ctx.sampleRate*30,ctx.sampleRate);
-   for(let channel=0;channel<2;channel++)buffer.getChannelData(channel).set(summerRain(ctx.sampleRate,30,Math.random,this.settings.rainDensity));
+   this.rainDrops=[];
+   for(let channel=0;channel<2;channel++)buffer.getChannelData(channel).set(summerRain(ctx.sampleRate,30,Math.random,this.settings.rainDensity,drop=>this.rainDrops.push(drop)));
+   this.rainDrops.sort((a,b)=>a.time-b.time);
    this.rainBufferDensity=this.settings.rainDensity;
    this.buffers.set(type,buffer);return buffer;
   }
@@ -100,13 +105,31 @@ export class Soundscape {
     source.connect(filter);filter.connect(gain);gain.connect(this.master);gain.gain.value=0;
     entry={source,gain,filter};
     source.onended=()=>{source.disconnect();filter.disconnect();gain.disconnect();entry?.mod?.disconnect();this.sources.delete(source);};
-    source.start();if(Number.isFinite(this.deadline))source.stop(this.deadline);
+    source.start();if(layer==='rain'){this.rainStarted=ctx.currentTime;this.rainCursor=0;}if(Number.isFinite(this.deadline))source.stop(this.deadline);
     this.sources.add(source);this.layers.set(layer,entry);
    }
    // Keep white, pink and brown noise behind the instruments and nature sounds.
    const level=layer==='noise'?.055:.22;
    entry.gain.gain.setTargetAtTime(settings[layer+'Volume' as 'rainVolume'|'windVolume'|'noiseVolume']/100*level,now,.12);
   }
+ }
+ /** Events from the actual looping rain buffer, driven by the audio clock. */
+ takeRainDrops():RainDrop[]{
+  const entry=this.layers.get('rain');
+  if(!this.running || !entry)return [];
+  const elapsed=this.time-this.rainStarted,previous=this.rainCursor;
+  this.rainCursor=elapsed;
+  if(!this.settings.rainAnimation||!this.settings.motion||this.settings.rainVolume===0)return [];
+  // Never replay a backlog when a hidden tab becomes visible again.
+  const from=Math.max(previous,elapsed-.1),duration=entry.source.buffer!.duration;
+  const drops:RainDrop[]=[];
+  for(let loop=Math.floor(from/duration);loop<=Math.floor(elapsed/duration);loop++){
+   for(const drop of this.rainDrops){
+    const at=loop*duration+drop.time;
+    if(at>from&&at<=elapsed)drops.push(drop);
+   }
+  }
+  return drops;
  }
  tick(){
   if(!this.active || !this.context || this.context.state!=='running')return;

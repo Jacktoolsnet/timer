@@ -1,4 +1,6 @@
 const de = {
+ instrumentAnimation:'Instrumente animieren',
+ rainAnimation:'Regen animieren',
  windActivity:'Windaktivität',windActivityHint:'Links: milde Böen und längere Pausen. Rechts: kräftigere Böen und kürzere Pausen. Auch während der Wiedergabe einstellbar.',
  rainDensity:'Tropfendichte',rainDensityHint:'Wenige Tropfen links, mehr Tropfen rechts. Auch während der Wiedergabe einstellbar.',
  pitch:'Tonhöhe',pitchLow:'Tief',pitchHigh:'Hoch',pitchOriginal:'Original',semitones:'Halbtöne',pitchHint:'Eine Oktave tiefer oder höher. Wirkt auf Windspiel und Klangschalen, auch während der Wiedergabe.',
@@ -33,6 +35,8 @@ const de = {
 };
 type Text = typeof de;
 const en:Text = {
+ instrumentAnimation:'Animate instruments',
+ rainAnimation:'Animate rain',
  windActivity:'Wind activity',windActivityHint:'Left: gentle gusts and longer pauses. Right: stronger gusts and shorter pauses. Adjustable during playback.',
  rainDensity:'Raindrop density',rainDensityHint:'Fewer drops on the left, more on the right. Adjustable during playback.',
  pitch:'Pitch',pitchLow:'Low',pitchHigh:'High',pitchOriginal:'Original',semitones:'semitones',pitchHint:'One octave lower or higher. Applies to wind chimes and singing bowls, including during playback.',
@@ -62,6 +66,8 @@ const en:Text = {
  privacyBody:'Sound choices, volumes, duration, density, display options and first-start guidance status are saved locally only with storage consent. Otherwise they stay in memory. Running sessions are not saved. Disabling storage or clearing preferences removes saved values. There is no cross-device synchronisation.',
 };
 const es:Text = {
+ instrumentAnimation:'Animar los instrumentos',
+ rainAnimation:'Animar la lluvia',
  windActivity:'Actividad del viento',windActivityHint:'Izquierda: ráfagas suaves y pausas largas. Derecha: ráfagas más fuertes y pausas cortas. Ajustable durante la reproducción.',
  rainDensity:'Densidad de gotas',rainDensityHint:'Menos gotas a la izquierda, más a la derecha. Ajustable durante la reproducción.',
  pitch:'Altura tonal',pitchLow:'Grave',pitchHigh:'Agudo',pitchOriginal:'Original',semitones:'semitonos',pitchHint:'Una octava más grave o más aguda. Afecta a las campanas y los cuencos, también durante la reproducción.',
@@ -91,6 +97,8 @@ const es:Text = {
  privacyBody:'Solo con consentimiento se guardan localmente sonidos, volúmenes, duración, densidad, opciones visuales y el estado del aviso inicial. Sin consentimiento permanecen en memoria. No se guarda una sesión en curso. Desactivar el almacenamiento o borrar ajustes elimina los datos guardados. No hay sincronización entre dispositivos.',
 };
 const fr:Text = {
+ instrumentAnimation:'Animer les instruments',
+ rainAnimation:'Animer la pluie',
  windActivity:'Activité du vent',windActivityHint:'À gauche : brises douces et pauses longues. À droite : rafales plus fortes et pauses courtes. Réglable pendant la lecture.',
  rainDensity:'Densité des gouttes',rainDensityHint:'Moins de gouttes à gauche, plus à droite. Réglable pendant la lecture.',
  pitch:'Hauteur des sons',pitchLow:'Grave',pitchHigh:'Aigu',pitchOriginal:'Original',semitones:'demi-tons',pitchHint:'Une octave plus grave ou plus aiguë. S’applique au carillon et aux bols, même pendant la lecture.',

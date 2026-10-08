@@ -17,7 +17,7 @@ let state:'ready'|'running'|'paused'|'ended'='ready',elapsed=0,anchor=0,total=0,
 const wake=screenWakeLock(el('wake-status'),'',t.awakeError);
 const stage=el('sound-shapes');
 function shape(note:NoteEvent){
- if(!settings.motion||document.hidden||state!=='running')return;
+ if(!settings.motion||!settings.instrumentAnimation||document.hidden||state!=='running')return;
  const node=document.createElement('div');node.className='sound-shape shape-'+note.index%4;
  node.style.setProperty('--tone-colour','var(--relax-tone-'+note.index+')');
  node.style.setProperty('--life',Math.max(5,note.duration)+'s');
@@ -25,14 +25,29 @@ function shape(note:NoteEvent){
  node.style.width=(24+Math.random()*20)+'%';
  node.dataset.note=String(note.index);stage.append(node);
  node.addEventListener('animationend',()=>node.remove(),{once:true});
- while(stage.children.length>8)stage.firstElementChild?.remove();
+ while(stage.querySelectorAll('.sound-shape').length>8)stage.querySelector('.sound-shape')?.remove();
 }
 const audio=new Soundscape(settings,shape);
+function rainFrame(){
+ const drops=audio.takeRainDrops();
+ if(state==='running'&&!document.hidden&&settings.motion&&settings.rainAnimation){
+  for(const drop of drops){
+   const node=document.createElement('span');node.className='rain-drop';
+   node.style.left=(8+Math.random()*84)+'%';node.style.top=(12+Math.random()*76)+'%';
+   node.style.setProperty('--drop-size',(5+drop.strength*16)+'px');
+   node.style.setProperty('--drop-colour','var(--relax-tone-'+(drop.variant*2)+')');
+   stage.append(node);node.addEventListener('animationend',()=>node.remove(),{once:true});
+  }
+  while(stage.querySelectorAll('.rain-drop').length>20)stage.querySelector('.rain-drop')?.remove();
+ }
+ requestAnimationFrame(rainFrame);
+}
+requestAnimationFrame(rainFrame);
 function save(){if(!storageAllowed())return;try{localStorage.setItem(KEY,JSON.stringify(settings));}catch{el('audio-status').textContent=document.querySelector<HTMLElement>('#clear-storage')!.dataset.error!;}}
 function sync(){
  document.querySelectorAll<HTMLInputElement>('[name=instrument]').forEach(r=>r.checked=r.value===(settings.bowls?'bowls':'chimes'));
  el('instrument-value').textContent=settings.bowls?t.bowls:t.chimes;
- for(const key of ['rain','wind','noise','motion','awake','background'] as const)input(key).checked=settings[key];
+ for(const key of ['instrumentAnimation','rainAnimation','rain','wind','noise','motion','awake','background'] as const)input(key).checked=settings[key];
  for(const key of ['windActivity','rainDensity','pitch','minutes','density','instrumentVolume','rainVolume','windVolume','noiseVolume'] as const){
   input(key).value=String(settings[key]);const output=document.getElementById(key+'-value');if(output)output.textContent=(key==='rainDensity'||key==='windActivity')?settings[key]+' / 10':key==='pitch'?(settings.pitch===0?t.pitchOriginal:(settings.pitch>0?'+':'')+settings.pitch+' '+t.semitones):settings[key]+' %';
  }
@@ -59,14 +74,14 @@ async function begin(){
  try{
   await audio.start(settings,total?Math.max(.01,total-elapsed):0);
   if(token!==generation){audio.stop();return;}
-  anchor=audio.time;state='running';el('audio-status').textContent='';wake(settings.awake);stage.querySelectorAll<HTMLElement>('.sound-shape').forEach(n=>n.style.animationPlayState='running');
+  anchor=audio.time;state='running';el('audio-status').textContent='';wake(settings.awake);stage.querySelectorAll<HTMLElement>('.sound-shape,.rain-drop').forEach(n=>n.style.animationPlayState='running');
  }catch{audio.stop();el('audio-status').textContent=t.audioError;}
  finally{pending=false;render();}
 }
 function pause(){
  if(state!=='running')return;
  elapsed=current();state='paused';generation++;audio.stop();wake(false);
- stage.querySelectorAll<HTMLElement>('.sound-shape').forEach(n=>n.style.animationPlayState='paused');render();
+ stage.querySelectorAll<HTMLElement>('.sound-shape,.rain-drop').forEach(n=>n.style.animationPlayState='paused');render();
 }
 function finish(){
  if(state==='running')elapsed=current();
@@ -86,11 +101,13 @@ safety.addEventListener('close',()=>el('safety-open').focus());
 form.addEventListener('submit',e=>e.preventDefault());
 function read(){
  settings.bowls=document.querySelector<HTMLInputElement>('[name=instrument]:checked')!.value==='bowls';settings.chimes=!settings.bowls;
- for(const key of ['rain','wind','noise','motion','awake','background'] as const)settings[key]=input(key).checked;
+ for(const key of ['instrumentAnimation','rainAnimation','rain','wind','noise','motion','awake','background'] as const)settings[key]=input(key).checked;
  for(const key of ['windActivity','rainDensity','pitch','minutes','density','instrumentVolume','rainVolume','windVolume','noiseVolume'] as const)settings[key]=Number(input(key).value);
  settings.noiseType=document.querySelector<HTMLInputElement>('[name=noiseType]:checked')!.value as Settings['noiseType'];
  settings=normalize(settings);sync();save();audio.update(settings);wake(state==='running'&&settings.awake);
  if(!settings.motion)stage.replaceChildren();
+ if(!settings.instrumentAnimation)stage.querySelectorAll('.sound-shape').forEach(n=>n.remove());
+ if(!settings.rainAnimation||!settings.rain||settings.rainVolume===0)stage.querySelectorAll('.rain-drop').forEach(n=>n.remove());
  if(state==='ready'||state==='ended')total=settings.minutes*60;
  if(document.hidden&&!settings.background)pause();render();
 }
@@ -121,7 +138,7 @@ focus.addEventListener('click',async()=>{
 document.addEventListener('fullscreenchange',()=>{if(requesting&&document.fullscreenElement===document.documentElement)owns=true;if(!document.fullscreenElement&&owns){owns=false;setFocus(false);}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!first.open&&!safety.open)void leave();});
 document.addEventListener('visibilitychange',()=>{
- stage.querySelectorAll<HTMLElement>('.sound-shape').forEach(n=>n.style.animationPlayState=document.hidden||state!=='running'?'paused':'running');
+ stage.querySelectorAll<HTMLElement>('.sound-shape,.rain-drop').forEach(n=>n.style.animationPlayState=document.hidden||state!=='running'?'paused':'running');
  if(document.hidden&&!settings.background)pause();else render();
 });
 window.addEventListener('pagehide',()=>{generation++;audio.stop();state='paused';wake(false);});

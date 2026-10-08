@@ -1,5 +1,5 @@
 import {naturalWind,randomWindGust} from '../src/lib/wind.ts';
-import {summerRain,randomDrop} from '../src/lib/rain.ts';
+import {summerRain,randomDrop,type RainDrop} from '../src/lib/rain.ts';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {normalize,defaults,randomGust,randomNote,randomGap,timeLabel} from '../src/lib/relax.ts';
@@ -86,4 +86,19 @@ test('natural wind has smooth gusts, real silent pauses and a soft loop ending',
  assert(data.some(n=>Math.abs(n)>.03));
  const quietWindows=Array.from({length:40},(_,i)=>data.slice(i*8000,(i+1)*8000).every(n=>n===0)).filter(Boolean);
  assert(quietWindows.length>=2);assert(Math.abs(data[data.length-1])<.0001);
+});
+
+test('rain animation defaults off and events match generated audio timing',()=>{
+ assert.equal(normalize({}).rainAnimation,false);assert.equal(normalize({rainAnimation:true}).rainAnimation,true);
+ const events:RainDrop[]=[];summerRain(8000,3,()=>.5,5,drop=>events.push(drop));
+ assert(events.length>5);
+ for(let i=0;i<events.length;i++){
+  assert(events[i].time>=0&&events[i].time<3);assert(events[i].strength>0);
+  if(i)assert(events[i].time>events[i-1].time);
+ }
+});
+
+test('instrument animation defaults on and preserves an explicit off preference',()=>{
+ assert.equal(normalize({}).instrumentAnimation,true);
+ assert.equal(normalize({instrumentAnimation:false}).instrumentAnimation,false);
 });

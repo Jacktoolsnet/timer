@@ -11,8 +11,9 @@ export function randomDrop(random=Math.random){
  return {...profile,index,duration:profile.duration*(.8+random()*.4),
   cutoff:profile.cutoff*(.8+random()*.4),strength:profile.strength*(.8+random()*.4)};
 }
+export type RainDrop={time:number;strength:number;variant:number};
 /** Soft rain on leaves: a subdued bed and sparse, rounded little impacts. */
-export function summerRain(sampleRate:number,seconds=30,random=Math.random,density=5):Float32Array {
+export function summerRain(sampleRate:number,seconds=30,random=Math.random,density=5,onDrop?:(drop:RainDrop)=>void):Float32Array {
  const data=new Float32Array(Math.round(sampleRate*seconds));
  let soft=0;
  for(let i=0;i<data.length;i++){
@@ -27,6 +28,7 @@ export function summerRain(sampleRate:number,seconds=30,random=Math.random,densi
   // Damped broadband splashes instead of pitched, ringing impacts.
   const smoothing=1-Math.exp(-2*Math.PI*drop.cutoff/sampleRate);
   const strength=drop.strength;
+  onDrop?.({time:start/sampleRate,strength,variant:drop.index});
   const scatterDelay=.012+random()*.015;
   let texture=0;
   for(let j=0;j<Math.floor(duration*sampleRate);j++){
