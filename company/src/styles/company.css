@@ -78,3 +78,8 @@ html{scroll-behavior:smooth;scroll-padding-top:30px}.header-tools{display:flex;a
 .spotlight-clock-number { fill:var(--text); stroke:none; font-size:14px; font-family:inherit; text-anchor:middle; dominant-baseline:central; }
 .spotlight-minute-mark { stroke:var(--muted); stroke-width:1; }
 .spotlight-hour-mark { stroke:var(--accent); stroke-width:3; }
+
+/* Give the spotlight's direct action a distinct, touch-friendly button treatment. */
+.hero-actions .text-link { display:inline-flex; align-items:center; justify-content:center; min-height:50px; padding:13px 20px; border:1.5px solid var(--accent); border-radius:10px; background:var(--accent-soft); color:var(--accent); font-weight:650; text-decoration:none; text-align:center; box-shadow:0 3px 12px color-mix(in srgb,var(--accent) 12%,transparent); }
+.hero-actions .text-link:hover { background:color-mix(in srgb,var(--accent) 20%,var(--surface)); }
+.hero-actions .text-link:focus-visible { outline:3px solid var(--accent); outline-offset:4px; }

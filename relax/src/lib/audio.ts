@@ -1,0 +1,166 @@
+import {naturalWind} from './wind';
+import {summerRain} from './rain';
+import {randomGap,randomNote,randomGust,pitches,type Settings,type Layer,type NoiseType} from './relax';
+export type NoteEvent={index:number;instrument:'chimes'|'bowls';duration:number};
+export class Soundscape {
+ private context:AudioContext|null=null;
+ private master:GainNode|null=null;
+ private instruments:GainNode|null=null;
+ private sources=new Set<AudioScheduledSourceNode>();
+ private voices=new Map<OscillatorNode,{gain:GainNode;instrument:'chimes'|'bowls'}>();
+ private output:DynamicsCompressorNode|null=null;
+ private layers=new Map<Layer,{source:AudioBufferSourceNode;gain:GainNode;filter:BiquadFilterNode;lfo?:OscillatorNode;mod?:GainNode}>();
+ private settings:Settings;
+ private buffers=new Map<string,AudioBuffer>();
+ private rainBufferDensity=0;
+ private windBufferActivity=0;
+ private nextNote=0;
+ private gust:{index:number;time:number;strength:number}[]=[];
+ private deadline=Infinity;
+ private active=false;
+ private limit: number|null=null;
+ constructor(settings:Settings,private onNote:(note:NoteEvent)=>void) {this.settings=settings;}
+ get running(){return this.active && this.context?.state==='running';}
+ get time(){return this.context?.currentTime || 0;}
+ async start(settings:Settings,remaining:number) {
+  this.settings=settings;
+  this.context??=new AudioContext();
+  await this.context.resume();
+  if(this.context.state!=='running') throw new Error('Audio unavailable');
+  const ctx=this.context;
+  const master=ctx.createGain();master.gain.setValueAtTime(0,ctx.currentTime);master.gain.linearRampToValueAtTime(1,ctx.currentTime+.3);
+  const compressor=ctx.createDynamicsCompressor();compressor.threshold.value=-12;compressor.ratio.value=4;
+  master.connect(compressor);compressor.connect(ctx.destination);
+  const instruments=ctx.createGain();instruments.connect(master);
+  this.master=master;this.instruments=instruments;this.output=compressor;
+  this.deadline=remaining>0?ctx.currentTime+remaining:Infinity;
+  if(Number.isFinite(this.deadline)) {
+   const fade=Math.min(4,remaining);
+   master.gain.setValueAtTime(1,Math.max(ctx.currentTime+.3,this.deadline-fade));
+   master.gain.linearRampToValueAtTime(0,this.deadline);
+   // The audio graph itself stops at the deadline, even if JS timers are throttled.
+   const sentinel=ctx.createBufferSource();sentinel.buffer=ctx.createBuffer(1,1,ctx.sampleRate);sentinel.loop=true;sentinel.connect(master);
+   sentinel.onended=()=>{master.disconnect();compressor.disconnect();};
+   sentinel.start();sentinel.stop(this.deadline);this.sources.add(sentinel);
+  }
+  this.active=true;this.nextNote=ctx.currentTime+.25;this.update(settings);
+  this.limit=window.setInterval(()=>this.tick(),150);this.tick();
+ }
+ private noiseBuffer(type:NoiseType|'rain'|'wind') {
+  if(type==='wind' && this.windBufferActivity!==this.settings.windActivity)this.buffers.delete('wind');
+  if(type==='rain' && this.rainBufferDensity!==this.settings.rainDensity)this.buffers.delete('rain');
+  const cached=this.buffers.get(type);if(cached)return cached;
+  const ctx=this.context!;
+  if(type==='wind'){
+   const buffer=ctx.createBuffer(1,ctx.sampleRate*60,ctx.sampleRate);
+   buffer.getChannelData(0).set(naturalWind(ctx.sampleRate,60,Math.random,this.settings.windActivity));
+   this.windBufferActivity=this.settings.windActivity;this.buffers.set(type,buffer);return buffer;
+  }
+  if(type==='rain'){
+   const buffer=ctx.createBuffer(2,ctx.sampleRate*30,ctx.sampleRate);
+   for(let channel=0;channel<2;channel++)buffer.getChannelData(channel).set(summerRain(ctx.sampleRate,30,Math.random,this.settings.rainDensity));
+   this.rainBufferDensity=this.settings.rainDensity;
+   this.buffers.set(type,buffer);return buffer;
+  }
+  const buffer=ctx.createBuffer(1,ctx.sampleRate*12,ctx.sampleRate),data=buffer.getChannelData(0);
+  let brown=0,b0=0,b1=0,b2=0;
+  for(let i=0;i<data.length;i++){
+   const white=Math.random()*2-1;
+   if(type==='brown'){brown=(brown+.02*white)/1.02;data[i]=brown*3.5;}
+   else if(type==='pink'){b0=.99765*b0+white*.099046;b1=.963*b1+white*.2965164;b2=.57*b2+white*1.0526913;data[i]=(b0+b1+b2+white*.1848)*.18;}
+   else data[i]=white;
+  }
+  this.buffers.set(type,buffer);return buffer;
+ }
+ update(settings:Settings) {
+  this.settings=settings;
+  if(!settings.chimes)this.gust=[];
+  if(!this.active || !this.context || !this.master || !this.instruments)return;
+  const ctx=this.context,now=ctx.currentTime;
+  for(const [source,voice] of this.voices) {
+   source.detune.setTargetAtTime(settings.pitch*100,now,.12);
+   if(!settings[voice.instrument]) {voice.gain.gain.cancelAndHoldAtTime(now);voice.gain.gain.linearRampToValueAtTime(0,now+.08);try{source.stop(now+.1);}catch{}}
+  }
+  this.instruments.gain.setTargetAtTime(settings.instrumentVolume/100*.65,now,.08);
+  for(const layer of ['rain','wind','noise'] as const) {
+   const old=this.layers.get(layer);
+   if(!settings[layer]) {
+    if(old){old.gain.gain.setTargetAtTime(0,now,.06);old.source.stop(now+.3);old.lfo?.stop(now+.3);this.layers.delete(layer);}
+    continue;
+   }
+   const type=layer==='noise'?settings.noiseType:layer;
+   if(old && (layer==='noise'||layer==='rain'||layer==='wind') && old.source.buffer!==this.noiseBuffer(type)){
+    old.gain.gain.setTargetAtTime(0,now,.06);old.source.stop(now+.3);this.layers.delete(layer);
+   }
+   let entry=this.layers.get(layer);
+   if(!entry){
+    const source=ctx.createBufferSource(),gain=ctx.createGain(),filter=ctx.createBiquadFilter();
+    source.buffer=this.noiseBuffer(type);source.loop=true;
+    filter.type='lowpass';filter.Q.value=.5;filter.frequency.value=layer==='rain'?2400:layer==='wind'?600:settings.noiseType==='white'?6500:3000;
+    source.connect(filter);filter.connect(gain);gain.connect(this.master);gain.gain.value=0;
+    entry={source,gain,filter};
+    source.onended=()=>{source.disconnect();filter.disconnect();gain.disconnect();entry?.mod?.disconnect();this.sources.delete(source);};
+    source.start();if(Number.isFinite(this.deadline))source.stop(this.deadline);
+    this.sources.add(source);this.layers.set(layer,entry);
+   }
+   // Keep white, pink and brown noise behind the instruments and nature sounds.
+   const level=layer==='noise'?.055:.22;
+   entry.gain.gain.setTargetAtTime(settings[layer+'Volume' as 'rainVolume'|'windVolume'|'noiseVolume']/100*level,now,.12);
+  }
+ }
+ tick(){
+  if(!this.active || !this.context || this.context.state!=='running')return;
+  const now=this.time;
+  if(now>=this.deadline)return;
+  if(now>=this.nextNote){
+   if(this.settings.chimes){
+    const strikes=randomGust();
+    this.gust.push(...strikes.map(strike=>({...strike,time:now+strike.offset})));
+    this.nextNote=now+strikes[strikes.length-1]!.offset+3+randomGap(this.settings.density);
+   }else{
+    this.nextNote=now+randomGap(this.settings.density);
+    if(this.settings.bowls)this.strike(randomNote().index,'bowls',now,1);
+   }
+  }
+  while(this.gust.length && this.gust[0]!.time<=now+.04){
+   const strike=this.gust.shift()!;
+   if(this.settings.chimes)this.strike(strike.index,'chimes',Math.max(now,strike.time),strike.strength);
+  }
+ }
+ private strike(noteIndex:number,instrument:'chimes'|'bowls',now:number,strength:number){
+  const duration=Math.min(instrument==='bowls'?10:8+Math.random()*3,this.deadline-now);
+  if(duration<.3)return;
+  const frequency=pitches[noteIndex]!*(instrument==='chimes'?2:1);
+  // Inharmonic resonances of suspended metal tubes; upper modes decay faster.
+  const partials=instrument==='chimes'?[1,2.756,5.404,8.933]:[1,2.01,2.76,4.1];
+  partials.forEach((partial,index)=>{
+   const oscillator=this.context!.createOscillator(),gain=this.context!.createGain();
+   oscillator.type='sine';oscillator.frequency.value=frequency*partial;
+   oscillator.detune.value=this.settings.pitch*100;
+   const tail=instrument==='chimes'?duration/(1+index*.65):duration;
+   const attack=instrument==='chimes'?.008:.04;
+   const peak=(instrument==='chimes'?.11:.16)*strength/(1+index*2);
+   gain.gain.setValueAtTime(0,now);gain.gain.linearRampToValueAtTime(peak,now+attack);
+   gain.gain.exponentialRampToValueAtTime(.0001,now+tail);
+   oscillator.connect(gain);gain.connect(this.instruments!);this.sources.add(oscillator);
+   this.voices.set(oscillator,{gain,instrument});
+   oscillator.onended=()=>{oscillator.disconnect();gain.disconnect();this.sources.delete(oscillator);this.voices.delete(oscillator);};
+   oscillator.start(now);oscillator.stop(now+tail+.02);
+  });
+  this.onNote({index:noteIndex,instrument,duration});
+ }
+
+ stop(){
+  this.active=false;this.gust=[];
+  if(this.limit!==null){clearInterval(this.limit);this.limit=null;}
+  const ctx=this.context,master=this.master;
+  if(ctx && master) {
+   const now=ctx.currentTime;
+   master.gain.cancelAndHoldAtTime(now);master.gain.linearRampToValueAtTime(0,now+.08);
+   for(const source of this.sources){try{source.stop(now+.1);}catch{}}
+   const old=master,output=this.output;window.setTimeout(()=>{old.disconnect();output?.disconnect();},150);
+  }
+  this.sources.clear();this.voices.clear();this.layers.clear();this.master=null;this.instruments=null;this.output=null;
+ }
+ async close(){this.stop();await this.context?.close();}
+}

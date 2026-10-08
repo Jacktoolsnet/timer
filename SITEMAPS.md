@@ -1,6 +1,6 @@
 # Sitemaps and Search Console
 
-All five projects build `dist/sitemap.xml`. Deploy the complete `dist/` contents
+All six projects build `dist/sitemap.xml`. Deploy the complete `dist/` contents
 (including `robots.txt`) to the corresponding domain root:
 
 - https://jacktools.net/sitemap.xml — company homepage only
@@ -8,6 +8,7 @@ All five projects build `dist/sitemap.xml`. Deploy the complete `dist/` contents
 - https://clock.jacktools.net/sitemap.xml — 4 languages
 - https://stopwatch.jacktools.net/sitemap.xml — 4 languages
 - https://breathe.jacktools.net/sitemap.xml — 4 languages
+- https://relax.jacktools.net/sitemap.xml — 4 languages
 
 Noindex legal pages, redirects and 404 pages are intentionally excluded.
 Tool sitemaps contain reciprocal language alternatives plus English x-default.

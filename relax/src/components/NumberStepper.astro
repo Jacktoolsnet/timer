@@ -1,0 +1,9 @@
+---
+interface Props { id: string; label: string; min: number; max: number; step: number; value: number; decrease: string; increase: string }
+const {id,label,min,max,step,value,decrease,increase}=Astro.props;
+---
+<div class="number-stepper">
+ <button type="button" data-step-target={id} data-step-direction="-1" aria-label={label+' · '+decrease} aria-controls={id}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg></button>
+ <input id={id} type="number" min={min} max={max} step={step} value={value} inputmode={step<1?'decimal':'numeric'} required />
+ <button type="button" data-step-target={id} data-step-direction="1" aria-label={label+' · '+increase} aria-controls={id}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg></button>
+</div>

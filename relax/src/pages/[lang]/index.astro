@@ -1,0 +1,7 @@
+---
+import RelaxPage from '../../components/RelaxPage.astro';
+import {languages} from '../../lib/i18n';
+export function getStaticPaths(){return languages.map(lang=>({params:{lang},props:{lang}}));}
+const {lang}=Astro.props;
+---
+<RelaxPage lang={lang}/>
