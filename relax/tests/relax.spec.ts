@@ -344,3 +344,21 @@ test('focus simulation fills the viewport with compact, accessible overlay contr
  }
  await page.locator('#safety-open').click();await expect(page.locator('#safety-dialog')).toBeVisible();
 });
+
+test('focus cursor hides after inactivity and returns for movement, dialogs and exit',async({page})=>{
+ await page.goto('/en/');await page.locator('#focus').click();
+ await page.mouse.move(200,200);
+ await expect(page.locator('body')).toHaveClass(/focus-cursor-hidden/,{timeout:5000});
+ await expect(page.locator('#sound-stage')).toHaveCSS('cursor','none');
+ await page.mouse.move(210,210);
+ await expect(page.locator('body')).not.toHaveClass(/focus-cursor-hidden/);
+ await page.locator('#safety-open').click();
+ await page.waitForTimeout(3200);
+ await expect(page.locator('body')).not.toHaveClass(/focus-cursor-hidden/);
+ await page.keyboard.press('Escape');
+ await expect(page.locator('body')).toHaveClass(/focus-cursor-hidden/,{timeout:5000});
+ await page.keyboard.press('Shift');
+ await expect(page.locator('body')).not.toHaveClass(/focus-cursor-hidden/);
+ await page.locator('#focus').click();
+ await expect(page.locator('body')).not.toHaveClass(/focus-view|focus-cursor-hidden/);
+});

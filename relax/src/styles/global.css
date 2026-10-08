@@ -808,3 +808,5 @@ body.focus-view .sound-shape { max-width: min(45dvh,45vw); }
  body.focus-view #state { flex-basis:auto; max-width:200px; }
  body.focus-view .relax-playback { padding:6px 12px 10px; gap:6px 12px; }
 }
+
+body.focus-view.focus-cursor-hidden, body.focus-view.focus-cursor-hidden * { cursor:none !important; }
