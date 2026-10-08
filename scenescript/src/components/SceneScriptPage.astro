@@ -24,7 +24,7 @@ const {lang}=Astro.props,t=editorDictionary(lang);
     <input id="image-file" type="file" accept="image/png,image/jpeg,image/webp" hidden />
    </aside>
    <section class="studio-preview" aria-label={t.preview}>
-    <div id="stage-frame"><div id="stage"></div><div id="safe-overlay" hidden></div><div id="recording-start" hidden><button id="start-recording" type="button" aria-label={t.startRecording}><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M23 14 49 32 23 50Z" /></svg><span>{t.startRecording}</span></button><p>{t.recordReadyHint}</p></div><div id="countdown" hidden aria-live="assertive"></div></div>
+    <div id="stage-frame"><div id="stage"></div><div id="safe-overlay" hidden></div><div id="recording-start" hidden><button id="start-recording" type="button" aria-label={t.startRecording}><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M23 14 49 32 23 50Z" /></svg><span>{t.startRecording}</span></button></div><div id="countdown" hidden aria-live="assertive"></div></div>
     <div class="playback-controls"><button id="play" class="primary">▶ {t.play}</button><button id="pause">Ⅱ {t.pause}</button><button id="reset">↺ {t.reset}</button><button id="focus">⛶ {t.focus}</button></div>
     <label class="timeline-label"><span id="time-label">0.0 / 10.0 s</span><input id="timeline" aria-label={t.preview} type="range" min="0" max="10" step="0.01" value="0" /></label>
     <p id="wake-status" class="small-hint" role="status" aria-live="polite"></p>

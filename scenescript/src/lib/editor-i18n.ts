@@ -1,7 +1,6 @@
 import type { Language } from './i18n';
 const words = {
  startRecording:['Präsentation starten','Start presentation','Iniciar presentación','Démarrer la présentation'],
- recordReadyHint:['Warte, bis der Vollbild-Hinweis verschwunden ist. Starte dann den Countdown mit Play.','Wait until the fullscreen notice disappears, then press Play to start the countdown.','Espera a que desaparezca el aviso de pantalla completa y pulsa Play para iniciar la cuenta atrás.','Attendez que l’avis de plein écran disparaisse, puis appuyez sur Play pour lancer le compte à rebours.'],
  wakeActive:['Bildschirm wird während der Wiedergabe wach gehalten.','Screen stays awake during playback.','La pantalla permanece activa durante la reproducción.','L’écran reste éveillé pendant la lecture.'],
  wakeUnavailable:['Bildschirm-Wachhalten ist nicht verfügbar oder wurde abgelehnt. Bitte den Ruhezustand für die Aufnahme in den Geräteeinstellungen deaktivieren.','Keeping the screen awake is unavailable or was denied. Please disable screen sleep in your device settings for recording.','No se puede mantener la pantalla activa. Desactiva el reposo en los ajustes del dispositivo para grabar.','Le maintien de l’écran éveillé est indisponible ou refusé. Désactivez la veille dans les réglages de l’appareil pour enregistrer.'],
  heading:['Deine Geschichte. Deine Bühne.','Your story. Your stage.','Tu historia. Tu escenario.','Votre histoire. Votre scène.'],
