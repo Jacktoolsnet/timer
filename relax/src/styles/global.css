@@ -819,8 +819,11 @@ body.focus-view.focus-cursor-hidden, body.focus-view.focus-cursor-hidden * { cur
 @keyframes campfire-smoke {
  0% { opacity:0;transform:translate(-50%,0) scale(.45); }
  15% { opacity:.25; }
+ 20% { transform:translate(calc(-50% + var(--smoke-drift)*.2 + var(--smoke-sway)),calc(var(--smoke-rise)*.2)) scale(.72); }
+ 40% { transform:translate(calc(-50% + var(--smoke-drift)*.4 - var(--smoke-sway)),calc(var(--smoke-rise)*.4)) scale(.99); }
  45% { opacity:.3; }
- 80% { opacity:.25; }
+ 60% { transform:translate(calc(-50% + var(--smoke-drift)*.6 + var(--smoke-sway)),calc(var(--smoke-rise)*.6)) scale(1.26); }
+ 80% { opacity:.25;transform:translate(calc(-50% + var(--smoke-drift)*.8 - var(--smoke-sway)),calc(var(--smoke-rise)*.8)) scale(1.53); }
  95% { opacity:.15; }
  100% { opacity:0;transform:translate(calc(-50% + var(--smoke-drift,0px)),var(--smoke-rise,-700px)) scale(1.8); }
 }
