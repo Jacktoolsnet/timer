@@ -45,7 +45,7 @@ const isPomo = mode === 'pomodoro';
         </div>
         <div class="focus-details">
         <div class="timer-controls"><button id="reset" class="secondary" aria-label={t.reset} title={t.reset}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10a9 9 0 1 1 1 8M3 4v6h6"/></svg><span>{t.reset}</span></button><button id="start" class="primary" aria-label={t.start} title={t.start} disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 11 7-11 7Z" fill="currentColor" stroke="none"/></svg></button>{isPomo && <button id="next" class="secondary" aria-label={t.next} title={t.next}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 5 9 7-9 7V5Zm11 0v14"/></svg></button>}</div>
-        <p id="wake-status" class="timer-status" role="status" data-active={wake.active} data-unavailable={wake.unavailable}></p>
+        <p id="wake-status" class="timer-status" role="status" data-unavailable={wake.unavailable}></p>
         <p id="timer-status" role="status" class="timer-status"></p>
         {!isPomo ? <div class="presets">{[1,5,10,15,30].map(m => <button data-minutes={m} aria-pressed={m === 5}>{m} {t.minutes}</button>)}</div> : <div class="phase-summary"><span><i></i>{t.focus} <b id="summary-focus">25</b></span><span><i></i>{t.short} <b id="summary-short">5</b></span><span><i></i>{t.long} <b id="summary-long">15</b></span></div>}
         <noscript><p class="notice">{t.js}</p></noscript>

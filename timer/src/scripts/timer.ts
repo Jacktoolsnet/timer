@@ -18,7 +18,7 @@ const field = (name: string) => form.elements.namedItem(name) as HTMLInputElemen
 const status = $('settings-status');
 const originalTitle = document.title;
 const wakeStatus = $('wake-status');
-const setWake = screenWakeLock(wakeStatus, wakeStatus.dataset.active!, wakeStatus.dataset.unavailable!);
+const setWake = screenWakeLock(wakeStatus, '', wakeStatus.dataset.unavailable!);
 let audio: AudioContext | undefined;
 function prepareAudio() {
   if (!settings.sound) return;
