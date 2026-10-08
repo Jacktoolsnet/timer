@@ -54,7 +54,7 @@ test('wake lock follows playback, pause and completion',async({page})=>{
  await mockWakeLock(page);await page.goto('/en/');
  const state=()=>page.evaluate(()=>(window as unknown as {wakeTest:{requests:number;releases:number}}).wakeTest);
  await page.locator('#play').click();await expect.poll(async()=>(await state()).requests).toBe(1);
- await expect(page.locator('#wake-status')).toContainText('Screen stays awake');
+ await expect(page.locator('#wake-status')).toBeEmpty();
  await page.locator('#pause').click();await expect.poll(async()=>(await state()).releases).toBe(1);
  await page.locator('#play').click();await expect.poll(async()=>(await state()).requests).toBe(2);
  await page.locator('#pause').click();await page.locator('#timeline').fill('9.9');await page.locator('#play').click();
@@ -114,4 +114,29 @@ test('small windows show notice; widening preserves the current project',async({
 });
 test('AI guide remains accessible on smartphone-sized windows',async({page})=>{
  await page.setViewportSize({width:390,height:844});await page.goto('/en/');await page.locator('.small-screen-note a').click();await expect(page.locator('#ai-guide')).toBeVisible();
+});
+
+test('project spans three columns and preview expands without losing state',async({page})=>{
+ await page.goto('/en/');const projectBox=await page.locator('.project-panel').boundingBox(),previewBox=await page.locator('.studio-preview').boundingBox();expect(projectBox!.width).toBeGreaterThan(previewBox!.width*2.5);expect(Math.abs(projectBox!.y-previewBox!.y)).toBeLessThan(2);
+ const smallWidth=(await page.locator('#stage-frame').boundingBox())!.width;
+ await page.locator('#open-preview').click();await expect(page.locator('#preview-dialog')).toBeVisible();await expect(page.locator('#play .control-label')).toBeVisible();expect((await page.locator('#stage-frame').boundingBox())!.width).toBeGreaterThan(smallWidth*1.5);
+ await page.locator('#safe-toggle').check();await page.locator('#timeline').fill('2');await page.keyboard.press('Escape');await expect(page.locator('#preview-dialog')).not.toBeVisible();await expect(page.locator('#timeline')).toHaveValue('2');await expect(page.locator('#play .control-label')).not.toBeVisible();await expect(page.locator('#stage')).toHaveCount(1);
+ await page.locator('#open-preview').click();await page.locator('#focus').click();await expect(page.locator('#preview-dialog')).not.toBeVisible();await expect(page.locator('#start-recording')).toBeVisible();await page.keyboard.press('Escape');await expect(page.locator('#timeline')).toHaveValue('2');await expect(page.locator('#stage-frame')).toBeVisible();
+});
+
+test('project images scroll horizontally without widening the page',async({page})=>{
+ const project=demoProject();for(let i=0;i<12;i++)project.assets['photo-'+i]={name:'Photo '+i+'.png',data:pixel};
+ await page.goto('/en/');await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(project));await page.locator('#import-json').click();await expect(page.locator('#json-dialog')).not.toBeVisible();
+ await expect(page.locator('.project-panel #asset-list img')).toHaveCount(12);await expect(page.locator('.scene-sidebar #asset-list')).toHaveCount(0);
+ expect(await page.locator('#asset-list').evaluate(el=>el.scrollWidth>el.clientWidth)).toBeTruthy();
+ await page.locator('#asset-list').evaluate(el=>{el.scrollLeft=el.scrollWidth;});expect(await page.locator('#asset-list').evaluate(el=>el.scrollLeft)).toBeGreaterThan(0);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();
+ await page.locator('#asset-list').evaluate(el=>{el.scrollLeft=0;});expect(await page.locator('#asset-list').evaluate(el=>el.scrollLeft)).toBe(0);
+});
+
+test('second row follows scenes, scene settings, elements, element settings',async({page})=>{
+ await page.goto('/en/');const panels=['.scene-sidebar','.scene-inspector','.elements-panel','.element-inspector'];
+ const boxes=await Promise.all(panels.map(selector=>page.locator(selector).boundingBox()));
+ for(let i=1;i<boxes.length;i++){expect(boxes[i]!.x).toBeGreaterThan(boxes[i-1]!.x);expect(Math.abs(boxes[i]!.y-boxes[0]!.y)).toBeLessThan(2);}
+ await page.locator('#element-list button').click();await expect(page.locator('.element-inspector [name=text]')).toBeVisible();await expect(page.locator('.scene-inspector [name=name]')).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();
 });

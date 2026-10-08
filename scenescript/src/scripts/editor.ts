@@ -6,7 +6,7 @@ import type {EditorKey} from '../lib/editor-i18n';
 const $=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(id) as T;
 const words=JSON.parse($('editor').dataset.words!) as Record<EditorKey,string>;
 const t=(key:string)=>words[key as EditorKey]||key;
-const keepScreenAwake=screenWakeLock($('wake-status'),t('wakeActive'),t('wakeUnavailable'));
+const keepScreenAwake=screenWakeLock($('wake-status'),'',t('wakeUnavailable'));
 let project:Project=demoProject(), sceneIndex=0, selectedId='',dirty=false,time=0,playing=false,recording=false;
 let revision=0, focusAttempt=0;
 // Recording uses its own playhead; returning must not discard the editor context.
@@ -36,7 +36,7 @@ function refresh(){
  renderForms();renderElements();renderAssets();draw();
 }
 function renderElements(){const list=$('element-list');list.replaceChildren();current().elements.forEach((e,i)=>{const li=document.createElement('li'),b=button(`${i+1}. ${t(e.type)} · ${e.type==='text'?e.text.slice(0,32):e.id.slice(0,8)}`,()=>{selectedId=e.id;renderForms();renderElements();draw();});b.setAttribute('aria-current',String(e.id===selectedId));li.append(b);list.append(li);});}
-function renderAssets(){const list=$('asset-list');list.replaceChildren();for(const [id,asset] of Object.entries(project.assets)){const row=document.createElement('div');row.className='asset-row';const img=document.createElement('img');img.src=asset.data;img.alt='';const name=document.createElement('span');name.textContent=asset.name;const remove=button('×',()=>{if(!confirm(t('remove')+' '+asset.name+'?'))return;delete project.assets[id];project.scenes.forEach(s=>{if(s.backgroundAsset===id)s.backgroundAsset='';s.elements.forEach(e=>{if(e.asset===id)e.asset='';});});changed();refresh();});remove.setAttribute('aria-label',`${t('remove')}: ${asset.name}`);row.append(img,name,remove);list.append(row);}}
+function renderAssets(){const list=$('asset-list');list.replaceChildren();for(const [id,asset] of Object.entries(project.assets)){const row=document.createElement('div');row.className='asset-row';const img=document.createElement('img');img.src=asset.data;img.alt='';const name=document.createElement('span');name.textContent=asset.name;name.title=asset.name;const remove=button('×',()=>{if(!confirm(t('remove')+' '+asset.name+'?'))return;delete project.assets[id];project.scenes.forEach(s=>{if(s.backgroundAsset===id)s.backgroundAsset='';s.elements.forEach(e=>{if(e.asset===id)e.asset='';});});changed();refresh();});remove.setAttribute('aria-label',`${t('remove')}: ${asset.name}`);row.append(img,name,remove);list.append(row);}}
 function field(form:HTMLElement,key:string,value:string|number|boolean,kind:string,action:(value:string|number|boolean)=>void,options?:readonly string[],min?:number,max?:number){
  const label=document.createElement('label');label.append(document.createTextNode(t(key)));
  let input:HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement;
@@ -71,6 +71,20 @@ function moveElement(delta:number){const s=current(),index=s.elements.findIndex(
 const stage=$('stage'),stageFrame=$('stage-frame');
 function resize(){const [w,h]=formats[project.format];stage.style.width=`${w}px`;stage.style.height=`${h}px`;stage.style.transform=`scale(${stageFrame.clientWidth/w})`;stageFrame.style.aspectRatio=`${w}/${h}`;document.documentElement.style.setProperty('--project-ratio',String(w/h));}
 new ResizeObserver(resize).observe(stageFrame);
+const previewDialog=$('preview-dialog') as HTMLDialogElement;
+const previewContent=$('preview-content');
+function closePreview(){
+ $('preview-slot').append(previewContent);previewContent.classList.remove('preview-expanded');
+ if(previewDialog.open)previewDialog.close();
+ resize();
+}
+$('open-preview').addEventListener('click',()=>{
+ $('preview-overlay-host').append(previewContent);previewContent.classList.add('preview-expanded');
+ previewDialog.showModal();resize();
+});
+$('close-preview').addEventListener('click',closePreview);
+previewDialog.addEventListener('close',()=>{if(previewContent.parentElement!==$('preview-slot'))closePreview();});
+previewDialog.addEventListener('click',event=>{if(event.target===previewDialog){const rect=previewDialog.getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)closePreview();}});
 // Retain image/text nodes during playback: only their animation state changes per frame.
 let stageKey='', views:{element:Element;node:HTMLDivElement;text?:HTMLSpanElement}[]=[],backgroundImage:HTMLImageElement|undefined;
 function draw(follow=true){
@@ -131,6 +145,7 @@ async function preload(p:Project){await Promise.all(Object.values(p.assets).map(
 $('image-file').addEventListener('change',async()=>{const input=$('image-file') as HTMLInputElement,file=input.files?.[0];input.value='';if(!file)return;const target=project;try{if(Object.keys(project.assets).length>=100)throw new Error('assets: maximum 100');if(file.size>MAX_IMAGE_BYTES)throw new Error('Image: maximum 8 MiB');if(!['image/png','image/jpeg','image/webp'].includes(file.type))throw new Error('PNG / JPEG / WebP');const data=await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=()=>reject(new Error('Image read failed'));reader.readAsDataURL(file);});validateImage(data);await decodeImage(data);if(project!==target)return;const id=crypto.randomUUID();project.assets[id]={name:file.name.slice(0,200),data};try{parseProject(JSON.stringify(project));}catch(error){delete project.assets[id];throw error;}const e=selected();if(e?.type==='image')e.asset=id;changed();refresh();}catch(error){status(t('error')+' '+(error as Error).message);}});
 $('focus').addEventListener('click',async()=>{
  if(($('focus') as HTMLButtonElement).disabled||recording)return;
+ closePreview();
  const attempt=++focusAttempt;($('focus') as HTMLButtonElement).disabled=true;stop();
  try{await preload(project);await document.fonts.ready;}
  catch(error){status(t('error')+' '+(error as Error).message);return;}

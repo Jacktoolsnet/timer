@@ -1,5 +1,8 @@
 import type { Language } from './i18n';
 const words = {
+ sceneSettings:['Szeneneinstellungen','Scene settings','Ajustes de escena','Réglages de la scène'],
+ elementSettings:['Elementeinstellungen','Element settings','Ajustes del elemento','Réglages de l’élément'],
+ expandPreview:['Vorschau vergrößern','Expand preview','Ampliar vista previa','Agrandir l’aperçu'],
  tabletRequired:['Bitte auf einem Tablet oder Computer öffnen','Please open on a tablet or computer','Abre la herramienta en una tableta o un ordenador','Ouvrez cet outil sur une tablette ou un ordinateur'],
  tabletHint:['Der Editor benötigt mindestens 768 Pixel Fensterbreite. Auf Smartphones ist die Bearbeitung nicht vorgesehen. Verwende ein Tablet oder einen Computer und vergrößere bei Bedarf das Browserfenster.','The editor needs a window at least 768 pixels wide. Editing on smartphones is not supported. Use a tablet or computer and widen the browser window if necessary.','El editor necesita una ventana de al menos 768 píxeles de ancho. No está diseñado para editar en móviles. Usa una tableta o un ordenador y amplía la ventana si es necesario.','L’éditeur nécessite une fenêtre d’au moins 768 pixels de large. L’édition sur smartphone n’est pas prise en charge. Utilisez une tablette ou un ordinateur et agrandissez la fenêtre si nécessaire.'],
  startRecording:['Präsentation starten','Start presentation','Iniciar presentación','Démarrer la présentation'],
