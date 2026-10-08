@@ -1,3 +1,4 @@
+import {wavePositionPicker} from '../src/lib/wave-position.ts';
 import {oceanSurf} from '../src/lib/ocean.ts';
 import {natureSound,type NatureEvent} from '../src/lib/nature.ts';
 import {applyPreset,matchingPreset,presetNames} from '../src/lib/presets.ts';
@@ -201,4 +202,21 @@ test('ocean surf has long overlapping swells and stronger waves at higher activi
  oceanSurf(8000,10,()=>.5,1,e=>gentle.push(e));
  oceanSurf(8000,10,()=>.5,10,e=>strong.push(e));
  assert(strong[0].strength>gentle[0].strength);
+});
+
+test('wave peaks visit the whole width without neighbouring region repeats',()=>{
+ let seed=42;
+ const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
+ const next=wavePositionPicker(random);
+ let previous=-1;
+ for(let batch=0;batch<20;batch++){
+  const regions=new Set<number>();
+  for(let i=0;i<5;i++){
+   const position=next(),region=Math.floor((position-80)/168);
+   assert(position>=80&&position<920);
+   assert.notEqual(region,previous);
+   regions.add(region);previous=region;
+  }
+  assert.equal(regions.size,5);
+ }
 });

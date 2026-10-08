@@ -1,3 +1,4 @@
+import {wavePositionPicker} from '../lib/wave-position';
 import {applyPreset,matchingPreset,presetNames,type Preset} from '../lib/presets';
 import {waveDirections,defaults,normalize,timeLabel,selectedInstrument,fadeWindow,type Settings} from '../lib/relax';
 import {Soundscape,type NoteEvent} from '../lib/audio';
@@ -32,7 +33,8 @@ function shape(note:NoteEvent){
 const audio=new Soundscape(settings,shape);
 const glow=document.querySelector<HTMLElement>('.ambient-glow')!;
 const ocean=el('ocean-wave'),surface=el('ocean-surface');
-const waveProfiles=new Map<string,{peak:number;width:number}>();
+const nextWavePosition=wavePositionPicker();
+const waveProfiles=new Map<string,{peak:number;width:number;height:number}>();
 function rainFrame(){
  const enabled=settings.stream&&settings.streamAnimation&&settings.motion&&!reduced.matches&&settings.streamVolume>0;
  if(!enabled||state==='ready'||state==='ended')ocean.setAttribute('data-hidden','true');
@@ -46,13 +48,13 @@ function rainFrame(){
    for(const key of waveProfiles.keys())if(!keys.has(key))waveProfiles.delete(key);
    group.querySelectorAll('[data-wave]').forEach(node=>{if(!keys.has((node as SVGElement).dataset.wave!))node.remove();});
    for(const wave of waves){
-    if(!waveProfiles.has(wave.key))waveProfiles.set(wave.key,{peak:120+Math.random()*760,width:160+Math.random()*110});
+    if(!waveProfiles.has(wave.key))waveProfiles.set(wave.key,{peak:nextWavePosition(),width:160+Math.random()*110,height:260+Math.random()*460});
     const profile=waveProfiles.get(wave.key)!;
     let node=Array.from(group.querySelectorAll<SVGPathElement>('[data-wave]')).find(n=>n.dataset.wave===wave.key);
     if(!node){node=document.createElementNS('http://www.w3.org/2000/svg','path');node.dataset.wave=wave.key;node.setAttribute('fill','url(#ocean-gradient)');group.append(node);}
     // A single smooth crest; its lateral position stays fixed during this wave.
     const baseline=1040-wave.level*180;
-    const height=(x:number)=>baseline-wave.level*660*Math.exp(-(((x-profile.peak)/profile.width)**2));
+    const height=(x:number)=>baseline-wave.level*profile.height*Math.exp(-(((x-profile.peak)/profile.width)**2));
     let path='M -100 '+height(-100);
     for(let x=-80;x<=1100;x+=20)path+=' L '+x+' '+height(x);
     node.setAttribute('d',path+' L 1100 1200 L -100 1200 Z');
