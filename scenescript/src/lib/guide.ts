@@ -126,6 +126,7 @@ Optional fields and their defaults:
 - font: "Arial"; allowed ${fonts.map(f=>`"${f}"`).join(', ')}.
 - fontSize: 90; number, 1–500 project pixels, not percentages or UI pixels.
 - align: "center"; allowed "left", "center", "right".
+- name: ""; optional display title, at most 200 characters. Does not change rendered text or IDs.
 - runs: []; optional structured rich-text segments (see Rich text below).
 - bold: false; boolean.
 - italic: false; boolean.

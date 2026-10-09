@@ -40,10 +40,24 @@ function renderElements(){
  const index=current().elements.findIndex(e=>e.id===selectedId),count=current().elements.length;
  ($('duplicate-element') as HTMLButtonElement).disabled=index<0||count>=100;
  ($('delete-element') as HTMLButtonElement).disabled=index<0;
+ ($('rename-element') as HTMLButtonElement).disabled=index<0;
  ($('element-up') as HTMLButtonElement).disabled=index<=0;
  ($('element-down') as HTMLButtonElement).disabled=index<0||index>=count-1;
  document.querySelectorAll<HTMLButtonElement>('[data-add]').forEach(b=>b.disabled=count>=100);
- const list=$('element-list');list.replaceChildren();current().elements.forEach((e,i)=>{const li=document.createElement('li'),b=button(`${i+1}. ${t(e.type)} · ${e.type==='text'?e.text:e.type==='image'?(project.assets[e.asset]?.name||e.id):e.id}`,()=>{selectedId=e.id;renderForms();renderElements();draw();});b.title=b.textContent||'';b.setAttribute('aria-current',String(e.id===selectedId));li.append(b);list.append(li);});}
+ const list=$('element-list');list.replaceChildren();current().elements.forEach((e,i)=>{const li=document.createElement('li'),b=button(`${i+1}. ${t(e.type)} · ${e.name||(e.type==='text'?e.text:e.type==='image'?(project.assets[e.asset]?.name||e.id):e.id)}`,()=>{selectedId=e.id;renderForms();renderElements();draw();});b.title=b.textContent||'';b.setAttribute('aria-current',String(e.id===selectedId));li.append(b);list.append(li);});}
+const renameDialog=$('rename-dialog') as HTMLDialogElement;
+let pendingRename:((name:string)=>void)|undefined;
+function askRename(name:string,action:(name:string)=>void){
+ stop();draw();pendingRename=action;const input=$('rename-input') as HTMLInputElement;input.value=name;renameDialog.showModal();input.focus();input.select();
+}
+$('cancel-rename').addEventListener('click',()=>renameDialog.close());
+renameDialog.addEventListener('close',()=>{pendingRename=undefined;});
+$('rename-form').addEventListener('submit',event=>{
+ event.preventDefault();const input=$('rename-input') as HTMLInputElement;const name=input.value.trim();if(!name){input.value='';input.reportValidity();return;}
+ const action=pendingRename;renameDialog.close();action?.(name);
+});
+$('rename-scene').addEventListener('click',()=>{const scene=current();askRename(scene.name,name=>{scene.name=name;changed();refresh();$('rename-scene').focus();});});
+$('rename-element').addEventListener('click',()=>{const element=selected();if(!element)return;askRename(element.name||t(element.type),name=>{element.name=name;changed();refresh();$('rename-element').focus();});});
 const deleteDialog=$('delete-dialog') as HTMLDialogElement;
 let pendingDelete:(()=>void)|undefined;
 function askDelete(name:string,kind:'scene'|'image',action:()=>void){
@@ -55,7 +69,10 @@ $('cancel-delete').addEventListener('click',()=>deleteDialog.close());
 $('confirm-delete').addEventListener('click',()=>{const action=pendingDelete;pendingDelete=undefined;deleteDialog.close();action?.();});
 deleteDialog.addEventListener('close',()=>{pendingDelete=undefined;});
 function renderAssets(){const list=$('asset-list');list.replaceChildren();for(const [id,asset] of Object.entries(project.assets)){const row=document.createElement('div');row.className='asset-row';const img=document.createElement('img');img.src=asset.data;img.alt='';const name=document.createElement('span');name.textContent=asset.name;name.title=asset.name;const remove=button('',()=>{const target=project;askDelete(asset.name,'image',()=>{if(project!==target)return;delete project.assets[id];project.scenes.forEach(s=>{if(s.backgroundAsset===id)s.backgroundAsset='';s.elements.forEach(e=>{if(e.asset===id)e.asset='';});});changed();refresh();$('import-image').focus();});});remove.setAttribute('aria-label',`${t('remove')}: ${asset.name}`);remove.title=`${t('remove')}: ${asset.name}`;
-const trash=document.createElementNS('http://www.w3.org/2000/svg','svg');trash.setAttribute('viewBox','0 0 24 24');trash.setAttribute('aria-hidden','true');const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('d','M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7');trash.append(path);remove.append(trash);row.append(img,name,remove);list.append(row);}}
+const trash=document.createElementNS('http://www.w3.org/2000/svg','svg');trash.setAttribute('viewBox','0 0 24 24');trash.setAttribute('aria-hidden','true');const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('d','M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7');trash.append(path);remove.append(trash);
+const rename=button('',()=>askRename(asset.name,newName=>{asset.name=newName;changed();refresh();$('import-image').focus();}));rename.title=`${t('rename')}: ${asset.name}`;rename.setAttribute('aria-label',rename.title);rename.dataset.renameAsset=id;
+const pencil=document.createElementNS('http://www.w3.org/2000/svg','svg');pencil.setAttribute('viewBox','0 0 24 24');pencil.setAttribute('aria-hidden','true');const pencilPath=document.createElementNS('http://www.w3.org/2000/svg','path');pencilPath.setAttribute('d','m15 4 5 5M4 20l5-1L21 7l-5-5L4 14ZM3 22h18');pencil.append(pencilPath);rename.append(pencil);
+const actions=document.createElement('div');actions.className='asset-actions';actions.append(rename,remove);row.append(img,name,actions);list.append(row);}}
 function field(form:HTMLElement,key:string,value:string|number|boolean,kind:string,action:(value:string|number|boolean)=>void,options?:readonly string[],min?:number,max?:number){
  const label=document.createElement('label');label.append(document.createTextNode(t(key)));
  let input:HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement;
@@ -93,7 +110,7 @@ function field(form:HTMLElement,key:string,value:string|number|boolean,kind:stri
  }else label.append(input);
  form.append(label);
 }
-function updateScene(key:keyof Scene,value:unknown){const previous=current()[key];(current() as unknown as Record<string,unknown>)[key]=value;try{parseProject(JSON.stringify(project));stop();time=offset(sceneIndex);changed();draw();if(key==='name'||key==='duration')renderSceneLabels();}catch(error){(current() as unknown as Record<string,unknown>)[key]=previous;status(t('error')+' '+(error as Error).message);renderForms();}}
+function updateScene(key:keyof Scene,value:unknown){const previous=current()[key];(current() as unknown as Record<string,unknown>)[key]=value;try{parseProject(JSON.stringify(project));stop();time=offset(sceneIndex);changed();draw();if(key==='background'&&richEditor)richEditor.editor.style.backgroundColor=current().background;if(key==='name'||key==='duration')renderSceneLabels();}catch(error){(current() as unknown as Record<string,unknown>)[key]=previous;status(t('error')+' '+(error as Error).message);renderForms();}}
 function renderSceneLabels(){const buttons=$('scene-list').querySelectorAll('button');project.scenes.forEach((s,i)=>{buttons[i].textContent=`${i+1}. ${s.name} · ${s.duration}s`;buttons[i].title=buttons[i].textContent||'';});}
 let richEditor:ReturnType<typeof richTextEditor>|undefined;
 function updateElement(key:keyof Element,value:unknown){
@@ -111,28 +128,30 @@ function renderForms(){
  if(e.type==='text'){
  richEditor=richTextEditor(e,()=>{changed();stop();draw(false);renderElements();},(key,value)=>updateElementValue(key,value),{selection:t('richSelectionHint'),block:t('richBlockHint')});
  richEditor.editor.setAttribute('aria-label',t('text'));
+ richEditor.editor.style.backgroundColor=s.background;
  const contentLabel=document.createElement('label');contentLabel.append(document.createTextNode(t('text')),richEditor.editor,richEditor.hint);contentLabel.dataset.richText='true';ef.append(contentLabel);field(ef,'font',e.font,'select',v=>updateElement('font',v),fonts);field(ef,'fontSize',e.fontSize,'number',v=>updateElement('fontSize',v),undefined,1,500);field(ef,'align',e.align,'select',v=>updateElement('align',v),['left','center','right']);for(const key of ['bold','italic','underline','strikethrough'] as const)field(ef,key,e[key],'checkbox',v=>updateElement(key,v));}
  if(e.type==='image'){field(ef,'asset',e.asset,'select',v=>updateElement('asset',v),['',...Object.keys(project.assets)]);field(ef,'fit',e.fit,'select',v=>updateElement('fit',v),['contain','cover']);}
  if(e.type!=='image')field(ef,'color',e.color,'color',v=>updateElement('color',v));
  for(const [key,min,max] of [['x',-100,100],['y',-100,100],['width',0.1,200],['height',0.1,200],['opacity',0,1],['rotation',-360,360],['radius',0,1000]] as const)field(ef,key,e[key],'number',v=>updateElement(key,v),undefined,min,max);
  field(ef,'animation',e.animation,'select',v=>updateElement('animation',v),animations);field(ef,'at',e.at,'number',v=>updateElement('at',v),undefined,0,s.duration);field(ef,'animationDuration',e.animationDuration,'number',v=>updateElement('animationDuration',v),undefined,0.01,3600);
- if(e.type==='text'){
-  ef.classList.add('text-settings');
-  for(const [title,keys] of [
+ ef.classList.add('text-settings');
+ const groups:readonly (readonly [string,readonly string[]])[]=e.type==='text'?[
    ['textContentGroup',['text']],
    ['textStyleGroup',['font','fontSize','align','bold','italic','underline','strikethrough','color','opacity','radius']],
    ['elementLayoutGroup',['x','y','width','height','rotation']],
    ['elementMotionGroup',['animation','at','animationDuration']]
-  ] as const){
+  ]:[
+   [e.type==='image'?'imageStyleGroup':'shapeStyleGroup',e.type==='image'?['asset','fit','opacity','radius']:['color','opacity','radius']],
+   ['elementLayoutGroup',['x','y','width','height','rotation']],
+   ['elementMotionGroup',['animation','at','animationDuration']]
+  ];
+  for(const [title,keys] of groups){
    const group=document.createElement('fieldset');group.className='text-settings-group '+title;
    const legend=document.createElement('legend');legend.textContent=t(title);group.append(legend);
    const fields=document.createElement('div');fields.className='text-settings-fields';group.append(fields);
    for(const key of keys){const label=key==='text'?ef.querySelector('label[data-rich-text]'):ef.querySelector(`[name="${key}"]`)?.closest('label');if(label)fields.append(label);}
    ef.append(group);
   }
- }
-
-
 }
 function moveElement(delta:number){const s=current(),index=s.elements.findIndex(e=>e.id===selectedId),next=index+delta;if(index<0||next<0||next>=s.elements.length)return;[s.elements[index],s.elements[next]]=[s.elements[next],s.elements[index]];changed();refresh();}
 const stage=$('stage'),stageFrame=$('stage-frame');

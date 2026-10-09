@@ -1,5 +1,9 @@
 import type { Language } from './i18n';
 const words = {
+ rename:['Umbenennen','Rename','Renombrar','Renommer'],
+ renameHint:['Ändere den Titel. Der Inhalt bleibt unverändert.','Change the title. The content stays unchanged.','Cambia el título. El contenido no cambia.','Modifiez le titre. Le contenu reste inchangé.'],
+ imageStyleGroup:['Bild & Darstellung','Image & appearance','Imagen y apariencia','Image et apparence'],
+ shapeStyleGroup:['Form & Darstellung','Shape & appearance','Forma y apariencia','Forme et apparence'],
  richSelectionHint:['Formatierung gilt für den markierten Text.','Formatting applies to selected text.','El formato se aplica al texto seleccionado.','La mise en forme s’applique au texte sélectionné.'],
  richBlockHint:['Wörter markieren, um sie einzeln zu formatieren. Ohne Markierung ändern Sie die Standardformatierung.','Select words to format them individually. Without a selection, controls change the default style.','Selecciona palabras para darles formato. Sin selección, se cambia el estilo predeterminado.','Sélectionnez des mots pour les formater. Sans sélection, les réglages modifient le style par défaut.'],
  italic:['Kursiv','Italic','Cursiva','Italique'],

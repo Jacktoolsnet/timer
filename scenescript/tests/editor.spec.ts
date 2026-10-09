@@ -152,8 +152,8 @@ test('project toolbar uses labeled icons and JSON is paste-only',async({page})=>
  await page.goto('/en/');await expect(page.locator('.editor-toolbar #import-image svg')).toHaveCount(1);
  for(const id of ['new-project','load-project','save-project','open-json','import-image']){const button=page.locator('#'+id);expect(await button.getAttribute('title')).toBeTruthy();expect(await button.getAttribute('aria-label')).toBeTruthy();expect((await button.textContent())!.trim()).toBe('');}
  await page.locator('#open-json').click();await expect(page.locator('#json-input')).toHaveValue('');await expect(page.locator('#copy-json')).toHaveCount(0);await page.locator('#close-json').click();
- await page.locator('#image-file').setInputFiles({name:'trash-test.png',mimeType:'image/png',buffer:Buffer.from(pixel.split(',')[1],'base64')});await expect(page.locator('#asset-list .asset-row button svg')).toHaveCount(1);
- await page.locator('#asset-list .asset-row button').click();await page.locator('#confirm-delete').click();await expect(page.locator('#asset-list img')).toHaveCount(0);
+ await page.locator('#image-file').setInputFiles({name:'trash-test.png',mimeType:'image/png',buffer:Buffer.from(pixel.split(',')[1],'base64')});await expect(page.locator('#asset-list .asset-row button svg')).toHaveCount(2);
+ await page.locator('#asset-list .asset-row button:not([data-rename-asset])').click();await page.locator('#confirm-delete').click();await expect(page.locator('#asset-list img')).toHaveCount(0);
 });
 
 test('app fullscreen hides surroundings and preserves edits and recording return',async({page})=>{
@@ -184,8 +184,8 @@ test('delete overlays support cancel, Escape and explicit scene/image confirmati
  await page.locator('#editor-fullscreen').click();await page.locator('#delete-scene').click();await page.keyboard.press('Escape');await expect(page.locator('#delete-dialog')).not.toBeVisible();await expect(page.locator('body')).toHaveClass(/editor-fullscreen/);
  await page.locator('#delete-scene').click();await page.locator('#confirm-delete').click();await expect(page.locator('#scene-list li')).toHaveCount(1);await expect(page.locator('#delete-scene')).toBeDisabled();
  await page.locator('#image-file').setInputFiles({name:'delete-me.png',mimeType:'image/png',buffer:Buffer.from(pixel.split(',')[1],'base64')});await page.locator('#scene-form [name=backgroundAsset]').selectOption({label:'delete-me.png'});
- await page.locator('#asset-list .asset-row button').click();await expect(page.locator('#delete-description')).toContainText('references');await page.locator('#cancel-delete').click();await expect(page.locator('#asset-list img')).toHaveCount(1);
- await page.locator('#asset-list .asset-row button').click();await page.locator('#confirm-delete').click();await expect(page.locator('#asset-list img')).toHaveCount(0);await expect(page.locator('#scene-form [name=backgroundAsset]')).toHaveValue('');expect(dialogs).toEqual([]);
+ await page.locator('#asset-list .asset-row button:not([data-rename-asset])').click();await expect(page.locator('#delete-description')).toContainText('references');await page.locator('#cancel-delete').click();await expect(page.locator('#asset-list img')).toHaveCount(1);
+ await page.locator('#asset-list .asset-row button:not([data-rename-asset])').click();await page.locator('#confirm-delete').click();await expect(page.locator('#asset-list img')).toHaveCount(0);await expect(page.locator('#scene-form [name=backgroundAsset]')).toHaveValue('');expect(dialogs).toEqual([]);
 });
 
 test('JSON footer has three icons, clipboard paste and safe denial fallback',async({page})=>{
@@ -261,4 +261,30 @@ test('rich editor preserves newlines and allows disabling an inherited style for
  await page.getByRole('switch',{name:'Underline',exact:true}).uncheck();await expect(editor).toHaveCSS('text-decoration-line','none');await expect(editor.locator('span').last()).toHaveCSS('text-decoration-line','none');
  const data=JSON.parse(await exportedJSON(page));expect(data.scenes[0].elements[0].underline).toBe(true);expect(data.scenes[0].elements[0].runs.at(-1).underline).toBe(false);
  await editor.fill('Line one');await editor.press('End');await editor.press('Enter');await editor.pressSequentially('Line two');expect(JSON.parse(await exportedJSON(page)).scenes[0].elements[0].text).toBe('Line one\nLine two');
+});
+
+test('image and shape settings use appearance, layout and animation groups',async({page})=>{
+ await page.goto('/en/');
+ for(const type of ['image','shape']){
+  await page.locator('#element-add-menu summary').click();await page.locator(`[data-add=${type}]`).click();
+  const form=page.locator('#element-form');await expect(form.locator('fieldset')).toHaveCount(3);
+  const appearance=form.locator(`.${type}StyleGroup`);await expect(appearance.locator('[name=opacity]')).toBeVisible();await expect(appearance.locator('[name=radius]')).toBeVisible();
+  await expect(form.locator('.elementLayoutGroup [name=x]')).toBeVisible();await expect(form.locator('.elementMotionGroup [name=animation]')).toBeVisible();
+  if(type==='image'){await expect(appearance.locator('[name=asset]')).toBeVisible();await expect(appearance.locator('[name=fit]')).toBeVisible();}else{await expect(appearance.locator('[name=color]')).toBeVisible();}
+  await form.locator('[name=width]').fill('60');await form.locator('[name=width]').dispatchEvent('change');
+  expect(JSON.parse(await exportedJSON(page)).scenes[0].elements.at(-1).width).toBe(60);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();
+ }
+});
+
+test('rename dialog handles scene, element and image names without changing content or IDs',async({page})=>{
+ await page.goto('/en/');await page.locator('#rename-scene').click();const dialog=page.locator('#rename-dialog');await expect(dialog.locator('header')).toBeVisible();await expect(dialog.locator('footer button')).toHaveCount(2);
+ await page.locator('#rename-input').fill('Renamed scene');await page.locator('#cancel-rename').click();await expect(page.locator('#scene-list button').first()).not.toContainText('Renamed scene');
+ await page.locator('#rename-scene').click();await page.locator('#rename-input').fill('Renamed scene');await page.locator('#rename-input').press('Enter');await expect(page.locator('#scene-list button').first()).toContainText('Renamed scene');
+ await expect(page.locator('#rename-element')).toBeDisabled();await page.locator('#element-list button').first().click();const original=JSON.parse(await exportedJSON(page));
+ await page.locator('#rename-element').click();await page.locator('#rename-input').fill('Headline');await page.locator('#apply-rename').click();await expect(page.locator('#element-list button').first()).toContainText('Headline');
+ await page.locator('#image-file').setInputFiles({name:'original.png',mimeType:'image/png',buffer:Buffer.from(pixel.split(',')[1],'base64')});await page.locator('#asset-list [data-rename-asset]').click();await page.locator('#rename-input').fill('Cover image');await page.locator('#apply-rename').click();await expect(page.locator('#asset-list .asset-row > span')).toHaveText('Cover image');
+ const saved=JSON.parse(await exportedJSON(page)),element=saved.scenes[0].elements[0];expect(saved.scenes[0].name).toBe('Renamed scene');expect(element.name).toBe('Headline');expect(element.id).toBe(original.scenes[0].elements[0].id);expect(element.text).toBe(original.scenes[0].elements[0].text);expect(Object.values(saved.assets)[0]).toMatchObject({name:'Cover image',data:pixel});
+ await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(saved));await page.locator('#import-json').click();await expect(page.locator('#element-list button').first()).toContainText('Headline');
+ await page.locator('#rename-scene').click();await page.keyboard.press('Escape');await expect(dialog).not.toBeVisible();
 });

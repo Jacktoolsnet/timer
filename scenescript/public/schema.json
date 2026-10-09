@@ -294,6 +294,12 @@
                       }
                     }
                   }
+                },
+                "name": {
+                  "type": "string",
+                  "maxLength": 200,
+                  "default": "",
+                  "description": "Optional display title; empty uses a content-based label."
                 }
               },
               "required": [

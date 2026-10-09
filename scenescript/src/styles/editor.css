@@ -422,3 +422,15 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
 /* Ellipsis must also constrain the list grid's intrinsic track size. */
 #scene-list,#element-list { grid-template-columns:minmax(0,1fr); min-width:0; }
 #scene-list li,#element-list li { min-width:0; }
+
+/* Image/shape appearance follows the same grouping as typography. */
+.imageStyleGroup .text-settings-fields label:has([name=asset]) { grid-column:1 / -1; }
+.shapeStyleGroup .text-settings-fields label:has([name=color]) { grid-column:1; grid-row:1; }
+.shapeStyleGroup .text-settings-fields label:has([name=opacity]) { grid-column:1; grid-row:2; }
+.shapeStyleGroup .text-settings-fields label:has([name=radius]) { grid-column:2; grid-row:1; }
+
+#rename-dialog { max-width:520px; }
+#rename-dialog label { display:block; margin-bottom:8px; color:var(--muted); font-size:calc(13px * var(--font-scale,1)); }
+#rename-input { width:100%; height:40px; padding:9px 12px; border:1px solid var(--line); border-radius:10px; background:var(--bg); color:var(--text); font:inherit; }
+.rename-footer { justify-content:flex-end; }
+.asset-actions { display:flex; justify-content:center; gap:8px; }
