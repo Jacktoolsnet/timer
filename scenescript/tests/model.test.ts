@@ -47,3 +47,10 @@ test('scene transitions validate, clamp and resolve all directions deterministic
  scene.transition='wipe-left';assert.equal(sceneTransitionState(scene,1).clip,'inset(0% 0% 0% 50%)');
  (scene as any).transition='unknown';assert.throws(()=>parseProject(serialize(p)));
 });
+
+test('zoom and through-black scene transitions include precise midpoint and endpoints',()=>{
+ const scene=demoProject().scenes[1];scene.transitionDuration=2;
+ scene.transition='zoom-in';assert.equal(sceneTransitionState(scene,0).incoming,'scale(0.7)');assert.equal(sceneTransitionState(scene,1).incoming,'scale(0.85)');assert.equal(sceneTransitionState(scene,2).incoming,'scale(1)');
+ scene.transition='zoom-out';assert.equal(sceneTransitionState(scene,0).incoming,'scale(1.3)');assert.equal(sceneTransitionState(scene,2).incoming,'scale(1)');assert.equal(sceneTransitionState(scene,1).opacity,.5);
+ scene.transition='through-black';for(const [time,outgoing,incoming] of [[0,1,0],[.5,.5,0],[1,0,0],[1.5,0,.5],[2,0,1]]){const state=sceneTransitionState(scene,time);assert.equal(state.outgoingOpacity,outgoing);assert.equal(state.opacity,incoming);}
+});

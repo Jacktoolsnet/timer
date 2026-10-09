@@ -226,7 +226,7 @@ function draw(follow=true){
   const view=createSceneLayer(s,at.index,true);incomingLayer=view.layer;views=view.views;stage.append(view.layer);
  }
  if(incomingLayer){incomingLayer.style.transform=transition.incoming;incomingLayer.style.clipPath=transition.clip;incomingLayer.style.opacity=String(transition.opacity);}
- if(outgoingLayer)outgoingLayer.style.transform=transition.outgoing;
+ if(outgoingLayer){outgoingLayer.style.transform=transition.outgoing;outgoingLayer.style.opacity=String(transition.outgoingOpacity);}
  // Preserve the existing fade-in semantics over the incoming background color.
  const sceneOpacity=s.transition==='fade'&&playing?Math.min(1,at.local/s.transitionDuration):1;
  const backgroundImage=incomingLayer?.querySelector<HTMLImageElement>('.scene-background');if(backgroundImage)backgroundImage.style.opacity=String(sceneOpacity);

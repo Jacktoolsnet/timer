@@ -109,7 +109,7 @@ Optional fields and their defaults:
 - duration: 5; number, 0.1–3600 seconds.
 - background: "#263b42"; #RRGGBB color.
 - backgroundAsset: ""; empty or an existing asset ID, maximum 100 code units.
-- transition: "fade"; allowed "none", "fade", "crossfade", "slide-left", "slide-right", "slide-up", "slide-down", "wipe-left", "wipe-right", "wipe-up", "wipe-down".
+- transition: "fade"; allowed "none", "fade", "crossfade", "slide-left", "slide-right", "slide-up", "slide-down", "wipe-left", "wipe-right", "wipe-up", "wipe-down", "zoom-in", "zoom-out", "through-black".
 - transitionDuration: 0.5; number, 0.01–3600 seconds.
 Scene durations add up to the total duration; transitions do not add time.
 
@@ -335,6 +335,11 @@ the movement/reveal direction (slide-left brings the next scene from the right).
 - crossfade: the full incoming scene, including background, blends over the previous scene.
 - slide-left/right/up/down: push the previous scene out while moving the incoming scene in.
 - wipe-left/right/up/down: progressively reveal the incoming scene over the previous scene.
+- zoom-in: incoming scene scales from 0.7 to 1 while blending over the previous scene.
+- zoom-out: incoming scene scales from 1.3 to 1 while blending over the previous scene.
+- through-black: first half fades the previous scene to black; second half fades
+  the incoming scene from black. At the midpoint the entire frame is black.
+  Without a previous scene the first half stays black.
 The previous scene is held at its final element-animation state; its entry
 transition is not replayed. On the first scene, these transitions start over black.
 Progress is linear, clamped to 0–1; unlike the legacy fade-in, these new

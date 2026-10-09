@@ -94,7 +94,10 @@
               "wipe-left",
               "wipe-right",
               "wipe-up",
-              "wipe-down"
+              "wipe-down",
+              "zoom-in",
+              "zoom-out",
+              "through-black"
             ],
             "default": "fade"
           },

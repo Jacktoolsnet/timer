@@ -9,7 +9,7 @@ export type Element = {
  opacity:number; rotation:number; radius:number; fit:'cover'|'contain';
  animation:typeof animations[number]; at:number; animationDuration:number;
 };
-export const sceneTransitions=['none','fade','crossfade','slide-left','slide-right','slide-up','slide-down','wipe-left','wipe-right','wipe-up','wipe-down'] as const;
+export const sceneTransitions=['none','fade','crossfade','slide-left','slide-right','slide-up','slide-down','wipe-left','wipe-right','wipe-up','wipe-down','zoom-in','zoom-out','through-black'] as const;
 export type Scene = { id:string; name:string; duration:number; background:string; backgroundAsset:string; transition:typeof sceneTransitions[number]; transitionDuration:number; elements:Element[] };
 export type Project = { version:'1.0'; title:string; format:keyof typeof formats; assets:Record<string,Asset>; scenes:Scene[] };
 export const MAX_FILE_BYTES = 30 * 1024 * 1024;
@@ -96,9 +96,9 @@ export function sceneTransitionState(scene:Scene,local:number){
  const progress=Math.min(1,Math.max(0,local/scene.transitionDuration));
  const direction=scene.transition.split('-')[1];
  const x=direction==='left'?1:direction==='right'?-1:0,y=direction==='up'?1:direction==='down'?-1:0;
- const incoming=scene.transition.startsWith('slide-')?`translate(${x*(1-progress)*100}%, ${y*(1-progress)*100}%)`:'none';
+ const incoming=scene.transition==='zoom-in'?`scale(${0.7+0.3*progress})`:scene.transition==='zoom-out'?`scale(${1.3-0.3*progress})`:scene.transition.startsWith('slide-')?`translate(${x*(1-progress)*100}%, ${y*(1-progress)*100}%)`:'none';
  const outgoing=scene.transition.startsWith('slide-')?`translate(${-x*progress*100}%, ${-y*progress*100}%)`:'none';
  const rest=(1-progress)*100;
  const clip=scene.transition.startsWith('wipe-')?`inset(${direction==='up'?rest:0}% ${direction==='right'?rest:0}% ${direction==='down'?rest:0}% ${direction==='left'?rest:0}%)`:'none';
- return {progress,incoming,outgoing,clip,opacity:scene.transition==='crossfade'?progress:1};
+ return {progress,incoming,outgoing,clip,opacity:scene.transition==='through-black'?Math.max(0,progress*2-1):scene.transition==='crossfade'||scene.transition.startsWith('zoom-')?progress:1,outgoingOpacity:scene.transition==='through-black'?Math.max(0,1-progress*2):1};
 }

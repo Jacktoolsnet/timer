@@ -315,3 +315,15 @@ test('crossfade, slide and wipe transition complete scene layers while paused an
  await page.locator('#open-preview').click();await expect(page.locator('.scene-layer')).toHaveCount(2);await page.locator('#timeline').fill('7');await expect(page.locator('.scene-layer')).toHaveCount(1);await expect(incoming).toHaveCSS('opacity','1');await page.locator('#close-preview').click();
  const saved=JSON.parse(await exportedJSON(page));expect(saved.scenes[1].transition).toBe('wipe-up');expect(saved.scenes[1].transitionDuration).toBe(2);
 });
+
+test('zoom and through-black transitions render complete scenes and save their values',async({page})=>{
+ const project=demoProject();project.scenes.forEach(s=>{s.transition='none';s.elements.forEach(e=>e.animation='none');});project.scenes[1].transition='through-black';project.scenes[1].transitionDuration=2;
+ await page.goto('/en/');await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(project));await page.locator('#import-json').click();await page.locator('#next-scene').click();
+ const incoming=page.locator('.scene-layer[data-scene-index="1"]'),outgoing=page.locator('.scene-layer[data-scene-index="0"]');await page.locator('#timeline').fill('5.5');await expect(outgoing).toHaveCSS('opacity','0.5');await expect(incoming).toHaveCSS('opacity','0');
+ await page.locator('#timeline').fill('6');await expect(outgoing).toHaveCSS('opacity','0');await expect(incoming).toHaveCSS('opacity','0');await expect(page.locator('#stage')).toHaveCSS('background-color','rgb(0, 0, 0)');
+ await page.locator('#timeline').fill('6.5');await expect(incoming).toHaveCSS('opacity','0.5');
+ for(const [kind,startScale] of [['zoom-in','scale(0.7)'],['zoom-out','scale(1.3)']]){
+  await page.locator('#scene-form [name=transition]').selectOption(kind);expect(await incoming.evaluate(el=>el.style.transform)).toBe(startScale);await page.locator('#timeline').fill('6');await expect(incoming).toHaveCSS('opacity','0.5');await page.locator('#timeline').fill('7');await expect(page.locator('.scene-layer')).toHaveCount(1);expect(await incoming.evaluate(el=>el.style.transform)).toBe('scale(1)');
+ }
+ expect(JSON.parse(await exportedJSON(page)).scenes[1].transition).toBe('zoom-out');
+});

@@ -1,5 +1,8 @@
 import type { Language } from './i18n';
 const words = {
+ 'transition-zoom-in':['Zoom hinein','Zoom in','Acercamiento','Zoom avant'],
+ 'transition-zoom-out':['Zoom heraus','Zoom out','Alejamiento','Zoom arrière'],
+ 'transition-through-black':['Über Schwarz','Through black','A través de negro','Passage au noir'],
  'transition-crossfade':['Überblenden','Crossfade','Fundido cruzado','Fondu enchaîné'],
  'transition-slide-left':['Schieben nach links','Slide left','Deslizar a la izquierda','Glisser vers la gauche'],
  'transition-slide-right':['Schieben nach rechts','Slide right','Deslizar a la derecha','Glisser vers la droite'],
