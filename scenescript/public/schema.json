@@ -338,6 +338,18 @@
                     "double"
                   ],
                   "default": "solid"
+                },
+                "shapeType": {
+                  "type": "string",
+                  "enum": [
+                    "rectangle",
+                    "ellipse",
+                    "triangle",
+                    "diamond",
+                    "star",
+                    "arrow"
+                  ],
+                  "default": "rectangle"
                 }
               },
               "required": [

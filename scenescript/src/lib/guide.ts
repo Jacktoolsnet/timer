@@ -115,7 +115,7 @@ Scene durations add up to the total duration; transitions do not add time.
 
 ### Elements
 
-Required: id and type. type must be "text", "image" or "shape" (a rectangle).
+Required: id and type. type must be "text", "image" or "shape" (a geometric form).
 Optional fields and their defaults:
 - text: "Your story starts here." for text, otherwise ""; string, max 10000
   UTF-16 code units.
@@ -127,6 +127,7 @@ Optional fields and their defaults:
 - fontSize: 90; number, 1–500 project pixels, not percentages or UI pixels.
 - align: "center"; allowed "left", "center", "right".
 - name: ""; optional display title, at most 200 characters. Does not change rendered text or IDs.
+- shapeType: "rectangle"; allowed "rectangle", "ellipse", "triangle", "diamond", "star", "arrow". Used by shape elements only.
 - fillColor: shape fill color (#RRGGBB) or "none". Omitted uses legacy color.
 - borderColor: "none"; #RRGGBB or "none", for shapes.
 - borderStyle: "solid"; allowed "solid", "dashed", "dotted", "double". Shape outline line style; ignored when borderColor is "none" or borderWidth is zero. A double line needs sufficient width (at least 3 project pixels) to be visible.
@@ -195,10 +196,10 @@ No object-position field exists. Background images always use centered cover
 across the whole canvas, above the background color and below all elements.
 color does not tint an actual image. It is the container's foreground color
 and can affect the text of an empty-image placeholder, not image pixels.
-For shape, fillColor sets the rectangle fill (or "none"); missing fillColor inherits
+For shape, fillColor sets the selected form’s fill (or "none"); missing fillColor inherits
 legacy color. borderColor independently sets its outline (or "none"). Text is not drawn.
 radius sets the element container's rounded corners for every type: it clips
-text and images and rounds shape fills. Large radii follow browser CSS border-
+text and images and rounds rectangle fills. For non-rectangle shapes, radius is ignored. Large radii follow browser CSS border-
 radius normalization. A scene background image has no radius field.
 
 ### Transforms and clipping
@@ -353,4 +354,13 @@ transitions also retain their exact state when pausing or seeking.
 The same renderer is used in compact preview, expanded preview and recording.
 All existing element animations run independently during the scene transition.
 Existing none/fade values and their behavior remain supported.
+
+Shape geometry: triangle points up; arrow points right (use rotation to change
+orientation); star has five outer points. Ellipse becomes a circle only when its
+rendered width and height match. Geometry fills the configured percentage bounds;
+width/height percentages use different canvas axes, so equal percentages do not
+necessarily create a circle. Non-rectangles use built-in SVG geometry with no
+external SVG imports. Fill, border color, width and all four line styles follow
+the real contour. Both fill and border may be "none". Default/missing shapeType
+is rectangle, preserving older projects. Radius applies only to rectangles.
 `;

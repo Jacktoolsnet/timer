@@ -1,6 +1,7 @@
+import {renderShape} from './shapes';
 import {showToast} from './toast';
 import {richTextEditor,renderRuns,type TextStyleKey} from './rich-text';
-import {demoProject,newScene,newElement,parseProject,formats,fonts,animations,sceneTransitions,sceneTransitionState,animationState,locateTime,MAX_FILE_BYTES,MAX_IMAGE_BYTES,validateImage,type Project,type Scene,type Element} from '../lib/model';
+import {demoProject,newScene,newElement,parseProject,formats,fonts,animations,shapeTypes,sceneTransitions,sceneTransitionState,animationState,locateTime,MAX_FILE_BYTES,MAX_IMAGE_BYTES,validateImage,type Project,type Scene,type Element} from '../lib/model';
 import {storageAllowed} from '../lib/storage';
 import {screenWakeLock} from '../lib/wake-lock';
 import {STORAGE_KEY} from '../lib/engine';
@@ -130,7 +131,7 @@ function updateElement(key:keyof Element,value:unknown){
  if(richEditor&&['font','fontSize','color','bold','italic','underline','strikethrough'].includes(key)){richEditor.apply(key as TextStyleKey,value);return;}
  updateElementValue(key,value);
 }
-function updateElementValue(key:keyof Element,value:unknown){const e=selected();if(!e)return;const old=e[key];(e as unknown as Record<string,unknown>)[key]=value;try{parseProject(JSON.stringify(project));stop();time=offset(sceneIndex)+e.at+e.animationDuration;time=Math.min(time,offset(sceneIndex)+current().duration-0.001);changed();draw(false);if(key==='text')renderElements();}catch(error){(e as unknown as Record<string,unknown>)[key]=old;status(t('error')+' '+(error as Error).message);renderForms();}}
+function updateElementValue(key:keyof Element,value:unknown){const e=selected();if(!e)return;const old=e[key];(e as unknown as Record<string,unknown>)[key]=value;try{parseProject(JSON.stringify(project));stop();time=offset(sceneIndex)+e.at+e.animationDuration;time=Math.min(time,offset(sceneIndex)+current().duration-0.001);changed();draw(false);if(key==='text')renderElements();if(key==='shapeType')renderForms();}catch(error){(e as unknown as Record<string,unknown>)[key]=old;status(t('error')+' '+(error as Error).message);renderForms();}}
 function renderForms(){
  richEditor?.dispose();richEditor=undefined;
  const form=$('scene-form');form.replaceChildren();const s=current();
@@ -145,9 +146,10 @@ function renderForms(){
  const contentLabel=document.createElement('label');contentLabel.append(document.createTextNode(t('text')),richEditor.editor,richEditor.hint);contentLabel.dataset.richText='true';ef.append(contentLabel);field(ef,'font',e.font,'select',v=>updateElement('font',v),fonts);field(ef,'fontSize',e.fontSize,'number',v=>updateElement('fontSize',v),undefined,1,500);field(ef,'align',e.align,'select',v=>updateElement('align',v),['left','center','right']);for(const key of ['bold','italic','underline','strikethrough'] as const)field(ef,key,e[key],'checkbox',v=>updateElement(key,v));}
  if(e.type==='image'){field(ef,'asset',e.asset,'select',v=>updateElement('asset',v),['',...Object.keys(project.assets)]);field(ef,'fit',e.fit,'select',v=>updateElement('fit',v),['contain','cover']);}
  if(e.type==='text')field(ef,'color',e.color,'color',v=>updateElement('color',v));
- if(e.type==='shape'){shapeColorField(ef,'fillColor',e.fillColor);shapeColorField(ef,'borderColor',e.borderColor);field(ef,'borderStyle',e.borderStyle,'select',v=>updateElement('borderStyle',v),['solid','dashed','dotted','double']);field(ef,'borderWidth',e.borderWidth,'number',v=>updateElement('borderWidth',v),undefined,0,500);}
+ if(e.type==='shape'){field(ef,'shapeType',e.shapeType,'select',v=>updateElement('shapeType',v),shapeTypes);shapeColorField(ef,'fillColor',e.fillColor);shapeColorField(ef,'borderColor',e.borderColor);field(ef,'borderStyle',e.borderStyle,'select',v=>updateElement('borderStyle',v),['solid','dashed','dotted','double']);field(ef,'borderWidth',e.borderWidth,'number',v=>updateElement('borderWidth',v),undefined,0,500);}
  for(const [key,min,max] of [['x',-100,100],['y',-100,100],['width',0.1,200],['height',0.1,200],['opacity',0,1],['rotation',-360,360],['radius',0,1000]] as const)field(ef,key,e[key],'number',v=>updateElement(key,v),undefined,min,max);
  field(ef,'animation',e.animation,'select',v=>updateElement('animation',v),animations);field(ef,'at',e.at,'number',v=>updateElement('at',v),undefined,0,s.duration);field(ef,'animationDuration',e.animationDuration,'number',v=>updateElement('animationDuration',v),undefined,0.01,3600);
+ if(e.type==='shape'&&e.shapeType!=='rectangle'){const radius=ef.querySelector<HTMLInputElement>('[name=radius]')!;radius.disabled=true;radius.closest('label')?.querySelectorAll('button').forEach(b=>b.disabled=true);}
  ef.classList.add('text-settings');
  const groups:readonly (readonly [string,readonly string[]])[]=e.type==='text'?[
    ['textContentGroup',['text']],
@@ -155,7 +157,7 @@ function renderForms(){
    ['elementLayoutGroup',['x','y','width','height','rotation']],
    ['elementMotionGroup',['animation','at','animationDuration']]
   ]:[
-   [e.type==='image'?'imageStyleGroup':'shapeStyleGroup',e.type==='image'?['asset','fit','opacity','radius']:['fillColor','borderColor','opacity','borderWidth','borderStyle','radius']],
+   [e.type==='image'?'imageStyleGroup':'shapeStyleGroup',e.type==='image'?['asset','fit','opacity','radius']:['shapeType','fillColor','borderColor','opacity','borderWidth','borderStyle','radius']],
    ['elementLayoutGroup',['x','y','width','height','rotation']],
    ['elementMotionGroup',['animation','at','animationDuration']]
   ];
@@ -215,7 +217,7 @@ function createSceneLayer(scene:Scene,index:number,interactive:boolean){
    Object.assign(node.style,{left:`${e.x*w/100}px`,top:`${e.y*h/100}px`,width:`${e.width*w/100}px`,height:`${e.height*h/100}px`,color:e.color,fontFamily:e.font,fontSize:`${e.fontSize}px`,fontWeight:e.bold?'700':'400',fontStyle:e.italic?'italic':'normal',textDecoration:[e.underline?'underline':'',e.strikethrough?'line-through':''].filter(Boolean).join(' ')||'none',textAlign:e.align,justifyContent:e.align==='left'?'flex-start':e.align==='right'?'flex-end':'center',borderRadius:`${e.radius}px`});
    let text:HTMLSpanElement|undefined;
    if(e.type==='text'){node.style.textDecoration='none';text=document.createElement('span');text.style.width='100%';node.append(text);}
-   else if(e.type==='shape'){node.style.background=e.fillColor==='none'?'transparent':e.fillColor;node.style.border=e.borderColor==='none'?'none':`${Math.min(e.borderWidth,e.width*w/200,e.height*h/200)}px ${e.borderStyle} ${e.borderColor}`;}
+   else if(e.type==='shape')renderShape(node,e,e.width*w/100,e.height*h/100);
    else if(e.asset){const img=document.createElement('img');img.src=project.assets[e.asset].data;img.alt=project.assets[e.asset].name;img.style.objectFit=e.fit;node.append(img);}
    else{node.textContent=t('image');node.style.background='#ffffff22';}
    node.addEventListener('click',()=>{if(!interactive||playing||recording)return;selectedId=e.id;renderForms();renderElements();draw();});

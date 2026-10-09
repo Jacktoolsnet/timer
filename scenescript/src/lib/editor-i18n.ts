@@ -1,5 +1,12 @@
 import type { Language } from './i18n';
 const words = {
+ shapeType:['Formtyp','Shape type','Tipo de forma','Type de forme'],
+ rectangle:['Rechteck','Rectangle','Rectángulo','Rectangle'],
+ ellipse:['Ellipse / Kreis','Ellipse / circle','Elipse / círculo','Ellipse / cercle'],
+ triangle:['Dreieck','Triangle','Triángulo','Triangle'],
+ diamond:['Raute','Diamond','Rombo','Losange'],
+ star:['Stern','Star','Estrella','Étoile'],
+ arrow:['Pfeil','Arrow','Flecha','Flèche'],
  borderStyle:['Linientyp','Line style','Tipo de línea','Style de ligne'],
  solid:['Durchgezogen','Solid','Continua','Continu'],
  dashed:['Gestrichelt','Dashed','Discontinua','Tirets'],

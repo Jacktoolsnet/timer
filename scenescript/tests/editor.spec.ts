@@ -344,3 +344,19 @@ test('shape border line styles render and persist independently of no border',as
  const saved=JSON.parse(await exportedJSON(page));expect(saved.scenes[0].elements.at(-1).borderStyle).toBe('double');
  await page.getByRole('switch',{name:'No border',exact:true}).check();await expect(page.locator('.scene-element.selected')).toHaveCSS('border-top-style','none');await page.getByRole('switch',{name:'No border',exact:true}).uncheck();await expect(page.locator('.scene-element.selected')).toHaveCSS('border-top-style','double');
 });
+
+test('built-in shape types render SVG contours with all border styles and round trip',async({page})=>{
+ await page.goto('/en/');await page.locator('#element-add-menu summary').click();await page.locator('[data-add=shape]').click();await page.getByRole('switch',{name:'No border',exact:true}).uncheck();
+ for(const kind of ['ellipse','triangle','diamond','star','arrow']){
+  await page.locator('[name=shapeType]').selectOption(kind);await expect(page.locator('.scene-element.selected .shape-svg')).toHaveCount(1);await expect(page.locator('[name=radius]')).toBeDisabled();
+  await expect(page.locator('.shape-svg > '+(kind==='ellipse'?'ellipse':'polygon')).first()).toHaveAttribute('fill','#b86445');
+ }
+ for(const style of ['solid','dashed','dotted','double']){
+  await page.locator('[name=borderStyle]').selectOption(style);const outline=page.locator('.shape-svg > polygon').last();await expect(outline).toHaveAttribute('stroke','#ffffff');
+  if(style==='dashed'||style==='dotted')await expect(outline).toHaveAttribute('stroke-dasharray',style==='dashed'?'12 8':'0 8');if(style==='double')await expect(page.locator('.shape-svg mask')).toHaveCount(1);
+ }
+ await page.getByRole('switch',{name:'No fill',exact:true}).check();await expect(page.locator('.shape-svg > polygon').first()).toHaveAttribute('fill','none');
+ const saved=JSON.parse(await exportedJSON(page));expect(saved.scenes[0].elements.at(-1)).toMatchObject({shapeType:'arrow',borderStyle:'double',fillColor:'none'});
+ await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(saved));await page.locator('#import-json').click();await page.locator('#element-list button').last().click();await expect(page.locator('[name=shapeType]')).toHaveValue('arrow');await expect(page.locator('.shape-svg mask')).toHaveCount(1);
+ await page.locator('[name=shapeType]').selectOption('rectangle');await expect(page.locator('[name=radius]')).toBeEnabled();await expect(page.locator('.scene-element.selected')).toHaveCSS('border-top-style','double');
+});

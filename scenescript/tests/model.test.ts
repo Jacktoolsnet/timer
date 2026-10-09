@@ -68,3 +68,10 @@ test('border line styles round trip, default to solid and reject unknown values'
  const legacy=JSON.parse(serialize(p));delete legacy.scenes[0].elements[0].borderStyle;assert.equal(parseProject(serialize(legacy)).scenes[0].elements[0].borderStyle,'solid');
  (e as any).borderStyle='unknown';assert.throws(()=>parseProject(serialize(p)));
 });
+
+test('built-in shape types round trip and legacy shapes stay rectangles',()=>{
+ const p=demoProject(),e=newElement('shape');p.scenes[0].elements=[e];
+ for(const kind of ['rectangle','ellipse','triangle','diamond','star','arrow'] as const){e.shapeType=kind;assert.equal(parseProject(serialize(p)).scenes[0].elements[0].shapeType,kind);}
+ const old=JSON.parse(serialize(p));delete old.scenes[0].elements[0].shapeType;assert.equal(parseProject(serialize(old)).scenes[0].elements[0].shapeType,'rectangle');
+ (e as any).shapeType='external-svg';assert.throws(()=>parseProject(serialize(p)));
+});
