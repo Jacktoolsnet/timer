@@ -1,3 +1,4 @@
+import {validateSvg,svgSource} from './svg.ts';
 export const formats = { landscape: [1920,1080], portrait: [1080,1920], square: [1080,1080] } as const;
 export const fonts = ['Arial','Georgia','Verdana','Courier New'] as const;
 export const animations = ['none','fade','slide-left','slide-up','zoom','typewriter','pan'] as const;
@@ -37,6 +38,7 @@ function keys(o:Record<string,unknown>,allowed:string[],path:string){for(const k
 function id(v:unknown,path:string){const s=str(v,path,100);if(!/^[a-zA-Z0-9_-]+$/.test(s))throw new Error(`${path}: invalid identifier`);return s;}
 export function validateImage(data:unknown,path='image'):string {
  const s=str(data,path,Math.ceil(MAX_IMAGE_BYTES/3)*4+100);
+ if(s.startsWith('data:image/svg+xml;')){validateSvg(svgSource(s));return s;}
  if(!/^data:image\/(png|jpeg|webp);base64,(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(s)||s.split(',')[1].length===0)throw new Error(`${path}: expected PNG, JPEG or WebP base64 data URL`);
  const payload=s.split(',')[1];
  const bytes=payload.length/4*3-(payload.endsWith('==')?2:payload.endsWith('=')?1:0);

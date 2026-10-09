@@ -65,12 +65,14 @@ Empty references must be "", not a URL, file path or an invented placeholder ID.
 Maximum 100 assets. Each asset must have exactly these required fields:
 - name: string, maximum 200 UTF-16 code units; a display name, not a path to load.
 - data: a nonempty Base64 data URL with one of these exact, lowercase prefixes:
-  data:image/png;base64, or data:image/jpeg;base64, or data:image/webp;base64,
+  data:image/png;base64, data:image/jpeg;base64, data:image/webp;base64,
+  or data:image/svg+xml;base64,
 The Base64 payload must use the standard alphabet, complete four-character
 blocks and appropriate trailing padding; whitespace and Base64URL are rejected.
-External URLs, SVG data URLs and other MIME prefixes are rejected.
+External URLs and other MIME prefixes are rejected. SVG is validated using the
+safe SVG profile below, not accepted as arbitrary executable markup.
 
-Each image must be at most 8 MiB of decoded image-file bytes, measured before
+Each raster image must be at most 8 MiB; SVG must be at most 1 MiB of UTF-8 bytes, measured before
 Base64 encoding. This means the bytes of the PNG/JPEG/WebP file, not the
 uncompressed pixel buffer. The validator computes that byte count from payload
 length and trailing padding; direct image upload also checks File.size.
@@ -85,9 +87,10 @@ The browser import path decodes every asset using Image.decode(), rejects
 undecodable images and rejects naturalWidth × naturalHeight > 40,000,000 pixels
 (40 megapixels per image). Direct image upload and recording-view preload use
 this check too. parseProject itself checks structure, Base64 syntax and byte
-limits, but does not decode images or check dimensions.
-The file picker accepts exactly image/png, image/jpeg and image/webp MIME types;
-its upload handler rejects another or missing File.type.
+limits and validates SVG XML, but does not decode raster images or check dimensions.
+The file picker accepts PNG, JPEG, WebP and SVG. SVG is recognized by
+image/svg+xml or a .svg filename and validated before it enters the project.
+Other images require a supported raster MIME type.
 
 Encode actual image-file bytes only when you have access to both those bytes
 and an encoding tool. Base64 must never be invented. Store each image once and
@@ -363,4 +366,58 @@ necessarily create a circle. Non-rectangles use built-in SVG geometry with no
 external SVG imports. Fill, border color, width and all four line styles follow
 the real contour. Both fill and border may be "none". Default/missing shapeType
 is rectangle, preserving older projects. Radius applies only to rectangles.
+
+## Safe SVG assets and deterministic animation
+SVG assets use data:image/svg+xml;base64, encoding the actual UTF-8 SVG source.
+Maximum 1 MiB source bytes, 2000 elements, 32 nesting levels and 100 animations.
+An SVG asset can be used by an image element or as a scene background. Normal
+asset references, fit, geometry, element animations and scene transitions apply.
+Import errors reject the SVG rather than silently stripping unknown features.
+
+Require a root svg element with xmlns="http://www.w3.org/2000/svg" and a positive
+viewBox, or positive numeric width/height from which a viewBox can be derived.
+Supported static elements: svg, g, defs, path, rect, circle, ellipse, line,
+polyline, polygon, text, tspan, linearGradient, radialGradient, stop, clipPath,
+title, desc. Nested svg roots are not supported. IDs must be unique identifiers
+starting with a letter or underscore; references use only url(#local-id).
+Gradient references are permitted for fill/stroke, clipPath references for
+clip-path. Nested clipping and missing references are rejected. The renderer
+prefixes IDs separately for each instance to avoid collisions.
+Standard geometry, transform (matrix/translate/scale/rotate/skewX/skewY), paint,
+opacity, stroke style, basic text/font attributes and gradient attributes are
+supported. Numeric values must be finite and bounded to ±100000. Prefer explicit
+attributes. Inline style declarations are accepted ONLY for supported paint,
+stroke, opacity, clipping and basic font properties and converted to attributes.
+
+No scripts, on* handlers, links, external references, href/use, foreignObject,
+embedded image, filter, mask, style element, CSS animations, remote fonts,
+DOCTYPE, entities or XML processing instructions (apart from the XML declaration).
+This is a deliberately limited profile, not a full SVG editor or arbitrary SVG player.
+
+Supported animations are animate and animateTransform on graphic parents:
+- animate: attributeName may be opacity, fill, stroke, fill-opacity,
+  stroke-opacity, stroke-width, stroke-dashoffset, x/y, x1/y1/x2/y2, cx/cy,
+  r/rx/ry, width/height. Animated paint must be a color, not a URL/reference.
+- animateTransform: attributeName="transform", type="translate", "scale" or "rotate".
+- Provide dur (0.01–3600 seconds) and either from/to or values (max 200 entries).
+- begin defaults to 0; only a numeric time from 0–3600 seconds is supported.
+  Timing accepts seconds, an s suffix or ms. No event-based or chained begins.
+- repeatCount defaults to 1; a positive number up to 1000 or indefinite is allowed.
+- fill may be freeze or remove; calcMode may be linear, discrete or spline.
+  Optional keyTimes must match values and monotonically cover 0–1; keySplines
+  must contain four 0–1 values per segment. No additive/accumulated animation.
+
+During preview/recording, SceneScript pauses the SVG's own clock and explicitly
+sets its time from the project playhead. Image element SVG time is
+max(0, sceneLocalTime - element.at); background SVG time is sceneLocalTime.
+Thus countdowns do not advance SVG animation, pause freezes it, seeking rewinds
+it and repeated recording starts from the same state. During transitions the
+previous SVG scene is held at its final time. Asset thumbnails may animate
+independently and are not the authoritative presentation preview.
+Example SVG source (encode these exact UTF-8 bytes with a real encoding tool):
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100">
+  <circle cx="30" cy="50" r="15" fill="#ff8800">
+    <animate attributeName="cx" from="30" to="170" dur="2s" repeatCount="indefinite" />
+  </circle>
+</svg>
 `;

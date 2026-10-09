@@ -34,7 +34,7 @@ test('playback, focus countdown, pause and exit',async({page})=>{
 });
 test('language routes, AI instructions, schema and mobile layout',async({page,request})=>{
  for(const lang of ['de','en','es','fr']){await page.goto('/'+lang+'/');await expect(page.locator('html')).toHaveAttribute('lang',lang);await expect(page.locator('#scene-list li')).toHaveCount(2);}
- expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();await page.goto('/de/ai/');await expect(page.locator('#ai-guide')).toContainText('External URLs, SVG data URLs and other MIME prefixes are rejected.');expect((await request.get('/ai.txt')).ok()).toBeTruthy();expect((await (await request.get('/schema.json')).json()).properties.version.const).toBe('1.0');
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();await page.goto('/de/ai/');await expect(page.locator('#ai-guide')).toContainText('Safe SVG assets and deterministic animation');await expect(page.locator('#ai-guide')).toContainText('No scripts, on* handlers');expect((await request.get('/ai.txt')).ok()).toBeTruthy();expect((await (await request.get('/schema.json')).json()).properties.version.const).toBe('1.0');
 });
 test('blocked storage does not prevent editing',async({page})=>{
  await page.addInitScript(()=>{Storage.prototype.getItem=()=>{throw Error('blocked');};Storage.prototype.setItem=()=>{throw Error('blocked');};});await page.goto('/en/');await page.locator('#element-add-menu summary').click();await page.locator('[data-add=shape]').click();await expect(page.locator('#element-list li')).toHaveCount(2);
@@ -359,4 +359,31 @@ test('built-in shape types render SVG contours with all border styles and round 
  const saved=JSON.parse(await exportedJSON(page));expect(saved.scenes[0].elements.at(-1)).toMatchObject({shapeType:'arrow',borderStyle:'double',fillColor:'none'});
  await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(saved));await page.locator('#import-json').click();await page.locator('#element-list button').last().click();await expect(page.locator('[name=shapeType]')).toHaveValue('arrow');await expect(page.locator('.shape-svg mask')).toHaveCount(1);
  await page.locator('[name=shapeType]').selectOption('rectangle');await expect(page.locator('[name=radius]')).toBeEnabled();await expect(page.locator('.scene-element.selected')).toHaveCSS('border-top-style','double');
+});
+
+const animatedSvg='<svg xmlns="http://www.w3.org/2000/svg" id="diagram" viewBox="0 0 100 100"><defs><linearGradient id="paint"><stop offset="0%" stop-color="#ff8800"/><stop offset="100%" stop-color="#ffffff"/></linearGradient></defs><circle cx="10" cy="50" r="8" fill="url(#paint)"><animate attributeName="cx" from="10" to="90" dur="4s" repeatCount="indefinite"/></circle><text x="5" y="90" fill="#ffffff">Grüße 😀</text></svg>';
+test('SVG import embeds UTF-8 artwork and synchronizes its animation with scene time',async({page})=>{
+ await page.goto('/en/');await page.locator('#element-add-menu summary').click();await page.locator('[data-add=image]').click();await page.locator('#image-file').setInputFiles({name:'motion.svg',mimeType:'image/svg+xml',buffer:Buffer.from(animatedSvg)});await expect(page.locator('.scene-svg-image')).toHaveCount(1);
+ await page.locator('#element-form [name=animation]').selectOption('none');await page.locator('#element-form [name=at]').fill('1');await page.locator('#element-form [name=at]').dispatchEvent('change');
+ await page.locator('#scene-form [name=backgroundAsset]').selectOption({label:'motion.svg'});await page.locator('#timeline').fill('2');
+ const svg=page.locator('.scene-svg-image');await expect.poll(()=>svg.locator('circle').evaluate(el=>(el as SVGCircleElement).cx.animVal.value)).toBeCloseTo(30,3);
+ await expect.poll(()=>page.locator('.scene-svg-background circle').evaluate(el=>(el as SVGCircleElement).cx.animVal.value)).toBeCloseTo(50,3);
+ expect(await svg.evaluate(el=>(el as SVGSVGElement).animationsPaused())).toBe(true);expect(await page.locator('#stage svg[id]').evaluateAll(nodes=>new Set(nodes.map(n=>n.id)).size===nodes.length)).toBe(true);await expect(svg.locator('text')).toHaveText('Grüße 😀');
+ await page.locator('#timeline').fill('1.5');await expect.poll(()=>svg.locator('circle').evaluate(el=>(el as SVGCircleElement).cx.animVal.value)).toBeCloseTo(20,3);
+ await page.locator('#open-preview').click();await expect(svg).toBeVisible();await page.locator('#play').click();await page.waitForTimeout(150);await page.locator('#play').click();const stopped=await svg.evaluate(el=>(el as SVGSVGElement).getCurrentTime());await page.waitForTimeout(100);expect(await svg.evaluate(el=>(el as SVGSVGElement).getCurrentTime())).toBeCloseTo(stopped,3);await page.locator('#close-preview').click();
+ const saved=JSON.parse(await exportedJSON(page));const asset:any=Object.values(saved.assets)[0];expect(asset.data).toMatch(/^data:image\/svg\+xml;base64,/);expect(Buffer.from(asset.data.split(',')[1],'base64').toString()).toContain('Grüße 😀');
+ await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(saved));await page.locator('#import-json').click();await expect(page.locator('#json-dialog')).not.toBeVisible();await page.locator('#timeline').fill('2');await expect.poll(()=>svg.locator('circle').evaluate(el=>(el as SVGCircleElement).cx.animVal.value)).toBeCloseTo(30,3);
+});
+test('unsafe SVG files and JSON are rejected without script execution or network requests',async({page})=>{
+ await page.goto('/en/');const requests:string[]=[];page.on('request',request=>{if(request.url().includes('svg-attack.example'))requests.push(request.url());});
+ const unsafe='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><script>window.svgAttack=true</script><image href="https://svg-attack.example/image.png"/></svg>';
+ await page.locator('#image-file').setInputFiles({name:'unsafe.svg',mimeType:'image/svg+xml',buffer:Buffer.from(unsafe)});await expect(page.locator('#editor-status')).toContainText('SVG');await expect(page.locator('#asset-list img')).toHaveCount(0);
+ const project=demoProject();project.assets.bad={name:'unsafe.svg',data:'data:image/svg+xml;base64,'+Buffer.from(unsafe).toString('base64')};await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(project));await page.locator('#import-json').click();await expect(page.locator('#json-status')).toContainText('SVG');await expect(page.locator('#scene-list button')).toHaveCount(2);expect(await page.evaluate(()=>(window as any).svgAttack)).toBeUndefined();expect(requests).toEqual([]);
+});
+
+test('SVG animation stays at zero during recording readiness and countdown',async({page})=>{
+ const project=demoProject();project.assets.motion={name:'motion.svg',data:'data:image/svg+xml;base64,'+Buffer.from(animatedSvg).toString('base64')};project.scenes=project.scenes.slice(0,1);project.scenes[0].elements=[{...project.scenes[0].elements[0],type:'image',asset:'motion',animation:'none',at:0}];
+ await page.goto('/en/');await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(project));await page.locator('#import-json').click();await page.locator('#timeline').fill('2');await page.locator('#focus').click();await expect(page.locator('#start-recording')).toBeVisible();
+ const time=()=>page.locator('.scene-svg-image').evaluate(el=>(el as SVGSVGElement).getCurrentTime());await expect.poll(time).toBe(0);await page.waitForTimeout(150);expect(await time()).toBe(0);await page.locator('#start-recording').click();await expect(page.locator('#countdown')).toHaveText('3');await page.waitForTimeout(150);expect(await time()).toBe(0);
+ await page.keyboard.press('Escape');await expect.poll(time).toBe(2);await expect(page.locator('#timeline')).toHaveValue('2');
 });

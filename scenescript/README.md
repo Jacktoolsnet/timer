@@ -38,7 +38,7 @@ Hochkant-Projekte für Smartphone-Zielgruppen sind weiterhin möglich.
 - 1920×1080, 1080×1920 und 1080×1080 als logische Projektauflösung.
 - Einblenden, Bewegung von rechts/unten, Zoom, Schreibmaschine, langsamer Zoom.
 - Szenenhintergründe als Farbe/Bild und optionales Einblenden des Szeneninhalts.
-- PNG/JPEG/WebP-Import: Bilder werden als Base64-Data-URLs zentral im JSON
+- PNG/JPEG/WebP/SVG-Import: Bilder werden als Base64-Data-URLs zentral im JSON
   gespeichert. Mehrfach verwendete Bilder stehen nur einmal in `assets`.
 - JSON-Einfügen mit Validierung, Projektdatei importieren und **Speichern
   unter** als Download einer selbstständigen `.scenescript.json`.
@@ -75,9 +75,10 @@ oder bereits heruntergeladene Dateien. Browserspeicher kann voll/gesperrt sein;
 der Editor bleibt nutzbar und weist auf Dateisicherung hin. Wichtige Projekte
 immer als Datei speichern. Laufende Wiedergabe wird nicht wiederhergestellt.
 
-Maximal 30 MiB JSON (UTF-8), 8 MiB je Bild und 40 Megapixel, 100 Assets,
+Maximal 30 MiB JSON (UTF-8), 8 MiB je Rasterbild / 1 MiB je SVG und 40 Megapixel, 100 Assets,
 100 Szenen, 100 Elemente pro Szene. Base64 benötigt etwa 33% zusätzlichen
-Speicher. V1 akzeptiert keine externen Bild-URLs, SVG, HTML oder beliebigen Code.
+Speicher. V1 akzeptiert keine externen Bild-URLs, HTML oder beliebigen Code; SVG nur im
+unten beschriebenen sicheren Profil.
 Bilddateien werden vor Import/Wiedergabe auf Decodierbarkeit geprüft.
 Ein KI-Modell benötigt Zugriff auf echte Bildbytes und ein Encoding-Werkzeug,
 um korrekte Base64-Bilder zu liefern; sonst separat im Editor importieren.
@@ -140,3 +141,15 @@ Barrierefreiheit vor Veröffentlichung zusätzlich prüfen.
 - `src/scripts/editor.ts`: DOM-Editor, Timeline, Dateien, Bilder, Aufnahmeansicht
 - `src/layouts/Layout.astro`, `src/scripts/site.ts`: Jacktools-Shell/Einstellungen
 - `src/styles/editor.css`: Studio und Aufnahmeansicht
+
+## Safe SVG assets
+The image picker also accepts SVG (max 1 MiB UTF-8 source), embedded as Base64
+in the project JSON. The runtime uses a strict XML/element/attribute allowlist;
+unsupported SVG is rejected, not inserted as arbitrary HTML. Scripts, event
+handlers, external references, embedded HTML/images, filters, masks and CSS
+animations are not accepted. Basic geometry, text, local gradients/clips and
+numeric-time SMIL `animate` / `animateTransform` are supported. The authoritative
+safe profile and an example are in `src/lib/guide.ts` (`/ai.txt`).
+Inline stage SVGs have per-instance IDs and their SMIL clocks are explicitly
+paused/seeked from scene time (image SVGs relative to element `at`). Asset gallery
+thumbnails can animate independently. No network services or hosting changes.

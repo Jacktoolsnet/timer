@@ -30,7 +30,7 @@ const {lang}=Astro.props,t=editorDictionary(lang);
      <div class="panel-heading"><h2 id="asset-heading">{t.assets}</h2></div>
      <p class="small-hint">{t.imageHint}</p>
      <div id="asset-list" tabindex="0" role="region" aria-labelledby="asset-heading"></div>
-     <input id="image-file" type="file" accept="image/png,image/jpeg,image/webp" hidden />
+     <input id="image-file" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml,.svg" hidden />
     </section>
     </div>
    </section>

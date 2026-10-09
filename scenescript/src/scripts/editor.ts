@@ -1,3 +1,5 @@
+import {createSvgImage,seekSvg} from './svg-image';
+import {validateSvg,svgDataURL} from '../lib/svg';
 import {renderShape} from './shapes';
 import {showToast} from './toast';
 import {richTextEditor,renderRuns,type TextStyleKey} from './rich-text';
@@ -205,28 +207,31 @@ $('close-preview').addEventListener('click',closePreview);
 previewDialog.addEventListener('close',()=>{if(previewContent.parentElement!==$('preview-slot'))closePreview();});
 previewDialog.addEventListener('click',event=>{if(event.target===previewDialog){const rect=previewDialog.getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)closePreview();}});
 // Render complete scene layers so transitions include backgrounds and rich text.
-type SceneView={element:Element;node:HTMLDivElement;text?:HTMLSpanElement};
-let stageKey='',views:SceneView[]=[],incomingLayer:HTMLDivElement|undefined,outgoingLayer:HTMLDivElement|undefined;
+type SceneView={element:Element;node:HTMLDivElement;text?:HTMLSpanElement;svg?:SVGSVGElement};
+let stageKey='',views:SceneView[]=[],incomingLayer:HTMLDivElement|undefined,incomingSvgBackground:SVGSVGElement|undefined,outgoingLayer:HTMLDivElement|undefined;
 function createSceneLayer(scene:Scene,index:number,interactive:boolean){
  const layer=document.createElement('div');layer.className='scene-layer';layer.dataset.sceneIndex=String(index);layer.style.background=scene.background;
  if(!interactive)layer.style.pointerEvents='none';
  const [w,h]=formats[project.format];const sceneViews:SceneView[]=[];
- if(scene.backgroundAsset){const image=document.createElement('img');image.className='scene-background';image.src=project.assets[scene.backgroundAsset].data;image.alt='';layer.append(image);}
+ let svgBackground:SVGSVGElement|undefined;
+ if(scene.backgroundAsset&&project.assets[scene.backgroundAsset].data.startsWith('data:image/svg+xml;')){svgBackground=createSvgImage(project.assets[scene.backgroundAsset].data,'cover',true);const background=document.createElement('div');background.className='scene-background';background.append(svgBackground);layer.append(background);}
+ else if(scene.backgroundAsset){const image=document.createElement('img');image.className='scene-background';image.src=project.assets[scene.backgroundAsset].data;image.alt='';layer.append(image);}
  scene.elements.forEach(e=>{
    const node=document.createElement('div');node.className='scene-element'+(interactive&&!playing&&e.id===selectedId?' selected':'');
    Object.assign(node.style,{left:`${e.x*w/100}px`,top:`${e.y*h/100}px`,width:`${e.width*w/100}px`,height:`${e.height*h/100}px`,color:e.color,fontFamily:e.font,fontSize:`${e.fontSize}px`,fontWeight:e.bold?'700':'400',fontStyle:e.italic?'italic':'normal',textDecoration:[e.underline?'underline':'',e.strikethrough?'line-through':''].filter(Boolean).join(' ')||'none',textAlign:e.align,justifyContent:e.align==='left'?'flex-start':e.align==='right'?'flex-end':'center',borderRadius:`${e.radius}px`});
-   let text:HTMLSpanElement|undefined;
+   let text:HTMLSpanElement|undefined,svg:SVGSVGElement|undefined;
    if(e.type==='text'){node.style.textDecoration='none';text=document.createElement('span');text.style.width='100%';node.append(text);}
    else if(e.type==='shape')renderShape(node,e,e.width*w/100,e.height*h/100);
+   else if(e.asset&&project.assets[e.asset].data.startsWith('data:image/svg+xml;')){svg=createSvgImage(project.assets[e.asset].data,e.fit);node.append(svg);}
    else if(e.asset){const img=document.createElement('img');img.src=project.assets[e.asset].data;img.alt=project.assets[e.asset].name;img.style.objectFit=e.fit;node.append(img);}
    else{node.textContent=t('image');node.style.background='#ffffff22';}
    node.addEventListener('click',()=>{if(!interactive||playing||recording)return;selectedId=e.id;renderForms();renderElements();draw();});
-   layer.append(node);sceneViews.push({element:e,node,text});
+   layer.append(node);sceneViews.push({element:e,node,text,svg});
  });
- return {layer,views:sceneViews};
+ return {layer,views:sceneViews,svgBackground};
 }
 function updateSceneViews(sceneViews:SceneView[],local:number,opacity=1){
- sceneViews.forEach(({element,node,text})=>{const state=animationState(element,local);node.style.opacity=String(state.opacity*opacity);node.style.visibility=state.visible?'visible':'hidden';node.style.transform=state.transform;if(text&&text.dataset.visibleText!==state.text){renderRuns(text,element,state.text);text.dataset.visibleText=state.text;}});
+ sceneViews.forEach(({element,node,text,svg})=>{seekSvg(svg,local-element.at);const state=animationState(element,local);node.style.opacity=String(state.opacity*opacity);node.style.visibility=state.visible?'visible':'hidden';node.style.transform=state.transform;if(text&&text.dataset.visibleText!==state.text){renderRuns(text,element,state.text);text.dataset.visibleText=state.text;}});
 }
 function draw(follow=true){
  const at=locateTime(project,time);
@@ -237,14 +242,15 @@ function draw(follow=true){
  const key=`${revision}:${at.index}:${project.format}:${playing}:${recording}:${selectedId}:${showPrevious}`;
  if(stageKey!==key){
   stageKey=key;stage.replaceChildren();outgoingLayer=undefined;stage.style.background=layered?'#000000':s.background;resize();
-  if(showPrevious){const previous=project.scenes[at.index-1],view=createSceneLayer(previous,at.index-1,false);outgoingLayer=view.layer;updateSceneViews(view.views,previous.duration);stage.append(view.layer);}
-  const view=createSceneLayer(s,at.index,true);incomingLayer=view.layer;views=view.views;stage.append(view.layer);
+  if(showPrevious){const previous=project.scenes[at.index-1],view=createSceneLayer(previous,at.index-1,false);outgoingLayer=view.layer;stage.append(view.layer);updateSceneViews(view.views,previous.duration);seekSvg(view.svgBackground,previous.duration);}
+  const view=createSceneLayer(s,at.index,true);incomingLayer=view.layer;incomingSvgBackground=view.svgBackground;views=view.views;stage.append(view.layer);
  }
  if(incomingLayer){incomingLayer.style.transform=transition.incoming;incomingLayer.style.clipPath=transition.clip;incomingLayer.style.opacity=String(transition.opacity);}
  if(outgoingLayer){outgoingLayer.style.transform=transition.outgoing;outgoingLayer.style.opacity=String(transition.outgoingOpacity);}
  // Preserve the existing fade-in semantics over the incoming background color.
  const sceneOpacity=s.transition==='fade'&&playing?Math.min(1,at.local/s.transitionDuration):1;
- const backgroundImage=incomingLayer?.querySelector<HTMLImageElement>('.scene-background');if(backgroundImage)backgroundImage.style.opacity=String(sceneOpacity);
+ const backgroundImage=incomingLayer?.querySelector<HTMLElement|SVGElement>('.scene-background');if(backgroundImage)backgroundImage.style.opacity=String(sceneOpacity);
+ seekSvg(incomingSvgBackground,at.local);
  updateSceneViews(views,at.local,sceneOpacity);
  ($('timeline') as HTMLInputElement).max=String(total());($('timeline') as HTMLInputElement).value=String(time);$('time-label').textContent=`${time.toFixed(1)} / ${total().toFixed(1)} s`;
  const playButton=$('play') as HTMLButtonElement;
@@ -313,9 +319,9 @@ $('paste-json').addEventListener('click',async()=>{
 $('import-json').addEventListener('click',async()=>{try{const next=parseProject(($('json-input') as HTMLTextAreaElement).value);await preload(next);if(canReplace()){replace(next);dialog.close();}}catch(error){jsonStatus(t('error')+' '+(error as Error).message,true);}});
 
 $('import-image').addEventListener('click',()=>($('image-file') as HTMLInputElement).click());
-async function decodeImage(data:string){const image=new Image();image.src=data;await image.decode();if(image.naturalWidth*image.naturalHeight>40_000_000)throw new Error('Image: maximum 40 megapixels');}
+async function decodeImage(data:string){const image=new Image();image.src=data;await image.decode();if(!image.naturalWidth||!image.naturalHeight)throw new Error('Image: invalid dimensions');if(image.naturalWidth*image.naturalHeight>40_000_000)throw new Error('Image: maximum 40 megapixels');}
 async function preload(p:Project){await Promise.all(Object.values(p.assets).map(a=>decodeImage(a.data)));}
-$('image-file').addEventListener('change',async()=>{const input=$('image-file') as HTMLInputElement,file=input.files?.[0];input.value='';if(!file)return;const target=project;try{if(Object.keys(project.assets).length>=100)throw new Error('assets: maximum 100');if(file.size>MAX_IMAGE_BYTES)throw new Error('Image: maximum 8 MiB');if(!['image/png','image/jpeg','image/webp'].includes(file.type))throw new Error('PNG / JPEG / WebP');const data=await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=()=>reject(new Error('Image read failed'));reader.readAsDataURL(file);});validateImage(data);await decodeImage(data);if(project!==target)return;const id=crypto.randomUUID();project.assets[id]={name:file.name.slice(0,200),data};try{parseProject(JSON.stringify(project));}catch(error){delete project.assets[id];throw error;}const e=selected();if(e?.type==='image')e.asset=id;changed();refresh();}catch(error){status(t('error')+' '+(error as Error).message);}});
+$('image-file').addEventListener('change',async()=>{const input=$('image-file') as HTMLInputElement,file=input.files?.[0];input.value='';if(!file)return;const target=project;try{if(Object.keys(project.assets).length>=100)throw new Error('assets: maximum 100');if(file.size>MAX_IMAGE_BYTES)throw new Error('Image: maximum 8 MiB');const isSvg=file.type==='image/svg+xml'||/\.svg$/i.test(file.name);if(!isSvg&&!['image/png','image/jpeg','image/webp'].includes(file.type))throw new Error('PNG / JPEG / WebP / SVG');const data=isSvg?svgDataURL(validateSvg(await file.text())):await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=()=>reject(new Error('Image read failed'));reader.readAsDataURL(file);});validateImage(data);await decodeImage(data);if(project!==target)return;const id=crypto.randomUUID();project.assets[id]={name:file.name.slice(0,200),data};try{parseProject(JSON.stringify(project));}catch(error){delete project.assets[id];throw error;}const e=selected();if(e?.type==='image')e.asset=id;changed();refresh();}catch(error){status(t('error')+' '+(error as Error).message);}});
 let editorFullscreen=false;
 function setEditorFullscreen(enabled:boolean){
  editorFullscreen=enabled;document.body.classList.toggle('editor-fullscreen',enabled);

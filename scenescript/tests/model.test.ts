@@ -1,3 +1,4 @@
+import {validateSvg,svgDataURL,svgSource} from '../src/lib/svg.ts';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -74,4 +75,17 @@ test('built-in shape types round trip and legacy shapes stay rectangles',()=>{
  for(const kind of ['rectangle','ellipse','triangle','diamond','star','arrow'] as const){e.shapeType=kind;assert.equal(parseProject(serialize(p)).scenes[0].elements[0].shapeType,kind);}
  const old=JSON.parse(serialize(p));delete old.scenes[0].elements[0].shapeType;assert.equal(parseProject(serialize(old)).scenes[0].elements[0].shapeType,'rectangle');
  (e as any).shapeType='external-svg';assert.throws(()=>parseProject(serialize(p)));
+});
+
+test('safe SVG supports graphics, local gradients, text and deterministic SMIL',()=>{
+ const source='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="paint"><stop offset="0%" stop-color="#fff"/><stop offset="100%" stop-color="#000"/></linearGradient></defs><circle cx="20" cy="50" r="10" fill="url(#paint)"><animate attributeName="cx" from="20" to="80" dur="2s" repeatCount="indefinite"/></circle><text x="5" y="15">Grüße 😀</text></svg>';
+ const data=svgDataURL(validateSvg(source));assert.equal(validateImage(data),data);assert.match(svgSource(data),/Grüße 😀/);
+ const p=demoProject();p.assets.vector={name:'vector.svg',data};p.scenes[0].backgroundAsset='vector';assert.deepEqual(parseProject(serialize(p)).assets.vector,p.assets.vector);
+ assert.match(validateSvg('<svg xmlns="http://www.w3.org/2000/svg" width="100" height="50"><rect width="40" height="30" style="fill: red;stroke: blue"/></svg>'),/viewBox="0 0 100 50"/);
+});
+test('unsafe, unsupported and malformed SVG is rejected before rendering',()=>{
+ const wrap=(content:string)=>'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">'+content+'</svg>';
+ for(const content of ['<script>alert(1)</script>','<foreignObject/>','<image href="https://example.com/x.png"/>','<use href="#x"/>','<rect onclick="alert(1)"/>','<rect fill="url(https://example.com/x)"/>','<rect style="background:url(https://example.com/x)"/>','<style>@import "x";</style>','<rect fill="url(#missing)"/>','<rect id="x"/><circle id="x"/>','<rect><animate attributeName="href" from="x" to="y" dur="1s"/></rect>','<rect><animate attributeName="opacity" from="0" to="1" begin="click" dur="1s"/></rect>','<rect><animate attributeName="opacity" from="0" to="1" dur="0s"/></rect>','<rect><animate attributeName="opacity" from="0" to="1" dur="1s" onbegin="alert(1)"/></rect>','<rect width="1e999"/>','<rect>','<filter/>','<mask/>','<g xmlns="http://www.w3.org/1999/xhtml"><script/></g>'])assert.throws(()=>validateImage(svgDataURL(wrap(content))),/SVG/,content);
+ assert.throws(()=>validateSvg('<!DOCTYPE svg [<!ENTITY x "secret">]>'+wrap('<text>&x;</text>')));
+ assert.throws(()=>validateSvg(wrap('<rect/>'.repeat(2001))));assert.throws(()=>validateSvg(wrap('<desc>'+'x'.repeat(1024*1024)+'</desc>')));
 });
