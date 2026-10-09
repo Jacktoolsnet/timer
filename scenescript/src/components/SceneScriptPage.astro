@@ -86,7 +86,7 @@ const {lang}=Astro.props,t=editorDictionary(lang);
    <div class="json-header-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 4H7v6l-2 2 2 2v6h2M15 4h2v6l2 2-2 2v6h-2" /></svg></div>
    <div><h2 id="json-title">{t.json}</h2><p id="json-hint">{t.jsonHint}</p></div>
   </header>
-  <div class="dialog-inner"><textarea aria-label="JSON" id="json-input" spellcheck="false" rows="14"></textarea><p id="json-status" role="status"></p></div>
+  <div class="dialog-inner"><textarea aria-label="JSON" id="json-input" spellcheck="false" rows="14"></textarea><div class="json-error-row"><p id="json-status" role="status"></p><button id="copy-json-error" type="button" title={t.copyError} aria-label={t.copyError} hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h13v13H8ZM3 16V3h13" /></svg></button></div><p id="json-copy-status" role="status"></p></div>
   <footer class="json-footer">
    <button id="paste-json" type="button" title={t.pasteClipboard} aria-label={t.pasteClipboard}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5H5v16h14V5h-4M9 3h6v4H9ZM8 12h8m-8 4h6" /></svg></button>
    <div class="json-footer-actions">

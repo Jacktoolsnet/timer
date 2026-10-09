@@ -190,7 +190,7 @@ test('delete overlays support cancel, Escape and explicit scene/image confirmati
 
 test('JSON footer has three icons, clipboard paste and safe denial fallback',async({page})=>{
  await page.addInitScript(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{readText:async()=>'{"version":"1.0"}'}}));
- await page.goto('/en/');await page.locator('#open-json').click();await expect(page.locator('.json-footer button')).toHaveCount(3);
+ await page.goto('/en/');await page.locator('#open-json').click();await expect(page.locator('#json-dialog .json-footer button')).toHaveCount(3);
  for(const id of ['paste-json','import-json','close-json']){await expect(page.locator('#'+id+' svg')).toHaveCount(1);expect(await page.locator('#'+id).getAttribute('title')).toBeTruthy();}
  await page.locator('#paste-json').click();await expect(page.locator('#json-input')).toHaveValue('{"version":"1.0"}');await expect(page.locator('#json-dialog')).toBeVisible();
  await page.evaluate(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{readText:async()=>{throw new Error('denied');}}}));await page.locator('#paste-json').click();await expect(page.locator('#json-status')).toContainText('Ctrl+V');await expect(page.locator('#json-input')).toHaveValue('{"version":"1.0"}');
@@ -287,4 +287,20 @@ test('rename dialog handles scene, element and image names without changing cont
  const saved=JSON.parse(await exportedJSON(page)),element=saved.scenes[0].elements[0];expect(saved.scenes[0].name).toBe('Renamed scene');expect(element.name).toBe('Headline');expect(element.id).toBe(original.scenes[0].elements[0].id);expect(element.text).toBe(original.scenes[0].elements[0].text);expect(Object.values(saved.assets)[0]).toMatchObject({name:'Cover image',data:pixel});
  await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(saved));await page.locator('#import-json').click();await expect(page.locator('#element-list button').first()).toContainText('Headline');
  await page.locator('#rename-scene').click();await page.keyboard.press('Escape');await expect(dialog).not.toBeVisible();
+});
+
+test('JSON validation errors can be copied with a manual fallback',async({page})=>{
+ await page.addInitScript(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async(text:string)=>{(window as any).copiedError=text;}}}));
+ await page.goto('/en/');await page.locator('#open-json').click();await expect(page.locator('#copy-json-error')).not.toBeVisible();await page.locator('#json-input').fill('{"version":"wrong"}');await page.locator('#import-json').click();
+ const message=await page.locator('#json-status').textContent();await page.locator('#copy-json-error').click();expect(await page.evaluate(()=>(window as any).copiedError)).toBe(message);await expect(page.locator('.app-toast[data-kind=success]')).toContainText('copied');await expect(page.locator('#json-status')).toHaveText(message!);
+ await page.evaluate(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async()=>{throw new Error('denied');}}}));await page.locator('#copy-json-error').click();await expect(page.locator('#json-copy-status')).toContainText('Ctrl+C');expect(await page.evaluate(()=>window.getSelection()?.toString())).toBe(message);
+ await page.locator('#json-input').fill('{}');await expect(page.locator('#copy-json-error')).not.toBeVisible();await expect(page.locator('#json-copy-status')).toBeEmpty();
+});
+
+test('copy confirmation is a bottom toast above the modal and dismisses automatically',async({page})=>{
+ await page.addInitScript(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async()=>{}}}));await page.goto('/en/');await page.locator('#open-json').click();await page.locator('#json-input').fill('{}');await page.locator('#import-json').click();await page.locator('#copy-json-error').click();
+ const toast=page.locator('.app-toast');await expect(toast).toBeVisible();await expect(toast).toHaveAttribute('data-kind','success');await expect(toast).toHaveAttribute('role','status');await expect(page.locator('#json-copy-status')).toBeEmpty();
+ const box=await toast.boundingBox(),viewport=page.viewportSize()!;expect(box!.y).toBeGreaterThan(viewport.height*.75);expect(box!.y+box!.height).toBeLessThanOrEqual(viewport.height);
+ expect(await toast.evaluate(el=>el.matches(':popover-open'))).toBe(true);await expect(toast).toHaveCount(0,{timeout:6000});
+ await page.locator('#copy-json-error').click();await expect(toast).toHaveCount(1);await page.locator('#close-json').click();await expect(toast).toHaveCount(0);
 });

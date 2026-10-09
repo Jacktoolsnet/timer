@@ -1,5 +1,8 @@
 import type { Language } from './i18n';
 const words = {
+ copyError:['Fehlermeldung kopieren','Copy error message','Copiar mensaje de error','Copier le message d’erreur'],
+ errorCopied:['Fehlermeldung kopiert.','Error message copied.','Mensaje de error copiado.','Message d’erreur copié.'],
+ errorCopyDenied:['Kopieren nicht möglich. Die Fehlermeldung ist markiert – bitte mit Strg+C bzw. Cmd+C kopieren.','Copying is unavailable. The error is selected — copy using Ctrl+C or Cmd+C.','No se puede copiar. El error está seleccionado; usa Ctrl+C o Cmd+C.','Copie indisponible. Le message est sélectionné ; copiez avec Ctrl+C ou Cmd+C.'],
  rename:['Umbenennen','Rename','Renombrar','Renommer'],
  renameHint:['Ändere den Titel. Der Inhalt bleibt unverändert.','Change the title. The content stays unchanged.','Cambia el título. El contenido no cambia.','Modifiez le titre. Le contenu reste inchangé.'],
  imageStyleGroup:['Bild & Darstellung','Image & appearance','Imagen y apariencia','Image et apparence'],

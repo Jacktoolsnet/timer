@@ -1,3 +1,4 @@
+import {showToast} from './toast';
 import {richTextEditor,renderRuns,type TextStyleKey} from './rich-text';
 import {demoProject,newScene,newElement,parseProject,formats,fonts,animations,animationState,locateTime,MAX_FILE_BYTES,MAX_IMAGE_BYTES,validateImage,type Project,type Scene,type Element} from '../lib/model';
 import {storageAllowed} from '../lib/storage';
@@ -254,21 +255,31 @@ $('load-project').addEventListener('click',()=>($('project-file') as HTMLInputEl
 $('project-file').addEventListener('change',async()=>{const input=$('project-file') as HTMLInputElement,file=input.files?.[0];input.value='';if(!file)return;try{if(file.size>MAX_FILE_BYTES)throw new Error('JSON: maximum 30 MiB');const next=parseProject(await file.text());await preload(next);if(canReplace())replace(next);}catch(error){status(t('error')+' '+(error as Error).message);}});
 const dialog=$('json-dialog') as HTMLDialogElement;
 let jsonSession=0;
+function jsonStatus(message:string,error=false){
+ $('json-status').textContent=message;$('copy-json-error').hidden=!error;$('json-copy-status').textContent='';
+}
+$('json-input').addEventListener('input',()=>jsonStatus(''));
+$('copy-json-error').addEventListener('click',async()=>{
+ const session=jsonSession,message=$('json-status').textContent||'',button=$('copy-json-error') as HTMLButtonElement;if(!message)return;button.disabled=true;
+ try{await navigator.clipboard.writeText(message);if(dialog.open&&session===jsonSession&&$('json-status').textContent===message)showToast(t('errorCopied'),'success');}
+ catch{if(dialog.open&&session===jsonSession&&$('json-status').textContent===message){const range=document.createRange();range.selectNodeContents($('json-status'));const selection=window.getSelection();selection?.removeAllRanges();selection?.addRange(range);$('json-copy-status').textContent=t('errorCopyDenied');}}
+ finally{button.disabled=false;}
+});
 dialog.addEventListener('close',()=>{jsonSession++;});
-$('open-json').addEventListener('click',()=>{jsonSession++;($('json-input') as HTMLTextAreaElement).value='';$('json-status').textContent='';dialog.showModal();$('json-input').focus();});
+$('open-json').addEventListener('click',()=>{jsonSession++;($('json-input') as HTMLTextAreaElement).value='';jsonStatus('');dialog.showModal();$('json-input').focus();});
 $('close-json').addEventListener('click',()=>dialog.close());
 $('paste-json').addEventListener('click',async()=>{
  const session=jsonSession,button=$('paste-json') as HTMLButtonElement;button.disabled=true;
  try{
   const text=await navigator.clipboard.readText();
   if(!dialog.open||session!==jsonSession)return;
-  if(new TextEncoder().encode(text).length>MAX_FILE_BYTES){$('json-status').textContent=t('error')+' JSON: maximum 30 MiB';return;}
-  ($('json-input') as HTMLTextAreaElement).value=text;$('json-status').textContent='';$('json-input').focus();
+  if(new TextEncoder().encode(text).length>MAX_FILE_BYTES){jsonStatus(t('error')+' JSON: maximum 30 MiB',true);return;}
+  ($('json-input') as HTMLTextAreaElement).value=text;jsonStatus('');$('json-input').focus();
  }catch{
-  if(dialog.open&&session===jsonSession){$('json-status').textContent=t('clipboardDenied');$('json-input').focus();}
+  if(dialog.open&&session===jsonSession){jsonStatus(t('clipboardDenied'));$('json-input').focus();}
  }finally{button.disabled=false;}
 });
-$('import-json').addEventListener('click',async()=>{try{const next=parseProject(($('json-input') as HTMLTextAreaElement).value);await preload(next);if(canReplace()){replace(next);dialog.close();}}catch(error){$('json-status').textContent=t('error')+' '+(error as Error).message;}});
+$('import-json').addEventListener('click',async()=>{try{const next=parseProject(($('json-input') as HTMLTextAreaElement).value);await preload(next);if(canReplace()){replace(next);dialog.close();}}catch(error){jsonStatus(t('error')+' '+(error as Error).message,true);}});
 
 $('import-image').addEventListener('click',()=>($('image-file') as HTMLInputElement).click());
 async function decodeImage(data:string){const image=new Image();image.src=data;await image.decode();if(image.naturalWidth*image.naturalHeight>40_000_000)throw new Error('Image: maximum 40 megapixels');}

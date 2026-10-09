@@ -434,3 +434,33 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
 #rename-input { width:100%; height:40px; padding:9px 12px; border:1px solid var(--line); border-radius:10px; background:var(--bg); color:var(--text); font:inherit; }
 .rename-footer { justify-content:flex-end; }
 .asset-actions { display:flex; justify-content:center; gap:8px; }
+
+.json-error-row { display:flex; align-items:flex-start; gap:12px; }
+.json-error-row #json-status { flex:1; min-width:0; overflow-wrap:anywhere; }
+#copy-json-error { display:grid; place-items:center; flex:0 0 40px; height:40px; padding:9px; margin-top:12px; border:1px solid var(--line); border-radius:10px; background:var(--accent-soft); color:var(--accent); }
+#copy-json-error[hidden] { display:none; }
+#copy-json-error svg { width:20px; height:20px; }
+#json-copy-status:empty { display:none; }
+
+/* Reusable top-layer notifications: independent of modal scrolling. */
+.app-toast {
+ position:fixed; inset:auto 16px max(24px,env(safe-area-inset-bottom)); margin:0 auto;
+ width:max-content; max-width:min(560px,calc(100vw - 32px));
+ display:flex; align-items:center; gap:12px; padding:14px 20px;
+ border:1px solid var(--toast-border); border-radius:14px;
+ background:var(--toast-bg); color:var(--toast-text);
+ font-size:calc(14px * var(--font-scale,1)); line-height:1.5;
+ box-shadow:0 8px 30px #0003; overflow-wrap:anywhere;
+ animation:toast-enter .2s ease-out; pointer-events:none;
+}
+.app-toast[data-kind=success] { --toast-bg:#e8f5ec; --toast-text:#195c34; --toast-border:#9bc9a9; }
+.app-toast[data-kind=warning] { --toast-bg:#fff3d6; --toast-text:#765000; --toast-border:#d8b968; }
+.app-toast[data-kind=error] { --toast-bg:#fdeaea; --toast-text:#922929; --toast-border:#d99b9b; }
+[data-theme=dark] .app-toast[data-kind=success] { --toast-bg:#173728; --toast-text:#b9edcc; --toast-border:#407b57; }
+[data-theme=dark] .app-toast[data-kind=warning] { --toast-bg:#40321a; --toast-text:#ffe0a0; --toast-border:#917339; }
+[data-theme=dark] .app-toast[data-kind=error] { --toast-bg:#452323; --toast-text:#ffc3c3; --toast-border:#985151; }
+.app-toast svg { width:24px; height:24px; flex-shrink:0; }
+.app-toast span { min-width:0; }
+.app-toast.toast-fallback { z-index:1000; }
+@keyframes toast-enter { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+@media(prefers-reduced-motion:reduce) { .app-toast { animation:none; } }
