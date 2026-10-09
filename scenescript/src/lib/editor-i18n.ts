@@ -1,5 +1,14 @@
 import type { Language } from './i18n';
 const words = {
+ 'transition-crossfade':['Überblenden','Crossfade','Fundido cruzado','Fondu enchaîné'],
+ 'transition-slide-left':['Schieben nach links','Slide left','Deslizar a la izquierda','Glisser vers la gauche'],
+ 'transition-slide-right':['Schieben nach rechts','Slide right','Deslizar a la derecha','Glisser vers la droite'],
+ 'transition-slide-up':['Schieben nach oben','Slide up','Deslizar hacia arriba','Glisser vers le haut'],
+ 'transition-slide-down':['Schieben nach unten','Slide down','Deslizar hacia abajo','Glisser vers le bas'],
+ 'transition-wipe-left':['Wischen nach links','Wipe left','Barrido a la izquierda','Balayage vers la gauche'],
+ 'transition-wipe-right':['Wischen nach rechts','Wipe right','Barrido a la derecha','Balayage vers la droite'],
+ 'transition-wipe-up':['Wischen nach oben','Wipe up','Barrido hacia arriba','Balayage vers le haut'],
+ 'transition-wipe-down':['Wischen nach unten','Wipe down','Barrido hacia abajo','Balayage vers le bas'],
  copyError:['Fehlermeldung kopieren','Copy error message','Copiar mensaje de error','Copier le message d’erreur'],
  errorCopied:['Fehlermeldung kopiert.','Error message copied.','Mensaje de error copiado.','Message d’erreur copié.'],
  errorCopyDenied:['Kopieren nicht möglich. Die Fehlermeldung ist markiert – bitte mit Strg+C bzw. Cmd+C kopieren.','Copying is unavailable. The error is selected — copy using Ctrl+C or Cmd+C.','No se puede copiar. El error está seleccionado; usa Ctrl+C o Cmd+C.','Copie indisponible. Le message est sélectionné ; copiez avec Ctrl+C ou Cmd+C.'],

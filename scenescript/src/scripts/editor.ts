@@ -1,6 +1,6 @@
 import {showToast} from './toast';
 import {richTextEditor,renderRuns,type TextStyleKey} from './rich-text';
-import {demoProject,newScene,newElement,parseProject,formats,fonts,animations,animationState,locateTime,MAX_FILE_BYTES,MAX_IMAGE_BYTES,validateImage,type Project,type Scene,type Element} from '../lib/model';
+import {demoProject,newScene,newElement,parseProject,formats,fonts,animations,sceneTransitions,sceneTransitionState,animationState,locateTime,MAX_FILE_BYTES,MAX_IMAGE_BYTES,validateImage,type Project,type Scene,type Element} from '../lib/model';
 import {storageAllowed} from '../lib/storage';
 import {screenWakeLock} from '../lib/wake-lock';
 import {STORAGE_KEY} from '../lib/engine';
@@ -77,7 +77,7 @@ const actions=document.createElement('div');actions.className='asset-actions';ac
 function field(form:HTMLElement,key:string,value:string|number|boolean,kind:string,action:(value:string|number|boolean)=>void,options?:readonly string[],min?:number,max?:number){
  const label=document.createElement('label');label.append(document.createTextNode(t(key)));
  let input:HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement;
- if(kind==='select'){input=document.createElement('select');options?.forEach(option=>{const o=document.createElement('option');o.value=option;o.textContent=key==='asset'||key==='backgroundAsset'?(option?project.assets[option].name:t('none')):t(option);input.append(o);});input.value=String(value);}
+ if(kind==='select'){input=document.createElement('select');options?.forEach(option=>{const o=document.createElement('option');o.value=option;o.textContent=key==='asset'||key==='backgroundAsset'?(option?project.assets[option].name:t('none')):t(key==='transition'&&option!=='none'&&option!=='fade'?'transition-'+option:option);input.append(o);});input.value=String(value);}
  else if(kind==='textarea'){input=document.createElement('textarea');input.value=String(value);input.maxLength=10000;}
  else{input=document.createElement('input');input.type=kind;if(kind==='checkbox')input.checked=Boolean(value);else input.value=String(value);if(kind==='number'){input.step='any';if(min!==undefined)input.min=String(min);if(max!==undefined)input.max=String(max);}if(kind==='text')input.maxLength=200;}
  input.name=key;
@@ -124,7 +124,7 @@ function renderForms(){
  const form=$('scene-form');form.replaceChildren();const s=current();
  field(form,'name',s.name,'text',v=>updateScene('name',v));field(form,'duration',s.duration,'number',v=>updateScene('duration',v),undefined,0.1,3600);
  field(form,'background',s.background,'color',v=>updateScene('background',v));field(form,'backgroundAsset',s.backgroundAsset,'select',v=>updateScene('backgroundAsset',v),['',...Object.keys(project.assets)]);
- field(form,'transition',s.transition,'select',v=>updateScene('transition',v),['none','fade']);field(form,'transitionDuration',s.transitionDuration,'number',v=>updateScene('transitionDuration',v),undefined,0.01,3600);
+ field(form,'transition',s.transition,'select',v=>updateScene('transition',v),sceneTransitions);field(form,'transitionDuration',s.transitionDuration,'number',v=>updateScene('transitionDuration',v),undefined,0.01,3600);
  const ef=$('element-form');ef.replaceChildren();ef.classList.remove('text-settings');const e=selected();if(!e){const p=document.createElement('p');p.className='small-hint';p.textContent=t('empty');ef.append(p);return;}
  if(e.type==='text'){
  richEditor=richTextEditor(e,()=>{changed();stop();draw(false);renderElements();},(key,value)=>updateElementValue(key,value),{selection:t('richSelectionHint'),block:t('richBlockHint')});
@@ -189,32 +189,48 @@ $('open-preview').addEventListener('click',()=>{
 $('close-preview').addEventListener('click',closePreview);
 previewDialog.addEventListener('close',()=>{if(previewContent.parentElement!==$('preview-slot'))closePreview();});
 previewDialog.addEventListener('click',event=>{if(event.target===previewDialog){const rect=previewDialog.getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)closePreview();}});
-// Retain image/text nodes during playback: only their animation state changes per frame.
-let stageKey='', views:{element:Element;node:HTMLDivElement;text?:HTMLSpanElement}[]=[],backgroundImage:HTMLImageElement|undefined;
-function draw(follow=true){
- const at=locateTime(project,time);
- if(follow&&at.index!==sceneIndex){sceneIndex=at.index;selectedId='';renderForms();renderElements();$('scene-list').querySelectorAll('button').forEach((b,i)=>b.setAttribute('aria-current',String(i===sceneIndex)));}
- const s=project.scenes[at.index];
- const key=`${revision}:${at.index}:${project.format}:${playing}:${recording}:${selectedId}`;
- if(stageKey!==key){
-  stageKey=key;stage.replaceChildren();views=[];backgroundImage=undefined;stage.style.background=s.background;resize();
-  const [w,h]=formats[project.format];
-  if(s.backgroundAsset){backgroundImage=document.createElement('img');backgroundImage.className='scene-background';backgroundImage.src=project.assets[s.backgroundAsset].data;backgroundImage.alt='';stage.append(backgroundImage);}
-  s.elements.forEach(e=>{
-   const node=document.createElement('div');node.className='scene-element'+(!playing&&e.id===selectedId?' selected':'');
+// Render complete scene layers so transitions include backgrounds and rich text.
+type SceneView={element:Element;node:HTMLDivElement;text?:HTMLSpanElement};
+let stageKey='',views:SceneView[]=[],incomingLayer:HTMLDivElement|undefined,outgoingLayer:HTMLDivElement|undefined;
+function createSceneLayer(scene:Scene,index:number,interactive:boolean){
+ const layer=document.createElement('div');layer.className='scene-layer';layer.dataset.sceneIndex=String(index);layer.style.background=scene.background;
+ if(!interactive)layer.style.pointerEvents='none';
+ const [w,h]=formats[project.format];const sceneViews:SceneView[]=[];
+ if(scene.backgroundAsset){const image=document.createElement('img');image.className='scene-background';image.src=project.assets[scene.backgroundAsset].data;image.alt='';layer.append(image);}
+ scene.elements.forEach(e=>{
+   const node=document.createElement('div');node.className='scene-element'+(interactive&&!playing&&e.id===selectedId?' selected':'');
    Object.assign(node.style,{left:`${e.x*w/100}px`,top:`${e.y*h/100}px`,width:`${e.width*w/100}px`,height:`${e.height*h/100}px`,color:e.color,fontFamily:e.font,fontSize:`${e.fontSize}px`,fontWeight:e.bold?'700':'400',fontStyle:e.italic?'italic':'normal',textDecoration:[e.underline?'underline':'',e.strikethrough?'line-through':''].filter(Boolean).join(' ')||'none',textAlign:e.align,justifyContent:e.align==='left'?'flex-start':e.align==='right'?'flex-end':'center',borderRadius:`${e.radius}px`});
    let text:HTMLSpanElement|undefined;
    if(e.type==='text'){node.style.textDecoration='none';text=document.createElement('span');text.style.width='100%';node.append(text);}
    else if(e.type==='shape')node.style.background=e.color;
    else if(e.asset){const img=document.createElement('img');img.src=project.assets[e.asset].data;img.alt=project.assets[e.asset].name;img.style.objectFit=e.fit;node.append(img);}
    else{node.textContent=t('image');node.style.background='#ffffff22';}
-   node.addEventListener('click',()=>{if(playing||recording)return;selectedId=e.id;renderForms();renderElements();draw();});
-   stage.append(node);views.push({element:e,node,text});
-  });
+   node.addEventListener('click',()=>{if(!interactive||playing||recording)return;selectedId=e.id;renderForms();renderElements();draw();});
+   layer.append(node);sceneViews.push({element:e,node,text});
+ });
+ return {layer,views:sceneViews};
+}
+function updateSceneViews(sceneViews:SceneView[],local:number,opacity=1){
+ sceneViews.forEach(({element,node,text})=>{const state=animationState(element,local);node.style.opacity=String(state.opacity*opacity);node.style.visibility=state.visible?'visible':'hidden';node.style.transform=state.transform;if(text&&text.dataset.visibleText!==state.text){renderRuns(text,element,state.text);text.dataset.visibleText=state.text;}});
+}
+function draw(follow=true){
+ const at=locateTime(project,time);
+ if(follow&&at.index!==sceneIndex){sceneIndex=at.index;selectedId='';renderForms();renderElements();$('scene-list').querySelectorAll('button').forEach((b,i)=>b.setAttribute('aria-current',String(i===sceneIndex)));}
+ const s=project.scenes[at.index],transition=sceneTransitionState(s,at.local);
+ const layered=s.transition!=='none'&&s.transition!=='fade';
+ const showPrevious=layered&&at.index>0&&transition.progress<1;
+ const key=`${revision}:${at.index}:${project.format}:${playing}:${recording}:${selectedId}:${showPrevious}`;
+ if(stageKey!==key){
+  stageKey=key;stage.replaceChildren();outgoingLayer=undefined;stage.style.background=layered?'#000000':s.background;resize();
+  if(showPrevious){const previous=project.scenes[at.index-1],view=createSceneLayer(previous,at.index-1,false);outgoingLayer=view.layer;updateSceneViews(view.views,previous.duration);stage.append(view.layer);}
+  const view=createSceneLayer(s,at.index,true);incomingLayer=view.layer;views=view.views;stage.append(view.layer);
  }
+ if(incomingLayer){incomingLayer.style.transform=transition.incoming;incomingLayer.style.clipPath=transition.clip;incomingLayer.style.opacity=String(transition.opacity);}
+ if(outgoingLayer)outgoingLayer.style.transform=transition.outgoing;
+ // Preserve the existing fade-in semantics over the incoming background color.
  const sceneOpacity=s.transition==='fade'&&playing?Math.min(1,at.local/s.transitionDuration):1;
- if(backgroundImage)backgroundImage.style.opacity=String(sceneOpacity);
- views.forEach(({element,node,text})=>{const state=animationState(element,at.local);node.style.opacity=String(state.opacity*sceneOpacity);node.style.visibility=state.visible?'visible':'hidden';node.style.transform=state.transform;if(text&&text.dataset.visibleText!==state.text){renderRuns(text,element,state.text);text.dataset.visibleText=state.text;}});
+ const backgroundImage=incomingLayer?.querySelector<HTMLImageElement>('.scene-background');if(backgroundImage)backgroundImage.style.opacity=String(sceneOpacity);
+ updateSceneViews(views,at.local,sceneOpacity);
  ($('timeline') as HTMLInputElement).max=String(total());($('timeline') as HTMLInputElement).value=String(time);$('time-label').textContent=`${time.toFixed(1)} / ${total().toFixed(1)} s`;
  const playButton=$('play') as HTMLButtonElement;
  playButton.title=t(playing?'pause':'play');playButton.setAttribute('aria-label',playButton.title);

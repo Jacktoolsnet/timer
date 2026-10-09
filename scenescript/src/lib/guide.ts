@@ -109,7 +109,7 @@ Optional fields and their defaults:
 - duration: 5; number, 0.1–3600 seconds.
 - background: "#263b42"; #RRGGBB color.
 - backgroundAsset: ""; empty or an existing asset ID, maximum 100 code units.
-- transition: "fade"; allowed "none" or "fade".
+- transition: "fade"; allowed "none", "fade", "crossfade", "slide-left", "slide-right", "slide-up", "slide-down", "wipe-left", "wipe-right", "wipe-up", "wipe-down".
 - transitionDuration: 0.5; number, 0.01–3600 seconds.
 Scene durations add up to the total duration; transitions do not add time.
 
@@ -327,4 +327,19 @@ Example:
 \`\`\`json
 {"id":"headline","type":"text","text":"Hello world","runs":[{"text":"Hello "},{"text":"world","bold":true,"color":"#ff8800"}]}
 \`\`\`
+
+## Additional scene transitions
+The transition belongs to the incoming scene and runs during its first
+transitionDuration seconds. It never adds time to the project. Directions name
+the movement/reveal direction (slide-left brings the next scene from the right).
+- crossfade: the full incoming scene, including background, blends over the previous scene.
+- slide-left/right/up/down: push the previous scene out while moving the incoming scene in.
+- wipe-left/right/up/down: progressively reveal the incoming scene over the previous scene.
+The previous scene is held at its final element-animation state; its entry
+transition is not replayed. On the first scene, these transitions start over black.
+Progress is linear, clamped to 0–1; unlike the legacy fade-in, these new
+transitions also retain their exact state when pausing or seeking.
+The same renderer is used in compact preview, expanded preview and recording.
+All existing element animations run independently during the scene transition.
+Existing none/fade values and their behavior remain supported.
 `;

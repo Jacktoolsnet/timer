@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {demoProject,parseProject,animationState,newElement,locateTime,validateImage} from '../src/lib/model.ts';
+import {demoProject,parseProject,animationState,newElement,locateTime,validateImage,sceneTransitions,sceneTransitionState} from '../src/lib/model.ts';
 const serialize=(value:unknown)=>JSON.stringify(value);
 test('complete demo round trips and schema covers every exported field',()=>{
  const p=demoProject();assert.deepEqual(JSON.parse(serialize(parseProject(serialize(p)))),p);
@@ -35,4 +35,15 @@ test('rich text inherits defaults, rejects unsafe styles and preserves Unicode t
  const parsed=parseProject(serialize(p)).scenes[0].elements[0];assert.equal(parsed.text,'😀 World');assert.deepEqual(parsed.runs,e.runs);
  parsed.animation='typewriter';parsed.at=0;parsed.animationDuration=1;assert.equal(animationState(parsed,.5).text,'😀 W');
  for(const run of [{text:'x',html:'<script>'},{text:'x',font:'Unknown'},{text:'x',fontSize:0},{text:'x',bold:'yes'}]){e.runs=[run as any];assert.throws(()=>parseProject(serialize(p)));}
+});
+
+test('scene transitions validate, clamp and resolve all directions deterministically',()=>{
+ const p=demoProject(),scene=p.scenes[1];scene.transitionDuration=2;
+ for(const kind of sceneTransitions){scene.transition=kind;assert.equal(parseProject(serialize(p)).scenes[1].transition,kind);const state=sceneTransitionState(scene,1);assert.equal(state.progress,.5);assert.equal(sceneTransitionState(scene,-1).progress,0);assert.equal(sceneTransitionState(scene,3).progress,1);}
+ scene.transition='crossfade';assert.equal(sceneTransitionState(scene,1).opacity,.5);
+ scene.transition='slide-left';assert.equal(sceneTransitionState(scene,1).incoming,'translate(50%, 0%)');assert.equal(sceneTransitionState(scene,1).outgoing,'translate(-50%, 0%)');
+ scene.transition='slide-down';assert.equal(sceneTransitionState(scene,1).incoming,'translate(0%, -50%)');
+ scene.transition='wipe-down';assert.equal(sceneTransitionState(scene,1).clip,'inset(0% 0% 50% 0%)');
+ scene.transition='wipe-left';assert.equal(sceneTransitionState(scene,1).clip,'inset(0% 0% 0% 50%)');
+ (scene as any).transition='unknown';assert.throws(()=>parseProject(serialize(p)));
 });

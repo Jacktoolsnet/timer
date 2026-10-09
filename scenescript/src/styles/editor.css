@@ -464,3 +464,5 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
 .app-toast.toast-fallback { z-index:1000; }
 @keyframes toast-enter { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
 @media(prefers-reduced-motion:reduce) { .app-toast { animation:none; } }
+
+.scene-layer { position:absolute; inset:0; overflow:hidden; transform-origin:center; }

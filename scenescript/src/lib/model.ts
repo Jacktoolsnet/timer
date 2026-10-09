@@ -9,7 +9,8 @@ export type Element = {
  opacity:number; rotation:number; radius:number; fit:'cover'|'contain';
  animation:typeof animations[number]; at:number; animationDuration:number;
 };
-export type Scene = { id:string; name:string; duration:number; background:string; backgroundAsset:string; transition:'none'|'fade'; transitionDuration:number; elements:Element[] };
+export const sceneTransitions=['none','fade','crossfade','slide-left','slide-right','slide-up','slide-down','wipe-left','wipe-right','wipe-up','wipe-down'] as const;
+export type Scene = { id:string; name:string; duration:number; background:string; backgroundAsset:string; transition:typeof sceneTransitions[number]; transitionDuration:number; elements:Element[] };
 export type Project = { version:'1.0'; title:string; format:keyof typeof formats; assets:Record<string,Asset>; scenes:Scene[] };
 export const MAX_FILE_BYTES = 30 * 1024 * 1024;
 export const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
@@ -77,7 +78,7 @@ export function parseProject(input:string):Project {
     opacity:num(merged.opacity,`${ep}.opacity`,0,1),rotation:num(merged.rotation,`${ep}.rotation`,-360,360),radius:num(merged.radius,`${ep}.radius`,0,1000),fit:one(merged.fit,['cover','contain'] as const,`${ep}.fit`),
     animation:one(merged.animation,animations,`${ep}.animation`),at:num(merged.at,`${ep}.at`,0,duration),animationDuration:num(merged.animationDuration,`${ep}.animationDuration`,0.01,3600)};
   });
-  return {id:sid,name:str(s.name??d.name,`${path}.name`,200),duration,background:color(s.background??d.background,`${path}.background`),backgroundAsset:ref(s.backgroundAsset??'',`${path}.backgroundAsset`),transition:one(s.transition??d.transition,['none','fade'] as const,`${path}.transition`),transitionDuration:num(s.transitionDuration??d.transitionDuration,`${path}.transitionDuration`,0.01,3600),elements};
+  return {id:sid,name:str(s.name??d.name,`${path}.name`,200),duration,background:color(s.background??d.background,`${path}.background`),backgroundAsset:ref(s.backgroundAsset??'',`${path}.backgroundAsset`),transition:one(s.transition??d.transition,sceneTransitions,`${path}.transition`),transitionDuration:num(s.transitionDuration??d.transitionDuration,`${path}.transitionDuration`,0.01,3600),elements};
  });
  return {version:'1.0',title:str(p.title,'title',200),format:one(p.format,['landscape','portrait','square'] as const,'format'),assets,scenes};
 }
@@ -88,4 +89,16 @@ export function locateTime(project:Project,time:number):{index:number;local:numb
 export function animationState(e:Element,time:number){
  const progress=Math.min(1,Math.max(0,(time-e.at)/e.animationDuration));const eased=1-(1-progress)**3;
  return {visible:time>=e.at,opacity:e.opacity*(e.animation==='fade'?progress:1),transform:`rotate(${e.rotation}deg) translate(${e.animation==='slide-left'?(1-eased)*80:0}px, ${e.animation==='slide-up'?(1-eased)*80:0}px) scale(${e.animation==='zoom'?0.7+0.3*eased:e.animation==='pan'?1+0.1*progress:1})`,text:e.animation==='typewriter'?Array.from(e.text).slice(0,Math.floor(Array.from(e.text).length*progress)).join(''):e.text};
+}
+
+// Incoming transitions occupy the start of the new scene; no extra timeline time.
+export function sceneTransitionState(scene:Scene,local:number){
+ const progress=Math.min(1,Math.max(0,local/scene.transitionDuration));
+ const direction=scene.transition.split('-')[1];
+ const x=direction==='left'?1:direction==='right'?-1:0,y=direction==='up'?1:direction==='down'?-1:0;
+ const incoming=scene.transition.startsWith('slide-')?`translate(${x*(1-progress)*100}%, ${y*(1-progress)*100}%)`:'none';
+ const outgoing=scene.transition.startsWith('slide-')?`translate(${-x*progress*100}%, ${-y*progress*100}%)`:'none';
+ const rest=(1-progress)*100;
+ const clip=scene.transition.startsWith('wipe-')?`inset(${direction==='up'?rest:0}% ${direction==='right'?rest:0}% ${direction==='down'?rest:0}% ${direction==='left'?rest:0}%)`:'none';
+ return {progress,incoming,outgoing,clip,opacity:scene.transition==='crossfade'?progress:1};
 }

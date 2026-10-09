@@ -304,3 +304,14 @@ test('copy confirmation is a bottom toast above the modal and dismisses automati
  expect(await toast.evaluate(el=>el.matches(':popover-open'))).toBe(true);await expect(toast).toHaveCount(0,{timeout:6000});
  await page.locator('#copy-json-error').click();await expect(toast).toHaveCount(1);await page.locator('#close-json').click();await expect(toast).toHaveCount(0);
 });
+
+test('crossfade, slide and wipe transition complete scene layers while paused and seeking',async({page})=>{
+ const project=demoProject();project.scenes.forEach(s=>{s.transition='none';s.elements.forEach(e=>{e.animation='none';e.at=0;});});project.scenes[0].background='#ff0000';project.scenes[1].background='#0000ff';project.scenes[1].transition='crossfade';project.scenes[1].transitionDuration=2;
+ await page.goto('/en/');await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(project));await page.locator('#import-json').click();
+ await page.locator('#next-scene').click();await expect(page.locator('#scene-form [name=transition]')).toHaveValue('crossfade');await expect(page.locator('.scene-layer')).toHaveCount(2);
+ await page.locator('#timeline').fill('6');const incoming=page.locator('.scene-layer[data-scene-index="1"]'),outgoing=page.locator('.scene-layer[data-scene-index="0"]');await expect(incoming).toHaveCSS('opacity','0.5');await expect(incoming).toHaveCSS('background-color','rgb(0, 0, 255)');await expect(outgoing).toHaveCSS('background-color','rgb(255, 0, 0)');
+ await page.locator('#scene-form [name=transition]').selectOption('slide-left');await page.locator('#timeline').fill('6');expect(await incoming.evaluate(el=>el.style.transform)).toBe('translate(50%, 0%)');expect(await outgoing.evaluate(el=>el.style.transform)).toBe('translate(-50%, 0%)');
+ await page.locator('#scene-form [name=transition]').selectOption('wipe-up');await page.locator('#timeline').fill('6');expect(await incoming.evaluate(el=>el.style.clipPath)).toBe('inset(50% 0% 0%)');
+ await page.locator('#open-preview').click();await expect(page.locator('.scene-layer')).toHaveCount(2);await page.locator('#timeline').fill('7');await expect(page.locator('.scene-layer')).toHaveCount(1);await expect(incoming).toHaveCSS('opacity','1');await page.locator('#close-preview').click();
+ const saved=JSON.parse(await exportedJSON(page));expect(saved.scenes[1].transition).toBe('wipe-up');expect(saved.scenes[1].transitionDuration).toBe(2);
+});

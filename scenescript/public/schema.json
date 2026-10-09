@@ -85,7 +85,16 @@
           "transition": {
             "enum": [
               "none",
-              "fade"
+              "fade",
+              "crossfade",
+              "slide-left",
+              "slide-right",
+              "slide-up",
+              "slide-down",
+              "wipe-left",
+              "wipe-right",
+              "wipe-up",
+              "wipe-down"
             ],
             "default": "fade"
           },
