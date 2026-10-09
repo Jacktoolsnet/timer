@@ -629,3 +629,13 @@ test('simulation modal applies with checkmark and discards drafts with X or Esca
  await page.locator('#project-simulation-form [name=simulationSeed]').fill('123');await page.locator('#project-simulation-form [name=simulationSeed]').dispatchEvent('change');
  await page.locator('#apply-simulation').click();expect(JSON.parse(await exportedJSON(page)).backgroundSimulation).toMatchObject({type:'snow',count:77,seed:123});
 });
+test('recording alignment frame hides for countdown and restart appears three seconds after completion',async({page})=>{
+ await page.goto('/en/');const p=demoProject();p.scenes=[p.scenes[0]];p.scenes[0].duration=.3;p.scenes[0].elements=[];
+ await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(p));await page.locator('#import-json').click();await page.locator('#focus').click();
+ await expect(page.locator('#recording-frame')).toBeVisible();await expect(page.locator('#start-recording')).toHaveAttribute('aria-label','Start presentation');
+ const bounds=await page.locator('#stage-frame').boundingBox();expect(await page.locator('#recording-frame').boundingBox()).toEqual(bounds);
+ await page.locator('#start-recording').click();await expect(page.locator('#recording-frame')).not.toBeVisible();await expect(page.locator('#stage-frame')).toHaveCSS('cursor','none');
+ await expect.poll(async()=>Number(await page.locator('#timeline').inputValue()),{timeout:6000}).toBe(.3);await page.waitForTimeout(1500);await expect(page.locator('#recording-start')).not.toBeVisible();
+ await expect(page.locator('#start-recording')).toBeVisible({timeout:3000});await expect(page.locator('#start-recording')).toHaveAttribute('aria-label','Restart presentation');await expect(page.locator('#recording-frame')).toBeVisible();
+ await page.locator('#start-recording').click();await expect(page.locator('#countdown')).toBeVisible();await expect(page.locator('#recording-frame')).not.toBeVisible();expect(await page.locator('#timeline').inputValue()).toBe('0');await page.keyboard.press('Escape');await page.waitForTimeout(3300);await expect(page.locator('#recording-start')).not.toBeVisible();await expect(page.locator('#recording-frame')).not.toBeVisible();
+});

@@ -21,6 +21,7 @@ let project:Project=demoProject(), sceneIndex=0, selectedId='',dirty=false,time=
 let revision=0, focusAttempt=0;
 // Recording uses its own playhead; returning must not discard the editor context.
 let recordingReturnState:{sceneIndex:number;selectedId:string;time:number}|undefined;
+let recordingRestartTimer:ReturnType<typeof setTimeout>|undefined;
 let playbackAttempt=0;
 let baseTime=0,started=0,frame=0,countdownTimer:ReturnType<typeof setTimeout>|undefined,draftTimer:ReturnType<typeof setTimeout>|undefined;
 const status=(message:string)=>{$('editor-status').textContent=message;};
@@ -420,10 +421,15 @@ function draw(follow=true){
  ($('previous-scene') as HTMLButtonElement).disabled=sceneIndex===0;
  ($('next-scene') as HTMLButtonElement).disabled=sceneIndex===project.scenes.length-1;
 }
-function stop(){playbackAttempt++;musicPlayer.stop();playing=false;cancelAnimationFrame(frame);keepScreenAwake(false);}
-function tick(now:number){time=Math.min(total(),musicPlayer.playhead()??(baseTime+(now-started)/1000));draw();if(time>=total()){stop();draw();return;}frame=requestAnimationFrame(tick);}
+function stop(){clearTimeout(recordingRestartTimer);recordingRestartTimer=undefined;playbackAttempt++;musicPlayer.stop();playing=false;cancelAnimationFrame(frame);keepScreenAwake(false);}
+function tick(now:number){time=Math.min(total(),musicPlayer.playhead()??(baseTime+(now-started)/1000));draw();if(time>=total()){
+ stop();draw();if(recording)recordingRestartTimer=setTimeout(()=>{
+  recordingRestartTimer=undefined;if(!recording||playing)return;
+  document.body.classList.add('recording-ready');setRecordingStart(true);$('recording-start').hidden=false;
+ },3000);return;
+}frame=requestAnimationFrame(tick);}
 function play(){
- if(countdownTimer||playing)return;if(time>=total())time=0;playing=true;keepScreenAwake(true);const attempt=++playbackAttempt;
+ if(countdownTimer||playing)return;clearTimeout(recordingRestartTimer);recordingRestartTimer=undefined;if(recording){document.body.classList.remove('recording-ready');$('recording-start').hidden=true;}if(time>=total())time=0;playing=true;keepScreenAwake(true);const attempt=++playbackAttempt;
  const begin=()=>{if(!playing||attempt!==playbackAttempt)return;baseTime=time;started=performance.now();frame=requestAnimationFrame(tick);};
  if(project.music?.enabled)void musicPlayer.start(project.music,time,total()).then(begin).catch(()=>{showToast(t('audioError'),'warning');begin();});else begin();
 }
@@ -497,6 +503,10 @@ $('editor-fullscreen').addEventListener('click',async()=>{
  if(editorFullscreen){setEditorFullscreen(false);if(document.fullscreenElement)await document.exitFullscreen().catch(()=>{});}
  else{setEditorFullscreen(true);try{await document.documentElement.requestFullscreen();}catch{/* App-only CSS fallback. */}}
 });
+function setRecordingStart(restart=false){
+ const b=$('start-recording');const label=t(restart?'restartRecording':'startRecording');b.setAttribute('aria-label',label);b.querySelector('span')!.textContent=label;
+ b.querySelector('path')!.setAttribute('d',restart?'M49 19V6l-6 6A23 23 0 1 0 55 32h-7a16 16 0 1 1-10-15l-6 6h17Z':'M23 14 49 32 23 50Z');
+}
 $('focus').addEventListener('click',async()=>{
  if(($('focus') as HTMLButtonElement).disabled||recording)return;
  closePreview();
@@ -506,7 +516,7 @@ $('focus').addEventListener('click',async()=>{
  finally{($('focus') as HTMLButtonElement).disabled=false;}
  if(attempt!==focusAttempt)return;
  recordingReturnState={sceneIndex,selectedId,time};recording=true;
- document.body.classList.add('recording','recording-ready');
+ document.body.classList.add('recording','recording-ready');setRecordingStart();
  $('recording-start').hidden=false;($('start-recording') as HTMLButtonElement).disabled=true;
  $('exit-focus').hidden=false;selectedId='';time=0;draw();
  try{await document.documentElement.requestFullscreen();}catch{/* CSS fallback. */}
@@ -516,6 +526,7 @@ $('focus').addEventListener('click',async()=>{
 function startCountdown(){
  if(!recording||!document.body.classList.contains('recording-ready')||($('start-recording') as HTMLButtonElement).disabled)return;
  if(project.music?.enabled)void musicPlayer.unlock().catch(()=>showToast(t('audioError'),'warning'));
+ clearTimeout(recordingRestartTimer);recordingRestartTimer=undefined;time=0;draw();
  document.body.classList.remove('recording-ready','controls-visible');clearTimeout(controlsTimer);
  $('recording-start').hidden=true;$('start-recording').blur();keepScreenAwake(true);
  let count=3;$('countdown').hidden=false;$('countdown').textContent=String(count);

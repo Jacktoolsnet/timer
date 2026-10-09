@@ -568,3 +568,7 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
 .music-body button svg { width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:1.7; }
 .music-body button:disabled { opacity:.4; cursor:not-allowed; }
 .music-body button:not(:disabled):hover { border-color:var(--accent); }
+
+/* Inset border marks the exact captured presentation bounds without changing layout. */
+#recording-frame { display:none; position:absolute; inset:0; z-index:5; pointer-events:none; box-sizing:border-box; border:2px solid #fff; box-shadow:inset 0 0 0 2px #111; }
+body.recording.recording-ready #recording-frame { display:block; }
