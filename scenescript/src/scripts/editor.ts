@@ -86,7 +86,7 @@ function downloadAsset(asset:{name:string;data:string}){
 const assetPreviewDialog=$('asset-preview-dialog') as HTMLDialogElement;
 function previewAsset(asset:{name:string;data:string}){
  const image=$('asset-preview-image') as HTMLImageElement;
- image.src=asset.data;image.alt=asset.name;$('asset-preview-title').textContent=asset.name;
+ image.src=asset.data;image.alt=asset.name;$('asset-preview-title').textContent=asset.name;$('asset-preview-title').title=asset.name;
  assetPreviewDialog.showModal();$('close-asset-preview').focus();
 }
 $('close-asset-preview').addEventListener('click',()=>assetPreviewDialog.close());
