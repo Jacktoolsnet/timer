@@ -94,12 +94,28 @@ function renderForms(){
  field(form,'name',s.name,'text',v=>updateScene('name',v));field(form,'duration',s.duration,'number',v=>updateScene('duration',v),undefined,0.1,3600);
  field(form,'background',s.background,'color',v=>updateScene('background',v));field(form,'backgroundAsset',s.backgroundAsset,'select',v=>updateScene('backgroundAsset',v),['',...Object.keys(project.assets)]);
  field(form,'transition',s.transition,'select',v=>updateScene('transition',v),['none','fade']);field(form,'transitionDuration',s.transitionDuration,'number',v=>updateScene('transitionDuration',v),undefined,0.01,3600);
- const ef=$('element-form');ef.replaceChildren();const e=selected();if(!e){const p=document.createElement('p');p.className='small-hint';p.textContent=t('empty');ef.append(p);return;}
+ const ef=$('element-form');ef.replaceChildren();ef.classList.remove('text-settings');const e=selected();if(!e){const p=document.createElement('p');p.className='small-hint';p.textContent=t('empty');ef.append(p);return;}
  if(e.type==='text'){field(ef,'text',e.text,'textarea',v=>updateElement('text',v));field(ef,'font',e.font,'select',v=>updateElement('font',v),fonts);field(ef,'fontSize',e.fontSize,'number',v=>updateElement('fontSize',v),undefined,1,500);field(ef,'align',e.align,'select',v=>updateElement('align',v),['left','center','right']);field(ef,'bold',e.bold,'checkbox',v=>updateElement('bold',v));}
  if(e.type==='image'){field(ef,'asset',e.asset,'select',v=>updateElement('asset',v),['',...Object.keys(project.assets)]);field(ef,'fit',e.fit,'select',v=>updateElement('fit',v),['contain','cover']);}
  if(e.type!=='image')field(ef,'color',e.color,'color',v=>updateElement('color',v));
  for(const [key,min,max] of [['x',-100,100],['y',-100,100],['width',0.1,200],['height',0.1,200],['opacity',0,1],['rotation',-360,360],['radius',0,1000]] as const)field(ef,key,e[key],'number',v=>updateElement(key,v),undefined,min,max);
  field(ef,'animation',e.animation,'select',v=>updateElement('animation',v),animations);field(ef,'at',e.at,'number',v=>updateElement('at',v),undefined,0,s.duration);field(ef,'animationDuration',e.animationDuration,'number',v=>updateElement('animationDuration',v),undefined,0.01,3600);
+ if(e.type==='text'){
+  ef.classList.add('text-settings');
+  for(const [title,keys] of [
+   ['textContentGroup',['text']],
+   ['textStyleGroup',['font','fontSize','align','bold','color','opacity','radius']],
+   ['elementLayoutGroup',['x','y','width','height','rotation']],
+   ['elementMotionGroup',['animation','at','animationDuration']]
+  ] as const){
+   const group=document.createElement('fieldset');group.className='text-settings-group '+title;
+   const legend=document.createElement('legend');legend.textContent=t(title);group.append(legend);
+   const fields=document.createElement('div');fields.className='text-settings-fields';group.append(fields);
+   for(const key of keys){const label=ef.querySelector(`[name="${key}"]`)?.closest('label');if(label)fields.append(label);}
+   ef.append(group);
+  }
+ }
+
 
 }
 function moveElement(delta:number){const s=current(),index=s.elements.findIndex(e=>e.id===selectedId),next=index+delta;if(index<0||next<0||next>=s.elements.length)return;[s.elements[index],s.elements[next]]=[s.elements[next],s.elements[index]];changed();refresh();}

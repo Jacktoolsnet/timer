@@ -1,5 +1,9 @@
 import type { Language } from './i18n';
 const words = {
+ textContentGroup:['Textinhalt','Text content','Contenido del texto','Contenu du texte'],
+ textStyleGroup:['Schrift & Darstellung','Typography & appearance','Tipografía y apariencia','Typographie et apparence'],
+ elementLayoutGroup:['Position & Größe','Position & size','Posición y tamaño','Position et taille'],
+ elementMotionGroup:['Animation & Timing','Animation & timing','Animación y tiempos','Animation et timing'],
  addElement:['Element hinzufügen','Add element','Añadir elemento','Ajouter un élément'],
  decrease:['Verringern','Decrease','Disminuir','Diminuer'],
  increase:['Erhöhen','Increase','Aumentar','Augmenter'],

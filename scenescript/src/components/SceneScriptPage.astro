@@ -23,7 +23,7 @@ const {lang}=Astro.props,t=editorDictionary(lang);
    <a href={'/'+lang+'/ai/'} target="_blank" rel="noopener" title={t.ai} aria-label={t.ai}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5C8 2 4 3 3 4v16c3-2 6-2 9 0 3-2 6-2 9 0V4c-3-2-6-2-9 1Zm0 0v15" /></svg></a>
   </nav>
     <div class="project-content">
-    <h2>{t.project}</h2><label>{t.title}<input id="project-title" maxlength="200" /></label>
+    <h2>{t.project}</h2><label>{t.title}<input id="project-title" type="text" maxlength="200" /></label>
     <label>{t.format}<select id="project-format"><option value="landscape">{t.landscape}</option><option value="portrait">{t.portrait}</option><option value="square">{t.square}</option></select></label>
 
     <section class="project-assets">

@@ -386,3 +386,15 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
 #element-list button { display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
 #scene-list button { display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+/* Text editing: readable, semantic groups rather than one long field grid. */
+.element-inspector form.text-settings { grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+.text-settings-group { min-width:0; margin:0; padding:16px; border:1px solid var(--line); border-radius:12px; background:var(--bg); }
+.text-settings-group legend { padding:0 8px; color:var(--accent); font-size:calc(13px * var(--font-scale,1)); font-weight:650; }
+.text-settings-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.textContentGroup,.elementMotionGroup { grid-column:1 / -1; }
+.textContentGroup .text-settings-fields { grid-template-columns:minmax(0,1fr); }
+.textContentGroup textarea { min-height:110px; }
+.textContentGroup .text-settings-fields label:has(textarea) { grid-column:1 / -1; }
+.elementMotionGroup .text-settings-fields { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.text-settings-group input,.text-settings-group select { background-color:var(--surface); }
