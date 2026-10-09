@@ -72,11 +72,32 @@ function askDelete(name:string,kind:'scene'|'image',action:()=>void){
 $('cancel-delete').addEventListener('click',()=>deleteDialog.close());
 $('confirm-delete').addEventListener('click',()=>{const action=pendingDelete;pendingDelete=undefined;deleteDialog.close();action?.();});
 deleteDialog.addEventListener('close',()=>{pendingDelete=undefined;});
-function renderAssets(){const list=$('asset-list');list.replaceChildren();for(const [id,asset] of Object.entries(project.assets)){const row=document.createElement('div');row.className='asset-row';const img=document.createElement('img');img.src=asset.data;img.alt='';const name=document.createElement('span');name.textContent=asset.name;name.title=asset.name;const remove=button('',()=>{const target=project;askDelete(asset.name,'image',()=>{if(project!==target)return;delete project.assets[id];project.scenes.forEach(s=>{if(s.backgroundAsset===id)s.backgroundAsset='';s.elements.forEach(e=>{if(e.asset===id)e.asset='';});});changed();refresh();$('import-image').focus();});});remove.setAttribute('aria-label',`${t('remove')}: ${asset.name}`);remove.title=`${t('remove')}: ${asset.name}`;
+function downloadAsset(asset:{name:string;data:string}){
+ try{
+  const [header,encoded]=asset.data.split(','),mime=header.slice(5,header.indexOf(';'));
+  const extension=({'image/png':'png','image/jpeg':'jpg','image/webp':'webp','image/svg+xml':'svg'} as Record<string,string>)[mime];
+  if(!extension)throw new Error('Unsupported image format');
+  const bytes=Uint8Array.from(atob(encoded),character=>character.charCodeAt(0));
+  const url=URL.createObjectURL(new Blob([bytes],{type:mime})),link=document.createElement('a');
+  const name=asset.name.replace(/\.(png|jpe?g|webp|svg)$/i,'').replace(/[<>:"/\\|?*\x00-\x1f]/g,'-').trim().replace(/[. ]+$/g,'').slice(0,160)||'image';
+  link.href=url;link.download=name+'.'+extension;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+ }catch(error){status(t('error')+' '+(error as Error).message);}
+}
+const assetPreviewDialog=$('asset-preview-dialog') as HTMLDialogElement;
+function previewAsset(asset:{name:string;data:string}){
+ const image=$('asset-preview-image') as HTMLImageElement;
+ image.src=asset.data;image.alt=asset.name;$('asset-preview-title').textContent=asset.name;
+ assetPreviewDialog.showModal();$('close-asset-preview').focus();
+}
+$('close-asset-preview').addEventListener('click',()=>assetPreviewDialog.close());
+assetPreviewDialog.addEventListener('close',()=>{($('asset-preview-image') as HTMLImageElement).removeAttribute('src');});
+function renderAssets(){const list=$('asset-list');list.replaceChildren();for(const [id,asset] of Object.entries(project.assets)){const row=document.createElement('div');row.className='asset-row';const img=document.createElement('img');img.src=asset.data;img.alt='';const preview=button('',()=>previewAsset(asset));preview.className='asset-thumbnail';preview.dataset.previewAsset=id;preview.title=`${t('imagePreview')}: ${asset.name}`;preview.setAttribute('aria-label',preview.title);preview.append(img);const name=document.createElement('span');name.textContent=asset.name;name.title=asset.name;const remove=button('',()=>{const target=project;askDelete(asset.name,'image',()=>{if(project!==target)return;delete project.assets[id];project.scenes.forEach(s=>{if(s.backgroundAsset===id)s.backgroundAsset='';s.elements.forEach(e=>{if(e.asset===id)e.asset='';});});changed();refresh();$('import-image').focus();});});remove.dataset.deleteAsset=id;remove.setAttribute('aria-label',`${t('remove')}: ${asset.name}`);remove.title=`${t('remove')}: ${asset.name}`;
 const trash=document.createElementNS('http://www.w3.org/2000/svg','svg');trash.setAttribute('viewBox','0 0 24 24');trash.setAttribute('aria-hidden','true');const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('d','M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7');trash.append(path);remove.append(trash);
 const rename=button('',()=>askRename(asset.name,newName=>{asset.name=newName;changed();refresh();$('import-image').focus();}));rename.title=`${t('rename')}: ${asset.name}`;rename.setAttribute('aria-label',rename.title);rename.dataset.renameAsset=id;
 const pencil=document.createElementNS('http://www.w3.org/2000/svg','svg');pencil.setAttribute('viewBox','0 0 24 24');pencil.setAttribute('aria-hidden','true');const pencilPath=document.createElementNS('http://www.w3.org/2000/svg','path');pencilPath.setAttribute('d','m15 4 5 5M4 20l5-1L21 7l-5-5L4 14ZM3 22h18');pencil.append(pencilPath);rename.append(pencil);
-const actions=document.createElement('div');actions.className='asset-actions';actions.append(rename,remove);row.append(img,name,actions);list.append(row);}}
+const save=button('',()=>downloadAsset(asset));save.title=`${t('saveImage')}: ${asset.name}`;save.setAttribute('aria-label',save.title);save.dataset.saveAsset=id;
+const downloadIcon=document.createElementNS('http://www.w3.org/2000/svg','svg');downloadIcon.setAttribute('viewBox','0 0 24 24');downloadIcon.setAttribute('aria-hidden','true');const downloadPath=document.createElementNS('http://www.w3.org/2000/svg','path');downloadPath.setAttribute('d','M12 3v12m-5-5 5 5 5-5M4 15v6h16v-6');downloadIcon.append(downloadPath);save.append(downloadIcon);
+const actions=document.createElement('div');actions.className='asset-actions';actions.append(rename,save,remove);row.append(preview,name,actions);list.append(row);}}
 function field(form:HTMLElement,key:string,value:string|number|boolean,kind:string,action:(value:string|number|boolean)=>void,options?:readonly string[],min?:number,max?:number){
  const label=document.createElement('label');label.append(document.createTextNode(t(key)));
  let input:HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement;

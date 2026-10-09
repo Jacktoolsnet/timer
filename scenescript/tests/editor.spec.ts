@@ -152,8 +152,8 @@ test('project toolbar uses labeled icons and JSON is paste-only',async({page})=>
  await page.goto('/en/');await expect(page.locator('.editor-toolbar #import-image svg')).toHaveCount(1);
  for(const id of ['new-project','load-project','save-project','open-json','import-image']){const button=page.locator('#'+id);expect(await button.getAttribute('title')).toBeTruthy();expect(await button.getAttribute('aria-label')).toBeTruthy();expect((await button.textContent())!.trim()).toBe('');}
  await page.locator('#open-json').click();await expect(page.locator('#json-input')).toHaveValue('');await expect(page.locator('#copy-json')).toHaveCount(0);await page.locator('#close-json').click();
- await page.locator('#image-file').setInputFiles({name:'trash-test.png',mimeType:'image/png',buffer:Buffer.from(pixel.split(',')[1],'base64')});await expect(page.locator('#asset-list .asset-row button svg')).toHaveCount(2);
- await page.locator('#asset-list .asset-row button:not([data-rename-asset])').click();await page.locator('#confirm-delete').click();await expect(page.locator('#asset-list img')).toHaveCount(0);
+ await page.locator('#image-file').setInputFiles({name:'trash-test.png',mimeType:'image/png',buffer:Buffer.from(pixel.split(',')[1],'base64')});await expect(page.locator('#asset-list .asset-row .asset-actions button svg')).toHaveCount(3);
+ await page.locator('#asset-list .asset-row button[data-delete-asset]').click();await page.locator('#confirm-delete').click();await expect(page.locator('#asset-list img')).toHaveCount(0);
 });
 
 test('app fullscreen hides surroundings and preserves edits and recording return',async({page})=>{
@@ -184,8 +184,8 @@ test('delete overlays support cancel, Escape and explicit scene/image confirmati
  await page.locator('#editor-fullscreen').click();await page.locator('#delete-scene').click();await page.keyboard.press('Escape');await expect(page.locator('#delete-dialog')).not.toBeVisible();await expect(page.locator('body')).toHaveClass(/editor-fullscreen/);
  await page.locator('#delete-scene').click();await page.locator('#confirm-delete').click();await expect(page.locator('#scene-list li')).toHaveCount(1);await expect(page.locator('#delete-scene')).toBeDisabled();
  await page.locator('#image-file').setInputFiles({name:'delete-me.png',mimeType:'image/png',buffer:Buffer.from(pixel.split(',')[1],'base64')});await page.locator('#scene-form [name=backgroundAsset]').selectOption({label:'delete-me.png'});
- await page.locator('#asset-list .asset-row button:not([data-rename-asset])').click();await expect(page.locator('#delete-description')).toContainText('references');await page.locator('#cancel-delete').click();await expect(page.locator('#asset-list img')).toHaveCount(1);
- await page.locator('#asset-list .asset-row button:not([data-rename-asset])').click();await page.locator('#confirm-delete').click();await expect(page.locator('#asset-list img')).toHaveCount(0);await expect(page.locator('#scene-form [name=backgroundAsset]')).toHaveValue('');expect(dialogs).toEqual([]);
+ await page.locator('#asset-list .asset-row button[data-delete-asset]').click();await expect(page.locator('#delete-description')).toContainText('references');await page.locator('#cancel-delete').click();await expect(page.locator('#asset-list img')).toHaveCount(1);
+ await page.locator('#asset-list .asset-row button[data-delete-asset]').click();await page.locator('#confirm-delete').click();await expect(page.locator('#asset-list img')).toHaveCount(0);await expect(page.locator('#scene-form [name=backgroundAsset]')).toHaveValue('');expect(dialogs).toEqual([]);
 });
 
 test('JSON footer has three icons, clipboard paste and safe denial fallback',async({page})=>{
@@ -386,4 +386,39 @@ test('SVG animation stays at zero during recording readiness and countdown',asyn
  await page.goto('/en/');await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(project));await page.locator('#import-json').click();await page.locator('#timeline').fill('2');await page.locator('#focus').click();await expect(page.locator('#start-recording')).toBeVisible();
  const time=()=>page.locator('.scene-svg-image').evaluate(el=>(el as SVGSVGElement).getCurrentTime());await expect.poll(time).toBe(0);await page.waitForTimeout(150);expect(await time()).toBe(0);await page.locator('#start-recording').click();await expect(page.locator('#countdown')).toHaveText('3');await page.waitForTimeout(150);expect(await time()).toBe(0);
  await page.keyboard.press('Escape');await expect.poll(time).toBe(2);await expect(page.locator('#timeline')).toHaveValue('2');
+});
+
+test('asset save downloads original PNG and SVG bytes without saving the project',async({page})=>{
+ await page.goto('/en/');
+ for(const image of [
+  {name:'generated.png',mimeType:'image/png',buffer:Buffer.from(pixel.split(',')[1],'base64'),renamed:'My generated image',filename:'My generated image.png'},
+  {name:'animated.svg',mimeType:'image/svg+xml',buffer:Buffer.from(animatedSvg),renamed:'Animation.svg',filename:'Animation.svg'}
+ ]){
+  await page.locator('#image-file').setInputFiles({name:image.name,mimeType:image.mimeType,buffer:image.buffer});
+  const row=page.locator('#asset-list .asset-row').last();
+  await row.locator('[data-rename-asset]').click();await page.locator('#rename-input').fill(image.renamed);await page.locator('#apply-rename').click();
+  const project=JSON.parse(await exportedJSON(page));
+  await page.locator('#project-title').fill('Still unsaved');
+  const pending=page.waitForEvent('download');await row.locator('[data-save-asset]').click();const download=await pending;
+  expect(download.suggestedFilename()).toBe(image.filename);
+  const asset=Object.values(project.assets).at(-1) as {data:string};
+  expect(await readFile((await download.path())!)).toEqual(Buffer.from(asset.data.split(',')[1],'base64'));
+  await expect(page.locator('#editor-status')).toHaveText('Unsaved changes');
+ }
+});
+
+test('asset thumbnails open a bounded image overlay with header and footer',async({page})=>{
+ await page.goto('/en/');
+ await page.locator('#image-file').setInputFiles({name:'preview.png',mimeType:'image/png',buffer:Buffer.from(pixel.split(',')[1],'base64')});
+ const thumbnail=page.locator('[data-preview-asset]'),dialog=page.locator('#asset-preview-dialog');
+ await thumbnail.focus();await page.keyboard.press('Enter');
+ await expect(dialog).toBeVisible();await expect(dialog.locator('header')).toContainText('preview.png');
+ await expect(page.locator('#asset-preview-image')).toHaveAttribute('src',pixel);
+ await expect(page.locator('#asset-preview-image')).toHaveAttribute('alt','preview.png');
+ expect(await dialog.evaluate(element=>element.scrollHeight<=element.clientHeight)).toBe(true);
+ const bounds=await page.locator('#asset-preview-image').boundingBox();expect(bounds!.height).toBeGreaterThan(120);
+ await dialog.locator('footer button').click();await expect(dialog).not.toBeVisible();await expect(thumbnail).toBeFocused();
+ await thumbnail.click();await page.keyboard.press('Escape');await expect(dialog).not.toBeVisible();
+ await expect(page.locator('#asset-preview-image')).not.toHaveAttribute('src',/./);
+ await expect(page.locator('#asset-list img')).toHaveCount(1);
 });

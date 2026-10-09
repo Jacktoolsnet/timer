@@ -69,6 +69,11 @@ const {lang}=Astro.props,t=editorDictionary(lang);
   <div id="preview-overlay-host"></div>
   <footer class="preview-dialog-footer"><button id="close-preview" type="button" title={t.close} aria-label={t.close}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg></button></footer>
  </dialog>
+ <dialog id="asset-preview-dialog" aria-labelledby="asset-preview-title">
+  <header class="preview-dialog-heading"><div class="preview-header-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 3h18v18H3ZM3 17l6-6 4 4 3-3 5 5M16 7h.01" /></svg></div><h2 id="asset-preview-title">{t.imagePreview}</h2></header>
+  <div class="asset-preview-body"><img id="asset-preview-image" alt="" /></div>
+  <footer class="json-footer rename-footer"><button id="close-asset-preview" type="button" title={t.close} aria-label={t.close}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg></button></footer>
+ </dialog>
  <button id="exit-focus" hidden>{t.exit}</button>
  <dialog id="delete-dialog" role="alertdialog" aria-labelledby="delete-title" aria-describedby="delete-description delete-name"><div class="dialog-inner"><div class="delete-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7" /></svg></div><h2 id="delete-title">{t.deleteTitle}</h2><p id="delete-name"></p><p id="delete-description"></p><div class="delete-actions"><button id="cancel-delete" type="button" autofocus>{t.cancel}</button><button id="confirm-delete" type="button">{t.remove}</button></div></div></dialog>
  <dialog id="rename-dialog" aria-labelledby="rename-title" aria-describedby="rename-hint">
