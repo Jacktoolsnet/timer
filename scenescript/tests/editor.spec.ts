@@ -270,7 +270,7 @@ test('image and shape settings use appearance, layout and animation groups',asyn
   const form=page.locator('#element-form');await expect(form.locator('fieldset')).toHaveCount(3);
   const appearance=form.locator(`.${type}StyleGroup`);await expect(appearance.locator('[name=opacity]')).toBeVisible();await expect(appearance.locator('[name=radius]')).toBeVisible();
   await expect(form.locator('.elementLayoutGroup [name=x]')).toBeVisible();await expect(form.locator('.elementMotionGroup [name=animation]')).toBeVisible();
-  if(type==='image'){await expect(appearance.locator('[name=asset]')).toBeVisible();await expect(appearance.locator('[name=fit]')).toBeVisible();}else{await expect(appearance.locator('[name=color]')).toBeVisible();}
+  if(type==='image'){await expect(appearance.locator('[name=asset]')).toBeVisible();await expect(appearance.locator('[name=fit]')).toBeVisible();}else{await expect(appearance.locator('[name=fillColor]')).toBeVisible();}
   await form.locator('[name=width]').fill('60');await form.locator('[name=width]').dispatchEvent('change');
   expect(JSON.parse(await exportedJSON(page)).scenes[0].elements.at(-1).width).toBe(60);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();
@@ -326,4 +326,21 @@ test('zoom and through-black transitions render complete scenes and save their v
   await page.locator('#scene-form [name=transition]').selectOption(kind);expect(await incoming.evaluate(el=>el.style.transform)).toBe(startScale);await page.locator('#timeline').fill('6');await expect(incoming).toHaveCSS('opacity','0.5');await page.locator('#timeline').fill('7');await expect(page.locator('.scene-layer')).toHaveCount(1);expect(await incoming.evaluate(el=>el.style.transform)).toBe('scale(1)');
  }
  expect(JSON.parse(await exportedJSON(page)).scenes[1].transition).toBe('zoom-out');
+});
+
+test('shapes support no fill, independent borders and JSON round trips',async({page})=>{
+ await page.goto('/en/');await page.locator('#element-add-menu summary').click();await page.locator('[data-add=shape]').click();const shape=page.locator('.scene-element.selected');
+ await page.getByRole('switch',{name:'No fill',exact:true}).check();await expect(page.locator('[name=fillColor]')).toBeDisabled();await expect(shape).toHaveCSS('background-color','rgba(0, 0, 0, 0)');
+ await page.getByRole('switch',{name:'No border',exact:true}).uncheck();await page.locator('[name=borderColor]').fill('#ff8800');await page.locator('[name=borderWidth]').fill('12');await page.locator('[name=borderWidth]').dispatchEvent('change');await expect(shape).toHaveCSS('border-top-width','12px');await expect(shape).toHaveCSS('border-top-color','rgb(255, 136, 0)');
+ const saved=JSON.parse(await exportedJSON(page));expect(saved.scenes[0].elements.at(-1)).toMatchObject({fillColor:'none',borderColor:'#ff8800',borderWidth:12});
+ await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(saved));await page.locator('#import-json').click();await page.locator('#element-list button').last().click();await expect(page.getByRole('switch',{name:'No fill',exact:true})).toBeChecked();await expect(shape).toHaveCSS('border-top-width','12px');
+ await page.getByRole('switch',{name:'No border',exact:true}).check();await expect(shape).toHaveCSS('border-top-style','none');await page.getByRole('switch',{name:'No fill',exact:true}).uncheck();await page.locator('[name=fillColor]').fill('#008800');await expect(shape).toHaveCSS('background-color','rgb(0, 136, 0)');
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();
+});
+
+test('shape border line styles render and persist independently of no border',async({page})=>{
+ await page.goto('/en/');await page.locator('#element-add-menu summary').click();await page.locator('[data-add=shape]').click();await page.getByRole('switch',{name:'No border',exact:true}).uncheck();
+ for(const style of ['solid','dashed','dotted','double']){await page.locator('[name=borderStyle]').selectOption(style);await expect(page.locator('.scene-element.selected')).toHaveCSS('border-top-style',style);}
+ const saved=JSON.parse(await exportedJSON(page));expect(saved.scenes[0].elements.at(-1).borderStyle).toBe('double');
+ await page.getByRole('switch',{name:'No border',exact:true}).check();await expect(page.locator('.scene-element.selected')).toHaveCSS('border-top-style','none');await page.getByRole('switch',{name:'No border',exact:true}).uncheck();await expect(page.locator('.scene-element.selected')).toHaveCSS('border-top-style','double');
 });

@@ -312,6 +312,32 @@
                   "maxLength": 200,
                   "default": "",
                   "description": "Optional display title; empty uses a content-based label."
+                },
+                "fillColor": {
+                  "type": "string",
+                  "pattern": "^(none|#[0-9a-fA-F]{6})$",
+                  "description": "Shape fill. Missing uses legacy color; none is transparent."
+                },
+                "borderColor": {
+                  "type": "string",
+                  "pattern": "^(none|#[0-9a-fA-F]{6})$",
+                  "default": "none"
+                },
+                "borderWidth": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 500,
+                  "default": 4
+                },
+                "borderStyle": {
+                  "type": "string",
+                  "enum": [
+                    "solid",
+                    "dashed",
+                    "dotted",
+                    "double"
+                  ],
+                  "default": "solid"
                 }
               },
               "required": [

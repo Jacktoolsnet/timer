@@ -1,5 +1,15 @@
 import type { Language } from './i18n';
 const words = {
+ borderStyle:['Linientyp','Line style','Tipo de línea','Style de ligne'],
+ solid:['Durchgezogen','Solid','Continua','Continu'],
+ dashed:['Gestrichelt','Dashed','Discontinua','Tirets'],
+ dotted:['Gepunktet','Dotted','Punteada','Pointillé'],
+ double:['Doppellinie','Double','Doble','Double'],
+ fillColor:['Füllfarbe','Fill color','Color de relleno','Couleur de remplissage'],
+ borderColor:['Rahmenfarbe','Border color','Color del borde','Couleur du contour'],
+ borderWidth:['Rahmenbreite (Projektpixel)','Border width (project pixels)','Grosor del borde (píxeles del proyecto)','Épaisseur du contour (pixels du projet)'],
+ noFill:['Keine Füllung','No fill','Sin relleno','Sans remplissage'],
+ noBorder:['Kein Rahmen','No border','Sin borde','Sans contour'],
  'transition-zoom-in':['Zoom hinein','Zoom in','Acercamiento','Zoom avant'],
  'transition-zoom-out':['Zoom heraus','Zoom out','Alejamiento','Zoom arrière'],
  'transition-through-black':['Über Schwarz','Through black','A través de negro','Passage au noir'],

@@ -111,6 +111,18 @@ function field(form:HTMLElement,key:string,value:string|number|boolean,kind:stri
  }else label.append(input);
  form.append(label);
 }
+function shapeColorField(form:HTMLElement,key:'fillColor'|'borderColor',value:string){
+ const label=document.createElement('label');label.append(document.createTextNode(t(key)));
+ const row=document.createElement('span');row.className='shape-color-control';
+ const color=document.createElement('input');color.type='color';color.name=key;let lastColor=value==='none'?'#ffffff':value;color.value=lastColor;color.disabled=value==='none';color.setAttribute('aria-label',t(key));
+ const none=document.createElement('span');none.className='shape-color-none';none.append(document.createTextNode(t('none')));
+ const wrapper=document.createElement('span');wrapper.className='safe-switch';
+ const toggle=document.createElement('input');toggle.type='checkbox';toggle.name=key+'None';toggle.checked=value==='none';toggle.setAttribute('role','switch');toggle.setAttribute('aria-label',t(key==='fillColor'?'noFill':'noBorder'));toggle.title=t(key==='fillColor'?'noFill':'noBorder');
+ const track=document.createElement('span');track.className='safe-switch-track';track.setAttribute('aria-hidden','true');wrapper.append(toggle,track);none.append(wrapper);
+ color.addEventListener('input',()=>{lastColor=color.value;updateElement(key,lastColor);});
+ toggle.addEventListener('change',()=>{color.disabled=toggle.checked;updateElement(key,toggle.checked?'none':lastColor);});
+ row.append(color,none);label.append(row);form.append(label);
+}
 function updateScene(key:keyof Scene,value:unknown){const previous=current()[key];(current() as unknown as Record<string,unknown>)[key]=value;try{parseProject(JSON.stringify(project));stop();time=offset(sceneIndex);changed();draw();if(key==='background'&&richEditor)richEditor.editor.style.backgroundColor=current().background;if(key==='name'||key==='duration')renderSceneLabels();}catch(error){(current() as unknown as Record<string,unknown>)[key]=previous;status(t('error')+' '+(error as Error).message);renderForms();}}
 function renderSceneLabels(){const buttons=$('scene-list').querySelectorAll('button');project.scenes.forEach((s,i)=>{buttons[i].textContent=`${i+1}. ${s.name} · ${s.duration}s`;buttons[i].title=buttons[i].textContent||'';});}
 let richEditor:ReturnType<typeof richTextEditor>|undefined;
@@ -132,7 +144,8 @@ function renderForms(){
  richEditor.editor.style.backgroundColor=s.background;
  const contentLabel=document.createElement('label');contentLabel.append(document.createTextNode(t('text')),richEditor.editor,richEditor.hint);contentLabel.dataset.richText='true';ef.append(contentLabel);field(ef,'font',e.font,'select',v=>updateElement('font',v),fonts);field(ef,'fontSize',e.fontSize,'number',v=>updateElement('fontSize',v),undefined,1,500);field(ef,'align',e.align,'select',v=>updateElement('align',v),['left','center','right']);for(const key of ['bold','italic','underline','strikethrough'] as const)field(ef,key,e[key],'checkbox',v=>updateElement(key,v));}
  if(e.type==='image'){field(ef,'asset',e.asset,'select',v=>updateElement('asset',v),['',...Object.keys(project.assets)]);field(ef,'fit',e.fit,'select',v=>updateElement('fit',v),['contain','cover']);}
- if(e.type!=='image')field(ef,'color',e.color,'color',v=>updateElement('color',v));
+ if(e.type==='text')field(ef,'color',e.color,'color',v=>updateElement('color',v));
+ if(e.type==='shape'){shapeColorField(ef,'fillColor',e.fillColor);shapeColorField(ef,'borderColor',e.borderColor);field(ef,'borderStyle',e.borderStyle,'select',v=>updateElement('borderStyle',v),['solid','dashed','dotted','double']);field(ef,'borderWidth',e.borderWidth,'number',v=>updateElement('borderWidth',v),undefined,0,500);}
  for(const [key,min,max] of [['x',-100,100],['y',-100,100],['width',0.1,200],['height',0.1,200],['opacity',0,1],['rotation',-360,360],['radius',0,1000]] as const)field(ef,key,e[key],'number',v=>updateElement(key,v),undefined,min,max);
  field(ef,'animation',e.animation,'select',v=>updateElement('animation',v),animations);field(ef,'at',e.at,'number',v=>updateElement('at',v),undefined,0,s.duration);field(ef,'animationDuration',e.animationDuration,'number',v=>updateElement('animationDuration',v),undefined,0.01,3600);
  ef.classList.add('text-settings');
@@ -142,7 +155,7 @@ function renderForms(){
    ['elementLayoutGroup',['x','y','width','height','rotation']],
    ['elementMotionGroup',['animation','at','animationDuration']]
   ]:[
-   [e.type==='image'?'imageStyleGroup':'shapeStyleGroup',e.type==='image'?['asset','fit','opacity','radius']:['color','opacity','radius']],
+   [e.type==='image'?'imageStyleGroup':'shapeStyleGroup',e.type==='image'?['asset','fit','opacity','radius']:['fillColor','borderColor','opacity','borderWidth','borderStyle','radius']],
    ['elementLayoutGroup',['x','y','width','height','rotation']],
    ['elementMotionGroup',['animation','at','animationDuration']]
   ];
@@ -202,7 +215,7 @@ function createSceneLayer(scene:Scene,index:number,interactive:boolean){
    Object.assign(node.style,{left:`${e.x*w/100}px`,top:`${e.y*h/100}px`,width:`${e.width*w/100}px`,height:`${e.height*h/100}px`,color:e.color,fontFamily:e.font,fontSize:`${e.fontSize}px`,fontWeight:e.bold?'700':'400',fontStyle:e.italic?'italic':'normal',textDecoration:[e.underline?'underline':'',e.strikethrough?'line-through':''].filter(Boolean).join(' ')||'none',textAlign:e.align,justifyContent:e.align==='left'?'flex-start':e.align==='right'?'flex-end':'center',borderRadius:`${e.radius}px`});
    let text:HTMLSpanElement|undefined;
    if(e.type==='text'){node.style.textDecoration='none';text=document.createElement('span');text.style.width='100%';node.append(text);}
-   else if(e.type==='shape')node.style.background=e.color;
+   else if(e.type==='shape'){node.style.background=e.fillColor==='none'?'transparent':e.fillColor;node.style.border=e.borderColor==='none'?'none':`${Math.min(e.borderWidth,e.width*w/200,e.height*h/200)}px ${e.borderStyle} ${e.borderColor}`;}
    else if(e.asset){const img=document.createElement('img');img.src=project.assets[e.asset].data;img.alt=project.assets[e.asset].name;img.style.objectFit=e.fit;node.append(img);}
    else{node.textContent=t('image');node.style.background='#ffffff22';}
    node.addEventListener('click',()=>{if(!interactive||playing||recording)return;selectedId=e.id;renderForms();renderElements();draw();});

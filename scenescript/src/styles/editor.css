@@ -466,3 +466,16 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
 @media(prefers-reduced-motion:reduce) { .app-toast { animation:none; } }
 
 .scene-layer { position:absolute; inset:0; overflow:hidden; transform-origin:center; }
+
+.shape-color-control { display:flex; align-items:center; gap:10px; min-width:0; }
+.shape-color-control > input[type=color] { flex:1; min-width:0; }
+.shape-color-none { display:flex; align-items:center; gap:6px; flex-shrink:0; font-size:calc(11px * var(--font-scale,1)); }
+.shape-color-none .safe-switch input { position:absolute; inset:0; width:100%; height:100%; margin:0; opacity:0; cursor:pointer; z-index:1; }
+.shape-color-control input[type=color]:disabled { opacity:.35; cursor:not-allowed; }
+.shapeStyleGroup .text-settings-fields label:has([name=fillColor]) { grid-column:1; grid-row:1; }
+.shapeStyleGroup .text-settings-fields label:has([name=borderColor]) { grid-column:2; grid-row:1; }
+.shapeStyleGroup .text-settings-fields label:has([name=borderWidth]) { grid-column:2; grid-row:2; }
+.shapeStyleGroup .text-settings-fields label:has([name=radius]) { grid-column:2; grid-row:3; }
+.shapeStyleGroup .text-settings-fields label:has([name=borderStyle]) { grid-column:2; grid-row:3; }
+.shapeStyleGroup .text-settings-fields label:has([name=radius]) { grid-column:2; grid-row:4; }
+.shapeStyleGroup .text-settings-fields label:has([name=radius]) { grid-column:1; grid-row:3; }

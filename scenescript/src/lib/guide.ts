@@ -127,6 +127,10 @@ Optional fields and their defaults:
 - fontSize: 90; number, 1–500 project pixels, not percentages or UI pixels.
 - align: "center"; allowed "left", "center", "right".
 - name: ""; optional display title, at most 200 characters. Does not change rendered text or IDs.
+- fillColor: shape fill color (#RRGGBB) or "none". Omitted uses legacy color.
+- borderColor: "none"; #RRGGBB or "none", for shapes.
+- borderStyle: "solid"; allowed "solid", "dashed", "dotted", "double". Shape outline line style; ignored when borderColor is "none" or borderWidth is zero. A double line needs sufficient width (at least 3 project pixels) to be visible.
+- borderWidth: 4; number, 0–500 project pixels. Zero hides the border. The border is inside the existing element bounds and follows radius; rendered width is clamped to half the smaller shape dimension.
 - runs: []; optional structured rich-text segments (see Rich text below).
 - bold: false; boolean.
 - italic: false; boolean.
@@ -178,7 +182,8 @@ and whitespace, with normal browser wrapping at available break opportunities.
 Long unbroken strings are not forcibly broken. Text too wide/tall is clipped to
 the element box (including rounded corners), then to the canvas. No auto-fit,
 automatic font-size reduction, overflow warning or padding/line-height field
-exists. color controls the text foreground; bold controls its font weight; italic, underline and strikethrough enable the corresponding text styles.
+exists. For shapes, fillColor and borderColor independently support "none"; both may be transparent.
+color controls the text foreground; bold controls its font weight; italic, underline and strikethrough enable the corresponding text styles.
 
 ### Images, backgrounds and shapes
 
@@ -190,7 +195,8 @@ No object-position field exists. Background images always use centered cover
 across the whole canvas, above the background color and below all elements.
 color does not tint an actual image. It is the container's foreground color
 and can affect the text of an empty-image placeholder, not image pixels.
-For shape, color is the rectangle's solid background color; text is not drawn.
+For shape, fillColor sets the rectangle fill (or "none"); missing fillColor inherits
+legacy color. borderColor independently sets its outline (or "none"). Text is not drawn.
 radius sets the element container's rounded corners for every type: it clips
 text and images and rounds shape fills. Large radii follow browser CSS border-
 radius normalization. A scene background image has no radius field.

@@ -54,3 +54,17 @@ test('zoom and through-black scene transitions include precise midpoint and endp
  scene.transition='zoom-out';assert.equal(sceneTransitionState(scene,0).incoming,'scale(1.3)');assert.equal(sceneTransitionState(scene,2).incoming,'scale(1)');assert.equal(sceneTransitionState(scene,1).opacity,.5);
  scene.transition='through-black';for(const [time,outgoing,incoming] of [[0,1,0],[.5,.5,0],[1,0,0],[1.5,0,.5],[2,0,1]]){const state=sceneTransitionState(scene,time);assert.equal(state.outgoingOpacity,outgoing);assert.equal(state.opacity,incoming);}
 });
+
+test('shape fill and border validate independently and preserve legacy color',()=>{
+ const p=demoProject();const shape=newElement('shape','rectangle');p.scenes[0].elements=[shape];
+ shape.fillColor='none';shape.borderColor='#ff8800';shape.borderWidth=12;assert.deepEqual(parseProject(serialize(p)).scenes[0].elements[0],shape);
+ const legacy=JSON.parse(serialize(p));delete legacy.scenes[0].elements[0].fillColor;delete legacy.scenes[0].elements[0].borderColor;delete legacy.scenes[0].elements[0].borderWidth;legacy.scenes[0].elements[0].color='#123456';const parsed=parseProject(serialize(legacy)).scenes[0].elements[0];assert.equal(parsed.fillColor,'#123456');assert.equal(parsed.borderColor,'none');
+ for(const [key,value] of [['fillColor','red'],['borderColor','transparent'],['borderWidth',-1],['borderWidth',501]]){const invalid=structuredClone(p);(invalid.scenes[0].elements[0] as any)[key]=value;assert.throws(()=>parseProject(serialize(invalid)));}
+});
+
+test('border line styles round trip, default to solid and reject unknown values',()=>{
+ const p=demoProject(),e=newElement('shape');p.scenes[0].elements=[e];
+ for(const style of ['solid','dashed','dotted','double'] as const){e.borderStyle=style;assert.equal(parseProject(serialize(p)).scenes[0].elements[0].borderStyle,style);}
+ const legacy=JSON.parse(serialize(p));delete legacy.scenes[0].elements[0].borderStyle;assert.equal(parseProject(serialize(legacy)).scenes[0].elements[0].borderStyle,'solid');
+ (e as any).borderStyle='unknown';assert.throws(()=>parseProject(serialize(p)));
+});

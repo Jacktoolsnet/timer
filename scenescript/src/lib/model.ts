@@ -5,7 +5,7 @@ export type Asset = { name:string; data:string };
 export type TextRun = {text:string} & Partial<Pick<Element,'font'|'fontSize'|'color'|'bold'|'italic'|'underline'|'strikethrough'>>;
 export type Element = {
  id:string; name:string; type:'text'|'image'|'shape'; text:string; runs:TextRun[]; asset:string; x:number; y:number; width:number; height:number;
- color:string; font:typeof fonts[number]; fontSize:number; align:'left'|'center'|'right'; bold:boolean; italic:boolean; underline:boolean; strikethrough:boolean;
+ color:string; fillColor:string; borderColor:string; borderWidth:number; borderStyle:'solid'|'dashed'|'dotted'|'double'; font:typeof fonts[number]; fontSize:number; align:'left'|'center'|'right'; bold:boolean; italic:boolean; underline:boolean; strikethrough:boolean;
  opacity:number; rotation:number; radius:number; fit:'cover'|'contain';
  animation:typeof animations[number]; at:number; animationDuration:number;
 };
@@ -15,7 +15,7 @@ export type Project = { version:'1.0'; title:string; format:keyof typeof formats
 export const MAX_FILE_BYTES = 30 * 1024 * 1024;
 export const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 export function newElement(type:Element['type'], id:string = crypto.randomUUID()):Element {
- return {id,name:'',type,text:type==='text'?'Your story starts here.':'',runs:[],asset:'',x:10,y:35,width:80,height:30,color:type==='shape'?'#b86445':'#ffffff',font:'Arial',fontSize:90,align:'center',bold:false,italic:false,underline:false,strikethrough:false,opacity:1,rotation:0,radius:0,fit:'contain',animation:'fade',at:0,animationDuration:1};
+ return {id,name:'',type,text:type==='text'?'Your story starts here.':'',runs:[],asset:'',x:10,y:35,width:80,height:30,color:type==='shape'?'#b86445':'#ffffff',fillColor:type==='shape'?'#b86445':'#ffffff',borderColor:'none',borderWidth:4,borderStyle:'solid',font:'Arial',fontSize:90,align:'center',bold:false,italic:false,underline:false,strikethrough:false,opacity:1,rotation:0,radius:0,fit:'contain',animation:'fade',at:0,animationDuration:1};
 }
 export function newScene(id:string = crypto.randomUUID()):Scene {
  return {id,name:'Scene',duration:5,background:'#263b42',backgroundAsset:'',transition:'fade',transitionDuration:0.5,elements:[]};
@@ -74,7 +74,7 @@ export function parseProject(input:string):Project {
    const text=runs.length?str(runs.map(r=>r.text).join(''),`${ep}.text`):str(merged.text,`${ep}.text`);
    return {id:eid,name:str(merged.name,`${ep}.name`,200),type,text,runs,asset:ref(merged.asset,`${ep}.asset`),
     x:num(merged.x,`${ep}.x`,-100,100),y:num(merged.y,`${ep}.y`,-100,100),width:num(merged.width,`${ep}.width`,0.1,200),height:num(merged.height,`${ep}.height`,0.1,200),
-    color:color(merged.color,`${ep}.color`),font:one(merged.font,fonts,`${ep}.font`),fontSize:num(merged.fontSize,`${ep}.fontSize`,1,500),align:one(merged.align,['left','center','right'] as const,`${ep}.align`),bold:merged.bold,italic:merged.italic,underline:merged.underline,strikethrough:merged.strikethrough,
+    color:color(merged.color,`${ep}.color`),fillColor:(e.fillColor??merged.color)==='none'?'none':color(e.fillColor??merged.color,`${ep}.fillColor`),borderColor:merged.borderColor==='none'?'none':color(merged.borderColor,`${ep}.borderColor`),borderWidth:num(merged.borderWidth,`${ep}.borderWidth`,0,500),borderStyle:one(merged.borderStyle,['solid','dashed','dotted','double'] as const,`${ep}.borderStyle`),font:one(merged.font,fonts,`${ep}.font`),fontSize:num(merged.fontSize,`${ep}.fontSize`,1,500),align:one(merged.align,['left','center','right'] as const,`${ep}.align`),bold:merged.bold,italic:merged.italic,underline:merged.underline,strikethrough:merged.strikethrough,
     opacity:num(merged.opacity,`${ep}.opacity`,0,1),rotation:num(merged.rotation,`${ep}.rotation`,-360,360),radius:num(merged.radius,`${ep}.radius`,0,1000),fit:one(merged.fit,['cover','contain'] as const,`${ep}.fit`),
     animation:one(merged.animation,animations,`${ep}.animation`),at:num(merged.at,`${ep}.at`,0,duration),animationDuration:num(merged.animationDuration,`${ep}.animationDuration`,0.01,3600)};
   });
