@@ -373,6 +373,11 @@
             "type": "number",
             "minimum": 0,
             "maximum": 1
+          },
+          "backgroundEnabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "False hides the entire scene background (color, gradient, image) without changing its saved settings or hiding elements."
           }
         },
         "required": [

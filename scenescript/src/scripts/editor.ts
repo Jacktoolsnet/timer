@@ -130,7 +130,7 @@ function field(form:HTMLElement,key:string,value:string|number|boolean,kind:stri
   function sync(){controls[0].disabled=min!==undefined&&number.valueAsNumber<=min;controls[1].disabled=max!==undefined&&number.valueAsNumber>=max;}
   number.addEventListener('input',sync);number.addEventListener('change',sync);sync();
   wrapper.append(controls[0],number,controls[1]);label.append(wrapper);
- }else if(kind==='checkbox'&&['bold','italic','underline','strikethrough'].includes(key)){
+ }else if(kind==='checkbox'&&['bold','italic','underline','strikethrough','backgroundEnabled'].includes(key)){
   label.classList.add('text-style-toggle');
   const wrapper=document.createElement('span');wrapper.className='safe-switch';
   input.setAttribute('role','switch');input.setAttribute('aria-label',t(key));
@@ -205,7 +205,7 @@ function renderProjectSimulation(){
 }
 $('project-simulation').addEventListener('click',()=>{renderProjectSimulation();simulationDialog.showModal();});
 $('close-simulation').addEventListener('click',()=>simulationDialog.close());
-function updateScene(key:keyof Scene,value:unknown){const previous=current()[key];(current() as unknown as Record<string,unknown>)[key]=value;try{parseProject(JSON.stringify(project));stop();time=offset(sceneIndex);changed();draw();if((key==='background'||key==='backgroundGradient')&&richEditor)richEditor.editor.style.background=gradientCSS(current().backgroundGradient,current().background);if(key==='name'||key==='duration')renderSceneLabels();}catch(error){(current() as unknown as Record<string,unknown>)[key]=previous;status(t('error')+' '+(error as Error).message);renderForms();}}
+function updateScene(key:keyof Scene,value:unknown){const previous=current()[key];(current() as unknown as Record<string,unknown>)[key]=value;try{parseProject(JSON.stringify(project));stop();time=offset(sceneIndex);changed();draw();if((key==='background'||key==='backgroundGradient'||key==='backgroundEnabled')&&richEditor)richEditor.editor.style.background=current().backgroundEnabled?gradientCSS(current().backgroundGradient,current().background):'#000000';if(key==='name'||key==='duration')renderSceneLabels();}catch(error){(current() as unknown as Record<string,unknown>)[key]=previous;status(t('error')+' '+(error as Error).message);renderForms();}}
 function renderSceneLabels(){const buttons=$('scene-list').querySelectorAll('button');project.scenes.forEach((s,i)=>{buttons[i].textContent=`${i+1}. ${s.name} · ${s.duration}s`;buttons[i].title=buttons[i].textContent||'';});}
 let richEditor:ReturnType<typeof richTextEditor>|undefined;
 function updateElement(key:keyof Element,value:unknown){
@@ -217,6 +217,7 @@ function renderForms(){
  richEditor?.dispose();richEditor=undefined;
  const form=$('scene-form');form.replaceChildren();const s=current();
  field(form,'name',s.name,'text',v=>updateScene('name',v));field(form,'duration',s.duration,'number',v=>updateScene('duration',v),undefined,0.1,3600);
+ field(form,'backgroundEnabled',s.backgroundEnabled,'checkbox',v=>updateScene('backgroundEnabled',v));
  field(form,'backgroundOpacity',s.backgroundOpacity,'number',v=>updateScene('backgroundOpacity',v),undefined,0,1);
  field(form,'background',s.background,'color',v=>updateScene('background',v));gradientFields(form,'backgroundGradient',s.backgroundGradient,s.background,v=>updateScene('backgroundGradient',v));field(form,'backgroundAsset',s.backgroundAsset,'select',v=>updateScene('backgroundAsset',v),['',...Object.keys(project.assets)]);
  field(form,'transition',s.transition,'select',v=>updateScene('transition',v),sceneTransitions);field(form,'transitionDuration',s.transitionDuration,'number',v=>updateScene('transitionDuration',v),undefined,0.01,3600);
@@ -224,7 +225,7 @@ function renderForms(){
  if(e.type==='text'){
  richEditor=richTextEditor(e,()=>{changed();stop();draw(false);renderElements();},(key,value)=>updateElementValue(key,value),{selection:t('richSelectionHint'),block:t('richBlockHint')});
  richEditor.editor.setAttribute('aria-label',t('text'));
- richEditor.editor.style.background=gradientCSS(s.backgroundGradient,s.background);
+ richEditor.editor.style.background=s.backgroundEnabled?gradientCSS(s.backgroundGradient,s.background):'#000000';
  const contentLabel=document.createElement('label');contentLabel.append(document.createTextNode(t('text')),richEditor.editor,richEditor.hint);contentLabel.dataset.richText='true';ef.append(contentLabel);field(ef,'font',e.font,'select',v=>updateElement('font',v),fonts);field(ef,'fontSize',e.fontSize,'number',v=>updateElement('fontSize',v),undefined,1,500);field(ef,'align',e.align,'select',v=>updateElement('align',v),['left','center','right']);for(const key of ['bold','italic','underline','strikethrough'] as const)field(ef,key,e[key],'checkbox',v=>updateElement(key,v));}
  if(e.type==='image'){field(ef,'asset',e.asset,'select',v=>updateElement('asset',v),['',...Object.keys(project.assets)]);field(ef,'fit',e.fit,'select',v=>updateElement('fit',v),['contain','cover']);}
  if(e.type==='text')field(ef,'color',e.color,'color',v=>updateElement('color',v));
@@ -301,9 +302,10 @@ function syncProjectSimulation(){
 let transitionBlack:HTMLDivElement|undefined;
 let stageKey='',views:SceneView[]=[],incomingLayer:HTMLDivElement|undefined,incomingSvgBackground:SVGSVGElement|undefined,outgoingLayer:HTMLDivElement|undefined;
 function createSceneLayer(scene:Scene,index:number,interactive:boolean){
- const layer=document.createElement('div');layer.className='scene-layer';layer.dataset.sceneIndex=String(index);layer.style.background=scene.backgroundOpacity===1?gradientCSS(scene.backgroundGradient,scene.background):'transparent';
+ const backgroundOpacity=scene.backgroundEnabled?scene.backgroundOpacity:0;
+ const layer=document.createElement('div');layer.className='scene-layer';layer.dataset.sceneIndex=String(index);layer.style.background=backgroundOpacity===1?gradientCSS(scene.backgroundGradient,scene.background):'transparent';
  let backgroundHost:HTMLElement=layer;
- if(scene.backgroundOpacity<1){const backdrop=document.createElement('div');backdrop.className='scene-backdrop';backdrop.style.background=gradientCSS(scene.backgroundGradient,scene.background);backdrop.style.opacity=String(scene.backgroundOpacity);layer.append(backdrop);backgroundHost=backdrop;}
+ if(backgroundOpacity<1){const backdrop=document.createElement('div');backdrop.className='scene-backdrop';backdrop.style.background=gradientCSS(scene.backgroundGradient,scene.background);backdrop.style.opacity=String(backgroundOpacity);layer.append(backdrop);backgroundHost=backdrop;}
  if(!interactive)layer.style.pointerEvents='none';
  const [w,h]=formats[project.format];const sceneViews:SceneView[]=[];
  const simulationPixelBudget=8000000/Math.max(1,scene.elements.filter(e=>e.type==='simulation').length);
@@ -338,7 +340,7 @@ function draw(follow=true){
  const key=`${revision}:${at.index}:${project.format}:${playing}:${recording}:${selectedId}:${showPrevious}`;
  if(stageKey!==key){
   stageKey=key;stage.replaceChildren(...(projectSimulation?[projectSimulation.canvas]:[]));outgoingLayer=undefined;transitionBlack=undefined;
-  if(projectSimulation&&s.transition==='through-black'){transitionBlack=document.createElement('div');transitionBlack.className='project-transition-black';stage.append(transitionBlack);}stage.style.background=projectSimulation||layered||s.backgroundGradient||s.backgroundOpacity<1?'#000000':s.background;resize();
+  if(projectSimulation&&s.transition==='through-black'){transitionBlack=document.createElement('div');transitionBlack.className='project-transition-black';stage.append(transitionBlack);}stage.style.background=projectSimulation||layered||s.backgroundGradient||!s.backgroundEnabled||s.backgroundOpacity<1?'#000000':s.background;resize();
   if(showPrevious){const previous=project.scenes[at.index-1],view=createSceneLayer(previous,at.index-1,false);outgoingLayer=view.layer;stage.append(view.layer);updateSceneViews(view.views,previous.duration);seekSvg(view.svgBackground,previous.duration);}
   const view=createSceneLayer(s,at.index,true);incomingLayer=view.layer;incomingSvgBackground=view.svgBackground;views=view.views;stage.append(view.layer);
  }

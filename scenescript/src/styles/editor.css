@@ -546,3 +546,5 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
 .simulationStyleGroup .simulation-settings { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
 .simulationStyleGroup .simulation-settings > label:first-child { grid-column:1 / -1; }
 .project-transition-black { position:absolute; inset:0; background:#000; pointer-events:none; }
+
+#scene-form .text-style-toggle:has([name=backgroundEnabled]) { flex-direction:row; align-items:center; justify-content:space-between; min-height:40px; gap:12px; }

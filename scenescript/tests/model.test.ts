@@ -116,3 +116,10 @@ test('simulation defaults, validation, opacity and particle budgets',()=>{
  raw.scenes[0].elements=Array.from({length:26},(_,i)=>({id:'effect-'+i,type:'simulation',simulation:{type:'snow',count:200}}));
  assert.throws(()=>parseProject(serialize(raw)),/5000/);
 });
+
+test('background switch defaults on and requires a boolean',()=>{
+ const p=JSON.parse(serialize(demoProject()));delete p.scenes[0].backgroundEnabled;
+ assert.equal(parseProject(serialize(p)).scenes[0].backgroundEnabled,true);
+ p.scenes[0].backgroundEnabled=false;assert.equal(parseProject(serialize(p)).scenes[0].backgroundEnabled,false);
+ p.scenes[0].backgroundEnabled='false';assert.throws(()=>parseProject(serialize(p)),/backgroundEnabled/);
+});

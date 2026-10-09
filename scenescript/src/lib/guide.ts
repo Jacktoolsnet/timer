@@ -117,6 +117,7 @@ Optional fields and their defaults:
 - name: "Scene"; string, maximum 200 UTF-16 code units.
 - duration: 5; number, 0.1–3600 seconds.
 - background: "#263b42"; #RRGGBB color.
+- backgroundEnabled: true; boolean. False hides scene color/gradient and background image, revealing the project simulation. Background settings are retained; scene elements are unaffected.
 - backgroundOpacity: 1; number 0–1, applies to the scene color/gradient and background image only, not its elements.
 - backgroundGradient: null; optional gradient object (see Gradients below).
 - backgroundAsset: ""; empty or an existing asset ID, maximum 100 code units.
@@ -461,7 +462,8 @@ Two uses:
 1. Project.backgroundSimulation: null (disabled by default) or a simulation object.
    It uses absolute project time, starting at zero. It remains a single background
    behind all scene layers and does not restart, slide or zoom on scene changes.
-   Set scene.backgroundOpacity to 0 to reveal it, or between 0 and 1 for a tint.
+   Set scene.backgroundEnabled to false to reveal it, or keep it true with
+   backgroundOpacity between 0 and 1 for a tint (0 hides the background too).
    An opaque scene background hides the simulation but does not stop its clock.
 2. Element.type: "simulation", with an element.simulation object.
    It has a transparent background and uses scene-local time minus element.at,

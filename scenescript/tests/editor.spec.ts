@@ -581,3 +581,19 @@ test('many simulation elements share a bounded canvas pixel budget',async({page}
  const pixels=await page.locator('.scene-element canvas').evaluateAll(nodes=>nodes.reduce((sum,node)=>sum+(node as HTMLCanvasElement).width*(node as HTMLCanvasElement).height,0));
  expect(pixels).toBeLessThan(8100000);
 });
+
+test('scene background switch reveals simulation and preserves background settings',async({page})=>{
+ await page.goto('/en/');await page.locator('#project-simulation').click();await page.locator('#project-simulation-form [name=simulationType]').selectOption('bubbles');await page.locator('#close-simulation').click();
+ await page.locator('[name=backgroundOpacity]').fill('0.6');await page.locator('[name=backgroundOpacity]').dispatchEvent('change');
+ await page.locator('[name=background]').fill('#224466');
+ const toggle=page.getByRole('switch',{name:'Show scene background',exact:true});
+ await expect(toggle).toBeChecked();await toggle.uncheck();
+ await expect(page.locator('.scene-backdrop')).toHaveCSS('opacity','0');
+ await expect(page.locator('.project-simulation-canvas')).toHaveCount(1);
+ await expect(page.locator('.scene-element').first()).toBeVisible();
+ await expect(page.locator('[name=backgroundOpacity]')).toHaveValue('0.6');await expect(page.locator('[name=background]')).toHaveValue('#224466');
+ const saved=JSON.parse(await exportedJSON(page));expect(saved.scenes[0]).toMatchObject({backgroundEnabled:false,backgroundOpacity:.6,background:'#224466'});
+ await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(saved));await page.locator('#import-json').click();await expect(toggle).not.toBeChecked();
+ await toggle.check();await expect(page.locator('.scene-backdrop')).toHaveCSS('opacity','0.6');
+ await expect(page.locator('[name=background]')).toHaveValue('#224466');
+});

@@ -14,7 +14,7 @@ export type Element = {
  animation:typeof animations[number]; at:number; animationDuration:number;
 };
 export const sceneTransitions=['none','fade','crossfade','slide-left','slide-right','slide-up','slide-down','wipe-left','wipe-right','wipe-up','wipe-down','zoom-in','zoom-out','through-black'] as const;
-export type Scene = { id:string; name:string; duration:number; background:string; backgroundOpacity:number; backgroundGradient:Gradient|null; backgroundAsset:string; transition:typeof sceneTransitions[number]; transitionDuration:number; elements:Element[] };
+export type Scene = { id:string; name:string; duration:number; background:string; backgroundEnabled:boolean; backgroundOpacity:number; backgroundGradient:Gradient|null; backgroundAsset:string; transition:typeof sceneTransitions[number]; transitionDuration:number; elements:Element[] };
 export type Project = { version:'1.0'; title:string; format:keyof typeof formats; backgroundSimulation:Simulation|null; assets:Record<string,Asset>; scenes:Scene[] };
 export const MAX_FILE_BYTES = 30 * 1024 * 1024;
 export const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
@@ -22,7 +22,7 @@ export function newElement(type:Element['type'], id:string = crypto.randomUUID()
  return {id,name:'',type,simulation:type==='simulation'?defaultSimulation():null,text:type==='text'?'Your story starts here.':'',runs:[],asset:'',x:10,y:35,width:80,height:30,color:type==='shape'?'#b86445':'#ffffff',fillGradient:null,fillColor:type==='shape'?'#b86445':'#ffffff',borderColor:'none',borderWidth:4,shapeType:'rectangle',borderStyle:'solid',font:'Arial',fontSize:90,align:'center',bold:false,italic:false,underline:false,strikethrough:false,opacity:1,rotation:0,radius:0,fit:'contain',animation:'fade',at:0,animationDuration:1};
 }
 export function newScene(id:string = crypto.randomUUID()):Scene {
- return {id,name:'Scene',duration:5,background:'#263b42',backgroundOpacity:1,backgroundGradient:null,backgroundAsset:'',transition:'fade',transitionDuration:0.5,elements:[]};
+ return {id,name:'Scene',duration:5,background:'#263b42',backgroundEnabled:true,backgroundOpacity:1,backgroundGradient:null,backgroundAsset:'',transition:'fade',transitionDuration:0.5,elements:[]};
 }
 export function demoProject():Project {
  const first = newScene('intro'); first.name='A new idea';
@@ -60,6 +60,7 @@ export function parseProject(input:string):Project {
  const scenes:Scene[]=p.scenes.map((value,i)=>{
   const path=`scenes[${i}]`,s=obj(value,path),d=newScene('scene');keys(s,Object.keys(d),path);
   const sid=id(s.id,`${path}.id`);if(sceneIds.has(sid))throw new Error(`${path}: duplicate ID`);sceneIds.add(sid);
+  if(typeof (s.backgroundEnabled??true)!=='boolean')throw new Error(path+'.backgroundEnabled: expected boolean');
   const duration=num(s.duration??d.duration,`${path}.duration`,0.1,3600);
   if(!Array.isArray(s.elements)||s.elements.length>100)throw new Error(`${path}.elements: expected array (max 100)`);
   const elements=s.elements.map((value,j)=>{
@@ -83,7 +84,7 @@ export function parseProject(input:string):Project {
     opacity:num(merged.opacity,`${ep}.opacity`,0,1),rotation:num(merged.rotation,`${ep}.rotation`,-360,360),radius:num(merged.radius,`${ep}.radius`,0,1000),fit:one(merged.fit,['cover','contain'] as const,`${ep}.fit`),
     animation:one(merged.animation,animations,`${ep}.animation`),at:num(merged.at,`${ep}.at`,0,duration),animationDuration:num(merged.animationDuration,`${ep}.animationDuration`,0.01,3600)};
   });
-  return {id:sid,name:str(s.name??d.name,`${path}.name`,200),duration,backgroundOpacity:num(s.backgroundOpacity??1,path+'.backgroundOpacity',0,1),backgroundGradient:parseGradient(s.backgroundGradient,path+'.backgroundGradient'),background:color(s.background??d.background,`${path}.background`),backgroundAsset:ref(s.backgroundAsset??'',`${path}.backgroundAsset`),transition:one(s.transition??d.transition,sceneTransitions,`${path}.transition`),transitionDuration:num(s.transitionDuration??d.transitionDuration,`${path}.transitionDuration`,0.01,3600),elements};
+  return {id:sid,name:str(s.name??d.name,`${path}.name`,200),duration,backgroundEnabled:(s.backgroundEnabled??true) as boolean,backgroundOpacity:num(s.backgroundOpacity??1,path+'.backgroundOpacity',0,1),backgroundGradient:parseGradient(s.backgroundGradient,path+'.backgroundGradient'),background:color(s.background??d.background,`${path}.background`),backgroundAsset:ref(s.backgroundAsset??'',`${path}.backgroundAsset`),transition:one(s.transition??d.transition,sceneTransitions,`${path}.transition`),transitionDuration:num(s.transitionDuration??d.transitionDuration,`${path}.transitionDuration`,0.01,3600),elements};
  });
  const backgroundSimulation=parseSimulation(p.backgroundSimulation,'backgroundSimulation');
  for(const [i,s] of scenes.entries())if(s.elements.reduce((n,e)=>n+(e.type==='simulation'?e.simulation!.count:0),backgroundSimulation?.count??0)>5000)throw new Error('scenes['+i+']: maximum 5000 simulated particles including project background');
