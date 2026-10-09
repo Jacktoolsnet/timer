@@ -73,7 +73,7 @@ const {lang}=Astro.props,t=editorDictionary(lang);
  <dialog id="simulation-dialog" aria-labelledby="simulation-title" aria-describedby="simulation-hint">
   <header class="json-header"><div class="json-header-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="5" cy="6" r="2" /><circle cx="17" cy="5" r="3" /><circle cx="12" cy="16" r="4" /></svg></div><div><h2 id="simulation-title">{t.projectSimulation}</h2><p id="simulation-hint">{t.simulationHint}</p></div></header>
   <div class="dialog-inner"><form id="project-simulation-form"></form></div>
-  <footer class="json-footer rename-footer"><button id="close-simulation" type="button" title={t.close} aria-label={t.close}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg></button></footer>
+  <footer class="json-footer rename-footer"><div class="json-footer-actions"><button id="apply-simulation" type="submit" form="project-simulation-form" class="json-apply" title={t.applyJson} aria-label={t.applyJson}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg></button><button id="close-simulation" type="button" title={t.cancel} aria-label={t.cancel}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg></button></div></footer>
  </dialog>
  <dialog id="asset-preview-dialog" aria-labelledby="asset-preview-title">
   <header class="preview-dialog-heading"><div class="preview-header-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 3h18v18H3ZM3 17l6-6 4 4 3-3 5 5M16 7h.01" /></svg></div><h2 id="asset-preview-title">{t.imagePreview}</h2></header>

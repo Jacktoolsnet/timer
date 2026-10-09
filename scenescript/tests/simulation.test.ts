@@ -12,3 +12,12 @@ for(const type of simulationTypes)test(type+' trajectories are deterministic, co
  }
  assert.deepEqual(simulationParticles(s,1920,1080,-1),simulationParticles(s,1920,1080,0));
 });
+
+test('effect switching uses matching size presets and preserves custom settings',async()=>{
+ const {switchSimulationType,parseSimulation}=await import('../src/lib/simulation.ts');
+ assert.equal(switchSimulationType(defaultSimulation(), 'bubbles').size,18);
+ assert.equal(switchSimulationType(defaultSimulation('bubbles'), 'snow').size,6);
+ assert.equal(switchSimulationType({...defaultSimulation(),size:25,color:'#a81f1f',seed:99}, 'bubbles').size,25);
+ assert.equal(switchSimulationType({...defaultSimulation(),color:'#a81f1f',seed:99}, 'bubbles').seed,99);
+ assert.equal(parseSimulation({type:'bubbles'},'test')!.size,18);
+});

@@ -474,10 +474,11 @@ Example simulation object:
 {"type":"snow","color":"#ffffff","count":60,"speed":1,"size":6,"opacity":0.75,"seed":1}
 Required type: particles, snow or bubbles. Other fields default as follows:
 color #ffffff; count 60 (integer 1..200); speed 1 (0.1..5 multiplier);
-size 5 (1..100, particle radius in project pixels); opacity 0.75 (0..1);
+size 5 for particles, 6 for snow, 18 for bubbles (1..100, particle radius in project pixels); opacity 0.75 (0..1);
 seed 1 (integer 0..4294967295).
-The project UI's initially chosen snow/bubbles presets use size 6/18 respectively;
-an imported object with omitted size always defaults to 5.
+Switching effect types also updates size if it still equals the old type's default;
+custom sizes and other settings are preserved. Imported omitted sizes use the
+selected type's default.
 Each scene supports at most 5000 particles across its simulation elements plus
 the project simulation. Prefer a few effects with modest counts for recording.
 Particles float upward and pulse softly; snow drifts downward; bubbles rise

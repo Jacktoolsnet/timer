@@ -159,3 +159,9 @@ safe profile and an example are in `src/lib/guide.ts` (`/ai.txt`).
 Inline stage SVGs have per-instance IDs and their SMIL clocks are explicitly
 paused/seeked from scene time (image SVGs relative to element `at`). Asset gallery
 thumbnails can animate independently. No network services or hosting changes.
+
+## Simulation testen
+
+`public/simulation-test.scenescript.json` enthält eine wirklich leere Szene mit
+großen weißen Blasen und ausgeschaltetem Szenenhintergrund. Über Projekt laden
+importieren; in der Aufnahmeansicht Play und den Countdown abwarten.

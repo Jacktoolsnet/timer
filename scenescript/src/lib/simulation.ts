@@ -1,10 +1,15 @@
 export const simulationTypes=['particles','snow','bubbles'] as const;
 export type Simulation={type:typeof simulationTypes[number];color:string;count:number;speed:number;size:number;opacity:number;seed:number};
 export function defaultSimulation(type:Simulation['type']='particles'):Simulation{return {type,color:'#ffffff',count:60,speed:1,size:type==='bubbles'?18:type==='snow'?6:5,opacity:.75,seed:1};}
+export function switchSimulationType(current:Simulation|null,type:Simulation['type']):Simulation{
+ const preset=defaultSimulation(type);if(!current)return preset;
+ return {...current,type,size:current.size===defaultSimulation(current.type).size?preset.size:current.size};
+}
 export function parseSimulation(value:unknown,path:string):Simulation|null{
  if(value===undefined||value===null)return null;
  if(typeof value!=='object'||Array.isArray(value))throw new Error(path+': expected object');
- const s=value as Record<string,unknown>,d=defaultSimulation();
+ const s=value as Record<string,unknown>;
+ const d=defaultSimulation(simulationTypes.includes(s.type as Simulation['type'])?s.type as Simulation['type']:'particles');
  for(const key of Object.keys(s))if(!Object.hasOwn(d,key))throw new Error(path+'.'+key+': unknown field');
  if(!simulationTypes.includes(s.type as Simulation['type']))throw new Error(path+'.type: particles, snow, bubbles');
  if(typeof (s.color??d.color)!=='string'||!/^#[0-9a-f]{6}$/i.test(String(s.color??d.color)))throw new Error(path+'.color: expected #RRGGBB');

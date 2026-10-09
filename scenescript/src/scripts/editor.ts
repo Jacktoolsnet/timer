@@ -1,4 +1,4 @@
-import {defaultSimulation,simulationTypes,type Simulation} from '../lib/simulation';
+import {switchSimulationType,simulationTypes,type Simulation} from '../lib/simulation';
 import {createSimulation,type SimulationView} from './simulation';
 import {defaultGradient,gradientCSS,type Gradient} from '../lib/gradient';
 import {createSvgImage,seekSvg} from './svg-image';
@@ -181,7 +181,7 @@ function simulationFields(form:HTMLElement,config:Simulation|null,update:(value:
  const container=document.createElement('div');container.dataset.simulationSettings='true';container.className='simulation-settings';form.append(container);
  field(container,'simulationType',config?.type||'none','select',v=>{
   if(v==='none'){update(null);return;}
-  update({...config||defaultSimulation(v as Simulation['type']),type:v as Simulation['type']});
+  update(switchSimulationType(config,v as Simulation['type']));
  },projectLevel?['none',...simulationTypes]:simulationTypes);
  if(!config)return;
  const settings:readonly [keyof Simulation,string,string,number?,number?][]=[
@@ -194,17 +194,30 @@ function simulationFields(form:HTMLElement,config:Simulation|null,update:(value:
  },undefined,min,max);
 }
 const simulationDialog=$('simulation-dialog') as HTMLDialogElement;
-$('project-simulation-form').addEventListener('submit',event=>event.preventDefault());
+let simulationDraft:Simulation|null|undefined;
 function renderProjectSimulation(){
  const form=$('project-simulation-form');form.replaceChildren();
- simulationFields(form,project.backgroundSimulation,value=>{
-  const previous=project.backgroundSimulation;project.backgroundSimulation=value;
-  try{parseProject(JSON.stringify(project));stop();changed();draw();if(previous?.type!==value?.type)renderProjectSimulation();return true;}
-  catch(error){project.backgroundSimulation=previous;status(t('error')+' '+(error as Error).message);showToast(t('error')+' '+(error as Error).message,'error');renderProjectSimulation();return false;}
+ simulationFields(form,simulationDraft??null,value=>{
+  const previous=simulationDraft;
+  try{
+   parseProject(JSON.stringify({...project,backgroundSimulation:value}));
+   simulationDraft=value;if(previous?.type!==value?.type)renderProjectSimulation();return true;
+  }catch(error){showToast(t('error')+' '+(error as Error).message,'error');renderProjectSimulation();return false;}
  },true);
 }
-$('project-simulation').addEventListener('click',()=>{renderProjectSimulation();simulationDialog.showModal();});
+$('project-simulation').addEventListener('click',()=>{
+ simulationDraft=structuredClone(project.backgroundSimulation);renderProjectSimulation();simulationDialog.showModal();
+});
+$('project-simulation-form').addEventListener('submit',event=>{
+ event.preventDefault();if(simulationDraft===undefined||!($('project-simulation-form') as HTMLFormElement).reportValidity())return;
+ try{
+  parseProject(JSON.stringify({...project,backgroundSimulation:simulationDraft}));
+  if(JSON.stringify(project.backgroundSimulation)!==JSON.stringify(simulationDraft)){project.backgroundSimulation=structuredClone(simulationDraft);stop();changed();draw();}
+  simulationDialog.close();
+ }catch(error){showToast(t('error')+' '+(error as Error).message,'error');}
+});
 $('close-simulation').addEventListener('click',()=>simulationDialog.close());
+simulationDialog.addEventListener('close',()=>{simulationDraft=undefined;});
 function updateScene(key:keyof Scene,value:unknown){const previous=current()[key];(current() as unknown as Record<string,unknown>)[key]=value;try{parseProject(JSON.stringify(project));stop();time=offset(sceneIndex);changed();draw();if((key==='background'||key==='backgroundGradient'||key==='backgroundEnabled')&&richEditor)richEditor.editor.style.background=current().backgroundEnabled?gradientCSS(current().backgroundGradient,current().background):'#000000';if(key==='name'||key==='duration')renderSceneLabels();}catch(error){(current() as unknown as Record<string,unknown>)[key]=previous;status(t('error')+' '+(error as Error).message);renderForms();}}
 function renderSceneLabels(){const buttons=$('scene-list').querySelectorAll('button');project.scenes.forEach((s,i)=>{buttons[i].textContent=`${i+1}. ${s.name} · ${s.duration}s`;buttons[i].title=buttons[i].textContent||'';});}
 let richEditor:ReturnType<typeof richTextEditor>|undefined;

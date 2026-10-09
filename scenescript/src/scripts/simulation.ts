@@ -13,7 +13,7 @@ export function createSimulation(s:Simulation,width:number,height:number,maxPixe
   for(const p of simulationParticles(s,width,height,t)){
    ctx.globalAlpha=p.alpha;ctx.beginPath();ctx.arc(p.x,p.y,p.radius,0,Math.PI*2);
    if(s.type==='bubbles'){
-    ctx.lineWidth=Math.max(1,p.radius*.08);ctx.stroke();
+    ctx.lineWidth=Math.max(2,p.radius*.12);ctx.stroke();
     ctx.globalAlpha=p.alpha*.13;ctx.fill();
     ctx.globalAlpha=p.alpha*.6;ctx.beginPath();ctx.arc(p.x-p.radius*.28,p.y-p.radius*.28,p.radius*.46,Math.PI,Math.PI*1.55);ctx.stroke();
    }else ctx.fill();

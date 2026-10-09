@@ -537,7 +537,7 @@ test('simulation elements offer transparent effects, positioning and saved setti
 
 test('project simulation keeps one canvas and global time across transitions, pause and recording',async({page})=>{
  await page.goto('/en/');
- await page.locator('#project-simulation').click();await expect(page.locator('#simulation-dialog header')).toBeVisible();await expect(page.locator('#simulation-dialog footer button')).toBeVisible();
+ await page.locator('#project-simulation').click();await expect(page.locator('#simulation-dialog header')).toBeVisible();await expect(page.locator('#simulation-dialog footer button')).toHaveCount(2);
  await page.locator('#project-simulation-form [name=simulationType]').selectOption('snow');
  const stepper=page.locator('#project-simulation-form .number-stepper').first();
  const minus=(await stepper.locator('button').first().boundingBox())!,input=(await stepper.locator('input').boundingBox())!,plus=(await stepper.locator('button').last().boundingBox())!;
@@ -546,7 +546,7 @@ test('project simulation keeps one canvas and global time across transitions, pa
  await page.locator('#project-simulation-form [name=simulationSpeed]').fill('1.5');await page.locator('#project-simulation-form [name=simulationSpeed]').dispatchEvent('change');
  await page.locator('#project-simulation-form [name=simulationSize]').fill('8');await page.locator('#project-simulation-form [name=simulationSize]').dispatchEvent('change');
  await page.locator('#project-simulation-form [name=simulationSeed]').fill('99');await page.locator('#project-simulation-form [name=simulationSeed]').dispatchEvent('change');
- await page.locator('#close-simulation').click();
+ await page.locator('#apply-simulation').click();
  await page.locator('[name=backgroundOpacity]').fill('0');await page.locator('[name=backgroundOpacity]').dispatchEvent('change');
  const canvas=page.locator('.project-simulation-canvas');
  await expect(canvas).toHaveCount(1);
@@ -569,7 +569,7 @@ test('project simulation keeps one canvas and global time across transitions, pa
  await seek('6');const prior=await canvas.evaluate((c:HTMLCanvasElement)=>c.toDataURL());
  await page.locator('#focus').click();await expect(canvas).toHaveAttribute('data-simulation-time','0');await page.waitForTimeout(120);await expect(canvas).toHaveAttribute('data-simulation-time','0');
  await page.locator('#exit-focus').click({force:true});await expect(canvas).toHaveAttribute('data-simulation-time','6');expect(await canvas.evaluate((c:HTMLCanvasElement)=>c.toDataURL())).toBe(prior);
- await page.locator('#project-simulation').click();await page.locator('#project-simulation-form [name=simulationType]').selectOption('none');await page.keyboard.press('Escape');await expect(canvas).toHaveCount(0);
+ await page.locator('#project-simulation').click();await page.locator('#project-simulation-form [name=simulationType]').selectOption('none');await page.locator('#apply-simulation').click();await expect(canvas).toHaveCount(0);
 });
 
 test('many simulation elements share a bounded canvas pixel budget',async({page})=>{
@@ -583,7 +583,7 @@ test('many simulation elements share a bounded canvas pixel budget',async({page}
 });
 
 test('scene background switch reveals simulation and preserves background settings',async({page})=>{
- await page.goto('/en/');await page.locator('#project-simulation').click();await page.locator('#project-simulation-form [name=simulationType]').selectOption('bubbles');await page.locator('#close-simulation').click();
+ await page.goto('/en/');await page.locator('#project-simulation').click();await page.locator('#project-simulation-form [name=simulationType]').selectOption('bubbles');await page.locator('#apply-simulation').click();
  await page.locator('[name=backgroundOpacity]').fill('0.6');await page.locator('[name=backgroundOpacity]').dispatchEvent('change');
  await page.locator('[name=background]').fill('#224466');
  const toggle=page.getByRole('switch',{name:'Show scene background',exact:true});
@@ -596,4 +596,36 @@ test('scene background switch reveals simulation and preserves background settin
  await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(saved));await page.locator('#import-json').click();await expect(toggle).not.toBeChecked();
  await toggle.check();await expect(page.locator('.scene-backdrop')).toHaveCSS('opacity','0.6');
  await expect(page.locator('[name=background]')).toHaveValue('#224466');
+});
+
+test('empty bubble example renders visible particles in recording mode',async({page})=>{
+ await page.goto('/en/');
+ const response=await page.request.get('/simulation-test.scenescript.json');expect(response.ok()).toBe(true);
+ await page.locator('#open-json').click();await page.locator('#json-input').fill(await response.text());await page.locator('#import-json').click();
+ await expect(page.locator('.scene-element')).toHaveCount(0);
+ await page.locator('#focus').click();await page.locator('#start-recording').click();
+ await expect(page.locator('#countdown')).not.toBeVisible({timeout:5000});
+ await expect(page.locator('#recording-start')).not.toBeVisible();await expect(page.locator('.scene-backdrop')).toHaveCSS('opacity','0');
+ const canvas=page.locator('.project-simulation-canvas');
+ expect(await canvas.evaluate((c:HTMLCanvasElement)=>{const data=c.getContext('2d')!.getImageData(0,0,c.width,c.height).data;let visible=0;for(let i=0;i<data.length;i+=4)if(data[i]>100&&data[i+3]>100)visible++;return visible;})).toBeGreaterThan(1000);
+ const t=Number(await canvas.getAttribute('data-simulation-time'));await page.waitForTimeout(150);expect(Number(await canvas.getAttribute('data-simulation-time'))).toBeGreaterThan(t);
+ await page.locator('#exit-focus').click({force:true});
+});
+
+test('simulation modal applies with checkmark and discards drafts with X or Escape',async({page})=>{
+ await page.goto('/en/');const initial=JSON.parse(await exportedJSON(page));
+ await page.locator('#project-simulation').click();await page.locator('#project-simulation-form [name=simulationType]').selectOption('bubbles');
+ await expect(page.locator('.project-simulation-canvas')).toHaveCount(0);
+ await page.locator('#close-simulation').click();
+ expect(JSON.parse(await exportedJSON(page)).backgroundSimulation).toEqual(initial.backgroundSimulation);
+ await page.locator('#project-simulation').click();await expect(page.locator('#project-simulation-form [name=simulationType]')).toHaveValue('none');
+ await page.locator('#project-simulation-form [name=simulationType]').selectOption('snow');await page.locator('#apply-simulation').click();
+ await expect(page.locator('#simulation-dialog')).not.toBeVisible();await expect(page.locator('.project-simulation-canvas')).toHaveCount(1);
+ const saved=JSON.parse(await exportedJSON(page));expect(saved.backgroundSimulation.type).toBe('snow');
+ await page.locator('#project-simulation').click();await page.locator('#project-simulation-form [name=simulationCount]').fill('100');await page.locator('#project-simulation-form [name=simulationCount]').dispatchEvent('change');
+ await page.keyboard.press('Escape');expect(JSON.parse(await exportedJSON(page)).backgroundSimulation).toEqual(saved.backgroundSimulation);
+ await page.locator('#project-simulation').click();await expect(page.locator('#project-simulation-form [name=simulationCount]')).toHaveValue('60');
+ await page.locator('#project-simulation-form [name=simulationCount]').fill('77');await page.locator('#project-simulation-form [name=simulationCount]').dispatchEvent('change');
+ await page.locator('#project-simulation-form [name=simulationSeed]').fill('123');await page.locator('#project-simulation-form [name=simulationSeed]').dispatchEvent('change');
+ await page.locator('#apply-simulation').click();expect(JSON.parse(await exportedJSON(page)).backgroundSimulation).toMatchObject({type:'snow',count:77,seed:123});
 });
