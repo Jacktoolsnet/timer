@@ -1,8 +1,8 @@
 import {simulationParticles,type Simulation} from '../lib/simulation';
 export type SimulationView={canvas:HTMLCanvasElement;draw:(time:number)=>void};
-export function createSimulation(s:Simulation,width:number,height:number):SimulationView{
+export function createSimulation(s:Simulation,width:number,height:number,maxPixels=1500000):SimulationView{
  const canvas=document.createElement('canvas');canvas.className='simulation-canvas';canvas.setAttribute('aria-hidden','true');
- const scale=Math.min(1,1600/Math.max(width,height),Math.sqrt(1500000/(width*height)));
+ const scale=Math.min(1,1600/Math.max(width,height),Math.sqrt(Math.min(1500000,maxPixels)/(width*height)));
  canvas.width=Math.max(1,Math.round(width*scale));canvas.height=Math.max(1,Math.round(height*scale));
  const ctx=canvas.getContext('2d');let lastTime=-1;
  return {canvas,draw(time){

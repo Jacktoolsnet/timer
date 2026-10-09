@@ -200,7 +200,7 @@ function renderProjectSimulation(){
  simulationFields(form,project.backgroundSimulation,value=>{
   const previous=project.backgroundSimulation;project.backgroundSimulation=value;
   try{parseProject(JSON.stringify(project));stop();changed();draw();if(previous?.type!==value?.type)renderProjectSimulation();return true;}
-  catch(error){project.backgroundSimulation=previous;status(t('error')+' '+(error as Error).message);renderProjectSimulation();return false;}
+  catch(error){project.backgroundSimulation=previous;status(t('error')+' '+(error as Error).message);showToast(t('error')+' '+(error as Error).message,'error');renderProjectSimulation();return false;}
  },true);
 }
 $('project-simulation').addEventListener('click',()=>{renderProjectSimulation();simulationDialog.showModal();});
@@ -230,7 +230,7 @@ function renderForms(){
  if(e.type==='text')field(ef,'color',e.color,'color',v=>updateElement('color',v));
  if(e.type==='shape'){field(ef,'shapeType',e.shapeType,'select',v=>updateElement('shapeType',v),shapeTypes);shapeColorField(ef,'fillColor',e.fillColor);shapeColorField(ef,'borderColor',e.borderColor);field(ef,'borderStyle',e.borderStyle,'select',v=>updateElement('borderStyle',v),['solid','dashed','dotted','double']);field(ef,'borderWidth',e.borderWidth,'number',v=>updateElement('borderWidth',v),undefined,0,500);}
  if(e.type==='simulation')simulationFields(ef,e.simulation,value=>{
-  if(!value)return false;const previous=e.simulation;updateElement('simulation',value);if(previous?.type!==value.type)renderForms();return e.simulation===value;
+  if(!value)return false;const previous=e.simulation;updateElement('simulation',value);if(previous?.type!==value.type){renderForms();renderElements();}return e.simulation===value;
  });
  if(e.type==='shape')gradientFields(ef,'fillGradient',e.fillGradient,e.fillColor,v=>updateElement('fillGradient',v));
  for(const [key,min,max] of [['x',-100,100],['y',-100,100],['width',0.1,200],['height',0.1,200],['opacity',0,1],['rotation',-360,360],['radius',0,1000]] as const)field(ef,key,e[key],'number',v=>updateElement(key,v),undefined,min,max);
@@ -306,6 +306,7 @@ function createSceneLayer(scene:Scene,index:number,interactive:boolean){
  if(scene.backgroundOpacity<1){const backdrop=document.createElement('div');backdrop.className='scene-backdrop';backdrop.style.background=gradientCSS(scene.backgroundGradient,scene.background);backdrop.style.opacity=String(scene.backgroundOpacity);layer.append(backdrop);backgroundHost=backdrop;}
  if(!interactive)layer.style.pointerEvents='none';
  const [w,h]=formats[project.format];const sceneViews:SceneView[]=[];
+ const simulationPixelBudget=8000000/Math.max(1,scene.elements.filter(e=>e.type==='simulation').length);
  let svgBackground:SVGSVGElement|undefined;
  if(scene.backgroundAsset&&project.assets[scene.backgroundAsset].data.startsWith('data:image/svg+xml;')){svgBackground=createSvgImage(project.assets[scene.backgroundAsset].data,'cover',true);const background=document.createElement('div');background.className='scene-background';background.append(svgBackground);backgroundHost.append(background);}
  else if(scene.backgroundAsset){const image=document.createElement('img');image.className='scene-background';image.src=project.assets[scene.backgroundAsset].data;image.alt='';backgroundHost.append(image);}
@@ -314,7 +315,7 @@ function createSceneLayer(scene:Scene,index:number,interactive:boolean){
    Object.assign(node.style,{left:`${e.x*w/100}px`,top:`${e.y*h/100}px`,width:`${e.width*w/100}px`,height:`${e.height*h/100}px`,color:e.color,fontFamily:e.font,fontSize:`${e.fontSize}px`,fontWeight:e.bold?'700':'400',fontStyle:e.italic?'italic':'normal',textDecoration:[e.underline?'underline':'',e.strikethrough?'line-through':''].filter(Boolean).join(' ')||'none',textAlign:e.align,justifyContent:e.align==='left'?'flex-start':e.align==='right'?'flex-end':'center',borderRadius:`${e.radius}px`});
    let text:HTMLSpanElement|undefined,svg:SVGSVGElement|undefined,simulation:SimulationView|undefined;
    if(e.type==='text'){node.style.textDecoration='none';text=document.createElement('span');text.style.width='100%';node.append(text);}
-   else if(e.type==='simulation'){simulation=createSimulation(e.simulation!,e.width*w/100,e.height*h/100);node.append(simulation.canvas);}
+   else if(e.type==='simulation'){simulation=createSimulation(e.simulation!,e.width*w/100,e.height*h/100,simulationPixelBudget);node.append(simulation.canvas);}
    else if(e.type==='shape')renderShape(node,e,e.width*w/100,e.height*h/100);
    else if(e.asset&&project.assets[e.asset].data.startsWith('data:image/svg+xml;')){svg=createSvgImage(project.assets[e.asset].data,e.fit);node.append(svg);}
    else if(e.asset){const img=document.createElement('img');img.src=project.assets[e.asset].data;img.alt=project.assets[e.asset].name;img.style.objectFit=e.fit;node.append(img);}

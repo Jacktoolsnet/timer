@@ -515,6 +515,7 @@ test('simulation elements offer transparent effects, positioning and saved setti
  const canvas=page.locator('.scene-element.selected canvas');
  for(const type of ['particles','snow','bubbles']){
   await page.locator('#element-form [name=simulationType]').selectOption(type);
+  await expect(page.locator('#element-list button').last()).toContainText(type==='particles'?'Particles':type==='snow'?'Snow':'Bubbles');
   await expect(canvas).toHaveCount(1);await expect(page.locator('.scene-element.selected')).toHaveCSS('background-color','rgba(0, 0, 0, 0)');
   expect(await canvas.evaluate((node:HTMLCanvasElement)=>Array.from(node.getContext('2d')!.getImageData(0,0,1,1).data))).toEqual([0,0,0,0]);
  }
@@ -569,4 +570,14 @@ test('project simulation keeps one canvas and global time across transitions, pa
  await page.locator('#focus').click();await expect(canvas).toHaveAttribute('data-simulation-time','0');await page.waitForTimeout(120);await expect(canvas).toHaveAttribute('data-simulation-time','0');
  await page.locator('#exit-focus').click({force:true});await expect(canvas).toHaveAttribute('data-simulation-time','6');expect(await canvas.evaluate((c:HTMLCanvasElement)=>c.toDataURL())).toBe(prior);
  await page.locator('#project-simulation').click();await page.locator('#project-simulation-form [name=simulationType]').selectOption('none');await page.keyboard.press('Escape');await expect(canvas).toHaveCount(0);
+});
+
+test('many simulation elements share a bounded canvas pixel budget',async({page})=>{
+ await page.goto('/en/');
+ const project=demoProject(),template=project.scenes[0].elements[0];
+ project.scenes[0].elements=Array.from({length:100},(_,i)=>({...structuredClone(template),id:'effect-'+i,type:'simulation' as const,width:200,height:200,simulation:{type:'particles' as const,color:'#ffffff',count:1,speed:1,size:5,opacity:1,seed:i}}));
+ await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(project));await page.locator('#import-json').click();
+ await expect(page.locator('.scene-element canvas')).toHaveCount(100);
+ const pixels=await page.locator('.scene-element canvas').evaluateAll(nodes=>nodes.reduce((sum,node)=>sum+(node as HTMLCanvasElement).width*(node as HTMLCanvasElement).height,0));
+ expect(pixels).toBeLessThan(8100000);
 });
