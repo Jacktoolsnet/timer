@@ -37,6 +37,8 @@ Hochkant-Projekte für Smartphone-Zielgruppen sind weiterhin möglich.
   Eckenradius, Bildanpassung und Animationszeitpunkte.
 - 1920×1080, 1080×1920 und 1080×1080 als logische Projektauflösung.
 - Einblenden, Bewegung von rechts/unten, Zoom, Schreibmaschine, langsamer Zoom.
+- Lineare, radiale und konische Verläufe für Szenen und alle Formtypen, mit 2–16
+  Farbstopps, Positionen und Transparenz; im Editor und JSON bearbeitbar.
 - Szenenhintergründe als Farbe/Bild und optionales Einblenden des Szeneninhalts.
 - PNG/JPEG/WebP/SVG-Import: Bilder werden als Base64-Data-URLs zentral im JSON
   gespeichert. Mehrfach verwendete Bilder stehen nur einmal in `assets`.

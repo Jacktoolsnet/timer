@@ -98,7 +98,7 @@ reuse its asset ID. If genuine image data is unavailable, do not create fake
 asset objects: use only the existing empty asset/backgroundAsset references
 and agree on later image import with the user before final JSON output.
 An image element with asset "" displays the editor's image placeholder; a scene
-with backgroundAsset "" uses only its background color. No additional placeholder
+with backgroundAsset "" uses its background color or backgroundGradient. No additional placeholder
 fields exist. In the UI, import the image, then choose it in the image element's
 asset selector or the scene's background-image selector. Importing while an
 image element is selected also assigns the new image to that element.
@@ -106,11 +106,17 @@ image element is selected also assigns the new image to that element.
 ### Scenes
 
 Each scene must have id and elements (an ordered array of 0–100 elements).
+Element array order defines back-to-front stacking: elements[0] is behind
+elements[1], and the last element is in front. Backgrounds are behind all elements.
+The editor list uses the same order: moving an element up sends it backward,
+moving it down brings it forward. Selection does not change its layer.
+There is no separate zIndex field.
 Later elements are painted on top of earlier elements.
 Optional fields and their defaults:
 - name: "Scene"; string, maximum 200 UTF-16 code units.
 - duration: 5; number, 0.1–3600 seconds.
 - background: "#263b42"; #RRGGBB color.
+- backgroundGradient: null; optional gradient object (see Gradients below).
 - backgroundAsset: ""; empty or an existing asset ID, maximum 100 code units.
 - transition: "fade"; allowed "none", "fade", "crossfade", "slide-left", "slide-right", "slide-up", "slide-down", "wipe-left", "wipe-right", "wipe-up", "wipe-down", "zoom-in", "zoom-out", "through-black".
 - transitionDuration: 0.5; number, 0.01–3600 seconds.
@@ -131,6 +137,7 @@ Optional fields and their defaults:
 - align: "center"; allowed "left", "center", "right".
 - name: ""; optional display title, at most 200 characters. Does not change rendered text or IDs.
 - shapeType: "rectangle"; allowed "rectangle", "ellipse", "triangle", "diamond", "star", "arrow". Used by shape elements only.
+- fillGradient: null; optional gradient object (see Gradients below), for shapes.
 - fillColor: shape fill color (#RRGGBB) or "none". Omitted uses legacy color.
 - borderColor: "none"; #RRGGBB or "none", for shapes.
 - borderStyle: "solid"; allowed "solid", "dashed", "dotted", "double". Shape outline line style; ignored when borderColor is "none" or borderWidth is zero. A double line needs sufficient width (at least 3 project pixels) to be visible.
@@ -158,7 +165,8 @@ Actual validator behavior is asymmetric:
 - assets omitted OR assets: null is normalized to {}.
 - Each optional scene field listed above uses its default when omitted OR null.
 - Scene id/elements and asset name/data do not accept null.
-- Every element field rejects explicit null, including otherwise optional fields:
+- Element fillGradient accepts explicit null, meaning solid/no gradient.
+- Other element fields reject explicit null, including otherwise optional fields:
   element defaults apply only to omitted fields, not explicit null.
 - Root version/title/format/scenes do not accept null.
 /schema.json describes the typed authoring structure, not every normalization
@@ -437,6 +445,7 @@ stops: 2..16, sorted ascending by position (0..100 percent), #RRGGBB color,
 opacity 0..1 (default 1). Equal positions produce hard edges. No repeating gradients.
 Gradients override the solid scene background / shape fillColor; null restores it.
 A transparent gradient shows content behind it, not the fallback solid color.
+The stage behind scene layers is black (or the outgoing scene during a transition).
 Shape borders remain independent. All six shape types support all three gradients.
 Scene background images render above the gradient; transparent images reveal it.
 The editor's None fill switch clears the gradient and sets fillColor to "none".

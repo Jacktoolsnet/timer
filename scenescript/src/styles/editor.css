@@ -509,3 +509,27 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
 .gradient-panel button { height:40px; border:1px solid var(--line); border-radius:8px; background:var(--surface); color:var(--accent); cursor:pointer; }
 .gradient-panel > button { width:40px; }
 .gradient-panel button:disabled { opacity:.4; cursor:default; }
+
+/* Only the scene inspector contributes to row two's intrinsic height. */
+.scene-sidebar,.elements-panel {
+ contain:size;
+ min-height:0;
+ grid-template-rows:minmax(0,1fr);
+ align-content:stretch;
+}
+.scene-list-content,.element-list-content {
+ display:flex;
+ flex-direction:column;
+ min-height:0;
+ overflow:hidden;
+}
+.scene-list-content > h2,.element-list-content > h2 { flex:0 0 auto; }
+#scene-list,#element-list {
+ flex:1 1 0;
+ min-height:0;
+ overflow-y:auto;
+ overflow-x:hidden;
+ align-content:start;
+ scrollbar-gutter:stable;
+ overscroll-behavior:contain;
+}

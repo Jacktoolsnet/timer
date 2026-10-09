@@ -36,8 +36,8 @@ function button(text:string,action:()=>void){const b=document.createElement('but
 function selectScene(index:number){stop();sceneIndex=index;selectedId='';time=offset(index);refresh();}
 function refresh(){
  ($('project-title') as HTMLInputElement).value=project.title;($('project-format') as HTMLSelectElement).value=project.format;
- const list=$('scene-list');list.replaceChildren();
- project.scenes.forEach((s,i)=>{const li=document.createElement('li'),b=button(`${i+1}. ${s.name} · ${s.duration}s`,()=>selectScene(i));b.title=b.textContent||'';b.setAttribute('aria-current',String(i===sceneIndex));li.append(b);list.append(li);});
+ const list=$('scene-list'),scrollTop=list.scrollTop;list.replaceChildren();
+ project.scenes.forEach((s,i)=>{const li=document.createElement('li'),b=button(`${i+1}. ${s.name} · ${s.duration}s`,()=>selectScene(i));b.title=b.textContent||'';b.setAttribute('aria-current',String(i===sceneIndex));li.append(b);list.append(li);});list.scrollTop=scrollTop;
  ($('delete-scene') as HTMLButtonElement).disabled=project.scenes.length===1;($('scene-up') as HTMLButtonElement).disabled=sceneIndex===0;($('scene-down') as HTMLButtonElement).disabled=sceneIndex===project.scenes.length-1;($('add-scene') as HTMLButtonElement).disabled=project.scenes.length>=100;
  renderForms();renderElements();renderAssets();draw();
 }
@@ -49,7 +49,7 @@ function renderElements(){
  ($('element-up') as HTMLButtonElement).disabled=index<=0;
  ($('element-down') as HTMLButtonElement).disabled=index<0||index>=count-1;
  document.querySelectorAll<HTMLButtonElement>('[data-add]').forEach(b=>b.disabled=count>=100);
- const list=$('element-list');list.replaceChildren();current().elements.forEach((e,i)=>{const li=document.createElement('li'),b=button(`${i+1}. ${t(e.type)} · ${e.name||(e.type==='text'?e.text:e.type==='image'?(project.assets[e.asset]?.name||e.id):e.id)}`,()=>{selectedId=e.id;renderForms();renderElements();draw();});b.title=b.textContent||'';b.setAttribute('aria-current',String(e.id===selectedId));li.append(b);list.append(li);});}
+ const list=$('element-list'),scrollTop=list.scrollTop;list.replaceChildren();current().elements.forEach((e,i)=>{const li=document.createElement('li'),b=button(`${i+1}. ${t(e.type)} · ${e.name||(e.type==='text'?e.text:e.type==='image'?(project.assets[e.asset]?.name||e.id):e.id)}`,()=>{selectedId=e.id;renderForms();renderElements();draw();});b.title=b.textContent||'';b.setAttribute('aria-current',String(e.id===selectedId));li.append(b);list.append(li);});list.scrollTop=scrollTop;}
 const renameDialog=$('rename-dialog') as HTMLDialogElement;
 let pendingRename:((name:string)=>void)|undefined;
 function askRename(name:string,action:(name:string)=>void){
@@ -291,7 +291,7 @@ function draw(follow=true){
  const showPrevious=layered&&at.index>0&&transition.progress<1;
  const key=`${revision}:${at.index}:${project.format}:${playing}:${recording}:${selectedId}:${showPrevious}`;
  if(stageKey!==key){
-  stageKey=key;stage.replaceChildren();outgoingLayer=undefined;stage.style.background=layered?'#000000':gradientCSS(s.backgroundGradient,s.background);resize();
+  stageKey=key;stage.replaceChildren();outgoingLayer=undefined;stage.style.background=layered||s.backgroundGradient?'#000000':s.background;resize();
   if(showPrevious){const previous=project.scenes[at.index-1],view=createSceneLayer(previous,at.index-1,false);outgoingLayer=view.layer;stage.append(view.layer);updateSceneViews(view.views,previous.duration);seekSvg(view.svgBackground,previous.duration);}
   const view=createSceneLayer(s,at.index,true);incomingLayer=view.layer;incomingSvgBackground=view.svgBackground;views=view.views;stage.append(view.layer);
  }

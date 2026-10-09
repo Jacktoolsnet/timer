@@ -454,3 +454,58 @@ test('scene and all shape types support editable gradients and JSON round trips'
  await page.getByRole('switch',{name:'No fill',exact:true}).check();await expect(fill.locator('[name=gradientType]')).toHaveValue('solid');await expect(page.locator('.scene-element.selected foreignObject')).toHaveCount(0);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();
 });
+
+test('long scene and element lists scroll without increasing row two height',async({page})=>{
+ await page.goto('/en/');
+ const inspector=page.locator('.scene-inspector');
+ const initialHeight=(await inspector.boundingBox())!.height;
+ const project=demoProject();
+ project.scenes=Array.from({length:60},(_,i)=>({...structuredClone(project.scenes[0]),id:'scene-'+i,name:'Scene '+i,elements:Array.from({length:i===0?60:0},(_,j)=>({...structuredClone(project.scenes[0].elements[0]),id:'element-'+j,text:'Element '+j}))}));
+ await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(project));await page.locator('#import-json').click();
+ expect((await inspector.boundingBox())!.height).toBeCloseTo(initialHeight,0);
+ for(const selector of ['.scene-sidebar','.elements-panel']){
+  const box=(await page.locator(selector).boundingBox())!,sceneBox=(await inspector.boundingBox())!;
+  expect(box.height).toBeCloseTo(sceneBox.height,0);expect(box.y).toBeCloseTo(sceneBox.y,0);
+ }
+ for(const id of ['scene-list','element-list']){
+  const list=page.locator('#'+id);
+  expect(await list.evaluate(el=>el.scrollHeight>el.clientHeight)).toBe(true);
+  await list.evaluate(el=>el.scrollTop=el.scrollHeight);
+  expect(await list.evaluate(el=>el.scrollTop)).toBeGreaterThan(0);
+ }
+ await page.locator('#element-list button').last().click();await expect(page.locator('#element-list button').last()).toHaveAttribute('aria-current','true');
+ expect(await page.locator('#element-list').evaluate(el=>el.scrollTop)).toBeGreaterThan(0);
+ // The inspector may grow for extra settings, but long lists must still not size it.
+ await page.locator('[data-gradient=backgroundGradient] [name=gradientType]').selectOption('radial');
+ const expandedHeight=(await inspector.boundingBox())!.height;expect(expandedHeight).toBeGreaterThan(initialHeight);
+ expect((await page.locator('.scene-sidebar').boundingBox())!.height).toBeCloseTo(expandedHeight,0);
+ expect((await page.locator('.elements-panel').boundingBox())!.height).toBeCloseTo(expandedHeight,0);
+ await page.locator('[data-gradient=backgroundGradient] [name=gradientType]').selectOption('solid');
+ expect((await inspector.boundingBox())!.height).toBeCloseTo(initialHeight,0);
+ await page.locator('#scene-list').evaluate(el=>el.scrollTop=el.scrollHeight);
+ await page.locator('#scene-list button').last().click();await expect(page.locator('#scene-list button').last()).toHaveAttribute('aria-current','true');
+ expect(await page.locator('#scene-list').evaluate(el=>el.scrollTop)).toBeGreaterThan(0);
+});
+
+test('element order determines visible stacking and moving changes layers',async({page})=>{
+ await page.goto('/en/');
+ const project=demoProject(),template=project.scenes[0].elements[0];
+ project.scenes[0].transition='none';
+ project.scenes[0].elements=['#ff0000','#0000ff'].map((color,i)=>({...structuredClone(template),id:'layer-'+i,type:'shape' as const,text:'',animation:'none' as const,x:20,y:20,width:60,height:60,fillColor:color}));
+ await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(project));await page.locator('#import-json').click();
+ const topColor=()=>page.locator('#stage-frame').evaluate(frame=>{
+  const rect=frame.getBoundingClientRect();const top=document.elementFromPoint(rect.x+rect.width/2,rect.y+rect.height/2)?.closest('.scene-element');
+  return top?getComputedStyle(top).backgroundColor:null;
+ });
+ await page.locator('#stage-frame').scrollIntoViewIfNeeded();
+ expect(await topColor()).toBe('rgb(0, 0, 255)');
+ await page.locator('#element-list button').first().click();await page.locator('#stage-frame').scrollIntoViewIfNeeded();
+ expect(await topColor()).toBe('rgb(0, 0, 255)'); // Selection must not raise a layer.
+ await page.locator('#element-down').click();await page.locator('#stage-frame').scrollIntoViewIfNeeded();
+ expect(await topColor()).toBe('rgb(255, 0, 0)');
+ const saved=JSON.parse(await exportedJSON(page));expect(saved.scenes[0].elements.map((e:{id:string})=>e.id)).toEqual(['layer-1','layer-0']);
+ await page.locator('#element-up').click();await page.locator('#stage-frame').scrollIntoViewIfNeeded();
+ expect(await topColor()).toBe('rgb(0, 0, 255)');
+ await page.locator('#open-preview').click();
+ expect(await topColor()).toBe('rgb(0, 0, 255)');
+});
