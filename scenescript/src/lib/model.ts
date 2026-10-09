@@ -1,3 +1,4 @@
+import {parseMusic,type Music} from './music.ts';
 import {parseSimulation,defaultSimulation,type Simulation} from './simulation.ts';
 import {parseGradient,type Gradient} from './gradient.ts';
 import {validateSvg,svgSource} from './svg.ts';
@@ -15,7 +16,7 @@ export type Element = {
 };
 export const sceneTransitions=['none','fade','crossfade','slide-left','slide-right','slide-up','slide-down','wipe-left','wipe-right','wipe-up','wipe-down','zoom-in','zoom-out','through-black'] as const;
 export type Scene = { id:string; name:string; duration:number; background:string; backgroundEnabled:boolean; backgroundOpacity:number; backgroundGradient:Gradient|null; backgroundAsset:string; transition:typeof sceneTransitions[number]; transitionDuration:number; elements:Element[] };
-export type Project = { version:'1.0'; title:string; format:keyof typeof formats; backgroundSimulation:Simulation|null; assets:Record<string,Asset>; scenes:Scene[] };
+export type Project = { version:'1.0'; title:string; format:keyof typeof formats; backgroundSimulation:Simulation|null; music:Music|null; assets:Record<string,Asset>; scenes:Scene[] };
 export const MAX_FILE_BYTES = 30 * 1024 * 1024;
 export const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 export function newElement(type:Element['type'], id:string = crypto.randomUUID()):Element {
@@ -29,7 +30,7 @@ export function demoProject():Project {
  const title=newElement('text','headline');title.text='Your idea.\nYour stage.';title.font='Georgia';title.animation='slide-up';first.elements=[title];
  const second=newScene('outro');second.name='Make it move';second.background='#684d45';
  const text=newElement('text','outro-text');text.text='Tell your story.\nOne scene at a time.';text.fontSize=72;text.animation='typewriter';text.animationDuration=2;second.elements=[text];
- return {version:'1.0',title:'My SceneScript',format:'landscape',backgroundSimulation:null,assets:{},scenes:[first,second]};
+ return {version:'1.0',title:'My SceneScript',format:'landscape',backgroundSimulation:null,music:null,assets:{},scenes:[first,second]};
 }
 function obj(v:unknown,path:string):Record<string,unknown>{if(!v||typeof v!=='object'||Array.isArray(v))throw new Error(`${path}: expected object`);return v as Record<string,unknown>;}
 function str(v:unknown,path:string,max=10000):string {if(typeof v!=='string'||v.length>max)throw new Error(`${path}: expected text (max ${max})`);return v;}
@@ -49,7 +50,7 @@ export function validateImage(data:unknown,path='image'):string {
 }
 export function parseProject(input:string):Project {
  if(new TextEncoder().encode(input).length>MAX_FILE_BYTES)throw new Error('JSON: maximum 30 MiB');
- const p=obj(JSON.parse(input),'project');keys(p,['version','title','format','backgroundSimulation','assets','scenes'],'project');
+ const p=obj(JSON.parse(input),'project');keys(p,['version','title','format','backgroundSimulation','music','assets','scenes'],'project');
  if(p.version!=='1.0')throw new Error('version: expected 1.0');
  const assets:Record<string,Asset>=Object.create(null);const raw=obj(p.assets??{},'assets');
  if(Object.keys(raw).length>100)throw new Error('assets: maximum 100');
@@ -88,7 +89,7 @@ export function parseProject(input:string):Project {
  });
  const backgroundSimulation=parseSimulation(p.backgroundSimulation,'backgroundSimulation');
  for(const [i,s] of scenes.entries())if(s.elements.reduce((n,e)=>n+(e.type==='simulation'?e.simulation!.count:0),backgroundSimulation?.count??0)>5000)throw new Error('scenes['+i+']: maximum 5000 simulated particles including project background');
- return {backgroundSimulation,version:'1.0',title:str(p.title,'title',200),format:one(p.format,['landscape','portrait','square'] as const,'format'),assets,scenes};
+ return {music:parseMusic(p.music,scenes.reduce((n,s)=>n+s.duration,0)),backgroundSimulation,version:'1.0',title:str(p.title,'title',200),format:one(p.format,['landscape','portrait','square'] as const,'format'),assets,scenes};
 }
 export function locateTime(project:Project,time:number):{index:number;local:number;ended:boolean}{
  let offset=0;for(let i=0;i<project.scenes.length;i++){const duration=project.scenes[i].duration;if(time<offset+duration)return {index:i,local:Math.max(0,time-offset),ended:false};offset+=duration;}

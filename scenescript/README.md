@@ -165,3 +165,8 @@ thumbnails can animate independently. No network services or hosting changes.
 `public/simulation-test.scenescript.json` enthält eine wirklich leere Szene mit
 großen weißen Blasen und ausgeschaltetem Szenenhintergrund. Über Projekt laden
 importieren; in der Aufnahmeansicht Play und den Countdown abwarten.
+
+## Hintergrundmusik
+Projekt-Toolbar: Musik-Icon öffnet einen Entwurf mit Übernehmen/Abbrechen und Hörprobe. Generierte Begleitung oder eigene Noten, editierbare synthetische Instrumente (ADSR, Obertöne, Filter, Echo/Hall). JSON und AI-Anleitung dokumentieren alle Parameter. Musik bleibt über Szenenwechsel durchgehend, pausiert und springt mit der Zeitleiste; Countdown bleibt stumm. Beim Screenrecorder Tab-/Systemaudio aktivieren. Keine externen Musikdienste oder Audiodateien erforderlich.
+
+Beispielprojekt: `public/music-demo.scenescript.json` (20 Sekunden generierte Begleitung).

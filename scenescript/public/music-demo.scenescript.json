@@ -1,0 +1,210 @@
+{
+  "version": "1.0",
+  "title": "SceneScript Music Demo",
+  "format": "landscape",
+  "backgroundSimulation": null,
+  "music": {
+    "enabled": true,
+    "mode": "generated",
+    "style": "calm",
+    "tempo": 72,
+    "key": 60,
+    "seed": 1,
+    "volume": 0.35,
+    "fadeIn": 1,
+    "fadeOut": 2,
+    "instruments": [
+      {
+        "id": "pad",
+        "name": "pad",
+        "wave": "sine",
+        "partials": [
+          {
+            "ratio": 1,
+            "gain": 1
+          },
+          {
+            "ratio": 2,
+            "gain": 0.15
+          }
+        ],
+        "attack": 0.3,
+        "decay": 0.5,
+        "sustain": 0.7,
+        "release": 1.2,
+        "volume": 0.35,
+        "filter": "lowpass",
+        "cutoff": 1800,
+        "resonance": 0.7,
+        "echo": {
+          "delay": 0.25,
+          "feedback": 0.2,
+          "mix": 0
+        },
+        "reverb": 0.22
+      },
+      {
+        "id": "handpan",
+        "name": "handpan",
+        "wave": "sine",
+        "partials": [
+          {
+            "ratio": 1,
+            "gain": 1
+          },
+          {
+            "ratio": 2,
+            "gain": 0.28
+          },
+          {
+            "ratio": 3,
+            "gain": 0.12
+          },
+          {
+            "ratio": 4.95,
+            "gain": 0.05
+          }
+        ],
+        "attack": 0.012,
+        "decay": 0.5,
+        "sustain": 0.12,
+        "release": 1.4,
+        "volume": 0.6,
+        "filter": "lowpass",
+        "cutoff": 5000,
+        "resonance": 0.7,
+        "echo": {
+          "delay": 0.25,
+          "feedback": 0.2,
+          "mix": 0
+        },
+        "reverb": 0.12
+      },
+      {
+        "id": "bass",
+        "name": "bass",
+        "wave": "triangle",
+        "partials": [
+          {
+            "ratio": 1,
+            "gain": 1
+          }
+        ],
+        "attack": 0.01,
+        "decay": 0.15,
+        "sustain": 0.6,
+        "release": 0.2,
+        "volume": 0.4,
+        "filter": "lowpass",
+        "cutoff": 700,
+        "resonance": 0.7,
+        "echo": {
+          "delay": 0.25,
+          "feedback": 0.2,
+          "mix": 0
+        },
+        "reverb": 0
+      }
+    ],
+    "notes": []
+  },
+  "assets": {},
+  "scenes": [
+    {
+      "id": "intro",
+      "name": "A new idea",
+      "duration": 10,
+      "background": "#263b42",
+      "backgroundEnabled": true,
+      "backgroundOpacity": 1,
+      "backgroundGradient": null,
+      "backgroundAsset": "",
+      "transition": "fade",
+      "transitionDuration": 0.5,
+      "elements": [
+        {
+          "id": "headline",
+          "name": "",
+          "type": "text",
+          "simulation": null,
+          "text": "Your idea.\nYour stage.",
+          "runs": [],
+          "asset": "",
+          "x": 10,
+          "y": 35,
+          "width": 80,
+          "height": 30,
+          "color": "#ffffff",
+          "fillGradient": null,
+          "fillColor": "#ffffff",
+          "borderColor": "none",
+          "borderWidth": 4,
+          "shapeType": "rectangle",
+          "borderStyle": "solid",
+          "font": "Georgia",
+          "fontSize": 90,
+          "align": "center",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "opacity": 1,
+          "rotation": 0,
+          "radius": 0,
+          "fit": "contain",
+          "animation": "slide-up",
+          "at": 0,
+          "animationDuration": 1
+        }
+      ]
+    },
+    {
+      "id": "outro",
+      "name": "Make it move",
+      "duration": 10,
+      "background": "#684d45",
+      "backgroundEnabled": true,
+      "backgroundOpacity": 1,
+      "backgroundGradient": null,
+      "backgroundAsset": "",
+      "transition": "fade",
+      "transitionDuration": 0.5,
+      "elements": [
+        {
+          "id": "outro-text",
+          "name": "",
+          "type": "text",
+          "simulation": null,
+          "text": "Tell your story.\nOne scene at a time.",
+          "runs": [],
+          "asset": "",
+          "x": 10,
+          "y": 35,
+          "width": 80,
+          "height": 30,
+          "color": "#ffffff",
+          "fillGradient": null,
+          "fillColor": "#ffffff",
+          "borderColor": "none",
+          "borderWidth": 4,
+          "shapeType": "rectangle",
+          "borderStyle": "solid",
+          "font": "Arial",
+          "fontSize": 72,
+          "align": "center",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "opacity": 1,
+          "rotation": 0,
+          "radius": 0,
+          "fit": "contain",
+          "animation": "typewriter",
+          "at": 0,
+          "animationDuration": 2
+        }
+      ]
+    }
+  ]
+}

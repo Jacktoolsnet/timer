@@ -1,3 +1,5 @@
+import {defaultMusic,parseMusic,presetInstrument,instrumentPresets,musicStyles,waveforms,type Music,type Instrument} from '../lib/music';
+import {MusicPlayer} from './music-audio';
 import {switchSimulationType,simulationTypes,type Simulation} from '../lib/simulation';
 import {createSimulation,type SimulationView} from './simulation';
 import {defaultGradient,gradientCSS,type Gradient} from '../lib/gradient';
@@ -19,6 +21,7 @@ let project:Project=demoProject(), sceneIndex=0, selectedId='',dirty=false,time=
 let revision=0, focusAttempt=0;
 // Recording uses its own playhead; returning must not discard the editor context.
 let recordingReturnState:{sceneIndex:number;selectedId:string;time:number}|undefined;
+let playbackAttempt=0;
 let baseTime=0,started=0,frame=0,countdownTimer:ReturnType<typeof setTimeout>|undefined,draftTimer:ReturnType<typeof setTimeout>|undefined;
 const status=(message:string)=>{$('editor-status').textContent=message;};
 try{if(storageAllowed()){const saved=localStorage.getItem(STORAGE_KEY);if(saved){project=parseProject(saved);dirty=true;status(t('recovery'));}}}catch{status(t('storageError'));}
@@ -104,7 +107,7 @@ const actions=document.createElement('div');actions.className='asset-actions';ac
 function field(form:HTMLElement,key:string,value:string|number|boolean,kind:string,action:(value:string|number|boolean)=>void,options?:readonly string[],min?:number,max?:number){
  const label=document.createElement('label');label.append(document.createTextNode(t(key)));
  let input:HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement;
- if(kind==='select'){input=document.createElement('select');options?.forEach(option=>{const o=document.createElement('option');o.value=option;o.textContent=key==='asset'||key==='backgroundAsset'?(option?project.assets[option].name:t('none')):t(key==='gradientType'&&option==='solid'?'gradientSolid':key==='transition'&&option!=='none'&&option!=='fade'?'transition-'+option:option);input.append(o);});input.value=String(value);}
+ if(kind==='select'){input=document.createElement('select');options?.forEach(option=>{const o=document.createElement('option');o.value=option;o.textContent=key==='asset'||key==='backgroundAsset'?(option?project.assets[option].name:t('none')):t(key==='style'&&option==='focus'?'musicFocus':key==='gradientType'&&option==='solid'?'gradientSolid':key==='transition'&&option!=='none'&&option!=='fade'?'transition-'+option:option);input.append(o);});input.value=String(value);}
  else if(kind==='textarea'){input=document.createElement('textarea');input.value=String(value);input.maxLength=10000;}
  else{input=document.createElement('input');input.type=kind;if(kind==='checkbox')input.checked=Boolean(value);else input.value=String(value);if(kind==='number'){input.step='any';if(min!==undefined)input.min=String(min);if(max!==undefined)input.max=String(max);}if(kind==='text')input.maxLength=200;if(['simulationCount','simulationSeed'].includes(key))input.step='1';}
  input.name=key;
@@ -117,7 +120,7 @@ function field(form:HTMLElement,key:string,value:string|number|boolean,kind:stri
  if(kind==='number'){
   const number=input as HTMLInputElement;
   const wrapper=document.createElement('span');wrapper.className='number-stepper';
-  const step=['opacity','stopOpacity','backgroundOpacity','simulationOpacity'].includes(key)?0.05:['duration','transitionDuration','animationDuration','at','simulationSpeed'].includes(key)?0.1:1;
+  const step=['opacity','stopOpacity','backgroundOpacity','simulationOpacity','volume','sustain','reverb','velocity','gain','echoMix','echoFeedback'].includes(key)?0.05:['duration','transitionDuration','animationDuration','at','simulationSpeed','attack','decay','release','fadeIn','fadeOut','echoDelay','ratio'].includes(key)?0.1:1;
   const controls=[-1,1].map(direction=>{
    const control=button(direction<0?'−':'+',()=>{
     if(!Number.isFinite(number.valueAsNumber))return;
@@ -130,7 +133,7 @@ function field(form:HTMLElement,key:string,value:string|number|boolean,kind:stri
   function sync(){controls[0].disabled=min!==undefined&&number.valueAsNumber<=min;controls[1].disabled=max!==undefined&&number.valueAsNumber>=max;}
   number.addEventListener('input',sync);number.addEventListener('change',sync);sync();
   wrapper.append(controls[0],number,controls[1]);label.append(wrapper);
- }else if(kind==='checkbox'&&['bold','italic','underline','strikethrough','backgroundEnabled'].includes(key)){
+ }else if(kind==='checkbox'&&['bold','italic','underline','strikethrough','backgroundEnabled','musicEnabled'].includes(key)){
   label.classList.add('text-style-toggle');
   const wrapper=document.createElement('span');wrapper.className='safe-switch';
   input.setAttribute('role','switch');input.setAttribute('aria-label',t(key));
@@ -218,6 +221,51 @@ $('project-simulation-form').addEventListener('submit',event=>{
 });
 $('close-simulation').addEventListener('click',()=>simulationDialog.close());
 simulationDialog.addEventListener('close',()=>{simulationDraft=undefined;});
+const musicDialog=$('music-dialog') as HTMLDialogElement;
+let musicDraft:Music|undefined,instrumentIndex=0,notePage=0;
+const musicPlayer=new MusicPlayer(),previewMusic=new MusicPlayer();
+let previewListening=false,previewTimer:ReturnType<typeof setTimeout>|undefined;
+function stopMusicPreview(){previewMusic.stop();previewListening=false;clearTimeout(previewTimer);const b=$('listen-music');b.title=t('listen');b.setAttribute('aria-label',b.title);b.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 4 12 8-12 8Z"/></svg>';}
+
+function musicGroup(title:string){const section=document.createElement('section');section.className='music-group';const heading=document.createElement('h3');heading.textContent=t(title);section.append(heading);$('music-form').append(section);return section;}
+function musicIcon(parent:HTMLElement,icon:'add'|'remove',action:()=>void){const b=button('',action);b.title=t(icon==='add'?'musicAdd':'remove');b.setAttribute('aria-label',b.title);b.innerHTML=icon==='add'?'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>':'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/></svg>';parent.append(b);return b;}
+function renderMusic(){
+ if(!musicDraft)return;const m=musicDraft;stopMusicPreview();$('music-form').replaceChildren();
+ const general=musicGroup('projectMusic');
+ field(general,'musicEnabled',m.enabled,'checkbox',v=>m.enabled=Boolean(v));
+ field(general,'mode',m.mode,'select',v=>{m.mode=v as Music['mode'];renderMusic();},['generated','score']);
+ field(general,'style',m.style,'select',v=>m.style=v as Music['style'],musicStyles);
+ for(const [key,min,max] of [['tempo',40,180],['key',48,72],['seed',0,4294967295],['volume',0,1],['fadeIn',0,10],['fadeOut',0,10]] as const)field(general,key,m[key],'number',v=>m[key]=Number(v),undefined,min,max);
+ const instruments=musicGroup('instruments');const hint=document.createElement('p');hint.className='small-hint';hint.textContent=t('musicRoles');instruments.append(hint);
+ field(instruments,'instruments',m.instruments[instrumentIndex].id,'select',v=>{instrumentIndex=m.instruments.findIndex(i=>i.id===v);renderMusic();},m.instruments.map(i=>i.id));
+ let preset:typeof instrumentPresets[number]='pad';field(instruments,'musicAdd',preset,'select',v=>preset=v as typeof preset,instrumentPresets);
+ musicIcon(instruments,'add',()=>{if(m.instruments.length>=8)return;let n=1;while(m.instruments.some(i=>i.id==='instrument-'+n))n++;m.instruments.push(presetInstrument(preset,'instrument-'+n));instrumentIndex=m.instruments.length-1;renderMusic();}).disabled=m.instruments.length>=8;
+ const i=m.instruments[instrumentIndex];
+ field(instruments,'id',i.id,'text',v=>{const old=i.id;i.id=String(v);m.notes.forEach(n=>{if(n.instrument===old)n.instrument=i.id;});});field(instruments,'name',i.name,'text',v=>i.name=String(v));
+ musicIcon(instruments,'remove',()=>{if(m.notes.some(n=>n.instrument===i.id)){showToast(t('error')+': '+t('notes'),'warning');return;}m.instruments.splice(instrumentIndex,1);instrumentIndex=0;renderMusic();}).disabled=m.instruments.length===1;
+ field(instruments,'wave',i.wave,'select',v=>i.wave=v as Instrument['wave'],waveforms);
+ field(instruments,'filter',i.filter,'select',v=>i.filter=v as Instrument['filter'],['none','lowpass','highpass','bandpass']);
+ for(const [key,min,max] of [['volume',0,1],['attack',0,2],['decay',0,3],['sustain',0,1],['release',0,5],['cutoff',40,20000],['resonance',.1,10],['reverb',0,.5]] as const)field(instruments,key,i[key],'number',v=>i[key]=Number(v),undefined,min,max);
+ for(const [key,min,max] of [['delay',.05,1],['feedback',0,.6],['mix',0,.5]] as const)field(instruments,{'delay':'echoDelay','feedback':'echoFeedback','mix':'echoMix'}[key],i.echo[key],'number',v=>i.echo[key]=Number(v),undefined,min,max);
+ const partials=musicGroup('partials');i.partials.forEach((p,index)=>{field(partials,'ratio',p.ratio,'number',v=>p.ratio=Number(v),undefined,.25,16);field(partials,'gain',p.gain,'number',v=>p.gain=Number(v),undefined,0,1);musicIcon(partials,'remove',()=>{i.partials.splice(index,1);renderMusic();}).disabled=i.partials.length===1;});musicIcon(partials,'add',()=>{i.partials.push({ratio:2,gain:.1});renderMusic();}).disabled=i.partials.length>=8;
+ if(m.mode==='score'){
+  const notes=musicGroup('notes'),list=document.createElement('div');list.className='music-wide';notes.append(list);notePage=Math.min(notePage,Math.max(0,Math.ceil(m.notes.length/40)-1));
+  m.notes.slice(notePage*40,notePage*40+40).forEach(n=>{const row=document.createElement('div');row.className='music-note';list.append(row);field(row,'instruments',n.instrument,'select',v=>n.instrument=String(v),m.instruments.map(i=>i.id));for(const [key,min,max] of [['at',0,total()],['duration',.05,16],['pitch',21,108],['velocity',0,1]] as const)field(row,key,n[key],'number',v=>n[key]=Number(v),undefined,min,max);musicIcon(row,'remove',()=>{m.notes.splice(m.notes.indexOf(n),1);renderMusic();});});
+  musicIcon(notes,'add',()=>{m.notes.push({instrument:i.id,at:0,duration:1,pitch:60,velocity:.7});notePage=Math.floor((m.notes.length-1)/40);renderMusic();}).disabled=m.notes.length>=10000;
+  for(const direction of [-1,1]){const b=button(direction<0?'‹':'›',()=>{notePage+=direction;renderMusic();});b.title=t(direction<0?'musicPrevious':'musicNext');b.disabled=direction<0?notePage===0:(notePage+1)*40>=m.notes.length;notes.append(b);}
+ }
+}
+$('project-music').addEventListener('click',()=>{stop();draw();musicDraft=structuredClone(project.music??{...defaultMusic(),enabled:false});instrumentIndex=0;notePage=0;renderMusic();musicDialog.showModal();});
+$('music-form').addEventListener('submit',event=>{event.preventDefault();try{const music=parseMusic(musicDraft,total());parseProject(JSON.stringify({...project,music}));if(JSON.stringify(project.music)!==JSON.stringify(music)){project.music=music;stop();changed();draw();}musicDialog.close();}catch(error){showToast((error as Error).message,'error');}});
+$('close-music').addEventListener('click',()=>musicDialog.close());
+musicDialog.addEventListener('close',()=>{stopMusicPreview();musicDraft=undefined;});
+$('listen-music').addEventListener('click',()=>{
+ if(previewListening){stopMusicPreview();return;}
+ try{const m=parseMusic(musicDraft,total())!;previewListening=true;const b=$('listen-music');b.title=t('pause');b.setAttribute('aria-label',b.title);b.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3v14H7ZM14 5h3v14h-3Z"/></svg>';
+ void previewMusic.start({...m,enabled:true},0,Math.min(8,total())).then(()=>{if(previewListening)previewTimer=setTimeout(stopMusicPreview,Math.min(8,total())*1000+100);}).catch(()=>{stopMusicPreview();showToast(t('audioError'),'warning');});
+ }catch(error){stopMusicPreview();showToast((error as Error).message,'error');}
+});
+
 function updateScene(key:keyof Scene,value:unknown){const previous=current()[key];(current() as unknown as Record<string,unknown>)[key]=value;try{parseProject(JSON.stringify(project));stop();time=offset(sceneIndex);changed();draw();if((key==='background'||key==='backgroundGradient'||key==='backgroundEnabled')&&richEditor)richEditor.editor.style.background=current().backgroundEnabled?gradientCSS(current().backgroundGradient,current().background):'#000000';if(key==='name'||key==='duration')renderSceneLabels();}catch(error){(current() as unknown as Record<string,unknown>)[key]=previous;status(t('error')+' '+(error as Error).message);renderForms();}}
 function renderSceneLabels(){const buttons=$('scene-list').querySelectorAll('button');project.scenes.forEach((s,i)=>{buttons[i].textContent=`${i+1}. ${s.name} · ${s.duration}s`;buttons[i].title=buttons[i].textContent||'';});}
 let richEditor:ReturnType<typeof richTextEditor>|undefined;
@@ -372,9 +420,13 @@ function draw(follow=true){
  ($('previous-scene') as HTMLButtonElement).disabled=sceneIndex===0;
  ($('next-scene') as HTMLButtonElement).disabled=sceneIndex===project.scenes.length-1;
 }
-function stop(){playing=false;cancelAnimationFrame(frame);keepScreenAwake(false);}
-function tick(now:number){time=Math.min(total(),baseTime+(now-started)/1000);draw();if(time>=total()){stop();draw();return;}frame=requestAnimationFrame(tick);}
-function play(){if(countdownTimer)return;if(time>=total())time=0;baseTime=time;started=performance.now();playing=true;keepScreenAwake(true);frame=requestAnimationFrame(tick);}
+function stop(){playbackAttempt++;musicPlayer.stop();playing=false;cancelAnimationFrame(frame);keepScreenAwake(false);}
+function tick(now:number){time=Math.min(total(),musicPlayer.playhead()??(baseTime+(now-started)/1000));draw();if(time>=total()){stop();draw();return;}frame=requestAnimationFrame(tick);}
+function play(){
+ if(countdownTimer||playing)return;if(time>=total())time=0;playing=true;keepScreenAwake(true);const attempt=++playbackAttempt;
+ const begin=()=>{if(!playing||attempt!==playbackAttempt)return;baseTime=time;started=performance.now();frame=requestAnimationFrame(tick);};
+ if(project.music?.enabled)void musicPlayer.start(project.music,time,total()).then(begin).catch(()=>{showToast(t('audioError'),'warning');begin();});else begin();
+}
 $('play').addEventListener('click',()=>{if(playing){stop();draw();}else play();});
 function skipScene(delta:number){const next=sceneIndex+delta;if(next<0||next>=project.scenes.length)return;const resume=playing;selectScene(next);if(resume)play();}
 $('previous-scene').addEventListener('click',()=>skipScene(-1));
@@ -383,7 +435,7 @@ $('timeline').addEventListener('input',()=>{stop();time=Number(($('timeline') as
 $('safe-toggle').addEventListener('change',()=>{$('safe-overlay').hidden=!($('safe-toggle') as HTMLInputElement).checked;});
 function replace(next:Project){stop();revision++;project=next;sceneIndex=0;selectedId='';time=0;dirty=false;persist();refresh();status(t('ready'));}
 const canReplace=()=>!dirty||confirm(t('unsaved'));
-$('new-project').addEventListener('click',()=>{if(canReplace()){replace({version:'1.0',title:'SceneScript',format:'landscape',backgroundSimulation:null,assets:{},scenes:[newScene()]});changed();}});
+$('new-project').addEventListener('click',()=>{if(canReplace()){replace({version:'1.0',title:'SceneScript',format:'landscape',backgroundSimulation:null,music:null,assets:{},scenes:[newScene()]});changed();}});
 $('project-title').addEventListener('input',()=>{project.title=($('project-title') as HTMLInputElement).value;changed();});
 $('project-format').addEventListener('change',()=>{project.format=($('project-format') as HTMLSelectElement).value as Project['format'];changed();draw();});
 $('add-scene').addEventListener('click',()=>{if(project.scenes.length>=100)return;project.scenes.push(newScene());changed();selectScene(project.scenes.length-1);});
@@ -463,6 +515,7 @@ $('focus').addEventListener('click',async()=>{
 });
 function startCountdown(){
  if(!recording||!document.body.classList.contains('recording-ready')||($('start-recording') as HTMLButtonElement).disabled)return;
+ if(project.music?.enabled)void musicPlayer.unlock().catch(()=>showToast(t('audioError'),'warning'));
  document.body.classList.remove('recording-ready','controls-visible');clearTimeout(controlsTimer);
  $('recording-start').hidden=true;$('start-recording').blur();keepScreenAwake(true);
  let count=3;$('countdown').hidden=false;$('countdown').textContent=String(count);

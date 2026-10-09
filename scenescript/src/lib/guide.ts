@@ -6,6 +6,55 @@ export const aiGuide = `# SceneScript format 1.0
 Create editable animated presentations for the browser-based SceneScript editor.
 This guide describes the existing format 1.0, not proposed features.
 
+## Project background music
+
+Optional root field music (null/omitted means silent). Music runs continuously across
+scene changes, pauses with playback and seeks with the project timeline. Recording
+countdown is silent. Enable system/tab audio in your screen recorder.
+No audio files, lyrics, executable expressions, or realistic sampled instruments.
+These are synthetic timbres, NOT an external AI audio-generation service.
+
+music fields and defaults: enabled true; mode "generated" or "score" (default
+"generated"); style "calm", "focus", "uplifting" (default "calm"); tempo 40–180
+BPM (72); key integer MIDI 48–72 (60); seed uint32 (1); volume 0–1 (.35);
+fadeIn/fadeOut 0–10 seconds (1/2); instruments 1–8; notes max 10000.
+Generated music uses instrument 1 for chords, 2 for melody (or 1 if absent),
+3 for bass if present. Later instruments are only used by explicit score notes.
+Style changes rhythms/harmony, not instrument settings. Seed is reproducible.
+Default instruments are pad, handpan, bass; UI also offers kalimba, harp and bell
+presets. Preset names are NOT instrument JSON types: describe each timbre explicitly.
+
+Each instrument has unique id (ASCII letters/digits/_/-, 1–100 characters), name
+(max 100), wave sine/triangle/sawtooth/square/noise; partials 1–8 objects with ratio
+.25–16 and gain 0–1 (at least one positive). Partials are normalized; ratio 1 is
+fundamental, 2 is an octave. Noise ignores pitch/partials and uses seeded noise.
+ADSR: attack 0–2 s, decay 0–3 s, sustain 0–1, release 0–5 s; volume 0–1;
+filter none/lowpass/highpass/bandpass; cutoff 40–20000 Hz (limited to rendering
+Nyquist), resonance .1–10. echo {delay:.05–1 seconds,feedback:0–.6,mix:0–.5}
+uses six repeats; reverb 0–.5 adds a short synthetic room. Unspecified instrument
+fields use pad defaults (not the preset suggested by its name): name=id,
+wave=sine, partials=[{ratio:1,gain:1},{ratio:2,gain:.15}], attack=.3, decay=.5,
+sustain=.7, release=1.2, volume=.35, filter=lowpass, cutoff=1800, resonance=.7,
+echo={delay:.25,feedback:.2,mix:0}, reverb=.22.
+Numbers above are explanatory; JSON numbers must use a leading zero (0.3, not .3).
+
+Score notes: {instrument:"ID",at:0,duration:1,pitch:60,velocity:.7}.
+at is absolute PROJECT seconds, within project duration; duration .05–16 seconds
+is held duration before release, pitch integer MIDI 21–108 (69 = A440), velocity
+0–1. Notes must reference existing IDs. Maximum 32 overlapping audible notes,
+INCLUDING release and effect tails. Note tails are cut at project end.
+Use mode "score" for specific melodies/chords; tempo does not rescale explicit
+second-based notes. All instrument parameters and notes are editable in the UI.
+Example optional root music property:
+{"enabled":true,"mode":"score","volume":0.3,"instruments":[
+ {"id":"glass","name":"Soft glass","wave":"sine","partials":[
+ {"ratio":1,"gain":1},{"ratio":2.71,"gain":0.12}],"attack":0.01,
+ "decay":0.4,"sustain":0.1,"release":1.2,"volume":0.5,
+ "filter":"lowpass","cutoff":5000,"resonance":0.7,
+ "echo":{"delay":0.3,"feedback":0.2,"mix":0.1},"reverb":0.15}],
+ "notes":[{"instrument":"glass","at":0,"duration":0.5,"pitch":60,"velocity":0.7},
+ {"instrument":"glass","at":1,"duration":0.5,"pitch":64,"velocity":0.6}]}
+
 ## Workflow: conversation first, project output last
 
 Before creating a project, establish the topic, audience, format/aspect ratio,
@@ -46,6 +95,7 @@ Required fields:
 - title: string, maximum 200 UTF-16 code units (empty is accepted).
 - format: ${Object.entries(formats).map(([k,v])=>`"${k}" (${v[0]} × ${v[1]} project pixels)`).join('; ')}.
 - scenes: ordered array of 1–100 scenes.
+Optional: music, null (default) or a music object (see Project background music above).
 Optional: backgroundSimulation, null (default) or a simulation object (see Simulations below).
 Optional: assets, an object mapping asset IDs to asset objects; default {}.
 Project coordinates and text sizes are independent of the editor UI's font-size
