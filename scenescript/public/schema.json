@@ -351,6 +351,9 @@
                     "arrow"
                   ],
                   "default": "rectangle"
+                },
+                "fillGradient": {
+                  "$ref": "#/$defs/gradient"
                 }
               },
               "required": [
@@ -358,6 +361,9 @@
                 "type"
               ]
             }
+          },
+          "backgroundGradient": {
+            "$ref": "#/$defs/gradient"
           }
         },
         "required": [
@@ -376,5 +382,76 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://scenescript.jacktools.net/schema.json",
   "title": "SceneScript 1.0",
-  "$comment": "Runtime validation additionally enforces unique IDs, resolved asset references, element.at <= scene.duration, total UTF-8 file size and image decoding / dimensions. Do not include $schema in project data."
+  "$comment": "Runtime validation additionally enforces unique IDs, resolved asset references, element.at <= scene.duration, total UTF-8 file size and image decoding / dimensions. Do not include $schema in project data.",
+  "$defs": {
+    "gradient": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "stops"
+          ],
+          "properties": {
+            "type": {
+              "enum": [
+                "linear",
+                "radial",
+                "conic"
+              ]
+            },
+            "angle": {
+              "type": "number",
+              "minimum": -360,
+              "maximum": 360
+            },
+            "x": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "y": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "stops": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 16,
+              "description": "Ascending positions; equal positions create hard edges.",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "color",
+                  "position"
+                ],
+                "properties": {
+                  "color": {
+                    "type": "string",
+                    "pattern": "^#[0-9a-fA-F]{6}$"
+                  },
+                  "position": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "opacity": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
 }

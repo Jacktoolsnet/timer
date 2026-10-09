@@ -89,3 +89,13 @@ test('unsafe, unsupported and malformed SVG is rejected before rendering',()=>{
  assert.throws(()=>validateSvg('<!DOCTYPE svg [<!ENTITY x "secret">]>'+wrap('<text>&x;</text>')));
  assert.throws(()=>validateSvg(wrap('<rect/>'.repeat(2001))));assert.throws(()=>validateSvg(wrap('<desc>'+'x'.repeat(1024*1024)+'</desc>')));
 });
+
+test('gradients validate, default, round trip and reject malformed stops',()=>{
+ const p=demoProject();const g={type:'conic',angle:45,x:20,y:70,stops:[{color:'#ff0000',position:0,opacity:1},{color:'#0000ff',position:100,opacity:0}]};
+ const raw=JSON.parse(serialize(p));raw.scenes[0].backgroundGradient=g;raw.scenes[0].elements.push({...newElement('shape','gradient-shape'),fillGradient:g});
+ const parsed=parseProject(serialize(raw));assert.deepEqual(parsed.scenes[0].backgroundGradient,g);assert.deepEqual(parsed.scenes[0].elements.at(-1)!.fillGradient,g);
+ delete raw.scenes[0].backgroundGradient;assert.equal(parseProject(serialize(raw)).scenes[0].backgroundGradient,null);
+ for(const change of [{type:'evil'},{angle:361},{x:-1},{stops:[]},{stops:[{color:'url(evil)',position:0},{color:'#ffffff',position:100}]},{stops:[{color:'#ffffff',position:90},{color:'#000000',position:10}]},{stops:[{color:'#ffffff',position:0,opacity:2},{color:'#000000',position:100}]},{extra:true}]){
+  raw.scenes[0].backgroundGradient={...g,...change};assert.throws(()=>parseProject(serialize(raw)),/backgroundGradient/);
+ }
+});

@@ -422,3 +422,35 @@ test('asset thumbnails open a bounded image overlay with header and footer',asyn
  await expect(page.locator('#asset-preview-image')).not.toHaveAttribute('src',/./);
  await expect(page.locator('#asset-list img')).toHaveCount(1);
 });
+
+test('scene and all shape types support editable gradients and JSON round trips',async({page})=>{
+ await page.goto('/en/');
+ const scene=page.locator('[data-gradient=backgroundGradient]');
+ await scene.locator('[name=gradientType]').selectOption('linear');
+ await expect(page.locator('.scene-layer').last()).toHaveCSS('background-image',/linear-gradient/);
+ await scene.locator('[name=gradientAngle]').fill('125');await scene.locator('[name=gradientAngle]').dispatchEvent('change');
+ await scene.locator('[name=stopColor]').first().fill('#ff0000');
+ await scene.getByRole('button',{name:'Add color stop',exact:true}).click();await expect(scene.locator('.gradient-stop')).toHaveCount(3);
+ await scene.locator('[name=stopOpacity]').last().fill('0');await scene.locator('[name=stopOpacity]').last().dispatchEvent('change');
+ await scene.locator('[name=gradientType]').selectOption('radial');
+ await scene.locator('[name=gradientX]').fill('25');await scene.locator('[name=gradientX]').dispatchEvent('change');
+ await scene.locator('[name=gradientY]').fill('75');await scene.locator('[name=gradientY]').dispatchEvent('change');
+ await expect(page.locator('.scene-layer').last()).toHaveCSS('background-image',/radial-gradient.*25% 75%/);
+ await page.locator('#element-add-menu summary').click();await page.locator('[data-add=shape]').click();
+ const fill=page.locator('[data-gradient=fillGradient]');
+ for(const type of ['linear','radial','conic']){
+  await fill.locator('[name=gradientType]').selectOption(type);
+  for(const shape of ['rectangle','ellipse','triangle','diamond','star','arrow']){
+   await page.locator('[name=shapeType]').selectOption(shape);
+   const node=shape==='rectangle'?page.locator('.scene-element.selected'):page.locator('.scene-element.selected foreignObject div');
+   await expect(node).toHaveCSS('background-image',new RegExp(type+'-gradient'));
+   if(shape!=='rectangle')await expect(page.locator('.scene-element.selected foreignObject')).toHaveAttribute('clip-path',/url\(#shape-fill-/);
+  }
+ }
+ const saved=JSON.parse(await exportedJSON(page));expect(saved.scenes[0].backgroundGradient).toMatchObject({type:'radial',angle:125,x:25,y:75});expect(saved.scenes[0].backgroundGradient.stops).toHaveLength(3);expect(saved.scenes[0].backgroundGradient.stops.at(-1).opacity).toBe(0);
+ expect(saved.scenes[0].elements.at(-1).fillGradient.type).toBe('conic');
+ await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(saved));await page.locator('#import-json').click();await page.locator('#element-list button').last().click();
+ await expect(fill.locator('[name=gradientType]')).toHaveValue('conic');
+ await page.getByRole('switch',{name:'No fill',exact:true}).check();await expect(fill.locator('[name=gradientType]')).toHaveValue('solid');await expect(page.locator('.scene-element.selected foreignObject')).toHaveCount(0);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();
+});

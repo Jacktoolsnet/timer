@@ -420,4 +420,26 @@ Example SVG source (encode these exact UTF-8 bytes with a real encoding tool):
     <animate attributeName="cx" from="30" to="170" dur="2s" repeatCount="indefinite" />
   </circle>
 </svg>
+
+## Gradients (optional, format 1.0)
+Scene.backgroundGradient and shape element.fillGradient accept null (default,
+legacy solid color) or this object:
+{"type":"linear","angle":90,"x":50,"y":50,"stops":[
+ {"color":"#263b42","position":0,"opacity":1},
+ {"color":"#ff8800","position":50,"opacity":0.8},
+ {"color":"#ffffff","position":100,"opacity":0}
+]}
+Types: linear, radial, conic. angle: -360..360 degrees, default 90; CSS convention:
+0 points up, 90 right. Conic angle is its starting angle, clockwise.
+x/y: center in percent 0..100, default 50; used by radial/conic only.
+Radial uses an ellipse reaching the farthest corner.
+stops: 2..16, sorted ascending by position (0..100 percent), #RRGGBB color,
+opacity 0..1 (default 1). Equal positions produce hard edges. No repeating gradients.
+Gradients override the solid scene background / shape fillColor; null restores it.
+A transparent gradient shows content behind it, not the fallback solid color.
+Shape borders remain independent. All six shape types support all three gradients.
+Scene background images render above the gradient; transparent images reveal it.
+The editor's None fill switch clears the gradient and sets fillColor to "none".
+Keep background and fillColor as valid legacy solid colors (or "none" for fillColor).
+Gradients are static, deterministic and included in JSON save/import.
 `;

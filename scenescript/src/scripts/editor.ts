@@ -1,3 +1,4 @@
+import {defaultGradient,gradientCSS,type Gradient} from '../lib/gradient';
 import {createSvgImage,seekSvg} from './svg-image';
 import {validateSvg,svgDataURL} from '../lib/svg';
 import {renderShape} from './shapes';
@@ -101,11 +102,12 @@ const actions=document.createElement('div');actions.className='asset-actions';ac
 function field(form:HTMLElement,key:string,value:string|number|boolean,kind:string,action:(value:string|number|boolean)=>void,options?:readonly string[],min?:number,max?:number){
  const label=document.createElement('label');label.append(document.createTextNode(t(key)));
  let input:HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement;
- if(kind==='select'){input=document.createElement('select');options?.forEach(option=>{const o=document.createElement('option');o.value=option;o.textContent=key==='asset'||key==='backgroundAsset'?(option?project.assets[option].name:t('none')):t(key==='transition'&&option!=='none'&&option!=='fade'?'transition-'+option:option);input.append(o);});input.value=String(value);}
+ if(kind==='select'){input=document.createElement('select');options?.forEach(option=>{const o=document.createElement('option');o.value=option;o.textContent=key==='asset'||key==='backgroundAsset'?(option?project.assets[option].name:t('none')):t(key==='gradientType'&&option==='solid'?'gradientSolid':key==='transition'&&option!=='none'&&option!=='fade'?'transition-'+option:option);input.append(o);});input.value=String(value);}
  else if(kind==='textarea'){input=document.createElement('textarea');input.value=String(value);input.maxLength=10000;}
  else{input=document.createElement('input');input.type=kind;if(kind==='checkbox')input.checked=Boolean(value);else input.value=String(value);if(kind==='number'){input.step='any';if(min!==undefined)input.min=String(min);if(max!==undefined)input.max=String(max);}if(kind==='text')input.maxLength=200;}
  input.name=key;
  input.addEventListener(kind==='textarea'||kind==='text'||kind==='color'?'input':'change',()=>{
+  if(!input.isConnected)return;
   if(input instanceof HTMLInputElement&&!input.checkValidity()){input.reportValidity();return;}
   const value=kind==='checkbox'?(input as HTMLInputElement).checked:kind==='number'?(input as HTMLInputElement).valueAsNumber:input.value;
   action(value);
@@ -113,7 +115,7 @@ function field(form:HTMLElement,key:string,value:string|number|boolean,kind:stri
  if(kind==='number'){
   const number=input as HTMLInputElement;
   const wrapper=document.createElement('span');wrapper.className='number-stepper';
-  const step=key==='opacity'?0.05:['duration','transitionDuration','animationDuration','at'].includes(key)?0.1:1;
+  const step=['opacity','stopOpacity'].includes(key)?0.05:['duration','transitionDuration','animationDuration','at'].includes(key)?0.1:1;
   const controls=[-1,1].map(direction=>{
    const control=button(direction<0?'−':'+',()=>{
     if(!Number.isFinite(number.valueAsNumber))return;
@@ -144,10 +146,36 @@ function shapeColorField(form:HTMLElement,key:'fillColor'|'borderColor',value:st
  const toggle=document.createElement('input');toggle.type='checkbox';toggle.name=key+'None';toggle.checked=value==='none';toggle.setAttribute('role','switch');toggle.setAttribute('aria-label',t(key==='fillColor'?'noFill':'noBorder'));toggle.title=t(key==='fillColor'?'noFill':'noBorder');
  const track=document.createElement('span');track.className='safe-switch-track';track.setAttribute('aria-hidden','true');wrapper.append(toggle,track);none.append(wrapper);
  color.addEventListener('input',()=>{lastColor=color.value;updateElement(key,lastColor);});
- toggle.addEventListener('change',()=>{color.disabled=toggle.checked;updateElement(key,toggle.checked?'none':lastColor);});
+ toggle.addEventListener('change',()=>{color.disabled=toggle.checked;updateElement(key,toggle.checked?'none':lastColor);if(key==='fillColor'&&toggle.checked){updateElement('fillGradient',null);renderForms();}});
  row.append(color,none);label.append(row);form.append(label);
 }
-function updateScene(key:keyof Scene,value:unknown){const previous=current()[key];(current() as unknown as Record<string,unknown>)[key]=value;try{parseProject(JSON.stringify(project));stop();time=offset(sceneIndex);changed();draw();if(key==='background'&&richEditor)richEditor.editor.style.backgroundColor=current().background;if(key==='name'||key==='duration')renderSceneLabels();}catch(error){(current() as unknown as Record<string,unknown>)[key]=previous;status(t('error')+' '+(error as Error).message);renderForms();}}
+function gradientFields(form:HTMLElement,key:'backgroundGradient'|'fillGradient',value:Gradient|null,color:string,update:(value:Gradient|null)=>void){
+ const label=document.createElement('div');label.className='gradient-control';label.dataset.gradient=key;
+ const panel=document.createElement('div');panel.className='gradient-panel';label.append(panel);form.append(label);
+ field(panel,'gradientType',value?.type||'solid','select',v=>{if(key==='fillGradient'&&v!=='solid'&&color==='none')updateElement('fillColor','#b86445');update(v==='solid'?null:{...(value||defaultGradient(color==='none'?'#b86445':color)),type:v as Gradient['type']});renderForms();},['solid','linear','radial','conic']);
+ if(!value)return;
+ const sample=document.createElement('div');sample.className='gradient-sample';panel.append(sample);
+ const commit=(next:Gradient)=>{if(JSON.stringify(next)===JSON.stringify(value))return;update(next);Object.assign(value!,next);sample.style.background=gradientCSS(next,color);};
+ sample.style.background=gradientCSS(value,color);
+ if(value.type!=='radial')field(panel,'gradientAngle',value.angle,'number',v=>commit({...value,angle:Number(v)}),undefined,-360,360);
+ if(value.type!=='linear'){field(panel,'gradientX',value.x,'number',v=>commit({...value,x:Number(v)}),undefined,0,100);field(panel,'gradientY',value.y,'number',v=>commit({...value,y:Number(v)}),undefined,0,100);}
+ const stops=document.createElement('div');stops.className='gradient-stops';panel.append(stops);
+ const setStop=(index:number,key:'color'|'position'|'opacity',v:string|number|boolean)=>{
+  const next={...value,stops:value.stops.map((stop,i)=>i===index?{...stop,[key]:v}:stop)};
+  next.stops.sort((a,b)=>a.position-b.position);commit(next);
+  // Preserve the active control for color edits; order changes need rebuilding.
+  value.stops=next.stops;if(key==='position')renderForms();
+ };
+ value.stops.forEach((stop,i)=>{
+  const row=document.createElement('div');row.className='gradient-stop';stops.append(row);
+  field(row,'stopColor',stop.color,'color',v=>setStop(i,'color',v));
+  field(row,'stopPosition',stop.position,'number',v=>setStop(i,'position',v),undefined,0,100);
+  field(row,'stopOpacity',stop.opacity,'number',v=>setStop(i,'opacity',v),undefined,0,1);
+  const remove=button('−',()=>{commit({...value,stops:value.stops.filter((_,index)=>index!==i)});renderForms();});remove.title=t('removeStop');remove.setAttribute('aria-label',remove.title);remove.disabled=value.stops.length<=2;row.append(remove);
+ });
+ const add=button('+',()=>{const stops=[...value.stops,{color:'#ffffff',position:50,opacity:1}].sort((a,b)=>a.position-b.position);commit({...value,stops});renderForms();});add.title=t('addStop');add.setAttribute('aria-label',add.title);add.disabled=value.stops.length>=16;panel.append(add);
+}
+function updateScene(key:keyof Scene,value:unknown){const previous=current()[key];(current() as unknown as Record<string,unknown>)[key]=value;try{parseProject(JSON.stringify(project));stop();time=offset(sceneIndex);changed();draw();if((key==='background'||key==='backgroundGradient')&&richEditor)richEditor.editor.style.background=gradientCSS(current().backgroundGradient,current().background);if(key==='name'||key==='duration')renderSceneLabels();}catch(error){(current() as unknown as Record<string,unknown>)[key]=previous;status(t('error')+' '+(error as Error).message);renderForms();}}
 function renderSceneLabels(){const buttons=$('scene-list').querySelectorAll('button');project.scenes.forEach((s,i)=>{buttons[i].textContent=`${i+1}. ${s.name} · ${s.duration}s`;buttons[i].title=buttons[i].textContent||'';});}
 let richEditor:ReturnType<typeof richTextEditor>|undefined;
 function updateElement(key:keyof Element,value:unknown){
@@ -159,17 +187,18 @@ function renderForms(){
  richEditor?.dispose();richEditor=undefined;
  const form=$('scene-form');form.replaceChildren();const s=current();
  field(form,'name',s.name,'text',v=>updateScene('name',v));field(form,'duration',s.duration,'number',v=>updateScene('duration',v),undefined,0.1,3600);
- field(form,'background',s.background,'color',v=>updateScene('background',v));field(form,'backgroundAsset',s.backgroundAsset,'select',v=>updateScene('backgroundAsset',v),['',...Object.keys(project.assets)]);
+ field(form,'background',s.background,'color',v=>updateScene('background',v));gradientFields(form,'backgroundGradient',s.backgroundGradient,s.background,v=>updateScene('backgroundGradient',v));field(form,'backgroundAsset',s.backgroundAsset,'select',v=>updateScene('backgroundAsset',v),['',...Object.keys(project.assets)]);
  field(form,'transition',s.transition,'select',v=>updateScene('transition',v),sceneTransitions);field(form,'transitionDuration',s.transitionDuration,'number',v=>updateScene('transitionDuration',v),undefined,0.01,3600);
  const ef=$('element-form');ef.replaceChildren();ef.classList.remove('text-settings');const e=selected();if(!e){const p=document.createElement('p');p.className='small-hint';p.textContent=t('empty');ef.append(p);return;}
  if(e.type==='text'){
  richEditor=richTextEditor(e,()=>{changed();stop();draw(false);renderElements();},(key,value)=>updateElementValue(key,value),{selection:t('richSelectionHint'),block:t('richBlockHint')});
  richEditor.editor.setAttribute('aria-label',t('text'));
- richEditor.editor.style.backgroundColor=s.background;
+ richEditor.editor.style.background=gradientCSS(s.backgroundGradient,s.background);
  const contentLabel=document.createElement('label');contentLabel.append(document.createTextNode(t('text')),richEditor.editor,richEditor.hint);contentLabel.dataset.richText='true';ef.append(contentLabel);field(ef,'font',e.font,'select',v=>updateElement('font',v),fonts);field(ef,'fontSize',e.fontSize,'number',v=>updateElement('fontSize',v),undefined,1,500);field(ef,'align',e.align,'select',v=>updateElement('align',v),['left','center','right']);for(const key of ['bold','italic','underline','strikethrough'] as const)field(ef,key,e[key],'checkbox',v=>updateElement(key,v));}
  if(e.type==='image'){field(ef,'asset',e.asset,'select',v=>updateElement('asset',v),['',...Object.keys(project.assets)]);field(ef,'fit',e.fit,'select',v=>updateElement('fit',v),['contain','cover']);}
  if(e.type==='text')field(ef,'color',e.color,'color',v=>updateElement('color',v));
  if(e.type==='shape'){field(ef,'shapeType',e.shapeType,'select',v=>updateElement('shapeType',v),shapeTypes);shapeColorField(ef,'fillColor',e.fillColor);shapeColorField(ef,'borderColor',e.borderColor);field(ef,'borderStyle',e.borderStyle,'select',v=>updateElement('borderStyle',v),['solid','dashed','dotted','double']);field(ef,'borderWidth',e.borderWidth,'number',v=>updateElement('borderWidth',v),undefined,0,500);}
+ if(e.type==='shape')gradientFields(ef,'fillGradient',e.fillGradient,e.fillColor,v=>updateElement('fillGradient',v));
  for(const [key,min,max] of [['x',-100,100],['y',-100,100],['width',0.1,200],['height',0.1,200],['opacity',0,1],['rotation',-360,360],['radius',0,1000]] as const)field(ef,key,e[key],'number',v=>updateElement(key,v),undefined,min,max);
  field(ef,'animation',e.animation,'select',v=>updateElement('animation',v),animations);field(ef,'at',e.at,'number',v=>updateElement('at',v),undefined,0,s.duration);field(ef,'animationDuration',e.animationDuration,'number',v=>updateElement('animationDuration',v),undefined,0.01,3600);
  if(e.type==='shape'&&e.shapeType!=='rectangle'){const radius=ef.querySelector<HTMLInputElement>('[name=radius]')!;radius.disabled=true;radius.closest('label')?.querySelectorAll('button').forEach(b=>b.disabled=true);}
@@ -180,7 +209,7 @@ function renderForms(){
    ['elementLayoutGroup',['x','y','width','height','rotation']],
    ['elementMotionGroup',['animation','at','animationDuration']]
   ]:[
-   [e.type==='image'?'imageStyleGroup':'shapeStyleGroup',e.type==='image'?['asset','fit','opacity','radius']:['shapeType','fillColor','borderColor','opacity','borderWidth','borderStyle','radius']],
+   [e.type==='image'?'imageStyleGroup':'shapeStyleGroup',e.type==='image'?['asset','fit','opacity','radius']:['shapeType','fillColor','borderColor','fillGradient','opacity','borderWidth','borderStyle','radius']],
    ['elementLayoutGroup',['x','y','width','height','rotation']],
    ['elementMotionGroup',['animation','at','animationDuration']]
   ];
@@ -188,7 +217,7 @@ function renderForms(){
    const group=document.createElement('fieldset');group.className='text-settings-group '+title;
    const legend=document.createElement('legend');legend.textContent=t(title);group.append(legend);
    const fields=document.createElement('div');fields.className='text-settings-fields';group.append(fields);
-   for(const key of keys){const label=key==='text'?ef.querySelector('label[data-rich-text]'):ef.querySelector(`[name="${key}"]`)?.closest('label');if(label)fields.append(label);}
+   for(const key of keys){const label=key==='fillGradient'?ef.querySelector('[data-gradient=fillGradient]'):key==='text'?ef.querySelector('label[data-rich-text]'):ef.querySelector(`[name="${key}"]`)?.closest('label');if(label)fields.append(label);}
    ef.append(group);
   }
 }
@@ -231,7 +260,7 @@ previewDialog.addEventListener('click',event=>{if(event.target===previewDialog){
 type SceneView={element:Element;node:HTMLDivElement;text?:HTMLSpanElement;svg?:SVGSVGElement};
 let stageKey='',views:SceneView[]=[],incomingLayer:HTMLDivElement|undefined,incomingSvgBackground:SVGSVGElement|undefined,outgoingLayer:HTMLDivElement|undefined;
 function createSceneLayer(scene:Scene,index:number,interactive:boolean){
- const layer=document.createElement('div');layer.className='scene-layer';layer.dataset.sceneIndex=String(index);layer.style.background=scene.background;
+ const layer=document.createElement('div');layer.className='scene-layer';layer.dataset.sceneIndex=String(index);layer.style.background=gradientCSS(scene.backgroundGradient,scene.background);
  if(!interactive)layer.style.pointerEvents='none';
  const [w,h]=formats[project.format];const sceneViews:SceneView[]=[];
  let svgBackground:SVGSVGElement|undefined;
@@ -262,7 +291,7 @@ function draw(follow=true){
  const showPrevious=layered&&at.index>0&&transition.progress<1;
  const key=`${revision}:${at.index}:${project.format}:${playing}:${recording}:${selectedId}:${showPrevious}`;
  if(stageKey!==key){
-  stageKey=key;stage.replaceChildren();outgoingLayer=undefined;stage.style.background=layered?'#000000':s.background;resize();
+  stageKey=key;stage.replaceChildren();outgoingLayer=undefined;stage.style.background=layered?'#000000':gradientCSS(s.backgroundGradient,s.background);resize();
   if(showPrevious){const previous=project.scenes[at.index-1],view=createSceneLayer(previous,at.index-1,false);outgoingLayer=view.layer;stage.append(view.layer);updateSceneViews(view.views,previous.duration);seekSvg(view.svgBackground,previous.duration);}
   const view=createSceneLayer(s,at.index,true);incomingLayer=view.layer;incomingSvgBackground=view.svgBackground;views=view.views;stage.append(view.layer);
  }
