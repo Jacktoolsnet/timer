@@ -29,3 +29,10 @@ test('animation progress, opacity, motion and Unicode typewriter',()=>{
  const e=newElement('text');e.at=2;assert.equal(animationState(e,1).visible,false);assert.equal(animationState(e,2).opacity,0);assert.equal(animationState(e,2.5).opacity,.5);assert.equal(animationState(e,4).opacity,1);
  e.animation='typewriter';e.text='😀ab';assert.equal(animationState(e,2.5).text,'😀');assert.equal(animationState(e,3).text,'😀ab');e.animation='slide-up';assert.match(animationState(e,3).transform,/0px/);
 });
+
+test('rich text inherits defaults, rejects unsafe styles and preserves Unicode timing',()=>{
+ const p=demoProject(),e=p.scenes[0].elements[0];e.runs=[{text:'😀 '},{text:'World',font:'Georgia',fontSize:120,color:'#ff8800',bold:true}];e.text='old';
+ const parsed=parseProject(serialize(p)).scenes[0].elements[0];assert.equal(parsed.text,'😀 World');assert.deepEqual(parsed.runs,e.runs);
+ parsed.animation='typewriter';parsed.at=0;parsed.animationDuration=1;assert.equal(animationState(parsed,.5).text,'😀 W');
+ for(const run of [{text:'x',html:'<script>'},{text:'x',font:'Unknown'},{text:'x',fontSize:0},{text:'x',bold:'yes'}]){e.runs=[run as any];assert.throws(()=>parseProject(serialize(p)));}
+});

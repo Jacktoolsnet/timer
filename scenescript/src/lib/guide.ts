@@ -126,6 +126,7 @@ Optional fields and their defaults:
 - font: "Arial"; allowed ${fonts.map(f=>`"${f}"`).join(', ')}.
 - fontSize: 90; number, 1–500 project pixels, not percentages or UI pixels.
 - align: "center"; allowed "left", "center", "right".
+- runs: []; optional structured rich-text segments (see Rich text below).
 - bold: false; boolean.
 - italic: false; boolean.
 - underline: false; boolean.
@@ -308,4 +309,21 @@ These are existing static routes; no new API or hosting is required.
 
 ## Complete valid example (no images required)
 ${JSON.stringify(demoProject(),null,2)}
+
+
+## Rich text (format 1.0 extension)
+Text elements may include a \`runs\` array (maximum 2000 entries). Each entry has
+\`text\` and optional \`font\`, \`fontSize\`, \`color\`, \`bold\`, \`italic\`, \`underline\`,
+\`strikethrough\` overrides, with the same ranges and allowed values as the element.
+Missing overrides inherit the element's defaults. No HTML, CSS, links or scripts
+are accepted. Newlines are encoded as \\n inside run text.
+When runs is nonempty, its concatenated text is authoritative; supply a matching
+\`text\` value for compatibility. When runs is omitted or empty, ordinary \`text\`
+continues to work. Total combined text is limited to 10000 characters.
+Alignment, opacity, radius, geometry and animation always apply to the whole block.
+Typewriter reveals Unicode characters across runs while preserving their styles.
+Example:
+\`\`\`json
+{"id":"headline","type":"text","text":"Hello world","runs":[{"text":"Hello "},{"text":"world","bold":true,"color":"#ff8800"}]}
+\`\`\`
 `;

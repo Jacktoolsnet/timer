@@ -7,7 +7,7 @@ test('editor, image embedding and downloaded project round trip',async({page})=>
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/de/');
  await expect(page.locator('#scene-list li')).toHaveCount(2);
  await page.locator('#project-title').fill('Mein Film');await page.locator('#project-format').selectOption('portrait');
- await page.locator('[data-add=text]').click();await page.locator('#element-form [name=text]').fill('Hallo Welt');
+ await page.locator('#element-add-menu summary').click();await page.locator('[data-add=text]').click();await page.locator('#element-form [name=text]').fill('Hallo Welt');
  await page.locator('#image-file').setInputFiles({name:'pixel.png',mimeType:'image/png',buffer:Buffer.from(pixel.split(',')[1],'base64')});
  await expect(page.locator('#asset-list img')).toHaveCount(1);
  await page.locator('#scene-form [name=backgroundAsset]').selectOption({label:'pixel.png'});
@@ -37,7 +37,7 @@ test('language routes, AI instructions, schema and mobile layout',async({page,re
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();await page.goto('/de/ai/');await expect(page.locator('#ai-guide')).toContainText('External URLs, SVG data URLs and other MIME prefixes are rejected.');expect((await request.get('/ai.txt')).ok()).toBeTruthy();expect((await (await request.get('/schema.json')).json()).properties.version.const).toBe('1.0');
 });
 test('blocked storage does not prevent editing',async({page})=>{
- await page.addInitScript(()=>{Storage.prototype.getItem=()=>{throw Error('blocked');};Storage.prototype.setItem=()=>{throw Error('blocked');};});await page.goto('/en/');await page.locator('[data-add=shape]').click();await expect(page.locator('#element-list li')).toHaveCount(2);
+ await page.addInitScript(()=>{Storage.prototype.getItem=()=>{throw Error('blocked');};Storage.prototype.setItem=()=>{throw Error('blocked');};});await page.goto('/en/');await page.locator('#element-add-menu summary').click();await page.locator('[data-add=shape]').click();await expect(page.locator('#element-list li')).toHaveCount(2);
 });
 
 async function mockWakeLock(page:import('@playwright/test').Page){
@@ -94,7 +94,7 @@ test('custom project and unsaved edits survive recording exit',async({page})=>{
   }
   await expect(page.locator('body')).not.toHaveClass(/recording/);
   await expect(page.locator('#editor-status')).toContainText('Unsaved changes');expect(await exportedJSON(page)).toBe(before);await page.locator('#project-title').fill('Unsaved imported project');
-  await expect(page.locator('#scene-list button').nth(2)).toHaveAttribute('aria-current','true');await expect(page.locator('#element-form [name=text]')).toHaveValue('Unsaved third-scene text');expect(await page.locator('#timeline').inputValue()).toBe(beforeTime);
+  await expect(page.locator('#scene-list button').nth(2)).toHaveAttribute('aria-current','true');await expect(page.locator('#element-form [name=text]')).toHaveText('Unsaved third-scene text');expect(await page.locator('#timeline').inputValue()).toBe(beforeTime);
   await expect(page.locator('#editor-status')).toContainText('Unsaved changes');
  }
 });
@@ -242,7 +242,23 @@ test('text styles use switches and survive JSON export and import',async({page})
  for(const name of ['Bold','Italic','Underline','Strikethrough'])await page.getByRole('switch',{name,exact:true}).check();
  const json=await exportedJSON(page),element=JSON.parse(json).scenes[0].elements[0];
  for(const key of ['bold','italic','underline','strikethrough'])expect(element[key]).toBe(true);
- const style=await page.locator('.scene-element').first().evaluate(el=>({font:el.style.fontStyle,decoration:el.style.textDecoration}));expect(style.font).toBe('italic');expect(style.decoration).toContain('underline');expect(style.decoration).toContain('line-through');
+ const style=await page.locator('.scene-element > span > span').first().evaluate(el=>({font:el.style.fontStyle,decoration:el.style.textDecoration}));expect(style.font).toBe('italic');expect(style.decoration).toContain('underline');expect(style.decoration).toContain('line-through');
  await page.locator('#open-json').click();await page.locator('#json-input').fill(json);await page.locator('#import-json').click();await page.locator('#element-list button').first().click();
  for(const name of ['Bold','Italic','Underline','Strikethrough'])await expect(page.getByRole('switch',{name,exact:true})).toBeChecked();
+});
+
+test('selected words receive rich formatting while block defaults remain unchanged',async({page})=>{
+ await page.goto('/en/');await page.locator('#element-list button').first().click();const editor=page.locator('.rich-text-editor');await editor.fill('Hello world');
+ await editor.evaluate(el=>{const node=el.querySelector('span')!.firstChild!;const range=document.createRange();range.setStart(node,6);range.setEnd(node,11);const selection=window.getSelection()!;selection.removeAllRanges();selection.addRange(range);el.dispatchEvent(new MouseEvent('mouseup'));});
+ await page.getByRole('switch',{name:'Bold',exact:true}).check();await page.locator('#element-form [name=font]').selectOption('Georgia');await page.locator('#element-form [name=color]').fill('#ff8800');
+ const data=JSON.parse(await exportedJSON(page)),e=data.scenes[0].elements[0];expect(e.text).toBe('Hello world');expect(e.bold).toBe(false);expect(e.runs.find((r:any)=>r.text==='world')).toMatchObject({bold:true,font:'Georgia',color:'#ff8800'});
+ await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(data));await page.locator('#import-json').click();await page.locator('#element-list button').first().click();await expect(editor).toHaveText('Hello world');await expect(editor.locator('span').last()).toHaveCSS('font-family','Georgia');
+});
+
+test('rich editor preserves newlines and allows disabling an inherited style for a word',async({page})=>{
+ await page.goto('/en/');await page.locator('#element-list button').first().click();const editor=page.locator('.rich-text-editor');await editor.fill('Hello world');await page.getByRole('switch',{name:'Underline',exact:true}).check();
+ await editor.evaluate(el=>{const node=el.querySelector('span')!.firstChild!;const range=document.createRange();range.setStart(node,6);range.setEnd(node,11);const selection=window.getSelection()!;selection.removeAllRanges();selection.addRange(range);el.dispatchEvent(new MouseEvent('mouseup'));});
+ await page.getByRole('switch',{name:'Underline',exact:true}).uncheck();await expect(editor).toHaveCSS('text-decoration-line','none');await expect(editor.locator('span').last()).toHaveCSS('text-decoration-line','none');
+ const data=JSON.parse(await exportedJSON(page));expect(data.scenes[0].elements[0].underline).toBe(true);expect(data.scenes[0].elements[0].runs.at(-1).underline).toBe(false);
+ await editor.fill('Line one');await editor.press('End');await editor.press('Enter');await editor.pressSequentially('Line two');expect(JSON.parse(await exportedJSON(page)).scenes[0].elements[0].text).toBe('Line one\nLine two');
 });

@@ -1,5 +1,7 @@
 import type { Language } from './i18n';
 const words = {
+ richSelectionHint:['Formatierung gilt für den markierten Text.','Formatting applies to selected text.','El formato se aplica al texto seleccionado.','La mise en forme s’applique au texte sélectionné.'],
+ richBlockHint:['Wörter markieren, um sie einzeln zu formatieren. Ohne Markierung ändern Sie die Standardformatierung.','Select words to format them individually. Without a selection, controls change the default style.','Selecciona palabras para darles formato. Sin selección, se cambia el estilo predeterminado.','Sélectionnez des mots pour les formater. Sans sélection, les réglages modifient le style par défaut.'],
  italic:['Kursiv','Italic','Cursiva','Italique'],
  underline:['Unterstrichen','Underline','Subrayado','Souligné'],
  strikethrough:['Durchgestrichen','Strikethrough','Tachado','Barré'],

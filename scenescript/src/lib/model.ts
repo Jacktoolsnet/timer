@@ -2,8 +2,9 @@ export const formats = { landscape: [1920,1080], portrait: [1080,1920], square: 
 export const fonts = ['Arial','Georgia','Verdana','Courier New'] as const;
 export const animations = ['none','fade','slide-left','slide-up','zoom','typewriter','pan'] as const;
 export type Asset = { name:string; data:string };
+export type TextRun = {text:string} & Partial<Pick<Element,'font'|'fontSize'|'color'|'bold'|'italic'|'underline'|'strikethrough'>>;
 export type Element = {
- id:string; type:'text'|'image'|'shape'; text:string; asset:string; x:number; y:number; width:number; height:number;
+ id:string; type:'text'|'image'|'shape'; text:string; runs:TextRun[]; asset:string; x:number; y:number; width:number; height:number;
  color:string; font:typeof fonts[number]; fontSize:number; align:'left'|'center'|'right'; bold:boolean; italic:boolean; underline:boolean; strikethrough:boolean;
  opacity:number; rotation:number; radius:number; fit:'cover'|'contain';
  animation:typeof animations[number]; at:number; animationDuration:number;
@@ -13,7 +14,7 @@ export type Project = { version:'1.0'; title:string; format:keyof typeof formats
 export const MAX_FILE_BYTES = 30 * 1024 * 1024;
 export const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 export function newElement(type:Element['type'], id:string = crypto.randomUUID()):Element {
- return {id,type,text:type==='text'?'Your story starts here.':'',asset:'',x:10,y:35,width:80,height:30,color:type==='shape'?'#b86445':'#ffffff',font:'Arial',fontSize:90,align:'center',bold:false,italic:false,underline:false,strikethrough:false,opacity:1,rotation:0,radius:0,fit:'contain',animation:'fade',at:0,animationDuration:1};
+ return {id,type,text:type==='text'?'Your story starts here.':'',runs:[],asset:'',x:10,y:35,width:80,height:30,color:type==='shape'?'#b86445':'#ffffff',font:'Arial',fontSize:90,align:'center',bold:false,italic:false,underline:false,strikethrough:false,opacity:1,rotation:0,radius:0,fit:'contain',animation:'fade',at:0,animationDuration:1};
 }
 export function newScene(id:string = crypto.randomUUID()):Scene {
  return {id,name:'Scene',duration:5,background:'#263b42',backgroundAsset:'',transition:'fade',transitionDuration:0.5,elements:[]};
@@ -59,7 +60,18 @@ export function parseProject(input:string):Project {
    const ep=`${path}.elements[${j}]`,e=obj(value,ep),type=one(e.type,['text','image','shape'] as const,`${ep}.type`),defaults=newElement(type,'element');keys(e,Object.keys(defaults),ep);
    const merged={...defaults,...e}; const eid=id(e.id,`${ep}.id`);if(elementIds.has(eid))throw new Error(`${ep}: duplicate ID`);elementIds.add(eid);
    for(const key of ['bold','italic','underline','strikethrough'] as const)if(typeof merged[key]!=='boolean')throw new Error(`${ep}.${key}: expected boolean`);
-   return {id:eid,type,text:str(merged.text,`${ep}.text`),asset:ref(merged.asset,`${ep}.asset`),
+   if(!Array.isArray(merged.runs)||merged.runs.length>2000)throw new Error(`${ep}.runs: expected array (max 2000)`);
+   const runs:TextRun[]=merged.runs.map((value,index)=>{
+    const path=`${ep}.runs[${index}]`,r=obj(value,path);keys(r,['text','font','fontSize','color','bold','italic','underline','strikethrough'],path);
+    const run:TextRun={text:str(r.text,`${path}.text`)};
+    if(r.font!==undefined)run.font=one(r.font,fonts,`${path}.font`);
+    if(r.fontSize!==undefined)run.fontSize=num(r.fontSize,`${path}.fontSize`,1,500);
+    if(r.color!==undefined)run.color=color(r.color,`${path}.color`);
+    for(const k of ['bold','italic','underline','strikethrough'] as const)if(r[k]!==undefined){if(typeof r[k]!=='boolean')throw new Error(`${path}.${k}: expected boolean`);run[k]=r[k];}
+    return run;
+   });
+   const text=runs.length?str(runs.map(r=>r.text).join(''),`${ep}.text`):str(merged.text,`${ep}.text`);
+   return {id:eid,type,text,runs,asset:ref(merged.asset,`${ep}.asset`),
     x:num(merged.x,`${ep}.x`,-100,100),y:num(merged.y,`${ep}.y`,-100,100),width:num(merged.width,`${ep}.width`,0.1,200),height:num(merged.height,`${ep}.height`,0.1,200),
     color:color(merged.color,`${ep}.color`),font:one(merged.font,fonts,`${ep}.font`),fontSize:num(merged.fontSize,`${ep}.fontSize`,1,500),align:one(merged.align,['left','center','right'] as const,`${ep}.align`),bold:merged.bold,italic:merged.italic,underline:merged.underline,strikethrough:merged.strikethrough,
     opacity:num(merged.opacity,`${ep}.opacity`,0,1),rotation:num(merged.rotation,`${ep}.rotation`,-360,360),radius:num(merged.radius,`${ep}.radius`,0,1000),fit:one(merged.fit,['cover','contain'] as const,`${ep}.fit`),

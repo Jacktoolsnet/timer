@@ -1,3 +1,4 @@
+import {richTextEditor,renderRuns,type TextStyleKey} from './rich-text';
 import {demoProject,newScene,newElement,parseProject,formats,fonts,animations,animationState,locateTime,MAX_FILE_BYTES,MAX_IMAGE_BYTES,validateImage,type Project,type Scene,type Element} from '../lib/model';
 import {storageAllowed} from '../lib/storage';
 import {screenWakeLock} from '../lib/wake-lock';
@@ -94,14 +95,23 @@ function field(form:HTMLElement,key:string,value:string|number|boolean,kind:stri
 }
 function updateScene(key:keyof Scene,value:unknown){const previous=current()[key];(current() as unknown as Record<string,unknown>)[key]=value;try{parseProject(JSON.stringify(project));stop();time=offset(sceneIndex);changed();draw();if(key==='name'||key==='duration')renderSceneLabels();}catch(error){(current() as unknown as Record<string,unknown>)[key]=previous;status(t('error')+' '+(error as Error).message);renderForms();}}
 function renderSceneLabels(){const buttons=$('scene-list').querySelectorAll('button');project.scenes.forEach((s,i)=>{buttons[i].textContent=`${i+1}. ${s.name} · ${s.duration}s`;buttons[i].title=buttons[i].textContent||'';});}
-function updateElement(key:keyof Element,value:unknown){const e=selected();if(!e)return;const old=e[key];(e as unknown as Record<string,unknown>)[key]=value;try{parseProject(JSON.stringify(project));stop();time=offset(sceneIndex)+e.at+e.animationDuration;time=Math.min(time,offset(sceneIndex)+current().duration-0.001);changed();draw(false);if(key==='text')renderElements();}catch(error){(e as unknown as Record<string,unknown>)[key]=old;status(t('error')+' '+(error as Error).message);renderForms();}}
+let richEditor:ReturnType<typeof richTextEditor>|undefined;
+function updateElement(key:keyof Element,value:unknown){
+ if(richEditor&&['font','fontSize','color','bold','italic','underline','strikethrough'].includes(key)){richEditor.apply(key as TextStyleKey,value);return;}
+ updateElementValue(key,value);
+}
+function updateElementValue(key:keyof Element,value:unknown){const e=selected();if(!e)return;const old=e[key];(e as unknown as Record<string,unknown>)[key]=value;try{parseProject(JSON.stringify(project));stop();time=offset(sceneIndex)+e.at+e.animationDuration;time=Math.min(time,offset(sceneIndex)+current().duration-0.001);changed();draw(false);if(key==='text')renderElements();}catch(error){(e as unknown as Record<string,unknown>)[key]=old;status(t('error')+' '+(error as Error).message);renderForms();}}
 function renderForms(){
+ richEditor?.dispose();richEditor=undefined;
  const form=$('scene-form');form.replaceChildren();const s=current();
  field(form,'name',s.name,'text',v=>updateScene('name',v));field(form,'duration',s.duration,'number',v=>updateScene('duration',v),undefined,0.1,3600);
  field(form,'background',s.background,'color',v=>updateScene('background',v));field(form,'backgroundAsset',s.backgroundAsset,'select',v=>updateScene('backgroundAsset',v),['',...Object.keys(project.assets)]);
  field(form,'transition',s.transition,'select',v=>updateScene('transition',v),['none','fade']);field(form,'transitionDuration',s.transitionDuration,'number',v=>updateScene('transitionDuration',v),undefined,0.01,3600);
  const ef=$('element-form');ef.replaceChildren();ef.classList.remove('text-settings');const e=selected();if(!e){const p=document.createElement('p');p.className='small-hint';p.textContent=t('empty');ef.append(p);return;}
- if(e.type==='text'){field(ef,'text',e.text,'textarea',v=>updateElement('text',v));field(ef,'font',e.font,'select',v=>updateElement('font',v),fonts);field(ef,'fontSize',e.fontSize,'number',v=>updateElement('fontSize',v),undefined,1,500);field(ef,'align',e.align,'select',v=>updateElement('align',v),['left','center','right']);for(const key of ['bold','italic','underline','strikethrough'] as const)field(ef,key,e[key],'checkbox',v=>updateElement(key,v));}
+ if(e.type==='text'){
+ richEditor=richTextEditor(e,()=>{changed();stop();draw(false);renderElements();},(key,value)=>updateElementValue(key,value),{selection:t('richSelectionHint'),block:t('richBlockHint')});
+ richEditor.editor.setAttribute('aria-label',t('text'));
+ const contentLabel=document.createElement('label');contentLabel.append(document.createTextNode(t('text')),richEditor.editor,richEditor.hint);contentLabel.dataset.richText='true';ef.append(contentLabel);field(ef,'font',e.font,'select',v=>updateElement('font',v),fonts);field(ef,'fontSize',e.fontSize,'number',v=>updateElement('fontSize',v),undefined,1,500);field(ef,'align',e.align,'select',v=>updateElement('align',v),['left','center','right']);for(const key of ['bold','italic','underline','strikethrough'] as const)field(ef,key,e[key],'checkbox',v=>updateElement(key,v));}
  if(e.type==='image'){field(ef,'asset',e.asset,'select',v=>updateElement('asset',v),['',...Object.keys(project.assets)]);field(ef,'fit',e.fit,'select',v=>updateElement('fit',v),['contain','cover']);}
  if(e.type!=='image')field(ef,'color',e.color,'color',v=>updateElement('color',v));
  for(const [key,min,max] of [['x',-100,100],['y',-100,100],['width',0.1,200],['height',0.1,200],['opacity',0,1],['rotation',-360,360],['radius',0,1000]] as const)field(ef,key,e[key],'number',v=>updateElement(key,v),undefined,min,max);
@@ -117,7 +127,7 @@ function renderForms(){
    const group=document.createElement('fieldset');group.className='text-settings-group '+title;
    const legend=document.createElement('legend');legend.textContent=t(title);group.append(legend);
    const fields=document.createElement('div');fields.className='text-settings-fields';group.append(fields);
-   for(const key of keys){const label=ef.querySelector(`[name="${key}"]`)?.closest('label');if(label)fields.append(label);}
+   for(const key of keys){const label=key==='text'?ef.querySelector('label[data-rich-text]'):ef.querySelector(`[name="${key}"]`)?.closest('label');if(label)fields.append(label);}
    ef.append(group);
   }
  }
@@ -174,7 +184,7 @@ function draw(follow=true){
    const node=document.createElement('div');node.className='scene-element'+(!playing&&e.id===selectedId?' selected':'');
    Object.assign(node.style,{left:`${e.x*w/100}px`,top:`${e.y*h/100}px`,width:`${e.width*w/100}px`,height:`${e.height*h/100}px`,color:e.color,fontFamily:e.font,fontSize:`${e.fontSize}px`,fontWeight:e.bold?'700':'400',fontStyle:e.italic?'italic':'normal',textDecoration:[e.underline?'underline':'',e.strikethrough?'line-through':''].filter(Boolean).join(' ')||'none',textAlign:e.align,justifyContent:e.align==='left'?'flex-start':e.align==='right'?'flex-end':'center',borderRadius:`${e.radius}px`});
    let text:HTMLSpanElement|undefined;
-   if(e.type==='text'){text=document.createElement('span');text.style.width='100%';node.append(text);}
+   if(e.type==='text'){node.style.textDecoration='none';text=document.createElement('span');text.style.width='100%';node.append(text);}
    else if(e.type==='shape')node.style.background=e.color;
    else if(e.asset){const img=document.createElement('img');img.src=project.assets[e.asset].data;img.alt=project.assets[e.asset].name;img.style.objectFit=e.fit;node.append(img);}
    else{node.textContent=t('image');node.style.background='#ffffff22';}
@@ -184,7 +194,7 @@ function draw(follow=true){
  }
  const sceneOpacity=s.transition==='fade'&&playing?Math.min(1,at.local/s.transitionDuration):1;
  if(backgroundImage)backgroundImage.style.opacity=String(sceneOpacity);
- views.forEach(({element,node,text})=>{const state=animationState(element,at.local);node.style.opacity=String(state.opacity*sceneOpacity);node.style.visibility=state.visible?'visible':'hidden';node.style.transform=state.transform;if(text&&text.textContent!==state.text)text.textContent=state.text;});
+ views.forEach(({element,node,text})=>{const state=animationState(element,at.local);node.style.opacity=String(state.opacity*sceneOpacity);node.style.visibility=state.visible?'visible':'hidden';node.style.transform=state.transform;if(text&&text.dataset.visibleText!==state.text){renderRuns(text,element,state.text);text.dataset.visibleText=state.text;}});
  ($('timeline') as HTMLInputElement).max=String(total());($('timeline') as HTMLInputElement).value=String(time);$('time-label').textContent=`${time.toFixed(1)} / ${total().toFixed(1)} s`;
  const playButton=$('play') as HTMLButtonElement;
  playButton.title=t(playing?'pause':'play');playButton.setAttribute('aria-label',playButton.title);
@@ -305,7 +315,7 @@ document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement
 document.addEventListener('keydown',event=>{if(event.key==='Escape'&&recording){exit();return;}if(event.key==='Escape'&&editorFullscreen&&!document.querySelector('dialog[open]')){setEditorFullscreen(false);if(document.fullscreenElement)void document.exitFullscreen().catch(()=>{});return;}if(event.code==='Space'&&recording){event.preventDefault();if(document.body.classList.contains('recording-ready')){startCountdown();return;}if(playing){stop();draw();}else play();}});
 refresh();
 
-$('duplicate-element').addEventListener('click',()=>{const e=selected();if(!e||current().elements.length>=100)return;const copy={...e,id:crypto.randomUUID()};current().elements.push(copy);selectedId=copy.id;changed();refresh();});
+$('duplicate-element').addEventListener('click',()=>{const e=selected();if(!e||current().elements.length>=100)return;const copy={...structuredClone(e),id:crypto.randomUUID()};current().elements.push(copy);selectedId=copy.id;changed();refresh();});
 $('element-up').addEventListener('click',()=>moveElement(-1));
 $('element-down').addEventListener('click',()=>moveElement(1));
 $('delete-element').addEventListener('click',()=>{if(!selected())return;current().elements=current().elements.filter(e=>e.id!==selectedId);selectedId='';changed();refresh();});
