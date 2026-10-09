@@ -398,3 +398,18 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
 .textContentGroup .text-settings-fields label:has(textarea) { grid-column:1 / -1; }
 .elementMotionGroup .text-settings-fields { grid-template-columns:repeat(3,minmax(0,1fr)); }
 .text-settings-group input,.text-settings-group select { background-color:var(--surface); }
+
+.element-inspector .text-style-toggle { flex-direction:row; align-items:center; justify-content:space-between; min-height:40px; gap:12px; }
+.text-style-toggle .safe-switch input { position:absolute; inset:0; width:100%; height:100%; margin:0; opacity:0; cursor:pointer; z-index:1; }
+
+/* Typography: switches on the left, numeric controls on the right. */
+.textStyleGroup .text-settings-fields label:has([name=font]) { grid-column:1; grid-row:1; }
+.textStyleGroup .text-settings-fields label:has([name=fontSize]) { grid-column:2; grid-row:1; }
+.textStyleGroup .text-settings-fields label:has([name=align]) { grid-column:1; grid-row:2; }
+.textStyleGroup .text-settings-fields label:has([name=radius]) { grid-column:2; grid-row:2; }
+.textStyleGroup .text-settings-fields label:has([name=bold]) { grid-column:1; grid-row:3; }
+.textStyleGroup .text-settings-fields label:has([name=italic]) { grid-column:1; grid-row:4; }
+.textStyleGroup .text-settings-fields label:has([name=underline]) { grid-column:1; grid-row:5; }
+.textStyleGroup .text-settings-fields label:has([name=strikethrough]) { grid-column:1; grid-row:6; }
+.textStyleGroup .text-settings-fields label:has([name=color]) { grid-column:2; grid-row:3; }
+.textStyleGroup .text-settings-fields label:has([name=opacity]) { grid-column:2; grid-row:4; }

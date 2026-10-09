@@ -236,3 +236,13 @@ test('element toolbar adds, duplicates, moves and deletes selected elements',asy
  await page.locator('#delete-element').click();await expect(page.locator('#element-list button')).toHaveCount(2);
  await expect(page.locator('#element-form .compact-actions')).toHaveCount(0);
 });
+
+test('text styles use switches and survive JSON export and import',async({page})=>{
+ await page.goto('/en/');await page.locator('#element-list button').first().click();
+ for(const name of ['Bold','Italic','Underline','Strikethrough'])await page.getByRole('switch',{name,exact:true}).check();
+ const json=await exportedJSON(page),element=JSON.parse(json).scenes[0].elements[0];
+ for(const key of ['bold','italic','underline','strikethrough'])expect(element[key]).toBe(true);
+ const style=await page.locator('.scene-element').first().evaluate(el=>({font:el.style.fontStyle,decoration:el.style.textDecoration}));expect(style.font).toBe('italic');expect(style.decoration).toContain('underline');expect(style.decoration).toContain('line-through');
+ await page.locator('#open-json').click();await page.locator('#json-input').fill(json);await page.locator('#import-json').click();await page.locator('#element-list button').first().click();
+ for(const name of ['Bold','Italic','Underline','Strikethrough'])await expect(page.getByRole('switch',{name,exact:true})).toBeChecked();
+});

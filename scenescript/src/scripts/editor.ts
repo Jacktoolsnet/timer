@@ -83,6 +83,12 @@ function field(form:HTMLElement,key:string,value:string|number|boolean,kind:stri
   function sync(){controls[0].disabled=min!==undefined&&number.valueAsNumber<=min;controls[1].disabled=max!==undefined&&number.valueAsNumber>=max;}
   number.addEventListener('input',sync);number.addEventListener('change',sync);sync();
   wrapper.append(controls[0],number,controls[1]);label.append(wrapper);
+ }else if(kind==='checkbox'&&['bold','italic','underline','strikethrough'].includes(key)){
+  label.classList.add('text-style-toggle');
+  const wrapper=document.createElement('span');wrapper.className='safe-switch';
+  input.setAttribute('role','switch');input.setAttribute('aria-label',t(key));
+  const track=document.createElement('span');track.className='safe-switch-track';track.setAttribute('aria-hidden','true');
+  wrapper.append(input,track);label.append(wrapper);
  }else label.append(input);
  form.append(label);
 }
@@ -95,7 +101,7 @@ function renderForms(){
  field(form,'background',s.background,'color',v=>updateScene('background',v));field(form,'backgroundAsset',s.backgroundAsset,'select',v=>updateScene('backgroundAsset',v),['',...Object.keys(project.assets)]);
  field(form,'transition',s.transition,'select',v=>updateScene('transition',v),['none','fade']);field(form,'transitionDuration',s.transitionDuration,'number',v=>updateScene('transitionDuration',v),undefined,0.01,3600);
  const ef=$('element-form');ef.replaceChildren();ef.classList.remove('text-settings');const e=selected();if(!e){const p=document.createElement('p');p.className='small-hint';p.textContent=t('empty');ef.append(p);return;}
- if(e.type==='text'){field(ef,'text',e.text,'textarea',v=>updateElement('text',v));field(ef,'font',e.font,'select',v=>updateElement('font',v),fonts);field(ef,'fontSize',e.fontSize,'number',v=>updateElement('fontSize',v),undefined,1,500);field(ef,'align',e.align,'select',v=>updateElement('align',v),['left','center','right']);field(ef,'bold',e.bold,'checkbox',v=>updateElement('bold',v));}
+ if(e.type==='text'){field(ef,'text',e.text,'textarea',v=>updateElement('text',v));field(ef,'font',e.font,'select',v=>updateElement('font',v),fonts);field(ef,'fontSize',e.fontSize,'number',v=>updateElement('fontSize',v),undefined,1,500);field(ef,'align',e.align,'select',v=>updateElement('align',v),['left','center','right']);for(const key of ['bold','italic','underline','strikethrough'] as const)field(ef,key,e[key],'checkbox',v=>updateElement(key,v));}
  if(e.type==='image'){field(ef,'asset',e.asset,'select',v=>updateElement('asset',v),['',...Object.keys(project.assets)]);field(ef,'fit',e.fit,'select',v=>updateElement('fit',v),['contain','cover']);}
  if(e.type!=='image')field(ef,'color',e.color,'color',v=>updateElement('color',v));
  for(const [key,min,max] of [['x',-100,100],['y',-100,100],['width',0.1,200],['height',0.1,200],['opacity',0,1],['rotation',-360,360],['radius',0,1000]] as const)field(ef,key,e[key],'number',v=>updateElement(key,v),undefined,min,max);
@@ -104,7 +110,7 @@ function renderForms(){
   ef.classList.add('text-settings');
   for(const [title,keys] of [
    ['textContentGroup',['text']],
-   ['textStyleGroup',['font','fontSize','align','bold','color','opacity','radius']],
+   ['textStyleGroup',['font','fontSize','align','bold','italic','underline','strikethrough','color','opacity','radius']],
    ['elementLayoutGroup',['x','y','width','height','rotation']],
    ['elementMotionGroup',['animation','at','animationDuration']]
   ] as const){
@@ -166,7 +172,7 @@ function draw(follow=true){
   if(s.backgroundAsset){backgroundImage=document.createElement('img');backgroundImage.className='scene-background';backgroundImage.src=project.assets[s.backgroundAsset].data;backgroundImage.alt='';stage.append(backgroundImage);}
   s.elements.forEach(e=>{
    const node=document.createElement('div');node.className='scene-element'+(!playing&&e.id===selectedId?' selected':'');
-   Object.assign(node.style,{left:`${e.x*w/100}px`,top:`${e.y*h/100}px`,width:`${e.width*w/100}px`,height:`${e.height*h/100}px`,color:e.color,fontFamily:e.font,fontSize:`${e.fontSize}px`,fontWeight:e.bold?'700':'400',textAlign:e.align,justifyContent:e.align==='left'?'flex-start':e.align==='right'?'flex-end':'center',borderRadius:`${e.radius}px`});
+   Object.assign(node.style,{left:`${e.x*w/100}px`,top:`${e.y*h/100}px`,width:`${e.width*w/100}px`,height:`${e.height*h/100}px`,color:e.color,fontFamily:e.font,fontSize:`${e.fontSize}px`,fontWeight:e.bold?'700':'400',fontStyle:e.italic?'italic':'normal',textDecoration:[e.underline?'underline':'',e.strikethrough?'line-through':''].filter(Boolean).join(' ')||'none',textAlign:e.align,justifyContent:e.align==='left'?'flex-start':e.align==='right'?'flex-end':'center',borderRadius:`${e.radius}px`});
    let text:HTMLSpanElement|undefined;
    if(e.type==='text'){text=document.createElement('span');text.style.width='100%';node.append(text);}
    else if(e.type==='shape')node.style.background=e.color;

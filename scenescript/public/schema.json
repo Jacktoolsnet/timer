@@ -228,6 +228,18 @@
                   "minimum": 0.01,
                   "maximum": 3600,
                   "default": 1
+                },
+                "italic": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "underline": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "strikethrough": {
+                  "type": "boolean",
+                  "default": false
                 }
               },
               "required": [

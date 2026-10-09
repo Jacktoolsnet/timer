@@ -127,6 +127,9 @@ Optional fields and their defaults:
 - fontSize: 90; number, 1–500 project pixels, not percentages or UI pixels.
 - align: "center"; allowed "left", "center", "right".
 - bold: false; boolean.
+- italic: false; boolean.
+- underline: false; boolean.
+- strikethrough: false; boolean. These styles can be combined; omitted style flags default to false.
 - opacity: 1; number, 0–1.
 - rotation: 0; number, -360 to 360 degrees.
 - radius: 0; number, 0–1000 project pixels.
@@ -173,7 +176,7 @@ and whitespace, with normal browser wrapping at available break opportunities.
 Long unbroken strings are not forcibly broken. Text too wide/tall is clipped to
 the element box (including rounded corners), then to the canvas. No auto-fit,
 automatic font-size reduction, overflow warning or padding/line-height field
-exists. color controls the text foreground; bold controls its font weight.
+exists. color controls the text foreground; bold controls its font weight; italic, underline and strikethrough enable the corresponding text styles.
 
 ### Images, backgrounds and shapes
 

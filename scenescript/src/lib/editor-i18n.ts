@@ -1,5 +1,8 @@
 import type { Language } from './i18n';
 const words = {
+ italic:['Kursiv','Italic','Cursiva','Italique'],
+ underline:['Unterstrichen','Underline','Subrayado','Souligné'],
+ strikethrough:['Durchgestrichen','Strikethrough','Tachado','Barré'],
  textContentGroup:['Textinhalt','Text content','Contenido del texto','Contenu du texte'],
  textStyleGroup:['Schrift & Darstellung','Typography & appearance','Tipografía y apariencia','Typographie et apparence'],
  elementLayoutGroup:['Position & Größe','Position & size','Posición y tamaño','Position et taille'],
