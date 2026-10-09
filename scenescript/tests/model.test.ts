@@ -99,3 +99,20 @@ test('gradients validate, default, round trip and reject malformed stops',()=>{
   raw.scenes[0].backgroundGradient={...g,...change};assert.throws(()=>parseProject(serialize(raw)),/backgroundGradient/);
  }
 });
+
+test('simulation defaults, validation, opacity and particle budgets',()=>{
+ const raw=JSON.parse(serialize(demoProject()));
+ raw.backgroundSimulation={type:'snow'};
+ raw.scenes[0].backgroundOpacity=0;
+ raw.scenes[0].elements.push({id:'effect',type:'simulation'});
+ const parsed=parseProject(serialize(raw));
+ assert.equal(parsed.backgroundSimulation!.type,'snow');assert.equal(parsed.backgroundSimulation!.count,60);
+ assert.equal(parsed.scenes[0].elements.at(-1)!.simulation!.type,'particles');assert.equal(parsed.scenes[0].backgroundOpacity,0);
+ assert.deepEqual(parseProject(serialize(parsed)),parsed);
+ for(const change of [{type:'fire'},{color:'red'},{count:0},{count:2.5},{speed:0},{size:101},{opacity:2},{seed:-1},{seed:1.5},{script:'evil'}]){
+  raw.backgroundSimulation={type:'particles',...change};assert.throws(()=>parseProject(serialize(raw)),/backgroundSimulation/);
+ }
+ raw.backgroundSimulation=null;raw.scenes[0].elements.at(-1).simulation=null;assert.throws(()=>parseProject(serialize(raw)),/simulation/);
+ raw.scenes[0].elements=Array.from({length:26},(_,i)=>({id:'effect-'+i,type:'simulation',simulation:{type:'snow',count:200}}));
+ assert.throws(()=>parseProject(serialize(raw)),/5000/);
+});

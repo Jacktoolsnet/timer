@@ -1,3 +1,5 @@
+import {defaultSimulation,simulationTypes,type Simulation} from '../lib/simulation';
+import {createSimulation,type SimulationView} from './simulation';
 import {defaultGradient,gradientCSS,type Gradient} from '../lib/gradient';
 import {createSvgImage,seekSvg} from './svg-image';
 import {validateSvg,svgDataURL} from '../lib/svg';
@@ -49,7 +51,7 @@ function renderElements(){
  ($('element-up') as HTMLButtonElement).disabled=index<=0;
  ($('element-down') as HTMLButtonElement).disabled=index<0||index>=count-1;
  document.querySelectorAll<HTMLButtonElement>('[data-add]').forEach(b=>b.disabled=count>=100);
- const list=$('element-list'),scrollTop=list.scrollTop;list.replaceChildren();current().elements.forEach((e,i)=>{const li=document.createElement('li'),b=button(`${i+1}. ${t(e.type)} · ${e.name||(e.type==='text'?e.text:e.type==='image'?(project.assets[e.asset]?.name||e.id):e.id)}`,()=>{selectedId=e.id;renderForms();renderElements();draw();});b.title=b.textContent||'';b.setAttribute('aria-current',String(e.id===selectedId));li.append(b);list.append(li);});list.scrollTop=scrollTop;}
+ const list=$('element-list'),scrollTop=list.scrollTop;list.replaceChildren();current().elements.forEach((e,i)=>{const li=document.createElement('li'),b=button(`${i+1}. ${t(e.type)} · ${e.name||(e.type==='text'?e.text:e.type==='image'?(project.assets[e.asset]?.name||e.id):e.type==='simulation'?t(e.simulation!.type):e.id)}`,()=>{selectedId=e.id;renderForms();renderElements();draw();});b.title=b.textContent||'';b.setAttribute('aria-current',String(e.id===selectedId));li.append(b);list.append(li);});list.scrollTop=scrollTop;}
 const renameDialog=$('rename-dialog') as HTMLDialogElement;
 let pendingRename:((name:string)=>void)|undefined;
 function askRename(name:string,action:(name:string)=>void){
@@ -104,7 +106,7 @@ function field(form:HTMLElement,key:string,value:string|number|boolean,kind:stri
  let input:HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement;
  if(kind==='select'){input=document.createElement('select');options?.forEach(option=>{const o=document.createElement('option');o.value=option;o.textContent=key==='asset'||key==='backgroundAsset'?(option?project.assets[option].name:t('none')):t(key==='gradientType'&&option==='solid'?'gradientSolid':key==='transition'&&option!=='none'&&option!=='fade'?'transition-'+option:option);input.append(o);});input.value=String(value);}
  else if(kind==='textarea'){input=document.createElement('textarea');input.value=String(value);input.maxLength=10000;}
- else{input=document.createElement('input');input.type=kind;if(kind==='checkbox')input.checked=Boolean(value);else input.value=String(value);if(kind==='number'){input.step='any';if(min!==undefined)input.min=String(min);if(max!==undefined)input.max=String(max);}if(kind==='text')input.maxLength=200;}
+ else{input=document.createElement('input');input.type=kind;if(kind==='checkbox')input.checked=Boolean(value);else input.value=String(value);if(kind==='number'){input.step='any';if(min!==undefined)input.min=String(min);if(max!==undefined)input.max=String(max);}if(kind==='text')input.maxLength=200;if(['simulationCount','simulationSeed'].includes(key))input.step='1';}
  input.name=key;
  input.addEventListener(kind==='textarea'||kind==='text'||kind==='color'?'input':'change',()=>{
   if(!input.isConnected)return;
@@ -115,7 +117,7 @@ function field(form:HTMLElement,key:string,value:string|number|boolean,kind:stri
  if(kind==='number'){
   const number=input as HTMLInputElement;
   const wrapper=document.createElement('span');wrapper.className='number-stepper';
-  const step=['opacity','stopOpacity'].includes(key)?0.05:['duration','transitionDuration','animationDuration','at'].includes(key)?0.1:1;
+  const step=['opacity','stopOpacity','backgroundOpacity','simulationOpacity'].includes(key)?0.05:['duration','transitionDuration','animationDuration','at','simulationSpeed'].includes(key)?0.1:1;
   const controls=[-1,1].map(direction=>{
    const control=button(direction<0?'−':'+',()=>{
     if(!Number.isFinite(number.valueAsNumber))return;
@@ -175,6 +177,34 @@ function gradientFields(form:HTMLElement,key:'backgroundGradient'|'fillGradient'
  });
  const add=button('+',()=>{const stops=[...value.stops,{color:'#ffffff',position:50,opacity:1}].sort((a,b)=>a.position-b.position);commit({...value,stops});renderForms();});add.title=t('addStop');add.setAttribute('aria-label',add.title);add.disabled=value.stops.length>=16;panel.append(add);
 }
+function simulationFields(form:HTMLElement,config:Simulation|null,update:(value:Simulation|null)=>boolean,projectLevel=false){
+ const container=document.createElement('div');container.dataset.simulationSettings='true';container.className='simulation-settings';form.append(container);
+ field(container,'simulationType',config?.type||'none','select',v=>{
+  if(v==='none'){update(null);return;}
+  update({...config||defaultSimulation(v as Simulation['type']),type:v as Simulation['type']});
+ },projectLevel?['none',...simulationTypes]:simulationTypes);
+ if(!config)return;
+ const settings:readonly [keyof Simulation,string,string,number?,number?][]=[
+  ['color','simulationColor','color'],['count','simulationCount','number',1,200],
+  ['speed','simulationSpeed','number',.1,5],['size','simulationSize','number',1,100],
+  ['opacity','simulationOpacity','number',0,1],['seed','simulationSeed','number',0,4294967295]
+ ];
+ for(const [key,label,kind,min,max] of settings)field(container,label,config[key],kind,v=>{
+  const next={...config,[key]:v};if(update(next))Object.assign(config!,next);
+ },undefined,min,max);
+}
+const simulationDialog=$('simulation-dialog') as HTMLDialogElement;
+$('project-simulation-form').addEventListener('submit',event=>event.preventDefault());
+function renderProjectSimulation(){
+ const form=$('project-simulation-form');form.replaceChildren();
+ simulationFields(form,project.backgroundSimulation,value=>{
+  const previous=project.backgroundSimulation;project.backgroundSimulation=value;
+  try{parseProject(JSON.stringify(project));stop();changed();draw();if(previous?.type!==value?.type)renderProjectSimulation();return true;}
+  catch(error){project.backgroundSimulation=previous;status(t('error')+' '+(error as Error).message);renderProjectSimulation();return false;}
+ },true);
+}
+$('project-simulation').addEventListener('click',()=>{renderProjectSimulation();simulationDialog.showModal();});
+$('close-simulation').addEventListener('click',()=>simulationDialog.close());
 function updateScene(key:keyof Scene,value:unknown){const previous=current()[key];(current() as unknown as Record<string,unknown>)[key]=value;try{parseProject(JSON.stringify(project));stop();time=offset(sceneIndex);changed();draw();if((key==='background'||key==='backgroundGradient')&&richEditor)richEditor.editor.style.background=gradientCSS(current().backgroundGradient,current().background);if(key==='name'||key==='duration')renderSceneLabels();}catch(error){(current() as unknown as Record<string,unknown>)[key]=previous;status(t('error')+' '+(error as Error).message);renderForms();}}
 function renderSceneLabels(){const buttons=$('scene-list').querySelectorAll('button');project.scenes.forEach((s,i)=>{buttons[i].textContent=`${i+1}. ${s.name} · ${s.duration}s`;buttons[i].title=buttons[i].textContent||'';});}
 let richEditor:ReturnType<typeof richTextEditor>|undefined;
@@ -187,6 +217,7 @@ function renderForms(){
  richEditor?.dispose();richEditor=undefined;
  const form=$('scene-form');form.replaceChildren();const s=current();
  field(form,'name',s.name,'text',v=>updateScene('name',v));field(form,'duration',s.duration,'number',v=>updateScene('duration',v),undefined,0.1,3600);
+ field(form,'backgroundOpacity',s.backgroundOpacity,'number',v=>updateScene('backgroundOpacity',v),undefined,0,1);
  field(form,'background',s.background,'color',v=>updateScene('background',v));gradientFields(form,'backgroundGradient',s.backgroundGradient,s.background,v=>updateScene('backgroundGradient',v));field(form,'backgroundAsset',s.backgroundAsset,'select',v=>updateScene('backgroundAsset',v),['',...Object.keys(project.assets)]);
  field(form,'transition',s.transition,'select',v=>updateScene('transition',v),sceneTransitions);field(form,'transitionDuration',s.transitionDuration,'number',v=>updateScene('transitionDuration',v),undefined,0.01,3600);
  const ef=$('element-form');ef.replaceChildren();ef.classList.remove('text-settings');const e=selected();if(!e){const p=document.createElement('p');p.className='small-hint';p.textContent=t('empty');ef.append(p);return;}
@@ -198,6 +229,9 @@ function renderForms(){
  if(e.type==='image'){field(ef,'asset',e.asset,'select',v=>updateElement('asset',v),['',...Object.keys(project.assets)]);field(ef,'fit',e.fit,'select',v=>updateElement('fit',v),['contain','cover']);}
  if(e.type==='text')field(ef,'color',e.color,'color',v=>updateElement('color',v));
  if(e.type==='shape'){field(ef,'shapeType',e.shapeType,'select',v=>updateElement('shapeType',v),shapeTypes);shapeColorField(ef,'fillColor',e.fillColor);shapeColorField(ef,'borderColor',e.borderColor);field(ef,'borderStyle',e.borderStyle,'select',v=>updateElement('borderStyle',v),['solid','dashed','dotted','double']);field(ef,'borderWidth',e.borderWidth,'number',v=>updateElement('borderWidth',v),undefined,0,500);}
+ if(e.type==='simulation')simulationFields(ef,e.simulation,value=>{
+  if(!value)return false;const previous=e.simulation;updateElement('simulation',value);if(previous?.type!==value.type)renderForms();return e.simulation===value;
+ });
  if(e.type==='shape')gradientFields(ef,'fillGradient',e.fillGradient,e.fillColor,v=>updateElement('fillGradient',v));
  for(const [key,min,max] of [['x',-100,100],['y',-100,100],['width',0.1,200],['height',0.1,200],['opacity',0,1],['rotation',-360,360],['radius',0,1000]] as const)field(ef,key,e[key],'number',v=>updateElement(key,v),undefined,min,max);
  field(ef,'animation',e.animation,'select',v=>updateElement('animation',v),animations);field(ef,'at',e.at,'number',v=>updateElement('at',v),undefined,0,s.duration);field(ef,'animationDuration',e.animationDuration,'number',v=>updateElement('animationDuration',v),undefined,0.01,3600);
@@ -209,7 +243,7 @@ function renderForms(){
    ['elementLayoutGroup',['x','y','width','height','rotation']],
    ['elementMotionGroup',['animation','at','animationDuration']]
   ]:[
-   [e.type==='image'?'imageStyleGroup':'shapeStyleGroup',e.type==='image'?['asset','fit','opacity','radius']:['shapeType','fillColor','borderColor','fillGradient','opacity','borderWidth','borderStyle','radius']],
+   [e.type==='simulation'?'simulationStyleGroup':e.type==='image'?'imageStyleGroup':'shapeStyleGroup',e.type==='simulation'?['simulation','opacity','radius']:e.type==='image'?['asset','fit','opacity','radius']:['shapeType','fillColor','borderColor','fillGradient','opacity','borderWidth','borderStyle','radius']],
    ['elementLayoutGroup',['x','y','width','height','rotation']],
    ['elementMotionGroup',['animation','at','animationDuration']]
   ];
@@ -217,7 +251,7 @@ function renderForms(){
    const group=document.createElement('fieldset');group.className='text-settings-group '+title;
    const legend=document.createElement('legend');legend.textContent=t(title);group.append(legend);
    const fields=document.createElement('div');fields.className='text-settings-fields';group.append(fields);
-   for(const key of keys){const label=key==='fillGradient'?ef.querySelector('[data-gradient=fillGradient]'):key==='text'?ef.querySelector('label[data-rich-text]'):ef.querySelector(`[name="${key}"]`)?.closest('label');if(label)fields.append(label);}
+   for(const key of keys){const label=key==='simulation'?ef.querySelector('[data-simulation-settings]'):key==='fillGradient'?ef.querySelector('[data-gradient=fillGradient]'):key==='text'?ef.querySelector('label[data-rich-text]'):ef.querySelector(`[name="${key}"]`)?.closest('label');if(label)fields.append(label);}
    ef.append(group);
   }
 }
@@ -257,33 +291,44 @@ $('close-preview').addEventListener('click',closePreview);
 previewDialog.addEventListener('close',()=>{if(previewContent.parentElement!==$('preview-slot'))closePreview();});
 previewDialog.addEventListener('click',event=>{if(event.target===previewDialog){const rect=previewDialog.getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)closePreview();}});
 // Render complete scene layers so transitions include backgrounds and rich text.
-type SceneView={element:Element;node:HTMLDivElement;text?:HTMLSpanElement;svg?:SVGSVGElement};
+type SceneView={element:Element;node:HTMLDivElement;text?:HTMLSpanElement;svg?:SVGSVGElement;simulation?:SimulationView};
+let projectSimulation:SimulationView|undefined,projectSimulationKey='';
+function syncProjectSimulation(){
+ const key=JSON.stringify([project.backgroundSimulation,project.format]);
+ if(key!==projectSimulationKey){projectSimulationKey=key;const [width,height]=formats[project.format];projectSimulation=project.backgroundSimulation?createSimulation(project.backgroundSimulation,width,height):undefined;projectSimulation?.canvas.classList.add('project-simulation-canvas');}
+ projectSimulation?.draw(time);
+}
+let transitionBlack:HTMLDivElement|undefined;
 let stageKey='',views:SceneView[]=[],incomingLayer:HTMLDivElement|undefined,incomingSvgBackground:SVGSVGElement|undefined,outgoingLayer:HTMLDivElement|undefined;
 function createSceneLayer(scene:Scene,index:number,interactive:boolean){
- const layer=document.createElement('div');layer.className='scene-layer';layer.dataset.sceneIndex=String(index);layer.style.background=gradientCSS(scene.backgroundGradient,scene.background);
+ const layer=document.createElement('div');layer.className='scene-layer';layer.dataset.sceneIndex=String(index);layer.style.background=scene.backgroundOpacity===1?gradientCSS(scene.backgroundGradient,scene.background):'transparent';
+ let backgroundHost:HTMLElement=layer;
+ if(scene.backgroundOpacity<1){const backdrop=document.createElement('div');backdrop.className='scene-backdrop';backdrop.style.background=gradientCSS(scene.backgroundGradient,scene.background);backdrop.style.opacity=String(scene.backgroundOpacity);layer.append(backdrop);backgroundHost=backdrop;}
  if(!interactive)layer.style.pointerEvents='none';
  const [w,h]=formats[project.format];const sceneViews:SceneView[]=[];
  let svgBackground:SVGSVGElement|undefined;
- if(scene.backgroundAsset&&project.assets[scene.backgroundAsset].data.startsWith('data:image/svg+xml;')){svgBackground=createSvgImage(project.assets[scene.backgroundAsset].data,'cover',true);const background=document.createElement('div');background.className='scene-background';background.append(svgBackground);layer.append(background);}
- else if(scene.backgroundAsset){const image=document.createElement('img');image.className='scene-background';image.src=project.assets[scene.backgroundAsset].data;image.alt='';layer.append(image);}
+ if(scene.backgroundAsset&&project.assets[scene.backgroundAsset].data.startsWith('data:image/svg+xml;')){svgBackground=createSvgImage(project.assets[scene.backgroundAsset].data,'cover',true);const background=document.createElement('div');background.className='scene-background';background.append(svgBackground);backgroundHost.append(background);}
+ else if(scene.backgroundAsset){const image=document.createElement('img');image.className='scene-background';image.src=project.assets[scene.backgroundAsset].data;image.alt='';backgroundHost.append(image);}
  scene.elements.forEach(e=>{
    const node=document.createElement('div');node.className='scene-element'+(interactive&&!playing&&e.id===selectedId?' selected':'');
    Object.assign(node.style,{left:`${e.x*w/100}px`,top:`${e.y*h/100}px`,width:`${e.width*w/100}px`,height:`${e.height*h/100}px`,color:e.color,fontFamily:e.font,fontSize:`${e.fontSize}px`,fontWeight:e.bold?'700':'400',fontStyle:e.italic?'italic':'normal',textDecoration:[e.underline?'underline':'',e.strikethrough?'line-through':''].filter(Boolean).join(' ')||'none',textAlign:e.align,justifyContent:e.align==='left'?'flex-start':e.align==='right'?'flex-end':'center',borderRadius:`${e.radius}px`});
-   let text:HTMLSpanElement|undefined,svg:SVGSVGElement|undefined;
+   let text:HTMLSpanElement|undefined,svg:SVGSVGElement|undefined,simulation:SimulationView|undefined;
    if(e.type==='text'){node.style.textDecoration='none';text=document.createElement('span');text.style.width='100%';node.append(text);}
+   else if(e.type==='simulation'){simulation=createSimulation(e.simulation!,e.width*w/100,e.height*h/100);node.append(simulation.canvas);}
    else if(e.type==='shape')renderShape(node,e,e.width*w/100,e.height*h/100);
    else if(e.asset&&project.assets[e.asset].data.startsWith('data:image/svg+xml;')){svg=createSvgImage(project.assets[e.asset].data,e.fit);node.append(svg);}
    else if(e.asset){const img=document.createElement('img');img.src=project.assets[e.asset].data;img.alt=project.assets[e.asset].name;img.style.objectFit=e.fit;node.append(img);}
    else{node.textContent=t('image');node.style.background='#ffffff22';}
    node.addEventListener('click',()=>{if(!interactive||playing||recording)return;selectedId=e.id;renderForms();renderElements();draw();});
-   layer.append(node);sceneViews.push({element:e,node,text,svg});
+   layer.append(node);sceneViews.push({element:e,node,text,svg,simulation});
  });
  return {layer,views:sceneViews,svgBackground};
 }
 function updateSceneViews(sceneViews:SceneView[],local:number,opacity=1){
- sceneViews.forEach(({element,node,text,svg})=>{seekSvg(svg,local-element.at);const state=animationState(element,local);node.style.opacity=String(state.opacity*opacity);node.style.visibility=state.visible?'visible':'hidden';node.style.transform=state.transform;if(text&&text.dataset.visibleText!==state.text){renderRuns(text,element,state.text);text.dataset.visibleText=state.text;}});
+ sceneViews.forEach(({element,node,text,svg,simulation})=>{simulation?.draw(local-element.at);seekSvg(svg,local-element.at);const state=animationState(element,local);node.style.opacity=String(state.opacity*opacity);node.style.visibility=state.visible?'visible':'hidden';node.style.transform=state.transform;if(text&&text.dataset.visibleText!==state.text){renderRuns(text,element,state.text);text.dataset.visibleText=state.text;}});
 }
 function draw(follow=true){
+ syncProjectSimulation();
  const at=locateTime(project,time);
  if(follow&&at.index!==sceneIndex){sceneIndex=at.index;selectedId='';renderForms();renderElements();$('scene-list').querySelectorAll('button').forEach((b,i)=>b.setAttribute('aria-current',String(i===sceneIndex)));}
  const s=project.scenes[at.index],transition=sceneTransitionState(s,at.local);
@@ -291,10 +336,12 @@ function draw(follow=true){
  const showPrevious=layered&&at.index>0&&transition.progress<1;
  const key=`${revision}:${at.index}:${project.format}:${playing}:${recording}:${selectedId}:${showPrevious}`;
  if(stageKey!==key){
-  stageKey=key;stage.replaceChildren();outgoingLayer=undefined;stage.style.background=layered||s.backgroundGradient?'#000000':s.background;resize();
+  stageKey=key;stage.replaceChildren(...(projectSimulation?[projectSimulation.canvas]:[]));outgoingLayer=undefined;transitionBlack=undefined;
+  if(projectSimulation&&s.transition==='through-black'){transitionBlack=document.createElement('div');transitionBlack.className='project-transition-black';stage.append(transitionBlack);}stage.style.background=projectSimulation||layered||s.backgroundGradient||s.backgroundOpacity<1?'#000000':s.background;resize();
   if(showPrevious){const previous=project.scenes[at.index-1],view=createSceneLayer(previous,at.index-1,false);outgoingLayer=view.layer;stage.append(view.layer);updateSceneViews(view.views,previous.duration);seekSvg(view.svgBackground,previous.duration);}
   const view=createSceneLayer(s,at.index,true);incomingLayer=view.layer;incomingSvgBackground=view.svgBackground;views=view.views;stage.append(view.layer);
  }
+ if(transitionBlack)transitionBlack.style.opacity=String(1-Math.abs(transition.progress*2-1));
  if(incomingLayer){incomingLayer.style.transform=transition.incoming;incomingLayer.style.clipPath=transition.clip;incomingLayer.style.opacity=String(transition.opacity);}
  if(outgoingLayer){outgoingLayer.style.transform=transition.outgoing;outgoingLayer.style.opacity=String(transition.outgoingOpacity);}
  // Preserve the existing fade-in semantics over the incoming background color.
@@ -320,7 +367,7 @@ $('timeline').addEventListener('input',()=>{stop();time=Number(($('timeline') as
 $('safe-toggle').addEventListener('change',()=>{$('safe-overlay').hidden=!($('safe-toggle') as HTMLInputElement).checked;});
 function replace(next:Project){stop();revision++;project=next;sceneIndex=0;selectedId='';time=0;dirty=false;persist();refresh();status(t('ready'));}
 const canReplace=()=>!dirty||confirm(t('unsaved'));
-$('new-project').addEventListener('click',()=>{if(canReplace()){replace({version:'1.0',title:'SceneScript',format:'landscape',assets:{},scenes:[newScene()]});changed();}});
+$('new-project').addEventListener('click',()=>{if(canReplace()){replace({version:'1.0',title:'SceneScript',format:'landscape',backgroundSimulation:null,assets:{},scenes:[newScene()]});changed();}});
 $('project-title').addEventListener('input',()=>{project.title=($('project-title') as HTMLInputElement).value;changed();});
 $('project-format').addEventListener('change',()=>{project.format=($('project-format') as HTMLSelectElement).value as Project['format'];changed();draw();});
 $('add-scene').addEventListener('click',()=>{if(project.scenes.length>=100)return;project.scenes.push(newScene());changed();selectScene(project.scenes.length-1);});
@@ -335,7 +382,7 @@ $('delete-scene').addEventListener('click',()=>{
  });
 });
 for(const [id,delta] of [['scene-up',-1],['scene-down',1]] as const)$ (id).addEventListener('click',()=>{const next=sceneIndex+delta;if(next<0||next>=project.scenes.length)return;[project.scenes[sceneIndex],project.scenes[next]]=[project.scenes[next],project.scenes[sceneIndex]];changed();selectScene(next);});
-document.querySelectorAll<HTMLButtonElement>('[data-add]').forEach(b=>b.addEventListener('click',()=>{if(current().elements.length>=100)return;($('element-add-menu') as HTMLDetailsElement).open=false;const e=newElement(b.dataset.add as Element['type']);if(e.type==='image')e.asset=Object.keys(project.assets)[0]||'';current().elements.push(e);selectedId=e.id;stop();time=offset(sceneIndex)+Math.min(current().duration-0.001,e.animationDuration);changed();refresh();}));
+document.querySelectorAll<HTMLButtonElement>('[data-add]').forEach(b=>b.addEventListener('click',()=>{if(current().elements.length>=100)return;($('element-add-menu') as HTMLDetailsElement).open=false;const e=newElement(b.dataset.add as Element['type']);if(e.type==='image')e.asset=Object.keys(project.assets)[0]||'';current().elements.push(e);try{parseProject(JSON.stringify(project));}catch(error){current().elements.pop();status(t('error')+' '+(error as Error).message);return;}selectedId=e.id;stop();time=offset(sceneIndex)+Math.min(current().duration-0.001,e.animationDuration);changed();refresh();}));
 function download(){try{parseProject(JSON.stringify(project));const blob=new Blob([JSON.stringify(project,null,2)],{type:'application/json'});if(blob.size>MAX_FILE_BYTES)throw new Error('JSON: maximum 30 MiB');const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=(project.title.replace(/[^\p{L}\p{N}_-]+/gu,'-').slice(0,80)||'project')+'.scenescript.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);dirty=false;status(t('saved'));}catch(error){status(t('error')+' '+(error as Error).message);}}
 $('save-project').addEventListener('click',download);
 $('load-project').addEventListener('click',()=>($('project-file') as HTMLInputElement).click());
@@ -432,7 +479,7 @@ document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement
 document.addEventListener('keydown',event=>{if(event.key==='Escape'&&recording){exit();return;}if(event.key==='Escape'&&editorFullscreen&&!document.querySelector('dialog[open]')){setEditorFullscreen(false);if(document.fullscreenElement)void document.exitFullscreen().catch(()=>{});return;}if(event.code==='Space'&&recording){event.preventDefault();if(document.body.classList.contains('recording-ready')){startCountdown();return;}if(playing){stop();draw();}else play();}});
 refresh();
 
-$('duplicate-element').addEventListener('click',()=>{const e=selected();if(!e||current().elements.length>=100)return;const copy={...structuredClone(e),id:crypto.randomUUID()};current().elements.push(copy);selectedId=copy.id;changed();refresh();});
+$('duplicate-element').addEventListener('click',()=>{const e=selected();if(!e||current().elements.length>=100)return;const copy={...structuredClone(e),id:crypto.randomUUID()};current().elements.push(copy);try{parseProject(JSON.stringify(project));}catch(error){current().elements.pop();status(t('error')+' '+(error as Error).message);return;}selectedId=copy.id;changed();refresh();});
 $('element-up').addEventListener('click',()=>moveElement(-1));
 $('element-down').addEventListener('click',()=>moveElement(1));
 $('delete-element').addEventListener('click',()=>{if(!selected())return;current().elements=current().elements.filter(e=>e.id!==selectedId);selectedId='';changed();refresh();});

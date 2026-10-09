@@ -32,11 +32,15 @@ Hochkant-Projekte für Smartphone-Zielgruppen sind weiterhin möglich.
 ## Erste Version
 
 - Szenen erstellen, duplizieren, umordnen, löschen und Dauer einstellen.
-- Text, Bild und Rechteck; Elemente auswählen, duplizieren, umordnen und löschen.
+- Text, Bild, Formen und Simulationen (Partikel, Schnee, Blasen); Elemente auswählen, duplizieren, umordnen und löschen.
 - Editor für Position, Größe, Farbe, Schrift, Ausrichtung, Deckkraft, Drehung,
   Eckenradius, Bildanpassung und Animationszeitpunkte.
 - 1920×1080, 1080×1920 und 1080×1080 als logische Projektauflösung.
 - Einblenden, Bewegung von rechts/unten, Zoom, Schreibmaschine, langsamer Zoom.
+- Transparente Simulationselemente sowie durchgängige Projektsimulationen mit
+  absoluter Zeitsteuerung, Seed, Farbe, Intensität, Geschwindigkeit und Größe.
+  Szenenhintergrunddeckkraft macht die Projektsimulation sichtbar, ohne sie beim
+  Szenenwechsel neu zu starten. Feuer und Wellen sind noch nicht enthalten.
 - Lineare, radiale und konische Verläufe für Szenen und alle Formtypen, mit 2–16
   Farbstopps, Positionen und Transparenz; im Editor und JSON bearbeitbar.
 - Szenenhintergründe als Farbe/Bild und optionales Einblenden des Szeneninhalts.

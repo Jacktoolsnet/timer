@@ -509,3 +509,64 @@ test('element order determines visible stacking and moving changes layers',async
  await page.locator('#open-preview').click();
  expect(await topColor()).toBe('rgb(0, 0, 255)');
 });
+
+test('simulation elements offer transparent effects, positioning and saved settings',async({page})=>{
+ await page.goto('/en/');await page.locator('#element-add-menu summary').click();await page.locator('[data-add=simulation]').click();
+ const canvas=page.locator('.scene-element.selected canvas');
+ for(const type of ['particles','snow','bubbles']){
+  await page.locator('#element-form [name=simulationType]').selectOption(type);
+  await expect(canvas).toHaveCount(1);await expect(page.locator('.scene-element.selected')).toHaveCSS('background-color','rgba(0, 0, 0, 0)');
+  expect(await canvas.evaluate((node:HTMLCanvasElement)=>Array.from(node.getContext('2d')!.getImageData(0,0,1,1).data))).toEqual([0,0,0,0]);
+ }
+ await page.locator('[name=simulationColor]').fill('#ff8800');
+ for(const [key,value] of [['simulationCount','24'],['simulationSpeed','2'],['simulationSize','12'],['simulationSeed','123'],['x','25'],['rotation','45']]){
+  await page.locator('#element-form [name='+key+']').fill(value);await page.locator('#element-form [name='+key+']').dispatchEvent('change');
+ }
+ const before=await canvas.evaluate((c:HTMLCanvasElement)=>c.toDataURL());
+ const time=await page.locator('#timeline').inputValue();
+ await page.locator('#timeline').fill('3');await page.locator('#timeline').dispatchEvent('input');
+ expect(await canvas.evaluate((c:HTMLCanvasElement)=>c.toDataURL())).not.toBe(before);
+ await page.locator('#timeline').fill(time);await page.locator('#timeline').dispatchEvent('input');
+ expect(await canvas.evaluate((c:HTMLCanvasElement)=>c.toDataURL())).toBe(before);
+ const saved=JSON.parse(await exportedJSON(page));expect(saved.scenes[0].elements.at(-1)).toMatchObject({type:'simulation',x:25,rotation:45,simulation:{type:'bubbles',color:'#ff8800',count:24,speed:2,size:12,seed:123}});
+ await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(saved));await page.locator('#import-json').click();await page.locator('#element-list button').last().click();
+ await expect(page.locator('[name=simulationType]')).toHaveValue('bubbles');await expect(page.locator('[name=simulationCount]')).toHaveValue('24');
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();
+});
+
+test('project simulation keeps one canvas and global time across transitions, pause and recording',async({page})=>{
+ await page.goto('/en/');
+ await page.locator('#project-simulation').click();await expect(page.locator('#simulation-dialog header')).toBeVisible();await expect(page.locator('#simulation-dialog footer button')).toBeVisible();
+ await page.locator('#project-simulation-form [name=simulationType]').selectOption('snow');
+ const stepper=page.locator('#project-simulation-form .number-stepper').first();
+ const minus=(await stepper.locator('button').first().boundingBox())!,input=(await stepper.locator('input').boundingBox())!,plus=(await stepper.locator('button').last().boundingBox())!;
+ expect(minus.width).toBe(30);expect(plus.width).toBe(30);expect(input.x-minus.x-minus.width).toBeCloseTo(4,0);expect(plus.x-input.x-input.width).toBeCloseTo(4,0);
+ await page.locator('#project-simulation-form [name=simulationCount]').fill('30');await page.locator('#project-simulation-form [name=simulationCount]').dispatchEvent('change');
+ await page.locator('#project-simulation-form [name=simulationSpeed]').fill('1.5');await page.locator('#project-simulation-form [name=simulationSpeed]').dispatchEvent('change');
+ await page.locator('#project-simulation-form [name=simulationSize]').fill('8');await page.locator('#project-simulation-form [name=simulationSize]').dispatchEvent('change');
+ await page.locator('#project-simulation-form [name=simulationSeed]').fill('99');await page.locator('#project-simulation-form [name=simulationSeed]').dispatchEvent('change');
+ await page.locator('#close-simulation').click();
+ await page.locator('[name=backgroundOpacity]').fill('0');await page.locator('[name=backgroundOpacity]').dispatchEvent('change');
+ const canvas=page.locator('.project-simulation-canvas');
+ await expect(canvas).toHaveCount(1);
+ await canvas.evaluate(node=>(window as any).originalSimulationCanvas=node);
+ const seek=async(time:string)=>{await page.locator('#timeline').fill(time);await page.locator('#timeline').dispatchEvent('input');};
+ await seek('4.99');const before=await canvas.evaluate((c:HTMLCanvasElement)=>c.toDataURL());
+ await seek('5.01');await expect(canvas).toHaveAttribute('data-simulation-time','5.01');
+ expect(await canvas.evaluate(node=>node===(window as any).originalSimulationCanvas)).toBe(true);
+ await page.locator('[name=backgroundOpacity]').fill('0');await page.locator('[name=backgroundOpacity]').dispatchEvent('change');
+ await page.locator('[name=transition]').selectOption('slide-left');
+ await seek('5.01');expect(await canvas.evaluate(node=>node===(window as any).originalSimulationCanvas)).toBe(true);
+ await expect(canvas).toHaveCSS('transform','none');
+ await seek('4.99');expect(await canvas.evaluate((c:HTMLCanvasElement)=>c.toDataURL())).toBe(before);
+ await page.locator('#play').click();await page.waitForTimeout(180);await page.locator('#play').click();
+ const paused=await canvas.evaluate((c:HTMLCanvasElement)=>c.toDataURL());await page.waitForTimeout(180);
+ expect(await canvas.evaluate((c:HTMLCanvasElement)=>c.toDataURL())).toBe(paused);
+ await seek('5.25');await page.locator('[name=transition]').selectOption('through-black');await seek('5.25');
+ await expect(page.locator('.project-transition-black')).toHaveCSS('opacity','1');
+ const saved=JSON.parse(await exportedJSON(page));expect(saved.backgroundSimulation).toMatchObject({type:'snow',seed:99,count:30,speed:1.5,size:8});expect(saved.scenes.map((s:{backgroundOpacity:number})=>s.backgroundOpacity)).toEqual([0,0]);
+ await seek('6');const prior=await canvas.evaluate((c:HTMLCanvasElement)=>c.toDataURL());
+ await page.locator('#focus').click();await expect(canvas).toHaveAttribute('data-simulation-time','0');await page.waitForTimeout(120);await expect(canvas).toHaveAttribute('data-simulation-time','0');
+ await page.locator('#exit-focus').click({force:true});await expect(canvas).toHaveAttribute('data-simulation-time','6');expect(await canvas.evaluate((c:HTMLCanvasElement)=>c.toDataURL())).toBe(prior);
+ await page.locator('#project-simulation').click();await page.locator('#project-simulation-form [name=simulationType]').selectOption('none');await page.keyboard.press('Escape');await expect(canvas).toHaveCount(0);
+});

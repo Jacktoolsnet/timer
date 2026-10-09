@@ -125,7 +125,8 @@
                   "enum": [
                     "text",
                     "image",
-                    "shape"
+                    "shape",
+                    "simulation"
                   ]
                 },
                 "text": {
@@ -354,6 +355,9 @@
                 },
                 "fillGradient": {
                   "$ref": "#/$defs/gradient"
+                },
+                "simulation": {
+                  "$ref": "#/$defs/simulation"
                 }
               },
               "required": [
@@ -364,6 +368,11 @@
           },
           "backgroundGradient": {
             "$ref": "#/$defs/gradient"
+          },
+          "backgroundOpacity": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
           }
         },
         "required": [
@@ -371,6 +380,9 @@
           "elements"
         ]
       }
+    },
+    "backgroundSimulation": {
+      "$ref": "#/$defs/simulation"
     }
   },
   "required": [
@@ -448,6 +460,58 @@
                   }
                 }
               }
+            }
+          }
+        }
+      ]
+    },
+    "simulation": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "type": {
+              "enum": [
+                "particles",
+                "snow",
+                "bubbles"
+              ]
+            },
+            "color": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "count": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            },
+            "speed": {
+              "type": "number",
+              "minimum": 0.1,
+              "maximum": 5
+            },
+            "size": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "opacity": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "seed": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967295
             }
           }
         }

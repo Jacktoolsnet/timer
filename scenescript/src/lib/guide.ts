@@ -46,6 +46,7 @@ Required fields:
 - title: string, maximum 200 UTF-16 code units (empty is accepted).
 - format: ${Object.entries(formats).map(([k,v])=>`"${k}" (${v[0]} × ${v[1]} project pixels)`).join('; ')}.
 - scenes: ordered array of 1–100 scenes.
+Optional: backgroundSimulation, null (default) or a simulation object (see Simulations below).
 Optional: assets, an object mapping asset IDs to asset objects; default {}.
 Project coordinates and text sizes are independent of the editor UI's font-size
 and appearance settings. The stage is uniformly scaled to its displayed size;
@@ -116,6 +117,7 @@ Optional fields and their defaults:
 - name: "Scene"; string, maximum 200 UTF-16 code units.
 - duration: 5; number, 0.1–3600 seconds.
 - background: "#263b42"; #RRGGBB color.
+- backgroundOpacity: 1; number 0–1, applies to the scene color/gradient and background image only, not its elements.
 - backgroundGradient: null; optional gradient object (see Gradients below).
 - backgroundAsset: ""; empty or an existing asset ID, maximum 100 code units.
 - transition: "fade"; allowed "none", "fade", "crossfade", "slide-left", "slide-right", "slide-up", "slide-down", "wipe-left", "wipe-right", "wipe-up", "wipe-down", "zoom-in", "zoom-out", "through-black".
@@ -124,8 +126,9 @@ Scene durations add up to the total duration; transitions do not add time.
 
 ### Elements
 
-Required: id and type. type must be "text", "image" or "shape" (a geometric form).
+Required: id and type. type must be "text", "image", "shape" (a geometric form) or "simulation".
 Optional fields and their defaults:
+- simulation: null for text/image/shape, default particles configuration for simulation elements; simulation elements must not explicitly set this to null.
 - text: "Your story starts here." for text, otherwise ""; string, max 10000
   UTF-16 code units.
 - asset: ""; empty or an existing asset ID, max 100 code units.
@@ -166,6 +169,7 @@ Actual validator behavior is asymmetric:
 - Each optional scene field listed above uses its default when omitted OR null.
 - Scene id/elements and asset name/data do not accept null.
 - Element fillGradient accepts explicit null, meaning solid/no gradient.
+- Element simulation accepts null except on type "simulation", which requires a simulation object.
 - Other element fields reject explicit null, including otherwise optional fields:
   element defaults apply only to omitted fields, not explicit null.
 - Root version/title/format/scenes do not accept null.
@@ -240,7 +244,7 @@ Slide/zoom easing is 1 - (1 - progress)^3 (cubic ease-out).
   text. It uses Array.from, NOT grapheme clusters. Combining marks, flags and
   joined emoji can therefore appear in parts; complete emoji/grapheme handling
   is not guaranteed. The partially revealed text is laid out again as it grows.
-  This affects text elements only; it does not reveal image or shape pixels.
+  This affects text elements only; it does not reveal image, shape or simulation pixels.
 - pan: a slow linear zoom from 100% to 110%, with NO sideways panning. It does
   not repeat, and holds 110% after animationDuration.
 For animations other than fade, element opacity is the configured opacity.
@@ -451,4 +455,38 @@ Scene background images render above the gradient; transparent images reveal it.
 The editor's None fill switch clears the gradient and sets fillColor to "none".
 Keep background and fillColor as valid legacy solid colors (or "none" for fillColor).
 Gradients are static, deterministic and included in JSON save/import.
+
+## Simulations: particles, snow and bubbles (format 1.0)
+Two uses:
+1. Project.backgroundSimulation: null (disabled by default) or a simulation object.
+   It uses absolute project time, starting at zero. It remains a single background
+   behind all scene layers and does not restart, slide or zoom on scene changes.
+   Set scene.backgroundOpacity to 0 to reveal it, or between 0 and 1 for a tint.
+   An opaque scene background hides the simulation but does not stop its clock.
+2. Element.type: "simulation", with an element.simulation object.
+   It has a transparent background and uses scene-local time minus element.at,
+   clamped to zero. Standard x/y/width/height, rotation, opacity, radius, layer order,
+   at and entrance animation controls also apply. It restarts at the start of its
+   containing scene, unlike the project-level background.
+Example simulation object:
+{"type":"snow","color":"#ffffff","count":60,"speed":1,"size":6,"opacity":0.75,"seed":1}
+Required type: particles, snow or bubbles. Other fields default as follows:
+color #ffffff; count 60 (integer 1..200); speed 1 (0.1..5 multiplier);
+size 5 (1..100, particle radius in project pixels); opacity 0.75 (0..1);
+seed 1 (integer 0..4294967295).
+The project UI's initially chosen snow/bubbles presets use size 6/18 respectively;
+an imported object with omitted size always defaults to 5.
+Each scene supports at most 5000 particles across its simulation elements plus
+the project simulation. Prefer a few effects with modest counts for recording.
+Particles float upward and pulse softly; snow drifts downward; bubbles rise
+with transparent interiors and highlighted outlines.
+Trajectories are computed from time and seed, never from a wall-clock random
+generator or incremental per-frame state. Pause, seek, replay and recording use
+the same timeline. Outgoing scene-element simulations freeze at that scene's
+end during a transition, while the project simulation keeps its global clock.
+Through-black transitions temporarily cover the project simulation, without
+resetting it. Transparent scene areas otherwise reveal the live simulation.
+Canvas rendering uses bounded backing resolution for performance; no external
+assets, scripts, physics engine, sound or executable expressions are supported.
+Fire and waves are not yet available. Do not invent simulation types.
 `;

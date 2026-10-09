@@ -1,3 +1,4 @@
+import {parseSimulation,defaultSimulation,type Simulation} from './simulation.ts';
 import {parseGradient,type Gradient} from './gradient.ts';
 import {validateSvg,svgSource} from './svg.ts';
 export const formats = { landscape: [1920,1080], portrait: [1080,1920], square: [1080,1080] } as const;
@@ -7,28 +8,28 @@ export const shapeTypes=['rectangle','ellipse','triangle','diamond','star','arro
 export type Asset = { name:string; data:string };
 export type TextRun = {text:string} & Partial<Pick<Element,'font'|'fontSize'|'color'|'bold'|'italic'|'underline'|'strikethrough'>>;
 export type Element = {
- id:string; name:string; type:'text'|'image'|'shape'; text:string; runs:TextRun[]; asset:string; x:number; y:number; width:number; height:number;
- color:string; fillGradient:Gradient|null; fillColor:string; borderColor:string; borderWidth:number; shapeType:typeof shapeTypes[number]; borderStyle:'solid'|'dashed'|'dotted'|'double'; font:typeof fonts[number]; fontSize:number; align:'left'|'center'|'right'; bold:boolean; italic:boolean; underline:boolean; strikethrough:boolean;
+ id:string; name:string; type:'text'|'image'|'shape'|'simulation'; text:string; runs:TextRun[]; asset:string; x:number; y:number; width:number; height:number;
+ simulation:Simulation|null; color:string; fillGradient:Gradient|null; fillColor:string; borderColor:string; borderWidth:number; shapeType:typeof shapeTypes[number]; borderStyle:'solid'|'dashed'|'dotted'|'double'; font:typeof fonts[number]; fontSize:number; align:'left'|'center'|'right'; bold:boolean; italic:boolean; underline:boolean; strikethrough:boolean;
  opacity:number; rotation:number; radius:number; fit:'cover'|'contain';
  animation:typeof animations[number]; at:number; animationDuration:number;
 };
 export const sceneTransitions=['none','fade','crossfade','slide-left','slide-right','slide-up','slide-down','wipe-left','wipe-right','wipe-up','wipe-down','zoom-in','zoom-out','through-black'] as const;
-export type Scene = { id:string; name:string; duration:number; background:string; backgroundGradient:Gradient|null; backgroundAsset:string; transition:typeof sceneTransitions[number]; transitionDuration:number; elements:Element[] };
-export type Project = { version:'1.0'; title:string; format:keyof typeof formats; assets:Record<string,Asset>; scenes:Scene[] };
+export type Scene = { id:string; name:string; duration:number; background:string; backgroundOpacity:number; backgroundGradient:Gradient|null; backgroundAsset:string; transition:typeof sceneTransitions[number]; transitionDuration:number; elements:Element[] };
+export type Project = { version:'1.0'; title:string; format:keyof typeof formats; backgroundSimulation:Simulation|null; assets:Record<string,Asset>; scenes:Scene[] };
 export const MAX_FILE_BYTES = 30 * 1024 * 1024;
 export const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 export function newElement(type:Element['type'], id:string = crypto.randomUUID()):Element {
- return {id,name:'',type,text:type==='text'?'Your story starts here.':'',runs:[],asset:'',x:10,y:35,width:80,height:30,color:type==='shape'?'#b86445':'#ffffff',fillGradient:null,fillColor:type==='shape'?'#b86445':'#ffffff',borderColor:'none',borderWidth:4,shapeType:'rectangle',borderStyle:'solid',font:'Arial',fontSize:90,align:'center',bold:false,italic:false,underline:false,strikethrough:false,opacity:1,rotation:0,radius:0,fit:'contain',animation:'fade',at:0,animationDuration:1};
+ return {id,name:'',type,simulation:type==='simulation'?defaultSimulation():null,text:type==='text'?'Your story starts here.':'',runs:[],asset:'',x:10,y:35,width:80,height:30,color:type==='shape'?'#b86445':'#ffffff',fillGradient:null,fillColor:type==='shape'?'#b86445':'#ffffff',borderColor:'none',borderWidth:4,shapeType:'rectangle',borderStyle:'solid',font:'Arial',fontSize:90,align:'center',bold:false,italic:false,underline:false,strikethrough:false,opacity:1,rotation:0,radius:0,fit:'contain',animation:'fade',at:0,animationDuration:1};
 }
 export function newScene(id:string = crypto.randomUUID()):Scene {
- return {id,name:'Scene',duration:5,background:'#263b42',backgroundGradient:null,backgroundAsset:'',transition:'fade',transitionDuration:0.5,elements:[]};
+ return {id,name:'Scene',duration:5,background:'#263b42',backgroundOpacity:1,backgroundGradient:null,backgroundAsset:'',transition:'fade',transitionDuration:0.5,elements:[]};
 }
 export function demoProject():Project {
  const first = newScene('intro'); first.name='A new idea';
  const title=newElement('text','headline');title.text='Your idea.\nYour stage.';title.font='Georgia';title.animation='slide-up';first.elements=[title];
  const second=newScene('outro');second.name='Make it move';second.background='#684d45';
  const text=newElement('text','outro-text');text.text='Tell your story.\nOne scene at a time.';text.fontSize=72;text.animation='typewriter';text.animationDuration=2;second.elements=[text];
- return {version:'1.0',title:'My SceneScript',format:'landscape',assets:{},scenes:[first,second]};
+ return {version:'1.0',title:'My SceneScript',format:'landscape',backgroundSimulation:null,assets:{},scenes:[first,second]};
 }
 function obj(v:unknown,path:string):Record<string,unknown>{if(!v||typeof v!=='object'||Array.isArray(v))throw new Error(`${path}: expected object`);return v as Record<string,unknown>;}
 function str(v:unknown,path:string,max=10000):string {if(typeof v!=='string'||v.length>max)throw new Error(`${path}: expected text (max ${max})`);return v;}
@@ -48,7 +49,7 @@ export function validateImage(data:unknown,path='image'):string {
 }
 export function parseProject(input:string):Project {
  if(new TextEncoder().encode(input).length>MAX_FILE_BYTES)throw new Error('JSON: maximum 30 MiB');
- const p=obj(JSON.parse(input),'project');keys(p,['version','title','format','assets','scenes'],'project');
+ const p=obj(JSON.parse(input),'project');keys(p,['version','title','format','backgroundSimulation','assets','scenes'],'project');
  if(p.version!=='1.0')throw new Error('version: expected 1.0');
  const assets:Record<string,Asset>=Object.create(null);const raw=obj(p.assets??{},'assets');
  if(Object.keys(raw).length>100)throw new Error('assets: maximum 100');
@@ -62,8 +63,8 @@ export function parseProject(input:string):Project {
   const duration=num(s.duration??d.duration,`${path}.duration`,0.1,3600);
   if(!Array.isArray(s.elements)||s.elements.length>100)throw new Error(`${path}.elements: expected array (max 100)`);
   const elements=s.elements.map((value,j)=>{
-   const ep=`${path}.elements[${j}]`,e=obj(value,ep),type=one(e.type,['text','image','shape'] as const,`${ep}.type`),defaults=newElement(type,'element');keys(e,Object.keys(defaults),ep);
-   const merged={...defaults,...e}; const eid=id(e.id,`${ep}.id`);if(elementIds.has(eid))throw new Error(`${ep}: duplicate ID`);elementIds.add(eid);
+   const ep=`${path}.elements[${j}]`,e=obj(value,ep),type=one(e.type,['text','image','shape','simulation'] as const,`${ep}.type`),defaults=newElement(type,'element');keys(e,Object.keys(defaults),ep);
+   const merged={...defaults,...e};const simulation=parseSimulation(merged.simulation,ep+'.simulation');if(type==='simulation'&&!simulation)throw new Error(ep+'.simulation: required for simulation element'); const eid=id(e.id,`${ep}.id`);if(elementIds.has(eid))throw new Error(`${ep}: duplicate ID`);elementIds.add(eid);
    for(const key of ['bold','italic','underline','strikethrough'] as const)if(typeof merged[key]!=='boolean')throw new Error(`${ep}.${key}: expected boolean`);
    if(!Array.isArray(merged.runs)||merged.runs.length>2000)throw new Error(`${ep}.runs: expected array (max 2000)`);
    const runs:TextRun[]=merged.runs.map((value,index)=>{
@@ -76,15 +77,17 @@ export function parseProject(input:string):Project {
     return run;
    });
    const text=runs.length?str(runs.map(r=>r.text).join(''),`${ep}.text`):str(merged.text,`${ep}.text`);
-   return {id:eid,name:str(merged.name,`${ep}.name`,200),type,text,runs,asset:ref(merged.asset,`${ep}.asset`),
+   return {id:eid,simulation,name:str(merged.name,`${ep}.name`,200),type,text,runs,asset:ref(merged.asset,`${ep}.asset`),
     x:num(merged.x,`${ep}.x`,-100,100),y:num(merged.y,`${ep}.y`,-100,100),width:num(merged.width,`${ep}.width`,0.1,200),height:num(merged.height,`${ep}.height`,0.1,200),
     fillGradient:parseGradient(merged.fillGradient,ep+'.fillGradient'),color:color(merged.color,`${ep}.color`),fillColor:(e.fillColor??merged.color)==='none'?'none':color(e.fillColor??merged.color,`${ep}.fillColor`),borderColor:merged.borderColor==='none'?'none':color(merged.borderColor,`${ep}.borderColor`),borderWidth:num(merged.borderWidth,`${ep}.borderWidth`,0,500),shapeType:one(merged.shapeType,shapeTypes,`${ep}.shapeType`),borderStyle:one(merged.borderStyle,['solid','dashed','dotted','double'] as const,`${ep}.borderStyle`),font:one(merged.font,fonts,`${ep}.font`),fontSize:num(merged.fontSize,`${ep}.fontSize`,1,500),align:one(merged.align,['left','center','right'] as const,`${ep}.align`),bold:merged.bold,italic:merged.italic,underline:merged.underline,strikethrough:merged.strikethrough,
     opacity:num(merged.opacity,`${ep}.opacity`,0,1),rotation:num(merged.rotation,`${ep}.rotation`,-360,360),radius:num(merged.radius,`${ep}.radius`,0,1000),fit:one(merged.fit,['cover','contain'] as const,`${ep}.fit`),
     animation:one(merged.animation,animations,`${ep}.animation`),at:num(merged.at,`${ep}.at`,0,duration),animationDuration:num(merged.animationDuration,`${ep}.animationDuration`,0.01,3600)};
   });
-  return {id:sid,name:str(s.name??d.name,`${path}.name`,200),duration,backgroundGradient:parseGradient(s.backgroundGradient,path+'.backgroundGradient'),background:color(s.background??d.background,`${path}.background`),backgroundAsset:ref(s.backgroundAsset??'',`${path}.backgroundAsset`),transition:one(s.transition??d.transition,sceneTransitions,`${path}.transition`),transitionDuration:num(s.transitionDuration??d.transitionDuration,`${path}.transitionDuration`,0.01,3600),elements};
+  return {id:sid,name:str(s.name??d.name,`${path}.name`,200),duration,backgroundOpacity:num(s.backgroundOpacity??1,path+'.backgroundOpacity',0,1),backgroundGradient:parseGradient(s.backgroundGradient,path+'.backgroundGradient'),background:color(s.background??d.background,`${path}.background`),backgroundAsset:ref(s.backgroundAsset??'',`${path}.backgroundAsset`),transition:one(s.transition??d.transition,sceneTransitions,`${path}.transition`),transitionDuration:num(s.transitionDuration??d.transitionDuration,`${path}.transitionDuration`,0.01,3600),elements};
  });
- return {version:'1.0',title:str(p.title,'title',200),format:one(p.format,['landscape','portrait','square'] as const,'format'),assets,scenes};
+ const backgroundSimulation=parseSimulation(p.backgroundSimulation,'backgroundSimulation');
+ for(const [i,s] of scenes.entries())if(s.elements.reduce((n,e)=>n+(e.type==='simulation'?e.simulation!.count:0),backgroundSimulation?.count??0)>5000)throw new Error('scenes['+i+']: maximum 5000 simulated particles including project background');
+ return {backgroundSimulation,version:'1.0',title:str(p.title,'title',200),format:one(p.format,['landscape','portrait','square'] as const,'format'),assets,scenes};
 }
 export function locateTime(project:Project,time:number):{index:number;local:number;ended:boolean}{
  let offset=0;for(let i=0;i<project.scenes.length;i++){const duration=project.scenes[i].duration;if(time<offset+duration)return {index:i,local:Math.max(0,time-offset),ended:false};offset+=duration;}

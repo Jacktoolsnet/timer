@@ -263,7 +263,7 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
 .preview-expanded #wake-status:empty { display:none; }
 
 /* Theme-aware selects, including the popup in browsers supporting base-select. */
-#editor select {
+:is(#editor,#simulation-dialog) select {
  appearance:none;
  min-height:40px;
  padding:9px 34px 9px 12px;
@@ -277,16 +277,16 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
  font:inherit;
  transition:border-color .15s,background-color .15s;
 }
-#editor select:hover { border-color:var(--accent); background-color:var(--accent-soft); }
-#editor select:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
-#editor select option { background:var(--surface); color:var(--text); padding:10px 12px; }
-[data-theme=dark] #editor select { color-scheme:dark; }
+:is(#editor,#simulation-dialog) select:hover { border-color:var(--accent); background-color:var(--accent-soft); }
+:is(#editor,#simulation-dialog) select:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+:is(#editor,#simulation-dialog) select option { background:var(--surface); color:var(--text); padding:10px 12px; }
+[data-theme=dark] :is(#editor,#simulation-dialog) select { color-scheme:dark; }
 @supports (appearance:base-select) {
- #editor select,#editor select::picker(select) { appearance:base-select; }
- #editor select { background-image:none; padding-right:12px; }
- #editor select::picker-icon { color:var(--accent); transition:rotate .15s; }
- #editor select:open::picker-icon { rotate:180deg; }
- #editor select::picker(select) {
+ :is(#editor,#simulation-dialog) select,:is(#editor,#simulation-dialog) select::picker(select) { appearance:base-select; }
+ :is(#editor,#simulation-dialog) select { background-image:none; padding-right:12px; }
+ :is(#editor,#simulation-dialog) select::picker-icon { color:var(--accent); transition:rotate .15s; }
+ :is(#editor,#simulation-dialog) select:open::picker-icon { rotate:180deg; }
+ :is(#editor,#simulation-dialog) select::picker(select) {
   padding:6px;
   margin-top:6px;
   border:1px solid var(--line);
@@ -297,18 +297,18 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
   max-height:min(320px,60dvh);
   overflow:auto;
  }
- #editor select option { min-height:40px; gap:10px; border-radius:8px; cursor:pointer; font:inherit; }
- #editor select option:hover,#editor select option:focus { background:var(--accent-soft); color:var(--accent); outline:none; }
- #editor select option:checked { background:var(--accent-soft); color:var(--accent); font-weight:600; }
- #editor select option::checkmark { color:var(--accent); }
+ :is(#editor,#simulation-dialog) select option { min-height:40px; gap:10px; border-radius:8px; cursor:pointer; font:inherit; }
+ :is(#editor,#simulation-dialog) select option:hover,:is(#editor,#simulation-dialog) select option:focus { background:var(--accent-soft); color:var(--accent); outline:none; }
+ :is(#editor,#simulation-dialog) select option:checked { background:var(--accent-soft); color:var(--accent); font-weight:600; }
+ :is(#editor,#simulation-dialog) select option::checkmark { color:var(--accent); }
 }
 @media(prefers-reduced-motion:reduce) {
- #editor select,#editor select::picker-icon { transition:none; }
+ :is(#editor,#simulation-dialog) select,:is(#editor,#simulation-dialog) select::picker-icon { transition:none; }
 }
 
 /* A consistent, lightweight chevron instead of the browser's picker glyph. */
 @supports (appearance:base-select) {
- #editor select::picker-icon {
+ :is(#editor,#simulation-dialog) select::picker-icon {
   content:"";
   display:block;
   flex:0 0 8px;
@@ -322,23 +322,23 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
   transform:translateY(-2px) rotate(45deg);
   rotate:0deg;
  }
- #editor select:open::picker-icon { rotate:180deg; }
+ :is(#editor,#simulation-dialog) select:open::picker-icon { rotate:180deg; }
 }
 
 @supports (appearance:base-select) {
- #editor select { display:flex; align-items:center; gap:12px; }
+ :is(#editor,#simulation-dialog) select { display:flex; align-items:center; gap:12px; }
 }
 
 .number-stepper { display:grid; grid-template-columns:30px minmax(0,1fr) 30px; gap:4px; align-items:center; }
 .number-stepper button { display:grid; place-items:center; min-height:40px; padding:0; border:1px solid var(--line); border-radius:9px; background:var(--accent-soft); color:var(--accent); font:inherit; font-size:20px; }
 .number-stepper button:hover:not(:disabled) { border-color:var(--accent); }
-.studio-panel .number-stepper input { appearance:textfield; -moz-appearance:textfield; padding-inline:4px; text-align:center; min-height:40px; }
+.studio-panel .number-stepper input,#project-simulation-form .number-stepper input { appearance:textfield; -moz-appearance:textfield; padding-inline:4px; text-align:center; min-height:40px; }
 .number-stepper input::-webkit-inner-spin-button,.number-stepper input::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
 
 /* Override the shared Relax stepper's 44px minimum in the compact editor grid. */
-#editor .number-stepper { grid-template-columns:30px minmax(0,1fr) 30px; gap:4px; }
-#editor .number-stepper button { min-width:0; width:100%; height:40px; min-height:40px; margin:0; box-sizing:border-box; }
-#editor .number-stepper input { min-width:0; width:100%; height:40px; margin:0; box-sizing:border-box; }
+:is(#editor,#simulation-dialog) .number-stepper { grid-template-columns:30px minmax(0,1fr) 30px; gap:4px; }
+:is(#editor,#simulation-dialog) .number-stepper button { min-width:0; width:100%; height:40px; min-height:40px; margin:0; box-sizing:border-box; }
+:is(#editor,#simulation-dialog) .number-stepper input { min-width:0; width:100%; height:40px; margin:0; box-sizing:border-box; }
 
 /* Scene settings occupy the middle columns; element settings get a full-width row. */
 .scene-inspector { grid-column:2 / span 2; grid-row:2; }
@@ -533,3 +533,16 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
  scrollbar-gutter:stable;
  overscroll-behavior:contain;
 }
+
+.simulation-canvas { display:block; width:100%; height:100%; pointer-events:none; }
+.project-simulation-canvas,.scene-backdrop { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+#simulation-dialog { width:calc(100% - 48px); max-width:620px; max-height:90dvh; padding:0; overflow:auto; }
+#project-simulation-form .simulation-settings { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+#project-simulation-form label { display:flex; flex-direction:column; gap:6px; color:var(--muted); font-size:calc(12px * var(--font-scale,1)); }
+#project-simulation-form input,#project-simulation-form select { width:100%; min-width:0; box-sizing:border-box; height:40px; padding:8px; border:1px solid var(--line); border-radius:8px; background-color:var(--bg); color:var(--text); font:inherit; }
+#project-simulation-form input[type=color] { padding:3px; }
+#project-simulation-form .simulation-settings > label:first-child { grid-column:1 / -1; }
+.simulationStyleGroup [data-simulation-settings] { grid-column:1 / -1; }
+.simulationStyleGroup .simulation-settings { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+.simulationStyleGroup .simulation-settings > label:first-child { grid-column:1 / -1; }
+.project-transition-black { position:absolute; inset:0; background:#000; pointer-events:none; }
