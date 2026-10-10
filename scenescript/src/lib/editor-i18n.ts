@@ -1,5 +1,9 @@
 import type { Language } from './i18n';
 const words = {
+ copyProjectJson:['Projekt-JSON kopieren','Copy project JSON','Copiar JSON del proyecto','Copier le JSON du projet'],
+ projectJsonCopied:['Projekt-JSON kopiert.','Project JSON copied.','JSON del proyecto copiado.','JSON du projet copié.'],
+ projectJsonCopyDenied:['Kopieren nicht möglich. Das Projekt-JSON ist markiert – bitte mit Strg+C bzw. Cmd+C kopieren.','Copying is unavailable. The project JSON is selected — copy using Ctrl+C or Cmd+C.','No se puede copiar. El JSON está seleccionado; usa Ctrl+C o Cmd+C.','Copie indisponible. Le JSON est sélectionné ; copiez avec Ctrl+C ou Cmd+C.'],
+
  projectDescription:['Beschreibung','Description','Descripción','Description'],
  projectHashtags:['Hashtags (kommagetrennt)','Hashtags (comma-separated)','Hashtags (separados por comas)','Hashtags (séparés par des virgules)'],
  projectCopyDenied:['Kopieren nicht möglich. Das Feld ist markiert – bitte mit Strg+C bzw. Cmd+C kopieren.','Copying is unavailable. The field is selected — copy using Ctrl+C or Cmd+C.','No se puede copiar. El campo está seleccionado; usa Ctrl+C o Cmd+C.','Copie indisponible. Le champ est sélectionné ; copiez avec Ctrl+C ou Cmd+C.'],

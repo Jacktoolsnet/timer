@@ -368,7 +368,8 @@
                     {
                       "$ref": "#/$defs/videoSettings"
                     }
-                  ]
+                  ],
+                  "description": "Omitted: default videoSettings object for type video, null for other types. Explicit null allowed for all types; objects validated even on other types."
                 }
               },
               "required": [
@@ -418,7 +419,8 @@
         {
           "$ref": "#/$defs/videoSettings"
         }
-      ]
+      ],
+      "default": null
     },
     "videos": {
       "type": "object",
@@ -453,7 +455,9 @@
             "pattern": "^data:video/[a-zA-Z0-9.+-]+;base64,[A-Za-z0-9+/]+={0,2}$"
           }
         }
-      }
+      },
+      "default": {},
+      "description": "Video namespace; omitted/null normalize to an empty map at runtime. Author with an object."
     },
     "description": {
       "type": "string",
@@ -826,12 +830,15 @@
       "properties": {
         "asset": {
           "type": "string",
-          "maxLength": 100
+          "maxLength": 100,
+          "default": "",
+          "description": "Empty or a key in root videos, not root assets; runtime resolves references."
         },
         "start": {
           "type": "number",
           "minimum": 0,
-          "maximum": 86400
+          "default": 0,
+          "exclusiveMaximum": 86400
         },
         "end": {
           "anyOf": [
@@ -840,27 +847,33 @@
             },
             {
               "type": "number",
-              "minimum": 0,
-              "maximum": 86400
+              "maximum": 86400,
+              "exclusiveMinimum": 0
             }
-          ]
+          ],
+          "default": null,
+          "description": "Null uses file duration; explicit end must exceed start and not exceed referenced duration (runtime checks)."
         },
         "loop": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         },
         "muted": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": true
         },
         "volume": {
           "type": "number",
           "minimum": 0,
-          "maximum": 1
+          "maximum": 1,
+          "default": 1
         },
         "fit": {
           "enum": [
             "contain",
             "cover"
-          ]
+          ],
+          "default": "cover"
         }
       }
     }

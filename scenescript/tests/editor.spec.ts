@@ -151,8 +151,8 @@ test('fourth column is reserved for a sticky preview',async({page})=>{
 });
 
 test('project toolbar uses labeled icons and JSON is paste-only',async({page})=>{
- await page.goto('/en/');await expect(page.locator('.editor-toolbar #import-image svg')).toHaveCount(1);
- for(const id of ['new-project','load-project','save-project','open-json','import-image']){const button=page.locator('#'+id);expect(await button.getAttribute('title')).toBeTruthy();expect(await button.getAttribute('aria-label')).toBeTruthy();expect((await button.textContent())!.trim()).toBe('');}
+ await page.goto('/en/');await expect(page.locator('.editor-toolbar #import-image')).toHaveCount(0);await expect(page.locator('#gallery-import-image svg')).toHaveCount(1);
+ for(const id of ['new-project','load-project','save-project','open-json','copy-project-json']){const button=page.locator('#'+id);expect(await button.getAttribute('title')).toBeTruthy();expect(await button.getAttribute('aria-label')).toBeTruthy();expect((await button.textContent())!.trim()).toBe('');}
  await page.locator('#open-json').click();await expect(page.locator('#json-input')).toHaveValue('');await expect(page.locator('#copy-json')).toHaveCount(0);await page.locator('#close-json').click();
  await page.locator('#image-file').setInputFiles({name:'trash-test.png',mimeType:'image/png',buffer:Buffer.from(pixel.split(',')[1],'base64')});await expect(page.locator('#asset-list .asset-row .asset-actions button svg')).toHaveCount(4);
  await page.locator('#asset-list .asset-row button[data-delete-asset]').click();await page.locator('#confirm-delete').click();await expect(page.locator('#asset-list img')).toHaveCount(0);
@@ -668,4 +668,15 @@ test('publication fields save, load and copy independently with denial fallback'
  expect(await page.locator('#project-description').evaluate((el:HTMLTextAreaElement)=>el.value.slice(el.selectionStart,el.selectionEnd))).toBe(fields.description);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();
  await page.locator('#new-project').click();await expect(page.locator('#project-description')).toHaveValue('');await expect(page.locator('#project-hashtags')).toHaveValue('');
+});
+
+test('toolbar copies complete project JSON and offers manual copying on clipboard denial',async({page})=>{
+ await page.goto('/en/');await page.locator('#project-title').fill('Clipboard project');await page.locator('#project-description').fill('Description');await page.locator('#project-hashtags').fill('#Video, #SceneScript');
+ await page.locator('#image-file').setInputFiles({name:'pixel.png',mimeType:'image/png',buffer:Buffer.from(pixel.split(',')[1],'base64')});
+ await page.evaluate(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async(text:string)=>{(window as any).projectJsonClipboard=text;}}}));
+ await page.locator('#copy-project-json').click();await expect(page.locator('.app-toast[data-kind=success]')).toHaveText('Project JSON copied.');
+ const copied=await page.evaluate(()=>(window as any).projectJsonClipboard);const project=JSON.parse(copied);expect(project).toMatchObject({title:'Clipboard project',description:'Description',hashtags:'#Video, #SceneScript'});expect(Object.values(project.assets).map((a:any)=>a.data)).toEqual([pixel]);expect(project.scenes).toHaveLength(2);
+ await expect(page.locator('#editor-status')).toHaveText('Unsaved changes');expect(JSON.parse(await exportedJSON(page))).toEqual(project);
+ await page.evaluate(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async()=>{throw new Error('denied');}}}));await page.locator('#copy-project-json').click();await expect(page.locator('#json-dialog')).toBeVisible();await expect(page.locator('#json-copy-status')).toContainText('project JSON is selected');
+ expect(await page.locator('#json-input').evaluate((el:HTMLTextAreaElement)=>el.value.slice(el.selectionStart,el.selectionEnd))).toBe(copied);await page.locator('#close-json').click();await expect(page.locator('#project-title')).toHaveValue('Clipboard project');await expect(page.locator('#copy-project-json')).toBeEnabled();
 });

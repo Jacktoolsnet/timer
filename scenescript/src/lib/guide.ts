@@ -11,7 +11,9 @@ This guide describes the existing format 1.0, not proposed features.
 Optional root field music (null/omitted means silent). Music runs continuously across
 scene changes, pauses with playback and seeks with the project timeline. Recording
 countdown is silent. Enable system/tab audio in your screen recorder.
-No audio files, lyrics, executable expressions, or realistic sampled instruments.
+No standalone audio-file assets, lyrics/vocals fields, executable expressions,
+or realistic sampled instruments are provided by the music model. Lyrics may
+be ordinary displayed text. Embedded video audio is supported separately below.
 These are synthetic timbres, NOT an external AI audio-generation service.
 
 music fields and defaults: enabled true; mode "generated" or "score" (default
@@ -57,29 +59,69 @@ Example optional root music property:
 
 ## Embedded videos
 
-Optional root videos: object of max 30 unique IDs mapping to
-{name:"clip.webm",data:"data:video/webm;base64,...",duration:12.4}.
-Each file max 32 MiB decoded; whole JSON max 160 MiB. duration is the ACTUAL
-finite duration in seconds (.001–86400), verified by browser decoding on import.
-WebM and MP4 are supported when the browser supports their codecs; other video
-MIME types are accepted only if the browser can decode them. Standalone files
-only: playlists and external streams (HLS/DASH) are not supported. Never invent Base64
-or duration: obtain real video bytes/metadata or ask the user to import a file.
-Videos are embedded once and referenced across scenes; no external URLs/scripts.
+The root videos map stores at most 30 video assets, each once, for reuse across
+scenes and the project background. Each asset has exactly three required fields:
+- name: string, at most 200 UTF-16 code units; display name, not a file path.
+- data: nonempty standard Base64 data URL, data:video/<MIME-subtype>;base64,<bytes>.
+  The runtime matches the prefix case-insensitively; use canonical lowercase
+  prefixes such as data:video/webm;base64, or data:video/mp4;base64, for authoring.
+  MIME subtypes contain ASCII letters/digits, dots, plus signs or hyphens.
+  Base64URL/whitespace are not accepted; the payload length must be a multiple
+  of four, with at most two trailing padding characters. Maximum 32 MiB decoded
+  bytes per video; the complete input JSON is limited to 160 MiB UTF-8.
+  MIME strings containing mpegurl, dash+xml or playlist are rejected.
+- duration: required finite number, 0.001–86400 seconds. Supply the real file
+  duration, not the selected excerpt length. The browser import/recording preload
+  decodes every video and rejects a measured duration differing by more than
+  0.2 seconds. parseProject checks metadata/bytes syntactically, not media codecs,
+  actual duration or the presence of a sound track.
+A schematic asset entry is {name:"clip.webm",data:"data:video/webm;base64,...",duration:40}.
+The ellipsis is NOT importable video data. Never invent Base64 or duration: obtain
+real bytes/metadata or agree on later user import. WebM/MP4 and other standalone
+video files require browser support for their actual codecs. External URLs,
+playlists and external HLS/DASH streams are not supported.
 
-Element type "video" uses video settings instead of image asset:
-video:{asset:"clip",start:3.5,end:35.6,loop:false,muted:true,volume:1,fit:"contain"}.
-start defaults 0; end null means file end; 0 <= start < end <= actual duration.
-loop repeats ONLY the selected range; otherwise the last frame remains visible.
-muted defaults true, volume 0–1, fit contain/cover (default cover).
-Element at is the scene entry time; video elapsed time = scene time minus at.
-Regular position, dimensions, opacity, rotation and entrance animations apply.
-Optional root backgroundVideo uses the SAME settings, with global project time.
-It continues across scenes underneath their backgrounds and elements; disable
-scene backgrounds or lower their opacity to see it. Project simulation is below
-project video. Pause, seek and restart follow the presentation; countdown is silent
-and frozen. Enable tab/system audio in the recorder if video sound is wanted.
-Large projects should be saved as files; browser local storage is limited.
+Video settings are shared by element.video and root backgroundVideo:
+- asset: "" by default; empty or an own key in the root videos map, max 100 code
+  units. This is the VIDEO namespace, not the images in assets.
+- start: 0 by default; finite number, 0 <= start < the referenced duration.
+- end: null by default, meaning referenced file end; a finite explicit end must
+  satisfy start < end <= duration. This is an absolute file timestamp, not a length.
+- loop: false by default; boolean. True repeats ONLY [start, end) for as long as
+  the element/project remains active, not the whole scene or presentation.
+- muted: true by default; boolean. Set false to request embedded video audio.
+- volume: 1 by default; finite number 0–1. No sound is synthesized for silent files.
+- fit: "cover" by default; "contain" or "cover", centered in the video box.
+All settings are optional inside an object; unknown setting keys are rejected.
+Explicit null is accepted for the whole settings object and end only; all other
+settings reject null. When asset is "", range validation uses 86400 seconds as
+its upper duration bound. Thus start < 86400 and numeric end <= 86400 still apply,
+even though no video is played. {} normalizes to the full default settings object,
+not to null. An omitted end remains null in normalized JSON (not a numeric duration).
+Example settings for a genuine 40-second clip:
+{asset:"clip",start:3.5,end:35.6,loop:false,muted:true,volume:1,fit:"contain"}.
+
+For a video element, elapsed time is scene-local time minus element.at. Its
+box uses ordinary position, dimensions, opacity, rotation, radius, stacking and
+entrance-animation settings. A non-looping excerpt pauses at its last selected
+frame (the timeline target is end - 0.001 seconds, clamped no earlier than start);
+it remains visible until scene end, but its audio stops at the selected end.
+Looping maps elapsed time modulo excerpt length. Pausing/seeking uses the same
+videoTime mapping. Native video playback seeks when drift exceeds the renderer's
+threshold, so it is synchronized playback, not guaranteed frame-accurate decoding.
+Outgoing-scene video views are frozen and muted during transitions. In live preview/recording, active-scene
+video audio is gated by playback/countdown and scene-fade audibility, not by
+individual element.opacity; even an element with opacity 0 can be audible.
+
+backgroundVideo uses global project time, starts at project time zero and continues
+across scenes. It is above the project simulation but beneath all scene layers;
+opaque scene backgrounds may hide it visually without muting its audio. Disable
+scene backgrounds or lower their opacity to reveal it. Null or an empty asset
+reference gives no project video. Countdown is silent/frozen; pause stops audio.
+Autoplay policies can prevent native playback/audio. Enable tab/system audio in
+a screen recorder when sound is wanted. Direct file export has separate codec
+requirements (see Recording, editing and delivery). Save large projects as files;
+browser local storage is limited.
 
 ## Workflow: conversation first, project output last
 
@@ -110,7 +152,8 @@ scene and element levels. Do not put $schema in project data.
 Numbers must be finite JSON numbers, not numeric strings. Booleans must be
 true or false, not strings or numbers. Colors must be six-digit #RRGGBB strings
 (case-insensitive hex digits, no alpha channel or named colors).
-All time fields use seconds. Ranges below include both endpoints.
+All time fields use seconds. Ranges below include both endpoints unless a strict
+inequality is stated (notably video start/end ranges).
 String limits are measured with JavaScript string.length (UTF-16 code units);
 for example, a supplementary Unicode character generally consumes two units.
 
@@ -119,25 +162,46 @@ for example, a supplementary Unicode character generally consumes two units.
 Required fields:
 - version: exactly "1.0".
 - title: string, maximum 200 UTF-16 code units (empty is accepted). Use a suitable video/upload title.
-- description: optional plain-text string, maximum 5000 UTF-16 code units, default "". Write a useful upload description (including line breaks when helpful).
-- hashtags: optional string, maximum 2000 UTF-16 code units, default "". A comma-separated list, e.g. "#SceneScript, #Video, #CreativeTools". NOT an array; use commas between entries. Keep hashtags relevant to the video.
-These are editable publication metadata, not scene elements. They are saved in the project JSON; each has a clipboard button in the editor. They do not appear on the presentation or become MP4 metadata. When asked for a complete video draft, provide all three together with the scenes. No automatic upload or platform-specific guarantees.
 - format: ${Object.entries(formats).map(([k,v])=>`"${k}" (${v[0]} × ${v[1]} project pixels)`).join('; ')}.
 - scenes: ordered array of 1–100 scenes.
-Optional: music, null (default) or a music object (see Project background music above).
-Optional: backgroundSimulation, null (default) or a simulation object (see Simulations below).
-Optional: assets, an object mapping asset IDs to asset objects; default {}.
+Optional fields:
+- description: plain-text string, maximum 5000 UTF-16 code units, default "".
+  A useful upload description; line breaks are allowed. Explicit null is rejected.
+- hashtags: string, maximum 2000 UTF-16 code units, default ""; explicit null is
+  rejected. Author a comma-separated list, e.g. "#SceneScript, #Video" (NOT an
+  array). The validator checks type/length, not hashtag syntax or comma placement.
+- music: omitted/null means disabled; otherwise a music object (see Project background music).
+- backgroundSimulation: omitted/null means disabled; otherwise a simulation object (see Simulations).
+- assets: object mapping image IDs to assets; omitted/null normalizes to {}.
+- videos: object mapping video IDs to video assets; at most 30. Omitted/null
+  normalizes to {}. Entries require name/data/duration; see Embedded videos for
+  types, limits and browser checks. References resolve against this map only.
+- backgroundVideo: omitted/null normalizes to null (no project video); otherwise
+  a video-settings object as described in Embedded videos. {} gets all playback
+  defaults, including asset "", and produces no video; a nonempty asset must
+  resolve in videos. A reference is validated even when muted or hidden.
+Title, description and hashtags are editable publication metadata stored in
+project JSON, not scene content or MP4/WebM container metadata. Each has its own
+clipboard button. For a complete video draft provide suitable values for all
+three. No automatic upload or platform-specific length/content guarantees exist.
 Project coordinates and text sizes are independent of the editor UI's font-size
 and appearance settings. The stage is uniformly scaled to its displayed size;
 the logical resolution is not a guarantee of recorded video resolution.
 
 ### IDs and references
 
-Asset keys, scene IDs and element IDs must contain 1–100 ASCII letters, digits,
-underscores or hyphens. Scene IDs must be unique across scenes. Element IDs must
-be unique throughout the project. These are separate ID namespaces.
+Image asset keys, video asset keys, scene IDs and element IDs must contain
+1–100 ASCII letters, digits, underscores or hyphens. Scene IDs are unique across
+scenes; element IDs are unique across the entire project, not just one scene.
+Images (assets), videos (videos), scenes and elements are separate namespaces:
+the same ID may appear once in each without conflict. Music instrument IDs form
+another independent namespace within music.
 Every nonempty backgroundAsset or asset reference must resolve to an own key
 in assets, even if the reference is irrelevant to the element's type.
+Every nonempty element.video.asset or backgroundVideo.asset must resolve to
+an own key in videos, even on a non-video element (where playback is ignored).
+General element.asset and scene.backgroundAsset always refer to images in assets;
+they cannot select videos. A matching ID in the wrong namespace does not resolve.
 Empty references must be "", not a URL, file path or an invented placeholder ID.
 
 ### Assets and image limits
@@ -208,13 +272,21 @@ Scene durations add up to the total duration; transitions do not add time.
 
 Required: id and type. type must be "video", "text", "image", "shape" (a geometric form) or "simulation".
 Optional fields and their defaults:
-- simulation: null for text/image/shape, default particles configuration for simulation elements; simulation elements must not explicitly set this to null.
+- video: for type "video", omission supplies {asset:"",start:0,end:null,loop:false,
+  muted:true,volume:1,fit:"cover"}; for other types omission supplies null.
+  Explicit video:null is accepted for EVERY type, including "video". An object
+  on any type is normalized/validated with the same settings and references;
+  only type "video" plays it. See Embedded videos for asset/start/end/loop/muted/
+  volume/fit. The validator does not require a video object or nonempty video.asset
+  for type "video"; for actual video playback you MUST provide an existing videos
+  ID in video.asset. No implicit lookup in the general image asset field occurs.
+- simulation: null for text/image/shape/video, default particles configuration for simulation elements; simulation elements must not explicitly set this to null.
 - text: "Your story starts here." for text, otherwise ""; string, max 10000
   UTF-16 code units.
 - asset: ""; empty or an existing asset ID, max 100 code units.
 - x: 10; y: 35; each -100 to 100, percentages of canvas width/height.
 - width: 80; height: 30; each 0.1–200, percentages of canvas width/height.
-- color: "#ffffff" for text/image, "#b86445" for shape; #RRGGBB color.
+- color: "#ffffff" for text/image/video/simulation, "#b86445" for shape; #RRGGBB color.
 - font: "Arial"; allowed ${fonts.map(f=>`"${f}"`).join(', ')}.
 - fontSize: 90; number, 1–500 project pixels, not percentages or UI pixels.
 - align: "center"; allowed "left", "center", "right".
@@ -233,30 +305,59 @@ Optional fields and their defaults:
 - opacity: 1; number, 0–1.
 - rotation: 0; number, -360 to 360 degrees.
 - radius: 0; number, 0–1000 project pixels.
-- fit: "contain"; allowed "contain" or "cover".
+- fit: "contain"; allowed "contain" or "cover". Used for image rendering; for an
+  actual video, video.fit alone controls fitting, independently of this field.
+  Both fields are validated/preserved; general fit does not override video.fit.
 - animation: "fade"; allowed ${animations.map(a=>`"${a}"`).join(', ')}.
 - at: 0; number, 0 to the containing scene's duration, relative to scene start.
 - animationDuration: 1; number, 0.01–3600 seconds.
 Type-irrelevant fields are accepted, validated and preserved, but may have no
 visual effect. All omitted optional element fields use these defaults.
 
+A video element with null video or empty video.asset is an accepted unassigned
+video, not a playback-ready clip. The live preview/recording renderer falls back
+to its image placeholder, or to general asset if a valid image reference was also
+provided (using general fit). Do not rely on this fallback for video authoring:
+the file-export renderer omits placeholders; a non-null video object with empty
+asset renders no video there and does not fall back to the image asset.
+
 ### Omitted fields versus explicit null
 
-Authoring guidance: omit optional fields to request defaults; do not emit null.
+Authoring guidance: omit fields to request defaults. Use null only for the
+explicitly supported disabled/automatic cases below; a defaulted full example
+may legitimately contain these nulls.
 Actual validator behavior is asymmetric:
 - Missing required fields are rejected.
-- assets omitted OR assets: null is normalized to {}.
+- Root assets/videos omitted OR null normalize to {} (schema authoring uses objects).
+- Root backgroundVideo omitted OR null normalizes to null; {} remains a default
+  settings object with no asset. Root music/backgroundSimulation omitted/null disable them.
+- Root description/hashtags default to "" only on omission, not on explicit null.
 - Each optional scene field listed above uses its default when omitted OR null.
 - Scene id/elements and asset name/data do not accept null.
 - Element fillGradient accepts explicit null, meaning solid/no gradient.
+- Element fillColor omitted OR null uses legacy element.color (or its type default).
+- Element video:null is accepted on ALL types. On a video element, omission instead
+  creates the default settings object; on other types omission produces null.
+  Object-valued video on other types still validates but is not played.
+- In video settings (including backgroundVideo), end:null means file end; omission
+  also produces null. Other individual video settings reject null.
 - Element simulation accepts null except on type "simulation", which requires a simulation object.
-- Other element fields reject explicit null, including otherwise optional fields:
+- Apart from the exceptions above, other element fields reject explicit null:
   element defaults apply only to omitted fields, not explicit null.
-- Root version/title/format/scenes do not accept null.
+- Root version/title/description/hashtags/format/scenes do not accept null.
 /schema.json describes the typed authoring structure, not every normalization
 exception. Runtime validation/import is authoritative; the schema alone does
-not enforce reference resolution, unique IDs, exact decoded image-byte limits,
-per-scene at bounds, file size, browser image decoding or image dimensions.
+not enforce cross-field/reference resolution (including video namespaces), global
+ID uniqueness, selected video end > start or bounds against referenced duration,
+Base64 decoded-byte limits, forbidden stream MIME names, real media decoding or
+measured duration, whole-JSON byte size, image dimensions, music polyphony or
+particle budgets. Video/image authoring prefixes in the schema are canonical
+lowercase, while the video runtime prefix is case-insensitive. Schema maxLength
+counts Unicode code points; runtime limits use UTF-16 code units. The typed schema
+intentionally excludes some accepted null-to-default forms (root assets/videos,
+most optional scene fields and element fillColor:null); use the runtime to check
+those normalization cases. VideoSettings start < 86400 and numeric end > 0 are
+structural bounds; tighter asset-dependent/cross-field rules remain runtime checks.
 
 ## Renderer behavior: layout and appearance
 
@@ -360,8 +461,12 @@ when pausing a still-incomplete scene fade.
   visually. Zero is rejected even for none.
 At exact intermediate scene boundaries, the next scene is selected with local
  time 0. At or beyond total duration, the last scene is displayed at its endpoint.
-No audio tracks, video assets, arbitrary code/keyframes, loops, new element types
-or exit animations are supported by this format.
+Supported sound comes from synthetic project music and unmuted embedded videos;
+there is no standalone audio-file asset/track element or recorded-vocal generator.
+Selected video excerpts may loop; safe SVG SMIL repeatCount also supports finite
+repetition or indefinite repetition. These do NOT add a scene/presentation loop
+field. Arbitrary executable code, free-form keyframes, custom element types beyond
+the documented type enum, and exit animations are not supported.
 
 ## Composition guidelines
 
@@ -409,7 +514,14 @@ whole project, transitions, SVG animation and continuous project backgrounds,
 without editor controls, countdown or restart screen. Video trims, loops, volume
 and mute are honored; video audio stops at the selected end unless looped.
 Export settings are UI-only, not JSON fields. Export runs locally and may be
-slower than real time; leave the tab open. The estimated output is limited to
+slower than real time; leave the tab open. Playback support alone does not guarantee file export: the exporter needs media
+decoders as well as the configured encoders. If audio is selected and potentially
+audible music/video exists, the relevant audio encoder is also required; otherwise
+no audio track is added. Export audio uses mute, volume, trims and loops, not
+visual element opacity or scene-fade factors. There is no automatic MP4-to-WebM fallback or server
+transcoding: unsupported settings report an error, and the user may choose WebM
+or different settings. Export honors timeline scene fades even on a stopped editor
+playhead (unlike the paused-preview fade exception above). The estimated output is limited to
 512 MiB to protect browser memory. Export can be cancelled and never replaces
 the editable project. Leaving recording
 view restores the previous editor scene, selected element and timeline position;
