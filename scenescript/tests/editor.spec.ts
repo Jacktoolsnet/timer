@@ -119,7 +119,7 @@ test('AI guide remains accessible on smartphone-sized windows',async({page})=>{
 });
 
 test('project spans three columns and preview expands without losing state',async({page})=>{
- await page.goto('/en/');const projectBox=await page.locator('.project-panel').boundingBox(),previewBox=await page.locator('.studio-preview').boundingBox();expect(projectBox!.width).toBeGreaterThan(previewBox!.width*2.5);expect(Math.abs(projectBox!.y-previewBox!.y)).toBeLessThan(2);expect(Math.abs(projectBox!.height-previewBox!.height)).toBeLessThan(2);
+ await page.goto('/en/');const projectBox=await page.locator('.project-panel').boundingBox(),previewBox=await page.locator('.studio-preview').boundingBox();expect(projectBox!.width).toBeGreaterThan(previewBox!.width*2.5);expect(Math.abs(projectBox!.y-previewBox!.y)).toBeLessThan(2);
  const smallWidth=(await page.locator('#stage-frame').boundingBox())!.width;
  await page.locator('#open-preview').click();await expect(page.locator('#preview-dialog')).toBeVisible();await expect(page.locator('#play .control-label')).not.toBeVisible();expect((await page.locator('#play').boundingBox())!.width).toBeGreaterThanOrEqual(48);expect((await page.locator('#stage-frame').boundingBox())!.width).toBeGreaterThan(smallWidth*1.5);
  await page.locator('#safe-toggle').check();await page.locator('#timeline').fill('2');await page.keyboard.press('Escape');await expect(page.locator('#preview-dialog')).not.toBeVisible();await expect(page.locator('#timeline')).toHaveValue('2');await expect(page.locator('#play .control-label')).not.toBeVisible();await expect(page.locator('#stage')).toHaveCount(1);
@@ -136,16 +136,18 @@ test('project images scroll horizontally without widening the page',async({page}
  await page.locator('#asset-list').evaluate(el=>{el.scrollLeft=0;});expect(await page.locator('#asset-list').evaluate(el=>el.scrollLeft)).toBe(0);
 });
 
-test('scene settings span two columns and element settings fill the third row',async({page})=>{
- await page.goto('/en/');const panels=['.scene-sidebar','.scene-inspector','.elements-panel','.element-inspector'];
- const boxes=await Promise.all(panels.map(selector=>page.locator(selector).boundingBox()));
- for(let i=1;i<3;i++){expect(boxes[i]!.x).toBeGreaterThan(boxes[i-1]!.x);expect(Math.abs(boxes[i]!.y-boxes[0]!.y)).toBeLessThan(2);}
- expect(boxes[1]!.width).toBeGreaterThan(boxes[0]!.width*1.9);
- for(let i=1;i<3;i++)expect(Math.abs(boxes[i]!.height-boxes[0]!.height)).toBeLessThan(2);
- expect(Math.abs(boxes[3]!.x-boxes[0]!.x)).toBeLessThan(2);
- expect(boxes[3]!.y).toBeGreaterThan(Math.max(...boxes.slice(0,3).map(b=>b!.y+b!.height)));
- expect(Math.abs(boxes[3]!.x+boxes[3]!.width-boxes[2]!.x-boxes[2]!.width)).toBeLessThan(2);
- await page.locator('#element-list button').click();await expect(page.locator('.element-inspector [name=text]')).toBeVisible();await expect(page.locator('.scene-inspector [name=name]')).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();
+test('fourth column is reserved for a sticky preview',async({page})=>{
+ await page.goto('/en/');await page.locator('#element-list button').click();
+ const box=async(selector:string)=>(await page.locator(selector).boundingBox())!;
+ const scene=await box('.scene-sidebar'),settings=await box('.scene-inspector'),elements=await box('.elements-panel'),elementSettings=await box('.element-inspector'),preview=await box('.studio-preview');
+ expect(settings.width).toBeGreaterThan(scene.width*1.9);expect(settings.y).toBeCloseTo(scene.y,0);
+ expect(elements.x).toBeCloseTo(scene.x,0);expect(elements.y).toBeGreaterThan(scene.y+scene.height);expect(elementSettings.y).toBeCloseTo(elements.y,0);
+ for(const panel of [scene,settings,elements,elementSettings])expect(panel.x+panel.width).toBeLessThan(preview.x);
+ await expect(page.locator('.studio-preview')).toHaveCSS('position','sticky');
+ await page.evaluate(()=>window.scrollTo(0,document.querySelector('.scene-inspector')!.getBoundingClientRect().top+scrollY));
+ expect((await box('.studio-preview')).y).toBeCloseTo(16,0);await expect(page.locator('#stage-frame')).toBeInViewport();
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();
+ await page.locator('#open-preview').click();await expect(page.locator('#preview-dialog')).toBeVisible();await page.locator('#close-preview').click();await expect(page.locator('#stage-frame')).toBeInViewport();
 });
 
 test('project toolbar uses labeled icons and JSON is paste-only',async({page})=>{
@@ -464,7 +466,7 @@ test('long scene and element lists scroll without increasing row two height',asy
  await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(project));await page.locator('#import-json').click();
  expect((await inspector.boundingBox())!.height).toBeCloseTo(initialHeight,0);
  for(const selector of ['.scene-sidebar','.elements-panel']){
-  const box=(await page.locator(selector).boundingBox())!,sceneBox=(await inspector.boundingBox())!;
+  const box=(await page.locator(selector).boundingBox())!,sceneBox=(await page.locator(selector==='.elements-panel'?'.element-inspector':'.scene-inspector').boundingBox())!;
   expect(box.height).toBeCloseTo(sceneBox.height,0);expect(box.y).toBeCloseTo(sceneBox.y,0);
  }
  for(const id of ['scene-list','element-list']){
@@ -479,7 +481,7 @@ test('long scene and element lists scroll without increasing row two height',asy
  await page.locator('[data-gradient=backgroundGradient] [name=gradientType]').selectOption('radial');
  const expandedHeight=(await inspector.boundingBox())!.height;expect(expandedHeight).toBeGreaterThan(initialHeight);
  expect((await page.locator('.scene-sidebar').boundingBox())!.height).toBeCloseTo(expandedHeight,0);
- expect((await page.locator('.elements-panel').boundingBox())!.height).toBeCloseTo(expandedHeight,0);
+ expect((await page.locator('.elements-panel').boundingBox())!.height).toBeCloseTo((await page.locator('.element-inspector').boundingBox())!.height,0);
  await page.locator('[data-gradient=backgroundGradient] [name=gradientType]').selectOption('solid');
  expect((await inspector.boundingBox())!.height).toBeCloseTo(initialHeight,0);
  await page.locator('#scene-list').evaluate(el=>el.scrollTop=el.scrollHeight);

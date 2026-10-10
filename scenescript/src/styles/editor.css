@@ -613,3 +613,14 @@ body.recording.recording-ready #recording-frame { display:block; }
 #export-dialog[open]{display:flex;flex-direction:column;overflow:hidden}
 #export-dialog .dialog-inner{overflow:auto}
 #export-dialog .json-header,#export-dialog .json-footer{flex:none}
+
+/* The fourth column belongs to the preview throughout the editor. The rail
+   spans all rows so its sticky child is not constrained by the project tile. */
+.preview-rail{grid-column:4;grid-row:1 / span 3;min-width:0;align-self:stretch}
+.preview-rail > .studio-preview{position:sticky;top:16px;align-self:start;max-height:calc(100dvh - 32px);overflow-y:auto;box-sizing:border-box}
+.elements-panel{grid-column:1;grid-row:3}
+.element-inspector{grid-column:2 / span 2;grid-row:3;min-height:360px}
+.element-inspector form{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:1200px){.element-inspector form.text-settings{grid-template-columns:minmax(0,1fr)}}
+body.recording .preview-rail{display:contents}
+body.recording .preview-rail > .studio-preview{position:fixed;top:0;max-height:none;overflow:visible}
