@@ -1,5 +1,20 @@
 import type { Language } from './i18n';
 const words = {
+ deleteVideoHint:['Das Video wird entfernt. Verwendungen in Szenen und im Projekt werden zurückgesetzt.','The video will be removed and its scene/project references cleared.','Se eliminará el vídeo y sus referencias.','La vidéo et ses références seront supprimées.'],
+ video:['Video', 'Video', 'Vídeo', 'Vidéo'],
+ videos:['Videos im Projekt', 'Project videos', 'Vídeos del proyecto', 'Vidéos du projet'],
+ importVideo:['Video importieren', 'Import video', 'Importar vídeo', 'Importer une vidéo'],
+ projectVideo:['Projektvideo', 'Project video', 'Vídeo del proyecto', 'Vidéo du projet'],
+ projectVideoHint:['Durchgängiges Video hinter den Szenen. Szenenhintergrund ausschalten, um es zu sehen.', 'Continuous video behind scenes. Disable scene backgrounds to reveal it.', 'Vídeo continuo detrás de las escenas. Desactiva el fondo para verlo.', 'Vidéo continue derrière les scènes. Désactivez les fonds pour la voir.'],
+ videoStart:['Start (s)', 'Start (s)', 'Inicio (s)', 'Début (s)'],
+ videoEnd:['Ende (s)', 'End (s)', 'Fin (s)', 'Fin (s)'],
+ videoUsePosition:['Aktuelle Position übernehmen', 'Use current position', 'Usar posición actual', 'Utiliser la position actuelle'],
+ loop:['Wiederholen', 'Loop', 'Repetir', 'Boucler'],
+ muted:['Stumm', 'Muted', 'Silenciado', 'Muet'],
+ videoJsonSize:['Projektgröße (JSON)', 'Project size (JSON)', 'Tamaño del proyecto (JSON)', 'Taille du projet (JSON)'],
+ videoStyleGroup:['Videodarstellung', 'Video appearance', 'Apariencia de vídeo', 'Apparence vidéo'],
+ seconds:['Sekunden', 'seconds', 'segundos', 'secondes'],
+
  pad:['Flächenklang', 'Pad', 'Pad', 'Nappe'],
  kalimba:['Kalimba', 'Kalimba', 'Kalimba', 'Kalimba'],
  handpan:['Handpan', 'Handpan', 'Handpan', 'Handpan'],

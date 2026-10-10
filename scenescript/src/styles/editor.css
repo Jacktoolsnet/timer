@@ -91,7 +91,10 @@ body.recording .preview-content #stage-frame { width:min(100vw,calc(100dvh * var
 }
 
 /* Project assets form one scrollable row, never widening the editor grid. */
-.project-assets { min-width:0; margin-top:18px; padding-top:14px; border-top:1px solid var(--line); }
+.project-assets { min-width:0; margin-top:18px; display:grid; gap:14px; }
+.media-gallery-tile { min-width:0; padding:14px; border:1px solid var(--line); border-radius:14px; background:var(--bg); box-shadow:0 3px 12px #00000005; }
+.media-gallery-tile .panel-heading { flex-wrap:nowrap; }
+.media-gallery-tile .panel-heading h2 { min-width:0; }
 .project-assets .panel-heading { gap:12px; flex-wrap:wrap; }
 .project-assets .panel-heading h2 { margin:0; }
 .project-assets .panel-heading #import-image { width:auto; height:auto; font-size:calc(12px * var(--font-scale,1)); }
@@ -263,7 +266,7 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
 .preview-expanded #wake-status:empty { display:none; }
 
 /* Theme-aware selects, including the popup in browsers supporting base-select. */
-:is(#editor,#simulation-dialog,#music-dialog) select {
+:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select {
  appearance:none;
  min-height:40px;
  padding:9px 34px 9px 12px;
@@ -277,16 +280,16 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
  font:inherit;
  transition:border-color .15s,background-color .15s;
 }
-:is(#editor,#simulation-dialog,#music-dialog) select:hover { border-color:var(--accent); background-color:var(--accent-soft); }
-:is(#editor,#simulation-dialog,#music-dialog) select:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
-:is(#editor,#simulation-dialog,#music-dialog) select option { background:var(--surface); color:var(--text); padding:10px 12px; }
-[data-theme=dark] :is(#editor,#simulation-dialog,#music-dialog) select { color-scheme:dark; }
+:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select:hover { border-color:var(--accent); background-color:var(--accent-soft); }
+:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select option { background:var(--surface); color:var(--text); padding:10px 12px; }
+[data-theme=dark] :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select { color-scheme:dark; }
 @supports (appearance:base-select) {
- :is(#editor,#simulation-dialog,#music-dialog) select,:is(#editor,#simulation-dialog,#music-dialog) select::picker(select) { appearance:base-select; }
- :is(#editor,#simulation-dialog,#music-dialog) select { background-image:none; padding-right:12px; }
- :is(#editor,#simulation-dialog,#music-dialog) select::picker-icon { color:var(--accent); transition:rotate .15s; }
- :is(#editor,#simulation-dialog,#music-dialog) select:open::picker-icon { rotate:180deg; }
- :is(#editor,#simulation-dialog,#music-dialog) select::picker(select) {
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select,:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select::picker(select) { appearance:base-select; }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select { background-image:none; padding-right:12px; }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select::picker-icon { color:var(--accent); transition:rotate .15s; }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select:open::picker-icon { rotate:180deg; }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select::picker(select) {
   padding:6px;
   margin-top:6px;
   border:1px solid var(--line);
@@ -297,18 +300,18 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
   max-height:min(320px,60dvh);
   overflow:auto;
  }
- :is(#editor,#simulation-dialog,#music-dialog) select option { min-height:40px; gap:10px; border-radius:8px; cursor:pointer; font:inherit; }
- :is(#editor,#simulation-dialog,#music-dialog) select option:hover,:is(#editor,#simulation-dialog,#music-dialog) select option:focus { background:var(--accent-soft); color:var(--accent); outline:none; }
- :is(#editor,#simulation-dialog,#music-dialog) select option:checked { background:var(--accent-soft); color:var(--accent); font-weight:600; }
- :is(#editor,#simulation-dialog,#music-dialog) select option::checkmark { color:var(--accent); }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select option { min-height:40px; gap:10px; border-radius:8px; cursor:pointer; font:inherit; }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select option:hover,:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select option:focus { background:var(--accent-soft); color:var(--accent); outline:none; }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select option:checked { background:var(--accent-soft); color:var(--accent); font-weight:600; }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select option::checkmark { color:var(--accent); }
 }
 @media(prefers-reduced-motion:reduce) {
- :is(#editor,#simulation-dialog,#music-dialog) select,:is(#editor,#simulation-dialog,#music-dialog) select::picker-icon { transition:none; }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select,:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select::picker-icon { transition:none; }
 }
 
 /* A consistent, lightweight chevron instead of the browser's picker glyph. */
 @supports (appearance:base-select) {
- :is(#editor,#simulation-dialog,#music-dialog) select::picker-icon {
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select::picker-icon {
   content:"";
   display:block;
   flex:0 0 8px;
@@ -322,11 +325,11 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
   transform:translateY(-2px) rotate(45deg);
   rotate:0deg;
  }
- :is(#editor,#simulation-dialog,#music-dialog) select:open::picker-icon { rotate:180deg; }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select:open::picker-icon { rotate:180deg; }
 }
 
 @supports (appearance:base-select) {
- :is(#editor,#simulation-dialog,#music-dialog) select { display:flex; align-items:center; gap:12px; }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select { display:flex; align-items:center; gap:12px; }
 }
 
 .number-stepper { display:grid; grid-template-columns:30px minmax(0,1fr) 30px; gap:4px; align-items:center; }
@@ -336,9 +339,9 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
 .number-stepper input::-webkit-inner-spin-button,.number-stepper input::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
 
 /* Override the shared Relax stepper's 44px minimum in the compact editor grid. */
-:is(#editor,#simulation-dialog,#music-dialog) .number-stepper { grid-template-columns:30px minmax(0,1fr) 30px; gap:4px; }
-:is(#editor,#simulation-dialog,#music-dialog) .number-stepper button { min-width:0; width:100%; height:40px; min-height:40px; margin:0; box-sizing:border-box; }
-:is(#editor,#simulation-dialog,#music-dialog) .number-stepper input { min-width:0; width:100%; height:40px; margin:0; box-sizing:border-box; }
+:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) .number-stepper { grid-template-columns:30px minmax(0,1fr) 30px; gap:4px; }
+:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) .number-stepper button { min-width:0; width:100%; height:40px; min-height:40px; margin:0; box-sizing:border-box; }
+:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) .number-stepper input { min-width:0; width:100%; height:40px; margin:0; box-sizing:border-box; }
 
 /* Scene settings occupy the middle columns; element settings get a full-width row. */
 .scene-inspector { grid-column:2 / span 2; grid-row:2; }
@@ -572,3 +575,28 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
 /* Inset border marks the exact captured presentation bounds without changing layout. */
 #recording-frame { display:none; position:absolute; inset:0; z-index:5; pointer-events:none; box-sizing:border-box; border:2px solid #fff; box-shadow:inset 0 0 0 2px #111; }
 body.recording.recording-ready #recording-frame { display:block; }
+
+#video-list { display:flex; gap:10px; max-width:100%; overflow-x:auto; padding:4px 4px 10px; }
+#video-list .asset-thumbnail video { display:block; width:100%; height:100%; object-fit:contain; }
+.scene-element video { width:100%; height:100%; display:block; }
+.project-video-canvas { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+.video-settings { grid-column:1/-1; min-width:0; }
+.video-trim-preview { display:block; width:min(100%,420px); max-height:220px; margin:12px auto; background:#111; }
+.video-controls { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.video-time-picker { display:grid; grid-template-columns:repeat(3,36px) minmax(60px,1fr) repeat(3,36px); gap:3px; }
+.video-time-picker button { height:40px; padding:2px; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:8px; border:1px solid var(--line); background:var(--accent-soft); color:var(--accent); }
+.video-time-picker small { font-size:9px; }
+.video-time-picker input { min-width:0; width:100%; height:40px; box-sizing:border-box; }
+#project-video-dialog,#video-preview-dialog { padding:0; width:calc(100% - 48px); max-width:1000px; max-height:90dvh; }
+#project-video-dialog[open],#video-preview-dialog[open] { display:flex; flex-direction:column; overflow:hidden; }
+#project-video-form,#video-preview-host { overflow:auto; min-height:0; padding:20px; }
+#video-preview-host video { display:block; width:100%; max-height:65dvh; }
+#project-video-form label { display:flex; flex-direction:column; gap:6px; }
+#project-video-dialog .json-header,#project-video-dialog .json-footer,#video-preview-dialog .json-header,#video-preview-dialog .json-footer { flex:none; }
+@media(max-width:1000px) { .video-controls { grid-template-columns:1fr; } }
+
+.project-assets .panel-heading .gallery-import { display:inline-flex; align-items:center; justify-content:center; gap:0; width:40px; min-width:40px; height:40px; flex:0 0 40px; padding:8px; border:1px solid var(--line); border-radius:10px; background:var(--accent-soft); color:var(--accent); font:inherit; font-size:calc(12px * var(--font-scale,1)); white-space:nowrap; }
+.gallery-import svg { width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2; }
+.project-assets .panel-heading .gallery-import:hover { border-color:var(--accent); }
+
+#video-list:empty { display:none; }

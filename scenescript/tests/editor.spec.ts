@@ -639,3 +639,10 @@ test('recording alignment frame hides for countdown and restart appears three se
  await expect(page.locator('#start-recording')).toBeVisible({timeout:3000});await expect(page.locator('#start-recording')).toHaveAttribute('aria-label','Restart presentation');await expect(page.locator('#recording-frame')).toBeVisible();
  await page.locator('#start-recording').click();await expect(page.locator('#countdown')).toBeVisible();await expect(page.locator('#recording-frame')).not.toBeVisible();expect(await page.locator('#timeline').inputValue()).toBe('0');await page.keyboard.press('Escape');await page.waitForTimeout(3300);await expect(page.locator('#recording-start')).not.toBeVisible();await expect(page.locator('#recording-frame')).not.toBeVisible();
 });
+
+test('gallery import buttons open image and video file pickers',async({page})=>{
+ await page.goto('/en/');await expect(page.locator('.media-gallery-tile')).toHaveCount(2);
+ for(const [id,accept] of [['gallery-import-image','image/png'],['gallery-import-video','video/*']]){
+  await expect(page.locator('#'+id)).toBeVisible();await expect(page.locator('#'+id+' svg')).toHaveCount(1);await expect(page.locator('#'+id)).toHaveText('');await expect(page.locator('#'+id)).toHaveAttribute('aria-label',/Import/);const pending=page.waitForEvent('filechooser');await page.locator('#'+id).click();const chooser=await pending;expect(await chooser.element().getAttribute('accept')).toContain(accept);
+ }
+});

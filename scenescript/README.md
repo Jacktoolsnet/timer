@@ -170,3 +170,6 @@ importieren; in der Aufnahmeansicht Play und den Countdown abwarten.
 Projekt-Toolbar: Musik-Icon öffnet einen Entwurf mit Übernehmen/Abbrechen und Hörprobe. Generierte Begleitung oder eigene Noten, editierbare synthetische Instrumente (ADSR, Obertöne, Filter, Echo/Hall). JSON und AI-Anleitung dokumentieren alle Parameter. Musik bleibt über Szenenwechsel durchgehend, pausiert und springt mit der Zeitleiste; Countdown bleibt stumm. Beim Screenrecorder Tab-/Systemaudio aktivieren. Keine externen Musikdienste oder Audiodateien erforderlich.
 
 Beispielprojekt: `public/music-demo.scenescript.json` (20 Sekunden generierte Begleitung).
+
+## Videos
+Videogalerie unter den Bildern: Import, Vorschau, Umbenennen, Download und Löschen. Videos werden einmal als Base64 im JSON gespeichert (32 MiB pro Video, 30 Videos, 160 MiB JSON). WebM/MP4 und weitere vom Browser dekodierbare Videoformate. Videoelemente und szenenübergreifendes Projektvideo unterstützen Ausschnitte, Wiederholung, Stummschaltung, Lautstärke und Einpassen/Zuschneiden. Start/Ende mit ±Minute/Sekunde/Zehntelsekunde oder direkt aus der Vorschau übernehmen. Große Projekte bitte als Datei speichern statt auf Browser-Speicher zu vertrauen.

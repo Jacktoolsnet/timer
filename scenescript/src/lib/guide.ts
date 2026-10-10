@@ -55,6 +55,32 @@ Example optional root music property:
  "notes":[{"instrument":"glass","at":0,"duration":0.5,"pitch":60,"velocity":0.7},
  {"instrument":"glass","at":1,"duration":0.5,"pitch":64,"velocity":0.6}]}
 
+## Embedded videos
+
+Optional root videos: object of max 30 unique IDs mapping to
+{name:"clip.webm",data:"data:video/webm;base64,...",duration:12.4}.
+Each file max 32 MiB decoded; whole JSON max 160 MiB. duration is the ACTUAL
+finite duration in seconds (.001–86400), verified by browser decoding on import.
+WebM and MP4 are supported when the browser supports their codecs; other video
+MIME types are accepted only if the browser can decode them. Standalone files
+only: playlists and external streams (HLS/DASH) are not supported. Never invent Base64
+or duration: obtain real video bytes/metadata or ask the user to import a file.
+Videos are embedded once and referenced across scenes; no external URLs/scripts.
+
+Element type "video" uses video settings instead of image asset:
+video:{asset:"clip",start:3.5,end:35.6,loop:false,muted:true,volume:1,fit:"contain"}.
+start defaults 0; end null means file end; 0 <= start < end <= actual duration.
+loop repeats ONLY the selected range; otherwise the last frame remains visible.
+muted defaults true, volume 0–1, fit contain/cover (default cover).
+Element at is the scene entry time; video elapsed time = scene time minus at.
+Regular position, dimensions, opacity, rotation and entrance animations apply.
+Optional root backgroundVideo uses the SAME settings, with global project time.
+It continues across scenes underneath their backgrounds and elements; disable
+scene backgrounds or lower their opacity to see it. Project simulation is below
+project video. Pause, seek and restart follow the presentation; countdown is silent
+and frozen. Enable tab/system audio in the recorder if video sound is wanted.
+Large projects should be saved as files; browser local storage is limited.
+
 ## Workflow: conversation first, project output last
 
 Before creating a project, establish the topic, audience, format/aspect ratio,
@@ -127,7 +153,7 @@ Each raster image must be at most 8 MiB; SVG must be at most 1 MiB of UTF-8 byte
 Base64 encoding. This means the bytes of the PNG/JPEG/WebP file, not the
 uncompressed pixel buffer. The validator computes that byte count from payload
 length and trailing padding; direct image upload also checks File.size.
-The complete input JSON must be at most 30 MiB as UTF-8, including Base64 data,
+The complete input JSON must be at most 160 MiB as UTF-8, including Base64 data,
 all other fields and whitespace. File loading also checks the selected file's
 byte size. Export checks the size of its complete, pretty-printed JSON Blob;
 extra export indentation can make an otherwise near-limit project too large.
@@ -177,7 +203,7 @@ Scene durations add up to the total duration; transitions do not add time.
 
 ### Elements
 
-Required: id and type. type must be "text", "image", "shape" (a geometric form) or "simulation".
+Required: id and type. type must be "video", "text", "image", "shape" (a geometric form) or "simulation".
 Optional fields and their defaults:
 - simulation: null for text/image/shape, default particles configuration for simulation elements; simulation elements must not explicitly set this to null.
 - text: "Your story starts here." for text, otherwise ""; string, max 10000
