@@ -173,3 +173,5 @@ Beispielprojekt: `public/music-demo.scenescript.json` (20 Sekunden generierte Be
 
 ## Videos
 Videogalerie unter den Bildern: Import, Vorschau, Umbenennen, Download und Löschen. Videos werden einmal als Base64 im JSON gespeichert (32 MiB pro Video, 30 Videos, 160 MiB JSON). WebM/MP4 und weitere vom Browser dekodierbare Videoformate. Videoelemente und szenenübergreifendes Projektvideo unterstützen Ausschnitte, Wiederholung, Stummschaltung, Lautstärke und Einpassen/Zuschneiden. Start/Ende mit ±Minute/Sekunde/Zehntelsekunde oder direkt aus der Vorschau übernehmen. Große Projekte bitte als Datei speichern statt auf Browser-Speicher zu vertrauen.
+
+Galerie-Dateien lassen sich über das Ersetzen-Icon austauschen. IDs, Namen und alle Verwendungen/Einstellungen bleiben erhalten. Passt ein kürzeres Video nicht zu bestehenden Ausschnitten, wird der Austausch mit Hinweis abgelehnt; die alte Datei bleibt unverändert.

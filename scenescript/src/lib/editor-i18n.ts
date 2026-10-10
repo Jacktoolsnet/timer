@@ -1,5 +1,7 @@
 import type { Language } from './i18n';
 const words = {
+ replaceMedia:['Datei ersetzen (Einstellungen behalten)','Replace file (keep settings)','Reemplazar archivo (conservar ajustes)','Remplacer le fichier (conserver les réglages)'],
+ replaceRangeError:['Das neue Video passt nicht zu den eingestellten Ausschnitten. Die bisherige Datei bleibt erhalten.','The new video does not fit the configured trims. The original file is unchanged.','El nuevo vídeo no admite los recortes configurados. Se conserva el archivo original.','La nouvelle vidéo ne correspond pas aux extraits configurés. Le fichier original est conservé.'],
  deleteVideoHint:['Das Video wird entfernt. Verwendungen in Szenen und im Projekt werden zurückgesetzt.','The video will be removed and its scene/project references cleared.','Se eliminará el vídeo y sus referencias.','La vidéo et ses références seront supprimées.'],
  video:['Video', 'Video', 'Vídeo', 'Vidéo'],
  videos:['Videos im Projekt', 'Project videos', 'Vídeos del proyecto', 'Vidéos du projet'],

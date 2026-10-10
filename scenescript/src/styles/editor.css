@@ -101,10 +101,10 @@ body.recording .preview-content #stage-frame { width:min(100vw,calc(100dvh * var
 #asset-list { display:flex; gap:10px; max-width:100%; overflow-x:auto; overflow-y:hidden; padding:4px 4px 10px; overscroll-behavior-x:contain; }
 #asset-list:empty { display:none; }
 #asset-list:focus-visible { outline:2px solid var(--accent); outline-offset:3px; border-radius:8px; }
-#asset-list .asset-row { flex:0 0 180px; min-width:0; padding:8px; border:1px solid var(--line); border-radius:10px; background:var(--bg); }
-#asset-list .asset-row img { flex:0 0 56px; width:56px; height:56px; }
-#asset-list .asset-row span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-#asset-list .asset-row button { flex-shrink:0; min-width:28px; min-height:32px; }
+:is(#asset-list,#video-list) .asset-row { flex:0 0 180px; min-width:0; padding:8px; border:1px solid var(--line); border-radius:10px; background:var(--bg); }
+:is(#asset-list,#video-list) .asset-row img { flex:0 0 56px; width:56px; height:56px; }
+:is(#asset-list,#video-list) .asset-row span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+:is(#asset-list,#video-list) .asset-row button { flex-shrink:0; min-width:28px; min-height:32px; }
 
 /* Second row follows the editing workflow from left to right. */
 .scene-inspector { grid-column:2; grid-row:2; }
@@ -120,9 +120,9 @@ body.recording .scene-inspector,body.recording .element-inspector,body.recording
 .project-panel .editor-toolbar button,.project-panel .editor-toolbar a { display:grid; place-items:center; width:44px; height:44px; padding:10px; margin:0; flex:0 0 44px; color:var(--accent); background:var(--accent-soft); border:1px solid var(--line); border-radius:10px; }
 .project-panel .editor-toolbar button:hover,.project-panel .editor-toolbar a:hover { background:var(--surface); }
 .project-panel .editor-toolbar svg { width:22px; height:22px; }
-#asset-list .asset-row button { display:grid; place-items:center; width:34px; height:36px; border:1px solid var(--line); border-radius:8px; color:var(--accent); background:var(--surface); }
-#asset-list .asset-row button:hover { background:var(--accent-soft); }
-#asset-list .asset-row button svg { width:18px; height:18px; }
+:is(#asset-list,#video-list) .asset-row button { display:grid; place-items:center; width:34px; height:36px; border:1px solid var(--line); border-radius:8px; color:var(--accent); background:var(--surface); }
+:is(#asset-list,#video-list) .asset-row button:hover { background:var(--accent-soft); }
+:is(#asset-list,#video-list) .asset-row button svg { width:18px; height:18px; }
 
 /* Fullscreen editing is separate from fullscreen recording. */
 body.editor-fullscreen .site-header,body.editor-fullscreen .scene-intro,body.editor-fullscreen .site-footer { display:none; }
@@ -164,7 +164,7 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
 .project-panel,.studio-preview { align-self:stretch; }
 
 /* Larger asset previews with centered filename and delete action below. */
-#asset-list .asset-row {
+:is(#asset-list,#video-list) .asset-row {
  flex:0 0 190px;
  flex-direction:column;
  align-items:center;
@@ -172,7 +172,7 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
  padding:12px;
  text-align:center;
 }
-#asset-list .asset-row img {
+:is(#asset-list,#video-list) .asset-row img {
  flex:0 0 auto;
  width:164px;
  height:120px;
@@ -180,13 +180,13 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
  background:var(--surface);
  border-radius:8px;
 }
-#asset-list .asset-row span {
+:is(#asset-list,#video-list) .asset-row span {
  flex:0 0 auto;
  width:100%;
  min-width:0;
  text-align:center;
 }
-#asset-list .asset-row button { flex:0 0 auto; }
+:is(#asset-list,#video-list) .asset-row button { flex:0 0 auto; }
 
 .playback-controls { justify-content:space-between; flex-wrap:nowrap; }
 .preview-transport,.preview-view-actions { display:flex; align-items:center; gap:6px; }
@@ -493,9 +493,9 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
 .scene-svg-background { width:100%; height:100%; display:block; }
 
 /* Image lightbox shares the existing modal header/footer, with a bounded stage. */
-#asset-list .asset-row .asset-thumbnail { display:block; width:164px; height:120px; min-height:0; padding:0; border:0; border-radius:8px; overflow:hidden; background:transparent; cursor:zoom-in; }
-#asset-list .asset-thumbnail img { display:block; width:100%; height:100%; object-fit:contain; }
-#asset-list .asset-thumbnail:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+:is(#asset-list,#video-list) .asset-row .asset-thumbnail { display:block; width:164px; height:120px; min-height:0; padding:0; border:0; border-radius:8px; overflow:hidden; background:transparent; cursor:zoom-in; }
+:is(#asset-list,#video-list) .asset-thumbnail img { display:block; width:100%; height:100%; object-fit:contain; }
+:is(#asset-list,#video-list) .asset-thumbnail:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
 #asset-preview-dialog { width:calc(100% - 48px); max-width:1100px; height:90dvh; max-height:90dvh; padding:0; overflow:hidden; }
 #asset-preview-dialog[open] { display:flex; flex-direction:column; }
 #asset-preview-dialog header,#asset-preview-dialog footer { flex:0 0 auto; }

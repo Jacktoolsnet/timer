@@ -152,7 +152,7 @@ test('project toolbar uses labeled icons and JSON is paste-only',async({page})=>
  await page.goto('/en/');await expect(page.locator('.editor-toolbar #import-image svg')).toHaveCount(1);
  for(const id of ['new-project','load-project','save-project','open-json','import-image']){const button=page.locator('#'+id);expect(await button.getAttribute('title')).toBeTruthy();expect(await button.getAttribute('aria-label')).toBeTruthy();expect((await button.textContent())!.trim()).toBe('');}
  await page.locator('#open-json').click();await expect(page.locator('#json-input')).toHaveValue('');await expect(page.locator('#copy-json')).toHaveCount(0);await page.locator('#close-json').click();
- await page.locator('#image-file').setInputFiles({name:'trash-test.png',mimeType:'image/png',buffer:Buffer.from(pixel.split(',')[1],'base64')});await expect(page.locator('#asset-list .asset-row .asset-actions button svg')).toHaveCount(3);
+ await page.locator('#image-file').setInputFiles({name:'trash-test.png',mimeType:'image/png',buffer:Buffer.from(pixel.split(',')[1],'base64')});await expect(page.locator('#asset-list .asset-row .asset-actions button svg')).toHaveCount(4);
  await page.locator('#asset-list .asset-row button[data-delete-asset]').click();await page.locator('#confirm-delete').click();await expect(page.locator('#asset-list img')).toHaveCount(0);
 });
 
@@ -645,4 +645,12 @@ test('gallery import buttons open image and video file pickers',async({page})=>{
  for(const [id,accept] of [['gallery-import-image','image/png'],['gallery-import-video','video/*']]){
   await expect(page.locator('#'+id)).toBeVisible();await expect(page.locator('#'+id+' svg')).toHaveCount(1);await expect(page.locator('#'+id)).toHaveText('');await expect(page.locator('#'+id)).toHaveAttribute('aria-label',/Import/);const pending=page.waitForEvent('filechooser');await page.locator('#'+id).click();const chooser=await pending;expect(await chooser.element().getAttribute('accept')).toContain(accept);
  }
+});
+test('image replacement keeps the asset ID, name, all references and element settings',async({page})=>{
+ await page.goto('/en/');await page.locator('#image-file').setInputFiles({name:'cover.png',mimeType:'image/png',buffer:Buffer.from(pixel.split(',')[1],'base64')});await expect(page.locator('#asset-list img')).toHaveCount(1);
+ const p=JSON.parse(await exportedJSON(page)),id=Object.keys(p.assets)[0];p.scenes[0].backgroundAsset=id;
+ p.scenes.forEach((s:any,index:number)=>s.elements.push({...structuredClone(p.scenes[0].elements[0]),id:'image-'+index,type:'image',asset:id,x:7,y:5,width:80,height:60,radius:24}));
+ await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(p));await page.locator('#import-json').click();
+ const chooser=page.waitForEvent('filechooser');await page.locator('#asset-list [data-replace-media]').click();const file=await chooser;const svg='<svg xmlns="http://www.w3.org/2000/svg" width="40" height="20"><rect width="40" height="20" fill="blue"/></svg>';await file.setFiles({name:'new.svg',mimeType:'image/svg+xml',buffer:Buffer.from(svg)});
+ await expect(page.locator('#asset-list img')).toHaveAttribute('src',/^data:image\/svg/);const replaced=JSON.parse(await exportedJSON(page));expect(Object.keys(replaced.assets)).toEqual([id]);expect(replaced.assets[id].name).toBe('cover.png');expect(replaced.assets[id].data).not.toBe(p.assets[id].data);expect(replaced.scenes).toEqual(p.scenes);
 });
