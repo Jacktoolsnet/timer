@@ -28,8 +28,12 @@ const {lang}=Astro.props,t=editorDictionary(lang);
    <a href={'/'+lang+'/ai/'} target="_blank" rel="noopener" title={t.ai} aria-label={t.ai}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5C8 2 4 3 3 4v16c3-2 6-2 9 0 3-2 6-2 9 0V4c-3-2-6-2-9 1Zm0 0v15" /></svg></a>
   </nav>
     <div class="project-content">
-    <h2>{t.project}</h2><label>{t.title}<input id="project-title" type="text" maxlength="200" /></label>
+    <h2>{t.project}</h2><div class="project-metadata">
+<label>{t.title}<span class="project-copy-field"><input id="project-title" type="text" maxlength="200" /><button id="copy-project-title" type="button" title={t.copy+": "+t.title} aria-label={t.copy+": "+t.title}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h13v13H8ZM3 16V3h13" /></svg></button></span></label>
     <label>{t.format}<select id="project-format"><option value="landscape">{t.landscape}</option><option value="portrait">{t.portrait}</option><option value="square">{t.square}</option></select></label>
+    <div class="project-metadata-wide"><label>{t.projectDescription}<span class="project-copy-field"><textarea id="project-description" rows="3" maxlength="5000"></textarea><button id="copy-project-description" type="button" title={t.copy+": "+t.projectDescription} aria-label={t.copy+": "+t.projectDescription}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h13v13H8ZM3 16V3h13" /></svg></button></span></label></div>
+    <div class="project-metadata-wide"><label>{t.projectHashtags}<span class="project-copy-field"><input id="project-hashtags" type="text" maxlength="2000" placeholder="#SceneScript, #Video" /><button id="copy-project-hashtags" type="button" title={t.copy+": "+t.projectHashtags} aria-label={t.copy+": "+t.projectHashtags}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h13v13H8ZM3 16V3h13" /></svg></button></span></label></div>
+    </div>
 
     <div class="project-assets">
      <section class="media-gallery-tile" aria-labelledby="asset-heading">

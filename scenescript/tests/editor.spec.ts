@@ -656,3 +656,16 @@ test('image replacement keeps the asset ID, name, all references and element set
  const chooser=page.waitForEvent('filechooser');await page.locator('#asset-list [data-replace-media]').click();const file=await chooser;const svg='<svg xmlns="http://www.w3.org/2000/svg" width="40" height="20"><rect width="40" height="20" fill="blue"/></svg>';await file.setFiles({name:'new.svg',mimeType:'image/svg+xml',buffer:Buffer.from(svg)});
  await expect(page.locator('#asset-list img')).toHaveAttribute('src',/^data:image\/svg/);const replaced=JSON.parse(await exportedJSON(page));expect(Object.keys(replaced.assets)).toEqual([id]);expect(replaced.assets[id].name).toBe('cover.png');expect(replaced.assets[id].data).not.toBe(p.assets[id].data);expect(replaced.scenes).toEqual(p.scenes);
 });
+
+test('publication fields save, load and copy independently with denial fallback',async({page})=>{
+ await page.goto('/en/');await page.evaluate(()=>{Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async(text:string)=>{(window as any).copiedProjectText=text;}}});});
+ const fields={title:'Video title',description:'First line\nSecond line',hashtags:'#Video, #SceneScript, #Ideas'};
+ for(const [key,value] of Object.entries(fields)){await page.locator('#project-'+key).fill(value);await page.locator('#copy-project-'+key).click();expect(await page.evaluate(()=>(window as any).copiedProjectText)).toBe(value);await expect(page.locator('.app-toast[data-kind=success]')).toHaveText('Copied.');}
+ const saved=JSON.parse(await exportedJSON(page));expect(saved).toMatchObject(fields);
+ await page.locator('#project-description').fill('Changed');page.on('dialog',dialog=>dialog.accept());await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(saved));await page.locator('#import-json').click();
+ for(const [key,value] of Object.entries(fields))await expect(page.locator('#project-'+key)).toHaveValue(value);
+ await page.evaluate(()=>{Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async()=>{throw new Error('denied');}}});});await page.locator('#copy-project-description').click();await expect(page.locator('.app-toast[data-kind=warning]')).toContainText('field is selected');
+ expect(await page.locator('#project-description').evaluate((el:HTMLTextAreaElement)=>el.value.slice(el.selectionStart,el.selectionEnd))).toBe(fields.description);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();
+ await page.locator('#new-project').click();await expect(page.locator('#project-description')).toHaveValue('');await expect(page.locator('#project-hashtags')).toHaveValue('');
+});

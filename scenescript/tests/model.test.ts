@@ -123,3 +123,11 @@ test('background switch defaults on and requires a boolean',()=>{
  p.scenes[0].backgroundEnabled=false;assert.equal(parseProject(serialize(p)).scenes[0].backgroundEnabled,false);
  p.scenes[0].backgroundEnabled='false';assert.throws(()=>parseProject(serialize(p)),/backgroundEnabled/);
 });
+
+test('publication metadata round trips, defaults for legacy projects and validates types and lengths',()=>{
+ const p=demoProject();p.description='A description\nwith a second line';p.hashtags='#Video, #SceneScript';
+ assert.equal(parseProject(serialize(p)).description,p.description);assert.equal(parseProject(serialize(p)).hashtags,p.hashtags);
+ const legacy=JSON.parse(serialize(p));delete legacy.description;delete legacy.hashtags;const parsed=parseProject(serialize(legacy));assert.equal(parsed.description,'');assert.equal(parsed.hashtags,'');
+ for(const key of ['description','hashtags'] as const){for(const invalid of [null,[],42])assert.throws(()=>parseProject(serialize({...p,[key]:invalid})),new RegExp(key));}
+ assert.throws(()=>parseProject(serialize({...p,description:'x'.repeat(5001)})),/description/);assert.throws(()=>parseProject(serialize({...p,hashtags:'x'.repeat(2001)})),/hashtags/);
+});

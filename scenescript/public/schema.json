@@ -454,6 +454,18 @@
           }
         }
       }
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 5000,
+      "default": "",
+      "description": "Plain text video description; not rendered in scenes."
+    },
+    "hashtags": {
+      "type": "string",
+      "maxLength": 2000,
+      "default": "",
+      "description": "Comma-separated list, e.g. #SceneScript, #Video. Not an array."
     }
   },
   "required": [

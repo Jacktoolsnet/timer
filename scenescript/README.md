@@ -201,3 +201,15 @@ Implementierung: dynamisch geladene `mediabunny`-Encoder/Decoder und
 kurzen Blöcken gemischt; synthetische Instrumente verwenden denselben
 Offline-Renderer wie die Wiedergabe. Es ist kein zusätzliches JSON-Feld nötig;
 die KI-Anleitung beschreibt den Export ebenfalls.
+
+
+## Veröffentlichungsdaten
+
+Im Projekt sind Titel, Beschreibung (bis 5000 Zeichen) und Hashtags (bis 2000
+Zeichen, als kommagetrennte Textliste, z. B. `#Video, #SceneScript`) editierbar.
+Jedes Feld hat einen eigenen Kopierbutton mit Erfolgs-Toast; verweigerter
+Zwischenablagezugriff markiert den Text zum manuellen Kopieren.
+`description` und `hashtags` sind optionale Root-Felder in Format 1.0. Ältere
+Projekte erhalten leere Werte. JSON-Dateien und lokale Entwürfe speichern die
+Angaben; sie werden nicht in der Präsentation eingeblendet. Die KI-Anleitung
+und das Schema enthalten die neuen Felder. Kein automatischer Plattform-Upload.

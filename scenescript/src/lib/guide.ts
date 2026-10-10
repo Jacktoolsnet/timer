@@ -118,7 +118,10 @@ for example, a supplementary Unicode character generally consumes two units.
 
 Required fields:
 - version: exactly "1.0".
-- title: string, maximum 200 UTF-16 code units (empty is accepted).
+- title: string, maximum 200 UTF-16 code units (empty is accepted). Use a suitable video/upload title.
+- description: optional plain-text string, maximum 5000 UTF-16 code units, default "". Write a useful upload description (including line breaks when helpful).
+- hashtags: optional string, maximum 2000 UTF-16 code units, default "". A comma-separated list, e.g. "#SceneScript, #Video, #CreativeTools". NOT an array; use commas between entries. Keep hashtags relevant to the video.
+These are editable publication metadata, not scene elements. They are saved in the project JSON; each has a clipboard button in the editor. They do not appear on the presentation or become MP4 metadata. When asked for a complete video draft, provide all three together with the scenes. No automatic upload or platform-specific guarantees.
 - format: ${Object.entries(formats).map(([k,v])=>`"${k}" (${v[0]} × ${v[1]} project pixels)`).join('; ')}.
 - scenes: ordered array of 1–100 scenes.
 Optional: music, null (default) or a music object (see Project background music above).

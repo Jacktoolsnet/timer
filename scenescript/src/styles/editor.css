@@ -624,3 +624,14 @@ body.recording.recording-ready #recording-frame { display:block; }
 @media(max-width:1200px){.element-inspector form.text-settings{grid-template-columns:minmax(0,1fr)}}
 body.recording .preview-rail{display:contents}
 body.recording .preview-rail > .studio-preview{position:fixed;top:0;max-height:none;overflow:visible}
+
+.project-metadata{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.project-metadata label{margin:0;min-width:0}
+.project-metadata-wide{grid-column:1/-1;min-width:0}
+.project-copy-field{display:grid;grid-template-columns:minmax(0,1fr) 40px;gap:8px;align-items:start}
+.project-copy-field input{height:40px}
+.project-copy-field textarea{min-height:80px;resize:vertical}
+.project-copy-field button{display:grid;place-items:center;width:40px;height:40px;padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--accent-soft);color:var(--accent)}
+.project-copy-field button:hover{background:var(--bg)}
+.project-copy-field svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+@media(max-width:1000px){.project-metadata{grid-template-columns:minmax(0,1fr)}}

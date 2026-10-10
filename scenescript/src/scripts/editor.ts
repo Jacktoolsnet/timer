@@ -43,7 +43,7 @@ document.querySelectorAll<HTMLAnchorElement>('.language-menu a').forEach(link=>l
 function button(text:string,action:()=>void){const b=document.createElement('button');b.type='button';b.textContent=text;b.addEventListener('click',action);return b;}
 function selectScene(index:number){stop();sceneIndex=index;selectedId='';time=offset(index);refresh();}
 function refresh(){
- ($('project-title') as HTMLInputElement).value=project.title;($('project-format') as HTMLSelectElement).value=project.format;
+ ($('project-title') as HTMLInputElement).value=project.title;($('project-description') as HTMLTextAreaElement).value=project.description;($('project-hashtags') as HTMLInputElement).value=project.hashtags;($('project-format') as HTMLSelectElement).value=project.format;
  const list=$('scene-list'),scrollTop=list.scrollTop;list.replaceChildren();
  project.scenes.forEach((s,i)=>{const li=document.createElement('li'),b=button(`${i+1}. ${s.name} · ${s.duration}s`,()=>selectScene(i));b.title=b.textContent||'';b.setAttribute('aria-current',String(i===sceneIndex));li.append(b);list.append(li);});list.scrollTop=scrollTop;
  ($('delete-scene') as HTMLButtonElement).disabled=project.scenes.length===1;($('scene-up') as HTMLButtonElement).disabled=sceneIndex===0;($('scene-down') as HTMLButtonElement).disabled=sceneIndex===project.scenes.length-1;($('add-scene') as HTMLButtonElement).disabled=project.scenes.length>=100;
@@ -510,7 +510,7 @@ $('timeline').addEventListener('input',()=>{stop();time=Number(($('timeline') as
 $('safe-toggle').addEventListener('change',()=>{$('safe-overlay').hidden=!($('safe-toggle') as HTMLInputElement).checked;});
 function replace(next:Project){stop();backgroundVideoNode=undefined;backgroundVideoAsset='';clearVideoURLs();revision++;project=next;sceneIndex=0;selectedId='';time=0;dirty=false;persist();refresh();status(t('ready'));}
 const canReplace=()=>!dirty||confirm(t('unsaved'));
-$('new-project').addEventListener('click',()=>{if(canReplace()){replace({version:'1.0',title:'SceneScript',format:'landscape',backgroundSimulation:null,backgroundVideo:null,videos:{},music:null,assets:{},scenes:[newScene()]});changed();}});
+$('new-project').addEventListener('click',()=>{if(canReplace()){replace({version:'1.0',title:'SceneScript',description:'',hashtags:'',format:'landscape',backgroundSimulation:null,backgroundVideo:null,videos:{},music:null,assets:{},scenes:[newScene()]});changed();}});
 $('project-title').addEventListener('input',()=>{project.title=($('project-title') as HTMLInputElement).value;changed();});
 $('project-format').addEventListener('change',()=>{project.format=($('project-format') as HTMLSelectElement).value as Project['format'];changed();draw();});
 $('add-scene').addEventListener('click',()=>{if(project.scenes.length>=100)return;project.scenes.push(newScene());changed();selectScene(project.scenes.length-1);});
@@ -662,3 +662,12 @@ $('start-export').addEventListener('click',async()=>{
  }catch(error){$('export-status').textContent=controller.signal.aborted?t('exportCancelled'):t('error')+' '+(error as Error).message;}
  finally{exportController=undefined;controls.forEach(n=>n.disabled=false);keepScreenAwake(false);}
 });
+
+for(const key of ['title','description','hashtags'] as const){
+ const input=$(key==='description'?'project-description':'project-'+key) as HTMLInputElement|HTMLTextAreaElement;
+ if(key!=='title')input.addEventListener('input',()=>{project[key]=input.value;changed();});
+ $('copy-project-'+key).addEventListener('click',async()=>{
+  try{await navigator.clipboard.writeText(input.value);showToast(t('copied'),'success');}
+  catch{input.focus();input.select();showToast(t('projectCopyDenied'),'warning');}
+ });
+}
