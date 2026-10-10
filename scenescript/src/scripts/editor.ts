@@ -658,7 +658,7 @@ $('start-export').addEventListener('click',async()=>{
   if(!await exportSupported(snapshot,options))throw new Error(t('exportUnsupported'));
   const blob=await exportVideo(snapshot,options,controller.signal,value=>{progress.value=value;});
   const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=(snapshot.title.replace(/[\/:*?"<>|]/g,'_')||'SceneScript')+'.'+options.format;link.click();setTimeout(()=>URL.revokeObjectURL(url),60000);
-  $('export-status').textContent=t('exportDone');showToast(t('exportDone'),'success');
+  $('export-status').textContent=t('exportDone');exportDialog.close();showToast(t('exportDone'),'success');
  }catch(error){$('export-status').textContent=controller.signal.aborted?t('exportCancelled'):t('error')+' '+(error as Error).message;}
  finally{exportController=undefined;controls.forEach(n=>n.disabled=false);keepScreenAwake(false);}
 });

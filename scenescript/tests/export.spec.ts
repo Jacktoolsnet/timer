@@ -10,7 +10,7 @@ test('offline export encodes complete WebM with rendered pixels and music',async
   const moduleURL=performance.getEntriesByType('resource').map(e=>e.name).find(n=>n.includes('/mediabunny.js?v='))!;const m=await import(/* @vite-ignore */ moduleURL);
   const input=new m.Input({formats:m.ALL_FORMATS,source:new m.BufferSource(new Uint8Array(data))});const track=await input.getPrimaryVideoTrack();const frame=await new m.CanvasSink(track).getCanvas(.1);const ctx=frame.canvas.getContext('2d')!;const pixel=Array.from(ctx.getImageData(20,20,1,1).data);let peak=0;const audio=await input.getPrimaryAudioTrack();for await(const item of new m.AudioBufferSink(audio).buffers()){for(const sample of item.buffer.getChannelData(0))peak=Math.max(peak,Math.abs(sample));}const duration=await input.computeDuration();input.dispose();return {pixel,peak,duration,width:frame.canvas.width};
  },Array.from(bytes));
- expect(result.width).toBe(854);expect(result.pixel[0]).toBeGreaterThan(200);expect(result.pixel[1]).toBeLessThan(30);expect(result.peak).toBeGreaterThan(.001);expect(result.duration).toBeCloseTo(.3,1);await expect(page.locator('#project-title')).toHaveValue('Export test');await expect(page.locator('#export-status')).toHaveText('Video exported');
+ expect(result.width).toBe(854);expect(result.pixel[0]).toBeGreaterThan(200);expect(result.pixel[1]).toBeLessThan(30);expect(result.peak).toBeGreaterThan(.001);expect(result.duration).toBeCloseTo(.3,1);await expect(page.locator('#project-title')).toHaveValue('Export test');await expect(page.locator('#export-dialog')).not.toBeVisible();await expect(page.locator('.app-toast[data-kind=success]')).toBeVisible();await expect(page.locator('.app-toast')).toHaveText('Video exported');
 });
 test('cancel stops export and removes the offscreen renderer',async({page})=>{
  await page.goto('/en/');await page.locator('#open-export').click();await page.locator('#export-format').selectOption('webm');await page.locator('#export-audio').uncheck();await page.locator('#start-export').click();await page.locator('#cancel-export').click();await expect(page.locator('#export-status')).toHaveText('Export cancelled');await expect(page.locator('#start-export')).toBeEnabled();expect(await page.evaluate(()=>document.querySelector('[data-export-renderer]'))).toBeNull();
@@ -47,4 +47,13 @@ test('SVG animations are frozen at the requested export time',async({page})=>{
   const media=new ExportMedia(p,new AbortController().signal),renderer=new ExportRenderer(p,media);
   try{const a=await renderer.frame(0,480,270),b=await renderer.frame(1,480,270);return [Array.from(a.getContext('2d')!.getImageData(240,135,1,1).data),Array.from(b.getContext('2d')!.getImageData(240,135,1,1).data)];}finally{renderer.dispose();media.dispose();}
  });expect(result[0].slice(0,3)).toEqual([255,0,0]);expect(result[1].slice(0,3)).toEqual([0,0,255]);
+});
+
+test('export audio uses one aligned slide switch instead of a visible checkbox',async({page})=>{
+ await page.goto('/en/');await page.locator('#open-export').click();
+ const input=page.locator('#export-audio'),track=page.locator('#export-options .safe-switch-track');
+ await expect(input).toHaveCSS('opacity','0');await expect(input).toHaveCSS('position','absolute');
+ const a=await input.boundingBox(),b=await track.boundingBox();expect(a).not.toBeNull();expect(b).not.toBeNull();
+ expect(a!.x).toBeCloseTo(b!.x,0);expect(a!.y).toBeCloseTo(b!.y,0);expect(a!.height).toBeCloseTo(b!.height,0);
+ await expect(input).toBeChecked();await input.click();await expect(input).not.toBeChecked();await input.press('Space');await expect(input).toBeChecked();
 });

@@ -361,7 +361,7 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
 .safe-toggle-icon { width:20px; height:20px; color:var(--accent); }
 .preview-content:not(.preview-expanded) .safe-toggle-text { display:none; }
 .safe-switch { position:relative; display:inline-block; flex:0 0 40px; width:40px; height:24px; }
-.preview-content .safe-switch input { position:absolute; inset:0; width:100%; height:100%; margin:0; opacity:0; cursor:pointer; z-index:1; }
+.safe-switch input { position:absolute; inset:0; width:100%; height:100%; margin:0; opacity:0; cursor:pointer; z-index:1; }
 .safe-switch-track { display:block; width:100%; height:100%; border:1px solid var(--line); border-radius:999px; background:var(--track); transition:background .18s; }
 .safe-switch-track::after { content:""; position:absolute; top:4px; left:4px; width:16px; height:16px; border-radius:50%; background:var(--muted); transition:transform .18s,background .18s; }
 .safe-switch input:checked + .safe-switch-track { background:var(--accent); border-color:var(--accent); }
