@@ -336,7 +336,7 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
 .number-stepper button { display:grid; place-items:center; min-height:40px; padding:0; border:1px solid var(--line); border-radius:9px; background:var(--accent-soft); color:var(--accent); font:inherit; font-size:20px; }
 .number-stepper button:hover:not(:disabled) { border-color:var(--accent); }
 .studio-panel .number-stepper input,#project-simulation-form .number-stepper input { appearance:textfield; -moz-appearance:textfield; padding-inline:4px; text-align:center; min-height:40px; }
-.number-stepper input::-webkit-inner-spin-button,.number-stepper input::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
+.number-stepper input::-webkit-inner-spin-button,.number-stepper input::-webkit-outer-spin-button,.video-time-picker input::-webkit-inner-spin-button,.video-time-picker input::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
 
 /* Override the shared Relax stepper's 44px minimum in the compact editor grid. */
 :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog) .number-stepper { grid-template-columns:30px minmax(0,1fr) 30px; gap:4px; }
@@ -586,7 +586,7 @@ body.recording.recording-ready #recording-frame { display:block; }
 .video-time-picker { display:grid; grid-template-columns:repeat(3,36px) minmax(60px,1fr) repeat(3,36px); gap:3px; }
 .video-time-picker button { height:40px; padding:2px; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:8px; border:1px solid var(--line); background:var(--accent-soft); color:var(--accent); }
 .video-time-picker small { font-size:9px; }
-.video-time-picker input { min-width:0; width:100%; height:40px; box-sizing:border-box; }
+.video-time-picker input { appearance:textfield; -moz-appearance:textfield; min-width:0; width:100%; height:40px; box-sizing:border-box; }
 #project-video-dialog,#video-preview-dialog { padding:0; width:calc(100% - 48px); max-width:1000px; max-height:90dvh; }
 #project-video-dialog[open],#video-preview-dialog[open] { display:flex; flex-direction:column; overflow:hidden; }
 #project-video-form,#video-preview-host { overflow:auto; min-height:0; padding:20px; }
