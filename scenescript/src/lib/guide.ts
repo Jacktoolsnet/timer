@@ -349,7 +349,8 @@ Actual validator behavior is asymmetric:
 exception. Runtime validation/import is authoritative; the schema alone does
 not enforce cross-field/reference resolution (including video namespaces), global
 ID uniqueness, selected video end > start or bounds against referenced duration,
-Base64 decoded-byte limits, forbidden stream MIME names, real media decoding or
+Base64 block/padding validity and decoded-byte limits, safe SVG contents, forbidden
+stream MIME names, real media decoding or
 measured duration, whole-JSON byte size, image dimensions, music polyphony or
 particle budgets. Video/image authoring prefixes in the schema are canonical
 lowercase, while the video runtime prefix is case-insensitive. Schema maxLength
