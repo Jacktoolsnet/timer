@@ -266,7 +266,7 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
 .preview-expanded #wake-status:empty { display:none; }
 
 /* Theme-aware selects, including the popup in browsers supporting base-select. */
-:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select {
+:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog) select {
  appearance:none;
  min-height:40px;
  padding:9px 34px 9px 12px;
@@ -280,16 +280,16 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
  font:inherit;
  transition:border-color .15s,background-color .15s;
 }
-:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select:hover { border-color:var(--accent); background-color:var(--accent-soft); }
-:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
-:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select option { background:var(--surface); color:var(--text); padding:10px 12px; }
-[data-theme=dark] :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select { color-scheme:dark; }
+:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog) select:hover { border-color:var(--accent); background-color:var(--accent-soft); }
+:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog) select:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog) select option { background:var(--surface); color:var(--text); padding:10px 12px; }
+[data-theme=dark] :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog) select { color-scheme:dark; }
 @supports (appearance:base-select) {
- :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select,:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select::picker(select) { appearance:base-select; }
- :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select { background-image:none; padding-right:12px; }
- :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select::picker-icon { color:var(--accent); transition:rotate .15s; }
- :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select:open::picker-icon { rotate:180deg; }
- :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select::picker(select) {
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog) select,:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog) select::picker(select) { appearance:base-select; }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog) select { background-image:none; padding-right:12px; }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog) select::picker-icon { color:var(--accent); transition:rotate .15s; }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog) select:open::picker-icon { rotate:180deg; }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog) select::picker(select) {
   padding:6px;
   margin-top:6px;
   border:1px solid var(--line);
@@ -300,18 +300,18 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
   max-height:min(320px,60dvh);
   overflow:auto;
  }
- :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select option { min-height:40px; gap:10px; border-radius:8px; cursor:pointer; font:inherit; }
- :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select option:hover,:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select option:focus { background:var(--accent-soft); color:var(--accent); outline:none; }
- :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select option:checked { background:var(--accent-soft); color:var(--accent); font-weight:600; }
- :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select option::checkmark { color:var(--accent); }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog) select option { min-height:40px; gap:10px; border-radius:8px; cursor:pointer; font:inherit; }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog) select option:hover,:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog) select option:focus { background:var(--accent-soft); color:var(--accent); outline:none; }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog) select option:checked { background:var(--accent-soft); color:var(--accent); font-weight:600; }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog) select option::checkmark { color:var(--accent); }
 }
 @media(prefers-reduced-motion:reduce) {
- :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select,:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select::picker-icon { transition:none; }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog) select,:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog) select::picker-icon { transition:none; }
 }
 
 /* A consistent, lightweight chevron instead of the browser's picker glyph. */
 @supports (appearance:base-select) {
- :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select::picker-icon {
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog) select::picker-icon {
   content:"";
   display:block;
   flex:0 0 8px;
@@ -325,11 +325,11 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
   transform:translateY(-2px) rotate(45deg);
   rotate:0deg;
  }
- :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select:open::picker-icon { rotate:180deg; }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog) select:open::picker-icon { rotate:180deg; }
 }
 
 @supports (appearance:base-select) {
- :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) select { display:flex; align-items:center; gap:12px; }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog) select { display:flex; align-items:center; gap:12px; }
 }
 
 .number-stepper { display:grid; grid-template-columns:30px minmax(0,1fr) 30px; gap:4px; align-items:center; }
@@ -339,9 +339,9 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
 .number-stepper input::-webkit-inner-spin-button,.number-stepper input::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
 
 /* Override the shared Relax stepper's 44px minimum in the compact editor grid. */
-:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) .number-stepper { grid-template-columns:30px minmax(0,1fr) 30px; gap:4px; }
-:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) .number-stepper button { min-width:0; width:100%; height:40px; min-height:40px; margin:0; box-sizing:border-box; }
-:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog) .number-stepper input { min-width:0; width:100%; height:40px; margin:0; box-sizing:border-box; }
+:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog) .number-stepper { grid-template-columns:30px minmax(0,1fr) 30px; gap:4px; }
+:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog) .number-stepper button { min-width:0; width:100%; height:40px; min-height:40px; margin:0; box-sizing:border-box; }
+:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog) .number-stepper input { min-width:0; width:100%; height:40px; margin:0; box-sizing:border-box; }
 
 /* Scene settings occupy the middle columns; element settings get a full-width row. */
 .scene-inspector { grid-column:2 / span 2; grid-row:2; }
@@ -600,3 +600,16 @@ body.recording.recording-ready #recording-frame { display:block; }
 .project-assets .panel-heading .gallery-import:hover { border-color:var(--accent); }
 
 #video-list:empty { display:none; }
+
+#export-dialog{width:min(620px,90vw)}
+#export-options{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+#export-options label{display:flex;flex-direction:column;gap:.4rem;min-width:0}
+#export-options label:last-child{flex-direction:row;align-items:center;grid-column:1/-1}
+#export-options select{width:100%;box-sizing:border-box}
+#export-progress{width:100%;margin-top:1.25rem;accent-color:var(--accent)}
+#export-status{overflow-wrap:anywhere}
+
+#export-dialog{padding:0;max-height:90dvh}
+#export-dialog[open]{display:flex;flex-direction:column;overflow:hidden}
+#export-dialog .dialog-inner{overflow:auto}
+#export-dialog .json-header,#export-dialog .json-footer{flex:none}

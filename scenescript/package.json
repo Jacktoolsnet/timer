@@ -15,7 +15,9 @@
   },
   "dependencies": {
     "@xmldom/xmldom": "^0.9.12",
-    "astro": "^7.3.5"
+    "astro": "^7.3.5",
+    "html-to-image": "^1.11.13",
+    "mediabunny": "^1.61.3"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",

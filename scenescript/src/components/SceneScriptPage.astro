@@ -16,6 +16,7 @@ const {lang}=Astro.props,t=editorDictionary(lang);
   <nav class="editor-toolbar" aria-label={t.project}>
    <button id="new-project" type="button" title={t.new} aria-label={t.new}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg></button>
    <button id="load-project" type="button" title={t.importProject} aria-label={t.importProject}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h6l2 2h10v11H3ZM12 3v10m-4-4 4 4 4-4" /></svg></button>
+   <button id="open-export" type="button" title={t.exportVideo} aria-label={t.exportVideo}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h18v12H3ZM12 8v13m-4-4 4 4 4-4" /></svg></button>
    <button id="save-project" type="button" title={t.save} aria-label={t.save}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h12l4 4v14H3V3ZM7 3v6h10V3M7 21v-8h10v8" /></svg></button>
    <button id="open-json" type="button" title={t.json} aria-label={t.json}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5H6v14h3m6-14h3v14h-3M10 9l-3 3 3 3m4-6 3 3-3 3" /></svg></button>
    <button id="import-image" type="button" title={t.importImage} aria-label={t.importImage}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h14v18H3ZM3 17l4-5 4 4 3-3 3 4M20 3v6m-3-3h6" /></svg></button>
@@ -120,6 +121,22 @@ const {lang}=Astro.props,t=editorDictionary(lang);
     <button id="close-json" type="button" title={t.cancel} aria-label={t.cancel}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg></button>
    </div>
   </footer>
+ </dialog>
+ <dialog id="export-dialog" aria-labelledby="export-title">
+  <header class="json-header"><div><h2 id="export-title">{t.exportVideo}</h2><p>{t.exportHint}</p></div></header>
+  <div class="dialog-inner">
+   <div id="export-options">
+    <label>{t.format}<select id="export-format"><option value="mp4">MP4</option><option value="webm">WebM</option></select></label>
+    <label>{t.exportResolution}<select id="export-resolution"><option value="480">480p</option><option value="720" selected>720p</option><option value="1080">1080p</option></select></label>
+    <label>{t.exportFps}<select id="export-fps"><option>24</option><option selected>30</option><option>60</option></select></label>
+    <label><span class="safe-switch"><input id="export-audio" type="checkbox" role="switch" checked /><span class="safe-switch-track" aria-hidden="true"></span></span>{t.exportAudio}</label>
+   </div>
+   <progress id="export-progress" max="1" value="0" hidden></progress><p id="export-status" role="status" aria-live="polite"></p>
+  </div>
+  <footer class="json-footer"><div class="json-footer-actions">
+   <button id="start-export" class="json-apply" type="button" title={t.exportVideo} aria-label={t.exportVideo}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg></button>
+   <button id="cancel-export" type="button" title={t.cancel} aria-label={t.cancel}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg></button>
+  </div></footer>
  </dialog>
  <noscript><p class="notice">JavaScript is required for the SceneScript editor.</p></noscript>
  <script src="../scripts/editor.ts"></script>

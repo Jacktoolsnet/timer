@@ -639,3 +639,26 @@ $('element-down').addEventListener('click',()=>moveElement(1));
 $('delete-element').addEventListener('click',()=>{if(!selected())return;current().elements=current().elements.filter(e=>e.id!==selectedId);selectedId='';changed();refresh();});
 document.addEventListener('click',event=>{const menu=$('element-add-menu') as HTMLDetailsElement;if(!menu.contains(event.target as Node))menu.open=false;});
 $('element-add-menu').addEventListener('keydown',event=>{if(event.key==='Escape'&&($('element-add-menu') as HTMLDetailsElement).open){event.preventDefault();event.stopPropagation();($('element-add-menu') as HTMLDetailsElement).open=false;$('element-add-menu').querySelector('summary')?.focus();}});
+
+// Export owns a snapshot and a separate renderer; editing state is never replaced.
+let exportController:AbortController|undefined;
+const exportDialog=$<HTMLDialogElement>('export-dialog');
+$('open-export').addEventListener('click',()=>{document.activeElement instanceof HTMLElement&&document.activeElement.blur();stop();$('export-status').textContent='';$('export-progress').hidden=true;exportDialog.showModal();});
+const cancelExport=()=>{if(exportController)exportController.abort();else exportDialog.close();};
+$('cancel-export').addEventListener('click',cancelExport);
+exportDialog.addEventListener('cancel',event=>{event.preventDefault();cancelExport();});
+$('start-export').addEventListener('click',async()=>{
+ if(exportController)return;const controller=new AbortController();exportController=controller;
+ const controls=Array.from(exportDialog.querySelectorAll<HTMLInputElement|HTMLSelectElement|HTMLButtonElement>('#export-options input,#export-options select,#start-export'));controls.forEach(n=>n.disabled=true);
+ const progress=$<HTMLProgressElement>('export-progress');progress.hidden=false;progress.value=0;$('export-status').textContent=t('exportBusy');keepScreenAwake(true);
+ try{
+  const {exportVideo,exportSupported}=await import('./video-export');
+  const options={format:$<HTMLSelectElement>('export-format').value as 'mp4'|'webm',resolution:Number($<HTMLSelectElement>('export-resolution').value),fps:Number($<HTMLSelectElement>('export-fps').value),audio:$<HTMLInputElement>('export-audio').checked};
+  const snapshot=structuredClone(project);
+  if(!await exportSupported(snapshot,options))throw new Error(t('exportUnsupported'));
+  const blob=await exportVideo(snapshot,options,controller.signal,value=>{progress.value=value;});
+  const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=(snapshot.title.replace(/[\/:*?"<>|]/g,'_')||'SceneScript')+'.'+options.format;link.click();setTimeout(()=>URL.revokeObjectURL(url),60000);
+  $('export-status').textContent=t('exportDone');showToast(t('exportDone'),'success');
+ }catch(error){$('export-status').textContent=controller.signal.aborted?t('exportCancelled'):t('error')+' '+(error as Error).message;}
+ finally{exportController=undefined;controls.forEach(n=>n.disabled=false);keepScreenAwake(false);}
+});

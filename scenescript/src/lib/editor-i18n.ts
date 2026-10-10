@@ -1,5 +1,15 @@
 import type { Language } from './i18n';
 const words = {
+ exportVideo:['Video exportieren','Export video','Exportar vídeo','Exporter la vidéo'],
+ exportHint:['Lokal, ohne Bildschirmaufnahme. MP4 benötigt einen unterstützten Browser-Encoder; alternativ WebM. Große Projekte können lange dauern.','Local export without screen recording. MP4 requires a supported browser encoder; WebM is an alternative. Large projects may take time.','Exportación local sin grabar la pantalla. MP4 requiere un codificador compatible; alternativa: WebM.','Export local sans capture d’écran. MP4 nécessite un encodeur compatible ; alternative : WebM.'],
+ exportResolution:['Auflösung','Resolution','Resolución','Résolution'],
+ exportFps:['Bilder pro Sekunde','Frames per second','Fotogramas por segundo','Images par seconde'],
+ exportAudio:['Musik und Videoton einschließen','Include music and video audio','Incluir música y audio','Inclure musique et audio'],
+ exportBusy:['Video wird erstellt … Bitte diesen Tab geöffnet lassen.','Creating video … Keep this tab open.','Creando vídeo … Mantén esta pestaña abierta.','Création de la vidéo … Gardez cet onglet ouvert.'],
+ exportDone:['Video exportiert','Video exported','Vídeo exportado','Vidéo exportée'],
+ exportUnsupported:['Diese Export-Einstellungen werden vom Browser nicht unterstützt. Versuche WebM, eine kleinere Auflösung oder Export ohne Ton.','These export settings are not supported by this browser. Try WebM, a lower resolution or export without audio.','Este navegador no admite estos ajustes. Prueba WebM, menor resolución o sin audio.','Ce navigateur ne prend pas en charge ces réglages. Essayez WebM, une résolution inférieure ou sans audio.'],
+ exportCancelled:['Export abgebrochen','Export cancelled','Exportación cancelada','Export annulé'],
+
  replaceMedia:['Datei ersetzen (Einstellungen behalten)','Replace file (keep settings)','Reemplazar archivo (conservar ajustes)','Remplacer le fichier (conserver les réglages)'],
  replaceRangeError:['Das neue Video passt nicht zu den eingestellten Ausschnitten. Die bisherige Datei bleibt erhalten.','The new video does not fit the configured trims. The original file is unchanged.','El nuevo vídeo no admite los recortes configurados. Se conserva el archivo original.','La nouvelle vidéo ne correspond pas aux extraits configurés. Le fichier original est conservé.'],
  deleteVideoHint:['Das Video wird entfernt. Verwendungen in Szenen und im Projekt werden zurückgesetzt.','The video will be removed and its scene/project references cleared.','Se eliminará el vídeo y sus referencias.','La vidéo et ses références seront supprimées.'],

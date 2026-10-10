@@ -398,7 +398,17 @@ released on pause/end/exit, and reacquired when active playback returns to a
 visible tab. Browser support, permissions and system policy can prevent it;
 if unavailable, disable device screen sleep manually for recording. Fullscreen is requested
 when supported, with a CSS focus-view fallback. Use a separate screen recorder;
-SceneScript does not record or export a video file itself. Leaving recording
+SceneScript does not capture the screen itself. Alternatively, the project toolbar
+provides local frame-by-frame video export: MP4 (H.264/AAC) if supported by the
+browser encoders, or WebM (VP9/Opus). Choose 480p/720p/1080p (short edge),
+24/30/60 fps and optionally music plus unmuted video audio. Export includes the
+whole project, transitions, SVG animation and continuous project backgrounds,
+without editor controls, countdown or restart screen. Video trims, loops, volume
+and mute are honored; video audio stops at the selected end unless looped.
+Export settings are UI-only, not JSON fields. Export runs locally and may be
+slower than real time; leave the tab open. The estimated output is limited to
+512 MiB to protect browser memory. Export can be cancelled and never replaces
+the editable project. Leaving recording
 view restores the previous editor scene, selected element and timeline position;
 the project and unsaved changes are retained.
 

@@ -131,7 +131,7 @@ Die tatsächlichen Servereinstellungen wurden nicht verändert.
 
 ## Noch nicht enthalten
 
-Direkter Videoexport, Audio, frei definierte Keyframes, Bildkomprimierung,
+Frei definierte Keyframes, Bildkomprimierung,
 Drag-and-drop-Positionierung, Rückgängig/Wiederholen oder weitere Vorlagen.
 Systemschriften können zwischen Geräten variieren; die Aufnahmeauflösung hängt
 vom Bildschirm und Screenrecorder ab. Sichere Textbereiche sind nur eine
@@ -175,3 +175,29 @@ Beispielprojekt: `public/music-demo.scenescript.json` (20 Sekunden generierte Be
 Videogalerie unter den Bildern: Import, Vorschau, Umbenennen, Download und Löschen. Videos werden einmal als Base64 im JSON gespeichert (32 MiB pro Video, 30 Videos, 160 MiB JSON). WebM/MP4 und weitere vom Browser dekodierbare Videoformate. Videoelemente und szenenübergreifendes Projektvideo unterstützen Ausschnitte, Wiederholung, Stummschaltung, Lautstärke und Einpassen/Zuschneiden. Start/Ende mit ±Minute/Sekunde/Zehntelsekunde oder direkt aus der Vorschau übernehmen. Große Projekte bitte als Datei speichern statt auf Browser-Speicher zu vertrauen.
 
 Galerie-Dateien lassen sich über das Ersetzen-Icon austauschen. IDs, Namen und alle Verwendungen/Einstellungen bleiben erhalten. Passt ein kürzeres Video nicht zu bestehenden Ausschnitten, wird der Austausch mit Hinweis abgelehnt; die alte Datei bleibt unverändert.
+
+
+## Lokaler Videoexport
+
+In der Projekt-Toolbar öffnet das Download/Video-Symbol den Exportdialog.
+MP4 (H.264/AAC) wird mit den tatsächlichen Browser-Encodern geprüft. Alternativ
+steht WebM (VP9/Opus) zur Verfügung. Unterstützt werden 480p, 720p und 1080p
+(kurze Seite des Projektformats), 24/30/60 fps sowie optional Hintergrundmusik
+und nicht stummgeschalteter Videoton. Ausschnitte, Schleifen und Lautstärke werden
+berücksichtigt. Der Export erzeugt Einzelbilder der gesamten Timeline ohne
+Countdown, Maus, Auswahlrahmen und Bedienoberfläche; kein Screenrecorder nötig.
+
+Alles bleibt im Browser, ohne Upload oder Änderungen am Hosting. Der Export
+kann länger als die Präsentation dauern; Tab offen lassen. Fortschritt und
+Abbrechen sind vorhanden. Geschätzte Dateien über 512 MiB werden vorab abgelehnt,
+da die fertige Datei im Arbeitsspeicher gesammelt wird. Systemschriften und
+Codec-Unterstützung hängen vom Gerät ab; nicht jedes im Browser abspielbare
+Video kann dort auch per WebCodecs decodiert werden. Bei fehlender Unterstützung
+erscheint eine Fehlermeldung statt einer unvollständigen Exportdatei.
+Projekt-JSON, Editor-Auswahl und Timeline bleiben unverändert.
+
+Implementierung: dynamisch geladene `mediabunny`-Encoder/Decoder und
+`html-to-image` für einen separaten, unsichtbaren Szenenbaum. Audio wird in
+kurzen Blöcken gemischt; synthetische Instrumente verwenden denselben
+Offline-Renderer wie die Wiedergabe. Es ist kein zusätzliches JSON-Feld nötig;
+die KI-Anleitung beschreibt den Export ebenfalls.
