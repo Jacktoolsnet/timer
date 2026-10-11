@@ -234,3 +234,13 @@ am Zielpunkt. Abschnitte können ergänzt, gelöscht und umsortiert werden; maxi
 Welle, Zickzack, Spirale und Flugbahn liefern editierbare Vorlagen. „Pfad kopieren“
 und „Pfad einfügen“ übertragen die komplette Konfiguration unabhängig zwischen
 Elementen über einen internen Puffer, ohne die System-Zwischenablage zu verwenden.
+
+### Projekt-Thumbnail
+
+Ein eigenes Thumbnail-Tile im Projekt bietet Plus-Import/Ersetzen, vergrößerte
+Vorschau, Originalbild-Download und Löschen mit Bestätigung. PNG, JPEG und WebP
+bis 8 MiB werden unabhängig von der Bildergalerie unter `thumbnail: {name, data}`
+als Base64-Daten-URL gespeichert. Ohne Thumbnail ist das Feld `null`; ältere
+Projekte bleiben kompatibel. Das Cover gehört nicht zur Präsentation oder zum
+Videoexport. Eine KI kann dasselbe Feld mit einer tatsächlich erzeugten Bilddatei
+befüllen; Schema und gemeinsame KI-Anleitung beschreiben das Format.

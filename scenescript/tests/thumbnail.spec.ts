@@ -1,0 +1,19 @@
+import {test,expect} from '@playwright/test';
+import {readFile} from 'node:fs/promises';
+import {demoProject} from '../src/lib/model';
+const pixel='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aD1sAAAAASUVORK5CYII=';
+test('thumbnail plus imports, previews, downloads, replaces and removes independently',async({page})=>{
+ await page.goto('/en/');await expect(page.locator('#thumbnail-content')).toContainText('No thumbnail yet');
+ const picker=page.waitForEvent('filechooser');await page.locator('#import-thumbnail').click();await(await picker).setFiles({name:'cover.png',mimeType:'image/png',buffer:Buffer.from(pixel.split(',')[1],'base64')});await expect(page.locator('#thumbnail-content img')).toHaveAttribute('src',pixel);await expect(page.locator('#asset-list img')).toHaveCount(0);
+ await page.locator('.thumbnail-preview').click();await expect(page.locator('#asset-preview-dialog')).toBeVisible();await expect(page.locator('#asset-preview-title')).toHaveText('cover.png');await page.locator('#close-asset-preview').click();
+ const pending=page.waitForEvent('download');await page.locator('#save-thumbnail').click();const image=await pending;expect(image.suggestedFilename()).toBe('cover.png');expect(await readFile((await image.path())!)).toEqual(Buffer.from(pixel.split(',')[1],'base64'));
+ await page.locator('#thumbnail-file').setInputFiles({name:'replacement.png',mimeType:'image/png',buffer:Buffer.from(pixel.split(',')[1],'base64')});await expect(page.locator('.thumbnail-name')).toHaveText('replacement.png');
+ await page.locator('#delete-thumbnail').click();await page.locator('#cancel-delete').click();await expect(page.locator('#thumbnail-content img')).toHaveCount(1);await page.locator('#delete-thumbnail').click();await page.locator('#confirm-delete').click();await expect(page.locator('#thumbnail-content img')).toHaveCount(0);await expect(page.locator('#scene-list li')).toHaveCount(2);
+});
+test('AI thumbnail round trips in JSON and malformed replacement leaves it untouched',async({page})=>{
+ await page.goto('/en/');const p=demoProject();p.thumbnail={name:'AI cover.png',data:pixel};
+ await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(p));await page.locator('#import-json').click();await expect(page.locator('.thumbnail-name')).toHaveText('AI cover.png');await expect(page.locator('#stage img')).toHaveCount(0);
+ const pending=page.waitForEvent('download');await page.locator('#save-project').click();const file=await pending;const json=JSON.parse(await readFile((await file.path())!,'utf8'));expect(json.thumbnail).toEqual(p.thumbnail);await page.locator('#project-file').setInputFiles((await file.path())!);await expect(page.locator('#thumbnail-content img')).toHaveAttribute('src',pixel);
+ await page.locator('#thumbnail-file').setInputFiles({name:'broken.png',mimeType:'image/png',buffer:Buffer.from('not an image')});await expect(page.locator('#editor-status')).toContainText('Please check:');await expect(page.locator('.thumbnail-name')).toHaveText('AI cover.png');
+ await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify({...p,thumbnail:{name:'bad',data:'https://example.com/a.png'}}));await page.locator('#import-json').click();await expect(page.locator('#json-status')).toContainText('thumbnail.data');await page.locator('#close-json').click();await expect(page.locator('.thumbnail-name')).toHaveText('AI cover.png');await page.locator('#new-project').click();await expect(page.locator('#thumbnail-content img')).toHaveCount(0);await expect(page.locator('#thumbnail-content')).toContainText('No thumbnail yet');
+});

@@ -131,3 +131,8 @@ test('publication metadata round trips, defaults for legacy projects and validat
  for(const key of ['description','hashtags'] as const){for(const invalid of [null,[],42])assert.throws(()=>parseProject(serialize({...p,[key]:invalid})),new RegExp(key));}
  assert.throws(()=>parseProject(serialize({...p,description:'x'.repeat(5001)})),/description/);assert.throws(()=>parseProject(serialize({...p,hashtags:'x'.repeat(2001)})),/hashtags/);
 });
+test('publication thumbnail defaults, embeds independently and validates strictly',()=>{
+ const p=demoProject();assert.equal(p.thumbnail,null);const legacy=JSON.parse(JSON.stringify(p));delete legacy.thumbnail;assert.equal(parseProject(JSON.stringify(legacy)).thumbnail,null);
+ const data='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aD1sAAAAASUVORK5CYII=';p.thumbnail={name:'cover.png',data};assert.deepEqual(parseProject(JSON.stringify(p)).thumbnail,p.thumbnail);assert.equal(Object.keys(p.assets).length,0);
+ for(const value of ['image-id',{}, {name:'cover',data:null},{name:null,data},{name:'cover',data:'https://example.com/image.png'},{name:'cover',data:svgDataURL('<svg xmlns="http://www.w3.org/2000/svg"/>')},{name:'cover',data,extra:true}])assert.throws(()=>parseProject(JSON.stringify({...p,thumbnail:value})));
+});

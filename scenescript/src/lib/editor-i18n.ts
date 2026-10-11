@@ -1,5 +1,12 @@
 import type { Language } from './i18n';
 const words = {
+ thumbnail:['Thumbnail','Thumbnail','Miniatura','Miniature'],
+ importThumbnail:['Thumbnail hinzufügen oder ersetzen','Add or replace thumbnail','Añadir o reemplazar miniatura','Ajouter ou remplacer la miniature'],
+ thumbnailHint:['Vorschaubild für die Veröffentlichung, nicht Teil des Videos. PNG, JPEG oder WebP; maximal 8 MiB.','Publication cover image, not part of the video. PNG, JPEG or WebP; maximum 8 MiB.','Imagen de portada, no forma parte del vídeo. PNG, JPEG o WebP; máximo 8 MiB.','Image de couverture, non incluse dans la vidéo. PNG, JPEG ou WebP ; maximum 8 MiB.'],
+ deleteThumbnailHint:['Das Thumbnail wird aus dem Projekt entfernt. Bilder und Szenen bleiben unverändert.','The thumbnail will be removed from the project. Images and scenes remain unchanged.','Se eliminará la miniatura del proyecto. Las imágenes y escenas no cambian.','La miniature sera supprimée du projet. Les images et scènes restent inchangées.'],
+ thumbnailEmpty:['Noch kein Thumbnail vorhanden.','No thumbnail yet.','Todavía no hay miniatura.','Aucune miniature pour le moment.'],
+ saveThumbnail:['Thumbnail speichern','Save thumbnail','Guardar miniatura','Enregistrer la miniature'],
+
  "motionPath":["Bewegungspfad", "Motion path", "Trayectoria", "Trajectoire"],
  "pathType":["Pfadtyp", "Path type", "Tipo de trayectoria", "Type de trajectoire"],
  "line":["Gerade", "Straight line", "Línea recta", "Ligne droite"],

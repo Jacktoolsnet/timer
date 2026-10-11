@@ -36,6 +36,11 @@ const {lang}=Astro.props,t=editorDictionary(lang);
     </div>
 
     <div class="project-assets">
+     <section class="media-gallery-tile" aria-labelledby="thumbnail-heading">
+      <div class="panel-heading"><h2 id="thumbnail-heading">{t.thumbnail}</h2><button id="import-thumbnail" class="gallery-import" type="button" title={t.importThumbnail} aria-label={t.importThumbnail}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button></div>
+      <p class="small-hint">{t.thumbnailHint}</p><div id="thumbnail-content"></div>
+      <input id="thumbnail-file" type="file" accept="image/png,image/jpeg,image/webp" hidden />
+     </section>
      <section class="media-gallery-tile" aria-labelledby="asset-heading">
      <div class="panel-heading"><h2 id="asset-heading">{t.assets}</h2><button id="gallery-import-image" class="gallery-import" type="button" title={t.importImage} aria-label={t.importImage}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button></div>
      <p class="small-hint">{t.imageHint}</p>
@@ -131,8 +136,8 @@ const {lang}=Astro.props,t=editorDictionary(lang);
   <header class="json-header"><div><h2 id="export-title">{t.exportVideo}</h2><p>{t.exportHint}</p></div></header>
   <div class="dialog-inner">
    <div id="export-options">
-    <label>{t.format}<select id="export-format"><option value="mp4">MP4</option><option value="webm">WebM</option></select></label>
-    <label>{t.exportResolution}<select id="export-resolution"><option value="480">480p</option><option value="720" selected>720p</option><option value="1080">1080p</option></select></label>
+    <label>{t.format}<select id="export-format"><option value="webm" selected>WebM</option><option value="mp4">MP4</option></select></label>
+    <label>{t.exportResolution}<select id="export-resolution"><option value="480">480p</option><option value="720">720p</option><option value="1080" selected>1080p</option></select></label>
     <label>{t.exportFps}<select id="export-fps"><option>24</option><option selected>30</option><option>60</option></select></label>
     <label><span class="safe-switch"><input id="export-audio" type="checkbox" role="switch" checked /><span class="safe-switch-track" aria-hidden="true"></span></span>{t.exportAudio}</label>
    </div>

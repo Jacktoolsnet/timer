@@ -657,3 +657,10 @@ body.recording .motion-path-overlay{display:none}
 @media(max-width:1000px){.path-segment-list{grid-template-columns:minmax(0,1fr)}}
 .motion-path-overlay circle.path-control-handle{fill:#8fd3ff;stroke-dasharray:3 2}
 .path-actions svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#thumbnail-content{display:flex;flex-direction:column;align-items:center;gap:10px;min-width:0}
+.thumbnail-preview{display:block;width:min(100%,320px);aspect-ratio:16/9;padding:0;background:var(--bg);border:1px solid var(--line);border-radius:10px;overflow:hidden;cursor:zoom-in}
+.thumbnail-preview img{display:block;width:100%;height:100%;object-fit:contain}
+.thumbnail-name{max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;font-size:calc(12px * var(--font-scale,1))}
+.thumbnail-actions{display:flex;justify-content:center;gap:8px}
+.thumbnail-actions button{display:grid;place-items:center;width:38px;height:38px;padding:8px;background:var(--accent-soft);color:var(--accent);border:1px solid var(--line);border-radius:8px}
+.thumbnail-actions svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}

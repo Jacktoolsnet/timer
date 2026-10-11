@@ -50,7 +50,7 @@ function refresh(){
  const list=$('scene-list'),scrollTop=list.scrollTop;list.replaceChildren();
  project.scenes.forEach((s,i)=>{const li=document.createElement('li'),b=button(`${i+1}. ${s.name} · ${s.duration}s`,()=>selectScene(i));b.title=b.textContent||'';b.setAttribute('aria-current',String(i===sceneIndex));li.append(b);list.append(li);});list.scrollTop=scrollTop;
  ($('delete-scene') as HTMLButtonElement).disabled=project.scenes.length===1;($('scene-up') as HTMLButtonElement).disabled=sceneIndex===0;($('scene-down') as HTMLButtonElement).disabled=sceneIndex===project.scenes.length-1;($('add-scene') as HTMLButtonElement).disabled=project.scenes.length>=100;
- renderForms();renderElements();renderAssets();draw();
+ renderForms();renderElements();renderAssets();renderThumbnail();draw();
 }
 function renderElements(){
  const index=current().elements.findIndex(e=>e.id===selectedId),count=current().elements.length;
@@ -76,9 +76,9 @@ $('rename-scene').addEventListener('click',()=>{const scene=current();askRename(
 $('rename-element').addEventListener('click',()=>{const element=selected();if(!element)return;askRename(element.name||t(element.type),name=>{element.name=name;changed();refresh();$('rename-element').focus();});});
 const deleteDialog=$('delete-dialog') as HTMLDialogElement;
 let pendingDelete:(()=>void)|undefined;
-function askDelete(name:string,kind:'scene'|'image'|'video',action:()=>void){
+function askDelete(name:string,kind:'scene'|'image'|'video'|'thumbnail',action:()=>void){
  stop();draw();pendingDelete=action;
- $('delete-name').textContent=name;$('delete-description').textContent=t(kind==='scene'?'deleteSceneHint':kind==='video'?'deleteVideoHint':'deleteImageHint');
+ $('delete-name').textContent=name;$('delete-description').textContent=t(kind==='scene'?'deleteSceneHint':kind==='video'?'deleteVideoHint':kind==='thumbnail'?'deleteThumbnailHint':'deleteImageHint');
  deleteDialog.showModal();$('cancel-delete').focus();
 }
 $('cancel-delete').addEventListener('click',()=>deleteDialog.close());
@@ -107,6 +107,17 @@ function replaceMediaButton(id:string,kind:'image'|'video'){
  const b=button('',()=>{const input=$('replace-'+kind+'-file') as HTMLInputElement;input.dataset.replaceAsset=id;input.click();});
  b.title=t('replaceMedia');b.setAttribute('aria-label',b.title);b.dataset.replaceMedia=id;
  b.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h15m-4-4 4 4-4 4M20 16H5m4-4-4 4 4 4"/></svg>';return b;
+}
+let thumbnailImportAttempt=0;
+function renderThumbnail(){
+ const host=$('thumbnail-content');host.replaceChildren();const asset=project.thumbnail;
+ if(!asset){const hint=document.createElement('p');hint.className='small-hint';hint.textContent=t('thumbnailEmpty');host.append(hint);return;}
+ const preview=button('',()=>previewAsset(asset));preview.className='thumbnail-preview';preview.title=t('imagePreview')+': '+asset.name;preview.setAttribute('aria-label',preview.title);const image=document.createElement('img');image.src=asset.data;image.alt='';preview.append(image);
+ const name=document.createElement('span');name.className='thumbnail-name';name.textContent=asset.name;name.title=asset.name;
+ const actions=document.createElement('div');actions.className='thumbnail-actions';
+ const save=button('',()=>downloadAsset(asset));save.id='save-thumbnail';save.title=t('saveThumbnail');save.setAttribute('aria-label',save.title);save.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 15v6h16v-6"/></svg>';
+ const remove=button('',()=>{const target=project;askDelete(asset.name,'thumbnail',()=>{if(project!==target||project.thumbnail!==asset)return;thumbnailImportAttempt++;project.thumbnail=null;changed();renderThumbnail();$('import-thumbnail').focus();});});remove.id='delete-thumbnail';remove.title=t('remove')+': '+t('thumbnail');remove.setAttribute('aria-label',remove.title);remove.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/></svg>';
+ actions.append(save,remove);host.append(preview,name,actions);
 }
 function renderAssets(){renderVideos();const list=$('asset-list');list.replaceChildren();for(const [id,asset] of Object.entries(project.assets)){const row=document.createElement('div');row.className='asset-row';const img=document.createElement('img');img.src=asset.data;img.alt='';const preview=button('',()=>previewAsset(asset));preview.className='asset-thumbnail';preview.dataset.previewAsset=id;preview.title=`${t('imagePreview')}: ${asset.name}`;preview.setAttribute('aria-label',preview.title);preview.append(img);const name=document.createElement('span');name.textContent=asset.name;name.title=asset.name;const remove=button('',()=>{const target=project;askDelete(asset.name,'image',()=>{if(project!==target)return;delete project.assets[id];project.scenes.forEach(s=>{if(s.backgroundAsset===id)s.backgroundAsset='';s.elements.forEach(e=>{if(e.asset===id)e.asset='';});});changed();refresh();$('gallery-import-image').focus();});});remove.dataset.deleteAsset=id;remove.setAttribute('aria-label',`${t('remove')}: ${asset.name}`);remove.title=`${t('remove')}: ${asset.name}`;
 const trash=document.createElementNS('http://www.w3.org/2000/svg','svg');trash.setAttribute('viewBox','0 0 24 24');trash.setAttribute('aria-hidden','true');const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('d','M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7');trash.append(path);remove.append(trash);
@@ -549,7 +560,7 @@ $('timeline').addEventListener('input',()=>{stop();time=Number(($('timeline') as
 $('safe-toggle').addEventListener('change',()=>{$('safe-overlay').hidden=!($('safe-toggle') as HTMLInputElement).checked;});
 function replace(next:Project){stop();backgroundVideoNode=undefined;backgroundVideoAsset='';clearVideoURLs();revision++;project=next;sceneIndex=0;selectedId='';time=0;dirty=false;persist();refresh();status(t('ready'));}
 const canReplace=()=>!dirty||confirm(t('unsaved'));
-$('new-project').addEventListener('click',()=>{if(canReplace()){replace({version:'1.0',title:'SceneScript',description:'',hashtags:'',format:'landscape',backgroundSimulation:null,backgroundVideo:null,videos:{},music:null,assets:{},scenes:[newScene()]});changed();}});
+$('new-project').addEventListener('click',()=>{if(canReplace()){replace({version:'1.0',title:'SceneScript',description:'',hashtags:'',thumbnail:null,format:'landscape',backgroundSimulation:null,backgroundVideo:null,videos:{},music:null,assets:{},scenes:[newScene()]});changed();}});
 $('project-title').addEventListener('input',()=>{project.title=($('project-title') as HTMLInputElement).value;changed();});
 $('project-format').addEventListener('change',()=>{project.format=($('project-format') as HTMLSelectElement).value as Project['format'];changed();draw();});
 $('add-scene').addEventListener('click',()=>{if(project.scenes.length>=100)return;project.scenes.push(newScene());changed();selectScene(project.scenes.length-1);});
@@ -597,9 +608,17 @@ $('paste-json').addEventListener('click',async()=>{
 });
 $('import-json').addEventListener('click',async()=>{try{const next=parseProject(($('json-input') as HTMLTextAreaElement).value);await preload(next);if(canReplace()){replace(next);dialog.close();}}catch(error){jsonStatus(t('error')+' '+(error as Error).message,true);}});
 
+$('import-thumbnail').onclick=()=>($('thumbnail-file') as HTMLInputElement).click();
+($('thumbnail-file') as HTMLInputElement).onchange=async()=>{
+ const input=$('thumbnail-file') as HTMLInputElement,file=input.files?.[0];input.value='';if(!file)return;const target=project,attempt=++thumbnailImportAttempt;
+ try{if(file.size>MAX_IMAGE_BYTES)throw new Error('Image: maximum 8 MiB');if(!['image/png','image/jpeg','image/webp'].includes(file.type))throw new Error('PNG / JPEG / WebP');
+  const data=await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=()=>reject(new Error('Image read failed'));reader.readAsDataURL(file);});
+  const thumbnail={name:file.name.slice(0,200),data};await decodeImage(data);if(project!==target||attempt!==thumbnailImportAttempt)return;parseProject(JSON.stringify({...target,thumbnail}));project.thumbnail=thumbnail;changed();renderThumbnail();
+ }catch(error){if(project===target&&attempt===thumbnailImportAttempt)status(t('error')+' '+(error as Error).message);}
+};
 $('gallery-import-image').onclick=()=>($('image-file') as HTMLInputElement).click();
 async function decodeImage(data:string){const image=new Image();image.src=data;await image.decode();if(!image.naturalWidth||!image.naturalHeight)throw new Error('Image: invalid dimensions');if(image.naturalWidth*image.naturalHeight>40_000_000)throw new Error('Image: maximum 40 megapixels');}
-async function preload(p:Project){await Promise.all([...Object.values(p.assets).map(a=>decodeImage(a.data)),...Object.values(p.videos).map(async a=>{const actual=await inspectVideo(a.data);if(Math.abs(actual-a.duration)>.2)throw new Error('Video: duration does not match file');})]);}
+async function preload(p:Project){await Promise.all([...Object.values(p.assets).map(a=>decodeImage(a.data)),...(p.thumbnail?[decodeImage(p.thumbnail.data)]:[]),...Object.values(p.videos).map(async a=>{const actual=await inspectVideo(a.data);if(Math.abs(actual-a.duration)>.2)throw new Error('Video: duration does not match file');})]);}
 async function importImageFile(input:HTMLInputElement){const file=input.files?.[0],replaceId=input.dataset.replaceAsset;delete input.dataset.replaceAsset;input.value='';if(!file)return;const target=project,previous=replaceId?project.assets[replaceId]:undefined;if(replaceId&&!previous)return;try{if(!replaceId&&Object.keys(project.assets).length>=100)throw new Error('assets: maximum 100');if(file.size>MAX_IMAGE_BYTES)throw new Error('Image: maximum 8 MiB');const isSvg=file.type==='image/svg+xml'||/\.svg$/i.test(file.name);if(!isSvg&&!['image/png','image/jpeg','image/webp'].includes(file.type))throw new Error('PNG / JPEG / WebP / SVG');const data=isSvg?svgDataURL(validateSvg(await file.text())):await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=()=>reject(new Error('Image read failed'));reader.readAsDataURL(file);});validateImage(data);await decodeImage(data);if(project!==target)return;if(replaceId&&project.assets[replaceId]!==previous)return;const id=replaceId??crypto.randomUUID(),next={name:previous?.name??file.name.slice(0,200),data};parseProject(JSON.stringify({...project,assets:{...project.assets,[id]:next}}));stop();project.assets[id]=next;const e=selected();if(!replaceId&&e?.type==='image')e.asset=id;changed();refresh();}catch(error){status(t('error')+' '+(error as Error).message);}}
 for(const id of ['image-file','replace-image-file']){const input=$(id) as HTMLInputElement;input.onchange=()=>void importImageFile(input);input.addEventListener('cancel',()=>delete input.dataset.replaceAsset);}
 let editorFullscreen=false;

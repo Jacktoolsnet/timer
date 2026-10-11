@@ -57,3 +57,7 @@ test('export audio uses one aligned slide switch instead of a visible checkbox',
  expect(a!.x).toBeCloseTo(b!.x,0);expect(a!.y).toBeCloseTo(b!.y,0);expect(a!.height).toBeCloseTo(b!.height,0);
  await expect(input).toBeChecked();await input.click();await expect(input).not.toBeChecked();await input.press('Space');await expect(input).toBeChecked();
 });
+
+test('WebM and 1080p are export defaults and alternatives remain selectable',async({page})=>{
+ await page.goto('/en/');await page.locator('#open-export').click();await expect(page.locator('#export-format')).toHaveValue('webm');await expect(page.locator('#export-resolution')).toHaveValue('1080');await page.locator('#export-resolution').selectOption('720');await expect(page.locator('#export-resolution')).toHaveValue('720');await page.locator('#export-format').selectOption('mp4');await expect(page.locator('#export-format')).toHaveValue('mp4');
+});

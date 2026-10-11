@@ -172,6 +172,23 @@ Optional fields:
   array). The validator checks type/length, not hashtag syntax or comma placement.
 - music: omitted/null means disabled; otherwise a music object (see Project background music).
 - backgroundSimulation: omitted/null means disabled; otherwise a simulation object (see Simulations).
+- thumbnail: omitted/null disables the publication cover image. Otherwise an
+  independent object with REQUIRED name (string, max 200 UTF-16 code units) and
+  data (PNG/JPEG/WebP base64 data URL, max decoded 8 MiB). Unknown keys are rejected.
+  This is embedded image data, NOT an assets ID, URL, path or SVG. It has no ID
+  namespace, is not counted in the 100 image assets and is not scene content.
+  The editor also decodes it and enforces the shared 40-megapixel image limit.
+  Users can import/replace it using the thumbnail plus button, open a large
+  preview, download the original image separately, or remove it. It is stored
+  in project JSON and counts toward the total 160 MiB JSON limit, but is never
+  rendered in the presentation or included in the exported video.
+  Prefer a landscape 16:9 cover for a conventional video; this is authoring
+  guidance, not a validation rule or guarantee of platform upload acceptance.
+  Example structure: {"thumbnail":{"name":"cover.png",
+  "data":"data:image/png;base64,<ACTUAL ENCODED IMAGE BYTES>"}}. The placeholder
+  is NOT valid data; omit thumbnail until a real image is available. A text-only
+  model must not invent base64 audio/image bytes. The generating agent needs
+  actual image-generation/file tools, or the user can import the file manually.
 - assets: object mapping image IDs to assets; omitted/null normalizes to {}.
 - videos: object mapping video IDs to video assets; at most 30. Omitted/null
   normalizes to {}. Entries require name/data/duration; see Embedded videos for
@@ -422,6 +439,7 @@ Actual validator behavior is asymmetric:
 - Root assets/videos omitted OR null normalize to {} (schema authoring uses objects).
 - Root backgroundVideo omitted OR null normalizes to null; {} remains a default
   settings object with no asset. Root music/backgroundSimulation omitted/null disable them.
+- Root thumbnail omitted/null disables it; thumbnail.name/data reject null.
 - Root description/hashtags default to "" only on omission, not on explicit null.
 - Each optional scene field listed above uses its default when omitted OR null.
 - Scene id/elements and asset name/data do not accept null.
