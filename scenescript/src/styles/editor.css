@@ -775,3 +775,5 @@ body.recording .comic-edit-overlay{display:none}
 #camera-time{accent-color:var(--accent)}
 #camera-form fieldset>button{border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--text)}
 #camera-form fieldset>button:hover{background:var(--accent-soft);color:var(--accent)}
+
+#camera-options .text-style-toggle,#scene-form .text-style-toggle:has([name=cameraOverview]){display:flex;flex-direction:row;align-items:center;justify-content:space-between;min-height:40px;gap:12px}
