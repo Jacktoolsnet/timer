@@ -680,3 +680,11 @@ body.recording .motion-path-overlay{display:none}
 #toggle-project[aria-expanded=false] svg{transform:rotate(180deg)}
 #project-toolbar[hidden],#project-content[hidden]{display:none}
 .project-panel.project-collapsed{row-gap:0;align-self:start}
+
+/* Recording is a viewport-sized surface, independent of editor layout rules. */
+body.recording .studio-grid > :not(.preview-rail){display:none}
+body.recording .preview-rail > .studio-preview{inset:0;width:100vw;height:100dvh;display:grid;place-items:center;background:#000;z-index:5}
+body.recording #preview-slot{display:grid;place-items:center}
+body.recording #preview-content{display:grid;place-items:center}
+body.recording #preview-content > :not(#stage-frame){display:none}
+body.recording .studio-preview > :not(#preview-slot){display:none}

@@ -61,3 +61,19 @@ test('export audio uses one aligned slide switch instead of a visible checkbox',
 test('WebM and 1080p are export defaults and alternatives remain selectable',async({page})=>{
  await page.goto('/en/');await page.locator('#open-export').click();await expect(page.locator('#export-format')).toHaveValue('webm');await expect(page.locator('#export-resolution')).toHaveValue('1080');await page.locator('#export-resolution').selectOption('720');await expect(page.locator('#export-resolution')).toHaveValue('720');await page.locator('#export-format').selectOption('mp4');await expect(page.locator('#export-format')).toHaveValue('mp4');
 });
+
+test('exports estimated above 512 MiB are not rejected by an artificial size limit',async({page})=>{
+ await page.goto('/en/');
+ const result=await page.evaluate(async()=>{
+  const {demoProject}=await import(/* @vite-ignore */ '/src/lib/model.ts' as string);
+  const {exportVideo,exportSupported}=await import(/* @vite-ignore */ '/src/scripts/video-export.ts' as string);
+  const p=demoProject();p.scenes=p.scenes.slice(0,1);p.scenes[0].duration=600;
+  const options={format:'webm',resolution:1080,fps:24,audio:false};
+  if(!await exportSupported(p,options))return null;
+  const controller=new AbortController();controller.abort();
+  try{await exportVideo(p,options,controller.signal,()=>{});return 'unexpected success';}
+  catch(error){return (error as Error).name;}
+ });
+ test.skip(result===null,'WebM encoder unavailable');
+ expect(result).toBe('AbortError');
+});

@@ -10,7 +10,6 @@ export function exportHasAudio(p:Project){return Boolean(narrationClips(p).lengt
 export async function exportSupported(p:Project,o:ExportOptions){const size=exportSize(p,o);return await canEncodeVideo(o.format==='mp4'?'avc':'vp9',{...size,frameRate:o.fps})&&(!o.audio||!exportHasAudio(p)||await canEncodeAudio(o.format==='mp4'?'aac':'opus',{sampleRate:48000,numberOfChannels:2,bitrate:128000}));}
 export async function exportVideo(p:Project,o:ExportOptions,signal:AbortSignal,progress:(fraction:number)=>void){
  const duration=p.scenes.reduce((n,s)=>n+s.duration,0),size=exportSize(p,o);
- if(duration*(size.bitrate+(o.audio?128000:0))/8>512*1024*1024)throw new Error('Export exceeds 512 MB. Reduce resolution or shorten the project.');
  if(!await exportSupported(p,o))throw new Error('Encoder unavailable. Try WebM or disable audio.');signal.throwIfAborted();
  const target=new BufferTarget(),output=new Output({target,format:o.format==='mp4'?new Mp4OutputFormat():new WebMOutputFormat()}),media=new ExportMedia(p,signal),renderer=new ExportRenderer(p,media);
  const canvas=document.createElement('canvas');canvas.width=size.width;canvas.height=size.height;

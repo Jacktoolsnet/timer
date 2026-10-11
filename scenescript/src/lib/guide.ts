@@ -695,8 +695,8 @@ no audio track is added. Export audio includes assigned narration and uses mute,
 visual element opacity or scene-fade factors. There is no automatic MP4-to-WebM fallback or server
 transcoding: unsupported settings report an error, and the user may choose WebM
 or different settings. Export honors timeline scene fades even on a stopped editor
-playhead (unlike the paused-preview fade exception above). The estimated output is limited to
-512 MiB to protect browser memory. Export can be cancelled and never replaces
+playhead (unlike the paused-preview fade exception above). There is no fixed output file-size limit. Output is buffered in browser memory,
+so available memory and browser limits can still prevent very large exports. Export can be cancelled and never replaces
 the editable project. Leaving recording
 view restores the previous editor scene, selected element and timeline position;
 the project and unsaved changes are retained.

@@ -703,3 +703,25 @@ test('project tile collapses without losing edits and remains keyboard accessibl
  await expect(page.locator('#project-format')).toHaveValue('portrait');
  await expect(page.locator('#project-toolbar')).toBeVisible();
 });
+
+test('recording fills the viewport and hides all editor panels and preview controls',async({page})=>{
+ await page.goto('/en/');
+ for(const format of ['landscape','portrait']){
+  await page.locator('#project-format').selectOption(format);
+  await page.locator('#focus').click();
+  await expect(page.locator('body')).toHaveClass(/recording/);
+  for(const selector of ['#project-panel','.scene-sidebar','.scene-inspector','.elements-panel','.element-inspector','.playback-controls','.timeline-label','.safe-toggle']){
+   await expect(page.locator(selector).first()).toBeHidden();
+  }
+  const viewport=page.viewportSize()!,surface=(await page.locator('.studio-preview').boundingBox())!,stage=(await page.locator('#stage-frame').boundingBox())!;
+  expect(surface.x).toBe(0);expect(surface.y).toBe(0);
+  expect(surface.width).toBe(viewport.width);expect(surface.height).toBe(viewport.height);
+  expect(stage.x).toBeGreaterThanOrEqual(-1);expect(stage.y).toBeGreaterThanOrEqual(-1);
+  expect(stage.x+stage.width).toBeLessThanOrEqual(viewport.width+1);
+  expect(stage.y+stage.height).toBeLessThanOrEqual(viewport.height+1);
+  await expect(page.locator('#start-recording')).toBeVisible();
+  await page.locator('#exit-focus').click({force:true});
+  await expect(page.locator('#project-panel')).toBeVisible();
+  await expect(page.locator('.playback-controls')).toBeVisible();
+ }
+});
