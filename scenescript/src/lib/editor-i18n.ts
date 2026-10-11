@@ -1,5 +1,14 @@
 import type { Language } from './i18n';
 const words = {
+ audios:['Audiodateien','Audio files','Archivos de audio','Fichiers audio'],
+ importAudio:['Audio importieren','Import audio','Importar audio','Importer un audio'],
+ audioHint:['Extern erzeugte Sprache oder eigene Aufnahme. Maximal 32 MiB je Datei. MP3 oder WAV empfohlen.','Externally generated speech or your own recording. Maximum 32 MiB per file. MP3 or WAV recommended.','Voz generada externamente o grabación propia. Máximo 32 MiB por archivo. MP3 o WAV recomendados.','Voix générée ailleurs ou votre enregistrement. Maximum 32 MiB par fichier. MP3 ou WAV recommandés.'],
+ projectNarration:['Projekt-Sprecher-Spur','Project narration','Narración del proyecto','Narration du projet'],
+ sceneNarration:['Sprachclip der Szene','Scene narration','Narración de la escena','Narration de la scène'],
+ narrationHint:['Audiodatei auswählen und den Ausschnitt festlegen. Die Sprache wird nicht im Tool erzeugt.','Choose an audio file and trim the clip. Speech is not generated in this tool.','Selecciona un audio y recórtalo. Esta herramienta no genera la voz.','Choisissez un fichier audio et un extrait. La voix n’est pas générée ici.'],
+ audioAsset:['Audiodatei','Audio file','Archivo de audio','Fichier audio'],audioAt:['Startzeit (Sekunden)','Start time (seconds)','Inicio (segundos)','Début (secondes)'],audioStart:['Datei ab Sekunde','File start (seconds)','Archivo desde segundo','Début dans le fichier'],audioEnd:['Datei bis Sekunde','File end (seconds)','Archivo hasta segundo','Fin dans le fichier'],audioVolume:['Lautstärke','Volume','Volumen','Volume'],audioMuted:['Stumm','Muted','Silencio','Muet'],audioFadeIn:['Einblenden (Sekunden)','Fade in (seconds)','Fundido de entrada','Fondu entrant'],audioFadeOut:['Ausblenden (Sekunden)','Fade out (seconds)','Fundido de salida','Fondu sortant'],narrationText:['Sprechertext (Notiz)','Narration script (note)','Guion (nota)','Texte narré (note)'],audioDucking:['Musik während der Sprache absenken','Lower music during narration','Bajar música durante la voz','Baisser la musique pendant la narration'],
+ deleteAudioHint:['Die Audiodatei und ihre Zuweisungen zu Projekt und Szenen werden entfernt.','The audio file and its project/scene assignments will be removed.','Se eliminarán el audio y sus asignaciones.','Le fichier audio et ses affectations seront supprimés.'],
+
  thumbnail:['Thumbnail','Thumbnail','Miniatura','Miniature'],
  importThumbnail:['Thumbnail hinzufügen oder ersetzen','Add or replace thumbnail','Añadir o reemplazar miniatura','Ajouter ou remplacer la miniature'],
  thumbnailHint:['Vorschaubild für die Veröffentlichung, nicht Teil des Videos. PNG, JPEG oder WebP; maximal 8 MiB.','Publication cover image, not part of the video. PNG, JPEG or WebP; maximum 8 MiB.','Imagen de portada, no forma parte del vídeo. PNG, JPEG o WebP; máximo 8 MiB.','Image de couverture, non incluse dans la vidéo. PNG, JPEG ou WebP ; maximum 8 MiB.'],
@@ -77,7 +86,7 @@ const words = {
  exportHint:['Lokal, ohne Bildschirmaufnahme. MP4 benötigt einen unterstützten Browser-Encoder; alternativ WebM. Große Projekte können lange dauern.','Local export without screen recording. MP4 requires a supported browser encoder; WebM is an alternative. Large projects may take time.','Exportación local sin grabar la pantalla. MP4 requiere un codificador compatible; alternativa: WebM.','Export local sans capture d’écran. MP4 nécessite un encodeur compatible ; alternative : WebM.'],
  exportResolution:['Auflösung','Resolution','Resolución','Résolution'],
  exportFps:['Bilder pro Sekunde','Frames per second','Fotogramas por segundo','Images par seconde'],
- exportAudio:['Musik und Videoton einschließen','Include music and video audio','Incluir música y audio','Inclure musique et audio'],
+ exportAudio:['Sprache, Musik und Videoton einschließen','Include narration, music and video audio','Incluir narración, música y audio','Inclure narration, musique et audio'],
  exportBusy:['Video wird erstellt … Bitte diesen Tab geöffnet lassen.','Creating video … Keep this tab open.','Creando vídeo … Mantén esta pestaña abierta.','Création de la vidéo … Gardez cet onglet ouvert.'],
  exportDone:['Video exportiert','Video exported','Vídeo exportado','Vidéo exportée'],
  exportUnsupported:['Diese Export-Einstellungen werden vom Browser nicht unterstützt. Versuche WebM, eine kleinere Auflösung oder Export ohne Ton.','These export settings are not supported by this browser. Try WebM, a lower resolution or export without audio.','Este navegador no admite estos ajustes. Prueba WebM, menor resolución o sin audio.','Ce navigateur ne prend pas en charge ces réglages. Essayez WebM, une résolution inférieure ou sans audio.'],

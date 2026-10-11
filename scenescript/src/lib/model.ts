@@ -1,3 +1,4 @@
+import {parseNarration,validateAudioData,type AudioAsset,type Narration} from './audio.ts';
 import {parseMotionPath,motionPathState,type MotionPath} from './motion-path.ts';
 import {parseVideo,validateVideoData,defaultVideo,type VideoAsset,type VideoSettings} from './video.ts';
 import {parseMusic,type Music} from './music.ts';
@@ -17,22 +18,22 @@ export type Element = {
  motionPath:MotionPath|null; animation:typeof animations[number]; at:number; animationDuration:number;
 };
 export const sceneTransitions=['none','fade','crossfade','slide-left','slide-right','slide-up','slide-down','wipe-left','wipe-right','wipe-up','wipe-down','zoom-in','zoom-out','through-black'] as const;
-export type Scene = { id:string; name:string; duration:number; background:string; backgroundEnabled:boolean; backgroundOpacity:number; backgroundGradient:Gradient|null; backgroundAsset:string; transition:typeof sceneTransitions[number]; transitionDuration:number; elements:Element[] };
-export type Project = { version:'1.0'; title:string; description:string; hashtags:string; thumbnail:Asset|null; format:keyof typeof formats; backgroundSimulation:Simulation|null; backgroundVideo:VideoSettings|null; videos:Record<string,VideoAsset>; music:Music|null; assets:Record<string,Asset>; scenes:Scene[] };
+export type Scene = {narration:Narration|null; id:string; name:string; duration:number; background:string; backgroundEnabled:boolean; backgroundOpacity:number; backgroundGradient:Gradient|null; backgroundAsset:string; transition:typeof sceneTransitions[number]; transitionDuration:number; elements:Element[] };
+export type Project = { version:'1.0'; title:string; description:string; hashtags:string; thumbnail:Asset|null; audios:Record<string,AudioAsset>; narration:Narration|null; audioDucking:boolean; format:keyof typeof formats; backgroundSimulation:Simulation|null; backgroundVideo:VideoSettings|null; videos:Record<string,VideoAsset>; music:Music|null; assets:Record<string,Asset>; scenes:Scene[] };
 export const MAX_FILE_BYTES = 160 * 1024 * 1024;
 export const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 export function newElement(type:Element['type'], id:string = crypto.randomUUID()):Element {
  return {id,name:'',type,motionPath:null,video:type==='video'?defaultVideo():null,simulation:type==='simulation'?defaultSimulation():null,text:type==='text'?'Your story starts here.':'',runs:[],asset:'',x:10,y:35,width:80,height:30,color:type==='shape'?'#b86445':'#ffffff',fillGradient:null,fillColor:type==='shape'?'#b86445':'#ffffff',borderColor:'none',borderWidth:4,shapeType:'rectangle',borderStyle:'solid',font:'Arial',fontSize:90,align:'center',bold:false,italic:false,underline:false,strikethrough:false,opacity:1,rotation:0,radius:0,fit:'contain',animation:'fade',at:0,animationDuration:1};
 }
 export function newScene(id:string = crypto.randomUUID()):Scene {
- return {id,name:'Scene',duration:5,background:'#263b42',backgroundEnabled:true,backgroundOpacity:1,backgroundGradient:null,backgroundAsset:'',transition:'fade',transitionDuration:0.5,elements:[]};
+ return {narration:null,id,name:'Scene',duration:5,background:'#263b42',backgroundEnabled:true,backgroundOpacity:1,backgroundGradient:null,backgroundAsset:'',transition:'fade',transitionDuration:0.5,elements:[]};
 }
 export function demoProject():Project {
  const first = newScene('intro'); first.name='A new idea';
  const title=newElement('text','headline');title.text='Your idea.\nYour stage.';title.font='Georgia';title.animation='slide-up';first.elements=[title];
  const second=newScene('outro');second.name='Make it move';second.background='#684d45';
  const text=newElement('text','outro-text');text.text='Tell your story.\nOne scene at a time.';text.fontSize=72;text.animation='typewriter';text.animationDuration=2;second.elements=[text];
- return {version:'1.0',title:'My SceneScript',description:'',hashtags:'',thumbnail:null,format:'landscape',backgroundSimulation:null,backgroundVideo:null,videos:{},music:null,assets:{},scenes:[first,second]};
+ return {version:'1.0',title:'My SceneScript',description:'',hashtags:'',thumbnail:null,audios:{},narration:null,audioDucking:false,format:'landscape',backgroundSimulation:null,backgroundVideo:null,videos:{},music:null,assets:{},scenes:[first,second]};
 }
 function obj(v:unknown,path:string):Record<string,unknown>{if(!v||typeof v!=='object'||Array.isArray(v))throw new Error(`${path}: expected object`);return v as Record<string,unknown>;}
 function str(v:unknown,path:string,max=10000):string {if(typeof v!=='string'||v.length>max)throw new Error(`${path}: expected text (max ${max})`);return v;}
@@ -52,7 +53,7 @@ export function validateImage(data:unknown,path='image'):string {
 }
 export function parseProject(input:string):Project {
  if(new TextEncoder().encode(input).length>MAX_FILE_BYTES)throw new Error('JSON: maximum 160 MiB');
- const p=obj(JSON.parse(input),'project');keys(p,['version','title','description','hashtags','thumbnail','format','backgroundSimulation','backgroundVideo','videos','music','assets','scenes'],'project');
+ const p=obj(JSON.parse(input),'project');keys(p,['version','title','description','hashtags','thumbnail','audios','narration','audioDucking','format','backgroundSimulation','backgroundVideo','videos','music','assets','scenes'],'project');
  if(p.version!=='1.0')throw new Error('version: expected 1.0');
  const assets:Record<string,Asset>=Object.create(null);const raw=obj(p.assets??{},'assets');
  if(Object.keys(raw).length>100)throw new Error('assets: maximum 100');
@@ -61,6 +62,9 @@ export function parseProject(input:string):Project {
  if(p.thumbnail!==undefined&&p.thumbnail!==null){const a=obj(p.thumbnail,'thumbnail');keys(a,['name','data'],'thumbnail');const data=validateImage(a.data,'thumbnail.data');if(!/^data:image\/(png|jpeg|webp);base64,/.test(data))throw new Error('thumbnail.data: expected PNG, JPEG or WebP');thumbnail={name:str(a.name,'thumbnail.name',200),data};}
  const videos:Record<string,VideoAsset>=Object.create(null);const rawVideos=obj(p.videos??{},'videos');if(Object.keys(rawVideos).length>30)throw new Error('videos: maximum 30');
  for(const [key,value] of Object.entries(rawVideos)){id(key,'video ID');const a=obj(value,'videos.'+key);keys(a,['name','data','duration'],'videos.'+key);videos[key]={name:str(a.name,key+'.name',200),data:validateVideoData(a.data,key+'.data'),duration:num(a.duration,key+'.duration',.001,86400)};}
+ const audios:Record<string,AudioAsset>=Object.create(null);const rawAudios=obj(p.audios??{},'audios');if(Object.keys(rawAudios).length>30)throw new Error('audios: maximum 30');
+ for(const [key,value] of Object.entries(rawAudios)){id(key,'audio ID');const a=obj(value,'audios.'+key);keys(a,['name','data','duration'],'audios.'+key);audios[key]={name:str(a.name,key+'.name',200),data:validateAudioData(a.data,key+'.data'),duration:num(a.duration,key+'.duration',.001,3600)};}
+ if(p.audioDucking!==undefined&&typeof p.audioDucking!=='boolean')throw new Error('audioDucking: expected boolean');
  const ref=(v:unknown,path:string)=>{const s=str(v,path,100);if(s&&!Object.hasOwn(assets,s))throw new Error(`${path}: missing asset ${s}`);return s;};
  if(!Array.isArray(p.scenes)||!p.scenes.length||p.scenes.length>100)throw new Error('scenes: expected 1–100 scenes');
  const sceneIds=new Set<string>(),elementIds=new Set<string>();
@@ -91,11 +95,11 @@ export function parseProject(input:string):Project {
     opacity:num(merged.opacity,`${ep}.opacity`,0,1),rotation:num(merged.rotation,`${ep}.rotation`,-360,360),radius:num(merged.radius,`${ep}.radius`,0,1000),fit:one(merged.fit,['cover','contain'] as const,`${ep}.fit`),
     animation:one(merged.animation,animations,`${ep}.animation`),at:num(merged.at,`${ep}.at`,0,duration),animationDuration:num(merged.animationDuration,`${ep}.animationDuration`,0.01,3600)};
   });
-  return {id:sid,name:str(s.name??d.name,`${path}.name`,200),duration,backgroundEnabled:(s.backgroundEnabled??true) as boolean,backgroundOpacity:num(s.backgroundOpacity??1,path+'.backgroundOpacity',0,1),backgroundGradient:parseGradient(s.backgroundGradient,path+'.backgroundGradient'),background:color(s.background??d.background,`${path}.background`),backgroundAsset:ref(s.backgroundAsset??'',`${path}.backgroundAsset`),transition:one(s.transition??d.transition,sceneTransitions,`${path}.transition`),transitionDuration:num(s.transitionDuration??d.transitionDuration,`${path}.transitionDuration`,0.01,3600),elements};
+  return {narration:parseNarration(s.narration,audios,duration,path+'.narration'),id:sid,name:str(s.name??d.name,`${path}.name`,200),duration,backgroundEnabled:(s.backgroundEnabled??true) as boolean,backgroundOpacity:num(s.backgroundOpacity??1,path+'.backgroundOpacity',0,1),backgroundGradient:parseGradient(s.backgroundGradient,path+'.backgroundGradient'),background:color(s.background??d.background,`${path}.background`),backgroundAsset:ref(s.backgroundAsset??'',`${path}.backgroundAsset`),transition:one(s.transition??d.transition,sceneTransitions,`${path}.transition`),transitionDuration:num(s.transitionDuration??d.transitionDuration,`${path}.transitionDuration`,0.01,3600),elements};
  });
  const backgroundSimulation=parseSimulation(p.backgroundSimulation,'backgroundSimulation');
  for(const [i,s] of scenes.entries())if(s.elements.reduce((n,e)=>n+(e.type==='simulation'?e.simulation!.count:0),backgroundSimulation?.count??0)>5000)throw new Error('scenes['+i+']: maximum 5000 simulated particles including project background');
- return {thumbnail,videos,backgroundVideo:parseVideo(p.backgroundVideo,videos,'backgroundVideo'),music:parseMusic(p.music,scenes.reduce((n,s)=>n+s.duration,0)),backgroundSimulation,version:'1.0',title:str(p.title,'title',200),description:str(p.description===undefined?'':p.description,'description',5000),hashtags:str(p.hashtags===undefined?'':p.hashtags,'hashtags',2000),format:one(p.format,['landscape','portrait','square'] as const,'format'),assets,scenes};
+ return {audios,narration:parseNarration(p.narration,audios,scenes.reduce((n,s)=>n+s.duration,0)),audioDucking:(p.audioDucking??false) as boolean,thumbnail,videos,backgroundVideo:parseVideo(p.backgroundVideo,videos,'backgroundVideo'),music:parseMusic(p.music,scenes.reduce((n,s)=>n+s.duration,0)),backgroundSimulation,version:'1.0',title:str(p.title,'title',200),description:str(p.description===undefined?'':p.description,'description',5000),hashtags:str(p.hashtags===undefined?'':p.hashtags,'hashtags',2000),format:one(p.format,['landscape','portrait','square'] as const,'format'),assets,scenes};
 }
 export function locateTime(project:Project,time:number):{index:number;local:number;ended:boolean}{
  let offset=0;for(let i=0;i<project.scenes.length;i++){const duration=project.scenes[i].duration;if(time<offset+duration)return {index:i,local:Math.max(0,time-offset),ended:false};offset+=duration;}

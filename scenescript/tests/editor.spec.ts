@@ -643,7 +643,7 @@ test('recording alignment frame hides for countdown and restart appears three se
 });
 
 test('gallery import buttons open image and video file pickers',async({page})=>{
- await page.goto('/en/');await expect(page.locator('.media-gallery-tile')).toHaveCount(3);
+ await page.goto('/en/');await expect(page.locator('.media-gallery-tile')).toHaveCount(4);
  for(const [id,accept] of [['gallery-import-image','image/png'],['gallery-import-video','video/*']]){
   await expect(page.locator('#'+id)).toBeVisible();await expect(page.locator('#'+id+' svg')).toHaveCount(1);await expect(page.locator('#'+id)).toHaveText('');await expect(page.locator('#'+id)).toHaveAttribute('aria-label',/Import/);const pending=page.waitForEvent('filechooser');await page.locator('#'+id).click();const chooser=await pending;expect(await chooser.element().getAttribute('accept')).toContain(accept);
  }
