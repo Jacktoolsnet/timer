@@ -342,6 +342,7 @@ Optional fields and their defaults:
 - name: "Scene"; string, maximum 200 UTF-16 code units.
 - duration: 5; number, 0.1–3600 seconds.
 - narration: null; optional scene-local imported speech clip (see Embedded audio).
+- camera: null; optional deterministic scene camera (see Scene camera below).
 - groups: []; flat group controllers (see Groups below); omitted defaults to [], null is rejected.
 - background: "#263b42"; #RRGGBB color.
 - backgroundEnabled: true; boolean. False hides scene color/gradient and background image, revealing the project simulation. Background settings are retained; scene elements are unaffected.
@@ -456,16 +457,73 @@ crop, frame, timing and layer independently, or use existing flat groups. Existi
 scene elements are not deleted. Applying the template is one Undo/Redo step and
 must fit the existing 100-element scene limit (two elements per panel).
 AI authors can generate these same ordinary elements directly with explicit crops.
-There is no scene camera or scene/screen coordinate-space field in this stage.
+Scene cameras are supported (see below). There is no scene/screen coordinate-space field yet; every scene element moves with its scene camera.
 
 Panel example: /panels.scenescript.json — one original embedded SVG illustration,
 full view, character close-up and two independent cropped panels. No external
 assets or additional copies of the image payload are needed.
 
+### Scene camera
+
+Optional scene.camera defaults to null for omission or explicit null (identity).
+An object requires only stations: an ordered array of 1–32 stations. Unknown
+camera/station fields are rejected. Stations require at, x, y, width. All are
+finite numbers. at is arrival in scene seconds, 0–scene.duration; the first
+station must have at:0. x/y are the top-left in project percentages, 0–100.
+width is 1–100 percent of project width. The height uses the SAME percentage
+of project height, preserving the project aspect ratio, even for portrait and
+square. x+width and y+width must be <=100 (floating tolerance 1e-9).
+There is no independent height, rotation or perspective.
+
+Optional station.hold defaults to 0 seconds (0–scene.duration); null is rejected.
+The rectangle stays fixed from at through at+hold. Optional station.easing
+defaults to "linear"; alternatively "ease-in-out" uses smoothstep p*p*(3-2*p).
+Null is rejected. Easing belongs to the DESTINATION station; the first station's
+easing is preserved but unused. Next arrival must be strictly greater than the
+previous at+hold. at+hold cannot exceed scene duration. After the final arrival,
+the last rectangle is held until the scene ends regardless of its hold value.
+Identical rectangles at successive stations can describe additional holds.
+
+Between holds/arrivals, interpolate x, y and width with the same eased fraction.
+The resulting project-to-screen transform is scale=100/width and translation
+(-x*projectWidth/width, -y*projectHeight/width), with origin (0,0).
+It is applied AFTER element entry/exit, motionPath, rotation, placement and flat
+group transforms. Scene background color/gradient/image and ALL scene elements,
+including bubble bodies/tails, simulations and videos, share this transform.
+Anchors remain correct within that shared scene space. Continuous project
+simulation/video backgrounds are NOT transformed and retain project-time clocks.
+Camera never changes positions, group membership, audio intervals or volume;
+it adds no duration. The final camera composition is clipped to the viewport,
+then scene transitions are applied. Outgoing scenes hold their final camera
+at exactly scene.duration. Pause, seek, restart and export evaluate the same
+pure scene-time calculation, not an accumulated animation clock.
+
+Example for a five-second scene (full view, one-second hold, move, hold, detail):
+
+\`\`\`json
+{"camera":{"stations":[
+ {"at":0,"x":0,"y":0,"width":100,"hold":1},
+ {"at":3,"x":10,"y":10,"width":50,"hold":0.5,"easing":"ease-in-out"},
+ {"at":5,"x":40,"y":40,"width":25,"easing":"linear"}
+]}}
+\`\`\`
+
+The scene settings open a draft editor with station controls, a scrubber and
+camera playback preview. Apply commits one undo step; Cancel/Escape discard.
+Disable camera saves null. Overview is editor-only and temporarily ignores the
+camera while paused; playback, recording and export always use the saved camera.
+Element/anchor/path handles are shown only in overview or without a camera.
+No camera drag handles or screen-fixed elements are implemented in this stage.
+The camera example at /camera.scenescript.json uses one shared animated SVG,
+a full-to-manager-to-briefcase shot and a final two-panel scene.
+
+Schema checks station shape and individual bounds; runtime additionally checks
+first arrival, ordering, hold intervals, scene duration and rectangle sums.
+
 ### Native comic bubbles and speaker anchors
 
 Version remains 1.0. Old projects need no migration. Flat group controllers are
-supported (see Groups below); nested coordinate containers, camera moves and
+supported (see Groups below); nested coordinate containers and
 character rigging are not supported. A scene is a comic
 panel/shot; reuse image assets for recurring characters instead of repeating Base64.
 
@@ -602,7 +660,7 @@ within scene duration. Moving an omitted-end interval makes its new end explicit
 editing just its start keeps until:null. Timelines do not shift independent
 motionPath.start or video clip start/end when element at changes. Group tracks
 can collapse; children remain independently editable. These controls do not add
-JSON fields. No nested groups, keyframe tracks or camera/rigging are supported.
+JSON fields. No nested groups, general keyframe tracks or character rigging are supported.
 
 ### Motion paths
 
@@ -695,6 +753,8 @@ not alter element position. A copied start time must fit the destination scene.
 These editor actions replace the selected element's path, without linking elements.
 
 ### Omitted fields versus explicit null
+
+Scene camera accepts omission/null as identity; station fields never accept null.
 
 Authoring guidance: omit fields to request defaults. Use null only for the
 explicitly supported disabled/automatic cases below; a defaulted full example

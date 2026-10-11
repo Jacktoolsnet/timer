@@ -1,3 +1,4 @@
+import {parseCamera,type Camera} from './camera.ts';
 import {parseCrop,type Crop} from './crop.ts';
 import {parsePlacement} from './groups.ts';
 import type {Matrix} from './comic.ts';
@@ -24,7 +25,7 @@ export type Element = {
 };
 export const sceneTransitions=['none','fade','crossfade','slide-left','slide-right','slide-up','slide-down','wipe-left','wipe-right','wipe-up','wipe-down','zoom-in','zoom-out','through-black'] as const;
 export type Group=Pick<Element,'id'|'name'|'x'|'y'|'rotation'|'opacity'|'animation'|'at'|'until'|'animationDuration'|'exitAnimation'|'exitDuration'|'motionPath'>&{members:string[];pivot:{x:number;y:number}};
-export type Scene = {groups:Group[]; narration:Narration|null; id:string; name:string; duration:number; background:string; backgroundEnabled:boolean; backgroundOpacity:number; backgroundGradient:Gradient|null; backgroundAsset:string; transition:typeof sceneTransitions[number]; transitionDuration:number; elements:Element[] };
+export type Scene = {camera:Camera|null; groups:Group[]; narration:Narration|null; id:string; name:string; duration:number; background:string; backgroundEnabled:boolean; backgroundOpacity:number; backgroundGradient:Gradient|null; backgroundAsset:string; transition:typeof sceneTransitions[number]; transitionDuration:number; elements:Element[] };
 export type Project = { version:'1.0'; title:string; description:string; hashtags:string; thumbnail:Asset|null; audios:Record<string,AudioAsset>; narration:Narration|null; audioDucking:boolean; format:keyof typeof formats; backgroundSimulation:Simulation|null; backgroundVideo:VideoSettings|null; videos:Record<string,VideoAsset>; music:Music|null; assets:Record<string,Asset>; scenes:Scene[] };
 export const MAX_FILE_BYTES = 160 * 1024 * 1024;
 export const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
@@ -32,7 +33,7 @@ export function newElement(type:Element['type'], id:string = crypto.randomUUID()
  return {crop:null,placement:null,id,name:'',type,bubble:type==='bubble'?defaultBubble():null,anchors:{},until:null,exitAnimation:'none',exitDuration:.5,motionPath:null,video:type==='video'?defaultVideo():null,simulation:type==='simulation'?defaultSimulation():null,text:type==='bubble'?'Hello!':type==='text'?'Your story starts here.':'',runs:[],asset:'',x:10,y:type==='bubble'?10:35,width:type==='bubble'?40:80,height:type==='bubble'?24:30,color:type==='bubble'?'#222222':type==='shape'?'#b86445':'#ffffff',fillGradient:null,fillColor:type==='shape'?'#b86445':'#ffffff',borderColor:type==='bubble'?'#222222':'none',borderWidth:4,shapeType:'rectangle',borderStyle:'solid',font:'Arial',fontSize:type==='bubble'?48:90,align:'center',bold:false,italic:false,underline:false,strikethrough:false,opacity:1,rotation:0,radius:0,fit:'contain',animation:'fade',at:0,animationDuration:1};
 }
 export function newScene(id:string = crypto.randomUUID()):Scene {
- return {groups:[],narration:null,id,name:'Scene',duration:5,background:'#263b42',backgroundEnabled:true,backgroundOpacity:1,backgroundGradient:null,backgroundAsset:'',transition:'fade',transitionDuration:0.5,elements:[]};
+ return {camera:null,groups:[],narration:null,id,name:'Scene',duration:5,background:'#263b42',backgroundEnabled:true,backgroundOpacity:1,backgroundGradient:null,backgroundAsset:'',transition:'fade',transitionDuration:0.5,elements:[]};
 }
 export function demoProject():Project {
  const first = newScene('intro'); first.name='A new idea';
@@ -121,7 +122,7 @@ export function parseProject(input:string):Project {
    const at=num(get('at',0),gp+'.at',0,duration),until=g.until===undefined||g.until===null?null:num(g.until,gp+'.until',0,duration);if(until!==null&&until<=at)throw new Error(gp+'.until: must be greater than at');
    return {id:gid,name:str(get('name','Group'),gp+'.name',200),members,pivot:{x:num(pivot.x,gp+'.pivot.x',-1000,1000),y:num(pivot.y,gp+'.pivot.y',-1000,1000)},x:num(get('x',0),gp+'.x',-1000,1000),y:num(get('y',0),gp+'.y',-1000,1000),rotation:num(get('rotation',0),gp+'.rotation',-360,360),opacity:num(get('opacity',1),gp+'.opacity',0,1),at,until,animation:one(get('animation','none'),animations.filter(a=>a!=='typewriter'),gp+'.animation'),animationDuration:num(get('animationDuration',1),gp+'.animationDuration',.01,3600),exitAnimation:one(get('exitAnimation','none'),exitAnimations,gp+'.exitAnimation'),exitDuration:num(get('exitDuration',.5),gp+'.exitDuration',.01,3600),motionPath:parseMotionPath(g.motionPath,duration,gp+'.motionPath')};
   });
-  return {groups,narration:parseNarration(s.narration,audios,duration,path+'.narration'),id:sid,name:str(s.name??d.name,`${path}.name`,200),duration,backgroundEnabled:(s.backgroundEnabled??true) as boolean,backgroundOpacity:num(s.backgroundOpacity??1,path+'.backgroundOpacity',0,1),backgroundGradient:parseGradient(s.backgroundGradient,path+'.backgroundGradient'),background:color(s.background??d.background,`${path}.background`),backgroundAsset:ref(s.backgroundAsset??'',`${path}.backgroundAsset`),transition:one(s.transition??d.transition,sceneTransitions,`${path}.transition`),transitionDuration:num(s.transitionDuration??d.transitionDuration,`${path}.transitionDuration`,0.01,3600),elements};
+  return {camera:parseCamera(s.camera,duration,path+'.camera'),groups,narration:parseNarration(s.narration,audios,duration,path+'.narration'),id:sid,name:str(s.name??d.name,`${path}.name`,200),duration,backgroundEnabled:(s.backgroundEnabled??true) as boolean,backgroundOpacity:num(s.backgroundOpacity??1,path+'.backgroundOpacity',0,1),backgroundGradient:parseGradient(s.backgroundGradient,path+'.backgroundGradient'),background:color(s.background??d.background,`${path}.background`),backgroundAsset:ref(s.backgroundAsset??'',`${path}.backgroundAsset`),transition:one(s.transition??d.transition,sceneTransitions,`${path}.transition`),transitionDuration:num(s.transitionDuration??d.transitionDuration,`${path}.transitionDuration`,0.01,3600),elements};
  });
  const backgroundSimulation=parseSimulation(p.backgroundSimulation,'backgroundSimulation');
  for(const [i,s] of scenes.entries())if(s.elements.reduce((n,e)=>n+(e.type==='simulation'?e.simulation!.count:0),backgroundSimulation?.count??0)>5000)throw new Error('scenes['+i+']: maximum 5000 simulated particles including project background');

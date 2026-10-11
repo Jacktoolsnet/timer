@@ -1,3 +1,4 @@
+import {cameraTransform} from '../lib/camera';
 import {createCropImage} from './crop-image';
 import type {Crop} from '../lib/crop';
 import {sceneElementState} from '../lib/groups';
@@ -19,7 +20,7 @@ export class ExportRenderer{
  private async image(asset:string,fit:'contain'|'cover',parent:HTMLElement,crop:Crop|null=null){const data=this.p.assets[asset].data;if(crop){const view=createCropImage(data,fit,crop);parent.append(view.svg);await view.ready;return view.svg;}if(data.startsWith('data:image/svg+xml;')){const svg=createSvgImage(data,fit);parent.append(svg);return svg;}const img=document.createElement('img');img.src=data;Object.assign(img.style,{width:'100%',height:'100%',objectFit:fit,display:'block'});parent.append(img);}
  private simulation(config:NonNullable<Project['backgroundSimulation']>,w:number,h:number,time:number,parent:HTMLElement,maxPixels=1500000){const view=createSimulation(config,w,h,maxPixels);view.draw(time);Object.assign(view.canvas.style,{width:'100%',height:'100%',display:'block'});parent.append(view.canvas);}
  private async video(c:VideoSettings,elapsed:number,parent:HTMLElement){if(!c.asset)return;const frame=await this.media.frame(c.asset,videoTime(c,this.p.videos[c.asset].duration,elapsed));const canvas=document.createElement('canvas');canvas.width=frame.canvas.width;canvas.height=frame.canvas.height;canvas.getContext('2d')!.drawImage(frame.canvas,0,0);Object.assign(canvas.style,{width:'100%',height:'100%',objectFit:c.fit,display:'block'});parent.append(canvas);}
- private async layer(s:Scene,local:number){const layer=this.box();this.root.append(layer);
+ private async layer(s:Scene,local:number){const viewport=this.box();viewport.style.overflow='hidden';this.root.append(viewport);const layer=this.box();layer.className='scene-camera-world';layer.style.transformOrigin='0 0';layer.style.transform=cameraTransform(s.camera,local,this.w,this.h);viewport.append(layer);
  const bg=this.box();bg.style.background=gradientCSS(s.backgroundGradient,s.background);bg.style.opacity=String(s.backgroundEnabled?s.backgroundOpacity:0);layer.append(bg);if(s.backgroundAsset){const host=this.box();bg.append(host);host.style.opacity=String(s.transition==='fade'?Math.min(1,local/s.transitionDuration):1);seekSvg(await this.image(s.backgroundAsset,'cover',host),local);}
  const fade=s.transition==='fade'?Math.min(1,local/s.transitionDuration):1;
  for(const e of s.elements){const state=sceneElementState(e,s,local,this.w,this.h);if(!state.visible)continue;const node=document.createElement('div');node.dataset.elementId=e.id;const w=e.width*this.w/100,h=e.height*this.h/100;
@@ -31,7 +32,7 @@ export class ExportRenderer{
  else if(e.type==='video'&&e.video)await this.video(e.video,local-e.at,node);
  else if(e.asset)seekSvg(await this.image(e.asset,e.fit,node,e.type==='image'?e.crop:null),local-e.at);
  }
- return layer;
+ return viewport;
  }
  /** Bake supported SMIL attributes before serializing; cloned SVG clocks otherwise reset. */
  private freezeSvg(){for(const svg of Array.from(this.root.querySelectorAll('svg'))){const originals=[svg,...Array.from(svg.querySelectorAll('*'))],clone=svg.cloneNode(true) as SVGSVGElement,copies=[clone,...Array.from(clone.querySelectorAll('*'))];originals.forEach((n,index)=>{const copy=copies[index];if(!copy)return;const style=getComputedStyle(n);for(const key of ['fill','stroke','stroke-width','stroke-dashoffset','opacity','fill-opacity','stroke-opacity']) (copy as SVGElement).style.setProperty(key,style.getPropertyValue(key));

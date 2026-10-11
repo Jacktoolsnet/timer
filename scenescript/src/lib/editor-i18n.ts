@@ -1,5 +1,18 @@
 import type { Language } from './i18n';
 const words = {
+ "sceneCamera":["Szenenkamera", "Scene camera", "Cámara de escena", "Caméra de scène"],
+ "cameraHint":["Stationen bestimmen Ankunftszeit, Ausschnitt und Haltezeit. X/Y und Breite in Projektprozent; Höhe folgt dem Projektformat. Übernehmen speichert alle Änderungen.", "Stations define arrival time, rectangle and hold. X/Y and width use project percentages; height follows the project format. Apply saves all changes.", "Las estaciones definen llegada, recorte y pausa. X/Y y ancho en porcentajes del proyecto; la altura sigue el formato. Aplicar guarda los cambios.", "Les stations définissent arrivée, cadrage et pause. X/Y et largeur en pourcentages du projet ; hauteur selon le format. Appliquer enregistre."],
+ "cameraStation":["Kamerastation", "Camera station", "Estación de cámara", "Station de caméra"],
+ "cameraAt":["Ankunft (s)", "Arrival (s)", "Llegada (s)", "Arrivée (s)"],
+ "cameraHold":["Haltezeit (s)", "Hold (s)", "Pausa (s)", "Pause (s)"],
+ "cameraEasing":["Bewegung zur Station", "Movement to station", "Movimiento a la estación", "Mouvement vers la station"],
+ "cameraOverview":["Gesamtübersicht (nur beim Bearbeiten)", "Overview (editing only)", "Vista general (solo edición)", "Vue d’ensemble (édition uniquement)"],
+ "cameraAdd":["Station hinzufügen", "Add station", "Añadir estación", "Ajouter une station"],
+ "cameraReset":["Kamera deaktivieren", "Disable camera", "Desactivar cámara", "Désactiver la caméra"],
+ "cameraEnabled":["Kamera verwenden", "Use camera", "Usar cámara", "Utiliser la caméra"],
+ "cameraPreview":["Kameravorschau", "Camera preview", "Vista previa de cámara", "Aperçu caméra"],
+ "cameraExample":["Kamera-Beispiel herunterladen", "Download camera example", "Descargar ejemplo de cámara", "Télécharger un exemple caméra"],
+
  cropNW:["Oben links","Top left","Arriba izquierda","En haut à gauche"],
  cropNE:["Oben rechts","Top right","Arriba derecha","En haut à droite"],
  cropSW:["Unten links","Bottom left","Abajo izquierda","En bas à gauche"],
