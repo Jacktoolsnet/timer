@@ -1,4 +1,4 @@
-import {sceneElementMatrix} from './groups.ts';
+import {displayElementMatrix} from './groups.ts';
 import {animationState,type Element,type Scene} from './model.ts';
 import type {Point} from './motion-path.ts';
 
@@ -38,8 +38,8 @@ export function bubbleTarget(e:Element,s:Scene,time:number,w:number,h:number):Po
  if(tail.mode==='anchor'){
   const speaker=s.elements.find(v=>v.id===tail.element),anchor=speaker?.anchors[tail.anchor];
   if(speaker&&anchor){
-   const world=applyMatrix(sceneElementMatrix(speaker,s,time,w,h),{x:anchor.x*speaker.width*w/10000,y:anchor.y*speaker.height*h/10000});
-   return inversePoint(sceneElementMatrix(e,s,time,w,h),world);
+   const world=applyMatrix(displayElementMatrix(speaker,s,time,w,h),{x:anchor.x*speaker.width*w/10000,y:anchor.y*speaker.height*h/10000});
+   return inversePoint(displayElementMatrix(e,s,time,w,h),world);
   }
  }
  return {x:tail.target.x*e.width*w/10000,y:tail.target.y*e.height*h/10000};

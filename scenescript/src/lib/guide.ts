@@ -357,6 +357,7 @@ Scene durations add up to the total duration; transitions do not add time.
 
 Required: id and type. type must be "video", "text", "image", "shape" (a geometric form) or "simulation" or "bubble".
 Optional fields and their defaults:
+- space: "scene"; "scene" follows the camera, "screen" stays fixed in the viewport (see Coordinate spaces). Null is rejected.
 - crop: null; optional intrinsic image rectangle (see Image crops and panel templates below).
 - placement: null; optional static affine matrix (see Groups below).
 - video: for type "video", omission supplies {asset:"",start:0,end:null,loop:false,
@@ -457,7 +458,7 @@ crop, frame, timing and layer independently, or use existing flat groups. Existi
 scene elements are not deleted. Applying the template is one Undo/Redo step and
 must fit the existing 100-element scene limit (two elements per panel).
 AI authors can generate these same ordinary elements directly with explicit crops.
-Scene cameras are supported (see below). There is no scene/screen coordinate-space field yet; every scene element moves with its scene camera.
+Scene cameras and scene/screen element coordinate spaces are supported (see below).
 
 Panel example: /panels.scenescript.json — one original embedded SVG illustration,
 full view, character close-up and two independent cropped panels. No external
@@ -488,9 +489,9 @@ Between holds/arrivals, interpolate x, y and width with the same eased fraction.
 The resulting project-to-screen transform is scale=100/width and translation
 (-x*projectWidth/width, -y*projectHeight/width), with origin (0,0).
 It is applied AFTER element entry/exit, motionPath, rotation, placement and flat
-group transforms. Scene background color/gradient/image and ALL scene elements,
-including bubble bodies/tails, simulations and videos, share this transform.
-Anchors remain correct within that shared scene space. Continuous project
+group transforms. Scene background color/gradient/image and scene-space elements
+(including bubbles, simulations and videos) share this transform. Screen-space
+elements do not; see Coordinate spaces below for cross-space anchors. Continuous project
 simulation/video backgrounds are NOT transformed and retain project-time clocks.
 Camera never changes positions, group membership, audio intervals or volume;
 it adds no duration. The final camera composition is clipped to the viewport,
@@ -515,12 +516,71 @@ camera while paused; playback, recording and export always use the saved camera.
 Element/anchor/path handles are shown only in overview or without a camera.
 Opening those handle editors automatically switches to overview; it does not
 change the saved camera.
-No camera drag handles or screen-fixed elements are implemented in this stage.
+In the camera dialog, select a station using its frame icon to open an overview
+with a camera rectangle. Drag the rectangle to move it; corner handles resize
+it with the project aspect ratio. Arrow keys move the frame by 0.1 percentage
+points; Shift uses 1. Corner arrow keys resize proportionally, keeping the
+opposite corner fixed. Controls stay inside the project and keep width >=1.
+The overview/frame selection is editor state, not JSON. Pointer cancellation
+restores the original draft. All draft edits commit as one Apply/Undo step.
+Frames/handles exist only in the editing dialog, never in recording/export.
 The camera example at /camera.scenescript.json uses one shared animated SVG,
-a full-to-manager-to-briefcase shot and a final two-panel scene.
+a full-to-manager-to-briefcase shot, a screen-fixed narrator and a screen-space
+speech bubble whose tail tracks the scene-space mouth during the camera move,
+and a final two-panel scene.
 
 Schema checks station shape and individual bounds; runtime additionally checks
 first arrival, ordering, hold intervals, scene duration and rectangle sums.
+
+### Coordinate spaces
+
+Every element supports optional space: "scene" (default) or "screen". Omission
+normalizes to "scene"; explicit null and unknown values are rejected. This is
+available for every existing element type, not just text and bubbles. Without
+a camera both spaces render identically. x/y, width/height, motionPath, placement
+and group offsets still use the same project-percentage/pixel conventions in
+the element's own space. "screen" means exempt from the SCENE CAMERA, not from
+its own animation, motion, rotation, placement, opacity or scene transitions.
+It does not persist the element across scenes or add time. Camera/space do not
+change any audio intervals, mute settings or levels.
+
+For local element geometry L, the composed own-space matrix is
+M = group * placement * element (the existing entry/exit/motion transform).
+Its final pre-transition screen matrix is C*M in scene space and M in screen
+space, where C is the scene-time camera matrix. Backgrounds remain scene space;
+continuous project backgrounds remain outside the scene composition. All
+scene elements retain the original array z-order, even when scene/screen spaces
+are interleaved: screen elements are NOT an automatically topmost overlay.
+Clipping is applied at the final viewport, not before camera compensation.
+Transitions are applied after composing BOTH spaces, with the outgoing camera
+and anchored bubble tail evaluated at exactly the outgoing scene duration.
+
+Flat groups infer their space from their members. Every member must have the
+same space, even without a camera; mixed-space groups are rejected by runtime.
+Groups have no separate space field, and group.space is unknown/invalid.
+Grouping incompatible selections is disabled with an explanatory tooltip.
+Changing a group's space in the editor changes all members in one undo step.
+Changing only one member of a multi-member group to a different space is
+rejected; dissolve the group or use the group settings instead.
+
+Anchor positions remain percentages of the target ELEMENT BOX, not intrinsic
+image/crop coordinates. An anchored bubble can reference a speaker in either
+space. Compute the speaker mouth with its final pre-transition screen matrix,
+then apply the inverse final screen matrix of the bubble to obtain its local
+tail tip. This includes entry/exit, motionPath, rotation, placement, group and
+camera transformations. Scene-to-screen and screen-to-scene references both
+work deterministically during pause, seek, restart and export. Manual tails
+remain local to the bubble and do not track another element. If a speaker is
+hidden by its interval or group, its geometric anchor still resolves as before;
+there is no automatic tail suppression or clipping at the speaker's box.
+Overview temporarily uses C=identity for both rendering and anchor conversion.
+
+Example element fields (inside an ordinary scene, with a valid speaker anchor):
+space: "screen", type: "bubble", bubble.tail.mode: "anchor",
+bubble.tail.element: "manager", bubble.tail.anchor: "mouth".
+No new element types, rigging, nested groups or general keyframe system are added.
+Schema validates the space enum/default; homogeneous group membership is a
+runtime constraint because it requires resolving scene element references.
 
 ### Native comic bubbles and speaker anchors
 
@@ -574,9 +634,10 @@ percent, relative to the untransformed element rectangle, not actual image pixel
 Names use the identifier syntax above, maximum 16 per element, unique within that
 element. Reused names on different elements are allowed. Extra fields/nulls reject.
 An image using contain may have letterboxing: place the mouth anchor accordingly.
-Anchor transforms exactly follow the element's Motion Path, entry/exit rotation,
-translation and scale, with transform-origin at the element center. The target is
-transformed into the bubble's local space using the inverse bubble transform.
+Anchor transforms follow Motion Path, entry/exit rotation, translation and scale,
+placement, flat groups and the element's scene/screen camera mapping. The target
+is transformed from final pre-transition screen coordinates into the bubble's
+local space using its inverse final screen transform (see Coordinate spaces).
 The bubble itself never moves to follow its speaker. Hidden speakers still supply
 their timeline-computed anchor: bubble and speaker visibility are independent.
 Editor anchor renaming updates references; deleting anchors/elements detaches
@@ -671,12 +732,12 @@ use null to disable it. An object (including {}) supplies these defaults:
 - type: "line"; allowed "line", "bezier" (cubic), "ellipse" (including circles), or "segments" (a connected route).
 - start: 0 seconds from SCENE start, independently of element.at; 0–scene.duration.
 - duration: 3 seconds per traversal; 0.01–3600.
-- easing: "linear" (approximately constant screen-pixel speed) or "ease-in-out".
+- easing: "linear" (approximately constant own-space project-pixel speed; camera movement can change visible speed) or "ease-in-out".
 - repeat: "once", "loop" or "ping-pong"; default "once". Loop jumps back to the
   start (continuous on an ellipse); ping-pong reverses direction every traversal.
 - after: "hold" or "reset"; default "hold". Only once uses this: keep endpoint,
   or return to path start as soon as duration has elapsed.
-- orient: false; true adds the path's screen-space tangent angle to element.rotation.
+- orient: false; true adds the path's own-space tangent angle to element.rotation.
   Reversed ping-pong motion faces the reverse direction. Zero tangents use 0 degrees.
 - from: {x:0,y:0}, to: {x:30,y:0}; used for line and bezier.
 - control1: {x:10,y:-20}, control2: {x:20,y:20}; cubic bezier controls.
@@ -800,7 +861,8 @@ ID uniqueness, selected video end > start or bounds against referenced duration,
 Base64 block/padding validity and decoded-byte limits, safe SVG contents, forbidden
 stream MIME names, real media decoding or
 measured duration, whole-JSON byte size, image dimensions, music polyphony or
-particle budgets. Group membership exclusivity, same-scene member references,
+particle budgets. Camera station ordering/holds/duration/rectangle bounds,
+homogeneous group spaces, group membership exclusivity, same-scene member references,
 group/element ID collisions, interval bounds against scene duration and matrix
 invertibility and image crop x+width/y+height bounds also require runtime validation. Video/image authoring prefixes in the schema are canonical
 lowercase, while the video runtime prefix is case-insensitive. Schema maxLength

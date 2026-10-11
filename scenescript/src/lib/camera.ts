@@ -1,3 +1,4 @@
+import type {Matrix} from './comic.ts';
 /** Percentages of the project viewport; height uses the same percentage as width. */
 export type CameraStation={at:number;x:number;y:number;width:number;hold:number;easing:'linear'|'ease-in-out'};
 export type Camera={stations:CameraStation[]};
@@ -29,3 +30,6 @@ export function cameraState(camera:Camera|null|undefined,time:number){
  return {x:previous.x,y:previous.y,width:previous.width};
 }
 export function cameraTransform(camera:Camera|null|undefined,time:number,width:number,height:number){const c=cameraState(camera,time),scale=100/c.width;return `matrix(${scale},0,0,${scale},${-c.x*width/100*scale},${-c.y*height/100*scale})`;}
+
+export function cameraMatrix(camera:Camera|null|undefined,time:number,w:number,h:number):Matrix{const c=cameraState(camera,time),scale=100/c.width;return {a:scale,b:0,c:0,d:scale,e:-c.x*w/c.width,f:-c.y*h/c.width};}
+export function cameraInverseMatrix(camera:Camera|null|undefined,time:number,w:number,h:number):Matrix{const c=cameraState(camera,time);return {a:c.width/100,b:0,c:0,d:c.width/100,e:c.x*w/100,f:c.y*h/100};}

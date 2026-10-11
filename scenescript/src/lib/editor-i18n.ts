@@ -1,5 +1,13 @@
 import type { Language } from './i18n';
 const words = {
+ groupSpaceMismatch:["Eine Gruppe darf nur Elemente aus demselben Koordinatenraum enthalten.","A group can only contain elements in the same coordinate space.","Un grupo solo puede contener elementos del mismo espacio.","Un groupe ne peut contenir que des éléments du même espace."],
+ "space":["Koordinatenraum", "Coordinate space", "Espacio de coordenadas", "Espace de coordonnées"],
+ "space-scene":["Szene (mit Kamera)", "Scene (moves with camera)", "Escena (con cámara)", "Scène (avec caméra)"],
+ "space-screen":["Bildschirm (fest)", "Screen (fixed)", "Pantalla (fijo)", "Écran (fixe)"],
+ "cameraFrameOverview":["Gesamtansicht mit Kamerarahmen", "Overview with camera frame", "Vista general con marco de cámara", "Vue générale avec cadre caméra"],
+ "cameraSelectStation":["Station im Bild bearbeiten", "Edit station in overview", "Editar estación en la vista general", "Modifier la station en vue générale"],
+ "cameraFrameHint":["Station über das Rahmen-Icon wählen. Rahmen verschieben oder an den Ecken ziehen. Pfeiltasten verschieben; an den Ecken ändern sie die Größe. Umschalt: größere Schritte.", "Select a station using its frame icon. Move the frame or drag its corners. Arrow keys move it; corner arrow keys resize it. Shift: larger steps.", "Elige una estación con el icono del marco. Mueve el marco o sus esquinas. Las flechas mueven; en las esquinas cambian el tamaño. Mayús: pasos mayores.", "Sélectionnez une station avec son icône de cadre. Déplacez le cadre ou ses coins. Les flèches déplacent ; aux coins elles redimensionnent. Maj : pas plus grands."],
+
  "sceneCamera":["Szenenkamera", "Scene camera", "Cámara de escena", "Caméra de scène"],
  "cameraHint":["Stationen bestimmen Ankunftszeit, Ausschnitt und Haltezeit. X/Y und Breite in Projektprozent; Höhe folgt dem Projektformat. Übernehmen speichert alle Änderungen.", "Stations define arrival time, rectangle and hold. X/Y and width use project percentages; height follows the project format. Apply saves all changes.", "Las estaciones definen llegada, recorte y pausa. X/Y y ancho en porcentajes del proyecto; la altura sigue el formato. Aplicar guarda los cambios.", "Les stations définissent arrivée, cadrage et pause. X/Y et largeur en pourcentages du projet ; hauteur selon le format. Appliquer enregistre."],
  "cameraStation":["Kamerastation", "Camera station", "Estación de cámara", "Station de caméra"],

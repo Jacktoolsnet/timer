@@ -755,7 +755,7 @@ body.recording .comic-edit-overlay{display:none}
 #panels-form select{height:40px}
 #crop-form .number-stepper input,#panels-form select{min-height:40px}
 
-.scene-camera-world{position:absolute;inset:0;width:100%;height:100%;transform-origin:0 0;overflow:hidden}
+.scene-camera-world{position:absolute;inset:0;width:100%;height:100%;transform-origin:0 0;overflow:visible}
 #camera-dialog{width:min(880px,94vw);padding:0;max-height:90dvh;overflow:hidden}
 #camera-dialog[open]{display:flex;flex-direction:column}
 #camera-dialog .dialog-inner{padding:18px;overflow:auto;min-height:0}
@@ -777,3 +777,16 @@ body.recording .comic-edit-overlay{display:none}
 #camera-form fieldset>button:hover{background:var(--accent-soft);color:var(--accent)}
 
 #camera-options .text-style-toggle,#scene-form .text-style-toggle:has([name=cameraOverview]){display:flex;flex-direction:row;align-items:center;justify-content:space-between;min-height:40px;gap:12px}
+
+.space-badge{display:inline-block;flex:none;color:var(--accent);margin-right:5px;font-size:.9em}
+.element-selection-row[data-space=screen] .space-badge{color:var(--text)}
+
+.camera-frame-overlay{position:absolute;inset:0;pointer-events:none}
+.camera-edit-frame{position:absolute;border:2px solid #ffcf69;box-shadow:0 0 0 2000px #0006;box-sizing:border-box;pointer-events:auto;touch-action:none;cursor:move}
+.camera-edit-frame:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+#camera-preview .camera-frame-corner{position:absolute;width:18px;height:18px;min-height:18px;padding:0;border:2px solid #fff;border-radius:5px;background:var(--accent);touch-action:none;pointer-events:auto;z-index:1}
+.camera-frame-corner.nw{left:-9px;top:-9px;cursor:nwse-resize}.camera-frame-corner.ne{right:-9px;top:-9px;cursor:nesw-resize}.camera-frame-corner.sw{left:-9px;bottom:-9px;cursor:nesw-resize}.camera-frame-corner.se{right:-9px;bottom:-9px;cursor:nwse-resize}
+#camera-form .camera-station-select{display:inline-grid;place-items:center;vertical-align:middle;margin-left:12px;width:32px;height:32px;padding:5px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--accent)}
+#camera-form .camera-station-select[aria-pressed=true]{background:var(--accent-soft)}
+
+.elementLayoutGroup .text-settings-fields>label:has([name=space]){grid-column:1/-1}

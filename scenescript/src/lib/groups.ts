@@ -1,3 +1,4 @@
+import {cameraMatrix,cameraInverseMatrix} from './camera.ts';
 import {animationState,newElement,type Element,type Scene, type Group} from './model.ts';
 import {elementMatrix,multiplyMatrix,type Matrix} from './comic.ts';
 export const identity:Matrix={a:1,b:0,c:0,d:1,e:0,f:0};
@@ -20,15 +21,16 @@ export function parentMatrix(e:Element,s:Scene,time:number,w:number,h:number):Ma
  const g=s.groups?.find(g=>g.members.includes(e.id));return multiplyMatrix(g?groupState(g,time,w,h,s.duration).matrix:identity,e.placement??identity);
 }
 export function sceneElementMatrix(e:Element,s:Scene,time:number,w:number,h:number):Matrix{return multiplyMatrix(parentMatrix(e,s,time,w,h),elementMatrix(e,time,w,h,s.duration));}
-export function sceneElementState(e:Element,s:Scene,time:number,w:number,h:number){
+export function displayElementMatrix(e:Element,s:Scene,time:number,w:number,h:number):Matrix{const m=sceneElementMatrix(e,s,time,w,h);return e.space==='screen'?m:multiplyMatrix(cameraMatrix(s.camera,time,w,h),m);}
+export function sceneElementState(e:Element,s:Scene,time:number,w:number,h:number,compensateCamera=false){
  const state=animationState(e,time,w,h,s.duration),g=s.groups?.find(g=>g.members.includes(e.id)),gs=g?groupState(g,time,w,h,s.duration):null;
- const matrix=sceneElementMatrix(e,s,time,w,h);
+ const native=sceneElementMatrix(e,s,time,w,h),matrix=compensateCamera&&e.space==='screen'?multiplyMatrix(cameraInverseMatrix(s.camera,time,w,h),native):native;
  // Matrix maps local element pixels to world pixels; CSS left/top are still applied outside it.
  const transform=`matrix(${matrix.a},${matrix.b},${matrix.c},${matrix.d},${matrix.e-e.x*w/100},${matrix.f-e.y*h/100})`;
  return {...state,visible:state.visible&&(!gs||gs.visible),opacity:state.opacity*(gs?.opacity??1),transform};
 }
 export function newGroup(s:Scene,members:string[],id:string):Group{
- const items=s.elements.filter(e=>members.includes(e.id));
+ const items=s.elements.filter(e=>members.includes(e.id));if(new Set(items.map(e=>e.space)).size>1)throw new Error('groupSpaceMismatch');
  return {id,name:'Group',members:[...members],pivot:{x:(Math.min(...items.map(e=>e.x))+Math.max(...items.map(e=>e.x+e.width)))/2,y:(Math.min(...items.map(e=>e.y))+Math.max(...items.map(e=>e.y+e.height)))/2},x:0,y:0,rotation:0,opacity:1,at:0,until:null,animation:'none',animationDuration:1,exitAnimation:'none',exitDuration:.5,motionPath:null};
 }
 /** Dissolve at the current playhead without changing the visible member geometry. */

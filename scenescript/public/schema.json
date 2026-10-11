@@ -457,6 +457,14 @@
                   ],
                   "default": null,
                   "description": "Applied only on image elements, before contain/cover fitting."
+                },
+                "space": {
+                  "enum": [
+                    "scene",
+                    "screen"
+                  ],
+                  "default": "scene",
+                  "description": "Scene follows the camera; screen stays in the viewport. All members of a flat group must use the same space (runtime constraint). Null is rejected."
                 }
               },
               "required": [
