@@ -1,9 +1,10 @@
+import {applyMatrix,inversePoint,type Matrix} from '../lib/comic';
 import {pathPoint,type MotionPath,type Point} from '../lib/motion-path';
 import type {Element} from '../lib/model';
 /** Editing overlay only. Coordinates are relative to the element's base position. */
-export function renderMotionPath(stage:HTMLElement,e:Element,w:number,h:number,update:(m:MotionPath)=>void,finish:()=>void){
+export function renderMotionPath(stage:HTMLElement,e:Element,w:number,h:number,update:(m:MotionPath)=>void,finish:()=>void,parent:Matrix={a:1,b:0,c:0,d:1,e:0,f:0}){
  const m=e.motionPath!;const ns='http://www.w3.org/2000/svg',svg=document.createElementNS(ns,'svg');svg.classList.add('motion-path-overlay');svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.setAttribute('aria-hidden','true');
- const xy=(p:Point)=>`${(e.x+p.x)*w/100},${(e.y+p.y)*h/100}`;
+ const world=(p:Point)=>applyMatrix(parent,{x:(e.x+p.x)*w/100,y:(e.y+p.y)*h/100});const xy=(p:Point)=>{const q=world(p);return `${q.x},${q.y}`;};
  const line=document.createElementNS(ns,'polyline');line.setAttribute('points',Array.from({length:m.type==='segments'?m.segments.length*64+1:129},(_,i)=>xy(pathPoint(m,i/(m.type==='segments'?m.segments.length*64:128)))).join(' '));line.classList.add('motion-path-line');svg.append(line);
  if(m.type==='bezier'){const guide=document.createElementNS(ns,'polyline');guide.setAttribute('points',[m.from,m.control1,m.control2,m.to].map(xy).join(' '));guide.classList.add('motion-path-guides');svg.append(guide);}
  if(m.type==='segments')m.segments.forEach((s,i)=>{if(s.type!=='bezier')return;const guide=document.createElementNS(ns,'polyline');guide.setAttribute('points',[i?m.segments[i-1].to:m.from,s.control1,s.control2,s.to].map(xy).join(' '));guide.classList.add('motion-path-guides');svg.append(guide);});
@@ -11,10 +12,10 @@ export function renderMotionPath(stage:HTMLElement,e:Element,w:number,h:number,u
  // Keep waypoints above overlapping controls so the connected route remains draggable.
  points.sort((a,b)=>Number(b[0].includes('control'))-Number(a[0].includes('control')));
  const r=12*w/Math.max(1,stage.getBoundingClientRect().width);
- for(const [key,p] of points){const c=document.createElementNS(ns,'circle');c.setAttribute('cx',String((e.x+p.x)*w/100));c.setAttribute('cy',String((e.y+p.y)*h/100));c.setAttribute('r',String(r));c.dataset.pathPoint=key;if(key.includes('control'))c.classList.add('path-control-handle');svg.append(c);
+ for(const [key,p] of points){const c=document.createElementNS(ns,'circle');c.setAttribute('cx',String(world(p).x));c.setAttribute('cy',String(world(p).y));c.setAttribute('r',String(r));c.dataset.pathPoint=key;if(key.includes('control'))c.classList.add('path-control-handle');svg.append(c);
   c.onpointerdown=event=>{
    if(event.button!==0)return;event.preventDefault();event.stopPropagation();const original=structuredClone(m),rect=stage.getBoundingClientRect(),sx=event.clientX,sy=event.clientY,id=event.pointerId;
-   const move=(ev:PointerEvent)=>{if(ev.pointerId!==id)return;ev.preventDefault();const dx=(ev.clientX-sx)/rect.width*100,dy=(ev.clientY-sy)/rect.height*100,next=structuredClone(original);
+   const move=(ev:PointerEvent)=>{if(ev.pointerId!==id)return;ev.preventDefault();const a=inversePoint(parent,{x:0,y:0}),b=inversePoint(parent,{x:(ev.clientX-sx)/rect.width*w,y:(ev.clientY-sy)/rect.height*h});const dx=(b.x-a.x)/w*100,dy=(b.y-a.y)/h*100,next=structuredClone(original);
     if(key.startsWith('segment-')){const [,index,property]=key.split('-');(next.segments[Number(index)] as unknown as Record<string,unknown>)[property]={x:Math.max(-200,Math.min(200,p.x+dx)),y:Math.max(-200,Math.min(200,p.y+dy))};}
     else if(key==='radiusX')next.radiusX=Math.max(.1,Math.min(200,original.radiusX+dx));
     else if(key==='radiusY')next.radiusY=Math.max(.1,Math.min(200,original.radiusY+dy));

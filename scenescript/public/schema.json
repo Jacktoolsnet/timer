@@ -434,6 +434,17 @@
                   "minimum": 0.01,
                   "maximum": 3600,
                   "default": 0.5
+                },
+                "placement": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/placement"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null
                 }
               },
               "required": [
@@ -486,6 +497,14 @@
               }
             ],
             "default": null
+          },
+          "groups": {
+            "type": "array",
+            "maxItems": 50,
+            "items": {
+              "$ref": "#/$defs/group"
+            },
+            "default": []
           }
         },
         "required": [
@@ -1555,6 +1574,195 @@
           "description": "Anchor mode requires an existing element and named anchor in the same scene. Manual target is a local bubble percentage, independent of speaker visibility."
         }
       }
+    },
+    "placement": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "a": {
+          "type": "number",
+          "minimum": -1000000,
+          "maximum": 1000000
+        },
+        "b": {
+          "type": "number",
+          "minimum": -1000000,
+          "maximum": 1000000
+        },
+        "c": {
+          "type": "number",
+          "minimum": -1000000,
+          "maximum": 1000000
+        },
+        "d": {
+          "type": "number",
+          "minimum": -1000000,
+          "maximum": 1000000
+        },
+        "e": {
+          "type": "number",
+          "minimum": -1000000,
+          "maximum": 1000000
+        },
+        "f": {
+          "type": "number",
+          "minimum": -1000000,
+          "maximum": 1000000
+        }
+      },
+      "required": [
+        "a",
+        "b",
+        "c",
+        "d",
+        "e",
+        "f"
+      ],
+      "description": "Static affine placement, applied before the group transform. Runtime additionally rejects singular matrices."
+    },
+    "group": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_-]+$"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 200,
+          "default": "Group",
+          "description": "Optional display title; empty uses a content-based label."
+        },
+        "x": {
+          "type": "number",
+          "minimum": -1000,
+          "maximum": 1000,
+          "default": 0
+        },
+        "y": {
+          "type": "number",
+          "minimum": -1000,
+          "maximum": 1000,
+          "default": 0
+        },
+        "rotation": {
+          "type": "number",
+          "minimum": -360,
+          "maximum": 360,
+          "default": 0
+        },
+        "opacity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 1
+        },
+        "animation": {
+          "enum": [
+            "none",
+            "fade",
+            "slide-left",
+            "slide-up",
+            "zoom",
+            "pan"
+          ],
+          "default": "none"
+        },
+        "at": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 3600,
+          "default": 0
+        },
+        "until": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 3600,
+          "default": null,
+          "description": "Scene-local exclusive end; must be > at and <= scene duration. Null/omitted: scene end, retaining legacy final paused-frame behavior."
+        },
+        "animationDuration": {
+          "type": "number",
+          "minimum": 0.01,
+          "maximum": 3600,
+          "default": 1
+        },
+        "exitAnimation": {
+          "enum": [
+            "none",
+            "fade",
+            "slide-left",
+            "slide-right",
+            "slide-up",
+            "slide-down",
+            "zoom-out"
+          ],
+          "default": "none"
+        },
+        "exitDuration": {
+          "type": "number",
+          "minimum": 0.01,
+          "maximum": 3600,
+          "default": 0.5
+        },
+        "motionPath": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/motionPath"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "pivot": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "x": {
+              "type": "number",
+              "minimum": -1000,
+              "maximum": 1000
+            },
+            "y": {
+              "type": "number",
+              "minimum": -1000,
+              "maximum": 1000
+            }
+          },
+          "required": [
+            "x",
+            "y"
+          ],
+          "default": {
+            "x": 50,
+            "y": 50
+          }
+        },
+        "members": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[a-zA-Z0-9_-]+$"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "members"
+      ]
     }
   }
 }

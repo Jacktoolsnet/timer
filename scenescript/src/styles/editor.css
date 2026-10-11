@@ -706,3 +706,32 @@ body.recording .studio-preview > :not(#preview-slot){display:none}
 body.recording .comic-edit-overlay{display:none}
 .element-interval{position:relative;height:12px;margin:16px 0 4px;background:var(--bg);border:1px solid var(--line);border-radius:6px;overflow:hidden}
 .element-interval>span{position:absolute;top:0;bottom:0;background:var(--accent);border-radius:5px}
+/* Multi-selection, flat group controllers and scene-relative interval tracks. */
+#element-list .element-selection-row{display:flex;align-items:center;gap:8px;min-width:0}
+#element-list .element-selection-row>input{width:16px;height:16px;flex:none;accent-color:var(--accent)}
+#element-list .element-selection-row>button{min-width:0;flex:1}
+.element-group-row button{font-weight:700}
+.edit-timeline-panel{grid-column:1 / span 3;grid-row:4;min-width:0}
+.preview-rail{grid-row:1 / span 4}
+.edit-timeline-panel>header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.timeline-snap{display:flex;align-items:center;gap:12px;font-size:.85rem}
+#edit-timeline{--track-label:130px;max-height:460px;overflow:auto;position:relative;min-width:0}
+.timeline-ruler,.timeline-row{display:grid;grid-template-columns:var(--track-label) minmax(0,1fr);gap:10px;min-height:42px;align-items:center}
+.timeline-ruler{position:sticky;top:0;z-index:2;background:var(--surface);font-size:.75rem}
+.timeline-scale{display:flex;justify-content:space-between;cursor:crosshair;padding:6px 0}
+.timeline-track-label{display:flex;min-width:0;align-items:center}
+.timeline-track-label button{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:5px;border:0;background:transparent;text-align:left}
+.timeline-track-label button:first-child:last-child{width:100%}
+.child-track .timeline-track-label{padding-left:12px}
+.timeline-lane{height:32px;position:relative;border-radius:6px;background:color-mix(in srgb,currentColor 7%,transparent);background-image:linear-gradient(to right,transparent calc(100% - 1px),color-mix(in srgb,currentColor 12%,transparent) 0);background-size:20% 100%}
+.timeline-lane:after{content:'';position:absolute;left:var(--playhead);top:0;bottom:0;border-left:2px solid #e38342;pointer-events:none;z-index:1}
+.timeline-bar{position:absolute;top:3px;height:26px;min-width:3px;border:1px solid color-mix(in srgb,currentColor 30%,transparent);border-radius:6px;background:color-mix(in srgb,#469ab7 40%,var(--surface));cursor:grab;touch-action:none;box-sizing:border-box}
+.group-track .timeline-bar{background:color-mix(in srgb,#ac71cd 40%,var(--surface))}
+.timeline-bar:focus-visible,.timeline-handle:focus-visible{outline:2px solid #e38342;outline-offset:2px}
+.timeline-entry,.timeline-exit{position:absolute;top:0;bottom:0;pointer-events:none;border-radius:5px;background:color-mix(in srgb,#5fc783 55%,transparent)}
+.timeline-entry{left:0}.timeline-exit{right:0;background:color-mix(in srgb,#e38342 55%,transparent)}
+.timeline-handle{position:absolute;top:0;bottom:0;width:10px;min-height:0;padding:0;border:0;border-radius:4px;background:color-mix(in srgb,currentColor 20%,transparent);cursor:ew-resize;touch-action:none;z-index:2}
+.timeline-handle.start{left:0}.timeline-handle.end{right:0}
+@media(max-width:900px){#edit-timeline{--track-label:95px}.timeline-handle{width:14px}.timeline-lane{height:40px}.timeline-bar{height:34px}}
+
+.edit-timeline-panel .timeline-snap{flex-direction:row;align-items:center;margin:0}

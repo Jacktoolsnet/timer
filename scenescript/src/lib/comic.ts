@@ -1,3 +1,4 @@
+import {sceneElementMatrix} from './groups.ts';
 import {animationState,type Element,type Scene} from './model.ts';
 import type {Point} from './motion-path.ts';
 
@@ -23,6 +24,7 @@ export function parseBubble(v:unknown,p:string):Bubble|null{
  return {kind:b.kind,padding:number(b.padding,p+'.padding',0,500),lineHeight:number(b.lineHeight,p+'.lineHeight',.5,4),tail:{mode:tail.mode as Bubble['tail']['mode'],target:point(tail.target,p+'.tail.target',-1000,1000),element:identifier(tail.element,p+'.tail.element',true),anchor:identifier(tail.anchor,p+'.tail.anchor',true),base:tail.base===null?null:number(tail.base,p+'.tail.base',-360,360),width:number(tail.width,p+'.tail.width',1,500),curve:number(tail.curve,p+'.tail.curve',-1,1)}};
 }
 export type Matrix={a:number;b:number;c:number;d:number;e:number;f:number};
+export function multiplyMatrix(l:Matrix,r:Matrix):Matrix{return {a:l.a*r.a+l.c*r.b,b:l.b*r.a+l.d*r.b,c:l.a*r.c+l.c*r.d,d:l.b*r.c+l.d*r.d,e:l.a*r.e+l.c*r.f+l.e,f:l.b*r.e+l.d*r.f+l.f};}
 export function applyMatrix(m:Matrix,p:Point):Point{return {x:m.a*p.x+m.c*p.y+m.e,y:m.b*p.x+m.d*p.y+m.f};}
 export function inversePoint(m:Matrix,p:Point):Point{const det=m.a*m.d-m.b*m.c;return {x:(m.d*(p.x-m.e)-m.c*(p.y-m.f))/det,y:(-m.b*(p.x-m.e)+m.a*(p.y-m.f))/det};}
 /** Same transform-origin and operation order as the CSS renderer. */
@@ -36,8 +38,8 @@ export function bubbleTarget(e:Element,s:Scene,time:number,w:number,h:number):Po
  if(tail.mode==='anchor'){
   const speaker=s.elements.find(v=>v.id===tail.element),anchor=speaker?.anchors[tail.anchor];
   if(speaker&&anchor){
-   const world=applyMatrix(elementMatrix(speaker,time,w,h,s.duration),{x:anchor.x*speaker.width*w/10000,y:anchor.y*speaker.height*h/10000});
-   return inversePoint(elementMatrix(e,time,w,h,s.duration),world);
+   const world=applyMatrix(sceneElementMatrix(speaker,s,time,w,h),{x:anchor.x*speaker.width*w/10000,y:anchor.y*speaker.height*h/10000});
+   return inversePoint(sceneElementMatrix(e,s,time,w,h),world);
   }
  }
  return {x:tail.target.x*e.width*w/10000,y:tail.target.y*e.height*h/10000};

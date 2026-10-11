@@ -281,6 +281,9 @@ they cannot select videos. A matching ID in the wrong namespace does not resolve
 Bubble tail.element selects a globally unique element ID, but it must be in the
 same scene as the bubble. tail.anchor selects a name from that element's anchors,
 a local namespace independent of assets and other elements' anchor names.
+Group IDs use the same syntax and are unique per scene, with no collision with
+that scene’s element IDs. Group members resolve only to same-scene element IDs
+and each element may belong to at most one group (see Groups below).
 Empty references must be "", not a URL, file path or an invented placeholder ID.
 
 ### Assets and image limits
@@ -339,6 +342,7 @@ Optional fields and their defaults:
 - name: "Scene"; string, maximum 200 UTF-16 code units.
 - duration: 5; number, 0.1–3600 seconds.
 - narration: null; optional scene-local imported speech clip (see Embedded audio).
+- groups: []; flat group controllers (see Groups below); omitted defaults to [], null is rejected.
 - background: "#263b42"; #RRGGBB color.
 - backgroundEnabled: true; boolean. False hides scene color/gradient and background image, revealing the project simulation. Background settings are retained; scene elements are unaffected.
 - backgroundOpacity: 1; number 0–1, applies to the scene color/gradient and background image only, not its elements.
@@ -352,6 +356,7 @@ Scene durations add up to the total duration; transitions do not add time.
 
 Required: id and type. type must be "video", "text", "image", "shape" (a geometric form) or "simulation" or "bubble".
 Optional fields and their defaults:
+- placement: null; optional static affine matrix (see Groups below).
 - video: for type "video", omission supplies {asset:"",start:0,end:null,loop:false,
   muted:true,volume:1,fit:"cover"}; for other types omission supplies null.
   Explicit video:null is accepted for EVERY type, including "video". An object
@@ -411,8 +416,9 @@ asset renders no video there and does not fall back to the image asset.
 
 ### Native comic bubbles and speaker anchors
 
-Version remains 1.0. Old projects need no migration. Groups and nested coordinates,
-camera moves and character rigging are NOT part of this stage. A scene is a comic
+Version remains 1.0. Old projects need no migration. Flat group controllers are
+supported (see Groups below); nested coordinate containers, camera moves and
+character rigging are not supported. A scene is a comic
 panel/shot; reuse image assets for recurring characters instead of repeating Base64.
 
 For type "bubble", provide normal text/runs and typography, position/size,
@@ -492,11 +498,63 @@ An element end stops/mutes associated video playback and bounds exported video
 audio, including looped clips. Exit opacity alone does NOT fade video audio.
 Project music, project/scene narration and project background video keep their
 existing scopes. The editor shows the selected interval in its timing settings;
-there are no draggable interval tracks or groups in this stage.
+scene-relative draggable interval tracks and collapsible group tracks are available.
 
 Comic example: /comic.scenescript.json — original SVG characters, three English
 dialogue beats, speech/thought bubbles, a moving mouth anchor, explicit ends and
 fade-outs. Fetch and import this JSON like the existing /example.scenescript.json.
+
+### Groups, affine placement and timeline editing
+
+Optional scene field groups is an array (default [] when omitted; explicit null is
+invalid), max 50. A group is a flat controller over existing scene elements: it
+contains members, not nested child elements. Members retain their original
+project-percentage positions, own animation clocks and the scene elements array
+layer order. Grouping does not reorder layers or change element IDs. Each group
+requires id and members (1–100 existing same-scene element IDs, no duplicates).
+An element can belong to only one group. Groups cannot contain groups.
+Group IDs are unique within their scene and must not collide with an element ID
+in that scene; they are a separate namespace from asset/video/audio/scene IDs.
+Speaker references still target element IDs, never group IDs. Duplicating a scene
+remaps group IDs, members and speaker references; hidden speakers keep supplying
+anchors after all element/placement/group transforms.
+
+Group fields/defaults: name "Group" (max 200); x/y 0 (-1000..1000 project % offsets);
+pivot {x:50,y:50} (project %, each -1000..1000); rotation 0 (-360..360 degrees);
+opacity 1 (0..1); at 0; until null; animation "none"; animationDuration 1;
+exitAnimation "none"; exitDuration .5; motionPath null. Group animation supports
+none/fade/slide-left/slide-up/zoom/pan (not typewriter); exit options and motionPath
+options are the same as for elements. Timing limits/null rules match element at,
+until, animationDuration and exitDuration. Motion-path coordinates are project %
+offsets added to the group offset; the group rotates/scales about pivot. Member
+animations are composed first, then placement, then the group transform. Opacity
+multiplies and visibility requires both member and group intervals. Group opacity
+is visual only; it does not change video volume. Video audio stops outside the
+intersection of the member and group intervals; music/narration are unaffected.
+
+Optional element placement is null/omitted for identity, otherwise an affine matrix
+{a,b,c,d,e,f} mapping project pixels: x'=a*x+c*y+e, y'=b*x+d*y+f. All six coefficients
+are required, finite and within -1000000..1000000; abs(a*d-b*c) must be >=1e-8.
+This is static authoring data, not executable code. It applies to the whole animated
+element before its current group, including anchors and bubble tails. The editor
+uses it to preserve geometry when dissolving a translated/rotated/scaled group.
+Ungroup freezes the group's transform and visual opacity at the current playhead;
+it does not preserve the group's future animation or group visibility gate. Choose
+a visible frame first (invisible/fully transparent groups cannot be dissolved).
+Member animations remain intact. Resetting a baked placement is an explicit action.
+
+The editor supports project Undo/Redo (30 undo steps; sequential typing coalesces).
+New/imported projects start a fresh history; history is not saved in JSON. Native
+text-field shortcuts remain native; toolbar Undo/Redo restores whole-project
+edits. Global Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z and Ctrl/Cmd+Y work outside text fields.
+Timeline tracks show scene-relative intervals, entry/exit regions and a playhead.
+Move an interval or its start/end by pointer or arrow keys (0.1 s; Shift 1 s).
+Optional pointer snapping uses a 0.1-second grid. Explicit ends must stay >at and
+within scene duration. Moving an omitted-end interval makes its new end explicit;
+editing just its start keeps until:null. Timelines do not shift independent
+motionPath.start or video clip start/end when element at changes. Group tracks
+can collapse; children remain independently editable. These controls do not add
+JSON fields. No nested groups, keyframe tracks or camera/rigging are supported.
 
 ### Motion paths
 
@@ -602,8 +660,12 @@ Actual validator behavior is asymmetric:
   settings object with no asset. Root music/backgroundSimulation omitted/null disable them.
 - Root thumbnail omitted/null disables it; thumbnail.name/data reject null.
 - Root description/hashtags default to "" only on omission, not on explicit null.
-- Each optional scene field listed above uses its default when omitted OR null.
+- Optional scene fields use their default when omitted OR null, EXCEPT groups:
+  groups defaults to [] only on omission; explicit null is rejected.
 - Scene id/elements and asset name/data do not accept null.
+- Element placement omitted/null means identity; matrix coefficients reject null.
+- Group fields default only on omission, except until and motionPath also accept
+  null. Required id/members reject null. Group pivot requires both x and y.
 - Element motionPath omitted/null disables path movement; individual path fields reject null.
 - Element fillGradient accepts explicit null, meaning solid/no gradient.
 - Element fillColor omitted OR null uses legacy element.color (or its type default), except bubble, which uses white.
@@ -627,7 +689,9 @@ ID uniqueness, selected video end > start or bounds against referenced duration,
 Base64 block/padding validity and decoded-byte limits, safe SVG contents, forbidden
 stream MIME names, real media decoding or
 measured duration, whole-JSON byte size, image dimensions, music polyphony or
-particle budgets. Video/image authoring prefixes in the schema are canonical
+particle budgets. Group membership exclusivity, same-scene member references,
+group/element ID collisions, interval bounds against scene duration and matrix
+invertibility also require runtime validation. Video/image authoring prefixes in the schema are canonical
 lowercase, while the video runtime prefix is case-insensitive. Schema maxLength
 counts Unicode code points; runtime limits use UTF-16 code units. The typed schema
 intentionally excludes some accepted null-to-default forms (root assets/videos,

@@ -1,3 +1,5 @@
+import {parsePlacement} from './groups.ts';
+import type {Matrix} from './comic.ts';
 import {defaultBubble,parseBubble,parseAnchors,type Bubble,type Anchors} from './comic.ts';
 import {parseNarration,validateAudioData,type AudioAsset,type Narration} from './audio.ts';
 import {parseMotionPath,motionPathState,type MotionPath} from './motion-path.ts';
@@ -14,21 +16,22 @@ export const shapeTypes=['rectangle','ellipse','triangle','diamond','star','arro
 export type Asset = { name:string; data:string };
 export type TextRun = {text:string} & Partial<Pick<Element,'font'|'fontSize'|'color'|'bold'|'italic'|'underline'|'strikethrough'>>;
 export type Element = {
- id:string; name:string; type:'text'|'image'|'shape'|'simulation'|'video'|'bubble'; bubble:Bubble|null; anchors:Anchors; until:number|null; exitAnimation:typeof exitAnimations[number]; exitDuration:number; video:VideoSettings|null; text:string; runs:TextRun[]; asset:string; x:number; y:number; width:number; height:number;
+ placement:Matrix|null; id:string; name:string; type:'text'|'image'|'shape'|'simulation'|'video'|'bubble'; bubble:Bubble|null; anchors:Anchors; until:number|null; exitAnimation:typeof exitAnimations[number]; exitDuration:number; video:VideoSettings|null; text:string; runs:TextRun[]; asset:string; x:number; y:number; width:number; height:number;
  simulation:Simulation|null; color:string; fillGradient:Gradient|null; fillColor:string; borderColor:string; borderWidth:number; shapeType:typeof shapeTypes[number]; borderStyle:'solid'|'dashed'|'dotted'|'double'; font:typeof fonts[number]; fontSize:number; align:'left'|'center'|'right'; bold:boolean; italic:boolean; underline:boolean; strikethrough:boolean;
  opacity:number; rotation:number; radius:number; fit:'cover'|'contain';
  motionPath:MotionPath|null; animation:typeof animations[number]; at:number; animationDuration:number;
 };
 export const sceneTransitions=['none','fade','crossfade','slide-left','slide-right','slide-up','slide-down','wipe-left','wipe-right','wipe-up','wipe-down','zoom-in','zoom-out','through-black'] as const;
-export type Scene = {narration:Narration|null; id:string; name:string; duration:number; background:string; backgroundEnabled:boolean; backgroundOpacity:number; backgroundGradient:Gradient|null; backgroundAsset:string; transition:typeof sceneTransitions[number]; transitionDuration:number; elements:Element[] };
+export type Group=Pick<Element,'id'|'name'|'x'|'y'|'rotation'|'opacity'|'animation'|'at'|'until'|'animationDuration'|'exitAnimation'|'exitDuration'|'motionPath'>&{members:string[];pivot:{x:number;y:number}};
+export type Scene = {groups:Group[]; narration:Narration|null; id:string; name:string; duration:number; background:string; backgroundEnabled:boolean; backgroundOpacity:number; backgroundGradient:Gradient|null; backgroundAsset:string; transition:typeof sceneTransitions[number]; transitionDuration:number; elements:Element[] };
 export type Project = { version:'1.0'; title:string; description:string; hashtags:string; thumbnail:Asset|null; audios:Record<string,AudioAsset>; narration:Narration|null; audioDucking:boolean; format:keyof typeof formats; backgroundSimulation:Simulation|null; backgroundVideo:VideoSettings|null; videos:Record<string,VideoAsset>; music:Music|null; assets:Record<string,Asset>; scenes:Scene[] };
 export const MAX_FILE_BYTES = 160 * 1024 * 1024;
 export const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 export function newElement(type:Element['type'], id:string = crypto.randomUUID()):Element {
- return {id,name:'',type,bubble:type==='bubble'?defaultBubble():null,anchors:{},until:null,exitAnimation:'none',exitDuration:.5,motionPath:null,video:type==='video'?defaultVideo():null,simulation:type==='simulation'?defaultSimulation():null,text:type==='bubble'?'Hello!':type==='text'?'Your story starts here.':'',runs:[],asset:'',x:10,y:type==='bubble'?10:35,width:type==='bubble'?40:80,height:type==='bubble'?24:30,color:type==='bubble'?'#222222':type==='shape'?'#b86445':'#ffffff',fillGradient:null,fillColor:type==='shape'?'#b86445':'#ffffff',borderColor:type==='bubble'?'#222222':'none',borderWidth:4,shapeType:'rectangle',borderStyle:'solid',font:'Arial',fontSize:type==='bubble'?48:90,align:'center',bold:false,italic:false,underline:false,strikethrough:false,opacity:1,rotation:0,radius:0,fit:'contain',animation:'fade',at:0,animationDuration:1};
+ return {placement:null,id,name:'',type,bubble:type==='bubble'?defaultBubble():null,anchors:{},until:null,exitAnimation:'none',exitDuration:.5,motionPath:null,video:type==='video'?defaultVideo():null,simulation:type==='simulation'?defaultSimulation():null,text:type==='bubble'?'Hello!':type==='text'?'Your story starts here.':'',runs:[],asset:'',x:10,y:type==='bubble'?10:35,width:type==='bubble'?40:80,height:type==='bubble'?24:30,color:type==='bubble'?'#222222':type==='shape'?'#b86445':'#ffffff',fillGradient:null,fillColor:type==='shape'?'#b86445':'#ffffff',borderColor:type==='bubble'?'#222222':'none',borderWidth:4,shapeType:'rectangle',borderStyle:'solid',font:'Arial',fontSize:type==='bubble'?48:90,align:'center',bold:false,italic:false,underline:false,strikethrough:false,opacity:1,rotation:0,radius:0,fit:'contain',animation:'fade',at:0,animationDuration:1};
 }
 export function newScene(id:string = crypto.randomUUID()):Scene {
- return {narration:null,id,name:'Scene',duration:5,background:'#263b42',backgroundEnabled:true,backgroundOpacity:1,backgroundGradient:null,backgroundAsset:'',transition:'fade',transitionDuration:0.5,elements:[]};
+ return {groups:[],narration:null,id,name:'Scene',duration:5,background:'#263b42',backgroundEnabled:true,backgroundOpacity:1,backgroundGradient:null,backgroundAsset:'',transition:'fade',transitionDuration:0.5,elements:[]};
 }
 export function demoProject():Project {
  const first = newScene('intro'); first.name='A new idea';
@@ -95,7 +98,7 @@ export function parseProject(input:string):Project {
    const bubble=parseBubble(merged.bubble,ep+'.bubble');if(type==='bubble'&&!bubble)throw new Error(ep+'.bubble: required for bubble element');
    const anchors=parseAnchors(merged.anchors,ep+'.anchors');
    const text=runs.length?str(runs.map(r=>r.text).join(''),`${ep}.text`):str(merged.text,`${ep}.text`);
-   return {id:eid,bubble,anchors,until,exitAnimation:one(merged.exitAnimation,exitAnimations,ep+'.exitAnimation'),exitDuration:num(merged.exitDuration,ep+'.exitDuration',.01,3600),motionPath:parseMotionPath(merged.motionPath,duration,ep+'.motionPath'),video:parseVideo(merged.video,videos,ep+'.video'),simulation,name:str(merged.name,`${ep}.name`,200),type,text,runs,asset:ref(merged.asset,`${ep}.asset`),
+   return {placement:parsePlacement(merged.placement,ep+'.placement'),id:eid,bubble,anchors,until,exitAnimation:one(merged.exitAnimation,exitAnimations,ep+'.exitAnimation'),exitDuration:num(merged.exitDuration,ep+'.exitDuration',.01,3600),motionPath:parseMotionPath(merged.motionPath,duration,ep+'.motionPath'),video:parseVideo(merged.video,videos,ep+'.video'),simulation,name:str(merged.name,`${ep}.name`,200),type,text,runs,asset:ref(merged.asset,`${ep}.asset`),
     x:num(merged.x,`${ep}.x`,-100,100),y:num(merged.y,`${ep}.y`,-100,100),width:num(merged.width,`${ep}.width`,0.1,200),height:num(merged.height,`${ep}.height`,0.1,200),
     fillGradient:parseGradient(merged.fillGradient,ep+'.fillGradient'),color:color(merged.color,`${ep}.color`),fillColor:(e.fillColor??(type==='bubble'?defaults.fillColor:merged.color))==='none'?'none':color(e.fillColor??(type==='bubble'?defaults.fillColor:merged.color),`${ep}.fillColor`),borderColor:merged.borderColor==='none'?'none':color(merged.borderColor,`${ep}.borderColor`),borderWidth:num(merged.borderWidth,`${ep}.borderWidth`,0,500),shapeType:one(merged.shapeType,shapeTypes,`${ep}.shapeType`),borderStyle:one(merged.borderStyle,['solid','dashed','dotted','double'] as const,`${ep}.borderStyle`),font:one(merged.font,fonts,`${ep}.font`),fontSize:num(merged.fontSize,`${ep}.fontSize`,1,500),align:one(merged.align,['left','center','right'] as const,`${ep}.align`),bold:merged.bold,italic:merged.italic,underline:merged.underline,strikethrough:merged.strikethrough,
     opacity:num(merged.opacity,`${ep}.opacity`,0,1),rotation:num(merged.rotation,`${ep}.rotation`,-360,360),radius:num(merged.radius,`${ep}.radius`,0,1000),fit:one(merged.fit,['cover','contain'] as const,`${ep}.fit`),
@@ -105,7 +108,19 @@ export function parseProject(input:string):Project {
    const target=elements.find(v=>v.id===e.bubble!.tail.element);
    if(!target||!Object.hasOwn(target.anchors,e.bubble.tail.anchor))throw new Error(path+'.elements: missing speaker element/anchor');
   }
-  return {narration:parseNarration(s.narration,audios,duration,path+'.narration'),id:sid,name:str(s.name??d.name,`${path}.name`,200),duration,backgroundEnabled:(s.backgroundEnabled??true) as boolean,backgroundOpacity:num(s.backgroundOpacity??1,path+'.backgroundOpacity',0,1),backgroundGradient:parseGradient(s.backgroundGradient,path+'.backgroundGradient'),background:color(s.background??d.background,`${path}.background`),backgroundAsset:ref(s.backgroundAsset??'',`${path}.backgroundAsset`),transition:one(s.transition??d.transition,sceneTransitions,`${path}.transition`),transitionDuration:num(s.transitionDuration??d.transitionDuration,`${path}.transitionDuration`,0.01,3600),elements};
+  const rawGroups=s.groups===undefined?[]:s.groups;
+  if(!Array.isArray(rawGroups)||rawGroups.length>50)throw new Error(path+'.groups: expected array (max 50)');
+  const memberIds=new Set<string>(),groupIds=new Set<string>();
+  const groups:Group[]=rawGroups.map((value,k)=>{
+   const gp=path+'.groups['+k+']',g=obj(value,gp),get=(key:string,fallback:unknown)=>g[key]===undefined?fallback:g[key];keys(g,['id','name','members','pivot','x','y','rotation','opacity','animation','at','until','animationDuration','exitAnimation','exitDuration','motionPath'],gp);
+   const gid=id(g.id,gp+'.id');if(groupIds.has(gid)||elements.some(e=>e.id===gid))throw new Error(gp+': duplicate ID');groupIds.add(gid);
+   if(!Array.isArray(g.members)||g.members.length<1||g.members.length>100)throw new Error(gp+'.members: expected 1–100 element IDs');
+   const members=g.members.map(v=>{const mid=id(v,gp+'.members');if(!elements.some(e=>e.id===mid)||memberIds.has(mid))throw new Error(gp+': missing or multiply grouped element');memberIds.add(mid);return mid;});
+   const pivot=obj(get('pivot',{x:50,y:50}),gp+'.pivot');keys(pivot,['x','y'],gp+'.pivot');
+   const at=num(get('at',0),gp+'.at',0,duration),until=g.until===undefined||g.until===null?null:num(g.until,gp+'.until',0,duration);if(until!==null&&until<=at)throw new Error(gp+'.until: must be greater than at');
+   return {id:gid,name:str(get('name','Group'),gp+'.name',200),members,pivot:{x:num(pivot.x,gp+'.pivot.x',-1000,1000),y:num(pivot.y,gp+'.pivot.y',-1000,1000)},x:num(get('x',0),gp+'.x',-1000,1000),y:num(get('y',0),gp+'.y',-1000,1000),rotation:num(get('rotation',0),gp+'.rotation',-360,360),opacity:num(get('opacity',1),gp+'.opacity',0,1),at,until,animation:one(get('animation','none'),animations.filter(a=>a!=='typewriter'),gp+'.animation'),animationDuration:num(get('animationDuration',1),gp+'.animationDuration',.01,3600),exitAnimation:one(get('exitAnimation','none'),exitAnimations,gp+'.exitAnimation'),exitDuration:num(get('exitDuration',.5),gp+'.exitDuration',.01,3600),motionPath:parseMotionPath(g.motionPath,duration,gp+'.motionPath')};
+  });
+  return {groups,narration:parseNarration(s.narration,audios,duration,path+'.narration'),id:sid,name:str(s.name??d.name,`${path}.name`,200),duration,backgroundEnabled:(s.backgroundEnabled??true) as boolean,backgroundOpacity:num(s.backgroundOpacity??1,path+'.backgroundOpacity',0,1),backgroundGradient:parseGradient(s.backgroundGradient,path+'.backgroundGradient'),background:color(s.background??d.background,`${path}.background`),backgroundAsset:ref(s.backgroundAsset??'',`${path}.backgroundAsset`),transition:one(s.transition??d.transition,sceneTransitions,`${path}.transition`),transitionDuration:num(s.transitionDuration??d.transitionDuration,`${path}.transitionDuration`,0.01,3600),elements};
  });
  const backgroundSimulation=parseSimulation(p.backgroundSimulation,'backgroundSimulation');
  for(const [i,s] of scenes.entries())if(s.elements.reduce((n,e)=>n+(e.type==='simulation'?e.simulation!.count:0),backgroundSimulation?.count??0)>5000)throw new Error('scenes['+i+']: maximum 5000 simulated particles including project background');
