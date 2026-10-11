@@ -248,7 +248,7 @@ befüllen; Schema und gemeinsame KI-Anleitung beschreiben das Format.
 ### Importierte Sprache / Audiospuren
 
 Audiodateien (MP3/WAV empfohlen, andere browserseitig decodierbare Audioformate)
-werden in einer eigenen Galerie als Base64 gespeichert: maximal 30 Dateien,
+in Mono/Stereo werden in einer eigenen Galerie als Base64 gespeichert: maximal 30 Dateien,
 32 MiB/Datei, 3600 Sekunden und 64 MiB decodierte Samples/Datei. Projekt-Sprecher-Spur
 läuft über Szenenwechsel weiter; jede Szene kann zusätzlich einen Clip erhalten.
 Startzeit, Dateiausschnitt, Lautstärke, Stumm, Fades und Sprechertext als Notiz sind

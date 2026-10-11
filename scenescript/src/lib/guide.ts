@@ -216,6 +216,7 @@ Root audios supports up to 30 assets. Each requires name (max 200 UTF-16 code
 units), data (nonempty audio/* base64 data URL, max decoded 32 MiB, no playlists),
 and duration (actual seconds, 0.001–3600). MP3/WAV are recommended; Ogg, M4A/AAC,
 FLAC, WebM or other audio containers work only if this browser decodes them.
+Only mono/stereo is supported so live playback and export use the same channels.
 The editor validates decoding and duration agreement (tolerance 0.2 seconds).
 Decoded audio is limited to 64 MiB per file; playback preparation has a 128 MiB
 budget across referenced files. Keep clips compact. Audio counts toward the

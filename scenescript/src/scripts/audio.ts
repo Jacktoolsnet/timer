@@ -2,7 +2,7 @@ import {narrationClips,narrationGain,type AudioAsset} from '../lib/audio';
 import type {Project} from '../lib/model';
 let decoder:OfflineAudioContext|undefined;
 export function audioBlob(a:AudioAsset){const raw=atob(a.data.split(',')[1]);return new Blob([Uint8Array.from(raw,c=>c.charCodeAt(0))],{type:a.data.slice(5,a.data.indexOf(';'))});}
-export async function decodeAudio(a:AudioAsset){decoder??=new OfflineAudioContext(2,1,48000);let b:AudioBuffer;try{b=await decoder.decodeAudioData(await audioBlob(a).arrayBuffer());}catch{throw new Error('Audio: unsupported format or codec');}if(!Number.isFinite(b.duration)||b.duration<=0||b.duration>3600||b.length*b.numberOfChannels*4>64*1024*1024)throw new Error('Audio: maximum 3600 seconds / 64 MiB decoded');return b;}
+export async function decodeAudio(a:AudioAsset){decoder??=new OfflineAudioContext(2,1,48000);let b:AudioBuffer;try{b=await decoder.decodeAudioData(await audioBlob(a).arrayBuffer());}catch{throw new Error('Audio: unsupported format or codec');}if(b.numberOfChannels>2)throw new Error('Audio: mono or stereo required');if(!Number.isFinite(b.duration)||b.duration<=0||b.duration>3600||b.length*b.numberOfChannels*4>64*1024*1024)throw new Error('Audio: maximum 3600 seconds / 64 MiB decoded');return b;}
 export class NarrationPlayer{
  private context:AudioContext|undefined;private sources:AudioBufferSourceNode[]=[];private gains:GainNode[]=[];private base=0;private anchor=0;private active=false;
  async unlock(){this.context??=new AudioContext();await this.context.resume();if(this.context.state!=='running')throw new Error('Audio unavailable');}
