@@ -1,4 +1,4 @@
-import {defaultMotionPath,pathTypes,type MotionPath} from '../lib/motion-path';
+import {defaultMotionPath,defaultSegment,pathTemplate,pathTypes,type Point,type MotionPath} from '../lib/motion-path';
 import {renderMotionPath} from './motion-path-editor';
 import {defaultVideo,parseVideo,validateVideoData,MAX_VIDEO_BYTES,type VideoSettings} from '../lib/video';
 import {createVideo,syncVideo,inspectVideo,videoURL,releaseVideoURL,clearVideoURLs} from './video';
@@ -118,7 +118,7 @@ const actions=document.createElement('div');actions.className='asset-actions';fo
 function field(form:HTMLElement,key:string,value:string|number|boolean,kind:string,action:(value:string|number|boolean)=>void,options?:readonly string[],min?:number,max?:number){
  const label=document.createElement('label');label.append(document.createTextNode(t(key)));
  let input:HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement;
- if(kind==='select'){input=document.createElement('select');options?.forEach(option=>{const o=document.createElement('option');o.value=option;o.textContent=key==='asset'||key==='backgroundAsset'?(option?project.assets[option].name:t('none')):t(key==='pathType'&&option==='ellipse'?'path-ellipse':key==='pathEasing'&&option==='linear'?'path-linear':key==='pathAfter'&&option==='reset'?'path-reset':key==='style'&&option==='focus'?'musicFocus':key==='gradientType'&&option==='solid'?'gradientSolid':key==='transition'&&option!=='none'&&option!=='fade'?'transition-'+option:option);input.append(o);});input.value=String(value);}
+ if(kind==='select'){input=document.createElement('select');options?.forEach(option=>{const o=document.createElement('option');o.value=option;o.textContent=key==='asset'||key==='backgroundAsset'?(option?project.assets[option].name:t('none')):t(key==='pathTemplate'&&option==='wave'?'path-wave':key==='pathType'&&option==='ellipse'?'path-ellipse':key==='pathEasing'&&option==='linear'?'path-linear':key==='pathAfter'&&option==='reset'?'path-reset':key==='style'&&option==='focus'?'musicFocus':key==='gradientType'&&option==='solid'?'gradientSolid':key==='transition'&&option!=='none'&&option!=='fade'?'transition-'+option:option);input.append(o);});input.value=String(value);}
  else if(kind==='textarea'){input=document.createElement('textarea');input.value=String(value);input.maxLength=10000;}
  else{input=document.createElement('input');input.type=kind;if(kind==='checkbox')input.checked=Boolean(value);else input.value=String(value);if(kind==='number'){input.step='any';if(min!==undefined)input.min=String(min);if(max!==undefined)input.max=String(max);}if(kind==='text')input.maxLength=200;if(['simulationCount','simulationSeed'].includes(key))input.step='1';}
  input.name=key;
@@ -135,7 +135,7 @@ function field(form:HTMLElement,key:string,value:string|number|boolean,kind:stri
   number.addEventListener('wheel',()=>number.blur(),{passive:true});
   if(eagerNumber)number.addEventListener('change',()=>{if(number.isConnected&&number.checkValidity()&&Number.isFinite(number.valueAsNumber))action(number.valueAsNumber);});
   const wrapper=document.createElement('span');wrapper.className='number-stepper';
-  const step=['opacity','stopOpacity','backgroundOpacity','simulationOpacity','volume','sustain','reverb','velocity','gain','echoMix','echoFeedback'].includes(key)?0.05:['pathStart','pathDuration','duration','transitionDuration','animationDuration','at','simulationSpeed','attack','decay','release','fadeIn','fadeOut','echoDelay','ratio'].includes(key)?0.1:1;
+  const step=['opacity','stopOpacity','backgroundOpacity','simulationOpacity','volume','sustain','reverb','velocity','gain','echoMix','echoFeedback'].includes(key)?0.05:['pathPause','pathStart','pathDuration','duration','transitionDuration','animationDuration','at','simulationSpeed','attack','decay','release','fadeIn','fadeOut','echoDelay','ratio'].includes(key)?0.1:1;
   const controls=[-1,1].map(direction=>{
    const control=button(direction<0?'−':'+',()=>{
     if(!Number.isFinite(number.valueAsNumber))return;
@@ -385,17 +385,35 @@ function renderForms(){
  motionPathFields(ef,e);
  if(e.type==='video')videoFields(ef,e.video??defaultVideo(),next=>{try{parseVideo(next,project.videos);updateElementValue('video',next);return e.video===next;}catch(error){showToast((error as Error).message,'error');return false;}});
 }
+let copiedMotionPath:MotionPath|null=null;
 function motionPathFields(host:HTMLElement,e:Element){
  const group=document.createElement('fieldset');group.className='text-settings-group path-settings';const legend=document.createElement('legend');legend.textContent=t('motionPath');group.append(legend);const fields=document.createElement('div');fields.className='text-settings-fields';group.append(fields);host.append(group);
  field(fields,'pathType',e.motionPath?.type||'none','select',value=>{updateElement('motionPath',value==='none'?null:defaultMotionPath(value as MotionPath['type']));renderForms();},['none',...pathTypes]);
- const m=e.motionPath;if(!m)return;
+ const m=e.motionPath;if(!m){const paste=button(t('path-paste'),()=>{if(copiedMotionPath){updateElement('motionPath',structuredClone(copiedMotionPath));renderForms();}});paste.disabled=!copiedMotionPath;paste.className='path-edit-button';group.append(paste);return;}
  const update=(key:keyof MotionPath,value:unknown)=>updateElement('motionPath',{...e.motionPath,[key]:value});
- for(const [key,min,max] of [['start',0,current().duration],['duration',.01,3600]] as const)field(fields,key==='start'?'pathStart':'pathDuration',m[key],'number',value=>update(key,value),undefined,min,max);
- field(fields,'pathEasing',m.easing,'select',value=>update('easing',value),['linear','ease-in-out']);field(fields,'pathRepeat',m.repeat,'select',value=>update('repeat',value),['once','loop','ping-pong']);
+ for(const [key,min,max] of (m.type==='segments'?[['start',0,current().duration]]:[['start',0,current().duration],['duration',.01,3600]]) as [string,number,number][])field(fields,key==='start'?'pathStart':'pathDuration',m[key as 'start'|'duration'],'number',value=>update(key as 'start'|'duration',value),undefined,min,max);
+ if(m.type!=='segments')field(fields,'pathEasing',m.easing,'select',value=>update('easing',value),['linear','ease-in-out']);field(fields,'pathRepeat',m.repeat,'select',value=>update('repeat',value),['once','loop','ping-pong']);
  field(fields,'pathAfter',m.after,'select',value=>update('after',value),['hold','reset']);field(fields,'pathOrient',m.orient,'checkbox',value=>update('orient',value));
- const points=m.type==='ellipse'?['center'] as const:m.type==='bezier'?['from','control1','control2','to'] as const:['from','to'] as const;
- for(const point of points)for(const axis of ['x','y'] as const)field(fields,'path-'+point+'-'+axis,m[point][axis],'number',value=>update(point,{...e.motionPath![point],[axis]:value}),undefined,-200,200);
- if(m.type==='ellipse'){for(const key of ['radiusX','radiusY','startAngle'] as const)field(fields,'path-'+key,m[key],'number',value=>update(key,value),undefined,key==='startAngle'?-360:.1,key==='startAngle'?360:200);field(fields,'pathClockwise',m.clockwise,'checkbox',value=>update('clockwise',value));}
+ const pointTile=(container:HTMLElement,title:string,p:Point,change:(p:Point)=>void)=>{const tile=document.createElement('div');tile.className='path-point-tile';tile.setAttribute('role','group');tile.setAttribute('aria-label',title);const heading=document.createElement('strong');heading.textContent=title;tile.append(heading);const coords=document.createElement('div');coords.className='path-point-coordinates';tile.append(coords);container.append(tile);for(const axis of ['x','y'] as const)field(coords,'path-'+axis,p[axis],'number',()=>change({x:Number((coords.querySelector('[name=path-x]') as HTMLInputElement).value),y:Number((coords.querySelector('[name=path-y]') as HTMLInputElement).value)}),undefined,-200,200);return tile;};
+ const points=m.type==='ellipse'?['center'] as const:m.type==='bezier'?['from','control1','control2','to'] as const:m.type==='segments'?['from'] as const:['from','to'] as const;
+ for(const point of points)pointTile(fields,t('path-point-'+point),m[point],p=>update(point,p));
+ if(m.type==='segments'){
+  const list=document.createElement('div');list.className='path-segment-list';group.append(list);
+  const changeSegment=(index:number,key:string,value:unknown)=>{const next=structuredClone(e.motionPath!);(next.segments[index] as unknown as Record<string,unknown>)[key]=value;updateElement('motionPath',next);};
+  m.segments.forEach((segment,index)=>{const tile=document.createElement('div');tile.className='path-segment-tile';tile.dataset.pathSegment=String(index);const heading=document.createElement('strong');heading.textContent=t('path-segment')+' '+(index+1);tile.append(heading);const settings=document.createElement('div');settings.className='path-point-coordinates';tile.append(settings);list.append(tile);
+   field(settings,'pathSegmentType',segment.type,'select',value=>{changeSegment(index,'type',value);renderForms();},['line','bezier']);
+   field(settings,'pathDuration',segment.duration,'number',value=>changeSegment(index,'duration',value),undefined,.01,3600);field(settings,'pathPause',segment.pause,'number',value=>changeSegment(index,'pause',value),undefined,0,3600);field(settings,'pathEasing',segment.easing,'select',value=>changeSegment(index,'easing',value),['linear','ease-in-out']);
+   pointTile(tile,t('path-point-to'),segment.to,p=>changeSegment(index,'to',p));if(segment.type==='bezier')for(const key of ['control1','control2'] as const)pointTile(tile,t('path-point-'+key),segment[key],p=>changeSegment(index,key,p));
+   const actions=document.createElement('div');actions.className='path-actions';tile.append(actions);
+   for(const [delta,symbol,title] of [[-1,'↑','path-up'],[1,'↓','path-down'],[0,'×','path-remove']] as const){const b=button(symbol,()=>{const next=structuredClone(e.motionPath!);if(delta){[next.segments[index],next.segments[index+delta]]=[next.segments[index+delta],next.segments[index]];}else next.segments.splice(index,1);updateElement('motionPath',next);renderForms();});b.innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${delta===0?'M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7':delta<0?'M12 20V4m-6 6 6-6 6 6':'M12 4v16m-6-6 6 6 6-6'}"/></svg>`;b.title=t(title);b.setAttribute('aria-label',t(title));b.disabled=delta===0?m.segments.length===1:index+delta<0||index+delta>=m.segments.length;actions.append(b);}
+  });
+  const add=button('+',()=>{const next=structuredClone(e.motionPath!);next.segments.push(defaultSegment(next.segments.at(-1)!.to));updateElement('motionPath',next);renderForms();});add.title=t('path-add');add.setAttribute('aria-label',add.title);add.disabled=m.segments.length>=32;add.className='path-edit-button';group.append(add);
+ }
+ const actions=document.createElement('div');actions.className='path-actions';group.append(actions);
+ const copy=button(t('path-copy'),()=>{copiedMotionPath=structuredClone(e.motionPath!);renderForms();});const paste=button(t('path-paste'),()=>{if(copiedMotionPath){updateElement('motionPath',structuredClone(copiedMotionPath));renderForms();}});paste.disabled=!copiedMotionPath;actions.append(copy,paste);
+ if(m.type!=='segments'&&m.type!=='ellipse'){const convert=button(t('path-convert'),()=>{updateElement('motionPath',{...e.motionPath,type:'segments',segments:[{...defaultSegment(),type:m.type as 'line'|'bezier',to:m.to,control1:m.control1,control2:m.control2,duration:m.duration,easing:m.easing}]});renderForms();});actions.append(convert);}
+ field(actions,'pathTemplate','none','select',value=>{if(value!=='none'){const next=pathTemplate(value as 'wave'|'zigzag'|'spiral'|'flight');const duration=Math.max(.01,(current().duration-m.start)/next.segments.length);next.segments.forEach(segment=>segment.duration=duration);updateElement('motionPath',{...next,start:m.start,repeat:m.repeat,after:m.after,orient:m.orient});renderForms();}},['none','wave','zigzag','spiral','flight']);
+ if(m.type==='ellipse'){for(const key of ['radiusX','radiusY','startAngle'] as const)field(fields,'path-'+key,m[key as 'start'|'duration'],'number',value=>update(key as 'start'|'duration',value),undefined,key==='startAngle'?-360:.1,key==='startAngle'?360:200);field(fields,'pathClockwise',m.clockwise,'checkbox',value=>update('clockwise',value));}
  if(m.type==='ellipse'){const circle=button(t('path-circle'),()=>{const [w,h]=formats[project.format];const rx=Math.max(.1,.1*h/w,Math.min(e.motionPath!.radiusX,200*h/w));updateElement('motionPath',{...e.motionPath,radiusX:rx,radiusY:rx*w/h});renderForms();});circle.className='path-edit-button';group.append(circle);}
  const hint=document.createElement('p');hint.className='small-hint';hint.textContent=t('pathHint');group.append(hint);
  const edit=button(t('editPath'),()=>{stop();motionEditing=true;$('open-preview').click();draw(false);});edit.className='path-edit-button';group.append(edit);

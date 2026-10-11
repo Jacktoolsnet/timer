@@ -326,7 +326,7 @@ asset renders no video there and does not fall back to the image asset.
 
 motionPath applies to text, images, shapes, simulations and videos. Omit it or
 use null to disable it. An object (including {}) supplies these defaults:
-- type: "line"; allowed "line", "bezier" (cubic), "ellipse" (including circles).
+- type: "line"; allowed "line", "bezier" (cubic), "ellipse" (including circles), or "segments" (a connected route).
 - start: 0 seconds from SCENE start, independently of element.at; 0–scene.duration.
 - duration: 3 seconds per traversal; 0.01–3600.
 - easing: "linear" (approximately constant screen-pixel speed) or "ease-in-out".
@@ -339,6 +339,7 @@ use null to disable it. An object (including {}) supplies these defaults:
 - from: {x:0,y:0}, to: {x:30,y:0}; used for line and bezier.
 - control1: {x:10,y:-20}, control2: {x:20,y:20}; cubic bezier controls.
 - center: {x:0,y:0}, radiusX:15, radiusY:15; used for ellipse.
+- segments: one default line segment; 1–32 objects (see Connected routes below).
 - startAngle:0 degrees (-360–360); clockwise:true; used for ellipse. 0 starts
   at the rightmost point; positive clockwise angles move downwards on screen.
 
@@ -366,6 +367,50 @@ are editor-only and never appear in recording or exported video.
 Example: move 40% right and 10% up over four seconds, starting at scene second 1:
 {"motionPath":{"type":"line","start":1,"duration":4,
 "from":{"x":0,"y":0},"to":{"x":40,"y":-10},"orient":false}}
+
+#### Connected routes (motionPath.type = "segments")
+
+The route starts at motionPath.from. Each segment starts at the previous segment's
+endpoint and uses these defaults when fields are omitted:
+- type: "line"; "line" or "bezier" (cubic).
+- to: {x:20,y:0}; endpoint relative to the ELEMENT BASE position, not the previous point.
+- control1: {x:0,y:0}, control2: {x:10,y:0}; Bézier controls in the same coordinates.
+- duration: 2 seconds, 0.01–3600, for this movement only.
+- pause: 0 seconds, 0–3600, holds at this segment's endpoint AFTER movement.
+- easing: "linear" or "ease-in-out"; default "linear", applies per segment.
+
+segments omitted supplies [{type:"line",to:{x:20,y:0},control1:{x:0,y:0},
+control2:{x:10,y:0},duration:2,pause:0,easing:"linear"}]. Empty arrays, null,
+more than 32 segments, unknown fields and null segment fields are rejected.
+Provided point objects require both x/y; the existing -200–200 bounds apply.
+Segment fields are validated even for a non-segments path. On a segments path,
+root duration/easing/to/control1/control2 remain validated and preserved but do
+not control movement: traversal duration is the SUM of segment duration + pause.
+Root start, repeat, after, orient and from retain their normal meaning.
+A pause holds the arriving segment's tangent orientation. Ping-pong reflects the
+entire route timeline, INCLUDING pauses, and reverses orientation on the return
+journey. Only once uses after; hold keeps the last endpoint, reset returns to from.
+Seeking and scene-end clipping work as with the simple paths. Bézier sections
+use the same arc-length approximation independently; sharp corners can change
+heading instantly. The editor does not automatically smooth segment joins.
+
+Example with a line, a one-second pause and a curve:
+{"motionPath":{"type":"segments","from":{"x":0,"y":0},"segments":[
+ {"type":"line","to":{"x":20,"y":-10},"duration":2,"pause":1},
+ {"type":"bezier","to":{"x":50,"y":0},"control1":{"x":30,"y":-20},
+  "control2":{"x":40,"y":10},"duration":3,"pause":0,"easing":"ease-in-out"}]}}
+
+Editor templates (wave, zigzag, spiral, flight path) generate ordinary segments;
+there is no JSON template field. Template sections evenly divide the remaining
+scene time after path start (minimum 0.01 seconds each). Spiral is a polygonal
+approximation. Reordering
+or deleting a segment reconnects the endpoints in their new array order, without
+automatically moving controls. Adding creates a line 20 percentage points to the
+right (clamped at x=200), duration 2, pause 0. Convert to segments preserves a
+simple line/Bézier path as one section. Copy/Paste path uses an in-memory editor
+buffer (not the system clipboard), deep-copies the entire configuration and does
+not alter element position. A copied start time must fit the destination scene.
+These editor actions replace the selected element's path, without linking elements.
 
 ### Omitted fields versus explicit null
 

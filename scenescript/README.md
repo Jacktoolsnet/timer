@@ -226,3 +226,11 @@ verwenden dieselbe zeitbasierte Berechnung; Hilfslinien werden nicht exportiert.
 JSON-Feld `motionPath`, Defaults und Grenzen sind in der gemeinsamen KI-Anleitung
 und im strukturellen Schema beschrieben. Das Schema kann die zusätzliche
 Runtime-Bedingung `motionPath.start <= scene.duration` nicht abbilden.
+
+**Verbundene Pfade:** Der Typ „Mehrere Abschnitte“ kombiniert Geraden und kubische
+Kurven. Jeder Abschnitt hat eine eigene Bewegungsdauer, Beschleunigung und Pause
+am Zielpunkt. Abschnitte können ergänzt, gelöscht und umsortiert werden; maximal
+32 pro Pfad. X/Y eines Punktes stehen zusammen in einem Tile (X links, Y rechts).
+Welle, Zickzack, Spirale und Flugbahn liefern editierbare Vorlagen. „Pfad kopieren“
+und „Pfad einfügen“ übertragen die komplette Konfiguration unabhängig zwischen
+Elementen über einen internen Puffer, ohne die System-Zwischenablage zu verwenden.

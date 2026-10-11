@@ -896,7 +896,8 @@
           "enum": [
             "line",
             "bezier",
-            "ellipse"
+            "ellipse",
+            "segments"
           ],
           "default": "line"
         },
@@ -1079,6 +1080,135 @@
           "minimum": -360,
           "maximum": 360,
           "default": 0
+        },
+        "segments": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "to": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "x",
+                  "y"
+                ],
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "minimum": -200,
+                    "maximum": 200
+                  },
+                  "y": {
+                    "type": "number",
+                    "minimum": -200,
+                    "maximum": 200
+                  }
+                },
+                "default": {
+                  "x": 20,
+                  "y": 0
+                }
+              },
+              "control1": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "x",
+                  "y"
+                ],
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "minimum": -200,
+                    "maximum": 200
+                  },
+                  "y": {
+                    "type": "number",
+                    "minimum": -200,
+                    "maximum": 200
+                  }
+                },
+                "default": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              "control2": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "x",
+                  "y"
+                ],
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "minimum": -200,
+                    "maximum": 200
+                  },
+                  "y": {
+                    "type": "number",
+                    "minimum": -200,
+                    "maximum": 200
+                  }
+                },
+                "default": {
+                  "x": 10,
+                  "y": 0
+                }
+              },
+              "duration": {
+                "type": "number",
+                "minimum": 0.01,
+                "maximum": 3600,
+                "default": 2
+              },
+              "easing": {
+                "enum": [
+                  "linear",
+                  "ease-in-out"
+                ],
+                "default": "linear"
+              },
+              "type": {
+                "enum": [
+                  "line",
+                  "bezier"
+                ],
+                "default": "line"
+              },
+              "pause": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 3600,
+                "default": 0
+              }
+            }
+          },
+          "default": [
+            {
+              "type": "line",
+              "to": {
+                "x": 20,
+                "y": 0
+              },
+              "control1": {
+                "x": 0,
+                "y": 0
+              },
+              "control2": {
+                "x": 10,
+                "y": 0
+              },
+              "duration": 2,
+              "pause": 0,
+              "easing": "linear"
+            }
+          ]
         }
       },
       "description": "Relative stage-percentage offsets. Runtime also checks start <= containing scene duration."
