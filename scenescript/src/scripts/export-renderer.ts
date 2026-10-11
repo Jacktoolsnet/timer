@@ -1,3 +1,5 @@
+import {createCropImage} from './crop-image';
+import type {Crop} from '../lib/crop';
 import {sceneElementState} from '../lib/groups';
 import {createBubble} from './bubble';
 import {toCanvas} from 'html-to-image';
@@ -14,11 +16,11 @@ export class ExportRenderer{
  readonly root=document.createElement('div');private w:number;private h:number;
  constructor(private p:Project,private media:ExportMedia){[this.w,this.h]=formats[p.format];Object.assign(this.root.style,{position:'fixed',left:'-30000px',top:'0',width:this.w+'px',height:this.h+'px',overflow:'hidden',background:'#000',pointerEvents:'none',fontFamily:'Arial',lineHeight:'normal',fontSize:'16px'});this.root.setAttribute('aria-hidden','true');this.root.dataset.exportRenderer='true';document.body.append(this.root);}
  private box(){const n=document.createElement('div');Object.assign(n.style,{position:'absolute',inset:'0',width:'100%',height:'100%'});return n;}
- private image(asset:string,fit:'contain'|'cover',parent:HTMLElement){const data=this.p.assets[asset].data;if(data.startsWith('data:image/svg+xml;')){const svg=createSvgImage(data,fit);parent.append(svg);return svg;}const img=document.createElement('img');img.src=data;Object.assign(img.style,{width:'100%',height:'100%',objectFit:fit,display:'block'});parent.append(img);}
+ private async image(asset:string,fit:'contain'|'cover',parent:HTMLElement,crop:Crop|null=null){const data=this.p.assets[asset].data;if(crop){const view=createCropImage(data,fit,crop);parent.append(view.svg);await view.ready;return view.svg;}if(data.startsWith('data:image/svg+xml;')){const svg=createSvgImage(data,fit);parent.append(svg);return svg;}const img=document.createElement('img');img.src=data;Object.assign(img.style,{width:'100%',height:'100%',objectFit:fit,display:'block'});parent.append(img);}
  private simulation(config:NonNullable<Project['backgroundSimulation']>,w:number,h:number,time:number,parent:HTMLElement,maxPixels=1500000){const view=createSimulation(config,w,h,maxPixels);view.draw(time);Object.assign(view.canvas.style,{width:'100%',height:'100%',display:'block'});parent.append(view.canvas);}
  private async video(c:VideoSettings,elapsed:number,parent:HTMLElement){if(!c.asset)return;const frame=await this.media.frame(c.asset,videoTime(c,this.p.videos[c.asset].duration,elapsed));const canvas=document.createElement('canvas');canvas.width=frame.canvas.width;canvas.height=frame.canvas.height;canvas.getContext('2d')!.drawImage(frame.canvas,0,0);Object.assign(canvas.style,{width:'100%',height:'100%',objectFit:c.fit,display:'block'});parent.append(canvas);}
  private async layer(s:Scene,local:number){const layer=this.box();this.root.append(layer);
- const bg=this.box();bg.style.background=gradientCSS(s.backgroundGradient,s.background);bg.style.opacity=String(s.backgroundEnabled?s.backgroundOpacity:0);layer.append(bg);if(s.backgroundAsset){const host=this.box();bg.append(host);host.style.opacity=String(s.transition==='fade'?Math.min(1,local/s.transitionDuration):1);seekSvg(this.image(s.backgroundAsset,'cover',host),local);}
+ const bg=this.box();bg.style.background=gradientCSS(s.backgroundGradient,s.background);bg.style.opacity=String(s.backgroundEnabled?s.backgroundOpacity:0);layer.append(bg);if(s.backgroundAsset){const host=this.box();bg.append(host);host.style.opacity=String(s.transition==='fade'?Math.min(1,local/s.transitionDuration):1);seekSvg(await this.image(s.backgroundAsset,'cover',host),local);}
  const fade=s.transition==='fade'?Math.min(1,local/s.transitionDuration):1;
  for(const e of s.elements){const state=sceneElementState(e,s,local,this.w,this.h);if(!state.visible)continue;const node=document.createElement('div');node.dataset.elementId=e.id;const w=e.width*this.w/100,h=e.height*this.h/100;
  Object.assign(node.style,{position:'absolute',left:e.x*this.w/100+'px',top:e.y*this.h/100+'px',width:w+'px',height:h+'px',overflow:'hidden',boxSizing:'border-box',display:'flex',alignItems:'center',whiteSpace:'pre-wrap',fontFamily:e.font,fontSize:e.fontSize+'px',fontWeight:e.bold?'700':'400',fontStyle:e.italic?'italic':'normal',color:e.color,textAlign:e.align,justifyContent:e.align==='left'?'flex-start':e.align==='right'?'flex-end':'center',borderRadius:e.radius+'px',opacity:String(state.opacity*fade),transform:state.transform,transformOrigin:'0 0'});layer.append(node);
@@ -27,7 +29,7 @@ export class ExportRenderer{
  else if(e.type==='shape')renderShape(node,e,w,h);
  else if(e.type==='simulation'&&e.simulation)this.simulation(e.simulation,w,h,local-e.at,node,8000000/Math.max(1,s.elements.filter(e=>e.type==='simulation').length));
  else if(e.type==='video'&&e.video)await this.video(e.video,local-e.at,node);
- else if(e.asset)seekSvg(this.image(e.asset,e.fit,node),local-e.at);
+ else if(e.asset)seekSvg(await this.image(e.asset,e.fit,node,e.type==='image'?e.crop:null),local-e.at);
  }
  return layer;
  }

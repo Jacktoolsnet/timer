@@ -1,5 +1,21 @@
 import type { Language } from './i18n';
 const words = {
+ cropNW:["Oben links","Top left","Arriba izquierda","En haut à gauche"],
+ cropNE:["Oben rechts","Top right","Arriba derecha","En haut à droite"],
+ cropSW:["Unten links","Bottom left","Abajo izquierda","En bas à gauche"],
+ cropSE:["Unten rechts","Bottom right","Abajo derecha","En bas à droite"],
+ editCrop:["Bildausschnitt wählen", "Choose image crop", "Elegir recorte", "Choisir le recadrage"],
+ resetCrop:["Bildausschnitt zurücksetzen", "Reset crop", "Restablecer recorte", "Réinitialiser le recadrage"],
+ cropHint:["Rahmen verschieben oder an den Ecken ziehen. Werte beziehen sich auf das Originalbild (%). Änderungen erst mit Übernehmen speichern.", "Move the rectangle or drag its corners. Values refer to the original image (%). Apply to save changes.", "Mueve el marco o sus esquinas. Valores relativos a la imagen original (%). Aplicar para guardar.", "Déplacez le cadre ou ses coins. Valeurs relatives à l’image originale (%). Appliquer pour enregistrer."],
+ panels:["Comic-Panels hinzufügen", "Add comic panels", "Añadir viñetas", "Ajouter des cases de BD"],
+ panelHint:["Die Vorlage fügt Bilder und Rahmen zur aktuellen Szene hinzu. Alle Bilder verwenden dasselbe Asset und lassen sich einzeln zuschneiden.", "The template adds images and frames to the current scene. Images share one asset and can be cropped independently.", "La plantilla añade imágenes y marcos a la escena. Comparten un recurso y pueden recortarse individualmente.", "Le modèle ajoute des images et des cadres à la scène. Ils partagent une ressource et peuvent être recadrés séparément."],
+ panelTemplate:["Panel-Vorlage", "Panel template", "Plantilla de viñetas", "Modèle de cases"],
+ "panel-full":["Vollbild", "Full frame", "Imagen completa", "Pleine image"],
+ "panel-two":["Zwei Panels", "Two panels", "Dos viñetas", "Deux cases"],
+ "panel-three":["Drei Panels", "Three panels", "Tres viñetas", "Trois cases"],
+ "panel-detail":["Detailpanel", "Detail inset", "Detalle insertado", "Détail incrusté"],
+ panelExample:["Panel-Beispiel herunterladen", "Download panel example", "Descargar ejemplo de viñetas", "Télécharger un exemple de cases"],
+
  groupName:["Gruppe","Group","Grupo","Groupe"],
  deleteGroupHint:["Die Gruppe und alle enthaltenen Elemente werden gelöscht.", "The group and all its member elements will be deleted.", "Se eliminarán el grupo y todos sus elementos.", "Le groupe et tous ses éléments seront supprimés."],
  undo:["Rückgängig", "Undo", "Deshacer", "Annuler"],

@@ -1,3 +1,6 @@
+import {createPanels} from '../lib/panels';
+import {createCropImage} from './crop-image';
+import {parseCrop,panelRects,panelTemplates,type Crop,type PanelTemplate} from '../lib/crop';
 import {editInterval} from '../lib/timeline';
 import {History} from '../lib/history';
 import {sceneElementState,sceneElementMatrix,newGroup,dissolveGroup,groupController,parentMatrix} from '../lib/groups';
@@ -66,6 +69,7 @@ function refresh(){
  renderForms();renderElements();renderAssets();renderThumbnail();renderAudios();historyButtons();renderTimeline();draw();
 }
 function renderElements(){
+ ($('open-panels') as HTMLButtonElement).disabled=!Object.keys(project.assets).length;
  const index=current().elements.findIndex(e=>e.id===selectedId),count=current().elements.length,g=current().groups.find(g=>g.id===selectedGroupId);
  ($('duplicate-element') as HTMLButtonElement).disabled=g?count+g.members.length>100||current().groups.length>=50:index<0||count>=100;
  ($('delete-element') as HTMLButtonElement).disabled=index<0&&!g;
@@ -129,6 +133,33 @@ function renderTimeline(){
  for(const e of s.elements)if(!s.groups.some(g=>g.members.includes(e.id)))row(e,false);
  host.style.setProperty('--playhead',Math.max(0,Math.min(100,(time-offset(sceneIndex))/s.duration*100))+'%');host.scrollTop=scrollTop;
 }
+const cropDialog=$('crop-dialog') as HTMLDialogElement;
+let cropTarget:Element|undefined,cropProject:Project|undefined,cropDraft:Crop={x:0,y:0,width:100,height:100},cropSession=0;
+async function openCrop(e:Element){
+ stop();const session=++cropSession;cropTarget=e;cropProject=project;cropDraft=structuredClone(e.crop??{x:0,y:0,width:100,height:100});const image=$('crop-source') as HTMLImageElement;image.src=project.assets[e.asset].data;
+ try{await image.decode();if(session!==cropSession||project!==cropProject)return;const ratio=image.naturalWidth/image.naturalHeight;$('crop-workspace').style.aspectRatio=String(ratio);$('crop-workspace').style.width=`min(100%, ${Math.min(640,window.innerHeight*.45*ratio)}px)`;renderCropForm();syncCropRectangle();cropDialog.showModal();}catch(error){showToast((error as Error).message,'error');}
+}
+function syncCropRectangle(){Object.assign($('crop-rectangle').style,{left:cropDraft.x+'%',top:cropDraft.y+'%',width:cropDraft.width+'%',height:cropDraft.height+'%'});}
+function renderCropForm(){const form=$('crop-form');form.replaceChildren();for(const key of ['x','y','width','height'] as const)field(form,key,cropDraft[key],'number',value=>{try{cropDraft=parseCrop({...cropDraft,[key]:value})!;syncCropRectangle();}catch(error){showToast((error as Error).message,'warning');renderCropForm();}},undefined,key==='width'||key==='height'?.01:0,100);}
+$('crop-form').addEventListener('submit',e=>e.preventDefault());
+$('crop-reset').addEventListener('click',()=>{cropDraft={x:0,y:0,width:100,height:100};renderCropForm();syncCropRectangle();});
+$('close-crop').addEventListener('click',()=>cropDialog.close());cropDialog.addEventListener('close',()=>{cropSession++;cropTarget=undefined;cropProject=undefined;});
+$('apply-crop').addEventListener('click',()=>{if(!cropTarget||cropProject!==project)return;try{const crop=parseCrop(cropDraft),target=cropTarget;target.crop=crop?.x===0&&crop.y===0&&crop.width===100&&crop.height===100?null:crop;changed();cropDialog.close();refresh();}catch(error){showToast((error as Error).message,'error');}});
+$('crop-rectangle').addEventListener('pointerdown',event=>{
+ if(event.button!==0)return;event.preventDefault();const rectangle=$('crop-rectangle'),box=$('crop-workspace').getBoundingClientRect(),original={...cropDraft},x=event.clientX,y=event.clientY,id=event.pointerId,corner=(event.target as HTMLElement).dataset.cropCorner;rectangle.setPointerCapture(id);
+ const move=(ev:PointerEvent)=>{if(ev.pointerId!==id)return;const dx=(ev.clientX-x)/box.width*100,dy=(ev.clientY-y)/box.height*100;let left=original.x,top=original.y,right=left+original.width,bottom=top+original.height;
+  if(!corner){left=Math.max(0,Math.min(100-original.width,left+dx));top=Math.max(0,Math.min(100-original.height,top+dy));right=left+original.width;bottom=top+original.height;}
+  else{if(corner.includes('w'))left=Math.max(0,Math.min(right-.01,left+dx));else right=Math.min(100,Math.max(left+.01,right+dx));if(corner.includes('n'))top=Math.max(0,Math.min(bottom-.01,top+dy));else bottom=Math.min(100,Math.max(top+.01,bottom+dy));}
+  cropDraft={x:left,y:top,width:right-left,height:bottom-top};syncCropRectangle();
+ };
+ const done=()=>{rectangle.removeEventListener('pointermove',move);rectangle.removeEventListener('pointerup',done);rectangle.removeEventListener('pointercancel',cancel);rectangle.removeEventListener('lostpointercapture',cancel);renderCropForm();};
+ const cancel=()=>{cropDraft=original;syncCropRectangle();done();};rectangle.addEventListener('pointermove',move);rectangle.addEventListener('pointerup',done);rectangle.addEventListener('pointercancel',cancel);rectangle.addEventListener('lostpointercapture',cancel);
+});
+const panelsDialog=$('panels-dialog') as HTMLDialogElement;let panelTemplate:PanelTemplate='two',panelAsset='',panelScene:Scene|undefined,panelProject:Project|undefined;
+function renderPanelPreview(){const host=$('panels-preview');host.replaceChildren();const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 100 100');for(const rect of panelRects(panelTemplate)){const node=document.createElementNS(svg.namespaceURI,'rect');for(const [key,value]of Object.entries(rect))node.setAttribute(key,String(value));svg.append(node);}host.append(svg);}
+$('open-panels').addEventListener('click',()=>{if(!Object.keys(project.assets).length)return;stop();panelScene=current();panelProject=project;panelAsset=selected()?.asset||Object.keys(project.assets)[0];const form=$('panels-form');form.replaceChildren();field(form,'asset',panelAsset,'select',value=>panelAsset=String(value),Object.keys(project.assets));field(form,'panelTemplate','panel-'+panelTemplate,'select',value=>{panelTemplate=String(value).slice(6) as PanelTemplate;renderPanelPreview();},panelTemplates.map(v=>'panel-'+v));renderPanelPreview();panelsDialog.showModal();});
+$('panels-form').addEventListener('submit',e=>e.preventDefault());$('close-panels').addEventListener('click',()=>panelsDialog.close());
+$('apply-panels').addEventListener('click',()=>{if(panelProject!==project||panelScene!==current()||!project.assets[panelAsset])return;const added=createPanels(panelAsset,panelTemplate);if(current().elements.length+added.length>100){showToast('elements: maximum 100','error');return;}current().elements.push(...added);try{parseProject(JSON.stringify(project));}catch(error){current().elements.splice(-added.length);showToast((error as Error).message,'error');return;}selectedGroupId='';selectedId=added[1].id;changed();panelsDialog.close();refresh();});
 const renameDialog=$('rename-dialog') as HTMLDialogElement;
 let pendingRename:((name:string)=>void)|undefined;
 function askRename(name:string,action:(name:string)=>void){
@@ -465,7 +496,7 @@ function renderForms(){
  richEditor.editor.setAttribute('aria-label',t('text'));
  richEditor.editor.style.background=e.type==='bubble'?(e.fillColor==='none'?s.background:e.fillColor):s.backgroundEnabled?gradientCSS(s.backgroundGradient,s.background):'#000000';
  const contentLabel=document.createElement('label');contentLabel.append(document.createTextNode(t('text')),richEditor.editor,richEditor.hint);contentLabel.dataset.richText='true';ef.append(contentLabel);field(ef,'font',e.font,'select',v=>updateElement('font',v),fonts);field(ef,'fontSize',e.fontSize,'number',v=>updateElement('fontSize',v),undefined,1,500);field(ef,'align',e.align,'select',v=>updateElement('align',v),['left','center','right']);for(const key of ['bold','italic','underline','strikethrough'] as const)field(ef,key,e[key],'checkbox',v=>updateElement(key,v));}
- if(e.type==='image'){field(ef,'asset',e.asset,'select',v=>updateElement('asset',v),['',...Object.keys(project.assets)]);field(ef,'fit',e.fit,'select',v=>updateElement('fit',v),['contain','cover']);}
+ if(e.type==='image'){const actions=document.createElement('div');actions.className='compact-actions';const crop=button(t('editCrop'),()=>openCrop(e));crop.disabled=!e.asset;const reset=button(t('resetCrop'),()=>{updateElement('crop',null);renderForms();});reset.disabled=!e.crop;actions.append(crop,reset);ef.append(actions);field(ef,'asset',e.asset,'select',v=>updateElement('asset',v),['',...Object.keys(project.assets)]);field(ef,'fit',e.fit,'select',v=>updateElement('fit',v),['contain','cover']);}
  if((e.type==='text'||e.type==='bubble'))field(ef,'color',e.color,'color',v=>updateElement('color',v));
  if(e.type==='shape'){field(ef,'shapeType',e.shapeType,'select',v=>updateElement('shapeType',v),shapeTypes);shapeColorField(ef,'fillColor',e.fillColor);shapeColorField(ef,'borderColor',e.borderColor);field(ef,'borderStyle',e.borderStyle,'select',v=>updateElement('borderStyle',v),['solid','dashed','dotted','double']);field(ef,'borderWidth',e.borderWidth,'number',v=>updateElement('borderWidth',v),undefined,0,500);}
  if(e.type==='simulation')simulationFields(ef,e.simulation,value=>{
@@ -701,6 +732,7 @@ function createSceneLayer(scene:Scene,index:number,interactive:boolean){
    else if(e.type==='text'){node.style.textDecoration='none';text=document.createElement('span');text.style.width='100%';node.append(text);}
    else if(e.type==='simulation'){simulation=createSimulation(e.simulation!,e.width*w/100,e.height*h/100,simulationPixelBudget);node.append(simulation.canvas);}
    else if(e.type==='shape')renderShape(node,e,e.width*w/100,e.height*h/100);
+   else if(e.type==='image'&&e.asset&&e.crop){const view=createCropImage(project.assets[e.asset].data,e.fit,e.crop);svg=view.svg;node.append(svg);void view.ready.then(()=>{if(node.isConnected)draw(false);}).catch(error=>status((error as Error).message));}
    else if(e.asset&&project.assets[e.asset].data.startsWith('data:image/svg+xml;')){svg=createSvgImage(project.assets[e.asset].data,e.fit);node.append(svg);}
    else if(e.asset){const img=document.createElement('img');img.src=project.assets[e.asset].data;img.alt=project.assets[e.asset].name;img.style.objectFit=e.fit;node.append(img);}
    else{node.textContent=t('image');node.style.background='#ffffff22';}

@@ -12,4 +12,4 @@ export function createSvgImage(data:string,fit:'contain'|'cover',background=fals
  svg.style.width='100%';svg.style.height='100%';svg.style.pointerEvents='none';svg.setAttribute('preserveAspectRatio',fit==='cover'?'xMidYMid slice':'xMidYMid meet');svg.classList.add(background?'scene-svg-background':'scene-svg-image');svg.setAttribute('aria-hidden','true');
  return svg;
 }
-export function seekSvg(svg:SVGSVGElement|undefined,time:number){if(!svg)return;svg.pauseAnimations();svg.setCurrentTime(Math.max(0,time));}
+export function seekSvg(svg:SVGSVGElement|undefined,time:number){if(!svg)return;for(const viewport of [svg,...Array.from(svg.querySelectorAll<SVGSVGElement>('svg'))]){viewport.pauseAnimations();viewport.setCurrentTime(Math.max(0,time));}}

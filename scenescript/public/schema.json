@@ -445,6 +445,18 @@
                     }
                   ],
                   "default": null
+                },
+                "crop": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/crop"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Applied only on image elements, before contain/cover fitting."
                 }
               },
               "required": [
@@ -1763,6 +1775,41 @@
         "id",
         "members"
       ]
+    },
+    "crop": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "x": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "y": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "width": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0,
+          "maximum": 100
+        },
+        "height": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0,
+          "maximum": 100
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "width",
+        "height"
+      ],
+      "description": "Intrinsic image percentages; runtime additionally requires x+width <=100 and y+height <=100."
     }
   }
 }

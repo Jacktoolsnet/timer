@@ -10,7 +10,7 @@
     "dev": "astro dev --host 127.0.0.1",
     "build": "astro check && astro build",
     "preview": "astro preview --host 127.0.0.1",
-    "test": "node --experimental-strip-types --test tests/model.test.ts tests/simulation.test.ts tests/music.test.ts tests/video.test.ts tests/motion-path.test.ts tests/audio.test.ts tests/comic.test.ts tests/groups.test.ts",
+    "test": "node --experimental-strip-types --test tests/model.test.ts tests/simulation.test.ts tests/music.test.ts tests/video.test.ts tests/motion-path.test.ts tests/audio.test.ts tests/comic.test.ts tests/groups.test.ts tests/crop.test.ts",
     "test:e2e": "playwright test"
   },
   "dependencies": {

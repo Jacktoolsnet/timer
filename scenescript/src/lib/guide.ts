@@ -356,6 +356,7 @@ Scene durations add up to the total duration; transitions do not add time.
 
 Required: id and type. type must be "video", "text", "image", "shape" (a geometric form) or "simulation" or "bubble".
 Optional fields and their defaults:
+- crop: null; optional intrinsic image rectangle (see Image crops and panel templates below).
 - placement: null; optional static affine matrix (see Groups below).
 - video: for type "video", omission supplies {asset:"",start:0,end:null,loop:false,
   muted:true,volume:1,fit:"cover"}; for other types omission supplies null.
@@ -413,6 +414,53 @@ to its image placeholder, or to general asset if a valid image reference was als
 provided (using general fit). Do not rely on this fallback for video authoring:
 the file-export renderer omits placeholders; a non-null video object with empty
 asset renders no video there and does not fall back to the image asset.
+
+### Image crops and panel templates
+
+Optional element field crop defaults to null when omitted; explicit null disables
+cropping. Otherwise it requires exactly {x,y,width,height}. Values are finite
+percentages of the original intrinsic image viewport, NOT of the element box.
+x/y are 0–100; width/height are >0–100; x+width and y+height must not exceed 100
+(with 1e-9 tolerance for floating-point arithmetic). Empty/outside rectangles and
+null coordinate values are rejected. Crop objects on other element types are
+validated/preserved but visually ignored. No asset reference is required merely
+to hold crop settings; actual image display still requires a nonempty image asset.
+
+First clip the original image to crop; then center-fit that clipped rectangle
+using the existing element fit (contain: letterboxing; cover: fill and clip).
+Without crop, the existing raster/SVG rendering is unchanged. Multiple elements
+can show different crops of one asset without repeating Base64 data. Reset means
+crop:null. Anchors remain local percentages of the element box; cropping does not
+automatically relocate speaker anchors. The visual crop dialog uses original-image percentages and supports
+numeric fields, moving the rectangle and resizing its corners (editor minimum
+width/height 0.01%; the runtime also accepts smaller positive rectangles). Apply commits one
+Undo/Redo step; Cancel/Escape discards the draft. It never modifies the image data.
+
+Cropped SVGs stay live SVGs inside a clipped outer viewport, not raster snapshots.
+Original viewBox origins and internal aspect-ratio mapping are retained. The SVG
+intrinsic viewport uses positive numeric/px width/height when present, otherwise
+viewBox dimensions, otherwise 300x150. Percentage/physical-unit root dimensions
+are not used to define the crop viewport. Supported SMIL animation stays governed
+by the presentation playhead, including seek, pause and export freezing. The
+crop rectangle is static; it does not follow animated objects. SVG safe-profile
+restrictions still apply. Raster images use their decoded natural dimensions.
+Editor selection handles are never included in presentation/recording/export.
+
+Panel templates are editor authoring helpers, NOT a new JSON field or element
+type. Full frame, Two panels, Three panels and Detail inset append ordinary
+image and rectangle-shape elements to the current scene. Each panel has a white
+frame surface with a dark 4-project-pixel border and an inset image; panel gaps
+are percentages of project width/height. All images reuse the chosen asset,
+start with full-image crop, fit:cover and animation:none. The user can edit each
+crop, frame, timing and layer independently, or use existing flat groups. Existing
+scene elements are not deleted. Applying the template is one Undo/Redo step and
+must fit the existing 100-element scene limit (two elements per panel).
+AI authors can generate these same ordinary elements directly with explicit crops.
+There is no scene camera or scene/screen coordinate-space field in this stage.
+
+Panel example: /panels.scenescript.json — one original embedded SVG illustration,
+full view, character close-up and two independent cropped panels. No external
+assets or additional copies of the image payload are needed.
 
 ### Native comic bubbles and speaker anchors
 
@@ -663,6 +711,7 @@ Actual validator behavior is asymmetric:
 - Optional scene fields use their default when omitted OR null, EXCEPT groups:
   groups defaults to [] only on omission; explicit null is rejected.
 - Scene id/elements and asset name/data do not accept null.
+- Element crop omitted/null disables cropping; individual crop fields reject null.
 - Element placement omitted/null means identity; matrix coefficients reject null.
 - Group fields default only on omission, except until and motionPath also accept
   null. Required id/members reject null. Group pivot requires both x and y.
@@ -691,7 +740,7 @@ stream MIME names, real media decoding or
 measured duration, whole-JSON byte size, image dimensions, music polyphony or
 particle budgets. Group membership exclusivity, same-scene member references,
 group/element ID collisions, interval bounds against scene duration and matrix
-invertibility also require runtime validation. Video/image authoring prefixes in the schema are canonical
+invertibility and image crop x+width/y+height bounds also require runtime validation. Video/image authoring prefixes in the schema are canonical
 lowercase, while the video runtime prefix is case-insensitive. Schema maxLength
 counts Unicode code points; runtime limits use UTF-16 code units. The typed schema
 intentionally excludes some accepted null-to-default forms (root assets/videos,
