@@ -491,7 +491,7 @@ function renderForms(){
  field(form,'backgroundOpacity',s.backgroundOpacity,'number',v=>updateScene('backgroundOpacity',v),undefined,0,1);
  field(form,'background',s.background,'color',v=>updateScene('background',v));gradientFields(form,'backgroundGradient',s.backgroundGradient,s.background,v=>updateScene('backgroundGradient',v));field(form,'backgroundAsset',s.backgroundAsset,'select',v=>updateScene('backgroundAsset',v),['',...Object.keys(project.assets)]);
  field(form,'transition',s.transition,'select',v=>updateScene('transition',v),sceneTransitions);field(form,'transitionDuration',s.transitionDuration,'number',v=>updateScene('transitionDuration',v),undefined,0.01,3600);
- field(form,'cameraOverview',cameraOverview,'checkbox',v=>{cameraOverview=Boolean(v);draw(false);});
+ if(s.camera)field(form,'cameraOverview',cameraOverview,'checkbox',v=>{cameraOverview=Boolean(v);draw(false);});
  const cameraButton=button(t('sceneCamera'),()=>openCamera());cameraButton.id='scene-camera';cameraButton.className='path-edit-button';form.append(cameraButton);
  const narrationButton=button(t('sceneNarration'),()=>openNarration(current()));narrationButton.id='scene-narration';narrationButton.className='path-edit-button';form.append(narrationButton);
  const ef=$('element-form');ef.querySelectorAll('video').forEach(v=>v.pause());ef.replaceChildren();ef.classList.remove('text-settings');const e=selected();const selectedGroup=s.groups.find(g=>g.id===selectedGroupId);$('element-heading').textContent=t(selectedGroup?'groupSettings':'elementSettings');if(selectedGroup){renderGroupForm(ef,selectedGroup);return;}if(!e){const p=document.createElement('p');p.className='small-hint';p.textContent=t('empty');ef.append(p);return;}
@@ -718,7 +718,7 @@ let transitionBlack:HTMLDivElement|undefined;
 let stageKey='',views:SceneView[]=[],incomingLayer:HTMLDivElement|undefined,incomingWorld:HTMLDivElement|undefined,incomingSvgBackground:SVGSVGElement|undefined,outgoingLayer:HTMLDivElement|undefined;
 function createSceneLayer(scene:Scene,index:number,interactive:boolean){
  const backgroundOpacity=scene.backgroundEnabled?scene.backgroundOpacity:0;
- const viewport=document.createElement('div');viewport.className='scene-layer';viewport.dataset.sceneIndex=String(index);const layer=document.createElement('div');layer.className='scene-camera-world';viewport.append(layer);layer.style.background=backgroundOpacity===1?gradientCSS(scene.backgroundGradient,scene.background):'transparent';
+ const viewport=document.createElement('div');viewport.className='scene-layer';viewport.dataset.sceneIndex=String(index);const layer=document.createElement('div');layer.className='scene-camera-world';viewport.append(layer);layer.style.background=backgroundOpacity===1?gradientCSS(scene.backgroundGradient,scene.background):'transparent';if(!scene.camera)viewport.style.background=layer.style.background;
  let backgroundHost:HTMLElement=layer;
  if(backgroundOpacity<1){const backdrop=document.createElement('div');backdrop.className='scene-backdrop';backdrop.style.background=gradientCSS(scene.backgroundGradient,scene.background);backdrop.style.opacity=String(backgroundOpacity);layer.append(backdrop);backgroundHost=backdrop;}
  if(!interactive)layer.style.pointerEvents='none';
@@ -1043,7 +1043,7 @@ function renderCameraPreview(){
  const view=cameraPreviewView;view.world.style.transform=cameraTransform(camera,local,w,h);updateSceneViews(view.views,local,cameraTarget.transition==='fade'?Math.min(1,local/cameraTarget.transitionDuration):1);seekSvg(view.svgBackground,local);$('camera-time-label').textContent=local.toFixed(2)+' s';
  const last=cameraDraft?.stations.at(-1);($('camera-add') as HTMLButtonElement).disabled=!last||cameraDraft!.stations.length>=32||last.at+last.hold>=cameraTarget.duration;
 }
-$('camera-form').addEventListener('submit',e=>e.preventDefault());$('camera-time').addEventListener('input',renderCameraPreview);
+$('camera-form').addEventListener('submit',e=>e.preventDefault());$('camera-time').addEventListener('input',()=>{cancelAnimationFrame(cameraPreviewFrame);cameraPreviewFrame=0;cameraPlayLabel(false);renderCameraPreview();});
 $('camera-add').addEventListener('click',()=>{const last=cameraDraft?.stations.at(-1);if(!last||!cameraTarget||last.at+last.hold>=cameraTarget.duration||cameraDraft!.stations.length>=32)return;cameraDraft!.stations.push({...last,at:Math.min(cameraTarget.duration,last.at+last.hold+Math.max(.1,(cameraTarget.duration-last.at-last.hold)/2)),hold:0});renderCameraForm();renderCameraPreview();});
 $('camera-reset').addEventListener('click',()=>{cameraDraft=null;renderCameraForm();renderCameraPreview();});
 $('close-camera').addEventListener('click',()=>cameraDialog.close());
