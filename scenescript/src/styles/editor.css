@@ -688,3 +688,21 @@ body.recording #preview-slot{display:grid;place-items:center}
 body.recording #preview-content{display:grid;place-items:center}
 body.recording #preview-content > :not(#stage-frame){display:none}
 body.recording .studio-preview > :not(#preview-slot){display:none}
+
+#export-preview{display:flex;justify-content:center;align-items:center;margin-top:18px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+#export-preview[hidden]{display:none}
+#export-preview-canvas{display:block;max-width:100%;height:auto;border-radius:8px;background:#000}
+
+.comic-settings{grid-column:1/-1}
+.comic-settings .text-settings-fields{grid-template-columns:repeat(2,minmax(0,1fr))}
+.comic-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.comic-actions button:not(.path-edit-button){display:grid;place-items:center;width:40px;height:40px;padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--accent-soft);color:var(--accent)}
+.comic-actions svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.bubble-overflow{color:#b45309;font-size:calc(13px * var(--font-scale,1));line-height:1.5}
+[data-theme=dark] .bubble-overflow{color:#fbbf24}
+.scene-element.scene-bubble.selected{outline:none}
+.comic-edit-overlay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.comic-edit-overlay circle{fill:#8fd3ff;stroke:#1d2935;stroke-width:2;vector-effect:non-scaling-stroke;pointer-events:all;cursor:grab;touch-action:none}
+body.recording .comic-edit-overlay{display:none}
+.element-interval{position:relative;height:12px;margin:16px 0 4px;background:var(--bg);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.element-interval>span{position:absolute;top:0;bottom:0;background:var(--accent);border-radius:5px}

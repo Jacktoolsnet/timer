@@ -32,7 +32,7 @@ export class ExportAudio{
    }
   };
   await video(this.p.backgroundVideo,0,this.total);let offset=0;
-  for(const scene of this.p.scenes){if(offset<end&&offset+scene.duration>start)for(const e of scene.elements)if(e.type==='video')await video(e.video,offset+e.at,offset+scene.duration);offset+=scene.duration;}
+  for(const scene of this.p.scenes){if(offset<end&&offset+scene.duration>start)for(const e of scene.elements)if(e.type==='video')await video(e.video,offset+e.at,offset+(e.until??scene.duration));offset+=scene.duration;}
   for(let j=0;j<data.length;j++)data[j]=Math.max(-1,Math.min(1,data[j]));return data;
  }
 }

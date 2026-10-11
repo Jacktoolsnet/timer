@@ -127,7 +127,8 @@
                     "image",
                     "shape",
                     "simulation",
-                    "video"
+                    "video",
+                    "bubble"
                   ]
                 },
                 "text": {
@@ -381,11 +382,84 @@
                     }
                   ],
                   "default": null
+                },
+                "bubble": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/bubble"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "description": "Omitted: default bubble object for type bubble; null otherwise. Type bubble requires a non-null object. Objects on other types are preserved but not rendered."
+                },
+                "anchors": {
+                  "type": "object",
+                  "maxProperties": 16,
+                  "default": {},
+                  "propertyNames": {
+                    "type": "string",
+                    "pattern": "^[a-zA-Z0-9_-]+$",
+                    "maxLength": 100
+                  },
+                  "additionalProperties": {
+                    "$ref": "#/$defs/anchorPoint"
+                  }
+                },
+                "until": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "maximum": 3600,
+                  "default": null,
+                  "description": "Scene-local exclusive end; must be > at and <= scene duration. Null/omitted: scene end, retaining legacy final paused-frame behavior."
+                },
+                "exitAnimation": {
+                  "enum": [
+                    "none",
+                    "fade",
+                    "slide-left",
+                    "slide-right",
+                    "slide-up",
+                    "slide-down",
+                    "zoom-out"
+                  ],
+                  "default": "none"
+                },
+                "exitDuration": {
+                  "type": "number",
+                  "minimum": 0.01,
+                  "maximum": 3600,
+                  "default": 0.5
                 }
               },
               "required": [
                 "id",
                 "type"
+              ],
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "type": {
+                        "const": "bubble"
+                      }
+                    },
+                    "required": [
+                      "type"
+                    ]
+                  },
+                  "then": {
+                    "properties": {
+                      "bubble": {
+                        "$ref": "#/$defs/bubble"
+                      }
+                    }
+                  }
+                }
               ]
             }
           },
@@ -584,7 +658,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://scenescript.jacktools.net/schema.json",
   "title": "SceneScript 1.0",
-  "$comment": "Runtime validation additionally enforces unique IDs, resolved asset references, element.at <= scene.duration, total UTF-8 file size and image decoding / dimensions. Do not include $schema in project data.",
+  "$comment": "Runtime validation additionally enforces unique IDs, resolved asset references, element.at <= scene.duration, total UTF-8 file size and image decoding / dimensions. Do not include $schema in project data. Comic cross-references, until relative to at/scene duration, safe geometry and text overflow are runtime checks, not structural schema constraints.",
   "$defs": {
     "gradient": {
       "anyOf": [
@@ -1364,6 +1438,123 @@
         }
       },
       "description": "Runtime checks audio reference, start < file duration, start < end <= file duration and at <= containing scope duration."
+    },
+    "anchorPoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "x": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "y": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        }
+      },
+      "required": [
+        "x",
+        "y"
+      ]
+    },
+    "bubble": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "speech",
+            "thought"
+          ],
+          "default": "speech"
+        },
+        "padding": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 500,
+          "default": 24
+        },
+        "lineHeight": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 4,
+          "default": 1.2
+        },
+        "tail": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "mode": {
+              "enum": [
+                "none",
+                "manual",
+                "anchor"
+              ],
+              "default": "manual"
+            },
+            "target": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "x": {
+                  "type": "number",
+                  "minimum": -1000,
+                  "maximum": 1000
+                },
+                "y": {
+                  "type": "number",
+                  "minimum": -1000,
+                  "maximum": 1000
+                }
+              },
+              "required": [
+                "x",
+                "y"
+              ],
+              "default": {
+                "x": 50,
+                "y": 150
+              }
+            },
+            "element": {
+              "type": "string",
+              "maxLength": 100,
+              "pattern": "^([a-zA-Z0-9_-]+)?$",
+              "default": ""
+            },
+            "anchor": {
+              "type": "string",
+              "maxLength": 100,
+              "pattern": "^([a-zA-Z0-9_-]+)?$",
+              "default": ""
+            },
+            "base": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": -360,
+              "maximum": 360,
+              "default": null
+            },
+            "width": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 500,
+              "default": 36
+            },
+            "curve": {
+              "type": "number",
+              "minimum": -1,
+              "maximum": 1,
+              "default": 0
+            }
+          },
+          "description": "Anchor mode requires an existing element and named anchor in the same scene. Manual target is a local bubble percentage, independent of speaker visibility."
+        }
+      }
     }
   }
 }

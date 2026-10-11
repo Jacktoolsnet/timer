@@ -1,3 +1,4 @@
+import {defaultBubble,parseBubble,parseAnchors,type Bubble,type Anchors} from './comic.ts';
 import {parseNarration,validateAudioData,type AudioAsset,type Narration} from './audio.ts';
 import {parseMotionPath,motionPathState,type MotionPath} from './motion-path.ts';
 import {parseVideo,validateVideoData,defaultVideo,type VideoAsset,type VideoSettings} from './video.ts';
@@ -8,11 +9,12 @@ import {validateSvg,svgSource} from './svg.ts';
 export const formats = { landscape: [1920,1080], portrait: [1080,1920], square: [1080,1080] } as const;
 export const fonts = ['Arial','Georgia','Verdana','Courier New'] as const;
 export const animations = ['none','fade','slide-left','slide-up','zoom','typewriter','pan'] as const;
+export const exitAnimations=['none','fade','slide-left','slide-right','slide-up','slide-down','zoom-out'] as const;
 export const shapeTypes=['rectangle','ellipse','triangle','diamond','star','arrow'] as const;
 export type Asset = { name:string; data:string };
 export type TextRun = {text:string} & Partial<Pick<Element,'font'|'fontSize'|'color'|'bold'|'italic'|'underline'|'strikethrough'>>;
 export type Element = {
- id:string; name:string; type:'text'|'image'|'shape'|'simulation'|'video'; video:VideoSettings|null; text:string; runs:TextRun[]; asset:string; x:number; y:number; width:number; height:number;
+ id:string; name:string; type:'text'|'image'|'shape'|'simulation'|'video'|'bubble'; bubble:Bubble|null; anchors:Anchors; until:number|null; exitAnimation:typeof exitAnimations[number]; exitDuration:number; video:VideoSettings|null; text:string; runs:TextRun[]; asset:string; x:number; y:number; width:number; height:number;
  simulation:Simulation|null; color:string; fillGradient:Gradient|null; fillColor:string; borderColor:string; borderWidth:number; shapeType:typeof shapeTypes[number]; borderStyle:'solid'|'dashed'|'dotted'|'double'; font:typeof fonts[number]; fontSize:number; align:'left'|'center'|'right'; bold:boolean; italic:boolean; underline:boolean; strikethrough:boolean;
  opacity:number; rotation:number; radius:number; fit:'cover'|'contain';
  motionPath:MotionPath|null; animation:typeof animations[number]; at:number; animationDuration:number;
@@ -23,7 +25,7 @@ export type Project = { version:'1.0'; title:string; description:string; hashtag
 export const MAX_FILE_BYTES = 160 * 1024 * 1024;
 export const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 export function newElement(type:Element['type'], id:string = crypto.randomUUID()):Element {
- return {id,name:'',type,motionPath:null,video:type==='video'?defaultVideo():null,simulation:type==='simulation'?defaultSimulation():null,text:type==='text'?'Your story starts here.':'',runs:[],asset:'',x:10,y:35,width:80,height:30,color:type==='shape'?'#b86445':'#ffffff',fillGradient:null,fillColor:type==='shape'?'#b86445':'#ffffff',borderColor:'none',borderWidth:4,shapeType:'rectangle',borderStyle:'solid',font:'Arial',fontSize:90,align:'center',bold:false,italic:false,underline:false,strikethrough:false,opacity:1,rotation:0,radius:0,fit:'contain',animation:'fade',at:0,animationDuration:1};
+ return {id,name:'',type,bubble:type==='bubble'?defaultBubble():null,anchors:{},until:null,exitAnimation:'none',exitDuration:.5,motionPath:null,video:type==='video'?defaultVideo():null,simulation:type==='simulation'?defaultSimulation():null,text:type==='bubble'?'Hello!':type==='text'?'Your story starts here.':'',runs:[],asset:'',x:10,y:type==='bubble'?10:35,width:type==='bubble'?40:80,height:type==='bubble'?24:30,color:type==='bubble'?'#222222':type==='shape'?'#b86445':'#ffffff',fillGradient:null,fillColor:type==='shape'?'#b86445':'#ffffff',borderColor:type==='bubble'?'#222222':'none',borderWidth:4,shapeType:'rectangle',borderStyle:'solid',font:'Arial',fontSize:type==='bubble'?48:90,align:'center',bold:false,italic:false,underline:false,strikethrough:false,opacity:1,rotation:0,radius:0,fit:'contain',animation:'fade',at:0,animationDuration:1};
 }
 export function newScene(id:string = crypto.randomUUID()):Scene {
  return {narration:null,id,name:'Scene',duration:5,background:'#263b42',backgroundEnabled:true,backgroundOpacity:1,backgroundGradient:null,backgroundAsset:'',transition:'fade',transitionDuration:0.5,elements:[]};
@@ -75,7 +77,7 @@ export function parseProject(input:string):Project {
   const duration=num(s.duration??d.duration,`${path}.duration`,0.1,3600);
   if(!Array.isArray(s.elements)||s.elements.length>100)throw new Error(`${path}.elements: expected array (max 100)`);
   const elements=s.elements.map((value,j)=>{
-   const ep=`${path}.elements[${j}]`,e=obj(value,ep),type=one(e.type,['text','image','shape','simulation','video'] as const,`${ep}.type`),defaults=newElement(type,'element');keys(e,Object.keys(defaults),ep);
+   const ep=`${path}.elements[${j}]`,e=obj(value,ep),type=one(e.type,['text','image','shape','simulation','video','bubble'] as const,`${ep}.type`),defaults=newElement(type,'element');keys(e,Object.keys(defaults),ep);
    const merged={...defaults,...e};const simulation=parseSimulation(merged.simulation,ep+'.simulation');if(type==='simulation'&&!simulation)throw new Error(ep+'.simulation: required for simulation element'); const eid=id(e.id,`${ep}.id`);if(elementIds.has(eid))throw new Error(`${ep}: duplicate ID`);elementIds.add(eid);
    for(const key of ['bold','italic','underline','strikethrough'] as const)if(typeof merged[key]!=='boolean')throw new Error(`${ep}.${key}: expected boolean`);
    if(!Array.isArray(merged.runs)||merged.runs.length>2000)throw new Error(`${ep}.runs: expected array (max 2000)`);
@@ -88,13 +90,21 @@ export function parseProject(input:string):Project {
     for(const k of ['bold','italic','underline','strikethrough'] as const)if(r[k]!==undefined){if(typeof r[k]!=='boolean')throw new Error(`${path}.${k}: expected boolean`);run[k]=r[k];}
     return run;
    });
+   const at=num(merged.at,ep+'.at',0,duration),until=merged.until===null?null:num(merged.until,ep+'.until',0,duration);
+   if(until!==null&&until<=at)throw new Error(ep+'.until: must be greater than at');
+   const bubble=parseBubble(merged.bubble,ep+'.bubble');if(type==='bubble'&&!bubble)throw new Error(ep+'.bubble: required for bubble element');
+   const anchors=parseAnchors(merged.anchors,ep+'.anchors');
    const text=runs.length?str(runs.map(r=>r.text).join(''),`${ep}.text`):str(merged.text,`${ep}.text`);
-   return {id:eid,motionPath:parseMotionPath(merged.motionPath,duration,ep+'.motionPath'),video:parseVideo(merged.video,videos,ep+'.video'),simulation,name:str(merged.name,`${ep}.name`,200),type,text,runs,asset:ref(merged.asset,`${ep}.asset`),
+   return {id:eid,bubble,anchors,until,exitAnimation:one(merged.exitAnimation,exitAnimations,ep+'.exitAnimation'),exitDuration:num(merged.exitDuration,ep+'.exitDuration',.01,3600),motionPath:parseMotionPath(merged.motionPath,duration,ep+'.motionPath'),video:parseVideo(merged.video,videos,ep+'.video'),simulation,name:str(merged.name,`${ep}.name`,200),type,text,runs,asset:ref(merged.asset,`${ep}.asset`),
     x:num(merged.x,`${ep}.x`,-100,100),y:num(merged.y,`${ep}.y`,-100,100),width:num(merged.width,`${ep}.width`,0.1,200),height:num(merged.height,`${ep}.height`,0.1,200),
-    fillGradient:parseGradient(merged.fillGradient,ep+'.fillGradient'),color:color(merged.color,`${ep}.color`),fillColor:(e.fillColor??merged.color)==='none'?'none':color(e.fillColor??merged.color,`${ep}.fillColor`),borderColor:merged.borderColor==='none'?'none':color(merged.borderColor,`${ep}.borderColor`),borderWidth:num(merged.borderWidth,`${ep}.borderWidth`,0,500),shapeType:one(merged.shapeType,shapeTypes,`${ep}.shapeType`),borderStyle:one(merged.borderStyle,['solid','dashed','dotted','double'] as const,`${ep}.borderStyle`),font:one(merged.font,fonts,`${ep}.font`),fontSize:num(merged.fontSize,`${ep}.fontSize`,1,500),align:one(merged.align,['left','center','right'] as const,`${ep}.align`),bold:merged.bold,italic:merged.italic,underline:merged.underline,strikethrough:merged.strikethrough,
+    fillGradient:parseGradient(merged.fillGradient,ep+'.fillGradient'),color:color(merged.color,`${ep}.color`),fillColor:(e.fillColor??(type==='bubble'?defaults.fillColor:merged.color))==='none'?'none':color(e.fillColor??(type==='bubble'?defaults.fillColor:merged.color),`${ep}.fillColor`),borderColor:merged.borderColor==='none'?'none':color(merged.borderColor,`${ep}.borderColor`),borderWidth:num(merged.borderWidth,`${ep}.borderWidth`,0,500),shapeType:one(merged.shapeType,shapeTypes,`${ep}.shapeType`),borderStyle:one(merged.borderStyle,['solid','dashed','dotted','double'] as const,`${ep}.borderStyle`),font:one(merged.font,fonts,`${ep}.font`),fontSize:num(merged.fontSize,`${ep}.fontSize`,1,500),align:one(merged.align,['left','center','right'] as const,`${ep}.align`),bold:merged.bold,italic:merged.italic,underline:merged.underline,strikethrough:merged.strikethrough,
     opacity:num(merged.opacity,`${ep}.opacity`,0,1),rotation:num(merged.rotation,`${ep}.rotation`,-360,360),radius:num(merged.radius,`${ep}.radius`,0,1000),fit:one(merged.fit,['cover','contain'] as const,`${ep}.fit`),
-    animation:one(merged.animation,animations,`${ep}.animation`),at:num(merged.at,`${ep}.at`,0,duration),animationDuration:num(merged.animationDuration,`${ep}.animationDuration`,0.01,3600)};
+    animation:one(merged.animation,animations,`${ep}.animation`),at,animationDuration:num(merged.animationDuration,`${ep}.animationDuration`,0.01,3600)};
   });
+  for(const e of elements)if(e.bubble?.tail.mode==='anchor'){
+   const target=elements.find(v=>v.id===e.bubble!.tail.element);
+   if(!target||!Object.hasOwn(target.anchors,e.bubble.tail.anchor))throw new Error(path+'.elements: missing speaker element/anchor');
+  }
   return {narration:parseNarration(s.narration,audios,duration,path+'.narration'),id:sid,name:str(s.name??d.name,`${path}.name`,200),duration,backgroundEnabled:(s.backgroundEnabled??true) as boolean,backgroundOpacity:num(s.backgroundOpacity??1,path+'.backgroundOpacity',0,1),backgroundGradient:parseGradient(s.backgroundGradient,path+'.backgroundGradient'),background:color(s.background??d.background,`${path}.background`),backgroundAsset:ref(s.backgroundAsset??'',`${path}.backgroundAsset`),transition:one(s.transition??d.transition,sceneTransitions,`${path}.transition`),transitionDuration:num(s.transitionDuration??d.transitionDuration,`${path}.transitionDuration`,0.01,3600),elements};
  });
  const backgroundSimulation=parseSimulation(p.backgroundSimulation,'backgroundSimulation');
@@ -105,10 +115,18 @@ export function locateTime(project:Project,time:number):{index:number;local:numb
  let offset=0;for(let i=0;i<project.scenes.length;i++){const duration=project.scenes[i].duration;if(time<offset+duration)return {index:i,local:Math.max(0,time-offset),ended:false};offset+=duration;}
  return {index:project.scenes.length-1,local:project.scenes.at(-1)!.duration,ended:true};
 }
-export function animationState(e:Element,time:number,width=1920,height=1080){
+export function animationState(e:Element,time:number,width=1920,height=1080,sceneDuration=Infinity){
  const motion=e.motionPath?motionPathState(e.motionPath,time,width,height):null;
  const progress=Math.min(1,Math.max(0,(time-e.at)/e.animationDuration));const eased=1-(1-progress)**3;
- return {visible:time>=e.at,opacity:e.opacity*(e.animation==='fade'?progress:1),transform:`${motion?`translate(${motion.x*width/100}px, ${motion.y*height/100}px) `:''}rotate(${e.rotation+(motion?.angle??0)}deg) translate(${e.animation==='slide-left'?(1-eased)*80:0}px, ${e.animation==='slide-up'?(1-eased)*80:0}px) scale(${e.animation==='zoom'?0.7+0.3*eased:e.animation==='pan'?1+0.1*progress:1})`,text:e.animation==='typewriter'?Array.from(e.text).slice(0,Math.floor(Array.from(e.text).length*progress)).join(''):e.text};
+ const end=e.until??sceneDuration,span=Math.max(0,end-e.at),exitLength=Math.min(e.exitDuration,span);
+ const exit=e.exitAnimation==='none'||!Number.isFinite(end)?0:exitLength>0?Math.min(1,Math.max(0,(time-(end-exitLength))/exitLength)):time>=end?1:0,out=1-(1-exit)**3;
+ const pose={motionX:motion?motion.x*width/100:0,motionY:motion?motion.y*height/100:0,rotation:e.rotation+(motion?.angle??0),
+ slideX:(e.animation==='slide-left'?(1-eased)*80:0)+(e.exitAnimation==='slide-left'?-80*out:e.exitAnimation==='slide-right'?80*out:0),
+ slideY:(e.animation==='slide-up'?(1-eased)*80:0)+(e.exitAnimation==='slide-up'?-80*out:e.exitAnimation==='slide-down'?80*out:0),
+ scale:(e.animation==='zoom'?0.7+0.3*eased:e.animation==='pan'?1+0.1*progress:1)*(e.exitAnimation==='zoom-out'?1-.3*out:1)};
+ return {pose,visible:time>=e.at&&(e.until===null||time<e.until),opacity:e.opacity*(e.animation==='fade'?progress:1)*(e.exitAnimation==='fade'?1-exit:1),
+ transform:`${motion?`translate(${pose.motionX}px, ${pose.motionY}px) `:''}rotate(${pose.rotation}deg) translate(${pose.slideX}px, ${pose.slideY}px) scale(${pose.scale})`,
+ text:e.animation==='typewriter'?Array.from(e.text).slice(0,Math.floor(Array.from(e.text).length*progress)).join(''):e.text};
 }
 
 // Incoming transitions occupy the start of the new scene; no extra timeline time.

@@ -1,3 +1,4 @@
+import {createBubble} from './bubble';
 import {toCanvas} from 'html-to-image';
 import {formats,locateTime,animationState,sceneTransitionState,type Project,type Scene} from '../lib/model';
 import {gradientCSS} from '../lib/gradient';
@@ -18,9 +19,10 @@ export class ExportRenderer{
  private async layer(s:Scene,local:number){const layer=this.box();this.root.append(layer);
  const bg=this.box();bg.style.background=gradientCSS(s.backgroundGradient,s.background);bg.style.opacity=String(s.backgroundEnabled?s.backgroundOpacity:0);layer.append(bg);if(s.backgroundAsset){const host=this.box();bg.append(host);host.style.opacity=String(s.transition==='fade'?Math.min(1,local/s.transitionDuration):1);seekSvg(this.image(s.backgroundAsset,'cover',host),local);}
  const fade=s.transition==='fade'?Math.min(1,local/s.transitionDuration):1;
- for(const e of s.elements){const state=animationState(e,local,this.w,this.h);if(!state.visible)continue;const node=document.createElement('div');const w=e.width*this.w/100,h=e.height*this.h/100;
+ for(const e of s.elements){const state=animationState(e,local,this.w,this.h,s.duration);if(!state.visible)continue;const node=document.createElement('div');node.dataset.elementId=e.id;const w=e.width*this.w/100,h=e.height*this.h/100;
  Object.assign(node.style,{position:'absolute',left:e.x*this.w/100+'px',top:e.y*this.h/100+'px',width:w+'px',height:h+'px',overflow:'hidden',boxSizing:'border-box',display:'flex',alignItems:'center',whiteSpace:'pre-wrap',fontFamily:e.font,fontSize:e.fontSize+'px',fontWeight:e.bold?'700':'400',fontStyle:e.italic?'italic':'normal',color:e.color,textAlign:e.align,justifyContent:e.align==='left'?'flex-start':e.align==='right'?'flex-end':'center',borderRadius:e.radius+'px',opacity:String(state.opacity*fade),transform:state.transform});layer.append(node);
- if(e.type==='text'){const text=document.createElement('span');text.style.width='100%';renderRuns(text,e,state.text);node.append(text);}
+ if(e.type==='bubble'){createBubble(node,e,w,h,this.w,this.h).update(s,local,state.text);}
+ else if(e.type==='text'){const text=document.createElement('span');text.style.width='100%';renderRuns(text,e,state.text);node.append(text);}
  else if(e.type==='shape')renderShape(node,e,w,h);
  else if(e.type==='simulation'&&e.simulation)this.simulation(e.simulation,w,h,local-e.at,node,8000000/Math.max(1,s.elements.filter(e=>e.type==='simulation').length));
  else if(e.type==='video'&&e.video)await this.video(e.video,local-e.at,node);

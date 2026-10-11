@@ -97,3 +97,15 @@ test('1080p MP4 includes AAC music even without a native AAC encoder',async({pag
  test.skip(result===null,'H.264 encoder unavailable in this browser');
  expect(result!.type).toBe('video/mp4');expect(result!.width).toBe(1920);expect(result!.codec).toBe('aac');expect(result!.packetBytes).toBeGreaterThan(0);expect(result!.duration).toBeGreaterThanOrEqual(.29);
 });
+
+test('export overlay shows the current rendered frame and resets on reopening',async({page})=>{
+ const p=demoProject();p.scenes=p.scenes.slice(0,1);p.scenes[0].duration=2;p.scenes[0].elements=[];p.scenes[0].transition='none';p.scenes[0].background='#ff0000';
+ await page.goto('/en/');await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(p));await page.locator('#import-json').click();
+ await page.locator('#open-export').click();await expect(page.locator('#export-preview')).toBeHidden();
+ await page.locator('#export-format').selectOption('webm');await page.locator('#export-resolution').selectOption('480');await page.locator('#export-audio').uncheck();await page.locator('#start-export').click();
+ await expect(page.locator('#export-preview')).toBeVisible();
+ const pixel=await page.locator('#export-preview-canvas').evaluate((c:HTMLCanvasElement)=>({width:c.width,height:c.height,pixel:Array.from(c.getContext('2d')!.getImageData(10,10,1,1).data)}));
+ expect(pixel.width).toBeLessThanOrEqual(320);expect(pixel.height).toBeLessThanOrEqual(180);expect(pixel.pixel.slice(0,3)).toEqual([255,0,0]);
+ await page.locator('#cancel-export').click();await expect(page.locator('#start-export')).toBeEnabled();await page.locator('#cancel-export').click();
+ await page.locator('#open-export').click();await expect(page.locator('#export-preview')).toBeHidden();
+});

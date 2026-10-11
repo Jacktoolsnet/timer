@@ -278,6 +278,9 @@ Every nonempty element.video.asset or backgroundVideo.asset must resolve to
 an own key in videos, even on a non-video element (where playback is ignored).
 General element.asset and scene.backgroundAsset always refer to images in assets;
 they cannot select videos. A matching ID in the wrong namespace does not resolve.
+Bubble tail.element selects a globally unique element ID, but it must be in the
+same scene as the bubble. tail.anchor selects a name from that element's anchors,
+a local namespace independent of assets and other elements' anchor names.
 Empty references must be "", not a URL, file path or an invented placeholder ID.
 
 ### Assets and image limits
@@ -347,7 +350,7 @@ Scene durations add up to the total duration; transitions do not add time.
 
 ### Elements
 
-Required: id and type. type must be "video", "text", "image", "shape" (a geometric form) or "simulation".
+Required: id and type. type must be "video", "text", "image", "shape" (a geometric form) or "simulation" or "bubble".
 Optional fields and their defaults:
 - video: for type "video", omission supplies {asset:"",start:0,end:null,loop:false,
   muted:true,volume:1,fit:"cover"}; for other types omission supplies null.
@@ -358,20 +361,20 @@ Optional fields and their defaults:
   for type "video"; for actual video playback you MUST provide an existing videos
   ID in video.asset. No implicit lookup in the general image asset field occurs.
 - simulation: null for text/image/shape/video, default particles configuration for simulation elements; simulation elements must not explicitly set this to null.
-- text: "Your story starts here." for text, otherwise ""; string, max 10000
+- text: "Your story starts here." for text, "Hello!" for bubble, otherwise ""; string, max 10000
   UTF-16 code units.
 - asset: ""; empty or an existing asset ID, max 100 code units.
-- x: 10; y: 35; each -100 to 100, percentages of canvas width/height.
-- width: 80; height: 30; each 0.1–200, percentages of canvas width/height.
-- color: "#ffffff" for text/image/video/simulation, "#b86445" for shape; #RRGGBB color.
+- x: 10; y: 35 (10 for bubble); each -100 to 100, percentages of canvas width/height.
+- width: 80 (40 for bubble); height: 30 (24 for bubble); each 0.1–200, percentages of canvas width/height.
+- color: "#ffffff" for text/image/video/simulation, "#b86445" for shape, "#222222" for bubble; #RRGGBB color.
 - font: "Arial"; allowed ${fonts.map(f=>`"${f}"`).join(', ')}.
-- fontSize: 90; number, 1–500 project pixels, not percentages or UI pixels.
+- fontSize: 90 (48 for bubble); number, 1–500 project pixels, not percentages or UI pixels.
 - align: "center"; allowed "left", "center", "right".
 - name: ""; optional display title, at most 200 characters. Does not change rendered text or IDs.
 - shapeType: "rectangle"; allowed "rectangle", "ellipse", "triangle", "diamond", "star", "arrow". Used by shape elements only.
 - fillGradient: null; optional gradient object (see Gradients below), for shapes.
-- fillColor: shape fill color (#RRGGBB) or "none". Omitted uses legacy color.
-- borderColor: "none"; #RRGGBB or "none", for shapes.
+- fillColor: shape/bubble fill color (#RRGGBB) or "none". Omitted/null uses legacy color except for bubble, which defaults to "#ffffff".
+- borderColor: "none" ("#222222" for bubble); #RRGGBB or "none", for shapes/bubbles.
 - borderStyle: "solid"; allowed "solid", "dashed", "dotted", "double". Shape outline line style; ignored when borderColor is "none" or borderWidth is zero. A double line needs sufficient width (at least 3 project pixels) to be visible.
 - borderWidth: 4; number, 0–500 project pixels. Zero hides the border. The border is inside the existing element bounds and follows radius; rendered width is clamped to half the smaller shape dimension.
 - runs: []; optional structured rich-text segments (see Rich text below).
@@ -389,6 +392,13 @@ Optional fields and their defaults:
 - animation: "fade"; allowed ${animations.map(a=>`"${a}"`).join(', ')}.
 - at: 0; number, 0 to the containing scene's duration, relative to scene start.
 - animationDuration: 1; number, 0.01–3600 seconds.
+- anchors: {}; up to 16 named local anchor points; explicit null rejected.
+- bubble: default bubble object for type bubble, null for other types. Type bubble
+  requires a non-null object; see Native comic bubbles.
+- until: null; optional exclusive scene-local end, greater than at and no later
+  than scene.duration. Explicit null means scene end.
+- exitAnimation: "none"; none/fade/slide-left/slide-right/slide-up/slide-down/zoom-out.
+- exitDuration: .5; number, .01–3600 seconds.
 Type-irrelevant fields are accepted, validated and preserved, but may have no
 visual effect. All omitted optional element fields use these defaults.
 
@@ -399,9 +409,98 @@ provided (using general fit). Do not rely on this fallback for video authoring:
 the file-export renderer omits placeholders; a non-null video object with empty
 asset renders no video there and does not fall back to the image asset.
 
+### Native comic bubbles and speaker anchors
+
+Version remains 1.0. Old projects need no migration. Groups and nested coordinates,
+camera moves and character rigging are NOT part of this stage. A scene is a comic
+panel/shot; reuse image assets for recurring characters instead of repeating Base64.
+
+For type "bubble", provide normal text/runs and typography, position/size,
+opacity/rotation, fillColor, borderColor and borderWidth. These are one object:
+body, text and tail move together; the tail can extend outside the body box.
+Text/runs remain safe literal text, never HTML. No automatic font shrinking or
+layout displacement occurs. The editor warns about text overflow and clips only
+the text. Canvas clipping still applies to the complete bubble.
+radius, fit, shapeType, fillGradient and borderStyle do not change bubble geometry;
+bubble outlines are solid and centered on the contour. borderWidth is not clamped
+to body dimensions. Large widths can obscure text: keep widths modest.
+
+bubble fields (all optional; unknown fields rejected):
+- kind: "speech" (default) or "thought". Speech has a rounded, superelliptic body
+  and one closed contour including its tail: no seam or second border at the base.
+  Thought has a cloud-like contour and three progressively smaller dots.
+- padding: 0–500 project pixels (24). Added to the safe-body inset: 9% of width/
+  height for speech; 20% for thought. The remaining centered text rectangle is
+  clipped independently. Excessive padding can leave zero available text space.
+- lineHeight: .5–4 (1.2), unitless multiplier; applies to text/runs.
+- tail: object with these defaults:
+  mode "manual"; target {x:50,y:150}; element ""; anchor ""; base null;
+  width 36; curve 0.
+  mode is "none", "manual" or "anchor". None removes the tail/dots.
+  target is a required x/y pair if supplied, each −1000–1000: percentages relative
+  to the untransformed bubble BODY width/height; (0,0) is its upper-left corner.
+  It is preserved even in anchor mode but only manual mode uses it.
+  element/anchor are empty or 1–100 ASCII letters/digits/_/-. In anchor mode they
+  must resolve to an element and one of its named anchors IN THE SAME SCENE.
+  They are NOT image/video/audio asset references, and need not precede the bubble.
+  base is null for automatic attachment direction, or −360–360 degrees: 0 points
+  right, 90 down. width is 1–500 project pixels, determining speech attachment
+  width (clamped angularly on small bodies) or thought dot size.
+  curve is −1–1; bends the speech tail perpendicular to the center-to-target vector.
+  Thought dots are placed at 25%, 55% and 85% of the contour-to-target line,
+  with radii 12/8/4 pixels × min(1,min(bodyWidth,bodyHeight)/200) × (1+width/100).
+  base/curve affect speech only. For an interior target the tail/dots are omitted;
+  no division-by-zero or inverted contour is created.
+Omitted bubble/tail fields use defaults. Explicit null is accepted only for
+tail.base inside a bubble object. Full bubble:null disables the object only on
+non-bubble types. A validated bubble object on other types is preserved but not drawn.
+
+anchors is an optional element object mapping names to {x,y}, each 0–100 local
+percent, relative to the untransformed element rectangle, not actual image pixels.
+Names use the identifier syntax above, maximum 16 per element, unique within that
+element. Reused names on different elements are allowed. Extra fields/nulls reject.
+An image using contain may have letterboxing: place the mouth anchor accordingly.
+Anchor transforms exactly follow the element's Motion Path, entry/exit rotation,
+translation and scale, with transform-origin at the element center. The target is
+transformed into the bubble's local space using the inverse bubble transform.
+The bubble itself never moves to follow its speaker. Hidden speakers still supply
+their timeline-computed anchor: bubble and speaker visibility are independent.
+Editor anchor renaming updates references; deleting anchors/elements detaches
+dependent tails to their last evaluated manual point (clamped to its allowed range).
+Duplicating a scene assigns new element IDs and remaps its speaker references.
+Dragging a tail target in expanded preview changes it to manual mode.
+Editor handles, selection outlines and overflow warnings are never exported.
+
+### Element ends and exit animations
+
+until is either null/omitted (scene end) or a finite scene-local time > at and
+<= scene.duration. Explicit ends use visibility [at,until), regardless of opacity.
+For backward compatibility, null ends preserve the old final stopped frame:
+an element can still be displayed at the exact final scene endpoint. Explicit
+ends never have this exception. No end or exit animation adds timeline duration.
+exitAnimation defaults to none; exitDuration defaults to .5, valid .01–3600 seconds.
+An exit occupies the last min(exitDuration, end-at) seconds of its interval.
+fade uses a linear opacity factor from 1 to 0. Slides use cubic ease-out and
+80 project pixels in the indicated direction; zoom-out scales from 1 to .7 with
+cubic ease-out. Entry animation progress remains unchanged if entry and exit
+overlap: opacity and scale factors multiply, slide offsets add. This is deterministic
+even for extremely short intervals.
+Transform order (rightmost operation is applied first): Motion Path translation,
+rotation (element plus path orientation), combined entry/exit local translation,
+combined scale. All operations use the element center as transform-origin.
+An element end stops/mutes associated video playback and bounds exported video
+audio, including looped clips. Exit opacity alone does NOT fade video audio.
+Project music, project/scene narration and project background video keep their
+existing scopes. The editor shows the selected interval in its timing settings;
+there are no draggable interval tracks or groups in this stage.
+
+Comic example: /comic.scenescript.json — original SVG characters, three English
+dialogue beats, speech/thought bubbles, a moving mouth anchor, explicit ends and
+fade-outs. Fetch and import this JSON like the existing /example.scenescript.json.
+
 ### Motion paths
 
-motionPath applies to text, images, shapes, simulations and videos. Omit it or
+motionPath applies to text, images, shapes, simulations, videos and bubbles. Omit it or
 use null to disable it. An object (including {}) supplies these defaults:
 - type: "line"; allowed "line", "bezier" (cubic), "ellipse" (including circles), or "segments" (a connected route).
 - start: 0 seconds from SCENE start, independently of element.at; 0–scene.duration.
@@ -507,13 +606,17 @@ Actual validator behavior is asymmetric:
 - Scene id/elements and asset name/data do not accept null.
 - Element motionPath omitted/null disables path movement; individual path fields reject null.
 - Element fillGradient accepts explicit null, meaning solid/no gradient.
-- Element fillColor omitted OR null uses legacy element.color (or its type default).
+- Element fillColor omitted OR null uses legacy element.color (or its type default), except bubble, which uses white.
 - Element video:null is accepted on ALL types. On a video element, omission instead
   creates the default settings object; on other types omission produces null.
   Object-valued video on other types still validates but is not played.
 - In video settings (including backgroundVideo), end:null means file end; omission
   also produces null. Other individual video settings reject null.
 - Element simulation accepts null except on type "simulation", which requires a simulation object.
+- Element until omitted/null means scene end. bubble omitted supplies the bubble
+  default only for type bubble; explicit bubble:null is rejected on type bubble,
+  accepted on other types. Bubble object fields reject null except tail.base.
+  anchors omitted means {}; anchors:null is rejected; coordinate fields reject null.
 - Apart from the exceptions above, other element fields reject explicit null:
   element defaults apply only to omitted fields, not explicit null.
 - Root version/title/description/hashtags/format/scenes do not accept null.
@@ -567,7 +670,8 @@ color does not tint an actual image. It is the container's foreground color
 and can affect the text of an empty-image placeholder, not image pixels.
 For shape, fillColor sets the selected form’s fill (or "none"); missing fillColor inherits
 legacy color. borderColor independently sets its outline (or "none"). Text is not drawn.
-radius sets the element container's rounded corners for every type: it clips
+radius sets the element container's rounded corners except for bubbles (whose
+contour is controlled by bubble.kind): it clips
 text and images and rounds rectangle fills. For non-rectangle shapes, radius is ignored. Large radii follow browser CSS border-
 radius normalization. A scene background image has no radius field.
 
@@ -598,11 +702,12 @@ Slide/zoom easing is 1 - (1 - progress)^3 (cubic ease-out).
   text. It uses Array.from, NOT grapheme clusters. Combining marks, flags and
   joined emoji can therefore appear in parts; complete emoji/grapheme handling
   is not guaranteed. The partially revealed text is laid out again as it grows.
-  This affects text elements only; it does not reveal image, shape or simulation pixels.
+  This affects text and bubble text only; it does not reveal image, shape or simulation pixels.
 - pan: a slow linear zoom from 100% to 110%, with NO sideways panning. It does
   not repeat, and holds 110% after animationDuration.
 For animations other than fade, element opacity is the configured opacity.
-Elements remain until their scene ends; there are no exit animations.
+By default elements remain until scene end. until can end them earlier; exitAnimation
+adds the documented exit factors without extending the scene.
 
 While playback is running and transition is "fade", the scene fade factor is
 min(1, localTime / transitionDuration). It multiplies each element's animated
@@ -640,7 +745,7 @@ type; audio narration belongs to the project or scene.
 Motion paths may loop or ping-pong. Selected video excerpts may loop; safe SVG SMIL repeatCount also supports finite
 repetition or indefinite repetition. These do NOT add a scene/presentation loop
 field. Arbitrary executable code, free-form keyframes, custom element types beyond
-the documented type enum, and exit animations are not supported.
+the documented type enum, are not supported. The documented exitAnimation enum is supported.
 
 ## Composition guidelines
 
