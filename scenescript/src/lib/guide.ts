@@ -690,8 +690,9 @@ and mute are honored; video audio stops at the selected end unless looped.
 Export settings are UI-only, not JSON fields. Export runs locally and may be
 slower than real time; leave the tab open. Playback support alone does not guarantee file export: the exporter needs media
 decoders as well as the configured encoders. If audio is selected and potentially
-audible narration/music/video exists, the relevant audio encoder is also required; otherwise
-no audio track is added. Export audio includes assigned narration and uses mute, volume, trims and video loops, not
+audible narration/music/video exists, the relevant audio encoder is also required. For MP4,
+a bundled local AAC software encoder is loaded if native AAC encoding is unavailable.
+No audio track is added when there is no potentially audible audio or audio is disabled. Export audio includes assigned narration and uses mute, volume, trims and video loops, not
 visual element opacity or scene-fade factors. There is no automatic MP4-to-WebM fallback or server
 transcoding: unsupported settings report an error, and the user may choose WebM
 or different settings. Export honors timeline scene fades even on a stopped editor

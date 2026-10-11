@@ -7,7 +7,21 @@ import {ExportAudio} from './export-audio';
 export type ExportOptions={format:'mp4'|'webm';resolution:number;fps:number;audio:boolean};
 export function exportSize(p:Project,o:ExportOptions){const [w,h]=formats[p.format],scale=o.resolution/Math.min(w,h);return {width:Math.round(w*scale/2)*2,height:Math.round(h*scale/2)*2,bitrate:o.resolution<=480?2000000:o.resolution<=720?4000000:8000000};}
 export function exportHasAudio(p:Project){return Boolean(narrationClips(p).length||p.music?.enabled&&p.music.volume>0||p.backgroundVideo?.asset&&!p.backgroundVideo.muted&&p.backgroundVideo.volume>0||p.scenes.some(s=>s.elements.some(e=>e.type==='video'&&e.video?.asset&&!e.video.muted&&e.video.volume>0)));}
-export async function exportSupported(p:Project,o:ExportOptions){const size=exportSize(p,o);return await canEncodeVideo(o.format==='mp4'?'avc':'vp9',{...size,frameRate:o.fps})&&(!o.audio||!exportHasAudio(p)||await canEncodeAudio(o.format==='mp4'?'aac':'opus',{sampleRate:48000,numberOfChannels:2,bitrate:128000}));}
+const audioConfig={sampleRate:48000,numberOfChannels:2,bitrate:128000};
+let aacFallback:Promise<void>|undefined;
+async function ensureAacEncoder(){
+ if(await canEncodeAudio('aac',audioConfig))return;
+ // Load the bundled, local WASM encoder only when native AAC is unavailable.
+ aacFallback??=import('@mediabunny/aac-encoder').then(({registerAacEncoder})=>{registerAacEncoder();}).catch(error=>{aacFallback=undefined;throw error;});
+ await aacFallback;
+}
+export async function exportSupported(p:Project,o:ExportOptions){
+ const size=exportSize(p,o);
+ if(!await canEncodeVideo(o.format==='mp4'?'avc':'vp9',{...size,frameRate:o.fps}))return false;
+ if(!o.audio||!exportHasAudio(p))return true;
+ if(o.format==='mp4')await ensureAacEncoder();
+ return canEncodeAudio(o.format==='mp4'?'aac':'opus',audioConfig);
+}
 export async function exportVideo(p:Project,o:ExportOptions,signal:AbortSignal,progress:(fraction:number)=>void){
  const duration=p.scenes.reduce((n,s)=>n+s.duration,0),size=exportSize(p,o);
  if(!await exportSupported(p,o))throw new Error('Encoder unavailable. Try WebM or disable audio.');signal.throwIfAborted();

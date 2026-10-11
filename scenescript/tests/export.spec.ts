@@ -58,8 +58,8 @@ test('export audio uses one aligned slide switch instead of a visible checkbox',
  await expect(input).toBeChecked();await input.click();await expect(input).not.toBeChecked();await input.press('Space');await expect(input).toBeChecked();
 });
 
-test('WebM and 1080p are export defaults and alternatives remain selectable',async({page})=>{
- await page.goto('/en/');await page.locator('#open-export').click();await expect(page.locator('#export-format')).toHaveValue('webm');await expect(page.locator('#export-resolution')).toHaveValue('1080');await page.locator('#export-resolution').selectOption('720');await expect(page.locator('#export-resolution')).toHaveValue('720');await page.locator('#export-format').selectOption('mp4');await expect(page.locator('#export-format')).toHaveValue('mp4');
+test('MP4 and 1080p are export defaults and alternatives remain selectable',async({page})=>{
+ await page.goto('/en/');await page.locator('#open-export').click();await expect(page.locator('#export-format')).toHaveValue('mp4');await expect(page.locator('#export-resolution')).toHaveValue('1080');await page.locator('#export-resolution').selectOption('720');await expect(page.locator('#export-resolution')).toHaveValue('720');await page.locator('#export-format').selectOption('webm');await expect(page.locator('#export-format')).toHaveValue('webm');
 });
 
 test('exports estimated above 512 MiB are not rejected by an artificial size limit',async({page})=>{
@@ -76,4 +76,24 @@ test('exports estimated above 512 MiB are not rejected by an artificial size lim
  });
  test.skip(result===null,'WebM encoder unavailable');
  expect(result).toBe('AbortError');
+});
+
+test('1080p MP4 includes AAC music even without a native AAC encoder',async({page})=>{
+ await page.goto('/en/');
+ const p=demoProject();p.scenes=p.scenes.slice(0,1);p.scenes[0].duration=.3;p.scenes[0].elements=[];p.scenes[0].transition='none';p.music=defaultMusic();p.music.fadeIn=0;p.music.fadeOut=0;
+ const result=await page.evaluate(async p=>{
+  const {exportVideo,exportSupported}=await import(/* @vite-ignore */ '/src/scripts/video-export.ts' as string);
+  const options={format:'mp4',resolution:1080,fps:30,audio:true};
+  if(!await exportSupported(p,options))return null;
+  const blob=await exportVideo(p,options,new AbortController().signal,()=>{});
+  const moduleURL=performance.getEntriesByType('resource').map(e=>e.name).find(n=>n.includes('/mediabunny.js?v='))!,m=await import(/* @vite-ignore */ moduleURL);
+  const input=new m.Input({formats:m.ALL_FORMATS,source:new m.BlobSource(blob)});
+  try{
+   const video=await input.getPrimaryVideoTrack(),audio=await input.getPrimaryAudioTrack();
+   const packet=audio?await new m.EncodedPacketSink(audio).getFirstPacket():null;
+   return {type:blob.type,width:video.displayWidth,codec:audio?.codec,packetBytes:packet?.data.byteLength??0,duration:await input.computeDuration()};
+  }finally{input.dispose();}
+ },p);
+ test.skip(result===null,'H.264 encoder unavailable in this browser');
+ expect(result!.type).toBe('video/mp4');expect(result!.width).toBe(1920);expect(result!.codec).toBe('aac');expect(result!.packetBytes).toBeGreaterThan(0);expect(result!.duration).toBeGreaterThanOrEqual(.29);
 });
