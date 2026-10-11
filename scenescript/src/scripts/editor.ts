@@ -1,3 +1,5 @@
+import {defaultMotionPath,pathTypes,type MotionPath} from '../lib/motion-path';
+import {renderMotionPath} from './motion-path-editor';
 import {defaultVideo,parseVideo,validateVideoData,MAX_VIDEO_BYTES,type VideoSettings} from '../lib/video';
 import {createVideo,syncVideo,inspectVideo,videoURL,releaseVideoURL,clearVideoURLs} from './video';
 import {defaultMusic,parseMusic,presetInstrument,instrumentPresets,musicStyles,waveforms,type Music,type Instrument} from '../lib/music';
@@ -21,6 +23,7 @@ const t=(key:string)=>words[key as EditorKey]||key;
 const keepScreenAwake=screenWakeLock($('wake-status'),'',t('wakeUnavailable'));
 let project:Project=demoProject(), sceneIndex=0, selectedId='',dirty=false,time=0,playing=false,recording=false;
 let revision=0, focusAttempt=0;
+let motionEditing=false;
 // Recording uses its own playhead; returning must not discard the editor context.
 let recordingReturnState:{sceneIndex:number;selectedId:string;time:number}|undefined;
 let recordingRestartTimer:ReturnType<typeof setTimeout>|undefined;
@@ -115,7 +118,7 @@ const actions=document.createElement('div');actions.className='asset-actions';fo
 function field(form:HTMLElement,key:string,value:string|number|boolean,kind:string,action:(value:string|number|boolean)=>void,options?:readonly string[],min?:number,max?:number){
  const label=document.createElement('label');label.append(document.createTextNode(t(key)));
  let input:HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement;
- if(kind==='select'){input=document.createElement('select');options?.forEach(option=>{const o=document.createElement('option');o.value=option;o.textContent=key==='asset'||key==='backgroundAsset'?(option?project.assets[option].name:t('none')):t(key==='style'&&option==='focus'?'musicFocus':key==='gradientType'&&option==='solid'?'gradientSolid':key==='transition'&&option!=='none'&&option!=='fade'?'transition-'+option:option);input.append(o);});input.value=String(value);}
+ if(kind==='select'){input=document.createElement('select');options?.forEach(option=>{const o=document.createElement('option');o.value=option;o.textContent=key==='asset'||key==='backgroundAsset'?(option?project.assets[option].name:t('none')):t(key==='pathType'&&option==='ellipse'?'path-ellipse':key==='pathEasing'&&option==='linear'?'path-linear':key==='pathAfter'&&option==='reset'?'path-reset':key==='style'&&option==='focus'?'musicFocus':key==='gradientType'&&option==='solid'?'gradientSolid':key==='transition'&&option!=='none'&&option!=='fade'?'transition-'+option:option);input.append(o);});input.value=String(value);}
  else if(kind==='textarea'){input=document.createElement('textarea');input.value=String(value);input.maxLength=10000;}
  else{input=document.createElement('input');input.type=kind;if(kind==='checkbox')input.checked=Boolean(value);else input.value=String(value);if(kind==='number'){input.step='any';if(min!==undefined)input.min=String(min);if(max!==undefined)input.max=String(max);}if(kind==='text')input.maxLength=200;if(['simulationCount','simulationSeed'].includes(key))input.step='1';}
  input.name=key;
@@ -132,7 +135,7 @@ function field(form:HTMLElement,key:string,value:string|number|boolean,kind:stri
   number.addEventListener('wheel',()=>number.blur(),{passive:true});
   if(eagerNumber)number.addEventListener('change',()=>{if(number.isConnected&&number.checkValidity()&&Number.isFinite(number.valueAsNumber))action(number.valueAsNumber);});
   const wrapper=document.createElement('span');wrapper.className='number-stepper';
-  const step=['opacity','stopOpacity','backgroundOpacity','simulationOpacity','volume','sustain','reverb','velocity','gain','echoMix','echoFeedback'].includes(key)?0.05:['duration','transitionDuration','animationDuration','at','simulationSpeed','attack','decay','release','fadeIn','fadeOut','echoDelay','ratio'].includes(key)?0.1:1;
+  const step=['opacity','stopOpacity','backgroundOpacity','simulationOpacity','volume','sustain','reverb','velocity','gain','echoMix','echoFeedback'].includes(key)?0.05:['pathStart','pathDuration','duration','transitionDuration','animationDuration','at','simulationSpeed','attack','decay','release','fadeIn','fadeOut','echoDelay','ratio'].includes(key)?0.1:1;
   const controls=[-1,1].map(direction=>{
    const control=button(direction<0?'−':'+',()=>{
     if(!Number.isFinite(number.valueAsNumber))return;
@@ -145,7 +148,7 @@ function field(form:HTMLElement,key:string,value:string|number|boolean,kind:stri
   function sync(){controls[0].disabled=min!==undefined&&number.valueAsNumber<=min;controls[1].disabled=max!==undefined&&number.valueAsNumber>=max;}
   number.addEventListener('input',sync);number.addEventListener('change',sync);sync();
   wrapper.append(controls[0],number,controls[1]);label.append(wrapper);
- }else if(kind==='checkbox'&&['bold','italic','underline','strikethrough','backgroundEnabled','musicEnabled','loop','muted'].includes(key)){
+ }else if(kind==='checkbox'&&['bold','italic','underline','strikethrough','backgroundEnabled','musicEnabled','loop','muted','pathOrient','pathClockwise'].includes(key)){
   label.classList.add('text-style-toggle');
   const wrapper=document.createElement('span');wrapper.className='safe-switch';
   input.setAttribute('role','switch');input.setAttribute('aria-label',t(key));
@@ -379,7 +382,23 @@ function renderForms(){
    for(const key of keys){const label=key==='simulation'?ef.querySelector('[data-simulation-settings]'):key==='fillGradient'?ef.querySelector('[data-gradient=fillGradient]'):key==='text'?ef.querySelector('label[data-rich-text]'):ef.querySelector(`[name="${key}"]`)?.closest('label');if(label)fields.append(label);}
    ef.append(group);
   }
+ motionPathFields(ef,e);
  if(e.type==='video')videoFields(ef,e.video??defaultVideo(),next=>{try{parseVideo(next,project.videos);updateElementValue('video',next);return e.video===next;}catch(error){showToast((error as Error).message,'error');return false;}});
+}
+function motionPathFields(host:HTMLElement,e:Element){
+ const group=document.createElement('fieldset');group.className='text-settings-group path-settings';const legend=document.createElement('legend');legend.textContent=t('motionPath');group.append(legend);const fields=document.createElement('div');fields.className='text-settings-fields';group.append(fields);host.append(group);
+ field(fields,'pathType',e.motionPath?.type||'none','select',value=>{updateElement('motionPath',value==='none'?null:defaultMotionPath(value as MotionPath['type']));renderForms();},['none',...pathTypes]);
+ const m=e.motionPath;if(!m)return;
+ const update=(key:keyof MotionPath,value:unknown)=>updateElement('motionPath',{...e.motionPath,[key]:value});
+ for(const [key,min,max] of [['start',0,current().duration],['duration',.01,3600]] as const)field(fields,key==='start'?'pathStart':'pathDuration',m[key],'number',value=>update(key,value),undefined,min,max);
+ field(fields,'pathEasing',m.easing,'select',value=>update('easing',value),['linear','ease-in-out']);field(fields,'pathRepeat',m.repeat,'select',value=>update('repeat',value),['once','loop','ping-pong']);
+ field(fields,'pathAfter',m.after,'select',value=>update('after',value),['hold','reset']);field(fields,'pathOrient',m.orient,'checkbox',value=>update('orient',value));
+ const points=m.type==='ellipse'?['center'] as const:m.type==='bezier'?['from','control1','control2','to'] as const:['from','to'] as const;
+ for(const point of points)for(const axis of ['x','y'] as const)field(fields,'path-'+point+'-'+axis,m[point][axis],'number',value=>update(point,{...e.motionPath![point],[axis]:value}),undefined,-200,200);
+ if(m.type==='ellipse'){for(const key of ['radiusX','radiusY','startAngle'] as const)field(fields,'path-'+key,m[key],'number',value=>update(key,value),undefined,key==='startAngle'?-360:.1,key==='startAngle'?360:200);field(fields,'pathClockwise',m.clockwise,'checkbox',value=>update('clockwise',value));}
+ if(m.type==='ellipse'){const circle=button(t('path-circle'),()=>{const [w,h]=formats[project.format];const rx=Math.max(.1,.1*h/w,Math.min(e.motionPath!.radiusX,200*h/w));updateElement('motionPath',{...e.motionPath,radiusX:rx,radiusY:rx*w/h});renderForms();});circle.className='path-edit-button';group.append(circle);}
+ const hint=document.createElement('p');hint.className='small-hint';hint.textContent=t('pathHint');group.append(hint);
+ const edit=button(t('editPath'),()=>{stop();motionEditing=true;$('open-preview').click();draw(false);});edit.className='path-edit-button';group.append(edit);
 }
 function moveElement(delta:number){const s=current(),index=s.elements.findIndex(e=>e.id===selectedId),next=index+delta;if(index<0||next<0||next>=s.elements.length)return;[s.elements[index],s.elements[next]]=[s.elements[next],s.elements[index]];changed();refresh();}
 const stage=$('stage'),stageFrame=$('stage-frame');
@@ -407,7 +426,7 @@ for(const child of Array.from(previewContent.children)){if(child!==stageFrame)pr
 function closePreview(){
  $('preview-slot').append(previewContent);previewContent.classList.remove('preview-expanded');
  if(previewDialog.open)previewDialog.close();
- resize();
+ motionEditing=false;draw(false);resize();
 }
 $('open-preview').addEventListener('click',()=>{
  $('preview-overlay-host').append(previewContent);previewContent.classList.add('preview-expanded');
@@ -454,7 +473,7 @@ function createSceneLayer(scene:Scene,index:number,interactive:boolean){
  return {layer,views:sceneViews,svgBackground};
 }
 function updateSceneViews(sceneViews:SceneView[],local:number,opacity=1){
- sceneViews.forEach(({element,node,text,svg,simulation,video})=>{if(video&&element.video)syncVideo(video,element.video,project.videos[element.video.asset].duration,local-element.at,playing&&!countdownTimer&&video.dataset.outgoing!=='true',opacity>0&&video.dataset.outgoing!=='true');simulation?.draw(local-element.at);seekSvg(svg,local-element.at);const state=animationState(element,local);node.style.opacity=String(state.opacity*opacity);node.style.visibility=state.visible?'visible':'hidden';node.style.transform=state.transform;if(text&&text.dataset.visibleText!==state.text){renderRuns(text,element,state.text);text.dataset.visibleText=state.text;}});
+ sceneViews.forEach(({element,node,text,svg,simulation,video})=>{if(video&&element.video)syncVideo(video,element.video,project.videos[element.video.asset].duration,local-element.at,playing&&!countdownTimer&&video.dataset.outgoing!=='true',opacity>0&&video.dataset.outgoing!=='true');simulation?.draw(local-element.at);seekSvg(svg,local-element.at);const state=animationState(element,local,...formats[project.format]);node.style.opacity=String(state.opacity*opacity);node.style.visibility=state.visible?'visible':'hidden';node.style.transform=state.transform;if(text&&text.dataset.visibleText!==state.text){renderRuns(text,element,state.text);text.dataset.visibleText=state.text;}});
 }
 let backgroundVideoNode:HTMLVideoElement|undefined,backgroundVideoAsset='';
 function draw(follow=true){
@@ -483,6 +502,8 @@ function draw(follow=true){
  const backgroundImage=incomingLayer?.querySelector<HTMLElement|SVGElement>('.scene-background');if(backgroundImage)backgroundImage.style.opacity=String(sceneOpacity);
  seekSvg(incomingSvgBackground,at.local);
  updateSceneViews(views,at.local,sceneOpacity);
+ stage.querySelector('.motion-path-overlay')?.remove();
+ const edit=selected();if(motionEditing&&!playing&&!recording&&edit?.motionPath)renderMotionPath(stage,edit,formats[project.format][0],formats[project.format][1],next=>{if(!motionEditing||selected()!==edit)return;edit.motionPath=next;changed();draw(false);},()=>{if(selected()===edit)renderForms();});
  ($('timeline') as HTMLInputElement).max=String(total());($('timeline') as HTMLInputElement).value=String(time);$('time-label').textContent=`${time.toFixed(1)} / ${total().toFixed(1)} s`;
  const playButton=$('play') as HTMLButtonElement;
  playButton.title=t(playing?'pause':'play');playButton.setAttribute('aria-label',playButton.title);

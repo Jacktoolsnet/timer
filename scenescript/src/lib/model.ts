@@ -1,3 +1,4 @@
+import {parseMotionPath,motionPathState,type MotionPath} from './motion-path.ts';
 import {parseVideo,validateVideoData,defaultVideo,type VideoAsset,type VideoSettings} from './video.ts';
 import {parseMusic,type Music} from './music.ts';
 import {parseSimulation,defaultSimulation,type Simulation} from './simulation.ts';
@@ -13,7 +14,7 @@ export type Element = {
  id:string; name:string; type:'text'|'image'|'shape'|'simulation'|'video'; video:VideoSettings|null; text:string; runs:TextRun[]; asset:string; x:number; y:number; width:number; height:number;
  simulation:Simulation|null; color:string; fillGradient:Gradient|null; fillColor:string; borderColor:string; borderWidth:number; shapeType:typeof shapeTypes[number]; borderStyle:'solid'|'dashed'|'dotted'|'double'; font:typeof fonts[number]; fontSize:number; align:'left'|'center'|'right'; bold:boolean; italic:boolean; underline:boolean; strikethrough:boolean;
  opacity:number; rotation:number; radius:number; fit:'cover'|'contain';
- animation:typeof animations[number]; at:number; animationDuration:number;
+ motionPath:MotionPath|null; animation:typeof animations[number]; at:number; animationDuration:number;
 };
 export const sceneTransitions=['none','fade','crossfade','slide-left','slide-right','slide-up','slide-down','wipe-left','wipe-right','wipe-up','wipe-down','zoom-in','zoom-out','through-black'] as const;
 export type Scene = { id:string; name:string; duration:number; background:string; backgroundEnabled:boolean; backgroundOpacity:number; backgroundGradient:Gradient|null; backgroundAsset:string; transition:typeof sceneTransitions[number]; transitionDuration:number; elements:Element[] };
@@ -21,7 +22,7 @@ export type Project = { version:'1.0'; title:string; description:string; hashtag
 export const MAX_FILE_BYTES = 160 * 1024 * 1024;
 export const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 export function newElement(type:Element['type'], id:string = crypto.randomUUID()):Element {
- return {id,name:'',type,video:type==='video'?defaultVideo():null,simulation:type==='simulation'?defaultSimulation():null,text:type==='text'?'Your story starts here.':'',runs:[],asset:'',x:10,y:35,width:80,height:30,color:type==='shape'?'#b86445':'#ffffff',fillGradient:null,fillColor:type==='shape'?'#b86445':'#ffffff',borderColor:'none',borderWidth:4,shapeType:'rectangle',borderStyle:'solid',font:'Arial',fontSize:90,align:'center',bold:false,italic:false,underline:false,strikethrough:false,opacity:1,rotation:0,radius:0,fit:'contain',animation:'fade',at:0,animationDuration:1};
+ return {id,name:'',type,motionPath:null,video:type==='video'?defaultVideo():null,simulation:type==='simulation'?defaultSimulation():null,text:type==='text'?'Your story starts here.':'',runs:[],asset:'',x:10,y:35,width:80,height:30,color:type==='shape'?'#b86445':'#ffffff',fillGradient:null,fillColor:type==='shape'?'#b86445':'#ffffff',borderColor:'none',borderWidth:4,shapeType:'rectangle',borderStyle:'solid',font:'Arial',fontSize:90,align:'center',bold:false,italic:false,underline:false,strikethrough:false,opacity:1,rotation:0,radius:0,fit:'contain',animation:'fade',at:0,animationDuration:1};
 }
 export function newScene(id:string = crypto.randomUUID()):Scene {
  return {id,name:'Scene',duration:5,background:'#263b42',backgroundEnabled:true,backgroundOpacity:1,backgroundGradient:null,backgroundAsset:'',transition:'fade',transitionDuration:0.5,elements:[]};
@@ -82,7 +83,7 @@ export function parseProject(input:string):Project {
     return run;
    });
    const text=runs.length?str(runs.map(r=>r.text).join(''),`${ep}.text`):str(merged.text,`${ep}.text`);
-   return {id:eid,video:parseVideo(merged.video,videos,ep+'.video'),simulation,name:str(merged.name,`${ep}.name`,200),type,text,runs,asset:ref(merged.asset,`${ep}.asset`),
+   return {id:eid,motionPath:parseMotionPath(merged.motionPath,duration,ep+'.motionPath'),video:parseVideo(merged.video,videos,ep+'.video'),simulation,name:str(merged.name,`${ep}.name`,200),type,text,runs,asset:ref(merged.asset,`${ep}.asset`),
     x:num(merged.x,`${ep}.x`,-100,100),y:num(merged.y,`${ep}.y`,-100,100),width:num(merged.width,`${ep}.width`,0.1,200),height:num(merged.height,`${ep}.height`,0.1,200),
     fillGradient:parseGradient(merged.fillGradient,ep+'.fillGradient'),color:color(merged.color,`${ep}.color`),fillColor:(e.fillColor??merged.color)==='none'?'none':color(e.fillColor??merged.color,`${ep}.fillColor`),borderColor:merged.borderColor==='none'?'none':color(merged.borderColor,`${ep}.borderColor`),borderWidth:num(merged.borderWidth,`${ep}.borderWidth`,0,500),shapeType:one(merged.shapeType,shapeTypes,`${ep}.shapeType`),borderStyle:one(merged.borderStyle,['solid','dashed','dotted','double'] as const,`${ep}.borderStyle`),font:one(merged.font,fonts,`${ep}.font`),fontSize:num(merged.fontSize,`${ep}.fontSize`,1,500),align:one(merged.align,['left','center','right'] as const,`${ep}.align`),bold:merged.bold,italic:merged.italic,underline:merged.underline,strikethrough:merged.strikethrough,
     opacity:num(merged.opacity,`${ep}.opacity`,0,1),rotation:num(merged.rotation,`${ep}.rotation`,-360,360),radius:num(merged.radius,`${ep}.radius`,0,1000),fit:one(merged.fit,['cover','contain'] as const,`${ep}.fit`),
@@ -98,9 +99,10 @@ export function locateTime(project:Project,time:number):{index:number;local:numb
  let offset=0;for(let i=0;i<project.scenes.length;i++){const duration=project.scenes[i].duration;if(time<offset+duration)return {index:i,local:Math.max(0,time-offset),ended:false};offset+=duration;}
  return {index:project.scenes.length-1,local:project.scenes.at(-1)!.duration,ended:true};
 }
-export function animationState(e:Element,time:number){
+export function animationState(e:Element,time:number,width=1920,height=1080){
+ const motion=e.motionPath?motionPathState(e.motionPath,time,width,height):null;
  const progress=Math.min(1,Math.max(0,(time-e.at)/e.animationDuration));const eased=1-(1-progress)**3;
- return {visible:time>=e.at,opacity:e.opacity*(e.animation==='fade'?progress:1),transform:`rotate(${e.rotation}deg) translate(${e.animation==='slide-left'?(1-eased)*80:0}px, ${e.animation==='slide-up'?(1-eased)*80:0}px) scale(${e.animation==='zoom'?0.7+0.3*eased:e.animation==='pan'?1+0.1*progress:1})`,text:e.animation==='typewriter'?Array.from(e.text).slice(0,Math.floor(Array.from(e.text).length*progress)).join(''):e.text};
+ return {visible:time>=e.at,opacity:e.opacity*(e.animation==='fade'?progress:1),transform:`${motion?`translate(${motion.x*width/100}px, ${motion.y*height/100}px) `:''}rotate(${e.rotation+(motion?.angle??0)}deg) translate(${e.animation==='slide-left'?(1-eased)*80:0}px, ${e.animation==='slide-up'?(1-eased)*80:0}px) scale(${e.animation==='zoom'?0.7+0.3*eased:e.animation==='pan'?1+0.1*progress:1})`,text:e.animation==='typewriter'?Array.from(e.text).slice(0,Math.floor(Array.from(e.text).length*progress)).join(''):e.text};
 }
 
 // Incoming transitions occupy the start of the new scene; no extra timeline time.

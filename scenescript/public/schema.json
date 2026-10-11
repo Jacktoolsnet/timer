@@ -370,6 +370,17 @@
                     }
                   ],
                   "description": "Omitted: default videoSettings object for type video, null for other types. Explicit null allowed for all types; objects validated even on other types."
+                },
+                "motionPath": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/motionPath"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null
                 }
               },
               "required": [
@@ -876,6 +887,201 @@
           "default": "cover"
         }
       }
+    },
+    "motionPath": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "line",
+            "bezier",
+            "ellipse"
+          ],
+          "default": "line"
+        },
+        "start": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 3600,
+          "default": 0
+        },
+        "duration": {
+          "type": "number",
+          "minimum": 0.01,
+          "maximum": 3600,
+          "default": 3
+        },
+        "easing": {
+          "enum": [
+            "linear",
+            "ease-in-out"
+          ],
+          "default": "linear"
+        },
+        "repeat": {
+          "enum": [
+            "once",
+            "loop",
+            "ping-pong"
+          ],
+          "default": "once"
+        },
+        "after": {
+          "enum": [
+            "hold",
+            "reset"
+          ],
+          "default": "hold"
+        },
+        "orient": {
+          "type": "boolean",
+          "default": false
+        },
+        "clockwise": {
+          "type": "boolean",
+          "default": true
+        },
+        "from": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "x",
+            "y"
+          ],
+          "properties": {
+            "x": {
+              "type": "number",
+              "minimum": -200,
+              "maximum": 200
+            },
+            "y": {
+              "type": "number",
+              "minimum": -200,
+              "maximum": 200
+            }
+          },
+          "default": {
+            "x": 0,
+            "y": 0
+          }
+        },
+        "to": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "x",
+            "y"
+          ],
+          "properties": {
+            "x": {
+              "type": "number",
+              "minimum": -200,
+              "maximum": 200
+            },
+            "y": {
+              "type": "number",
+              "minimum": -200,
+              "maximum": 200
+            }
+          },
+          "default": {
+            "x": 30,
+            "y": 0
+          }
+        },
+        "control1": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "x",
+            "y"
+          ],
+          "properties": {
+            "x": {
+              "type": "number",
+              "minimum": -200,
+              "maximum": 200
+            },
+            "y": {
+              "type": "number",
+              "minimum": -200,
+              "maximum": 200
+            }
+          },
+          "default": {
+            "x": 10,
+            "y": -20
+          }
+        },
+        "control2": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "x",
+            "y"
+          ],
+          "properties": {
+            "x": {
+              "type": "number",
+              "minimum": -200,
+              "maximum": 200
+            },
+            "y": {
+              "type": "number",
+              "minimum": -200,
+              "maximum": 200
+            }
+          },
+          "default": {
+            "x": 20,
+            "y": 20
+          }
+        },
+        "center": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "x",
+            "y"
+          ],
+          "properties": {
+            "x": {
+              "type": "number",
+              "minimum": -200,
+              "maximum": 200
+            },
+            "y": {
+              "type": "number",
+              "minimum": -200,
+              "maximum": 200
+            }
+          },
+          "default": {
+            "x": 0,
+            "y": 0
+          }
+        },
+        "radiusX": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 200,
+          "default": 15
+        },
+        "radiusY": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 200,
+          "default": 15
+        },
+        "startAngle": {
+          "type": "number",
+          "minimum": -360,
+          "maximum": 360,
+          "default": 0
+        }
+      },
+      "description": "Relative stage-percentage offsets. Runtime also checks start <= containing scene duration."
     }
   }
 }

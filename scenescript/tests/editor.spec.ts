@@ -269,7 +269,7 @@ test('image and shape settings use appearance, layout and animation groups',asyn
  await page.goto('/en/');
  for(const type of ['image','shape']){
   await page.locator('#element-add-menu summary').click();await page.locator(`[data-add=${type}]`).click();
-  const form=page.locator('#element-form');await expect(form.locator('fieldset')).toHaveCount(3);
+  const form=page.locator('#element-form');await expect(form.locator('fieldset')).toHaveCount(4);await expect(form.locator('.path-settings [name=pathType]')).toHaveValue('none');
   const appearance=form.locator(`.${type}StyleGroup`);await expect(appearance.locator('[name=opacity]')).toBeVisible();await expect(appearance.locator('[name=radius]')).toBeVisible();
   await expect(form.locator('.elementLayoutGroup [name=x]')).toBeVisible();await expect(form.locator('.elementMotionGroup [name=animation]')).toBeVisible();
   if(type==='image'){await expect(appearance.locator('[name=asset]')).toBeVisible();await expect(appearance.locator('[name=fit]')).toBeVisible();}else{await expect(appearance.locator('[name=fillColor]')).toBeVisible();}

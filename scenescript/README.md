@@ -213,3 +213,16 @@ Zwischenablagezugriff markiert den Text zum manuellen Kopieren.
 Projekte erhalten leere Werte. JSON-Dateien und lokale Entwürfe speichern die
 Angaben; sie werden nicht in der Präsentation eingeblendet. Die KI-Anleitung
 und das Schema enthalten die neuen Felder. Kein automatischer Plattform-Upload.
+
+### Bewegungspfade
+
+Unter **Elementeinstellungen → Bewegungspfad** stehen Gerade, kubische
+Bézier-Kurve und Kreis/Ellipse zur Verfügung. Start/Dauer, Wiederholung,
+Hin-und-zurück, sanfte Beschleunigung und Ausrichtung sind konfigurierbar.
+**Pfad in großer Vorschau bearbeiten** zeigt verschiebbare Kontrollpunkte.
+Koordinaten sind relative Prozentabstände zur Elementposition. **Kreis einstellen**
+berücksichtigt das aktuelle Seitenverhältnis. Vorschau, Aufnahme und Export
+verwenden dieselbe zeitbasierte Berechnung; Hilfslinien werden nicht exportiert.
+JSON-Feld `motionPath`, Defaults und Grenzen sind in der gemeinsamen KI-Anleitung
+und im strukturellen Schema beschrieben. Das Schema kann die zusätzliche
+Runtime-Bedingung `motionPath.start <= scene.duration` nicht abbilden.

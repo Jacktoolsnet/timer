@@ -308,6 +308,7 @@ Optional fields and their defaults:
 - fit: "contain"; allowed "contain" or "cover". Used for image rendering; for an
   actual video, video.fit alone controls fitting, independently of this field.
   Both fields are validated/preserved; general fit does not override video.fit.
+- motionPath: null; optional movement path on any element type (see Motion paths).
 - animation: "fade"; allowed ${animations.map(a=>`"${a}"`).join(', ')}.
 - at: 0; number, 0 to the containing scene's duration, relative to scene start.
 - animationDuration: 1; number, 0.01–3600 seconds.
@@ -320,6 +321,51 @@ to its image placeholder, or to general asset if a valid image reference was als
 provided (using general fit). Do not rely on this fallback for video authoring:
 the file-export renderer omits placeholders; a non-null video object with empty
 asset renders no video there and does not fall back to the image asset.
+
+### Motion paths
+
+motionPath applies to text, images, shapes, simulations and videos. Omit it or
+use null to disable it. An object (including {}) supplies these defaults:
+- type: "line"; allowed "line", "bezier" (cubic), "ellipse" (including circles).
+- start: 0 seconds from SCENE start, independently of element.at; 0–scene.duration.
+- duration: 3 seconds per traversal; 0.01–3600.
+- easing: "linear" (approximately constant screen-pixel speed) or "ease-in-out".
+- repeat: "once", "loop" or "ping-pong"; default "once". Loop jumps back to the
+  start (continuous on an ellipse); ping-pong reverses direction every traversal.
+- after: "hold" or "reset"; default "hold". Only once uses this: keep endpoint,
+  or return to path start as soon as duration has elapsed.
+- orient: false; true adds the path's screen-space tangent angle to element.rotation.
+  Reversed ping-pong motion faces the reverse direction. Zero tangents use 0 degrees.
+- from: {x:0,y:0}, to: {x:30,y:0}; used for line and bezier.
+- control1: {x:10,y:-20}, control2: {x:20,y:20}; cubic bezier controls.
+- center: {x:0,y:0}, radiusX:15, radiusY:15; used for ellipse.
+- startAngle:0 degrees (-360–360); clockwise:true; used for ellipse. 0 starts
+  at the rightmost point; positive clockwise angles move downwards on screen.
+
+Points are relative offsets from the element's base x/y anchor, NOT absolute
+positions. X uses canvas width, Y canvas height; each point coordinate is -200–200.
+Provided point objects require both x and y. Radii are 0.1–200 in the same axis
+percentages. A circle requires radiusX * canvasWidth == radiusY * canvasHeight;
+equal percentage radii produce an ellipse on a non-square canvas. The editor's
+Set circle action adjusts radii for the current project format. Changing format
+preserves stored percentages rather than automatically preserving circularity.
+All shape-specific fields are accepted, validated and preserved on every path
+type. Unknown keys and explicit null for individual fields are rejected.
+
+Before start the element remains at the path's initial offset. Element.at still
+controls visibility; entrance animation and motion run independently. Path translation
+is added to the base position, without being rotated/scaled by element transforms.
+Existing entrance effects and base rotation remain active. Elements rotate about
+their box center, not about the path anchor. Paths can extend off-canvas.
+Scene end clips movement; paths never extend project duration. Bézier/ellipse
+speed uses a deterministic 256-segment arc-length approximation. Seeking,
+preview, recording and export calculate motion from the same scene-local time.
+The expanded preview offers draggable path/control/radius handles; these guides
+are editor-only and never appear in recording or exported video.
+
+Example: move 40% right and 10% up over four seconds, starting at scene second 1:
+{"motionPath":{"type":"line","start":1,"duration":4,
+"from":{"x":0,"y":0},"to":{"x":40,"y":-10},"orient":false}}
 
 ### Omitted fields versus explicit null
 
@@ -334,6 +380,7 @@ Actual validator behavior is asymmetric:
 - Root description/hashtags default to "" only on omission, not on explicit null.
 - Each optional scene field listed above uses its default when omitted OR null.
 - Scene id/elements and asset name/data do not accept null.
+- Element motionPath omitted/null disables path movement; individual path fields reject null.
 - Element fillGradient accepts explicit null, meaning solid/no gradient.
 - Element fillColor omitted OR null uses legacy element.color (or its type default).
 - Element video:null is accepted on ALL types. On a video element, omission instead
@@ -464,7 +511,7 @@ At exact intermediate scene boundaries, the next scene is selected with local
  time 0. At or beyond total duration, the last scene is displayed at its endpoint.
 Supported sound comes from synthetic project music and unmuted embedded videos;
 there is no standalone audio-file asset/track element or recorded-vocal generator.
-Selected video excerpts may loop; safe SVG SMIL repeatCount also supports finite
+Motion paths may loop or ping-pong. Selected video excerpts may loop; safe SVG SMIL repeatCount also supports finite
 repetition or indefinite repetition. These do NOT add a scene/presentation loop
 field. Arbitrary executable code, free-form keyframes, custom element types beyond
 the documented type enum, and exit animations are not supported.
