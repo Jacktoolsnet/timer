@@ -513,6 +513,8 @@ camera playback preview. Apply commits one undo step; Cancel/Escape discard.
 Disable camera saves null. Overview is editor-only and temporarily ignores the
 camera while paused; playback, recording and export always use the saved camera.
 Element/anchor/path handles are shown only in overview or without a camera.
+Opening those handle editors automatically switches to overview; it does not
+change the saved camera.
 No camera drag handles or screen-fixed elements are implemented in this stage.
 The camera example at /camera.scenescript.json uses one shared animated SVG,
 a full-to-manager-to-briefcase shot and a final two-panel scene.

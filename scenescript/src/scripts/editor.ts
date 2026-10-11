@@ -586,7 +586,7 @@ function bubbleFields(host:HTMLElement,e:Element){
    if(b.tail.base!==null)field(fields,'bubbleBase',b.tail.base,'number',v=>tail('base',v),undefined,-360,360);
    field(fields,'bubbleCurve',b.tail.curve,'number',v=>tail('curve',v),undefined,-1,1);
   }
-  const edit=button(t('bubbleEdit'),()=>{stop();comicEditing='tail';motionEditing=false;$('open-preview').click();draw(false);});edit.className='path-edit-button';group.append(edit);
+  const edit=button(t('bubbleEdit'),()=>{stop();comicEditing='tail';motionEditing=false;if(current().camera){cameraOverview=true;renderForms();}$('open-preview').click();draw(false);});edit.className='path-edit-button';group.append(edit);
  }
  const hint=document.createElement('p');hint.className='small-hint';hint.textContent=t('bubbleHint');group.append(hint);
  const warning=document.createElement('p');warning.id='bubble-overflow';warning.className='bubble-overflow';warning.setAttribute('role','status');warning.textContent=t('bubbleOverflow');warning.hidden=true;group.append(warning);
@@ -610,7 +610,7 @@ function anchorFields(host:HTMLElement,e:Element){
   let name='mouth',n=2;while(Object.hasOwn(e.anchors,name))name='anchor-'+n++;
   updateElementValue('anchors',{...e.anchors,[name]:{x:50,y:50}});renderForms();
  }).disabled=Object.keys(e.anchors).length>=16;
- if(Object.keys(e.anchors).length){const edit=button(t('anchorEdit'),()=>{stop();comicEditing='anchors';motionEditing=false;$('open-preview').click();draw(false);});edit.className='path-edit-button';actions.append(edit);}
+ if(Object.keys(e.anchors).length){const edit=button(t('anchorEdit'),()=>{stop();comicEditing='anchors';motionEditing=false;if(current().camera){cameraOverview=true;renderForms();}$('open-preview').click();draw(false);});edit.className='path-edit-button';actions.append(edit);}
  const hint=document.createElement('p');hint.className='small-hint';hint.textContent=t('anchorHint');group.append(hint);
 }
 function renderComicHandles(e:Element,local:number){
@@ -669,7 +669,7 @@ function motionPathFields(host:HTMLElement,e:Element,apply:(value:MotionPath|nul
  if(m.type==='ellipse'){for(const key of ['radiusX','radiusY','startAngle'] as const)field(fields,'path-'+key,m[key as 'start'|'duration'],'number',value=>update(key as 'start'|'duration',value),undefined,key==='startAngle'?-360:.1,key==='startAngle'?360:200);field(fields,'pathClockwise',m.clockwise,'checkbox',value=>update('clockwise',value));}
  if(m.type==='ellipse'){const circle=button(t('path-circle'),()=>{const [w,h]=formats[project.format];const rx=Math.max(.1,.1*h/w,Math.min(e.motionPath!.radiusX,200*h/w));apply({...e.motionPath!,radiusX:rx,radiusY:rx*w/h});renderForms();});circle.className='path-edit-button';group.append(circle);}
  const hint=document.createElement('p');hint.className='small-hint';hint.textContent=t('pathHint');group.append(hint);
- const edit=button(t('editPath'),()=>{stop();comicEditing=null;motionEditing=true;$('open-preview').click();draw(false);});edit.className='path-edit-button';group.append(edit);
+ const edit=button(t('editPath'),()=>{stop();comicEditing=null;motionEditing=true;if(current().camera){cameraOverview=true;renderForms();}$('open-preview').click();draw(false);});edit.className='path-edit-button';group.append(edit);
 }
 function moveElement(delta:number){const s=current(),index=s.elements.findIndex(e=>e.id===selectedId),next=index+delta;if(index<0||next<0||next>=s.elements.length)return;[s.elements[index],s.elements[next]]=[s.elements[next],s.elements[index]];changed();refresh();}
 const stage=$('stage'),stageFrame=$('stage-frame');
