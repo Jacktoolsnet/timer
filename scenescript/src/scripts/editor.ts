@@ -716,9 +716,9 @@ function syncProjectSimulation(){
 }
 let transitionBlack:HTMLDivElement|undefined;
 let stageKey='',views:SceneView[]=[],incomingLayer:HTMLDivElement|undefined,incomingWorld:HTMLDivElement|undefined,incomingSvgBackground:SVGSVGElement|undefined,outgoingLayer:HTMLDivElement|undefined;
-function createSceneLayer(scene:Scene,index:number,interactive:boolean){
+function createSceneLayer(scene:Scene,index:number,interactive:boolean,forceWorld=false){
  const backgroundOpacity=scene.backgroundEnabled?scene.backgroundOpacity:0;
- const viewport=document.createElement('div');viewport.className='scene-layer';viewport.dataset.sceneIndex=String(index);const layer=document.createElement('div');layer.className='scene-camera-world';viewport.append(layer);layer.style.background=backgroundOpacity===1?gradientCSS(scene.backgroundGradient,scene.background):'transparent';if(!scene.camera)viewport.style.background=layer.style.background;
+ const viewport=document.createElement('div');viewport.className='scene-layer';viewport.dataset.sceneIndex=String(index);const layer=document.createElement('div');layer.className='scene-camera-world';viewport.append(layer);layer.style.background=backgroundOpacity===1?gradientCSS(scene.backgroundGradient,scene.background):'transparent';if(!scene.camera&&!forceWorld){viewport.style.background=layer.style.background;layer.style.background='transparent';}
  let backgroundHost:HTMLElement=layer;
  if(backgroundOpacity<1){const backdrop=document.createElement('div');backdrop.className='scene-backdrop';backdrop.style.background=gradientCSS(scene.backgroundGradient,scene.background);backdrop.style.opacity=String(backgroundOpacity);layer.append(backdrop);backgroundHost=backdrop;}
  if(!interactive)layer.style.pointerEvents='none';
@@ -1037,7 +1037,7 @@ function renderCameraPreview(){
  if(!cameraPreviewView){host.replaceChildren();const root=document.createElement('div');Object.assign(root.style,{position:'relative',width:w+'px',height:h+'px',transformOrigin:'0 0',transform:`scale(${previewWidth/w})`,background:'#000'});host.style.width=previewWidth+'px';host.style.height=(previewWidth*h/w)+'px';host.append(root);
  if(project.backgroundSimulation){cameraPreviewSimulation=createSimulation(project.backgroundSimulation,w,h);Object.assign(cameraPreviewSimulation.canvas.style,{position:'absolute',inset:'0',width:'100%',height:'100%'});root.append(cameraPreviewSimulation.canvas);}
  if(project.backgroundVideo?.asset){cameraPreviewVideo=createVideo(project.videos[project.backgroundVideo.asset]);Object.assign(cameraPreviewVideo.style,{position:'absolute',inset:'0',width:'100%',height:'100%',objectFit:project.backgroundVideo.fit});cameraPreviewVideo.muted=true;root.append(cameraPreviewVideo);cameraPreviewVideo.addEventListener('loadeddata',renderCameraPreview,{once:true});}
- cameraPreviewView=createSceneLayer(cameraTarget,sceneIndex,false);root.append(cameraPreviewView.layer);cameraPreviewView.views.forEach(v=>v.video?.addEventListener('loadeddata',renderCameraPreview,{once:true}));}
+ cameraPreviewView=createSceneLayer(cameraTarget,sceneIndex,false,true);root.append(cameraPreviewView.layer);cameraPreviewView.views.forEach(v=>v.video?.addEventListener('loadeddata',renderCameraPreview,{once:true}));}
  cameraPreviewSimulation?.draw(offset(sceneIndex)+local);
  if(cameraPreviewVideo&&project.backgroundVideo?.asset)syncVideo(cameraPreviewVideo,{...project.backgroundVideo,muted:true},project.videos[project.backgroundVideo.asset].duration,offset(sceneIndex)+local,false,false);
  const view=cameraPreviewView;view.world.style.transform=cameraTransform(camera,local,w,h);updateSceneViews(view.views,local,cameraTarget.transition==='fade'?Math.min(1,local/cameraTarget.transitionDuration):1);seekSvg(view.svgBackground,local);$('camera-time-label').textContent=local.toFixed(2)+' s';
