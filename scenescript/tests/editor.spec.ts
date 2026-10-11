@@ -680,3 +680,26 @@ test('toolbar copies complete project JSON and offers manual copying on clipboar
  await page.evaluate(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async()=>{throw new Error('denied');}}}));await page.locator('#copy-project-json').click();await expect(page.locator('#json-dialog')).toBeVisible();await expect(page.locator('#json-copy-status')).toContainText('project JSON is selected');
  expect(await page.locator('#json-input').evaluate((el:HTMLTextAreaElement)=>el.value.slice(el.selectionStart,el.selectionEnd))).toBe(copied);await page.locator('#close-json').click();await expect(page.locator('#project-title')).toHaveValue('Clipboard project');await expect(page.locator('#copy-project-json')).toBeEnabled();
 });
+
+test('project tile collapses without losing edits and remains keyboard accessible',async({page})=>{
+ await page.goto('/en/');
+ await page.locator('#project-title').fill('Keep my project');
+ await page.locator('#project-description').fill('Keep my description');
+ await page.locator('#project-format').selectOption('portrait');
+ const panel=page.locator('#project-panel'),toggle=page.locator('#toggle-project');
+ const expanded=(await panel.boundingBox())!.height;
+ await toggle.click();
+ await expect(toggle).toHaveAttribute('aria-expanded','false');
+ await expect(toggle).toHaveAccessibleName('Expand project');
+ await expect(page.locator('#project-content')).toBeHidden();
+ await expect(page.locator('#project-toolbar')).toBeHidden();
+ expect((await panel.boundingBox())!.height).toBeLessThan(expanded/2);
+ await expect(page.locator('#stage-frame')).toBeVisible();
+ await toggle.focus();await page.keyboard.press('Enter');
+ await expect(toggle).toHaveAttribute('aria-expanded','true');
+ await expect(toggle).toHaveAccessibleName('Collapse project');
+ await expect(page.locator('#project-title')).toHaveValue('Keep my project');
+ await expect(page.locator('#project-description')).toHaveValue('Keep my description');
+ await expect(page.locator('#project-format')).toHaveValue('portrait');
+ await expect(page.locator('#project-toolbar')).toBeVisible();
+});

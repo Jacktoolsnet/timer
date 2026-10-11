@@ -596,6 +596,14 @@ $('safe-toggle').addEventListener('change',()=>{$('safe-overlay').hidden=!($('sa
 function replace(next:Project){stop();backgroundVideoNode=undefined;backgroundVideoAsset='';clearVideoURLs();clearAudioURLs();revision++;project=next;sceneIndex=0;selectedId='';time=0;dirty=false;persist();refresh();status(t('ready'));}
 const canReplace=()=>!dirty||confirm(t('unsaved'));
 $('new-project').addEventListener('click',()=>{if(canReplace()){replace({version:'1.0',title:'SceneScript',description:'',hashtags:'',thumbnail:null,audios:{},narration:null,audioDucking:false,format:'landscape',backgroundSimulation:null,backgroundVideo:null,videos:{},music:null,assets:{},scenes:[newScene()]});changed();}});
+$('toggle-project').addEventListener('click',()=>{
+ const button=$('toggle-project'),collapsed=button.getAttribute('aria-expanded')==='true';
+ $('project-panel').classList.toggle('project-collapsed',collapsed);
+ $('project-toolbar').hidden=collapsed;$('project-content').hidden=collapsed;
+ button.setAttribute('aria-expanded',String(!collapsed));
+ const label=t(collapsed?'expandProject':'collapseProject');button.title=label;button.setAttribute('aria-label',label);
+ if(collapsed)stopAudioPreviews();
+});
 $('project-title').addEventListener('input',()=>{project.title=($('project-title') as HTMLInputElement).value;changed();});
 $('project-format').addEventListener('change',()=>{project.format=($('project-format') as HTMLSelectElement).value as Project['format'];changed();draw();});
 $('add-scene').addEventListener('click',()=>{if(project.scenes.length>=100)return;project.scenes.push(newScene());changed();selectScene(project.scenes.length-1);});

@@ -670,3 +670,13 @@ body.recording .motion-path-overlay{display:none}
 #narration-dialog{width:min(700px,90vw);max-height:90dvh;overflow:auto}#narration-form audio{width:100%;margin-top:16px}#narration-form .text-settings-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}#narration-form label{display:flex;flex-direction:column;gap:6px;min-width:0}#narration-form input,#narration-form select,#narration-form textarea{box-sizing:border-box;max-width:100%;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px;font:inherit}#narration-form textarea{min-height:90px;resize:vertical}
 #narration-form .number-stepper input{border:0;border-radius:0;padding:0 8px;height:100%}
 #narration-form .studio-select{width:100%;min-width:0}
+
+/* Collapse only the project UI; keep its inputs and editor state intact. */
+.project-heading{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.project-heading h2{margin:0}
+#toggle-project{display:grid;place-items:center;flex:none;width:40px;height:40px;padding:9px;border:1px solid var(--line);border-radius:10px;background:var(--accent-soft);color:var(--accent)}
+#toggle-project:hover{background:var(--bg)}
+#toggle-project svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#toggle-project[aria-expanded=false] svg{transform:rotate(180deg)}
+#project-toolbar[hidden],#project-content[hidden]{display:none}
+.project-panel.project-collapsed{row-gap:0;align-self:start}

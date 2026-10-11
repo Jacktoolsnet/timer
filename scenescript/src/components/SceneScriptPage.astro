@@ -12,8 +12,12 @@ const {lang}=Astro.props,t=editorDictionary(lang);
   <input id="project-file" type="file" accept=".json,application/json" hidden />
   <p id="editor-status" role="status" aria-live="polite"></p>
   <div class="studio-grid">
-   <section class="studio-panel project-panel">
-  <nav class="editor-toolbar" aria-label={t.project}>
+   <section class="studio-panel project-panel" id="project-panel">
+    <header class="project-heading">
+     <h2>{t.project}</h2>
+     <button id="toggle-project" type="button" title={t.collapseProject} aria-label={t.collapseProject} aria-expanded="true" aria-controls="project-toolbar project-content"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6" /></svg></button>
+    </header>
+  <nav id="project-toolbar" class="editor-toolbar" aria-label={t.project}>
    <button id="new-project" type="button" title={t.new} aria-label={t.new}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg></button>
    <button id="load-project" type="button" title={t.importProject} aria-label={t.importProject}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h6l2 2h10v11H3ZM12 3v10m-4-4 4 4 4-4" /></svg></button>
    <button id="open-export" type="button" title={t.exportVideo} aria-label={t.exportVideo}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h18v12H3ZM12 8v13m-4-4 4 4 4-4" /></svg></button>
@@ -28,8 +32,8 @@ const {lang}=Astro.props,t=editorDictionary(lang);
    <button id="editor-fullscreen" type="button" title={t.appFullscreen} aria-label={t.appFullscreen} aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5" /></svg></button>
    <a href={'/'+lang+'/ai/'} target="_blank" rel="noopener" title={t.ai} aria-label={t.ai}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5C8 2 4 3 3 4v16c3-2 6-2 9 0 3-2 6-2 9 0V4c-3-2-6-2-9 1Zm0 0v15" /></svg></a>
   </nav>
-    <div class="project-content">
-    <h2>{t.project}</h2><div class="project-metadata">
+    <div class="project-content" id="project-content">
+    <div class="project-metadata">
 <label>{t.title}<span class="project-copy-field"><input id="project-title" type="text" maxlength="200" /><button id="copy-project-title" type="button" title={t.copy+": "+t.title} aria-label={t.copy+": "+t.title}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h13v13H8ZM3 16V3h13" /></svg></button></span></label>
     <label>{t.format}<select id="project-format"><option value="landscape">{t.landscape}</option><option value="portrait">{t.portrait}</option><option value="square">{t.square}</option></select></label>
     <div class="project-metadata-wide"><label>{t.projectDescription}<span class="project-copy-field"><textarea id="project-description" rows="3" maxlength="5000"></textarea><button id="copy-project-description" type="button" title={t.copy+": "+t.projectDescription} aria-label={t.copy+": "+t.projectDescription}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h13v13H8ZM3 16V3h13" /></svg></button></span></label></div>

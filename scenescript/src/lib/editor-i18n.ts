@@ -1,5 +1,7 @@
 import type { Language } from './i18n';
 const words = {
+ collapseProject:['Projekt einklappen','Collapse project','Contraer proyecto','Replier le projet'],
+ expandProject:['Projekt ausklappen','Expand project','Expandir proyecto','Déplier le projet'],
  audios:['Audiodateien','Audio files','Archivos de audio','Fichiers audio'],
  importAudio:['Audio importieren','Import audio','Importar audio','Importer un audio'],
  audioHint:['Extern erzeugte Sprache oder eigene Aufnahme. Maximal 32 MiB je Datei. MP3 oder WAV empfohlen.','Externally generated speech or your own recording. Maximum 32 MiB per file. MP3 or WAV recommended.','Voz generada externamente o grabación propia. Máximo 32 MiB por archivo. MP3 o WAV recomendados.','Voix générée ailleurs ou votre enregistrement. Maximum 32 MiB par fichier. MP3 ou WAV recommandés.'],
