@@ -4,6 +4,8 @@ import Layout from '../layouts/Layout.astro';
 import { getDictionary, type Language } from '../lib/i18n';
 import ClockAlarm from './ClockAlarm.astro';
 import { alarmText } from '../lib/alarm-text';
+import AnimatedBackgrounds from './AnimatedBackgrounds.astro';
+import AnimatedAurora from './AnimatedAurora.astro';
 import SeasonalBackground from './SeasonalBackground.astro';
 import { clockText } from '../lib/clock-text';
 import { clockBackgrounds, backgroundText, locationText } from '../lib/clock-backgrounds';
@@ -19,6 +21,8 @@ const backgrounds=backgroundText[lang];const location=locationText[lang];
 <div class="workspace">
 <section class="timer-card clock-card">
 <SeasonalBackground />
+<AnimatedAurora />
+<AnimatedBackgrounds />
 <p id="clock-alarm-badge" class="clock-alarm-badge" hidden></p>
 <div class="card-top"><button id="clock-focus" class="icon-text" aria-label={t.focusMode} aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg><span>{t.focusMode}</span></button></div>
 <div class="clock-display" data-view="analog">
@@ -42,6 +46,7 @@ const backgrounds=backgroundText[lang];const location=locationText[lang];
 </fieldset>
 <fieldset class="clock-settings-group"><legend>{backgrounds.label}</legend>
 <label>{backgrounds.label}<select name="background"><option value="none">{backgrounds.none}</option>{clockBackgrounds.map((id,index)=><option value={id} data-preview={'/backgrounds/'+id+'.svg'}>{backgrounds.names[index]}</option>)}<option value="seasonal" data-preview="/backgrounds/seasonal-preview.svg">{backgrounds.seasonal}</option></select></label>
+<label id="clock-background-animation" class="toggle-row" hidden><span><strong>{backgrounds.animate}</strong></span><input type="checkbox" role="switch" name="animateBackground" disabled/><span class="toggle" aria-hidden="true"></span></label>
 <label class="clock-transparency" hidden>{backgrounds.transparency}<span class="clock-transparency-control"><input id="clock-transparency" name="transparency" type="range" min="0" max="100" step="1" value="0" disabled aria-describedby="clock-transparency-hint"/><output id="clock-transparency-value" for="clock-transparency">0 %</output></span></label>
 <p id="clock-transparency-hint" class="form-hint" hidden>{backgrounds.transparencyHint}</p>
 <div id="seasonal-settings" data-location-text={JSON.stringify(location)} hidden>

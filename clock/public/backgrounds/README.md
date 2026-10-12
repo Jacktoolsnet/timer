@@ -34,3 +34,16 @@ option. Artwork appears in normal and focus view, with a theme-aware overlay and
 subtle text shadows for contrast. There is no extra readout panel around the
 time and date. Selection persists only with storage consent.
 Custom uploads and adjustable contrast controls are not implemented yet.
+
+Aurora additionally has an opt-in inline SVG animation in
+`src/components/AnimatedAurora.astro`. It adds slowly moving green/violet bands,
+faint star dust, gentle twinkling and infrequent meteors. Static assets are
+unchanged; hidden tabs pause animation and reduced motion uses static artwork.
+
+All twelve static motifs now support the shared animation toggle. The other
+eleven inline variants are derived at build time from these authored assets by
+`src/lib/animated-backgrounds.ts` and `AnimatedBackgrounds.astro`, keeping
+gradient IDs isolated. They animate only clouds/mist, water/reflections,
+selected windows, pattern tiles, tree crowns, stars/meteors, sand or colour
+fields. Disabled/reduced-motion states always use the original static SVG.
+The seasonal simulation is independent of this toggle.

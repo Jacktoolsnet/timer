@@ -1,0 +1,33 @@
+<svg id="animated-aurora" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false" data-active="false" data-paused="false">
+  <defs>
+    <linearGradient id="animated-aurora-sky" x2="0" y2="1"><stop stop-color="#112633"/><stop offset="1" stop-color="#365653"/></linearGradient>
+    <linearGradient id="animated-aurora-light" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#94b9c5" stop-opacity="0"/><stop offset=".48" stop-color="#59e5bc" stop-opacity=".72"/><stop offset=".82" stop-color="#b0ffd0" stop-opacity=".9"/><stop offset="1" stop-color="#91d1ac" stop-opacity="0"/></linearGradient>
+    <linearGradient id="animated-aurora-violet" x2="0" y2="1"><stop stop-color="#b0a0cd" stop-opacity="0"/><stop offset=".65" stop-color="#c0a2f3" stop-opacity=".58"/><stop offset="1" stop-color="#8ab5c4" stop-opacity="0"/></linearGradient>
+    <filter id="animated-aurora-soft" x="-20%" y="-30%" width="140%" height="160%" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation="18"/></filter>
+    <radialGradient id="animated-aurora-dust"><stop stop-color="#a4b2c8" stop-opacity=".11"/><stop offset="1" stop-color="#a4b2c8" stop-opacity="0"/></radialGradient>
+    <linearGradient id="animated-aurora-meteor"><stop stop-color="#dfebe6" stop-opacity="0"/><stop offset="1" stop-color="#dfebe6" stop-opacity=".65"/></linearGradient>
+    <linearGradient id="animated-aurora-curtain" x2="0" y2="1"><stop stop-color="#bda0ff" stop-opacity="0"/><stop offset=".25" stop-color="#9b8fe8" stop-opacity=".16"/><stop offset=".7" stop-color="#54e6bd" stop-opacity=".4"/><stop offset=".92" stop-color="#baffdc" stop-opacity=".72"/><stop offset="1" stop-color="#baffdc" stop-opacity="0"/></linearGradient>
+    <filter id="animated-aurora-fine" x="-10%" y="-20%" width="120%" height="140%"><feGaussianBlur stdDeviation="4"/></filter>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#animated-aurora-sky)"/>
+  <ellipse cx="1180" cy="235" rx="620" ry="180" transform="rotate(-20 1180 235)" fill="url(#animated-aurora-dust)"/>
+  <g class="aurora-stars" fill="#dbe5df">{Array.from({length:65},(_,i)=><circle class={i%3===0?'aurora-twinkle':''} cx={25+(i*317)%1550} cy={25+(i*139)%655} r={i%5===0?1.7:1} opacity={.2+(i%5)*.07} style={'animation-delay:'+(-i%17)+'s'}/>)}</g>
+  <g class="aurora-meteor aurora-meteor-one"><path d="M100 100l-85-45" stroke="url(#animated-aurora-meteor)" stroke-width="2"/><circle cx="100" cy="100" r="1.8" fill="#dfebe6"/></g>
+  <g class="aurora-meteor aurora-meteor-two"><path d="M1230 170l-70-40" stroke="url(#animated-aurora-meteor)" stroke-width="2"/><circle cx="1230" cy="170" r="1.5" fill="#dfebe6"/></g>
+  <g filter="url(#animated-aurora-soft)">
+    <path class="aurora-violet" d="M-160 110Q180 15 430 170T960 165T1760 70V360Q1370 510 980 385T430 395T-160 340Z" fill="url(#animated-aurora-violet)"/>
+    <path class="aurora-green" d="M-180 80Q180 370 480 150T1050 190T1760 90V410Q1380 570 1070 425T480 450T-180 385Z" fill="url(#animated-aurora-light)"/>
+    <path class="aurora-edge" d="M-100 265Q160 560 490 340T1060 370T1730 300" fill="none" stroke="#8bc4a6" stroke-width="14" opacity=".22"/>
+  </g>
+  <g class="aurora-veil aurora-veil-back" filter="url(#animated-aurora-soft)" fill="url(#animated-aurora-curtain)"><path d="M-100 50Q240 0 520 90T1150 50T1700 100L1700 425Q1380 345 1110 410T520 415T-100 380Z"/><path d="M-100 150Q230 100 550 190T1180 160T1700 190L1700 530Q1390 470 1130 525T550 490T-100 470Z" opacity=".65"/></g>
+  <g class="aurora-veil aurora-veil-front" filter="url(#animated-aurora-fine)">
+    {Array.from({length:76},(_,i)=>{const x=-50+i*23,base=360+65*Math.sin(i*.14)+28*Math.sin(i*.37),height=150+70*(1+Math.sin(i*.21));return <path d={'M'+x+' '+(base-height)+'Q'+(x+14)+' '+(base-height/2)+' '+(x+6)+' '+base} fill="none" stroke="url(#animated-aurora-curtain)" stroke-width={5+i%4} opacity={.28+(i%5)*.06}/>;})}
+    <path d="M-80 350Q270 470 530 375T1070 390T1680 350" fill="none" stroke="#abffd9" stroke-width="5" opacity=".44"/>
+  </g>
+  <g fill="#dbe5df" opacity=".48">
+    <circle cx="130" cy="140" r="1.5"/><circle cx="350" cy="75" r="1"/><circle cx="645" cy="115" r="1.6"/><circle cx="890" cy="70" r="1"/><circle cx="1175" cy="125" r="1.4"/><circle cx="1470" cy="185" r="1.8"/>
+    <circle cx="80" cy="515" r="1"/><circle cx="260" cy="635" r="1.7"/><circle cx="595" cy="550" r="1"/><circle cx="805" cy="470" r="1.2"/><circle cx="1115" cy="585" r="1.6"/><circle cx="1370" cy="625" r="1"/><circle cx="1530" cy="460" r="1.4"/>
+  </g>
+  <path d="M0 870L180 745L315 815L555 720L790 840L1060 760L1320 825L1490 725L1600 790V1000H0Z" fill="#243e43"/>
+  <path d="M0 955Q350 850 700 920T1300 905T1600 935V1000H0Z" fill="#172f36"/>
+</svg>

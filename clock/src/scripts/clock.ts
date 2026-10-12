@@ -6,13 +6,14 @@ import {storageAllowed} from '../lib/storage';
 import {screenWakeLock} from '../lib/wake-lock';
 import {createSeasonalBackground} from './seasonal-background';
 import {createSeasonalLocation} from './seasonal-location';
-import {clockBackgroundOptions} from '../lib/clock-backgrounds';
+import {clockBackgrounds,clockBackgroundOptions} from '../lib/clock-backgrounds';
 const $=(id:string)=>document.getElementById(id)!;
 const t=JSON.parse($('clock-app').dataset.text!);
 const form=$('clock-settings') as HTMLFormElement;
 const field=(key:string)=>form.elements.namedItem(key) as HTMLInputElement | HTMLSelectElement;
-const defaults={view:'analog',background:'none',hemisphere:'north',transparency:0,date:'long',dateView:'calendarDate',format:'medium',hourCycle:'auto',zone:'local',seconds:true,numbers:true,smooth:false,awake:false};
+const defaults={view:'analog',background:'none',animateBackground:false,hemisphere:'north',transparency:0,date:'long',dateView:'calendarDate',format:'medium',hourCycle:'auto',zone:'local',seconds:true,numbers:true,smooth:false,awake:false};
 let settings={...defaults};
+const backgroundMotion=matchMedia('(prefers-reduced-motion: reduce)');
 try {if(storageAllowed()) {const saved=JSON.parse(localStorage.getItem('jacktools.clock.settings.v1')||'null');for(const key of Object.keys(defaults) as (keyof typeof defaults)[]){const value=saved?.[key];if(typeof defaults[key]==='boolean'){if(typeof value==='boolean')Object.assign(settings,{[key]:value});}else if(typeof defaults[key]==='number'){if(typeof value==='number'&&Number.isInteger(value)&&value>=0&&value<=100)Object.assign(settings,{[key]:value});}else if([...((field(key) as HTMLSelectElement).options)].some(o=>o.value===value))Object.assign(settings,{[key]:value});}}}catch{}
 for(const [key,value] of Object.entries(settings)){if(typeof value==='boolean')(field(key) as HTMLInputElement).checked=value;else field(key).value=String(value);}
 function applyTransparency(){
@@ -39,7 +40,15 @@ function configure(){
  const card=document.querySelector<HTMLElement>('.clock-card')!;
  const background=clockBackgroundOptions.find(id=>id===settings.background);
  card.dataset.background=background||'none';
- if(background&&background!=='seasonal')card.style.setProperty('--clock-background',`url("/backgrounds/${background}.svg")`);
+ const supportsAnimation=clockBackgrounds.some(id=>id===background);
+ $('clock-background-animation').hidden=!supportsAnimation;
+ (field('animateBackground') as HTMLInputElement).disabled=!supportsAnimation;
+ const animate=supportsAnimation&&settings.animateBackground&&!backgroundMotion.matches;
+ card.dataset.animateBackground=String(animate);
+ $('animated-aurora').dataset.active=String(animate&&background==='aurora');
+ document.querySelectorAll<SVGElement>('.animated-background-scene').forEach(scene=>{scene.dataset.active=String(animate&&scene.id===`animated-background-${background}`);scene.dataset.paused=String(document.hidden);});
+ $('animated-aurora').dataset.paused=String(document.hidden);
+ if(background&&background!=='seasonal'&&!animate)card.style.setProperty('--clock-background',`url("/backgrounds/${background}.svg")`);
  else card.style.removeProperty('--clock-background');
  const zone=settings.zone==='local'?Intl.DateTimeFormat().resolvedOptions().timeZone:settings.zone;
  $('seasonal-background').dataset.active=String(background==='seasonal');
@@ -77,6 +86,11 @@ function focus(on:boolean){document.body.classList.toggle('focus-view',on);const
 async function leave(){focus(false);if(ownsFullscreen&&document.fullscreenElement){ownsFullscreen=false;await document.exitFullscreen().catch(()=>{});}}
 $('clock-focus').addEventListener('click',async()=>{if(document.body.classList.contains('focus-view'))return leave();focus(true);if(!document.fullscreenElement)try{await document.documentElement.requestFullscreen();ownsFullscreen=true;if(!document.body.classList.contains('focus-view'))await leave();}catch{}});
 document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement){ownsFullscreen=false;focus(false);}});document.addEventListener('keydown',e=>{if(e.key==='Escape')void leave();});
+backgroundMotion.addEventListener('change',()=>configure());
+document.addEventListener('visibilitychange',()=>{
+ $('animated-aurora').dataset.paused=String(document.hidden);
+ document.querySelectorAll<SVGElement>('.animated-background-scene').forEach(scene=>scene.dataset.paused=String(document.hidden));
+});
 configure();setInterval(()=>{if(!document.hidden)render();},50);document.addEventListener('visibilitychange',()=>{if(!document.hidden){configure();}});
 
 enhanceClockSelects(form);

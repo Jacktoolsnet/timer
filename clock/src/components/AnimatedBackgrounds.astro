@@ -1,0 +1,8 @@
+---
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { clockBackgrounds } from '../lib/clock-backgrounds';
+import { animatedBackground } from '../lib/animated-backgrounds';
+const scenes=clockBackgrounds.filter(id=>id!=='aurora').map(id=>animatedBackground(readFileSync(resolve('public/backgrounds',`${id}.svg`),'utf8'),id));
+---
+{scenes.map(markup=><Fragment set:html={markup} />)}

@@ -1052,3 +1052,61 @@ body.focus-view .clock-alarm-badge { max-width:calc(100% - 175px); }
  padding-top:.08em;
  padding-bottom:.22em;
 }
+
+/* Animated aurora is decorative; clock hands and numbers are never transformed. */
+#clock-background-animation[hidden] { display:none; }
+#animated-aurora { position:absolute; inset:0; width:100%; height:100%; z-index:-2; border-radius:inherit; overflow:hidden; pointer-events:none; stroke:none; }
+#animated-aurora[data-active=false] { display:none; }
+#animated-aurora .aurora-meteor { opacity:0; }
+#animated-aurora[data-active=true] .aurora-green { transform-origin:800px 300px; animation:aurora-green-drift 28s ease-in-out infinite alternate; }
+#animated-aurora[data-active=true] .aurora-violet { transform-origin:800px 250px; animation:aurora-violet-drift 37s ease-in-out -11s infinite alternate; }
+#animated-aurora[data-active=true] .aurora-edge { animation:aurora-edge-drift 32s ease-in-out -8s infinite alternate; }
+#animated-aurora[data-active=true] .aurora-twinkle { animation:aurora-star-glow 14s ease-in-out infinite alternate; }
+#animated-aurora[data-active=true] .aurora-meteor-one { animation:aurora-meteor 48s linear 16s infinite; }
+#animated-aurora[data-active=true] .aurora-meteor-two { animation:aurora-meteor 67s linear 37s infinite; }
+#animated-aurora[data-paused=true] * { animation-play-state:paused !important; }
+@keyframes aurora-green-drift { from { transform:translate(-24px,-6px) scaleY(.96); opacity:.78; } to { transform:translate(28px,20px) scaleY(1.08); opacity:1; } }
+@keyframes aurora-violet-drift { from { transform:translate(28px,-12px) scaleY(1.04); opacity:.7; } to { transform:translate(-30px,16px) scaleY(.94); opacity:1; } }
+@keyframes aurora-edge-drift { from { transform:translate(-18px,-6px); opacity:.16; } to { transform:translate(22px,14px); opacity:.26; } }
+@keyframes aurora-star-glow { from { opacity:.18; } to { opacity:.5; } }
+@keyframes aurora-meteor { 0% { opacity:0; transform:translate(0,0); } .5% { opacity:.42; } 2% { opacity:0; transform:translate(190px,110px); } 100% { opacity:0; transform:translate(190px,110px); } }
+@media(prefers-reduced-motion:reduce) { #animated-aurora * { animation:none !important; } }
+
+#animated-aurora[data-active=true] .aurora-veil-back { transform-origin:800px 350px; animation:aurora-veil-flow 43s ease-in-out -15s infinite alternate; }
+#animated-aurora[data-active=true] .aurora-veil-front { transform-origin:800px 350px; animation:aurora-veil-flow 31s ease-in-out -5s infinite alternate-reverse; }
+@keyframes aurora-veil-flow { from { transform:translate(-30px,-14px) skewX(-4deg) scaleY(.94); opacity:.65; } to { transform:translate(35px,18px) skewX(4deg) scaleY(1.09); opacity:.95; } }
+
+/* Other authored motifs use build-time inline SVG copies; static files stay untouched. */
+.animated-background-scene { position:absolute; inset:0; width:100%; height:100%; z-index:-2; border-radius:inherit; overflow:hidden; pointer-events:none; stroke:none; }
+.animated-background-scene[data-active=false] { display:none; }
+.animated-background-scene[data-active=true] .bg-cloud { animation:bg-cloud-drift 65s ease-in-out infinite alternate; }
+.animated-background-scene[data-active=true] .bg-fog { animation:bg-fog-drift 48s ease-in-out infinite alternate; }
+.animated-background-scene[data-active=true] .bg-fog-slow { animation-duration:73s; animation-delay:-25s; }
+.animated-background-scene[data-active=true] .bg-waves { animation:bg-wave-drift 12s ease-in-out infinite alternate; }
+.animated-background-scene[data-active=true] .bg-shore { animation:bg-shore-drift 17s ease-in-out -4s infinite alternate; }
+.animated-background-scene[data-active=true] .bg-reflections { animation:bg-reflection 15s ease-in-out infinite alternate; }
+.animated-background-scene[data-active=true] .bg-window { animation:bg-window-glow 31s ease-in-out infinite alternate; }
+.animated-background-scene[data-active=true] .bg-pattern { animation:bg-pattern-drift 120s linear infinite; }
+.animated-background-scene[data-active=true] .bg-tree { transform-box:fill-box; transform-origin:50% 100%; animation:bg-tree-sway 14s ease-in-out infinite alternate; }
+.animated-background-scene[data-active=true] .bg-star { animation:bg-star-glow 19s ease-in-out infinite alternate; }
+.animated-background-scene .bg-meteor { opacity:0; }
+.animated-background-scene[data-active=true] .bg-meteor { animation:aurora-meteor 61s linear 25s infinite; }
+.animated-background-scene[data-active=true] .bg-sand { animation:bg-sand-drift 38s ease-in-out infinite alternate; }
+.animated-background-scene[data-active=true] .bg-lake-reflection { animation:bg-lake-reflection 16s ease-in-out infinite alternate; }
+.animated-background-scene[data-active=true] .bg-color { transform-origin:800px 500px; animation:bg-color-flow 53s ease-in-out infinite alternate; }
+.animated-background-scene[data-active=true] .bg-color-sage { animation-duration:67s; animation-delay:-20s; animation-direction:alternate-reverse; }
+.animated-background-scene[data-active=true] .bg-color-lavender { animation-duration:79s; animation-delay:-35s; }
+.animated-background-scene[data-paused=true] * { animation-play-state:paused !important; }
+@keyframes bg-cloud-drift { from { transform:translate(-35px,0); } to { transform:translate(45px,6px); } }
+@keyframes bg-fog-drift { from { transform:translate(-35px,-3px); opacity:.1; } to { transform:translate(40px,7px); opacity:.18; } }
+@keyframes bg-wave-drift { from { transform:translate(-10px,-2px); } to { transform:translate(12px,5px); } }
+@keyframes bg-shore-drift { from { transform:translate(0,-2px); opacity:.4; } to { transform:translate(0,5px); opacity:.65; } }
+@keyframes bg-reflection { from { transform:translate(-9px,0); opacity:.16; } to { transform:translate(10px,4px); opacity:.3; } }
+@keyframes bg-window-glow { from { opacity:.13; } to { opacity:.48; } }
+@keyframes bg-pattern-drift { from { transform:translate(0,0); } to { transform:translate(160px,160px); } }
+@keyframes bg-tree-sway { from { transform:rotate(-.35deg); } to { transform:rotate(.4deg); } }
+@keyframes bg-star-glow { from { opacity:.15; } to { opacity:.5; } }
+@keyframes bg-sand-drift { from { transform:translate(-20px,-2px); opacity:.09; } to { transform:translate(35px,5px); opacity:.2; } }
+@keyframes bg-lake-reflection { from { transform:translate(-3px,0); } to { transform:translate(4px,3px); } }
+@keyframes bg-color-flow { from { transform:translate(-40px,-20px) scale(1.02); } to { transform:translate(45px,25px) scale(1.08); } }
+@media(prefers-reduced-motion:reduce) { .animated-background-scene * { animation:none !important; } }
