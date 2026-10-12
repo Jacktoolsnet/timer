@@ -123,6 +123,12 @@ test('animated flip leaves do not stack translucent backgrounds', async ({ page 
   const surface = await page.locator('#test-flaps .flip-digit').first().evaluate(el => getComputedStyle(el, '::before').backgroundColor);
   expect(surface).toContain('0.5');
   expect(await page.locator('#test-flaps .flip-moving').first().evaluate(el => getComputedStyle(el).opacity)).toBe('1');
+  const newUpper = page.locator('#test-flaps .flip-top:not(.flip-moving) > span').first();
+  expect(await newUpper.evaluate(el => getComputedStyle(el).opacity)).toBe('0');
+  await page.locator('#test-flaps .flip-moving.flip-top').evaluateAll(elements => elements.forEach(el => el.dispatchEvent(new Event('animationend'))));
+  await expect(page.locator('#test-flaps .flip-moving.flip-top')).toHaveCount(0);
+  expect(await newUpper.evaluate(el => getComputedStyle(el).opacity)).toBe('1');
+  expect(await page.locator('#test-flaps .flip-top > span').allTextContents()).toEqual(['1', '0']);
   const outgoing = page.locator('#test-flaps .flip-outgoing-glyph').first();
   await outgoing.evaluate(el => { el.getAnimations()[0].currentTime = 389; });
   expect(await outgoing.evaluate(el => getComputedStyle(el).opacity)).toBe('1');
@@ -165,6 +171,19 @@ test('large focus screens double the calendar without changing normal view', asy
   expect(large!.height).toBeGreaterThanOrEqual(small!.height * 1.95);
   await page.evaluate(() => document.body.classList.remove('focus-view'));
   expect(await page.locator('.date-day').evaluate(el => getComputedStyle(el).fontSize)).toBe('48px');
+});
+
+test('clock spans the workspace and grouped settings sit below it responsively', async ({ page }) => {
+  await page.goto('/de/');
+  for (const width of [1440, 850, 412]) {
+    await page.setViewportSize({ width, height: 1000 });
+    const card = await page.locator('.clock-card').boundingBox();
+    const settings = await page.locator('#clock-app .settings-card').boundingBox();
+    expect(Math.abs(card!.width - settings!.width)).toBeLessThan(1);
+    expect(settings!.y).toBeGreaterThan(card!.y + card!.height);
+    await expect(page.locator('.clock-settings-group')).toHaveCount(3);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
+  }
 });
 
 for (const lang of ['en', 'es', 'fr']) {

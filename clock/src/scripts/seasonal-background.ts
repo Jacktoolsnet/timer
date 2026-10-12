@@ -1,7 +1,9 @@
 import { seasonalState, mixColor } from '../lib/seasonal-background';
+import { locationSky, type SeasonalLocation } from '../lib/seasonal-location';
 
 export function createSeasonalBackground(root: SVGSVGElement) {
   let zone = 'UTC', hemisphere = 'north', last = -1;
+  let location: SeasonalLocation | undefined;
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   const colors = [
     ['#aebcc9', '#eef0e4', '#748e97', '#435c68'],
@@ -26,11 +28,12 @@ export function createSeasonalBackground(root: SVGSVGElement) {
     if (tick === last) return;
     last = tick;
     const date = motion.matches ? new Date(Math.floor(now.getTime() / 3600000) * 3600000) : now;
-    const s = seasonalState(date, zone, hemisphere);
+    const s = seasonalState(date, zone, location ? location.latitude < 0 ? 'south' : 'north' : hemisphere);
+    const sky = location ? locationSky(date, location) : s;
     const palette = colors[s.season].map((c, i) => mixColor(c, colors[(s.season + 1) % 4][i], s.blend));
-    const end = stops.findIndex(stop => stop.h > s.hour);
+    const end = stops.findIndex(stop => stop.h > sky.hour);
     const a = stops[end - 1], b = stops[end];
-    const t = (s.hour - a.h) / (b.h - a.h), light = a.light + (b.light - a.light) * t;
+    const t = (sky.hour - a.h) / (b.h - a.h), light = a.light + (b.light - a.light) * t;
     find('sky-top').setAttribute('stop-color', mixColor(a.top || palette[0], b.top || palette[0], t));
     find('sky-bottom').setAttribute('stop-color', mixColor(a.bottom || palette[1], b.bottom || palette[1], t));
     find('far').setAttribute('fill', mixColor('#304552', palette[2], light));
@@ -43,11 +46,12 @@ export function createSeasonalBackground(root: SVGSVGElement) {
     find('flowers').style.opacity = String((s.season === 0 ? s.blend : s.season === 1 ? 1 - s.blend : 0) * light);
     find('stars').style.opacity = String(1 - light);
     for (const body of ['sun', 'moon'] as const) {
-      const p = s[body]; find(body).setAttribute('transform', `translate(${p.x.toFixed(2)} ${p.y.toFixed(2)})`);
-      find(body).style.opacity = String(body === 'sun' ? Number(s.sunVisible) : Number(!s.sunVisible));
+      const p = sky[body]; find(body).setAttribute('transform', `translate(${p.x.toFixed(2)} ${p.y.toFixed(2)})`);
+      find(body).style.opacity = String(body === 'sun' ? Number(sky.sunVisible) : Number('moonVisible' in sky ? sky.moonVisible : !sky.sunVisible));
     }
-    root.dataset.phase = s.phase;
+    root.dataset.phase = sky.phase;
+    root.dataset.locationBased = String(!!location);
     root.dataset.season = ['winter', 'spring', 'summer', 'autumn'][Math.floor((s.cycle + .5) % 4)];
   }
-  return { configure(nextZone: string, nextHemisphere: string) { zone = nextZone; hemisphere = nextHemisphere; last = -1; }, render };
+  return { configure(nextZone: string, nextHemisphere: string, nextLocation?: SeasonalLocation) { zone = nextZone; hemisphere = nextHemisphere; location = nextLocation; last = -1; }, render };
 }

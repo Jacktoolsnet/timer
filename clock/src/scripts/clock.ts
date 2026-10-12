@@ -4,6 +4,7 @@ import {enhanceClockSelects} from './clock-selects';
 import {storageAllowed} from '../lib/storage';
 import {screenWakeLock} from '../lib/wake-lock';
 import {createSeasonalBackground} from './seasonal-background';
+import {createSeasonalLocation} from './seasonal-location';
 import {clockBackgroundOptions} from '../lib/clock-backgrounds';
 const $=(id:string)=>document.getElementById(id)!;
 const t=JSON.parse($('clock-app').dataset.text!);
@@ -25,6 +26,7 @@ function applyTransparency(){
  $('clock-transparency-value').textContent=`${settings.transparency} %`;
 }
 const seasonal=createSeasonalBackground($('seasonal-background') as unknown as SVGSVGElement);
+const geolocation=createSeasonalLocation($('seasonal-settings'),()=>configure());
 const wake=screenWakeLock($('wake-status'),'',t.unavailable);
 const styledDate = createClockDate($('styled-date'));
 const updateFlip = createFlipClock($('flip-clock'));
@@ -40,7 +42,8 @@ function configure(){
  const zone=settings.zone==='local'?Intl.DateTimeFormat().resolvedOptions().timeZone:settings.zone;
  $('seasonal-background').dataset.active=String(background==='seasonal');
  $('seasonal-settings').hidden=background!=='seasonal';
- seasonal.configure(zone,settings.hemisphere);
+ geolocation.setActive(background==='seasonal');
+ seasonal.configure(zone,settings.hemisphere,geolocation.location);
  const locale=document.documentElement.lang;
  digits=new Intl.DateTimeFormat(locale,{timeZone:zone,hour:'2-digit',minute:'2-digit',...(settings.seconds&&settings.format!=='short'?{second:'2-digit' as const}:{}),...(settings.format==='long'?{timeZoneName:'short' as const}:{}),...(settings.hourCycle==='auto'?{}:{hour12:settings.hourCycle==='12'})});
  dateFormat=new Intl.DateTimeFormat(locale,{timeZone:zone,...(settings.date==='short'?{dateStyle:'short' as const}:settings.date==='medium'?{dateStyle:'medium' as const}:{dateStyle:'full' as const})});
@@ -65,6 +68,7 @@ field('transparency').addEventListener('input',()=>{
  applyTransparency();save();
 });
 document.addEventListener('storage-enabled',save);
+document.addEventListener('preferences-cleared',()=>{geolocation.clear();configure();});
 let ownsFullscreen=false;
 function focus(on:boolean){document.body.classList.toggle('focus-view',on);const b=$('clock-focus');b.setAttribute('aria-pressed',String(on));b.setAttribute('aria-label',on?t.exitFocus:t.focusMode);b.querySelector('span')!.textContent=on?t.exitFocus:t.focusMode;}
 async function leave(){focus(false);if(ownsFullscreen&&document.fullscreenElement){ownsFullscreen=false;await document.exitFullscreen().catch(()=>{});}}

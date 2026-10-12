@@ -23,7 +23,13 @@ regression tests with `npm run test:e2e` (requires Playwright Chromium installed
 The additional "Year simulation" background is a local, dynamic SVG landscape.
 It follows the selected time zone and a north/south hemisphere setting, with
 blended seasonal colors, foliage, snow, flowers, stars and moving sun/moon.
-Daily phases use fixed local times: morning 05–08, day 08–17, evening 17–20,
+Without location, daily phases use fixed local times: morning 05–08, day 08–17, evening 17–20,
 otherwise night. The illustrative sun is above the horizon 06–18; these are not
-astronomical rise/set times or a calculated moon phase. No location is requested.
+astronomical rise/set times or a calculated moon phase. The optional location switch explicitly requests a single browser position (HTTPS).
+Coordinates and location mode are memory-only, never persisted, and cleared on
+switch-off, background change, preference clearing or reload. SunCalc v2 is
+bundled locally to calculate apparent sun/moon positions in degrees; no remote
+lookup is made. Clock display keeps the selected zone. Location mode derives
+hemisphere from latitude and uses solar altitude for twilight, including polar
+day/night. The fixed crescent is decorative, not a moon-phase calculation.
 Reduced-motion mode holds celestial positions steady within each hour.

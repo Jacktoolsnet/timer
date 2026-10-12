@@ -4,10 +4,11 @@ import Layout from '../layouts/Layout.astro';
 import { getDictionary, type Language } from '../lib/i18n';
 import SeasonalBackground from './SeasonalBackground.astro';
 import { clockText } from '../lib/clock-text';
-import { clockBackgrounds, backgroundText } from '../lib/clock-backgrounds';
+import { clockBackgrounds, backgroundText, locationText } from '../lib/clock-backgrounds';
 interface Props { lang: Language }
 const {lang}=Astro.props; const t=getDictionary(lang);const c=clockText[lang];const guide=clockGuide[lang];
-const backgrounds=backgroundText[lang];
+const groups={de:{display:'Uhr & Datum',behavior:'Zeit & Verhalten'},en:{display:'Clock & date',behavior:'Time & behavior'},es:{display:'Reloj y fecha',behavior:'Hora y comportamiento'},fr:{display:'Horloge et date',behavior:'Heure et comportement'}}[lang];
+const backgrounds=backgroundText[lang];const location=locationText[lang];
 ---
 <Layout lang={lang} title={guide.title} description={guide.intro} route="">
 <section class="intro"><h1>{c.title}</h1><p class="intro-copy">{guide.intro}</p></section>
@@ -28,18 +29,33 @@ const backgrounds=backgroundText[lang];
 <p id="wake-status" class="timer-status" role="status"></p><noscript>{t.js}</noscript>
 </section>
 <aside class="settings-card"><h2>{t.settings}</h2><form id="clock-settings" class="clock-settings">
+<fieldset class="clock-settings-group"><legend>{groups.display}</legend>
 <label>{t.appearance}<select name="view">{(['analog','digital','combined','flip','analogFlip'] as const).map(v=><option value={v} selected={v==='analog'}>{c[v]}</option>)}</select></label>
-<label>{backgrounds.label}<select name="background"><option value="none">{backgrounds.none}</option>{clockBackgrounds.map((id,index)=><option value={id} data-preview={'/backgrounds/'+id+'.svg'}>{backgrounds.names[index]}</option>)}<option value="seasonal" data-preview="/backgrounds/seasonal-preview.svg">{backgrounds.seasonal}</option></select></label>
-<p class="form-hint">{backgrounds.hint}</p>
-<div id="seasonal-settings" hidden><label>{backgrounds.hemisphere}<select name="hemisphere"><option value="north">{backgrounds.north}</option><option value="south">{backgrounds.south}</option></select></label><p class="form-hint">{backgrounds.seasonalHint}</p></div>
-<label class="clock-transparency" hidden>{backgrounds.transparency}<span class="clock-transparency-control"><input id="clock-transparency" name="transparency" type="range" min="0" max="100" step="1" value="0" disabled aria-describedby="clock-transparency-hint"/><output id="clock-transparency-value" for="clock-transparency">0 %</output></span></label>
-<p id="clock-transparency-hint" class="form-hint" hidden>{backgrounds.transparencyHint}</p>
 <label>{c.dateAppearance}<select name="dateView">{(['textDate','calendarDate','elegantDate','flipDate'] as const).map(v=><option value={v} selected={v==='calendarDate'}>{c[v]}</option>)}</select></label>
 <label>{c.date}<select name="date">{(['off','short','medium','long'] as const).map(v=><option value={v} selected={v==='long'}>{c[v]}</option>)}</select></label>
+{(['seconds','numbers','smooth'] as const).map(k=><label class="toggle-row"><span><strong>{c[k]}</strong></span><input type="checkbox" role="switch" name={k} checked={k==='seconds'||k==='numbers'} /><span class="toggle" aria-hidden="true"></span></label>)}
+</fieldset>
+<fieldset class="clock-settings-group"><legend>{backgrounds.label}</legend>
+<label>{backgrounds.label}<select name="background"><option value="none">{backgrounds.none}</option>{clockBackgrounds.map((id,index)=><option value={id} data-preview={'/backgrounds/'+id+'.svg'}>{backgrounds.names[index]}</option>)}<option value="seasonal" data-preview="/backgrounds/seasonal-preview.svg">{backgrounds.seasonal}</option></select></label>
+<label class="clock-transparency" hidden>{backgrounds.transparency}<span class="clock-transparency-control"><input id="clock-transparency" name="transparency" type="range" min="0" max="100" step="1" value="0" disabled aria-describedby="clock-transparency-hint"/><output id="clock-transparency-value" for="clock-transparency">0 %</output></span></label>
+<p id="clock-transparency-hint" class="form-hint" hidden>{backgrounds.transparencyHint}</p>
+<div id="seasonal-settings" data-location-text={JSON.stringify(location)} hidden>
+<fieldset id="seasonal-hemisphere"><legend>{backgrounds.hemisphere}</legend>
+<select name="hemisphere" hidden aria-hidden="true"><option value="north">{backgrounds.north}</option><option value="south">{backgrounds.south}</option></select>
+<label class="toggle-row"><span><strong>{backgrounds.north}</strong></span><input id="seasonal-north" type="radio" name="seasonalMode" value="north" checked/><span class="toggle" aria-hidden="true"></span></label>
+<label class="toggle-row"><span><strong>{backgrounds.south}</strong></span><input id="seasonal-south" type="radio" name="seasonalMode" value="south"/><span class="toggle" aria-hidden="true"></span></label>
+<label class="toggle-row"><span><strong>{location.label}</strong></span><input id="seasonal-location" type="radio" name="seasonalMode" value="location" aria-describedby="seasonal-location-hint"/><span class="toggle" aria-hidden="true"></span></label>
+</fieldset>
+<p id="seasonal-location-hint" class="form-hint">{location.hint}</p><p id="seasonal-location-status" class="settings-status" role="status"></p>
+</div>
+
+</fieldset>
+<fieldset class="clock-settings-group"><legend>{groups.behavior}</legend>
 <label>{c.time}<select name="format">{(['short','medium','long'] as const).map(v=><option value={v} selected={v==='medium'}>{c[v]}</option>)}</select></label>
 <label>12 / 24 h<select name="hourCycle"><option value="auto">{c.auto}</option><option value="12">12 h</option><option value="24">24 h</option></select></label>
 <label>{c.zone}<select name="zone"><option value="local">{c.local}</option>{['UTC','Europe/Berlin','Europe/London','Europe/Paris','Europe/Madrid','America/New_York','America/Los_Angeles','Asia/Tokyo','Asia/Kolkata','Australia/Sydney'].map(z=><option value={z}>{z.replaceAll('_',' ')}</option>)}</select></label>
-{(['seconds','numbers','smooth','awake'] as const).map(k=><label class="toggle-row"><span><strong>{c[k]}</strong></span><input type="checkbox" role="switch" name={k} checked={k==='seconds'||k==='numbers'} /><span class="toggle" aria-hidden="true"></span></label>)}
+<label class="toggle-row"><span><strong>{c.awake}</strong></span><input type="checkbox" role="switch" name="awake"/><span class="toggle" aria-hidden="true"></span></label>
+</fieldset>
 <p id="clock-settings-status" role="status"></p>
 </form></aside></div><p class="local-note">{c.note}</p><p class="privacy-promise">{t.privacyPromise}</p></div>
 <section class="guide"><div class="guide-heading"><p class="eyebrow">THE JACKTOOLS.NET WAY</p><h2>{guide.heading}</h2><p>{guide.body}</p></div><div class="guide-grid">{guide.steps.map(([title,body],i)=><article><span class="step-number">0{i+1}</span><h3>{title}</h3><p>{body}</p></article>)}</div></section>

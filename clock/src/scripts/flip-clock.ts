@@ -30,6 +30,9 @@ export function createFlipClock(root: HTMLElement) {
       const before = cell.dataset.value!;cell.dataset.value = ch;
       cell.replaceChildren(half(ch,'top'),half(ch,'bottom'));
       if(!animate || motion.matches) return;
+      // Reveal the new upper glyph only when the outgoing upper leaf is gone.
+      const incomingTopGlyph = cell.children[0].firstElementChild!;
+      incomingTopGlyph.classList.add('flip-incoming-top');
       // Hide the old lower glyph at 75% of the full two-stage flip.
       const restingBottom = cell.children[1] as HTMLElement;
       const outgoingGlyph = restingBottom.firstElementChild!;
@@ -37,7 +40,10 @@ export function createFlipClock(root: HTMLElement) {
       outgoingGlyph.classList.add('flip-outgoing-glyph');
       const top=half(before,'top',true),bottom=half(ch,'bottom',true);
       cell.append(top,bottom);
-      top.addEventListener('animationend',()=>top.remove(),{once:true});
+      top.addEventListener('animationend',()=>{
+        top.remove();
+        incomingTopGlyph.classList.remove('flip-incoming-top');
+      },{once:true});
       bottom.addEventListener('animationend',()=>{
         outgoingGlyph.classList.remove('flip-outgoing-glyph');
         outgoingGlyph.textContent = ch;

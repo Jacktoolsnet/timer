@@ -688,6 +688,7 @@ body.focus-view .card-top { position: absolute; top: 12px; right: 12px; z-index:
 .flip-moving.flip-top { z-index:3; animation:flip-up var(--flip-duration) ease-in forwards; }
 .flip-moving.flip-bottom { z-index:4; transform:rotateX(90deg); animation:flip-down var(--flip-duration) var(--flip-duration) ease-out forwards; }
 .flip-outgoing-glyph { animation:flip-hide-old calc(var(--flip-duration) * 1.5) steps(1,end) forwards; }
+.flip-incoming-top { opacity:0; }
 @keyframes flip-hide-old { from { opacity:1; } to { opacity:0; } }
 @keyframes flip-up { to {transform:rotateX(-90deg);} }
 @keyframes flip-down { to {transform:rotateX(0deg);} }
@@ -907,7 +908,7 @@ body.focus-view .clock-card .clock-display[data-view] #styled-date:not([hidden])
 .clock-card #styled-date .date-calendar { background:color-mix(in srgb,var(--surface) var(--clock-surface-opacity,100%),transparent); }
 .clock-card #styled-date .date-month { background:color-mix(in srgb,var(--accent) var(--clock-surface-opacity,100%),transparent); }
 .clock-transparency-control { display:flex; align-items:center; gap:12px; }
-.clock-settings .clock-transparency[hidden] { display:none; }
+#clock-settings .clock-transparency[hidden] { display:none; }
 .clock-transparency-control input { flex:1; min-width:0; min-height:32px; margin:0; accent-color:var(--accent); cursor:pointer; }
 .clock-transparency-control output { min-width:3.5em; text-align:right; font-size:12px; font-variant-numeric:tabular-nums; color:var(--muted); }
 /* Large focus displays get a genuinely larger calendar, not a scaled overlay. */
@@ -946,4 +947,25 @@ body.focus-view .clock-card .clock-display[data-view] #styled-date:not([hidden])
  body.focus-view .clock-display[data-view=analog] { display:flex; }
  body.focus-view .clock-display[data-view=analog] #analog-clock { height:calc(100dvh - 80px); }
  body.focus-view .clock-display:is([data-view=combined],[data-view=analogFlip]) { display:flex; }
+}
+
+/* Full-width clock, followed by three responsive settings groups. */
+body:not(.focus-view) #clock-app .workspace { grid-template-columns:repeat(3,minmax(0,1fr)); }
+body:not(.focus-view) #clock-app .workspace > :is(.clock-card,.settings-card) { grid-column:1 / -1; }
+#clock-settings { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; align-items:start; }
+.clock-settings-group { min-width:0; padding:0; margin:0; }
+.clock-settings-group legend { margin:0 0 8px; padding:0; font-size:15px; font-weight:650; color:var(--accent); }
+.clock-settings-group > label:not(.toggle-row) { display:flex; flex-direction:column; gap:8px; margin:15px 0; font-size:14px; }
+.clock-settings-group .form-hint { margin:8px 0 16px; }
+#clock-settings-status { grid-column:1 / -1; margin:0; }
+#clock-settings-status:empty { display:none; }
+@media(min-width:1000px) {
+ .clock-settings-group + .clock-settings-group { border-left:1px solid var(--line); padding-left:24px; }
+}
+@media(min-width:700px) and (max-width:999px) {
+ #clock-settings { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:699px) {
+ #clock-settings { grid-template-columns:1fr; gap:24px; }
+ .clock-settings-group + .clock-settings-group { border-top:1px solid var(--line); padding-top:20px; }
 }

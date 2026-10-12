@@ -2,6 +2,7 @@
 export function enhanceClockSelects(form: HTMLFormElement) {
   const closers: (() => void)[] = [];
   form.querySelectorAll<HTMLSelectElement>('select').forEach(select => {
+    if(select.hidden) return;
     const label = select.closest('label')!;
     const caption = document.createElement('span');
     caption.id = `caption-${select.name}`;

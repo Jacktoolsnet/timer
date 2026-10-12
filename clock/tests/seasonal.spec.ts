@@ -38,8 +38,7 @@ test('seasonal scene updates with time, hemisphere and background selection', as
   await page.clock.fastForward(5 * 3600000);
   await expect(scene).toHaveAttribute('data-phase', 'day');
   expect(await sun.getAttribute('transform')).not.toBe(before);
-  await page.locator('#trigger-hemisphere').click();
-  await page.locator('#options-hemisphere [role=option]').last().click();
+  await page.locator('#seasonal-south').check();
   await expect(scene).toHaveAttribute('data-season', 'summer');
   await page.clock.fastForward(10 * 3600000);
   await expect(scene).toHaveAttribute('data-phase', 'night');
