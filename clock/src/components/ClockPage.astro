@@ -2,12 +2,15 @@
 import { clockGuide } from '../lib/clock-guide';
 import Layout from '../layouts/Layout.astro';
 import { getDictionary, type Language } from '../lib/i18n';
+import ClockAlarm from './ClockAlarm.astro';
+import { alarmText } from '../lib/alarm-text';
 import SeasonalBackground from './SeasonalBackground.astro';
 import { clockText } from '../lib/clock-text';
 import { clockBackgrounds, backgroundText, locationText } from '../lib/clock-backgrounds';
 interface Props { lang: Language }
 const {lang}=Astro.props; const t=getDictionary(lang);const c=clockText[lang];const guide=clockGuide[lang];
 const groups={de:{display:'Uhr & Datum',behavior:'Zeit & Verhalten'},en:{display:'Clock & date',behavior:'Time & behavior'},es:{display:'Reloj y fecha',behavior:'Hora y comportamiento'},fr:{display:'Horloge et date',behavior:'Heure et comportement'}}[lang];
+const alarm=alarmText[lang];
 const backgrounds=backgroundText[lang];const location=locationText[lang];
 ---
 <Layout lang={lang} title={guide.title} description={guide.intro} route="">
@@ -16,6 +19,7 @@ const backgrounds=backgroundText[lang];const location=locationText[lang];
 <div class="workspace">
 <section class="timer-card clock-card">
 <SeasonalBackground />
+<p id="clock-alarm-badge" class="clock-alarm-badge" hidden></p>
 <div class="card-top"><button id="clock-focus" class="icon-text" aria-label={t.focusMode} aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg><span>{t.focusMode}</span></button></div>
 <div class="clock-display" data-view="analog">
 <svg id="analog-clock" viewBox="0 0 320 320" role="img" aria-label={c.analog}>
@@ -56,9 +60,11 @@ const backgrounds=backgroundText[lang];const location=locationText[lang];
 <label>{c.zone}<select name="zone"><option value="local">{c.local}</option>{['UTC','Europe/Berlin','Europe/London','Europe/Paris','Europe/Madrid','America/New_York','America/Los_Angeles','Asia/Tokyo','Asia/Kolkata','Australia/Sydney'].map(z=><option value={z}>{z.replaceAll('_',' ')}</option>)}</select></label>
 <label class="toggle-row"><span><strong>{c.awake}</strong></span><input type="checkbox" role="switch" name="awake"/><span class="toggle" aria-hidden="true"></span></label>
 </fieldset>
+<ClockAlarm lang={lang} />
 <p id="clock-settings-status" role="status"></p>
 </form></aside></div><p class="local-note">{c.note}</p><p class="privacy-promise">{t.privacyPromise}</p></div>
 <section class="guide"><div class="guide-heading"><p class="eyebrow">THE JACKTOOLS.NET WAY</p><h2>{guide.heading}</h2><p>{guide.body}</p></div><div class="guide-grid">{guide.steps.map(([title,body],i)=><article><span class="step-number">0{i+1}</span><h3>{title}</h3><p>{body}</p></article>)}</div></section>
 <section class="faq"><h2>{t.faq}</h2>{guide.faq.map(([question,answer])=><details><summary>{question}<span aria-hidden="true">+</span></summary><p>{answer}</p></details>)}</section>
+<dialog id="alarm-dialog" aria-labelledby="alarm-dialog-title"><div class="dialog-inner"><h2 id="alarm-dialog-title">{alarm.ringing}</h2><p id="alarm-dialog-time"></p><p id="alarm-dialog-audio" role="status"></p><div class="dialog-actions"><button id="alarm-stop" type="button" class="primary" autofocus>{alarm.stop}</button><button id="alarm-snooze" type="button" class="secondary">{alarm.snooze}</button></div></div></dialog>
 <script src="../scripts/clock.ts"></script>
 </Layout>

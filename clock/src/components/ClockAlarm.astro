@@ -1,0 +1,15 @@
+---
+import { alarmText } from '../lib/alarm-text';
+import type { Language } from '../lib/i18n';
+interface Props { lang: Language }
+const t=alarmText[Astro.props.lang];
+---
+<fieldset id="clock-alarm" class="clock-alarm-group" data-text={JSON.stringify(t)}>
+ <legend>{t.title}</legend>
+ <div class="clock-alarm-fields">
+ <div><label class="alarm-time-field" for="alarm-time">{t.time}<input id="alarm-time" type="time" value="07:00" step="60"/></label><p id="alarm-zone" class="form-hint"></p><label class="toggle-row"><span><strong>{t.enabled}</strong></span><input id="alarm-enabled" type="checkbox" role="switch"/><span class="toggle" aria-hidden="true"></span></label></div>
+ <div><label class="alarm-time-field" for="alarm-volume">{t.volume}<span class="clock-transparency-control"><input id="alarm-volume" type="range" min="0" max="100" value="50"/><output id="alarm-volume-value" for="alarm-volume">50 %</output></span></label><label class="toggle-row"><span><strong>{t.vibration}</strong></span><input id="alarm-vibration" type="checkbox" role="switch" aria-describedby="alarm-vibration-hint"/><span class="toggle" aria-hidden="true"></span></label><p id="alarm-vibration-hint" class="form-hint">{t.vibrationHint}</p></div>
+ <div><button id="alarm-test" class="secondary" type="button">{t.test}</button><p id="alarm-status" class="settings-status" role="status">{t.off}</p><p id="alarm-audio-status" class="settings-status" role="status"></p></div>
+ </div>
+ <p class="form-hint alarm-warning">{t.warning}</p><p class="form-hint">{t.settingsHint}</p>
+</fieldset>

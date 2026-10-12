@@ -1,4 +1,5 @@
 import {createClockDate} from './clock-date';
+import {createAlarm} from './alarm';
 import {createFlipClock} from './flip-clock';
 import {enhanceClockSelects} from './clock-selects';
 import {storageAllowed} from '../lib/storage';
@@ -27,6 +28,7 @@ function applyTransparency(){
 }
 const seasonal=createSeasonalBackground($('seasonal-background') as unknown as SVGSVGElement);
 const geolocation=createSeasonalLocation($('seasonal-settings'),()=>configure());
+const alarm=createAlarm($('clock-alarm'),$('alarm-dialog') as HTMLDialogElement,$('clock-alarm-badge'));
 const wake=screenWakeLock($('wake-status'),'',t.unavailable);
 const styledDate = createClockDate($('styled-date'));
 const updateFlip = createFlipClock($('flip-clock'));
@@ -44,6 +46,7 @@ function configure(){
  $('seasonal-settings').hidden=background!=='seasonal';
  geolocation.setActive(background==='seasonal');
  seasonal.configure(zone,settings.hemisphere,geolocation.location);
+ alarm.configure(zone);
  const locale=document.documentElement.lang;
  digits=new Intl.DateTimeFormat(locale,{timeZone:zone,hour:'2-digit',minute:'2-digit',...(settings.seconds&&settings.format!=='short'?{second:'2-digit' as const}:{}),...(settings.format==='long'?{timeZoneName:'short' as const}:{}),...(settings.hourCycle==='auto'?{}:{hour12:settings.hourCycle==='12'})});
  dateFormat=new Intl.DateTimeFormat(locale,{timeZone:zone,...(settings.date==='short'?{dateStyle:'short' as const}:settings.date==='medium'?{dateStyle:'medium' as const}:{dateStyle:'full' as const})});

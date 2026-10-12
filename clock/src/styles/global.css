@@ -969,3 +969,19 @@ body:not(.focus-view) #clock-app .workspace > :is(.clock-card,.settings-card) { 
  #clock-settings { grid-template-columns:1fr; gap:24px; }
  .clock-settings-group + .clock-settings-group { border-top:1px solid var(--line); padding-top:20px; }
 }
+
+.clock-alarm-group { grid-column:1 / -1; min-width:0; border-top:1px solid var(--line); padding-top:20px; }
+.clock-alarm-group legend { font-size:15px; font-weight:650; color:var(--accent); padding:0 8px 0 0; }
+.clock-alarm-fields { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; }
+.clock-alarm-fields > div { min-width:0; }
+.alarm-time-field { display:flex; flex-direction:column; gap:8px; font-size:14px; }
+#alarm-time { width:100%; min-width:0; min-height:46px; padding:10px 12px; background:var(--surface); color:var(--text); border:1px solid var(--line); border-radius:10px; }
+.alarm-warning { color:var(--accent); }
+.clock-alarm-badge { position:absolute; top:14px; left:16px; max-width:calc(100% - 185px); margin:0; padding:6px 10px; border:1px solid var(--line); border-radius:10px; background:var(--surface); color:var(--accent); font-size:12px; z-index:4; }
+.clock-alarm-badge[hidden] { display:none; }
+body.focus-view .clock-alarm-badge { max-width:calc(100% - 175px); }
+@media(max-width:699px) {
+ .clock-alarm-fields { grid-template-columns:1fr; gap:12px; }
+ .clock-alarm-badge { max-width:calc(100% - 80px); font-size:11px; }
+ body.focus-view .clock-alarm-badge { max-width:calc(100% - 85px); }
+}
