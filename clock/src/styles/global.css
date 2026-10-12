@@ -985,3 +985,70 @@ body.focus-view .clock-alarm-badge { max-width:calc(100% - 175px); }
  .clock-alarm-badge { max-width:calc(100% - 80px); font-size:11px; }
  body.focus-view .clock-alarm-badge { max-width:calc(100% - 85px); }
 }
+
+/* App-owned time picker follows palette, style and font instead of OS chrome. */
+.alarm-time-picker-wrap { position:relative; margin-top:8px; }
+.alarm-time-input-row { display:flex; align-items:center; border:1px solid var(--line); border-radius:10px; background:var(--surface); }
+.alarm-time-input-row #alarm-time { flex:1; border:0; background:transparent; font:inherit; font-variant-numeric:tabular-nums; }
+.alarm-time-input-row:has(#alarm-time:focus-visible) { outline:3px solid var(--accent); outline-offset:4px; }
+.alarm-time-input-row #alarm-time:focus-visible { outline:none; }
+#alarm-time-open { display:grid; place-items:center; flex:none; width:44px; min-height:44px; border-radius:8px; margin-right:2px; background:var(--accent-soft); color:var(--accent); }
+#alarm-time-picker { position:absolute; top:calc(100% + 8px); left:0; z-index:10; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; width:100%; min-width:0; padding:14px; border:1px solid var(--line); border-radius:14px; background:var(--surface); color:var(--text); box-shadow:var(--shadow); font:inherit; }
+#alarm-time-picker[hidden] { display:none; }
+#alarm-time-picker .clock-select-field { margin:0; font:inherit; font-size:13px; }
+#alarm-time-done { grid-column:1 / -1; min-height:40px; }
+[data-style=technical] :is(.alarm-time-input-row,#alarm-time-open,#alarm-time-picker) { border-radius:4px; }
+[data-style=minimal] :is(.alarm-time-input-row,#alarm-time-open,#alarm-time-picker) { border-radius:8px; }
+[data-style=soft] :is(.alarm-time-input-row,#alarm-time-open,#alarm-time-picker) { border-radius:18px; }
+
+#alarm-test { width:100%; }
+#alarm-status { text-align:center; }
+#alarm-status:empty,#alarm-audio-status:empty { display:none; }
+
+.alarm-readout-indicator { display:flex; align-items:center; justify-content:center; gap:8px; margin:12px 0 0; color:var(--text); font-size:16px; font-variant-numeric:tabular-nums; }
+.alarm-readout-indicator[hidden],#alarm-readout-time[hidden],#alarm-mini-flips[hidden] { display:none; }
+.clock-display:is([data-view=digital],[data-view=flip]) .alarm-readout-indicator {
+ width:fit-content;
+ max-width:100%;
+ margin-inline:auto;
+ padding:5px 10px;
+ border:1px solid var(--line);
+ border-radius:10px;
+ background:color-mix(in srgb,var(--accent-soft) var(--clock-surface-opacity,100%),transparent);
+ box-shadow:0 2px 6px #0002;
+}
+.alarm-readout-indicator > svg { width:18px; height:18px; color:var(--accent); }
+.alarm-readout-indicator:has(#alarm-mini-flips:not([hidden])) > svg {
+ width:1em;
+ height:1.35em;
+ padding:.15em;
+ font-size:min(24px,5cqw);
+ border:1px solid var(--line);
+ border-radius:.1em;
+ background:color-mix(in srgb,var(--accent-soft) var(--clock-surface-opacity,100%),transparent);
+ box-shadow:0 .06em .1em #0003;
+ color:var(--accent);
+}
+#alarm-mini-flips { display:flex; align-items:center; gap:.07em; font:700 min(24px,5cqw)/1.35 ui-monospace,SFMono-Regular,Consolas,monospace; }
+#alarm-analog-indicator { stroke:var(--accent); stroke-width:1.7; }
+#alarm-analog-indicator > svg { width:20px; height:20px; }
+#alarm-analog-time { fill:var(--text); stroke:none; font-size:16px; font-family:inherit; font-variant-numeric:tabular-nums; }
+
+@media(max-height:450px) {
+ body.focus-view .clock-display[data-view=flip]:has(#alarm-readout-indicator:not([hidden])) #flip-clock { --flip-size:min(15cqw,16dvh); }
+}
+
+/* The inset alarm badge scales with the SVG dial in all analog combinations. */
+.alarm-dial-badge { display:flex; align-items:center; justify-content:center; gap:8px; height:calc(100% - 8px); margin:4px; padding:5px 10px; border:1px solid var(--line); border-radius:10px; background:color-mix(in srgb,var(--accent-soft) var(--clock-surface-opacity,100%),transparent); box-shadow:0 2px 6px #0002; color:var(--text); font-size:16px; font-family:inherit; font-variant-numeric:tabular-nums; }
+.alarm-dial-badge > svg { width:18px; height:18px; color:var(--accent); flex:none; }
+#alarm-analog-time { font:inherit; }
+#alarm-analog-time[hidden],#alarm-analog-flips[hidden] { display:none; }
+#alarm-analog-flips { display:flex; align-items:center; gap:.07em; font:700 16px/1.35 ui-monospace,SFMono-Regular,Consolas,monospace; }
+.alarm-dial-badge:has(#alarm-analog-flips:not([hidden])) > svg { width:1em; height:1.35em; font-size:16px; padding:.15em; border:1px solid var(--line); border-radius:.1em; background:color-mix(in srgb,var(--accent-soft) var(--clock-surface-opacity,100%),transparent); box-shadow:0 .06em .1em #0003; color:var(--accent); }
+
+/* Optical centering: the alarm glyph's bells leave more whitespace above. */
+.alarm-readout-indicator:has(#alarm-mini-flips:not([hidden])) > svg,
+.alarm-dial-badge:has(#alarm-analog-flips:not([hidden])) > svg {
+ padding-top:.08em;
+ padding-bottom:.22em;
+}

@@ -39,5 +39,5 @@ optional Vibration API, a three-second test and five-minute elapsed-time snooze.
 It requires an open page and must not be relied upon for critical wakeups.
 Audio/vibration stop after two minutes; triggers over five minutes late are
 reported as missed. DST gaps are skipped and folds use the next future instant.
-Only time, volume and vibration preference persist with storage consent under
+Five locally synthesised tones are selectable and testable. Only time, tone, volume and vibration preference persist with storage consent under
 `jacktools.clock.alarm.v1`; activation/due times/snooze are memory-only.

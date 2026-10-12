@@ -77,6 +77,7 @@ export function enhanceClockSelects(form: HTMLFormElement) {
     control.addEventListener('focusout',e=>{if(!control.contains(e.relatedTarget as Node))close();});
     document.addEventListener('click',e=>{if(!control.contains(e.target as Node))close();});
     select.addEventListener('change',sync);
+    select.addEventListener('options-sync',sync);
     label.replaceWith(wrapper); select.hidden = true;
     control.append(trigger,list); wrapper.append(caption,select,control); sync();
   });
