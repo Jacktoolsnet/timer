@@ -30,10 +30,16 @@ export function createFlipClock(root: HTMLElement) {
       const before = cell.dataset.value!;cell.dataset.value = ch;
       cell.replaceChildren(half(ch,'top'),half(ch,'bottom'));
       if(!animate || motion.matches) return;
+      // The old lower leaf stays behind the incoming leaf until it has landed.
+      const restingBottom = cell.children[1] as HTMLElement;
+      restingBottom.firstElementChild!.textContent = before;
       const top=half(before,'top',true),bottom=half(ch,'bottom',true);
       cell.append(top,bottom);
       top.addEventListener('animationend',()=>top.remove(),{once:true});
-      bottom.addEventListener('animationend',()=>bottom.remove(),{once:true});
+      bottom.addEventListener('animationend',()=>{
+        restingBottom.firstElementChild!.textContent = ch;
+        bottom.remove();
+      },{once:true});
     });
   };
 }

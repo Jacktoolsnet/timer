@@ -700,3 +700,10 @@ body.focus-view .focus-details .phase-summary { margin:0; gap:8px; font-size:.75
 @media(max-height:450px) { body.focus-view .timer-card { padding-top:48px; padding-bottom:70px; } body.focus-view .clock { width:min(90vw,calc(100dvh - 115px)); } }
 
 body.focus-view .focus-details .timer-controls .primary { width:48px; min-width:48px; flex:none; }
+
+/* Hide idle focus controls without moving the main display. */
+body.focus-view.focus-cursor-hidden :is(.card-top,.focus-details):not(:has(:focus-visible)) {
+ opacity:0;
+ visibility:hidden;
+ pointer-events:none;
+}

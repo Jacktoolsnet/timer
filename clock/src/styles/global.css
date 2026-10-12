@@ -799,6 +799,12 @@ body.focus-view .workspace { display:block; width:100%; max-width:none; height:1
 body.focus-view .timer-card { position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; height:100%; min-height:0; max-width:none; margin:0; padding:64px 12px 100px; border:0; border-radius:20px; overflow:hidden; }
 body.focus-view .card-top { position:absolute; top:max(12px,env(safe-area-inset-top)); right:max(12px,env(safe-area-inset-right)); z-index:5; margin:0; }
 body.focus-view .card-top button { background:color-mix(in srgb,var(--surface) 90%,transparent); border:1px solid var(--line); border-radius:12px; min-height:44px; padding:8px 12px; }
+/* Reuse the idle-pointer timer without changing the clock's layout. */
+body.focus-view.focus-cursor-hidden .clock-card .card-top:not(:has(:focus-visible)) {
+ opacity:0;
+ visibility:hidden;
+ pointer-events:none;
+}
 body.focus-view .timer-status:empty { display:none; }
 body.focus-view .focus-details, body.focus-view .timer-card > .focus-details { position:absolute; flex-direction:row; bottom:max(12px,env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%); z-index:3; display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:4px 12px; width:max-content; max-width:calc(100% - 24px); padding:8px 14px; margin:0; border:1px solid var(--line); border-radius:16px; background:color-mix(in srgb,var(--surface) 90%,transparent); backdrop-filter:blur(12px); }
 body.focus-view .focus-details .timer-controls { display:flex; justify-content:center; gap:8px; margin:0; }
@@ -843,6 +849,14 @@ body.focus-view .focus-details .timer-controls .primary { width:48px; min-width:
 
 body.focus-view #analog-clock { height:min(88vw,calc(100dvh - 200px)); aspect-ratio:1; }
 body.focus-view .clock-display:is([data-view=combined],[data-view=analogFlip]) #analog-clock { height:min(85vw,48dvh); }
+/* Keep the combined flip view's spacing consistent with its date readout. */
+body.focus-view .clock-display[data-view=analogFlip] {
+ --clock-flip-gap:clamp(20px,4vmin,48px);
+ gap:var(--clock-flip-gap);
+}
+body.focus-view .clock-display[data-view=analogFlip] #styled-date[data-style] {
+ margin-top:var(--clock-flip-gap);
+}
 @media(min-width:900px), (orientation:landscape) and (min-width:600px) {
  body.focus-view .clock-display:is([data-view=combined],[data-view=analogFlip]) #analog-clock { height:min(46vw,calc(100dvh - 100px)); }
 }

@@ -811,6 +811,13 @@ body.focus-view .sound-shape { max-width: min(45dvh,45vw); }
 
 body.focus-view.focus-cursor-hidden, body.focus-view.focus-cursor-hidden * { cursor:none !important; }
 
+/* Hide idle focus controls, but leave dialogs and keyboard navigation usable. */
+body.focus-view.focus-cursor-hidden :is(.relax-top,.relax-playback,.relax-safety):not(:has(:focus-visible)) {
+ opacity:0;
+ visibility:hidden;
+ pointer-events:none;
+}
+
 .nature-glimmer { position:absolute; width:var(--nature-size); height:var(--nature-size); border-radius:50%; pointer-events:none; opacity:0; animation:nature-glow 2.8s ease-in-out forwards; }
 /* Smoke always rises, independently of the selected ocean-wave direction. */
 .fire-glimmer { width:calc(var(--nature-size)*.55); height:calc(var(--nature-size)*3.2); border-radius:45% 55% 40% 60% / 65% 45% 55% 35%; background:radial-gradient(ellipse,color-mix(in srgb,var(--nature-colour) 35%,var(--muted)) 0%,transparent 70%); filter:blur(3px); animation:campfire-smoke var(--smoke-life,10s) linear forwards; }

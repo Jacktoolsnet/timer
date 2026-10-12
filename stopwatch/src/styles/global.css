@@ -877,3 +877,11 @@ body.focus-view .stopwatch-laps .laps-heading { gap:8px; flex-wrap:wrap; }
 @media(max-height:450px) { body.focus-view .stopwatch-card { padding-top:48px; padding-bottom:70px; } body.focus-view #analog-stopwatch svg { width:min(90vw,calc(100dvh - 155px)); } }
 
 body.focus-view .focus-details .timer-controls .primary { width:48px; min-width:48px; flex:none; }
+
+/* Hide idle focus controls without moving the main display or lap results. */
+body.focus-view.focus-cursor-hidden :is(.card-top,.focus-details):not(:has(:focus-visible)),
+body.focus-view.focus-cursor-hidden .laps-heading button:not(:focus-visible) {
+ opacity:0;
+ visibility:hidden;
+ pointer-events:none;
+}
