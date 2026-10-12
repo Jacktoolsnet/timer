@@ -29,6 +29,8 @@ const backgrounds=backgroundText[lang];
 <label>{t.appearance}<select name="view">{(['analog','digital','combined','flip','analogFlip'] as const).map(v=><option value={v} selected={v==='analog'}>{c[v]}</option>)}</select></label>
 <label>{backgrounds.label}<select name="background"><option value="none">{backgrounds.none}</option>{clockBackgrounds.map((id,index)=><option value={id} data-preview={'/backgrounds/'+id+'.svg'}>{backgrounds.names[index]}</option>)}</select></label>
 <p class="form-hint">{backgrounds.hint}</p>
+<label class="clock-transparency" hidden>{backgrounds.transparency}<span class="clock-transparency-control"><input id="clock-transparency" name="transparency" type="range" min="0" max="100" step="1" value="0" disabled aria-describedby="clock-transparency-hint"/><output id="clock-transparency-value" for="clock-transparency">0 %</output></span></label>
+<p id="clock-transparency-hint" class="form-hint" hidden>{backgrounds.transparencyHint}</p>
 <label>{c.dateAppearance}<select name="dateView">{(['textDate','calendarDate','elegantDate','flipDate'] as const).map(v=><option value={v} selected={v==='calendarDate'}>{c[v]}</option>)}</select></label>
 <label>{c.date}<select name="date">{(['off','short','medium','long'] as const).map(v=><option value={v} selected={v==='long'}>{c[v]}</option>)}</select></label>
 <label>{c.time}<select name="format">{(['short','medium','long'] as const).map(v=><option value={v} selected={v==='medium'}>{c[v]}</option>)}</select></label>

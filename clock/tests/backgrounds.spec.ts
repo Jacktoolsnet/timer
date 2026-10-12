@@ -70,6 +70,70 @@ test('unsupported saved backgrounds fall back safely', async ({ page }) => {
   await expect(page.locator('.clock-display')).toHaveAttribute('data-view', 'analogFlip');
 });
 
+test('transparency updates surfaces live, keeps text visible and follows consent', async ({ page }) => {
+  await page.goto('/de/');
+  const slider = page.locator('#clock-transparency');
+  await expect(slider).toBeHidden();
+  await expect(slider).toBeDisabled();
+  await choose(page, 'aurora');
+  await slider.focus();
+  await page.keyboard.press('End');
+  await expect(slider).toHaveValue('100');
+  await expect(page.locator('#clock-transparency-value')).toHaveText('100 %');
+  expect(await page.locator('.clock-card').evaluate(el => el.style.getPropertyValue('--clock-surface-opacity'))).toBe('0%');
+  expect(await page.locator('#clock-zone').evaluate(el => getComputedStyle(el).opacity)).toBe('1');
+  expect(await page.evaluate(() => localStorage.getItem('jacktools.clock.settings.v1'))).toBeNull();
+  await choose(page, 'none');
+  await expect(slider).toBeHidden();
+  expect(await page.locator('.clock-card').evaluate(el => el.style.getPropertyValue('--clock-surface-opacity'))).toBe('100%');
+  await choose(page, 'aurora');
+  await expect(slider).toHaveValue('100');
+  expect(await page.locator('.clock-card').evaluate(el => el.style.getPropertyValue('--clock-surface-opacity'))).toBe('0%');
+  await page.locator('#palette-dropdown summary').click();
+  await page.locator('#remember-preferences').check();
+  await page.reload();
+  await expect(slider).toHaveValue('100');
+  await slider.focus();
+  await page.keyboard.press('Home');
+  await expect(page.locator('#clock-transparency-value')).toHaveText('0 %');
+  expect(await page.locator('.clock-card').evaluate(el => el.style.getPropertyValue('--clock-surface-opacity'))).toBe('100%');
+});
+
+test('animated flip leaves do not stack translucent backgrounds', async ({ page }) => {
+  await page.goto('/de/');
+  await choose(page, 'aurora');
+  await page.evaluate(async () => {
+    const slider = document.querySelector<HTMLInputElement>('#clock-transparency')!;
+    slider.value = '50'; slider.dispatchEvent(new Event('input', { bubbles: true }));
+    const select = document.querySelector<HTMLSelectElement>('select[name=view]')!;
+    select.value = 'flip'; select.dispatchEvent(new Event('change', { bubbles: true }));
+    // Detached from the live clock, but inside its card to use the same styling.
+    const root = document.createElement('div'); root.id = 'test-flaps';
+    document.querySelector('.clock-card')!.append(root);
+    const modulePath = '/src/scripts/flip-clock.ts';
+    const { createFlipClock } = await import(modulePath);
+    const update = createFlipClock(root);
+    update([{ type: 'second', value: '09' }], false);
+    update([{ type: 'second', value: '10' }], true);
+    root.querySelectorAll('*').forEach(el => el.getAnimations().forEach(animation => animation.pause()));
+  });
+  await expect(page.locator('#test-flaps .flip-moving')).toHaveCount(4);
+  expect(await page.locator('#test-flaps .flip-half').evaluateAll(elements => elements.every(el => getComputedStyle(el).backgroundColor === 'rgba(0, 0, 0, 0)'))).toBeTruthy();
+  const surface = await page.locator('#test-flaps .flip-digit').first().evaluate(el => getComputedStyle(el, '::before').backgroundColor);
+  expect(surface).toContain('0.5');
+  expect(await page.locator('#test-flaps .flip-moving').first().evaluate(el => getComputedStyle(el).opacity)).toBe('1');
+  const outgoing = page.locator('#test-flaps .flip-outgoing-glyph').first();
+  await outgoing.evaluate(el => { el.getAnimations()[0].currentTime = 389; });
+  expect(await outgoing.evaluate(el => getComputedStyle(el).opacity)).toBe('1');
+  await outgoing.evaluate(el => { el.getAnimations()[0].currentTime = 390; });
+  expect(await outgoing.evaluate(el => getComputedStyle(el).opacity)).toBe('0');
+  await page.locator('#test-flaps .flip-moving.flip-bottom').evaluateAll(elements => elements.forEach(el => el.dispatchEvent(new Event('animationend'))));
+  await expect(page.locator('#test-flaps .flip-outgoing-glyph')).toHaveCount(0);
+  expect(await page.locator('#test-flaps .flip-bottom > span').allTextContents()).toEqual(['1', '0']);
+  await choose(page, 'none');
+  await expect(page.locator('.clock-card')).toHaveAttribute('data-transparent-flaps', 'false');
+});
+
 test('backgrounds fit all readouts in portrait and landscape', async ({ page }) => {
   await page.goto('/de/');
   await choose(page, 'aurora');

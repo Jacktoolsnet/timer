@@ -684,8 +684,11 @@ body.focus-view .card-top { position: absolute; top: 12px; right: 12px; z-index:
 .flip-top>span { top:0; }.flip-bottom>span { bottom:0; }
 .flip-digit::after { content:''; position:absolute; left:0; right:0; top:50%; border-top:1px solid var(--line); z-index:5; pointer-events:none; }
 .flip-separator { color:var(--accent); font-size:.65em; }
-.flip-moving.flip-top { z-index:3; animation:flip-up .26s ease-in forwards; }
-.flip-moving.flip-bottom { z-index:4; transform:rotateX(90deg); animation:flip-down .26s .26s ease-out forwards; }
+.flip-digit { --flip-duration:.26s; }
+.flip-moving.flip-top { z-index:3; animation:flip-up var(--flip-duration) ease-in forwards; }
+.flip-moving.flip-bottom { z-index:4; transform:rotateX(90deg); animation:flip-down var(--flip-duration) var(--flip-duration) ease-out forwards; }
+.flip-outgoing-glyph { animation:flip-hide-old calc(var(--flip-duration) * 1.5) steps(1,end) forwards; }
+@keyframes flip-hide-old { from { opacity:1; } to { opacity:0; } }
 @keyframes flip-up { to {transform:rotateX(-90deg);} }
 @keyframes flip-down { to {transform:rotateX(0deg);} }
 .focus-view #flip-clock { --flip-size:min(calc(110px * var(--font-scale,1)),12cqw); }
@@ -870,7 +873,7 @@ body.focus-view .clock-display[data-view=analogFlip] #styled-date[data-style] {
  background-position:center;
  pointer-events:none;
 }
-.clock-card[data-background]:not([data-background=none]) :is(#digital-clock,#clock-date,#clock-zone,#flip-context) {
+.clock-card[data-background]:not([data-background=none]) :is(#digital-clock,#clock-date,#flip-context) {
  text-shadow:0 1px 3px var(--surface),0 0 8px var(--surface);
 }
 body .clock-card .clock-display[data-view] #clock-zone {
@@ -881,8 +884,32 @@ body .clock-card .clock-display[data-view] #clock-zone {
  padding:5px 10px;
  border:1px solid var(--line);
  border-radius:10px;
- background:color-mix(in srgb,var(--surface) 94%,transparent);
+ background:color-mix(in srgb,var(--surface) var(--clock-surface-opacity,100%),transparent);
 }
+body.focus-view .clock-card .clock-display[data-view] #styled-date:not([hidden]) + #clock-zone {
+ margin-top:12px;
+}
+@media(max-height:450px) {
+ body.focus-view .clock-display[data-view=digital] #digital-clock { font-size:min(14cqw,24dvh); }
+ body.focus-view .clock-display[data-view=flip] #flip-clock { --flip-size:min(15cqw,26dvh); }
+}
+.clock-card .dial { fill:color-mix(in srgb,var(--surface) var(--clock-surface-opacity,100%),transparent); }
+.clock-card .flip-half { background:color-mix(in srgb,var(--accent-soft) var(--clock-surface-opacity,100%),transparent); }
+/* A single surface avoids accumulating alpha on overlapping animated leaves. */
+.clock-card[data-transparent-flaps=true] .flip-digit::before {
+ content:'';
+ position:absolute;
+ inset:0;
+ border-radius:inherit;
+ background:color-mix(in srgb,var(--accent-soft) var(--clock-surface-opacity,100%),transparent);
+}
+.clock-card[data-transparent-flaps=true] .flip-half { background:transparent; }
+.clock-card #styled-date .date-calendar { background:color-mix(in srgb,var(--surface) var(--clock-surface-opacity,100%),transparent); }
+.clock-card #styled-date .date-month { background:color-mix(in srgb,var(--accent) var(--clock-surface-opacity,100%),transparent); }
+.clock-transparency-control { display:flex; align-items:center; gap:12px; }
+.clock-settings .clock-transparency[hidden] { display:none; }
+.clock-transparency-control input { flex:1; min-width:0; min-height:32px; margin:0; accent-color:var(--accent); cursor:pointer; }
+.clock-transparency-control output { min-width:3.5em; text-align:right; font-size:12px; font-variant-numeric:tabular-nums; color:var(--muted); }
 .clock-card[data-background]:not([data-background=none]) .card-top button {
  background:color-mix(in srgb,var(--surface) 94%,transparent);
  border:1px solid var(--line);

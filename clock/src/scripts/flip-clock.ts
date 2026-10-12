@@ -30,14 +30,17 @@ export function createFlipClock(root: HTMLElement) {
       const before = cell.dataset.value!;cell.dataset.value = ch;
       cell.replaceChildren(half(ch,'top'),half(ch,'bottom'));
       if(!animate || motion.matches) return;
-      // The old lower leaf stays behind the incoming leaf until it has landed.
+      // Hide the old lower glyph at 75% of the full two-stage flip.
       const restingBottom = cell.children[1] as HTMLElement;
-      restingBottom.firstElementChild!.textContent = before;
+      const outgoingGlyph = restingBottom.firstElementChild!;
+      outgoingGlyph.textContent = before;
+      outgoingGlyph.classList.add('flip-outgoing-glyph');
       const top=half(before,'top',true),bottom=half(ch,'bottom',true);
       cell.append(top,bottom);
       top.addEventListener('animationend',()=>top.remove(),{once:true});
       bottom.addEventListener('animationend',()=>{
-        restingBottom.firstElementChild!.textContent = ch;
+        outgoingGlyph.classList.remove('flip-outgoing-glyph');
+        outgoingGlyph.textContent = ch;
         bottom.remove();
       },{once:true});
     });

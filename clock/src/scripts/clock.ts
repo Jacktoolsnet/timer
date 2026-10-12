@@ -8,16 +8,28 @@ const $=(id:string)=>document.getElementById(id)!;
 const t=JSON.parse($('clock-app').dataset.text!);
 const form=$('clock-settings') as HTMLFormElement;
 const field=(key:string)=>form.elements.namedItem(key) as HTMLInputElement | HTMLSelectElement;
-const defaults={view:'analog',background:'none',date:'long',dateView:'calendarDate',format:'medium',hourCycle:'auto',zone:'local',seconds:true,numbers:true,smooth:false,awake:false};
+const defaults={view:'analog',background:'none',transparency:0,date:'long',dateView:'calendarDate',format:'medium',hourCycle:'auto',zone:'local',seconds:true,numbers:true,smooth:false,awake:false};
 let settings={...defaults};
-try {if(storageAllowed()) {const saved=JSON.parse(localStorage.getItem('jacktools.clock.settings.v1')||'null');for(const key of Object.keys(defaults) as (keyof typeof defaults)[]){const value=saved?.[key];if(typeof defaults[key]==='boolean'){if(typeof value==='boolean')Object.assign(settings,{[key]:value});}else if([...((field(key) as HTMLSelectElement).options)].some(o=>o.value===value))Object.assign(settings,{[key]:value});}}}catch{}
-for(const [key,value] of Object.entries(settings)){if(typeof value==='boolean')(field(key) as HTMLInputElement).checked=value;else field(key).value=value;}
+try {if(storageAllowed()) {const saved=JSON.parse(localStorage.getItem('jacktools.clock.settings.v1')||'null');for(const key of Object.keys(defaults) as (keyof typeof defaults)[]){const value=saved?.[key];if(typeof defaults[key]==='boolean'){if(typeof value==='boolean')Object.assign(settings,{[key]:value});}else if(typeof defaults[key]==='number'){if(typeof value==='number'&&Number.isInteger(value)&&value>=0&&value<=100)Object.assign(settings,{[key]:value});}else if([...((field(key) as HTMLSelectElement).options)].some(o=>o.value===value))Object.assign(settings,{[key]:value});}}}catch{}
+for(const [key,value] of Object.entries(settings)){if(typeof value==='boolean')(field(key) as HTMLInputElement).checked=value;else field(key).value=String(value);}
+function applyTransparency(){
+ const enabled=clockBackgrounds.some(id=>id===settings.background);
+ const slider=field('transparency') as HTMLInputElement;
+ slider.disabled=!enabled;
+ slider.closest<HTMLElement>('label')!.hidden=!enabled;
+ $('clock-transparency-hint').hidden=!enabled;
+ const card=document.querySelector<HTMLElement>('.clock-card')!;
+ card.style.setProperty('--clock-surface-opacity',`${enabled?100-settings.transparency:100}%`);
+ card.dataset.transparentFlaps=String(enabled&&settings.transparency>0);
+ $('clock-transparency-value').textContent=`${settings.transparency} %`;
+}
 const wake=screenWakeLock($('wake-status'),'',t.unavailable);
 const styledDate = createClockDate($('styled-date'));
 const updateFlip = createFlipClock($('flip-clock'));
 let lastFlipTick = 0;
 let digits:Intl.DateTimeFormat,dateFormat:Intl.DateTimeFormat,parts:Intl.DateTimeFormat;
 function configure(){
+ applyTransparency();
  const card=document.querySelector<HTMLElement>('.clock-card')!;
  const background=clockBackgrounds.find(id=>id===settings.background);
  card.dataset.background=background||'none';
@@ -42,7 +54,11 @@ function render(){const now=new Date();const p=Object.fromEntries(parts.formatTo
  const text=digits.format(now);$('digital-clock').textContent=text;$('digital-clock').setAttribute('datetime',now.toISOString());$('analog-clock').setAttribute('aria-label',text);$('clock-date').textContent=dateFormat.format(now);styledDate.render(now);
 }
 function save(){if(!storageAllowed())return;try{localStorage.setItem('jacktools.clock.settings.v1',JSON.stringify(settings));}catch{$('clock-settings-status').textContent=t.storageError;}}
-form.addEventListener('submit',e=>e.preventDefault());form.addEventListener('change',()=>{for(const key of Object.keys(defaults)){const input=field(key);Object.assign(settings,{[key]:input.type==='checkbox'?(input as HTMLInputElement).checked:input.value});}configure();save();});
+form.addEventListener('submit',e=>e.preventDefault());form.addEventListener('change',()=>{for(const key of Object.keys(defaults)){const input=field(key);Object.assign(settings,{[key]:input.type==='checkbox'?(input as HTMLInputElement).checked:input.type==='range'?Number(input.value):input.value});}configure();save();});
+field('transparency').addEventListener('input',()=>{
+ settings.transparency=Number(field('transparency').value);
+ applyTransparency();save();
+});
 document.addEventListener('storage-enabled',save);
 let ownsFullscreen=false;
 function focus(on:boolean){document.body.classList.toggle('focus-view',on);const b=$('clock-focus');b.setAttribute('aria-pressed',String(on));b.setAttribute('aria-label',on?t.exitFocus:t.focusMode);b.querySelector('span')!.textContent=on?t.exitFocus:t.focusMode;}
