@@ -3,8 +3,10 @@ import { clockGuide } from '../lib/clock-guide';
 import Layout from '../layouts/Layout.astro';
 import { getDictionary, type Language } from '../lib/i18n';
 import { clockText } from '../lib/clock-text';
+import { clockBackgrounds, backgroundText } from '../lib/clock-backgrounds';
 interface Props { lang: Language }
 const {lang}=Astro.props; const t=getDictionary(lang);const c=clockText[lang];const guide=clockGuide[lang];
+const backgrounds=backgroundText[lang];
 ---
 <Layout lang={lang} title={guide.title} description={guide.intro} route="">
 <section class="intro"><h1>{c.title}</h1><p class="intro-copy">{guide.intro}</p></section>
@@ -25,6 +27,8 @@ const {lang}=Astro.props; const t=getDictionary(lang);const c=clockText[lang];co
 </section>
 <aside class="settings-card"><h2>{t.settings}</h2><form id="clock-settings" class="clock-settings">
 <label>{t.appearance}<select name="view">{(['analog','digital','combined','flip','analogFlip'] as const).map(v=><option value={v} selected={v==='analog'}>{c[v]}</option>)}</select></label>
+<label>{backgrounds.label}<select name="background"><option value="none">{backgrounds.none}</option>{clockBackgrounds.map((id,index)=><option value={id} data-preview={'/backgrounds/'+id+'.svg'}>{backgrounds.names[index]}</option>)}</select></label>
+<p class="form-hint">{backgrounds.hint}</p>
 <label>{c.dateAppearance}<select name="dateView">{(['textDate','calendarDate','elegantDate','flipDate'] as const).map(v=><option value={v} selected={v==='calendarDate'}>{c[v]}</option>)}</select></label>
 <label>{c.date}<select name="date">{(['off','short','medium','long'] as const).map(v=><option value={v} selected={v==='long'}>{c[v]}</option>)}</select></label>
 <label>{c.time}<select name="format">{(['short','medium','long'] as const).map(v=><option value={v} selected={v==='medium'}>{c[v]}</option>)}</select></label>

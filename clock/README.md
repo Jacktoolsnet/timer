@@ -15,3 +15,7 @@ npm run dev -- --port 4322
 Open http://localhost:4322. Build with `npm run build`; deploy only contents of dist/
 to clock.jacktools.net. Use HTTPS for Wake Lock. Keep the test deployment password
 protected until clock-specific hosting/privacy details are complete.
+
+Clock settings include twelve local SVG backgrounds for normal and focus view; remembering
+the selected motif follows the existing storage consent. Run background picker
+regression tests with `npm run test:e2e` (requires Playwright Chromium installed).

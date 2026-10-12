@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" role="img" aria-labelledby="title description">
+  <title id="title">Warme Dünen</title>
+  <desc id="description">Fließende Sanddünen in gedeckten Terrakotta- und Beigetönen.</desc>
+  <defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0.000" stop-color="#e8d7bd"/><stop offset="1.000" stop-color="#d4b89c"/></linearGradient><linearGradient id="sand" x1="0" y1="0" x2="0" y2="1"><stop offset="0.000" stop-color="#be896b"/><stop offset="1.000" stop-color="#835744"/></linearGradient></defs>
+  
+<rect width="1600" height="1000" fill="url(#sky)"/>
+<circle cx="1240" cy="245" r="83" fill="#f6e4c8" opacity=".6"/>
+<path d="M0 635Q330 535 660 630T1300 590T1600 610V1000H0Z" fill="#ccac8a"/>
+<path d="M0 800Q370 545 790 725Q1140 840 1600 655V1000H0Z" fill="#bc9675"/>
+<path d="M0 930Q425 705 830 860T1600 800V1000H0Z" fill="url(#sand)"/>
+<path d="M0 926Q425 701 830 856T1600 796" fill="none" stroke="#e6c3a0" stroke-width="3" opacity=".4"/>
+<path d="M990 1000Q1200 932 1520 920M1090 1000Q1280 957 1600 952" fill="none" stroke="#d5ac88" stroke-width="2" opacity=".18"/>
+
+</svg>

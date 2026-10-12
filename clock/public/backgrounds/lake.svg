@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" role="img" aria-labelledby="title description">
+  <title id="title">See im Morgenlicht</title>
+  <desc id="description">Ein stiller See zwischen sanften bewaldeten Hügeln mit dezenten Spiegelungen im Wasser.</desc>
+  <defs>
+    <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#deded1"/><stop offset="1" stop-color="#abc3ba"/></linearGradient>
+    <linearGradient id="water" x2="0" y2="1"><stop stop-color="#9bb9b2"/><stop offset="1" stop-color="#537c79"/></linearGradient>
+    <linearGradient id="reflection" x2="0" y2="1"><stop stop-color="#56766b" stop-opacity=".3"/><stop offset="1" stop-color="#56766b" stop-opacity="0"/></linearGradient>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#sky)"/>
+  <circle cx="1240" cy="225" r="73" fill="#f2ead6" opacity=".6"/>
+  <path d="M0 550Q210 325 470 470T950 465T1600 450V700H0Z" fill="#9bb2a0"/>
+  <path d="M0 575Q180 420 420 555Q575 620 770 570Q1140 395 1600 530V720H0Z" fill="#6e9180"/>
+  <path d="M0 600Q290 540 540 608T1140 594T1600 580V1000H0Z" fill="url(#water)"/>
+  <path d="M0 600Q290 540 540 608T1140 594T1600 580V790Q1210 735 1000 790T460 760T0 830Z" fill="url(#reflection)"/>
+  <path d="M0 598Q290 538 540 606T1140 592T1600 578" fill="none" stroke="#dbe0ca" stroke-width="3" opacity=".45"/>
+  <g fill="none" stroke="#d5dfcf" stroke-linecap="round">
+    <path d="M1090 680H1370M1160 709H1330M1120 742H1385" stroke-width="4" opacity=".22"/>
+    <path d="M150 726Q380 710 585 726M870 812Q1110 794 1430 812" stroke-width="2" opacity=".2"/>
+    <path d="M340 905Q655 880 980 905" stroke-width="3" opacity=".16"/>
+  </g>
+  <path d="M0 870Q145 810 285 893T610 1000H0Z M1600 865Q1460 870 1290 1000H1600Z" fill="#395d52"/>
+  <g fill="none" stroke="#6b8970" stroke-width="4" stroke-linecap="round">
+    <path d="M60 939Q65 870 45 828M90 949Q100 878 120 860M125 967Q140 908 159 896M1550 959Q1540 902 1520 885M1575 950Q1570 878 1590 850"/>
+  </g>
+</svg>

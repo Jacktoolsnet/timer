@@ -3,11 +3,12 @@ import {createFlipClock} from './flip-clock';
 import {enhanceClockSelects} from './clock-selects';
 import {storageAllowed} from '../lib/storage';
 import {screenWakeLock} from '../lib/wake-lock';
+import {clockBackgrounds} from '../lib/clock-backgrounds';
 const $=(id:string)=>document.getElementById(id)!;
 const t=JSON.parse($('clock-app').dataset.text!);
 const form=$('clock-settings') as HTMLFormElement;
 const field=(key:string)=>form.elements.namedItem(key) as HTMLInputElement | HTMLSelectElement;
-const defaults={view:'analog',date:'long',dateView:'calendarDate',format:'medium',hourCycle:'auto',zone:'local',seconds:true,numbers:true,smooth:false,awake:false};
+const defaults={view:'analog',background:'none',date:'long',dateView:'calendarDate',format:'medium',hourCycle:'auto',zone:'local',seconds:true,numbers:true,smooth:false,awake:false};
 let settings={...defaults};
 try {if(storageAllowed()) {const saved=JSON.parse(localStorage.getItem('jacktools.clock.settings.v1')||'null');for(const key of Object.keys(defaults) as (keyof typeof defaults)[]){const value=saved?.[key];if(typeof defaults[key]==='boolean'){if(typeof value==='boolean')Object.assign(settings,{[key]:value});}else if([...((field(key) as HTMLSelectElement).options)].some(o=>o.value===value))Object.assign(settings,{[key]:value});}}}catch{}
 for(const [key,value] of Object.entries(settings)){if(typeof value==='boolean')(field(key) as HTMLInputElement).checked=value;else field(key).value=value;}
@@ -17,6 +18,11 @@ const updateFlip = createFlipClock($('flip-clock'));
 let lastFlipTick = 0;
 let digits:Intl.DateTimeFormat,dateFormat:Intl.DateTimeFormat,parts:Intl.DateTimeFormat;
 function configure(){
+ const card=document.querySelector<HTMLElement>('.clock-card')!;
+ const background=clockBackgrounds.find(id=>id===settings.background);
+ card.dataset.background=background||'none';
+ if(background)card.style.setProperty('--clock-background',`url("/backgrounds/${background}.svg")`);
+ else card.style.removeProperty('--clock-background');
  const zone=settings.zone==='local'?Intl.DateTimeFormat().resolvedOptions().timeZone:settings.zone;
  const locale=document.documentElement.lang;
  digits=new Intl.DateTimeFormat(locale,{timeZone:zone,hour:'2-digit',minute:'2-digit',...(settings.seconds&&settings.format!=='short'?{second:'2-digit' as const}:{}),...(settings.format==='long'?{timeZoneName:'short' as const}:{}),...(settings.hourCycle==='auto'?{}:{hour12:settings.hourCycle==='12'})});

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" role="img" aria-labelledby="title description">
+  <title id="title">Polarlichter</title>
+  <desc id="description">Sanfte grüne und violette Lichtbänder über einer dunklen nordischen Landschaft.</desc>
+  <defs>
+    <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#112633"/><stop offset="1" stop-color="#365653"/></linearGradient>
+    <linearGradient id="light" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#94b9c5" stop-opacity="0"/><stop offset=".48" stop-color="#78c9b0" stop-opacity=".38"/><stop offset=".82" stop-color="#91d1ac" stop-opacity=".58"/><stop offset="1" stop-color="#91d1ac" stop-opacity="0"/></linearGradient>
+    <linearGradient id="violet" x2="0" y2="1"><stop stop-color="#b0a0cd" stop-opacity="0"/><stop offset=".65" stop-color="#a59bc6" stop-opacity=".28"/><stop offset="1" stop-color="#8ab5c4" stop-opacity="0"/></linearGradient>
+    <filter id="soft" x="-20%" y="-30%" width="140%" height="160%" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation="18"/></filter>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#sky)"/>
+  <g filter="url(#soft)">
+    <path d="M-160 110Q180 15 430 170T960 165T1760 70V360Q1370 510 980 385T430 395T-160 340Z" fill="url(#violet)"/>
+    <path d="M-180 80Q180 370 480 150T1050 190T1760 90V410Q1380 570 1070 425T480 450T-180 385Z" fill="url(#light)"/>
+    <path d="M-100 265Q160 560 490 340T1060 370T1730 300" fill="none" stroke="#8bc4a6" stroke-width="14" opacity=".22"/>
+  </g>
+  <g fill="#dbe5df" opacity=".48">
+    <circle cx="130" cy="140" r="1.5"/><circle cx="350" cy="75" r="1"/><circle cx="645" cy="115" r="1.6"/><circle cx="890" cy="70" r="1"/><circle cx="1175" cy="125" r="1.4"/><circle cx="1470" cy="185" r="1.8"/>
+    <circle cx="80" cy="515" r="1"/><circle cx="260" cy="635" r="1.7"/><circle cx="595" cy="550" r="1"/><circle cx="805" cy="470" r="1.2"/><circle cx="1115" cy="585" r="1.6"/><circle cx="1370" cy="625" r="1"/><circle cx="1530" cy="460" r="1.4"/>
+  </g>
+  <path d="M0 870L180 745L315 815L555 720L790 840L1060 760L1320 825L1490 725L1600 790V1000H0Z" fill="#243e43"/>
+  <path d="M0 955Q350 850 700 920T1300 905T1600 935V1000H0Z" fill="#172f36"/>
+</svg>

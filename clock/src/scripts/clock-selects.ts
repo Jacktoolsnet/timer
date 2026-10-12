@@ -17,6 +17,8 @@ export function enhanceClockSelects(form: HTMLFormElement) {
     trigger.setAttribute('aria-expanded', 'false');
     trigger.setAttribute('aria-labelledby', `${caption.id} ${trigger.id}`);
     const value = document.createElement('span');
+    const preview = document.createElement('img');
+    preview.className = 'clock-background-thumbnail'; preview.alt = ''; preview.hidden = true;
     const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     arrow.setAttribute('viewBox', '0 0 24 24');
     arrow.setAttribute('class', 'clock-select-chevron');
@@ -25,7 +27,7 @@ export function enhanceClockSelects(form: HTMLFormElement) {
     const chevron = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     chevron.setAttribute('d', 'm6 9 6 6 6-6');
     arrow.append(chevron);
-    trigger.append(value, arrow);
+    trigger.append(preview, value, arrow);
     const list = document.createElement('div'); list.id = `options-${select.name}`;
     list.className = 'clock-select-options'; list.setAttribute('role','listbox');
     list.setAttribute('aria-labelledby',caption.id); list.hidden = true;
@@ -34,12 +36,25 @@ export function enhanceClockSelects(form: HTMLFormElement) {
       const button = document.createElement('button'); button.type = 'button';
       button.setAttribute('role','option'); button.tabIndex = -1;
       const text = document.createElement('span'); text.textContent = option.text;
+      if(option.dataset.preview) {
+        const thumbnail = document.createElement('img');
+        thumbnail.className = 'clock-background-thumbnail'; thumbnail.alt = '';
+        thumbnail.src = option.dataset.preview; thumbnail.loading = 'lazy';
+        button.append(thumbnail);
+      }
       const check = document.createElement('span'); check.className = 'option-check'; check.textContent = '✓'; check.setAttribute('aria-hidden','true');
       button.append(text,check);
       button.addEventListener('click', () => { select.value = option.value; select.dispatchEvent(new Event('change',{bubbles:true})); close(); trigger.focus(); });
       list.append(button); return button;
     });
-    function sync() { value.textContent = select.selectedOptions[0]?.text || ''; options.forEach((b,i)=>b.setAttribute('aria-selected',String(i===select.selectedIndex))); }
+    function sync() {
+      const selected = select.selectedOptions[0];
+      value.textContent = selected?.text || '';
+      preview.hidden = !selected?.dataset.preview;
+      if(selected?.dataset.preview) preview.src = selected.dataset.preview;
+      else preview.removeAttribute('src');
+      options.forEach((b,i)=>b.setAttribute('aria-selected',String(i===select.selectedIndex)));
+    }
     function close() { list.hidden = true; trigger.setAttribute('aria-expanded','false'); }
     function open() { closers.forEach(fn=>fn()); list.hidden = false; trigger.setAttribute('aria-expanded','true'); options[select.selectedIndex]?.focus(); }
     closers.push(close);

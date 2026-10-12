@@ -857,6 +857,48 @@ body.focus-view .clock-display[data-view=analogFlip] {
 body.focus-view .clock-display[data-view=analogFlip] #styled-date[data-style] {
  margin-top:var(--clock-flip-gap);
 }
+/* Decorative local SVG artwork fills the clock card in both views. */
+.clock-card[data-background]:not([data-background=none]) { isolation:isolate; }
+.clock-card[data-background]:not([data-background=none])::before {
+ content:'';
+ position:absolute;
+ inset:0;
+ z-index:-1;
+ border-radius:inherit;
+ background-image:linear-gradient(color-mix(in srgb,var(--surface) 18%,transparent),color-mix(in srgb,var(--surface) 18%,transparent)),var(--clock-background);
+ background-size:cover;
+ background-position:center;
+ pointer-events:none;
+}
+.clock-card[data-background]:not([data-background=none]) :is(#digital-clock,#clock-date,#clock-zone,#flip-context) {
+ text-shadow:0 1px 3px var(--surface),0 0 8px var(--surface);
+}
+body .clock-card .clock-display[data-view] #clock-zone {
+ position:static;
+ width:fit-content;
+ max-width:100%;
+ margin-inline:auto;
+ padding:5px 10px;
+ border:1px solid var(--line);
+ border-radius:10px;
+ background:color-mix(in srgb,var(--surface) 94%,transparent);
+}
+.clock-card[data-background]:not([data-background=none]) .card-top button {
+ background:color-mix(in srgb,var(--surface) 94%,transparent);
+ border:1px solid var(--line);
+ border-radius:12px;
+ min-height:44px;
+ padding:8px 12px;
+}
+.clock-background-thumbnail { width:56px; height:35px; flex:0 0 56px; object-fit:cover; border-radius:5px; border:1px solid var(--line); }
+.clock-background-thumbnail[hidden] { display:none; }
+.clock-select-trigger > span:first-of-type,.clock-select-options button > span:first-of-type { flex:1; }
+@media(min-height:451px) {
+ body.focus-view .clock-card:not([data-background=none]) .clock-display[data-view=analog] #analog-clock {
+  width:min(88vw,calc(100dvh - 290px));
+  height:min(88vw,calc(100dvh - 290px));
+ }
+}
 @media(min-width:900px), (orientation:landscape) and (min-width:600px) {
  body.focus-view .clock-display:is([data-view=combined],[data-view=analogFlip]) #analog-clock { height:min(46vw,calc(100dvh - 100px)); }
 }
