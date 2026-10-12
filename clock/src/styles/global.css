@@ -868,7 +868,7 @@ body.focus-view .clock-display[data-view=analogFlip] #styled-date[data-style] {
  inset:0;
  z-index:-1;
  border-radius:inherit;
- background-image:linear-gradient(color-mix(in srgb,var(--surface) 18%,transparent),color-mix(in srgb,var(--surface) 18%,transparent)),var(--clock-background);
+ background-image:linear-gradient(color-mix(in srgb,var(--surface) 18%,transparent),color-mix(in srgb,var(--surface) 18%,transparent)),var(--clock-background,none);
  background-size:cover;
  background-position:center;
  pointer-events:none;
@@ -910,6 +910,17 @@ body.focus-view .clock-card .clock-display[data-view] #styled-date:not([hidden])
 .clock-settings .clock-transparency[hidden] { display:none; }
 .clock-transparency-control input { flex:1; min-width:0; min-height:32px; margin:0; accent-color:var(--accent); cursor:pointer; }
 .clock-transparency-control output { min-width:3.5em; text-align:right; font-size:12px; font-variant-numeric:tabular-nums; color:var(--muted); }
+/* Large focus displays get a genuinely larger calendar, not a scaled overlay. */
+@media(min-width:1200px) and (min-height:800px) {
+ body.focus-view #styled-date[data-style=calendarDate] .date-calendar { min-width:340px; border-radius:24px; }
+ body.focus-view .date-month { font-size:24px; padding:8px 24px; }
+ body.focus-view .date-day { font-size:64px; padding:8px 24px; }
+ body.focus-view .date-footer { font-size:22px; padding:0 20px 8px; }
+ body.focus-view .clock-card .clock-display[data-view=analog]:has(#styled-date[data-style=calendarDate]:not([hidden])) #analog-clock {
+  width:min(46vw,calc(100dvh - 420px));
+  height:min(46vw,calc(100dvh - 420px));
+ }
+}
 .clock-card[data-background]:not([data-background=none]) .card-top button {
  background:color-mix(in srgb,var(--surface) 94%,transparent);
  border:1px solid var(--line);
@@ -919,6 +930,8 @@ body.focus-view .clock-card .clock-display[data-view] #styled-date:not([hidden])
 }
 .clock-background-thumbnail { width:56px; height:35px; flex:0 0 56px; object-fit:cover; border-radius:5px; border:1px solid var(--line); }
 .clock-background-thumbnail[hidden] { display:none; }
+#seasonal-background { position:absolute; inset:0; width:100%; height:100%; z-index:-2; border-radius:inherit; overflow:hidden; pointer-events:none; stroke:none; }
+#seasonal-background[data-active=false],#seasonal-settings[hidden] { display:none; }
 .clock-select-trigger > span:first-of-type,.clock-select-options button > span:first-of-type { flex:1; }
 @media(min-height:451px) {
  body.focus-view .clock-card:not([data-background=none]) .clock-display[data-view=analog] #analog-clock {

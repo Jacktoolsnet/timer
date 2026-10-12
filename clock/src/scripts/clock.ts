@@ -3,17 +3,18 @@ import {createFlipClock} from './flip-clock';
 import {enhanceClockSelects} from './clock-selects';
 import {storageAllowed} from '../lib/storage';
 import {screenWakeLock} from '../lib/wake-lock';
-import {clockBackgrounds} from '../lib/clock-backgrounds';
+import {createSeasonalBackground} from './seasonal-background';
+import {clockBackgroundOptions} from '../lib/clock-backgrounds';
 const $=(id:string)=>document.getElementById(id)!;
 const t=JSON.parse($('clock-app').dataset.text!);
 const form=$('clock-settings') as HTMLFormElement;
 const field=(key:string)=>form.elements.namedItem(key) as HTMLInputElement | HTMLSelectElement;
-const defaults={view:'analog',background:'none',transparency:0,date:'long',dateView:'calendarDate',format:'medium',hourCycle:'auto',zone:'local',seconds:true,numbers:true,smooth:false,awake:false};
+const defaults={view:'analog',background:'none',hemisphere:'north',transparency:0,date:'long',dateView:'calendarDate',format:'medium',hourCycle:'auto',zone:'local',seconds:true,numbers:true,smooth:false,awake:false};
 let settings={...defaults};
 try {if(storageAllowed()) {const saved=JSON.parse(localStorage.getItem('jacktools.clock.settings.v1')||'null');for(const key of Object.keys(defaults) as (keyof typeof defaults)[]){const value=saved?.[key];if(typeof defaults[key]==='boolean'){if(typeof value==='boolean')Object.assign(settings,{[key]:value});}else if(typeof defaults[key]==='number'){if(typeof value==='number'&&Number.isInteger(value)&&value>=0&&value<=100)Object.assign(settings,{[key]:value});}else if([...((field(key) as HTMLSelectElement).options)].some(o=>o.value===value))Object.assign(settings,{[key]:value});}}}catch{}
 for(const [key,value] of Object.entries(settings)){if(typeof value==='boolean')(field(key) as HTMLInputElement).checked=value;else field(key).value=String(value);}
 function applyTransparency(){
- const enabled=clockBackgrounds.some(id=>id===settings.background);
+ const enabled=clockBackgroundOptions.some(id=>id===settings.background);
  const slider=field('transparency') as HTMLInputElement;
  slider.disabled=!enabled;
  slider.closest<HTMLElement>('label')!.hidden=!enabled;
@@ -23,6 +24,7 @@ function applyTransparency(){
  card.dataset.transparentFlaps=String(enabled&&settings.transparency>0);
  $('clock-transparency-value').textContent=`${settings.transparency} %`;
 }
+const seasonal=createSeasonalBackground($('seasonal-background') as unknown as SVGSVGElement);
 const wake=screenWakeLock($('wake-status'),'',t.unavailable);
 const styledDate = createClockDate($('styled-date'));
 const updateFlip = createFlipClock($('flip-clock'));
@@ -31,11 +33,14 @@ let digits:Intl.DateTimeFormat,dateFormat:Intl.DateTimeFormat,parts:Intl.DateTim
 function configure(){
  applyTransparency();
  const card=document.querySelector<HTMLElement>('.clock-card')!;
- const background=clockBackgrounds.find(id=>id===settings.background);
+ const background=clockBackgroundOptions.find(id=>id===settings.background);
  card.dataset.background=background||'none';
- if(background)card.style.setProperty('--clock-background',`url("/backgrounds/${background}.svg")`);
+ if(background&&background!=='seasonal')card.style.setProperty('--clock-background',`url("/backgrounds/${background}.svg")`);
  else card.style.removeProperty('--clock-background');
  const zone=settings.zone==='local'?Intl.DateTimeFormat().resolvedOptions().timeZone:settings.zone;
+ $('seasonal-background').dataset.active=String(background==='seasonal');
+ $('seasonal-settings').hidden=background!=='seasonal';
+ seasonal.configure(zone,settings.hemisphere);
  const locale=document.documentElement.lang;
  digits=new Intl.DateTimeFormat(locale,{timeZone:zone,hour:'2-digit',minute:'2-digit',...(settings.seconds&&settings.format!=='short'?{second:'2-digit' as const}:{}),...(settings.format==='long'?{timeZoneName:'short' as const}:{}),...(settings.hourCycle==='auto'?{}:{hour12:settings.hourCycle==='12'})});
  dateFormat=new Intl.DateTimeFormat(locale,{timeZone:zone,...(settings.date==='short'?{dateStyle:'short' as const}:settings.date==='medium'?{dateStyle:'medium' as const}:{dateStyle:'full' as const})});
@@ -48,7 +53,7 @@ function configure(){
  $('dial-numbers').style.display=settings.numbers?'':'none';$('second-hand').style.display=settings.seconds?'':'none';
  lastFlipTick = 0; wake(settings.awake);render();
 }
-function render(){const now=new Date();const p=Object.fromEntries(parts.formatToParts(now).map(v=>[v.type,v.value]));const second=Number(p.second)+(settings.smooth&&!matchMedia('(prefers-reduced-motion: reduce)').matches?now.getMilliseconds()/1000:0);const minute=Number(p.minute)+second/60,hour=Number(p.hour)%12+minute/60;
+function render(){const now=new Date();if(settings.background==='seasonal')seasonal.render(now);const p=Object.fromEntries(parts.formatToParts(now).map(v=>[v.type,v.value]));const second=Number(p.second)+(settings.smooth&&!matchMedia('(prefers-reduced-motion: reduce)').matches?now.getMilliseconds()/1000:0);const minute=Number(p.minute)+second/60,hour=Number(p.hour)%12+minute/60;
  for(const [id,angle] of [['hour-hand',hour*30],['minute-hand',minute*6],['second-hand',second*6]] as const)$(id).setAttribute('transform',`rotate(${angle} 160 160)`);
  if(settings.view==='flip'||settings.view==='analogFlip'){const formatted=digits.formatToParts(now);updateFlip(formatted,lastFlipTick>0 && now.getTime()-lastFlipTick<1500);lastFlipTick=now.getTime();$('flip-context').textContent=formatted.filter(p=>p.type==='dayPeriod'||p.type==='timeZoneName').map(p=>p.value).join(' · ');}
  const text=digits.format(now);$('digital-clock').textContent=text;$('digital-clock').setAttribute('datetime',now.toISOString());$('analog-clock').setAttribute('aria-label',text);$('clock-date').textContent=dateFormat.format(now);styledDate.render(now);

@@ -1,0 +1,15 @@
+<svg id="seasonal-background" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false" data-active="false">
+ <defs><linearGradient id="seasonal-sky" x2="0" y2="1"><stop data-seasonal="sky-top" stop-color="#80b3c9"/><stop data-seasonal="sky-bottom" offset="1" stop-color="#e4dfb8"/></linearGradient></defs>
+ <rect width="1600" height="1000" fill="url(#seasonal-sky)"/>
+ <g data-seasonal="stars" fill="#e6e9dd">{Array.from({length:55},(_,i)=><circle cx={30+(i*293)%1540} cy={30+(i*137)%550} r={i%4===0?2:1} opacity={.3+(i%5)*.12}/>)}</g>
+ <g data-seasonal="sun"><circle r="64" fill="#f4dfae"/><circle r="88" fill="#f4dfae" opacity=".12"/></g>
+ <g data-seasonal="moon"><path d="M-12-48A50 50 0 1 0 38 32A45 45 0 0 1-12-48Z" fill="#e2e8da"/></g>
+ <path data-seasonal="far" d="M0 710Q230 460 480 630T970 615T1600 555V1000H0Z" fill="#8aad79"/>
+ <path data-seasonal="near" d="M0 850Q300 660 650 810T1200 760T1600 795V1000H0Z" fill="#476f58"/>
+ <path data-seasonal="snow" d="M0 850Q300 660 650 810T1200 760T1600 795V1000H0Z" fill="#e8ece6"/>
+ <g data-seasonal="flowers" fill="#ead2bb">{Array.from({length:20},(_,i)=><circle cx={65+(i*227)%1470} cy={885+(i*19)%80} r={3+i%3}/>)}</g>
+ <g data-seasonal="trees">
+ <g stroke="#4f5147" stroke-width="12" fill="none" stroke-linecap="round"><path d="M150 825V605M150 730L90 660M150 700L215 625M1450 835V595M1450 710L1390 645M1450 740L1510 655"/></g>
+ <g data-seasonal="leaves" fill="#476f58"><ellipse cx="150" cy="605" rx="103" ry="90"/><ellipse cx="85" cy="650" rx="65" ry="60"/><ellipse cx="220" cy="640" rx="66" ry="65"/><ellipse cx="1450" cy="590" rx="106" ry="85"/><ellipse cx="1380" cy="645" rx="65" ry="62"/><ellipse cx="1510" cy="650" rx="66" ry="60"/></g>
+ </g>
+</svg>

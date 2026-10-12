@@ -19,3 +19,11 @@ protected until clock-specific hosting/privacy details are complete.
 Clock settings include twelve local SVG backgrounds for normal and focus view; remembering
 the selected motif follows the existing storage consent. Run background picker
 regression tests with `npm run test:e2e` (requires Playwright Chromium installed).
+
+The additional "Year simulation" background is a local, dynamic SVG landscape.
+It follows the selected time zone and a north/south hemisphere setting, with
+blended seasonal colors, foliage, snow, flowers, stars and moving sun/moon.
+Daily phases use fixed local times: morning 05–08, day 08–17, evening 17–20,
+otherwise night. The illustrative sun is above the horizon 06–18; these are not
+astronomical rise/set times or a calculated moon phase. No location is requested.
+Reduced-motion mode holds celestial positions steady within each hour.

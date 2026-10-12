@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" role="img" aria-labelledby="title description">
+ <title id="title">Jahressimulation</title>
+ <desc id="description">Vier Landschaftsausschnitte zeigen Frühling, Sommer, Herbst und eine winterliche Sternennacht.</desc>
+ <defs>
+  <linearGradient id="spring" x2="0" y2="1"><stop stop-color="#97c4c1"/><stop offset="1" stop-color="#dce8c2"/></linearGradient>
+  <linearGradient id="summer" x2="0" y2="1"><stop stop-color="#80b3c9"/><stop offset="1" stop-color="#e4dfb8"/></linearGradient>
+  <linearGradient id="autumn" x2="0" y2="1"><stop stop-color="#9293ac"/><stop offset="1" stop-color="#efc39d"/></linearGradient>
+  <linearGradient id="winter" x2="0" y2="1"><stop stop-color="#152635"/><stop offset="1" stop-color="#3d5362"/></linearGradient>
+  <path id="trunk" d="M200 845V585M200 740L125 655M200 700L270 615" fill="none" stroke="#4f5147" stroke-width="16" stroke-linecap="round"/>
+  <g id="canopy"><ellipse cx="200" cy="580" rx="115" ry="100"/><ellipse cx="115" cy="650" rx="78" ry="72"/><ellipse cx="280" cy="640" rx="78" ry="72"/></g>
+ </defs>
+ <svg width="400" height="1000" viewBox="0 0 400 1000">
+  <rect width="400" height="1000" fill="url(#spring)"/>
+  <path d="M0 680Q200 460 400 640V1000H0Z" fill="#8aad79"/><path d="M0 880Q200 700 400 815V1000H0Z" fill="#476f58"/>
+  <use href="#trunk"/><use href="#canopy" fill="#79966a"/>
+  <g fill="#ead2bb"><circle cx="78" cy="917" r="9"/><circle cx="135" cy="965" r="8"/><circle cx="300" cy="910" r="9"/><circle cx="340" cy="960" r="8"/></g>
+ </svg>
+ <svg x="400" width="400" height="1000" viewBox="0 0 400 1000">
+  <rect width="400" height="1000" fill="url(#summer)"/><circle cx="200" cy="240" r="66" fill="#f4dfae"/>
+  <path d="M0 640Q200 550 400 690V1000H0Z" fill="#7d9a62"/><path d="M0 815Q200 720 400 870V1000H0Z" fill="#3e6850"/>
+  <use href="#trunk"/><use href="#canopy" fill="#3e6850"/>
+ </svg>
+ <svg x="800" width="400" height="1000" viewBox="0 0 400 1000">
+  <rect width="400" height="1000" fill="url(#autumn)"/><circle cx="275" cy="370" r="55" fill="#f4dfae" opacity=".75"/>
+  <path d="M0 690Q200 500 400 640V1000H0Z" fill="#c19863"/><path d="M0 870Q200 740 400 830V1000H0Z" fill="#795c48"/>
+  <use href="#trunk"/><use href="#canopy" fill="#a67a4d"/>
+  <g fill="#caa374"><ellipse cx="95" cy="930" rx="13" ry="6"/><ellipse cx="285" cy="900" rx="14" ry="6"/></g>
+ </svg>
+ <svg x="1200" width="400" height="1000" viewBox="0 0 400 1000">
+  <rect width="400" height="1000" fill="url(#winter)"/>
+  <g fill="#e6e9dd" opacity=".7"><circle cx="65" cy="150" r="3"/><circle cx="320" cy="115" r="3"/><circle cx="145" cy="350" r="2"/><circle cx="335" cy="420" r="3"/><circle cx="55" cy="465" r="2"/></g>
+  <path d="M215 190a52 52 0 1 0 58 68a47 47 0 0 1-58-68Z" fill="#e2e8da"/>
+  <path d="M0 640Q200 515 400 695V1000H0Z" fill="#748e97"/><path d="M0 830Q200 730 400 880V1000H0Z" fill="#c5d1d2"/>
+  <use href="#trunk"/>
+ </svg>
+</svg>

@@ -11,7 +11,7 @@ test('all motifs have local previews and appear in both clock views', async ({ p
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.goto('/de/');
-  await expect(page.locator('#options-background [role=option]')).toHaveCount(13);
+  await expect(page.locator('#options-background [role=option]')).toHaveCount(14);
   for (const id of clockBackgrounds) {
     expect((await page.request.get(`/backgrounds/${id}.svg`)).ok()).toBeTruthy();
     await choose(page, id);
@@ -43,6 +43,7 @@ test('selection is keyboard accessible and only persists with consent', async ({
   await page.locator('#trigger-background').focus();
   await page.keyboard.press('ArrowDown');
   await page.keyboard.press('End');
+  await page.keyboard.press('ArrowUp');
   await page.keyboard.press('Enter');
   await expect(page.locator('.clock-card')).toHaveAttribute('data-background', 'gradient');
   expect(await page.evaluate(() => localStorage.getItem('jacktools.clock.settings.v1'))).toBeNull();
@@ -150,6 +151,20 @@ test('backgrounds fit all readouts in portrait and landscape', async ({ page }) 
       await expect(page.locator('.clock-readout')).toBeVisible();
     }
   }
+});
+
+test('large focus screens double the calendar without changing normal view', async ({ page }) => {
+  await page.setViewportSize({ width: 1000, height: 900 });
+  await page.goto('/de/');
+  await page.evaluate(() => document.body.classList.add('focus-view'));
+  const calendar = page.locator('.date-calendar');
+  const small = await calendar.boundingBox();
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const large = await calendar.boundingBox();
+  expect(large!.width).toBeGreaterThanOrEqual(small!.width * 2);
+  expect(large!.height).toBeGreaterThanOrEqual(small!.height * 1.95);
+  await page.evaluate(() => document.body.classList.remove('focus-view'));
+  expect(await page.locator('.date-day').evaluate(el => getComputedStyle(el).fontSize)).toBe('48px');
 });
 
 for (const lang of ['en', 'es', 'fr']) {
