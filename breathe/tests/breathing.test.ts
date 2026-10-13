@@ -40,7 +40,9 @@ test('first-use status is restored only as a boolean',()=>{
  assert.equal(normalize({safetySeen:'true'}).safetySeen,false);
 });
 
-test("audio is enabled by default but saved opt-outs are respected",()=>{
- assert.equal(normalize(null).sound,true); assert.equal(normalize(null).chime,true);
+test("breath audio defaults on, phase signals default off, and saved choices are respected",()=>{
+ assert.equal(normalize(null).sound,true); assert.equal(normalize(null).chime,false);
+ assert.equal(normalize({sound:true}).chime,false);
+ assert.equal(normalize({chime:true}).chime,true);
  const saved=normalize({sound:false,chime:false}); assert.equal(saved.sound,false); assert.equal(saved.chime,false);
 });

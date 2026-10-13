@@ -9,7 +9,7 @@ export const presets = {
 } satisfies Record<string, Durations>;
 export type Preset = keyof typeof presets;
 export interface Settings { showCaption:boolean; background: Background; backgroundMotion:boolean; preset: Preset; durations: Durations; minutes: number; countSeconds: number; sound: boolean; chime: boolean; safetySeen: boolean; awake: boolean; motion: boolean }
-export const defaults: Settings = { showCaption:true,background:'none',backgroundMotion:true,preset: 'box', durations: [4,4,4,4], minutes: 3, countSeconds: 1, sound: true, chime: true, safetySeen: false, awake: true, motion: true };
+export const defaults: Settings = { showCaption:true,background:'none',backgroundMotion:true,preset: 'box', durations: [4,4,4,4], minutes: 3, countSeconds: 1, sound: true, chime: false, safetySeen: false, awake: true, motion: true };
 export function normalize(value: unknown): Settings {
   const v = value && typeof value === 'object' ? value as Partial<Settings> : {};
   const valid = (n: unknown, min: number, max: number, fallback: number) => typeof n === 'number' && Number.isFinite(n) ? Math.max(min, Math.min(max, Math.round(n))) : fallback;
@@ -23,7 +23,7 @@ export function normalize(value: unknown): Settings {
     countSeconds: typeof v.countSeconds === 'number' && Number.isFinite(v.countSeconds) ? Math.max(.5,Math.min(3,Math.round(v.countSeconds*10)/10)) : 1,
     sound: typeof v.sound === 'boolean' ? v.sound : defaults.sound,
     safetySeen: v.safetySeen === true,
-    chime: typeof v.chime === 'boolean' ? v.chime : typeof v.sound === 'boolean' ? v.sound : defaults.chime,
+    chime: typeof v.chime === 'boolean' ? v.chime : defaults.chime,
     awake: typeof v.awake === 'boolean' ? v.awake : true,
     motion: typeof v.motion === 'boolean' ? v.motion : true,
   };

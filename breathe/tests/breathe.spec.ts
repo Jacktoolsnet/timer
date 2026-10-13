@@ -149,3 +149,22 @@ test('six nature landscapes can be selected and animated independently',async({p
  await page.locator('[name=breath-background][value=none]').check();
  await expect(page.locator('.breathe-nature-scene:visible')).toHaveCount(0);
 });
+
+test('window candle has flame and wax animations that can be disabled',async({page})=>{
+ await page.goto('/de/');
+ await page.locator('#background-picker summary').click();
+ await page.locator('[name=breath-background][value=candle]').check();
+ await expect(page.locator('.breathe-candle-scene')).toBeVisible();
+ await expect(page.locator('.candle-flame')).toHaveCSS('animation-play-state','running');
+ await expect(page.locator('.candle-wax-drop')).toHaveCSS('animation-play-state','running');
+ await page.locator('.breath-card').screenshot({path:'/tmp/breathe-candle-'+test.info().project.name+'.png'});
+ await page.locator('#background-motion').uncheck();
+ await expect(page.locator('.candle-flame')).toHaveCSS('animation-play-state','paused');
+ await expect(page.locator('.candle-wax-drop')).toHaveCSS('animation-play-state','paused');
+ await page.locator('#focus').click();
+ await expect(page.locator('.candle-object')).toBeVisible();
+ await page.locator('#focus').click();
+ await page.locator('#background-picker summary').click();
+ await page.locator('[name=breath-background][value=none]').check();
+ await expect(page.locator('.breathe-candle-scene')).toBeHidden();
+});
