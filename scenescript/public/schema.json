@@ -497,6 +497,96 @@
                   ],
                   "default": "scene",
                   "description": "Scene follows the camera; screen stays in the viewport. All members of a flat group must use the same space (runtime constraint). Null is rejected."
+                },
+                "textEffects": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "glow": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "enabled": {
+                          "type": "boolean",
+                          "default": false
+                        },
+                        "color": {
+                          "type": "string",
+                          "pattern": "^#[0-9a-fA-F]{6}$",
+                          "default": "#ff66cc"
+                        },
+                        "intensity": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 100,
+                          "default": 16
+                        }
+                      }
+                    },
+                    "shadow": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "enabled": {
+                          "type": "boolean",
+                          "default": false
+                        },
+                        "color": {
+                          "type": "string",
+                          "pattern": "^#[0-9a-fA-F]{6}$",
+                          "default": "#000000"
+                        },
+                        "blur": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 100,
+                          "default": 6
+                        },
+                        "x": {
+                          "type": "number",
+                          "minimum": -100,
+                          "maximum": 100,
+                          "default": 4
+                        },
+                        "y": {
+                          "type": "number",
+                          "minimum": -100,
+                          "maximum": 100,
+                          "default": 4
+                        },
+                        "opacity": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1,
+                          "default": 0.7
+                        }
+                      }
+                    },
+                    "outline": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "enabled": {
+                          "type": "boolean",
+                          "default": false
+                        },
+                        "color": {
+                          "type": "string",
+                          "pattern": "^#[0-9a-fA-F]{6}$",
+                          "default": "#000000"
+                        },
+                        "width": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 20,
+                          "default": 2
+                        }
+                      }
+                    }
+                  }
+                },
+                "textGradient": {
+                  "$ref": "#/$defs/gradient"
                 }
               },
               "required": [

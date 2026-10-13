@@ -20,6 +20,45 @@ Vier Sprachversionen: `/de/`, `/en/`, `/es/`, `/fr/`. Die neutrale Startseite
 bevorzugt mit Speicherzustimmung die gespeicherte Sprache, sonst die
 Browsersprache, sonst Englisch. Explizite Sprach-URLs werden nicht umgeleitet.
 
+## Texteffekte
+
+Für Text und Sprechblasen steht im Elementformular „Texteffekte“ bereit:
+Glow mit Farbe und Stärke (0–100 px), Textschatten mit Farbe, Unschärfe
+(0–100 px), X-/Y-Versatz (−100 bis 100 px) und Deckkraft (0–1).
+Zusätzlich gibt es Textkonturen mit Farbe und Breite (0–20 px).
+Alle drei Effekte sind kombinierbar und gelten für den gesamten Text, auch bei
+formatierten Textabschnitten. Die Pixelwerte beziehen sich auf die logische
+Projektauflösung; Vorschau und Export skalieren sie gemeinsam mit dem Text.
+
+Gespeichert wird dies als `elements[].textEffects` mit `glow`, `shadow` und `outline`.
+Ältere Projekte ohne diese Eigenschaft bleiben kompatibel; alle Effekte sind
+standardmäßig ausgeschaltet. Aufnahmeansicht und Videoexport verwenden
+dieselbe Darstellung wie die Vorschau.
+
+## Text-Presets
+
+Unter „Texteffekte“ wenden Neon Pink, Neon Blau, Gold und Comic mit einem Klick
+aufeinander abgestimmte Textfarben, Verläufe und Effekte an. Sie ersetzen die
+bisherigen Effekte vollständig; Comic aktiviert zusätzlich Fett. Farben in
+formatierten Textabschnitten werden auf die Preset-Farbe vereinheitlicht.
+Schriftarten, Schriftgrößen, Inhalt, Position und Animation bleiben erhalten.
+Alle Werte können anschließend geändert werden. Ein Klick ist ein einzelner
+Rückgängig-Schritt. Gespeichert werden die normalen Stilwerte, keine Preset-ID.
+„Effekte zurücksetzen“ entfernt Verlauf, Kontur, Glow und Schatten, behält aber
+Textfarben und Formatierungen bei; Rückgängig stellt den vorherigen Stil wieder her.
+Neon wirkt besonders gut auf dunklem Hintergrund; der Szenenhintergrund wird
+nicht automatisch verändert.
+
+## Schrift-Farbverläufe
+
+Text und Sprechblasen haben einen eigenen „Schrift-Farbverlauf“ mit linearen,
+radialen und konischen Verläufen, zwei bis 16 Farbstopps, deren Position und
+Deckkraft sowie Richtung bzw. Mittelpunkt. Gespeichert wird er als
+`elements[].textGradient`; ohne Verlauf ist der Wert `null`.
+„Einfarbig“ stellt die bisherigen Textfarben einschließlich formatierter
+Textabschnitte wieder her. Verläufe beginnen je formatiertem Abschnitt bzw.
+Zeilenfragment neu. Kontur, Glow und Schatten bleiben unabhängig davon aktiv.
+
 ## Mindestgröße
 
 Der Editor ist für Tablet und Computer vorgesehen: mindestens **768 CSS-Pixel

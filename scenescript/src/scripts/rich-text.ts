@@ -1,6 +1,19 @@
+import {gradientCSS,type Gradient} from '../lib/gradient';
+import {textEffectsCSS,textOutlineCSS} from '../lib/text-effects';
 import type {Element,TextRun} from '../lib/model';
 export type TextStyleKey='font'|'fontSize'|'color'|'bold'|'italic'|'underline'|'strikethrough';
-export function styleText(node:HTMLElement,style:Partial<Element>,scale=1){
+export function styleTextGradient(node:HTMLElement,gradient:Gradient|null){
+ node.style.backgroundImage=gradient?gradientCSS(gradient,'#ffffff'):'none';
+ node.style.setProperty('background-clip',gradient?'text':'border-box');
+ node.style.setProperty('-webkit-background-clip',gradient?'text':'border-box');
+ node.style.setProperty('-webkit-text-fill-color',gradient?'transparent':'currentcolor');
+ node.style.setProperty('box-decoration-break','clone');
+ node.style.setProperty('-webkit-box-decoration-break','clone');
+}
+export function styleText(node:HTMLElement,style:Partial<Element>,scale=1,includeGradient=true){
+ if(includeGradient&&style.textGradient!==undefined)styleTextGradient(node,style.textGradient);
+ // Paint the outline behind the fill so thick contours do not obscure the letters.
+ if(style.textEffects!==undefined){node.style.textShadow=textEffectsCSS(style.textEffects,scale);node.style.setProperty('-webkit-text-stroke',textOutlineCSS(style.textEffects,scale));node.style.setProperty('paint-order','stroke fill');}
  if(style.font!==undefined)node.style.fontFamily=style.font;
  if(style.fontSize!==undefined)node.style.fontSize=`${style.fontSize*scale}px`;
  if(style.color!==undefined)node.style.color=style.color;
@@ -18,7 +31,7 @@ export function renderRuns(node:HTMLElement,e:Element,text=e.text,scale=1){
 }
 export function richTextEditor(e:Element,save:()=>void,defaultStyle:(key:TextStyleKey,value:any)=>void,hints:{selection:string;block:string}){
  const editor=document.createElement('div');editor.className='rich-text-editor';editor.contentEditable='true';editor.setAttribute('name','text');editor.setAttribute('role','textbox');editor.setAttribute('aria-multiline','true');editor.setAttribute('aria-label','Text');
- styleText(editor,e,1/3);editor.style.textDecoration='none';renderRuns(editor,e,e.text,1/3);
+ styleText(editor,e,1/3,false);editor.style.textDecoration='none';renderRuns(editor,e,e.text,1/3);
  const hint=document.createElement('p');hint.className='rich-text-hint';hint.textContent=hints.block;hint.setAttribute('role','status');
  const listeners=new AbortController();
  let selection:{start:number;end:number}|undefined;
@@ -67,7 +80,7 @@ export function richTextEditor(e:Element,save:()=>void,defaultStyle:(key:TextSty
  editor.addEventListener('beforeinput',event=>{if(event.inputType==='insertParagraph'||event.inputType==='insertLineBreak'){event.preventDefault();insertText('\n');}});
 
  const api={editor,hint,dispose:()=>listeners.abort(),apply(key:TextStyleKey,value:any){
-  if(!selection||selection.start===selection.end){defaultStyle(key,value);styleText(editor,e,1/3);editor.style.textDecoration='none';renderRuns(editor,e,e.text,1/3);return;}
+  if(!selection||selection.start===selection.end){defaultStyle(key,value);styleText(editor,e,1/3,false);editor.style.textDecoration='none';renderRuns(editor,e,e.text,1/3);return;}
   let offset=0;const runs:TextRun[]=[];
   for(const run of read()){
    const start=Math.max(0,selection.start-offset),end=Math.min(run.text.length,selection.end-offset);

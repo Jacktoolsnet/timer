@@ -740,3 +740,56 @@ test('bundled script fonts load and survive project export and import',async({pa
   await page.locator('#element-list button').first().click();await expect(page.locator('#element-form [name=font]')).toHaveValue(font);
  }
 });
+
+test('glow and shadow combine, persist and can be disabled',async({page})=>{
+ await page.goto('/en/');await page.locator('#element-list button').first().click();
+ const form=page.locator('#element-form');await form.locator('[name=glowEnabled]').check();await form.locator('[name=glowColor]').fill('#00ffff');
+ await form.locator('[name=glowIntensity]').fill('24');await form.locator('[name=glowIntensity]').press('Tab');await form.locator('[name=shadowEnabled]').check();
+ const text=page.locator('.scene-element > span > span').first();await expect(text).toHaveCSS('text-shadow',/rgb\(0, 255, 255\)/);
+ const css=await text.evaluate(el=>getComputedStyle(el).textShadow);expect(css).toContain('rgba(0, 0, 0, 0.7)');
+ const data=JSON.parse(await exportedJSON(page));expect(data.scenes[0].elements[0].textEffects.glow).toEqual({enabled:true,color:'#00ffff',intensity:24});
+ await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(data));await page.locator('#import-json').click();await page.locator('#element-list button').first().click();
+ await expect(form.locator('[name=glowEnabled]')).toBeChecked();await expect(text).toHaveCSS('text-shadow',css);
+ await form.locator('[name=glowEnabled]').uncheck();await form.locator('[name=shadowEnabled]').uncheck();await expect(text).toHaveCSS('text-shadow','none');
+});
+
+test('text outline combines with glow, persists and resets when disabled',async({page})=>{
+ await page.goto('/en/');await page.locator('#element-list button').first().click();const form=page.locator('#element-form');
+ await form.locator('[name=outlineEnabled]').check();await form.locator('[name=outlineColor]').fill('#ff0000');await form.locator('[name=outlineWidth]').fill('8');await form.locator('[name=outlineWidth]').press('Tab');await form.locator('[name=glowEnabled]').check();
+ const span=page.locator('.scene-element > span > span').first();await expect(span).toHaveCSS('-webkit-text-stroke-width','8px');await expect(span).toHaveCSS('-webkit-text-stroke-color','rgb(255, 0, 0)');await expect(span).toHaveCSS('paint-order',/^stroke(?: fill)?$/);await expect(span).not.toHaveCSS('text-shadow','none');
+ const data=JSON.parse(await exportedJSON(page));expect(data.scenes[0].elements[0].textEffects.outline).toEqual({enabled:true,color:'#ff0000',width:8});
+ await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(data));await page.locator('#import-json').click();await page.locator('#element-list button').first().click();await expect(form.locator('[name=outlineEnabled]')).toBeChecked();await expect(span).toHaveCSS('-webkit-text-stroke-width','8px');
+ await form.locator('[name=outlineEnabled]').uncheck();await expect(span).toHaveCSS('-webkit-text-stroke-width','0px');await expect(span).not.toHaveCSS('text-shadow','none');
+});
+
+test('text gradient edits, persists and restores rich text colors when disabled',async({page})=>{
+ const p=demoProject();const e=p.scenes[0].elements[0];e.runs=[{text:'Red',color:'#ff0000'},{text:' Blue',color:'#0000ff'}];e.text='Red Blue';
+ await page.goto('/en/');await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(p));await page.locator('#import-json').click();await page.locator('#element-list button').first().click();
+ const panel=page.locator('[data-gradient=textGradient]');await panel.locator('[name=gradientType]').selectOption('linear');await panel.locator('[name=stopColor]').first().fill('#00ff00');await panel.locator('[name=stopColor]').last().fill('#ff00ff');
+ const span=page.locator('.scene-element > span > span').first();await expect(span).toHaveCSS('-webkit-text-fill-color','rgba(0, 0, 0, 0)');await expect(span).toHaveCSS('background-image',/linear-gradient/);await expect(page.locator('.rich-text-editor [data-style]').first()).toHaveCSS('background-image',/linear-gradient/);
+ await page.locator('#element-form [name=outlineEnabled]').check();await expect(span).toHaveCSS('-webkit-text-stroke-width','2px');
+ const data=JSON.parse(await exportedJSON(page));expect(data.scenes[0].elements[0].textGradient.stops.map((s:any)=>s.color)).toEqual(['#00ff00','#ff00ff']);
+ await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(data));await page.locator('#import-json').click();await page.locator('#element-list button').first().click();await expect(panel.locator('[name=gradientType]')).toHaveValue('linear');
+ await panel.locator('[name=gradientType]').selectOption('solid');await expect(span).toHaveCSS('background-image','none');await expect(span).toHaveCSS('-webkit-text-fill-color','rgb(255, 0, 0)');await expect(page.locator('.scene-element > span > span').nth(1)).toHaveCSS('-webkit-text-fill-color','rgb(0, 0, 255)');
+});
+
+test('text presets are one-click, editable, reversible and survive import',async({page})=>{
+ const p=demoProject(),e=p.scenes[0].elements[0];e.font='Allura';e.runs=[{text:'Hello',color:'#ff0000',italic:true}];e.text='Hello';
+ await page.goto('/en/');await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(p));await page.locator('#import-json').click();await page.locator('#element-list button').first().click();
+ const form=page.locator('#element-form');const original=JSON.parse(await exportedJSON(page)).scenes[0].elements[0];
+ await form.locator('[data-text-preset=neonPink]').click();await expect(form.locator('[name=glowEnabled]')).toBeChecked();await expect(form.locator('[name=glowColor]')).toHaveValue('#ff33bb');await expect(form.locator('[name=font]')).toHaveValue('Allura');await expect(form.locator('.rich-text-editor')).toHaveText('Hello');
+ await page.locator('#undo-project').click();expect(JSON.parse(await exportedJSON(page)).scenes[0].elements[0]).toEqual(original);
+ await page.locator('#redo-project').click();await expect(form.locator('[name=glowColor]')).toHaveValue('#ff33bb');
+ await form.locator('[data-text-preset=gold]').click();await expect(form.locator('[name=glowEnabled]')).not.toBeChecked();await expect(form.locator('[data-gradient=textGradient] [name=gradientType]')).toHaveValue('linear');await expect(form.locator('[name=shadowEnabled]')).toBeChecked();
+ await form.locator('[data-text-preset=comic]').click();await expect(form.locator('[name=outlineEnabled]')).toBeChecked();await expect(form.locator('[name=bold]')).toBeChecked();await expect(form.locator('[data-gradient=textGradient] [name=gradientType]')).toHaveValue('solid');
+ await form.locator('[data-text-preset=neonBlue]').click();await expect(form.locator('[name=outlineEnabled]')).not.toBeChecked();await expect(form.locator('[name=shadowEnabled]')).not.toBeChecked();await expect(form.locator('[name=glowColor]')).toHaveValue('#00bbff');
+ await form.locator('[name=glowIntensity]').fill('36');await form.locator('[name=glowIntensity]').press('Tab');const data=JSON.parse(await exportedJSON(page));expect(data.scenes[0].elements[0].textEffects.glow.intensity).toBe(36);
+ await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(data));await page.locator('#import-json').click();await page.locator('#element-list button').first().click();await expect(form.locator('[name=glowIntensity]')).toHaveValue('36');
+ await form.locator('[data-reset-text-effects]').click();await expect(form.locator('[name=glowEnabled]')).not.toBeChecked();await expect(form.locator('[name=outlineEnabled]')).not.toBeChecked();await expect(form.locator('[name=shadowEnabled]')).not.toBeChecked();await page.locator('#undo-project').click();await expect(form.locator('[name=glowIntensity]')).toHaveValue('36');await expect(form.locator('[name=glowEnabled]')).toBeChecked();
+});
+
+test('AI page and plain text guide document text effects, gradients, bundled fonts and presets',async({page,request})=>{
+ const response=await request.get('/ai.txt');expect(response.ok()).toBe(true);const guide=await response.text();
+ for(const value of ['textEffects','textGradient','outline.width: 0..20','glow.intensity: 0..100','shadow.opacity: 0..1','Allura, Great Vibes, Parisienne and Sacramento are bundled','neonPink:','neonBlue:','gold:','comic:','NOT JSON fields or enum values'])expect(guide).toContain(value);
+ for(const lang of ['de','en','es','fr']){await page.goto('/'+lang+'/ai/');await expect(page.locator('#ai-guide')).toHaveText(guide);}
+});

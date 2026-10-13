@@ -1,3 +1,5 @@
+import {applyTextPreset,textPresets} from '../src/lib/text-presets.ts';
+import {defaultTextEffects,parseTextEffects,textEffectsCSS,textOutlineCSS} from '../src/lib/text-effects.ts';
 import {validateSvg,svgDataURL,svgSource} from '../src/lib/svg.ts';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
@@ -148,4 +150,41 @@ test('all offered fonts round trip in elements and rich text and match the schem
   const parsed=parseProject(serialize(p)).scenes[0].elements[0];
   assert.equal(parsed.font,font);assert.deepEqual(parsed.runs,e.runs);
  }
+});
+
+test('text effects default off, round trip and reject invalid input',()=>{
+ const p=demoProject(),e=p.scenes[0].elements[0];assert.equal(textEffectsCSS(e.textEffects),'none');
+ const legacy=JSON.parse(serialize(p));delete legacy.scenes[0].elements[0].textEffects;
+ assert.deepEqual(parseProject(serialize(legacy)).scenes[0].elements[0].textEffects,defaultTextEffects());
+ e.textEffects.glow.enabled=true;e.textEffects.shadow.enabled=true;
+ assert.deepEqual(parseProject(serialize(p)).scenes[0].elements[0].textEffects,e.textEffects);
+ assert.match(textEffectsCSS(e.textEffects),/0 0 16px #ff66cc/);assert.match(textEffectsCSS(e.textEffects,.5),/2px 2px 3px rgba/);
+ for(const v of [null,[],{unknown:true},{glow:{enabled:'yes'}},{glow:{color:'red'}},{glow:{intensity:101}},{shadow:{blur:-1}},{shadow:{x:101}},{shadow:{y:-101}},{shadow:{opacity:2}},{shadow:{opacity:NaN}}])assert.throws(()=>parseTextEffects(v,'effects'));
+ assert.equal(textEffectsCSS(parseTextEffects({glow:{enabled:true,intensity:0},shadow:{enabled:true,opacity:0}},'effects')),'none');
+});
+
+test('text outlines validate, scale and default off in older effect settings',()=>{
+ const effects=parseTextEffects({glow:{enabled:true}},'effects');assert.deepEqual(effects.outline,{enabled:false,color:'#000000',width:2});assert.equal(textOutlineCSS(effects),'0px transparent');
+ effects.outline={enabled:true,color:'#ff0000',width:12};assert.equal(textOutlineCSS(effects,.5),'6px #ff0000');
+ const p=demoProject();p.scenes[0].elements[0].textEffects=effects;assert.deepEqual(parseProject(serialize(p)).scenes[0].elements[0].textEffects,effects);
+ for(const outline of [null,[],{enabled:'true'},{color:'red'},{width:-1},{width:21},{width:Infinity},{extra:true}])assert.throws(()=>parseTextEffects({outline},'effects'));
+ effects.outline.width=0;assert.equal(textOutlineCSS(effects),'0px transparent');
+});
+
+test('text gradients round trip, default off and validate with the existing gradient rules',()=>{
+ const p=demoProject(),e=p.scenes[0].elements[0];assert.equal(e.textGradient,null);const legacy=JSON.parse(serialize(p));delete legacy.scenes[0].elements[0].textGradient;assert.equal(parseProject(serialize(legacy)).scenes[0].elements[0].textGradient,null);
+ for(const type of ['linear','radial','conic'] as const){e.textGradient={type,angle:90,x:50,y:50,stops:[{color:'#ff0000',position:0,opacity:1},{color:'#0000ff',position:100,opacity:1}]};assert.deepEqual(parseProject(serialize(p)).scenes[0].elements[0].textGradient,e.textGradient);}
+ for(const value of [{type:'invalid'}, {type:'linear',stops:[]},{type:'linear',stops:[{color:'red',position:0},{color:'#ffffff',position:100}]}]){const raw=JSON.parse(serialize(p));raw.scenes[0].elements[0].textGradient=value;assert.throws(()=>parseProject(serialize(raw)));}
+});
+
+test('text presets round trip, replace old effects and preserve content and layout',()=>{
+ const p=demoProject(),e=p.scenes[0].elements[0];e.font='Allura';e.runs=[{text:'Hello',color:'#ff0000',font:'Parisienne',italic:true,bold:false}];
+ const original=serialize(e);
+ for(const preset of textPresets){const next=applyTextPreset(e,preset);p.scenes[0].elements[0]=next;const parsed=parseProject(serialize(p)).scenes[0].elements[0];assert.deepEqual(parsed.textEffects,next.textEffects);assert.deepEqual(parsed.textGradient,next.textGradient);
+  for(const key of ['id','font','x','y','width','height','animation','at','animationDuration'] as const)assert.equal(next[key],e[key]);
+  assert.equal(next.runs[0].text,'Hello');assert.equal(next.runs[0].font,'Parisienne');assert.equal(next.runs[0].italic,true);assert.equal(next.runs[0].color,undefined);
+ }
+ assert.equal(serialize(e),original);const comic=applyTextPreset(e,'comic');assert.equal(comic.bold,true);assert.equal(comic.runs[0].bold,undefined);
+ const neon=applyTextPreset(comic,'neonBlue');assert.equal(neon.textEffects.outline.enabled,false);assert.equal(neon.textEffects.shadow.enabled,false);assert.equal(neon.textGradient,null);
+ const a=applyTextPreset(e,'gold'),b=applyTextPreset(e,'gold');a.textGradient!.stops[0].color='#000000';assert.notEqual(a.textGradient!.stops[0].color,b.textGradient!.stops[0].color);
 });

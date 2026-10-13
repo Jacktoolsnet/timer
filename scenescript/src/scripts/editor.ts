@@ -1,3 +1,6 @@
+import {applyTextPreset,textPresets} from '../lib/text-presets';
+import {defaultTextEffects} from '../lib/text-effects';
+import {textEffectsCSS,textOutlineCSS} from '../lib/text-effects';
 import {parseCamera,cameraTransform,type Camera} from '../lib/camera';
 import {createPanels} from '../lib/panels';
 import {createCropImage} from './crop-image';
@@ -22,7 +25,7 @@ import {createSvgImage,seekSvg} from './svg-image';
 import {validateSvg,svgDataURL} from '../lib/svg';
 import {renderShape} from './shapes';
 import {showToast} from './toast';
-import {richTextEditor,renderRuns,type TextStyleKey} from './rich-text';
+import {richTextEditor,renderRuns,styleTextGradient,type TextStyleKey} from './rich-text';
 import {demoProject,newScene,newElement,parseProject,formats,fonts,animations,exitAnimations,shapeTypes,sceneTransitions,sceneTransitionState,locateTime,MAX_FILE_BYTES,MAX_IMAGE_BYTES,validateImage,type Project,type Scene,type Element,type Group} from '../lib/model';
 import {storageAllowed} from '../lib/storage';
 import {screenWakeLock} from '../lib/wake-lock';
@@ -278,7 +281,7 @@ function field(form:HTMLElement,key:string,value:string|number|boolean,kind:stri
   number.addEventListener('wheel',()=>number.blur(),{passive:true});
   if(eagerNumber)number.addEventListener('change',()=>{if(number.isConnected&&number.checkValidity()&&Number.isFinite(number.valueAsNumber))action(number.valueAsNumber);});
   const wrapper=document.createElement('span');wrapper.className='number-stepper';
-  const step=['audioVolume','opacity','stopOpacity','backgroundOpacity','simulationOpacity','volume','sustain','reverb','velocity','gain','echoMix','echoFeedback'].includes(key)?0.05:['cameraAt','cameraHold','audioAt','audioStart','audioEnd','audioFadeIn','audioFadeOut','pathPause','pathStart','pathDuration','duration','transitionDuration','animationDuration','exitDuration','until','bubbleLineHeight','bubbleCurve','at','simulationSpeed','attack','decay','release','fadeIn','fadeOut','echoDelay','ratio'].includes(key)?0.1:1;
+  const step=['audioVolume','opacity','stopOpacity','backgroundOpacity','simulationOpacity','volume','sustain','reverb','velocity','gain','echoMix','echoFeedback','shadowOpacity'].includes(key)?0.05:['cameraAt','cameraHold','audioAt','audioStart','audioEnd','audioFadeIn','audioFadeOut','pathPause','pathStart','pathDuration','duration','transitionDuration','animationDuration','exitDuration','until','bubbleLineHeight','bubbleCurve','at','simulationSpeed','attack','decay','release','fadeIn','fadeOut','echoDelay','ratio'].includes(key)?0.1:1;
   const controls=[-1,1].map(direction=>{
    const control=button(direction<0?'−':'+',()=>{
     if(!Number.isFinite(number.valueAsNumber))return;
@@ -312,7 +315,7 @@ function shapeColorField(form:HTMLElement,key:'fillColor'|'borderColor',value:st
  toggle.addEventListener('change',()=>{color.disabled=toggle.checked;updateElement(key,toggle.checked?'none':lastColor);if(key==='fillColor'&&toggle.checked){updateElement('fillGradient',null);renderForms();}});
  row.append(color,none);label.append(row);form.append(label);
 }
-function gradientFields(form:HTMLElement,key:'backgroundGradient'|'fillGradient',value:Gradient|null,color:string,update:(value:Gradient|null)=>void){
+function gradientFields(form:HTMLElement,key:'backgroundGradient'|'fillGradient'|'textGradient',value:Gradient|null,color:string,update:(value:Gradient|null)=>void){
  const label=document.createElement('div');label.className='gradient-control';label.dataset.gradient=key;
  const panel=document.createElement('div');panel.className='gradient-panel';label.append(panel);form.append(label);
  field(panel,'gradientType',value?.type||'solid','select',v=>{if(key==='fillGradient'&&v!=='solid'&&color==='none')updateElement('fillColor','#b86445');update(v==='solid'?null:{...(value||defaultGradient(color==='none'?'#b86445':color)),type:v as Gradient['type']});renderForms();},['solid','linear','radial','conic']);
@@ -502,12 +505,43 @@ function renderForms(){
  richEditor.editor.setAttribute('aria-label',t('text'));
  richEditor.editor.style.background=e.type==='bubble'?(e.fillColor==='none'?s.background:e.fillColor):s.backgroundEnabled?gradientCSS(s.backgroundGradient,s.background):'#000000';
  const contentLabel=document.createElement('label');contentLabel.append(document.createTextNode(t('text')),richEditor.editor,richEditor.hint);contentLabel.dataset.richText='true';ef.append(contentLabel);field(ef,'font',e.font,'select',v=>updateElement('font',v),fonts);field(ef,'fontSize',e.fontSize,'number',v=>updateElement('fontSize',v),undefined,1,500);field(ef,'align',e.align,'select',v=>updateElement('align',v),['left','center','right']);for(const key of ['bold','italic','underline','strikethrough'] as const)field(ef,key,e[key],'checkbox',v=>updateElement(key,v));}
+ if(e.type==='text'||e.type==='bubble'){
+  const group=document.createElement('fieldset');group.className='text-settings-group';const legend=document.createElement('legend');legend.textContent=t('textEffects');group.append(legend);ef.append(group);
+  const presets=document.createElement('div');presets.className='compact-actions';presets.dataset.textPresets='true';
+  for(const preset of textPresets){const action=button(t('preset-'+preset),()=>{
+   const next=applyTextPreset(e,preset);
+   const index=current().elements.findIndex(element=>element.id===e.id);if(index<0)return;
+   current().elements[index]=next;
+   try{parseProject(JSON.stringify(project));}catch(error){current().elements[index]=e;status(t('error')+' '+(error as Error).message);return;}
+   stop();time=Math.min(offset(sceneIndex)+next.at+next.animationDuration,offset(sceneIndex)+(next.until??current().duration)-.001);changed();renderForms();draw(false);
+  });action.dataset.textPreset=preset;presets.append(action);}
+  const reset=button(t('resetTextEffects'),()=>{
+   const next={...e,textEffects:defaultTextEffects(),textGradient:null};
+   const index=current().elements.findIndex(element=>element.id===e.id);if(index<0)return;
+   current().elements[index]=next;stop();changed();renderForms();draw(false);
+  });reset.dataset.resetTextEffects='true';presets.append(reset);group.append(presets);
+  const presetHint=document.createElement('p');presetHint.className='small-hint';presetHint.textContent=t('textPresetHint');group.append(presetHint);
+  const effectField=(key:string,part:'glow'|'shadow'|'outline',property:string,kind:string,min?:number,max?:number)=>{
+   field(group,key,(e.textEffects[part] as unknown as Record<string,string|number|boolean>)[property],kind,value=>{
+    updateElement('textEffects',{...e.textEffects,[part]:{...e.textEffects[part],[property]:value}});
+    if(richEditor){for(const node of [richEditor.editor,...richEditor.editor.querySelectorAll<HTMLElement>('span')]){node.style.textShadow=textEffectsCSS(e.textEffects,1/3);node.style.setProperty('-webkit-text-stroke',textOutlineCSS(e.textEffects,1/3));node.style.setProperty('paint-order','stroke fill');}}
+   },undefined,min,max);
+  };
+  effectField('outlineEnabled','outline','enabled','checkbox');effectField('outlineColor','outline','color','color');effectField('outlineWidth','outline','width','number',0,20);
+  effectField('glowEnabled','glow','enabled','checkbox');effectField('glowColor','glow','color','color');effectField('glowIntensity','glow','intensity','number',0,100);
+  effectField('shadowEnabled','shadow','enabled','checkbox');effectField('shadowColor','shadow','color','color');effectField('shadowBlur','shadow','blur','number',0,100);effectField('shadowX','shadow','x','number',-100,100);effectField('shadowY','shadow','y','number',-100,100);effectField('shadowOpacity','shadow','opacity','number',0,1);
+ }
  if(e.type==='image'){const actions=document.createElement('div');actions.className='compact-actions';const crop=button(t('editCrop'),()=>openCrop(e));crop.disabled=!e.asset;const reset=button(t('resetCrop'),()=>{updateElement('crop',null);renderForms();});reset.disabled=!e.crop;actions.append(crop,reset);ef.append(actions);field(ef,'asset',e.asset,'select',v=>updateElement('asset',v),['',...Object.keys(project.assets)]);field(ef,'fit',e.fit,'select',v=>updateElement('fit',v),['contain','cover']);}
  if((e.type==='text'||e.type==='bubble'))field(ef,'color',e.color,'color',v=>updateElement('color',v));
  if(e.type==='shape'){field(ef,'shapeType',e.shapeType,'select',v=>updateElement('shapeType',v),shapeTypes);shapeColorField(ef,'fillColor',e.fillColor);shapeColorField(ef,'borderColor',e.borderColor);field(ef,'borderStyle',e.borderStyle,'select',v=>updateElement('borderStyle',v),['solid','dashed','dotted','double']);field(ef,'borderWidth',e.borderWidth,'number',v=>updateElement('borderWidth',v),undefined,0,500);}
  if(e.type==='simulation')simulationFields(ef,e.simulation,value=>{
   if(!value)return false;const previous=e.simulation;updateElement('simulation',value);if(previous?.type!==value.type){renderForms();renderElements();}return e.simulation===value;
  });
+ if(e.type==='text'||e.type==='bubble'){
+  const group=document.createElement('fieldset');group.className='text-settings-group';const legend=document.createElement('legend');legend.textContent=t('textGradient');group.append(legend);ef.append(group);
+  const hint=document.createElement('p');hint.className='small-hint';hint.textContent=t('textGradientHint');group.append(hint);
+  gradientFields(group,'textGradient',e.textGradient,e.color,value=>{updateElement('textGradient',value);richEditor?.editor.querySelectorAll<HTMLElement>('[data-style]').forEach(node=>styleTextGradient(node,e.textGradient));});
+ }
  if(e.type==='shape')gradientFields(ef,'fillGradient',e.fillGradient,e.fillColor,v=>updateElement('fillGradient',v));
  for(const [key,min,max] of [['x',-100,100],['y',-100,100],['width',0.1,200],['height',0.1,200],['opacity',0,1],['rotation',-360,360],['radius',0,1000]] as const)field(ef,key,e[key],'number',v=>updateElement(key,v),undefined,min,max);
  field(ef,'animation',e.animation,'select',v=>updateElement('animation',v),animations);field(ef,'at',e.at,'number',v=>updateElement('at',v),undefined,0,s.duration);field(ef,'animationDuration',e.animationDuration,'number',v=>updateElement('animationDuration',v),undefined,0.01,3600);

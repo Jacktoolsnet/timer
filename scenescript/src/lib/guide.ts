@@ -1,4 +1,6 @@
-import {demoProject,formats,fonts,animations} from './model';
+import {demoProject,formats,fonts,animations,newElement} from './model';
+import {defaultTextEffects} from './text-effects';
+import {applyTextPreset,textPresets} from './text-presets';
 
 // Single source for the localized AI pages, /ai/ and /ai.txt.
 export const aiGuide = `# SceneScript format 1.0
@@ -376,6 +378,8 @@ Optional fields and their defaults:
 - width: 80 (40 for bubble); height: 30 (24 for bubble); each 0.1–200, percentages of canvas width/height.
 - color: "#ffffff" for text/image/video/simulation, "#b86445" for shape, "#222222" for bubble; #RRGGBB color.
 - font: "Arial"; allowed ${fonts.map(f=>`"${f}"`).join(', ')}.
+- textEffects: optional object (see Text effects and presets below); omitted defaults to all effects disabled.
+- textGradient: null; optional gradient object for text/bubble glyph fill (see Text effects and presets below).
 - fontSize: 90 (48 for bubble); number, 1–500 project pixels, not percentages or UI pixels.
 - align: "center"; allowed "left", "center", "right".
 - name: ""; optional display title, at most 200 characters. Does not change rendered text or IDs.
@@ -885,7 +889,9 @@ controls, not JSON content; selection outlines are hidden in recording view.
 Text is rendered with textContent, not HTML. There is no internal padding or
 border on the text box. Line-height is the CSS/browser default "normal", not
 an explicitly fixed ratio or editable field. Font metrics may differ by device;
-fonts are local system fonts and can fall back when unavailable.
+Allura, Great Vibes, Parisienne and Sacramento are bundled script fonts, served
+from this website without third-party font requests. Other families are local
+system fonts and can fall back when unavailable.
 The text span is full box width, vertically centered by flex layout. align sets
 horizontal text alignment. white-space: pre-wrap preserves explicit newlines
 and whitespace, with normal browser wrapping at available break opportunities.
@@ -1153,7 +1159,8 @@ Example SVG source (encode these exact UTF-8 bytes with a real encoding tool):
 </svg>
 
 ## Gradients (optional, format 1.0)
-Scene.backgroundGradient and shape element.fillGradient accept null (default,
+Scene.backgroundGradient, shape element.fillGradient and text/bubble
+element.textGradient accept null (default,
 legacy solid color) or this object:
 {"type":"linear","angle":90,"x":50,"y":50,"stops":[
  {"color":"#263b42","position":0,"opacity":1},
@@ -1174,6 +1181,53 @@ Scene background images render above the gradient; transparent images reveal it.
 The editor's None fill switch clears the gradient and sets fillColor to "none".
 Keep background and fillColor as valid legacy solid colors (or "none" for fillColor).
 Gradients are static, deterministic and included in JSON save/import.
+
+## Text effects and presets (optional, format 1.0)
+
+Text and bubble elements support textEffects and textGradient. These are element
+fields, NOT TextRun fields. They apply across all runs, including typewriter text,
+and are rendered in preview, recording view and video export. All effects are
+static and may be combined. Existing projects retain their appearance when these
+fields are omitted.
+
+textEffects defaults (generated from the implementation):
+${JSON.stringify(defaultTextEffects(),null,2)}
+
+textEffects must be an object, not null; omitted subobjects and fields use defaults.
+Only glow, shadow and outline are allowed. Each enabled value is boolean, each
+color is #RRGGBB. glow.intensity: 0..100 project pixels (default 16); zero hides glow.
+Glow uses three centered shadows with blur radii intensity × .25, .6 and 1.
+shadow.blur: 0..100 project pixels (6); shadow.x/y: -100..100 project pixels (4/4);
+shadow.opacity: 0..1 (.7). Zero opacity hides the shadow; zero blur makes it sharp.
+outline.width: 0..20 project pixels (2); zero hides it. The outline is painted
+behind the glyph fill. Negative x/y shadow offsets are supported.
+These distances scale with the logical project canvas, not the editor UI font size.
+Effects may be clipped by the text box, bubble text area or canvas; allow enough
+space around the text for thick outlines, shadows and glow.
+
+textGradient is null (default, solid text) or a gradient object using the exact
+Gradients specification above: linear, radial or conic, 2..16 sorted stops,
+positions, opacity, angle and center. It colors glyphs only, not the text box or
+bubble background. A gradient overrides element.color and run.color visually;
+setting it to null restores those colors without losing them. Each formatted
+run and wrapped line fragment starts its own gradient. Transparent stops reveal
+what is behind the glyphs, rather than the solid text color.
+Keep element.color and any run.color valid even when textGradient is active.
+For neon, choose a dark background explicitly; no preset changes the background.
+
+The editor offers Neon Pink, Neon Blue, Gold and Comic buttons. Preset names are
+NOT JSON fields or enum values: do not output preset, textPreset or a preset ID.
+Write their ordinary appearance fields instead. The following settings are
+generated from the same implementation used by the editor:
+${textPresets.map(preset=>{const e=applyTextPreset(newElement('text','preset-example'),preset);return preset+':\n'+JSON.stringify({color:e.color,...(preset==='comic'?{bold:true}:{}),textGradient:e.textGradient,textEffects:e.textEffects},null,2);}).join('\n\n')}
+
+Applying a preset replaces text colors, gradient and all effects throughout the
+text. Run colors are removed so they inherit the new element color. Comic also
+sets element.bold=true and removes run.bold overrides. Other presets do not
+change bold; fonts, sizes, other formatting, content, layout and animation remain.
+There is no saved preset identity; all values can be edited afterward.
+Reset effects means textEffects at the defaults above and textGradient:null;
+it retains text colors and bold/other formatting. Undo restores the previous style.
 
 ## Simulations: particles, snow and bubbles (format 1.0)
 Two uses:

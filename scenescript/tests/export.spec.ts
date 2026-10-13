@@ -109,3 +109,31 @@ test('export overlay shows the current rendered frame and resets on reopening',a
  await page.locator('#cancel-export').click();await expect(page.locator('#start-export')).toBeEnabled();await page.locator('#cancel-export').click();
  await page.locator('#open-export').click();await expect(page.locator('#export-preview')).toBeHidden();
 });
+
+test('text glow and shadow render into exported canvas',async({page})=>{
+ await page.goto('/en/');const p=demoProject();p.scenes=p.scenes.slice(0,1);const s=p.scenes[0];s.transition='none';s.background='#000000';const e=s.elements[0];Object.assign(e,{text:'Glow',runs:[],font:'Arial',fontSize:150,animation:'none'});e.textEffects.glow={enabled:true,color:'#00ff00',intensity:30};e.textEffects.shadow={enabled:true,color:'#ff0000',blur:2,x:20,y:20,opacity:1};
+ const result=await page.evaluate(async p=>{
+  const {ExportMedia}=await import(/* @vite-ignore */ '/src/scripts/export-media.ts' as string);const {ExportRenderer}=await import(/* @vite-ignore */ '/src/scripts/export-renderer.ts' as string);const media=new ExportMedia(p,new AbortController().signal),renderer=new ExportRenderer(p,media);
+  try{const count=async()=>{const canvas=await renderer.frame(1,480,270),pixels=canvas.getContext('2d')!.getImageData(0,0,480,270).data;let green=0,red=0;for(let i=0;i<pixels.length;i+=4){if(pixels[i+1]>pixels[i]+15&&pixels[i+1]>pixels[i+2]+15)green++;if(pixels[i]>pixels[i+1]+15&&pixels[i]>pixels[i+2]+15)red++;}return {green,red};};const enabled=await count();p.scenes[0].elements[0].textEffects.glow.enabled=false;p.scenes[0].elements[0].textEffects.shadow.enabled=false;return {enabled,disabled:await count()};}finally{renderer.dispose();media.dispose();}
+ },p);
+ expect(result.enabled.green).toBeGreaterThan(20);expect(result.enabled.red).toBeGreaterThan(20);expect(result.disabled).toEqual({green:0,red:0});
+});
+
+test('text outline is painted into the exported canvas',async({page})=>{
+ await page.goto('/en/');const p=demoProject();p.scenes=p.scenes.slice(0,1);const s=p.scenes[0];s.transition='none';s.background='#000000';const e=s.elements[0];Object.assign(e,{text:'Outline',runs:[],font:'Arial',fontSize:150,animation:'none'});e.textEffects.outline={enabled:true,color:'#ff0000',width:12};
+ const result=await page.evaluate(async p=>{
+  const {ExportMedia}=await import(/* @vite-ignore */ '/src/scripts/export-media.ts' as string);const {ExportRenderer}=await import(/* @vite-ignore */ '/src/scripts/export-renderer.ts' as string);const media=new ExportMedia(p,new AbortController().signal),renderer=new ExportRenderer(p,media);
+  try{const count=async()=>{const canvas=await renderer.frame(1,480,270),pixels=canvas.getContext('2d')!.getImageData(0,0,480,270).data;let red=0,white=0;for(let i=0;i<pixels.length;i+=4){if(pixels[i]>pixels[i+1]+30&&pixels[i]>pixels[i+2]+30)red++;if(pixels[i]>240&&pixels[i+1]>240&&pixels[i+2]>240)white++;}return {red,white};};const enabled=await count();p.scenes[0].elements[0].textEffects.outline.enabled=false;return {enabled,disabled:await count()};}finally{renderer.dispose();media.dispose();}
+ },p);
+ expect(result.enabled.red).toBeGreaterThan(20);expect(result.enabled.white).toBeGreaterThan(20);expect(result.disabled.red).toBe(0);
+});
+
+test('text gradients paint colored glyphs into exported canvas without filling the text box',async({page})=>{
+ await page.goto('/en/');const p=demoProject();p.scenes=p.scenes.slice(0,1);const s=p.scenes[0];s.transition='none';s.background='#000000';const e=s.elements[0];Object.assign(e,{text:'Gradient',runs:[],font:'Arial',fontSize:150,animation:'none'});e.textGradient={type:'linear',angle:90,x:50,y:50,stops:[{color:'#ff0000',position:0,opacity:1},{color:'#0000ff',position:100,opacity:1}]};
+ const result=await page.evaluate(async p=>{
+  const {ExportMedia}=await import(/* @vite-ignore */ '/src/scripts/export-media.ts' as string);const {ExportRenderer}=await import(/* @vite-ignore */ '/src/scripts/export-renderer.ts' as string);const media=new ExportMedia(p,new AbortController().signal),renderer=new ExportRenderer(p,media);
+  try{const count=async()=>{const canvas=await renderer.frame(1,480,270),pixels=canvas.getContext('2d')!.getImageData(0,0,480,270).data;let red=0,blue=0,black=0;for(let i=0;i<pixels.length;i+=4){if(pixels[i]>pixels[i+2]+30)red++;if(pixels[i+2]>pixels[i]+30)blue++;if(pixels[i]===0&&pixels[i+1]===0&&pixels[i+2]===0)black++;}return {red,blue,black};};const enabled=await count();const other=[];for(const type of ['radial','conic'] as const){p.scenes[0].elements[0].textGradient!.type=type;other.push(await count());}p.scenes[0].elements[0].textGradient!.type='linear';p.scenes[0].elements[0].textEffects.outline={enabled:true,color:'#00ff00',width:4};p.scenes[0].elements[0].textEffects.glow={enabled:true,color:'#00ff00',intensity:4};p.scenes[0].elements[0].textEffects.shadow.enabled=true;const combined=await count();p.scenes[0].elements[0].textGradient=null;p.scenes[0].elements[0].textEffects.outline.enabled=false;p.scenes[0].elements[0].textEffects.glow.enabled=false;p.scenes[0].elements[0].textEffects.shadow.enabled=false;return {enabled,other,combined,disabled:await count()};}finally{renderer.dispose();media.dispose();}
+ },p);
+ for(const frame of [...result.other,result.combined]){expect(frame.red).toBeGreaterThan(20);expect(frame.blue).toBeGreaterThan(20);}
+ expect(result.enabled.red).toBeGreaterThan(20);expect(result.enabled.blue).toBeGreaterThan(20);expect(result.enabled.black).toBeGreaterThan(480*270*.9);expect(result.disabled.red).toBe(0);expect(result.disabled.blue).toBe(0);
+});
