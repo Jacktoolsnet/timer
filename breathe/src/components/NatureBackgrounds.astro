@@ -1,0 +1,42 @@
+---
+const scenes=['valley','beach','forest','lake','dunes','meadow'];
+const hills={
+ valley:['M0 610L170 420 290 530 520 290 730 540 920 380 1200 550 1410 370 1600 540V1000H0Z','M0 620L160 460 470 660 750 710 1130 570 1440 430 1600 500V1000H0Z','M0 1000V760Q240 570 470 790L720 1000Z M1600 1000V700Q1330 580 1120 790L890 1000Z'],
+ beach:['M0 580Q230 530 470 570T900 565T1600 580V1000H0Z','M0 650Q720 610 1600 640V1000H0Z','M0 890Q510 720 980 845T1600 880V1000H0Z'],
+ forest:['M0 620Q340 460 700 610T1600 590V1000H0Z','M0 750Q360 570 750 725T1600 740V1000H0Z','M0 930Q350 760 780 895T1600 850V1000H0Z'],
+ lake:['M0 570L220 330 410 510 660 370 850 550 1200 350 1400 500 1600 390V1000H0Z','M0 650Q700 610 1600 640V1000H0Z','M0 1000V800Q220 735 400 875L680 1000Z M1600 1000V770Q1340 800 1130 960L1080 1000Z'],
+ dunes:['M0 600Q220 420 550 590T1100 570T1600 530V1000H0Z','M0 740Q430 490 820 690T1600 670V1000H0Z','M0 940Q350 690 770 880T1600 835V1000H0Z'],
+ meadow:['M0 620Q200 480 550 610T1120 555T1600 610V1000H0Z','M0 755Q380 540 780 710T1600 700V1000H0Z','M0 900Q320 710 750 855T1600 830V1000H0Z'],
+};
+---
+{scenes.map(scene=><svg class="breathe-nature-scene" data-scene={scene} viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+ <defs>
+  <linearGradient id={'nature-sky-'+scene} x2="0" y2="1"><stop class="nature-sky-top"/><stop offset="1" class="nature-sky-bottom"/></linearGradient>
+  <linearGradient id={'nature-land-'+scene} x2=".2" y2="1"><stop class="nature-ground-top"/><stop offset="1" class="nature-ground-bottom"/></linearGradient>
+ </defs>
+ <rect width="1600" height="1000" fill={'url(#nature-sky-'+scene+')'}/>
+ <circle cx={scene==='meadow'?1190:scene==='beach'?1130:1020} cy={scene==='meadow'?465:290} r={scene==='meadow'?65:46} class="nature-sun"/>
+ <g class="nature-cloud nature-cloud-a"><path d="M120 270Q210 245 310 265T540 260" class="nature-cloud-stroke"/><path d="M1000 180Q1100 155 1230 176T1510 168" class="nature-cloud-stroke"/></g>
+ <path d={hills[scene as keyof typeof hills][0]} class="nature-far"/>
+ <path d={hills[scene as keyof typeof hills][1]} fill={'url(#nature-land-'+scene+')'}/>
+ {(scene==='lake'||scene==='beach')&&<>
+  <path d="M0 640Q800 625 1600 640V1000H0Z" class="nature-water"/>
+  <g class="nature-water-lines">{Array.from({length:8},(_,i)=><path d={'M'+(i%2?60:220)+' '+(663+i*i*4)+'q320 -8 640 0t800 0'}/>)}</g>
+ </>}
+ {scene==='valley'&&<path d="M800 650Q720 720 855 760T750 870Q640 910 820 1000H980Q720 910 895 850T905 750Q780 710 800 650Z" class="nature-river"/>}
+ <path d={hills[scene as keyof typeof hills][2]} class="nature-near"/>
+ {(scene==='valley'||scene==='forest')&&<g class="nature-trees">{[90,190,310,1320,1450,1550].map((x,i)=><g transform={'translate('+x+' '+(scene==='forest'?820:910)+') scale('+(scene==='forest'?1.4:1)+')'}><path d="M-7 0 7 0 4-230H-4Z" class="nature-trunk"/><path d={'M0-'+(260+i%2*35)+' 70-145 42-150 88-90 54-98 105-28H-105L-54-98-88-90-42-150-70-145Z'} class="nature-foliage"/></g>)}</g>}
+ {scene==='forest'&&<>
+  <g class="nature-light-rays"><path d="M420 0 860 960 680 1000 360 0Z"/><path d="M720 0 1220 970 1110 1000 680 0Z"/></g>
+  <path d="M620 1000Q800 830 810 710L835 690Q845 810 910 1000Z" class="nature-path"/>
+  <g class="nature-forest-frame"><path d="M0 0H80L125 1000H45Z M1515 0H1600V1000H1470Z" class="nature-trunk"/><ellipse cx="120" cy="40" rx="430" ry="210" class="nature-foliage"/><ellipse cx="1510" cy="15" rx="380" ry="210" class="nature-foliage"/></g>
+ </>}
+ {scene==='beach'&&<>
+  {[120,1480].map((x,i)=><g class="nature-palm" style={'--palm-lean:'+(i?'-2deg':'2deg')}><g transform={'translate('+x+' 920) scale('+(i?-1:1)+' 1)'}><path d="M-18 0Q70-230 30-520L53-520Q110-230 12 0Z" class="nature-trunk"/><g class="nature-palm-leaves">{[-85,-45,0,45,80].map(angle=><path d="M42-510Q120-675 300-490Q160-565 42-510Z" transform={'rotate('+angle+' 42 -510)'}/>)}</g></g></g>)}
+  {[0,1,2].map(i=><g class="nature-bird" style={'--bird-delay:'+(-i*13)+'s;--bird-y:'+(180+i*48)+'px'}><path d="M-16 0Q-8-9 0 0Q8-9 16 0"/></g>)}
+  <g class="nature-surf"><path d="M-100 823Q430 700 920 810T1700 850"/></g>
+ </>}
+ {(scene==='lake'||scene==='dunes')&&<g class="nature-grasses">{Array.from({length:16},(_,i)=><g transform={'translate('+(i<8?35+i*22:1320+(i-8)*31)+' 1000)'}><path d={'M0 0Q'+(i%2?25:-20)+'-90 '+(i%2?38:-32)+'-'+(120+i%5*25)}/><path d="M0 0Q-30-75-50-110"/>{scene==='lake'&&<path d="M38-105V-157" class="nature-reed"/>}</g>)}</g>}
+ {scene==='meadow'&&<g class="nature-flowers">{Array.from({length:28},(_,i)=><g transform={'translate('+((i*137+35)%1600)+' '+(850+(i*31)%150)+')'}><path d="M0 0Q5-28 0-50"/><circle cy="-50" r={6+i%3*3}/><circle cy="-50" r="3" class="nature-flower-heart"/></g>)}</g>}
+ {(scene==='valley'||scene==='lake')&&<g class="nature-mist"><ellipse cx="690" cy="645" rx="500" ry="15"/><ellipse cx="1030" cy="700" rx="540" ry="19"/></g>}
+</svg>)}

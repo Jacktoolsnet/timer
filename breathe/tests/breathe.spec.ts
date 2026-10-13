@@ -68,3 +68,84 @@ test('touch steppers support counts, decimal pace and zero holds',async({page})=
  await expect(page.locator('#duration-1')).toHaveValue('0');
  const box=await up.boundingBox(); expect(box!.width).toBeGreaterThanOrEqual(44); expect(box!.height).toBeGreaterThanOrEqual(44);
 });
+
+test('full-width breathing view and responsive grouped settings',async({page})=>{
+ await page.goto('/de/');
+ await expect(page.locator('.breathe-settings-tile')).toHaveCount(3);
+ for(const width of [1440,900,390]){
+  await page.setViewportSize({width,height:1000});
+  const layout=await page.evaluate(()=>{
+   const app=document.querySelector('#breathe-app')!.getBoundingClientRect();
+   const stage=document.querySelector('.breath-card')!.getBoundingClientRect();
+   const settings=document.querySelector('.breathe-settings')!.getBoundingClientRect();
+   return {width:app.width,stage:stage.width,below:settings.top>=stage.bottom,
+    columns:getComputedStyle(document.querySelector('.breathe-settings-grid')!).gridTemplateColumns.split(' ').length,
+    overflow:document.documentElement.scrollWidth>innerWidth};
+  });
+  expect(Math.abs(layout.width-layout.stage)).toBeLessThan(2);
+  expect(layout.below).toBe(true);
+  expect(layout.columns).toBe(width===1440?3:width===900?2:1);
+  expect(layout.overflow).toBe(false);
+ }
+});
+
+test('polar background follows palette, supports focus and optional motion',async({page})=>{
+ await page.goto('/de/');
+ const card=page.locator('.breath-card');
+ await expect(card).toHaveAttribute('data-background','none');
+ await page.locator('#background-picker summary').click();
+ await page.locator('[name=breath-background][value=polar]').check();
+ await expect(card).toHaveAttribute('data-background','polar');
+ await expect(page.locator('.breathe-polar-scene')).toBeVisible();
+ await expect(page.locator('.polar-aurora-front')).toHaveCSS('animation-play-state','running');
+ const before=await page.locator('.polar-light-top').first().evaluate(el=>getComputedStyle(el).stopColor);
+ await page.getByLabel('Einstellungen',{exact:true}).click();
+ await page.locator('[name=colorScheme][value=blue]').check();
+ await page.locator('#preferences-close').click();
+ expect(await page.locator('.polar-light-top').first().evaluate(el=>getComputedStyle(el).stopColor)).not.toBe(before);
+ await page.locator('#background-motion').uncheck();
+ await expect(page.locator('.polar-aurora-front')).toHaveCSS('animation-play-state','paused');
+ await page.locator('#focus').click();
+ await expect(page.locator('.breathe-polar-scene')).toBeVisible();
+ await expect(page.locator('.breathe-settings')).toBeHidden();
+ await page.screenshot({path:'/tmp/breathe-polar-'+test.info().project.name+'.png'});
+ await page.locator('#focus').click();
+ await page.locator('#background-picker summary').click();
+ await page.locator('[name=breath-background][value=none]').check();
+ await expect(page.locator('.breathe-polar-scene')).toBeHidden();
+});
+
+test('phase counter tile can be hidden independently of background and focus',async({page})=>{
+ await page.goto('/de/');
+ await expect(page.locator('.breath-caption')).toBeVisible();
+ await page.locator('#show-caption').uncheck();
+ await expect(page.locator('.breath-caption')).toBeHidden();
+ await page.locator('#background-picker summary').click();
+ await page.locator('[name=breath-background][value=polar]').check();
+ await expect(page.locator('.breath-caption')).toBeHidden();
+ await page.locator('#focus').click();
+ await expect(page.locator('.breath-caption')).toBeHidden();
+ await expect(page.locator('#breath-circle')).toBeVisible();
+ await page.locator('#focus').click();
+ await page.locator('#show-caption').check();
+ await expect(page.locator('.breath-caption')).toBeVisible();
+});
+
+test('six nature landscapes can be selected and animated independently',async({page})=>{
+ await page.goto('/de/');
+ for(const scene of ['valley','beach','forest','lake','dunes','meadow']){
+  await page.locator('#background-picker summary').click();
+  await page.locator('[name=breath-background][value='+scene+']').check();
+  await expect(page.locator('.breath-card')).toHaveAttribute('data-background',scene);
+  await expect(page.locator('.breathe-nature-scene[data-scene='+scene+']')).toBeVisible();
+  await expect(page.locator('.breathe-nature-scene:visible')).toHaveCount(1);
+  await expect(page.locator('.breathe-polar-scene')).toBeHidden();
+  await page.locator('.breath-card').screenshot({path:'/tmp/breathe-'+scene+'-'+test.info().project.name+'.png'});
+ }
+ await page.locator('#background-motion').uncheck();
+ await expect(page.locator('[data-scene=meadow] .nature-cloud')).toHaveCSS('animation-play-state','paused');
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ await page.locator('#background-picker summary').click();
+ await page.locator('[name=breath-background][value=none]').check();
+ await expect(page.locator('.breathe-nature-scene:visible')).toHaveCount(0);
+});

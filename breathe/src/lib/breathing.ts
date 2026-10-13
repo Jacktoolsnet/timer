@@ -1,3 +1,4 @@
+import {backgrounds,type Background} from './backgrounds.ts';
 export type Durations = [number, number, number, number];
 export const presets = {
   box: [4, 4, 4, 4],
@@ -7,12 +8,15 @@ export const presets = {
   custom: [4, 4, 4, 4],
 } satisfies Record<string, Durations>;
 export type Preset = keyof typeof presets;
-export interface Settings { preset: Preset; durations: Durations; minutes: number; countSeconds: number; sound: boolean; chime: boolean; safetySeen: boolean; awake: boolean; motion: boolean }
-export const defaults: Settings = { preset: 'box', durations: [4,4,4,4], minutes: 3, countSeconds: 1, sound: true, chime: true, safetySeen: false, awake: true, motion: true };
+export interface Settings { showCaption:boolean; background: Background; backgroundMotion:boolean; preset: Preset; durations: Durations; minutes: number; countSeconds: number; sound: boolean; chime: boolean; safetySeen: boolean; awake: boolean; motion: boolean }
+export const defaults: Settings = { showCaption:true,background:'none',backgroundMotion:true,preset: 'box', durations: [4,4,4,4], minutes: 3, countSeconds: 1, sound: true, chime: true, safetySeen: false, awake: true, motion: true };
 export function normalize(value: unknown): Settings {
   const v = value && typeof value === 'object' ? value as Partial<Settings> : {};
   const valid = (n: unknown, min: number, max: number, fallback: number) => typeof n === 'number' && Number.isFinite(n) ? Math.max(min, Math.min(max, Math.round(n))) : fallback;
   return {
+    showCaption:typeof v.showCaption==='boolean'?v.showCaption:true,
+    background:backgrounds.includes(v.background!)?v.background!:'none',
+    backgroundMotion:typeof v.backgroundMotion==='boolean'?v.backgroundMotion:true,
     preset: v.preset && Object.hasOwn(presets, v.preset) ? v.preset : 'box',
     durations: defaults.durations.map((n,i) => valid(v.durations?.[i], i % 2 === 0 ? 1 : 0, 20, n)) as Durations,
     minutes: valid(v.minutes, 0, 30, 3),

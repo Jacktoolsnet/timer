@@ -1,0 +1,18 @@
+<svg class="breathe-polar-scene" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+ <defs>
+  <linearGradient id="polar-sky" x2="0" y2="1"><stop class="polar-sky-top"/><stop offset="1" class="polar-sky-bottom"/></linearGradient>
+  <linearGradient id="polar-light" x2="0" y2="1"><stop class="polar-light-top" stop-opacity="0"/><stop offset=".55" class="polar-light-top" stop-opacity=".5"/><stop offset="1" class="polar-light-bottom" stop-opacity="0"/></linearGradient>
+  <linearGradient id="polar-snow" x2=".3" y2="1"><stop class="polar-snow-top"/><stop offset="1" class="polar-snow-bottom"/></linearGradient>
+  <filter id="polar-soft" x="-30%" y="-50%" width="160%" height="200%"><feGaussianBlur stdDeviation="10"/></filter>
+ </defs>
+ <rect width="1600" height="1000" fill="url(#polar-sky)"/>
+ <g fill="#fff9ed" opacity=".6">{Array.from({length:70},(_,i)=><circle cx={(i*293+31)%1600} cy={(i*107+29)%490} r={i%7===0?1.8:1} opacity={.35+(i%4)*.18}/>)}</g>
+ <g class="polar-aurora polar-aurora-back" filter="url(#polar-soft)"><path d="M-180 130Q180 330 460 130T990 160T1790 100L1790 370Q1300 240 990 370T460 350T-180 370Z" fill="url(#polar-light)"/></g>
+ <g class="polar-aurora polar-aurora-front"><path d="M-150 210C180 70 300 410 590 215S1080 140 1750 260L1750 440C1090 330 900 425 590 390S150 330-150 460Z" fill="url(#polar-light)"/>{Array.from({length:36},(_,i)=><path d={'M'+(i*48-40)+' '+(170+Math.sin(i*.48)*65)+'q18 75 8 185'} class="polar-curtain" opacity={.1+(i%5)*.025}/>)}</g>
+ <ellipse cx="830" cy="570" rx="680" ry="40" class="polar-haze"/>
+ <path d="M0 600L110 530 190 566 330 480 420 548 510 510 645 570 790 525 900 572 1070 485 1180 552 1340 515 1480 565 1600 520V1000H0Z" class="polar-distant"/>
+ <path d="M0 600Q420 655 810 590T1600 625V1000H0Z" fill="url(#polar-snow)"/>
+ <path d="M0 720Q290 610 670 710T1600 690V1000H0Z" class="polar-middle"/>
+ <path d="M0 860Q380 730 680 850T1600 815V1000H0Z" class="polar-foreground"/>
+ <g class="polar-trails" fill="none"><path d="M760 605Q630 685 380 1000"/><path d="M805 610Q1000 745 1440 1000"/><path d="M0 785Q410 700 770 795"/></g>
+</svg>

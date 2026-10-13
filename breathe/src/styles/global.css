@@ -656,7 +656,7 @@ body.focus-view .card-top { position: absolute; top: 12px; right: 12px; z-index:
 .support-actions a.support-coffee{background:var(--accent);color:var(--surface);border-color:var(--accent);font-weight:650;min-height:50px;box-shadow:0 4px 14px color-mix(in srgb,var(--accent) 20%,transparent)}.support-actions a.support-coffee:hover{background:var(--accent);border-color:var(--accent);filter:brightness(.94)}[data-theme=dark] .support-actions a.support-coffee{color:#24241f}
 
 /* Breathing guide: transform-only animation, with a stationary readable caption. */
-.breath-top { display:flex; align-items:center; justify-content:space-between; gap:12px; color:var(--muted); font-size:.85rem; }
+.breath-top { display:flex; align-items:center; justify-content:flex-end; gap:12px; color:var(--muted); font-size:.85rem; }
 
 .breath-stage { width:min(100%,350px); aspect-ratio:1; position:relative; margin:26px auto; display:grid; place-items:center; }
 #breath-circle { position:absolute; inset:0; border-radius:50%; background:radial-gradient(circle at 30% 25%,var(--accent-soft),color-mix(in srgb,var(--accent) 65%,var(--surface)) 55%,var(--accent)); box-shadow:0 0 55px color-mix(in srgb,var(--accent) 18%,transparent); transform:scale(.48); }
@@ -851,3 +851,106 @@ body.focus-view.focus-cursor-hidden :is(.breath-top,.focus-details,.breath-safet
 
 .brand-icon:has(img) {background:transparent;padding:0;}
 .brand-icon img {display:block;width:100%;height:100%;object-fit:contain;}
+/* Full-width simulation and responsive grouped settings. */
+body:not(.focus-view) #breathe-app {display:block;max-width:none;}
+body:not(.focus-view) #breathe-app > .breath-card {width:100%;margin-bottom:28px;}
+body:not(.focus-view) .breath-stage {width:min(100%,460px);max-width:none;margin:24px auto;}
+.breathe-settings {background:transparent;border:0;padding:0;box-shadow:none;}
+.breathe-settings-grid {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;align-items:start;}
+.breathe-settings-tile {min-width:0;padding:22px;border:1px solid var(--line);border-radius:18px;background:var(--surface);box-shadow:var(--shadow);}
+.breathe-settings-tile h3 {margin:0 0 20px;font-size:calc(16px * var(--font-scale,1));font-weight:650;}
+.breathe-settings-tile .breath-picker[open] {z-index:5;}
+.breathe-settings > h2 {padding-inline-start:22px;}
+@media(max-width:1050px){.breathe-settings-grid {grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:650px){.breathe-settings-grid {grid-template-columns:minmax(0,1fr);} .breathe-settings-tile {padding:20px;}.breathe-settings > h2 {padding-inline-start:20px;}}
+.breath-card {position:relative;isolation:isolate;}
+.breathe-polar-scene,.breathe-nature-scene {display:none;position:absolute;inset:0;width:100%;height:100%;border-radius:inherit;overflow:hidden;z-index:-1;stroke:none;}
+.breath-card[data-background=polar] .breathe-polar-scene {display:block;}
+.breath-card[data-background]:not([data-background=none]) .breath-meta,.breath-card[data-background]:not([data-background=none]) .breath-safety,.breath-card[data-background]:not([data-background=none]) .session-status {color:#fff9ed;text-shadow:0 1px 5px #101727;}
+.breath-card[data-background]:not([data-background=none]) .breath-top button,.breath-card[data-background]:not([data-background=none]) .safety-link {color:#fff9ed;background:#101727b0;border-color:#fff9ed50;}
+.breath-card[data-background]:not([data-background=none]) .breath-progress-ring .ring-track {stroke:#fff9ed50;}
+.breath-card[data-background]:not([data-background=none]) #session-ring-progress {stroke:#fff9ed;}
+.breath-card[data-background]:not([data-background=none]) .breath-safety {background:#10172780;border-radius:12px;padding:10px;}
+.polar-sky-top {stop-color:color-mix(in srgb,var(--accent) 15%,#080e22);}
+.polar-sky-bottom {stop-color:color-mix(in srgb,var(--accent) 35%,#243749);}
+.polar-light-top {stop-color:var(--accent);}
+.polar-light-bottom {stop-color:var(--green);}
+.polar-curtain {fill:none;stroke:var(--accent-soft);stroke-width:7;filter:blur(4px);}
+.polar-haze {fill:var(--accent-soft);opacity:.15;}
+.polar-distant {fill:color-mix(in srgb,var(--accent) 25%,#677e90);}
+.polar-snow-top {stop-color:color-mix(in srgb,var(--accent-soft) 55%,#a9becf);}
+.polar-snow-bottom {stop-color:color-mix(in srgb,var(--accent) 25%,#304356);}
+.polar-middle {fill:color-mix(in srgb,var(--accent) 20%,#536d85);}
+.polar-foreground {fill:color-mix(in srgb,var(--accent) 20%,#233648);}
+.polar-trails {stroke:var(--accent-soft);stroke-width:3;opacity:.14;}
+.polar-aurora {transform-box:fill-box;transform-origin:center;animation:polar-drift 32s ease-in-out infinite alternate;animation-play-state:paused;}
+.polar-aurora-back {opacity:.65;animation-duration:43s;animation-direction:alternate-reverse;}
+.breath-card[data-background-animated=true] .polar-aurora {animation-play-state:running;}
+@keyframes polar-drift {from{transform:translate(-22px,0) skewX(-3deg) scaleY(.96);opacity:.55;}to{transform:translate(24px,-12px) skewX(3deg) scaleY(1.06);opacity:.85;}}
+@media(prefers-reduced-motion:reduce){.polar-aurora {animation:none!important;}}
+body.focus-view .breath-card[data-background]:not([data-background=none]) .breath-focus-details {background:#101727d0;border-color:#fff9ed40;}
+.breath-card[data-background]:not([data-background=none]) .timer-controls .secondary {color:var(--text);}
+.breath-card[data-background]:not([data-background=none]) .breath-instruction {color:var(--text);text-shadow:none;}
+.breath-card[data-background]:not([data-background=none]) #breath-circle {opacity:.48;}
+.breath-card[data-background]:not([data-background=none]) .breath-progress-ring {opacity:.6;}
+.breath-caption[hidden] {display:none!important;}
+.breath-card[data-background]:not([data-background=none]) .breath-caption {background:color-mix(in srgb,var(--tile-tint) 60%,transparent);}
+.breath-card[data-background=valley] .breathe-nature-scene[data-scene=valley] {display:block;}
+.breath-card[data-background=beach] .breathe-nature-scene[data-scene=beach] {display:block;}
+.breath-card[data-background=forest] .breathe-nature-scene[data-scene=forest] {display:block;}
+.breath-card[data-background=lake] .breathe-nature-scene[data-scene=lake] {display:block;}
+.breath-card[data-background=dunes] .breathe-nature-scene[data-scene=dunes] {display:block;}
+.breath-card[data-background=meadow] .breathe-nature-scene[data-scene=meadow] {display:block;}
+.nature-sky-top {stop-color:color-mix(in srgb,var(--accent) 30%,#375577);}
+.nature-sky-bottom {stop-color:color-mix(in srgb,var(--accent-soft) 65%,#e2cba4);}
+.nature-ground-top {stop-color:color-mix(in srgb,var(--green) 50%,#8a9a83);}
+.nature-ground-bottom {stop-color:color-mix(in srgb,var(--accent) 30%,#334f56);}
+.nature-sun {fill:var(--accent-soft);opacity:.75;}
+.nature-far {fill:color-mix(in srgb,var(--accent) 30%,#8a99a8);}
+.nature-near {fill:color-mix(in srgb,var(--green) 45%,#25464a);}
+.nature-water,.nature-river {fill:color-mix(in srgb,var(--accent) 30%,#718fa9);}
+.nature-water-lines {fill:none;stroke:var(--accent-soft);stroke-width:3;opacity:.3;}
+.nature-trunk {fill:color-mix(in srgb,var(--accent) 20%,#3b3739);}
+.nature-foliage,.nature-palm-leaves {fill:color-mix(in srgb,var(--green) 65%,#193f39);}
+.nature-cloud-stroke {fill:none;stroke:var(--accent-soft);stroke-width:25;stroke-linecap:round;opacity:.22;filter:blur(7px);}
+.nature-light-rays {fill:var(--accent-soft);opacity:.09;}
+.nature-path {fill:color-mix(in srgb,var(--accent-soft) 40%,#717a60);}
+.nature-bird {fill:none;stroke:color-mix(in srgb,var(--accent) 20%,#303b48);stroke-width:3;stroke-linecap:round;}
+.nature-surf {fill:none;stroke:var(--accent-soft);stroke-width:8;opacity:.55;}
+.nature-grasses {fill:none;stroke:color-mix(in srgb,var(--green) 60%,#526351);stroke-width:5;}
+.nature-reed {stroke-width:10;stroke:var(--accent);}
+.nature-flowers {stroke:var(--green);stroke-width:3;fill:var(--accent-soft);}
+.nature-flower-heart {fill:var(--accent);stroke:none;}
+.nature-mist {fill:var(--accent-soft);opacity:.25;filter:blur(9px);}
+[data-scene=dunes] .nature-far {fill:color-mix(in srgb,var(--accent-soft) 65%,#c6a479);}
+[data-scene=dunes] .nature-ground-top {stop-color:color-mix(in srgb,var(--accent-soft) 65%,#d8b687);}
+[data-scene=dunes] .nature-ground-bottom {stop-color:color-mix(in srgb,var(--accent) 30%,#a17c5d);}
+[data-scene=dunes] .nature-near,[data-scene=beach] .nature-near {fill:color-mix(in srgb,var(--accent-soft) 65%,#c8a477);}
+[data-scene=meadow] .nature-sky-top {stop-color:color-mix(in srgb,var(--accent) 45%,#72718d);}
+.nature-cloud,.nature-mist {animation:nature-drift 48s ease-in-out infinite alternate;}
+.nature-water-lines,.nature-surf {animation:nature-water 12s ease-in-out infinite alternate;}
+.nature-palm,.nature-grasses,.nature-flowers {transform-origin:center bottom;animation:nature-sway 9s ease-in-out infinite alternate;}
+.nature-bird {animation:nature-flight 46s linear var(--bird-delay,0s) infinite;}
+.breathe-nature-scene * {animation-play-state:paused;}
+.breath-card[data-background-animated=true] .breathe-nature-scene * {animation-play-state:running;}
+@keyframes nature-drift {from{transform:translateX(-22px);}to{transform:translateX(32px);}}
+@keyframes nature-water {from{transform:translateY(-4px);opacity:.25;}to{transform:translateY(6px);opacity:.5;}}
+@keyframes nature-sway {from{transform:skewX(-1deg);}to{transform:skewX(1deg);}}
+@keyframes nature-flight {from{transform:translate(-60px,var(--bird-y,220px));}to{transform:translate(1660px,calc(var(--bird-y,220px) - 45px));}}
+@media(prefers-reduced-motion:reduce){.breathe-nature-scene * {animation:none!important;}.nature-bird {transform:translate(1100px,var(--bird-y,220px));}}
+#background-picker .breath-options {max-height:320px;overflow-y:auto;overscroll-behavior:contain;}
+.breath-top #focus {border:1px solid var(--line);border-radius:12px;min-height:44px;padding:8px 12px;}
+.breath-card[data-background]:not([data-background=none]) .breath-top {padding:0;background:transparent;text-shadow:none;}
+.breath-safety .safety-link {display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);border-radius:12px;padding:8px 12px;min-height:44px;text-decoration:none;margin-top:8px;}
+.breath-safety .safety-link svg {width:18px;height:18px;flex-shrink:0;}
+body.focus-view .breath-card[data-background]:not([data-background=none]) .breath-safety {background:transparent;padding:0;text-shadow:none;}
+body.focus-view .breath-safety .safety-link {margin-top:0;}
+/* Shared, clearly recognisable secondary actions above the landscape. */
+body:not(.focus-view) .breath-card .breath-top {width:100%;display:flex;justify-content:flex-end;}
+.breath-card #focus {margin-inline-start:auto;}
+.breath-card #focus,.breath-card #safety-open {display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 15px;border:1px solid color-mix(in srgb,var(--accent) 45%,var(--line));border-radius:12px;background:var(--surface);color:var(--text);font-size:calc(12px * var(--font-scale,1));font-weight:600;line-height:1.25;text-decoration:none;text-shadow:none;box-shadow:0 3px 10px #00000012;}
+.breath-card[data-background]:not([data-background=none]) #focus,.breath-card[data-background]:not([data-background=none]) #safety-open {background:color-mix(in srgb,var(--surface) 94%,transparent);backdrop-filter:blur(6px);}
+.breath-card #focus:hover,.breath-card #safety-open:hover {background:var(--accent-soft);border-color:var(--accent);filter:none;}
+.breath-card #focus:focus-visible,.breath-card #safety-open:focus-visible {outline:3px solid var(--accent);outline-offset:3px;}
+.breath-card #focus svg,.breath-card #safety-open svg {width:18px;height:18px;color:var(--accent);}
+body.focus-view .breath-card .breath-top {width:auto;left:auto;right:12px;}

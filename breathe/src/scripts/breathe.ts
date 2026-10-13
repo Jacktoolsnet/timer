@@ -1,3 +1,4 @@
+import {backgrounds} from '../lib/backgrounds';
 import { breathAt, defaults, normalize, presets, type Settings, type Durations, type Preset } from '../lib/breathing';
 import { dictionaries } from '../lib/breathe-i18n';
 import { storageAllowed } from '../lib/storage';
@@ -34,6 +35,11 @@ function save() {
  try { localStorage.setItem(KEY,JSON.stringify(settings)); } catch { el('storage-status').textContent = document.querySelector<HTMLElement>('#clear-storage')!.dataset.error!; }
 }
 function syncForm() {
+ document.querySelectorAll<HTMLInputElement>('[name=breath-background]').forEach(r=>r.checked=r.value===settings.background);
+ el('background-selected').textContent=t.backgroundNames[backgrounds.indexOf(settings.background)]!;
+ input('background-motion').checked=settings.backgroundMotion;
+ input('show-caption').checked=settings.showCaption;
+
  input('preset').value = settings.preset;
  el('preset-selected').textContent = t.presets[Object.keys(presets).indexOf(settings.preset)]!;
  document.querySelectorAll<HTMLInputElement>('[name="breathing-preset"]').forEach(radio => { radio.checked = radio.value === settings.preset; });
@@ -80,12 +86,12 @@ function tone(phase: number, duration = settings.durations[phase]!*settings.coun
    filter.frequency.linearRampToValueAtTime(phase===0?1150:700,now+duration);
    noise.connect(filter); filter.connect(gain); source=noise;
    // Softer overall level; volume follows the direction of the breath.
-   const peak = .16;
+   const peak = .12;
    const edge = Math.min(.08,duration/10);
    const release = Math.min(.35,duration*.3);
    gain.gain.setValueAtTime(0,now);
    if (phase === 0) {
-    gain.gain.linearRampToValueAtTime(.008,now+edge);
+    gain.gain.linearRampToValueAtTime(.006,now+edge);
     gain.gain.linearRampToValueAtTime(peak,now+duration-release);
     gain.gain.linearRampToValueAtTime(0,now+duration);
    } else {
@@ -118,9 +124,14 @@ async function playCurrentSound(preview?: 'sound' | 'chime') {
 }
 function nowElapsed() { return running ? elapsed+(performance.now()-anchor)/1000 : elapsed; }
 function render(time = elapsed) {
+ const card=document.querySelector<HTMLElement>('.breath-card')!;
+ card.dataset.background=settings.background;
+ card.dataset.backgroundAnimated=String(settings.backgroundMotion&&settings.motion&&!reduced.matches&&!document.hidden&&!finished&&(running||elapsed===0));
+
  const state = breathAt(time,settings.durations,settings.countSeconds);
  const total = settings.minutes*60;
  const tile = document.querySelector<HTMLElement>('.breath-caption')!;
+ tile.hidden=!settings.showCaption;
  tile.dataset.phase = running ? String(state.phase) : 'ready';
  el('tile-phase').textContent = finished ? t.ended : !running && elapsed ? t.paused : t.phases[state.phase]!.split(' · ')[0]!;
 
@@ -239,6 +250,9 @@ form.addEventListener('change',e => {
  } else {
   settings.sound=input('sound').checked; settings.chime=input('chime').checked; settings.awake=input('awake').checked;
   settings.motion=input('motion').checked;
+  settings.background=document.querySelector<HTMLInputElement>('[name=breath-background]:checked')!.value as Settings['background'];
+  settings.backgroundMotion=input('background-motion').checked;
+  settings.showCaption=input('show-caption').checked;
   wake(running && settings.awake);
   if (target.id==='sound' || target.id==='chime') {
    soundGeneration++; silence();
@@ -303,3 +317,9 @@ document.querySelectorAll<HTMLButtonElement>('[data-step-target]').forEach(butto
   field.dispatchEvent(new Event('change',{bubbles:true}));
  });
 });
+
+const backgroundPicker=el('background-picker') as HTMLDetailsElement;
+backgroundPicker.addEventListener('change',()=>{backgroundPicker.open=false;backgroundPicker.querySelector('summary')!.focus();});
+document.addEventListener('click',e=>{if(!backgroundPicker.contains(e.target as Node))backgroundPicker.open=false;});
+backgroundPicker.addEventListener('keydown',e=>{if(e.key==='Escape'){e.stopPropagation();backgroundPicker.open=false;backgroundPicker.querySelector('summary')!.focus();}});
+document.addEventListener('visibilitychange',()=>render(nowElapsed()));
