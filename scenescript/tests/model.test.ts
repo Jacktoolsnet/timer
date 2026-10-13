@@ -2,7 +2,7 @@ import {validateSvg,svgDataURL,svgSource} from '../src/lib/svg.ts';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {demoProject,parseProject,animationState,newElement,locateTime,validateImage,sceneTransitions,sceneTransitionState} from '../src/lib/model.ts';
+import {fonts,demoProject,parseProject,animationState,newElement,locateTime,validateImage,sceneTransitions,sceneTransitionState} from '../src/lib/model.ts';
 const serialize=(value:unknown)=>JSON.stringify(value);
 test('complete demo round trips and schema covers every exported field',()=>{
  const p=demoProject();assert.deepEqual(JSON.parse(serialize(parseProject(serialize(p)))),p);
@@ -135,4 +135,17 @@ test('publication thumbnail defaults, embeds independently and validates strictl
  const p=demoProject();assert.equal(p.thumbnail,null);const legacy=JSON.parse(JSON.stringify(p));delete legacy.thumbnail;assert.equal(parseProject(JSON.stringify(legacy)).thumbnail,null);
  const data='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aD1sAAAAASUVORK5CYII=';p.thumbnail={name:'cover.png',data};assert.deepEqual(parseProject(JSON.stringify(p)).thumbnail,p.thumbnail);assert.equal(Object.keys(p.assets).length,0);
  for(const value of ['image-id',{}, {name:'cover',data:null},{name:null,data},{name:'cover',data:'https://example.com/image.png'},{name:'cover',data:svgDataURL('<svg xmlns="http://www.w3.org/2000/svg"/>')},{name:'cover',data,extra:true}])assert.throws(()=>parseProject(JSON.stringify({...p,thumbnail:value})));
+});
+
+test('all offered fonts round trip in elements and rich text and match the schema',()=>{
+ const schema=JSON.parse(readFileSync(new URL('../public/schema.json',import.meta.url),'utf8'));
+ const properties=schema.properties.scenes.items.properties.elements.items.properties;
+ assert.deepEqual(properties.font.enum,[...fonts]);
+ assert.deepEqual(properties.runs.items.properties.font.enum,[...fonts]);
+ assert.equal(new Set(fonts).size,fonts.length);
+ for(const font of fonts){
+  const p=demoProject(),e=p.scenes[0].elements[0];e.font=font;e.runs=[{text:'ÄÖÜ äöü ß',font}];
+  const parsed=parseProject(serialize(p)).scenes[0].elements[0];
+  assert.equal(parsed.font,font);assert.deepEqual(parsed.runs,e.runs);
+ }
 });

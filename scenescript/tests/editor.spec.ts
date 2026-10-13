@@ -725,3 +725,18 @@ test('recording fills the viewport and hides all editor panels and preview contr
   await expect(page.locator('.playback-controls')).toBeVisible();
  }
 });
+
+test('bundled script fonts load and survive project export and import',async({page})=>{
+ await page.goto('/en/');await page.locator('#element-list button').first().click();
+ for(const font of ['Allura','Great Vibes','Parisienne','Sacramento']){
+  await page.locator('#element-form [name=font]').selectOption(font);
+  const loaded=await page.evaluate(async family=>{
+   const faces=await document.fonts.load('48px "'+family+'"','ÄÖÜ äöü ß');
+   return faces.length>0 && faces.every(face=>face.status==='loaded');
+  },font);
+  expect(loaded).toBe(true);
+  const data=JSON.parse(await exportedJSON(page));expect(data.scenes[0].elements[0].font).toBe(font);
+  await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(data));await page.locator('#import-json').click();
+  await page.locator('#element-list button').first().click();await expect(page.locator('#element-form [name=font]')).toHaveValue(font);
+ }
+});

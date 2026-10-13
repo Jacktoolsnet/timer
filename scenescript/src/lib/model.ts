@@ -11,7 +11,8 @@ import {parseSimulation,defaultSimulation,type Simulation} from './simulation.ts
 import {parseGradient,type Gradient} from './gradient.ts';
 import {validateSvg,svgSource} from './svg.ts';
 export const formats = { landscape: [1920,1080], portrait: [1080,1920], square: [1080,1080] } as const;
-export const fonts = ['Arial','Georgia','Verdana','Courier New'] as const;
+// System fonts use local fallbacks; the four script families are bundled with the site.
+export const fonts = ['Arial','Georgia','Verdana','Courier New','Helvetica','Tahoma','Trebuchet MS','Segoe UI','Times New Roman','Palatino Linotype','Garamond','Consolas','Lucida Console','Impact','Arial Black','Comic Sans MS','Allura','Great Vibes','Parisienne','Sacramento'] as const;
 export const animations = ['none','fade','slide-left','slide-up','zoom','typewriter','pan'] as const;
 export const exitAnimations=['none','fade','slide-left','slide-right','slide-up','slide-down','zoom-out'] as const;
 export const shapeTypes=['rectangle','ellipse','triangle','diamond','star','arrow'] as const;
