@@ -396,3 +396,19 @@ test('reset all confirms, preserves clocks and names, and clears every measureme
  await page.locator('#lap-all').click();
  await expect(page.locator('#laps-body tr')).toHaveCount(2);
 });
+
+test('print icon opens printing and prepares the report',async({page})=>{
+ await page.addInitScript(()=>{(window as any).printCalls=0;window.print=()=>{(window as any).printCalls++;};});
+ await page.goto('/de/');
+ const button=page.locator('#print-stopwatch');
+ await expect(button).toHaveAccessibleName('Drucken');
+ await expect(button).toHaveAttribute('title','Drucken');
+ await expect(button.locator('svg')).toHaveCount(1);
+ await button.click();
+ expect(await page.evaluate(()=>(window as any).printCalls)).toBe(1);
+ await expect(page.locator('#print-laps th')).toHaveText(['Runde','Rundenzeit','Gesamtzeit']);
+ await page.locator('#stopwatch-focus').click();
+ await expect(button).toBeVisible();
+ await button.click();
+ expect(await page.evaluate(()=>(window as any).printCalls)).toBe(2);
+});

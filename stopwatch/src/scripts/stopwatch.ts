@@ -363,3 +363,5 @@ function renderPrintView(){
 }
 window.addEventListener('beforeprint',renderPrintView);
 renderPrintView();
+
+$('print-stopwatch').addEventListener('click',()=>{renderPrintView();window.print();});
