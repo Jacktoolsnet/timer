@@ -375,17 +375,17 @@ for(const layer of ['fire','stream'] as const){
   const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto('/en/');await page.locator('#instrumentsEnabled').uncheck();
   await page.locator('#'+layer).check();await page.locator('#'+layer+'Animation').check();await begin(page);
-  await expect(page.locator(layer==='stream'?'#ocean-wave':'.fire-glimmer').first()).toBeVisible();
-  if(layer==='fire'){await expect(page.locator('.campfire-scene')).toBeVisible();await expect(page.locator('.campfire-flame')).toHaveCount(17);}
+  await expect(page.locator(layer==='stream'?'#ocean-wave':'.closeup-fire-art').first()).toBeVisible();
+  if(layer==='fire'){await expect(page.locator('.campfire-scene')).toBeVisible();await expect(page.locator('.closeup-smoke-wisp')).toHaveCount(6);await expect(page.locator('.closeup-fire-art #closeup-fire-bowl')).toBeVisible();}
   if(layer==='stream'){
    await page.locator('#wave-direction-dropdown summary').click();await page.locator('[name=waveDirection][value=left]').check();
    await expect(page.locator('#ocean-direction')).toHaveAttribute('transform','rotate(90 500 500)');
   }
   await page.locator('#'+(layer==='fire'?'fireDensity':'streamFlow')).fill('8');
   await expect(page.locator('#'+(layer==='fire'?'fireDensity':'streamFlow')+'-value')).toHaveText('8 / 10');
-  await page.locator('#start').click();if(layer==='fire')await expect(page.locator('.fire-glimmer').first()).toHaveCSS('animation-play-state','paused');
+  await page.locator('#start').click();if(layer==='fire')await expect(page.locator('.closeup-smoke-wisp').first()).toHaveCSS('animation-play-state','paused');
   else {const path=await page.locator('#ocean-surface').getAttribute('d');await page.waitForTimeout(250);expect(await page.locator('#ocean-surface').getAttribute('d')).toBe(path);}
-  if(layer==='fire')await expect(page.locator('.campfire-flame').first()).toHaveCSS('animation-play-state','paused');
+  if(layer==='fire')await expect(page.locator('.closeup-fire-main')).toHaveCSS('animation-play-state','paused');
   await page.locator('#start').click();
   await page.locator('#'+layer+'Animation').uncheck();if(layer==='stream')await expect(page.locator('#ocean-wave')).toBeHidden();else await expect(page.locator('.fire-glimmer')).toHaveCount(0);
   if(layer==='fire')await expect(page.locator('.campfire-scene')).toBeHidden();
@@ -432,8 +432,7 @@ test('specialized preset scenes can be changed independently and appear in focus
   await page.locator('#preset-dropdown summary').click();
   await page.locator('[name=preset][value='+preset+']').check();
   await expect(page.locator('#sound-stage')).toHaveAttribute('data-background-image',scene);
-  if(scene==='lakeside-camp')await expect(page.locator('#lakeside-camp-scene')).toBeVisible();
-  else await expect(page.locator('#relax-background')).toHaveCSS('background-image',new RegExp(scene+'\\.svg'));
+  await expect(page.locator('#relax-background')).toHaveCSS('background-image',new RegExp(scene+'\\.svg'));
   expect((await page.request.get('/backgrounds/'+scene+'.svg')).ok()).toBeTruthy();
  }
  await page.locator('#background-image-dropdown summary').click();
@@ -446,34 +445,21 @@ test('specialized preset scenes can be changed independently and appear in focus
  await expect(page.locator('#sound-stage')).toHaveAttribute('data-background-image','focus-room');
 });
 
-test('camp illustration replaces generic flames only for the animated camp combination',async({page})=>{
+test('lakeside camp uses the fire bowl and contains no baked-in fire',async({page})=>{
  await page.goto('/de/');
+ await expect(page.locator('[name=backgroundImage][value=fireside]')).toHaveCount(0);
  await page.locator('#preset-dropdown summary').click();await page.locator('[name=preset][value=fireside]').check();
- const camp=page.locator('#lakeside-camp-scene');
- await expect(camp).toHaveCSS('stroke','none');
- await expect(camp.locator('path[d="M140 860 350 615 560 860Z"]')).toHaveCSS('stroke','none');
- await expect(camp.locator('#camp-stone-ring path[stroke]').first()).not.toHaveCSS('stroke','none');
- await expect(camp.locator('.camp-static-fire')).toBeVisible();
- await expect(camp.locator('.camp-animated-fire')).toBeHidden();
- await begin(page);
- await expect(camp.locator('.camp-smoke')).toBeVisible();
- await expect(camp.locator('.camp-static-fire')).toBeHidden();
- await expect(camp.locator('.camp-animated-fire')).toBeVisible();
- await expect(page.locator('.campfire-scene')).toBeHidden();
- await page.locator('#start').click();await expect(camp).toHaveAttribute('data-fire-paused','true');
- await expect(camp.locator('.camp-smoke-wisp').first()).toHaveCSS('animation-play-state','paused');
- await page.locator('#fireAnimation').uncheck();
- await expect(camp.locator('.camp-smoke')).toBeHidden();
- await expect(camp.locator('.camp-static-fire')).toBeVisible();
- await expect(camp.locator('.camp-animated-fire')).toBeHidden();
- await page.locator('#fireAnimation').check();
- await page.locator('#background-image-dropdown summary').click();await page.locator('[name=backgroundImage][value=forest]').check();
- await expect(camp).toBeHidden();await expect(page.locator('.campfire-scene')).toBeVisible();
- await page.locator('#background-image-dropdown summary').click();await page.locator('[name=backgroundImage][value=lakeside-camp]').check();
- await page.locator('#fire').uncheck();await expect(camp.locator('.camp-static-fire')).toBeVisible();
- await page.locator('#fire').check();await page.locator('#motion').uncheck();
- await expect(camp.locator('.camp-static-fire')).toBeVisible();
- await page.locator('#motion').check();await page.locator('#fireVolume').fill('0');await page.locator('#fireVolume').dispatchEvent('input');
- await expect(camp.locator('.camp-static-fire')).toBeVisible();
- await page.locator('#end-session').click();await expect(camp.locator('.camp-static-fire')).toBeVisible();
+ await expect(page.locator('#fire')).toBeChecked();await expect(page.locator('#fireAnimation')).toBeChecked();
+ await expect(page.locator('#sound-stage')).toHaveAttribute('data-background-image','lakeside-camp');
+ const scene=page.locator('#campfire-closeup');
+ await expect(scene).toBeHidden();await begin(page);
+ await expect(scene).toBeVisible();await expect(scene.locator('#closeup-fire-bowl')).toBeVisible();
+ await page.locator('#start').click();await expect(scene).toHaveAttribute('data-paused','true');
+ await page.locator('#fireAnimation').uncheck();await expect(scene).toBeHidden();
+ await page.locator('#fireAnimation').check();await expect(scene).toBeVisible();
+ await page.locator('#fire').uncheck();await expect(scene).toBeHidden();
+ await page.locator('#fire').check();await page.locator('#motion').uncheck();await expect(scene).toBeHidden();
+ await page.locator('#motion').check();await page.locator('#end-session').click();await expect(scene).toBeHidden();
+ const image=await page.request.get('/backgrounds/lakeside-camp.svg');
+ expect(await image.text()).not.toMatch(/camp-firepit|camp-stone-ring|M760 872/);
 });

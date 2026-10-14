@@ -879,17 +879,25 @@ body.focus-view #relax-app > .relax-card { margin-bottom:0; }
 .ocean-base {stop-color:var(--relax-tone-6);stop-opacity:.18;}
 
 /* A quiet, layered flame band; smoke originates from these same flame positions. */
-.campfire-scene {position:absolute;inset:auto 0 0;height:min(32%,180px);pointer-events:none;}
-.campfire-scene[hidden] {display:none;}
-.campfire-scene::before {content:'';position:absolute;inset:30% 12% -35%;background:radial-gradient(ellipse at bottom,color-mix(in srgb,var(--relax-tone-0) 40%,#df7030),transparent 70%);filter:blur(12px);opacity:.45;}
-.campfire-flame {position:absolute;bottom:-8px;width:clamp(30px,8%,100px);border-radius:65% 35% 40% 45% / 95% 95% 10% 10%;transform-origin:50% 100%;background:linear-gradient(to top,#b8492380 0%,color-mix(in srgb,var(--relax-tone-0) 35%,#ed8a38) 45%,#f9d889b0 85%,#fff2c950);opacity:.72;filter:blur(1px);animation:campfire-flame var(--flame-time,4s) ease-in-out var(--flame-delay,0s) infinite;}
-.campfire-flame::after {content:'';position:absolute;inset:38% 26% -2%;border-radius:50% 50% 35% 35% / 85% 85% 15% 15%;background:linear-gradient(to top,#ffe4a9b0,#fff2ce80,transparent);}
-@keyframes campfire-flame {
- 0%,100% {transform:translateX(-50%) scale(1.05,.8) rotate(calc(-1*var(--flame-lean,5deg)));opacity:.6;}
- 35% {transform:translateX(-50%) scale(.72,1.25) rotate(var(--flame-lean,5deg));opacity:.8;}
- 70% {transform:translateX(-50%) scale(.9,1.02) rotate(-2deg);opacity:.68;}
-}
-@media(prefers-reduced-motion:reduce){.campfire-scene {display:none;}}
+/* Large seated-eye-level campfire, kept below playback controls in focus view. */
+.campfire-scene { position:absolute; inset:0 0 2%; pointer-events:none; }
+.campfire-scene[hidden] { display:none; }
+.closeup-fire-art { width:100%; height:100%; fill:#000; stroke:none; stroke-width:1; stroke-linecap:butt; stroke-linejoin:miter; }
+.closeup-fire-back,.closeup-fire-main,.closeup-fire-heart { transform-origin:805px 883px; }
+.closeup-fire-back { animation:closeup-flame-back 3.7s ease-in-out infinite; }
+.closeup-fire-main { animation:closeup-flame-main 2.9s ease-in-out -.8s infinite; }
+.closeup-fire-heart { animation:closeup-flame-heart 1.9s ease-in-out -.4s infinite; }
+.closeup-smoke-wisp { opacity:0; transform-origin:805px 770px; animation:closeup-smoke-rise 12s linear var(--smoke-delay,0s) infinite; }
+.closeup-ember { opacity:0; animation:closeup-ember-rise 8s linear var(--ember-delay,0s) infinite; }
+.campfire-scene[data-paused="true"] :is(.closeup-fire-back,.closeup-fire-main,.closeup-fire-heart,.closeup-smoke-wisp,.closeup-ember) { animation-play-state:paused; }
+@keyframes closeup-flame-back { 0%,100%{transform:scale(.95,1.03) skewX(-3deg)} 43%{transform:scale(1.1,.89) skewX(4deg)} 76%{transform:scale(.94,1.16) skewX(1deg)} }
+@keyframes closeup-flame-main { 0%,100%{transform:scale(1,1)} 25%{transform:scale(.92,1.15) skewX(3deg)} 62%{transform:scale(1.06,.91) skewX(-3deg)} 83%{transform:scale(.97,1.06)} }
+@keyframes closeup-flame-heart { 0%,100%{transform:scale(1,.96);opacity:.9} 35%{transform:scale(.87,1.2) skewX(-4deg);opacity:1} 70%{transform:scale(1.1,.92) skewX(3deg);opacity:.85} }
+@keyframes closeup-smoke-rise { 0%{opacity:0;transform:translate(0,0) scale(.65)} 18%{opacity:.2;transform:translate(-5px,-45px) scale(.9)} 50%{opacity:.15;transform:translate(var(--smoke-drift),-155px) scale(1.5)} 100%{opacity:0;transform:translate(10px,-325px) scale(2.1)} }
+@keyframes closeup-ember-rise { 0%,15%{opacity:0;transform:translate(0,0)} 20%{opacity:.65} 70%{opacity:.3;transform:translate(12px,-155px)} 100%{opacity:0;transform:translate(-8px,-235px)} }
+body.focus-view .campfire-scene { bottom:10%; }
+@media(prefers-reduced-motion:reduce){.campfire-scene {display:none;} .closeup-fire-art * {animation:none!important;} }
+
 
 .brand-icon:has(img) {background:transparent;padding:0;}
 .brand-icon img {display:block;width:100%;height:100%;object-fit:contain;}
@@ -900,35 +908,3 @@ body.focus-view #relax-app > .relax-card { margin-bottom:0; }
 #sound-stage:not([data-background-image="none"]) .scene-word { opacity:1; color:var(--text); text-shadow:0 1px 12px var(--surface); }
 /* Preview rows inside the background dropdown. */
 .background-image-options .background-preview { flex:0 0 64px; height:42px; border:1px solid var(--line); border-radius:7px; background:var(--surface); background-size:cover; background-position:center; }
-
-/* The inline camp shares the static asset's cover crop, including in focus view. */
-#lakeside-camp-scene { display:none; width:100%; height:100%; }
-[data-background-image="lakeside-camp"] #lakeside-camp-scene { display:block; }
-.camp-animated-fire { display:none; transform-origin:805px 887px; }
-#lakeside-camp-scene[data-fire-animated="true"] .camp-static-fire { display:none; }
-#lakeside-camp-scene[data-fire-animated="true"] .camp-animated-fire { display:inline; animation:camp-illustrated-fire 2.8s ease-in-out infinite; }
-#lakeside-camp-scene[data-fire-paused="true"] .camp-animated-fire { animation-play-state:paused; }
-@keyframes camp-illustrated-fire {
- 0%,100% { transform:scale(1,1) skewX(0deg); }
- 30% { transform:scale(.96,1.08) skewX(2deg); }
- 65% { transform:scale(1.04,.93) skewX(-2deg); }
-}
-@media(prefers-reduced-motion:reduce) {
- #lakeside-camp-scene[data-fire-animated="true"] .camp-static-fire { display:inline; }
- #lakeside-camp-scene[data-fire-animated="true"] .camp-animated-fire { display:none; animation:none; }
-}
-/* Inline artwork must not inherit the global UI icon stroke and fill. */
-#lakeside-camp-scene { fill:#000; stroke:none; stroke-width:1; stroke-linecap:butt; stroke-linejoin:miter; }
-
-.camp-smoke { display:none; pointer-events:none; }
-#lakeside-camp-scene[data-fire-animated="true"] .camp-smoke { display:inline; }
-.camp-smoke-wisp { opacity:0; transform-origin:810px 775px; animation:camp-smoke-rise 12s linear var(--smoke-delay,0s) infinite; }
-#lakeside-camp-scene[data-fire-paused="true"] .camp-smoke-wisp { animation-play-state:paused; }
-@keyframes camp-smoke-rise {
- 0% { opacity:0; transform:translate(0,0) scale(.65); }
- 15% { opacity:.18; transform:translate(-5px,-40px) scale(.9); }
- 45% { opacity:.14; transform:translate(15px,-145px) scale(1.35); }
- 75% { opacity:.07; transform:translate(-10px,-255px) scale(1.8); }
- 100% { opacity:0; transform:translate(30px,-365px) scale(2.2); }
-}
-@media(prefers-reduced-motion:reduce) { #lakeside-camp-scene[data-fire-animated="true"] .camp-smoke { display:none; } .camp-smoke-wisp { animation:none; } }

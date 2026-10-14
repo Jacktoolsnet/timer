@@ -245,3 +245,10 @@ test('specialized scenes are available, local and assigned to their presets',()=
  const focus=readFileSync(new URL('../public/backgrounds/focus-room.svg',import.meta.url),'utf8');
  assert.match(focus,/cat-fur/);assert.match(focus,/M67 166C37 148/);
 });
+
+test('removed fireplace backgrounds fall back safely and camp has no static fire',()=>{
+ assert.equal(normalize({backgroundImage:'fireside'}).backgroundImage,'none');
+ const camp=readFileSync(new URL('../public/backgrounds/lakeside-camp.svg',import.meta.url),'utf8');
+ assert.doesNotMatch(camp,/camp-firepit|camp-stone-ring|M760 872/);
+ assert.equal(applyPreset(defaults,'fireside').fireAnimation,true);
+});

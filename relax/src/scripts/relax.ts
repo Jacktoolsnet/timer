@@ -36,32 +36,11 @@ const glow=document.querySelector<HTMLElement>('.ambient-glow')!;
 const ocean=el('ocean-wave'),surface=el('ocean-surface');
 const nextWavePosition=wavePositionPicker();
 const waveProfiles=new Map<string,{peak:number;width:number;height:number}>();
-const fireScene=document.createElement('div');
-fireScene.className='campfire-scene';fireScene.setAttribute('aria-hidden','true');fireScene.hidden=true;
-el('sound-stage').insertBefore(fireScene,stage);
-const flameOrigins=Array.from({length:17},(_,i)=>{
- const centre=1-Math.abs(i-8)/8;
- return {x:18+i*4,height:.18+.3*Math.pow(centre,1.5)+1.6*Math.pow(centre,3)*(.95+Math.random()*.1)};
-});
-for(const origin of flameOrigins){
- const flame=document.createElement('span');flame.className='campfire-flame';
- flame.style.left=origin.x+'%';flame.style.height=origin.height*100+'%';
- flame.style.setProperty('--flame-time',(2.8+Math.random()*2.4)+'s');
- flame.style.setProperty('--flame-delay',(-Math.random()*5)+'s');
- flame.style.setProperty('--flame-lean',(3+Math.random()*6)+'deg');
- fireScene.append(flame);
-}
+const fireScene=el('campfire-closeup');
 function rainFrame(){
  const fireVisible=settings.fire&&settings.fireAnimation&&settings.motion&&!reduced.matches&&settings.fireVolume>0&&(state==='running'||state==='paused');
- const campSelected=settings.backgroundImage==='lakeside-camp';
- fireScene.hidden=!fireVisible||campSelected;
- const camp=el('lakeside-camp-scene');
- camp.dataset.fireAnimated=String(campSelected&&fireVisible);
- camp.dataset.firePaused=String(state!=='running'||document.hidden);
- if(campSelected)stage.querySelectorAll('.fire-glimmer').forEach(n=>n.remove());
- fireScene.querySelectorAll<HTMLElement>('.campfire-flame').forEach(flame=>{
-  flame.style.animationPlayState=state==='running'&&!document.hidden?'running':'paused';
- });
+ fireScene.hidden=!fireVisible;
+ fireScene.dataset.paused=String(state!=='running'||document.hidden);
 
  const enabled=settings.stream&&settings.streamAnimation&&settings.motion&&!reduced.matches&&settings.streamVolume>0;
  if(!enabled||state==='ready'||state==='ended')ocean.setAttribute('data-hidden','true');
@@ -97,27 +76,8 @@ function rainFrame(){
  glow.dataset.windAnimated=String(windAnimated);
  if(!windAnimated)glow.style.setProperty('--wind-level','0');
  else if(state==='running'&&!document.hidden)glow.style.setProperty('--wind-level',String(audio.windStrength()));
- for(const layer of ['fire'] as const){
-  const events=audio.takeNatureEvents(layer);
-  if(state==='running'&&!document.hidden&&settings.motion&&!reduced.matches&&!campSelected){
-   for(const event of events){
-    const node=document.createElement('span');node.className='nature-glimmer '+layer+'-glimmer';
-    const origin=flameOrigins[Math.floor(Math.random()*flameOrigins.length)];
-    node.style.left=origin.x+'%';
-    node.style.top=(stage.clientHeight-Math.min(stage.clientHeight*.32,180)*origin.height*.7)+'px';
-    const smokeSize=85+Math.random()*65+event.strength*70;
-    // Carry the entire expanded plume past the top, not just its leading edge.
-    node.style.setProperty('--smoke-rise',(-stage.clientHeight-smokeSize*3.2*1.8)+'px');
-    node.style.setProperty('--smoke-drift',(Math.random()*100-50)+'px');
-    node.style.setProperty('--smoke-sway',(12+Math.random()*18)+'px');
-    node.style.setProperty('--smoke-life',(8+Math.random()*4)+'s');
-    node.style.setProperty('--nature-size',smokeSize+'px');
-    node.style.setProperty('--nature-colour','var(--relax-tone-'+(layer==='fire'?0:4)+')');
-    stage.append(node);node.addEventListener('animationend',()=>node.remove(),{once:true});
-   }
-  }
-  while(stage.querySelectorAll('.'+layer+'-glimmer').length>64)stage.querySelector('.'+layer+'-glimmer')?.remove();
- }
+ // Smoke now belongs to the illustrated fire, rather than unrelated screen-wide puffs.
+ audio.takeNatureEvents('fire');
  const drops=audio.takeRainDrops();
  if(state==='running'&&!document.hidden&&settings.motion&&settings.rainAnimation){
   for(const drop of drops){
@@ -137,7 +97,7 @@ function sync(){
  const bg=backgroundText[document.documentElement.lang as keyof typeof backgroundText]||backgroundText.en;
  el('background-image-value').textContent=bg.names[backgroundImages.indexOf(settings.backgroundImage)]!;
  document.querySelectorAll<HTMLInputElement>('[name=backgroundImage]').forEach(r=>r.checked=r.value===settings.backgroundImage);
- el('relax-background').style.backgroundImage=settings.backgroundImage==='none'||settings.backgroundImage==='lakeside-camp'?'none':`url(/backgrounds/${settings.backgroundImage}.svg)`;
+ el('relax-background').style.backgroundImage=settings.backgroundImage==='none'?'none':`url(/backgrounds/${settings.backgroundImage}.svg)`;
  el('sound-stage').dataset.backgroundImage=settings.backgroundImage;
 
  document.querySelectorAll<HTMLInputElement>('[name=waveDirection]').forEach(r=>r.checked=r.value===settings.waveDirection);

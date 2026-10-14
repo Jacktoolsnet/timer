@@ -1,0 +1,27 @@
+---
+import artwork from '../assets/campfire.svg?raw';
+// Reuse the illustrated flame silhouette; the independent close-up uses a metal bowl.
+const wood=artwork.slice(artwork.indexOf('<path d="m745 885'),artwork.indexOf('<path d="M760 872'));
+const flames=artwork.slice(artwork.indexOf('<path d="M760 872'),artwork.lastIndexOf('</svg>'));
+---
+<div class="campfire-scene" id="campfire-closeup" aria-hidden="true" hidden>
+ <svg class="closeup-fire-art" viewBox="620 450 370 500" preserveAspectRatio="xMidYMax meet" focusable="false">
+  <defs><linearGradient id="closeup-bowl-metal" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#64615a"/><stop offset=".25" stop-color="#434643"/><stop offset="1" stop-color="#242e2e"/></linearGradient><linearGradient id="closeup-bowl-rim" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#666d66"/><stop offset=".5" stop-color="#b59470"/><stop offset="1" stop-color="#535e58"/></linearGradient><radialGradient id="closeup-fire-glow"><stop stop-color="#f4b26d" stop-opacity=".38"/><stop offset="1" stop-color="#e98140" stop-opacity="0"/></radialGradient><filter id="closeup-smoke-soft" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="7"/></filter></defs>
+  <ellipse cx="805" cy="851" rx="178" ry="98" fill="url(#closeup-fire-glow)"/>
+  <g class="closeup-smoke" fill="#b6b7aa" filter="url(#closeup-smoke-soft)">{Array.from({length:6},(_,i)=><g class="closeup-smoke-wisp" style={`--smoke-delay:${-i*2}s;--smoke-drift:${i%2?24:-18}px`}><ellipse cx={805+i%3*6} cy="762" rx="18" ry="29"/><ellipse cx="805" cy="735" rx="14" ry="21"/></g>)}</g>
+  <g id="closeup-fire-bowl">
+   <ellipse cx="805" cy="940" rx="124" ry="9" fill="#18211e" opacity=".2"/>
+   <g stroke="#333d3b" stroke-width="12" stroke-linecap="round"><path d="M741 903 724 937M868 903 887 937M805 913v29"/></g>
+   <path d="M689 861C696 904 735 926 805 928S914 905 921 861Z" fill="url(#closeup-bowl-metal)"/>
+   <ellipse cx="805" cy="861" rx="116" ry="29" fill="url(#closeup-bowl-rim)"/>
+   <ellipse cx="805" cy="861" rx="107" ry="23" fill="#292e29"/>
+   <ellipse cx="805" cy="870" rx="76" ry="13" fill="#503c2d"/>
+   <g transform="translate(0 -15)"><Fragment set:html={wood}/></g>
+  </g>
+  <g class="closeup-fire-back"><path d="M754 877q-30-55 4-105-4 45 33 59 4-65 54-118-20 65 18 99 23 40-3 69Z" fill="#d98747"/></g>
+  <g class="closeup-fire-main"><Fragment set:html={flames}/></g>
+  <g class="closeup-fire-heart"><path d="M771 879q-15-35 18-72-5 31 17 40 9-42 30-58-11 45 8 70 12 25-20 27Z" fill="#ffd38b"/><path d="M792 880q-9-17 14-43 0 22 15 30 9 18-14 20Z" fill="#ffe8b1"/></g>
+  <path d="M690 862Q805 909 920 862" fill="none" stroke="url(#closeup-bowl-rim)" stroke-width="5" stroke-linecap="round"/>
+  <g class="closeup-embers" fill="#ffc581">{[0,1,2].map(i=><circle class="closeup-ember" cx={787+i*16} cy="790" r="1.3" style={`--ember-delay:${-i*2.7}s`}/>)}</g>
+ </svg>
+</div>

@@ -8,7 +8,7 @@ from Clock; the six preset scenes were authored specifically for Relax:
 - evening-terrace: wooden terrace, potted plants and soft string lights.
 - focus-room: minimal room, garden window, desk and sleeping Breathe cat.
 - forest-clearing: layered woodland, open clearing and ferns.
-- lakeside-camp: two tents, lake, stars and campfire.
+- lakeside-camp: two tents, lake, stars; fire is supplied by the separate animated bowl.
 - quiet-coast: shore, soft surf, rocks and coastal grasses (current ocean preset).
 
 The focus cat reuses the exact geometry from Breathe's CandleBackground.astro,
