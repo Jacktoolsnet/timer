@@ -1,3 +1,4 @@
+import {renderLapInsights} from './lap-insights';
 import {enhanceStopwatchSelects} from './stopwatch-selects';
 import {Stopwatch, formatElapsed, lapRows, lapsCsv} from '../lib/stopwatch';
 import {screenWakeLock} from '../lib/wake-lock';
@@ -53,6 +54,7 @@ function sync() {
 function toggle() {timer.running ? timer.pause(now()) : timer.start(now()); sync();}
 function capture() {
  const item = timer.lap(now()); if (!item) return;
+ renderLapInsights(timer.laps,t);
  const row = document.createElement('tr');
  for (const value of [String(timer.laps.length),formatElapsed(item.duration),formatElapsed(item.elapsed)]) {
  const cell = document.createElement('td'); cell.textContent = value; row.append(cell);
@@ -69,7 +71,7 @@ reset.addEventListener('click', () => {
 });
 resetDialog.addEventListener('close', () => {
  if (resetDialog.returnValue !== 'reset' || timer.running) return;
- timer.reset(); $('laps-body').replaceChildren(); $('laps-table').hidden = true; $('empty-laps').hidden = false; $('lap-status').textContent = ''; $('export-status').textContent = ''; sync();
+ timer.reset(); renderLapInsights(timer.laps,t); $('laps-body').replaceChildren(); $('laps-table').hidden = true; $('empty-laps').hidden = false; $('lap-status').textContent = ''; $('export-status').textContent = ''; sync();
  // The reset button is disabled after clearing; return focus to the next action.
  start.focus();
 });

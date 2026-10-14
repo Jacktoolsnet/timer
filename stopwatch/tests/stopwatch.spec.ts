@@ -148,3 +148,50 @@ test('analog, digital and combined views show only the selected displays',async(
  await expect(page.locator('#analog-stopwatch')).toBeVisible();
  await expect(page.locator('#elapsed')).toBeVisible();
 });
+
+test('lap analysis and chart update from completed laps and clear on reset',async({page})=>{
+ await page.addInitScript(()=>{(window as any).testNow=1000;Date.now=()=>(window as any).testNow;});
+ await page.goto('/de/');
+ await expect(page.locator('#lap-insights')).toBeHidden();
+ await page.locator('#toggle-timing').click();
+ for(const duration of [3000,1000,2000]){
+  await page.evaluate(ms=>{(window as any).testNow+=ms;},duration);
+  await page.locator('#lap').click();
+ }
+ await expect(page.locator('#lap-insights')).toBeVisible();
+ await expect(page.locator('#lap-fastest')).toHaveText('00:00:01.00 · Runde 2');
+ await expect(page.locator('#lap-slowest')).toHaveText('00:00:03.00 · Runde 1');
+ await expect(page.locator('#lap-average')).toHaveText('00:00:02.00');
+ await expect(page.locator('#lap-difference')).toHaveText('+00:00:01.00');
+ await expect(page.locator('#lap-chart circle')).toHaveCount(3);
+ await expect(page.locator('#lap-chart .lap-chart-average')).toHaveCount(1);
+ await page.locator('#toggle-timing').click();
+ await page.locator('#reset-timing').click();
+ await page.locator('#reset-confirm').click();
+ await expect(page.locator('#lap-insights')).toBeHidden();
+ await expect(page.locator('#lap-chart circle')).toHaveCount(0);
+ await page.locator('#toggle-timing').click();
+ await page.locator('#lap').click();
+ await expect(page.locator('#lap-average')).toHaveText('00:00:00.00');
+ await expect(page.locator('#lap-difference')).toHaveText('—');
+ await expect(page.locator('#lap-chart circle')).toHaveCount(1);
+ expect(await page.locator('#lap-chart-content').innerHTML()).not.toContain('NaN');
+});
+
+test('focus shows the empty lap panel before recording and after reset',async({page})=>{
+ await page.goto('/de/');
+ await page.locator('#stopwatch-focus').click();
+ await expect(page.locator('.stopwatch-laps')).toBeVisible();
+ await expect(page.locator('#empty-laps')).toBeVisible();
+ await expect(page.locator('#laps-table')).toBeHidden();
+ await expect(page.locator('#copy-laps')).toBeDisabled();
+ await expect(page.locator('#export-laps')).toBeDisabled();
+ await page.locator('#toggle-timing').click();
+ await page.locator('#lap').click();
+ await expect(page.locator('#empty-laps')).toBeHidden();
+ await page.locator('#toggle-timing').click();
+ await page.locator('#reset-timing').click();
+ await page.locator('#reset-confirm').click();
+ await expect(page.locator('.stopwatch-laps')).toBeVisible();
+ await expect(page.locator('#empty-laps')).toBeVisible();
+});

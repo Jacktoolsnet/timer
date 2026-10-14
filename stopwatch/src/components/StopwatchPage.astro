@@ -36,7 +36,20 @@ const {lang}=Astro.props; const t=getDictionary(lang); const c=stopwatchText[lan
 <section class="lap-panel stopwatch-laps" aria-labelledby="laps-title"><div class="laps-heading"><h2 id="laps-title">{c.laps}</h2><div class="laps-actions">
 <button id="copy-laps" class="secondary" aria-label={c.copyLaps} title={c.copyLaps} disabled><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V3H3v13h5"/></svg></button>
 <button id="export-laps" class="secondary" aria-label={c.exportCsv} title={c.exportCsv} disabled><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></svg></button>
-</div></div><p id="empty-laps">{c.empty}</p><div class="lap-scroll"><table id="laps-table" hidden><caption class="sr-only">{c.laps}</caption><thead><tr><th scope="col">{c.lap}</th><th scope="col">{c.duration}</th><th scope="col">{c.total}</th></tr></thead><tbody id="laps-body"></tbody></table></div><p id="export-status" class="export-status" role="status"></p><p id="lap-status" role="status" class="sr-only"></p></section>
+</div></div><p id="empty-laps">{c.empty}</p><div class="lap-scroll"><table id="laps-table" hidden><caption class="sr-only">{c.laps}</caption><thead><tr><th scope="col">{c.lap}</th><th scope="col">{c.duration}</th><th scope="col">{c.total}</th></tr></thead><tbody id="laps-body"></tbody></table></div><p id="export-status" class="export-status" role="status"></p><p id="lap-status" role="status" class="sr-only"></p>
+<div id="lap-insights" hidden>
+<h3>{c.analysis}</h3>
+<dl class="lap-stats">
+<div><dt>{c.fastest}</dt><dd id="lap-fastest"></dd></div>
+<div><dt>{c.slowest}</dt><dd id="lap-slowest"></dd></div>
+<div><dt>{c.average}</dt><dd id="lap-average"></dd></div>
+<div><dt>{c.previous}</dt><dd id="lap-difference"></dd></div>
+</dl>
+<figure class="lap-chart"><figcaption id="lap-chart-title">{c.chart}</figcaption>
+<p class="lap-chart-legend"><span aria-hidden="true"></span>{c.average} · {c.seconds}</p>
+<svg id="lap-chart" viewBox="0 0 480 230" role="img" aria-labelledby="lap-chart-title lap-chart-description"><desc id="lap-chart-description"></desc><g id="lap-chart-content"></g></svg>
+</figure>
+</div></section>
 </section><aside class="settings-card stopwatch-options" aria-labelledby="options-title"><h2 id="options-title">{c.options}</h2>
 <label class="stopwatch-view-choice" for="stopwatch-view">{c.view}<select id="stopwatch-view" name="view"><option value="digital">{c.digital}</option><option value="analog" selected>{c.analog}</option><option value="combined">{c.combined}</option></select></label>
 <label class="toggle-row"><span><strong>{c.awake}</strong><small>{c.awakeHint}</small></span><input id="awake" type="checkbox" role="switch" /><span class="toggle" aria-hidden="true"></span></label>

@@ -21,3 +21,16 @@ export function lapRows(laps: readonly {duration: number; elapsed: number}[], he
 export function lapsCsv(rows: readonly (readonly string[])[]): string {
  return '\uFEFF' + rows.map(row => row.map(cell => '"' + cell.replaceAll('"', '""') + '"').join(',')).join('\r\n') + '\r\n';
 }
+
+/** Completed laps only; ties consistently select the first recorded lap. */
+export function analyzeLaps(laps: readonly {duration: number}[]) {
+ if (!laps.length) return null;
+ let fastest = 0, slowest = 0, total = 0;
+ laps.forEach((lap,index) => {
+  total += lap.duration;
+  if (lap.duration < laps[fastest]!.duration) fastest = index;
+  if (lap.duration > laps[slowest]!.duration) slowest = index;
+ });
+ return {fastest,slowest,average:total / laps.length,
+  difference:laps.length > 1 ? laps.at(-1)!.duration - laps.at(-2)!.duration : null};
+}

@@ -866,12 +866,11 @@ body.focus-view #analog-stopwatch svg { width:min(90vw,calc(100dvh - 210px)); ma
 body.focus-view .stopwatch-main .stopwatch-time { font-size:min(11cqw,26dvh); margin:0; line-height:1.15; letter-spacing:-.025em; }
 body.focus-view .stopwatch-main #stopwatch-display:is([data-view=analog],[data-view=combined]) .stopwatch-time { font-size:min(7cqw,6dvh); margin:8px 0 0; }
 body.focus-view .timer-card > .stopwatch-laps { position:absolute; top:70px; right:12px; z-index:2; width:min(280px,42vw); max-width:none; max-height:calc(100dvh - 170px); margin:0; padding:10px; border:1px solid var(--line); border-radius:12px; background:color-mix(in srgb,var(--surface) 94%,transparent); overflow:auto; }
-body.focus-view .stopwatch-laps:has(#laps-table[hidden]) { display:none; }
 body.focus-view .stopwatch-laps .lap-scroll { max-height:28dvh; }
 body.focus-view .stopwatch-laps h2 { font-size:.85rem; margin:0; }
 body.focus-view .stopwatch-laps .laps-heading { gap:8px; flex-wrap:wrap; }
 @media(min-width:1100px) {
- body.focus-view .stopwatch-card:has(#laps-table:not([hidden])) .stopwatch-main { padding-right:300px; }
+ body.focus-view .stopwatch-card .stopwatch-main { padding-right:300px; }
  body.focus-view .stopwatch-laps .lap-scroll { max-height:calc(100dvh - 250px); }
 }
 @media(max-height:450px) { body.focus-view .stopwatch-card { padding-top:48px; padding-bottom:70px; } body.focus-view #analog-stopwatch svg { width:min(90vw,calc(100dvh - 155px)); } }
@@ -911,3 +910,20 @@ body.focus-view .stopwatch-options{display:none}
 
 /* Hidden readouts stay hidden in every view, including focus mode. */
 #elapsed[hidden]{display:none}
+
+#lap-insights[hidden]{display:none}
+#lap-insights{border-top:1px solid var(--line);margin-top:20px;padding-top:16px}
+#lap-insights h3,.lap-chart figcaption{font-size:14px;font-weight:550;margin:0 0 12px}
+.lap-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:0}
+.lap-stats>div{min-width:0}
+.lap-stats dt{font-size:11px;color:var(--muted);line-height:1.5}
+.lap-stats dd{margin:5px 0 0;font-size:12px;line-height:1.5;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.lap-chart{margin:22px 0 0}
+#lap-chart{display:block;width:100%;height:auto;stroke:none;fill:var(--muted);overflow:visible}
+#lap-chart text{font:11px system-ui}
+.lap-chart-grid{stroke:var(--line);stroke-width:1}
+.lap-chart-average{stroke:var(--green);stroke-width:1.5;stroke-dasharray:5 4}
+.lap-chart-line{fill:none;stroke:var(--accent);stroke-width:2}
+.lap-chart-point{fill:var(--accent)}
+.lap-panel .lap-chart-legend{font-size:11px;margin:0 0 8px}
+.lap-chart-legend span{display:inline-block;width:20px;border-top:2px dashed var(--green);margin-right:6px;vertical-align:middle}

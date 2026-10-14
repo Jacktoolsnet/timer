@@ -10,3 +10,11 @@ test('export rows are chronological and CSV quotes headings and preserves UTF-8'
  assert.deepEqual(rows[1],['1','00:00:01.23','00:00:01.23']);assert.deepEqual(rows[2],['2','00:00:02.34','00:00:03.57']);
  assert.ok(lapsCsv(rows).startsWith('\uFEFF"Runde","Dauer, ""präzise""","Gesamtzeit"\r\n'));
 });
+
+test('lap analysis handles empty lists, ties, averages and signed differences',async()=>{
+ const {analyzeLaps}=await import('../src/lib/stopwatch.ts');
+ assert.equal(analyzeLaps([]),null);
+ assert.deepEqual(analyzeLaps([{duration:0}]),{fastest:0,slowest:0,average:0,difference:null});
+ assert.deepEqual(analyzeLaps([{duration:3000},{duration:1000},{duration:2000}]),{fastest:1,slowest:0,average:2000,difference:1000});
+ assert.deepEqual(analyzeLaps([{duration:2000},{duration:2000},{duration:1000}]),{fastest:2,slowest:0,average:5000/3,difference:-1000});
+});
