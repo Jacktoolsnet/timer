@@ -174,3 +174,27 @@ test('video export decoder preserves sequential, repeated, backwards and end-fra
  expect(result.frames.map(f=>Math.round(f.timestamp*10))).toEqual([0,0,1,3,3,3,5,1,4,5]);
  for(const [i,frame] of result.frames.entries())expect(frame.pixel[i<3||i===7?0:2]).toBeGreaterThan(200);
 });
+
+test('AAC video audio is identical across adjacent one-second export chunks',async({page})=>{
+ await page.goto('/en/');const result=await page.evaluate(async()=>{
+  const {demoProject,newElement}=await import(/* @vite-ignore */ '/src/lib/model.ts' as string);
+  const {defaultMusic}=await import(/* @vite-ignore */ '/src/lib/music.ts' as string);
+  const {exportSupported}=await import(/* @vite-ignore */ '/src/scripts/video-export.ts' as string);
+  const {ExportAudio}=await import(/* @vite-ignore */ '/src/scripts/export-audio.ts' as string);
+  const {ExportMedia}=await import(/* @vite-ignore */ '/src/scripts/export-media.ts' as string);
+  const p=demoProject();p.music=defaultMusic();if(!await exportSupported(p,{format:'mp4',resolution:480,fps:24,audio:true}))return null;p.music=null;
+  const moduleURL=performance.getEntriesByType('resource').map(e=>e.name).find(n=>n.includes('/mediabunny.js?v='))!,m=await import(/* @vite-ignore */ moduleURL);
+  const target=new m.BufferTarget(),output=new m.Output({target,format:new m.Mp4OutputFormat()}),source=new m.AudioSampleSource({codec:'aac',bitrate:128000});output.addAudioTrack(source);await output.start();
+  const rate=48000,length=rate*4,data=Float32Array.from({length:length*2},(_,i)=>.2*Math.sin((i%length)*2*Math.PI*220/rate));
+  const sample=new m.AudioSample({data,format:'f32-planar',numberOfChannels:2,sampleRate:rate,timestamp:0});try{await source.add(sample);}finally{sample.close();}await output.finalize();
+  const url=await new Promise<string>(resolve=>{const r=new FileReader();r.onload=()=>resolve(String(r.result));r.readAsDataURL(new Blob([target.buffer],{type:'video/mp4'}));});
+  p.scenes=p.scenes.slice(0,1);p.scenes[0].duration=3;p.videos={clip:{name:'tone.mp4',data:url,duration:4}};const e=newElement('video');e.video={asset:'clip',start:.3,end:3.3,loop:false,muted:false,volume:1,fit:'cover'};p.scenes[0].elements=[e];
+  const oneMedia=new ExportMedia(p,new AbortController().signal),splitMedia=new ExportMedia(p,new AbortController().signal);
+  try{
+   const whole=await new ExportAudio(p,oneMedia,3).chunk(0,3),mixer=new ExportAudio(p,splitMedia,3);let maxError=0,peak=0;
+   for(let second=0;second<3;second++){const part=await mixer.chunk(second,second+1);for(let c=0;c<2;c++)for(let j=0;j<rate;j++){maxError=Math.max(maxError,Math.abs(part[c*rate+j]-whole[c*rate*3+second*rate+j]));peak=Math.max(peak,Math.abs(part[c*rate+j]));}}
+   return {maxError,peak};
+  }finally{oneMedia.dispose();splitMedia.dispose();}
+ });
+ test.skip(result===null,'H.264 encoder unavailable');expect(result!.peak).toBeGreaterThan(.1);expect(result!.maxError).toBeLessThan(1e-6);
+});
