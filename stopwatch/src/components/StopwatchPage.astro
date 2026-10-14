@@ -20,12 +20,12 @@ const {lang}=Astro.props; const t=getDictionary(lang); const c=stopwatchText[lan
 {Array.from({length:12},(_,i)=>{const n=i*5,a=i*Math.PI/6;return <text x={160+112*Math.sin(a)} y={160-112*Math.cos(a)} class="stopwatch-number">{n===0?60:n}</text>})}
 <circle cx="160" cy="107" r="33" class="stopwatch-subdial"/>
 {Array.from({length:12},(_,i)=><line x1="160" y1="79" x2="160" y2={i%3===0?'84':'82'} transform={'rotate('+i*30+' 160 107)'} class="stopwatch-minor"/>)}
-<text x="160" y="91" class="stopwatch-subnumber">60</text><text x="180" y="110" class="stopwatch-subnumber">15</text><text x="160" y="128" class="stopwatch-subnumber">30</text><text x="140" y="110" class="stopwatch-subnumber">45</text>
+<text x="160" y="94" class="stopwatch-subnumber">60</text><text x="177" y="107" class="stopwatch-subnumber">15</text><text x="160" y="124" class="stopwatch-subnumber">30</text><text x="143" y="107" class="stopwatch-subnumber">45</text>
 <line id="stopwatch-minute-hand" x1="160" y1="112" x2="160" y2="85"/>
 <circle cx="160" cy="107" r="3" class="stopwatch-hub"/>
 <line id="stopwatch-second-hand" x1="160" y1="182" x2="160" y2="38"/><circle cx="160" cy="160" r="5" class="stopwatch-hub"/>
 </svg><p class="dial-hint">{c.dialHint}</p></div>
-<div id="elapsed" class="stopwatch-time" role="timer" aria-label={c.total} aria-live="off">00:00:00.00</div></div>
+<div id="elapsed" hidden class="stopwatch-time" role="timer" aria-label={c.total} aria-live="off">00:00:00.00</div></div>
 <div class="focus-details stopwatch-focus-details"><div class="timer-controls">
 <button id="reset-timing" class="secondary" aria-label={c.reset} title={c.reset} disabled><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 10a9 9 0 1 1 1 8M3 4v6h6"/></svg></button>
 <button id="toggle-timing" class="primary" aria-label={c.start} title={c.start} disabled><span id="play-symbol"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m8 5 11 7-11 7Z" fill="currentColor" stroke="none"/></svg></span><span id="pause-symbol" hidden><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 5v14M16 5v14" stroke-width="4"/></svg></span></button>
@@ -37,10 +37,10 @@ const {lang}=Astro.props; const t=getDictionary(lang); const c=stopwatchText[lan
 <button id="copy-laps" class="secondary" aria-label={c.copyLaps} title={c.copyLaps} disabled><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V3H3v13h5"/></svg></button>
 <button id="export-laps" class="secondary" aria-label={c.exportCsv} title={c.exportCsv} disabled><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></svg></button>
 </div></div><p id="empty-laps">{c.empty}</p><div class="lap-scroll"><table id="laps-table" hidden><caption class="sr-only">{c.laps}</caption><thead><tr><th scope="col">{c.lap}</th><th scope="col">{c.duration}</th><th scope="col">{c.total}</th></tr></thead><tbody id="laps-body"></tbody></table></div><p id="export-status" class="export-status" role="status"></p><p id="lap-status" role="status" class="sr-only"></p></section>
-</section><div class="stopwatch-sidebar"><aside class="settings-card stopwatch-options" aria-labelledby="options-title"><h2 id="options-title">{c.options}</h2>
-<label class="stopwatch-view-choice" for="stopwatch-view">{c.view}<select id="stopwatch-view" name="view"><option value="digital">{c.digital}</option><option value="analog" selected>{c.analog}</option></select></label>
+</section><aside class="settings-card stopwatch-options" aria-labelledby="options-title"><h2 id="options-title">{c.options}</h2>
+<label class="stopwatch-view-choice" for="stopwatch-view">{c.view}<select id="stopwatch-view" name="view"><option value="digital">{c.digital}</option><option value="analog" selected>{c.analog}</option><option value="combined">{c.combined}</option></select></label>
 <label class="toggle-row"><span><strong>{c.awake}</strong><small>{c.awakeHint}</small></span><input id="awake" type="checkbox" role="switch" /><span class="toggle" aria-hidden="true"></span></label>
-</aside></div></div>
+</aside></div>
 <p class="local-note">{c.note}</p><p class="privacy-promise">{t.privacyPromise}</p></div>
 <section class="guide"><div class="guide-heading"><p class="eyebrow">THE JACKTOOLS.NET WAY</p><h2>{c.guide}</h2></div><div class="guide-grid">{c.steps.map(([title,body],i)=><article><span class="step-number">0{i+1}</span><h3>{title}</h3><p>{body}</p></article>)}</div></section>
 <section class="faq"><h2>{t.faq}</h2><details><summary>{c.question}<span aria-hidden="true">+</span></summary><p>{c.answer}</p></details></section>

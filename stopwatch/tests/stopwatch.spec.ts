@@ -85,3 +85,66 @@ test('copy and CSV export include chronological laps, work in focus, handle clip
  await page.locator('#copy-laps').click();await expect(page.locator('#export-status')).toContainText('CSV-Export');
  await page.locator('#reset-timing').click();await page.locator('#reset-confirm').click();await expect(page.locator('#copy-laps')).toBeDisabled();await expect(page.locator('#export-laps')).toBeDisabled();await expect(page.locator('#export-status')).toBeEmpty();
 });
+
+test('normal layout puts laps to the right and options in the next row',async({page})=>{
+ await page.goto('/de/');
+ for(const width of [1440,768,390]){
+  await page.setViewportSize({width,height:1000});
+  const main=(await page.locator('.stopwatch-main').boundingBox())!;
+  const laps=(await page.locator('.stopwatch-laps').boundingBox())!;
+  const card=(await page.locator('.stopwatch-card').boundingBox())!;
+  const options=(await page.locator('.stopwatch-options').boundingBox())!;
+  expect(options.y).toBeGreaterThanOrEqual(card.y+card.height);
+  expect(options.width).toBeCloseTo(card.width,0);
+  if(width>600){
+   expect(laps.x).toBeGreaterThanOrEqual(main.x+main.width);
+   const heading=(await page.locator('#options-title').boundingBox())!;
+   const view=(await page.locator('.stopwatch-view-choice').boundingBox())!;
+   const awake=(await page.locator('.stopwatch-options .toggle-row').boundingBox())!;
+   expect(view.x).toBeGreaterThanOrEqual(heading.x+heading.width);
+   expect(awake.x).toBeGreaterThanOrEqual(view.x+view.width);
+   expect(view.y).toBeCloseTo(heading.y,0);
+   expect(awake.y).toBeCloseTo(heading.y,0);
+  }else expect(laps.y).toBeGreaterThanOrEqual(main.y+main.height);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ }
+});
+
+test('option headings share alignment and typography after select enhancement',async({page})=>{
+ await page.goto('/de/');
+ await expect(page.locator('#trigger-view')).toBeVisible();
+ const headings=page.locator('#options-title, #caption-view, .stopwatch-options .toggle-row strong');
+ const styles=await headings.evaluateAll(elements=>elements.map(element=>{
+  const style=getComputedStyle(element);
+  return {fontSize:style.fontSize,fontWeight:style.fontWeight,lineHeight:style.lineHeight};
+ }));
+ expect(styles).toHaveLength(3);
+ expect(styles[1]).toEqual(styles[0]);
+ expect(styles[2]).toEqual(styles[0]);
+ if(page.viewportSize()!.width>600){
+  const boxes=await headings.evaluateAll(elements=>elements.map(element=>element.getBoundingClientRect().top));
+  expect(boxes[1]).toBeCloseTo(boxes[0],0);
+  expect(boxes[2]).toBeCloseTo(boxes[0],0);
+ }
+});
+
+test('analog, digital and combined views show only the selected displays',async({page})=>{
+ await page.goto('/de/');
+ for(const focus of [false,true]){
+  if(focus) await page.locator('#stopwatch-focus').click();
+  for(const view of ['analog','digital','combined']){
+   await page.locator('#stopwatch-view').selectOption(view,{force:true});
+   if(view==='digital') await expect(page.locator('#analog-stopwatch')).toBeHidden();
+   else await expect(page.locator('#analog-stopwatch')).toBeVisible();
+   if(view==='analog') await expect(page.locator('#elapsed')).toBeHidden();
+   else await expect(page.locator('#elapsed')).toBeVisible();
+  }
+ }
+ await page.keyboard.press('Escape');
+ await page.locator('#palette-dropdown summary').click();
+ await page.locator('#remember-preferences').check();
+ await page.reload();
+ await expect(page.locator('#stopwatch-view')).toHaveValue('combined');
+ await expect(page.locator('#analog-stopwatch')).toBeVisible();
+ await expect(page.locator('#elapsed')).toBeVisible();
+});

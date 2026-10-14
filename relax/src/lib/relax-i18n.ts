@@ -1,4 +1,6 @@
 const de = {
+ backgroundAnimationHint:'Alle Hintergrundbilder bewegen sich sanft. Eingeschaltete Instrumente verstärken passende Bewegungen und Lichtakzente.',
+ backgroundAnimation:'Hintergrund animieren',
  birds:'Vogelgezwitscher',birdsAnimation:'Vögel animieren',birdsActivity:'Rufhäufigkeit',birdsActivityHint:'Links vereinzelte Rufe, rechts lebhaftes Zwitschern.',
  instrumentGroup:'Instrumente',sessionGroup:'Sitzung & Schlafmodus',displayGroup:'Darstellung & Wiedergabe',
  waveDirection:'Wellenrichtung',waveDirectionNames:['Von unten','Von oben','Von links','Von rechts'],fire:'Lagerfeuer',stream:'Meeresrauschen',fireAnimation:'Feuer und Rauch animieren',streamAnimation:'Wellen animieren',fireDensity:'Knisterdichte',streamFlow:'Wellenstärke',fireDensityHint:'Wenige Knackser links, lebhafteres Knistern rechts.',streamFlowHint:'Links sanfte Wellen, rechts kräftigere Wellen und kürzere Ruhephasen.',
@@ -42,6 +44,8 @@ const de = {
 };
 type Text = typeof de;
 const en:Text = {
+ backgroundAnimationHint:'All backgrounds move gently. Enabled instruments enhance matching movements and light accents.',
+ backgroundAnimation:'Animate background',
  birds:'Birdsong',birdsAnimation:'Animate birds',birdsActivity:'Call frequency',birdsActivityHint:'Left: occasional calls. Right: lively birdsong.',
  instrumentGroup:'Instruments',sessionGroup:'Session & sleep mode',displayGroup:'Display & playback',
  waveDirection:'Wave direction',waveDirectionNames:['From below','From above','From the left','From the right'],fire:'Campfire',stream:'Ocean surf',fireAnimation:'Animate fire and smoke',streamAnimation:'Animate waves',fireDensity:'Crackle density',streamFlow:'Wave intensity',fireDensityHint:'Fewer crackles on the left, livelier crackling on the right.',streamFlowHint:'Gentle waves on the left, stronger waves and shorter lulls on the right.',
@@ -80,6 +84,8 @@ const en:Text = {
  privacyBody:'Sound choices, volumes, duration, density, display options and first-start guidance status are saved locally only with storage consent. Otherwise they stay in memory. Running sessions are not saved. Disabling storage or clearing preferences removes saved values. There is no cross-device synchronisation.',
 };
 const es:Text = {
+ backgroundAnimationHint:'Todos los fondos se mueven suavemente. Los instrumentos activados realzan los movimientos y la luz.',
+ backgroundAnimation:'Animar fondo',
  birds:'Canto de pájaros',birdsAnimation:'Animar pájaros',birdsActivity:'Frecuencia de cantos',birdsActivityHint:'Izquierda: cantos ocasionales. Derecha: canto animado.',
  instrumentGroup:'Instrumentos',sessionGroup:'Sesión y modo sueño',displayGroup:'Visualización y reproducción',
  waveDirection:'Dirección de las olas',waveDirectionNames:['Desde abajo','Desde arriba','Desde la izquierda','Desde la derecha'],fire:'Fogata',stream:'Oleaje del mar',fireAnimation:'Animar fuego y humo',streamAnimation:'Animar las olas',fireDensity:'Densidad de crepitación',streamFlow:'Intensidad de las olas',fireDensityHint:'Menos chasquidos a la izquierda, más crepitación a la derecha.',streamFlowHint:'Olas suaves a la izquierda; olas más fuertes y pausas más cortas a la derecha.',
@@ -118,6 +124,8 @@ const es:Text = {
  privacyBody:'Solo con consentimiento se guardan localmente sonidos, volúmenes, duración, densidad, opciones visuales y el estado del aviso inicial. Sin consentimiento permanecen en memoria. No se guarda una sesión en curso. Desactivar el almacenamiento o borrar ajustes elimina los datos guardados. No hay sincronización entre dispositivos.',
 };
 const fr:Text = {
+ backgroundAnimationHint:'Tous les décors bougent doucement. Les instruments activés renforcent les mouvements et les accents lumineux.',
+ backgroundAnimation:'Animer l’arrière-plan',
  birds:'Chant des oiseaux',birdsAnimation:'Animer les oiseaux',birdsActivity:'Fréquence des chants',birdsActivityHint:'À gauche : chants isolés. À droite : chants plus fréquents.',
  instrumentGroup:'Instruments',sessionGroup:'Séance et mode sommeil',displayGroup:'Affichage et lecture',
  waveDirection:'Direction des vagues',waveDirectionNames:['Depuis le bas','Depuis le haut','Depuis la gauche','Depuis la droite'],fire:'Feu de camp',stream:'Vagues de la mer',fireAnimation:'Animer le feu et la fumée',streamAnimation:'Animer les vagues',fireDensity:'Densité du crépitement',streamFlow:'Intensité des vagues',fireDensityHint:'Moins de craquements à gauche, plus de crépitement à droite.',streamFlowHint:'Vagues douces à gauche, vagues plus fortes et pauses plus courtes à droite.',

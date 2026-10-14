@@ -484,3 +484,37 @@ test('birdsong presets, independent flight animation and consent persistence',as
  await page.locator('#preset-dropdown summary').click();await page.locator('[name=preset][value=evening]').check();
  await expect(page.locator('#birds')).not.toBeChecked();
 });
+
+test('background scenes animate independently, respond to notes and pause safely',async({page})=>{
+ await page.goto('/de/');
+ await page.locator('#preset-dropdown summary').click();await page.locator('[name=preset][value=focus]').check();
+ const bg=page.locator('#relax-background'),scene=bg.locator('[data-scene=focus-room]');
+ await expect(page.locator('#instrumentAnimation')).not.toBeChecked();
+ await expect(scene).toBeVisible();await expect(bg).toHaveAttribute('data-paused','true');
+ await begin(page);await expect(bg).toHaveAttribute('data-paused','false');
+ await expect.poll(async()=>bg.evaluate(n=>Number((n as HTMLElement).style.getPropertyValue('--scene-energy'))),{timeout:15000}).toBeGreaterThan(0);
+ await expect(bg).toHaveAttribute('data-instrument','kalimba');
+ await expect(scene.locator('.scene-cat')).toHaveCSS('animation-name','scene-cat-breathe');
+ await expect(page.locator('.sound-shape')).toHaveCount(0);
+ await page.locator('#start').click();await expect(scene.locator('.scene-cat')).toHaveCSS('animation-play-state','paused');
+ await page.locator('#backgroundAnimation').uncheck();await expect(scene).toBeHidden();
+ await expect(page.locator('#relax-background')).toHaveCSS('background-image',/focus-room/);
+ await page.locator('#backgroundAnimation').check();await expect(scene).toBeVisible();
+ await page.emulateMedia({reducedMotion:'reduce'});await expect(scene).toBeHidden();
+});
+
+test('all background options have enabled animation and instrument-reactive scenery',async({page})=>{
+ await page.goto('/de/');
+ const options=await page.locator('[name=backgroundImage]').evaluateAll(nodes=>nodes.map(n=>(n as HTMLInputElement).value).filter(n=>n!=='none'));
+ for(const scene of options){
+  await page.locator('#background-image-dropdown summary').click();await page.locator('[name=backgroundImage][value="'+scene+'"]').check();
+  await expect(page.locator('#backgroundAnimation')).toBeEnabled();
+  await expect(page.locator('.relax-animated-scene[data-scene="'+scene+'"]')).toBeVisible();
+ }
+ await page.locator('#background-image-dropdown summary').click();await page.locator('[name=backgroundImage][value=stars]').check();
+ await begin(page);
+ await expect.poll(async()=>page.locator('#relax-background').evaluate(n=>Number((n as HTMLElement).style.getPropertyValue('--scene-energy'))),{timeout:15000}).toBeGreaterThan(0);
+ await page.locator('#instrumentsEnabled').uncheck();
+ await expect(page.locator('.relax-animated-scene[data-scene=stars] .scene-star').first()).toHaveCSS('animation-name','scene-star');
+ await page.locator('#backgroundAnimation').uncheck();await expect(page.locator('.relax-animated-scene:visible')).toHaveCount(0);
+});

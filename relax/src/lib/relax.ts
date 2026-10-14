@@ -6,6 +6,7 @@ export type Layer = 'rain' | 'wind' | 'noise' | 'fire' | 'stream' | 'birds';
 export const waveDirections=['bottom','top','left','right'] as const;
 export interface Settings {
  birds:boolean; birdsAnimation:boolean; birdsVolume:number; birdsActivity:number;
+ backgroundAnimation:boolean;
  backgroundImage:BackgroundImage;
  waveDirection:typeof waveDirections[number];
  sleepMode:boolean; instrumentsEnabled:boolean; minutes:number; density:number; chimes:boolean; bowls:boolean; kalimba:boolean; handpan:boolean; bells:boolean; gong:boolean; harp:boolean; instrumentVolume:number; pitch:number;
@@ -15,6 +16,7 @@ export interface Settings {
 }
 export const defaults:Settings = {
  birds:false,birdsAnimation:false,birdsVolume:20,birdsActivity:4,
+ backgroundAnimation:true,
  backgroundImage:'none',
  waveDirection:'bottom',sleepMode:false,instrumentsEnabled:true,minutes:15,density:5,chimes:true,bowls:false,kalimba:false,handpan:false,bells:false,gong:false,harp:false,instrumentVolume:45,pitch:0,
  windAnimation:false,instrumentAnimation:true,rainAnimation:false,rain:false,wind:false,noise:false,windActivity:5,rainDensity:5,rainVolume:25,windVolume:20,noiseVolume:20,
@@ -24,7 +26,7 @@ export const defaults:Settings = {
 export function normalize(value:unknown):Settings {
  const v=value && typeof value==='object'?value as Partial<Settings>:{};
  const result={...defaults};
- for(const key of ['birds','birdsAnimation','fire','stream','fireAnimation','streamAnimation','sleepMode','instrumentsEnabled','windAnimation','instrumentAnimation','rainAnimation','chimes','bowls','kalimba','handpan','bells','gong','harp','rain','wind','noise','motion','awake','background','safetySeen'] as const) {
+ for(const key of ['backgroundAnimation','birds','birdsAnimation','fire','stream','fireAnimation','streamAnimation','sleepMode','instrumentsEnabled','windAnimation','instrumentAnimation','rainAnimation','chimes','bowls','kalimba','handpan','bells','gong','harp','rain','wind','noise','motion','awake','background','safetySeen'] as const) {
   if(typeof v[key]==='boolean') result[key]=v[key]!;
  }
  for(const [key,min,max] of [['birdsVolume',0,100],['birdsActivity',1,10],['fireVolume',0,100],['streamVolume',0,100],['fireDensity',1,10],['streamFlow',1,10],['windActivity',1,10],['rainDensity',1,10],['pitch',-12,12],['minutes',0,180],['density',1,10],['instrumentVolume',0,100],['rainVolume',0,100],['windVolume',0,100],['noiseVolume',0,100]] as const) {

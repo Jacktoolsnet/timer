@@ -1,3 +1,4 @@
+import {animateScene,animatedScenes} from '../src/lib/animated-backgrounds.ts';
 import {birdSong} from '../src/lib/birds.ts';
 import {backgroundImages,backgroundText} from '../src/lib/backgrounds.ts';
 import {readFileSync} from 'node:fs';
@@ -278,4 +279,20 @@ test('all presets disable instrument animation while leaving it manually adjusta
   assert.equal(settings.instrumentAnimation,false);
   assert.equal(normalize({...settings,instrumentAnimation:true}).instrumentAnimation,true);
  }
+});
+
+test('preset animation assets have isolated IDs and decorative inline motion hooks',()=>{
+ for(const scene of animatedScenes){
+  const artwork=readFileSync(new URL('../public/backgrounds/'+scene+'.svg',import.meta.url),'utf8');
+  const svg=animateScene(artwork,scene);
+  assert.match(svg,/aria-hidden="true"/);assert.match(svg,/class="relax-animated-scene"/);
+  assert.match(svg,/scene-(?:leaves|flower|lamp|cat|tent|water|surf|fog|star|sand|cloud)/);
+  assert.doesNotMatch(svg,/url\(#sky\)|id="sky"|<script/);
+ }
+ assert.equal(normalize({backgroundAnimation:false}).backgroundAnimation,false);
+ for(const preset of presetNames)assert.equal(applyPreset({...defaults,backgroundAnimation:false},preset).backgroundAnimation,false);
+});
+
+test('every selectable background has an animation variant',()=>{
+ assert.deepEqual(animatedScenes,backgroundImages.filter(scene=>scene!=='none'));
 });

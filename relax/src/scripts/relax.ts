@@ -1,3 +1,4 @@
+import {animatedScenes} from '../lib/animated-backgrounds';
 import {backgroundImages,backgroundText} from '../lib/backgrounds';
 import {wavePositionPicker} from '../lib/wave-position';
 import {applyPreset,matchingPreset,presetNames,type Preset} from '../lib/presets';
@@ -20,7 +21,21 @@ if(reduced.matches)settings.motion=false;
 let state:'ready'|'running'|'paused'|'ended'='ready',elapsed=0,anchor=0,total=0,pending=false,generation=0;
 const wake=screenWakeLock(el('wake-status'),'',t.awakeError);
 const stage=el('sound-shapes');
+let sceneImpulse=0,lastSceneFrame=0;
+function backgroundState(){
+ const enabled=settings.backgroundAnimation&&settings.motion&&!reduced.matches;
+ const running=state==='running'&&!document.hidden;
+ el('relax-background').dataset.animated=String(enabled);
+ el('relax-background').dataset.paused=String(!running);
+ if(!enabled||state==='ready'||state==='ended')sceneImpulse=0;
+}
+
 function shape(note:NoteEvent){
+ if(settings.backgroundAnimation&&settings.motion&&!reduced.matches&&settings.instrumentsEnabled&&settings.instrumentVolume>0&&!document.hidden&&state==='running'){
+  sceneImpulse=Math.min(1,sceneImpulse+(note.instrument==='chimes'?.22:note.instrument==='handpan'?.3:.18));
+  el('relax-background').dataset.instrument=note.instrument;
+ }
+
  if(!settings.instrumentsEnabled||!settings.motion||!settings.instrumentAnimation||document.hidden||state!=='running')return;
  const node=document.createElement('div');node.className='sound-shape shape-'+note.index%4+' instrument-'+note.instrument;
  node.style.setProperty('--tone-colour','var(--relax-tone-'+note.index+')');
@@ -38,6 +53,16 @@ const nextWavePosition=wavePositionPicker();
 const waveProfiles=new Map<string,{peak:number;width:number;height:number}>();
 const fireScene=el('campfire-closeup');
 function rainFrame(){
+ backgroundState();
+ const now=performance.now(),dt=Math.min(.1,(now-lastSceneFrame)/1000);lastSceneFrame=now;
+ if(state==='running'&&!document.hidden)sceneImpulse*=Math.exp(-dt/2.5);
+ const bg=el('relax-background');
+ bg.style.setProperty('--scene-energy',String(sceneImpulse));
+ bg.style.setProperty('--scene-sway',(1+sceneImpulse*1.5+audio.windStrength()*1.5)+'deg');
+ bg.style.setProperty('--scene-light',String(.04+sceneImpulse*.14));
+ bg.style.setProperty('--scene-ripple',(7+sceneImpulse*6)+'px');
+ bg.style.setProperty('--scene-drift',(12+sceneImpulse*9)+'px');
+
  const fireVisible=settings.fire&&settings.fireAnimation&&settings.motion&&!reduced.matches&&settings.fireVolume>0&&(state==='running'||state==='paused');
  fireScene.hidden=!fireVisible;
  fireScene.dataset.paused=String(state!=='running'||document.hidden);
@@ -111,6 +136,9 @@ function sync(){
  document.querySelectorAll<HTMLInputElement>('[name=backgroundImage]').forEach(r=>r.checked=r.value===settings.backgroundImage);
  el('relax-background').style.backgroundImage=settings.backgroundImage==='none'?'none':`url(/backgrounds/${settings.backgroundImage}.svg)`;
  el('sound-stage').dataset.backgroundImage=settings.backgroundImage;
+ input('backgroundAnimation').disabled=!animatedScenes.some(scene=>scene===settings.backgroundImage);
+ document.querySelectorAll<SVGElement>('.relax-animated-scene').forEach(scene=>scene.dataset.active=String(scene.dataset.scene===settings.backgroundImage));
+ backgroundState();
 
  document.querySelectorAll<HTMLInputElement>('[name=waveDirection]').forEach(r=>r.checked=r.value===settings.waveDirection);
  el('wave-direction-value').textContent=t.waveDirectionNames[waveDirections.indexOf(settings.waveDirection)]!;
@@ -119,7 +147,7 @@ function sync(){
  document.querySelectorAll<HTMLInputElement>('[name=preset]').forEach(r=>r.checked=r.value===preset);
  document.querySelectorAll<HTMLInputElement>('[name=instrument]').forEach(r=>r.checked=r.value===selectedInstrument(settings));
  el('instrument-value').textContent=t[selectedInstrument(settings)];
- for(const key of ['birds','birdsAnimation','fire','stream','fireAnimation','streamAnimation','sleepMode','instrumentsEnabled','windAnimation','instrumentAnimation','rainAnimation','rain','wind','noise','motion','awake','background'] as const)input(key).checked=settings[key];
+ for(const key of ['backgroundAnimation','birds','birdsAnimation','fire','stream','fireAnimation','streamAnimation','sleepMode','instrumentsEnabled','windAnimation','instrumentAnimation','rainAnimation','rain','wind','noise','motion','awake','background'] as const)input(key).checked=settings[key];
  for(const key of ['birdsVolume','birdsActivity','fireVolume','streamVolume','fireDensity','streamFlow','windActivity','rainDensity','pitch','minutes','density','instrumentVolume','rainVolume','windVolume','noiseVolume'] as const){
   input(key).value=String(settings[key]);const output=document.getElementById(key+'-value');if(output)output.textContent=(key==='birdsActivity'||key==='rainDensity'||key==='windActivity'||key==='fireDensity'||key==='streamFlow')?settings[key]+' / 10':key==='pitch'?(settings.pitch===0?t.pitchOriginal:(settings.pitch>0?'+':'')+settings.pitch+' '+t.semitones):settings[key]+' %';
  }
@@ -180,7 +208,7 @@ function read(){
  settings.backgroundImage=document.querySelector<HTMLInputElement>('[name=backgroundImage]:checked')!.value as Settings['backgroundImage'];
  const selected=document.querySelector<HTMLInputElement>('[name=instrument]:checked')!.value;
  for(const key of ['chimes','bowls','kalimba','handpan','bells','gong','harp'] as const)settings[key]=key===selected;
- for(const key of ['birds','birdsAnimation','fire','stream','fireAnimation','streamAnimation','sleepMode','instrumentsEnabled','windAnimation','instrumentAnimation','rainAnimation','rain','wind','noise','motion','awake','background'] as const)settings[key]=input(key).checked;
+ for(const key of ['backgroundAnimation','birds','birdsAnimation','fire','stream','fireAnimation','streamAnimation','sleepMode','instrumentsEnabled','windAnimation','instrumentAnimation','rainAnimation','rain','wind','noise','motion','awake','background'] as const)settings[key]=input(key).checked;
  for(const key of ['birdsVolume','birdsActivity','fireVolume','streamVolume','fireDensity','streamFlow','windActivity','rainDensity','pitch','minutes','density','instrumentVolume','rainVolume','windVolume','noiseVolume'] as const)settings[key]=Number(input(key).value);
  settings.waveDirection=document.querySelector<HTMLInputElement>('[name=waveDirection]:checked')!.value as Settings['waveDirection'];
  settings.noiseType=document.querySelector<HTMLInputElement>('[name=noiseType]:checked')!.value as Settings['noiseType'];

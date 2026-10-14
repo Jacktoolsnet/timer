@@ -20,7 +20,7 @@ const now = () => Date.now();
 try { if (storageAllowed()) {
  const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
  awake.checked = saved?.awake === true;
- if (saved?.view === 'analog' || saved?.view === 'digital') view.value = saved.view;
+ if (saved?.view === 'analog' || saved?.view === 'digital' || saved?.view === 'combined') view.value = saved.view;
 } } catch {}
 function save() {
  if (!storageAllowed()) return;
@@ -29,14 +29,15 @@ function save() {
 }
 function render() {
  const elapsed = timer.elapsed(now()); $('elapsed').textContent = formatElapsed(elapsed);
- if (view.value === 'analog') {
+ if (view.value !== 'digital') {
  $('stopwatch-second-hand').setAttribute('transform', `rotate(${(elapsed % 60000) / 60000 * 360} 160 160)`);
  $('stopwatch-minute-hand').setAttribute('transform', `rotate(${(elapsed % 3600000) / 3600000 * 360} 160 107)`);
  }
 }
 function configureView() {
  $('stopwatch-display').dataset.view = view.value;
- $('analog-stopwatch').hidden = view.value !== 'analog'; render();
+ $('analog-stopwatch').hidden = view.value === 'digital';
+ $('elapsed').hidden = view.value === 'analog'; render();
 }
 view.addEventListener('change', () => {configureView(); save();});
 function sync() {
