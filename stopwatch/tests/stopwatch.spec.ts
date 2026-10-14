@@ -343,3 +343,56 @@ test('combined clipboard and CSV export share clock columns and lap rows',async(
  const {readFile}=await import('node:fs/promises');
  expect(await readFile((await download.path())!,'utf8')).toBe('\uFEFF"Runde","Stoppuhr 1","Stoppuhr 2"\r\n"1","00:00:01.00","00:00:01.00"\r\n"2","00:00:02.00",""\r\n');
 });
+
+test('print view contains grouped times and diagram without application controls',async({page})=>{
+ await page.goto('/de/');
+ await page.locator('#add-clock').click();
+ await page.locator('#start-all').click();
+ await page.locator('#lap-all').click();
+ await page.locator('#show-all-laps').click();
+ await page.emulateMedia({media:'print'});
+ await expect(page.locator('.print-clock-section')).toHaveCount(2);
+ await expect(page.locator('.print-clock-section h3')).toHaveText(['Stoppuhr 1','Stoppuhr 2']);
+ for(const section of await page.locator('.print-clock-section').all()){
+  await expect(section.locator('th')).toHaveText(['Runde','Rundenzeit','Gesamtzeit']);
+  await expect(section.locator('tbody tr')).toHaveCount(1);
+  await expect(section.locator('svg')).toBeVisible();
+ }
+ await expect(page.locator('#print-chart svg')).toBeVisible();
+ await expect(page.locator('#print-chart polyline')).toHaveCount(2);
+ for(const selector of ['.site-header','.site-footer','.stopwatch-workspace','.guide','.faq','.intro']){
+  await expect(page.locator(selector)).toBeHidden();
+ }
+ await page.emulateMedia({media:'screen'});
+ await expect(page.locator('#stopwatch-print')).toBeHidden();
+ await expect(page.locator('.stopwatch-workspace')).toBeVisible();
+});
+
+test('reset all confirms, preserves clocks and names, and clears every measurement',async({page})=>{
+ await page.goto('/de/');
+ await page.locator('#add-clock').click();
+ await page.locator('.extra-clock input').fill('Training');
+ await expect(page.locator('#reset-all')).toBeDisabled();
+ await page.locator('#start-all').click();
+ await page.locator('#lap-all').click();
+ await expect(page.locator('#reset-all')).toBeDisabled();
+ await page.locator('#pause-all').click();
+ await page.locator('#show-all-laps').click();
+ await page.locator('#reset-all').click();
+ await expect(page.locator('#reset-title')).toHaveText('Alle Stoppuhren zurücksetzen?');
+ await page.locator('#reset-cancel').click();
+ await expect(page.locator('#laps-body tr')).toHaveCount(2);
+ await page.locator('#reset-all').click();
+ await page.locator('#reset-confirm').click();
+ await expect(page.locator('.clock-tile')).toHaveCount(2);
+ await expect(page.locator('.extra-clock input')).toHaveValue('Training');
+ await expect(page.locator('#elapsed')).toHaveText('00:00:00.00');
+ await expect(page.locator('.extra-clock [data-readout]')).toHaveText('00:00:00.00');
+ await expect(page.locator('#laps-body tr')).toHaveCount(0);
+ await expect(page.locator('#lap-insights')).toBeHidden();
+ await expect(page.locator('#reset-all')).toBeDisabled();
+ await expect(page.locator('#start-all')).toBeFocused();
+ await page.locator('#start-all').click();
+ await page.locator('#lap-all').click();
+ await expect(page.locator('#laps-body tr')).toHaveCount(2);
+});

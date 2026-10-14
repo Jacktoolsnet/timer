@@ -1,7 +1,7 @@
 import {analyzeLaps,formatElapsed} from '../lib/stopwatch';
 
-export function renderLapInsights(laps: readonly {duration:number}[], t: Record<string,string>) {
- const $ = (id:string) => document.getElementById(id)!;
+export function renderLapInsights(laps: readonly {duration:number}[], t: Record<string,string>, root:ParentNode=document) {
+ const $ = (id:string) => root.querySelector<HTMLElement>('#'+id)!;
  const analysis = analyzeLaps(laps);
  $('lap-insights').hidden = !analysis;
  const content = $('lap-chart-content');

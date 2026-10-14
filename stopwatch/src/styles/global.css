@@ -997,3 +997,39 @@ body.focus-view .clock-tile .focus-details .timer-controls button,
 body.focus-view .clock-tile .focus-details .timer-controls button.primary{width:40px;min-width:40px;min-height:40px;padding:8px}
 .multi-toolbar button{width:44px;min-width:44px;height:44px;padding:10px}
 #show-all-laps[aria-pressed=true]{background:var(--accent-soft);color:var(--accent)}
+
+#stopwatch-print{display:none}
+@media print{
+ html:has(#stopwatch-app),body:has(#stopwatch-app){background:#fff!important;color:#000!important;overflow:visible!important}
+ body:has(#stopwatch-app){--text:#000;--muted:#444;--surface:#fff;--line:#ccc;--accent:#a64d35;--green:#59745c}
+ body:has(#stopwatch-app) .site-shell{display:block!important;width:auto!important;max-width:none!important;padding:0!important}
+ body:has(#stopwatch-app) .site-shell>:not(main),
+ body:has(#stopwatch-app) .skip-link,
+ body:has(#stopwatch-app) dialog,
+ body:has(#stopwatch-app) main>:not(#stopwatch-app),
+ #stopwatch-app>:not(#stopwatch-print){display:none!important}
+ #stopwatch-print{display:block!important;font:11pt/1.5 Arial,sans-serif}
+ #stopwatch-print h2{font-size:16pt;margin:0 0 6mm}
+ #print-laps{width:100%;border-collapse:collapse;table-layout:fixed;font-variant-numeric:tabular-nums;font-size:9pt}
+ #print-laps th,#print-laps td{padding:3mm 1mm;border-bottom:1px solid #ccc;text-align:right;overflow-wrap:anywhere}
+ #print-laps th:first-child,#print-laps td:first-child{text-align:left}
+ #print-laps thead{display:table-header-group}
+ #print-laps tr{break-inside:avoid}
+ #print-chart .lap-chart{margin:8mm 0 0;break-inside:avoid;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+ #print-chart svg{display:block;width:100%;max-height:100mm;height:auto;fill:#444;stroke:none}
+ #print-chart svg text{font:11px Arial,sans-serif}
+}
+@media print{
+ #stopwatch-print table{width:100%;border-collapse:collapse;table-layout:fixed;font-variant-numeric:tabular-nums;font-size:9pt}
+ #stopwatch-print table[hidden]{display:none!important}
+ #stopwatch-print th,#stopwatch-print td{padding:3mm 1mm;border-bottom:1px solid #ccc;text-align:right;overflow-wrap:anywhere}
+ #stopwatch-print th:first-child,#stopwatch-print td:first-child{text-align:left}
+ #stopwatch-print thead{display:table-header-group}
+ #stopwatch-print tr{break-inside:avoid}
+ #stopwatch-print h3{font-size:13pt;margin:8mm 0 3mm;break-after:avoid}
+ #stopwatch-print .lap-chart{break-inside:avoid;print-color-adjust:exact;-webkit-print-color-adjust:exact;margin:5mm 0}
+ #stopwatch-print svg{display:block;width:100%;height:auto;max-height:90mm;fill:#444;stroke:none}
+ #stopwatch-print svg text{font:11px Arial,sans-serif}
+ .print-clock-section+.print-clock-section{break-before:page}
+ #print-chart:has(h3){break-before:page}
+}

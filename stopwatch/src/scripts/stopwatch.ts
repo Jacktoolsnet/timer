@@ -56,6 +56,7 @@ function sync() {
  reset.disabled = timer.running || (timer.elapsed(now()) === 0 && !timer.laps.length);
  const anyRunning=clocks.some(clock=>clock.timer.running);
  ($('lap-all') as HTMLButtonElement).disabled=!anyRunning;
+ ($('reset-all') as HTMLButtonElement).disabled=anyRunning || !clocks.some(clock=>clock.timer.elapsed(now())>0 || clock.timer.laps.length);
  ($('pause-all') as HTMLButtonElement).disabled=!anyRunning;
  ($('start-all') as HTMLButtonElement).disabled=clocks.every(clock=>clock.timer.running);
  wake(awake.checked && anyRunning); render(); syncExtras();
@@ -75,12 +76,15 @@ reset.addEventListener('click', () => {
  openReset(0);
 });
 resetDialog.addEventListener('close', () => {
- const clock=clocks[resetTarget]!;
- if (resetDialog.returnValue !== 'reset' || clock.timer.running) return;
- clock.timer.reset();
- for(let i=captures.length-1;i>=0;i--) if(captures[i]!.clock===resetTarget) captures.splice(i,1);
- renderRounds(); sync();
- if(resetTarget===0) start.focus(); else clock.card!.querySelector<HTMLButtonElement>('[data-action=toggle]')!.focus();
+ const targets=resetTarget<0?clocks:[clocks[resetTarget]!];
+ if(resetDialog.returnValue!=='reset' || targets.some(clock=>clock.timer.running))return;
+ targets.forEach(clock=>clock.timer.reset());
+ for(let i=captures.length-1;i>=0;i--)if(resetTarget<0 || captures[i]!.clock===resetTarget)captures.splice(i,1);
+ $('lap-status').textContent='';
+ renderRounds();sync();
+ if(resetTarget<0)($('start-all') as HTMLButtonElement).focus();
+ else if(resetTarget===0)start.focus();
+ else clocks[resetTarget]!.card!.querySelector<HTMLButtonElement>('[data-action=toggle]')!.focus();
 
 });
 awake.addEventListener('change', () => {wake(awake.checked && clocks.some(clock=>clock.timer.running)); save();});
@@ -140,7 +144,8 @@ exportLaps.addEventListener('click', () => {
 
 function openReset(index:number){
  resetTarget=index;
- $('reset-title').textContent=clocks.length>1 ? t.resetTitle+' · '+clocks[index]!.name : t.resetTitle;
+ $('reset-title').textContent=index<0?t.resetAllTitle:clocks.length>1?t.resetTitle+' · '+clocks[index]!.name:t.resetTitle;
+ $('reset-description').textContent=index<0?t.resetAllBody:t.resetBody;
  resetDialog.returnValue='cancel';resetDialog.showModal();
 }
 function displayedLaps() {return selectedClock<0 ? captures : clocks[selectedClock]!.timer.laps;}
@@ -169,6 +174,7 @@ function renderRounds() {
  const dash=document.createElement('span');dash.setAttribute('aria-hidden','true');legend.append(dash,document.createTextNode(t.average+' · '+t.seconds));
  renderLapInsights(selectedClock<0 ? [] : clocks[selectedClock]!.timer.laps,t);
  if(selectedClock<0) renderCombinedChart();
+ renderPrintView();
 }
 function selectClock(index:number) {selectedClock=index;renderRounds();}
 function syncExtras(){
@@ -202,6 +208,10 @@ $('clock-primary-name').addEventListener('input',()=>{
 $('previous-clock').addEventListener('click',()=>selectClock(selectedClock<0?clocks.length-1:(selectedClock+clocks.length-1)%clocks.length));
 $('next-clock').addEventListener('click',()=>selectClock(selectedClock<0?0:(selectedClock+1)%clocks.length));
 $('all-clocks').addEventListener('click',()=>selectClock(-1));
+$('reset-all').addEventListener('click',()=>{
+ if(($('reset-all') as HTMLButtonElement).disabled || resetDialog.open)return;
+ openReset(-1);
+});
 $('show-all-laps').addEventListener('click',()=>selectClock(-1));
 $('lap-all').addEventListener('click',()=>{
  const stamp=now();
@@ -246,11 +256,12 @@ $('add-clock').addEventListener('click',()=>{
  button('lap',t.lap,()=>capture(index)),button('show',t.showLaps,()=>selectClock(index)));
 
  card.append(controls);$('extra-clocks').append(card);
- for(const id of ['clock-primary-heading','start-all','pause-all','lap-all','show-all-laps','lap-navigation']) $(id).hidden=false;
+ for(const id of ['clock-primary-heading','start-all','pause-all','reset-all','lap-all','show-all-laps','lap-navigation']) $(id).hidden=false;
  document.body.classList.add('multiple-stopwatches');
  sync();renderRounds();name.focus();
 });
-function renderCombinedChart(){
+function renderCombinedChart(root:ParentNode=document){
+ const $=(id:string)=>root.querySelector<HTMLElement>('[id="'+id+'"]')!;
  const active=clocks.filter(clock=>clock.timer.laps.length);
  if(!active.length)return;
  $('lap-insights').hidden=false;
@@ -290,3 +301,65 @@ function renderCombinedChart(){
  add('text',{x:260,y:228,'text-anchor':'middle'},t.lap);
  $('lap-chart-description').textContent=active.map(clock=>clock.name+': '+clock.timer.laps.map(lap=>formatElapsed(lap.duration)).join(', ')).join('. ');
 }
+
+
+
+function renderPrintView(){
+ const multiple=clocks.length>1;
+ $('print-title').textContent=t.laps+' · '+(multiple?t.allClocks:clocks[0]!.name);
+ const fillTable=(table:HTMLTableElement,rows:string[][])=>{
+  table.createTHead().replaceChildren();
+  const body=table.tBodies[0] || table.createTBody();body.replaceChildren();
+  rows.forEach((values,index)=>{
+   const row=document.createElement('tr');
+   for(const value of values){
+    const cell=document.createElement(index===0?'th':'td');
+    if(index===0)cell.setAttribute('scope','col');
+    cell.textContent=value;row.append(cell);
+   }
+   (index===0?table.tHead!:body).append(row);
+  });
+ };
+ const makeChart=(index:number|null)=>{
+  const root=document.createElement('div');
+  root.append($('lap-insights').cloneNode(true));
+  if(index===null)renderCombinedChart(root);
+  else {
+   renderLapInsights(clocks[index]!.timer.laps,t,root);
+   const legend=root.querySelector('.lap-chart-legend')!;
+   const dash=document.createElement('span');dash.setAttribute('aria-hidden','true');
+   legend.replaceChildren(dash,document.createTextNode(t.average+' · '+t.seconds));
+  }
+  const chart=root.querySelector('.lap-chart')! as HTMLElement;
+  chart.querySelectorAll('[id]').forEach(element=>element.removeAttribute('id'));
+  const svg=chart.querySelector('svg')!;
+  svg.removeAttribute('aria-labelledby');svg.setAttribute('aria-label',t.chart);
+  return chart;
+ };
+ const overview=$('print-laps') as HTMLTableElement;
+ overview.hidden=multiple;
+ fillTable(overview,lapRows(clocks[0]!.timer.laps,[t.lap,t.duration,t.total]));
+ const sections=$('print-clock-sections');sections.replaceChildren();
+ if(multiple)clocks.forEach((clock,index)=>{
+  const section=document.createElement('section');section.className='print-clock-section';
+  const heading=document.createElement('h3');heading.textContent=clock.name;section.append(heading);
+  if(clock.timer.laps.length){
+   const table=document.createElement('table');
+   fillTable(table,lapRows(clock.timer.laps,[t.lap,t.duration,t.total]));
+   section.append(table,makeChart(index));
+  }else{
+   const empty=document.createElement('p');empty.textContent=t.empty;section.append(empty);
+  }
+  sections.append(section);
+ });
+ $('print-chart').replaceChildren();
+ if(clocks.some(clock=>clock.timer.laps.length)){
+  if(multiple){
+   const heading=document.createElement('h3');heading.textContent=t.chart+' · '+t.allClocks;
+   $('print-chart').append(heading);
+  }
+  $('print-chart').append(makeChart(multiple?null:0));
+ }
+}
+window.addEventListener('beforeprint',renderPrintView);
+renderPrintView();
