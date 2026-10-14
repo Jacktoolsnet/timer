@@ -18,3 +18,10 @@ test('lap analysis handles empty lists, ties, averages and signed differences',a
  assert.deepEqual(analyzeLaps([{duration:3000},{duration:1000},{duration:2000}]),{fastest:1,slowest:0,average:2000,difference:1000});
  assert.deepEqual(analyzeLaps([{duration:2000},{duration:2000},{duration:1000}]),{fastest:2,slowest:0,average:5000/3,difference:-1000});
 });
+
+test('combined export uses clock columns and lap rows with empty missing rounds',async()=>{
+ const {combinedLapRows,lapsCsv}=await import('../src/lib/stopwatch.ts');
+ const rows=combinedLapRows([{name:'Uhr A',laps:[{duration:1000},{duration:2000}]},{name:'Uhr B',laps:[{duration:1500}]},{name:'Uhr C',laps:[]}],'Runde');
+ assert.deepEqual(rows,[['Runde','Uhr A','Uhr B','Uhr C'],['1','00:00:01.00','00:00:01.50',''],['2','00:00:02.00','','']]);
+ assert.ok(lapsCsv(rows).includes('"2","00:00:02.00","",""'));
+});

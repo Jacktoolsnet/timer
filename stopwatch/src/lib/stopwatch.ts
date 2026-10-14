@@ -34,3 +34,11 @@ export function analyzeLaps(laps: readonly {duration: number}[]) {
  return {fastest,slowest,average:total / laps.length,
   difference:laps.length > 1 ? laps.at(-1)!.duration - laps.at(-2)!.duration : null};
 }
+
+/** Compare lap durations by stopwatch column; missing laps remain empty. */
+export function combinedLapRows(clocks: readonly {name:string; laps:readonly {duration:number}[]}[], lapHeading:string):string[][] {
+ const count=clocks.reduce((maximum,clock)=>Math.max(maximum,clock.laps.length),0);
+ return [[lapHeading,...clocks.map(clock=>clock.name)],...Array.from({length:count},(_,index)=>[
+  String(index+1),...clocks.map(clock=>clock.laps[index] ? formatElapsed(clock.laps[index]!.duration) : '')
+ ])];
+}

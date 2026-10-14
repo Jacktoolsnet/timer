@@ -835,7 +835,6 @@ body.focus-view .stopwatch-main #stopwatch-display:is([data-view=analog],[data-v
 
 .laps-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.laps-heading h2{margin:0}.laps-actions{display:flex;gap:8px;flex-shrink:0}.laps-actions button{width:40px;min-height:40px;padding:8px}.laps-actions svg{width:18px;height:18px}.lap-panel .export-status{font-size:12px;color:var(--accent);line-height:1.5;margin:10px 0 0}.export-status:empty{display:none}
 
-body.focus-view.focus-cursor-hidden, body.focus-view.focus-cursor-hidden * { cursor:none !important; }
 
 /* Full-viewport focus display with a compact floating control bar. */
 body.focus-view { overflow:hidden; }
@@ -858,7 +857,6 @@ body.focus-view .focus-details .timer-controls #reset > span:not(.sr-only) { dis
 
 .stopwatch-focus-details { display:contents; }
 body.focus-view .stopwatch-main { width:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; }
-body.focus-view #measurement-status { position:absolute; top:18px; left:18px; margin:0; font-size:.75rem; }
 body.focus-view .keyboard-hint,body.focus-view .dial-hint { display:none; }
 body.focus-view #stopwatch-display { width:100%; margin:0; }
 body.focus-view #analog-stopwatch { margin:0; }
@@ -877,13 +875,7 @@ body.focus-view .stopwatch-laps .laps-heading { gap:8px; flex-wrap:wrap; }
 
 body.focus-view .focus-details .timer-controls .primary { width:48px; min-width:48px; flex:none; }
 
-/* Hide idle focus controls without moving the main display or lap results. */
-body.focus-view.focus-cursor-hidden :is(.card-top,.focus-details):not(:has(:focus-visible)),
-body.focus-view.focus-cursor-hidden .laps-heading button:not(:focus-visible) {
- opacity:0;
- visibility:hidden;
- pointer-events:none;
-}
+
 
 /* Timing and laps share the first row; options span three columns below. */
 body:not(.focus-view) .stopwatch-workspace{grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -927,3 +919,81 @@ body.focus-view .stopwatch-options{display:none}
 .lap-chart-point{fill:var(--accent)}
 .lap-panel .lap-chart-legend{font-size:11px;margin:0 0 8px}
 .lap-chart-legend span{display:inline-block;width:20px;border-top:2px dashed var(--green);margin-right:6px;vertical-align:middle}
+
+.multi-toolbar,.clock-heading,.lap-navigation,.extra-clock-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.multi-toolbar{margin:12px 0}
+.multi-toolbar button,.clock-heading button,.lap-navigation button,.extra-clock-controls button{font-size:12px;padding:8px 10px;min-height:40px}
+.clock-heading input{min-width:0;width:160px;max-width:100%;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--text);padding:8px;font:inherit}
+.clock-heading[hidden],.lap-navigation[hidden],.multi-toolbar button[hidden]{display:none}
+.lap-navigation{margin:12px 0;font-size:12px}
+#selected-clock{flex:1;min-width:0;overflow-wrap:anywhere}
+#all-clocks[aria-pressed=true]{background:var(--accent-soft)}
+#extra-clocks{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:16px;margin-top:20px}
+#extra-clocks:empty{display:none}
+.extra-clock{min-width:0;border:1px solid var(--line);border-top:3px solid var(--clock-color);border-radius:12px;padding:12px}
+.extra-clock>svg{display:block;width:min(200px,100%);height:auto;margin:12px auto}
+.extra-clock [data-second]{stroke:var(--clock-color);stroke-width:2}
+.extra-clock [data-minute]{stroke:var(--text);stroke-width:2}
+.extra-clock-time{text-align:center;font-size:24px;font-variant-numeric:tabular-nums}
+.extra-clock-time[hidden]{display:none}
+.extra-clock-controls{justify-content:center}
+body.focus-view.multiple-stopwatches .stopwatch-main{display:block;height:100%;overflow:auto;padding-bottom:12px}
+body.focus-view.multiple-stopwatches .stopwatch-focus-details{position:static;transform:none;margin:16px auto}
+body.focus-view.multiple-stopwatches #analog-stopwatch svg{width:min(200px,100%)}
+body.focus-view.multiple-stopwatches #stopwatch-display .stopwatch-time{font-size:32px}
+body.focus-view.multiple-stopwatches .stopwatch-laps{width:320px}
+@media(max-width:1099px){
+ body.focus-view.multiple-stopwatches .stopwatch-card{display:block;overflow:auto;padding:64px 12px 20px}
+ body.focus-view.multiple-stopwatches .stopwatch-main{height:auto;overflow:visible}
+ body.focus-view.multiple-stopwatches .stopwatch-laps{position:static;width:100%;max-height:none;margin-top:20px}
+}
+.multiple-stopwatches #clock-primary-heading{border-top:3px solid #a64d35;padding-top:12px}
+.lap-chart-legend .combined-legend-entry{display:inline-flex;align-items:center;width:auto;border:0;margin:0 10px 4px 0;gap:5px;overflow-wrap:anywhere}
+.combined-legend-entry i{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+
+/* Unified stopwatch tiles: normal view stays at at most two columns. */
+.clock-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;width:100%;min-width:0}
+#extra-clocks{display:contents}
+.clock-tile{display:flex;flex-direction:column;min-width:0;border:1px solid var(--line);border-top:3px solid var(--clock-color,var(--accent));border-radius:14px;padding:16px;background:var(--surface)}
+.clock-tile .clock-heading{margin-bottom:12px}
+.clock-tile .clock-heading input{width:100%}
+.multiple-stopwatches #clock-primary-heading{border:0;padding:0}
+.clock-tile .timer-controls{gap:6px;flex-wrap:nowrap;margin-top:auto}
+.stopwatch-card .clock-tile .timer-controls button{width:40px;min-width:40px;min-height:40px;padding:8px}
+.clock-tile .timer-controls span[hidden]{display:none}
+.clock-tile>svg{width:min(200px,100%);margin:12px auto;height:auto}
+.clock-tile #analog-stopwatch{margin:12px auto 0;width:100%}
+.clock-tile #analog-stopwatch svg{width:min(200px,100%)}
+.clock-tile .dial-hint{display:none}
+.clock-tile #stopwatch-display .stopwatch-time,.clock-tile .extra-clock-time{font-size:clamp(20px,3vw,30px);letter-spacing:-1px;margin:16px 0;text-align:center}
+.clock-tile .stopwatch-focus-details{display:contents}
+body:not(.focus-view).multiple-stopwatches .stopwatch-card{grid-template-columns:minmax(0,1fr)}
+body:not(.focus-view).multiple-stopwatches .stopwatch-laps{border-left:0;border-top:1px solid var(--line);padding:24px 0 0}
+@media(min-width:700px){
+ body:not(.focus-view) .clock-grid:has(.extra-clock){grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+/* Focus uses all available width; clocks and results scroll together. */
+body.focus-view .stopwatch-card{display:block;overflow:auto;padding:64px 16px 20px}
+body.focus-view .stopwatch-card .stopwatch-main,body.focus-view.multiple-stopwatches .stopwatch-main{display:block;width:100%;height:auto;overflow:visible;padding:0}
+body.focus-view .clock-grid{grid-template-columns:minmax(0,1fr)}
+body.focus-view .clock-tile .stopwatch-focus-details,body.focus-view.multiple-stopwatches .clock-tile .stopwatch-focus-details{display:contents;position:static;transform:none;border:0;padding:0;background:none;backdrop-filter:none}
+body.focus-view .clock-tile #analog-stopwatch svg,body.focus-view.multiple-stopwatches .clock-tile #analog-stopwatch svg{width:min(240px,100%)}
+body.focus-view .clock-tile #stopwatch-display .stopwatch-time,body.focus-view.multiple-stopwatches .clock-tile #stopwatch-display .stopwatch-time{font-size:clamp(20px,3vw,32px);margin:16px 0}
+body.focus-view .timer-card>.stopwatch-laps,body.focus-view.multiple-stopwatches .timer-card>.stopwatch-laps{position:static;width:100%;max-width:none;max-height:none;margin:24px 0 0;padding:20px;border:1px solid var(--line);align-self:auto}
+body.focus-view .stopwatch-laps .lap-scroll{max-height:40dvh}
+body.focus-view .multi-toolbar{margin:0 0 16px}
+@media(min-width:600px){body.focus-view .clock-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(min-width:850px){body.focus-view .clock-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(min-width:1100px){body.focus-view .clock-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(min-width:1400px){body.focus-view .clock-grid{grid-template-columns:repeat(5,minmax(0,1fr))}}
+@media(min-width:1700px){body.focus-view .clock-grid{grid-template-columns:repeat(6,minmax(0,1fr))}}
+
+/* Shared notifications must not change the height of the first clock tile. */
+#wake-status:empty{display:none}
+body.focus-view .clock-tile>svg{width:min(240px,100%)}
+body.focus-view .clock-tile .extra-clock-time{font-size:clamp(20px,3vw,32px)}
+body.focus-view .clock-tile .focus-details .timer-controls{margin-top:auto}
+body.focus-view .clock-tile .focus-details .timer-controls button,
+body.focus-view .clock-tile .focus-details .timer-controls button.primary{width:40px;min-width:40px;min-height:40px;padding:8px}
+.multi-toolbar button{width:44px;min-width:44px;height:44px;padding:10px}
+#show-all-laps[aria-pressed=true]{background:var(--accent-soft);color:var(--accent)}

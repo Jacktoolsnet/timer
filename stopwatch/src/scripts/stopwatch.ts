@@ -1,12 +1,18 @@
 import {renderLapInsights} from './lap-insights';
 import {enhanceStopwatchSelects} from './stopwatch-selects';
-import {Stopwatch, formatElapsed, lapRows, lapsCsv} from '../lib/stopwatch';
+import {Stopwatch, formatElapsed, lapRows, lapsCsv, combinedLapRows} from '../lib/stopwatch';
 import {screenWakeLock} from '../lib/wake-lock';
 import {storageAllowed} from '../lib/storage';
 import {STORAGE_KEY} from '../lib/engine';
 const $ = (id: string) => document.getElementById(id)!;
 const t = JSON.parse($('stopwatch-app').dataset.text!);
 const timer = new Stopwatch();
+const colors = ['#a64d35','#59745c','#427ca1','#9465aa','#b17a20'];
+const clocks: {timer:Stopwatch; name:string; color:string; card?:HTMLElement}[] = [{timer,name:t.clock+' 1',color:colors[0]!}];
+const captures: {clock:number; number:number; duration:number; elapsed:number}[] = [];
+let selectedClock = 0;
+let resetTarget = 0;
+
 const start = $('toggle-timing') as HTMLButtonElement;
 const lap = $('lap') as HTMLButtonElement;
 const reset = $('reset-timing') as HTMLButtonElement;
@@ -46,36 +52,38 @@ function sync() {
  start.setAttribute('aria-label', label); start.title = label;
  $('play-symbol').hidden = timer.running; $('pause-symbol').hidden = !timer.running;
  start.disabled = false; lap.disabled = !timer.running;
- copyLaps.disabled = exportLaps.disabled = timer.laps.length === 0;
+ copyLaps.disabled = exportLaps.disabled = displayedLaps().length === 0;
  reset.disabled = timer.running || (timer.elapsed(now()) === 0 && !timer.laps.length);
- $('measurement-status').textContent = timer.running ? t.running : timer.elapsed(now()) > 0 ? t.paused : t.ready;
- wake(awake.checked && timer.running); render();
+ const anyRunning=clocks.some(clock=>clock.timer.running);
+ ($('lap-all') as HTMLButtonElement).disabled=!anyRunning;
+ ($('pause-all') as HTMLButtonElement).disabled=!anyRunning;
+ ($('start-all') as HTMLButtonElement).disabled=clocks.every(clock=>clock.timer.running);
+ wake(awake.checked && anyRunning); render(); syncExtras();
 }
 function toggle() {timer.running ? timer.pause(now()) : timer.start(now()); sync();}
-function capture() {
- const item = timer.lap(now()); if (!item) return;
- renderLapInsights(timer.laps,t);
- const row = document.createElement('tr');
- for (const value of [String(timer.laps.length),formatElapsed(item.duration),formatElapsed(item.elapsed)]) {
- const cell = document.createElement('td'); cell.textContent = value; row.append(cell);
- }
- $('laps-body').prepend(row); $('laps-table').hidden = false; $('empty-laps').hidden = true;
- copyLaps.disabled = exportLaps.disabled = false; $('export-status').textContent = '';
- $('lap-status').textContent = `${t.lap} ${timer.laps.length}: ${formatElapsed(item.duration)}`;
+function capture(index=0,stamp=now()) {
+ const clock=clocks[index]!;
+ const item=clock.timer.lap(stamp); if(!item) return;
+ captures.push({clock:index,number:clock.timer.laps.length,...item});
+ renderRounds(); sync();
+ $('lap-status').textContent = `${clock.name}: ${t.lap} ${clock.timer.laps.length}: ${formatElapsed(item.duration)}`;
 }
-start.addEventListener('click', toggle); lap.addEventListener('click', capture);
+start.addEventListener('click', toggle); lap.addEventListener('click', () => capture());
 const resetDialog = $('reset-dialog') as HTMLDialogElement;
 reset.addEventListener('click', () => {
  if (timer.running || reset.disabled || resetDialog.open) return;
- resetDialog.returnValue = 'cancel'; resetDialog.showModal();
+ openReset(0);
 });
 resetDialog.addEventListener('close', () => {
- if (resetDialog.returnValue !== 'reset' || timer.running) return;
- timer.reset(); renderLapInsights(timer.laps,t); $('laps-body').replaceChildren(); $('laps-table').hidden = true; $('empty-laps').hidden = false; $('lap-status').textContent = ''; $('export-status').textContent = ''; sync();
- // The reset button is disabled after clearing; return focus to the next action.
- start.focus();
+ const clock=clocks[resetTarget]!;
+ if (resetDialog.returnValue !== 'reset' || clock.timer.running) return;
+ clock.timer.reset();
+ for(let i=captures.length-1;i>=0;i--) if(captures[i]!.clock===resetTarget) captures.splice(i,1);
+ renderRounds(); sync();
+ if(resetTarget===0) start.focus(); else clock.card!.querySelector<HTMLButtonElement>('[data-action=toggle]')!.focus();
+
 });
-awake.addEventListener('change', () => {wake(awake.checked && timer.running); save();});
+awake.addEventListener('change', () => {wake(awake.checked && clocks.some(clock=>clock.timer.running)); save();});
 document.addEventListener('storage-enabled', save);
 document.addEventListener('preferences-cleared', () => {awake.checked = false; wake(false); view.value = 'analog'; view.dispatchEvent(new Event('change')); });
 let ownsFullscreen = false;
@@ -100,24 +108,27 @@ document.addEventListener('keydown', e => {
  if (e.code === 'Space') {e.preventDefault(); toggle();}
  if (e.key.toLowerCase() === 'l') {e.preventDefault(); capture();}
 });
-window.addEventListener('beforeunload', e => {if (timer.running || timer.elapsed(now()) > 0 || timer.laps.length) {e.preventDefault();}});
+window.addEventListener('beforeunload', e => {if (clocks.some(clock=>clock.timer.running || clock.timer.elapsed(now())>0 || clock.timer.laps.length)) {e.preventDefault();}});
 window.addEventListener('pageshow', sync);
-configureView(); sync(); setInterval(() => {if (!document.hidden && timer.running) render();}, 30);
-document.addEventListener('visibilitychange', () => {if (!document.hidden) render();});
+configureView(); sync(); setInterval(() => {if (!document.hidden && clocks.some(clock=>clock.timer.running)) {render(); renderExtras();}}, 30);
+document.addEventListener('visibilitychange', () => {if (!document.hidden) {render(); renderExtras();}});
 
 enhanceStopwatchSelects(document.querySelector<HTMLElement>('.stopwatch-options')!);
 
-function exportRows() {return lapRows(timer.laps, [t.lap, t.duration, t.total]);}
+function exportRows() {
+ if(selectedClock>=0) return lapRows(clocks[selectedClock]!.timer.laps,[t.lap,t.duration,t.total]);
+ return combinedLapRows(clocks.map(clock=>({name:clock.name,laps:clock.timer.laps})),t.lap);
+}
 copyLaps.addEventListener('click', async () => {
- if (!timer.laps.length) return;
- const snapshot = timer.laps;
+ if (!displayedLaps().length) return;
+ const snapshot = exportRows().map(row => row.join('\t')).join('\n');
  try {
- await navigator.clipboard.writeText(exportRows().map(row => row.join('\t')).join('\n'));
- if (timer.laps === snapshot) $('export-status').textContent = t.copied;
- } catch {if (timer.laps === snapshot) $('export-status').textContent = t.copyError;}
+ await navigator.clipboard.writeText(snapshot);
+ if (exportRows().map(row=>row.join('\t')).join('\n') === snapshot) $('export-status').textContent = t.copied;
+ } catch {if (exportRows().map(row=>row.join('\t')).join('\n') === snapshot) $('export-status').textContent = t.copyError;}
 });
 exportLaps.addEventListener('click', () => {
- if (!timer.laps.length) return;
+ if (!displayedLaps().length) return;
  const blob = new Blob([lapsCsv(exportRows())], {type:'text/csv;charset=utf-8'});
  const url = URL.createObjectURL(blob);
  const link = document.createElement('a'); link.href = url; link.download = 'jacktools-stopwatch-' + new Date().toISOString().replaceAll(':','-').slice(0,19) + '.csv';
@@ -125,3 +136,157 @@ exportLaps.addEventListener('click', () => {
  setTimeout(() => URL.revokeObjectURL(url), 10000);
  $('export-status').textContent = t.exported;
 });
+
+
+function openReset(index:number){
+ resetTarget=index;
+ $('reset-title').textContent=clocks.length>1 ? t.resetTitle+' · '+clocks[index]!.name : t.resetTitle;
+ resetDialog.returnValue='cancel';resetDialog.showModal();
+}
+function displayedLaps() {return selectedClock<0 ? captures : clocks[selectedClock]!.timer.laps;}
+function renderRounds() {
+ const laps=displayedLaps();
+ $('laps-body').replaceChildren();
+ const rows=selectedClock<0 ? captures : captures.filter(item=>item.clock===selectedClock);
+ for(const item of [...rows].reverse()){
+  const row=document.createElement('tr');
+  const values=[String(item.number),formatElapsed(item.duration),formatElapsed(item.elapsed)];
+  if(selectedClock<0) values.unshift(clocks[item.clock]!.name);
+  for(const value of values){const cell=document.createElement('td');cell.textContent=value;row.append(cell);}
+  $('laps-body').append(row);
+ }
+ $('lap-clock-heading').hidden=selectedClock>=0;
+ $('laps-table').hidden=!laps.length; $('empty-laps').hidden=!!laps.length;
+ copyLaps.disabled=exportLaps.disabled=!laps.length;
+ $('selected-clock').textContent=selectedClock<0 ? t.allClocks : clocks[selectedClock]!.name;
+ $('all-clocks').setAttribute('aria-pressed',String(selectedClock<0));
+ $('show-all-laps').setAttribute('aria-pressed',String(selectedClock<0));
+ $('export-status').textContent='';
+ $('lap-insights').querySelector('h3')!.hidden=false;
+ $('lap-insights').querySelector<HTMLElement>('.lap-stats')!.hidden=false;
+ const legend=$('lap-insights').querySelector<HTMLElement>('.lap-chart-legend')!;
+ legend.replaceChildren();
+ const dash=document.createElement('span');dash.setAttribute('aria-hidden','true');legend.append(dash,document.createTextNode(t.average+' · '+t.seconds));
+ renderLapInsights(selectedClock<0 ? [] : clocks[selectedClock]!.timer.laps,t);
+ if(selectedClock<0) renderCombinedChart();
+}
+function selectClock(index:number) {selectedClock=index;renderRounds();}
+function syncExtras(){
+ for(const clock of clocks.slice(1)){
+  const card=clock.card!;
+  const toggle=card.querySelector<HTMLButtonElement>('[data-action=toggle]')!;
+  const label=clock.timer.running?t.pause:clock.timer.elapsed(now())>0?t.resume:t.start;
+  toggle.setAttribute('aria-label',label);toggle.title=label;
+  toggle.querySelector('[data-play]')!.toggleAttribute('hidden',clock.timer.running);
+  toggle.querySelector('[data-pause]')!.toggleAttribute('hidden',!clock.timer.running);
+  card.querySelector<HTMLButtonElement>('[data-action=lap]')!.disabled=!clock.timer.running;
+  card.querySelector<HTMLButtonElement>('[data-action=reset]')!.disabled=clock.timer.running || (!clock.timer.elapsed(now())&&!clock.timer.laps.length);
+ }
+ renderExtras();
+}
+function renderExtras(){
+ for(const clock of clocks.slice(1)){
+  const elapsed=clock.timer.elapsed(now()),card=clock.card!;
+  card.querySelector('[data-readout]')!.textContent=formatElapsed(elapsed);
+  card.querySelector<HTMLElement>('[data-readout]')!.hidden=view.value==='analog';
+  card.querySelector<SVGElement>(':scope > svg')!.style.display=view.value==='digital'?'none':'block';
+  card.querySelector('[data-second]')!.setAttribute('transform',`rotate(${elapsed%60000/60000*360} 160 160)`);
+  card.querySelector('[data-minute]')!.setAttribute('transform',`rotate(${elapsed%3600000/3600000*360} 160 107)`);
+ }
+}
+view.addEventListener('change',renderExtras);
+$('primary-show-laps').addEventListener('click',()=>selectClock(0));
+$('clock-primary-name').addEventListener('input',()=>{
+ clocks[0]!.name=($('clock-primary-name') as HTMLInputElement).value.trim() || t.clock+' 1';renderRounds();
+});
+$('previous-clock').addEventListener('click',()=>selectClock(selectedClock<0?clocks.length-1:(selectedClock+clocks.length-1)%clocks.length));
+$('next-clock').addEventListener('click',()=>selectClock(selectedClock<0?0:(selectedClock+1)%clocks.length));
+$('all-clocks').addEventListener('click',()=>selectClock(-1));
+$('show-all-laps').addEventListener('click',()=>selectClock(-1));
+$('lap-all').addEventListener('click',()=>{
+ const stamp=now();
+ clocks.forEach((clock,index)=>{if(clock.timer.running)capture(index,stamp);});
+});
+$('start-all').addEventListener('click',()=>{const stamp=now();clocks.forEach(clock=>clock.timer.start(stamp));sync();});
+$('pause-all').addEventListener('click',()=>{const stamp=now();clocks.forEach(clock=>clock.timer.pause(stamp));sync();});
+$('add-clock').addEventListener('click',()=>{
+ const index=clocks.length;
+ const card=document.createElement('section');card.className='extra-clock clock-tile';
+ const color=colors[index%colors.length]!;
+ card.style.setProperty('--clock-color',color);
+ const heading=document.createElement('div');heading.className='clock-heading';
+ const name=document.createElement('input');name.value=t.clock+' '+(index+1);name.maxLength=60;name.setAttribute('aria-label',t.clockName);
+ const clock={timer:new Stopwatch(),name:name.value,color,card};clocks.push(clock);
+ name.addEventListener('input',()=>{clock.name=name.value.trim() || t.clock+' '+(index+1);renderRounds();});
+ heading.append(name);
+ const button=(action:string,label:string,handler:()=>void)=>{
+  const element=document.createElement('button');element.className='secondary';element.dataset.action=action;element.setAttribute('aria-label',label);element.title=label;
+  const source=action==='toggle'?'toggle-timing':action==='lap'?'lap':action==='reset'?'reset-timing':'primary-show-laps';
+  for(const child of $(source).children)element.append(child.cloneNode(true));
+  element.querySelectorAll('[id]').forEach(node=>{
+   if(node.id==='play-symbol')node.setAttribute('data-play','');
+   if(node.id==='pause-symbol')node.setAttribute('data-pause','');
+   node.removeAttribute('id');
+  });
+  if(action==='toggle')element.className='primary';
+  element.addEventListener('click',handler);return element;
+ };
+ card.append(heading);
+ const dial=$('analog-stopwatch').querySelector('svg')!.cloneNode(true) as SVGElement;
+ dial.querySelector('#stopwatch-second-hand')!.setAttribute('data-second','');
+ dial.querySelector('#stopwatch-minute-hand')!.setAttribute('data-minute','');
+ dial.querySelectorAll('[id]').forEach(element=>element.removeAttribute('id'));
+ card.append(dial);
+ const readout=document.createElement('p');readout.dataset.readout='';readout.className='extra-clock-time';readout.setAttribute('role','timer');readout.setAttribute('aria-live','off');card.append(readout);
+ const controls=document.createElement('div');controls.className='extra-clock-controls timer-controls';
+ controls.append(button('reset',t.reset,()=>{
+  if(clock.timer.running || resetDialog.open)return;
+  openReset(index);
+ }),button('toggle',t.start,()=>{clock.timer.running?clock.timer.pause(now()):clock.timer.start(now());sync();}),
+ button('lap',t.lap,()=>capture(index)),button('show',t.showLaps,()=>selectClock(index)));
+
+ card.append(controls);$('extra-clocks').append(card);
+ for(const id of ['clock-primary-heading','start-all','pause-all','lap-all','show-all-laps','lap-navigation']) $(id).hidden=false;
+ document.body.classList.add('multiple-stopwatches');
+ sync();renderRounds();name.focus();
+});
+function renderCombinedChart(){
+ const active=clocks.filter(clock=>clock.timer.laps.length);
+ if(!active.length)return;
+ $('lap-insights').hidden=false;
+ // A pooled average is deliberately not presented as a per-clock comparison.
+ $('lap-insights').querySelector('h3')!.hidden=true;
+ $('lap-insights').querySelector<HTMLElement>('.lap-stats')!.hidden=true;
+ const legend=$('lap-insights').querySelector<HTMLElement>('.lap-chart-legend')!;
+ legend.replaceChildren();
+ for(const clock of active){
+  const entry=document.createElement('span');entry.className='combined-legend-entry';
+  const swatch=document.createElement('i');swatch.style.backgroundColor=clock.color;swatch.setAttribute('aria-hidden','true');
+  entry.append(swatch,document.createTextNode(clock.name));legend.append(entry);
+ }
+ legend.append(document.createTextNode(' · '+t.seconds));
+ const group=$('lap-chart-content');group.replaceChildren();
+ const maximum=active.reduce((maximum,clock)=>clock.timer.laps.reduce((maximum,lap)=>Math.max(maximum,lap.duration),maximum),10)*1.15;
+ const count=active.reduce((maximum,clock)=>Math.max(maximum,clock.timer.laps.length),1);
+ const x=(i:number)=>count===1?260:52+i/(count-1)*408,y=(ms:number)=>190-ms/maximum*170;
+ const add=(tag:string,attrs:Record<string,string|number>,text?:string,parent:Element=group)=>{
+  const element=document.createElementNS('http://www.w3.org/2000/svg',tag);
+  Object.entries(attrs).forEach(([key,value])=>element.setAttribute(key,String(value)));
+  if(text!==undefined)element.textContent=text;parent.append(element);return element;
+ };
+ for(let i=0;i<=4;i++){
+  add('line',{x1:52,x2:460,y1:y(maximum*i/4),y2:y(maximum*i/4),class:'lap-chart-grid'});
+  add('text',{x:44,y:y(maximum*i/4)+4,'text-anchor':'end'},(maximum*i/4000).toLocaleString(undefined,{maximumFractionDigits:2}));
+ }
+ for(const clock of active){
+  add('polyline',{points:clock.timer.laps.map((lap,i)=>`${x(i)},${y(lap.duration)}`).join(' '),fill:'none',stroke:clock.color,'stroke-width':2});
+  clock.timer.laps.forEach((lap,i)=>{
+   const point=add('circle',{cx:x(i),cy:y(lap.duration),r:3,fill:clock.color});
+   add('title',{},`${clock.name} · ${t.lap} ${i+1}: ${formatElapsed(lap.duration)}`,point);
+  });
+ }
+ const stride=Math.max(1,Math.ceil(count/8));
+ for(let i=0;i<count;i++)if(i%stride===0||i===count-1)add('text',{x:x(i),y:210,'text-anchor':'middle'},String(i+1));
+ add('text',{x:260,y:228,'text-anchor':'middle'},t.lap);
+ $('lap-chart-description').textContent=active.map(clock=>clock.name+': '+clock.timer.laps.map(lap=>formatElapsed(lap.duration)).join(', ')).join('. ');
+}

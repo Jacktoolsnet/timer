@@ -43,24 +43,25 @@ test('styled view dropdown supports keyboard, selection and dismissal',async({pa
  await page.goto('/de/');const trigger=page.locator('#trigger-view');
  await expect(trigger).toHaveAccessibleName('Ansicht Analog');await trigger.click();
  await expect(page.getByRole('listbox')).toBeVisible();await expect(page.getByRole('option',{name:'Analog',exact:true})).toHaveAttribute('aria-selected','true');
- await page.keyboard.press('ArrowDown');await page.keyboard.press('Enter');
+ await page.keyboard.press('ArrowDown');await page.keyboard.press('ArrowDown');await page.keyboard.press('Enter');
  await expect(trigger).toHaveAccessibleName('Ansicht Digital');await expect(trigger).toBeFocused();await expect(page.locator('#analog-stopwatch')).toBeHidden();await expect(page.getByRole('listbox')).toBeHidden();
  await trigger.click();await page.keyboard.press('Escape');await expect(trigger).toBeFocused();await expect(trigger).toHaveAttribute('aria-expanded','false');
  await trigger.click();await page.locator('h1').click();await expect(trigger).toHaveAttribute('aria-expanded','false');
 });
 
-test('focus laps follow screen width and orientation',async({page})=>{
+test('focus lap section remains accessible across orientations',async({page})=>{
  await page.goto('/de/');await page.locator('#toggle-timing').click();await page.waitForTimeout(50);await page.locator('#lap').click();await page.locator('#toggle-timing').click();
  // Focus layout also works without the optional fullscreen API.
  await page.evaluate(()=>{document.documentElement.requestFullscreen=async()=>{throw new Error('not available');};});
  await page.locator('#stopwatch-focus').click();
- for(const [width,height,side] of [[1440,1000,true],[390,844,false],[844,390,true],[667,375,true]] as const){
+ for(const [width,height] of [[1440,1000],[390,844],[844,390],[667,375]] as const){
   await page.setViewportSize({width,height});
   for(const view of ['digital','analog']){
    await page.locator('#stopwatch-view').selectOption(view,{force:true});
    const main=await page.locator('.stopwatch-main').boundingBox();const laps=await page.locator('.stopwatch-laps').boundingBox();
    expect(main).not.toBeNull();expect(laps).not.toBeNull();
-   if(side)expect(laps!.x).toBeGreaterThanOrEqual(main!.x+main!.width);else expect(laps!.y).toBeGreaterThanOrEqual(main!.y+main!.height);
+   expect(laps!.x).toBeGreaterThanOrEqual(0);expect(laps!.x+laps!.width).toBeLessThanOrEqual(width);
+   await page.locator('.stopwatch-laps').scrollIntoViewIfNeeded();
    await expect(page.locator('#laps-table')).toBeVisible();
    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   }
@@ -99,7 +100,7 @@ test('normal layout puts laps to the right and options in the next row',async({p
   if(width>600){
    expect(laps.x).toBeGreaterThanOrEqual(main.x+main.width);
    const heading=(await page.locator('#options-title').boundingBox())!;
-   const view=(await page.locator('.stopwatch-view-choice').boundingBox())!;
+   const view=(await page.locator('.stopwatch-options .clock-select-field').boundingBox())!;
    const awake=(await page.locator('.stopwatch-options .toggle-row').boundingBox())!;
    expect(view.x).toBeGreaterThanOrEqual(heading.x+heading.width);
    expect(awake.x).toBeGreaterThanOrEqual(view.x+view.width);
@@ -194,4 +195,151 @@ test('focus shows the empty lap panel before recording and after reset',async({p
  await page.locator('#reset-confirm').click();
  await expect(page.locator('.stopwatch-laps')).toBeVisible();
  await expect(page.locator('#empty-laps')).toBeVisible();
+});
+
+test('multiple clocks have independent laps, arrow navigation and combined exports',async({page})=>{
+ await page.addInitScript(()=>{
+  (window as any).testNow=1000;Date.now=()=>(window as any).testNow;
+  Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async(text:string)=>{(window as any).copiedText=text;}}});
+ });
+ await page.goto('/de/');
+ await page.locator('#add-clock').click();
+ const extra=page.locator('.extra-clock').first();
+ await expect(extra).toBeVisible();
+ await extra.locator('input').fill('Training');
+ await page.locator('#start-all').click();
+ await page.evaluate(()=>{(window as any).testNow+=1000;});
+ await extra.locator('[data-action=lap]').click();
+ await expect(page.locator('#laps-body tr')).toHaveCount(0);
+ await extra.locator('[data-action=show]').click();
+ await expect(page.locator('#selected-clock')).toHaveText('Training');
+ await expect(page.locator('#laps-body tr')).toHaveCount(1);
+ await expect(page.locator('#lap-average')).toHaveText('00:00:01.00');
+ await page.evaluate(()=>{(window as any).testNow+=2000;});
+ await page.locator('#lap').click();
+ await expect(page.locator('#laps-body tr')).toHaveCount(1);
+ await page.locator('#previous-clock').click();
+ await expect(page.locator('#selected-clock')).toHaveText('Stoppuhr 1');
+ await expect(page.locator('#lap-average')).toHaveText('00:00:03.00');
+ await page.locator('#all-clocks').click();
+ await expect(page.locator('#laps-body tr')).toHaveCount(2);
+ await expect(page.locator('#lap-chart polyline')).toHaveCount(2);
+ await page.locator('#copy-laps').click();
+ expect(await page.evaluate(()=>(window as any).copiedText)).toBe('Runde\tStoppuhr 1\tTraining\n1\t00:00:03.00\t00:00:01.00');
+ await page.locator('#pause-all').click();
+ await extra.locator('[data-action=reset]').click();
+ await page.locator('#reset-confirm').click();
+ await expect(page.locator('#laps-body tr')).toHaveCount(1);
+ await page.locator('#next-clock').click();
+ await expect(page.locator('#lap-insights h3')).toBeVisible();
+ await expect(page.locator('.lap-stats')).toBeVisible();
+ await page.locator('#stopwatch-focus').click();
+ await expect(extra.locator('[data-action=lap]')).toBeVisible();
+ await expect(page.locator('#lap-navigation')).toBeVisible();
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});
+
+test('focus controls remain visible after inactivity',async({page})=>{
+ await page.goto('/de/');
+ await page.locator('#stopwatch-focus').click();
+ await page.mouse.move(0,0);
+ await page.waitForTimeout(3500);
+ await expect(page.locator('body')).not.toHaveClass(/focus-cursor-hidden/);
+ for(const id of ['stopwatch-focus','toggle-timing','lap','reset-timing','copy-laps','export-laps']){
+  await expect(page.locator('#'+id)).toBeVisible();
+  await expect(page.locator('#'+id)).toHaveCSS('visibility','visible');
+ }
+});
+
+test('clock tiles use icon controls and responsive grids in normal and focus views',async({page})=>{
+ await page.goto('/de/');
+ await page.evaluate(()=>{document.documentElement.requestFullscreen=async()=>{throw new Error('unavailable');};});
+ for(let i=0;i<5;i++)await page.locator('#add-clock').click();
+ await expect(page.locator('.clock-tile')).toHaveCount(6);
+ for(const tile of await page.locator('.clock-tile').all()){
+  const buttons=tile.locator('.timer-controls button');
+  await expect(buttons).toHaveCount(4);
+  for(const button of await buttons.all()){
+   await expect(button).toHaveText('');
+   expect(await button.getAttribute('aria-label')).toBeTruthy();
+   await expect(button.locator('svg').first()).toBeAttached();
+  }
+ }
+ for(const [width,columns] of [[390,1],[900,2],[1800,2]]){
+  await page.setViewportSize({width,height:1000});
+  expect(await page.locator('#clock-grid').evaluate(element=>getComputedStyle(element).gridTemplateColumns.split(' ').length)).toBe(columns);
+ }
+ await page.locator('#stopwatch-focus').click();
+ for(const [width,columns] of [[390,1],[650,2],[900,3],[1200,4],[1500,5],[1800,6]]){
+  await page.setViewportSize({width,height:1000});
+  expect(await page.locator('#clock-grid').evaluate(element=>getComputedStyle(element).gridTemplateColumns.split(' ').length)).toBe(columns);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ }
+ await page.locator('.extra-clock').last().locator('[data-action=show]').click();
+ await expect(page.locator('#selected-clock')).toHaveText('Stoppuhr 6');
+});
+
+test('all clock tiles have matching layout without a first-clock status message',async({page})=>{
+ await page.goto('/de/');
+ await page.locator('#add-clock').click();
+ await expect(page.locator('#measurement-status')).toHaveCount(0);
+ await expect(page.getByText('Bereit, wenn du es bist.',{exact:true})).toHaveCount(0);
+ expect(await page.locator('#primary-clock #wake-status').count()).toBe(0);
+ await page.setViewportSize({width:1200,height:1000});
+ for(const focus of [false,true]){
+  if(focus)await page.locator('#stopwatch-focus').click();
+  const primary=await page.locator('#primary-clock .timer-controls').boundingBox();
+  const extra=await page.locator('.extra-clock .timer-controls').boundingBox();
+  expect(primary!.y).toBeCloseTo(extra!.y,0);
+ }
+});
+
+test('global icon controls capture simultaneous laps only for running clocks',async({page})=>{
+ await page.addInitScript(()=>{(window as any).testNow=1000;Date.now=()=>(window as any).testNow;});
+ await page.goto('/de/');
+ await page.locator('#add-clock').click();
+ await page.locator('#add-clock').click();
+ for(const button of await page.locator('.multi-toolbar button').all()){
+  await expect(button).toHaveText('');
+  expect(await button.getAttribute('aria-label')).toBeTruthy();
+  await expect(button.locator('svg')).toHaveCount(1);
+ }
+ await expect(page.locator('#lap-all')).toBeDisabled();
+ await page.locator('#start-all').click();
+ await page.evaluate(()=>{(window as any).testNow+=2000;});
+ await page.locator('.extra-clock').last().locator('[data-action=toggle]').click();
+ await page.locator('#lap-all').click();
+ await page.locator('#show-all-laps').click();
+ await expect(page.locator('#show-all-laps')).toHaveAttribute('aria-pressed','true');
+ await expect(page.locator('#laps-body tr')).toHaveCount(2);
+ for(const row of await page.locator('#laps-body tr').all()){
+  await expect(row.locator('td').nth(2)).toHaveText('00:00:02.00');
+ }
+ await page.locator('.extra-clock').last().locator('[data-action=show]').click();
+ await expect(page.locator('#empty-laps')).toBeVisible();
+ await expect(page.locator('#show-all-laps')).toHaveAttribute('aria-pressed','false');
+ await page.locator('#pause-all').click();
+ await expect(page.locator('#lap-all')).toBeDisabled();
+});
+
+test('combined clipboard and CSV export share clock columns and lap rows',async({page})=>{
+ await page.addInitScript(()=>{
+  (window as any).testNow=1000;Date.now=()=>(window as any).testNow;
+  Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async(text:string)=>{(window as any).copiedText=text;}}});
+ });
+ await page.goto('/de/');
+ await page.locator('#add-clock').click();
+ await page.locator('#start-all').click();
+ await page.evaluate(()=>{(window as any).testNow+=1000;});
+ await page.locator('#lap-all').click();
+ await page.evaluate(()=>{(window as any).testNow+=2000;});
+ await page.locator('#lap').click();
+ await page.locator('#show-all-laps').click();
+ await page.locator('#copy-laps').click();
+ expect(await page.evaluate(()=>(window as any).copiedText)).toBe('Runde\tStoppuhr 1\tStoppuhr 2\n1\t00:00:01.00\t00:00:01.00\n2\t00:00:02.00\t');
+ const downloading=page.waitForEvent('download');
+ await page.locator('#export-laps').click();
+ const download=await downloading;
+ const {readFile}=await import('node:fs/promises');
+ expect(await readFile((await download.path())!,'utf8')).toBe('\uFEFF"Runde","Stoppuhr 1","Stoppuhr 2"\r\n"1","00:00:01.00","00:00:01.00"\r\n"2","00:00:02.00",""\r\n');
 });
