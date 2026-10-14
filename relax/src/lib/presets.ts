@@ -8,10 +8,10 @@ const base={
  fire:false,stream:false,fireAnimation:false,streamAnimation:false,fireVolume:25,streamVolume:25,fireDensity:4,streamFlow:4,
  rain:false,wind:false,noise:false,rainVolume:35,windVolume:25,noiseVolume:20,
  rainDensity:4,windActivity:4,noiseType:'pink',
- instrumentAnimation:true,rainAnimation:false,windAnimation:false,
+ instrumentAnimation:false,rainAnimation:false,windAnimation:false,
 } satisfies Partial<Settings>;
 export const presets:Record<Preset,Partial<Settings>>={
- summer:{...base,birds:true,birdsAnimation:true,birdsVolume:18,birdsActivity:4,backgroundImage:'summer-garden',chimes:true,pitch:-7,rain:true,wind:true,rainAnimation:true,windAnimation:true},
+ summer:{...base,birds:true,birdsAnimation:true,birdsVolume:18,birdsActivity:4,backgroundImage:'summer-garden',chimes:true,pitch:-7,rain:false,wind:true,rainAnimation:false,windAnimation:true},
  evening:{...base,backgroundImage:'evening-terrace',handpan:true,instrumentVolume:30,density:2,pitch:-4,wind:true,windVolume:15,windActivity:2,noise:true,noiseType:'brown',noiseVolume:15,windAnimation:true},
  focus:{...base,backgroundImage:'focus-room',kalimba:true,instrumentVolume:30,density:3,noise:true,noiseType:'brown',noiseVolume:10},
  nature:{...base,birds:true,birdsAnimation:true,birdsVolume:22,birdsActivity:3,backgroundImage:'forest-clearing',chimes:true,instrumentsEnabled:false,rain:true,wind:true,rainVolume:40,rainAnimation:true,windAnimation:true},

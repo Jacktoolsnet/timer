@@ -265,3 +265,17 @@ test('birdsong has soft finite calls with gaps and adjustable activity',()=>{
  assert.equal(normalize({birdsActivity:99,birdsVolume:-5}).birdsActivity,10);
  assert.equal(normalize({birdsActivity:99,birdsVolume:-5}).birdsVolume,0);
 });
+
+test('summer garden has birds and breeze without rain',()=>{
+ const summer=applyPreset({...defaults,rain:true,rainAnimation:true},'summer');
+ assert.equal(summer.rain,false);assert.equal(summer.rainAnimation,false);
+ assert.equal(summer.birds,true);assert.equal(summer.wind,true);
+});
+
+test('all presets disable instrument animation while leaving it manually adjustable',()=>{
+ for(const preset of presetNames){
+  const settings=applyPreset({...defaults,instrumentAnimation:true},preset);
+  assert.equal(settings.instrumentAnimation,false);
+  assert.equal(normalize({...settings,instrumentAnimation:true}).instrumentAnimation,true);
+ }
+});
