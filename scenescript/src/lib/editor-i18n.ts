@@ -1,5 +1,7 @@
 import type { Language } from './i18n';
 const words = {
+ previewPreparing:['Vorschau wird vorbereitet …','Preparing preview …','Preparando vista previa …','Préparation de l’aperçu …'],
+ previewPrepareError:['Vorschau konnte nicht vorbereitet werden.','Preview could not be prepared.','No se pudo preparar la vista previa.','Impossible de préparer l’aperçu.'],
  groupSpaceMismatch:["Eine Gruppe darf nur Elemente aus demselben Koordinatenraum enthalten.","A group can only contain elements in the same coordinate space.","Un grupo solo puede contener elementos del mismo espacio.","Un groupe ne peut contenir que des éléments du même espace."],
  "space":["Koordinatenraum", "Coordinate space", "Espacio de coordenadas", "Espace de coordonnées"],
  "space-scene":["Szene (mit Kamera)", "Scene (moves with camera)", "Escena (con cámara)", "Scène (avec caméra)"],

@@ -15,7 +15,7 @@ import {decodeAudio,audioBlob,NarrationPlayer} from './audio';
 import {defaultMotionPath,defaultSegment,pathTemplate,pathTypes,type Point,type MotionPath} from '../lib/motion-path';
 import {renderMotionPath} from './motion-path-editor';
 import {defaultVideo,parseVideo,validateVideoData,MAX_VIDEO_BYTES,type VideoSettings} from '../lib/video';
-import {createVideo,syncVideo,inspectVideo,videoURL,releaseVideoURL,clearVideoURLs} from './video';
+import {createVideo,syncVideo,prepareVideo,videoPlayhead,inspectVideo,videoURL,releaseVideoURL,clearVideoURLs} from './video';
 import {defaultMusic,parseMusic,presetInstrument,instrumentPresets,musicStyles,waveforms,type Music,type Instrument} from '../lib/music';
 import {MusicPlayer} from './music-audio';
 import {switchSimulationType,simulationTypes,type Simulation} from '../lib/simulation';
@@ -46,7 +46,8 @@ let motionEditing=false,comicEditing:'tail'|'anchors'|null=null;
 // Recording uses its own playhead; returning must not discard the editor context.
 let recordingReturnState:{sceneIndex:number;selectedId:string;selectedGroupId:string;multiSelection:string[];time:number}|undefined;
 let recordingRestartTimer:ReturnType<typeof setTimeout>|undefined;
-let playbackAttempt=0;
+let playbackAttempt=0,preparingPlayback=false;
+let playbackPreparation:AbortController|undefined;
 let baseTime=0,started=0,frame=0,countdownTimer:ReturnType<typeof setTimeout>|undefined,draftTimer:ReturnType<typeof setTimeout>|undefined;
 const status=(message:string)=>{$('editor-status').textContent=message;};
 try{if(storageAllowed()){const saved=localStorage.getItem(STORAGE_KEY);if(saved){project=parseProject(saved);dirty=true;status(t('recovery'));}}}catch{status(t('storageError'));}
@@ -785,8 +786,8 @@ function updateSceneViews(sceneViews:SceneView[],local:number,opacity=1,cameraEn
  sceneViews.forEach(({element,node,text,svg,simulation,video,bubble,scene})=>{
   const effectiveScene={...scene,camera:cameraEnabled?(cameraOverride===undefined?scene.camera:cameraOverride):null};
   const state=sceneElementState(element,effectiveScene,local,formats[project.format][0],formats[project.format][1],true);
-  if(video&&element.video)syncVideo(video,element.video,project.videos[element.video.asset].duration,local-element.at,playing&&!countdownTimer&&state.visible&&video.dataset.outgoing!=='true',state.visible&&opacity>0&&video.dataset.outgoing!=='true');
-  simulation?.draw(local-element.at);seekSvg(svg,local-element.at);
+  if(video&&element.video)syncVideo(video,element.video,project.videos[element.video.asset].duration,local-element.at,playing&&!preparingPlayback&&!countdownTimer&&state.visible&&video.dataset.outgoing!=='true',state.visible&&opacity>0&&video.dataset.outgoing!=='true');
+  if(state.visible){simulation?.draw(local-element.at);seekSvg(svg,local-element.at);}
   node.style.opacity=String(state.opacity*opacity);node.style.visibility=state.visible?'visible':'hidden';node.style.transform=state.transform;node.style.transformOrigin='0 0';
   if(text&&text.dataset.visibleText!==state.text){renderRuns(text,element,state.text);text.dataset.visibleText=state.text;}
   bubble?.update(effectiveScene,local,state.text,!playing&&!recording&&(element.id===selectedId||scene.groups.some(g=>g.id===selectedGroupId&&g.members.includes(element.id))));
@@ -795,12 +796,12 @@ function updateSceneViews(sceneViews:SceneView[],local:number,opacity=1,cameraEn
  if(warning){const view=sceneViews.find(v=>v.element.id===selectedId)?.bubble;warning.hidden=!view?.overflow();}
 
 }
-let backgroundVideoNode:HTMLVideoElement|undefined,backgroundVideoAsset='';
+let backgroundVideoNode:HTMLVideoElement|undefined,backgroundVideoAsset='',playbackUIKey='';
 function draw(follow=true){
  syncProjectSimulation();
  const bg=project.backgroundVideo;
  if((bg?.asset??'')!==backgroundVideoAsset||backgroundVideoNode&&backgroundVideoNode.dataset.projectRevision!==String(revision)&&!project.videos[backgroundVideoAsset]){backgroundVideoNode?.pause();backgroundVideoAsset=bg?.asset??'';backgroundVideoNode=bg?.asset?createVideo(project.videos[bg.asset]):undefined;if(backgroundVideoNode){backgroundVideoNode.className='project-video-canvas';backgroundVideoNode.addEventListener('loadeddata',()=>draw(false),{once:true});}}
- if(backgroundVideoNode&&bg)syncVideo(backgroundVideoNode,bg,project.videos[bg.asset].duration,time,playing&&!countdownTimer);
+ if(backgroundVideoNode&&bg)syncVideo(backgroundVideoNode,bg,project.videos[bg.asset].duration,time,playing&&!preparingPlayback&&!countdownTimer);
 
  const at=locateTime(project,time);
  if(follow&&at.index!==sceneIndex){sceneIndex=at.index;selectedId='';selectedGroupId='';multiSelection.clear();renderForms();renderElements();renderTimeline();$('scene-list').querySelectorAll('button').forEach((b,i)=>b.setAttribute('aria-current',String(i===sceneIndex)));}
@@ -827,6 +828,10 @@ function draw(follow=true){
  const edit=selected();if((!s.camera||cameraOverview)&&motionEditing&&!playing&&!recording&&edit?.motionPath)renderMotionPath(stage,edit,formats[project.format][0],formats[project.format][1],next=>{if(!motionEditing||selected()!==edit)return;edit.motionPath=next;changed();draw(false);},()=>{if(selected()===edit)renderForms();},parentMatrix(edit,s,at.local,formats[project.format][0],formats[project.format][1]));
  const activeGroup=s.groups.find(g=>g.id===selectedGroupId);if((!s.camera||cameraOverview)&&motionEditing&&!playing&&!recording&&activeGroup?.motionPath){const controller=groupController(activeGroup);controller.x+=activeGroup.x;controller.y+=activeGroup.y;renderMotionPath(stage,controller,formats[project.format][0],formats[project.format][1],next=>{activeGroup.motionPath=next;changed();draw(false);},renderForms);}
  if((!s.camera||cameraOverview)&&comicEditing&&!playing&&!recording&&edit)renderComicHandles(edit,at.local);
+ // Transport labels and the editor timeline only need ten updates per second;
+ // scene/video animation above still runs at the display's frame rate.
+ const uiKey=`${Math.floor(time*10)}:${total()}:${sceneIndex}:${playing}:${preparingPlayback}`;
+ if(playbackUIKey!==uiKey){playbackUIKey=uiKey;
  ($('timeline') as HTMLInputElement).max=String(total());($('timeline') as HTMLInputElement).value=String(time);$('time-label').textContent=`${time.toFixed(1)} / ${total().toFixed(1)} s`;
  const timelineHost=$('edit-timeline');if(timelineHost)timelineHost.style.setProperty('--playhead',Math.max(0,Math.min(100,(time-offset(sceneIndex))/current().duration*100))+'%');
  const playButton=$('play') as HTMLButtonElement;
@@ -834,9 +839,18 @@ function draw(follow=true){
  playButton.querySelector('[aria-hidden]')!.textContent=playing?'Ⅱ':'▶';playButton.querySelector('.control-label')!.textContent=playButton.title;
  ($('previous-scene') as HTMLButtonElement).disabled=sceneIndex===0;
  ($('next-scene') as HTMLButtonElement).disabled=sceneIndex===project.scenes.length-1;
+ }
 }
-function stop(){document.querySelectorAll('video').forEach(v=>v.pause());clearTimeout(recordingRestartTimer);recordingRestartTimer=undefined;playbackAttempt++;musicPlayer.stop();narrationPlayer.stop();document.querySelectorAll('audio').forEach(a=>a.pause());playing=false;cancelAnimationFrame(frame);keepScreenAwake(false);}
-function tick(now:number){time=Math.min(total(),musicPlayer.playhead()??narrationPlayer.playhead()??(baseTime+(now-started)/1000));draw();if(time>=total()){
+function stop(){playbackPreparation?.abort();playbackPreparation=undefined;preparingPlayback=false;document.querySelectorAll('video').forEach(v=>v.pause());clearTimeout(recordingRestartTimer);recordingRestartTimer=undefined;playbackAttempt++;musicPlayer.stop();narrationPlayer.stop();document.querySelectorAll('audio').forEach(a=>a.pause());playing=false;cancelAnimationFrame(frame);keepScreenAwake(false);}
+function previewVideoPlayhead(){
+ const candidates:{video:HTMLVideoElement;settings:VideoSettings;origin:number}[]=[];
+ for(const view of views)if(view.video&&view.element.video&&view.node.style.visibility!=='hidden')candidates.push({video:view.video,settings:view.element.video,origin:offset(sceneIndex)+view.element.at});
+ if(backgroundVideoNode&&project.backgroundVideo)candidates.push({video:backgroundVideoNode,settings:project.backgroundVideo,origin:0});
+ candidates.sort((a,b)=>Number(a.settings.muted||!a.settings.volume)-Number(b.settings.muted||!b.settings.volume));
+ for(const {video,settings,origin} of candidates){const value=videoPlayhead(video,settings,origin,time);if(value!==null)return value;}
+ return null;
+}
+function tick(now:number){time=Math.min(total(),musicPlayer.playhead()??narrationPlayer.playhead()??previewVideoPlayhead()??(baseTime+(now-started)/1000));baseTime=time;started=now;draw();if(time>=total()){
  stop();draw();if(recording)recordingRestartTimer=setTimeout(()=>{
   recordingRestartTimer=undefined;if(!recording||playing)return;
   document.body.classList.add('recording-ready');setRecordingStart(true);$('recording-start').hidden=false;
@@ -844,9 +858,18 @@ function tick(now:number){time=Math.min(total(),musicPlayer.playhead()??narratio
 }frame=requestAnimationFrame(tick);}
 function play(){
  if(countdownTimer||playing)return;stopAudioPreviews();if(project.music?.enabled)void musicPlayer.unlock().catch(()=>{});document.querySelectorAll('video').forEach(v=>v.pause());clearTimeout(recordingRestartTimer);recordingRestartTimer=undefined;if(recording){document.body.classList.remove('recording-ready');$('recording-start').hidden=true;}if(time>=total())time=0;playing=true;keepScreenAwake(true);const attempt=++playbackAttempt;
- const begin=()=>{if(!playing||attempt!==playbackAttempt)return;baseTime=time;started=performance.now();frame=requestAnimationFrame(tick);};
+ preparingPlayback=true;const preparation=new AbortController();playbackPreparation=preparation;
+ // Build the playing scene once, but keep its video paused while it buffers.
+ // The first playback tick reuses these same, already prepared video nodes.
+ draw();$('time-label').textContent=t('previewPreparing');
+ const begin=()=>{if(!playing||attempt!==playbackAttempt)return;preparingPlayback=false;playbackPreparation=undefined;baseTime=time;started=performance.now();draw(false);frame=requestAnimationFrame(tick);};
  const clips=narrationClips(project);const prepare=clips.length?narrationPlayer.prepare(project).catch(error=>{showToast(t('audioError')+' '+(error as Error).message,'warning');return null;}):Promise.resolve(null);
- void prepare.then(async buffers=>{if(!playing||attempt!==playbackAttempt)return;if(project.music?.enabled){try{await musicPlayer.start(project.music,time,total(),t=>buffers?duckGain(project,t,clips):1);}catch{showToast(t('audioError'),'warning');}}if(!playing||attempt!==playbackAttempt)return;if(buffers)narrationPlayer.start(project,musicPlayer.playhead()??time,buffers);begin();}).catch(error=>{if(!playing||attempt!==playbackAttempt)return;narrationPlayer.stop();showToast(t('audioError')+' '+(error as Error).message,'warning');begin();});
+ const videos=[...(backgroundVideoNode?[backgroundVideoNode]:[]),...views.filter(v=>v.video&&v.node.style.visibility!=='hidden').map(v=>v.video!)];
+ void Promise.all([prepare,Promise.all(videos.map(v=>prepareVideo(v,preparation.signal)))]).then(async([buffers])=>{
+  if(!playing||attempt!==playbackAttempt)return;
+  if(project.music?.enabled){try{await musicPlayer.start(project.music,time,total(),t=>buffers?duckGain(project,t,clips):1);}catch{showToast(t('audioError'),'warning');}}
+  if(!playing||attempt!==playbackAttempt)return;if(buffers)narrationPlayer.start(project,musicPlayer.playhead()??time,buffers);begin();
+ }).catch(error=>{if(preparation.signal.aborted||attempt!==playbackAttempt)return;stop();draw();showToast(t('previewPrepareError')+' '+(error as Error).message,'warning');});
 }
 $('play').addEventListener('click',()=>{if(playing){stop();draw();}else play();});
 function skipScene(delta:number){const next=sceneIndex+delta;if(next<0||next>=project.scenes.length)return;const resume=playing;selectScene(next);if(resume)play();}
