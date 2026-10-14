@@ -1,6 +1,6 @@
 import {renderLapInsights} from './lap-insights';
 import {enhanceStopwatchSelects} from './stopwatch-selects';
-import {Stopwatch, formatElapsed, lapRows, lapsCsv, combinedLapRows} from '../lib/stopwatch';
+import {Stopwatch, formatElapsed, lapRows, lapsCsv, combinedLapRows, analyzeLaps} from '../lib/stopwatch';
 import {screenWakeLock} from '../lib/wake-lock';
 import {storageAllowed} from '../lib/storage';
 import {STORAGE_KEY} from '../lib/engine';
@@ -328,7 +328,7 @@ function renderPrintView(){
    renderLapInsights(clocks[index]!.timer.laps,t,root);
    const legend=root.querySelector('.lap-chart-legend')!;
    const dash=document.createElement('span');dash.setAttribute('aria-hidden','true');
-   legend.replaceChildren(dash,document.createTextNode(t.average+' · '+t.seconds));
+   legend.replaceChildren(dash,document.createTextNode(t.average+': '+formatElapsed(analyzeLaps(clocks[index]!.timer.laps)!.average)+' · '+t.seconds));
   }
   const chart=root.querySelector('.lap-chart')! as HTMLElement;
   chart.querySelectorAll('[id]').forEach(element=>element.removeAttribute('id'));

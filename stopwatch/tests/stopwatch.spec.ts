@@ -412,3 +412,21 @@ test('print icon opens printing and prepares the report',async({page})=>{
  await button.click();
  expect(await page.evaluate(()=>(window as any).printCalls)).toBe(2);
 });
+
+test('printed charts show the numeric average for each stopwatch',async({page})=>{
+ await page.addInitScript(()=>{(window as any).testNow=1000;Date.now=()=>(window as any).testNow;});
+ await page.goto('/de/');
+ await page.locator('#toggle-timing').click();
+ await page.evaluate(()=>{(window as any).testNow+=1000;});
+ await page.locator('#lap').click();
+ await page.evaluate(()=>{(window as any).testNow+=3000;});
+ await page.locator('#lap').click();
+ await expect(page.locator('#print-chart .lap-chart-legend')).toContainText('Durchschnitt: 00:00:02.00');
+ await page.locator('#add-clock').click();
+ await page.locator('.extra-clock [data-action=toggle]').click();
+ await page.evaluate(()=>{(window as any).testNow+=5000;});
+ await page.locator('.extra-clock [data-action=lap]').click();
+ await page.emulateMedia({media:'print'});
+ await expect(page.locator('.print-clock-section').nth(0).locator('.lap-chart-legend')).toContainText('Durchschnitt: 00:00:02.00');
+ await expect(page.locator('.print-clock-section').nth(1).locator('.lap-chart-legend')).toContainText('Durchschnitt: 00:00:05.00');
+});
