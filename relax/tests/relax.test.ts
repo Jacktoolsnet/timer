@@ -1,3 +1,4 @@
+import {birdSong} from '../src/lib/birds.ts';
 import {backgroundImages,backgroundText} from '../src/lib/backgrounds.ts';
 import {readFileSync} from 'node:fs';
 import {wavePositionPicker} from '../src/lib/wave-position.ts';
@@ -251,4 +252,16 @@ test('removed fireplace backgrounds fall back safely and camp has no static fire
  const camp=readFileSync(new URL('../public/backgrounds/lakeside-camp.svg',import.meta.url),'utf8');
  assert.doesNotMatch(camp,/camp-firepit|camp-stone-ring|M760 872/);
  assert.equal(applyPreset(defaults,'fireside').fireAnimation,true);
+});
+
+test('birdsong has soft finite calls with gaps and adjustable activity',()=>{
+ const sparse:{time:number;duration:number}[]=[],busy:{time:number;duration:number}[]=[];
+ const data=birdSong(12000,30,()=>.5,1,e=>sparse.push(e));birdSong(12000,30,()=>.5,10,e=>busy.push(e));
+ assert.equal(data.length,360000);assert(data.every(Number.isFinite));
+ assert(data.some(n=>n!==0));assert(Math.max(...data.slice(0,24000))<.5);
+ assert(busy.length>sparse.length);assert(sparse.every((e,i)=>!i||e.time>sparse[i-1]!.time+sparse[i-1]!.duration));
+ assert.equal(applyPreset(defaults,'summer').birds,true);assert.equal(applyPreset(defaults,'nature').birds,true);
+ for(const preset of ['evening','focus','fireside','brook'] as const)assert.equal(applyPreset(defaults,preset).birds,false);
+ assert.equal(normalize({birdsActivity:99,birdsVolume:-5}).birdsActivity,10);
+ assert.equal(normalize({birdsActivity:99,birdsVolume:-5}).birdsVolume,0);
 });

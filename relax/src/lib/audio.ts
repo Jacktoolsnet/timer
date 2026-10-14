@@ -1,3 +1,4 @@
+import {birdSong,type BirdCall} from './birds';
 import {natureSound,type NatureLayer,type NatureEvent} from './nature';
 import {instrumentTone,type Instrument} from './instruments';
 import {naturalWind,windStrengthAt,type WindGust} from './wind';
@@ -18,6 +19,10 @@ export class Soundscape {
  private natureEvents=new Map<NatureLayer,NatureEvent[]>();
  private natureStarted=new Map<NatureLayer,number>();
  private natureCursor=new Map<NatureLayer,number>();
+ private birdActivity=0;
+ private birdCalls:BirdCall[]=[];
+ private birdStarted=0;
+ private birdCursor=0;
  private rainBufferDensity=0;
  private rainDrops:RainDrop[]=[];
  private rainStarted=0;
@@ -58,13 +63,14 @@ export class Soundscape {
   this.active=true;this.nextNote=ctx.currentTime+.25;this.update(settings);
   this.limit=window.setInterval(()=>this.tick(),150);this.tick();
  }
- private noiseBuffer(type:NoiseType|'rain'|'wind'|NatureLayer) {
+ private noiseBuffer(type:NoiseType|'rain'|'wind'|'birds'|NatureLayer) {
   if(type==='wind' && this.windBufferActivity!==this.settings.windActivity)this.buffers.delete('wind');
   if(type==='rain' && this.rainBufferDensity!==this.settings.rainDensity)this.buffers.delete('rain');
   if(type==='fire'||type==='stream'){
    const activity=type==='fire'?this.settings.fireDensity:this.settings.streamFlow;
    if(this.natureActivity.get(type)!==activity)this.buffers.delete(type);
   }
+  if(type==='birds'&&this.birdActivity!==this.settings.birdsActivity)this.buffers.delete('birds');
   const cached=this.buffers.get(type);if(cached)return cached;
   const ctx=this.context!;
   if(type==='fire'||type==='stream'){
@@ -75,6 +81,11 @@ export class Soundscape {
    }
    events.sort((a,b)=>a.time-b.time);this.natureEvents.set(type,events);
    this.natureActivity.set(type,activity);this.buffers.set(type,buffer);return buffer;
+  }
+  if(type==='birds'){
+   const buffer=ctx.createBuffer(1,ctx.sampleRate*45,ctx.sampleRate);this.birdCalls=[];
+   buffer.getChannelData(0).set(birdSong(ctx.sampleRate,45,Math.random,this.settings.birdsActivity,call=>this.birdCalls.push(call)));
+   this.birdActivity=this.settings.birdsActivity;this.buffers.set(type,buffer);return buffer;
   }
   if(type==='wind'){
    const buffer=ctx.createBuffer(1,ctx.sampleRate*60,ctx.sampleRate);
@@ -120,7 +131,7 @@ export class Soundscape {
    if(!settings.instrumentsEnabled||!settings[voice.instrument]) {voice.gain.gain.cancelAndHoldAtTime(now);voice.gain.gain.linearRampToValueAtTime(0,now+.08);try{source.stop(now+.1);}catch{}}
   }
   this.instruments.gain.setTargetAtTime(settings.instrumentVolume/100*.65,now,.08);
-  for(const layer of ['rain','wind','noise','fire','stream'] as const) {
+  for(const layer of ['rain','wind','noise','fire','stream','birds'] as const) {
    const old=this.layers.get(layer);
    if(!settings[layer]) {
     if(old){old.gain.gain.setTargetAtTime(0,now,.06);old.source.stop(now+.3);old.lfo?.stop(now+.3);this.layers.delete(layer);}
@@ -135,16 +146,16 @@ export class Soundscape {
    if(!entry){
     const source=ctx.createBufferSource(),gain=ctx.createGain(),filter=ctx.createBiquadFilter();
     source.buffer=this.noiseBuffer(type);source.loop=true;
-    filter.type='lowpass';filter.Q.value=.5;filter.frequency.value=layer==='rain'?2400:layer==='wind'?600:layer==='fire'?3400:layer==='stream'?3800:settings.noiseType==='white'?6500:3000;
+    filter.type='lowpass';filter.Q.value=.5;filter.frequency.value=layer==='birds'?6500:layer==='rain'?2400:layer==='wind'?600:layer==='fire'?3400:layer==='stream'?3800:settings.noiseType==='white'?6500:3000;
     source.connect(filter);filter.connect(gain);gain.connect(this.master);gain.gain.value=0;
     entry={source,gain,filter};
     source.onended=()=>{source.disconnect();filter.disconnect();gain.disconnect();entry?.mod?.disconnect();this.sources.delete(source);};
-    source.start();if(layer==='fire'||layer==='stream'){this.natureStarted.set(layer,ctx.currentTime);this.natureCursor.set(layer,0);}if(layer==='wind')this.windStarted=ctx.currentTime;if(layer==='rain'){this.rainStarted=ctx.currentTime;this.rainCursor=0;}if(Number.isFinite(this.deadline))source.stop(this.deadline);
+    source.start();if(layer==='birds'){this.birdStarted=ctx.currentTime;this.birdCursor=0;}if(layer==='fire'||layer==='stream'){this.natureStarted.set(layer,ctx.currentTime);this.natureCursor.set(layer,0);}if(layer==='wind')this.windStarted=ctx.currentTime;if(layer==='rain'){this.rainStarted=ctx.currentTime;this.rainCursor=0;}if(Number.isFinite(this.deadline))source.stop(this.deadline);
     this.sources.add(source);this.layers.set(layer,entry);
    }
    // Keep white, pink and brown noise behind the instruments and nature sounds.
    const level=layer==='noise'?.055:.22;
-   entry.gain.gain.setTargetAtTime(settings[layer+'Volume' as 'rainVolume'|'windVolume'|'noiseVolume'|'fireVolume'|'streamVolume']/100*level,now,.12);
+   entry.gain.gain.setTargetAtTime(settings[layer+'Volume' as 'rainVolume'|'windVolume'|'noiseVolume'|'fireVolume'|'streamVolume'|'birdsVolume']/100*level,now,.12);
   }
  }
  private scheduleFade(sleepMode:boolean){
@@ -191,6 +202,16 @@ export class Soundscape {
   return windStrengthAt(this.time-this.windStarted,this.windGusts,entry.source.buffer!.duration);
  }
  /** Events from the actual looping rain buffer, driven by the audio clock. */
+ takeBirdCalls():BirdCall[]{
+  const entry=this.layers.get('birds');if(!this.running||!entry)return [];
+  const elapsed=this.time-this.birdStarted,from=Math.max(this.birdCursor,elapsed-.1);this.birdCursor=elapsed;
+  if(!this.settings.birdsAnimation||!this.settings.motion||!this.settings.birdsVolume)return [];
+  const duration=entry.source.buffer!.duration,calls:BirdCall[]=[];
+  for(let loop=Math.floor(from/duration);loop<=Math.floor(elapsed/duration);loop++)for(const call of this.birdCalls){
+   const at=loop*duration+call.time;if(at>from&&at<=elapsed)calls.push(call);
+  }
+  return calls;
+ }
  takeRainDrops():RainDrop[]{
   const entry=this.layers.get('rain');
   if(!this.running || !entry)return [];

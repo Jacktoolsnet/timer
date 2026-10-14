@@ -908,3 +908,10 @@ body.focus-view .campfire-scene { bottom:10%; }
 #sound-stage:not([data-background-image="none"]) .scene-word { opacity:1; color:var(--text); text-shadow:0 1px 12px var(--surface); }
 /* Preview rows inside the background dropdown. */
 .background-image-options .background-preview { flex:0 0 64px; height:42px; border:1px solid var(--line); border-radius:7px; background:var(--surface); background-size:cover; background-position:center; }
+
+.flying-bird { position:absolute; left:-40px; top:var(--bird-y,15%); width:28px; height:18px; pointer-events:none; opacity:.65; animation:bird-flight var(--bird-duration,17s) linear forwards; animation-direction:var(--bird-direction,normal); }
+.flying-bird svg { width:100%; height:100%; fill:none; stroke:var(--text); stroke-width:2; animation:bird-wings 1.2s ease-in-out infinite; transform-origin:center; }
+@keyframes bird-flight { 0%{left:-40px;transform:translateY(10px)} 40%{transform:translateY(-20px)} 100%{left:calc(100% + 40px);transform:translateY(5px)} }
+@keyframes bird-wings { 0%,100%{transform:scaleY(1)} 50%{transform:scaleY(.35)} }
+[data-relax-state="paused"] .flying-bird,[data-relax-state="paused"] .flying-bird svg { animation-play-state:paused; }
+@media(prefers-reduced-motion:reduce) { .flying-bird { display:none; animation:none; } .flying-bird svg { animation:none; } }

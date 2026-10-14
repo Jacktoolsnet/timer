@@ -2,6 +2,7 @@ import {normalize,type Settings} from './relax.ts';
 export const presetNames=['summer','evening','focus','nature','fireside','brook'] as const;
 export type Preset=typeof presetNames[number];
 const base={
+ birds:false,birdsAnimation:false,birdsVolume:20,birdsActivity:4,
  instrumentsEnabled:true,chimes:false,bowls:false,kalimba:false,handpan:false,bells:false,gong:false,harp:false,
  instrumentVolume:35,pitch:0,density:4,
  fire:false,stream:false,fireAnimation:false,streamAnimation:false,fireVolume:25,streamVolume:25,fireDensity:4,streamFlow:4,
@@ -10,10 +11,10 @@ const base={
  instrumentAnimation:true,rainAnimation:false,windAnimation:false,
 } satisfies Partial<Settings>;
 export const presets:Record<Preset,Partial<Settings>>={
- summer:{...base,backgroundImage:'summer-garden',chimes:true,pitch:-7,rain:true,wind:true,rainAnimation:true,windAnimation:true},
+ summer:{...base,birds:true,birdsAnimation:true,birdsVolume:18,birdsActivity:4,backgroundImage:'summer-garden',chimes:true,pitch:-7,rain:true,wind:true,rainAnimation:true,windAnimation:true},
  evening:{...base,backgroundImage:'evening-terrace',handpan:true,instrumentVolume:30,density:2,pitch:-4,wind:true,windVolume:15,windActivity:2,noise:true,noiseType:'brown',noiseVolume:15,windAnimation:true},
  focus:{...base,backgroundImage:'focus-room',kalimba:true,instrumentVolume:30,density:3,noise:true,noiseType:'brown',noiseVolume:10},
- nature:{...base,backgroundImage:'forest-clearing',chimes:true,instrumentsEnabled:false,rain:true,wind:true,rainVolume:40,rainAnimation:true,windAnimation:true},
+ nature:{...base,birds:true,birdsAnimation:true,birdsVolume:22,birdsActivity:3,backgroundImage:'forest-clearing',chimes:true,instrumentsEnabled:false,rain:true,wind:true,rainVolume:40,rainAnimation:true,windAnimation:true},
  fireside:{...base,backgroundImage:'lakeside-camp',chimes:true,instrumentsEnabled:false,fire:true,fireVolume:35,fireDensity:4,fireAnimation:true},
  brook:{...base,backgroundImage:'quiet-coast',chimes:true,instrumentsEnabled:false,stream:true,streamVolume:35,streamFlow:4,streamAnimation:true,wind:true,windVolume:8,windActivity:2},
 };

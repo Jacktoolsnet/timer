@@ -78,6 +78,18 @@ function rainFrame(){
  else if(state==='running'&&!document.hidden)glow.style.setProperty('--wind-level',String(audio.windStrength()));
  // Smoke now belongs to the illustrated fire, rather than unrelated screen-wide puffs.
  audio.takeNatureEvents('fire');
+ const calls=audio.takeBirdCalls();
+ if(state==='running'&&!document.hidden&&settings.motion&&settings.birdsAnimation&&!reduced.matches){
+  for(let index=0;index<calls.length;index++){
+   if(Math.random()>.6||stage.querySelectorAll('.flying-bird').length>=2)continue;
+   const bird=document.createElement('span');bird.className='flying-bird';
+   bird.style.setProperty('--bird-y',(8+Math.random()*22)+'%');
+   bird.style.setProperty('--bird-duration',(14+Math.random()*7)+'s');
+   bird.style.setProperty('--bird-direction',Math.random()>.5?'normal':'reverse');
+   bird.innerHTML='<svg viewBox="0 0 40 20" aria-hidden="true"><path d="M2 12Q10 0 20 12Q30 0 38 12"/></svg>';
+   stage.append(bird);bird.addEventListener('animationend',event=>{if(event.target===bird)bird.remove();});
+  }
+ }
  const drops=audio.takeRainDrops();
  if(state==='running'&&!document.hidden&&settings.motion&&settings.rainAnimation){
   for(const drop of drops){
@@ -107,9 +119,9 @@ function sync(){
  document.querySelectorAll<HTMLInputElement>('[name=preset]').forEach(r=>r.checked=r.value===preset);
  document.querySelectorAll<HTMLInputElement>('[name=instrument]').forEach(r=>r.checked=r.value===selectedInstrument(settings));
  el('instrument-value').textContent=t[selectedInstrument(settings)];
- for(const key of ['fire','stream','fireAnimation','streamAnimation','sleepMode','instrumentsEnabled','windAnimation','instrumentAnimation','rainAnimation','rain','wind','noise','motion','awake','background'] as const)input(key).checked=settings[key];
- for(const key of ['fireVolume','streamVolume','fireDensity','streamFlow','windActivity','rainDensity','pitch','minutes','density','instrumentVolume','rainVolume','windVolume','noiseVolume'] as const){
-  input(key).value=String(settings[key]);const output=document.getElementById(key+'-value');if(output)output.textContent=(key==='rainDensity'||key==='windActivity'||key==='fireDensity'||key==='streamFlow')?settings[key]+' / 10':key==='pitch'?(settings.pitch===0?t.pitchOriginal:(settings.pitch>0?'+':'')+settings.pitch+' '+t.semitones):settings[key]+' %';
+ for(const key of ['birds','birdsAnimation','fire','stream','fireAnimation','streamAnimation','sleepMode','instrumentsEnabled','windAnimation','instrumentAnimation','rainAnimation','rain','wind','noise','motion','awake','background'] as const)input(key).checked=settings[key];
+ for(const key of ['birdsVolume','birdsActivity','fireVolume','streamVolume','fireDensity','streamFlow','windActivity','rainDensity','pitch','minutes','density','instrumentVolume','rainVolume','windVolume','noiseVolume'] as const){
+  input(key).value=String(settings[key]);const output=document.getElementById(key+'-value');if(output)output.textContent=(key==='birdsActivity'||key==='rainDensity'||key==='windActivity'||key==='fireDensity'||key==='streamFlow')?settings[key]+' / 10':key==='pitch'?(settings.pitch===0?t.pitchOriginal:(settings.pitch>0?'+':'')+settings.pitch+' '+t.semitones):settings[key]+' %';
  }
  document.querySelectorAll<HTMLInputElement>('[name=noiseType]').forEach(r=>r.checked=r.value===settings.noiseType);
  document.documentElement.dataset.relaxMotion=settings.motion?'on':'off';
@@ -137,14 +149,14 @@ async function begin(){
  try{
   await audio.start(settings,total?Math.max(.01,total-elapsed):0,total);
   if(token!==generation){audio.stop();return;}
-  anchor=audio.time;state='running';el('audio-status').textContent='';wake(settings.awake&&!settings.sleepMode);stage.querySelectorAll<HTMLElement>('.sound-shape,.rain-drop,.nature-glimmer').forEach(n=>n.style.animationPlayState='running');
+  anchor=audio.time;state='running';el('audio-status').textContent='';wake(settings.awake&&!settings.sleepMode);stage.querySelectorAll<HTMLElement>('.sound-shape,.rain-drop,.nature-glimmer,.flying-bird,.flying-bird svg').forEach(n=>n.style.animationPlayState='running');
  }catch{audio.stop();el('audio-status').textContent=t.audioError;}
  finally{pending=false;render();}
 }
 function pause(){
  if(state!=='running')return;
  elapsed=current();state='paused';generation++;audio.stop();wake(false);
- stage.querySelectorAll<HTMLElement>('.sound-shape,.rain-drop,.nature-glimmer').forEach(n=>n.style.animationPlayState='paused');render();
+ stage.querySelectorAll<HTMLElement>('.sound-shape,.rain-drop,.nature-glimmer,.flying-bird,.flying-bird svg').forEach(n=>n.style.animationPlayState='paused');render();
 }
 function finish(){
  if(state==='running')elapsed=current();
@@ -168,8 +180,8 @@ function read(){
  settings.backgroundImage=document.querySelector<HTMLInputElement>('[name=backgroundImage]:checked')!.value as Settings['backgroundImage'];
  const selected=document.querySelector<HTMLInputElement>('[name=instrument]:checked')!.value;
  for(const key of ['chimes','bowls','kalimba','handpan','bells','gong','harp'] as const)settings[key]=key===selected;
- for(const key of ['fire','stream','fireAnimation','streamAnimation','sleepMode','instrumentsEnabled','windAnimation','instrumentAnimation','rainAnimation','rain','wind','noise','motion','awake','background'] as const)settings[key]=input(key).checked;
- for(const key of ['fireVolume','streamVolume','fireDensity','streamFlow','windActivity','rainDensity','pitch','minutes','density','instrumentVolume','rainVolume','windVolume','noiseVolume'] as const)settings[key]=Number(input(key).value);
+ for(const key of ['birds','birdsAnimation','fire','stream','fireAnimation','streamAnimation','sleepMode','instrumentsEnabled','windAnimation','instrumentAnimation','rainAnimation','rain','wind','noise','motion','awake','background'] as const)settings[key]=input(key).checked;
+ for(const key of ['birdsVolume','birdsActivity','fireVolume','streamVolume','fireDensity','streamFlow','windActivity','rainDensity','pitch','minutes','density','instrumentVolume','rainVolume','windVolume','noiseVolume'] as const)settings[key]=Number(input(key).value);
  settings.waveDirection=document.querySelector<HTMLInputElement>('[name=waveDirection]:checked')!.value as Settings['waveDirection'];
  settings.noiseType=document.querySelector<HTMLInputElement>('[name=noiseType]:checked')!.value as Settings['noiseType'];
  applySettings();
@@ -177,6 +189,7 @@ function read(){
 function applySettings(){
  settings=normalize(settings);sync();save();audio.update(settings);wake(state==='running'&&settings.awake&&!settings.sleepMode);
  if(!settings.motion)stage.replaceChildren();
+ if(!settings.birds||!settings.birdsAnimation||settings.birdsVolume===0)stage.querySelectorAll('.flying-bird').forEach(n=>n.remove());
  if(!settings.instrumentsEnabled||!settings.instrumentAnimation)stage.querySelectorAll('.sound-shape').forEach(n=>n.remove());
  for(const layer of ['fire','stream'] as const){
   if(!settings[layer]||!settings[layer+'Animation' as 'fireAnimation'|'streamAnimation']||settings[layer+'Volume' as 'fireVolume'|'streamVolume']===0)stage.querySelectorAll('.'+layer+'-glimmer').forEach(n=>n.remove());
@@ -247,7 +260,7 @@ focus.addEventListener('click',async()=>{
 document.addEventListener('fullscreenchange',()=>{if(requesting&&document.fullscreenElement===document.documentElement)owns=true;if(!document.fullscreenElement&&owns){owns=false;setFocus(false);}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!first.open&&!safety.open&&!sleepScreen.open)void leave();});
 document.addEventListener('visibilitychange',()=>{
- stage.querySelectorAll<HTMLElement>('.sound-shape,.rain-drop,.nature-glimmer').forEach(n=>n.style.animationPlayState=document.hidden||state!=='running'?'paused':'running');
+ stage.querySelectorAll<HTMLElement>('.sound-shape,.rain-drop,.nature-glimmer,.flying-bird,.flying-bird svg').forEach(n=>n.style.animationPlayState=document.hidden||state!=='running'?'paused':'running');
  if(document.hidden&&!settings.background)pause();else render();
 });
 window.addEventListener('pagehide',()=>{generation++;audio.stop();state='paused';wake(false);});

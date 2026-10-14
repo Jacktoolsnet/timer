@@ -32,12 +32,17 @@ export async function exportVideo(p:Project,o:ExportOptions,signal:AbortSignal,p
  const mixer=new ExportAudio(p,media,duration);let audioEnd=0;
  const cancel=()=>{void output.cancel().catch(()=>{});};signal.addEventListener('abort',cancel,{once:true});
  try{
-  await document.fonts.ready;await output.start();const frames=Math.ceil(duration*o.fps);
+  await document.fonts.ready;await output.start();const frames=Math.ceil(duration*o.fps);let previewPercent=-1;
   for(let i=0;i<frames;i++){
    signal.throwIfAborted();const time=i/o.fps;
    if(audio&&time>=audioEnd){const end=Math.min(duration,audioEnd+1),data=await mixer.chunk(audioEnd,end);const sample=new AudioSample({data,format:'f32-planar',numberOfChannels:2,sampleRate:48000,timestamp:audioEnd});try{await audio.add(sample);}finally{sample.close();}audioEnd=end;}
-   const image=await renderer.frame(time,size.width,size.height);canvas.getContext('2d')!.drawImage(image,0,0);await video.add(time,Math.min(1/o.fps,duration-time));onFrame?.(canvas,time);progress((i+1)/frames*.98);
+   const image=await renderer.frame(time,size.width,size.height);
+   try{canvas.getContext('2d')!.drawImage(image,0,0);}finally{image.width=0;image.height=0;}
+   await video.add(time,Math.min(1/o.fps,duration-time));
+   const fraction=(i+1)/frames*.98,percent=Math.floor(fraction*100);
+   if(percent!==previewPercent){previewPercent=percent;onFrame?.(canvas,time);}
+   progress(fraction);
   }
   signal.throwIfAborted();await output.finalize();signal.throwIfAborted();progress(1);return new Blob([target.buffer!],{type:o.format==='mp4'?'video/mp4':'video/webm'});
- }finally{signal.removeEventListener('abort',cancel);if(output.state!=='finalized'&&output.state!=='canceled')await output.cancel().catch(()=>{});renderer.dispose();media.dispose();}
+ }finally{signal.removeEventListener('abort',cancel);if(output.state!=='finalized'&&output.state!=='canceled')await output.cancel().catch(()=>{});renderer.dispose();media.dispose();canvas.width=0;canvas.height=0;}
 }

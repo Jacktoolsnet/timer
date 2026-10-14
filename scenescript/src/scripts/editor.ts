@@ -1013,13 +1013,13 @@ $('start-export').addEventListener('click',async()=>{
  if(exportController)return;const controller=new AbortController();exportController=controller;
  const controls=Array.from(exportDialog.querySelectorAll<HTMLInputElement|HTMLSelectElement|HTMLButtonElement>('#export-options input,#export-options select,#start-export'));controls.forEach(n=>n.disabled=true);
  const preview=$<HTMLCanvasElement>('export-preview-canvas');$('export-preview').hidden=true;
- const progress=$<HTMLProgressElement>('export-progress');progress.hidden=false;progress.value=0;$('export-status').textContent=t('exportBusy');keepScreenAwake(true);
+ const progress=$<HTMLProgressElement>('export-progress');progress.hidden=false;progress.value=0;$('export-status').textContent=t('exportBusy')+' 0 %';keepScreenAwake(true);
  try{
   const {exportVideo,exportSupported}=await import('./video-export');
   const options={format:$<HTMLSelectElement>('export-format').value as 'mp4'|'webm',resolution:Number($<HTMLSelectElement>('export-resolution').value),fps:Number($<HTMLSelectElement>('export-fps').value),audio:$<HTMLInputElement>('export-audio').checked};
   const snapshot=structuredClone(project);
   if(!await exportSupported(snapshot,options))throw new Error(t('exportUnsupported'));
-  const blob=await exportVideo(snapshot,options,controller.signal,value=>{progress.value=value;},frame=>{
+  const blob=await exportVideo(snapshot,options,controller.signal,value=>{progress.value=value;const percent=Math.min(100,Math.floor(value*1000)/10);$('export-status').textContent=t('exportBusy')+' '+percent.toLocaleString(document.documentElement.lang,{minimumFractionDigits:1,maximumFractionDigits:1})+' %';},frame=>{
    const scale=Math.min(320/frame.width,180/frame.height),width=Math.max(1,Math.round(frame.width*scale)),height=Math.max(1,Math.round(frame.height*scale));
    if(preview.width!==width||preview.height!==height){preview.width=width;preview.height=height;}
    preview.getContext('2d')!.drawImage(frame,0,0,width,height);$('export-preview').hidden=false;

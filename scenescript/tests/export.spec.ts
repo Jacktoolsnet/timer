@@ -99,11 +99,12 @@ test('1080p MP4 includes AAC music even without a native AAC encoder',async({pag
 });
 
 test('export overlay shows the current rendered frame and resets on reopening',async({page})=>{
- const p=demoProject();p.scenes=p.scenes.slice(0,1);p.scenes[0].duration=2;p.scenes[0].elements=[];p.scenes[0].transition='none';p.scenes[0].background='#ff0000';
+ const p=demoProject();p.scenes=p.scenes.slice(0,1);p.scenes[0].duration=20;p.scenes[0].elements=[];p.scenes[0].transition='none';p.scenes[0].background='#ff0000';
  await page.goto('/en/');await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(p));await page.locator('#import-json').click();
  await page.locator('#open-export').click();await expect(page.locator('#export-preview')).toBeHidden();
  await page.locator('#export-format').selectOption('webm');await page.locator('#export-resolution').selectOption('480');await page.locator('#export-audio').uncheck();await page.locator('#start-export').click();
  await expect(page.locator('#export-preview')).toBeVisible();
+ await expect(page.locator('#export-status')).toHaveText(/Creating video .* \d+\.\d %/);
  const pixel=await page.locator('#export-preview-canvas').evaluate((c:HTMLCanvasElement)=>({width:c.width,height:c.height,pixel:Array.from(c.getContext('2d')!.getImageData(10,10,1,1).data)}));
  expect(pixel.width).toBeLessThanOrEqual(320);expect(pixel.height).toBeLessThanOrEqual(180);expect(pixel.pixel.slice(0,3)).toEqual([255,0,0]);
  await page.locator('#cancel-export').click();await expect(page.locator('#start-export')).toBeEnabled();await page.locator('#cancel-export').click();
@@ -136,4 +137,40 @@ test('text gradients paint colored glyphs into exported canvas without filling t
  },p);
  for(const frame of [...result.other,result.combined]){expect(frame.red).toBeGreaterThan(20);expect(frame.blue).toBeGreaterThan(20);}
  expect(result.enabled.red).toBeGreaterThan(20);expect(result.enabled.blue).toBeGreaterThan(20);expect(result.enabled.black).toBeGreaterThan(480*270*.9);expect(result.disabled.red).toBe(0);expect(result.disabled.blue).toBe(0);
+});
+
+test('preview is emitted at most once per percentage point while progress stays frame-accurate',async({page})=>{
+ test.setTimeout(90000);await page.goto('/en/');
+ const result=await page.evaluate(async()=>{
+  const {demoProject}=await import(/* @vite-ignore */ '/src/lib/model.ts' as string);
+  const {exportVideo}=await import(/* @vite-ignore */ '/src/scripts/video-export.ts' as string);
+  const p=demoProject();p.scenes=p.scenes.slice(0,1);p.scenes[0].duration=2;p.scenes[0].elements=[];p.scenes[0].transition='none';
+  const progress:number[]=[],previewTimes:number[]=[];
+  await exportVideo(p,{format:'webm',resolution:480,fps:60,audio:false},new AbortController().signal,(v:number)=>progress.push(v),(_:HTMLCanvasElement,time:number)=>previewTimes.push(time));
+  return {progress,previewTimes};
+ });
+ expect(result.progress).toHaveLength(121);expect(result.progress.at(-1)).toBe(1);
+ expect(result.progress.slice(0,-1).every((v,i)=>Math.abs(v-(i+1)/120*.98)<1e-10)).toBe(true);
+ expect(result.previewTimes.length).toBeLessThanOrEqual(99);expect(result.previewTimes.length).toBeLessThan(120);
+ const buckets=result.previewTimes.map(time=>Math.floor((Math.round(time*60)+1)/120*.98*100));
+ expect(new Set(buckets).size).toBe(buckets.length);
+ expect(result.previewTimes[0]).toBe(0);
+});
+
+test('video export decoder preserves sequential, repeated, backwards and end-frame requests',async({page})=>{
+ await page.goto('/en/');const result=await page.evaluate(async()=>{
+  const {demoProject}=await import(/* @vite-ignore */ '/src/lib/model.ts' as string);
+  const {ExportMedia}=await import(/* @vite-ignore */ '/src/scripts/export-media.ts' as string);
+  const moduleURL=performance.getEntriesByType('resource').map(e=>e.name).find(n=>n.includes('/mediabunny.js?v='))!,m=await import(/* @vite-ignore */ moduleURL);
+  const canvas=document.createElement('canvas');canvas.width=64;canvas.height=64;const ctx=canvas.getContext('2d')!;
+  const target=new m.BufferTarget(),output=new m.Output({target,format:new m.WebMOutputFormat()}),source=new m.CanvasSource(canvas,{codec:'vp9',bitrate:100000});output.addVideoTrack(source,{frameRate:10});await output.start();
+  for(let i=0;i<6;i++){ctx.fillStyle=i<3?'#ff0000':'#0000ff';ctx.fillRect(0,0,64,64);await source.add(i/10,.1);}await output.finalize();
+  const data=await new Promise<string>(resolve=>{const r=new FileReader();r.onload=()=>resolve(String(r.result));r.readAsDataURL(new Blob([target.buffer],{type:'video/webm'}));});
+  const p=demoProject();p.videos={clip:{name:'clip.webm',data,duration:.6}};
+  const controller=new AbortController(),media=new ExportMedia(p,controller.signal);const frames=[];
+  try{for(const time of [0,.05,.1,.3,.35,.35,.599,.1,.4,5]){const frame=await media.frame('clip',time);frames.push({timestamp:frame.timestamp,pixel:Array.from(frame.canvas.getContext('2d')!.getImageData(10,10,1,1).data)});}controller.abort();let aborted=false;try{await media.frame('clip',0);}catch(error){aborted=(error as Error).name==='AbortError';}return {frames,aborted};}finally{media.dispose();}
+ });
+ expect(result.aborted).toBe(true);
+ expect(result.frames.map(f=>Math.round(f.timestamp*10))).toEqual([0,0,1,3,3,3,5,1,4,5]);
+ for(const [i,frame] of result.frames.entries())expect(frame.pixel[i<3||i===7?0:2]).toBeGreaterThan(200);
 });

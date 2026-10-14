@@ -3,7 +3,7 @@ import {createCropImage} from './crop-image';
 import type {Crop} from '../lib/crop';
 import {sceneElementState} from '../lib/groups';
 import {createBubble} from './bubble';
-import {toCanvas} from 'html-to-image';
+import {toSvg} from 'html-to-image';
 import {formats,locateTime,sceneTransitionState,type Project,type Scene} from '../lib/model';
 import {gradientCSS} from '../lib/gradient';
 import {videoTime,type VideoSettings} from '../lib/video';
@@ -39,14 +39,25 @@ export class ExportRenderer{
  for(const attr of ['x','y','width','height','cx','cy','r','rx','ry','x1','y1','x2','y2','viewBox']){const value=(n as unknown as Record<string,{animVal?:{value?:number;x?:number;y?:number;width?:number;height?:number}}>)[attr]?.animVal;if(value?.value!==undefined)copy.setAttribute(attr,String(value.value));else if(attr==='viewBox'&&value?.x!==undefined)copy.setAttribute(attr,`${value.x} ${value.y} ${value.width} ${value.height}`);}
  const transform=(n as SVGGraphicsElement).transform?.animVal;if(transform?.numberOfItems){let m=new DOMMatrix();for(let j=0;j<transform.numberOfItems;j++)m=m.multiply(transform.getItem(j).matrix);if(m)copy.setAttribute('transform',`matrix(${m.a} ${m.b} ${m.c} ${m.d} ${m.e} ${m.f})`);}
  });clone.querySelectorAll('animate,animateTransform,set').forEach(n=>n.remove());svg.replaceWith(clone);}}
- async frame(time:number,width:number,height:number){this.media.check();this.root.replaceChildren();
+ async frame(time:number,width:number,height:number){this.media.check();this.clear();
  if(this.p.backgroundSimulation){const host=this.box();this.root.append(host);this.simulation(this.p.backgroundSimulation,this.w,this.h,time,host);}
  if(this.p.backgroundVideo){const host=this.box();this.root.append(host);await this.video(this.p.backgroundVideo,time,host);}
  const at=locateTime(this.p,time),s=this.p.scenes[at.index],transition=sceneTransitionState(s,at.local),previous=s.transition!=='none'&&s.transition!=='fade'&&at.index>0&&transition.progress<1;
  if(s.transition==='through-black'&&transition.progress<1){const black=this.box();black.style.background='#000';black.style.opacity=String(1-Math.abs(transition.progress*2-1));this.root.append(black);}
  if(previous){const out=await this.layer(this.p.scenes[at.index-1],this.p.scenes[at.index-1].duration);out.style.transform=transition.outgoing;out.style.opacity=String(transition.outgoingOpacity);}
  const incoming=await this.layer(s,at.local);incoming.style.transform=transition.incoming;incoming.style.clipPath=transition.clip;incoming.style.opacity=String(transition.opacity);
- this.freezeSvg();const canvas=await toCanvas(this.root,{pixelRatio:1,canvasWidth:width,canvasHeight:height,skipFonts:true,style:{position:'relative',left:'0px',top:'0px',right:'auto',bottom:'auto',margin:'0',transform:'none',visibility:'visible',contentVisibility:'visible'},skipAutoScale:true});this.media.check();return canvas;
+ this.freezeSvg();
+ // html-to-image's toCanvas leaves its decoded SVG Image to garbage collection.
+ // Explicitly unload each large, unique frame instead of retaining native image
+ // resources until the browser happens to run a GC during a long export.
+ const uri=await toSvg(this.root,{skipFonts:true,style:{position:'relative',left:'0px',top:'0px',right:'auto',bottom:'auto',margin:'0',transform:'none',visibility:'visible',contentVisibility:'visible'}});
+ const image=new Image(),canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;
+ try{
+  image.src=uri;await image.decode();this.media.check();canvas.getContext('2d')!.drawImage(image,0,0,width,height);return canvas;
+ }catch(error){canvas.width=0;canvas.height=0;throw error;}
+ finally{image.removeAttribute('src');this.clear();}
  }
- dispose(){this.root.remove();}
+ // Detached canvases can otherwise retain large native pixel buffers until a GC.
+ private clear(){for(const canvas of this.root.querySelectorAll('canvas')){canvas.width=0;canvas.height=0;}this.root.replaceChildren();}
+ dispose(){this.clear();this.root.remove();}
 }

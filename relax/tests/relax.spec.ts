@@ -463,3 +463,24 @@ test('lakeside camp uses the fire bowl and contains no baked-in fire',async({pag
  const image=await page.request.get('/backgrounds/lakeside-camp.svg');
  expect(await image.text()).not.toMatch(/camp-firepit|camp-stone-ring|M760 872/);
 });
+
+test('birdsong presets, independent flight animation and consent persistence',async({page})=>{
+ await page.goto('/de/');
+ await page.locator('#preset-dropdown summary').click();await page.locator('[name=preset][value=summer]').check();
+ await expect(page.locator('#birds')).toBeChecked();await expect(page.locator('#birdsVolume')).toHaveValue('18');
+ await expect(page.locator('#birdsAnimation')).toBeChecked();
+ await page.locator('#birdsActivity').fill('10');await begin(page);
+ await expect(page.locator('.flying-bird').first()).toBeVisible({timeout:30000});
+ expect(await page.locator('.flying-bird').count()).toBeLessThanOrEqual(2);
+ await page.locator('#start').click();
+ await expect(page.locator('.flying-bird').first()).toHaveCSS('animation-play-state','paused');
+ await page.locator('#birdsAnimation').uncheck();await expect(page.locator('.flying-bird')).toHaveCount(0);
+ await expect(page.locator('#birds')).toBeChecked();
+ await page.locator('#birdsVolume').fill('27');
+ await page.locator('#palette-dropdown summary').click();await page.locator('#remember-preferences').check();await page.locator('#preferences-close').click();
+ await page.reload();await expect(page.locator('#birds')).toBeChecked();
+ await expect(page.locator('#birdsVolume')).toHaveValue('27');await expect(page.locator('#birdsActivity')).toHaveValue('10');
+ await expect(page.locator('#birdsAnimation')).not.toBeChecked();
+ await page.locator('#preset-dropdown summary').click();await page.locator('[name=preset][value=evening]').check();
+ await expect(page.locator('#birds')).not.toBeChecked();
+});
