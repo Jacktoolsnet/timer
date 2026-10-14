@@ -1,6 +1,6 @@
 import {renderLapInsights} from './lap-insights';
 import {enhanceStopwatchSelects} from './stopwatch-selects';
-import {Stopwatch, formatElapsed, lapRows, lapsCsv, combinedLapRows, analyzeLaps} from '../lib/stopwatch';
+import {Stopwatch, formatElapsed, lapRows, lapsCsv, combinedLapRows, analyzeLaps, lapsHtml} from '../lib/stopwatch';
 import {screenWakeLock} from '../lib/wake-lock';
 import {storageAllowed} from '../lib/storage';
 import {STORAGE_KEY} from '../lib/engine';
@@ -123,13 +123,63 @@ function exportRows() {
  if(selectedClock>=0) return lapRows(clocks[selectedClock]!.timer.laps,[t.lap,t.duration,t.total]);
  return combinedLapRows(clocks.map(clock=>({name:clock.name,laps:clock.timer.laps})),t.lap);
 }
-copyLaps.addEventListener('click', async () => {
+async function copyRounds(formatted:boolean) {
  if (!displayedLaps().length) return;
- const snapshot = exportRows().map(row => row.join('\t')).join('\n');
+ const rows=exportRows();
+ const snapshot=rows.map(row=>row.join('\t')).join('\n');
+ const heading=t.laps+' · '+(selectedClock<0?t.allClocks:clocks[selectedClock]!.name);
+ let message=t.copied;
  try {
- await navigator.clipboard.writeText(snapshot);
- if (exportRows().map(row=>row.join('\t')).join('\n') === snapshot) $('export-status').textContent = t.copied;
- } catch {if (exportRows().map(row=>row.join('\t')).join('\n') === snapshot) $('export-status').textContent = t.copyError;}
+  if(formatted){
+   let richCopied=false;
+   if(typeof ClipboardItem!=='undefined' && typeof navigator.clipboard?.write==='function'){
+    try{
+     await navigator.clipboard.write([new ClipboardItem({
+      'text/plain':new Blob([snapshot],{type:'text/plain'}),
+      'text/html':new Blob([lapsHtml(rows,heading)],{type:'text/html'})
+     })]);
+     richCopied=true;
+    }catch{/* Unsupported formats or permissions: attempt plain text below. */}
+   }
+   if(richCopied)message=t.copiedFormatted;
+   else{await navigator.clipboard.writeText(snapshot);message=t.copiedPlainFallback;}
+  }else await navigator.clipboard.writeText(snapshot);
+  if(exportRows().map(row=>row.join('\t')).join('\n')===snapshot)$('export-status').textContent=message;
+ }catch{
+  if(exportRows().map(row=>row.join('\t')).join('\n')===snapshot)$('export-status').textContent=t.copyError;
+ }
+}
+
+const copyMenu=$('copy-menu');
+function closeCopyMenu(restoreFocus=false){
+ copyMenu.hidden=true;copyLaps.setAttribute('aria-expanded','false');
+ if(restoreFocus)copyLaps.focus();
+}
+function openCopyMenu(last=false){
+ if(copyLaps.disabled)return;
+ copyMenu.hidden=false;copyLaps.setAttribute('aria-expanded','true');
+ (last?$('copy-formatted'):$('copy-plain')).focus();
+}
+copyLaps.addEventListener('click',()=>copyMenu.hidden?openCopyMenu():closeCopyMenu(true));
+copyLaps.addEventListener('keydown',event=>{
+ if(event.key==='ArrowDown'||event.key==='ArrowUp'){event.preventDefault();openCopyMenu(event.key==='ArrowUp');}
+});
+$('copy-plain').addEventListener('click',()=>{closeCopyMenu(true);void copyRounds(false);});
+$('copy-formatted').addEventListener('click',()=>{closeCopyMenu(true);void copyRounds(true);});
+copyMenu.addEventListener('keydown',event=>{
+ const items=[$('copy-plain'),$('copy-formatted')];
+ if(event.key==='Escape'){event.preventDefault();event.stopPropagation();closeCopyMenu(true);}
+ else if(['ArrowDown','ArrowUp','Home','End'].includes(event.key)){
+  event.preventDefault();
+  const index=items.indexOf(document.activeElement as HTMLElement);
+  items[event.key==='Home'?0:event.key==='End'?1:(index+1)%2]!.focus();
+ }
+});
+document.addEventListener('click',event=>{
+ if(!(event.target as HTMLElement).closest('.copy-menu-wrapper'))closeCopyMenu();
+});
+document.querySelector('.copy-menu-wrapper')!.addEventListener('focusout',event=>{
+ if(!(event.currentTarget as HTMLElement).contains((event as FocusEvent).relatedTarget as Node|null))closeCopyMenu();
 });
 exportLaps.addEventListener('click', () => {
  if (!displayedLaps().length) return;

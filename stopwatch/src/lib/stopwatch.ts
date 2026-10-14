@@ -42,3 +42,13 @@ export function combinedLapRows(clocks: readonly {name:string; laps:readonly {du
   String(index+1),...clocks.map(clock=>clock.laps[index] ? formatElapsed(clock.laps[index]!.duration) : '')
  ])];
 }
+
+/** Inline styles survive pasting better than page CSS; escape all user-supplied names. */
+export function lapsHtml(rows:readonly (readonly string[])[],heading:string):string {
+ const escape=(value:string)=>value.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
+ const cells=(row:readonly string[],header:boolean)=>row.map((value,index)=>{
+  const tag=header?'th':'td';
+  return '<'+tag+(header?' scope="col"':'')+' style="border:1px solid #d9d9d9;padding:8px 12px;text-align:'+(index===0?'left':'right')+';'+(header?'background-color:#f4e7dd;font-weight:bold;':'')+'">'+escape(value)+'</'+tag+'>';
+ }).join('');
+ return '<div style="font-family:Arial,sans-serif;color:#222"><h2 style="font-size:18px;margin:0 0 12px">'+escape(heading)+'</h2><table style="border-collapse:collapse;font-size:13px"><thead><tr>'+cells(rows[0]??[],true)+'</tr></thead><tbody>'+rows.slice(1).map(row=>'<tr>'+cells(row,false)+'</tr>').join('')+'</tbody></table></div>';
+}

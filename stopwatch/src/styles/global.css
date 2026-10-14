@@ -1033,3 +1033,15 @@ body.focus-view .clock-tile .focus-details .timer-controls button.primary{width:
  .print-clock-section+.print-clock-section{break-before:page}
  #print-chart:has(h3){break-before:page}
 }
+.laps-actions{flex-wrap:wrap;justify-content:flex-end;flex-shrink:1}
+
+body.focus-view .timer-card>.stopwatch-laps{overflow:visible}
+
+.copy-menu-wrapper{position:relative}
+.laps-actions .copy-menu{left:auto;right:0;min-width:164px;padding:5px;box-shadow:0 8px 28px #0002}
+.laps-actions .copy-menu button{width:100%;height:auto;min-height:42px;padding:9px 10px;font-size:12px;font-weight:550}
+
+/* Stretch the vertical divider across the shared clock/results row. */
+@media(min-width:601px){
+ body:not(.focus-view):not(.multiple-stopwatches) .stopwatch-card>.stopwatch-laps{align-self:stretch;margin:24px 0 8px}
+}

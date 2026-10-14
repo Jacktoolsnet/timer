@@ -77,13 +77,13 @@ test('copy and CSV export include chronological laps, work in focus, handle clip
  await page.addInitScript(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async(text:string)=>{(window as any).copiedText=text;}}}));
  await page.goto('/de/');await expect(page.locator('#copy-laps')).toBeDisabled();await expect(page.locator('#export-laps')).toBeDisabled();
  await page.locator('#toggle-timing').click();await page.waitForTimeout(70);await page.locator('#lap').click();await page.waitForTimeout(50);await page.locator('#lap').click();await page.locator('#toggle-timing').click();
- await page.locator('#copy-laps').click();await expect(page.locator('#export-status')).toHaveText('Rundenzeiten kopiert.');
+ await page.locator('#copy-laps').click();await page.locator('#copy-plain').click();await expect(page.locator('#export-status')).toHaveText('Rundenzeiten kopiert.');
  const copied=await page.evaluate(()=>(window as any).copiedText as string);const lines=copied.split('\n');expect(lines[0]).toBe('Runde\tRundenzeit\tGesamtzeit');expect(lines[1]).toMatch(/^1\t/);expect(lines[2]).toMatch(/^2\t/);
  await page.locator('#stopwatch-focus').click();await expect(page.locator('#export-laps')).toBeVisible();
  const downloadPromise=page.waitForEvent('download');await page.locator('#export-laps').click();const download=await downloadPromise;expect(download.suggestedFilename()).toMatch(/^jacktools-stopwatch-.*\.csv$/);
  const {readFile}=await import('node:fs/promises');const csv=await readFile((await download.path())!,'utf8');expect(csv).toBe('\uFEFF'+lines.map(line=>line.split('\t').map(cell=>'"'+cell+'"').join(',')).join('\r\n')+'\r\n');
  await page.evaluate(()=>{Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async()=>{throw new Error('denied');}}});});
- await page.locator('#copy-laps').click();await expect(page.locator('#export-status')).toContainText('CSV-Export');
+ await page.locator('#copy-laps').click();await page.locator('#copy-plain').click();await expect(page.locator('#export-status')).toContainText('CSV-Export');
  await page.locator('#reset-timing').click();await page.locator('#reset-confirm').click();await expect(page.locator('#copy-laps')).toBeDisabled();await expect(page.locator('#export-laps')).toBeDisabled();await expect(page.locator('#export-status')).toBeEmpty();
 });
 
@@ -224,7 +224,7 @@ test('multiple clocks have independent laps, arrow navigation and combined expor
  await page.locator('#all-clocks').click();
  await expect(page.locator('#laps-body tr')).toHaveCount(2);
  await expect(page.locator('#lap-chart polyline')).toHaveCount(2);
- await page.locator('#copy-laps').click();
+ await page.locator('#copy-laps').click();await page.locator('#copy-plain').click();
  expect(await page.evaluate(()=>(window as any).copiedText)).toBe('Runde\tStoppuhr 1\tTraining\n1\t00:00:03.00\t00:00:01.00');
  await page.locator('#pause-all').click();
  await extra.locator('[data-action=reset]').click();
@@ -335,7 +335,7 @@ test('combined clipboard and CSV export share clock columns and lap rows',async(
  await page.evaluate(()=>{(window as any).testNow+=2000;});
  await page.locator('#lap').click();
  await page.locator('#show-all-laps').click();
- await page.locator('#copy-laps').click();
+ await page.locator('#copy-laps').click();await page.locator('#copy-plain').click();
  expect(await page.evaluate(()=>(window as any).copiedText)).toBe('Runde\tStoppuhr 1\tStoppuhr 2\n1\t00:00:01.00\t00:00:01.00\n2\t00:00:02.00\t');
  const downloading=page.waitForEvent('download');
  await page.locator('#export-laps').click();
@@ -429,4 +429,57 @@ test('printed charts show the numeric average for each stopwatch',async({page})=
  await page.emulateMedia({media:'print'});
  await expect(page.locator('.print-clock-section').nth(0).locator('.lap-chart-legend')).toContainText('Durchschnitt: 00:00:02.00');
  await expect(page.locator('.print-clock-section').nth(1).locator('.lap-chart-legend')).toContainText('Durchschnitt: 00:00:05.00');
+});
+
+test('formatted copy writes HTML and plain text with safe clock names',async({page})=>{
+ await page.addInitScript(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{
+  write:async(items:ClipboardItem[])=>{(window as any).copiedHtml=await(await items[0].getType('text/html')).text();(window as any).copiedPlain=await(await items[0].getType('text/plain')).text();}
+ }}));
+ await page.goto('/de/');
+ await page.locator('#add-clock').click();
+ await page.locator('.extra-clock input').fill('<Test>');
+ await page.locator('#start-all').click();
+ await page.locator('#lap-all').click();
+ await page.locator('#show-all-laps').click();
+  await page.locator('#copy-laps').click();await page.locator('#copy-formatted').click();
+ await expect(page.locator('#export-status')).toHaveText('Formatierte Tabelle kopiert.');
+ const html=await page.evaluate(()=>(window as any).copiedHtml);
+ expect(html).toContain('&lt;Test&gt;');expect(html).toContain('<table');expect(html).not.toContain('<Test>');
+ expect(await page.evaluate(()=>(window as any).copiedPlain)).toContain('Runde\tStoppuhr 1\t<Test>');
+});
+
+test('formatted copy falls back to plain text if rich clipboard is unavailable',async({page})=>{
+ await page.addInitScript(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{
+  write:async()=>{throw new Error('Unsupported');},
+  writeText:async(text:string)=>{(window as any).copiedText=text;}
+ }}));
+ await page.goto('/de/');
+ await page.locator('#toggle-timing').click();await page.locator('#lap').click();
+  await page.locator('#copy-laps').click();await page.locator('#copy-formatted').click();
+ await expect(page.locator('#export-status')).toHaveText('Formatierung nicht verfügbar. Tabelle als Text kopiert.');
+ expect(await page.evaluate(()=>(window as any).copiedText)).toContain('Runde\tRundenzeit\tGesamtzeit');
+});
+
+
+test('copy button menu supports keyboard selection and dismissal',async({page})=>{
+ await page.goto('/de/');
+ await page.locator('#toggle-timing').click();await page.locator('#lap').click();
+ const trigger=page.locator('#copy-laps'),menu=page.locator('#copy-menu');
+ await trigger.click();await expect(menu).toBeVisible();
+ await expect(page.locator('#copy-plain')).toBeFocused();
+ await page.keyboard.press('ArrowDown');await expect(page.locator('#copy-formatted')).toBeFocused();
+ await page.keyboard.press('Escape');await expect(menu).toBeHidden();await expect(trigger).toBeFocused();
+ await trigger.click();await page.locator('h1').click();await expect(menu).toBeHidden();
+ await trigger.focus();await page.keyboard.press('ArrowUp');await expect(page.locator('#copy-formatted')).toBeFocused();
+ await page.keyboard.press('Tab');await expect(menu).toBeHidden();
+});
+
+test('vertical lap divider stretches to the bottom of the clock area',async({page})=>{
+ await page.goto('/de/');
+ await page.setViewportSize({width:1440,height:1000});
+ const main=(await page.locator('.stopwatch-main').boundingBox())!;
+ const laps=(await page.locator('.stopwatch-laps').boundingBox())!;
+ expect(laps.y).toBeCloseTo(main.y+24,0);
+ expect(laps.y+laps.height).toBeCloseTo(main.y+main.height-8,0);
+ await expect(page.locator('.stopwatch-laps')).toHaveCSS('border-left-width','1px');
 });

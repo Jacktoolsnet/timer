@@ -25,3 +25,14 @@ test('combined export uses clock columns and lap rows with empty missing rounds'
  assert.deepEqual(rows,[['Runde','Uhr A','Uhr B','Uhr C'],['1','00:00:01.00','00:00:01.50',''],['2','00:00:02.00','','']]);
  assert.ok(lapsCsv(rows).includes('"2","00:00:02.00","",""'));
 });
+
+test('formatted clipboard HTML escapes names and preserves table structure',async()=>{
+ const {lapsHtml}=await import('../src/lib/stopwatch.ts');
+ const html=lapsHtml([['Runde','<img src=x onerror=alert(1)>'],['1','00:00:01.00']],'Training & <Test>');
+ assert.ok(html.includes('Training &amp; &lt;Test&gt;'));
+ assert.ok(html.includes('&lt;img src=x onerror=alert(1)&gt;'));
+ assert.ok(!html.includes('<img'));
+ assert.ok(html.includes('<thead>'));
+ assert.ok(html.includes('<tbody>'));
+ assert.ok(html.includes('00:00:01.00'));
+});
