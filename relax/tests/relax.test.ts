@@ -1,3 +1,5 @@
+import {backgroundImages,backgroundText} from '../src/lib/backgrounds.ts';
+import {readFileSync} from 'node:fs';
 import {wavePositionPicker} from '../src/lib/wave-position.ts';
 import {oceanSurf} from '../src/lib/ocean.ts';
 import {natureSound,type NatureEvent} from '../src/lib/nature.ts';
@@ -219,4 +221,27 @@ test('wave peaks visit the whole width without neighbouring region repeats',()=>
   }
   assert.equal(regions.size,5);
  }
+});
+test('preset backgrounds can be overridden independently and are validated',()=>{
+ for(const preset of presetNames){
+  const s=applyPreset(defaults,preset);
+  assert.notEqual(s.backgroundImage,'none');
+  assert.equal(matchingPreset({...s,backgroundImage:'none'}),preset);
+  assert.equal(normalize(s).backgroundImage,s.backgroundImage);
+ }
+ assert.equal(normalize({backgroundImage:'invalid'}).backgroundImage,'none');
+ assert.equal(normalize({backgroundImage:'forest'}).backgroundImage,'forest');
+});
+
+test('specialized scenes are available, local and assigned to their presets',()=>{
+ const scenes={summer:'summer-garden',evening:'evening-terrace',focus:'focus-room',nature:'forest-clearing',fireside:'lakeside-camp',brook:'quiet-coast'};
+ for(const preset of presetNames)assert.equal(applyPreset(defaults,preset).backgroundImage,scenes[preset]);
+ for(const text of Object.values(backgroundText))assert.equal(text.names.length,backgroundImages.length);
+ for(const name of backgroundImages.filter(name=>name!=='none')){
+  const svg=readFileSync(new URL('../public/backgrounds/'+name+'.svg',import.meta.url),'utf8');
+  assert.match(svg,/viewBox="0 0 1600 1000"/);
+  assert.doesNotMatch(svg,/<script|<animate|<foreignObject|(?:href|url\()=["']https?:/i);
+ }
+ const focus=readFileSync(new URL('../public/backgrounds/focus-room.svg',import.meta.url),'utf8');
+ assert.match(focus,/cat-fur/);assert.match(focus,/M67 166C37 148/);
 });

@@ -1,3 +1,4 @@
+import {backgroundImages,backgroundText} from '../lib/backgrounds';
 import {wavePositionPicker} from '../lib/wave-position';
 import {applyPreset,matchingPreset,presetNames,type Preset} from '../lib/presets';
 import {waveDirections,defaults,normalize,timeLabel,selectedInstrument,fadeWindow,type Settings} from '../lib/relax';
@@ -52,7 +53,12 @@ for(const origin of flameOrigins){
 }
 function rainFrame(){
  const fireVisible=settings.fire&&settings.fireAnimation&&settings.motion&&!reduced.matches&&settings.fireVolume>0&&(state==='running'||state==='paused');
- fireScene.hidden=!fireVisible;
+ const campSelected=settings.backgroundImage==='lakeside-camp';
+ fireScene.hidden=!fireVisible||campSelected;
+ const camp=el('lakeside-camp-scene');
+ camp.dataset.fireAnimated=String(campSelected&&fireVisible);
+ camp.dataset.firePaused=String(state!=='running'||document.hidden);
+ if(campSelected)stage.querySelectorAll('.fire-glimmer').forEach(n=>n.remove());
  fireScene.querySelectorAll<HTMLElement>('.campfire-flame').forEach(flame=>{
   flame.style.animationPlayState=state==='running'&&!document.hidden?'running':'paused';
  });
@@ -93,7 +99,7 @@ function rainFrame(){
  else if(state==='running'&&!document.hidden)glow.style.setProperty('--wind-level',String(audio.windStrength()));
  for(const layer of ['fire'] as const){
   const events=audio.takeNatureEvents(layer);
-  if(state==='running'&&!document.hidden&&settings.motion&&!reduced.matches){
+  if(state==='running'&&!document.hidden&&settings.motion&&!reduced.matches&&!campSelected){
    for(const event of events){
     const node=document.createElement('span');node.className='nature-glimmer '+layer+'-glimmer';
     const origin=flameOrigins[Math.floor(Math.random()*flameOrigins.length)];
@@ -128,6 +134,12 @@ function rainFrame(){
 requestAnimationFrame(rainFrame);
 function save(){if(!storageAllowed())return;try{localStorage.setItem(KEY,JSON.stringify(settings));}catch{el('audio-status').textContent=document.querySelector<HTMLElement>('#clear-storage')!.dataset.error!;}}
 function sync(){
+ const bg=backgroundText[document.documentElement.lang as keyof typeof backgroundText]||backgroundText.en;
+ el('background-image-value').textContent=bg.names[backgroundImages.indexOf(settings.backgroundImage)]!;
+ document.querySelectorAll<HTMLInputElement>('[name=backgroundImage]').forEach(r=>r.checked=r.value===settings.backgroundImage);
+ el('relax-background').style.backgroundImage=settings.backgroundImage==='none'||settings.backgroundImage==='lakeside-camp'?'none':`url(/backgrounds/${settings.backgroundImage}.svg)`;
+ el('sound-stage').dataset.backgroundImage=settings.backgroundImage;
+
  document.querySelectorAll<HTMLInputElement>('[name=waveDirection]').forEach(r=>r.checked=r.value===settings.waveDirection);
  el('wave-direction-value').textContent=t.waveDirectionNames[waveDirections.indexOf(settings.waveDirection)]!;
  const preset=matchingPreset(settings);
@@ -193,6 +205,7 @@ el('safety-open').addEventListener('click',()=>{pause();safety.showModal();});
 safety.addEventListener('close',()=>el('safety-open').focus());
 form.addEventListener('submit',e=>e.preventDefault());
 function read(){
+ settings.backgroundImage=document.querySelector<HTMLInputElement>('[name=backgroundImage]:checked')!.value as Settings['backgroundImage'];
  const selected=document.querySelector<HTMLInputElement>('[name=instrument]:checked')!.value;
  for(const key of ['chimes','bowls','kalimba','handpan','bells','gong','harp'] as const)settings[key]=key===selected;
  for(const key of ['fire','stream','fireAnimation','streamAnimation','sleepMode','instrumentsEnabled','windAnimation','instrumentAnimation','rainAnimation','rain','wind','noise','motion','awake','background'] as const)settings[key]=input(key).checked;
@@ -288,3 +301,14 @@ const waveDropdown=el('wave-direction-dropdown') as HTMLDetailsElement;
 waveDropdown.addEventListener('change',()=>{waveDropdown.open=false;waveDropdown.querySelector('summary')!.focus();});
 document.addEventListener('click',e=>{if(!waveDropdown.contains(e.target as Node))waveDropdown.open=false;});
 waveDropdown.addEventListener('keydown',e=>{if(e.key==='Escape'){e.stopPropagation();waveDropdown.open=false;waveDropdown.querySelector('summary')!.focus();}});
+
+const backgroundDropdown=el('background-image-dropdown') as HTMLDetailsElement;
+backgroundDropdown.addEventListener('change',()=>{
+ backgroundDropdown.open=false;backgroundDropdown.querySelector('summary')!.focus();
+});
+document.addEventListener('click',event=>{
+ if(!backgroundDropdown.contains(event.target as Node))backgroundDropdown.open=false;
+});
+backgroundDropdown.addEventListener('keydown',event=>{
+ if(event.key==='Escape'){event.stopPropagation();backgroundDropdown.open=false;backgroundDropdown.querySelector('summary')!.focus();}
+});

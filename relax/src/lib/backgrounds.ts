@@ -1,0 +1,8 @@
+export const backgroundImages = ['none','landscape','mountains','forest','stars','lake','dunes','fireside','summer-garden','evening-terrace','focus-room','forest-clearing','lakeside-camp','quiet-coast'] as const;
+export type BackgroundImage = typeof backgroundImages[number];
+export const backgroundText = {
+ de: {label:'Hintergrundbild', hint:'Presets wählen ein passendes Motiv. Du kannst es unabhängig vom Klang ändern.', names:['Kein Hintergrund','Landschaft','Berge im Abendlicht','Wald','Sternennacht','See','Warme Dünen','Kaminzimmer','Sommergarten','Abendterrasse','Fokusraum mit Katze','Waldlichtung','Zeltlager am See','Ruhige Küste']},
+ en: {label:'Background image', hint:'Presets select a matching scene. You can change it independently of the sound.', names:['No background','Landscape','Evening mountains','Forest','Starry night','Lake','Warm dunes','Fireplace room','Summer garden','Evening terrace','Focus room with cat','Forest clearing','Lakeside camp','Quiet coast']},
+ es: {label:'Imagen de fondo', hint:'Los presets eligen una escena. Puedes cambiarla sin cambiar el sonido.', names:['Sin fondo','Paisaje','Montañas al atardecer','Bosque','Noche estrellada','Lago','Dunas cálidas','Sala con chimenea','Jardín de verano','Terraza al atardecer','Estudio con gato','Claro del bosque','Campamento junto al lago','Costa tranquila']},
+ fr: {label:'Image de fond', hint:'Les préréglages choisissent un décor. Vous pouvez le changer sans modifier le son.', names:['Sans arrière-plan','Paysage','Montagnes au crépuscule','Forêt','Nuit étoilée','Lac','Dunes chaleureuses','Salon avec cheminée','Jardin d’été','Terrasse au crépuscule','Bureau avec chat','Clairière','Campement au bord du lac','Côte paisible']},
+};

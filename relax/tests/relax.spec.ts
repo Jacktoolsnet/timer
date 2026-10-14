@@ -425,3 +425,55 @@ test('instrument tile uses two columns only when the settings grid does',async({
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  }
 });
+
+test('specialized preset scenes can be changed independently and appear in focus',async({page})=>{
+ await page.goto('/de/');
+ for(const [preset,scene] of Object.entries({summer:'summer-garden',evening:'evening-terrace',focus:'focus-room',nature:'forest-clearing',fireside:'lakeside-camp',brook:'quiet-coast'})){
+  await page.locator('#preset-dropdown summary').click();
+  await page.locator('[name=preset][value='+preset+']').check();
+  await expect(page.locator('#sound-stage')).toHaveAttribute('data-background-image',scene);
+  if(scene==='lakeside-camp')await expect(page.locator('#lakeside-camp-scene')).toBeVisible();
+  else await expect(page.locator('#relax-background')).toHaveCSS('background-image',new RegExp(scene+'\\.svg'));
+  expect((await page.request.get('/backgrounds/'+scene+'.svg')).ok()).toBeTruthy();
+ }
+ await page.locator('#background-image-dropdown summary').click();
+ await page.locator('[name=backgroundImage][value=focus-room]').check();
+ await expect(page.locator('#background-image-value')).toHaveText('Fokusraum mit Katze');
+ await expect(page.locator('[name=preset][value=brook]')).toBeChecked();
+ await expect(page.locator('#background-image-dropdown')).not.toHaveAttribute('open','');
+ await page.locator('#focus').click();
+ await expect(page.locator('#relax-background')).toBeVisible();
+ await expect(page.locator('#sound-stage')).toHaveAttribute('data-background-image','focus-room');
+});
+
+test('camp illustration replaces generic flames only for the animated camp combination',async({page})=>{
+ await page.goto('/de/');
+ await page.locator('#preset-dropdown summary').click();await page.locator('[name=preset][value=fireside]').check();
+ const camp=page.locator('#lakeside-camp-scene');
+ await expect(camp).toHaveCSS('stroke','none');
+ await expect(camp.locator('path[d="M140 860 350 615 560 860Z"]')).toHaveCSS('stroke','none');
+ await expect(camp.locator('#camp-stone-ring path[stroke]').first()).not.toHaveCSS('stroke','none');
+ await expect(camp.locator('.camp-static-fire')).toBeVisible();
+ await expect(camp.locator('.camp-animated-fire')).toBeHidden();
+ await begin(page);
+ await expect(camp.locator('.camp-smoke')).toBeVisible();
+ await expect(camp.locator('.camp-static-fire')).toBeHidden();
+ await expect(camp.locator('.camp-animated-fire')).toBeVisible();
+ await expect(page.locator('.campfire-scene')).toBeHidden();
+ await page.locator('#start').click();await expect(camp).toHaveAttribute('data-fire-paused','true');
+ await expect(camp.locator('.camp-smoke-wisp').first()).toHaveCSS('animation-play-state','paused');
+ await page.locator('#fireAnimation').uncheck();
+ await expect(camp.locator('.camp-smoke')).toBeHidden();
+ await expect(camp.locator('.camp-static-fire')).toBeVisible();
+ await expect(camp.locator('.camp-animated-fire')).toBeHidden();
+ await page.locator('#fireAnimation').check();
+ await page.locator('#background-image-dropdown summary').click();await page.locator('[name=backgroundImage][value=forest]').check();
+ await expect(camp).toBeHidden();await expect(page.locator('.campfire-scene')).toBeVisible();
+ await page.locator('#background-image-dropdown summary').click();await page.locator('[name=backgroundImage][value=lakeside-camp]').check();
+ await page.locator('#fire').uncheck();await expect(camp.locator('.camp-static-fire')).toBeVisible();
+ await page.locator('#fire').check();await page.locator('#motion').uncheck();
+ await expect(camp.locator('.camp-static-fire')).toBeVisible();
+ await page.locator('#motion').check();await page.locator('#fireVolume').fill('0');await page.locator('#fireVolume').dispatchEvent('input');
+ await expect(camp.locator('.camp-static-fire')).toBeVisible();
+ await page.locator('#end-session').click();await expect(camp.locator('.camp-static-fire')).toBeVisible();
+});

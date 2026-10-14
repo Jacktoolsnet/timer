@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" role="img" aria-labelledby="title description">
+  <title id="title">Berge im Abendlicht</title>
+  <desc id="description">Gestaffelte Bergketten in kühlen Blautönen mit dezenten Schneegipfeln.</desc>
+  <defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0.000" stop-color="#d4d8dc"/><stop offset="1.000" stop-color="#aebdc5"/></linearGradient><linearGradient id="front" x1="0" y1="0" x2="0" y2="1"><stop offset="0.000" stop-color="#536d80"/><stop offset="1.000" stop-color="#293d50"/></linearGradient></defs>
+  
+<rect width="1600" height="1000" fill="url(#sky)"/>
+<circle cx="1290" cy="230" r="70" fill="#eee8dc" opacity=".55"/>
+<path d="M0 735L180 545L310 650L550 345L800 680L1080 425L1370 650L1510 525L1600 630V1000H0Z" fill="#91a5b3"/>
+<path d="M440 482L550 345L663 497L588 465L551 424L512 463Z M982 544L1080 425L1194 558L1101 515L1072 480L1048 511Z" fill="#dae1e3" opacity=".7"/>
+<path d="M0 825L250 585L530 850L760 555L1110 860L1370 570L1600 795V1000H0Z" fill="#678294"/>
+<path d="M0 900L205 790L380 855L640 705L880 840L1110 750L1380 885L1600 760V1000H0Z" fill="url(#front)"/>
+
+</svg>
