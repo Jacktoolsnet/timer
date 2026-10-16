@@ -1,5 +1,4 @@
 import {formats,newElement} from './model.ts';
-import {defaultTextEffects} from './text-effects.ts';
 import {applyTextPreset,textPresets} from './text-presets.ts';
 
 export const artisticEffectKeys=['liquid','exposure','paper','stopMotion','afterimages','reveal','glitch','print','kaleidoscope','lighting'] as const;
@@ -530,4 +529,4 @@ ${JSON.stringify(aiCameraExample,null,2)}
 
 ### 12c. Kaleidoscope and moving light on a colorful star
 ${JSON.stringify(aiArtExample,null,2)}
-`;
+`.trim();
