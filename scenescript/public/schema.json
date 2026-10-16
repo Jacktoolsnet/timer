@@ -503,6 +503,18 @@
                   "default": "scene",
                   "description": "Scene follows the camera; screen stays in the viewport. All members of a flat group must use the same space (runtime constraint). Null is rejected."
                 },
+                "liquid": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "Omitted: disabled defaults. Element-local timeline-driven liquid distortion; not a group setting.",
+                  "properties": {
+                    "enabled": {"type": "boolean", "default": false},
+                    "style": {"enum": ["water", "melt"], "default": "water"},
+                    "strength": {"type": "number", "minimum": 0, "maximum": 100, "default": 24},
+                    "wavelength": {"type": "number", "minimum": 10, "maximum": 500, "default": 120},
+                    "speed": {"type": "number", "minimum": 0, "maximum": 5, "default": 1}
+                  }
+                },
                 "textEffects": {
                   "type": "object",
                   "additionalProperties": false,

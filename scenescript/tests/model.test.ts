@@ -1,3 +1,4 @@
+import {defaultLiquid,liquidState} from '../src/lib/liquid.ts';
 import {particleProgress,fragmentState} from '../src/lib/particles.ts';
 import {applyTextPreset,textPresets} from '../src/lib/text-presets.ts';
 import {defaultTextEffects,parseTextEffects,textEffectsCSS,textOutlineCSS} from '../src/lib/text-effects.ts';
@@ -230,4 +231,27 @@ test('particle timing clamps exit duration and fragment motion is reproducible',
   assert.equal(fragmentState('id',0,kind,0,800,400).opacity,1);
   assert.equal(fragmentState('id',0,kind,1,800,400).opacity,0);
  }
+});
+
+test('liquid distortion defaults, round trips and strict field validation',()=>{
+ const p=demoProject(),e=p.scenes[0].elements[0];e.liquid={enabled:true,style:'melt',strength:35,wavelength:90,speed:.7};
+ assert.deepEqual(parseProject(serialize(p)).scenes[0].elements[0].liquid,e.liquid);
+ const legacy=JSON.parse(serialize(p));delete legacy.scenes[0].elements[0].liquid;
+ assert.deepEqual(parseProject(serialize(legacy)).scenes[0].elements[0].liquid,{enabled:false,style:'water',strength:24,wavelength:120,speed:1});
+ for(const value of [null,[],42,{enabled:'yes'},{style:'unknown'},{strength:-1},{strength:101},{wavelength:9},{wavelength:501},{speed:-1},{speed:6},{speed:null},{unknown:1}]){
+  const invalid=JSON.parse(serialize(p));invalid.scenes[0].elements[0].liquid=value;
+  assert.throws(()=>parseProject(serialize(invalid)),/liquid/);
+ }
+ const partial=JSON.parse(serialize(p));partial.scenes[0].elements[0].liquid={enabled:true};
+ assert.equal(parseProject(serialize(partial)).scenes[0].elements[0].liquid.strength,24);
+});
+
+test('liquid motion is timeline-driven, freezes at speed zero and disables cleanly',()=>{
+ const e={...defaultLiquid(),enabled:true};
+ assert.deepEqual(liquidState(e,-1),liquidState(e,0));
+ assert.deepEqual(liquidState(e,1),liquidState(e,1));
+ assert.notDeepEqual(liquidState(e,1),liquidState(e,2));
+ assert.deepEqual(liquidState({...e,speed:0},1),liquidState({...e,speed:0},100));
+ assert.equal(liquidState({...e,enabled:false},1).strength,0);
+ assert.equal(liquidState({...e,strength:0},1).strength,0);
 });

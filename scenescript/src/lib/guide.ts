@@ -382,6 +382,18 @@ Optional fields and their defaults:
 - width: 80 (40 for bubble); height: 30 (24 for bubble); each 0.1–200, percentages of canvas width/height.
 - color: "#ffffff" for text/image/video/simulation, "#b86445" for shape, "#222222" for bubble; #RRGGBB color.
 - font: "Arial"; allowed ${fonts.map(f=>`"${f}"`).join(', ')}.
+- liquid: optional object; omitted defaults to
+  {"enabled":false,"style":"water","strength":24,"wavelength":120,"speed":1}.
+  All element types support it; not a group setting. Explicit null and unknown
+  keys are rejected; omitted subfields use defaults.
+  enabled is boolean; style is "water" (underwater ripples) or "melt" (elongated
+  liquid distortion). strength is 0–100 project pixels; 0 means no distortion.
+  wavelength is 10–500 project pixels; smaller values create finer ripples.
+  speed is 0–5; 0 freezes the pattern. Motion uses time since element.at and is
+  deterministic when scrubbing or exporting. This is a continuous visual effect,
+  independent of entrance/exit animation; combinable with line drawing and particles.
+  It does not change element geometry, bubble anchors, camera targets or hit boxes.
+  Example: "liquid":{"enabled":true,"style":"water","strength":35,"wavelength":100,"speed":0.7}.
 - textEffects: optional object (see Text effects and presets below); omitted defaults to all effects disabled.
 - textGradient: null; optional gradient object for text/bubble glyph fill (see Text effects and presets below).
 - fontSize: 90 (48 for bubble); number, 1–500 project pixels, not percentages or UI pixels.

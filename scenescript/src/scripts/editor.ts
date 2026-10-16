@@ -1,3 +1,4 @@
+import {updateLiquid} from './liquid';
 import {isParticleExit} from '../lib/particles';
 import {updateParticles} from './particles';
 import {applyTextPreset,textPresets} from '../lib/text-presets';
@@ -284,7 +285,7 @@ function field(form:HTMLElement,key:string,value:string|number|boolean,kind:stri
   number.addEventListener('wheel',()=>number.blur(),{passive:true});
   if(eagerNumber)number.addEventListener('change',()=>{if(number.isConnected&&number.checkValidity()&&Number.isFinite(number.valueAsNumber))action(number.valueAsNumber);});
   const wrapper=document.createElement('span');wrapper.className='number-stepper';
-  const step=['audioVolume','opacity','stopOpacity','backgroundOpacity','simulationOpacity','volume','sustain','reverb','velocity','gain','echoMix','echoFeedback','shadowOpacity'].includes(key)?0.05:['cameraAt','cameraHold','audioAt','audioStart','audioEnd','audioFadeIn','audioFadeOut','pathPause','pathStart','pathDuration','duration','transitionDuration','animationDuration','exitDuration','until','bubbleLineHeight','bubbleCurve','at','simulationSpeed','attack','decay','release','fadeIn','fadeOut','echoDelay','ratio'].includes(key)?0.1:1;
+  const step=['audioVolume','opacity','stopOpacity','backgroundOpacity','simulationOpacity','volume','sustain','reverb','velocity','gain','echoMix','echoFeedback','shadowOpacity'].includes(key)?0.05:['cameraAt','cameraHold','audioAt','audioStart','audioEnd','audioFadeIn','audioFadeOut','pathPause','pathStart','pathDuration','duration','transitionDuration','animationDuration','exitDuration','until','bubbleLineHeight','bubbleCurve','at','simulationSpeed','liquidSpeed','attack','decay','release','fadeIn','fadeOut','echoDelay','ratio'].includes(key)?0.1:1;
   const controls=[-1,1].map(direction=>{
    const control=button(direction<0?'−':'+',()=>{
     if(!Number.isFinite(number.valueAsNumber))return;
@@ -297,7 +298,7 @@ function field(form:HTMLElement,key:string,value:string|number|boolean,kind:stri
   function sync(){controls[0].disabled=min!==undefined&&number.valueAsNumber<=min;controls[1].disabled=max!==undefined&&number.valueAsNumber>=max;}
   number.addEventListener('input',sync);number.addEventListener('change',sync);sync();
   wrapper.append(controls[0],number,controls[1]);label.append(wrapper);
- }else if(kind==='checkbox'&&['cameraEnabled','cameraOverview','cameraFrameOverview','bold','italic','underline','strikethrough','backgroundEnabled','musicEnabled','loop','muted','audioMuted','audioDucking','pathOrient','pathClockwise','elementEndEnabled','bubbleBaseAuto'].includes(key)){
+ }else if(kind==='checkbox'&&['cameraEnabled','cameraOverview','cameraFrameOverview','liquidEnabled','bold','italic','underline','strikethrough','backgroundEnabled','musicEnabled','loop','muted','audioMuted','audioDucking','pathOrient','pathClockwise','elementEndEnabled','bubbleBaseAuto'].includes(key)){
   label.classList.add('text-style-toggle');
   const wrapper=document.createElement('span');wrapper.className='safe-switch';
   input.setAttribute('role','switch');input.setAttribute('aria-label',t(key));
@@ -546,6 +547,15 @@ function renderForms(){
   gradientFields(group,'textGradient',e.textGradient,e.color,value=>{updateElement('textGradient',value);richEditor?.editor.querySelectorAll<HTMLElement>('[data-style]').forEach(node=>styleTextGradient(node,e.textGradient));});
  }
  if(e.type==='shape')gradientFields(ef,'fillGradient',e.fillGradient,e.fillColor,v=>updateElement('fillGradient',v));
+ const liquidGroup=document.createElement('fieldset');liquidGroup.className='text-settings-group';
+ const liquidLegend=document.createElement('legend');liquidLegend.textContent=t('liquid');liquidGroup.append(liquidLegend);ef.append(liquidGroup);
+ field(liquidGroup,'liquidEnabled',e.liquid.enabled,'checkbox',v=>{updateElement('liquid',{...e.liquid,enabled:v});renderForms();});
+ if(e.liquid.enabled){
+  field(liquidGroup,'liquidStyle',e.liquid.style,'select',v=>updateElement('liquid',{...e.liquid,style:v}),['water','melt']);
+  for(const [key,label,min,max] of [['strength','liquidStrength',0,100],['wavelength','liquidWavelength',10,500],['speed','liquidSpeed',0,5]] as const)
+   field(liquidGroup,label,e.liquid[key],'number',v=>updateElement('liquid',{...e.liquid,[key]:v}),undefined,min,max);
+ }
+
  for(const [key,min,max] of [['x',-100,100],['y',-100,100],['width',0.1,200],['height',0.1,200],['opacity',0,1],['rotation',-360,360],['radius',0,1000]] as const)field(ef,key,e[key],'number',v=>updateElement(key,v),undefined,min,max);
  field(ef,'animation',e.animation,'select',v=>updateElement('animation',v),animations.filter(a=>a!=='draw'||e.type==='shape'));field(ef,'at',e.at,'number',v=>updateElement('at',v),undefined,0,s.duration);field(ef,'animationDuration',e.animationDuration,'number',v=>updateElement('animationDuration',v),undefined,0.01,3600);
  field(ef,'elementEndEnabled',e.until!==null,'checkbox',v=>{updateElement('until',v?s.duration:null);renderForms();});
@@ -794,7 +804,7 @@ function updateSceneViews(sceneViews:SceneView[],local:number,opacity=1,cameraEn
   node.style.opacity=String(state.opacity*opacity);node.style.visibility=state.visible?'visible':'hidden';node.style.transform=state.transform;node.style.transformOrigin='0 0';
   if(text&&text.dataset.visibleText!==state.text){renderRuns(text,element,state.text);text.dataset.visibleText=state.text;}
   bubble?.update(effectiveScene,local,state.text,!playing&&!recording&&(element.id===selectedId||scene.groups.some(g=>g.id===selectedGroupId&&g.members.includes(element.id))));
-  const [pw,ph]=formats[project.format];updateParticles(node,element,local,scene.duration,element.width*pw/100,element.height*ph/100);
+  const [pw,ph]=formats[project.format];updateLiquid(node,element,local,element.width*pw/100,element.height*ph/100);updateParticles(node,element,local,scene.duration,element.width*pw/100,element.height*ph/100);
  });
  const warning=document.getElementById('bubble-overflow');
  if(warning){const view=sceneViews.find(v=>v.element.id===selectedId)?.bubble;warning.hidden=!view?.overflow();}

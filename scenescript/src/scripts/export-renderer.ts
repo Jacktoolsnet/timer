@@ -1,3 +1,4 @@
+import {updateLiquid} from './liquid';
 import {updateParticles} from './particles';
 import {cameraTransform} from '../lib/camera';
 import {createCropImage} from './crop-image';
@@ -32,13 +33,13 @@ export class ExportRenderer{
  else if(e.type==='simulation'&&e.simulation)this.simulation(e.simulation,w,h,local-e.at,node,8000000/Math.max(1,s.elements.filter(e=>e.type==='simulation').length));
  else if(e.type==='video'&&e.video)await this.video(e.video,local-e.at,node);
  else if(e.asset)seekSvg(await this.image(e.asset,e.fit,node,e.type==='image'?e.crop:null),local-e.at);
- updateParticles(node,e,local,s.duration,w,h);
+ updateLiquid(node,e,local,w,h);updateParticles(node,e,local,s.duration,w,h);
  }
  return viewport;
  }
  /** Bake supported SMIL attributes before serializing; cloned SVG clocks otherwise reset. */
  private freezeSvg(){for(const svg of Array.from(this.root.querySelectorAll('svg'))){const originals=[svg,...Array.from(svg.querySelectorAll('*'))],clone=svg.cloneNode(true) as SVGSVGElement,copies=[clone,...Array.from(clone.querySelectorAll('*'))];originals.forEach((n,index)=>{const copy=copies[index];if(!copy)return;const style=getComputedStyle(n);for(const key of ['fill','stroke','stroke-width','stroke-dashoffset','opacity','fill-opacity','stroke-opacity']) (copy as SVGElement).style.setProperty(key,style.getPropertyValue(key));
- for(const attr of ['x','y','width','height','cx','cy','r','rx','ry','x1','y1','x2','y2','viewBox']){const value=(n as unknown as Record<string,{animVal?:{value?:number;x?:number;y?:number;width?:number;height?:number}}>)[attr]?.animVal;if(value?.value!==undefined)copy.setAttribute(attr,String(value.value));else if(attr==='viewBox'&&value?.x!==undefined)copy.setAttribute(attr,`${value.x} ${value.y} ${value.width} ${value.height}`);}
+ for(const attr of ['x','y','width','height','cx','cy','r','rx','ry','x1','y1','x2','y2','viewBox']){try{const value=(n as unknown as Record<string,{animVal?:{value?:number;x?:number;y?:number;width?:number;height?:number}}>)[attr]?.animVal;if(value?.value!==undefined)copy.setAttribute(attr,String(value.value));else if(attr==='viewBox'&&value?.x!==undefined)copy.setAttribute(attr,`${value.x} ${value.y} ${value.width} ${value.height}`);}catch{/* Filter primitive percentage defaults may have no resolvable SVGLength; retain the original attribute. */}}
  const transform=(n as SVGGraphicsElement).transform?.animVal;if(transform?.numberOfItems){let m=new DOMMatrix();for(let j=0;j<transform.numberOfItems;j++)m=m.multiply(transform.getItem(j).matrix);if(m)copy.setAttribute('transform',`matrix(${m.a} ${m.b} ${m.c} ${m.d} ${m.e} ${m.f})`);}
  });clone.querySelectorAll('animate,animateTransform,set').forEach(n=>n.remove());svg.replaceWith(clone);}}
  async frame(time:number,width:number,height:number){this.media.check();this.clear();
