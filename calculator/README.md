@@ -116,7 +116,7 @@ name/title edits, overlays, appearance menus, IME and modifier shortcuts are
 left alone. Numeric input is not redirected into a disabled note/subtotal value.
 
 Keyboard: enter adds a step; after entering a number, + - * / commits it and
-selects the next operation. A leading minus enters a negative value. These
+selects the next operation. Consecutive operators replace the selection even in an empty field. Use ± or paste a signed number to enter a negative value. These
 shortcuts act only in the value field, not in names/notes.
 
 Saving the current calculation is separately opt-in and off by default:
@@ -141,3 +141,8 @@ Currency labels appear on results, print/PDF, CSV and clipboard exports. JSON an
 opt-in local document saving retain the selection, including undo/redo. Selecting
 another currency never converts values or changes decimal places or rounding.
 Print/PDF includes active steps only, with note, operation and result columns.
+
+Usage notes are available in all four tool languages, with a shared localized
+content model, linked contents and matching footer/hreflang links. They document
+the current receipt view, keyboard behaviour, rounding, currency, opt-in saving
+and the differences between JSON, CSV, clipboard and active-only print/PDF.

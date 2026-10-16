@@ -30,7 +30,7 @@ let pendingExample:ExampleId|null=null;
 function resetExamples(){pendingExample=null;$('examples-list').hidden=false;$('example-confirmation').hidden=true;}
 $('examples').setAttribute('aria-haspopup','dialog');$('examples').setAttribute('aria-controls','examples-dialog');
 $('examples').addEventListener('click',()=>{resetExamples();examplesDialog.showModal();});
-function loadExample(id:ExampleId){mutate(()=>{doc=buildExample(exampleLang,id);});resetEditor();render();examplesDialog.close();resetExamples();$('export-status').textContent=exampleUi[exampleLang].loaded;}
+function loadExample(id:ExampleId){mutate(()=>{doc=buildExample(exampleLang,id);});resetEditor();render();examplesDialog.close();resetExamples();$('export-status').textContent='';}
 examplesDialog.querySelectorAll<HTMLButtonElement>('[data-example]').forEach(button=>button.addEventListener('click',()=>{
  const id=button.dataset.example as ExampleId;
  if(doc.steps.length||doc.title||input.value||name.value){pendingExample=id;$('example-confirmation-title').textContent=buildExample(exampleLang,id).title;$('examples-list').hidden=true;$('example-confirmation').hidden=false;$('example-cancel').focus();}
