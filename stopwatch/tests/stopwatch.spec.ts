@@ -483,3 +483,34 @@ test('vertical lap divider stretches to the bottom of the clock area',async({pag
  expect(laps.y+laps.height).toBeCloseTo(main.y+main.height-8,0);
  await expect(page.locator('.stopwatch-laps')).toHaveCSS('border-left-width','1px');
 });
+
+test('delete clocks safely, promote primary and keep remaining controls correctly linked',async({page})=>{
+ await page.goto('/de/');
+ await expect(page.locator('#delete-primary-clock')).toBeDisabled();
+ await page.locator('#add-clock').click();await page.locator('#add-clock').click();
+ await page.locator('.extra-clock').first().locator('.delete-clock').click();
+ await expect(page.locator('.clock-tile')).toHaveCount(2);
+ await expect(page.locator('.extra-clock input')).toHaveValue('Stoppuhr 3');
+ await page.locator('.extra-clock [data-action=toggle]').click();
+ await page.locator('.extra-clock [data-action=lap]').click();
+ await page.locator('.extra-clock [data-action=show]').click();
+ await expect(page.locator('#laps-body tr')).toHaveCount(1);
+ page.once('dialog',dialog=>dialog.dismiss());
+ await page.locator('.extra-clock .delete-clock').click();
+ await expect(page.locator('.clock-tile')).toHaveCount(2);
+ await page.locator('#delete-primary-clock').click();
+ await expect(page.locator('.clock-tile')).toHaveCount(1);
+ await expect(page.locator('#clock-primary-name')).toHaveValue('Stoppuhr 3');
+ await expect(page.locator('#toggle-timing')).toHaveAccessibleName('Pause');
+ await expect(page.locator('#laps-body tr')).toHaveCount(1);
+ await expect(page.locator('#delete-primary-clock')).toBeDisabled();
+ await page.locator('#toggle-timing').click();
+ await page.locator('#add-clock').click();
+ await expect(page.locator('.extra-clock input')).toHaveValue('Stoppuhr 4');
+ await page.locator('#show-all-laps').click();
+ page.once('dialog',dialog=>dialog.accept());
+ await page.locator('#delete-primary-clock').click();
+ await expect(page.locator('#clock-primary-name')).toHaveValue('Stoppuhr 4');
+ await expect(page.locator('#laps-body tr')).toHaveCount(0);
+ await expect(page.locator('#toggle-timing')).toHaveAccessibleName('Start');
+});

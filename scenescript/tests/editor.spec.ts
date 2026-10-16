@@ -793,3 +793,40 @@ test('AI page and plain text guide document text effects, gradients, bundled fon
  for(const value of ['textEffects','textGradient','outline.width: 0..20','glow.intensity: 0..100','shadow.opacity: 0..1','Allura, Great Vibes, Parisienne and Sacramento are bundled','neonPink:','neonBlue:','gold:','comic:','NOT JSON fields or enum values'])expect(guide).toContain(value);
  for(const lang of ['de','en','es','fr']){await page.goto('/'+lang+'/ai/');await expect(page.locator('#ai-guide')).toHaveText(guide);}
 });
+
+test('file validation opens a copyable JSON overlay and successful imports show a toast',async({page})=>{
+ await page.addInitScript(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async(text:string)=>{(window as any).copiedError=text;}}}));
+ await page.goto('/en/');const original=await page.locator('#project-title').inputValue();
+ const project=demoProject();project.title='Imported project';project.scenes[0].transitionDuration=0;
+ const source=JSON.stringify(project);
+ const file={name:'project.json',mimeType:'application/json',buffer:Buffer.from(source)};
+ for(let i=0;i<2;i++){
+  await page.locator('#project-file').setInputFiles(file);
+  await expect(page.locator('#json-dialog')).toBeVisible();
+  await expect(page.locator('#json-status')).toContainText('scenes[0].transitionDuration: expected number 0.01–3600');
+  await expect(page.locator('#json-input')).toHaveValue(source);
+  await expect(page.locator('#project-title')).toHaveValue(original);
+  await page.locator('#copy-json-error').click();
+  expect(await page.evaluate(()=>(window as any).copiedError)).toBe(await page.locator('#json-status').textContent());
+  await page.locator('#close-json').click();
+ }
+ project.scenes[0].transitionDuration=.01;
+ await page.locator('#project-file').setInputFiles({...file,buffer:Buffer.from(JSON.stringify(project))});
+ await expect(page.locator('#project-title')).toHaveValue(project.title);
+ await expect(page.locator('.app-toast[data-kind=success]')).toHaveText('Project loaded successfully.');
+ await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(project));await page.locator('#import-json').click();
+ await expect(page.locator('#json-dialog')).not.toBeVisible();
+ await expect(page.locator('.app-toast[data-kind=success]')).toHaveText('Project loaded successfully.');
+});
+
+test('elements panel contains its entire toolbar at every viewport size',async({page})=>{
+ for(const width of [1440,1024,768]){
+  await page.setViewportSize({width,height:1000});await page.goto('/en/');
+  const panel=page.locator('.elements-panel'),toolbar=page.locator('.element-toolbar');
+  await expect(toolbar).toBeVisible();
+  const outer=(await panel.boundingBox())!,inner=(await toolbar.boundingBox())!;
+  expect(inner.y).toBeGreaterThanOrEqual(outer.y);
+  expect(inner.y+inner.height).toBeLessThanOrEqual(outer.y+outer.height-10);
+  expect(inner.x+inner.width).toBeLessThanOrEqual(outer.x+outer.width);
+ }
+});

@@ -1,0 +1,184 @@
+.calc-workspace{grid-template-columns:minmax(280px,.85fr) minmax(0,1.4fr);max-width:1120px}.calc-card h2,.calc-tape h2,.calc-settings h2{font-size:calc(18px * var(--font-scale,1));font-weight:550;margin:0 0 20px}.calc-card{position:static}.calc-left-column{display:grid;gap:24px;min-width:0}.calc-display{background:var(--accent-soft);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:22px;text-align:right}.calc-display span{display:block;font-size:calc(11px * var(--font-scale,1));color:var(--muted);margin-bottom:8px}.calc-display output{display:block;font-size:calc(30px * var(--font-scale,1));font-variant-numeric:tabular-nums;overflow-wrap:anywhere;color:var(--accent)}.calc-card label:not(.calc-check){display:block;font-size:calc(12px * var(--font-scale,1));margin:14px 0 7px;color:var(--muted)}.calc-card input:not([type=checkbox]),.calc-card select,.calc-tape>input,.step-edit-value{width:100%;min-width:0;color:var(--text);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:11px 12px;font-size:calc(14px * var(--font-scale,1));min-height:44px}.calc-card #value{font-size:calc(23px * var(--font-scale,1));text-align:right;font-variant-numeric:tabular-nums}.calc-keypad{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:15px 0}.calc-keypad button{font-size:calc(21px * var(--font-scale,1));padding:12px 0;min-height:52px}.calc-keypad .operator-key{background:var(--accent-soft);color:var(--accent);border-color:transparent}.calc-keypad .equals-key{grid-column:span 2;font-size:calc(15px * var(--font-scale,1));gap:6px}.equals-key span{font-size:calc(11px * var(--font-scale,1))}.calc-options{margin:20px 0;border-block:1px solid var(--line);padding:14px 0}.calc-options summary{font-size:calc(13px * var(--font-scale,1));font-weight:600}.calc-check{display:flex;gap:10px;align-items:center;font-size:calc(12px * var(--font-scale,1));line-height:1.6;margin:16px 0 0;cursor:pointer}.calc-check input{accent-color:var(--accent);width:18px;height:18px;flex-shrink:0}.tape-heading{display:flex;justify-content:space-between;gap:12px}.tape-heading span{color:var(--muted);font-variant-numeric:tabular-nums}.calc-tape ol{list-style:none;padding:0;margin:0}.tape-step{padding:18px 0;border-top:1px dashed var(--line)}.tape-step[data-enabled=false]{background:color-mix(in srgb,var(--track) 40%,transparent)}.step-head{display:flex;gap:10px;align-items:baseline}.step-number-small{color:var(--accent);font-size:calc(12px * var(--font-scale,1));font-variant-numeric:tabular-nums}.step-name{font-size:calc(14px * var(--font-scale,1));font-weight:600;overflow-wrap:anywhere;flex:1}.step-equation{margin:10px 0;font-size:calc(13px * var(--font-scale,1));line-height:1.7;overflow-wrap:anywhere;color:var(--muted)}.step-result{text-align:right;font-size:calc(21px * var(--font-scale,1));font-variant-numeric:tabular-nums;margin:8px 0;overflow-wrap:anywhere}.step-actions{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.step-actions button{background:transparent;border:1px solid var(--line);border-radius:6px;font-size:calc(11px * var(--font-scale,1));min-height:34px;min-width:34px;padding:6px 8px}.step-actions label{display:flex;gap:6px;align-items:center;font-size:calc(11px * var(--font-scale,1));padding:6px 4px;min-height:34px}.step-actions input{accent-color:var(--accent)}.tape-total{border-top:2px solid var(--accent);padding-top:20px;margin-top:20px;display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}.tape-total strong{font-size:calc(26px * var(--font-scale,1));font-weight:550;overflow-wrap:anywhere;max-width:100%}.tape-total span,#empty-tape{color:var(--muted);font-size:calc(13px * var(--font-scale,1));line-height:1.7}#calc-status,#export-status{font-size:calc(12px * var(--font-scale,1));line-height:1.7;color:var(--accent);min-height:20px}.calc-guide{margin-top:42px}#print-calculation{display:none}.tape-step[data-editing=true]{box-shadow:inset 3px 0 var(--accent);padding-left:12px}.tape-step[draggable=true]{cursor:grab}.tape-step.drag-over{border-top:3px solid var(--accent)}[hidden]{display:none!important}
+@media(max-width:900px){.calc-workspace{grid-template-columns:minmax(260px,.85fr) minmax(0,1fr)}}@media(max-width:680px){.calc-workspace{grid-template-columns:1fr}.calc-card{position:static}.calc-display output{font-size:calc(28px * var(--font-scale,1))}.calc-toolbar .secondary{padding:10px 13px}.calc-tape{padding:22px 18px}}
+@media print{html,body{background:white!important;color:black!important}.site-shell{max-width:none;padding:0}.site-header,.site-footer,.intro,.calc-guide,.calc-toolbar,.calc-workspace,.local-note,dialog,.skip-link{display:none!important}#print-calculation{display:block!important}#print-calculation h1{font-size:24px;letter-spacing:0}#print-calculation h2{font-size:18px}#print-calculation p{font-size:11px}#print-calculation table{width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed}#print-calculation th,#print-calculation td{text-align:left;vertical-align:top;border-bottom:1px solid #ccc;padding:8px 4px;overflow-wrap:anywhere}#print-calculation th:first-child{width:4%}#print-calculation th:nth-child(2){width:40%}#print-calculation th:nth-child(3){width:42%}#print-calculation th:nth-child(4){width:14%}#print-calculation :is(th,td):nth-child(4){text-align:right;font-variant-numeric:tabular-nums}#print-calculation tr{break-inside:avoid}#print-calculation thead{display:table-header-group}}
+/* Keep long translated headings usable on small screens and enlarged text. */
+.intro h1{overflow-wrap:anywhere}.skip-link:not(:focus){visibility:hidden}
+/* Dedicated special-function column, adjacent to the standard operator keys. */
+.current-operation{font-size:calc(12px * var(--font-scale,1));line-height:1.6;margin:15px 0 0;display:flex;flex-wrap:wrap;gap:3px 8px}.current-operation>span{color:var(--muted)}.current-operation strong{color:var(--accent);font-weight:600}
+.calc-keypad-layout{--key-height:calc(56px * var(--font-scale,1));--key-gap:8px;display:grid;grid-template-columns:minmax(0,1fr) 82px;gap:9px;margin:15px 0}.calc-keypad-layout .calc-keypad{margin:0;align-content:start;align-self:start;grid-auto-rows:var(--key-height);gap:var(--key-gap)}.calc-keypad-layout .calc-keypad button{height:var(--key-height);min-height:var(--key-height)}.special-keys{display:grid;grid-template-rows:repeat(7,var(--key-height));gap:var(--key-gap);align-content:start;align-self:start;min-width:0}.special-keys .special-key{display:flex;flex-direction:column;gap:3px;padding:5px 3px;min-width:0;height:var(--key-height);min-height:var(--key-height);background:var(--accent-soft);border:1px solid transparent;color:var(--accent)}.special-key>span{font-size:calc(17px * var(--font-scale,1));line-height:1.1}.special-key small{font-size:calc(9px * var(--font-scale,1));font-weight:550;line-height:1.25;overflow-wrap:anywhere}.special-key[aria-pressed=true],.operator-key[aria-pressed=true]{border:2px solid var(--accent)!important;box-shadow:inset 0 0 0 1px var(--surface)}.calc-keypad .equals-key{flex-wrap:wrap;padding:8px 4px}.operation-help:has(p:not([hidden])){border:1px solid var(--line);background:var(--accent-soft);border-radius:10px;padding:12px 14px;margin:0 0 15px}.operation-help p{font-size:calc(11px * var(--font-scale,1));line-height:1.75;margin:0;color:var(--text);overflow-wrap:anywhere}
+@media(max-width:360px){.calc-keypad-layout{--key-gap:5px;grid-template-columns:minmax(0,1fr) 66px;gap:6px}.calc-keypad{gap:5px}.calc-keypad .equals-key span{font-size:calc(9px * var(--font-scale,1))}}
+
+.calc-settings .calc-options{margin:0;border-top:0;padding-top:0}.calc-settings label[for=decimals]{display:block;font-size:calc(12px * var(--font-scale,1));margin:14px 0 7px;color:var(--muted)}.calc-settings select{width:100%;min-width:0;color:var(--text);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:11px 12px;font-size:calc(14px * var(--font-scale,1));min-height:44px}
+@media(max-width:680px){.calc-left-column{gap:20px}}
+
+/* Stretch the left column with the tape so the calculator can follow page scrolling.
+   Only the calculator is sticky; options live in a modal. Tall cards remain scrollable. */
+@media screen and (min-width:681px){
+ .calc-left-column{align-self:stretch;grid-template-rows:1fr;align-items:start}
+ .calc-left-column .calc-card{position:sticky;top:20px;align-self:start;max-height:calc(100dvh - 40px);overflow-y:auto;scrollbar-gutter:stable}
+}
+
+.calc-action-keys{grid-column:1/-1;grid-row:span 2;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,var(--key-height));gap:var(--key-gap)}
+.calc-keypad .calc-action-key{display:flex;flex-direction:column;gap:3px;padding:5px 3px;min-width:0;line-height:1.15}
+.calc-action-key>span{font-size:calc(19px * var(--font-scale,1))}.calc-action-key small{font-size:calc(10px * var(--font-scale,1));line-height:1.2;font-weight:550;overflow-wrap:anywhere}
+#calculator-options{max-height:calc(100dvh - 32px);overflow-y:auto}@media screen{html:has(#calculator-options[open],#operation-explanation[open],#new-calculation-dialog[open],#calculation-title-dialog[open],#examples-dialog[open]){overflow:hidden}}
+
+/* A palette-specific secondary accent distinguishes actions from arithmetic. */
+:root{--calc-action-accent:#315f88}
+:root[data-palette=blue]{--calc-action-accent:#67458b}
+:root[data-palette=green]{--calc-action-accent:#335a86}
+:root[data-palette=orange]{--calc-action-accent:#275b80}
+:root[data-palette=red]{--calc-action-accent:#67457e}
+:root[data-palette=violet]{--calc-action-accent:#24695c}
+:root[data-palette=teal]{--calc-action-accent:#69508a}
+:root[data-palette=rose]{--calc-action-accent:#375d85}
+:root[data-theme=dark]{--calc-action-accent:#adcbea}
+:root[data-theme=dark][data-palette=blue]{--calc-action-accent:#d4b9ec}
+:root[data-theme=dark][data-palette=green]{--calc-action-accent:#b4cfee}
+:root[data-theme=dark][data-palette=orange]{--calc-action-accent:#a9d4ec}
+:root[data-theme=dark][data-palette=red]{--calc-action-accent:#dcbbed}
+:root[data-theme=dark][data-palette=violet]{--calc-action-accent:#a1d7c8}
+:root[data-theme=dark][data-palette=teal]{--calc-action-accent:#d1bdf0}
+:root[data-theme=dark][data-palette=rose]{--calc-action-accent:#b9d1ef}
+.calc-keypad .calc-action-key{color:var(--calc-action-accent);background:color-mix(in srgb,var(--calc-action-accent) 10%,var(--surface));border-color:transparent}
+.calc-keypad .calc-action-key:focus-visible{outline-color:var(--calc-action-accent)}
+
+.calc-card-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:20px}.calc-card-heading h2{margin:0}.calc-focus-toggle{min-height:36px;padding:8px 10px;font-size:calc(11px * var(--font-scale,1));font-weight:500}.calc-focus-toggle svg{width:16px;height:16px}
+/* Keep focus layout isolated from the timer-specific shared focus styles. */
+@media screen{
+ body.calculator-focus-view .site-header,body.calculator-focus-view .intro,body.calculator-focus-view .site-footer,body.calculator-focus-view .calc-guide,body.calculator-focus-view .local-note{display:none}
+ body.calculator-focus-view .site-shell{max-width:1600px;padding:24px}
+ body.calculator-focus-view .calc-workspace{max-width:1400px;grid-template-columns:minmax(300px,.9fr) minmax(0,1.5fr);min-height:calc(100dvh - 48px)}
+ body.calculator-focus-view #calculator-focus{color:var(--accent);background:var(--accent-soft)}
+}
+@media screen and (max-width:680px){
+ body.calculator-focus-view .site-shell{padding:16px}
+ body.calculator-focus-view .calc-workspace{grid-template-columns:1fr;min-height:calc(100dvh - 32px)}
+}
+
+.calc-settings .calc-option-switch{display:flex;align-items:center;justify-content:space-between;gap:18px;min-height:48px;font-size:calc(13px * var(--font-scale,1));line-height:1.6;cursor:pointer;margin-top:16px}.calc-option-switch>span:first-child{flex:1;min-width:0}.calc-option-switch .storage-switch input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer;z-index:1}
+.calc-settings .clock-select-field{margin:16px 0;gap:8px}.calc-settings .clock-select-field>span{font-size:calc(12px * var(--font-scale,1));color:var(--muted)}.calc-settings .clock-select-trigger{font-size:calc(14px * var(--font-scale,1));min-height:48px;background:var(--surface)}.calc-settings .clock-select-options{max-height:min(260px,40dvh);overflow-y:auto;overscroll-behavior:contain}.calc-settings .clock-select-options button{font-size:calc(14px * var(--font-scale,1))}
+
+/* Current operation and its explanation share a single, clearly labelled panel. */
+.operation-info{margin:16px 0;background:var(--accent-soft);border:1px solid var(--line);border-inline-start:3px solid var(--accent);border-radius:10px;padding:13px 15px}
+.operation-info .current-operation{margin:0;display:flex;flex-direction:column;align-items:flex-start;gap:5px}
+.operation-info .current-operation>span{font-size:calc(10px * var(--font-scale,1));letter-spacing:.04em}
+.operation-info .current-operation strong{font-size:calc(14px * var(--font-scale,1));line-height:1.5}
+.operation-info .operation-help:has(p:not([hidden])){background:transparent;border:0;border-top:1px solid color-mix(in srgb,var(--accent) 20%,var(--line));border-radius:0;padding:10px 0 0;margin:10px 0 0}
+[data-style=technical] .operation-info{border-radius:4px}
+
+/* Named areas preserve calculator width, stickiness and the mobile reading order. */
+.calc-workspace{grid-template-areas:"calculator tape"}.calc-left-column{grid-area:calculator}.calc-tape{grid-area:tape}
+@media screen and (min-width:681px){
+ html[data-calculator-side=right] .calc-workspace{grid-template-areas:"tape calculator";grid-template-columns:minmax(0,1.4fr) minmax(280px,.85fr)}
+ html[data-calculator-side=right] body.calculator-focus-view .calc-workspace{grid-template-columns:minmax(0,1.5fr) minmax(300px,.9fr)}
+}
+@media screen and (min-width:681px) and (max-width:900px){html[data-calculator-side=right] .calc-workspace{grid-template-columns:minmax(0,1fr) minmax(260px,.85fr)}}
+@media(max-width:680px){.calc-workspace{grid-template-areas:"calculator" "tape"}}
+
+/* Explanation is modal-only: operation choices never expand the keypad. */
+.operation-info{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;min-height:calc(114px * var(--font-scale,1))}
+.calc-operation-info-button{padding:8px;min-height:38px;width:38px;background:var(--surface);color:var(--accent)}.calc-operation-info-button svg{width:20px;height:20px}
+#operation-explanation{max-height:calc(100dvh - 32px);overflow-y:auto}#operation-explanation .operation-help:has(p:not([hidden])){border:0;padding:0;background:transparent;margin:0}#operation-explanation .operation-help p{font-size:calc(13px * var(--font-scale,1));line-height:1.85}
+
+#new-calculation-dialog{max-width:470px;max-height:calc(100dvh - 32px);overflow-y:auto}.new-calculation-icon{display:grid;place-items:center;width:50px;height:50px;border-radius:14px;color:var(--accent);background:var(--accent-soft)}.new-calculation-icon svg{width:26px;height:26px}#new-calculation-dialog .dialog-actions{justify-content:flex-end}
+
+/* Whole-tape actions: compact horizontal toolbar above the title, in normal document flow. */
+.tape-actions{position:relative;display:flex;align-items:center;gap:6px;width:max-content;max-width:100%;padding:6px;margin:0 0 18px;border:1px solid var(--line);border-radius:12px;background:var(--surface);box-shadow:var(--shadow)}
+.tape-tool{position:relative;flex:0 0 auto}.tape-tool .secondary{width:44px;height:44px;min-height:44px;padding:10px;background:var(--accent-soft);color:var(--accent);border-color:transparent}.tape-tool svg{width:22px;height:22px}
+.tape-tooltip{display:none;position:absolute;top:calc(100% + 8px);z-index:10;right:0;width:max-content;max-width:min(200px,calc(100vw - 48px));padding:8px 11px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--text);box-shadow:0 6px 22px #0002;font-size:calc(12px * var(--font-scale,1));line-height:1.5;white-space:normal;overflow-wrap:anywhere}
+.tape-tool:nth-child(-n+2) .tape-tooltip{left:0;right:auto}.tape-tool:hover .tape-tooltip,.tape-tool:focus-within .tape-tooltip{display:block}.tape-tool[data-tooltip-dismissed=true] .tape-tooltip{display:none}.tape-tool::after{content:"";position:absolute;top:100%;left:0;right:0;height:8px}
+[data-style=technical] :is(.tape-actions,.tape-tooltip){border-radius:4px}
+@media(max-width:360px){.tape-actions{gap:3px;padding:3px}}
+
+.calculation-title-heading{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:4px 0 24px;padding-bottom:20px;border-bottom:1px solid var(--line)}.calculation-title-heading>div{min-width:0;flex:1}.calculation-title-label{font-size:calc(10px * var(--font-scale,1));letter-spacing:.06em;color:var(--muted);margin:0 0 7px;line-height:1.5}.calculation-title-heading h3{font-family:Georgia,serif;font-size:calc(25px * var(--font-scale,1));line-height:1.3;letter-spacing:-.4px;font-weight:400;margin:0;overflow-wrap:anywhere}.calculation-title-heading>.secondary{width:40px;height:40px;min-height:40px;flex-shrink:0;padding:8px;color:var(--accent);background:var(--accent-soft);border-color:transparent}
+#calculation-title-dialog{max-width:520px;max-height:calc(100dvh - 32px);overflow-y:auto}#calculation-title-form>label{display:block;font-size:calc(12px * var(--font-scale,1));color:var(--muted);margin:0 0 9px}#calculation-title-form>input{width:100%;min-width:0;min-height:48px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--text);font-size:calc(16px * var(--font-scale,1))}#calculation-title-form .dialog-actions{justify-content:flex-end}
+[data-style=minimal] .calculation-title-heading h3,[data-style=technical] .calculation-title-heading h3{font-family:inherit;font-weight:550}[data-style=technical] #calculation-title-form>input{border-radius:4px}
+
+/* Value first, then step name: one visually distinct entry area. */
+.calc-entry-fields{min-width:0;margin:0;padding:14px;border:1px solid color-mix(in srgb,var(--accent) 38%,var(--line));border-radius:14px;background:color-mix(in srgb,var(--accent) 7%,var(--surface))}
+.calc-card .calc-entry-fields label{color:var(--accent);font-weight:600;margin:14px 0 8px;line-height:1.5}.calc-card .calc-entry-fields label[for=value]{margin-top:0}
+.calc-card .calc-entry-fields input{background:var(--surface);border-color:color-mix(in srgb,var(--accent) 40%,var(--line));min-height:48px;font-size:calc(16px * var(--font-scale,1));padding:11px 12px}.calc-card .calc-entry-fields #value{font-size:calc(25px * var(--font-scale,1));min-height:56px}
+.calc-entry-fields:focus-within{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 12%,transparent)}.calc-entry-fields input:disabled{opacity:.5;cursor:not-allowed}
+[data-style=technical] .calc-entry-fields{border-radius:4px}[data-style=soft] .calc-entry-fields{border-radius:20px}
+@media(max-width:360px){.calc-entry-fields{padding:12px}}
+
+/* Return/Enter is the invariant visual; accessible label and tooltip follow edit mode. */
+.calc-keypad .equals-key .return-symbol{font-family:system-ui,"Segoe UI Symbol",sans-serif;font-size:calc(34px * var(--font-scale,1));font-weight:500;line-height:1}
+
+/* Each step ends with a compact, palette-aware icon toolbar and enable switch. */
+.step-actions{display:grid;grid-template-columns:34px repeat(5,minmax(0,1fr));align-items:center;gap:4px;margin-top:14px;padding:6px;border:1px solid var(--line);border-radius:10px;background:color-mix(in srgb,var(--surface) 70%,var(--track));max-width:330px}
+.step-tool{position:relative;min-width:0}.step-actions .step-tool button{display:grid;place-items:center;width:100%;min-width:0;min-height:44px;height:44px;padding:7px;border:0;border-radius:7px;background:var(--accent-soft);color:var(--accent)}.step-tool svg{width:19px;height:19px}
+.step-actions .step-switch{display:flex;align-items:center;justify-content:center;gap:0;padding:0;min-height:44px;cursor:pointer}.step-switch .storage-switch{flex:0 0 34px;width:34px;height:20px;margin:0}.step-switch .storage-switch input{position:absolute;inset:0;z-index:1;width:100%;height:100%;margin:0;opacity:0;cursor:pointer}.step-switch .storage-switch-track::after{top:3px;left:3px;width:14px;height:14px}.step-switch .storage-switch input:checked+.storage-switch-track::after{transform:translateX(14px)}
+.step-tool:hover>.tape-tooltip,.step-tool:focus-within>.tape-tooltip{display:block}.step-tool[data-tooltip-dismissed=true]>.tape-tooltip{display:none}.step-tool:nth-child(-n+2)>.tape-tooltip{left:0;right:auto}.step-tool::after{content:"";position:absolute;left:0;right:0;top:100%;height:8px}
+[data-style=technical] :is(.step-actions,.step-actions button){border-radius:4px}
+
+/* The operation is always the step heading; an optional note gets its own line. */
+.step-head .step-name{margin:0;font-family:inherit;line-height:1.5}.step-note{margin:8px 0 12px;font-size:calc(13px * var(--font-scale,1));line-height:1.7;color:var(--muted);overflow-wrap:anywhere;white-space:pre-wrap}
+
+/* Spacious step cards keep numbering, notes, values and tools off the edges. */
+.calc-tape .tape-step{margin:14px 0;padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--surface);box-shadow:0 3px 14px #00000004}
+.tape-step .step-head{align-items:center;gap:12px;min-width:0}.tape-step .step-number-small{display:grid;place-items:center;flex:0 0 34px;width:34px;height:34px;border-radius:10px;background:var(--accent-soft);color:var(--accent);font-weight:650;font-size:calc(12px * var(--font-scale,1))}.tape-step .step-head .step-name{font-size:calc(15px * var(--font-scale,1));line-height:1.5;min-width:0}
+.tape-step .step-note{margin:12px 0;color:var(--text)}.tape-step .step-equation{padding:10px 12px;margin:14px 0;border-radius:9px;background:color-mix(in srgb,var(--track) 50%,var(--surface));font-size:calc(12px * var(--font-scale,1));line-height:1.75}
+.step-values{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;margin:16px 0 0}.step-values[data-has-input=false]{grid-template-columns:1fr}.step-values>div{min-width:0}.step-values dt{margin:0 0 6px;font-size:calc(10px * var(--font-scale,1));line-height:1.6;letter-spacing:.04em;color:var(--muted)}.step-values dd{margin:0;font-variant-numeric:tabular-nums;overflow-wrap:anywhere;line-height:1.5}.step-input-value{font-size:calc(18px * var(--font-scale,1));color:var(--text);font-weight:550}.step-values .step-result{font-size:calc(22px * var(--font-scale,1));color:var(--accent);margin:0}.step-result-cell{text-align:right}
+.calc-tape .tape-step[data-enabled=false]{background:color-mix(in srgb,var(--track) 35%,var(--surface));border-style:dashed}.tape-step[data-enabled=false] .step-result{color:var(--muted)}.step-state{display:inline-flex;margin:10px 0 0;padding:3px 9px;background:var(--track);color:var(--text);border:1px solid var(--line);border-radius:999px;font-size:calc(10px * var(--font-scale,1));line-height:1.6}
+.tape-step .step-actions{max-width:none;margin-top:18px;padding:6px;border-radius:10px}.calc-tape .tape-step[data-editing=true]{border-color:var(--accent);box-shadow:inset 3px 0 var(--accent)}.calc-tape .tape-step.drag-over{border-top:3px solid var(--accent)}
+[data-style=technical] .calc-tape .tape-step,[data-style=technical] .step-number-small,[data-style=technical] .step-equation{border-radius:4px}[data-style=soft] .calc-tape .tape-step{border-radius:22px}
+@media(max-width:680px){.calc-tape .tape-step{padding:14px}.tape-step .step-actions{gap:3px;padding:4px}.step-values{gap:8px}.step-values .step-result{font-size:calc(20px * var(--font-scale,1))}}
+
+/* Status belongs next to the operation heading, separate from the bottom tools. */
+.step-top-line{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:12px}.step-top-line .step-head{min-height:44px}
+.step-status-control{display:flex;align-items:center;justify-content:flex-end;gap:8px;min-height:44px;margin:0;padding:0;cursor:pointer}.step-status-text{font-size:calc(11px * var(--font-scale,1));line-height:1.5;color:var(--muted);white-space:nowrap}.step-status-control .step-state{margin:0;padding:0;border:0;border-radius:0;background:transparent;font-size:calc(11px * var(--font-scale,1));color:var(--text)}
+.step-actions{grid-template-columns:repeat(5,minmax(0,1fr))}
+@media(max-width:680px){.step-top-line{gap:8px}.step-top-line .step-head{gap:8px}.step-top-line .step-number-small{flex-basis:28px;width:28px;height:28px}.tape-step .step-top-line .step-name{font-size:calc(13px * var(--font-scale,1))}.step-status-control{gap:6px}.step-status-text,.step-status-control .step-state{font-size:calc(10px * var(--font-scale,1))}}
+
+/* Input and result share typography; their colour roles are distinct. */
+.step-values .step-input-value,.step-values .step-result{font-size:calc(22px * var(--font-scale,1));font-weight:550;color:var(--accent)}
+.tape-step[data-enabled=false] .step-values .step-result{color:var(--muted)}
+@media(max-width:680px){.step-values .step-input-value,.step-values .step-result{font-size:calc(20px * var(--font-scale,1))}}
+
+:root{--calc-value-colour:color-mix(in srgb,var(--accent) 65%,#111)}
+:root[data-theme=dark]{--calc-value-colour:color-mix(in srgb,var(--accent) 85%,var(--surface))}
+.step-values .step-input-value{color:var(--calc-value-colour)}
+
+#examples-dialog{max-width:640px;max-height:calc(100dvh - 32px);overflow-y:auto}.examples-list{display:grid;gap:14px}.example-card{border:1px solid var(--line);border-radius:14px;padding:18px;background:color-mix(in srgb,var(--accent-soft) 35%,var(--surface))}.example-card h3{margin:0 0 8px;font-size:calc(17px * var(--font-scale,1));line-height:1.4;font-weight:600}.example-card p{margin:0 0 14px}.example-card button{background:var(--surface);color:var(--accent)}#example-confirmation{padding:18px;background:var(--accent-soft);border:1px solid var(--line);border-radius:14px}#example-confirmation h3{margin-top:0;overflow-wrap:anywhere}
+@media(max-width:360px){.tape-tool .secondary{width:36px;padding:7px}.tape-tool svg{width:20px;height:20px}.example-card{padding:14px}}
+/* Fit six tools even in a narrow desktop tape without wrapping or overflow. */
+.tape-actions{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));width:308px}.tape-tool{min-width:0}.tape-tool .secondary{width:100%;min-width:0}
+.example-card h3,.example-card p,#examples-notice{overflow-wrap:anywhere}
+
+/* Result and next operation form one expression; help sits at the left edge. */
+.calc-display{display:grid;grid-template-columns:38px minmax(0,1fr) 90px;align-items:center;gap:12px;padding:16px;min-height:calc(132px * var(--font-scale,1))}
+.calc-display .calc-operation-info-button{align-self:center;padding:8px;min-height:38px;width:38px}.calc-result-value{min-width:0}.calc-result-value #result{font-size:calc(30px * var(--font-scale,1));line-height:1.25;text-align:right;overflow-wrap:anywhere}
+.calc-operation-display{align-self:stretch;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;border-inline-start:1px solid color-mix(in srgb,var(--accent) 24%,var(--line));padding-inline-start:12px;text-align:center}
+.calc-operation-display #operation-symbol{display:block;margin:0;font-family:system-ui,"Segoe UI Symbol",sans-serif;font-size:calc(32px * var(--font-scale,1));line-height:1.1;color:var(--accent);font-weight:500}.calc-operation-display #operation-label{font-size:calc(10px * var(--font-scale,1));line-height:1.4;color:var(--accent);font-weight:550;overflow-wrap:anywhere}
+@media(max-width:680px){.calc-display{grid-template-columns:32px minmax(0,1fr) 68px;gap:8px;padding:12px}.calc-display .calc-operation-info-button{width:32px;min-height:34px;padding:5px}.calc-result-value #result{font-size:calc(24px * var(--font-scale,1))}.calc-operation-display{padding-inline-start:8px}}
+
+/* A quiet, selectable paper receipt; editing tools appear only on demand. */
+.receipt-summary{display:none}
+:root[data-tape-view="simple"] .calc-tape #steps{padding:10px 0;border-block:1px dashed var(--line);font-variant-numeric:tabular-nums}
+:root[data-tape-view="simple"] .calc-tape .tape-step{margin:0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
+:root[data-tape-view="simple"] .tape-step>.step-note,
+:root[data-tape-view="simple"] .tape-step>.step-equation,
+:root[data-tape-view="simple"] .tape-step>.step-values,
+:root[data-tape-view="simple"] .tape-step .step-head{display:none}
+:root[data-tape-view="simple"] .tape-step>.receipt-summary{display:flex;flex-direction:column;gap:5px;width:100%;min-height:44px;padding:13px 12px;border:0;border-radius:4px;background:transparent;color:var(--text);text-align:right;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:calc(15px * var(--font-scale,1));font-weight:400;line-height:1.6;box-shadow:none;white-space:normal;overflow-wrap:anywhere}
+:root[data-tape-view="simple"] .receipt-summary .receipt-note{align-self:flex-start;text-align:left;color:var(--muted)}
+:root[data-tape-view="simple"] .receipt-summary:is(:hover,:focus-visible){background:color-mix(in srgb,var(--accent) 8%,var(--surface))}
+:root[data-tape-view="simple"] .tape-step[data-enabled="false"] .receipt-equation{color:var(--muted)}
+:root[data-tape-view="simple"] .tape-step:not([data-expanded="true"])>.step-top-line,
+:root[data-tape-view="simple"] .tape-step:not([data-expanded="true"])>.step-actions{display:none}
+:root[data-tape-view="simple"] .tape-step[data-expanded="true"]{background:color-mix(in srgb,var(--accent) 5%,var(--surface));border-radius:8px}
+:root[data-tape-view="simple"] .tape-step>.step-top-line{display:flex;justify-content:flex-end;padding:6px 12px}
+:root[data-tape-view="simple"] .tape-step>.step-actions{margin:6px 12px 12px;padding:6px}
+
+/* The final sum belongs to the receipt, not to the detailed card UI. */
+:root[data-tape-view="simple"] .calc-tape #steps{border-bottom:0}
+:root[data-tape-view="simple"] .tape-step>.receipt-summary{font-style:normal}
+:root[data-tape-view="simple"] .calc-tape .tape-total{margin-top:4px;padding:14px 12px 0;border-top:3px double var(--muted);font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:calc(15px * var(--font-scale,1));font-style:normal;line-height:1.6;font-variant-numeric:tabular-nums;color:var(--text)}
+:root[data-tape-view="simple"] .tape-total span,
+:root[data-tape-view="simple"] .tape-total #tape-result{font-family:inherit;font-size:inherit;line-height:inherit;color:inherit}
+:root[data-tape-view="simple"] .tape-total #tape-result{font-weight:600;text-align:right;margin-inline-start:auto}
+
+/* Subtle separators keep receipt steps distinct without bringing back cards. */
+:root[data-tape-view="simple"] .calc-tape .tape-step+.tape-step{border-top:1px solid color-mix(in srgb,var(--text) 12%,transparent)}

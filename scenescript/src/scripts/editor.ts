@@ -906,7 +906,19 @@ document.querySelectorAll<HTMLButtonElement>('[data-add]').forEach(b=>b.addEvent
 function download(){try{parseProject(JSON.stringify(project));const blob=new Blob([JSON.stringify(project,null,2)],{type:'application/json'});if(blob.size>MAX_FILE_BYTES)throw new Error('JSON: maximum 160 MiB');const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=(project.title.replace(/[^\p{L}\p{N}_-]+/gu,'-').slice(0,80)||'project')+'.scenescript.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);dirty=false;status(t('saved'));}catch(error){status(t('error')+' '+(error as Error).message);}}
 $('save-project').addEventListener('click',download);
 $('load-project').addEventListener('click',()=>($('project-file') as HTMLInputElement).click());
-$('project-file').addEventListener('change',async()=>{const input=$('project-file') as HTMLInputElement,file=input.files?.[0];input.value='';if(!file)return;try{if(file.size>MAX_FILE_BYTES)throw new Error('JSON: maximum 160 MiB');const next=parseProject(await file.text());await preload(next);if(canReplace())replace(next);}catch(error){status(t('error')+' '+(error as Error).message);}});
+$('project-file').addEventListener('change',async()=>{
+ const input=$('project-file') as HTMLInputElement,file=input.files?.[0];input.value='';if(!file)return;
+ let source='';
+ try{
+  if(file.size>MAX_FILE_BYTES)throw new Error('JSON: maximum 160 MiB');
+  source=await file.text();const next=parseProject(source);await preload(next);
+  if(canReplace()){replace(next);showToast(t('loaded'),'success');}
+ }catch(error){
+  jsonSession++;($('json-input') as HTMLTextAreaElement).value=source;
+  const message=t('error')+' '+(error as Error).message;status(message);jsonStatus(message,true);
+  if(!dialog.open)dialog.showModal();$('copy-json-error').focus();
+ }
+});
 const dialog=$('json-dialog') as HTMLDialogElement;
 let jsonSession=0;
 function jsonStatus(message:string,error=false){
@@ -933,7 +945,7 @@ $('paste-json').addEventListener('click',async()=>{
   if(dialog.open&&session===jsonSession){jsonStatus(t('clipboardDenied'));$('json-input').focus();}
  }finally{button.disabled=false;}
 });
-$('import-json').addEventListener('click',async()=>{try{const next=parseProject(($('json-input') as HTMLTextAreaElement).value);await preload(next);if(canReplace()){replace(next);dialog.close();}}catch(error){jsonStatus(t('error')+' '+(error as Error).message,true);}});
+$('import-json').addEventListener('click',async()=>{try{const next=parseProject(($('json-input') as HTMLTextAreaElement).value);await preload(next);if(canReplace()){replace(next);dialog.close();showToast(t('loaded'),'success');}}catch(error){jsonStatus(t('error')+' '+(error as Error).message,true);}});
 
 $('import-thumbnail').onclick=()=>($('thumbnail-file') as HTMLInputElement).click();
 ($('thumbnail-file') as HTMLInputElement).onchange=async()=>{

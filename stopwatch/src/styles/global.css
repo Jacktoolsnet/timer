@@ -1045,3 +1045,7 @@ body.focus-view .timer-card>.stopwatch-laps{overflow:visible}
 @media(min-width:601px){
  body:not(.focus-view):not(.multiple-stopwatches) .stopwatch-card>.stopwatch-laps{align-self:stretch;margin:24px 0 8px}
 }
+.clock-tile .clock-heading{flex-wrap:nowrap}
+.clock-tile .clock-heading input{flex:1;width:0}
+.clock-tile .clock-heading .delete-clock{flex:0 0 36px;width:36px;min-width:36px;min-height:36px;padding:7px;margin-left:auto;color:var(--muted)}
+.clock-tile .clock-heading .delete-clock:hover:not(:disabled){color:var(--accent);background:var(--accent-soft)}

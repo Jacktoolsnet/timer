@@ -520,6 +520,12 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
  grid-template-rows:minmax(0,1fr);
  align-content:stretch;
 }
+/* Let the toolbar set the panel's minimum height instead of overflowing it.
+   The list remains flexible and scrollable alongside the toolbar. */
+.elements-panel {
+ contain:inline-size;
+ grid-template-rows:minmax(min-content,1fr);
+}
 .scene-list-content,.element-list-content {
  display:flex;
  flex-direction:column;

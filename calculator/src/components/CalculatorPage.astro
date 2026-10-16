@@ -1,0 +1,71 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getDictionary, type Language } from '../lib/i18n';
+import { calculatorText } from '../lib/calculator-text';
+import { operationHelp, specialOperations, specialSymbols, standardOperations } from '../lib/operation-help';
+import { operations } from '../lib/calculation';
+import {exampleDefinitions,exampleIds,exampleUi} from '../lib/examples';
+import '../styles/calculator.css';
+interface Props {lang:Language}
+const {lang}=Astro.props; const c=calculatorText[lang]; const t=getDictionary(lang); const help=operationHelp[lang]; const examples=exampleDefinitions[lang]; const e=exampleUi[lang];
+---
+<Layout lang={lang} title={c.title} description={c.intro} route="">
+<section class="intro"><h1>{c.title} <em>{c.accent}</em></h1><p class="intro-copy">{c.intro}</p></section>
+<div id="calculator-app" data-text={JSON.stringify(c)}>
+
+<div class="workspace calc-workspace"><div class="calc-left-column">
+
+<section class="timer-card calc-card" aria-labelledby="calculator-heading"><div class="calc-card-heading"><h2 id="calculator-heading">{c.calculator}</h2><button type="button" id="calculator-focus" class="secondary calc-focus-toggle" aria-pressed="false" aria-label={t.focusMode} data-enter={t.focusMode} data-exit={t.exitFocus}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg><span>{t.focusMode}</span></button></div>
+<div class="calc-display"><button type="button" id="operation-explain" class="secondary calc-operation-info-button" aria-label={c.explain} title={c.explain} aria-haspopup="dialog" aria-controls="operation-explanation"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></svg></button><div class="calc-result-value"><span class="calc-result-label">{c.total}</span><output id="result" aria-live="polite" aria-atomic="true">0,00</output></div><div class="calc-operation-display" role="group" aria-labelledby="operation-caption operation-label"><span id="operation-caption" class="sr-only">{help.current}</span><span id="operation-symbol" aria-hidden="true">{specialSymbols.set}</span><strong id="operation-label" aria-live="polite">{c.ops.set}</strong></div></div>
+<form id="step-form">
+<input id="operation" type="hidden" value="set" />
+<fieldset class="calc-entry-fields"><legend class="sr-only">{c.entryLabel}</legend>
+<label for="value">{c.value}</label><input id="value" inputmode="decimal" maxlength="40" autocomplete="off" spellcheck="false" aria-describedby="calc-status" />
+<label for="step-name">{c.name}</label><input id="step-name" maxlength="120" autocomplete="off" />
+</fieldset>
+<div class="calc-keypad-layout"><div class="calc-keypad" aria-label={c.calculator}>
+{['7','8','9','÷','4','5','6','×','1','2','3','−','±','0',lang==='en'?'.':',','+'].map(key=><button type="button" class:list={['secondary',{'operator-key':['÷','×','−','+'].includes(key)}]} data-key={key} aria-label={key==='±'?c.sign:key} aria-pressed={standardOperations[key]?false:undefined}>{key}</button>)}
+<button type="button" class="secondary" data-key="clear" aria-label={c.inputClear}>CE</button><button type="button" class="secondary" data-key="backspace" aria-label={c.backspace}>⌫</button><button type="submit" class="primary equals-key" id="add-step" aria-label={c.addStep} title={c.addStep}><span class="return-symbol" aria-hidden="true">↵</span></button>
+<div class="calc-action-keys" role="group" aria-label={t.menuSettings}>
+<button type="button" id="new" class="secondary calc-action-key" title={c.new}><span aria-hidden="true">↺</span><small>{c.new}</small></button>
+<button type="button" id="calculator-settings" class="secondary calc-action-key" aria-haspopup="dialog" aria-controls="calculator-options" title={t.menuSettings}><span aria-hidden="true">⚙</span><small>{t.menuSettings}</small></button>
+<button type="button" id="undo" class="secondary calc-action-key" title={c.undo} disabled><span aria-hidden="true">↶</span><small>{c.undo}</small></button>
+<button type="button" id="redo" class="secondary calc-action-key" title={c.redo} disabled><span aria-hidden="true">↷</span><small>{c.redo}</small></button>
+</div>
+</div>
+<fieldset class="special-keys"><legend class="sr-only">{help.specials}</legend>{specialOperations.map(op=><button type="button" class="secondary special-key" data-operation={op} aria-label={c.ops[op]} aria-pressed={op==='set'}><span aria-hidden="true">{specialSymbols[op]}</span><small>{help.labels[op]}</small></button>)}</fieldset></div>
+
+<button type="button" id="cancel-edit" class="secondary" hidden>{c.cancel}</button>
+</form>
+<p id="calc-status" role="status"></p>
+<noscript>{t.js}</noscript></section>
+</div>
+<section class="timer-card calc-tape" aria-labelledby="tape-heading"><div class="tape-heading"><h2 id="tape-heading">{c.tape}</h2><span id="step-count">0</span></div>
+<div class="tape-actions" role="toolbar" aria-label={c.tape} aria-orientation="horizontal">
+{[
+ {id:'copy',label:c.copy,path:'M8 8h13v13H8ZM16 8V3H3v13h5'},
+ {id:'print',label:c.print,path:'M6 9V3h12v6M6 17H3V9h18v8h-3M6 14h12v7H6ZM17 12h1'},
+ {id:'csv',label:c.csv,path:'M14 3H4v18h16V9ZM14 3v6h6M8 13h8M8 17h8M11 13v4'},
+ {id:'export',label:c.export,path:'M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5'},
+ {id:'import',label:c.import,path:'M3 7h7l2 2h9l-3 11H3ZM3 7V4h7l2 3M13 16v-5m-2 2 2-2 2 2'},
+ {id:'examples',label:e.title,path:'M12 5c-3-2-6-2-10-1v15c4-1 7-1 10 1 3-2 6-2 10-1V4c-4-1-7-1-10 1Zm0 0v15M5 8h4M5 12h4m6-4h4m-4 4h4'}
+].map(action=><div class="tape-tool"><button type="button" id={action.id} class="secondary" aria-label={action.label} aria-describedby={'tape-tooltip-'+action.id}><svg viewBox="0 0 24 24" aria-hidden="true"><path d={action.path}/></svg></button><span class="tape-tooltip" role="tooltip" id={'tape-tooltip-'+action.id}>{action.label}</span></div>)}
+</div><input id="import-file" type="file" accept=".json,application/json" hidden />
+<div class="calculation-title-heading"><div><p class="calculation-title-label">{c.titleLabel}</p><h3 id="calculation-title-display">{c.untitled}</h3></div><button type="button" id="edit-calculation-title" class="secondary" aria-label={c.editTitle} title={c.editTitle} aria-haspopup="dialog" aria-controls="calculation-title-dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m16 3 5 5M4 15 16 3l5 5L9 20l-6 1Z"/></svg></button></div>
+
+<p id="empty-tape">{c.empty}</p><ol id="steps"></ol><div class="tape-total"><span>{c.total}</span><strong id="tape-result">0,00</strong></div><p id="export-status" role="status"></p>
+</section></div><dialog id="calculator-options" class="calc-settings" aria-labelledby="calc-options-heading"><div class="dialog-inner"><h2 id="calc-options-heading">{c.options}</h2>
+<label class="calc-option-switch"><span>{c.simpleView}</span><span class="storage-switch"><input id="simple-tape" type="checkbox" role="switch" aria-describedby="simple-tape-hint" /><span class="storage-switch-track" aria-hidden="true"></span></span></label><p id="simple-tape-hint" class="form-hint">{c.simpleHint}</p>
+<label for="calculator-side"><span>{c.position}</span><select id="calculator-side" name="calculator-side" aria-describedby="position-hint"><option value="left">{c.left}</option><option value="right">{c.right}</option></select></label><p id="position-hint" class="form-hint">{c.positionHint}</p>
+<details class="calc-options" open><summary>{c.rounding}</summary><label for="decimals"><span>{c.decimals}</span><select id="decimals" name="decimals">{Array.from({length:9},(_,i)=><option value={i} selected={i===2}>{i}</option>)}</select></label><label class="calc-option-switch"><span>{c.round}</span><span class="storage-switch"><input id="round-each" type="checkbox" role="switch" aria-describedby="rounding-hint" /><span class="storage-switch-track" aria-hidden="true"></span></span></label><p id="rounding-hint" class="form-hint">{c.roundHint}</p></details>
+<label class="calc-option-switch"><span>{c.remember}</span><span class="storage-switch"><input id="remember-calculation" type="checkbox" role="switch" /><span class="storage-switch-track" aria-hidden="true"></span></span></label>
+<form method="dialog" class="dialog-actions"><button type="submit" class="primary">{t.close}</button></form></div></dialog><p class="local-note">{c.local}</p>
+<dialog id="operation-explanation" aria-labelledby="operation-explanation-title"><div class="dialog-inner"><h2 id="operation-explanation-title">{c.ops.set}</h2><div class="operation-help" aria-label={help.specials}>{operations.map(op=><p id={'operation-tip-'+op} hidden>{help.hints[op]}</p>)}</div><form method="dialog" class="dialog-actions"><button type="submit" class="primary">{t.close}</button></form></div></dialog>
+<dialog id="new-calculation-dialog" aria-labelledby="new-calculation-title" aria-describedby="new-calculation-description"><div class="dialog-inner"><div class="new-calculation-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 3H5v18h14V8Z"/><path d="M14 3v5h5M8 13h8M12 9v8"/></svg></div><h2 id="new-calculation-title">{c.newConfirmTitle}</h2><p id="new-calculation-description">{c.confirm}</p><form method="dialog" class="dialog-actions"><button type="submit" class="secondary" value="cancel" autofocus>{c.cancel}</button><button type="submit" id="confirm-new-calculation" class="primary" value="new">{c.new}</button></form></div></dialog>
+<dialog id="calculation-title-dialog" aria-labelledby="calculation-title-dialog-heading"><div class="dialog-inner"><div class="new-calculation-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m16 3 5 5M4 15 16 3l5 5L9 20l-6 1Z"/></svg></div><h2 id="calculation-title-dialog-heading">{c.editTitle}</h2><form id="calculation-title-form"><label for="calculation-title">{c.titleLabel}</label><input id="calculation-title" type="text" maxlength="120" autocomplete="off" autofocus /><div class="dialog-actions"><button type="button" id="cancel-calculation-title" class="secondary">{c.cancel}</button><button type="submit" class="primary">{c.saveTitle}</button></div></form></div></dialog>
+<dialog id="examples-dialog" aria-labelledby="examples-title" aria-describedby="examples-notice"><div class="dialog-inner"><h2 id="examples-title">{e.title}</h2><p id="examples-notice">{e.notice}</p><div id="examples-list" class="examples-list">{exampleIds.map(id=><article class="example-card"><h3>{examples[id].title}</h3><p>{examples[id].description}</p><button type="button" class="secondary" data-example={id} aria-label={e.load+': '+examples[id].title}>{e.load}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></button></article>)}</div><section id="example-confirmation" hidden aria-labelledby="example-confirmation-title"><h3 id="example-confirmation-title"></h3><p>{e.replace}</p><div class="dialog-actions"><button type="button" id="example-cancel" class="secondary">{c.cancel}</button><button type="button" id="example-confirm" class="primary">{e.load}</button></div></section><form method="dialog" class="dialog-actions"><button type="submit" class="secondary">{t.close}</button></form></div></dialog>
+<section id="print-calculation"><h1 id="print-title"></h1><p id="print-rounding"></p><table><thead><tr><th>#</th><th>{c.name}</th><th>{c.operation}</th><th>{c.total}</th></tr></thead><tbody id="print-rows"></tbody></table><h2 id="print-result"></h2></section>
+</div>
+<section class="guide calc-guide"><div class="guide-heading"><p class="eyebrow">THE JACKTOOLS.NET WAY</p><h2>{c.guide}</h2></div><div class="guide-grid">{c.guides.map(([title,body],i)=><article><span class="step-number">0{i+1}</span><h3>{title}</h3><p>{body}</p></article>)}</div></section>
+<script src="../scripts/calculator.ts"></script>
+</Layout>

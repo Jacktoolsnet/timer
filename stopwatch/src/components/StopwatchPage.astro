@@ -21,7 +21,7 @@ const {lang}=Astro.props; const t=getDictionary(lang); const c=stopwatchText[lan
 <button id="lap-all" class="secondary" aria-label={c.lapAll} title={c.lapAll} hidden disabled><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 21V3m0 1c4-3 6 3 10 0v9c-4 3-6-3-10 0M17 15h6m-3-3v6"/></svg></button>
 <button id="show-all-laps" class="secondary" aria-label={c.showAllLaps} title={c.showAllLaps} aria-pressed="false" hidden><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 5h12M9 10h12M9 15h12M3 5h1M3 10h1M3 15h1M5 20h16"/></svg></button>
 </div>
-<div id="clock-grid" class="clock-grid"><section id="primary-clock" class="clock-tile"><div id="clock-primary-heading" class="clock-heading" hidden><input id="clock-primary-name" aria-label={c.clockName} value={c.clock+' 1'} maxlength="60"/></div>
+<div id="clock-grid" class="clock-grid"><section id="primary-clock" class="clock-tile"><div id="clock-primary-heading" class="clock-heading"><input id="clock-primary-name" aria-label={c.clockName} value={c.clock+' 1'} maxlength="60"/><button id="delete-primary-clock" class="secondary delete-clock" aria-label={c.deleteClock} title={c.deleteClock} disabled><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/></svg></button></div>
 <div id="stopwatch-display" data-view="analog">
 <div id="analog-stopwatch">
 <svg viewBox="0 0 320 320" aria-hidden="true" focusable="false">

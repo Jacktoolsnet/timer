@@ -6,7 +6,8 @@ import {storageAllowed} from '../lib/storage';
 import {STORAGE_KEY} from '../lib/engine';
 const $ = (id: string) => document.getElementById(id)!;
 const t = JSON.parse($('stopwatch-app').dataset.text!);
-const timer = new Stopwatch();
+let timer = new Stopwatch();
+let nextClockNumber=2;
 const colors = ['#a64d35','#59745c','#427ca1','#9465aa','#b17a20'];
 const clocks: {timer:Stopwatch; name:string; color:string; card?:HTMLElement}[] = [{timer,name:t.clock+' 1',color:colors[0]!}];
 const captures: {clock:number; number:number; duration:number; elapsed:number}[] = [];
@@ -48,6 +49,7 @@ function configureView() {
 }
 view.addEventListener('change', () => {configureView(); save();});
 function sync() {
+ document.querySelectorAll<HTMLButtonElement>('.delete-clock').forEach(button=>button.disabled=clocks.length===1);
  const label = timer.running ? t.pause : timer.elapsed(now()) > 0 ? t.resume : t.start;
  start.setAttribute('aria-label', label); start.title = label;
  $('play-symbol').hidden = timer.running; $('pause-symbol').hidden = !timer.running;
@@ -271,14 +273,19 @@ $('start-all').addEventListener('click',()=>{const stamp=now();clocks.forEach(cl
 $('pause-all').addEventListener('click',()=>{const stamp=now();clocks.forEach(clock=>clock.timer.pause(stamp));sync();});
 $('add-clock').addEventListener('click',()=>{
  const index=clocks.length;
+ const clockNumber=nextClockNumber++;
  const card=document.createElement('section');card.className='extra-clock clock-tile';
  const color=colors[index%colors.length]!;
  card.style.setProperty('--clock-color',color);
  const heading=document.createElement('div');heading.className='clock-heading';
- const name=document.createElement('input');name.value=t.clock+' '+(index+1);name.maxLength=60;name.setAttribute('aria-label',t.clockName);
+ const name=document.createElement('input');name.value=t.clock+' '+clockNumber;name.maxLength=60;name.setAttribute('aria-label',t.clockName);
  const clock={timer:new Stopwatch(),name:name.value,color,card};clocks.push(clock);
- name.addEventListener('input',()=>{clock.name=name.value.trim() || t.clock+' '+(index+1);renderRounds();});
+ name.addEventListener('input',()=>{clock.name=name.value.trim() || t.clock+' '+clockNumber;renderRounds();});
  heading.append(name);
+ const remove=$('delete-primary-clock').cloneNode(true) as HTMLButtonElement;
+ remove.removeAttribute('id');remove.disabled=false;
+ remove.addEventListener('click',()=>deleteClock(clocks.indexOf(clock)));
+ heading.append(remove);
  const button=(action:string,label:string,handler:()=>void)=>{
   const element=document.createElement('button');element.className='secondary';element.dataset.action=action;element.setAttribute('aria-label',label);element.title=label;
   const source=action==='toggle'?'toggle-timing':action==='lap'?'lap':action==='reset'?'reset-timing':'primary-show-laps';
@@ -301,9 +308,9 @@ $('add-clock').addEventListener('click',()=>{
  const controls=document.createElement('div');controls.className='extra-clock-controls timer-controls';
  controls.append(button('reset',t.reset,()=>{
   if(clock.timer.running || resetDialog.open)return;
-  openReset(index);
+  openReset(clocks.indexOf(clock));
  }),button('toggle',t.start,()=>{clock.timer.running?clock.timer.pause(now()):clock.timer.start(now());sync();}),
- button('lap',t.lap,()=>capture(index)),button('show',t.showLaps,()=>selectClock(index)));
+ button('lap',t.lap,()=>capture(clocks.indexOf(clock))),button('show',t.showLaps,()=>selectClock(clocks.indexOf(clock))));
 
  card.append(controls);$('extra-clocks').append(card);
  for(const id of ['clock-primary-heading','start-all','pause-all','reset-all','lap-all','show-all-laps','lap-navigation']) $(id).hidden=false;
@@ -415,3 +422,31 @@ window.addEventListener('beforeprint',renderPrintView);
 renderPrintView();
 
 $('print-stopwatch').addEventListener('click',()=>{renderPrintView();window.print();});
+
+
+$('delete-primary-clock').addEventListener('click',()=>deleteClock(0));
+function deleteClock(index:number){
+ if(clocks.length===1 || index<0 || resetDialog.open)return;
+ const clock=clocks[index]!;
+ if((clock.timer.running || clock.timer.elapsed(now())>0 || clock.timer.laps.length) &&
+  !window.confirm(clock.name+'\n'+t.deleteClockConfirm))return;
+ clock.timer.pause(now());
+ for(let i=captures.length-1;i>=0;i--){
+  if(captures[i]!.clock===index)captures.splice(i,1);
+  else if(captures[i]!.clock>index)captures[i]!.clock--;
+ }
+ clocks.splice(index,1);
+ if(index===0){
+  const promoted=clocks[0]!;
+  promoted.card!.remove();delete promoted.card;
+  timer=promoted.timer;
+  ($('clock-primary-name') as HTMLInputElement).value=promoted.name;
+  $('primary-clock').style.setProperty('--clock-color',promoted.color);
+ }else clock.card!.remove();
+ if(selectedClock===index)selectedClock=Math.min(index,clocks.length-1);
+ else if(selectedClock>index)selectedClock--;
+ for(const id of ['start-all','pause-all','reset-all','lap-all','show-all-laps','lap-navigation'])$(id).hidden=clocks.length===1;
+ document.body.classList.toggle('multiple-stopwatches',clocks.length>1);
+ closeCopyMenu();renderRounds();sync();
+ $('add-clock').focus();
+}
