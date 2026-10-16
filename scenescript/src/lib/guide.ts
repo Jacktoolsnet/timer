@@ -382,6 +382,24 @@ Optional fields and their defaults:
 - width: 80 (40 for bubble); height: 30 (24 for bubble); each 0.1–200, percentages of canvas width/height.
 - color: "#ffffff" for text/image/video/simulation, "#b86445" for shape, "#222222" for bubble; #RRGGBB color.
 - font: "Arial"; allowed ${fonts.map(f=>`"${f}"`).join(', ')}.
+- stopMotion: optional object; omitted defaults to
+  {"enabled":false,"fps":12,"jitter":1.5,"rotation":0.35,"seed":17}.
+  Supported on all element types, not groups. Omitted fields use defaults;
+  explicit null, wrong types and unknown fields are rejected. enabled is boolean;
+  fps is integer 1–60; jitter is 0–20 project pixels; rotation is 0–5 degrees;
+  seed is integer 0–65535.
+  Samples element animation/motionPath and visual-effect clocks on a grid
+  starting at element.at and holds each frame until the next sample. Shape
+  drawing, typewriter text, fades, simulation/SVG visuals, liquid and particle
+  exits use this clock. Start/end visibility remains exact on the real timeline;
+  the scene-end pose is evaluated exactly so exits/drawing can finish.
+  Optional positional/rotational wobble is deterministic per element ID, seed and
+  sampled frame (first frame has no wobble); set jitter and rotation to 0 for
+  pure stepped movement. At 8–12 fps it resembles handmade animation.
+  Camera and group movement, scene transitions, video footage and audio remain
+  continuous and are not resampled. Does not change project duration or export
+  fps. Combinable with paper, liquid, double exposure and particle exits.
+  Example: "stopMotion":{"enabled":true,"fps":8,"jitter":2,"rotation":0.5}.
 - paper: optional object; omitted defaults to
   {"enabled":false,"edge":"torn","color":"#f4ecd8","padding":16,
    "roughness":8,"texture":0.18,"shadow":12,"seed":17}.

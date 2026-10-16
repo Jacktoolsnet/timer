@@ -1,3 +1,5 @@
+import {defaultStopMotion,stopMotionState} from '../src/lib/stop-motion.ts';
+import {elementMatrix,bubbleTarget} from '../src/lib/comic.ts';
 import {defaultPaper,paperPolygon,paperInset,paperGrain} from '../src/lib/paper.ts';
 import {defaultExposure,exposureCSS,exposureModes} from '../src/lib/exposure.ts';
 import {defaultLiquid,liquidState} from '../src/lib/liquid.ts';
@@ -300,4 +302,42 @@ test('paper edge and grain are seeded, bounded and stable for small elements',()
   assert.ok(coords.every(n=>n>=0&&n<=100));assert.ok(paperInset(p,size,size)<=Math.max(0,(size-1)/2));
  }
  assert.equal(paperGrain(17),paperGrain(17));assert.notEqual(paperGrain(17),paperGrain(18));
+});
+
+test('stop motion defaults, round trips and strict bounded settings',()=>{
+ const p=demoProject(),e=p.scenes[0].elements[0];e.stopMotion={enabled:true,fps:8,jitter:2,rotation:.5,seed:123};
+ assert.deepEqual(parseProject(serialize(p)).scenes[0].elements[0].stopMotion,e.stopMotion);
+ const legacy=JSON.parse(serialize(p));delete legacy.scenes[0].elements[0].stopMotion;
+ assert.deepEqual(parseProject(serialize(legacy)).scenes[0].elements[0].stopMotion,defaultStopMotion());
+ for(const value of [null,[],42,{enabled:'yes'},{fps:0},{fps:61},{fps:1.5},{jitter:-1},{jitter:21},{rotation:6},{seed:-1},{seed:1.5},{seed:65536},{fps:null},{unknown:1}]){
+  const invalid=JSON.parse(serialize(p));invalid.scenes[0].elements[0].stopMotion=value;assert.throws(()=>parseProject(serialize(invalid)),/stopMotion/);
+ }
+});
+
+test('stop motion samples locally, holds jitter and preserves exact start/end timing',()=>{
+ const c={...defaultStopMotion(),enabled:true,fps:4},at=.13;
+ const a=stopMotionState(c,'a',.4,at,1.2),b=stopMotionState(c,'a',.6,at,1.2);
+ assert.deepEqual(a,b);assert.equal(a.time,.38);
+ assert.notDeepEqual(a,stopMotionState(c,'a',.7,at,1.2));
+ assert.notDeepEqual(a,stopMotionState({...c,seed:18},'a',.4,at,1.2));
+ assert.notDeepEqual(a,stopMotionState(c,'b',.4,at,1.2));
+ assert.equal(stopMotionState(c,'a',1.2,at,1.2).time,1.2);
+ assert.deepEqual(stopMotionState(c,'a',10,at,1.2),stopMotionState(c,'a',1.2,at,1.2));
+ const e=newElement('text');Object.assign(e,{at,until:1.2,animation:'typewriter',text:'abcdefghijklmnopqrst',stopMotion:{...c,jitter:0,rotation:0}});
+ assert.equal(animationState(e,.12).visible,false);assert.equal(animationState(e,.13).visible,true);
+ assert.equal(animationState(e,.4).text,animationState(e,.6).text);assert.notEqual(animationState(e,.4).text,animationState(e,.7).text);
+ assert.equal(animationState(e,1.199).visible,true);assert.equal(animationState(e,1.2).visible,false);
+ e.until=null;e.animation='fade';e.exitAnimation='fade';e.exitDuration=.3;
+ assert.equal(animationState(e,1.2,1920,1080,1.2).opacity,0);
+ e.stopMotion.enabled=false;assert.equal(animationState(e,.44).sampleTime,.44);
+});
+
+test('stop-motion matrices and bubble anchors follow the same held pose',()=>{
+ const p=demoProject(),s=p.scenes[0],e=newElement('shape'),bubble=newElement('bubble');
+ e.stopMotion={...defaultStopMotion(),enabled:true,fps:4};e.animation='slide-left';e.anchors={mouth:{x:50,y:50}};
+ bubble.animation='none';bubble.bubble!.tail.mode='anchor';bubble.bubble!.tail.element=e.id;bubble.bubble!.tail.anchor='mouth';s.elements=[e,bubble];
+ assert.deepEqual(elementMatrix(e,.3,1920,1080,5),elementMatrix(e,.4,1920,1080,5));
+ assert.notDeepEqual(elementMatrix(e,.3,1920,1080,5),elementMatrix(e,.5,1920,1080,5));
+ assert.deepEqual(bubbleTarget(bubble,s,.3,1920,1080),bubbleTarget(bubble,s,.4,1920,1080));
+ assert.notDeepEqual(bubbleTarget(bubble,s,.3,1920,1080),bubbleTarget(bubble,s,.5,1920,1080));
 });
