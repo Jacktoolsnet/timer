@@ -830,3 +830,17 @@ test('elements panel contains its entire toolbar at every viewport size',async({
   expect(inner.x+inner.width).toBeLessThanOrEqual(outer.x+outer.width);
  }
 });
+
+test('line drawing shapes follow the timeline forwards and backwards and survive import',async({page})=>{
+ await page.goto('/en/');await page.locator('#element-add-menu summary').click();await page.locator('[data-add=shape]').click();
+ await page.locator('#element-form [name=animation]').selectOption('draw');
+ await page.locator('#element-form [name=animationDuration]').fill('2');
+ const shape=page.locator('.scene-element.selected'),stroke=shape.locator('[data-draw-stroke]'),fill=shape.locator('[data-draw-fill]');
+ for(const [time,offset,opacity] of [['0','1','0'],['0.8','0.5','0'],['2','0','1'],['0','1','0']]){
+  await page.locator('#timeline').fill(time);
+  await expect(stroke).toHaveAttribute('stroke-dashoffset',offset);await expect(fill).toHaveCSS('opacity',opacity);
+ }
+ const saved=JSON.parse(await exportedJSON(page));expect(saved.scenes[0].elements.at(-1).animation).toBe('draw');
+ await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(saved));await page.locator('#import-json').click();
+ await expect(page.locator('.shape-svg [data-draw-stroke]')).toHaveCount(1);
+});

@@ -198,3 +198,10 @@ test('first comment metadata is optional, bounded plain text and round trips',()
   assert.throws(()=>parseProject(serialize({...p,firstComment})),/firstComment/);
  p.firstComment='x'.repeat(5000);assert.equal(parseProject(serialize(p)).firstComment.length,5000);
 });
+
+test('line drawing animation persists on shapes and is excluded from group animations',()=>{
+ const p=demoProject(),shape=newElement('shape');shape.animation='draw';p.scenes[0].elements=[shape];
+ assert.equal(parseProject(serialize(p)).scenes[0].elements[0].animation,'draw');
+ p.scenes[0].groups=[{id:'draw-group',name:'Group',members:[shape.id],pivot:{x:0,y:0},x:0,y:0,rotation:0,opacity:1,animation:'draw',at:0,until:null,animationDuration:1,exitAnimation:'none',exitDuration:.5,motionPath:null}];
+ assert.throws(()=>parseProject(serialize(p)),/groups\[0\].animation/);
+});

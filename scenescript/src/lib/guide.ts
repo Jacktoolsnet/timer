@@ -945,6 +945,11 @@ Slide/zoom easing is 1 - (1 - progress)^3 (cubic ease-out).
 - slide-left: translates from 80 project pixels to the right to zero, eased.
 - slide-up: translates from 80 project pixels below to zero, eased.
 - zoom: scales from 70% to 100%, eased.
+- draw: shape elements only visually; progressively draws the outline during the
+  first 80% of animationDuration, then fades in the fill over the last 20%.
+  Uses border settings; when borderColor is none or borderWidth is zero, a
+  4-project-pixel outline is used (fillColor, or color if fillColor is none).
+  Other element types have no drawing effect. Not allowed on groups.
 - typewriter: displays floor(codePointCount × progress) Unicode code points of
   text. It uses Array.from, NOT grapheme clusters. Combining marks, flags and
   joined emoji can therefore appear in parts; complete emoji/grapheme handling

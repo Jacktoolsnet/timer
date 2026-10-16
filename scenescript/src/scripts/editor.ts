@@ -23,7 +23,7 @@ import {createSimulation,type SimulationView} from './simulation';
 import {defaultGradient,gradientCSS,type Gradient} from '../lib/gradient';
 import {createSvgImage,seekSvg} from './svg-image';
 import {validateSvg,svgDataURL} from '../lib/svg';
-import {renderShape} from './shapes';
+import {renderShape,updateShapeDrawing} from './shapes';
 import {showToast} from './toast';
 import {richTextEditor,renderRuns,styleTextGradient,type TextStyleKey} from './rich-text';
 import {demoProject,newScene,newElement,parseProject,formats,fonts,animations,exitAnimations,shapeTypes,sceneTransitions,sceneTransitionState,locateTime,MAX_FILE_BYTES,MAX_IMAGE_BYTES,validateImage,type Project,type Scene,type Element,type Group} from '../lib/model';
@@ -104,7 +104,7 @@ function renderGroupForm(host:HTMLElement,g:Group){
  const update=(key:keyof Group,value:unknown)=>{const old=g[key];Object.assign(g,{[key]:value});try{parseProject(JSON.stringify(project));stop();changed();draw(false);if(key==='name')renderElements();}catch(error){Object.assign(g,{[key]:old});showToast((error as Error).message,'error');renderForms();}};
  field(host,'name',g.name,'text',v=>update('name',v));
  for(const key of ['x','y','rotation','opacity','at','animationDuration','exitDuration'] as const)field(host,key,g[key],'number',v=>update(key,v),undefined,key==='rotation'?-360:key==='x'||key==='y'?-1000:key==='animationDuration'||key==='exitDuration'?.01:0,key==='rotation'?360:key==='opacity'?1:key==='at'?current().duration:key==='x'||key==='y'?1000:3600);
- field(host,'animation',g.animation,'select',v=>update('animation',v),animations.filter(a=>a!=='typewriter'));field(host,'exitAnimation',g.exitAnimation,'select',v=>update('exitAnimation',v),exitAnimations);
+ field(host,'animation',g.animation,'select',v=>update('animation',v),animations.filter(a=>a!=='typewriter'&&a!=='draw'));field(host,'exitAnimation',g.exitAnimation,'select',v=>update('exitAnimation',v),exitAnimations);
  field(host,'elementEndEnabled',g.until!==null,'checkbox',v=>{if(v&&g.at>=current().duration)return;update('until',v?current().duration:null);renderForms();});if(g.until!==null)field(host,'until',g.until,'number',v=>update('until',v),undefined,g.at+.001,current().duration);
  comicPoint(host,t('groupPivot'),g.pivot,p=>update('pivot',p),-1000,1000);
  motionPathFields(host,groupController(g),next=>update('motionPath',next));
@@ -545,7 +545,7 @@ function renderForms(){
  }
  if(e.type==='shape')gradientFields(ef,'fillGradient',e.fillGradient,e.fillColor,v=>updateElement('fillGradient',v));
  for(const [key,min,max] of [['x',-100,100],['y',-100,100],['width',0.1,200],['height',0.1,200],['opacity',0,1],['rotation',-360,360],['radius',0,1000]] as const)field(ef,key,e[key],'number',v=>updateElement(key,v),undefined,min,max);
- field(ef,'animation',e.animation,'select',v=>updateElement('animation',v),animations);field(ef,'at',e.at,'number',v=>updateElement('at',v),undefined,0,s.duration);field(ef,'animationDuration',e.animationDuration,'number',v=>updateElement('animationDuration',v),undefined,0.01,3600);
+ field(ef,'animation',e.animation,'select',v=>updateElement('animation',v),animations.filter(a=>a!=='draw'||e.type==='shape'));field(ef,'at',e.at,'number',v=>updateElement('at',v),undefined,0,s.duration);field(ef,'animationDuration',e.animationDuration,'number',v=>updateElement('animationDuration',v),undefined,0.01,3600);
  field(ef,'elementEndEnabled',e.until!==null,'checkbox',v=>{updateElement('until',v?s.duration:null);renderForms();});
  field(ef,'until',e.until??s.duration,'number',v=>updateElement('until',v),undefined,0,s.duration);
  const endInput=ef.querySelector<HTMLInputElement>('[name=until]')!;endInput.disabled=e.until===null;endInput.closest('label')?.querySelectorAll('button').forEach(b=>b.disabled=e.until===null);
@@ -787,6 +787,7 @@ function updateSceneViews(sceneViews:SceneView[],local:number,opacity=1,cameraEn
   const effectiveScene={...scene,camera:cameraEnabled?(cameraOverride===undefined?scene.camera:cameraOverride):null};
   const state=sceneElementState(element,effectiveScene,local,formats[project.format][0],formats[project.format][1],true);
   if(video&&element.video)syncVideo(video,element.video,project.videos[element.video.asset].duration,local-element.at,playing&&!preparingPlayback&&!countdownTimer&&state.visible&&video.dataset.outgoing!=='true',state.visible&&opacity>0&&video.dataset.outgoing!=='true');
+  if(element.type==='shape')updateShapeDrawing(node,element,local);
   if(state.visible){simulation?.draw(local-element.at);seekSvg(svg,local-element.at);}
   node.style.opacity=String(state.opacity*opacity);node.style.visibility=state.visible?'visible':'hidden';node.style.transform=state.transform;node.style.transformOrigin='0 0';
   if(text&&text.dataset.visibleText!==state.text){renderRuns(text,element,state.text);text.dataset.visibleText=state.text;}

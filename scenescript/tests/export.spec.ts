@@ -198,3 +198,25 @@ test('AAC video audio is identical across adjacent one-second export chunks',asy
  });
  test.skip(result===null,'H.264 encoder unavailable');expect(result!.peak).toBeGreaterThan(.1);expect(result!.maxError).toBeLessThan(1e-6);
 });
+
+test('line drawing exports distinct start, partial and completed frames for every shape',async({page})=>{
+ await page.goto('/en/');const p=demoProject();p.scenes=p.scenes.slice(0,1);p.scenes[0].transition='none';p.scenes[0].background='#000000';
+ const e=newElement('shape');Object.assign(e,{x:10,y:10,width:80,height:80,fillColor:'#00ff00',borderColor:'#ffffff',borderWidth:12,animation:'draw',animationDuration:2});p.scenes[0].elements=[e];
+ const result=await page.evaluate(async(p)=>{
+  const {ExportMedia}=await import(/* @vite-ignore */ '/src/scripts/export-media.ts' as string);const {ExportRenderer}=await import(/* @vite-ignore */ '/src/scripts/export-renderer.ts' as string);
+  const results=[];
+  for(const type of ['rectangle','ellipse','triangle','diamond','star','arrow'] as const){
+   p.scenes[0].elements[0].shapeType=type;
+   const media=new ExportMedia(p,new AbortController().signal),renderer=new ExportRenderer(p,media);
+   try{
+    const counts=[];
+    for(const t of [0,.8,2]){
+     const canvas=await renderer.frame(t,480,270),data=canvas.getContext('2d')!.getImageData(0,0,480,270).data;let lit=0;
+     for(let i=0;i<data.length;i+=4)if(data[i]+data[i+1]+data[i+2]>100)lit++;
+     counts.push(lit);
+    }results.push(counts);
+   }finally{renderer.dispose();media.dispose();}
+  }return results;
+ },p);
+ for(const [start,partial,end] of result){expect(start).toBeLessThan(10);expect(partial).toBeGreaterThan(50);expect(end).toBeGreaterThan(partial*2);}
+});

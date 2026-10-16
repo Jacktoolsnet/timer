@@ -245,6 +245,7 @@
                     "slide-up",
                     "zoom",
                     "typewriter",
+                    "draw",
                     "pan"
                   ],
                   "default": "fade"

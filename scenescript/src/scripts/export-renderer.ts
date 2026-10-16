@@ -8,7 +8,7 @@ import {formats,locateTime,sceneTransitionState,type Project,type Scene} from '.
 import {gradientCSS} from '../lib/gradient';
 import {videoTime,type VideoSettings} from '../lib/video';
 import {createSimulation} from './simulation';
-import {renderShape} from './shapes';
+import {renderShape,updateShapeDrawing} from './shapes';
 import {renderRuns} from './rich-text';
 import {createSvgImage,seekSvg} from './svg-image';
 import type {ExportMedia} from './export-media';
@@ -27,7 +27,7 @@ export class ExportRenderer{
  Object.assign(node.style,{position:'absolute',left:e.x*this.w/100+'px',top:e.y*this.h/100+'px',width:w+'px',height:h+'px',overflow:'hidden',boxSizing:'border-box',display:'flex',alignItems:'center',whiteSpace:'pre-wrap',fontFamily:e.font,fontSize:e.fontSize+'px',fontWeight:e.bold?'700':'400',fontStyle:e.italic?'italic':'normal',color:e.color,textAlign:e.align,justifyContent:e.align==='left'?'flex-start':e.align==='right'?'flex-end':'center',borderRadius:e.radius+'px',opacity:String(state.opacity*fade),transform:state.transform,transformOrigin:'0 0'});layer.append(node);
  if(e.type==='bubble'){createBubble(node,e,w,h,this.w,this.h).update(s,local,state.text);}
  else if(e.type==='text'){const text=document.createElement('span');text.style.width='100%';renderRuns(text,e,state.text);node.append(text);}
- else if(e.type==='shape')renderShape(node,e,w,h);
+ else if(e.type==='shape'){renderShape(node,e,w,h);updateShapeDrawing(node,e,local);}
  else if(e.type==='simulation'&&e.simulation)this.simulation(e.simulation,w,h,local-e.at,node,8000000/Math.max(1,s.elements.filter(e=>e.type==='simulation').length));
  else if(e.type==='video'&&e.video)await this.video(e.video,local-e.at,node);
  else if(e.asset)seekSvg(await this.image(e.asset,e.fit,node,e.type==='image'?e.crop:null),local-e.at);
