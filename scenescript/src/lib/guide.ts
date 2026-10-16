@@ -382,6 +382,21 @@ Optional fields and their defaults:
 - width: 80 (40 for bubble); height: 30 (24 for bubble); each 0.1–200, percentages of canvas width/height.
 - color: "#ffffff" for text/image/video/simulation, "#b86445" for shape, "#222222" for bubble; #RRGGBB color.
 - font: "Arial"; allowed ${fonts.map(f=>`"${f}"`).join(', ')}.
+- exposure: optional object; omitted defaults to
+  {"enabled":false,"mode":"screen","strength":0.65}.
+  Double exposure blends the element with lower elements/background in the same
+  scene, not the page or another scene. Later elements paint above earlier ones.
+  enabled must be boolean; mode is "screen", "multiply", "overlay", "soft-light"
+  or "lighten"; strength is 0–1 and multiplies existing element opacity/fades.
+  Enabled strength 0 makes this element invisible; 1 uses its full existing opacity.
+  Disabled means normal rendering (strength ignored). Explicit null and unknown
+  fields are rejected; omitted subfields use defaults. Supported on all element
+  types, not groups. Combinable with liquid, line drawing and particle exits.
+  Place a second photo above a first photo; use screen for bright/dreamy exposure
+  (black becomes neutral) or multiply for darker ink-like combinations (white
+  becomes neutral). Overlay and soft-light add contrast; lighten keeps brighter
+  channels. This is layer blending, not an automatic silhouette cutout/mask.
+  Example: "exposure":{"enabled":true,"mode":"screen","strength":0.7}.
 - liquid: optional object; omitted defaults to
   {"enabled":false,"style":"water","strength":24,"wavelength":120,"speed":1}.
   All element types support it; not a group setting. Explicit null and unknown

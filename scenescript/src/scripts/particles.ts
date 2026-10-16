@@ -27,7 +27,7 @@ export function updateParticles(node:HTMLElement,e:Element,time:number,duration:
   const tile=document.createElement('div');
   Object.assign(tile.style,{position:'absolute',left:x+'px',top:y+'px',width:width/8+'px',height:height/6+'px',overflow:'hidden'});
   const copy=node.cloneNode(true) as HTMLElement;copy.classList.remove('selected');copy.removeAttribute('data-element-id');copy.removeAttribute('data-space');
-  Object.assign(copy.style,{left:-x+'px',top:-y+'px',transform:'none',transformOrigin:'0 0',opacity:'1',visibility:'visible',pointerEvents:'none',outline:'none'});
+  Object.assign(copy.style,{left:-x+'px',top:-y+'px',transform:'none',transformOrigin:'0 0',opacity:'1',mixBlendMode:'normal',visibility:'visible',pointerEvents:'none',outline:'none'});
   // Remap internal SVG paint/mask references without changing image data or text.
   const ids=new Map<string,string>();
   copy.querySelectorAll('[id]').forEach(n=>{const id=n.id,next='particle-'+crypto.randomUUID();ids.set(id,next);n.id=next;});

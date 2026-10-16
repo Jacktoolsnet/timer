@@ -1,3 +1,4 @@
+import {exposureCSS,exposureModes} from '../lib/exposure';
 import {updateLiquid} from './liquid';
 import {isParticleExit} from '../lib/particles';
 import {updateParticles} from './particles';
@@ -285,7 +286,7 @@ function field(form:HTMLElement,key:string,value:string|number|boolean,kind:stri
   number.addEventListener('wheel',()=>number.blur(),{passive:true});
   if(eagerNumber)number.addEventListener('change',()=>{if(number.isConnected&&number.checkValidity()&&Number.isFinite(number.valueAsNumber))action(number.valueAsNumber);});
   const wrapper=document.createElement('span');wrapper.className='number-stepper';
-  const step=['audioVolume','opacity','stopOpacity','backgroundOpacity','simulationOpacity','volume','sustain','reverb','velocity','gain','echoMix','echoFeedback','shadowOpacity'].includes(key)?0.05:['cameraAt','cameraHold','audioAt','audioStart','audioEnd','audioFadeIn','audioFadeOut','pathPause','pathStart','pathDuration','duration','transitionDuration','animationDuration','exitDuration','until','bubbleLineHeight','bubbleCurve','at','simulationSpeed','liquidSpeed','attack','decay','release','fadeIn','fadeOut','echoDelay','ratio'].includes(key)?0.1:1;
+  const step=['audioVolume','opacity','stopOpacity','backgroundOpacity','simulationOpacity','volume','sustain','reverb','velocity','gain','echoMix','echoFeedback','shadowOpacity','exposureStrength'].includes(key)?0.05:['cameraAt','cameraHold','audioAt','audioStart','audioEnd','audioFadeIn','audioFadeOut','pathPause','pathStart','pathDuration','duration','transitionDuration','animationDuration','exitDuration','until','bubbleLineHeight','bubbleCurve','at','simulationSpeed','liquidSpeed','attack','decay','release','fadeIn','fadeOut','echoDelay','ratio'].includes(key)?0.1:1;
   const controls=[-1,1].map(direction=>{
    const control=button(direction<0?'−':'+',()=>{
     if(!Number.isFinite(number.valueAsNumber))return;
@@ -298,7 +299,7 @@ function field(form:HTMLElement,key:string,value:string|number|boolean,kind:stri
   function sync(){controls[0].disabled=min!==undefined&&number.valueAsNumber<=min;controls[1].disabled=max!==undefined&&number.valueAsNumber>=max;}
   number.addEventListener('input',sync);number.addEventListener('change',sync);sync();
   wrapper.append(controls[0],number,controls[1]);label.append(wrapper);
- }else if(kind==='checkbox'&&['cameraEnabled','cameraOverview','cameraFrameOverview','liquidEnabled','bold','italic','underline','strikethrough','backgroundEnabled','musicEnabled','loop','muted','audioMuted','audioDucking','pathOrient','pathClockwise','elementEndEnabled','bubbleBaseAuto'].includes(key)){
+ }else if(kind==='checkbox'&&['cameraEnabled','cameraOverview','cameraFrameOverview','liquidEnabled','exposureEnabled','bold','italic','underline','strikethrough','backgroundEnabled','musicEnabled','loop','muted','audioMuted','audioDucking','pathOrient','pathClockwise','elementEndEnabled','bubbleBaseAuto'].includes(key)){
   label.classList.add('text-style-toggle');
   const wrapper=document.createElement('span');wrapper.className='safe-switch';
   input.setAttribute('role','switch');input.setAttribute('aria-label',t(key));
@@ -547,6 +548,14 @@ function renderForms(){
   gradientFields(group,'textGradient',e.textGradient,e.color,value=>{updateElement('textGradient',value);richEditor?.editor.querySelectorAll<HTMLElement>('[data-style]').forEach(node=>styleTextGradient(node,e.textGradient));});
  }
  if(e.type==='shape')gradientFields(ef,'fillGradient',e.fillGradient,e.fillColor,v=>updateElement('fillGradient',v));
+ const exposureGroup=document.createElement('fieldset');exposureGroup.className='text-settings-group';
+ const exposureLegend=document.createElement('legend');exposureLegend.textContent=t('exposure');exposureGroup.append(exposureLegend);ef.append(exposureGroup);
+ const exposureHint=document.createElement('p');exposureHint.className='small-hint';exposureHint.textContent=t('exposureHint');exposureGroup.append(exposureHint);
+ field(exposureGroup,'exposureEnabled',e.exposure.enabled,'checkbox',v=>{updateElement('exposure',{...e.exposure,enabled:v});renderForms();});
+ if(e.exposure.enabled){
+  field(exposureGroup,'exposureMode',e.exposure.mode,'select',v=>updateElement('exposure',{...e.exposure,mode:v}),exposureModes);
+  field(exposureGroup,'exposureStrength',e.exposure.strength,'number',v=>updateElement('exposure',{...e.exposure,strength:v}),undefined,0,1);
+ }
  const liquidGroup=document.createElement('fieldset');liquidGroup.className='text-settings-group';
  const liquidLegend=document.createElement('legend');liquidLegend.textContent=t('liquid');liquidGroup.append(liquidLegend);ef.append(liquidGroup);
  field(liquidGroup,'liquidEnabled',e.liquid.enabled,'checkbox',v=>{updateElement('liquid',{...e.liquid,enabled:v});renderForms();});
@@ -767,7 +776,7 @@ let transitionBlack:HTMLDivElement|undefined;
 let stageKey='',views:SceneView[]=[],incomingLayer:HTMLDivElement|undefined,incomingWorld:HTMLDivElement|undefined,incomingSvgBackground:SVGSVGElement|undefined,outgoingLayer:HTMLDivElement|undefined;
 function createSceneLayer(scene:Scene,index:number,interactive:boolean,forceWorld=false){
  const backgroundOpacity=scene.backgroundEnabled?scene.backgroundOpacity:0;
- const viewport=document.createElement('div');viewport.className='scene-layer';viewport.dataset.sceneIndex=String(index);const layer=document.createElement('div');layer.className='scene-camera-world';viewport.append(layer);layer.style.background=backgroundOpacity===1?gradientCSS(scene.backgroundGradient,scene.background):'transparent';if(!scene.camera&&!forceWorld){viewport.style.background=layer.style.background;layer.style.background='transparent';}
+ const viewport=document.createElement('div');viewport.style.isolation='isolate';viewport.className='scene-layer';viewport.dataset.sceneIndex=String(index);const layer=document.createElement('div');layer.className='scene-camera-world';viewport.append(layer);layer.style.background=backgroundOpacity===1?gradientCSS(scene.backgroundGradient,scene.background):'transparent';if(!scene.camera&&!forceWorld&&!scene.elements.some(e=>e.exposure.enabled)){viewport.style.background=layer.style.background;layer.style.background='transparent';}
  let backgroundHost:HTMLElement=layer;
  if(backgroundOpacity<1){const backdrop=document.createElement('div');backdrop.className='scene-backdrop';backdrop.style.background=gradientCSS(scene.backgroundGradient,scene.background);backdrop.style.opacity=String(backgroundOpacity);layer.append(backdrop);backgroundHost=backdrop;}
  if(!interactive)layer.style.pointerEvents='none';
@@ -801,7 +810,7 @@ function updateSceneViews(sceneViews:SceneView[],local:number,opacity=1,cameraEn
   if(video&&element.video)syncVideo(video,element.video,project.videos[element.video.asset].duration,local-element.at,playing&&!preparingPlayback&&!countdownTimer&&state.visible&&video.dataset.outgoing!=='true',state.visible&&opacity>0&&video.dataset.outgoing!=='true');
   if(element.type==='shape')updateShapeDrawing(node,element,local);
   if(state.visible){simulation?.draw(local-element.at);seekSvg(svg,local-element.at);}
-  node.style.opacity=String(state.opacity*opacity);node.style.visibility=state.visible?'visible':'hidden';node.style.transform=state.transform;node.style.transformOrigin='0 0';
+  Object.assign(node.style,exposureCSS(element.exposure,state.opacity*opacity));node.style.visibility=state.visible?'visible':'hidden';node.style.transform=state.transform;node.style.transformOrigin='0 0';
   if(text&&text.dataset.visibleText!==state.text){renderRuns(text,element,state.text);text.dataset.visibleText=state.text;}
   bubble?.update(effectiveScene,local,state.text,!playing&&!recording&&(element.id===selectedId||scene.groups.some(g=>g.id===selectedGroupId&&g.members.includes(element.id))));
   const [pw,ph]=formats[project.format];updateLiquid(node,element,local,element.width*pw/100,element.height*ph/100);updateParticles(node,element,local,scene.duration,element.width*pw/100,element.height*ph/100);

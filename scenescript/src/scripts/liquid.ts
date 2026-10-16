@@ -22,7 +22,7 @@ export function updateLiquid(node:HTMLElement,e:Element,time:number,width:number
   foreign.setAttribute('width',String(width));foreign.setAttribute('height',String(height));foreign.setAttribute('filter',`url(#${id})`);
   // Preserve the original clipping, shape fill/border and flex text layout inside the filter.
   content.style.cssText=originalStyle;
-  Object.assign(content.style,{position:'relative',left:'0',top:'0',width:'100%',height:'100%',transform:'none',transformOrigin:'0 0',opacity:'1',visibility:'visible',pointerEvents:'auto',outline:'none',display:computed.display,alignItems:computed.alignItems,justifyContent:computed.justifyContent,whiteSpace:computed.whiteSpace,boxSizing:computed.boxSizing,overflow:computed.overflow});
+  Object.assign(content.style,{position:'relative',left:'0',top:'0',width:'100%',height:'100%',transform:'none',transformOrigin:'0 0',opacity:'1',mixBlendMode:'normal',visibility:'visible',pointerEvents:'auto',outline:'none',display:computed.display,alignItems:computed.alignItems,justifyContent:computed.justifyContent,whiteSpace:computed.whiteSpace,boxSizing:computed.boxSizing,overflow:computed.overflow});
   content.append(...Array.from(node.childNodes));foreign.append(content);svg.append(defs,foreign);
   svg.classList.add('liquid-svg');svg.setAttribute('viewBox',`0 0 ${width} ${height}`);svg.setAttribute('aria-hidden','true');
   Object.assign(svg.style,{position:'absolute',inset:'0',width:'100%',height:'100%',overflow:'visible',display:'block',flexShrink:'0',pointerEvents:'none'});

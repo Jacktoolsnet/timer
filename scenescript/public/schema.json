@@ -503,6 +503,16 @@
                   "default": "scene",
                   "description": "Scene follows the camera; screen stays in the viewport. All members of a flat group must use the same space (runtime constraint). Null is rejected."
                 },
+                "exposure": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "Double exposure with lower layers/background in this scene. Omitted: disabled defaults. Contribution multiplies existing element opacity; 0 hides the enabled exposure, 1 uses full opacity. No automatic silhouette masking.",
+                  "properties": {
+                    "enabled": {"type": "boolean", "default": false},
+                    "mode": {"enum": ["screen", "multiply", "overlay", "soft-light", "lighten"], "default": "screen"},
+                    "strength": {"type": "number", "minimum": 0, "maximum": 1, "default": 0.65}
+                  }
+                },
                 "liquid": {
                   "type": "object",
                   "additionalProperties": false,

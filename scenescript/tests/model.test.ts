@@ -1,3 +1,4 @@
+import {defaultExposure,exposureCSS,exposureModes} from '../src/lib/exposure.ts';
 import {defaultLiquid,liquidState} from '../src/lib/liquid.ts';
 import {particleProgress,fragmentState} from '../src/lib/particles.ts';
 import {applyTextPreset,textPresets} from '../src/lib/text-presets.ts';
@@ -254,4 +255,21 @@ test('liquid motion is timeline-driven, freezes at speed zero and disables clean
  assert.deepEqual(liquidState({...e,speed:0},1),liquidState({...e,speed:0},100));
  assert.equal(liquidState({...e,enabled:false},1).strength,0);
  assert.equal(liquidState({...e,strength:0},1).strength,0);
+});
+
+test('double exposure validates strictly and preserves legacy rendering',()=>{
+ const p=demoProject(),e=p.scenes[0].elements[0];e.exposure={enabled:true,mode:'screen',strength:.7};
+ assert.deepEqual(parseProject(serialize(p)).scenes[0].elements[0].exposure,e.exposure);
+ const legacy=JSON.parse(serialize(p));delete legacy.scenes[0].elements[0].exposure;
+ assert.deepEqual(parseProject(serialize(legacy)).scenes[0].elements[0].exposure,defaultExposure());
+ for(const value of [null,[],42,{enabled:'yes'},{mode:'unknown'},{strength:-.1},{strength:1.1},{strength:null},{unknown:1}]){
+  const invalid=JSON.parse(serialize(p));invalid.scenes[0].elements[0].exposure=value;
+  assert.throws(()=>parseProject(serialize(invalid)),/exposure/);
+ }
+ for(const mode of exposureModes){e.exposure.mode=mode;assert.equal(parseProject(serialize(p)).scenes[0].elements[0].exposure.mode,mode);}
+ const partial=JSON.parse(serialize(p));partial.scenes[0].elements[0].exposure={enabled:true};
+ assert.equal(parseProject(serialize(partial)).scenes[0].elements[0].exposure.strength,.65);
+ assert.deepEqual(exposureCSS({enabled:true,mode:'multiply',strength:.5},.4),{mixBlendMode:'multiply',opacity:'0.2'});
+ assert.deepEqual(exposureCSS({enabled:false,mode:'multiply',strength:0},.4),{mixBlendMode:'normal',opacity:'0.4'});
+ assert.equal(exposureCSS({enabled:true,mode:'screen',strength:0},1).opacity,'0');
 });
