@@ -382,6 +382,25 @@ Optional fields and their defaults:
 - width: 80 (40 for bubble); height: 30 (24 for bubble); each 0.1–200, percentages of canvas width/height.
 - color: "#ffffff" for text/image/video/simulation, "#b86445" for shape, "#222222" for bubble; #RRGGBB color.
 - font: "Arial"; allowed ${fonts.map(f=>`"${f}"`).join(', ')}.
+- paper: optional object; omitted defaults to
+  {"enabled":false,"edge":"torn","color":"#f4ecd8","padding":16,
+   "roughness":8,"texture":0.18,"shadow":12,"seed":17}.
+  Collage / paper look for text, image and shape elements only when enabled.
+  Not a group effect. Explicit null/unknown fields are rejected; omitted fields
+  use defaults. enabled is boolean; edge is "torn", "cut" or "straight";
+  color is #RRGGBB; padding 0–100, roughness 0–40 and shadow 0–40 are project
+  pixels; texture is 0–1; seed is an integer 0–65535.
+  The paper sheet occupies the existing element bounds. Padding scales the
+  original content down inside that sheet (no text reflow); clamped for tiny
+  elements. Roughness clips inward, never beyond the element bounds. Straight
+  edges or roughness 0 give a rectangle. Grain overlays both paper and content;
+  texture 0 disables grain. Shadow 0 disables the outside drop shadow.
+  Seeded edges/grain stay identical when scrubbing/exporting; no external
+  texture assets needed. Duplicate/overlap/rotate elements for stacked collage
+  pieces using the existing x/y/rotation and layer order. Combinable with
+  line drawing, liquid, double exposure and particle exits. Does not change
+  layout geometry or camera targets.
+  Example: "paper":{"enabled":true,"edge":"torn","padding":20,"roughness":10}.
 - exposure: optional object; omitted defaults to
   {"enabled":false,"mode":"screen","strength":0.65}.
   Double exposure blends the element with lower elements/background in the same

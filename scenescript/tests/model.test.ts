@@ -1,3 +1,4 @@
+import {defaultPaper,paperPolygon,paperInset,paperGrain} from '../src/lib/paper.ts';
 import {defaultExposure,exposureCSS,exposureModes} from '../src/lib/exposure.ts';
 import {defaultLiquid,liquidState} from '../src/lib/liquid.ts';
 import {particleProgress,fragmentState} from '../src/lib/particles.ts';
@@ -272,4 +273,31 @@ test('double exposure validates strictly and preserves legacy rendering',()=>{
  assert.deepEqual(exposureCSS({enabled:true,mode:'multiply',strength:.5},.4),{mixBlendMode:'multiply',opacity:'0.2'});
  assert.deepEqual(exposureCSS({enabled:false,mode:'multiply',strength:0},.4),{mixBlendMode:'normal',opacity:'0.4'});
  assert.equal(exposureCSS({enabled:true,mode:'screen',strength:0},1).opacity,'0');
+});
+
+test('paper collage defaults, strict validation and supported element types',()=>{
+ const p=demoProject(),e=p.scenes[0].elements[0];e.paper={...defaultPaper(),enabled:true,edge:'cut',seed:123};
+ assert.deepEqual(parseProject(serialize(p)).scenes[0].elements[0].paper,e.paper);
+ const legacy=JSON.parse(serialize(p));delete legacy.scenes[0].elements[0].paper;
+ assert.deepEqual(parseProject(serialize(legacy)).scenes[0].elements[0].paper,defaultPaper());
+ for(const value of [null,[],42,{enabled:'yes'},{edge:'bad'},{color:'red'},{padding:-1},{padding:101},{roughness:41},{texture:1.1},{shadow:41},{seed:1.5},{seed:65536},{seed:null},{unknown:1}]){
+  const invalid=JSON.parse(serialize(p));invalid.scenes[0].elements[0].paper=value;assert.throws(()=>parseProject(serialize(invalid)),/paper/);
+ }
+ for(const type of ['bubble','video','simulation'] as const){
+  const invalid=demoProject(),element=newElement(type);element.paper.enabled=true;invalid.scenes[0].elements=[element];assert.throws(()=>parseProject(serialize(invalid)),/paper/);
+ }
+ for(const type of ['text','image','shape'] as const){e.type=type;assert.equal(parseProject(serialize(p)).scenes[0].elements[0].paper.enabled,true);}
+});
+
+test('paper edge and grain are seeded, bounded and stable for small elements',()=>{
+ const p={...defaultPaper(),enabled:true};
+ assert.equal(paperPolygon(p,800,400),paperPolygon(p,800,400));
+ assert.notEqual(paperPolygon(p,800,400),paperPolygon({...p,seed:18},800,400));
+ assert.notEqual(paperPolygon(p,800,400),paperPolygon({...p,edge:'cut'},800,400));
+ assert.equal(paperPolygon({...p,roughness:0},800,400),'polygon(0% 0%,100% 0%,100% 100%,0% 100%)');
+ for(const size of [1,2,10,400]){
+  const coords=paperPolygon(p,size,size).match(/[0-9.]+(?=%)/g)!.map(Number);
+  assert.ok(coords.every(n=>n>=0&&n<=100));assert.ok(paperInset(p,size,size)<=Math.max(0,(size-1)/2));
+ }
+ assert.equal(paperGrain(17),paperGrain(17));assert.notEqual(paperGrain(17),paperGrain(18));
 });

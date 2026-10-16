@@ -1,3 +1,5 @@
+import {paperEdges} from '../lib/paper';
+import {renderPaper} from './paper';
 import {exposureCSS,exposureModes} from '../lib/exposure';
 import {updateLiquid} from './liquid';
 import {isParticleExit} from '../lib/particles';
@@ -271,7 +273,7 @@ function field(form:HTMLElement,key:string,value:string|number|boolean,kind:stri
  let input:HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement;
  if(kind==='select'){input=document.createElement('select');options?.forEach(option=>{const o=document.createElement('option');o.value=option;o.textContent=key==='space'?t('space-'+option):key==='exitAnimation'?t('exit-'+option):key==='bubbleSpeaker'?(option?(current().elements.find(e=>e.id===option)?.name||option):t('none')):key==='bubbleAnchor'?option:key==='audioAsset'?(option?project.audios[option].name:t('none')):key==='asset'||key==='backgroundAsset'?(option?project.assets[option].name:t('none')):t(key==='pathTemplate'&&option==='wave'?'path-wave':key==='pathType'&&option==='ellipse'?'path-ellipse':key==='pathEasing'&&option==='linear'?'path-linear':key==='pathAfter'&&option==='reset'?'path-reset':key==='style'&&option==='focus'?'musicFocus':key==='gradientType'&&option==='solid'?'gradientSolid':key==='transition'&&option!=='none'&&option!=='fade'?'transition-'+option:option);input.append(o);});input.value=String(value);}
  else if(kind==='textarea'){input=document.createElement('textarea');input.value=String(value);input.maxLength=10000;}
- else{input=document.createElement('input');input.type=kind;if(kind==='checkbox')input.checked=Boolean(value);else input.value=String(value);if(kind==='number'){input.step='any';if(min!==undefined)input.min=String(min);if(max!==undefined)input.max=String(max);}if(kind==='text')input.maxLength=200;if(['simulationCount','simulationSeed'].includes(key))input.step='1';}
+ else{input=document.createElement('input');input.type=kind;if(kind==='checkbox')input.checked=Boolean(value);else input.value=String(value);if(kind==='number'){input.step='any';if(min!==undefined)input.min=String(min);if(max!==undefined)input.max=String(max);}if(kind==='text')input.maxLength=200;if(['simulationCount','simulationSeed','paperSeed'].includes(key))input.step='1';}
  input.name=key;
  const eagerNumber=kind==='number'&&['x','y','width','height','rotation'].includes(key);
  input.addEventListener(kind==='textarea'||kind==='text'||kind==='color'||eagerNumber?'input':'change',event=>{
@@ -286,7 +288,7 @@ function field(form:HTMLElement,key:string,value:string|number|boolean,kind:stri
   number.addEventListener('wheel',()=>number.blur(),{passive:true});
   if(eagerNumber)number.addEventListener('change',()=>{if(number.isConnected&&number.checkValidity()&&Number.isFinite(number.valueAsNumber))action(number.valueAsNumber);});
   const wrapper=document.createElement('span');wrapper.className='number-stepper';
-  const step=['audioVolume','opacity','stopOpacity','backgroundOpacity','simulationOpacity','volume','sustain','reverb','velocity','gain','echoMix','echoFeedback','shadowOpacity','exposureStrength'].includes(key)?0.05:['cameraAt','cameraHold','audioAt','audioStart','audioEnd','audioFadeIn','audioFadeOut','pathPause','pathStart','pathDuration','duration','transitionDuration','animationDuration','exitDuration','until','bubbleLineHeight','bubbleCurve','at','simulationSpeed','liquidSpeed','attack','decay','release','fadeIn','fadeOut','echoDelay','ratio'].includes(key)?0.1:1;
+  const step=['audioVolume','opacity','stopOpacity','backgroundOpacity','simulationOpacity','volume','sustain','reverb','velocity','gain','echoMix','echoFeedback','shadowOpacity','exposureStrength','paperTexture'].includes(key)?0.05:['cameraAt','cameraHold','audioAt','audioStart','audioEnd','audioFadeIn','audioFadeOut','pathPause','pathStart','pathDuration','duration','transitionDuration','animationDuration','exitDuration','until','bubbleLineHeight','bubbleCurve','at','simulationSpeed','liquidSpeed','attack','decay','release','fadeIn','fadeOut','echoDelay','ratio'].includes(key)?0.1:1;
   const controls=[-1,1].map(direction=>{
    const control=button(direction<0?'−':'+',()=>{
     if(!Number.isFinite(number.valueAsNumber))return;
@@ -299,7 +301,7 @@ function field(form:HTMLElement,key:string,value:string|number|boolean,kind:stri
   function sync(){controls[0].disabled=min!==undefined&&number.valueAsNumber<=min;controls[1].disabled=max!==undefined&&number.valueAsNumber>=max;}
   number.addEventListener('input',sync);number.addEventListener('change',sync);sync();
   wrapper.append(controls[0],number,controls[1]);label.append(wrapper);
- }else if(kind==='checkbox'&&['cameraEnabled','cameraOverview','cameraFrameOverview','liquidEnabled','exposureEnabled','bold','italic','underline','strikethrough','backgroundEnabled','musicEnabled','loop','muted','audioMuted','audioDucking','pathOrient','pathClockwise','elementEndEnabled','bubbleBaseAuto'].includes(key)){
+ }else if(kind==='checkbox'&&['cameraEnabled','cameraOverview','cameraFrameOverview','liquidEnabled','exposureEnabled','paperEnabled','bold','italic','underline','strikethrough','backgroundEnabled','musicEnabled','loop','muted','audioMuted','audioDucking','pathOrient','pathClockwise','elementEndEnabled','bubbleBaseAuto'].includes(key)){
   label.classList.add('text-style-toggle');
   const wrapper=document.createElement('span');wrapper.className='safe-switch';
   input.setAttribute('role','switch');input.setAttribute('aria-label',t(key));
@@ -548,6 +550,18 @@ function renderForms(){
   gradientFields(group,'textGradient',e.textGradient,e.color,value=>{updateElement('textGradient',value);richEditor?.editor.querySelectorAll<HTMLElement>('[data-style]').forEach(node=>styleTextGradient(node,e.textGradient));});
  }
  if(e.type==='shape')gradientFields(ef,'fillGradient',e.fillGradient,e.fillColor,v=>updateElement('fillGradient',v));
+ if(['text','image','shape'].includes(e.type)){
+  const paperGroup=document.createElement('fieldset');paperGroup.className='text-settings-group';
+  const legend=document.createElement('legend');legend.textContent=t('paper');paperGroup.append(legend);ef.append(paperGroup);
+  const hint=document.createElement('p');hint.className='small-hint';hint.textContent=t('paperHint');paperGroup.append(hint);
+  field(paperGroup,'paperEnabled',e.paper.enabled,'checkbox',v=>{updateElement('paper',{...e.paper,enabled:v});renderForms();});
+  if(e.paper.enabled){
+   field(paperGroup,'paperEdge',e.paper.edge,'select',v=>updateElement('paper',{...e.paper,edge:v}),paperEdges);
+   field(paperGroup,'paperColor',e.paper.color,'color',v=>updateElement('paper',{...e.paper,color:v}));
+   for(const [key,label,min,max] of [['padding','paperPadding',0,100],['roughness','paperRoughness',0,40],['texture','paperTexture',0,1],['shadow','paperShadow',0,40],['seed','paperSeed',0,65535]] as const)
+    field(paperGroup,label,e.paper[key],'number',v=>updateElement('paper',{...e.paper,[key]:v}),undefined,min,max);
+  }
+ }
  const exposureGroup=document.createElement('fieldset');exposureGroup.className='text-settings-group';
  const exposureLegend=document.createElement('legend');exposureLegend.textContent=t('exposure');exposureGroup.append(exposureLegend);ef.append(exposureGroup);
  const exposureHint=document.createElement('p');exposureHint.className='small-hint';exposureHint.textContent=t('exposureHint');exposureGroup.append(exposureHint);
@@ -798,6 +812,7 @@ function createSceneLayer(scene:Scene,index:number,interactive:boolean,forceWorl
    else if(e.asset&&project.assets[e.asset].data.startsWith('data:image/svg+xml;')){svg=createSvgImage(project.assets[e.asset].data,e.fit);node.append(svg);}
    else if(e.asset){const img=document.createElement('img');img.src=project.assets[e.asset].data;img.alt=project.assets[e.asset].name;img.style.objectFit=e.fit;node.append(img);}
    else{node.textContent=t('image');node.style.background='#ffffff22';}
+   renderPaper(node,e,e.width*w/100,e.height*h/100);
    node.addEventListener('click',()=>{if(!interactive||playing||recording)return;selectedGroupId='';selectedId=e.id;renderForms();renderElements();draw();});
    layer.append(node);sceneViews.push({element:e,node,text,svg,simulation,video,bubble,scene});
  });

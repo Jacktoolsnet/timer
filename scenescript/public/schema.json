@@ -503,6 +503,21 @@
                   "default": "scene",
                   "description": "Scene follows the camera; screen stays in the viewport. All members of a flat group must use the same space (runtime constraint). Null is rejected."
                 },
+                "paper": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "Code-native collage paper, supported on text/image/shape when enabled. Border is inside element bounds; original content is scaled down. Unknown fields/null rejected; omitted fields use defaults.",
+                  "properties": {
+                    "enabled": {"type": "boolean", "default": false},
+                    "edge": {"enum": ["torn", "cut", "straight"], "default": "torn"},
+                    "color": {"type": "string", "pattern": "^#[0-9a-fA-F]{6}$", "default": "#f4ecd8"},
+                    "padding": {"type": "number", "minimum": 0, "maximum": 100, "default": 16},
+                    "roughness": {"type": "number", "minimum": 0, "maximum": 40, "default": 8},
+                    "texture": {"type": "number", "minimum": 0, "maximum": 1, "default": 0.18},
+                    "shadow": {"type": "number", "minimum": 0, "maximum": 40, "default": 12},
+                    "seed": {"type": "integer", "minimum": 0, "maximum": 65535, "default": 17}
+                  }
+                },
                 "exposure": {
                   "type": "object",
                   "additionalProperties": false,

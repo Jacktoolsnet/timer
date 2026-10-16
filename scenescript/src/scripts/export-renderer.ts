@@ -1,3 +1,4 @@
+import {renderPaper} from './paper';
 import {exposureCSS} from '../lib/exposure';
 import {updateLiquid} from './liquid';
 import {updateParticles} from './particles';
@@ -34,7 +35,7 @@ export class ExportRenderer{
  else if(e.type==='simulation'&&e.simulation)this.simulation(e.simulation,w,h,local-e.at,node,8000000/Math.max(1,s.elements.filter(e=>e.type==='simulation').length));
  else if(e.type==='video'&&e.video)await this.video(e.video,local-e.at,node);
  else if(e.asset)seekSvg(await this.image(e.asset,e.fit,node,e.type==='image'?e.crop:null),local-e.at);
- Object.assign(node.style,exposureCSS(e.exposure,state.opacity*fade));
+ renderPaper(node,e,w,h);Object.assign(node.style,exposureCSS(e.exposure,state.opacity*fade));
  updateLiquid(node,e,local,w,h);updateParticles(node,e,local,s.duration,w,h);
  }
  return viewport;
