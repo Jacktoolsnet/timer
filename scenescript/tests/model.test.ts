@@ -188,3 +188,13 @@ test('text presets round trip, replace old effects and preserve content and layo
  const neon=applyTextPreset(comic,'neonBlue');assert.equal(neon.textEffects.outline.enabled,false);assert.equal(neon.textEffects.shadow.enabled,false);assert.equal(neon.textGradient,null);
  const a=applyTextPreset(e,'gold'),b=applyTextPreset(e,'gold');a.textGradient!.stops[0].color='#000000';assert.notEqual(a.textGradient!.stops[0].color,b.textGradient!.stops[0].color);
 });
+
+test('first comment metadata is optional, bounded plain text and round trips',()=>{
+ const p=demoProject();p.firstComment='Your thoughts?\n<img src=x onerror=alert(1)>';
+ assert.equal(parseProject(serialize(p)).firstComment,p.firstComment);
+ const legacy=JSON.parse(serialize(p));delete legacy.firstComment;
+ assert.equal(parseProject(serialize(legacy)).firstComment,'');
+ for(const firstComment of [null,42,[],{},'x'.repeat(5001)])
+  assert.throws(()=>parseProject(serialize({...p,firstComment})),/firstComment/);
+ p.firstComment='x'.repeat(5000);assert.equal(parseProject(serialize(p)).firstComment.length,5000);
+});

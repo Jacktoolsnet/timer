@@ -169,6 +169,10 @@ Required fields:
 Optional fields:
 - description: plain-text string, maximum 5000 UTF-16 code units, default "".
   A useful upload description; line breaks are allowed. Explicit null is rejected.
+- firstComment: plain-text string, maximum 5000 UTF-16 code units, default "".
+  Suggest a useful first comment to post below the video (for example a question
+  inviting discussion). Line breaks are allowed; explicit null is rejected.
+  Publication metadata only: not rendered in scenes or posted automatically.
 - hashtags: string, maximum 2000 UTF-16 code units, default ""; explicit null is
   rejected. Author a comma-separated list, e.g. "#SceneScript, #Video" (NOT an
   array). The validator checks type/length, not hashtag syntax or comma placement.
@@ -203,7 +207,7 @@ Optional fields:
   a video-settings object as described in Embedded videos. {} gets all playback
   defaults, including asset "", and produces no video; a nonempty asset must
   resolve in videos. A reference is validated even when muted or hidden.
-Title, description and hashtags are editable publication metadata stored in
+Title, description, firstComment and hashtags are editable publication metadata stored in
 project JSON, not scene content or MP4/WebM container metadata. Each has its own
 clipboard button. For a complete video draft provide suitable values for all
 three. No automatic upload or platform-specific length/content guarantees exist.
@@ -834,7 +838,7 @@ Actual validator behavior is asymmetric:
 - Root backgroundVideo omitted OR null normalizes to null; {} remains a default
   settings object with no asset. Root music/backgroundSimulation omitted/null disable them.
 - Root thumbnail omitted/null disables it; thumbnail.name/data reject null.
-- Root description/hashtags default to "" only on omission, not on explicit null.
+- Root description/firstComment/hashtags default to "" only on omission, not on explicit null.
 - Optional scene fields use their default when omitted OR null, EXCEPT groups:
   groups defaults to [] only on omission; explicit null is rejected.
 - Scene id/elements and asset name/data do not accept null.
@@ -857,7 +861,7 @@ Actual validator behavior is asymmetric:
   anchors omitted means {}; anchors:null is rejected; coordinate fields reject null.
 - Apart from the exceptions above, other element fields reject explicit null:
   element defaults apply only to omitted fields, not explicit null.
-- Root version/title/description/hashtags/format/scenes do not accept null.
+- Root version/title/description/firstComment/hashtags/format/scenes do not accept null.
 /schema.json describes the typed authoring structure, not every normalization
 exception. Runtime validation/import is authoritative; the schema alone does
 not enforce cross-field/reference resolution (including video namespaces), global

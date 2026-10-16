@@ -659,7 +659,7 @@ test('image replacement keeps the asset ID, name, all references and element set
 
 test('publication fields save, load and copy independently with denial fallback',async({page})=>{
  await page.goto('/en/');await page.evaluate(()=>{Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async(text:string)=>{(window as any).copiedProjectText=text;}}});});
- const fields={title:'Video title',description:'First line\nSecond line',hashtags:'#Video, #SceneScript, #Ideas'};
+ const fields={title:'Video title',description:'First line\nSecond line',firstComment:'What do you think?\nShare your ideas!',hashtags:'#Video, #SceneScript, #Ideas'};
  for(const [key,value] of Object.entries(fields)){await page.locator('#project-'+key).fill(value);await page.locator('#copy-project-'+key).click();expect(await page.evaluate(()=>(window as any).copiedProjectText)).toBe(value);await expect(page.locator('.app-toast[data-kind=success]')).toHaveText('Copied.');}
  const saved=JSON.parse(await exportedJSON(page));expect(saved).toMatchObject(fields);
  await page.locator('#project-description').fill('Changed');page.on('dialog',dialog=>dialog.accept());await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(saved));await page.locator('#import-json').click();
@@ -667,7 +667,7 @@ test('publication fields save, load and copy independently with denial fallback'
  await page.evaluate(()=>{Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async()=>{throw new Error('denied');}}});});await page.locator('#copy-project-description').click();await expect(page.locator('.app-toast[data-kind=warning]')).toContainText('field is selected');
  expect(await page.locator('#project-description').evaluate((el:HTMLTextAreaElement)=>el.value.slice(el.selectionStart,el.selectionEnd))).toBe(fields.description);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();
- await page.locator('#new-project').click();await expect(page.locator('#project-description')).toHaveValue('');await expect(page.locator('#project-hashtags')).toHaveValue('');
+ await page.locator('#new-project').click();await expect(page.locator('#project-description')).toHaveValue('');await expect(page.locator('#project-hashtags')).toHaveValue('');await expect(page.locator('#project-firstComment')).toHaveValue('');
 });
 
 test('toolbar copies complete project JSON and offers manual copying on clipboard denial',async({page})=>{

@@ -733,6 +733,12 @@
       "default": "",
       "description": "Plain text video description; not rendered in scenes."
     },
+    "firstComment": {
+      "type": "string",
+      "maxLength": 5000,
+      "default": "",
+      "description": "Suggested first comment for publication; plain text with optional line breaks, not rendered in scenes."
+    },
     "hashtags": {
       "type": "string",
       "maxLength": 2000,
