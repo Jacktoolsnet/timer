@@ -503,6 +503,27 @@
                   "default": "scene",
                   "description": "Scene follows the camera; screen stays in the viewport. All members of a flat group must use the same space (runtime constraint). Null is rejected."
                 },
+                "lighting": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "Multiplicative 2D spotlight plus an alpha-shaped cast shadow. All element types, not groups. Sampled element-local clock. Strength 0 bypasses exactly. Not 3D lighting or inter-element shadow casting.",
+                  "properties": {
+                    "enabled": {"type": "boolean", "default": false},
+                    "strength": {"type": "number", "minimum": 0, "maximum": 1, "default": 0.85},
+                    "color": {"type": "string", "pattern": "^#[0-9a-fA-F]{6}$", "default": "#fff1cf"},
+                    "ambient": {"type": "number", "minimum": 0, "maximum": 1, "default": 0.3},
+                    "centerX": {"type": "number", "minimum": 0, "maximum": 100, "default": 35},
+                    "centerY": {"type": "number", "minimum": 0, "maximum": 100, "default": 25},
+                    "radius": {"type": "number", "minimum": 10, "maximum": 200, "default": 70},
+                    "angle": {"type": "number", "minimum": -180, "maximum": 180, "default": -135},
+                    "speed": {"type": "number", "minimum": -90, "maximum": 90, "default": 0},
+                    "orbit": {"type": "number", "minimum": 0, "maximum": 50, "default": 0},
+                    "shadowColor": {"type": "string", "pattern": "^#[0-9a-fA-F]{6}$", "default": "#000000"},
+                    "shadowOpacity": {"type": "number", "minimum": 0, "maximum": 1, "default": 0.45},
+                    "shadowDistance": {"type": "number", "minimum": 0, "maximum": 120, "default": 24},
+                    "shadowBlur": {"type": "number", "minimum": 0, "maximum": 60, "default": 12}
+                  }
+                },
                 "kaleidoscope": {
                   "type": "object",
                   "additionalProperties": false,

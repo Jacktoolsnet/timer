@@ -1,3 +1,4 @@
+import {updateLighting} from './lighting';
 import {updateKaleidoscope} from './kaleidoscope';
 import {updatePrint} from './print';
 import {updateGlitch} from './glitch';
@@ -294,7 +295,7 @@ function field(form:HTMLElement,key:string,value:string|number|boolean,kind:stri
   number.addEventListener('wheel',()=>number.blur(),{passive:true});
   if(eagerNumber)number.addEventListener('change',()=>{if(number.isConnected&&number.checkValidity()&&Number.isFinite(number.valueAsNumber))action(number.valueAsNumber);});
   const wrapper=document.createElement('span');wrapper.className='number-stepper';
-  const step=key==='afterimagesSpacing'?.01:['audioVolume','opacity','stopOpacity','backgroundOpacity','simulationOpacity','volume','sustain','reverb','velocity','gain','echoMix','echoFeedback','shadowOpacity','printStrength','exposureStrength','paperTexture','afterimagesOpacity'].includes(key)?0.05:['cameraAt','cameraHold','audioAt','audioStart','audioEnd','audioFadeIn','audioFadeOut','pathPause','pathStart','pathDuration','duration','transitionDuration','animationDuration','exitDuration','until','bubbleLineHeight','bubbleCurve','at','simulationSpeed','liquidSpeed','stopMotionJitter','stopMotionRotation','afterimagesSpacing','revealDelay','revealDuration','glitchRate','kaleidoscopeSpeed','kaleidoscopeZoom','attack','decay','release','fadeIn','fadeOut','echoDelay','ratio'].includes(key)?0.1:1;
+  const step=key==='afterimagesSpacing'?.01:['audioVolume','opacity','stopOpacity','backgroundOpacity','simulationOpacity','volume','sustain','reverb','velocity','gain','echoMix','echoFeedback','shadowOpacity','lightingStrength','lightingAmbient','lightingShadowOpacity','printStrength','exposureStrength','paperTexture','afterimagesOpacity'].includes(key)?0.05:['cameraAt','cameraHold','audioAt','audioStart','audioEnd','audioFadeIn','audioFadeOut','pathPause','pathStart','pathDuration','duration','transitionDuration','animationDuration','exitDuration','until','bubbleLineHeight','bubbleCurve','at','simulationSpeed','liquidSpeed','stopMotionJitter','stopMotionRotation','afterimagesSpacing','revealDelay','revealDuration','glitchRate','kaleidoscopeSpeed','kaleidoscopeZoom','lightingSpeed','attack','decay','release','fadeIn','fadeOut','echoDelay','ratio'].includes(key)?0.1:1;
   const controls=[-1,1].map(direction=>{
    const control=button(direction<0?'−':'+',()=>{
     if(!Number.isFinite(number.valueAsNumber))return;
@@ -307,7 +308,7 @@ function field(form:HTMLElement,key:string,value:string|number|boolean,kind:stri
   function sync(){controls[0].disabled=min!==undefined&&number.valueAsNumber<=min;controls[1].disabled=max!==undefined&&number.valueAsNumber>=max;}
   number.addEventListener('input',sync);number.addEventListener('change',sync);sync();
   wrapper.append(controls[0],number,controls[1]);label.append(wrapper);
- }else if(kind==='checkbox'&&['cameraEnabled','cameraOverview','cameraFrameOverview','liquidEnabled','exposureEnabled','paperEnabled','stopMotionEnabled','afterimagesEnabled','afterimagesTint','revealEnabled','glitchEnabled','printEnabled','kaleidoscopeEnabled','bold','italic','underline','strikethrough','backgroundEnabled','musicEnabled','loop','muted','audioMuted','audioDucking','pathOrient','pathClockwise','elementEndEnabled','bubbleBaseAuto'].includes(key)){
+ }else if(kind==='checkbox'&&['cameraEnabled','cameraOverview','cameraFrameOverview','liquidEnabled','exposureEnabled','paperEnabled','stopMotionEnabled','afterimagesEnabled','afterimagesTint','revealEnabled','glitchEnabled','printEnabled','kaleidoscopeEnabled','lightingEnabled','bold','italic','underline','strikethrough','backgroundEnabled','musicEnabled','loop','muted','audioMuted','audioDucking','pathOrient','pathClockwise','elementEndEnabled','bubbleBaseAuto'].includes(key)){
   label.classList.add('text-style-toggle');
   const wrapper=document.createElement('span');wrapper.className='safe-switch';
   input.setAttribute('role','switch');input.setAttribute('aria-label',t(key));
@@ -582,6 +583,15 @@ function renderForms(){
   field(kaleidoscopeGroup,'kaleidoscopeSegments',e.kaleidoscope.segments,'select',v=>updateElement('kaleidoscope',{...e.kaleidoscope,segments:Number(v)}),['4','6','8','10','12','14','16']);
   for(const [key,label,min,max] of [['rotation','kaleidoscopeRotation',-180,180],['speed','kaleidoscopeSpeed',-90,90],['zoom','kaleidoscopeZoom',.25,4],['centerX','kaleidoscopeCenterX',0,100],['centerY','kaleidoscopeCenterY',0,100]] as const)
    field(kaleidoscopeGroup,label,e.kaleidoscope[key],'number',v=>updateElement('kaleidoscope',{...e.kaleidoscope,[key]:v}),undefined,min,max);
+ }
+ const lightingGroup=document.createElement('fieldset');lightingGroup.className='text-settings-group';
+ const lightingLegend=document.createElement('legend');lightingLegend.textContent=t('lighting');lightingGroup.append(lightingLegend);ef.append(lightingGroup);
+ const lightingHint=document.createElement('p');lightingHint.className='small-hint';lightingHint.textContent=t('lightingHint');lightingGroup.append(lightingHint);
+ field(lightingGroup,'lightingEnabled',e.lighting.enabled,'checkbox',v=>{updateElement('lighting',{...e.lighting,enabled:v});renderForms();});
+ if(e.lighting.enabled){
+  for(const [key,label,min,max] of [['strength','lightingStrength',0,1],['ambient','lightingAmbient',0,1],['centerX','lightingCenterX',0,100],['centerY','lightingCenterY',0,100],['radius','lightingRadius',10,200],['angle','lightingAngle',-180,180],['speed','lightingSpeed',-90,90],['orbit','lightingOrbit',0,50],['shadowOpacity','lightingShadowOpacity',0,1],['shadowDistance','lightingShadowDistance',0,120],['shadowBlur','lightingShadowBlur',0,60]] as const)
+   field(lightingGroup,label,e.lighting[key],'number',v=>updateElement('lighting',{...e.lighting,[key]:v}),undefined,min,max);
+  for(const [key,label] of [['color','lightingColor'],['shadowColor','lightingShadowColor']] as const)field(lightingGroup,label,e.lighting[key],'color',v=>updateElement('lighting',{...e.lighting,[key]:v}));
  }
  const revealGroup=document.createElement('fieldset');revealGroup.className='text-settings-group';
  const revealLegend=document.createElement('legend');revealLegend.textContent=t('reveal');revealGroup.append(revealLegend);ef.append(revealGroup);
@@ -893,7 +903,7 @@ function updateSceneViews(sceneViews:SceneView[],local:number,opacity=1,cameraEn
   Object.assign(node.style,exposureCSS(element.exposure,state.opacity*opacity));node.style.visibility=state.visible?'visible':'hidden';node.style.transform=state.transform;node.style.transformOrigin='0 0';
   if(text&&text.dataset.visibleText!==state.text){renderRuns(text,element,state.text);text.dataset.visibleText=state.text;}
   bubble?.update(effectiveScene,local,state.text,!playing&&!recording&&(element.id===selectedId||scene.groups.some(g=>g.id===selectedGroupId&&g.members.includes(element.id))));
-  const [pw,ph]=formats[project.format];updateLiquid(node,element,state.sampleTime,element.width*pw/100,element.height*ph/100);updateGlitch(node,element,state.sampleTime,element.width*pw/100,element.height*ph/100);updatePrint(node,element,element.width*pw/100,element.height*ph/100);updateKaleidoscope(node,element,state.sampleTime,element.width*pw/100,element.height*ph/100);updateReveal(node,element,state.sampleTime,element.width*pw/100,element.height*ph/100);updateParticles(node,element,state.sampleTime,scene.duration,element.width*pw/100,element.height*ph/100);
+  const [pw,ph]=formats[project.format];updateLiquid(node,element,state.sampleTime,element.width*pw/100,element.height*ph/100);updateGlitch(node,element,state.sampleTime,element.width*pw/100,element.height*ph/100);updatePrint(node,element,element.width*pw/100,element.height*ph/100);updateKaleidoscope(node,element,state.sampleTime,element.width*pw/100,element.height*ph/100);updateLighting(node,element,state.sampleTime,element.width*pw/100,element.height*ph/100);updateReveal(node,element,state.sampleTime,element.width*pw/100,element.height*ph/100);updateParticles(node,element,state.sampleTime,scene.duration,element.width*pw/100,element.height*ph/100);
   void updateAfterimages(node,element,effectiveScene,project.assets,local,pw,ph,opacity,()=>draw(false)).catch(error=>status((error as Error).message));
  });
  const warning=document.getElementById('bubble-overflow');

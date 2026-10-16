@@ -1,3 +1,5 @@
+import {lightingShadowMargin} from '../lib/lighting';
+import {updateLighting} from './lighting';
 import {updateKaleidoscope} from './kaleidoscope';
 import {updatePrint} from './print';
 import {updateGlitch} from './glitch';
@@ -38,7 +40,7 @@ function createGhost(e:Element,assets:Record<string,Asset>,w:number,h:number,onR
   node.style.opacity=String(state.opacity*sceneOpacity*(e.exposure.enabled?e.exposure.strength:1));
   if(text&&text.dataset.visibleText!==state.text){renderRuns(text,e,state.text);text.dataset.visibleText=state.text;}
   if(e.type==='shape')updateShapeDrawing(node,e,state.sampleTime);
-  seekSvg(svg,state.sampleTime-e.at);updateLiquid(node,e,state.sampleTime,width,height);updateGlitch(node,e,state.sampleTime,width,height);updatePrint(node,e,width,height);updateKaleidoscope(node,e,state.sampleTime,width,height);updateReveal(node,e,state.sampleTime,width,height);updateParticles(node,e,state.sampleTime,scene.duration,width,height);
+  seekSvg(svg,state.sampleTime-e.at);updateLiquid(node,e,state.sampleTime,width,height);updateGlitch(node,e,state.sampleTime,width,height);updatePrint(node,e,width,height);updateKaleidoscope(node,e,state.sampleTime,width,height);updateLighting(node,e,state.sampleTime,width,height);updateReveal(node,e,state.sampleTime,width,height);updateParticles(node,e,state.sampleTime,scene.duration,width,height);
  }};
  // Cropped raster dimensions can arrive after the first update. Rebuild visual
  // effects from the latest requested historical state, never an obsolete frame.
@@ -52,7 +54,7 @@ function tintedContent(container:HTMLElement,e:Element,width:number,height:numbe
  const color=e.afterimages.color;
  // Filter only the element's local canvas, not a full-screen surface per ghost.
  // Include margins for paper shadows, liquid displacement and particle travel.
- const margin=2+(e.paper.enabled?e.paper.shadow*4:0)+(e.liquid.enabled?64:0)+(e.glitch.enabled?e.glitch.strength+e.glitch.channelShift:0)+(isParticleExit(e.exitAnimation)?1000:0);
+ const margin=2+lightingShadowMargin(e.lighting)+(e.paper.enabled?e.paper.shadow*4:0)+(e.liquid.enabled?64:0)+(e.glitch.enabled?e.glitch.strength+e.glitch.channelShift:0)+(isParticleExit(e.exitAnimation)?1000:0);
  const regionWidth=width+margin*2,regionHeight=height+margin*2;
  const ns='http://www.w3.org/2000/svg',svg=document.createElementNS(ns,'svg'),defs=document.createElementNS(ns,'defs'),filter=document.createElementNS(ns,'filter'),matrix=document.createElementNS(ns,'feColorMatrix'),foreign=document.createElementNS(ns,'foreignObject'),content=document.createElement('div');
  const id='afterimage-tint-'+crypto.randomUUID(),[r,g,b]=[1,3,5].map(i=>parseInt(color.slice(i,i+2),16)/255);

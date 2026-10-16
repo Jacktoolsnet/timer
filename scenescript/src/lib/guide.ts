@@ -1,12 +1,66 @@
-import {demoProject,formats,fonts,animations,newElement} from './model';
-import {defaultTextEffects} from './text-effects';
-import {applyTextPreset,textPresets} from './text-presets';
+import {demoProject,formats,fonts,animations,newElement} from './model.ts';
+import {defaultTextEffects} from './text-effects.ts';
+import {applyTextPreset,textPresets} from './text-presets.ts';
+
+export const artisticEffectKeys=['liquid','exposure','paper','stopMotion','afterimages','reveal','glitch','print','kaleidoscope','lighting'] as const;
+const artisticElement=newElement('shape','artistic-defaults');
+export const artisticEffectDefaults=Object.fromEntries(artisticEffectKeys.map(key=>[key,artisticElement[key]]));
+export const aiArtExample={version:'1.0',title:'Mirrored light',format:'square',scenes:[{id:'art',duration:6,transition:'none',background:'#18232b',elements:[{
+ id:'motif',type:'shape',shapeType:'star',x:15,y:15,width:70,height:70,animation:'none',
+ fillGradient:{type:'linear',angle:35,stops:[{color:'#ff546d',position:0},{color:'#ffd25a',position:45},{color:'#4ac7df',position:100}]},
+ kaleidoscope:{enabled:true,segments:8,speed:10,zoom:1.5},
+ lighting:{enabled:true,strength:.8,ambient:.3,centerX:40,centerY:30,radius:70,orbit:15,speed:12,shadowOpacity:.5}
+}]}]};
 
 // Single source for the localized AI pages, /ai/ and /ai.txt.
 export const aiGuide = `# SceneScript format 1.0
 
 Create editable animated presentations for the browser-based SceneScript editor.
 This guide describes the existing format 1.0, not proposed features.
+
+## Artistic effects — authoring quick reference
+
+All twelve artistic options below are implemented in format 1.0, not future plans:
+1. Line drawing: animation "draw" on shapes. Not bitmap-to-line tracing.
+2. Particle dissolution: exitAnimation "particles-dust", "particles-sparks" or "particles-confetti".
+3. Liquid distortion: element.liquid.
+4. Double exposure: element.exposure (blends with lower layers in the same scene).
+5. Collage / paper: element.paper (text/image/shape only).
+6. Stop motion: element.stopMotion.
+7. Afterimages: element.afterimages (text/image/shape only).
+8. Mask reveal: element.reveal.
+9. Glitch / channel shift: element.glitch.
+10. Halftone / printmaking: element.print.
+11. Kaleidoscope: element.kaleidoscope.
+12. Light and shadow: element.lighting.
+
+Place these objects on EACH element, never on the project, scene or group.
+Omission keeps them disabled. To use an object effect, explicitly set enabled:true.
+Do not invent effect, effects, morph, morphing, preset or light objects.
+These are stylized 2D effects, not automatic image morphing or a 3D scene renderer.
+Groups animate their members but have no separate artistic effect objects.
+Use a few complementary effects rather than enabling everything. Kaleidoscope,
+large shadows, many afterimages and particle exits can multiply rendering cost.
+Text glow/shadow/outline (textEffects) are separate from element.lighting;
+lighting applies to the entire processed element, not just glyphs.
+
+Processing order: source animation/line drawing → paper → liquid → glitch → print
+→ kaleidoscope → lighting → reveal → particle exits. Historical afterimages
+reconstruct their own earlier processed source; they never recursively copy trails.
+Double exposure is applied once when the element is composited over lower layers.
+Stop motion supplies sampled clocks, while visibility, video footage, camera,
+scene transitions and audio remain on their normal clocks.
+Zero is effect-specific: exposure.strength=0 hides the element; liquid.strength,
+glitch (BOTH offsets), print.strength and lighting.strength=0 bypass their effects.
+Rotation speed 0 freezes only that effect's rotation, not source animation/media.
+Particle exitDuration is clamped to the element's visible interval. See exact bounds,
+defaults and per-effect limitations under Elements below and in /schema.json.
+
+Object defaults below are generated from the same factories as the editor:
+${JSON.stringify(artisticEffectDefaults,null,2)}
+
+Complete importable example (no external assets; format 1.0):
+${JSON.stringify(aiArtExample,null,2)}
 
 ## Project background music
 
@@ -382,6 +436,35 @@ Optional fields and their defaults:
 - width: 80 (40 for bubble); height: 30 (24 for bubble); each 0.1–200, percentages of canvas width/height.
 - color: "#ffffff" for text/image/video/simulation, "#b86445" for shape, "#222222" for bubble; #RRGGBB color.
 - font: "Arial"; allowed ${fonts.map(f=>`"${f}"`).join(', ')}.
+- lighting: optional object; omitted defaults to
+  ${JSON.stringify(artisticEffectDefaults.lighting)}.
+  All element types, not groups; null/unknown fields/wrong types rejected.
+  enabled is boolean; strength and ambient are 0–1; color/shadowColor #rrggbb.
+  centerX/centerY are 0–100 percent of the element box. radius is 10–200 percent
+  of its LONGER side (a circular falloff, not an elliptical mask).
+  angle is -180–180 degrees: 0 light from right, 90 from below, -90 from above.
+  Shadow offsets point opposite that direction. speed is -90–90 degrees/second;
+  orbit is 0–50 percent of the SHORTER side, relative to the authored center.
+  angle(t)=angle+speed*max(0,sampledElementLocalTime-at), wrapped to 0–360.
+  Light center moves by orbit*cos(angle(t)), orbit*sin(angle(t)). With orbit 0,
+  speed rotates only the shadow direction; with speed 0, the light stays static.
+  shadowOpacity 0–1, shadowDistance 0–120 and shadowBlur 0–60 project pixels;
+  shadow opacity is additionally multiplied by strength. Opacity 0 removes only
+  the shadow; blur 0 is sharp. Shadows can extend beyond the element box.
+  Soft colored multiplicative light: center channel multiplier is
+  1-strength+strength*colorChannel/255; outside the radius it is
+  1-strength+strength*ambient, interpolated radially. It never brightens beyond
+  the original; black artwork stays black. Ambient 1 removes outer darkening.
+  Source alpha is restored once; transparent gaps remain transparent except for
+  the optional alpha-shaped shadow. This is an artistic 2D spotlight, NOT 3D
+  surface lighting, normal maps, occlusion or shadows cast onto other elements.
+  Strength 0 and disabled bypass exactly. Stop motion and historical afterimages
+  use their sampled clocks; no changes to layout, audio or visibility timing.
+  Pipeline: paper, liquid, glitch, print, kaleidoscope, lighting, reveal, particles.
+  Reveal masks the light AND outside shadow until completion; particle fragments
+  carry the lit artwork. Existing textEffects and paper shadows stay independent.
+  Example: "lighting":{"enabled":true,"color":"#ffe0b0","ambient":0.2,
+  "orbit":20,"speed":15,"shadowDistance":40,"shadowBlur":18}.
 - kaleidoscope: optional object; omitted defaults to
   {"enabled":false,"segments":8,"rotation":0,"speed":15,"zoom":1.5,"centerX":50,"centerY":50}.
   All element types, not groups. Unknown fields rejected. enabled is boolean;
@@ -398,7 +481,7 @@ Optional fields and their defaults:
   Stop-motion samples the clock; historical afterimages use their earlier source
   and rotation. Speed 0 does NOT freeze animations or media in the source.
   Disabled restores the original exactly. Does not change layout, audio or timing.
-  Order: paper, liquid, glitch, print, kaleidoscope, reveal, particles.
+  Order: paper, liquid, glitch, print, kaleidoscope, lighting, reveal, particles.
   At most 16 visual copies per element; many afterimages plus particles can be costly.
   Example: "kaleidoscope":{"enabled":true,"segments":12,"speed":12,"zoom":2}.
 - print: optional object; omitted defaults to
@@ -412,7 +495,7 @@ Optional fields and their defaults:
   Strength blends with the original; 0 and disabled bypass exactly.
   Screen geometry is static in element-local coordinates, with no random flicker.
   Live source animation and sampled stop-motion time still work normally.
-  Order: paper, liquid, glitch, print, kaleidoscope, reveal, particles; historical afterimages
+  Order: paper, liquid, glitch, print, kaleidoscope, lighting, reveal, particles; historical afterimages
   include their earlier printed source content. No changes to layout, audio or timing.
   Example: "print":{"enabled":true,"style":"dots","size":20,"angle":30,
   "ink":"#20182b","paper":"#ffe8bd","strength":0.85}.
@@ -430,7 +513,7 @@ Optional fields and their defaults:
   floor(max(0,time-element.at)*rate), respecting stop-motion's sampled clock.
   No global opacity/brightness toggling is introduced; prefer modest offsets
   and freeze the pattern when continuous motion is not wanted.
-  Paper/liquid are processed first, then glitch, print, kaleidoscope, reveal, particle exits.
+  Paper/liquid are processed first, then glitch, print, kaleidoscope, lighting, reveal, particle exits.
   Historical afterimages reconstruct their own earlier glitch patterns. Effects
   do not change layout geometry, anchors, audio, project length or export fps.
   Example: "glitch":{"enabled":true,"strength":20,"channelShift":8,"rate":4}.
@@ -470,7 +553,7 @@ Optional fields and their defaults:
   fade linearly: opacity*(count+1-index)/(count+1), additionally multiplied by
   historical element/group opacity and current scene fade.
   Rebuilds true historical text, shape drawing, SVG animation, liquid, paper,
-  particle exits and motionPath/stopMotion poses; no stored playback history or
+  glitch, print, kaleidoscope, lighting, reveal, particle exits and motionPath/stopMotion poses; no stored playback history or
   recursive trails. Parent/group historical poses are sampled too. Camera uses
   the current view; screen-space histories remain screen-space.
   Ghosts use normal compositing, while retaining exposure strength; the main
@@ -486,8 +569,8 @@ Optional fields and their defaults:
   seed is integer 0–65535.
   Samples element animation/motionPath and visual-effect clocks on a grid
   starting at element.at and holds each frame until the next sample. Shape
-  drawing, typewriter text, fades, simulation/SVG visuals, liquid and particle
-  exits use this clock. Start/end visibility remains exact on the real timeline;
+  drawing, typewriter text, fades, simulation/SVG visuals, liquid, glitch, kaleidoscope, lighting, reveal and
+  particle exits use this clock. Start/end visibility remains exact on the real timeline;
   the scene-end pose is evaluated exactly so exits/drawing can finish.
   Optional positional/rotational wobble is deterministic per element ID, seed and
   sampled frame (first frame has no wobble); set jitter and rotation to 0 for

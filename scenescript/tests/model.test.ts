@@ -1,3 +1,5 @@
+import {aiGuide,aiArtExample,artisticEffectDefaults,artisticEffectKeys} from '../src/lib/guide.ts';
+import {defaultLighting,parseLighting,lightingState,lightingMap,lightingShadowMargin} from '../src/lib/lighting.ts';
 import {defaultKaleidoscope,parseKaleidoscope,kaleidoscopeState} from '../src/lib/kaleidoscope.ts';
 import {defaultPrint,parsePrint,printPattern} from '../src/lib/print.ts';
 import {defaultGlitch,glitchState} from '../src/lib/glitch.ts';
@@ -460,4 +462,25 @@ test('kaleidoscope geometry is deterministic, alternating, bounded and clock-dri
  const k={...defaultKaleidoscope(),enabled:true};const a=kaleidoscopeState(k,1,400,200);assert.deepEqual(a,kaleidoscopeState(k,1,400,200));assert.equal(a.angle,15);assert.equal(a.wedges.length,8);assert.match(a.wedges[0].transform,/scale\(1.5,1.5\)/);assert.match(a.wedges[1].transform,/scale\(1.5,-1.5\)/);assert.match(a.wedges[0].transform,/translate\(200px,100px\)/);
  assert.equal(kaleidoscopeState(k,-1,400,200).angle,0);assert.equal(kaleidoscopeState({...k,speed:-15},1,400,200).angle,345);assert.equal(kaleidoscopeState(k,25,400,200).angle,15);assert.deepEqual(kaleidoscopeState({...k,speed:0},1,400,200),kaleidoscopeState({...k,speed:0},900,400,200));
  assert.notDeepEqual(a,kaleidoscopeState({...k,rotation:25,centerX:0,centerY:100,zoom:2,segments:4},1,400,200));
+});
+
+test('lighting defaults, all element types, validation and JSON round trip',()=>{
+ const p=demoProject(),e=p.scenes[0].elements[0];delete (e as any).lighting;assert.deepEqual(parseProject(serialize(p)).scenes[0].elements[0].lighting,defaultLighting());
+ for(const type of ['text','image','shape','bubble','video','simulation'] as const){assert.deepEqual(newElement(type).lighting,defaultLighting());assert.notEqual(newElement(type).lighting,newElement(type).lighting);}
+ e.lighting={...defaultLighting(),enabled:true,strength:1,ambient:0,color:'#AAbbCC',angle:90,speed:-12,orbit:20,shadowDistance:120,shadowBlur:60};assert.deepEqual(parseProject(serialize(p)).scenes[0].elements[0].lighting,e.lighting);
+ for(const value of [null,[],false,{oops:1},{enabled:1},{strength:-.1},{strength:1.1},{ambient:2},{color:'red'},{shadowColor:'#fff'},{centerX:-1},{centerY:101},{radius:0},{radius:201},{angle:181},{speed:-91},{orbit:51},{shadowOpacity:-1},{shadowDistance:121},{shadowBlur:61},{speed:'10'}]){(e as any).lighting=value;assert.throws(()=>parseProject(serialize(p)),/\.lighting/);}
+ for(const key of ['strength','ambient','centerX','centerY','radius','angle','speed','orbit','shadowOpacity','shadowDistance','shadowBlur'])assert.throws(()=>parseLighting({[key]:NaN},'lighting'),/expected number/);
+});
+test('lighting geometry and falloff are deterministic and use correct units',()=>{
+ const l={...defaultLighting(),enabled:true,centerX:50,centerY:50,angle:0,orbit:20,speed:90,shadowDistance:30};
+ const a=lightingState(l,0,400,200);assert.deepEqual(a,{angle:0,x:240,y:100,dx:-30,dy:-0});const b=lightingState(l,1,400,200);assert.ok(Math.abs(b.x-200)<1e-8);assert.equal(b.y,140);assert.ok(Math.abs(b.dx)<1e-8);assert.equal(b.dy,-30);
+ assert.deepEqual(a,lightingState(l,-1,400,200));assert.deepEqual(a,lightingState(l,4,400,200));assert.deepEqual(lightingState({...l,speed:0},1,400,200),lightingState({...l,speed:0},30,400,200));assert.equal(lightingState({...l,speed:-90},1,400,200).angle,270);
+ const map=lightingMap(l,a,400,200,10);assert.equal(map,lightingMap(l,a,400,200,10));assert.match(map,/cx="250" cy="110" r="280"/);assert.ok(map.length<1000);assert.notEqual(map,lightingMap({...l,strength:.2},a,400,200,10));
+ assert.equal(lightingShadowMargin({...l,shadowBlur:10}),60);assert.equal(lightingShadowMargin({...l,strength:0}),0);assert.equal(lightingShadowMargin({...l,shadowOpacity:0}),0);
+});
+test('AI artistic defaults match factories and schema; the complete guide example imports',()=>{
+ const schema=JSON.parse(readFileSync(new URL('../public/schema.json',import.meta.url),'utf8')).properties.scenes.items.properties.elements.items.properties;
+ const fresh=newElement('shape');for(const key of artisticEffectKeys){assert.deepEqual(artisticEffectDefaults[key],fresh[key]);assert.deepEqual(Object.keys(schema[key].properties).sort(),Object.keys(fresh[key]).sort());for(const [field,value] of Object.entries(fresh[key]))assert.deepEqual(schema[key].properties[field].default,value,key+'.'+field);assert.ok(aiGuide.includes('- '+key+': optional object'),key);}
+ assert.ok(aiGuide.includes('Light and shadow: element.lighting'));assert.ok(aiGuide.includes('kaleidoscope → lighting → reveal'));assert.ok(aiGuide.includes('firstComment'));
+ const example=parseProject(serialize(aiArtExample));assert.equal(example.scenes[0].elements[0].lighting.enabled,true);assert.equal(example.scenes[0].elements[0].kaleidoscope.enabled,true);assert.deepEqual(parseProject(serialize(example)),example);
 });
