@@ -40,3 +40,11 @@ export function dissolveGroup(s:Scene,g:Group,time:number,w:number,h:number){
  for(const e of s.elements)if(g.members.includes(e.id)){e.placement=multiplyMatrix(state.matrix,e.placement??identity);e.opacity*=state.opacity;}
  s.groups=s.groups.filter(v=>v.id!==g.id);
 }
+
+/** Historical world pose under the current camera; screen-space trails stay on screen. */
+export function sceneAfterimageState(e:Element,s:Scene,past:number,current:number,w:number,h:number){
+ const state=sceneElementState(e,s,past,w,h);
+ if(e.space!=='screen')return state;
+ const matrix=multiplyMatrix(cameraInverseMatrix(s.camera,current,w,h),sceneElementMatrix(e,s,past,w,h));
+ return {...state,transform:`matrix(${matrix.a},${matrix.b},${matrix.c},${matrix.d},${matrix.e-e.x*w/100},${matrix.f-e.y*h/100})`};
+}

@@ -382,6 +382,27 @@ Optional fields and their defaults:
 - width: 80 (40 for bubble); height: 30 (24 for bubble); each 0.1–200, percentages of canvas width/height.
 - color: "#ffffff" for text/image/video/simulation, "#b86445" for shape, "#222222" for bubble; #RRGGBB color.
 - font: "Arial"; allowed ${fonts.map(f=>`"${f}"`).join(', ')}.
+- afterimages: optional object; omitted defaults to
+  {"enabled":false,"count":4,"spacing":0.08,"opacity":0.45,
+   "tint":false,"color":"#66ccff"}.
+  For text/image/shape elements only when enabled, not groups/video/simulations/
+  bubbles. Explicit null/unknown fields rejected; omitted subfields use defaults.
+  enabled/tint are booleans, count is integer 1–8, spacing is 0.01–1 seconds,
+  opacity 0–1, color #RRGGBB. Historical times are current sampled element time
+  minus index*spacing, drawn oldest first immediately behind that element.
+  No samples before element.at; trails end with current element/group visibility
+  or the scene, do not extend duration and do not cross scenes. Older ghosts
+  fade linearly: opacity*(count+1-index)/(count+1), additionally multiplied by
+  historical element/group opacity and current scene fade.
+  Rebuilds true historical text, shape drawing, SVG animation, liquid, paper,
+  particle exits and motionPath/stopMotion poses; no stored playback history or
+  recursive trails. Parent/group historical poses are sampled too. Camera uses
+  the current view; screen-space histories remain screen-space.
+  Ghosts use normal compositing, while retaining exposure strength; the main
+  element keeps its configured double-exposure mode. Tint recolors ghost RGB
+  while preserving alpha. With no motion ghosts can overlap at the same position.
+  Example: "afterimages":{"enabled":true,"count":5,"spacing":0.12,
+  "opacity":0.5,"tint":true,"color":"#66ccff"}.
 - stopMotion: optional object; omitted defaults to
   {"enabled":false,"fps":12,"jitter":1.5,"rotation":0.35,"seed":17}.
   Supported on all element types, not groups. Omitted fields use defaults;

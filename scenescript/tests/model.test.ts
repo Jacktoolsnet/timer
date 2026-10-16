@@ -1,3 +1,6 @@
+import {defaultAfterimages,afterimageSamples} from '../src/lib/afterimages.ts';
+import {sceneAfterimageState} from '../src/lib/groups.ts';
+import {cameraMatrix} from '../src/lib/camera.ts';
 import {defaultStopMotion,stopMotionState} from '../src/lib/stop-motion.ts';
 import {elementMatrix,bubbleTarget} from '../src/lib/comic.ts';
 import {defaultPaper,paperPolygon,paperInset,paperGrain} from '../src/lib/paper.ts';
@@ -340,4 +343,37 @@ test('stop-motion matrices and bubble anchors follow the same held pose',()=>{
  assert.notDeepEqual(elementMatrix(e,.3,1920,1080,5),elementMatrix(e,.5,1920,1080,5));
  assert.deepEqual(bubbleTarget(bubble,s,.3,1920,1080),bubbleTarget(bubble,s,.4,1920,1080));
  assert.notDeepEqual(bubbleTarget(bubble,s,.3,1920,1080),bubbleTarget(bubble,s,.5,1920,1080));
+});
+
+test('afterimage settings are optional, bounded and restricted to static element types',()=>{
+ const p=demoProject(),e=p.scenes[0].elements[0];e.afterimages={...defaultAfterimages(),enabled:true,count:3,tint:true};
+ assert.deepEqual(parseProject(serialize(p)).scenes[0].elements[0].afterimages,e.afterimages);
+ const legacy=JSON.parse(serialize(p));delete legacy.scenes[0].elements[0].afterimages;
+ assert.deepEqual(parseProject(serialize(legacy)).scenes[0].elements[0].afterimages,defaultAfterimages());
+ for(const value of [null,[],42,{enabled:'yes'},{tint:1},{count:0},{count:9},{count:1.5},{spacing:0},{spacing:1.1},{opacity:-1},{opacity:1.1},{color:'red'},{unknown:1}]){
+  const invalid=JSON.parse(serialize(p));invalid.scenes[0].elements[0].afterimages=value;assert.throws(()=>parseProject(serialize(invalid)),/afterimages/);
+ }
+ for(const type of ['bubble','video','simulation'] as const){
+  const invalid=demoProject(),element=newElement(type);element.afterimages.enabled=true;invalid.scenes[0].elements=[element];assert.throws(()=>parseProject(serialize(invalid)),/afterimages/);
+ }
+});
+
+test('afterimages are ordered oldest first, fade with age and never outlive visibility',()=>{
+ const a={...defaultAfterimages(),enabled:true,count:3,spacing:.2,opacity:1};
+ const samples=afterimageSamples(a,1,0,5);assert.deepEqual(samples.map(s=>s.index),[3,2,1]);
+ assert.deepEqual(samples.map(s=>s.opacity),[.25,.5,.75]);assert.ok(samples[0].time<samples[1].time);
+ assert.deepEqual(afterimageSamples(a,1,0,5),samples);
+ assert.deepEqual(afterimageSamples(a,0,0,5),[]);assert.deepEqual(afterimageSamples(a,5,0,5),[]);
+ assert.equal(afterimageSamples(a,.3,0,5).length,1);
+ assert.deepEqual(afterimageSamples({...a,opacity:0},1,0,5),[]);
+});
+
+test('screen-space afterimages compensate the current rather than historical camera',()=>{
+ const p=demoProject(),s=p.scenes[0],e=newElement('shape');e.space='screen';e.animation='none';s.elements=[e];
+ s.camera={stations:[{at:0,x:0,y:0,width:100,hold:0,easing:'linear'},{at:2,x:20,y:10,width:50,hold:0,easing:'linear'}]};
+ const current=1.5,state=sceneAfterimageState(e,s,.3,current,1920,1080),values=state.transform.slice(7,-1).split(',').map(Number);
+ const camera=cameraMatrix(s.camera,current,1920,1080);
+ const world={x:e.x*1920/100+values[4],y:e.y*1080/100+values[5]};
+ assert.ok(Math.abs(camera.a*world.x+camera.c*world.y+camera.e-e.x*1920/100)<1e-6);
+ assert.ok(Math.abs(camera.b*world.x+camera.d*world.y+camera.f-e.y*1080/100)<1e-6);
 });

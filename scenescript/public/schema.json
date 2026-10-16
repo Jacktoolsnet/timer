@@ -503,6 +503,19 @@
                   "default": "scene",
                   "description": "Scene follows the camera; screen stays in the viewport. All members of a flat group must use the same space (runtime constraint). Null is rejected."
                 },
+                "afterimages": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "Historical poses behind text/image/shape elements, oldest first. No recursive trails. End with the element/scene. Optional flat-alpha tint; normal compositing for ghosts.",
+                  "properties": {
+                    "enabled": {"type": "boolean", "default": false},
+                    "count": {"type": "integer", "minimum": 1, "maximum": 8, "default": 4},
+                    "spacing": {"type": "number", "minimum": 0.01, "maximum": 1, "default": 0.08},
+                    "opacity": {"type": "number", "minimum": 0, "maximum": 1, "default": 0.45},
+                    "tint": {"type": "boolean", "default": false},
+                    "color": {"type": "string", "pattern": "^#[0-9a-fA-F]{6}$", "default": "#66ccff"}
+                  }
+                },
                 "stopMotion": {
                   "type": "object",
                   "additionalProperties": false,

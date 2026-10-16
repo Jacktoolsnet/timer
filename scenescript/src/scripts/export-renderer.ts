@@ -1,3 +1,4 @@
+import {updateAfterimages} from './afterimages';
 import {renderPaper} from './paper';
 import {exposureCSS} from '../lib/exposure';
 import {updateLiquid} from './liquid';
@@ -37,6 +38,7 @@ export class ExportRenderer{
  else if(e.asset)seekSvg(await this.image(e.asset,e.fit,node,e.type==='image'?e.crop:null),state.sampleTime-e.at);
  renderPaper(node,e,w,h);Object.assign(node.style,exposureCSS(e.exposure,state.opacity*fade));
  updateLiquid(node,e,state.sampleTime,w,h);updateParticles(node,e,state.sampleTime,s.duration,w,h);
+ await updateAfterimages(node,e,s,this.p.assets,local,this.w,this.h,fade);
  }
  return viewport;
  }
