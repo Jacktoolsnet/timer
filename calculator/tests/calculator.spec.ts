@@ -258,7 +258,7 @@ test('automatic typing preserves title edits, modal controls and explicit notes'
 
 test('whole-tape actions form a horizontal icon toolbar with tooltips and keyboard navigation',async({page},testInfo)=>{
  const toolbar=page.getByRole('toolbar',{name:'Rechenstreifen',exact:true});
- await expect(toolbar).toHaveAttribute('aria-orientation','horizontal');await expect(toolbar.getByRole('button')).toHaveCount(6);
+ await expect(toolbar).toHaveAttribute('aria-orientation','horizontal');await expect(toolbar.getByRole('button')).toHaveCount(6);await expect(page.locator('#email,#email-dialog,a[href^="mailto:"]')).toHaveCount(0);
  const positions=await toolbar.getByRole('button').evaluateAll(buttons=>buttons.map(button=>({y:button.getBoundingClientRect().y,text:button.textContent?.trim(),icon:!!button.querySelector('svg')})));
  for(const position of positions){expect(position.y).toBeCloseTo(positions[0].y,3);expect(position.text).toBe('');expect(position.icon).toBe(true);}
  const box=await toolbar.boundingBox(),title=await page.locator('#calculation-title-display').boundingBox();expect(box!.y+box!.height).toBeLessThan(title!.y);
@@ -560,4 +560,42 @@ test('print operation operands follow configured decimal places without rounding
   await page.emulateMedia({media:'screen'});
  }
  await page.locator('.tape-step').nth(1).getByRole('button',{name:/Bearbeiten:/}).click();await expect(page.locator('#value')).toHaveValue('-1.235');
+});
+
+async function chooseCurrency(page:Page,code:string){await optionAction(page,async()=>{await page.locator('#trigger-currency').click();await page.getByRole('option',{name:code?new RegExp('^'+code+' ·'):'Ohne Währung',exact:!code}).click();});}
+
+test('currency labels results and print without converting values or percentage operands',async({page})=>{
+ await add(page,'100','set');await add(page,'20','add');await add(page,'2','multiply');
+ await page.locator('#value').fill('10');await chooseCurrency(page,'EUR');
+ await expect(page.locator('#result')).toHaveText('240,00 €');await expect(page.locator('#tape-result')).toHaveText('240,00 €');await expect(page.locator('.step-result').last()).toHaveText('240,00 €');
+ await expect(page.locator('#value')).toHaveValue('10');
+ await page.locator('#undo').click();await expect(page.locator('#result')).toHaveText('240,00');await page.locator('#redo').click();await expect(page.locator('#result')).toHaveText('240,00 €');
+ await add(page,'10','increase');await expect(page.locator('#result')).toHaveText('264,00 €');
+ await optionAction(page,()=>page.locator('#simple-tape').check());await expect(page.locator('.receipt-summary').last()).toContainText('10,00 % = 264,00 €');
+ await page.emulateMedia({media:'print'});await expect(page.locator('#print-rounding')).toContainText('Währung: EUR');await expect(page.locator('#print-result')).toHaveText('Ergebnis: 264,00 €');
+ await expect(page.locator('#print-rows tr').last().locator('td').nth(2)).toContainText('10,00 %');await expect(page.locator('#print-rows tr').last().locator('td').nth(3)).toHaveText('264,00 €');
+ await page.emulateMedia({media:'screen'});await chooseCurrency(page,'CHF');await expect(page.locator('#result')).toHaveText('264,00 CHF');await chooseCurrency(page,'');await expect(page.locator('#result')).toHaveText('264,00');
+});
+
+test('currency persists with the calculation and roundtrips through JSON while legacy imports remain supported',async({page})=>{
+ await add(page,'42');await chooseCurrency(page,'USD');await optionAction(page,()=>page.locator('#remember-calculation').check());await page.reload();
+ await expect(page.locator('#result')).toHaveText('42,00 US$');await page.locator('#calculator-settings').click();await expect(page.locator('#trigger-currency')).toContainText('USD');await page.locator('#calculator-options').press('Escape');
+ const pending=page.waitForEvent('download');await page.locator('#export').click();const stream=(await (await pending).createReadStream())!,chunks:Buffer[]=[];for await(const chunk of stream)chunks.push(chunk);const saved=JSON.parse(Buffer.concat(chunks).toString());expect(saved.currency).toBe('USD');expect(saved.steps[0].value).toBe('42');
+ page.on('dialog',dialog=>dialog.accept());
+ await page.locator('#import-file').setInputFiles({name:'legacy.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify({...saved,currency:undefined}))});await expect(page.locator('#result')).toHaveText('42,00');
+ await page.locator('#import-file').setInputFiles({name:'saved.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(saved))});await expect(page.locator('#result')).toHaveText('42,00 US$');
+ await page.locator('#import-file').setInputFiles({name:'bad.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify({...saved,currency:'XYZ'}))});await expect(page.locator('#export-status')).toContainText('Keine gültige');await expect(page.locator('#result')).toHaveText('42,00 US$');
+ await page.locator('#new').click();await page.locator('#confirm-new-calculation').click();await expect(page.locator('#result')).toHaveText('0,00');await page.locator('#undo').click();await expect(page.locator('#result')).toHaveText('42,00 US$');
+});
+
+test('currency metadata is included in CSV and clipboard and currency selection is localized',async({page})=>{
+ await add(page,'12.5');await chooseCurrency(page,'EUR');
+ await page.evaluate(()=>{Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async(text:string)=>{(window as Window & {currencyCopy?:string}).currencyCopy=text;}}});});await page.locator('#copy').click();expect(await page.evaluate(()=>(window as Window & {currencyCopy?:string}).currencyCopy)).toContain('Währung: EUR');
+ const pending=page.waitForEvent('download');await page.locator('#csv').click();const stream=(await (await pending).createReadStream())!,chunks:Buffer[]=[];for await(const chunk of stream)chunks.push(chunk);const csv=Buffer.concat(chunks).toString();expect(csv).toContain('"Währung";"EUR"');expect(csv).toContain('12,50\u00a0€');
+ page.on('dialog',dialog=>dialog.accept());
+ for(const [lang,label] of [['en','Currency'],['es','Moneda'],['fr','Devise']]){
+  await page.goto('/'+lang+'/');await page.locator('#calculator-settings').click();await expect(page.locator('#trigger-currency')).toHaveAccessibleName(new RegExp(label));await page.locator('#trigger-currency').click();await page.getByRole('option',{name:/^JPY ·/}).click();await page.locator('#calculator-options').press('Escape');
+  await add(page,'12.5','set');await expect(page.locator('#result')).toHaveText(lang==='en'?'12.50 ¥':'12,50 ¥');
+  await page.setViewportSize({width:320,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ }
 });

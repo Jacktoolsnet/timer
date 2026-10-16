@@ -1,4 +1,4 @@
-import { calculate, emptyDocument, fixed, parse, validateDocument, type Document, type Step, type Operation, type Rational } from '../lib/calculation';
+import { currencySymbols, type Currency, calculate, emptyDocument, fixed, parse, validateDocument, type Document, type Step, type Operation, type Rational } from '../lib/calculation';
 import {buildExample,exampleUi,type ExampleId} from '../lib/examples';
 import type {Language} from '../lib/i18n';
 import { calculatorText } from '../lib/calculator-text';
@@ -9,6 +9,7 @@ const c=JSON.parse(app.dataset.text!) as typeof calculatorText.en;
 const $=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(id) as T;
 const input=$<HTMLInputElement>('value'), name=$<HTMLInputElement>('step-name'), operation=$<HTMLInputElement>('operation');
 const title=$<HTMLInputElement>('calculation-title'), decimals=$<HTMLSelectElement>('decimals'), round=$<HTMLInputElement>('round-each'), remember=$<HTMLInputElement>('remember-calculation');
+const currency=$<HTMLSelectElement>('currency');
 const side=$<HTMLSelectElement>('calculator-side');
 side.value=document.documentElement.dataset.calculatorSide==='right'?'right':'left';
 side.addEventListener('change',()=>{document.documentElement.dataset.calculatorSide=side.value;document.dispatchEvent(new Event('calculator-side-change'));});
@@ -89,6 +90,7 @@ try {remember.checked=localStorage.getItem(CONSENT)==='yes';if(remember.checked)
 function persist(){if(!remember.checked)return;try{localStorage.setItem(KEY,JSON.stringify(doc));storageHealthy=true;}catch{storageHealthy=false;$('calc-status').textContent=c.storageError;}}
 function mutate(action:()=>void){undo.push(clone());if(undo.length>100)undo.shift();redo=[];action();dirty=true;persist();render();}
 function display(value:Rational|null){return value?fixed(value,doc.decimals).replace('.',document.documentElement.lang==='en'?'.':','):'—';}
+function amount(value:Rational|null){return display(value)+(value&&doc.currency?'\u00a0'+currencySymbols[doc.currency]:'');}
 function errorText(error:string|null){return error==='zero'?c.zero:error==='blocked'?c.blocked:error==='limit'?c.limit:c.invalid;}
 function node(tag:string,text?:string,className?:string){const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(className)e.className=className;return e;}
 function setSubmitLabel(label:string){const button=$<HTMLButtonElement>('add-step');button.setAttribute('aria-label',label);button.title=label;}
@@ -130,14 +132,14 @@ function receiptFormula(s:Step,before:Rational|null,result:Rational|null,error:s
  const symbols={set:'=',add:'+',subtract:'−',multiply:'×',divide:'÷',increase:'+',taxIn:'+',discount:'−',taxOut:'÷',subtotal:'Σ',note:''};
  const expression=s.operation==='subtotal'?'Σ':s.operation==='set'?value:s.operation==='taxOut'?`${display(before)} ÷ (1 + ${value} / 100)`:`${display(before)} ${symbols[s.operation]} ${value}${percent?' %':''}`;
  if(!s.enabled)return `${expression} · ${c.disabled}`;
- if(s.operation==='set')return `= ${error?errorText(error):display(result)}`;
- return `${expression} = ${error?errorText(error):display(result)}`;
+ if(s.operation==='set')return `= ${error?errorText(error):amount(result)}`;
+ return `${expression} = ${error?errorText(error):amount(result)}`;
 }
 function render(){
- const calculation=calculate(doc);$('result').textContent=display(calculation.result);$('tape-result').textContent=display(calculation.result);
+ const calculation=calculate(doc);$('result').textContent=amount(calculation.result);$('tape-result').textContent=amount(calculation.result);
  $('step-count').textContent=String(doc.steps.length);$('empty-tape').hidden=doc.steps.length>0;
  $('calculation-title-display').textContent=doc.title||c.untitled;
- if(!titleDialog.open)title.value=doc.title;decimals.value=String(doc.decimals);decimalsControl.sync();round.checked=doc.roundEach;
+ if(!titleDialog.open)title.value=doc.title;currency.value=doc.currency||'';decimals.value=String(doc.decimals);decimalsControl.sync();round.checked=doc.roundEach;
  $<HTMLButtonElement>('undo').disabled=!undo.length;$<HTMLButtonElement>('redo').disabled=!redo.length;
  const list=$('steps');list.replaceChildren();
  doc.steps.forEach((s,i)=>{
@@ -151,7 +153,7 @@ function render(){
   li.append(node('p',formula(s,row.before,row.result),'step-equation'));
   const values=node('dl',undefined,'step-values'),hasInput=!['note','subtotal'].includes(s.operation);values.dataset.hasInput=String(hasInput);
   if(hasInput){const entered=node('div'),suffix=['increase','discount','taxIn','taxOut'].includes(s.operation)?' %':'';const value=node('dd',display(parse(s.value))+suffix,'step-input-value');value.title=c.value+': '+s.value.replace('.',document.documentElement.lang==='en'?'.':',')+suffix;entered.append(node('dt',c.value),value);values.append(entered);}
-  const total=node('div',undefined,'step-result-cell');total.append(node('dt',c.total),node('dd',!s.enabled?'—':row.error?errorText(row.error):display(row.result),'step-result'));values.append(total);li.append(values);
+  const total=node('div',undefined,'step-result-cell');total.append(node('dt',c.total),node('dd',!s.enabled?'—':row.error?errorText(row.error):amount(row.result),'step-result'));values.append(total);li.append(values);
   const actions=node('div',undefined,'step-actions');actions.id=`step-actions-${s.id}`;actions.setAttribute('role','toolbar');actions.setAttribute('aria-orientation','horizontal');actions.setAttribute('aria-label',`${c.stepActions}: ${s.name||i+1}`);
   const label=node('label',undefined,'step-switch step-status-control'),trackWrap=node('span',undefined,'storage-switch'),checkbox=document.createElement('input');label.id=`step-status-${s.id}`;checkbox.type='checkbox';checkbox.checked=s.enabled;checkbox.setAttribute('role','switch');checkbox.setAttribute('aria-label',`${c.enabled}: ${s.name||i+1}`);
   checkbox.addEventListener('change',()=>{mutate(()=>{s.enabled=checkbox.checked;});document.querySelector<HTMLInputElement>(`[data-id="${s.id}"] input`)?.focus();});
@@ -231,19 +233,20 @@ newDialog.addEventListener('close',()=>{
  if(!confirmed)return;
  mutate(()=>{doc=emptyDocument();});resetEditor();render();input.focus();
 });
+currency.addEventListener('change',()=>mutate(()=>doc.currency=currency.value as Currency));
 decimals.addEventListener('change',()=>mutate(()=>doc.decimals=Number(decimals.value)));round.addEventListener('change',()=>mutate(()=>doc.roundEach=round.checked));
 remember.addEventListener('change',()=>{try{if(remember.checked){localStorage.setItem(CONSENT,'yes');persist();}else{localStorage.removeItem(CONSENT);localStorage.removeItem(KEY);}}catch{remember.checked=false;storageHealthy=false;$('calc-status').textContent=c.storageError;}});
 document.addEventListener('calculator-clear',()=>{try{localStorage.removeItem(CONSENT);localStorage.removeItem(KEY);}catch{}remember.checked=false;});
-function exportRows(){const result=calculate(doc);return doc.steps.map((s,i)=>[String(i+1),s.name,c.ops[s.operation],s.value,s.enabled?c.active:c.disabled,display(result.rows[i].before),formula(s,result.rows[i].before,result.rows[i].result),result.rows[i].error?errorText(result.rows[i].error):display(result.rows[i].result)]);}
+function exportRows(){const result=calculate(doc);return doc.steps.map((s,i)=>[String(i+1),s.name,c.ops[s.operation],s.value,s.enabled?c.active:c.disabled,display(result.rows[i].before),formula(s,result.rows[i].before,result.rows[i].result),result.rows[i].error?errorText(result.rows[i].error):amount(result.rows[i].result)]);}
 function download(data:string,type:string,extension:string){const url=URL.createObjectURL(new Blob([data],{type}));const a=document.createElement('a');a.href=url;a.download=(doc.title||'jacktools-calculator').replace(/[^\p{L}\p{N}\-_ ]/gu,'').slice(0,80)+extension;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 $('export').addEventListener('click',()=>download(JSON.stringify(doc,null,2),'application/json','.json'));
 $('csv').addEventListener('click',()=>{
  const escape=(v:string)=>'"'+(/^[=+\-@\t\r]/.test(v)?"'":'')+v.replaceAll('"','""')+'"';
- const rows=[[c.titleLabel,doc.title],[c.rounding,doc.roundEach?c.perStep:c.exact],[c.decimals,String(doc.decimals)],[],['#',c.name,c.operation,c.value,c.status,c.before,c.delta,c.total],...exportRows(),[c.total,display(calculate(doc).result)]];
+ const rows=[[c.titleLabel,doc.title],[c.rounding,doc.roundEach?c.perStep:c.exact],[c.decimals,String(doc.decimals)],...(doc.currency?[[c.currency,doc.currency]]:[]),[],['#',c.name,c.operation,c.value,c.status,c.before,c.delta,c.total],...exportRows(),[c.total,amount(calculate(doc).result)]];
  download('\uFEFF'+rows.map(row=>row.map(escape).join(';')).join('\r\n'),'text/csv;charset=utf-8','.csv');
 });
-$('copy').addEventListener('click',async()=>{try{await navigator.clipboard.writeText([doc.title||c.title,`${c.rounding}: ${doc.roundEach?c.perStep:c.exact} (${doc.decimals})`,...exportRows().map(row=>row.join('\t')),`${c.total}: ${display(calculate(doc).result)}`].join('\n'));$('export-status').textContent=c.copied;}catch{$('export-status').textContent=c.copyError;}});
-function renderPrint(){const result=calculate(doc);$('print-title').textContent=doc.title||c.title;$('print-rounding').textContent=`${c.rounding}: ${doc.roundEach?c.perStep:c.exact} · ${c.decimals}: ${doc.decimals}`;$('print-result').textContent=c.total+': '+display(result.result);const body=$('print-rows');body.replaceChildren();doc.steps.forEach((s,i)=>{if(!s.enabled)return;const tr=node('tr');for(const value of [String(i+1),s.name,formula(s,result.rows[i].before,result.rows[i].result,true),result.rows[i].error?errorText(result.rows[i].error):display(result.rows[i].result)])tr.append(node('td',value));body.append(tr);});}
+$('copy').addEventListener('click',async()=>{try{await navigator.clipboard.writeText([doc.title||c.title,...(doc.currency?[`${c.currency}: ${doc.currency}`]:[]),`${c.rounding}: ${doc.roundEach?c.perStep:c.exact} (${doc.decimals})`,...exportRows().map(row=>row.join('\t')),`${c.total}: ${amount(calculate(doc).result)}`].join('\n'));$('export-status').textContent=c.copied;}catch{$('export-status').textContent=c.copyError;}});
+function renderPrint(){const result=calculate(doc);$('print-title').textContent=doc.title||c.title;$('print-rounding').textContent=`${c.rounding}: ${doc.roundEach?c.perStep:c.exact} · ${c.decimals}: ${doc.decimals}${doc.currency?` · ${c.currency}: ${doc.currency}`:''}`;$('print-result').textContent=c.total+': '+amount(result.result);const body=$('print-rows');body.replaceChildren();doc.steps.forEach((s,i)=>{if(!s.enabled)return;const tr=node('tr');for(const value of [String(i+1),s.name,formula(s,result.rows[i].before,result.rows[i].result,true),result.rows[i].error?errorText(result.rows[i].error):amount(result.rows[i].result)])tr.append(node('td',value));body.append(tr);});}
 $('print').addEventListener('click',()=>{renderPrint();window.print();});
 $('import').addEventListener('click',()=>$<HTMLInputElement>('import-file').click());
 $('import-file').addEventListener('change',async()=>{const element=$<HTMLInputElement>('import-file'),file=element.files?.[0];if(!file)return;try{if(file.size>500000)throw Error();const loaded=validateDocument(JSON.parse(await file.text()));if(doc.steps.length&&!confirm(c.confirm))return;mutate(()=>doc=loaded);resetEditor();render();$('export-status').textContent=c.fileLoaded;}catch{$('export-status').textContent=c.fileError;}finally{element.value='';}});

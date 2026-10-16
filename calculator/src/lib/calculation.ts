@@ -2,7 +2,10 @@
 export const operations = ['set','add','subtract','multiply','divide','increase','taxIn','discount','taxOut','subtotal','note'] as const;
 export type Operation = typeof operations[number];
 export interface Step { id: string; name: string; operation: Operation; value: string; enabled: boolean }
-export interface Document { version: 1; title: string; decimals: number; roundEach: boolean; steps: Step[] }
+export const currencies = ['', 'EUR', 'USD', 'CHF', 'GBP', 'JPY', 'CAD', 'AUD', 'SEK', 'NOK', 'DKK', 'PLN', 'CZK'] as const;
+export type Currency = typeof currencies[number];
+export const currencySymbols:Record<Currency,string> = {'':'',EUR:'€',USD:'US$',CHF:'CHF',GBP:'£',JPY:'¥',CAD:'CA$',AUD:'A$',SEK:'SEK',NOK:'NOK',DKK:'DKK',PLN:'PLN',CZK:'CZK'};
+export interface Document { version: 1; currency?: Currency; title: string; decimals: number; roundEach: boolean; steps: Step[] }
 export type Rational = { n: bigint; d: bigint };
 function gcd(a: bigint,b: bigint): bigint { a=a<0n?-a:a; while(b){[a,b]=[b,a%b];} return a||1n; }
 function rational(n: bigint,d=1n): Rational { if(!d)throw Error('zero'); if(d<0n){n=-n;d=-d;} const g=gcd(n,d); n/=g;d/=g; if(n.toString().length>250||d.toString().length>250)throw Error('limit'); return {n,d}; }
@@ -33,9 +36,10 @@ export function calculate(doc:Document): {result:Rational|null; rows:{before:Rat
  }
  return {result,rows};
 }
-export function emptyDocument():Document {return {version:1,title:'',decimals:2,roundEach:false,steps:[]};}
+export function emptyDocument():Document {return {version:1,currency:'',title:'',decimals:2,roundEach:false,steps:[]};}
 export function validateDocument(data:unknown):Document {
  const d=data as Document;if(!d||d.version!==1||typeof d.title!=='string'||d.title.length>120||!Number.isInteger(d.decimals)||d.decimals<0||d.decimals>8||typeof d.roundEach!=='boolean'||!Array.isArray(d.steps)||d.steps.length>500)throw Error('invalid');
+ if(d.currency!==undefined&&!currencies.includes(d.currency))throw Error('invalid');
  const ids=new Set<string>();for(const s of d.steps){if(!s||typeof s.id!=='string'||! /^[A-Za-z0-9_-]{1,80}$/.test(s.id)||ids.has(s.id)||typeof s.name!=='string'||s.name.length>120||!operations.includes(s.operation)||typeof s.enabled!=='boolean'||typeof s.value!=='string'||s.value.length>40)throw Error('invalid');ids.add(s.id);if(!['note','subtotal'].includes(s.operation))parse(s.value);}
  return structuredClone(d);
 }

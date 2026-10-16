@@ -3,7 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import { getDictionary, type Language } from '../lib/i18n';
 import { calculatorText } from '../lib/calculator-text';
 import { operationHelp, specialOperations, specialSymbols, standardOperations } from '../lib/operation-help';
-import { operations } from '../lib/calculation';
+import { operations, currencies, currencySymbols } from '../lib/calculation';
 import {exampleDefinitions,exampleIds,exampleUi} from '../lib/examples';
 import '../styles/calculator.css';
 interface Props {lang:Language}
@@ -57,6 +57,7 @@ const {lang}=Astro.props; const c=calculatorText[lang]; const t=getDictionary(la
 </section></div><dialog id="calculator-options" class="calc-settings" aria-labelledby="calc-options-heading"><div class="dialog-inner"><h2 id="calc-options-heading">{c.options}</h2>
 <label class="calc-option-switch"><span>{c.simpleView}</span><span class="storage-switch"><input id="simple-tape" type="checkbox" role="switch" aria-describedby="simple-tape-hint" /><span class="storage-switch-track" aria-hidden="true"></span></span></label><p id="simple-tape-hint" class="form-hint">{c.simpleHint}</p>
 <label for="calculator-side"><span>{c.position}</span><select id="calculator-side" name="calculator-side" aria-describedby="position-hint"><option value="left">{c.left}</option><option value="right">{c.right}</option></select></label><p id="position-hint" class="form-hint">{c.positionHint}</p>
+<label for="currency"><span>{c.currency}</span><select id="currency" name="currency" aria-describedby="currency-hint">{currencies.map(code=><option value={code}>{code ? `${code} · ${new Intl.DisplayNames([lang], {type:'currency'}).of(code)} (${currencySymbols[code]})` : c.noCurrency}</option>)}</select></label><p id="currency-hint" class="form-hint">{c.currencyHint}</p>
 <details class="calc-options" open><summary>{c.rounding}</summary><label for="decimals"><span>{c.decimals}</span><select id="decimals" name="decimals">{Array.from({length:9},(_,i)=><option value={i} selected={i===2}>{i}</option>)}</select></label><label class="calc-option-switch"><span>{c.round}</span><span class="storage-switch"><input id="round-each" type="checkbox" role="switch" aria-describedby="rounding-hint" /><span class="storage-switch-track" aria-hidden="true"></span></span></label><p id="rounding-hint" class="form-hint">{c.roundHint}</p></details>
 <label class="calc-option-switch"><span>{c.remember}</span><span class="storage-switch"><input id="remember-calculation" type="checkbox" role="switch" /><span class="storage-switch-track" aria-hidden="true"></span></span></label>
 <form method="dialog" class="dialog-actions"><button type="submit" class="primary">{t.close}</button></form></div></dialog><p class="local-note">{c.local}</p>

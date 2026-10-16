@@ -20,3 +20,10 @@ test('very large intermediate results remain valid with per-step rounding',()=>{
 test('resource limit is a visible error',()=>{const d=document(Array.from({length:30},()=>['multiply','999999999999999999999999'] as [Operation,string]));d.steps[0].operation='set';assert.equal(calculate(d).result,null);assert.ok(calculate(d).rows.some(row=>row.error==='limit'));});
 
 test('gross tax addition is named separately and roundtrips with net removal',()=>{assert.equal(result([['set','100'],['taxIn','19']]),'119.00');assert.equal(result([['set','100'],['taxIn','19'],['taxOut','19']]),'100.00');assert.equal(result([['set','100'],['taxIn','7']]),'107.00');assert.deepEqual(validateDocument(document([['set','100'],['taxIn','19']])),document([['set','100'],['taxIn','19']]));});
+
+test('currency is optional metadata and never changes arithmetic or rounding',()=>{
+ const base=document([['set','100'],['increase','19'],['taxOut','19']]);
+ for(const currency of ['EUR','CHF','JPY'] as const){const d={...base,currency};assert.equal(fixed(calculate(d).result!,2),'100.00');assert.equal(validateDocument(d).currency,currency);assert.equal(d.decimals,2);}
+ const legacy={...base};delete legacy.currency;assert.equal(validateDocument(legacy).currency,undefined);
+ for(const currency of ['XYZ','eur',null,123,'<script>'])assert.throws(()=>validateDocument({...base,currency}));
+});

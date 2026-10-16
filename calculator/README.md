@@ -131,6 +131,13 @@ browser navigation warning is requested after changes (browser-dependent).
 JSON export/import is validated and versioned; no executable data is loaded.
 CSV uses UTF-8 BOM, semicolon delimiters and quoting; formula-like cells are
 prefixed with an apostrophe. Print/PDF provides a plain, named calculation tape
-with active/disabled states and rounding rules. Files are browser downloads;
+with active steps only and rounding rules. Files are browser downloads;
 no calculation data is sent to a server. Local saving is not a backup—download
 important work as JSON. No currency conversions or automatic tax-rate selection.
+
+Currency is optional per-calculation metadata (`currency`, an allowlisted ISO code).
+The default is no currency; older version-1 files without this field still load.
+Currency labels appear on results, print/PDF, CSV and clipboard exports. JSON and
+opt-in local document saving retain the selection, including undo/redo. Selecting
+another currency never converts values or changes decimal places or rounding.
+Print/PDF includes active steps only, with note, operation and result columns.
