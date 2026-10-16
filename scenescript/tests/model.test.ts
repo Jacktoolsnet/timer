@@ -1,4 +1,5 @@
-import {aiGuide,aiArtExample,artisticEffectDefaults,artisticEffectKeys} from '../src/lib/guide.ts';
+import {guideFieldCatalog,guideTypes} from '../src/lib/guide-fields.ts';
+import {aiGuide,aiArtExample,aiGuideExamples,aiCameraExample,artisticEffectDefaults,artisticEffectKeys} from '../src/lib/guide.ts';
 import {defaultLighting,parseLighting,lightingState,lightingMap,lightingShadowMargin} from '../src/lib/lighting.ts';
 import {defaultKaleidoscope,parseKaleidoscope,kaleidoscopeState} from '../src/lib/kaleidoscope.ts';
 import {defaultPrint,parsePrint,printPattern} from '../src/lib/print.ts';
@@ -480,7 +481,25 @@ test('lighting geometry and falloff are deterministic and use correct units',()=
 });
 test('AI artistic defaults match factories and schema; the complete guide example imports',()=>{
  const schema=JSON.parse(readFileSync(new URL('../public/schema.json',import.meta.url),'utf8')).properties.scenes.items.properties.elements.items.properties;
- const fresh=newElement('shape');for(const key of artisticEffectKeys){assert.deepEqual(artisticEffectDefaults[key],fresh[key]);assert.deepEqual(Object.keys(schema[key].properties).sort(),Object.keys(fresh[key]).sort());for(const [field,value] of Object.entries(fresh[key]))assert.deepEqual(schema[key].properties[field].default,value,key+'.'+field);assert.ok(aiGuide.includes('- '+key+': optional object'),key);}
+ const fresh=newElement('shape');for(const key of artisticEffectKeys){assert.deepEqual(artisticEffectDefaults[key],fresh[key]);assert.deepEqual(Object.keys(schema[key].properties).sort(),Object.keys(fresh[key]).sort());for(const [field,value] of Object.entries(fresh[key]))assert.deepEqual(schema[key].properties[field].default,value,key+'.'+field);assert.ok(aiGuide.includes('element.'+key),key);}
  assert.ok(aiGuide.includes('Light and shadow: element.lighting'));assert.ok(aiGuide.includes('kaleidoscope → lighting → reveal'));assert.ok(aiGuide.includes('firstComment'));
  const example=parseProject(serialize(aiArtExample));assert.equal(example.scenes[0].elements[0].lighting.enabled,true);assert.equal(example.scenes[0].elements[0].kaleidoscope.enabled,true);assert.deepEqual(parseProject(serialize(example)),example);
+});
+
+
+test('self-contained AI guide covers every schema object and field with unique type names',()=>{
+ const schema=JSON.parse(readFileSync(new URL('../public/schema.json',import.meta.url),'utf8'));
+ const names=guideTypes.map(t=>t.name);assert.equal(new Set(names).size,names.length);
+ const shapes=new Set(guideTypes.map(t=>JSON.stringify(t.schema)));
+ function visit(node:any){if(!node||typeof node!=='object')return;if(node.type==='object'&&node.properties)assert.ok(shapes.has(JSON.stringify(node)),'undocumented object: '+Object.keys(node.properties).join(','));for(const value of Object.values(node))if(Array.isArray(value))value.forEach(visit);else visit(value);}
+ visit(schema);
+ for(const type of guideTypes){assert.deepEqual(type.fields,Object.keys(type.schema.properties!));assert.ok(guideFieldCatalog.includes(type.name+'\n'));for(const field of type.fields)assert.match(guideFieldCatalog,new RegExp('  '+field+'!?: '));}
+ assert.match(guideFieldCatalog,/TextRun\n  text!:[\s\S]*?font: Font = inherit Element.font/);
+ assert.match(guideFieldCatalog,/fontSize: num\[1\.\.500\] = 90; bubble:48/);
+ assert.match(aiGuide,/specification notation, NOT JSON syntax/);assert.ok(!aiGuide.includes('JSON.stringify'));assert.ok(new TextEncoder().encode(aiGuide).length<60000,'keep the full copy/paste guide compact');
+});
+test('all compact guide examples validate and preserve camera holds and enabled effects',()=>{
+ for(const p of aiGuideExamples){const parsed=parseProject(serialize(p));assert.deepEqual(parseProject(serialize(parsed)),parsed);assert.ok(aiGuide.includes(JSON.stringify(p,null,2)));}
+ const camera=parseProject(serialize(aiCameraExample)).scenes[0].camera!;assert.equal(camera.stations[0].at,0);assert.equal(camera.stations[1].at,3);assert.equal(camera.stations[1].hold,2);assert.equal(camera.stations[2].width,50);
+ assert.ok(aiGuide.includes('Next at MUST be > previous at+hold'));assert.ok(aiGuide.includes('ONLY text/image/shape'));assert.ok(aiGuide.includes('Element.asset always selects an IMAGE'));assert.ok(aiGuide.includes('without'));
 });

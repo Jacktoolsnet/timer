@@ -790,7 +790,7 @@ test('text presets are one-click, editable, reversible and survive import',async
 
 test('AI page and plain text guide document text effects, gradients, bundled fonts and presets',async({page,request})=>{
  const response=await request.get('/ai.txt');expect(response.ok()).toBe(true);const guide=await response.text();
- for(const value of ['textEffects','textGradient','outline.width: 0..20','glow.intensity: 0..100','shadow.opacity: 0..1','Allura, Great Vibes, Parisienne and Sacramento are bundled','neonPink:','neonBlue:','gold:','comic:','NOT JSON fields or enum values'])expect(guide).toContain(value);
+ for(const value of ['textEffects','textGradient','TextEffectsOutline\n  enabled: bool = false','width: num[0..20] = 2','TextEffectsGlow','intensity: num[0..100] = 16','TextEffectsShadow','Allura, Great Vibes, Parisienne and Sacramento are bundled','neonPink:','neonBlue:','gold:','comic:','NOT JSON fields or enum values'])expect(guide).toContain(value);
  for(const lang of ['de','en','es','fr']){await page.goto('/'+lang+'/ai/');await expect(page.locator('#ai-guide')).toHaveText(guide);}
 });
 
