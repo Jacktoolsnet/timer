@@ -1,3 +1,4 @@
+import {base64ByteLength} from './data-size.ts';
 import {DOMParser,XMLSerializer,type Element as XmlElement} from '@xmldom/xmldom';
 export const SVG_NS='http://www.w3.org/2000/svg';
 export const MAX_SVG_BYTES=1024*1024;
@@ -19,9 +20,13 @@ function duration(value:string,min=0){const match=/^(\d+(?:\.\d+)?)(ms|s)?$/.exe
 function paint(value:string){if(!/^(?:#(?:[\da-f]{3}|[\da-f]{4}|[\da-f]{6}|[\da-f]{8})|[a-z]+|(?:rgb|rgba|hsl|hsla)\([\d\s.,%/+\-]+\))$/i.test(value)||value.length>128)fail('unsupported paint color');}
 export function svgDataURL(source:string){const bytes=new TextEncoder().encode(source);let binary='';for(const byte of bytes)binary+=String.fromCharCode(byte);return 'data:image/svg+xml;base64,'+btoa(binary);}
 export function svgSource(data:string){
- const match=/^data:image\/svg\+xml;base64,((?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?)$/.exec(data);if(!match||!match[1])fail('expected base64 SVG data URL');
- if(match![1].length>Math.ceil(MAX_SVG_BYTES/3)*4)fail('maximum 1 MiB');
- try{const bytes=Uint8Array.from(atob(match![1]),c=>c.charCodeAt(0));return new TextDecoder('utf-8',{fatal:true}).decode(bytes);}catch{return fail('invalid UTF-8/Base64');}
+ const prefix='data:image/svg+xml;base64,';
+ if(!data.startsWith(prefix))fail('expected base64 SVG data URL');
+ if(data.length-prefix.length>Math.ceil(MAX_SVG_BYTES/3)*4)fail('maximum 1 MiB');
+ const payload=data.slice(prefix.length),bytes=base64ByteLength(payload);
+ if(bytes<0)fail('expected base64 SVG data URL');
+ if(bytes>MAX_SVG_BYTES)fail('maximum 1 MiB');
+ try{const decoded=Uint8Array.from(atob(payload),c=>c.charCodeAt(0));return new TextDecoder('utf-8',{fatal:true}).decode(decoded);}catch{return fail('invalid UTF-8/Base64');}
 }
 export function validateSvg(source:string):string{
  const cached=checkedSources.get(source);if(cached)return cached;

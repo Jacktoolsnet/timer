@@ -120,7 +120,7 @@ oder bereits heruntergeladene Dateien. Browserspeicher kann voll/gesperrt sein;
 der Editor bleibt nutzbar und weist auf Dateisicherung hin. Wichtige Projekte
 immer als Datei speichern. Laufende Wiedergabe wird nicht wiederhergestellt.
 
-Maximal 30 MiB JSON (UTF-8), 8 MiB je Rasterbild / 1 MiB je SVG und 40 Megapixel, 100 Assets,
+Maximal 160 MiB JSON (UTF-8), 8 MiB je Rasterbild / 1 MiB je SVG und 40 Megapixel, 100 Assets,
 100 Szenen, 100 Elemente pro Szene. Base64 benötigt etwa 33% zusätzlichen
 Speicher. V1 akzeptiert keine externen Bild-URLs, HTML oder beliebigen Code; SVG nur im
 unten beschriebenen sicheren Profil.
@@ -342,3 +342,14 @@ Manuelles Kürzen unter zugeordnete Sprache wird verhindert. Erst Audio trimmen,
 verschieben oder entfernen. Die bestehenden Audio-/Projektgrößenlimits gelten.
 Löschen einer Audiodatei behält die Textvorlage; ein Import ist als Ganzes per
 Undo/Redo rückgängig zu machen. Anschließend das SceneScript-Projekt speichern.
+
+### Große Projektdateien
+
+Auch große eingebettete Base64-Medien werden ohne rekursive Regex-Gruppen
+geprüft. Editor-Änderungen validieren die Projektobjekte direkt statt das gesamte
+JSON inklusive Medien zu serialisieren und erneut zu parsen. Die Größenanzeige
+zählt Medien ohne vollständige JSON-Kopie; beim Import werden Medien nacheinander
+dekodiert, um Speicherspitzen zu reduzieren. Die bestehenden Größenlimits bleiben
+erhalten. Projekte über 4 MiB werden nicht als lokaler Browser-Entwurf gespeichert;
+bitte über **Speichern** als Projektdatei sichern. Ein 60-MiB-Projekt wird in den
+Browser-Regressionstests auf Desktop und Tablet importiert, bearbeitet und exportiert.

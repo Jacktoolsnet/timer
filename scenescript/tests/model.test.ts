@@ -503,3 +503,38 @@ test('all compact guide examples validate and preserve camera holds and enabled 
  const camera=parseProject(serialize(aiCameraExample)).scenes[0].camera!;assert.equal(camera.stations[0].at,0);assert.equal(camera.stations[1].at,3);assert.equal(camera.stations[1].hold,2);assert.equal(camera.stations[2].width,50);
  assert.ok(aiGuide.includes('Next at MUST be > previous at+hold'));assert.ok(aiGuide.includes('ONLY text/image/shape'));assert.ok(aiGuide.includes('Element.asset always selects an IMAGE'));assert.ok(aiGuide.includes('without'));
 });
+
+test('large embedded media validate without overflowing the regex stack',async()=>{
+ const {validateAudioData,MAX_AUDIO_BYTES}=await import('../src/lib/audio.ts');
+ const {validateVideoData}=await import('../src/lib/video.ts');
+ const {base64ByteLength}=await import('../src/lib/data-size.ts');
+ const media=Buffer.alloc(MAX_AUDIO_BYTES).toString('base64');
+ assert.equal(validateAudioData('data:audio/mpeg;base64,'+media).length,media.length+'data:audio/mpeg;base64,'.length);
+ assert.equal(validateVideoData('data:video/mp4;base64,'+media).length,media.length+'data:video/mp4;base64,'.length);
+ assert.equal(base64ByteLength(media),MAX_AUDIO_BYTES);
+ for(const payload of ['', 'A', 'AAA', 'AAAA=', 'A===', 'AA=A', 'AA==AAAA', 'AAAA\n', 'AA A'])assert.equal(base64ByteLength(payload),-1,payload);
+ for(const size of [1,2,3,4,5,6])assert.equal(base64ByteLength(Buffer.alloc(size).toString('base64')),size);
+ assert.throws(()=>validateAudioData('data:audio/mpeg;base64,'+media.slice(0,-4)+'!!!!'),/expected base64/);
+ assert.throws(()=>validateVideoData('data:video/mp4;base64,'+media.slice(0,-4)+'!!!!'),/expected base64/);
+});
+
+test('60 MiB JSON parses and object validation avoids serializing its media',async()=>{
+ const {MAX_IMAGE_BYTES,projectJsonBytes,validateProject}=await import('../src/lib/model.ts');
+ const p=demoProject();
+ for(let i=0;i<6;i++)p.assets['image'+i]={name:`Bild ${i} 🖼️`,data:'data:image/png;base64,'+Buffer.alloc((i===5?5:8)*1024*1024).toString('base64')};
+ const source=JSON.stringify(p);assert.ok(source.length>60*1024*1024);
+ const parsed=parseProject(source);assert.equal(Object.keys(parsed.assets).length,6);
+ assert.equal(projectJsonBytes(parsed),Buffer.byteLength(source));
+ assert.deepEqual(validateProject(parsed),parsed);
+ const oversized={...p,assets:Object.fromEntries(Array.from({length:16},(_,i)=>['image'+i,p.assets.image0]))};
+ assert.throws(()=>validateProject(oversized),/maximum 160 MiB/);
+ parsed.scenes[0].duration=-1;assert.throws(()=>validateProject(parsed),/duration/);
+ assert.throws(()=>validateImage('data:image/png;base64,'+Buffer.alloc(MAX_IMAGE_BYTES+1).toString('base64')),/maximum 8 MiB/);
+ // The encoded length rounds to a multiple of four; the decoded limit must still be exact.
+ assert.throws(()=>svgSource('data:image/svg+xml;base64,'+Buffer.alloc(1024*1024+1).toString('base64')),/maximum 1 MiB/);
+});
+
+test('allocation-free UTF-8 sizes match encoding including unpaired surrogates',async()=>{
+ const {utf8ByteLength}=await import('../src/lib/data-size.ts');
+ for(const text of ['', 'ASCII', 'Grüße', '漢字', '🖼️', '\ud800', '\udc00', '\ud800A', '\ud800\ud800\udc00'])assert.equal(utf8ByteLength(text),new TextEncoder().encode(text).length);
+});

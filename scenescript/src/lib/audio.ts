@@ -1,10 +1,14 @@
+import {base64ByteLength} from './data-size.ts';
 export const MAX_AUDIO_BYTES=32*1024*1024;
 export type AudioAsset={name:string;data:string;duration:number};
 export type Narration={asset:string;at:number;start:number;end:number|null;volume:number;muted:boolean;fadeIn:number;fadeOut:number;text:string;instructions:string;speaker:string};
 export function defaultNarration():Narration{return {asset:'',at:0,start:0,end:null,volume:1,muted:false,fadeIn:0,fadeOut:0,text:'',instructions:'',speaker:''};}
 export function validateAudioData(v:unknown,path='audio.data'):string{
- if(typeof v!=='string'||v.length>Math.ceil(MAX_AUDIO_BYTES/3)*4+100||!/^data:audio\/[a-z0-9.+-]+;base64,(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/i.test(v)||!v.split(',')[1])throw new Error(path+': expected base64 audio data URL (max 32 MiB)');
- if(/mpegurl|playlist/i.test(v.slice(0,v.indexOf(','))))throw new Error(path+': external playlists not supported');const b=v.split(',')[1];if(b.length/4*3-(b.endsWith('==')?2:b.endsWith('=')?1:0)>MAX_AUDIO_BYTES)throw new Error(path+': maximum 32 MiB');return v;
+ if(typeof v!=='string'||v.length>Math.ceil(MAX_AUDIO_BYTES/3)*4+100)throw new Error(path+': expected base64 audio data URL (max 32 MiB)');
+ const comma=v.indexOf(','),header=v.slice(0,comma+1),bytes=base64ByteLength(v.slice(comma+1));
+ if(!/^data:audio\/[a-z0-9.+-]+;base64,$/i.test(header)||bytes<0)throw new Error(path+': expected base64 audio data URL (max 32 MiB)');
+ if(/mpegurl|playlist/i.test(header))throw new Error(path+': external playlists not supported');
+ if(bytes>MAX_AUDIO_BYTES)throw new Error(path+': maximum 32 MiB');return v;
 }
 export function parseNarration(value:unknown,assets:Record<string,AudioAsset>,scope:number,path='narration'):Narration|null{
  if(value===undefined||value===null)return null;if(typeof value!=='object'||Array.isArray(value))throw new Error(path+': expected object');const d=defaultNarration();for(const key of Object.keys(value))if(!Object.hasOwn(d,key))throw new Error(path+'.'+key+': unknown field');const v={...d,...value} as Narration;

@@ -1,3 +1,4 @@
+import {base64ByteLength,utf8ByteLength} from './data-size.ts';
 import {defaultLighting,parseLighting,type Lighting} from './lighting.ts';
 import {defaultKaleidoscope,parseKaleidoscope,type Kaleidoscope} from './kaleidoscope.ts';
 import {defaultPrint,parsePrint,type PrintEffect} from './print.ts';
@@ -65,15 +66,29 @@ function id(v:unknown,path:string){const s=str(v,path,100);if(!/^[a-zA-Z0-9_-]+$
 export function validateImage(data:unknown,path='image'):string {
  const s=str(data,path,Math.ceil(MAX_IMAGE_BYTES/3)*4+100);
  if(s.startsWith('data:image/svg+xml;')){validateSvg(svgSource(s));return s;}
- if(!/^data:image\/(png|jpeg|webp);base64,(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(s)||s.split(',')[1].length===0)throw new Error(`${path}: expected PNG, JPEG or WebP base64 data URL`);
- const payload=s.split(',')[1];
- const bytes=payload.length/4*3-(payload.endsWith('==')?2:payload.endsWith('=')?1:0);
+ const comma=s.indexOf(','),header=s.slice(0,comma+1),bytes=base64ByteLength(s.slice(comma+1));
+ if(!/^data:image\/(png|jpeg|webp);base64,$/.test(header)||bytes<0)throw new Error(`${path}: expected PNG, JPEG or WebP base64 data URL`);
  if(bytes>MAX_IMAGE_BYTES)throw new Error(`${path}: maximum 8 MiB`);
  return s;
 }
 export function parseProject(input:string):Project {
- if(new TextEncoder().encode(input).length>MAX_FILE_BYTES)throw new Error('JSON: maximum 160 MiB');
- const p=obj(JSON.parse(input),'project');keys(p,['version','title','description','firstComment','hashtags','thumbnail','audios','narration','audioDucking','format','backgroundSimulation','backgroundVideo','videos','music','assets','scenes'],'project');
+ if(utf8ByteLength(input)>MAX_FILE_BYTES)throw new Error('JSON: maximum 160 MiB');
+ return readProject(JSON.parse(input));
+}
+/** Validate editor objects without serializing and parsing all embedded media again. */
+export function validateProject(input:unknown):Project {
+ const project=readProject(input);
+ if(projectJsonBytes(project)>MAX_FILE_BYTES)throw new Error('JSON: maximum 160 MiB');
+ return project;
+}
+/** Exact compact JSON size for a validated project; Base64 payloads need no escaping. */
+export function projectJsonBytes(project:Project):number {
+ let mediaBytes=0;
+ const metadata=JSON.stringify(project,(key,value)=>{if(key==='data'&&typeof value==='string'){mediaBytes+=value.length;return '';}return value;});
+ return utf8ByteLength(metadata)+mediaBytes;
+}
+function readProject(input:unknown):Project {
+ const p=obj(input,'project');keys(p,['version','title','description','firstComment','hashtags','thumbnail','audios','narration','audioDucking','format','backgroundSimulation','backgroundVideo','videos','music','assets','scenes'],'project');
  if(p.version!=='1.0')throw new Error('version: expected 1.0');
  const assets:Record<string,Asset>=Object.create(null);const raw=obj(p.assets??{},'assets');
  if(Object.keys(raw).length>100)throw new Error('assets: maximum 100');
