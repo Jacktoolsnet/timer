@@ -503,6 +503,20 @@
                   "default": "scene",
                   "description": "Scene follows the camera; screen stays in the viewport. All members of a flat group must use the same space (runtime constraint). Null is rejected."
                 },
+                "kaleidoscope": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "Alternating mirrored source sectors, clipped to the element box. All element types, not groups. Source rotation uses sampled element-local time; speed 0 freezes rotation. Transparency and gaps are retained.",
+                  "properties": {
+                    "enabled": {"type": "boolean", "default": false},
+                    "segments": {"type": "integer", "enum": [4,6,8,10,12,14,16], "default": 8},
+                    "rotation": {"type": "number", "minimum": -180, "maximum": 180, "default": 0},
+                    "speed": {"type": "number", "minimum": -90, "maximum": 90, "default": 15},
+                    "zoom": {"type": "number", "minimum": 0.25, "maximum": 4, "default": 1.5},
+                    "centerX": {"type": "number", "minimum": 0, "maximum": 100, "default": 50},
+                    "centerY": {"type": "number", "minimum": 0, "maximum": 100, "default": 50}
+                  }
+                },
                 "print": {
                   "type": "object",
                   "additionalProperties": false,

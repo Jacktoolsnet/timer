@@ -1,3 +1,4 @@
+import {updateKaleidoscope} from './kaleidoscope';
 import {updatePrint} from './print';
 import {updateGlitch} from './glitch';
 import {updateReveal} from './reveal';
@@ -37,7 +38,7 @@ function createGhost(e:Element,assets:Record<string,Asset>,w:number,h:number,onR
   node.style.opacity=String(state.opacity*sceneOpacity*(e.exposure.enabled?e.exposure.strength:1));
   if(text&&text.dataset.visibleText!==state.text){renderRuns(text,e,state.text);text.dataset.visibleText=state.text;}
   if(e.type==='shape')updateShapeDrawing(node,e,state.sampleTime);
-  seekSvg(svg,state.sampleTime-e.at);updateLiquid(node,e,state.sampleTime,width,height);updateGlitch(node,e,state.sampleTime,width,height);updatePrint(node,e,width,height);updateReveal(node,e,state.sampleTime,width,height);updateParticles(node,e,state.sampleTime,scene.duration,width,height);
+  seekSvg(svg,state.sampleTime-e.at);updateLiquid(node,e,state.sampleTime,width,height);updateGlitch(node,e,state.sampleTime,width,height);updatePrint(node,e,width,height);updateKaleidoscope(node,e,state.sampleTime,width,height);updateReveal(node,e,state.sampleTime,width,height);updateParticles(node,e,state.sampleTime,scene.duration,width,height);
  }};
  // Cropped raster dimensions can arrive after the first update. Rebuild visual
  // effects from the latest requested historical state, never an obsolete frame.

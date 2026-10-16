@@ -1,3 +1,4 @@
+import {copyMediaPixels} from './visual-media';
 import type {Element} from '../lib/model';
 import {fragmentState,isParticleExit,particleProgress} from '../lib/particles';
 import {seekSvg} from './svg-image';
@@ -6,7 +7,7 @@ const active=new WeakMap<HTMLElement,FragmentView>();
 /** Bounded 8×6 fragment grid. Each tile keeps the source's real colors and alpha. */
 export function updateParticles(node:HTMLElement,e:Element,time:number,duration:number,width:number,height:number){
  const previous=active.get(node);
- const remove=()=>{previous?.host.remove();active.delete(node);};
+ const remove=()=>{previous?.host.querySelectorAll('canvas').forEach(c=>{c.width=0;c.height=0;});previous?.host.remove();active.delete(node);};
  if(!isParticleExit(e.exitAnimation)){remove();return;}
  const kind=e.exitAnimation;
  const progress=particleProgress(e.at,e.until,duration,e.exitDuration,time);
@@ -21,12 +22,13 @@ export function updateParticles(node:HTMLElement,e:Element,time:number,duration:
  host.style.cssText=node.style.cssText;
  Object.assign(host.style,{overflow:'visible',background:'none',border:'0',borderRadius:'0',clipPath:'none',pointerEvents:'none',display:'block'});
  node.after(host);const tiles:HTMLElement[]=[];active.set(node,{host,signature,tiles});
+ const snapshots=new Map<HTMLCanvasElement|HTMLVideoElement,string>();
  // Clones are visual only. Never duplicate document IDs or live controls.
  for(let index=0;index<(progress===1?0:48);index++){
   const col=index%8,row=Math.floor(index/8),x=col*width/8,y=row*height/6;
   const tile=document.createElement('div');
   Object.assign(tile.style,{position:'absolute',left:x+'px',top:y+'px',width:width/8+'px',height:height/6+'px',overflow:'hidden'});
-  const copy=node.cloneNode(true) as HTMLElement;copy.classList.remove('selected');copy.removeAttribute('data-element-id');copy.removeAttribute('data-space');
+  const copy=node.cloneNode(true) as HTMLElement;copyMediaPixels(node,copy,snapshots);copy.classList.remove('selected');copy.removeAttribute('data-element-id');copy.removeAttribute('data-space');
   Object.assign(copy.style,{left:-x+'px',top:-y+'px',transform:'none',transformOrigin:'0 0',opacity:'1',mixBlendMode:'normal',filter:'none',visibility:'visible',pointerEvents:'none',outline:'none'});
   // Remap internal SVG paint/mask references without changing image data or text.
   const ids=new Map<string,string>();

@@ -1,3 +1,4 @@
+import {defaultKaleidoscope,parseKaleidoscope,kaleidoscopeState} from '../src/lib/kaleidoscope.ts';
 import {defaultPrint,parsePrint,printPattern} from '../src/lib/print.ts';
 import {defaultGlitch,glitchState} from '../src/lib/glitch.ts';
 import {defaultReveal,revealClip,revealProgress,revealTypes} from '../src/lib/reveal.ts';
@@ -446,4 +447,17 @@ test('print defaults, strict validation, all element types and JSON round trips'
 test('print patterns are bounded, deterministic and respond to screen geometry',()=>{
  const e=defaultPrint(),a=printPattern(e,1920,1080);assert.equal(a,printPattern(e,1920,1080));assert.match(a,/radialGradient/);assert.match(a,/rotate\(45\)/);assert.ok(a.length<1000);
  assert.notEqual(a,printPattern({...e,size:32},1920,1080));assert.notEqual(a,printPattern({...e,angle:0},1920,1080));assert.match(printPattern({...e,style:'lines'},1920,1080),/linearGradient/);
+});
+
+test('kaleidoscope defaults, all types, strict validation and round trip',()=>{
+ const p=demoProject(),e=p.scenes[0].elements[0];delete (e as any).kaleidoscope;assert.deepEqual(parseProject(serialize(p)).scenes[0].elements[0].kaleidoscope,defaultKaleidoscope());
+ for(const type of ['text','image','shape','bubble','video','simulation'] as const){assert.deepEqual(newElement(type).kaleidoscope,defaultKaleidoscope());assert.notEqual(newElement(type).kaleidoscope,newElement(type).kaleidoscope);}
+ e.kaleidoscope={...defaultKaleidoscope(),enabled:true,segments:16,rotation:-45,speed:-12,zoom:2,centerX:25,centerY:75};assert.deepEqual(parseProject(serialize(p)).scenes[0].elements[0].kaleidoscope,e.kaleidoscope);
+ for(const value of [null,[],false,{oops:1},{enabled:1},{segments:3},{segments:5},{segments:6.5},{segments:18},{speed:-91},{speed:91},{zoom:0},{zoom:5},{centerX:-1},{centerY:101},{rotation:-181},{rotation:181},{speed:'15'}]){(e as any).kaleidoscope=value;assert.throws(()=>parseProject(serialize(p)),/\.kaleidoscope/);}
+ for(const key of ['speed','zoom','rotation','centerX','centerY','segments'])assert.throws(()=>parseKaleidoscope({[key]:Infinity},'kaleidoscope'),/expected number/);
+});
+test('kaleidoscope geometry is deterministic, alternating, bounded and clock-driven',()=>{
+ const k={...defaultKaleidoscope(),enabled:true};const a=kaleidoscopeState(k,1,400,200);assert.deepEqual(a,kaleidoscopeState(k,1,400,200));assert.equal(a.angle,15);assert.equal(a.wedges.length,8);assert.match(a.wedges[0].transform,/scale\(1.5,1.5\)/);assert.match(a.wedges[1].transform,/scale\(1.5,-1.5\)/);assert.match(a.wedges[0].transform,/translate\(200px,100px\)/);
+ assert.equal(kaleidoscopeState(k,-1,400,200).angle,0);assert.equal(kaleidoscopeState({...k,speed:-15},1,400,200).angle,345);assert.equal(kaleidoscopeState(k,25,400,200).angle,15);assert.deepEqual(kaleidoscopeState({...k,speed:0},1,400,200),kaleidoscopeState({...k,speed:0},900,400,200));
+ assert.notDeepEqual(a,kaleidoscopeState({...k,rotation:25,centerX:0,centerY:100,zoom:2,segments:4},1,400,200));
 });
