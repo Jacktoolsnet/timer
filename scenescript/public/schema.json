@@ -503,6 +503,20 @@
                   "default": "scene",
                   "description": "Scene follows the camera; screen stays in the viewport. All members of a flat group must use the same space (runtime constraint). Null is rejected."
                 },
+                "print": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "Luminance-based dot or line screen, all element types, not groups. Preserves source alpha. Project-pixel spacing. Strength 0 bypasses exactly.",
+                  "properties": {
+                    "enabled": {"type": "boolean", "default": false},
+                    "style": {"enum": ["dots", "lines"], "default": "dots"},
+                    "size": {"type": "number", "minimum": 4, "maximum": 80, "default": 16},
+                    "angle": {"type": "number", "minimum": -180, "maximum": 180, "default": 45},
+                    "ink": {"type": "string", "pattern": "^#[0-9a-fA-F]{6}$", "default": "#18232b"},
+                    "paper": {"type": "string", "pattern": "^#[0-9a-fA-F]{6}$", "default": "#fff2d6"},
+                    "strength": {"type": "number", "minimum": 0, "maximum": 1, "default": 1}
+                  }
+                },
                 "glitch": {
                   "type": "object",
                   "additionalProperties": false,

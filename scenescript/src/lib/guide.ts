@@ -382,6 +382,21 @@ Optional fields and their defaults:
 - width: 80 (40 for bubble); height: 30 (24 for bubble); each 0.1–200, percentages of canvas width/height.
 - color: "#ffffff" for text/image/video/simulation, "#b86445" for shape, "#222222" for bubble; #RRGGBB color.
 - font: "Arial"; allowed ${fonts.map(f=>`"${f}"`).join(', ')}.
+- print: optional object; omitted defaults to
+  {"enabled":false,"style":"dots","size":16,"angle":45,"ink":"#18232b","paper":"#fff2d6","strength":1}.
+  All element types, not groups. Unknown fields are rejected. enabled is boolean;
+  style is dots or lines; size is 4–80 project pixels (not output pixels);
+  angle is -180–180 degrees; ink and paper are #rrggbb; strength is 0–1.
+  Brightness drives ink coverage: shadows use more ink, highlights more paper.
+  This is a stylized two-color screen, not a physical CMYK print simulation.
+  Source transparency is preserved; paper color fills only visible artwork.
+  Strength blends with the original; 0 and disabled bypass exactly.
+  Screen geometry is static in element-local coordinates, with no random flicker.
+  Live source animation and sampled stop-motion time still work normally.
+  Order: paper, liquid, glitch, print, reveal, particles; historical afterimages
+  include their earlier printed source content. No changes to layout, audio or timing.
+  Example: "print":{"enabled":true,"style":"dots","size":20,"angle":30,
+  "ink":"#20182b","paper":"#ffe8bd","strength":0.85}.
 - glitch: optional object; omitted defaults to
   {"enabled":false,"strength":16,"channelShift":5,"bands":8,"rate":6,"seed":17}.
   All element types, not groups. Explicit null/unknown fields/wrong types rejected;
@@ -396,7 +411,7 @@ Optional fields and their defaults:
   floor(max(0,time-element.at)*rate), respecting stop-motion's sampled clock.
   No global opacity/brightness toggling is introduced; prefer modest offsets
   and freeze the pattern when continuous motion is not wanted.
-  Paper/liquid are processed first, then glitch, reveal, particle exits.
+  Paper/liquid are processed first, then glitch, print, reveal, particle exits.
   Historical afterimages reconstruct their own earlier glitch patterns. Effects
   do not change layout geometry, anchors, audio, project length or export fps.
   Example: "glitch":{"enabled":true,"strength":20,"channelShift":8,"rate":4}.

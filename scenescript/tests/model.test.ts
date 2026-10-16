@@ -1,3 +1,4 @@
+import {defaultPrint,parsePrint,printPattern} from '../src/lib/print.ts';
 import {defaultGlitch,glitchState} from '../src/lib/glitch.ts';
 import {defaultReveal,revealClip,revealProgress,revealTypes} from '../src/lib/reveal.ts';
 import {defaultAfterimages,afterimageSamples} from '../src/lib/afterimages.ts';
@@ -431,4 +432,18 @@ test('glitch motion is seeded, bounded, held per pattern frame and can freeze',(
  }
  assert.ok(glitchState({...e,strength:0},1).shifts.every(n=>n===0));
  assert.equal(glitchState({...e,channelShift:0},1).red,0);assert.equal(glitchState({...e,channelShift:0},1).blue,0);
+});
+
+test('print defaults, strict validation, all element types and JSON round trips',()=>{
+ const p=demoProject(),e=p.scenes[0].elements[0];delete (e as any).print;
+ assert.deepEqual(parseProject(serialize(p)).scenes[0].elements[0].print,defaultPrint());
+ for(const type of ['text','image','shape','bubble','video','simulation'] as const){const n=newElement(type);assert.deepEqual(n.print,defaultPrint());assert.notEqual(n.print,newElement(type).print);}
+ e.print={...defaultPrint(),enabled:true,style:'lines',size:32,angle:-60,ink:'#aAbBcC',paper:'#ffcc88',strength:.75};
+ assert.deepEqual(parseProject(serialize(p)).scenes[0].elements[0].print,e.print);
+ for(const value of [null,[],false,{oops:1},{enabled:1},{style:'cmyk'},{size:3},{size:81},{angle:-181},{angle:181},{strength:-.1},{strength:1.1},{ink:'red'},{paper:'#fff'},{size:'16'}]){(e as any).print=value;assert.throws(()=>parseProject(serialize(p)),/\.print/);}
+ for(const key of ['size','angle','strength'] as const)assert.throws(()=>parsePrint({[key]:NaN},'print'),/expected number/);
+});
+test('print patterns are bounded, deterministic and respond to screen geometry',()=>{
+ const e=defaultPrint(),a=printPattern(e,1920,1080);assert.equal(a,printPattern(e,1920,1080));assert.match(a,/radialGradient/);assert.match(a,/rotate\(45\)/);assert.ok(a.length<1000);
+ assert.notEqual(a,printPattern({...e,size:32},1920,1080));assert.notEqual(a,printPattern({...e,angle:0},1920,1080));assert.match(printPattern({...e,style:'lines'},1920,1080),/linearGradient/);
 });
