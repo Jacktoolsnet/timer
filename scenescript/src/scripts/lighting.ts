@@ -1,7 +1,7 @@
 import type {Element} from '../lib/model';
 import {lightingMap,lightingState,lightingShadowMargin} from '../lib/lighting';
 const ns='http://www.w3.org/2000/svg';
-type View={svg:SVGSVGElement;content:HTMLDivElement;style:string;map:SVGElement;offset:SVGElement;signature:string;margin:number};
+type View={svg:SVGSVGElement;content:HTMLDivElement;style:string;map:SVGElement;offset:SVGElement;signature:string;mapMargin:number};
 const views=new WeakMap<HTMLElement,View>();
 /** Self-contained filter, shared by preview, recording, historical ghosts and export. */
 export function updateLighting(node:HTMLElement,e:Element,time:number,width:number,height:number){
@@ -20,7 +20,9 @@ export function updateLighting(node:HTMLElement,e:Element,time:number,width:numb
   filter.setAttribute('filterUnits','userSpaceOnUse');filter.setAttribute('primitiveUnits','userSpaceOnUse');filter.setAttribute('color-interpolation-filters','sRGB');
   for(const [key,value] of Object.entries({x:-margin,y:-margin,width:width+margin*2,height:height+margin*2}))filter.setAttribute(key,String(value));
   const add=(name:string,attrs:Record<string,string>)=>{const n=document.createElementNS(ns,name);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);filter.append(n);return n;};
-  const map=add('feImage',{x:String(-margin),y:String(-margin),width:String(width+margin*2),height:String(height+margin*2),preserveAspectRatio:'none',result:'light-map'});
+  // Overscan the orbit, then translate one immutable map instead of decoding a new image per frame.
+  const mapMargin=margin+g.orbit*Math.min(width,height)/100;
+  const map=add('feImage',{x:String(-mapMargin),y:String(-mapMargin),width:String(width+mapMargin*2),height:String(height+mapMargin*2),preserveAspectRatio:'none',result:'light-map'});
   // Make source RGB opaque before multiplying, then restore its original alpha once.
   add('feColorMatrix',{in:'SourceGraphic',type:'matrix',values:'1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0 1',result:'opaque'});
   add('feBlend',{in:'opaque',in2:'light-map',mode:'multiply',result:'relit'});
@@ -36,10 +38,12 @@ export function updateLighting(node:HTMLElement,e:Element,time:number,width:numb
   content.append(...Array.from(node.childNodes));foreign.append(content);svg.append(defs,foreign);svg.classList.add('lighting-svg');svg.setAttribute('viewBox',`0 0 ${width} ${height}`);svg.setAttribute('aria-hidden','true');
   Object.assign(svg.style,{position:'absolute',inset:'0',width:'100%',height:'100%',overflow:'visible',display:'block',flexShrink:'0',pointerEvents:'none'});
   Object.assign(node.style,{background:'none',border:'0',borderRadius:'0',overflow:'visible'});node.append(svg);
-  view={svg,content,style,map,offset,signature:'',margin};views.set(node,view);
+  view={svg,content,style,map,offset,signature:'',mapMargin};views.set(node,view);
  }
- const state=lightingState(g,time-e.at,width,height),data=lightingMap(g,state,width,height,view.margin);
+ const state=lightingState(g,time-e.at,width,height),baseX=width*g.centerX/100,baseY=height*g.centerY/100;
+ const data=lightingMap(g,{...state,x:baseX,y:baseY},width,height,view.mapMargin);
  if(view.signature!==data){view.map.setAttribute('href','data:image/svg+xml;base64,'+btoa(data));view.signature=data;}
+ view.map.setAttribute('x',String(-view.mapMargin+state.x-baseX));view.map.setAttribute('y',String(-view.mapMargin+state.y-baseY));
  view.offset.setAttribute('dx',String(state.dx));view.offset.setAttribute('dy',String(state.dy));
 
 }
