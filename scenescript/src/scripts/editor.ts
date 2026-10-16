@@ -1,3 +1,4 @@
+import {updateGlitch} from './glitch';
 import {revealTypes} from '../lib/reveal';
 import {updateReveal} from './reveal';
 import {updateAfterimages} from './afterimages';
@@ -276,7 +277,7 @@ function field(form:HTMLElement,key:string,value:string|number|boolean,kind:stri
  let input:HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement;
  if(kind==='select'){input=document.createElement('select');options?.forEach(option=>{const o=document.createElement('option');o.value=option;o.textContent=key==='revealType'?t('reveal-'+option):key==='space'?t('space-'+option):key==='exitAnimation'?t('exit-'+option):key==='bubbleSpeaker'?(option?(current().elements.find(e=>e.id===option)?.name||option):t('none')):key==='bubbleAnchor'?option:key==='audioAsset'?(option?project.audios[option].name:t('none')):key==='asset'||key==='backgroundAsset'?(option?project.assets[option].name:t('none')):t(key==='pathTemplate'&&option==='wave'?'path-wave':key==='pathType'&&option==='ellipse'?'path-ellipse':key==='pathEasing'&&option==='linear'?'path-linear':key==='pathAfter'&&option==='reset'?'path-reset':key==='style'&&option==='focus'?'musicFocus':key==='gradientType'&&option==='solid'?'gradientSolid':key==='transition'&&option!=='none'&&option!=='fade'?'transition-'+option:option);input.append(o);});input.value=String(value);}
  else if(kind==='textarea'){input=document.createElement('textarea');input.value=String(value);input.maxLength=10000;}
- else{input=document.createElement('input');input.type=kind;if(kind==='checkbox')input.checked=Boolean(value);else input.value=String(value);if(kind==='number'){input.step='any';if(min!==undefined)input.min=String(min);if(max!==undefined)input.max=String(max);}if(kind==='text')input.maxLength=200;if(['simulationCount','simulationSeed','paperSeed','stopMotionFps','stopMotionSeed','afterimagesCount','revealStrokes','revealSeed'].includes(key))input.step='1';}
+ else{input=document.createElement('input');input.type=kind;if(kind==='checkbox')input.checked=Boolean(value);else input.value=String(value);if(kind==='number'){input.step='any';if(min!==undefined)input.min=String(min);if(max!==undefined)input.max=String(max);}if(kind==='text')input.maxLength=200;if(['simulationCount','simulationSeed','paperSeed','stopMotionFps','stopMotionSeed','afterimagesCount','revealStrokes','revealSeed','glitchBands','glitchSeed'].includes(key))input.step='1';}
  input.name=key;
  const eagerNumber=kind==='number'&&['x','y','width','height','rotation'].includes(key);
  input.addEventListener(kind==='textarea'||kind==='text'||kind==='color'||eagerNumber?'input':'change',event=>{
@@ -291,7 +292,7 @@ function field(form:HTMLElement,key:string,value:string|number|boolean,kind:stri
   number.addEventListener('wheel',()=>number.blur(),{passive:true});
   if(eagerNumber)number.addEventListener('change',()=>{if(number.isConnected&&number.checkValidity()&&Number.isFinite(number.valueAsNumber))action(number.valueAsNumber);});
   const wrapper=document.createElement('span');wrapper.className='number-stepper';
-  const step=key==='afterimagesSpacing'?.01:['audioVolume','opacity','stopOpacity','backgroundOpacity','simulationOpacity','volume','sustain','reverb','velocity','gain','echoMix','echoFeedback','shadowOpacity','exposureStrength','paperTexture','afterimagesOpacity'].includes(key)?0.05:['cameraAt','cameraHold','audioAt','audioStart','audioEnd','audioFadeIn','audioFadeOut','pathPause','pathStart','pathDuration','duration','transitionDuration','animationDuration','exitDuration','until','bubbleLineHeight','bubbleCurve','at','simulationSpeed','liquidSpeed','stopMotionJitter','stopMotionRotation','afterimagesSpacing','revealDelay','revealDuration','attack','decay','release','fadeIn','fadeOut','echoDelay','ratio'].includes(key)?0.1:1;
+  const step=key==='afterimagesSpacing'?.01:['audioVolume','opacity','stopOpacity','backgroundOpacity','simulationOpacity','volume','sustain','reverb','velocity','gain','echoMix','echoFeedback','shadowOpacity','exposureStrength','paperTexture','afterimagesOpacity'].includes(key)?0.05:['cameraAt','cameraHold','audioAt','audioStart','audioEnd','audioFadeIn','audioFadeOut','pathPause','pathStart','pathDuration','duration','transitionDuration','animationDuration','exitDuration','until','bubbleLineHeight','bubbleCurve','at','simulationSpeed','liquidSpeed','stopMotionJitter','stopMotionRotation','afterimagesSpacing','revealDelay','revealDuration','glitchRate','attack','decay','release','fadeIn','fadeOut','echoDelay','ratio'].includes(key)?0.1:1;
   const controls=[-1,1].map(direction=>{
    const control=button(direction<0?'−':'+',()=>{
     if(!Number.isFinite(number.valueAsNumber))return;
@@ -304,7 +305,7 @@ function field(form:HTMLElement,key:string,value:string|number|boolean,kind:stri
   function sync(){controls[0].disabled=min!==undefined&&number.valueAsNumber<=min;controls[1].disabled=max!==undefined&&number.valueAsNumber>=max;}
   number.addEventListener('input',sync);number.addEventListener('change',sync);sync();
   wrapper.append(controls[0],number,controls[1]);label.append(wrapper);
- }else if(kind==='checkbox'&&['cameraEnabled','cameraOverview','cameraFrameOverview','liquidEnabled','exposureEnabled','paperEnabled','stopMotionEnabled','afterimagesEnabled','afterimagesTint','revealEnabled','bold','italic','underline','strikethrough','backgroundEnabled','musicEnabled','loop','muted','audioMuted','audioDucking','pathOrient','pathClockwise','elementEndEnabled','bubbleBaseAuto'].includes(key)){
+ }else if(kind==='checkbox'&&['cameraEnabled','cameraOverview','cameraFrameOverview','liquidEnabled','exposureEnabled','paperEnabled','stopMotionEnabled','afterimagesEnabled','afterimagesTint','revealEnabled','glitchEnabled','bold','italic','underline','strikethrough','backgroundEnabled','musicEnabled','loop','muted','audioMuted','audioDucking','pathOrient','pathClockwise','elementEndEnabled','bubbleBaseAuto'].includes(key)){
   label.classList.add('text-style-toggle');
   const wrapper=document.createElement('span');wrapper.className='safe-switch';
   input.setAttribute('role','switch');input.setAttribute('aria-label',t(key));
@@ -553,6 +554,14 @@ function renderForms(){
   gradientFields(group,'textGradient',e.textGradient,e.color,value=>{updateElement('textGradient',value);richEditor?.editor.querySelectorAll<HTMLElement>('[data-style]').forEach(node=>styleTextGradient(node,e.textGradient));});
  }
  if(e.type==='shape')gradientFields(ef,'fillGradient',e.fillGradient,e.fillColor,v=>updateElement('fillGradient',v));
+ const glitchGroup=document.createElement('fieldset');glitchGroup.className='text-settings-group';
+ const glitchLegend=document.createElement('legend');glitchLegend.textContent=t('glitch');glitchGroup.append(glitchLegend);ef.append(glitchGroup);
+ const glitchHint=document.createElement('p');glitchHint.className='small-hint';glitchHint.textContent=t('glitchHint');glitchGroup.append(glitchHint);
+ field(glitchGroup,'glitchEnabled',e.glitch.enabled,'checkbox',v=>{updateElement('glitch',{...e.glitch,enabled:v});renderForms();});
+ if(e.glitch.enabled){
+  for(const [key,label,min,max] of [['strength','glitchStrength',0,60],['channelShift','glitchChannelShift',0,30],['bands','glitchBands',1,16],['rate','glitchRate',0,12],['seed','glitchSeed',0,65535]] as const)
+   field(glitchGroup,label,e.glitch[key],'number',v=>updateElement('glitch',{...e.glitch,[key]:v}),undefined,min,max);
+ }
  const revealGroup=document.createElement('fieldset');revealGroup.className='text-settings-group';
  const revealLegend=document.createElement('legend');revealLegend.textContent=t('reveal');revealGroup.append(revealLegend);ef.append(revealGroup);
  const revealHint=document.createElement('p');revealHint.className='small-hint';revealHint.textContent=t('revealHint');revealGroup.append(revealHint);
@@ -863,7 +872,7 @@ function updateSceneViews(sceneViews:SceneView[],local:number,opacity=1,cameraEn
   Object.assign(node.style,exposureCSS(element.exposure,state.opacity*opacity));node.style.visibility=state.visible?'visible':'hidden';node.style.transform=state.transform;node.style.transformOrigin='0 0';
   if(text&&text.dataset.visibleText!==state.text){renderRuns(text,element,state.text);text.dataset.visibleText=state.text;}
   bubble?.update(effectiveScene,local,state.text,!playing&&!recording&&(element.id===selectedId||scene.groups.some(g=>g.id===selectedGroupId&&g.members.includes(element.id))));
-  const [pw,ph]=formats[project.format];updateLiquid(node,element,state.sampleTime,element.width*pw/100,element.height*ph/100);updateReveal(node,element,state.sampleTime,element.width*pw/100,element.height*ph/100);updateParticles(node,element,state.sampleTime,scene.duration,element.width*pw/100,element.height*ph/100);
+  const [pw,ph]=formats[project.format];updateLiquid(node,element,state.sampleTime,element.width*pw/100,element.height*ph/100);updateGlitch(node,element,state.sampleTime,element.width*pw/100,element.height*ph/100);updateReveal(node,element,state.sampleTime,element.width*pw/100,element.height*ph/100);updateParticles(node,element,state.sampleTime,scene.duration,element.width*pw/100,element.height*ph/100);
   void updateAfterimages(node,element,effectiveScene,project.assets,local,pw,ph,opacity,()=>draw(false)).catch(error=>status((error as Error).message));
  });
  const warning=document.getElementById('bubble-overflow');

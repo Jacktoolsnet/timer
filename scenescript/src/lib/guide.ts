@@ -382,6 +382,24 @@ Optional fields and their defaults:
 - width: 80 (40 for bubble); height: 30 (24 for bubble); each 0.1–200, percentages of canvas width/height.
 - color: "#ffffff" for text/image/video/simulation, "#b86445" for shape, "#222222" for bubble; #RRGGBB color.
 - font: "Arial"; allowed ${fonts.map(f=>`"${f}"`).join(', ')}.
+- glitch: optional object; omitted defaults to
+  {"enabled":false,"strength":16,"channelShift":5,"bands":8,"rate":6,"seed":17}.
+  All element types, not groups. Explicit null/unknown fields/wrong types rejected;
+  omitted subfields use defaults. enabled is boolean; strength 0–60 and
+  channelShift 0–30 are project-pixel offsets; bands integer 1–16; rate 0–12
+  pattern changes per second; seed integer 0–65535.
+  Horizontal bands shift by at most strength. Red/blue channels shift in opposing
+  directions by at most channelShift; green stays centered; channels recombine
+  with screen blending. Splitting may change edge alpha/color, as part of the look.
+  Set channelShift 0 for bands only, strength 0 for RGB only, or both 0 to
+  bypass the effect exactly. rate 0 freezes a seeded pattern. Motion uses
+  floor(max(0,time-element.at)*rate), respecting stop-motion's sampled clock.
+  No global opacity/brightness toggling is introduced; prefer modest offsets
+  and freeze the pattern when continuous motion is not wanted.
+  Paper/liquid are processed first, then glitch, reveal, particle exits.
+  Historical afterimages reconstruct their own earlier glitch patterns. Effects
+  do not change layout geometry, anchors, audio, project length or export fps.
+  Example: "glitch":{"enabled":true,"strength":20,"channelShift":8,"rate":4}.
 - reveal: optional object; omitted defaults to
   {"enabled":false,"type":"left-to-right","delay":0,"duration":1.5,
    "easing":"ease-in-out","originX":50,"originY":50,"strokes":5,

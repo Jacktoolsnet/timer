@@ -1,3 +1,4 @@
+import {defaultGlitch,glitchState} from '../src/lib/glitch.ts';
 import {defaultReveal,revealClip,revealProgress,revealTypes} from '../src/lib/reveal.ts';
 import {defaultAfterimages,afterimageSamples} from '../src/lib/afterimages.ts';
 import {sceneAfterimageState} from '../src/lib/groups.ts';
@@ -406,4 +407,28 @@ test('reveal timing, directional clipping, circle geometry and seeded brush mask
   const coords=revealClip(brush,time,.3,1,2).match(/[0-9.]+(?=%)/g)!.map(Number);assert.ok(coords.every(n=>n>=0&&n<=100));
  }
  assert.equal(revealClip(defaultReveal(),0,0,100,50),'none');
+});
+
+test('glitch settings are optional, strict and supported on all element types',()=>{
+ const p=demoProject(),e=p.scenes[0].elements[0];e.glitch={...defaultGlitch(),enabled:true,strength:30,channelShift:12};
+ assert.deepEqual(parseProject(serialize(p)).scenes[0].elements[0].glitch,e.glitch);
+ const legacy=JSON.parse(serialize(p));delete legacy.scenes[0].elements[0].glitch;assert.deepEqual(parseProject(serialize(legacy)).scenes[0].elements[0].glitch,defaultGlitch());
+ for(const value of [null,[],42,{enabled:'yes'},{strength:-1},{strength:61},{channelShift:31},{bands:0},{bands:17},{bands:1.5},{rate:-1},{rate:13},{seed:-1},{seed:1.5},{seed:65536},{rate:null},{unknown:1}]){
+  const invalid=JSON.parse(serialize(p));invalid.scenes[0].elements[0].glitch=value;assert.throws(()=>parseProject(serialize(invalid)),/glitch/);
+ }
+ for(const type of ['text','image','shape','bubble','simulation','video'] as const){
+  const element=newElement(type);element.glitch.enabled=true;p.scenes[0].elements=[element];assert.equal(parseProject(serialize(p)).scenes[0].elements[0].glitch.enabled,true);
+ }
+});
+
+test('glitch motion is seeded, bounded, held per pattern frame and can freeze',()=>{
+ const e={...defaultGlitch(),enabled:true,rate:4};
+ assert.deepEqual(glitchState(e,.26),glitchState(e,.49));assert.notDeepEqual(glitchState(e,.26),glitchState(e,.5));
+ assert.deepEqual(glitchState(e,-1),glitchState(e,0));assert.deepEqual(glitchState({...e,rate:0},1),glitchState({...e,rate:0},100));
+ assert.notDeepEqual(glitchState(e,1),glitchState({...e,seed:18},1));
+ for(const time of [0,.2,1,10,100]){
+  const state=glitchState(e,time);assert.equal(state.shifts.length,e.bands);assert.ok(state.shifts.every(n=>Math.abs(n)<=e.strength));assert.ok(Math.abs(state.red)<=e.channelShift);assert.ok(Math.abs(state.blue)<=e.channelShift);assert.ok(state.red*state.blue<=0);
+ }
+ assert.ok(glitchState({...e,strength:0},1).shifts.every(n=>n===0));
+ assert.equal(glitchState({...e,channelShift:0},1).red,0);assert.equal(glitchState({...e,channelShift:0},1).blue,0);
 });
