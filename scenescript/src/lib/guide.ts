@@ -166,14 +166,15 @@ group transforms then camera are applied. Rotation also rotates local slide.
 Scene transition (applies to the incoming scene; first scene has no outgoing one):
 - none: no fade/transform. fade: incoming elements/background IMAGE fade in over
   their OWN immediate background color; NOT a crossfade from the previous scene.
-- crossfade: incoming opacity 0→1; outgoing 1→0.
+- crossfade: full incoming scene opacity 0→1 over the held outgoing scene.
 - slide-left/right/up/down: incoming travels in named direction from one viewport
-  away; previous scene travels out in same direction. Eased progress.
+  away; previous scene travels out in same direction. Linear progress.
 - wipe-left/right/up/down: reveals incoming scene by clipping in named direction;
-  outgoing stays underneath. zoom-in: incoming scale 0.8→1 and fades; outgoing fades.
-- zoom-out: incoming fades; outgoing scale 1→1.2 and fades.
+  outgoing stays underneath. zoom-in: incoming scale 0.7→1 and opacity 0→1.
+- zoom-out: incoming scale 1.3→1 and opacity 0→1; outgoing stays underneath.
 - through-black: outgoing fades first half; incoming second half; black overlays.
-Non-fade transitions use cubic ease-in-out; viewport, not project pixels, sets travel.
+Non-fade transition progress is linear and clamped; it is retained when paused or
+seeking. First-scene transitions run over black. Viewport size sets slide travel.
 Transitions overlap the start of a scene, do not extend durations or mute narration.
 
 Accepted edge cases (not rejection rules): at==scene.duration is legal but usually
@@ -376,8 +377,7 @@ References and limits:
   0.001–86400s. AudioData analogous data:audio/<subtype>;base64, <=32 MiB; <=30 files;
   real duration 0.001–3600s. Use canonical lowercase; video prefix is runtime
   case-insensitive. Reject playlists/streams (mpegurl/dash+xml/playlist for video;
-  mpegurl/playlist for audio). Subtype characters: ASCII letters/digits/. /+/-
-  (the dot, plus and hyphen, not spaces or another slash).
+  mpegurl/playlist for audio). Subtype characters: ASCII letters, digits, dot, plus, hyphen; no spaces/slashes.
 - Standard Base64 alphabet, nonempty payload, full four-character blocks with
   appropriate = padding. No whitespace/Base64URL/external URLs. Encode only real
   available bytes with an encoding tool. Reuse assets rather than duplicating data.
@@ -502,10 +502,13 @@ JSON is the editable project, NOT a video file. The editor can import pasted JSO
 or a .scenescript.json file and save it; recent editing/undo state is not project
 content. Preview/recording never exports handles, selection outlines or safe zones.
 Direct MP4/WebM export is browser-side, requires compatible decoders and encoders;
-MP4 can use bundled local AAC fallback. Audio is optional; no server transcoding or
+MP4 can use bundled local AAC fallback. Export size (480p/720p/1080p short edge),
+24/30/60 fps and audio choice are UI-only, NOT Project fields. No server transcoding or
 automatic MP4→WebM fallback. Export can be cancelled; it does not replace editable
 JSON. Screen recording is another route; capture tab/system audio if wanted.
-No automatic publishing or platform acceptance guarantees exist.
+The editor requires a viewport >=768 CSS pixels (tablet/desktop), not a landscape
+project; phone-shaped videos are supported. AI documentation remains accessible
+on smaller viewports. No automatic publishing or platform acceptance guarantees exist.
 
 ## 11. Field catalog (specification notation, not output JSON)
 Every block below defines one object type. Follow the reference from its parent's

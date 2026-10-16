@@ -298,3 +298,17 @@ Aufnahme und Offline-WebM/MP4-Export enthalten die zugewiesenen Sprachclips; der
 Export-Audioschalter schaltet alle Tonquellen gemeinsam aus. Keine externe TTS-API,
 keine Schlüssel, keine Hosting-Änderung. Schema/KI-Anleitung beschreiben `audios`,
 `narration`, Szenen-`narration` und `audioDucking`, inklusive Runtime-Grenzen.
+
+### Kopierbare KI-Spezifikation
+
+`src/lib/guide.ts` enthält eine einzige, auch offline per Copy/Paste nutzbare
+Anleitung: Einstieg ohne Vorwissen, erklärte Typnotation, Funktionsregeln und
+vollständige kompakte JSON-Beispiele (Text, Comic-Kamerafahrt, Kunsteffekte).
+`src/lib/guide-fields.ts` erzeugt den Feldkatalog aus `public/schema.json` und den
+Laufzeit-Defaults. Vererbte TextRun-Stile und typabhängige Element-Defaults werden
+explizit ausgewiesen. Die Notation ist **keine** alternative Import-Syntax.
+Alle KI-Seiten, `/ai.txt` und der Kopierbutton verwenden denselben vollständigen
+Text; zusätzliche Downloads sind zum Verstehen nicht erforderlich.
+Tests prüfen Feldabdeckung, Default-Abgleich, Größenbudget, Beispielimporte und
+Clipboard-Fallback. Bei neuen Feldern Schema/Factory und die zugehörige semantische
+Erklärung gemeinsam aktualisieren; keine zweite vollständige Referenz pflegen.
