@@ -1759,9 +1759,21 @@
           "type": "string",
           "maxLength": 10000,
           "default": ""
+        },
+        "instructions": {
+          "type": "string",
+          "maxLength": 5000,
+          "default": "",
+          "description": "Delivery direction for external speech generation; not spoken or rendered."
+        },
+        "speaker": {
+          "type": "string",
+          "maxLength": 200,
+          "default": "",
+          "description": "Speaker or voice label for external speech generation; not a provider voice ID."
         }
       },
-      "description": "Runtime checks audio reference, start < file duration, start < end <= file duration and at <= containing scope duration."
+      "description": "Narration or a text-only speech draft (asset empty). Matched speech import resets trims and extends scene/project duration to fit real decoded audio. Runtime checks reference, start/end and scope; legacy playback still clips to scope."
     },
     "anchorPoint": {
       "type": "object",

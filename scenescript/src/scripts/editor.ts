@@ -1,3 +1,5 @@
+import {speechJobs,speechJobText,matchSpeechFiles,attachSpeechFiles,fitSpeechDurations,sceneSpeechMinimum} from '../lib/speech-jobs';
+import {textZip} from '../lib/text-zip';
 import {updateLighting} from './lighting';
 import {updateKaleidoscope} from './kaleidoscope';
 import {updatePrint} from './print';
@@ -23,8 +25,8 @@ import {History} from '../lib/history';
 import {sceneElementState,sceneElementMatrix,newGroup,dissolveGroup,groupController,parentMatrix} from '../lib/groups';
 import {createBubble,type BubbleView} from './bubble';
 import {bubbleTarget,applyMatrix,inversePoint,detachAnchor,renameAnchor,type Bubble} from '../lib/comic';
-import {defaultNarration,parseNarration,validateAudioData,narrationClips,duckGain,MAX_AUDIO_BYTES,type Narration,type AudioAsset} from '../lib/audio';
-import {decodeAudio,audioBlob,NarrationPlayer} from './audio';
+import {defaultNarration,parseNarration,narrationClips,duckGain,MAX_AUDIO_BYTES,type Narration,type AudioAsset} from '../lib/audio';
+import {decodeAudio,readAudioFile,audioBlob,NarrationPlayer} from './audio';
 import {defaultMotionPath,defaultSegment,pathTemplate,pathTypes,type Point,type MotionPath} from '../lib/motion-path';
 import {renderMotionPath} from './motion-path-editor';
 import {defaultVideo,parseVideo,validateVideoData,MAX_VIDEO_BYTES,type VideoSettings} from '../lib/video';
@@ -248,25 +250,60 @@ function renderAudios(){const list=$('audio-list');list.querySelectorAll('audio'
  const rename=button('',()=>askRename(asset.name,name=>{asset.name=name;changed();refresh();}));audioIcon(rename,'m15 4 5 5M4 20l5-1L21 7l-5-5L4 14Z',t('rename'));
  const replace=button('',()=>{const input=$('audio-file') as HTMLInputElement;input.dataset.replaceAsset=id;input.click();});replace.dataset.replaceAudio=id;audioIcon(replace,'M4 8h12m-4-4 4 4-4 4M20 16H8m4-4-4 4 4 4',t('replaceMedia'));
  const save=button('',()=>{const url=audioURL(asset),link=document.createElement('a'),mime=asset.data.slice(5,asset.data.indexOf(';')),extension=({'audio/mpeg':'mp3','audio/mp3':'mp3','audio/wav':'wav','audio/x-wav':'wav','audio/wave':'wav','audio/ogg':'ogg','audio/mp4':'m4a','audio/aac':'aac','audio/flac':'flac','audio/webm':'webm'} as Record<string,string>)[mime]??'audio';link.href=url;const name=asset.name.replace(/[<>:"/\\|?*\x00-\x1f]/g,'-').trim().replace(/[. ]+$/g,'').slice(0,160)||'audio';link.download=/\.(mp3|wav|ogg|m4a|aac|flac|webm|opus|aiff?|au|3gp)$/i.test(name)?name:name+'.'+extension;link.click();});save.dataset.saveAudio=id;audioIcon(save,'M12 3v12m-5-5 5 5 5-5M4 15v6h16v-6',t('save'));
- const remove=button('',()=>{const target=project;askDelete(asset.name,'audio',()=>{if(project!==target)return;stop();delete project.audios[id];if(project.narration?.asset===id)project.narration=null;project.scenes.forEach(s=>{if(s.narration?.asset===id)s.narration=null;});clearAudioURLs();changed();refresh();});});remove.dataset.deleteAudio=id;audioIcon(remove,'M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7',t('remove'));actions.append(rename,replace,save,remove);row.append(preview,name,actions);list.append(row);
+ const remove=button('',()=>{const target=project;askDelete(asset.name,'audio',()=>{if(project!==target)return;stop();delete project.audios[id];if(project.narration?.asset===id)project.narration={...project.narration,asset:'',start:0,end:null};project.scenes.forEach(s=>{if(s.narration?.asset===id)s.narration={...s.narration,asset:'',start:0,end:null};});clearAudioURLs();changed();refresh();});});remove.dataset.deleteAudio=id;audioIcon(remove,'M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7',t('remove'));actions.append(rename,replace,save,remove);row.append(preview,name,actions);list.append(row);
 }}
 let audioImportAttempt=0;
 $('gallery-import-audio').onclick=()=>{delete ($('audio-file') as HTMLInputElement).dataset.replaceAsset;($('audio-file') as HTMLInputElement).click();};
 ($('audio-file') as HTMLInputElement).addEventListener('cancel',()=>delete ($('audio-file') as HTMLInputElement).dataset.replaceAsset);
 ($('audio-file') as HTMLInputElement).onchange=async()=>{const input=$('audio-file') as HTMLInputElement,file=input.files?.[0],id=input.dataset.replaceAsset;input.value='';delete input.dataset.replaceAsset;if(!file)return;const target=project,attempt=++audioImportAttempt;try{if(file.size>MAX_AUDIO_BYTES)throw new Error('Audio: maximum 32 MiB');if(!id&&Object.keys(project.audios).length>=30)throw new Error('audios: maximum 30');if(id&&!project.audios[id])return;
- const data=await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=()=>reject(new Error('Audio read failed'));const fallback=({'mp3':'audio/mpeg','wav':'audio/wav','ogg':'audio/ogg','m4a':'audio/mp4','aac':'audio/aac','flac':'audio/flac','webm':'audio/webm'} as Record<string,string>)[file.name.split('.').pop()!.toLowerCase()];reader.readAsDataURL(!file.type.startsWith('audio/')&&fallback?new Blob([file],{type:fallback}):file);});validateAudioData(data);const asset={name:file.name.slice(0,200),data,duration:0};asset.duration=(await decodeAudio(asset)).duration;if(project!==target||attempt!==audioImportAttempt)return;const key=id??crypto.randomUUID(),next=structuredClone(project);next.audios[key]={...asset,name:id?project.audios[id].name:asset.name};
+ const asset=await readAudioFile(file);if(project!==target||attempt!==audioImportAttempt)return;const key=id??crypto.randomUUID(),next=structuredClone(project);next.audios[key]={...asset,name:id?project.audios[id].name:asset.name};
  if(id){const clamp=(n:Narration|null)=>{if(n?.asset!==id)return n;const start=Math.min(n.start,Math.max(0,asset.duration-.001)),end=n.end===null?null:Math.min(n.end,asset.duration);return {...n,start,end:end!==null&&end<=start?null:end};};next.narration=clamp(next.narration);next.scenes.forEach(s=>s.narration=clamp(s.narration));}
- parseProject(JSON.stringify(next));stop();project.audios=next.audios;project.narration=next.narration;project.scenes.forEach((s,i)=>s.narration=next.scenes[i].narration);clearAudioURLs();changed();refresh();
+ fitSpeechDurations(next);parseProject(JSON.stringify(next));stop();project.scenes.forEach((s,i)=>s.duration=next.scenes[i].duration);project.audios=next.audios;project.narration=next.narration;project.scenes.forEach((s,i)=>s.narration=next.scenes[i].narration);clearAudioURLs();changed();refresh();
  }catch(error){if(project===target&&attempt===audioImportAttempt)status(t('error')+' '+(error as Error).message);}};
 const narrationDialog=$('narration-dialog') as HTMLDialogElement;let narrationTarget:Scene|'project'='project',narrationDraft=defaultNarration(),duckDraft=false,narrationProject:Project;
 function openNarration(target:Scene|'project'){stop();narrationProject=project;narrationTarget=target;narrationDraft=structuredClone((target==='project'?project.narration:target.narration)??defaultNarration());duckDraft=project.audioDucking;$('narration-title').textContent=t(target==='project'?'projectNarration':'sceneNarration');renderNarration();narrationDialog.showModal();}
 function renderNarration(){const form=$('narration-form');form.querySelectorAll('audio').forEach(a=>a.pause());form.replaceChildren();const fields=document.createElement('div');fields.className='text-settings-fields';form.append(fields);const d=narrationDraft,scope=narrationTarget==='project'?total():narrationTarget.duration;field(fields,'audioAsset',d.asset,'select',value=>{narrationDraft={...narrationDraft,asset:String(value),start:0,end:null};renderNarration();},['',...Object.keys(project.audios)]);
- if(d.asset){const duration=project.audios[d.asset].duration;for(const [key,label,max] of [['at','audioAt',scope],['start','audioStart',duration],['end','audioEnd',duration],['volume','audioVolume',1],['fadeIn','audioFadeIn',3600],['fadeOut','audioFadeOut',3600]] as const)field(fields,label,d[key]??duration,'number',value=>{(narrationDraft as unknown as Record<string,unknown>)[key]=key==='end'&&value===duration?null:value;const a=form.querySelector('audio');if(a){a.pause();a.currentTime=narrationDraft.start;a.volume=narrationDraft.volume;}},undefined,0,max);
- field(fields,'audioMuted',d.muted,'checkbox',value=>narrationDraft.muted=Boolean(value));field(fields,'narrationText',d.text,'textarea',value=>narrationDraft.text=String(value));const audio=document.createElement('audio');audio.id='narration-preview';audio.controls=true;audio.src=audioURL(project.audios[d.asset]);audio.volume=d.volume;audio.onloadedmetadata=()=>audio.currentTime=narrationDraft.start;audio.onplay=()=>{if(audio.currentTime<narrationDraft.start||audio.currentTime>=(narrationDraft.end??duration))audio.currentTime=narrationDraft.start;};audio.ontimeupdate=()=>{if(audio.currentTime>=(narrationDraft.end??duration))audio.pause();};form.append(audio);}
+ field(fields,'narrationText',d.text,'textarea',value=>narrationDraft.text=String(value));
+ field(fields,'narrationInstructions',d.instructions,'textarea',value=>narrationDraft.instructions=String(value));fields.querySelector<HTMLTextAreaElement>('[name=narrationInstructions]')!.maxLength=5000;
+ field(fields,'narrationSpeaker',d.speaker,'text',value=>narrationDraft.speaker=String(value));
+ const hint=document.createElement('p');hint.className='small-hint';hint.textContent=t('speechDraftHint');fields.append(hint);
+ field(fields,'audioAt',d.at,'number',value=>narrationDraft.at=Number(value),undefined,0,scope);
+ if(d.asset){const duration=project.audios[d.asset].duration;for(const [key,label,max] of [['start','audioStart',duration],['end','audioEnd',duration],['volume','audioVolume',1],['fadeIn','audioFadeIn',3600],['fadeOut','audioFadeOut',3600]] as const)field(fields,label,d[key]??duration,'number',value=>{(narrationDraft as unknown as Record<string,unknown>)[key]=key==='end'&&value===duration?null:value;const a=form.querySelector('audio');if(a){a.pause();a.currentTime=narrationDraft.start;a.volume=narrationDraft.volume;}},undefined,0,max);
+ field(fields,'audioMuted',d.muted,'checkbox',value=>narrationDraft.muted=Boolean(value));const audio=document.createElement('audio');audio.id='narration-preview';audio.controls=true;audio.src=audioURL(project.audios[d.asset]);audio.volume=d.volume;audio.onloadedmetadata=()=>audio.currentTime=narrationDraft.start;audio.onplay=()=>{if(audio.currentTime<narrationDraft.start||audio.currentTime>=(narrationDraft.end??duration))audio.currentTime=narrationDraft.start;};audio.ontimeupdate=()=>{if(audio.currentTime>=(narrationDraft.end??duration))audio.pause();};form.append(audio);}
  if(narrationTarget==='project')field(fields,'audioDucking',duckDraft,'checkbox',value=>duckDraft=Boolean(value));
 }
 $('project-narration').onclick=()=>openNarration('project');$('close-narration').onclick=()=>narrationDialog.close();narrationDialog.addEventListener('close',()=>stopAudioPreviews());
-$('narration-form').addEventListener('submit',event=>{event.preventDefault();try{if(project!==narrationProject)throw new Error('Project changed');const scope=narrationTarget==='project'?total():narrationTarget.duration,narration=narrationDraft.asset?parseNarration(narrationDraft,project.audios,scope):null;const candidate=structuredClone(project);if(narrationTarget==='project'){candidate.narration=narration;candidate.audioDucking=duckDraft;}else{const index=project.scenes.indexOf(narrationTarget);if(index<0)throw new Error('Scene removed');candidate.scenes[index].narration=narration;}parseProject(JSON.stringify(candidate));stop();if(narrationTarget==='project'){project.narration=narration;project.audioDucking=duckDraft;}else narrationTarget.narration=narration;changed();narrationDialog.close();draw();}catch(error){showToast((error as Error).message,'error');}});
+$('narration-form').addEventListener('submit',event=>{event.preventDefault();try{
+ if(project!==narrationProject)throw new Error('Project changed');
+ const scope=narrationTarget==='project'?total():narrationTarget.duration,d=narrationDraft;
+ const narration=d.asset||d.text.trim()||d.instructions.trim()||d.speaker.trim()?parseNarration(d,project.audios,scope):null;
+ const candidate=structuredClone(project);if(narrationTarget==='project'){candidate.narration=narration;candidate.audioDucking=duckDraft;}else{const index=project.scenes.indexOf(narrationTarget);if(index<0)throw new Error('Scene removed');candidate.scenes[index].narration=narration;}
+ const extended=fitSpeechDurations(candidate);parseProject(JSON.stringify(candidate));stop();project.narration=candidate.narration;project.audioDucking=candidate.audioDucking;project.scenes.forEach((s,i)=>{s.narration=candidate.scenes[i].narration;s.duration=candidate.scenes[i].duration;});changed();narrationDialog.close();refresh();if(extended.length)showToast(t('speechExtended')+' '+extended.length,'success');
+ }catch(error){showToast((error as Error).message,'error');}});
+
+const speechReport=$('speech-report') as HTMLDialogElement;
+function reportSpeech(text:string){$('speech-report-text').textContent=text;speechReport.showModal();}
+$('close-speech-report').onclick=()=>speechReport.close();$('copy-speech-report').onclick=async()=>{try{await navigator.clipboard.writeText($('speech-report-text').textContent||'');showToast(t('copied'),'success');}catch{const range=document.createRange();range.selectNodeContents($('speech-report-text'));const selection=window.getSelection();selection?.removeAllRanges();selection?.addRange(range);}};
+$('export-speech-jobs').onclick=async()=>{const snapshot=structuredClone(project);try{
+ const jobs=await speechJobs(snapshot);if(!jobs.length){showToast(t('speechNoJobs'),'warning');return;}
+ const files=jobs.map(job=>({name:job.textName,text:speechJobText(job,{target:t('speechTarget'),scope:t('speechScope'),project:t('projectNarration'),scene:t('sceneNarration'),speaker:t('narrationSpeaker'),instructions:t('narrationInstructions'),script:t('narrationText'),hint:t('speechTextHint')})}));
+ const blob=new Blob([textZip(files)],{type:'application/zip'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=(snapshot.title.replace(/[^\p{L}\p{N}_-]+/gu,'-').slice(0,80)||'project')+'-speech.zip';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);showToast(t('speechExported')+' '+files.length,'success');
+ }catch(error){reportSpeech(t('error')+' '+(error as Error).message);}};
+let speechImportAttempt=0;
+$('import-speech-files').onclick=()=>($('speech-audio-files') as HTMLInputElement).click();
+($('speech-audio-files') as HTMLInputElement).onchange=async()=>{const input=$('speech-audio-files') as HTMLInputElement,files=[...input.files||[]];input.value='';if(!files.length)return;
+ const target=project,started=revision,attempt=++speechImportAttempt;
+ const unchanged=()=>project===target&&revision===started&&attempt===speechImportAttempt;
+ try{
+  if(files.length>30)throw new Error('Speech: maximum 30 audio files');if(files.reduce((n,f)=>n+f.size,0)>MAX_FILE_BYTES*.75)throw new Error('Speech: JSON would exceed 160 MiB');
+  const jobs=await speechJobs(structuredClone(target));matchSpeechFiles(jobs,files.map(f=>f.name));
+  const loaded:{name:string;asset:AudioAsset}[]=[];for(const file of files){try{loaded.push({name:file.name,asset:await readAudioFile(file)});}catch(error){throw new Error(file.name+': '+(error as Error).message);}if(!unchanged())throw new Error(t('speechChanged'));}
+  const next=attachSpeechFiles(target,jobs,loaded);parseProject(JSON.stringify(next.project));if(!unchanged())throw new Error(t('speechChanged'));
+  stop();project.audios=next.project.audios;project.narration=next.project.narration;project.scenes.forEach((s,i)=>{s.narration=next.project.scenes[i].narration;s.duration=next.project.scenes[i].duration;});time=offset(sceneIndex);clearAudioURLs();changed();refresh();
+  reportSpeech(t('speechImported')+' '+loaded.length+'\n'+t('speechExtended')+' '+next.extended.length+'\n\n'+next.matched.map((j,i)=>files[i].name+' → '+(j.scope==='project'?t('projectNarration'):t('sceneNarration')+' ['+j.sceneId+']')+' — '+j.name).join('\n'));
+ }catch(error){if(attempt===speechImportAttempt)reportSpeech(t('speechImportFailed')+'\n'+(error as Error).message+'\n\n'+t('speechMatchingHint'));}
+};
+
 
 function renderAssets(){renderVideos();const list=$('asset-list');list.replaceChildren();for(const [id,asset] of Object.entries(project.assets)){const row=document.createElement('div');row.className='asset-row';const img=document.createElement('img');img.src=asset.data;img.alt='';const preview=button('',()=>previewAsset(asset));preview.className='asset-thumbnail';preview.dataset.previewAsset=id;preview.title=`${t('imagePreview')}: ${asset.name}`;preview.setAttribute('aria-label',preview.title);preview.append(img);const name=document.createElement('span');name.textContent=asset.name;name.title=asset.name;const remove=button('',()=>{const target=project;askDelete(asset.name,'image',()=>{if(project!==target)return;delete project.assets[id];project.scenes.forEach(s=>{if(s.backgroundAsset===id)s.backgroundAsset='';s.elements.forEach(e=>{if(e.asset===id)e.asset='';});});changed();refresh();$('gallery-import-image').focus();});});remove.dataset.deleteAsset=id;remove.setAttribute('aria-label',`${t('remove')}: ${asset.name}`);remove.title=`${t('remove')}: ${asset.name}`;
 const trash=document.createElementNS('http://www.w3.org/2000/svg','svg');trash.setAttribute('viewBox','0 0 24 24');trash.setAttribute('aria-hidden','true');const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('d','M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7');trash.append(path);remove.append(trash);
@@ -442,7 +479,7 @@ $('listen-music').addEventListener('click',()=>{
  }catch(error){stopMusicPreview();showToast((error as Error).message,'error');}
 });
 
-function updateScene(key:keyof Scene,value:unknown){const previous=current()[key];(current() as unknown as Record<string,unknown>)[key]=value;try{parseProject(JSON.stringify(project));stop();time=offset(sceneIndex);changed();draw();if((key==='background'||key==='backgroundGradient'||key==='backgroundEnabled')&&richEditor)richEditor.editor.style.background=current().backgroundEnabled?gradientCSS(current().backgroundGradient,current().background):'#000000';if(key==='name'||key==='duration')renderSceneLabels();}catch(error){(current() as unknown as Record<string,unknown>)[key]=previous;status(t('error')+' '+(error as Error).message);renderForms();}}
+function updateScene(key:keyof Scene,value:unknown){const previous=current()[key];(current() as unknown as Record<string,unknown>)[key]=value;try{if(key==='duration'){const check=structuredClone(project);fitSpeechDurations(check);if(check.scenes.some((s,i)=>s.duration!==project.scenes[i].duration))throw new Error(t('speechDurationFloor'));}parseProject(JSON.stringify(project));stop();time=offset(sceneIndex);changed();draw();if((key==='background'||key==='backgroundGradient'||key==='backgroundEnabled')&&richEditor)richEditor.editor.style.background=current().backgroundEnabled?gradientCSS(current().backgroundGradient,current().background):'#000000';if(key==='name'||key==='duration')renderSceneLabels();}catch(error){(current() as unknown as Record<string,unknown>)[key]=previous;status(t('error')+' '+(error as Error).message);renderForms();}}
 function renderSceneLabels(){const buttons=$('scene-list').querySelectorAll('button');project.scenes.forEach((s,i)=>{buttons[i].textContent=`${i+1}. ${s.name} · ${s.duration}s`;buttons[i].title=buttons[i].textContent||'';});}
 let richEditor:ReturnType<typeof richTextEditor>|undefined;
 function updateElement(key:keyof Element,value:unknown){
@@ -504,7 +541,7 @@ for(const id of ['video-file','replace-video-file']){const input=$(id) as HTMLIn
 function renderForms(){
  richEditor?.dispose();richEditor=undefined;
  const form=$('scene-form');form.replaceChildren();const s=current();
- field(form,'name',s.name,'text',v=>updateScene('name',v));field(form,'duration',s.duration,'number',v=>updateScene('duration',v),undefined,0.1,3600);
+ field(form,'name',s.name,'text',v=>updateScene('name',v));field(form,'duration',s.duration,'number',v=>updateScene('duration',v),undefined,Math.max(.1,sceneSpeechMinimum(s,project)),3600);
  field(form,'backgroundEnabled',s.backgroundEnabled,'checkbox',v=>updateScene('backgroundEnabled',v));
  field(form,'backgroundOpacity',s.backgroundOpacity,'number',v=>updateScene('backgroundOpacity',v),undefined,0,1);
  field(form,'background',s.background,'color',v=>updateScene('background',v));gradientFields(form,'backgroundGradient',s.backgroundGradient,s.background,v=>updateScene('backgroundGradient',v));field(form,'backgroundAsset',s.backgroundAsset,'select',v=>updateScene('backgroundAsset',v),['',...Object.keys(project.assets)]);
@@ -991,7 +1028,7 @@ $('previous-scene').addEventListener('click',()=>skipScene(-1));
 $('next-scene').addEventListener('click',()=>skipScene(1));
 $('timeline').addEventListener('input',()=>{stop();time=Number(($('timeline') as HTMLInputElement).value);draw();});
 $('safe-toggle').addEventListener('change',()=>{$('safe-overlay').hidden=!($('safe-toggle') as HTMLInputElement).checked;});
-function replace(next:Project){stop();backgroundVideoNode=undefined;backgroundVideoAsset='';clearVideoURLs();clearAudioURLs();revision++;project=next;sceneIndex=0;selectedId='';time=0;dirty=false;selectedGroupId='';multiSelection.clear();history.reset(project);persist();refresh();status(t('ready'));}
+function replace(next:Project){fitSpeechDurations(next);stop();backgroundVideoNode=undefined;backgroundVideoAsset='';clearVideoURLs();clearAudioURLs();revision++;project=next;sceneIndex=0;selectedId='';time=0;dirty=false;selectedGroupId='';multiSelection.clear();history.reset(project);persist();refresh();status(t('ready'));}
 const canReplace=()=>!dirty||confirm(t('unsaved'));
 $('new-project').addEventListener('click',()=>{if(canReplace()){replace({version:'1.0',title:'SceneScript',description:'',firstComment:'',hashtags:'',thumbnail:null,audios:{},narration:null,audioDucking:false,format:'landscape',backgroundSimulation:null,backgroundVideo:null,videos:{},music:null,assets:{},scenes:[newScene()]});changed();}});
 $('toggle-project').addEventListener('click',()=>{
@@ -1012,7 +1049,7 @@ $('delete-scene').addEventListener('click',()=>{
  askDelete(scene.name,'scene',()=>{
   if(project!==target||project.scenes.length===1)return;
   const index=project.scenes.findIndex(s=>s.id===scene.id);if(index<0)return;
-  project.scenes.splice(index,1);changed();selectScene(Math.min(index,project.scenes.length-1));$('delete-scene').focus();
+  try{const next=structuredClone(project);next.scenes.splice(index,1);fitSpeechDurations(next);parseProject(JSON.stringify(next));project.scenes.splice(index,1);project.scenes.forEach((s,i)=>s.duration=next.scenes[i].duration);changed();selectScene(Math.min(index,project.scenes.length-1));$('delete-scene').focus();}catch(error){showToast((error as Error).message,'error');}
  });
 });
 for(const [id,delta] of [['scene-up',-1],['scene-down',1]] as const)$ (id).addEventListener('click',()=>{const next=sceneIndex+delta;if(next<0||next>=project.scenes.length)return;[project.scenes[sceneIndex],project.scenes[next]]=[project.scenes[next],project.scenes[sceneIndex]];changed();selectScene(next);});

@@ -1,8 +1,14 @@
-import {narrationClips,narrationGain,type AudioAsset} from '../lib/audio';
+import {narrationClips,narrationGain,validateAudioData,MAX_AUDIO_BYTES,type AudioAsset} from '../lib/audio';
 import type {Project} from '../lib/model';
 let decoder:OfflineAudioContext|undefined;
 export function audioBlob(a:AudioAsset){const raw=atob(a.data.split(',')[1]);return new Blob([Uint8Array.from(raw,c=>c.charCodeAt(0))],{type:a.data.slice(5,a.data.indexOf(';'))});}
 export async function decodeAudio(a:AudioAsset){decoder??=new OfflineAudioContext(2,1,48000);let b:AudioBuffer;try{b=await decoder.decodeAudioData(await audioBlob(a).arrayBuffer());}catch{throw new Error('Audio: unsupported format or codec');}if(b.numberOfChannels>2)throw new Error('Audio: mono or stereo required');if(!Number.isFinite(b.duration)||b.duration<=0||b.duration>3600||b.length*b.numberOfChannels*4>64*1024*1024)throw new Error('Audio: maximum 3600 seconds / 64 MiB decoded');return b;}
+export async function readAudioFile(file:File):Promise<AudioAsset>{
+ if(file.size>MAX_AUDIO_BYTES)throw new Error('Audio: maximum 32 MiB');
+ const fallback=({'mp3':'audio/mpeg','wav':'audio/wav','ogg':'audio/ogg','m4a':'audio/mp4','aac':'audio/aac','flac':'audio/flac','webm':'audio/webm'} as Record<string,string>)[file.name.split('.').pop()!.toLowerCase()];
+ const data=await new Promise<string>((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result));r.onerror=()=>reject(new Error('Audio read failed'));r.readAsDataURL(!file.type.startsWith('audio/')&&fallback?new Blob([file],{type:fallback}):file);});
+ validateAudioData(data);const asset={name:file.name.slice(0,200),data,duration:0};asset.duration=(await decodeAudio(asset)).duration;return asset;
+}
 export class NarrationPlayer{
  private context:AudioContext|undefined;private sources:AudioBufferSourceNode[]=[];private gains:GainNode[]=[];private base=0;private anchor=0;private active=false;
  async unlock(){this.context??=new AudioContext();await this.context.resume();if(this.context.state!=='running')throw new Error('Audio unavailable');}

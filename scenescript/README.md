@@ -312,3 +312,33 @@ Text; zusätzliche Downloads sind zum Verstehen nicht erforderlich.
 Tests prüfen Feldabdeckung, Default-Abgleich, Größenbudget, Beispielimporte und
 Clipboard-Fallback. Bei neuen Feldern Schema/Factory und die zugehörige semantische
 Erklärung gemeinsam aktualisieren; keine zweite vollständige Referenz pflegen.
+
+### Extern erzeugte Sprache zuordnen
+
+1. Projekt- oder Szenen-Sprecher-Spur öffnen. Sprechtext, Sprechregie und Sprecher
+   können schon **ohne Audiodatei** gespeichert werden (`narration.text`,
+   `instructions`, `speaker`). Das Tool erzeugt selbst keine Sprache.
+2. In der Audiogalerie **Sprechtexte exportieren (ZIP)** wählen. ZIP entpacken:
+   eine UTF-8-Textdatei je nichtleerem Sprechertext. Jede Datei nennt den erwarteten
+   MP3-Dateinamen. Nur den Sprechtext beim externen Dienst einfügen; Regie und Stimme
+   separat umsetzen. Keine Anweisungen oder Dateinamen mitsprechen lassen.
+3. MP3s genau so benennen, dann über **Sprachdateien zuordnen** gemeinsam auswählen.
+   WAV/OGG/M4A/AAC/FLAC/WebM mit gleichem Basisnamen werden ebenfalls akzeptiert,
+   sofern der Browser das Format decodiert. ZIP/TXT hier nicht importieren.
+
+Dateinamen enthalten Zuordnung plus Inhaltsfingerprint. Szenen umbenennen,
+verschieben oder ihre Zeiten bearbeiten ist erlaubt. Nach Änderungen an Text,
+Regie oder Sprecher neu exportieren. Unbekannte, veraltete oder doppelte Namen
+und nicht decodierbare Audios brechen den **gesamten Import ohne Änderung** ab.
+Es gibt keine Prüfung des tatsächlich gesprochenen Inhalts anhand des Dateinamens.
+
+Der Import misst die tatsächliche Audiodauer und setzt den neuen Ausschnitt auf
+0 bis Dateiende. Zu kurze Szenen wachsen auf Sprachstart + Audiodauer; für die
+projektweite Spur wächst bei Bedarf die letzte Szene. Szenen werden nie verkürzt,
+Sprache nie beschleunigt. Die 3600-Sekunden-Szenengrenze bleibt bestehen. Explizite
+Element-/Gruppenenden und Kamerastationen werden nicht gestreckt; die letzte
+Kamerastation hält bis zum neuen Szenenende. Nachfolgende Szenen beginnen später.
+Manuelles Kürzen unter zugeordnete Sprache wird verhindert. Erst Audio trimmen,
+verschieben oder entfernen. Die bestehenden Audio-/Projektgrößenlimits gelten.
+Löschen einer Audiodatei behält die Textvorlage; ein Import ist als Ganzes per
+Undo/Redo rückgängig zu machen. Anschließend das SceneScript-Projekt speichern.

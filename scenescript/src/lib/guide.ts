@@ -15,7 +15,8 @@ import {guideFieldCatalog,guideFonts} from './guide-fields.ts';
 
 export const aiMinimalExample={version:'1.0',title:'Hello SceneScript',format:'landscape',scenes:[{id:'intro',duration:5,transition:'none',elements:[{id:'headline',type:'text',text:'Hello SceneScript',x:10,y:35,width:80,height:30,animation:'none'}]}]};
 export const aiCameraExample={version:'1.0',title:'Comic page camera',format:'landscape',scenes:[{id:'page',duration:12,transition:'none',background:'#f4ecd8',camera:{stations:[{at:0,x:0,y:0,width:100,hold:1},{at:3,x:0,y:20,width:50,hold:2,easing:'ease-in-out'},{at:8,x:50,y:20,width:50,hold:1,easing:'ease-in-out'},{at:10,x:0,y:0,width:100,hold:2,easing:'ease-in-out'}]},elements:[{id:'panel_left',type:'shape',x:4,y:25,width:42,height:40,fillColor:'#b86445',animation:'none'},{id:'panel_right',type:'shape',x:54,y:25,width:42,height:40,fillColor:'#285f80',animation:'none'},{id:'label_left',type:'text',text:'Panel 1',x:7,y:35,width:36,height:15,fontSize:64,animation:'none'},{id:'label_right',type:'text',text:'Panel 2',x:57,y:35,width:36,height:15,fontSize:64,animation:'none'}]}]};
-export const aiGuideExamples=[aiMinimalExample,aiCameraExample,aiArtExample];
+export const aiSpeechExample={version:'1.0',title:'External narration workflow',format:'landscape',scenes:[{id:'opening',duration:5,transition:'none',narration:{text:'Welcome to our story. Let us take a closer look.',instructions:'Warm, calm narration. A short pause after the first sentence.',speaker:'Narrator'},elements:[{id:'opening_title',type:'text',text:'Our story',animation:'none'}]}]};
+export const aiGuideExamples=[aiMinimalExample,aiCameraExample,aiArtExample,aiSpeechExample];
 const presetExamples=textPresets.map(preset=>{const e=applyTextPreset(newElement('text','preset'),preset);return preset+': '+JSON.stringify({font:e.font,color:e.color,...(e.bold?{bold:true}:{}),...(e.textGradient?{textGradient:e.textGradient}:{}),textEffects:Object.fromEntries(Object.entries(e.textEffects).filter(([,v])=>v.enabled))});}).join('\n');
 
 // One self-contained copy/paste specification for all AI pages and /ai.txt.
@@ -434,13 +435,49 @@ offline exported sound follows mute/volume/trims/scopes, not visual fades/opacit
 Project.backgroundVideo uses continuous project time from0, above project
 simulation and below all scenes; opaque scenes may hide it WITHOUT muting audio.
 
-Narration is imported speech, NOT speech generation or subtitle text. Project.
-narration spans scenes; Scene.narration starts relative to its scene and is cut
-at scene end. They may overlap/add; avoid doubling a voice unintentionally.
-start/end trims use the audio file duration (3600s bound when unassigned).
+Narration is imported speech, NOT speech generation or subtitle text. Each Project
+and each Scene has ONE narration assignment; use scene assignments for separate
+files per scene, or a project assignment for one continuous voice track. Both may
+coexist/overlap; avoid doubling a voice. narration.text is the actual SCRIPT;
+instructions is delivery direction (never read aloud), speaker is a human-readable
+voice/character label, not a provider voice ID. These strings can be saved BEFORE
+an audio file exists: omit asset or set asset:"". Empty/unassigned drafts are silent.
+
+External speech workflow (no cloud API/key needed):
+1. AI writes Scene.narration.text, instructions and speaker; never fake audio bytes.
+2. Editor "Export speech scripts (ZIP)" creates one UTF-8 TXT per NONBLANK script,
+   including project narration if present. Already voiced scripts may be exported
+   again for regeneration. Unzip, copy ONLY the SCRIPT section to the speech service;
+   apply speaker/direction separately using that service's supported controls.
+3. Save generated MP3 with the EXACT filename printed in the TXT header; WAV and
+   other supported audio extensions may use the same basename. No added (1) suffix.
+4. "Assign speech files" accepts multiple AUDIO files, not TXT/ZIP. Basenames match
+   generated scope/scene-ID + content fingerprint (text/instructions/speaker), not
+   scene index/display name. Rename/reorder/retime is safe; after changing the script,
+   speaker or direction export AGAIN. Old, unknown or duplicate names reject the
+   WHOLE batch without changes. Import subsets is allowed. Matching does not verify
+   what the speaker actually said; filenames are not authentication.
+5. Each file is decoded and its real duration measured. Matching assignments reset
+   file trim to start=0,end=null while retaining narration.at/volume/mute/fades and
+   script metadata. Reimports replace the assignment without altering shared clips.
+   Existing audio budgets (30 assets,32 MiB/file,160 MiB total JSON) still apply.
+6. Short scenes automatically EXTEND to at + imported clip duration; never shorten
+   or speed up speech. A project-wide track extends the LAST scene if total time is
+   insufficient. Per-scene max3600s remains; impossible extensions cancel the batch.
+   Explicit element/group until values, camera stations and paths are NOT stretched;
+   the final camera view holds to the new end. Later scene start times shift.
+   Manual shortening below assigned narration is blocked; trim, move or remove it
+   first. Ordinary editor assignment/replacement/import also fits narration timing.
+   Deleting an audio file keeps its script metadata for regeneration. Undo restores
+   the whole batch, assignments AND durations. Save the SceneScript JSON afterward.
+
+Legacy runtime playback still clips to scope; pure JSON validation alone does not
+extend anything. In the editor, audio-backed narration scopes are fitted on load.
+start/end trims select the file excerpt (3600s placeholder bound when unassigned).
 Playback length=min(end-start,remaining scope after at); fade gain=min(fadeIn,
-fadeOut factors) on that clipped interval. text is only a note/script, not spoken
-or rendered. No standalone-audio element or narration loop. Muted refs still validate.
+fadeOut factors) on that interval. Text/direction/voice labels are not rendered or
+spoken automatically. No standalone-audio element or narration loop; muted refs
+still validate and retain their timing floor. §12d is a complete draft example.
 audioDucking=true lowers synthetic music to30% during active/unmuted/nonzero-volume
 narration, 0.15s lead-in and0.3s recovery; overlap takes strongest reduction. It
 never ducks video audio/other narration, and does not detect silence within files.
@@ -529,4 +566,7 @@ ${JSON.stringify(aiCameraExample,null,2)}
 
 ### 12c. Kaleidoscope and moving light on a colorful star
 ${JSON.stringify(aiArtExample,null,2)}
+
+### 12d. Speech script before external generation (no audio bytes yet)
+${JSON.stringify(aiSpeechExample,null,2)}
 `.trim();
