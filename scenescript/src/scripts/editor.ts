@@ -1,3 +1,5 @@
+import {revealTypes} from '../lib/reveal';
+import {updateReveal} from './reveal';
 import {updateAfterimages} from './afterimages';
 import {paperEdges} from '../lib/paper';
 import {renderPaper} from './paper';
@@ -272,9 +274,9 @@ const actions=document.createElement('div');actions.className='asset-actions';fo
 function field(form:HTMLElement,key:string,value:string|number|boolean,kind:string,action:(value:string|number|boolean)=>void,options?:readonly string[],min?:number,max?:number){
  const label=document.createElement('label');label.append(document.createTextNode(t(key)));
  let input:HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement;
- if(kind==='select'){input=document.createElement('select');options?.forEach(option=>{const o=document.createElement('option');o.value=option;o.textContent=key==='space'?t('space-'+option):key==='exitAnimation'?t('exit-'+option):key==='bubbleSpeaker'?(option?(current().elements.find(e=>e.id===option)?.name||option):t('none')):key==='bubbleAnchor'?option:key==='audioAsset'?(option?project.audios[option].name:t('none')):key==='asset'||key==='backgroundAsset'?(option?project.assets[option].name:t('none')):t(key==='pathTemplate'&&option==='wave'?'path-wave':key==='pathType'&&option==='ellipse'?'path-ellipse':key==='pathEasing'&&option==='linear'?'path-linear':key==='pathAfter'&&option==='reset'?'path-reset':key==='style'&&option==='focus'?'musicFocus':key==='gradientType'&&option==='solid'?'gradientSolid':key==='transition'&&option!=='none'&&option!=='fade'?'transition-'+option:option);input.append(o);});input.value=String(value);}
+ if(kind==='select'){input=document.createElement('select');options?.forEach(option=>{const o=document.createElement('option');o.value=option;o.textContent=key==='revealType'?t('reveal-'+option):key==='space'?t('space-'+option):key==='exitAnimation'?t('exit-'+option):key==='bubbleSpeaker'?(option?(current().elements.find(e=>e.id===option)?.name||option):t('none')):key==='bubbleAnchor'?option:key==='audioAsset'?(option?project.audios[option].name:t('none')):key==='asset'||key==='backgroundAsset'?(option?project.assets[option].name:t('none')):t(key==='pathTemplate'&&option==='wave'?'path-wave':key==='pathType'&&option==='ellipse'?'path-ellipse':key==='pathEasing'&&option==='linear'?'path-linear':key==='pathAfter'&&option==='reset'?'path-reset':key==='style'&&option==='focus'?'musicFocus':key==='gradientType'&&option==='solid'?'gradientSolid':key==='transition'&&option!=='none'&&option!=='fade'?'transition-'+option:option);input.append(o);});input.value=String(value);}
  else if(kind==='textarea'){input=document.createElement('textarea');input.value=String(value);input.maxLength=10000;}
- else{input=document.createElement('input');input.type=kind;if(kind==='checkbox')input.checked=Boolean(value);else input.value=String(value);if(kind==='number'){input.step='any';if(min!==undefined)input.min=String(min);if(max!==undefined)input.max=String(max);}if(kind==='text')input.maxLength=200;if(['simulationCount','simulationSeed','paperSeed','stopMotionFps','stopMotionSeed','afterimagesCount'].includes(key))input.step='1';}
+ else{input=document.createElement('input');input.type=kind;if(kind==='checkbox')input.checked=Boolean(value);else input.value=String(value);if(kind==='number'){input.step='any';if(min!==undefined)input.min=String(min);if(max!==undefined)input.max=String(max);}if(kind==='text')input.maxLength=200;if(['simulationCount','simulationSeed','paperSeed','stopMotionFps','stopMotionSeed','afterimagesCount','revealStrokes','revealSeed'].includes(key))input.step='1';}
  input.name=key;
  const eagerNumber=kind==='number'&&['x','y','width','height','rotation'].includes(key);
  input.addEventListener(kind==='textarea'||kind==='text'||kind==='color'||eagerNumber?'input':'change',event=>{
@@ -289,7 +291,7 @@ function field(form:HTMLElement,key:string,value:string|number|boolean,kind:stri
   number.addEventListener('wheel',()=>number.blur(),{passive:true});
   if(eagerNumber)number.addEventListener('change',()=>{if(number.isConnected&&number.checkValidity()&&Number.isFinite(number.valueAsNumber))action(number.valueAsNumber);});
   const wrapper=document.createElement('span');wrapper.className='number-stepper';
-  const step=key==='afterimagesSpacing'?.01:['audioVolume','opacity','stopOpacity','backgroundOpacity','simulationOpacity','volume','sustain','reverb','velocity','gain','echoMix','echoFeedback','shadowOpacity','exposureStrength','paperTexture','afterimagesOpacity'].includes(key)?0.05:['cameraAt','cameraHold','audioAt','audioStart','audioEnd','audioFadeIn','audioFadeOut','pathPause','pathStart','pathDuration','duration','transitionDuration','animationDuration','exitDuration','until','bubbleLineHeight','bubbleCurve','at','simulationSpeed','liquidSpeed','stopMotionJitter','stopMotionRotation','afterimagesSpacing','attack','decay','release','fadeIn','fadeOut','echoDelay','ratio'].includes(key)?0.1:1;
+  const step=key==='afterimagesSpacing'?.01:['audioVolume','opacity','stopOpacity','backgroundOpacity','simulationOpacity','volume','sustain','reverb','velocity','gain','echoMix','echoFeedback','shadowOpacity','exposureStrength','paperTexture','afterimagesOpacity'].includes(key)?0.05:['cameraAt','cameraHold','audioAt','audioStart','audioEnd','audioFadeIn','audioFadeOut','pathPause','pathStart','pathDuration','duration','transitionDuration','animationDuration','exitDuration','until','bubbleLineHeight','bubbleCurve','at','simulationSpeed','liquidSpeed','stopMotionJitter','stopMotionRotation','afterimagesSpacing','revealDelay','revealDuration','attack','decay','release','fadeIn','fadeOut','echoDelay','ratio'].includes(key)?0.1:1;
   const controls=[-1,1].map(direction=>{
    const control=button(direction<0?'−':'+',()=>{
     if(!Number.isFinite(number.valueAsNumber))return;
@@ -302,7 +304,7 @@ function field(form:HTMLElement,key:string,value:string|number|boolean,kind:stri
   function sync(){controls[0].disabled=min!==undefined&&number.valueAsNumber<=min;controls[1].disabled=max!==undefined&&number.valueAsNumber>=max;}
   number.addEventListener('input',sync);number.addEventListener('change',sync);sync();
   wrapper.append(controls[0],number,controls[1]);label.append(wrapper);
- }else if(kind==='checkbox'&&['cameraEnabled','cameraOverview','cameraFrameOverview','liquidEnabled','exposureEnabled','paperEnabled','stopMotionEnabled','afterimagesEnabled','afterimagesTint','bold','italic','underline','strikethrough','backgroundEnabled','musicEnabled','loop','muted','audioMuted','audioDucking','pathOrient','pathClockwise','elementEndEnabled','bubbleBaseAuto'].includes(key)){
+ }else if(kind==='checkbox'&&['cameraEnabled','cameraOverview','cameraFrameOverview','liquidEnabled','exposureEnabled','paperEnabled','stopMotionEnabled','afterimagesEnabled','afterimagesTint','revealEnabled','bold','italic','underline','strikethrough','backgroundEnabled','musicEnabled','loop','muted','audioMuted','audioDucking','pathOrient','pathClockwise','elementEndEnabled','bubbleBaseAuto'].includes(key)){
   label.classList.add('text-style-toggle');
   const wrapper=document.createElement('span');wrapper.className='safe-switch';
   input.setAttribute('role','switch');input.setAttribute('aria-label',t(key));
@@ -551,6 +553,18 @@ function renderForms(){
   gradientFields(group,'textGradient',e.textGradient,e.color,value=>{updateElement('textGradient',value);richEditor?.editor.querySelectorAll<HTMLElement>('[data-style]').forEach(node=>styleTextGradient(node,e.textGradient));});
  }
  if(e.type==='shape')gradientFields(ef,'fillGradient',e.fillGradient,e.fillColor,v=>updateElement('fillGradient',v));
+ const revealGroup=document.createElement('fieldset');revealGroup.className='text-settings-group';
+ const revealLegend=document.createElement('legend');revealLegend.textContent=t('reveal');revealGroup.append(revealLegend);ef.append(revealGroup);
+ const revealHint=document.createElement('p');revealHint.className='small-hint';revealHint.textContent=t('revealHint');revealGroup.append(revealHint);
+ field(revealGroup,'revealEnabled',e.reveal.enabled,'checkbox',v=>{updateElement('reveal',{...e.reveal,enabled:v});renderForms();});
+ if(e.reveal.enabled){
+  field(revealGroup,'revealType',e.reveal.type,'select',v=>{updateElement('reveal',{...e.reveal,type:v});renderForms();},revealTypes);
+  for(const [key,label,min,max] of [['delay','revealDelay',0,3600],['duration','revealDuration',.01,3600]] as const)
+   field(revealGroup,label,e.reveal[key],'number',v=>updateElement('reveal',{...e.reveal,[key]:v}),undefined,min,max);
+  field(revealGroup,'revealEasing',e.reveal.easing,'select',v=>updateElement('reveal',{...e.reveal,easing:v}),['linear','ease-in-out']);
+  const extra=e.reveal.type==='circle'?[['originX','revealOriginX',0,100],['originY','revealOriginY',0,100]] as const:e.reveal.type==='brush'?[['strokes','revealStrokes',1,12],['roughness','revealRoughness',0,80],['seed','revealSeed',0,65535]] as const:[];
+  for(const [key,label,min,max] of extra)field(revealGroup,label,e.reveal[key as keyof typeof e.reveal] as number,'number',v=>updateElement('reveal',{...e.reveal,[key]:v}),undefined,min,max);
+ }
  if(['text','image','shape'].includes(e.type)){
   const paperGroup=document.createElement('fieldset');paperGroup.className='text-settings-group';
   const legend=document.createElement('legend');legend.textContent=t('paper');paperGroup.append(legend);ef.append(paperGroup);
@@ -849,7 +863,7 @@ function updateSceneViews(sceneViews:SceneView[],local:number,opacity=1,cameraEn
   Object.assign(node.style,exposureCSS(element.exposure,state.opacity*opacity));node.style.visibility=state.visible?'visible':'hidden';node.style.transform=state.transform;node.style.transformOrigin='0 0';
   if(text&&text.dataset.visibleText!==state.text){renderRuns(text,element,state.text);text.dataset.visibleText=state.text;}
   bubble?.update(effectiveScene,local,state.text,!playing&&!recording&&(element.id===selectedId||scene.groups.some(g=>g.id===selectedGroupId&&g.members.includes(element.id))));
-  const [pw,ph]=formats[project.format];updateLiquid(node,element,state.sampleTime,element.width*pw/100,element.height*ph/100);updateParticles(node,element,state.sampleTime,scene.duration,element.width*pw/100,element.height*ph/100);
+  const [pw,ph]=formats[project.format];updateLiquid(node,element,state.sampleTime,element.width*pw/100,element.height*ph/100);updateReveal(node,element,state.sampleTime,element.width*pw/100,element.height*ph/100);updateParticles(node,element,state.sampleTime,scene.duration,element.width*pw/100,element.height*ph/100);
   void updateAfterimages(node,element,effectiveScene,project.assets,local,pw,ph,opacity,()=>draw(false)).catch(error=>status((error as Error).message));
  });
  const warning=document.getElementById('bubble-overflow');

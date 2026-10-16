@@ -382,6 +382,29 @@ Optional fields and their defaults:
 - width: 80 (40 for bubble); height: 30 (24 for bubble); each 0.1–200, percentages of canvas width/height.
 - color: "#ffffff" for text/image/video/simulation, "#b86445" for shape, "#222222" for bubble; #RRGGBB color.
 - font: "Arial"; allowed ${fonts.map(f=>`"${f}"`).join(', ')}.
+- reveal: optional object; omitted defaults to
+  {"enabled":false,"type":"left-to-right","delay":0,"duration":1.5,
+   "easing":"ease-in-out","originX":50,"originY":50,"strokes":5,
+   "roughness":20,"seed":17}.
+  All element types, not groups. Null/unknown fields/wrong types rejected;
+  omitted subfields use defaults. enabled is boolean; type is "left-to-right",
+  "right-to-left", "top-to-bottom", "bottom-to-top", "circle" or "brush".
+  delay 0–3600 and duration 0.01–3600 are seconds relative to element.at;
+  easing is "linear" or "ease-in-out". originX/originY 0–100 are circle-center
+  percentages. strokes integer 1–12 controls alternating horizontal brush
+  passes; roughness 0–80 project pixels and seed integer 0–65535 control the
+  deterministic bristle edge. Circle radius uses actual element pixel dimensions.
+  Before at+delay the element is fully masked; after at+delay+duration the mask
+  is removed completely. Does not change authored visibility timing, duration,
+  geometry or anchors. Masked-out regions cannot be clicked in the preview;
+  select the element via the element list. Longer masks may stay incomplete
+  if the element ends.
+  Uses the stop-motion sampled clock; historical afterimages get their own earlier
+  masks. Paper and liquid are masked too (outside shadows/displacement are
+  clipped during the reveal, restored at completion). Particles carry the revealed
+  pixels and can move beyond the element mask. No arbitrary external mask assets.
+  Set entrance animation "none" for a pure reveal, or combine with other animations.
+  Example: "reveal":{"enabled":true,"type":"brush","duration":2,"strokes":4}.
 - afterimages: optional object; omitted defaults to
   {"enabled":false,"count":4,"spacing":0.08,"opacity":0.45,
    "tint":false,"color":"#66ccff"}.

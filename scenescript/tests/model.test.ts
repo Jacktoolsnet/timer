@@ -1,3 +1,4 @@
+import {defaultReveal,revealClip,revealProgress,revealTypes} from '../src/lib/reveal.ts';
 import {defaultAfterimages,afterimageSamples} from '../src/lib/afterimages.ts';
 import {sceneAfterimageState} from '../src/lib/groups.ts';
 import {cameraMatrix} from '../src/lib/camera.ts';
@@ -376,4 +377,33 @@ test('screen-space afterimages compensate the current rather than historical cam
  const world={x:e.x*1920/100+values[4],y:e.y*1080/100+values[5]};
  assert.ok(Math.abs(camera.a*world.x+camera.c*world.y+camera.e-e.x*1920/100)<1e-6);
  assert.ok(Math.abs(camera.b*world.x+camera.d*world.y+camera.f-e.y*1080/100)<1e-6);
+});
+
+test('reveal settings default, round trip and reject invalid mask fields',()=>{
+ const p=demoProject(),e=p.scenes[0].elements[0];e.reveal={...defaultReveal(),enabled:true,type:'brush',strokes:4};
+ assert.deepEqual(parseProject(serialize(p)).scenes[0].elements[0].reveal,e.reveal);
+ const legacy=JSON.parse(serialize(p));delete legacy.scenes[0].elements[0].reveal;assert.deepEqual(parseProject(serialize(legacy)).scenes[0].elements[0].reveal,defaultReveal());
+ for(const value of [null,[],42,{enabled:'yes'},{type:'bad'},{delay:-1},{delay:3601},{duration:0},{duration:3601},{easing:'bad'},{originX:-1},{originY:101},{strokes:0},{strokes:13},{strokes:1.5},{roughness:81},{seed:-1},{seed:1.5},{seed:65536},{unknown:1}]){
+  const invalid=JSON.parse(serialize(p));invalid.scenes[0].elements[0].reveal=value;assert.throws(()=>parseProject(serialize(invalid)),/reveal/);
+ }
+ for(const type of ['text','image','shape','bubble','simulation','video'] as const){
+  const element=newElement(type);element.reveal.enabled=true;p.scenes[0].elements=[element];assert.equal(parseProject(serialize(p)).scenes[0].elements[0].reveal.enabled,true);
+ }
+});
+
+test('reveal timing, directional clipping, circle geometry and seeded brush masks',()=>{
+ const e={...defaultReveal(),enabled:true,delay:.2,duration:2,easing:'linear' as const};
+ assert.equal(revealClip(e,.4,.3,100,50),'inset(100%)');assert.equal(revealClip(e,2.5,.3,100,50),'none');
+ assert.equal(revealProgress(e,1.5,.3),.5);
+ assert.equal(revealClip(e,1.5,.3,100,50),'inset(0 50% 0 0)');
+ assert.equal(revealClip({...e,type:'right-to-left'},1.5,.3,100,50),'inset(0 0 0 50%)');
+ const circle=revealClip({...e,type:'circle',originX:0,originY:0},1.5,.3,100,50);assert.ok(circle.startsWith('circle('+Math.hypot(100,50)*.5+'px'));
+ for(const type of revealTypes){assert.equal(revealClip({...e,type},.3,.3,100,50),'inset(100%)');assert.equal(revealClip({...e,type},3,.3,100,50),'none');}
+ const brush={...e,type:'brush' as const};
+ assert.equal(revealClip(brush,1.5,.3,100,50),revealClip(brush,1.5,.3,100,50));
+ assert.notEqual(revealClip(brush,1.5,.3,100,50),revealClip({...brush,seed:18},1.5,.3,100,50));
+ for(const time of [.6,1,1.5,2.4]){
+  const coords=revealClip(brush,time,.3,1,2).match(/[0-9.]+(?=%)/g)!.map(Number);assert.ok(coords.every(n=>n>=0&&n<=100));
+ }
+ assert.equal(revealClip(defaultReveal(),0,0,100,50),'none');
 });

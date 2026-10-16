@@ -19,7 +19,7 @@ export function updateParticles(node:HTMLElement,e:Element,time:number,duration:
  const host=document.createElement('div');host.dataset.particleOverlay=e.id;
  host.setAttribute('aria-hidden','true');
  host.style.cssText=node.style.cssText;
- Object.assign(host.style,{overflow:'visible',background:'none',border:'0',borderRadius:'0',pointerEvents:'none',display:'block'});
+ Object.assign(host.style,{overflow:'visible',background:'none',border:'0',borderRadius:'0',clipPath:'none',pointerEvents:'none',display:'block'});
  node.after(host);const tiles:HTMLElement[]=[];active.set(node,{host,signature,tiles});
  // Clones are visual only. Never duplicate document IDs or live controls.
  for(let index=0;index<(progress===1?0:48);index++){
