@@ -413,7 +413,15 @@ Optional fields and their defaults:
   requires a non-null object; see Native comic bubbles.
 - until: null; optional exclusive scene-local end, greater than at and no later
   than scene.duration. Explicit null means scene end.
-- exitAnimation: "none"; none/fade/slide-left/slide-right/slide-up/slide-down/zoom-out.
+- exitAnimation: "none"; none/fade/slide-left/slide-right/slide-up/slide-down/zoom-out,
+  particles-dust, particles-sparks, particles-confetti.
+  Particle exits are for text, image and shape elements only (not groups,
+  bubbles, simulations or video). They split the actual content into 48 fragments:
+  dust drifts and shrinks, sparks scatter upward, confetti tumbles and falls.
+  They use exitDuration, ending at until or the scene end; duration is clamped to
+  the visible interval. Motion is deterministic per element ID and timeline time.
+  Colors come from the element, not a separate particle palette.
+  Use a longer exitDuration (e.g. 1.5 seconds) to make the effect easy to see.
 - exitDuration: .5; number, .01–3600 seconds.
 Type-irrelevant fields are accepted, validated and preserved, but may have no
 visual effect. All omitted optional element fields use these defaults.

@@ -451,6 +451,7 @@
                   "description": "Scene-local exclusive end; must be > at and <= scene duration. Null/omitted: scene end, retaining legacy final paused-frame behavior."
                 },
                 "exitAnimation": {
+                  "description": "Particle variants require type text, image or shape at runtime; fragments retain the original colors.",
                   "enum": [
                     "none",
                     "fade",
@@ -458,7 +459,10 @@
                     "slide-right",
                     "slide-up",
                     "slide-down",
-                    "zoom-out"
+                    "zoom-out",
+                    "particles-dust",
+                    "particles-sparks",
+                    "particles-confetti"
                   ],
                   "default": "none"
                 },

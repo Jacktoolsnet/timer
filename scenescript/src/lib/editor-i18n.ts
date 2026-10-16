@@ -96,6 +96,9 @@ const words = {
  'exit-slide-right':['Nach rechts','To the right','Hacia la derecha','Vers la droite'],
  'exit-slide-up':['Nach oben','Upwards','Hacia arriba','Vers le haut'],
  'exit-slide-down':['Nach unten','Downwards','Hacia abajo','Vers le bas'],
+ 'exit-particles-dust':['Partikel: Staub','Particles: dust','Partículas: polvo','Particules : poussière'],
+ 'exit-particles-sparks':['Partikel: Funken','Particles: sparks','Partículas: chispas','Particules : étincelles'],
+ 'exit-particles-confetti':['Partikel: Konfetti','Particles: confetti','Partículas: confeti','Particules : confettis'],
  'exit-zoom-out':['Verkleinern','Zoom out','Alejar','Réduire'],
  elementInterval:['Sichtbares Intervall','Visible interval','Intervalo visible','Intervalle visible'],
 

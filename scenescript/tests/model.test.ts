@@ -1,3 +1,4 @@
+import {particleProgress,fragmentState} from '../src/lib/particles.ts';
 import {applyTextPreset,textPresets} from '../src/lib/text-presets.ts';
 import {defaultTextEffects,parseTextEffects,textEffectsCSS,textOutlineCSS} from '../src/lib/text-effects.ts';
 import {validateSvg,svgDataURL,svgSource} from '../src/lib/svg.ts';
@@ -204,4 +205,29 @@ test('line drawing animation persists on shapes and is excluded from group anima
  assert.equal(parseProject(serialize(p)).scenes[0].elements[0].animation,'draw');
  p.scenes[0].groups=[{id:'draw-group',name:'Group',members:[shape.id],pivot:{x:0,y:0},x:0,y:0,rotation:0,opacity:1,animation:'draw',at:0,until:null,animationDuration:1,exitAnimation:'none',exitDuration:.5,motionPath:null}];
  assert.throws(()=>parseProject(serialize(p)),/groups\[0\].animation/);
+});
+
+test('particle exits round trip and reject unsupported elements and groups',()=>{
+ const p=demoProject(),e=newElement('shape');p.scenes[0].elements=[e];
+ for(const exit of ['particles-dust','particles-sparks','particles-confetti'] as const){
+  e.exitAnimation=exit;assert.equal(parseProject(serialize(p)).scenes[0].elements[0].exitAnimation,exit);
+  for(const type of ['text','image'] as const){e.type=type;assert.equal(parseProject(serialize(p)).scenes[0].elements[0].exitAnimation,exit);}e.type='shape';
+  for(const type of ['bubble','video','simulation'] as const)assert.throws(()=>parseProject(serialize({...p,scenes:[{...p.scenes[0],elements:[{...newElement(type),exitAnimation:exit}]}]})),/exitAnimation/);
+  p.scenes[0].groups=[{id:'particle-group',name:'Group',members:[e.id],pivot:{x:0,y:0},x:0,y:0,rotation:0,opacity:1,animation:'none',at:0,until:null,animationDuration:1,exitAnimation:exit,exitDuration:1,motionPath:null}];
+  assert.throws(()=>parseProject(serialize(p)),/groups\[0\].exitAnimation/);p.scenes[0].groups=[];
+ }
+});
+
+test('particle timing clamps exit duration and fragment motion is reproducible',()=>{
+ assert.equal(particleProgress(2,null,5,2,2),0);
+ assert.equal(particleProgress(2,null,5,2,4),.5);
+ assert.equal(particleProgress(2,4,8,10,3),.5);
+ assert.equal(particleProgress(2,4,8,10,5),1);
+ const a=fragmentState('stable',17,'particles-dust',.5,800,400);
+ assert.deepEqual(a,fragmentState('stable',17,'particles-dust',.5,800,400));
+ assert.notDeepEqual(a,fragmentState('other',17,'particles-dust',.5,800,400));
+ for(const kind of ['particles-dust','particles-sparks','particles-confetti'] as const){
+  assert.equal(fragmentState('id',0,kind,0,800,400).opacity,1);
+  assert.equal(fragmentState('id',0,kind,1,800,400).opacity,0);
+ }
 });

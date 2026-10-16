@@ -1,3 +1,4 @@
+import {isParticleExit} from './particles.ts';
 import {defaultTextEffects,parseTextEffects,type TextEffects} from './text-effects.ts';
 import {parseCamera,type Camera} from './camera.ts';
 import {parseCrop,type Crop} from './crop.ts';
@@ -15,7 +16,7 @@ export const formats = { landscape: [1920,1080], portrait: [1080,1920], square: 
 // System fonts use local fallbacks; the four script families are bundled with the site.
 export const fonts = ['Arial','Georgia','Verdana','Courier New','Helvetica','Tahoma','Trebuchet MS','Segoe UI','Times New Roman','Palatino Linotype','Garamond','Consolas','Lucida Console','Impact','Arial Black','Comic Sans MS','Allura','Great Vibes','Parisienne','Sacramento'] as const;
 export const animations = ['none','fade','slide-left','slide-up','zoom','typewriter','pan','draw'] as const;
-export const exitAnimations=['none','fade','slide-left','slide-right','slide-up','slide-down','zoom-out'] as const;
+export const exitAnimations=['none','fade','slide-left','slide-right','slide-up','slide-down','zoom-out','particles-dust','particles-sparks','particles-confetti'] as const;
 export const shapeTypes=['rectangle','ellipse','triangle','diamond','star','arrow'] as const;
 export type Asset = { name:string; data:string };
 export type TextRun = {text:string} & Partial<Pick<Element,'font'|'fontSize'|'color'|'bold'|'italic'|'underline'|'strikethrough'>>;
@@ -85,7 +86,7 @@ export function parseProject(input:string):Project {
   if(!Array.isArray(s.elements)||s.elements.length>100)throw new Error(`${path}.elements: expected array (max 100)`);
   const elements=s.elements.map((value,j)=>{
    const ep=`${path}.elements[${j}]`,e=obj(value,ep),type=one(e.type,['text','image','shape','simulation','video','bubble'] as const,`${ep}.type`),defaults=newElement(type,'element');keys(e,Object.keys(defaults),ep);
-   const merged={...defaults,...e};const simulation=parseSimulation(merged.simulation,ep+'.simulation');if(type==='simulation'&&!simulation)throw new Error(ep+'.simulation: required for simulation element'); const eid=id(e.id,`${ep}.id`);if(elementIds.has(eid))throw new Error(`${ep}: duplicate ID`);elementIds.add(eid);
+   const merged={...defaults,...e};if(typeof merged.exitAnimation==='string'&&isParticleExit(merged.exitAnimation)&&!['text','image','shape'].includes(type))throw new Error(ep+'.exitAnimation: particles require text, image or shape');const simulation=parseSimulation(merged.simulation,ep+'.simulation');if(type==='simulation'&&!simulation)throw new Error(ep+'.simulation: required for simulation element'); const eid=id(e.id,`${ep}.id`);if(elementIds.has(eid))throw new Error(`${ep}: duplicate ID`);elementIds.add(eid);
    for(const key of ['bold','italic','underline','strikethrough'] as const)if(typeof merged[key]!=='boolean')throw new Error(`${ep}.${key}: expected boolean`);
    if(!Array.isArray(merged.runs)||merged.runs.length>2000)throw new Error(`${ep}.runs: expected array (max 2000)`);
    const runs:TextRun[]=merged.runs.map((value,index)=>{
@@ -123,7 +124,7 @@ export function parseProject(input:string):Project {
    if(new Set(members.map(mid=>elements.find(e=>e.id===mid)!.space)).size>1)throw new Error(gp+'.members: all members must use the same coordinate space');
    const pivot=obj(get('pivot',{x:50,y:50}),gp+'.pivot');keys(pivot,['x','y'],gp+'.pivot');
    const at=num(get('at',0),gp+'.at',0,duration),until=g.until===undefined||g.until===null?null:num(g.until,gp+'.until',0,duration);if(until!==null&&until<=at)throw new Error(gp+'.until: must be greater than at');
-   return {id:gid,name:str(get('name','Group'),gp+'.name',200),members,pivot:{x:num(pivot.x,gp+'.pivot.x',-1000,1000),y:num(pivot.y,gp+'.pivot.y',-1000,1000)},x:num(get('x',0),gp+'.x',-1000,1000),y:num(get('y',0),gp+'.y',-1000,1000),rotation:num(get('rotation',0),gp+'.rotation',-360,360),opacity:num(get('opacity',1),gp+'.opacity',0,1),at,until,animation:one(get('animation','none'),animations.filter(a=>a!=='typewriter'&&a!=='draw'),gp+'.animation'),animationDuration:num(get('animationDuration',1),gp+'.animationDuration',.01,3600),exitAnimation:one(get('exitAnimation','none'),exitAnimations,gp+'.exitAnimation'),exitDuration:num(get('exitDuration',.5),gp+'.exitDuration',.01,3600),motionPath:parseMotionPath(g.motionPath,duration,gp+'.motionPath')};
+   return {id:gid,name:str(get('name','Group'),gp+'.name',200),members,pivot:{x:num(pivot.x,gp+'.pivot.x',-1000,1000),y:num(pivot.y,gp+'.pivot.y',-1000,1000)},x:num(get('x',0),gp+'.x',-1000,1000),y:num(get('y',0),gp+'.y',-1000,1000),rotation:num(get('rotation',0),gp+'.rotation',-360,360),opacity:num(get('opacity',1),gp+'.opacity',0,1),at,until,animation:one(get('animation','none'),animations.filter(a=>a!=='typewriter'&&a!=='draw'),gp+'.animation'),animationDuration:num(get('animationDuration',1),gp+'.animationDuration',.01,3600),exitAnimation:one(get('exitAnimation','none'),exitAnimations.filter(a=>!isParticleExit(a)),gp+'.exitAnimation'),exitDuration:num(get('exitDuration',.5),gp+'.exitDuration',.01,3600),motionPath:parseMotionPath(g.motionPath,duration,gp+'.motionPath')};
   });
   return {camera:parseCamera(s.camera,duration,path+'.camera'),groups,narration:parseNarration(s.narration,audios,duration,path+'.narration'),id:sid,name:str(s.name??d.name,`${path}.name`,200),duration,backgroundEnabled:(s.backgroundEnabled??true) as boolean,backgroundOpacity:num(s.backgroundOpacity??1,path+'.backgroundOpacity',0,1),backgroundGradient:parseGradient(s.backgroundGradient,path+'.backgroundGradient'),background:color(s.background??d.background,`${path}.background`),backgroundAsset:ref(s.backgroundAsset??'',`${path}.backgroundAsset`),transition:one(s.transition??d.transition,sceneTransitions,`${path}.transition`),transitionDuration:num(s.transitionDuration??d.transitionDuration,`${path}.transitionDuration`,0.01,3600),elements};
  });

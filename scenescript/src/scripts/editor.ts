@@ -1,3 +1,5 @@
+import {isParticleExit} from '../lib/particles';
+import {updateParticles} from './particles';
 import {applyTextPreset,textPresets} from '../lib/text-presets';
 import {defaultTextEffects} from '../lib/text-effects';
 import {textEffectsCSS,textOutlineCSS} from '../lib/text-effects';
@@ -104,7 +106,7 @@ function renderGroupForm(host:HTMLElement,g:Group){
  const update=(key:keyof Group,value:unknown)=>{const old=g[key];Object.assign(g,{[key]:value});try{parseProject(JSON.stringify(project));stop();changed();draw(false);if(key==='name')renderElements();}catch(error){Object.assign(g,{[key]:old});showToast((error as Error).message,'error');renderForms();}};
  field(host,'name',g.name,'text',v=>update('name',v));
  for(const key of ['x','y','rotation','opacity','at','animationDuration','exitDuration'] as const)field(host,key,g[key],'number',v=>update(key,v),undefined,key==='rotation'?-360:key==='x'||key==='y'?-1000:key==='animationDuration'||key==='exitDuration'?.01:0,key==='rotation'?360:key==='opacity'?1:key==='at'?current().duration:key==='x'||key==='y'?1000:3600);
- field(host,'animation',g.animation,'select',v=>update('animation',v),animations.filter(a=>a!=='typewriter'&&a!=='draw'));field(host,'exitAnimation',g.exitAnimation,'select',v=>update('exitAnimation',v),exitAnimations);
+ field(host,'animation',g.animation,'select',v=>update('animation',v),animations.filter(a=>a!=='typewriter'&&a!=='draw'));field(host,'exitAnimation',g.exitAnimation,'select',v=>update('exitAnimation',v),exitAnimations.filter(a=>!isParticleExit(a)));
  field(host,'elementEndEnabled',g.until!==null,'checkbox',v=>{if(v&&g.at>=current().duration)return;update('until',v?current().duration:null);renderForms();});if(g.until!==null)field(host,'until',g.until,'number',v=>update('until',v),undefined,g.at+.001,current().duration);
  comicPoint(host,t('groupPivot'),g.pivot,p=>update('pivot',p),-1000,1000);
  motionPathFields(host,groupController(g),next=>update('motionPath',next));
@@ -549,7 +551,7 @@ function renderForms(){
  field(ef,'elementEndEnabled',e.until!==null,'checkbox',v=>{updateElement('until',v?s.duration:null);renderForms();});
  field(ef,'until',e.until??s.duration,'number',v=>updateElement('until',v),undefined,0,s.duration);
  const endInput=ef.querySelector<HTMLInputElement>('[name=until]')!;endInput.disabled=e.until===null;endInput.closest('label')?.querySelectorAll('button').forEach(b=>b.disabled=e.until===null);
- field(ef,'exitAnimation',e.exitAnimation,'select',v=>updateElement('exitAnimation',v),exitAnimations);
+ field(ef,'exitAnimation',e.exitAnimation,'select',v=>updateElement('exitAnimation',v),exitAnimations.filter(a=>!isParticleExit(a)||['text','image','shape'].includes(e.type)));
  field(ef,'exitDuration',e.exitDuration,'number',v=>updateElement('exitDuration',v),undefined,.01,3600);
  if(e.type==='bubble'||e.type==='shape'&&e.shapeType!=='rectangle'){const radius=ef.querySelector<HTMLInputElement>('[name=radius]')!;radius.disabled=true;radius.closest('label')?.querySelectorAll('button').forEach(b=>b.disabled=true);}
  ef.classList.add('text-settings');
@@ -792,6 +794,7 @@ function updateSceneViews(sceneViews:SceneView[],local:number,opacity=1,cameraEn
   node.style.opacity=String(state.opacity*opacity);node.style.visibility=state.visible?'visible':'hidden';node.style.transform=state.transform;node.style.transformOrigin='0 0';
   if(text&&text.dataset.visibleText!==state.text){renderRuns(text,element,state.text);text.dataset.visibleText=state.text;}
   bubble?.update(effectiveScene,local,state.text,!playing&&!recording&&(element.id===selectedId||scene.groups.some(g=>g.id===selectedGroupId&&g.members.includes(element.id))));
+  const [pw,ph]=formats[project.format];updateParticles(node,element,local,scene.duration,element.width*pw/100,element.height*ph/100);
  });
  const warning=document.getElementById('bubble-overflow');
  if(warning){const view=sceneViews.find(v=>v.element.id===selectedId)?.bubble;warning.hidden=!view?.overflow();}
