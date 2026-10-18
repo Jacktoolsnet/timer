@@ -1,4 +1,5 @@
 ---
+import ToolInformation from '../../../shared/ToolInformation.astro';
 import {toolSeo} from '../../../shared/seo';
 import {backgrounds} from '../lib/backgrounds';
 import NatureBackgrounds from './NatureBackgrounds.astro';
@@ -61,7 +62,8 @@ const seo=toolSeo.breathe[lang];
   </section>
  </div>
  <p class="local-note">{t.local}</p>
- <section class="guide"><div class="guide-heading"><h2>{t.guide}</h2></div><div class="guide-grid">{t.steps.map((step,i)=><article><span class="step-number">0{i+1}</span><h3>{step}</h3><p>{t.tips[i]}</p></article>)}</div></section>
+ <ToolInformation lang={lang} tool="breathe" />
+<section class="guide"><div class="guide-heading"><h2>{t.guide}</h2></div><div class="guide-grid">{t.steps.map((step,i)=><article><span class="step-number">0{i+1}</span><h3>{step}</h3><p>{t.tips[i]}</p></article>)}</div></section>
  <dialog id="first-start-dialog" aria-labelledby="first-safety-title">
   <div class="dialog-inner"><h2 id="first-safety-title">{t.safetyTitle}</h2><p>{t.firstHint}</p><p class="notice">{t.safePlace}</p>
    <div class="dialog-actions"><button id="safety-continue" class="primary" autofocus>{t.continueLabel}</button><form method="dialog"><button class="secondary">{t.closeLabel}</button></form></div>

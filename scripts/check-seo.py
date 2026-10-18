@@ -14,6 +14,8 @@ PROJECTS = ['company', 'timer', 'clock', 'stopwatch', 'breathe', 'relax']
 class Metadata(HTMLParser):
     def __init__(self, html):
         super().__init__()
+        self.visible = ''
+        self.in_script = False
         self.title = ''
         self.h1 = []
         self.description = ''
@@ -44,12 +46,14 @@ class Metadata(HTMLParser):
         if tag == 'link':
             if a.get('rel') == 'canonical': self.canonical = a.get('href')
             if a.get('hreflang'): self.alternates[a['hreflang']] = a.get('href')
+        if tag == 'script': self.in_script = True
         if tag == 'script' and a.get('type') == 'application/ld+json':
             self.in_json = True; self.json = ''
 
     def handle_endtag(self, tag):
         if tag == 'template': self.template -= 1; return
         if self.template: return
+        if tag == 'script': self.in_script = False
         if tag == 'title': self.in_title = False
         if tag == 'h1': self.in_h1 = False
         if tag == 'script' and self.in_json:
@@ -57,6 +61,7 @@ class Metadata(HTMLParser):
 
     def handle_data(self, data):
         if self.template: return
+        if not self.in_script and not self.in_title: self.visible += data
         if self.in_title: self.title += data
         if self.in_h1: self.h1[-1] += data
         if self.in_json: self.json += data
@@ -82,8 +87,9 @@ for project in PROJECTS:
             assert set(meta.alternates) == {'de', 'en', 'es', 'fr', 'x-default'}, (url, 'hreflang')
         for schema in meta.schemas:
             if schema.get('@type') == 'WebApplication':
-                assert schema['description'] == meta.description, (url, 'schema description')
-                assert schema['name'] == meta.title, (url, 'schema title')
+                assert schema['description'] in meta.visible, (url, 'schema description must be visible')
+                assert schema['name'] in meta.visible, (url, 'schema name must be visible')
+                assert all(feature in meta.visible for feature in schema['featureList']), (url, 'schema features must be visible')
         seen_titles.add(meta.title); seen_descriptions.add(meta.description); pages += 1
         print(f'OK {url}: {meta.title}')
 assert pages == 29, pages

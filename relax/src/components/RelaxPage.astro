@@ -1,4 +1,5 @@
 ---
+import ToolInformation from '../../../shared/ToolInformation.astro';
 import {toolSeo} from '../../../shared/seo';
 import {backgroundImages,backgroundText} from '../lib/backgrounds';
 import CampfireCloseup from './CampfireCloseup.astro';
@@ -57,7 +58,8 @@ const seo=toolSeo.relax[lang];
   </form></section>
  </div>
  <p class="local-note">{t.local}</p>
- <section class="guide"><div class="guide-heading"><h2>{t.guide}</h2></div><div class="guide-grid">{t.steps.map((step,i)=><article><span class="step-number">0{i+1}</span><h3>{step}</h3><p>{t.tips[i]}</p></article>)}</div></section>
+ <ToolInformation lang={lang} tool="relax" />
+<section class="guide"><div class="guide-heading"><h2>{t.guide}</h2></div><div class="guide-grid">{t.steps.map((step,i)=><article><span class="step-number">0{i+1}</span><h3>{step}</h3><p>{t.tips[i]}</p></article>)}</div></section>
  <dialog id="sleep-screen" aria-labelledby="sleep-screen-title"><h2 id="sleep-screen-title" class="sr-only">{t.sleepMode}</h2><form method="dialog"><button class="sleep-screen-surface" aria-label={t.returnControls}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15.5A8.5 8.5 0 0 1 8.5 4 8.5 8.5 0 1 0 20 15.5Z"/></svg><span id="sleep-remaining"></span><small>{t.tapToBrighten}</small></button></form></dialog>
  <dialog id="first-start-dialog" aria-labelledby="first-safety-title"><div class="dialog-inner"><h2 id="first-safety-title">{t.safetyTitle}</h2><p>{t.firstHint}</p><p class="notice">{t.safePlace}</p><div class="dialog-actions"><button id="safety-continue" class="primary" autofocus>{t.continueLabel}</button><form method="dialog"><button class="secondary">{t.closeLabel}</button></form></div></div></dialog>
  <dialog id="safety-dialog" aria-labelledby="safety-title"><div class="dialog-inner"><h2 id="safety-title">{t.safetyLink}</h2><p>{t.firstHint}</p><p>{t.safePlace}</p><ul>{t.safetyDetails.map(text=><li>{text}</li>)}</ul><p><a href="https://www.who.int/news-room/questions-and-answers/item/deafness-and-hearing-loss-safe-listening" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">WHO · Safe listening ↗</a></p><form method="dialog" class="dialog-actions"><button class="primary" autofocus>{t.closeLabel}</button></form></div></dialog>

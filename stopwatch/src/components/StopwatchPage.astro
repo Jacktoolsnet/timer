@@ -1,4 +1,5 @@
 ---
+import ToolInformation from '../../../shared/ToolInformation.astro';
 import {toolSeo} from '../../../shared/seo';
 import Layout from '../layouts/Layout.astro';
 import {getDictionary, type Language} from '../lib/i18n';
@@ -70,6 +71,7 @@ const seo=toolSeo.stopwatch[lang];
 <label class="toggle-row"><span><strong>{c.awake}</strong><small>{c.awakeHint}</small></span><input id="awake" type="checkbox" role="switch" /><span class="toggle" aria-hidden="true"></span></label>
 </aside></div>
 <p class="local-note">{c.note}</p><p class="privacy-promise">{t.privacyPromise}</p></div>
+<ToolInformation lang={lang} tool="stopwatch" />
 <section class="guide"><div class="guide-heading"><p class="eyebrow">THE JACKTOOLS.NET WAY</p><h2>{c.guide}</h2></div><div class="guide-grid">{c.steps.map(([title,body],i)=><article><span class="step-number">0{i+1}</span><h3>{title}</h3><p>{body}</p></article>)}</div></section>
 <section class="faq"><h2>{t.faq}</h2><details><summary>{c.question}<span aria-hidden="true">+</span></summary><p>{c.answer}</p></details></section>
 <dialog id="reset-dialog" class="reset-dialog" aria-labelledby="reset-title" aria-describedby="reset-description">

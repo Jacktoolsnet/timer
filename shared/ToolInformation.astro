@@ -1,0 +1,42 @@
+---
+import {information,informationLabels,relatedTools,toolUrl,type ToolId,type ToolLanguage} from './tool-information';
+interface Props { tool:ToolId; lang:ToolLanguage }
+const {tool,lang}=Astro.props;
+const c=information[tool][lang],labels=informationLabels[lang];
+const url=toolUrl(tool,lang);
+const schema={
+ '@context':'https://schema.org','@type':'WebApplication','@id':url+'#application',
+ name:c.name,description:c.summary,url,inLanguage:lang,operatingSystem:'Any',
+ applicationCategory:tool==='scenescript'?'MultimediaApplication':tool==='breathe'||tool==='relax'?'LifestyleApplication':'UtilitiesApplication',
+ isAccessibleForFree:true,offers:{'@type':'Offer',price:'0',priceCurrency:'EUR'},
+ featureList:c.features,browserRequirements:'Requires JavaScript',
+ publisher:{'@type':'Organization','@id':'https://jacktools.net/#organization',name:'Jacktools',url:'https://jacktools.net/'},
+};
+---
+<section class="tool-information" data-tool-information={tool} aria-labelledby="tool-information-title">
+ <header><p class="tool-information-eyebrow">{labels.heading}</p><h2 id="tool-information-title">{c.name}</h2><p class="tool-summary">{c.summary}</p></header>
+ <div class="tool-information-grid">
+  <section><h3>{labels.features}</h3><ul>{c.features.map(feature=><li>{feature}</li>)}</ul></section>
+  <section><h3>{labels.limits}</h3><p>{c.limit}</p></section>
+  <nav aria-label={labels.related}><h3>{labels.related}</h3><ul>{relatedTools(tool).map(id=><li><a href={toolUrl(id,lang)}>{information[id][lang].name}<span aria-hidden="true"> ↗</span></a></li>)}</ul></nav>
+ </div>
+ <dl class="tool-questions"><div><dt>{c.question}</dt><dd>{c.answer}</dd></div><div><dt>{labels.accountQuestion}</dt><dd>{labels.accountAnswer}</dd></div></dl>
+</section>
+<script type="application/ld+json" set:html={JSON.stringify(schema).replace(/</g,'\\u003c')} />
+<style>
+.tool-information{max-width:1000px;margin:40px auto 56px;padding:28px;border:1px solid var(--line);border-radius:18px;background:var(--surface);color:var(--text)}
+.tool-information header{max-width:760px;margin-bottom:24px}
+.tool-information-eyebrow{font-size:12px;letter-spacing:.1em;color:var(--accent);font-weight:650}
+.tool-information h2{font-size:clamp(23px,3vw,32px);line-height:1.3;margin:10px 0 14px;font-weight:550}
+.tool-information h3,.tool-questions dt{font-size:15px;line-height:1.5;font-weight:650;margin:0 0 10px}
+.tool-information p,.tool-information li,.tool-questions dd{font-size:14px;line-height:1.8;color:var(--muted);overflow-wrap:anywhere}
+.tool-information-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px}
+.tool-information-grid ul{padding-left:20px;margin:0}.tool-information-grid p{margin:0}
+.tool-information a{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+.tool-information a:focus-visible{outline:3px solid var(--accent);outline-offset:4px}
+.tool-questions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px;border-top:1px solid var(--line);padding-top:24px;margin:24px 0 0}
+.tool-questions dd{margin:0}
+@media(max-width:680px){.tool-information{padding:20px;margin:28px auto 40px}.tool-information-grid,.tool-questions{grid-template-columns:minmax(0,1fr);gap:22px}}
+:global(body.focus-view) .tool-information{display:none}
+@media print{.tool-information{display:none}}
+</style>

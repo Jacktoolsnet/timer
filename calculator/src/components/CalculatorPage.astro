@@ -1,4 +1,5 @@
 ---
+import ToolInformation from '../../../shared/ToolInformation.astro';
 import Layout from '../layouts/Layout.astro';
 import { getDictionary, type Language } from '../lib/i18n';
 import { calculatorText } from '../lib/calculator-text';
@@ -67,6 +68,7 @@ const {lang}=Astro.props; const c=calculatorText[lang]; const t=getDictionary(la
 <dialog id="examples-dialog" aria-labelledby="examples-title" aria-describedby="examples-notice"><div class="dialog-inner"><h2 id="examples-title">{e.title}</h2><p id="examples-notice">{e.notice}</p><div id="examples-list" class="examples-list">{exampleIds.map(id=><article class="example-card"><h3>{examples[id].title}</h3><p>{examples[id].description}</p><button type="button" class="secondary" data-example={id} aria-label={e.load+': '+examples[id].title}>{e.load}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></button></article>)}</div><section id="example-confirmation" hidden aria-labelledby="example-confirmation-title"><h3 id="example-confirmation-title"></h3><p>{e.replace}</p><div class="dialog-actions"><button type="button" id="example-cancel" class="secondary">{c.cancel}</button><button type="button" id="example-confirm" class="primary">{e.load}</button></div></section><form method="dialog" class="dialog-actions"><button type="submit" class="secondary">{t.close}</button></form></div></dialog>
 <section id="print-calculation"><h1 id="print-title"></h1><p id="print-rounding"></p><table><thead><tr><th>#</th><th>{c.name}</th><th>{c.operation}</th><th>{c.total}</th></tr></thead><tbody id="print-rows"></tbody></table><h2 id="print-result"></h2></section>
 </div>
+<ToolInformation lang={lang} tool="calculator" />
 <section class="guide calc-guide"><div class="guide-heading"><p class="eyebrow">THE JACKTOOLS.NET WAY</p><h2>{c.guide}</h2></div><div class="guide-grid">{c.guides.map(([title,body],i)=><article><span class="step-number">0{i+1}</span><h3>{title}</h3><p>{body}</p></article>)}</div></section>
 <script src="../scripts/calculator.ts"></script>
 </Layout>

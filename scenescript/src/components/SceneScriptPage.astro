@@ -1,4 +1,5 @@
 ---
+import ToolInformation from '../../../shared/ToolInformation.astro';
 import Layout from '../layouts/Layout.astro';
 import { editorDictionary } from '../lib/editor-i18n';
 import type {Language} from '../lib/i18n';
@@ -183,6 +184,7 @@ const {lang}=Astro.props,t=editorDictionary(lang);
    <button id="cancel-export" type="button" title={t.cancel} aria-label={t.cancel}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg></button>
   </div></footer>
  </dialog>
+ <ToolInformation lang={lang} tool="scenescript" />
  <noscript><p class="notice">JavaScript is required for the SceneScript editor.</p></noscript>
  <script src="../scripts/editor.ts"></script>
 </Layout>
