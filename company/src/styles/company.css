@@ -96,3 +96,22 @@ html{scroll-behavior:smooth;scroll-padding-top:30px}.header-tools{display:flex;a
 .spotlight-relax .company-relax-scene {position:absolute;width:76%;left:12%;top:24%;}
 
 .hero-slogan { color:var(--accent); font-size:clamp(16px,1.8vw,22px); line-height:1.5; margin:0 0 16px; }
+
+/* Descriptive product cards and a stable, crawlable tool directory. */
+.tool-shortcuts{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 24px}
+.tool-shortcuts a{padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--accent);font-size:calc(13px * var(--font-scale,1));line-height:1.5}
+.tool-shortcuts a:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.product-card{scroll-margin-top:24px}.product-copy h3{overflow-wrap:anywhere}
+.feature-list a{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+.stopwatch-preview .small-clock strong{font-size:calc(43px * var(--font-scale,1));letter-spacing:-2px}
+.stopwatch-preview .preview-hundredths{font-size:.5em;color:var(--muted);letter-spacing:0}
+.preview-laps{display:grid;gap:8px;width:min(240px,100%);font-size:calc(12px * var(--font-scale,1));color:var(--muted)}
+.preview-laps>span{display:flex;justify-content:space-between;gap:14px}.preview-laps b{font-weight:550;color:var(--text);font-variant-numeric:tabular-nums}
+.time-tools-grid .message-art{height:auto;min-height:340px;padding:0}
+.tool-suggestion{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;padding:24px;margin-top:25px;border:1px dashed var(--line);border-radius:16px}
+.tool-suggestion h3{font-size:calc(18px * var(--font-scale,1));margin:0}.tool-suggestion p{flex:1 1 280px;font-size:calc(13px * var(--font-scale,1));line-height:1.8;color:var(--muted);margin:0}
+
+.company-calculation{width:min(290px,100%);padding:24px;border:1px solid var(--line);border-radius:14px;background:var(--surface);box-shadow:var(--shadow);font-variant-numeric:tabular-nums}
+.company-calculation>span{display:block;font-size:calc(10px * var(--font-scale,1));letter-spacing:.12em;color:var(--muted);margin-bottom:20px}
+.company-calculation>div{display:flex;justify-content:space-between;gap:16px;padding:10px 0;border-bottom:1px solid var(--line);font-size:calc(14px * var(--font-scale,1));color:var(--muted)}
+.company-calculation b{color:var(--text);font-weight:550}.company-calculation p{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:20px 0 0;color:var(--accent);font-size:calc(12px * var(--font-scale,1))}.company-calculation strong{font-size:calc(28px * var(--font-scale,1));font-weight:650}

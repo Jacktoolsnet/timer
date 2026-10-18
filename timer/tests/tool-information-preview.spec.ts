@@ -10,7 +10,7 @@ for(const [index,app] of apps.entries()){
   await expect(section).toBeVisible();
   await expect(section.locator('dt')).toHaveCount(2);
   const links=await section.locator('nav a').evaluateAll(els=>els.map(el=>(el as HTMLAnchorElement).href));
-  expect(links.every(url=>!url.includes('calculator.')&&!url.includes('scenescript.'))).toBeTruthy();
+  expect(links.every(url=>!url.includes('scenescript.'))).toBeTruthy();
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();
   await section.screenshot({path:`/tmp/${app}-tool-information-${info.project.name}.png`});
   expect(errors).toEqual([]);

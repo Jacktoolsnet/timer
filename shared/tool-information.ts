@@ -62,7 +62,7 @@ export const information:Record<ToolId,Record<ToolLanguage,Entry>>={
 export const toolRoutes:Record<ToolId,{host:string;path:string;published:boolean}>={
  countdown:{host:'timer',path:'',published:true},pomodoro:{host:'timer',path:'pomodoro/',published:true},interval:{host:'timer',path:'training/',published:true},
  clock:{host:'clock',path:'',published:true},stopwatch:{host:'stopwatch',path:'',published:true},breathe:{host:'breathe',path:'',published:true},relax:{host:'relax',path:'',published:true},
- calculator:{host:'calculator',path:'',published:false},scenescript:{host:'scenescript',path:'',published:false},
+ calculator:{host:'calculator',path:'',published:true},scenescript:{host:'scenescript',path:'',published:false},
 };
 export function toolUrl(tool:ToolId,lang:ToolLanguage){const route=toolRoutes[tool];return `https://${route.host}.jacktools.net/${lang}/${route.path}`;}
 const related:Record<ToolId,ToolId[]>={countdown:['pomodoro','interval','stopwatch'],pomodoro:['countdown','breathe','relax'],interval:['countdown','stopwatch','breathe'],clock:['countdown','stopwatch'],stopwatch:['countdown','interval','clock'],breathe:['relax','pomodoro'],relax:['breathe','pomodoro'],calculator:['countdown','clock'],scenescript:['clock','relax']};

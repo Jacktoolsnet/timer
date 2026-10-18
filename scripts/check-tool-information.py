@@ -9,7 +9,7 @@ import xml.etree.ElementTree as ET
 ROOT = Path(__file__).resolve().parents[1]
 LANGS = ['de', 'en', 'es', 'fr']
 TOOLS = {'timer':['','pomodoro','training'],'clock':[''],'stopwatch':[''],'breathe':[''],'relax':[''],'calculator':[''],'scenescript':['']}
-PUBLISHED = {'timer','clock','stopwatch','breathe','relax'}
+PUBLISHED = {'timer','clock','stopwatch','breathe','relax','calculator'}
 
 class Information(HTMLParser):
     def __init__(self, html):
@@ -58,5 +58,5 @@ for project,routes in TOOLS.items():
 # The machine-readable publisher is also described by the homepage's entity graph.
 home=Information((ROOT/'company/dist/index.html').read_text())
 graph=next(x['@graph'] for x in home.schemas if '@graph' in x)
-assert {x['@type'] for x in graph}=={'Organization','WebSite'}
+assert {'Organization','WebSite','ItemList'}=={x['@type'] for x in graph}
 print(f'Validated {count} localized tool pages, related links and the homepage entity graph.')

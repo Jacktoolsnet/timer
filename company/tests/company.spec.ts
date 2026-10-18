@@ -3,14 +3,14 @@ test('homepage, preferences, opt-in and legal links', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.goto('/');
-  await expect(page.locator('h1')).toContainText('Möglichkeiten');
+  await expect(page.locator('h1')).toContainText('Online-Tools');
   await expect(page.locator('html')).toHaveAttribute('data-palette', 'green');
   await expect(page.locator('html')).toHaveAttribute('data-style', 'technical');
   await expect(page.locator('.message-art .message-marker')).toHaveCount(3);
   await expect(page.locator('.marker-message')).toHaveAttribute('src', '/markers/message-marker.svg');
   await expect(page.locator('.brand-icon img')).toHaveAttribute('src', '/jacktools-icon.png');
   await expect(page.locator('link[rel=icon]')).toHaveAttribute('href', '/jacktools-icon.png');
-  await expect(page.getByRole('link', { name: 'Timer öffnen' })).toHaveAttribute('href', 'https://timer.jacktools.net/de/');
+  await expect(page.getByRole('link', { name: 'Countdown-Timer öffnen' })).toHaveAttribute('href', 'https://timer.jacktools.net/de/');
   expect(await page.evaluate(() => localStorage.length)).toBe(0);
   await page.getByLabel('Einstellungen', { exact: true }).click();
   await page.locator('#theme').click();
@@ -76,12 +76,12 @@ test('timer and clock are adjacent on desktop and stacked on mobile', async ({ p
 });
 
 test('Relax card and random spotlight link to the new tool',async({page})=>{
- await page.addInitScript(()=>{Math.random=()=>.7;});
+ await page.addInitScript(()=>{Math.random=()=>.6;});
  await page.goto('/');
  await expect(page.locator('#company-spotlight')).toHaveAttribute('data-tool','relax');
  await expect(page.locator('#company-spotlight .text-link')).toHaveAttribute('href','https://relax.jacktools.net/de/');
  await expect(page.locator('#company-spotlight .company-relax-scene')).toBeVisible();
- await expect(page.getByRole('link',{name:'Relax öffnen'})).toHaveAttribute('href','https://relax.jacktools.net/de/');
+ await expect(page.getByRole('link',{name:'Naturgeräusche öffnen'})).toHaveAttribute('href','https://relax.jacktools.net/de/');
  await expect(page.locator('.relax-feature .company-relax-scene')).toBeVisible();
  await expect(page.locator('.relax-feature')).toContainText('Lagerfeuer');
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
