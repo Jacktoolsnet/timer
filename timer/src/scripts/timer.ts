@@ -1,3 +1,4 @@
+import {createTimerAppearance} from './timer-appearance';
 import { screenWakeLock } from '../lib/wake-lock';
 import { renderPlayButton } from '../lib/play-button';
 import { storageAllowed } from '../lib/storage';
@@ -50,7 +51,9 @@ function persist(value: Settings = settings) {
     return true;
   } catch { status.textContent = t.storageError; return false; }
 }
+const updateAnalog=createTimerAppearance();
 function render() {
+  updateAnalog(timer.remaining);
   const running = timer.deadline !== null;
   setWake(running && settings.awake);
   const display = formatTime(timer.remaining);

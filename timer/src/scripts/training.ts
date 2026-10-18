@@ -1,3 +1,4 @@
+import {createTimerAppearance} from './timer-appearance';
 import { renderPlayButton } from '../lib/play-button';
 import { TRAINING_KEY, sanitizeTraining, trainingPhases } from '../lib/training';
 import { storageAllowed } from '../lib/storage';
@@ -30,7 +31,9 @@ function beep(frequency: number, count = 1) {
   if (!settings.sound || !audio || audio.state !== 'running' || document.hidden) return;
   for (let i=0;i<count;i++) { const osc = audio.createOscillator(), gain = audio.createGain(), at = audio.currentTime+i*.22; osc.frequency.value=frequency; gain.gain.setValueAtTime(.08,at); gain.gain.exponentialRampToValueAtTime(.001,at+.18); osc.connect(gain);gain.connect(audio.destination);osc.start(at);osc.stop(at+.2);osc.onended=()=>{osc.disconnect();gain.disconnect();}; }
 }
+const updateAnalog=createTimerAppearance();
 function render() {
+  updateAnalog(remaining);
   const phase = phases[index];
   el('training-phase').textContent = phase ? t[phase.kind] : t.done;
   el('training-time').textContent = formatTime(remaining);

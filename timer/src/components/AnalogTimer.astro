@@ -1,0 +1,11 @@
+---
+import { analogDesignStyles, dialMarkup } from '../../../shared/analog-designs';
+---
+<style is:inline set:html={analogDesignStyles} />
+<svg id="analog-timer" class="analog-face" data-design="standard" viewBox="0 0 320 320" aria-hidden="true" data-hidden="true">
+<g id="timer-dial" set:html={dialMarkup('standard')} />
+<line class="timer-hour-hand" x1="160" y1="170" x2="160" y2="83"/>
+<line class="timer-minute-hand" x1="160" y1="176" x2="160" y2="48"/>
+<line class="timer-second-hand" x1="160" y1="187" x2="160" y2="32"/>
+<circle cx="160" cy="160" r="5" class="timer-hub"/>
+</svg>

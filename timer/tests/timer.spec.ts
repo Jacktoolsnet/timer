@@ -467,7 +467,7 @@ test('training advances automatically and finishes without final rest', async ({
   await page.locator('[name=rounds]').fill('2');
   await page.locator('#training-form button[type=submit]').click();
   await page.locator('#training-start').click();
-  await expect(page.locator('#training-phase')).toHaveText('Training abgeschlossen!', { timeout: 7000 });
+  await expect(page.locator('#training-phase')).toHaveText('Intervalle abgeschlossen!', { timeout: 7000 });
   await expect(page.locator('#training-time')).toHaveText('00:00');
   expect(await page.evaluate(() => localStorage.getItem('jacktools.timer.training.v1'))).toBeNull();
 });
@@ -515,4 +515,14 @@ test('training labels wrap while number fields stay in the right column', async 
   expect(Math.abs(inputBox!.x - previousBox!.x)).toBeLessThan(1);
   expect(inputBox!.x).toBeGreaterThanOrEqual(textBox!.x + textBox!.width);
   expect(inputBox!.y).toBeLessThan(textBox!.y + textBox!.height);
+});
+
+
+test('interval mode uses general-purpose labels and keeps existing links', async ({ page }) => {
+  await page.goto('/de/');
+  await page.getByRole('link', { name: 'Intervall', exact: true }).click();
+  await expect(page).toHaveURL(/\/de\/training\//);
+  await expect(page.getByRole('heading', { name: 'Deine Intervalle. Dein Rhythmus.', exact: true })).toBeVisible();
+  await expect(page.locator('label[for=work]')).toContainText('Aktivphase');
+  await expect(page.getByRole('link', { name: 'Intervall', exact: true })).toHaveAttribute('aria-current', 'page');
 });

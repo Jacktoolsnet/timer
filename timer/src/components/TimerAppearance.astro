@@ -1,0 +1,13 @@
+---
+import type { Language } from '../lib/i18n';
+import { analogDesigns, analogDesignText, analogPreview } from '../../../shared/analog-designs';
+import { timerAppearanceText } from '../lib/timer-appearance';
+interface Props { lang: Language }
+const {lang}=Astro.props;
+const t=timerAppearanceText[lang], designs=analogDesignText[lang];
+---
+<form id="timer-appearance">
+<label>{t.label}<select name="timerView"><option value="digital">{t.digital}</option><option value="analog">{t.analog}</option></select></label>
+<label>{designs.label}<select name="analogDesign">{analogDesigns.map((id,i)=><option value={id} data-preview={analogPreview(id)}>{designs.names[i]}</option>)}</select></label>
+<p id="analog-timer-hint" class="form-hint" hidden>{t.hint}</p>
+</form>
