@@ -1,8 +1,14 @@
 /** Descriptive search metadata and visible headings for the published tools. */
 type Language = 'de' | 'en' | 'es' | 'fr';
-type Tool = 'countdown' | 'pomodoro' | 'interval' | 'clock' | 'stopwatch' | 'breathe' | 'relax';
+type Tool = 'countdown' | 'pomodoro' | 'interval' | 'clock' | 'stopwatch' | 'breathe' | 'relax' | 'lava';
 type Copy = { title: string; heading: string; description: string };
 export const toolSeo: Record<Tool, Record<Language, Copy>> = {
+ lava: {
+  de:{"title": "Lavalampe online – animierte Lava", "heading": "Online-Lavalampe zum Entspannen", "description": "Beobachte weich fließende Lava in vier Farbwelten. Passe Tempo und Helligkeit an und nutze die Fokusansicht. Kostenlos im Browser, ohne Anmeldung."},
+  en:{"title": "Online lava lamp – flowing animation", "heading": "Online lava lamp for a quiet break", "description": "Watch softly flowing lava in four colour palettes. Adjust speed and brightness or switch to focus view. Free in your browser, with no sign-up."},
+  es:{"title": "Lámpara de lava online – animación", "heading": "Lámpara de lava online para desconectar", "description": "Observa lava en movimiento suave con cuatro paletas de color. Ajusta velocidad y brillo y activa la vista de enfoque. Gratis en el navegador, sin registro."},
+  fr:{"title": "Lampe à lave en ligne – animation", "heading": "Lampe à lave en ligne pour une pause", "description": "Regardez la lave évoluer doucement dans quatre palettes. Réglez vitesse et luminosité et activez la vue concentration. Gratuit dans le navigateur, sans inscription."},
+ },
  countdown: {
   de:{title:'Online-Countdown-Timer',heading:'Online-Countdown-Timer',description:'Stelle deinen Countdown frei ein: mit Signalton, analoger oder digitaler Anzeige und Fokusansicht. Kostenlos im Browser, ohne Anmeldung.'},
   en:{title:'Online countdown timer',heading:'Online countdown timer',description:'Set your own countdown with sound alerts, analog or digital display and focus view. Free in your browser, with no sign-up.'},

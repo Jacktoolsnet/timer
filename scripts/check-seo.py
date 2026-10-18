@@ -9,7 +9,7 @@ import json
 import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
-PROJECTS = ['company', 'timer', 'clock', 'stopwatch', 'breathe', 'relax']
+PROJECTS = ['company', 'timer', 'clock', 'stopwatch', 'breathe', 'relax', 'lava']
 
 class Metadata(HTMLParser):
     def __init__(self, html):
@@ -92,5 +92,5 @@ for project in PROJECTS:
                 assert all(feature in meta.visible for feature in schema['featureList']), (url, 'schema features must be visible')
         seen_titles.add(meta.title); seen_descriptions.add(meta.description); pages += 1
         print(f'OK {url}: {meta.title}')
-assert pages == 29, pages
-print(f'Validated {pages} canonical pages across {len(PROJECTS)} published projects.')
+assert pages == 33, pages
+print(f'Validated {pages} canonical pages across {len(PROJECTS)} configured projects.')

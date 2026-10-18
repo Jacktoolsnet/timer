@@ -1,0 +1,83 @@
+import {test,expect} from '@playwright/test';
+test('lamp controls, rendering and layout',async({page})=>{
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/de/');
+ await expect(page.locator('h1')).toHaveText('Online-Lavalampe zum Entspannen');
+ await expect(page.locator('#lava-toggle')).toHaveAttribute('aria-pressed','false');
+ await expect(page.locator('#lava-stage')).not.toHaveClass(/no-webgl/);
+ await page.locator('#lava-toggle').click();
+ await expect(page.locator('#lava-toggle')).toHaveAccessibleName('Pausieren');
+ await page.waitForTimeout(300);
+ await page.locator('#lava-colour-picker summary').click();
+ await page.getByText('Lagune',{exact:true}).click();
+ await page.locator('#lava-speed').fill('0.5');
+ await expect(page.locator('#speed-value')).toHaveText('0.5×');
+ await page.locator('#lava-brightness').fill('60');
+ await expect(page.locator('#brightness-value')).toHaveText('60 %');
+ await page.locator('#lava-toggle').click();
+ await expect(page.locator('#lava-toggle')).toHaveAccessibleName('Starten');
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ expect(errors).toEqual([]);
+ await page.screenshot({path:'/tmp/lava-'+test.info().project.name+'.png',fullPage:true});
+});
+test('reduced motion and storage opt-in',async({page})=>{
+ await page.emulateMedia({reducedMotion:'reduce'});
+ await page.goto('/de/');
+ await expect(page.locator('#lava-status')).toContainText('reduziert');
+ expect(await page.evaluate(()=>Object.keys(localStorage))).toEqual([]);
+ await page.locator('#palette-dropdown summary').click();
+ await page.locator('#remember-preferences').check();
+ expect(await page.evaluate(()=>localStorage.getItem('jacktools.lava.storage-consent.v1'))).toBe('yes');
+});
+test('static fallback when WebGL is unavailable',async({page})=>{
+ await page.addInitScript(()=>{HTMLCanvasElement.prototype.getContext=(()=>null) as typeof HTMLCanvasElement.prototype.getContext;});
+ await page.goto('/en/');
+ await expect(page.locator('#lava-stage')).toHaveClass(/no-webgl/);
+ await expect(page.locator('.fallback')).toBeVisible();
+});
+
+test('focus label and palette-aware sliders',async({page})=>{
+ await page.goto('/de/');
+ await expect(page.locator('#lava-fullscreen')).toHaveText('Fokusansicht');
+ await expect(page.locator('#lava-stage #lava-fullscreen')).toBeVisible();
+ await expect(page.locator('#lava-stage #lava-toggle')).toHaveAccessibleName('Starten');
+ const stage=await page.locator('#lava-stage').boundingBox();
+ const focus=await page.locator('#lava-fullscreen').boundingBox();
+ expect(focus!.x+focus!.width).toBeGreaterThan(stage!.x+stage!.width-30);
+ expect(focus!.y).toBeLessThan(stage!.y+30);
+ const slider=page.locator('#lava-speed');
+ const initial=await slider.evaluate(el=>getComputedStyle(el).accentColor);
+ await page.locator('#palette-dropdown summary').click();
+ await page.locator('[name=colorScheme][value=violet]').check();
+ const selected=await slider.evaluate(el=>getComputedStyle(el).accentColor);
+ expect(selected).not.toBe(initial);
+ const brightness=await page.locator('#lava-brightness').evaluate(el=>getComputedStyle(el).accentColor);
+ expect(brightness).toBe(selected);
+});
+
+test('focus controls hide after inactivity and return on interaction',async({page})=>{
+ await page.goto('/de/');
+ await page.locator('#lava-fullscreen').click();
+ await expect(page.locator('#lava-stage')).toHaveJSProperty('id','lava-stage');
+ // Some mobile browsers do not expose fullscreen.
+ if (!await page.evaluate(()=>!!document.fullscreenElement)) return;
+ await page.locator('#lava-stage').click({position:{x:30,y:100}});
+ await expect(page.locator('#lava-toggle')).toHaveCSS('opacity','0',{timeout:5000});
+ await expect(page.locator('#exit-fullscreen')).toHaveCSS('opacity','0');
+ await page.locator('#lava-stage').dispatchEvent('pointermove');
+ await expect(page.locator('#lava-toggle')).toHaveCSS('opacity','1');
+ await page.keyboard.press('Tab');
+ await expect(page.locator('#lava-toggle')).toHaveCSS('opacity','1');
+ await page.keyboard.press('Escape');
+ await expect(page.locator('#lava-stage')).not.toHaveClass(/focus-controls-hidden/);
+});
+
+test('settings cards have equal height when sharing a row',async({page})=>{
+ await page.goto('/de/');
+ const cards=await page.locator('.lava-controls .settings-tile').all();
+ const boxes=await Promise.all(cards.map(card=>card.boundingBox()));
+ for(let i=0;i<boxes.length;i++)for(let j=i+1;j<boxes.length;j++){
+  if(Math.abs(boxes[i]!.y-boxes[j]!.y)<1)
+   expect(Math.abs(boxes[i]!.height-boxes[j]!.height)).toBeLessThan(1);
+ }
+});
