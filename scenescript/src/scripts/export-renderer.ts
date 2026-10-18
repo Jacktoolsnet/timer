@@ -13,7 +13,7 @@ import {createCropImage} from './crop-image';
 import type {Crop} from '../lib/crop';
 import {sceneElementState} from '../lib/groups';
 import {createBubble} from './bubble';
-import {toSvg} from 'html-to-image';
+import {toSvg,getFontEmbedCSS} from 'html-to-image';
 import {formats,locateTime,sceneTransitionState,type Project,type Scene} from '../lib/model';
 import {gradientCSS} from '../lib/gradient';
 import {videoTime,type VideoSettings} from '../lib/video';
@@ -24,6 +24,7 @@ import {createSvgImage,seekSvg} from './svg-image';
 import type {ExportMedia} from './export-media';
 /** A separate, offscreen scene tree: exporting never changes the editor playhead. */
 export class ExportRenderer{
+ private fontCss=new Map<string,Promise<string>>();
  readonly root=document.createElement('div');private w:number;private h:number;
  constructor(private p:Project,private media:ExportMedia){[this.w,this.h]=formats[p.format];Object.assign(this.root.style,{position:'fixed',left:'-30000px',top:'0',width:this.w+'px',height:this.h+'px',overflow:'hidden',background:'#000',pointerEvents:'none',fontFamily:'Arial',lineHeight:'normal',fontSize:'16px'});this.root.setAttribute('aria-hidden','true');this.root.dataset.exportRenderer='true';document.body.append(this.root);}
  private box(){const n=document.createElement('div');Object.assign(n.style,{position:'absolute',inset:'0',width:'100%',height:'100%'});return n;}
@@ -60,11 +61,19 @@ export class ExportRenderer{
  if(s.transition==='through-black'&&transition.progress<1){const black=this.box();black.style.background='#000';black.style.opacity=String(1-Math.abs(transition.progress*2-1));this.root.append(black);}
  if(previous){const out=await this.layer(this.p.scenes[at.index-1],this.p.scenes[at.index-1].duration);out.style.transform=transition.outgoing;out.style.opacity=String(transition.outgoingOpacity);}
  const incoming=await this.layer(s,at.local);incoming.style.transform=transition.incoming;incoming.style.clipPath=transition.clip;incoming.style.opacity=String(transition.opacity);
- this.freezeSvg();
+ // Load the actual glyphs/styles in this frame, including rich text and SVG text.
+ const fonts=new Map<string,string>(),families=new Set<string>();
+ for(const node of this.root.querySelectorAll('[data-element-id],span,text,tspan')){if(!node.textContent)continue;const style=getComputedStyle(node),font=`${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;fonts.set(font,(fonts.get(font)||'')+node.textContent);families.add(style.fontFamily);}
+ await Promise.all([...fonts].map(([font,text])=>document.fonts.load(font,text)));
+ await document.fonts.ready;
+ await Promise.all([...this.root.querySelectorAll('img')].map(image=>image.decode()));
+ this.media.check();this.freezeSvg();
  // html-to-image's toCanvas leaves its decoded SVG Image to garbage collection.
  // Explicitly unload each large, unique frame instead of retaining native image
  // resources until the browser happens to run a GC during a long export.
- const uri=await toSvg(this.root,{skipFonts:true,style:{position:'relative',left:'0px',top:'0px',right:'auto',bottom:'auto',margin:'0',transform:'none',visibility:'visible',contentVisibility:'visible'}});
+ const fontKey=[...families].sort().join('|');
+ let fontCSS=this.fontCss.get(fontKey);if(!fontCSS){fontCSS=getFontEmbedCSS(this.root);if(this.fontCss.size>=16)this.fontCss.clear();this.fontCss.set(fontKey,fontCSS);}
+ const uri=await toSvg(this.root,{fontEmbedCSS:await fontCSS,style:{position:'relative',left:'0px',top:'0px',right:'auto',bottom:'auto',margin:'0',transform:'none',visibility:'visible',contentVisibility:'visible'}});
  const image=new Image(),canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;
  try{
   image.src=uri;await image.decode();this.media.check();canvas.getContext('2d')!.drawImage(image,0,0,width,height);return canvas;
@@ -73,5 +82,5 @@ export class ExportRenderer{
  }
  // Detached canvases can otherwise retain large native pixel buffers until a GC.
  private clear(){for(const canvas of this.root.querySelectorAll('canvas')){canvas.width=0;canvas.height=0;}this.root.replaceChildren();}
- dispose(){this.clear();this.root.remove();}
+ dispose(){this.clear();this.fontCss.clear();this.root.remove();}
 }

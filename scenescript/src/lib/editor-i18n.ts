@@ -1,5 +1,19 @@
 import type { Language } from './i18n';
 const words = {
+ stillExport:["Bilder & Kontaktbogen", "Images & contact sheet", "Imágenes y hoja de contacto", "Images et planche-contact"],
+ stillHint:["PNG-Bilder mit dem Videoexport-Renderer, ohne Editorhilfen. Zeitangaben in Sekunden. Dein Projekt und die Abspielposition bleiben unverändert.", "PNG images using the video export renderer, without editor overlays. Times are in seconds. Your project and playhead stay unchanged.", "Imágenes PNG con el renderizador de vídeo, sin guías. Tiempos en segundos. El proyecto y el cursor no cambian.", "Images PNG avec le moteur vidéo, sans repères. Temps en secondes. Projet et tête de lecture inchangés."],
+ stillTime:["Projektzeit (s)", "Project time (s)", "Tiempo del proyecto (s)", "Temps du projet (s)"],
+ stillCurrent:["Aktuelle Abspielposition übernehmen", "Use current playhead", "Usar posición actual", "Utiliser la position actuelle"],
+ stillDownload:["Einzelbild als PNG herunterladen", "Download frame as PNG", "Descargar imagen PNG", "Télécharger une image PNG"],
+ stillContact:["Kontaktbogen herunterladen", "Download contact sheet", "Descargar hoja de contacto", "Télécharger la planche-contact"],
+ stillTimes:["Szenenzeitpunkte (s)", "Scene times (s)", "Tiempos de escena (s)", "Temps de scène (s)"],
+ stillScenes:["Szenen für den Kontaktbogen", "Contact sheet scenes", "Escenas de la hoja", "Scènes de la planche"],
+ stillAll:["Alle auswählen", "Select all", "Seleccionar todas", "Tout sélectionner"],
+ stillNone:["Keine auswählen", "Select none", "Deseleccionar todas", "Tout désélectionner"],
+ stillContactHint:["Pro Szene 1–12 Zeitpunkte vor dem Szenenende, mit Semikolon trennen (z. B. 1; 2,5; 4). Standard: drei verteilte Momentaufnahmen. Bis zu sechs Bilder pro PNG; mehrere Seiten als ZIP mit Zeitangaben in frames.json. Bilder zeigen echte Übergänge – bei 0 s kann eine Einblendung noch schwarz sein.", "Choose 1–12 times before each scene ends, separated by semicolons (e.g. 1; 2.5; 4). Default: three distributed samples. Up to six images per PNG; multiple pages in a ZIP with times in frames.json. Real transitions are included: a fade may still be black at 0 s.", "Elige 1–12 tiempos antes del final de cada escena, separados por punto y coma. Por defecto: tres muestras. Hasta seis imágenes por PNG; varias páginas en ZIP con tiempos en frames.json. Se incluyen las transiciones: un fundido puede ser negro a 0 s.", "Choisissez 1–12 temps avant la fin de chaque scène, séparés par un point-virgule. Par défaut : trois échantillons. Six images par PNG ; plusieurs pages en ZIP avec les temps dans frames.json. Les transitions sont incluses : un fondu peut être noir à 0 s."],
+ stillWorking:["Bilder werden erstellt …", "Rendering images …", "Generando imágenes …", "Création des images …"],
+ stillDone:["Bilder zum Download bereitgestellt.", "Images prepared for download.", "Imágenes listas para descargar.", "Images prêtes à télécharger."],
+
  previewPreparing:['Vorschau wird vorbereitet …','Preparing preview …','Preparando vista previa …','Préparation de l’aperçu …'],
  previewPrepareError:['Vorschau konnte nicht vorbereitet werden.','Preview could not be prepared.','No se pudo preparar la vista previa.','Impossible de préparer l’aperçu.'],
  groupSpaceMismatch:["Eine Gruppe darf nur Elemente aus demselben Koordinatenraum enthalten.","A group can only contain elements in the same coordinate space.","Un grupo solo puede contener elementos del mismo espacio.","Un groupe ne peut contenir que des éléments du même espace."],

@@ -542,6 +542,14 @@ MP4 can use bundled local AAC fallback. Export size (480p/720p/1080p short edge)
 24/30/60 fps and audio choice are UI-only, NOT Project fields. No server transcoding or
 automatic MP4→WebM fallback. Export can be cancelled; it does not replace editable
 JSON. Screen recording is another route; capture tab/system audio if wanted.
+For visual review, the preview's Images & contact sheet dialog exports a PNG at
+an exact project time (native project resolution) or contact sheets from selected
+scene-local times. It uses the SAME renderer/clock as video export, including
+camera, animation and real transitions, without editor overlays. At 0 s a fade
+may still be black. Contact sheets label scene IDs and local/project seconds;
+up to six samples per PNG, multiple pages in one ZIP with frames.json mapping.
+Send these images back to the authoring AI to review actual layout and speaker
+positions instead of guessing from JSON. These controls are UI-only, not fields.
 The editor requires a viewport >=768 CSS pixels (tablet/desktop), not a landscape
 project; phone-shaped videos are supported. AI documentation remains accessible
 on smaller viewports. No automatic publishing or platform acceptance guarantees exist.

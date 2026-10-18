@@ -6,6 +6,15 @@ import {operationSymbols} from '../lib/operation-help';
 import { enhanceCalculatorSelects } from './calculator-selects';
 const app=document.querySelector<HTMLElement>('#calculator-app')!;
 const c=JSON.parse(app.dataset.text!) as typeof calculatorText.en;
+// Never create a nested scroll area. Only pin the whole calculator when it fits.
+const calculatorCard=app.querySelector<HTMLElement>('.calc-card')!;
+function updateCalculatorFit(){calculatorCard.dataset.fitsViewport=String(calculatorCard.getBoundingClientRect().height<=(window.visualViewport?.height??window.innerHeight)-40);}
+const calculatorSizeObserver=new ResizeObserver(updateCalculatorFit);
+calculatorSizeObserver.observe(calculatorCard);
+window.addEventListener('resize',updateCalculatorFit);
+window.visualViewport?.addEventListener('resize',updateCalculatorFit);
+updateCalculatorFit();
+
 const $=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(id) as T;
 const input=$<HTMLInputElement>('value'), name=$<HTMLInputElement>('step-name'), operation=$<HTMLInputElement>('operation');
 const title=$<HTMLInputElement>('calculation-title'), decimals=$<HTMLSelectElement>('decimals'), round=$<HTMLInputElement>('round-each'), remember=$<HTMLInputElement>('remember-calculation');

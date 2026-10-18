@@ -12,10 +12,11 @@
 @media(max-width:680px){.calc-left-column{gap:20px}}
 
 /* Stretch the left column with the tape so the calculator can follow page scrolling.
-   Only the calculator is sticky; options live in a modal. Tall cards remain scrollable. */
+   Only a calculator that fits the viewport is sticky. Tall cards use page scrolling. */
 @media screen and (min-width:681px){
  .calc-left-column{align-self:stretch;grid-template-rows:1fr;align-items:start}
- .calc-left-column .calc-card{position:sticky;top:20px;align-self:start;max-height:calc(100dvh - 40px);overflow-y:auto;scrollbar-gutter:stable}
+ .calc-left-column .calc-card{align-self:start;max-height:none;overflow:visible}
+ .calc-left-column .calc-card[data-fits-viewport="true"]{position:sticky;top:20px}
 }
 
 .calc-action-keys{grid-column:1/-1;grid-row:span 2;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,var(--key-height));gap:var(--key-gap)}
@@ -98,7 +99,7 @@
 /* Value first, then step name: one visually distinct entry area. */
 .calc-entry-fields{min-width:0;margin:0;padding:14px;border:1px solid color-mix(in srgb,var(--accent) 38%,var(--line));border-radius:14px;background:color-mix(in srgb,var(--accent) 7%,var(--surface))}
 .calc-card .calc-entry-fields label{color:var(--accent);font-weight:600;margin:14px 0 8px;line-height:1.5}.calc-card .calc-entry-fields label[for=value]{margin-top:0}
-.calc-card .calc-entry-fields input{background:var(--surface);border-color:color-mix(in srgb,var(--accent) 40%,var(--line));min-height:48px;font-size:calc(16px * var(--font-scale,1));padding:11px 12px}.calc-card .calc-entry-fields #value{font-size:calc(25px * var(--font-scale,1));min-height:56px}
+.calc-card .calc-entry-fields input{background:var(--surface);border-color:color-mix(in srgb,var(--accent) 40%,var(--line));height:calc(56px * var(--font-scale,1));min-height:56px;font-size:calc(16px * var(--font-scale,1));line-height:1.2;padding:11px 12px}.calc-card .calc-entry-fields #value{font-size:calc(25px * var(--font-scale,1))}
 .calc-entry-fields:focus-within{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 12%,transparent)}.calc-entry-fields input:disabled{opacity:.5;cursor:not-allowed}
 [data-style=technical] .calc-entry-fields{border-radius:4px}[data-style=soft] .calc-entry-fields{border-radius:20px}
 @media(max-width:360px){.calc-entry-fields{padding:12px}}
@@ -148,11 +149,11 @@
 .example-card h3,.example-card p,#examples-notice{overflow-wrap:anywhere}
 
 /* Result and next operation form one expression; help sits at the left edge. */
-.calc-display{display:grid;grid-template-columns:38px minmax(0,1fr) 90px;align-items:center;gap:12px;padding:16px;min-height:calc(132px * var(--font-scale,1))}
+.calc-display{display:grid;grid-template-columns:38px minmax(0,1fr) 90px;align-items:center;gap:12px;padding:8px 16px;min-height:calc(112px * var(--font-scale,1))}
 .calc-display .calc-operation-info-button{align-self:center;padding:8px;min-height:38px;width:38px}.calc-result-value{min-width:0}.calc-result-value #result{font-size:calc(30px * var(--font-scale,1));line-height:1.25;text-align:right;overflow-wrap:anywhere}
-.calc-operation-display{align-self:stretch;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;border-inline-start:1px solid color-mix(in srgb,var(--accent) 24%,var(--line));padding-inline-start:12px;text-align:center}
-.calc-operation-display #operation-symbol{display:block;margin:0;font-family:system-ui,"Segoe UI Symbol",sans-serif;font-size:calc(32px * var(--font-scale,1));line-height:1.1;color:var(--accent);font-weight:500}.calc-operation-display #operation-label{font-size:calc(10px * var(--font-scale,1));line-height:1.4;color:var(--accent);font-weight:550;overflow-wrap:anywhere}
-@media(max-width:680px){.calc-display{grid-template-columns:32px minmax(0,1fr) 68px;gap:8px;padding:12px}.calc-display .calc-operation-info-button{width:32px;min-height:34px;padding:5px}.calc-result-value #result{font-size:calc(24px * var(--font-scale,1))}.calc-operation-display{padding-inline-start:8px}}
+.calc-operation-display{align-self:stretch;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border-inline-start:1px solid color-mix(in srgb,var(--accent) 24%,var(--line));padding-inline-start:12px;text-align:center}
+.calc-operation-display #operation-symbol{display:block;margin:0;font-family:system-ui,"Segoe UI Symbol",sans-serif;font-size:calc(28px * var(--font-scale,1));line-height:1.1;color:var(--accent);font-weight:500}.calc-operation-display #operation-label{font-size:calc(10px * var(--font-scale,1));line-height:1.4;color:var(--accent);font-weight:550;overflow-wrap:anywhere}
+@media(max-width:680px){.calc-display{grid-template-columns:32px minmax(0,1fr) 68px;gap:8px;padding:8px 12px}.calc-display .calc-operation-info-button{width:32px;min-height:34px;padding:5px}.calc-result-value #result{font-size:calc(24px * var(--font-scale,1))}.calc-operation-display{padding-inline-start:8px}}
 
 /* A quiet, selectable paper receipt; editing tools appear only on demand. */
 .receipt-summary{display:none}

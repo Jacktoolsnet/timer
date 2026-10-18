@@ -1,10 +1,12 @@
-/** Small ZIP32 writer (stored UTF-8 files) for portable, dependency-free speech exports. */
+/** Small ZIP32 writer (stored files, UTF-8 names) for portable speech and image exports. */
 const crcTable=Uint32Array.from({length:256},(_,n)=>{let c=n;for(let k=0;k<8;k++)c=c&1?0xedb88320^(c>>>1):c>>>1;return c>>>0;});
 export function crc32(data:Uint8Array){let c=0xffffffff;for(const b of data)c=crcTable[(c^b)&255]^(c>>>8);return (c^0xffffffff)>>>0;}
-export function textZip(files:{name:string;text:string}[]){
+export function textZip(files:{name:string;text:string}[]){return binaryZip(files.map(f=>({name:f.name,data:new TextEncoder().encode(f.text)})));}
+/** Stored binary files, also used for paginated PNG contact sheets. */
+export function binaryZip(files:{name:string;data:Uint8Array}[]){
  if(!files.length||files.length>1000)throw new Error('ZIP: expected 1–1000 files');
  const encoder=new TextEncoder(),names=new Set<string>();
- const entries=files.map(f=>{if(!f.name||/[\\/\x00-\x1f]/.test(f.name)||names.has(f.name.toLowerCase()))throw new Error('ZIP: invalid or duplicate filename');names.add(f.name.toLowerCase());const name=encoder.encode(f.name),data=encoder.encode(f.text);if(name.length>65535||data.length>16*1024*1024)throw new Error('ZIP: file too large');return {name,data,crc:crc32(data)};});
+ const entries=files.map(f=>{if(!f.name||/[\\/\x00-\x1f]/.test(f.name)||names.has(f.name.toLowerCase()))throw new Error('ZIP: invalid or duplicate filename');names.add(f.name.toLowerCase());const name=encoder.encode(f.name),data=f.data;if(name.length>65535||data.length>16*1024*1024)throw new Error('ZIP: file too large');return {name,data,crc:crc32(data)};});
  const localSize=entries.reduce((n,e)=>n+30+e.name.length+e.data.length,0),centralSize=entries.reduce((n,e)=>n+46+e.name.length,0);
  if(localSize+centralSize>32*1024*1024)throw new Error('ZIP: maximum 32 MiB');
  const bytes=new Uint8Array(localSize+centralSize+22),v=new DataView(bytes.buffer);let local=0,central=localSize;

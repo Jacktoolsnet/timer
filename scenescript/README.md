@@ -353,3 +353,30 @@ dekodiert, um Speicherspitzen zu reduzieren. Die bestehenden Größenlimits blei
 erhalten. Projekte über 4 MiB werden nicht als lokaler Browser-Entwurf gespeichert;
 bitte über **Speichern** als Projektdatei sichern. Ein 60-MiB-Projekt wird in den
 Browser-Regressionstests auf Desktop und Tablet importiert, bearbeitet und exportiert.
+
+### Einzelbilder und Kontaktbögen für die visuelle KI-Rückmeldung
+
+Unter der Vorschau öffnet **Bilder & Kontaktbogen** den Bildexport. Ein Einzelbild
+wird als PNG in Projektauflösung zu einer exakten **Projektzeit** exportiert. Der
+Startwert ist die aktuelle Abspielposition; diese bleibt beim Export unverändert.
+
+Für Kontaktbögen lassen sich Szenen auswählen und je Szene 1–12 **lokale Zeitpunkte**
+angeben, getrennt durch Semikolon (z. B. `1; 2,5; 4`). Standardmäßig werden drei
+über die Szene verteilte Momente vorgeschlagen. Die Zeitpunkte müssen vor dem
+Szenenende liegen, damit nicht versehentlich die nächste Szene abgebildet wird.
+Bis zu sechs Bilder stehen mit Szenenname, ID und lokalen/globalen Sekunden auf
+einer PNG-Seite (480 Pixel Bildbreite pro Ausschnitt). Mehrere Seiten werden als
+ein ZIP mit `frames.json` zur eindeutigen Zuordnung geliefert. Maximal 600 Bilder
+und 30 MiB PNG-Daten pro Auftrag; bei großen Projekten weniger Szenen auswählen.
+
+Beide Funktionen nutzen `ExportRenderer` und dieselbe Zeitberechnung wie der
+Videoexport, warten auf Bilddekodierung und verwendete Schriften und enthalten
+keine Auswahlrahmen oder Editorhilfen. Die selbst gehosteten Schriften werden für
+Bild- und Videoexport eingebettet und je Renderer zwischengespeichert. Echte
+Einblendungen sind enthalten: Bei 0 Sekunden kann ein Bild noch schwarz sein,
+auch wenn die pausierte Editorvorschau es bereits zeigt. Bilder sind stumm und
+dienen der Sichtprüfung, nicht der Beurteilung von Ton oder Bewegungsfluss.
+
+PNG/Kontaktbogen zusammen mit JSON an die KI zurückgeben: So kann sie tatsächliche
+Personenpositionen, Sprechblasenspitzen und Textanordnung gezielt beurteilen. Neue
+Schemafelder oder Änderungen bestehender Projektdateien sind dafür nicht nötig.

@@ -796,3 +796,28 @@ body.recording .comic-edit-overlay{display:none}
 #camera-form .camera-station-select[aria-pressed=true]{background:var(--accent-soft)}
 
 .elementLayoutGroup .text-settings-fields>label:has([name=space]){grid-column:1/-1}
+
+/* Still exports use bounded, scrollable controls on both desktop and tablet. */
+#stills-dialog{padding:0;width:min(820px,94vw);max-height:90dvh}
+#stills-dialog[open]{display:flex;flex-direction:column;overflow:hidden}
+#stills-dialog .json-header,#stills-dialog .json-footer{flex:none}
+#stills-dialog .dialog-inner{padding:20px;overflow:auto;min-height:0}
+#still-options{display:grid;gap:12px}
+#still-options fieldset{min-width:0;margin:12px 0 0;border:1px solid var(--line);border-radius:10px;padding:12px}
+#still-options input[type=number]{width:10rem;max-width:100%;box-sizing:border-box}
+#still-scenes{display:grid;gap:10px;margin-top:12px}
+.still-scene-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(120px,1fr);gap:12px;align-items:center}
+.still-scene-row label{overflow-wrap:anywhere;min-width:0}
+.still-scene-row input[type=text]{min-width:0;width:100%;box-sizing:border-box}
+#still-progress{width:100%;margin-top:16px}
+#still-status{overflow-wrap:anywhere}
+
+#still-options button{min-height:40px;padding:9px 14px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--text);font:inherit;cursor:pointer}
+#still-options button:hover:not(:disabled){border-color:var(--accent);background:var(--accent-soft)}
+#still-options>button{background:var(--accent-soft);color:var(--accent);font-weight:600}
+#still-options button:disabled{opacity:.55;cursor:wait}
+#still-options input[type=text],#still-options input[type=number]{min-height:42px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--text);font:inherit}
+#still-options input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent)}
+#stills-dialog :is(button,input):focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+#stills-dialog .json-footer{justify-content:flex-end}
+#close-stills{width:auto;min-width:110px;padding-inline:20px;font:inherit}

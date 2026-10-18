@@ -40,7 +40,7 @@ appearance preference (not a calculation step); persistence uses the existing
 opt-in “Remember settings on this device” appearance storage.
 
 Whole-tape copy, print/PDF, CSV, JSON export and JSON import are icon buttons in
-a horizontal sticky toolbar above the calculation title. Labels appear on hover
+a horizontal toolbar at the start of the tape above the calculation title. Labels appear on hover
 and keyboard focus. Left/right arrows, Home/End navigate the toolbar; Escape
 dismisses its tooltip. The toolbar stays with the tape regardless of which side
 the calculator occupies, including focus and mobile layouts.
@@ -146,3 +146,9 @@ Usage notes are available in all four tool languages, with a shared localized
 content model, linked contents and matching footer/hreflang links. They document
 the current receipt view, keyboard behaviour, rounding, currency, opt-in saving
 and the differences between JSON, CSV, clipboard and active-only print/PDF.
+
+The calculator never has its own scroll container or viewport-height cap. On
+side-by-side layouts it stays sticky only when the complete card fits the visible
+viewport with margins. ResizeObserver and viewport resize events account for
+font size, card content, focus view and screen changes. Taller cards stay in
+normal page flow so every control is reachable by scrolling the page.

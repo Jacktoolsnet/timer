@@ -110,13 +110,15 @@ test('calculator follows a long tape on desktop but not in stacked mobile layout
  await page.locator('#import-file').setInputFiles({name:'long.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(document))});
  const card=page.locator('.calc-card');
  if(testInfo.project.name==='desktop'){
+  await page.setViewportSize({width:1440,height:1400});
   await expect(card).toHaveCSS('position','sticky');
   const initial=await card.boundingBox();await page.evaluate(y=>window.scrollTo(0,y),initial!.y+500);
   await expect.poll(async()=>Math.round((await card.boundingBox())!.y)).toBe(20);
   await expect(page.locator('.calc-settings')).not.toBeInViewport();
   await page.setViewportSize({width:1440,height:600});
-  expect((await card.boundingBox())!.height).toBeLessThanOrEqual(560);
-  expect(await card.evaluate(e=>e.scrollHeight>e.clientHeight)).toBe(true);
+  await expect(card).toHaveCSS('position','static');await expect(card).toHaveCSS('max-height','none');await expect(card).toHaveCSS('overflow-y','visible');
+  expect((await card.boundingBox())!.height).toBeGreaterThan(560);
+  expect(await card.evaluate(e=>e.scrollHeight-e.clientHeight)).toBeLessThanOrEqual(1);
   await page.locator('#add-step').scrollIntoViewIfNeeded();await expect(page.locator('#add-step')).toBeInViewport();
  }else{
   await expect(card).toHaveCSS('position','static');await expect(card).toHaveCSS('max-height','none');
@@ -191,7 +193,8 @@ test('selected operation and info button share the result display',async({page})
  await page.locator('#value').fill('19');await page.locator('#add-step').click();await expect(page.locator('#result')).toHaveText('0,00');
 });
 
-test('calculator side can be changed, stays sticky, and respects mobile and focus layouts',async({page},testInfo)=>{
+test('calculator side can be changed, stays sticky when it fits, and respects mobile and focus layouts',async({page},testInfo)=>{
+ if(testInfo.project.name==='desktop')await page.setViewportSize({width:1440,height:1400});
  await page.evaluate(()=>{document.documentElement.requestFullscreen=()=>Promise.reject(new Error('Denied'));});
  await add(page,'100');await optionAction(page,async()=>{await page.locator('#trigger-calculator-side').click();await page.getByRole('option',{name:'Rechts vom Rechenstreifen',exact:true}).click();});
  await expect(page.locator('html')).toHaveAttribute('data-calculator-side','right');await expect(page.locator('#result')).toHaveText('100,00');
@@ -598,4 +601,45 @@ test('currency metadata is included in CSV and clipboard and currency selection 
   await add(page,'12.5','set');await expect(page.locator('#result')).toHaveText(lang==='en'?'12.50 ¥':'12,50 ¥');
   await page.setViewportSize({width:320,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  }
+});
+
+
+test('short screens scroll the page rather than the calculator, including focus and large fonts',async({page})=>{
+ const card=page.locator('.calc-card');
+ for(const width of [1440,390]){
+  await page.setViewportSize({width,height:500});
+  await expect(card).toHaveCSS('max-height','none');await expect(card).toHaveCSS('overflow-y','visible');await expect(card).toHaveCSS('position','static');
+  await page.locator('#value').scrollIntoViewIfNeeded();await page.locator('#value').hover();const before=await page.evaluate(()=>window.scrollY);await page.mouse.wheel(0,300);await expect.poll(()=>page.evaluate(()=>window.scrollY)).toBeGreaterThan(before);
+  await card.evaluate(el=>el.scrollTop=500);expect(await card.evaluate(el=>el.scrollTop)).toBe(0);
+  await page.locator('#add-step').scrollIntoViewIfNeeded();await expect(page.locator('#add-step')).toBeInViewport();
+ }
+ await page.evaluate(()=>{document.documentElement.dataset.fontSize='3';Object.defineProperty(document.documentElement,'requestFullscreen',{configurable:true,value:()=>Promise.reject(new Error('unavailable'))});});
+ await page.locator('#calculator-focus').click();await expect(page.locator('body')).toHaveClass(/calculator-focus-view/);
+ await expect(card).toHaveCSS('position','static');await expect(card).toHaveCSS('overflow-y','visible');
+ expect(await card.evaluate(el=>el.scrollHeight-el.clientHeight)).toBeLessThanOrEqual(1);
+ await page.locator('#add-step').scrollIntoViewIfNeeded();await expect(page.locator('#add-step')).toBeInViewport();expect(await page.evaluate(()=>window.scrollY)).toBeGreaterThan(0);
+ await page.keyboard.press('Escape');await expect(page.locator('body')).not.toHaveClass(/calculator-focus-view/);
+});
+
+
+test('result panel is flatter while keeping the value legible and operation controls accessible',async({page})=>{
+ const panel=page.locator('.calc-display'),heights:number[]=[];
+ for(const operation of ['set','taxOut','taxIn','discount','note']){
+  await page.locator('[data-operation='+operation+']').click();const box=(await panel.boundingBox())!;heights.push(box.height);expect(box.height).toBeLessThanOrEqual(114);
+  const op=(await page.locator('.calc-operation-display').boundingBox())!;expect(op.y).toBeGreaterThan(box.y);expect(op.y+op.height).toBeLessThan(box.y+box.height);
+ }
+ expect(Math.max(...heights)-Math.min(...heights)).toBeLessThan(1);
+ expect(parseFloat(await page.locator('#result').evaluate(el=>getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(24);
+ await page.locator('#operation-explain').click();await expect(page.locator('#operation-explanation')).toBeVisible();await page.keyboard.press('Escape');
+ await page.setViewportSize({width:320,height:600});await page.locator('[data-operation=taxOut]').click();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});
+
+
+test('value and note fields have equal heights at every text size',async({page})=>{
+ for(const size of ['0','1','2','3']){
+  await page.locator('html').evaluate((el,size)=>{(el as HTMLElement).dataset.fontSize=size;},size);
+  const value=(await page.locator('#value').boundingBox())!,note=(await page.locator('#step-name').boundingBox())!;
+  expect(value.height).toBeCloseTo(note.height,3);expect(value.height).toBeGreaterThanOrEqual(56);
+ }
+ await page.locator('#value').fill('123,45');await page.locator('#step-name').fill('Material');await page.locator('#add-step').click();await expect(page.locator('#result')).toHaveText('123,45');
 });

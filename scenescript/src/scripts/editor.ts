@@ -1,3 +1,4 @@
+import {contactPlan,defaultStillTimes,parseStillTimes} from '../lib/still-plan';
 import {utf8ByteLength} from '../lib/data-size';
 import {speechJobs,speechJobText,matchSpeechFiles,attachSpeechFiles,fitSpeechDurations,sceneSpeechMinimum} from '../lib/speech-jobs';
 import {textZip} from '../lib/text-zip';
@@ -1193,6 +1194,44 @@ $('element-down').addEventListener('click',()=>moveElement(1));
 $('delete-element').addEventListener('click',()=>{const g=current().groups.find(g=>g.id===selectedGroupId);if(g){askDelete(g.name,'group',()=>{for(const id of g.members)detachAnchor(current(),id,undefined,time-offset(sceneIndex),formats[project.format][0],formats[project.format][1]);current().elements=current().elements.filter(e=>!g.members.includes(e.id));current().groups=current().groups.filter(v=>v.id!==g.id);selectedGroupId='';changed();refresh();});return;}if(!selected())return;detachAnchor(current(),selectedId,undefined,time-offset(sceneIndex),formats[project.format][0],formats[project.format][1]);current().elements=current().elements.filter(e=>e.id!==selectedId);current().groups.forEach(g=>g.members=g.members.filter(id=>id!==selectedId));current().groups=current().groups.filter(g=>g.members.length);selectedId='';changed();refresh();});
 document.addEventListener('click',event=>{const menu=$('element-add-menu') as HTMLDetailsElement;if(!menu.contains(event.target as Node))menu.open=false;});
 $('element-add-menu').addEventListener('keydown',event=>{if(event.key==='Escape'&&($('element-add-menu') as HTMLDetailsElement).open){event.preventDefault();event.stopPropagation();($('element-add-menu') as HTMLDetailsElement).open=false;$('element-add-menu').querySelector('summary')?.focus();}});
+
+// Image exports share the video renderer but own their project snapshot and clock.
+const stillDialog=$<HTMLDialogElement>('stills-dialog');
+let stillController:AbortController|undefined;
+function syncStillTime(){const input=$<HTMLInputElement>('still-time');input.value=String(time);input.max=String(total());}
+$('open-stills').addEventListener('click',()=>{
+ document.activeElement instanceof HTMLElement&&document.activeElement.blur();stop();syncStillTime();$('still-status').textContent='';$('still-progress').hidden=true;
+ const host=$('still-scenes');host.replaceChildren();
+ project.scenes.forEach((scene,index)=>{
+  const row=document.createElement('div');row.className='still-scene-row';row.dataset.sceneIndex=String(index);
+  const label=document.createElement('label'),check=document.createElement('input');check.type='checkbox';check.checked=true;check.dataset.stillSelect='';label.append(check,document.createTextNode(` ${index+1}. ${scene.name} [${scene.id}] · ${scene.duration} s`));
+  const times=document.createElement('input');times.type='text';times.value=defaultStillTimes(scene.duration).join('; ');times.setAttribute('aria-label',`${t('stillTimes')}: ${scene.name}`);times.dataset.stillTimes='';times.addEventListener('input',()=>times.setCustomValidity(''));check.addEventListener('change',()=>times.disabled=!check.checked);row.append(label,times);host.append(row);
+ });
+ stillDialog.showModal();
+});
+$('still-current').addEventListener('click',syncStillTime);
+for(const [id,checked] of [['still-all',true],['still-none',false]] as const)$(id).addEventListener('click',()=>{for(const row of document.querySelectorAll<HTMLElement>('.still-scene-row')){row.querySelector<HTMLInputElement>('[data-still-select]')!.checked=checked;row.querySelector<HTMLInputElement>('[data-still-times]')!.disabled=!checked;}});
+const cancelStills=()=>{if(stillController)stillController.abort();else stillDialog.close();};
+$('close-stills').addEventListener('click',cancelStills);stillDialog.addEventListener('cancel',event=>{event.preventDefault();cancelStills();});
+async function downloadImages(contact:boolean){
+ if(stillController)return;
+ const controller=new AbortController();stillController=controller;
+ const controls=Array.from($('still-options').querySelectorAll<HTMLInputElement|HTMLButtonElement>('input,button')),disabled=controls.map(n=>n.disabled);controls.forEach(n=>n.disabled=true);
+ const progress=$<HTMLProgressElement>('still-progress');progress.hidden=false;progress.value=0;$('still-status').textContent=t('stillWorking');$('close-stills').textContent=t('cancel');keepScreenAwake(true);
+ try{
+  const snapshot=structuredClone(project),timeInput=$<HTMLInputElement>('still-time');
+  const {exportStill,exportContactSheets}=await import('./still-export');
+  let blob:Blob,suffix:string;
+  if(contact){
+   const selection=Array.from(document.querySelectorAll<HTMLElement>('.still-scene-row')).filter(row=>row.querySelector<HTMLInputElement>('[data-still-select]')!.checked).map(row=>({sceneIndex:Number(row.dataset.sceneIndex),times:parseStillTimes(row.querySelector<HTMLInputElement>('[data-still-times]')!.value)}));
+   const result=await exportContactSheets(snapshot,contactPlan(snapshot,selection),controller.signal,(done,total)=>{progress.value=done/total;$('still-status').textContent=`${t('stillWorking')} ${done}/${total}`;});blob=result.blob;suffix=`contact.${result.extension}`;
+  }else{const at=timeInput.valueAsNumber;blob=await exportStill(snapshot,at,controller.signal);suffix=`frame-${at.toFixed(3)}s.png`;}
+  controller.signal.throwIfAborted();progress.value=1;
+  const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=(snapshot.title.replace(/[^\p{L}\p{N}_-]+/gu,'-').slice(0,80)||'project')+'-'+suffix;link.click();setTimeout(()=>URL.revokeObjectURL(url),60000);$('still-status').textContent=t('stillDone');
+ }catch(error){$('still-status').textContent=controller.signal.aborted?t('exportCancelled'):t('error')+' '+(error as Error).message;}
+ finally{stillController=undefined;controls.forEach((n,i)=>n.disabled=disabled[i]);$('close-stills').textContent=t('close');keepScreenAwake(false);}
+}
+$('download-still').addEventListener('click',()=>void downloadImages(false));$('download-contact').addEventListener('click',()=>void downloadImages(true));
 
 // Export owns a snapshot and a separate renderer; editing state is never replaced.
 let exportController:AbortController|undefined;
