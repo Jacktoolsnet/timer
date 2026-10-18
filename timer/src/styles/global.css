@@ -819,3 +819,15 @@ body:not(.focus-view) .timer-card[data-background]:not([data-background=none]) .
 body:not(.focus-view) .timer-card[data-background]:not([data-background=none]) .timer-controls button { width:48px; min-width:48px; min-height:48px; padding:12px; }
 body:not(.focus-view) .timer-card[data-background]:not([data-background=none]) .timer-controls .primary { width:56px; min-width:56px; }
 body:not(.focus-view) .timer-card[data-background]:not([data-background=none]) .focus-details :is(.presets,.phase-summary) { width:100%; margin:0; padding-top:12px; }
+
+/* Keep the Pomodoro phase summary below the transport controls in focus view. */
+body.focus-view #timer-app[data-mode=pomodoro] .focus-details {
+ flex-direction:column; gap:10px;
+}
+body.focus-view #timer-app[data-mode=pomodoro] .focus-details .phase-summary {
+ width:100%; justify-content:center; padding-top:10px;
+}
+
+/* Interval total follows the buttons in normal and focus layouts. */
+body.focus-view #training-app .focus-details { flex-direction:column; gap:10px; }
+body.focus-view #training-app #training-total { width:100%; text-align:center; }

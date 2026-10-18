@@ -22,7 +22,7 @@ export function createTimerAppearance() {
   if(saved?.view==='analog'||saved?.view==='combined')view.value=saved.view;
   if(timerBackgrounds.includes(saved?.background))background.value=saved.background;
   if(Number.isInteger(saved?.transparency)&&saved.transparency>=0&&saved.transparency<=100)transparency.value=String(saved.transparency);
-  smooth.checked=saved?.smooth===true;
+  smooth.checked=typeof saved?.smooth==='boolean'?saved.smooth:true;
   if(analogDesigns.includes(saved?.design))design.value=saved.design;
  }catch{}
  function save(){if(storageAllowed())try{localStorage.setItem(APPEARANCE_KEY,JSON.stringify({view:view.value,design:design.value,smooth:smooth.checked,background:background.value,transparency:Number(transparency.value)}));}catch{}}
@@ -41,12 +41,13 @@ export function createTimerAppearance() {
   const analog=view.value==='analog'||view.value==='combined';
   clock.dataset.timerView=view.value;
   face.dataset.hidden=String(!analog);
-  document.getElementById('analog-timer-hint')!.hidden=!analog;
   if(face.dataset.design!==design.value||face.dataset.hourOffset!==String(hourOffset)||face.dataset.scale!==(minuteScale?'minutes':'hours')){document.getElementById('timer-dial')!.innerHTML=dialMarkup(design.value as AnalogDesign,hourOffset,minuteScale);face.dataset.design=design.value;face.dataset.hourOffset=String(hourOffset);face.dataset.scale=minuteScale?'minutes':'hours';}
  }
  transparency.addEventListener('input',()=>{applyBackground();save();});
  form.addEventListener('submit',e=>e.preventDefault());
- form.addEventListener('change',()=>{apply();save();update(lastRemaining,lastShowSeconds);});
+ function changeAppearance(){apply();save();update(lastRemaining,lastShowSeconds);}
+ form.addEventListener('change',changeAppearance);
+ smooth.addEventListener('change',changeAppearance);
  reducedMotion.addEventListener('change',()=>update(lastRemaining,lastShowSeconds));
  document.addEventListener('storage-enabled',save);
  document.addEventListener('preferences-cleared',()=>{try{localStorage.removeItem(APPEARANCE_KEY);}catch{}});

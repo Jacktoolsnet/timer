@@ -1,12 +1,14 @@
 import {test,expect} from '@playwright/test';
 for(const route of ['/de/','/de/pomodoro/','/de/training/']) {
- test(`second hand ticks by default and can sweep on ${route}`,async({page})=>{
+ test(`second hand sweeps by default and can tick on ${route}`,async({page})=>{
   await page.goto(route);
   await page.clock.install();
   await page.locator('#trigger-timerView').click();
   await page.getByRole('option',{name:'Analog',exact:true}).click();
   const toggle=page.getByRole('switch',{name:'Fließender Sekundenzeiger',exact:true});
-  await expect(toggle).not.toBeChecked();
+  await expect(toggle).toBeChecked();
+  await expect(page.locator('.behavior-options input[name=smooth]')).toHaveCount(1);
+  await toggle.uncheck();
   await page.locator('#start, #training-start').click();
   const hand=page.locator('.timer-second-hand');
   const initial=await hand.getAttribute('transform');
@@ -30,15 +32,16 @@ for(const route of ['/de/','/de/pomodoro/','/de/training/']) {
  });
 }
 
-test('smooth hand preference is opt-in and stored only with consent',async({page})=>{
+test('hand movement defaults on and stores an explicit off choice only with consent',async({page})=>{
  await page.goto('/de/');
  const toggle=page.locator('input[name=smooth]');
- await toggle.check();
+ await expect(toggle).toBeChecked();
+ await toggle.uncheck();
  await page.reload();
- await expect(toggle).not.toBeChecked();
- await toggle.check();
+ await expect(toggle).toBeChecked();
+ await toggle.uncheck();
  await page.locator('#palette-dropdown summary').click();
  await page.locator('#remember-preferences').check();
  await page.reload();
- await expect(toggle).toBeChecked();
+ await expect(toggle).not.toBeChecked();
 });

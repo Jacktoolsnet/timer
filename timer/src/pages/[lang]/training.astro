@@ -1,4 +1,5 @@
 ---
+import TimerHandMotion from '../../components/TimerHandMotion.astro';
 import AnalogTimer from '../../components/AnalogTimer.astro';
 import TimerAppearance from '../../components/TimerAppearance.astro';
 import { timerOptionGroups } from '../../lib/timer-option-groups';
@@ -24,8 +25,8 @@ const {lang} = Astro.props; const groups=timerOptionGroups[lang]; const t = getD
 <div class="card-top"><button id="training-focus" class="icon-text" aria-label={t.focusMode} aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg><span>{t.focusMode}</span></button></div>
 <div class="clock"><AnalogTimer /><svg class="progress-ring" viewBox="0 0 344 344" aria-hidden="true"><circle class="ring-track" cx="172" cy="172" r="165"/><circle id="training-total-progress" cx="172" cy="172" r="165" pathLength="100"/><circle class="ring-track" cx="172" cy="172" r="146"/><circle id="ring-progress" cx="172" cy="172" r="146" pathLength="100"/></svg><div class="clock-content"><p id="training-phase" class="phase-label" role="status">{x.preparation}</p><div id="training-time" class="time" role="timer">00:10</div><p id="training-round"></p></div></div>
 <div class="focus-details">
-<p id="training-total" class="timer-status"></p>
 <div class="timer-controls"><button id="training-reset" class="secondary" aria-label={t.reset} title={t.reset}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10a9 9 0 1 1 1 8M3 4v6h6"/></svg></button><button id="training-start" class="primary" aria-label={t.start} title={t.start} disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 11 7-11 7Z" fill="currentColor" stroke="none"/></svg></button><button id="training-next" class="secondary" aria-label={t.next} title={t.next}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 5 9 7-9 7V5Zm11 0v14"/></svg></button></div>
+<p id="training-total" class="timer-status"></p>
 <p id="wake-status" class="timer-status" role="status"></p><noscript>{t.js}</noscript>
 </div>
 </section>
@@ -33,6 +34,7 @@ const {lang} = Astro.props; const groups=timerOptionGroups[lang]; const t = getD
 {(['preparation','work','rest','rounds','countdown'] as const).map(key => <div class="number-field"><label class="training-field-label" for={key}>{x[key]}</label><NumberStepper id={key} name={key} label={x[key]} min={key === 'work' || key === 'rounds' ? 1 : 0} max={key === 'rounds' ? 100 : key === 'countdown' ? 10 : 3600} step={1} value={trainingDefaults[key]} lang={lang}/></div>)}
 </div></fieldset>
 <fieldset class="timer-options-group behavior-options"><legend>{groups.behavior}</legend>
+<TimerHandMotion lang={lang} />
 {(['halfway','sound','awake'] as const).map(key => <label class="toggle-row"><span><strong>{x[key]}</strong></span><input name={key} type="checkbox" role="switch" checked /><span class="toggle" aria-hidden="true"></span></label>)}
 </fieldset><div class="timer-options-footer"><button class="apply-button" type="submit">{t.apply}</button><p class="form-hint">{t.settingsResetHint}</p><p id="training-settings-status" role="status"></p></div></form></aside>
 </div>

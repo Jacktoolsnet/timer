@@ -15,7 +15,5 @@ const t=timerAppearanceText[lang], designs=analogDesignText[lang];
 <label>{designs.label}<select name="analogDesign">{analogDesigns.map((id,i)=><option value={id} data-preview={analogPreview(id)}>{designs.names[i]}</option>)}</select></label>
 <label>{backgrounds.label}<select name="background"><option value="none">{backgrounds.none}</option>{timerBackgrounds.map((id,i)=><option value={id} data-preview={'/backgrounds/'+id+'.svg'}>{backgrounds.names[i]}</option>)}</select></label>
 <label id="timer-transparency-field" hidden>{backgrounds.transparency}<span class="timer-transparency-control"><input name="transparency" id="timer-transparency" type="range" min="0" max="100" step="1" value="0" disabled/><output id="timer-transparency-value" for="timer-transparency">0 %</output></span></label>
-<label class="toggle-row"><span><strong>{t.smooth}</strong></span><input name="smooth" type="checkbox" role="switch"/><span class="toggle" aria-hidden="true"></span></label>
 {pomodoro && <label class="toggle-row"><span><strong>{secondsText[0]}</strong><small>{secondsText[1]}</small></span><input name="pomodoroSeconds" type="checkbox" role="switch"/><span class="toggle" aria-hidden="true"></span></label>}
-<p id="analog-timer-hint" class="form-hint" hidden>{t.hint}{pomodoro && <> {secondsText[1]}</>}</p>
 </form>

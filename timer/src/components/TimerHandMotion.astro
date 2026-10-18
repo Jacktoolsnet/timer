@@ -1,0 +1,7 @@
+---
+import type { Language } from '../lib/i18n';
+import { timerAppearanceText } from '../lib/timer-appearance';
+interface Props { lang: Language }
+const {lang}=Astro.props;
+---
+<label class="toggle-row"><span><strong>{timerAppearanceText[lang].smooth}</strong></span><input name="smooth" form="timer-appearance" type="checkbox" role="switch" checked/><span class="toggle" aria-hidden="true"></span></label>
