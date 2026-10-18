@@ -797,7 +797,9 @@ body.focus-view .timer-options { display:none; }
  fill:color-mix(in srgb,var(--surface) var(--timer-display-opacity,100%),transparent);
 }
 .timer-card[data-background]:not([data-background=none]) .focus-details {
- padding:12px; border-radius:16px; background:color-mix(in srgb,var(--surface) 92%,transparent);
+ padding:14px 16px; border-radius:16px;
+ background:color-mix(in srgb,var(--surface) var(--timer-display-opacity,100%),transparent);
+ backdrop-filter:none;
 }
 .timer-card[data-background]:not([data-background=none]) .card-top button { padding:8px 12px; border-radius:10px; background:var(--surface); }
 .clock-background-thumbnail { width:56px; height:38px; flex:0 0 56px; object-fit:cover; border-radius:6px; border:1px solid var(--line); }
@@ -806,5 +808,14 @@ body.focus-view .timer-options { display:none; }
 .timer-transparency-control input { flex:1; min-width:0; min-height:32px; accent-color:var(--accent); }
 .timer-transparency-control output { min-width:3.5em; text-align:right; font-variant-numeric:tabular-nums; }
 body:not(.focus-view) .timer-card[data-background]:not([data-background=none]) .focus-details {
- display:block; width:min(580px,100%); margin-inline:auto;
+ display:flex; flex-direction:column; align-items:center; gap:12px;
+ width:fit-content; max-width:100%; min-width:min(280px,100%); margin-inline:auto;
 }
+
+/* Compact, evenly spaced transport controls; empty status lines reserve no space. */
+body:not(.focus-view) .timer-card[data-background]:not([data-background=none]) .focus-details > .timer-status:empty { display:none; }
+body:not(.focus-view) .timer-card[data-background]:not([data-background=none]) .focus-details > .timer-status { margin:0; min-height:0; }
+body:not(.focus-view) .timer-card[data-background]:not([data-background=none]) .timer-controls { gap:10px; margin:0; flex-wrap:wrap; }
+body:not(.focus-view) .timer-card[data-background]:not([data-background=none]) .timer-controls button { width:48px; min-width:48px; min-height:48px; padding:12px; }
+body:not(.focus-view) .timer-card[data-background]:not([data-background=none]) .timer-controls .primary { width:56px; min-width:56px; }
+body:not(.focus-view) .timer-card[data-background]:not([data-background=none]) .focus-details :is(.presets,.phase-summary) { width:100%; margin:0; padding-top:12px; }
