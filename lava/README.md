@@ -39,3 +39,7 @@ Die Simulation ist eine stilisierte Animation, keine thermodynamische Simulation
 
 Die Einordnung als Relax-Tool ist auf der Seite vorhanden; die öffentliche
 Company-Toolliste wurde nicht geändert, da die neue Subdomain noch nicht live ist.
+
+Trägerflüssigkeit: Klar, Blau, Violett, Bernstein oder Türkis. Zähigkeit beeinflusst
+Bewegungstempo, Dehnung und Formwechsel unabhängig vom Geschwindigkeitsregler.
+Beide Werte werden nur mit Speicherzustimmung gesichert. Stilisierte Physik.

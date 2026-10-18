@@ -9,18 +9,18 @@ export function rainbowColour(hue: number): number[] {
 export function createBlobColours(): Float32Array {
  return new Float32Array(Array.from({length: BLOB_COUNT}, (_, i) => rainbowColour(i / BLOB_COUNT)).flat());
 }
-export function blobShape(index: number, time: number) {
+export function blobShape(index: number, time: number, viscosity = .35) {
  const phase = time * (.11 + index * .006) + index * 2.399;
  const radius = .055 + .035 * (.5 + .5 * Math.sin(index * 7));
- const shapeCycle = .5 + .5 * Math.sin(time * .075 + index * 1.73);
- const stretch = .85 + 1.65 * Math.pow(shapeCycle, 1.4) * (.6 + .4 * Math.abs(Math.cos(phase)));
+ const shapeCycle = .5 + .5 * Math.sin(time * (.075 / (1 + viscosity)) + index * 1.73);
+ const stretch = .85 + (1.2 + 1.3 * viscosity) * Math.pow(shapeCycle, 1.4) * (.6 + .4 * Math.abs(Math.cos(phase)));
  return {x: .5 + Math.sin(phase * .45 + index * 2.399) * .46, y: .5 + .55 * Math.sin(phase),
   rx: radius / Math.sqrt(stretch), ry: radius * Math.sqrt(stretch)};
 }
-export function advanceBlobColours(colours: Float32Array, time: number, dt: number, aspect: number) {
+export function advanceBlobColours(colours: Float32Array, time: number, dt: number, aspect: number, viscosity = .35) {
  if (dt <= 0) return;
  const sizeScale = Math.min(aspect, 1);
- const shapes = Array.from({length: BLOB_COUNT}, (_, i) => blobShape(i, time));
+ const shapes = Array.from({length: BLOB_COUNT}, (_, i) => blobShape(i, time, viscosity));
  // Simultaneous symmetric exchange avoids order-dependent mixing and retains colour.
  const changes = new Float32Array(colours.length);
  for (let i = 0; i < BLOB_COUNT; i++) for (let j = i + 1; j < BLOB_COUNT; j++) {

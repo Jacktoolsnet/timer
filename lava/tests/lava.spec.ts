@@ -156,3 +156,24 @@ test('metallic and oil palettes render and oil preference persists',async({page}
  await expect(page.locator('#lava-stage')).toHaveAttribute('data-material','oil');
  await expect(page.locator('#lava-toggle')).toHaveAttribute('aria-pressed','false');
 });
+
+test('carrier liquid and viscosity can be changed and remembered',async({page})=>{
+ await page.goto('/de/');
+ await page.locator('#fluid-picker summary').click();
+ await page.locator('[name=fluid-color][value="3"]').check();
+ await expect(page.locator('#fluid-value')).toHaveText('Bernstein');
+ await page.locator('#lava-viscosity').fill('80');
+ await expect(page.locator('#viscosity-value')).toHaveText('80 %');
+ await expect(page.locator('#lava-stage')).not.toHaveClass(/no-webgl/);
+ expect(await page.evaluate(()=>localStorage.getItem('jacktools.lava.settings.v1'))).toBeNull();
+ await page.locator('#palette-dropdown summary').click();
+ await page.locator('#remember-preferences').check();
+ await page.reload();
+ await expect(page.locator('#fluid-value')).toHaveText('Bernstein');
+ await expect(page.locator('#lava-viscosity')).toHaveValue('80');
+ await expect(page.locator('#lava-toggle')).toHaveAttribute('aria-pressed','false');
+ await page.locator('#lava-toggle').click();
+ await page.waitForTimeout(250);
+ await page.locator('#lava-toggle').click();
+ await expect(page.locator('#lava-stage')).not.toHaveClass(/no-webgl/);
+});

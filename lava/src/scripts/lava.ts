@@ -7,6 +7,8 @@ const toggle = document.querySelector<HTMLButtonElement>('#lava-toggle')!;
 const status = document.querySelector<HTMLElement>('#lava-status')!;
 const speed = document.querySelector<HTMLInputElement>('#lava-speed')!;
 const brightness = document.querySelector<HTMLInputElement>('#lava-brightness')!;
+const viscosity=document.querySelector<HTMLInputElement>('#lava-viscosity')!;
+let fluidColour=0;
 const motion = matchMedia('(prefers-reduced-motion: reduce)');
 const gl = canvas.getContext('webgl', { alpha: false, antialias: false, preserveDrawingBuffer: false });
 let running = false, frame = 0, previous = 0, elapsed = 12, colour = 0;
@@ -25,10 +27,12 @@ if (gl) {
  const vertex = shader(gl.VERTEX_SHADER,'attribute vec2 p; varying vec2 uv; void main(){uv=p*.5+.5;gl_Position=vec4(p,0.,1.);}');
  const fragment = shader(gl.FRAGMENT_SHADER,`
  precision mediump float;
- varying vec2 uv; uniform vec3 params; uniform vec3 colour; uniform vec3 blobColours[14];
+ varying vec2 uv; uniform vec4 params; uniform vec4 colourData; uniform vec3 blobColours[14];
  #define time params.x
  #define aspect params.y
  #define material params.z
+ #define viscosity params.w
+ #define colour colourData.rgb
  float contribution(vec2 p, float n){
    float phase=time*(.11+n*.006)+n*2.399;
    vec2 c=vec2(.5+sin(phase*.45+n*2.399)*.46,.5+.55*sin(phase));
@@ -36,8 +40,8 @@ if (gl) {
    // Stretch fastest in transit, then gather at the turning points.
    // Reciprocal axes preserve approximate area instead of inflating the wax.
    float travel=abs(cos(phase));
-   float shapeCycle=.5+.5*sin(time*.075+n*1.73);
-   float stretch=.85+1.65*pow(shapeCycle,1.4)*(.6+.4*travel);
+   float shapeCycle=.5+.5*sin(time*(.075/(1.+viscosity))+n*1.73);
+   float stretch=.85+(1.2+1.3*viscosity)*pow(shapeCycle,1.4)*(.6+.4*travel);
    // Size wax relative to the shorter side: portrait must not magnify
    // blobs until they fill almost the entire narrow viewport.
    vec2 d=(p-c)*vec2(aspect,1.)/min(aspect,1.);
@@ -116,7 +120,13 @@ if (gl) {
      +iridescence*band*.32+vec3(.75,.87,1.)*softbox*.3;
    }
   }
-  vec3 bg=vec3(.055,.025,.095)+colour*.055;
+  vec3 carrier=vec3(.055,.025,.095);
+  if(colourData.w>.5)carrier=vec3(.025,.13,.32);
+  if(colourData.w>1.5)carrier=vec3(.19,.045,.29);
+  if(colourData.w>2.5)carrier=vec3(.29,.13,.025);
+  if(colourData.w>3.5)carrier=vec3(.025,.22,.19);
+  vec3 bg=carrier+colour*.055;
+  liquid=mix(liquid,liquid*(.8+carrier*.9),.28);
   bg+=lampLight*beam*.34;
   // Concentrated warm glow above the base, diffusing into the liquid.
   float source=exp(-pow((p.x-.5)/.9,2.)-p.y*24.);
@@ -137,16 +147,16 @@ function draw(){
  const ratio=Math.min(devicePixelRatio||1,1.5);
  const width=Math.round(canvas.clientWidth*ratio),height=Math.round(canvas.clientHeight*ratio);
  if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;}
- gl.viewport(0,0,width,height);gl.uniform3f(gl.getUniformLocation(program,'params'),elapsed,width/height,colour);
+ gl.viewport(0,0,width,height);gl.uniform4f(gl.getUniformLocation(program,'params'),elapsed,width/height,colour,Number(viscosity.value)/100);
  gl.uniform3fv(gl.getUniformLocation(program,'blobColours[0]'),blobColours);
- gl.uniform3fv(gl.getUniformLocation(program,'colour'),colours[colour]);gl.drawArrays(gl.TRIANGLES,0,6);
+ gl.uniform4f(gl.getUniformLocation(program,'colourData'),...colours[colour] as [number,number,number],fluidColour);gl.drawArrays(gl.TRIANGLES,0,6);
 }
 function animate(now:number){
  if(!running||document.hidden)return;
  if(previous){
-  const dt=Math.min((now-previous)/1000,.05)*Number(speed.value);
+  const dt=Math.min((now-previous)/1000,.05)*Number(speed.value)/(1+Number(viscosity.value)/100*1.5);
   elapsed+=dt;
-  if(colour===4)advanceBlobColours(blobColours,elapsed,dt,canvas.clientWidth/canvas.clientHeight);
+  if(colour===4)advanceBlobColours(blobColours,elapsed,dt,canvas.clientWidth/canvas.clientHeight,Number(viscosity.value)/100);
  }
  previous=now;draw();frame=requestAnimationFrame(animate);
 }
@@ -210,12 +220,24 @@ document.addEventListener('click',event=>{if(!colourPicker.contains(event.target
 colourPicker.addEventListener('keydown',event=>{if(event.key==='Escape'){colourPicker.open=false;colourPicker.querySelector('summary')!.focus();}});
 
 
+const fluidPicker=document.querySelector<HTMLDetailsElement>('#fluid-picker')!;
+document.querySelectorAll<HTMLInputElement>('[name=fluid-color]').forEach(input=>input.addEventListener('change',()=>{
+ fluidColour=Number(input.value);
+ document.querySelector('#fluid-value')!.textContent=input.closest('label')!.querySelector('strong')!.textContent;
+ fluidPicker.open=false;draw();saveLavaSettings();
+}));
+document.addEventListener('click',event=>{if(!fluidPicker.contains(event.target as Node))fluidPicker.open=false;});
+fluidPicker.addEventListener('keydown',event=>{if(event.key==='Escape'){fluidPicker.open=false;fluidPicker.querySelector('summary')!.focus();}});
+viscosity.addEventListener('input',()=>{
+ document.querySelector('#viscosity-value')!.textContent=viscosity.value+' %';draw();saveLavaSettings();
+});
+
 // Save only with explicit consent; never persist playback or a running session.
 function saveLavaSettings() {
  if (!storageAllowed()) return;
  try {
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
-   colour, speed: Number(speed.value), brightness: Number(brightness.value)
+   colour, speed: Number(speed.value), brightness: Number(brightness.value), fluidColour, viscosity: Number(viscosity.value)
   }));
  } catch { /* Blocked/full storage must not prevent using the animation. */ }
 }
@@ -228,6 +250,13 @@ if (storageAllowed()) {
  try {
   const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
   if (saved && typeof saved === 'object') {
+   if(Number.isInteger(saved.fluidColour)&&saved.fluidColour>=0&&saved.fluidColour<5){
+    const input=document.querySelector<HTMLInputElement>('[name=fluid-color][value="'+saved.fluidColour+'"]')!;
+    input.checked=true;input.dispatchEvent(new Event('change'));
+   }
+   if(Number.isInteger(saved.viscosity)&&saved.viscosity>=0&&saved.viscosity<=100){
+    viscosity.value=String(saved.viscosity);viscosity.dispatchEvent(new Event('input'));
+   }
    if (Number.isInteger(saved.colour) && saved.colour >= 0 && saved.colour < colours.length) {
     const input = document.querySelector<HTMLInputElement>('[name=lava-color][value="'+saved.colour+'"]')!;
     input.checked = true;
