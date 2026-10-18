@@ -1,1 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#171321"/><path d="M25 9h14l9 39H16Z" fill="#ff763f"/><path d="M20 50h24l4 7H16Z" fill="#aaa"/><ellipse cx="31" cy="30" rx="8" ry="11" fill="#ffd18a"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="warm" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#c97850"/>
+      <stop offset="1" stop-color="#8f4439"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="20" fill="url(#warm)"/>
+  <path d="M25 13c-6 0-10 5-9 11 1 5 5 7 5 12 0 5-3 9-1 13 2 5 11 5 14 0 3-5-1-10-3-14-3-5 2-10 2-14 0-5-3-8-8-8Z" fill="#fff9ed"/>
+  <path d="M44 30c-5 0-8 5-8 11s3 10 8 10 8-4 8-10-3-11-8-11Z" fill="#fff9ed"/>
+  <circle cx="45" cy="17" r="5" fill="#ffe1aa"/>
+</svg>

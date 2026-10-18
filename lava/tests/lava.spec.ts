@@ -81,3 +81,61 @@ test('settings cards have equal height when sharing a row',async({page})=>{
    expect(Math.abs(boxes[i]!.height-boxes[j]!.height)).toBeLessThan(1);
  }
 });
+
+test('rainbow palette runs and switches back to a single colour',async({page})=>{
+ const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));
+ await page.goto('/de/');
+ await page.locator('#lava-colour-picker summary').click();
+ await page.getByText('Regenbogen',{exact:true}).click();
+ await expect(page.locator('#lava-stage')).toHaveAttribute('data-rainbow','true');
+ await expect(page.locator('#lava-colour-value')).toHaveText('Regenbogen');
+ await expect(page.locator('#lava-stage')).not.toHaveClass(/no-webgl/);
+ await page.locator('#lava-toggle').click();
+ await page.waitForTimeout(400);
+ await page.locator('#lava-toggle').click();
+ await page.locator('#lava-colour-picker summary').click();
+ await page.getByText('Glut',{exact:true}).click();
+ await expect(page.locator('#lava-stage')).toHaveAttribute('data-rainbow','false');
+ expect(errors).toEqual([]);
+});
+
+test('portrait focus resizes the canvas while paused',async({page})=>{
+ await page.setViewportSize({width:390,height:844});
+ await page.goto('/de/');
+ await page.locator('#lava-fullscreen').click();
+ if(!await page.evaluate(()=>!!document.fullscreenElement)){
+  // Headless/mobile emulation may deny native fullscreen. Exercise its geometry.
+  await page.locator('#lava-stage').evaluate(el=>Object.assign(el.style,{
+   position:'fixed',inset:'0',width:'100vw',height:'100dvh',zIndex:'100',borderRadius:'0'
+  }));
+ }
+ await expect.poll(()=>page.locator('#lava-canvas').evaluate((el:HTMLCanvasElement)=>{
+  const rect=el.getBoundingClientRect();
+  return Math.abs(el.width/el.height-rect.width/rect.height);
+ })).toBeLessThan(.01);
+ await expect(page.locator('#lava-stage')).not.toHaveClass(/no-webgl/);
+ await expect(page.locator('#lava-toggle')).toHaveAttribute('aria-pressed','false');
+ await page.screenshot({path:'/tmp/lava-portrait-focus-'+test.info().project.name+'.png'});
+});
+
+test('animation preferences persist only with consent, never autoplay',async({page})=>{
+ await page.goto('/de/');
+ await page.locator('#lava-colour-picker summary').click();
+ await page.getByText('Regenbogen',{exact:true}).click();
+ await page.locator('#lava-speed').fill('0.5');
+ await page.locator('#lava-brightness').fill('60');
+ expect(await page.evaluate(()=>localStorage.getItem('jacktools.lava.settings.v1'))).toBeNull();
+ await page.locator('#palette-dropdown summary').click();
+ await page.locator('#remember-preferences').check();
+ await page.reload();
+ await expect(page.locator('#lava-colour-value')).toHaveText('Regenbogen');
+ await expect(page.locator('#lava-speed')).toHaveValue('0.5');
+ await expect(page.locator('#lava-brightness')).toHaveValue('60');
+ await expect(page.locator('#lava-toggle')).toHaveAttribute('aria-pressed','false');
+ await page.locator('#palette-dropdown summary').click();
+ await page.locator('#remember-preferences').uncheck();
+ expect(await page.evaluate(()=>localStorage.getItem('jacktools.lava.settings.v1'))).toBeNull();
+ await page.reload();
+ await expect(page.locator('#lava-colour-value')).toHaveText('Glut');
+ await expect(page.locator('#lava-speed')).toHaveValue('1');
+});
