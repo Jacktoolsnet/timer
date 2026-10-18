@@ -19,7 +19,7 @@ export function enhanceClockSelects(form: HTMLFormElement) {
     trigger.setAttribute('aria-labelledby', `${caption.id} ${trigger.id}`);
     const value = document.createElement('span');
     const preview = document.createElement('img');
-    preview.className = 'clock-background-thumbnail'; preview.alt = ''; preview.hidden = true;
+    preview.className = select.name==='analogDesign'?'clock-design-thumbnail':'clock-background-thumbnail'; preview.alt = ''; preview.hidden = true;
     const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     arrow.setAttribute('viewBox', '0 0 24 24');
     arrow.setAttribute('class', 'clock-select-chevron');
@@ -39,7 +39,7 @@ export function enhanceClockSelects(form: HTMLFormElement) {
       const text = document.createElement('span'); text.textContent = option.text;
       if(option.dataset.preview) {
         const thumbnail = document.createElement('img');
-        thumbnail.className = 'clock-background-thumbnail'; thumbnail.alt = '';
+        thumbnail.className = select.name==='analogDesign'?'clock-design-thumbnail':'clock-background-thumbnail'; thumbnail.alt = '';
         thumbnail.src = option.dataset.preview; thumbnail.loading = 'lazy';
         button.append(thumbnail);
       }

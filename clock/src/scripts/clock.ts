@@ -1,3 +1,4 @@
+import {dialMarkup, type AnalogDesign} from '../lib/analog-designs';
 import {createClockDate} from './clock-date';
 import {createAlarm} from './alarm';
 import {createFlipClock} from './flip-clock';
@@ -11,7 +12,7 @@ const $=(id:string)=>document.getElementById(id)!;
 const t=JSON.parse($('clock-app').dataset.text!);
 const form=$('clock-settings') as HTMLFormElement;
 const field=(key:string)=>form.elements.namedItem(key) as HTMLInputElement | HTMLSelectElement;
-const defaults={view:'analog',background:'none',animateBackground:false,hemisphere:'north',transparency:0,date:'long',dateView:'calendarDate',format:'medium',hourCycle:'auto',zone:'local',seconds:true,numbers:true,smooth:false,awake:false};
+const defaults={view:'analog',analogDesign:'standard',background:'none',animateBackground:false,hemisphere:'north',transparency:0,date:'long',dateView:'calendarDate',format:'medium',hourCycle:'auto',zone:'local',seconds:true,numbers:true,smooth:false,awake:false};
 let settings={...defaults};
 const backgroundMotion=matchMedia('(prefers-reduced-motion: reduce)');
 try {if(storageAllowed()) {const saved=JSON.parse(localStorage.getItem('jacktools.clock.settings.v1')||'null');for(const key of Object.keys(defaults) as (keyof typeof defaults)[]){const value=saved?.[key];if(typeof defaults[key]==='boolean'){if(typeof value==='boolean')Object.assign(settings,{[key]:value});}else if(typeof defaults[key]==='number'){if(typeof value==='number'&&Number.isInteger(value)&&value>=0&&value<=100)Object.assign(settings,{[key]:value});}else if([...((field(key) as HTMLSelectElement).options)].some(o=>o.value===value))Object.assign(settings,{[key]:value});}}}catch{}
@@ -65,7 +66,9 @@ function configure(){
  $('clock-date').hidden=settings.date==='off'||settings.dateView!=='textDate';
  $('styled-date').hidden=settings.date==='off'||settings.dateView==='textDate';
  styledDate.configure(locale,zone,settings.dateView);
- $('dial-numbers').style.display=settings.numbers?'':'none';$('second-hand').style.display=settings.seconds?'':'none';
+ const face=$('analog-clock');
+ if(face.dataset.design!==settings.analogDesign){$('dial-face').innerHTML=dialMarkup(settings.analogDesign as AnalogDesign);face.dataset.design=settings.analogDesign;}
+ face.querySelector<SVGElement>('.dial-numerals')!.style.display=settings.numbers?'':'none';$('second-hand').style.display=settings.seconds?'':'none';
  lastFlipTick = 0; wake(settings.awake);render();
 }
 function render(){const now=new Date();if(settings.background==='seasonal')seasonal.render(now);const p=Object.fromEntries(parts.formatToParts(now).map(v=>[v.type,v.value]));const second=Number(p.second)+(settings.smooth&&!matchMedia('(prefers-reduced-motion: reduce)').matches?now.getMilliseconds()/1000:0);const minute=Number(p.minute)+second/60,hour=Number(p.hour)%12+minute/60;

@@ -1110,3 +1110,6 @@ body.focus-view .clock-alarm-badge { max-width:calc(100% - 175px); }
 @keyframes bg-lake-reflection { from { transform:translate(-3px,0); } to { transform:translate(4px,3px); } }
 @keyframes bg-color-flow { from { transform:translate(-40px,-20px) scale(1.02); } to { transform:translate(45px,25px) scale(1.08); } }
 @media(prefers-reduced-motion:reduce) { .animated-background-scene * { animation:none !important; } }
+
+.clock-design-thumbnail { width:48px; height:48px; flex:0 0 48px; object-fit:contain; border-radius:8px; }
+.clock-design-thumbnail[hidden] { display:none; }
