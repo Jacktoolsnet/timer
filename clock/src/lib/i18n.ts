@@ -19,7 +19,7 @@ const en = {
   start: 'Start timer', pause: 'Pause', resume: 'Resume', reset: 'Reset', next: 'Next phase',
   finished: 'Time is up. Take a breath.', phaseFinished: 'Phase complete. Start the next phase when you are ready.',
   round: 'Round', of: 'of', minutes: 'min', hours: 'Hours', mins: 'Minutes', seconds: 'Seconds',
-  settings: 'Make it yours', settingsIntro: 'A rhythm that works for you.',
+  settings: 'Customize your clock', settingsIntro: 'Choose your display, design and background.',
   duration: 'Countdown duration', focusMinutes: 'Focus · minutes', shortMinutes: 'Short break · minutes', longMinutes: 'Long break · minutes',
   rounds: 'Rounds before a long break', sound: 'End-of-timer sound', soundHint: 'A gentle signal when your time is up.',
   
@@ -70,7 +70,7 @@ const de: Dictionary = {
   start: 'Timer starten', pause: 'Pausieren', resume: 'Fortsetzen', reset: 'Zurücksetzen', next: 'Nächste Phase',
   finished: 'Die Zeit ist um. Atme kurz durch.', phaseFinished: 'Phase geschafft. Starte die nächste Phase, wenn du bereit bist.',
   round: 'Runde', of: 'von', minutes: 'Min.', hours: 'Stunden', mins: 'Minuten', seconds: 'Sekunden',
-  settings: 'Dein eigener Rhythmus', settingsIntro: 'So, wie es zu deinem Tag passt.',
+  settings: 'Deine Uhr gestalten', settingsIntro: 'Wähle Anzeige, Design und Hintergrund.',
   duration: 'Countdown-Dauer', focusMinutes: 'Fokus · Minuten', shortMinutes: 'Kurze Pause · Minuten', longMinutes: 'Lange Pause · Minuten',
   rounds: 'Runden vor einer langen Pause', sound: 'Signalton am Ende', soundHint: 'Ein sanfter Klang, wenn deine Zeit um ist.',
   
@@ -118,7 +118,7 @@ const es: Dictionary = {
   start: 'Iniciar', pause: 'Pausar', resume: 'Continuar', reset: 'Reiniciar', next: 'Siguiente fase',
   finished: 'Se acabó el tiempo. Respira.', phaseFinished: 'Fase completada. Inicia la siguiente cuando quieras.',
   round: 'Ronda', of: 'de', minutes: 'min', hours: 'Horas', mins: 'Minutos', seconds: 'Segundos',
-  settings: 'A tu manera', settingsIntro: 'Un ritmo que se adapta a tu día.', duration: 'Duración de la cuenta atrás',
+  settings: 'Personaliza tu reloj', settingsIntro: 'Elige la vista, el diseño y el fondo.', duration: 'Duración de la cuenta atrás',
   focusMinutes: 'Concentración · minutos', shortMinutes: 'Descanso corto · minutos', longMinutes: 'Descanso largo · minutos',
   rounds: 'Rondas antes del descanso largo', sound: 'Sonido al terminar', soundHint: 'Una señal suave cuando termina el tiempo.',
   
@@ -161,7 +161,7 @@ const fr: Dictionary = {
   start: 'Démarrer', pause: 'Pause', resume: 'Reprendre', reset: 'Réinitialiser', next: 'Phase suivante',
   finished: 'Le temps est écoulé. Respirez.', phaseFinished: 'Phase terminée. Lancez la suivante quand vous le souhaitez.',
   round: 'Cycle', of: 'sur', minutes: 'min', hours: 'Heures', mins: 'Minutes', seconds: 'Secondes',
-  settings: 'À votre rythme', settingsIntro: 'Un rythme adapté à votre journée.', duration: 'Durée du compte à rebours',
+  settings: 'Personnalisez votre horloge', settingsIntro: 'Choisissez l’affichage, le style et le fond.', duration: 'Durée du compte à rebours',
   focusMinutes: 'Concentration · minutes', shortMinutes: 'Petite pause · minutes', longMinutes: 'Longue pause · minutes',
   rounds: 'Cycles avant une longue pause', sound: 'Son en fin de minuteur', soundHint: 'Un signal doux lorsque le temps est écoulé.',
   
