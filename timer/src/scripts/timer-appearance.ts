@@ -10,6 +10,7 @@ export function createTimerAppearance() {
  const smooth=form.elements.namedItem('smooth') as HTMLInputElement;
  const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
  let lastRemaining=0,lastShowSeconds=true;
+ let hourOffset=0,minuteScale=false;
  const face=document.getElementById('analog-timer')!;
  const clock=face.closest<HTMLElement>('.clock')!;
  try {
@@ -24,7 +25,7 @@ export function createTimerAppearance() {
   clock.dataset.timerView=view.value;
   face.dataset.hidden=String(!analog);
   document.getElementById('analog-timer-hint')!.hidden=!analog;
-  if(face.dataset.design!==design.value){document.getElementById('timer-dial')!.innerHTML=dialMarkup(design.value as AnalogDesign);face.dataset.design=design.value;}
+  if(face.dataset.design!==design.value||face.dataset.hourOffset!==String(hourOffset)||face.dataset.scale!==(minuteScale?'minutes':'hours')){document.getElementById('timer-dial')!.innerHTML=dialMarkup(design.value as AnalogDesign,hourOffset,minuteScale);face.dataset.design=design.value;face.dataset.hourOffset=String(hourOffset);face.dataset.scale=minuteScale?'minutes':'hours';}
  }
  form.addEventListener('submit',e=>e.preventDefault());
  form.addEventListener('change',()=>{apply();save();update(lastRemaining,lastShowSeconds);});
@@ -37,6 +38,10 @@ export function createTimerAppearance() {
   (face.querySelector('.timer-second-hand') as SVGElement).style.display=showSeconds?'':'none';
   const preciseSeconds=Math.max(0,remaining)/1000;
   const seconds=smooth.checked&&!reducedMotion.matches?preciseSeconds:Math.ceil(preciseSeconds);
+  const nextOffset=Math.max(0,Math.ceil(seconds/(12*3600))-1)*12;
+  const nextMinuteScale=preciseSeconds<3600;
+  if(nextOffset!==hourOffset||nextMinuteScale!==minuteScale){hourOffset=nextOffset;minuteScale=nextMinuteScale;apply();}
+  (face.querySelector('.timer-hour-hand') as SVGElement).style.display=minuteScale?'none':'';
   for(const [selector,angle] of [['.timer-hour-hand',(seconds/3600%12)*30],['.timer-minute-hand',(seconds/60%60)*6],['.timer-second-hand',(seconds%60)*6]] as const)
    face.querySelector(selector)!.setAttribute('transform',`rotate(${angle} 160 160)`);
  }

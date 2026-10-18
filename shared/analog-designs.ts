@@ -7,7 +7,12 @@ export const analogDesignText = {
  es: {label:'Diseño del reloj analógico', names:['Estándar', 'Romano', 'Minimalista', 'Ferroviario', 'Estándar · Cuadrado', 'Romano · Cuadrado', 'Minimalista · Cuadrado', 'Ferroviario · Cuadrado']},
  fr: {label:'Style de l’horloge analogique', names:['Standard', 'Romain', 'Minimaliste', 'Gare', 'Standard · Carré', 'Romain · Carré', 'Minimaliste · Carré', 'Gare · Carré']},
 };
-const roman = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
+function romanNumeral(value: number) {
+ let result='';
+ for(const [number,symbol] of [[100,'C'],[90,'XC'],[50,'L'],[40,'XL'],[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']] as const)
+  while(value>=number){result+=symbol;value-=number;}
+ return result;
+}
 /** Distance from the centre to a rounded-square edge along a clock-hand ray. */
 function squareRadius(angle: number, half: number, corner: number) {
  const x=Math.abs(Math.sin(angle)), y=Math.abs(Math.cos(angle));
@@ -19,7 +24,7 @@ function squareRadius(angle: number, half: number, corner: number) {
  }
  return (low+high)/2;
 }
-export function dialMarkup(design: AnalogDesign) {
+export function dialMarkup(design: AnalogDesign, hourOffset = 0, minuteScale = false) {
  const square=design.startsWith('square-');
  const style=square?design.slice(7):design;
  const ticks = Array.from({length:60},(_,i) => {
@@ -31,10 +36,11 @@ export function dialMarkup(design: AnalogDesign) {
   const n=i+1,a=n*Math.PI/6;
   if(style==='minimal' && n%3!==0)return '';
   const radius=square?squareRadius(a,116,20):116;
-  return `<text x="${160+radius*Math.sin(a)}" y="${160-radius*Math.cos(a)}">${style==='roman'?roman[i]:n}</text>`;
+  const value=minuteScale?n*5:n+hourOffset;
+  return `<text x="${160+radius*Math.sin(a)}" y="${160-radius*Math.cos(a)}">${style==='roman'?romanNumeral(value):value}</text>`;
  }).join('');
  const frame=square?'<rect x="11" y="11" width="298" height="298" rx="30" class="dial"/>':'<circle cx="160" cy="160" r="149" class="dial"/>';
- return `${frame}${ticks}<g class="dial-numerals">${numbers}</g>`;
+ return `${frame}${ticks}<g class="dial-numerals" data-hour-offset="${hourOffset}" data-scale="${minuteScale?'minutes':'hours'}">${numbers}</g>`;
 }
 export const analogDesignStyles = `
 .analog-face .dial-numerals text{fill:var(--text);stroke:none;font:16px system-ui;text-anchor:middle;dominant-baseline:middle}
