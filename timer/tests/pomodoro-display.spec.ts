@@ -1,0 +1,50 @@
+import {test,expect} from '@playwright/test';
+
+test('minutes by default, seconds in final minute and instant toggle without reset',async({page})=>{
+ await page.goto('/de/pomodoro/');
+ await page.clock.install();
+ await expect(page.locator('#time')).toHaveText('25');
+ const toggle=page.getByRole('switch',{name:/Sekunden immer anzeigen/});
+ await expect(toggle).not.toBeChecked();
+ await page.locator('input[name=focus]').fill('2');
+ await page.locator('.apply-button').click();
+ await page.locator('#start').click();
+ await page.clock.runFor(10000);
+ await expect(page.locator('#time')).toHaveText('2');
+ await toggle.check();
+ await expect(page.locator('#time')).toHaveText('01:50');
+ await toggle.uncheck();
+ await expect(page.locator('#time')).toHaveText('2');
+ await page.clock.runFor(50000);
+ await expect(page.locator('#time')).toHaveText('60');
+ await page.clock.runFor(1000);
+ await expect(page.locator('#time')).toHaveText('59');
+ await page.locator('#start').click();
+ await page.clock.runFor(5000);
+ await expect(page.locator('#time')).toHaveText('59');
+ await page.locator('#next').click();
+ await expect(page.locator('#time')).toHaveText('5');
+ await page.locator('#trigger-timerView').click();
+ await page.getByRole('option',{name:'Analog',exact:true}).click();
+ await expect(page.locator('.timer-second-hand')).toHaveCSS('display','none');
+ await toggle.check();
+ await expect(page.locator('.timer-second-hand')).not.toHaveCSS('display','none');
+});
+
+test('seconds preference requires consent and countdown keeps seconds',async({page})=>{
+ await page.goto('/de/pomodoro/');
+ const toggle=page.locator('input[name=pomodoroSeconds]');
+ await toggle.check();
+ await page.reload();
+ await expect(toggle).not.toBeChecked();
+ await page.locator('#palette-dropdown summary').click();
+ await page.locator('#remember-preferences').check();
+ await page.locator('#palette-dropdown summary').click();
+ await toggle.check();
+ await page.reload();
+ await expect(toggle).toBeChecked();
+ await expect(page.locator('#time')).toHaveText('25:00');
+ await page.goto('/de/');
+ await expect(page.locator('#time')).toHaveText('05:00');
+ await expect(page.locator('input[name=pomodoroSeconds]')).toHaveCount(0);
+});

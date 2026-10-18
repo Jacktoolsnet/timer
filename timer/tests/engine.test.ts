@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { Timer, defaults, formatTime, sanitizeSettings } from '../src/lib/engine.ts';
+import { Timer, defaults, formatTime, formatPomodoroTime, sanitizeSettings } from '../src/lib/engine.ts';
 
 test('countdown uses a deadline and completes once after a background delay', () => {
   const timer = new Timer('timer', { ...defaults, countdown: 60 });
@@ -73,4 +73,12 @@ test('palette settings accept supported values and migrate old preferences safel
   assert.equal(sanitizeSettings({ remember: true }).colorScheme, 'terracotta');
   assert.equal(sanitizeSettings({ colorScheme: 'unknown' }).colorScheme, 'terracotta');
   assert.equal(sanitizeSettings({ colorScheme: null }).colorScheme, 'terracotta');
+});
+
+test('Pomodoro hides seconds until the last minute unless enabled',()=>{
+  for(const [ms,text] of [[1500000,'25'],[1499000,'25'],[60001,'2'],[60000,'60'],[59000,'59'],[0,'0'],[10800000,'180']] as const)
+    assert.equal(formatPomodoroTime(ms),text);
+  assert.equal(formatPomodoroTime(1499000,true),'24:59');
+  assert.equal(sanitizeSettings({}).pomodoroSeconds,false);
+  assert.equal(sanitizeSettings({pomodoroSeconds:true}).pomodoroSeconds,true);
 });

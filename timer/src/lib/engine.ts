@@ -2,8 +2,8 @@ export type Mode = 'timer' | 'pomodoro';
 export type Phase = 'focus' | 'short' | 'long';
 export const colorSchemes = ['terracotta', 'blue', 'green', 'orange', 'red', 'violet', 'teal', 'rose'] as const;
 export type ColorScheme = typeof colorSchemes[number];
-export type Settings = { countdown: number; focus: number; short: number; long: number; rounds: number; sound: boolean; awake: boolean; dark: boolean; colorScheme: ColorScheme };
-export const defaults: Settings = { countdown: 300, focus: 25, short: 5, long: 15, rounds: 4, sound: true, awake: true, dark: false, colorScheme: 'terracotta' };
+export type Settings = { countdown: number; focus: number; short: number; long: number; rounds: number; sound: boolean; pomodoroSeconds: boolean; awake: boolean; dark: boolean; colorScheme: ColorScheme };
+export const defaults: Settings = { countdown: 300, focus: 25, short: 5, long: 15, rounds: 4, sound: true, pomodoroSeconds: false, awake: true, dark: false, colorScheme: 'terracotta' };
 export const STORAGE_KEY = 'jacktools.timer.settings.v1';
 export function sanitizeSettings(input: unknown): Settings {
   const value = (input && typeof input === 'object' ? input : {}) as Partial<Settings>;
@@ -15,6 +15,7 @@ export function sanitizeSettings(input: unknown): Settings {
     countdown: number('countdown', 1, 359999), focus: number('focus', 1, 180),
     short: number('short', 1, 60), long: number('long', 1, 120), rounds: number('rounds', 1, 12),
     sound: typeof value.sound === 'boolean' ? value.sound : defaults.sound,
+    pomodoroSeconds: typeof value.pomodoroSeconds === 'boolean' ? value.pomodoroSeconds : defaults.pomodoroSeconds,
     awake: typeof value.awake === 'boolean' ? value.awake : defaults.awake,
     dark: value.dark === true,
     colorScheme: colorSchemes.includes(value.colorScheme as ColorScheme) ? value.colorScheme! : defaults.colorScheme,
@@ -24,6 +25,11 @@ export function formatTime(ms: number): string {
   const seconds = Math.ceil(Math.max(0, ms) / 1000);
   const h = Math.floor(seconds / 3600), m = Math.floor(seconds % 3600 / 60), s = seconds % 60;
   return (h ? String(h).padStart(2, '0') + ':' : '') + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+}
+/** Round up whole minutes until the final minute, then show the exact countdown. */
+export function formatPomodoroTime(ms: number, alwaysSeconds = false): string {
+  if (alwaysSeconds) return formatTime(ms);
+  return String(Math.ceil(Math.max(0, ms) / (ms > 60000 ? 60000 : 1000)));
 }
 export class Timer {
   phase: Phase = 'focus';

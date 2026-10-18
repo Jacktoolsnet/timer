@@ -2,7 +2,7 @@ import {createTimerAppearance} from './timer-appearance';
 import { screenWakeLock } from '../lib/wake-lock';
 import { renderPlayButton } from '../lib/play-button';
 import { storageAllowed } from '../lib/storage';
-import { Timer, defaults, sanitizeSettings, formatTime, STORAGE_KEY, type Settings, type Mode, type ColorScheme } from '../lib/engine';
+import { Timer, defaults, sanitizeSettings, formatTime, formatPomodoroTime, STORAGE_KEY, type Settings, type Mode, type ColorScheme } from '../lib/engine';
 const app = document.querySelector<HTMLElement>('#timer-app')!;
 const t = JSON.parse(app.dataset.translations!) as Record<string, string>;
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -53,12 +53,12 @@ function persist(value: Settings = settings) {
 }
 const updateAnalog=createTimerAppearance();
 function render() {
-  updateAnalog(timer.remaining);
+  updateAnalog(timer.remaining, timer.mode!=='pomodoro'||settings.pomodoroSeconds||timer.remaining<=60000);
   const running = timer.deadline !== null;
   setWake(running && settings.awake);
-  const display = formatTime(timer.remaining);
+  const display = timer.mode==='pomodoro'?formatPomodoroTime(timer.remaining,settings.pomodoroSeconds):formatTime(timer.remaining);
   $('time').textContent = display;
-  $('time').classList.toggle('has-hours', display.length > 5);
+  $('time').classList.toggle('has-hours', display.includes(':') && display.split(':').length === 3);
   renderPlayButton($('start'), running, running ? t.pause : timer.remaining < timer.total && !timer.completed ? t.resume : t.start);
   $('phase-label').textContent = timer.mode === 'timer' ? t.ready : t[timer.phase];
   app.dataset.phase = timer.mode === 'pomodoro' ? timer.phase : 'focus';
@@ -172,10 +172,20 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && document.body.classList.contains('focus-view')) void leaveFocus();
 });
 function tick() { if (timer.tick(Date.now())) finish(); render(); }
-setInterval(() => { if (timer.deadline !== null) tick(); }, 200);
+setInterval(() => { if (timer.deadline !== null) tick(); }, 50);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
 fillForm(); render();
 
 document.addEventListener('storage-enabled', () => persist(readFormSettings() || settings));
 
 field('awake').addEventListener('change', () => { settings.awake = field('awake').checked; persist(); render(); });
+
+const secondsOption=document.querySelector<HTMLInputElement>('input[name=pomodoroSeconds]');
+if(secondsOption){
+  secondsOption.checked=settings.pomodoroSeconds;
+  secondsOption.addEventListener('change',()=>{
+    settings.pomodoroSeconds=secondsOption.checked;
+    persist(readFormSettings() || settings);
+    render();
+  });
+}

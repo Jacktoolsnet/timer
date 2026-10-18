@@ -726,7 +726,7 @@ body.focus-view.focus-cursor-hidden :is(.card-top,.focus-details):not(:has(:focu
 .clock-select-trigger > span:first-of-type,.clock-select-options button > span:first-of-type { flex:1; }
 .clock-design-thumbnail { width:48px; height:48px; flex:0 0 48px; object-fit:contain; border-radius:8px; }
 .clock-design-thumbnail[hidden] { display:none; }
-#timer-appearance > label{display:flex;flex-direction:column;gap:8px;margin:15px 0;font-size:14px}
+#timer-appearance > label:not(.toggle-row){display:flex;flex-direction:column;gap:8px;margin:15px 0;font-size:14px}
 #timer-appearance select{padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--text)}
 #analog-timer{width:100%;height:auto;aspect-ratio:1;stroke:var(--text);stroke-width:2;fill:none;flex:none}
 #analog-timer[data-hidden=true]{display:none}
@@ -737,9 +737,46 @@ body.focus-view.focus-cursor-hidden :is(.card-top,.focus-details):not(:has(:focu
 :where(#analog-timer) .timer-minute-hand{stroke-width:4}
 :where(#analog-timer) .timer-second-hand{stroke:var(--accent);stroke-width:2}
 :where(#analog-timer) .timer-hub{fill:var(--accent);stroke:none}
-body .clock[data-timer-view=analog]{display:flex;flex-direction:column;aspect-ratio:auto;gap:12px}
-.clock[data-timer-view=analog] > .progress-ring{display:none}
-body .clock[data-timer-view=analog] .time{font-size:clamp(24px,10cqw,42px);letter-spacing:-1px}
-body .clock[data-timer-view=analog] .phase-label{margin-bottom:6px}
-body .clock[data-timer-view=analog] :is(.round-label,#training-round){margin:6px 0}
-body.focus-view .clock[data-timer-view=analog]{width:min(80vw,calc(100dvh - 285px));height:auto;max-width:450px}
+body .clock:is([data-timer-view=analog],[data-timer-view=combined]){display:flex;flex-direction:column;aspect-ratio:auto;gap:12px}
+.clock:is([data-timer-view=analog],[data-timer-view=combined]) > .progress-ring{display:none}
+body .clock:is([data-timer-view=analog],[data-timer-view=combined]) .time{font-size:clamp(24px,10cqw,42px);letter-spacing:-1px}
+body .clock:is([data-timer-view=analog],[data-timer-view=combined]) .phase-label{margin-bottom:6px}
+body .clock:is([data-timer-view=analog],[data-timer-view=combined]) :is(.round-label,#training-round){margin:6px 0}
+body.focus-view .clock:is([data-timer-view=analog],[data-timer-view=combined]){width:min(80vw,calc(100dvh - 285px));height:auto;max-width:450px}
+
+/* Full-width timer above three clearly separated option groups. */
+.timer-workspace { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.timer-workspace > .timer-card,.timer-workspace > .timer-options { grid-column:1 / -1; }
+body:not(.focus-view) .timer-workspace > .timer-card > .clock { width:min(380px,100%); }
+.timer-options { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; }
+.timer-options > .settings-heading,.timer-options-footer { grid-column:1 / -1; }
+.timer-options .settings-heading h2 { margin:0 0 8px; }
+.timer-options .settings-heading p { margin:0; }
+.timer-options .settings-icon { display:none; }
+.timer-options-form { display:contents; }
+.timer-options .timer-options-group { min-width:0; margin:0; padding:20px; border:1px solid var(--line); border-radius:14px; background:var(--surface); }
+.timer-options-group > legend { padding:0 6px; margin-left:-6px; font-size:14px; font-weight:650; }
+.timer-options-group > h3 { font-size:14px; font-weight:650; margin:0 0 16px; }
+.timer-options .toggle-row { margin:10px 0 20px; }
+.timer-options .clock-select-field { font-size:12px; }
+.timer-options .clock-select-trigger { padding:10px; gap:8px; }
+.timer-options-footer { border-top:1px solid var(--line); padding-top:20px; }
+.timer-options-footer .apply-button { max-width:320px; margin-inline:auto; }
+.timer-options-footer :is(.form-hint,.settings-status,#training-settings-status) { text-align:center; }
+.timer-options #training-form .number-field { grid-template-columns:minmax(0,1fr); gap:8px; }
+@media(max-width:900px) {
+ .timer-options { grid-template-columns:repeat(2,minmax(0,1fr)); }
+ .timer-options .behavior-options { grid-column:1 / -1; }
+}
+@media(max-width:680px) {
+ .timer-options { grid-template-columns:minmax(0,1fr); gap:16px; padding:20px; }
+ .timer-options .timer-options-group { padding:16px; }
+ body:not(.focus-view) .timer-workspace > .timer-card > .clock { width:min(320px,100%); }
+}
+body.focus-view .timer-options { display:none; }
+
+/* Keep the exact countdown available to assistive technology in analog-only mode. */
+.clock[data-timer-view=analog] .time {
+ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
+ clip:rect(0,0,0,0); clip-path:inset(50%); white-space:nowrap; border:0;
+}

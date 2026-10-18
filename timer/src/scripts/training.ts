@@ -93,4 +93,4 @@ document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement
 document.addEventListener('keydown',event=>{if(event.key==='Escape')focus(false);});
 document.addEventListener('visibilitychange',()=>{tick();void syncWake();});
 window.addEventListener('pagehide',()=>{deadline=null;void syncWake();});
-setInterval(tick,100);render();
+setInterval(tick,50);render();

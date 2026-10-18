@@ -53,3 +53,35 @@ test('appearance persists only with consent',async({page})=>{
  await page.goto('/de/training/');
  await expect(page.locator('#analog-timer')).toBeVisible();
 });
+
+for(const route of ['/de/','/de/pomodoro/','/de/training/']) {
+ test(`digital, analog and combined views are distinct on ${route}`,async({page})=>{
+  await page.goto(route);
+  const face=page.locator('#analog-timer');
+  const time=page.locator('#time, #training-time');
+  const before=await time.textContent();
+  await expect(face).toBeHidden();
+  expect((await time.boundingBox())!.width).toBeGreaterThan(1);
+  for(const [name,view] of [['Analog','analog'],['Analog + Digital','combined'],['Digital','digital']] as const){
+   await page.locator('#trigger-timerView').click();
+   await page.getByRole('option',{name,exact:true}).click();
+   await expect(page.locator('.clock')).toHaveAttribute('data-timer-view',view);
+   if(view==='digital')await expect(face).toBeHidden();else await expect(face).toBeVisible();
+   if(view==='analog')expect((await time.boundingBox())!.width).toBe(1);
+   else expect((await time.boundingBox())!.width).toBeGreaterThan(1);
+   await expect(time).toHaveText(before!);
+  }
+ });
+}
+
+test('combined selection is restored with consent',async({page})=>{
+ await page.goto('/de/');
+ await page.locator('#trigger-timerView').click();
+ await page.getByRole('option',{name:'Analog + Digital',exact:true}).click();
+ await page.locator('#palette-dropdown summary').click();
+ await page.locator('#remember-preferences').check();
+ await page.reload();
+ await expect(page.locator('.clock')).toHaveAttribute('data-timer-view','combined');
+ await expect(page.locator('#analog-timer')).toBeVisible();
+ await expect(page.locator('#time')).toBeVisible();
+});
