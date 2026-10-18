@@ -1,4 +1,5 @@
 ---
+import {toolSeo} from '../../../shared/seo';
 import {backgroundImages,backgroundText} from '../lib/backgrounds';
 import CampfireCloseup from './CampfireCloseup.astro';
 import AnimatedBackgrounds from './AnimatedBackgrounds.astro';
@@ -10,9 +11,10 @@ import {dictionaries} from '../lib/relax-i18n';
 import type {Language} from '../lib/i18n';
 interface Props {lang:Language}
 const {lang}=Astro.props,t=dictionaries[lang],bg=backgroundText[lang];
+const seo=toolSeo.relax[lang];
 ---
-<Layout lang={lang} title={lang==='de'?'Relax – ruhige Klänge und sanfte Formen':t.title} description={t.intro} route="">
- <section class="intro"><h1>{t.title}</h1><p class="intro-copy">{t.intro}</p></section>
+<Layout lang={lang} title={seo.title} description={seo.description} route="">
+ <section class="intro"><p class="eyebrow">{t.title}</p><h1>{seo.heading}</h1><p class="intro-copy">{seo.description}</p></section>
  <div class="workspace" id="relax-app">
   <section class="timer-card relax-card">
    <div class="relax-top"><span>Relax</span><button id="focus" class="icon-text" aria-label={t.focus} title={t.focus} aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg><span>{t.focus}</span></button></div>

@@ -1,4 +1,5 @@
 ---
+import {toolSeo} from '../../../shared/seo';
 import TimerHandMotion from './TimerHandMotion.astro';
 import AnalogTimer from './AnalogTimer.astro';
 import TimerAppearance from './TimerAppearance.astro';
@@ -15,13 +16,14 @@ const t = getDictionary(lang);
 const wake = trainingText[lang];
 const groups=timerOptionGroups[lang];
 const isPomo = mode === 'pomodoro';
+const seo=toolSeo[isPomo?'pomodoro':'countdown'][lang];
 ---
-<Layout lang={lang} title={isPomo ? t.pomodoroTitle : t.timerTitle} description={isPomo ? t.pomodoroDescription : t.timerDescription} route={mode === 'timer' ? '' : mode}>
+<Layout lang={lang} title={seo.title} description={seo.description} route={mode === 'timer' ? '' : mode}>
   <script type="application/ld+json" set:html={JSON.stringify({
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
-    name: (isPomo ? t.pomodoroTitle : t.timerTitle) + ' · Jacktools',
-    description: isPomo ? t.pomodoroDescription : t.timerDescription,
+    name: seo.title + ' · Jacktools',
+    description: seo.description,
     url: new URL('/' + lang + '/' + (mode === 'timer' ? '' : mode + '/'), Astro.site).href,
     inLanguage: lang,
     applicationCategory: 'UtilitiesApplication',
@@ -31,8 +33,8 @@ const isPomo = mode === 'pomodoro';
   })} />
   <section class="intro">
     
-    <h1>{t.heading} <em>{t.headingAccent}</em></h1>
-    <p class="intro-copy">{t.intro}</p>
+    <p class="eyebrow">{t.heading} {t.headingAccent}</p><h1>{seo.heading}</h1>
+    <p class="intro-copy">{seo.description}</p>
   </section>
   <div id="timer-app" data-mode={mode} data-translations={JSON.stringify(t)}>
     <TimerNavigation lang={lang} mode={mode} />

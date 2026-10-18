@@ -5,6 +5,7 @@ import { storageAllowed } from '../lib/storage';
 import { formatTime } from '../lib/engine';
 const el = (id: string) => document.getElementById(id)!;
 const t = JSON.parse(el('training-app').dataset.translations!);
+const originalTitle=document.title;
 const form = el('training-form') as HTMLFormElement;
 const field = (name: string) => form.elements.namedItem(name) as HTMLInputElement;
 let settings = sanitizeTraining(null);
@@ -46,7 +47,9 @@ function render() {
   el('training-total').textContent = t.total + ': ' + formatTime(totalRemaining);
   renderPlayButton(el('training-start'), deadline !== null, deadline !== null ? t.pause : remaining < (phase?.seconds || 0) * 1000 ? t.resume : t.start);
   (el('training-next') as HTMLButtonElement).disabled = !phase;
-  document.title = formatTime(remaining) + ' · ' + (phase ? t[phase.kind] : t.done) + ' · Jacktools';
+  document.title = deadline!==null||index>0||remaining<(phase?.seconds||0)*1000
+    ? formatTime(remaining) + ' · ' + (phase ? t[phase.kind] : t.done) + ' · Jacktools'
+    : originalTitle;
 }
 function tick() {
   if (deadline === null) return;

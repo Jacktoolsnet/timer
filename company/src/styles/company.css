@@ -94,3 +94,5 @@ html{scroll-behavior:smooth;scroll-padding-top:30px}.header-tools{display:flex;a
 .relax-preview-orb.orb-c {width:10%;aspect-ratio:1;left:48%;top:12%;opacity:.35;}
 .relax-preview-name {position:absolute;inset:0;display:grid;place-items:center;font-size:36px;font-weight:300;letter-spacing:.08em;color:var(--text);}
 .spotlight-relax .company-relax-scene {position:absolute;width:76%;left:12%;top:24%;}
+
+.hero-slogan { color:var(--accent); font-size:clamp(16px,1.8vw,22px); line-height:1.5; margin:0 0 16px; }

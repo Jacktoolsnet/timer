@@ -1,0 +1,1006 @@
+{
+  "checked_on": "2026-10-18",
+  "scope": "Public HTML, HTTP headers, robots.txt and sitemap inspection; not Google index or ranking data. Calculator and SceneScript are not published, confirmed by owner.",
+  "transport": [
+    {
+      "url": "https://jacktools.net/",
+      "status": 200,
+      "type": "text/html",
+      "robots_header": null,
+      "title": "Kleine Tools. Mehr Möglichkeiten. · Jacktools.net",
+      "h1": "Weniger Ablenkung.Mehr Möglichkeiten.",
+      "canonical": "https://jacktools.net/",
+      "robots": null
+    },
+    {
+      "url": "https://jacktools.net/robots.txt",
+      "status": 200,
+      "type": "text/plain",
+      "robots_header": null,
+      "body": "User-agent: *\nAllow: /\nSitemap: https://jacktools.net/sitemap.xml\n"
+    },
+    {
+      "url": "https://jacktools.net/sitemap.xml",
+      "status": 200,
+      "type": "application/xml",
+      "robots_header": null,
+      "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n  <url>\n    <loc>https://jacktools.net/<"
+    },
+    {
+      "url": "https://timer.jacktools.net/de/",
+      "status": 200,
+      "type": "text/html",
+      "robots_header": null,
+      "title": "Kostenloser Online-Countdown-Timer · Jacktools",
+      "h1": "Zeit für das, was dir wichtig ist.",
+      "canonical": "https://timer.jacktools.net/de/",
+      "robots": null
+    },
+    {
+      "url": "https://timer.jacktools.net/robots.txt",
+      "status": 200,
+      "type": "text/plain",
+      "robots_header": null,
+      "body": "User-agent: *\nAllow: /\nSitemap: https://timer.jacktools.net/sitemap.xml\n"
+    },
+    {
+      "url": "https://timer.jacktools.net/sitemap.xml",
+      "status": 200,
+      "type": "application/xml",
+      "robots_header": null,
+      "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\" xmlns:xhtml=\"http://www.w3.org/1999/xhtml"
+    },
+    {
+      "url": "https://clock.jacktools.net/de/",
+      "status": 200,
+      "type": "text/html",
+      "robots_header": null,
+      "title": "Kostenlose Online-Uhr – analog, digital und Klappzahlen · Jacktools",
+      "h1": "Deine Zeit. Auf einen Blick.",
+      "canonical": "https://clock.jacktools.net/de/",
+      "robots": null
+    },
+    {
+      "url": "https://clock.jacktools.net/robots.txt",
+      "status": 200,
+      "type": "text/plain",
+      "robots_header": null,
+      "body": "User-agent: *\nAllow: /\nSitemap: https://clock.jacktools.net/sitemap.xml\n"
+    },
+    {
+      "url": "https://clock.jacktools.net/sitemap.xml",
+      "status": 200,
+      "type": "application/xml",
+      "robots_header": null,
+      "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\" xmlns:xhtml=\"http://www.w3.org/1999/xhtml"
+    },
+    {
+      "url": "https://stopwatch.jacktools.net/de/",
+      "status": 200,
+      "type": "text/html",
+      "robots_header": null,
+      "title": "Online-Stoppuhr · Jacktools",
+      "h1": "Deine Zeit. Dein Tempo.",
+      "canonical": "https://stopwatch.jacktools.net/de/",
+      "robots": null
+    },
+    {
+      "url": "https://stopwatch.jacktools.net/robots.txt",
+      "status": 200,
+      "type": "text/plain",
+      "robots_header": null,
+      "body": "User-agent: *\nAllow: /\nSitemap: https://stopwatch.jacktools.net/sitemap.xml\n"
+    },
+    {
+      "url": "https://stopwatch.jacktools.net/sitemap.xml",
+      "status": 200,
+      "type": "application/xml",
+      "robots_header": null,
+      "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\" xmlns:xhtml=\"http://www.w3.org/1999/xhtml"
+    },
+    {
+      "url": "https://breathe.jacktools.net/de/",
+      "status": 200,
+      "type": "text/html",
+      "robots_header": null,
+      "title": "Atemübungen für Ruhe und Fokus · Jacktools",
+      "h1": "Ein Atemzug. Ein Moment für dich.",
+      "canonical": "https://breathe.jacktools.net/de/",
+      "robots": null
+    },
+    {
+      "url": "https://breathe.jacktools.net/robots.txt",
+      "status": 200,
+      "type": "text/plain",
+      "robots_header": null,
+      "body": "User-agent: *\nAllow: /\nSitemap: https://breathe.jacktools.net/sitemap.xml\n"
+    },
+    {
+      "url": "https://breathe.jacktools.net/sitemap.xml",
+      "status": 200,
+      "type": "application/xml",
+      "robots_header": null,
+      "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\" xmlns:xhtml=\"http://www.w3.org/1999/xhtml"
+    },
+    {
+      "url": "https://relax.jacktools.net/de/",
+      "status": 200,
+      "type": "text/html",
+      "robots_header": null,
+      "title": "Relax – ruhige Klänge und sanfte Formen · Jacktools",
+      "h1": "Ein Klang. Ein Moment für dich.",
+      "canonical": "https://relax.jacktools.net/de/",
+      "robots": null
+    },
+    {
+      "url": "https://relax.jacktools.net/robots.txt",
+      "status": 200,
+      "type": "text/plain",
+      "robots_header": null,
+      "body": "User-agent: *\nAllow: /\nSitemap: https://relax.jacktools.net/sitemap.xml\n"
+    },
+    {
+      "url": "https://relax.jacktools.net/sitemap.xml",
+      "status": 200,
+      "type": "application/xml",
+      "robots_header": null,
+      "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\" xmlns:xhtml=\"http://www.w3.org/1999/xhtml"
+    },
+    {
+      "url": "https://calculator.jacktools.net/de/",
+      "error": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Hostname mismatch, certificate is not valid for 'calculator.jacktools.net'. (_ssl.c:992)>"
+    },
+    {
+      "url": "https://calculator.jacktools.net/robots.txt",
+      "error": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Hostname mismatch, certificate is not valid for 'calculator.jacktools.net'. (_ssl.c:992)>"
+    },
+    {
+      "url": "https://calculator.jacktools.net/sitemap.xml",
+      "error": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Hostname mismatch, certificate is not valid for 'calculator.jacktools.net'. (_ssl.c:992)>"
+    },
+    {
+      "url": "https://scenescript.jacktools.net/de/",
+      "error": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Hostname mismatch, certificate is not valid for 'scenescript.jacktools.net'. (_ssl.c:992)>"
+    },
+    {
+      "url": "https://scenescript.jacktools.net/robots.txt",
+      "error": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Hostname mismatch, certificate is not valid for 'scenescript.jacktools.net'. (_ssl.c:992)>"
+    },
+    {
+      "url": "https://scenescript.jacktools.net/sitemap.xml",
+      "error": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Hostname mismatch, certificate is not valid for 'scenescript.jacktools.net'. (_ssl.c:992)>"
+    }
+  ],
+  "pages": [
+    {
+      "url": "https://jacktools.net/",
+      "status": 200,
+      "title": "Kleine Tools. Mehr Möglichkeiten. · Jacktools.net",
+      "h1": "Weniger Ablenkung.Mehr Möglichkeiten.Zeit für das Wesentliche.Deine Zeit. Auf einen Blick.Jeder Moment zählt.Ein Atemzug. Ein Moment für dich.Ruhige Klänge. Dein Moment.Die Welt hat etwas zu erzählen.",
+      "description": "Entdecke Jacktools: Timer für Fokus und Training, eine anpassbare Online-Uhr, Breathe für ruhige Atempausen, Relax für entspannende Klanglandschaften, MessageDrop für Nachrichten auf der Weltkarte und neue Ideen für deinen Alltag.",
+      "canonical": "https://jacktools.net/",
+      "lang": "de",
+      "hreflang": {},
+      "robots": "",
+      "schemas": [],
+      "html_kb": 38.9,
+      "js": [],
+      "links_to_tools": [
+        "https://breathe.jacktools.net/de/",
+        "https://clock.jacktools.net/",
+        "https://clock.jacktools.net/de/",
+        "https://relax.jacktools.net/de/",
+        "https://stopwatch.jacktools.net/de/",
+        "https://timer.jacktools.net/de/"
+      ]
+    },
+    {
+      "url": "https://timer.jacktools.net/en/",
+      "status": 200,
+      "title": "Free online countdown timer · Jacktools",
+      "h1": "Make time for what matters.",
+      "description": "A simple online countdown timer with custom durations, sound and dark mode. Free, no account needed.",
+      "canonical": "https://timer.jacktools.net/en/",
+      "lang": "en",
+      "hreflang": {
+        "en": "https://timer.jacktools.net/en/",
+        "de": "https://timer.jacktools.net/de/",
+        "es": "https://timer.jacktools.net/es/",
+        "fr": "https://timer.jacktools.net/fr/",
+        "x-default": "https://timer.jacktools.net/en/"
+      },
+      "robots": "",
+      "schemas": [
+        {
+          "@context": "https://schema.org",
+          "@type": "WebApplication",
+          "name": "Free online countdown timer · Jacktools",
+          "description": "A simple online countdown timer with custom durations, sound and dark mode. Free, no account needed.",
+          "url": "https://timer.jacktools.net/en/",
+          "inLanguage": "en",
+          "applicationCategory": "UtilitiesApplication",
+          "operatingSystem": "Any",
+          "browserRequirements": "Requires JavaScript",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "EUR"
+          }
+        }
+      ],
+      "html_kb": 27.2,
+      "js": [
+        "/_astro/TimerPage.astro_astro_type_script_index_0_lang.DcLSAYhQ.js",
+        "/_astro/Layout.astro_astro_type_script_index_0_lang.Cy9gshb-.js"
+      ],
+      "links_to_tools": []
+    },
+    {
+      "url": "https://timer.jacktools.net/de/",
+      "status": 200,
+      "title": "Kostenloser Online-Countdown-Timer · Jacktools",
+      "h1": "Zeit für das, was dir wichtig ist.",
+      "description": "Ein einfacher Online-Countdown mit frei wählbarer Dauer, Signalton und Dark Mode. Kostenlos und ohne Anmeldung.",
+      "canonical": "https://timer.jacktools.net/de/",
+      "lang": "de",
+      "hreflang": {
+        "en": "https://timer.jacktools.net/en/",
+        "de": "https://timer.jacktools.net/de/",
+        "es": "https://timer.jacktools.net/es/",
+        "fr": "https://timer.jacktools.net/fr/",
+        "x-default": "https://timer.jacktools.net/en/"
+      },
+      "robots": "",
+      "schemas": [
+        {
+          "@context": "https://schema.org",
+          "@type": "WebApplication",
+          "name": "Kostenloser Online-Countdown-Timer · Jacktools",
+          "description": "Ein einfacher Online-Countdown mit frei wählbarer Dauer, Signalton und Dark Mode. Kostenlos und ohne Anmeldung.",
+          "url": "https://timer.jacktools.net/de/",
+          "inLanguage": "de",
+          "applicationCategory": "UtilitiesApplication",
+          "operatingSystem": "Any",
+          "browserRequirements": "Requires JavaScript",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "EUR"
+          }
+        }
+      ],
+      "html_kb": 28.5,
+      "js": [
+        "/_astro/TimerPage.astro_astro_type_script_index_0_lang.DcLSAYhQ.js",
+        "/_astro/Layout.astro_astro_type_script_index_0_lang.Cy9gshb-.js"
+      ],
+      "links_to_tools": []
+    },
+    {
+      "url": "https://timer.jacktools.net/es/",
+      "status": 200,
+      "title": "Temporizador online gratis · Jacktools",
+      "h1": "Tiempo para lo que importa.",
+      "description": "Cuenta atrás online con duración personalizable, sonido y modo oscuro. Gratis y sin registro.",
+      "canonical": "https://timer.jacktools.net/es/",
+      "lang": "es",
+      "hreflang": {
+        "en": "https://timer.jacktools.net/en/",
+        "de": "https://timer.jacktools.net/de/",
+        "es": "https://timer.jacktools.net/es/",
+        "fr": "https://timer.jacktools.net/fr/",
+        "x-default": "https://timer.jacktools.net/en/"
+      },
+      "robots": "",
+      "schemas": [
+        {
+          "@context": "https://schema.org",
+          "@type": "WebApplication",
+          "name": "Temporizador online gratis · Jacktools",
+          "description": "Cuenta atrás online con duración personalizable, sonido y modo oscuro. Gratis y sin registro.",
+          "url": "https://timer.jacktools.net/es/",
+          "inLanguage": "es",
+          "applicationCategory": "UtilitiesApplication",
+          "operatingSystem": "Any",
+          "browserRequirements": "Requires JavaScript",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "EUR"
+          }
+        }
+      ],
+      "html_kb": 28.2,
+      "js": [
+        "/_astro/TimerPage.astro_astro_type_script_index_0_lang.DcLSAYhQ.js",
+        "/_astro/Layout.astro_astro_type_script_index_0_lang.Cy9gshb-.js"
+      ],
+      "links_to_tools": []
+    },
+    {
+      "url": "https://timer.jacktools.net/fr/",
+      "status": 200,
+      "title": "Minuteur en ligne gratuit · Jacktools",
+      "h1": "Du temps pour ce qui compte.",
+      "description": "Un compte à rebours en ligne avec durée personnalisable, son et mode sombre. Gratuit, sans inscription.",
+      "canonical": "https://timer.jacktools.net/fr/",
+      "lang": "fr",
+      "hreflang": {
+        "en": "https://timer.jacktools.net/en/",
+        "de": "https://timer.jacktools.net/de/",
+        "es": "https://timer.jacktools.net/es/",
+        "fr": "https://timer.jacktools.net/fr/",
+        "x-default": "https://timer.jacktools.net/en/"
+      },
+      "robots": "",
+      "schemas": [
+        {
+          "@context": "https://schema.org",
+          "@type": "WebApplication",
+          "name": "Minuteur en ligne gratuit · Jacktools",
+          "description": "Un compte à rebours en ligne avec durée personnalisable, son et mode sombre. Gratuit, sans inscription.",
+          "url": "https://timer.jacktools.net/fr/",
+          "inLanguage": "fr",
+          "applicationCategory": "UtilitiesApplication",
+          "operatingSystem": "Any",
+          "browserRequirements": "Requires JavaScript",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "EUR"
+          }
+        }
+      ],
+      "html_kb": 28.7,
+      "js": [
+        "/_astro/TimerPage.astro_astro_type_script_index_0_lang.DcLSAYhQ.js",
+        "/_astro/Layout.astro_astro_type_script_index_0_lang.Cy9gshb-.js"
+      ],
+      "links_to_tools": []
+    },
+    {
+      "url": "https://timer.jacktools.net/en/pomodoro/",
+      "status": 200,
+      "title": "Free online Pomodoro timer · Jacktools",
+      "h1": "Make time for what matters.",
+      "description": "Find your rhythm with a free Pomodoro timer. Adjustable focus sessions, short breaks and long breaks.",
+      "canonical": "https://timer.jacktools.net/en/pomodoro/",
+      "lang": "en",
+      "hreflang": {
+        "en": "https://timer.jacktools.net/en/pomodoro/",
+        "de": "https://timer.jacktools.net/de/pomodoro/",
+        "es": "https://timer.jacktools.net/es/pomodoro/",
+        "fr": "https://timer.jacktools.net/fr/pomodoro/",
+        "x-default": "https://timer.jacktools.net/en/pomodoro/"
+      },
+      "robots": "",
+      "schemas": [
+        {
+          "@context": "https://schema.org",
+          "@type": "WebApplication",
+          "name": "Free online Pomodoro timer · Jacktools",
+          "description": "Find your rhythm with a free Pomodoro timer. Adjustable focus sessions, short breaks and long breaks.",
+          "url": "https://timer.jacktools.net/en/pomodoro/",
+          "inLanguage": "en",
+          "applicationCategory": "UtilitiesApplication",
+          "operatingSystem": "Any",
+          "browserRequirements": "Requires JavaScript",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "EUR"
+          }
+        }
+      ],
+      "html_kb": 28.2,
+      "js": [
+        "/_astro/TimerPage.astro_astro_type_script_index_0_lang.DcLSAYhQ.js",
+        "/_astro/Layout.astro_astro_type_script_index_0_lang.Cy9gshb-.js"
+      ],
+      "links_to_tools": []
+    },
+    {
+      "url": "https://timer.jacktools.net/de/pomodoro/",
+      "status": 200,
+      "title": "Kostenloser Online-Pomodoro-Timer · Jacktools",
+      "h1": "Zeit für das, was dir wichtig ist.",
+      "description": "Finde deinen Rhythmus mit dem kostenlosen Pomodoro-Timer. Individuelle Fokuszeiten, kurze und lange Pausen.",
+      "canonical": "https://timer.jacktools.net/de/pomodoro/",
+      "lang": "de",
+      "hreflang": {
+        "en": "https://timer.jacktools.net/en/pomodoro/",
+        "de": "https://timer.jacktools.net/de/pomodoro/",
+        "es": "https://timer.jacktools.net/es/pomodoro/",
+        "fr": "https://timer.jacktools.net/fr/pomodoro/",
+        "x-default": "https://timer.jacktools.net/en/pomodoro/"
+      },
+      "robots": "",
+      "schemas": [
+        {
+          "@context": "https://schema.org",
+          "@type": "WebApplication",
+          "name": "Kostenloser Online-Pomodoro-Timer · Jacktools",
+          "description": "Finde deinen Rhythmus mit dem kostenlosen Pomodoro-Timer. Individuelle Fokuszeiten, kurze und lange Pausen.",
+          "url": "https://timer.jacktools.net/de/pomodoro/",
+          "inLanguage": "de",
+          "applicationCategory": "UtilitiesApplication",
+          "operatingSystem": "Any",
+          "browserRequirements": "Requires JavaScript",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "EUR"
+          }
+        }
+      ],
+      "html_kb": 29.5,
+      "js": [
+        "/_astro/TimerPage.astro_astro_type_script_index_0_lang.DcLSAYhQ.js",
+        "/_astro/Layout.astro_astro_type_script_index_0_lang.Cy9gshb-.js"
+      ],
+      "links_to_tools": []
+    },
+    {
+      "url": "https://timer.jacktools.net/es/pomodoro/",
+      "status": 200,
+      "title": "Temporizador Pomodoro online gratis · Jacktools",
+      "h1": "Tiempo para lo que importa.",
+      "description": "Encuentra tu ritmo con un temporizador Pomodoro gratis. Sesiones de concentración y descansos ajustables.",
+      "canonical": "https://timer.jacktools.net/es/pomodoro/",
+      "lang": "es",
+      "hreflang": {
+        "en": "https://timer.jacktools.net/en/pomodoro/",
+        "de": "https://timer.jacktools.net/de/pomodoro/",
+        "es": "https://timer.jacktools.net/es/pomodoro/",
+        "fr": "https://timer.jacktools.net/fr/pomodoro/",
+        "x-default": "https://timer.jacktools.net/en/pomodoro/"
+      },
+      "robots": "",
+      "schemas": [
+        {
+          "@context": "https://schema.org",
+          "@type": "WebApplication",
+          "name": "Temporizador Pomodoro online gratis · Jacktools",
+          "description": "Encuentra tu ritmo con un temporizador Pomodoro gratis. Sesiones de concentración y descansos ajustables.",
+          "url": "https://timer.jacktools.net/es/pomodoro/",
+          "inLanguage": "es",
+          "applicationCategory": "UtilitiesApplication",
+          "operatingSystem": "Any",
+          "browserRequirements": "Requires JavaScript",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "EUR"
+          }
+        }
+      ],
+      "html_kb": 29.3,
+      "js": [
+        "/_astro/TimerPage.astro_astro_type_script_index_0_lang.DcLSAYhQ.js",
+        "/_astro/Layout.astro_astro_type_script_index_0_lang.Cy9gshb-.js"
+      ],
+      "links_to_tools": []
+    },
+    {
+      "url": "https://timer.jacktools.net/fr/pomodoro/",
+      "status": 200,
+      "title": "Minuteur Pomodoro en ligne gratuit · Jacktools",
+      "h1": "Du temps pour ce qui compte.",
+      "description": "Trouvez votre rythme avec un minuteur Pomodoro gratuit. Séances de concentration et pauses personnalisables.",
+      "canonical": "https://timer.jacktools.net/fr/pomodoro/",
+      "lang": "fr",
+      "hreflang": {
+        "en": "https://timer.jacktools.net/en/pomodoro/",
+        "de": "https://timer.jacktools.net/de/pomodoro/",
+        "es": "https://timer.jacktools.net/es/pomodoro/",
+        "fr": "https://timer.jacktools.net/fr/pomodoro/",
+        "x-default": "https://timer.jacktools.net/en/pomodoro/"
+      },
+      "robots": "",
+      "schemas": [
+        {
+          "@context": "https://schema.org",
+          "@type": "WebApplication",
+          "name": "Minuteur Pomodoro en ligne gratuit · Jacktools",
+          "description": "Trouvez votre rythme avec un minuteur Pomodoro gratuit. Séances de concentration et pauses personnalisables.",
+          "url": "https://timer.jacktools.net/fr/pomodoro/",
+          "inLanguage": "fr",
+          "applicationCategory": "UtilitiesApplication",
+          "operatingSystem": "Any",
+          "browserRequirements": "Requires JavaScript",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "EUR"
+          }
+        }
+      ],
+      "html_kb": 29.7,
+      "js": [
+        "/_astro/TimerPage.astro_astro_type_script_index_0_lang.DcLSAYhQ.js",
+        "/_astro/Layout.astro_astro_type_script_index_0_lang.Cy9gshb-.js"
+      ],
+      "links_to_tools": []
+    },
+    {
+      "url": "https://timer.jacktools.net/en/training/",
+      "status": 200,
+      "title": "Training timer · Jacktools",
+      "h1": "Make time for what matters.",
+      "description": "Find your rhythm for exercise and recovery.",
+      "canonical": "https://timer.jacktools.net/en/training/",
+      "lang": "en",
+      "hreflang": {
+        "en": "https://timer.jacktools.net/en/training/",
+        "de": "https://timer.jacktools.net/de/training/",
+        "es": "https://timer.jacktools.net/es/training/",
+        "fr": "https://timer.jacktools.net/fr/training/",
+        "x-default": "https://timer.jacktools.net/en/training/"
+      },
+      "robots": "",
+      "schemas": [],
+      "html_kb": 29.1,
+      "js": [
+        "/_astro/training.astro_astro_type_script_index_0_lang.CzVhqEUV.js",
+        "/_astro/Layout.astro_astro_type_script_index_0_lang.Cy9gshb-.js"
+      ],
+      "links_to_tools": []
+    },
+    {
+      "url": "https://timer.jacktools.net/de/training/",
+      "status": 200,
+      "title": "Trainingstimer · Jacktools",
+      "h1": "Zeit für das, was dir wichtig ist.",
+      "description": "Dein Rhythmus für Training und Erholung.",
+      "canonical": "https://timer.jacktools.net/de/training/",
+      "lang": "de",
+      "hreflang": {
+        "en": "https://timer.jacktools.net/en/training/",
+        "de": "https://timer.jacktools.net/de/training/",
+        "es": "https://timer.jacktools.net/es/training/",
+        "fr": "https://timer.jacktools.net/fr/training/",
+        "x-default": "https://timer.jacktools.net/en/training/"
+      },
+      "robots": "",
+      "schemas": [],
+      "html_kb": 30.4,
+      "js": [
+        "/_astro/training.astro_astro_type_script_index_0_lang.CzVhqEUV.js",
+        "/_astro/Layout.astro_astro_type_script_index_0_lang.Cy9gshb-.js"
+      ],
+      "links_to_tools": []
+    },
+    {
+      "url": "https://timer.jacktools.net/es/training/",
+      "status": 200,
+      "title": "Temporizador de entrenamiento · Jacktools",
+      "h1": "Tiempo para lo que importa.",
+      "description": "Tu ritmo para entrenar y descansar.",
+      "canonical": "https://timer.jacktools.net/es/training/",
+      "lang": "es",
+      "hreflang": {
+        "en": "https://timer.jacktools.net/en/training/",
+        "de": "https://timer.jacktools.net/de/training/",
+        "es": "https://timer.jacktools.net/es/training/",
+        "fr": "https://timer.jacktools.net/fr/training/",
+        "x-default": "https://timer.jacktools.net/en/training/"
+      },
+      "robots": "",
+      "schemas": [],
+      "html_kb": 30.2,
+      "js": [
+        "/_astro/training.astro_astro_type_script_index_0_lang.CzVhqEUV.js",
+        "/_astro/Layout.astro_astro_type_script_index_0_lang.Cy9gshb-.js"
+      ],
+      "links_to_tools": []
+    },
+    {
+      "url": "https://timer.jacktools.net/fr/training/",
+      "status": 200,
+      "title": "Minuteur d’entraînement · Jacktools",
+      "h1": "Du temps pour ce qui compte.",
+      "description": "Votre rythme pour bouger et récupérer.",
+      "canonical": "https://timer.jacktools.net/fr/training/",
+      "lang": "fr",
+      "hreflang": {
+        "en": "https://timer.jacktools.net/en/training/",
+        "de": "https://timer.jacktools.net/de/training/",
+        "es": "https://timer.jacktools.net/es/training/",
+        "fr": "https://timer.jacktools.net/fr/training/",
+        "x-default": "https://timer.jacktools.net/en/training/"
+      },
+      "robots": "",
+      "schemas": [],
+      "html_kb": 30.7,
+      "js": [
+        "/_astro/training.astro_astro_type_script_index_0_lang.CzVhqEUV.js",
+        "/_astro/Layout.astro_astro_type_script_index_0_lang.Cy9gshb-.js"
+      ],
+      "links_to_tools": []
+    },
+    {
+      "url": "https://clock.jacktools.net/en/",
+      "status": 200,
+      "title": "Free online clock – analog, digital and flip clock · Jacktools",
+      "h1": "Your time. At a glance.",
+      "description": "An online clock for your desk, kitchen or a quiet moment. Choose analog, digital or flip digits, with a date, selectable time zone and your own visual style. Free, with no account needed.",
+      "canonical": "https://clock.jacktools.net/en/",
+      "lang": "en",
+      "hreflang": {
+        "en": "https://clock.jacktools.net/en/",
+        "de": "https://clock.jacktools.net/de/",
+        "es": "https://clock.jacktools.net/es/",
+        "fr": "https://clock.jacktools.net/fr/",
+        "x-default": "https://clock.jacktools.net/en/"
+      },
+      "robots": "",
+      "schemas": [],
+      "html_kb": 118.8,
+      "js": [
+        "/_astro/ClockPage.astro_astro_type_script_index_0_lang.BvfWR4av.js",
+        "/_astro/Layout.astro_astro_type_script_index_0_lang.KpraPT3a.js"
+      ],
+      "links_to_tools": []
+    },
+    {
+      "url": "https://clock.jacktools.net/de/",
+      "status": 200,
+      "title": "Kostenlose Online-Uhr – analog, digital und Klappzahlen · Jacktools",
+      "h1": "Deine Zeit. Auf einen Blick.",
+      "description": "Deine Online-Uhr für Schreibtisch, Küche oder einen ruhigen Moment. Analog, digital oder mit Klappzahlen – mit Datum, wählbarer Zeitzone und einem Design, das zu dir passt. Kostenlos und ohne Anmeldung.",
+      "canonical": "https://clock.jacktools.net/de/",
+      "lang": "de",
+      "hreflang": {
+        "en": "https://clock.jacktools.net/en/",
+        "de": "https://clock.jacktools.net/de/",
+        "es": "https://clock.jacktools.net/es/",
+        "fr": "https://clock.jacktools.net/fr/",
+        "x-default": "https://clock.jacktools.net/en/"
+      },
+      "robots": "",
+      "schemas": [],
+      "html_kb": 120.5,
+      "js": [
+        "/_astro/ClockPage.astro_astro_type_script_index_0_lang.BvfWR4av.js",
+        "/_astro/Layout.astro_astro_type_script_index_0_lang.KpraPT3a.js"
+      ],
+      "links_to_tools": []
+    },
+    {
+      "url": "https://clock.jacktools.net/es/",
+      "status": 200,
+      "title": "Reloj online gratis – analógico, digital y de láminas · Jacktools",
+      "h1": "Tu hora. De un vistazo.",
+      "description": "Un reloj para tu escritorio, cocina o un momento tranquilo. Elige una vista analógica, digital o de láminas, con fecha, zona horaria y diseño personal. Gratis y sin registro.",
+      "canonical": "https://clock.jacktools.net/es/",
+      "lang": "es",
+      "hreflang": {
+        "en": "https://clock.jacktools.net/en/",
+        "de": "https://clock.jacktools.net/de/",
+        "es": "https://clock.jacktools.net/es/",
+        "fr": "https://clock.jacktools.net/fr/",
+        "x-default": "https://clock.jacktools.net/en/"
+      },
+      "robots": "",
+      "schemas": [],
+      "html_kb": 119.9,
+      "js": [
+        "/_astro/ClockPage.astro_astro_type_script_index_0_lang.BvfWR4av.js",
+        "/_astro/Layout.astro_astro_type_script_index_0_lang.KpraPT3a.js"
+      ],
+      "links_to_tools": []
+    },
+    {
+      "url": "https://clock.jacktools.net/fr/",
+      "status": 200,
+      "title": "Horloge en ligne gratuite – analogique, numérique et à palettes · Jacktools",
+      "h1": "Votre heure. En un regard.",
+      "description": "Une horloge pour votre bureau, votre cuisine ou un moment calme. Analogique, numérique ou à palettes, avec date, fuseau horaire et style personnalisables. Gratuite et sans inscription.",
+      "canonical": "https://clock.jacktools.net/fr/",
+      "lang": "fr",
+      "hreflang": {
+        "en": "https://clock.jacktools.net/en/",
+        "de": "https://clock.jacktools.net/de/",
+        "es": "https://clock.jacktools.net/es/",
+        "fr": "https://clock.jacktools.net/fr/",
+        "x-default": "https://clock.jacktools.net/en/"
+      },
+      "robots": "",
+      "schemas": [],
+      "html_kb": 120.8,
+      "js": [
+        "/_astro/ClockPage.astro_astro_type_script_index_0_lang.BvfWR4av.js",
+        "/_astro/Layout.astro_astro_type_script_index_0_lang.KpraPT3a.js"
+      ],
+      "links_to_tools": []
+    },
+    {
+      "url": "https://stopwatch.jacktools.net/en/",
+      "status": 200,
+      "title": "Online stopwatch · Jacktools",
+      "h1": "Your time. Your pace.",
+      "description": "For a workout, a study session or a little challenge: measure your time, capture laps and keep track of your progress. Your free online stopwatch – no account, no distractions.",
+      "canonical": "https://stopwatch.jacktools.net/en/",
+      "lang": "en",
+      "hreflang": {
+        "en": "https://stopwatch.jacktools.net/en/",
+        "de": "https://stopwatch.jacktools.net/de/",
+        "es": "https://stopwatch.jacktools.net/es/",
+        "fr": "https://stopwatch.jacktools.net/fr/",
+        "x-default": "https://stopwatch.jacktools.net/en/"
+      },
+      "robots": "",
+      "schemas": [],
+      "html_kb": 41.2,
+      "js": [
+        "/_astro/StopwatchPage.astro_astro_type_script_index_0_lang.B4KW9gsP.js",
+        "/_astro/Layout.astro_astro_type_script_index_0_lang.Dn5R5j09.js"
+      ],
+      "links_to_tools": []
+    },
+    {
+      "url": "https://stopwatch.jacktools.net/de/",
+      "status": 200,
+      "title": "Online-Stoppuhr · Jacktools",
+      "h1": "Deine Zeit. Dein Tempo.",
+      "description": "Ob beim Training, beim Lernen oder für eine kleine Herausforderung: Miss deine Zeit, halte Runden fest und behalte deinen Fortschritt im Blick. Deine kostenlose Online-Stoppuhr – ohne Anmeldung, ohne Ablenkung.",
+      "canonical": "https://stopwatch.jacktools.net/de/",
+      "lang": "de",
+      "hreflang": {
+        "en": "https://stopwatch.jacktools.net/en/",
+        "de": "https://stopwatch.jacktools.net/de/",
+        "es": "https://stopwatch.jacktools.net/es/",
+        "fr": "https://stopwatch.jacktools.net/fr/",
+        "x-default": "https://stopwatch.jacktools.net/en/"
+      },
+      "robots": "",
+      "schemas": [],
+      "html_kb": 42.9,
+      "js": [
+        "/_astro/StopwatchPage.astro_astro_type_script_index_0_lang.B4KW9gsP.js",
+        "/_astro/Layout.astro_astro_type_script_index_0_lang.Dn5R5j09.js"
+      ],
+      "links_to_tools": []
+    },
+    {
+      "url": "https://stopwatch.jacktools.net/es/",
+      "status": 200,
+      "title": "Cronómetro online · Jacktools",
+      "h1": "Tu tiempo. Tu ritmo.",
+      "description": "Para entrenar, estudiar o superar un pequeño reto: mide el tiempo, registra vueltas y sigue tu progreso. Tu cronómetro online gratuito, sin registro ni distracciones.",
+      "canonical": "https://stopwatch.jacktools.net/es/",
+      "lang": "es",
+      "hreflang": {
+        "en": "https://stopwatch.jacktools.net/en/",
+        "de": "https://stopwatch.jacktools.net/de/",
+        "es": "https://stopwatch.jacktools.net/es/",
+        "fr": "https://stopwatch.jacktools.net/fr/",
+        "x-default": "https://stopwatch.jacktools.net/en/"
+      },
+      "robots": "",
+      "schemas": [],
+      "html_kb": 43.0,
+      "js": [
+        "/_astro/StopwatchPage.astro_astro_type_script_index_0_lang.B4KW9gsP.js",
+        "/_astro/Layout.astro_astro_type_script_index_0_lang.Dn5R5j09.js"
+      ],
+      "links_to_tools": []
+    },
+    {
+      "url": "https://stopwatch.jacktools.net/fr/",
+      "status": 200,
+      "title": "Chronomètre en ligne · Jacktools",
+      "h1": "Votre temps. Votre rythme.",
+      "description": "Pour un entraînement, une séance d’étude ou un petit défi : mesurez le temps, enregistrez les tours et suivez vos progrès. Votre chronomètre en ligne gratuit, sans inscription ni distractions.",
+      "canonical": "https://stopwatch.jacktools.net/fr/",
+      "lang": "fr",
+      "hreflang": {
+        "en": "https://stopwatch.jacktools.net/en/",
+        "de": "https://stopwatch.jacktools.net/de/",
+        "es": "https://stopwatch.jacktools.net/es/",
+        "fr": "https://stopwatch.jacktools.net/fr/",
+        "x-default": "https://stopwatch.jacktools.net/en/"
+      },
+      "robots": "",
+      "schemas": [],
+      "html_kb": 43.6,
+      "js": [
+        "/_astro/StopwatchPage.astro_astro_type_script_index_0_lang.B4KW9gsP.js",
+        "/_astro/Layout.astro_astro_type_script_index_0_lang.Dn5R5j09.js"
+      ],
+      "links_to_tools": []
+    },
+    {
+      "url": "https://breathe.jacktools.net/en/",
+      "status": 200,
+      "title": "One breath. A moment for you. · Jacktools",
+      "h1": "One breath. A moment for you.",
+      "description": "Find your rhythm – for a quiet break or a clearer mind.",
+      "canonical": "https://breathe.jacktools.net/en/",
+      "lang": "en",
+      "hreflang": {
+        "en": "https://breathe.jacktools.net/en/",
+        "de": "https://breathe.jacktools.net/de/",
+        "es": "https://breathe.jacktools.net/es/",
+        "fr": "https://breathe.jacktools.net/fr/",
+        "x-default": "https://breathe.jacktools.net/en/"
+      },
+      "robots": "",
+      "schemas": [],
+      "html_kb": 64.9,
+      "js": [
+        "/_astro/BreathePage.astro_astro_type_script_index_0_lang.B_6-DMAm.js",
+        "/_astro/Layout.astro_astro_type_script_index_0_lang.Cs18cPaT.js"
+      ],
+      "links_to_tools": []
+    },
+    {
+      "url": "https://breathe.jacktools.net/de/",
+      "status": 200,
+      "title": "Atemübungen für Ruhe und Fokus · Jacktools",
+      "h1": "Ein Atemzug. Ein Moment für dich.",
+      "description": "Finde deinen Rhythmus – für eine ruhige Pause oder einen klaren Kopf.",
+      "canonical": "https://breathe.jacktools.net/de/",
+      "lang": "de",
+      "hreflang": {
+        "en": "https://breathe.jacktools.net/en/",
+        "de": "https://breathe.jacktools.net/de/",
+        "es": "https://breathe.jacktools.net/es/",
+        "fr": "https://breathe.jacktools.net/fr/",
+        "x-default": "https://breathe.jacktools.net/en/"
+      },
+      "robots": "",
+      "schemas": [],
+      "html_kb": 65.6,
+      "js": [
+        "/_astro/BreathePage.astro_astro_type_script_index_0_lang.B_6-DMAm.js",
+        "/_astro/Layout.astro_astro_type_script_index_0_lang.Cs18cPaT.js"
+      ],
+      "links_to_tools": []
+    },
+    {
+      "url": "https://breathe.jacktools.net/es/",
+      "status": 200,
+      "title": "Una respiración. Un momento para ti. · Jacktools",
+      "h1": "Una respiración. Un momento para ti.",
+      "description": "Encuentra tu ritmo para una pausa tranquila.",
+      "canonical": "https://breathe.jacktools.net/es/",
+      "lang": "es",
+      "hreflang": {
+        "en": "https://breathe.jacktools.net/en/",
+        "de": "https://breathe.jacktools.net/de/",
+        "es": "https://breathe.jacktools.net/es/",
+        "fr": "https://breathe.jacktools.net/fr/",
+        "x-default": "https://breathe.jacktools.net/en/"
+      },
+      "robots": "",
+      "schemas": [],
+      "html_kb": 65.4,
+      "js": [
+        "/_astro/BreathePage.astro_astro_type_script_index_0_lang.B_6-DMAm.js",
+        "/_astro/Layout.astro_astro_type_script_index_0_lang.Cs18cPaT.js"
+      ],
+      "links_to_tools": []
+    },
+    {
+      "url": "https://breathe.jacktools.net/fr/",
+      "status": 200,
+      "title": "Un souffle. Un moment pour vous. · Jacktools",
+      "h1": "Un souffle. Un moment pour vous.",
+      "description": "Trouvez votre rythme pour une pause tranquille.",
+      "canonical": "https://breathe.jacktools.net/fr/",
+      "lang": "fr",
+      "hreflang": {
+        "en": "https://breathe.jacktools.net/en/",
+        "de": "https://breathe.jacktools.net/de/",
+        "es": "https://breathe.jacktools.net/es/",
+        "fr": "https://breathe.jacktools.net/fr/",
+        "x-default": "https://breathe.jacktools.net/en/"
+      },
+      "robots": "",
+      "schemas": [],
+      "html_kb": 65.8,
+      "js": [
+        "/_astro/BreathePage.astro_astro_type_script_index_0_lang.B_6-DMAm.js",
+        "/_astro/Layout.astro_astro_type_script_index_0_lang.Cs18cPaT.js"
+      ],
+      "links_to_tools": []
+    },
+    {
+      "url": "https://relax.jacktools.net/en/",
+      "status": 200,
+      "title": "One sound. A moment for you. · Jacktools",
+      "h1": "One sound. A moment for you.",
+      "description": "Random sounds, gentle shapes and room to unwind. Create your own quiet soundscape.",
+      "canonical": "https://relax.jacktools.net/en/",
+      "lang": "en",
+      "hreflang": {
+        "en": "https://relax.jacktools.net/en/",
+        "de": "https://relax.jacktools.net/de/",
+        "es": "https://relax.jacktools.net/es/",
+        "fr": "https://relax.jacktools.net/fr/",
+        "x-default": "https://relax.jacktools.net/en/"
+      },
+      "robots": "",
+      "schemas": [],
+      "html_kb": 132.9,
+      "js": [
+        "/_astro/RelaxPage.astro_astro_type_script_index_0_lang.D5Bzi2eQ.js",
+        "/_astro/Layout.astro_astro_type_script_index_0_lang.CtUgbiZo.js"
+      ],
+      "links_to_tools": []
+    },
+    {
+      "url": "https://relax.jacktools.net/de/",
+      "status": 200,
+      "title": "Relax – ruhige Klänge und sanfte Formen · Jacktools",
+      "h1": "Ein Klang. Ein Moment für dich.",
+      "description": "Zufällige Klänge, sanfte Formen und Raum zum Abschalten. Gestalte deine eigene ruhige Klanglandschaft.",
+      "canonical": "https://relax.jacktools.net/de/",
+      "lang": "de",
+      "hreflang": {
+        "en": "https://relax.jacktools.net/en/",
+        "de": "https://relax.jacktools.net/de/",
+        "es": "https://relax.jacktools.net/es/",
+        "fr": "https://relax.jacktools.net/fr/",
+        "x-default": "https://relax.jacktools.net/en/"
+      },
+      "robots": "",
+      "schemas": [],
+      "html_kb": 133.9,
+      "js": [
+        "/_astro/RelaxPage.astro_astro_type_script_index_0_lang.D5Bzi2eQ.js",
+        "/_astro/Layout.astro_astro_type_script_index_0_lang.CtUgbiZo.js"
+      ],
+      "links_to_tools": []
+    },
+    {
+      "url": "https://relax.jacktools.net/es/",
+      "status": 200,
+      "title": "Un sonido. Un momento para ti. · Jacktools",
+      "h1": "Un sonido. Un momento para ti.",
+      "description": "Sonidos aleatorios y formas suaves para desconectar. Crea tu propio paisaje sonoro.",
+      "canonical": "https://relax.jacktools.net/es/",
+      "lang": "es",
+      "hreflang": {
+        "en": "https://relax.jacktools.net/en/",
+        "de": "https://relax.jacktools.net/de/",
+        "es": "https://relax.jacktools.net/es/",
+        "fr": "https://relax.jacktools.net/fr/",
+        "x-default": "https://relax.jacktools.net/en/"
+      },
+      "robots": "",
+      "schemas": [],
+      "html_kb": 133.7,
+      "js": [
+        "/_astro/RelaxPage.astro_astro_type_script_index_0_lang.D5Bzi2eQ.js",
+        "/_astro/Layout.astro_astro_type_script_index_0_lang.CtUgbiZo.js"
+      ],
+      "links_to_tools": []
+    },
+    {
+      "url": "https://relax.jacktools.net/fr/",
+      "status": 200,
+      "title": "Un son. Un moment pour vous. · Jacktools",
+      "h1": "Un son. Un moment pour vous.",
+      "description": "Des sons aléatoires, des formes douces et un espace pour souffler. Composez votre paysage sonore.",
+      "canonical": "https://relax.jacktools.net/fr/",
+      "lang": "fr",
+      "hreflang": {
+        "en": "https://relax.jacktools.net/en/",
+        "de": "https://relax.jacktools.net/de/",
+        "es": "https://relax.jacktools.net/es/",
+        "fr": "https://relax.jacktools.net/fr/",
+        "x-default": "https://relax.jacktools.net/en/"
+      },
+      "robots": "",
+      "schemas": [],
+      "html_kb": 134.1,
+      "js": [
+        "/_astro/RelaxPage.astro_astro_type_script_index_0_lang.D5Bzi2eQ.js",
+        "/_astro/Layout.astro_astro_type_script_index_0_lang.CtUgbiZo.js"
+      ],
+      "links_to_tools": []
+    }
+  ]
+}

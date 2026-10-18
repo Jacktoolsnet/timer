@@ -1,12 +1,14 @@
 ---
+import {toolSeo} from '../../../shared/seo';
 import Layout from '../layouts/Layout.astro';
 import {getDictionary, type Language} from '../lib/i18n';
 import {stopwatchText} from '../lib/stopwatch-text';
 interface Props {lang: Language}
 const {lang}=Astro.props; const t=getDictionary(lang); const c=stopwatchText[lang];
+const seo=toolSeo.stopwatch[lang];
 ---
-<Layout lang={lang} title={c.title} description={c.intro} route="">
-<section class="intro"><h1>{c.heading} <em>{c.headingAccent}</em></h1><p class="intro-copy">{c.intro}</p></section>
+<Layout lang={lang} title={seo.title} description={seo.description} route="">
+<section class="intro"><p class="eyebrow">{c.heading} {c.headingAccent}</p><h1>{seo.heading}</h1><p class="intro-copy">{seo.description}</p></section>
 <div id="stopwatch-app" data-text={JSON.stringify({...t,...c})}>
 <section id="stopwatch-print" aria-label={c.laps}><h2 id="print-title">{c.laps}</h2><table id="print-laps"><thead></thead><tbody></tbody></table><div id="print-clock-sections"></div><div id="print-chart"></div></section>
 <div class="workspace stopwatch-workspace"><section class="timer-card stopwatch-card">
