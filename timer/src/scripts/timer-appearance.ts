@@ -1,3 +1,4 @@
+import {timerBackgrounds} from '../lib/timer-backgrounds';
 import {analogDesigns, dialMarkup, type AnalogDesign} from '../../../shared/analog-designs';
 import {enhanceClockSelects} from '../../../shared/preview-selects';
 import {storageAllowed} from '../lib/storage';
@@ -7,6 +8,9 @@ export function createTimerAppearance() {
  const form=document.getElementById('timer-appearance') as HTMLFormElement;
  const view=form.elements.namedItem('timerView') as HTMLSelectElement;
  const design=form.elements.namedItem('analogDesign') as HTMLSelectElement;
+ const background=form.elements.namedItem('background') as HTMLSelectElement;
+ const transparency=form.elements.namedItem('transparency') as HTMLInputElement;
+ const card=document.querySelector<HTMLElement>('.timer-card')!;
  const smooth=form.elements.namedItem('smooth') as HTMLInputElement;
  const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
  let lastRemaining=0,lastShowSeconds=true;
@@ -16,17 +20,31 @@ export function createTimerAppearance() {
  try {
   const saved=storageAllowed()?JSON.parse(localStorage.getItem(APPEARANCE_KEY)||'null'):null;
   if(saved?.view==='analog'||saved?.view==='combined')view.value=saved.view;
+  if(timerBackgrounds.includes(saved?.background))background.value=saved.background;
+  if(Number.isInteger(saved?.transparency)&&saved.transparency>=0&&saved.transparency<=100)transparency.value=String(saved.transparency);
   smooth.checked=saved?.smooth===true;
   if(analogDesigns.includes(saved?.design))design.value=saved.design;
  }catch{}
- function save(){if(storageAllowed())try{localStorage.setItem(APPEARANCE_KEY,JSON.stringify({view:view.value,design:design.value,smooth:smooth.checked}));}catch{}}
+ function save(){if(storageAllowed())try{localStorage.setItem(APPEARANCE_KEY,JSON.stringify({view:view.value,design:design.value,smooth:smooth.checked,background:background.value,transparency:Number(transparency.value)}));}catch{}}
+ function applyBackground(){
+  const enabled=timerBackgrounds.some(id=>id===background.value);
+  card.dataset.background=enabled?background.value:'none';
+  if(enabled)card.style.setProperty('--timer-background',`url("/backgrounds/${background.value}.svg")`);
+  else card.style.removeProperty('--timer-background');
+  card.style.setProperty('--timer-display-opacity',`${enabled?100-Number(transparency.value):100}%`);
+  transparency.disabled=!enabled;
+  document.getElementById('timer-transparency-field')!.hidden=!enabled;
+  document.getElementById('timer-transparency-value')!.textContent=`${transparency.value} %`;
+ }
  function apply(){
+  applyBackground();
   const analog=view.value==='analog'||view.value==='combined';
   clock.dataset.timerView=view.value;
   face.dataset.hidden=String(!analog);
   document.getElementById('analog-timer-hint')!.hidden=!analog;
   if(face.dataset.design!==design.value||face.dataset.hourOffset!==String(hourOffset)||face.dataset.scale!==(minuteScale?'minutes':'hours')){document.getElementById('timer-dial')!.innerHTML=dialMarkup(design.value as AnalogDesign,hourOffset,minuteScale);face.dataset.design=design.value;face.dataset.hourOffset=String(hourOffset);face.dataset.scale=minuteScale?'minutes':'hours';}
  }
+ transparency.addEventListener('input',()=>{applyBackground();save();});
  form.addEventListener('submit',e=>e.preventDefault());
  form.addEventListener('change',()=>{apply();save();update(lastRemaining,lastShowSeconds);});
  reducedMotion.addEventListener('change',()=>update(lastRemaining,lastShowSeconds));

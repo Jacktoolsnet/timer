@@ -1,4 +1,5 @@
 ---
+import { timerBackgrounds,timerBackgroundText } from '../lib/timer-backgrounds';
 import { timerOptionGroups } from '../lib/timer-option-groups';
 import type { Language } from '../lib/i18n';
 import { analogDesigns, analogDesignText, analogPreview } from '../../../shared/analog-designs';
@@ -6,11 +7,14 @@ import { timerAppearanceText } from '../lib/timer-appearance';
 interface Props { lang: Language; pomodoro?: boolean }
 const {lang,pomodoro=false}=Astro.props;
 const secondsText={de:['Sekunden immer anzeigen','Standardmäßig nur Minuten; in der letzten Minute nur Sekunden.'],en:['Always show seconds','Minutes only by default; seconds only in the final minute.'],es:['Mostrar siempre los segundos','Solo minutos por defecto; solo segundos en el último minuto.'],fr:['Toujours afficher les secondes','Minutes seules par défaut ; secondes seules dans la dernière minute.']}[lang];
+const backgrounds=timerBackgroundText[lang];
 const t=timerAppearanceText[lang], designs=analogDesignText[lang];
 ---
 <form id="timer-appearance" class="timer-options-group appearance-options"><h3>{timerOptionGroups[lang].appearance}</h3>
 <label>{t.label}<select name="timerView"><option value="digital">{t.digital}</option><option value="analog">{t.analog}</option><option value="combined">{t.combined}</option></select></label>
 <label>{designs.label}<select name="analogDesign">{analogDesigns.map((id,i)=><option value={id} data-preview={analogPreview(id)}>{designs.names[i]}</option>)}</select></label>
+<label>{backgrounds.label}<select name="background"><option value="none">{backgrounds.none}</option>{timerBackgrounds.map((id,i)=><option value={id} data-preview={'/backgrounds/'+id+'.svg'}>{backgrounds.names[i]}</option>)}</select></label>
+<label id="timer-transparency-field" hidden>{backgrounds.transparency}<span class="timer-transparency-control"><input name="transparency" id="timer-transparency" type="range" min="0" max="100" step="1" value="0" disabled/><output id="timer-transparency-value" for="timer-transparency">0 %</output></span></label>
 <label class="toggle-row"><span><strong>{t.smooth}</strong></span><input name="smooth" type="checkbox" role="switch"/><span class="toggle" aria-hidden="true"></span></label>
 {pomodoro && <label class="toggle-row"><span><strong>{secondsText[0]}</strong><small>{secondsText[1]}</small></span><input name="pomodoroSeconds" type="checkbox" role="switch"/><span class="toggle" aria-hidden="true"></span></label>}
 <p id="analog-timer-hint" class="form-hint" hidden>{t.hint}{pomodoro && <> {secondsText[1]}</>}</p>
