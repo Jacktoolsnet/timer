@@ -1,6 +1,7 @@
 ---
 import ToolInformation from '../../../shared/ToolInformation.astro';
 import {toolSeo} from '../../../shared/seo';
+import {presetLabels} from '../lib/presets';
 import Layout from '../layouts/Layout.astro';
 import { type Language } from '../lib/i18n';
 interface Props {lang: Language}
@@ -13,6 +14,7 @@ fr:['Lampe à lave','Un peu de lumière. Un moment pour toi.','Laisse tes pensé
 };
 const t=labels[lang];
 const seo=toolSeo.lava[lang];
+const presetCopy=presetLabels[lang];
 const materialLabels={de:['Silber / Metall','Kupfer','Gold','Ölschimmer'],en:['Silver / metal','Copper','Gold','Oil shimmer'],es:['Plata / metal','Cobre','Oro','Brillo de aceite'],fr:['Argent / métal','Cuivre','Or','Reflets d’huile']}[lang];
 const rainbowLabel={de:'Regenbogen',en:'Rainbow',es:'Arcoíris',fr:'Arc-en-ciel'}[lang];
 const fluid={de:['Trägerflüssigkeit','Klar','Blau','Violett','Bernstein','Türkis','Zähigkeit','Dünnflüssig','Zähflüssig'],en:['Carrier liquid','Clear','Blue','Violet','Amber','Teal','Viscosity','Fluid','Viscous'],es:['Líquido portador','Claro','Azul','Violeta','Ámbar','Turquesa','Viscosidad','Fluido','Viscoso'],fr:['Liquide porteur','Clair','Bleu','Violet','Ambre','Turquoise','Viscosité','Fluide','Visqueux']}[lang];
@@ -32,6 +34,7 @@ const settingsTitle={de:'Einstellungen',en:'Settings',es:'Ajustes',fr:'Réglages
  <section class="settings-card relax-settings lava-controls" aria-labelledby="lava-settings-title">
  <h2 id="lava-settings-title">{settingsTitle}</h2>
  <div class="relax-settings-grid">
+  <section class="settings-tile"><h3>{presetCopy.heading}</h3><div class="relax-field"><details id="lava-preset-picker" class="sound-dropdown"><summary aria-label={presetCopy.heading}><span id="lava-preset-value" data-custom={presetCopy.custom}>{presetCopy.names[0]}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary><fieldset class="instrument-options"><legend class="sr-only">{presetCopy.heading}</legend>{presetCopy.names.map((name,i)=><label><input type="radio" name="lava-preset" value={i} checked={i===0}/><span class="instrument-option-copy"><strong>{name}</strong></span><svg class="instrument-check" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4 10-10"/></svg></label>)}</fieldset></details></div></section>
   <section class="settings-tile"><h3>{t[3]}</h3>
    <div class="relax-field"><details id="lava-colour-picker" class="sound-dropdown"><summary aria-label={t[3]}><span id="lava-colour-value">{t[4]}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
     <fieldset class="instrument-options"><legend class="sr-only">{t[3]}</legend>{['ember','amethyst','lagoon','rose','rainbow','silver','copper','gold','oil'].map((color,i)=><label><input type="radio" name="lava-color" value={i} checked={i===0}/><span class="lava-swatch" data-lava-color={color} aria-hidden="true"></span><span class="instrument-option-copy"><strong>{i>4?materialLabels[i-5]:i===4?rainbowLabel:t[i+4]}</strong></span><svg class="instrument-check" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4 10-10"/></svg></label>)}</fieldset>

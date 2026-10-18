@@ -1,3 +1,4 @@
+import {presets} from '../lib/presets';
 import {storageAllowed} from '../lib/storage';
 import {STORAGE_KEY} from '../lib/engine';
 import {createBlobColours, advanceBlobColours} from '../lib/rainbow';
@@ -272,4 +273,43 @@ if (storageAllowed()) {
    }
   }
  } catch { /* Ignore malformed preferences. */ }
+}
+
+
+const presetPicker=document.querySelector<HTMLDetailsElement>('#lava-preset-picker')!;
+const presetValue=document.querySelector<HTMLElement>('#lava-preset-value')!;
+const presetInputs=document.querySelectorAll<HTMLInputElement>('[name=lava-preset]');
+let applyingPreset=false;
+function syncPresetLabel() {
+ if(applyingPreset)return;
+ presetInputs.forEach(input=>{input.checked=false;});
+ presetValue.textContent=presetValue.dataset.custom!;
+}
+presetInputs.forEach(input=>input.addEventListener('change',()=>{
+ const preset=presets[Number(input.value)];
+ if(!preset)return;
+ applyingPreset=true;
+ try {
+  for(const [name,value] of [['lava-color',preset.colour],['fluid-color',preset.fluidColour]] as const){
+   const radio=document.querySelector<HTMLInputElement>('[name="'+name+'"][value="'+value+'"]')!;
+   radio.checked=true;radio.dispatchEvent(new Event('change'));
+  }
+  for(const [control,value] of [[speed,preset.speed],[brightness,preset.brightness],[viscosity,preset.viscosity]] as const){
+   control.value=String(value);control.dispatchEvent(new Event('input'));
+  }
+ } finally {applyingPreset=false;}
+ presetValue.textContent=input.closest('label')!.querySelector('strong')!.textContent;
+ presetPicker.open=false;
+ saveLavaSettings();
+}));
+document.querySelectorAll<HTMLInputElement>('[name=lava-color],[name=fluid-color]').forEach(input=>input.addEventListener('change',syncPresetLabel));
+for(const control of [speed,brightness,viscosity])control.addEventListener('input',syncPresetLabel);
+document.addEventListener('click',event=>{if(!presetPicker.contains(event.target as Node))presetPicker.open=false;});
+presetPicker.addEventListener('keydown',event=>{if(event.key==='Escape'){presetPicker.open=false;presetPicker.querySelector('summary')!.focus();}});
+// Derive the initial label from restored values; no extra storage field needed.
+const initialPreset=presets.findIndex(p=>p.colour===colour&&p.fluidColour===fluidColour&&p.speed===Number(speed.value)&&p.brightness===Number(brightness.value)&&p.viscosity===Number(viscosity.value));
+if(initialPreset<0)syncPresetLabel();
+else{
+ const input=presetInputs[initialPreset];input.checked=true;
+ presetValue.textContent=input.closest('label')!.querySelector('strong')!.textContent;
 }

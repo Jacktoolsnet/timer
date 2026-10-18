@@ -177,3 +177,25 @@ test('carrier liquid and viscosity can be changed and remembered',async({page})=
  await page.locator('#lava-toggle').click();
  await expect(page.locator('#lava-stage')).not.toHaveClass(/no-webgl/);
 });
+
+test('presets apply together, preserve pause and allow custom settings',async({page})=>{
+ await page.goto('/de/');
+ await page.locator('#lava-preset-picker summary').click();
+ await page.getByText('Goldrausch',{exact:true}).click();
+ await expect(page.locator('#lava-preset-value')).toHaveText('Goldrausch');
+ await expect(page.locator('#lava-colour-value')).toHaveText('Gold');
+ await expect(page.locator('#fluid-value')).toHaveText('Bernstein');
+ await expect(page.locator('#lava-viscosity')).toHaveValue('80');
+ await expect(page.locator('#lava-speed')).toHaveValue('0.6');
+ await expect(page.locator('#lava-brightness')).toHaveValue('90');
+ await expect(page.locator('#lava-toggle')).toHaveAttribute('aria-pressed','false');
+ await page.locator('#palette-dropdown summary').click();
+ await page.locator('#remember-preferences').check();
+ await page.reload();
+ await expect(page.locator('#lava-preset-value')).toHaveText('Goldrausch');
+ await page.locator('#lava-speed').fill('0.9');
+ await expect(page.locator('#lava-preset-value')).toHaveText('Benutzerdefiniert');
+ await page.reload();
+ await expect(page.locator('#lava-preset-value')).toHaveText('Benutzerdefiniert');
+ await expect(page.locator('#lava-speed')).toHaveValue('0.9');
+});

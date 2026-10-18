@@ -43,3 +43,8 @@ Company-Toolliste wurde nicht geändert, da die neue Subdomain noch nicht live i
 Trägerflüssigkeit: Klar, Blau, Violett, Bernstein oder Türkis. Zähigkeit beeinflusst
 Bewegungstempo, Dehnung und Formwechsel unabhängig vom Geschwindigkeitsregler.
 Beide Werte werden nur mit Speicherzustimmung gesichert. Stilisierte Physik.
+
+Vorlagen: Klassisch, Goldrausch, Tiefsee, Ölfilm und Regenbogentraum setzen
+Farbwelt, Trägerflüssigkeit, Zähigkeit, Tempo und Helligkeit gemeinsam.
+Einzeländerungen zeigen „Benutzerdefiniert“. Wiedergabe bleibt unverändert;
+mit Speicherzustimmung werden die Werte gesichert und die Vorlage beim Laden erkannt.
