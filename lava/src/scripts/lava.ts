@@ -10,8 +10,8 @@ const brightness = document.querySelector<HTMLInputElement>('#lava-brightness')!
 const motion = matchMedia('(prefers-reduced-motion: reduce)');
 const gl = canvas.getContext('webgl', { alpha: false, antialias: false, preserveDrawingBuffer: false });
 let running = false, frame = 0, previous = 0, elapsed = 12, colour = 0;
-const colours = [[1,.28,.055],[.63,.22,1],[.05,.85,.64],[1,.22,.49]];
-const glows = ['#ff703e','#b784ff','#50e8cc','#ff80b5','#ae7eff'];
+const colours = [[1,.28,.055],[.63,.22,1],[.05,.85,.64],[1,.22,.49],[.63,.22,1],[.64,.72,.84],[.78,.34,.17],[.95,.66,.17],[.16,.19,.28]];
+const glows = ['#ff703e','#b784ff','#50e8cc','#ff80b5','#ae7eff','#bdcce0','#dc916a','#edc46b','#9582ce'];
 const blobColours=createBlobColours();
 let program: WebGLProgram | null = null;
 function shader(type: number, source: string) {
@@ -28,7 +28,7 @@ if (gl) {
  varying vec2 uv; uniform vec3 params; uniform vec3 colour; uniform vec3 blobColours[14];
  #define time params.x
  #define aspect params.y
- #define rainbow params.z
+ #define material params.z
  float contribution(vec2 p, float n){
    float phase=time*(.11+n*.006)+n*2.399;
    vec2 c=vec2(.5+sin(phase*.45+n*2.399)*.46,.5+.55*sin(phase));
@@ -86,7 +86,7 @@ if (gl) {
   float coneWidth=.8+p.y*.36;
   float beam=exp(-pow((p.x-.5)/coneWidth,2.))*exp(-p.y*1.65);
   vec3 waxColour=colour;
-  if(rainbow>.5){
+  if(abs(material-4.)<.1){
    vec3 mixed=vec3(0.);float total=0.;
    for(int i=0;i<14;i++){
     // Local influence blends at the neck, without tinting distant blobs.
@@ -99,6 +99,23 @@ if (gl) {
   float rim=pow(1.-normal.z,2.);
   vec3 liquid=waxColour*(.75+.48*light)+lampLight*(.22+.48*uplight)+vec3(1.,.88,.65)*pow(light,10.)*.28;
   liquid+=waxColour*rim*.5;
+  if(material>4.5){
+   // Broad studio-like reflections rather than pin-point highlights.
+   vec3 reflection=reflect(vec3(0.,0.,-1.),normal);
+   float band=exp(-pow((reflection.x+.3+reflection.y*.35)/.24,2.));
+   float softbox=exp(-pow((reflection.x-.45)/.5,2.))*smoothstep(-.5,.7,reflection.y);
+   float fresnel=.16+.84*pow(1.-normal.z,3.);
+   liquid=waxColour*(.22+.38*light)+waxColour*band*.65
+    +mix(waxColour,vec3(1.),.6)*softbox*.65+vec3(.65,.74,.9)*fresnel*.3;
+   if(material>7.5){
+    // Thin-film-inspired interference; varies with curvature and slow motion.
+    float film=normal.z*2.2+normal.x*.28+normal.y*.18
+     +.13*sin(p.x*4.+p.y*3.+time*.055);
+    vec3 iridescence=.5+.5*cos(6.28318*(film+vec3(0.,.33,.67)));
+    liquid=mix(vec3(.045,.055,.09),iridescence,.38+.38*fresnel)
+     +iridescence*band*.32+vec3(.75,.87,1.)*softbox*.3;
+   }
+  }
   vec3 bg=vec3(.055,.025,.095)+colour*.055;
   bg+=lampLight*beam*.34;
   // Concentrated warm glow above the base, diffusing into the liquid.
@@ -120,9 +137,9 @@ function draw(){
  const ratio=Math.min(devicePixelRatio||1,1.5);
  const width=Math.round(canvas.clientWidth*ratio),height=Math.round(canvas.clientHeight*ratio);
  if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;}
- gl.viewport(0,0,width,height);gl.uniform3f(gl.getUniformLocation(program,'params'),elapsed,width/height,colour===4?1:0);
+ gl.viewport(0,0,width,height);gl.uniform3f(gl.getUniformLocation(program,'params'),elapsed,width/height,colour);
  gl.uniform3fv(gl.getUniformLocation(program,'blobColours[0]'),blobColours);
- gl.uniform3fv(gl.getUniformLocation(program,'colour'),colours[colour===4?1:colour]);gl.drawArrays(gl.TRIANGLES,0,6);
+ gl.uniform3fv(gl.getUniformLocation(program,'colour'),colours[colour]);gl.drawArrays(gl.TRIANGLES,0,6);
 }
 function animate(now:number){
  if(!running||document.hidden)return;
@@ -144,7 +161,7 @@ toggle.addEventListener('click',()=>{running=!running;status.textContent='';sync
 document.addEventListener('visibilitychange',sync);
 motion.addEventListener('change',()=>{if(motion.matches){running=false;status.textContent=status.dataset.reduced!;sync();}});
 document.querySelectorAll<HTMLInputElement>('[name=lava-color]').forEach(input=>input.addEventListener('change',()=>{
- colour=Number(input.value);stage.dataset.rainbow=String(colour===4);
+ colour=Number(input.value);stage.dataset.rainbow=String(colour===4);stage.dataset.material=['ember','amethyst','lagoon','rose','rainbow','silver','copper','gold','oil'][colour];
  const picker=document.querySelector<HTMLDetailsElement>('#lava-colour-picker')!;
  document.querySelector('#lava-colour-value')!.textContent=input.closest('label')!.querySelector('strong')!.textContent;
  picker.open=false;
@@ -211,7 +228,7 @@ if (storageAllowed()) {
  try {
   const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
   if (saved && typeof saved === 'object') {
-   if (Number.isInteger(saved.colour) && saved.colour >= 0 && saved.colour <= 4) {
+   if (Number.isInteger(saved.colour) && saved.colour >= 0 && saved.colour < colours.length) {
     const input = document.querySelector<HTMLInputElement>('[name=lava-color][value="'+saved.colour+'"]')!;
     input.checked = true;
     input.dispatchEvent(new Event('change'));

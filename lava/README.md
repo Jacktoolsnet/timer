@@ -29,7 +29,7 @@ Wenn eine andere Domain gewünscht ist, zuerst astro.config.mjs anpassen.
 
 ## Version 1
 WebGL-Metaballs mit organischen Übergängen, Glasreflexen und Metallgehäuse.
-Fünf Farbwelten inklusive Regenbogen mit bleibender Farbmischung bei Kontakt,, Tempo, Helligkeit, Start/Pause und optionales Vollbild.
+Neun Farbwelten inklusive Regenbogen, Metallen und Ölschimmer mit bleibender Farbmischung bei Kontakt,, Tempo, Helligkeit, Start/Pause und optionales Vollbild.
 Keine Audiodateien, Bibliotheken für Rendering, externen Schriften oder Tracker.
 Kein automatischer Animationsstart; reduzierte Bewegung wird respektiert,
 in ausgeblendeten Tabs pausiert die Berechnung. Ohne WebGL statische Ersatzansicht.

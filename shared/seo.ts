@@ -4,10 +4,10 @@ type Tool = 'countdown' | 'pomodoro' | 'interval' | 'clock' | 'stopwatch' | 'bre
 type Copy = { title: string; heading: string; description: string };
 export const toolSeo: Record<Tool, Record<Language, Copy>> = {
  lava: {
-  de:{"title": "Lavalampe online – animierte Lava", "heading": "Online-Lavalampe zum Entspannen", "description": "Beobachte weich fließende Lava in fünf Farbwelten inklusive Regenbogen. Passe Tempo und Helligkeit an und nutze die Fokusansicht. Kostenlos im Browser, ohne Anmeldung."},
-  en:{"title": "Online lava lamp – flowing animation", "heading": "Online lava lamp for a quiet break", "description": "Watch softly flowing lava in five colour palettes including rainbow. Adjust speed and brightness or switch to focus view. Free in your browser, with no sign-up."},
-  es:{"title": "Lámpara de lava online – animación", "heading": "Lámpara de lava online para desconectar", "description": "Observa lava en movimiento suave con cinco paletas de color, incluido arcoíris. Ajusta velocidad y brillo y activa la vista de enfoque. Gratis en el navegador, sin registro."},
-  fr:{"title": "Lampe à lave en ligne – animation", "heading": "Lampe à lave en ligne pour une pause", "description": "Regardez la lave évoluer doucement dans cinq palettes, dont un arc-en-ciel. Réglez vitesse et luminosité et activez la vue concentration. Gratuit dans le navigateur, sans inscription."},
+  de:{"title": "Lavalampe online – animierte Lava", "heading": "Online-Lavalampe zum Entspannen", "description": "Beobachte weich fließende Lava in neun Farbwelten inklusive Regenbogen und Metallen. Passe Tempo und Helligkeit an und nutze die Fokusansicht. Kostenlos im Browser, ohne Anmeldung."},
+  en:{"title": "Online lava lamp – flowing animation", "heading": "Online lava lamp for a quiet break", "description": "Watch softly flowing lava in nine colour palettes including rainbow and metals. Adjust speed and brightness or switch to focus view. Free in your browser, with no sign-up."},
+  es:{"title": "Lámpara de lava online – animación", "heading": "Lámpara de lava online para desconectar", "description": "Observa lava en movimiento suave con nueve paletas con arcoíris, metales y brillo de aceite. Ajusta velocidad y brillo y activa la vista de enfoque. Gratis en el navegador, sin registro."},
+  fr:{"title": "Lampe à lave en ligne – animation", "heading": "Lampe à lave en ligne pour une pause", "description": "Regardez la lave évoluer doucement dans neuf palettes avec arc-en-ciel, métaux et reflets d’huile. Réglez vitesse et luminosité et activez la vue concentration. Gratuit dans le navigateur, sans inscription."},
  },
  countdown: {
   de:{title:'Online-Countdown-Timer',heading:'Online-Countdown-Timer',description:'Stelle deinen Countdown frei ein: mit Signalton, analoger oder digitaler Anzeige und Fokusansicht. Kostenlos im Browser, ohne Anmeldung.'},

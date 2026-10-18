@@ -139,3 +139,20 @@ test('animation preferences persist only with consent, never autoplay',async({pa
  await expect(page.locator('#lava-colour-value')).toHaveText('Glut');
  await expect(page.locator('#lava-speed')).toHaveValue('1');
 });
+
+test('metallic and oil palettes render and oil preference persists',async({page})=>{
+ await page.goto('/de/');
+ for(const [label,material] of [['Silber / Metall','silver'],['Kupfer','copper'],['Gold','gold'],['Ölschimmer','oil']]){
+  await page.locator('#lava-colour-picker summary').click();
+  await page.getByText(label,{exact:true}).click();
+  await expect(page.locator('#lava-colour-value')).toHaveText(label);
+  await expect(page.locator('#lava-stage')).toHaveAttribute('data-material',material);
+  await expect(page.locator('#lava-stage')).not.toHaveClass(/no-webgl/);
+ }
+ await page.locator('#palette-dropdown summary').click();
+ await page.locator('#remember-preferences').check();
+ await page.reload();
+ await expect(page.locator('#lava-colour-value')).toHaveText('Ölschimmer');
+ await expect(page.locator('#lava-stage')).toHaveAttribute('data-material','oil');
+ await expect(page.locator('#lava-toggle')).toHaveAttribute('aria-pressed','false');
+});
