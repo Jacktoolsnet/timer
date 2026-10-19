@@ -425,7 +425,8 @@ eines echten Exports. Das ersetzt keinen vollständigen Langzeittest jedes
 ### Exportdauer und Restzeit
 
 Während des Videoexports zeigt der Dialog die vergangene Zeit und eine geschätzte
-Restzeit. Die Uhr startet nach der Dateiauswahl; die Schätzung basiert erst nach
+Restzeit. Direkt rechts neben der Fortschrittsleiste steht zusätzlich der
+Prozentwert mit lokalisierter Nachkommastelle (z. B. `42,7 %`). Die Uhr startet nach der Dateiauswahl; die Schätzung basiert erst nach
 mindestens fünf Sekunden gemessenen Renderfortschritts auf der jüngsten
 Geschwindigkeit (gleitendes Fenster von etwa 45 Sekunden). Aufwendigere Szenen
 können die Prognose ändern. Bei zehn Sekunden ohne Fortschritt wird eine alte
@@ -437,3 +438,10 @@ irreführenden Restzeit von null Sekunden. Abbruch und Fehler stoppen die Uhr un
 entfernen die überholte Schätzung; ein neuer Versuch beginnt wieder bei null.
 Die Anzeige wird höchstens einmal pro Sekunde aktualisiert (Phasenwechsel sofort),
 speichert keine Historie über Aufträge hinweg und ergänzt keine JSON-Felder.
+
+Der Exportdialog trennt Einstellungen und laufenden Export: Nach dem Start werden
+Optionen, Speicherhinweise, Aufräum- und Startschaltfläche ausgeblendet. Sichtbar
+bleiben Vorschau (sobald verfügbar), geschätzte Dateigröße, Fortschritt, Zeiten und
+Abbrechen. Bei Fehler oder Abbruch erscheinen die Einstellungen mit ihren
+bisherigen Werten wieder; die Fehlermeldung und der erreichte Stand bleiben zur
+Orientierung erhalten. Tastaturfokus wechselt zu Abbrechen bzw. zurück zu Start.

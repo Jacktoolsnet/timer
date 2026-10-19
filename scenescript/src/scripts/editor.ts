@@ -1239,6 +1239,11 @@ $('download-still').addEventListener('click',()=>void downloadImages(false));$('
 // Export owns a snapshot and a separate renderer; editing state is never replaced.
 let exportController:AbortController|undefined;
 const exportDialog=$<HTMLDialogElement>('export-dialog');
+function setExportRunning(running:boolean){
+ $('export-settings').hidden=running;$('export-setup-hint').hidden=running;$('start-export').hidden=running;exportDialog.querySelector<HTMLElement>('.dialog-inner')!.scrollTop=0;
+ if(exportDialog.open)$(running?'cancel-export':'start-export').focus({preventScroll:true});
+}
+
 function exportOptions():ExportOptions{return {format:$<HTMLSelectElement>('export-format').value as 'mp4'|'webm',resolution:Number($<HTMLSelectElement>('export-resolution').value),fps:Number($<HTMLSelectElement>('export-fps').value),audio:$<HTMLInputElement>('export-audio').checked};}
 let exportDestinationChosen=false;
 function updateExportPlan(){
@@ -1248,14 +1253,14 @@ function updateExportPlan(){
 }
 $('export-destination').addEventListener('change',()=>{exportDestinationChosen=true;updateExportPlan();});
 for(const id of ['export-format','export-resolution','export-fps','export-audio'])$(id).addEventListener('change',updateExportPlan);
-$('open-export').addEventListener('click',()=>{document.activeElement instanceof HTMLElement&&document.activeElement.blur();stop();$('export-status').textContent='';$('export-progress').hidden=true;$('export-preview').hidden=true;$('export-timing').hidden=true;exportDestinationChosen=false;updateExportPlan();exportDialog.showModal();});
+$('open-export').addEventListener('click',()=>{document.activeElement instanceof HTMLElement&&document.activeElement.blur();stop();$('export-status').textContent='';$('export-progress').hidden=true;$('export-progress-row').hidden=true;$('export-preview').hidden=true;$('export-timing').hidden=true;exportDestinationChosen=false;updateExportPlan();setExportRunning(false);exportDialog.showModal();});
 $('clear-export-files').addEventListener('click',async()=>{if(exportController)return;const button=$<HTMLButtonElement>('clear-export-files');button.disabled=true;try{await clearCompletedVideoExports();$('export-status').textContent=t('exportFilesCleared');}catch(error){$('export-status').textContent=t('error')+' '+(error as Error).message;}finally{button.disabled=false;}});
 const cancelExport=()=>{if(exportController)exportController.abort();else exportDialog.close();};
 $('cancel-export').addEventListener('click',cancelExport);
 exportDialog.addEventListener('cancel',event=>{event.preventDefault();cancelExport();});
 $('start-export').addEventListener('click',async()=>{
  if(exportController)return;const controller=new AbortController();exportController=controller;
- const controls=Array.from(exportDialog.querySelectorAll<HTMLInputElement|HTMLSelectElement|HTMLButtonElement>('#export-options input,#export-options select,#start-export,#clear-export-files'));controls.forEach(n=>n.disabled=true);
+ const controls=Array.from(exportDialog.querySelectorAll<HTMLInputElement|HTMLSelectElement|HTMLButtonElement>('#export-options input,#export-options select,#start-export,#clear-export-files'));controls.forEach(n=>n.disabled=true);setExportRunning(true);
  const preview=$<HTMLCanvasElement>('export-preview-canvas');$('export-preview').hidden=true;
  let timing:ExportTiming|undefined,timingInterval:number|undefined,lastTimingPaint=-Infinity;$('export-timing').hidden=true;
  const paintTiming=(force=false)=>{
@@ -1264,7 +1269,7 @@ $('start-export').addEventListener('click',async()=>{
   $('export-remaining').textContent=value.phase==='finalizing'?t('exportTimeSaving'):value.phase==='stopped'?'—':value.phase==='stalled'?t('exportReestimating'):value.remainingMs===null?t('exportEstimating'):t('exportTimeApprox')+' '+formatExportDuration(Math.ceil(value.remainingMs/1000)*1000);
  };
 
- const progress=$<HTMLProgressElement>('export-progress');progress.hidden=false;progress.value=0;$('export-status').textContent=t('exportBusy')+' 0 %';keepScreenAwake(true);
+ const progress=$<HTMLProgressElement>('export-progress');progress.hidden=false;progress.value=0;$('export-progress-row').hidden=false;$('export-progress-label').textContent='0 %';$('export-status').textContent='';keepScreenAwake(true);
  try{
   const options=exportOptions(),name=(project.title.replace(/[\/:*?"<>|]/g,'_')||'SceneScript')+'.'+options.format;
   // Open the picker before the first import/encoder await, preserving user activation.
@@ -1274,7 +1279,7 @@ $('start-export').addEventListener('click',async()=>{
   const {exportVideo,exportVideoToFile,exportSupported}=await import('./video-export');
   const snapshot=structuredClone(project);
   if(!await exportSupported(snapshot,options))throw new Error(t('exportUnsupported'));
-  const onProgress=(value:number)=>{timing?.observe(value,performance.now());paintTiming(value>=.98);progress.value=value;const percent=Math.min(100,Math.floor(value*1000)/10);$('export-status').textContent=t(value>=.98&&value<1?'exportFinalizing':'exportBusy')+' '+percent.toLocaleString(document.documentElement.lang,{minimumFractionDigits:1,maximumFractionDigits:1})+' %';};
+  const onProgress=(value:number)=>{timing?.observe(value,performance.now());paintTiming(value>=.98);progress.value=value;const percent=Math.min(100,Math.floor(value*1000)/10),label=percent.toLocaleString(document.documentElement.lang,{minimumFractionDigits:1,maximumFractionDigits:1})+' %';$('export-progress-label').textContent=label;};
   const onFrame=(frame:HTMLCanvasElement)=>{
    const scale=Math.min(320/frame.width,180/frame.height),width=Math.max(1,Math.round(frame.width*scale)),height=Math.max(1,Math.round(frame.height*scale));
    if(preview.width!==width||preview.height!==height){preview.width=width;preview.height=height;}
@@ -1290,7 +1295,7 @@ $('start-export').addEventListener('click',async()=>{
   const message=(error as Error).message,key=['exportDiskUnavailable','exportDiskSpace','exportMemoryLimit'].find(k=>k===message) as 'exportDiskUnavailable'|'exportDiskSpace'|'exportMemoryLimit'|undefined;
   $('export-status').textContent=controller.signal.aborted||(error as Error).name==='AbortError'?t('exportCancelled'):t('error')+' '+(key?t(key):(error as Error).name==='QuotaExceededError'?t('exportDiskSpace'):/out of memory/i.test(message)?t('exportOutOfMemory'):message);
  }
- finally{if(timingInterval!==undefined)clearInterval(timingInterval);timing?.stop(performance.now());paintTiming(true);exportController=undefined;controls.forEach(n=>n.disabled=false);keepScreenAwake(false);}
+ finally{if(timingInterval!==undefined)clearInterval(timingInterval);timing?.stop(performance.now());paintTiming(true);exportController=undefined;controls.forEach(n=>n.disabled=false);setExportRunning(false);keepScreenAwake(false);}
 });
 
 for(const key of ['title','description','firstComment','hashtags'] as const){

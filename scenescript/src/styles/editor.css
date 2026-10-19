@@ -612,8 +612,12 @@ body.recording.recording-ready #recording-frame { display:block; }
 #export-options label{display:flex;flex-direction:column;gap:.4rem;min-width:0}
 #export-options label:last-child{flex-direction:row;align-items:center;grid-column:1/-1}
 #export-options select{width:100%;box-sizing:border-box}
-#export-progress{width:100%;margin-top:1.25rem;accent-color:var(--accent)}
+#export-progress-row{margin-top:1.25rem;min-width:0}
+#export-progress-row:not([hidden]){display:flex;align-items:center;gap:12px}
+#export-progress{flex:1 1 auto;width:0;min-width:0;margin:0;accent-color:var(--accent)}
+#export-progress-label{flex:0 0 auto;min-width:6ch;text-align:right;white-space:nowrap;font-weight:600;font-variant-numeric:tabular-nums;color:var(--accent)}
 #export-status{overflow-wrap:anywhere}
+#export-status:empty{margin:0}
 
 #export-dialog{padding:0;max-height:90dvh}
 #export-dialog[open]{display:flex;flex-direction:column;overflow:hidden}
@@ -832,3 +836,5 @@ body.recording .comic-edit-overlay{display:none}
 #export-timing dl>div{min-width:0;padding:10px 12px;background:var(--accent-soft);border:1px solid var(--line);border-radius:9px}
 #export-timing dt{font-size:.85em;color:var(--muted);overflow-wrap:anywhere}
 #export-timing dd{margin:4px 0 0;font-weight:600;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+
+#start-export[hidden]{display:none}

@@ -104,7 +104,7 @@ test('export overlay shows the current rendered frame and resets on reopening',a
  await page.locator('#open-export').click();await expect(page.locator('#export-preview')).toBeHidden();
  await page.locator('#export-format').selectOption('webm');await page.locator('#export-resolution').selectOption('480');await page.locator('#export-audio').uncheck();await page.locator('#start-export').click();
  await expect(page.locator('#export-preview')).toBeVisible();
- await expect(page.locator('#export-status')).toHaveText(/Creating video .* \d+\.\d %/);
+ await expect(page.locator('#export-status')).toBeEmpty();await expect(page.locator('#export-progress-label')).toHaveText(/\d+\.\d %/);
  const pixel=await page.locator('#export-preview-canvas').evaluate((c:HTMLCanvasElement)=>({width:c.width,height:c.height,pixel:Array.from(c.getContext('2d')!.getImageData(10,10,1,1).data)}));
  expect(pixel.width).toBeLessThanOrEqual(320);expect(pixel.height).toBeLessThanOrEqual(180);expect(pixel.pixel.slice(0,3)).toEqual([255,0,0]);
  await page.locator('#cancel-export').click();await expect(page.locator('#start-export')).toBeEnabled();await page.locator('#cancel-export').click();
