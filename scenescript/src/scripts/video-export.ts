@@ -1,11 +1,13 @@
 import {narrationClips} from '../lib/audio';
-import {Output,Mp4OutputFormat,WebMOutputFormat,BufferTarget,CanvasSource,AudioSampleSource,AudioSample,canEncodeVideo,canEncodeAudio} from 'mediabunny';
-import {formats,type Project} from '../lib/model';
+import {Output,Mp4OutputFormat,WebMOutputFormat,StreamTarget,CanvasSource,AudioSampleSource,AudioSample,canEncodeVideo,canEncodeAudio} from 'mediabunny';
+import type {Project} from '../lib/model';
+import {exportSize,estimatedExportBytes,type ExportOptions} from '../lib/export-plan';
+import {createVideoDestination,type VideoFileHandle,type VideoDestination} from './export-storage';
+export {exportSize} from '../lib/export-plan';
+export type {ExportOptions} from '../lib/export-plan';
 import {ExportMedia} from './export-media';
 import {ExportRenderer} from './export-renderer';
 import {ExportAudio} from './export-audio';
-export type ExportOptions={format:'mp4'|'webm';resolution:number;fps:number;audio:boolean};
-export function exportSize(p:Project,o:ExportOptions){const [w,h]=formats[p.format],scale=o.resolution/Math.min(w,h);return {width:Math.round(w*scale/2)*2,height:Math.round(h*scale/2)*2,bitrate:o.resolution<=480?2000000:o.resolution<=720?4000000:8000000};}
 export function exportHasAudio(p:Project){return Boolean(narrationClips(p).length||p.music?.enabled&&p.music.volume>0||p.backgroundVideo?.asset&&!p.backgroundVideo.muted&&p.backgroundVideo.volume>0||p.scenes.some(s=>s.elements.some(e=>e.type==='video'&&e.video?.asset&&!e.video.muted&&e.video.volume>0)));}
 const audioConfig={sampleRate:48000,numberOfChannels:2,bitrate:128000};
 let aacFallback:Promise<void>|undefined;
@@ -22,16 +24,22 @@ export async function exportSupported(p:Project,o:ExportOptions){
  if(o.format==='mp4')await ensureAacEncoder();
  return canEncodeAudio(o.format==='mp4'?'aac':'opus',audioConfig);
 }
-export async function exportVideo(p:Project,o:ExportOptions,signal:AbortSignal,progress:(fraction:number)=>void,onFrame?:(canvas:HTMLCanvasElement,time:number)=>void){
+async function renderVideo(p:Project,o:ExportOptions,signal:AbortSignal,progress:(fraction:number)=>void,onFrame:((canvas:HTMLCanvasElement,time:number)=>void)|undefined,handle?:VideoFileHandle){
+ signal.throwIfAborted();
  const duration=p.scenes.reduce((n,s)=>n+s.duration,0),size=exportSize(p,o);
  if(!await exportSupported(p,o))throw new Error('Encoder unavailable. Try WebM or disable audio.');signal.throwIfAborted();
- const target=new BufferTarget(),output=new Output({target,format:o.format==='mp4'?new Mp4OutputFormat():new WebMOutputFormat()}),media=new ExportMedia(p,signal),renderer=new ExportRenderer(p,media);
+ const destination=await createVideoDestination(o.format==='mp4'?'video/mp4':'video/webm',estimatedExportBytes(p,o),signal,handle);
+ try{return await encodeVideo(p,o,signal,progress,onFrame,destination,duration,size);}
+ catch(error){await destination.abort();throw error;}
+}
+async function encodeVideo(p:Project,o:ExportOptions,signal:AbortSignal,progress:(fraction:number)=>void,onFrame:((canvas:HTMLCanvasElement,time:number)=>void)|undefined,destination:VideoDestination,duration:number,size:ReturnType<typeof exportSize>){
+ const target=new StreamTarget(destination.stream,{chunked:true,chunkSize:1024*1024}),output=new Output({target,format:o.format==='mp4'?new Mp4OutputFormat({fastStart:false}):new WebMOutputFormat()}),media=new ExportMedia(p,signal),renderer=new ExportRenderer(p,media);
  const canvas=document.createElement('canvas');canvas.width=size.width;canvas.height=size.height;
+ const cancel=()=>{void output.cancel().catch(()=>{});};signal.addEventListener('abort',cancel,{once:true});
+ try{
  const video=new CanvasSource(canvas,{codec:o.format==='mp4'?'avc':'vp9',bitrate:size.bitrate});output.addVideoTrack(video,{frameRate:o.fps});
  const audio=o.audio&&exportHasAudio(p)?new AudioSampleSource({codec:o.format==='mp4'?'aac':'opus',bitrate:128000}):null;if(audio)output.addAudioTrack(audio);
  const mixer=new ExportAudio(p,media,duration);let audioEnd=0;
- const cancel=()=>{void output.cancel().catch(()=>{});};signal.addEventListener('abort',cancel,{once:true});
- try{
   await document.fonts.ready;await output.start();const frames=Math.ceil(duration*o.fps);let previewPercent=-1;
   for(let i=0;i<frames;i++){
    signal.throwIfAborted();const time=i/o.fps;
@@ -43,6 +51,11 @@ export async function exportVideo(p:Project,o:ExportOptions,signal:AbortSignal,p
    if(percent!==previewPercent){previewPercent=percent;onFrame?.(canvas,time);}
    progress(fraction);
   }
-  signal.throwIfAborted();await output.finalize();signal.throwIfAborted();progress(1);return new Blob([target.buffer!],{type:o.format==='mp4'?'video/mp4':'video/webm'});
+  signal.throwIfAborted();await output.finalize();signal.throwIfAborted();const result=await destination.finish();progress(1);return result;
  }finally{signal.removeEventListener('abort',cancel);if(output.state!=='finalized'&&output.state!=='canceled')await output.cancel().catch(()=>{});renderer.dispose();media.dispose();canvas.width=0;canvas.height=0;}
 }
+
+/** Default downloads are backed by a temporary disk file whenever the browser supports OPFS. */
+export async function exportVideo(p:Project,o:ExportOptions,signal:AbortSignal,progress:(fraction:number)=>void,onFrame?:(canvas:HTMLCanvasElement,time:number)=>void):Promise<Blob>{return (await renderVideo(p,o,signal,progress,onFrame))!;}
+/** Native save-picker output: no complete video buffer or final download Blob is created. */
+export async function exportVideoToFile(p:Project,o:ExportOptions,signal:AbortSignal,progress:(fraction:number)=>void,handle:VideoFileHandle,onFrame?:(canvas:HTMLCanvasElement,time:number)=>void):Promise<void>{await renderVideo(p,o,signal,progress,onFrame,handle);}

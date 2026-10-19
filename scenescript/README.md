@@ -228,8 +228,8 @@ Countdown, Maus, Auswahlrahmen und Bedienoberfläche; kein Screenrecorder nötig
 
 Alles bleibt im Browser, ohne Upload oder Änderungen am Hosting. Der Export
 kann länger als die Präsentation dauern; Tab offen lassen. Fortschritt und
-Abbrechen sind vorhanden. Geschätzte Dateien über 512 MiB werden vorab abgelehnt,
-da die fertige Datei im Arbeitsspeicher gesammelt wird. Systemschriften und
+Abbrechen sind vorhanden. Die Ausgabe wird stückweise in eine Datei geschrieben
+(siehe Speicherziele unten), statt das gesamte Video im Arbeitsspeicher zu sammeln. Systemschriften und
 Codec-Unterstützung hängen vom Gerät ab; nicht jedes im Browser abspielbare
 Video kann dort auch per WebCodecs decodiert werden. Bei fehlender Unterstützung
 erscheint eine Fehlermeldung statt einer unvollständigen Exportdatei.
@@ -380,3 +380,60 @@ dienen der Sichtprüfung, nicht der Beurteilung von Ton oder Bewegungsfluss.
 PNG/Kontaktbogen zusammen mit JSON an die KI zurückgeben: So kann sie tatsächliche
 Personenpositionen, Sprechblasenspitzen und Textanordnung gezielt beurteilen. Neue
 Schemafelder oder Änderungen bestehender Projektdateien sind dafür nicht nötig.
+
+### Lange Videoexporte: stückweise auf die Festplatte
+
+Der Export verwendet `StreamTarget` mit 1-MiB-Schreibblöcken statt `BufferTarget`.
+MP4 schreibt mit `fastStart: false` normale Metadaten am Dateiende, ohne alle
+Medienpakete für Fast Start im RAM zu halten. Positionsangaben werden beachtet,
+damit nachträgliche Header-Korrekturen gültige MP4-/WebM-Dateien ergeben.
+Schreib-Backpressure wird bis zum Encoder durchgereicht.
+
+- **Direkt in Datei:** In unterstützten Browsern wählst du vor dem Rendern eine
+  Zieldatei. Für voraussichtlich große Exporte wird dieses Ziel vorausgewählt.
+  Erst nach erfolgreichem Abschluss wird die Schreibtransaktion geschlossen.
+  Abbruch/Fehler bricht sie ab, statt vorhandene Dateien mit Teilvideos zu
+  überschreiben. Eine neu gewählte Datei kann als leerer Platzhalter zurückbleiben.
+- **Download über temporäre Datei:** Standardmäßig OPFS im lokalen Browser:
+  `scenescript-video-exports`. Das fertige Video wird als dateibasierter Blob
+  heruntergeladen; kein abschließendes `arrayBuffer()` und keine vollständige
+  RAM-Kopie. Abgebrochene Aufträge werden bereinigt. Fertige temporäre Dateien
+  bleiben verfügbar, bis sie ausdrücklich im Exportdialog gelöscht oder bei
+  einem späteren Export nach 24 Stunden bereinigt werden. Erst löschen, wenn
+  Downloads abgeschlossen sind. Laufende/unfertige Exporte anderer Tabs bleiben
+  unangetastet. Die Dateien werden nicht hochgeladen.
+- **Fehlender Dateispeicher:** Nur kurze Exporte mit geschätzt höchstens 64 MiB
+  dürfen den Blob-Fallback verwenden. Er hat zusätzlich ein tatsächliches
+  128-MiB-Limit. Größere Exporte werden vor dem Rendern mit einer verständlichen
+  Meldung abgelehnt, statt später einen riesigen ArrayBuffer zu vergrößern.
+
+Die Dateigröße wird aus Laufzeit, Zielbitrate und Reserve geschätzt; variable
+Bitraten können davon abweichen. Für OPFS wird die verfügbare Browserquote vor
+dem Rendern geprüft, Schreib-/Quota-Fehler werden dennoch weiterhin abgefangen.
+Das ist keine Garantie gegen volle Datenträger oder andere Browser-Speicherlimits.
+98 % bedeutet Abschluss des Renderns, nicht bereits erfolgreiches Speichern.
+100 %/Erfolg wird erst nach erfolgreichem Dateischluss gemeldet. Der Export muss
+bei einem Fehler neu gestartet werden; Checkpoints/Wiederaufnahme gibt es nicht.
+
+Tests: Positionskorrekturen, Backpressure, Abbruch ohne Commit, Schreib- und
+Commit-Fehler, kleine Fallbacks und ein synthetischer 3-GiB-Schreibpfad ohne
+Gesamtpuffer. Browser-Tests prüfen echte MP4-/WebM-Ausgabe, OPFS-Downloads und
+native Dateiauswahl mit Mocks; ein Test verbietet `ArrayBuffer.resize` während
+eines echten Exports. Das ersetzt keinen vollständigen Langzeittest jedes
+22-Minuten-Projekts.
+
+### Exportdauer und Restzeit
+
+Während des Videoexports zeigt der Dialog die vergangene Zeit und eine geschätzte
+Restzeit. Die Uhr startet nach der Dateiauswahl; die Schätzung basiert erst nach
+mindestens fünf Sekunden gemessenen Renderfortschritts auf der jüngsten
+Geschwindigkeit (gleitendes Fenster von etwa 45 Sekunden). Aufwendigere Szenen
+können die Prognose ändern. Bei zehn Sekunden ohne Fortschritt wird eine alte
+Schätzung ausgeblendet und nach Wiederaufnahme neu eingemessen.
+
+Die Restzeit bezieht sich auf das Rendern. Während des abschließenden
+Dateischreibens steht ausdrücklich **Abschluss / Speichern …** statt einer
+irreführenden Restzeit von null Sekunden. Abbruch und Fehler stoppen die Uhr und
+entfernen die überholte Schätzung; ein neuer Versuch beginnt wieder bei null.
+Die Anzeige wird höchstens einmal pro Sekunde aktualisiert (Phasenwechsel sofort),
+speichert keine Historie über Aufträge hinweg und ergänzt keine JSON-Felder.

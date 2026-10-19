@@ -541,7 +541,15 @@ Direct MP4/WebM export is browser-side, requires compatible decoders and encoder
 MP4 can use bundled local AAC fallback. Export size (480p/720p/1080p short edge),
 24/30/60 fps and audio choice are UI-only, NOT Project fields. No server transcoding or
 automatic MP4→WebM fallback. Export can be cancelled; it does not replace editable
-JSON. Screen recording is another route; capture tab/system audio if wanted.
+JSON. Export writes to a selected file (where supported) or a temporary local
+browser file, not one growing video ArrayBuffer. Large exports recommend direct
+file output. Free disk/browser quota is required; size estimates are approximate.
+Without disk storage only small exports are allowed. Temporary completed videos
+can be deleted in the export dialog; later exports clean them up after 24 hours.
+Wait for downloads to finish before clearing them. No upload or resumable export.
+Elapsed time and approximate rendering time remaining are UI-only, based on recent
+measured export speed; final file saving is shown as a separate phase.
+Screen recording is another route; capture tab/system audio if wanted.
 For visual review, the preview's Images & contact sheet dialog exports a PNG at
 an exact project time (native project resolution) or contact sheets from selected
 scene-local times. It uses the SAME renderer/clock as video export, including

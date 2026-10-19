@@ -821,3 +821,14 @@ body.recording .comic-edit-overlay{display:none}
 #stills-dialog :is(button,input):focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 #stills-dialog .json-footer{justify-content:flex-end}
 #close-stills{width:auto;min-width:110px;padding-inline:20px;font:inherit}
+
+#export-options .export-destination-label{grid-column:1/-1}
+#export-storage-hint,#export-estimate{overflow-wrap:anywhere}
+
+#clear-export-files{min-height:38px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--text);font:inherit;cursor:pointer}
+#clear-export-files:disabled{opacity:.5;cursor:wait}
+
+#export-timing dl{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0 0}
+#export-timing dl>div{min-width:0;padding:10px 12px;background:var(--accent-soft);border:1px solid var(--line);border-radius:9px}
+#export-timing dt{font-size:.85em;color:var(--muted);overflow-wrap:anywhere}
+#export-timing dd{margin:4px 0 0;font-weight:600;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}

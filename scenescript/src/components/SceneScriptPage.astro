@@ -174,10 +174,14 @@ const {lang}=Astro.props,t=editorDictionary(lang);
     <label>{t.format}<select id="export-format"><option value="mp4" selected>MP4</option><option value="webm">WebM</option></select></label>
     <label>{t.exportResolution}<select id="export-resolution"><option value="480">480p</option><option value="720">720p</option><option value="1080" selected>1080p</option></select></label>
     <label>{t.exportFps}<select id="export-fps"><option>24</option><option selected>30</option><option>60</option></select></label>
+    <label class="export-destination-label">{t.exportDestination}<select id="export-destination"><option value="download">{t.exportTemporary}</option><option value="file">{t.exportDirect}</option></select></label>
     <label><span class="safe-switch"><input id="export-audio" type="checkbox" role="switch" checked /><span class="safe-switch-track" aria-hidden="true"></span></span>{t.exportAudio}</label>
    </div>
+   <p id="export-storage-hint" class="small-hint"></p><p id="export-estimate" class="small-hint"></p><button id="clear-export-files" type="button">{t.exportClearFiles}</button>
    <div id="export-preview" hidden><canvas id="export-preview-canvas" role="img" aria-label={t.preview}></canvas></div>
-   <progress id="export-progress" max="1" value="0" hidden></progress><p id="export-status" role="status" aria-live="polite"></p>
+   <progress id="export-progress" max="1" value="0" hidden></progress>
+   <div id="export-timing" hidden aria-live="off"><dl><div><dt>{t.exportElapsed}</dt><dd id="export-elapsed">00:00</dd></div><div><dt>{t.exportRemaining}</dt><dd id="export-remaining">{t.exportEstimating}</dd></div></dl><p class="small-hint">{t.exportTimingHint}</p></div>
+   <p id="export-status" role="status" aria-live="polite"></p>
   </div>
   <footer class="json-footer"><div class="json-footer-actions">
    <button id="start-export" class="json-apply" type="button" title={t.exportVideo} aria-label={t.exportVideo}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg></button>
