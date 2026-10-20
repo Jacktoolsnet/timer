@@ -249,6 +249,34 @@ anchors remain box-local and do not automatically follow a changed crop.
 Panel templates are editor helpers creating ordinary image+rectangle Elements,
 not a template field/type. Camera movement is continuous even under stopMotion.
 
+### Reusable 3D stages and characters (first prototype)
+Project.characters and Project.stages are independent ID maps (max 30 each).
+Characters are procedural block robots: name, height and body/head/limb/accent colors.
+Stages currently share one built-in block plaza geometry, customized by name and
+sky/ground/block colors; a stage name does NOT generate arbitrary scenery.
+Scene.stage3d=null/omitted disables 3D. Otherwise stage references Project.stages;
+actors (max 12) reference Project.characters. Unlisted characters are absent.
+Actors have scene-local unique IDs, independent of 2D Element IDs. Each scene
+explicitly supplies positions/actions: no implicit cross-scene state or persistence.
+Positions x/z and toX/toZ use 3D WORLD UNITS, not 2D percentages; Y is up, feet
+stand on the ground. rotation is yaw in degrees; scale multiplies character height.
+at/duration define one action interval within the scene. Actors remain visible
+before/after it; positions interpolate linearly and clamp to their endpoints.
+Actions: idle (subtle breathing), walk (arm/leg cycles), wave (right-arm gesture).
+Rotations are explicit; movement does not automatically face the travel direction.
+Camera yaw/pitch are degrees, distance/targetX/Y/Z world units; orbit is yaw degrees
+per second, using scene-local time. This is independent of Scene.camera's 2D crop.
+The 3D stage is an opaque background above ordinary scene backgrounds, below all
+2D elements; the 2D scene camera transforms it too. Use screen-space captions.
+Absolute-time poses are shared by preview, stills and video export. WebGL2 is
+required; unavailable graphics/context loss is an error, never a silent blank export.
+The 3D dialog edits shared definitions and scene shots; each character/stage can
+be exported/imported independently. Imports are independent copies across projects;
+ID collisions offer copy or explicit update. No GLB import, arbitrary JavaScript,
+physics, lip sync, automatic rigging or arbitrary character shapes in this prototype.
+Minimal syntax example (add publication copy and a real cover for final delivery):
+{"version":"1.0","title":"Hello robots","format":"landscape","characters":{"robot":{}},"stages":{"plaza":{}},"scenes":[{"id":"hello","duration":5,"stage3d":{"stage":"plaza","actors":[{"id":"r1","character":"robot","action":"wave"}]},"elements":[]}]}
+
 ## 6. Bubbles, anchors, groups and motion paths
 Bubble = one movable body+text+tail. kind=speech (rounded) or thought (cloud+3 dots).
 Use normal text/runs/font/color, plus fillColor/borderColor/borderWidth. Border is

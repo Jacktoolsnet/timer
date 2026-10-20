@@ -1,0 +1,14 @@
+{
+  "format": "scenescript-3d-resource",
+  "version": "1.0",
+  "kind": "character",
+  "id": "bo",
+  "definition": {
+    "name": "Bo",
+    "bodyColor": "#f28b32",
+    "headColor": "#fff1d0",
+    "limbColor": "#875845",
+    "accentColor": "#6cf0d0",
+    "height": 2.7
+  }
+}

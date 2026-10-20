@@ -11,7 +11,7 @@
     "dev": "astro dev --host 127.0.0.1",
     "build": "astro check && astro build",
     "preview": "astro preview --host 127.0.0.1",
-    "test": "node --experimental-strip-types --test tests/model.test.ts tests/simulation.test.ts tests/music.test.ts tests/video.test.ts tests/motion-path.test.ts tests/audio.test.ts tests/audio-mix.test.ts tests/audio-packet-stream.test.ts tests/comic.test.ts tests/groups.test.ts tests/crop.test.ts tests/camera.test.ts tests/spaces.test.ts tests/still-plan.test.ts tests/export-storage.test.ts tests/export-timing.test.ts",
+    "test": "node --experimental-strip-types --test tests/model.test.ts tests/simulation.test.ts tests/music.test.ts tests/video.test.ts tests/motion-path.test.ts tests/audio.test.ts tests/audio-mix.test.ts tests/audio-packet-stream.test.ts tests/comic.test.ts tests/groups.test.ts tests/crop.test.ts tests/camera.test.ts tests/spaces.test.ts tests/still-plan.test.ts tests/export-storage.test.ts tests/export-timing.test.ts tests/stage3d.test.ts",
     "test:e2e": "playwright test"
   },
   "dependencies": {
@@ -19,12 +19,14 @@
     "@xmldom/xmldom": "^0.9.12",
     "astro": "^7.4.0",
     "html-to-image": "^1.11.13",
-    "mediabunny": "^1.61.3"
+    "mediabunny": "^1.61.3",
+    "three": "^0.186.1"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
     "@playwright/test": "^1.63.0",
     "@types/node": "^24.19.1",
+    "@types/three": "^0.186.0",
     "typescript": "^5.9.3"
   }
 }

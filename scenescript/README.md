@@ -451,3 +451,46 @@ bleiben Vorschau (sobald verfügbar), geschätzte Dateigröße, Fortschritt, Zei
 Abbrechen. Bei Fehler oder Abbruch erscheinen die Einstellungen mit ihren
 bisherigen Werten wieder; die Fehlermeldung und der erreichte Stand bleiben zur
 Orientierung erhalten. Tastaturfokus wechselt zu Abbrechen bzw. zurück zu Start.
+
+### 3D-Prototyp: gemeinsame Charaktere und Bühnen
+
+Unter **Projekt → 3D-Bühnen & Charaktere → Beispiel mit zwei Robotern laden**
+startet eine 13-sekündige Szene mit Mika und Bo in einer eigenen Bauklotz-Plaza,
+anschließend dieselben Figuren auf derselben Bühne mit anderer Kamera. Das ersetzt
+nach Rückfrage das Projekt und erzeugt ein echtes PNG-Cover aus dem Renderer.
+Keine originalen Roblox-Assets; keine Verbindung zu Roblox oder externen Diensten.
+
+- `characters` und `stages`: projektweite Ressourcenbibliotheken (je max. 30).
+  Name, Farben und Figurenhöhe sind über Formulare editierbar. Änderungen wirken
+  auf alle Szenenverweise; Import in andere Projekte erzeugt unabhängige Kopien.
+- `Scene.stage3d`: Bühnenreferenz, 3D-Kamera und max. zwölf Auftritte. Die Auftritte
+  werden im Prototyp als JSON editiert; eine Figur lässt sich per Button einsetzen.
+  Positionen in Welteinheiten, Y nach oben; `rotation`, Kamerawinkel in Grad,
+  `orbit` in Grad/s. `at`/`duration` begrenzen die Aktion auf die Szenendauer.
+  `toX`/`toZ` interpolieren linear; davor/danach bleibt die Figur sichtbar am
+  Start-/Endpunkt. Aktionen: `idle`, `walk`, `wave`. Kein impliziter Folgezustand.
+- Die Bühne liegt als undurchsichtiger Hintergrund unter normalen 2D-Elementen.
+  Die vorhandene 2D-Kamera kann zusätzlich das gesamte Bild beschneiden/bewegen.
+- Einzelexport als `.scenecharacter.json` / `.scenestage.json`, Import wahlweise
+  als Kopie oder explizite Aktualisierung derselben ID. Format und Version werden
+  geprüft; Definitionen sind eigenständig und enthalten keine externen Ressourcen.
+- Derzeit ein festes, farblich anpassbares Plaza-Modell und parametrische Roboter,
+  noch kein freier Welteneditor, GLB-Import, Physik, Rigging oder Lippensynchronisation.
+- Three.js wird nur bei 3D-Nutzung nachgeladen (lokal gebündelt, kein CDN).
+  WebGL2 ist nötig. Kein stiller leerer Export bei fehlendem/verlorenem Kontext.
+  Vorschau und Export nutzen dieselben absoluten Zeitposen; GPU-Kontexte werden
+  nicht pro Bild neu erzeugt. Zwei begrenzte Szenengraphen pro Renderer werden
+  wiederverwendet und beim Verwerfen/Exportende samt GPU-Ressourcen freigegeben.
+  Native Bildauflösung ist auch beim Export die interne 3D-Auflösung.
+- Schema, Laufzeitvalidierung und gemeinsame KI-Anleitung dokumentieren dieselbe
+  kleine 3D-Sprache. Das Größenbudget der vollständigen Anleitung beträgt nun
+  65 kB einschließlich des erweiterten Feldkatalogs.
+
+Importierbares Beispiel: `/examples/block-robots.scenescript.json` (mit Cover).
+Einzelressourcen: `/examples/mika.scenecharacter.json`,
+`/examples/bo.scenecharacter.json`, `/examples/plaza.scenestage.json`.
+Three.js-Lizenz (MIT): `/licenses/three.txt`.
+
+Tests: `tests/stage3d.test.ts` (Defaults, Grenzen, Referenzen, Ressourcendateien,
+Zeitposen) und `tests/stage3d.spec.ts` (Bearbeitung, Undo, Ressourcenimport/-export,
+Vorschau-/Exportvergleich, Rückwärtssuche, tatsächlicher MP4-Export und Layout).

@@ -1,3 +1,4 @@
+import type {Stage3DRenderer} from './stage3d';
 import {updateLighting} from './lighting';
 import {updateKaleidoscope} from './kaleidoscope';
 import {updatePrint} from './print';
@@ -24,6 +25,7 @@ import {createSvgImage,seekSvg} from './svg-image';
 import type {ExportMedia} from './export-media';
 /** A separate, offscreen scene tree: exporting never changes the editor playhead. */
 export class ExportRenderer{
+ private stage3d:Stage3DRenderer|undefined;
  private fontCss=new Map<string,Promise<string>>();
  readonly root=document.createElement('div');private w:number;private h:number;
  constructor(private p:Project,private media:ExportMedia){[this.w,this.h]=formats[p.format];Object.assign(this.root.style,{position:'fixed',left:'-30000px',top:'0',width:this.w+'px',height:this.h+'px',overflow:'hidden',background:'#000',pointerEvents:'none',fontFamily:'Arial',lineHeight:'normal',fontSize:'16px'});this.root.setAttribute('aria-hidden','true');this.root.dataset.exportRenderer='true';document.body.append(this.root);}
@@ -33,6 +35,7 @@ export class ExportRenderer{
  private async video(c:VideoSettings,elapsed:number,parent:HTMLElement){if(!c.asset)return;const frame=await this.media.frame(c.asset,videoTime(c,this.p.videos[c.asset].duration,elapsed));const canvas=document.createElement('canvas');canvas.width=frame.canvas.width;canvas.height=frame.canvas.height;canvas.getContext('2d')!.drawImage(frame.canvas,0,0);Object.assign(canvas.style,{width:'100%',height:'100%',objectFit:c.fit,display:'block'});parent.append(canvas);}
  private async layer(s:Scene,local:number){const viewport=this.box();viewport.style.overflow='hidden';viewport.style.isolation='isolate';this.root.append(viewport);const layer=this.box();layer.className='scene-camera-world';layer.style.transformOrigin='0 0';layer.style.overflow='visible';layer.style.transform=cameraTransform(s.camera,local,this.w,this.h);viewport.append(layer);
  const bg=this.box();bg.style.background=gradientCSS(s.backgroundGradient,s.background);bg.style.opacity=String(s.backgroundEnabled?s.backgroundOpacity:0);layer.append(bg);if(s.backgroundAsset){const host=this.box();bg.append(host);host.style.opacity=String(s.transition==='fade'?Math.min(1,local/s.transitionDuration):1);seekSvg(await this.image(s.backgroundAsset,'cover',host),local);}
+ if(s.stage3d){this.media.check();if(!this.stage3d){const {Stage3DRenderer}=await import('./stage3d');this.media.check();this.stage3d=new Stage3DRenderer();}const canvas=document.createElement('canvas');canvas.className='stage3d-canvas';canvas.style.opacity=String(s.transition==='fade'?Math.min(1,local/s.transitionDuration):1);Object.assign(canvas.style,{position:'absolute',inset:'0',width:'100%',height:'100%'});layer.append(canvas);this.stage3d.render(this.p,s.stage3d,local,this.w,this.h,canvas);}
  const fade=s.transition==='fade'?Math.min(1,local/s.transitionDuration):1;
  for(const e of s.elements){const state=sceneElementState(e,s,local,this.w,this.h,true);if(!state.visible)continue;const node=document.createElement('div');node.dataset.elementId=e.id;node.dataset.space=e.space;const w=e.width*this.w/100,h=e.height*this.h/100;
  Object.assign(node.style,{position:'absolute',left:e.x*this.w/100+'px',top:e.y*this.h/100+'px',width:w+'px',height:h+'px',overflow:'hidden',boxSizing:'border-box',display:'flex',alignItems:'center',whiteSpace:'pre-wrap',fontFamily:e.font,fontSize:e.fontSize+'px',fontWeight:e.bold?'700':'400',fontStyle:e.italic?'italic':'normal',color:e.color,textAlign:e.align,justifyContent:e.align==='left'?'flex-start':e.align==='right'?'flex-end':'center',borderRadius:e.radius+'px',opacity:String(state.opacity*fade),transform:state.transform,transformOrigin:'0 0'});layer.append(node);
@@ -82,5 +85,5 @@ export class ExportRenderer{
  }
  // Detached canvases can otherwise retain large native pixel buffers until a GC.
  private clear(){for(const canvas of this.root.querySelectorAll('canvas')){canvas.width=0;canvas.height=0;}this.root.replaceChildren();}
- dispose(){this.clear();this.fontCss.clear();this.root.remove();}
+ dispose(){this.stage3d?.dispose();this.stage3d=undefined;this.clear();this.fontCss.clear();this.root.remove();}
 }

@@ -1,4 +1,6 @@
 ---
+import Stage3DDialog from './Stage3DDialog.astro';
+import {stage3DWords} from '../lib/stage3d-i18n';
 import ToolInformation from '../../../shared/ToolInformation.astro';
 import Layout from '../layouts/Layout.astro';
 import { editorDictionary } from '../lib/editor-i18n';
@@ -35,6 +37,7 @@ const {lang}=Astro.props,t=editorDictionary(lang);
    <a href={'/'+lang+'/ai/'} target="_blank" rel="noopener" title={t.ai} aria-label={t.ai}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5C8 2 4 3 3 4v16c3-2 6-2 9 0 3-2 6-2 9 0V4c-3-2-6-2-9 1Zm0 0v15" /></svg></a>
   </nav>
     <div class="project-content" id="project-content">
+    <button id="open-stage3d" type="button">{stage3DWords[lang].title}</button>
     <div class="project-metadata">
 <label>{t.title}<span class="project-copy-field"><input id="project-title" type="text" maxlength="200" /><button id="copy-project-title" type="button" title={t.copy+": "+t.title} aria-label={t.copy+": "+t.title}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h13v13H8ZM3 16V3h13" /></svg></button></span></label>
     <label>{t.format}<select id="project-format"><option value="landscape">{t.landscape}</option><option value="portrait">{t.portrait}</option><option value="square">{t.square}</option></select></label>
@@ -191,6 +194,7 @@ const {lang}=Astro.props,t=editorDictionary(lang);
    <button id="cancel-export" type="button" title={t.cancel} aria-label={t.cancel}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg></button>
   </div></footer>
  </dialog>
+ <Stage3DDialog lang={lang} />
  <ToolInformation lang={lang} tool="scenescript" />
  <noscript><p class="notice">JavaScript is required for the SceneScript editor.</p></noscript>
  <script src="../scripts/editor.ts"></script>

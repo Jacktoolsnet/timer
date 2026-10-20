@@ -838,3 +838,30 @@ body.recording .comic-edit-overlay{display:none}
 #export-timing dd{margin:4px 0 0;font-weight:600;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 
 #start-export[hidden]{display:none}
+
+/* First declarative 3D prototype: keep resource management separate from shots. */
+#open-stage3d{margin-bottom:12px;width:100%}
+#stage3d-dialog{width:min(1080px,96vw);max-height:92dvh;padding:0}
+#stage3d-dialog[open]{display:flex;flex-direction:column}
+#stage3d-dialog .dialog-inner{overflow:auto;padding:20px;min-height:0}
+#stage3d-dialog .json-header,#stage3d-dialog .json-footer{flex:none}
+.stage3d-grid{display:grid;grid-template-columns:minmax(190px,1fr) minmax(0,2fr);gap:24px}
+.stage3d-grid section{min-width:0}
+.stage3d-grid label{display:flex;flex-direction:column;gap:5px;margin:10px 0}
+.stage3d-grid select,.stage3d-grid input,.stage3d-grid textarea{width:100%;min-width:0;box-sizing:border-box}
+#stage3d-fields input[type=color]{height:38px}
+#stage3d-shot{font-family:monospace;resize:vertical;min-height:160px}
+.stage3d-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0}
+#stage3d-dialog button{white-space:normal;overflow-wrap:anywhere}
+#stage3d-preview{aspect-ratio:16/9;max-width:640px;background:#e5edf0;overflow:hidden}
+#stage3d-preview canvas{position:static;display:block;width:100%;height:100%}
+#stage3d-status{white-space:pre-wrap;overflow-wrap:anywhere;user-select:text}
+.stage3d-canvas{display:block;width:100%;height:100%}
+@media(max-width:650px){.stage3d-grid{grid-template-columns:1fr}}
+#stage3d-dialog{max-width:min(1080px,96vw);overflow:hidden}
+#stage3d-dialog .json-footer{margin:0}
+#stage3d-dialog .json-footer button{display:inline-flex;align-items:center;justify-content:center;width:auto;min-width:100px;height:auto;min-height:44px;padding:10px 16px;overflow-wrap:normal}
+#stage3d-dialog input,#stage3d-dialog select,#stage3d-dialog textarea{background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:7px;padding:8px;font:inherit}
+#stage3d-dialog textarea{font-family:monospace;font-size:12px;line-height:1.4}
+#stage3d-dialog .dialog-inner button,#open-stage3d{padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--accent-soft);color:var(--accent)}
+#stage3d-dialog #stage3d-apply{background:var(--accent);color:var(--bg)}

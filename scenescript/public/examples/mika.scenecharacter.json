@@ -1,0 +1,14 @@
+{
+  "format": "scenescript-3d-resource",
+  "version": "1.0",
+  "kind": "character",
+  "id": "mika",
+  "definition": {
+    "name": "Mika",
+    "bodyColor": "#238dcc",
+    "headColor": "#e3f4ff",
+    "limbColor": "#416987",
+    "accentColor": "#ffd34d",
+    "height": 3
+  }
+}

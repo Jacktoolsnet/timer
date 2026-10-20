@@ -1,0 +1,30 @@
+import {test} from 'node:test';
+import {readFileSync} from 'node:fs';
+import assert from 'node:assert/strict';
+import {demoProject,parseProject,validateProject} from '../src/lib/model.ts';
+import {stage3DExample} from '../src/lib/stage3d-example.ts';
+import {unique3DResourceID,actor3DPose,defaultActor3D,parse3DResource,MAX_3D_RESOURCE_BYTES,defaultCharacter3D} from '../src/lib/stage3d.ts';
+import {aiGuide} from '../src/lib/guide.ts';
+const sample=()=>validateProject(stage3DExample);
+test('legacy projects default to empty 3D libraries and disabled stage shots',()=>{
+ const p:any=demoProject();delete p.characters;delete p.stages;p.scenes.forEach((s:any)=>delete s.stage3d);const out=parseProject(JSON.stringify(p));assert.deepEqual(out.characters,{});assert.deepEqual(out.stages,{});assert.equal(out.scenes[0].stage3d,null);
+});
+test('two robots and one stage are shared across two self-contained scene shots',()=>{
+ const p=sample();assert.equal(Object.keys(p.characters).length,2);assert.equal(Object.keys(p.stages).length,1);assert.equal(p.scenes.length,2);assert.equal(p.scenes[0].stage3d!.stage,p.scenes[1].stage3d!.stage);assert.deepEqual(parseProject(JSON.stringify(p)),p);assert.ok(aiGuide.includes('3D WORLD UNITS'));assert.ok(aiGuide.includes('no implicit cross-scene state'));
+});
+test('3D import validates finite numbers, known fields, budgets, scopes and own references',()=>{
+ const mutate=[(p:any)=>p.characters.mika.height=NaN,(p:any)=>p.characters.mika.height=7,(p:any)=>p.characters.mika.headColor='red',(p:any)=>p.characters.mika.name=null,(p:any)=>p.characters.mika.script='alert(1)',(p:any)=>p.characters=null,(p:any)=>p.stages.plaza.model='remote.glb',(p:any)=>p.scenes[0].stage3d.stage='constructor',(p:any)=>p.scenes[0].stage3d.actors[0].character='constructor',(p:any)=>p.scenes[0].stage3d.camera.pitch=90,(p:any)=>p.scenes[0].stage3d.camera.distance=null,(p:any)=>p.scenes[0].stage3d.actors[0].duration=8,(p:any)=>p.scenes[0].stage3d.actors[0].at=7,(p:any)=>p.scenes[0].stage3d.actors[0].action='eval',(p:any)=>p.scenes[0].stage3d.actors[0].scale=0,(p:any)=>p.scenes[0].stage3d.actors[0].x=Infinity,(p:any)=>p.scenes[0].stage3d.actors[1].id='mika',(p:any)=>p.scenes[0].stage3d.actors=Array.from({length:13},(_,i)=>({...defaultActor3D('mika','r'+i)})),(p:any)=>p.characters=Object.fromEntries(Array.from({length:31},(_,i)=>['c'+i,defaultCharacter3D()]))];
+ for(const change of mutate){const p=sample();change(p);assert.throws(()=>validateProject(p));}
+});
+test('3D action poses are deterministic under reverse seeks and clamp at endpoints',()=>{
+ const a={...defaultActor3D('mika'),x:-4,toX:2,action:'walk' as const,at:1,duration:4};const middle=actor3DPose(a,3);actor3DPose(a,8);assert.deepEqual(actor3DPose(a,3),middle);assert.equal(actor3DPose(a,0).x,-4);assert.equal(actor3DPose(a,99).x,2);assert.equal(actor3DPose(a,5).leftLeg,0);assert.notEqual(actor3DPose(a,2).leftLeg,0);
+ const wave={...a,action:'wave' as const};assert.equal(actor3DPose(wave,0).rightArm,0);assert.notEqual(actor3DPose(wave,2).rightArm,0);assert.equal(actor3DPose(wave,6).rightArm,0);
+});
+test('individual 3D resources are versioned, self-contained and strictly bounded',()=>{
+ for(const [kind,id,definition] of [['character','mika',sample().characters.mika],['stage','plaza',sample().stages.plaza]] as const){const resource={format:'scenescript-3d-resource',version:'1.0',kind,id,definition};assert.deepEqual(parse3DResource(JSON.stringify(resource)),resource);for(const change of [{version:'2'},{url:'https://invalid'},{kind:'script'},{id:'bad id'},{definition:null}])assert.throws(()=>parse3DResource(JSON.stringify({...resource,...change})));}
+ assert.throws(()=>parse3DResource(' '.repeat(MAX_3D_RESOURCE_BYTES+1)),/32 KiB/);
+});
+
+test('resource copy IDs stay bounded and never replace an existing character',()=>{const id='a'.repeat(100),copy=unique3DResourceID(id,{[id]:{}});assert.equal(copy.length,100);assert.notEqual(copy,id);assert.ok(copy.endsWith('_2'));assert.equal(unique3DResourceID('new',{}),'new');});
+
+test('downloadable robot example and companion files match the canonical project',()=>{const p=parseProject(readFileSync(new URL('../public/examples/block-robots.scenescript.json',import.meta.url),'utf8'));assert.match(p.thumbnail!.data,/^data:image\/png;base64,/);p.thumbnail=null;assert.deepEqual(p,sample());for(const [file,id,kind] of [['mika.scenecharacter.json','mika','character'],['bo.scenecharacter.json','bo','character'],['plaza.scenestage.json','plaza','stage']]){const resource=parse3DResource(readFileSync(new URL('../public/examples/'+file,import.meta.url),'utf8'));assert.equal(resource.kind,kind);assert.deepEqual(resource.definition,kind==='character'?p.characters[id]:p.stages[id]);}});

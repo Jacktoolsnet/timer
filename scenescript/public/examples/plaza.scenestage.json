@@ -1,0 +1,12 @@
+{
+  "format": "scenescript-3d-resource",
+  "version": "1.0",
+  "kind": "stage",
+  "id": "plaza",
+  "definition": {
+    "name": "Bunte Bauklotz-Plaza",
+    "skyColor": "#9bd6f4",
+    "groundColor": "#83b957",
+    "blockColor": "#e9bd77"
+  }
+}

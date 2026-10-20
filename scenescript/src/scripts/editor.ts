@@ -1,3 +1,5 @@
+import {installStage3DEditor} from './stage3d-editor';
+import {createStage3DView,prepareStage3DPreview,type Stage3DView} from './stage3d-preview';
 import {ExportTiming,formatExportDuration} from '../lib/export-timing';
 import {estimatedExportBytes,MEMORY_EXPORT_LIMIT,type ExportOptions} from '../lib/export-plan';
 import {canPickVideoFile,pickVideoFile,clearCompletedVideoExports} from './export-storage';
@@ -904,7 +906,7 @@ function syncProjectSimulation(){
  projectSimulation?.draw(time);
 }
 let transitionBlack:HTMLDivElement|undefined;
-let stageKey='',views:SceneView[]=[],incomingLayer:HTMLDivElement|undefined,incomingWorld:HTMLDivElement|undefined,incomingSvgBackground:SVGSVGElement|undefined,outgoingLayer:HTMLDivElement|undefined;
+let stageKey='',views:SceneView[]=[],incomingLayer:HTMLDivElement|undefined,incomingWorld:HTMLDivElement|undefined,incomingSvgBackground:SVGSVGElement|undefined,incomingStage3D:Stage3DView|undefined,outgoingLayer:HTMLDivElement|undefined;
 function createSceneLayer(scene:Scene,index:number,interactive:boolean,forceWorld=false){
  const backgroundOpacity=scene.backgroundEnabled?scene.backgroundOpacity:0;
  const viewport=document.createElement('div');viewport.style.isolation='isolate';viewport.className='scene-layer';viewport.dataset.sceneIndex=String(index);const layer=document.createElement('div');layer.className='scene-camera-world';viewport.append(layer);layer.style.background=backgroundOpacity===1?gradientCSS(scene.backgroundGradient,scene.background):'transparent';if(!scene.camera&&!forceWorld&&!scene.elements.some(e=>e.exposure.enabled)){viewport.style.background=layer.style.background;layer.style.background='transparent';}
@@ -916,6 +918,7 @@ function createSceneLayer(scene:Scene,index:number,interactive:boolean,forceWorl
  let svgBackground:SVGSVGElement|undefined;
  if(scene.backgroundAsset&&project.assets[scene.backgroundAsset].data.startsWith('data:image/svg+xml;')){svgBackground=createSvgImage(project.assets[scene.backgroundAsset].data,'cover',true);const background=document.createElement('div');background.className='scene-background';background.append(svgBackground);backgroundHost.append(background);}
  else if(scene.backgroundAsset){const image=document.createElement('img');image.className='scene-background';image.src=project.assets[scene.backgroundAsset].data;image.alt='';backgroundHost.append(image);}
+ const stage3d=scene.stage3d?createStage3DView(project,scene.stage3d,w,h,error=>status(error.message)):undefined;if(stage3d)layer.append(stage3d.canvas);
  scene.elements.forEach(e=>{
    const node=document.createElement('div');node.dataset.elementId=e.id;node.dataset.space=e.space;node.className='scene-element'+(interactive&&!playing&&(e.id===selectedId||scene.groups.some(g=>g.id===selectedGroupId&&g.members.includes(e.id)))?' selected':'');
    Object.assign(node.style,{left:`${e.x*w/100}px`,top:`${e.y*h/100}px`,width:`${e.width*w/100}px`,height:`${e.height*h/100}px`,color:e.color,fontFamily:e.font,fontSize:`${e.fontSize}px`,fontWeight:e.bold?'700':'400',fontStyle:e.italic?'italic':'normal',textDecoration:[e.underline?'underline':'',e.strikethrough?'line-through':''].filter(Boolean).join(' ')||'none',textAlign:e.align,justifyContent:e.align==='left'?'flex-start':e.align==='right'?'flex-end':'center',borderRadius:`${e.radius}px`});
@@ -933,7 +936,7 @@ function createSceneLayer(scene:Scene,index:number,interactive:boolean,forceWorl
    node.addEventListener('click',()=>{if(!interactive||playing||recording)return;selectedGroupId='';selectedId=e.id;renderForms();renderElements();draw();});
    layer.append(node);sceneViews.push({element:e,node,text,svg,simulation,video,bubble,scene});
  });
- return {layer:viewport,world:layer,views:sceneViews,svgBackground};
+ return {layer:viewport,world:layer,views:sceneViews,svgBackground,stage3d};
 }
 function updateSceneViews(sceneViews:SceneView[],local:number,opacity=1,cameraEnabled=true,cameraOverride:Camera|null|undefined=undefined){
  sceneViews.forEach(({element,node,text,svg,simulation,video,bubble,scene})=>{
@@ -968,8 +971,8 @@ function draw(follow=true){
  if(stageKey!==key){
   stageKey=key;stage.querySelectorAll<HTMLVideoElement>('video:not(.project-video-canvas)').forEach(v=>v.pause());for(const child of Array.from(stage.children))if(child!==projectSimulation?.canvas&&child!==backgroundVideoNode)child.remove();if(projectSimulation&&projectSimulation.canvas.parentElement!==stage)stage.prepend(projectSimulation.canvas);if(backgroundVideoNode&&backgroundVideoNode.parentElement!==stage){if(projectSimulation)projectSimulation.canvas.after(backgroundVideoNode);else stage.prepend(backgroundVideoNode);}outgoingLayer=undefined;transitionBlack=undefined;
   if((projectSimulation||backgroundVideoNode)&&s.transition==='through-black'){transitionBlack=document.createElement('div');transitionBlack.className='project-transition-black';stage.append(transitionBlack);}stage.style.background=projectSimulation||backgroundVideoNode||layered||s.backgroundGradient||!s.backgroundEnabled||s.backgroundOpacity<1?'#000000':s.background;resize();
-  if(showPrevious){const previous=project.scenes[at.index-1],view=createSceneLayer(previous,at.index-1,false);outgoingLayer=view.layer;view.world.style.transform=cameraTransform(cameraOverview&&!playing&&!recording?null:previous.camera,previous.duration,formats[project.format][0],formats[project.format][1]);stage.append(view.layer);updateSceneViews(view.views,previous.duration,1,!(cameraOverview&&!playing&&!recording));seekSvg(view.svgBackground,previous.duration);}
-  const view=createSceneLayer(s,at.index,true);incomingLayer=view.layer;incomingWorld=view.world;incomingSvgBackground=view.svgBackground;views=view.views;stage.append(view.layer);
+  if(showPrevious){const previous=project.scenes[at.index-1],view=createSceneLayer(previous,at.index-1,false);outgoingLayer=view.layer;view.world.style.transform=cameraTransform(cameraOverview&&!playing&&!recording?null:previous.camera,previous.duration,formats[project.format][0],formats[project.format][1]);stage.append(view.layer);updateSceneViews(view.views,previous.duration,1,!(cameraOverview&&!playing&&!recording));seekSvg(view.svgBackground,previous.duration);view.stage3d?.draw(previous.duration);}
+  const view=createSceneLayer(s,at.index,true);incomingLayer=view.layer;incomingWorld=view.world;incomingSvgBackground=view.svgBackground;incomingStage3D=view.stage3d;views=view.views;stage.append(view.layer);
  }
  if(incomingWorld)incomingWorld.style.transform=cameraTransform(cameraOverview&&!playing&&!recording?null:s.camera,at.local,formats[project.format][0],formats[project.format][1]);
  if(transitionBlack)transitionBlack.style.opacity=String(1-Math.abs(transition.progress*2-1));
@@ -978,7 +981,7 @@ function draw(follow=true){
  // Preserve the existing fade-in semantics over the incoming background color.
  const sceneOpacity=s.transition==='fade'&&playing?Math.min(1,at.local/s.transitionDuration):1;
  const backgroundImage=incomingLayer?.querySelector<HTMLElement|SVGElement>('.scene-background');if(backgroundImage)backgroundImage.style.opacity=String(sceneOpacity);
- seekSvg(incomingSvgBackground,at.local);
+ seekSvg(incomingSvgBackground,at.local);incomingStage3D?.draw(at.local);
  updateSceneViews(views,at.local,sceneOpacity,!(cameraOverview&&!playing&&!recording));
  stage.querySelector('.motion-path-overlay')?.remove();stage.querySelector('.comic-edit-overlay')?.remove();
  const edit=selected();if((!s.camera||cameraOverview)&&motionEditing&&!playing&&!recording&&edit?.motionPath)renderMotionPath(stage,edit,formats[project.format][0],formats[project.format][1],next=>{if(!motionEditing||selected()!==edit)return;edit.motionPath=next;changed();draw(false);},()=>{if(selected()===edit)renderForms();},parentMatrix(edit,s,at.local,formats[project.format][0],formats[project.format][1]));
@@ -1021,7 +1024,7 @@ function play(){
  const begin=()=>{if(!playing||attempt!==playbackAttempt)return;preparingPlayback=false;playbackPreparation=undefined;baseTime=time;started=performance.now();draw(false);frame=requestAnimationFrame(tick);};
  const clips=narrationClips(project);const prepare=clips.length?narrationPlayer.prepare(project).catch(error=>{showToast(t('audioError')+' '+(error as Error).message,'warning');return null;}):Promise.resolve(null);
  const videos=[...(backgroundVideoNode?[backgroundVideoNode]:[]),...views.filter(v=>v.video&&v.node.style.visibility!=='hidden').map(v=>v.video!)];
- void Promise.all([prepare,Promise.all(videos.map(v=>prepareVideo(v,preparation.signal)))]).then(async([buffers])=>{
+ void Promise.all([prepare,Promise.all(videos.map(v=>prepareVideo(v,preparation.signal))),project.scenes.some(s=>s.stage3d)?prepareStage3DPreview():Promise.resolve()]).then(async([buffers])=>{
   if(!playing||attempt!==playbackAttempt)return;
   if(project.music?.enabled){try{await musicPlayer.start(project.music,time,total(),t=>buffers?duckGain(project,t,clips):1);}catch{showToast(t('audioError'),'warning');}}
   if(!playing||attempt!==playbackAttempt)return;if(buffers)narrationPlayer.start(project,musicPlayer.playhead()??time,buffers);begin();
@@ -1034,8 +1037,9 @@ $('next-scene').addEventListener('click',()=>skipScene(1));
 $('timeline').addEventListener('input',()=>{stop();time=Number(($('timeline') as HTMLInputElement).value);draw();});
 $('safe-toggle').addEventListener('change',()=>{$('safe-overlay').hidden=!($('safe-toggle') as HTMLInputElement).checked;});
 function replace(next:Project){fitSpeechDurations(next);stop();backgroundVideoNode=undefined;backgroundVideoAsset='';clearVideoURLs();clearAudioURLs();revision++;project=next;sceneIndex=0;selectedId='';time=0;dirty=false;selectedGroupId='';multiSelection.clear();history.reset(project);persist();refresh();status(t('ready'));}
+installStage3DEditor(()=>({project,index:sceneIndex,revision}),next=>{stop();project=next;changed();refresh();},next=>{replace(next);changed();},stop);
 const canReplace=()=>!dirty||confirm(t('unsaved'));
-$('new-project').addEventListener('click',()=>{if(canReplace()){replace({version:'1.0',title:'SceneScript',description:'',firstComment:'',hashtags:'',thumbnail:null,audios:{},narration:null,audioDucking:false,format:'landscape',backgroundSimulation:null,backgroundVideo:null,videos:{},music:null,assets:{},scenes:[newScene()]});changed();}});
+$('new-project').addEventListener('click',()=>{if(canReplace()){replace({characters:{},stages:{},version:'1.0',title:'SceneScript',description:'',firstComment:'',hashtags:'',thumbnail:null,audios:{},narration:null,audioDucking:false,format:'landscape',backgroundSimulation:null,backgroundVideo:null,videos:{},music:null,assets:{},scenes:[newScene()]});changed();}});
 $('toggle-project').addEventListener('click',()=>{
  const button=$('toggle-project'),collapsed=button.getAttribute('aria-expanded')==='true';
  $('project-panel').classList.toggle('project-collapsed',collapsed);
@@ -1347,7 +1351,7 @@ function renderCameraPreview(){
  cameraPreviewView=createSceneLayer(cameraTarget,sceneIndex,false,true);root.append(cameraPreviewView.layer);cameraPreviewView.views.forEach(v=>v.video?.addEventListener('loadeddata',renderCameraPreview,{once:true}));}
  cameraPreviewSimulation?.draw(offset(sceneIndex)+local);
  if(cameraPreviewVideo&&project.backgroundVideo?.asset)syncVideo(cameraPreviewVideo,{...project.backgroundVideo,muted:true},project.videos[project.backgroundVideo.asset].duration,offset(sceneIndex)+local,false,false);
- const view=cameraPreviewView;view.world.style.transform=cameraTransform(cameraFrameOverview?null:camera,local,w,h);updateSceneViews(view.views,local,cameraTarget.transition==='fade'?Math.min(1,local/cameraTarget.transitionDuration):1,!cameraFrameOverview,camera);seekSvg(view.svgBackground,local);$('camera-time-label').textContent=local.toFixed(2)+' s';renderCameraFrame();
+ const view=cameraPreviewView;view.world.style.transform=cameraTransform(cameraFrameOverview?null:camera,local,w,h);updateSceneViews(view.views,local,cameraTarget.transition==='fade'?Math.min(1,local/cameraTarget.transitionDuration):1,!cameraFrameOverview,camera);seekSvg(view.svgBackground,local);view.stage3d?.draw(local);$('camera-time-label').textContent=local.toFixed(2)+' s';renderCameraFrame();
  const last=cameraDraft?.stations.at(-1);($('camera-add') as HTMLButtonElement).disabled=!last||cameraDraft!.stations.length>=32||last.at+last.hold>=cameraTarget.duration;
 }
 $('camera-form').addEventListener('submit',e=>e.preventDefault());$('camera-time').addEventListener('input',()=>{cancelAnimationFrame(cameraPreviewFrame);cameraPreviewFrame=0;cameraPlayLabel(false);renderCameraPreview();});
