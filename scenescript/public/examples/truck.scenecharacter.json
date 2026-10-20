@@ -1,0 +1,1116 @@
+{
+  "format": "scenescript-3d-resource",
+  "version": "1.0",
+  "kind": "character",
+  "id": "truck",
+  "definition": {
+    "model": {
+      "parts": [
+        {
+          "id": "chassis",
+          "parent": "",
+          "shape": "box",
+          "color": "#334c60",
+          "position": {
+            "x": 0,
+            "y": 1.1,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 2.7,
+            "y": 0.35,
+            "z": 3.7
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "body",
+          "parent": "",
+          "shape": "group",
+          "color": "#dc493f",
+          "position": {
+            "x": 0,
+            "y": 1.55,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 1,
+            "y": 1,
+            "z": 1
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "id": "suspension",
+              "motion": "translation",
+              "axis": "y",
+              "min": -0.12,
+              "max": 0.12,
+              "value": 0,
+              "control": "none",
+              "target": 0.12
+            }
+          ]
+        },
+        {
+          "id": "hood",
+          "parent": "body",
+          "shape": "box",
+          "color": "#ed5948",
+          "position": {
+            "x": 0,
+            "y": 0,
+            "z": 1.05
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 2.65,
+            "y": 0.55,
+            "z": 1.6
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "cab",
+          "parent": "body",
+          "shape": "box",
+          "color": "#ed5948",
+          "position": {
+            "x": 0,
+            "y": 0.65,
+            "z": -0.45
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 2.2,
+            "y": 1.35,
+            "z": 1.9
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "windshield",
+          "parent": "body",
+          "shape": "box",
+          "color": "#9bdeef",
+          "position": {
+            "x": 0,
+            "y": 0.85,
+            "z": 0.52
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 1.8,
+            "y": 0.65,
+            "z": 0.04
+          },
+          "roughness": 0.78,
+          "metalness": 0.35,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "roof",
+          "parent": "body",
+          "shape": "box",
+          "color": "#f7be38",
+          "position": {
+            "x": 0,
+            "y": 1.38,
+            "z": -0.45
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 2.5,
+            "y": 0.15,
+            "z": 2.1
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "bumper",
+          "parent": "body",
+          "shape": "box",
+          "color": "#d6e3ed",
+          "position": {
+            "x": 0,
+            "y": -0.05,
+            "z": 1.95
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 3,
+            "y": 0.22,
+            "z": 0.2
+          },
+          "roughness": 0.78,
+          "metalness": 0.7,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "lampL",
+          "parent": "body",
+          "shape": "sphere",
+          "color": "#fff4a2",
+          "position": {
+            "x": -0.9,
+            "y": 0.08,
+            "z": 1.88
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.4,
+            "y": 0.28,
+            "z": 0.12
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "lampR",
+          "parent": "body",
+          "shape": "sphere",
+          "color": "#fff4a2",
+          "position": {
+            "x": 0.9,
+            "y": 0.08,
+            "z": 1.88
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.4,
+            "y": 0.28,
+            "z": 0.12
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "steerleftRear",
+          "parent": "",
+          "shape": "group",
+          "color": "#253746",
+          "position": {
+            "x": -1.65,
+            "y": 0.75,
+            "z": -1.35
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 1,
+            "y": 1,
+            "z": 1
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "rollleftRear",
+          "parent": "steerleftRear",
+          "shape": "group",
+          "color": "#253746",
+          "position": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 1,
+            "y": 1,
+            "z": 1
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "id": "rollleftRear",
+              "motion": "rotation",
+              "axis": "x",
+              "min": -3600,
+              "max": 3600,
+              "value": 0,
+              "control": "none",
+              "target": 3600
+            }
+          ]
+        },
+        {
+          "id": "tireleftRear",
+          "parent": "rollleftRear",
+          "shape": "cylinder",
+          "color": "#27333e",
+          "position": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 90
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 1.45,
+            "y": 0.65,
+            "z": 1.45
+          },
+          "roughness": 1,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "hubleftRear",
+          "parent": "rollleftRear",
+          "shape": "cylinder",
+          "color": "#f6b52d",
+          "position": {
+            "x": -0.36,
+            "y": 0,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 90
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.7,
+            "y": 0.08,
+            "z": 0.7
+          },
+          "roughness": 0.78,
+          "metalness": 0.6,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "stripeleftRear",
+          "parent": "rollleftRear",
+          "shape": "box",
+          "color": "#ecf5fa",
+          "position": {
+            "x": -0.41,
+            "y": 0,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.04,
+            "y": 0.62,
+            "z": 0.1
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "steerleftFront",
+          "parent": "",
+          "shape": "group",
+          "color": "#253746",
+          "position": {
+            "x": -1.65,
+            "y": 0.75,
+            "z": 1.35
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 1,
+            "y": 1,
+            "z": 1
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "id": "steerleftFront",
+              "motion": "rotation",
+              "axis": "y",
+              "min": -35,
+              "max": 35,
+              "value": 0,
+              "control": "none",
+              "target": 35
+            }
+          ]
+        },
+        {
+          "id": "rollleftFront",
+          "parent": "steerleftFront",
+          "shape": "group",
+          "color": "#253746",
+          "position": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 1,
+            "y": 1,
+            "z": 1
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "id": "rollleftFront",
+              "motion": "rotation",
+              "axis": "x",
+              "min": -3600,
+              "max": 3600,
+              "value": 0,
+              "control": "none",
+              "target": 3600
+            }
+          ]
+        },
+        {
+          "id": "tireleftFront",
+          "parent": "rollleftFront",
+          "shape": "cylinder",
+          "color": "#27333e",
+          "position": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 90
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 1.45,
+            "y": 0.65,
+            "z": 1.45
+          },
+          "roughness": 1,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "hubleftFront",
+          "parent": "rollleftFront",
+          "shape": "cylinder",
+          "color": "#f6b52d",
+          "position": {
+            "x": -0.36,
+            "y": 0,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 90
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.7,
+            "y": 0.08,
+            "z": 0.7
+          },
+          "roughness": 0.78,
+          "metalness": 0.6,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "stripeleftFront",
+          "parent": "rollleftFront",
+          "shape": "box",
+          "color": "#ecf5fa",
+          "position": {
+            "x": -0.41,
+            "y": 0,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.04,
+            "y": 0.62,
+            "z": 0.1
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "steerrightRear",
+          "parent": "",
+          "shape": "group",
+          "color": "#253746",
+          "position": {
+            "x": 1.65,
+            "y": 0.75,
+            "z": -1.35
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 1,
+            "y": 1,
+            "z": 1
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "rollrightRear",
+          "parent": "steerrightRear",
+          "shape": "group",
+          "color": "#253746",
+          "position": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 1,
+            "y": 1,
+            "z": 1
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "id": "rollrightRear",
+              "motion": "rotation",
+              "axis": "x",
+              "min": -3600,
+              "max": 3600,
+              "value": 0,
+              "control": "none",
+              "target": 3600
+            }
+          ]
+        },
+        {
+          "id": "tirerightRear",
+          "parent": "rollrightRear",
+          "shape": "cylinder",
+          "color": "#27333e",
+          "position": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 90
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 1.45,
+            "y": 0.65,
+            "z": 1.45
+          },
+          "roughness": 1,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "hubrightRear",
+          "parent": "rollrightRear",
+          "shape": "cylinder",
+          "color": "#f6b52d",
+          "position": {
+            "x": 0.36,
+            "y": 0,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 90
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.7,
+            "y": 0.08,
+            "z": 0.7
+          },
+          "roughness": 0.78,
+          "metalness": 0.6,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "striperightRear",
+          "parent": "rollrightRear",
+          "shape": "box",
+          "color": "#ecf5fa",
+          "position": {
+            "x": 0.41,
+            "y": 0,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.04,
+            "y": 0.62,
+            "z": 0.1
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "steerrightFront",
+          "parent": "",
+          "shape": "group",
+          "color": "#253746",
+          "position": {
+            "x": 1.65,
+            "y": 0.75,
+            "z": 1.35
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 1,
+            "y": 1,
+            "z": 1
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "id": "steerrightFront",
+              "motion": "rotation",
+              "axis": "y",
+              "min": -35,
+              "max": 35,
+              "value": 0,
+              "control": "none",
+              "target": 35
+            }
+          ]
+        },
+        {
+          "id": "rollrightFront",
+          "parent": "steerrightFront",
+          "shape": "group",
+          "color": "#253746",
+          "position": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 1,
+            "y": 1,
+            "z": 1
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "id": "rollrightFront",
+              "motion": "rotation",
+              "axis": "x",
+              "min": -3600,
+              "max": 3600,
+              "value": 0,
+              "control": "none",
+              "target": 3600
+            }
+          ]
+        },
+        {
+          "id": "tirerightFront",
+          "parent": "rollrightFront",
+          "shape": "cylinder",
+          "color": "#27333e",
+          "position": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 90
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 1.45,
+            "y": 0.65,
+            "z": 1.45
+          },
+          "roughness": 1,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "hubrightFront",
+          "parent": "rollrightFront",
+          "shape": "cylinder",
+          "color": "#f6b52d",
+          "position": {
+            "x": 0.36,
+            "y": 0,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 90
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.7,
+            "y": 0.08,
+            "z": 0.7
+          },
+          "roughness": 0.78,
+          "metalness": 0.6,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "striperightFront",
+          "parent": "rollrightFront",
+          "shape": "box",
+          "color": "#ecf5fa",
+          "position": {
+            "x": 0.41,
+            "y": 0,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.04,
+            "y": 0.62,
+            "z": 0.1
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        }
+      ],
+      "animations": {
+        "drive": {
+          "duration": 4,
+          "tracks": [
+            {
+              "joint": "rollleftFront",
+              "keys": [
+                {
+                  "at": 0,
+                  "value": 0
+                },
+                {
+                  "at": 4,
+                  "value": 1440
+                }
+              ],
+              "easing": "linear"
+            },
+            {
+              "joint": "rollrightFront",
+              "keys": [
+                {
+                  "at": 0,
+                  "value": 0
+                },
+                {
+                  "at": 4,
+                  "value": 1440
+                }
+              ],
+              "easing": "linear"
+            },
+            {
+              "joint": "rollleftRear",
+              "keys": [
+                {
+                  "at": 0,
+                  "value": 0
+                },
+                {
+                  "at": 4,
+                  "value": 1440
+                }
+              ],
+              "easing": "linear"
+            },
+            {
+              "joint": "rollrightRear",
+              "keys": [
+                {
+                  "at": 0,
+                  "value": 0
+                },
+                {
+                  "at": 4,
+                  "value": 1440
+                }
+              ],
+              "easing": "linear"
+            },
+            {
+              "joint": "steerleftFront",
+              "keys": [
+                {
+                  "at": 0,
+                  "value": 0
+                },
+                {
+                  "at": 1,
+                  "value": 24
+                },
+                {
+                  "at": 2,
+                  "value": 0
+                },
+                {
+                  "at": 3,
+                  "value": -24
+                },
+                {
+                  "at": 4,
+                  "value": 0
+                }
+              ],
+              "easing": "linear"
+            },
+            {
+              "joint": "steerrightFront",
+              "keys": [
+                {
+                  "at": 0,
+                  "value": 0
+                },
+                {
+                  "at": 1,
+                  "value": 24
+                },
+                {
+                  "at": 2,
+                  "value": 0
+                },
+                {
+                  "at": 3,
+                  "value": -24
+                },
+                {
+                  "at": 4,
+                  "value": 0
+                }
+              ],
+              "easing": "linear"
+            },
+            {
+              "joint": "suspension",
+              "keys": [
+                {
+                  "at": 0,
+                  "value": 0
+                },
+                {
+                  "at": 0.6666666666666666,
+                  "value": 0.1
+                },
+                {
+                  "at": 1.3333333333333333,
+                  "value": 0
+                },
+                {
+                  "at": 2,
+                  "value": -0.1
+                },
+                {
+                  "at": 2.6666666666666665,
+                  "value": 0
+                },
+                {
+                  "at": 3.3333333333333335,
+                  "value": 0.1
+                },
+                {
+                  "at": 4,
+                  "value": 0
+                }
+              ],
+              "easing": "linear"
+            }
+          ]
+        }
+      }
+    },
+    "expression": "neutral",
+    "style": "classic",
+    "name": "Freier Monstertruck",
+    "bodyColor": "#36a9e1",
+    "headColor": "#dde7ed",
+    "limbColor": "#64748b",
+    "accentColor": "#ffe066",
+    "height": 3
+  }
+}

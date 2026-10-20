@@ -1,6 +1,7 @@
 {
   "characters": {
     "mika": {
+      "model": null,
       "expression": "neutral",
       "style": "robot",
       "name": "Mika",
@@ -11,6 +12,7 @@
       "height": 3
     },
     "bo": {
+      "model": null,
       "expression": "neutral",
       "style": "pixel",
       "name": "Bo",
@@ -21,6 +23,7 @@
       "height": 2.7
     },
     "lina": {
+      "model": null,
       "expression": "neutral",
       "style": "brick",
       "name": "Lina",
@@ -33,6 +36,7 @@
   },
   "stages": {
     "plaza": {
+      "model": null,
       "name": "Bunte Bauklotz-Plaza",
       "skyColor": "#9bd6f4",
       "groundColor": "#83b957",
@@ -72,6 +76,11 @@
         },
         "actors": [
           {
+            "joints": {},
+            "motions": [],
+            "y": 0,
+            "pitch": 0,
+            "roll": 0,
             "speech": {
               "source": "scene",
               "strength": 1
@@ -167,6 +176,11 @@
             "duration": 4
           },
           {
+            "joints": {},
+            "motions": [],
+            "y": 0,
+            "pitch": 0,
+            "roll": 0,
             "speech": null,
             "expressions": [
               {
@@ -247,6 +261,11 @@
             "duration": 4
           },
           {
+            "joints": {},
+            "motions": [],
+            "y": 0,
+            "pitch": 0,
+            "roll": 0,
             "speech": null,
             "expressions": [
               {
@@ -295,7 +314,9 @@
             "at": 0,
             "duration": 4
           }
-        ]
+        ],
+        "stageJoints": {},
+        "stageMotions": []
       },
       "camera": null,
       "groups": [],
@@ -495,6 +516,11 @@
         },
         "actors": [
           {
+            "joints": {},
+            "motions": [],
+            "y": 0,
+            "pitch": 0,
+            "roll": 0,
             "speech": null,
             "expressions": [
               {
@@ -582,6 +608,11 @@
             "duration": 4
           },
           {
+            "joints": {},
+            "motions": [],
+            "y": 0,
+            "pitch": 0,
+            "roll": 0,
             "speech": {
               "source": "scene",
               "strength": 1
@@ -691,6 +722,11 @@
             "duration": 4
           },
           {
+            "joints": {},
+            "motions": [],
+            "y": 0,
+            "pitch": 0,
+            "roll": 0,
             "speech": null,
             "expressions": [
               {
@@ -772,7 +808,9 @@
             "at": 0,
             "duration": 4
           }
-        ]
+        ],
+        "stageJoints": {},
+        "stageMotions": []
       },
       "camera": null,
       "groups": [],

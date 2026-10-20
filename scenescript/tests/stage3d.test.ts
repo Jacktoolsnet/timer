@@ -23,7 +23,7 @@ test('3D action poses are deterministic under reverse seeks and clamp at endpoin
 });
 test('individual 3D resources are versioned, self-contained and strictly bounded',()=>{
  for(const [kind,id,definition] of [['character','mika',sample().characters.mika],['stage','plaza',sample().stages.plaza]] as const){const resource={format:'scenescript-3d-resource',version:'1.0',kind,id,definition};assert.deepEqual(parse3DResource(JSON.stringify(resource)),resource);for(const change of [{version:'2'},{url:'https://invalid'},{kind:'script'},{id:'bad id'},{definition:null}])assert.throws(()=>parse3DResource(JSON.stringify({...resource,...change})));}
- assert.throws(()=>parse3DResource(' '.repeat(MAX_3D_RESOURCE_BYTES+1)),/32 KiB/);
+ assert.throws(()=>parse3DResource(' '.repeat(MAX_3D_RESOURCE_BYTES+1)),/512 KiB/);
 });
 
 test('resource copy IDs stay bounded and never replace an existing character',()=>{const id='a'.repeat(100),copy=unique3DResourceID(id,{[id]:{}});assert.equal(copy.length,100);assert.notEqual(copy,id);assert.ok(copy.endsWith('_2'));assert.equal(unique3DResourceID('new',{}),'new');});

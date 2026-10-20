@@ -1,0 +1,288 @@
+{
+  "format": "scenescript-3d-resource",
+  "version": "1.0",
+  "kind": "stage",
+  "id": "workshop",
+  "definition": {
+    "model": {
+      "parts": [
+        {
+          "id": "platform",
+          "parent": "",
+          "shape": "box",
+          "color": "#cfdae1",
+          "position": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 12,
+            "y": 0.2,
+            "z": 9
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "trunkL",
+          "parent": "",
+          "shape": "cylinder",
+          "color": "#896444",
+          "position": {
+            "x": -5,
+            "y": 1,
+            "z": -3
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.45,
+            "y": 2,
+            "z": 0.45
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "treeL",
+          "parent": "",
+          "shape": "cone",
+          "color": "#44916b",
+          "position": {
+            "x": -5,
+            "y": 2.65,
+            "z": -3
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 2.2,
+            "y": 3,
+            "z": 2.2
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "trunkR",
+          "parent": "",
+          "shape": "cylinder",
+          "color": "#896444",
+          "position": {
+            "x": 5,
+            "y": 1,
+            "z": -3
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.45,
+            "y": 2,
+            "z": 0.45
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "treeR",
+          "parent": "",
+          "shape": "cone",
+          "color": "#44916b",
+          "position": {
+            "x": 5,
+            "y": 2.65,
+            "z": -3
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 2.2,
+            "y": 3,
+            "z": 2.2
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "gatePost",
+          "parent": "",
+          "shape": "box",
+          "color": "#f6b52d",
+          "position": {
+            "x": 4,
+            "y": 1.3,
+            "z": -2
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.3,
+            "y": 2.6,
+            "z": 0.3
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "gate",
+          "parent": "",
+          "shape": "box",
+          "color": "#ed5948",
+          "position": {
+            "x": 2.3,
+            "y": 1.3,
+            "z": -2
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 1.7,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 3.2,
+            "y": 0.22,
+            "z": 0.2
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "id": "gateHinge",
+              "motion": "rotation",
+              "axis": "y",
+              "min": 0,
+              "max": 100,
+              "value": 0,
+              "control": "none",
+              "target": 100
+            }
+          ]
+        },
+        {
+          "id": "backPanel",
+          "parent": "",
+          "shape": "box",
+          "color": "#3d5a83",
+          "position": {
+            "x": 0,
+            "y": 1.2,
+            "z": -4
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 7,
+            "y": 2.2,
+            "z": 0.12
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        }
+      ],
+      "animations": {
+        "openGate": {
+          "duration": 2,
+          "tracks": [
+            {
+              "joint": "gateHinge",
+              "keys": [
+                {
+                  "at": 0,
+                  "value": 0
+                },
+                {
+                  "at": 2,
+                  "value": 95
+                }
+              ],
+              "easing": "linear"
+            }
+          ]
+        }
+      }
+    },
+    "name": "Freie Werkstatt-Bühne",
+    "skyColor": "#b5e1f4",
+    "groundColor": "#79ac78",
+    "blockColor": "#e6bd7a"
+  }
+}

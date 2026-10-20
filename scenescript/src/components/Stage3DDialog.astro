@@ -9,12 +9,13 @@ const {lang}=Astro.props,w=stage3DWords[lang];
  <div class="dialog-inner">
   <p id="stage3d-status" role="status" aria-live="polite"></p>
   <div class="stage3d-grid">
-   <section class="stage3d-library"><label>{w.kind}<select id="stage3d-kind"><option value="character">{w.characters}</option><option value="stage">{w.stages}</option></select></label>
+   <section class="stage3d-library"><label>{w.kind}<select id="stage3d-kind"><option value="character">{w.objects}</option><option value="stage">{w.stages}</option></select></label>
     <label><span id="stage3d-resource-label">{w.resource}</span><select id="stage3d-resource"></select></label>
     <div class="stage3d-actions"><button id="stage3d-add" type="button" title={w.add} aria-label={w.add}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg></button><button id="stage3d-remove" type="button" title={w.remove} aria-label={w.remove}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7" /></svg></button></div>
     <div class="stage3d-actions"><button id="stage3d-export" type="button" title={w.export} aria-label={w.export}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 15v6h16v-6" /></svg></button><button id="stage3d-import" type="button" title={w.import} aria-label={w.import}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m-5 5 5-5 5 5M4 15v6h16v-6" /></svg></button></div>
     <select id="stage3d-import-mode" aria-label={w.import}><option value="copy">{w.copy}</option><option value="update">{w.update}</option></select>
     <input id="stage3d-file" type="file" accept=".json,application/json" hidden />
+    <label>{w.demoType}<select id="stage3d-demo-type"><option value="classic">{w.demoClassic}</option><option value="construction">{w.demoConstruction}</option></select></label>
     <div class="stage3d-actions"><button id="stage3d-demo" type="button" title={w.demo} aria-label={w.demo}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10h18v11H3Zm0 0L2 5l18-3 1 5Zm4-6 3 4m3-5 3 4M10 13l5 3-5 3Z" /></svg></button></div>
    </section>
    <section class="stage3d-details">
@@ -26,7 +27,7 @@ const {lang}=Astro.props,w=stage3DWords[lang];
     <p class="small-hint">{w.resourcePreviewHint}</p>
     <details id="stage3d-scene-settings"><summary>{w.sceneSettings}</summary><h3 id="stage3d-scene"></h3><label>{w.stage}<select id="stage3d-stage"></select></label>
     <button id="stage3d-insert" type="button" title={w.insert} aria-label={w.insert}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM4 21v-3a7 7 0 0 1 11-5m4-2v10m-4-5h8" /></svg></button>
-    <label>{w.shot}<textarea id="stage3d-shot" rows="12" spellcheck="false" maxlength="32000" aria-describedby="stage3d-shot-hint"></textarea></label>
+    <label>{w.shot}<textarea id="stage3d-shot" rows="12" spellcheck="false" maxlength="524288" aria-describedby="stage3d-shot-hint"></textarea></label>
     <p id="stage3d-shot-hint" class="small-hint">{w.hint}</p>
     <fieldset id="stage3d-speech" class="stage3d-speech"><legend>{w.lipSync}</legend>
      <div class="stage3d-field-grid">

@@ -1,3 +1,4 @@
+import {parseModel3D} from '../lib/model3d';
 import {resource3DPreview} from '../lib/stage3d-resource-preview';
 import {validateProject,type Project} from '../lib/model';
 import {expressions3D,unique3DResourceID,defaultCharacter3D,defaultStage3D,defaultStageCamera3D,defaultActor3D,parse3DResource,MAX_3D_RESOURCE_BYTES,type Resource3D,type Character3D,type Stage3D,type Shot3D} from '../lib/stage3d';
@@ -7,6 +8,7 @@ const $=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(
 export function installStage3DEditor(context:()=>{project:Project;index:number;revision:number},apply:(p:Project)=>void,replace:(p:Project)=>void,stop:()=>void){
  const dialog=$<HTMLDialogElement>('dialog'),words=JSON.parse(dialog.dataset.words!) as Record<string,string>;
  let draft:Project,index=0,origin:ReturnType<typeof context>,session=0,resourceFrame=0,resourceTicket=0;
+ const modelTexts=new Map<string,string>(),modelErrors=new Map<string,string>();
  let resourceView:Stage3DView|undefined,sceneView:Stage3DView|undefined;
  const kind=()=>$<HTMLSelectElement>('kind').value as Resource3D['kind'];
  const library=()=>kind()==='character'?draft.characters:draft.stages;
@@ -14,7 +16,7 @@ export function installStage3DEditor(context:()=>{project:Project;index:number;r
  const report=(e:unknown)=>{$('status').textContent=e instanceof Error?e.message:String(e);};
  const validContext=()=>{const now=context();if(!dialog.open||now.project!==origin.project||now.revision!==origin.revision)throw new Error(words.stale);};
  const setShot=(shot:Shot3D|null)=>{$<HTMLTextAreaElement>('shot').value=JSON.stringify(shot,null,2);$<HTMLSelectElement>('stage').value=shot?.stage??'';refreshSpeech(shot);};
- const readShot=()=>{draft.scenes[index].stage3d=JSON.parse($<HTMLTextAreaElement>('shot').value);return validateProject(draft);};
+ const readShot=()=>{if(modelErrors.size)throw new Error(modelErrors.values().next().value);draft.scenes[index].stage3d=JSON.parse($<HTMLTextAreaElement>('shot').value);return validateProject(draft);};
  const options=(select:HTMLSelectElement,values:[string,string][],selected='')=>{select.replaceChildren(...values.map(([id,name])=>{const o=document.createElement('option');o.value=id;o.textContent=name;return o;}));if(values.some(([id])=>id===selected))select.value=selected;};
  function refreshSpeech(shot:Shot3D|null){
   const actors=Array.isArray(shot?.actors)?shot.actors:[],select=$<HTMLSelectElement>('speech-actor'),selected=select.value;
@@ -35,14 +37,14 @@ export function installStage3DEditor(context:()=>{project:Project;index:number;r
  $('speech-actor').addEventListener('change',()=>{try{refreshSpeech(readShot().scenes[index].stage3d);}catch(error){report(error);}});
  $('speech-source').addEventListener('change',changeSpeech);$('speech-strength').addEventListener('change',changeSpeech);
  function updateResourceTitle(){
-  const value=library()[chosen()],label=words[kind()==='character'?'character':'stageResource'];
+  const value=library()[chosen()],label=words[kind()==='character'?'objects':'stageResource'];
   $('resource-label').textContent=label;$('detail-title').textContent=value?label+' · '+(value.name||words.settings):words.settings;$('detail-id').textContent=value?chosen():'';
  }
  function queueResourcePreview(){
   cancelAnimationFrame(resourceFrame);resourceFrame=requestAnimationFrame(()=>{resourceFrame=0;if(!dialog.open)return;
    const ticket=++resourceTicket,value=library()[chosen()],host=$('resource-preview'),message=$('resource-preview-status');resourceView?.dispose();resourceView=undefined;host.replaceChildren();message.textContent='';host.closest('figure')!.hidden=!value;if(!value)return;
-   try{const sample=resource3DPreview(kind(),chosen(),value);const view=createStage3DView(sample.project,sample.shot,640,480,error=>{if(dialog.open&&ticket===resourceTicket)message.textContent=error.message;},{studio:sample.studio,label:sample.label});
-    resourceView=view;view.canvas.dataset.resource3dKind=kind();view.canvas.dataset.resource3dId=chosen();host.append(view.canvas);view.draw(0);
+   try{const animation=$<HTMLSelectElement>('model-animation')?.value??'',time=$<HTMLInputElement>('model-time')?.valueAsNumber??0;const sample=resource3DPreview(kind(),chosen(),value,animation);const view=createStage3DView(sample.project,sample.shot,640,480,error=>{if(dialog.open&&ticket===resourceTicket)message.textContent=error.message;},{studio:sample.studio,label:sample.label});
+    resourceView=view;view.canvas.dataset.resource3dKind=kind();view.canvas.dataset.resource3dId=chosen();host.append(view.canvas);view.draw(Number.isFinite(time)?Math.min(time,sample.project.scenes[0].duration-1e-6):0);
    }catch(error){message.textContent=(error as Error).message;}
   });
  }
@@ -52,6 +54,7 @@ export function installStage3DEditor(context:()=>{project:Project;index:number;r
   const group=(name:string)=>{const fieldset=document.createElement('fieldset'),legend=document.createElement('legend');legend.textContent=words[name];fieldset.append(legend);const grid=document.createElement('div');grid.className='stage3d-field-grid';fieldset.append(grid);host.append(fieldset);return grid;};
   const general=group('general'),appearance=group('appearance');
   for(const [key,v] of Object.entries(value)){
+   if(key==='model')continue;
    if(key==='style'||key==='expression'){
     const label=document.createElement('label'),caption=document.createElement('span'),select=document.createElement('select');label.className='stage3d-name-field';caption.textContent=words[key];select.dataset.resourceField=key;
     options(select,(key==='style'?['classic','robot','pixel','brick']:expressions3D).map(id=>[id,words[key+'_'+id]]),String(v));
@@ -66,6 +69,24 @@ export function installStage3DEditor(context:()=>{project:Project;index:number;r
     if(input.type==='color')output.textContent=input.value.toUpperCase();queueResourcePreview();
    });(key.endsWith('Color')?appearance:general).append(label);
   }
+  const details=document.createElement('details'),summary=document.createElement('summary'),textarea=document.createElement('textarea'),hint=document.createElement('p'),error=document.createElement('p');
+  const resourceKey=kind()+':'+chosen();details.className='model3d-editor';summary.textContent=words.modelEditor;details.open=Boolean(value.model);
+  textarea.id='stage3d-model';textarea.setAttribute('aria-label',words.modelEditor);textarea.spellcheck=false;textarea.rows=14;textarea.maxLength=512*1024;textarea.value=modelTexts.get(resourceKey)??JSON.stringify(value.model,null,2);
+  hint.className='small-hint';hint.textContent=words.modelHint;error.className='model3d-error';error.setAttribute('role','status');error.textContent=modelErrors.get(resourceKey)??'';if(modelErrors.has(resourceKey))textarea.setAttribute('aria-invalid','true');
+  const controls=document.createElement('div');controls.className='stage3d-field-grid';
+  const animation=document.createElement('select');animation.id='stage3d-model-animation';animation.setAttribute('aria-label',words.modelAnimation);
+  const time=document.createElement('input');time.id='stage3d-model-time';time.type='range';time.min='0';time.max='4';time.step='.01';time.value='0';time.setAttribute('aria-label',words.modelTime);
+  const animations=()=>{options(animation,[['',words.modelRest],...Object.keys(value.model?.animations??{}).map(id=>[id,id] as [string,string])]);animation.disabled=!value.model;time.disabled=!value.model;};
+  animations();animation.addEventListener('change',()=>{time.max=String(value.model?.animations[animation.value]?.duration??4);time.value='0';queueResourcePreview();});time.addEventListener('input',queueResourcePreview);
+  textarea.addEventListener('input',()=>{
+   modelTexts.set(resourceKey,textarea.value);
+   try{value.model=parseModel3D(JSON.parse(textarea.value),resourceKey+'.model');modelErrors.delete(resourceKey);error.textContent='';textarea.removeAttribute('aria-invalid');animations();time.value='0';output.textContent='0.00 s';queueResourcePreview();}
+   catch(e){const message=(e as Error).message;modelErrors.set(resourceKey,message);error.textContent=message;textarea.setAttribute('aria-invalid','true');}
+  });
+  const animationLabel=document.createElement('label'),timeLabel=document.createElement('label'),output=document.createElement('output');animationLabel.textContent=words.modelAnimation;timeLabel.textContent=words.modelTime;output.textContent='0.00 s';
+  animationLabel.append(animation);timeLabel.append(time,output);time.addEventListener('input',()=>output.textContent=Number(time.value).toFixed(2)+' s');animation.addEventListener('change',()=>output.textContent='0.00 s');
+  controls.append(animationLabel,timeLabel);details.append(summary,hint,textarea,controls,error);host.append(details);
+
  }
 
  function resources(selected=''){
@@ -74,12 +95,12 @@ export function installStage3DEditor(context:()=>{project:Project;index:number;r
  }
  function preview(){try{const p=readShot(),shot=p.scenes[index].stage3d;refreshSpeech(shot);const host=$('preview');sceneView?.dispose();sceneView=undefined;host.replaceChildren();if(!shot)return;const time=$<HTMLInputElement>('time').valueAsNumber;if(!Number.isFinite(time)||time<0||time>p.scenes[index].duration)throw new Error(words.time+': 0–'+p.scenes[index].duration);const view=createStage3DView(p,shot,640,360,report);sceneView=view;host.append(view.canvas);view.draw(time);report('');}catch(e){report(e);}}
  document.getElementById('open-stage3d')!.addEventListener('click',()=>{
-  stop();origin=context();session++;draft=structuredClone(origin.project);index=origin.index;$('scene').textContent=words.scene+': '+draft.scenes[index].name;
+  stop();modelTexts.clear();modelErrors.clear();origin=context();session++;draft=structuredClone(origin.project);index=origin.index;$('scene').textContent=words.scene+': '+draft.scenes[index].name;
   resources();setShot(draft.scenes[index].stage3d);$<HTMLInputElement>('time').max=String(draft.scenes[index].duration);$<HTMLInputElement>('time').value=String(Math.min(1,draft.scenes[index].duration));report('');$<HTMLDetailsElement>('scene-settings').open=false;dialog.showModal();queueResourcePreview();
  });
  $('kind').addEventListener('change',()=>resources());$('resource').addEventListener('change',fields);
  $('add').addEventListener('click',()=>{if(Object.keys(library()).length>=30){report('Maximum 30');return;}let id=kind();for(let n=2;Object.hasOwn(library(),id);n++)id=kind()+'_'+n;Object.defineProperty(library(),id,{value:kind()==='character'?defaultCharacter3D():defaultStage3D(),enumerable:true,writable:true,configurable:true});resources(id);});
- $('remove').addEventListener('click',()=>{try{readShot();const id=chosen();if(kind()==='character'?draft.scenes.some(s=>s.stage3d?.actors.some(a=>a.character===id)):draft.scenes.some(s=>s.stage3d?.stage===id))throw new Error(id+': resource is used by a scene');delete library()[id];resources();report('');}catch(e){report(e);}});
+ $('remove').addEventListener('click',()=>{try{readShot();const id=chosen();if(kind()==='character'?draft.scenes.some(s=>s.stage3d?.actors.some(a=>a.character===id)):draft.scenes.some(s=>s.stage3d?.stage===id))throw new Error(id+': resource is used by a scene');delete library()[id];modelTexts.delete(kind()+':'+id);modelErrors.delete(kind()+':'+id);resources();report('');}catch(e){report(e);}});
  $('stage').addEventListener('change',()=>{try{const stage=$<HTMLSelectElement>('stage').value,shot=JSON.parse($<HTMLTextAreaElement>('shot').value) as Shot3D|null;setShot(stage?{stage,camera:shot?.camera??defaultStageCamera3D(),actors:shot?.actors??[]}:null);preview();}catch(e){report(e);}});
  $('insert').addEventListener('click',()=>{try{const p=readShot(),shot=p.scenes[index].stage3d;if(!shot)throw new Error(words.stage);const id=kind()==='character'?chosen():Object.keys(p.characters)[0];if(!id)throw new Error(words.empty);if(shot.actors.length>=12)throw new Error('Maximum 12 actors');let actorId='actor';for(let n=2;shot.actors.some(a=>a.id===actorId);n++)actorId='actor_'+n;const a=defaultActor3D(id,actorId);a.duration=Math.min(4,p.scenes[index].duration);a.x=shot.actors.length*2-2;a.toX=a.x;shot.actors.push(a);setShot(shot);preview();}catch(e){report(e);}});
  $('preview-button').addEventListener('click',preview);
@@ -87,11 +108,11 @@ export function installStage3DEditor(context:()=>{project:Project;index:number;r
  $('apply').addEventListener('click',()=>{try{validContext();const next=readShot();apply(next);dialog.close();showToast(words.saved,'success');}catch(e){report(e);}});
  $('close').addEventListener('click',()=>dialog.close());dialog.addEventListener('close',()=>{session++;resourceTicket++;cancelAnimationFrame(resourceFrame);resourceFrame=0;resourceView?.dispose();resourceView=undefined;sceneView?.dispose();sceneView=undefined;$('resource-preview').replaceChildren();$('resource-preview-status').textContent='';$('preview').replaceChildren();document.getElementById('open-stage3d')!.focus();});
  const download=(name:string,data:string)=>{const blob=new Blob([data],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
- $('export').addEventListener('click',()=>{try{const r=parse3DResource(JSON.stringify({format:'scenescript-3d-resource',version:'1.0',kind:kind(),id:chosen(),definition:library()[chosen()]}));download(r.id+(r.kind==='character'?'.scenecharacter.json':'.scenestage.json'),JSON.stringify(r,null,2));}catch(e){report(e);}});
+ $('export').addEventListener('click',()=>{try{const error=modelErrors.get(kind()+':'+chosen());if(error)throw new Error(error);const r=parse3DResource(JSON.stringify({format:'scenescript-3d-resource',version:'1.0',kind:kind(),id:chosen(),definition:library()[chosen()]}));download(r.id+(r.kind==='character'?'.scenecharacter.json':'.scenestage.json'),JSON.stringify(r,null,2));}catch(e){report(e);}});
  $('import').addEventListener('click',()=>$<HTMLInputElement>('file').click());
- $('file').addEventListener('change',async()=>{const input=$<HTMLInputElement>('file'),file=input.files?.[0],ticket=session;input.value='';if(!file)return;try{if(file.size>MAX_3D_RESOURCE_BYTES)throw new Error('3D resource: maximum 32 KiB');const r=parse3DResource(await file.text());if(ticket!==session)return;validContext();$<HTMLSelectElement>('kind').value=r.kind;let id=r.id;const values=r.kind==='character'?draft.characters:draft.stages;if($<HTMLSelectElement>('import-mode').value==='copy')id=unique3DResourceID(r.id,values);if(!Object.hasOwn(values,id)&&Object.keys(values).length>=30)throw new Error('Maximum 30');Object.defineProperty(values,id,{value:r.definition as Character3D&Stage3D,enumerable:true,writable:true,configurable:true});resources(id);report(words.imported);}catch(e){if(ticket===session)report(e);}});
+ $('file').addEventListener('change',async()=>{const input=$<HTMLInputElement>('file'),file=input.files?.[0],ticket=session;input.value='';if(!file)return;try{if(file.size>MAX_3D_RESOURCE_BYTES)throw new Error('3D resource: maximum 512 KiB');const r=parse3DResource(await file.text());if(ticket!==session)return;validContext();$<HTMLSelectElement>('kind').value=r.kind;let id=r.id;const values=r.kind==='character'?draft.characters:draft.stages;if($<HTMLSelectElement>('import-mode').value==='copy')id=unique3DResourceID(r.id,values);if(!Object.hasOwn(values,id)&&Object.keys(values).length>=30)throw new Error('Maximum 30');Object.defineProperty(values,id,{value:r.definition as Character3D&Stage3D,enumerable:true,writable:true,configurable:true});modelTexts.delete(r.kind+':'+id);modelErrors.delete(r.kind+':'+id);resources(id);report(words.imported);}catch(e){if(ticket===session)report(e);}});
  $('demo').addEventListener('click',async()=>{
   if(!confirm(words.confirm))return;const ticket=session,b=$<HTMLButtonElement>('demo');b.disabled=true;report(words.busy);
-  try{validContext();const {stage3DExample}=await import('../lib/stage3d-example'),{exportStill}=await import('./still-export');const p=validateProject(stage3DExample),blob=await exportStill(p,6.9,new AbortController().signal);const data=await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result as string);reader.onerror=()=>reject(reader.error);reader.readAsDataURL(blob);});if(ticket!==session)return;validContext();p.thumbnail={name:'Mika-Bo-Lina-Cover.png',data};replace(validateProject(p));dialog.close();}catch(e){if(ticket===session)report(e);}finally{b.disabled=false;}
+  try{validContext();const custom=$<HTMLSelectElement>('demo-type').value==='construction';const example=custom?(await import('../lib/model3d-example')).construction3DExample:(await import('../lib/stage3d-example')).stage3DExample,{exportStill}=await import('./still-export');const p=validateProject(example),blob=await exportStill(p,custom?2.6:6.9,new AbortController().signal);const data=await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result as string);reader.onerror=()=>reject(reader.error);reader.readAsDataURL(blob);});if(ticket!==session)return;validContext();p.thumbnail={name:custom?'Baukasten-Cover.png':'Mika-Bo-Lina-Cover.png',data};replace(validateProject(p));dialog.close();}catch(e){if(ticket===session)report(e);}finally{b.disabled=false;}
  });
 }

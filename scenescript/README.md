@@ -620,3 +620,51 @@ Vorschau, Zurückspulen, PNG und Video nutzen dieselbe deterministische Abtastun
 auch bei Videoexport ohne Ton. Analyse-/Codecfehler werden gemeldet statt still
 eine falsche Animation zu exportieren. Ein laufender Analysevorgang liefert nach
 Schließen der Vorschau keine verspäteten Canvas-Inhalte mehr.
+
+
+### Allgemeiner 3D-Baukasten (Objekte, Figuren und Bühnen)
+
+`characters` verwaltet nun auch frei definierte Fahrzeuge, Requisiten usw.;
+der JSON-Name bleibt aus Kompatibilitätsgründen erhalten. Die bisherigen Figuren
+und Bühnen bleiben mit `model:null` unverändert nutzbar.
+
+- `Character3D.model` und `Stage3D.model`: eigene `parts` und benannte `animations`.
+  Ein Modell ersetzt die bisherige Vorlagengeometrie; Himmel/Boden bleiben.
+- Grundformen: unsichtbare Gruppe, Quader, Kugel, Zylinder, Kegel, Fläche.
+  Material: Farbe, Rauheit, Metallanteil, Deckkraft. Keine externen Modelle,
+  Bildtexturen oder ausführbaren Skripte in diesem ersten Baukastenstand.
+- Teile referenzieren ihren Elternteil per ID. Position/Drehpunkt sind lokal,
+  Drehungen in Grad, Größen in Welteinheiten. Kinder erben die Transformation,
+  nicht die Geometriegröße. Drehpunktkette:
+  `T(position) · T(pivot) · R_XYZ(rotation + Gelenke) · T(-pivot)`.
+- Freiheitsgrade über `joints`: Rotation oder Verschiebung, Achse X/Y/Z,
+  Grenzen `min/max`, Ruhewert `value`. Keine Physiksimulation.
+- Benannte Animationen enthalten Gelenk-Keyframes; `motions` am Auftritt
+  bzw. `stageMotions` an der Szene starten sie, optional wiederholend.
+  `joints` / `stageJoints` setzen individuelle Ruheposen.
+- Mimik/Sprechen bleiben über Gelenk-`control` nutzbar: Mundöffnung, Blinzeln,
+  happy/sad/angry/surprised bewegen frei definierte Gesichtsteile Richtung `target`.
+- Auftritte unterstützen zusätzlich `y`, `pitch`, `roll`. Bisherige
+  Gehen-/Winken-Beinbewegungen gelten nur für die alten Vorlagen; eigene Gelenke
+  werden durch eigene Animationen bewegt. Root-Bewegung bleibt verfügbar.
+- Ressourcen sind weiterhin einzeln importier-/exportierbar (jetzt bis 512 KiB).
+  Im Ressourcendialog: **Bauteile, Gelenke & Animationen (JSON)**, Animation wählen,
+  Zeitregler bewegen. Fehler sind kopierbar und verhindern stilles Übernehmen
+  einer älteren gültigen Modellfassung.
+- Budgets: 256 Teile/Modell, Tiefe 32, 256 Gelenke, 16 Clips, 4096 Keyframes gesamt;
+  64 Bewegungsereignisse/Spur. Szene: max. 12 Auftritte, 2048 geschätzte aktive Teile.
+  Grenzen und Verweise werden vor dem Rendern validiert.
+
+Unter **Beispieltyp → Freier Baukasten: Truck & Roboter** lädt das Beispiel
+einen aus Teilen gebauten Monstertruck (Räder, Lenkung, Federung), einen jubelnden
+Roboter mit ansteuerbarem Mund/Augenlidern sowie eine eigene Bühne mit Schwenktor.
+Download: `/examples/construction.scenescript.json`; unabhängige Ressourcen:
+`/examples/truck.scenecharacter.json`, `/examples/workshop-robot.scenecharacter.json`,
+`/examples/workshop.scenestage.json`. Vorschau, PNG und Video verwenden dieselbe
+absolute Zeitberechnung. Keine Geometrieerzeugung pro Frame.
+
+Dies ist die Grundlage für die gewünschte Rennwelt, noch nicht die komplette
+Rennsimulation: räumliche Fahrpfade, Looping-/Sprungsteuerung, Fahrzeugkameras und
+große Zuschauermengen sind eigenständige nächste Schritte. Die vollständige
+Copy/Paste-KI-Anleitung enthält die neue Grammatik plus ein kompaktes Beispiel;
+das Größenbudget wächst für dieses zusätzliche Modul auf 76 kB.

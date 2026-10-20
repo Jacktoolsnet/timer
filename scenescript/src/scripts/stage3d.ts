@@ -1,10 +1,12 @@
 import * as THREE from 'three';
+import {createModel3D} from './model3d';
 import {actor3DMouth,emptySpeechEnvelopes,type SpeechEnvelopes} from '../lib/stage3d-speech';
 import {facePixel3D} from '../lib/stage3d-face';
 import {actor3DFace,type FacePose3D,actor3DPose,type Shot3D,type Actor3D,type Character3D,type Stage3D} from '../lib/stage3d';
 import type {Project} from '../lib/model';
 type Robot={actor:Actor3D;character:Character3D;updateFace:(pose:FacePose3D,mouth?:number)=>void;root:THREE.Group;leftArm:THREE.Group;rightArm:THREE.Group;leftLeg:THREE.Group;rightLeg:THREE.Group};
-type World={scene:THREE.Scene;robots:Robot[];geometries:Set<THREE.BufferGeometry>;materials:Map<string,THREE.MeshStandardMaterial>};
+type Custom3D=ReturnType<typeof createModel3D>&{actor:Actor3D;character:Character3D};
+type World={custom:Custom3D[];stageModel:ReturnType<typeof createModel3D>|null;scene:THREE.Scene;robots:Robot[];geometries:Set<THREE.BufferGeometry>;materials:Map<string,THREE.MeshStandardMaterial>};
 /** A bounded cache and ONE GPU context per owner, never a new context per frame. */
 export class Stage3DRenderer{
  private renderer:THREE.WebGLRenderer;private camera=new THREE.PerspectiveCamera(38,1,.1,160);private cache=new Map<string,World>();private disposed=false;private lost=false;private size=new THREE.Vector2();
@@ -17,13 +19,13 @@ export class Stage3DRenderer{
  private release(world:World){world.scene.traverse(node=>{if(node instanceof THREE.InstancedMesh)node.dispose();});world.geometries.forEach(g=>g.dispose());world.materials.forEach(m=>m.dispose());world.scene.clear();}
  private world(stage:Stage3D,characters:Project['characters'],actors:Actor3D[],studio=false):World{
   const scene=new THREE.Scene();scene.background=new THREE.Color(stage.skyColor);scene.fog=new THREE.Fog(stage.skyColor,35,85);
-  const world:World={scene,robots:[],geometries:new Set(),materials:new Map()};
+  const world:World={custom:[],stageModel:null,scene,robots:[],geometries:new Set(),materials:new Map()};
   const cube=new THREE.BoxGeometry(1,1,1);world.geometries.add(cube);
   const material=(color:string)=>{let m=world.materials.get(color);if(!m){m=new THREE.MeshStandardMaterial({color,roughness:.78,metalness:.08});world.materials.set(color,m);}return m;};
   const box=(parent:THREE.Object3D,color:string,x:number,y:number,z:number,w:number,h:number,d:number)=>{const m=new THREE.Mesh(cube,material(color));m.position.set(x,y,z);m.scale.set(w,h,d);parent.add(m);return m;};
   scene.add(new THREE.HemisphereLight('#ffffff','#72864c',2.3));const sun=new THREE.DirectionalLight('#fff2d4',3.5);sun.position.set(-8,14,8);scene.add(sun);
   box(scene,stage.groundColor,0,-.32,0,56,.6,56);
-  if(!studio){
+  if(!studio&&!stage.model){
   // Raised plaza, stepping stones and a small arch create depth without external assets.
   box(scene,'#c7d4d9',0,-.08,0,16,.25,10);
   for(let x=-7;x<=7;x+=2)for(let z=-4;z<=4;z+=2)box(scene,(x+z)%4===0?'#dce6e7':'#b8c9ce',x,.055,z,1.94,.05,1.94);
@@ -34,6 +36,7 @@ export class Stage3DRenderer{
   box(scene,stage.blockColor,-3,2,-8,1,4,1);box(scene,stage.blockColor,3,2,-8,1,4,1);box(scene,'#fff0cd',0,4.3,-8,7,1,1.3);
   for(const [x,z] of [[-7,5],[8,5],[-6,-11],[12,-11]]){box(scene,'#946c47',x,1.2,z,.65,2.4,.65);box(scene,'#4d9466',x,3,z,2.6,2.3,2.6);box(scene,'#6cad73',x-.35,4.3,z,1.8,1,1.8);}
   }
+  if(!studio&&stage.model){world.stageModel=createModel3D(stage.model,world);scene.add(world.stageModel.root);}
   // Low-cost soft ground marks instead of expensive real-time shadow maps.
   const shadowGeometry=new THREE.CircleGeometry(.85,24);world.geometries.add(shadowGeometry);
   const shadowMaterial=new THREE.MeshStandardMaterial({color:'#526674',transparent:true,opacity:.18,depthWrite:false});world.materials.set('shadow',shadowMaterial);
@@ -109,7 +112,7 @@ export class Stage3DRenderer{
    const leftArm=limb(-.78,2.05,false),rightArm=limb(.78,2.05,false),leftLeg=limb(-.31,1.13,true),rightLeg=limb(.31,1.13,true);
    return {actor:a,character:c,updateFace,root,leftArm,rightArm,leftLeg,rightLeg};
   };
-  world.robots=actors.map(a=>robot(a,characters[a.character]));return world;
+  for(const actor of actors){const character=characters[actor.character];if(character.model){const model=createModel3D(character.model,world);model.root.scale.setScalar(character.height/3*actor.scale);scene.add(model.root);world.custom.push({...model,actor,character});}else world.robots.push(robot(actor,character));}return world;
  }
  render(project:Project,shot:Shot3D,time:number,width:number,height:number,target:HTMLCanvasElement,studio=false,speech:SpeechEnvelopes=emptySpeechEnvelopes){
   if(this.disposed||this.lost)throw new Error('3D: graphics context unavailable. Reload the project before exporting.');
@@ -117,7 +120,13 @@ export class Stage3DRenderer{
   const key=JSON.stringify([project.stages[shot.stage],definitions,shot.actors,studio]);let world=this.cache.get(key);
   if(!world){world=this.world(project.stages[shot.stage],project.characters,shot.actors,studio);this.cache.set(key,world);if(this.cache.size>2){const oldest=this.cache.keys().next().value!;this.release(this.cache.get(oldest)!);this.cache.delete(oldest);}}
   else{this.cache.delete(key);this.cache.set(key,world);}
-  for(const r of world.robots){r.updateFace(actor3DFace(r.actor,time,r.character.expression),actor3DMouth(project,shot,r.actor,time,speech));const p=actor3DPose(r.actor,time,shot.actors);r.root.position.set(p.x,p.bob,p.z);r.root.rotation.y=p.rotation;r.leftArm.rotation.x=p.leftArm;r.rightArm.rotation.x=p.rightArm;r.rightArm.rotation.z=p.wave;r.leftLeg.rotation.x=p.leftLeg;r.rightLeg.rotation.x=p.rightLeg;}
+  for(const r of world.robots){r.updateFace(actor3DFace(r.actor,time,r.character.expression),actor3DMouth(project,shot,r.actor,time,speech));const p=actor3DPose(r.actor,time,shot.actors);r.root.position.set(p.x,r.actor.y+p.bob,p.z);r.root.rotation.set(r.actor.pitch*Math.PI/180,p.rotation,r.actor.roll*Math.PI/180);r.leftArm.rotation.x=p.leftArm;r.rightArm.rotation.x=p.rightArm;r.rightArm.rotation.z=p.wave;r.leftLeg.rotation.x=p.leftLeg;r.rightLeg.rotation.x=p.rightLeg;}
+  world.stageModel?.update(shot.stageJoints??{},shot.stageMotions??[],time);
+  for(const r of world.custom){
+   const pose=actor3DPose(r.actor,time,shot.actors),face=actor3DFace(r.actor,time,r.character.expression),mouth=actor3DMouth(project,shot,r.actor,time,speech);
+   r.root.position.set(pose.x,r.actor.y,pose.z);r.root.rotation.set(r.actor.pitch*Math.PI/180,pose.rotation,r.actor.roll*Math.PI/180);
+   r.update(r.actor.joints,r.actor.motions,time,{...face,mouth:Math.max(mouth,face.surprised)});
+  }
   const c=shot.camera,yaw=(c.yaw+c.orbit*time)*Math.PI/180,pitch=c.pitch*Math.PI/180;
   this.camera.position.set(c.targetX+Math.sin(yaw)*Math.cos(pitch)*c.distance,c.targetY+Math.sin(pitch)*c.distance,c.targetZ+Math.cos(yaw)*Math.cos(pitch)*c.distance);this.camera.lookAt(c.targetX,c.targetY,c.targetZ);this.camera.aspect=width/height;this.camera.updateProjectionMatrix();
   this.renderer.getSize(this.size);if(this.size.x!==width||this.size.y!==height)this.renderer.setSize(width,height,false);this.renderer.render(world.scene,this.camera);

@@ -63,7 +63,7 @@ test('unavailable WebGL2 reports a preview error and rejects export instead of a
 
 
 test('3D dropdowns and popup options follow the theme and support keyboard selection',async({page})=>{
- await page.goto('/en/');await page.locator('#open-stage3d').click();const selects=page.locator('#stage3d-dialog select');await expect(selects).toHaveCount(6);
+ await page.goto('/en/');await page.locator('#open-stage3d').click();const selects=page.locator('#stage3d-dialog select');await expect(selects).toHaveCount(7);
  for(const select of await selects.all()){await expect(select).toHaveCSS('border-radius','10px');if(await select.isVisible())expect(await select.evaluate(n=>n.getBoundingClientRect().height)).toBeGreaterThanOrEqual(40);}
  const kind=page.locator('#stage3d-kind'),baseSelect=await page.evaluate(()=>CSS.supports('appearance','base-select'));
  for(const theme of ['light','dark']){
@@ -81,12 +81,12 @@ test('3D dropdowns and popup options follow the theme and support keyboard selec
 async function resourcePixels(page:any){return page.locator('#stage3d-resource-preview canvas').evaluate((c:HTMLCanvasElement)=>c.toDataURL());}
 
 test('selected characters have their own formatted settings and isolated live preview on the right',async({page})=>{
- await load(page);await page.locator('#open-stage3d').click();await expect(page.locator('#stage3d-resource-label')).toHaveText('Character');
+ await load(page);await page.locator('#open-stage3d').click();await expect(page.locator('#stage3d-resource-label')).toHaveText('Objects & characters');
  await expect(page.locator('.stage3d-library [data-resource-field]')).toHaveCount(0);await expect(page.locator('.stage3d-details [data-resource-field]')).toHaveCount(8);await expect(page.locator('#stage3d-fields fieldset')).toHaveCount(2);
  const canvas=page.locator('#stage3d-resource-preview canvas');await expect(canvas).toHaveAttribute('data-resource3d-id','mika');await expect(canvas).toHaveAttribute('data-stage3d-time','0');await expect(canvas).toHaveAttribute('aria-label','Mika');
  const left=(await page.locator('.stage3d-library').boundingBox())!,right=(await page.locator('.stage3d-details').boundingBox())!;expect(right.x).toBeGreaterThanOrEqual(left.x+left.width);const previewBox=(await canvas.boundingBox())!,footer=(await page.locator('#stage3d-dialog footer').boundingBox())!;expect(previewBox.y+previewBox.height).toBeLessThanOrEqual(footer.y);
  const original=await resourcePixels(page);await page.locator('[data-resource-field=bodyColor]').fill('#ff0055');await expect.poll(()=>resourcePixels(page)).not.toBe(original);await expect(page.locator('.stage3d-color-swatch output').first()).toHaveText('#FF0055');
- await page.locator('[data-resource-field=name]').fill('Mika preview');await expect(page.locator('#stage3d-detail-title')).toHaveText('Character · Mika preview');await expect(canvas).toHaveAttribute('aria-label','Mika preview');await expect(page.locator('#stage3d-resource option:checked')).toHaveText('mika · Mika preview');
+ await page.locator('[data-resource-field=name]').fill('Mika preview');await expect(page.locator('#stage3d-detail-title')).toHaveText('Objects & characters · Mika preview');await expect(canvas).toHaveAttribute('aria-label','Mika preview');await expect(page.locator('#stage3d-resource option:checked')).toHaveText('mika · Mika preview');
  await page.locator('#stage3d-resource').selectOption('bo');await expect(page.locator('[data-resource-field=name]')).toHaveValue('Bo');await expect(canvas).toHaveAttribute('data-resource3d-id','bo');await expect(canvas).toHaveAttribute('aria-label','Bo');await expect(canvas).toHaveAttribute('data-stage3d-time','0');expect(await resourcePixels(page)).not.toBe(original);
  expect(await page.locator('#stage3d-scene-settings').getAttribute('open')).toBeNull();expect(JSON.parse(await page.locator('#stage3d-shot').inputValue()).actors).toHaveLength(3);
  await page.locator('#stage3d-close').click();await expect(page.locator('#stage3d-resource-preview canvas')).toHaveCount(0);

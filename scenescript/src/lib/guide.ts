@@ -1,3 +1,4 @@
+import {aiModel3DExample} from './model3d-example.ts';
 import {aiAction3DExample} from './stage3d-example.ts';
 import {formats,newElement} from './model.ts';
 import {applyTextPreset,textPresets} from './text-presets.ts';
@@ -252,11 +253,12 @@ not a template field/type. Camera movement is continuous even under stopMotion.
 
 ### Reusable 3D stages and characters
 Project.characters/stages: independent ID maps, max 30 each.
-Characters: procedural geometry, name, height, body/head/limb/accent colors.
+characters stores reusable 3D OBJECTS (people, robots, cars, props); the legacy
+map/type name remains for compatibility. Name, height, colors and optional model.
 style: classic (default legacy robot), robot (mechanical mouth), pixel (monitor
 face), brick (brick person: eyes/nose/mouth; headColor also colors hands).
-Character.expression sets the base face. Stages share one built-in block plaza;
-name and sky/ground/block colors do NOT generate arbitrary scenery.
+Character.expression sets the base face. model:null uses the existing preset.
+Stage.model:null uses the built-in plaza; stage name/colors alone do not model scenery.
 Scene.stage3d=null/omitted disables 3D; otherwise stage references Project.stages
 and actors (max 12) reference Project.characters. Unlisted characters are absent.
 Actor IDs are scene-local, independent of 2D IDs. Supply each scene's starting
@@ -308,7 +310,46 @@ WebGL2 required; unavailable graphics/context loss is an error, not blank export
 3D dialog: shared resource definitions + isolated preview; actors/camera/speech
 bindings in expandable scene section. Confirm applies; closing discards.
 Independent resource imports/exports; ID collisions: copy or explicit update.
-No external models/scripts, physics, automatic rigging or head-only looking.
+No external model files/scripts, physics, skinning or head-only looking.
+Generic construction resources follow below; they do not add racing paths/camera tracking.
+FREE CONSTRUCTION: Character3D.model / Stage3D.model = {parts:[...],animations:{...}}.
+A non-null model REPLACES preset geometry/colors; stage ground/sky remain.
+Parts: unique id, parent="" for root or another part ID (any list order), shape
+group/box/sphere/cylinder/cone/plane. Group is invisible; other shapes are centered
+unit shapes scaled by size (diameters for sphere/cylinder/cone; cylinder/cone axis Y;
+plane lies in XY, faces ±Z, size.z ignored). Colors/materials are per part.
+position/pivot/size are local world units; rotation XYZ degrees. Transform:
+T(position) T(pivot) R_XYZ(rotation + joints) T(-pivot). Children inherit this
+transform, NOT mesh size. Translation joints offset position in PARENT axes.
+Actor height/3 and scale multiply the whole model; y/pitch/roll position/orient
+the instance in addition to x/z/rotation. Custom objects have no automatic breathing.
+Joints: globally unique id per model, motion rotation(default)/translation, axis
+x(default)/y/z. min/max REQUIRED, value defaults 0 inside those bounds; target defaults
+max. Degrees ±3600 for rotation; world units ±50 for translation; min<=max.
+One joint per motion+axis per part. These are kinematic limits, NOT physics.
+Actor.joints and Shot.stageJoints override rest values by joint ID, within limits.
+Named animations: {duration,tracks:[{joint,keys:[{at,value}],easing}]}.
+Keys start at 0, then strictly increase within clip duration; values obey joint
+limits. Values interpolate linearly or ease-in-out; last value holds to clip end.
+Actor.motions / Shot.stageMotions schedule clips by animation ID. duration required,
+at chains from previous motion end (first:0), ordered/non-overlapping inside scene.
+speed .01–10 (default1); loop false(default) holds final clip pose, true repeats.
+blend 0–2 s (default .2, capped at half event duration) fades from rest/overrides
+and back; 0 switches directly. Gaps/end restore rest/overrides, no implicit carry.
+Rotation keys interpolate NUMERIC angles, not shortest arc (0→360 rolls a wheel).
+Design matching loop endpoints; combine simultaneous joints in one multi-track clip.
+Custom walk/wave changes no limbs automatically: define motions for those joints;
+existing actions still move/turn the root. Motions run alongside actions/Mimik.
+Actor joint.control none(default)/mouth/happy/sad/angry/surprised/blink blends sampled
+value toward target using expression weight; mouth uses max(speech, surprised).
+Thus custom faces can keep existing expressions/speech without hardcoded geometry.
+Order: rest → joints overrides → motion → control → clamp to min/max.
+Limits/model: 256 parts, depth32, 256 joints (6/part), 16 clips, 64 tracks/clip,
+64 keys/track, 4096 keys total. Shot: 2048 estimated active parts, max12 actors.
+Independent resource files: 512 KiB. No image textures/custom meshes yet.
+In resource dialog edit model JSON, choose animation and scrub preview time.
+Minimal independent example (add audience-specific publication copy/cover for delivery):
+${JSON.stringify(aiModel3DExample)}
 Complete compact sequence example (add publication copy and real cover for delivery):
 ${JSON.stringify(aiAction3DExample)}
 

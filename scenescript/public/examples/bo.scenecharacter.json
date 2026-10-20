@@ -4,6 +4,7 @@
   "kind": "character",
   "id": "bo",
   "definition": {
+    "model": null,
     "expression": "neutral",
     "style": "pixel",
     "name": "Bo",

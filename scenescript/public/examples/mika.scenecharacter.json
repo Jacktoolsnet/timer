@@ -4,6 +4,7 @@
   "kind": "character",
   "id": "mika",
   "definition": {
+    "model": null,
     "expression": "neutral",
     "style": "robot",
     "name": "Mika",

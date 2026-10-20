@@ -4,6 +4,7 @@
   "kind": "character",
   "id": "lina",
   "definition": {
+    "model": null,
     "expression": "neutral",
     "style": "brick",
     "name": "Lina",
