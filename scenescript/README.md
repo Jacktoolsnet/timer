@@ -252,6 +252,12 @@ Zwischenablagezugriff markiert den Text zum manuellen Kopieren.
 Projekte erhalten leere Werte. JSON-Dateien und lokale Entwürfe speichern die
 Angaben; sie werden nicht in der Präsentation eingeblendet. Die KI-Anleitung
 und das Schema enthalten die neuen Felder. Kein automatischer Plattform-Upload.
+Die KI-Anleitung lässt zuerst die Zielgruppe bestimmen und fordert darauf
+abgestimmte YouTube-Titel, Beschreibung und relevante Hashtags statt interner
+Projektbeschreibungen oder Szenenprotokolle. Ein fertiges Video benötigt außerdem
+ein echtes Cover in `thumbnail`: vorhandenes passendes Bild wiederverwenden,
+ansonsten erzeugen bzw. bei fehlendem Bildwerkzeug vor der finalen Ausgabe mit
+dem Nutzer beschaffen. Schema und Import bleiben für ältere Projekte unverändert.
 
 ### Bewegungspfade
 

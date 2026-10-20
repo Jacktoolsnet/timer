@@ -498,6 +498,18 @@ test('self-contained AI guide covers every schema object and field with unique t
  assert.match(guideFieldCatalog,/fontSize: num\[1\.\.500\] = 90; bubble:48/);
  assert.match(aiGuide,/specification notation, NOT JSON syntax/);assert.ok(!aiGuide.includes('JSON.stringify'));assert.ok(new TextEncoder().encode(aiGuide).length<60000,'keep the full copy/paste guide compact');
 });
+test('AI guide prioritizes audience-specific YouTube copy and real covers',()=>{
+ assert.match(aiGuide,/Identify the target audience FIRST/);
+ assert.match(aiGuide,/Project\.title is the proposed YOUTUBE TITLE, not an internal project label/);
+ assert.match(aiGuide,/Project\.description is the proposed YOUTUBE DESCRIPTION, not a scene-by-scene/);
+ assert.match(aiGuide,/Project\.hashtags: select a small focused set/);
+ assert.match(aiGuide,/never claim live trend research/);
+ assert.match(aiGuide,/Every completed video project MUST have a suitable cover in Project\.thumbnail/);
+ assert.match(aiGuide,/Reuse a suitable supplied\/existing cover; if missing, create a real thumbnail/);
+ assert.match(aiGuide,/If no such tool is available, arrange a real image with the user BEFORE final/);
+ assert.match(aiGuide,/invented Base64 is NOT a completed cover/);
+ assert.match(aiGuide,/Legacy imports may omit them/);
+});
 test('all compact guide examples validate and preserve camera holds and enabled effects',()=>{
  for(const p of aiGuideExamples){const parsed=parseProject(serialize(p));assert.deepEqual(parseProject(serialize(parsed)),parsed);assert.ok(aiGuide.includes(JSON.stringify(p,null,2)));}
  const camera=parseProject(serialize(aiCameraExample)).scenes[0].camera!;assert.equal(camera.stations[0].at,0);assert.equal(camera.stations[1].at,3);assert.equal(camera.stations[1].hold,2);assert.equal(camera.stations[2].width,50);
