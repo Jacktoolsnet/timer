@@ -1,8 +1,0 @@
----
-interface Props {x:number;y:number;radius:number;secondary?:boolean}
-const {x,y,radius,secondary=false}=Astro.props;
----
-<g transform={'translate('+x+' '+y+') scale('+radius/10+')'} fill={secondary?'var(--brand-secondary)':'var(--accent)'}>
- {Array.from({length:10},(_,i)=><rect x="-2" y="-12" width="4" height="5" rx=".6" transform={'rotate('+i*36+')'}/>)}
- <circle r="9.8"/><circle r="6.7" fill="var(--bg)"/>
-</g>

@@ -59,7 +59,7 @@ for(const tool of [...tools,'company']){
    await page.locator('[name=colorScheme][value="'+palette+'"]').check();
    await expect(page.locator('html')).toHaveAttribute('data-palette',palette);
    const paint=await icon.evaluate(el=>{
-    const target=el.querySelector('linearGradient stop:last-child')||el.querySelector('g');
+    const target=el.querySelector('linearGradient stop:last-child')||el.querySelector('.company-logo-grey');
     return target?getComputedStyle(target).getPropertyValue(target.tagName==='stop'?'stop-color':'fill'):'';
    });
    expect(paint).not.toBe('');colours.add(paint);
