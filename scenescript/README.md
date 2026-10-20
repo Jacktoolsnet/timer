@@ -484,7 +484,7 @@ Keine originalen Roblox-Assets; keine Verbindung zu Roblox oder externen Dienste
   Native Bildauflösung ist auch beim Export die interne 3D-Auflösung.
 - Schema, Laufzeitvalidierung und gemeinsame KI-Anleitung dokumentieren dieselbe
   kleine 3D-Sprache. Das Größenbudget der vollständigen Anleitung beträgt nun
-  65 kB einschließlich des erweiterten Feldkatalogs.
+  68 kB einschließlich des erweiterten Feldkatalogs.
 
 Importierbares Beispiel: `/examples/block-robots.scenescript.json` (mit Cover).
 Einzelressourcen: `/examples/mika.scenecharacter.json`,
@@ -522,3 +522,31 @@ unabhängig vom Szenen-JSON. Sie erzeugt keine Auftritte oder Kameraänderungen 
 Projekt. Szenenauftritte/Kamera bleiben im separaten aufklappbaren Abschnitt.
 Übernehmen bestätigt den Entwurf; Schließen verwirft ihn. Häufige Änderungen werden
 pro Browserframe gebündelt; alte Vorschau-Canvas-Puffer werden explizit freigegeben.
+
+
+### KI-gesteuerte 3D-Aktionsfolgen
+
+Neue Auftritte können `actions` mit bis zu 64 nicht überlappenden Schritten enthalten:
+`idle`, `walk`, `wave`, `turn`. `duration` ist erforderlich; ohne `at` beginnt der
+Schritt am Ende des vorherigen. Ziele `toX`/`toZ` sind absolute Welteinheiten und
+nur bei `walk` erlaubt. Die vorherige Position bleibt für ausgelassene Koordinaten,
+Wartezeiten und nach dem letzten Schritt erhalten. Standardmäßig wird Bewegung
+mit Smoothstep ein-/ausgebremst; `easing:"linear"` ist optional.
+
+`target` richtet den ganzen Körper auf eine andere **Auftritts-ID derselben Szene**
+aus (keine Charakterressourcen-ID); alternativ absolute `rotation` oder bei Gehen
+`faceMovement:true`. Die kürzeste Drehung wird verwendet. Gegenseitiges Anschauen
+ist möglich, weil Zielpositionen ohne rekursive Orientierungsberechnung abgetastet
+werden. `turn` dreht über die gesamte Schrittdauer, andere Aktionen blenden die
+Ausrichtung über `blend` ein. Gesten werden über `blend` weich ein-/ausgeblendet
+(Standard 0,3 s, intern auf halbe Schrittdauer begrenzt); nach Ende sind Arme/Beine
+wieder in Ruhe. Blickverfolgung endet mit dem Schritt. Noch keine Mimik, Augen-/
+Mundsteuerung, Kopf-only-Ausrichtung oder überlappende Gehen-und-Winken-Aktionen.
+
+Alte Projekte ohne Aktionsfolge bleiben unverändert abspielbar. Bei nichtleerem
+`actions` ersetzt die Folge die alten Einzelaktions-/Bewegungsfelder; alle
+vorhandenen Werte werden weiterhin validiert. Vorschau, Sprünge, Kontaktbögen und
+Export verwenden dieselbe reine absolute Zeitberechnung. JSON-Schema, KI-Anleitung
+und das Roboterbeispiel unter `/examples/block-robots.scenescript.json` zeigen die
+neue Syntax. Das Beispiel demonstriert Annähern, Warten, gegenseitiges Drehen und
+Winken sowie eine zweite Aufnahme mit anschließender Bewegung.

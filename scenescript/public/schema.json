@@ -1141,10 +1141,107 @@
         }
       }
     },
+    "actorAction3D": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "idle",
+            "walk",
+            "wave",
+            "turn"
+          ],
+          "default": "idle"
+        },
+        "at": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 3600
+        },
+        "duration": {
+          "type": "number",
+          "minimum": 0.01,
+          "maximum": 3600
+        },
+        "toX": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": -20,
+              "maximum": 20
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "toZ": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": -20,
+              "maximum": 20
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "rotation": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": -360,
+              "maximum": 360
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "target": {
+          "type": "string",
+          "maxLength": 100,
+          "pattern": "^(?:[a-zA-Z0-9_-]+)?$",
+          "default": ""
+        },
+        "faceMovement": {
+          "type": "boolean"
+        },
+        "blend": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2,
+          "default": 0.3
+        },
+        "easing": {
+          "enum": [
+            "linear",
+            "ease-in-out"
+          ],
+          "default": "ease-in-out"
+        }
+      },
+      "required": [
+        "duration"
+      ]
+    },
     "actor3D": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "actions": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {
+            "$ref": "#/$defs/actorAction3D"
+          },
+          "default": []
+        },
         "id": {
           "type": "string",
           "minLength": 1,

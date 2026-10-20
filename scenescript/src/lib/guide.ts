@@ -1,3 +1,4 @@
+import {aiAction3DExample} from './stage3d-example.ts';
 import {formats,newElement} from './model.ts';
 import {applyTextPreset,textPresets} from './text-presets.ts';
 
@@ -260,10 +261,34 @@ Actors have scene-local unique IDs, independent of 2D Element IDs. Each scene
 explicitly supplies positions/actions: no implicit cross-scene state or persistence.
 Positions x/z and toX/toZ use 3D WORLD UNITS, not 2D percentages; Y is up, feet
 stand on the ground. rotation is yaw in degrees; scale multiplies character height.
-at/duration define one action interval within the scene. Actors remain visible
-before/after it; positions interpolate linearly and clamp to their endpoints.
-Actions: idle (subtle breathing), walk (arm/leg cycles), wave (right-arm gesture).
-Rotations are explicit; movement does not automatically face the travel direction.
+For NEW stories use Actor3D.actions: up to 64 ordered, non-overlapping steps per
+actor. Each step requires duration; at defaults to previous end (first:0). Times
+are scene-local seconds and every step must finish within scene.duration. Gaps
+and the time after the last step hold position/orientation with idle breathing.
+Start position/yaw/scale come from the actor; later steps inherit the last pose.
+Step types: idle (wait), walk (limb cycles + optional toX/toZ destination), wave
+(right-arm gesture), turn (whole-body yaw). Only walk accepts toX/toZ; null/omitted
+coordinates hold the preceding coordinate. Coordinates are absolute world units.
+Movement defaults easing="ease-in-out" (smoothstep); "linear" is also available.
+At each step choose at most ONE orientation controller:
+- target: another ACTOR ID in this same shot, not a project character ID; no self
+  target. Turn/follow its time-sampled position without moving toward it. Reciprocal
+  targets are allowed; coincident positions retain that step's starting yaw.
+- rotation: absolute yaw in degrees, shortest angular route. 0 faces +Z, 90 faces +X.
+- faceMovement:true: walk-only, faces its start→destination direction. Defaults true
+  on walk unless target/rotation is provided; false elsewhere. False holds yaw.
+turn requires target or rotation and uses the full step duration to rotate.
+Other types ease toward their chosen heading over blend seconds. target tracking
+ends with the step; its final yaw then holds until another orientation change.
+blend defaults .3 seconds (0–2, internally capped at half the step duration): soft
+entry/exit for walk/wave gestures, soft facing entry. 0 opts into immediate changes.
+Limbs return to rest at step end, not a frozen raised arm. No overlapping actions
+or simultaneous walk+wave yet. Position/facing never depends on playback history.
+Legacy actions: when actions is empty/omitted, action/at/duration/toX/toZ keep the
+original single-action behavior (linear movement, explicit fixed rotation). A
+nonempty actions list overrides those legacy timing/movement fields; they remain
+validated. Do not mix them in newly authored JSON. Mimik, eye/mouth animation and
+head-only looking are NOT supported yet; target currently turns the whole body.
 Camera yaw/pitch are degrees, distance/targetX/Y/Z world units; orbit is yaw degrees
 per second, using scene-local time. This is independent of Scene.camera's 2D crop.
 The 3D stage is an opaque background above ordinary scene backgrounds, below all
@@ -278,8 +303,8 @@ Each character/stage can be exported/imported independently. Imports are indepen
 copies across projects;
 ID collisions offer copy or explicit update. No GLB import, arbitrary JavaScript,
 physics, lip sync, automatic rigging or arbitrary character shapes in this prototype.
-Minimal syntax example (add publication copy and a real cover for final delivery):
-{"version":"1.0","title":"Hello robots","format":"landscape","characters":{"robot":{}},"stages":{"plaza":{}},"scenes":[{"id":"hello","duration":5,"stage3d":{"stage":"plaza","actors":[{"id":"r1","character":"robot","action":"wave"}]},"elements":[]}]}
+Complete compact sequence example (add publication copy and real cover for delivery):
+${JSON.stringify(aiAction3DExample)}
 
 ## 6. Bubbles, anchors, groups and motion paths
 Bubble = one movable body+text+tail. kind=speech (rounded) or thought (cloud+3 dots).
