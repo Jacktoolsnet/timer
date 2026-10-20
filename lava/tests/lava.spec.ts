@@ -199,3 +199,45 @@ test('presets apply together, preserve pause and allow custom settings',async({p
  await expect(page.locator('#lava-preset-value')).toHaveText('Benutzerdefiniert');
  await expect(page.locator('#lava-speed')).toHaveValue('0.9');
 });
+
+test('living lava switches default on, react to strokes and persist',async({page})=>{
+ test.setTimeout(60000);
+ await page.goto('/de/');
+ await expect(page.locator('#lava-touch')).toBeChecked();
+ await expect(page.locator('#lava-evolution')).toBeChecked();
+ await expect(page.locator('#lava-stage')).not.toHaveClass(/no-webgl/);
+ await page.locator('#lava-toggle').click();
+ await expect(page.locator('#lava-stage')).toHaveCSS('touch-action','none');
+ const box=(await page.locator('#lava-canvas').boundingBox())!;
+ await page.mouse.move(box.x+box.width*.4,box.y+box.height*.4);
+ await page.mouse.down();
+ await page.mouse.move(box.x+box.width*.6,box.y+box.height*.5,{steps:5});
+ await page.mouse.up();
+ await page.locator('#lava-toggle').click();
+ await page.locator('#lava-touch').uncheck();
+ await page.locator('#lava-evolution').uncheck();
+ await expect(page.locator('#lava-stage')).toHaveCSS('touch-action','auto');
+ await page.locator('#palette-dropdown summary').click();
+ await page.locator('#remember-preferences').check();
+ await page.reload();
+ await expect(page.locator('#lava-touch')).not.toBeChecked();
+ await expect(page.locator('#lava-evolution')).not.toBeChecked();
+ await expect(page.locator('#lava-toggle')).toHaveAttribute('aria-pressed','false');
+});
+
+test('bubble sounds default on and persist when disabled',async({page})=>{
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/de/');
+ await expect(page.locator('#lava-sound')).toBeChecked();
+ await expect(page.locator('#lava-toggle')).toHaveAttribute('aria-pressed','false');
+ await page.locator('#lava-sound').uncheck();
+ await page.locator('#palette-dropdown summary').click();
+ await page.locator('#remember-preferences').check();
+ await page.reload();
+ await expect(page.locator('#lava-sound')).not.toBeChecked();
+ await page.locator('#lava-toggle').click();
+ await page.locator('#lava-sound').check();
+ await page.locator('#lava-sound').uncheck();
+ await page.locator('#lava-toggle').click();
+ expect(errors).toEqual([]);
+});

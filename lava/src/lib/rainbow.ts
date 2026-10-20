@@ -17,10 +17,10 @@ export function blobShape(index: number, time: number, viscosity = .35) {
  return {x: .5 + Math.sin(phase * .45 + index * 2.399) * .46, y: .5 + .55 * Math.sin(phase),
   rx: radius / Math.sqrt(stretch), ry: radius * Math.sqrt(stretch)};
 }
-export function advanceBlobColours(colours: Float32Array, time: number, dt: number, aspect: number, viscosity = .35) {
+export function advanceBlobColours(colours: Float32Array, time: number, dt: number, aspect: number, viscosity = .35, offsets?: Float32Array, evolve = true) {
  if (dt <= 0) return;
  const sizeScale = Math.min(aspect, 1);
- const shapes = Array.from({length: BLOB_COUNT}, (_, i) => blobShape(i, time, viscosity));
+ const shapes = Array.from({length: BLOB_COUNT}, (_, i) => {const shape=blobShape(i,time,viscosity);return {...shape,x:shape.x+(offsets?.[i*2]||0),y:shape.y+(offsets?.[i*2+1]||0)};});
  // Simultaneous symmetric exchange avoids order-dependent mixing and retains colour.
  const changes = new Float32Array(colours.length);
  for (let i = 0; i < BLOB_COUNT; i++) for (let j = i + 1; j < BLOB_COUNT; j++) {
@@ -34,7 +34,7 @@ export function advanceBlobColours(colours: Float32Array, time: number, dt: numb
    changes[j * 3 + c] -= delta;
   }
  }
- const drift = 1 - Math.exp(-dt / 100);
+ const drift = evolve ? 1 - Math.exp(-dt / 100) : 0;
  for (let i = 0; i < BLOB_COUNT; i++) {
   const target = rainbowColour(i / BLOB_COUNT + time / 240);
   for (let c = 0; c < 3; c++) {

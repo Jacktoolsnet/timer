@@ -48,3 +48,15 @@ Vorlagen: Klassisch, Goldrausch, Tiefsee, Ölfilm und Regenbogentraum setzen
 Farbwelt, Trägerflüssigkeit, Zähigkeit, Tempo und Helligkeit gemeinsam.
 Einzeländerungen zeigen „Benutzerdefiniert“. Wiedergabe bleibt unverändert;
 mit Speicherzustimmung werden die Werte gesichert und die Vorlage beim Laden erkannt.
+
+Berührungsaktion und endlose Verwandlung sind standardmäßig an und einzeln
+abschaltbar. Ziehen mit Maus oder Finger versetzt nahe Blasen sanft; nach dem
+Loslassen kehren sie allmählich zurück. Nur während laufender Animation,
+nicht auf Bedienelementen. Bei abgeschalteter Interaktion bleibt normales
+Touch-Scrollen möglich. Endlose Verwandlung entwickelt Formen und Nuancen
+langsam weiter. Beide Schalter werden mit Speicherzustimmung gesichert;
+Presets ändern diese Schalter nicht. Kein Autostart, auch bei Reduced Motion.
+
+Optionale, lokal synthetisierte Blasentöne beim Verbinden und Trennen; standardmäßig
+an, aber erst nach Benutzerstart hörbar. Pause und Hintergrund schalten Ton aus.
+Der Sound-Schalter bleibt nur mit Speicherzustimmung gespeichert.

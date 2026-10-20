@@ -1,3 +1,5 @@
+import {BubbleAudio} from '../lib/bubble-audio';
+import {LavaInteraction} from '../lib/interaction';
 import {presets} from '../lib/presets';
 import {storageAllowed} from '../lib/storage';
 import {STORAGE_KEY} from '../lib/engine';
@@ -10,6 +12,12 @@ const speed = document.querySelector<HTMLInputElement>('#lava-speed')!;
 const brightness = document.querySelector<HTMLInputElement>('#lava-brightness')!;
 const viscosity=document.querySelector<HTMLInputElement>('#lava-viscosity')!;
 let fluidColour=0;
+const touch=document.querySelector<HTMLInputElement>('#lava-touch')!;
+const evolution=document.querySelector<HTMLInputElement>('#lava-evolution')!;
+const interaction=new LavaInteraction();
+let evolutionTime=12;
+const sound=document.querySelector<HTMLInputElement>('#lava-sound')!;
+const bubbleAudio=new BubbleAudio();
 const motion = matchMedia('(prefers-reduced-motion: reduce)');
 const gl = canvas.getContext('webgl', { alpha: false, antialias: false, preserveDrawingBuffer: false });
 let running = false, frame = 0, previous = 0, elapsed = 12, colour = 0;
@@ -17,6 +25,15 @@ const colours = [[1,.28,.055],[.63,.22,1],[.05,.85,.64],[1,.22,.49],[.63,.22,1],
 const glows = ['#ff703e','#b784ff','#50e8cc','#ff80b5','#ae7eff','#bdcce0','#dc916a','#edc46b','#9582ce'];
 const blobColours=createBlobColours();
 let program: WebGLProgram | null = null;
+const textureData=new Uint8Array(16*2*4);
+const blobTexture=gl?.createTexture();
+if(gl&&blobTexture){
+ gl.bindTexture(gl.TEXTURE_2D,blobTexture);
+ gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST);
+ gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST);
+ gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
+ gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+}
 function shader(type: number, source: string) {
  const s = gl!.createShader(type)!; gl!.shaderSource(s,source); gl!.compileShader(s);
  if (!gl!.getShaderParameter(s,gl!.COMPILE_STATUS)) {gl!.deleteShader(s);throw Error('Shader compilation failed');}
@@ -27,8 +44,12 @@ if (gl) {
  program = gl.createProgram()!;
  const vertex = shader(gl.VERTEX_SHADER,'attribute vec2 p; varying vec2 uv; void main(){uv=p*.5+.5;gl_Position=vec4(p,0.,1.);}');
  const fragment = shader(gl.FRAGMENT_SHADER,`
+ #ifdef GL_FRAGMENT_PRECISION_HIGH
+ precision highp float;
+ #else
  precision mediump float;
- varying vec2 uv; uniform vec4 params; uniform vec4 colourData; uniform vec3 blobColours[14];
+ #endif
+ varying vec2 uv; uniform vec4 params; uniform vec4 colourData; uniform sampler2D blobs; uniform float evolutionTime; uniform vec2 resolution;
  #define time params.x
  #define aspect params.y
  #define material params.z
@@ -37,11 +58,13 @@ if (gl) {
  float contribution(vec2 p, float n){
    float phase=time*(.11+n*.006)+n*2.399;
    vec2 c=vec2(.5+sin(phase*.45+n*2.399)*.46,.5+.55*sin(phase));
+   vec2 offset=texture2D(blobs,vec2((n+.5)/16.,.75)).rg;
+   c+=(offset*255.-128.)/127.*.24;
    float r=.055+.035*(.5+.5*sin(n*7.));
    // Stretch fastest in transit, then gather at the turning points.
    // Reciprocal axes preserve approximate area instead of inflating the wax.
    float travel=abs(cos(phase));
-   float shapeCycle=.5+.5*sin(time*(.075/(1.+viscosity))+n*1.73);
+   float shapeCycle=.5+.5*sin(evolutionTime*(.075/(1.+viscosity))+n*1.73);
    float stretch=.85+(1.2+1.3*viscosity)*pow(shapeCycle,1.4)*(.6+.4*travel);
    // Size wax relative to the shorter side: portrait must not magnify
    // blobs until they fill almost the entire narrow viewport.
@@ -55,7 +78,7 @@ if (gl) {
    d*=vec2(sqrt(stretch)*taper,1./sqrt(stretch));
    // Slowly morph the cross-section from round to a soft rounded square.
    // Normalising by radius keeps the exponent numerically stable on mobile GPUs.
-   float squareness=smoothstep(.18,.88,.5+.5*sin(time*.055+n*2.17));
+   float squareness=smoothstep(.18,.88,.5+.5*sin(evolutionTime*.055+n*2.17));
    float exponent=mix(2.,4.2,squareness);
    vec2 q=sqrt(d*d+vec2(.000001))/r;
    float distanceSquared=pow(pow(q.x,exponent)+pow(q.y,exponent),2./exponent);
@@ -78,11 +101,17 @@ if (gl) {
  void main(){
   vec2 p=uv;
   float f=field(p);
-  float mask=smoothstep(.82,.99,f);
+
   vec2 stepSize=.004*min(aspect,1.)/vec2(aspect,1.);
   vec2 grad=vec2(
    surfaceHeight(p+vec2(stepSize.x,0.))-surfaceHeight(p-vec2(stepSize.x,0.)),
    surfaceHeight(p+vec2(0.,stepSize.y))-surfaceHeight(p-vec2(0.,stepSize.y)));
+  // Keep contour softness near one physical pixel, not a fraction of
+  // the scene: fullscreen should reveal detail rather than enlarge blur.
+  float height= f/(1.+f);
+  vec2 fieldSlope=grad/(2.*stepSize)/max((1.-height)*(1.-height),.0001);
+  float edgeWidth=clamp(length(fieldSlope/resolution)*.85,.002,.09);
+  float mask=smoothstep(.905-edgeWidth,.905+edgeWidth,f);
   vec3 normal=normalize(vec3(-grad*9.,.65));
   // A concealed bulb below the glass lights the wax and the carrier liquid.
   vec3 toBulb=normalize(vec3((.5-p.x)*.15,-.12-p.y,.32));
@@ -96,9 +125,13 @@ if (gl) {
    for(int i=0;i<14;i++){
     // Local influence blends at the neck, without tinting distant blobs.
     float weight=pow(contribution(p,float(i)),2.);
-    mixed+=blobColours[i]*weight;total+=weight;
+    mixed+=texture2D(blobs,vec2((float(i)+.5)/16.,.25)).rgb*weight;total+=weight;
    }
    waxColour=mixed/max(total,.0001);
+  }
+  if(material<3.5){
+   vec3 nuance=.5+.5*cos(evolutionTime*.018+vec3(0.,2.094,4.188));
+   waxColour=mix(waxColour,waxColour*(.65+.7*nuance),.32);
   }
   vec3 lampLight=mix(waxColour,vec3(1.,.82,.48),.26);
   float rim=pow(1.-normal.z,2.);
@@ -115,7 +148,7 @@ if (gl) {
    if(material>7.5){
     // Thin-film-inspired interference; varies with curvature and slow motion.
     float film=normal.z*2.2+normal.x*.28+normal.y*.18
-     +.13*sin(p.x*4.+p.y*3.+time*.055);
+     +.13*sin(p.x*4.+p.y*3.+evolutionTime*.055);
     vec3 iridescence=.5+.5*cos(6.28318*(film+vec3(0.,.33,.67)));
     liquid=mix(vec3(.045,.055,.09),iridescence,.38+.38*fresnel)
      +iridescence*band*.32+vec3(.75,.87,1.)*softbox*.3;
@@ -145,11 +178,20 @@ if (gl) {
 } else stage.classList.add('no-webgl');
 function draw(){
  if(!gl||!program)return;
- const ratio=Math.min(devicePixelRatio||1,1.5);
+ const ratio=Math.min(devicePixelRatio||1,2);
  const width=Math.round(canvas.clientWidth*ratio),height=Math.round(canvas.clientHeight*ratio);
  if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;}
+ gl.uniform2f(gl.getUniformLocation(program,'resolution'),width,height);
  gl.viewport(0,0,width,height);gl.uniform4f(gl.getUniformLocation(program,'params'),elapsed,width/height,colour,Number(viscosity.value)/100);
- gl.uniform3fv(gl.getUniformLocation(program,'blobColours[0]'),blobColours);
+ for(let i=0;i<14;i++){
+  for(let c=0;c<3;c++)textureData[i*4+c]=Math.round(blobColours[i*3+c]*255);
+  textureData[i*4+3]=255;
+  for(let c=0;c<2;c++)textureData[64+i*4+c]=Math.round(128+interaction.offsets[i*2+c]/.24*127);
+ }
+ gl.bindTexture(gl.TEXTURE_2D,blobTexture!);
+ gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,16,2,0,gl.RGBA,gl.UNSIGNED_BYTE,textureData);
+ gl.uniform1i(gl.getUniformLocation(program,'blobs'),0);
+ gl.uniform1f(gl.getUniformLocation(program,'evolutionTime'),evolutionTime);
  gl.uniform4f(gl.getUniformLocation(program,'colourData'),...colours[colour] as [number,number,number],fluidColour);gl.drawArrays(gl.TRIANGLES,0,6);
 }
 function animate(now:number){
@@ -157,18 +199,22 @@ function animate(now:number){
  if(previous){
   const dt=Math.min((now-previous)/1000,.05)*Number(speed.value)/(1+Number(viscosity.value)/100*1.5);
   elapsed+=dt;
-  if(colour===4)advanceBlobColours(blobColours,elapsed,dt,canvas.clientWidth/canvas.clientHeight,Number(viscosity.value)/100);
+  if(evolution.checked)evolutionTime+=dt;
+  interaction.advance(dt,Number(viscosity.value)/100);
+  if(colour===4)advanceBlobColours(blobColours,elapsed,dt,canvas.clientWidth/canvas.clientHeight,Number(viscosity.value)/100,interaction.offsets,evolution.checked);
  }
+ bubbleAudio.update(elapsed,canvas.clientWidth/canvas.clientHeight,Number(viscosity.value)/100,interaction.offsets);
  previous=now;draw();frame=requestAnimationFrame(animate);
 }
 function sync(){
  cancelAnimationFrame(frame);previous=0;
+ if(!running||document.hidden)bubbleAudio.stop();
  const label=running?toggle.dataset.pause!:toggle.dataset.start!;
  toggle.setAttribute('aria-label',label);toggle.title=label;
  toggle.setAttribute('aria-pressed',String(running));
  if(running&&!document.hidden)frame=requestAnimationFrame(animate);
 }
-toggle.addEventListener('click',()=>{running=!running;status.textContent='';sync();});
+toggle.addEventListener('click',()=>{running=!running;status.textContent='';sync();if(running&&sound.checked)void bubbleAudio.start();});
 document.addEventListener('visibilitychange',sync);
 motion.addEventListener('change',()=>{if(motion.matches){running=false;status.textContent=status.dataset.reduced!;sync();}});
 document.querySelectorAll<HTMLInputElement>('[name=lava-color]').forEach(input=>input.addEventListener('change',()=>{
@@ -238,7 +284,7 @@ function saveLavaSettings() {
  if (!storageAllowed()) return;
  try {
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
-   colour, speed: Number(speed.value), brightness: Number(brightness.value), fluidColour, viscosity: Number(viscosity.value)
+   colour, speed: Number(speed.value), brightness: Number(brightness.value), fluidColour, viscosity: Number(viscosity.value), touch:touch.checked, evolution:evolution.checked, sound:sound.checked
   }));
  } catch { /* Blocked/full storage must not prevent using the animation. */ }
 }
@@ -251,6 +297,9 @@ if (storageAllowed()) {
  try {
   const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
   if (saved && typeof saved === 'object') {
+   if(typeof saved.sound==='boolean')sound.checked=saved.sound;
+   if(typeof saved.touch==='boolean')touch.checked=saved.touch;
+   if(typeof saved.evolution==='boolean')evolution.checked=saved.evolution;
    if(Number.isInteger(saved.fluidColour)&&saved.fluidColour>=0&&saved.fluidColour<5){
     const input=document.querySelector<HTMLInputElement>('[name=fluid-color][value="'+saved.fluidColour+'"]')!;
     input.checked=true;input.dispatchEvent(new Event('change'));
@@ -313,3 +362,43 @@ else{
  const input=presetInputs[initialPreset];input.checked=true;
  presetValue.textContent=input.closest('label')!.querySelector('strong')!.textContent;
 }
+
+
+let activePointer:number|null=null;
+let lastPoint={x:0,y:0};
+function updateTouchMode(){
+ stage.style.touchAction=touch.checked&&running?'none':'auto';
+}
+function stopStroke(){activePointer=null;}
+stage.addEventListener('pointerdown',event=>{
+ if(!touch.checked||!running||!program||!(event.target instanceof Element)||event.target.closest('button'))return;
+ if(activePointer!==null)return;
+ const rect=canvas.getBoundingClientRect();
+ activePointer=event.pointerId;
+ lastPoint={x:(event.clientX-rect.left)/rect.width,y:1-(event.clientY-rect.top)/rect.height};
+ stage.setPointerCapture(event.pointerId);
+});
+stage.addEventListener('pointermove',event=>{
+ if(event.pointerId!==activePointer||!touch.checked||!running)return;
+ const rect=canvas.getBoundingClientRect();
+ const point={x:(event.clientX-rect.left)/rect.width,y:1-(event.clientY-rect.top)/rect.height};
+ interaction.stroke(point.x,point.y,point.x-lastPoint.x,point.y-lastPoint.y,elapsed,rect.width/rect.height,Number(viscosity.value)/100);
+ lastPoint=point;
+});
+for(const name of ['pointerup','pointercancel','lostpointercapture'])stage.addEventListener(name,stopStroke);
+touch.addEventListener('change',()=>{stopStroke();if(!touch.checked)interaction.reset();updateTouchMode();draw();saveLavaSettings();});
+evolution.addEventListener('change',saveLavaSettings);
+toggle.addEventListener('click',()=>{stopStroke();updateTouchMode();});
+document.addEventListener('visibilitychange',stopStroke);
+motion.addEventListener('change',()=>{stopStroke();updateTouchMode();});
+updateTouchMode();
+
+sound.addEventListener('change',()=>{
+ if(sound.checked&&running&&!document.hidden)void bubbleAudio.start();
+ else bubbleAudio.stop();
+ saveLavaSettings();
+});
+document.addEventListener('visibilitychange',()=>{
+ if(!document.hidden&&running&&sound.checked)void bubbleAudio.start();
+});
+window.addEventListener('pagehide',()=>bubbleAudio.stop());
