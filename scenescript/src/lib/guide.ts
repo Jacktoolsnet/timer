@@ -316,9 +316,9 @@ No external model files/scripts, physics, skinning or head-only looking.
 3D PATHS (no physics): Stage.paths is a reusable ID map, max16 paths. Each has
 points:[{x,y,z},...], 2–128 points (closed:at least3), closed:false(default),
 interpolation:smooth(default Catmull-Rom)/linear. Coordinates ±100 world units.
-Optional ups: empty = transported frames; otherwise one nonzero, non-tangent-parallel
-up vector per point. Interpolated normals define banked turns/loop rolls; add
-intermediate vectors for half-turns.
+Optional ups: [] = transported frames; else one nonzero up vector/point, not parallel
+to tangent. Normals define banks/loop rolls; add intermediate vectors for half-turns.
+Ground/fog expand for paths beyond the 56-unit plaza.
 Adjacent points must differ; closed:true closes automatically: DO NOT repeat the
 first point at the end. Smooth curves may overshoot; linear has sharp corners.
 Actor.path=null(default) or {path:"route",duration:12,laps:4,offset:1} references

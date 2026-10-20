@@ -38,6 +38,10 @@ export function parseStage3D(value:unknown,path='stage'):Stage3D{
  const v=object(value,path),d=defaultStage3D();keys(v,Object.keys(d),path);
  return {paths:parsePaths3D(v.paths,path+'.paths'),model:parseModel3D(v.model,path+'.model')??presetStageModel3D(),name:text(v.name===undefined?d.name:v.name,path+'.name'),skyColor:color(v.skyColor===undefined?d.skyColor:v.skyColor,path+'.skyColor'),groundColor:color(v.groundColor===undefined?d.groundColor:v.groundColor,path+'.groundColor'),blockColor:color(v.blockColor===undefined?d.blockColor:v.blockColor,path+'.blockColor')};
 }
+/** Keep the original plaza size, expanding ground/fog for larger authored paths. */
+export function stage3DGroundSize(stage:Stage3D){
+ let half=28;for(const path of Object.values(stage.paths??{}))for(const p of path.points)half=Math.max(half,Math.abs(p.x)+8,Math.abs(p.z)+8);return half*2;
+}
 export function parse3DLibrary<T>(value:unknown,parse:(v:unknown,p:string)=>T,path:string):Record<string,T>{
  const v=object(value===undefined?{}:value,path),out:Record<string,T>={};if(Object.keys(v).length>30)throw new Error(path+': maximum 30');
  for(const [id,item] of Object.entries(v)){identifier(id,path);Object.defineProperty(out,id,{value:parse(item,path+'.'+id),enumerable:true,writable:true,configurable:true});}return out;

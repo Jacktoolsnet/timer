@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import {createModel3D} from './model3d';
 import {actor3DMouth,emptySpeechEnvelopes,type SpeechEnvelopes} from '../lib/stage3d-speech';
 import {presetCharacterModel3D,presetStageModel3D} from '../lib/stage3d-presets';
-import {actor3DFace,actor3DPose,actor3DFrame,type Shot3D,type Actor3D,type Character3D,type Stage3D} from '../lib/stage3d';
+import {stage3DGroundSize,actor3DFace,actor3DPose,actor3DFrame,type Shot3D,type Actor3D,type Character3D,type Stage3D} from '../lib/stage3d';
 import type {Project} from '../lib/model';
 type Custom3D=ReturnType<typeof createModel3D>&{actor:Actor3D;character:Character3D};
 type GroupCopy3D=ReturnType<typeof createModel3D>&{member:GroupMember3D;placement:GroupPlacement3D;duration:number;controls:Record<string,number>;motions:Actor3D['motions']};
@@ -20,13 +20,14 @@ export class Stage3DRenderer{
  private onLost=(event:Event)=>{event.preventDefault();this.lost=true;};
  private release(world:World){world.scene.traverse(node=>{if(node instanceof THREE.InstancedMesh)node.dispose();});world.geometries.forEach(g=>g.dispose());world.materials.forEach(m=>m.dispose());world.scene.clear();}
  private world(stage:Stage3D,characters:Project['characters'],actors:Actor3D[],groups:Record<string,Group3D>,placements:GroupPlacement3D[],studio=false):World{
-  const scene=new THREE.Scene();scene.background=new THREE.Color(stage.skyColor);scene.fog=new THREE.Fog(stage.skyColor,35,85);
+  const groundSize=stage3DGroundSize(stage),fogScale=groundSize/56;
+  const scene=new THREE.Scene();scene.background=new THREE.Color(stage.skyColor);scene.fog=new THREE.Fog(stage.skyColor,35*fogScale,85*fogScale);
   const world:World={members:[],framing:null,custom:[],stageModel:null,scene,geometries:new Set(),materials:new Map()};
   const cube=new THREE.BoxGeometry(1,1,1);world.geometries.add(cube);
   const material=(color:string)=>{let m=world.materials.get(color);if(!m){m=new THREE.MeshStandardMaterial({color,roughness:.78,metalness:.08});world.materials.set(color,m);}return m;};
   const box=(parent:THREE.Object3D,color:string,x:number,y:number,z:number,w:number,h:number,d:number)=>{const m=new THREE.Mesh(cube,material(color));m.position.set(x,y,z);m.scale.set(w,h,d);parent.add(m);return m;};
   scene.add(new THREE.HemisphereLight('#ffffff','#72864c',2.3));const sun=new THREE.DirectionalLight('#fff2d4',3.5);sun.position.set(-8,14,8);scene.add(sun);
-  box(scene,stage.groundColor,0,-.32,0,56,.6,56);
+  box(scene,stage.groundColor,0,-.32,0,groundSize,.6,groundSize);
   if(!studio){world.stageModel=createModel3D(stage.model??presetStageModel3D(),world,stage);scene.add(world.stageModel.root);}
   for(const actor of actors){const character=characters[actor.character],model=createModel3D(character.model??presetCharacterModel3D(character.style),world,character);model.root.scale.setScalar(character.height/3*actor.scale);scene.add(model.root);world.custom.push({...model,actor,character});}
   for(const placement of placements){const group=groups[placement.group];for(const member of groupMembers3D(group)){

@@ -798,13 +798,20 @@ Ohne wiederherstellbaren lokalen Entwurf öffnet der Editor jetzt
 Countdown, vier zusammenhängende Runden je Fahrzeug, Führungswechsel, Zielfoto,
 Rot mit 48,0 s / Blau mit 48,5 s und ein Schlussbild. Die Kamera wechselt zwischen
 Verfolgung, Zuschauerschwenk, Fahrersicht und Übersicht. Die Flagge bewegt sich am
-Ziel; Tribüne, vier Zuschauervorlagen, Werbung und Bäume sind enthalten.
+Ziel; die Tribüne schaut zum Looping. Vier Zuschauervorlagen, Werbung und Bäume
+sind enthalten. Ein Start-Ziel-Turm mit Treppe, verglaster Rennleitung und
+Balkon steht neben der Strecke. Eine eigenständig exportierbare Rennleitungsfigur
+schwenkt dort die karierte Flagge während des Zieleinlaufs; ihre Arm- und
+Flaggenbewegung bleibt über Kameraschnitte hinweg synchron.
 
-Die Produktionsbahn hat eine gut 200 Welteinheiten lange, kurvenreiche Route.
+Die Produktionsbahn hat eine rund 235 Welteinheiten lange, kurvenreiche Route.
 Der Spiral-Looping versetzt Ein- und Ausfahrt seitlich um 6,4 Einheiten bei
 4,8 Einheiten Fahrbahnbreite. Die Hochkurven sind bis ca. 28° überhöht;
-Rampe, Flugbahn und Landung bleiben oberirdisch. 448 feinere Fahrbahnabschnitte
-und zusätzliche Stützen bilden die Strecke. Die Trucks besitzen Profilblöcke,
+Rampe, Flugbahn und Landung bleiben oberirdisch. Fein unterteilte Fahrbahnabschnitte
+und zusätzliche Stützen bilden die Strecke. Größere Radien und weiter auseinander
+liegende Kurven nutzen eine größere Arena. Boden und Nebelreichweite passen sich
+an die Pfadausdehnung an; die kleinen bestehenden Bühnen bleiben unverändert.
+Die Trucks besitzen Profilblöcke,
 Felgenspeichen, Radmuttern, Federbeine, Achsen, Spiegel, Kühlergrill,
 Zusatzscheinwerfer, Überrollbügel und Ersatzrad als normale exportierbare Bauteile.
 

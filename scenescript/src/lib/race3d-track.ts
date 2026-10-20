@@ -4,7 +4,9 @@ export const spiralEntryIndex3D=points.length;
 // One full turn, but with 6.4 units of side separation and zero lateral derivative at both ends.
 for(let i=0;i<=24;i++){const f=i/24,a=f*Math.PI*2,s=f*f*(3-2*f);points.push(vec(-11+4*Math.sin(a),height+4*(1-Math.cos(a)),-15+6.4*s));ups.push(vec(-Math.sin(a),Math.cos(a),0));}
 export const spiralExitIndex3D=points.length-1;
-const extras=[[-9.95,height,-8.6],[-6,height,-8.6],[0,1.7,-8.6],[4,2.4,-8.6],[6,3.9,-8.6],[8,3.6,-8.6],[10,2.1,-8.6],[13,1.5,-8.6],[18,1.8,-9],[23,2,-6],[24,2,-1],[20,2.2,3],[15,2,5],[12,1.6,9],[17,1.8,13],[22,2,16],[20,2,21],[14,2,23],[8,1.8,20],[4,1.6,17],[-2,height,18],[-8,1.6,22],[-16,2,21],[-23,2,16],[-24,2,9],[-20,1.6,5],[-15,height,3],[-16,height,-2],[-22,1.6,-5],[-24,1.6,-10],[-23,height,-14]];
+// The start/loop/jump retain their dimensions; the outer course gets genuinely wider arcs.
+const extras=[[-9.95,height,-8.6],[-6,height,-8.6],[0,1.7,-8.6],[4,2.4,-8.6],[6,3.9,-8.6],[8,3.6,-8.6],[10,2.1,-8.6],[13,1.5,-8.6],
+ [23,1.9,-8],[32,2,-1],[34,2,9],[29,2.1,18],[18,1.8,21],[11,1.7,27],[16,1.9,34],[8,2,37],[-2,1.8,33],[-10,1.7,27],[-21,1.9,30],[-32,2,24],[-35,2,13],[-30,1.8,3],[-23,1.6,-3],[-25,1.5,-10],[-23,height,-14]];
 points.push(...extras.map(([x,y,z])=>vec(x,y,z)));
 for(let i=ups.length;i<points.length;i++){
  const p=points[i],previous=points[i-1],next=points[(i+1)%points.length],a=norm(vec(p.x-previous.x,0,p.z-previous.z)),b=norm(vec(next.x-p.x,0,next.z-p.z)),angle=Math.atan2(cross(a,b).y,dot(a,b));
@@ -12,7 +14,7 @@ for(let i=ups.length;i<points.length;i++){
  ups.push(add(add(mul(vertical,Math.cos(bank)),mul(cross(forward,vertical),Math.sin(bank))),mul(forward,dot(forward,vertical)*(1-Math.cos(bank)))));
 }
 export const racePath3D:Path3D={closed:true,interpolation:'smooth',points,ups};
-export const raceRoadWidth3D=4.8,raceRoadSamples3D=448;
+export const raceRoadWidth3D=4.8,raceRoadSamples3D=400;
 export const raceJumpGap3D=(p:V3)=>p.z>-9.2&&p.z<-8&&p.x>4.8&&p.x<8.6;
 export function frameRotation3D(f:ReturnType<typeof samplePath3D>){
  const y=Math.asin(Math.max(-1,Math.min(1,f.forward.x))),c=Math.cos(y);
