@@ -255,7 +255,7 @@ Project.characters and Project.stages are independent ID maps (max 30 each).
 Characters are procedural figures: name, height and body/head/limb/accent colors.
 style: classic (default, legacy robot), robot (visible mechanical mouth), pixel
 (robot with pixel-monitor eyes/mouth), brick (brick-style person with eyes, nose,
-smile; headColor also colors hands). These are static faces, not expression controls.
+smile; headColor also colors hands). Character.expression sets its base face.
 Stages currently share one built-in block plaza geometry, customized by name and
 sky/ground/block colors; a stage name does NOT generate arbitrary scenery.
 Scene.stage3d=null/omitted disables 3D. Otherwise stage references Project.stages;
@@ -287,25 +287,29 @@ blend defaults .3 seconds (0–2, internally capped at half the step duration): 
 entry/exit for walk/wave gestures, soft facing entry. 0 opts into immediate changes.
 Limbs return to rest at step end, not a frozen raised arm. No overlapping actions
 or simultaneous walk+wave yet. Position/facing never depends on playback history.
-Legacy actions: when actions is empty/omitted, action/at/duration/toX/toZ keep the
-original single-action behavior (linear movement, explicit fixed rotation). A
-nonempty actions list overrides those legacy timing/movement fields; they remain
-validated. Do not mix them in newly authored JSON. Mimik, eye/mouth animation and
-head-only looking are NOT supported yet; target currently turns the whole body.
-Camera yaw/pitch are degrees, distance/targetX/Y/Z world units; orbit is yaw degrees
-per second, using scene-local time. This is independent of Scene.camera's 2D crop.
-The 3D stage is an opaque background above ordinary scene backgrounds, below all
-2D elements; the 2D scene camera transforms it too. Use screen-space captions.
-Absolute-time poses are shared by preview, stills and video export. WebGL2 is
-required; unavailable graphics/context loss is an error, never a silent blank export.
-The 3D dialog selects resource type/ID on the left and edits its shared definition
-with an isolated live preview on the right (even without a scene assignment).
-Scene actors/camera remain in a separate expandable section; previews never add
-actors or modify scene cameras. Confirm applies drafts; closing discards them.
-Each character/stage can be exported/imported independently. Imports are independent
-copies across projects;
-ID collisions offer copy or explicit update. No GLB import, arbitrary JavaScript,
-physics, lip sync, automatic rigging or arbitrary character shapes in this prototype.
+Legacy: empty/omitted actions uses action/at/duration/toX/toZ (linear motion, fixed
+yaw). Nonempty actions overrides these fields, which remain validated. Do not mix
+both styles in new JSON. No head-only looking; target turns the whole body.
+MIMIK: Actor3D.expressions is a SEPARATE track, parallel to actions (e.g. happy
+while walking). Max 64 ordered non-overlapping events within scene.duration.
+expression: neutral, happy, sad, angry, surprised, blink; duration is required;
+at defaults to previous expression end (first:0). intensity 0–1 defaults 1.
+blend 0–2 seconds defaults .2, capped at half duration: fade from Character.expression
+to the event and back. 0 switches immediately. Gaps and event end restore the base
+face; no persistence across events/scenes. A neutral event temporarily neutralizes
+a non-neutral base. blink closes/reopens eyes without changing the base mood; use duration .15–.3.
+No automatic/random blinking. Pixel faces keep discrete LEDs with blended cell
+sizes; other faces deform eyes, brows and mouth. classic has limited mouth detail;
+choose robot/pixel/brick for expressive mouths. Same timing in preview and exports.
+Camera: yaw/pitch degrees, distance/targetX/Y/Z world units; orbit degrees/second
+in scene-local time. 3D is opaque, above scene backgrounds, below 2D elements.
+Scene.camera's independent 2D crop also transforms 3D; use screen-space captions.
+Preview/stills/video share absolute-time poses. WebGL2 is required; unavailable
+graphics/context loss causes an error, never a silent blank export.
+3D dialog: select type/ID, edit definition with isolated preview; actors/camera in
+a separate expandable section. Confirm applies drafts; closing discards. Independent
+character/stage imports/exports; ID collisions: copy or explicit update. No external
+models, arbitrary scripts/shapes, physics, automatic rigging or speech lip-sync.
 Complete compact sequence example (add publication copy and real cover for delivery):
 ${JSON.stringify(aiAction3DExample)}
 

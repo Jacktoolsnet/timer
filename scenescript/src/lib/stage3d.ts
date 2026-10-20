@@ -1,15 +1,20 @@
 /** Small declarative 3D vocabulary. No scripts, URLs or external models are executed. */
-export type Character3D={style:'classic'|'robot'|'pixel'|'brick';name:string;bodyColor:string;headColor:string;limbColor:string;accentColor:string;height:number};
+export const expressions3D=['neutral','happy','sad','angry','surprised','blink'] as const;
+export type Expression3D=typeof expressions3D[number];
+export type ActorExpression3D={expression:Expression3D;at:number;duration:number;intensity:number;blend:number};
+export const defaultActorExpression3D=():ActorExpression3D=>({expression:'neutral',at:0,duration:1,intensity:1,blend:.2});
+export type FacePose3D=Record<Exclude<Expression3D,'neutral'>,number>;
+export type Character3D={expression:Expression3D;style:'classic'|'robot'|'pixel'|'brick';name:string;bodyColor:string;headColor:string;limbColor:string;accentColor:string;height:number};
 export type Stage3D={name:string;skyColor:string;groundColor:string;blockColor:string};
 export type ActorAction3D={type:'idle'|'walk'|'wave'|'turn';at:number;duration:number;toX:number|null;toZ:number|null;rotation:number|null;target:string;faceMovement:boolean;blend:number;easing:'linear'|'ease-in-out'};
 export const defaultActorAction3D=():ActorAction3D=>({type:'idle',at:0,duration:1,toX:null,toZ:null,rotation:null,target:'',faceMovement:false,blend:.3,easing:'ease-in-out'});
-export type Actor3D={actions:ActorAction3D[];id:string;character:string;x:number;z:number;toX:number;toZ:number;rotation:number;scale:number;action:'idle'|'walk'|'wave';at:number;duration:number};
+export type Actor3D={expressions:ActorExpression3D[];actions:ActorAction3D[];id:string;character:string;x:number;z:number;toX:number;toZ:number;rotation:number;scale:number;action:'idle'|'walk'|'wave';at:number;duration:number};
 export type StageCamera3D={yaw:number;pitch:number;distance:number;targetX:number;targetY:number;targetZ:number;orbit:number};
 export type Shot3D={stage:string;camera:StageCamera3D;actors:Actor3D[]};
-export const defaultCharacter3D=():Character3D=>({style:'classic',name:'Robot',bodyColor:'#36a9e1',headColor:'#dde7ed',limbColor:'#64748b',accentColor:'#ffe066',height:3});
+export const defaultCharacter3D=():Character3D=>({expression:'neutral',style:'classic',name:'Robot',bodyColor:'#36a9e1',headColor:'#dde7ed',limbColor:'#64748b',accentColor:'#ffe066',height:3});
 export const defaultStage3D=():Stage3D=>({name:'Block plaza',skyColor:'#a7d9f5',groundColor:'#78a653',blockColor:'#e6bd7a'});
 export const defaultStageCamera3D=():StageCamera3D=>({yaw:20,pitch:18,distance:18,targetX:0,targetY:1.6,targetZ:0,orbit:0});
-export const defaultActor3D=(character:string,id='actor'):Actor3D=>({actions:[],id,character,x:0,z:0,toX:0,toZ:0,rotation:0,scale:1,action:'idle',at:0,duration:4});
+export const defaultActor3D=(character:string,id='actor'):Actor3D=>({expressions:[],actions:[],id,character,x:0,z:0,toX:0,toZ:0,rotation:0,scale:1,action:'idle',at:0,duration:4});
 const object=(v:unknown,p:string)=>{if(!v||typeof v!=='object'||Array.isArray(v))throw new Error(p+': expected object');return v as Record<string,unknown>;};
 const keys=(v:Record<string,unknown>,names:string[],p:string)=>{for(const k of Object.keys(v))if(!names.includes(k))throw new Error(p+'.'+k+': unknown field');};
 const text=(v:unknown,p:string,max=200)=>{if(typeof v!=='string'||v.length>max)throw new Error(p+': expected text (max '+max+')');return v;};
@@ -19,7 +24,8 @@ const color=(v:unknown,p:string)=>{const s=text(v,p,7);if(!/^#[a-f\d]{6}$/i.test
 export function parseCharacter3D(value:unknown,path='character'):Character3D{
  const v=object(value,path),d=defaultCharacter3D();keys(v,Object.keys(d),path);
  const style=v.style===undefined?d.style:v.style;if(!['classic','robot','pixel','brick'].includes(style as string))throw new Error(path+'.style: classic, robot, pixel, brick');
- return {style:style as Character3D['style'],name:text(v.name===undefined?d.name:v.name,path+'.name'),bodyColor:color(v.bodyColor===undefined?d.bodyColor:v.bodyColor,path+'.bodyColor'),headColor:color(v.headColor===undefined?d.headColor:v.headColor,path+'.headColor'),limbColor:color(v.limbColor===undefined?d.limbColor:v.limbColor,path+'.limbColor'),accentColor:color(v.accentColor===undefined?d.accentColor:v.accentColor,path+'.accentColor'),height:number(v.height===undefined?d.height:v.height,path+'.height',1,6)};
+ const expression=v.expression===undefined?d.expression:v.expression;if(!expressions3D.includes(expression as Expression3D))throw new Error(path+'.expression: '+expressions3D.join(', '));
+ return {expression:expression as Expression3D,style:style as Character3D['style'],name:text(v.name===undefined?d.name:v.name,path+'.name'),bodyColor:color(v.bodyColor===undefined?d.bodyColor:v.bodyColor,path+'.bodyColor'),headColor:color(v.headColor===undefined?d.headColor:v.headColor,path+'.headColor'),limbColor:color(v.limbColor===undefined?d.limbColor:v.limbColor,path+'.limbColor'),accentColor:color(v.accentColor===undefined?d.accentColor:v.accentColor,path+'.accentColor'),height:number(v.height===undefined?d.height:v.height,path+'.height',1,6)};
 }
 export function parseStage3D(value:unknown,path='stage'):Stage3D{
  const v=object(value,path),d=defaultStage3D();keys(v,Object.keys(d),path);
@@ -52,7 +58,15 @@ export function parseShot3D(value:unknown,characters:Record<string,Character3D>,
    const easing=read('easing','ease-in-out');if(!['linear','ease-in-out'].includes(easing as string))throw new Error(path+'.easing: linear, ease-in-out');
    return {type:type as ActorAction3D['type'],at:start,duration:span,toX,toZ,rotation,target,faceMovement,blend:number(read('blend',.3),path+'.blend',0,2),easing:easing as ActorAction3D['easing']};
   });
-  return {actions,id,character,x,z,toX:number(get('toX',x),p+'.toX',-20,20),toZ:number(get('toZ',z),p+'.toZ',-20,20),rotation:number(get('rotation',0),p+'.rotation',-360,360),scale:number(get('scale',1),p+'.scale',.25,3),action:action as Actor3D['action'],at,duration:span};
+  const rawExpressions=get('expressions',[]);if(!Array.isArray(rawExpressions)||rawExpressions.length>64)throw new Error(p+'.expressions: expected array (max 64)');let expressionEnd=0;
+  const expressions:ActorExpression3D[]=rawExpressions.map((item,j)=>{
+   const path=p+'.expressions['+j+']',v=object(item,path),d=defaultActorExpression3D();keys(v,Object.keys(d),path);
+   const expression=v.expression===undefined?d.expression:v.expression;if(!expressions3D.includes(expression as Expression3D))throw new Error(path+'.expression: '+expressions3D.join(', '));
+   const at=number(v.at===undefined?expressionEnd:v.at,path+'.at',0,duration-.01+1e-9),span=number(v.duration,path+'.duration',.01,Math.min(3600,duration-at+1e-9));
+   if(at<expressionEnd-1e-9)throw new Error(path+'.at: expressions must be ordered and non-overlapping');expressionEnd=at+span;
+   return {expression:expression as Expression3D,at,duration:span,intensity:number(v.intensity===undefined?d.intensity:v.intensity,path+'.intensity',0,1),blend:number(v.blend===undefined?d.blend:v.blend,path+'.blend',0,2)};
+  });
+  return {expressions,actions,id,character,x,z,toX:number(get('toX',x),p+'.toX',-20,20),toZ:number(get('toZ',z),p+'.toZ',-20,20),rotation:number(get('rotation',0),p+'.rotation',-360,360),scale:number(get('scale',1),p+'.scale',.25,3),action:action as Actor3D['action'],at,duration:span};
  });for(const [i,actor] of actors.entries())for(const [j,action] of actor.actions.entries())if(action.target&&(action.target===actor.id||!actors.some(a=>a.id===action.target)))throw new Error(path+'.actors['+i+'].actions['+j+'].target: missing or self actor target');
  return {stage,camera,actors};
 }
@@ -89,6 +103,16 @@ function sequence3DPose(a:Actor3D,time:number,actors:readonly Actor3D[]){
  const t=active?time-active.at:0,blend=active?Math.min(active.blend,active.duration/2):0,envelope=active?(blend>0?smooth3D(Math.min(t/blend,(active.duration-t)/blend)):1):0;
  const walk=active?.type==='walk',wave=active?.type==='wave',swing=walk?Math.sin(t*7)*.6*envelope:0,idleBob=Math.sin(time*1.6)*.015;
  return {...position,rotation,leftArm:swing,rightArm:wave?-Math.PI*.8*envelope:(swing?-swing:0),leftLeg:swing?-swing:0,rightLeg:swing,wave:wave?Math.sin(t*9)*.22*envelope:0,bob:idleBob+(walk?Math.abs(Math.sin(t*7))*.07*envelope:0)};
+}
+/** Independent, absolute-time face track. Each event returns to the character's base face. */
+export function actor3DFace(a:Actor3D,time:number,base:Expression3D='neutral'):FacePose3D{
+ const pose:FacePose3D={happy:0,sad:0,angry:0,surprised:0,blink:0};if(base!=='neutral')pose[base]=1;
+ const event=a.expressions?.find(e=>time>=e.at&&time<e.at+e.duration);if(!event)return pose;
+ const blend=Math.min(event.blend,event.duration/2),elapsed=time-event.at;
+ const weight=event.intensity*(blend>0?smooth3D(Math.min(elapsed/blend,(event.duration-elapsed)/blend)):1);
+ if(event.expression==='blink'){pose.blink+=(1-pose.blink)*weight;return pose;}
+ for(const key of Object.keys(pose) as (keyof FacePose3D)[])pose[key]=pose[key]*(1-weight)+(key===event.expression?weight:0);
+ return pose;
 }
 export type Resource3D={format:'scenescript-3d-resource';version:'1.0';kind:'character'|'stage';id:string;definition:Character3D|Stage3D};
 export const MAX_3D_RESOURCE_BYTES=32*1024;

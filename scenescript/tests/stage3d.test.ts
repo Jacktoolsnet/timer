@@ -93,3 +93,39 @@ test('character face styles validate, survive resource export and preserve legac
  for(const style of [null,42,'smile',{},'']){const raw:any=structuredClone(stage3DExample);raw.characters.mika.style=style;assert.throws(()=>validateProject(raw),/style/);}
  const raw:any=structuredClone(stage3DExample);delete raw.characters.mika.style;assert.equal(validateProject(raw).characters.mika.style,'classic');
 });
+
+test('facial expressions are an independent absolute-time track with soft entry and return to base',async()=>{
+ const {actor3DFace}=await import('../src/lib/stage3d.ts');
+ const a=defaultActor3D('robot');a.expressions=[{expression:'happy',at:1,duration:2,intensity:.8,blend:.5},{expression:'blink',at:3,duration:.24,intensity:1,blend:.12}];
+ assert.equal(actor3DFace(a,0).happy,0);assert.equal(actor3DFace(a,1).happy,0);
+ assert.ok(Math.abs(actor3DFace(a,1.25).happy-.4)<1e-9);assert.equal(actor3DFace(a,2).happy,.8);
+ assert.ok(Math.abs(actor3DFace(a,2.75).happy-.4)<1e-9);assert.equal(actor3DFace(a,3).happy,0);
+ assert.ok(actor3DFace(a,3.12).blink>.999);assert.equal(actor3DFace(a,3.12,'happy').happy,1);assert.equal(actor3DFace(a,3.24).blink,0);
+ const face=actor3DFace(a,1.3);for(const t of [99,0,3.1,2])actor3DFace(a,t);assert.deepEqual(actor3DFace(a,1.3),face);
+ assert.equal(actor3DFace(a,0,'sad').sad,1);assert.ok(Math.abs(actor3DFace(a,2,'sad').sad-.2)<1e-9);
+ a.expressions=[{expression:'neutral',at:0,duration:2,intensity:1,blend:0}];assert.equal(actor3DFace(a,1,'angry').angry,0);assert.equal(actor3DFace(a,2,'angry').angry,1);
+ a.expressions[0]={expression:'happy',at:0,duration:.1,intensity:1,blend:2};assert.equal(actor3DFace(a,.05).happy,1);
+ a.expressions[0].intensity=0;assert.equal(actor3DFace(a,.05,'sad').sad,1);
+});
+
+test('expression defaults, timing bounds and independent track validation',()=>{
+ const raw:any=structuredClone(stage3DExample);raw.scenes[0].stage3d.actors[0].expressions=[{expression:'happy',duration:2},{expression:'blink',duration:.2},{expression:'sad',at:4,duration:3}];
+ const p=validateProject(raw),a=p.scenes[0].stage3d!.actors[0];assert.deepEqual(a.expressions.map(e=>e.at),[0,2,4]);assert.equal(a.expressions[0].intensity,1);assert.equal(a.expressions[0].blend,.2);assert.deepEqual(parseProject(JSON.stringify(p)),p);
+ for(const patch of [{expression:'talk'},{expression:null},{at:-1},{duration:0},{duration:8},{intensity:-.1},{intensity:1.1},{intensity:null},{blend:-1},{blend:3},{blend:NaN},{script:'bad'}]){
+  const invalid=structuredClone(raw);Object.assign(invalid.scenes[0].stage3d.actors[0].expressions[0],patch);assert.throws(()=>validateProject(invalid),/expressions/);
+ }
+ for(const expressions of [null,{},Array.from({length:65},()=>({duration:.01})),[{duration:2},{at:1,duration:1}],[{duration:7},{duration:.01}]]){
+  const invalid=structuredClone(raw);invalid.scenes[0].stage3d.actors[0].expressions=expressions;assert.throws(()=>validateProject(invalid),/expressions/);
+ }
+ delete raw.characters.mika.expression;delete raw.scenes[0].stage3d.actors[0].expressions;
+ const legacy=validateProject(raw);assert.equal(legacy.characters.mika.expression,'neutral');assert.deepEqual(legacy.scenes[0].stage3d!.actors[0].expressions,[]);
+ for(const expression of [null,'talk',0]){raw.characters.mika.expression=expression;assert.throws(()=>validateProject(raw),/expression/);}
+});
+
+test('pixel masks stay bounded and blinking preserves the active mouth',async()=>{
+ const {pixelFaces3D,facePixel3D}=await import('../src/lib/stage3d-face.ts'),{actor3DFace}=await import('../src/lib/stage3d.ts');
+ for(const mask of Object.values(pixelFaces3D)){assert.equal(mask.length,8);for(const row of mask)assert.match(row,/^[.#]{12}$/);}
+ const actor=defaultActor3D('robot'),happy=actor3DFace(actor,0,'happy'),blink={...happy,blink:1};
+ for(let row=0;row<8;row++)for(let col=0;col<12;col++){const value=facePixel3D(happy,row,col);assert.ok(value>=0&&value<=1);if(row>=4)assert.equal(facePixel3D(blink,row,col),value);}
+ assert.ok(aiGuide.includes('Actor3D.expressions'));assert.ok(aiGuide.includes('no persistence across events/scenes'));
+});

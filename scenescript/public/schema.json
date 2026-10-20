@@ -1027,6 +1027,10 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "expression": {
+          "enum": ["neutral", "happy", "sad", "angry", "surprised", "blink"],
+          "default": "neutral"
+        },
         "style": {
           "type": "string",
           "enum": ["classic", "robot", "pixel", "brick"],
@@ -1235,10 +1239,28 @@
         "duration"
       ]
     },
+    "actorExpression3D": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "expression": {"enum": ["neutral", "happy", "sad", "angry", "surprised", "blink"], "default": "neutral"},
+        "at": {"type": "number", "minimum": 0, "maximum": 3600},
+        "duration": {"type": "number", "minimum": 0.01, "maximum": 3600},
+        "intensity": {"type": "number", "minimum": 0, "maximum": 1, "default": 1},
+        "blend": {"type": "number", "minimum": 0, "maximum": 2, "default": 0.2}
+      },
+      "required": ["duration"]
+    },
     "actor3D": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "expressions": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {"$ref": "#/$defs/actorExpression3D"},
+          "default": []
+        },
         "actions": {
           "type": "array",
           "maxItems": 64,

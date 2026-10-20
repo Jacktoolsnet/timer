@@ -1,6 +1,6 @@
 import {resource3DPreview} from '../lib/stage3d-resource-preview';
 import {validateProject,type Project} from '../lib/model';
-import {unique3DResourceID,defaultCharacter3D,defaultStage3D,defaultStageCamera3D,defaultActor3D,parse3DResource,MAX_3D_RESOURCE_BYTES,type Resource3D,type Character3D,type Stage3D,type Shot3D} from '../lib/stage3d';
+import {expressions3D,unique3DResourceID,defaultCharacter3D,defaultStage3D,defaultStageCamera3D,defaultActor3D,parse3DResource,MAX_3D_RESOURCE_BYTES,type Resource3D,type Character3D,type Stage3D,type Shot3D} from '../lib/stage3d';
 import {createStage3DView,type Stage3DView} from './stage3d-preview';
 import {showToast} from './toast';
 const $=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById('stage3d-'+id) as T;
@@ -34,9 +34,9 @@ export function installStage3DEditor(context:()=>{project:Project;index:number;r
   const group=(name:string)=>{const fieldset=document.createElement('fieldset'),legend=document.createElement('legend');legend.textContent=words[name];fieldset.append(legend);const grid=document.createElement('div');grid.className='stage3d-field-grid';fieldset.append(grid);host.append(fieldset);return grid;};
   const general=group('general'),appearance=group('appearance');
   for(const [key,v] of Object.entries(value)){
-   if(key==='style'){
-    const label=document.createElement('label'),caption=document.createElement('span'),select=document.createElement('select');label.className='stage3d-name-field';caption.textContent=words.style;select.dataset.resourceField=key;
-    options(select,['classic','robot','pixel','brick'].map(id=>[id,words['style_'+id]]),String(v));
+   if(key==='style'||key==='expression'){
+    const label=document.createElement('label'),caption=document.createElement('span'),select=document.createElement('select');label.className='stage3d-name-field';caption.textContent=words[key];select.dataset.resourceField=key;
+    options(select,(key==='style'?['classic','robot','pixel','brick']:expressions3D).map(id=>[id,words[key+'_'+id]]),String(v));
     select.addEventListener('change',()=>{(value as unknown as Record<string,unknown>)[key]=select.value;queueResourcePreview();});
     label.append(caption,select);appearance.append(label);continue;
    }

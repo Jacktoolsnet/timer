@@ -1,7 +1,8 @@
 import * as THREE from 'three';
-import {actor3DPose,type Shot3D,type Actor3D,type Character3D,type Stage3D} from '../lib/stage3d';
+import {facePixel3D} from '../lib/stage3d-face';
+import {actor3DFace,type FacePose3D,actor3DPose,type Shot3D,type Actor3D,type Character3D,type Stage3D} from '../lib/stage3d';
 import type {Project} from '../lib/model';
-type Robot={actor:Actor3D;root:THREE.Group;leftArm:THREE.Group;rightArm:THREE.Group;leftLeg:THREE.Group;rightLeg:THREE.Group};
+type Robot={actor:Actor3D;character:Character3D;updateFace:(pose:FacePose3D)=>void;root:THREE.Group;leftArm:THREE.Group;rightArm:THREE.Group;leftLeg:THREE.Group;rightLeg:THREE.Group};
 type World={scene:THREE.Scene;robots:Robot[];geometries:Set<THREE.BufferGeometry>;materials:Map<string,THREE.MeshStandardMaterial>};
 /** A bounded cache and ONE GPU context per owner, never a new context per frame. */
 export class Stage3DRenderer{
@@ -43,9 +44,10 @@ export class Stage3DRenderer{
    if(!person){box(root,c.accentColor,0,1.7,.345,.55,.45,.08);box(root,'#effaff',0,1.72,.4,.16,.15,.04);}
    else{box(root,c.accentColor,0,1.22,.34,1.08,.12,.04);for(const y of [1.5,1.8,2])box(root,c.accentColor,0,y,.34,.07,.07,.04);}
    box(root,person?c.headColor:c.limbColor,0,2.26,0,.35,.2,.35);
-   // Stable named face parts are built once, ready for future expression controls.
+   // Stable face geometry is built once; only transforms change per frame.
    const face=new THREE.Group();face.name='face';root.add(face);
    const part=(name:string,color:string,x:number,y:number,z:number,w:number,h:number,d:number)=>{const mesh=box(face,color,x,y,z,w,h,d);mesh.name=name;return mesh;};
+   const pixelMeshes:THREE.Mesh[]=[];
    if(person){
     const headGeometry=new THREE.CylinderGeometry(.48,.48,.75,32);world.geometries.add(headGeometry);
     const head=new THREE.Mesh(headGeometry,material(c.headColor));head.position.y=2.67;root.add(head);
@@ -59,8 +61,7 @@ export class Stage3DRenderer{
      part('monitor-frame',c.limbColor,0,2.67,.432,.88,.64,.1);
      part('monitor','#101e2c',0,2.67,.492,.78,.54,.035);
      // A real 12×8 pixel face, with gaps instead of a blurred texture.
-     const pixels=['............','..##....##..','..##....##..','............','............','..#......#..','...######...','............'];
-     for(let row=0;row<8;row++)for(let col=0;col<12;col++)if(pixels[row][col]==='#')part(row<3?'eye-pixel':'mouth-pixel',c.accentColor,(col-5.5)*.058,2.67+(3.5-row)*.058,.518,.046,.046,.02);
+     for(let row=0;row<8;row++)for(let col=0;col<12;col++)pixelMeshes.push(part('face-pixel',c.accentColor,(col-5.5)*.058,2.67+(3.5-row)*.058,.518,.046,.046,.02));
     }else{
      part('visor','#213746',0,2.71,.414,.76,.34,.04);
      part('eye',c.accentColor,-.21,2.75,.445,.17,.12,.03);part('eye',c.accentColor,.21,2.75,.445,.17,.12,.03);
@@ -72,9 +73,39 @@ export class Stage3DRenderer{
     }
     box(root,c.limbColor,0,3.12,0,.1,.25,.1);box(root,c.accentColor,0,3.26,0,.23,.12,.23);
    }
+   if(c.style!=='pixel'){
+    for(const x of [-.2,.2])part('brow',person?'#663d32':c.accentColor,x,2.94,person?.446:.45,.19,.035,.035);
+    if(person){
+     const mouthGeometry=new THREE.CylinderGeometry(.085,.085,.035,16);world.geometries.add(mouthGeometry);
+     const mouth=new THREE.Mesh(mouthGeometry,material('#663d32'));mouth.name='surprise-mouth';mouth.position.set(0,2.43,.496);mouth.rotation.x=Math.PI/2;face.add(mouth);
+    }
+   }
+   const parts=face.children.map(mesh=>({mesh:mesh as THREE.Mesh,position:mesh.position.clone(),scale:mesh.scale.clone()}));
+   const updateFace=(p:FacePose3D)=>{
+    if(c.style==='pixel'){
+     pixelMeshes.forEach((mesh,i)=>{const weight=facePixel3D(p,Math.floor(i/12),i%12);mesh.visible=weight>1e-5;mesh.scale.set(.046*weight,.046*weight,.02);});return;
+    }
+    const eyeScale=(1-.3*p.happy-.2*p.sad-.35*p.angry+.45*p.surprised)*(1-.95*p.blink);
+    for(const {mesh,position,scale} of parts){
+     mesh.position.copy(position);mesh.scale.copy(scale);mesh.rotation.z=0;mesh.visible=true;
+     const side=Math.sign(position.x);
+     if(mesh.name==='eye'||mesh.name==='eye-highlight'){mesh.scale.y*=eyeScale;mesh.rotation.z=side*(p.angry*.22-p.sad*.12);if(mesh.name==='eye-highlight')mesh.visible=p.blink<.8;}
+     if(mesh.name==='brow'){
+      const strength=Math.max(p.happy*.4,p.sad,p.angry,p.surprised);mesh.visible=strength>1e-5;mesh.scale.y*=strength;
+      mesh.rotation.z=side*(p.angry*.45-p.sad*.4);mesh.position.y+=p.surprised*.035-p.angry*.04;
+     }
+     if(mesh.name==='mouth'){
+      if(person){const edge=Math.abs(position.x)/.19;mesh.position.y+=p.happy*.06*(edge-.5)-(p.sad+p.angry*.7)*.18*(edge-.5);mesh.scale.x*=1-p.surprised;mesh.scale.y*=1-p.surprised;}
+      else{mesh.scale.x*=1-.55*p.surprised;mesh.scale.y*=1+p.surprised*1.6;mesh.rotation.z=p.sad*.12;mesh.position.y+=p.happy*.015-p.sad*.015;}
+     }
+     if(mesh.name==='mouth-frame'){mesh.scale.y*=1+p.surprised*.9;mesh.scale.x*=1-p.surprised*.35;}
+     if(mesh.name==='mouth-grille'){mesh.scale.y*=1-p.surprised;mesh.position.y+=(Math.abs(position.x)/.14-.5)*(.045*p.happy-.045*p.sad);}
+     if(mesh.name==='surprise-mouth'){mesh.visible=p.surprised>1e-5;mesh.scale.set(p.surprised,1,p.surprised*1.4);}
+    }
+   };
    const limb=(x:number,y:number,leg:boolean)=>{const pivot=new THREE.Group();pivot.position.set(x,y,0);root.add(pivot);box(pivot,person&&!leg?c.bodyColor:c.limbColor,0,leg?-.48:-.42,0,leg?.38:.32,leg?.85:.72,.4);box(pivot,leg?(person?c.limbColor:c.bodyColor):c.headColor,0,leg?-.89:-.87,leg?.1:0,leg?.44:.38,.28,leg?.66:.44);return pivot;};
    const leftArm=limb(-.78,2.05,false),rightArm=limb(.78,2.05,false),leftLeg=limb(-.31,1.13,true),rightLeg=limb(.31,1.13,true);
-   return {actor:a,root,leftArm,rightArm,leftLeg,rightLeg};
+   return {actor:a,character:c,updateFace,root,leftArm,rightArm,leftLeg,rightLeg};
   };
   world.robots=actors.map(a=>robot(a,characters[a.character]));return world;
  }
@@ -84,7 +115,7 @@ export class Stage3DRenderer{
   const key=JSON.stringify([project.stages[shot.stage],definitions,shot.actors,studio]);let world=this.cache.get(key);
   if(!world){world=this.world(project.stages[shot.stage],project.characters,shot.actors,studio);this.cache.set(key,world);if(this.cache.size>2){const oldest=this.cache.keys().next().value!;this.release(this.cache.get(oldest)!);this.cache.delete(oldest);}}
   else{this.cache.delete(key);this.cache.set(key,world);}
-  for(const r of world.robots){const p=actor3DPose(r.actor,time,shot.actors);r.root.position.set(p.x,p.bob,p.z);r.root.rotation.y=p.rotation;r.leftArm.rotation.x=p.leftArm;r.rightArm.rotation.x=p.rightArm;r.rightArm.rotation.z=p.wave;r.leftLeg.rotation.x=p.leftLeg;r.rightLeg.rotation.x=p.rightLeg;}
+  for(const r of world.robots){r.updateFace(actor3DFace(r.actor,time,r.character.expression));const p=actor3DPose(r.actor,time,shot.actors);r.root.position.set(p.x,p.bob,p.z);r.root.rotation.y=p.rotation;r.leftArm.rotation.x=p.leftArm;r.rightArm.rotation.x=p.rightArm;r.rightArm.rotation.z=p.wave;r.leftLeg.rotation.x=p.leftLeg;r.rightLeg.rotation.x=p.rightLeg;}
   const c=shot.camera,yaw=(c.yaw+c.orbit*time)*Math.PI/180,pitch=c.pitch*Math.PI/180;
   this.camera.position.set(c.targetX+Math.sin(yaw)*Math.cos(pitch)*c.distance,c.targetY+Math.sin(pitch)*c.distance,c.targetZ+Math.cos(yaw)*Math.cos(pitch)*c.distance);this.camera.lookAt(c.targetX,c.targetY,c.targetZ);this.camera.aspect=width/height;this.camera.updateProjectionMatrix();
   this.renderer.getSize(this.size);if(this.size.x!==width||this.size.y!==height)this.renderer.setSize(width,height,false);this.renderer.render(world.scene,this.camera);

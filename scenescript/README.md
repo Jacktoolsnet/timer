@@ -466,8 +466,8 @@ Keine originalen Roblox-Assets; keine Verbindung zu Roblox oder externen Dienste
 - Charakterfeld `style`: `classic` erhält alte Roboter, `robot` ergänzt einen
   sichtbaren Mund, `pixel` ein Pixelmonitor-Gesicht, `brick` eine eigene
   Klemmbaustein-Figur mit Augen, Nase und Mund. Im Ressourcendialog auswählbar,
-  einzeln exportierbar und in der Vorschau sichtbar. Die Gesichter sind zunächst
-  statisch; Mimik und Lippensynchronisation sind noch nicht implementiert.
+  einzeln exportierbar und in der Vorschau sichtbar. Mimik wird über die separate
+  `expressions`-Spur animiert; Lippensynchronisation ist noch nicht implementiert.
 - `Scene.stage3d`: Bühnenreferenz, 3D-Kamera und max. zwölf Auftritte. Die Auftritte
   werden im Prototyp als JSON editiert; eine Figur lässt sich per Button einsetzen.
   Positionen in Welteinheiten, Y nach oben; `rotation`, Kamerawinkel in Grad,
@@ -546,8 +546,8 @@ ist möglich, weil Zielpositionen ohne rekursive Orientierungsberechnung abgetas
 werden. `turn` dreht über die gesamte Schrittdauer, andere Aktionen blenden die
 Ausrichtung über `blend` ein. Gesten werden über `blend` weich ein-/ausgeblendet
 (Standard 0,3 s, intern auf halbe Schrittdauer begrenzt); nach Ende sind Arme/Beine
-wieder in Ruhe. Blickverfolgung endet mit dem Schritt. Noch keine Mimik, Augen-/
-Mundsteuerung, Kopf-only-Ausrichtung oder überlappende Gehen-und-Winken-Aktionen.
+wieder in Ruhe. Blickverfolgung endet mit dem Schritt. Noch keine Kopf-only-Ausrichtung,
+Lippensynchronisation oder überlappende Gehen-und-Winken-Aktionen.
 
 Alte Projekte ohne Aktionsfolge bleiben unverändert abspielbar. Bei nichtleerem
 `actions` ersetzt die Folge die alten Einzelaktions-/Bewegungsfelder; alle
@@ -556,3 +556,33 @@ Export verwenden dieselbe reine absolute Zeitberechnung. JSON-Schema, KI-Anleitu
 und das Roboterbeispiel unter `/examples/block-robots.scenescript.json` zeigen die
 neue Syntax. Das Beispiel demonstriert Annähern, Warten, gegenseitiges Drehen und
 Winken sowie eine zweite Aufnahme mit anschließender Bewegung.
+
+
+### Zeitgesteuerte 3D-Mimik
+
+Im Charakterformular wählt **Grundausdruck** den dauerhaft sichtbaren Gesichtsausdruck
+(auch in der Einzelvorschau und in exportierten Charakterressourcen).
+Eine Szene kann ihn pro Auftritt über `expressions` vorübergehend ändern:
+
+```json
+"expressions": [
+  {"expression":"happy","at":0,"duration":2,"intensity":0.8},
+  {"expression":"blink","at":2,"duration":0.24,"blend":0.12},
+  {"expression":"surprised","at":3,"duration":1.5}
+]
+```
+
+- `neutral`, `happy`, `sad`, `angry`, `surprised`, `blink`.
+- Eigene Spur parallel zu `actions`: Gehen und Mimik können gleichzeitig laufen.
+- Max. 64 chronologisch sortierte, nicht überlappende Einträge pro Auftritt,
+  vollständig innerhalb der Szene; `duration` ist Pflicht, `at` wird sonst verkettet.
+- `intensity`: 0–1, Standard 1. `blend`: Ein-/Ausblendzeit 0–2 s, Standard .2 s,
+  intern maximal die halbe Eintragsdauer. 0 schaltet direkt.
+- Nach jedem Eintrag/in Pausen gilt wieder der Grundausdruck. Ein `neutral`-Eintrag
+  neutralisiert ihn vorübergehend. `blink` schließt die Augen; kurze Einträge
+  von .15–.3 s ergeben ein Blinzeln. Kein zufälliges automatisches Blinzeln.
+- Die KI-Anleitung und das Drei-Figuren-Beispiel zeigen die neue Spur.
+  Absolute Zeitabtastung sorgt für identische Mimik beim Zurückspulen sowie
+  in Vorschau, PNG und Video. Keine neuen Geometrien/Materialien pro Frame.
+- Der klassische Roboter hat nur einen sehr kleinen Mund; für deutliche Mimik
+  `robot`, `pixel` oder `brick` wählen. Noch keine sprachgesteuerten Lippenbewegungen.

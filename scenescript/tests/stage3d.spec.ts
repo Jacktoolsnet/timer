@@ -41,7 +41,7 @@ test('absolute-time preview and export agree, reverse seeks are stable, and rend
 
 test('short 3D MP4 export contains rendered scene pixels',async({page})=>{
  test.setTimeout(90000);await page.goto('/en/');const result=await page.evaluate(async(source)=>{
-  const {validateProject}=await import(/* @vite-ignore */ '/src/lib/model.ts' as string),{exportVideo,exportSupported}=await import(/* @vite-ignore */ '/src/scripts/video-export.ts' as string);const p=validateProject(source);p.scenes=p.scenes.slice(0,1);p.scenes[0].duration=.3;p.scenes[0].elements=[];p.scenes[0].stage3d.actors.forEach((a:any)=>{a.at=0;a.duration=.3;a.actions=[{...a.actions[0],type:'wave',at:0,duration:.3,toX:null,toZ:null,rotation:null,target:'',faceMovement:false}];});const o={format:'mp4',resolution:480,fps:24,audio:false};if(!await exportSupported(p,o))return null;
+  const {validateProject}=await import(/* @vite-ignore */ '/src/lib/model.ts' as string),{exportVideo,exportSupported}=await import(/* @vite-ignore */ '/src/scripts/video-export.ts' as string);const p=validateProject(source);p.scenes=p.scenes.slice(0,1);p.scenes[0].duration=.3;p.scenes[0].elements=[];p.scenes[0].stage3d.actors.forEach((a:any)=>{a.at=0;a.duration=.3;a.expressions=[];a.actions=[{...a.actions[0],type:'wave',at:0,duration:.3,toX:null,toZ:null,rotation:null,target:'',faceMovement:false}];});const o={format:'mp4',resolution:480,fps:24,audio:false};if(!await exportSupported(p,o))return null;
   const blob=await exportVideo(p,o,new AbortController().signal,()=>{}),url=URL.createObjectURL(blob),video=document.createElement('video');video.src=url;video.muted=true;try{await new Promise<void>((resolve,reject)=>{video.onloadeddata=()=>resolve();video.onerror=()=>reject(new Error('cannot decode MP4'));});await new Promise<void>(resolve=>{video.onseeked=()=>resolve();video.currentTime=.1;});const c=document.createElement('canvas');c.width=video.videoWidth;c.height=video.videoHeight;c.getContext('2d')!.drawImage(video,0,0);const data=c.getContext('2d')!.getImageData(0,0,c.width,c.height).data;let min=255,max=0;for(let i=0;i<data.length;i+=4){min=Math.min(min,data[i]);max=Math.max(max,data[i]);}return {bytes:blob.size,type:blob.type,width:c.width,range:max-min};}finally{video.removeAttribute('src');video.load();URL.revokeObjectURL(url);}
  },stage3DExample);test.skip(!result,'MP4 encoder unavailable');expect(result!.bytes).toBeGreaterThan(1000);expect(result!.type).toBe('video/mp4');expect(result!.width).toBe(854);expect(result!.range).toBeGreaterThan(100);
 });
@@ -82,7 +82,7 @@ async function resourcePixels(page:any){return page.locator('#stage3d-resource-p
 
 test('selected characters have their own formatted settings and isolated live preview on the right',async({page})=>{
  await load(page);await page.locator('#open-stage3d').click();await expect(page.locator('#stage3d-resource-label')).toHaveText('Character');
- await expect(page.locator('.stage3d-library [data-resource-field]')).toHaveCount(0);await expect(page.locator('.stage3d-details [data-resource-field]')).toHaveCount(7);await expect(page.locator('#stage3d-fields fieldset')).toHaveCount(2);
+ await expect(page.locator('.stage3d-library [data-resource-field]')).toHaveCount(0);await expect(page.locator('.stage3d-details [data-resource-field]')).toHaveCount(8);await expect(page.locator('#stage3d-fields fieldset')).toHaveCount(2);
  const canvas=page.locator('#stage3d-resource-preview canvas');await expect(canvas).toHaveAttribute('data-resource3d-id','mika');await expect(canvas).toHaveAttribute('data-stage3d-time','0');await expect(canvas).toHaveAttribute('aria-label','Mika');
  const left=(await page.locator('.stage3d-library').boundingBox())!,right=(await page.locator('.stage3d-details').boundingBox())!;expect(right.x).toBeGreaterThanOrEqual(left.x+left.width);const previewBox=(await canvas.boundingBox())!,footer=(await page.locator('#stage3d-dialog footer').boundingBox())!;expect(previewBox.y+previewBox.height).toBeLessThanOrEqual(footer.y);
  const original=await resourcePixels(page);await page.locator('[data-resource-field=bodyColor]').fill('#ff0055');await expect.poll(()=>resourcePixels(page)).not.toBe(original);await expect(page.locator('.stage3d-color-swatch output').first()).toHaveText('#FF0055');
@@ -133,4 +133,44 @@ test('face style selector updates preview and survives standalone and project ex
  await page.locator('#stage3d-apply').click();
  const saved=page.waitForEvent('download');await page.locator('#save-project').click();
  const project=JSON.parse(await readFile((await (await saved).path())!,'utf8'));expect(project.characters.lina.style).toBe('pixel');expect(project.characters.mika.style).toBe('robot');
+});
+
+test('base expression previews all styles and survives character export and project save',async({page})=>{
+ await load(page);await page.locator('#open-stage3d').click();
+ const expression=page.locator('[data-resource-field=expression]');
+ for(const id of ['mika','bo','lina']){
+  await page.locator('#stage3d-resource').selectOption(id);await expect(expression).toHaveValue('neutral');
+  const canvas=page.locator('#stage3d-resource-preview canvas');await expect(canvas).toHaveAttribute('data-stage3d-time','0');
+  const before=await canvas.evaluate((c:HTMLCanvasElement)=>c.toDataURL());await expression.selectOption('surprised');
+  await expect.poll(()=>canvas.evaluate((c:HTMLCanvasElement)=>c.toDataURL())).not.toBe(before);
+ }
+ const pending=page.waitForEvent('download');await page.locator('#stage3d-export').click();
+ const resource=JSON.parse(await readFile((await (await pending).path())!,'utf8'));expect(resource.definition.expression).toBe('surprised');
+ await page.locator('#stage3d-apply').click();const saved=page.waitForEvent('download');await page.locator('#save-project').click();
+ const p=JSON.parse(await readFile((await (await saved).path())!,'utf8'));
+ expect(Object.values(p.characters).every((c:any)=>c.expression==='surprised')).toBe(true);
+ expect(p.scenes[0].stage3d.actors[0].expressions[0].expression).toBe('surprised');
+});
+
+test('face animation rewinds identically on every style without allocating per-frame GPU resources',async({page})=>{
+ await page.goto('/en/');
+ const result=await page.evaluate(async()=>{
+  const {resource3DPreview}=await import(/* @vite-ignore */ '/src/lib/stage3d-resource-preview.ts' as string),{Stage3DRenderer}=await import(/* @vite-ignore */ '/src/scripts/stage3d.ts' as string),{stage3DExample}=await import(/* @vite-ignore */ '/src/lib/stage3d-example.ts' as string),{validateProject}=await import(/* @vite-ignore */ '/src/lib/model.ts' as string);
+  const renderer=new Stage3DRenderer(),results=[];
+  try{
+   for(const [id,character]of Object.entries(stage3DExample.characters)){
+    const v=resource3DPreview('character',id,character);v.project.scenes[0].duration=6;
+    v.shot.actors[0].expressions=['happy','sad','angry','surprised','blink'].map((expression,i)=>({expression,at:i+1,duration:i===4?.24:1,intensity:1,blend:.1}));
+    validateProject(v.project);
+    const canvas=document.createElement('canvas'),draw=(t:number)=>{renderer.render(v.project,v.shot,t,360,360,canvas,true);return canvas.toDataURL();};
+    const samples=[0,1.5,2.5,3.5,4.5,5.12].map(draw);
+    const world=Array.from((renderer as any).cache.values()).at(-1) as any;
+    const geometry=Array.from(world.geometries),materials=Array.from(world.materials.values()),parts=world.robots[0].root.children.length;
+    const baseline=draw(1.5);for(let i=0;i<40;i++)draw((i%12)*.45);const repeated=draw(1.5);
+    results.push({unique:new Set(samples).size,stable:baseline===repeated,geometryStable:geometry.every(g=>world.geometries.has(g))&&world.geometries.size===geometry.length,materialsStable:materials.every(m=>Array.from(world.materials.values()).includes(m))&&world.materials.size===materials.length,partsStable:parts===world.robots[0].root.children.length});
+   }
+  }finally{renderer.dispose();}
+  return results;
+ });
+ expect(result).toHaveLength(3);for(const r of result)expect(r).toEqual({unique:6,stable:true,geometryStable:true,materialsStable:true,partsStable:true});
 });
