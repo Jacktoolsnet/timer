@@ -454,8 +454,8 @@ Orientierung erhalten. Tastaturfokus wechselt zu Abbrechen bzw. zurück zu Start
 
 ### 3D-Prototyp: gemeinsame Charaktere und Bühnen
 
-Unter **Projekt → 3D-Bühnen & Charaktere → Beispiel mit zwei Robotern laden**
-startet eine 13-sekündige Szene mit Mika und Bo in einer eigenen Bauklotz-Plaza,
+Unter **Projekt → 3D-Bühnen & Charaktere → Beispiel mit drei Figuren laden**
+startet ein 13-sekündiges Beispiel mit Mika, Bo und Lina in einer eigenen Bauklotz-Plaza,
 anschließend dieselben Figuren auf derselben Bühne mit anderer Kamera. Das ersetzt
 nach Rückfrage das Projekt und erzeugt ein echtes PNG-Cover aus dem Renderer.
 Keine originalen Roblox-Assets; keine Verbindung zu Roblox oder externen Diensten.
@@ -463,6 +463,11 @@ Keine originalen Roblox-Assets; keine Verbindung zu Roblox oder externen Dienste
 - `characters` und `stages`: projektweite Ressourcenbibliotheken (je max. 30).
   Name, Farben und Figurenhöhe sind über Formulare editierbar. Änderungen wirken
   auf alle Szenenverweise; Import in andere Projekte erzeugt unabhängige Kopien.
+- Charakterfeld `style`: `classic` erhält alte Roboter, `robot` ergänzt einen
+  sichtbaren Mund, `pixel` ein Pixelmonitor-Gesicht, `brick` eine eigene
+  Klemmbaustein-Figur mit Augen, Nase und Mund. Im Ressourcendialog auswählbar,
+  einzeln exportierbar und in der Vorschau sichtbar. Die Gesichter sind zunächst
+  statisch; Mimik und Lippensynchronisation sind noch nicht implementiert.
 - `Scene.stage3d`: Bühnenreferenz, 3D-Kamera und max. zwölf Auftritte. Die Auftritte
   werden im Prototyp als JSON editiert; eine Figur lässt sich per Button einsetzen.
   Positionen in Welteinheiten, Y nach oben; `rotation`, Kamerawinkel in Grad,
@@ -474,7 +479,7 @@ Keine originalen Roblox-Assets; keine Verbindung zu Roblox oder externen Dienste
 - Einzelexport als `.scenecharacter.json` / `.scenestage.json`, Import wahlweise
   als Kopie oder explizite Aktualisierung derselben ID. Format und Version werden
   geprüft; Definitionen sind eigenständig und enthalten keine externen Ressourcen.
-- Derzeit ein festes, farblich anpassbares Plaza-Modell und parametrische Roboter,
+- Derzeit ein festes, farblich anpassbares Plaza-Modell und parametrische Figuren,
   noch kein freier Welteneditor, GLB-Import, Physik, Rigging oder Lippensynchronisation.
 - Three.js wird nur bei 3D-Nutzung nachgeladen (lokal gebündelt, kein CDN).
   WebGL2 ist nötig. Kein stiller leerer Export bei fehlendem/verlorenem Kontext.
@@ -488,7 +493,8 @@ Keine originalen Roblox-Assets; keine Verbindung zu Roblox oder externen Dienste
 
 Importierbares Beispiel: `/examples/block-robots.scenescript.json` (mit Cover).
 Einzelressourcen: `/examples/mika.scenecharacter.json`,
-`/examples/bo.scenecharacter.json`, `/examples/plaza.scenestage.json`.
+`/examples/bo.scenecharacter.json`, `/examples/lina.scenecharacter.json`,
+`/examples/plaza.scenestage.json`.
 Three.js-Lizenz (MIT): `/licenses/three.txt`.
 
 Tests: `tests/stage3d.test.ts` (Defaults, Grenzen, Referenzen, Ressourcendateien,

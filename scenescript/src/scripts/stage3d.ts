@@ -38,11 +38,41 @@ export class Stage3DRenderer{
   const robot=(a:Actor3D,c:Character3D)=>{
    const root=new THREE.Group();scene.add(root);const factor=c.height/3*a.scale;root.scale.setScalar(factor);
    const shadow=new THREE.Mesh(shadowGeometry,shadowMaterial);shadow.rotation.x=-Math.PI/2;shadow.position.y=.1;root.add(shadow);
-   box(root,c.bodyColor,0,1.65,0,1.15,1.05,.65);box(root,c.accentColor,0,1.7,.345,.55,.45,.08);box(root,'#effaff',0,1.72,.4,.16,.15,.04);
-   box(root,c.limbColor,0,2.26,0,.35,.2,.35);box(root,c.headColor,0,2.67,0,.96,.75,.8);box(root,'#213746',0,2.71,.414,.76,.34,.04);
-   box(root,c.accentColor,-.21,2.75,.445,.17,.12,.03);box(root,c.accentColor,.21,2.75,.445,.17,.12,.03);box(root,c.headColor,0,2.49,.45,.23,.045,.03);
-   box(root,c.limbColor,0,3.12,0,.1,.25,.1);box(root,c.accentColor,0,3.26,0,.23,.12,.23);
-   const limb=(x:number,y:number,leg:boolean)=>{const pivot=new THREE.Group();pivot.position.set(x,y,0);root.add(pivot);box(pivot,c.limbColor,0,leg?-.48:-.42,0,leg?.38:.32,leg?.85:.72,.4);box(pivot,leg?c.bodyColor:c.headColor,0,leg?-.89:-.87,leg?.1:0,leg?.44:.38,.28,leg?.66:.44);return pivot;};
+   const person=c.style==='brick';
+   box(root,c.bodyColor,0,1.65,0,1.15,1.05,.65);
+   if(!person){box(root,c.accentColor,0,1.7,.345,.55,.45,.08);box(root,'#effaff',0,1.72,.4,.16,.15,.04);}
+   else{box(root,c.accentColor,0,1.22,.34,1.08,.12,.04);for(const y of [1.5,1.8,2])box(root,c.accentColor,0,y,.34,.07,.07,.04);}
+   box(root,person?c.headColor:c.limbColor,0,2.26,0,.35,.2,.35);
+   // Stable named face parts are built once, ready for future expression controls.
+   const face=new THREE.Group();face.name='face';root.add(face);
+   const part=(name:string,color:string,x:number,y:number,z:number,w:number,h:number,d:number)=>{const mesh=box(face,color,x,y,z,w,h,d);mesh.name=name;return mesh;};
+   if(person){
+    const headGeometry=new THREE.CylinderGeometry(.48,.48,.75,32);world.geometries.add(headGeometry);
+    const head=new THREE.Mesh(headGeometry,material(c.headColor));head.position.y=2.67;root.add(head);
+    box(root,c.headColor,0,3.09,0,.32,.13,.32);
+    for(const x of [-.19,.19]){part('eye','#213746',x,2.77,.441,.09,.13,.055);part('eye-highlight','#ffffff',x-.015,2.8,.474,.025,.035,.015);}
+    part('nose',c.headColor,0,2.63,.5,.14,.15,.17);
+    for(const [x,y] of [[-.19,2.51],[-.12,2.47],[0,2.45],[.12,2.47],[.19,2.51]])part('mouth','#663d32',x,y,Math.sqrt(.48*.48-x*x)+.012,.085,.045,.04);
+   }else{
+    box(root,c.headColor,0,2.67,0,.96,.75,.8);
+    if(c.style==='pixel'){
+     part('monitor-frame',c.limbColor,0,2.67,.432,.88,.64,.1);
+     part('monitor','#101e2c',0,2.67,.492,.78,.54,.035);
+     // A real 12×8 pixel face, with gaps instead of a blurred texture.
+     const pixels=['............','..##....##..','..##....##..','............','............','..#......#..','...######...','............'];
+     for(let row=0;row<8;row++)for(let col=0;col<12;col++)if(pixels[row][col]==='#')part(row<3?'eye-pixel':'mouth-pixel',c.accentColor,(col-5.5)*.058,2.67+(3.5-row)*.058,.518,.046,.046,.02);
+    }else{
+     part('visor','#213746',0,2.71,.414,.76,.34,.04);
+     part('eye',c.accentColor,-.21,2.75,.445,.17,.12,.03);part('eye',c.accentColor,.21,2.75,.445,.17,.12,.03);
+     if(c.style==='robot'){
+      part('mouth-frame',c.limbColor,0,2.43,.43,.54,.16,.06);
+      part('mouth','#142733',0,2.43,.468,.44,.09,.025);
+      for(const x of [-.14,0,.14])part('mouth-grille',c.headColor,x,2.43,.486,.027,.08,.02);
+     }else part('mouth',c.headColor,0,2.49,.45,.23,.045,.03);
+    }
+    box(root,c.limbColor,0,3.12,0,.1,.25,.1);box(root,c.accentColor,0,3.26,0,.23,.12,.23);
+   }
+   const limb=(x:number,y:number,leg:boolean)=>{const pivot=new THREE.Group();pivot.position.set(x,y,0);root.add(pivot);box(pivot,person&&!leg?c.bodyColor:c.limbColor,0,leg?-.48:-.42,0,leg?.38:.32,leg?.85:.72,.4);box(pivot,leg?(person?c.limbColor:c.bodyColor):c.headColor,0,leg?-.89:-.87,leg?.1:0,leg?.44:.38,.28,leg?.66:.44);return pivot;};
    const leftArm=limb(-.78,2.05,false),rightArm=limb(.78,2.05,false),leftLeg=limb(-.31,1.13,true),rightLeg=limb(.31,1.13,true);
    return {actor:a,root,leftArm,rightArm,leftLeg,rightLeg};
   };

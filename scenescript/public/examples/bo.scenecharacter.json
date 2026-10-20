@@ -4,6 +4,7 @@
   "kind": "character",
   "id": "bo",
   "definition": {
+    "style": "pixel",
     "name": "Bo",
     "bodyColor": "#f28b32",
     "headColor": "#fff1d0",

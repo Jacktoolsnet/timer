@@ -4,6 +4,7 @@
   "kind": "character",
   "id": "mika",
   "definition": {
+    "style": "robot",
     "name": "Mika",
     "bodyColor": "#238dcc",
     "headColor": "#e3f4ff",

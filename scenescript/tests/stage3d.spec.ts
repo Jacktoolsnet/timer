@@ -8,14 +8,14 @@ test('3D loads only on demand; the two-scene robot demo includes a real cover',a
  test.setTimeout(60000);const requests:string[]=[];page.on('request',r=>requests.push(r.url()));page.on('dialog',d=>d.accept());await page.goto('/en/');expect(requests.some(u=>u.includes('/src/scripts/stage3d.ts')||u.includes('/deps/three.js'))).toBe(false);
  await page.locator('#open-stage3d').click();await page.locator('#stage3d-demo').click();await expect(page.locator('#stage3d-dialog')).not.toBeVisible({timeout:30000});await expect(page.locator('#project-title')).toHaveValue(stage3DExample.title);await expect(page.locator('#thumbnail-content img')).toHaveAttribute('src',/^data:image\/png;base64,/);
  await expect(page.locator('#stage .stage3d-canvas')).toHaveAttribute('data-stage3d-stage','plaza');await page.locator('#timeline').fill('8');await expect(page.locator('#stage .stage3d-canvas').last()).toHaveAttribute('data-stage3d-time','1');
- const file=page.waitForEvent('download');await page.locator('#save-project').click();const p=JSON.parse(await readFile((await (await file).path())!,'utf8'));expect(Object.keys(p.characters)).toEqual(['mika','bo']);expect(p.scenes).toHaveLength(2);expect(p.thumbnail.data.length).toBeGreaterThan(1000);
+ const file=page.waitForEvent('download');await page.locator('#save-project').click();const p=JSON.parse(await readFile((await (await file).path())!,'utf8'));expect(Object.keys(p.characters)).toEqual(['mika','bo','lina']);expect(p.scenes).toHaveLength(2);expect(p.thumbnail.data.length).toBeGreaterThan(1000);
 });
 
 test('resource edits apply project-wide and individual imports copy or explicitly update IDs',async({page})=>{
  await load(page);await page.locator('#open-stage3d').click();await page.locator('#stage3d-resource').selectOption('mika');await page.locator('[data-resource-field=name]').fill('Mika II');
  const download=page.waitForEvent('download');await page.locator('#stage3d-export').click();const resource=await download;expect(resource.suggestedFilename()).toBe('mika.scenecharacter.json');const source=await readFile((await resource.path())!,'utf8');expect(JSON.parse(source).definition.name).toBe('Mika II');
  await page.locator('#stage3d-file').setInputFiles({name:'mika.scenecharacter.json',mimeType:'application/json',buffer:Buffer.from(source)});await expect(page.locator('#stage3d-resource')).toHaveValue('mika_2');
- await page.locator('#stage3d-import-mode').selectOption('update');await page.locator('#stage3d-file').setInputFiles({name:'mika.scenecharacter.json',mimeType:'application/json',buffer:Buffer.from(source)});await expect(page.locator('#stage3d-resource')).toHaveValue('mika');expect(await page.locator('#stage3d-resource option').count()).toBe(3);
+ await page.locator('#stage3d-import-mode').selectOption('update');await page.locator('#stage3d-file').setInputFiles({name:'mika.scenecharacter.json',mimeType:'application/json',buffer:Buffer.from(source)});await expect(page.locator('#stage3d-resource')).toHaveValue('mika');expect(await page.locator('#stage3d-resource option').count()).toBe(4);
  await page.locator('#stage3d-apply').click();await expect(page.locator('#stage3d-dialog')).not.toBeVisible();const saved=page.waitForEvent('download');await page.locator('#save-project').click();const p=JSON.parse(await readFile((await (await saved).path())!,'utf8'));expect(p.characters.mika.name).toBe('Mika II');expect(p.scenes[1].stage3d.actors[0].character).toBe('mika');
  await page.locator('#undo-project').click();await page.locator('#open-stage3d').click();await expect(page.locator('[data-resource-field=name]')).toHaveValue('Mika');await page.locator('#stage3d-close').click();
 });
@@ -82,13 +82,13 @@ async function resourcePixels(page:any){return page.locator('#stage3d-resource-p
 
 test('selected characters have their own formatted settings and isolated live preview on the right',async({page})=>{
  await load(page);await page.locator('#open-stage3d').click();await expect(page.locator('#stage3d-resource-label')).toHaveText('Character');
- await expect(page.locator('.stage3d-library [data-resource-field]')).toHaveCount(0);await expect(page.locator('.stage3d-details [data-resource-field]')).toHaveCount(6);await expect(page.locator('#stage3d-fields fieldset')).toHaveCount(2);
+ await expect(page.locator('.stage3d-library [data-resource-field]')).toHaveCount(0);await expect(page.locator('.stage3d-details [data-resource-field]')).toHaveCount(7);await expect(page.locator('#stage3d-fields fieldset')).toHaveCount(2);
  const canvas=page.locator('#stage3d-resource-preview canvas');await expect(canvas).toHaveAttribute('data-resource3d-id','mika');await expect(canvas).toHaveAttribute('data-stage3d-time','0');await expect(canvas).toHaveAttribute('aria-label','Mika');
  const left=(await page.locator('.stage3d-library').boundingBox())!,right=(await page.locator('.stage3d-details').boundingBox())!;expect(right.x).toBeGreaterThanOrEqual(left.x+left.width);const previewBox=(await canvas.boundingBox())!,footer=(await page.locator('#stage3d-dialog footer').boundingBox())!;expect(previewBox.y+previewBox.height).toBeLessThanOrEqual(footer.y);
  const original=await resourcePixels(page);await page.locator('[data-resource-field=bodyColor]').fill('#ff0055');await expect.poll(()=>resourcePixels(page)).not.toBe(original);await expect(page.locator('.stage3d-color-swatch output').first()).toHaveText('#FF0055');
  await page.locator('[data-resource-field=name]').fill('Mika preview');await expect(page.locator('#stage3d-detail-title')).toHaveText('Character · Mika preview');await expect(canvas).toHaveAttribute('aria-label','Mika preview');await expect(page.locator('#stage3d-resource option:checked')).toHaveText('mika · Mika preview');
  await page.locator('#stage3d-resource').selectOption('bo');await expect(page.locator('[data-resource-field=name]')).toHaveValue('Bo');await expect(canvas).toHaveAttribute('data-resource3d-id','bo');await expect(canvas).toHaveAttribute('aria-label','Bo');await expect(canvas).toHaveAttribute('data-stage3d-time','0');expect(await resourcePixels(page)).not.toBe(original);
- expect(await page.locator('#stage3d-scene-settings').getAttribute('open')).toBeNull();expect(JSON.parse(await page.locator('#stage3d-shot').inputValue()).actors).toHaveLength(2);
+ expect(await page.locator('#stage3d-scene-settings').getAttribute('open')).toBeNull();expect(JSON.parse(await page.locator('#stage3d-shot').inputValue()).actors).toHaveLength(3);
  await page.locator('#stage3d-close').click();await expect(page.locator('#stage3d-resource-preview canvas')).toHaveCount(0);
 });
 
@@ -116,4 +116,21 @@ test('disposing a resource preview before its lazy renderer is ready does not re
 test('AI-authored action lists give identical preview poses when seeking backwards',async({page})=>{
  await load(page);const captures:string[]=[];for(const time of ['0.5','3.8','5','1.2','3.8']){await page.locator('#timeline').fill(time);const canvas=page.locator('#stage .stage3d-canvas');await expect(canvas).toHaveAttribute('data-stage3d-time',String(Number(time)));captures.push(await canvas.evaluate((c:HTMLCanvasElement)=>c.toDataURL()));}
  expect(captures[1]).toBe(captures[4]);expect(captures[0]).not.toBe(captures[1]);expect(captures[1]).not.toBe(captures[2]);
+});
+
+test('face style selector updates preview and survives standalone and project export',async({page})=>{
+ await load(page);await page.locator('#open-stage3d').click();
+ const style=page.locator('[data-resource-field=style]');
+ for(const [id,expected] of [['mika','robot'],['bo','pixel'],['lina','brick']]){
+  await page.locator('#stage3d-resource').selectOption(id);await expect(style).toHaveValue(expected);
+  await expect(page.locator('#stage3d-resource-preview canvas')).toHaveAttribute('data-resource3d-id',id);
+ }
+ const canvas=page.locator('#stage3d-resource-preview canvas');await expect(canvas).toHaveAttribute('data-stage3d-time','0');
+ const before=await canvas.evaluate((c:HTMLCanvasElement)=>c.toDataURL());await style.selectOption('pixel');
+ await expect.poll(()=>canvas.evaluate((c:HTMLCanvasElement)=>c.toDataURL())).not.toBe(before);
+ const download=page.waitForEvent('download');await page.locator('#stage3d-export').click();
+ const resource=JSON.parse(await readFile((await (await download).path())!,'utf8'));expect(resource.definition.style).toBe('pixel');
+ await page.locator('#stage3d-apply').click();
+ const saved=page.waitForEvent('download');await page.locator('#save-project').click();
+ const project=JSON.parse(await readFile((await (await saved).path())!,'utf8'));expect(project.characters.lina.style).toBe('pixel');expect(project.characters.mika.style).toBe('robot');
 });

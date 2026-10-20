@@ -1,12 +1,12 @@
 /** Small declarative 3D vocabulary. No scripts, URLs or external models are executed. */
-export type Character3D={name:string;bodyColor:string;headColor:string;limbColor:string;accentColor:string;height:number};
+export type Character3D={style:'classic'|'robot'|'pixel'|'brick';name:string;bodyColor:string;headColor:string;limbColor:string;accentColor:string;height:number};
 export type Stage3D={name:string;skyColor:string;groundColor:string;blockColor:string};
 export type ActorAction3D={type:'idle'|'walk'|'wave'|'turn';at:number;duration:number;toX:number|null;toZ:number|null;rotation:number|null;target:string;faceMovement:boolean;blend:number;easing:'linear'|'ease-in-out'};
 export const defaultActorAction3D=():ActorAction3D=>({type:'idle',at:0,duration:1,toX:null,toZ:null,rotation:null,target:'',faceMovement:false,blend:.3,easing:'ease-in-out'});
 export type Actor3D={actions:ActorAction3D[];id:string;character:string;x:number;z:number;toX:number;toZ:number;rotation:number;scale:number;action:'idle'|'walk'|'wave';at:number;duration:number};
 export type StageCamera3D={yaw:number;pitch:number;distance:number;targetX:number;targetY:number;targetZ:number;orbit:number};
 export type Shot3D={stage:string;camera:StageCamera3D;actors:Actor3D[]};
-export const defaultCharacter3D=():Character3D=>({name:'Robot',bodyColor:'#36a9e1',headColor:'#dde7ed',limbColor:'#64748b',accentColor:'#ffe066',height:3});
+export const defaultCharacter3D=():Character3D=>({style:'classic',name:'Robot',bodyColor:'#36a9e1',headColor:'#dde7ed',limbColor:'#64748b',accentColor:'#ffe066',height:3});
 export const defaultStage3D=():Stage3D=>({name:'Block plaza',skyColor:'#a7d9f5',groundColor:'#78a653',blockColor:'#e6bd7a'});
 export const defaultStageCamera3D=():StageCamera3D=>({yaw:20,pitch:18,distance:18,targetX:0,targetY:1.6,targetZ:0,orbit:0});
 export const defaultActor3D=(character:string,id='actor'):Actor3D=>({actions:[],id,character,x:0,z:0,toX:0,toZ:0,rotation:0,scale:1,action:'idle',at:0,duration:4});
@@ -18,7 +18,8 @@ const number=(v:unknown,p:string,min:number,max:number)=>{if(typeof v!=='number'
 const color=(v:unknown,p:string)=>{const s=text(v,p,7);if(!/^#[a-f\d]{6}$/i.test(s))throw new Error(p+': expected #RRGGBB');return s;};
 export function parseCharacter3D(value:unknown,path='character'):Character3D{
  const v=object(value,path),d=defaultCharacter3D();keys(v,Object.keys(d),path);
- return {name:text(v.name===undefined?d.name:v.name,path+'.name'),bodyColor:color(v.bodyColor===undefined?d.bodyColor:v.bodyColor,path+'.bodyColor'),headColor:color(v.headColor===undefined?d.headColor:v.headColor,path+'.headColor'),limbColor:color(v.limbColor===undefined?d.limbColor:v.limbColor,path+'.limbColor'),accentColor:color(v.accentColor===undefined?d.accentColor:v.accentColor,path+'.accentColor'),height:number(v.height===undefined?d.height:v.height,path+'.height',1,6)};
+ const style=v.style===undefined?d.style:v.style;if(!['classic','robot','pixel','brick'].includes(style as string))throw new Error(path+'.style: classic, robot, pixel, brick');
+ return {style:style as Character3D['style'],name:text(v.name===undefined?d.name:v.name,path+'.name'),bodyColor:color(v.bodyColor===undefined?d.bodyColor:v.bodyColor,path+'.bodyColor'),headColor:color(v.headColor===undefined?d.headColor:v.headColor,path+'.headColor'),limbColor:color(v.limbColor===undefined?d.limbColor:v.limbColor,path+'.limbColor'),accentColor:color(v.accentColor===undefined?d.accentColor:v.accentColor,path+'.accentColor'),height:number(v.height===undefined?d.height:v.height,path+'.height',1,6)};
 }
 export function parseStage3D(value:unknown,path='stage'):Stage3D{
  const v=object(value,path),d=defaultStage3D();keys(v,Object.keys(d),path);

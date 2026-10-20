@@ -1027,6 +1027,11 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "style": {
+          "type": "string",
+          "enum": ["classic", "robot", "pixel", "brick"],
+          "default": "classic"
+        },
         "name": {
           "type": "string",
           "maxLength": 200,

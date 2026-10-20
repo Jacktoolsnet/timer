@@ -1,0 +1,15 @@
+{
+  "format": "scenescript-3d-resource",
+  "version": "1.0",
+  "kind": "character",
+  "id": "lina",
+  "definition": {
+    "style": "brick",
+    "name": "Lina",
+    "bodyColor": "#ad5ad7",
+    "headColor": "#ffd36a",
+    "limbColor": "#3567a6",
+    "accentColor": "#fff1cd",
+    "height": 2.4
+  }
+}

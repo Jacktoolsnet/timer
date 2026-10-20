@@ -252,7 +252,10 @@ not a template field/type. Camera movement is continuous even under stopMotion.
 
 ### Reusable 3D stages and characters (first prototype)
 Project.characters and Project.stages are independent ID maps (max 30 each).
-Characters are procedural block robots: name, height and body/head/limb/accent colors.
+Characters are procedural figures: name, height and body/head/limb/accent colors.
+style: classic (default, legacy robot), robot (visible mechanical mouth), pixel
+(robot with pixel-monitor eyes/mouth), brick (brick-style person with eyes, nose,
+smile; headColor also colors hands). These are static faces, not expression controls.
 Stages currently share one built-in block plaza geometry, customized by name and
 sky/ground/block colors; a stage name does NOT generate arbitrary scenery.
 Scene.stage3d=null/omitted disables 3D. Otherwise stage references Project.stages;
