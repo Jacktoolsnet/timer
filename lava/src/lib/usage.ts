@@ -22,6 +22,7 @@ export const usageCopy = {
     'Die ebenfalls eingeschaltete Lavabläschen-Spur lässt beim Ziehen kleine Blasen zurück, die nach wenigen Sekunden verschwinden. Sie benötigt eine laufende Animation und aktivierte Berührungsaktion. Du kannst die Spur separat abschalten.',
     'Streiche bei laufender Animation mit gedrückter Maustaste oder einem Finger durch die Fläche. Nahe Blasen werden sanft mitgezogen. Nach dem Loslassen klingt der Einfluss allmählich ab. Die Bedienelemente bleiben normal anklickbar.',
     'Bei aktiver Berührungsaktion und laufender Animation wird eine Wischbewegung innerhalb der Fläche für die Lava genutzt statt zum Scrollen. Pausiere oder schalte die Berührungsaktion aus, um dort wieder normal zu scrollen.',
+    '„Bläschen ablösen“ ist ebenfalls zunächst an. Tippe gezielt eine große Blase an und ziehe sie: Kleine Bläschen lösen sich am Rand der gewählten Blase, nicht an der Fingerposition. Die Fingerspur bleibt davon unabhängig und beide Effekte sind einzeln abschaltbar.',
     'Endlose Verwandlung entwickelt Formen und Farbnuancen langsam weiter. Ausschalten hält diese zusätzliche Entwicklung an; die normale Bewegung und die Farbmischung bei Kontakt bleiben erhalten. Pause hält auch die Verwandlung an.',
    ]},
    {title:'Blasentöne und Lautstärke',items:[
@@ -70,6 +71,7 @@ export const usageCopy = {
     'The bubble trail is also on by default: dragging leaves small bubbles that dissolve after a few seconds. It requires running animation and touch interaction. The trail can be switched off separately.',
     'While the animation is running, drag through it with a pressed mouse button or one finger. Nearby bubbles follow gently. The influence gradually fades after release. Controls remain clickable.',
     'With touch interaction on and the animation running, swipes inside the scene move lava instead of scrolling. Pause or turn off touch interaction to scroll normally there.',
+    'Bubble shedding is also initially on. Press a large bubble and drag: small bubbles detach from the selected bubble’s edge, not from the pointer. The writing trail is independent and both effects can be switched off separately.',
     'Endless transformation slowly develops shapes and colour nuances. Turning it off stops this extra development; normal movement and colour exchange on contact continue. Pause also freezes transformation.',
    ]},
    {title:'Bubble sounds and volume',items:[

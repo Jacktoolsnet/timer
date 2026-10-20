@@ -1,3 +1,4 @@
+import {hitBlob,sheddingPoint} from '../lib/shedding';
 import {LavaTrail} from '../lib/trail';
 import {BubbleAudio} from '../lib/bubble-audio';
 import {LavaInteraction} from '../lib/interaction';
@@ -6,6 +7,8 @@ import {storageAllowed} from '../lib/storage';
 import {STORAGE_KEY} from '../lib/engine';
 import {createBlobColours, advanceBlobColours} from '../lib/rainbow';
 const trail=new LavaTrail();
+const shedding=new LavaTrail();
+const sheddingEnabled=document.querySelector<HTMLInputElement>('#lava-shedding')!;
 const trailEnabled=document.querySelector<HTMLInputElement>('#lava-trail')!;
 const trailCanvas=document.querySelector<HTMLCanvasElement>('#lava-trail-canvas')!;
 const trailContext=trailCanvas.getContext('2d');
@@ -207,6 +210,7 @@ function animate(now:number){
   const dt=Math.min((now-previous)/1000,.05)*Number(speed.value)/(1+Number(viscosity.value)/100*1.5);
   elapsed+=dt;
   if(evolution.checked)evolutionTime+=dt;
+  shedding.advance(dt,Number(viscosity.value)/100);
   trail.advance(dt,Number(viscosity.value)/100);
   interaction.advance(dt,Number(viscosity.value)/100);
   if(colour===4)advanceBlobColours(blobColours,elapsed,dt,canvas.clientWidth/canvas.clientHeight,Number(viscosity.value)/100,interaction.offsets,evolution.checked);
@@ -292,7 +296,7 @@ function saveLavaSettings() {
  if (!storageAllowed()) return;
  try {
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
-   colour, speed: Number(speed.value), brightness: Number(brightness.value), fluidColour, viscosity: Number(viscosity.value), touch:touch.checked, evolution:evolution.checked, sound:sound.checked, trail:trailEnabled.checked, volume:Number(volume.value)
+   colour, speed: Number(speed.value), brightness: Number(brightness.value), fluidColour, viscosity: Number(viscosity.value), touch:touch.checked, evolution:evolution.checked, sound:sound.checked, trail:trailEnabled.checked, shedding:sheddingEnabled.checked, volume:Number(volume.value)
   }));
  } catch { /* Blocked/full storage must not prevent using the animation. */ }
 }
@@ -305,6 +309,7 @@ if (storageAllowed()) {
  try {
   const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
   if (saved && typeof saved === 'object') {
+   if(typeof saved.shedding==='boolean')sheddingEnabled.checked=saved.shedding;
    if(typeof saved.trail==='boolean')trailEnabled.checked=saved.trail;
    if(typeof saved.sound==='boolean')sound.checked=saved.sound;
    if(Number.isInteger(saved.volume)&&saved.volume>=0&&saved.volume<=100)volume.value=String(saved.volume);
@@ -375,17 +380,19 @@ else{
 
 
 let activePointer:number|null=null;
+let grabbedBlob=-1;
 let lastPoint={x:0,y:0};
 function updateTouchMode(){
  stage.style.touchAction=touch.checked&&running?'none':'auto';
 }
-function stopStroke(){activePointer=null;}
+function stopStroke(){activePointer=null;grabbedBlob=-1;}
 stage.addEventListener('pointerdown',event=>{
  if(!touch.checked||!running||!program||!(event.target instanceof Element)||event.target.closest('button'))return;
  if(activePointer!==null)return;
  const rect=canvas.getBoundingClientRect();
  activePointer=event.pointerId;
  lastPoint={x:(event.clientX-rect.left)/rect.width,y:1-(event.clientY-rect.top)/rect.height};
+ grabbedBlob=hitBlob(lastPoint.x,lastPoint.y,elapsed,rect.width/rect.height,Number(viscosity.value)/100,interaction.offsets);
  stage.setPointerCapture(event.pointerId);
 });
 stage.addEventListener('pointermove',event=>{
@@ -393,11 +400,19 @@ stage.addEventListener('pointermove',event=>{
  const rect=canvas.getBoundingClientRect();
  const point={x:(event.clientX-rect.left)/rect.width,y:1-(event.clientY-rect.top)/rect.height};
  if(trailEnabled.checked)trail.stroke(point.x,point.y,point.x-lastPoint.x,point.y-lastPoint.y,rect.width/rect.height,trailColour(point.x,point.y));
+ if(sheddingEnabled.checked&&grabbedBlob>=0){
+  const dx=point.x-lastPoint.x,dy=point.y-lastPoint.y;
+  const edge=sheddingPoint(grabbedBlob,elapsed,rect.width/rect.height,Number(viscosity.value)/100,interaction.offsets,dx,dy);
+  if(edge){
+   const parent=trailColour(edge.x,edge.y,grabbedBlob);
+   shedding.stroke(edge.x,edge.y,dx*.45,dy*.45,rect.width/rect.height,parent);
+  }
+ }
  interaction.stroke(point.x,point.y,point.x-lastPoint.x,point.y-lastPoint.y,elapsed,rect.width/rect.height,Number(viscosity.value)/100);
  lastPoint=point;
 });
 for(const name of ['pointerup','pointercancel','lostpointercapture'])stage.addEventListener(name,stopStroke);
-touch.addEventListener('change',()=>{stopStroke();if(!touch.checked){interaction.reset();trail.clear();}updateTouchMode();draw();saveLavaSettings();});
+touch.addEventListener('change',()=>{stopStroke();if(!touch.checked){interaction.reset();trail.clear();shedding.clear();}updateTouchMode();draw();saveLavaSettings();});
 evolution.addEventListener('change',saveLavaSettings);
 toggle.addEventListener('click',()=>{stopStroke();updateTouchMode();});
 document.addEventListener('visibilitychange',stopStroke);
@@ -422,8 +437,9 @@ volume.addEventListener('input',()=>{updateVolume();saveLavaSettings();});
 updateVolume();
 
 
-function trailColour(x:number,y:number){
+function trailColour(x:number,y:number,parent?:number){
  if(colour!==4)return ['#ff763f','#b784ff','#50e8cc','#ff80b5','#b784ff','#c9d8ed','#dd956d','#f0ca61','#9b9cde'][colour];
+ if(parent!==undefined)return 'rgb('+[0,1,2].map(c=>Math.round(blobColours[parent*3+c]*255)).join(',')+')';
  let closest=0,distance=Infinity;
  for(let i=0;i<14;i++){
   const phase=elapsed*(.11+i*.006)+i*2.399;
@@ -439,8 +455,9 @@ function drawTrail(){
  const width=Math.round(trailCanvas.clientWidth*ratio),height=Math.round(trailCanvas.clientHeight*ratio);
  if(trailCanvas.width!==width||trailCanvas.height!==height){trailCanvas.width=width;trailCanvas.height=height;}
  const ctx=trailContext;ctx.clearRect(0,0,width,height);
- if(!trailEnabled.checked||!touch.checked)return;
- for(const p of trail.bubbles){
+ if(!touch.checked)return;
+ const particles=[...(trailEnabled.checked?trail.bubbles:[]),...(sheddingEnabled.checked?shedding.bubbles:[])];
+ for(const p of particles){
   const fraction=p.life/p.duration;
   const radius=p.radius*Math.min(width,height)*Math.min(1,fraction*2);
   if(radius<.2)continue;
@@ -454,3 +471,5 @@ function drawTrail(){
  ctx.globalAlpha=1;ctx.shadowBlur=0;
 }
 trailEnabled.addEventListener('change',()=>{if(!trailEnabled.checked)trail.clear();drawTrail();saveLavaSettings();});
+
+sheddingEnabled.addEventListener('change',()=>{if(!sheddingEnabled.checked)shedding.clear();drawTrail();saveLavaSettings();});

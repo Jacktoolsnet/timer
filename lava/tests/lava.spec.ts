@@ -262,6 +262,7 @@ test('bubble trail draws on drag, clears when disabled and remembers choice',asy
  test.setTimeout(60000);
  await page.goto('/de/');
  await expect(page.locator('#lava-trail')).toBeChecked();
+ await page.locator('#lava-shedding').uncheck();
  await page.locator('#lava-sound').uncheck();
  await page.locator('#lava-toggle').click();
  const box=(await page.locator('#lava-canvas').boundingBox())!;
@@ -281,4 +282,21 @@ test('bubble trail draws on drag, clears when disabled and remembers choice',asy
  await page.locator('#remember-preferences').check();
  await page.reload();
  await expect(page.locator('#lava-trail')).not.toBeChecked();
+});
+
+
+test('shedding and writing trail can be selected independently',async({page})=>{
+ await page.goto('/de/');
+ await expect(page.locator('#lava-shedding')).toBeChecked();
+ await expect(page.locator('#lava-trail')).toBeChecked();
+ await page.locator('#lava-trail').uncheck();
+ await expect(page.locator('#lava-shedding')).toBeChecked();
+ await page.locator('#lava-trail').check();
+ await page.locator('#lava-shedding').uncheck();
+ await expect(page.locator('#lava-trail')).toBeChecked();
+ await page.locator('#palette-dropdown summary').click();
+ await page.locator('#remember-preferences').check();
+ await page.reload();
+ await expect(page.locator('#lava-shedding')).not.toBeChecked();
+ await expect(page.locator('#lava-trail')).toBeChecked();
 });

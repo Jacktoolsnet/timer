@@ -65,3 +65,9 @@ Lavabläschen-Spur: standardmäßig an, einzeln abschaltbar. Beim Ziehen währen
 laufender Berührungsaktion bleiben kleine Blasen in passenden Farben zurück,
 die nach wenigen Sekunden verschwinden. Maximal 64 Partikel; bei Pause eingefroren.
 Der Schalter wird nur mit Speicherzustimmung gesichert, die Spur selbst nicht.
+
+„Bläschen ablösen“ ergänzt die Fingerspur unabhängig: Wird direkt eine große
+Blase getroffen und gezogen, entstehen kleine Partikel an deren nachlaufendem
+Rand. Der Elternkontakt wird beim Antippen bestimmt und beim Loslassen gelöst.
+Die Option ist standardmäßig an und wird mit Speicherzustimmung gemerkt.
+Fingerspur und Ablösen sind separat schaltbar; beide benötigen aktive Berührung.

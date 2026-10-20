@@ -715,7 +715,7 @@ export const usageTranslations:Record<UsageTool,Record<'es'|'fr',readonly UsageS
       {
         "title": "Interacción táctil y transformación continua",
         "paragraphs": [
-          "La interacción táctil y la transformación continua empiezan activadas y se pueden desactivar por separado. La estela de burbujas también está activada: al arrastrar deja pequeñas burbujas que desaparecen en unos segundos. Requiere animación e interacción activas y se puede desactivar por separado.",
+          "La interacción táctil y la transformación continua empiezan activadas y se pueden desactivar por separado. Desprender burbujas está activado inicialmente: pulsa una burbuja grande y arrastra para desprender pequeñas burbujas de su borde, no del dedo. Se puede desactivar por separado de la estela. La estela de burbujas también está activada: al arrastrar deja pequeñas burbujas que desaparecen en unos segundos. Requiere animación e interacción activas y se puede desactivar por separado.",
           "Con la animación en marcha, arrastra con el ratón pulsado o un dedo. Las burbujas próximas siguen suavemente; al soltar, el efecto se disipa. Los botones siguen siendo utilizables.",
           "Si la interacción está activa durante la reproducción, deslizar dentro de la escena mueve la lava en vez de desplazar la página. Pausa o desactiva la interacción para volver a desplazar normalmente allí.",
           "Transformación continua desarrolla formas y matices lentamente. Apagarla detiene esta evolución adicional, no el movimiento normal ni la mezcla al contacto. Pausa también detiene la transformación."
@@ -789,7 +789,7 @@ export const usageTranslations:Record<UsageTool,Record<'es'|'fr',readonly UsageS
       {
         "title": "Interaction tactile et transformation continue",
         "paragraphs": [
-          "L’interaction tactile et la transformation continue sont activées initialement et désactivables séparément. La traînée de bulles est aussi activée : glisser laisse de petites bulles qui disparaissent après quelques secondes. Elle exige une animation et une interaction actives et peut être désactivée séparément.",
+          "L’interaction tactile et la transformation continue sont activées initialement et désactivables séparément. Le détachement est activé initialement : appuyez sur une grande bulle et déplacez-la pour détacher de petites bulles de son bord, pas du doigt. Cette option est indépendante de la traînée. La traînée de bulles est aussi activée : glisser laisse de petites bulles qui disparaissent après quelques secondes. Elle exige une animation et une interaction actives et peut être désactivée séparément.",
           "Pendant l’animation, glissez avec le bouton de souris enfoncé ou un doigt. Les bulles proches suivent doucement ; l’effet s’atténue après relâchement. Les boutons restent utilisables.",
           "Si l’interaction est active pendant la lecture, glisser dans la scène déplace la lave au lieu de faire défiler la page. Mettez en pause ou désactivez l’interaction pour défiler normalement à cet endroit.",
           "La transformation continue développe lentement formes et nuances. La désactiver arrête ce développement supplémentaire, pas le mouvement normal ni le mélange au contact. Pause fige aussi la transformation."
