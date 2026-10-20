@@ -108,7 +108,7 @@ export function modelPose3D(model:Model3D,overrides:Record<string,number>,motion
 /** Conservative framing radius, including nested translations, pivot offsets and joint travel. */
 export function modelRadius3D(model:Model3D):number{
  const parts=new Map(model.parts.map(p=>[p.id,p]));let radius=1;
- for(const part of model.parts){let reach=Math.hypot(part.size.x,part.size.y,part.size.z)/2;for(const j of part.joints)if(j.motion==='scale')reach*=Math.max(1,j.max);let current:Part3D|undefined=part;
+ for(const part of model.parts){let reach=Math.hypot(part.size.x,part.size.y,part.size.z)/2;for(const j of part.joints)if(j.motion==='scale')reach*=Math.max(1,j.max);reach+=Math.max(0,...part.instances.map(p=>Math.hypot(p.x,p.y,p.z)));let current:Part3D|undefined=part;
   while(current){reach+=Math.hypot(current.position.x,current.position.y,current.position.z)+2*Math.hypot(current.pivot.x,current.pivot.y,current.pivot.z);for(const joint of current.joints)if(joint.motion==='translation')reach+=Math.max(Math.abs(joint.min),Math.abs(joint.max));current=parts.get(current.parent);}radius=Math.max(radius,reach);
  }return radius;
 }

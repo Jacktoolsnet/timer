@@ -4,7 +4,1576 @@
   "kind": "character",
   "id": "mika",
   "definition": {
-    "model": null,
+    "model": {
+      "parts": [
+        {
+          "id": "body",
+          "parent": "",
+          "palette": "",
+          "instances": [],
+          "shape": "group",
+          "color": "#36a9e1",
+          "position": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 1,
+            "y": 1,
+            "z": 1
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {},
+              "id": "breathing",
+              "motion": "translation",
+              "axis": "y",
+              "min": -0.1,
+              "max": 0.1,
+              "value": 0,
+              "control": "bob",
+              "target": 0.1
+            }
+          ]
+        },
+        {
+          "id": "shadow",
+          "parent": "body",
+          "palette": "",
+          "instances": [],
+          "shape": "cylinder",
+          "color": "#526674",
+          "position": {
+            "x": 0,
+            "y": 0.1,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 1.7,
+            "y": 0.01,
+            "z": 1.7
+          },
+          "roughness": 1,
+          "metalness": 0,
+          "opacity": 0.18,
+          "joints": []
+        },
+        {
+          "id": "torso",
+          "parent": "body",
+          "palette": "bodyColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#36a9e1",
+          "position": {
+            "x": 0,
+            "y": 1.65,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 1.15,
+            "y": 1.05,
+            "z": 0.65
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "chest",
+          "parent": "body",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0,
+            "y": 1.7,
+            "z": 0.345
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.55,
+            "y": 0.45,
+            "z": 0.08
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "chestLight",
+          "parent": "body",
+          "palette": "",
+          "instances": [],
+          "shape": "box",
+          "color": "#effaff",
+          "position": {
+            "x": 0,
+            "y": 1.72,
+            "z": 0.4
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.16,
+            "y": 0.15,
+            "z": 0.04
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "neck",
+          "parent": "body",
+          "palette": "limbColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#64748b",
+          "position": {
+            "x": 0,
+            "y": 2.26,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.35,
+            "y": 0.2,
+            "z": 0.35
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "face",
+          "parent": "body",
+          "palette": "",
+          "instances": [],
+          "shape": "group",
+          "color": "#36a9e1",
+          "position": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 1,
+            "y": 1,
+            "z": 1
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "head",
+          "parent": "body",
+          "palette": "headColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#dde7ed",
+          "position": {
+            "x": 0,
+            "y": 2.67,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.96,
+            "y": 0.75,
+            "z": 0.8
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "visor",
+          "parent": "face",
+          "palette": "",
+          "instances": [],
+          "shape": "box",
+          "color": "#213746",
+          "position": {
+            "x": 0,
+            "y": 2.71,
+            "z": 0.414
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.76,
+            "y": 0.34,
+            "z": 0.04
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "eye0",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.21,
+            "y": 2.75,
+            "z": 0.445
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.17,
+            "y": 0.12,
+            "z": 0.03
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0.7,
+                "sad": 0.8,
+                "angry": 0.65,
+                "surprised": 1.45
+              },
+              "id": "eyeHeight0",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0.01,
+              "max": 2,
+              "value": 1,
+              "control": "blink",
+              "target": 0.05
+            },
+            {
+              "responses": {
+                "angry": -12.605071492878112,
+                "sad": 6.875493541569878
+              },
+              "id": "eyeTilt0",
+              "motion": "rotation",
+              "axis": "z",
+              "min": -90,
+              "max": 90,
+              "value": 0,
+              "control": "none",
+              "target": 90
+            }
+          ]
+        },
+        {
+          "id": "eye1",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.21,
+            "y": 2.75,
+            "z": 0.445
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.17,
+            "y": 0.12,
+            "z": 0.03
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0.7,
+                "sad": 0.8,
+                "angry": 0.65,
+                "surprised": 1.45
+              },
+              "id": "eyeHeight1",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0.01,
+              "max": 2,
+              "value": 1,
+              "control": "blink",
+              "target": 0.05
+            },
+            {
+              "responses": {
+                "angry": 12.605071492878112,
+                "sad": -6.875493541569878
+              },
+              "id": "eyeTilt1",
+              "motion": "rotation",
+              "axis": "z",
+              "min": -90,
+              "max": 90,
+              "value": 0,
+              "control": "none",
+              "target": 90
+            }
+          ]
+        },
+        {
+          "id": "mouthFrame",
+          "parent": "face",
+          "palette": "limbColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#64748b",
+          "position": {
+            "x": 0,
+            "y": 2.43,
+            "z": 0.43
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.54,
+            "y": 0.16,
+            "z": 0.06
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {},
+              "id": "frameHeight",
+              "motion": "scale",
+              "axis": "y",
+              "min": 1,
+              "max": 1.9,
+              "value": 1,
+              "control": "mouth",
+              "target": 1.9
+            },
+            {
+              "responses": {},
+              "id": "frameWidth",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0.65,
+              "max": 1,
+              "value": 1,
+              "control": "mouth",
+              "target": 0.65
+            }
+          ]
+        },
+        {
+          "id": "mouth",
+          "parent": "face",
+          "palette": "",
+          "instances": [],
+          "shape": "box",
+          "color": "#142733",
+          "position": {
+            "x": 0,
+            "y": 2.43,
+            "z": 0.468
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.44,
+            "y": 0.09,
+            "z": 0.025
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {},
+              "id": "mouthWidth",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0.45,
+              "max": 1,
+              "value": 1,
+              "control": "mouth",
+              "target": 0.45
+            },
+            {
+              "responses": {},
+              "id": "mouthHeight",
+              "motion": "scale",
+              "axis": "y",
+              "min": 1,
+              "max": 2.6,
+              "value": 1,
+              "control": "mouth",
+              "target": 2.6
+            },
+            {
+              "responses": {
+                "sad": 6.875493541569878
+              },
+              "id": "mouthTilt",
+              "motion": "rotation",
+              "axis": "z",
+              "min": -20,
+              "max": 20,
+              "value": 0,
+              "control": "none",
+              "target": 20
+            },
+            {
+              "responses": {
+                "happy": 0.015,
+                "sad": -0.015
+              },
+              "id": "smile",
+              "motion": "translation",
+              "axis": "y",
+              "min": -0.1,
+              "max": 0.1,
+              "value": 0,
+              "control": "none",
+              "target": 0.1
+            }
+          ]
+        },
+        {
+          "id": "grille0",
+          "parent": "face",
+          "palette": "headColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#dde7ed",
+          "position": {
+            "x": -0.14,
+            "y": 2.43,
+            "z": 0.486
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.027,
+            "y": 0.08,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {},
+              "id": "grilleHeight0",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 1,
+              "control": "mouth",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0.0225,
+                "sad": -0.0225
+              },
+              "id": "grilleSmile0",
+              "motion": "translation",
+              "axis": "y",
+              "min": -0.1,
+              "max": 0.1,
+              "value": 0,
+              "control": "none",
+              "target": 0.1
+            }
+          ]
+        },
+        {
+          "id": "grille1",
+          "parent": "face",
+          "palette": "headColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#dde7ed",
+          "position": {
+            "x": 0,
+            "y": 2.43,
+            "z": 0.486
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.027,
+            "y": 0.08,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {},
+              "id": "grilleHeight1",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 1,
+              "control": "mouth",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": -0.0225,
+                "sad": 0.0225
+              },
+              "id": "grilleSmile1",
+              "motion": "translation",
+              "axis": "y",
+              "min": -0.1,
+              "max": 0.1,
+              "value": 0,
+              "control": "none",
+              "target": 0.1
+            }
+          ]
+        },
+        {
+          "id": "grille2",
+          "parent": "face",
+          "palette": "headColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#dde7ed",
+          "position": {
+            "x": 0.14,
+            "y": 2.43,
+            "z": 0.486
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.027,
+            "y": 0.08,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {},
+              "id": "grilleHeight2",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 1,
+              "control": "mouth",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0.0225,
+                "sad": -0.0225
+              },
+              "id": "grilleSmile2",
+              "motion": "translation",
+              "axis": "y",
+              "min": -0.1,
+              "max": 0.1,
+              "value": 0,
+              "control": "none",
+              "target": 0.1
+            }
+          ]
+        },
+        {
+          "id": "antenna",
+          "parent": "body",
+          "palette": "limbColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#64748b",
+          "position": {
+            "x": 0,
+            "y": 3.12,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.1,
+            "y": 0.25,
+            "z": 0.1
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "antennaTip",
+          "parent": "body",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0,
+            "y": 3.26,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.23,
+            "y": 0.12,
+            "z": 0.23
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "brow0",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.2,
+            "y": 2.94,
+            "z": 0.45
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.19,
+            "y": 0.035,
+            "z": 0.035
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0.4,
+                "sad": 1,
+                "angry": 1,
+                "surprised": 1
+              },
+              "id": "browHeight0",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "none",
+              "target": 1
+            },
+            {
+              "responses": {
+                "angry": -25.783100780887047,
+                "sad": 22.91831180523293
+              },
+              "id": "browTilt0",
+              "motion": "rotation",
+              "axis": "z",
+              "min": -90,
+              "max": 90,
+              "value": 0,
+              "control": "none",
+              "target": 90
+            },
+            {
+              "responses": {
+                "surprised": 0.035,
+                "angry": -0.04
+              },
+              "id": "browLift0",
+              "motion": "translation",
+              "axis": "y",
+              "min": -0.1,
+              "max": 0.1,
+              "value": 0,
+              "control": "none",
+              "target": 0.1
+            }
+          ]
+        },
+        {
+          "id": "brow1",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.2,
+            "y": 2.94,
+            "z": 0.45
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.19,
+            "y": 0.035,
+            "z": 0.035
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0.4,
+                "sad": 1,
+                "angry": 1,
+                "surprised": 1
+              },
+              "id": "browHeight1",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "none",
+              "target": 1
+            },
+            {
+              "responses": {
+                "angry": 25.783100780887047,
+                "sad": -22.91831180523293
+              },
+              "id": "browTilt1",
+              "motion": "rotation",
+              "axis": "z",
+              "min": -90,
+              "max": 90,
+              "value": 0,
+              "control": "none",
+              "target": 90
+            },
+            {
+              "responses": {
+                "surprised": 0.035,
+                "angry": -0.04
+              },
+              "id": "browLift1",
+              "motion": "translation",
+              "axis": "y",
+              "min": -0.1,
+              "max": 0.1,
+              "value": 0,
+              "control": "none",
+              "target": 0.1
+            }
+          ]
+        },
+        {
+          "id": "leftArm",
+          "parent": "body",
+          "palette": "",
+          "instances": [],
+          "shape": "group",
+          "color": "#36a9e1",
+          "position": {
+            "x": -0.78,
+            "y": 2.05,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 1,
+            "y": 1,
+            "z": 1
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {},
+              "id": "leftArm",
+              "motion": "rotation",
+              "axis": "x",
+              "min": -180,
+              "max": 180,
+              "value": 0,
+              "control": "leftArm",
+              "target": 180
+            }
+          ]
+        },
+        {
+          "id": "leftArmSegment",
+          "parent": "leftArm",
+          "palette": "limbColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#64748b",
+          "position": {
+            "x": 0,
+            "y": -0.42,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.32,
+            "y": 0.72,
+            "z": 0.4
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "leftArmEnd",
+          "parent": "leftArm",
+          "palette": "headColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#dde7ed",
+          "position": {
+            "x": 0,
+            "y": -0.87,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.38,
+            "y": 0.28,
+            "z": 0.44
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "rightArm",
+          "parent": "body",
+          "palette": "",
+          "instances": [],
+          "shape": "group",
+          "color": "#36a9e1",
+          "position": {
+            "x": 0.78,
+            "y": 2.05,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 1,
+            "y": 1,
+            "z": 1
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {},
+              "id": "rightArm",
+              "motion": "rotation",
+              "axis": "x",
+              "min": -180,
+              "max": 180,
+              "value": 0,
+              "control": "rightArm",
+              "target": 180
+            },
+            {
+              "responses": {},
+              "id": "wave",
+              "motion": "rotation",
+              "axis": "z",
+              "min": -90,
+              "max": 90,
+              "value": 0,
+              "control": "wave",
+              "target": 90
+            }
+          ]
+        },
+        {
+          "id": "rightArmSegment",
+          "parent": "rightArm",
+          "palette": "limbColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#64748b",
+          "position": {
+            "x": 0,
+            "y": -0.42,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.32,
+            "y": 0.72,
+            "z": 0.4
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "rightArmEnd",
+          "parent": "rightArm",
+          "palette": "headColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#dde7ed",
+          "position": {
+            "x": 0,
+            "y": -0.87,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.38,
+            "y": 0.28,
+            "z": 0.44
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "leftLeg",
+          "parent": "body",
+          "palette": "",
+          "instances": [],
+          "shape": "group",
+          "color": "#36a9e1",
+          "position": {
+            "x": -0.31,
+            "y": 1.13,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 1,
+            "y": 1,
+            "z": 1
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {},
+              "id": "leftLeg",
+              "motion": "rotation",
+              "axis": "x",
+              "min": -180,
+              "max": 180,
+              "value": 0,
+              "control": "leftLeg",
+              "target": 180
+            }
+          ]
+        },
+        {
+          "id": "leftLegSegment",
+          "parent": "leftLeg",
+          "palette": "limbColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#64748b",
+          "position": {
+            "x": 0,
+            "y": -0.48,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.38,
+            "y": 0.85,
+            "z": 0.4
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "leftLegEnd",
+          "parent": "leftLeg",
+          "palette": "bodyColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#36a9e1",
+          "position": {
+            "x": 0,
+            "y": -0.89,
+            "z": 0.1
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.44,
+            "y": 0.28,
+            "z": 0.66
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "rightLeg",
+          "parent": "body",
+          "palette": "",
+          "instances": [],
+          "shape": "group",
+          "color": "#36a9e1",
+          "position": {
+            "x": 0.31,
+            "y": 1.13,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 1,
+            "y": 1,
+            "z": 1
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {},
+              "id": "rightLeg",
+              "motion": "rotation",
+              "axis": "x",
+              "min": -180,
+              "max": 180,
+              "value": 0,
+              "control": "rightLeg",
+              "target": 180
+            }
+          ]
+        },
+        {
+          "id": "rightLegSegment",
+          "parent": "rightLeg",
+          "palette": "limbColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#64748b",
+          "position": {
+            "x": 0,
+            "y": -0.48,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.38,
+            "y": 0.85,
+            "z": 0.4
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "rightLegEnd",
+          "parent": "rightLeg",
+          "palette": "bodyColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#36a9e1",
+          "position": {
+            "x": 0,
+            "y": -0.89,
+            "z": 0.1
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.44,
+            "y": 0.28,
+            "z": 0.66
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        }
+      ],
+      "animations": {
+        "walk": {
+          "duration": 1,
+          "tracks": [
+            {
+              "joint": "leftArm",
+              "keys": [
+                {
+                  "at": 0,
+                  "value": 0
+                },
+                {
+                  "at": 0.25,
+                  "value": 34
+                },
+                {
+                  "at": 0.5,
+                  "value": 0
+                },
+                {
+                  "at": 0.75,
+                  "value": -34
+                },
+                {
+                  "at": 1,
+                  "value": 0
+                }
+              ],
+              "easing": "linear"
+            },
+            {
+              "joint": "rightArm",
+              "keys": [
+                {
+                  "at": 0,
+                  "value": 0
+                },
+                {
+                  "at": 0.25,
+                  "value": -34
+                },
+                {
+                  "at": 0.5,
+                  "value": 0
+                },
+                {
+                  "at": 0.75,
+                  "value": 34
+                },
+                {
+                  "at": 1,
+                  "value": 0
+                }
+              ],
+              "easing": "linear"
+            },
+            {
+              "joint": "leftLeg",
+              "keys": [
+                {
+                  "at": 0,
+                  "value": 0
+                },
+                {
+                  "at": 0.25,
+                  "value": -34
+                },
+                {
+                  "at": 0.5,
+                  "value": 0
+                },
+                {
+                  "at": 0.75,
+                  "value": 34
+                },
+                {
+                  "at": 1,
+                  "value": 0
+                }
+              ],
+              "easing": "linear"
+            },
+            {
+              "joint": "rightLeg",
+              "keys": [
+                {
+                  "at": 0,
+                  "value": 0
+                },
+                {
+                  "at": 0.25,
+                  "value": 34
+                },
+                {
+                  "at": 0.5,
+                  "value": 0
+                },
+                {
+                  "at": 0.75,
+                  "value": -34
+                },
+                {
+                  "at": 1,
+                  "value": 0
+                }
+              ],
+              "easing": "linear"
+            }
+          ]
+        },
+        "wave": {
+          "duration": 2,
+          "tracks": [
+            {
+              "joint": "rightArm",
+              "keys": [
+                {
+                  "at": 0,
+                  "value": 0
+                },
+                {
+                  "at": 0.5,
+                  "value": -144
+                },
+                {
+                  "at": 1,
+                  "value": -144
+                },
+                {
+                  "at": 1.5,
+                  "value": -144
+                },
+                {
+                  "at": 2,
+                  "value": 0
+                }
+              ],
+              "easing": "linear"
+            },
+            {
+              "joint": "wave",
+              "keys": [
+                {
+                  "at": 0,
+                  "value": 0
+                },
+                {
+                  "at": 0.5,
+                  "value": 10
+                },
+                {
+                  "at": 1,
+                  "value": -10
+                },
+                {
+                  "at": 1.5,
+                  "value": 10
+                },
+                {
+                  "at": 2,
+                  "value": 0
+                }
+              ],
+              "easing": "linear"
+            }
+          ]
+        }
+      }
+    },
     "expression": "neutral",
     "style": "robot",
     "name": "Mika",

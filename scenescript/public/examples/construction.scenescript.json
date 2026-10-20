@@ -6,6 +6,8 @@
           {
             "id": "chassis",
             "parent": "",
+            "palette": "",
+            "instances": [],
             "shape": "box",
             "color": "#334c60",
             "position": {
@@ -36,6 +38,8 @@
           {
             "id": "body",
             "parent": "",
+            "palette": "",
+            "instances": [],
             "shape": "group",
             "color": "#dc493f",
             "position": {
@@ -63,6 +67,7 @@
             "opacity": 1,
             "joints": [
               {
+                "responses": {},
                 "id": "suspension",
                 "motion": "translation",
                 "axis": "y",
@@ -77,6 +82,8 @@
           {
             "id": "hood",
             "parent": "body",
+            "palette": "",
+            "instances": [],
             "shape": "box",
             "color": "#ed5948",
             "position": {
@@ -107,6 +114,8 @@
           {
             "id": "cab",
             "parent": "body",
+            "palette": "",
+            "instances": [],
             "shape": "box",
             "color": "#ed5948",
             "position": {
@@ -137,6 +146,8 @@
           {
             "id": "windshield",
             "parent": "body",
+            "palette": "",
+            "instances": [],
             "shape": "box",
             "color": "#9bdeef",
             "position": {
@@ -167,6 +178,8 @@
           {
             "id": "roof",
             "parent": "body",
+            "palette": "",
+            "instances": [],
             "shape": "box",
             "color": "#f7be38",
             "position": {
@@ -197,6 +210,8 @@
           {
             "id": "bumper",
             "parent": "body",
+            "palette": "",
+            "instances": [],
             "shape": "box",
             "color": "#d6e3ed",
             "position": {
@@ -227,6 +242,8 @@
           {
             "id": "lampL",
             "parent": "body",
+            "palette": "",
+            "instances": [],
             "shape": "sphere",
             "color": "#fff4a2",
             "position": {
@@ -257,6 +274,8 @@
           {
             "id": "lampR",
             "parent": "body",
+            "palette": "",
+            "instances": [],
             "shape": "sphere",
             "color": "#fff4a2",
             "position": {
@@ -287,6 +306,8 @@
           {
             "id": "steerleftRear",
             "parent": "",
+            "palette": "",
+            "instances": [],
             "shape": "group",
             "color": "#253746",
             "position": {
@@ -317,6 +338,8 @@
           {
             "id": "rollleftRear",
             "parent": "steerleftRear",
+            "palette": "",
+            "instances": [],
             "shape": "group",
             "color": "#253746",
             "position": {
@@ -344,6 +367,7 @@
             "opacity": 1,
             "joints": [
               {
+                "responses": {},
                 "id": "rollleftRear",
                 "motion": "rotation",
                 "axis": "x",
@@ -358,6 +382,8 @@
           {
             "id": "tireleftRear",
             "parent": "rollleftRear",
+            "palette": "",
+            "instances": [],
             "shape": "cylinder",
             "color": "#27333e",
             "position": {
@@ -388,6 +414,8 @@
           {
             "id": "hubleftRear",
             "parent": "rollleftRear",
+            "palette": "",
+            "instances": [],
             "shape": "cylinder",
             "color": "#f6b52d",
             "position": {
@@ -418,6 +446,8 @@
           {
             "id": "stripeleftRear",
             "parent": "rollleftRear",
+            "palette": "",
+            "instances": [],
             "shape": "box",
             "color": "#ecf5fa",
             "position": {
@@ -448,6 +478,8 @@
           {
             "id": "steerleftFront",
             "parent": "",
+            "palette": "",
+            "instances": [],
             "shape": "group",
             "color": "#253746",
             "position": {
@@ -475,6 +507,7 @@
             "opacity": 1,
             "joints": [
               {
+                "responses": {},
                 "id": "steerleftFront",
                 "motion": "rotation",
                 "axis": "y",
@@ -489,6 +522,8 @@
           {
             "id": "rollleftFront",
             "parent": "steerleftFront",
+            "palette": "",
+            "instances": [],
             "shape": "group",
             "color": "#253746",
             "position": {
@@ -516,6 +551,7 @@
             "opacity": 1,
             "joints": [
               {
+                "responses": {},
                 "id": "rollleftFront",
                 "motion": "rotation",
                 "axis": "x",
@@ -530,6 +566,8 @@
           {
             "id": "tireleftFront",
             "parent": "rollleftFront",
+            "palette": "",
+            "instances": [],
             "shape": "cylinder",
             "color": "#27333e",
             "position": {
@@ -560,6 +598,8 @@
           {
             "id": "hubleftFront",
             "parent": "rollleftFront",
+            "palette": "",
+            "instances": [],
             "shape": "cylinder",
             "color": "#f6b52d",
             "position": {
@@ -590,6 +630,8 @@
           {
             "id": "stripeleftFront",
             "parent": "rollleftFront",
+            "palette": "",
+            "instances": [],
             "shape": "box",
             "color": "#ecf5fa",
             "position": {
@@ -620,6 +662,8 @@
           {
             "id": "steerrightRear",
             "parent": "",
+            "palette": "",
+            "instances": [],
             "shape": "group",
             "color": "#253746",
             "position": {
@@ -650,6 +694,8 @@
           {
             "id": "rollrightRear",
             "parent": "steerrightRear",
+            "palette": "",
+            "instances": [],
             "shape": "group",
             "color": "#253746",
             "position": {
@@ -677,6 +723,7 @@
             "opacity": 1,
             "joints": [
               {
+                "responses": {},
                 "id": "rollrightRear",
                 "motion": "rotation",
                 "axis": "x",
@@ -691,6 +738,8 @@
           {
             "id": "tirerightRear",
             "parent": "rollrightRear",
+            "palette": "",
+            "instances": [],
             "shape": "cylinder",
             "color": "#27333e",
             "position": {
@@ -721,6 +770,8 @@
           {
             "id": "hubrightRear",
             "parent": "rollrightRear",
+            "palette": "",
+            "instances": [],
             "shape": "cylinder",
             "color": "#f6b52d",
             "position": {
@@ -751,6 +802,8 @@
           {
             "id": "striperightRear",
             "parent": "rollrightRear",
+            "palette": "",
+            "instances": [],
             "shape": "box",
             "color": "#ecf5fa",
             "position": {
@@ -781,6 +834,8 @@
           {
             "id": "steerrightFront",
             "parent": "",
+            "palette": "",
+            "instances": [],
             "shape": "group",
             "color": "#253746",
             "position": {
@@ -808,6 +863,7 @@
             "opacity": 1,
             "joints": [
               {
+                "responses": {},
                 "id": "steerrightFront",
                 "motion": "rotation",
                 "axis": "y",
@@ -822,6 +878,8 @@
           {
             "id": "rollrightFront",
             "parent": "steerrightFront",
+            "palette": "",
+            "instances": [],
             "shape": "group",
             "color": "#253746",
             "position": {
@@ -849,6 +907,7 @@
             "opacity": 1,
             "joints": [
               {
+                "responses": {},
                 "id": "rollrightFront",
                 "motion": "rotation",
                 "axis": "x",
@@ -863,6 +922,8 @@
           {
             "id": "tirerightFront",
             "parent": "rollrightFront",
+            "palette": "",
+            "instances": [],
             "shape": "cylinder",
             "color": "#27333e",
             "position": {
@@ -893,6 +954,8 @@
           {
             "id": "hubrightFront",
             "parent": "rollrightFront",
+            "palette": "",
+            "instances": [],
             "shape": "cylinder",
             "color": "#f6b52d",
             "position": {
@@ -923,6 +986,8 @@
           {
             "id": "striperightFront",
             "parent": "rollrightFront",
+            "palette": "",
+            "instances": [],
             "shape": "box",
             "color": "#ecf5fa",
             "position": {
@@ -1116,6 +1181,8 @@
           {
             "id": "body",
             "parent": "",
+            "palette": "",
+            "instances": [],
             "shape": "box",
             "color": "#6f68d8",
             "position": {
@@ -1146,6 +1213,8 @@
           {
             "id": "head",
             "parent": "",
+            "palette": "",
+            "instances": [],
             "shape": "box",
             "color": "#dceaf5",
             "position": {
@@ -1176,6 +1245,8 @@
           {
             "id": "visor",
             "parent": "",
+            "palette": "",
+            "instances": [],
             "shape": "box",
             "color": "#233d51",
             "position": {
@@ -1206,6 +1277,8 @@
           {
             "id": "eyeL",
             "parent": "",
+            "palette": "",
+            "instances": [],
             "shape": "sphere",
             "color": "#5ce5d1",
             "position": {
@@ -1236,6 +1309,8 @@
           {
             "id": "lidL",
             "parent": "",
+            "palette": "",
+            "instances": [],
             "shape": "box",
             "color": "#dceaf5",
             "position": {
@@ -1263,6 +1338,7 @@
             "opacity": 1,
             "joints": [
               {
+                "responses": {},
                 "id": "blinkL",
                 "motion": "translation",
                 "axis": "y",
@@ -1277,6 +1353,8 @@
           {
             "id": "legL",
             "parent": "",
+            "palette": "",
+            "instances": [],
             "shape": "box",
             "color": "#3d5a83",
             "position": {
@@ -1307,6 +1385,8 @@
           {
             "id": "footL",
             "parent": "",
+            "palette": "",
+            "instances": [],
             "shape": "box",
             "color": "#6f68d8",
             "position": {
@@ -1337,6 +1417,8 @@
           {
             "id": "armL",
             "parent": "",
+            "palette": "",
+            "instances": [],
             "shape": "box",
             "color": "#dceaf5",
             "position": {
@@ -1364,6 +1446,7 @@
             "opacity": 1,
             "joints": [
               {
+                "responses": {},
                 "id": "shoulderL",
                 "motion": "rotation",
                 "axis": "z",
@@ -1378,6 +1461,8 @@
           {
             "id": "eyeR",
             "parent": "",
+            "palette": "",
+            "instances": [],
             "shape": "sphere",
             "color": "#5ce5d1",
             "position": {
@@ -1408,6 +1493,8 @@
           {
             "id": "lidR",
             "parent": "",
+            "palette": "",
+            "instances": [],
             "shape": "box",
             "color": "#dceaf5",
             "position": {
@@ -1435,6 +1522,7 @@
             "opacity": 1,
             "joints": [
               {
+                "responses": {},
                 "id": "blinkR",
                 "motion": "translation",
                 "axis": "y",
@@ -1449,6 +1537,8 @@
           {
             "id": "legR",
             "parent": "",
+            "palette": "",
+            "instances": [],
             "shape": "box",
             "color": "#3d5a83",
             "position": {
@@ -1479,6 +1569,8 @@
           {
             "id": "footR",
             "parent": "",
+            "palette": "",
+            "instances": [],
             "shape": "box",
             "color": "#6f68d8",
             "position": {
@@ -1509,6 +1601,8 @@
           {
             "id": "armR",
             "parent": "",
+            "palette": "",
+            "instances": [],
             "shape": "box",
             "color": "#dceaf5",
             "position": {
@@ -1536,6 +1630,7 @@
             "opacity": 1,
             "joints": [
               {
+                "responses": {},
                 "id": "shoulderR",
                 "motion": "rotation",
                 "axis": "z",
@@ -1550,6 +1645,8 @@
           {
             "id": "mouth",
             "parent": "",
+            "palette": "",
+            "instances": [],
             "shape": "box",
             "color": "#233d51",
             "position": {
@@ -1577,6 +1674,7 @@
             "opacity": 1,
             "joints": [
               {
+                "responses": {},
                 "id": "jaw",
                 "motion": "translation",
                 "axis": "y",
@@ -1591,6 +1689,8 @@
           {
             "id": "antenna",
             "parent": "",
+            "palette": "",
+            "instances": [],
             "shape": "cylinder",
             "color": "#3d5a83",
             "position": {
@@ -1621,6 +1721,8 @@
           {
             "id": "antennaTip",
             "parent": "",
+            "palette": "",
+            "instances": [],
             "shape": "sphere",
             "color": "#f7be38",
             "position": {
@@ -1726,6 +1828,8 @@
           {
             "id": "platform",
             "parent": "",
+            "palette": "",
+            "instances": [],
             "shape": "box",
             "color": "#cfdae1",
             "position": {
@@ -1756,6 +1860,8 @@
           {
             "id": "trunkL",
             "parent": "",
+            "palette": "",
+            "instances": [],
             "shape": "cylinder",
             "color": "#896444",
             "position": {
@@ -1786,6 +1892,8 @@
           {
             "id": "treeL",
             "parent": "",
+            "palette": "",
+            "instances": [],
             "shape": "cone",
             "color": "#44916b",
             "position": {
@@ -1816,6 +1924,8 @@
           {
             "id": "trunkR",
             "parent": "",
+            "palette": "",
+            "instances": [],
             "shape": "cylinder",
             "color": "#896444",
             "position": {
@@ -1846,6 +1956,8 @@
           {
             "id": "treeR",
             "parent": "",
+            "palette": "",
+            "instances": [],
             "shape": "cone",
             "color": "#44916b",
             "position": {
@@ -1876,6 +1988,8 @@
           {
             "id": "gatePost",
             "parent": "",
+            "palette": "",
+            "instances": [],
             "shape": "box",
             "color": "#f6b52d",
             "position": {
@@ -1906,6 +2020,8 @@
           {
             "id": "gate",
             "parent": "",
+            "palette": "",
+            "instances": [],
             "shape": "box",
             "color": "#ed5948",
             "position": {
@@ -1933,6 +2049,7 @@
             "opacity": 1,
             "joints": [
               {
+                "responses": {},
                 "id": "gateHinge",
                 "motion": "rotation",
                 "axis": "y",
@@ -1947,6 +2064,8 @@
           {
             "id": "backPanel",
             "parent": "",
+            "palette": "",
+            "instances": [],
             "shape": "box",
             "color": "#3d5a83",
             "position": {

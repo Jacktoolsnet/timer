@@ -9,6 +9,8 @@
         {
           "id": "chassis",
           "parent": "",
+          "palette": "",
+          "instances": [],
           "shape": "box",
           "color": "#334c60",
           "position": {
@@ -39,6 +41,8 @@
         {
           "id": "body",
           "parent": "",
+          "palette": "",
+          "instances": [],
           "shape": "group",
           "color": "#dc493f",
           "position": {
@@ -66,6 +70,7 @@
           "opacity": 1,
           "joints": [
             {
+              "responses": {},
               "id": "suspension",
               "motion": "translation",
               "axis": "y",
@@ -80,6 +85,8 @@
         {
           "id": "hood",
           "parent": "body",
+          "palette": "",
+          "instances": [],
           "shape": "box",
           "color": "#ed5948",
           "position": {
@@ -110,6 +117,8 @@
         {
           "id": "cab",
           "parent": "body",
+          "palette": "",
+          "instances": [],
           "shape": "box",
           "color": "#ed5948",
           "position": {
@@ -140,6 +149,8 @@
         {
           "id": "windshield",
           "parent": "body",
+          "palette": "",
+          "instances": [],
           "shape": "box",
           "color": "#9bdeef",
           "position": {
@@ -170,6 +181,8 @@
         {
           "id": "roof",
           "parent": "body",
+          "palette": "",
+          "instances": [],
           "shape": "box",
           "color": "#f7be38",
           "position": {
@@ -200,6 +213,8 @@
         {
           "id": "bumper",
           "parent": "body",
+          "palette": "",
+          "instances": [],
           "shape": "box",
           "color": "#d6e3ed",
           "position": {
@@ -230,6 +245,8 @@
         {
           "id": "lampL",
           "parent": "body",
+          "palette": "",
+          "instances": [],
           "shape": "sphere",
           "color": "#fff4a2",
           "position": {
@@ -260,6 +277,8 @@
         {
           "id": "lampR",
           "parent": "body",
+          "palette": "",
+          "instances": [],
           "shape": "sphere",
           "color": "#fff4a2",
           "position": {
@@ -290,6 +309,8 @@
         {
           "id": "steerleftRear",
           "parent": "",
+          "palette": "",
+          "instances": [],
           "shape": "group",
           "color": "#253746",
           "position": {
@@ -320,6 +341,8 @@
         {
           "id": "rollleftRear",
           "parent": "steerleftRear",
+          "palette": "",
+          "instances": [],
           "shape": "group",
           "color": "#253746",
           "position": {
@@ -347,6 +370,7 @@
           "opacity": 1,
           "joints": [
             {
+              "responses": {},
               "id": "rollleftRear",
               "motion": "rotation",
               "axis": "x",
@@ -361,6 +385,8 @@
         {
           "id": "tireleftRear",
           "parent": "rollleftRear",
+          "palette": "",
+          "instances": [],
           "shape": "cylinder",
           "color": "#27333e",
           "position": {
@@ -391,6 +417,8 @@
         {
           "id": "hubleftRear",
           "parent": "rollleftRear",
+          "palette": "",
+          "instances": [],
           "shape": "cylinder",
           "color": "#f6b52d",
           "position": {
@@ -421,6 +449,8 @@
         {
           "id": "stripeleftRear",
           "parent": "rollleftRear",
+          "palette": "",
+          "instances": [],
           "shape": "box",
           "color": "#ecf5fa",
           "position": {
@@ -451,6 +481,8 @@
         {
           "id": "steerleftFront",
           "parent": "",
+          "palette": "",
+          "instances": [],
           "shape": "group",
           "color": "#253746",
           "position": {
@@ -478,6 +510,7 @@
           "opacity": 1,
           "joints": [
             {
+              "responses": {},
               "id": "steerleftFront",
               "motion": "rotation",
               "axis": "y",
@@ -492,6 +525,8 @@
         {
           "id": "rollleftFront",
           "parent": "steerleftFront",
+          "palette": "",
+          "instances": [],
           "shape": "group",
           "color": "#253746",
           "position": {
@@ -519,6 +554,7 @@
           "opacity": 1,
           "joints": [
             {
+              "responses": {},
               "id": "rollleftFront",
               "motion": "rotation",
               "axis": "x",
@@ -533,6 +569,8 @@
         {
           "id": "tireleftFront",
           "parent": "rollleftFront",
+          "palette": "",
+          "instances": [],
           "shape": "cylinder",
           "color": "#27333e",
           "position": {
@@ -563,6 +601,8 @@
         {
           "id": "hubleftFront",
           "parent": "rollleftFront",
+          "palette": "",
+          "instances": [],
           "shape": "cylinder",
           "color": "#f6b52d",
           "position": {
@@ -593,6 +633,8 @@
         {
           "id": "stripeleftFront",
           "parent": "rollleftFront",
+          "palette": "",
+          "instances": [],
           "shape": "box",
           "color": "#ecf5fa",
           "position": {
@@ -623,6 +665,8 @@
         {
           "id": "steerrightRear",
           "parent": "",
+          "palette": "",
+          "instances": [],
           "shape": "group",
           "color": "#253746",
           "position": {
@@ -653,6 +697,8 @@
         {
           "id": "rollrightRear",
           "parent": "steerrightRear",
+          "palette": "",
+          "instances": [],
           "shape": "group",
           "color": "#253746",
           "position": {
@@ -680,6 +726,7 @@
           "opacity": 1,
           "joints": [
             {
+              "responses": {},
               "id": "rollrightRear",
               "motion": "rotation",
               "axis": "x",
@@ -694,6 +741,8 @@
         {
           "id": "tirerightRear",
           "parent": "rollrightRear",
+          "palette": "",
+          "instances": [],
           "shape": "cylinder",
           "color": "#27333e",
           "position": {
@@ -724,6 +773,8 @@
         {
           "id": "hubrightRear",
           "parent": "rollrightRear",
+          "palette": "",
+          "instances": [],
           "shape": "cylinder",
           "color": "#f6b52d",
           "position": {
@@ -754,6 +805,8 @@
         {
           "id": "striperightRear",
           "parent": "rollrightRear",
+          "palette": "",
+          "instances": [],
           "shape": "box",
           "color": "#ecf5fa",
           "position": {
@@ -784,6 +837,8 @@
         {
           "id": "steerrightFront",
           "parent": "",
+          "palette": "",
+          "instances": [],
           "shape": "group",
           "color": "#253746",
           "position": {
@@ -811,6 +866,7 @@
           "opacity": 1,
           "joints": [
             {
+              "responses": {},
               "id": "steerrightFront",
               "motion": "rotation",
               "axis": "y",
@@ -825,6 +881,8 @@
         {
           "id": "rollrightFront",
           "parent": "steerrightFront",
+          "palette": "",
+          "instances": [],
           "shape": "group",
           "color": "#253746",
           "position": {
@@ -852,6 +910,7 @@
           "opacity": 1,
           "joints": [
             {
+              "responses": {},
               "id": "rollrightFront",
               "motion": "rotation",
               "axis": "x",
@@ -866,6 +925,8 @@
         {
           "id": "tirerightFront",
           "parent": "rollrightFront",
+          "palette": "",
+          "instances": [],
           "shape": "cylinder",
           "color": "#27333e",
           "position": {
@@ -896,6 +957,8 @@
         {
           "id": "hubrightFront",
           "parent": "rollrightFront",
+          "palette": "",
+          "instances": [],
           "shape": "cylinder",
           "color": "#f6b52d",
           "position": {
@@ -926,6 +989,8 @@
         {
           "id": "striperightFront",
           "parent": "rollrightFront",
+          "palette": "",
+          "instances": [],
           "shape": "box",
           "color": "#ecf5fa",
           "position": {

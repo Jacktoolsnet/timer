@@ -9,6 +9,8 @@
         {
           "id": "body",
           "parent": "",
+          "palette": "",
+          "instances": [],
           "shape": "box",
           "color": "#6f68d8",
           "position": {
@@ -39,6 +41,8 @@
         {
           "id": "head",
           "parent": "",
+          "palette": "",
+          "instances": [],
           "shape": "box",
           "color": "#dceaf5",
           "position": {
@@ -69,6 +73,8 @@
         {
           "id": "visor",
           "parent": "",
+          "palette": "",
+          "instances": [],
           "shape": "box",
           "color": "#233d51",
           "position": {
@@ -99,6 +105,8 @@
         {
           "id": "eyeL",
           "parent": "",
+          "palette": "",
+          "instances": [],
           "shape": "sphere",
           "color": "#5ce5d1",
           "position": {
@@ -129,6 +137,8 @@
         {
           "id": "lidL",
           "parent": "",
+          "palette": "",
+          "instances": [],
           "shape": "box",
           "color": "#dceaf5",
           "position": {
@@ -156,6 +166,7 @@
           "opacity": 1,
           "joints": [
             {
+              "responses": {},
               "id": "blinkL",
               "motion": "translation",
               "axis": "y",
@@ -170,6 +181,8 @@
         {
           "id": "legL",
           "parent": "",
+          "palette": "",
+          "instances": [],
           "shape": "box",
           "color": "#3d5a83",
           "position": {
@@ -200,6 +213,8 @@
         {
           "id": "footL",
           "parent": "",
+          "palette": "",
+          "instances": [],
           "shape": "box",
           "color": "#6f68d8",
           "position": {
@@ -230,6 +245,8 @@
         {
           "id": "armL",
           "parent": "",
+          "palette": "",
+          "instances": [],
           "shape": "box",
           "color": "#dceaf5",
           "position": {
@@ -257,6 +274,7 @@
           "opacity": 1,
           "joints": [
             {
+              "responses": {},
               "id": "shoulderL",
               "motion": "rotation",
               "axis": "z",
@@ -271,6 +289,8 @@
         {
           "id": "eyeR",
           "parent": "",
+          "palette": "",
+          "instances": [],
           "shape": "sphere",
           "color": "#5ce5d1",
           "position": {
@@ -301,6 +321,8 @@
         {
           "id": "lidR",
           "parent": "",
+          "palette": "",
+          "instances": [],
           "shape": "box",
           "color": "#dceaf5",
           "position": {
@@ -328,6 +350,7 @@
           "opacity": 1,
           "joints": [
             {
+              "responses": {},
               "id": "blinkR",
               "motion": "translation",
               "axis": "y",
@@ -342,6 +365,8 @@
         {
           "id": "legR",
           "parent": "",
+          "palette": "",
+          "instances": [],
           "shape": "box",
           "color": "#3d5a83",
           "position": {
@@ -372,6 +397,8 @@
         {
           "id": "footR",
           "parent": "",
+          "palette": "",
+          "instances": [],
           "shape": "box",
           "color": "#6f68d8",
           "position": {
@@ -402,6 +429,8 @@
         {
           "id": "armR",
           "parent": "",
+          "palette": "",
+          "instances": [],
           "shape": "box",
           "color": "#dceaf5",
           "position": {
@@ -429,6 +458,7 @@
           "opacity": 1,
           "joints": [
             {
+              "responses": {},
               "id": "shoulderR",
               "motion": "rotation",
               "axis": "z",
@@ -443,6 +473,8 @@
         {
           "id": "mouth",
           "parent": "",
+          "palette": "",
+          "instances": [],
           "shape": "box",
           "color": "#233d51",
           "position": {
@@ -470,6 +502,7 @@
           "opacity": 1,
           "joints": [
             {
+              "responses": {},
               "id": "jaw",
               "motion": "translation",
               "axis": "y",
@@ -484,6 +517,8 @@
         {
           "id": "antenna",
           "parent": "",
+          "palette": "",
+          "instances": [],
           "shape": "cylinder",
           "color": "#3d5a83",
           "position": {
@@ -514,6 +549,8 @@
         {
           "id": "antennaTip",
           "parent": "",
+          "palette": "",
+          "instances": [],
           "shape": "sphere",
           "color": "#f7be38",
           "position": {

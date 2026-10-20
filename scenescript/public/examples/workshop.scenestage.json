@@ -9,6 +9,8 @@
         {
           "id": "platform",
           "parent": "",
+          "palette": "",
+          "instances": [],
           "shape": "box",
           "color": "#cfdae1",
           "position": {
@@ -39,6 +41,8 @@
         {
           "id": "trunkL",
           "parent": "",
+          "palette": "",
+          "instances": [],
           "shape": "cylinder",
           "color": "#896444",
           "position": {
@@ -69,6 +73,8 @@
         {
           "id": "treeL",
           "parent": "",
+          "palette": "",
+          "instances": [],
           "shape": "cone",
           "color": "#44916b",
           "position": {
@@ -99,6 +105,8 @@
         {
           "id": "trunkR",
           "parent": "",
+          "palette": "",
+          "instances": [],
           "shape": "cylinder",
           "color": "#896444",
           "position": {
@@ -129,6 +137,8 @@
         {
           "id": "treeR",
           "parent": "",
+          "palette": "",
+          "instances": [],
           "shape": "cone",
           "color": "#44916b",
           "position": {
@@ -159,6 +169,8 @@
         {
           "id": "gatePost",
           "parent": "",
+          "palette": "",
+          "instances": [],
           "shape": "box",
           "color": "#f6b52d",
           "position": {
@@ -189,6 +201,8 @@
         {
           "id": "gate",
           "parent": "",
+          "palette": "",
+          "instances": [],
           "shape": "box",
           "color": "#ed5948",
           "position": {
@@ -216,6 +230,7 @@
           "opacity": 1,
           "joints": [
             {
+              "responses": {},
               "id": "gateHinge",
               "motion": "rotation",
               "axis": "y",
@@ -230,6 +245,8 @@
         {
           "id": "backPanel",
           "parent": "",
+          "palette": "",
+          "instances": [],
           "shape": "box",
           "color": "#3d5a83",
           "position": {

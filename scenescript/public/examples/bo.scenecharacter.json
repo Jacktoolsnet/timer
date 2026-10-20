@@ -4,7 +4,7257 @@
   "kind": "character",
   "id": "bo",
   "definition": {
-    "model": null,
+    "model": {
+      "parts": [
+        {
+          "id": "body",
+          "parent": "",
+          "palette": "",
+          "instances": [],
+          "shape": "group",
+          "color": "#36a9e1",
+          "position": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 1,
+            "y": 1,
+            "z": 1
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {},
+              "id": "breathing",
+              "motion": "translation",
+              "axis": "y",
+              "min": -0.1,
+              "max": 0.1,
+              "value": 0,
+              "control": "bob",
+              "target": 0.1
+            }
+          ]
+        },
+        {
+          "id": "shadow",
+          "parent": "body",
+          "palette": "",
+          "instances": [],
+          "shape": "cylinder",
+          "color": "#526674",
+          "position": {
+            "x": 0,
+            "y": 0.1,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 1.7,
+            "y": 0.01,
+            "z": 1.7
+          },
+          "roughness": 1,
+          "metalness": 0,
+          "opacity": 0.18,
+          "joints": []
+        },
+        {
+          "id": "torso",
+          "parent": "body",
+          "palette": "bodyColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#36a9e1",
+          "position": {
+            "x": 0,
+            "y": 1.65,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 1.15,
+            "y": 1.05,
+            "z": 0.65
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "chest",
+          "parent": "body",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0,
+            "y": 1.7,
+            "z": 0.345
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.55,
+            "y": 0.45,
+            "z": 0.08
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "chestLight",
+          "parent": "body",
+          "palette": "",
+          "instances": [],
+          "shape": "box",
+          "color": "#effaff",
+          "position": {
+            "x": 0,
+            "y": 1.72,
+            "z": 0.4
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.16,
+            "y": 0.15,
+            "z": 0.04
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "neck",
+          "parent": "body",
+          "palette": "limbColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#64748b",
+          "position": {
+            "x": 0,
+            "y": 2.26,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.35,
+            "y": 0.2,
+            "z": 0.35
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "face",
+          "parent": "body",
+          "palette": "",
+          "instances": [],
+          "shape": "group",
+          "color": "#36a9e1",
+          "position": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 1,
+            "y": 1,
+            "z": 1
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "head",
+          "parent": "body",
+          "palette": "headColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#dde7ed",
+          "position": {
+            "x": 0,
+            "y": 2.67,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.96,
+            "y": 0.75,
+            "z": 0.8
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "monitorFrame",
+          "parent": "face",
+          "palette": "limbColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#64748b",
+          "position": {
+            "x": 0,
+            "y": 2.67,
+            "z": 0.432
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.88,
+            "y": 0.64,
+            "z": 0.1
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "monitor",
+          "parent": "face",
+          "palette": "",
+          "instances": [],
+          "shape": "box",
+          "color": "#101e2c",
+          "position": {
+            "x": 0,
+            "y": 2.67,
+            "z": 0.492
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.78,
+            "y": 0.54,
+            "z": 0.035
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "pixel_0_0",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.319,
+            "y": 2.8729999999999998,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_0_0_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_0_0_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_0_1",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.261,
+            "y": 2.8729999999999998,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 1,
+                "surprised": 0
+              },
+              "id": "pixel_0_1_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 1,
+                "surprised": 0
+              },
+              "id": "pixel_0_1_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_0_2",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.203,
+            "y": 2.8729999999999998,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_0_2_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_0_2_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_0_3",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.14500000000000002,
+            "y": 2.8729999999999998,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_0_3_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_0_3_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_0_4",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.08700000000000001,
+            "y": 2.8729999999999998,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_0_4_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_0_4_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_0_5",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.029,
+            "y": 2.8729999999999998,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_0_5_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_0_5_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_0_6",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.029,
+            "y": 2.8729999999999998,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_0_6_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_0_6_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_0_7",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.08700000000000001,
+            "y": 2.8729999999999998,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_0_7_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_0_7_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_0_8",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.14500000000000002,
+            "y": 2.8729999999999998,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_0_8_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_0_8_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_0_9",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.203,
+            "y": 2.8729999999999998,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_0_9_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_0_9_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_0_10",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.261,
+            "y": 2.8729999999999998,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 1,
+                "surprised": 0
+              },
+              "id": "pixel_0_10_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 1,
+                "surprised": 0
+              },
+              "id": "pixel_0_10_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_0_11",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.319,
+            "y": 2.8729999999999998,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_0_11_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_0_11_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_1_0",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.319,
+            "y": 2.815,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_1_0_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_1_0_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_1_1",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.261,
+            "y": 2.815,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_1_1_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_1_1_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_1_2",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.203,
+            "y": 2.815,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 1,
+                "sad": 1,
+                "angry": 1,
+                "surprised": 1
+              },
+              "id": "pixel_1_2_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 1,
+              "control": "blink",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 1,
+                "sad": 1,
+                "angry": 1,
+                "surprised": 1
+              },
+              "id": "pixel_1_2_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 1,
+              "control": "blink",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_1_3",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.14500000000000002,
+            "y": 2.815,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 1,
+                "sad": 1,
+                "angry": 0,
+                "surprised": 1
+              },
+              "id": "pixel_1_3_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 1,
+              "control": "blink",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 1,
+                "sad": 1,
+                "angry": 0,
+                "surprised": 1
+              },
+              "id": "pixel_1_3_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 1,
+              "control": "blink",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_1_4",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.08700000000000001,
+            "y": 2.815,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_1_4_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_1_4_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_1_5",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.029,
+            "y": 2.815,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_1_5_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_1_5_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_1_6",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.029,
+            "y": 2.815,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_1_6_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_1_6_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_1_7",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.08700000000000001,
+            "y": 2.815,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_1_7_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_1_7_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_1_8",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.14500000000000002,
+            "y": 2.815,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 1,
+                "sad": 1,
+                "angry": 0,
+                "surprised": 1
+              },
+              "id": "pixel_1_8_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 1,
+              "control": "blink",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 1,
+                "sad": 1,
+                "angry": 0,
+                "surprised": 1
+              },
+              "id": "pixel_1_8_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 1,
+              "control": "blink",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_1_9",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.203,
+            "y": 2.815,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 1,
+                "sad": 1,
+                "angry": 1,
+                "surprised": 1
+              },
+              "id": "pixel_1_9_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 1,
+              "control": "blink",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 1,
+                "sad": 1,
+                "angry": 1,
+                "surprised": 1
+              },
+              "id": "pixel_1_9_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 1,
+              "control": "blink",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_1_10",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.261,
+            "y": 2.815,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_1_10_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_1_10_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_1_11",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.319,
+            "y": 2.815,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_1_11_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_1_11_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_2_0",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.319,
+            "y": 2.757,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_2_0_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_2_0_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_2_1",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.261,
+            "y": 2.757,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 1,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_2_1_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 1
+            },
+            {
+              "responses": {
+                "happy": 1,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_2_1_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 1
+            }
+          ]
+        },
+        {
+          "id": "pixel_2_2",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.203,
+            "y": 2.757,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 1,
+                "angry": 1,
+                "surprised": 1
+              },
+              "id": "pixel_2_2_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 1,
+              "control": "blink",
+              "target": 1
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 1,
+                "angry": 1,
+                "surprised": 1
+              },
+              "id": "pixel_2_2_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 1,
+              "control": "blink",
+              "target": 1
+            }
+          ]
+        },
+        {
+          "id": "pixel_2_3",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.14500000000000002,
+            "y": 2.757,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 1,
+                "angry": 1,
+                "surprised": 1
+              },
+              "id": "pixel_2_3_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 1,
+              "control": "blink",
+              "target": 1
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 1,
+                "angry": 1,
+                "surprised": 1
+              },
+              "id": "pixel_2_3_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 1,
+              "control": "blink",
+              "target": 1
+            }
+          ]
+        },
+        {
+          "id": "pixel_2_4",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.08700000000000001,
+            "y": 2.757,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 1,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_2_4_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 1
+            },
+            {
+              "responses": {
+                "happy": 1,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_2_4_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 1
+            }
+          ]
+        },
+        {
+          "id": "pixel_2_5",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.029,
+            "y": 2.757,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_2_5_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_2_5_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_2_6",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.029,
+            "y": 2.757,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_2_6_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_2_6_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_2_7",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.08700000000000001,
+            "y": 2.757,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 1,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_2_7_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 1
+            },
+            {
+              "responses": {
+                "happy": 1,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_2_7_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 1
+            }
+          ]
+        },
+        {
+          "id": "pixel_2_8",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.14500000000000002,
+            "y": 2.757,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 1,
+                "angry": 1,
+                "surprised": 1
+              },
+              "id": "pixel_2_8_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 1,
+              "control": "blink",
+              "target": 1
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 1,
+                "angry": 1,
+                "surprised": 1
+              },
+              "id": "pixel_2_8_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 1,
+              "control": "blink",
+              "target": 1
+            }
+          ]
+        },
+        {
+          "id": "pixel_2_9",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.203,
+            "y": 2.757,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 1,
+                "angry": 1,
+                "surprised": 1
+              },
+              "id": "pixel_2_9_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 1,
+              "control": "blink",
+              "target": 1
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 1,
+                "angry": 1,
+                "surprised": 1
+              },
+              "id": "pixel_2_9_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 1,
+              "control": "blink",
+              "target": 1
+            }
+          ]
+        },
+        {
+          "id": "pixel_2_10",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.261,
+            "y": 2.757,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 1,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_2_10_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 1
+            },
+            {
+              "responses": {
+                "happy": 1,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_2_10_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 1
+            }
+          ]
+        },
+        {
+          "id": "pixel_2_11",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.319,
+            "y": 2.757,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_2_11_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_2_11_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_3_0",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.319,
+            "y": 2.699,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_3_0_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_3_0_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_3_1",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.261,
+            "y": 2.699,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_3_1_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_3_1_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_3_2",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.203,
+            "y": 2.699,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_3_2_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_3_2_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_3_3",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.14500000000000002,
+            "y": 2.699,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_3_3_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_3_3_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_3_4",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.08700000000000001,
+            "y": 2.699,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_3_4_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_3_4_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_3_5",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.029,
+            "y": 2.699,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_3_5_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_3_5_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_3_6",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.029,
+            "y": 2.699,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_3_6_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_3_6_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_3_7",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.08700000000000001,
+            "y": 2.699,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_3_7_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_3_7_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_3_8",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.14500000000000002,
+            "y": 2.699,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_3_8_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_3_8_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_3_9",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.203,
+            "y": 2.699,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_3_9_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_3_9_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_3_10",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.261,
+            "y": 2.699,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_3_10_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_3_10_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_3_11",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.319,
+            "y": 2.699,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_3_11_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_3_11_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "blink",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_4_0",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.319,
+            "y": 2.641,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_4_0_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_4_0_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_4_1",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.261,
+            "y": 2.641,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_4_1_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_4_1_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_4_2",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.203,
+            "y": 2.641,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_4_2_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_4_2_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_4_3",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.14500000000000002,
+            "y": 2.641,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_4_3_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_4_3_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_4_4",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.08700000000000001,
+            "y": 2.641,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_4_4_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_4_4_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_4_5",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.029,
+            "y": 2.641,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 1
+              },
+              "id": "pixel_4_5_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 1
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 1
+              },
+              "id": "pixel_4_5_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 1
+            }
+          ]
+        },
+        {
+          "id": "pixel_4_6",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.029,
+            "y": 2.641,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 1
+              },
+              "id": "pixel_4_6_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 1
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 1
+              },
+              "id": "pixel_4_6_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 1
+            }
+          ]
+        },
+        {
+          "id": "pixel_4_7",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.08700000000000001,
+            "y": 2.641,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_4_7_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_4_7_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_4_8",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.14500000000000002,
+            "y": 2.641,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_4_8_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_4_8_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_4_9",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.203,
+            "y": 2.641,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_4_9_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_4_9_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_4_10",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.261,
+            "y": 2.641,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_4_10_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_4_10_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_4_11",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.319,
+            "y": 2.641,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_4_11_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_4_11_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_5_0",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.319,
+            "y": 2.5829999999999997,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_5_0_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_5_0_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_5_1",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.261,
+            "y": 2.5829999999999997,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_5_1_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_5_1_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_5_2",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.203,
+            "y": 2.5829999999999997,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 1,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_5_2_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 1,
+              "control": "speech",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 1,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_5_2_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 1,
+              "control": "speech",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_5_3",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.14500000000000002,
+            "y": 2.5829999999999997,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 1,
+                "angry": 1,
+                "surprised": 0
+              },
+              "id": "pixel_5_3_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 1,
+                "angry": 1,
+                "surprised": 0
+              },
+              "id": "pixel_5_3_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_5_4",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.08700000000000001,
+            "y": 2.5829999999999997,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 1,
+                "angry": 1,
+                "surprised": 1
+              },
+              "id": "pixel_5_4_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 1
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 1,
+                "angry": 1,
+                "surprised": 1
+              },
+              "id": "pixel_5_4_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 1
+            }
+          ]
+        },
+        {
+          "id": "pixel_5_5",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.029,
+            "y": 2.5829999999999997,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 1,
+                "angry": 1,
+                "surprised": 0
+              },
+              "id": "pixel_5_5_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 1,
+                "angry": 1,
+                "surprised": 0
+              },
+              "id": "pixel_5_5_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_5_6",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.029,
+            "y": 2.5829999999999997,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 1,
+                "angry": 1,
+                "surprised": 0
+              },
+              "id": "pixel_5_6_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 1,
+                "angry": 1,
+                "surprised": 0
+              },
+              "id": "pixel_5_6_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_5_7",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.08700000000000001,
+            "y": 2.5829999999999997,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 1,
+                "angry": 1,
+                "surprised": 1
+              },
+              "id": "pixel_5_7_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 1
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 1,
+                "angry": 1,
+                "surprised": 1
+              },
+              "id": "pixel_5_7_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 1
+            }
+          ]
+        },
+        {
+          "id": "pixel_5_8",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.14500000000000002,
+            "y": 2.5829999999999997,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 1,
+                "angry": 1,
+                "surprised": 0
+              },
+              "id": "pixel_5_8_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 1,
+                "angry": 1,
+                "surprised": 0
+              },
+              "id": "pixel_5_8_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_5_9",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.203,
+            "y": 2.5829999999999997,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 1,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_5_9_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 1,
+              "control": "speech",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 1,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_5_9_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 1,
+              "control": "speech",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_5_10",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.261,
+            "y": 2.5829999999999997,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_5_10_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_5_10_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_5_11",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.319,
+            "y": 2.5829999999999997,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_5_11_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_5_11_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_6_0",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.319,
+            "y": 2.525,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_6_0_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_6_0_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_6_1",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.261,
+            "y": 2.525,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_6_1_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_6_1_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_6_2",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.203,
+            "y": 2.525,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 1,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_6_2_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 1,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_6_2_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_6_3",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.14500000000000002,
+            "y": 2.525,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 1,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_6_3_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 1,
+              "control": "speech",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 1,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_6_3_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 1,
+              "control": "speech",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_6_4",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.08700000000000001,
+            "y": 2.525,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 1,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 1
+              },
+              "id": "pixel_6_4_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 1,
+              "control": "speech",
+              "target": 1
+            },
+            {
+              "responses": {
+                "happy": 1,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 1
+              },
+              "id": "pixel_6_4_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 1,
+              "control": "speech",
+              "target": 1
+            }
+          ]
+        },
+        {
+          "id": "pixel_6_5",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.029,
+            "y": 2.525,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 1,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_6_5_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 1,
+              "control": "speech",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 1,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_6_5_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 1,
+              "control": "speech",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_6_6",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.029,
+            "y": 2.525,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 1,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_6_6_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 1,
+              "control": "speech",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 1,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_6_6_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 1,
+              "control": "speech",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_6_7",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.08700000000000001,
+            "y": 2.525,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 1,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 1
+              },
+              "id": "pixel_6_7_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 1,
+              "control": "speech",
+              "target": 1
+            },
+            {
+              "responses": {
+                "happy": 1,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 1
+              },
+              "id": "pixel_6_7_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 1,
+              "control": "speech",
+              "target": 1
+            }
+          ]
+        },
+        {
+          "id": "pixel_6_8",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.14500000000000002,
+            "y": 2.525,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 1,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_6_8_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 1,
+              "control": "speech",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 1,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_6_8_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 1,
+              "control": "speech",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_6_9",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.203,
+            "y": 2.525,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 1,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_6_9_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 1,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_6_9_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_6_10",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.261,
+            "y": 2.525,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_6_10_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_6_10_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_6_11",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.319,
+            "y": 2.525,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_6_11_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_6_11_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_7_0",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.319,
+            "y": 2.467,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_7_0_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_7_0_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_7_1",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.261,
+            "y": 2.467,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_7_1_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_7_1_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_7_2",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.203,
+            "y": 2.467,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_7_2_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_7_2_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_7_3",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.14500000000000002,
+            "y": 2.467,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_7_3_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_7_3_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_7_4",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.08700000000000001,
+            "y": 2.467,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_7_4_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_7_4_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_7_5",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": -0.029,
+            "y": 2.467,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 1
+              },
+              "id": "pixel_7_5_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 1
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 1
+              },
+              "id": "pixel_7_5_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 1
+            }
+          ]
+        },
+        {
+          "id": "pixel_7_6",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.029,
+            "y": 2.467,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 1
+              },
+              "id": "pixel_7_6_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 1
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 1
+              },
+              "id": "pixel_7_6_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 1
+            }
+          ]
+        },
+        {
+          "id": "pixel_7_7",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.08700000000000001,
+            "y": 2.467,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_7_7_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_7_7_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_7_8",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.14500000000000002,
+            "y": 2.467,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_7_8_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_7_8_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_7_9",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.203,
+            "y": 2.467,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_7_9_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_7_9_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_7_10",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.261,
+            "y": 2.467,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_7_10_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_7_10_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "pixel_7_11",
+          "parent": "face",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0.319,
+            "y": 2.467,
+            "z": 0.518
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.046,
+            "y": 0.046,
+            "z": 0.02
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_7_11_x",
+              "motion": "scale",
+              "axis": "x",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            },
+            {
+              "responses": {
+                "happy": 0,
+                "sad": 0,
+                "angry": 0,
+                "surprised": 0
+              },
+              "id": "pixel_7_11_y",
+              "motion": "scale",
+              "axis": "y",
+              "min": 0,
+              "max": 1,
+              "value": 0,
+              "control": "speech",
+              "target": 0
+            }
+          ]
+        },
+        {
+          "id": "antenna",
+          "parent": "body",
+          "palette": "limbColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#64748b",
+          "position": {
+            "x": 0,
+            "y": 3.12,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.1,
+            "y": 0.25,
+            "z": 0.1
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "antennaTip",
+          "parent": "body",
+          "palette": "accentColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#ffe066",
+          "position": {
+            "x": 0,
+            "y": 3.26,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.23,
+            "y": 0.12,
+            "z": 0.23
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "leftArm",
+          "parent": "body",
+          "palette": "",
+          "instances": [],
+          "shape": "group",
+          "color": "#36a9e1",
+          "position": {
+            "x": -0.78,
+            "y": 2.05,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 1,
+            "y": 1,
+            "z": 1
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {},
+              "id": "leftArm",
+              "motion": "rotation",
+              "axis": "x",
+              "min": -180,
+              "max": 180,
+              "value": 0,
+              "control": "leftArm",
+              "target": 180
+            }
+          ]
+        },
+        {
+          "id": "leftArmSegment",
+          "parent": "leftArm",
+          "palette": "limbColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#64748b",
+          "position": {
+            "x": 0,
+            "y": -0.42,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.32,
+            "y": 0.72,
+            "z": 0.4
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "leftArmEnd",
+          "parent": "leftArm",
+          "palette": "headColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#dde7ed",
+          "position": {
+            "x": 0,
+            "y": -0.87,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.38,
+            "y": 0.28,
+            "z": 0.44
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "rightArm",
+          "parent": "body",
+          "palette": "",
+          "instances": [],
+          "shape": "group",
+          "color": "#36a9e1",
+          "position": {
+            "x": 0.78,
+            "y": 2.05,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 1,
+            "y": 1,
+            "z": 1
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {},
+              "id": "rightArm",
+              "motion": "rotation",
+              "axis": "x",
+              "min": -180,
+              "max": 180,
+              "value": 0,
+              "control": "rightArm",
+              "target": 180
+            },
+            {
+              "responses": {},
+              "id": "wave",
+              "motion": "rotation",
+              "axis": "z",
+              "min": -90,
+              "max": 90,
+              "value": 0,
+              "control": "wave",
+              "target": 90
+            }
+          ]
+        },
+        {
+          "id": "rightArmSegment",
+          "parent": "rightArm",
+          "palette": "limbColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#64748b",
+          "position": {
+            "x": 0,
+            "y": -0.42,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.32,
+            "y": 0.72,
+            "z": 0.4
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "rightArmEnd",
+          "parent": "rightArm",
+          "palette": "headColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#dde7ed",
+          "position": {
+            "x": 0,
+            "y": -0.87,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.38,
+            "y": 0.28,
+            "z": 0.44
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "leftLeg",
+          "parent": "body",
+          "palette": "",
+          "instances": [],
+          "shape": "group",
+          "color": "#36a9e1",
+          "position": {
+            "x": -0.31,
+            "y": 1.13,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 1,
+            "y": 1,
+            "z": 1
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {},
+              "id": "leftLeg",
+              "motion": "rotation",
+              "axis": "x",
+              "min": -180,
+              "max": 180,
+              "value": 0,
+              "control": "leftLeg",
+              "target": 180
+            }
+          ]
+        },
+        {
+          "id": "leftLegSegment",
+          "parent": "leftLeg",
+          "palette": "limbColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#64748b",
+          "position": {
+            "x": 0,
+            "y": -0.48,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.38,
+            "y": 0.85,
+            "z": 0.4
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "leftLegEnd",
+          "parent": "leftLeg",
+          "palette": "bodyColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#36a9e1",
+          "position": {
+            "x": 0,
+            "y": -0.89,
+            "z": 0.1
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.44,
+            "y": 0.28,
+            "z": 0.66
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "rightLeg",
+          "parent": "body",
+          "palette": "",
+          "instances": [],
+          "shape": "group",
+          "color": "#36a9e1",
+          "position": {
+            "x": 0.31,
+            "y": 1.13,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 1,
+            "y": 1,
+            "z": 1
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {},
+              "id": "rightLeg",
+              "motion": "rotation",
+              "axis": "x",
+              "min": -180,
+              "max": 180,
+              "value": 0,
+              "control": "rightLeg",
+              "target": 180
+            }
+          ]
+        },
+        {
+          "id": "rightLegSegment",
+          "parent": "rightLeg",
+          "palette": "limbColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#64748b",
+          "position": {
+            "x": 0,
+            "y": -0.48,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.38,
+            "y": 0.85,
+            "z": 0.4
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "rightLegEnd",
+          "parent": "rightLeg",
+          "palette": "bodyColor",
+          "instances": [],
+          "shape": "box",
+          "color": "#36a9e1",
+          "position": {
+            "x": 0,
+            "y": -0.89,
+            "z": 0.1
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.44,
+            "y": 0.28,
+            "z": 0.66
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        }
+      ],
+      "animations": {
+        "walk": {
+          "duration": 1,
+          "tracks": [
+            {
+              "joint": "leftArm",
+              "keys": [
+                {
+                  "at": 0,
+                  "value": 0
+                },
+                {
+                  "at": 0.25,
+                  "value": 34
+                },
+                {
+                  "at": 0.5,
+                  "value": 0
+                },
+                {
+                  "at": 0.75,
+                  "value": -34
+                },
+                {
+                  "at": 1,
+                  "value": 0
+                }
+              ],
+              "easing": "linear"
+            },
+            {
+              "joint": "rightArm",
+              "keys": [
+                {
+                  "at": 0,
+                  "value": 0
+                },
+                {
+                  "at": 0.25,
+                  "value": -34
+                },
+                {
+                  "at": 0.5,
+                  "value": 0
+                },
+                {
+                  "at": 0.75,
+                  "value": 34
+                },
+                {
+                  "at": 1,
+                  "value": 0
+                }
+              ],
+              "easing": "linear"
+            },
+            {
+              "joint": "leftLeg",
+              "keys": [
+                {
+                  "at": 0,
+                  "value": 0
+                },
+                {
+                  "at": 0.25,
+                  "value": -34
+                },
+                {
+                  "at": 0.5,
+                  "value": 0
+                },
+                {
+                  "at": 0.75,
+                  "value": 34
+                },
+                {
+                  "at": 1,
+                  "value": 0
+                }
+              ],
+              "easing": "linear"
+            },
+            {
+              "joint": "rightLeg",
+              "keys": [
+                {
+                  "at": 0,
+                  "value": 0
+                },
+                {
+                  "at": 0.25,
+                  "value": 34
+                },
+                {
+                  "at": 0.5,
+                  "value": 0
+                },
+                {
+                  "at": 0.75,
+                  "value": -34
+                },
+                {
+                  "at": 1,
+                  "value": 0
+                }
+              ],
+              "easing": "linear"
+            }
+          ]
+        },
+        "wave": {
+          "duration": 2,
+          "tracks": [
+            {
+              "joint": "rightArm",
+              "keys": [
+                {
+                  "at": 0,
+                  "value": 0
+                },
+                {
+                  "at": 0.5,
+                  "value": -144
+                },
+                {
+                  "at": 1,
+                  "value": -144
+                },
+                {
+                  "at": 1.5,
+                  "value": -144
+                },
+                {
+                  "at": 2,
+                  "value": 0
+                }
+              ],
+              "easing": "linear"
+            },
+            {
+              "joint": "wave",
+              "keys": [
+                {
+                  "at": 0,
+                  "value": 0
+                },
+                {
+                  "at": 0.5,
+                  "value": 10
+                },
+                {
+                  "at": 1,
+                  "value": -10
+                },
+                {
+                  "at": 1.5,
+                  "value": 10
+                },
+                {
+                  "at": 2,
+                  "value": 0
+                }
+              ],
+              "easing": "linear"
+            }
+          ]
+        }
+      }
+    },
     "expression": "neutral",
     "style": "pixel",
     "name": "Bo",
