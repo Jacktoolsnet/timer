@@ -19,11 +19,17 @@ export const usageCopy = {
    ]},
    {title:'Berührungsaktion und endlose Verwandlung',items:[
     'Berührungsaktion und endlose Verwandlung sind zunächst eingeschaltet und lassen sich einzeln ausschalten.',
-    'Die ebenfalls eingeschaltete Lavabläschen-Spur lässt beim Ziehen kleine Blasen zurück, die nach wenigen Sekunden verschwinden. Sie benötigt eine laufende Animation und aktivierte Berührungsaktion. Du kannst die Spur separat abschalten.',
     'Streiche bei laufender Animation mit gedrückter Maustaste oder einem Finger durch die Fläche. Nahe Blasen werden sanft mitgezogen. Nach dem Loslassen klingt der Einfluss allmählich ab. Die Bedienelemente bleiben normal anklickbar.',
     'Bei aktiver Berührungsaktion und laufender Animation wird eine Wischbewegung innerhalb der Fläche für die Lava genutzt statt zum Scrollen. Pausiere oder schalte die Berührungsaktion aus, um dort wieder normal zu scrollen.',
-    '„Bläschen ablösen“ ist ebenfalls zunächst an. Tippe gezielt eine große Blase an und ziehe sie: Kleine Bläschen lösen sich am Rand der gewählten Blase, nicht an der Fingerposition. Sind beide Effekte eingeschaltet, entscheidet der Startpunkt: auf einer Blase nur Ablösen, im freien Bereich nur Fingerspur. Die Zuordnung bleibt bis zum Loslassen bestehen. Beide Effekte sind einzeln abschaltbar.',
     'Endlose Verwandlung entwickelt Formen und Farbnuancen langsam weiter. Ausschalten hält diese zusätzliche Entwicklung an; die normale Bewegung und die Farbmischung bei Kontakt bleiben erhalten. Pause hält auch die Verwandlung an.',
+   ]},
+   {title:'Fingerspur und abgelöste Lavabläschen',items:[
+    '„Lavabläschen-Spur“ und „Bläschen ablösen“ sind standardmäßig eingeschaltet. Beide benötigen eine laufende Animation und aktivierte Berührungsaktion. Ziehe mit einem Finger oder gedrückter Maustaste; bloßes Antippen ohne Ziehen erzeugt keine Spur.',
+    'Die Lavabläschen-Spur folgt deinem Finger oder Mauszeiger. Damit kannst du Linien oder kurze Nachrichten in die Flüssigkeit schreiben. Die kleinen Bläschen steigen sanft auf und verschwinden nach wenigen Sekunden.',
+    '„Bläschen ablösen“ setzt an einer großen Lavablase an: Tippe sie direkt an und ziehe. Kleine Bläschen lösen sich am nachlaufenden Rand dieser Blase – nicht an der aktuellen Fingerposition.',
+    'Sind beide Optionen an, entscheidet ausschließlich der Startpunkt der Geste: Start auf einer großen Lavablase = nur Ablösen; Start im freien Bereich = nur Fingerspur. Die Auswahl bleibt bis zum Loslassen bestehen, auch wenn du danach durch andere Blasen ziehst.',
+    'Du kannst beide Effekte unabhängig ausschalten. Ist nur die Fingerspur aktiv, zeichnet sie auch beim Start auf einer Blase. Ist nur Ablösen aktiv, erzeugt ein Start im freien Bereich keine Bläschenspur. Sind beide aus, bleibt das sanfte Verschieben der großen Blasen verfügbar.',
+    'Pausieren hält auch die kleinen Bläschen an. Das Ausschalten eines Effekts entfernt seine vorhandenen Bläschen. Mit „Einstellungen auf diesem Gerät merken“ werden beide Schalter gespeichert; gezeichnete Nachrichten und Partikel selbst nicht.',
    ]},
    {title:'Blasentöne und Lautstärke',items:[
     'Blasentöne sind zunächst eingeschaltet, beginnen aber erst nach deinem Start. Leise synthetische Töne begleiten das Annähern und Auseinanderfließen von Blasen. Sie sind eine stilisierte Begleitung, keine echte Aufnahme; nicht jeder sichtbare Kontakt erzeugt einen Ton.',
@@ -68,11 +74,17 @@ export const usageCopy = {
    ]},
    {title:'Touch interaction and endless transformation',items:[
     'Touch interaction and endless transformation are initially on and can be switched off separately.',
-    'The bubble trail is also on by default: dragging leaves small bubbles that dissolve after a few seconds. It requires running animation and touch interaction. The trail can be switched off separately.',
     'While the animation is running, drag through it with a pressed mouse button or one finger. Nearby bubbles follow gently. The influence gradually fades after release. Controls remain clickable.',
     'With touch interaction on and the animation running, swipes inside the scene move lava instead of scrolling. Pause or turn off touch interaction to scroll normally there.',
-    'Bubble shedding is also initially on. Press a large bubble and drag: small bubbles detach from the selected bubble’s edge, not from the pointer. With both effects on, starting on a bubble selects shedding only; starting in empty space selects the writing trail only. This choice lasts until release. Both options can be switched off separately.',
     'Endless transformation slowly develops shapes and colour nuances. Turning it off stops this extra development; normal movement and colour exchange on contact continue. Pause also freezes transformation.',
+   ]},
+   {title:'Finger trail and detached lava bubbles',items:[
+    'Bubble trail and Bubble shedding are on by default. Both require running animation and enabled touch interaction. Drag with one finger or a pressed mouse button; tapping without dragging does not produce a trail.',
+    'Bubble trail follows your finger or pointer, letting you draw lines or short messages in the liquid. Small bubbles rise gently and disappear after a few seconds.',
+    'Bubble shedding starts on a large lava bubble: press it directly and drag. Small bubbles detach from its trailing edge, not from the current pointer position.',
+    'With both options on, only the gesture’s starting point decides: starting on a large bubble selects shedding only; starting in empty space selects the finger trail only. This selection stays until release, even if you cross other bubbles afterwards.',
+    'The effects can be disabled independently. With only the finger trail on, it also draws when starting on a bubble. With only shedding on, starting in empty space creates no small-bubble trail. With both off, gently moving the large bubbles remains available.',
+    'Pause also freezes small bubbles. Turning an effect off clears its existing bubbles. Remember settings on this device saves both switches, but not drawn messages or particles.',
    ]},
    {title:'Bubble sounds and volume',items:[
     'Bubble sounds are initially on but begin only after you start. Quiet synthetic tones accompany bubbles approaching and separating. They are stylised sounds, not recordings; not every visible contact produces a tone.',

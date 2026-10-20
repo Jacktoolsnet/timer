@@ -715,10 +715,21 @@ export const usageTranslations:Record<UsageTool,Record<'es'|'fr',readonly UsageS
       {
         "title": "Interacción táctil y transformación continua",
         "paragraphs": [
-          "La interacción táctil y la transformación continua empiezan activadas y se pueden desactivar por separado. Desprender burbujas está activado inicialmente: pulsa una burbuja grande y arrastra para desprender pequeñas burbujas de su borde, no del dedo. Con ambas opciones activas, el inicio sobre una burbuja usa solo desprendimiento y el inicio en espacio libre solo la estela, hasta soltar. Ambas se pueden desactivar por separado. La estela de burbujas también está activada: al arrastrar deja pequeñas burbujas que desaparecen en unos segundos. Requiere animación e interacción activas y se puede desactivar por separado.",
+          "La interacción táctil y la transformación continua están inicialmente activadas y se pueden desactivar por separado.",
           "Con la animación en marcha, arrastra con el ratón pulsado o un dedo. Las burbujas próximas siguen suavemente; al soltar, el efecto se disipa. Los botones siguen siendo utilizables.",
           "Si la interacción está activa durante la reproducción, deslizar dentro de la escena mueve la lava en vez de desplazar la página. Pausa o desactiva la interacción para volver a desplazar normalmente allí.",
           "Transformación continua desarrolla formas y matices lentamente. Apagarla detiene esta evolución adicional, no el movimiento normal ni la mezcla al contacto. Pausa también detiene la transformación."
+        ]
+      },
+      {
+        "title": "Estela del dedo y burbujas desprendidas",
+        "paragraphs": [
+          "Estela de burbujas y Desprender burbujas están activados por defecto. Ambos requieren animación en marcha e interacción táctil activa. Arrastra con un dedo o el ratón pulsado; tocar sin arrastrar no genera una estela.",
+          "La estela sigue el dedo o puntero y permite dibujar líneas o mensajes breves. Las burbujas pequeñas ascienden suavemente y desaparecen en unos segundos.",
+          "Para desprender burbujas, empieza directamente sobre una burbuja grande y arrastra. Las pequeñas salen del borde posterior de esa burbuja, no de la posición actual del dedo.",
+          "Si ambas opciones están activadas, decide el punto inicial: sobre una burbuja grande, solo desprendimiento; en espacio libre, solo estela del dedo. La selección se mantiene hasta soltar, incluso al cruzar otras burbujas.",
+          "Se pueden desactivar por separado. Con solo la estela activa se dibuja también al empezar sobre una burbuja. Con solo desprendimiento, empezar en espacio libre no genera estela. Con ambas desactivadas sigue siendo posible mover suavemente las burbujas grandes.",
+          "Pausa detiene también las burbujas pequeñas. Desactivar un efecto elimina sus burbujas existentes. Recordar ajustes guarda ambos interruptores, pero no los mensajes dibujados ni las partículas."
         ]
       },
       {
@@ -789,10 +800,21 @@ export const usageTranslations:Record<UsageTool,Record<'es'|'fr',readonly UsageS
       {
         "title": "Interaction tactile et transformation continue",
         "paragraphs": [
-          "L’interaction tactile et la transformation continue sont activées initialement et désactivables séparément. Le détachement est activé initialement : appuyez sur une grande bulle et déplacez-la pour détacher de petites bulles de son bord, pas du doigt. Si les deux sont activées, partir sur une bulle utilise seulement le détachement ; partir dans l’espace libre utilise seulement la traînée, jusqu’au relâchement. Les deux sont désactivables séparément. La traînée de bulles est aussi activée : glisser laisse de petites bulles qui disparaissent après quelques secondes. Elle exige une animation et une interaction actives et peut être désactivée séparément.",
+          "L’interaction tactile et la transformation continue sont activées initialement et désactivables séparément.",
           "Pendant l’animation, glissez avec le bouton de souris enfoncé ou un doigt. Les bulles proches suivent doucement ; l’effet s’atténue après relâchement. Les boutons restent utilisables.",
           "Si l’interaction est active pendant la lecture, glisser dans la scène déplace la lave au lieu de faire défiler la page. Mettez en pause ou désactivez l’interaction pour défiler normalement à cet endroit.",
           "La transformation continue développe lentement formes et nuances. La désactiver arrête ce développement supplémentaire, pas le mouvement normal ni le mélange au contact. Pause fige aussi la transformation."
+        ]
+      },
+      {
+        "title": "Traînée du doigt et bulles détachées",
+        "paragraphs": [
+          "Traînée de bulles et Détacher des bulles sont activés par défaut. Les deux exigent une animation en cours et une interaction tactile active. Glissez avec un doigt ou le bouton de souris enfoncé ; toucher sans glisser ne produit pas de traînée.",
+          "La traînée suit le doigt ou le pointeur et permet de dessiner des lignes ou de courts messages. Les petites bulles montent doucement et disparaissent après quelques secondes.",
+          "Pour détacher des bulles, commencez directement sur une grande bulle puis glissez. Les petites bulles sortent de son bord arrière, pas de la position actuelle du doigt.",
+          "Si les deux options sont actives, seul le départ décide : sur une grande bulle, détachement uniquement ; dans l’espace libre, traînée uniquement. Le choix reste fixe jusqu’au relâchement, même en traversant d’autres bulles.",
+          "Les effets se désactivent séparément. Avec la traînée seule, elle dessine aussi en partant sur une bulle. Avec le détachement seul, partir dans l’espace libre ne produit aucune traînée. Les deux désactivés, le déplacement doux des grandes bulles reste disponible.",
+          "Pause fige aussi les petites bulles. Désactiver un effet efface ses bulles existantes. La mémorisation conserve les deux interrupteurs, pas les messages dessinés ni les particules."
         ]
       },
       {

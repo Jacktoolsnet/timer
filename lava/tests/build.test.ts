@@ -37,3 +37,14 @@ test('usage guidance covers current controls in German and English',()=>{
   assert.ok(html.includes('2026'));
  }
 });
+test('all four usage languages explain exclusive gesture-start trails',()=>{
+ for(const [lang,terms] of [
+  ['de',['Fingerspur und abgelöste Lavabläschen','bis zum Loslassen','Start im freien Bereich']],
+  ['en',['Finger trail and detached lava bubbles','until release','starting in empty space']],
+  ['es',['Estela del dedo y burbujas desprendidas','hasta soltar','punto inicial']],
+  ['fr',['Traînée du doigt et bulles détachées','jusqu’au relâchement','seul le départ décide']]
+ ] as const){
+  const html=readFileSync(new URL('../dist/'+lang+'/usage/index.html',import.meta.url),'utf8');
+  for(const term of terms)assert.ok(html.includes(term),lang+': '+term);
+ }
+});
