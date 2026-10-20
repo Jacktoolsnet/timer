@@ -312,7 +312,37 @@ WebGL2 required; unavailable graphics/context loss is an error, not blank export
 bindings in expandable scene section. Confirm applies; closing discards.
 Independent resource imports/exports; ID collisions: copy or explicit update.
 No external model files/scripts, physics, skinning or head-only looking.
-Generic construction resources follow below; they do not add racing paths/camera tracking.
+3D PATHS (no physics): Stage.paths is a reusable ID map, max16 paths. Each has
+points:[{x,y,z},...], 2–128 points (closed:at least3), closed:false(default),
+interpolation:smooth(default Catmull-Rom)/linear. Coordinates ±100 world units.
+Adjacent points must differ; closed:true closes automatically: DO NOT repeat the
+first point at the end. Smooth curves may overshoot; linear has sharp corners.
+Actor.path=null(default) or {path:"route",duration:12,laps:4,offset:1} references
+this shot's STAGE path. at:0, start:0 (normalized route fraction), laps:1,
+offset:0 (signed sideways world units, +right), orient:true are defaults.
+Motion advances at approximately constant centerline speed using arc length.
+at/duration are scene-local, entirely inside scene.duration. Before/after hold
+the start/end pose. Closed paths wrap; laps may be fractional (.001–100). Open
+paths require start+laps<=1. Actor x/y/z ADD world-space offsets; yaw/pitch/roll
+are LOCAL orientation corrections. +Z forward, +Y up. Transported frames follow
+vertical loops without upright snapping; orient:false keeps fixed orientation.
+Path and nonempty actions are mutually exclusive. Joint motions, expressions
+and speech remain independent; wheels need a drive clip, not walking actions.
+Two lanes: same path/time/laps, different offset. No automatic collisions,
+gravity, lane-length speed correction or generated road geometry. Model the road
+separately. Across camera cuts, use the SAME stage and explicit start fractions;
+there is no implicit continuation. E.g. four 12s shots with laps:1 each = 4 laps.
+CAMERA RIG: camera.follow={actor:"truck",mode:"chase"} references a SHOT ACTOR.
+chase/onboard attach camera position(offset) and look-at(target) in actor-local
+axes, UNSCALED world units, including loop roll. They differ in default offsets.
+track uses offset as a FIXED WORLD camera position and tracks the actor's local
+target (spectator pan). Static yaw/pitch/distance/orbit are ignored in follow mode.
+Alternatively camera.keys:[{at:0,position:{x:8,y:4,z:8},target:{y:1},roll:0},...]
+provides up to64 absolute world position/look-at keys. First at:0, then strictly
+increasing <=scene.duration; position and target required and distinct. Linear
+interpolation, last pose holds; roll is numeric degrees. Do NOT combine keys and
+follow. Empty keys + null follow retain the legacy orbital camera. Use separate
+scenes for camera cuts. Preview, stills and export sample the same absolute time.
 FREE CONSTRUCTION: Character3D.model / Stage3D.model = {parts:[...],animations:{...}}.
 An explicit model defines geometry; stage ground/sky remain. palette optionally
 reads a hex color from a resource field (e.g. headColor/blockColor), else uses color.

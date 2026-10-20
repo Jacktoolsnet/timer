@@ -1471,10 +1471,16 @@
         }
       }
     },
+    "pathVector3D": {"type": "object", "additionalProperties": false, "properties": {"x": {"type": "number", "minimum": -100, "maximum": 100, "default": 0}, "y": {"type": "number", "minimum": -100, "maximum": 100, "default": 0}, "z": {"type": "number", "minimum": -100, "maximum": 100, "default": 0}}},
+    "path3D": {"type": "object", "additionalProperties": false, "properties": {"points": {"type": "array", "minItems": 2, "maxItems": 128, "items": {"$ref": "#/$defs/pathVector3D"}}, "closed": {"type": "boolean", "default": false}, "interpolation": {"enum": ["smooth", "linear"], "default": "smooth"}}, "required": ["points"]},
+    "pathMotion3D": {"type": "object", "additionalProperties": false, "properties": {"path": {"type": "string", "pattern": "^[A-Za-z0-9_-]+$", "minLength": 1, "maxLength": 100}, "duration": {"type": "number", "minimum": 0.01, "maximum": 3600}, "at": {"type": "number", "minimum": 0, "maximum": 3600, "default": 0}, "laps": {"type": "number", "minimum": 0.001, "maximum": 100, "default": 1}, "start": {"type": "number", "minimum": 0, "maximum": 1, "default": 0}, "offset": {"type": "number", "minimum": -10, "maximum": 10, "default": 0}, "orient": {"type": "boolean", "default": true}}, "required": ["path", "duration"]},
+    "cameraFollow3D": {"type": "object", "additionalProperties": false, "properties": {"actor": {"type": "string", "pattern": "^[A-Za-z0-9_-]+$", "minLength": 1, "maxLength": 100}, "mode": {"enum": ["chase", "onboard", "track"], "default": "chase"}, "offset": {"$ref": "#/$defs/pathVector3D"}, "target": {"$ref": "#/$defs/pathVector3D"}}, "required": ["actor"]},
+    "cameraKey3D": {"type": "object", "additionalProperties": false, "properties": {"at": {"type": "number", "minimum": 0, "maximum": 3600}, "position": {"$ref": "#/$defs/pathVector3D"}, "target": {"$ref": "#/$defs/pathVector3D"}, "roll": {"type": "number", "minimum": -3600, "maximum": 3600, "default": 0}}, "required": ["at", "position", "target"]},
     "stage3D": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "paths": {"type": "object", "maxProperties": 16, "propertyNames": {"type": "string", "pattern": "^[A-Za-z0-9_-]+$", "minLength": 1, "maxLength": 100}, "additionalProperties": {"$ref": "#/$defs/path3D"}, "default": {}},
         "model": {"anyOf": [{"$ref": "#/$defs/model3D"}, {"type": "null"}], "default": null},
         "name": {
           "type": "string",
@@ -1505,6 +1511,8 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "follow": {"anyOf": [{"$ref": "#/$defs/cameraFollow3D"}, {"type": "null"}], "default": null},
+        "keys": {"type": "array", "maxItems": 64, "items": {"$ref": "#/$defs/cameraKey3D"}, "default": []},
         "yaw": {
           "type": "number",
           "minimum": -360,
@@ -1662,6 +1670,7 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "path": {"anyOf": [{"$ref": "#/$defs/pathMotion3D"}, {"type": "null"}], "default": null},
         "joints": {"type": "object", "additionalProperties": {"type": "number"}, "default": {}},
         "motions": {"type": "array", "items": {"$ref": "#/$defs/modelMotion3D"}, "maxItems": 64, "default": []},
         "y": {"type": "number", "minimum": -20, "maximum": 20, "default": 0},

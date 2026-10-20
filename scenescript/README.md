@@ -698,3 +698,42 @@ Keine zweite fest verdrahtete Figuren-/Bühnen-Renderstrecke mehr.
   eine andere Vorlage. Eigene Bauteiländerungen werden dabei nicht überschrieben.
 - Die Einzelvorschau rahmt die tatsächlichen Modellabmessungen ein; Größe und
   Renderressourcen werden nicht für jedes Animationsbild neu aufgebaut.
+
+
+### Allgemeine 3D-Fahrpfade und Kameras
+
+Unter **3D-Ressourcen → Beispieltyp → Fahrpfade: Looping & Kameras** gibt es
+zwei Monstertrucks auf einer kleinen Testbahn: vier Runden mit Folgekamera,
+Zuschauerschwenk, freiem Kameraflug und Fahrerkamera. Die Demo bekommt beim Laden
+ein echtes, aus der Szene gerendertes Cover. Dies ist der Pfad-/Kamera-Funktionsnachweis,
+noch nicht das vollständig ausgestattete Rennvideo mit Tribünen und Werbung.
+
+- Bühnen speichern `paths` mit bis zu 16 wiederverwendbaren Wegen. 2–128 Punkte,
+  `closed` (mind. drei Punkte, ersten Punkt nicht wiederholen), `interpolation`
+  `smooth` (Catmull-Rom) oder `linear`. Im Ressourcendialog als eigener JSON-Bereich
+  editierbar, einschließlich Fehleranzeige. Bühne einzeln exportieren nimmt die Wege mit.
+- Auftritte verwenden z. B. `path:{path:"circuit",duration:12,laps:4,offset:1}`.
+  `at` ist Szenenzeit, `start` eine normierte Wegposition. `offset` verschiebt
+  seitlich in Welt-Einheiten; zwei Autos teilen sich so einen Weg mit zwei Spuren.
+  Offene Wege erfordern `start+laps<=1`; geschlossene erlauben wiederholte Runden.
+- Die Bewegung verwendet näherungsweise konstante Bogenlängengeschwindigkeit und
+  mitgeführte Koordinatenachsen für Loopings ohne erzwungenes Aufrichten. Vor und
+  nach dem Zeitintervall hält die Pose. `orient:false` deaktiviert die Ausrichtung.
+  Auftritts-x/y/z werden als Weltversatz addiert, pitch/rotation/roll als lokale
+  Modellkorrektur angewandt. Keine Physiksimulation, Kollisionen oder automatisch
+  erzeugte Fahrbahn. Sprünge sind ebenfalls vorgegebene dreidimensionale Wege.
+- Nicht mit `actions` kombinieren; Gelenkclips, Mimik und Sprache bleiben parallel
+  verfügbar. Eine Radrotation muss im Modell als Animation definiert werden.
+- `camera.follow:{actor:"red",mode:"chase"}` folgt einem Auftritt. `onboard`
+  verwendet Fahrerpositionen als Standard; beide nutzen `offset`/`target` in lokalen
+  Fahrzeugachsen, unskalierten Welt-Einheiten. `track` steht mit `offset` an einem
+  festen Weltpunkt und schwenkt zum bewegten Ziel. Looping-Roll wird bei montierten
+  Kameras übernommen, bei Zuschauerkameras nicht.
+- Alternativ `camera.keys:[{at:0,position:{...},target:{...},roll:0},...]` für freie
+  Kameraflüge. Bis 64 Keys, erster bei 0, strikt aufsteigend innerhalb der Szene;
+  linear interpoliert, letzter hält. Nicht gleichzeitig mit `follow` verwenden.
+- Szenenwechsel sind Kameraschnitte, keine versteckte Zustandsspeicherung. Für
+  Fortsetzungen dieselbe Bühne und passende `start`-Anteile/Lappenlängen angeben.
+  Vorschau, Timeline, Standbild und Video nutzen dieselbe absolute Zeitauswertung.
+- Die vollständige Offline-KI-Anleitung samt Schema-Katalog ist aktualisiert;
+  das Größenbudget beträgt jetzt 82.000 UTF-8-Bytes.

@@ -15,7 +15,7 @@ const {lang}=Astro.props,w=stage3DWords[lang];
     <div class="stage3d-actions"><button id="stage3d-export" type="button" title={w.export} aria-label={w.export}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 15v6h16v-6" /></svg></button><button id="stage3d-import" type="button" title={w.import} aria-label={w.import}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m-5 5 5-5 5 5M4 15v6h16v-6" /></svg></button></div>
     <select id="stage3d-import-mode" aria-label={w.import}><option value="copy">{w.copy}</option><option value="update">{w.update}</option></select>
     <input id="stage3d-file" type="file" accept=".json,application/json" hidden />
-    <label>{w.demoType}<select id="stage3d-demo-type"><option value="classic">{w.demoClassic}</option><option value="construction">{w.demoConstruction}</option></select></label>
+    <label>{w.demoType}<select id="stage3d-demo-type"><option value="classic">{w.demoClassic}</option><option value="construction">{w.demoConstruction}</option><option value="paths">{w.demoPaths}</option></select></label>
     <div class="stage3d-actions"><button id="stage3d-demo" type="button" title={w.demo} aria-label={w.demo}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10h18v11H3Zm0 0L2 5l18-3 1 5Zm4-6 3 4m3-5 3 4M10 13l5 3-5 3Z" /></svg></button></div>
    </section>
    <section class="stage3d-details">
