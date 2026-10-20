@@ -26,3 +26,14 @@ test('application schema matches visible facts in all languages',()=>{
   assert.ok(!html.includes('S L O W'));
  }
 });
+test('usage guidance covers current controls in German and English',()=>{
+ for(const [lang,terms] of [
+  ['de',['Vorlagen','Zähigkeit','Berührungsaktion','Endlose Verwandlung','Blasentöne','Lautstärke','Fokusansicht','Speicherung']],
+  ['en',['Presets','Viscosity','Touch interaction','Endless transformation','Bubble sounds','Volume','Focus view','Preferences']]
+ ] as const){
+  const html=readFileSync(new URL('../dist/'+lang+'/usage/index.html',import.meta.url),'utf8');
+  assert.ok(html.includes('noindex, follow'));
+  for(const term of terms)assert.ok(html.toLowerCase().includes(term.toLowerCase()),term);
+  assert.ok(html.includes('2026'));
+ }
+});
