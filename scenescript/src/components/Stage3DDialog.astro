@@ -28,7 +28,7 @@ const {lang}=Astro.props,w=stage3DWords[lang];
     <details id="stage3d-scene-settings"><summary>{w.sceneSettings}</summary><h3 id="stage3d-scene"></h3><label>{w.stage}<select id="stage3d-stage"></select></label>
     <button id="stage3d-insert" type="button" title={w.insert} aria-label={w.insert}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM4 21v-3a7 7 0 0 1 11-5m4-2v10m-4-5h8" /></svg></button>
     <label>{w.shot}<textarea id="stage3d-shot" rows="12" spellcheck="false" maxlength="524288" aria-describedby="stage3d-shot-hint"></textarea></label>
-    <p id="stage3d-shot-hint" class="small-hint">{w.hint}</p>
+    <p id="stage3d-shot-hint" class="small-hint">{w.hint}</p><p class="small-hint">{w.rigHint}</p>
     <fieldset id="stage3d-speech" class="stage3d-speech"><legend>{w.lipSync}</legend>
      <div class="stage3d-field-grid">
       <label>{w.speechActor}<select id="stage3d-speech-actor"></select></label>

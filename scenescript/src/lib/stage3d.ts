@@ -15,11 +15,11 @@ export const defaultActorAction3D=():ActorAction3D=>({type:'idle',at:0,duration:
 export type ActorSpeech3D={source:'scene'|'project';strength:number};
 export const defaultActorSpeech3D=():ActorSpeech3D=>({source:'scene',strength:1});
 export type Actor3D={path?:PathMotion3D|null;joints:Record<string,number>;motions:ModelMotion3D[];y:number;pitch:number;roll:number;speech:ActorSpeech3D|null;expressions:ActorExpression3D[];actions:ActorAction3D[];id:string;character:string;x:number;z:number;toX:number;toZ:number;rotation:number;scale:number;action:'idle'|'walk'|'wave';at:number;duration:number};
-export type StageCamera3D=CameraRig3D&{yaw:number;pitch:number;distance:number;targetX:number;targetY:number;targetZ:number;orbit:number};
+export type StageCamera3D=CameraRig3D&{fov?:number;yaw:number;pitch:number;distance:number;targetX:number;targetY:number;targetZ:number;orbit:number};
 export type Shot3D={stageJoints?:Record<string,number>;stageMotions?:ModelMotion3D[];stage:string;camera:StageCamera3D;actors:Actor3D[]};
 export const defaultCharacter3D=():Character3D=>({model:null,expression:'neutral',style:'classic',name:'Robot',bodyColor:'#36a9e1',headColor:'#dde7ed',limbColor:'#64748b',accentColor:'#ffe066',height:3});
 export const defaultStage3D=():Stage3D=>({paths:{},model:null,name:'Block plaza',skyColor:'#a7d9f5',groundColor:'#78a653',blockColor:'#e6bd7a'});
-export const defaultStageCamera3D=():StageCamera3D=>({yaw:20,pitch:18,distance:18,targetX:0,targetY:1.6,targetZ:0,orbit:0});
+export const defaultStageCamera3D=():StageCamera3D=>({fov:38,yaw:20,pitch:18,distance:18,targetX:0,targetY:1.6,targetZ:0,orbit:0});
 export const defaultActor3D=(character:string,id='actor'):Actor3D=>({path:null,joints:{},motions:[],y:0,pitch:0,roll:0,speech:null,expressions:[],actions:[],id,character,x:0,z:0,toX:0,toZ:0,rotation:0,scale:1,action:'idle',at:0,duration:4});
 const object=(v:unknown,p:string)=>{if(!v||typeof v!=='object'||Array.isArray(v))throw new Error(p+': expected object');return v as Record<string,unknown>;};
 const keys=(v:Record<string,unknown>,names:string[],p:string)=>{for(const k of Object.keys(v))if(!names.includes(k))throw new Error(p+'.'+k+': unknown field');};
@@ -45,7 +45,7 @@ export function parseShot3D(value:unknown,characters:Record<string,Character3D>,
  if(value===undefined||value===null)return null;
  const v=object(value,path);keys(v,['stage','camera','actors','stageJoints','stageMotions'],path);const stage=identifier(v.stage,path+'.stage');if(!Object.hasOwn(stages,stage))throw new Error(path+'.stage: missing stage '+stage);
  const raw=v.camera===undefined?{}:object(v.camera,path+'.camera'),d=defaultStageCamera3D();keys(raw,[...Object.keys(d),'follow','keys'],path+'.camera');const camera={...d,...parseCameraRig3D(raw,duration,path+'.camera')};
- for(const k of ['yaw','pitch','distance','targetX','targetY','targetZ','orbit'] as const){const [min,max]=k==='pitch'?[5,80]:k==='distance'?[5,80]:k==='orbit'?[-30,30]:k==='yaw'?[-360,360]:k==='targetY'?[-5,15]:[-25,25];camera[k]=number(raw[k]===undefined?d[k]:raw[k],path+'.camera.'+k,min,max);}
+ for(const k of ['fov','yaw','pitch','distance','targetX','targetY','targetZ','orbit'] as const){const [min,max]=k==='fov'?[20,110]:k==='pitch'?[5,80]:k==='distance'?[5,80]:k==='orbit'?[-30,30]:k==='yaw'?[-360,360]:k==='targetY'?[-5,15]:[-25,25];camera[k]=number(raw[k]===undefined?d[k]:raw[k],path+'.camera.'+k,min,max);}
  const list=v.actors===undefined?[]:v.actors;if(!Array.isArray(list)||list.length>12)throw new Error(path+'.actors: expected array (max 12)');const ids=new Set<string>();
  const actors=list.map((item,i)=>{const p=path+'.actors['+i+']',a=object(item,p),id=identifier(a.id,p+'.id'),character=identifier(a.character,p+'.character');if(ids.has(id))throw new Error(p+': duplicate ID');ids.add(id);if(!Object.hasOwn(characters,character))throw new Error(p+'.character: missing character '+character);keys(a,Object.keys(defaultActor3D(character)),p);
   const get=(k:string,f:unknown)=>a[k]===undefined?f:a[k];const x=number(get('x',0),p+'.x',-20,20),z=number(get('z',0),p+'.z',-20,20),at=number(get('at',0),p+'.at',0,Math.max(0,duration-.01)),span=number(get('duration',Math.min(4,duration-at)),p+'.duration',.01,duration-at),action=get('action','idle');if(!['idle','walk','wave'].includes(action as string))throw new Error(p+'.action: idle, walk, wave');

@@ -303,7 +303,7 @@ zero volume closes it (existing surprised expression may keep its mouth open).
 Respects narration at/start/end/volume/fades, scene boundaries and project-global
 timing, NOT actor action timing. Music/video audio do not drive it. Mood/eyes stay
 independent. This is amplitude-driven, NOT phoneme/viseme-accurate lip-sync.
-Camera yaw/pitch: degrees; distance/targetX/Y/Z: world units; orbit: degrees/second
+Camera fov: vertical degrees (20–110, default38); yaw/pitch: degrees; distance/targetX/Y/Z: world units; orbit: degrees/second
 in scene-local time. 3D is opaque, above scene backgrounds, below 2D elements;
 Scene.camera's 2D crop transforms it too. Use screen-space captions.
 Preview/stills/video share absolute-time poses, including silent video exports.
@@ -336,7 +336,7 @@ CAMERA RIG: camera.follow={actor:"truck",mode:"chase"} references a SHOT ACTOR.
 chase/onboard attach camera position(offset) and look-at(target) in actor-local
 axes, UNSCALED world units, including loop roll. They differ in default offsets.
 track uses offset as a FIXED WORLD camera position and tracks the actor's local
-target (spectator pan). Static yaw/pitch/distance/orbit are ignored in follow mode.
+target (spectator pan). Static yaw/pitch/distance/orbit are ignored in follow mode; fov still applies.
 Alternatively camera.keys:[{at:0,position:{x:8,y:4,z:8},target:{y:1},roll:0},...]
 provides up to64 absolute world position/look-at keys. First at:0, then strictly
 increasing <=scene.duration; position and target required and distinct. Linear

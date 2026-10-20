@@ -1511,6 +1511,7 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "fov": {"type": "number", "minimum": 20, "maximum": 110, "default": 38},
         "follow": {"anyOf": [{"$ref": "#/$defs/cameraFollow3D"}, {"type": "null"}], "default": null},
         "keys": {"type": "array", "maxItems": 64, "items": {"$ref": "#/$defs/cameraKey3D"}, "default": []},
         "yaw": {

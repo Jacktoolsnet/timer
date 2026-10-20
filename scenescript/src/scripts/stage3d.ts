@@ -45,7 +45,7 @@ export class Stage3DRenderer{
   }
   const c=world.framing?{...shot.camera,targetX:world.framing.center.x,targetY:world.framing.center.y,targetZ:world.framing.center.z,distance:Math.min(80,Math.max(5.5,world.framing.size.length()/2/Math.sin(19*Math.PI/180)*1.12/Math.min(1,width/height)))}:shot.camera;
   const view=cameraPose3D(c,time,id=>actor3DFrame(shot.actors.find(a=>a.id===id)!,time,shot.actors,paths));
-  this.camera.position.set(view.position.x,view.position.y,view.position.z);this.camera.up.set(view.up.x,view.up.y,view.up.z);this.camera.lookAt(view.target.x,view.target.y,view.target.z);this.camera.aspect=width/height;this.camera.updateProjectionMatrix();
+  this.camera.position.set(view.position.x,view.position.y,view.position.z);this.camera.up.set(view.up.x,view.up.y,view.up.z);this.camera.lookAt(view.target.x,view.target.y,view.target.z);this.camera.fov=c.fov??38;this.camera.aspect=width/height;this.camera.updateProjectionMatrix();
   this.renderer.getSize(this.size);if(this.size.x!==width||this.size.y!==height)this.renderer.setSize(width,height,false);this.renderer.render(world.scene,this.camera);
   if(target.width!==width)target.width=width;if(target.height!==height)target.height=height;
   const ctx=target.getContext('2d');if(!ctx)throw new Error('3D: cannot copy rendered frame');ctx.clearRect(0,0,width,height);ctx.drawImage(this.renderer.domElement,0,0);

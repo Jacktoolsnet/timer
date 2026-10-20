@@ -489,7 +489,7 @@ Keine originalen Roblox-Assets; keine Verbindung zu Roblox oder externen Dienste
   Native Bildauflösung ist auch beim Export die interne 3D-Auflösung.
 - Schema, Laufzeitvalidierung und gemeinsame KI-Anleitung dokumentieren dieselbe
   kleine 3D-Sprache. Das Größenbudget der vollständigen Anleitung beträgt nun
-  68 kB einschließlich des erweiterten Feldkatalogs.
+  82 kB einschließlich des erweiterten Feldkatalogs.
 
 Importierbares Beispiel: `/examples/block-robots.scenescript.json` (mit Cover).
 Einzelressourcen: `/examples/mika.scenecharacter.json`,
@@ -666,10 +666,10 @@ Download: `/examples/construction.scenescript.json`; unabhängige Ressourcen:
 absolute Zeitberechnung. Keine Geometrieerzeugung pro Frame.
 
 Dies ist die Grundlage für die gewünschte Rennwelt, noch nicht die komplette
-Rennsimulation: räumliche Fahrpfade, Looping-/Sprungsteuerung, Fahrzeugkameras und
-große Zuschauermengen sind eigenständige nächste Schritte. Die vollständige
+Rennsimulation: Fahrpfade und Fahrzeugkameras sind im nächsten Abschnitt beschrieben;
+große Zuschauermengen bleiben ein eigenständiger nächster Schritt. Die vollständige
 Copy/Paste-KI-Anleitung enthält die neue Grammatik plus ein kompaktes Beispiel;
-das Größenbudget wächst für dieses zusätzliche Modul auf 76 kB.
+das Größenbudget wächst für dieses zusätzliche Modul auf 82 kB.
 
 
 ### Bestehende Figuren und Plaza als freie Ressourcen
@@ -729,11 +729,14 @@ noch nicht das vollständig ausgestattete Rennvideo mit Tribünen und Werbung.
   Fahrzeugachsen, unskalierten Welt-Einheiten. `track` steht mit `offset` an einem
   festen Weltpunkt und schwenkt zum bewegten Ziel. Looping-Roll wird bei montierten
   Kameras übernommen, bei Zuschauerkameras nicht.
+- `camera.fov` legt den vertikalen Bildwinkel fest (20–110°, Standard 38°);
+  die Fahrerkamera der Demo nutzt einen größeren Blickwinkel. Die Kameras haben
+  keine automatische Hinderniserkennung; passende Abstände müssen vorgegeben werden.
 - Alternativ `camera.keys:[{at:0,position:{...},target:{...},roll:0},...]` für freie
   Kameraflüge. Bis 64 Keys, erster bei 0, strikt aufsteigend innerhalb der Szene;
   linear interpoliert, letzter hält. Nicht gleichzeitig mit `follow` verwenden.
 - Szenenwechsel sind Kameraschnitte, keine versteckte Zustandsspeicherung. Für
-  Fortsetzungen dieselbe Bühne und passende `start`-Anteile/Lappenlängen angeben.
+  Fortsetzungen dieselbe Bühne und passende `start`-Anteile und `laps`-Werte angeben.
   Vorschau, Timeline, Standbild und Video nutzen dieselbe absolute Zeitauswertung.
 - Die vollständige Offline-KI-Anleitung samt Schema-Katalog ist aktualisiert;
   das Größenbudget beträgt jetzt 82.000 UTF-8-Bytes.
