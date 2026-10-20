@@ -840,7 +840,7 @@ body.recording .comic-edit-overlay{display:none}
 #start-export[hidden]{display:none}
 
 /* First declarative 3D prototype: keep resource management separate from shots. */
-#open-stage3d{margin-bottom:12px;width:100%}
+
 #stage3d-dialog{width:min(1080px,96vw);max-height:92dvh;padding:0}
 #stage3d-dialog[open]{display:flex;flex-direction:column}
 #stage3d-dialog .dialog-inner{overflow:auto;padding:20px;min-height:0}
@@ -863,5 +863,29 @@ body.recording .comic-edit-overlay{display:none}
 #stage3d-dialog .json-footer button{display:inline-flex;align-items:center;justify-content:center;width:auto;min-width:100px;height:auto;min-height:44px;padding:10px 16px;overflow-wrap:normal}
 #stage3d-dialog input,#stage3d-dialog select,#stage3d-dialog textarea{background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:7px;padding:8px;font:inherit}
 #stage3d-dialog textarea{font-family:monospace;font-size:12px;line-height:1.4}
-#stage3d-dialog .dialog-inner button,#open-stage3d{padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--accent-soft);color:var(--accent)}
+#stage3d-dialog .dialog-inner button{padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--accent-soft);color:var(--accent)}
 #stage3d-dialog #stage3d-apply{background:var(--accent);color:var(--bg)}
+
+/* Media galleries live in a modal; only the thumbnail and launchers stay in the project. */
+.resource-launchers{display:grid;gap:10px}
+.resource-launchers button{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;padding:14px 16px;background:var(--accent-soft);color:var(--accent);border:1px solid var(--line);border-radius:12px;font:inherit;font-weight:600;text-align:left}
+.resource-launchers button span{min-width:0;overflow-wrap:anywhere}
+.resource-launchers button:hover{background:var(--surface)}
+#resources-dialog{width:min(1080px,96vw);max-width:min(1080px,96vw);max-height:92dvh;padding:0;overflow:hidden}
+#resources-dialog[open]{display:flex;flex-direction:column}
+#resources-dialog .json-header,#resources-dialog .json-footer{flex:none}
+#resources-dialog .dialog-inner{min-height:0;overflow:auto;padding:20px}
+.resources-galleries{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+#resources-dialog section[aria-labelledby=audio-heading]{grid-column:1/-1}
+#resources-dialog .panel-heading{gap:12px}
+#resources-dialog .panel-heading h2{margin:0;font-size:1rem;overflow-wrap:anywhere}
+#resources-dialog .gallery-import{flex-shrink:0;display:grid;place-items:center;width:40px;height:40px;border:1px solid var(--line);font-size:inherit}
+#resources-dialog .small-hint{overflow-wrap:anywhere}
+#resources-dialog .compact-actions{align-items:stretch}
+#resources-dialog .compact-actions button{white-space:normal;overflow-wrap:anywhere}
+#resources-dialog .json-footer{justify-content:flex-end}
+#close-resources{width:auto;min-width:110px;padding-inline:20px;font:inherit}
+@media(max-width:850px){.resources-galleries{grid-template-columns:minmax(0,1fr)}}
+
+#resources-status{white-space:pre-wrap;overflow-wrap:anywhere;user-select:text;color:var(--accent)}
+#resources-status:empty{margin:0}

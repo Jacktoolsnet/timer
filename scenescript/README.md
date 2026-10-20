@@ -494,3 +494,17 @@ Three.js-Lizenz (MIT): `/licenses/three.txt`.
 Tests: `tests/stage3d.test.ts` (Defaults, Grenzen, Referenzen, Ressourcendateien,
 Zeitposen) und `tests/stage3d.spec.ts` (Bearbeitung, Undo, Ressourcenimport/-export,
 Vorschau-/Exportvergleich, Rückwärtssuche, tatsächlicher MP4-Export und Layout).
+
+
+### Medienressourcen im eigenen Overlay
+
+Unter dem weiterhin direkt sichtbaren **Thumbnail** stehen zwei große Buttons:
+**Ressourcen** öffnet Bilder, Videos und Audiodateien einschließlich Sprechtext-
+Export und Sprachdatei-Zuordnung; **3D-Ressourcen** öffnet die Charakter-/Bühnenverwaltung.
+Medien können unverändert importiert, angesehen, umbenannt, ersetzt, einzeln
+heruntergeladen und gelöscht werden. Änderungen gelten direkt, es gibt keinen
+zusätzlichen Übernehmen-Schritt. Importfehler erscheinen auch im Overlay als
+markierbarer Text. Vorschau/Wiedergabe pausiert beim Öffnen; Audio-Vorschauen
+pausieren beim Schließen. Escape/Schließen bringt den Fokus zum Ressourcenbutton
+zurück. Vorhandene Medienvorschauen und Bestätigungsdialoge öffnen sich darüber.
+Projektformat, Speicherung, Referenzen und Undo bleiben unverändert.

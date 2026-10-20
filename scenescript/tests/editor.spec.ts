@@ -1,3 +1,4 @@
+import {openResources,closeResources} from './helpers/resources';
 import {test,expect} from '@playwright/test';
 import {readFile} from 'node:fs/promises';
 async function exportedJSON(page:import('@playwright/test').Page){const pending=page.waitForEvent('download');await page.locator('#save-project').click();const download=await pending;return readFile((await download.path())!,'utf8');}
@@ -126,10 +127,10 @@ test('project spans three columns and preview expands without losing state',asyn
  await page.locator('#open-preview').click();await page.locator('#focus').click();await expect(page.locator('#preview-dialog')).not.toBeVisible();await expect(page.locator('#start-recording')).toBeVisible();await page.keyboard.press('Escape');await expect(page.locator('#timeline')).toHaveValue('2');await expect(page.locator('#stage-frame')).toBeVisible();
 });
 
-test('project images scroll horizontally without widening the page',async({page})=>{
+test('resource images scroll horizontally without widening the overlay',async({page})=>{
  const project=demoProject();for(let i=0;i<12;i++)project.assets['photo-'+i]={name:'Photo '+i+'.png',data:pixel};
  await page.goto('/en/');await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(project));await page.locator('#import-json').click();await expect(page.locator('#json-dialog')).not.toBeVisible();
- await expect(page.locator('.project-panel #asset-list img')).toHaveCount(12);await expect(page.locator('.scene-sidebar #asset-list')).toHaveCount(0);
+ await openResources(page);await expect(page.locator('#resources-dialog #asset-list img')).toHaveCount(12);await expect(page.locator('.scene-sidebar #asset-list')).toHaveCount(0);
  expect(await page.locator('#asset-list').evaluate(el=>el.scrollWidth>el.clientWidth)).toBeTruthy();
  await page.locator('#asset-list').evaluate(el=>{el.scrollLeft=el.scrollWidth;});expect(await page.locator('#asset-list').evaluate(el=>el.scrollLeft)).toBeGreaterThan(0);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();
@@ -155,7 +156,7 @@ test('project toolbar uses labeled icons and JSON is paste-only',async({page})=>
  for(const id of ['new-project','load-project','save-project','open-json','copy-project-json']){const button=page.locator('#'+id);expect(await button.getAttribute('title')).toBeTruthy();expect(await button.getAttribute('aria-label')).toBeTruthy();expect((await button.textContent())!.trim()).toBe('');}
  await page.locator('#open-json').click();await expect(page.locator('#json-input')).toHaveValue('');await expect(page.locator('#copy-json')).toHaveCount(0);await page.locator('#close-json').click();
  await page.locator('#image-file').setInputFiles({name:'trash-test.png',mimeType:'image/png',buffer:Buffer.from(pixel.split(',')[1],'base64')});await expect(page.locator('#asset-list .asset-row .asset-actions button svg')).toHaveCount(4);
- await page.locator('#asset-list .asset-row button[data-delete-asset]').click();await page.locator('#confirm-delete').click();await expect(page.locator('#asset-list img')).toHaveCount(0);
+ await openResources(page);await page.locator('#asset-list .asset-row button[data-delete-asset]').click();await page.locator('#confirm-delete').click();await expect(page.locator('#asset-list img')).toHaveCount(0);
 });
 
 test('app fullscreen hides surroundings and preserves edits and recording return',async({page})=>{
@@ -186,8 +187,8 @@ test('delete overlays support cancel, Escape and explicit scene/image confirmati
  await page.locator('#editor-fullscreen').click();await page.locator('#delete-scene').click();await page.keyboard.press('Escape');await expect(page.locator('#delete-dialog')).not.toBeVisible();await expect(page.locator('body')).toHaveClass(/editor-fullscreen/);
  await page.locator('#delete-scene').click();await page.locator('#confirm-delete').click();await expect(page.locator('#scene-list li')).toHaveCount(1);await expect(page.locator('#delete-scene')).toBeDisabled();
  await page.locator('#image-file').setInputFiles({name:'delete-me.png',mimeType:'image/png',buffer:Buffer.from(pixel.split(',')[1],'base64')});await page.locator('#scene-form [name=backgroundAsset]').selectOption({label:'delete-me.png'});
- await page.locator('#asset-list .asset-row button[data-delete-asset]').click();await expect(page.locator('#delete-description')).toContainText('references');await page.locator('#cancel-delete').click();await expect(page.locator('#asset-list img')).toHaveCount(1);
- await page.locator('#asset-list .asset-row button[data-delete-asset]').click();await page.locator('#confirm-delete').click();await expect(page.locator('#asset-list img')).toHaveCount(0);await expect(page.locator('#scene-form [name=backgroundAsset]')).toHaveValue('');expect(dialogs).toEqual([]);
+ await openResources(page);await page.locator('#asset-list .asset-row button[data-delete-asset]').click();await expect(page.locator('#delete-description')).toContainText('references');await page.locator('#cancel-delete').click();await expect(page.locator('#asset-list img')).toHaveCount(1);
+ await openResources(page);await page.locator('#asset-list .asset-row button[data-delete-asset]').click();await page.locator('#confirm-delete').click();await expect(page.locator('#asset-list img')).toHaveCount(0);await closeResources(page);await expect(page.locator('#scene-form [name=backgroundAsset]')).toHaveValue('');expect(dialogs).toEqual([]);
 });
 
 test('JSON footer has three icons, clipboard paste and safe denial fallback',async({page})=>{
@@ -269,7 +270,7 @@ test('image and shape settings use appearance, layout and animation groups',asyn
  await page.goto('/en/');
  for(const type of ['image','shape']){
   await page.locator('#element-add-menu summary').click();await page.locator(`[data-add=${type}]`).click();
-  const form=page.locator('#element-form');await expect(form.locator('fieldset')).toHaveCount(5);await expect(form.locator('.comic-settings legend')).toHaveText('Anchor points');await expect(form.locator('.path-settings [name=pathType]')).toHaveValue('none');
+  const form=page.locator('#element-form');for(const group of [type+'StyleGroup','elementLayoutGroup','elementMotionGroup','comic-settings','path-settings'])await expect(form.locator('fieldset.'+group)).toHaveCount(1);await expect(form.locator('.comic-settings legend')).toHaveText('Anchor points');await expect(form.locator('.path-settings [name=pathType]')).toHaveValue('none');
   const appearance=form.locator(`.${type}StyleGroup`);await expect(appearance.locator('[name=opacity]')).toBeVisible();await expect(appearance.locator('[name=radius]')).toBeVisible();
   await expect(form.locator('.elementLayoutGroup [name=x]')).toBeVisible();await expect(form.locator('.elementMotionGroup [name=animation]')).toBeVisible();
   if(type==='image'){await expect(appearance.locator('[name=asset]')).toBeVisible();await expect(appearance.locator('[name=fit]')).toBeVisible();}else{await expect(appearance.locator('[name=fillColor]')).toBeVisible();}
@@ -285,8 +286,8 @@ test('rename dialog handles scene, element and image names without changing cont
  await page.locator('#rename-scene').click();await page.locator('#rename-input').fill('Renamed scene');await page.locator('#rename-input').press('Enter');await expect(page.locator('#scene-list button').first()).toContainText('Renamed scene');
  await expect(page.locator('#rename-element')).toBeDisabled();await page.locator('#element-list button').first().click();const original=JSON.parse(await exportedJSON(page));
  await page.locator('#rename-element').click();await page.locator('#rename-input').fill('Headline');await page.locator('#apply-rename').click();await expect(page.locator('#element-list button').first()).toContainText('Headline');
- await page.locator('#image-file').setInputFiles({name:'original.png',mimeType:'image/png',buffer:Buffer.from(pixel.split(',')[1],'base64')});await page.locator('#asset-list [data-rename-asset]').click();await page.locator('#rename-input').fill('Cover image');await page.locator('#apply-rename').click();await expect(page.locator('#asset-list .asset-row > span')).toHaveText('Cover image');
- const saved=JSON.parse(await exportedJSON(page)),element=saved.scenes[0].elements[0];expect(saved.scenes[0].name).toBe('Renamed scene');expect(element.name).toBe('Headline');expect(element.id).toBe(original.scenes[0].elements[0].id);expect(element.text).toBe(original.scenes[0].elements[0].text);expect(Object.values(saved.assets)[0]).toMatchObject({name:'Cover image',data:pixel});
+ await page.locator('#image-file').setInputFiles({name:'original.png',mimeType:'image/png',buffer:Buffer.from(pixel.split(',')[1],'base64')});await openResources(page);await page.locator('#asset-list [data-rename-asset]').click();await page.locator('#rename-input').fill('Cover image');await page.locator('#apply-rename').click();await expect(page.locator('#asset-list .asset-row > span')).toHaveText('Cover image');
+ await closeResources(page);const saved=JSON.parse(await exportedJSON(page)),element=saved.scenes[0].elements[0];expect(saved.scenes[0].name).toBe('Renamed scene');expect(element.name).toBe('Headline');expect(element.id).toBe(original.scenes[0].elements[0].id);expect(element.text).toBe(original.scenes[0].elements[0].text);expect(Object.values(saved.assets)[0]).toMatchObject({name:'Cover image',data:pixel});
  await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(saved));await page.locator('#import-json').click();await expect(page.locator('#element-list button').first()).toContainText('Headline');
  await page.locator('#rename-scene').click();await page.keyboard.press('Escape');await expect(dialog).not.toBeVisible();
 });
@@ -398,14 +399,14 @@ test('asset save downloads original PNG and SVG bytes without saving the project
  ]){
   await page.locator('#image-file').setInputFiles({name:image.name,mimeType:image.mimeType,buffer:image.buffer});
   const row=page.locator('#asset-list .asset-row').last();
-  await row.locator('[data-rename-asset]').click();await page.locator('#rename-input').fill(image.renamed);await page.locator('#apply-rename').click();
-  const project=JSON.parse(await exportedJSON(page));
-  await page.locator('#project-title').fill('Still unsaved');
+  await openResources(page);await row.locator('[data-rename-asset]').click();await page.locator('#rename-input').fill(image.renamed);await page.locator('#apply-rename').click();
+  await closeResources(page);const project=JSON.parse(await exportedJSON(page));
+  await page.locator('#project-title').fill('Still unsaved');await openResources(page);
   const pending=page.waitForEvent('download');await row.locator('[data-save-asset]').click();const download=await pending;
   expect(download.suggestedFilename()).toBe(image.filename);
   const asset=Object.values(project.assets).at(-1) as {data:string};
   expect(await readFile((await download.path())!)).toEqual(Buffer.from(asset.data.split(',')[1],'base64'));
-  await expect(page.locator('#editor-status')).toHaveText('Unsaved changes');
+  await expect(page.locator('#editor-status')).toHaveText('Unsaved changes');await closeResources(page);
  }
 });
 
@@ -413,7 +414,7 @@ test('asset thumbnails open a bounded image overlay with header and footer',asyn
  await page.goto('/en/');
  await page.locator('#image-file').setInputFiles({name:'preview.png',mimeType:'image/png',buffer:Buffer.from(pixel.split(',')[1],'base64')});
  const thumbnail=page.locator('[data-preview-asset]'),dialog=page.locator('#asset-preview-dialog');
- await thumbnail.focus();await page.keyboard.press('Enter');
+ await openResources(page);await thumbnail.focus();await page.keyboard.press('Enter');
  await expect(dialog).toBeVisible();await expect(dialog.locator('header')).toContainText('preview.png');
  await expect(page.locator('#asset-preview-image')).toHaveAttribute('src',pixel);
  await expect(page.locator('#asset-preview-image')).toHaveAttribute('alt','preview.png');
@@ -466,7 +467,7 @@ test('long scene and element lists scroll without increasing row two height',asy
  await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(project));await page.locator('#import-json').click();
  expect((await inspector.boundingBox())!.height).toBeCloseTo(initialHeight,0);
  for(const selector of ['.scene-sidebar','.elements-panel']){
-  const box=(await page.locator(selector).boundingBox())!,sceneBox=(await page.locator(selector==='.elements-panel'?'.element-inspector':'.scene-inspector').boundingBox())!;
+  const box=(await page.locator(selector).boundingBox())!,sceneBox=(await page.locator('.scene-inspector').boundingBox())!;
   expect(box.height).toBeCloseTo(sceneBox.height,0);expect(box.y).toBeCloseTo(sceneBox.y,0);
  }
  for(const id of ['scene-list','element-list']){
@@ -481,7 +482,7 @@ test('long scene and element lists scroll without increasing row two height',asy
  await page.locator('[data-gradient=backgroundGradient] [name=gradientType]').selectOption('radial');
  const expandedHeight=(await inspector.boundingBox())!.height;expect(expandedHeight).toBeGreaterThan(initialHeight);
  expect((await page.locator('.scene-sidebar').boundingBox())!.height).toBeCloseTo(expandedHeight,0);
- expect((await page.locator('.elements-panel').boundingBox())!.height).toBeCloseTo((await page.locator('.element-inspector').boundingBox())!.height,0);
+ expect((await page.locator('.elements-panel').boundingBox())!.height).toBeCloseTo((await page.locator('.scene-inspector').boundingBox())!.height,0);
  await page.locator('[data-gradient=backgroundGradient] [name=gradientType]').selectOption('solid');
  expect((await inspector.boundingBox())!.height).toBeCloseTo(initialHeight,0);
  await page.locator('#scene-list').evaluate(el=>el.scrollTop=el.scrollHeight);
@@ -643,7 +644,7 @@ test('recording alignment frame hides for countdown and restart appears three se
 });
 
 test('gallery import buttons open image and video file pickers',async({page})=>{
- await page.goto('/en/');await expect(page.locator('.media-gallery-tile')).toHaveCount(4);
+ await page.goto('/en/');await openResources(page);await expect(page.locator('.media-gallery-tile')).toHaveCount(4);
  for(const [id,accept] of [['gallery-import-image','image/png'],['gallery-import-video','video/*']]){
   await expect(page.locator('#'+id)).toBeVisible();await expect(page.locator('#'+id+' svg')).toHaveCount(1);await expect(page.locator('#'+id)).toHaveText('');await expect(page.locator('#'+id)).toHaveAttribute('aria-label',/Import/);const pending=page.waitForEvent('filechooser');await page.locator('#'+id).click();const chooser=await pending;expect(await chooser.element().getAttribute('accept')).toContain(accept);
  }
@@ -653,8 +654,8 @@ test('image replacement keeps the asset ID, name, all references and element set
  const p=JSON.parse(await exportedJSON(page)),id=Object.keys(p.assets)[0];p.scenes[0].backgroundAsset=id;
  p.scenes.forEach((s:any,index:number)=>s.elements.push({...structuredClone(p.scenes[0].elements[0]),id:'image-'+index,type:'image',asset:id,x:7,y:5,width:80,height:60,radius:24}));
  await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(p));await page.locator('#import-json').click();
- const chooser=page.waitForEvent('filechooser');await page.locator('#asset-list [data-replace-media]').click();const file=await chooser;const svg='<svg xmlns="http://www.w3.org/2000/svg" width="40" height="20"><rect width="40" height="20" fill="blue"/></svg>';await file.setFiles({name:'new.svg',mimeType:'image/svg+xml',buffer:Buffer.from(svg)});
- await expect(page.locator('#asset-list img')).toHaveAttribute('src',/^data:image\/svg/);const replaced=JSON.parse(await exportedJSON(page));expect(Object.keys(replaced.assets)).toEqual([id]);expect(replaced.assets[id].name).toBe('cover.png');expect(replaced.assets[id].data).not.toBe(p.assets[id].data);expect(replaced.scenes).toEqual(p.scenes);
+ await openResources(page);const chooser=page.waitForEvent('filechooser');await page.locator('#asset-list [data-replace-media]').click();const file=await chooser;const svg='<svg xmlns="http://www.w3.org/2000/svg" width="40" height="20"><rect width="40" height="20" fill="blue"/></svg>';await file.setFiles({name:'new.svg',mimeType:'image/svg+xml',buffer:Buffer.from(svg)});
+ await expect(page.locator('#asset-list img')).toHaveAttribute('src',/^data:image\/svg/);await closeResources(page);const replaced=JSON.parse(await exportedJSON(page));expect(Object.keys(replaced.assets)).toEqual([id]);expect(replaced.assets[id].name).toBe('cover.png');expect(replaced.assets[id].data).not.toBe(p.assets[id].data);expect(replaced.scenes).toEqual(p.scenes);
 });
 
 test('publication fields save, load and copy independently with denial fallback',async({page})=>{

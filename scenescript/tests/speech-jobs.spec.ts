@@ -1,3 +1,4 @@
+import {openResources,closeResources} from './helpers/resources';
 import {test,expect,type Page} from '@playwright/test';
 import {readFile} from 'node:fs/promises';
 import {demoProject,type Project} from '../src/lib/model';
@@ -14,7 +15,8 @@ test('save scripts before audio, cancel edits and export one named text file per
  await page.goto('/en/');page.on('dialog',d=>d.accept());await page.locator('#project-narration').click();await expect(page.locator('[name=narrationText]')).toBeVisible();await page.locator('[name=narrationText]').fill('A project voice.');await page.locator('[name=narrationInstructions]').fill('Warm voice; do not read this.');await page.locator('[name=narrationSpeaker]').fill('Narrator');await page.locator('#narration-dialog button[type=submit]').click();
  await page.locator('#scene-narration').click();await page.locator('[name=narrationText]').fill('Hello 😀');await page.locator('#narration-dialog button[type=submit]').click();await page.locator('#scene-narration').click();await page.locator('[name=narrationText]').fill('Discard this');await page.locator('#close-narration').click();
  const p=await saved(page);expect(p.narration).toMatchObject({asset:'',text:'A project voice.',instructions:'Warm voice; do not read this.',speaker:'Narrator'});expect(p.scenes[0].narration?.text).toBe('Hello 😀');expect(p.audios).toEqual({});
- const pending=page.waitForEvent('download');await page.locator('#export-speech-jobs').click();const dl=await pending;expect(dl.suggestedFilename()).toMatch(/-speech\.zip$/);const entries=storedEntries(await readFile((await dl.path())!)),jobs=await speechJobs(p);expect(entries.size).toBe(2);for(const j of jobs){const text=entries.get(j.textName)!;expect(text).toContain(j.audioName);expect(text).toContain('do NOT read');expect(text.endsWith(j.text)).toBe(true);}
+ await openResources(page);const pending=page.waitForEvent('download');await page.locator('#export-speech-jobs').click();const dl=await pending;expect(dl.suggestedFilename()).toMatch(/-speech\.zip$/);const entries=storedEntries(await readFile((await dl.path())!)),jobs=await speechJobs(p);expect(entries.size).toBe(2);for(const j of jobs){const text=entries.get(j.textName)!;expect(text).toContain(j.audioName);expect(text).toContain('do NOT read');expect(text.endsWith(j.text)).toBe(true);}
+ await closeResources(page);
  // The workflow also survives saving and loading the editable project.
  await load(page,p);await page.locator('#project-narration').click();await expect(page.locator('[name=narrationInstructions]')).toHaveValue('Warm voice; do not read this.');await page.locator('#close-narration').click();
 });
@@ -46,9 +48,9 @@ test('project-wide voice extends the final scene and timing cannot be shortened 
 });
 
 test('ordinary assignments extend scenes, deleting audio keeps the draft, and empty exports warn',async({page})=>{
- await page.goto('/en/');page.on('dialog',d=>d.accept());await page.locator('#export-speech-jobs').click();await expect(page.locator('.app-toast')).toContainText('No speech scripts');const p=draft();p.scenes[0].narration!.text='Regenerate me';await load(page,p);
+ await page.goto('/en/');page.on('dialog',d=>d.accept());await openResources(page);await page.locator('#export-speech-jobs').click();await expect(page.locator('.app-toast')).toContainText('No speech scripts');await closeResources(page);const p=draft();p.scenes[0].narration!.text='Regenerate me';await load(page,p);
  await page.locator('#audio-file').setInputFiles({name:'ordinary.wav',mimeType:'audio/wav',buffer:wav(3)});await expect(page.locator('.audio-row')).toHaveCount(1);await page.locator('#scene-narration').click();await page.locator('[name=audioAsset]').selectOption({label:'ordinary.wav'});await page.locator('#narration-dialog button[type=submit]').click();expect((await saved(page)).scenes[0].duration).toBe(3.25);
- await page.locator('[data-delete-audio]').click();await page.locator('#confirm-delete').click();const q=await saved(page);expect(q.audios).toEqual({});expect(q.scenes[0].narration).toMatchObject({asset:'',text:'Regenerate me',speaker:'Narrator'});expect((await speechJobs(q)).length).toBe(2);
+ await openResources(page);await page.locator('[data-delete-audio]').click();await page.locator('#confirm-delete').click();await closeResources(page);const q=await saved(page);expect(q.audios).toEqual({});expect(q.scenes[0].narration).toMatchObject({asset:'',text:'Regenerate me',speaker:'Narrator'});expect((await speechJobs(q)).length).toBe(2);
 });
 
 test('a project change while decoding cancels a pending batch instead of overwriting edits',async({page})=>{

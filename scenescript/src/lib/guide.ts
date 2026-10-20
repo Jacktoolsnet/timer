@@ -417,6 +417,11 @@ for neon use a dark background. These compact settings come from editor factorie
 ${presetExamples}
 
 ## 8. Real media and Safe SVG assets and deterministic animation
+Editor UI: the thumbnail stays in the project panel. Below it, Resources opens
+image/video/audio management (including speech file exchange); 3D resources opens
+characters/stages. Media edits apply directly and remain undoable. This UI grouping
+does not change the JSON asset maps, references or publication thumbnail semantics.
+
 References and limits:
 - Element.asset / Scene.backgroundAsset → Project.assets (ImageAsset).
 - Element.video.asset / Project.backgroundVideo.asset → Project.videos (VideoAsset).

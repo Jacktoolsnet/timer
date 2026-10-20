@@ -249,6 +249,9 @@ const words = {
 
  collapseProject:['Projekt einklappen','Collapse project','Contraer proyecto','Replier le projet'],
  expandProject:['Projekt ausklappen','Expand project','Expandir proyecto','Déplier le projet'],
+ resources:['Ressourcen','Resources','Recursos','Ressources'],
+ resources3d:['3D-Ressourcen','3D resources','Recursos 3D','Ressources 3D'],
+ resourcesHint:['Bilder, Videos und Audio für dieses Projekt verwalten. Änderungen werden direkt im Projekt übernommen.','Manage images, videos and audio for this project. Changes apply directly to the project.','Gestiona imágenes, vídeos y audio de este proyecto. Los cambios se aplican directamente.','Gérez les images, vidéos et fichiers audio du projet. Les modifications sont appliquées directement.'],
  audios:['Audiodateien','Audio files','Archivos de audio','Fichiers audio'],
  importAudio:['Audio importieren','Import audio','Importar audio','Importer un audio'],
  exportSpeechJobs:['Sprechtexte exportieren (ZIP)','Export speech scripts (ZIP)','Exportar guiones (ZIP)','Exporter les textes (ZIP)'],

@@ -1,3 +1,4 @@
+import {openResources,closeResources} from './helpers/resources';
 import {test,expect} from '@playwright/test';
 import {readFile,writeFile} from 'node:fs/promises';
 import {demoProject} from '../src/lib/model';
@@ -18,7 +19,7 @@ test('60 MiB project loads, remains editable and downloads with all media',async
  await expect(page.locator('#project-title')).toHaveValue(project.title,{timeout:30000});
  await expect(page.locator('#json-dialog')).not.toBeVisible();
  await expect(page.locator('#asset-list img')).toHaveCount(6);
- await expect(page.locator('#video-size')).toContainText('60.0 MiB');
+ await openResources(page);await expect(page.locator('#video-size')).toContainText('60.0 MiB');await closeResources(page);
  await page.locator('#element-list li button').first().click();
  await page.locator('#element-form [name=x]').fill('15');
  await expect(page.locator('#element-form [name=x]')).toHaveValue('15');

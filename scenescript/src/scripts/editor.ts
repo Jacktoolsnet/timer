@@ -71,7 +71,7 @@ let recordingRestartTimer:ReturnType<typeof setTimeout>|undefined;
 let playbackAttempt=0,preparingPlayback=false;
 let playbackPreparation:AbortController|undefined;
 let baseTime=0,started=0,frame=0,countdownTimer:ReturnType<typeof setTimeout>|undefined,draftTimer:ReturnType<typeof setTimeout>|undefined;
-const status=(message:string)=>{$('editor-status').textContent=message;};
+const status=(message:string)=>{$('editor-status').textContent=message;if(($('resources-dialog') as HTMLDialogElement)?.open)$('resources-status').textContent=message;};
 try{if(storageAllowed()){const saved=localStorage.getItem(STORAGE_KEY);if(saved){project=parseProject(saved);dirty=true;status(t('recovery'));}}}catch{status(t('storageError'));}
 const history=new History(project);
 document.querySelectorAll('#scene-form, #element-form').forEach(form=>form.addEventListener('submit',event=>event.preventDefault()));
@@ -1115,6 +1115,10 @@ $('import-thumbnail').onclick=()=>($('thumbnail-file') as HTMLInputElement).clic
   const thumbnail={name:file.name.slice(0,200),data};await decodeImage(data);if(project!==target||attempt!==thumbnailImportAttempt)return;validateProject({...target,thumbnail});project.thumbnail=thumbnail;changed();renderThumbnail();
  }catch(error){if(project===target&&attempt===thumbnailImportAttempt)status(t('error')+' '+(error as Error).message);}
 };
+const resourcesDialog=$('resources-dialog') as HTMLDialogElement;
+$('open-resources').addEventListener('click',()=>{stop();stopAudioPreviews();draw(false);$('resources-status').textContent='';resourcesDialog.showModal();});
+$('close-resources').addEventListener('click',()=>resourcesDialog.close());
+resourcesDialog.addEventListener('close',()=>{resourcesDialog.querySelectorAll('audio,video').forEach(media=>(media as HTMLMediaElement).pause());$('open-resources').focus();});
 $('gallery-import-image').onclick=()=>($('image-file') as HTMLInputElement).click();
 async function decodeImage(data:string){const image=new Image();image.src=data;await image.decode();if(!image.naturalWidth||!image.naturalHeight)throw new Error('Image: invalid dimensions');if(image.naturalWidth*image.naturalHeight>40_000_000)throw new Error('Image: maximum 40 megapixels');}
 async function preload(p:Project){
