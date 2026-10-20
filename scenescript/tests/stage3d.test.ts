@@ -1,3 +1,4 @@
+import {resource3DPreview} from '../src/lib/stage3d-resource-preview.ts';
 import {test} from 'node:test';
 import {readFileSync} from 'node:fs';
 import assert from 'node:assert/strict';
@@ -28,3 +29,11 @@ test('individual 3D resources are versioned, self-contained and strictly bounded
 test('resource copy IDs stay bounded and never replace an existing character',()=>{const id='a'.repeat(100),copy=unique3DResourceID(id,{[id]:{}});assert.equal(copy.length,100);assert.notEqual(copy,id);assert.ok(copy.endsWith('_2'));assert.equal(unique3DResourceID('new',{}),'new');});
 
 test('downloadable robot example and companion files match the canonical project',()=>{const p=parseProject(readFileSync(new URL('../public/examples/block-robots.scenescript.json',import.meta.url),'utf8'));assert.match(p.thumbnail!.data,/^data:image\/png;base64,/);p.thumbnail=null;assert.deepEqual(p,sample());for(const [file,id,kind] of [['mika.scenecharacter.json','mika','character'],['bo.scenecharacter.json','bo','character'],['plaza.scenestage.json','plaza','stage']]){const resource=parse3DResource(readFileSync(new URL('../public/examples/'+file,import.meta.url),'utf8'));assert.equal(resource.kind,kind);assert.deepEqual(resource.definition,kind==='character'?p.characters[id]:p.stages[id]);}});
+
+test('resource preview is isolated, valid and uses only the chosen character or stage',()=>{
+ const project=sample(),before=JSON.stringify(project),character=resource3DPreview('character','bo',project.characters.bo);
+ assert.equal(character.studio,true);assert.equal(character.label,'Bo');assert.deepEqual(Object.keys(character.project.characters),['bo']);assert.equal(character.shot.actors.length,1);assert.equal(character.shot.actors[0].character,'bo');assert.equal(character.shot.actors[0].x,0);assert.equal(character.shot.camera.orbit,0);assert.ok(validateProject(character.project));
+ const stage=resource3DPreview('stage','plaza',project.stages.plaza);assert.equal(stage.studio,false);assert.equal(stage.shot.actors.length,0);assert.deepEqual(Object.keys(stage.project.stages),['plaza']);assert.ok(validateProject(stage.project));assert.equal(JSON.stringify(project),before);
+ for(const height of [1,6])assert.ok(validateProject(resource3DPreview('character','bo',{...project.characters.bo,height}).project));
+ assert.throws(()=>resource3DPreview('character','bo',{...project.characters.bo,height:NaN}),/height/);
+});

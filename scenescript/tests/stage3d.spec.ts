@@ -21,7 +21,7 @@ test('resource edits apply project-wide and individual imports copy or explicitl
 
 test('invalid scene shots and referenced resource deletion do not mutate the project',async({page})=>{
  await load(page);await page.locator('#open-stage3d').click();await page.locator('#stage3d-remove').click();await expect(page.locator('#stage3d-status')).toContainText('used by a scene');
- await page.locator('#stage3d-shot').fill('{"stage":"missing"}');await page.locator('#stage3d-apply').click();await expect(page.locator('#stage3d-status')).toContainText('missing stage');await expect(page.locator('#stage3d-dialog')).toBeVisible();await page.locator('#stage3d-close').click();await page.locator('#open-stage3d').click();expect(JSON.parse(await page.locator('#stage3d-shot').inputValue()).stage).toBe('plaza');
+ await page.locator('#stage3d-scene-settings summary').click();await page.locator('#stage3d-shot').fill('{"stage":"missing"}');await page.locator('#stage3d-apply').click();await expect(page.locator('#stage3d-status')).toContainText('missing stage');await expect(page.locator('#stage3d-dialog')).toBeVisible();await page.locator('#stage3d-close').click();await page.locator('#open-stage3d').click();expect(JSON.parse(await page.locator('#stage3d-shot').inputValue()).stage).toBe('plaza');
  await page.locator('#stage3d-kind').selectOption('stage');const download=page.waitForEvent('download');await page.locator('#stage3d-export').click();const f=await download;expect(f.suggestedFilename()).toBe('plaza.scenestage.json');await page.locator('#stage3d-close').click();
 });
 
@@ -46,7 +46,10 @@ test('short 3D MP4 export contains rendered scene pixels',async({page})=>{
 });
 
 test('3D dialog fits tablet and desktop and has translated controls',async({page})=>{
- for(const [lang,title] of [['de','3D-Bühnen & Charaktere'],['en','3D stages & characters'],['es','Escenarios y personajes 3D'],['fr','Décors et personnages 3D']]){await page.goto(`/${lang}/`);await page.locator('#open-stage3d').click();await expect(page.locator('#stage3d-title')).toHaveText(title);expect(await page.locator('#stage3d-dialog').evaluate(n=>n.scrollWidth<=n.clientWidth)).toBe(true);await page.locator('#stage3d-close').click();}
+ for(const [lang,title] of [['de','3D-Bühnen & Charaktere'],['en','3D stages & characters'],['es','Escenarios y personajes 3D'],['fr','Décors et personnages 3D']]){await page.goto(`/${lang}/`);await page.locator('#open-stage3d').click();await expect(page.locator('#stage3d-title')).toHaveText(title);expect(await page.locator('#stage3d-dialog').evaluate(n=>n.scrollWidth<=n.clientWidth)).toBe(true);
+  const buttons=page.locator('#stage3d-dialog button');await expect(buttons).toHaveCount(9);
+  for(const button of await buttons.all()){await expect(button).toHaveText('');await expect(button.locator('svg[aria-hidden=true]')).toHaveCount(1);const label=await button.getAttribute('aria-label');expect(label).toBeTruthy();await expect(button).toHaveAttribute('title',label!);if(await button.isVisible()){const bounds=await button.boundingBox();expect(bounds!.width).toBeGreaterThanOrEqual(44);expect(bounds!.height).toBeGreaterThanOrEqual(44);}}
+  await page.locator('#stage3d-close').click();}
 });
 
 
@@ -55,4 +58,55 @@ test('unavailable WebGL2 reports a preview error and rejects export instead of a
  await page.goto('/en/');await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(stage3DExample));await page.locator('#import-json').click();await expect(page.locator('#editor-status')).toContainText('WebGL 2 is not available');
  const result=await page.evaluate(async(source)=>{const {validateProject}=await import(/* @vite-ignore */ '/src/lib/model.ts' as string),{exportStill}=await import(/* @vite-ignore */ '/src/scripts/still-export.ts' as string);try{await exportStill(validateProject(source),1,new AbortController().signal);return 'unexpected success';}catch(e){return (e as Error).message;}},stage3DExample);
  expect(result).toContain('WebGL 2 is not available');expect(await page.locator('[data-export-renderer]').count()).toBe(0);
+});
+
+
+test('3D dropdowns and popup options follow the theme and support keyboard selection',async({page})=>{
+ await page.goto('/en/');await page.locator('#open-stage3d').click();const selects=page.locator('#stage3d-dialog select');await expect(selects).toHaveCount(4);
+ for(const select of await selects.all()){await expect(select).toHaveCSS('border-radius','10px');if(await select.isVisible())expect(await select.evaluate(n=>n.getBoundingClientRect().height)).toBeGreaterThanOrEqual(40);}
+ const kind=page.locator('#stage3d-kind'),baseSelect=await page.evaluate(()=>CSS.supports('appearance','base-select'));
+ for(const theme of ['light','dark']){
+  await page.evaluate(theme=>document.documentElement.dataset.theme=theme,theme);
+  if(baseSelect){await kind.click();await expect.poll(()=>kind.evaluate(n=>n.matches(':open'))).toBe(true);
+   const styles=await kind.evaluate(n=>{const picker=getComputedStyle(n,'::picker(select)'),selected=getComputedStyle(n.querySelector('option:checked')!);return {appearance:picker.appearance,radius:picker.borderRadius,background:picker.backgroundColor,optionRadius:selected.borderRadius,optionWeight:selected.fontWeight,checkmark:getComputedStyle(n.querySelector('option:checked')!,'::checkmark').color};});
+   expect(styles.appearance).toBe('base-select');expect(styles.radius).toBe('14px');expect(styles.background).not.toBe('rgba(0, 0, 0, 0)');expect(styles.optionRadius).toBe('8px');expect(styles.optionWeight).toBe('600');expect(styles.checkmark).not.toBe('rgba(0, 0, 0, 0)');await page.keyboard.press('Escape');await expect(page.locator('#stage3d-dialog')).toBeVisible();
+  }
+ }
+ await kind.focus();await page.keyboard.press('Space');await page.keyboard.press('End');await page.keyboard.press('Enter');await expect(kind).toHaveValue('stage');await page.locator('#stage3d-add').click();await expect(page.locator('[data-resource-field=skyColor]')).toBeVisible();
+ await page.locator('#stage3d-close').click();
+});
+
+
+async function resourcePixels(page:any){return page.locator('#stage3d-resource-preview canvas').evaluate((c:HTMLCanvasElement)=>c.toDataURL());}
+
+test('selected characters have their own formatted settings and isolated live preview on the right',async({page})=>{
+ await load(page);await page.locator('#open-stage3d').click();await expect(page.locator('#stage3d-resource-label')).toHaveText('Character');
+ await expect(page.locator('.stage3d-library [data-resource-field]')).toHaveCount(0);await expect(page.locator('.stage3d-details [data-resource-field]')).toHaveCount(6);await expect(page.locator('#stage3d-fields fieldset')).toHaveCount(2);
+ const canvas=page.locator('#stage3d-resource-preview canvas');await expect(canvas).toHaveAttribute('data-resource3d-id','mika');await expect(canvas).toHaveAttribute('data-stage3d-time','0');await expect(canvas).toHaveAttribute('aria-label','Mika');
+ const left=(await page.locator('.stage3d-library').boundingBox())!,right=(await page.locator('.stage3d-details').boundingBox())!;expect(right.x).toBeGreaterThanOrEqual(left.x+left.width);const previewBox=(await canvas.boundingBox())!,footer=(await page.locator('#stage3d-dialog footer').boundingBox())!;expect(previewBox.y+previewBox.height).toBeLessThanOrEqual(footer.y);
+ const original=await resourcePixels(page);await page.locator('[data-resource-field=bodyColor]').fill('#ff0055');await expect.poll(()=>resourcePixels(page)).not.toBe(original);await expect(page.locator('.stage3d-color-swatch output').first()).toHaveText('#FF0055');
+ await page.locator('[data-resource-field=name]').fill('Mika preview');await expect(page.locator('#stage3d-detail-title')).toHaveText('Character · Mika preview');await expect(canvas).toHaveAttribute('aria-label','Mika preview');await expect(page.locator('#stage3d-resource option:checked')).toHaveText('mika · Mika preview');
+ await page.locator('#stage3d-resource').selectOption('bo');await expect(page.locator('[data-resource-field=name]')).toHaveValue('Bo');await expect(canvas).toHaveAttribute('data-resource3d-id','bo');await expect(canvas).toHaveAttribute('aria-label','Bo');await expect(canvas).toHaveAttribute('data-stage3d-time','0');expect(await resourcePixels(page)).not.toBe(original);
+ expect(await page.locator('#stage3d-scene-settings').getAttribute('open')).toBeNull();expect(JSON.parse(await page.locator('#stage3d-shot').inputValue()).actors).toHaveLength(2);
+ await page.locator('#stage3d-close').click();await expect(page.locator('#stage3d-resource-preview canvas')).toHaveCount(0);
+});
+
+test('a new character previews without a stage assignment, invalid heights are reported, and closing discards edits',async({page})=>{
+ await page.goto('/en/');await page.locator('#open-stage3d').click();await page.locator('#stage3d-add').click();const canvas=page.locator('#stage3d-resource-preview canvas');await expect(canvas).toHaveAttribute('data-stage3d-time','0');await expect(canvas).toHaveAttribute('data-resource3d-id','character');await expect(page.locator('#stage3d-shot')).toHaveValue('null');
+ await page.locator('[data-resource-field=height]').fill('6');await expect(page.locator('#stage3d-resource-preview-status')).toBeEmpty();await expect(canvas).toHaveAttribute('data-stage3d-time','0');
+ await page.locator('[data-resource-field=height]').fill('');await expect(page.locator('#stage3d-resource-preview-status')).toContainText('height');await page.locator('#stage3d-apply').click();await expect(page.locator('#stage3d-dialog')).toBeVisible();await expect(page.locator('#stage3d-status')).toContainText('height');
+ await page.locator('[data-resource-field=height]').fill('2');await expect(page.locator('#stage3d-resource-preview-status')).toBeEmpty();await expect(canvas).toHaveAttribute('data-stage3d-time','0');await page.locator('#stage3d-close').click();await page.locator('#open-stage3d').click();await expect(page.locator('#stage3d-resource option')).toHaveCount(0);await page.locator('#stage3d-close').click();
+});
+
+test('resource preview ignores broken scene JSON and stage selection does not change scene actors',async({page})=>{
+ await load(page);await page.locator('#open-stage3d').click();const shot=await page.locator('#stage3d-shot').inputValue();await page.locator('#stage3d-scene-settings summary').click();await page.locator('#stage3d-shot').fill('{broken');
+ await page.locator('[data-resource-field=bodyColor]').fill('#112233');await expect(page.locator('#stage3d-resource-preview canvas')).toHaveAttribute('data-stage3d-time','0');await expect(page.locator('#stage3d-resource-preview-status')).toBeEmpty();
+ await page.locator('#stage3d-shot').fill(shot);await page.locator('#stage3d-kind').selectOption('stage');await expect(page.locator('#stage3d-resource-label')).toHaveText('Stage');await expect(page.locator('.stage3d-details [data-resource-field]')).toHaveCount(4);const canvas=page.locator('#stage3d-resource-preview canvas');await expect(canvas).toHaveAttribute('data-resource3d-id','plaza');await expect(canvas).toHaveAttribute('data-stage3d-time','0');
+ const before=await resourcePixels(page);await page.locator('[data-resource-field=groundColor]').fill('#ff2277');await expect.poll(()=>resourcePixels(page)).not.toBe(before);expect(await page.locator('#stage3d-shot').inputValue()).toBe(shot);
+ await page.locator('#stage3d-apply').click();const pending=page.waitForEvent('download');await page.locator('#save-project').click();const saved=JSON.parse(await readFile((await (await pending).path())!,'utf8'));expect(saved.stages.plaza.groundColor).toBe('#ff2277');expect(saved.scenes[0].stage3d).toEqual(JSON.parse(shot));expect(saved.scenes[1].stage3d.actors).toEqual(stage3DExample.scenes[1].stage3d.actors.map(a=>expect.objectContaining(a)));
+});
+
+
+test('disposing a resource preview before its lazy renderer is ready does not restore its buffers',async({page})=>{
+ await page.goto('/en/');const result=await page.evaluate(async()=>{const {resource3DPreview}=await import(/* @vite-ignore */ '/src/lib/stage3d-resource-preview.ts' as string),{defaultCharacter3D}=await import(/* @vite-ignore */ '/src/lib/stage3d.ts' as string),{createStage3DView,prepareStage3DPreview}=await import(/* @vite-ignore */ '/src/scripts/stage3d-preview.ts' as string);const p=resource3DPreview('character','robot',defaultCharacter3D()),errors:string[]=[];const view=createStage3DView(p.project,p.shot,640,480,(e:Error)=>errors.push(e.message),{studio:true});view.dispose();await prepareStage3DPreview();view.draw(1);return {width:view.canvas.width,height:view.canvas.height,errors};});expect(result).toEqual({width:0,height:0,errors:[]});
 });

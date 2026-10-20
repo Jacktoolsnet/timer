@@ -13,7 +13,7 @@ export class Stage3DRenderer{
  }
  private onLost=(event:Event)=>{event.preventDefault();this.lost=true;};
  private release(world:World){world.scene.traverse(node=>{if(node instanceof THREE.InstancedMesh)node.dispose();});world.geometries.forEach(g=>g.dispose());world.materials.forEach(m=>m.dispose());world.scene.clear();}
- private world(stage:Stage3D,characters:Project['characters'],actors:Actor3D[]):World{
+ private world(stage:Stage3D,characters:Project['characters'],actors:Actor3D[],studio=false):World{
   const scene=new THREE.Scene();scene.background=new THREE.Color(stage.skyColor);scene.fog=new THREE.Fog(stage.skyColor,35,85);
   const world:World={scene,robots:[],geometries:new Set(),materials:new Map()};
   const cube=new THREE.BoxGeometry(1,1,1);world.geometries.add(cube);
@@ -21,6 +21,7 @@ export class Stage3DRenderer{
   const box=(parent:THREE.Object3D,color:string,x:number,y:number,z:number,w:number,h:number,d:number)=>{const m=new THREE.Mesh(cube,material(color));m.position.set(x,y,z);m.scale.set(w,h,d);parent.add(m);return m;};
   scene.add(new THREE.HemisphereLight('#ffffff','#72864c',2.3));const sun=new THREE.DirectionalLight('#fff2d4',3.5);sun.position.set(-8,14,8);scene.add(sun);
   box(scene,stage.groundColor,0,-.32,0,56,.6,56);
+  if(!studio){
   // Raised plaza, stepping stones and a small arch create depth without external assets.
   box(scene,'#c7d4d9',0,-.08,0,16,.25,10);
   for(let x=-7;x<=7;x+=2)for(let z=-4;z<=4;z+=2)box(scene,(x+z)%4===0?'#dce6e7':'#b8c9ce',x,.055,z,1.94,.05,1.94);
@@ -30,6 +31,7 @@ export class Stage3DRenderer{
   for(const [x,z,h,c] of [[-9,-7,4,'#e6956e'],[8,-8,6,stage.blockColor],[-12,2,3,'#8fb5cf'],[12,0,4,'#9c9ed2']] as const){box(scene,c,x,h/2,z,3,h,3);box(scene,'#f4e6c6',x,h+.2,z,3.35,.4,3.35);for(let y=1;y<h;y+=1.5)box(scene,'#537b95',x,y,z+1.52,1,.7,.06);}
   box(scene,stage.blockColor,-3,2,-8,1,4,1);box(scene,stage.blockColor,3,2,-8,1,4,1);box(scene,'#fff0cd',0,4.3,-8,7,1,1.3);
   for(const [x,z] of [[-7,5],[8,5],[-6,-11],[12,-11]]){box(scene,'#946c47',x,1.2,z,.65,2.4,.65);box(scene,'#4d9466',x,3,z,2.6,2.3,2.6);box(scene,'#6cad73',x-.35,4.3,z,1.8,1,1.8);}
+  }
   // Low-cost soft ground marks instead of expensive real-time shadow maps.
   const shadowGeometry=new THREE.CircleGeometry(.85,24);world.geometries.add(shadowGeometry);
   const shadowMaterial=new THREE.MeshStandardMaterial({color:'#526674',transparent:true,opacity:.18,depthWrite:false});world.materials.set('shadow',shadowMaterial);
@@ -46,11 +48,11 @@ export class Stage3DRenderer{
   };
   world.robots=actors.map(a=>robot(a,characters[a.character]));return world;
  }
- render(project:Project,shot:Shot3D,time:number,width:number,height:number,target:HTMLCanvasElement){
+ render(project:Project,shot:Shot3D,time:number,width:number,height:number,target:HTMLCanvasElement,studio=false){
   if(this.disposed||this.lost)throw new Error('3D: graphics context unavailable. Reload the project before exporting.');
   const definitions=Object.fromEntries(shot.actors.map(a=>[a.character,project.characters[a.character]]));
-  const key=JSON.stringify([project.stages[shot.stage],definitions,shot.actors]);let world=this.cache.get(key);
-  if(!world){world=this.world(project.stages[shot.stage],project.characters,shot.actors);this.cache.set(key,world);if(this.cache.size>2){const oldest=this.cache.keys().next().value!;this.release(this.cache.get(oldest)!);this.cache.delete(oldest);}}
+  const key=JSON.stringify([project.stages[shot.stage],definitions,shot.actors,studio]);let world=this.cache.get(key);
+  if(!world){world=this.world(project.stages[shot.stage],project.characters,shot.actors,studio);this.cache.set(key,world);if(this.cache.size>2){const oldest=this.cache.keys().next().value!;this.release(this.cache.get(oldest)!);this.cache.delete(oldest);}}
   else{this.cache.delete(key);this.cache.set(key,world);}
   for(const r of world.robots){const p=actor3DPose(r.actor,time);r.root.position.set(p.x,p.bob,p.z);r.root.rotation.y=p.rotation;r.leftArm.rotation.x=p.leftArm;r.rightArm.rotation.x=p.rightArm;r.rightArm.rotation.z=p.wave;r.leftLeg.rotation.x=p.leftLeg;r.rightLeg.rotation.x=p.rightLeg;}
   const c=shot.camera,yaw=(c.yaw+c.orbit*time)*Math.PI/180,pitch=c.pitch*Math.PI/180;

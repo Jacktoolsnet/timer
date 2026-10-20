@@ -467,7 +467,7 @@ test('long scene and element lists scroll without increasing row two height',asy
  await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(project));await page.locator('#import-json').click();
  expect((await inspector.boundingBox())!.height).toBeCloseTo(initialHeight,0);
  for(const selector of ['.scene-sidebar','.elements-panel']){
-  const box=(await page.locator(selector).boundingBox())!,sceneBox=(await page.locator('.scene-inspector').boundingBox())!;
+  const box=(await page.locator(selector).boundingBox())!,sceneBox=(await page.locator(selector==='.elements-panel'?'.element-inspector':'.scene-inspector').boundingBox())!;
   expect(box.height).toBeCloseTo(sceneBox.height,0);expect(box.y).toBeCloseTo(sceneBox.y,0);
  }
  for(const id of ['scene-list','element-list']){
@@ -482,7 +482,7 @@ test('long scene and element lists scroll without increasing row two height',asy
  await page.locator('[data-gradient=backgroundGradient] [name=gradientType]').selectOption('radial');
  const expandedHeight=(await inspector.boundingBox())!.height;expect(expandedHeight).toBeGreaterThan(initialHeight);
  expect((await page.locator('.scene-sidebar').boundingBox())!.height).toBeCloseTo(expandedHeight,0);
- expect((await page.locator('.elements-panel').boundingBox())!.height).toBeCloseTo((await page.locator('.scene-inspector').boundingBox())!.height,0);
+ expect((await page.locator('.elements-panel').boundingBox())!.height).toBeCloseTo((await page.locator('.element-inspector').boundingBox())!.height,0);
  await page.locator('[data-gradient=backgroundGradient] [name=gradientType]').selectOption('solid');
  expect((await inspector.boundingBox())!.height).toBeCloseTo(initialHeight,0);
  await page.locator('#scene-list').evaluate(el=>el.scrollTop=el.scrollHeight);

@@ -508,3 +508,17 @@ markierbarer Text. Vorschau/Wiedergabe pausiert beim Öffnen; Audio-Vorschauen
 pausieren beim Schließen. Escape/Schließen bringt den Fokus zum Ressourcenbutton
 zurück. Vorhandene Medienvorschauen und Bestätigungsdialoge öffnen sich darüber.
 Projektformat, Speicherung, Referenzen und Undo bleiben unverändert.
+
+
+### Auswahlbezogene 3D-Ressourcenbearbeitung
+
+Im 3D-Dialog stehen Ressourcenart und Ressource links. Rechts werden ausschließlich
+Einstellungen der gewählten Figur/Bühne angezeigt, gegliedert in Allgemein und
+Aussehen, mit Farbfeldern und Hexwerten. Daneben (auf Tablets darüber innerhalb
+der rechten Spalte) erscheint eine isolierte Live-Vorschau. Charaktere stehen in
+einer neutralen Studioumgebung, Bühnen werden ohne Szenenfiguren gezeigt. Die
+Vorschau funktioniert auch ohne Verwendung der Ressource in einer Szene und ist
+unabhängig vom Szenen-JSON. Sie erzeugt keine Auftritte oder Kameraänderungen im
+Projekt. Szenenauftritte/Kamera bleiben im separaten aufklappbaren Abschnitt.
+Übernehmen bestätigt den Entwurf; Schließen verwirft ihn. Häufige Änderungen werden
+pro Browserframe gebündelt; alte Vorschau-Canvas-Puffer werden explizit freigegeben.

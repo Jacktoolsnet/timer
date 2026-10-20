@@ -9,23 +9,31 @@ const {lang}=Astro.props,w=stage3DWords[lang];
  <div class="dialog-inner">
   <p id="stage3d-status" role="status" aria-live="polite"></p>
   <div class="stage3d-grid">
-   <section><label>{w.kind}<select id="stage3d-kind"><option value="character">{w.characters}</option><option value="stage">{w.stages}</option></select></label>
-    <label>{w.resource}<select id="stage3d-resource"></select></label>
-    <div class="stage3d-actions"><button id="stage3d-add" type="button">{w.add}</button><button id="stage3d-remove" type="button">{w.remove}</button></div>
-    <div id="stage3d-fields"></div>
-    <div class="stage3d-actions"><button id="stage3d-export" type="button">{w.export}</button><button id="stage3d-import" type="button">{w.import}</button></div>
+   <section class="stage3d-library"><label>{w.kind}<select id="stage3d-kind"><option value="character">{w.characters}</option><option value="stage">{w.stages}</option></select></label>
+    <label><span id="stage3d-resource-label">{w.resource}</span><select id="stage3d-resource"></select></label>
+    <div class="stage3d-actions"><button id="stage3d-add" type="button" title={w.add} aria-label={w.add}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg></button><button id="stage3d-remove" type="button" title={w.remove} aria-label={w.remove}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7" /></svg></button></div>
+    <div class="stage3d-actions"><button id="stage3d-export" type="button" title={w.export} aria-label={w.export}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 15v6h16v-6" /></svg></button><button id="stage3d-import" type="button" title={w.import} aria-label={w.import}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m-5 5 5-5 5 5M4 15v6h16v-6" /></svg></button></div>
     <select id="stage3d-import-mode" aria-label={w.import}><option value="copy">{w.copy}</option><option value="update">{w.update}</option></select>
     <input id="stage3d-file" type="file" accept=".json,application/json" hidden />
+    <div class="stage3d-actions"><button id="stage3d-demo" type="button" title={w.demo} aria-label={w.demo}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10h18v11H3Zm0 0L2 5l18-3 1 5Zm4-6 3 4m3-5 3 4M10 13l5 3-5 3Z" /></svg></button></div>
    </section>
-   <section><h3 id="stage3d-scene"></h3><label>{w.stage}<select id="stage3d-stage"></select></label>
-    <button id="stage3d-insert" type="button">{w.insert}</button>
+   <section class="stage3d-details">
+    <header class="stage3d-detail-heading"><h3 id="stage3d-detail-title">{w.settings}</h3><span id="stage3d-detail-id"></span></header>
+    <div class="stage3d-resource-editor">
+     <div id="stage3d-fields"></div>
+     <figure class="stage3d-resource-preview-card"><figcaption>{w.resourcePreview}</figcaption><div id="stage3d-resource-preview"></div><p id="stage3d-resource-preview-status" role="status" aria-live="polite"></p></figure>
+    </div>
+    <p class="small-hint">{w.resourcePreviewHint}</p>
+    <details id="stage3d-scene-settings"><summary>{w.sceneSettings}</summary><h3 id="stage3d-scene"></h3><label>{w.stage}<select id="stage3d-stage"></select></label>
+    <button id="stage3d-insert" type="button" title={w.insert} aria-label={w.insert}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM4 21v-3a7 7 0 0 1 11-5m4-2v10m-4-5h8" /></svg></button>
     <label>{w.shot}<textarea id="stage3d-shot" rows="12" spellcheck="false" maxlength="32000" aria-describedby="stage3d-shot-hint"></textarea></label>
     <p id="stage3d-shot-hint" class="small-hint">{w.hint}</p>
-    <div class="stage3d-actions"><label>{w.time}<input id="stage3d-time" type="number" min="0" step="0.1" value="1" /></label><button id="stage3d-preview-button" type="button">{w.preview}</button></div>
+    <div class="stage3d-actions"><label>{w.time}<input id="stage3d-time" type="number" min="0" step="0.1" value="1" /></label><button id="stage3d-preview-button" type="button" title={w.preview} aria-label={w.preview}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 4v6h-6M4 20v-6h6M5 9a7 7 0 0 1 12-4l3 5M4 14l3 5a7 7 0 0 0 12-4" /></svg></button></div>
     <div id="stage3d-preview"></div>
+    </details>
    </section>
   </div>
-  <button id="stage3d-demo" type="button">{w.demo}</button>
+
  </div>
- <footer class="json-footer stage3d-actions"><button id="stage3d-apply" class="primary" type="button">{w.save}</button><button id="stage3d-close" type="button">{w.close}</button></footer>
+ <footer class="json-footer stage3d-actions"><button id="stage3d-apply" class="primary" type="button" title={w.save} aria-label={w.save}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg></button><button id="stage3d-close" type="button" title={w.close} aria-label={w.close}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg></button></footer>
 </dialog>

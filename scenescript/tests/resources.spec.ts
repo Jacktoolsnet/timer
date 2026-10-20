@@ -35,6 +35,6 @@ test('translated galleries fit the viewport and do not widen the page with many 
  for(const [lang,label] of [['de','Ressourcen'],['en','Resources'],['es','Recursos'],['fr','Ressources']]){
   await page.goto(`/${lang}/`);await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(p));await page.locator('#import-json').click();await openResources(page);await expect(page.locator('#resources-title')).toHaveText(label);
   const dimensions=await page.locator('#resources-dialog').evaluate(n=>({width:n.clientWidth,scroll:n.scrollWidth,bottom:n.getBoundingClientRect().bottom}));expect(dimensions.scroll).toBeLessThanOrEqual(dimensions.width);expect(dimensions.bottom).toBeLessThanOrEqual(page.viewportSize()!.height);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
-  await expect(page.locator('#close-resources')).toBeVisible();await closeResources(page);await expect(page.locator('#asset-list img')).toHaveCount(12);
+  const close=page.locator('#close-resources');await expect(close).toBeVisible();await expect(close).toHaveText('');await expect(close.locator('svg')).toHaveCount(1);expect(await close.getAttribute('aria-label')).toBeTruthy();expect(await close.getAttribute('title')).toBe(await close.getAttribute('aria-label'));await closeResources(page);await expect(page.locator('#asset-list img')).toHaveCount(12);
  }
 });

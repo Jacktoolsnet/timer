@@ -270,8 +270,12 @@ The 3D stage is an opaque background above ordinary scene backgrounds, below all
 2D elements; the 2D scene camera transforms it too. Use screen-space captions.
 Absolute-time poses are shared by preview, stills and video export. WebGL2 is
 required; unavailable graphics/context loss is an error, never a silent blank export.
-The 3D dialog edits shared definitions and scene shots; each character/stage can
-be exported/imported independently. Imports are independent copies across projects;
+The 3D dialog selects resource type/ID on the left and edits its shared definition
+with an isolated live preview on the right (even without a scene assignment).
+Scene actors/camera remain in a separate expandable section; previews never add
+actors or modify scene cameras. Confirm applies drafts; closing discards them.
+Each character/stage can be exported/imported independently. Imports are independent
+copies across projects;
 ID collisions offer copy or explicit update. No GLB import, arbitrary JavaScript,
 physics, lip sync, automatic rigging or arbitrary character shapes in this prototype.
 Minimal syntax example (add publication copy and a real cover for final delivery):
