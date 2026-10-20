@@ -13,14 +13,14 @@ test('finished race is a valid four-lap production with continuous transforms th
   }close(laps,4);
  }
  assert.ok(raceProgress3D('blue',12)>raceProgress3D('red',12));assert.ok(raceProgress3D('blue',24)<raceProgress3D('red',24));close(raceProgress3D('red',48),4);assert.ok(raceProgress3D('blue',48)<4);close(raceProgress3D('blue',48.5),4);
- assert.ok(p.music?.enabled);assert.ok(p.music.notes.length>200);assert.ok(p.characters.marshal.model!.animations.finishWave);assert.ok(p.firstComment.includes('Team'));assert.ok(p.hashtags.includes('#Monstertruck'));
+ assert.ok(p.music?.enabled);assert.ok(p.music.notes.length>200);assert.ok(p.characters.marshal.model!.animations.finishWave);assert.ok(p.firstComment.includes('Team'));assert.ok(p.hashtags.includes('#MonsterTruck'));
 });
 test('procedural effects are deterministic, finite mono PCM, correctly timed and self-contained',()=>{
  const a=raceEffectsWav(),b=raceEffectsWav();assert.deepEqual(a,b);const v=new DataView(a.buffer);assert.equal(new TextDecoder().decode(a.slice(0,4)),'RIFF');assert.equal(v.getUint32(24,true),12000);assert.equal(v.getUint16(22,true),1);close(v.getUint32(40,true)/24000,61.5);
  const energy=(time:number)=>{let sum=0;for(let i=0;i<600;i++){const sample=v.getInt16(44+(Math.floor(time*12000)+i)*2,true);sum+=sample*sample;}return sum;};assert.equal(energy(1),0);assert.ok(energy(4.04)>0);assert.ok(energy(8)>0);assert.ok(energy(58)>0);
 });
 test('shipped default includes cover, sound, four templates and complete publication metadata within recovery budget',()=>{
- const p=parseProject(readFileSync(new URL('../public/examples/monstertruck-race.scenescript.json',import.meta.url),'utf8'));assert.equal(p.title,race3DExample.title);assert.match(p.thumbnail!.data,/^data:image\/png;base64,/);assert.match(p.audios.racefx.data,/^data:audio\/wav;base64,/);close(p.audios.racefx.duration,raceDuration3D);assert.equal(p.narration!.asset,'racefx');assert.equal(p.groups3d.audience.characters.length,4);assert.ok(projectJsonBytes(p)<4*1024*1024);assert.deepEqual(parseProject(JSON.stringify(p)),p);
+ const p=parseProject(readFileSync(new URL('../public/examples/monstertruck-race.scenescript.json',import.meta.url),'utf8'));assert.equal(p.title,race3DExample.title);assert.match(p.thumbnail!.data,/^data:image\/jpeg;base64,/);assert.match(p.audios.racefx.data,/^data:audio\/wav;base64,/);close(p.audios.racefx.duration,raceDuration3D);assert.equal(p.narration!.asset,'racefx');assert.equal(p.groups3d.audience.characters.length,4);assert.ok(projectJsonBytes(p)<4*1024*1024);assert.deepEqual(parseProject(JSON.stringify(p)),p);
 });
 test('startup prioritizes saved work, handles corrupt storage and failed default loads without losing editing',async()=>{
  const p=demoProject();p.title='My saved work';let calls=0;const load=async()=>{calls++;return validateProject(race3DExample);};const recovered=await resolveStartupProject(JSON.stringify(p),load);assert.equal(recovered.project.title,p.title);assert.ok(recovered.recovered);assert.equal(calls,0);
@@ -72,4 +72,10 @@ test('marshal and attached flag keep one global wave clock across all cuts, with
   assert.equal(after.z,-19.6);assert.equal(after.y,3);
  }
  const waving=p.scenes.find(s=>s.id==='race8')!.stage3d!.actors.find(a=>a.id==='marshal')!;assert.notEqual(modelPose3D(model,{},waving.motions,.1).get('flagWave'),modelPose3D(model,{},waving.motions,.3).get('flagWave'));
+});
+test('English publication metadata and authored cover are preserved in the shipped race',()=>{
+ const p=parseProject(readFileSync(new URL('../public/examples/monstertruck-race.scenescript.json',import.meta.url),'utf8')),notes=readFileSync(new URL('../public/examples/monstertruck-race-publication.en.md',import.meta.url),'utf8');
+ for(const key of ['title','description','firstComment','hashtags'] as const){assert.equal(p[key],race3DExample[key]);assert.ok(notes.includes(p[key]));}
+ assert.ok(p.title.length<70);assert.equal(p.hashtags.split(' ').length,3);assert.ok(!p.hashtags.includes('#Roblox'));assert.ok(p.description.includes('Not Roblox gameplay'));
+ const cover=readFileSync(new URL('../public/examples/monstertruck-race-cover-en.jpg',import.meta.url));assert.equal(p.thumbnail!.data,'data:image/jpeg;base64,'+cover.toString('base64'));assert.ok(cover.byteLength<2*1024*1024);
 });

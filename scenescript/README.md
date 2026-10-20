@@ -826,7 +826,9 @@ pro Szene bleibt bestehen.
   PCM-WAV-Datei sowie eine eigene Musik-Partitur. Kein Audio-Download oder externer
   Dienst nötig; kein automatisches Abspielen beim Öffnen. Die Effekte nutzen die
   vorhandene Projekt-Audiospur, nicht Sprachsteuerung der Figuren.
-- Echt gerendertes Cover, YouTube-Titel/-Beschreibung, Hashtags und erster Kommentar.
+- Eigenes KI-generiertes englisches Cover, YouTube-Titel/-Beschreibung, Hashtags
+  und erster Kommentar auf Englisch. Zielgruppenannahme und Cover-Prompt stehen in
+  `public/examples/monstertruck-race-publication.en.md`.
 - Die Gesamtdatei bleibt unter dem bestehenden 4-MiB-Budget für lokale Entwürfe.
 - Vorhandene Entwürfe haben Vorrang; sie werden vor dem Laden des Startprojekts
   geprüft. Der Startprojekt-Download entfällt dann vollständig.
@@ -843,7 +845,7 @@ pro Szene bleibt bestehen.
   über die gemeinsame Test-Fixture; `race3d.spec.ts` prüft den echten neuen Start,
   Wiederherstellung, Fehlerfälle, asynchrone Änderungen sowie Rendering/Audioexport.
 
-Reproduzierbare Neuerzeugung der mitgelieferten Datei bei laufendem Dev-Server:
-`npm run example:race` (standardmäßig Port 4321, alternativ `BASE_URL=...`).
-Der Generator erstellt die Effekte aus `race3d-audio.ts` und das Cover über den
-normalen Standbild-Renderer in einem eigenen, leeren Browserkontext.
+Reproduzierbare Offline-Neuerzeugung der mitgelieferten Datei: `npm run example:race`.
+Der Generator erstellt die Effekte aus `race3d-audio.ts` und bettet das dauerhaft
+abgelegte `monstertruck-race-cover-en.jpg` ein; ein Dev-Server ist nicht nötig.
+Das Cover wird bei einer Neuerzeugung nicht durch einen Filmframe ersetzt.
