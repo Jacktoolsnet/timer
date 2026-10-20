@@ -2,16 +2,16 @@
 export type Vector3D={x:number;y:number;z:number};
 export const vector3D=(value=0):Vector3D=>({x:value,y:value,z:value});
 export const shapes3D=['group','box','sphere','cylinder','cone','plane'] as const;
-export const jointControls3D=['none','mouth','happy','sad','angry','surprised','blink'] as const;
-export type Joint3D={id:string;motion:'rotation'|'translation';axis:'x'|'y'|'z';min:number;max:number;value:number;control:typeof jointControls3D[number];target:number};
-export type Part3D={id:string;parent:string;shape:typeof shapes3D[number];position:Vector3D;rotation:Vector3D;pivot:Vector3D;size:Vector3D;color:string;roughness:number;metalness:number;opacity:number;joints:Joint3D[]};
+export const jointControls3D=['none','mouth','speech','happy','sad','angry','surprised','blink','leftArm','rightArm','leftLeg','rightLeg','wave','bob'] as const;
+export type Joint3D={id:string;motion:'rotation'|'translation'|'scale';axis:'x'|'y'|'z';min:number;max:number;value:number;control:typeof jointControls3D[number];target:number;responses:Partial<Record<typeof jointControls3D[number],number>>};
+export type Part3D={id:string;parent:string;palette:string;instances:Vector3D[];shape:typeof shapes3D[number];position:Vector3D;rotation:Vector3D;pivot:Vector3D;size:Vector3D;color:string;roughness:number;metalness:number;opacity:number;joints:Joint3D[]};
 export type JointKey3D={at:number;value:number};
 export type JointTrack3D={joint:string;keys:JointKey3D[];easing:'linear'|'ease-in-out'};
 export type ModelAnimation3D={duration:number;tracks:JointTrack3D[]};
 export type Model3D={parts:Part3D[];animations:Record<string,ModelAnimation3D>};
 export type ModelMotion3D={animation:string;at:number;duration:number;speed:number;loop:boolean;blend:number};
-export const defaultJoint3D=():Joint3D=>({id:'joint',motion:'rotation',axis:'x',min:-180,max:180,value:0,control:'none',target:180});
-export const defaultPart3D=():Part3D=>({id:'part',parent:'',shape:'box',position:vector3D(),rotation:vector3D(),pivot:vector3D(),size:vector3D(1),color:'#36a9e1',roughness:.78,metalness:.08,opacity:1,joints:[]});
+export const defaultJoint3D=():Joint3D=>({id:'joint',motion:'rotation',axis:'x',min:-180,max:180,value:0,control:'none',target:180,responses:{}});
+export const defaultPart3D=():Part3D=>({id:'part',parent:'',palette:'',instances:[],shape:'box',position:vector3D(),rotation:vector3D(),pivot:vector3D(),size:vector3D(1),color:'#36a9e1',roughness:.78,metalness:.08,opacity:1,joints:[]});
 export const defaultModelMotion3D=():ModelMotion3D=>({animation:'',at:0,duration:1,speed:1,loop:false,blend:.2});
 const obj=(v:unknown,p:string)=>{if(!v||typeof v!=='object'||Array.isArray(v))throw new Error(p+': expected object');return v as Record<string,unknown>;};
 const fields=(v:Record<string,unknown>,allowed:string[],p:string)=>{for(const k of Object.keys(v))if(!allowed.includes(k))throw new Error(p+'.'+k+': unknown field');};
@@ -37,12 +37,19 @@ export function parseModel3D(value:unknown,path='model'):Model3D|null{
   const parsedJoints:Joint3D[]=list.map((value,index)=>{
    const path=p+'.joints['+index+']',v=obj(value,path),d=defaultJoint3D();fields(v,Object.keys(d),path);
    const jointId=id(v.id,path+'.id');if(joints.has(jointId)||++jointCount>256)throw new Error(path+'.id: duplicate joint or maximum 256');
-   const motion=choice(v.motion===undefined?d.motion:v.motion,['rotation','translation'],path+'.motion'),axis=choice(v.axis===undefined?d.axis:v.axis,['x','y','z'],path+'.axis'),bound=motion==='rotation'?3600:50;
+   const motion=choice(v.motion===undefined?d.motion:v.motion,['rotation','translation','scale'],path+'.motion'),axis=choice(v.axis===undefined?d.axis:v.axis,['x','y','z'],path+'.axis'),bound=motion==='rotation'?3600:50;
    if(axes.has(motion+axis))throw new Error(path+': duplicate motion/axis');axes.add(motion+axis);
-   const min=num(v.min,path+'.min',-bound,bound),max=num(v.max,path+'.max',min,bound),rest=num(v.value===undefined?0:v.value,path+'.value',min,max);
-   const joint:Joint3D={id:jointId,motion,axis,min,max,value:rest,control:choice(v.control===undefined?'none':v.control,jointControls3D,path+'.control'),target:num(v.target===undefined?max:v.target,path+'.target',min,max)};joints.set(jointId,joint);return joint;
+   const min=num(v.min,path+'.min',motion==='scale'?0:-bound,bound),max=num(v.max,path+'.max',min,bound),rest=num(v.value===undefined?(motion==='scale'?1:0):v.value,path+'.value',min,max);
+   const responseValues=obj(v.responses===undefined?{}:v.responses,path+'.responses'),responses:Joint3D['responses']={};
+   for(const [name,value]of Object.entries(responseValues)){choice(name,jointControls3D,path+'.responses');if(name==='none')throw new Error(path+'.responses.none: no signal');Object.defineProperty(responses,name,{value:num(value,path+'.responses.'+name,min,max),enumerable:true,writable:true,configurable:true});}
+   const joint:Joint3D={responses,id:jointId,motion,axis,min,max,value:rest,control:choice(v.control===undefined?'none':v.control,jointControls3D,path+'.control'),target:num(v.target===undefined?max:v.target,path+'.target',min,max)};joints.set(jointId,joint);return joint;
   });
-  return {id:partId,parent,shape,color,position:vector(v.position,p+'.position',d.position,-50,50),rotation:vector(v.rotation,p+'.rotation',d.rotation,-360,360),pivot:vector(v.pivot,p+'.pivot',d.pivot,-50,50),size:vector(v.size,p+'.size',d.size,.01,50),roughness:num(get('roughness'),p+'.roughness',0,1),metalness:num(get('metalness'),p+'.metalness',0,1),opacity:num(get('opacity'),p+'.opacity',0,1),joints:parsedJoints};
+  const palette=get('palette')===''?'':id(get('palette'),p+'.palette'),rawInstances=get('instances');
+  if(!Array.isArray(rawInstances)||rawInstances.length>256)throw new Error(p+'.instances: maximum 256');
+  if(shape==='group'&&parsedJoints.some(j=>j.motion==='scale'))throw new Error(p+'.joints: scale affects mesh geometry, not groups');
+  if(rawInstances.length&&(shape==='group'||parsedJoints.some(j=>j.motion==='scale')))throw new Error(p+'.instances: needs geometry without scale joints');
+  const instances=rawInstances.map((v,i)=>vector(v,p+'.instances['+i+']',vector3D(),-50,50));
+  return {id:partId,parent,palette,instances,shape,color,position:vector(v.position,p+'.position',d.position,-50,50),rotation:vector(v.rotation,p+'.rotation',d.rotation,-360,360),pivot:vector(v.pivot,p+'.pivot',d.pivot,-50,50),size:vector(v.size,p+'.size',d.size,.01,50),roughness:num(get('roughness'),p+'.roughness',0,1),metalness:num(get('metalness'),p+'.metalness',0,1),opacity:num(get('opacity'),p+'.opacity',0,1),joints:parsedJoints};
  });
  const parents=new Map(parts.map(p=>[p.id,p.parent]));
  for(const part of parts){let current=part.id;const seen=new Set<string>();while(current){if(!parents.has(current))throw new Error(path+'.parts.'+part.id+'.parent: missing part '+current);if(seen.has(current))throw new Error(path+'.parts.'+part.id+'.parent: hierarchy cycle');if(seen.size>=32)throw new Error(path+'.parts: maximum hierarchy depth 32');seen.add(current);current=parents.get(current)!;}}
@@ -91,13 +98,19 @@ export function modelPose3D(model:Model3D,overrides:Record<string,number>,motion
    const base=values.get(track.joint)!;values.set(track.joint,base+(left.value+(right.value-left.value)*f-base)*weight);
   }
  }
- for(const [id,joint]of definitions){const base=values.get(id)!,weight=Math.max(0,Math.min(1,joint.control==='none'?0:controls[joint.control]??0));values.set(id,Math.max(joint.min,Math.min(joint.max,base+(joint.target-base)*weight)));}
+ const weight=(signal:typeof jointControls3D[number])=>signal==='none'?0:Math.max(['leftArm','rightArm','leftLeg','rightLeg','wave','bob'].includes(signal)?-1:0,Math.min(1,controls[signal]??0));
+ for(const [id,joint]of definitions){const base=values.get(id)!;let value=base;
+  for(const [signal,target]of Object.entries(joint.responses))value+=(target!-base)*weight(signal as typeof jointControls3D[number]);
+  value+=(joint.target-value)*weight(joint.control);values.set(id,Math.max(joint.min,Math.min(joint.max,value)));
+ }
  return values;
 }
 /** Conservative framing radius, including nested translations, pivot offsets and joint travel. */
 export function modelRadius3D(model:Model3D):number{
  const parts=new Map(model.parts.map(p=>[p.id,p]));let radius=1;
- for(const part of model.parts){let reach=Math.hypot(part.size.x,part.size.y,part.size.z)/2,current:Part3D|undefined=part;
+ for(const part of model.parts){let reach=Math.hypot(part.size.x,part.size.y,part.size.z)/2;for(const j of part.joints)if(j.motion==='scale')reach*=Math.max(1,j.max);let current:Part3D|undefined=part;
   while(current){reach+=Math.hypot(current.position.x,current.position.y,current.position.z)+2*Math.hypot(current.pivot.x,current.pivot.y,current.pivot.z);for(const joint of current.joints)if(joint.motion==='translation')reach+=Math.max(Math.abs(joint.min),Math.abs(joint.max));current=parts.get(current.parent);}radius=Math.max(radius,reach);
  }return radius;
 }
+
+export const modelPartCount3D=(model:Model3D|null)=>model?.parts.reduce((sum,p)=>sum+Math.max(1,p.instances.length),0)??0;

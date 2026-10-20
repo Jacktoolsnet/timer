@@ -1107,7 +1107,8 @@
         "motion": {
           "enum": [
             "rotation",
-            "translation"
+            "translation",
+            "scale"
           ],
           "default": "rotation"
         },
@@ -1137,16 +1138,48 @@
           "enum": [
             "none",
             "mouth",
+            "speech",
             "happy",
             "sad",
             "angry",
             "surprised",
-            "blink"
+            "blink",
+            "leftArm",
+            "rightArm",
+            "leftLeg",
+            "rightLeg",
+            "wave",
+            "bob"
           ],
           "default": "none"
         },
         "target": {
           "type": "number"
+        },
+        "responses": {
+          "type": "object",
+          "maxProperties": 13,
+          "propertyNames": {
+            "enum": [
+              "mouth",
+              "speech",
+              "happy",
+              "sad",
+              "angry",
+              "surprised",
+              "blink",
+              "leftArm",
+              "rightArm",
+              "leftLeg",
+              "rightLeg",
+              "wave",
+              "bob"
+            ]
+          },
+          "additionalProperties": {
+            "type": "number"
+          },
+          "default": {}
         }
       },
       "required": [
@@ -1222,6 +1255,20 @@
             "$ref": "#/$defs/joint3D"
           },
           "maxItems": 6,
+          "default": []
+        },
+        "palette": {
+          "type": "string",
+          "maxLength": 100,
+          "pattern": "^(?:[A-Za-z0-9_-]+)?$",
+          "default": ""
+        },
+        "instances": {
+          "type": "array",
+          "maxItems": 256,
+          "items": {
+            "$ref": "#/$defs/vector3D"
+          },
           "default": []
         }
       },

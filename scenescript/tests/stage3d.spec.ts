@@ -165,9 +165,9 @@ test('face animation rewinds identically on every style without allocating per-f
     const canvas=document.createElement('canvas'),draw=(t:number)=>{renderer.render(v.project,v.shot,t,360,360,canvas,true);return canvas.toDataURL();};
     const samples=[0,1.5,2.5,3.5,4.5,5.12].map(draw);
     const world=Array.from((renderer as any).cache.values()).at(-1) as any;
-    const geometry=Array.from(world.geometries),materials=Array.from(world.materials.values()),parts=world.robots[0].root.children.length;
+    const geometry=Array.from(world.geometries),materials=Array.from(world.materials.values()),parts=world.custom[0].root.children.length;
     const baseline=draw(1.5);for(let i=0;i<40;i++)draw((i%12)*.45);const repeated=draw(1.5);
-    results.push({unique:new Set(samples).size,stable:baseline===repeated,geometryStable:geometry.every(g=>world.geometries.has(g))&&world.geometries.size===geometry.length,materialsStable:materials.every(m=>Array.from(world.materials.values()).includes(m))&&world.materials.size===materials.length,partsStable:parts===world.robots[0].root.children.length});
+    results.push({unique:new Set(samples).size,stable:baseline===repeated,geometryStable:geometry.every(g=>world.geometries.has(g))&&world.geometries.size===geometry.length,materialsStable:materials.every(m=>Array.from(world.materials.values()).includes(m))&&world.materials.size===materials.length,partsStable:parts===world.custom[0].root.children.length});
    }
   }finally{renderer.dispose();}
   return results;

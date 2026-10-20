@@ -1,4 +1,5 @@
-import {parseModel3D,parseJointValues3D,parseModelMotions3D,type Model3D,type ModelMotion3D} from './model3d.ts';
+import {presetCharacterModel3D,presetStageModel3D} from './stage3d-presets.ts';
+import {parseModel3D,parseJointValues3D,parseModelMotions3D,modelPartCount3D,type Model3D,type ModelMotion3D} from './model3d.ts';
 /** Small declarative 3D vocabulary. No scripts, URLs or external models are executed. */
 export const expressions3D=['neutral','happy','sad','angry','surprised','blink'] as const;
 export type Expression3D=typeof expressions3D[number];
@@ -28,11 +29,11 @@ export function parseCharacter3D(value:unknown,path='character'):Character3D{
  const v=object(value,path),d=defaultCharacter3D();keys(v,Object.keys(d),path);
  const style=v.style===undefined?d.style:v.style;if(!['classic','robot','pixel','brick'].includes(style as string))throw new Error(path+'.style: classic, robot, pixel, brick');
  const expression=v.expression===undefined?d.expression:v.expression;if(!expressions3D.includes(expression as Expression3D))throw new Error(path+'.expression: '+expressions3D.join(', '));
- return {model:parseModel3D(v.model,path+'.model'),expression:expression as Expression3D,style:style as Character3D['style'],name:text(v.name===undefined?d.name:v.name,path+'.name'),bodyColor:color(v.bodyColor===undefined?d.bodyColor:v.bodyColor,path+'.bodyColor'),headColor:color(v.headColor===undefined?d.headColor:v.headColor,path+'.headColor'),limbColor:color(v.limbColor===undefined?d.limbColor:v.limbColor,path+'.limbColor'),accentColor:color(v.accentColor===undefined?d.accentColor:v.accentColor,path+'.accentColor'),height:number(v.height===undefined?d.height:v.height,path+'.height',1,6)};
+ return {model:parseModel3D(v.model,path+'.model')??presetCharacterModel3D(style as string),expression:expression as Expression3D,style:style as Character3D['style'],name:text(v.name===undefined?d.name:v.name,path+'.name'),bodyColor:color(v.bodyColor===undefined?d.bodyColor:v.bodyColor,path+'.bodyColor'),headColor:color(v.headColor===undefined?d.headColor:v.headColor,path+'.headColor'),limbColor:color(v.limbColor===undefined?d.limbColor:v.limbColor,path+'.limbColor'),accentColor:color(v.accentColor===undefined?d.accentColor:v.accentColor,path+'.accentColor'),height:number(v.height===undefined?d.height:v.height,path+'.height',1,6)};
 }
 export function parseStage3D(value:unknown,path='stage'):Stage3D{
  const v=object(value,path),d=defaultStage3D();keys(v,Object.keys(d),path);
- return {model:parseModel3D(v.model,path+'.model'),name:text(v.name===undefined?d.name:v.name,path+'.name'),skyColor:color(v.skyColor===undefined?d.skyColor:v.skyColor,path+'.skyColor'),groundColor:color(v.groundColor===undefined?d.groundColor:v.groundColor,path+'.groundColor'),blockColor:color(v.blockColor===undefined?d.blockColor:v.blockColor,path+'.blockColor')};
+ return {model:parseModel3D(v.model,path+'.model')??presetStageModel3D(),name:text(v.name===undefined?d.name:v.name,path+'.name'),skyColor:color(v.skyColor===undefined?d.skyColor:v.skyColor,path+'.skyColor'),groundColor:color(v.groundColor===undefined?d.groundColor:v.groundColor,path+'.groundColor'),blockColor:color(v.blockColor===undefined?d.blockColor:v.blockColor,path+'.blockColor')};
 }
 export function parse3DLibrary<T>(value:unknown,parse:(v:unknown,p:string)=>T,path:string):Record<string,T>{
  const v=object(value===undefined?{}:value,path),out:Record<string,T>={};if(Object.keys(v).length>30)throw new Error(path+': maximum 30');
@@ -79,7 +80,7 @@ export function parseShot3D(value:unknown,characters:Record<string,Character3D>,
   return {joints,motions,y:number(get('y',0),p+'.y',-20,20),pitch:number(get('pitch',0),p+'.pitch',-360,360),roll:number(get('roll',0),p+'.roll',-360,360),speech,expressions,actions,id,character,x,z,toX:number(get('toX',x),p+'.toX',-20,20),toZ:number(get('toZ',z),p+'.toZ',-20,20),rotation:number(get('rotation',0),p+'.rotation',-360,360),scale:number(get('scale',1),p+'.scale',.25,3),action:action as Actor3D['action'],at,duration:span};
  });for(const [i,actor] of actors.entries())for(const [j,action] of actor.actions.entries())if(action.target&&(action.target===actor.id||!actors.some(a=>a.id===action.target)))throw new Error(path+'.actors['+i+'].actions['+j+'].target: missing or self actor target');
  const model=stages[stage].model,stageJoints=parseJointValues3D(v.stageJoints,model,path+'.stageJoints'),stageMotions=parseModelMotions3D(v.stageMotions,model,duration,path+'.stageMotions');
- if((model?.parts.length??0)+actors.reduce((sum,a)=>sum+(characters[a.character].model?.parts.length??160),0)>2048)throw new Error(path+': maximum 2048 active 3D parts');
+ if(modelPartCount3D(model)+actors.reduce((sum,a)=>sum+modelPartCount3D(characters[a.character].model),0)>2048)throw new Error(path+': maximum 2048 active 3D parts');
  return {stage,camera,actors,stageJoints,stageMotions};
 }
 /** Pure absolute-time pose: seeking backwards is identical to playing forwards. */

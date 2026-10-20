@@ -257,8 +257,9 @@ characters stores reusable 3D OBJECTS (people, robots, cars, props); the legacy
 map/type name remains for compatibility. Name, height, colors and optional model.
 style: classic (default legacy robot), robot (mechanical mouth), pixel (monitor
 face), brick (brick person: eyes/nose/mouth; headColor also colors hands).
-Character.expression sets the base face. model:null uses the existing preset.
-Stage.model:null uses the built-in plaza; stage name/colors alone do not model scenery.
+Character.expression sets the base face. Omitted/null model is a LEGACY IMPORT
+SHORTHAND: expanded to editable construction data (figure style / plaza). Saved
+projects/resources contain explicit models; geometry is never a renderer preset.
 Scene.stage3d=null/omitted disables 3D; otherwise stage references Project.stages
 and actors (max 12) reference Project.characters. Unlisted characters are absent.
 Actor IDs are scene-local, independent of 2D IDs. Supply each scene's starting
@@ -313,7 +314,10 @@ Independent resource imports/exports; ID collisions: copy or explicit update.
 No external model files/scripts, physics, skinning or head-only looking.
 Generic construction resources follow below; they do not add racing paths/camera tracking.
 FREE CONSTRUCTION: Character3D.model / Stage3D.model = {parts:[...],animations:{...}}.
-A non-null model REPLACES preset geometry/colors; stage ground/sky remain.
+An explicit model defines geometry; stage ground/sky remain. palette optionally
+reads a hex color from a resource field (e.g. headColor/blockColor), else uses color.
+Parts.instances repeats geometry at up to 256 local offsets; no group/scale-joint
+instances. Size is per copy. Repeated copies count toward the scene part budget.
 Parts: unique id, parent="" for root or another part ID (any list order), shape
 group/box/sphere/cylinder/cone/plane. Group is invisible; other shapes are centered
 unit shapes scaled by size (diameters for sphere/cylinder/cone; cylinder/cone axis Y;
@@ -322,10 +326,11 @@ position/pivot/size are local world units; rotation XYZ degrees. Transform:
 T(position) T(pivot) R_XYZ(rotation + joints) T(-pivot). Children inherit this
 transform, NOT mesh size. Translation joints offset position in PARENT axes.
 Actor height/3 and scale multiply the whole model; y/pitch/roll position/orient
-the instance in addition to x/z/rotation. Custom objects have no automatic breathing.
-Joints: globally unique id per model, motion rotation(default)/translation, axis
-x(default)/y/z. min/max REQUIRED, value defaults 0 inside those bounds; target defaults
-max. Degrees ±3600 for rotation; world units ±50 for translation; min<=max.
+the instance in addition to x/z/rotation. Breathing needs an explicit bob driver.
+Joints: globally unique id per model, motion rotation(default)/translation/scale, axis
+x(default)/y/z. min/max REQUIRED; value defaults 0 (scale:1), inside the bounds;
+target defaults max. Rotation ±3600 degrees, translation ±50 units, scale 0–50.
+Scale multiplies only that mesh axis, never children; 0 hides the mesh, no groups.
 One joint per motion+axis per part. These are kinematic limits, NOT physics.
 Actor.joints and Shot.stageJoints override rest values by joint ID, within limits.
 Named animations: {duration,tracks:[{joint,keys:[{at,value}],easing}]}.
@@ -338,12 +343,19 @@ blend 0–2 s (default .2, capped at half event duration) fades from rest/overri
 and back; 0 switches directly. Gaps/end restore rest/overrides, no implicit carry.
 Rotation keys interpolate NUMERIC angles, not shortest arc (0→360 rolls a wheel).
 Design matching loop endpoints; combine simultaneous joints in one multi-track clip.
-Custom walk/wave changes no limbs automatically: define motions for those joints;
-existing actions still move/turn the root. Motions run alongside actions/Mimik.
-Actor joint.control none(default)/mouth/happy/sad/angry/surprised/blink blends sampled
-value toward target using expression weight; mouth uses max(speech, surprised).
-Thus custom faces can keep existing expressions/speech without hardcoded geometry.
-Order: rest → joints overrides → motion → control → clamp to min/max.
+Walk/wave still move/turn the root; joints need explicit drivers or motions for
+limb movement. Migrated figures include these drivers plus named walk/wave clips.
+Actor joint.control: none(default), mouth=max(speech,surprised), speech=audio-only,
+happy/sad/angry/surprised/blink=expression weight. Additional signed drivers:
+leftArm/rightArm/leftLeg/rightLeg = action pose radians/PI; wave = arm-Z radians/
+(PI/2); bob = breathing/walking height/.1. Use rotation target 180 for limbs,
+90 for wave, translation target .1 for bob. Expression/audio weights are 0–1,
+signed drivers -1–1. control blends sampled value toward target by this weight.
+responses maps signal names to target values; each contributes (target-base)*weight
+additively, then primary control applies, then clamp. E.g. eye scale can respond
+to moods while blink overrides it. Pixel scales use mood responses and blink
+(eyes) / speech (mouth) control. All facial geometry remains editable data.
+Order: rest → joints overrides → motion → responses → control → clamp.
 Limits/model: 256 parts, depth32, 256 joints (6/part), 16 clips, 64 tracks/clip,
 64 keys/track, 4096 keys total. Shot: 2048 estimated active parts, max12 actors.
 Independent resource files: 512 KiB. No image textures/custom meshes yet.

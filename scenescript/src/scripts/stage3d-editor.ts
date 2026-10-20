@@ -1,7 +1,8 @@
+import {presetCharacterModel3D} from '../lib/stage3d-presets';
 import {parseModel3D} from '../lib/model3d';
 import {resource3DPreview} from '../lib/stage3d-resource-preview';
 import {validateProject,type Project} from '../lib/model';
-import {expressions3D,unique3DResourceID,defaultCharacter3D,defaultStage3D,defaultStageCamera3D,defaultActor3D,parse3DResource,MAX_3D_RESOURCE_BYTES,type Resource3D,type Character3D,type Stage3D,type Shot3D} from '../lib/stage3d';
+import {expressions3D,unique3DResourceID,defaultCharacter3D,defaultStage3D,parseCharacter3D,parseStage3D,defaultStageCamera3D,defaultActor3D,parse3DResource,MAX_3D_RESOURCE_BYTES,type Resource3D,type Character3D,type Stage3D,type Shot3D} from '../lib/stage3d';
 import {createStage3DView,type Stage3DView} from './stage3d-preview';
 import {showToast} from './toast';
 const $=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById('stage3d-'+id) as T;
@@ -58,7 +59,11 @@ export function installStage3DEditor(context:()=>{project:Project;index:number;r
    if(key==='style'||key==='expression'){
     const label=document.createElement('label'),caption=document.createElement('span'),select=document.createElement('select');label.className='stage3d-name-field';caption.textContent=words[key];select.dataset.resourceField=key;
     options(select,(key==='style'?['classic','robot','pixel','brick']:expressions3D).map(id=>[id,words[key+'_'+id]]),String(v));
-    select.addEventListener('change',()=>{(value as unknown as Record<string,unknown>)[key]=select.value;queueResourcePreview();});
+    select.addEventListener('change',()=>{
+     const resourceKey=kind()+':'+chosen(),regenerate=key==='style'&&!modelTexts.has(resourceKey)&&JSON.stringify(value.model)===JSON.stringify(presetCharacterModel3D((value as Character3D).style));
+     (value as unknown as Record<string,unknown>)[key]=select.value;
+     if(regenerate){value.model=presetCharacterModel3D(select.value);fields();}else queueResourcePreview();
+    });
     label.append(caption,select);appearance.append(label);continue;
    }
    const label=document.createElement('label'),caption=document.createElement('span');caption.textContent=words[key]??key;label.append(caption);const input=document.createElement('input');input.dataset.resourceField=key;input.type=key.endsWith('Color')?'color':typeof v==='number'?'number':'text';input.value=String(v);
@@ -99,7 +104,7 @@ export function installStage3DEditor(context:()=>{project:Project;index:number;r
   resources();setShot(draft.scenes[index].stage3d);$<HTMLInputElement>('time').max=String(draft.scenes[index].duration);$<HTMLInputElement>('time').value=String(Math.min(1,draft.scenes[index].duration));report('');$<HTMLDetailsElement>('scene-settings').open=false;dialog.showModal();queueResourcePreview();
  });
  $('kind').addEventListener('change',()=>resources());$('resource').addEventListener('change',fields);
- $('add').addEventListener('click',()=>{if(Object.keys(library()).length>=30){report('Maximum 30');return;}let id=kind();for(let n=2;Object.hasOwn(library(),id);n++)id=kind()+'_'+n;Object.defineProperty(library(),id,{value:kind()==='character'?defaultCharacter3D():defaultStage3D(),enumerable:true,writable:true,configurable:true});resources(id);});
+ $('add').addEventListener('click',()=>{if(Object.keys(library()).length>=30){report('Maximum 30');return;}let id=kind();for(let n=2;Object.hasOwn(library(),id);n++)id=kind()+'_'+n;Object.defineProperty(library(),id,{value:kind()==='character'?parseCharacter3D(defaultCharacter3D()):parseStage3D(defaultStage3D()),enumerable:true,writable:true,configurable:true});resources(id);});
  $('remove').addEventListener('click',()=>{try{readShot();const id=chosen();if(kind()==='character'?draft.scenes.some(s=>s.stage3d?.actors.some(a=>a.character===id)):draft.scenes.some(s=>s.stage3d?.stage===id))throw new Error(id+': resource is used by a scene');delete library()[id];modelTexts.delete(kind()+':'+id);modelErrors.delete(kind()+':'+id);resources();report('');}catch(e){report(e);}});
  $('stage').addEventListener('change',()=>{try{const stage=$<HTMLSelectElement>('stage').value,shot=JSON.parse($<HTMLTextAreaElement>('shot').value) as Shot3D|null;setShot(stage?{stage,camera:shot?.camera??defaultStageCamera3D(),actors:shot?.actors??[]}:null);preview();}catch(e){report(e);}});
  $('insert').addEventListener('click',()=>{try{const p=readShot(),shot=p.scenes[index].stage3d;if(!shot)throw new Error(words.stage);const id=kind()==='character'?chosen():Object.keys(p.characters)[0];if(!id)throw new Error(words.empty);if(shot.actors.length>=12)throw new Error('Maximum 12 actors');let actorId='actor';for(let n=2;shot.actors.some(a=>a.id===actorId);n++)actorId='actor_'+n;const a=defaultActor3D(id,actorId);a.duration=Math.min(4,p.scenes[index].duration);a.x=shot.actors.length*2-2;a.toX=a.x;shot.actors.push(a);setShot(shot);preview();}catch(e){report(e);}});

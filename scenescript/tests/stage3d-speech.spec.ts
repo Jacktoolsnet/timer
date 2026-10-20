@@ -36,7 +36,7 @@ test('all face styles speak only during audio, retain their eyes, rewind identic
   try{for(const id of ['mika','bo','lina']){
    const actor=shot.actors[0];actor.character=id;p.characters[id].expression='happy';
    const envelopes=await prepareStage3DSpeech(p,shot),canvas=document.createElement('canvas'),draw=(t:number,voices=envelopes)=>{renderer.render(p,shot,t,1920,1080,canvas,false,voices);return canvas.toDataURL();};
-   const snapshotEyes=()=>{const world=Array.from((renderer as any).cache.values()).at(-1) as any;return JSON.stringify(world.robots[0].root.getObjectByName('face').children.filter((m:any)=>m.name.startsWith('eye')||m.name==='brow'||m.name==='face-pixel'&&m.position.y>2.69).map((m:any)=>[m.position.toArray(),m.scale.toArray(),m.rotation.toArray(),m.visible]));};
+   const snapshotEyes=()=>{const world=Array.from((renderer as any).cache.values()).at(-1) as any;return JSON.stringify(world.custom[0].character.model.parts.filter((p:any)=>p.id.startsWith('eye')||p.id.startsWith('brow')||p.id.startsWith('pixel_')&&p.position.y>2.69).map((p:any)=>{const anchor=world.custom[0].root.getObjectByName(p.id),mesh=world.custom[0].root.getObjectByName(p.id+'-geometry');return [anchor.position.toArray(),anchor.children[0].rotation.toArray(),mesh.scale.toArray(),mesh.visible];}));};
    const closed=draw(1,new Map()),closedEyes=snapshotEyes(),open=draw(1),openEyes=snapshotEyes();draw(3);draw(.1);const repeated=draw(1);
    const native=document.createElement('canvas');native.width=480;native.height=270;native.getContext('2d')!.drawImage(canvas,0,0,480,270);
    const media=new ExportMedia(p,new AbortController().signal),output=new ExportRenderer(p,media);let error=0;

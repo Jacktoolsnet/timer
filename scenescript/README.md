@@ -626,10 +626,12 @@ Schließen der Vorschau keine verspäteten Canvas-Inhalte mehr.
 
 `characters` verwaltet nun auch frei definierte Fahrzeuge, Requisiten usw.;
 der JSON-Name bleibt aus Kompatibilitätsgründen erhalten. Die bisherigen Figuren
-und Bühnen bleiben mit `model:null` unverändert nutzbar.
+und Bühnen werden bei fehlendem/`null`-Modell in editierbare Bauteile umgewandelt.
+Gespeicherte Projekte und Einzelexporte enthalten die vollständigen Modelle.
 
 - `Character3D.model` und `Stage3D.model`: eigene `parts` und benannte `animations`.
-  Ein Modell ersetzt die bisherige Vorlagengeometrie; Himmel/Boden bleiben.
+  Ein Modell definiert die Geometrie; auch bisherige Vorlagen nutzen diesen Renderer.
+  Himmel/Boden bleiben. `palette` bindet Teilfarben an Ressourcenfelder.
 - Grundformen: unsichtbare Gruppe, Quader, Kugel, Zylinder, Kegel, Fläche.
   Material: Farbe, Rauheit, Metallanteil, Deckkraft. Keine externen Modelle,
   Bildtexturen oder ausführbaren Skripte in diesem ersten Baukastenstand.
@@ -644,9 +646,9 @@ und Bühnen bleiben mit `model:null` unverändert nutzbar.
   `joints` / `stageJoints` setzen individuelle Ruheposen.
 - Mimik/Sprechen bleiben über Gelenk-`control` nutzbar: Mundöffnung, Blinzeln,
   happy/sad/angry/surprised bewegen frei definierte Gesichtsteile Richtung `target`.
-- Auftritte unterstützen zusätzlich `y`, `pitch`, `roll`. Bisherige
-  Gehen-/Winken-Beinbewegungen gelten nur für die alten Vorlagen; eigene Gelenke
-  werden durch eigene Animationen bewegt. Root-Bewegung bleibt verfügbar.
+- Auftritte unterstützen zusätzlich `y`, `pitch`, `roll`. Gehen-/Winken-Bewegungen
+  können über explizite Gelenk-Treiber an beliebige eigene Figuren gebunden werden.
+  Root-Bewegung bleibt verfügbar.
 - Ressourcen sind weiterhin einzeln importier-/exportierbar (jetzt bis 512 KiB).
   Im Ressourcendialog: **Bauteile, Gelenke & Animationen (JSON)**, Animation wählen,
   Zeitregler bewegen. Fehler sind kopierbar und verhindern stilles Übernehmen
@@ -668,3 +670,31 @@ Rennsimulation: räumliche Fahrpfade, Looping-/Sprungsteuerung, Fahrzeugkameras 
 große Zuschauermengen sind eigenständige nächste Schritte. Die vollständige
 Copy/Paste-KI-Anleitung enthält die neue Grammatik plus ein kompaktes Beispiel;
 das Größenbudget wächst für dieses zusätzliche Modul auf 76 kB.
+
+
+### Bestehende Figuren und Plaza als freie Ressourcen
+
+Mika, Bo, Lina und die Bauklotz-Plaza sind jetzt vollständige `model`-Ressourcen,
+auch in den herunterladbaren Beispielen und den einzelnen Ressourcendateien.
+Keine zweite fest verdrahtete Figuren-/Bühnen-Renderstrecke mehr.
+
+- Alte Projekte/Ressourcen mit fehlendem oder `null`-Modell werden beim Laden
+  automatisch in Bauteile umgewandelt. Szene, Kamera und Zeitabläufe bleiben bestehen.
+- Die Figuren enthalten Gelenke für Gehen/Winken, Mimik und Sprechen sowie benannte
+  `walk`-/`wave`-Animationen. Die bisherigen Aktionen funktionieren über Treiber
+  `leftArm/rightArm/leftLeg/rightLeg/wave/bob`.
+- `motion:"scale"` skaliert nur die Geometrie des Teils, nicht seine Kinder;
+  Skala 0 blendet die Geometrie aus. So bleiben Bo als echtes Pixelgesicht und
+  die veränderbaren Augen/Münder vollständig durch Daten beschrieben.
+- `responses` mischt mehrere Signalziele, bevor der primäre `control`-Treiber
+  angewandt wird; Blinzeln kann z. B. den emotionalen Augenausdruck übersteuern.
+  `speech` ist reine Audioöffnung, `mouth` kombiniert Sprache und Überraschung.
+- `palette` liest eine passende Hex-Farbe aus dem Ressourcenfeld (sonst `color`).
+  Deshalb bleiben die bisherigen Farbformulare bei den umgestellten Vorlagen wirksam.
+- `instances` wiederholt einfache Geometrie effizient, etwa die 224 Bodennoppen
+  der Plaza. Keine Gruppen-/Skalierungs-Gelenke bei Instanzen, max. 256 Kopien je Teil.
+  Das Szenenbudget zählt jede Kopie.
+- Ein Typwechsel im Formular erzeugt nur bei einer noch unveränderten Vorlage
+  eine andere Vorlage. Eigene Bauteiländerungen werden dabei nicht überschrieben.
+- Die Einzelvorschau rahmt die tatsächlichen Modellabmessungen ein; Größe und
+  Renderressourcen werden nicht für jedes Animationsbild neu aufgebaut.
