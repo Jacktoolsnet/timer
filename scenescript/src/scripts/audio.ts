@@ -3,6 +3,20 @@ import type {Project} from '../lib/model';
 let decoder:OfflineAudioContext|undefined;
 export function audioBlob(a:AudioAsset){const raw=atob(a.data.split(',')[1]);return new Blob([Uint8Array.from(raw,c=>c.charCodeAt(0))],{type:a.data.slice(5,a.data.indexOf(';'))});}
 export async function decodeAudio(a:AudioAsset){decoder??=new OfflineAudioContext(2,1,48000);let b:AudioBuffer;try{b=await decoder.decodeAudioData(await audioBlob(a).arrayBuffer());}catch{throw new Error('Audio: unsupported format or codec');}if(b.numberOfChannels>2)throw new Error('Audio: mono or stereo required');if(!Number.isFinite(b.duration)||b.duration<=0||b.duration>3600||b.length*b.numberOfChannels*4>64*1024*1024)throw new Error('Audio: maximum 3600 seconds / 64 MiB decoded');return b;}
+// Weak keys let removed projects/assets and their envelopes be garbage collected.
+const speechEnvelopes=new WeakMap<AudioAsset,{data:string;promise:Promise<import('../lib/speech-envelope').SpeechEnvelope>}>();
+let speechAnalysis:Promise<unknown>=Promise.resolve();
+export function speechEnvelope(asset:AudioAsset){
+ const previous=speechEnvelopes.get(asset);if(previous?.data===asset.data)return previous.promise;
+ const data=asset.data;
+ const promise=speechAnalysis.catch(()=>{}).then(async()=>{
+  const {analyseSpeechEnvelope}=await import('../lib/speech-envelope');
+  return analyseSpeechEnvelope(await decodeAudio({...asset,data}));
+ });
+ speechEnvelopes.set(asset,{data,promise});speechAnalysis=promise.then(()=>{},()=>{});
+ void promise.catch(()=>{if(speechEnvelopes.get(asset)?.promise===promise)speechEnvelopes.delete(asset);});
+ return promise;
+}
 export async function readAudioFile(file:File):Promise<AudioAsset>{
  if(file.size>MAX_AUDIO_BYTES)throw new Error('Audio: maximum 32 MiB');
  const fallback=({'mp3':'audio/mpeg','wav':'audio/wav','ogg':'audio/ogg','m4a':'audio/mp4','aac':'audio/aac','flac':'audio/flac','webm':'audio/webm'} as Record<string,string>)[file.name.split('.').pop()!.toLowerCase()];

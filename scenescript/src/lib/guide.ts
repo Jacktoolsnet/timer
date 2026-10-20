@@ -250,66 +250,65 @@ anchors remain box-local and do not automatically follow a changed crop.
 Panel templates are editor helpers creating ordinary image+rectangle Elements,
 not a template field/type. Camera movement is continuous even under stopMotion.
 
-### Reusable 3D stages and characters (first prototype)
-Project.characters and Project.stages are independent ID maps (max 30 each).
-Characters are procedural figures: name, height and body/head/limb/accent colors.
-style: classic (default, legacy robot), robot (visible mechanical mouth), pixel
-(robot with pixel-monitor eyes/mouth), brick (brick-style person with eyes, nose,
-smile; headColor also colors hands). Character.expression sets its base face.
-Stages currently share one built-in block plaza geometry, customized by name and
-sky/ground/block colors; a stage name does NOT generate arbitrary scenery.
-Scene.stage3d=null/omitted disables 3D. Otherwise stage references Project.stages;
-actors (max 12) reference Project.characters. Unlisted characters are absent.
-Actors have scene-local unique IDs, independent of 2D Element IDs. Each scene
-explicitly supplies positions/actions: no implicit cross-scene state or persistence.
-Positions x/z and toX/toZ use 3D WORLD UNITS, not 2D percentages; Y is up, feet
-stand on the ground. rotation is yaw in degrees; scale multiplies character height.
-For NEW stories use Actor3D.actions: up to 64 ordered, non-overlapping steps per
-actor. Each step requires duration; at defaults to previous end (first:0). Times
-are scene-local seconds and every step must finish within scene.duration. Gaps
-and the time after the last step hold position/orientation with idle breathing.
-Start position/yaw/scale come from the actor; later steps inherit the last pose.
-Step types: idle (wait), walk (limb cycles + optional toX/toZ destination), wave
-(right-arm gesture), turn (whole-body yaw). Only walk accepts toX/toZ; null/omitted
-coordinates hold the preceding coordinate. Coordinates are absolute world units.
-Movement defaults easing="ease-in-out" (smoothstep); "linear" is also available.
-At each step choose at most ONE orientation controller:
-- target: another ACTOR ID in this same shot, not a project character ID; no self
-  target. Turn/follow its time-sampled position without moving toward it. Reciprocal
-  targets are allowed; coincident positions retain that step's starting yaw.
-- rotation: absolute yaw in degrees, shortest angular route. 0 faces +Z, 90 faces +X.
-- faceMovement:true: walk-only, faces its start→destination direction. Defaults true
-  on walk unless target/rotation is provided; false elsewhere. False holds yaw.
-turn requires target or rotation and uses the full step duration to rotate.
-Other types ease toward their chosen heading over blend seconds. target tracking
-ends with the step; its final yaw then holds until another orientation change.
-blend defaults .3 seconds (0–2, internally capped at half the step duration): soft
-entry/exit for walk/wave gestures, soft facing entry. 0 opts into immediate changes.
-Limbs return to rest at step end, not a frozen raised arm. No overlapping actions
-or simultaneous walk+wave yet. Position/facing never depends on playback history.
-Legacy: empty/omitted actions uses action/at/duration/toX/toZ (linear motion, fixed
-yaw). Nonempty actions overrides these fields, which remain validated. Do not mix
-both styles in new JSON. No head-only looking; target turns the whole body.
-MIMIK: Actor3D.expressions is a SEPARATE track, parallel to actions (e.g. happy
-while walking). Max 64 ordered non-overlapping events within scene.duration.
-expression: neutral, happy, sad, angry, surprised, blink; duration is required;
-at defaults to previous expression end (first:0). intensity 0–1 defaults 1.
-blend 0–2 seconds defaults .2, capped at half duration: fade from Character.expression
-to the event and back. 0 switches immediately. Gaps and event end restore the base
-face; no persistence across events/scenes. A neutral event temporarily neutralizes
-a non-neutral base. blink closes/reopens eyes without changing the base mood; use duration .15–.3.
-No automatic/random blinking. Pixel faces keep discrete LEDs with blended cell
-sizes; other faces deform eyes, brows and mouth. classic has limited mouth detail;
-choose robot/pixel/brick for expressive mouths. Same timing in preview and exports.
-Camera: yaw/pitch degrees, distance/targetX/Y/Z world units; orbit degrees/second
-in scene-local time. 3D is opaque, above scene backgrounds, below 2D elements.
-Scene.camera's independent 2D crop also transforms 3D; use screen-space captions.
-Preview/stills/video share absolute-time poses. WebGL2 is required; unavailable
-graphics/context loss causes an error, never a silent blank export.
-3D dialog: select type/ID, edit definition with isolated preview; actors/camera in
-a separate expandable section. Confirm applies drafts; closing discards. Independent
-character/stage imports/exports; ID collisions: copy or explicit update. No external
-models, arbitrary scripts/shapes, physics, automatic rigging or speech lip-sync.
+### Reusable 3D stages and characters
+Project.characters/stages: independent ID maps, max 30 each.
+Characters: procedural geometry, name, height, body/head/limb/accent colors.
+style: classic (default legacy robot), robot (mechanical mouth), pixel (monitor
+face), brick (brick person: eyes/nose/mouth; headColor also colors hands).
+Character.expression sets the base face. Stages share one built-in block plaza;
+name and sky/ground/block colors do NOT generate arbitrary scenery.
+Scene.stage3d=null/omitted disables 3D; otherwise stage references Project.stages
+and actors (max 12) reference Project.characters. Unlisted characters are absent.
+Actor IDs are scene-local, independent of 2D IDs. Supply each scene's starting
+position/yaw/scale: no implicit cross-scene state or persistence.
+x/z and toX/toZ: absolute 3D WORLD UNITS, NOT percentages; Y up, feet on ground.
+rotation: yaw degrees (0 faces +Z, 90 +X); scale multiplies character height.
+NEW stories: Actor3D.actions, max 64 ordered, non-overlapping steps. duration is
+required; at defaults to previous end (first:0). All times are scene-local seconds,
+every step ends within scene.duration. Gaps/end hold position/yaw with idle breathing.
+idle waits, walk cycles limbs, wave gestures with right arm, turn is whole-body yaw.
+Only walk accepts toX/toZ (omitted/null retains preceding coordinate).
+easing: ease-in-out (smoothstep, default) or linear.
+Choose at most ONE heading controller per step:
+- target: another ACTOR ID in this shot, not character ID; no self-target. Follows
+  sampled position without moving toward it. Reciprocal targets work; coincident
+  positions retain step-start yaw.
+- rotation: absolute yaw, shortest route.
+- faceMovement:true: walk-only, faces movement; default true on walk without
+  target/rotation, false otherwise. False retains yaw.
+turn requires target/rotation, uses full duration. Other steps turn over blend
+seconds; target tracking ends with the step, final yaw then holds.
+blend: 0–2 s, default .3, capped at half duration. Soft gesture entry/exit and
+heading entry; 0 switches immediately. Limbs return to rest. No walk+wave overlap.
+Legacy: empty/omitted actions uses action/at/duration/toX/toZ (linear, fixed yaw).
+Nonempty actions overrides these still-validated fields; do not mix in new JSON.
+MIMIK: Actor3D.expressions is a SEPARATE track parallel to actions.
+Max 64 ordered non-overlapping events inside scene.duration; duration required,
+at defaults to previous expression end (first:0).
+expression: neutral/happy/sad/angry/surprised/blink; intensity 0–1 defaults 1.
+blend: 0–2 s, default .2, capped at half duration: fade from base to event and back;
+0 switches immediately. Gaps/end restore Character.expression; no persistence across events/scenes.
+neutral temporarily neutralizes the base. blink closes/reopens eyes, retaining base
+mood; use .15–.3 s. No automatic/random blinking. Pixel LEDs blend cell sizes;
+other faces deform eyes/brows/mouth. classic has limited mouth detail.
+SPEECH: Actor3D.speech=null (default/off) or {"source":"scene","strength":1}.
+source scene/project uses that EXISTING narration, never plays duplicate audio.
+Assign its file via Scene.narration/Project.narration; text alone cannot animate.
+Use existing TTS text export + matching MP3 import. Binding works before import.
+strength 0–3, default 1. Analysed loudness opens the mouth; silence/no file/mute/
+zero volume closes it (existing surprised expression may keep its mouth open).
+Respects narration at/start/end/volume/fades, scene boundaries and project-global
+timing, NOT actor action timing. Music/video audio do not drive it. Mood/eyes stay
+independent. This is amplitude-driven, NOT phoneme/viseme-accurate lip-sync.
+Camera yaw/pitch: degrees; distance/targetX/Y/Z: world units; orbit: degrees/second
+in scene-local time. 3D is opaque, above scene backgrounds, below 2D elements;
+Scene.camera's 2D crop transforms it too. Use screen-space captions.
+Preview/stills/video share absolute-time poses, including silent video exports.
+WebGL2 required; unavailable graphics/context loss is an error, not blank export.
+3D dialog: shared resource definitions + isolated preview; actors/camera/speech
+bindings in expandable scene section. Confirm applies; closing discards.
+Independent resource imports/exports; ID collisions: copy or explicit update.
+No external models/scripts, physics, automatic rigging or head-only looking.
 Complete compact sequence example (add publication copy and real cover for delivery):
 ${JSON.stringify(aiAction3DExample)}
 

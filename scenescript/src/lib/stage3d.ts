@@ -8,13 +8,15 @@ export type Character3D={expression:Expression3D;style:'classic'|'robot'|'pixel'
 export type Stage3D={name:string;skyColor:string;groundColor:string;blockColor:string};
 export type ActorAction3D={type:'idle'|'walk'|'wave'|'turn';at:number;duration:number;toX:number|null;toZ:number|null;rotation:number|null;target:string;faceMovement:boolean;blend:number;easing:'linear'|'ease-in-out'};
 export const defaultActorAction3D=():ActorAction3D=>({type:'idle',at:0,duration:1,toX:null,toZ:null,rotation:null,target:'',faceMovement:false,blend:.3,easing:'ease-in-out'});
-export type Actor3D={expressions:ActorExpression3D[];actions:ActorAction3D[];id:string;character:string;x:number;z:number;toX:number;toZ:number;rotation:number;scale:number;action:'idle'|'walk'|'wave';at:number;duration:number};
+export type ActorSpeech3D={source:'scene'|'project';strength:number};
+export const defaultActorSpeech3D=():ActorSpeech3D=>({source:'scene',strength:1});
+export type Actor3D={speech:ActorSpeech3D|null;expressions:ActorExpression3D[];actions:ActorAction3D[];id:string;character:string;x:number;z:number;toX:number;toZ:number;rotation:number;scale:number;action:'idle'|'walk'|'wave';at:number;duration:number};
 export type StageCamera3D={yaw:number;pitch:number;distance:number;targetX:number;targetY:number;targetZ:number;orbit:number};
 export type Shot3D={stage:string;camera:StageCamera3D;actors:Actor3D[]};
 export const defaultCharacter3D=():Character3D=>({expression:'neutral',style:'classic',name:'Robot',bodyColor:'#36a9e1',headColor:'#dde7ed',limbColor:'#64748b',accentColor:'#ffe066',height:3});
 export const defaultStage3D=():Stage3D=>({name:'Block plaza',skyColor:'#a7d9f5',groundColor:'#78a653',blockColor:'#e6bd7a'});
 export const defaultStageCamera3D=():StageCamera3D=>({yaw:20,pitch:18,distance:18,targetX:0,targetY:1.6,targetZ:0,orbit:0});
-export const defaultActor3D=(character:string,id='actor'):Actor3D=>({expressions:[],actions:[],id,character,x:0,z:0,toX:0,toZ:0,rotation:0,scale:1,action:'idle',at:0,duration:4});
+export const defaultActor3D=(character:string,id='actor'):Actor3D=>({speech:null,expressions:[],actions:[],id,character,x:0,z:0,toX:0,toZ:0,rotation:0,scale:1,action:'idle',at:0,duration:4});
 const object=(v:unknown,p:string)=>{if(!v||typeof v!=='object'||Array.isArray(v))throw new Error(p+': expected object');return v as Record<string,unknown>;};
 const keys=(v:Record<string,unknown>,names:string[],p:string)=>{for(const k of Object.keys(v))if(!names.includes(k))throw new Error(p+'.'+k+': unknown field');};
 const text=(v:unknown,p:string,max=200)=>{if(typeof v!=='string'||v.length>max)throw new Error(p+': expected text (max '+max+')');return v;};
@@ -66,7 +68,13 @@ export function parseShot3D(value:unknown,characters:Record<string,Character3D>,
    if(at<expressionEnd-1e-9)throw new Error(path+'.at: expressions must be ordered and non-overlapping');expressionEnd=at+span;
    return {expression:expression as Expression3D,at,duration:span,intensity:number(v.intensity===undefined?d.intensity:v.intensity,path+'.intensity',0,1),blend:number(v.blend===undefined?d.blend:v.blend,path+'.blend',0,2)};
   });
-  return {expressions,actions,id,character,x,z,toX:number(get('toX',x),p+'.toX',-20,20),toZ:number(get('toZ',z),p+'.toZ',-20,20),rotation:number(get('rotation',0),p+'.rotation',-360,360),scale:number(get('scale',1),p+'.scale',.25,3),action:action as Actor3D['action'],at,duration:span};
+  let speech:ActorSpeech3D|null=null;
+  if(a.speech!==undefined&&a.speech!==null){
+   const path=p+'.speech',v=object(a.speech,path);keys(v,['source','strength'],path);
+   const source=v.source===undefined?'scene':v.source;if(source!=='scene'&&source!=='project')throw new Error(path+'.source: scene, project');
+   speech={source,strength:number(v.strength===undefined?1:v.strength,path+'.strength',0,3)};
+  }
+  return {speech,expressions,actions,id,character,x,z,toX:number(get('toX',x),p+'.toX',-20,20),toZ:number(get('toZ',z),p+'.toZ',-20,20),rotation:number(get('rotation',0),p+'.rotation',-360,360),scale:number(get('scale',1),p+'.scale',.25,3),action:action as Actor3D['action'],at,duration:span};
  });for(const [i,actor] of actors.entries())for(const [j,action] of actor.actions.entries())if(action.target&&(action.target===actor.id||!actors.some(a=>a.id===action.target)))throw new Error(path+'.actors['+i+'].actions['+j+'].target: missing or self actor target');
  return {stage,camera,actors};
 }

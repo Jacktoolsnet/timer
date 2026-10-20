@@ -924,3 +924,6 @@ body.recording .comic-edit-overlay{display:none}
 #stage3d-scene-settings h3{font-size:.95rem}
 @media(max-width:1000px){.stage3d-resource-editor{grid-template-columns:minmax(0,1fr)}.stage3d-resource-preview-card{grid-row:1;max-width:480px;width:100%}}
 @media(max-width:650px){.stage3d-grid{grid-template-columns:minmax(0,1fr)}}
+
+.stage3d-speech{min-width:0;margin:16px 0;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.stage3d-speech legend{padding-inline:6px;font-weight:600}

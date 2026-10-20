@@ -13,9 +13,27 @@ export function installStage3DEditor(context:()=>{project:Project;index:number;r
  const chosen=()=>$<HTMLSelectElement>('resource').value;
  const report=(e:unknown)=>{$('status').textContent=e instanceof Error?e.message:String(e);};
  const validContext=()=>{const now=context();if(!dialog.open||now.project!==origin.project||now.revision!==origin.revision)throw new Error(words.stale);};
- const setShot=(shot:Shot3D|null)=>{$<HTMLTextAreaElement>('shot').value=JSON.stringify(shot,null,2);$<HTMLSelectElement>('stage').value=shot?.stage??'';};
+ const setShot=(shot:Shot3D|null)=>{$<HTMLTextAreaElement>('shot').value=JSON.stringify(shot,null,2);$<HTMLSelectElement>('stage').value=shot?.stage??'';refreshSpeech(shot);};
  const readShot=()=>{draft.scenes[index].stage3d=JSON.parse($<HTMLTextAreaElement>('shot').value);return validateProject(draft);};
  const options=(select:HTMLSelectElement,values:[string,string][],selected='')=>{select.replaceChildren(...values.map(([id,name])=>{const o=document.createElement('option');o.value=id;o.textContent=name;return o;}));if(values.some(([id])=>id===selected))select.value=selected;};
+ function refreshSpeech(shot:Shot3D|null){
+  const actors=Array.isArray(shot?.actors)?shot.actors:[],select=$<HTMLSelectElement>('speech-actor'),selected=select.value;
+  options(select,actors.map(a=>[a.id,a.id+' · '+(draft.characters[a.character]?.name??a.character)]),selected);
+  const actor=actors.find(a=>a.id===select.value),source=$<HTMLSelectElement>('speech-source'),strength=$<HTMLInputElement>('speech-strength');
+  select.disabled=!actor;source.disabled=!actor;source.value=actor?.speech?.source??'';strength.disabled=!actor?.speech;strength.value=String(actor?.speech?.strength??1);
+  const n=source.value==='project'?draft.narration:source.value==='scene'?draft.scenes[index].narration:null;
+  $('speech-file').textContent=n?.asset?draft.audios[n.asset]?.name??words.speechMissing:source.value?words.speechMissing:'';
+ }
+ function changeSpeech(){
+  try{
+   const p=readShot(),shot=p.scenes[index].stage3d,actor=shot?.actors.find(a=>a.id===$<HTMLSelectElement>('speech-actor').value);if(!actor)return;
+   const source=$<HTMLSelectElement>('speech-source').value,strength=$<HTMLInputElement>('speech-strength').valueAsNumber;
+   if(!Number.isFinite(strength)||strength<0||strength>3)throw new Error(words.speechStrength+': 0–3');
+   actor.speech=source?{source:source as 'scene'|'project',strength}:null;setShot(shot);preview();
+  }catch(error){report(error);}
+ }
+ $('speech-actor').addEventListener('change',()=>{try{refreshSpeech(readShot().scenes[index].stage3d);}catch(error){report(error);}});
+ $('speech-source').addEventListener('change',changeSpeech);$('speech-strength').addEventListener('change',changeSpeech);
  function updateResourceTitle(){
   const value=library()[chosen()],label=words[kind()==='character'?'character':'stageResource'];
   $('resource-label').textContent=label;$('detail-title').textContent=value?label+' · '+(value.name||words.settings):words.settings;$('detail-id').textContent=value?chosen():'';
@@ -54,7 +72,7 @@ export function installStage3DEditor(context:()=>{project:Project;index:number;r
   options($<HTMLSelectElement>('resource'),Object.entries(library()).map(([id,r])=>[id,id+' · '+r.name]),selected);fields();
   const current=$<HTMLSelectElement>('stage').value;options($<HTMLSelectElement>('stage'),[['',words.none],...Object.entries(draft.stages).map(([id,s]):[string,string]=>[id,id+' · '+s.name])],current);
  }
- function preview(){try{const p=readShot(),shot=p.scenes[index].stage3d;const host=$('preview');sceneView?.dispose();sceneView=undefined;host.replaceChildren();if(!shot)return;const time=$<HTMLInputElement>('time').valueAsNumber;if(!Number.isFinite(time)||time<0||time>p.scenes[index].duration)throw new Error(words.time+': 0–'+p.scenes[index].duration);const view=createStage3DView(p,shot,640,360,report);sceneView=view;host.append(view.canvas);view.draw(time);report('');}catch(e){report(e);}}
+ function preview(){try{const p=readShot(),shot=p.scenes[index].stage3d;refreshSpeech(shot);const host=$('preview');sceneView?.dispose();sceneView=undefined;host.replaceChildren();if(!shot)return;const time=$<HTMLInputElement>('time').valueAsNumber;if(!Number.isFinite(time)||time<0||time>p.scenes[index].duration)throw new Error(words.time+': 0–'+p.scenes[index].duration);const view=createStage3DView(p,shot,640,360,report);sceneView=view;host.append(view.canvas);view.draw(time);report('');}catch(e){report(e);}}
  document.getElementById('open-stage3d')!.addEventListener('click',()=>{
   stop();origin=context();session++;draft=structuredClone(origin.project);index=origin.index;$('scene').textContent=words.scene+': '+draft.scenes[index].name;
   resources();setShot(draft.scenes[index].stage3d);$<HTMLInputElement>('time').max=String(draft.scenes[index].duration);$<HTMLInputElement>('time').value=String(Math.min(1,draft.scenes[index].duration));report('');$<HTMLDetailsElement>('scene-settings').open=false;dialog.showModal();queueResourcePreview();

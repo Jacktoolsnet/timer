@@ -467,7 +467,7 @@ Keine originalen Roblox-Assets; keine Verbindung zu Roblox oder externen Dienste
   sichtbaren Mund, `pixel` ein Pixelmonitor-Gesicht, `brick` eine eigene
   Klemmbaustein-Figur mit Augen, Nase und Mund. Im Ressourcendialog auswählbar,
   einzeln exportierbar und in der Vorschau sichtbar. Mimik wird über die separate
-  `expressions`-Spur animiert; Lippensynchronisation ist noch nicht implementiert.
+  `expressions`-Spur animiert; lautstärkegesteuerte Mundbewegung wird über `speech` aktiviert.
 - `Scene.stage3d`: Bühnenreferenz, 3D-Kamera und max. zwölf Auftritte. Die Auftritte
   werden im Prototyp als JSON editiert; eine Figur lässt sich per Button einsetzen.
   Positionen in Welteinheiten, Y nach oben; `rotation`, Kamerawinkel in Grad,
@@ -480,7 +480,7 @@ Keine originalen Roblox-Assets; keine Verbindung zu Roblox oder externen Dienste
   als Kopie oder explizite Aktualisierung derselben ID. Format und Version werden
   geprüft; Definitionen sind eigenständig und enthalten keine externen Ressourcen.
 - Derzeit ein festes, farblich anpassbares Plaza-Modell und parametrische Figuren,
-  noch kein freier Welteneditor, GLB-Import, Physik, Rigging oder Lippensynchronisation.
+  noch kein freier Welteneditor, GLB-Import, Physik, Rigging oder lautgetreue Lippensynchronisation.
 - Three.js wird nur bei 3D-Nutzung nachgeladen (lokal gebündelt, kein CDN).
   WebGL2 ist nötig. Kein stiller leerer Export bei fehlendem/verlorenem Kontext.
   Vorschau und Export nutzen dieselben absoluten Zeitposen; GPU-Kontexte werden
@@ -547,7 +547,7 @@ werden. `turn` dreht über die gesamte Schrittdauer, andere Aktionen blenden die
 Ausrichtung über `blend` ein. Gesten werden über `blend` weich ein-/ausgeblendet
 (Standard 0,3 s, intern auf halbe Schrittdauer begrenzt); nach Ende sind Arme/Beine
 wieder in Ruhe. Blickverfolgung endet mit dem Schritt. Noch keine Kopf-only-Ausrichtung,
-Lippensynchronisation oder überlappende Gehen-und-Winken-Aktionen.
+lautgetreue Lippensynchronisation oder überlappende Gehen-und-Winken-Aktionen.
 
 Alte Projekte ohne Aktionsfolge bleiben unverändert abspielbar. Bei nichtleerem
 `actions` ersetzt die Folge die alten Einzelaktions-/Bewegungsfelder; alle
@@ -585,4 +585,38 @@ Eine Szene kann ihn pro Auftritt über `expressions` vorübergehend ändern:
   Absolute Zeitabtastung sorgt für identische Mimik beim Zurückspulen sowie
   in Vorschau, PNG und Video. Keine neuen Geometrien/Materialien pro Frame.
 - Der klassische Roboter hat nur einen sehr kleinen Mund; für deutliche Mimik
-  `robot`, `pixel` oder `brick` wählen. Noch keine sprachgesteuerten Lippenbewegungen.
+  `robot`, `pixel` oder `brick` wählen. Sprachgesteuerte Mundöffnung siehe unten.
+
+
+### Lautstärkegesteuerte 3D-Mundbewegung
+
+1. Sprachdatei wie bisher als **Szenensprache** oder **Projektsprache** zuweisen
+   (auch über TTS-Textexport und dateinamenbasierten MP3-Import).
+2. Unter **3D-Ressourcen → Szenenauftritte & Kamera → Sprachgesteuerter Mund**
+   den Figurenauftritt und die vorhandene Sprachquelle auswählen.
+3. Empfindlichkeit nach Bedarf anpassen (0–3, Standard 1); Vorschauzeit wählen
+   oder das Projekt mit Ton abspielen.
+
+KI-Syntax am Auftritt: `"speech":{"source":"scene","strength":1}`.
+`source:"project"` verwendet die Projektsprachspur; `speech:null` schaltet aus.
+Die Bindung erzeugt **keinen zusätzlichen Ton**. Text ohne importierte Audiodatei
+bewegt den Mund noch nicht. Das Drei-Figuren-Beispiel enthält vorbereitete
+Sprechtexte und Bindungen (Mika in Szene 1, Bo in Szene 2).
+
+Der Mund folgt der analysierten Lautstärke, mit Rauschschwelle und geglätteten
+Übergängen. Stereo wird nach Energie ausgewertet, ohne gegenphasige Kanäle
+wegzumischen. Kleine 50-Hz-Hüllkurven werden zwischengespeichert; keine
+Audioanalyse/Geometrieerzeugung pro Frame. Analyse erfolgt nur für tatsächlich
+zugeordnete Sprachdateien, nacheinander und unter den vorhandenen Audio-Limits.
+
+Start, Zuschnitt, Lautstärke, Stummschaltung und Ein-/Ausblendungen der
+Sprachspur gelten auch für den Mund. Projektsprachspuren laufen szenenübergreifend
+auf der Projektzeit; Szenenspuren lokal. Außerhalb der Sprachspur/in Pausen ist
+keine Sprechöffnung aktiv. Mimik bleibt erhalten; ein überraschter Gesichtsausdruck
+kann unabhängig von Sprache einen offenen Mund haben. Musik und Videoton werden
+nicht analysiert. Es ist keine Laut-/Phonem-Erkennung.
+
+Vorschau, Zurückspulen, PNG und Video nutzen dieselbe deterministische Abtastung,
+auch bei Videoexport ohne Ton. Analyse-/Codecfehler werden gemeldet statt still
+eine falsche Animation zu exportieren. Ein laufender Analysevorgang liefert nach
+Schließen der Vorschau keine verspäteten Canvas-Inhalte mehr.

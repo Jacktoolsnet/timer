@@ -63,7 +63,7 @@ test('unavailable WebGL2 reports a preview error and rejects export instead of a
 
 
 test('3D dropdowns and popup options follow the theme and support keyboard selection',async({page})=>{
- await page.goto('/en/');await page.locator('#open-stage3d').click();const selects=page.locator('#stage3d-dialog select');await expect(selects).toHaveCount(4);
+ await page.goto('/en/');await page.locator('#open-stage3d').click();const selects=page.locator('#stage3d-dialog select');await expect(selects).toHaveCount(6);
  for(const select of await selects.all()){await expect(select).toHaveCSS('border-radius','10px');if(await select.isVisible())expect(await select.evaluate(n=>n.getBoundingClientRect().height)).toBeGreaterThanOrEqual(40);}
  const kind=page.locator('#stage3d-kind'),baseSelect=await page.evaluate(()=>CSS.supports('appearance','base-select'));
  for(const theme of ['light','dark']){

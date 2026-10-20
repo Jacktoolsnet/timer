@@ -28,6 +28,14 @@ const {lang}=Astro.props,w=stage3DWords[lang];
     <button id="stage3d-insert" type="button" title={w.insert} aria-label={w.insert}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM4 21v-3a7 7 0 0 1 11-5m4-2v10m-4-5h8" /></svg></button>
     <label>{w.shot}<textarea id="stage3d-shot" rows="12" spellcheck="false" maxlength="32000" aria-describedby="stage3d-shot-hint"></textarea></label>
     <p id="stage3d-shot-hint" class="small-hint">{w.hint}</p>
+    <fieldset id="stage3d-speech" class="stage3d-speech"><legend>{w.lipSync}</legend>
+     <div class="stage3d-field-grid">
+      <label>{w.speechActor}<select id="stage3d-speech-actor"></select></label>
+      <label>{w.speechSource}<select id="stage3d-speech-source"><option value="">{w.speechOff}</option><option value="scene">{w.speechScene}</option><option value="project">{w.speechProject}</option></select></label>
+      <label>{w.speechStrength}<input id="stage3d-speech-strength" type="number" min="0" max="3" step="0.1" value="1" /></label>
+     </div>
+     <p id="stage3d-speech-file" class="small-hint"></p><p class="small-hint">{w.speechHint}</p>
+    </fieldset>
     <div class="stage3d-actions"><label>{w.time}<input id="stage3d-time" type="number" min="0" step="0.1" value="1" /></label><button id="stage3d-preview-button" type="button" title={w.preview} aria-label={w.preview}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 4v6h-6M4 20v-6h6M5 9a7 7 0 0 1 12-4l3 5M4 14l3 5a7 7 0 0 0 12-4" /></svg></button></div>
     <div id="stage3d-preview"></div>
     </details>

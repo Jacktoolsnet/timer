@@ -1,8 +1,9 @@
 import * as THREE from 'three';
+import {actor3DMouth,emptySpeechEnvelopes,type SpeechEnvelopes} from '../lib/stage3d-speech';
 import {facePixel3D} from '../lib/stage3d-face';
 import {actor3DFace,type FacePose3D,actor3DPose,type Shot3D,type Actor3D,type Character3D,type Stage3D} from '../lib/stage3d';
 import type {Project} from '../lib/model';
-type Robot={actor:Actor3D;character:Character3D;updateFace:(pose:FacePose3D)=>void;root:THREE.Group;leftArm:THREE.Group;rightArm:THREE.Group;leftLeg:THREE.Group;rightLeg:THREE.Group};
+type Robot={actor:Actor3D;character:Character3D;updateFace:(pose:FacePose3D,mouth?:number)=>void;root:THREE.Group;leftArm:THREE.Group;rightArm:THREE.Group;leftLeg:THREE.Group;rightLeg:THREE.Group};
 type World={scene:THREE.Scene;robots:Robot[];geometries:Set<THREE.BufferGeometry>;materials:Map<string,THREE.MeshStandardMaterial>};
 /** A bounded cache and ONE GPU context per owner, never a new context per frame. */
 export class Stage3DRenderer{
@@ -81,9 +82,10 @@ export class Stage3DRenderer{
     }
    }
    const parts=face.children.map(mesh=>({mesh:mesh as THREE.Mesh,position:mesh.position.clone(),scale:mesh.scale.clone()}));
-   const updateFace=(p:FacePose3D)=>{
+   const updateFace=(p:FacePose3D,mouth=0)=>{
+    const open=Math.max(p.surprised,mouth);
     if(c.style==='pixel'){
-     pixelMeshes.forEach((mesh,i)=>{const weight=facePixel3D(p,Math.floor(i/12),i%12);mesh.visible=weight>1e-5;mesh.scale.set(.046*weight,.046*weight,.02);});return;
+     pixelMeshes.forEach((mesh,i)=>{const weight=facePixel3D(p,Math.floor(i/12),i%12,mouth);mesh.visible=weight>1e-5;mesh.scale.set(.046*weight,.046*weight,.02);});return;
     }
     const eyeScale=(1-.3*p.happy-.2*p.sad-.35*p.angry+.45*p.surprised)*(1-.95*p.blink);
     for(const {mesh,position,scale} of parts){
@@ -95,12 +97,12 @@ export class Stage3DRenderer{
       mesh.rotation.z=side*(p.angry*.45-p.sad*.4);mesh.position.y+=p.surprised*.035-p.angry*.04;
      }
      if(mesh.name==='mouth'){
-      if(person){const edge=Math.abs(position.x)/.19;mesh.position.y+=p.happy*.06*(edge-.5)-(p.sad+p.angry*.7)*.18*(edge-.5);mesh.scale.x*=1-p.surprised;mesh.scale.y*=1-p.surprised;}
-      else{mesh.scale.x*=1-.55*p.surprised;mesh.scale.y*=1+p.surprised*1.6;mesh.rotation.z=p.sad*.12;mesh.position.y+=p.happy*.015-p.sad*.015;}
+      if(person){const edge=Math.abs(position.x)/.19;mesh.position.y+=p.happy*.06*(edge-.5)-(p.sad+p.angry*.7)*.18*(edge-.5);mesh.scale.x*=1-open;mesh.scale.y*=1-open;}
+      else{mesh.scale.x*=1-.55*open;mesh.scale.y*=1+open*1.6;mesh.rotation.z=p.sad*.12;mesh.position.y+=p.happy*.015-p.sad*.015;}
      }
-     if(mesh.name==='mouth-frame'){mesh.scale.y*=1+p.surprised*.9;mesh.scale.x*=1-p.surprised*.35;}
-     if(mesh.name==='mouth-grille'){mesh.scale.y*=1-p.surprised;mesh.position.y+=(Math.abs(position.x)/.14-.5)*(.045*p.happy-.045*p.sad);}
-     if(mesh.name==='surprise-mouth'){mesh.visible=p.surprised>1e-5;mesh.scale.set(p.surprised,1,p.surprised*1.4);}
+     if(mesh.name==='mouth-frame'){mesh.scale.y*=1+open*.9;mesh.scale.x*=1-open*.35;}
+     if(mesh.name==='mouth-grille'){mesh.scale.y*=1-open;mesh.position.y+=(Math.abs(position.x)/.14-.5)*(.045*p.happy-.045*p.sad);}
+     if(mesh.name==='surprise-mouth'){mesh.visible=open>1e-5;mesh.scale.set(open,1,open*1.4);}
     }
    };
    const limb=(x:number,y:number,leg:boolean)=>{const pivot=new THREE.Group();pivot.position.set(x,y,0);root.add(pivot);box(pivot,person&&!leg?c.bodyColor:c.limbColor,0,leg?-.48:-.42,0,leg?.38:.32,leg?.85:.72,.4);box(pivot,leg?(person?c.limbColor:c.bodyColor):c.headColor,0,leg?-.89:-.87,leg?.1:0,leg?.44:.38,.28,leg?.66:.44);return pivot;};
@@ -109,13 +111,13 @@ export class Stage3DRenderer{
   };
   world.robots=actors.map(a=>robot(a,characters[a.character]));return world;
  }
- render(project:Project,shot:Shot3D,time:number,width:number,height:number,target:HTMLCanvasElement,studio=false){
+ render(project:Project,shot:Shot3D,time:number,width:number,height:number,target:HTMLCanvasElement,studio=false,speech:SpeechEnvelopes=emptySpeechEnvelopes){
   if(this.disposed||this.lost)throw new Error('3D: graphics context unavailable. Reload the project before exporting.');
   const definitions=Object.fromEntries(shot.actors.map(a=>[a.character,project.characters[a.character]]));
   const key=JSON.stringify([project.stages[shot.stage],definitions,shot.actors,studio]);let world=this.cache.get(key);
   if(!world){world=this.world(project.stages[shot.stage],project.characters,shot.actors,studio);this.cache.set(key,world);if(this.cache.size>2){const oldest=this.cache.keys().next().value!;this.release(this.cache.get(oldest)!);this.cache.delete(oldest);}}
   else{this.cache.delete(key);this.cache.set(key,world);}
-  for(const r of world.robots){r.updateFace(actor3DFace(r.actor,time,r.character.expression));const p=actor3DPose(r.actor,time,shot.actors);r.root.position.set(p.x,p.bob,p.z);r.root.rotation.y=p.rotation;r.leftArm.rotation.x=p.leftArm;r.rightArm.rotation.x=p.rightArm;r.rightArm.rotation.z=p.wave;r.leftLeg.rotation.x=p.leftLeg;r.rightLeg.rotation.x=p.rightLeg;}
+  for(const r of world.robots){r.updateFace(actor3DFace(r.actor,time,r.character.expression),actor3DMouth(project,shot,r.actor,time,speech));const p=actor3DPose(r.actor,time,shot.actors);r.root.position.set(p.x,p.bob,p.z);r.root.rotation.y=p.rotation;r.leftArm.rotation.x=p.leftArm;r.rightArm.rotation.x=p.rightArm;r.rightArm.rotation.z=p.wave;r.leftLeg.rotation.x=p.leftLeg;r.rightLeg.rotation.x=p.rightLeg;}
   const c=shot.camera,yaw=(c.yaw+c.orbit*time)*Math.PI/180,pitch=c.pitch*Math.PI/180;
   this.camera.position.set(c.targetX+Math.sin(yaw)*Math.cos(pitch)*c.distance,c.targetY+Math.sin(pitch)*c.distance,c.targetZ+Math.cos(yaw)*Math.cos(pitch)*c.distance);this.camera.lookAt(c.targetX,c.targetY,c.targetZ);this.camera.aspect=width/height;this.camera.updateProjectionMatrix();
   this.renderer.getSize(this.size);if(this.size.x!==width||this.size.y!==height)this.renderer.setSize(width,height,false);this.renderer.render(world.scene,this.camera);

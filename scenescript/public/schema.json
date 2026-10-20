@@ -1251,10 +1251,22 @@
       },
       "required": ["duration"]
     },
+    "actorSpeech3D": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source": {"enum": ["scene", "project"], "default": "scene"},
+        "strength": {"type": "number", "minimum": 0, "maximum": 3, "default": 1}
+      }
+    },
     "actor3D": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "speech": {
+          "anyOf": [{"$ref": "#/$defs/actorSpeech3D"}, {"type": "null"}],
+          "default": null
+        },
         "expressions": {
           "type": "array",
           "maxItems": 64,

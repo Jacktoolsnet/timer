@@ -72,6 +72,10 @@
         },
         "actors": [
           {
+            "speech": {
+              "source": "scene",
+              "strength": 1
+            },
             "expressions": [
               {
                 "expression": "surprised",
@@ -163,6 +167,7 @@
             "duration": 4
           },
           {
+            "speech": null,
             "expressions": [
               {
                 "expression": "blink",
@@ -242,6 +247,7 @@
             "duration": 4
           },
           {
+            "speech": null,
             "expressions": [
               {
                 "expression": "happy",
@@ -293,7 +299,19 @@
       },
       "camera": null,
       "groups": [],
-      "narration": null,
+      "narration": {
+        "asset": "",
+        "at": 0,
+        "start": 0,
+        "end": null,
+        "volume": 1,
+        "muted": false,
+        "fadeIn": 0,
+        "fadeOut": 0,
+        "text": "Hallo Bo! Was für eine schöne Bauklotz-Welt. Komm, wir entdecken sie zusammen!",
+        "instructions": "",
+        "speaker": "Mika"
+      },
       "id": "meet",
       "name": "Treffen auf der Plaza",
       "duration": 7,
@@ -477,6 +495,7 @@
         },
         "actors": [
           {
+            "speech": null,
             "expressions": [
               {
                 "expression": "happy",
@@ -563,6 +582,10 @@
             "duration": 4
           },
           {
+            "speech": {
+              "source": "scene",
+              "strength": 1
+            },
             "expressions": [
               {
                 "expression": "angry",
@@ -668,6 +691,7 @@
             "duration": 4
           },
           {
+            "speech": null,
             "expressions": [
               {
                 "expression": "sad",
@@ -752,7 +776,19 @@
       },
       "camera": null,
       "groups": [],
-      "narration": null,
+      "narration": {
+        "asset": "",
+        "at": 0,
+        "start": 0,
+        "end": null,
+        "volume": 1,
+        "muted": false,
+        "fadeIn": 0,
+        "fadeOut": 0,
+        "text": "Hallo Mika und Lina! Ich bin bereit für unser nächstes Abenteuer!",
+        "instructions": "",
+        "speaker": "Bo"
+      },
       "id": "hello",
       "name": "Ein gemeinsames Hallo",
       "duration": 6,
