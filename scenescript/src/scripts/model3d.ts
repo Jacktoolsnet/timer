@@ -1,10 +1,11 @@
 import * as THREE from 'three';
 import {modelPose3D,type Model3D,type ModelMotion3D,type jointControls3D} from '../lib/model3d';
 type Storage={geometries:Set<THREE.BufferGeometry>;materials:Map<string,THREE.MeshStandardMaterial>};
+const sharedGeometries=new WeakMap<Storage,Map<string,THREE.BufferGeometry>>();
 /** Transform chain: position → pivot → XYZ rotation → -pivot → geometry/children. */
 export function createModel3D(model:Model3D,storage:Storage,palette:object={}){
  const root=new THREE.Group(),nodes=new Map<string,{anchor:THREE.Group;pivot:THREE.Group;content:THREE.Group;mesh?:THREE.Mesh}>();
- const geometries=new Map<string,THREE.BufferGeometry>();
+ let geometries=sharedGeometries.get(storage);if(!geometries){geometries=new Map();sharedGeometries.set(storage,geometries);}
  for(const part of model.parts){
   const anchor=new THREE.Group(),pivot=new THREE.Group(),content=new THREE.Group();anchor.name=part.id;pivot.position.set(part.pivot.x,part.pivot.y,part.pivot.z);content.position.set(-part.pivot.x,-part.pivot.y,-part.pivot.z);anchor.add(pivot);pivot.add(content);nodes.set(part.id,{anchor,pivot,content});
   if(part.shape==='group')continue;

@@ -1,0 +1,658 @@
+{
+  "format": "scenescript-3d-resource",
+  "version": "1.0",
+  "kind": "character",
+  "id": "fan3",
+  "definition": {
+    "model": {
+      "parts": [
+        {
+          "id": "torso",
+          "parent": "",
+          "palette": "",
+          "instances": [],
+          "shape": "box",
+          "color": "#d365a5",
+          "position": {
+            "x": 0,
+            "y": 1.35,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.65,
+            "y": 0.7,
+            "z": 0.4
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "hips",
+          "parent": "",
+          "palette": "",
+          "instances": [],
+          "shape": "box",
+          "color": "#34465a",
+          "position": {
+            "x": 0,
+            "y": 0.93,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.64,
+            "y": 0.2,
+            "z": 0.45
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "head",
+          "parent": "",
+          "palette": "",
+          "instances": [],
+          "shape": "box",
+          "color": "#d99d70",
+          "position": {
+            "x": 0,
+            "y": 1.98,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.58,
+            "y": 0.6,
+            "z": 0.5
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "hair",
+          "parent": "",
+          "palette": "",
+          "instances": [],
+          "shape": "box",
+          "color": "#824b2a",
+          "position": {
+            "x": 0,
+            "y": 2.28,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.63,
+            "y": 0.16,
+            "z": 0.54
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "eyes",
+          "parent": "",
+          "palette": "",
+          "instances": [
+            {
+              "x": -0.13,
+              "y": 0,
+              "z": 0
+            },
+            {
+              "x": 0.13,
+              "y": 0,
+              "z": 0
+            }
+          ],
+          "shape": "box",
+          "color": "#23313e",
+          "position": {
+            "x": 0,
+            "y": 2.02,
+            "z": 0.265
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.17,
+            "y": 0.07,
+            "z": 0.025
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "smile",
+          "parent": "",
+          "palette": "",
+          "instances": [],
+          "shape": "box",
+          "color": "#8a3e40",
+          "position": {
+            "x": 0,
+            "y": 1.86,
+            "z": 0.27
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.2,
+            "y": 0.05,
+            "z": 0.03
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "nose",
+          "parent": "",
+          "palette": "",
+          "instances": [],
+          "shape": "box",
+          "color": "#d99d70",
+          "position": {
+            "x": 0,
+            "y": 1.96,
+            "z": 0.3
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.07,
+            "y": 0.09,
+            "z": 0.09
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "leftShoulder",
+          "parent": "",
+          "palette": "",
+          "instances": [],
+          "shape": "group",
+          "color": "#36a9e1",
+          "position": {
+            "x": -0.42,
+            "y": 1.62,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 1,
+            "y": 1,
+            "z": 1
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {},
+              "id": "leftArm",
+              "motion": "rotation",
+              "axis": "z",
+              "min": -160,
+              "max": 160,
+              "value": 0,
+              "control": "none",
+              "target": 160
+            }
+          ]
+        },
+        {
+          "id": "leftHand",
+          "parent": "leftShoulder",
+          "palette": "",
+          "instances": [],
+          "shape": "box",
+          "color": "#d99d70",
+          "position": {
+            "x": 0,
+            "y": -0.25,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.19,
+            "y": 0.62,
+            "z": 0.22
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "leftThigh",
+          "parent": "",
+          "palette": "",
+          "instances": [],
+          "shape": "box",
+          "color": "#34465a",
+          "position": {
+            "x": -0.2,
+            "y": 0.9,
+            "z": 0.27
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.22,
+            "y": 0.2,
+            "z": 0.65
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "leftShin",
+          "parent": "",
+          "palette": "",
+          "instances": [],
+          "shape": "box",
+          "color": "#34465a",
+          "position": {
+            "x": -0.2,
+            "y": 0.46,
+            "z": 0.53
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.18,
+            "y": 0.75,
+            "z": 0.18
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "leftShoe",
+          "parent": "",
+          "palette": "",
+          "instances": [],
+          "shape": "box",
+          "color": "#f0f1ea",
+          "position": {
+            "x": -0.2,
+            "y": 0.1,
+            "z": 0.63
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.25,
+            "y": 0.15,
+            "z": 0.4
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "rightShoulder",
+          "parent": "",
+          "palette": "",
+          "instances": [],
+          "shape": "group",
+          "color": "#36a9e1",
+          "position": {
+            "x": 0.42,
+            "y": 1.62,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 1,
+            "y": 1,
+            "z": 1
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": [
+            {
+              "responses": {},
+              "id": "rightArm",
+              "motion": "rotation",
+              "axis": "z",
+              "min": -160,
+              "max": 160,
+              "value": 0,
+              "control": "none",
+              "target": 160
+            }
+          ]
+        },
+        {
+          "id": "rightHand",
+          "parent": "rightShoulder",
+          "palette": "",
+          "instances": [],
+          "shape": "box",
+          "color": "#d99d70",
+          "position": {
+            "x": 0,
+            "y": -0.25,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.19,
+            "y": 0.62,
+            "z": 0.22
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "rightThigh",
+          "parent": "",
+          "palette": "",
+          "instances": [],
+          "shape": "box",
+          "color": "#34465a",
+          "position": {
+            "x": 0.2,
+            "y": 0.9,
+            "z": 0.27
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.22,
+            "y": 0.2,
+            "z": 0.65
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "rightShin",
+          "parent": "",
+          "palette": "",
+          "instances": [],
+          "shape": "box",
+          "color": "#34465a",
+          "position": {
+            "x": 0.2,
+            "y": 0.46,
+            "z": 0.53
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.18,
+            "y": 0.75,
+            "z": 0.18
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        },
+        {
+          "id": "rightShoe",
+          "parent": "",
+          "palette": "",
+          "instances": [],
+          "shape": "box",
+          "color": "#f0f1ea",
+          "position": {
+            "x": 0.2,
+            "y": 0.1,
+            "z": 0.63
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "pivot": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "size": {
+            "x": 0.25,
+            "y": 0.15,
+            "z": 0.4
+          },
+          "roughness": 0.78,
+          "metalness": 0.08,
+          "opacity": 1,
+          "joints": []
+        }
+      ],
+      "animations": {
+        "cheer": {
+          "duration": 2,
+          "tracks": [
+            {
+              "joint": "leftArm",
+              "keys": [
+                {
+                  "at": 0,
+                  "value": -105
+                },
+                {
+                  "at": 0.5,
+                  "value": -150
+                },
+                {
+                  "at": 1,
+                  "value": -110
+                },
+                {
+                  "at": 1.5,
+                  "value": -145
+                },
+                {
+                  "at": 2,
+                  "value": -105
+                }
+              ],
+              "easing": "ease-in-out"
+            },
+            {
+              "joint": "rightArm",
+              "keys": [
+                {
+                  "at": 0,
+                  "value": 130
+                },
+                {
+                  "at": 0.5,
+                  "value": 95
+                },
+                {
+                  "at": 1,
+                  "value": 150
+                },
+                {
+                  "at": 1.5,
+                  "value": 110
+                },
+                {
+                  "at": 2,
+                  "value": 130
+                }
+              ],
+              "easing": "ease-in-out"
+            }
+          ]
+        }
+      }
+    },
+    "expression": "happy",
+    "style": "classic",
+    "name": "Brillen-Fan",
+    "bodyColor": "#36a9e1",
+    "headColor": "#dde7ed",
+    "limbColor": "#64748b",
+    "accentColor": "#ffe066",
+    "height": 3
+  }
+}

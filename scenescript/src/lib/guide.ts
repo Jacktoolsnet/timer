@@ -252,7 +252,7 @@ Panel templates are editor helpers creating ordinary image+rectangle Elements,
 not a template field/type. Camera movement is continuous even under stopMotion.
 
 ### Reusable 3D stages and characters
-Project.characters/stages: independent ID maps, max 30 each.
+Project.characters/stages/groups3d: independent ID maps, max 30 each.
 characters stores reusable 3D OBJECTS (people, robots, cars, props); the legacy
 map/type name remains for compatibility. Name, height, colors and optional model.
 style: classic (default legacy robot), robot (mechanical mouth), pixel (monitor
@@ -261,7 +261,8 @@ Character.expression sets the base face. Omitted/null model is a LEGACY IMPORT
 SHORTHAND: expanded to editable construction data (figure style / plaza). Saved
 projects/resources contain explicit models; geometry is never a renderer preset.
 Scene.stage3d=null/omitted disables 3D; otherwise stage references Project.stages
-and actors (max 12) reference Project.characters. Unlisted characters are absent.
+and actors (max 12) reference Project.characters. Additional repeated objects use
+groups (below); unlisted objects are absent.
 Actor IDs are scene-local, independent of 2D IDs. Supply each scene's starting
 position/yaw/scale: no implicit cross-scene state or persistence.
 x/z and toX/toZ: absolute 3D WORLD UNITS, NOT percentages; Y up, feet on ground.
@@ -343,6 +344,38 @@ increasing <=scene.duration; position and target required and distinct. Linear
 interpolation, last pose holds; roll is numeric degrees. Do NOT combine keys and
 follow. Empty keys + null follow retain the legacy orbital camera. Use separate
 scenes for camera cuts. Preview, stills and export sample the same absolute time.
+REUSABLE GROUPS: Project.groups3d stores Group3D definitions, NOT Scene.groups
+(the latter is 2D). Characters: 1–16 distinct Project.characters IDs. All are
+selected with equal probability using seed (integer), NEVER fresh random values
+per frame. Templates remain shared; do not duplicate their model data per copy.
+layout:grid(default) places count copies in columns: X centered, row Y/Z increments
+by spacing, origin is front-row center. spacing defaults {x:1.3,y:0.5,z:1.5}; use
+negative z for receding seats. scatter distributes count copies in a centered box
+size(default {x:10,y:0,z:10}). points uses explicit local positions: count defaults
+to points.length and must match if supplied. Other layouts require empty points.
+jitter adds seeded independent ±x/y/z offsets. rotation is local yaw; scale is
+model multiplier; rotationVariation adds ±degrees; scaleVariation multiplies by
+1±value. Design seated figures/benches explicitly: no automatic seating/avoidance.
+animation is a NAMED CLIP present in EVERY template (empty disables animation).
+It loops continuously: local clip time = (scene time + placement.timeOffset)*
+memberSpeed + memberPhase, modulo clip.duration. phase sets random offset seconds
+in [0,phase); speedVariation multiplies speed by 1±value. Set phase to a clip length
+for varied cheering; also use small speedVariation. No speech/actions/paths on
+individual copies; use normal actors for individually controlled protagonists.
+Shot.groups:[{id:"audience",group:"fans",x:0,y:0,z:0,rotation:0,scale:1,timeOffset:0}]
+places a group. Placement scale affects both local positions and model size; its
+yaw rotates the arrangement; timeOffset enables explicit continuity over cuts.
+Same resource + seed gives identical templates/variation in every scene/export.
+Group IDs are separate from actor IDs; cameras track normal actors only.
+Limits: 16 placements/shot, 256 TOTAL group copies, all copies count toward the
+existing 2048-part scene budget. Grid/scatter/points each allow at most256 copies.
+3D resource dialog: Groups offers editable JSON + animated isolated preview and
+insertion into the current shot. .scenegroup.json bundles definition + required
+characters, importable into an empty project. Envelope: format:"scenescript-3d-resource",
+version:"1.0", kind:"group", id, definition:Group3D, characters:Map<ID,Character3D>.
+Copy/update controls the group ID;
+identical dependencies are reused, conflicting objects get new IDs and references
+are remapped. Existing unrelated objects are NEVER overwritten by a group import.
 FREE CONSTRUCTION: Character3D.model / Stage3D.model = {parts:[...],animations:{...}}.
 An explicit model defines geometry; stage ground/sky remain. palette optionally
 reads a hex color from a resource field (e.g. headColor/blockColor), else uses color.

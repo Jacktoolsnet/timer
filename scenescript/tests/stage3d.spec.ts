@@ -73,7 +73,7 @@ test('3D dropdowns and popup options follow the theme and support keyboard selec
    expect(styles.appearance).toBe('base-select');expect(styles.radius).toBe('14px');expect(styles.background).not.toBe('rgba(0, 0, 0, 0)');expect(styles.optionRadius).toBe('8px');expect(styles.optionWeight).toBe('600');expect(styles.checkmark).not.toBe('rgba(0, 0, 0, 0)');await page.keyboard.press('Escape');await expect(page.locator('#stage3d-dialog')).toBeVisible();
   }
  }
- await kind.focus();await page.keyboard.press('Space');await page.keyboard.press('End');await page.keyboard.press('Enter');await expect(kind).toHaveValue('stage');await page.locator('#stage3d-add').click();await expect(page.locator('[data-resource-field=skyColor]')).toBeVisible();
+ await kind.focus();await page.keyboard.press('Space');await page.keyboard.press('End');await page.keyboard.press('ArrowUp');await page.keyboard.press('Enter');await expect(kind).toHaveValue('stage');await page.locator('#stage3d-add').click();await expect(page.locator('[data-resource-field=skyColor]')).toBeVisible();
  await page.locator('#stage3d-close').click();
 });
 

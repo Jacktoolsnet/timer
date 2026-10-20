@@ -667,7 +667,7 @@ absolute Zeitberechnung. Keine Geometrieerzeugung pro Frame.
 
 Dies ist die Grundlage für die gewünschte Rennwelt, noch nicht die komplette
 Rennsimulation: Fahrpfade und Fahrzeugkameras sind im nächsten Abschnitt beschrieben;
-große Zuschauermengen bleiben ein eigenständiger nächster Schritt. Die vollständige
+wiederholte Ressourcen sind im Abschnitt zu Ressourcengruppen beschrieben. Die vollständige
 Copy/Paste-KI-Anleitung enthält die neue Grammatik plus ein kompaktes Beispiel;
 das Größenbudget wächst für dieses zusätzliche Modul auf 82 kB.
 
@@ -705,8 +705,8 @@ Keine zweite fest verdrahtete Figuren-/Bühnen-Renderstrecke mehr.
 Unter **3D-Ressourcen → Beispieltyp → Fahrpfade: Looping & Kameras** gibt es
 zwei Monstertrucks auf einer kleinen Testbahn: vier Runden mit Folgekamera,
 Zuschauerschwenk, freiem Kameraflug und Fahrerkamera. Die Demo bekommt beim Laden
-ein echtes, aus der Szene gerendertes Cover. Dies ist der Pfad-/Kamera-Funktionsnachweis,
-noch nicht das vollständig ausgestattete Rennvideo mit Tribünen und Werbung.
+ein echtes, aus der Szene gerendertes Cover. Die Demo enthält außerdem eine Tribüne, 48 Zuschauer aus vier Vorlagen
+mit zeitversetztem Jubel sowie drei Fantasie-Werbetafeln.
 
 - Bühnen speichern `paths` mit bis zu 16 wiederverwendbaren Wegen. 2–128 Punkte,
   `closed` (mind. drei Punkte, ersten Punkt nicht wiederholen), `interpolation`
@@ -744,3 +744,48 @@ noch nicht das vollständig ausgestattete Rennvideo mit Tribünen und Werbung.
 Importierbare Demo mit Cover: `/examples/path-camera.scenescript.json`.
 Einzelressourcen: `/examples/path-track.scenestage.json`,
 `/examples/path-red.scenecharacter.json`, `/examples/path-blue.scenecharacter.json`.
+
+
+### Wiederverwendbare 3D-Ressourcengruppen
+
+Unter **3D-Ressourcen → Ressourcenart → Gruppen** lassen sich Anordnungen aus
+vorhandenen Objekten/Figuren erstellen, bearbeiten, animiert vorab ansehen,
+einsetzen und einzeln als `.scenegroup.json` exportieren/importieren.
+Die Beispielstrecke nutzt `audience` mit 48 Sitzplätzen und vier eigenen Figuren.
+Die Objekte sind normale frei definierte Modelle, keine fest eingebauten Zuschauer.
+
+- `Project.groups3d`: bis zu 30 Definitionen. `characters` verweist auf 1–16
+  verschiedene Objektvorlagen im Projekt. Keine Verschachtelung von Gruppen.
+- `layout:grid`: `count`, `columns`, `spacing`. X zentriert, Y/Z wachsen pro Reihe.
+  `layout:scatter`: Verteilung in einem zentrierten `size`-Quader.
+  `layout:points`: genaue lokale `points`; `count` entspricht der Punktanzahl.
+- `seed` erzeugt eine stabile Auswahl und Variation. `jitter` variiert Positionen,
+  `rotationVariation` den Winkel, `scaleVariation` die Größe. Ohne Variation werden
+  exakte Sitzpositionen oder andere Anordnungen verwendet. Kein automatisches
+  Platzieren auf Sitzflächen, keine Kollisionsvermeidung oder Physik.
+- `animation` nennt einen Clip, der in jeder Vorlage existieren muss. `phase`
+  verteilt dessen Anfangszeit in Sekunden, `speedVariation` variiert das Tempo.
+  Dadurch jubeln nicht alle gleichzeitig. Leere Animation zeigt die Ruhepose.
+- `Shot.groups` platziert Definitionen mit eigener ID, x/y/z, rotation und scale.
+  Der Maßstab der Platzierung skaliert Anordnung **und** Modelle. `timeOffset`
+  erlaubt durchlaufende Animation über Kameraschnitte (Demo: 0, 12, 24, 36 s).
+  Vorschau, Zurückspringen und Export sampeln ausschließlich absolute Zeit.
+- Gruppenmitglieder belegen keine der zwölf regulären Hauptdarsteller-Plätze.
+  Maximal 16 Platzierungen und 256 Kopien pro Szene; **alle** Teile jeder Kopie
+  zählen zum bestehenden Budget von 2048 aktiven 3D-Teilen. Hohe Dichten werden
+  vor dem GPU-Aufbau als Fehler gemeldet, nicht still reduziert.
+- Die Instanzen teilen Geometrien und Materialien innerhalb eines Szenengraphen.
+  Es entsteht keine neue Geometrie pro Bild; die bestehenden zwei Cacheplätze
+  und das vollständige Freigeben beim Schließen/Exportende bleiben erhalten.
+- Gruppenexport enthält die tatsächlich benötigten Objektdefinitionen. Import in
+  ein leeres Projekt funktioniert ohne vorherigen Einzelimport der Figuren.
+  Identische Abhängigkeiten werden wiederverwendet. Abweichende vorhandene IDs
+  bekommen neue IDs; Gruppenverweise werden umgeschrieben. „Aktualisieren“ betrifft
+  die Gruppen-ID, überschreibt aber **keine fremden Figuren**. Bei Fehlern bleibt
+  das Projekt unverändert; Abhängigkeits-/Größenlimits gelten auch für den Import.
+- KI-Anleitung und Schema beschreiben alle Felder; das bisherige kompakte
+  82-kB-Budget der Offline-Anleitung wird weiterhin eingehalten.
+
+Die aktualisierte Datei `/examples/path-camera.scenescript.json` enthält das komplette
+Gruppenbeispiel samt echtem Cover. `/examples/path-audience.scenegroup.json` ist die
+separat importierbare Publikumsgruppe mit ihren vier Figuren.

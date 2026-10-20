@@ -1040,7 +1040,7 @@ $('safe-toggle').addEventListener('change',()=>{$('safe-overlay').hidden=!($('sa
 function replace(next:Project){fitSpeechDurations(next);stop();backgroundVideoNode=undefined;backgroundVideoAsset='';clearVideoURLs();clearAudioURLs();revision++;project=next;sceneIndex=0;selectedId='';time=0;dirty=false;selectedGroupId='';multiSelection.clear();history.reset(project);persist();refresh();status(t('ready'));}
 installStage3DEditor(()=>({project,index:sceneIndex,revision}),next=>{stop();project=next;changed();refresh();},next=>{replace(next);changed();},stop);
 const canReplace=()=>!dirty||confirm(t('unsaved'));
-$('new-project').addEventListener('click',()=>{if(canReplace()){replace({characters:{},stages:{},version:'1.0',title:'SceneScript',description:'',firstComment:'',hashtags:'',thumbnail:null,audios:{},narration:null,audioDucking:false,format:'landscape',backgroundSimulation:null,backgroundVideo:null,videos:{},music:null,assets:{},scenes:[newScene()]});changed();}});
+$('new-project').addEventListener('click',()=>{if(canReplace()){replace({groups3d:{},characters:{},stages:{},version:'1.0',title:'SceneScript',description:'',firstComment:'',hashtags:'',thumbnail:null,audios:{},narration:null,audioDucking:false,format:'landscape',backgroundSimulation:null,backgroundVideo:null,videos:{},music:null,assets:{},scenes:[newScene()]});changed();}});
 $('toggle-project').addEventListener('click',()=>{
  const button=$('toggle-project'),collapsed=button.getAttribute('aria-expanded')==='true';
  $('project-panel').classList.toggle('project-collapsed',collapsed);
