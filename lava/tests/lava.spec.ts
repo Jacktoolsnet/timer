@@ -257,3 +257,28 @@ test('bubble volume is adjustable and remembered without autoplay',async({page})
  await page.locator('#lava-volume').fill('0');
  await expect(page.locator('#volume-value')).toHaveText('0 %');
 });
+
+test('bubble trail draws on drag, clears when disabled and remembers choice',async({page})=>{
+ test.setTimeout(60000);
+ await page.goto('/de/');
+ await expect(page.locator('#lava-trail')).toBeChecked();
+ await page.locator('#lava-sound').uncheck();
+ await page.locator('#lava-toggle').click();
+ const box=(await page.locator('#lava-canvas').boundingBox())!;
+ await page.mouse.move(box.x+box.width*.3,box.y+box.height*.5);
+ await page.mouse.down();
+ await page.mouse.move(box.x+box.width*.65,box.y+box.height*.45,{steps:8});
+ await page.mouse.up();
+ const hasTrail=()=>page.locator('#lava-trail-canvas').evaluate((el:HTMLCanvasElement)=>{
+  const pixels=el.getContext('2d')!.getImageData(0,0,el.width,el.height).data;
+  return pixels.some((value,index)=>index%4===3&&value>0);
+ });
+ await expect.poll(hasTrail).toBe(true);
+ await page.locator('#lava-toggle').click();
+ await page.locator('#lava-trail').uncheck();
+ await expect.poll(hasTrail).toBe(false);
+ await page.locator('#palette-dropdown summary').click();
+ await page.locator('#remember-preferences').check();
+ await page.reload();
+ await expect(page.locator('#lava-trail')).not.toBeChecked();
+});

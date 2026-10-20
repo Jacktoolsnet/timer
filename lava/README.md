@@ -60,3 +60,8 @@ Presets ändern diese Schalter nicht. Kein Autostart, auch bei Reduced Motion.
 Optionale, lokal synthetisierte Blasentöne beim Verbinden und Trennen; standardmäßig
 an, aber erst nach Benutzerstart hörbar. Pause und Hintergrund schalten Ton aus.
 Der Sound-Schalter bleibt nur mit Speicherzustimmung gespeichert.
+
+Lavabläschen-Spur: standardmäßig an, einzeln abschaltbar. Beim Ziehen während
+laufender Berührungsaktion bleiben kleine Blasen in passenden Farben zurück,
+die nach wenigen Sekunden verschwinden. Maximal 64 Partikel; bei Pause eingefroren.
+Der Schalter wird nur mit Speicherzustimmung gesichert, die Spur selbst nicht.

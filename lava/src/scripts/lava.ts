@@ -1,9 +1,14 @@
+import {LavaTrail} from '../lib/trail';
 import {BubbleAudio} from '../lib/bubble-audio';
 import {LavaInteraction} from '../lib/interaction';
 import {presets} from '../lib/presets';
 import {storageAllowed} from '../lib/storage';
 import {STORAGE_KEY} from '../lib/engine';
 import {createBlobColours, advanceBlobColours} from '../lib/rainbow';
+const trail=new LavaTrail();
+const trailEnabled=document.querySelector<HTMLInputElement>('#lava-trail')!;
+const trailCanvas=document.querySelector<HTMLCanvasElement>('#lava-trail-canvas')!;
+const trailContext=trailCanvas.getContext('2d');
 const canvas = document.querySelector<HTMLCanvasElement>('#lava-canvas')!;
 const stage = document.querySelector<HTMLElement>('#lava-stage')!;
 const toggle = document.querySelector<HTMLButtonElement>('#lava-toggle')!;
@@ -178,6 +183,7 @@ if (gl) {
  } catch {program=null;stage.classList.add('no-webgl');}
 } else stage.classList.add('no-webgl');
 function draw(){
+ drawTrail();
  if(!gl||!program)return;
  const ratio=Math.min(devicePixelRatio||1,2);
  const width=Math.round(canvas.clientWidth*ratio),height=Math.round(canvas.clientHeight*ratio);
@@ -201,6 +207,7 @@ function animate(now:number){
   const dt=Math.min((now-previous)/1000,.05)*Number(speed.value)/(1+Number(viscosity.value)/100*1.5);
   elapsed+=dt;
   if(evolution.checked)evolutionTime+=dt;
+  trail.advance(dt,Number(viscosity.value)/100);
   interaction.advance(dt,Number(viscosity.value)/100);
   if(colour===4)advanceBlobColours(blobColours,elapsed,dt,canvas.clientWidth/canvas.clientHeight,Number(viscosity.value)/100,interaction.offsets,evolution.checked);
  }
@@ -285,7 +292,7 @@ function saveLavaSettings() {
  if (!storageAllowed()) return;
  try {
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
-   colour, speed: Number(speed.value), brightness: Number(brightness.value), fluidColour, viscosity: Number(viscosity.value), touch:touch.checked, evolution:evolution.checked, sound:sound.checked, volume:Number(volume.value)
+   colour, speed: Number(speed.value), brightness: Number(brightness.value), fluidColour, viscosity: Number(viscosity.value), touch:touch.checked, evolution:evolution.checked, sound:sound.checked, trail:trailEnabled.checked, volume:Number(volume.value)
   }));
  } catch { /* Blocked/full storage must not prevent using the animation. */ }
 }
@@ -298,6 +305,7 @@ if (storageAllowed()) {
  try {
   const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
   if (saved && typeof saved === 'object') {
+   if(typeof saved.trail==='boolean')trailEnabled.checked=saved.trail;
    if(typeof saved.sound==='boolean')sound.checked=saved.sound;
    if(Number.isInteger(saved.volume)&&saved.volume>=0&&saved.volume<=100)volume.value=String(saved.volume);
    if(typeof saved.touch==='boolean')touch.checked=saved.touch;
@@ -384,11 +392,12 @@ stage.addEventListener('pointermove',event=>{
  if(event.pointerId!==activePointer||!touch.checked||!running)return;
  const rect=canvas.getBoundingClientRect();
  const point={x:(event.clientX-rect.left)/rect.width,y:1-(event.clientY-rect.top)/rect.height};
+ if(trailEnabled.checked)trail.stroke(point.x,point.y,point.x-lastPoint.x,point.y-lastPoint.y,rect.width/rect.height,trailColour(point.x,point.y));
  interaction.stroke(point.x,point.y,point.x-lastPoint.x,point.y-lastPoint.y,elapsed,rect.width/rect.height,Number(viscosity.value)/100);
  lastPoint=point;
 });
 for(const name of ['pointerup','pointercancel','lostpointercapture'])stage.addEventListener(name,stopStroke);
-touch.addEventListener('change',()=>{stopStroke();if(!touch.checked)interaction.reset();updateTouchMode();draw();saveLavaSettings();});
+touch.addEventListener('change',()=>{stopStroke();if(!touch.checked){interaction.reset();trail.clear();}updateTouchMode();draw();saveLavaSettings();});
 evolution.addEventListener('change',saveLavaSettings);
 toggle.addEventListener('click',()=>{stopStroke();updateTouchMode();});
 document.addEventListener('visibilitychange',stopStroke);
@@ -411,3 +420,37 @@ function updateVolume(){
 }
 volume.addEventListener('input',()=>{updateVolume();saveLavaSettings();});
 updateVolume();
+
+
+function trailColour(x:number,y:number){
+ if(colour!==4)return ['#ff763f','#b784ff','#50e8cc','#ff80b5','#b784ff','#c9d8ed','#dd956d','#f0ca61','#9b9cde'][colour];
+ let closest=0,distance=Infinity;
+ for(let i=0;i<14;i++){
+  const phase=elapsed*(.11+i*.006)+i*2.399;
+  const dx=(.5+Math.sin(phase*.45+i*2.399)*.46+interaction.offsets[i*2]-x)*canvas.clientWidth/canvas.clientHeight;
+  const dy=.5+.55*Math.sin(phase)+interaction.offsets[i*2+1]-y;
+  if(dx*dx+dy*dy<distance){closest=i;distance=dx*dx+dy*dy;}
+ }
+ return 'rgb('+[0,1,2].map(c=>Math.round(blobColours[closest*3+c]*255)).join(',')+')';
+}
+function drawTrail(){
+ if(!trailContext)return;
+ const ratio=Math.min(devicePixelRatio||1,2);
+ const width=Math.round(trailCanvas.clientWidth*ratio),height=Math.round(trailCanvas.clientHeight*ratio);
+ if(trailCanvas.width!==width||trailCanvas.height!==height){trailCanvas.width=width;trailCanvas.height=height;}
+ const ctx=trailContext;ctx.clearRect(0,0,width,height);
+ if(!trailEnabled.checked||!touch.checked)return;
+ for(const p of trail.bubbles){
+  const fraction=p.life/p.duration;
+  const radius=p.radius*Math.min(width,height)*Math.min(1,fraction*2);
+  if(radius<.2)continue;
+  const x=p.x*width,y=(1-p.y)*height;
+  ctx.globalAlpha=Math.min(1,(1-fraction)*8)*Math.min(1,fraction*2);
+  const fill=ctx.createRadialGradient(x-radius*.3,y-radius*.35,radius*.05,x,y,radius);
+  fill.addColorStop(0,'#fff5df');fill.addColorStop(.27,p.colour);fill.addColorStop(1,p.colour);
+  ctx.fillStyle=fill;ctx.shadowColor=p.colour;ctx.shadowBlur=radius*.8;
+  ctx.beginPath();ctx.ellipse(x,y,radius*.86,radius*1.1,Math.sin(p.life)*.2,0,Math.PI*2);ctx.fill();
+ }
+ ctx.globalAlpha=1;ctx.shadowBlur=0;
+}
+trailEnabled.addEventListener('change',()=>{if(!trailEnabled.checked)trail.clear();drawTrail();saveLavaSettings();});

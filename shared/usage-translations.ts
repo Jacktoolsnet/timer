@@ -715,7 +715,7 @@ export const usageTranslations:Record<UsageTool,Record<'es'|'fr',readonly UsageS
       {
         "title": "Interacción táctil y transformación continua",
         "paragraphs": [
-          "Ambas opciones empiezan activadas y se pueden desactivar por separado.",
+          "La interacción táctil y la transformación continua empiezan activadas y se pueden desactivar por separado. La estela de burbujas también está activada: al arrastrar deja pequeñas burbujas que desaparecen en unos segundos. Requiere animación e interacción activas y se puede desactivar por separado.",
           "Con la animación en marcha, arrastra con el ratón pulsado o un dedo. Las burbujas próximas siguen suavemente; al soltar, el efecto se disipa. Los botones siguen siendo utilizables.",
           "Si la interacción está activa durante la reproducción, deslizar dentro de la escena mueve la lava en vez de desplazar la página. Pausa o desactiva la interacción para volver a desplazar normalmente allí.",
           "Transformación continua desarrolla formas y matices lentamente. Apagarla detiene esta evolución adicional, no el movimiento normal ni la mezcla al contacto. Pausa también detiene la transformación."
@@ -741,7 +741,7 @@ export const usageTranslations:Record<UsageTool,Record<'es'|'fr',readonly UsageS
         "title": "Recordar y borrar ajustes",
         "paragraphs": [
           "Recordar ajustes en este dispositivo es opcional y está desactivado inicialmente. Sin consentimiento, los cambios solo duran en la página actual.",
-          "Con consentimiento se guardan colores, velocidad, brillo, líquido, viscosidad, interacción, transformación, sonidos y volumen. También se pueden restaurar idioma y diseño general.",
+          "Con consentimiento se guardan colores, velocidad, brillo, líquido, viscosidad, interacción, transformación, estela de burbujas, sonidos y volumen. También se pueden restaurar idioma y diseño general.",
           "Los datos quedan en este navegador, no en una cuenta, y no pasan automáticamente a otros dispositivos. No se guardan reproducción, posiciones ni mezclas de color.",
           "Desactivar almacenamiento o borrar ajustes locales elimina los datos guardados. Los valores visibles pueden permanecer hasta recargar. Si se bloquea el almacenamiento, el uso sigue siendo posible."
         ]
@@ -789,7 +789,7 @@ export const usageTranslations:Record<UsageTool,Record<'es'|'fr',readonly UsageS
       {
         "title": "Interaction tactile et transformation continue",
         "paragraphs": [
-          "Les deux options sont activées initialement et désactivables séparément.",
+          "L’interaction tactile et la transformation continue sont activées initialement et désactivables séparément. La traînée de bulles est aussi activée : glisser laisse de petites bulles qui disparaissent après quelques secondes. Elle exige une animation et une interaction actives et peut être désactivée séparément.",
           "Pendant l’animation, glissez avec le bouton de souris enfoncé ou un doigt. Les bulles proches suivent doucement ; l’effet s’atténue après relâchement. Les boutons restent utilisables.",
           "Si l’interaction est active pendant la lecture, glisser dans la scène déplace la lave au lieu de faire défiler la page. Mettez en pause ou désactivez l’interaction pour défiler normalement à cet endroit.",
           "La transformation continue développe lentement formes et nuances. La désactiver arrête ce développement supplémentaire, pas le mouvement normal ni le mélange au contact. Pause fige aussi la transformation."
@@ -815,7 +815,7 @@ export const usageTranslations:Record<UsageTool,Record<'es'|'fr',readonly UsageS
         "title": "Mémoriser et effacer les réglages",
         "paragraphs": [
           "La mémorisation sur cet appareil est facultative et désactivée au départ. Sans accord, les changements restent sur la page actuelle.",
-          "Avec accord sont conservés palette, vitesse, luminosité, liquide, viscosité, interaction, transformation, sons et volume. Langue et apparence générale peuvent aussi être restaurées.",
+          "Avec accord sont conservés palette, vitesse, luminosité, liquide, viscosité, interaction, transformation, traînée de bulles, sons et volume. Langue et apparence générale peuvent aussi être restaurées.",
           "Les données restent dans ce navigateur, sans compte, et ne passent pas automatiquement à d’autres appareils. Lecture, positions et mélanges de couleurs ne sont pas enregistrés.",
           "Désactiver le stockage ou effacer les réglages locaux supprime les données sauvegardées. Les valeurs visibles peuvent rester jusqu’au rechargement. Le stockage bloqué n’empêche pas l’utilisation."
         ]

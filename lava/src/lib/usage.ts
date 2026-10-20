@@ -18,7 +18,8 @@ export const usageCopy = {
     'Zähigkeit verändert Bewegungstempo, Dehnung und Formwechsel. Höhere Werte lassen die Lava träger und länger gezogen wirken. Du kannst die Geschwindigkeit zusätzlich separat anpassen.',
    ]},
    {title:'Berührungsaktion und endlose Verwandlung',items:[
-    'Beide Optionen sind zunächst eingeschaltet und lassen sich einzeln ausschalten.',
+    'Berührungsaktion und endlose Verwandlung sind zunächst eingeschaltet und lassen sich einzeln ausschalten.',
+    'Die ebenfalls eingeschaltete Lavabläschen-Spur lässt beim Ziehen kleine Blasen zurück, die nach wenigen Sekunden verschwinden. Sie benötigt eine laufende Animation und aktivierte Berührungsaktion. Du kannst die Spur separat abschalten.',
     'Streiche bei laufender Animation mit gedrückter Maustaste oder einem Finger durch die Fläche. Nahe Blasen werden sanft mitgezogen. Nach dem Loslassen klingt der Einfluss allmählich ab. Die Bedienelemente bleiben normal anklickbar.',
     'Bei aktiver Berührungsaktion und laufender Animation wird eine Wischbewegung innerhalb der Fläche für die Lava genutzt statt zum Scrollen. Pausiere oder schalte die Berührungsaktion aus, um dort wieder normal zu scrollen.',
     'Endlose Verwandlung entwickelt Formen und Farbnuancen langsam weiter. Ausschalten hält diese zusätzliche Entwicklung an; die normale Bewegung und die Farbmischung bei Kontakt bleiben erhalten. Pause hält auch die Verwandlung an.',
@@ -65,7 +66,8 @@ export const usageCopy = {
     'Viscosity changes movement speed, stretching and shape changes. Higher values make lava more sluggish and elongated. Speed can also be adjusted separately.',
    ]},
    {title:'Touch interaction and endless transformation',items:[
-    'Both options are initially on and can be switched off separately.',
+    'Touch interaction and endless transformation are initially on and can be switched off separately.',
+    'The bubble trail is also on by default: dragging leaves small bubbles that dissolve after a few seconds. It requires running animation and touch interaction. The trail can be switched off separately.',
     'While the animation is running, drag through it with a pressed mouse button or one finger. Nearby bubbles follow gently. The influence gradually fades after release. Controls remain clickable.',
     'With touch interaction on and the animation running, swipes inside the scene move lava instead of scrolling. Pause or turn off touch interaction to scroll normally there.',
     'Endless transformation slowly develops shapes and colour nuances. Turning it off stops this extra development; normal movement and colour exchange on contact continue. Pause also freezes transformation.',
@@ -82,7 +84,7 @@ export const usageCopy = {
    ]},
    {title:'Remember and clear preferences',items:[
     '“Remember settings on this device” is optional and initially off. Without consent, changes last only on the current page.',
-    'With consent, the colour palette, speed, brightness, carrier liquid, viscosity, touch interaction, transformation, bubble sounds and volume are saved. Language and general appearance preferences can also be restored.',
+    'With consent, the colour palette, speed, brightness, carrier liquid, viscosity, touch interaction, transformation, bubble trail, bubble sounds and volume are saved. Language and general appearance preferences can also be restored.',
     'Preferences stay in this browser, not an account. They do not automatically transfer to another browser or device. Playback, bubble positions and mixed colours are not saved.',
     'Turning off storage or using the clear action under local settings removes saved preferences. Currently displayed values may remain until reloading. The tool remains usable if browser storage is blocked.',
    ]},
