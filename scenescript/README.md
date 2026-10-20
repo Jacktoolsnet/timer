@@ -740,3 +740,7 @@ noch nicht das vollständig ausgestattete Rennvideo mit Tribünen und Werbung.
   Vorschau, Timeline, Standbild und Video nutzen dieselbe absolute Zeitauswertung.
 - Die vollständige Offline-KI-Anleitung samt Schema-Katalog ist aktualisiert;
   das Größenbudget beträgt jetzt 82.000 UTF-8-Bytes.
+
+Importierbare Demo mit Cover: `/examples/path-camera.scenescript.json`.
+Einzelressourcen: `/examples/path-track.scenestage.json`,
+`/examples/path-red.scenecharacter.json`, `/examples/path-blue.scenecharacter.json`.

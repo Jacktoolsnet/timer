@@ -1,3 +1,4 @@
+import {readFileSync} from 'node:fs';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {parsePaths3D,parsePathMotion3D,samplePath3D,pathMotionFrame3D,vec,dot,cross,sub,eulerFrame3D,type Path3D} from '../src/lib/path3d.ts';
@@ -75,4 +76,14 @@ test('four demo laps meet at identical poses and explicit fractional starts cont
  const p=project(),a=p.scenes[0].stage3d!.actors[0],paths=p.stages.track.paths!;assert.deepEqual(actor3DFrame(a,12,[a],paths),actor3DFrame(a,0,[a],paths));
  const first={...a,path:{...a.path!,laps:.25}},next={...a,path:{...a.path!,laps:.25,start:.25}};assert.deepEqual(actor3DFrame(first,12,[first],paths),actor3DFrame(next,0,[next],paths));
  for(const t of [0,.1,.3,.5,.7,.9]){const frame=samplePath3D(demoPath3D,t);assert.ok(Object.values(frame.position).every(Number.isFinite));}
+});
+
+test('downloadable path project has a real cover and independently importable matching stage/vehicles',()=>{
+ const p=parseProject(readFileSync(new URL('../public/examples/path-camera.scenescript.json',import.meta.url),'utf8'));
+ assert.match(p.thumbnail!.data,/^data:image\/png;base64,/);assert.equal(p.scenes.length,4);
+ for(const [id,kind]of [['track','stage'],['red','character'],['blue','character']] as const){const file='../public/examples/path-'+id+(kind==='stage'?'.scenestage.json':'.scenecharacter.json'),r=parse3DResource(readFileSync(new URL(file,import.meta.url),'utf8'));assert.equal(r.id,id);assert.deepEqual(r.definition,kind==='stage'?p.stages[id]:p.characters[id]);}
+});
+test('camera field of view is validated and preserved in saved projects',()=>{
+ const p=project();assert.equal(p.scenes[3].stage3d!.camera.fov,85);assert.equal(p.scenes[0].stage3d!.camera.fov,38);
+ for(const fov of [0,111,NaN,null]){const p=project();(p.scenes[0].stage3d!.camera as any).fov=fov;assert.throws(()=>validateProject(p),/camera.fov/);}
 });
