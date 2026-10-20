@@ -1,4 +1,5 @@
 ---
+import BrandIcon from '../../../shared/BrandIcon.astro';
 import '../styles/global.css';
 import '../styles/company.css';
 import { colorSchemes } from '../lib/appearance';
@@ -48,7 +49,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <div class="site-shell">
       <header class="site-header">
         <a class="brand" href={'/'} aria-label="Jacktools Startseite">
-          <span class="brand-icon"><img src="/jacktools-icon.png" width="40" height="40" alt="" /></span>
+          <span class="brand-icon"><BrandIcon tool="company"/></span>
           <span class="brand-wordmark">jacktools<span class="brand-dot">.</span>net</span>
         </a>
         <div class="header-tools"><nav class="header-nav" aria-label="Hauptnavigation"><a href="/#tools">Tools</a><a href="/#idee">Unsere Idee</a></nav>

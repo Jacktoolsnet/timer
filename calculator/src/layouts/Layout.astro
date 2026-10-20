@@ -1,4 +1,5 @@
 ---
+import BrandIcon from '../../../shared/BrandIcon.astro';
 import '../styles/global.css';
 import { colorSchemes } from '../lib/engine';
 import { getDictionary, languages, languageNames, type Language } from '../lib/i18n';
@@ -67,7 +68,7 @@ const alternateLanguages = legal && route !== 'usage' ? (['en', 'de'] as const) 
     <div class="site-shell">
       <header class="site-header">
         <a class="brand" href={'/' + lang + '/'} aria-label="Jacktools Calculator">
-          <span class="brand-icon"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="6" y="3" width="20" height="26" rx="3"/><path d="M10 8h12M10 14h2m8 0h2m-12 5h2m8 0h2m-12 5h2m8 0h2"/></svg></span>
+          <span class="brand-icon"><BrandIcon tool="calculator"/></span>
           <span class="brand-wordmark">jacktools<span class="brand-dot">.</span>net<span class="brand-product">/calculator</span></span>
         </a>
         <div class="header-tools">

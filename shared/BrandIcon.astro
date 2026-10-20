@@ -1,0 +1,51 @@
+---
+import BrandGear from './BrandGear.astro';
+export type BrandTool='timer'|'clock'|'stopwatch'|'calculator'|'breathe'|'relax'|'scenescript'|'lava'|'company';
+interface Props {tool:BrandTool}
+const {tool}=Astro.props;
+const gradientId='jacktools-header-'+tool;
+---
+<svg class="brand-mark" data-brand-icon={tool} viewBox="0 0 64 64" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+ {tool==='company'?<>
+  <BrandGear x={17} y={17} radius={12}/>
+  <BrandGear x={46} y={21} radius={12}/>
+  <BrandGear x={30} y={47} radius={12} secondary/>
+  <g fill="none" stroke="var(--accent)" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round">
+   <path d="M14 13c0-4 7-4 7 0 0 3-4 2-4 5m0 3v.1M46 15v7m0 4v.1"/>
+   <path d="M26 44a4 4 0 1 1 7 3l-1 2h-4l-1-2m1 5h4" stroke="var(--brand-secondary)"/>
+  </g>
+ </>:<>
+  <defs><linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="1">
+   <stop stop-color="var(--brand-top)"/><stop offset="1" stop-color="var(--accent)"/>
+  </linearGradient></defs>
+  <rect width="64" height="64" rx="20" fill={'url(#'+gradientId+')'}/>
+  {tool==='timer'&&<g fill="none" stroke="var(--bg)" stroke-width="4" stroke-linecap="round"><circle cx="32" cy="35" r="19"/><path d="M32 35V24m-6-16h12M32 8v8m16 3 4-4"/></g>}
+  {tool==='clock'&&<g fill="none" stroke="var(--bg)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="32" cy="32" r="23"/><path d="M32 15v2m17 15h-2M32 49v-2m-17-15h2M32 21v11l10 6"/></g>}
+  {tool==='stopwatch'&&<g fill="none" stroke="var(--bg)" stroke-width="3" stroke-linecap="round"><circle cx="32" cy="36" r="20"/><path d="M26 8h12M32 8v8M47 17l4 4M32 23v13l8 5"/></g>}
+  {tool==='calculator'&&<g fill="none" stroke="var(--bg)" stroke-width="3" stroke-linecap="round"><rect x="17" y="10" width="30" height="44" rx="4"/><path d="M23 20h18M24 30h2m12 0h2m-16 9h2m12 0h2m-16 9h2m12 0h2"/></g>}
+  {tool==='breathe'&&<>
+   <circle cx="32" cy="32" r="23" fill="none" stroke="var(--bg)" stroke-opacity=".5" stroke-width="2.5"/>
+   <path d="M32 9a23 23 0 0 1 23 23" fill="none" stroke="var(--bg)" stroke-width="3" stroke-linecap="round"/>
+   <circle cx="32" cy="32" r="16" fill="var(--bg)"/><circle cx="35" cy="36" r="11" fill="var(--accent-soft)" opacity=".55"/>
+  </>}
+  {tool==='relax'&&<>
+   <circle cx="43" cy="18" r="5" fill="var(--bg)"/>
+   <g fill="none" stroke="var(--bg)" stroke-width="4" stroke-linecap="round"><path d="M12 29c7-9 13-9 20 0s13 9 20 0M12 40c7-9 13-9 20 0s13 9 20 0M12 51c7-9 13-9 20 0s13 9 20 0"/></g>
+  </>}
+  {tool==='scenescript'&&<g transform="scale(1.33333)">
+   <rect x="9" y="12" width="30" height="24" rx="4" fill="none" stroke="var(--bg)" stroke-width="2"/>
+   <path d="m21 18 10 6-10 6Z" fill="var(--bg)"/><path d="M14 8h20M14 40h20" fill="none" stroke="var(--bg)" stroke-width="2" stroke-linecap="round"/>
+  </g>}
+  {tool==='lava'&&<g fill="var(--bg)">
+   <path d="M25 13c-6 0-10 5-9 11 1 5 5 7 5 12 0 5-3 9-1 13 2 5 11 5 14 0 3-5-1-10-3-14-3-5 2-10 2-14 0-5-3-8-8-8Z"/>
+   <path d="M44 30c-5 0-8 5-8 11s3 10 8 10 8-4 8-10-3-11-8-11Z"/><circle cx="45" cy="17" r="5"/>
+  </g>}
+ </>}
+</svg>
+<style>
+.brand-mark{
+ --brand-top:color-mix(in srgb,var(--accent) 82%,var(--bg));
+ --brand-secondary:color-mix(in srgb,var(--accent) 75%,var(--text));
+ display:block;width:100%;height:100%;flex-shrink:0;fill:none;stroke:none;
+}
+</style>
