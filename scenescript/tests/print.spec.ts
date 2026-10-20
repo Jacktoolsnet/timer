@@ -1,4 +1,4 @@
-import {test,expect} from '@playwright/test';
+import {test,expect} from './helpers/editor-test';
 import {demoProject,newElement} from '../src/lib/model';
 import {defaultPrint} from '../src/lib/print';
 import {defaultGlitch} from '../src/lib/glitch';

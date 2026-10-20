@@ -1,4 +1,4 @@
-import {test,expect,type Page} from '@playwright/test';
+import {test,expect,type Page} from './helpers/editor-test';
 async function setup(page:Page,lang='en'){
  await page.addInitScript(()=>{(window as any).exportTestNow=0;Object.defineProperty(performance,'now',{configurable:true,value:()=>(window as any).exportTestNow});});
  // Isolate timing/UI lifecycle from codecs; real MP4/WebM coverage lives in export.spec.ts.

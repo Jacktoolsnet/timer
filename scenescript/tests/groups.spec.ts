@@ -1,4 +1,4 @@
-import {test,expect,type Page} from '@playwright/test';
+import {test,expect,type Page} from './helpers/editor-test';
 import {demoProject,newElement,newScene} from '../src/lib/model';
 import {newGroup} from '../src/lib/groups';
 import {defaultMotionPath} from '../src/lib/motion-path';

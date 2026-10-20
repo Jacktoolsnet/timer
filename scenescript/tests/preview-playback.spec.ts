@@ -1,4 +1,4 @@
-import {test,expect} from '@playwright/test';
+import {test,expect} from './helpers/editor-test';
 
 test('live drift correction avoids audio-interrupting seeks and preserves trim loops',async({page})=>{
  await page.goto('/en/');const result=await page.evaluate(async()=>{

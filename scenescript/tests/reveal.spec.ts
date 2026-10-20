@@ -1,4 +1,4 @@
-import {test,expect} from '@playwright/test';
+import {test,expect} from './helpers/editor-test';
 import {demoProject,newElement} from '../src/lib/model';
 import {defaultReveal,revealTypes} from '../src/lib/reveal';
 import {defaultAfterimages} from '../src/lib/afterimages';

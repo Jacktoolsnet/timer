@@ -1,4 +1,4 @@
-import {test,expect,type Page} from '@playwright/test';
+import {test,expect,type Page} from './helpers/editor-test';
 import {demoProject} from '../src/lib/model';
 async function load(page:Page,duration=.3){const p=demoProject();p.title='Disk export';p.scenes=p.scenes.slice(0,1);p.scenes[0].duration=duration;p.scenes[0].transition='none';p.scenes[0].background='#ff0000';p.scenes[0].elements=[];await page.goto('/en/');await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(p));await page.locator('#import-json').click();await expect(page.locator('#json-dialog')).not.toBeVisible();}
 async function mockPicker(page:Page,mode='ok'){

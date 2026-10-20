@@ -1,4 +1,4 @@
-import {test,expect} from '@playwright/test';
+import {test,expect} from './helpers/editor-test';
 import {aiGuide,aiGuideExamples,aiCameraExample} from '../src/lib/guide';
 import {parseProject} from '../src/lib/model';
 

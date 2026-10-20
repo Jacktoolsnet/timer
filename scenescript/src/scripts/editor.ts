@@ -1,3 +1,4 @@
+import {getStartupProject,loadDefaultProject} from '../lib/startup-project';
 import {installStage3DEditor} from './stage3d-editor';
 import {createStage3DView,prepareStage3DPreview,type Stage3DView} from './stage3d-preview';
 import {ExportTiming,formatExportDuration} from '../lib/export-timing';
@@ -48,7 +49,7 @@ import {validateSvg,svgDataURL} from '../lib/svg';
 import {renderShape,updateShapeDrawing} from './shapes';
 import {showToast} from './toast';
 import {richTextEditor,renderRuns,styleTextGradient,type TextStyleKey} from './rich-text';
-import {demoProject,newScene,newElement,parseProject,validateProject,projectJsonBytes,formats,fonts,animations,exitAnimations,shapeTypes,sceneTransitions,sceneTransitionState,locateTime,MAX_FILE_BYTES,MAX_IMAGE_BYTES,validateImage,type Project,type Scene,type Element,type Group} from '../lib/model';
+import {newScene,newElement,parseProject,validateProject,projectJsonBytes,formats,fonts,animations,exitAnimations,shapeTypes,sceneTransitions,sceneTransitionState,locateTime,MAX_FILE_BYTES,MAX_IMAGE_BYTES,validateImage,type Project,type Scene,type Element,type Group} from '../lib/model';
 import {storageAllowed} from '../lib/storage';
 import {screenWakeLock} from '../lib/wake-lock';
 import {STORAGE_KEY} from '../lib/engine';
@@ -57,7 +58,8 @@ const $=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(
 const words=JSON.parse($('editor').dataset.words!) as Record<EditorKey,string>;
 const t=(key:string)=>words[key as EditorKey]||key;
 const keepScreenAwake=screenWakeLock($('wake-status'),'',t('wakeUnavailable'));
-let project:Project=demoProject(), sceneIndex=0, selectedId='',dirty=false,time=0,playing=false,recording=false;
+const startup=getStartupProject();
+let project:Project=startup.project, sceneIndex=0, selectedId='',dirty=false,time=0,playing=false,recording=false;
 let revision=0, focusAttempt=0;
 let historyGesture='';
 document.addEventListener('pointerdown',event=>{if((event.target as HTMLElement).closest('.motion-path-overlay,.comic-edit-overlay'))historyGesture='gesture:'+event.pointerId+':'+Date.now();},{capture:true});
@@ -72,7 +74,7 @@ let playbackAttempt=0,preparingPlayback=false;
 let playbackPreparation:AbortController|undefined;
 let baseTime=0,started=0,frame=0,countdownTimer:ReturnType<typeof setTimeout>|undefined,draftTimer:ReturnType<typeof setTimeout>|undefined;
 const status=(message:string)=>{$('editor-status').textContent=message;if(($('resources-dialog') as HTMLDialogElement)?.open)$('resources-status').textContent=message;};
-try{if(storageAllowed()){const saved=localStorage.getItem(STORAGE_KEY);if(saved){project=parseProject(saved);dirty=true;status(t('recovery'));}}}catch{status(t('storageError'));}
+if(startup.recovered){dirty=true;status(t('recovery'));}else if(startup.error)status(t('startupLoadError'));else status('');
 const history=new History(project);
 document.querySelectorAll('#scene-form, #element-form').forEach(form=>form.addEventListener('submit',event=>event.preventDefault()));
 const current=()=>project.scenes[sceneIndex];
@@ -1040,6 +1042,7 @@ $('safe-toggle').addEventListener('change',()=>{$('safe-overlay').hidden=!($('sa
 function replace(next:Project){fitSpeechDurations(next);stop();backgroundVideoNode=undefined;backgroundVideoAsset='';clearVideoURLs();clearAudioURLs();revision++;project=next;sceneIndex=0;selectedId='';time=0;dirty=false;selectedGroupId='';multiSelection.clear();history.reset(project);persist();refresh();status(t('ready'));}
 installStage3DEditor(()=>({project,index:sceneIndex,revision}),next=>{stop();project=next;changed();refresh();},next=>{replace(next);changed();},stop);
 const canReplace=()=>!dirty||confirm(t('unsaved'));
+$('load-default-project').addEventListener('click',async()=>{if(!canReplace())return;const origin=project,version=revision,button=$('load-default-project') as HTMLButtonElement;button.disabled=true;try{const next=await loadDefaultProject();if(project!==origin||revision!==version){showToast(t('defaultStale'),'warning');return;}replace(next);changed();}catch(error){showToast(t('defaultLoadError')+' '+(error as Error).message,'error');}finally{button.disabled=false;}});
 $('new-project').addEventListener('click',()=>{if(canReplace()){replace({groups3d:{},characters:{},stages:{},version:'1.0',title:'SceneScript',description:'',firstComment:'',hashtags:'',thumbnail:null,audios:{},narration:null,audioDucking:false,format:'landscape',backgroundSimulation:null,backgroundVideo:null,videos:{},music:null,assets:{},scenes:[newScene()]});changed();}});
 $('toggle-project').addEventListener('click',()=>{
  const button=$('toggle-project'),collapsed=button.getAttribute('aria-expanded')==='true';

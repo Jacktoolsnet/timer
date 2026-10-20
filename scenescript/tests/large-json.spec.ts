@@ -1,5 +1,5 @@
 import {openResources,closeResources} from './helpers/resources';
-import {test,expect} from '@playwright/test';
+import {test,expect} from './helpers/editor-test';
 import {readFile,writeFile} from 'node:fs/promises';
 import {demoProject} from '../src/lib/model';
 

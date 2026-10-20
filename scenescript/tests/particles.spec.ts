@@ -1,4 +1,4 @@
-import {test,expect} from '@playwright/test';
+import {test,expect} from './helpers/editor-test';
 import {demoProject,newElement} from '../src/lib/model';
 test('particle exits are selectable, deterministic, reversible and survive import',async({page})=>{
  await page.addInitScript(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async(text:string)=>{(window as any).particleJSON=text;}}}));

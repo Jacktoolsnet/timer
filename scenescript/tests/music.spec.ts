@@ -1,4 +1,4 @@
-import {test,expect} from '@playwright/test';
+import {test,expect} from './helpers/editor-test';
 import {readFile} from 'node:fs/promises';
 async function exported(page:import('@playwright/test').Page){const pending=page.waitForEvent('download');await page.locator('#save-project').click();return JSON.parse(await readFile((await (await pending).path())!,'utf8'));}
 test('music dialog drafts cancel and apply; instruments and score editable',async({page})=>{

@@ -1,4 +1,4 @@
-import {test,expect} from '@playwright/test';
+import {test,expect} from './helpers/editor-test';
 import {demoProject,newElement} from '../src/lib/model';
 test('liquid controls, reversible scrubbing, disabling and JSON round trip',async({page})=>{
  await page.addInitScript(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async(text:string)=>{(window as any).liquidJSON=text;}}}));

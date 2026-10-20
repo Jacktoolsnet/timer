@@ -1,4 +1,4 @@
-import {test,expect} from '@playwright/test';
+import {test,expect} from './helpers/editor-test';
 import {readFile} from 'node:fs/promises';
 import {wav} from './audio-fixture';
 import {validateProject} from '../src/lib/model';

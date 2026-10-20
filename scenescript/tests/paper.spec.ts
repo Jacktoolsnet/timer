@@ -1,4 +1,4 @@
-import {test,expect} from '@playwright/test';
+import {test,expect} from './helpers/editor-test';
 import {demoProject,newElement} from '../src/lib/model';
 import {defaultPaper} from '../src/lib/paper';
 test('paper controls persist and seeded edges remain unchanged while scrubbing',async({page})=>{

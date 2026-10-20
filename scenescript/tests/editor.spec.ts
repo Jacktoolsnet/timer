@@ -1,5 +1,5 @@
 import {openResources,closeResources} from './helpers/resources';
-import {test,expect} from '@playwright/test';
+import {test,expect} from './helpers/editor-test';
 import {readFile} from 'node:fs/promises';
 async function exportedJSON(page:import('@playwright/test').Page){const pending=page.waitForEvent('download');await page.locator('#save-project').click();const download=await pending;return readFile((await download.path())!,'utf8');}
 import {demoProject} from '../src/lib/model';

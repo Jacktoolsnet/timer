@@ -1,4 +1,4 @@
-import {test,expect,type Page} from '@playwright/test';
+import {test,expect,type Page} from './helpers/editor-test';
 import {readFile} from 'node:fs/promises';
 import {demoProject} from '../src/lib/model';
 import {contactLayout} from '../src/lib/still-plan';

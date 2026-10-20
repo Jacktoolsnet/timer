@@ -789,3 +789,39 @@ Die Objekte sind normale frei definierte Modelle, keine fest eingebauten Zuschau
 Die aktualisierte Datei `/examples/path-camera.scenescript.json` enthält das komplette
 Gruppenbeispiel samt echtem Cover. `/examples/path-audience.scenegroup.json` ist die
 separat importierbare Publikumsgruppe mit ihren vier Figuren.
+
+
+### Fertiger Monstertruck-Film als Startprojekt
+
+Ohne wiederherstellbaren lokalen Entwurf öffnet der Editor jetzt
+`/examples/monstertruck-race.scenescript.json`: **61,5 Sekunden**, 13 Einstellungen,
+Countdown, vier zusammenhängende Runden je Fahrzeug, Führungswechsel, Zielfoto,
+Rot mit 48,0 s / Blau mit 48,5 s und ein Schlussbild. Die Kamera wechselt zwischen
+Verfolgung, Zuschauerschwenk, Fahrersicht und Übersicht. Die Flagge bewegt sich am
+Ziel; Tribüne, vier Zuschauervorlagen, Werbung und Bäume sind enthalten.
+
+- Originale synthetische Motoren-, Startsignal- und Publikumseffekte als eingebettete
+  PCM-WAV-Datei sowie eine eigene Musik-Partitur. Kein Audio-Download oder externer
+  Dienst nötig; kein automatisches Abspielen beim Öffnen. Die Effekte nutzen die
+  vorhandene Projekt-Audiospur, nicht Sprachsteuerung der Figuren.
+- Echt gerendertes Cover, YouTube-Titel/-Beschreibung, Hashtags und erster Kommentar.
+- Die Gesamtdatei bleibt unter dem bestehenden 4-MiB-Budget für lokale Entwürfe.
+- Vorhandene Entwürfe haben Vorrang; sie werden vor dem Laden des Startprojekts
+  geprüft. Der Startprojekt-Download entfällt dann vollständig.
+- Über das **Flaggensymbol in der Projekt-Werkzeugleiste** lässt sich das fertige
+  Rennprojekt gezielt laden. Bei ungespeicherter Arbeit wird nachgefragt; Änderungen
+  während eines laufenden Downloads werden nicht nachträglich überschrieben.
+- **Neues Projekt** bleibt ein leeres Projekt. Die technische Pfad-Demo unter
+  „3D-Ressourcen → Fahrpfade: Looping & Kameras“ bleibt unabhängig davon erhalten.
+- Netzwerk-/Dateifehler beim Start zeigen einen Hinweis und öffnen das kleine
+  2D-Beispiel als bearbeitbaren Ersatz. Gespeicherte Daten werden dabei nicht
+  überschrieben. Bis zum Abschluss der Initialisierung ist der Editor gesperrt,
+  damit keine frühen Klicks verloren gehen oder später ersetzt werden.
+- Ältere UI-Regressionstests wählen ihr kleines 2D-Startprojekt jetzt ausdrücklich
+  über die gemeinsame Test-Fixture; `race3d.spec.ts` prüft den echten neuen Start,
+  Wiederherstellung, Fehlerfälle, asynchrone Änderungen sowie Rendering/Audioexport.
+
+Reproduzierbare Neuerzeugung der mitgelieferten Datei bei laufendem Dev-Server:
+`npm run example:race` (standardmäßig Port 4321, alternativ `BASE_URL=...`).
+Der Generator erstellt die Effekte aus `race3d-audio.ts` und das Cover über den
+normalen Standbild-Renderer in einem eigenen, leeren Browserkontext.

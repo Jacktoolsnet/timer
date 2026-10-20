@@ -1,5 +1,5 @@
 import {openResources,closeResources} from './helpers/resources';
-import {test,expect,type Page} from '@playwright/test';
+import {test,expect,type Page} from './helpers/editor-test';
 import {readFile} from 'node:fs/promises';
 import {demoProject,type Project} from '../src/lib/model';
 import {defaultNarration} from '../src/lib/audio';

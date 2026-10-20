@@ -1,4 +1,4 @@
-import {test,expect} from '@playwright/test';
+import {test,expect} from './helpers/editor-test';
 import {demoProject} from '../src/lib/model';
 import {defaultMotionPath} from '../src/lib/motion-path';
 test('motion settings, circle preset and editable preview handles',async({page})=>{

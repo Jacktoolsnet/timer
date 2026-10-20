@@ -1,4 +1,4 @@
-import {test,expect,type Page} from '@playwright/test';
+import {test,expect,type Page} from './helpers/editor-test';
 import {comicProject} from '../src/lib/comic-example';
 import {newElement} from '../src/lib/model';
 import {defaultMotionPath} from '../src/lib/motion-path';
