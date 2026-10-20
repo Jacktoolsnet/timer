@@ -618,6 +618,8 @@ body.recording.recording-ready #recording-frame { display:block; }
 #export-progress-label{flex:0 0 auto;min-width:6ch;text-align:right;white-space:nowrap;font-weight:600;font-variant-numeric:tabular-nums;color:var(--accent)}
 #export-status{overflow-wrap:anywhere}
 #export-status:empty{margin:0}
+#export-status[data-kind=error]{padding:12px;border:1px solid #b93838;border-radius:8px;background:#b9383814;color:var(--text);white-space:pre-wrap;user-select:text}
+#export-copy-status:empty{display:none}
 
 #export-dialog{padding:0;max-height:90dvh}
 #export-dialog[open]{display:flex;flex-direction:column;overflow:hidden}

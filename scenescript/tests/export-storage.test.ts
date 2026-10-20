@@ -51,3 +51,11 @@ test('bad positions cannot allocate sparse in-memory output',async()=>{
   const d=memoryVideoDestination('video/webm',new AbortController().signal,8),w=d.stream.getWriter();await assert.rejects(()=>w.write({type:'write',position,data:bytes(1)}));await d.abort();
  }
 });
+
+test('only explicit user cancellation or save-picker dismissal count as cancelled exports',async()=>{
+ const {exportErrorInfo,isExportCancellation}=await import('../src/lib/export-errors.ts');
+ const abort=new DOMException('Encoder was aborted unexpectedly','AbortError');
+ assert.equal(isExportCancellation(abort,false,false),false);assert.equal(isExportCancellation(abort,false,true),true);assert.equal(isExportCancellation(Error('anything'),true,false),true);
+ assert.equal(exportErrorInfo(abort).message,'Encoder was aborted unexpectedly');
+ for(const error of [null,undefined,'Disk failed',{message:'write failed'},Error('failure')])assert.ok(exportErrorInfo(error).message.length>0);
+});

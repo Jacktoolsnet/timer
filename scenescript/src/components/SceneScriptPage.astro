@@ -168,6 +168,7 @@ const {lang}=Astro.props,t=editorDictionary(lang);
   <header class="json-header"><div><h2 id="export-title">{t.exportVideo}</h2><p id="export-setup-hint">{t.exportHint}</p></div></header>
   <div class="dialog-inner">
    <p id="export-status" role="status" aria-live="polite"></p>
+   <div id="export-error-actions" hidden><button id="copy-export-error" type="button">{t.copyError}</button><p id="export-copy-status" role="status"></p></div>
    <div id="export-settings">
    <div id="export-options">
     <label>{t.format}<select id="export-format"><option value="mp4" selected>MP4</option><option value="webm">WebM</option></select></label>

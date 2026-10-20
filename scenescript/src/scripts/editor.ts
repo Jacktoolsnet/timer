@@ -1,6 +1,7 @@
 import {getStartupProject,loadDefaultProject} from '../lib/startup-project';
 import {installStage3DEditor} from './stage3d-editor';
 import {createStage3DView,prepareStage3DPreview,type Stage3DView} from './stage3d-preview';
+import {exportErrorInfo,isExportCancellation} from '../lib/export-errors';
 import {ExportTiming,formatExportDuration} from '../lib/export-timing';
 import {estimatedExportBytes,MEMORY_EXPORT_LIMIT,type ExportOptions} from '../lib/export-plan';
 import {canPickVideoFile,pickVideoFile,clearCompletedVideoExports} from './export-storage';
@@ -1256,6 +1257,13 @@ function setExportRunning(running:boolean){
  if(exportDialog.open)$(running?'cancel-export':'start-export').focus({preventScroll:true});
 }
 
+let exportErrorDetail='';
+function resetExportError(){exportErrorDetail='';$('export-status').removeAttribute('data-kind');$('export-status').setAttribute('role','status');$('export-error-actions').hidden=true;$('export-copy-status').textContent='';}
+$('copy-export-error').addEventListener('click',async()=>{
+ const detail=exportErrorDetail;if(!detail)return;
+ try{await navigator.clipboard.writeText(detail);if(exportErrorDetail===detail)$('export-copy-status').textContent=t('errorCopied');}
+ catch{if(exportErrorDetail===detail){const range=document.createRange();range.selectNodeContents($('export-status'));const selection=window.getSelection();selection?.removeAllRanges();selection?.addRange(range);$('export-copy-status').textContent=t('errorCopyDenied');}}
+});
 function exportOptions():ExportOptions{return {format:$<HTMLSelectElement>('export-format').value as 'mp4'|'webm',resolution:Number($<HTMLSelectElement>('export-resolution').value),fps:Number($<HTMLSelectElement>('export-fps').value),audio:$<HTMLInputElement>('export-audio').checked};}
 let exportDestinationChosen=false;
 function updateExportPlan(){
@@ -1265,27 +1273,31 @@ function updateExportPlan(){
 }
 $('export-destination').addEventListener('change',()=>{exportDestinationChosen=true;updateExportPlan();});
 for(const id of ['export-format','export-resolution','export-fps','export-audio'])$(id).addEventListener('change',updateExportPlan);
-$('open-export').addEventListener('click',()=>{document.activeElement instanceof HTMLElement&&document.activeElement.blur();stop();$('export-status').textContent='';$('export-progress').hidden=true;$('export-progress-row').hidden=true;$('export-preview').hidden=true;$('export-timing').hidden=true;exportDestinationChosen=false;updateExportPlan();setExportRunning(false);exportDialog.showModal();});
-$('clear-export-files').addEventListener('click',async()=>{if(exportController)return;const button=$<HTMLButtonElement>('clear-export-files');button.disabled=true;try{await clearCompletedVideoExports();$('export-status').textContent=t('exportFilesCleared');}catch(error){$('export-status').textContent=t('error')+' '+(error as Error).message;}finally{button.disabled=false;}});
+$('open-export').addEventListener('click',()=>{document.activeElement instanceof HTMLElement&&document.activeElement.blur();stop();resetExportError();$('export-status').textContent='';$('export-progress').hidden=true;$('export-progress-row').hidden=true;$('export-preview').hidden=true;$('export-timing').hidden=true;exportDestinationChosen=false;updateExportPlan();setExportRunning(false);exportDialog.showModal();});
+$('clear-export-files').addEventListener('click',async()=>{if(exportController)return;const button=$<HTMLButtonElement>('clear-export-files');button.disabled=true;try{resetExportError();await clearCompletedVideoExports();$('export-status').textContent=t('exportFilesCleared');}catch(error){$('export-status').textContent=t('error')+' '+(error as Error).message;}finally{button.disabled=false;}});
 const cancelExport=()=>{if(exportController)exportController.abort();else exportDialog.close();};
 $('cancel-export').addEventListener('click',cancelExport);
 exportDialog.addEventListener('cancel',event=>{event.preventDefault();cancelExport();});
 $('start-export').addEventListener('click',async()=>{
  if(exportController)return;const controller=new AbortController();exportController=controller;
- const controls=Array.from(exportDialog.querySelectorAll<HTMLInputElement|HTMLSelectElement|HTMLButtonElement>('#export-options input,#export-options select,#start-export,#clear-export-files'));controls.forEach(n=>n.disabled=true);setExportRunning(true);
- const preview=$<HTMLCanvasElement>('export-preview-canvas');$('export-preview').hidden=true;
- let timing:ExportTiming|undefined,timingInterval:number|undefined,lastTimingPaint=-Infinity;$('export-timing').hidden=true;
+ const controls=Array.from(exportDialog.querySelectorAll<HTMLInputElement|HTMLSelectElement|HTMLButtonElement>('#export-options input,#export-options select,#start-export,#clear-export-files'));
+ const preview=$<HTMLCanvasElement>('export-preview-canvas');
+ let timing:ExportTiming|undefined,timingInterval:number|undefined,lastTimingPaint=-Infinity,pickingFile=false;
  const paintTiming=(force=false)=>{
   if(!timing)return;const now=performance.now();if(!force&&now-lastTimingPaint<1000)return;lastTimingPaint=now;
   const value=timing.read(now);$('export-elapsed').textContent=formatExportDuration(value.elapsedMs);
   $('export-remaining').textContent=value.phase==='finalizing'?t('exportTimeSaving'):value.phase==='stopped'?'—':value.phase==='stalled'?t('exportReestimating'):value.remainingMs===null?t('exportEstimating'):t('exportTimeApprox')+' '+formatExportDuration(Math.ceil(value.remainingMs/1000)*1000);
  };
 
- const progress=$<HTMLProgressElement>('export-progress');progress.hidden=false;progress.value=0;$('export-progress-row').hidden=false;$('export-progress-label').textContent='0 %';$('export-status').textContent='';keepScreenAwake(true);
+ const progress=$<HTMLProgressElement>('export-progress');
  try{
+  resetExportError();controls.forEach(n=>n.disabled=true);setExportRunning(true);
+  $('export-preview').hidden=true;$('export-timing').hidden=true;
+  progress.hidden=false;progress.value=0;$('export-progress-row').hidden=false;$('export-progress-label').textContent='0 %';$('export-status').textContent='';keepScreenAwake(true);
   const options=exportOptions(),name=(project.title.replace(/[\/:*?"<>|]/g,'_')||'SceneScript')+'.'+options.format;
   // Open the picker before the first import/encoder await, preserving user activation.
-  const handle=$<HTMLSelectElement>('export-destination').value==='file'?await pickVideoFile(name,options.format):undefined;
+  pickingFile=$<HTMLSelectElement>('export-destination').value==='file';
+  const handle=pickingFile?await pickVideoFile(name,options.format):undefined;pickingFile=false;
   controller.signal.throwIfAborted();
   timing=new ExportTiming(performance.now());$('export-timing').hidden=false;paintTiming(true);timingInterval=window.setInterval(()=>paintTiming(),1000);
   const {exportVideo,exportVideoToFile,exportSupported}=await import('./video-export');
@@ -1304,8 +1316,14 @@ $('start-export').addEventListener('click',async()=>{
   }
   $('export-status').textContent=t('exportDone');exportDialog.close();showToast(t('exportDone'),'success');
  }catch(error){
-  const message=(error as Error).message,key=['exportDiskUnavailable','exportDiskSpace','exportMemoryLimit'].find(k=>k===message) as 'exportDiskUnavailable'|'exportDiskSpace'|'exportMemoryLimit'|undefined;
-  $('export-status').textContent=controller.signal.aborted||(error as Error).name==='AbortError'?t('exportCancelled'):t('error')+' '+(key?t(key):(error as Error).name==='QuotaExceededError'?t('exportDiskSpace'):/out of memory/i.test(message)?t('exportOutOfMemory'):message);
+  const info=exportErrorInfo(error),key=['exportDiskUnavailable','exportDiskSpace','exportMemoryLimit'].find(k=>k===info.message) as 'exportDiskUnavailable'|'exportDiskSpace'|'exportMemoryLimit'|undefined;
+  if(isExportCancellation(error,controller.signal.aborted,pickingFile))$('export-status').textContent=t('exportCancelled');
+  else{
+   const message=t('error')+' '+(key?t(key):info.name==='QuotaExceededError'?t('exportDiskSpace'):/out of memory/i.test(info.message)?t('exportOutOfMemory'):info.message);
+   $('export-status').textContent=message;$('export-status').dataset.kind='error';$('export-status').setAttribute('role','alert');$('export-error-actions').hidden=false;
+   exportErrorDetail=message+'\n\n'+info.detail+'\n'+JSON.stringify(exportOptions())+'\n'+navigator.userAgent;
+   console.error('SceneScript video export failed',error);showToast(message,'error');
+  }
  }
  finally{if(timingInterval!==undefined)clearInterval(timingInterval);timing?.stop(performance.now());paintTiming(true);exportController=undefined;controls.forEach(n=>n.disabled=false);setExportRunning(false);keepScreenAwake(false);}
 });

@@ -8,7 +8,7 @@ async function setup(page:Page,lang='en'){
   window.reportExportProgress=progress;
   return new Promise((resolve,reject)=>{
    window.finishTestExport=()=>{progress(1);resolve(new Blob(['timing UI fixture'],{type:'video/webm'}));};
-   window.failTestExport=()=>reject(new Error('Test write failed'));
+   window.failTestExport=(reason=new Error('Test write failed'))=>reject(reason);
    signal.addEventListener('abort',()=>reject(new DOMException('Cancelled','AbortError')),{once:true});
   });
  };
@@ -47,4 +47,15 @@ test('percentage label uses localized decimals, fits next to the bar and resets 
  const bar=(await page.locator('#export-progress').boundingBox())!,label=(await page.locator('#export-progress-label').boundingBox())!,row=(await page.locator('#export-progress-row').boundingBox())!;
  expect(label.x).toBeGreaterThanOrEqual(bar.x+bar.width);expect(label.x+label.width).toBeLessThanOrEqual(row.x+row.width+1);
  await page.locator('#cancel-export').click();await expect(page.locator('#start-export')).toBeEnabled();await expect(page.locator('#export-progress-label')).toHaveText('42,7 %');await page.locator('#start-export').click();await expect(page.locator('#export-progress-label')).toHaveText('0 %');await page.locator('#cancel-export').click();
+});
+
+test('an internal encoder AbortError stays visible and copyable instead of becoming a user cancellation',async({page})=>{
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await setup(page);
+ await page.evaluate(()=>{(navigator.clipboard as any).writeText=async(text:string)=>(window as any).copiedExportError=text;(window as any).failTestExport(new DOMException('Encoder stopped unexpectedly','AbortError'));});
+ await expect(page.locator('#export-dialog')).toBeVisible();await expect(page.locator('#export-status')).toHaveAttribute('role','alert');await expect(page.locator('#export-status')).toContainText('Encoder stopped unexpectedly');await expect(page.locator('#export-status')).toBeInViewport();await expect(page.locator('#export-settings')).toBeVisible();await page.locator('#copy-export-error').click();
+ const copied=await page.evaluate(()=>(window as any).copiedExportError);expect(copied).toContain('AbortError');expect(copied).toContain('Encoder stopped unexpectedly');expect(copied).toContain('"resolution":1080');expect(errors).toEqual([]);
+ await page.locator('#start-export').click();await expect(page.locator('#export-error-actions')).toBeHidden();await expect(page.locator('#export-status')).toBeEmpty();await page.locator('#cancel-export').click();await expect(page.locator('#export-status')).toHaveText('Export cancelled');
+});
+test('non-Error rejection cannot crash the error handler and silently reset export',async({page})=>{
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await setup(page);await page.evaluate(()=>(window as any).failTestExport(null));await expect(page.locator('#export-status')).toHaveText('Please check: null');await expect(page.locator('#copy-export-error')).toBeVisible();await expect(page.locator('#start-export')).toBeEnabled();expect(errors).toEqual([]);
 });
