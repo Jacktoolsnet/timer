@@ -241,3 +241,19 @@ test('bubble sounds default on and persist when disabled',async({page})=>{
  await page.locator('#lava-toggle').click();
  expect(errors).toEqual([]);
 });
+
+test('bubble volume is adjustable and remembered without autoplay',async({page})=>{
+ await page.goto('/de/');
+ await expect(page.locator('#lava-volume')).toHaveValue('50');
+ await page.locator('#lava-volume').fill('75');
+ await expect(page.locator('#volume-value')).toHaveText('75 %');
+ expect(await page.evaluate(()=>localStorage.getItem('jacktools.lava.settings.v1'))).toBeNull();
+ await page.locator('#palette-dropdown summary').click();
+ await page.locator('#remember-preferences').check();
+ await page.reload();
+ await expect(page.locator('#lava-volume')).toHaveValue('75');
+ await expect(page.locator('#volume-value')).toHaveText('75 %');
+ await expect(page.locator('#lava-toggle')).toHaveAttribute('aria-pressed','false');
+ await page.locator('#lava-volume').fill('0');
+ await expect(page.locator('#volume-value')).toHaveText('0 %');
+});

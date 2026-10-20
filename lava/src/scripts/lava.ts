@@ -18,6 +18,7 @@ const interaction=new LavaInteraction();
 let evolutionTime=12;
 const sound=document.querySelector<HTMLInputElement>('#lava-sound')!;
 const bubbleAudio=new BubbleAudio();
+const volume=document.querySelector<HTMLInputElement>('#lava-volume')!;
 const motion = matchMedia('(prefers-reduced-motion: reduce)');
 const gl = canvas.getContext('webgl', { alpha: false, antialias: false, preserveDrawingBuffer: false });
 let running = false, frame = 0, previous = 0, elapsed = 12, colour = 0;
@@ -284,7 +285,7 @@ function saveLavaSettings() {
  if (!storageAllowed()) return;
  try {
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
-   colour, speed: Number(speed.value), brightness: Number(brightness.value), fluidColour, viscosity: Number(viscosity.value), touch:touch.checked, evolution:evolution.checked, sound:sound.checked
+   colour, speed: Number(speed.value), brightness: Number(brightness.value), fluidColour, viscosity: Number(viscosity.value), touch:touch.checked, evolution:evolution.checked, sound:sound.checked, volume:Number(volume.value)
   }));
  } catch { /* Blocked/full storage must not prevent using the animation. */ }
 }
@@ -298,6 +299,7 @@ if (storageAllowed()) {
   const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
   if (saved && typeof saved === 'object') {
    if(typeof saved.sound==='boolean')sound.checked=saved.sound;
+   if(Number.isInteger(saved.volume)&&saved.volume>=0&&saved.volume<=100)volume.value=String(saved.volume);
    if(typeof saved.touch==='boolean')touch.checked=saved.touch;
    if(typeof saved.evolution==='boolean')evolution.checked=saved.evolution;
    if(Number.isInteger(saved.fluidColour)&&saved.fluidColour>=0&&saved.fluidColour<5){
@@ -402,3 +404,10 @@ document.addEventListener('visibilitychange',()=>{
  if(!document.hidden&&running&&sound.checked)void bubbleAudio.start();
 });
 window.addEventListener('pagehide',()=>bubbleAudio.stop());
+
+function updateVolume(){
+ bubbleAudio.setVolume(Number(volume.value)/100);
+ document.querySelector('#volume-value')!.textContent=volume.value+' %';
+}
+volume.addEventListener('input',()=>{updateVolume();saveLavaSettings();});
+updateVolume();

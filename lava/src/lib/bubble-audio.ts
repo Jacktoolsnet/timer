@@ -3,6 +3,12 @@ import {BLOB_COUNT,blobShape} from './rainbow.ts';
 /** Quiet procedural bubbles, no files or network requests. */
 export class BubbleAudio {
  private context:AudioContext|null=null;
+ private master:GainNode|null=null;
+ private volume=.5;
+ setVolume(value:number){
+  this.volume=Math.max(0,Math.min(1,value));
+  if(this.master&&this.context)this.master.gain.setTargetAtTime(this.volume*2,this.context.currentTime,.025);
+ }
  private contacts=new Map<string,boolean>();
  private lastSound=-10;
  private primed=false;
@@ -11,6 +17,11 @@ export class BubbleAudio {
   this.enabled=true;
   try{
    this.context??=new AudioContext();
+   if(!this.master){
+    this.master=this.context.createGain();
+    this.master.gain.value=this.volume*2;
+    this.master.connect(this.context.destination);
+   }
    await this.context.resume();
    if(!this.enabled)await this.context.suspend();
   }catch{this.enabled=false;}
@@ -51,7 +62,7 @@ export class BubbleAudio {
   gain.gain.setValueAtTime(0,now);
   gain.gain.linearRampToValueAtTime(.05,now+.018);
   gain.gain.exponentialRampToValueAtTime(.0001,now+.24);
-  osc.connect(gain);gain.connect(ctx.destination);
+  osc.connect(gain);gain.connect(this.master!);
   osc.start(now);osc.stop(now+.26);
   osc.onended=()=>{osc.disconnect();gain.disconnect();};
  }
