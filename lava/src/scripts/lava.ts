@@ -1,4 +1,4 @@
-import {hitBlob,sheddingPoint} from '../lib/shedding';
+import {hitBlob,sheddingPoint,strokeEffect} from '../lib/shedding';
 import {LavaTrail} from '../lib/trail';
 import {BubbleAudio} from '../lib/bubble-audio';
 import {LavaInteraction} from '../lib/interaction';
@@ -381,11 +381,12 @@ else{
 
 let activePointer:number|null=null;
 let grabbedBlob=-1;
+let activeEffect:'trail'|'shedding'|null=null;
 let lastPoint={x:0,y:0};
 function updateTouchMode(){
  stage.style.touchAction=touch.checked&&running?'none':'auto';
 }
-function stopStroke(){activePointer=null;grabbedBlob=-1;}
+function stopStroke(){activePointer=null;grabbedBlob=-1;activeEffect=null;}
 stage.addEventListener('pointerdown',event=>{
  if(!touch.checked||!running||!program||!(event.target instanceof Element)||event.target.closest('button'))return;
  if(activePointer!==null)return;
@@ -393,14 +394,15 @@ stage.addEventListener('pointerdown',event=>{
  activePointer=event.pointerId;
  lastPoint={x:(event.clientX-rect.left)/rect.width,y:1-(event.clientY-rect.top)/rect.height};
  grabbedBlob=hitBlob(lastPoint.x,lastPoint.y,elapsed,rect.width/rect.height,Number(viscosity.value)/100,interaction.offsets);
+ activeEffect=strokeEffect(grabbedBlob,trailEnabled.checked,sheddingEnabled.checked);
  stage.setPointerCapture(event.pointerId);
 });
 stage.addEventListener('pointermove',event=>{
  if(event.pointerId!==activePointer||!touch.checked||!running)return;
  const rect=canvas.getBoundingClientRect();
  const point={x:(event.clientX-rect.left)/rect.width,y:1-(event.clientY-rect.top)/rect.height};
- if(trailEnabled.checked)trail.stroke(point.x,point.y,point.x-lastPoint.x,point.y-lastPoint.y,rect.width/rect.height,trailColour(point.x,point.y));
- if(sheddingEnabled.checked&&grabbedBlob>=0){
+ if(activeEffect==='trail'&&trailEnabled.checked)trail.stroke(point.x,point.y,point.x-lastPoint.x,point.y-lastPoint.y,rect.width/rect.height,trailColour(point.x,point.y));
+ if(activeEffect==='shedding'&&sheddingEnabled.checked&&grabbedBlob>=0){
   const dx=point.x-lastPoint.x,dy=point.y-lastPoint.y;
   const edge=sheddingPoint(grabbedBlob,elapsed,rect.width/rect.height,Number(viscosity.value)/100,interaction.offsets,dx,dy);
   if(edge){

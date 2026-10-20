@@ -19,3 +19,9 @@ export function sheddingPoint(index:number,time:number,aspect:number,viscosity:n
  return {x:s.x+offsets[index*2]-nx*s.rx*scale/aspect,
   y:s.y+offsets[index*2+1]-ny*s.ry*scale};
 }
+
+/** Pick one effect at gesture start; never switch modes while crossing a blob. */
+export function strokeEffect(blob:number,trail:boolean,shedding:boolean):'trail'|'shedding'|null{
+ if(blob>=0&&shedding)return 'shedding';
+ return trail?'trail':null;
+}
