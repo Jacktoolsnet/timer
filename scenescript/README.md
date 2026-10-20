@@ -454,8 +454,8 @@ Orientierung erhalten. Tastaturfokus wechselt zu Abbrechen bzw. zurück zu Start
 
 ### 3D-Prototyp: gemeinsame Charaktere und Bühnen
 
-Unter **Projekt → 3D-Bühnen & Charaktere → Beispiel mit drei Figuren laden**
-startet ein 13-sekündiges Beispiel mit Mika, Bo und Lina in einer eigenen Bauklotz-Plaza,
+Unter **Projekt → 3D-Bühnen & Charaktere → Beispieltyp: Bisherige Figuren**
+startet per Beispielsymbol ein 13-sekündiges Beispiel mit Mika, Bo und Lina in einer eigenen Bauklotz-Plaza,
 anschließend dieselben Figuren auf derselben Bühne mit anderer Kamera. Das ersetzt
 nach Rückfrage das Projekt und erzeugt ein echtes PNG-Cover aus dem Renderer.
 Keine originalen Roblox-Assets; keine Verbindung zu Roblox oder externen Diensten.
