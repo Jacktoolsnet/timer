@@ -87,3 +87,11 @@ test('camera field of view is validated and preserved in saved projects',()=>{
  const p=project();assert.equal(p.scenes[3].stage3d!.camera.fov,85);assert.equal(p.scenes[0].stage3d!.camera.fov,38);
  for(const fov of [0,111,NaN,null]){const p=project();(p.scenes[0].stage3d!.camera as any).fov=fov;assert.throws(()=>validateProject(p),/camera.fov/);}
 });
+test('explicit up vectors control banking, validate unsafe inputs and round-trip without drift',()=>{
+ const route={...straight,ups:[vec(0,2,0),vec(1,1,0),vec(1,1,0)]},parsed=parsePaths3D({route}).route;
+ assert.ok(samplePath3D(parsed,.5).up.x>.7);assert.ok(samplePath3D(parsed,.5).right.y<-.7);
+ assert.deepEqual(parsePaths3D(JSON.parse(JSON.stringify({route:parsed}))).route,parsed);
+ assert.deepEqual(parsePaths3D({route:{...straight,ups:[]}}).route,straight);
+ for(const ups of [[vec(0,1,0)],[vec(),vec(0,1,0),vec(0,1,0)],[vec(0,0,1),vec(0,1,0),vec(0,1,0)],[vec(0,1,0),vec(0,-1,0),vec(0,1,0)]])assert.throws(()=>parsePaths3D({route:{...straight,ups}}),/ups/);
+ const closed={closed:true,interpolation:'smooth',points:[vec(),vec(2,0,0),vec(2,0,2)],ups:[vec(0,1,0),vec(1,1,0),vec(0,-1,0)]};assert.throws(()=>parsePaths3D({route:closed}),/half-turns/);
+});

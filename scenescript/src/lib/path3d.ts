@@ -1,6 +1,6 @@
 /** Bounded, data-only paths. Arc length + parallel transport frames are cached per definition. */
 export type V3={x:number;y:number;z:number};
-export type Path3D={points:V3[];closed:boolean;interpolation:'smooth'|'linear'};
+export type Path3D={ups?:V3[];points:V3[];closed:boolean;interpolation:'smooth'|'linear'};
 export type PathMotion3D={path:string;at:number;duration:number;laps:number;start:number;offset:number;orient:boolean};
 export type Frame3D={position:V3;right:V3;up:V3;forward:V3};
 export const vec=(x=0,y=0,z=0):V3=>({x:x+0,y:y+0,z:z+0});
@@ -21,13 +21,16 @@ export function parsePaths3D(value:unknown,p='paths'):Record<string,Path3D>{
  const values=value===undefined?{}:record3D(value,p),out:Record<string,Path3D>={};if(Object.keys(values).length>16)throw new Error(p+': maximum 16');
  for(const [id,raw]of Object.entries(values)){
   const path=p+'.'+id;if(!/^[A-Za-z0-9_-]{1,100}$/.test(id))throw new Error(path+': invalid identifier');
-  const v=record3D(raw,path);fields3D(v,['points','closed','interpolation'],path);
+  const v=record3D(raw,path);fields3D(v,['points','closed','interpolation','ups'],path);
   const closed=v.closed===undefined?false:v.closed;if(typeof closed!=='boolean')throw new Error(path+'.closed: expected boolean');
   const interpolation=v.interpolation===undefined?'smooth':v.interpolation;if(interpolation!=='linear'&&interpolation!=='smooth')throw new Error(path+'.interpolation: smooth, linear');
   if(!Array.isArray(v.points)||v.points.length<(closed?3:2)||v.points.length>128)throw new Error(path+'.points: expected '+(closed?3:2)+'–128 points');
   const points=v.points.map((v,i)=>vector3DInput(v,path+'.points['+i+']'));
   for(let i=1;i<points.length+(closed?1:0);i++)if(Math.hypot(...Object.values(sub(points[i%points.length],points[i-1])))<1e-5)throw new Error(path+'.points: consecutive points must differ; closed paths omit repeated endpoint');
-  Object.defineProperty(out,id,{value:{points,closed,interpolation},enumerable:true,writable:true,configurable:true});
+  const rawUps=v.ups===undefined?[]:v.ups;if(!Array.isArray(rawUps)||rawUps.length!==0&&rawUps.length!==points.length)throw new Error(path+'.ups: empty or one up vector per point');
+  const ups=rawUps.map((v,i)=>{const up=vector3DInput(v,path+'.ups['+i+']');if(Math.hypot(up.x,up.y,up.z)<1e-5)throw new Error(path+'.ups['+i+']: expected nonzero up vector');return Math.abs(Math.hypot(up.x,up.y,up.z)-1)<1e-12?up:norm(up);});
+  for(let i=0;i<ups.length;i++){const a=points[closed?(i-1+points.length)%points.length:Math.max(0,i-1)],b=points[closed?(i+1)%points.length:Math.min(points.length-1,i+1)],t=norm(sub(b,a));if(Math.abs(dot(t,ups[i]))>.99999)throw new Error(path+'.ups['+i+']: up must not be parallel to path');if((i||closed)&&dot(ups[(i-1+ups.length)%ups.length],ups[i])<-.99999)throw new Error(path+'.ups: add intermediate vectors for half-turns');}
+  Object.defineProperty(out,id,{value:{points,closed,interpolation,...(ups.length?{ups}:{})},enumerable:true,writable:true,configurable:true});
  }return out;
 }
 export function parsePathMotion3D(value:unknown,paths:Record<string,Path3D>,duration:number,p='path'):PathMotion3D|null{
@@ -65,6 +68,7 @@ export function samplePath3D(path:Path3D,fraction:number,offset=0):Frame3D{
  let lo=0,hi=samples.length-1;while(lo+1<hi){const mid=(lo+hi)>>1;if(samples[mid].length<=distance)lo=mid;else hi=mid;}
  const a=samples[lo],b=samples[hi],t=b.length>a.length?(distance-a.length)/(b.length-a.length):0,u=a.u+(b.u-a.u)*t,forward=norm(mix(a.forward,b.forward,t));
  let up=perpendicular(mix(a.up,b.up,t),forward);if(twist)up=rotate(up,forward,twist*progress);
+ if(path.ups?.length){const n=path.points.length,k=Math.min((path.closed?n:n-1)-1,Math.floor(u*(path.closed?n:n-1))),f=u*(path.closed?n:n-1)-k;up=perpendicular(mix(path.ups[k],path.ups[(k+1)%n],f),forward);}
  const right=norm(cross(up,forward));up=norm(cross(forward,right));return {position:add(point(path,u),mul(right,offset)),right,up,forward};
 }
 export function pathMotionFrame3D(paths:Record<string,Path3D>,motion:PathMotion3D,time:number){return samplePath3D(paths[motion.path],motion.start+clamp((time-motion.at)/motion.duration)*motion.laps,motion.offset);}

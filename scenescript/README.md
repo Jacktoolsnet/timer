@@ -653,7 +653,7 @@ Gespeicherte Projekte und Einzelexporte enthalten die vollständigen Modelle.
   Im Ressourcendialog: **Bauteile, Gelenke & Animationen (JSON)**, Animation wählen,
   Zeitregler bewegen. Fehler sind kopierbar und verhindern stilles Übernehmen
   einer älteren gültigen Modellfassung.
-- Budgets: 256 Teile/Modell, Tiefe 32, 256 Gelenke, 16 Clips, 4096 Keyframes gesamt;
+- Budgets: 512 Teile/Modell, Tiefe 32, 256 Gelenke, 16 Clips, 4096 Keyframes gesamt;
   64 Bewegungsereignisse/Spur. Szene: max. 12 Auftritte, 2048 geschätzte aktive Teile.
   Grenzen und Verweise werden vor dem Rendern validiert.
 
@@ -799,6 +799,21 @@ Countdown, vier zusammenhängende Runden je Fahrzeug, Führungswechsel, Zielfoto
 Rot mit 48,0 s / Blau mit 48,5 s und ein Schlussbild. Die Kamera wechselt zwischen
 Verfolgung, Zuschauerschwenk, Fahrersicht und Übersicht. Die Flagge bewegt sich am
 Ziel; Tribüne, vier Zuschauervorlagen, Werbung und Bäume sind enthalten.
+
+Die Produktionsbahn hat eine gut 200 Welteinheiten lange, kurvenreiche Route.
+Der Spiral-Looping versetzt Ein- und Ausfahrt seitlich um 6,4 Einheiten bei
+4,8 Einheiten Fahrbahnbreite. Die Hochkurven sind bis ca. 28° überhöht;
+Rampe, Flugbahn und Landung bleiben oberirdisch. 448 feinere Fahrbahnabschnitte
+und zusätzliche Stützen bilden die Strecke. Die Trucks besitzen Profilblöcke,
+Felgenspeichen, Radmuttern, Federbeine, Achsen, Spiegel, Kühlergrill,
+Zusatzscheinwerfer, Überrollbügel und Ersatzrad als normale exportierbare Bauteile.
+
+`Path3D.ups` erlaubt optional einen Aufwärtsvektor je Kontrollpunkt: So werden
+Überhöhungen und die Orientierung im Spiral-Looping explizit beschrieben und
+von Straße, Fahrzeugen und Kameras gemeinsam genutzt. Ohne diese Vektoren bleibt
+der bisherige Paralleltransport unverändert. Für feinere Konstruktionen gilt
+nun ein Limit von 512 Teilen pro Modell; das Gesamtbudget von 2048 aktiven Teilen
+pro Szene bleibt bestehen.
 
 - Originale synthetische Motoren-, Startsignal- und Publikumseffekte als eingebettete
   PCM-WAV-Datei sowie eine eigene Musik-Partitur. Kein Audio-Download oder externer

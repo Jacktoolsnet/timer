@@ -25,7 +25,7 @@ function vector(v:unknown,p:string,fallback:Vector3D,min:number,max:number):Vect
 export function parseModel3D(value:unknown,path='model'):Model3D|null{
  if(value===undefined||value===null)return null;
  const v=obj(value,path);fields(v,['parts','animations'],path);
- if(!Array.isArray(v.parts)||!v.parts.length||v.parts.length>256)throw new Error(path+'.parts: expected 1–256 parts');
+ if(!Array.isArray(v.parts)||!v.parts.length||v.parts.length>512)throw new Error(path+'.parts: expected 1–512 parts');
  const ids=new Set<string>(),joints=new Map<string,Joint3D>();let jointCount=0;
  const parts:Part3D[]=v.parts.map((value,index)=>{
   const p=path+'.parts['+index+']',v=obj(value,p),d=defaultPart3D();fields(v,Object.keys(d),p);

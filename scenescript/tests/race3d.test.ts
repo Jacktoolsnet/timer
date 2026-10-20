@@ -28,3 +28,25 @@ test('startup prioritizes saved work, handles corrupt storage and failed default
  const corrupt=await resolveStartupProject('{invalid',load);assert.ok(corrupt.error);assert.equal(corrupt.project.title,race3DExample.title);
  const failed=await resolveStartupProject(null,async()=>{throw Error('offline');});assert.ok(failed.error);assert.equal(failed.project.title,demoProject().title);
 });
+test('production track has a separated spiral, banked curves and entirely above-ground road meshes',async()=>{
+ const {racePath3D:route,raceRoadParts3D:road,raceRoadWidth3D:width,spiralEntryIndex3D:entry,spiralExitIndex3D:exit,raceJumpGap3D:gap,raceRoadSamples3D:samples}=await import('../src/lib/race3d-track.ts');
+ const {samplePath3D,sub,eulerFrame3D,dot}=await import('../src/lib/path3d.ts');
+ const a=route.points[entry],b=route.points[exit];close(a.x,b.x);close(a.y,b.y);assert.ok(Math.abs(a.z-b.z)>width+1);assert.equal(exit-entry,24);
+ let length=0,previous=samplePath3D(route,0),maxBank=0;
+ for(let i=1;i<=2000;i++){
+  const f=samplePath3D(route,i/2000);length+=Math.hypot(...Object.values(sub(f.position,previous.position)));assert.ok(dot(previous.up,f.up)>.98);assert.ok(dot(previous.forward,f.forward)>.98);
+  if(f.position.z>0){assert.ok(f.up.y>.8);maxBank=Math.max(maxBank,Math.abs(f.right.y));}
+  for(const lane of [-1.15,1.15])assert.ok(samplePath3D(route,i/2000,lane).position.y>.5);
+  previous=f;
+ }
+ assert.ok(length>200);assert.ok(maxBank>Math.sin(20*Math.PI/180));
+ for(let i=0;i<samples;i++)assert.equal(road.some(p=>p.id==='road'+i),!gap(samplePath3D(route,(i+.5)/samples).position));assert.ok(road.some(p=>p.position.x>9&&p.position.x<14&&p.position.z< -8));
+ for(const p of road){const r=p.rotation,f=eulerFrame3D(r.x*Math.PI/180,r.y*Math.PI/180,r.z*Math.PI/180);for(const x of [-1,1])for(const y of [-1,1])for(const z of [-1,1]){const bottom=p.position.y+x*p.size.x/2*f.right.y+y*p.size.y/2*f.up.y+z*p.size.z/2*f.forward.y;assert.ok(bottom>0,`${p.id} penetrates ground: ${bottom}`);}}
+ const seam0=samplePath3D(route,0),seam1=samplePath3D(route,1-1e-7);assert.ok(dot(seam0.up,seam1.up)>.99999);
+});
+test('detailed trucks use reusable animated wheel children and shipped geometry matches the source',()=>{
+ const p=validateProject(race3DExample),shipped=parseProject(readFileSync(new URL('../public/examples/monstertruck-race.scenescript.json',import.meta.url),'utf8'));
+ for(const car of ['red','blue']){const m=p.characters[car].model!;assert.ok(m.parts.length>120);for(const id of ['grille','rollCrossbar','roofLights','spareTire','axle1','shockleftFront','treadleftFront0'])assert.ok(m.parts.some(p=>p.id===id),id);assert.equal(m.parts.find(p=>p.id==='treadleftFront0')!.parent,'rollleftFront');assert.deepEqual(shipped.characters[car].model,m);}
+ assert.deepEqual(shipped.stages.track.paths,p.stages.track.paths);
+ assert.deepEqual(shipped.stages.track.model,p.stages.track.model);
+});

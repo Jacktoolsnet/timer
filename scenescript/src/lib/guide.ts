@@ -316,6 +316,9 @@ No external model files/scripts, physics, skinning or head-only looking.
 3D PATHS (no physics): Stage.paths is a reusable ID map, max16 paths. Each has
 points:[{x,y,z},...], 2–128 points (closed:at least3), closed:false(default),
 interpolation:smooth(default Catmull-Rom)/linear. Coordinates ±100 world units.
+Optional ups: empty = transported frames; otherwise one nonzero, non-tangent-parallel
+up vector per point. Interpolated normals define banked turns/loop rolls; add
+intermediate vectors for half-turns.
 Adjacent points must differ; closed:true closes automatically: DO NOT repeat the
 first point at the end. Smooth curves may overshoot; linear has sharp corners.
 Actor.path=null(default) or {path:"route",duration:12,laps:4,offset:1} references
@@ -419,7 +422,7 @@ additively, then primary control applies, then clamp. E.g. eye scale can respond
 to moods while blink overrides it. Pixel scales use mood responses and blink
 (eyes) / speech (mouth) control. All facial geometry remains editable data.
 Order: rest → joints overrides → motion → responses → control → clamp.
-Limits/model: 256 parts, depth32, 256 joints (6/part), 16 clips, 64 tracks/clip,
+Limits/model: 512 parts, depth32, 256 joints (6/part), 16 clips, 64 tracks/clip,
 64 keys/track, 4096 keys total. Shot: 2048 estimated active parts, max12 actors.
 Independent resource files: 512 KiB. No image textures/custom meshes yet.
 In resource dialog edit model JSON, choose animation and scrub preview time.
