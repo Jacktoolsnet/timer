@@ -1,0 +1,17 @@
+---
+import UsageLanguageNav from '../../../../shared/UsageLanguageNav.astro';
+import {usageSections,browserNotes} from '../../lib/usage';
+import Layout from '../../layouts/Layout.astro';
+import {dictionaries} from '../../lib/relax-i18n';
+interface Props {lang:'de'|'en'}
+const {lang}=Astro.props,t=dictionaries[lang];
+---
+<Layout lang={lang} title={t.usage} description={t.usage} route="usage" noindex legal>
+ <article class="legal-page"><h1>{t.usage}</h1><UsageLanguageNav lang={lang}/>
+ <p>{lang==='de'?'Stand: 8. Oktober 2026. Die deutsche Fassung ist die Originalfassung; Englisch ist eine Übersetzung.':'Last updated: 8 October 2026. German is the original; English is a translation.'}</p>
+ <h2>{t.purpose}</h2><p>{t.usageBody}</p>
+ {usageSections[lang].map(section=><section><h2>{section.title}</h2><ul>{section.items.map(item=><li>{item}</li>)}</ul></section>)}
+ <h2>{t.safetyLink}</h2><p>{t.firstHint}</p><p class="notice">{t.safePlace}</p><ul>{t.safetyDetails.map(text=><li>{text}</li>)}</ul>
+ <h2>{t.technical}</h2>{browserNotes[lang].map(note=><p>{note}</p>)}<h2>{t.privacyTitle}</h2><p>{t.privacyBody}</p><p><a href={'/'+lang+'/privacy/'}>{lang==='de'?'Datenschutzerklärung':'Privacy notice'}</a></p><p class="legal-back"><a href={'/'+lang+'/'}>← Relax</a></p>
+ </article>
+</Layout>

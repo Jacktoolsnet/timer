@@ -6,7 +6,7 @@ interface Props { lang: Language; title: string; description: string; route: str
 const { lang, title, description, route, noindex = false, legal = false } = Astro.props;
 const t = getDictionary(lang);
 const canonical = new URL(Astro.url.pathname === '/' ? '/en/' : Astro.url.pathname, Astro.site);
-const alternateLanguages = legal ? (['en', 'de'] as const) : languages;
+const alternateLanguages = legal && route !== 'usage' ? (['en', 'de'] as const) : languages;
 ---
 <!doctype html>
 <html lang={lang} data-palette="terracotta" data-style="warm" data-font-size="0">
@@ -71,7 +71,7 @@ const alternateLanguages = legal ? (['en', 'de'] as const) : languages;
               <section class="preferences-language" aria-labelledby="language-heading">
                 <h3 id="language-heading">{t.language}</h3>
             <nav class="language-menu" aria-label={t.language}>
-              {languages.map(l => <a href={'/' + l + '/' + (legal && !['de', 'en'].includes(l) ? '' : (route ? route + '/' : ''))} lang={l} hreflang={l} aria-current={l === lang ? 'page' : undefined}>
+              {languages.map(l => <a href={'/' + l + '/' + (legal && route !== 'usage' && !['de', 'en'].includes(l) ? '' : (route ? route + '/' : ''))} lang={l} hreflang={l} aria-current={l === lang ? 'page' : undefined}>
                 <span class="language-code" aria-hidden="true">{l.toUpperCase()}</span>
                 <span>{languageNames[l]}</span>
                 {l === lang && <svg class="language-check" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4 10-10"/></svg>}
@@ -124,7 +124,7 @@ const alternateLanguages = legal ? (['en', 'de'] as const) : languages;
           </div>
         </section>
         <div><a class="footer-brand" href={'/' + lang + '/'}>jacktools.net</a><p>{t.footer}</p></div>
-        <nav aria-label={t.legal}><a href={'/' + (lang === 'de' ? 'de' : 'en') + '/legal/'}>{t.legal}{!['de','en'].includes(lang) && ' (EN)'}</a><a href={'/' + (lang === 'de' ? 'de' : 'en') + '/privacy/'}>{t.privacy}{!['de','en'].includes(lang) && ' (EN)'}</a><a href={'/' + (lang === 'de' ? 'de' : 'en') + '/usage/'}>{t.usage}{!['de','en'].includes(lang) && ' (EN)'}</a><button id="privacy-open">{t.preferences}</button></nav>
+        <nav aria-label={t.legal}><a href={'/' + (lang === 'de' ? 'de' : 'en') + '/legal/'}>{t.legal}{!['de','en'].includes(lang) && ' (EN)'}</a><a href={'/' + (lang === 'de' ? 'de' : 'en') + '/privacy/'}>{t.privacy}{!['de','en'].includes(lang) && ' (EN)'}</a><a href={'/' + lang + '/usage/'}>{t.usage}</a><button id="privacy-open">{t.preferences}</button></nav>
         <p class="footer-credit">{t.creditBefore} ❤️ ☕ {t.creditAnd} 🍫 {t.creditAfter} <a href="https://jacktools.net" rel="noreferrer" referrerpolicy="no-referrer"><strong>jacktools.net</strong></a></p>
       </footer>
     </div>

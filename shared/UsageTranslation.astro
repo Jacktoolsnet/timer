@@ -1,0 +1,24 @@
+---
+import {usageTranslations,type UsageTool} from './usage-translations';
+import UsageLanguageNav from './UsageLanguageNav.astro';
+interface Props {tool:UsageTool;lang:'es'|'fr';safety?:{title:string;paragraphs:string[];items:readonly string[]}}
+const {tool,lang,safety}=Astro.props,es=lang==='es';
+const sections=usageTranslations[tool][lang];
+const title=es?'Instrucciones de uso':'Guide d’utilisation';
+---
+<article class="legal-page">
+ <h1>{title}</h1><UsageLanguageNav lang={lang}/>
+ <p>{es?'La versión alemana es el original editorial; esta versión es una traducción.':'La version allemande est l’original éditorial ; cette version est une traduction.'}</p>
+ {sections.map((section,index)=><>
+  <section><h2>{section.title}</h2>{section.paragraphs.map(text=><p>{text}</p>)}</section>
+  {index===0&&safety&&<section><h2>{safety.title}</h2>{safety.paragraphs.map(text=><p>{text}</p>)}<ul>{safety.items.map(text=><li>{text}</li>)}</ul></section>}
+ </>)}
+ {tool==='breathe'&&<p>
+  <a href="https://www.nhs.uk/mental-health/self-help/guides-tools-and-activities/breathing-exercises-for-stress/" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">{es?'Ejercicios respiratorios suaves (NHS, en inglés)':'Exercices respiratoires doux (NHS, en anglais)'}</a> · <a href="https://digital-strategy.ec.europa.eu/en/policies/112" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">{es?'Número de emergencia 112 en la UE':'Numéro d’urgence 112 dans l’UE'}</a>
+ </p>}
+ {tool==='scenescript'&&<p><a href={'/'+lang+'/ai/'}>{es?'Guía de formato para IA':'Guide de format pour l’IA'}</a></p>}
+ <p><a href="/en/privacy/">{es?'Aviso de privacidad (EN)':'Politique de confidentialité (EN)'}</a></p>
+ <h2>{es?'¿Problemas o preguntas?':'Problèmes ou questions ?'}</h2>
+ <p>{es?'Describe el problema e indica tu navegador y dispositivo: ':'Décrivez le problème et indiquez votre navigateur et appareil : '}<a href="mailto:jacktoolsnet@gmail.com">jacktoolsnet@gmail.com</a>.</p>
+ <p class="legal-back"><a href={'/'+lang+'/'}>← {es?'Volver a la herramienta':'Retour à l’outil'}</a></p>
+</article>

@@ -1,18 +1,14 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import {usageCopy} from '../../lib/usage';
-export function getStaticPaths(){return (['de','en'] as const).map(lang=>({params:{lang},props:{lang}}));}
-const {lang}=Astro.props;
-const de=lang==='de', t=usageCopy[lang];
+import Original from '../../components/usage/Original.astro';
+import UsageTranslation from '../../../../shared/UsageTranslation.astro';
+import {languages,type Language} from '../../lib/i18n';
+export function getStaticPaths(){return languages.map(lang=>({params:{lang},props:{lang}}));}
+const {lang}=Astro.props as {lang:Language};
+const title=lang==='es'?'Instrucciones de uso':'Guide d’utilisation';
+
 ---
-<Layout lang={lang} title={t.title} description={de?'Bedienung, Einstellungen und technische Grenzen der Jacktools-Lavalampe.':'Controls, preferences and technical limits of the Jacktools lava lamp.'} route="usage" noindex legal>
- <article class="legal-page">
-  <h1>{t.title}</h1>
-  <nav class="legal-nav"><a href="/de/usage/" lang="de">Deutsch · Original</a><a href="/en/usage/" lang="en">English · Translation</a></nav>
-  <p>{de?'Stand: 20. Oktober 2026. Die deutsche Fassung ist die Originalfassung; Englisch ist eine Übersetzung.':'Last updated: 20 October 2026. German is the original; English is a translation.'}</p>
-  <p>{t.intro}</p>
-  {t.sections.map(section=><section><h2>{section.title}</h2><ul>{section.items.map(item=><li>{item}</li>)}</ul></section>)}
-  <p><a href={'/'+lang+'/privacy/'}>{de?'Datenschutzerklärung':'Privacy notice'}</a></p>
-  <p class="legal-back"><a href={'/'+lang+'/'}>← Lava</a></p>
- </article>
-</Layout>
+{lang==='de'||lang==='en'?<Original lang={lang}/>:
+ <Layout lang={lang} title={title} description={title+' · Jacktools Lava'} route="usage" noindex legal>
+  <UsageTranslation tool="lava" lang={lang}/>
+ </Layout>}

@@ -1,0 +1,10 @@
+---
+interface Props {lang:'de'|'en'|'es'|'fr'}
+const {lang}=Astro.props;
+const labels={de:'Dokumentsprache',en:'Document language',es:'Idioma del documento',fr:'Langue du document'};
+const names={de:'Deutsch',en:'English',es:'Español',fr:'Français'};
+---
+<nav class="legal-nav" aria-label={labels[lang]}>
+ {(['de','en','es','fr'] as const).map(language=><a href={'/'+language+'/usage/'} lang={language} hreflang={language} aria-current={language===lang?'page':undefined}>{names[language]}</a>)}
+</nav>
+<style>.legal-nav{display:flex;flex-wrap:wrap;gap:10px 20px}</style>
