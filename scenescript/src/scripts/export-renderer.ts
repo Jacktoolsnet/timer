@@ -1,3 +1,5 @@
+import {morphMesh} from '../lib/morph';
+import {renderMorph} from './morph';
 import {prepareStage3DSpeech} from './stage3d-speech';
 import type {SpeechEnvelopes} from '../lib/stage3d-speech';
 import type {Shot3D} from '../lib/stage3d';
@@ -28,6 +30,8 @@ import {createSvgImage,seekSvg} from './svg-image';
 import type {ExportMedia} from './export-media';
 /** A separate, offscreen scene tree: exporting never changes the editor playhead. */
 export class ExportRenderer{
+ private morphQueue:Promise<unknown>=Promise.resolve();
+ private morphCache=new Map<string,Promise<{outgoing:HTMLCanvasElement;incoming:HTMLCanvasElement;mesh:ReturnType<typeof morphMesh>}>>();
  private stage3d:Stage3DRenderer|undefined;
  private speech=new WeakMap<Shot3D,Promise<SpeechEnvelopes>>();
  private fontCss=new Map<string,Promise<string>>();
@@ -61,10 +65,25 @@ export class ExportRenderer{
  for(const attr of ['x','y','width','height','cx','cy','r','rx','ry','x1','y1','x2','y2','viewBox']){if((n.localName==='filter'||n.localName.startsWith('fe'))&&!n.hasAttribute(attr))continue;try{const value=(n as unknown as Record<string,{animVal?:{value?:number;x?:number;y?:number;width?:number;height?:number}}>)[attr]?.animVal;if(value?.value!==undefined)copy.setAttribute(attr,String(value.value));else if(attr==='viewBox'&&value?.x!==undefined)copy.setAttribute(attr,`${value.x} ${value.y} ${value.width} ${value.height}`);}catch{/* Filter primitive percentage defaults may have no resolvable SVGLength; retain the original attribute. */}}
  const transform=(n as SVGGraphicsElement).transform?.animVal;if(transform?.numberOfItems){let m=new DOMMatrix();for(let j=0;j<transform.numberOfItems;j++)m=m.multiply(transform.getItem(j).matrix);if(m)copy.setAttribute('transform',`matrix(${m.a} ${m.b} ${m.c} ${m.d} ${m.e} ${m.f})`);}
  });clone.querySelectorAll('animate,animateTransform,set').forEach(n=>n.remove());svg.replaceWith(clone);}}
- async frame(time:number,width:number,height:number){this.media.check();this.clear();
+ async frame(time:number,width:number,height:number){
+ const at=locateTime(this.p,time),scene=this.p.scenes[at.index];
+ if(scene.transition==='morph'&&at.index>0&&at.local<scene.transitionDuration){
+  const endpoints=await this.prepareMorph(at.index,width,height);this.media.check();return renderMorph(endpoints.outgoing,endpoints.incoming,endpoints.mesh,at.local/scene.transitionDuration);
+ }
+ return this.renderFrame(time,width,height);
+ }
+ prepareMorph(index:number,width:number,height:number){
+ const key=`${index}:${width}:${height}`;let cached=this.morphCache.get(key);if(cached)return cached;
+ // At most two pairs of raster endpoints; never retain a frame per timeline tick.
+ if(this.morphCache.size>=2){const first=this.morphCache.keys().next().value!;void this.morphCache.get(first)!.then(p=>{p.outgoing.width=0;p.incoming.width=0;}).catch(()=>{});this.morphCache.delete(first);}
+ cached=this.morphQueue.then(async()=>{this.media.check();const previous=this.p.scenes[index-1],scene=this.p.scenes[index],start=this.p.scenes.slice(0,index).reduce((n,s)=>n+s.duration,0),local=Math.min(scene.duration,scene.transitionDuration),outgoing=await this.renderFrame(start,width,height,{index:index-1,local:previous.duration});try{const incoming=await this.renderFrame(start+local,width,height,{index,local});return {outgoing,incoming,mesh:morphMesh(scene.morph??null)};}catch(error){outgoing.width=0;outgoing.height=0;throw error;}});
+ this.morphQueue=cached.catch(()=>{});
+ this.morphCache.set(key,cached);return cached;
+ }
+ private async renderFrame(time:number,width:number,height:number,only?:{index:number;local:number}){this.media.check();this.clear();
  if(this.p.backgroundSimulation){const host=this.box();this.root.append(host);this.simulation(this.p.backgroundSimulation,this.w,this.h,time,host);}
  if(this.p.backgroundVideo){const host=this.box();this.root.append(host);await this.video(this.p.backgroundVideo,time,host);}
- const at=locateTime(this.p,time),s=this.p.scenes[at.index],transition=sceneTransitionState(s,at.local),previous=s.transition!=='none'&&s.transition!=='fade'&&at.index>0&&transition.progress<1;
+ const at=only??locateTime(this.p,time),original=this.p.scenes[at.index],s=only?{...original,transition:'none' as const}:original,transition=sceneTransitionState(s,at.local),previous=s.transition!=='none'&&s.transition!=='fade'&&at.index>0&&transition.progress<1;
  if(s.transition==='through-black'&&transition.progress<1){const black=this.box();black.style.background='#000';black.style.opacity=String(1-Math.abs(transition.progress*2-1));this.root.append(black);}
  if(previous){const out=await this.layer(this.p.scenes[at.index-1],this.p.scenes[at.index-1].duration);out.style.transform=transition.outgoing;out.style.opacity=String(transition.outgoingOpacity);}
  const incoming=await this.layer(s,at.local);incoming.style.transform=transition.incoming;incoming.style.clipPath=transition.clip;incoming.style.opacity=String(transition.opacity);
@@ -89,5 +108,5 @@ export class ExportRenderer{
  }
  // Detached canvases can otherwise retain large native pixel buffers until a GC.
  private clear(){for(const canvas of this.root.querySelectorAll('canvas')){canvas.width=0;canvas.height=0;}this.root.replaceChildren();}
- dispose(){this.speech=new WeakMap();this.stage3d?.dispose();this.stage3d=undefined;this.clear();this.fontCss.clear();this.root.remove();}
+ dispose(){for(const cached of this.morphCache.values())void cached.then(p=>{p.outgoing.width=0;p.outgoing.height=0;p.incoming.width=0;p.incoming.height=0;}).catch(()=>{});this.morphCache.clear();this.speech=new WeakMap();this.stage3d?.dispose();this.stage3d=undefined;this.clear();this.fontCss.clear();this.root.remove();}
 }

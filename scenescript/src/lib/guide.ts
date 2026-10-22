@@ -72,9 +72,8 @@ The following is specification notation, NOT JSON syntax:
   = {}                        the object's subfield defaults apply (not an enable switch)
   = inherit Element.field     inherit the containing element's actual value
   ∞                           no separate per-field upper bound; global budgets still apply
-A capitalized type name refers to its field block in §11, not a JSON discriminator.
-Only documented field names may be emitted; !, Type names, ranges and section
-references never go into JSON. JSON has no comments or trailing commas.
+A capitalized type refers to §11, not a JSON discriminator. Emit only field names
+and values: no notation, section references, comments or trailing commas.
 
 Universal requirements:
 - Root must be an object. version is the STRING "1.0". Do not add $schema.
@@ -92,8 +91,7 @@ Universal requirements:
 - Omit optional fields for defaults; do not substitute null or empty strings.
   Explicit null is not a general way to request defaults; see §10.
 - Total JSON: <=160 MiB UTF-8 including Base64/whitespace; 1 MiB=1,048,576 bytes.
-  Avoid approaching the limit: pretty-printing adds bytes. Browser memory/storage
-  can impose smaller practical limits. Base64 adds roughly one third to file size.
+  Pretty-printing adds bytes; Base64 adds ~1/3. Browser limits may be smaller.
 
 ## 3. Content, coordinates and appearance
 Project.scenes plays in array order; durations add up with no transition tail time.
@@ -194,14 +192,21 @@ Scene transition (applies to the incoming scene; first scene has no outgoing one
 - none: no fade/transform. fade: incoming elements/background IMAGE fade in over
   their OWN immediate background color; NOT a crossfade from the previous scene.
 - crossfade: full incoming scene opacity 0→1 over the held outgoing scene.
+- morph: mesh-warp and dissolve two frozen frames: previous scene end → incoming
+  scene at min(transitionDuration,duration). Scene.morph.points maps from/to x/y
+  screen percentages 0–100 (max32 distinct source landmarks). Match visible
+  features; edges stay pinned. Extreme maps are attenuated to prevent folds.
+  null/omitted morph uses a gentle default warp; points:[] gives a dissolve.
+  Hold incoming motion until transitionDuration to avoid a jump at the end.
+  Preview/export use the same raster mesh, not AI-generated intermediate images.
 - slide-left/right/up/down: incoming travels in named direction from one viewport
   away; previous scene travels out in same direction. Linear progress.
 - wipe-left/right/up/down: reveals incoming scene by clipping in named direction;
   outgoing stays underneath. zoom-in: incoming scale 0.7→1 and opacity 0→1.
 - zoom-out: incoming scale 1.3→1 and opacity 0→1; outgoing stays underneath.
 - through-black: outgoing fades first half; incoming second half; black overlays.
-Non-fade transition progress is linear and clamped; it is retained when paused or
-seeking. First-scene transitions run over black. Viewport size sets slide travel.
+Progress is clamped and seekable: linear except morph (smoothstep). First-scene
+morph falls back to a fade over black. Viewport size sets slide travel.
 Transitions overlap the start of a scene, do not extend durations or mute narration.
 
 Accepted edge cases (not rejection rules): at==scene.duration is legal but usually
@@ -745,29 +750,22 @@ JSON is the editable project, NOT a video file. The editor can import pasted JSO
 or a .scenescript.json file and save it; recent editing/undo state is not project
 content. Preview/recording never exports handles, selection outlines or safe zones.
 Direct MP4/WebM export is browser-side, requires compatible decoders and encoders;
-MP4 can use bundled local AAC fallback. Export size (480p/720p/1080p short edge),
-24/30/60 fps and audio choice are UI-only, NOT Project fields. No server transcoding or
-automatic MP4→WebM fallback. Export can be cancelled; it does not replace editable
-JSON. Export writes to a selected file (where supported) or a temporary local
-browser file, not one growing video ArrayBuffer. Large exports recommend direct
-file output. Free disk/browser quota is required; size estimates are approximate.
-Without disk storage only small exports are allowed. Temporary completed videos
-can be deleted in the export dialog; later exports clean them up after 24 hours.
-Wait for downloads to finish before clearing them. No upload or resumable export.
-Elapsed time and approximate rendering time remaining are UI-only, based on recent
-measured export speed; final file saving is shown as a separate phase.
-Screen recording is another route; capture tab/system audio if wanted.
-For visual review, the preview's Images & contact sheet dialog exports a PNG at
-an exact project time (native project resolution) or contact sheets from selected
-scene-local times. It uses the SAME renderer/clock as video export, including
-camera, animation and real transitions, without editor overlays. At 0 s a fade
-may still be black. Contact sheets label scene IDs and local/project seconds;
-up to six samples per PNG, multiple pages in one ZIP with frames.json mapping.
-Send these images back to the authoring AI to review actual layout and speaker
-positions instead of guessing from JSON. These controls are UI-only, not fields.
-The editor requires a viewport >=768 CSS pixels (tablet/desktop), not a landscape
-project; phone-shaped videos are supported. AI documentation remains accessible
-on smaller viewports. No automatic publishing or platform acceptance guarantees exist.
+MP4 has a bundled local AAC fallback. Resolution (480/720/1080 short edge),
+24/30/60 fps and audio are UI-only. No server transcoding or automatic format
+fallback. Cancellable exports preserve JSON and write to a selected file (where
+supported) or temporary browser storage, not a growing video ArrayBuffer. Large
+exports recommend direct file output and require free disk/quota; without disk
+storage only small exports work. Size/time estimates are approximate, based on
+recent rendering speed; saving is separate. Completed temporary videos can be
+deleted in the dialog and are cleaned after 24 hours on later exports. Finish
+pending downloads before deletion. No upload/resume. For screen recording,
+capture tab/system audio if wanted.
+Visual review: Images & contact sheet exports native-resolution PNGs using the
+video renderer/clock, without editor overlays. Contact sheets: six samples/page,
+ZIP includes frames.json with scene/project times. Send frames to the authoring
+AI to check actual layout. UI-only, not project fields.
+Editor requires >=768 CSS px; portrait videos work. AI docs also work on phones.
+No automatic publishing or platform acceptance guarantee.
 
 ## 11. Field catalog (specification notation, not output JSON)
 Every block below defines one object type. Follow the reference from its parent's

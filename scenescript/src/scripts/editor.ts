@@ -1,3 +1,4 @@
+import type {MorphPreview} from './morph-preview';
 import {removeTextureAsset3D} from '../lib/texture3d';
 import {getStartupProject,loadDefaultProject} from '../lib/startup-project';
 import {installStage3DEditor} from './stage3d-editor';
@@ -959,6 +960,14 @@ function updateSceneViews(sceneViews:SceneView[],local:number,opacity=1,cameraEn
  if(warning){const view=sceneViews.find(v=>v.element.id===selectedId)?.bubble;warning.hidden=!view?.overflow();}
 
 }
+let morphPreview:MorphPreview|undefined,morphPreviewReady:Promise<MorphPreview>|undefined,morphRevision=-1;
+function ensureMorphPreview(){
+ if(!morphPreviewReady||morphRevision!==revision){
+  morphPreview?.dispose();morphPreview=undefined;const version=revision;morphRevision=version;
+  morphPreviewReady=import('./morph-preview').then(({MorphPreview})=>{const view=new MorphPreview(project,error=>status(error.message));if(version!==revision){view.dispose();throw new DOMException('Stale morph preview','AbortError');}morphPreview=view;return view;});
+ }
+ return morphPreviewReady;
+}
 let backgroundVideoNode:HTMLVideoElement|undefined,backgroundVideoAsset='',playbackUIKey='';
 function draw(follow=true){
  syncProjectSimulation();
@@ -973,11 +982,14 @@ function draw(follow=true){
  const showPrevious=layered&&at.index>0&&transition.progress<1;
  const key=`${revision}:${at.index}:${project.format}:${playing}:${recording}:${selectedId}:${selectedGroupId}:${showPrevious}:${cameraOverview}`;
  if(stageKey!==key){
+  if(morphRevision!==revision){morphPreview?.dispose();morphPreview=undefined;morphPreviewReady=undefined;}
   incomingStage3D?.dispose();incomingStage3D=undefined;outgoingStage3D?.dispose();outgoingStage3D=undefined;
   stageKey=key;stage.querySelectorAll<HTMLVideoElement>('video:not(.project-video-canvas)').forEach(v=>v.pause());for(const child of Array.from(stage.children))if(child!==projectSimulation?.canvas&&child!==backgroundVideoNode)child.remove();if(projectSimulation&&projectSimulation.canvas.parentElement!==stage)stage.prepend(projectSimulation.canvas);if(backgroundVideoNode&&backgroundVideoNode.parentElement!==stage){if(projectSimulation)projectSimulation.canvas.after(backgroundVideoNode);else stage.prepend(backgroundVideoNode);}outgoingLayer=undefined;transitionBlack=undefined;
   if((projectSimulation||backgroundVideoNode)&&s.transition==='through-black'){transitionBlack=document.createElement('div');transitionBlack.className='project-transition-black';stage.append(transitionBlack);}stage.style.background=projectSimulation||backgroundVideoNode||layered||s.backgroundGradient||!s.backgroundEnabled||s.backgroundOpacity<1?'#000000':s.background;resize();
   if(showPrevious){const previous=project.scenes[at.index-1],view=createSceneLayer(previous,at.index-1,false);outgoingLayer=view.layer;view.world.style.transform=cameraTransform(cameraOverview&&!playing&&!recording?null:previous.camera,previous.duration,formats[project.format][0],formats[project.format][1]);stage.append(view.layer);updateSceneViews(view.views,previous.duration,1,!(cameraOverview&&!playing&&!recording));seekSvg(view.svgBackground,previous.duration);outgoingStage3D=view.stage3d;outgoingStage3D?.draw(previous.duration);}
   const view=createSceneLayer(s,at.index,true);incomingLayer=view.layer;incomingWorld=view.world;incomingSvgBackground=view.svgBackground;incomingStage3D=view.stage3d;views=view.views;stage.append(view.layer);
+  const morphIndex=s.transition==='morph'&&showPrevious?at.index:project.scenes[at.index+1]?.transition==='morph'?at.index+1:-1;
+  if(morphIndex>0)void ensureMorphPreview().then(async view=>{await view.ready(morphIndex);if(stageKey===key&&s.transition==='morph'&&showPrevious){stage.append(view.canvas);view.draw(time);}}).catch(error=>{if((error as Error).name!=='AbortError')status((error as Error).message);});
  }
  if(incomingWorld)incomingWorld.style.transform=cameraTransform(cameraOverview&&!playing&&!recording?null:s.camera,at.local,formats[project.format][0],formats[project.format][1]);
  if(transitionBlack)transitionBlack.style.opacity=String(1-Math.abs(transition.progress*2-1));
@@ -987,6 +999,7 @@ function draw(follow=true){
  const sceneOpacity=s.transition==='fade'&&playing?Math.min(1,at.local/s.transitionDuration):1;
  const backgroundImage=incomingLayer?.querySelector<HTMLElement|SVGElement>('.scene-background');if(backgroundImage)backgroundImage.style.opacity=String(sceneOpacity);
  seekSvg(incomingSvgBackground,at.local);incomingStage3D?.draw(at.local);
+ if(s.transition==='morph'&&showPrevious&&morphPreview?.canvas.isConnected)morphPreview.draw(time);
  updateSceneViews(views,at.local,sceneOpacity,!(cameraOverview&&!playing&&!recording));
  stage.querySelector('.motion-path-overlay')?.remove();stage.querySelector('.comic-edit-overlay')?.remove();
  const edit=selected();if((!s.camera||cameraOverview)&&motionEditing&&!playing&&!recording&&edit?.motionPath)renderMotionPath(stage,edit,formats[project.format][0],formats[project.format][1],next=>{if(!motionEditing||selected()!==edit)return;edit.motionPath=next;changed();draw(false);},()=>{if(selected()===edit)renderForms();},parentMatrix(edit,s,at.local,formats[project.format][0],formats[project.format][1]));
@@ -1029,7 +1042,9 @@ function play(){
  const begin=()=>{if(!playing||attempt!==playbackAttempt)return;preparingPlayback=false;playbackPreparation=undefined;baseTime=time;started=performance.now();draw(false);frame=requestAnimationFrame(tick);};
  const clips=narrationClips(project);const prepare=clips.length?narrationPlayer.prepare(project).catch(error=>{showToast(t('audioError')+' '+(error as Error).message,'warning');return null;}):Promise.resolve(null);
  const videos=[...(backgroundVideoNode?[backgroundVideoNode]:[]),...views.filter(v=>v.video&&v.node.style.visibility!=='hidden').map(v=>v.video!)];
- void Promise.all([prepare,Promise.all(videos.map(v=>prepareVideo(v,preparation.signal))),project.scenes.some(s=>s.stage3d)?prepareStage3DPreview(project,()=>preparation.signal.throwIfAborted()):Promise.resolve()]).then(async([buffers])=>{
+ const currentAt=locateTime(project,time),morphIndex=project.scenes[currentAt.index].transition==='morph'&&currentAt.index>0?currentAt.index:project.scenes[currentAt.index+1]?.transition==='morph'?currentAt.index+1:-1;
+ const morphReady=morphIndex>0?ensureMorphPreview().then(view=>view.ready(morphIndex)):Promise.resolve();
+ void Promise.all([prepare,Promise.all(videos.map(v=>prepareVideo(v,preparation.signal))),morphReady,project.scenes.some(s=>s.stage3d)?prepareStage3DPreview(project,()=>preparation.signal.throwIfAborted()):Promise.resolve()]).then(async([buffers])=>{
   if(!playing||attempt!==playbackAttempt)return;
   if(project.music?.enabled){try{await musicPlayer.start(project.music,time,total(),t=>buffers?duckGain(project,t,clips):1);}catch{showToast(t('audioError'),'warning');}}
   if(!playing||attempt!==playbackAttempt)return;if(buffers)narrationPlayer.start(project,musicPlayer.playhead()??time,buffers);begin();

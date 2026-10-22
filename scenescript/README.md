@@ -952,3 +952,25 @@ ganze Fläche zusammenhängend. Das Inflationsbeispiel nutzt je Material ein
 Profil statt der bisherigen Balken. Die Schrift besitzt nun dunkle, tiefe
 Extrusionskörper und helle Fronten auf einer leicht gedrehten 3D-Schriftebene.
 Cover, Audio und Dauer bleiben unverändert.
+
+### Landmark-guided scene morph
+
+Set the incoming scene's `transition` to `"morph"`. Optional
+`morph: {points: [{from: {x: 25, y: 50}, to: {x: 30, y: 45}}]}` maps
+matching visible features in screen percentages (0–100), up to 32 distinct source
+landmarks. Frame edges remain pinned; extreme maps are attenuated to prevent folds.
+Without settings a gentle default warp is used; `points: []` is a dissolve.
+
+The previous scene's final frame and incoming scene at
+`min(transitionDuration, duration)` are frozen, smoothly mesh-warped and blended.
+Hold incoming animations/camera until the transition finishes to avoid a jump.
+The transition occupies the start of the incoming scene, never adds timeline time
+and does not stretch audio. A first-scene morph fades over black. This is
+controlled screen-space image deformation, not generative intermediate images
+or semantic optical flow. Preview and export share the compositor; at most two
+endpoint pairs are cached per renderer and released on disposal.
+
+The inflation default now aligns its left-hand camera, larger title and initial
+wavy contours with the cover. Its diagram grid is mounted on a translucent
+glass backboard above the tiled floor. The three-second simulation follows the
+0.3-second cover-to-chart morph; explicitly reload the default to replace a draft.

@@ -6,8 +6,10 @@ English-speaking mobile short-video viewers curious about everyday prices. This 
 ## Timing and design
 - Portrait 9:16, total **4.3 seconds**.
 - One-second title image: **INFLATION EXPLAINED WITH CHOCOLATE**.
-- 0.3-second crossfade to a perspective 3D chart; its initial state holds during the transition.
+- 0.3-second landmark-guided mesh morph to the 3D chart. Frozen endpoints align the cover with the held chart pose; simulation begins after the morph.
 - **Exactly three seconds** of continuous simulation with a matching original whoosh.
+- The initial wavy chocolate/gold contours echo the cover, then chocolate shrinks further while gold grows. The camera looks from the left at a lower angle; title positions and proportions are cover-aligned.
+- A translucent glass backboard carries the raised grid above the floor; the floor is visible through its unoccupied areas.
 - Continuous extruded profiles replace all vertical bar segments. Their wavy upper contours use shape-preserving cubic interpolation, with a fixed baseline and reusable buffers.
 - The title has deep dark extrusion bodies, polished front caps and a slightly angled lettering plane.
 - The thick chocolate-filled area shrinks; the embossed golden money-filled area grows. Non-linear, uneven curves, chocolate-tablet top tiles and coin-like gold details.
