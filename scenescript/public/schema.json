@@ -1189,6 +1189,20 @@
         "max"
       ]
     },
+    "texture3D":{
+      "type":"object","additionalProperties":false,
+      "properties":{
+        "asset":{"type":"string","maxLength":100,"pattern":"^(?:[A-Za-z0-9_-]+)?$","default":""},
+        "repeat":{"type":"object","additionalProperties":false,"properties":{"x":{"type":"number","minimum":0.01,"maximum":100,"default":1},"y":{"type":"number","minimum":0.01,"maximum":100,"default":1}}},
+        "offset":{"type":"object","additionalProperties":false,"properties":{"x":{"type":"number","minimum":-100,"maximum":100,"default":0},"y":{"type":"number","minimum":-100,"maximum":100,"default":0}}},
+        "rotation":{"type":"number","minimum":-3600,"maximum":3600,"default":0},
+        "faces":{"type":"object","additionalProperties":false,"properties":{
+          "right":{"type":"string","maxLength":100,"pattern":"^(?:[A-Za-z0-9_-]+)?$"},"left":{"type":"string","maxLength":100,"pattern":"^(?:[A-Za-z0-9_-]+)?$"},
+          "top":{"type":"string","maxLength":100,"pattern":"^(?:[A-Za-z0-9_-]+)?$"},"bottom":{"type":"string","maxLength":100,"pattern":"^(?:[A-Za-z0-9_-]+)?$"},
+          "front":{"type":"string","maxLength":100,"pattern":"^(?:[A-Za-z0-9_-]+)?$"},"back":{"type":"string","maxLength":100,"pattern":"^(?:[A-Za-z0-9_-]+)?$"}
+        }}
+      }
+    },
     "part3D": {
       "type": "object",
       "additionalProperties": false,
@@ -1232,6 +1246,7 @@
           "pattern": "^#[a-fA-F0-9]{6}$",
           "default": "#36a9e1"
         },
+        "texture":{"anyOf":[{"$ref":"#/$defs/texture3D"},{"type":"null"}],"default":null},
         "finish": {"enum":["standard","polished","glass"],"default":"standard"},
         "roughness": {
           "type": "number",

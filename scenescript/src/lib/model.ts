@@ -1,6 +1,6 @@
 import {parseGroup3D,type Group3D} from './group3d.ts';
 import {parse3DLibrary,parseCharacter3D,parseStage3D,parseShot3D,type Character3D,type Stage3D,type Shot3D} from './stage3d.ts';
-import {base64ByteLength,utf8ByteLength} from './data-size.ts';
+import {utf8ByteLength} from './data-size.ts';
 import {defaultLighting,parseLighting,type Lighting} from './lighting.ts';
 import {defaultKaleidoscope,parseKaleidoscope,type Kaleidoscope} from './kaleidoscope.ts';
 import {defaultPrint,parsePrint,type PrintEffect} from './print.ts';

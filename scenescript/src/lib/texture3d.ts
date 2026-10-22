@@ -8,9 +8,9 @@ const asset=(v:unknown,p:string)=>{if(typeof v!=='string'||v.length>100||v!==''&
 const num=(v:unknown,p:string,min:number,max:number)=>{if(typeof v!=='number'||!Number.isFinite(v)||v<min||v>max)throw new Error(p+': expected number '+min+'–'+max);return v;};
 export function parseTexture3D(value:unknown,shape:string,path:string):Texture3D|undefined{
  if(value===undefined||value===null)return undefined;const v=obj(value,path);keys(v,['asset','repeat','offset','rotation','faces'],path);if(shape==='group')throw new Error(path+': requires geometry');
- const pair=(value:unknown,key:string,fallback:number,min:number,max:number)=>{const v=value===undefined?{}:obj(value,path+'.'+key);keys(v,['x','y'],path+'.'+key);return {x:num(v.x??fallback,path+'.'+key+'.x',min,max),y:num(v.y??fallback,path+'.'+key+'.y',min,max)};};
+ const pair=(value:unknown,key:string,fallback:number,min:number,max:number)=>{const v=value===undefined?{}:obj(value,path+'.'+key);keys(v,['x','y'],path+'.'+key);return {x:num(v.x===undefined?fallback:v.x,path+'.'+key+'.x',min,max),y:num(v.y===undefined?fallback:v.y,path+'.'+key+'.y',min,max)};};
  const faces:Texture3D['faces']={};if(v.faces!==undefined){if(shape!=='box')throw new Error(path+'.faces: requires box');const f=obj(v.faces,path+'.faces');keys(f,textureFaces3D,path+'.faces');for(const key of textureFaces3D)if(Object.hasOwn(f,key))faces[key]=asset(f[key],path+'.faces.'+key);}
- const result={asset:asset(v.asset??'',path+'.asset'),repeat:pair(v.repeat,'repeat',1,.01,100),offset:pair(v.offset,'offset',0,-100,100),rotation:num(v.rotation===undefined?0:v.rotation,path+'.rotation',-3600,3600),faces};
+ const result={asset:asset(v.asset===undefined?'':v.asset,path+'.asset'),repeat:pair(v.repeat,'repeat',1,.01,100),offset:pair(v.offset,'offset',0,-100,100),rotation:num(v.rotation===undefined?0:v.rotation,path+'.rotation',-3600,3600),faces};
  if(!textureAssetIDs3D(result).length)throw new Error(path+': missing image asset');return result;
 }
 export function textureAssetIDs3D(t?:Texture3D){return t?[...new Set([t.asset,...Object.values(t.faces)].filter(Boolean))]:[];}

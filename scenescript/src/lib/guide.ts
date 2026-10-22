@@ -295,24 +295,20 @@ blend: 0–2 s, default .2, capped at half duration: fade from base to event and
 neutral temporarily neutralizes the base. blink closes/reopens eyes, retaining base
 mood; use .15–.3 s. No automatic/random blinking. Pixel LEDs blend cell sizes;
 other faces deform eyes/brows/mouth. classic has limited mouth detail.
-SPEECH: Actor3D.speech=null (default/off) or {"source":"scene","strength":1}.
-source scene/project uses that EXISTING narration, never plays duplicate audio.
-Assign its file via Scene.narration/Project.narration; text alone cannot animate.
-Use existing TTS text export + matching MP3 import. Binding works before import.
-strength 0–3, default 1. Analysed loudness opens the mouth; silence/no file/mute/
-zero volume closes it (existing surprised expression may keep its mouth open).
-Respects narration at/start/end/volume/fades, scene boundaries and project-global
-timing, NOT actor action timing. Music/video audio do not drive it. Mood/eyes stay
-independent. This is amplitude-driven, NOT phoneme/viseme-accurate lip-sync.
-Camera fov: vertical degrees (20–110, default38); yaw/pitch: degrees; distance/targetX/Y/Z: world units; orbit: degrees/second
-in scene-local time. 3D is opaque by default, below 2D elements;
-Scene.camera's 2D crop transforms it too. Use screen-space captions.
-Preview/stills/video share absolute-time poses.
-WebGL2 required; graphics/context loss fails visibly.
-3D dialog: shared resources, isolated previews; scene JSON binds actors/camera/speech.
-Apply saves; close discards. Import copies or updates an ID.
-No external model files/scripts, physics, skinning or head-only looking.
-Stage.transparentBackground:true removes sky, ground and fog so 2D backgrounds show through.
+SPEECH: Actor3D.speech=null(default/off) or {source:"scene",strength:1}.
+source scene/project binds EXISTING Scene/Project.narration, never duplicates audio.
+Text alone cannot animate; use TTS text export/matching MP3 import (binding may precede it).
+strength:0–3, default1. Loudness opens mouth; silence/no file/mute/zero volume closes
+it, unless surprised keeps it open. Respects at/start/end/volume/fades, scene and
+project-global timing, not action timing. Music/video audio do not drive speech.
+Mood/eyes stay independent. Amplitude-driven, NOT phoneme/viseme lip-sync.
+Camera fov:vertical degrees20–110(default38); yaw/pitch:degrees; distance/targetX/Y/Z:
+world units; orbit:degrees/scene-local second. 3D is opaque by default, below 2D
+captions; Scene.camera also crops it. Preview/stills/video share absolute-time poses.
+WebGL2 required; context loss fails visibly. Dialog: shared resources/isolated previews;
+scene JSON binds actors/camera/speech. Apply saves; close discards. Imports copy/update IDs.
+No external models/scripts, physics, skinning or head-only looking.
+Stage.transparentBackground:true omits sky/ground/fog to reveal 2D backgrounds.
 3D PATHS: Stage.paths maps ≤16 IDs to
 points:[{x,y,z},...], 2–128 points (closed≥3), closed:false, interpolation:smooth
 (Catmull-Rom) or linear. Coordinates ±100. Ground/fog expand beyond the 56-unit plaza.
@@ -347,37 +343,30 @@ interpolation, last pose holds; roll is numeric degrees. Do NOT combine keys and
 follow. Empty keys + null follow retain the legacy orbital camera. Use separate
 scenes for camera cuts. Preview, stills and export sample the same absolute time.
 REUSABLE GROUPS: Project.groups3d stores Group3D definitions, NOT Scene.groups
-(the latter is 2D). Characters: 1–16 distinct Project.characters IDs. All are
-selected with equal probability using seed (integer), NEVER fresh random values
-per frame. Templates remain shared; do not duplicate their model data per copy.
-layout:grid(default) places count copies in columns: X centered, row Y/Z increments
-by spacing, origin is front-row center. spacing defaults {x:1.3,y:0.5,z:1.5}; use
-negative z for receding seats. scatter distributes count copies in a centered box
-size(default {x:10,y:0,z:10}). points uses explicit local positions: count defaults
-to points.length and must match if supplied. Other layouts require empty points.
-jitter adds seeded independent ±x/y/z offsets. rotation is local yaw; scale is
-model multiplier; rotationVariation adds ±degrees; scaleVariation multiplies by
-1±value. Design seated figures/benches explicitly: no automatic seating/avoidance.
-animation is a NAMED CLIP present in EVERY template (empty disables animation).
-It loops continuously: local clip time = (scene time + placement.timeOffset)*
-memberSpeed + memberPhase, modulo clip.duration. phase sets random offset seconds
-in [0,phase); speedVariation multiplies speed by 1±value. Set phase to a clip length
-for varied cheering; also use small speedVariation. No speech/actions/paths on
-individual copies; use normal actors for individually controlled protagonists.
-Shot.groups:[{id:"audience",group:"fans",x:0,y:0,z:0,rotation:0,scale:1,timeOffset:0}]
-places a group. Placement scale affects both local positions and model size; its
-yaw rotates the arrangement; timeOffset enables explicit continuity over cuts.
-Same resource + seed gives identical templates/variation in every scene/export.
-Group IDs are separate from actor IDs; cameras track normal actors only.
-Limits: 16 placements/shot, 256 TOTAL group copies, all copies count toward the
-existing 2048-part scene budget. Grid/scatter/points each allow at most256 copies.
-3D resource dialog: Groups offers editable JSON + animated isolated preview and
-insertion into the current shot. .scenegroup.json bundles definition + required
-characters, importable into an empty project. Envelope: format:"scenescript-3d-resource",
-version:"1.0", kind:"group", id, definition:Group3D, characters:Map<ID,Character3D>.
-Copy/update controls the group ID;
-identical dependencies are reused, conflicting objects get new IDs and references
-are remapped. Existing unrelated objects are NEVER overwritten by a group import.
+(the latter is 2D). characters:1–16 distinct Project.characters IDs, selected with
+seeded equal probability, never fresh randomness/frame. Templates stay shared.
+layout:grid(default): count copies, columns centered on X, row Y/Z use spacing
+(default {x:1.3,y:0.5,z:1.5}); origin=front-row center, negative z recedes.
+scatter distributes count in centered size(default {x:10,y:0,z:10}).
+points uses local positions: count defaults points.length, must match if provided;
+other layouts require empty points. jitter adds seeded ±x/y/z offsets.
+rotation=yaw; scale=model multiplier; rotationVariation adds ±degrees;
+scaleVariation multiplies by 1±value. Seating/benches/avoidance are not automatic.
+animation names a clip in EVERY template, empty disables it. It loops at
+(scene time + placement.timeOffset)*memberSpeed + memberPhase, modulo clip.duration.
+phase samples [0,phase) seconds; speedVariation multiplies speed by 1±value.
+For varied cheering set phase=clip duration and a small speedVariation.
+Copies have no speech/actions/paths; use actors for controlled protagonists.
+Shot.groups:[{id:"audience",group:"fans",x:0,y:0,z:0,rotation:0,scale:1,timeOffset:0}].
+Placement scale affects positions/model size; yaw rotates the layout; timeOffset
+preserves continuity across cuts. Same resource+seed gives identical variation.
+Group/actor IDs are separate; cameras track actors only. ≤16 placements/shot,
+≤256 total group copies; each counts toward the 2048-part scene budget.
+Group resource JSON/preview/insertion: .scenegroup.json bundles definition and
+required characters: {format:"scenescript-3d-resource",version:"1.0",kind:"group",
+id,definition:Group3D,characters:Map<ID,Character3D>}. Copy/update controls group ID;
+identical dependencies are reused, conflicts get new IDs and remapped references.
+Unrelated resources are NEVER overwritten.
 FREE CONSTRUCTION: Character3D.model / Stage3D.model = {parts:[...],animations:{...}}.
 model defines geometry; stage ground/sky remain. palette reads a resource hex field
 (e.g. headColor/blockColor), falling back to color.
@@ -394,22 +383,22 @@ T(position) T(pivot) R_XYZ(rotation + joints) T(-pivot). Children inherit this
 transform, NOT mesh size. Translation joints offset position in PARENT axes.
 Actor height/3 and scale multiply the whole model; y/pitch/roll position/orient
 the instance in addition to x/z/rotation. Breathing needs an explicit bob driver.
-Joints: globally unique id per model, motion rotation(default)/translation/scale, axis
-x(default)/y/z. min/max REQUIRED; value defaults 0 (scale:1), inside the bounds;
-target defaults max. Rotation ±3600 degrees, translation ±50 units, scale 0–50.
+Joints: unique id/model, motion rotation(default)/translation/scale; axis x(default)/y/z.
+min/max REQUIRED; value:0(scale:1), inside bounds; target:max.
+Bounds:rotation±3600°, translation±50, scale0–50.
 Scale multiplies only that mesh axis, never children; 0 hides the mesh, no groups.
 One joint per motion+axis per part. These are kinematic limits, NOT physics.
 Actor.joints and Shot.stageJoints override rest values by joint ID, within limits.
 Named animations: {duration,tracks:[{joint,keys:[{at,value}],easing}]}.
 Keys start at 0, then strictly increase within clip duration; values obey joint
 limits. Values interpolate linearly or ease-in-out; last value holds to clip end.
-Actor.motions / Shot.stageMotions schedule clips by animation ID. duration required,
-at chains from previous motion end (first:0), ordered/non-overlapping inside scene.
-speed .01–10 (default1); loop false(default) holds final clip pose, true repeats.
+Actor.motions/Shot.stageMotions schedule animation IDs; duration required.
+at chains from previous end(first:0); ordered/non-overlapping inside scene.
+speed .01–10(default1); loop false(default) holds final clip pose; true repeats.
 blend 0–2 s (default .2, capped at half event duration) fades from rest/overrides
 and back; 0 switches directly. Gaps/end restore rest/overrides, no implicit carry.
-Rotation keys interpolate NUMERIC angles, not shortest arc (0→360 rolls a wheel).
-Design matching loop endpoints; combine simultaneous joints in one multi-track clip.
+Rotation keys interpolate numeric angles, not shortest arc (0→360 rolls a wheel).
+Match loop endpoints; combine simultaneous joints in one clip.
 Walk/wave still move/turn the root; joints need explicit drivers or motions for
 limb movement. Migrated figures include these drivers plus named walk/wave clips.
 Actor joint.control: none(default), mouth=max(speech,surprised), speech=audio-only,
@@ -418,14 +407,20 @@ leftArm/rightArm/leftLeg/rightLeg = action pose radians/PI; wave = arm-Z radians
 (PI/2); bob = breathing/walking height/.1. Use rotation target 180 for limbs,
 90 for wave, translation target .1 for bob. Expression/audio weights are 0–1,
 signed drivers -1–1. control blends sampled value toward target by this weight.
-responses maps signal names to target values; each contributes (target-base)*weight
-additively, then primary control applies, then clamp. E.g. eye scale can respond
-to moods while blink overrides it. Pixel scales use mood responses and blink
-(eyes) / speech (mouth) control. All facial geometry remains editable data.
+responses maps signals to targets: add (target-base)*weight, then primary control,
+then clamp. Eyes may use mood responses plus blink; mouths may use speech.
+All facial geometry remains editable.
 Order: rest → joints overrides → motion → responses → control → clamp.
 Limits/model: 512 parts, depth32, 256 joints (6/part), 16 clips, 64 tracks/clip,
 64 keys/track, 4096 keys total. Shot: 2048 estimated active parts, max12 actors.
-Independent resource files: 512 KiB. No image textures/custom meshes yet.
+Part.texture:{asset:"imageID",repeat:{x:1,y:1},offset:{x:0,y:0},rotation:0} references
+Project.assets PNG/JPEG/WebP (no SVG/URLs). Color multiplies image; white preserves it.
+UV repeat/offset are image units; rotation is degrees around center. Box-only faces
+right/left/top/bottom/front/back = +X/−X/+Y/−Y/+Z/−Z override asset; omitted inherits,
+"" disables that face. Mapping follows mesh deformation. PNG cutouts use alpha test.
+Limits/shot:32 images,4096px/side,16MP total;128 UV variants, cached/disposed with GPU.
+Resource bundles include only required assets; imports remap collisions/reuse images.
+Envelope≤32MiB including textures; geometry≤512KiB. No custom meshes yet.
 In resource dialog edit model JSON, choose animation and scrub preview time.
 Minimal independent example (add audience-specific publication copy/cover for delivery):
 ${JSON.stringify(aiModel3DExample)}

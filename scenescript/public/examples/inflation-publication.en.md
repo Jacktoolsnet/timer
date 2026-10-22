@@ -11,7 +11,8 @@ English-speaking mobile short-video viewers curious about everyday prices. This 
 - The thick chocolate-filled area shrinks; the embossed golden money-filled area grows. Non-linear, uneven curves, chocolate-tablet top tiles and coin-like gold details.
 - Real glass plinth with refraction, engraved grid, illuminated edges, polished chocolate/gold and a moving studio highlight. The procedural reflection map is offline and cached.
 - The title INFLATION FOR DUMMIES persists above the chart as actual extruded 3D stroke geometry, not a flat bitmap. No additional captions, numbers, narration, music or explanation overlays.
-- The existing generated cover is unchanged.
+- The existing generated cover is unchanged. Chocolate and money now use their own embedded color-texture images, with runtime PBR reflections and gloss.
+- Texture files, built-in generation mode and final prompts: [material texture provenance](inflation-texture-prompts.en.md).
 - Relative progression only, not actual years or historical prices; the project description makes the metaphor explicit.
 - Final poses hold if the scene is extended. Reverse seeks are deterministic.
 

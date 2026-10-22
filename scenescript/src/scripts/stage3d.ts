@@ -30,6 +30,7 @@ export class Stage3DRenderer{
   const groundSize=stage3DGroundSize(stage),fogScale=groundSize/56,transparent=Boolean(stage.transparentBackground&&!studio);
   const scene=new THREE.Scene();scene.background=transparent?null:new THREE.Color(stage.skyColor);scene.fog=transparent?null:new THREE.Fog(stage.skyColor,35*fogScale,85*fogScale);
   const world:World={members:[],framing:null,custom:[],stageModel:null,scene,images,geometries:new Set(),materials:new Map()};
+  try{
   const cube=new THREE.BoxGeometry(1,1,1);world.geometries.add(cube);
   const material=(color:string)=>{let m=world.materials.get(color);if(!m){m=new THREE.MeshStandardMaterial({color,roughness:.78,metalness:.08});world.materials.set(color,m);}return m;};
   const box=(parent:THREE.Object3D,color:string,x:number,y:number,z:number,w:number,h:number,d:number)=>{const m=new THREE.Mesh(cube,material(color));m.position.set(x,y,z);m.scale.set(w,h,d);parent.add(m);return m;};
@@ -45,6 +46,7 @@ export class Stage3DRenderer{
    const clip=group.animation?character.model?.animations[group.animation]:undefined;world.members.push({...model,member,placement,duration:clip?.duration??1,controls:{...(character.expression==='neutral'?{}:{[character.expression]:1}),speech:0,mouth:character.expression==='surprised'?1:0},motions:clip?[{animation:group.animation,at:0,duration:clip.duration+1,speed:1,loop:true,blend:0}]:[]});
   }}
   if(studio&&(world.custom.length||world.members.length)){const bounds=new THREE.Box3();for(const r of [...world.custom,...world.members])bounds.expandByObject(r.root);if(!bounds.isEmpty())world.framing={center:bounds.getCenter(new THREE.Vector3()),size:bounds.getSize(new THREE.Vector3())};}return world;
+  }catch(error){this.release(world);throw error;}
  }
  private specification(project:Project,shot:Shot3D,studio=false){
   const placements=shot.groups??[],groups=Object.fromEntries(placements.map(p=>[p.group,project.groups3d[p.group]])),refs=new Set([...shot.actors.map(a=>a.character),...Object.values(groups).flatMap(g=>g.characters)]),definitions=Object.fromEntries([...refs].map(id=>[id,project.characters[id]]));
@@ -58,7 +60,7 @@ export class Stage3DRenderer{
   if(this.disposed||this.lost)throw new Error('3D: graphics context unavailable.');const spec=this.specification(project,shot,studio);if(this.cache.has(spec.key))return;
   let pending=this.pending.get(spec.key);if(!pending){pending=(async()=>{
    const images=new Map<string,HTMLImageElement>(),unique=new Map<string,HTMLImageElement>();let pixels=0;
-   for(const id of spec.ids){const data=project.assets[id].data;let image=unique.get(data);if(!image){image=new Image();image.src=data;try{await image.decode();}catch{throw new Error('3D texture: cannot decode '+id);}if(!image.naturalWidth||!image.naturalHeight||image.naturalWidth>4096||image.naturalHeight>4096)throw new Error('3D texture '+id+': maximum 4096 × 4096');pixels+=image.naturalWidth*image.naturalHeight;if(pixels>16777216)throw new Error('3D textures: maximum 16 megapixels per scene');unique.set(data,image);}images.set(id,image);}
+   for(const id of spec.ids){const data=project.assets[id].data;if(!/^data:image\/(png|jpeg|webp);base64,/.test(data))throw new Error('3D texture '+id+': requires embedded PNG, JPEG or WebP');let image=unique.get(data);if(!image){image=new Image();image.src=data;try{await image.decode();}catch{throw new Error('3D texture: cannot decode '+id);}if(!image.naturalWidth||!image.naturalHeight||image.naturalWidth>4096||image.naturalHeight>4096)throw new Error('3D texture '+id+': maximum 4096 × 4096');pixels+=image.naturalWidth*image.naturalHeight;if(pixels>16777216)throw new Error('3D textures: maximum 16 megapixels per scene');unique.set(data,image);}images.set(id,image);}
    if(this.disposed||this.lost)throw new Error('3D: graphics context unavailable.');const world=this.world(project.stages[shot.stage],project.characters,shot.actors,spec.groups,spec.placements,studio,images);this.remember(spec.key,world);
   })();this.pending.set(spec.key,pending);}
   try{await pending;}finally{if(this.pending.get(spec.key)===pending)this.pending.delete(spec.key);}

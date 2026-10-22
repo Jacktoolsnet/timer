@@ -177,12 +177,13 @@ export function export3DResource(kind:Resource3D['kind'],id:string,library:Libra
 }
 /** Transactional merge. Never overwrite unrelated characters when importing a group bundle. */
 export function import3DResource(resource:Resource3D,library:Libraries3D,mode:'copy'|'update'){
+ validateTextureAssets3D(resourceModels3D(resource),resource.assets??{},'resource textures');
  const next={assets:{...library.assets},characters:{...library.characters},stages:{...library.stages},groups3d:{...library.groups3d}},values=resource.kind==='character'?next.characters:resource.kind==='stage'?next.stages:next.groups3d;
  const id=mode==='copy'?unique3DResourceID(resource.id,values):resource.id;
  if(!Object.hasOwn(values,id)&&Object.keys(values).length>=30)throw new Error('Maximum 30');
  const assetMapping=new Map<string,string>();for(const [key,value]of Object.entries(resource.assets??{})){
   const matching=Object.keys(next.assets).find(id=>next.assets[id].data===value.data),target=matching??unique3DResourceID(key,next.assets);
-  if(!Object.hasOwn(next.assets,target)&&Object.keys(next.assets).length>=100)throw new Error('assets: maximum 100');Object.defineProperty(next.assets,target,{value,enumerable:true,writable:true,configurable:true});assetMapping.set(key,target);
+  if(!Object.hasOwn(next.assets,target)&&Object.keys(next.assets).length>=100)throw new Error('assets: maximum 100');if(!Object.hasOwn(next.assets,target))Object.defineProperty(next.assets,target,{value,enumerable:true,writable:true,configurable:true});assetMapping.set(key,target);
  }
  let definition=resource.kind==='group'?resource.definition:{...resource.definition,model:remapTextureAssets3D((resource.definition as Character3D|Stage3D).model,assetMapping)};
 

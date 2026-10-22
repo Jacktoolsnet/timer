@@ -633,8 +633,8 @@ Gespeicherte Projekte und Einzelexporte enthalten die vollständigen Modelle.
   Ein Modell definiert die Geometrie; auch bisherige Vorlagen nutzen diesen Renderer.
   Himmel/Boden bleiben. `palette` bindet Teilfarben an Ressourcenfelder.
 - Grundformen: unsichtbare Gruppe, Quader, Kugel, Zylinder, Kegel, Fläche.
-  Material: Farbe, Rauheit, Metallanteil, Deckkraft. Keine externen Modelle,
-  Bildtexturen oder ausführbaren Skripte in diesem ersten Baukastenstand.
+  Material: Farbe, Rauheit, Metallanteil, Deckkraft, optisches Finish und Bildtexturen.
+  Keine externen Modelle oder ausführbaren Skripte.
 - Teile referenzieren ihren Elternteil per ID. Position/Drehpunkt sind lokal,
   Drehungen in Grad, Größen in Welteinheiten. Kinder erben die Transformation,
   nicht die Geometriegröße. Drehpunktkette:
@@ -649,7 +649,8 @@ Gespeicherte Projekte und Einzelexporte enthalten die vollständigen Modelle.
 - Auftritte unterstützen zusätzlich `y`, `pitch`, `roll`. Gehen-/Winken-Bewegungen
   können über explizite Gelenk-Treiber an beliebige eigene Figuren gebunden werden.
   Root-Bewegung bleibt verfügbar.
-- Ressourcen sind weiterhin einzeln importier-/exportierbar (jetzt bis 512 KiB).
+- Ressourcen sind einzeln importier-/exportierbar: bis 32 MiB inklusive Texturbildern,
+  maximal 512 KiB reine Geometrie/Animationsdaten.
   Im Ressourcendialog: **Bauteile, Gelenke & Animationen (JSON)**, Animation wählen,
   Zeitregler bewegen. Fehler sind kopierbar und verhindern stilles Übernehmen
   einer älteren gültigen Modellfassung.
@@ -885,3 +886,40 @@ Optische Materialien (frei definierte 3D-Teile): optionales `finish` mit `standa
 haben abgerundete Kanten. Eine kleine prozedurale Studio-Umgebung liefert
 Reflexionen ohne HDR-Download; sie wird pro Renderer einmal erstellt und wieder
 freigegeben. Alte Standardmaterialien behalten ihre bisherige Beleuchtung.
+
+### Bilder als 3D-Texturen
+
+Im 3D-Ressourcendialog unter **Bildtexturen** ein geometrisches Teil und ein Bild
+aus den Projektressourcen wählen. PNG/JPEG/WebP werden unterstützt; SVG bleibt
+für 2D verfügbar. Wiederholung, Versatz und Drehung sind einstellbar. Bei Boxen
+kann jede Seite ein eigenes Bild haben; „Allgemeines Bild verwenden“ erbt die
+Standardtextur, „Kein Bild“ entfernt sie nur auf dieser Seite. Weiß erhält die
+Bildfarben, andere Teilfarben tönen die Textur. PNG-Ausschnitte nutzen Alpha-Test.
+
+```json
+{"id":"poster","shape":"box","color":"#ffffff","texture":{"asset":"paper",
+ "repeat":{"x":2,"y":1},"offset":{"x":0,"y":0},"rotation":0,
+ "faces":{"front":"posterImage","back":""}}}
+```
+
+Seiten: right/left/top/bottom/front/back = +X/−X/+Y/−Y/+Z/−Z. Alle Verweise
+sind Bild-IDs aus `Project.assets`, keine Dateipfade oder URLs. Bilder werden
+vor dem ersten Vorschau-/Exportbild decodiert; fehlende/defekte Bilder scheitern
+sichtbar. UVs folgen der Geometrieverformung (bei Skalierung dehnt sich das Bild).
+
+Charakter-, Bühnen- und Gruppenexporte enthalten nur die benötigten Bilder.
+Importe verwenden identische Bilder wieder; bei ID-Kollisionen werden Bilder
+umbenannt und alle Verweise angepasst, ohne fremde Ressourcen zu überschreiben.
+Das Löschen eines Bildes entfernt auch seine 3D-Zuweisungen, nicht die Geometrie.
+
+GPU-Grenzen pro Szene: 32 Bild-IDs, 4096 Pixel je Kante, 16 Megapixel insgesamt
+(ein identisches Bild nur einmal gezählt), 128 UV-Varianten. Varianten teilen
+sich GPU-Bilddaten; pro Renderer bleiben höchstens zwei Welten im Cache, deren
+Texturen beim Verdrängen/Schließen freigegeben werden. Texturen funktionieren
+auch mit Instanzen und behalten bei Standardmaterialien das bisherige Aussehen.
+
+Das aktuelle Inflationsbeispiel verwendet eigene KI-Schokoladen-/Geldtexturen,
+die als Projektbilder sichtbar und im nativen Script eingebettet sind. Das Cover
+bleibt unverändert. Bilder und finale Prompts: `public/examples/inflation-texture-prompts.en.md`.
+`npm run example:inflation` aktualisiert auch das eingebettete Textur-Quellpaket
+aus den beiden JPEGs (nur bei Änderungen, damit unnötige HMR-Neuladungen entfallen).

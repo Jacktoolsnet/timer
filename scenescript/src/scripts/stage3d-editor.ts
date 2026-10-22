@@ -1,3 +1,5 @@
+import {installTextureEditor} from './stage3d-textures';
+import {validateTextureAssets3D} from '../lib/texture3d';
 import {parseGroup3D,defaultGroup3D,defaultGroupPlacement3D} from '../lib/group3d';
 import {parsePaths3D} from '../lib/path3d';
 import {presetCharacterModel3D} from '../lib/stage3d-presets';
@@ -101,12 +103,14 @@ export function installStage3DEditor(context:()=>{project:Project;index:number;r
   animations();animation.addEventListener('change',()=>{time.max=String(value.model?.animations[animation.value]?.duration??4);time.value='0';queueResourcePreview();});time.addEventListener('input',queueResourcePreview);
   textarea.addEventListener('input',()=>{
    modelTexts.set(resourceKey,textarea.value);
-   try{value.model=parseModel3D(JSON.parse(textarea.value),resourceKey+'.model');modelErrors.delete(resourceKey);error.textContent='';textarea.removeAttribute('aria-invalid');animations();time.value='0';output.textContent='0.00 s';queueResourcePreview();}
+   try{const next=parseModel3D(JSON.parse(textarea.value),resourceKey+'.model');validateTextureAssets3D([next],draft.assets);value.model=next;refreshTextures();modelErrors.delete(resourceKey);error.textContent='';textarea.removeAttribute('aria-invalid');animations();time.value='0';output.textContent='0.00 s';queueResourcePreview();}
    catch(e){const message=(e as Error).message;modelErrors.set(resourceKey,message);error.textContent=message;textarea.setAttribute('aria-invalid','true');}
   });
   const animationLabel=document.createElement('label'),timeLabel=document.createElement('label'),output=document.createElement('output');animationLabel.textContent=words.modelAnimation;timeLabel.textContent=words.modelTime;output.textContent='0.00 s';
   animationLabel.append(animation);timeLabel.append(time,output);time.addEventListener('input',()=>output.textContent=Number(time.value).toFixed(2)+' s');animation.addEventListener('change',()=>output.textContent='0.00 s');
   controls.append(animationLabel,timeLabel);details.append(summary,hint,textarea,controls,error);host.append(details);
+  const refreshTextures=installTextureEditor(host,()=>value.model,draft.assets,words,next=>{if(modelErrors.has(resourceKey))throw new Error(modelErrors.get(resourceKey));validateTextureAssets3D([next],draft.assets);value.model=next;textarea.value=JSON.stringify(next,null,2);modelTexts.set(resourceKey,textarea.value);queueResourcePreview();});host.insertBefore(host.lastElementChild!,details);
+
 
  }
 

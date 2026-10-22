@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
 import {textureFaces3D,type Texture3D} from '../lib/texture3d';
 import {modelPose3D,type Model3D,type ModelMotion3D,type jointControls3D} from '../lib/model3d';
-type Storage={textures?:Map<string,THREE.Texture>;images?:Map<string,HTMLImageElement>;geometries:Set<THREE.BufferGeometry>;materials:Map<string,THREE.MeshStandardMaterial>};
+type Storage={textures?:Map<string,THREE.Texture>;images?:Map<string,HTMLImageElement>;textureSources?:WeakMap<HTMLImageElement,THREE.Texture>;geometries:Set<THREE.BufferGeometry>;materials:Map<string,THREE.MeshStandardMaterial>};
 const sharedGeometries=new WeakMap<Storage,Map<string,THREE.BufferGeometry>>();
 /** Transform chain: position → pivot → XYZ rotation → -pivot → geometry/children. */
 export function createModel3D(model:Model3D,storage:Storage,palette:object={}){
@@ -18,12 +18,12 @@ export function createModel3D(model:Model3D,storage:Storage,palette:object={}){
   const texture=(id:string,settings:Texture3D)=>{
    if(!id)return null;const images=storage.images,image=images?.get(id);if(!image)throw new Error('3D texture not prepared: '+id);
    const cache=storage.textures??=new Map(),key=JSON.stringify([id,settings.repeat,settings.offset,settings.rotation]);let map=cache.get(key);
-   if(!map){if(cache.size>=128)throw new Error('3D textures: maximum 128 UV variants per scene');map=new THREE.Texture(image);map.colorSpace=THREE.SRGBColorSpace;map.wrapS=map.wrapT=THREE.RepeatWrapping;map.repeat.set(settings.repeat.x,settings.repeat.y);map.offset.set(settings.offset.x,settings.offset.y);map.center.set(.5,.5);map.rotation=settings.rotation*Math.PI/180;map.anisotropy=4;map.needsUpdate=true;cache.set(key,map);}return map;
+   if(!map){if(cache.size-[...cache.keys()].filter(k=>k.startsWith('source:')).length>=128)throw new Error('3D textures: maximum 128 UV variants per scene');const sources=storage.textureSources??=new WeakMap();let source=sources.get(image);if(!source){source=new THREE.Texture(image);sources.set(image,source);cache.set('source:'+id,source);}map=source.clone();map.colorSpace=THREE.SRGBColorSpace;map.wrapS=map.wrapT=THREE.RepeatWrapping;map.repeat.set(settings.repeat.x,settings.repeat.y);map.offset.set(settings.offset.x,settings.offset.y);map.center.set(.5,.5);map.rotation=settings.rotation*Math.PI/180;map.anisotropy=4;map.needsUpdate=true;cache.set(key,map);}return map;
   };
   const makeMaterial=(id='')=>{
    const map=part.texture&&id?texture(id,part.texture):null,key=JSON.stringify(['model',color,part.roughness,part.metalness,part.opacity,part.finish??'standard',map?.uuid]);let material=storage.materials.get(key);
    if(!material){
-    const base={color,map,roughness:part.roughness,metalness:part.metalness,opacity:part.opacity,transparent:part.opacity<1||Boolean(map),alphaTest:map?.01:0,depthWrite:part.opacity===1,side:THREE.DoubleSide};
+    const base={color,map,roughness:part.roughness,metalness:part.metalness,opacity:part.opacity,transparent:part.opacity<1,alphaTest:map?.01:0,depthWrite:part.opacity===1,side:THREE.DoubleSide};
     material=part.finish==='glass'?new THREE.MeshPhysicalMaterial({...base,metalness:0,roughness:Math.min(part.roughness,.12),transmission:.94,thickness:.6,ior:1.45,clearcoat:1,clearcoatRoughness:.05}):part.finish==='polished'?new THREE.MeshPhysicalMaterial({...base,clearcoat:1,clearcoatRoughness:.08}):new THREE.MeshStandardMaterial(base);storage.materials.set(key,material);
    }return material;
   };
