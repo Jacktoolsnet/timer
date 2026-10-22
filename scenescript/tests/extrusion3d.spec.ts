@@ -1,0 +1,18 @@
+import {test,expect} from '@playwright/test';import {writeFile} from 'node:fs/promises';
+test('solid cover typography has shared closed meshes, separate edge colors and safe frame margins',async({page})=>{
+ test.setTimeout(90000);await page.goto('/en/ai/');const result=await page.evaluate(async()=>{
+  const {parseProject}=await import(/* @vite-ignore */ '/src/lib/model.ts' as string),{Stage3DRenderer}=await import(/* @vite-ignore */ '/src/scripts/stage3d.ts' as string),{createModel3D}=await import(/* @vite-ignore */ '/src/scripts/model3d.ts' as string);
+  const p=parseProject(await(await fetch('/examples/inflation-explained.scenescript.json')).text()),r=new Stage3DRenderer(),canvas=document.createElement('canvas'),storage={geometries:new Set<any>(),materials:new Map<string,any>()},built=createModel3D(p.stages.chart.model!,storage);
+  try{await r.prepare(p,p.scenes[1].stage3d!);r.render(p,p.scenes[1].stage3d!,.3,540,960,canvas);const pixels=canvas.getContext('2d')!.getImageData(0,0,540,960).data;let left=540,right=0,top=960;for(let y=0;y<330;y++)for(let x=0;x<540;x++)if(pixels[(y*540+x)*4+3]>128){left=Math.min(left,x);right=Math.max(right,x);top=Math.min(top,y);}
+   const letters=p.stages.chart.model!.parts.filter((p:any)=>p.shape==='extrusion'),meshes=letters.map((p:any)=>built.root.getObjectByName(p.id+'-geometry') as any);
+   return {left,right,top,png:canvas.toDataURL(),count:meshes.length,closed:meshes.every((m:any)=>m.geometry.type==='ExtrudeGeometry'),materials:meshes.every((m:any)=>Array.isArray(m.material)&&m.material.length===2&&m.material[0].color.getHex()!==m.material[1].color.getHex()),shared:(built.root.getObjectByName('titleChocolate2-geometry') as any).geometry===(built.root.getObjectByName('titleChocolate4-geometry') as any).geometry};
+  }finally{r.dispose();storage.geometries.forEach(g=>g.dispose());storage.materials.forEach(m=>m.dispose());}
+ });await writeFile('/tmp/inflation-solid-lettering.png',Buffer.from(result.png.split(',')[1],'base64'));expect(result).toMatchObject({count:31,closed:true,materials:true,shared:true});expect(result.left).toBeGreaterThan(10);expect(result.right).toBeLessThan(530);expect(result.top).toBeGreaterThan(15);
+});
+test('beveled lettering in the real 3D stage survives an actual short MP4 export',async({page})=>{
+ test.setTimeout(120000);await page.goto('/en/ai/');const result=await page.evaluate(async()=>{
+  const {parseProject,validateProject}=await import(/* @vite-ignore */ '/src/lib/model.ts' as string),{exportVideo,exportSupported}=await import(/* @vite-ignore */ '/src/scripts/video-export.ts' as string);
+  const p=parseProject(await(await fetch('/examples/inflation-explained.scenescript.json')).text()),scene=p.scenes[1];scene.duration=.2;scene.transition='none';scene.narration=null;scene.stage3d!.camera.keys=scene.stage3d!.camera.keys!.slice(0,1);scene.stage3d!.actors.forEach((a:any)=>{a.motions=[];a.duration=.2;});p.scenes=[scene];const checked=validateProject(p),options={format:'mp4',resolution:480,fps:30,audio:false};if(!await exportSupported(checked,options))return null;
+  const blob=await exportVideo(checked,options,new AbortController().signal,()=>{}),video=document.createElement('video'),url=URL.createObjectURL(blob);try{video.src=url;await new Promise((resolve,reject)=>{video.onloadedmetadata=resolve;video.onerror=reject;});return {type:blob.type,size:blob.size,duration:video.duration};}finally{URL.revokeObjectURL(url);}
+ });test.skip(result===null,'No MP4 encoder');expect(result!.type).toBe('video/mp4');expect(result!.size).toBeGreaterThan(1000);expect(result!.duration).toBeCloseTo(.2,1);
+});

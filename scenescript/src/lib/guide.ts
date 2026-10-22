@@ -27,12 +27,10 @@ export const aiGuide = `# SceneScript 1.0 — complete authoring specification
 
 ## 1. Start here
 SceneScript turns JSON into an editable animated presentation/video in a browser.
-A Project contains sequential Scenes; each Scene contains layered Elements.
-Elements can be text, images, shapes, speech/thought bubbles, video or simulations.
-A scene camera can visit panels on a whole comic page, pause and zoom into details.
-This document is self-contained: no website access, linked manual or schema download
-is needed. It describes existing features only. Read §§1–4 first, then the feature
-sections you need; §11 defines every field and §12 contains complete examples.
+Projects contain sequential Scenes with layered text, images, shapes, bubbles,
+video, simulations or 3D. A scene camera can visit comic panels, pause and zoom.
+Self-contained: no website/schema download needed. Read §§1–4 first, then needed
+features; §11 defines every field and §12 gives complete JSON examples.
 
 Authoring workflow:
 - Reuse the user's topic, audience, aspect ratio, style and desired duration.
@@ -95,11 +93,10 @@ Universal requirements:
 
 ## 3. Content, coordinates and appearance
 Project.scenes plays in array order; durations add up with no transition tail time.
-Scene.elements paints back-to-front: later entries cover earlier ones. Backgrounds
-are below all elements. There is no zIndex. Element x/y is the box's untransformed
-TOP-LEFT in % of project width/height; width/height uses the same axis percentages.
-They are not coordinates relative to another element. Rotation/scaling use the
-box center. Outside-canvas content is clipped; do not rely on automatic layout.
+Scene.elements paints back-to-front over backgrounds; no zIndex. Element x/y is
+its untransformed TOP-LEFT in project-axis %, not relative to another element.
+width/height use the same percentages; rotation/scaling use the box center.
+Outside-canvas content is clipped; no automatic layout.
 
 Element types and conditional defaults (all unspecified values are in §11):
 - text: literal text, defaults text="Your story starts here.", color="#ffffff".
@@ -374,13 +371,18 @@ model defines geometry; stage ground/sky remain. palette reads a resource hex fi
 Parts.instances repeats geometry at ≤256 local offsets; no group/scale-joint
 instances. Size is per copy; copies count toward the scene budget.
 Parts: unique id, parent="" for root or another part ID (any list order), shape
-group/box/sphere/cylinder/cone/plane/profile. Group is invisible; primitives except profile are centered
+group/box/sphere/cylinder/cone/plane/profile/extrusion. Group is invisible; primitives except profile are centered
 unit shapes scaled by size (diameters for sphere/cylinder/cone; cylinder/cone axis Y;
 plane: XY, faces ±Z, size.z ignored). Materials are per part.
 profile: closed extruded area, bottom at local y:0, x:−.5..+.5, z:±.5.
 profile:{heights:[...],target:[...]}:2–32 normalized heights0–1 at equal X spacing;
 target defaults heights, same length. Smooth shape-preserving interpolation, no overshoot.
 size scales width/height/depth. morph joint interpolates heights→target; no instances.
+extrusion: centered solid contour with through-holes and bevels, scaled by size.
+extrusion.contour/holes: simple XY polygons in 0–1; 3–128 points/ring, ≤4 holes,
+≤192 points/part, ≤16000/model. Do not repeat the first point. Holes must be strictly
+inside, disjoint; no self-intersections. bevel0–0.03 (default .012); use 0 for thin
+features. sideColor optionally tints edges separately; front uses Part.color.
 finish:standard(default), polished(clearcoat), glass(refraction; use opacity:1).
 Polished/glass use rounded boxes and an offline studio reflection map.
 position/pivot/size:local units; rotation:XYZ degrees. Transform:
@@ -727,12 +729,10 @@ null semantics/legacy normalizations (not additional fields to emit):
 - Nested defaults do not relax required keys. {} works for all-optional objects
   such as lighting, not Camera (needs stations) or Gradient (needs type and stops).
 
-The field catalog derives from the typed schema; runtime/import additionally
-checks references, global IDs, scene/scope times, camera ordering/holds/bounds,
-group space/exclusivity, crop sums, matrix determinant, real-media bytes/decoding,
-SVG safety, duration agreement, polyphony and particle budgets. Schema maxLength
-counts code points; runtime string limits count UTF-16. Legacy null normalization
-can accept cases the typed schema deliberately excludes. Runtime is authoritative.
+Runtime additionally checks references, IDs, scoped times, camera holds/bounds,
+group exclusivity, crop sums, determinants, decoded media, SVG safety, duration,
+polyphony, contour topology and particle budgets. Schema maxLength counts code
+points; runtime counts UTF-16. Runtime/legacy normalization is authoritative.
 
 Before final JSON output check:
 1. Required root/scene/element fields, unique IDs, exact spelling/case; no unknowns.
@@ -746,9 +746,8 @@ Before final JSON output check:
    suitable real thumbnail present (reuse existing, otherwise create it).
 7. Return plain valid JSON only after planning/media arrangements are settled.
 
-JSON is the editable project, NOT a video file. The editor can import pasted JSON
-or a .scenescript.json file and save it; recent editing/undo state is not project
-content. Preview/recording never exports handles, selection outlines or safe zones.
+JSON is an editable project, NOT video. Import via paste or .scenescript.json;
+undo state is not project content. Rendered output excludes editing overlays.
 Direct MP4/WebM export is browser-side, requires compatible decoders and encoders;
 MP4 has a bundled local AAC fallback. Resolution (480/720/1080 short edge),
 24/30/60 fps and audio are UI-only. No server transcoding or automatic format
@@ -768,8 +767,7 @@ Editor requires >=768 CSS px; portrait videos work. AI docs also work on phones.
 No automatic publishing or platform acceptance guarantee.
 
 ## 11. Field catalog (specification notation, not output JSON)
-Every block below defines one object type. Follow the reference from its parent's
-field; there are no hidden/unlinked field definitions or external dependencies.
+Object blocks below define every field; follow each parent's type references.
 
 ${guideFieldCatalog}
 

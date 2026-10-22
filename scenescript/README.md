@@ -976,3 +976,18 @@ to half the starting height, a solid gold ingot grows to 1.25 times it. Both
 bottoms stay fixed; no horizontal flow or percentage labels. Its raised white diagram grid sits on a subtly glossy black
 backboard above the tiled floor. The separated bars are opaque; the plinth remains glass. The three-second simulation follows the
 0.3-second cover-to-chart morph; explicitly reload the default to replace a draft.
+
+### Solid contour extrusions and cover-style 3D lettering
+
+`shape: "extrusion"` with `extrusion: {contour: [{x,y}, ...], holes: [[{x,y}, ...]],
+bevel: 0.012, sideColor: "#895315"}` creates a centered solid mesh with real holes
+and separate cap/edge colors. Coordinates are normalized XY 0–1; `size` sets
+width/height/depth. Rings: 3–128 points, at most four holes and 192 total points
+per part, 16000 per model. Rings must be simple, holes strictly inside and
+disjoint; do not repeat the first point. Bevel range 0–0.03 (0 for thin features).
+Bevels extend the contour bounds slightly; previews include a conservative margin.
+The inflation title uses original heavy block-letter outlines rather than
+overlapping bars: sans-serif stems, open counters, warm metallic caps, dark
+extruded sides and bright beveled edges. No image sprites, remote font or runtime
+font dependency. The generated cover has no recoverable exact font; this is an
+independent geometric approximation of its proportions and material palette.
