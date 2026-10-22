@@ -1,6 +1,6 @@
 # Inflation material textures
 
-Generated with the built-in image generator, not CLI. The selected square PNGs were technically resized to 1024 × 1024 JPEGs at quality 0.90; no semantic post-editing. These are color images, not normal/roughness maps. Actual glass, reflection and clearcoat lighting still come from the renderer. The existing cover is unchanged.
+Generated with the built-in image generator, not CLI. The selected square PNGs were technically resized to 1024 × 1024 JPEGs at quality 0.90; no semantic post-editing. These are color images, not normal/roughness maps. Actual glass, reflection and clearcoat lighting still come from the renderer. These textures are independent of the cover; the cover lettering was subsequently updated to Inflation Explained with Chocolate.
 
 Final workspace assets:
 - `public/examples/inflation-chocolate-texture.jpg`

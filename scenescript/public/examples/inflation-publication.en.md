@@ -1,23 +1,23 @@
-# Inflation for Dummies — ultra-short publication package
+# Inflation Explained with Chocolate — ultra-short publication package
 
 ## Audience and format
 English-speaking mobile short-video viewers curious about everyday prices. This is an editorial assumption, not audience research or a promise of performance.
 
 ## Timing and design
 - Portrait 9:16, total **4.3 seconds**.
-- One-second title image: **INFLATION FOR DUMMIES**.
+- One-second title image: **INFLATION EXPLAINED WITH CHOCOLATE**.
 - 0.3-second crossfade to a perspective 3D chart; its initial state holds during the transition.
 - **Exactly three seconds** of continuous simulation with a matching original whoosh.
 - The thick chocolate-filled area shrinks; the embossed golden money-filled area grows. Non-linear, uneven curves, chocolate-tablet top tiles and coin-like gold details.
 - Real glass plinth with refraction, engraved grid, illuminated edges, polished chocolate/gold and a moving studio highlight. The procedural reflection map is offline and cached.
-- The title INFLATION FOR DUMMIES persists above the chart as actual extruded 3D stroke geometry, not a flat bitmap. No additional captions, numbers, narration, music or explanation overlays.
-- The existing generated cover is unchanged. Chocolate and money now use their own embedded color-texture images, with runtime PBR reflections and gloss.
+- The title INFLATION EXPLAINED WITH CHOCOLATE persists above the chart as actual extruded 3D stroke geometry, not a flat bitmap. No additional captions, numbers, narration, music or explanation overlays.
+- Only the cover title lettering has been updated; the chocolate/gold chart and glass styling are retained. Chocolate and money now use their own embedded color-texture images, with runtime PBR reflections and gloss.
 - Texture files, built-in generation mode and final prompts: [material texture provenance](inflation-texture-prompts.en.md).
 - Relative progression only, not actual years or historical prices; the project description makes the metaphor explicit.
 - Final poses hold if the scene is extended. Reverse seeks are deterministic.
 
 ## Publication metadata
-Title: **Inflation for Dummies 🍫💰**
+Title: **Inflation Explained with Chocolate**
 Hashtags: **#Inflation #Shrinkflation #Shorts**
 
 The authoritative description and first comment live in the generated JSON. Falling chocolate quantities and rising prices also allude to shrinkflation: a visual metaphor, not an economic time series.
@@ -30,10 +30,10 @@ The authoritative description and first comment live in the generated JSON. Fall
 - Source includes an SVG title-card fallback, replaced with the selected JPEG by the generation script.
 
 ## Cover generation
-Mode: built-in image generator, not CLI. The generated PNG was technically resized/encoded to JPEG, with no semantic post-editing.
+Mode: built-in image generator, edit of the existing title card (not CLI). The requested title is now “INFLATION EXPLAINED WITH CHOCOLATE”, in three lines. Output was technically resized/encoded to 1080 × 1920 JPEG; no semantic post-editing.
 
-Final prompt:
-> Create a premium cinematic vertical 9:16 cover/title card for a very fast economics short. The ONLY text is the exact English title 'INFLATION FOR DUMMIES', set huge in a stylish bold legible typographic layout across the top third. No other letters, labels, numbers, logos or watermark. Below it an impressive dimensional area chart sculpted from two materials: a rich segmented milk-chocolate tablet landscape that slopes and curves down from high left to low right, and an embossed golden money/coin-like solid landscape that curves up from low left to high right. These are thick continuous filled areas, not line charts, not separate bar graphs, and not a tower of coins. Dynamic camera in three-quarter perspective, translucent glass-like chart plinth with subtle cyan grid, moody deep navy backdrop, warm gold and chocolate studio lighting, tactile beveled surfaces and dramatic glossy highlights. Beautiful minimalist high-end 3D editorial rendering, visually understandable instantly. Mobile first, energetic but uncluttered. Typography safely inset from edges. No actual years, no numeric axes, no arrows needed.
+Final edit prompt:
+> Edit ONLY the title lettering in this existing cover image. Preserve the entire lower chocolate-and-gold 3D area chart, glass plinth, lighting, background, layout, viewpoint, all materials, style and portrait aspect ratio as faithfully as possible. Replace the old title 'INFLATION FOR DUMMIES' completely with the exact English title 'INFLATION EXPLAINED WITH CHOCOLATE'. Set this in three mobile-readable lines in the same upper title area: 'INFLATION' large gold letters, 'EXPLAINED WITH' smaller warm gold letters, and 'CHOCOLATE' large rich chocolate/copper letters with golden bevel highlights. Maintain the original impressive extruded 3D typography, premium cinematic finish, generous safe margins, no overlap of title and chart. No other new text, no remaining DUMMIES words, no logos, no watermark. Do not redesign the chart.
 
 ## General compositing
 Optional `Stage.transparentBackground:true` omits sky, automatic ground and fog, revealing the 2D backdrop behind real 3D geometry. Resource studio previews and legacy stages remain opaque.

@@ -852,19 +852,19 @@ abgelegte `monstertruck-race-cover-en.jpg` ein; ein Dev-Server ist nicht nötig.
 Das Cover wird bei einer Neuerzeugung nicht durch einen Filmframe ersetzt.
 
 
-### Aktuelles Startprojekt: Inflation for Dummies (2D + 3D)
+### Aktuelles Startprojekt: Inflation Explained with Chocolate (2D + 3D)
 
 `/examples/inflation-explained.scenescript.json` ist das neue Standardprojekt für
 frische Sitzungen. Bestehende lokale Entwürfe haben weiterhin Vorrang. Der
 Beispiel-/Startprojekt-Button lädt es ausdrücklich; der Rennfilm bleibt erhalten.
 
-- **4,3 Sekunden, Hochformat 9:16**: eine Sekunde Titelbild „Inflation for Dummies“,
+- **4,3 Sekunden, Hochformat 9:16**: eine Sekunde Titelbild „Inflation Explained with Chocolate“,
   0,3 Sekunden Überblendung und **genau drei Sekunden** Simulation.
 - Zwei echte 3D-Flächen mit ungleichmäßigem Kurvenverlauf: die schokoladenartige
   Fläche schrumpft, die goldene Geldfläche mit Prägungen wächst.
 - Perspektivisches Diagramm auf einem echten Glassockel mit graviertem Raster,
   Lichtkanten, Studioreflexionen und bewegtem Glanzlicht.
-- „INFLATION FOR DUMMIES“ bleibt als extrudierte 3D-Schrift über dem Diagramm.
+- „INFLATION EXPLAINED WITH CHOCOLATE“ bleibt als extrudierte 3D-Schrift über dem Diagramm.
   Keine weiteren Texte oder Zahlen; die Entwicklung ist rein illustrativ.
 - Originaler, deterministisch synthetisierter WAV-Whoosh statt Musik oder Sprache;
   in der Projektdatei eingebettet. Kontinuierliche absolute Zeitinterpolation.
