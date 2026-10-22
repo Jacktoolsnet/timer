@@ -1,24 +1,21 @@
 import textureAssets from './inflation-textures.json' with {type:'json'};
 /** Fast, illustrative material-area chart. No historical data or executable scene code. */
 export const inflationTimelineSeconds=3,inflationDuration=4.3;
-export const inflationProfilePoints=17;
 const box=(id:string,position:object,size:object,color:string,extra:object={})=>({id,shape:'box',position,size,color,...extra});
-// Invented, gently undulating quantity/price contours, never historical data.
-export function inflationHeight(money:boolean,x:number,progress:number){
- const u=Math.max(0,Math.min(1,progress)),q=u*u*(3-2*u),wave=.5*x+.5*x*x+.075*Math.sin(x*Math.PI*4);
- return 6+(money?1.5:-3)*q*wave;
-}
+// Invented comparison ratios, not historical inflation data.
+export function inflationHeight(money:boolean,progress:number){const u=Math.max(0,Math.min(1,progress)),q=u*u*(3-2*u);return 6+(money?1.5:-3)*q;}
 function surface(money:boolean){
- const initialShift=money?-3.925:-4.725;
- const horizontal=(prefix:string)=>[{id:prefix+'Width',motion:'scale',axis:'x',min:.055,max:1,value:1},{id:prefix+'Shift',motion:'translation',axis:'x',min:-5,max:0,value:0}];
+ const ratio=money?1.25:.5;
  const track=(joint:string,start:number,end:number)=>({joint,easing:'ease-in-out',keys:[{at:0,value:start},{at:.3,value:start},{at:3.3,value:end}]});
- const heights=Array.from({length:inflationProfilePoints},(_,i)=>inflationHeight(money,i/(inflationProfilePoints-1),0)/10),target=heights.map((_,i)=>inflationHeight(money,i/(inflationProfilePoints-1),1)/10);
- return {name:money?'Money — flowing golden area':'Chocolate — smooth tablet contour',height:3,model:{parts:[{
-  id:'area',shape:'profile',position:{y:2,z:money?1.05:-1.05},size:{x:10,y:10,z:.92},profile:{heights,target},color:'#ffffff',finish:'polished',roughness:money?.16:.23,metalness:money?.82:.04,opacity:money?.52:1,
-  texture:{asset:money?'moneyTexture':'chocolateTexture',repeat:{x:money?4:2.5,y:money?2.8:2.5}},joints:[{id:'fillMorph',motion:'morph',axis:'y',min:0,max:1},...horizontal('flow')]
- },box('base',{y:2.015,z:money?1.05:-1.05},{x:10,y:.045,z:.94},money?'#eab846':'#63331c',{finish:'polished',metalness:money?.8:.04,roughness:.22,joints:horizontal('base')})],animations:{flow:{duration:3.3,tracks:[track('fillMorph',0,1),track('flowWidth',.055,1),track('flowShift',initialShift,0),track('baseWidth',.055,1),track('baseShift',initialShift,0)]}}}};
+ return {name:money?'Gold ingot — rising bar':'Chocolate tablet — shrinking bar',height:3,model:{parts:[
+  box('area',{y:2},{x:2.6,y:6,z:1.2},money?'#e6ac29':'#ffffff',{
+   finish:'polished',roughness:money?.22:.26,metalness:money?.85:.04,
+   ...(!money?{texture:{asset:'chocolateTexture',repeat:{x:1,y:1}}}:{}),
+   joints:[{id:'barHeight',motion:'scale',axis:'y',min:.5,max:1.25,value:ratio},{id:'barLift',motion:'translation',axis:'y',min:1.5,max:3.75,value:3*ratio}]
+  }),box('base',{y:2.015},{x:2.65,y:.045,z:1.25},money?'#eab846':'#63331c',{finish:'polished',metalness:money?.8:.04,roughness:.22})
+ ],animations:{flow:{duration:3.3,tracks:[track('barHeight',1,ratio),track('barLift',3,3*ratio)]}}}};
 }
-export const inflationPoses=(final=false)=>Object.fromEntries((['chocolate','money'] as const).map(name=>{const shift=final?0:name==='money'?-3.925:-4.725,width=final?1:.055;return [name,{fillMorph:final?1:0,flowWidth:width,flowShift:shift,baseWidth:width,baseShift:shift}];}));
+export const inflationPoses=(final=false)=>Object.fromEntries((['chocolate','money'] as const).map(name=>{const ratio=final?(name==='money'?1.25:.5):1;return [name,{barHeight:ratio,barLift:3*ratio}];}));
 // Native stroke lettering: a camera-facing common plane, open counters and shallow, non-overlapping extrusion.
 // Real geometry; no remote fonts, sprites or raster title.
 const glyphs:Record<string,number[][]>={
@@ -59,7 +56,7 @@ const floorTiles=Array.from({length:143},(_,i)=>({x:(i%11-5)*2.6,z:(Math.floor(i
 stageParts.push(box('floorGrout',{y:.79,z:2.6},{x:28.6,y:.12,z:33.8},'#080e15',{roughness:.85}),
  ...['#142330','#182734','#11202b','#1b2b36'].map((color,variant)=>box('floorTile'+variant,{y:.9},{x:2.555,y:.1,z:2.555},color,{finish:'polished',metalness:.32,roughness:.24+variant*.025,instances:floorTiles.filter((_,i)=>(i*7+Math.floor(i/11)*3)%4===variant)})));
 const camera={fov:38,keys:[{at:0,position:{x:-6,y:11,z:34},target:{x:0,y:8,z:0}},{at:3.3,position:{x:-5.5,y:10.8,z:34},target:{x:0,y:8,z:0}}]};
-const shot={stage:'chart',camera,actors:(['chocolate','money'] as const).map(name=>({id:name,character:name,joints:inflationPoses(true)[name],motions:[{animation:'flow',at:0,duration:3.3,blend:0}]}))};
+const shot={stage:'chart',camera,actors:(['chocolate','money'] as const).map(name=>({id:name,character:name,x:name==='money'?2.4:-2.4,joints:inflationPoses(true)[name],motions:[{animation:'flow',at:0,duration:3.3,blend:0}]}))};
 const svg=(name:string,value:string)=>({name,data:'data:image/svg+xml;base64,'+btoa(value)});
 const background=svg('Atmosphere.svg','<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920"><defs><radialGradient id="g"><stop stop-color="#28647b"/><stop offset="1" stop-color="#060d1b"/></radialGradient></defs><path fill="url(#g)" d="M0 0H1080V1920H0Z"/></svg>');
 // Deterministic, original broadband sweep; no music, speech or external sound dependency.

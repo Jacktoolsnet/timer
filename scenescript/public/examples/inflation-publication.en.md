@@ -8,15 +8,14 @@ English-speaking mobile short-video viewers curious about everyday prices. This 
 - One-second title image: **INFLATION EXPLAINED WITH CHOCOLATE**.
 - 0.3-second landmark-guided mesh morph to the 3D chart. Frozen endpoints align the cover with the held chart pose; simulation begins after the morph.
 - **Exactly three seconds** of continuous simulation with a matching original whoosh.
-- Two narrow bars start at equal height (6 units), slightly separated so both materials read clearly. Their profiles and matching foot rails extend smoothly rightward; the left reference height stays fixed. At the right endpoint chocolate reaches 3 units and gold 7.5 units. These are illustrative design ratios, never historical data; no percentage labels appear. The camera looks from the left at a lower angle; title positions and proportions are cover-aligned.
-- An opaque near-black, subtly glossy backboard carries raised white, mildly reflective grid lines above the floor. The gold area is semi-transparent (opacity 0.52), revealing chocolate behind overlaps; the glass plinth is retained.
-- Continuous extruded profiles replace all vertical bar segments. Their wavy upper contours use shape-preserving cubic interpolation, with a fixed baseline and reusable buffers.
+- Two upright, fixed-width 3D bars stand side by side: a textured chocolate tablet on the left, a solid polished gold ingot on the right. Both start at 6 units. Chocolate shrinks to 3, gold grows to 7.5, with anchored bottoms and smooth vertical motion only. These are illustrative design ratios, not historical data; no percentage labels appear.
+- An opaque near-black, subtly glossy backboard carries raised white, mildly reflective grid lines above the floor. The separated bars are opaque; the glass plinth is retained.
 - The title uses one camera-facing lettering plane, thinner strokes with open counters (including A), polished front caps and shallow dark extrusions that meet the caps without overlapping.
-- As the chart fills from left to right, the chocolate contour falls and the golden money contour rises. Non-linear, uneven curves, chocolate-tablet top tiles and coin-like gold details.
+- No flowing area profiles or horizontal movement: only the two bar heights change.
 - Real glass plinth with refraction, engraved grid, illuminated edges, polished chocolate/gold and a moving studio highlight. The procedural reflection map is offline and cached.
 - Dark glossy 3D floor tiles with narrow grout joints echo the cover. Four instanced materials keep the floor inexpensive; highlights use the existing studio environment, not planar scene reflections.
 - The title INFLATION EXPLAINED WITH CHOCOLATE persists above the chart as actual extruded 3D stroke geometry, not a flat bitmap. No additional captions, numbers, narration, music or explanation overlays.
-- Only the cover title lettering has been updated; the chocolate/gold chart and glass styling are retained. Chocolate and money now use their own embedded color-texture images, with runtime PBR reflections and gloss.
+- Only the cover title lettering has been updated; the chocolate/gold chart and glass styling are retained. The chocolate uses its embedded tablet texture; the gold ingot uses a solid metallic gold material, without the coin texture.
 - Texture files, built-in generation mode and final prompts: [material texture provenance](inflation-texture-prompts.en.md).
 - Relative progression only, not actual years or historical prices; the project description makes the metaphor explicit.
 - Final poses hold if the scene is extended. Reverse seeks are deterministic.

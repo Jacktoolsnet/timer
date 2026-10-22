@@ -1,6 +1,5 @@
-import {profileSample3D} from '../src/lib/profile3d.ts';
 import {test} from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';
-import {inflationExample,inflationDuration,inflationTimelineSeconds,inflationHeight,inflationProfilePoints} from '../src/lib/inflation-example.ts';
+import {inflationExample,inflationDuration,inflationTimelineSeconds,inflationHeight} from '../src/lib/inflation-example.ts';
 import {parseProject,validateProject,projectJsonBytes} from '../src/lib/model.ts';
 import {modelPose3D} from '../src/lib/model3d.ts';import {parseStage3D} from '../src/lib/stage3d.ts';
 import {DEFAULT_PROJECT_URL,resolveStartupProject} from '../src/lib/startup-project.ts';
@@ -13,16 +12,15 @@ test('default is a one-second title card, short mesh morph and exactly three-sec
  assert.ok(projectJsonBytes(native)<4*1024*1024);assert.deepEqual(parseProject(JSON.stringify(native)),native);assert.equal((await resolveStartupProject(null,async()=>native)).project.title,p.title);assert.ok(p.description.includes('not historical inflation data'));
  const wav=Buffer.from(p.audios.whoosh.data.split(',')[1],'base64');assert.equal(wav.toString('ascii',0,4),'RIFF');assert.equal(wav.readUInt32LE(24),22050);assert.equal(wav.readUInt32LE(40),22050*3*2);assert.ok([...wav.subarray(20000,22000)].some(x=>x>150));
 });
-test('continuous material profiles morph in opposite directions with an anchored baseline and held final pose',()=>{
- const p=project(),scene=p.scenes[1];
- for(const actor of scene.stage3d!.actors){const model=p.characters[actor.character].model!,money=actor.id==='money',area=model.parts.find(p=>p.id==='area')!;assert.equal(area.shape,'profile');assert.equal(model.parts.length,2);assert.equal(model.animations.flow.tracks.length,5);assert.equal(area.profile!.heights.length,inflationProfilePoints);
-  for(let i=0;i<inflationProfilePoints;i++){const x=i/(inflationProfilePoints-1);let previous=inflationHeight(money,x,0);for(const t of [0,.15,.3,.31,.6,1,1.8,2.7,3.299,3.3,5]){const pose=modelPose3D(model,actor.joints,actor.motions,t),h=profileSample3D(area.profile!,x,pose.get('fillMorph')).height*area.size.y;assert.ok(money?h>=previous-1e-8:h<=previous+1e-8);assert.ok(Math.abs(h-inflationHeight(money,x,Math.min(1,Math.max(0,(t-.3)/3))))<1e-7);previous=h;}assert.ok(Math.abs(previous-inflationHeight(money,x,1))<1e-7);}
-  assert.equal(area.position.y,2);assert.deepEqual([...modelPose3D(model,actor.joints,actor.motions,3.3)],[...modelPose3D(model,actor.joints,actor.motions,10)]);
+test('two fixed-width bars animate vertically from equal height with anchored bottoms and held final poses',()=>{
+ const p=project(),actors=p.scenes[1].stage3d!.actors;assert.equal(actors.length,2);assert.ok(actors[0].x<actors[1].x);
+ for(const actor of actors){const model=p.characters[actor.character].model!,money=actor.id==='money',area=model.parts.find(p=>p.id==='area')!;assert.equal(area.shape,'box');assert.equal(model.parts.length,2);assert.equal(model.animations.flow.tracks.length,2);assert.equal(area.size.x,2.6);assert.equal(area.position.x,0);assert.equal(area.joints.some(j=>j.axis==='x'),false);
+  let previous=6;for(const t of [0,.15,.3,.31,.6,1,1.8,2.7,3.299,3.3,5]){const pose=modelPose3D(model,actor.joints,actor.motions,t),h=area.size.y*pose.get('barHeight')!,bottom=area.position.y+pose.get('barLift')!-h/2;assert.ok(Math.abs(bottom-2)<1e-8);assert.ok(money?h>=previous-1e-8:h<=previous+1e-8);assert.ok(Math.abs(h-inflationHeight(money,(t-.3)/3))<1e-8);if(t<=.3)assert.equal(h,6);if(t>=3.3)assert.equal(h,money?7.5:3);previous=h;}
+  assert.deepEqual([...modelPose3D(model,actor.joints,actor.motions,3.3)],[...modelPose3D(model,actor.joints,actor.motions,10)]);
  }
- const values=Array.from({length:inflationProfilePoints},(_,i)=>inflationHeight(true,i/(inflationProfilePoints-1),1));assert.ok(values.slice(1,-1).some((n,i)=>Math.abs(n-(values[i]+values[i+2])/2)>.005));
 });
 test('glass plinth, polished areas and extruded title are embedded declarative geometry',()=>{
- const p=project(),parts=p.stages.chart.model!.parts;assert.equal(parts.find(x=>x.id==='plinth')!.finish,'glass');assert.equal(parts.filter(x=>x.id.startsWith('headline')&&!x.id.includes('Depth')).length,30);for(const [prefix,line]of [['subtitle','EXPLAINED WITH'],['titleChocolate','CHOCOLATE']])for(const [index,letter]of [...line].entries())if(letter!==' ')assert.ok(parts.some(p=>p.id.startsWith(prefix+index+'_')),line+' letter '+index);assert.equal(p.title,'Inflation Explained with Chocolate');assert.ok(parts.find(p=>p.id==='headlineDepth0_0')!.size.z>=.4);assert.equal(parts.find(p=>p.id==='letteringRig')!.rotation.y,-10);const coverText=Buffer.from(p.assets.cover.data.split(',')[1],'base64').toString();assert.ok(coverText.includes('EXPLAINED WITH'));assert.ok(coverText.includes('CHOCOLATE'));assert.ok(!coverText.includes('DUMMIES'));assert.ok(parts.some(x=>x.id==='glassGrid0'));assert.ok(parts.every(x=>!x.id.startsWith('headline')||x.finish==='polished'));assert.ok(p.characters.chocolate.model!.parts.some(x=>x.finish==='polished'));assert.ok(p.characters.money.model!.parts.some(x=>x.finish==='polished'));assert.ok(p.characters.chocolate.model!.parts.some(x=>x.texture?.asset==='chocolateTexture'));assert.ok(p.characters.money.model!.parts.some(x=>x.texture?.asset==='moneyTexture'));for(const [id,file]of [['chocolateTexture','inflation-chocolate-texture.jpg'],['moneyTexture','inflation-money-texture.jpg']])assert.equal(p.assets[id].data,'data:image/jpeg;base64,'+readFileSync(new URL('../public/examples/'+file,import.meta.url)).toString('base64'));
+ const p=project(),parts=p.stages.chart.model!.parts;assert.equal(parts.find(x=>x.id==='plinth')!.finish,'glass');assert.equal(parts.filter(x=>x.id.startsWith('headline')&&!x.id.includes('Depth')).length,30);for(const [prefix,line]of [['subtitle','EXPLAINED WITH'],['titleChocolate','CHOCOLATE']])for(const [index,letter]of [...line].entries())if(letter!==' ')assert.ok(parts.some(p=>p.id.startsWith(prefix+index+'_')),line+' letter '+index);assert.equal(p.title,'Inflation Explained with Chocolate');assert.ok(parts.find(p=>p.id==='headlineDepth0_0')!.size.z>=.4);assert.equal(parts.find(p=>p.id==='letteringRig')!.rotation.y,-10);const coverText=Buffer.from(p.assets.cover.data.split(',')[1],'base64').toString();assert.ok(coverText.includes('EXPLAINED WITH'));assert.ok(coverText.includes('CHOCOLATE'));assert.ok(!coverText.includes('DUMMIES'));assert.ok(parts.some(x=>x.id==='glassGrid0'));assert.ok(parts.every(x=>!x.id.startsWith('headline')||x.finish==='polished'));assert.ok(p.characters.chocolate.model!.parts.some(x=>x.finish==='polished'));assert.ok(p.characters.money.model!.parts.some(x=>x.finish==='polished'));assert.ok(p.characters.chocolate.model!.parts.some(x=>x.texture?.asset==='chocolateTexture'));assert.ok(p.characters.money.model!.parts.every(x=>!x.texture));for(const [id,file]of [['chocolateTexture','inflation-chocolate-texture.jpg'],['moneyTexture','inflation-money-texture.jpg']])assert.equal(p.assets[id].data,'data:image/jpeg;base64,'+readFileSync(new URL('../public/examples/'+file,import.meta.url)).toString('base64'));
 });
 test('transparent 3D background is strictly optional, bounded and round-trips without changing opaque stages',()=>{
  const stage={name:'Layer',model:{parts:[{id:'box'}]}};assert.ok(!Object.hasOwn(parseStage3D(stage),'transparentBackground'));assert.ok(!Object.hasOwn(parseStage3D({...stage,transparentBackground:false}),'transparentBackground'));
@@ -43,9 +41,9 @@ test('cover-aligned camera looks from the left and the grid sits on a raised opa
  assert.ok(p.scenes[1].stage3d!.camera.keys![0].position.x<0);assert.ok(p.scenes[1].morph!.points.length>=6);
 });
 
-test('gold area reveals chocolate behind it while chocolate and the glass plinth retain their materials',()=>{
+test('separate chocolate tablet and solid gold ingot retain distinct materials and the glass plinth',()=>{
  const p=project(),gold=p.characters.money.model!.parts.find(p=>p.id==='area')!,chocolate=p.characters.chocolate.model!.parts.find(p=>p.id==='area')!;
- assert.equal(gold.opacity,.52);assert.equal(chocolate.opacity,1);assert.ok(gold.position.z>chocolate.position.z);assert.ok(gold.texture);assert.equal(gold.finish,'polished');assert.equal(p.stages.chart.model!.parts.find(p=>p.id==='plinth')!.finish,'glass');
+ assert.equal(gold.opacity,1);assert.equal(chocolate.opacity,1);assert.equal(gold.position.z,chocolate.position.z);assert.equal(gold.texture,undefined);assert.ok(gold.metalness>.8);assert.equal(chocolate.texture!.asset,'chocolateTexture');assert.equal(gold.finish,'polished');assert.equal(p.stages.chart.model!.parts.find(p=>p.id==='plinth')!.finish,'glass');
 });
 
 test('title caps share a camera-facing plane and their extrusion cannot fill the A counters',()=>{
@@ -62,11 +60,7 @@ test('title caps share a camera-facing plane and their extrusion cannot fill the
  }
 });
 
-test('equal-height starting bars flow rightward to half chocolate and one-quarter more gold without numeric labels',()=>{
- const p=project(),shot=p.scenes[1].stage3d!;
- for(const actor of shot.actors){const money=actor.id==='money',model=p.characters[actor.character].model!,area=model.parts.find(p=>p.id==='area')!;
-  assert.ok(area.joints.some(j=>j.id==='flowWidth'));let oldRight=-Infinity;
-  for(const t of [0,.3,.6,1,2,3.3,5]){const pose=modelPose3D(model,actor.joints,actor.motions,t),width=pose.get('flowWidth')!,shift=pose.get('flowShift')!,right=shift+area.size.x*width/2;assert.ok(right>=oldRight-1e-8);oldRight=right;assert.equal(pose.get('baseWidth'),width);assert.equal(pose.get('baseShift'),shift);assert.equal(profileSample3D(area.profile!,0,pose.get('fillMorph')).height*area.size.y,6);if(t<=.3){assert.ok(Math.abs(width-.055)<1e-8);assert.equal(profileSample3D(area.profile!,1,pose.get('fillMorph')).height*area.size.y,6);}if(t>=3.3){assert.equal(width,1);assert.equal(shift,0);assert.equal(profileSample3D(area.profile!,1,pose.get('fillMorph')).height*area.size.y,money?7.5:3);}}
- }
- assert.ok(!JSON.stringify(p.scenes).includes('%'));assert.equal(inflationHeight(false,0,1),inflationHeight(true,0,1));
+test('bar comparison retains the intended ratios without percentage labels or horizontal flow',()=>{
+ const p=project();assert.equal(inflationHeight(false,0),inflationHeight(true,0));assert.equal(inflationHeight(false,1),3);assert.equal(inflationHeight(true,1),7.5);assert.ok(!JSON.stringify(p.scenes).includes('%'));
+ for(const character of Object.values(p.characters))for(const part of character.model!.parts)assert.ok(part.joints.every(j=>j.axis==='y'));
 });
