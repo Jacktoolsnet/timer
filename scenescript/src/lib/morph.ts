@@ -32,7 +32,14 @@ export function morphMesh(config:Morph|null,columns=16,rows=24):MorphMesh{
  let strength=1;
  const area=(a:Point,b:Point,c:Point)=>(b.x-a.x)*(c.y-a.y)-(b.y-a.y)*(c.x-a.x);
  const scaled=(i:number,t:number)=>({x:from[i].x+(to[i].x-from[i].x)*t,y:from[i].y+(to[i].y-from[i].y)*t});
- while(strength>1/128&&triangles.some(([a,b,c])=>[.25,.5,.75,1].some(t=>area(scaled(a,t*strength),scaled(b,t*strength),scaled(c,t*strength))<area(from[a],from[b],from[c])*.08)))strength/=2;
+ const folds=([a,b,c]:number[])=>{
+  const at=(t:number)=>area(scaled(a,t*strength),scaled(b,t*strength),scaled(c,t*strength)),start=at(0),end=at(1),half=at(.5);
+  // Signed triangle area is quadratic in time. Check its exact interior minimum,
+  // not just sampled frames, so even a brief fold between samples is excluded.
+  const quadratic=2*(end-2*half+start),linear=end-start-quadratic,minimumAt=quadratic>0?-linear/(2*quadratic):0;
+  return Math.min(start,end,minimumAt>0&&minimumAt<1?at(minimumAt):Infinity)<start*.08;
+ };
+ while(strength>1/128&&triangles.some(folds))strength/=2;
  return {from,to:to.map((_,i)=>scaled(i,strength)),triangles,strength};
 }
 export const morphProgress=(p:number)=>{const t=Math.max(0,Math.min(1,p));return t*t*(3-2*t);};

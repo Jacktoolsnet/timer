@@ -37,8 +37,13 @@ test('glossy tiled floor is instanced, grouted and supports the glass plinth wit
  const positions=tiles.flatMap(p=>p.instances!);assert.equal(new Set(positions.map(p=>p.x+','+p.z)).size,143);assert.ok(positions.some(p=>p.z>15));assert.ok(positions.some(p=>p.z< -10));
 });
 
-test('cover-aligned camera looks from the left and the grid sits on a raised glass backboard',()=>{
- const p=project(),parts=p.stages.chart.model!.parts,glass=parts.find(p=>p.id==='diagramGlass')!,floor=parts.find(p=>p.id==='floorTile0')!;
- assert.equal(glass.finish,'glass');assert.ok(glass.position.y-glass.size.y/2>floor.position.y+floor.size.y/2);for(const grid of parts.filter(p=>/^grid\d+$/.test(p.id))){assert.ok(grid.position.z>glass.position.z+glass.size.z/2);assert.ok(grid.position.y<glass.position.y+glass.size.y/2);}
+test('cover-aligned camera looks from the left and the grid sits on a raised opaque black backboard',()=>{
+ const p=project(),parts=p.stages.chart.model!.parts,glass=parts.find(p=>p.id==='diagramBackboard')!,floor=parts.find(p=>p.id==='floorTile0')!;
+ assert.equal(glass.finish??'standard','standard');assert.equal(glass.opacity,1);assert.equal(glass.color,'#060708');assert.ok(glass.roughness>=.3);assert.ok(glass.position.y-glass.size.y/2>floor.position.y+floor.size.y/2);for(const grid of parts.filter(p=>/^grid\d+$/.test(p.id))){assert.equal(grid.color,'#ffffff');assert.ok(grid.metalness>0);assert.ok(grid.position.z-grid.size.z/2>=glass.position.z+glass.size.z/2-1e-8);assert.ok(grid.position.y<glass.position.y+glass.size.y/2);}
  assert.ok(p.scenes[1].stage3d!.camera.keys![0].position.x<0);assert.ok(p.scenes[1].morph!.points.length>=6);
+});
+
+test('gold area reveals chocolate behind it while chocolate and the glass plinth retain their materials',()=>{
+ const p=project(),gold=p.characters.money.model!.parts.find(p=>p.id==='area')!,chocolate=p.characters.chocolate.model!.parts.find(p=>p.id==='area')!;
+ assert.equal(gold.opacity,.52);assert.equal(chocolate.opacity,1);assert.ok(gold.position.z>chocolate.position.z);assert.ok(gold.texture);assert.equal(gold.finish,'polished');assert.equal(p.stages.chart.model!.parts.find(p=>p.id==='plinth')!.finish,'glass');
 });

@@ -13,7 +13,8 @@ test('filled chocolate and gold areas composite onto the background and reverse 
  },DEFAULT_PROJECT_URL);expect(result.first.brown).toBeGreaterThan(300);expect(result.last.brown).toBeLessThan(result.first.brown);expect(result.last.gold).toBeGreaterThan(result.first.gold);expect(result.again).toEqual(result.first);expect(result.alpha).toBe(0);
 });
 test('complete glossy short exports an actual MP4 including the whoosh',async({page})=>{
- test.setTimeout(300000);await page.goto('/en/');await ready(page);const result=await page.evaluate(async url=>{
+ // Full native-resolution glass/transmission rendering is slow on CI software GPUs.
+ test.setTimeout(600000);await page.goto('/en/');await ready(page);const result=await page.evaluate(async url=>{
  const {parseProject}=await import(/* @vite-ignore */ '/src/lib/model.ts' as string),{exportVideo,exportSupported}=await import(/* @vite-ignore */ '/src/scripts/video-export.ts' as string);const p=parseProject(await(await fetch(url)).text()),options={format:'mp4',resolution:480,fps:30,audio:true};if(!await exportSupported(p,options))return null;const blob=await exportVideo(p,options,new AbortController().signal,()=>{});const video=document.createElement('video'),src=URL.createObjectURL(blob);try{video.src=src;await new Promise((resolve,reject)=>{video.onloadedmetadata=resolve;video.onerror=reject;});return {size:blob.size,type:blob.type,duration:video.duration};}finally{URL.revokeObjectURL(src);}
  },DEFAULT_PROJECT_URL);test.skip(result===null,'No MP4 encoder available');expect(result!.size).toBeGreaterThan(20000);expect(result!.type).toBe('video/mp4');expect(result!.duration).toBeCloseTo(4.3,1);
 });

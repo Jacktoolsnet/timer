@@ -971,6 +971,7 @@ or semantic optical flow. Preview and export share the compositor; at most two
 endpoint pairs are cached per renderer and released on disposal.
 
 The inflation default now aligns its left-hand camera, larger title and initial
-wavy contours with the cover. Its diagram grid is mounted on a translucent
-glass backboard above the tiled floor. The three-second simulation follows the
+wavy contours with the cover. Its raised white diagram grid sits on a subtly glossy black
+backboard above the tiled floor. The gold area has opacity 0.52 to reveal chocolate
+behind overlapping regions; the plinth remains glass. The three-second simulation follows the
 0.3-second cover-to-chart morph; explicitly reload the default to replace a draft.
