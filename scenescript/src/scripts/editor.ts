@@ -1,3 +1,4 @@
+import {installStoryboardEditor} from './storyboard-editor';
 import type {MorphPreview} from './morph-preview';
 import {removeTextureAsset3D} from '../lib/texture3d';
 import {getStartupProject,loadDefaultProject} from '../lib/startup-project';
@@ -1057,10 +1058,11 @@ $('next-scene').addEventListener('click',()=>skipScene(1));
 $('timeline').addEventListener('input',()=>{stop();time=Number(($('timeline') as HTMLInputElement).value);draw();});
 $('safe-toggle').addEventListener('change',()=>{$('safe-overlay').hidden=!($('safe-toggle') as HTMLInputElement).checked;});
 function replace(next:Project){fitSpeechDurations(next);stop();backgroundVideoNode=undefined;backgroundVideoAsset='';clearVideoURLs();clearAudioURLs();revision++;project=next;sceneIndex=0;selectedId='';time=0;dirty=false;selectedGroupId='';multiSelection.clear();history.reset(project);persist();refresh();status(t('ready'));}
+installStoryboardEditor(()=>({project,revision}),next=>{stop();project=next;changed();refresh();},stop);
 installStage3DEditor(()=>({project,index:sceneIndex,revision}),next=>{stop();project=next;changed();refresh();},next=>{replace(next);changed();},stop);
 const canReplace=()=>!dirty||confirm(t('unsaved'));
 $('load-default-project').addEventListener('click',async()=>{if(!canReplace())return;const origin=project,version=revision,button=$('load-default-project') as HTMLButtonElement;button.disabled=true;try{const next=await loadDefaultProject();if(project!==origin||revision!==version){showToast(t('defaultStale'),'warning');return;}replace(next);changed();}catch(error){showToast(t('defaultLoadError')+' '+(error as Error).message,'error');}finally{button.disabled=false;}});
-$('new-project').addEventListener('click',()=>{if(canReplace()){replace({groups3d:{},characters:{},stages:{},version:'1.0',title:'SceneScript',description:'',firstComment:'',hashtags:'',thumbnail:null,audios:{},narration:null,audioDucking:false,format:'landscape',backgroundSimulation:null,backgroundVideo:null,videos:{},music:null,assets:{},scenes:[newScene()]});changed();}});
+$('new-project').addEventListener('click',()=>{if(canReplace()){replace({storyboard:null,groups3d:{},characters:{},stages:{},version:'1.0',title:'SceneScript',description:'',firstComment:'',hashtags:'',thumbnail:null,audios:{},narration:null,audioDucking:false,format:'landscape',backgroundSimulation:null,backgroundVideo:null,videos:{},music:null,assets:{},scenes:[newScene()]});changed();}});
 $('toggle-project').addEventListener('click',()=>{
  const button=$('toggle-project'),collapsed=button.getAttribute('aria-expanded')==='true';
  $('project-panel').classList.toggle('project-collapsed',collapsed);

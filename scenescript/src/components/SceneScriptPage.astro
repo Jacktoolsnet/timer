@@ -1,6 +1,7 @@
 ---
 import Stage3DDialog from './Stage3DDialog.astro';
 import ResourcesDialog from './ResourcesDialog.astro';
+import StoryboardDialog from './StoryboardDialog.astro';
 import ToolInformation from '../../../shared/ToolInformation.astro';
 import Layout from '../layouts/Layout.astro';
 import { editorDictionary } from '../lib/editor-i18n';
@@ -53,6 +54,7 @@ const {lang}=Astro.props,t=editorDictionary(lang);
       <input id="thumbnail-file" type="file" accept="image/png,image/jpeg,image/webp" hidden />
      </section>
      <div class="resource-launchers">
+      <button id="open-storyboard" type="button" aria-haspopup="dialog" aria-controls="storyboard-dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h18v16H3ZM3 10h18M11 10v10"/></svg><span>Storyboard</span></button>
       <button id="open-resources" type="button" aria-haspopup="dialog" aria-controls="resources-dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h6l2 2h10v11H3ZM3 7V4h7l2 3" /></svg><span>{t.resources}</span></button>
       <button id="open-stage3d" type="button" aria-haspopup="dialog" aria-controls="stage3d-dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 9 5v10l-9 5-9-5V7Zm0 10 9-5M12 12 3 7m9 5v10" /></svg><span>{t.resources3d}</span></button>
      </div>
@@ -189,6 +191,7 @@ const {lang}=Astro.props,t=editorDictionary(lang);
    <button id="cancel-export" type="button" title={t.cancel} aria-label={t.cancel}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg></button>
   </div></footer>
  </dialog>
+ <StoryboardDialog lang={lang} />
  <ResourcesDialog lang={lang} />
  <Stage3DDialog lang={lang} />
  <ToolInformation lang={lang} tool="scenescript" />

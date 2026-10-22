@@ -32,6 +32,16 @@ video, simulations or 3D. A scene camera can visit comic panels, pause and zoom.
 Self-contained: no website/schema download needed. Read §§1–4 first, then needed
 features; §11 defines every field and §12 gives complete JSON examples.
 
+Optional planning: Project.storyboard stores a separate plan, never rendered. It can
+contain the whole story, recurring characters/objects, settings, sketches and shots.
+Use the Storyboard dialog’s separate instructions and feedback JSON for revisions;
+its envelope is NOT an executable Project. Preserve IDs, revision and user comments.
+Only users resolve comments and approve shots/plans. Approval does not generate video.
+When asked to generate a video from an approved plan, follow it and this specification;
+preserve its storyboard data and never silently replace an existing video. Omit
+storyboard (default null) for direct video creation. Plans allow at most 25 MiB total,
+100 images (8 MiB each); image references and subject IDs must resolve inside the plan.
+
 Authoring workflow:
 - Reuse the user's topic, audience, aspect ratio, style and desired duration.
   Ask only about materially missing details; if told not to ask, make reasonable

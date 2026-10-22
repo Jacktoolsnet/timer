@@ -2,6 +2,7 @@
   "type": "object",
   "additionalProperties": false,
   "properties": {
+    "storyboard": {"anyOf": [{"$ref": "#/$defs/Storyboard"}, {"type": "null"}], "default": null},
     "groups3d": {"type": "object", "maxProperties": 30, "propertyNames": {"type": "string", "pattern": "^[A-Za-z0-9_-]+$", "minLength": 1, "maxLength": 100}, "additionalProperties": {"$ref": "#/$defs/group3D"}, "default": {}},
     "characters": {
       "type": "object",
@@ -3091,6 +3092,299 @@
         }
       },
       "$comment": "Runtime additionally requires first at=0, strictly ordered arrivals after previous holds, scene duration bounds and x+width/y+width<=100."
+    },
+    "BoardComment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "text",
+        "resolved",
+        "reply"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[a-zA-Z0-9_-]+$"
+        },
+        "text": {
+          "type": "string",
+          "maxLength": 5000
+        },
+        "resolved": {
+          "type": "boolean"
+        },
+        "reply": {
+          "type": "string",
+          "maxLength": 5000
+        }
+      }
+    },
+    "BoardSubject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "description",
+        "image",
+        "comments"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[a-zA-Z0-9_-]+$"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "image": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[a-zA-Z0-9_-]+$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "comments": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/$defs/BoardComment"
+          }
+        }
+      }
+    },
+    "BoardShot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "duration",
+        "action",
+        "camera",
+        "audio",
+        "image",
+        "characters",
+        "settings",
+        "status",
+        "comments"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[a-zA-Z0-9_-]+$"
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "duration": {
+          "type": "number",
+          "minimum": 0.01,
+          "maximum": 3600
+        },
+        "action": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "camera": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "audio": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "image": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "pattern": "^[a-zA-Z0-9_-]+$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "characters": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[a-zA-Z0-9_-]+$"
+          }
+        },
+        "settings": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[a-zA-Z0-9_-]+$"
+          }
+        },
+        "status": {
+          "enum": [
+            "draft",
+            "approved"
+          ]
+        },
+        "comments": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/$defs/BoardComment"
+          }
+        }
+      }
+    },
+    "BoardImage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "data"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "data": {
+          "type": "string",
+          "pattern": "^data:image/(png|jpeg|webp|svg\\+xml);base64,"
+        }
+      }
+    },
+    "Storyboard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "revision",
+        "title",
+        "story",
+        "message",
+        "audience",
+        "language",
+        "style",
+        "duration",
+        "comments",
+        "characters",
+        "settings",
+        "shots",
+        "images",
+        "approved"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[a-zA-Z0-9_-]+$"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000000.0
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "story": {
+          "type": "string",
+          "maxLength": 30000
+        },
+        "message": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "audience": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "language": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "style": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "duration": {
+          "type": "number",
+          "minimum": 0.01,
+          "maximum": 86400
+        },
+        "comments": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/$defs/BoardComment"
+          }
+        },
+        "characters": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/$defs/BoardSubject"
+          }
+        },
+        "settings": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/$defs/BoardSubject"
+          }
+        },
+        "shots": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/$defs/BoardShot"
+          }
+        },
+        "images": {
+          "type": "object",
+          "maxProperties": 100,
+          "propertyNames": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[a-zA-Z0-9_-]+$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/BoardImage"
+          }
+        },
+        "approved": {
+          "type": "boolean"
+        }
+      }
     }
   }
 }

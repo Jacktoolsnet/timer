@@ -48,3 +48,22 @@ animated model implements the exact comparison ratios independently.
 ## General compositing
 Optional `Stage.transparentBackground:true` omits sky, automatic ground and fog, revealing the 2D backdrop behind real 3D geometry. Resource studio previews and legacy stages remain opaque.
 
+
+## Planning example
+
+The native default project also includes an independent storyboard: the whole
+story, audience/message/style, two recurring objects (chocolate and gold), one
+chart setting and three shot cards. The original AI-generated cover is its opening
+reference; two AI-authored SVG schematics illustrate equal initial heights and
+the final contrast. These are planning sketches, not rendered video frames.
+
+Open **Storyboard** below the thumbnail. Comment, approve individual shots and
+resolve comments before approving the plan. **Save changes** stores it with the
+project (automatic browser recovery still requires storage consent and respects
+the existing size limit). Export the full storyboard JSON for an image-inclusive
+backup. Feedback JSON deliberately exports image names/IDs only; download needed
+reference images separately from their links before attaching them to an AI chat.
+Copy the separate planning instructions with the feedback JSON, then import the
+AI’s revised storyboard JSON. Imports preserve user comments and embedded images,
+reject stale revisions, and do not change the executable video. This initial
+version does not call an AI service or automatically generate video from the plan.

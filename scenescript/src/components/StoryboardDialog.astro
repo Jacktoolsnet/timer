@@ -1,0 +1,17 @@
+---
+import {storyboardWords} from '../lib/storyboard-i18n';
+import type {Language} from '../lib/i18n';
+interface Props{lang:Language}
+const {lang}=Astro.props,t=storyboardWords(lang);
+---
+<dialog id="storyboard-dialog" aria-labelledby="storyboard-title" aria-describedby="storyboard-hint" data-words={JSON.stringify(t)}>
+ <header class="json-header"><div><h2 id="storyboard-title">{t.title}</h2><p id="storyboard-hint">{t.hint}</p></div><button id="storyboard-close" type="button" title={t.close} aria-label={t.close}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></header>
+ <div class="dialog-inner">
+  <div id="storyboard-review"><span id="storyboard-state"></span><button id="storyboard-approve" type="button">{t.approve}</button><p>{t.approveHint}</p></div>
+  <nav id="storyboard-tabs" aria-label={t.title}>{(['story','characters','settings','shots'] as const).map(key=><button type="button" data-board-tab={key} aria-pressed={key==='story'?'true':'false'}>{t[key]}</button>)}</nav>
+  <div id="storyboard-content"></div>
+  <details id="storyboard-exchange"><summary>{t.exchange}</summary><p>{t.exchangeHint}</p><div class="compact-actions"><button id="storyboard-guide" type="button">{t.guide}</button><button id="storyboard-feedback" type="button">{t.feedback}</button><button id="storyboard-download" type="button">{t.download}</button></div><label for="storyboard-json">{t.json}</label><textarea id="storyboard-json" rows="7" spellcheck="false"></textarea><div class="compact-actions"><button id="storyboard-import" type="button">{t.import}</button><button id="storyboard-file-open" type="button">{t.file}</button><input id="storyboard-file" type="file" accept="application/json,.json" hidden/></div></details>
+  <p id="storyboard-status" role="status" aria-live="polite"></p><div id="storyboard-error-box" hidden><label for="storyboard-error">{t.error}</label><textarea id="storyboard-error" rows="3" readonly></textarea></div>
+ </div>
+ <footer class="json-footer"><button id="storyboard-save" type="button">{t.save}</button></footer>
+</dialog>

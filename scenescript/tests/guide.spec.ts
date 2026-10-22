@@ -5,7 +5,7 @@ import {parseProject} from '../src/lib/model';
 test('one offline-ready copy includes notation, all field types and complete examples',async({page})=>{
  await page.addInitScript(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async(text:string)=>{(window as any).copiedGuide=text;}}}));
  await page.goto('/de/ai/');await expect(page.locator('.legal-page>p').filter({hasText:'offline'})).toBeVisible();await page.locator('#copy-guide').click();
- const copied=await page.evaluate(()=>(window as any).copiedGuide as string);expect(copied).toBe(aiGuide);expect(copied.length).toBeLessThan(82000);
+ const copied=await page.evaluate(()=>(window as any).copiedGuide as string);expect(copied).toBe(aiGuide);expect(copied.length).toBeLessThan(85000);
  expect(copied).toContain('Identify the target audience FIRST');expect(copied).toContain('proposed YOUTUBE DESCRIPTION');expect(copied).toContain('MUST have a suitable cover in Project.thumbnail');
  for(const p of aiGuideExamples){expect(copied).toContain(JSON.stringify(p,null,2));expect(parseProject(JSON.stringify(p)).scenes).toHaveLength(1);}
  expect(copied).toContain('required field');expect(copied).toContain('inherit the containing element');expect(copied).toContain('not a JSON discriminator');expect(copied).not.toContain('Fetch and import');

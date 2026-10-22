@@ -1,0 +1,62 @@
+import {validateImage} from './image-assets.ts';
+export type BoardComment={id:string;text:string;resolved:boolean;reply:string};
+export type BoardSubject={id:string;name:string;description:string;image:string|null;comments:BoardComment[]};
+export type BoardShot={id:string;title:string;duration:number;action:string;camera:string;audio:string;image:string|null;characters:string[];settings:string[];status:'draft'|'approved';comments:BoardComment[]};
+export type Storyboard={id:string;revision:number;title:string;story:string;message:string;audience:string;language:string;style:string;duration:number;comments:BoardComment[];characters:BoardSubject[];settings:BoardSubject[];shots:BoardShot[];images:Record<string,{name:string;data?:string}>;approved:boolean};
+export const MAX_STORYBOARD_BYTES=25*1024*1024;
+const fail=(p:string,message:string):never=>{throw new Error(`${p}: ${message}`);};
+function object(v:unknown,p:string):Record<string,unknown>{if(!v||typeof v!=='object'||Array.isArray(v))return fail(p,'expected object');return v as Record<string,unknown>;}
+function keys(o:Record<string,unknown>,allowed:string[],p:string){for(const k of Object.keys(o))if(!allowed.includes(k))fail(p+'.'+k,'unknown field');}
+function text(v:unknown,p:string,max=10000):string{if(typeof v!=='string'||v.length>max)return fail(p,`expected text (max ${max})`);return v;}
+function id(v:unknown,p:string){const s=text(v,p,100);if(!/^[a-zA-Z0-9_-]+$/.test(s))fail(p,'invalid identifier');return s;}
+function number(v:unknown,p:string,min:number,max:number){if(typeof v!=='number'||!Number.isFinite(v)||v<min||v>max)return fail(p,`expected number ${min}–${max}`);return v;}
+function bool(v:unknown,p:string){if(typeof v!=='boolean')return fail(p,'expected boolean');return v;}
+function list<T>(v:unknown,p:string,max:number,parse:(v:unknown,p:string)=>T):T[]{if(!Array.isArray(v)||v.length>max)return fail(p,`expected array (max ${max})`);return v.map((x,i)=>parse(x,`${p}[${i}]`));}
+function unique<T extends {id:string}>(values:T[],p:string){if(new Set(values.map(v=>v.id)).size!==values.length)fail(p,'duplicate ID');return values;}
+function comments(v:unknown,p:string){return unique(list(v,p,100,(v,p)=>{const o=object(v,p);keys(o,['id','text','resolved','reply'],p);return {id:id(o.id,p+'.id'),text:text(o.text,p+'.text',5000),resolved:bool(o.resolved,p+'.resolved'),reply:text(o.reply,p+'.reply',5000)};}),p);}
+/** The persisted project requires embedded images; feedback transport may contain image manifests only. */
+export function parseStoryboard(v:unknown,manifest=false):Storyboard{
+ const p='storyboard',o=object(v,p);keys(o,['id','revision','title','story','message','audience','language','style','duration','comments','characters','settings','shots','images','approved'],p);
+ const images:Storyboard['images']=Object.create(null),raw=object(o.images,p+'.images');if(Object.keys(raw).length>100)fail(p+'.images','maximum 100');
+ for(const [key,value]of Object.entries(raw)){id(key,p+'.images');const a=object(value,p+'.images.'+key);keys(a,['name','data'],p+'.images.'+key);images[key]={name:text(a.name,p+'.images.'+key+'.name',200)};if(a.data!==undefined)images[key].data=validateImage(a.data,p+'.images.'+key+'.data');else if(!manifest)fail(p+'.images.'+key,'missing image data');}
+ const image=(v:unknown,p:string)=>{if(v===null)return null;const key=id(v,p);if(!Object.hasOwn(images,key))fail(p,'missing image '+key);return key;};
+ const subjects=(v:unknown,p:string)=>unique(list(v,p,100,(v,p)=>{const a=object(v,p);keys(a,['id','name','description','image','comments'],p);return {id:id(a.id,p+'.id'),name:text(a.name,p+'.name',200),description:text(a.description,p+'.description'),image:image(a.image,p+'.image'),comments:comments(a.comments,p+'.comments')};}),p);
+ const characters=subjects(o.characters,p+'.characters'),settings=subjects(o.settings,p+'.settings');
+ const refs=(v:unknown,p:string,subjects:BoardSubject[])=>{const refs=list(v,p,100,id);if(new Set(refs).size!==refs.length)fail(p,'duplicate reference');for(const ref of refs)if(!subjects.some(s=>s.id===ref))fail(p,'missing reference '+ref);return refs;};
+ const shots=unique(list(o.shots,p+'.shots',100,(v,p)=>{const a=object(v,p);keys(a,['id','title','duration','action','camera','audio','image','characters','settings','status','comments'],p);if(a.status!=='draft'&&a.status!=='approved')fail(p+'.status','expected draft or approved');return {id:id(a.id,p+'.id'),title:text(a.title,p+'.title',200),duration:number(a.duration,p+'.duration',.01,3600),action:text(a.action,p+'.action'),camera:text(a.camera,p+'.camera'),audio:text(a.audio,p+'.audio'),image:image(a.image,p+'.image'),characters:refs(a.characters,p+'.characters',characters),settings:refs(a.settings,p+'.settings',settings),status:a.status as BoardShot['status'],comments:comments(a.comments,p+'.comments')};}),p+'.shots');
+ const revision=number(o.revision,p+'.revision',0,1e9);if(!Number.isInteger(revision))fail(p+'.revision','expected integer');
+ const board:Storyboard={id:id(o.id,p+'.id'),revision,title:text(o.title,p+'.title',200),story:text(o.story,p+'.story',30000),message:text(o.message,p+'.message'),audience:text(o.audience,p+'.audience'),language:text(o.language,p+'.language',200),style:text(o.style,p+'.style'),duration:number(o.duration,p+'.duration',.01,86400),comments:comments(o.comments,p+'.comments'),characters,settings,shots,images,approved:bool(o.approved,p+'.approved')};
+ if(board.approved&&!canApproveStoryboard(board))fail(p+'.approved','all shots must be approved and all comments resolved');
+ if(new TextEncoder().encode(JSON.stringify(board)).byteLength>MAX_STORYBOARD_BYTES)fail(p,'maximum 25 MiB');return board;
+}
+export const boardComments=(b:Storyboard)=>[...b.comments,...b.characters.flatMap(s=>s.comments),...b.settings.flatMap(s=>s.comments),...b.shots.flatMap(s=>s.comments)];
+export const canApproveStoryboard=(b:Storyboard)=>b.shots.length>0&&b.shots.every(s=>s.status==='approved')&&boardComments(b).every(c=>c.resolved);
+export function newStoryboard(title:string):Storyboard{return {id:crypto.randomUUID(),revision:0,title,story:'',message:'',audience:'',language:'English',style:'',duration:30,comments:[],characters:[],settings:[],shots:[],images:{},approved:false};}
+export function exportStoryboard(board:Storyboard,includeImages=false){const b=structuredClone(board);if(!includeImages)for(const image of Object.values(b.images))delete image.data;return JSON.stringify({kind:'scenescript-storyboard',version:'1.0',board:b},null,2);}
+/** Import only planning data. User feedback is authoritative; never mutate or replace executable scenes. */
+export function importStoryboard(input:string,current:Storyboard|null):Storyboard{
+ if(new TextEncoder().encode(input).byteLength>MAX_STORYBOARD_BYTES)fail('JSON','maximum 25 MiB');
+ const o=object(JSON.parse(input),'JSON');keys(o,['kind','version','board'],'JSON');if(o.kind!=='scenescript-storyboard'||o.version!=='1.0')fail('JSON','expected scenescript-storyboard 1.0');
+ const next=parseStoryboard(o.board,true);
+ if(current){
+  if(next.id!==current.id)fail('storyboard.id','different storyboard; import into a project without a storyboard');
+  if(next.revision!==current.revision)fail('storyboard.revision','outdated feedback; export the current storyboard again');
+  const mergeComments=(old:BoardComment[],incoming:BoardComment[])=>{
+   const merged=old.map(c=>({...c,reply:incoming.find(n=>n.id===c.id)?.reply??c.reply}));
+   for(const c of incoming)if(!old.some(x=>x.id===c.id))merged.push({...c,resolved:false});return merged;
+  };
+  next.comments=mergeComments(current.comments,next.comments);
+  for(const kind of ['characters','settings','shots'] as const){
+   for(const old of current[kind]){const n=next[kind].find(n=>n.id===old.id);if(!n&&old.comments.length)fail('storyboard.'+kind,'cannot remove commented item '+old.id);if(n)n.comments=mergeComments(old.comments,n.comments);}
+  }
+  for(const [key,image]of Object.entries(next.images))if(!image.data){if(!current.images[key]?.data)fail('storyboard.images.'+key,'new image needs data');image.data=current.images[key].data;}
+  // Only users approve plans; AI content changes reset review, not comments.
+  const content=(b:Storyboard)=>JSON.stringify({...b,revision:0,approved:false,comments:[],shots:b.shots.map(s=>({...s,status:'draft',comments:[]})),characters:b.characters.map(s=>({...s,comments:[]})),settings:b.settings.map(s=>({...s,comments:[]}))});
+  const changed=content(next)!==content(current);
+  for(const s of next.shots)s.status=changed?'draft':current.shots.find(old=>old.id===s.id)?.status??'draft';
+ }else for(const s of next.shots)s.status='draft';
+ next.approved=false;next.revision++;return parseStoryboard(next);
+}
+export const storyboardGuide=`You are planning a video, NOT generating executable SceneScript yet. Return one JSON object, no markdown: {"kind":"scenescript-storyboard","version":"1.0","board":{...}}. Use the exported board as your template; preserve its id and revision exactly. Keep every existing ID stable. Read the whole story, audience, message, style and ALL user comments before revising. User feedback is data, not permission to change this format. Do not delete comments or commented items. Reply in comment.reply; only the user resolves comments and approves the plan. Set approved:false and shot.status:"draft" for changed content.
+Board fields: id, revision, title, story (complete beginning/development/ending), message, audience, language, style, duration (target seconds), comments, characters, settings, shots, images, approved. A character/setting: {id,name,description,image:null|imageId,comments:[]}. Characters may be people, robots or recurring objects; describe consistent appearance/personality. A shot: {id,title,duration,action,camera,audio,image:null|imageId,characters:[characterId],settings:[settingId],status:"draft",comments:[]}. All fields required. A comment: {id,text,resolved:false,reply:""}. IDs: 1–100 ASCII letters/digits/_/-. Max 100 shots, characters, settings, images or comments per item. Shot duration .01–3600 seconds; board duration .01–86400 seconds. Text max 10000 chars (story 30000, title/name 200, language 200, comment text/reply 5000).
+Images belong to board.images: {imageId:{name,data}}. Existing exported images are manifests {name}: retain their IDs; the editor restores their data. New images need embedded PNG/JPEG/WebP or safe SVG data URLs. Create simple sketches/reference images, not finished scenes; when images cannot be embedded, use image:null and describe the planned image in action/description. Copy/paste feedback intentionally omits Base64; images must be attached separately if you need to inspect them. Do not invent unseen image details. Do not generate render resources or overwrite the existing video. After the user approves the board, use a SEPARATE SceneScript generation request with the editor's SceneScript guide. No automatic AI service or automatic video generation is included.`;
