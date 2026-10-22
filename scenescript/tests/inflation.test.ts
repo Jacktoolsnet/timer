@@ -28,3 +28,11 @@ test('transparent 3D background is strictly optional, bounded and round-trips wi
  const stage={name:'Layer',model:{parts:[{id:'box'}]}};assert.ok(!Object.hasOwn(parseStage3D(stage),'transparentBackground'));assert.ok(!Object.hasOwn(parseStage3D({...stage,transparentBackground:false}),'transparentBackground'));
  const transparent=parseStage3D({...stage,transparentBackground:true});assert.equal(transparent.transparentBackground,true);assert.deepEqual(parseStage3D(JSON.parse(JSON.stringify(transparent))),transparent);for(const value of ['true',1,null])assert.throws(()=>parseStage3D({...stage,transparentBackground:value}),/expected boolean/);
 });
+
+test('glossy tiled floor is instanced, grouted and supports the glass plinth within the stage budget',()=>{
+ const p=project(),parts=p.stages.chart.model!.parts,tiles=parts.filter(p=>p.id.startsWith('floorTile')),bed=parts.find(p=>p.id==='floorGrout')!,base=parts.find(p=>p.id==='baseShadow')!;
+ assert.equal(tiles.length,4);assert.equal(tiles.reduce((n,p)=>n+p.instances!.length,0),143);
+ assert.ok(parts.reduce((n,p)=>n+Math.max(1,p.instances?.length??0),0)<=512);
+ for(const tile of tiles){assert.equal(tile.shape,'box');assert.equal(tile.finish,'polished');assert.ok(tile.roughness<.35);assert.ok(tile.size.x<2.6);assert.ok(tile.size.z<2.6);assert.ok(bed.position.y+bed.size.y/2<=tile.position.y-tile.size.y/2+1e-8);assert.ok(Math.abs(tile.position.y+tile.size.y/2-(base.position.y-base.size.y/2))<1e-8);}
+ const positions=tiles.flatMap(p=>p.instances!);assert.equal(new Set(positions.map(p=>p.x+','+p.z)).size,143);assert.ok(positions.some(p=>p.z>15));assert.ok(positions.some(p=>p.z< -10));
+});

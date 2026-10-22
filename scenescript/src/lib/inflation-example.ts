@@ -48,6 +48,11 @@ stageParts.push(...[1.08,1.91].flatMap((y,i)=>[
  box('backEdge'+i,{y,z:-2.56},{x:11.45,y:.025,z:.025},'#71c8e1',{finish:'polished',roughness:.12}),
  ...[-5.73,5.73].map((x,j)=>box('sideEdge'+i+j,{x,y},{x:.025,y:.025,z:5.1},'#a9ecff',{finish:'polished',roughness:.12}))
 ]),...Array.from({length:15},(_,i)=>box('glassGrid'+i,{x:-5.5+i*11/14,y:1.48,z:2.56},{x:.014,y:.82,z:.012},'#588ba3',{opacity:.55})),...Array.from({length:7},(_,i)=>box('glassDepth'+i,{x:5.75,y:1.48,z:-2.4+i*.8},{x:.015,y:.82,z:.015},'#649ab1',{opacity:.55})));
+// Real instanced tiles keep the cover's floor motif in perspective without a bitmap overlay.
+// Four shared materials avoid one draw call per tile; narrow gaps reveal the grout bed.
+const floorTiles=Array.from({length:143},(_,i)=>({x:(i%11-5)*2.6,z:(Math.floor(i/11)-6)*2.6+2.6}));
+stageParts.push(box('floorGrout',{y:.79,z:2.6},{x:28.6,y:.12,z:33.8},'#080e15',{roughness:.85}),
+ ...['#142330','#182734','#11202b','#1b2b36'].map((color,variant)=>box('floorTile'+variant,{y:.9},{x:2.555,y:.1,z:2.555},color,{finish:'polished',metalness:.32,roughness:.24+variant*.025,instances:floorTiles.filter((_,i)=>(i*7+Math.floor(i/11)*3)%4===variant)})));
 const camera={fov:44,keys:[{at:0,position:{x:10,y:15,z:32},target:{x:0,y:5.7,z:0}},{at:3.3,position:{x:8,y:14,z:31},target:{x:0,y:5.7,z:0}}]};
 const shot={stage:'chart',camera,actors:(['chocolate','money'] as const).map(name=>({id:name,character:name,joints:inflationPoses(true)[name],motions:[{animation:'flow',at:0,duration:3.3,blend:0}]}))};
 const svg=(name:string,value:string)=>({name,data:'data:image/svg+xml;base64,'+btoa(value)});

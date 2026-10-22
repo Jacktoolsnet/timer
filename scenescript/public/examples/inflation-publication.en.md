@@ -12,6 +12,7 @@ English-speaking mobile short-video viewers curious about everyday prices. This 
 - The title has deep dark extrusion bodies, polished front caps and a slightly angled lettering plane.
 - The thick chocolate-filled area shrinks; the embossed golden money-filled area grows. Non-linear, uneven curves, chocolate-tablet top tiles and coin-like gold details.
 - Real glass plinth with refraction, engraved grid, illuminated edges, polished chocolate/gold and a moving studio highlight. The procedural reflection map is offline and cached.
+- Dark glossy 3D floor tiles with narrow grout joints echo the cover. Four instanced materials keep the floor inexpensive; highlights use the existing studio environment, not planar scene reflections.
 - The title INFLATION EXPLAINED WITH CHOCOLATE persists above the chart as actual extruded 3D stroke geometry, not a flat bitmap. No additional captions, numbers, narration, music or explanation overlays.
 - Only the cover title lettering has been updated; the chocolate/gold chart and glass styling are retained. Chocolate and money now use their own embedded color-texture images, with runtime PBR reflections and gloss.
 - Texture files, built-in generation mode and final prompts: [material texture provenance](inflation-texture-prompts.en.md).
