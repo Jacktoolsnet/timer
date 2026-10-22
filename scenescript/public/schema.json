@@ -1109,7 +1109,8 @@
           "enum": [
             "rotation",
             "translation",
-            "scale"
+            "scale",
+            "morph"
           ],
           "default": "rotation"
         },
@@ -1203,6 +1204,10 @@
         }}
       }
     },
+    "profile3D":{"type":"object","additionalProperties":false,"required":["heights"],"properties":{
+      "heights":{"type":"array","minItems":2,"maxItems":32,"items":{"type":"number","minimum":0,"maximum":1}},
+      "target":{"type":"array","minItems":2,"maxItems":32,"items":{"type":"number","minimum":0,"maximum":1}}
+    }},
     "part3D": {
       "type": "object",
       "additionalProperties": false,
@@ -1225,7 +1230,8 @@
             "sphere",
             "cylinder",
             "cone",
-            "plane"
+            "plane",
+            "profile"
           ],
           "default": "box"
         },
@@ -1246,6 +1252,7 @@
           "pattern": "^#[a-fA-F0-9]{6}$",
           "default": "#36a9e1"
         },
+        "profile":{"$ref":"#/$defs/profile3D"},
         "texture":{"anyOf":[{"$ref":"#/$defs/texture3D"},{"type":"null"}],"default":null},
         "finish": {"enum":["standard","polished","glass"],"default":"standard"},
         "roughness": {

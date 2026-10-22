@@ -8,6 +8,8 @@ English-speaking mobile short-video viewers curious about everyday prices. This 
 - One-second title image: **INFLATION EXPLAINED WITH CHOCOLATE**.
 - 0.3-second crossfade to a perspective 3D chart; its initial state holds during the transition.
 - **Exactly three seconds** of continuous simulation with a matching original whoosh.
+- Continuous extruded profiles replace all vertical bar segments. Their wavy upper contours use shape-preserving cubic interpolation, with a fixed baseline and reusable buffers.
+- The title has deep dark extrusion bodies, polished front caps and a slightly angled lettering plane.
 - The thick chocolate-filled area shrinks; the embossed golden money-filled area grows. Non-linear, uneven curves, chocolate-tablet top tiles and coin-like gold details.
 - Real glass plinth with refraction, engraved grid, illuminated edges, polished chocolate/gold and a moving studio highlight. The procedural reflection map is offline and cached.
 - The title INFLATION EXPLAINED WITH CHOCOLATE persists above the chart as actual extruded 3D stroke geometry, not a flat bitmap. No additional captions, numbers, narration, music or explanation overlays.

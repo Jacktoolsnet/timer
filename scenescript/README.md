@@ -632,7 +632,7 @@ Gespeicherte Projekte und Einzelexporte enthalten die vollständigen Modelle.
 - `Character3D.model` und `Stage3D.model`: eigene `parts` und benannte `animations`.
   Ein Modell definiert die Geometrie; auch bisherige Vorlagen nutzen diesen Renderer.
   Himmel/Boden bleiben. `palette` bindet Teilfarben an Ressourcenfelder.
-- Grundformen: unsichtbare Gruppe, Quader, Kugel, Zylinder, Kegel, Fläche.
+- Grundformen: unsichtbare Gruppe, Quader, Kugel, Zylinder, Kegel, Fläche, extrudierte Profilfläche.
   Material: Farbe, Rauheit, Metallanteil, Deckkraft, optisches Finish und Bildtexturen.
   Keine externen Modelle oder ausführbaren Skripte.
 - Teile referenzieren ihren Elternteil per ID. Position/Drehpunkt sind lokal,
@@ -923,3 +923,32 @@ die als Projektbilder sichtbar und im nativen Script eingebettet sind. Das Cover
 bleibt unverändert. Bilder und finale Prompts: `public/examples/inflation-texture-prompts.en.md`.
 `npm run example:inflation` aktualisiert auch das eingebettete Textur-Quellpaket
 aus den beiden JPEGs (nur bei Änderungen, damit unnötige HMR-Neuladungen entfallen).
+
+### Weiche 3D-Profilflächen
+
+`shape:"profile"` ist ein geschlossenes, extrudiertes Flächenstück mit einer
+zusammenhängenden, weich geschwungenen Oberkante – kein Stapel von Quadern.
+`profile.heights` enthält 2–32 Werte von 0 bis 1 an gleichmäßigen X-Positionen.
+`target` ist optional (Standard: dieselben Höhen), muss aber gleich lang sein.
+Eine formerhaltende kubische Interpolation verhindert Überschwingen unter die
+Grundlinie. `size` skaliert Breite/Höhe/Tiefe; die Unterkante liegt lokal bei y=0,
+X/Z reichen vor Skalierung von −0,5 bis +0,5.
+
+Ein Gelenk mit `motion:"morph",axis:"y",min:0,max:1` interpoliert zwischen den
+beiden Höhenprofilen und lässt sich über die vorhandenen benannten Clips und
+Joint-Overrides animieren. Morph-Gelenke funktionieren nur auf Profilteilen;
+Profile erlauben keine `instances`, aber normale Gruppen-/Ressourcenplatzierung.
+
+```json
+{"id":"area","shape":"profile","size":{"x":10,"y":8,"z":1},
+ "profile":{"heights":[0.9,0.8,0.9,0.5,0.2],"target":[0.2,0.4,0.3,0.7,0.9]},
+ "joints":[{"id":"flow","motion":"morph","axis":"y","min":0,"max":1}]}
+```
+
+Der Renderer verwendet feste Geometrie-/UV-Puffer mit 96 Segmenten und glatten
+Oberkantennormalen. Es entstehen beim Animieren keine neuen Geometrien oder
+Texturen; Rückwärtssprünge bleiben deterministisch. Texturen bleiben über die
+ganze Fläche zusammenhängend. Das Inflationsbeispiel nutzt je Material ein
+Profil statt der bisherigen Balken. Die Schrift besitzt nun dunkle, tiefe
+Extrusionskörper und helle Fronten auf einer leicht gedrehten 3D-Schriftebene.
+Cover, Audio und Dauer bleiben unverändert.

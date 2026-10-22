@@ -1,3 +1,4 @@
+import {createProfileGeometry3D} from './profile3d';
 import * as THREE from 'three';
 import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
 import {textureFaces3D,type Texture3D} from '../lib/texture3d';
@@ -6,13 +7,14 @@ type Storage={textures?:Map<string,THREE.Texture>;images?:Map<string,HTMLImageEl
 const sharedGeometries=new WeakMap<Storage,Map<string,THREE.BufferGeometry>>();
 /** Transform chain: position → pivot → XYZ rotation → -pivot → geometry/children. */
 export function createModel3D(model:Model3D,storage:Storage,palette:object={}){
- const root=new THREE.Group(),nodes=new Map<string,{anchor:THREE.Group;pivot:THREE.Group;content:THREE.Group;mesh?:THREE.Mesh}>();
+ const root=new THREE.Group(),nodes=new Map<string,{anchor:THREE.Group;pivot:THREE.Group;content:THREE.Group;mesh?:THREE.Mesh;profile?:ReturnType<typeof createProfileGeometry3D>}>();
  let geometries=sharedGeometries.get(storage);if(!geometries){geometries=new Map();sharedGeometries.set(storage,geometries);}
  for(const part of model.parts){
   const anchor=new THREE.Group(),pivot=new THREE.Group(),content=new THREE.Group();anchor.name=part.id;pivot.position.set(part.pivot.x,part.pivot.y,part.pivot.z);content.position.set(-part.pivot.x,-part.pivot.y,-part.pivot.z);anchor.add(pivot);pivot.add(content);nodes.set(part.id,{anchor,pivot,content});
   if(part.shape==='group')continue;
   const rounded=part.shape==='box'&&part.finish&&part.finish!=='standard',geometryKey=part.shape+(rounded?'-rounded':'');
-  let geometry=geometries.get(geometryKey);
+  const profile=part.profile?createProfileGeometry3D(part.profile):undefined;if(profile){nodes.get(part.id)!.profile=profile;storage.geometries.add(profile.geometry);}
+  let geometry=profile?.geometry??geometries.get(geometryKey);
   if(!geometry){geometry=part.shape==='box'?(rounded?new RoundedBoxGeometry(1,1,1,2,.035):new THREE.BoxGeometry(1,1,1)):part.shape==='sphere'?new THREE.SphereGeometry(.5,16,12):part.shape==='cylinder'?new THREE.CylinderGeometry(.5,.5,1,16):part.shape==='cone'?new THREE.ConeGeometry(.5,1,16):new THREE.PlaneGeometry(1,1);geometries.set(geometryKey,geometry);storage.geometries.add(geometry);}
   const paletteColor=Object.hasOwn(palette,part.palette)?(palette as Record<string,unknown>)[part.palette]:undefined,color=typeof paletteColor==='string'&&/^#[a-f\d]{6}$/i.test(paletteColor)?paletteColor:part.color;
   const texture=(id:string,settings:Texture3D)=>{
@@ -35,8 +37,9 @@ export function createModel3D(model:Model3D,storage:Storage,palette:object={}){
  for(const part of model.parts)(part.parent?nodes.get(part.parent)!.content:root).add(nodes.get(part.id)!.anchor);
  const update=(overrides:Record<string,number>,motions:readonly ModelMotion3D[],time:number,controls:Partial<Record<typeof jointControls3D[number],number>>={})=>{
   const values=modelPose3D(model,overrides,motions,time,controls);
-  for(const part of model.parts){const {anchor,pivot,mesh}=nodes.get(part.id)!;if(mesh&&!(mesh instanceof THREE.InstancedMesh))mesh.scale.set(part.size.x,part.size.y,part.size.z);anchor.position.set(part.position.x,part.position.y,part.position.z);pivot.rotation.set(part.rotation.x*Math.PI/180,part.rotation.y*Math.PI/180,part.rotation.z*Math.PI/180);
-   for(const joint of part.joints){const value=values.get(joint.id)!;if(joint.motion==='translation')anchor.position[joint.axis]+=value;else if(joint.motion==='rotation')pivot.rotation[joint.axis]+=value*Math.PI/180;else if(mesh)mesh.scale[joint.axis]*=value;}
+  for(const part of model.parts){const {anchor,pivot,mesh,profile}=nodes.get(part.id)!;if(mesh&&!(mesh instanceof THREE.InstancedMesh))mesh.scale.set(part.size.x,part.size.y,part.size.z);anchor.position.set(part.position.x,part.position.y,part.position.z);pivot.rotation.set(part.rotation.x*Math.PI/180,part.rotation.y*Math.PI/180,part.rotation.z*Math.PI/180);
+   for(const joint of part.joints){const value=values.get(joint.id)!;if(joint.motion==='translation')anchor.position[joint.axis]+=value;else if(joint.motion==='rotation')pivot.rotation[joint.axis]+=value*Math.PI/180;else if(joint.motion==='morph')profile?.update(value);else if(mesh)mesh.scale[joint.axis]*=value;}
+   if(profile&&!part.joints.some(j=>j.motion==='morph'))profile.update(0);
    if(mesh)mesh.visible=mesh.scale.x>1e-5&&mesh.scale.y>1e-5&&mesh.scale.z>1e-5;
   }
  };

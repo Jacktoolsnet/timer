@@ -316,32 +316,28 @@ ups: [] = transported frames; else one nonzero, non-tangent-parallel vector/poin
 Normals define banks/rolls; intermediate vectors avoid half-turns.
 Adjacent points must differ. closed:true closes: never repeat the first point.
 Smooth may overshoot; linear has corners.
-Actor.path=null(default) or {path:"route",duration:12,laps:4,offset:1} references
-this shot's STAGE path. at:0, start:0 (normalized route fraction), laps:1,
-offset:0 (signed sideways world units, +right), orient:true are defaults.
-Motion advances at approximately constant centerline speed using arc length.
-at/duration are scene-local, entirely inside scene.duration. Before/after hold
-the start/end pose. Closed paths wrap; laps may be fractional (.001–100). Open
-paths require start+laps<=1. Actor x/y/z ADD world-space offsets; yaw/pitch/roll
-are LOCAL orientation corrections. +Z forward, +Y up. Transported frames follow
-vertical loops without upright snapping; orient:false keeps fixed orientation.
+Actor.path=null(default) or {path:"route",duration:12,laps:4,offset:1} binds a STAGE path.
+Defaults:at0,start0(normalized),laps1,offset0(signed sideways units,+right),orient:true.
+Arc-length motion approximates constant centerline speed. at/duration are scene-local,
+inside scene.duration; before/after hold endpoints. Closed paths wrap; laps .001–100
+may be fractional; open paths require start+laps<=1. Actor x/y/z ADD world offsets;
+yaw/pitch/roll are LOCAL corrections. +Z forward,+Y up. Transported frames follow
+loops without upright snapping; orient:false retains orientation.
 Path and nonempty actions are mutually exclusive. Joint motions, expressions
 and speech remain independent; wheels need a drive clip, not walking actions.
 Two lanes: same path/time/laps, different offset. No automatic collisions,
 gravity, lane-length speed correction or generated road geometry. Model the road
 separately. Across camera cuts, use the SAME stage and explicit start fractions;
 there is no implicit continuation. E.g. four 12s shots with laps:1 each = 4 laps.
-CAMERA RIG: camera.follow={actor:"truck",mode:"chase"} references a SHOT ACTOR.
-chase/onboard attach camera position(offset) and look-at(target) in actor-local
-axes, UNSCALED world units, including loop roll. They differ in default offsets.
-track uses offset as a FIXED WORLD camera position and tracks the actor's local
-target (spectator pan). Static yaw/pitch/distance/orbit are ignored in follow mode; fov still applies.
-Alternatively camera.keys:[{at:0,position:{x:8,y:4,z:8},target:{y:1},roll:0},...]
-provides up to64 absolute world position/look-at keys. First at:0, then strictly
-increasing <=scene.duration; position and target required and distinct. Linear
-interpolation, last pose holds; roll is numeric degrees. Do NOT combine keys and
-follow. Empty keys + null follow retain the legacy orbital camera. Use separate
-scenes for camera cuts. Preview, stills and export sample the same absolute time.
+CAMERA RIG: camera.follow={actor:"truck",mode:"chase"} binds a SHOT ACTOR.
+chase/onboard:offset/target in actor-local unscaled world units, including loop roll;
+default offsets differ. track:offset is a FIXED WORLD camera, target remains actor-local.
+Follow ignores yaw/pitch/distance/orbit, not fov.
+camera.keys:[{at:0,position:{x:8,y:4,z:8},target:{y:1},roll:0},...] instead gives
+≤64 absolute world keys: first at0, strictly increasing≤scene.duration; position and
+target required/distinct. Linear interpolation, numeric-degree roll, last pose holds.
+Never mix keys/follow. Empty keys+null follow retain legacy orbit. Use scenes for cuts.
+Preview/stills/export sample the same time.
 REUSABLE GROUPS: Project.groups3d stores Group3D definitions, NOT Scene.groups
 (the latter is 2D). characters:1–16 distinct Project.characters IDs, selected with
 seeded equal probability, never fresh randomness/frame. Templates stay shared.
@@ -373,19 +369,22 @@ model defines geometry; stage ground/sky remain. palette reads a resource hex fi
 Parts.instances repeats geometry at ≤256 local offsets; no group/scale-joint
 instances. Size is per copy; copies count toward the scene budget.
 Parts: unique id, parent="" for root or another part ID (any list order), shape
-group/box/sphere/cylinder/cone/plane. Group is invisible; other shapes are centered
+group/box/sphere/cylinder/cone/plane/profile. Group is invisible; primitives except profile are centered
 unit shapes scaled by size (diameters for sphere/cylinder/cone; cylinder/cone axis Y;
 plane: XY, faces ±Z, size.z ignored). Materials are per part.
+profile: closed extruded area, bottom at local y:0, x:−.5..+.5, z:±.5.
+profile:{heights:[...],target:[...]}:2–32 normalized heights0–1 at equal X spacing;
+target defaults heights, same length. Smooth shape-preserving interpolation, no overshoot.
+size scales width/height/depth. morph joint interpolates heights→target; no instances.
 finish:standard(default), polished(clearcoat), glass(refraction; use opacity:1).
 Polished/glass use rounded boxes and an offline studio reflection map.
-position/pivot/size are local world units; rotation XYZ degrees. Transform:
-T(position) T(pivot) R_XYZ(rotation + joints) T(-pivot). Children inherit this
-transform, NOT mesh size. Translation joints offset position in PARENT axes.
-Actor height/3 and scale multiply the whole model; y/pitch/roll position/orient
-the instance in addition to x/z/rotation. Breathing needs an explicit bob driver.
-Joints: unique id/model, motion rotation(default)/translation/scale; axis x(default)/y/z.
+position/pivot/size:local units; rotation:XYZ degrees. Transform:
+T(position) T(pivot) R_XYZ(rotation+joints) T(-pivot). Children inherit transforms,
+NOT mesh size. Translation joints use PARENT axes. Actor height/3 and scale
+multiply the model; y/pitch/roll add to x/z/rotation. Breathing needs a bob driver.
+Joints: unique id/model, motion rotation(default)/translation/scale/morph; axis x(default)/y/z.
 min/max REQUIRED; value:0(scale:1), inside bounds; target:max.
-Bounds:rotation±3600°, translation±50, scale0–50.
+Bounds:rotation±3600°, translation±50, scale0–50; morph0–1 (profile only, axis:y).
 Scale multiplies only that mesh axis, never children; 0 hides the mesh, no groups.
 One joint per motion+axis per part. These are kinematic limits, NOT physics.
 Actor.joints and Shot.stageJoints override rest values by joint ID, within limits.
@@ -413,15 +412,13 @@ All facial geometry remains editable.
 Order: rest → joints overrides → motion → responses → control → clamp.
 Limits/model: 512 parts, depth32, 256 joints (6/part), 16 clips, 64 tracks/clip,
 64 keys/track, 4096 keys total. Shot: 2048 estimated active parts, max12 actors.
-Part.texture:{asset:"imageID",repeat:{x:1,y:1},offset:{x:0,y:0},rotation:0} references
-Project.assets PNG/JPEG/WebP (no SVG/URLs). Color multiplies image; white preserves it.
-UV repeat/offset are image units; rotation is degrees around center. Box-only faces
-right/left/top/bottom/front/back = +X/−X/+Y/−Y/+Z/−Z override asset; omitted inherits,
-"" disables that face. Mapping follows mesh deformation. PNG cutouts use alpha test.
-Limits/shot:32 images,4096px/side,16MP total;128 UV variants, cached/disposed with GPU.
-Resource bundles include only required assets; imports remap collisions/reuse images.
-Envelope≤32MiB including textures; geometry≤512KiB. No custom meshes yet.
-In resource dialog edit model JSON, choose animation and scrub preview time.
+Part.texture:{asset:"imageID"} uses Project.assets PNG/JPEG/WebP, no SVG/URLs.
+Color multiplies image; white preserves it. repeat/offset:image units; rotation:degrees
+around center. Box faces right/left/top/bottom/front/back = +X/−X/+Y/−Y/+Z/−Z
+may override asset; absent inherits, "" disables. UVs deform with mesh; PNG alpha test.
+Limits/shot:32 images,4096px/side,16MP total,128 UV variants; GPU caching/disposal.
+Resource bundles include required images; imports reuse/remap conflicts.
+Envelope≤32MiB, geometry≤512KiB. No arbitrary custom meshes. Dialog:model JSON/clip/time.
 Minimal independent example (add audience-specific publication copy/cover for delivery):
 ${JSON.stringify(aiModel3DExample)}
 Complete compact sequence example (add publication copy and real cover for delivery):

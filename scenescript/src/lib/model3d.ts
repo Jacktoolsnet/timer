@@ -1,11 +1,12 @@
+import {parseProfile3D,type Profile3D} from './profile3d.ts';
 import {parseTexture3D,type Texture3D} from './texture3d.ts';
 /** Declarative, bounded construction vocabulary. No executable code or external URLs. */
 export type Vector3D={x:number;y:number;z:number};
 export const vector3D=(value=0):Vector3D=>({x:value,y:value,z:value});
-export const shapes3D=['group','box','sphere','cylinder','cone','plane'] as const;
+export const shapes3D=['group','box','sphere','cylinder','cone','plane','profile'] as const;
 export const jointControls3D=['none','mouth','speech','happy','sad','angry','surprised','blink','leftArm','rightArm','leftLeg','rightLeg','wave','bob'] as const;
-export type Joint3D={id:string;motion:'rotation'|'translation'|'scale';axis:'x'|'y'|'z';min:number;max:number;value:number;control:typeof jointControls3D[number];target:number;responses:Partial<Record<typeof jointControls3D[number],number>>};
-export type Part3D={texture?:Texture3D;finish?:'standard'|'polished'|'glass';id:string;parent:string;palette:string;instances:Vector3D[];shape:typeof shapes3D[number];position:Vector3D;rotation:Vector3D;pivot:Vector3D;size:Vector3D;color:string;roughness:number;metalness:number;opacity:number;joints:Joint3D[]};
+export type Joint3D={id:string;motion:'rotation'|'translation'|'scale'|'morph';axis:'x'|'y'|'z';min:number;max:number;value:number;control:typeof jointControls3D[number];target:number;responses:Partial<Record<typeof jointControls3D[number],number>>};
+export type Part3D={profile?:Profile3D;texture?:Texture3D;finish?:'standard'|'polished'|'glass';id:string;parent:string;palette:string;instances:Vector3D[];shape:typeof shapes3D[number];position:Vector3D;rotation:Vector3D;pivot:Vector3D;size:Vector3D;color:string;roughness:number;metalness:number;opacity:number;joints:Joint3D[]};
 export type JointKey3D={at:number;value:number};
 export type JointTrack3D={joint:string;keys:JointKey3D[];easing:'linear'|'ease-in-out'};
 export type ModelAnimation3D={duration:number;tracks:JointTrack3D[]};
@@ -29,7 +30,7 @@ export function parseModel3D(value:unknown,path='model'):Model3D|null{
  if(!Array.isArray(v.parts)||!v.parts.length||v.parts.length>512)throw new Error(path+'.parts: expected 1–512 parts');
  const ids=new Set<string>(),joints=new Map<string,Joint3D>();let jointCount=0;
  const parts:Part3D[]=v.parts.map((value,index)=>{
-  const p=path+'.parts['+index+']',v=obj(value,p),d=defaultPart3D();fields(v,[...Object.keys(d),'finish','texture'],p);
+  const p=path+'.parts['+index+']',v=obj(value,p),d=defaultPart3D();fields(v,[...Object.keys(d),'finish','texture','profile'],p);
   const get=(key:keyof Part3D)=>v[key]===undefined?d[key]:v[key],partId=id(v.id,p+'.id');if(ids.has(partId))throw new Error(p+'.id: duplicate part');ids.add(partId);
   const parent=get('parent')===''?'':id(v.parent,p+'.parent'),shape=choice(get('shape'),shapes3D,p+'.shape');
   const color=get('color');if(typeof color!=='string'||!/^#[a-f\d]{6}$/i.test(color))throw new Error(p+'.color: expected #RRGGBB');
@@ -38,9 +39,10 @@ export function parseModel3D(value:unknown,path='model'):Model3D|null{
   const parsedJoints:Joint3D[]=list.map((value,index)=>{
    const path=p+'.joints['+index+']',v=obj(value,path),d=defaultJoint3D();fields(v,Object.keys(d),path);
    const jointId=id(v.id,path+'.id');if(joints.has(jointId)||++jointCount>256)throw new Error(path+'.id: duplicate joint or maximum 256');
-   const motion=choice(v.motion===undefined?d.motion:v.motion,['rotation','translation','scale'],path+'.motion'),axis=choice(v.axis===undefined?d.axis:v.axis,['x','y','z'],path+'.axis'),bound=motion==='rotation'?3600:50;
+   const motion=choice(v.motion===undefined?d.motion:v.motion,['rotation','translation','scale','morph'],path+'.motion'),axis=choice(v.axis===undefined?d.axis:v.axis,['x','y','z'],path+'.axis'),bound=motion==='rotation'?3600:motion==='morph'?1:50;
+   if(motion==='morph'&&(shape!=='profile'||axis!=='y'))throw new Error(path+': morph requires profile shape and axis y');
    if(axes.has(motion+axis))throw new Error(path+': duplicate motion/axis');axes.add(motion+axis);
-   const min=num(v.min,path+'.min',motion==='scale'?0:-bound,bound),max=num(v.max,path+'.max',min,bound),rest=num(v.value===undefined?(motion==='scale'?1:0):v.value,path+'.value',min,max);
+   const min=num(v.min,path+'.min',motion==='scale'||motion==='morph'?0:-bound,bound),max=num(v.max,path+'.max',min,bound),rest=num(v.value===undefined?(motion==='scale'?1:0):v.value,path+'.value',min,max);
    const responseValues=obj(v.responses===undefined?{}:v.responses,path+'.responses'),responses:Joint3D['responses']={};
    for(const [name,value]of Object.entries(responseValues)){choice(name,jointControls3D,path+'.responses');if(name==='none')throw new Error(path+'.responses.none: no signal');Object.defineProperty(responses,name,{value:num(value,path+'.responses.'+name,min,max),enumerable:true,writable:true,configurable:true});}
    const joint:Joint3D={responses,id:jointId,motion,axis,min,max,value:rest,control:choice(v.control===undefined?'none':v.control,jointControls3D,path+'.control'),target:num(v.target===undefined?max:v.target,path+'.target',min,max)};joints.set(jointId,joint);return joint;
@@ -48,11 +50,13 @@ export function parseModel3D(value:unknown,path='model'):Model3D|null{
   const palette=get('palette')===''?'':id(get('palette'),p+'.palette'),rawInstances=get('instances');
   if(!Array.isArray(rawInstances)||rawInstances.length>256)throw new Error(p+'.instances: maximum 256');
   if(shape==='group'&&parsedJoints.some(j=>j.motion==='scale'))throw new Error(p+'.joints: scale affects mesh geometry, not groups');
+  if(rawInstances.length&&shape==='profile')throw new Error(p+'.instances: profiles cannot be instanced');
   if(rawInstances.length&&(shape==='group'||parsedJoints.some(j=>j.motion==='scale')))throw new Error(p+'.instances: needs geometry without scale joints');
   const instances=rawInstances.map((v,i)=>vector(v,p+'.instances['+i+']',vector3D(),-50,50));
+  const profile=parseProfile3D(v.profile,shape,p+'.profile');
   const texture=parseTexture3D(v.texture,shape,p+'.texture');
   const finish=choice(v.finish===undefined?'standard':v.finish,['standard','polished','glass'],p+'.finish');
-  return {...(texture?{texture}:{}),...(finish==='standard'?{}:{finish}),id:partId,parent,palette,instances,shape,color,position:vector(v.position,p+'.position',d.position,-50,50),rotation:vector(v.rotation,p+'.rotation',d.rotation,-360,360),pivot:vector(v.pivot,p+'.pivot',d.pivot,-50,50),size:vector(v.size,p+'.size',d.size,.01,50),roughness:num(get('roughness'),p+'.roughness',0,1),metalness:num(get('metalness'),p+'.metalness',0,1),opacity:num(get('opacity'),p+'.opacity',0,1),joints:parsedJoints};
+  return {...(profile?{profile}:{}),...(texture?{texture}:{}),...(finish==='standard'?{}:{finish}),id:partId,parent,palette,instances,shape,color,position:vector(v.position,p+'.position',d.position,-50,50),rotation:vector(v.rotation,p+'.rotation',d.rotation,-360,360),pivot:vector(v.pivot,p+'.pivot',d.pivot,-50,50),size:vector(v.size,p+'.size',d.size,.01,50),roughness:num(get('roughness'),p+'.roughness',0,1),metalness:num(get('metalness'),p+'.metalness',0,1),opacity:num(get('opacity'),p+'.opacity',0,1),joints:parsedJoints};
  });
  const parents=new Map(parts.map(p=>[p.id,p.parent]));
  for(const part of parts){let current=part.id;const seen=new Set<string>();while(current){if(!parents.has(current))throw new Error(path+'.parts.'+part.id+'.parent: missing part '+current);if(seen.has(current))throw new Error(path+'.parts.'+part.id+'.parent: hierarchy cycle');if(seen.size>=32)throw new Error(path+'.parts: maximum hierarchy depth 32');seen.add(current);current=parents.get(current)!;}}
@@ -111,7 +115,7 @@ export function modelPose3D(model:Model3D,overrides:Record<string,number>,motion
 /** Conservative framing radius, including nested translations, pivot offsets and joint travel. */
 export function modelRadius3D(model:Model3D):number{
  const parts=new Map(model.parts.map(p=>[p.id,p]));let radius=1;
- for(const part of model.parts){let reach=Math.hypot(part.size.x,part.size.y,part.size.z)/2;for(const j of part.joints)if(j.motion==='scale')reach*=Math.max(1,j.max);reach+=Math.max(0,...part.instances.map(p=>Math.hypot(p.x,p.y,p.z)));let current:Part3D|undefined=part;
+ for(const part of model.parts){let reach=part.shape==='profile'?Math.hypot(part.size.x/2,part.size.y,part.size.z/2):Math.hypot(part.size.x,part.size.y,part.size.z)/2;for(const j of part.joints)if(j.motion==='scale')reach*=Math.max(1,j.max);reach+=Math.max(0,...part.instances.map(p=>Math.hypot(p.x,p.y,p.z)));let current:Part3D|undefined=part;
   while(current){reach+=Math.hypot(current.position.x,current.position.y,current.position.z)+2*Math.hypot(current.pivot.x,current.pivot.y,current.pivot.z);for(const joint of current.joints)if(joint.motion==='translation')reach+=Math.max(Math.abs(joint.min),Math.abs(joint.max));current=parts.get(current.parent);}radius=Math.max(radius,reach);
  }return radius;
 }

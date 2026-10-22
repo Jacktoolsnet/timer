@@ -11,7 +11,7 @@
     "dev": "astro dev --host 127.0.0.1",
     "build": "astro check && astro build",
     "preview": "astro preview --host 127.0.0.1",
-    "test": "node --experimental-strip-types --test tests/model.test.ts tests/simulation.test.ts tests/music.test.ts tests/video.test.ts tests/motion-path.test.ts tests/audio.test.ts tests/audio-mix.test.ts tests/audio-packet-stream.test.ts tests/comic.test.ts tests/groups.test.ts tests/crop.test.ts tests/camera.test.ts tests/spaces.test.ts tests/still-plan.test.ts tests/export-storage.test.ts tests/export-timing.test.ts tests/stage3d.test.ts tests/stage3d-speech.test.ts tests/model3d.test.ts tests/stage3d-presets.test.ts tests/path3d.test.ts tests/group3d.test.ts tests/race3d.test.ts tests/inflation.test.ts tests/texture3d.test.ts",
+    "test": "node --experimental-strip-types --test tests/model.test.ts tests/simulation.test.ts tests/music.test.ts tests/video.test.ts tests/motion-path.test.ts tests/audio.test.ts tests/audio-mix.test.ts tests/audio-packet-stream.test.ts tests/comic.test.ts tests/groups.test.ts tests/crop.test.ts tests/camera.test.ts tests/spaces.test.ts tests/still-plan.test.ts tests/export-storage.test.ts tests/export-timing.test.ts tests/stage3d.test.ts tests/stage3d-speech.test.ts tests/model3d.test.ts tests/stage3d-presets.test.ts tests/path3d.test.ts tests/group3d.test.ts tests/race3d.test.ts tests/inflation.test.ts tests/texture3d.test.ts tests/profile3d.test.ts",
     "example:inflation": "node --experimental-strip-types scripts/generate-inflation-example.mjs",
     "example:race": "node --experimental-strip-types scripts/generate-race-example.mjs",
     "test:e2e": "playwright test"
