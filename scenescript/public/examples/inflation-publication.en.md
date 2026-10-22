@@ -67,3 +67,20 @@ Copy the separate planning instructions with the feedback JSON, then import the
 AI’s revised storyboard JSON. Imports preserve user comments and embedded images,
 reject stale revisions, and do not change the executable video. This initial
 version does not call an AI service or automatically generate video from the plan.
+
+
+### Manual planning edits
+
+The whole-story card includes the planned aspect ratio (landscape, portrait or
+square). It is independent from the existing video's format. Older project plans
+without this field inherit the project format on load; standalone legacy plans
+fall back to landscape (or retain the current plan's format during revision).
+
+Pencil buttons open small field-specific editing dialogs. Write multiline text,
+choose the format or existing reference image, enter durations in seconds and
+assign characters/settings to shots. Characters, settings and shot cards can also
+be added manually, so a new storyboard can be prefilled before involving AI.
+Cancel/Escape discards just the current field edit. Apply updates the planning
+draft; Save changes in the main dialog commits it to the project. Content edits
+invalidate the plan approval and affected shot approvals, preserving comments
+and leaving the executable video untouched.

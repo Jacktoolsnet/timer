@@ -33,7 +33,8 @@ Self-contained: no website/schema download needed. Read §§1–4 first, then ne
 features; §11 defines every field and §12 gives complete JSON examples.
 
 Optional planning: Project.storyboard stores a separate plan, never rendered. It can
-contain the whole story, recurring characters/objects, settings, sketches and shots.
+contain the whole story, target format, recurring characters/objects, settings, sketches
+and shots. Storyboard format is planning-only and does not change Project.format.
 Use the Storyboard dialog’s separate instructions and feedback JSON for revisions;
 its envelope is NOT an executable Project. Preserve IDs, revision and user comments.
 Only users resolve comments and approve shots/plans. Approval does not generate video.

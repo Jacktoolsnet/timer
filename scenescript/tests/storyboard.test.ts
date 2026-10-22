@@ -27,3 +27,10 @@ test('strict structure, references, bounded counts, safe images and finite durat
 test('a fresh planning-only board exports a usable template and independent instructions',()=>{
  const b=newStoryboard('New film');assert.equal(b.shots.length,0);assert.equal(canApproveStoryboard(b),false);b.comments.push(comment());assert.deepEqual(importStoryboard(exportStoryboard(b),b).comments,b.comments);assert.ok(storyboardGuide.includes('NOT generating executable SceneScript'));assert.ok(storyboardGuide.includes('all fields required')||storyboardGuide.includes('All fields required'));assert.ok(storyboardGuide.length<4000);
 });
+test('planning format is portable, validated and independent from the video; old plans inherit project format',()=>{
+ assert.equal(newStoryboard('New').format,'landscape');assert.equal(newStoryboard('New','square').format,'square');
+ const p=demoProject();p.format='portrait';p.storyboard=example();p.storyboard.format='square';assert.equal(validateProject(p).format,'portrait');assert.equal(parseProject(JSON.stringify(p)).storyboard!.format,'square');
+ const legacy:any=JSON.parse(JSON.stringify(p));delete legacy.storyboard.format;assert.equal(parseProject(JSON.stringify(legacy)).storyboard!.format,'portrait');assert.equal(parseStoryboard(legacy.storyboard).format,'landscape');
+ const old=example();old.format='square';const feedback=JSON.parse(exportStoryboard(old));delete feedback.board.format;assert.equal(importStoryboard(JSON.stringify(feedback),old).format,'square');
+ for(const bad of [null,'wide',16,{},''])assert.throws(()=>parseStoryboard({...old,format:bad}),/format/);
+});

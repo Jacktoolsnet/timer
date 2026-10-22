@@ -3300,6 +3300,7 @@
         "approved"
       ],
       "properties": {
+        "format": {"enum": ["landscape", "portrait", "square"], "default": "landscape"},
         "id": {
           "type": "string",
           "minLength": 1,

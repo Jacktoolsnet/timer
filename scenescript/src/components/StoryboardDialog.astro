@@ -15,3 +15,17 @@ const {lang}=Astro.props,t=storyboardWords(lang);
  </div>
  <footer class="json-footer"><button id="storyboard-save" type="button">{t.save}</button></footer>
 </dialog>
+
+<dialog id="storyboard-field-dialog" aria-labelledby="storyboard-field-heading" aria-describedby="storyboard-field-hint">
+ <form id="storyboard-field-form">
+  <header class="json-header"><h2 id="storyboard-field-heading"></h2><button id="storyboard-field-close" type="button" title={t.close} aria-label={t.close}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></header>
+  <div class="dialog-inner"><p id="storyboard-field-hint">{t.editHint}</p><label id="storyboard-field-label" for="storyboard-field-text"></label>
+   <textarea id="storyboard-field-text" rows="8"></textarea>
+   <input id="storyboard-field-number" type="number" step="any" hidden/>
+   <select id="storyboard-field-select" hidden></select>
+   <div id="storyboard-field-choices" role="group" aria-labelledby="storyboard-field-label" hidden></div>
+   <p id="storyboard-field-error" role="alert"></p>
+  </div>
+  <footer class="json-footer"><button id="storyboard-field-cancel" type="button">{t.cancel}</button><button id="storyboard-field-apply" type="submit">{t.apply}</button></footer>
+ </form>
+</dialog>
