@@ -12,7 +12,7 @@ test('texture syntax has strict bounded UVs, safe IDs and box-only face override
  assert.throws(()=>parseTexture3D({asset:'x'},'group','t'),/geometry/);assert.throws(()=>parseTexture3D({asset:'x',faces:{front:'y'}},'sphere','t'),/box/);
  const p=source();assert.deepEqual(validateProject(JSON.parse(JSON.stringify(p))),validateProject(p));delete p.assets.photo;assert.throws(()=>validateProject(p),/missing asset photo/);
  const svg=source();svg.assets.photo.data='data:image/svg+xml;base64,'+Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"/>').toString('base64');assert.throws(()=>validateProject(svg),/PNG, JPEG or WebP/);
- assert.ok(!Object.hasOwn(parseModel3D({parts:[{id:'legacy'}]})!.parts[0],'texture'));
+ assert.ok(!Object.hasOwn(parseModel3D({parts:[{id:'legacy'}]})!.parts[0],'texture'));for(const shape of ['box','plane','sphere','cylinder','cone']){const model=parseModel3D({parts:[{id:'m',shape,texture:{asset:'photo'}}]})!;assert.deepEqual(parseModel3D(JSON.parse(JSON.stringify(model))),model);const p=demoProject();p.assets.photo=image;p.characters.item=parseCharacter3D({model});assert.ok(parse3DResource(JSON.stringify(export3DResource('character','item',p))));}
 });
 test('character, stage and group bundles carry only required images and remap collisions transactionally',()=>{
  const p=source();for(const [kind,id]of [['character','box'],['stage','room'],['group','crowd']] as const){const bundle=export3DResource(kind,id,p);assert.equal(Object.hasOwn(bundle.assets!,'unused'),false);assert.deepEqual(parse3DResource(JSON.stringify(bundle)),bundle);assert.ok(JSON.stringify(bundle).length<MAX_3D_RESOURCE_BYTES);
