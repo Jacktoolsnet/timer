@@ -970,8 +970,9 @@ controlled screen-space image deformation, not generative intermediate images
 or semantic optical flow. Preview and export share the compositor; at most two
 endpoint pairs are cached per renderer and released on disposal.
 
-The inflation default now aligns its left-hand camera, larger title and initial
-wavy contours with the cover. Its raised white diagram grid sits on a subtly glossy black
+The inflation default now aligns its left-hand camera, larger title with the cover.
+Two equal-height starting bars extend rightward into wavy areas: chocolate ends
+at half the shared reference height, gold at 1.25 times it; no percent labels. Its raised white diagram grid sits on a subtly glossy black
 backboard above the tiled floor. The gold area has opacity 0.52 to reveal chocolate
 behind overlapping regions; the plinth remains glass. The three-second simulation follows the
 0.3-second cover-to-chart morph; explicitly reload the default to replace a draft.
