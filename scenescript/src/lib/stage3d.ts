@@ -1,3 +1,5 @@
+import {validateImage} from './image-assets.ts';
+import {modelTextureIDs3D,validateTextureAssets3D,remapTextureAssets3D} from './texture3d.ts';
 import {parseGroup3D,parseGroupPlacements3D,groupBudget3D,type Group3D,type GroupPlacement3D} from './group3d.ts';
 import {parsePaths3D,parsePathMotion3D,pathMotionFrame3D,eulerFrame3D,localVector3D,add,vec,type Path3D,type PathMotion3D,type Frame3D} from './path3d.ts';
 import {parseCameraRig3D,type CameraRig3D} from './camera3d.ts';
@@ -10,7 +12,7 @@ export type ActorExpression3D={expression:Expression3D;at:number;duration:number
 export const defaultActorExpression3D=():ActorExpression3D=>({expression:'neutral',at:0,duration:1,intensity:1,blend:.2});
 export type FacePose3D=Record<Exclude<Expression3D,'neutral'>,number>;
 export type Character3D={model:Model3D|null;expression:Expression3D;style:'classic'|'robot'|'pixel'|'brick';name:string;bodyColor:string;headColor:string;limbColor:string;accentColor:string;height:number};
-export type Stage3D={paths?:Record<string,Path3D>;model:Model3D|null;name:string;skyColor:string;groundColor:string;blockColor:string};
+export type Stage3D={transparentBackground?:boolean;paths?:Record<string,Path3D>;model:Model3D|null;name:string;skyColor:string;groundColor:string;blockColor:string};
 export type ActorAction3D={type:'idle'|'walk'|'wave'|'turn';at:number;duration:number;toX:number|null;toZ:number|null;rotation:number|null;target:string;faceMovement:boolean;blend:number;easing:'linear'|'ease-in-out'};
 export const defaultActorAction3D=():ActorAction3D=>({type:'idle',at:0,duration:1,toX:null,toZ:null,rotation:null,target:'',faceMovement:false,blend:.3,easing:'ease-in-out'});
 export type ActorSpeech3D={source:'scene'|'project';strength:number};
@@ -35,8 +37,9 @@ export function parseCharacter3D(value:unknown,path='character'):Character3D{
  return {model:parseModel3D(v.model,path+'.model')??presetCharacterModel3D(style as string),expression:expression as Expression3D,style:style as Character3D['style'],name:text(v.name===undefined?d.name:v.name,path+'.name'),bodyColor:color(v.bodyColor===undefined?d.bodyColor:v.bodyColor,path+'.bodyColor'),headColor:color(v.headColor===undefined?d.headColor:v.headColor,path+'.headColor'),limbColor:color(v.limbColor===undefined?d.limbColor:v.limbColor,path+'.limbColor'),accentColor:color(v.accentColor===undefined?d.accentColor:v.accentColor,path+'.accentColor'),height:number(v.height===undefined?d.height:v.height,path+'.height',1,6)};
 }
 export function parseStage3D(value:unknown,path='stage'):Stage3D{
- const v=object(value,path),d=defaultStage3D();keys(v,Object.keys(d),path);
- return {paths:parsePaths3D(v.paths,path+'.paths'),model:parseModel3D(v.model,path+'.model')??presetStageModel3D(),name:text(v.name===undefined?d.name:v.name,path+'.name'),skyColor:color(v.skyColor===undefined?d.skyColor:v.skyColor,path+'.skyColor'),groundColor:color(v.groundColor===undefined?d.groundColor:v.groundColor,path+'.groundColor'),blockColor:color(v.blockColor===undefined?d.blockColor:v.blockColor,path+'.blockColor')};
+ const v=object(value,path),d=defaultStage3D();keys(v,[...Object.keys(d),'transparentBackground'],path);
+ if(v.transparentBackground!==undefined&&typeof v.transparentBackground!=='boolean')throw new Error(path+'.transparentBackground: expected boolean');
+ return {...(v.transparentBackground?{transparentBackground:true}:{}),paths:parsePaths3D(v.paths,path+'.paths'),model:parseModel3D(v.model,path+'.model')??presetStageModel3D(),name:text(v.name===undefined?d.name:v.name,path+'.name'),skyColor:color(v.skyColor===undefined?d.skyColor:v.skyColor,path+'.skyColor'),groundColor:color(v.groundColor===undefined?d.groundColor:v.groundColor,path+'.groundColor'),blockColor:color(v.blockColor===undefined?d.blockColor:v.blockColor,path+'.blockColor')};
 }
 /** Keep the original plaza size, expanding ground/fog for larger authored paths. */
 export function stage3DGroundSize(stage:Stage3D){
@@ -146,32 +149,46 @@ export function actor3DFace(a:Actor3D,time:number,base:Expression3D='neutral'):F
  for(const key of Object.keys(pose) as (keyof FacePose3D)[])pose[key]=pose[key]*(1-weight)+(key===event.expression?weight:0);
  return pose;
 }
-export type Resource3D={format:'scenescript-3d-resource';version:'1.0';kind:'character'|'stage'|'group';id:string;definition:Character3D|Stage3D|Group3D;characters?:Record<string,Character3D>};
-export const MAX_3D_RESOURCE_BYTES=512*1024;
+export type Resource3D={format:'scenescript-3d-resource';version:'1.0';kind:'character'|'stage'|'group';id:string;definition:Character3D|Stage3D|Group3D;characters?:Record<string,Character3D>;assets?:Record<string,{name:string;data:string}>};
+export const MAX_3D_RESOURCE_BYTES=32*1024*1024;
+const resourceModels3D=(r:Pick<Resource3D,'kind'|'definition'|'characters'>)=>r.kind==='group'?Object.values(r.characters??{}).map(c=>c.model):[(r.definition as Character3D|Stage3D).model];
 export function parse3DResource(source:string):Resource3D{
- if(new TextEncoder().encode(source).length>MAX_3D_RESOURCE_BYTES)throw new Error('3D resource: maximum 512 KiB');const v=object(JSON.parse(source),'resource');keys(v,['format','version','kind','id','definition',...(v.kind==='group'?['characters']:[])],'resource');
+ if(new TextEncoder().encode(source).length>MAX_3D_RESOURCE_BYTES)throw new Error('3D resource: maximum 32 MiB');const v=object(JSON.parse(source),'resource');keys(v,['format','version','kind','id','definition','assets',...(v.kind==='group'?['characters']:[])],'resource');
  if(v.format!=='scenescript-3d-resource'||v.version!=='1.0'||!['character','stage','group'].includes(v.kind as string))throw new Error('resource: unsupported format, version or kind');
- const kind=v.kind as Resource3D['kind'];if(kind==='group'){const characters=parse3DLibrary(v.characters,parseCharacter3D,'resource.characters'),definition=parseGroup3D(v.definition,characters,'resource.definition');if(Object.keys(characters).some(id=>!definition.characters.includes(id)))throw new Error('resource.characters: unreferenced dependency');return {format:'scenescript-3d-resource',version:'1.0',kind,id:identifier(v.id,'resource.id'),definition,characters};}return {format:'scenescript-3d-resource',version:'1.0',kind,id:identifier(v.id,'resource.id'),definition:kind==='character'?parseCharacter3D(v.definition):parseStage3D(v.definition)};
+ if(new TextEncoder().encode(JSON.stringify({...v,assets:undefined})).length>512*1024)throw new Error('3D resource: geometry maximum 512 KiB');
+ const kind=v.kind as Resource3D['kind'],id=identifier(v.id,'resource.id');let result:Resource3D;
+ if(kind==='group'){const characters=parse3DLibrary(v.characters,parseCharacter3D,'resource.characters'),definition=parseGroup3D(v.definition,characters,'resource.definition');if(Object.keys(characters).some(id=>!definition.characters.includes(id)))throw new Error('resource.characters: unreferenced dependency');result={format:'scenescript-3d-resource',version:'1.0',kind,id,definition,characters};}
+ else result={format:'scenescript-3d-resource',version:'1.0',kind,id,definition:kind==='character'?parseCharacter3D(v.definition):parseStage3D(v.definition)};
+ const assets:NonNullable<Resource3D['assets']>=Object.create(null);if(v.assets!==undefined){const raw=object(v.assets,'resource.assets');if(Object.keys(raw).length>100)throw new Error('resource.assets: maximum 100');for(const [id,value]of Object.entries(raw)){identifier(id,'resource.assets');const a=object(value,'resource.assets.'+id);keys(a,['name','data'],'resource.assets.'+id);assets[id]={name:text(a.name,'resource.assets.'+id+'.name'),data:validateImage(a.data,'resource.assets.'+id+'.data')};}}
+ const models=resourceModels3D(result),used=new Set(models.flatMap(modelTextureIDs3D));validateTextureAssets3D(models,assets,'resource textures');if(Object.keys(assets).some(id=>!used.has(id)))throw new Error('resource.assets: unreferenced dependency');if(used.size)result.assets=assets;return result;
 }
 /** Copy imports preserve the ID bound even when the original already has 100 characters. */
 export function unique3DResourceID(preferred:string,library:Record<string,unknown>):string{
  let id=preferred;for(let n=2;Object.hasOwn(library,id);n++){const suffix='_'+n;id=preferred.slice(0,100-suffix.length)+suffix;}return id;
 }
 
-export type Libraries3D={characters:Record<string,Character3D>;stages:Record<string,Stage3D>;groups3d:Record<string,Group3D>};
+export type Libraries3D={assets?:Resource3D['assets'];characters:Record<string,Character3D>;stages:Record<string,Stage3D>;groups3d:Record<string,Group3D>};
 /** Group exports are self-contained; their referenced object definitions travel with them. */
 export function export3DResource(kind:Resource3D['kind'],id:string,library:Libraries3D):Resource3D{
  const definition=(kind==='character'?library.characters:kind==='stage'?library.stages:library.groups3d)[id];if(!definition)throw new Error('resource: missing '+id);
  const characters=kind==='group'?Object.fromEntries((definition as Group3D).characters.map(id=>[id,library.characters[id]])):undefined;
- const source=JSON.stringify({format:'scenescript-3d-resource',version:'1.0',kind,id,definition,characters});return parse3DResource(source);
+ const ids=new Set(resourceModels3D({kind,definition,characters}).flatMap(modelTextureIDs3D));const assets=ids.size?Object.fromEntries([...ids].map(id=>[id,library.assets?.[id]])):undefined;
+ const source=JSON.stringify({format:'scenescript-3d-resource',version:'1.0',kind,id,definition,characters,assets});return parse3DResource(source);
 }
 /** Transactional merge. Never overwrite unrelated characters when importing a group bundle. */
 export function import3DResource(resource:Resource3D,library:Libraries3D,mode:'copy'|'update'){
- const next:Libraries3D={characters:{...library.characters},stages:{...library.stages},groups3d:{...library.groups3d}},values=resource.kind==='character'?next.characters:resource.kind==='stage'?next.stages:next.groups3d;
+ const next={assets:{...library.assets},characters:{...library.characters},stages:{...library.stages},groups3d:{...library.groups3d}},values=resource.kind==='character'?next.characters:resource.kind==='stage'?next.stages:next.groups3d;
  const id=mode==='copy'?unique3DResourceID(resource.id,values):resource.id;
- if(!Object.hasOwn(values,id)&&Object.keys(values).length>=30)throw new Error('Maximum 30');let definition=resource.definition;
+ if(!Object.hasOwn(values,id)&&Object.keys(values).length>=30)throw new Error('Maximum 30');
+ const assetMapping=new Map<string,string>();for(const [key,value]of Object.entries(resource.assets??{})){
+  const matching=Object.keys(next.assets).find(id=>next.assets[id].data===value.data),target=matching??unique3DResourceID(key,next.assets);
+  if(!Object.hasOwn(next.assets,target)&&Object.keys(next.assets).length>=100)throw new Error('assets: maximum 100');Object.defineProperty(next.assets,target,{value,enumerable:true,writable:true,configurable:true});assetMapping.set(key,target);
+ }
+ let definition=resource.kind==='group'?resource.definition:{...resource.definition,model:remapTextureAssets3D((resource.definition as Character3D|Stage3D).model,assetMapping)};
+
  if(resource.kind==='group'){
-  const mapping=new Map<string,string>();for(const [key,value]of Object.entries(resource.characters??{})){
+  const mapping=new Map<string,string>();for(const [key,original]of Object.entries(resource.characters??{})){
+   const value={...original,model:remapTextureAssets3D(original.model,assetMapping)};
    const used=new Set(mapping.values()),source=JSON.stringify(value),same=!used.has(key)&&Object.hasOwn(next.characters,key)&&JSON.stringify(next.characters[key])===source,matching=same?key:Object.keys(next.characters).find(id=>!used.has(id)&&JSON.stringify(next.characters[id])===source),target=matching??unique3DResourceID(key,next.characters);
    if(!Object.hasOwn(next.characters,target)&&Object.keys(next.characters).length>=30)throw new Error('characters: maximum 30');Object.defineProperty(next.characters,target,{value,enumerable:true,writable:true,configurable:true});mapping.set(key,target);
   }definition=parseGroup3D({...definition,characters:(definition as Group3D).characters.map(id=>mapping.get(id)!)},next.characters);

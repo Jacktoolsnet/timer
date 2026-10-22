@@ -1,5 +1,5 @@
 import {demoProject,parseProject,type Project} from './model.ts';
-export const DEFAULT_PROJECT_URL='/examples/monstertruck-race.scenescript.json';
+export const DEFAULT_PROJECT_URL='/examples/inflation-explained.scenescript.json';
 export type StartupProject={project:Project;recovered:boolean;error:boolean};
 let initial:StartupProject|undefined;
 export const setStartupProject=(value:StartupProject)=>{initial=value;};

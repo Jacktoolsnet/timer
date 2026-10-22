@@ -76,3 +76,10 @@ test('resource IDs cannot access prototypes and construction key budgets are enf
  const tracks=joints.map(j=>({joint:j.id,keys:Array.from({length:64},(_,i)=>({at:i/63,value:0}))}));
  assert.throws(()=>parseModel3D({parts:[{id:'part',joints}],animations:Object.fromEntries(Array.from({length:16},(_,i)=>['clip'+i,{duration:1,tracks}]))}),/4096/);
 });
+
+test('optical finishes are strictly optional, validated and portable without altering standard parts',()=>{
+ const plain=parseModel3D({parts:[{id:'base'}]})!;assert.ok(!Object.hasOwn(plain.parts[0],'finish'));assert.deepEqual(parseModel3D({parts:[{id:'base',finish:'standard'}]}),plain);
+ for(const finish of ['glass','polished']){const model=parseModel3D({parts:[{id:'base',finish}]})!;assert.equal(model.parts[0].finish,finish);assert.deepEqual(parseModel3D(JSON.parse(JSON.stringify(model))),model);}
+ for(const finish of [null,1,true,'mirror','<script>'])assert.throws(()=>parseModel3D({parts:[{id:'bad',finish}]}),/finish/);
+ assert.throws(()=>parseModelMotions3D([{animation:'swing',duration:1,finish:'glass'}],parseModel3D(simple()),2,'motions'),/unknown field/);
+});

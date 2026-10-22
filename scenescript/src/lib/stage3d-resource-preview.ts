@@ -3,8 +3,8 @@ import {modelRadius3D} from './model3d.ts';
 import {demoProject,newScene,type Project} from './model.ts';
 import {defaultActor3D,defaultStage3D,defaultStageCamera3D,parseCharacter3D,parseStage3D,type Resource3D,type Shot3D} from './stage3d.ts';
 /** An isolated preview project: never changes scene actors, camera or project resources. */
-export function resource3DPreview(kind:Resource3D['kind'],id:string,definition:unknown,animation='',characters:Project['characters']={}):{project:Project;shot:Shot3D;studio:boolean;label:string}{
- const project=demoProject(),scene=newScene('resource-preview');scene.elements=[];scene.transition='none';project.scenes=[scene];
+export function resource3DPreview(kind:Resource3D['kind'],id:string,definition:unknown,animation='',characters:Project['characters']={},assets:Project['assets']={}):{project:Project;shot:Shot3D;studio:boolean;label:string}{
+ const project=demoProject();project.assets=assets;const scene=newScene('resource-preview');scene.elements=[];scene.transition='none';project.scenes=[scene];
  if(kind==='group'){
   const group=parseGroup3D(definition,characters);project.characters=characters;project.groups3d={[id]:group};project.stages={studio:parseStage3D({...defaultStage3D(),model:{parts:[{id:'empty',shape:'group'}]},skyColor:'#e6edf3',groundColor:'#c9d4df'})};
   const shot:Shot3D={stage:'studio',camera:{...defaultStageCamera3D(),yaw:18,pitch:18,distance:18},actors:[],groups:[defaultGroupPlacement3D(id)]};scene.duration=12;scene.stage3d=shot;

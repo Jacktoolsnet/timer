@@ -24,7 +24,9 @@ import {parseVideo,validateVideoData,defaultVideo,type VideoAsset,type VideoSett
 import {parseMusic,type Music} from './music.ts';
 import {parseSimulation,defaultSimulation,type Simulation} from './simulation.ts';
 import {parseGradient,type Gradient} from './gradient.ts';
-import {validateSvg,svgSource} from './svg.ts';
+import {validateImage} from './image-assets.ts';
+import {validateTextureAssets3D} from './texture3d.ts';
+export {validateImage,MAX_IMAGE_BYTES} from './image-assets.ts';
 export const formats = { landscape: [1920,1080], portrait: [1080,1920], square: [1080,1080] } as const;
 // System fonts use local fallbacks; the four script families are bundled with the site.
 export const fonts = ['Arial','Georgia','Verdana','Courier New','Helvetica','Tahoma','Trebuchet MS','Segoe UI','Times New Roman','Palatino Linotype','Garamond','Consolas','Lucida Console','Impact','Arial Black','Comic Sans MS','Allura','Great Vibes','Parisienne','Sacramento'] as const;
@@ -44,7 +46,6 @@ export type Group=Pick<Element,'id'|'name'|'x'|'y'|'rotation'|'opacity'|'animati
 export type Scene = {stage3d:Shot3D|null; camera:Camera|null; groups:Group[]; narration:Narration|null; id:string; name:string; duration:number; background:string; backgroundEnabled:boolean; backgroundOpacity:number; backgroundGradient:Gradient|null; backgroundAsset:string; transition:typeof sceneTransitions[number]; transitionDuration:number; elements:Element[] };
 export type Project = { groups3d:Record<string,Group3D>; characters:Record<string,Character3D>; stages:Record<string,Stage3D>; version:'1.0'; title:string; description:string; firstComment:string; hashtags:string; thumbnail:Asset|null; audios:Record<string,AudioAsset>; narration:Narration|null; audioDucking:boolean; format:keyof typeof formats; backgroundSimulation:Simulation|null; backgroundVideo:VideoSettings|null; videos:Record<string,VideoAsset>; music:Music|null; assets:Record<string,Asset>; scenes:Scene[] };
 export const MAX_FILE_BYTES = 160 * 1024 * 1024;
-export const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 export function newElement(type:Element['type'], id:string = crypto.randomUUID()):Element {
  return {lighting:defaultLighting(),kaleidoscope:defaultKaleidoscope(),print:defaultPrint(),glitch:defaultGlitch(),reveal:defaultReveal(),afterimages:defaultAfterimages(),stopMotion:defaultStopMotion(),paper:defaultPaper(),exposure:defaultExposure(),liquid:defaultLiquid(),textGradient:null,textEffects:defaultTextEffects(),space:'scene',crop:null,placement:null,id,name:'',type,bubble:type==='bubble'?defaultBubble():null,anchors:{},until:null,exitAnimation:'none',exitDuration:.5,motionPath:null,video:type==='video'?defaultVideo():null,simulation:type==='simulation'?defaultSimulation():null,text:type==='bubble'?'Hello!':type==='text'?'Your story starts here.':'',runs:[],asset:'',x:10,y:type==='bubble'?10:35,width:type==='bubble'?40:80,height:type==='bubble'?24:30,color:type==='bubble'?'#222222':type==='shape'?'#b86445':'#ffffff',fillGradient:null,fillColor:type==='shape'?'#b86445':'#ffffff',borderColor:type==='bubble'?'#222222':'none',borderWidth:4,shapeType:'rectangle',borderStyle:'solid',font:'Arial',fontSize:type==='bubble'?48:90,align:'center',bold:false,italic:false,underline:false,strikethrough:false,opacity:1,rotation:0,radius:0,fit:'contain',animation:'fade',at:0,animationDuration:1};
 }
@@ -65,14 +66,6 @@ function one<T extends string>(v:unknown,values:readonly T[],path:string):T {if(
 function color(v:unknown,path:string):string {const s=str(v,path,7);if(!/^#[0-9a-f]{6}$/i.test(s))throw new Error(`${path}: expected #RRGGBB`);return s;}
 function keys(o:Record<string,unknown>,allowed:string[],path:string){for(const k of Object.keys(o))if(!allowed.includes(k))throw new Error(`${path}.${k}: unknown field`);}
 function id(v:unknown,path:string){const s=str(v,path,100);if(!/^[a-zA-Z0-9_-]+$/.test(s))throw new Error(`${path}: invalid identifier`);return s;}
-export function validateImage(data:unknown,path='image'):string {
- const s=str(data,path,Math.ceil(MAX_IMAGE_BYTES/3)*4+100);
- if(s.startsWith('data:image/svg+xml;')){validateSvg(svgSource(s));return s;}
- const comma=s.indexOf(','),header=s.slice(0,comma+1),bytes=base64ByteLength(s.slice(comma+1));
- if(!/^data:image\/(png|jpeg|webp);base64,$/.test(header)||bytes<0)throw new Error(`${path}: expected PNG, JPEG or WebP base64 data URL`);
- if(bytes>MAX_IMAGE_BYTES)throw new Error(`${path}: maximum 8 MiB`);
- return s;
-}
 export function parseProject(input:string):Project {
  if(utf8ByteLength(input)>MAX_FILE_BYTES)throw new Error('JSON: maximum 160 MiB');
  return readProject(JSON.parse(input));
@@ -97,6 +90,7 @@ function readProject(input:unknown):Project {
  const assets:Record<string,Asset>=Object.create(null);const raw=obj(p.assets??{},'assets');
  if(Object.keys(raw).length>100)throw new Error('assets: maximum 100');
  for(const [key,value] of Object.entries(raw)){id(key,'asset ID');const a=obj(value,`assets.${key}`);keys(a,['name','data'],`assets.${key}`);assets[key]={name:str(a.name,`${key}.name`,200),data:validateImage(a.data,`${key}.data`)};}
+ validateTextureAssets3D([...Object.values(characters),...Object.values(stages)].map(v=>v.model),assets);
  let thumbnail:Asset|null=null;
  if(p.thumbnail!==undefined&&p.thumbnail!==null){const a=obj(p.thumbnail,'thumbnail');keys(a,['name','data'],'thumbnail');const data=validateImage(a.data,'thumbnail.data');if(!/^data:image\/(png|jpeg|webp);base64,/.test(data))throw new Error('thumbnail.data: expected PNG, JPEG or WebP');thumbnail={name:str(a.name,'thumbnail.name',200),data};}
  const videos:Record<string,VideoAsset>=Object.create(null);const rawVideos=obj(p.videos??{},'videos');if(Object.keys(rawVideos).length>30)throw new Error('videos: maximum 30');

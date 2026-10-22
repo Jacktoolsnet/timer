@@ -1,6 +1,8 @@
 import * as THREE from 'three';
+import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
+import {textureFaces3D,type Texture3D} from '../lib/texture3d';
 import {modelPose3D,type Model3D,type ModelMotion3D,type jointControls3D} from '../lib/model3d';
-type Storage={geometries:Set<THREE.BufferGeometry>;materials:Map<string,THREE.MeshStandardMaterial>};
+type Storage={textures?:Map<string,THREE.Texture>;images?:Map<string,HTMLImageElement>;geometries:Set<THREE.BufferGeometry>;materials:Map<string,THREE.MeshStandardMaterial>};
 const sharedGeometries=new WeakMap<Storage,Map<string,THREE.BufferGeometry>>();
 /** Transform chain: position → pivot → XYZ rotation → -pivot → geometry/children. */
 export function createModel3D(model:Model3D,storage:Storage,palette:object={}){
@@ -9,11 +11,23 @@ export function createModel3D(model:Model3D,storage:Storage,palette:object={}){
  for(const part of model.parts){
   const anchor=new THREE.Group(),pivot=new THREE.Group(),content=new THREE.Group();anchor.name=part.id;pivot.position.set(part.pivot.x,part.pivot.y,part.pivot.z);content.position.set(-part.pivot.x,-part.pivot.y,-part.pivot.z);anchor.add(pivot);pivot.add(content);nodes.set(part.id,{anchor,pivot,content});
   if(part.shape==='group')continue;
-  let geometry=geometries.get(part.shape);
-  if(!geometry){geometry=part.shape==='box'?new THREE.BoxGeometry(1,1,1):part.shape==='sphere'?new THREE.SphereGeometry(.5,16,12):part.shape==='cylinder'?new THREE.CylinderGeometry(.5,.5,1,16):part.shape==='cone'?new THREE.ConeGeometry(.5,1,16):new THREE.PlaneGeometry(1,1);geometries.set(part.shape,geometry);storage.geometries.add(geometry);}
+  const rounded=part.shape==='box'&&part.finish&&part.finish!=='standard',geometryKey=part.shape+(rounded?'-rounded':'');
+  let geometry=geometries.get(geometryKey);
+  if(!geometry){geometry=part.shape==='box'?(rounded?new RoundedBoxGeometry(1,1,1,2,.035):new THREE.BoxGeometry(1,1,1)):part.shape==='sphere'?new THREE.SphereGeometry(.5,16,12):part.shape==='cylinder'?new THREE.CylinderGeometry(.5,.5,1,16):part.shape==='cone'?new THREE.ConeGeometry(.5,1,16):new THREE.PlaneGeometry(1,1);geometries.set(geometryKey,geometry);storage.geometries.add(geometry);}
   const paletteColor=Object.hasOwn(palette,part.palette)?(palette as Record<string,unknown>)[part.palette]:undefined,color=typeof paletteColor==='string'&&/^#[a-f\d]{6}$/i.test(paletteColor)?paletteColor:part.color;
-  const key=JSON.stringify(['model',color,part.roughness,part.metalness,part.opacity]);let material=storage.materials.get(key);
-  if(!material){material=new THREE.MeshStandardMaterial({color,roughness:part.roughness,metalness:part.metalness,opacity:part.opacity,transparent:part.opacity<1,depthWrite:part.opacity===1,side:THREE.DoubleSide});storage.materials.set(key,material);}
+  const texture=(id:string,settings:Texture3D)=>{
+   if(!id)return null;const images=storage.images,image=images?.get(id);if(!image)throw new Error('3D texture not prepared: '+id);
+   const cache=storage.textures??=new Map(),key=JSON.stringify([id,settings.repeat,settings.offset,settings.rotation]);let map=cache.get(key);
+   if(!map){if(cache.size>=128)throw new Error('3D textures: maximum 128 UV variants per scene');map=new THREE.Texture(image);map.colorSpace=THREE.SRGBColorSpace;map.wrapS=map.wrapT=THREE.RepeatWrapping;map.repeat.set(settings.repeat.x,settings.repeat.y);map.offset.set(settings.offset.x,settings.offset.y);map.center.set(.5,.5);map.rotation=settings.rotation*Math.PI/180;map.anisotropy=4;map.needsUpdate=true;cache.set(key,map);}return map;
+  };
+  const makeMaterial=(id='')=>{
+   const map=part.texture&&id?texture(id,part.texture):null,key=JSON.stringify(['model',color,part.roughness,part.metalness,part.opacity,part.finish??'standard',map?.uuid]);let material=storage.materials.get(key);
+   if(!material){
+    const base={color,map,roughness:part.roughness,metalness:part.metalness,opacity:part.opacity,transparent:part.opacity<1||Boolean(map),alphaTest:map?.01:0,depthWrite:part.opacity===1,side:THREE.DoubleSide};
+    material=part.finish==='glass'?new THREE.MeshPhysicalMaterial({...base,metalness:0,roughness:Math.min(part.roughness,.12),transmission:.94,thickness:.6,ior:1.45,clearcoat:1,clearcoatRoughness:.05}):part.finish==='polished'?new THREE.MeshPhysicalMaterial({...base,clearcoat:1,clearcoatRoughness:.08}):new THREE.MeshStandardMaterial(base);storage.materials.set(key,material);
+   }return material;
+  };
+  const material=part.texture&&Object.keys(part.texture.faces).length?textureFaces3D.map(face=>makeMaterial(part.texture!.faces[face]??part.texture!.asset)):makeMaterial(part.texture?.asset);
   const mesh=part.instances.length?new THREE.InstancedMesh(geometry,material,part.instances.length):new THREE.Mesh(geometry,material);mesh.name=part.id+'-geometry';
   if(mesh instanceof THREE.InstancedMesh){const dummy=new THREE.Object3D();part.instances.forEach((position,i)=>{dummy.position.set(position.x,position.y,position.z);dummy.scale.set(part.size.x,part.size.y,part.size.z);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix);});}else mesh.scale.set(part.size.x,part.size.y,part.size.z);
   nodes.get(part.id)!.mesh=mesh;content.add(mesh);

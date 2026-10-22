@@ -1,9 +1,9 @@
 import type { Language } from './i18n';
 const words = {
- loadDefault:['Rennstrecke / Startprojekt laden','Load race / default project','Cargar carrera / proyecto inicial','Charger la course / projet initial'],
+ loadDefault:['Beispiel / Startprojekt laden','Load example / default project','Cargar ejemplo / proyecto inicial','Charger l’exemple / projet initial'],
  startupLoading:['Projekt wird geladen …','Loading project …','Cargando proyecto …','Chargement du projet …'],
  startupLoadError:['Gespeicherter Entwurf oder Startprojekt konnten nicht geladen werden. Ein Ersatzprojekt ist geöffnet; gespeicherte Daten wurden nicht überschrieben.','The saved draft or default could not be loaded. A fallback project is open; stored data was not overwritten.','No se pudo cargar el borrador o proyecto inicial. Se abrió un proyecto alternativo sin sobrescribir los datos guardados.','Le brouillon ou projet initial n’a pas pu être chargé. Un projet de secours est ouvert sans écraser les données enregistrées.'],
- defaultLoadError:['Das Rennprojekt konnte nicht geladen werden. Das aktuelle Projekt bleibt erhalten.','Could not load the race. Your current project is preserved.','No se pudo cargar la carrera. Se conserva el proyecto actual.','Impossible de charger la course. Le projet actuel est conservé.'],
+ defaultLoadError:['Das Startprojekt konnte nicht geladen werden. Das aktuelle Projekt bleibt erhalten.','Could not load the default project. Your current project is preserved.','No se pudo cargar el proyecto inicial. Se conserva el proyecto actual.','Impossible de charger le projet initial. Le projet actuel est conservé.'],
  defaultStale:['Das Projekt wurde inzwischen geändert. Bitte erneut laden.','The project changed meanwhile. Please load again.','El proyecto ha cambiado. Vuelve a cargarlo.','Le projet a été modifié. Veuillez réessayer.'],
  exportElapsed:["Vergangene Zeit", "Elapsed time", "Tiempo transcurrido", "Temps écoulé"],
  exportRemaining:["Geschätzte Restzeit", "Estimated time remaining", "Tiempo restante estimado", "Temps restant estimé"],

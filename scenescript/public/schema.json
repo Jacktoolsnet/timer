@@ -1232,6 +1232,7 @@
           "pattern": "^#[a-fA-F0-9]{6}$",
           "default": "#36a9e1"
         },
+        "finish": {"enum":["standard","polished","glass"],"default":"standard"},
         "roughness": {
           "type": "number",
           "minimum": 0,
@@ -1486,6 +1487,7 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "transparentBackground": {"type":"boolean","default":false},
         "paths": {"type": "object", "maxProperties": 16, "propertyNames": {"type": "string", "pattern": "^[A-Za-z0-9_-]+$", "minLength": 1, "maxLength": 100}, "additionalProperties": {"$ref": "#/$defs/path3D"}, "default": {}},
         "model": {"anyOf": [{"$ref": "#/$defs/model3D"}, {"type": "null"}], "default": null},
         "name": {

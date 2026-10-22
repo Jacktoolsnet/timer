@@ -791,9 +791,9 @@ Gruppenbeispiel samt echtem Cover. `/examples/path-audience.scenegroup.json` ist
 separat importierbare Publikumsgruppe mit ihren vier Figuren.
 
 
-### Fertiger Monstertruck-Film als Startprojekt
+### Fertiger Monstertruck-Film (weiteres Beispiel)
 
-Ohne wiederherstellbaren lokalen Entwurf öffnet der Editor jetzt
+Das bisherige Startprojekt bleibt separat importierbar:
 `/examples/monstertruck-race.scenescript.json`: **61,5 Sekunden**, 13 Einstellungen,
 Countdown, vier zusammenhängende Runden je Fahrzeug, Führungswechsel, Zielfoto,
 Rot mit 48,0 s / Blau mit 48,5 s und ein Schlussbild. Die Kamera wechselt zwischen
@@ -832,8 +832,8 @@ pro Szene bleibt bestehen.
 - Die Gesamtdatei bleibt unter dem bestehenden 4-MiB-Budget für lokale Entwürfe.
 - Vorhandene Entwürfe haben Vorrang; sie werden vor dem Laden des Startprojekts
   geprüft. Der Startprojekt-Download entfällt dann vollständig.
-- Über das **Flaggensymbol in der Projekt-Werkzeugleiste** lässt sich das fertige
-  Rennprojekt gezielt laden. Bei ungespeicherter Arbeit wird nachgefragt; Änderungen
+- Über das **Flaggensymbol in der Projekt-Werkzeugleiste** lässt sich das jeweils
+  aktuelle Startprojekt gezielt laden. Bei ungespeicherter Arbeit wird nachgefragt; Änderungen
   während eines laufenden Downloads werden nicht nachträglich überschrieben.
 - **Neues Projekt** bleibt ein leeres Projekt. Die technische Pfad-Demo unter
   „3D-Ressourcen → Fahrpfade: Looping & Kameras“ bleibt unabhängig davon erhalten.
@@ -842,10 +842,46 @@ pro Szene bleibt bestehen.
   überschrieben. Bis zum Abschluss der Initialisierung ist der Editor gesperrt,
   damit keine frühen Klicks verloren gehen oder später ersetzt werden.
 - Ältere UI-Regressionstests wählen ihr kleines 2D-Startprojekt jetzt ausdrücklich
-  über die gemeinsame Test-Fixture; `race3d.spec.ts` prüft den echten neuen Start,
+  über die gemeinsame Test-Fixture; `race3d.spec.ts` wählt den Rennfilm ausdrücklich und prüft
   Wiederherstellung, Fehlerfälle, asynchrone Änderungen sowie Rendering/Audioexport.
 
 Reproduzierbare Offline-Neuerzeugung der mitgelieferten Datei: `npm run example:race`.
 Der Generator erstellt die Effekte aus `race3d-audio.ts` und bettet das dauerhaft
 abgelegte `monstertruck-race-cover-en.jpg` ein; ein Dev-Server ist nicht nötig.
 Das Cover wird bei einer Neuerzeugung nicht durch einen Filmframe ersetzt.
+
+
+### Aktuelles Startprojekt: Inflation for Dummies (2D + 3D)
+
+`/examples/inflation-explained.scenescript.json` ist das neue Standardprojekt für
+frische Sitzungen. Bestehende lokale Entwürfe haben weiterhin Vorrang. Der
+Beispiel-/Startprojekt-Button lädt es ausdrücklich; der Rennfilm bleibt erhalten.
+
+- **4,3 Sekunden, Hochformat 9:16**: eine Sekunde Titelbild „Inflation for Dummies“,
+  0,3 Sekunden Überblendung und **genau drei Sekunden** Simulation.
+- Zwei echte 3D-Flächen mit ungleichmäßigem Kurvenverlauf: die schokoladenartige
+  Fläche schrumpft, die goldene Geldfläche mit Prägungen wächst.
+- Perspektivisches Diagramm auf einem echten Glassockel mit graviertem Raster,
+  Lichtkanten, Studioreflexionen und bewegtem Glanzlicht.
+- „INFLATION FOR DUMMIES“ bleibt als extrudierte 3D-Schrift über dem Diagramm.
+  Keine weiteren Texte oder Zahlen; die Entwicklung ist rein illustrativ.
+- Originaler, deterministisch synthetisierter WAV-Whoosh statt Musik oder Sprache;
+  in der Projektdatei eingebettet. Kontinuierliche absolute Zeitinterpolation.
+- Eigenes KI-Cover im Hochformat; Zielgruppenannahme und Bildprompt in
+  `public/examples/inflation-publication.en.md`.
+- `Stage.transparentBackground:true` ermöglicht die echte Kombination eines
+  2D-Hintergrundbildes mit freigestellten 3D-Objekten und darüberliegenden
+  2D-Elementen. Automatischer Himmel/Boden/Nebel entfallen nur bei dieser Option.
+  Die Checkbox ist im 3D-Ressourcendialog verfügbar; ältere Bühnen bleiben opak.
+- Vorschau, Standbild und Video teilen die gleiche absolute Animationszeit;
+  Vorwärts-/Rückwärtssprünge, Transparenz, Material-Caches und MP4 mit Whoosh werden getestet.
+
+Offline neu erzeugen: `npm run example:inflation`. Das native Projekt wird atomar
+ersetzt, damit ein gleichzeitig laufender Download keine halbe JSON-Datei liest.
+
+Optische Materialien (frei definierte 3D-Teile): optionales `finish` mit `standard`
+(bisheriges Aussehen, Standard), `polished` (Klarlack/Glanz) oder `glass`
+(Transmission/Brechung, üblicherweise `opacity:1`). Glänzende/gläserne Boxen
+haben abgerundete Kanten. Eine kleine prozedurale Studio-Umgebung liefert
+Reflexionen ohne HDR-Download; sie wird pro Renderer einmal erstellt und wieder
+freigegeben. Alte Standardmaterialien behalten ihre bisherige Beleuchtung.

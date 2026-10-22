@@ -305,22 +305,21 @@ Respects narration at/start/end/volume/fades, scene boundaries and project-globa
 timing, NOT actor action timing. Music/video audio do not drive it. Mood/eyes stay
 independent. This is amplitude-driven, NOT phoneme/viseme-accurate lip-sync.
 Camera fov: vertical degrees (20–110, default38); yaw/pitch: degrees; distance/targetX/Y/Z: world units; orbit: degrees/second
-in scene-local time. 3D is opaque, above scene backgrounds, below 2D elements;
+in scene-local time. 3D is opaque by default, below 2D elements;
 Scene.camera's 2D crop transforms it too. Use screen-space captions.
-Preview/stills/video share absolute-time poses, including silent video exports.
-WebGL2 required; unavailable graphics/context loss is an error, not blank export.
-3D dialog: shared resource definitions + isolated preview; actors/camera/speech
-bindings in expandable scene section. Confirm applies; closing discards.
-Independent resource imports/exports; ID collisions: copy or explicit update.
+Preview/stills/video share absolute-time poses.
+WebGL2 required; graphics/context loss fails visibly.
+3D dialog: shared resources, isolated previews; scene JSON binds actors/camera/speech.
+Apply saves; close discards. Import copies or updates an ID.
 No external model files/scripts, physics, skinning or head-only looking.
-3D PATHS (no physics): Stage.paths is a reusable ID map, max16 paths. Each has
-points:[{x,y,z},...], 2–128 points (closed:at least3), closed:false(default),
-interpolation:smooth(default Catmull-Rom)/linear. Coordinates ±100 world units.
-Optional ups: [] = transported frames; else one nonzero up vector/point, not parallel
-to tangent. Normals define banks/loop rolls; add intermediate vectors for half-turns.
-Ground/fog expand for paths beyond the 56-unit plaza.
-Adjacent points must differ; closed:true closes automatically: DO NOT repeat the
-first point at the end. Smooth curves may overshoot; linear has sharp corners.
+Stage.transparentBackground:true removes sky, ground and fog so 2D backgrounds show through.
+3D PATHS: Stage.paths maps ≤16 IDs to
+points:[{x,y,z},...], 2–128 points (closed≥3), closed:false, interpolation:smooth
+(Catmull-Rom) or linear. Coordinates ±100. Ground/fog expand beyond the 56-unit plaza.
+ups: [] = transported frames; else one nonzero, non-tangent-parallel vector/point.
+Normals define banks/rolls; intermediate vectors avoid half-turns.
+Adjacent points must differ. closed:true closes: never repeat the first point.
+Smooth may overshoot; linear has corners.
 Actor.path=null(default) or {path:"route",duration:12,laps:4,offset:1} references
 this shot's STAGE path. at:0, start:0 (normalized route fraction), laps:1,
 offset:0 (signed sideways world units, +right), orient:true are defaults.
@@ -380,14 +379,16 @@ Copy/update controls the group ID;
 identical dependencies are reused, conflicting objects get new IDs and references
 are remapped. Existing unrelated objects are NEVER overwritten by a group import.
 FREE CONSTRUCTION: Character3D.model / Stage3D.model = {parts:[...],animations:{...}}.
-An explicit model defines geometry; stage ground/sky remain. palette optionally
-reads a hex color from a resource field (e.g. headColor/blockColor), else uses color.
-Parts.instances repeats geometry at up to 256 local offsets; no group/scale-joint
-instances. Size is per copy. Repeated copies count toward the scene part budget.
+model defines geometry; stage ground/sky remain. palette reads a resource hex field
+(e.g. headColor/blockColor), falling back to color.
+Parts.instances repeats geometry at ≤256 local offsets; no group/scale-joint
+instances. Size is per copy; copies count toward the scene budget.
 Parts: unique id, parent="" for root or another part ID (any list order), shape
 group/box/sphere/cylinder/cone/plane. Group is invisible; other shapes are centered
 unit shapes scaled by size (diameters for sphere/cylinder/cone; cylinder/cone axis Y;
-plane lies in XY, faces ±Z, size.z ignored). Colors/materials are per part.
+plane: XY, faces ±Z, size.z ignored). Materials are per part.
+finish:standard(default), polished(clearcoat), glass(refraction; use opacity:1).
+Polished/glass use rounded boxes and an offline studio reflection map.
 position/pivot/size are local world units; rotation XYZ degrees. Transform:
 T(position) T(pivot) R_XYZ(rotation + joints) T(-pivot). Children inherit this
 transform, NOT mesh size. Translation joints offset position in PARENT axes.

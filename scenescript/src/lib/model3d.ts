@@ -1,10 +1,11 @@
+import {parseTexture3D,type Texture3D} from './texture3d.ts';
 /** Declarative, bounded construction vocabulary. No executable code or external URLs. */
 export type Vector3D={x:number;y:number;z:number};
 export const vector3D=(value=0):Vector3D=>({x:value,y:value,z:value});
 export const shapes3D=['group','box','sphere','cylinder','cone','plane'] as const;
 export const jointControls3D=['none','mouth','speech','happy','sad','angry','surprised','blink','leftArm','rightArm','leftLeg','rightLeg','wave','bob'] as const;
 export type Joint3D={id:string;motion:'rotation'|'translation'|'scale';axis:'x'|'y'|'z';min:number;max:number;value:number;control:typeof jointControls3D[number];target:number;responses:Partial<Record<typeof jointControls3D[number],number>>};
-export type Part3D={id:string;parent:string;palette:string;instances:Vector3D[];shape:typeof shapes3D[number];position:Vector3D;rotation:Vector3D;pivot:Vector3D;size:Vector3D;color:string;roughness:number;metalness:number;opacity:number;joints:Joint3D[]};
+export type Part3D={texture?:Texture3D;finish?:'standard'|'polished'|'glass';id:string;parent:string;palette:string;instances:Vector3D[];shape:typeof shapes3D[number];position:Vector3D;rotation:Vector3D;pivot:Vector3D;size:Vector3D;color:string;roughness:number;metalness:number;opacity:number;joints:Joint3D[]};
 export type JointKey3D={at:number;value:number};
 export type JointTrack3D={joint:string;keys:JointKey3D[];easing:'linear'|'ease-in-out'};
 export type ModelAnimation3D={duration:number;tracks:JointTrack3D[]};
@@ -28,7 +29,7 @@ export function parseModel3D(value:unknown,path='model'):Model3D|null{
  if(!Array.isArray(v.parts)||!v.parts.length||v.parts.length>512)throw new Error(path+'.parts: expected 1–512 parts');
  const ids=new Set<string>(),joints=new Map<string,Joint3D>();let jointCount=0;
  const parts:Part3D[]=v.parts.map((value,index)=>{
-  const p=path+'.parts['+index+']',v=obj(value,p),d=defaultPart3D();fields(v,Object.keys(d),p);
+  const p=path+'.parts['+index+']',v=obj(value,p),d=defaultPart3D();fields(v,[...Object.keys(d),'finish','texture'],p);
   const get=(key:keyof Part3D)=>v[key]===undefined?d[key]:v[key],partId=id(v.id,p+'.id');if(ids.has(partId))throw new Error(p+'.id: duplicate part');ids.add(partId);
   const parent=get('parent')===''?'':id(v.parent,p+'.parent'),shape=choice(get('shape'),shapes3D,p+'.shape');
   const color=get('color');if(typeof color!=='string'||!/^#[a-f\d]{6}$/i.test(color))throw new Error(p+'.color: expected #RRGGBB');
@@ -49,7 +50,9 @@ export function parseModel3D(value:unknown,path='model'):Model3D|null{
   if(shape==='group'&&parsedJoints.some(j=>j.motion==='scale'))throw new Error(p+'.joints: scale affects mesh geometry, not groups');
   if(rawInstances.length&&(shape==='group'||parsedJoints.some(j=>j.motion==='scale')))throw new Error(p+'.instances: needs geometry without scale joints');
   const instances=rawInstances.map((v,i)=>vector(v,p+'.instances['+i+']',vector3D(),-50,50));
-  return {id:partId,parent,palette,instances,shape,color,position:vector(v.position,p+'.position',d.position,-50,50),rotation:vector(v.rotation,p+'.rotation',d.rotation,-360,360),pivot:vector(v.pivot,p+'.pivot',d.pivot,-50,50),size:vector(v.size,p+'.size',d.size,.01,50),roughness:num(get('roughness'),p+'.roughness',0,1),metalness:num(get('metalness'),p+'.metalness',0,1),opacity:num(get('opacity'),p+'.opacity',0,1),joints:parsedJoints};
+  const texture=parseTexture3D(v.texture,shape,p+'.texture');
+  const finish=choice(v.finish===undefined?'standard':v.finish,['standard','polished','glass'],p+'.finish');
+  return {...(texture?{texture}:{}),...(finish==='standard'?{}:{finish}),id:partId,parent,palette,instances,shape,color,position:vector(v.position,p+'.position',d.position,-50,50),rotation:vector(v.rotation,p+'.rotation',d.rotation,-360,360),pivot:vector(v.pivot,p+'.pivot',d.pivot,-50,50),size:vector(v.size,p+'.size',d.size,.01,50),roughness:num(get('roughness'),p+'.roughness',0,1),metalness:num(get('metalness'),p+'.metalness',0,1),opacity:num(get('opacity'),p+'.opacity',0,1),joints:parsedJoints};
  });
  const parents=new Map(parts.map(p=>[p.id,p.parent]));
  for(const part of parts){let current=part.id;const seen=new Set<string>();while(current){if(!parents.has(current))throw new Error(path+'.parts.'+part.id+'.parent: missing part '+current);if(seen.has(current))throw new Error(path+'.parts.'+part.id+'.parent: hierarchy cycle');if(seen.size>=32)throw new Error(path+'.parts: maximum hierarchy depth 32');seen.add(current);current=parents.get(current)!;}}
