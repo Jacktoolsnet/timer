@@ -28,3 +28,18 @@ test('native space animation renders each beat and deterministic reverse seeks i
  expect(new Set(frames.frames.map(f=>f.png)).size).toBe(13);
  for(const f of frames.frames.slice(0,-1)){expect(f.width).toBe(270);expect(f.height).toBe(480);await info.attach('space-frame-'+f.time,{body:Buffer.from(f.png.split(',')[1],'base64'),contentType:'image/png'});}
 });
+
+test('cockpit displays change with timeline time and stay deterministic when seeking backwards',async({page},info)=>{
+ test.setTimeout(120000);await page.goto('/en/');await expect(page.locator('#editor')).toHaveAttribute('data-ready','true');
+ await page.locator('#timeline').fill('15.2');await expect(page.locator('#stage')).toContainText('TARGETS  3 / 6');
+ await page.locator('#timeline').fill('16.15');await expect(page.locator('#stage')).toContainText('FIRING');
+ await page.locator('#timeline').fill('16.6');await expect(page.locator('#stage')).toContainText('TARGET DESTROYED');await expect(page.locator('#stage')).toContainText('TARGETS  4 / 6');
+ await page.locator('#timeline').fill('15.2');await expect(page.locator('#stage')).toContainText('TARGETS  3 / 6');
+ const out=await page.evaluate(async url=>{
+  const {parseProject}=await import(/* @vite-ignore */ '/src/lib/model.ts' as string),{ExportMedia}=await import(/* @vite-ignore */ '/src/scripts/export-media.ts' as string),{ExportRenderer}=await import(/* @vite-ignore */ '/src/scripts/export-renderer.ts' as string);
+  const p=parseProject(await(await fetch(url)).text()),m=new ExportMedia(p,new AbortController().signal),r=new ExportRenderer(p,m),frames=[];
+  try{for(const t of [4.2,5.4,15.2,16.15,16.6,25.5,4.2]){const c=await r.frame(t,360,640);frames.push({time:t,png:c.toDataURL()});c.width=0;c.height=0;}return frames;}finally{r.dispose();m.dispose();}
+ },url);
+ expect(out[0].png).not.toBe(out[1].png);expect(out[0].png).toBe(out.at(-1)!.png);
+ for(const f of out.slice(0,-1))await info.attach('cockpit-'+f.time,{body:Buffer.from(f.png.split(',')[1],'base64'),contentType:'image/png'});
+});

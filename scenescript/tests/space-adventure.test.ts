@@ -81,3 +81,21 @@ test('all cameras stay outside the large planets and the last laser misses the s
  assert.ok(20+pose(28.5).get('volleyTravel0z')!>24,'first tracer centre has not reached the sealed entrance yet');
  assert.ok(samplePath3D(stage.paths!['escape-payoff'],.95).forward.z<-.99);
 });
+
+test('detailed cockpit has moving physical instruments and editable, mission-synchronized readouts',()=>{
+ const cockpit=project.characters.cockpit.model!;assert.ok(cockpit.parts.length>=60);
+ for(const id of ['gaugeNeedleL','throttleR','ventL0','bezelScrewR3','toggleL2'])assert.ok(cockpit.parts.some(p=>p.id===id));
+ const scene=project.scenes.find(s=>s.id==='cockpit-fourth-target')!,actor=scene.stage3d!.actors[0];
+ const a=modelPose3D(cockpit,actor.joints,actor.motions,.2),b=modelPose3D(cockpit,actor.joints,actor.motions,1.2);
+ assert.notEqual(a.get('needleL'),b.get('needleL'));assert.notEqual(a.get('throttleR'),b.get('throttleR'));
+ for(const id of ['cockpit-mission','cockpit-fourth-target','mission-confirmed']){
+  const shot=project.scenes.find(s=>s.id===id)!;assert.ok(shot.elements.length<=100);assert.ok(shot.elements.some(e=>e.id.endsWith('scanDot')&&e.motionPath?.repeat==='loop'));
+  assert.equal(shot.elements.filter(e=>/speed[0-3]$/.test(e.id)).length,4);
+ }
+ const counter=scene.elements.find(e=>e.id.endsWith('targetCounterAfter'))!;assert.equal(counter.at,2.4);assert.equal(counter.text,'TARGETS  4 / 6');
+ assert.equal(scene.elements.find(e=>e.id.endsWith('weaponState3'))!.at,2.4);
+ assert.equal(scene.elements.find(e=>e.id.endsWith('fireStatus'))!.until,2.4);
+ assert.equal(scene.elements.find(e=>e.id.endsWith('charge0'))!.until,2);
+ assert.equal(scene.elements.find(e=>e.id.endsWith('recharge0'))!.at,2.4);
+ assert.ok(scene.elements.find(e=>e.id.endsWith('recharge4'))!.at>2.8);
+});

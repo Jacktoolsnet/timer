@@ -139,9 +139,43 @@ const cockpitParts=[
  ...[-1,1].flatMap(s=>[
   part('strut'+s,'cylinder',V(s*.78,1.2,2.7),V(.055,4,.055),'#b48462',{rotation:V(0,0,s*12),metalness:.8}),
   part('sideConsole'+s,'sphere',V(s*1.3,-.2,.5),V(.6,.55,1.6),'#254452',{finish:'polished'}),
-  part('glove'+s,'sphere',V(s*.7,.16,2.1),V(.38,.28,.6),'#182433',{roughness:.85}),
+  part('glove'+s,'sphere',V(s*.7,.65,2.1),V(.38,.28,.6),'#182433',{roughness:.85}),
   part('control'+s,'cylinder',V(s*1,.17,.8),V(.15,.48,.15),'#725c4c',{rotation:V(18,0,s*10),metalness:.7})])
 ];
+// Layered housings, fasteners, cooling slots, backlit switches and articulated controls.
+const cockpitCurves=new Map();
+function cockpitJoint(p,id,axis,min,max,curve,motion='rotation'){
+ (p.joints??=[]).push({id,motion,axis,min,max,value:curve(0)});cockpitCurves.set(id,curve);return p;
+}
+for(const side of [-1,1]){
+ const suffix=side<0?'L':'R';
+ cockpitParts.push(
+  part('instrumentHousing'+suffix,'box',V(side*.83,.8,2.8),V(.6,.63,.18),'#182f3c',{rotation:V(-12,side*-12,0),finish:'polished'}),
+  part('instrumentGlass'+suffix,'box',V(side*.83,.82,2.69),V(.48,.49,.035),'#071821',{rotation:V(-12,side*-12,0),roughness:.12}),
+  part('consoleTrim'+suffix,'box',V(side*.86,-.02,1.48),V(.045,.05,1.6),'#b78b64',{metalness:.8}),
+  part('handCuff'+suffix,'cylinder',V(side*.7,.58,1.93),V(.28,.36,.28),'#354958',{rotation:V(70,0,0),roughness:.8})
+ );
+ for(let i=0;i<6;i++){
+  cockpitParts.push(part('vent'+suffix+i,'box',V(side*(.45+i*.075),-.18,1.4),V(.025,.035,.24),'#07121b'));
+  const toggle=part('toggle'+suffix+i,'box',V(side*(.43+i*.085),.015,1.82),V(.055,.085,.1),i%3===0?'#d4a45f':'#5cb4b4',{metalness:.5});
+  if(i===2)cockpitJoint(toggle,'switch'+suffix,'x',-25,25,t=>Math.sin(t*2+side)*15);
+  cockpitParts.push(toggle);
+ }
+ for(let i=0;i<4;i++)cockpitParts.push(part('bezelScrew'+suffix+i,'cylinder',V(side*(.59+(i%2)*.47),.58+Math.floor(i/2)*.45,2.66),V(.035,.018,.035),'#a7bcc3',{rotation:V(90,0,0),metalness:.85}));
+ for(let i=0;i<8;i++){const a=i/8*Math.PI*2;cockpitParts.push(part('dialTick'+suffix+i,'box',V(side*.83+Math.sin(a)*.17,.83+Math.cos(a)*.17,2.65),V(.014,.035,.015),'#9abbc1',{rotation:V(0,0,-i*45)}));}
+ const needle=part('gaugeNeedle'+suffix,'box',V(side*.83,.83,2.65),V(.018,.23,.018),'#72f5da',{pivot:V(0,-.1,0)});
+ cockpitJoint(needle,'needle'+suffix,'z',-65,65,t=>Math.sin(t*(side<0?1.7:2.2))*38);cockpitParts.push(needle);
+ const lever=part('throttle'+suffix,'group',V(side*.68,.50,2.15),V(1,1,1),'#111111');
+ cockpitJoint(lever,'throttle'+suffix,'x',-30,30,t=>Math.sin(t*1.1+side)*12);
+ cockpitParts.push(lever,part('throttleStem'+suffix,'cylinder',V(0,.12,0),V(.045,.26,.045),'#aab7bd',{parent:lever.id,metalness:.8}),part('throttleGrip'+suffix,'box',V(0,.27,0),V(.16,.09,.13),'#273742',{parent:lever.id,finish:'polished'}));
+}
+for(let i=0;i<9;i++)cockpitParts.push(part('dashboardRivet'+i,'sphere',V(-1+i*.25,.59,1.24),V(.025,.025,.025),'#b98b65',{metalness:.8}));
+cockpitParts.push(part('upperControlRail','box',V(0,.69,2.02),V(1.5,.14,.18),'#1d3543',{finish:'polished'}));
+for(let i=0;i<7;i++){
+ cockpitParts.push(part('rotaryKnob'+i,'cylinder',V(-.6+i*.2,.72,1.9),V(.075,.07,.075),i%3===0?'#bf946f':'#607d89',{rotation:V(90,0,0),metalness:.7}));
+ cockpitParts.push(part('rotaryIndex'+i,'box',V(-.6+i*.2,.74,1.855),V(.012,.035,.012),'#d3e8dc'));
+}
+cockpitParts.push(part('lowerInstrumentRail','box',V(0,-.27,1.02),V(1.65,.12,.15),'#122632',{finish:'polished'}));
 const characters={needlefin:fighter,cockpit:{name:'Needlefin cockpit — anonymous pilot POV',height:3,model:{parts:cockpitParts,animations:{}}}};
 const arrivalHull=structuredClone(hull);
 for(const p of arrivalHull)p.joints=[...(p.joints??[]),{id:'arrive'+p.id,motion:'scale',axis:'x',min:0,max:1,value:0}];
@@ -149,12 +183,61 @@ characters.arriving={...fighter,name:'Needlefin — arrival through the spatial 
 
 // Native HUD with dark display, exact English mission and six lights. No baked-in sketch images.
 function element(id,type,values){return {id,type,animation:'none',...values};}
-function hud(destroyed,mission=false,complete=false){
- const e=[element('screen','shape',{x:12,y:61,width:76,height:21,fillColor:'#071b27',borderColor:'#7bbaa9',borderWidth:2,radius:18})];
- if(mission)e.push(element('mission','text',{text:'DESTROY ALL\nSIX TARGETS\nIN THIS SECTOR',x:16,y:62,width:68,height:14,fontSize:39,bold:true,color:'#a2fff0'}));
- if(complete)e.push(element('missionComplete','text',{text:'✓',x:32,y:61,width:36,height:14,fontSize:100,bold:true,color:'#80edaf'}));
- for(let i=0;i<6;i++)e.push(element('indicator'+i,'shape',{x:23+i*8,y:77,width:4.6,height:2.6,shapeType:'ellipse',fillColor:i<destroyed?'#172f3a':'#ffbd5d',borderColor:i<destroyed?'#3a5662':'#ffe4a3',borderWidth:2}));
- if(!mission&&!complete)e.push(element('reticle','text',{text:'⌖',x:44,y:40,width:12,height:8,fontSize:66,color:'#8be9d8'}));return e;
+function hud(destroyed,mission=false,complete=false,duration=3,start=3){
+ const e=[];
+ const box=(id,x,y,width,height,fillColor,borderColor='#315a65',extra={})=>e.push(element(id,'shape',{x,y,width,height,fillColor,borderColor,borderWidth:1.5,radius:10,...extra}));
+ const text=(id,value,x,y,width,height,fontSize=20,color='#8fcbce',extra={})=>e.push(element(id,'text',{text:value,x,y,width,height,fontSize,color,bold:true,...extra}));
+ const move=(from,to,span=duration,repeat='once')=>({type:'line',from,to,start:0,duration:span,repeat,after:'hold',easing:'linear',orient:false});
+ box('screen',23,60,54,24,'#061822','#649d9f');
+ box('flightPanel',2,65,19,19,'#0a1c29');
+ box('weaponPanel',79,65,19,19,'#0a1c29');
+ box('systemsPanel',23,86,54,11,'#0b1d28');
+ text('screenLabel','NEEDLEFIN  //  MISSION',26,60.8,48,2.5,16);
+ if(mission)text('mission','DESTROY ALL\nSIX TARGETS\nIN THIS SECTOR',26,64.5,48,11,34,'#b5fff0');
+ if(complete){text('missionComplete','✓',37,64,26,10,76,'#80edaf');text('completeLabel','MISSION CLEAR',27,74.7,46,2.8,22,'#80edaf');}
+ for(let i=0;i<6;i++)box('indicator'+i,29+i*7,79,3.8,2.1,i<destroyed?'#172f3a':'#ffbd5d',i<destroyed?'#3a5662':'#ffe4a3',{shapeType:'ellipse'});
+ text('flightLabel','FLIGHT',3,65.8,17,2.5,17);
+ text('velocityLabel','SPD',3,68.5,17,2.4,15);
+ text('weaponLabel','LASER',80,65.8,17,2.5,17);
+ text('chargeLabel','CHARGE',80,74,17,2.2,13);
+ // Readouts are timed native elements, not random animation or executable expressions.
+ for(let i=0;i<4;i++){
+  const at=i*duration/4,until=i===3?null:(i+1)*duration/4;
+  const speed=Math.round(280+start*6+i*17-(complete?i*10:0));
+  text('speed'+i,String(speed),3,70.8,17,4,31,'#b7f4ee',{at,until});
+  const phase=complete?'SAFE':!mission?['TRACK','LOCK','FIRING','READY'][i]:['SCAN','SCAN','LOCK','READY'][i];
+  const phaseTimes=!mission&&!complete?[0,1.3,2,2.4,duration]:[0,duration/4,duration/2,duration*.75,duration];
+  text('weaponState'+i,phase,80,69,17,3,17,phase==='FIRING'?'#ffc36f':'#8ae8d4',{at:phaseTimes[i],until:i===3?null:phaseTimes[i+1]});
+ }
+ const firing=!mission&&!complete;
+ for(let i=0;i<5;i++){
+  box('chargeSlot'+i,81+i*2.8,77,1.8,3,'#19353e','#19353e');
+  box('charge'+i,81+i*2.8,77,1.8,3,'#46b9a2','#46b9a2',{until:firing?2:null});
+  if(firing)box('recharge'+i,81+i*2.8,77,1.8,3,'#46b9a2','#46b9a2',{at:2.4+i*.12});
+ }
+ box('chargeCursor',81,77,1.4,3,'#e6fff0','#e6fff0',{until:firing?2:null,motionPath:move({x:0,y:0},{x:11.2,y:0},.8,'ping-pong')});
+ if(firing)box('rechargeCursor',81,77,1.4,3,'#e6fff0','#e6fff0',{at:2.4,motionPath:{...move({x:0,y:0},{x:11.2,y:0},.48),start:2.4}});
+ text('systemsLabel','SYSTEMS',26,86.5,48,2,15);
+ for(let i=0;i<3;i++){text('systemName'+i,['PWR','SHLD','TEMP'][i],26,89+i*2.2,10,1.8,13);box('systemBase'+i,39,89.3+i*2.2,32,1,'#19353e');box('systemFill'+i,39,89.3+i*2.2,[26,30,17][i],1,['#6bc9b3','#8dbbdc','#d3a56b'][i]);}
+ box('thermalCursor',39,93.7,1,1,'#f1dec4','#f1dec4',{motionPath:move({x:0,y:0},{x:12,y:0},1.1,'ping-pong')});
+ // Navigation scope with moving contacts; left margin stays clear of the main mission text.
+ box('radarPanel',2,86,19,11,'#071a24');
+ for(let i=0;i<2;i++)box('radarRing'+i,4+i*3,87+i*1.7,15-i*6,8.4-i*3.4,'none','#3b7378',{shapeType:'ellipse',borderWidth:1});
+ box('radarHorizontal',4,91.2,15,.1,'#315760','#315760');box('radarVertical',11.4,87,.12,8.4,'#315760','#315760');
+ for(let i=0;i<3;i++)box('contact'+i,8+i*3,88+i*1.3,1,.56,complete?'#4b7f75':'#ffc775','none',{shapeType:'ellipse',motionPath:move({x:0,y:0},{x:(i-1)*1.8,y:2-i},duration)});
+ box('scanDot',11,91,1,.56,'#9dfff0','none',{shapeType:'ellipse',motionPath:{type:'ellipse',center:{x:0,y:0},radiusX:6,radiusY:3.4,startAngle:(start*45)%360,start:0,duration:1.6,repeat:'loop',after:'hold',easing:'linear',orient:false}});
+ box('navPanel',79,86,19,11,'#071a24');
+ text('navLabel','NAV',80,87,17,2.5,16);text('navVector','SECTOR 06',80,90,17,2.5,14);
+ text('navStatus',complete?'JUMP READY':'LINK ACTIVE',79,94,19,2.5,13,complete?'#ffdb8c':'#73b9b1');
+ if(!mission&&!complete){
+  text('reticle','⌖',44,40,12,8,66,'#8be9d8');
+  text('targetCounterBefore','TARGETS  3 / 6',27,65,46,3,24,'#98d6d1',{until:2.4});
+  text('targetCounterAfter','TARGETS  4 / 6',27,65,46,3,24,'#98d6d1',{at:2.4});
+  text('targetStatus','TARGET 04  //  LOCKED',26,70,48,3,18,'#efc47a',{until:2});
+  text('fireStatus','FIRING',26,70,48,3,20,'#ffd18a',{at:2,until:2.4});
+  text('hitStatus','TARGET DESTROYED',26,70,48,3,20,'#8df0bf',{at:2.4});
+ }
+ return e;
 }
 const animations={},scenes=[];
 function camKey(at,p,target,roll=0){return {at,position:p,target,roll};}
@@ -172,6 +255,11 @@ for(const [id,start,duration,view]of specs){
  const cockpit=view==='cockpit',actor={id:'hero',character:cockpit?'cockpit':'needlefin',path:{path:id,duration,orient:!cockpit},motions:[]};
  for(const w of weapons.filter(w=>w.type==='torpedo'&&w.at>=start&&w.at+.7<=end))if(!cockpit)actor.motions.push({animation:'launch',at:w.at-start,duration:.7,blend:0});
  if(view==='arrival'){actor.character='arriving';actor.motions=[{animation:'arrive',duration,blend:0}];}
+ if(cockpit){
+  const times=Array.from({length:25},(_,i)=>duration*i/24);
+  characters.cockpit.model.animations[id]={duration,tracks:[...cockpitCurves].map(([joint,curve])=>({joint,keys:times.map(at=>({at,value:curve(start+at)}))}))};
+  actor.motions=[{animation:id,duration,blend:0}];
+ }
  const actors=(view==='escape'?[]:[actor]);
  // Escape needs hull geometry to disappear behind the closed aperture, not sit at the path endpoint.
  if(view==='escape'){
@@ -190,11 +278,11 @@ for(const [id,start,duration,view]of specs){
  else if(view==='last')camera={fov:62,keys:[camKey(0,V(10,8,20),V(0,3,48)),camKey(duration,V(9,8,24),V(0,3,49))]};
  else camera={fov:68,keys:[camKey(0,V(15,11,53),V(2,3,42)),camKey(1,V(13,9,47),V(3,2,35)),camKey(2.47,V(11,7,43),V(0,1,24)),camKey(4,V(11,7,43),V(0,1,24))]};
  const shot=board.shots.find(s=>s.id===id),name=shot?.title??'Mission confirmed — cockpit insert';
- const elements=cockpit?hud(hits.filter(t=>t<=start).length,id==='cockpit-mission',id==='mission-confirmed'):[];
+ const elements=cockpit?hud(hits.filter(t=>t<=start).length,id==='cockpit-mission',id==='mission-confirmed',duration,start):[];
  if(id==='cockpit-fourth-target'){
   // Switch the fourth lamp exactly when the fourth relay is destroyed.
   elements.find(e=>e.id==='indicator3').until=hits[3]-start;
-  elements.push(element('indicator3dark','shape',{x:47,y:77,width:4.6,height:2.6,shapeType:'ellipse',fillColor:'#172f3a',borderColor:'#3a5662',borderWidth:2,at:hits[3]-start}));
+  elements.push(element('indicator3dark','shape',{x:50,y:79,width:3.8,height:2.1,shapeType:'ellipse',fillColor:'#172f3a',borderColor:'#3a5662',borderWidth:2,at:hits[3]-start}));
  }
  for(const e of elements)e.id=id+'-'+e.id;
  scenes.push({id,name,duration,transition:'none',background:'#050b19',backgroundAsset:'nebula',elements,stage3d:{stage:'sector',camera,actors,stageJoints:Object.fromEntries([...curves].map(([id,f])=>[id,f(start)])),stageMotions:[{animation:id,duration,blend:0}]}});

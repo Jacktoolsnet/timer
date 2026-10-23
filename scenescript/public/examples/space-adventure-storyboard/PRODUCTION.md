@@ -20,7 +20,13 @@ Space Adventure explicitly.
   exterior attack and a one-second cockpit confirmation: nine executable scenes.
 - Original smooth seed-hull fighter with smoked canopy, copper seams, offset fin,
   recessed turquoise propulsion slots and animated torpedo launch hatch.
-- 3D cockpit, anonymous gloved hands, editable 2D mission screen and six lights.
+- Detailed 3D cockpit with inset instrument housings, copper trim, bezel screws,
+  cooling slots, backlit switches, cuffs, moving gauge needles and throttle levers.
+- Editable native HUD: timed speed readouts, target acquisition / firing / ready
+  states, a moving charge indicator, three system bars, thermal cursor and radar
+  scope with orbiting scan dot and drifting contacts. The fourth-target counter,
+  firing display and mission lights switch at the actual attack/impact times.
+  Mission text stays readable in the central display.
 - Six individually tracked, unmanned relays. Impacts at 7.30 / 9.00 / 12.20 /
   16.40 / 19.35 / 24.25 seconds. Targets stay destroyed in later shots.
 - Laser attacks on targets 1, 2, 4 and 6; curved torpedoes on targets 3 and 5.
@@ -66,7 +72,7 @@ rendered scene beats, persistence of approvals and publication cover.
 
 ## Export verification
 
-The updated low-resolution `space-adventure-preview.mp4` accompanies this production (270 × 480, 24 fps, 30.037 seconds including encoder padding). A complete export and its decoded audio track were verified.
+The updated low-resolution `space-adventure-preview.mp4` accompanies this production (270 × 480, 12 fps, 30.037 seconds including encoder padding). A complete export and its decoded audio track were verified.
 Use the native project to export a higher-resolution master in the editor.
 The approved storyboard remains the original planning record; these runtime
 revisions implement the user's subsequent feedback without fabricating new approvals.
