@@ -1085,3 +1085,17 @@ body.recording .comic-edit-overlay{display:none}
 .board-detail-grid .board-sketch{height:260px}
 @media(max-width:900px){.board-browser{grid-template-columns:minmax(150px,190px) minmax(0,1fr);gap:12px}.board-detail>.board-card.board-detail-grid{grid-template-columns:minmax(0,1fr)}.board-detail-grid>.board-detail-tile{padding:12px}.board-detail-grid>.board-approval-switch>input{left:12px}}
 @media(max-width:620px){.board-browser{grid-template-columns:minmax(0,1fr)}.board-library{position:static}.board-library-list{max-height:180px}}
+
+
+#storyboard-replace-dialog{box-sizing:border-box;width:min(540px,94vw);max-height:90dvh;padding:0;overflow:auto;border:1px solid var(--line);border-radius:16px;background:var(--surface);color:var(--text);box-shadow:0 24px 80px #0005}
+#storyboard-replace-dialog::backdrop{background:#0008;backdrop-filter:blur(3px)}
+#storyboard-replace-dialog .json-header{padding:18px 22px;background:var(--accent-soft);border-bottom:1px solid var(--line)}
+#storyboard-replace-title{margin:0;font-size:1.15rem}
+#storyboard-replace-dialog .dialog-inner{padding:22px}
+#storyboard-replace-message{margin:16px 0 0;line-height:1.7;overflow-wrap:anywhere}
+.board-replace-icon{display:grid;place-items:center;width:48px;height:48px;border-radius:14px;background:var(--accent-soft);color:var(--accent)}
+.board-replace-icon svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#storyboard-replace-dialog .json-footer{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:10px;padding:16px 22px;border-top:1px solid var(--line)}
+#storyboard-replace-dialog button{min-height:42px;padding:10px 16px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--text);font:inherit;cursor:pointer}
+#storyboard-replace-dialog #storyboard-replace-apply{background:var(--accent);color:#fff;border-color:var(--accent)}
+#storyboard-replace-dialog button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}

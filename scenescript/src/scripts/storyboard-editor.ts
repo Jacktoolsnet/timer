@@ -7,6 +7,17 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
  const fieldDialog=$<HTMLDialogElement>('field-dialog'),exchange=$<HTMLDialogElement>('exchange');
  type FieldConfig={label:string;value:string|string[];kind?:'text'|'number'|'select'|'choices';max?:number;min?:number;limit?:number;required?:boolean;options?:[string,string][];shot?:string;target?:BoardReviewTarget;subjectKind?:boolean;newComment?:boolean;editComment?:boolean;newItem?:boolean;apply:(draft:Storyboard,value:string|string[])=>void};
  let edit:{config:FieldConfig;board:Storyboard;revision:number;session:number;focusKey:string}|null=null;
+ const replaceDialog=$<HTMLDialogElement>('replace-dialog');
+ let finishReplace:((accepted:boolean)=>void)|null=null;
+ const confirmReplace=()=>new Promise<boolean>(resolve=>{
+  if(finishReplace){resolve(false);return;}
+  const focused=document.activeElement as HTMLElement|null;
+  finishReplace=(accepted)=>{console.warn("FINISH",accepted,new Error().stack);finishReplace=null;replaceDialog.close();focused?.focus();resolve(accepted);};
+  replaceDialog.showModal();$('replace-cancel').focus();
+ });
+ $('replace-cancel').addEventListener('click',()=>finishReplace?.(false));
+ $('replace-apply').addEventListener('click',()=>finishReplace?.(true));
+ replaceDialog.addEventListener('cancel',e=>{e.preventDefault();finishReplace?.(false);});
  let selectedItems:Record<string,string>={};
  let board:Storyboard,origin:ReturnType<typeof context>,dirty=false,tab='story',session=0;
  const check=()=>{const now=context();if(!dialog.open||now.project!==origin.project||now.revision!==origin.revision)throw new Error(t.stale);};
@@ -51,7 +62,7 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
   if(config.newComment||config.editComment)draft.approved=false;else invalidateStoryboardApprovals(draft,config.target??(config.shot?{kind:'shots',id:config.shot}:undefined));
   board=parseStoryboard(draft);dirty=true;if(config.subjectKind){tab=value==='object'?'objects':'characters';if(config.target)selectedItems[tab]=config.target.id;}if(config.newItem)selectedItems[tab]=sectionItems().at(-1)?.id??'';render();closeField();
  }catch(e){$('field-error').textContent=e instanceof Error?e.message:String(e);}});
- dialog.addEventListener('close',()=>{if(fieldDialog.open)closeField();if(exchange.open)exchange.close();});
+ dialog.addEventListener('close',()=>{finishReplace?.(false);if(fieldDialog.open)closeField();if(exchange.open)exchange.close();});
  function approvalSwitch(parent:HTMLElement,item:{status:'draft'|'approved'},name:string){
   const label=node('label'),input=node('input'),track=node('span');label.className='board-approval-switch';input.type='checkbox';input.setAttribute('role','switch');input.setAttribute('aria-description',name);input.checked=item.status==='approved';track.className='board-switch-track';track.setAttribute('aria-hidden','true');
   input.addEventListener('change',()=>{item.status=input.checked?'approved':'draft';touch();});label.append(input,track,node('span',t.approved));parent.append(label);
@@ -151,11 +162,25 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
  const copy=async(value:string)=>{const ticket=session;try{check();await navigator.clipboard.writeText(value);if(ticket===session&&dialog.open){clear();$('status').textContent=t.copied;}}catch(e){if(ticket===session&&dialog.open)error(e);}};
  $('guide').addEventListener('click',()=>void copy(storyboardGuide));$('feedback').addEventListener('click',()=>void copy(exportStoryboard(board)));
  $('download').addEventListener('click',()=>{try{check();const blob=new Blob([exportStoryboard(board,true)],{type:'application/json'}),url=URL.createObjectURL(blob),a=node('a');a.href=url;a.download='storyboard.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(e){error(e);}});
- const load=(value:string)=>{try{check();board=importStoryboard(value,!origin.project.storyboard&&!dirty&&!board.shots.length&&!board.characters.length&&!board.settings.length&&!board.comments.length?null:board);dirty=true;clear();render();if(exchange.open)exchange.close();$('status').textContent=t.imported;}catch(e){error(e);}};
+ const load=async(value:string,fromFile=false)=>{try{
+  check();let next:Storyboard;
+  try{next=importStoryboard(value,!origin.project.storyboard&&!dirty&&!board.shots.length&&!board.characters.length&&!board.settings.length&&!board.comments.length?null:board);}
+  catch(e){
+   // File backups/examples can deliberately replace a plan. Pasted AI feedback must never bypass revision checks.
+   if(!fromFile||!(e instanceof Error)||!/^storyboard\.(revision: outdated feedback|id: different storyboard)/.test(e.message))throw e;
+   next=importStoryboard(value,null); // Validate the complete, self-contained file before asking to replace anything.
+   next.revision=Math.max(board.revision+1,next.revision);next=parseStoryboard(next);
+   const ticket=session,current=board,revision=board.revision;
+   if(!await confirmReplace())return;console.warn("ACCEPTED");
+   check();if(ticket!==session||current!==board||revision!==board.revision)throw new Error(t.stale);
+   selectedItems={};
+  }
+  board=next;dirty=true;clear();render();if(exchange.open)exchange.close();$('status').textContent=t.imported;
+ }catch(e){error(e);}};
  $('import').addEventListener('click',()=>load($<HTMLTextAreaElement>('json').value));
  $('json-open').addEventListener('click',()=>{try{check();$('exchange-error-box').hidden=true;exchange.showModal();$('json').focus();}catch(e){error(e);}});
  $('exchange-close').addEventListener('click',()=>exchange.close());
  exchange.addEventListener('close',()=>{if(dialog.open)$('json-open').focus();});
  $('file-open').addEventListener('click',()=>$<HTMLInputElement>('file').click());
- $('file').addEventListener('change',async()=>{const input=$<HTMLInputElement>('file'),file=input.files?.[0],ticket=session;input.value='';if(!file)return;try{if(file.size>MAX_STORYBOARD_BYTES)throw new Error('JSON: maximum 25 MiB');const value=await file.text();if(ticket!==session||!dialog.open)return;load(value);}catch(e){if(ticket===session&&dialog.open)error(e);}});
+ $('file').addEventListener('change',async()=>{const input=$<HTMLInputElement>('file'),file=input.files?.[0],ticket=session;input.value='';if(!file)return;try{if(file.size>MAX_STORYBOARD_BYTES)throw new Error('JSON: maximum 25 MiB');const value=await file.text();if(ticket!==session||!dialog.open)return;load(value,true);}catch(e){if(ticket===session&&dialog.open)error(e);}});
 }

@@ -35,8 +35,12 @@ The pilot reference reuses the existing cockpit sketch, not a new model sheet.
 Review each entry in the left-hand list and its grouped properties on the right;
 approval is a user-controlled switch. The JSON imports into either the original
 prefilled revision-7 board or the enriched revision-7 plan. If a later revision is
-already saved, request fresh feedback JSON before preparing another response;
-do not defeat the stale-response protection by blindly changing the revision.
+already saved, the file loader offers an explicit full replacement confirmation.
+Cancel to keep current edits and comments; confirm only when you want the file
+to replace the entire board, then choose “Änderungen speichern”. Export a backup
+first if needed. For incremental AI revisions, request fresh feedback JSON;
+pasted AI responses still enforce the revision check. Do not manually change
+the revision to bypass this protection.
 
 Images describe composition, lighting and design, not an exact animation state.
 The text controls the six-target destruction sequence and four fleet escorts;

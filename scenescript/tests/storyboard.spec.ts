@@ -185,3 +185,26 @@ test('comment edit overlays cancel safely, validate input and retain IDs and rep
  await page.locator('#storyboard-save').click();await page.locator('#open-storyboard').click();
  await expect(page.locator('.board-comment-text')).toContainText('Edited comment');
 });
+
+test('stale files require explicit replacement consent while pasted feedback stays protected',async({page})=>{
+ page.on('console',m=>console.log(m.text()));await setup(page);await addComment(page,undefined,'Keep my current notes');
+ const file=inflationStoryboard();file.revision=0;file.title='Replacement from file';
+ const raw=exportStoryboard(file,true),upload={name:'older-board.json',mimeType:'application/json',buffer:Buffer.from(raw)};
+ await page.locator('#storyboard-json-open').click();await page.locator('#storyboard-json').fill(raw);await page.locator('#storyboard-import').click();
+ await expect(page.locator('#storyboard-exchange-error')).toHaveValue(/outdated feedback/);await page.locator('#storyboard-exchange-close').click();
+ await page.locator('#storyboard-file').setInputFiles(upload);await expect(page.locator('#storyboard-replace-dialog')).toBeVisible();await expect(page.locator('#storyboard-replace-message')).toContainText('Kommentare');await expect(page.locator('#storyboard-replace-cancel')).toBeFocused();await page.locator('#storyboard-replace-cancel').click();await expect(page.locator('.board-comment-text')).toHaveText('Keep my current notes');
+ await page.locator('#storyboard-file').setInputFiles(upload);await expect(page.locator('#storyboard-replace-dialog')).toBeVisible();await page.keyboard.press('Escape');await expect(page.locator('#storyboard-replace-dialog')).not.toBeVisible();await expect(page.locator('.board-comment-text')).toHaveText('Keep my current notes');
+ await page.locator('#storyboard-file').setInputFiles(upload);await page.locator('#storyboard-replace-apply').click();
+ await expect(page.locator('#storyboard-status')).toContainText('Storyboard übernommen');
+ await expect(page.locator('#storyboard-content')).toContainText('Replacement from file');await expect(page.locator('.board-comment')).toHaveCount(0);
+ await page.locator('#storyboard-feedback').click();const json=await copied(page);expect(json.board.revision).toBeGreaterThan(1);expect(json.board.approved).toBe(false);
+ await page.locator('#storyboard-save').click();
+ const download=page.waitForEvent('download');await page.locator('#save-project').click();const d=await download;
+ const native=JSON.parse(await readFile((await d.path())!,'utf8'));expect(native.scenes).toEqual(fixture().scenes);expect(native.storyboard.title).toBe('Replacement from file');
+});
+test('incomplete stale file cannot replace current storyboard or discard its comments',async({page})=>{
+ await setup(page);await addComment(page,undefined,'Preserve this');
+ const json=JSON.parse(exportStoryboard(inflationStoryboard()));json.board.revision=0;
+ await page.locator('#storyboard-file').setInputFiles({name:'manifest.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(json))});
+ await expect(page.locator('#storyboard-error')).toHaveValue(/image/);await expect(page.locator('.board-comment-text')).toHaveText('Preserve this');
+});
