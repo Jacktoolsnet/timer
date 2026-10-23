@@ -2,7 +2,7 @@
 
 ## Executable video project
 
-The approved user export has now been turned into a native 30-second 3D project:
+The approved user export has now been turned into a native 28.6-second 3D project:
 - [space-adventure.scenescript.json](space-adventure.scenescript.json) — load through
   the **main project importer**, not the Storyboard overlay.
 - [space-adventure-preview.mp4](space-adventure-preview.mp4) — complete test export

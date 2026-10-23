@@ -5,6 +5,7 @@ import {validateProject} from '../src/lib/model.ts';
 import {samplePath3D} from '../src/lib/path3d.ts';
 import {canApproveStoryboard} from '../src/lib/storyboard.ts';
 import {defaultMusic,presetInstrument} from '../src/lib/music.ts';
+const filmDuration=28.6; // End on the first closed-aperture frames, without an epilogue.
 const root=new URL('../public/examples/space-adventure-storyboard/',import.meta.url);
 const input=await readFile(new URL('spaceadventure_scenescript.json',root),'utf8');
 const source=validateProject(JSON.parse(input)),board=source.storyboard;
@@ -264,7 +265,7 @@ for(const [id,start,duration,view]of specs){
  // Escape needs hull geometry to disappear behind the closed aperture, not sit at the path endpoint.
  if(view==='escape'){
   const escapeHull=structuredClone(hull);
-  for(const p of escapeHull)if(p.shape!=='group')p.joints=[...(p.joints??[]),...['x'].map(axis=>({id:'exit'+p.id+axis,motion:'scale',axis,min:0,max:1,value:1}))];
+  for(const p of escapeHull)if(p.shape!=='group')p.joints=[...(p.joints??[]),...['x'].map(axis=>({id:'exit'+p.id+axis,motion:'scale',axis,min:0,max:1,value:0}))];
   const tracks=escapeHull.flatMap(p=>(p.joints??[]).filter(j=>j.motion==='scale').map(j=>({joint:j.id,keys:[{at:0,value:1},{at:2.469,value:1},{at:2.47,value:0},{at:4,value:0}]})));
   characters.escaping={...fighter,name:'Needlefin — exit aperture concealment',model:{parts:escapeHull,animations:{exit:{duration:4,tracks}}}};
   actors.push({...actor,character:'escaping',motions:[{animation:'exit',duration:4,blend:0}]});
@@ -291,9 +292,9 @@ const stage={name:'Silent relay sector — continuous 3D space',transparentBackg
 // Original electronic underscore, intentionally no narration. Shift to threat at the fleet reveal.
 const bass={...presetInstrument('bass'),volume:.22,release:.12},pluck={...presetInstrument('kalimba','pulse'),volume:.15,release:.15,reverb:.08},noise={...presetInstrument('bass','tick'),wave:'noise',volume:.06,attack:.002,decay:.035,sustain:0,release:.03,filter:'highpass',cutoff:1500};
 const notes=[];for(let i=0;i<64;i++){const at=i*.46875;if(at>19.7&&at<21.5)continue;const base=at<20?38:35;notes.push({instrument:'bass',at,duration:.24,pitch:base+[0,0,7,3][i%4],velocity:.6},{instrument:'tick',at,duration:.05,pitch:48,velocity:.5});if(i%2===0)notes.push({instrument:'pulse',at,duration:.15,pitch:base+24+[0,7,10,7][i/2%4],velocity:.45});}
-notes.push({instrument:'bass',at:20.2,duration:1.4,pitch:29,velocity:.8},{instrument:'pulse',at:25.2,duration:.2,pitch:81,velocity:.6},{instrument:'bass',at:29.2,duration:.5,pitch:38,velocity:.7});notes.sort((a,b)=>a.at-b.at);
+notes.push({instrument:'bass',at:20.2,duration:1.4,pitch:29,velocity:.8},{instrument:'pulse',at:25.2,duration:.2,pitch:81,velocity:.6},{instrument:'bass',at:28.25,duration:.25,pitch:38,velocity:.7});notes.sort((a,b)=>a.at-b.at);
 // Procedural PCM effects, authored here and embedded. No external sound downloads/licences.
-function effectsWav(){const rate=24000,count=rate*30,bytes=new Uint8Array(44+count*2),dv=new DataView(bytes.buffer),word=(at,s)=>[...s].forEach((c,i)=>bytes[at+i]=c.charCodeAt(0));
+function effectsWav(){const rate=24000,count=Math.round(rate*filmDuration),bytes=new Uint8Array(44+count*2),dv=new DataView(bytes.buffer),word=(at,s)=>[...s].forEach((c,i)=>bytes[at+i]=c.charCodeAt(0));
  word(0,'RIFF');dv.setUint32(4,bytes.length-8,true);word(8,'WAVE');word(12,'fmt ');dv.setUint32(16,16,true);dv.setUint16(20,1,true);dv.setUint16(22,1,true);dv.setUint32(24,rate,true);dv.setUint32(28,rate*2,true);dv.setUint16(32,2,true);dv.setUint16(34,16,true);word(36,'data');dv.setUint32(40,count*2,true);
  let rnd=9,low=0;const tones=[...weapons.map(w=>({at:w.at,length:w.type==='laser'?.18:.8,type:w.type})),...hits.map(at=>({at,length:.75,type:'impact'})),{at:0,length:1.3,type:'portal'},{at:2.15,length:.6,type:'portal'},{at:20,length:1.8,type:'portal'},{at:26,length:1.6,type:'portal'},{at:28.4,length:.5,type:'portal'},{at:25.1,length:.4,type:'confirm'},{at:3.1,length:.2,type:'confirm'},...volleyStarts.map(at=>({at,length:.3,type:'laser'}))];
  for(let i=0;i<count;i++){const t=i/rate;rnd=(Math.imul(rnd,1664525)+1013904223)>>>0;const n=rnd/4294967296*2-1;low+=.04*(n-low);let s=.018*Math.sin(t*2*Math.PI*47)+.015*low;
@@ -304,7 +305,7 @@ function effectsWav(){const rate=24000,count=rate*30,bytes=new Uint8Array(44+cou
    else if(e.type==='confirm')s+=.15*env*Math.sin(phase*(u<.5?880:1174));
    else s+=.3*env*(low*1.8+Math.sin(phase*(42+80*u))*.5+n*.13);
   }
-  const fade=Math.min(1,t/.02,(30-t)/.3);dv.setInt16(44+i*2,Math.round(Math.tanh(s*1.3)*fade*30000),true);
+  const fade=Math.min(1,t/.02,(filmDuration-t)/.12);dv.setInt16(44+i*2,Math.round(Math.tanh(s*1.3)*fade*30000),true);
  }return bytes;}
 // Code-native vector starfield; smooth gradients avoid baked storyboard art in the animation.
 const stars=Array.from({length:850},()=>{const x=(random()*1080).toFixed(1),y=(random()*1920).toFixed(1),r=(.3+random()*1.1).toFixed(2),a=(.15+random()*.6).toFixed(2);return '<circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="#ccddf6" opacity="'+a+'"/>';}).join('');
@@ -315,10 +316,20 @@ for(const [id,file]of [['vortexCyan','vortex-cyan.png'],['vortexViolet','vortex-
 }
 
 const cover=board.images['sketch-arrival-hook'];
-const project=validateProject({...source,title:'Six Targets. One Escape. | Space Adventure',description:'One pilot. Six targets. Then an entire fleet arrives. Can Needlefin finish the mission and escape in time?\n\nAn original 30-second sci-fi short with stylized 3D spacecraft, cockpit views and an electronic soundtrack. No franchise ships. No dialogue — just action.\n\n#SciFi #SpaceAdventure #3DAnimation #Shorts',firstComment:'Finish the mission or escape immediately — what would you do?',hashtags:'#SciFi #SpaceAdventure #3DAnimation #Shorts',format:'portrait',storyboard:board,assets,characters,stages:{sector:stage},groups3d:{},videos:{},backgroundVideo:null,backgroundSimulation:null,audios:{spacefx:{name:'Needlefin — original synthesized space effects.wav',duration:30,data:'data:audio/wav;base64,'+Buffer.from(effectsWav()).toString('base64')}},narration:{asset:'spacefx',volume:.8,fadeIn:.01,fadeOut:.25,instructions:'Original synthesized spatial tears, engines, laser pulses, torpedoes, impacts and UI confirmation. No spoken narration.'},thumbnail:{name:'Space-Adventure-Needlefin-Cover.jpg',data:cover.data},music:{...defaultMusic('focus'),enabled:true,mode:'score',tempo:128,volume:.3,fadeIn:.1,fadeOut:.8,instruments:[bass,pluck,noise],notes},scenes});
+// Preserve the original path's speed/timing when shortening the final scene.
+// Resampling only its prefix avoids stretching the entire escape into the shorter shot.
+const finale=scenes.at(-1),originalPath=paths[finale.id],originalDuration=finale.duration,finalSpan=filmDuration-26;
+const prefix=Array.from({length:64},(_,i)=>samplePath3D(originalPath,(finalSpan/originalDuration)*i/63));
+paths[finale.id]={closed:false,interpolation:'smooth',points:prefix.map(f=>f.position),ups:prefix.map(f=>f.up)};
+finale.duration=finalSpan;
+for(const actor of finale.stage3d.actors){actor.path.duration=finalSpan;for(const motion of actor.motions)motion.duration=finalSpan;}
+for(const motion of finale.stage3d.stageMotions)motion.duration=finalSpan;
+const cameraKeys=finale.stage3d.camera.keys;
+finale.stage3d.camera.keys=[...cameraKeys.filter(k=>k.at<finalSpan),{...cameraKeys.at(-1),at:finalSpan}];
+const project=validateProject({...source,title:'Six Targets. One Escape. | Space Adventure',description:'One pilot. Six targets. Then an entire fleet arrives. Can Needlefin finish the mission and escape in time?\n\nAn original sci-fi short with stylized 3D spacecraft, cockpit views and an electronic soundtrack. No franchise ships. No dialogue — just action.\n\n#SciFi #SpaceAdventure #3DAnimation #Shorts',firstComment:'Finish the mission or escape immediately — what would you do?',hashtags:'#SciFi #SpaceAdventure #3DAnimation #Shorts',format:'portrait',storyboard:board,assets,characters,stages:{sector:stage},groups3d:{},videos:{},backgroundVideo:null,backgroundSimulation:null,audios:{spacefx:{name:'Needlefin — original synthesized space effects.wav',duration:filmDuration,data:'data:audio/wav;base64,'+Buffer.from(effectsWav()).toString('base64')}},narration:{asset:'spacefx',volume:.8,fadeIn:.01,fadeOut:.25,instructions:'Original synthesized spatial tears, engines, laser pulses, torpedoes, impacts and UI confirmation. No spoken narration.'},thumbnail:{name:'Space-Adventure-Needlefin-Cover.jpg',data:cover.data},music:{...defaultMusic('focus'),enabled:true,mode:'score',tempo:128,volume:.3,fadeIn:.1,fadeOut:.8,instruments:[bass,pluck,noise],notes:notes.filter(n=>n.at<filmDuration)},scenes});
 assert.deepEqual(project.storyboard,source.storyboard);
-assert.equal(project.scenes.reduce((n,s)=>n+s.duration,0),30);
+assert.equal(project.scenes.reduce((n,s)=>n+s.duration,0),filmDuration);
 assert.equal(project.scenes.length,9);assert.equal(weapons.length,6);
 assert.equal(await readFile(new URL('spaceadventure_scenescript.json',root),'utf8'),input);
 const dest=new URL('space-adventure.scenescript.json',root),tmp=new URL(dest.href+'.tmp');await writeFile(tmp,JSON.stringify(project,null,2)+'\n');await rename(tmp,dest);
-console.log('Created space-adventure.scenescript.json: 30 s, 9 scenes (8 storyboard shots + cockpit insert), six targets, 3D resources, original audio. Approved storyboard and source file preserved.');
+console.log('Created space-adventure.scenescript.json: 28.6 s, 9 scenes (8 storyboard shots + cockpit insert), six targets, 3D resources, original audio. Approved storyboard and source file preserved.');

@@ -15,7 +15,7 @@ Space Adventure explicitly.
 
 ## Production
 
-- Portrait 9:16, exactly 30 seconds, English mission display/publication metadata.
+- Portrait 9:16, 28.6 seconds, ending immediately after the aperture seals, English mission display/publication metadata.
 - Eight approved storyboard shots, with shot seven split into a three-second
   exterior attack and a one-second cockpit confirmation: nine executable scenes.
 - Original smooth seed-hull fighter with smoked canopy, copper seams, offset fin,
@@ -72,7 +72,12 @@ rendered scene beats, persistence of approvals and publication cover.
 
 ## Export verification
 
-The updated low-resolution `space-adventure-preview.mp4` accompanies this production (270 × 480, 12 fps, 30.037 seconds including encoder padding). A complete export and its decoded audio track were verified.
+The updated low-resolution `space-adventure-preview.mp4` accompanies this production (270 × 480, 12 fps, approximately 28.6 seconds). A complete export and its decoded audio track were verified.
 Use the native project to export a higher-resolution master in the editor.
 The approved storyboard remains the original planning record; these runtime
 revisions implement the user's subsequent feedback without fabricating new approvals.
+
+The final scene is shortened to 2.6 seconds without speeding up its flight path.
+The escape resource rests hidden: it cannot reappear when its animation ends
+or when the playhead lands on the exact final timestamp. The original approved
+30-second storyboard remains unchanged as the planning record.
