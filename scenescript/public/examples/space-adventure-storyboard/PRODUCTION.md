@@ -26,8 +26,14 @@ Space Adventure explicitly.
 - Laser attacks on targets 1, 2, 4 and 6; curved torpedoes on targets 3 and 5.
 - Separate arrival, fleet and escape apertures, animated native geometry.
 - One hostile command vessel and exactly four escorts; final volley fires only
-  after the fighter has left and the escape aperture has closed.
-- Continuous flight route, chase/side/cockpit views, and seek-safe animation.
+  during the retreat. The first tracer centre reaches the entrance at about 28.52 s,
+  just after it seals at 28.50 s; the fighter clears it immediately beforehand.
+- Widely distributed targets, a banked slalom, barrel roll, diving attack and
+  tight U-turn away from the fleet. The final cameras keep the portal in view.
+- Three large textured planetary spheres, including a ringed gas giant.
+- Opaque cyan/violet vortex interiors, animated together with their aperture rims:
+  the opening no longer reveals the ordinary galaxy behind it.
+- Chase/side/cockpit views and seek-safe animation.
 - Embedded original synthesized effects (24 kHz PCM WAV) and an electronic score;
   no narration, downloaded audio, remote assets or AI services needed to play.
 - The existing arrival sketch doubles as publication cover. Storyboard images
@@ -35,8 +41,8 @@ Space Adventure explicitly.
 
 The runtime deliberately uses the editor's existing declarative vocabulary:
 3D geometry, joints, paths, camera keys, transparency, layered aperture rings,
-2D HUD and SVG starfield. It is a stylized interpretation, not a pixel-identical
-recreation of the illustrated concept art or a volumetric portal simulation.
+2D HUD, SVG starfield and deterministic, procedurally authored PNG textures. It is a stylized interpretation, not a pixel-identical
+recreation of the illustrated concept art or a volumetric portal simulation. The new tunnel image is a texture mapped to native 3D aperture geometry.
 Reusable fighter/cockpit resources and the animated sector live in the project's
 3D library and can be exported with the existing resource tools.
 
@@ -45,6 +51,7 @@ Reusable fighter/cockpit resources and the animated sector live in the project's
 From `scenescript/`, Node 24:
 
 ```sh
+npm run example:space-textures # optional: regenerate the mathematical texture artwork
 npm run example:space
 npm test
 npx playwright test tests/space-adventure.spec.ts
@@ -59,7 +66,7 @@ rendered scene beats, persistence of approvals and publication cover.
 
 ## Export verification
 
-A complete MP4 export with audio was verified: 270 × 480, 24 fps,
-30.037 seconds including encoder padding, 3,715,241 bytes.
-`space-adventure-preview.mp4` is that low-resolution check export.
+The updated low-resolution `space-adventure-preview.mp4` accompanies this production (270 × 480, 24 fps, 30.037 seconds including encoder padding). A complete export and its decoded audio track were verified.
 Use the native project to export a higher-resolution master in the editor.
+The approved storyboard remains the original planning record; these runtime
+revisions implement the user's subsequent feedback without fabricating new approvals.
