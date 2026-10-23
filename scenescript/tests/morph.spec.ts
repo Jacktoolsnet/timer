@@ -1,4 +1,6 @@
 import {test,expect} from '@playwright/test';
+import {DEFAULT_PROJECT_URL} from '../src/lib/startup-project';
+test.beforeEach(async({page})=>{await page.route('**'+DEFAULT_PROJECT_URL,route=>route.fulfill({path:'public/examples/inflation-explained.scenescript.json',contentType:'application/json'}));});
 test('shared mesh compositor preserves endpoints, warps landmarks and has no transparent cracks',async({page})=>{
  await page.goto('/en/');await expect(page.locator('#editor')).toHaveAttribute('data-ready','true');
  const result=await page.evaluate(async()=>{

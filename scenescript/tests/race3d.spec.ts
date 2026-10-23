@@ -1,4 +1,4 @@
-// Select the race explicitly; the shipping default is now the hybrid inflation example.
+// Select the race explicitly; the shipping default is now Space Adventure.
 import {test,expect} from '@playwright/test';import {readFile} from 'node:fs/promises';
 import {demoProject} from '../src/lib/model';import {race3DExample} from '../src/lib/race3d-example';import {DEFAULT_PROJECT_URL} from '../src/lib/startup-project';
 test.beforeEach(async({page})=>{await page.route('**'+DEFAULT_PROJECT_URL,route=>route.fulfill({contentType:'application/json',path:new URL('../public/examples/monstertruck-race.scenescript.json',import.meta.url).pathname}));});

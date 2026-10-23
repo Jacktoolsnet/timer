@@ -2,10 +2,10 @@ import {test} from 'node:test';import assert from 'node:assert/strict';import {r
 import {inflationExample,inflationDuration,inflationTimelineSeconds,inflationHeight} from '../src/lib/inflation-example.ts';
 import {parseProject,validateProject,projectJsonBytes} from '../src/lib/model.ts';
 import {modelPose3D} from '../src/lib/model3d.ts';import {parseStage3D} from '../src/lib/stage3d.ts';
-import {DEFAULT_PROJECT_URL,resolveStartupProject} from '../src/lib/startup-project.ts';
+import {resolveStartupProject} from '../src/lib/startup-project.ts';
 const project=()=>validateProject(inflationExample);
-test('default is a one-second title card, short mesh morph and exactly three-second text-free material simulation',async()=>{
- const p=project(),native=parseProject(readFileSync(new URL('../public'+DEFAULT_PROJECT_URL,import.meta.url),'utf8'));
+test('inflation example is a one-second title card, short mesh morph and exactly three-second text-free material simulation',async()=>{
+ const p=project(),native=parseProject(readFileSync(new URL('../public/examples/inflation-explained.scenescript.json',import.meta.url),'utf8'));
  assert.equal(p.format,'portrait');assert.equal(p.scenes.length,2);assert.equal(p.scenes[0].duration,1);assert.equal(p.scenes[1].transition,'morph');assert.equal(p.scenes[1].transitionDuration,.3);assert.equal(p.scenes[1].duration-.3,inflationTimelineSeconds);assert.equal(inflationTimelineSeconds,3);assert.equal(p.scenes.reduce((n,s)=>n+s.duration,0),inflationDuration);assert.equal(inflationDuration,4.3);
  assert.ok(p.scenes.every(s=>s.elements.length===0));assert.equal(p.music,null);assert.equal(p.scenes[1].narration?.asset,'whoosh');assert.equal(p.scenes[1].narration?.at,.3);assert.equal(p.audios.whoosh.duration,3);
  assert.equal(native.storyboard!.images.cover.data,native.assets.cover.data);

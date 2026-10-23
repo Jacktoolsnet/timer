@@ -1,5 +1,18 @@
 # Space adventure — Storyboard with sketches
 
+## Executable video project
+
+The approved user export has now been turned into a native 30-second 3D project:
+- [space-adventure.scenescript.json](space-adventure.scenescript.json) — load through
+  the **main project importer**, not the Storyboard overlay.
+- [space-adventure-preview.mp4](space-adventure-preview.mp4) — complete test export
+  with sound, 270 × 480, 24 fps (low-resolution preview, not a 1080p master).
+- [PRODUCTION.md](PRODUCTION.md) — implementation, timing and rebuild instructions.
+
+The supplied `spaceadventure_scenescript.json` and its approved storyboard are
+preserved. Space Adventure is the application default. Existing browser-saved projects still take precedence; the “Beispiel / Startprojekt laden” button opens Space Adventure explicitly.
+
+
 Eight portrait concept sketches were created with the **built-in image_gen tool**.
 The prompts, including design and continuity constraints, are in `prompts.json`.
 The JPEG files are resized/encoded copies of those generated images, not video
