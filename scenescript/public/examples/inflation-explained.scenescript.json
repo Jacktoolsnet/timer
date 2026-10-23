@@ -13,22 +13,27 @@
     "comments": [],
     "characters": [
       {
+        "status": "draft",
         "id": "chocolate",
         "name": "Chocolate tablet",
         "description": "Recurring visual subject, not a person: segmented brown chocolate bar, left side of the chart. Keep width and base fixed. Start at equal height to gold, shrink vertically to 50% of initial height.",
         "image": "start",
-        "comments": []
+        "comments": [],
+        "kind": "object"
       },
       {
+        "status": "draft",
         "id": "gold",
         "name": "Gold ingot / money",
         "description": "Recurring visual subject: polished warm-gold rectangular ingot, right side. Keep width and base fixed. Start level with chocolate, grow vertically to 125% of initial height. Represents more money needed, not rising gold prices.",
         "image": "start",
-        "comments": []
+        "comments": [],
+        "kind": "object"
       }
     ],
     "settings": [
       {
+        "status": "draft",
         "id": "chart",
         "name": "Dark dimensional chart stage",
         "description": "A single consistent portrait stage: dark glossy tiles, a dimensional plinth, black slightly glossy chart backdrop, white scale lines visible above the floor. Main title above chart. Camera perspective and lighting should match the cover as closely as practical.",

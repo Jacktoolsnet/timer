@@ -3,26 +3,37 @@
 Eight portrait concept sketches were created with the **built-in image_gen tool**.
 The prompts, including design and continuity constraints, are in `prompts.json`.
 The JPEG files are resized/encoded copies of those generated images, not video
-renders. Character and setting references reuse matching shot sketches; dedicated
+renders. Character, object and setting references reuse matching shot sketches; dedicated
 model sheets have not been generated.
 
 - `index.html`: visual overview of the eight shots (also opens locally).
 - `space-adventure.storyboard.json`: importable response, all eight JPEGs embedded.
-- `space-adventure.plan.json`: the previously proposed text-only plan, retained as
-  an editable source for offline repackaging.
+- `space-adventure.plan.json`: the editable text-only source for offline repackaging,
+  updated to the current storyboard structure.
 - `01-*.jpg` through `08-*.jpg`: individual illustrations.
 
 ## Import
 
-Open **Storyboard → Austausch mit der KI → JSON-Datei öffnen**, choose
+Open **Storyboard**, use the folder icon **JSON-Datei öffnen** in its top toolbar, choose
 `space-adventure.storyboard.json`, review the cards and **Änderungen speichern**.
 Do not use the main executable SceneScript/video importer for this envelope.
 
 The board ID `18f5f639-2ce9-4b30-aae5-bdbf13a0937b` and response revision **7** match
 the user's exported input. The editor increments the revision on import. Existing
-user fields, descriptions, IDs, comments and the 30-second plan were preserved;
-only the image library and image references were added. The user comment remains
-unresolved and shots remain drafts. The JSON imports into either the original
+user fields, descriptions, IDs, comments, eight sketches and the 30-second plan
+were preserved. The current structure explicitly distinguishes:
+- **Charaktere:** the anonymous pilot, visible only through cockpit POV (no invented portrait).
+- **Objekte:** Needlefin, the six relays and the hostile fleet.
+- **Kulissen:** the relay sector, cockpit and fold-space apertures.
+- **Szenen:** the original eight shots, with the pilot linked to cockpit shots.
+
+Objects remain in `board.characters` with `kind:"object"`; people use
+`kind:"character"`. Scene references still use `characters` for both categories.
+All characters, objects, settings and shots have explicit `status:"draft"`.
+Nothing is pre-approved and the original user comment remains unresolved.
+The pilot reference reuses the existing cockpit sketch, not a new model sheet.
+Review each entry in the left-hand list and its grouped properties on the right;
+approval is a user-controlled switch. The JSON imports into either the original
 prefilled revision-7 board or the enriched revision-7 plan. If a later revision is
 already saved, request fresh feedback JSON before preparing another response;
 do not defeat the stale-response protection by blindly changing the revision.

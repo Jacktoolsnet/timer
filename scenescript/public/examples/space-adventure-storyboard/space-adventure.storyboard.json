@@ -22,29 +22,45 @@
     ],
     "characters": [
       {
+        "status": "draft",
+        "id": "pilot",
+        "name": "Needlefin pilot",
+        "description": "The anonymous pilot of Needlefin, shown only through a first-person cockpit perspective. No face, name or full-body appearance is established. If hands enter the frame, use understated dark flight gloves consistently; do not invent a portrait or recognizable franchise costume. The pilot acts decisively under pressure, completes the six-target mission and escapes. Use the existing cockpit composition as a perspective reference, not as a character model sheet.",
+        "image": "sketch-cockpit-mission",
+        "comments": [],
+        "kind": "character"
+      },
+      {
+        "status": "draft",
         "id": "hero-fighter",
         "name": "Needlefin — small mission fighter",
         "description": "An original, smoothly modelled single-seat spacecraft. Compact flattened seed-shaped hull, short curved nose, one offset dorsal fin and two recessed vent-like propulsion slots integrated into the rear body. No separate engine pods or broad wings. Deep petrol-blue ceramic panels, copper seams and turquoise engine light. A narrow smoked canopy sits near the front. Slight asymmetry gives it a recognizable silhouette. Stylized cinematic 3D, neither photorealistic nor block-built. Maintain the same proportions, markings and lighting throughout. Reference sketch brief: front three-quarter view, side silhouette and rear propulsion detail on a neutral background. Develop independently rather than adapting an existing franchise design.",
         "image": "sketch-arrival-hook",
-        "comments": []
+        "comments": [],
+        "kind": "object"
       },
       {
+        "status": "draft",
         "id": "sector-targets",
         "name": "Six unmanned sector relays",
         "description": "Six separate hostile, unmanned orbital relay devices. Each has a rounded triangular ceramic core surrounded by three unequal curved shielding plates, with an amber light in its centre. Use the same design family with small variations in plate orientation and damage. Their centres flash white immediately before destruction, making successful hits readable on a small screen. No inhabited stations or visible casualties. The six devices must remain individually accounted for: targets 1 and 2 are destroyed in shot 3, target 3 in shot 4, target 4 in shot 5, target 5 in shot 6 and target 6 in shot 7. Reference sketch brief: one intact relay, one damaged relay and a simple layout of all six.",
         "image": "sketch-torpedo-third-target",
-        "comments": []
+        "comments": [],
+        "kind": "object"
       },
       {
+        "status": "draft",
         "id": "enemy-fleet",
         "name": "The arriving hostile fleet",
         "description": "An original fleet consisting of one large command vessel and four smaller escorts. Their silhouettes resemble layered, uneven river stones with deep channels between overlapping armour shells. Broad compact bodies, no exposed bridges or familiar wing arrangements. Charcoal armour, pale mineral edges and narrow vermilion light strips distinguish them immediately from the turquoise hero fighter. The command vessel has three staggered armour masses around an off-centre glowing channel. Escorts share the visual language without being identical miniatures. Reference sketch brief: fleet silhouettes at matching scale, plus a front three-quarter view of the command vessel. Avoid recognizable franchise shapes, markings and weapon effects.",
         "image": "sketch-fifth-target-fleet-arrival",
-        "comments": []
+        "comments": [],
+        "kind": "object"
       }
     ],
     "settings": [
       {
+        "status": "draft",
         "id": "relay-sector",
         "name": "The silent relay sector",
         "description": "A stylized cinematic 3D space environment with a deep indigo background, sparse stars, a soft violet dust cloud and a distant pale planet partly outside the frame. Six orbital relays occupy a loose curved corridor, allowing a readable forward attack route. A few slow-moving rock fragments provide parallax but never obscure the action. Cool environmental rim lighting contrasts with warm explosions. Compose for portrait 9:16: keep critical objects near the central vertical axis and leave the lower and right edges free of essential information for platform overlays. Reference sketch brief: a vertical establishing composition and a simple overhead route diagram.",
@@ -52,6 +68,7 @@
         "comments": []
       },
       {
+        "status": "draft",
         "id": "fighter-cockpit",
         "name": "Needlefin cockpit",
         "description": "The interior of the same hero fighter, seen from the seated pilot's eyes. A curved canopy frames the sector ahead. Two low copper-edged control surfaces surround one central, stable mission display. No visible pilot face is required; gloved hands may briefly appear at the bottom of the frame. English mission text must be large and clearly readable: \"DESTROY ALL SIX TARGETS IN THIS SECTOR\". A simple six-light progress indicator supports continuity without requiring additional explanatory captions. No fictional brand logos or familiar franchise interface layouts. Reference sketch brief: portrait pilot-eye composition with the mission display inside the central safe area.",
@@ -59,6 +76,7 @@
         "comments": []
       },
       {
+        "status": "draft",
         "id": "wormhole-design",
         "name": "Fold-space apertures",
         "description": "Temporary spatial openings, not permanent physical gates. A thin irregular luminous seam splits open into an elongated oval with rippling layers and a dark displaced star field at its centre. Distortion should remain localized so the ship stays readable. The hero's arrival and escape apertures glow turquoise-white; the fleet's larger aperture glows violet with a warm red inner edge. Each opening visibly expands, stabilizes, then contracts after passage. Reference sketch brief: opening, stable passage and closing silhouettes against the same star field. Avoid imitating a recognizable portal effect from an existing production.",
@@ -94,6 +112,7 @@
         "audio": "Brief interface activation tone and restrained cockpit hum. The action pulse gains momentum. No voiceover or spoken mission briefing.",
         "image": "sketch-cockpit-mission",
         "characters": [
+          "pilot",
           "hero-fighter",
           "sector-targets"
         ],
@@ -149,6 +168,7 @@
         "audio": "Close cockpit hum, a passing debris hiss, short laser pulses and a filtered impact. The action pulse becomes tighter and faster in perceived intensity without making the scene visually frantic.",
         "image": "sketch-cockpit-fourth-target",
         "characters": [
+          "pilot",
           "hero-fighter",
           "sector-targets"
         ],
@@ -188,6 +208,7 @@
         "audio": "Rising enemy weapon-charge tone, one forceful laser burst and a sharp final target impact. A short confirmation chime cuts through the tension. The music launches into its final escape accent.",
         "image": "sketch-last-target-under-threat",
         "characters": [
+          "pilot",
           "hero-fighter",
           "sector-targets",
           "enemy-fleet"

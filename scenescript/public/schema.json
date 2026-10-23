@@ -3133,6 +3133,7 @@
         "comments"
       ],
       "properties": {
+        "status": {"enum": ["draft", "approved"], "default": "draft"},
         "id": {
           "type": "string",
           "minLength": 1,
@@ -3169,6 +3170,7 @@
         }
       }
     },
+    "BoardCharacter": {"type":"object","additionalProperties":false,"required":["id","name","description","image","comments"],"properties":{"status":{"enum":["draft","approved"],"default":"draft"},"id":{"type":"string","minLength":1,"maxLength":100,"pattern":"^[a-zA-Z0-9_-]+$"},"name":{"type":"string","maxLength":200},"description":{"type":"string","maxLength":10000},"image":{"anyOf":[{"type":"string","minLength":1,"maxLength":100,"pattern":"^[a-zA-Z0-9_-]+$"},{"type":"null"}]},"comments":{"type":"array","maxItems":100,"items":{"$ref":"#/$defs/BoardComment"}},"kind":{"enum":["character","object"],"default":"character"}}},
     "BoardShot": {
       "type": "object",
       "additionalProperties": false,
@@ -3352,7 +3354,7 @@
           "type": "array",
           "maxItems": 100,
           "items": {
-            "$ref": "#/$defs/BoardSubject"
+            "$ref": "#/$defs/BoardCharacter"
           }
         },
         "settings": {

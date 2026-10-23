@@ -266,7 +266,7 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
 .preview-expanded #wake-status:empty { display:none; }
 
 /* Theme-aware selects, including the popup in browsers supporting base-select. */
-:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog) select {
+:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog) select {
  appearance:none;
  min-height:40px;
  padding:9px 34px 9px 12px;
@@ -280,16 +280,16 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
  font:inherit;
  transition:border-color .15s,background-color .15s;
 }
-:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog) select:hover { border-color:var(--accent); background-color:var(--accent-soft); }
-:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog) select:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
-:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog) select option { background:var(--surface); color:var(--text); padding:10px 12px; }
-[data-theme=dark] :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog) select { color-scheme:dark; }
+:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog) select:hover { border-color:var(--accent); background-color:var(--accent-soft); }
+:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog) select:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog) select option { background:var(--surface); color:var(--text); padding:10px 12px; }
+[data-theme=dark] :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog) select { color-scheme:dark; }
 @supports (appearance:base-select) {
- :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog) select,:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog) select::picker(select) { appearance:base-select; }
- :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog) select { background-image:none; padding-right:12px; }
- :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog) select::picker-icon { color:var(--accent); transition:rotate .15s; }
- :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog) select:open::picker-icon { rotate:180deg; }
- :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog) select::picker(select) {
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog) select,:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog) select::picker(select) { appearance:base-select; }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog) select { background-image:none; padding-right:12px; }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog) select::picker-icon { color:var(--accent); transition:rotate .15s; }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog) select:open::picker-icon { rotate:180deg; }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog) select::picker(select) {
   padding:6px;
   margin-top:6px;
   border:1px solid var(--line);
@@ -300,18 +300,18 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
   max-height:min(320px,60dvh);
   overflow:auto;
  }
- :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog) select option { min-height:40px; gap:10px; border-radius:8px; cursor:pointer; font:inherit; }
- :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog) select option:hover,:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog) select option:focus { background:var(--accent-soft); color:var(--accent); outline:none; }
- :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog) select option:checked { background:var(--accent-soft); color:var(--accent); font-weight:600; }
- :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog) select option::checkmark { color:var(--accent); }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog) select option { min-height:40px; gap:10px; border-radius:8px; cursor:pointer; font:inherit; }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog) select option:hover,:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog) select option:focus { background:var(--accent-soft); color:var(--accent); outline:none; }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog) select option:checked { background:var(--accent-soft); color:var(--accent); font-weight:600; }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog) select option::checkmark { color:var(--accent); }
 }
 @media(prefers-reduced-motion:reduce) {
- :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog) select,:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog) select::picker-icon { transition:none; }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog) select,:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog) select::picker-icon { transition:none; }
 }
 
 /* A consistent, lightweight chevron instead of the browser's picker glyph. */
 @supports (appearance:base-select) {
- :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog) select::picker-icon {
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog) select::picker-icon {
   content:"";
   display:block;
   flex:0 0 8px;
@@ -325,11 +325,11 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
   transform:translateY(-2px) rotate(45deg);
   rotate:0deg;
  }
- :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog) select:open::picker-icon { rotate:180deg; }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog) select:open::picker-icon { rotate:180deg; }
 }
 
 @supports (appearance:base-select) {
- :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog) select { display:flex; align-items:center; gap:12px; }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog) select { display:flex; align-items:center; gap:12px; }
 }
 
 .number-stepper { display:grid; grid-template-columns:30px minmax(0,1fr) 30px; gap:4px; align-items:center; }
@@ -935,20 +935,19 @@ body.recording .comic-edit-overlay{display:none}
 /* Planning stays separate from executable scenes and render resources. */
 #storyboard-dialog{width:min(1120px,96vw);max-width:96vw;max-height:94dvh;padding:0;overflow:hidden}
 #storyboard-dialog[open]{display:flex;flex-direction:column}
-#storyboard-dialog .json-header{display:flex;align-items:flex-start;gap:20px;justify-content:space-between}
+#storyboard-dialog .json-header{display:flex;flex-direction:column;align-items:stretch;gap:14px;justify-content:space-between}
 #storyboard-dialog .json-header p{max-width:85ch;line-height:1.5}
-#storyboard-close{flex:none;width:42px;height:42px;padding:10px}
 #storyboard-dialog .dialog-inner{overflow:auto;min-height:0;padding:20px}
 #storyboard-dialog .json-header,#storyboard-dialog .json-footer{flex:none}
 #storyboard-dialog button{white-space:normal;overflow-wrap:anywhere}
 #storyboard-dialog textarea{width:100%;box-sizing:border-box;resize:vertical;min-height:60px;padding:10px;background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:8px;font:inherit}
 #storyboard-dialog p{white-space:pre-wrap;overflow-wrap:anywhere}
-#storyboard-review{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
-#storyboard-review p{flex-basis:100%;font-size:.85rem;margin:0}
-#storyboard-state{font-weight:700}
-#storyboard-state.board-approved{color:#228855}
-#storyboard-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
-#storyboard-tabs [aria-pressed=true]{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
+#storyboard-tabs{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin;margin-bottom:20px;border-bottom:1px solid var(--line)}
+#storyboard-dialog #storyboard-tabs [role=tab]{flex:none;border:0;border-bottom:3px solid transparent;border-radius:8px 8px 0 0;background:transparent;color:var(--muted);white-space:nowrap;padding:12px 16px}
+#storyboard-dialog #storyboard-tabs [role=tab]:hover{background:var(--accent-soft);color:var(--accent)}
+#storyboard-dialog #storyboard-tabs [aria-selected=true]{background:var(--accent-soft);color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+#storyboard-dialog #storyboard-tabs [role=tab]:focus-visible{outline-offset:-3px}
+#storyboard-content:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:8px}
 #storyboard-content{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:16px;align-items:start}
 .board-card{border:1px solid var(--line);border-radius:14px;padding:18px;background:var(--surface);min-width:0}
 .board-card h3{margin:0 0 16px}
@@ -960,9 +959,6 @@ body.recording .comic-edit-overlay{display:none}
 .board-comment{border-left:3px solid var(--accent);padding-left:10px;margin:14px 0}
 .board-comment label,.board-card>label{display:flex;gap:8px;align-items:center;margin:10px 0}
 .board-comment input,.board-card>label input{width:auto}
-#storyboard-exchange{margin-top:24px;border-top:1px solid var(--line);padding-top:16px}
-#storyboard-exchange summary{cursor:pointer;font-weight:700}
-#storyboard-exchange .compact-actions{margin:12px 0;flex-wrap:wrap}
 #storyboard-error-box textarea{border-color:#c54c44}
 #storyboard-status{color:#228855}
 .board-image-download{display:block;margin:6px 0 12px;overflow-wrap:anywhere;font-size:.85rem}
@@ -970,9 +966,8 @@ body.recording .comic-edit-overlay{display:none}
 #storyboard-dialog button:hover:not(:disabled){background:var(--surface);border-color:var(--accent)}
 #storyboard-dialog button:disabled{opacity:.45;cursor:default}
 #storyboard-dialog button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-#storyboard-dialog #storyboard-close{padding:10px;min-height:42px}
 #storyboard-dialog .json-footer{justify-content:flex-end}
-#storyboard-dialog #storyboard-save{width:auto;height:auto;flex:0 0 auto;padding:12px 18px;min-height:44px;background:var(--accent);color:#fff}
+#storyboard-dialog #storyboard-save{background:var(--accent);color:#fff}
 #storyboard-content[data-tab=shots] .board-card h3{min-height:2.8em;line-height:1.4}
 
 .board-field-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;min-width:0}
@@ -989,7 +984,7 @@ body.recording .comic-edit-overlay{display:none}
 #storyboard-field-heading{font-size:1.15rem;margin:0;overflow-wrap:anywhere}
 #storyboard-field-dialog .dialog-inner{padding:20px;overflow:auto;min-height:0}
 #storyboard-field-dialog label{display:block;margin-bottom:8px}
-#storyboard-field-dialog textarea,#storyboard-field-dialog input[type=number],#storyboard-field-dialog select{box-sizing:border-box;width:100%;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--text);font:inherit}
+#storyboard-field-dialog textarea,#storyboard-field-dialog input[type=number]{box-sizing:border-box;width:100%;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--text);font:inherit}
 #storyboard-field-dialog textarea{resize:vertical;min-height:150px;max-height:45dvh;line-height:1.6}
 #storyboard-field-dialog button{width:auto;height:auto;flex:0 0 auto;padding:10px 16px;min-height:42px;border:1px solid var(--line);border-radius:8px;background:var(--accent-soft);color:var(--accent);font:inherit;font-size:.9rem;cursor:pointer}
 #storyboard-field-dialog #storyboard-field-close{width:40px;height:40px;min-height:40px;padding:10px}
@@ -999,4 +994,94 @@ body.recording .comic-edit-overlay{display:none}
 #storyboard-field-error{color:#c54c44;white-space:pre-wrap;overflow-wrap:anywhere}
 #storyboard-field-choices label{display:flex;gap:10px;align-items:center;overflow-wrap:anywhere}
 #storyboard-field-dialog button:focus-visible,#storyboard-field-dialog :is(textarea,input,select):focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-#storyboard-field-dialog select option{background:var(--surface);color:var(--text)}
+#storyboard-field-dialog select{box-sizing:border-box;width:100%;min-width:0}
+#storyboard-field-dialog select[hidden]{display:none}
+
+/* Global storyboard actions stay visible while cards scroll. Navigation keeps labels. */
+#storyboard-dialog>.json-header h2{margin:0}
+#storyboard-dialog>.json-header p{margin:8px 0 0}
+#storyboard-dialog>.json-header{padding:0;gap:0}
+#storyboard-dialog .board-header-intro{padding:24px 24px 18px}
+#storyboard-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;min-width:0;width:100%;box-sizing:border-box;padding:12px 24px;border-top:1px solid var(--line);border-top-color:color-mix(in srgb,var(--accent) 35%,var(--line));background:var(--accent-soft);background:color-mix(in srgb,var(--accent) 22%,var(--surface))}
+#storyboard-dialog #storyboard-toolbar button{background:var(--surface)}
+#storyboard-dialog #storyboard-toolbar button:hover:not(:disabled){background:var(--accent-soft)}
+#storyboard-dialog .board-icon,#storyboard-dialog #storyboard-save,#storyboard-dialog #storyboard-close{display:inline-grid;place-items:center;flex:0 0 44px;width:44px;height:44px;min-height:44px;padding:10px}
+#storyboard-dialog .board-icon svg{display:block;width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+#storyboard-dialog>.json-footer #storyboard-close{margin-inline-end:auto}
+.board-toolbar-divider{height:26px;border-inline-start:1px solid var(--line);margin-inline:2px}
+
+#storyboard-dialog #storyboard-toolbar #storyboard-approve[aria-pressed=true]{color:#228855;border-color:#228855;background:color-mix(in srgb,#228855 12%,var(--surface));opacity:1}
+
+/* Dedicated, stacked JSON exchange modal; the planning draft stays in the parent. */
+#storyboard-exchange{width:min(680px,94vw);max-width:94vw;max-height:88dvh;padding:0;overflow:hidden}
+#storyboard-exchange[open]{display:flex;flex-direction:column}
+#storyboard-exchange::backdrop{background:#0007}
+#storyboard-exchange .json-header{justify-content:space-between;flex:none}
+#storyboard-exchange h2{font-size:1.15rem;margin:0}
+#storyboard-exchange .dialog-inner{padding:20px;overflow:auto;min-height:0}
+#storyboard-exchange-hint{margin-top:0}
+#storyboard-exchange label{display:block;margin:12px 0 8px}
+#storyboard-exchange textarea{box-sizing:border-box;width:100%;min-height:90px;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--text);font:13px/1.5 monospace;resize:vertical;max-height:38dvh}
+#storyboard-exchange #storyboard-json{min-height:180px}
+#storyboard-exchange-error{border-color:#c54c44!important;white-space:pre-wrap}
+#storyboard-exchange .json-footer{justify-content:flex-end;flex:none}
+#storyboard-exchange button{display:inline-grid;place-items:center;flex:0 0 44px;width:44px;height:44px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--accent-soft);color:var(--accent);cursor:pointer}
+#storyboard-exchange button svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+#storyboard-exchange #storyboard-import{background:var(--accent);color:#fff}
+#storyboard-exchange :is(button,textarea):focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* One review switch per reusable subject, setting and shot. */
+.board-card>.board-approval-switch{position:relative;display:flex;align-items:center;gap:12px;min-height:44px;margin:20px 0 0;padding:12px 0 0;border-top:1px solid var(--line);cursor:pointer;font-size:.9rem}
+.board-card>.board-approval-switch>input,.board-comment>.board-approval-switch>input{position:absolute;left:0;width:46px;height:26px;margin:0;opacity:0;cursor:pointer}
+.board-switch-track{pointer-events:none;position:relative;display:inline-block;flex:0 0 46px;width:46px;height:26px;box-sizing:border-box;border:1px solid var(--muted);border-radius:999px;background:var(--line);transition:background .16s,border-color .16s}
+.board-switch-track::before{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--surface);box-shadow:0 1px 3px #0003;transition:transform .16s}
+.board-approval-switch>input:checked+.board-switch-track{background:#228855;border-color:#228855}
+.board-approval-switch>input:checked+.board-switch-track::before{transform:translateX(20px);background:#fff}
+.board-approval-switch>input:focus-visible+.board-switch-track{outline:2px solid var(--accent);outline-offset:3px}
+@media(prefers-reduced-motion:reduce){.board-switch-track,.board-switch-track::before{transition:none}}
+
+.board-comment>.board-approval-switch{position:relative;display:flex;align-items:center;gap:12px;min-height:44px;margin:8px 0;cursor:pointer;font-size:.9rem}
+
+/* Project overview: distinct editable tiles instead of one long card. */
+#storyboard-content[data-tab=story]{grid-template-columns:minmax(0,1fr)}
+.board-project-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;min-width:0;align-items:start}
+.board-project-grid>.board-project-tile{min-width:0;margin:0;padding:16px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.board-project-tile[data-project-field=title],.board-project-tile[data-project-field=story],.board-project-grid>.board-comments{grid-column:1/-1}
+.board-project-tile .board-field-heading{align-items:center;margin-bottom:12px}
+.board-project-tile .board-field-heading h4,.board-project-tile>h4{margin:0}
+.board-project-grid>.board-comments>h4{margin-bottom:12px}
+@media(min-width:1100px){.board-project-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:620px){.board-project-grid{grid-template-columns:minmax(0,1fr)}}
+
+.board-comment-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:8px 0}
+.board-comment-heading h4{margin:0}
+.board-comment-actions{display:flex;justify-content:flex-end;gap:6px;margin-bottom:6px}
+.board-comment-text{white-space:pre-wrap;overflow-wrap:anywhere;margin:6px 0}
+#storyboard-dialog .board-comment-action{display:inline-grid;place-items:center;flex:0 0 34px;width:34px;height:34px;min-height:34px;padding:7px}
+#storyboard-dialog .board-comment-action svg{display:block;width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+#storyboard-dialog .board-comment-delete{color:var(--danger,#bd3434)}
+
+/* Resource and scene browser: approval list left, tiled detail on the right. */
+#storyboard-content:not([data-tab=story]){grid-template-columns:minmax(0,1fr)}
+.board-browser{display:grid;grid-template-columns:minmax(170px,230px) minmax(0,1fr);gap:18px;align-items:start;min-width:0}
+.board-library{position:sticky;top:0;min-width:0;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.board-library h3{font-size:1rem;margin:0 0 12px;overflow-wrap:anywhere}
+.board-library-list{list-style:none;padding:0;margin:0 0 12px;display:grid;gap:8px;max-height:50dvh;overflow:auto;scrollbar-width:thin}
+#storyboard-dialog .board-library-list button{display:grid;grid-template-columns:20px minmax(0,1fr);gap:4px 8px;align-items:start;width:100%;padding:10px;text-align:left;background:var(--surface);color:var(--text)}
+#storyboard-dialog .board-library-list button[aria-current=true]{border-color:var(--accent);background:var(--accent-soft)}
+.board-library-name{overflow-wrap:anywhere;font-weight:600}
+.board-library-status{grid-column:2;font-size:.75rem;color:var(--muted)}
+.board-library-mark{font-size:1rem;line-height:1.4;color:var(--muted)}
+.board-library-list [data-approved=true] :is(.board-library-mark,.board-library-status){color:#228855}
+#storyboard-dialog .board-library .board-add-item{width:100%;font-size:.8rem}
+.board-detail{min-width:0}
+.board-detail>.board-card.board-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding:0;border:0;background:transparent}
+.board-detail-grid>.board-detail-tile{min-width:0;margin:0;padding:16px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.board-detail-title,.board-detail-grid>.board-image-field,.board-detail-grid>.board-comments{grid-column:1/-1}
+.board-detail-grid>.board-field:has([data-board-edit$="-description"]),.board-detail-grid>.board-field:has([data-board-edit$="-action"]){grid-column:1/-1}
+.board-detail-grid .board-field-heading{align-items:center;margin-bottom:10px}
+.board-detail-grid .board-field-heading :is(h3,h4){margin:0;min-height:0!important}
+.board-detail-grid>.board-approval-switch>input{left:16px}
+.board-detail-grid .board-sketch{height:260px}
+@media(max-width:900px){.board-browser{grid-template-columns:minmax(150px,190px) minmax(0,1fr);gap:12px}.board-detail>.board-card.board-detail-grid{grid-template-columns:minmax(0,1fr)}.board-detail-grid>.board-detail-tile{padding:12px}.board-detail-grid>.board-approval-switch>input{left:12px}}
+@media(max-width:620px){.board-browser{grid-template-columns:minmax(0,1fr)}.board-library{position:static}.board-library-list{max-height:180px}}

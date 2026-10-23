@@ -84,3 +84,40 @@ Cancel/Escape discards just the current field edit. Apply updates the planning
 draft; Save changes in the main dialog commits it to the project. Content edits
 invalidate the plan approval and affected shot approvals, preserving comments
 and leaving the executable video untouched.
+
+
+### Resource review
+
+Characters/objects, settings and shots each have an accessible approval slide
+switch. The plan can only be approved after every item is approved and all
+comments are resolved. Review statuses travel with native project saves and
+storyboard feedback JSON. Editing a reusable resource revokes its approval and
+those of the shots referencing it; editing a shot only revokes that shot. Global
+planning edits require a fresh review of all items. AI imports cannot grant user
+approvals. Older plans without subject review fields remain loadable: subjects
+start as drafts and any old overall approval is cleared for the new review.
+
+
+### Separate character and object tabs
+
+People and acting personalities (including robots) appear in **Characters**;
+props and vehicles appear in **Objects**. Each card has an editable Category
+field. Changing it moves the existing card without changing its ID, image,
+comments or shot links. It requires fresh review of that item and dependent
+shots. Shots offer separate character and object selection fields.
+
+Both categories deliberately remain in `board.characters`, distinguished by
+`kind: "character" | "object"`, and share the existing `shot.characters` ID
+namespace. Old entries without a kind default to character; users can reclassify
+them explicitly. No guessing based on names or descriptions is performed. The
+chocolate and gold subjects in this authored example are marked as objects.
+
+
+### List/detail layout
+
+Characters, objects, settings and storyboard scenes use a left-hand list showing
+every item's name and draft/approved state. Clicking an entry displays only that
+item's editable property tiles on the right. The last selection is remembered per
+tab while the dialog is open. Up/down arrows and Home/End navigate the list; new
+entries and reclassified resources are selected automatically. Approval switches
+update list badges immediately. These view selections do not alter saved JSON.
