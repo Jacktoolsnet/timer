@@ -43,3 +43,22 @@ test('cockpit displays change with timeline time and stay deterministic when see
  expect(out[0].png).not.toBe(out[1].png);expect(out[0].png).toBe(out.at(-1)!.png);
  for(const f of out.slice(0,-1))await info.attach('cockpit-'+f.time,{body:Buffer.from(f.png.split(',')[1],'base64'),contentType:'image/png'});
 });
+
+test('Play keeps the opening wormhole rendering after 3D playback preparation',async({page})=>{
+ test.setTimeout(90000);await page.goto('/en/');await expect(page.locator('#editor')).toHaveAttribute('data-ready','true');
+ // Start through the actual transport, not ExportRenderer or a paused seek.
+ // Other textured shots must not evict the active world during preparation.
+ const result=await page.evaluate(()=>new Promise<{time:number;error:boolean;changed:boolean}>((resolve,reject)=>{
+  let observer:MutationObserver|undefined;const timeout=setTimeout(()=>{observer?.disconnect();reject(new Error('Opening preview never advanced'));},30000);
+  document.querySelector<HTMLButtonElement>('#play')!.click();
+  const canvas=document.querySelector<HTMLCanvasElement>('#stage .stage3d-canvas')!;
+  let first='';
+  const inspect=()=>{
+   if(canvas.dataset.stage3dError){clearTimeout(timeout);observer?.disconnect();resolve({time:Number(canvas.dataset.stage3dTime),error:true,changed:false});return;}
+   const time=Number(canvas.dataset.stage3dTime??0);if(!first&&canvas.width)first=canvas.toDataURL();
+   if(time>=1.5){clearTimeout(timeout);observer?.disconnect();resolve({time,error:false,changed:canvas.toDataURL()!==first});}
+  };
+  observer=new MutationObserver(inspect);observer.observe(canvas,{attributes:true});inspect();
+ }));
+ expect(result.error).toBe(false);expect(result.time).toBeGreaterThanOrEqual(1.5);expect(result.changed).toBe(true);
+});

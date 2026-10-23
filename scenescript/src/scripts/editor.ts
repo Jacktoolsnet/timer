@@ -1045,7 +1045,7 @@ function play(){
  const videos=[...(backgroundVideoNode?[backgroundVideoNode]:[]),...views.filter(v=>v.video&&v.node.style.visibility!=='hidden').map(v=>v.video!)];
  const currentAt=locateTime(project,time),morphIndex=project.scenes[currentAt.index].transition==='morph'&&currentAt.index>0?currentAt.index:project.scenes[currentAt.index+1]?.transition==='morph'?currentAt.index+1:-1;
  const morphReady=morphIndex>0?ensureMorphPreview().then(view=>view.ready(morphIndex)):Promise.resolve();
- void Promise.all([prepare,Promise.all(videos.map(v=>prepareVideo(v,preparation.signal))),morphReady,project.scenes.some(s=>s.stage3d)?prepareStage3DPreview(project,()=>preparation.signal.throwIfAborted()):Promise.resolve()]).then(async([buffers])=>{
+ void Promise.all([prepare,Promise.all(videos.map(v=>prepareVideo(v,preparation.signal))),morphReady,project.scenes.some(s=>s.stage3d)?prepareStage3DPreview(project,()=>preparation.signal.throwIfAborted(),project.scenes[currentAt.index].stage3d??undefined):Promise.resolve()]).then(async([buffers])=>{
   if(!playing||attempt!==playbackAttempt)return;
   if(project.music?.enabled){try{await musicPlayer.start(project.music,time,total(),t=>buffers?duckGain(project,t,clips):1);}catch{showToast(t('audioError'),'warning');}}
   if(!playing||attempt!==playbackAttempt)return;if(buffers)narrationPlayer.start(project,musicPlayer.playhead()??time,buffers);begin();

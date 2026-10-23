@@ -5,10 +5,17 @@ import type {Project} from '../lib/model';
 import type {Shot3D} from '../lib/stage3d';
 import type {Stage3DRenderer} from './stage3d';
 let renderer:Stage3DRenderer|undefined,pending:Promise<Stage3DRenderer>|undefined;
-export function prepareStage3DPreview(project?:Project,check:()=>void=()=>{}){
+export function prepareStage3DPreview(project?:Project,check:()=>void=()=>{},shot?:Shot3D){
  const ready=pending??=import('./stage3d').then(m=>renderer=new m.Stage3DRenderer());
  if(!project)return ready;
- return ready.then(async value=>{for(const scene of project.scenes){check();if(scene.stage3d){await value.prepare(project,scene.stage3d);check();await prepareStage3DSpeech(project,scene.stage3d,check);}}return value;});
+ return ready.then(async value=>{
+  // Keep the active world resident. Preparing every scene here evicts it from
+  // the bounded GPU cache, leaving an already-ready view unable to render.
+  // Later scene views prepare their own textures when they are created.
+  check();if(shot){await value.prepare(project,shot);check();}
+  for(const scene of project.scenes){check();if(scene.stage3d)await prepareStage3DSpeech(project,scene.stage3d,check);}
+  check();return value;
+ });
 }
 window.addEventListener('pagehide',()=>{renderer?.dispose();renderer=undefined;pending=undefined;});
 export type Stage3DView={canvas:HTMLCanvasElement;draw:(time:number)=>void;dispose:()=>void};
