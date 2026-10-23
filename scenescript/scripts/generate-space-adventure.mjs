@@ -18,8 +18,8 @@ function joint(p,id,motion,axis,min,max,value,curve){(p.joints??=[]).push({id,mo
 function scale(p,id,curve,max=3,axes=['x']){for(const axis of axes)joint(p,id+axis,'scale',axis,0,max,curve(0),curve);}
 const event=(t,at,rise=.12,hold=.1,fall=.5)=>t<at?0:t<at+rise?(t-at)/rise:t<at+rise+hold?1:1-clamp((t-at-rise-hold)/fall);
 function keyCurve(keys){return t=>{if(t<=keys[0][0])return keys[0][1];for(let i=1;i<keys.length;i++)if(t<=keys[i][0])return mix(keys[i-1][1],keys[i][1],(t-keys[i-1][0])/(keys[i][0]-keys[i-1][0]));return keys.at(-1)[1];};}
-const heroZ=keyCurve([[0,-12],[3,-7],[6,-5],[7.3,-1],[9,7],[10,11],[12.2,17],[14,22],[16.4,27],[18,31],[19.35,33],[22,37],[24.25,40],[25,41],[26,42],[26.4,43],[26.8,40],[27.3,35],[28.1,24],[29,12],[30,4]]);
-const heroX=keyCurve([[0,0],[1.3,-1.8],[3,-2],[6,-3],[7.3,-5],[8.2,0],[9,4],[10,5],[11,-1],[12.2,-5],[14,-5],[15,0],[16,4],[17,5],[18,2],[19.35,-3],[21,-1],[23,2],[25,1],[26,0],[26.4,4],[26.8,6],[27.3,4],[28.1,0],[29,0],[30,0]]);
+const heroZ=keyCurve([[0,-22],[.8,-20],[1.3,-16],[1.9,-10],[3,-7],[6,-5],[7.3,-1],[9,7],[10,11],[12.2,17],[14,22],[16.4,27],[18,31],[19.35,33],[22,37],[24.25,40],[25,41],[26,42],[26.4,43],[26.8,40],[27.3,35],[28.1,24],[29,12],[30,4]]);
+const heroX=keyCurve([[0,0],[1.6,0],[2.2,-.6],[3,-2],[6,-3],[7.3,-5],[8.2,0],[9,4],[10,5],[11,-1],[12.2,-5],[14,-5],[15,0],[16,4],[17,5],[18,2],[19.35,-3],[21,-1],[23,2],[25,1],[26,0],[26.4,4],[26.8,6],[27.3,4],[28.1,0],[29,0],[30,0]]);
 const heroY=keyCurve([[0,0],[3,.4],[6,.4],[7.3,1],[8.2,4],[9,3],[10,2],[11,-2],[12.2,-3],[14,-1],[15,3],[16.4,2],[18,0],[19.35,-1],[22,2],[24.25,3],[26,3],[26.4,5],[26.8,4],[27.3,2],[28.1,1],[30,1]]);
 const heroBank=keyCurve([[0,0],[1,-25],[2.6,10],[3,0],[6,-20],[7,-55],[8.2,150],[9.3,360],[10,360],[11,405],[12.2,325],[14,360],[15,325],[16.3,360],[18,390],[19.4,340],[22,360],[24,335],[25,360],[26,360],[26.5,440],[27.1,400],[28.1,360],[30,360]]);
 const heroPosition=t=>V(heroX(t),heroY(t),heroZ(t));
@@ -84,19 +84,19 @@ function relay(i){const p=targets[i],at=hits[i],prefix='relay'+(i+1),alive=t=>t<
 for(let i=0;i<6;i++)relay(i);
 // Elliptical spatial tears, with open centres and layered translucent glow.
 const circle=(r,phase=0)=>Array.from({length:48},(_,i)=>{const a=i/48*Math.PI*2;return {x:.5+Math.cos(a)*r*(1+.018*Math.sin(i*3+phase)),y:.5+Math.sin(a)*r*(1+.018*Math.sin(i*3+phase))};});
-function portal(id,p,size,color,curve,parent='',facing=0){
+function portal(id,p,size,color,curve,parent='',facing=0,heightCurve=curve){
  const portalRoot=mesh(id+'Root','group',p,V(1,1,1),'#000000',{parent,rotation:V(0,facing,0)});
  joint(portalRoot,id+'RootSpin','rotation','z',-3600,3600,0,t=>curve(t)>0?t*10:0);
  const backing=mesh(id+'Tunnel','plane',V(0,0,-.12),V(size.x*.96,size.y*.96,1),'#ffffff',{parent:portalRoot.id,texture:{asset:id==='fleetAperture'?'vortexViolet':'vortexCyan'},metalness:0,roughness:1});
- scale(backing,id+'Tunnel',curve,1.4);joint(backing,id+'TunnelY','scale','y',0,1.4,curve(0),curve);
+ scale(backing,id+'Tunnel',curve,1.4);joint(backing,id+'TunnelY','scale','y',0,1.4,heightCurve(0),heightCurve);
 
  for(let n=0;n<2;n++){
   const ring=mesh(id+n,'extrusion',V(0,0,-n*.05),V(size.x*(1+n*.06),size.y*(1+n*.06),.1),color,{parent:portalRoot.id,extrusion:{contour:circle(.49,n),holes:[circle(.455,n).reverse()],bevel:.006,sideColor:color},opacity:n===0?.95:.15,metalness:0,roughness:.2});
-  scale(ring,id+n,curve,1.4);joint(ring,id+n+'y','scale','y',0,1.4,curve(0),curve);
+  scale(ring,id+n,curve,1.4);joint(ring,id+n+'y','scale','y',0,1.4,heightCurve(0),heightCurve);
  }
 }
 mesh('fleetDepth','group',V(0,0,18),V(1,1,1),'#000000');
-portal('arrival',V(0,0,-13),V(8,12,1),'#73efe2',keyCurve([[0,.08],[.55,1],[1.7,1],[2.75,0],[30,0]]));
+portal('arrival',V(0,0,-13),V(8,12,1),'#73efe2',keyCurve([[0,0],[.12,.04],[.45,.55],[.85,1],[2.35,1],[2.95,0],[30,0]]),'',0,keyCurve([[0,0],[.12,.5],[.4,1],[2.35,1],[2.95,0],[30,0]]));
 portal('fleetAperture',V(0,4,47),V(21,27,1),'#cc77eb',keyCurve([[0,0],[19.8,0],[20.55,1],[24.4,1],[25.1,0],[30,0]]),'fleetDepth',180);
 portal('escapeAperture',V(0,1,24),V(8,11,1),'#7cffee',keyCurve([[0,0],[26.65,0],[27.3,1],[28.4,1],[28.5,0],[30,0]]));
 // Command vessel and exactly four escorts: smooth overlapping mineral-like armour masses.
@@ -180,7 +180,7 @@ cockpitParts.push(part('lowerInstrumentRail','box',V(0,-.27,1.02),V(1.65,.12,.15
 const characters={needlefin:fighter,cockpit:{name:'Needlefin cockpit — anonymous pilot POV',height:3,model:{parts:cockpitParts,animations:{}}}};
 const arrivalHull=structuredClone(hull);
 for(const p of arrivalHull)p.joints=[...(p.joints??[]),{id:'arrive'+p.id,motion:'scale',axis:'x',min:0,max:1,value:0}];
-characters.arriving={...fighter,name:'Needlefin — arrival through the spatial tear',model:{parts:arrivalHull,animations:{arrive:{duration:3,tracks:arrivalHull.map(p=>({joint:'arrive'+p.id,keys:[{at:0,value:0},{at:.449,value:0},{at:.45,value:1},{at:3,value:1}]}))}}}};
+characters.arriving={...fighter,name:'Needlefin — arrival through the spatial tear',model:{parts:arrivalHull,animations:{arrive:{duration:3,tracks:arrivalHull.map(p=>({joint:'arrive'+p.id,keys:[{at:0,value:0},{at:.849,value:0},{at:.85,value:1},{at:3,value:1}]}))}}}};
 
 // Native HUD with dark display, exact English mission and six lights. No baked-in sketch images.
 function element(id,type,values){return {id,type,animation:'none',...values};}
@@ -246,7 +246,7 @@ for(const [id,start,duration,view]of specs){
  // Slice continuous global animation curves into deterministic scene-local keys, including exact event times.
  // Keep all hard discontinuities explicit; compact collinear keys to fit native limits.
  const keyTimes=[0,duration];for(let t=.1;t<duration;t+=.1)keyTimes.push(+t.toFixed(5));
- for(const t of [...hits,...hits.map(t=>t+.06),...weapons.flatMap(w=>[w.at,w.hit]),...volleyStarts,...volleyStarts.map(t=>t+.9),28.47,28.5])for(const delta of [-.001,0])if(t+delta>start&&t+delta<start+duration)keyTimes.push(+(t+delta-start).toFixed(5));
+ for(const t of [.12,.4,.45,.85,2.35,2.95,...hits,...hits.map(t=>t+.06),...weapons.flatMap(w=>[w.at,w.hit]),...volleyStarts,...volleyStarts.map(t=>t+.9),28.47,28.5])for(const delta of [-.001,0])if(t+delta>start&&t+delta<start+duration)keyTimes.push(+(t+delta-start).toFixed(5));
  const kt=[...new Set(keyTimes)].sort((a,b)=>a-b);
  const compact=keys=>{const out=[];for(const k of keys){while(out.length>=2){const a=out.at(-2),b=out.at(-1),linear=a.value+(k.value-a.value)*(b.at-a.at)/(k.at-a.at);if(Math.abs(b.value-linear)>1e-8)break;out.pop();}out.push(k);}return out;};
  const tracks=[...curves].map(([joint,f])=>({joint,keys:compact(kt.map(at=>({at,value:f(start+at)})))})).filter(track=>track.keys.some(k=>Math.abs(k.value-track.keys[0].value)>1e-9));
@@ -272,7 +272,7 @@ for(const [id,start,duration,view]of specs){
  }
  let camera;
  if(cockpit)camera={fov:82,follow:{actor:'hero',mode:'onboard',offset:V(0,1,.05),target:V(0,1,9)}};
- else if(view==='arrival')camera={fov:50,keys:[camKey(0,V(8,4,2),V(0,0,-11)),camKey(duration,V(7,3,5),V(heroX(end),0,heroZ(end)))]};
+ else if(view==='arrival')camera={fov:56,keys:[camKey(0,V(5,3,7),V(0,0,-13)),camKey(1.8,V(6,3,6),V(0,.2,-12)),camKey(duration,V(7,3,6),V(-1,.4,-9))]};
  else if(view==='rear')camera={fov:59,keys:[camKey(0,V(-9,8,heroZ(start)-17),V(-2,1,3)),camKey(duration,V(-6,8,heroZ(end)-17),V(2,2,13))]};
  else if(view==='torpedo')camera={fov:58,keys:[camKey(0,V(11,1,heroZ(start)-9),V(2,0,heroZ(start)+4)),camKey(1.6,V(7,1,8),V(-4,-2,22)),camKey(duration,V(6,5,11),V(-3,-1,25))]};
  else if(view==='fleet')camera={fov:66,keys:[camKey(0,V(12,8,11),V(-2,0,36)),camKey(2,V(10,9,15),V(0,3,43)),camKey(duration,V(9,10,18),V(0,4,49))]};
@@ -296,7 +296,7 @@ notes.push({instrument:'bass',at:20.2,duration:1.4,pitch:29,velocity:.8},{instru
 // Procedural PCM effects, authored here and embedded. No external sound downloads/licences.
 function effectsWav(){const rate=24000,count=Math.round(rate*filmDuration),bytes=new Uint8Array(44+count*2),dv=new DataView(bytes.buffer),word=(at,s)=>[...s].forEach((c,i)=>bytes[at+i]=c.charCodeAt(0));
  word(0,'RIFF');dv.setUint32(4,bytes.length-8,true);word(8,'WAVE');word(12,'fmt ');dv.setUint32(16,16,true);dv.setUint16(20,1,true);dv.setUint16(22,1,true);dv.setUint32(24,rate,true);dv.setUint32(28,rate*2,true);dv.setUint16(32,2,true);dv.setUint16(34,16,true);word(36,'data');dv.setUint32(40,count*2,true);
- let rnd=9,low=0;const tones=[...weapons.map(w=>({at:w.at,length:w.type==='laser'?.18:.8,type:w.type})),...hits.map(at=>({at,length:.75,type:'impact'})),{at:0,length:1.3,type:'portal'},{at:2.15,length:.6,type:'portal'},{at:20,length:1.8,type:'portal'},{at:26,length:1.6,type:'portal'},{at:28.4,length:.5,type:'portal'},{at:25.1,length:.4,type:'confirm'},{at:3.1,length:.2,type:'confirm'},...volleyStarts.map(at=>({at,length:.3,type:'laser'}))];
+ let rnd=9,low=0;const tones=[...weapons.map(w=>({at:w.at,length:w.type==='laser'?.18:.8,type:w.type})),...hits.map(at=>({at,length:.75,type:'impact'})),{at:0,length:1.3,type:'portal'},{at:2.35,length:.6,type:'portal'},{at:20,length:1.8,type:'portal'},{at:26,length:1.6,type:'portal'},{at:28.4,length:.5,type:'portal'},{at:25.1,length:.4,type:'confirm'},{at:3.1,length:.2,type:'confirm'},...volleyStarts.map(at=>({at,length:.3,type:'laser'}))];
  for(let i=0;i<count;i++){const t=i/rate;rnd=(Math.imul(rnd,1664525)+1013904223)>>>0;const n=rnd/4294967296*2-1;low+=.04*(n-low);let s=.018*Math.sin(t*2*Math.PI*47)+.015*low;
   for(const e of tones){const u=(t-e.at)/e.length;if(u<0||u>=1)continue;const env=Math.sin(Math.PI*u)*Math.exp(-2*u),phase=2*Math.PI*(t-e.at);
    if(e.type==='laser')s+=.27*env*Math.sin(phase*(1500-900*u));

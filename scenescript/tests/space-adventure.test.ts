@@ -110,3 +110,16 @@ test('the film ends with the closed gate and the fighter stays hidden at the exa
  const end=modelPose3D(project.stages.sector.model!,shot.stageJoints!,shot.stageMotions!,scene.duration);
  assert.equal(end.get('escapeAperture0x'),0);assert.equal(project.scenes.reduce((n,s)=>n+s.duration,0),28.6);
 });
+
+test('arrival aperture opens from a vertical seam before the fighter actually crosses its plane',()=>{
+ const shot=project.scenes[0].stage3d!,actor=shot.actors[0],model=project.characters[actor.character].model!,path=project.stages.sector.paths!['arrival-hook'];
+ assert.equal(pose(0).get('arrival0x'),0);
+ assert.ok(pose(.12).get('arrival0y')!>pose(.12).get('arrival0x')!*5,'opening begins as a tall narrow seam');
+ assert.equal(pose(.9).get('arrival0x'),1);assert.equal(pose(.9).get('arrival0y'),1);
+ assert.equal(modelPose3D(model,actor.joints,actor.motions,.8).get('arrivehull'),0);
+ assert.equal(modelPose3D(model,actor.joints,actor.motions,.9).get('arrivehull'),1);
+ const before=samplePath3D(path,.9/3).position,after=samplePath3D(path,2.35/3).position;
+ assert.ok(before.z+2.7<-13,'even the nose is behind the opaque vortex when enabled');
+ assert.ok(after.z-2.7>-13,'the tail clears the gate before it contracts');
+ assert.equal(pose(2.98).get('arrival0x'),0);
+});

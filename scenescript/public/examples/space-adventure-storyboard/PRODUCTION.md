@@ -81,3 +81,8 @@ The final scene is shortened to 2.6 seconds without speeding up its flight path.
 The escape resource rests hidden: it cannot reappear when its animation ends
 or when the playhead lands on the exact final timestamp. The original approved
 30-second storyboard remains unchanged as the planning record.
+
+The arrival opens from a tall narrow seam to a full aperture before Needlefin
+becomes visible. The ship starts behind the opaque vortex plane and crosses it
+nose-first; the aperture contracts only after the tail clears it. The exterior
+camera keeps the complete opening in frame rather than cropping it at the edge.
