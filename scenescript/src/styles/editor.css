@@ -1096,6 +1096,15 @@ body.recording .comic-edit-overlay{display:none}
 .board-replace-icon{display:grid;place-items:center;width:48px;height:48px;border-radius:14px;background:var(--accent-soft);color:var(--accent)}
 .board-replace-icon svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 #storyboard-replace-dialog .json-footer{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:10px;padding:16px 22px;border-top:1px solid var(--line)}
-#storyboard-replace-dialog button{min-height:42px;padding:10px 16px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--text);font:inherit;cursor:pointer}
+#storyboard-replace-dialog button{width:auto;height:auto;flex:0 0 auto;min-height:42px;padding:10px 16px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--text);font:inherit;cursor:pointer}
 #storyboard-replace-dialog #storyboard-replace-apply{background:var(--accent);color:#fff;border-color:var(--accent)}
 #storyboard-replace-dialog button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+
+
+/* Review controls stay with their list entries, independently of detail selection. */
+.board-library-list>li{min-width:0;border:1px solid var(--line);border-radius:10px;background:var(--surface);overflow:hidden}
+.board-library-list>li:has([aria-current=true]){border-color:var(--accent)}
+#storyboard-dialog .board-library-list button{border:0;border-radius:0}
+.board-library-list>li>.board-approval-switch{position:relative;display:flex;align-items:center;gap:8px;min-height:44px;margin:0;padding:4px 10px;border-top:1px solid var(--line);font-size:.75rem;cursor:pointer}
+.board-library-list>li>.board-approval-switch>input{position:absolute;left:10px;width:46px;height:26px;margin:0;opacity:0;cursor:pointer}
+.board-library-list .board-approval-switch>span:last-child{min-width:0;overflow-wrap:anywhere}

@@ -12,7 +12,7 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
  const confirmReplace=()=>new Promise<boolean>(resolve=>{
   if(finishReplace){resolve(false);return;}
   const focused=document.activeElement as HTMLElement|null;
-  finishReplace=(accepted)=>{console.warn("FINISH",accepted,new Error().stack);finishReplace=null;replaceDialog.close();focused?.focus();resolve(accepted);};
+  finishReplace=(accepted)=>{finishReplace=null;replaceDialog.close();focused?.focus();resolve(accepted);};
   replaceDialog.showModal();$('replace-cancel').focus();
  });
  $('replace-cancel').addEventListener('click',()=>finishReplace?.(false));
@@ -99,7 +99,7 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
   for(const [index,item]of items.entries()){
    const row=node('li'),button=node('button'),name=node('span','title' in item?`${index+1}. ${item.title}`:item.name),status=node('small'),mark=node('span');button.type='button';button.dataset.boardItem=item.id;button.setAttribute('aria-controls',detail.id);if(item.id===selectedItems[tab])button.setAttribute('aria-current','true');name.className='board-library-name';status.className='board-library-status';status.textContent=item.status==='approved'?t.approved:t.draft;mark.className='board-library-mark';mark.textContent=item.status==='approved'?'✓':'○';mark.setAttribute('aria-hidden','true');button.dataset.approved=String(item.status==='approved');button.append(mark,name,status);
    const choose=(id:string)=>{const scroll=$('content').querySelector('.board-library-list')?.scrollTop??0;selectedItems[tab]=id;render();const nextList=$('content').querySelector('.board-library-list');if(nextList)nextList.scrollTop=scroll;const button=Array.from($('content').querySelectorAll<HTMLButtonElement>('[data-board-item]')).find(b=>b.dataset.boardItem===id);button?.focus({preventScroll:true});button?.scrollIntoView({block:'nearest',inline:'nearest'});const body=$('content').closest('.dialog-inner');if(body)body.scrollTop=0;};
-   button.addEventListener('click',()=>choose(item.id));button.addEventListener('keydown',event=>{const next=event.key==='ArrowDown'?(index+1)%items.length:event.key==='ArrowUp'?(index+items.length-1)%items.length:event.key==='Home'?0:event.key==='End'?items.length-1:-1;if(next<0||event.altKey||event.ctrlKey||event.metaKey)return;event.preventDefault();choose(items[next].id);});row.append(button);list.append(row);
+   button.addEventListener('click',()=>choose(item.id));button.addEventListener('keydown',event=>{const next=event.key==='ArrowDown'?(index+1)%items.length:event.key==='ArrowUp'?(index+items.length-1)%items.length:event.key==='Home'?0:event.key==='End'?items.length-1:-1;if(next<0||event.altKey||event.ctrlKey||event.metaKey)return;event.preventDefault();choose(items[next].id);});row.dataset.boardReview=item.id;row.append(button);approvalSwitch(row,item,'title' in item?item.title:item.name);list.append(row);
   }
   sidebar.append(list);layout.append(sidebar,detail);root.append(layout);return {sidebar,detail};
  }
@@ -126,7 +126,7 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
     heading(card,subject.name,{...textConfig(t.fieldTitle,subject.name,(b,v)=>{get(b).name=String(v);},200),target},kind+'-'+subject.id+'-name');
     if(kind==='characters'){const character=subject as BoardCharacter;field(card,t.category,character.kind==='object'?t.objectCategory:t.characterCategory,{label:t.category,value:character.kind,kind:'select',options:[['character',t.characterCategory],['object',t.objectCategory]],target,subjectKind:true,apply:(b,v)=>{b.characters.find(c=>c.id===subject.id)!.kind=v as BoardCharacter['kind'];}},kind+'-'+subject.id+'-kind');}
     picture(card,subject.image,subject.name,(b,v)=>{get(b).image=String(v)||null;},kind+'-'+subject.id+'-image',undefined,target);
-    field(card,t.description,subject.description,{...textConfig(t.description,subject.description,(b,v)=>{get(b).description=String(v);}),target},kind+'-'+subject.id+'-description');approvalSwitch(card,subject,subject.name);commentList(card,subject.comments,target);tileDetail(card);detail.append(card);
+    field(card,t.description,subject.description,{...textConfig(t.description,subject.description,(b,v)=>{get(b).description=String(v);}),target},kind+'-'+subject.id+'-description');commentList(card,subject.comments,target);tileDetail(card);detail.append(card);
    }
    if(!subjects.length)detail.append(node('p',t.empty));
    const addLabel=tab==='settings'?t.addSetting:tab==='objects'?t.addObject:t.addCharacter,add=node('button',addLabel);add.type='button';add.className='board-add-item';add.dataset.boardEdit='add-'+tab;add.disabled=board[kind].length>=100;add.addEventListener('click',()=>openField({label:addLabel,value:'',max:200,required:true,newItem:true,apply:(b,v)=>{const subject={status:'draft' as const,id:crypto.randomUUID(),name:String(v),description:'',image:null,comments:[]};if(kind==='settings')b.settings.push(subject);else b.characters.push({...subject,kind:category});}},'add-'+tab));sidebar.append(add);
@@ -142,7 +142,7 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
      const kind=category==='settings'?'settings':'characters',subjects=kind==='settings'?board.settings:board.characters.filter(c=>c.kind===(category==='objects'?'object':'character')),ids=new Set(subjects.map(s=>s.id)),selected=shot[kind].filter(id=>ids.has(id));
      field(card,t[category],selected.map(id=>subjects.find(s=>s.id===id)?.name??id).join(', '),{label:t[category],value:selected,kind:'choices',options:subjects.map(s=>[s.id,s.name]),shot:shot.id,apply:(b,v)=>{get(b)[kind]=[...get(b)[kind].filter(id=>!ids.has(id)),...v as string[]];}},shot.id+'-'+category);
     }
-    approvalSwitch(card,shot,shot.title);commentList(card,shot.comments,{kind:'shots',id:shot.id});tileDetail(card);detail.append(card);
+    commentList(card,shot.comments,{kind:'shots',id:shot.id});tileDetail(card);detail.append(card);
    }
    if(!board.shots.length)detail.append(node('p',t.empty));
    const add=node('button',t.addShot);add.type='button';add.className='board-add-item';add.dataset.boardEdit='add-shots';add.disabled=board.shots.length>=100;add.addEventListener('click',()=>openField({label:t.addShot,value:'',max:200,required:true,newItem:true,apply:(b,v)=>{b.shots.push({id:crypto.randomUUID(),title:String(v),duration:3,action:'',camera:'',audio:'',image:null,characters:[],settings:[],status:'draft',comments:[]});}},'add-shots'));sidebar.append(add);
@@ -171,7 +171,7 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
    next=importStoryboard(value,null); // Validate the complete, self-contained file before asking to replace anything.
    next.revision=Math.max(board.revision+1,next.revision);next=parseStoryboard(next);
    const ticket=session,current=board,revision=board.revision;
-   if(!await confirmReplace())return;console.warn("ACCEPTED");
+   if(!await confirmReplace())return;
    check();if(ticket!==session||current!==board||revision!==board.revision)throw new Error(t.stale);
    selectedItems={};
   }
