@@ -68,7 +68,7 @@ export function createModelEffects3D(model:Model3D,root:THREE.Group,nodes:Map<st
       }else{
        const travel=burst?age*5*r:clock*2*r;x=vx*travel;y=(burst?z:Math.abs(z))*travel;zz=vz*travel;size=r*.045*(burst?1-state.progress:1-clock)*envelope;stretch=burst?2:1.6;
       }
-      dummy.position.set(x,y,zz);dummy.rotation.set(age*(phase+.5),a,0);dummy.scale.set(size,size*stretch,size);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix);
+      dummy.position.set(x,y,zz);dummy.rotation.set(age*(phase+.5),a,0);if(!burst&&channel===0)dummy.rotation.set(Math.sin(age*11+phase)*.15,a,Math.cos(age*13+phase)*.15);dummy.scale.set(size,size*stretch,size);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix);
      }mesh.instanceMatrix.needsUpdate=true;
     }
    }
