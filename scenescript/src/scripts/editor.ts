@@ -1163,7 +1163,7 @@ $('editor-fullscreen').addEventListener('click',async()=>{
  else{setEditorFullscreen(true);try{await document.documentElement.requestFullscreen();}catch{/* App-only CSS fallback. */}}
 });
 function setRecordingStart(restart=false){
- const b=$('start-recording');const label=t(restart?'restartRecording':'startRecording');b.setAttribute('aria-label',label);b.querySelector('span')!.textContent=label;
+ const b=$('start-recording');const label=t(restart?'restartRecording':'startRecording');b.setAttribute('aria-label',label);b.title=label;
  b.querySelector('path')!.setAttribute('d',restart?'M49 19V6l-6 6A23 23 0 1 0 55 32h-7a16 16 0 1 1-10-15l-6 6h17Z':'M23 14 49 32 23 50Z');
 }
 $('focus').addEventListener('click',async()=>{

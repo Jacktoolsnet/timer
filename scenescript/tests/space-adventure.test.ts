@@ -181,7 +181,7 @@ test('discreet twin laser ports are present on all exterior variants and emit fr
  }
  for(const [id,time,side] of [['laser1',6.95,-1],['laser2',8.6,1],['laser4',16,-1],['laser6',23.8,1]] as const){
   let start=0;const scene=project.scenes.find(s=>{if(time<start+s.duration)return true;start+=s.duration;return false;})!;
-  const shot=scene.stage3d!,frame=samplePath3D(project.stages.sector.paths![scene.id],(time-start)/scene.duration),expected=add(frame.position,localVector3D(frame,{x:side*.29,y:-.13,z:2.789})),values=pose(time);
+  const frame=samplePath3D(project.stages.sector.paths![scene.id],(time-start)/scene.duration),expected=add(frame.position,localVector3D(frame,{x:side*.29,y:-.13,z:2.789})),values=pose(time);
   for(const axis of ['x','y','z'] as const)assert.ok(Math.abs(values.get(id+'move'+axis)!-expected[axis])<1e-7,id+' starts at its nose port');
  }
 });

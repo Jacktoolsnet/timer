@@ -635,11 +635,11 @@ test('simulation modal applies with checkmark and discards drafts with X or Esca
 test('recording alignment frame hides for countdown and restart appears three seconds after completion',async({page})=>{
  await page.goto('/en/');const p=demoProject();p.scenes=[p.scenes[0]];p.scenes[0].duration=.3;p.scenes[0].elements=[];
  await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(p));await page.locator('#import-json').click();await page.locator('#focus').click();
- await expect(page.locator('#recording-frame')).toBeVisible();await expect(page.locator('#start-recording')).toHaveAttribute('aria-label','Start presentation');
+ await expect(page.locator('#recording-frame')).toBeVisible();await expect(page.locator('#start-recording')).toHaveAttribute('aria-label','Start presentation');await expect(page.locator('#start-recording')).toHaveText('');await expect(page.locator('#start-recording')).toHaveAttribute('title','Start presentation');await expect(page.locator('#start-recording svg')).toHaveCount(1);
  const bounds=await page.locator('#stage-frame').boundingBox();expect(await page.locator('#recording-frame').boundingBox()).toEqual(bounds);
  await page.locator('#start-recording').click();await expect(page.locator('#recording-frame')).not.toBeVisible();await expect(page.locator('#stage-frame')).toHaveCSS('cursor','none');
  await expect.poll(async()=>Number(await page.locator('#timeline').inputValue()),{timeout:6000}).toBe(.3);await page.waitForTimeout(1500);await expect(page.locator('#recording-start')).not.toBeVisible();
- await expect(page.locator('#start-recording')).toBeVisible({timeout:3000});await expect(page.locator('#start-recording')).toHaveAttribute('aria-label','Restart presentation');await expect(page.locator('#recording-frame')).toBeVisible();
+ await expect(page.locator('#start-recording')).toBeVisible({timeout:3000});await expect(page.locator('#start-recording')).toHaveAttribute('aria-label','Restart presentation');await expect(page.locator('#start-recording')).toHaveText('');await expect(page.locator('#start-recording')).toHaveAttribute('title','Restart presentation');await expect(page.locator('#start-recording svg')).toHaveCount(1);await expect(page.locator('#recording-frame')).toBeVisible();
  await page.locator('#start-recording').click();await expect(page.locator('#countdown')).toBeVisible();await expect(page.locator('#recording-frame')).not.toBeVisible();expect(await page.locator('#timeline').inputValue()).toBe('0');await page.keyboard.press('Escape');await page.waitForTimeout(3300);await expect(page.locator('#recording-start')).not.toBeVisible();await expect(page.locator('#recording-frame')).not.toBeVisible();
 });
 
