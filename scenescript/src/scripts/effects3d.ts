@@ -10,7 +10,7 @@ export function createModelEffects3D(model:Model3D,root:THREE.Group,nodes:Map<st
  const charred=new Map<string,THREE.MeshStandardMaterial>();
  const tint=(material:THREE.Material,intensity=1)=>{const key=material.uuid+':'+intensity;let copy=charred.get(key);if(!copy){copy=(material as THREE.MeshStandardMaterial).clone();copy.color.multiplyScalar(Math.max(.08,1-.78*Math.min(1.15,intensity)));copy.metalness*=1-.5*Math.min(1,intensity);charred.set(key,copy);storage.materials.set('effect-char-'+copy.uuid,copy);}return copy;};
  const inside=(id:string,parent:string)=>{let p=model.parts.find(p=>p.id===id);while(p){if(p.id===parent)return true;p=model.parts.find(q=>q.id===p!.parent);}return false;};
- const geometry=new THREE.SphereGeometry(.5,8,6);storage.geometries.add(geometry);
+ const geometry:THREE.BufferGeometry=new THREE.SphereGeometry(.5,8,6);storage.geometries.add(geometry);
  const tongue=new THREE.ConeGeometry(.5,1,8);storage.geometries.add(tongue);
  const pool=(count:number,color:string,opacity:number,glow=false,additive=false)=>{
   const material=new THREE.MeshStandardMaterial({color,emissive:glow?color:'#000000',emissiveIntensity:glow?.8:0,roughness:1,metalness:0,opacity,transparent:true,depthWrite:false,blending:additive?THREE.AdditiveBlending:THREE.NormalBlending});storage.materials.set('effect-'+material.uuid,material);
