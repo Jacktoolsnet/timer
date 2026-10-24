@@ -8,7 +8,7 @@ const raw=()=>({version:'1.0',title:'Generic damage',format:'landscape',characte
 test('effect sites and scene events roundtrip, reference stage or actors and travel in resource bundles',()=>{
  const project=parseProject(JSON.stringify(raw()));assert.deepEqual(validateProject(project),project);
  assert.equal(project.scenes[0].stage3d!.effects![0].actor,'');assert.equal(project.characters.thing.model!.effectSites![0].direction.y,1);
- const bundle=parse3DResource(export3DResource(project,'character','thing'));assert.deepEqual(bundle.definition.model!.effectSites,project.characters.thing.model!.effectSites);
+ const bundle=parse3DResource(JSON.stringify(export3DResource('character','thing',project)));assert.deepEqual((bundle.definition as typeof project.characters.thing).model!.effectSites,project.characters.thing.model!.effectSites);
 });
 test('strict effect fields, references, finite limits and per-shot budgets reject invalid input',()=>{
  for(const change of [

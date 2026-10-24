@@ -7,8 +7,8 @@ type Storage={geometries:Set<THREE.BufferGeometry>;materials:Map<string,THREE.Me
 export function createModelEffects3D(model:Model3D,root:THREE.Group,nodes:Map<string,Node>,storage:Storage,events:readonly Effect3D[],ownerAt?:(time:number)=>THREE.Matrix4){
  const layer=new THREE.Group();layer.name='model-effects';root.add(layer);
  const original=new Map([...nodes].filter(([,n])=>n.mesh).map(([id,n])=>[id,n.mesh!.material]));
- const charred=new Map<THREE.Material,THREE.MeshStandardMaterial>();
- const tint=(material:THREE.Material)=>{let copy=charred.get(material);if(!copy){copy=(material as THREE.MeshStandardMaterial).clone();copy.color.multiplyScalar(.22);copy.metalness*=.5;charred.set(material,copy);storage.materials.set('effect-char-'+copy.uuid,copy);}return copy;};
+ const charred=new Map<string,THREE.MeshStandardMaterial>();
+ const tint=(material:THREE.Material,intensity=1)=>{const key=material.uuid+':'+intensity;let copy=charred.get(key);if(!copy){copy=(material as THREE.MeshStandardMaterial).clone();copy.color.multiplyScalar(Math.max(.08,1-.78*Math.min(1.15,intensity)));copy.metalness*=1-.5*Math.min(1,intensity);charred.set(key,copy);storage.materials.set('effect-char-'+copy.uuid,copy);}return copy;};
  const inside=(id:string,parent:string)=>{let p=model.parts.find(p=>p.id===id);while(p){if(p.id===parent)return true;p=model.parts.find(q=>q.id===p!.parent);}return false;};
  const geometry=new THREE.SphereGeometry(.5,8,6);storage.geometries.add(geometry);
  const pool=(count:number,color:string,opacity:number,glow=false)=>{
@@ -22,7 +22,7 @@ export function createModelEffects3D(model:Model3D,root:THREE.Group,nodes:Map<st
   group.add(flame,smoke,sparks,flash);
   const selected=site.debris.length?site.debris:[site.part];
   const debris=event.result==='break'?model.parts.filter(p=>nodes.get(p.id)!.mesh&&selected.some(id=>inside(p.id,id))).slice(0,24).map(p=>{
-   const mesh=nodes.get(p.id)!.mesh!.clone();mesh.name='debris-'+p.id;mesh.matrixAutoUpdate=false;mesh.frustumCulled=false;layer.add(mesh);return {id:p.id,mesh};
+   const mesh=nodes.get(p.id)!.mesh!.clone();mesh.material=Array.isArray(mesh.material)?mesh.material.map(m=>tint(m,.6)):tint(mesh.material,.6);mesh.name='debris-'+p.id;mesh.matrixAutoUpdate=false;mesh.frustumCulled=false;layer.add(mesh);return {id:p.id,mesh};
   }):[];
   return {event,site,group,flame,smoke,sparks,flash,debris};
  });
@@ -82,7 +82,7 @@ export function createModelEffects3D(model:Model3D,root:THREE.Group,nodes:Map<st
   // Apply persistent damage LAST, never contaminate other event captures.
   for(const {event:e,site}of entries){const state=effectState3D(e,time);if(state.result==='none')continue;
    if(state.result==='hide'||state.result==='break')nodes.get(site.part)!.content.visible=false;
-   else for(const p of model.parts.filter(p=>inside(p.id,site.part))){const mesh=nodes.get(p.id)!.mesh;if(mesh)mesh.material=Array.isArray(original.get(p.id))?(original.get(p.id) as THREE.Material[]).map(tint):tint(original.get(p.id) as THREE.Material);}
+   else for(const p of model.parts.filter(p=>inside(p.id,site.part))){const mesh=nodes.get(p.id)!.mesh;if(mesh)mesh.material=Array.isArray(original.get(p.id))?(original.get(p.id) as THREE.Material[]).map(m=>tint(m,e.intensity)):tint(original.get(p.id) as THREE.Material,e.intensity);}
   }
  };
  return {reset,update};

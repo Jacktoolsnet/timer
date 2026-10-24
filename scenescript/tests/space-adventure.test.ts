@@ -32,8 +32,8 @@ test('six targets use generic destruction, remain destroyed across cuts and supp
  assert.equal(destroyed(6.9,'relay1'),false);
  assert.equal(project.stages.sector.model!.effectSites!.length,6);
  assert.ok(!project.stages.sector.model!.parts.some(p=>/relay.*(flash|fire)/.test(p.id)),'no hand-built explosion geometry');
- assert.ok(project.scenes.flatMap(s=>s.stage3d!.effects!).some(e=>e.kind==='burn'));
- assert.ok(project.scenes.flatMap(s=>s.stage3d!.effects!).some(e=>e.kind==='damage'));
+ assert.ok(project.scenes.flatMap(s=>(s.stage3d!.effects??[])).some(e=>e.kind==='burn'));
+ assert.ok(project.scenes.flatMap(s=>(s.stage3d!.effects??[])).some(e=>e.kind==='damage'));
  assert.ok(Math.abs(project.scenes.find(s=>s.id==='cockpit-fourth-target')!.elements.find(e=>e.id.endsWith('indicator3dark'))!.at-2.4)<1e-8);
 });
 test('fleet has one command vessel and four escorts; gates and final volley obey story timing',()=>{
