@@ -9,7 +9,7 @@
   },
   "scripts": {
     "dev": "astro dev --host 127.0.0.1",
-    "build": "astro check && astro build",
+    "build": "astro check && astro build && node scripts/write-tool-redirects.mjs",
     "preview": "astro preview --host 127.0.0.1",
     "test:e2e": "playwright test"
   },

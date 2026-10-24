@@ -47,3 +47,36 @@ der Prüfung entfernen. Diese lokale Änderung wurde nicht veröffentlicht.
 Als Ausgangspunkte wurden https://jacktools.net und https://app.messagedrop.de
 sowie das lokale Timer-Projekt verwendet. Projekttexte sind keine Aussage über
 die rechtliche Vollständigkeit der bisherigen Website.
+
+## Kurzadressen und Weiterleitungen
+
+`https://jacktools.net/clock` und `/clock/` leiten auf
+`https://clock.jacktools.net/` weiter. Entsprechend existieren Kurzadressen für
+`timer`, `stopwatch`, `breathe`, `relax`, `calculator`, `lava` und `scenescript`.
+Zusätzlich: `pomodoro`, `interval`, `intervall`, `training` und `messagedrop`.
+Die einzigen Zieladressen stehen in `src/lib/tool-redirects.ts`.
+Noch nicht veröffentlichte Tools sind über ihre vorbereiteten Kurzadressen erst
+nutzbar, wenn die jeweilige Subdomain veröffentlicht wurde. Die Homepage muss
+sie deshalb nicht schon als verfügbare Angebote verlinken.
+
+Der Build erzeugt:
+
+- Statische Weiterleitungsseiten (`dist/clock/index.html` usw.) als Fallback für
+  alle statischen Hosts: Meta-Refresh, sichtbarer Ziellink, noindex und Canonical
+  auf die Subdomain. Mit JavaScript werden Queryparameter und Fragment erhalten.
+- `dist/.htaccess`: echte **HTTP-301-Weiterleitungen** für Apache mit mod_rewrite,
+  mit und ohne abschließenden Slash. Queryparameter bleiben dabei erhalten.
+- `hosting/tool-redirects.nginx.conf`: entsprechende Regeln für einen nginx-Host.
+
+**Deployment:** Auch die versteckte Datei `.htaccess` berücksichtigen. Gibt es
+auf dem Server bereits eine `.htaccess`, die erzeugten Regeln mit den bestehenden
+Regeln zusammenführen, statt die vorhandene Konfiguration blind zu ersetzen.
+Bei nginx die Snippet-Regeln im passenden `server`-Block einbinden; eine
+`.htaccess` wird von nginx nicht ausgewertet. Hostingänderungen sind nicht Teil
+des lokalen Builds. Ohne Serverregeln erfolgt die Weiterleitung durch die
+statische HTML-Seite; diese liefert selbst keinen HTTP-301-Status.
+
+Die Hauptseite verlinkt weiterhin die echten Subdomains; Kurzadressen kommen
+nicht in die Sitemap. Nach dem Upload z. B. mit
+`curl -I https://jacktools.net/clock` prüfen: bei aktiven Serverregeln werden
+`301` und `Location: https://clock.jacktools.net/` erwartet.

@@ -5,7 +5,7 @@ import {parseProject,validateProject} from '../src/lib/model.ts';
 import {canApproveStoryboard} from '../src/lib/storyboard.ts';
 import {cameraPose3D} from '../src/lib/camera3d.ts';
 import {actor3DFrame} from '../src/lib/stage3d.ts';
-import {samplePath3D} from '../src/lib/path3d.ts';
+import {samplePath3D,dot,norm,sub,add,localVector3D} from '../src/lib/path3d.ts';
 import {modelPose3D} from '../src/lib/model3d.ts';
 const root=new URL('../public/examples/space-adventure-storyboard/',import.meta.url);
 const source=parseProject(readFileSync(new URL('spaceadventure_scenescript.json',root),'utf8'));
@@ -63,7 +63,7 @@ test('vortex interiors, textured giant planets, distributed targets and the bank
   const a=targets[i-1].position,b=targets[i].position;assert.ok(Math.hypot(a.x-b.x,a.y-b.y,a.z-b.z)>10);
  }
  const route=paths['escape-payoff'];assert.ok(route.points.some(p=>p.x>5));assert.ok(route.points[0].z>route.points.at(-1)!.z+20);
- assert.ok(paths['laser-double-strike'].ups!.some(p=>p.y<-.5),'A barrel roll includes inverted frames');
+ assert.ok(paths['laser-double-strike'].ups!.every(p=>p.y>.25),'Bank into curves without an independent barrel roll');
  assert.equal(project.scenes.find(s=>s.id==='escape-payoff')!.stage3d!.actors[0].character,'escaping');
 });
 
@@ -83,6 +83,7 @@ test('all cameras stay outside the large planets and the last laser misses the s
 });
 
 test('detailed cockpit has moving physical instruments and editable, mission-synchronized readouts',()=>{
+ assert.ok(project.scenes.filter(s=>s.stage3d?.actors.some(a=>a.character==='cockpit')).every(s=>s.elements.every(e=>e.id!=='reticle'&&e.text!=='⌖')),'Cockpit views stay free of crosshairs');
  const cockpit=project.characters.cockpit.model!;assert.ok(cockpit.parts.length>=60);
  for(const id of ['gaugeNeedleL','throttleR','ventL0','bezelScrewR3','toggleL2'])assert.ok(cockpit.parts.some(p=>p.id===id));
  const scene=project.scenes.find(s=>s.id==='cockpit-fourth-target')!,actor=scene.stage3d!.actors[0];
@@ -122,4 +123,65 @@ test('arrival aperture opens from a vertical seam before the fighter actually cr
  assert.ok(before.z+2.7<-13,'even the nose is behind the opaque vortex when enabled');
  assert.ok(after.z-2.7>-13,'the tail clears the gate before it contracts');
  assert.equal(pose(2.98).get('arrival0x'),0);
+});
+
+
+test('flight paths round manoeuvres, keep moving nose-first and meet without orientation snaps',()=>{
+ const paths=project.stages.sector.paths!;
+ for(const [index,scene] of project.scenes.entries()){
+  const path=paths[scene.id],oriented=scene.stage3d!.actors[0].path!.orient,steps=Math.ceil(scene.duration*60);
+  for(let i=1;i<=steps;i++){
+   const a=samplePath3D(path,(i-1)/steps),b=samplePath3D(path,i/steps),travel=sub(b.position,a.position);
+   assert.ok(Math.hypot(travel.x,travel.y,travel.z)>.001,scene.id+' must translate, not rotate in place');
+   assert.ok(dot(norm(travel),a.forward)>.99,scene.id+' nose follows its curved trajectory');
+   const limit=Math.cos((oriented?5:10)*Math.PI/180);
+   assert.ok(dot(a.forward,b.forward)>limit,scene.id+' heading changes gradually at 60 fps');
+   assert.ok(dot(a.up,b.up)>limit,scene.id+' banks gradually instead of spinning');
+  }
+  if(index){
+   const a=samplePath3D(paths[project.scenes[index-1].id],1),b=samplePath3D(path,0),gap=sub(a.position,b.position);
+   assert.ok(Math.hypot(gap.x,gap.y,gap.z)<1e-6,'positions join at '+scene.id);
+   assert.ok(dot(a.forward,b.forward)>Math.cos(6*Math.PI/180),'tangents join at '+scene.id);
+  }
+ }
+});
+
+
+test('torpedoes cold-launch through sliding bay doors before their detailed cyan engines ignite',()=>{
+ const fighter=project.characters.needlefin.model!;
+ assert.ok(!fighter.parts.some(p=>p.id==='launchHatch'));
+ for(const id of ['doorLeft','doorRight'])assert.equal(fighter.parts.flatMap(p=>p.joints).find(j=>j.id===id)!.motion,'translation');
+ for(const [sceneId,id,release,impact] of [['torpedo-third-target','torpedo3',.7,2.2],['fifth-target-fleet-arrival','torpedo5',.4,1.35]] as const){
+  const shot=project.scenes.find(s=>s.id===sceneId)!.stage3d!,hero=shot.actors[0],actor=shot.actors.find(a=>a.id===id)!,model=project.characters[actor.character].model!;
+  const torpedo=(time:number)=>modelPose3D(model,actor.joints,actor.motions,time);
+  const closed=modelPose3D(fighter,hero.joints,hero.motions,release-.3),open=modelPose3D(fighter,hero.joints,hero.motions,release);
+  assert.equal(closed.get('doorLeft'),0);assert.equal(open.get('doorLeft'),-.65);assert.equal(open.get('doorRight'),.65);
+  assert.ok(model.parts.some(p=>p.id==='sensor'));assert.equal(model.parts.filter(p=>p.id.startsWith('fin')).length,4);
+  assert.equal(torpedo(release-.01).get('visiblebody'),0);
+  assert.equal(torpedo(release+.01).get('visiblebody'),1);assert.equal(torpedo(release+.3).get('visibleengine'),0);
+  assert.ok(torpedo(release+.42).get('visibleengine')!>.99);assert.ok(torpedo(release+.42).get('visibletrail')!>.99);
+  const early=torpedo(release+.01),late=torpedo(release+.3);
+  const earlyPosition={x:early.get('movex')!,y:early.get('movey')!,z:early.get('movez')!},latePosition={x:late.get('movex')!,y:late.get('movey')!,z:late.get('movez')!};
+  const frame=actor3DFrame(hero,release,shot.actors,project.stages.sector.paths);
+  assert.ok(dot(sub(latePosition,earlyPosition),frame.up)<-.8,'torpedo drops clear before ignition');
+  assert.equal(torpedo(impact).get('visiblebody'),0);assert.equal(torpedo(impact+.01).get('visibletrail'),0);
+  assert.deepEqual(torpedo(release+.01),early,'reverse seeking restores the launch deterministically');
+ }
+});
+
+
+test('discreet twin laser ports are present on all exterior variants and emit from the actual muzzle',()=>{
+ for(const name of ['needlefin','arriving','escaping']){
+  const parts=project.characters[name].model!.parts;
+  for(const side of [-1,1]){
+   const muzzle=parts.find(p=>p.id==='laserMuzzle'+side)!;
+   assert.equal(muzzle.shape,'cylinder');assert.ok(muzzle.size.x<.2&&muzzle.size.y<.06);
+   assert.ok(parts.some(p=>p.id==='laserBore'+side));assert.ok(parts.some(p=>p.id==='laserLens'+side));
+  }
+ }
+ for(const [id,time,side] of [['laser1',6.95,-1],['laser2',8.6,1],['laser4',16,-1],['laser6',23.8,1]] as const){
+  let start=0;const scene=project.scenes.find(s=>{if(time<start+s.duration)return true;start+=s.duration;return false;})!;
+  const shot=scene.stage3d!,frame=samplePath3D(project.stages.sector.paths![scene.id],(time-start)/scene.duration),expected=add(frame.position,localVector3D(frame,{x:side*.29,y:-.13,z:2.789})),values=pose(time);
+  for(const axis of ['x','y','z'] as const)assert.ok(Math.abs(values.get(id+'move'+axis)!-expected[axis])<1e-7,id+' starts at its nose port');
+ }
 });

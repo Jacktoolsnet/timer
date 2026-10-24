@@ -34,7 +34,7 @@ Space Adventure explicitly.
 - One hostile command vessel and exactly four escorts; final volley fires only
   during the retreat. The first tracer centre reaches the entrance at about 28.52 s,
   just after it seals at 28.50 s; the fighter clears it immediately beforehand.
-- Widely distributed targets, a banked slalom, barrel roll, diving attack and
+- Widely distributed targets, a smoothly banked slalom, diving attack and
   tight U-turn away from the fleet. The final cameras keep the portal in view.
 - Three large textured planetary spheres, including a ringed gas giant.
 - Opaque cyan/violet vortex interiors, animated together with their aperture rims:
@@ -86,3 +86,20 @@ The arrival opens from a tall narrow seam to a full aperture before Needlefin
 becomes visible. The ship starts behind the opaque vortex plane and crosses it
 nose-first; the aperture contracts only after the tail clears it. The exterior
 camera keeps the complete opening in frame rather than cropping it at the edge.
+
+Flight positions now use rounded cubic curves with a short Gaussian smoothing
+window and 65 path controls per shot. Banking follows the upcoming turn rather
+than an independent roll animation; the escape uses a wider, moving U-turn.
+Weapon origins are rebuilt from the resulting runtime paths. Regression checks
+bound frame-to-frame heading/bank changes and verify forward travel, continuous
+shot boundaries, portal clearance and the unchanged film endpoint.
+
+The ventral launcher now has two translational sliding doors and a recessed bay.
+Both torpedoes are independently reusable native 3D resources with a sensor nose,
+armoured collars, four fins, nozzle and cyan engine/core/plume. They inherit the
+fighter's motion, drop clear unpowered for 0.32 seconds, then ignite and accelerate
+along a guided cubic flight path. Doors close after release; sound and impacts
+remain synchronized. Cockpit shots no longer contain a targeting crosshair.
+
+Two small flush nose laser ports use muted metal lips, dark bores and tiny cyan
+lenses. Laser shots alternate between their actual transformed muzzle positions.
