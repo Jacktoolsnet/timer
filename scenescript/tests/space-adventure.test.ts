@@ -1,3 +1,4 @@
+import {effectState3D} from '../src/lib/effects3d.ts';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -21,14 +22,18 @@ test('space adventure preserves the exact approved storyboard, comments, referen
  assert.equal(project.scenes.length,9);assert.ok(project.scenes.every(s=>s.stage3d&&s.transition==='none'));
  assert.equal(project.scenes.find(s=>s.id==='last-target-under-threat')!.duration+project.scenes.find(s=>s.id==='mission-confirmed')!.duration,4);
 });
-test('six targets are destroyed separately, stay destroyed and support reverse seeking',()=>{
+test('six targets use generic destruction, remain destroyed across cuts and support reverse seeking',()=>{
+ const destroyed=(time:number,site:string)=>{let start=0;for(const scene of project.scenes){if(time<start+scene.duration)return scene.stage3d!.effects!.some(e=>e.site===site&&effectState3D(e,time-start).result==='break');start+=scene.duration;}return false;};
  const hits=[7.3,9,12.2,16.4,19.35,24.25];
  for(const [index,at]of hits.entries()){
-  const id='relay'+(index+1);assert.equal(pose(at-.01).get(id+'corex'),1);assert.equal(pose(at+.01).get(id+'corex'),0);
-  assert.ok(Math.abs(pose(Math.min(at+1,28.59)).get(id+'plate0x')!)<1e-8);
+  const id='relay'+(index+1);assert.equal(destroyed(at-.01,id),false);assert.equal(destroyed(at+.01,id),true);assert.equal(destroyed(Math.min(at+1,28.59),id),true);
  }
- for(let i=1;i<=6;i++)assert.equal(pose(28.59).get('relay'+i+'corex'),0);
- const before=pose(6.9);pose(28.59);assert.deepEqual(pose(6.9),before);
+ for(let i=1;i<=6;i++)assert.equal(destroyed(28.59,'relay'+i),true);
+ assert.equal(destroyed(6.9,'relay1'),false);
+ assert.equal(project.stages.sector.model!.effectSites!.length,6);
+ assert.ok(!project.stages.sector.model!.parts.some(p=>/relay.*(flash|fire)/.test(p.id)),'no hand-built explosion geometry');
+ assert.ok(project.scenes.flatMap(s=>s.stage3d!.effects!).some(e=>e.kind==='burn'));
+ assert.ok(project.scenes.flatMap(s=>s.stage3d!.effects!).some(e=>e.kind==='damage'));
  assert.ok(Math.abs(project.scenes.find(s=>s.id==='cockpit-fourth-target')!.elements.find(e=>e.id.endsWith('indicator3dark'))!.at-2.4)<1e-8);
 });
 test('fleet has one command vessel and four escorts; gates and final volley obey story timing',()=>{

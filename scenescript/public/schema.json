@@ -1449,10 +1449,142 @@
         "tracks"
       ]
     },
+    "effectSite3D": {
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "part"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{1,100}$",
+      "maxLength": 100,
+      "minLength": 1
+    },
+    "part": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{1,100}$",
+      "maxLength": 100,
+      "minLength": 1
+    },
+    "position": {
+      "$ref": "#/$defs/pathVector3D"
+    },
+    "direction": {
+      "$ref": "#/$defs/pathVector3D"
+    },
+    "radius": {
+      "type": "number",
+      "minimum": 0.01,
+      "maximum": 20,
+      "default": 1
+    },
+    "debris": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9_-]{1,100}$",
+        "maxLength": 100,
+        "minLength": 1
+      },
+      "maxItems": 24,
+      "uniqueItems": true,
+      "default": []
+    },
+    "fireColor": {
+      "type": "string",
+      "pattern": "^#[a-fA-F0-9]{6}$",
+      "default": "#ff8638"
+    },
+    "smokeColor": {
+      "type": "string",
+      "pattern": "^#[a-fA-F0-9]{6}$",
+      "default": "#343d49"
+    },
+    "sparkColor": {
+      "type": "string",
+      "pattern": "^#[a-fA-F0-9]{6}$",
+      "default": "#fff0b0"
+    }
+  }
+},
+    "effect3D": {
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "site"
+  ],
+  "properties": {
+    "actor": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{1,100}$",
+          "maxLength": 100,
+          "minLength": 1
+        },
+        {
+          "const": ""
+        }
+      ],
+      "default": ""
+    },
+    "site": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{1,100}$",
+      "maxLength": 100,
+      "minLength": 1
+    },
+    "kind": {
+      "enum": [
+        "burn",
+        "explode",
+        "damage"
+      ],
+      "default": "explode"
+    },
+    "at": {
+      "type": "number",
+      "minimum": -86400,
+      "maximum": 3600,
+      "default": 0
+    },
+    "duration": {
+      "type": "number",
+      "minimum": 0.01,
+      "maximum": 3600,
+      "default": 1.5
+    },
+    "intensity": {
+      "type": "number",
+      "minimum": 0.1,
+      "maximum": 4,
+      "default": 1
+    },
+    "seed": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295,
+      "default": 1
+    },
+    "result": {
+      "enum": [
+        "none",
+        "char",
+        "hide",
+        "break"
+      ],
+      "default": "none"
+    }
+  }
+},
     "model3D": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "effectSites": {"type":"array","items":{"$ref":"#/$defs/effectSite3D"},"maxItems":32,"default":[]},
         "parts": {
           "type": "array",
           "items": {
@@ -1876,6 +2008,7 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "effects": {"type":"array","items":{"$ref":"#/$defs/effect3D"},"maxItems":32,"default":[]},
         "groups": {"type": "array", "maxItems": 16, "items": {"$ref": "#/$defs/groupPlacement3D"}, "default": []},
             "stageJoints": {"type": "object", "additionalProperties": {"type": "number"}, "default": {}},
             "stageMotions": {"type": "array", "items": {"$ref": "#/$defs/modelMotion3D"}, "maxItems": 64, "default": []},

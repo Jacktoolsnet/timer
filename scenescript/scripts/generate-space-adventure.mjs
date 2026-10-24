@@ -105,17 +105,16 @@ const fighter={model:{parts:hull,animations:{launch:{duration:1.15,tracks:[-1,1]
 // Six individually tracked, unmanned relays. Damage is absolute-time and seek-safe.
 const targets=[V(-6,1,2),V(5,3,12),V(-6,-3,22),V(5,2,30),V(-4,-1,37),V(2,3,44)];
 const hits=[7.3,9,12.2,16.4,19.35,24.25];
-function relay(i){const p=targets[i],at=hits[i],prefix='relay'+(i+1),alive=t=>t<at?1:0;
+const effectSites=[];
+function relay(i){const p=targets[i],prefix='relay'+(i+1);
  const root=mesh(prefix,'group',p,V(1,1,1),'#111111');
- const core=mesh(prefix+'core','sphere',V(),V(.8,.8,.65),'#ffc46b',{parent:root.id,metalness:.3});scale(core,prefix+'core',alive);
- const shell=mesh(prefix+'rim','sphere',V(),V(1.15,1.15,.55),'#5e6975',{parent:root.id,opacity:.55,metalness:.8});scale(shell,prefix+'rim',alive);
+ mesh(prefix+'core','sphere',V(),V(.8,.8,.65),'#ffc46b',{parent:root.id,metalness:.3});
+ mesh(prefix+'rim','sphere',V(),V(1.15,1.15,.55),'#5e6975',{parent:root.id,opacity:.55,metalness:.8});
  for(let n=0;n<3;n++){
-  const a=n*Math.PI*2/3+.25,dir=V(Math.cos(a),Math.sin(a),.25),plate=mesh(prefix+'plate'+n,'sphere',V(dir.x*.9,dir.y*.9,0),V(.72,1.35,.45),'#344b5d',{parent:root.id,rotation:V(0,15,n*120-75),finish:'polished',metalness:.75});
-  scale(plate,prefix+'plate'+n,t=>t<at?1:1-clamp((t-at)/.85));
-  for(const axis of ['x','y','z'])joint(plate,prefix+'drift'+n+axis,'translation',axis,-5,5,0,t=>dir[axis]*3*clamp((t-at)/.85));
+  const a=n*Math.PI*2/3+.25,dir=V(Math.cos(a),Math.sin(a),.25);
+  mesh(prefix+'plate'+n,'sphere',V(dir.x*.9,dir.y*.9,0),V(.72,1.35,.45),'#344b5d',{parent:root.id,rotation:V(0,15,n*120-75),finish:'polished',metalness:.75});
  }
- const flash=mesh(prefix+'flash','sphere',V(),V(2.7,2.7,2.7),'#ffe5b7',{parent:root.id,opacity:.75,metalness:0});scale(flash,prefix+'flash',t=>event(t,at,.06,.03,.38),1.2,['x','y','z']);
- const fire=mesh(prefix+'fire','sphere',V(),V(4.1,4.1,4.1),'#ed8b42',{parent:root.id,opacity:.16,metalness:0});scale(fire,prefix+'fire',t=>event(t,at,.16,.05,.65),1.2,['x','y','z']);
+ effectSites.push({id:prefix,part:prefix,radius:1.1,debris:[prefix+'rim',...Array.from({length:3},(_,n)=>prefix+'plate'+n)]});
 }
 for(let i=0;i<6;i++)relay(i);
 // Elliptical spatial tears, with open centres and layered translucent glow.
@@ -318,6 +317,7 @@ for(const [id,start,duration,view]of specs){
  const compact=keys=>{const out=[];for(const k of keys){while(out.length>=2){const a=out.at(-2),b=out.at(-1),linear=a.value+(k.value-a.value)*(b.at-a.at)/(k.at-a.at);if(Math.abs(b.value-linear)>1e-8)break;out.pop();}out.push(k);}return out;};
  const tracks=[...curves].map(([joint,f])=>({joint,keys:compact(kt.map(at=>({at,value:f(start+at)})))})).filter(track=>track.keys.some(k=>Math.abs(k.value-track.keys[0].value)>1e-9));
  if(!tracks.length){const [joint,f]=curves.entries().next().value;tracks.push({joint,keys:[{at:0,value:f(start)},{at:duration,value:f(start)}]});}
+ if(!tracks.length)tracks.push({joint:'arrivalRootSpin',keys:[{at:0,value:0}]});
  assert.ok(tracks.length<=64,id+': '+tracks.length+' animated tracks');animations[id]={duration,tracks};
  const end=start+duration;
  const cockpit=view==='cockpit',actor={id:'hero',character:cockpit?'cockpit':'needlefin',path:{path:id,duration,orient:!cockpit},motions:[]};
@@ -354,9 +354,18 @@ for(const [id,start,duration,view]of specs){
   elements.push(element('indicator3dark','shape',{x:50,y:79,width:3.8,height:2.1,shapeType:'ellipse',fillColor:'#172f3a',borderColor:'#3a5662',borderWidth:2,at:hits[3]-start}));
  }
  for(const e of elements)e.id=id+'-'+e.id;
- scenes.push({id,name,duration,transition:'none',background:'#050b19',backgroundAsset:'nebula',elements,stage3d:{stage:'sector',camera,actors,stageJoints:Object.fromEntries([...curves].map(([id,f])=>[id,f(start)])),stageMotions:[{animation:id,duration,blend:0}]}});
+ const effects=[];
+ for(let i=0;i<hits.length;i++){
+  const at=hits[i],site='relay'+(i+1);
+  // Repeat historical events with negative scene-local at: damage must survive
+  // cuts and seeking without any project-specific visibility/fragment tracks.
+  if(at<end)effects.push({site,kind:'explode',at:at-start,duration:1.6,intensity:i===5?1.35:1,seed:101+i,result:'break'});
+  if(at<end&&at+1.3>start)effects.push({site,kind:'burn',at:at-start,duration:1.3,intensity:.7,seed:201+i});
+ }
+ if(start<=24.25&&end>22){effects.push({site:'relay6',kind:'damage',at:22-start,duration:.1,result:'char',seed:306});effects.push({site:'relay6',kind:'burn',at:22-start,duration:2.25,intensity:.45,seed:307});}
+ scenes.push({id,name,duration,transition:'none',background:'#050b19',backgroundAsset:'nebula',elements,stage3d:{stage:'sector',camera,actors,effects,stageJoints:Object.fromEntries([...curves].map(([id,f])=>[id,f(start)])),stageMotions:[{animation:id,duration,blend:0}]}});
 }
-const stage={name:'Silent relay sector — continuous 3D space',transparentBackground:true,model:{parts,animations},paths};
+const stage={name:'Silent relay sector — continuous 3D space',transparentBackground:true,model:{parts,animations,effectSites},paths};
 // Original electronic underscore, intentionally no narration. Shift to threat at the fleet reveal.
 const bass={...presetInstrument('bass'),volume:.22,release:.12},pluck={...presetInstrument('kalimba','pulse'),volume:.15,release:.15,reverb:.08},noise={...presetInstrument('bass','tick'),wave:'noise',volume:.06,attack:.002,decay:.035,sustain:0,release:.03,filter:'highpass',cutoff:1500};
 const notes=[];for(let i=0;i<64;i++){const at=i*.46875;if(at>19.7&&at<21.5)continue;const base=at<20?38:35;notes.push({instrument:'bass',at,duration:.24,pitch:base+[0,0,7,3][i%4],velocity:.6},{instrument:'tick',at,duration:.05,pitch:48,velocity:.5});if(i%2===0)notes.push({instrument:'pulse',at,duration:.15,pitch:base+24+[0,7,10,7][i/2%4],velocity:.45});}

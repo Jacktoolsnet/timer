@@ -1,3 +1,5 @@
+import {createModelEffects3D} from './effects3d';
+import type {Effect3D} from '../lib/effects3d';
 import {createExtrusionGeometry3D} from './extrusion3d';
 import {createProfileGeometry3D} from './profile3d';
 import * as THREE from 'three';
@@ -7,7 +9,7 @@ import {modelPose3D,type Model3D,type ModelMotion3D,type jointControls3D} from '
 type Storage={textures?:Map<string,THREE.Texture>;images?:Map<string,HTMLImageElement>;textureSources?:WeakMap<HTMLImageElement,THREE.Texture>;geometries:Set<THREE.BufferGeometry>;materials:Map<string,THREE.MeshStandardMaterial>};
 const sharedGeometries=new WeakMap<Storage,Map<string,THREE.BufferGeometry>>();
 /** Transform chain: position → pivot → XYZ rotation → -pivot → geometry/children. */
-export function createModel3D(model:Model3D,storage:Storage,palette:object={}){
+export function createModel3D(model:Model3D,storage:Storage,palette:object={},events:readonly Effect3D[]=[],ownerAt?:(time:number)=>THREE.Matrix4){
  const root=new THREE.Group(),nodes=new Map<string,{anchor:THREE.Group;pivot:THREE.Group;content:THREE.Group;mesh?:THREE.Mesh;profile?:ReturnType<typeof createProfileGeometry3D>}>();
  let geometries=sharedGeometries.get(storage);if(!geometries){geometries=new Map();sharedGeometries.set(storage,geometries);}
  for(const part of model.parts){
@@ -36,7 +38,9 @@ export function createModel3D(model:Model3D,storage:Storage,palette:object={}){
   nodes.get(part.id)!.mesh=mesh;content.add(mesh);
  }
  for(const part of model.parts)(part.parent?nodes.get(part.parent)!.content:root).add(nodes.get(part.id)!.anchor);
- const update=(overrides:Record<string,number>,motions:readonly ModelMotion3D[],time:number,controls:Partial<Record<typeof jointControls3D[number],number>>={})=>{
+ let effects:ReturnType<typeof createModelEffects3D>|undefined;
+ const updateBase=(overrides:Record<string,number>,motions:readonly ModelMotion3D[],time:number,controls:Partial<Record<typeof jointControls3D[number],number>>={})=>{
+  effects?.reset();
   const values=modelPose3D(model,overrides,motions,time,controls);
   for(const part of model.parts){const {anchor,pivot,mesh,profile}=nodes.get(part.id)!;if(mesh&&!(mesh instanceof THREE.InstancedMesh))mesh.scale.set(part.size.x,part.size.y,part.size.z);anchor.position.set(part.position.x,part.position.y,part.position.z);pivot.rotation.set(part.rotation.x*Math.PI/180,part.rotation.y*Math.PI/180,part.rotation.z*Math.PI/180);
    for(const joint of part.joints){const value=values.get(joint.id)!;if(joint.motion==='translation')anchor.position[joint.axis]+=value;else if(joint.motion==='rotation')pivot.rotation[joint.axis]+=value*Math.PI/180;else if(joint.motion==='morph')profile?.update(value);else if(mesh)mesh.scale[joint.axis]*=value;}
@@ -44,5 +48,10 @@ export function createModel3D(model:Model3D,storage:Storage,palette:object={}){
    if(mesh)mesh.visible=mesh.scale.x>1e-5&&mesh.scale.y>1e-5&&mesh.scale.z>1e-5;
   }
  };
- update({},[],0);return {root,update};
+ updateBase({},[],0);
+ if(events.length)effects=createModelEffects3D(model,root,nodes,storage,events,ownerAt);
+ const update=(overrides:Record<string,number>,motions:readonly ModelMotion3D[],time:number,controls:Partial<Record<typeof jointControls3D[number],number>>={})=>{
+  if(effects)effects.update(time,at=>updateBase(overrides,motions,at,at===time?controls:{}));else updateBase(overrides,motions,time,controls);
+ };
+ return {root,update};
 }

@@ -417,6 +417,31 @@ blend 0–2 s (default .2, capped at half event duration) fades from rest/overri
 and back; 0 switches directly. Gaps/end restore rest/overrides, no implicit carry.
 Rotation keys interpolate numeric angles, not shortest arc (0→360 rolls a wheel).
 Match loop endpoints; combine simultaneous joints in one clip.
+Object-neutral destruction: Model.effectSites defines up to 32 local attachment
+sites: {id,part,position?,direction?,radius?,debris?,fireColor?,smokeColor?,sparkColor?}.
+part MUST exist; position/direction use the part's content coordinates, NOT its
+mesh size. direction defaults +Y; radius is local units (default1). debris lists
+up to24 unique part IDs within that subtree; empty selects up to24 meshes there.
+Shot.effects (max32) schedules {actor:"",site,kind,at,duration,intensity,seed,result}.
+actor:"" targets the STAGE model; otherwise use an actor ID, NOT a character ID.
+kind: burn (flames/smoke/sparks follow the attachment), explode (flash/fireball,
+smoke/sparks at the captured impact pose), damage (no particles).
+result:none(default),char(darken subtree),hide,break(hide subtree and scatter
+selected meshes). burn applies its result AFTER duration; explode/damage at at.
+Results persist to scene end, even after particles expire. Reverse seeking restores
+pristine geometry. This is deterministic visual staging, NOT material/fire physics.
+Default duration1.5s,intensity1 (.1–4),seed1 (uint32). Same seed/time => same effect.
+at is scene-local; negative at replays an earlier event across a cut. Repeat the
+same event with at=globalStart-sceneStart in later shots so damage persists.
+For negative-at moving actors the source pose is the new shot's starting pose;
+keep a moving explosion within one shot for an exact frozen release position.
+Group copies cannot be targeted individually; use an actor for such an object.
+No automatic sound: author matching audio separately. Do NOT also animate the
+same debris/visibility manually; SceneScript handles them. Example:
+model.effectSites:[{id:"engine",part:"engineHousing",radius:.4,debris:["cover"]}]
+shot.effects:[{actor:"ship",site:"engine",kind:"burn",at:2,duration:2,result:"char",seed:7},
+{actor:"ship",site:"engine",kind:"explode",at:4,duration:1.5,result:"break",seed:8}]
+
 Walk/wave still move/turn the root; joints need explicit drivers or motions for
 limb movement. Migrated figures include these drivers plus named walk/wave clips.
 Actor joint.control: none(default), mouth=max(speech,surprised), speech=audio-only,

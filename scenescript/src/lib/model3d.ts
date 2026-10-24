@@ -1,3 +1,4 @@
+import {parseEffectSites3D,type EffectSite3D} from './effects3d.ts';
 import {parseExtrusion3D,type Extrusion3D} from './extrusion3d.ts';
 import {parseProfile3D,type Profile3D} from './profile3d.ts';
 import {parseTexture3D,type Texture3D} from './texture3d.ts';
@@ -11,7 +12,7 @@ export type Part3D={extrusion?:Extrusion3D;profile?:Profile3D;texture?:Texture3D
 export type JointKey3D={at:number;value:number};
 export type JointTrack3D={joint:string;keys:JointKey3D[];easing:'linear'|'ease-in-out'};
 export type ModelAnimation3D={duration:number;tracks:JointTrack3D[]};
-export type Model3D={parts:Part3D[];animations:Record<string,ModelAnimation3D>};
+export type Model3D={effectSites?:EffectSite3D[];parts:Part3D[];animations:Record<string,ModelAnimation3D>};
 export type ModelMotion3D={animation:string;at:number;duration:number;speed:number;loop:boolean;blend:number};
 export const defaultJoint3D=():Joint3D=>({id:'joint',motion:'rotation',axis:'x',min:-180,max:180,value:0,control:'none',target:180,responses:{}});
 export const defaultPart3D=():Part3D=>({id:'part',parent:'',palette:'',instances:[],shape:'box',position:vector3D(),rotation:vector3D(),pivot:vector3D(),size:vector3D(1),color:'#36a9e1',roughness:.78,metalness:.08,opacity:1,joints:[]});
@@ -27,7 +28,7 @@ function vector(v:unknown,p:string,fallback:Vector3D,min:number,max:number):Vect
 }
 export function parseModel3D(value:unknown,path='model'):Model3D|null{
  if(value===undefined||value===null)return null;
- const v=obj(value,path);fields(v,['parts','animations'],path);
+ const v=obj(value,path);fields(v,['parts','animations','effectSites'],path);
  if(!Array.isArray(v.parts)||!v.parts.length||v.parts.length>512)throw new Error(path+'.parts: expected 1–512 parts');
  const ids=new Set<string>(),joints=new Map<string,Joint3D>();let jointCount=0;
  const parts:Part3D[]=v.parts.map((value,index)=>{
@@ -78,7 +79,8 @@ export function parseModel3D(value:unknown,path='model'):Model3D|null{
    });return {joint,keys,easing:choice(v.easing===undefined?'linear':v.easing,['linear','ease-in-out'],path+'.easing')};
   });Object.defineProperty(animations,name,{value:{duration,tracks},enumerable:true,writable:true,configurable:true});
  }
- return {parts,animations};
+ const effectSites=parseEffectSites3D(v.effectSites,parts,path+'.effectSites');
+ return {...(effectSites.length?{effectSites}:{}),parts,animations};
 }
 export function modelJoints3D(model:Model3D|null){return new Map(model?.parts.flatMap(p=>p.joints.map(j=>[j.id,j] as const))??[]);}
 export function parseJointValues3D(value:unknown,model:Model3D|null,path:string):Record<string,number>{

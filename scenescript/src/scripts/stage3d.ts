@@ -26,7 +26,7 @@ export class Stage3DRenderer{
   return this.environment.texture;
  }
  private release(world:World){world.scene.traverse(node=>{if(node instanceof THREE.InstancedMesh)node.dispose();});world.geometries.forEach(g=>g.dispose());world.materials.forEach(m=>m.dispose());world.textures?.forEach(t=>t.dispose());world.textures?.clear();world.images?.clear();world.scene.clear();}
- private world(stage:Stage3D,characters:Project['characters'],actors:Actor3D[],groups:Record<string,Group3D>,placements:GroupPlacement3D[],studio=false,images=new Map<string,HTMLImageElement>()):World{
+ private world(stage:Stage3D,characters:Project['characters'],actors:Actor3D[],groups:Record<string,Group3D>,placements:GroupPlacement3D[],studio=false,images=new Map<string,HTMLImageElement>(),shot?:Shot3D):World{
   const groundSize=stage3DGroundSize(stage),fogScale=groundSize/56,transparent=Boolean(stage.transparentBackground&&!studio);
   const scene=new THREE.Scene();scene.background=transparent?null:new THREE.Color(stage.skyColor);scene.fog=transparent?null:new THREE.Fog(stage.skyColor,35*fogScale,85*fogScale);
   const world:World={members:[],framing:null,custom:[],stageModel:null,scene,images,geometries:new Set(),materials:new Map()};
@@ -38,8 +38,11 @@ export class Stage3DRenderer{
   if(physical){scene.environment=this.studioEnvironment();scene.environmentIntensity=.55;const rim=new THREE.DirectionalLight('#a4dfff',1.1);rim.position.set(8,10,-7);scene.add(rim);const softbox=new THREE.DirectionalLight('#ffffff',1.1);softbox.position.set(10,16,5);scene.add(softbox);world.studioSweep=softbox;}
   scene.add(new THREE.HemisphereLight('#ffffff','#72864c',physical?1:2.3));const sun=new THREE.DirectionalLight('#fff2d4',physical?2:3.5);sun.position.set(-8,14,8);scene.add(sun);
   if(!transparent)box(scene,stage.groundColor,0,-.32,0,groundSize,.6,groundSize);
-  if(!studio){world.stageModel=createModel3D(stage.model??presetStageModel3D(),world,stage);scene.add(world.stageModel.root);}
-  for(const actor of actors){const character=characters[actor.character],model=createModel3D(character.model??presetCharacterModel3D(character.style),world,character);model.root.scale.setScalar(character.height/3*actor.scale);scene.add(model.root);world.custom.push({...model,actor,character});}
+  if(!studio){world.stageModel=createModel3D(stage.model??presetStageModel3D(),world,stage,shot?.effects?.filter(e=>!e.actor));scene.add(world.stageModel.root);}
+  for(const actor of actors){const character=characters[actor.character],model=createModel3D(character.model??presetCharacterModel3D(character.style),world,character,shot?.effects?.filter(e=>e.actor===actor.id),time=>{
+   const f=actor3DFrame(actor,time,actors,stage.paths??{}),m=new THREE.Matrix4().makeBasis(new THREE.Vector3(f.right.x,f.right.y,f.right.z),new THREE.Vector3(f.up.x,f.up.y,f.up.z),new THREE.Vector3(f.forward.x,f.forward.y,f.forward.z));
+   m.setPosition(f.position.x,f.position.y,f.position.z);return m.scale(new THREE.Vector3().setScalar(character.height/3*actor.scale));
+  });model.root.scale.setScalar(character.height/3*actor.scale);scene.add(model.root);world.custom.push({...model,actor,character});}
   for(const placement of placements){const group=groups[placement.group];for(const member of groupMembers3D(group)){
    const character=characters[member.character],model=createModel3D(character.model??presetCharacterModel3D(character.style),world,character),frame=groupMemberFrame3D(member,placement);
    model.root.position.set(frame.position.x,frame.position.y,frame.position.z);model.root.rotation.y=(placement.rotation+member.rotation)*Math.PI/180;model.root.scale.setScalar(character.height/3*member.scale*placement.scale);scene.add(model.root);
@@ -53,7 +56,7 @@ export class Stage3DRenderer{
   const ids=[...new Set([project.stages[shot.stage].model,...Object.values(definitions).map(c=>c.model)].flatMap(modelTextureIDs3D))];
   if(ids.length>32)throw new Error('3D textures: maximum 32 image assets per scene');
   const stamps=ids.map(id=>{const asset=project.assets[id];if(!asset)throw new Error('3D texture: missing asset '+id);let stamp=this.assetStamps.get(asset);if(!stamp||stamp.data!==asset.data){stamp={data:asset.data,id:++this.nextAssetStamp};this.assetStamps.set(asset,stamp);}return [id,stamp.id];});
-  return {placements,groups,ids,key:JSON.stringify([project.stages[shot.stage],definitions,shot.actors,groups,placements,studio,stamps])};
+  return {placements,groups,ids,key:JSON.stringify([project.stages[shot.stage],definitions,shot.actors,groups,placements,studio,stamps,shot.effects??[]])};
  }
  /** Exports and previews await decoded color maps before the first frame (never blank-texture races). */
  async prepare(project:Project,shot:Shot3D,studio=false){
@@ -61,7 +64,7 @@ export class Stage3DRenderer{
   let pending=this.pending.get(spec.key);if(!pending){pending=(async()=>{
    const images=new Map<string,HTMLImageElement>(),unique=new Map<string,HTMLImageElement>();let pixels=0;
    for(const id of spec.ids){const data=project.assets[id].data;if(!/^data:image\/(png|jpeg|webp);base64,/.test(data))throw new Error('3D texture '+id+': requires embedded PNG, JPEG or WebP');let image=unique.get(data);if(!image){image=new Image();image.src=data;try{await image.decode();}catch{throw new Error('3D texture: cannot decode '+id);}if(!image.naturalWidth||!image.naturalHeight||image.naturalWidth>4096||image.naturalHeight>4096)throw new Error('3D texture '+id+': maximum 4096 × 4096');pixels+=image.naturalWidth*image.naturalHeight;if(pixels>16777216)throw new Error('3D textures: maximum 16 megapixels per scene');unique.set(data,image);}images.set(id,image);}
-   if(this.disposed||this.lost)throw new Error('3D: graphics context unavailable.');const world=this.world(project.stages[shot.stage],project.characters,shot.actors,spec.groups,spec.placements,studio,images);this.remember(spec.key,world);
+   if(this.disposed||this.lost)throw new Error('3D: graphics context unavailable.');const world=this.world(project.stages[shot.stage],project.characters,shot.actors,spec.groups,spec.placements,studio,images,shot);this.remember(spec.key,world);
   })();this.pending.set(spec.key,pending);}
   try{await pending;}finally{if(this.pending.get(spec.key)===pending)this.pending.delete(spec.key);}
  }
@@ -69,7 +72,7 @@ export class Stage3DRenderer{
  render(project:Project,shot:Shot3D,time:number,width:number,height:number,target:HTMLCanvasElement,studio=false,speech:SpeechEnvelopes=emptySpeechEnvelopes){
   if(this.disposed||this.lost)throw new Error('3D: graphics context unavailable. Reload the project before exporting.');
   const {placements,groups,ids,key}=this.specification(project,shot,studio);let world=this.cache.get(key);
-  if(!world){if(ids.length)throw new Error('3D textures: await prepare before rendering.');world=this.world(project.stages[shot.stage],project.characters,shot.actors,groups,placements,studio);this.remember(key,world);}else{this.cache.delete(key);this.cache.set(key,world);}
+  if(!world){if(ids.length)throw new Error('3D textures: await prepare before rendering.');world=this.world(project.stages[shot.stage],project.characters,shot.actors,groups,placements,studio,new Map(),shot);this.remember(key,world);}else{this.cache.delete(key);this.cache.set(key,world);}
   if(world.studioSweep)world.studioSweep.position.set(-12+24*Math.min(1,Math.max(0,(time-.3)/3)),14,9);
   world.stageModel?.update(shot.stageJoints??{},shot.stageMotions??[],time);
   for(const r of world.members)r.update({},r.motions,groupAnimationTime3D(r.member,r.placement,time,r.duration),r.controls);

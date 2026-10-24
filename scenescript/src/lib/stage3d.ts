@@ -1,3 +1,4 @@
+import {parseEffects3D,type Effect3D} from './effects3d.ts';
 import {validateImage} from './image-assets.ts';
 import {modelTextureIDs3D,validateTextureAssets3D,remapTextureAssets3D} from './texture3d.ts';
 import {parseGroup3D,parseGroupPlacements3D,groupBudget3D,type Group3D,type GroupPlacement3D} from './group3d.ts';
@@ -19,7 +20,7 @@ export type ActorSpeech3D={source:'scene'|'project';strength:number};
 export const defaultActorSpeech3D=():ActorSpeech3D=>({source:'scene',strength:1});
 export type Actor3D={path?:PathMotion3D|null;joints:Record<string,number>;motions:ModelMotion3D[];y:number;pitch:number;roll:number;speech:ActorSpeech3D|null;expressions:ActorExpression3D[];actions:ActorAction3D[];id:string;character:string;x:number;z:number;toX:number;toZ:number;rotation:number;scale:number;action:'idle'|'walk'|'wave';at:number;duration:number};
 export type StageCamera3D=CameraRig3D&{fov?:number;yaw:number;pitch:number;distance:number;targetX:number;targetY:number;targetZ:number;orbit:number};
-export type Shot3D={groups?:GroupPlacement3D[];stageJoints?:Record<string,number>;stageMotions?:ModelMotion3D[];stage:string;camera:StageCamera3D;actors:Actor3D[]};
+export type Shot3D={effects?:Effect3D[];groups?:GroupPlacement3D[];stageJoints?:Record<string,number>;stageMotions?:ModelMotion3D[];stage:string;camera:StageCamera3D;actors:Actor3D[]};
 export const defaultCharacter3D=():Character3D=>({model:null,expression:'neutral',style:'classic',name:'Robot',bodyColor:'#36a9e1',headColor:'#dde7ed',limbColor:'#64748b',accentColor:'#ffe066',height:3});
 export const defaultStage3D=():Stage3D=>({paths:{},model:null,name:'Block plaza',skyColor:'#a7d9f5',groundColor:'#78a653',blockColor:'#e6bd7a'});
 export const defaultStageCamera3D=():StageCamera3D=>({fov:38,yaw:20,pitch:18,distance:18,targetX:0,targetY:1.6,targetZ:0,orbit:0});
@@ -51,7 +52,7 @@ export function parse3DLibrary<T>(value:unknown,parse:(v:unknown,p:string)=>T,pa
 }
 export function parseShot3D(value:unknown,characters:Record<string,Character3D>,stages:Record<string,Stage3D>,duration:number,path='stage3d',groups3d:Record<string,Group3D>={}):Shot3D|null{
  if(value===undefined||value===null)return null;
- const v=object(value,path);keys(v,['stage','camera','actors','stageJoints','stageMotions','groups'],path);const stage=identifier(v.stage,path+'.stage');if(!Object.hasOwn(stages,stage))throw new Error(path+'.stage: missing stage '+stage);
+ const v=object(value,path);keys(v,['stage','camera','actors','stageJoints','stageMotions','groups','effects'],path);const stage=identifier(v.stage,path+'.stage');if(!Object.hasOwn(stages,stage))throw new Error(path+'.stage: missing stage '+stage);
  const raw=v.camera===undefined?{}:object(v.camera,path+'.camera'),d=defaultStageCamera3D();keys(raw,[...Object.keys(d),'follow','keys'],path+'.camera');const camera={...d,...parseCameraRig3D(raw,duration,path+'.camera')};
  for(const k of ['fov','yaw','pitch','distance','targetX','targetY','targetZ','orbit'] as const){const [min,max]=k==='fov'?[20,110]:k==='pitch'?[5,80]:k==='distance'?[5,80]:k==='orbit'?[-30,30]:k==='yaw'?[-360,360]:k==='targetY'?[-5,15]:[-25,25];camera[k]=number(raw[k]===undefined?d[k]:raw[k],path+'.camera.'+k,min,max);}
  const list=v.actors===undefined?[]:v.actors;if(!Array.isArray(list)||list.length>12)throw new Error(path+'.actors: expected array (max 12)');const ids=new Set<string>();
@@ -94,7 +95,8 @@ export function parseShot3D(value:unknown,characters:Record<string,Character3D>,
  const model=stages[stage].model,stageJoints=parseJointValues3D(v.stageJoints,model,path+'.stageJoints'),stageMotions=parseModelMotions3D(v.stageMotions,model,duration,path+'.stageMotions');
  const groups=parseGroupPlacements3D(v.groups,groups3d,path+'.groups'),groupParts=groupBudget3D(groups,groups3d,characters,path+'.groups');
  if(groupParts+modelPartCount3D(model)+actors.reduce((sum,a)=>sum+modelPartCount3D(characters[a.character].model),0)>2048)throw new Error(path+': maximum 2048 active 3D parts');
- return {stage,camera,actors,stageJoints,stageMotions,groups};
+ const effects=parseEffects3D(v.effects,actor=>actor===''?model?.effectSites??[]:actors.some(a=>a.id===actor)?characters[actors.find(a=>a.id===actor)!.character].model?.effectSites??[]:undefined,duration,path+'.effects');
+ return {...(effects.length?{effects}:{}),stage,camera,actors,stageJoints,stageMotions,groups};
 }
 /** Pure absolute-time pose: seeking backwards is identical to playing forwards. */
 export function actor3DPose(a:Actor3D,time:number,actors:readonly Actor3D[]=[a],paths:Record<string,Path3D>={}){
