@@ -51,7 +51,7 @@ export function createModel3D(model:Model3D,storage:Storage,palette:object={},ev
  updateBase({},[],0);
  if(events.length)effects=createModelEffects3D(model,root,nodes,storage,events,ownerAt);
  const update=(overrides:Record<string,number>,motions:readonly ModelMotion3D[],time:number,controls:Partial<Record<typeof jointControls3D[number],number>>={})=>{
-  if(effects)effects.update(time,at=>updateBase(overrides,motions,at,at===time?controls:{}));else updateBase(overrides,motions,time,controls);
+  if(effects)effects.update(time,(at,historical)=>updateBase(overrides,motions,at,historical?{}:controls));else updateBase(overrides,motions,time,controls);
  };
  return {root,update};
 }

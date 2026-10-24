@@ -11,14 +11,16 @@ export function createModelEffects3D(model:Model3D,root:THREE.Group,nodes:Map<st
  const tint=(material:THREE.Material,intensity=1)=>{const key=material.uuid+':'+intensity;let copy=charred.get(key);if(!copy){copy=(material as THREE.MeshStandardMaterial).clone();copy.color.multiplyScalar(Math.max(.08,1-.78*Math.min(1.15,intensity)));copy.metalness*=1-.5*Math.min(1,intensity);charred.set(key,copy);storage.materials.set('effect-char-'+copy.uuid,copy);}return copy;};
  const inside=(id:string,parent:string)=>{let p=model.parts.find(p=>p.id===id);while(p){if(p.id===parent)return true;p=model.parts.find(q=>q.id===p!.parent);}return false;};
  const geometry=new THREE.SphereGeometry(.5,8,6);storage.geometries.add(geometry);
- const pool=(count:number,color:string,opacity:number,glow=false)=>{
-  const material=new THREE.MeshStandardMaterial({color,emissive:glow?color:'#000000',emissiveIntensity:glow?2:0,roughness:1,metalness:0,opacity,transparent:true,depthWrite:false,blending:glow?THREE.AdditiveBlending:THREE.NormalBlending});storage.materials.set('effect-'+material.uuid,material);
+ const tongue=new THREE.ConeGeometry(.5,1,8);storage.geometries.add(tongue);
+ const pool=(count:number,color:string,opacity:number,glow=false,additive=false)=>{
+  const material=new THREE.MeshStandardMaterial({color,emissive:glow?color:'#000000',emissiveIntensity:glow?.8:0,roughness:1,metalness:0,opacity,transparent:true,depthWrite:false,blending:additive?THREE.AdditiveBlending:THREE.NormalBlending});storage.materials.set('effect-'+material.uuid,material);
   const mesh=new THREE.InstancedMesh(geometry,material,count);mesh.frustumCulled=false;return mesh;
  };
  const entries=events.map((event,index)=>{
   const site=model.effectSites!.find(s=>s.id===event.site)!;
   const group=new THREE.Group();group.name='effect-'+index;group.matrixAutoUpdate=false;layer.add(group);
-  const flame=pool(18,site.fireColor,.7,true),smoke=pool(20,site.smokeColor,.24),sparks=pool(24,site.sparkColor,.9,true),flash=pool(1,site.sparkColor,.95,true);
+  const flame=pool(18,site.fireColor,.7,true),smoke=pool(20,site.smokeColor,.17),sparks=pool(24,site.sparkColor,.9,true,true),flash=pool(1,site.sparkColor,.3,true,true);
+  if(event.kind==='burn')flame.geometry=tongue;
   group.add(flame,smoke,sparks,flash);
   const selected=site.debris.length?site.debris:[site.part];
   const debris=event.result==='break'?model.parts.filter(p=>nodes.get(p.id)!.mesh&&selected.some(id=>inside(p.id,id))).slice(0,24).map(p=>{
@@ -29,14 +31,14 @@ export function createModelEffects3D(model:Model3D,root:THREE.Group,nodes:Map<st
  const dummy=new THREE.Object3D(),inverse=new THREE.Matrix4(),offset=new THREE.Matrix4(),rotation=new THREE.Quaternion(),position=new THREE.Vector3(),scale=new THREE.Vector3();
  const align=new THREE.Quaternion(),up=new THREE.Vector3(0,1,0);
  const reset=()=>{for(const [id,material]of original)nodes.get(id)!.mesh!.material=material;for(const n of nodes.values())n.content.visible=true;};
- const update=(time:number,pose:(at:number)=>void)=>{
+ const update=(time:number,pose:(at:number,historical?:boolean)=>void)=>{
   // Capture each explosion's original animated attachment and owner pose, then
   // restore the current pose. This also works when first seeking after impact.
   const frozen=entries.map(({event,site,debris})=>{
    const fragmentsState=effectDebrisState3D(event,time);
    if(!(event.kind==='explode'&&effectState3D(event,time).active)&&!fragmentsState.active)return null;
    const captureAt=Math.max(0,event.kind==='burn'?fragmentsState.at:event.at);
-   pose(captureAt);root.updateMatrixWorld(true);inverse.copy(root.matrixWorld).invert();
+   pose(captureAt,true);root.updateMatrixWorld(true);inverse.copy(root.matrixWorld).invert();
    const owner=ownerAt?.(captureAt)??root.matrixWorld;
    const anchor=new THREE.Matrix4().multiplyMatrices(owner,new THREE.Matrix4().multiplyMatrices(inverse,nodes.get(site.part)!.content.matrixWorld));
    const fragments=debris.map(d=>new THREE.Matrix4().multiplyMatrices(owner,new THREE.Matrix4().multiplyMatrices(inverse,nodes.get(d.id)!.mesh!.matrixWorld)));
@@ -57,7 +59,7 @@ export function createModelEffects3D(model:Model3D,root:THREE.Group,nodes:Map<st
       const a=random(e.seed,i,0)*Math.PI*2,z=random(e.seed,i,1)*2-1,s=Math.sqrt(1-z*z),vx=Math.cos(a)*s,vz=Math.sin(a)*s;
       const phase=random(e.seed,i,2),life=channel===0?.65:channel===1?1.6:.8,clock=(age/life+phase)%1;
       let x=0,y=0,zz=0,size=0,stretch=1;
-      if(channel===3){size=burst?r*5*Math.max(0,1-age/Math.min(.23,e.duration)):0;}
+      if(channel===3){size=burst?r*3*Math.max(0,1-age/Math.min(.18,e.duration)):0;}
       else if(channel===0){
        if(burst){const travel=(.25+phase)*r*age*3;x=vx*travel;y=z*travel;zz=vz*travel;size=r*(.35+phase*.45)*Math.max(0,1-state.progress)*envelope;}
        else{x=vx*r*.45;y=clock*r*1.9;zz=vz*r*.45;size=r*(.22+phase*.22)*(1-clock)*envelope;stretch=2.5;}
