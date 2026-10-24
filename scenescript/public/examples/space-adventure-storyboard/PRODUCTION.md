@@ -103,3 +103,21 @@ remain synchronized. Cockpit shots no longer contain a targeting crosshair.
 
 Two small flush nose laser ports use muted metal lips, dark bores and tiny cyan
 lenses. Laser shots alternate between their actual transformed muzzle positions.
+
+## Object-neutral damage effects
+
+The six relays now declare `model.effectSites`. Scene-local `stage3d.effects`
+request seeded explosions, fire/smoke, sparks and breakup. Old hand-built flash,
+fireball and plate-drift animation tracks have been removed. The final relay is
+already scorched and burning when approached. Existing impact times, soundtrack,
+mission indicators, approved storyboard, opening and ending remain unchanged.
+Historical events are repeated with negative local `at`, keeping destruction
+persistent across cuts and direct/reverse seeks without playback-history state.
+
+The same descriptors work on stage subtrees or actor resources. Burning follows
+an animated attachment; explosion particles and selected fragments capture the
+impact pose and detach in world space. Limits: 32 sites/model, 32 events/shot,
+24 fragment meshes/event. Fire is deterministic visual staging, not a material
+or fluid simulation. Group instances are not individually targetable; use actors
+for independently damageable objects. Moving effects should stay within a shot
+for an exact frozen impact pose (negative-at carry uses the next shot's start).

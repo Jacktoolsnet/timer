@@ -13,9 +13,9 @@ export function parseEffectSites3D(value:unknown,parts:readonly {id:string;paren
  return raw.map((item,i)=>{const p=path+'['+i+']',v=record3D(item,p),d=defaultEffectSite3D();fields3D(v,Object.keys(d),p);
   const site=id(v.id,p+'.id'),part=id(v.part,p+'.part');if(ids.has(site))throw new Error(p+'.id: duplicate site');ids.add(site);if(!available.has(part))throw new Error(p+'.part: missing part');
   const direction=vector3DInput(v.direction,p+'.direction',d.direction);if(Math.hypot(direction.x,direction.y,direction.z)<1e-5)throw new Error(p+'.direction: expected nonzero vector');
-  const debris=v.debris??[];if(!Array.isArray(debris)||debris.length>24)throw new Error(p+'.debris: maximum 24 part IDs');
+  const debris=v.debris===undefined?[]:v.debris;if(!Array.isArray(debris)||debris.length>24)throw new Error(p+'.debris: maximum 24 part IDs');
   const selected=new Set<string>();for(const name of debris){id(name,p+'.debris');if(selected.has(name))throw new Error(p+'.debris: duplicate part');selected.add(name);let current=name;while(current&&current!==part)current=available.get(current)??'';if(current!==part)throw new Error(p+'.debris: must reference the site part or its descendants');}
-  return {id:site,part,position:vector3DInput(v.position,p+'.position'),direction:norm(direction),radius:numeric3D(v.radius??d.radius,p+'.radius',.01,20),debris:[...selected],fireColor:color(v.fireColor??d.fireColor,p+'.fireColor'),smokeColor:color(v.smokeColor??d.smokeColor,p+'.smokeColor'),sparkColor:color(v.sparkColor??d.sparkColor,p+'.sparkColor')};
+  return {id:site,part,position:vector3DInput(v.position,p+'.position'),direction:norm(direction),radius:numeric3D((v.radius===undefined?d.radius:v.radius),p+'.radius',.01,20),debris:[...selected],fireColor:color((v.fireColor===undefined?d.fireColor:v.fireColor),p+'.fireColor'),smokeColor:color((v.smokeColor===undefined?d.smokeColor:v.smokeColor),p+'.smokeColor'),sparkColor:color((v.sparkColor===undefined?d.sparkColor:v.sparkColor),p+'.sparkColor')};
  });
 }
 export function parseEffects3D(value:unknown,sites:(actor:string)=>readonly EffectSite3D[]|undefined,duration:number,path:string):Effect3D[]{
@@ -23,10 +23,10 @@ export function parseEffects3D(value:unknown,sites:(actor:string)=>readonly Effe
  return raw.map((item,i)=>{const p=path+'['+i+']',v=record3D(item,p),d=defaultEffect3D();fields3D(v,Object.keys(d),p);
   const actor=v.actor===undefined?'':v.actor===''?'':id(v.actor,p+'.actor'),site=id(v.site,p+'.site'),available=sites(actor);
   if(!available)throw new Error(p+'.actor: missing actor');if(!available.some(s=>s.id===site))throw new Error(p+'.site: missing effect site on target model');
-  const seed=numeric3D(v.seed??d.seed,p+'.seed',0,4294967295);if(!Number.isInteger(seed))throw new Error(p+'.seed: expected integer');
+  const seed=numeric3D((v.seed===undefined?d.seed:v.seed),p+'.seed',0,4294967295);if(!Number.isInteger(seed))throw new Error(p+'.seed: expected integer');
   // Negative at carries the SAME event across a cut. Result persists until the
   // scene ends, even after particles die; no previous playback is required.
-  return {actor,site,kind:choice(v.kind??d.kind,['burn','explode','damage'],p+'.kind'),at:numeric3D(v.at??d.at,p+'.at',-86400,duration),duration:numeric3D(v.duration??d.duration,p+'.duration',.01,3600),intensity:numeric3D(v.intensity??d.intensity,p+'.intensity',.1,4),seed,result:choice(v.result??d.result,['none','char','hide','break'],p+'.result')};
+  return {actor,site,kind:choice((v.kind===undefined?d.kind:v.kind),['burn','explode','damage'],p+'.kind'),at:numeric3D((v.at===undefined?d.at:v.at),p+'.at',-86400,duration),duration:numeric3D((v.duration===undefined?d.duration:v.duration),p+'.duration',.01,3600),intensity:numeric3D((v.intensity===undefined?d.intensity:v.intensity),p+'.intensity',.1,4),seed,result:choice((v.result===undefined?d.result:v.result),['none','char','hide','break'],p+'.result')};
  });
 }
 export function effectState3D(e:Effect3D,time:number){
