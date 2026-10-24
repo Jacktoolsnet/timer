@@ -74,7 +74,7 @@ export function createModelEffects3D(model:Model3D,root:THREE.Group,nodes:Map<st
    }
    for(const [j,d]of debris.entries()){
     const fragment=effectDebrisState3D(e,time);d.mesh.visible=fragment.active;if(!d.mesh.visible)continue;
-    const frozenMatrix=frozen[index]!.fragments[j],center=new THREE.Vector3().setFromMatrixPosition(frozen[index]!.anchor),delta=new THREE.Vector3().setFromMatrixPosition(frozenMatrix).sub(center);
+    const frozenMatrix=frozen[index]!.fragments[j],center=new THREE.Vector3(site.position.x,site.position.y,site.position.z).applyMatrix4(frozen[index]!.anchor),delta=new THREE.Vector3().setFromMatrixPosition(frozenMatrix).sub(center);
     if(delta.length()<.01)delta.set(random(e.seed,j,8)-.5,random(e.seed,j,9)-.5,random(e.seed,j,10)-.5);delta.normalize();
     frozenMatrix.decompose(position,rotation,scale);position.addScaledVector(delta,fragment.age*r*(1.5+random(e.seed,j,11)*2));
     rotation.multiply(new THREE.Quaternion().setFromAxisAngle(delta,fragment.age*(1+random(e.seed,j,12)*4)));scale.multiplyScalar(Math.min(1,(fragment.duration-fragment.age)/.35));

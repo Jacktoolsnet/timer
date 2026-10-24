@@ -3,19 +3,19 @@ import {test,expect} from '@playwright/test';
 test('generic damage restores shared materials, detaches debris in world space and seeks deterministically',async({page})=>{
  await page.goto('/en/');await expect(page.locator('#editor')).toHaveAttribute('data-ready','true');
  const result=await page.evaluate(async()=>{
-  const {parseModel3D}=await import(/* @vite-ignore */ '/src/lib/model3d.ts' as string),{createModel3D}=await import(/* @vite-ignore */ '/src/scripts/model3d.ts' as string),{defaultEffect3D}=await import(/* @vite-ignore */ '/src/lib/effects3d.ts' as string),THREE=await import(/* @vite-ignore */ performance.getEntriesByType('resource').map(e=>e.name).find(n=>/\/three\.js\?/.test(n))!);
-  const model=parseModel3D({parts:[{id:'assembly',shape:'group'},{id:'cover',parent:'assembly',color:'#88aacc'},{id:'other',position:{x:3},color:'#88aacc'}],effectSites:[{id:'engine',part:'assembly',radius:.5,debris:['cover']}]})!;
+  const {parseModel3D}=await import(/* @vite-ignore */ '/src/lib/model3d.ts' as string),{createModel3D}=await import(/* @vite-ignore */ '/src/scripts/model3d.ts' as string),{defaultEffect3D,effectRandom3D}=await import(/* @vite-ignore */ '/src/lib/effects3d.ts' as string),THREE=await import(/* @vite-ignore */ performance.getEntriesByType('resource').map(e=>e.name).find(n=>/\/three\.js\?/.test(n))!);
+  const model=parseModel3D({parts:[{id:'assembly',shape:'group'},{id:'cover',parent:'assembly',color:'#88aacc'},{id:'other',position:{x:3},color:'#88aacc'}],effectSites:[{id:'engine',part:'assembly',position:{x:1},radius:.5,debris:['cover']}]})!;
   const events=[{...defaultEffect3D(),site:'engine',kind:'burn',at:1,duration:1,result:'char'},{...defaultEffect3D(),site:'engine',at:3,duration:1,result:'break'}];
   // Use the SAME Three module as the renderer without relying on Vite's versioned URL.
   const storage={geometries:new Set<any>(),materials:new Map<string,any>()};
   const built=createModel3D(model,storage,{},events,(t:number)=>new THREE.Matrix4().makeTranslation(t*2,0,0));
   const cover:any=built.root.getObjectByName('cover-geometry'),other:any=built.root.getObjectByName('other-geometry'),content=built.root.getObjectByName('assembly')!.children[0].children[0];
   const sample=(time:number,owner=time*2)=>{built.root.position.x=owner;built.update({},[],time);built.root.updateMatrixWorld(true);const fragment:any=built.root.getObjectByName('debris-cover'),fire:any=built.root.getObjectByName('effect-0');return {source:content.visible,cover:cover.material.color.getHexString(),other:other.material.color.getHexString(),fragment:fragment.visible,world:fragment.getWorldPosition(new THREE.Vector3()).toArray(),fire:fire.visible,pool:Array.from(fire.children[0].instanceMatrix.array)};};
-  try{const pristine=sample(0),burning=sample(1.5),charred=sample(2.5),blast=sample(3.2),moved=sample(3.2,200),ended=sample(5),back=sample(0),again=sample(3.2);return {pristine,burning,charred,blast,moved,ended,back,again};}
+  try{const pristine=sample(0),burning=sample(1.5),charred=sample(2.5),blast=sample(3.2),moved=sample(3.2,200),ended=sample(5),back=sample(0),again=sample(3.2);return {pristine,burning,charred,blast,moved,ended,back,again,expectedX:6-.2*.5*(1.5+effectRandom3D(1,0,11)*2)};}
   finally{built.root.traverse((o:any)=>{if(o.isInstancedMesh)o.dispose();});storage.geometries.forEach(g=>g.dispose());storage.materials.forEach(m=>m.dispose());}
  });
  expect(result.burning.fire).toBe(true);expect(result.charred.cover).not.toBe(result.pristine.cover);expect(result.charred.other).toBe(result.pristine.other);
- expect(result.blast.source).toBe(false);expect(result.blast.fragment).toBe(true);expect(result.ended.source).toBe(false);expect(result.ended.fragment).toBe(false);
+ expect(result.blast.world[0]).toBeCloseTo(result.expectedX,7);expect(result.blast.source).toBe(false);expect(result.blast.fragment).toBe(true);expect(result.ended.source).toBe(false);expect(result.ended.fragment).toBe(false);
  for(let i=0;i<3;i++)expect(result.moved.world[i]).toBeCloseTo(result.blast.world[i],7);
  expect(result.back.cover).toBe(result.pristine.cover);expect(result.back.source).toBe(true);expect(result.back.fire).toBe(false);
  expect(result.again).toEqual(result.blast);
