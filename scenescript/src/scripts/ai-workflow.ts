@@ -11,7 +11,7 @@ import {VoiceAssignmentError,speechVoice} from '../lib/voices';
 import {aiLanguageInstruction,aiImageLanguageInstruction} from '../lib/ai-language';
 import type {Project} from '../lib/model';
 import {validateProject} from '../lib/model';
-import {storyboardGuide,type Storyboard,type BoardReviewTarget} from '../lib/storyboard';
+import {canApproveStoryboard,storyboardGuide,type Storyboard,type BoardReviewTarget} from '../lib/storyboard';
 import {boardManifest,projectManifest,inputJson,planningBoard,requireApprovedBoard,acceptPlanning,acceptScript,imagePrompt,acceptImage,boardReferences} from '../lib/ai-workflow';
 import {AiApiError,generateText,generateImage,generateSpeech,listGenerationModels} from '../lib/ai-api';
 import {speechJobs,attachSpeechFiles,type SpeechJob} from '../lib/speech-jobs';
@@ -19,7 +19,7 @@ import {readAudioFile} from './audio';
 import {ensureApiVaultUnlocked,requestApiKey} from './api-vault';
 import {VaultError} from '../lib/api-vault';
 import type {aiWorkflowWords} from '../lib/ai-workflow-i18n';
-export type AiWorkflowContext={project:Project;valid:()=>boolean;apply:(p:Project)=>void;preload?:(p:Project)=>Promise<void>;draft?:boolean};
+export type AiWorkflowContext={project:Project;valid:()=>boolean;apply:(p:Project)=>void;preload?:(p:Project)=>Promise<void>;draft?:boolean;applyScript?:(p:Project)=>void};
 export type AiWorkflowOptions={imageTarget?:BoardReviewTarget;quickImage?:boolean};
 let openWorkflow:((context:AiWorkflowContext,action?:string,options?:AiWorkflowOptions)=>void)|undefined;
 export function openAiWorkflow(context:AiWorkflowContext,action='board',options:AiWorkflowOptions={}){openWorkflow?.(context,action,options);}
@@ -92,7 +92,7 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,re
   if(dialog.open||active||opening)return;opening=true;stop();
   try{if(!await ensureApiVaultUnlocked()||!next.valid())return;ctx=next;const ticket=++session;modelPicker.reset();clearPreview();jobs=[];jobsSelect.replaceChildren();option(jobsSelect,'missing',t.all);targets.replaceChildren();if(!ctx.draft)option(targets,'cover',t.cover);
   const b=ctx.project.storyboard;for(const kind of ['characters','settings','shots'] as const)for(const item of b?.[kind]??[])option(targets,kind+':'+item.id,kind+' · '+('title'in item?item.title:item.name));
-  for(const o of action.options)o.disabled=!!ctx.draft&&['script','speech'].includes(o.value);
+  for(const o of action.options)o.disabled=!!ctx.draft&&(o.value==='speech'||o.value==='script'&&(!ctx.applyScript||!b?.approved||!canApproveStoryboard(b)));
   action.value=initial;if(options.imageTarget){targets.value=options.imageTarget.kind+':'+options.imageTarget.id;if(!targets.value)return;}prompt.value='';$('draft').hidden=!ctx.draft;$<HTMLInputElement>('refs').checked=false;$<HTMLInputElement>('image-refs').checked=true;configure();if(options.quickImage&&initial==='image'){if(!await confirmQuick()||!next.valid())return;dialog.showModal();consent.checked=true;start.disabled=false;start.click();return;}dialog.showModal();
   void speechJobs(ctx.project).then(value=>{if(ticket!==session||!dialog.open)return;jobs=value;for(const j of jobs)option(jobsSelect,j.stem,j.name+(j.speaker?' · '+j.speaker:''));speechEstimate();}).catch(error);
   }finally{opening=false;}
@@ -151,7 +151,7 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,re
     }
    }
    $('status').textContent=t.ready;
-   if(candidate&&(kind==='board'||ctx.draft||kind==='image'&&target)){
+   if(candidate&&(kind==='board'||ctx.draft&&kind!=='script'||kind==='image'&&target)){
     check();controller.signal.throwIfAborted();const next=candidate;
     if(ctx.draft){ctx.apply(next);dialog.close();}
     else{ctx.apply(next);dialog.close();try{reviewStoryboard(next.storyboard!,true);}catch(e){dialog.showModal();throw e;}}
@@ -165,7 +165,7 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,re
   try{await navigator.clipboard.writeText(message);if(ticket===session&&field.value===message)$('copy-status').textContent=t.copiedError;}
   catch{if(ticket===session&&dialog.open&&field.value===message){field.focus();field.select();$('copy-status').textContent=t.copyFailed;}}
  });
- apply.addEventListener('click',()=>{if(active||!candidate)return;try{check();const next=candidate;ctx.apply(next);clearPreview();$('status').textContent=t.applied;dialog.close();}catch(e){clearPreview();error(e);}});
+ apply.addEventListener('click',()=>{if(active||!candidate)return;try{check();const next=candidate;if(action.value==='script'&&ctx.applyScript)ctx.applyScript(next);else ctx.apply(next);clearPreview();$('status').textContent=t.applied;dialog.close();}catch(e){clearPreview();error(e);}});
  const close=()=>{if(active){active.abort();return;}if(dialog.classList.contains('ai-error-view')&&candidate&&action.value==='speech'){dialog.classList.remove('ai-error-view');$('title').textContent=t.title;$('error-box').hidden=true;return;}dialog.close();};
  $('cancel').addEventListener('click',()=>active?.abort());$('close').addEventListener('click',close);dialog.addEventListener('cancel',event=>{event.preventDefault();close();});
  dialog.addEventListener('close',()=>{if(dialog.open)return;progressVisual.setRunning(false);session++;active?.abort();modelPicker.reset();clearPreview();prompt.value='';consent.checked=false;});

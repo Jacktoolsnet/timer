@@ -1304,3 +1304,15 @@ ohne Referenzen weiterhin `/v1/images/generations`. Kein Upload über Files API,
 keine automatischen Wiederholungen oder kostenpflichtigen Fallback-Aufrufe.
 Bildreferenzen verursachen zusätzliche Eingabekosten und garantieren keine vollständig identischen Figuren.
 API-Format: [offizielle OpenAI-Dokumentation](https://developers.openai.com/api/reference/resources/images/methods/edit).
+
+#### SceneScript direkt aus dem Storyboard starten
+Die Storyboard-Toolbar enthält einen eigenen Icon-Button „SceneScript aus freigegebenem Storyboard
+erstellen“. Er ist nur aktiv, wenn alle Charaktere, Objekte, Kulissen und Szenen sowie das gesamte
+Storyboard freigegeben und alle Kommentare erledigt sind. Der Button speichert den aktuellen
+freigegebenen Plan ins Projekt und öffnet den KI-Workflow direkt mit der Aufgabe SceneScript.
+Auch im allgemeinen KI-Einstieg aus einem vollständig freigegebenen Storyboard ist diese Aufgabe
+jetzt wählbar. Vor der kostenpflichtigen Anfrage gilt weiterhin die Daten-/Kostenbestätigung.
+Das ausführbare Ergebnis wird zunächst validiert und als Vorschau angeboten, nicht automatisch
+als Storyboard-Antwort übernommen. Erst „Übernehmen“ ersetzt das aktuelle Projekt/Video, erhält
+das freigegebene Storyboard, schließt beide Dialoge und erlaubt Undo. Abbruch oder Schließen der
+Vorschau lässt das bestehende Video unverändert.

@@ -6,7 +6,7 @@ import {voicePickerWords} from '../lib/voice-picker-i18n';
 import type {Language} from '../lib/i18n';
 import {videoLanguageForLocale,videoLanguageOptions} from '../lib/video-languages';
 import {aiLanguageInstruction} from '../lib/ai-language';
-import {openAiWorkflow,type AiWorkflowOptions} from './ai-workflow';
+import {openAiWorkflow,type AiWorkflowOptions,type AiWorkflowContext} from './ai-workflow';
 import type {Project} from '../lib/model';
 import {MAX_STORYBOARD_BYTES,newStoryboard,parseStoryboard,importStoryboard,exportStoryboard,storyboardGuide,canApproveStoryboard,invalidateStoryboardApprovals,type BoardReviewTarget,type BoardSetting,type BoardCharacter,type Storyboard,type BoardFormat,type BoardComment} from '../lib/storyboard';
 import type {storyboardWords} from '../lib/storyboard-i18n';
@@ -14,7 +14,7 @@ const $=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(
 let showAiStoryboard:((board:Storyboard,saved?:boolean)=>void)|undefined;
 /** Review planning data; API results may already be saved, never approved automatically. */
 export function openStoryboardDraft(board:Storyboard,saved=false){showAiStoryboard?.(board,saved);}
-export function installStoryboardEditor(context:()=>{project:Project;revision:number},apply:(p:Project)=>void,stop:()=>void){
+export function installStoryboardEditor(context:()=>{project:Project;revision:number},apply:(p:Project)=>void,stop:()=>void,scriptContext?:()=>AiWorkflowContext){
  const dialog=$<HTMLDialogElement>('dialog'),t=JSON.parse(dialog.dataset.words!) as ReturnType<typeof storyboardWords>;
  const fieldDialog=$<HTMLDialogElement>('field-dialog'),exchange=$<HTMLDialogElement>('exchange');
  type FieldConfig={label:string;value:string|string[];kind?:'text'|'number'|'select'|'choices'|'voice';max?:number;min?:number;limit?:number;required?:boolean;options?:[string,string][];shot?:string;target?:BoardReviewTarget;subjectKind?:boolean;newComment?:boolean;editComment?:boolean;newItem?:boolean;apply:(draft:Storyboard,value:string|string[])=>void};
@@ -51,7 +51,7 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
  const error=(e:unknown)=>{const prefix=exchange.open?'exchange-':'';$(prefix+'error-box').hidden=false;$<HTMLTextAreaElement>(prefix+'error').value=e instanceof Error?e.message:String(e);$(prefix+'error-box').scrollIntoView({block:'nearest'});};
  const clear=()=>{$('error-box').hidden=true;$('exchange-error-box').hidden=true;$('status').textContent='';};
  const touch=()=>{board.revision++;board.approved=false;dirty=true;review();};
- function review(){const button=$<HTMLButtonElement>('approve'),ready=canApproveStoryboard(board);button.disabled=board.approved||!ready;button.setAttribute('aria-pressed',String(board.approved));button.title=board.approved?t.approved:ready?t.approve:t.approve+' — '+t.approveHint;updateListState();}
+ function review(){const button=$<HTMLButtonElement>('approve'),ready=canApproveStoryboard(board);button.disabled=board.approved||!ready;button.setAttribute('aria-pressed',String(board.approved));button.title=board.approved?t.approved:ready?t.approve:t.approve+' — '+t.approveHint;const script=$<HTMLButtonElement>('script-open');script.disabled=!scriptContext||!board.approved||!ready;script.title=t.generateScript+(script.disabled?' — '+t.scriptApprovalHint:'');updateListState();}
  function node<K extends keyof HTMLElementTagNameMap>(tag:K,text?:string){const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;}
  function pencil(config:FieldConfig,key:string){
   const button=node('button');button.type='button';button.className='board-pencil';button.dataset.boardEdit=key;button.title=t.edit+': '+config.label;button.setAttribute('aria-label',button.title);
@@ -67,8 +67,8 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
   board=structuredClone(validated);origin=context();dirty=false;session++;
  }
  function runWorkflow(action='board',options:AiWorkflowOptions={}){
-  try{check();const source=board,rev=board.revision,ticket=session;
-   openAiWorkflow({project:{...origin.project,storyboard:board},draft:true,valid:()=>{try{check();return board===source&&board.revision===rev&&session===ticket;}catch{return false;}},apply:next=>{saveBoard(next.storyboard!);clear();render();$('status').textContent=t.saved;}},action,options);
+  try{check();if(action==='script'&&(!board.approved||!canApproveStoryboard(board)))return;if(action==='script')saveBoard();const source=board,rev=board.revision,ticket=session,main=scriptContext?.();
+   openAiWorkflow({project:{...origin.project,storyboard:board},draft:true,preload:main?.preload,applyScript:main?next=>{check();if(!main.valid())throw new Error(t.stale);main.apply(next);dirty=false;session++;dialog.close();}:undefined,valid:()=>{try{check();return board===source&&board.revision===rev&&session===ticket;}catch{return false;}},apply:next=>{saveBoard(next.storyboard!);clear();render();$('status').textContent=t.saved;}},action,options);
   }catch(e){error(e);}
  }
  function picture(parent:HTMLElement,id:string|null,alt:string,apply:FieldConfig['apply'],key:string,shot?:string,target?:BoardReviewTarget){
@@ -213,6 +213,7 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
  showAiStoryboard=(draft,saved)=>{show(draft,saved);if(saved)$('status').textContent=t.saved;};
  document.getElementById('open-storyboard')!.addEventListener('click',()=>show());
  $('ai-open').addEventListener('click',()=>runWorkflow());
+ $('script-open').addEventListener('click',()=>runWorkflow('script'));
  $('close').addEventListener('click',close);dialog.addEventListener('cancel',e=>{e.preventDefault();close();});
  const tabs=Array.from($('tabs').querySelectorAll<HTMLButtonElement>('[role=tab]'));
  const activateTab=(button:HTMLButtonElement,focus=false)=>{tab=button.dataset.boardTab!;render();if(focus){button.focus();button.scrollIntoView({block:'nearest',inline:'nearest'});}};

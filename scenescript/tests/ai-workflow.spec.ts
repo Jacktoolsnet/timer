@@ -355,3 +355,24 @@ test('oversized reference sources are compressed to the shared upload budget wit
  await expect(page.locator('#storyboard-status')).toContainText('saved in the project');await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();
  await page.locator('#storyboard-close').click();const saved=await exportProject(page);expect(saved.storyboard!.images.one.data).toBe(original);expect(saved.storyboard!.images.two.data).toBe(original);expect(calls).toBe(1);
 });
+
+test('approved storyboard entry permits SceneScript selection and applies the full project only explicitly',async({page})=>{
+ const before=fixture();await setup(page,before);
+ await page.route('https://api.openai.com/v1/responses',async r=>{if(r.request().method()==='OPTIONS'){await r.fulfill({headers:cors});return;}
+  const project=JSON.parse(r.request().postDataJSON().input[0].content[0].text).project;project.title='Generated from open storyboard';project.scenes[0].duration=4;await r.fulfill({headers:cors,json:response(JSON.stringify(project))});});
+ await page.locator('#open-storyboard').click();await expect(page.locator('#storyboard-script-open')).toBeEnabled();
+ await page.locator('#storyboard-ai-open').click();await expect(page.locator('#ai-workflow-action option[value=script]')).toHaveJSProperty('disabled',false);await page.locator('#ai-workflow-action').selectOption('script');
+ await generate(page);await expect(page.locator('#ai-workflow-apply')).toBeEnabled();await expect(page.locator('#ai-workflow-preview')).toBeVisible();await expect(page.locator('#project-title')).toHaveValue(before.title);
+ await page.locator('#ai-workflow-apply').click();await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();await expect(page.locator('#storyboard-dialog')).not.toBeVisible();
+ const generated=await exportProject(page);expect(generated.title).toBe('Generated from open storyboard');expect(generated.scenes[0].duration).toBe(4);expect(generated.storyboard).toEqual(before.storyboard);
+ await page.locator('#undo-project').click();expect((await exportProject(page)).title).toBe(before.title);
+});
+test('dedicated storyboard toolbar button opens SceneScript task directly without a paid call',async({page})=>{
+ await setup(page);let calls=0;page.on('request',r=>{if(r.method()==='POST'&&r.url().includes('api.openai.com'))calls++;});
+ await page.locator('#open-storyboard').click();await page.locator('#storyboard-script-open').click();await expect(page.locator('#ai-workflow-dialog')).toBeVisible();await expect(page.locator('#ai-workflow-action')).toHaveValue('script');
+ await expect(page.locator('#ai-workflow-start')).toBeDisabled();expect(calls).toBe(0);await page.locator('#ai-workflow-close').click();await expect(page.locator('#storyboard-dialog')).toBeVisible();
+});
+test('unapproved storyboard entry keeps script selection and its toolbar button disabled',async({page})=>{
+ const p=fixture();p.storyboard!.approved=false;await setup(page,p);await page.locator('#open-storyboard').click();await expect(page.locator('#storyboard-script-open')).toBeDisabled();
+ await page.locator('#storyboard-ai-open').click();await expect(page.locator('#ai-workflow-action option[value=script]')).toHaveJSProperty('disabled',true);
+});
