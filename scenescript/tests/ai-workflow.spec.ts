@@ -48,7 +48,7 @@ test('rejected and stale results show copyable errors without retry or overwriti
 test('image API cover is previewed and stored only after apply',async({page})=>{
  await setup(page);const before=await exportProject(page),png='iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aZ1sAAAAASUVORK5CYII=';
  await page.route('https://api.openai.com/v1/images/generations',async r=>{if(r.request().method()==='OPTIONS'){await r.fulfill({headers:cors});return;}expect(r.request().postDataJSON().n).toBe(1);await r.fulfill({headers:cors,json:{data:[{b64_json:png}]}});});
- await page.locator('#open-ai-workflow').click();await page.locator('#ai-workflow-action').selectOption('image');await page.locator('#ai-workflow-prompt').fill('Robot on the moon');await generate(page);await expect(page.locator('#ai-workflow-image-preview')).toBeVisible();await expect(page.locator('#ai-workflow-apply')).toBeEnabled();await page.locator('#ai-workflow-apply').click();const after=await exportProject(page);expect(after.thumbnail!.data).toBe('data:image/png;base64,'+png);expect(after.storyboard).toEqual(before.storyboard);
+ await page.locator('#open-ai-workflow').click();await page.locator('#ai-workflow-action').selectOption('image');await page.locator('#ai-workflow-prompt').fill('Robot on the moon');await generate(page);await expect(page.locator('#ai-workflow-image-preview')).toBeVisible();await expect(page.locator('#ai-workflow-apply')).toBeEnabled();await page.locator('#ai-workflow-apply').click();const after=await exportProject(page);expect(after.thumbnail!.data).toContain('data:image/png;base64,');expect(await page.evaluate(async data=>{const img=new Image();img.src=data;await img.decode();return [img.naturalWidth,img.naturalHeight];},after.thumbnail!.data)).toEqual([1536,864]);expect(after.storyboard).toEqual(before.storyboard);
 });
 
 function wav(seconds:number){const length=16000*seconds,buffer=Buffer.alloc(44+length*2);buffer.write('RIFF');buffer.writeUInt32LE(buffer.length-8,4);buffer.write('WAVEfmt ',8);buffer.writeUInt32LE(16,16);buffer.writeUInt16LE(1,20);buffer.writeUInt16LE(1,22);buffer.writeUInt32LE(16000,24);buffer.writeUInt32LE(32000,28);buffer.writeUInt16LE(2,32);buffer.writeUInt16LE(16,34);buffer.write('data',36);buffer.writeUInt32LE(length*2,40);return buffer;}
@@ -185,4 +185,29 @@ test('planning distinguishes reference inputs from separately generated preview 
  await page.locator('#ai-workflow-target').selectOption('shots:shot');expect(paid).toBe(0);
  await page.locator('#ai-workflow-action').selectOption('script');
  await expect(page.locator('#ai-workflow-planning-image-hint')).toBeHidden();
+});
+
+for(const [format,size]of [['landscape','1280x720'],['portrait','720x1280'],['square','816x816']] as const)test('sketch defaults use small project-shaped images: '+format,async({page})=>{
+ const p=fixture();p.storyboard!.format=format;await setup(page,p);
+ const png='iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aZ1sAAAAASUVORK5CYII=';let calls=0;
+ await page.route('https://api.openai.com/v1/images/generations',async r=>{if(r.request().method()==='OPTIONS'){await r.fulfill({headers:cors});return;}calls++;const body=r.request().postDataJSON();expect(body.size).toBe(size);expect(body.quality).toBe('low');await r.fulfill({headers:cors,json:{data:[{b64_json:png}]}});});
+ await page.locator('#open-ai-workflow').click();await page.locator('#ai-workflow-action').selectOption('image');
+ await expect(page.locator('#ai-workflow-quality')).toHaveValue('high');await expect(page.locator('#ai-workflow-size')).toHaveValue('1536x864');
+ await page.locator('#ai-workflow-target').selectOption('shots:shot');
+ await expect(page.locator('#ai-workflow-quality')).toHaveValue('low');await expect(page.locator('#ai-workflow-size')).toHaveValue(size);await expect(page.locator('#ai-workflow-size')).toHaveAttribute('readonly','');
+ await generate(page);await expect(page.locator('#storyboard-dialog')).toBeVisible();await page.locator('#storyboard-save').click();
+ const after=await exportProject(page),data=after.storyboard!.images[after.storyboard!.shots[0].image!].data!;
+ expect(await page.evaluate(async data=>{const img=new Image();img.src=data;await img.decode();return [img.naturalWidth,img.naturalHeight];},data)).toEqual(size.split('x').map(Number));expect(calls).toBe(1);
+});
+test('fixed-size image models use supported dimensions and crop to the project format',async({page})=>{
+ const p=fixture();p.format='portrait';p.storyboard!.format='portrait';await setup(page,p);
+ const png='iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aZ1sAAAAASUVORK5CYII=';
+ await page.route('https://api.openai.com/v1/images/generations',async r=>{if(r.request().method()==='OPTIONS'){await r.fulfill({headers:cors});return;}expect(r.request().postDataJSON()).toMatchObject({model:'gpt-image-1.5',size:'1024x1536',quality:'low'});await r.fulfill({headers:cors,json:{data:[{b64_json:png}]}});});
+ await page.locator('#open-ai-workflow').click();await page.locator('#ai-workflow-action').selectOption('image');
+ await expect(page.locator('#ai-workflow-size')).toHaveValue('864x1536');
+ await page.locator('#ai-workflow-target').selectOption('shots:shot');await page.locator('#ai-workflow-model-choice').selectOption('gpt-image-1.5');
+ await expect(page.locator('#ai-workflow-size')).toHaveValue('720x1280');await expect(page.locator('#ai-workflow-quality')).toHaveValue('low');
+ await generate(page);await expect(page.locator('#storyboard-dialog')).toBeVisible();await page.locator('#storyboard-save').click();
+ const after=await exportProject(page),data=after.storyboard!.images[after.storyboard!.shots[0].image!].data!;
+ expect(await page.evaluate(async data=>{const img=new Image();img.src=data;await img.decode();return [img.naturalWidth,img.naturalHeight];},data)).toEqual([720,1280]);
 });

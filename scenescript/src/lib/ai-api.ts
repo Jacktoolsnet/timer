@@ -1,3 +1,4 @@
+import {validImageSize} from './ai-image-settings.ts';
 import {modelProfile,supportsReasoning,type ReasoningEffort,type ModelEntry} from './ai-models.ts';
 import {voiceGender,type CatalogueVoice} from './voices.ts';
 import {videoLanguageCode} from './video-languages.ts';
@@ -44,7 +45,7 @@ export async function generateText(key:string,request:TextRequest,signal:AbortSi
  try{JSON.parse(text);}catch{throw new AiApiError('response');}return text;
 }
 export async function generateImage(key:string,request:{model:string;prompt:string;size:string;quality:string},signal:AbortSignal,fetcher:typeof fetch=fetch){
- if(!['1024x1024','1536x1024','1024x1536'].includes(request.size)||!['low','medium','high'].includes(request.quality)||!request.prompt.trim()||request.prompt.length>32000)throw new AiApiError('request');
+ if(!validImageSize(request.model,request.size)||!['low','medium','high'].includes(request.quality)||!request.prompt.trim()||request.prompt.length>32000)throw new AiApiError('request');
  const r=json(await call('openai','/v1/images/generations',key,{...request,model:id(request.model),n:1,output_format:'png'},signal,12*MiB,fetcher));
  const data=r?.data?.[0]?.b64_json;if(typeof data!=='string'||!data||data.length>Math.ceil(8*MiB/3)*4||!/^[A-Za-z0-9+/]*={0,2}$/.test(data))throw new AiApiError('response');return 'data:image/png;base64,'+data;
 }

@@ -26,7 +26,8 @@ const {lang}=Astro.props,t=aiWorkflowWords(lang),m=aiModelWords(lang),l=aiWorkfl
    </section>
    <section id="ai-workflow-image-options" class="ai-flow-tile" data-ai-tile="image" aria-labelledby="ai-image-heading" hidden><h3 id="ai-image-heading">{l.image}</h3>
     <label>{t.target}<select id="ai-workflow-target"></select></label>
-    <label>{t.size}<select id="ai-workflow-size"><option>1024x1024</option><option>1024x1536</option><option>1536x1024</option></select></label>
+    <label>{t.size}<input id="ai-workflow-size" type="text" readonly aria-describedby="ai-workflow-image-size-hint"/></label>
+    <p id="ai-workflow-image-size-hint" class="small-hint">{t.imageSizeHint}</p>
     <label>{t.quality}<select id="ai-workflow-quality"><option value="low">{t.low}</option><option value="medium" selected>{t.medium}</option><option value="high">{t.high}</option></select></label>
     <details class="ai-flow-details"><summary>{l.details}</summary><p class="small-hint">{t.imageHint}</p></details>
    </section>

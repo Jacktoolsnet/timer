@@ -1244,3 +1244,13 @@ Anbieter-, Modell- und Kontextgrenzen, lokale Antwortgrößen und Timeouts bleib
 bestehen. Reasoning verbraucht weiterhin Generierungstokens; größere Antworten
 können höhere Kosten verursachen. Unvollständige/ungültige Antworten werden nicht
 übernommen, aber auch nicht automatisch kostenpflichtig wiederholt oder fortgesetzt.
+
+#### Storyboard-Vorschaubilder und Cover
+Die Bildgröße folgt automatisch dem Storyboard-Format; Cover folgen dem ausführbaren Projektformat.
+Skizzen starten mit Qualität `low`: GPT Image 2 nutzt 1280×720 (16:9), 720×1280 (9:16) oder 816×816.
+Cover starten mit `high` und 1536×864, 864×1536 oder 1024×1024. Die Qualität bleibt manuell änderbar.
+Für GPT Image 1.5 und unbekannte Modelle werden konservativ die festen Standardgrößen angefragt;
+danach wird lokal mittig auf das Zielformat zugeschnitten. Dabei können Randdetails verloren gehen.
+Das Verkleinern oder Zuschneiden nach der Erzeugung spart keine API-Kosten. Kosten hängen von Modell,
+Qualität und Abrechnung des Anbieters ab; kleinere Auflösung allein ist keine Preisgarantie.
+Bereits vorhandene Bilder bleiben unverändert. Keine automatischen kostenpflichtigen Bildaufrufe.

@@ -81,3 +81,24 @@ test('JSON mode always includes an explicit JSON instruction inside input, even 
 test('text generation adds no application output-token cap, including for unknown models',async()=>{
  for(const model of ['gpt-6.1-sol','gpt-5-mini','gpt-future-model'])await generateText(key,{...request,model},signal(),async(_,init)=>{const body=JSON.parse(String(init?.body));assert.ok(!Object.hasOwn(body,'max_output_tokens'));return Response.json(completed('{"ok":true}'));});
 });
+
+test('image presets preserve exact project ratios and only use custom sizes for known GPT Image 2',async()=>{
+ const {imageSettings,validImageSize}=await import('../src/lib/ai-image-settings.ts');
+ for(const format of ['landscape','portrait','square'] as const)for(const cover of [false,true]){
+  const settings=imageSettings('gpt-image-2',format,cover),[w,h]=settings.size.split('x').map(Number);
+  assert.equal(w/h,format==='landscape'?16/9:format==='portrait'?9/16:1);
+  assert.equal(settings.quality,cover?'high':'low');assert.equal(settings.size,settings.requestSize);
+  assert.equal(validImageSize('gpt-image-2',settings.requestSize),true);
+  for(const model of ['gpt-image-1.5','unknown-model']){
+   const legacy=imageSettings(model,format,cover);
+   assert.ok(['1024x1024','1536x1024','1024x1536'].includes(legacy.requestSize));
+   assert.equal(legacy.size,settings.size);assert.equal(validImageSize(model,legacy.requestSize),true);
+  }
+ }
+ assert.equal(validImageSize('gpt-image-2-2026-10-01','1280x720'),true);
+});
+test('invalid image dimensions fail locally before a paid request',async()=>{
+ for(const [model,size]of [['gpt-image-2','256x256'],['gpt-image-2','1152x648'],['gpt-image-2','3840x3840'],['gpt-image-1.5','1280x720'],['unknown-model','1280x720']]){
+  let calls=0;await assert.rejects(generateImage(key,{model,size,prompt:'Sketch',quality:'low'},signal(),async()=>{calls++;return Response.json({});}),AiApiError);assert.equal(calls,0);
+ }
+});
