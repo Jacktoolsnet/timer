@@ -10,7 +10,7 @@ test('Responses sends minimal fixed-origin request, secret only in header, no st
  const result=await generateText(key,{...request,images:['data:image/png;base64,AAAA']},signal(),async(url,init)=>{
   calls++;assert.equal(url,'https://api.openai.com/v1/responses');assert.equal(init?.credentials,'omit');assert.equal(init?.redirect,'error');assert.equal(init?.cache,'no-store');assert.equal(init?.referrerPolicy,'no-referrer');
   assert.equal((init?.headers as Record<string,string>).Authorization,'Bearer '+key);assert.ok(!String(init?.body).includes(key));
-  const body=JSON.parse(String(init?.body));assert.equal(body.store,false);assert.equal(body.text.format.type,'json_object');assert.equal(body.max_output_tokens,2048);assert.equal(body.input[0].content[1].type,'input_image');
+  const body=JSON.parse(String(init?.body));assert.equal(body.store,false);assert.equal(body.text.format.type,'json_object');assert.equal(body.max_output_tokens,2048);assert.equal(body.input[0].content[2].type,'input_image');
   return Response.json(completed('{"valid":true}'));
  });assert.deepEqual(JSON.parse(result),{valid:true});assert.equal(calls,1);
 });
@@ -62,4 +62,17 @@ test('model catalogs are read-only, provider-specific, bounded and discard unrel
  const openai=await listGenerationModels('openai',key,signal(),async(url,init)=>{assert.equal(url,'https://api.openai.com/v1/models');assert.equal(init?.method,'GET');assert.equal(init?.body,undefined);assert.equal((init?.headers as Record<string,string>).Authorization,'Bearer '+key);return Response.json({data:[{id:'gpt-6.1-sol',owned_by:key},{id:'gpt-6.1-sol'},{id:'unsafe id'},null]});});assert.deepEqual(openai,[{id:'gpt-6.1-sol',name:'gpt-6.1-sol'}]);
  const eleven=await listGenerationModels('elevenlabs',key,signal(),async(url,init)=>{assert.equal(url,'https://api.elevenlabs.io/v1/models');assert.equal((init?.headers as Record<string,string>)['xi-api-key'],key);return Response.json([{model_id:'tts_model',name:'TTS',can_do_text_to_speech:true},{model_id:'vc_model',name:'VC',can_do_text_to_speech:false}]);});assert.deepEqual(eleven,[{id:'tts_model',name:'TTS'}]);
  await assert.rejects(listGenerationModels('openai',key,signal(),mock({data:new Array(2001).fill({id:'model'})})),AiApiError);
+});
+
+
+test('JSON mode always includes an explicit JSON instruction inside input, even with a JSON-free project payload',async()=>{
+ const input=JSON.stringify({request:'',referenceImageIds:[],storyboard:{kind:'scenescript-storyboard',version:'1.0',board:{title:'Space adventure',language:'German'}}});assert.ok(!/json/i.test(input));
+ for(const model of ['gpt-6.1-sol','gpt-5-mini']){
+  let calls=0;const result=await generateText(key,{...request,model,input,instructions:'Return JSON according to the supplied format.',reasoning:'medium'},signal(),async(_,init)=>{
+   calls++;const body=JSON.parse(String(init?.body));assert.equal(body.text.format.type,'json_object');assert.equal(body.input[0].content[0].text,input);assert.deepEqual(JSON.parse(body.input[0].content[0].text),JSON.parse(input));
+   const inputText=body.input.flatMap((m:any)=>m.content).filter((c:any)=>c.type==='input_text').map((c:any)=>c.text).join(' ');
+   if(!/json/i.test(inputText))return Response.json({error:{message:'Response input messages must contain the word json',param:'input'}},{status:400});
+   assert.match(inputText,/Return exactly one valid JSON object/);return Response.json(completed('{"ok":true}'));
+  });assert.deepEqual(JSON.parse(result),{ok:true});assert.equal(calls,1);
+ }
 });

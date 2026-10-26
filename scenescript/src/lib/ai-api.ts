@@ -30,7 +30,9 @@ export async function generateText(key:string,request:TextRequest,signal:AbortSi
  if(!Number.isInteger(request.maxTokens)||request.maxTokens<1024||request.maxTokens>65536)throw new AiApiError('request');
  if(modelProfile(request.model)&&modelProfile(request.model)!.task!=='text')throw new AiApiError('request');
  if(request.reasoning!==undefined&&!supportsReasoning(request.model,request.reasoning))throw new AiApiError('request');
- const content:unknown[]=[{type:'input_text',text:request.input}];
+ // JSON mode validates input messages, not just the top-level instructions.
+ // Keep the structured project payload unchanged and add a separate format cue.
+ const content:unknown[]=[{type:'input_text',text:request.input},{type:'input_text',text:'Return exactly one valid JSON object following the supplied instructions. Do not use Markdown or add text outside the JSON object.'}];
  for(const image of request.images??[]){if(!/^data:image\/(png|jpeg|webp);base64,/.test(image))throw new AiApiError('request');content.push({type:'input_image',image_url:image,detail:'low'});}
  const body={model:id(request.model),instructions:request.instructions,input:[{role:'user',content}],text:{format:{type:'json_object'}},max_output_tokens:request.maxTokens,store:false,...(request.reasoning?{reasoning:{effort:request.reasoning}}:{})};
  if(new TextEncoder().encode(JSON.stringify(body)).length>10*MiB)throw new AiApiError('size');
