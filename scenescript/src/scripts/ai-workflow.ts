@@ -35,7 +35,7 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,re
  function speechEstimate(){const selected=selectedSpeechJobs();$('speech-estimate').textContent=selected.length?`${selected.length} ${t.assignments} · ${selected.reduce((n,j)=>n+j.text.length,0)} ${t.characters}`:t.empty;$<HTMLTextAreaElement>('speech-text').value=selected.map(j=>j.text).join('\n\n');}
  function configure(){
   clearPreview();$('error-box').hidden=true;$('status').textContent='';consent.checked=false;const kind=action.value;modelPicker.configure(models[kind]);
-  $('text-options').hidden=kind==='image'||kind==='speech';$('content-options').hidden=kind==='speech';$('image-options').hidden=kind!=='image';$('speech-options').hidden=kind!=='speech';$('refs-label').hidden=kind==='image'||kind==='speech';$('prompt-label').hidden=kind==='speech';speechEstimate();busy(false);
+  $('planning-image-hint').hidden=kind!=='board';$('text-options').hidden=kind==='image'||kind==='speech';$('content-options').hidden=kind==='speech';$('image-options').hidden=kind!=='image';$('speech-options').hidden=kind!=='speech';$('refs-label').hidden=kind==='image'||kind==='speech';$('prompt-label').hidden=kind==='speech';speechEstimate();busy(false);
  }
  function preview(p:Project,kind:string){
   check();candidate=p;$('preview').hidden=false;

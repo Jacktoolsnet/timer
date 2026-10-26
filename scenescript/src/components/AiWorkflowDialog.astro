@@ -38,6 +38,7 @@ const {lang}=Astro.props,t=aiWorkflowWords(lang),m=aiModelWords(lang),l=aiWorkfl
    </section>
    <section id="ai-workflow-content-options" class="ai-flow-tile" data-ai-tile="content" aria-labelledby="ai-content-heading"><h3 id="ai-content-heading">{l.content}</h3>
    <label id="ai-workflow-prompt-label">{t.prompt}<textarea id="ai-workflow-prompt" rows="5" maxlength="10000"></textarea></label>
+   <p id="ai-workflow-planning-image-hint" class="small-hint">{t.planningImageHint}</p>
    <label id="ai-workflow-refs-label" class="ai-check board-approval-switch"><input id="ai-workflow-refs" type="checkbox" role="switch"/><span class="board-switch-track" aria-hidden="true"></span><span>{t.refs}</span></label>
    </section>
    <section class="ai-flow-tile ai-flow-wide ai-flow-consent" data-ai-tile="consent" aria-labelledby="ai-consent-heading"><h3 id="ai-consent-heading">{l.consent}</h3>

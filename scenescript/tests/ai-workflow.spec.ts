@@ -171,3 +171,18 @@ test('AI workflow groups settings into responsive task tiles with collapsible hi
 test('storyboard generation satisfies the API JSON-mode input requirement without user-entered JSON text',async({page})=>{
  await setup(page);let calls=0;await page.route('https://api.openai.com/v1/responses',async r=>{if(r.request().method()==='OPTIONS'){await r.fulfill({headers:cors});return;}calls++;const body=r.request().postDataJSON(),data=JSON.parse(body.input[0].content[0].text);expect(body.model).toBe('gpt-6.1-sol');expect(data.request).toBe('');expect(body.input[0].content[0].text.toLowerCase()).not.toContain('json');const text=body.input.flatMap((m:any)=>m.content).filter((c:any)=>c.type==='input_text').map((c:any)=>c.text).join(' ');if(!/json/i.test(text)){await r.fulfill({headers:cors,status:400,json:{error:{message:'Response input messages must contain the word json',param:'input'}}});return;}data.storyboard.board.approved=false;data.storyboard.board.title='JSON mode fixed';await r.fulfill({headers:cors,json:response(JSON.stringify(data.storyboard))});});await page.locator('#open-ai-workflow').click();await page.locator('#ai-workflow-use-recommendation').click();await generate(page);await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();await expect(page.locator('#storyboard-content')).toContainText('JSON mode fixed');expect(calls).toBe(1);
 });
+
+test('planning distinguishes reference inputs from separately generated preview images',async({page})=>{
+ await setup(page,fixture(),'de');let paid=0;page.on('request',r=>{if(r.method()==='POST'&&r.url().startsWith('https://api.openai.com/'))paid++;});
+ await page.locator('#open-ai-workflow').click();
+ await expect(page.locator('#ai-workflow-planning-image-hint')).toBeVisible();
+ await expect(page.locator('#ai-workflow-planning-image-hint')).toContainText('separate kostenpflichtige Anfrage');
+ await expect(page.locator('#ai-workflow-refs-label')).toContainText('erzeugt keine Bilder');
+ await page.locator('#ai-workflow-refs').check();expect(paid).toBe(0);
+ await page.locator('#ai-workflow-action').selectOption('image');
+ await expect(page.locator('#ai-workflow-planning-image-hint')).toBeHidden();
+ await expect(page.locator('#ai-workflow-target')).toBeVisible();
+ await page.locator('#ai-workflow-target').selectOption('shots:shot');expect(paid).toBe(0);
+ await page.locator('#ai-workflow-action').selectOption('script');
+ await expect(page.locator('#ai-workflow-planning-image-hint')).toBeHidden();
+});
