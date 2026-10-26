@@ -1153,8 +1153,9 @@ body.recording .comic-edit-overlay{display:none}
 #ai-workflow-settings label{display:grid;gap:.4rem}
 #ai-workflow-dialog input:not([type=checkbox]),#ai-workflow-dialog select,#ai-workflow-dialog textarea{width:100%;box-sizing:border-box;min-width:0}
 #ai-workflow-dialog textarea{resize:vertical}
-#ai-workflow-dialog .ai-check{display:flex;align-items:flex-start;gap:.6rem}
-#ai-workflow-dialog .ai-check input{margin-top:.3rem;flex-shrink:0}
+#ai-workflow-dialog .ai-check{position:relative;display:flex;align-items:flex-start;gap:.6rem;min-height:44px;cursor:pointer}
+#ai-workflow-dialog .ai-check>input{position:absolute;left:0;top:0;width:46px;height:26px;margin:0;opacity:0;cursor:pointer}
+#ai-workflow-dialog .ai-check>input:disabled+.board-switch-track{opacity:.4}
 #ai-workflow-dialog .ai-disclosure{padding:.8rem;border:1px solid #69849d;border-radius:.6rem;background:#1b354333}
 #ai-workflow-image-options,#ai-workflow-speech-options{display:grid;gap:.8rem}
 #ai-workflow-preview{padding:1rem;border:1px solid #599971;border-radius:.7rem;background:#528e6512}

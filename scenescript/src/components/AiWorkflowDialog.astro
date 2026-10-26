@@ -30,9 +30,9 @@ const {lang}=Astro.props,t=aiWorkflowWords(lang),m=aiModelWords(lang);
     <p>{t.speechHint}</p><p id="ai-workflow-speech-estimate"></p><label>{t.speechText}<textarea id="ai-workflow-speech-text" rows="4" readonly></textarea></label>
    </div>
    <label id="ai-workflow-prompt-label">{t.prompt}<textarea id="ai-workflow-prompt" rows="4" maxlength="10000"></textarea></label>
-   <label id="ai-workflow-refs-label" class="ai-check"><input id="ai-workflow-refs" type="checkbox"/>{t.refs}</label>
+   <label id="ai-workflow-refs-label" class="ai-check board-approval-switch"><input id="ai-workflow-refs" type="checkbox" role="switch"/><span class="board-switch-track" aria-hidden="true"></span><span>{t.refs}</span></label>
    <p class="ai-disclosure">{t.risk}</p>
-   <label class="ai-check"><input id="ai-workflow-consent" type="checkbox"/>{t.consent}</label>
+   <label class="ai-check board-approval-switch"><input id="ai-workflow-consent" type="checkbox" role="switch"/><span class="board-switch-track" aria-hidden="true"></span><span>{t.consent}</span></label>
   </fieldset>
   <p id="ai-workflow-status" role="status" aria-live="polite"></p>
   <progress id="ai-workflow-progress" hidden></progress>
