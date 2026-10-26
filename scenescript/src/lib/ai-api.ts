@@ -1,10 +1,11 @@
+import {providerErrorDetails} from './ai-error-details.ts';
 import {validImageSize} from './ai-image-settings.ts';
 import {modelProfile,supportsReasoning,type ReasoningEffort,type ModelEntry} from './ai-models.ts';
 import {voiceGender,type CatalogueVoice} from './voices.ts';
 import {videoLanguageCode} from './video-languages.ts';
 /** Browser-only provider calls. Never persist keys, log responses or retry paid requests. */
 export type AiErrorCode='auth'|'permission'|'limit'|'request'|'network'|'timeout'|'cancelled'|'response'|'size'|'incomplete';
-export class AiApiError extends Error{readonly code:AiErrorCode;constructor(code:AiErrorCode){super('AI: '+code);this.code=code;}}
+export class AiApiError extends Error{readonly code:AiErrorCode;readonly details:string;constructor(code:AiErrorCode,details=''){super('AI: '+code+(details?'\n'+details:''));this.code=code;this.details=details;}}
 const id=(s:string)=>{if(!/^[a-zA-Z0-9_.:/-]{1,150}$/.test(s))throw new AiApiError('request');return s;};
 const MiB=1024*1024;
 async function bytes(response:Response,max:number,signal:AbortSignal){
@@ -21,7 +22,11 @@ async function call(provider:'openai'|'elevenlabs',path:string,key:string,body:u
  try{
   combined.throwIfAborted();
   const response=await fetcher((provider==='openai'?'https://api.openai.com':'https://api.elevenlabs.io')+path,{method:body===undefined?'GET':'POST',headers:{...(provider==='openai'?{Authorization:'Bearer '+key}:{'xi-api-key':key}),...(body===undefined?{}:{'Content-Type':'application/json'})},body:body===undefined?undefined:JSON.stringify(body),signal:combined,mode:'cors',credentials:'omit',cache:'no-store',redirect:'error',referrerPolicy:'no-referrer'});
-  if(!response.ok){await response.body?.cancel();throw new AiApiError(response.status===401?'auth':response.status===403?'permission':response.status===429||response.status===402?'limit':'request');}
+  if(!response.ok){
+   let payload:unknown;
+   try{const text=new TextDecoder().decode(await bytes(response,16*1024,combined));try{payload=JSON.parse(text);}catch{if(!/^\s*</.test(text))payload={error:{message:text}};}}catch{/* Oversized / unreadable diagnostics must not hide the HTTP error. */}
+   throw new AiApiError(response.status===401?'auth':response.status===403?'permission':response.status===429||response.status===402?'limit':'request',providerErrorDetails(provider,key,payload,response.status,response.headers.get('x-request-id')));
+  }
   return await bytes(response,max,combined);
  }catch(e){if(signal.aborted)throw new AiApiError('cancelled');if(timeout.aborted)throw new AiApiError('timeout');if(e instanceof AiApiError)throw e;throw new AiApiError('network');}
 }
@@ -38,9 +43,9 @@ export async function generateText(key:string,request:TextRequest,signal:AbortSi
  const body={model:id(request.model),instructions:request.instructions,input:[{role:'user',content}],text:{format:{type:'json_object'}},store:false,...(request.reasoning?{reasoning:{effort:request.reasoning}}:{})};
  if(new TextEncoder().encode(JSON.stringify(body)).length>10*MiB)throw new AiApiError('size');
  const r=json(await call('openai','/v1/responses',key,body,signal,12*MiB,fetcher));
- if(r?.status!=='completed')throw new AiApiError('incomplete');
+ if(r?.status!=='completed')throw new AiApiError(r?.status==='failed'?'response':'incomplete',providerErrorDetails('openai',key,r));
  let text='';if(!Array.isArray(r.output))throw new AiApiError('response');
- for(const item of r.output)if(item&&item.type==='message'&&Array.isArray(item.content))for(const c of item.content){if(!c||typeof c!=='object')throw new AiApiError('response');if(c.type==='refusal')throw new AiApiError('response');if(c.type==='output_text'&&typeof c.text==='string')text+=c.text;}
+ for(const item of r.output)if(item&&item.type==='message'&&Array.isArray(item.content))for(const c of item.content){if(!c||typeof c!=='object')throw new AiApiError('response');if(c.type==='refusal')throw new AiApiError('response',providerErrorDetails('openai',key,{error:{message:c.refusal}}));if(c.type==='output_text'&&typeof c.text==='string')text+=c.text;}
  if(!text||text.length>8*MiB)throw new AiApiError('response');
  try{JSON.parse(text);}catch{throw new AiApiError('response');}return text;
 }

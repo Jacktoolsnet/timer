@@ -102,3 +102,35 @@ test('invalid image dimensions fail locally before a paid request',async()=>{
   let calls=0;await assert.rejects(generateImage(key,{model,size,prompt:'Sketch',quality:'low'},signal(),async()=>{calls++;return Response.json({});}),AiApiError);assert.equal(calls,0);
  }
 });
+
+test('provider errors retain useful message, code, parameter and HTTP status, but never credentials or unrelated payload',async()=>{
+ let calls=0;
+ await assert.rejects(generateText(key,request,signal(),async()=>{calls++;return Response.json({error:{message:'Unsupported parameter: reasoning.effort. Key '+key,type:'invalid_request_error',code:'unsupported_parameter',param:'reasoning.effort',debug:'UNSAFE_DEBUG'},headers:{Authorization:key}},{status:400,headers:{'x-request-id':'req_test'}});}),e=>{
+  assert.ok(e instanceof AiApiError);assert.equal(e.code,'request');
+  for(const text of ['OpenAI · HTTP 400','Unsupported parameter: reasoning.effort','unsupported_parameter','param: reasoning.effort','req_test'])assert.ok(e.details.includes(text),text);
+  assert.ok(!e.details.includes(key));assert.ok(!e.message.includes(key));assert.ok(!e.details.includes('UNSAFE_DEBUG'));return true;
+ });assert.equal(calls,1);
+});
+test('ElevenLabs detail messages and plain-text errors are preserved safely',async()=>{
+ for(const detail of [{status:'quota_exceeded',message:'Not enough credits for this voice.'},'Voice unavailable']){
+  await assert.rejects(generateSpeech(key,{voice:'test',model:'eleven_multilingual_v2',text:'Hello'},signal(),async()=>Response.json({detail},{status:400})),e=>e instanceof AiApiError&&e.details.includes(typeof detail==='string'?detail:detail.message));
+ }
+ await assert.rejects(generateText(key,request,signal(),async()=>new Response('Temporarily unavailable',{status:503})),e=>e instanceof AiApiError&&e.details.includes('Temporarily unavailable'));
+});
+test('failed and incomplete Responses expose their provider diagnostics without applying a result',async()=>{
+ for(const result of [{status:'failed',error:{message:'Unable to access this model',code:'model_not_found'}},{status:'incomplete',incomplete_details:{reason:'max_output_tokens'}}]){
+  await assert.rejects(generateText(key,request,signal(),mock(result)),e=>e instanceof AiApiError&&e.details.includes(result.status==='failed'?'model_not_found':'max_output_tokens'));
+ }
+});
+test('oversized, malformed and HTML error bodies cannot hide HTTP errors or flood the UI',async()=>{
+ for(const response of [new Response('<html>Proxy error</html>',{status:502}),new Response('x'.repeat(20000),{status:429}),new Response('no',{status:401,headers:{'content-length':'20000'}})]){
+  await assert.rejects(generateText(key,request,signal(),async()=>response),e=>e instanceof AiApiError&&e.details.length<4500&&!e.details.includes('<html>')&&e.details.includes('HTTP'));
+ }
+});
+test('diagnostics redact secrets before truncation and discard control characters',async()=>{
+ const {providerErrorDetails}=await import('../src/lib/ai-error-details.ts');
+ const details=providerErrorDetails('openai',key,{error:{message:'x'.repeat(1990)+key+'\u202e\u0001 sk-proj-1234567890 Bearer OTHER_SECRET',code:key,param:'safe'}});
+ assert.ok(!details.includes(key));assert.ok(!details.includes('sk-proj-1234567890'));assert.ok(!details.includes('\u202e'));assert.ok(details.length<4500);
+ const short=providerErrorDetails('elevenlabs',key,{detail:{message:'xi-api-key: OTHER_SECRET; Authorization: Bearer TOKEN sk-test-12345678'}});
+ assert.ok(!short.includes('OTHER_SECRET'));assert.ok(!short.includes('TOKEN'));assert.ok(!short.includes('sk-test-12345678'));
+});

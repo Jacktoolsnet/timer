@@ -1262,3 +1262,18 @@ im aktuellen Projekt gespeichert. Das gilt auch für den KI-Button direkt am Bil
 Freigaben bleiben explizit; fehlerhafte, abgebrochene oder veraltete Antworten werden nicht übernommen.
 Projektänderungen lassen sich rückgängig machen. Eine exportierte Datei auf der Festplatte wird dabei
 nicht automatisch überschrieben; dafür das SceneScript weiterhin explizit herunterladen.
+
+#### Fehlerdetails aus den Anbieterantworten
+Das kopierbare Fehlerfeld zeigt die Originalmeldung des Anbieters zuerst, ergänzt durch HTTP-Status,
+Fehlertyp, Code, Parameter und Request-ID, soweit vorhanden. Darunter bleibt die allgemeine lokalisierte
+Einordnung als Hilfestellung. Die Originalmeldung wird nicht automatisch übersetzt.
+Ausgewertet werden nur bekannte Diagnosefelder; keine vollständigen Antwort-/Header-Dumps.
+Fehlerantworten sind auf 16 KiB begrenzt, einzelne Meldungen werden gekürzt und API-Schlüssel maskiert.
+HTML-Fehlerseiten werden nicht als Diagnose angezeigt. Ohne verwertbare Details bleibt die allgemeine
+Meldung erhalten. Auch fehlgeschlagene und unvollständige Responses liefern vorhandene Diagnosegründe.
+Es entstehen keine zusätzlichen API-Aufrufe oder automatischen Wiederholungen.
+
+Fehler erscheinen als kompaktes Overlay ohne die normalen Workflow-Einstellungen.
+Die untere Toolbar enthält links Kopieren und rechts Schließen (Icons mit Tooltips).
+Bei teilfertigen Sprachaufträgen führt das Schließen der Fehlermeldung zurück zur Vorschau
+der bereits erzeugten Dateien, damit diese weiterhin ausdrücklich übernommen werden können.

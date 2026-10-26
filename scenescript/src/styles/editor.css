@@ -1303,3 +1303,14 @@ body.recording .comic-edit-overlay{display:none}
 .ai-elapsed>span{font-size:.75rem;color:var(--muted)}
 #ai-workflow-elapsed{font:600 1.3rem/1.2 ui-monospace,monospace;font-variant-numeric:tabular-nums}
 @media(prefers-reduced-motion:reduce){#ai-workflow-matrix span{animation:none;transform:translateY(-35%);text-shadow:none}#ai-workflow-matrix{opacity:.15}}
+
+/* A failed request is a compact, copyable error overlay, not a settings form. */
+#ai-workflow-dialog:not(.ai-error-view) #ai-workflow-copy-error{display:none}
+#ai-workflow-dialog.ai-error-view{width:min(560px,94vw);max-width:94vw}
+#ai-workflow-dialog.ai-error-view>.dialog-inner>:not(#ai-workflow-error-box),#ai-workflow-dialog.ai-error-view #ai-workflow-matrix,#ai-workflow-dialog.ai-error-view #ai-workflow-start,#ai-workflow-dialog.ai-error-view #ai-workflow-apply,#ai-workflow-dialog.ai-error-view #ai-workflow-cancel{display:none!important}
+#ai-workflow-dialog.ai-error-view #ai-workflow-error-box{margin:0;padding:0;border:0;background:transparent}
+#ai-workflow-dialog.ai-error-view #ai-workflow-error-box>label{display:none}
+#ai-workflow-dialog.ai-error-view #ai-workflow-error{min-height:120px;max-height:50dvh;resize:vertical;color:var(--text)}
+#ai-workflow-dialog.ai-error-view>.json-footer{display:flex;justify-content:space-between}
+#ai-workflow-dialog.ai-error-view #ai-workflow-close{margin-left:auto;margin-right:0}
+#ai-workflow-copy-status{display:block;margin-top:8px;font-size:.8rem}

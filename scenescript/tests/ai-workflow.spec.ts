@@ -69,7 +69,7 @@ test('cancelling an unlock request never calls the paid endpoint',async({page})=
 test('partial speech batches can be applied and missing-recording runs skip completed audio',async({page})=>{
  const p=fixture();p.scenes[0].narration={...defaultNarration(),text:'First line'};p.scenes[1].narration={...defaultNarration(),text:'Second line'};await setup(page,p);const texts:string[]=[];
  await page.route('https://api.elevenlabs.io/v1/text-to-speech/Voice123?output_format=mp3_44100_128',async r=>{if(r.request().method()==='OPTIONS'){await r.fulfill({headers:cors});return;}const text=r.request().postDataJSON().text;texts.push(text);if(text==='Second line'&&texts.length===2)await r.fulfill({headers:cors,status:429,body:'Limited'});else await r.fulfill({headers:cors,contentType:'audio/mpeg',body:wav(2)});});
- await page.locator('#open-ai-workflow').click();await page.locator('#ai-workflow-action').selectOption('speech');await page.locator('#ai-workflow-voice').fill('Voice123');await generate(page);await expect(page.locator('#ai-workflow-status')).toHaveText(/Some recordings/);await expect(page.locator('#ai-workflow-apply')).toBeEnabled();await page.locator('#ai-workflow-apply').click();const partial=await exportProject(page);expect(partial.scenes[0].narration!.asset).toBeTruthy();expect(partial.scenes[1].narration!.asset).toBe('');
+ await page.locator('#open-ai-workflow').click();await page.locator('#ai-workflow-action').selectOption('speech');await page.locator('#ai-workflow-voice').fill('Voice123');await generate(page);await expect(page.locator('#ai-workflow-error')).toHaveValue(/Limited/);await page.locator('#ai-workflow-close').click();await expect(page.locator('#ai-workflow-status')).toHaveText(/Some recordings/);await expect(page.locator('#ai-workflow-apply')).toBeEnabled();await page.locator('#ai-workflow-apply').click();const partial=await exportProject(page);expect(partial.scenes[0].narration!.asset).toBeTruthy();expect(partial.scenes[1].narration!.asset).toBe('');
  await page.locator('#open-ai-workflow').click();await page.locator('#ai-workflow-action').selectOption('speech');await generate(page);await expect(page.locator('#ai-workflow-status')).toHaveText(/Ready/);await page.locator('#ai-workflow-apply').click();expect(texts).toEqual(['First line','Second line','Second line']);const after=await exportProject(page);expect(after.scenes[1].narration!.asset).toBeTruthy();expect(Object.keys(after.audios)).toHaveLength(2);
 });
 
@@ -107,7 +107,7 @@ test('reasoning options follow model capabilities and recommendations require an
 
 test('restricted model-list access retains manual input and default reasoning is omitted',async({page})=>{
  await setup(page);let reads=0;await page.route('https://api.openai.com/v1/models',async r=>{if(r.request().method()==='OPTIONS'){await r.fulfill({headers:cors});return;}reads++;await r.fulfill({headers:cors,status:403,json:{error:{message:openai}}});});await page.route('https://api.openai.com/v1/responses',async r=>{if(r.request().method()==='OPTIONS'){await r.fulfill({headers:cors});return;}const body=r.request().postDataJSON();expect(body.model).toBe('gpt-future-model');expect(body).not.toHaveProperty('reasoning');const data=JSON.parse(body.input[0].content[0].text).storyboard;data.board.approved=false;await r.fulfill({headers:cors,json:response(JSON.stringify(data))});});
- await page.locator('#open-ai-workflow').click();await page.locator('#ai-workflow-model-load').click();await expect(page.locator('#ai-workflow-error')).toHaveValue(/denied/);await expect(page.locator('#ai-workflow-error')).not.toHaveValue(new RegExp(openai));expect(reads).toBe(1);await page.locator('#ai-workflow-model-choice').selectOption('__manual');await page.locator('#ai-workflow-model').fill('gpt-future-model');await generate(page);await expect(page.locator('#storyboard-dialog')).toBeVisible();await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();
+ await page.locator('#open-ai-workflow').click();await page.locator('#ai-workflow-model-load').click();await expect(page.locator('#ai-workflow-error')).toHaveValue(/denied/);await expect(page.locator('#ai-workflow-error')).not.toHaveValue(new RegExp(openai));expect(reads).toBe(1);await page.locator('#ai-workflow-close').click();await page.locator('#open-ai-workflow').click();await page.locator('#ai-workflow-model-choice').selectOption('__manual');await page.locator('#ai-workflow-model').fill('gpt-future-model');await generate(page);await expect(page.locator('#storyboard-dialog')).toBeVisible();await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();
 });
 
 test('ElevenLabs model list filters TTS capability and speech requests never receive reasoning',async({page})=>{
@@ -151,7 +151,7 @@ test('generation errors are shown and copied without leaking keys; denied clipbo
 });
 
 test('cancelling the spinner leaves the existing storyboard unchanged',async({page})=>{
- await setup(page);let release!:()=>void;const gate=new Promise<void>(resolve=>release=resolve);let paid=0;await page.route('https://api.openai.com/v1/responses',async r=>{if(r.request().method()==='OPTIONS'){await r.fulfill({headers:cors});return;}paid++;await gate;await r.fulfill({headers:cors,json:response('{}')}).catch(()=>{});});await page.locator('#open-ai-workflow').click();await generate(page);await expect(page.locator('#ai-workflow-spinner')).toBeVisible();await expect.poll(()=>paid).toBe(1);await page.locator('#ai-workflow-cancel').click();await expect(page.locator('#ai-workflow-error')).toHaveValue(/cancelled/);await expect(page.locator('#ai-workflow-settings')).toBeVisible();release();await page.locator('#ai-workflow-close').click();expect((await exportProject(page)).storyboard!.title).toBe('Space plan');expect(paid).toBe(1);
+ await setup(page);let release!:()=>void;const gate=new Promise<void>(resolve=>release=resolve);let paid=0;await page.route('https://api.openai.com/v1/responses',async r=>{if(r.request().method()==='OPTIONS'){await r.fulfill({headers:cors});return;}paid++;await gate;await r.fulfill({headers:cors,json:response('{}')}).catch(()=>{});});await page.locator('#open-ai-workflow').click();await generate(page);await expect(page.locator('#ai-workflow-spinner')).toBeVisible();await expect.poll(()=>paid).toBe(1);await page.locator('#ai-workflow-cancel').click();await expect(page.locator('#ai-workflow-error')).toHaveValue(/cancelled/);await expect(page.locator('#ai-workflow-settings')).not.toBeVisible();release();await page.locator('#ai-workflow-close').click();expect((await exportProject(page)).storyboard!.title).toBe('Space plan');expect(paid).toBe(1);
 });
 
 
@@ -261,7 +261,7 @@ test('running AI shows elapsed time and theme-aware Matrix rain, respects reduce
  await page.locator('#ai-workflow-dialog').screenshot({path:'/tmp/scene-ai-matrix-'+testInfo.project.name+'.png'});
  await expect.poll(()=>releases.length).toBe(1);releases[0]();
  await expect(page.locator('#ai-workflow-error')).toHaveValue(/quota/);await expect(matrix).toBeHidden();const stopped=await elapsed.textContent();await page.waitForTimeout(1100);await expect(elapsed).toHaveText(stopped!);
- await generate(page);await expect(elapsed).toHaveText('00:00');await expect(matrix).toBeVisible();await expect.poll(()=>calls).toBe(2);
+ await page.locator('#ai-workflow-close').click();await page.locator('#open-ai-workflow').click();await generate(page);await expect(elapsed).toHaveText('00:00');await expect(matrix).toBeVisible();await expect.poll(()=>calls).toBe(2);
  await page.locator('#ai-workflow-cancel').click();await expect(matrix).toBeHidden();await expect(page.locator('#ai-workflow-error')).toHaveValue(/cancelled/);releases[1]?.();
 });
 
@@ -281,4 +281,30 @@ test('inline AI preview is saved automatically and survives closing without pres
  await page.locator('#open-storyboard').click();await page.locator('[data-board-tab=characters]').click();await page.locator('.board-generate-image').click();await page.locator('#ai-workflow-quick-start').click();
  await expect(page.locator('.board-sketch')).toHaveCount(1);await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();await expect(page.locator('#storyboard-status')).toContainText('saved in the project');
  await page.locator('#storyboard-close').click();const result=await exportProject(page);expect(result.storyboard!.characters[0].image).toBeTruthy();expect(result.storyboard!.characters[0].status).toBe('draft');expect(result.scenes).toEqual(p.scenes);
+});
+
+test('provider error details are visible and copied verbatim except for redacted secrets',async({page})=>{
+ await setup(page);await page.evaluate(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async(text:string)=>{(window as any).providerErrorCopied=text;}}}));
+ let calls=0;await page.route('https://api.openai.com/v1/responses',async r=>{if(r.request().method()==='OPTIONS'){await r.fulfill({headers:cors});return;}calls++;await r.fulfill({headers:cors,status:400,json:{error:{message:'Unsupported parameter: reasoning.effort. Credential '+openai,type:'invalid_request_error',code:'unsupported_parameter',param:'reasoning.effort',debug:password}}});});
+ await page.locator('#open-ai-workflow').click();await generate(page);const field=page.locator('#ai-workflow-error');
+ await expect(field).toHaveValue(/Unsupported parameter: reasoning.effort/);const text=await field.inputValue();
+ for(const part of ['HTTP 400','invalid_request_error','unsupported_parameter','param: reasoning.effort','[REDACTED]'])expect(text).toContain(part);
+ for(const secret of [openai,password,elevenlabs])expect(text).not.toContain(secret);
+ await page.locator('#ai-workflow-copy-error').click();expect(await page.evaluate(()=>(window as any).providerErrorCopied)).toBe(text);expect(calls).toBe(1);
+ await page.locator('#ai-workflow-close').click();expect((await exportProject(page)).storyboard!.title).toBe('Space plan');
+});
+
+test('failed AI requests show only a compact error overlay with copy left and close right',async({page})=>{
+ await setup(page);let calls=0;
+ await page.route('https://api.openai.com/v1/responses',async r=>{if(r.request().method()==='OPTIONS'){await r.fulfill({headers:cors});return;}calls++;await r.fulfill({headers:cors,status:400,json:{error:{message:'The selected model does not support this parameter.',code:'unsupported_parameter'}}});});
+ await page.locator('#open-ai-workflow').click();await generate(page);
+ const dialog=page.locator('#ai-workflow-dialog'),copy=page.locator('#ai-workflow-copy-error'),close=page.locator('#ai-workflow-close');
+ await expect(dialog).toHaveClass(/ai-error-view/);await expect(page.locator('#ai-workflow-error')).toHaveValue(/does not support/);
+ for(const id of ['settings','spinner','preview','status','start','apply','cancel'])await expect(page.locator('#ai-workflow-'+id)).not.toBeVisible();
+ await expect(dialog.locator('footer button:visible')).toHaveCount(2);
+ await expect(copy).toHaveAttribute('title','Copy error to clipboard');await expect(close).toHaveAttribute('title','Close');
+ const box=(await dialog.boundingBox())!,left=(await copy.boundingBox())!,right=(await close.boundingBox())!;
+ expect(box.width).toBeLessThanOrEqual(560);expect(left.x-box.x).toBeLessThan(40);expect(box.x+box.width-right.x-right.width).toBeLessThan(40);expect(left.x).toBeLessThan(right.x);
+ await close.click();await expect(dialog).not.toBeVisible();expect(calls).toBe(1);
+ await page.locator('#open-ai-workflow').click();await expect(dialog).not.toHaveClass(/ai-error-view/);await expect(page.locator('#ai-workflow-settings')).toBeVisible();await expect(copy).not.toBeVisible();
 });

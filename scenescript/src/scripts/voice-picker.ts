@@ -27,7 +27,7 @@ export function installVoicePicker(){
  async function load(more:boolean){
   if(active||more&&!next)return;const controller=new AbortController(),ticket=session;active=controller;busy(true);$('error-box').hidden=true;$('status').textContent=t.busy;let key='';
   try{check();key=await requestApiKey('elevenlabs',controller.signal);check();const page=await listVoicePage(key,controller.signal,more?next!:'');controller.signal.throwIfAborted();check();if(ticket!==session)return;voices=[...new Map([...(more?voices:[]),...page.voices].map(v=>[v.id,v])).values()].slice(0,1000);next=page.next;render();}
-  catch(e){if(ticket===session&&!controller.signal.aborted){$('status').textContent='';$('error-box').hidden=false;$<HTMLTextAreaElement>('error').value=e instanceof AiApiError?(e.code==='size'?errors.sizeError:errors[e.code]):e instanceof Error&&e.message===t.stale?t.stale:t.locked;}}
+  catch(e){if(ticket===session&&!controller.signal.aborted){$('status').textContent='';$('error-box').hidden=false;$<HTMLTextAreaElement>('error').value=e instanceof AiApiError?(e.details?e.details+'\n\n':'')+(e.code==='size'?errors.sizeError:errors[e.code]):e instanceof Error&&e.message===t.stale?t.stale:t.locked;}}
   finally{key='';if(ticket===session){active=undefined;busy(false);}}
  }
  $('load').addEventListener('click',()=>void load(false));$('more').addEventListener('click',()=>void load(true));filter.addEventListener('change',render);search.addEventListener('input',render);
