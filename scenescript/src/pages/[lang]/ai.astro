@@ -2,6 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import {languages} from '../../lib/i18n';
 import {editorDictionary} from '../../lib/editor-i18n';
+import {aiLanguageInstruction} from '../../lib/ai-language';
 import {aiGuide} from '../../lib/guide';
 export function getStaticPaths(){return languages.map(lang=>({params:{lang},props:{lang}}));}
 const {lang}=Astro.props,t=editorDictionary(lang);
@@ -9,7 +10,7 @@ const intro={de:'Kopiere die vollständige Anleitung für deinen KI-Agenten. Der
 ---
 <Layout lang={lang} title={t.ai+' — SceneScript'} description={t.ai+' · JSON 1.0'} route="ai">
  <article class="legal-page ai-doc"><p class="eyebrow">SCENESCRIPT / FORMAT 1.0</p><h1>{t.ai}</h1><p>{intro[lang]}</p>
- <div class="compact-actions"><button id="copy-guide" class="primary" data-copied={t.copied}>{t.copy}</button><a href="/ai.txt">Plain text</a><a href="/schema.json">JSON Schema</a><a href="/example.scenescript.json" download>{t.load} · example</a><a href="/comic.scenescript.json" download>{t.comicExample}</a><a href="/panels.scenescript.json" download>{t.panelExample}</a><a href="/camera.scenescript.json" download>{t.cameraExample}</a></div><p id="guide-status" role="status"></p>
- <pre id="ai-guide">{aiGuide}</pre><p><a href={'/'+lang+'/'}>← SceneScript</a></p></article>
+ <div class="compact-actions"><button id="copy-guide" class="primary" data-copied={t.copied}>{t.copy}</button><a href={'/'+lang+'/ai.txt'}>Plain text</a><a href="/schema.json">JSON Schema</a><a href="/example.scenescript.json" download>{t.load} · example</a><a href="/comic.scenescript.json" download>{t.comicExample}</a><a href="/panels.scenescript.json" download>{t.panelExample}</a><a href="/camera.scenescript.json" download>{t.cameraExample}</a></div><p id="guide-status" role="status"></p>
+ <pre id="ai-guide">{aiGuide+'\n'+aiLanguageInstruction(lang)}</pre><p><a href={'/'+lang+'/'}>← SceneScript</a></p></article>
  <script>document.getElementById('copy-guide')?.addEventListener('click',async()=>{const guide=document.getElementById('ai-guide')!;try{await navigator.clipboard.writeText(guide.textContent||'');document.getElementById('guide-status')!.textContent=document.getElementById('copy-guide')!.dataset.copied||'Copied.';}catch{const selection=window.getSelection();const range=document.createRange();range.selectNodeContents(guide);selection?.removeAllRanges();selection?.addRange(range);document.getElementById('guide-status')!.textContent='Ctrl+C / Cmd+C';}});</script>
 </Layout>

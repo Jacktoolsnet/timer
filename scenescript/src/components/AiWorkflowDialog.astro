@@ -1,0 +1,44 @@
+---
+import {aiWorkflowWords} from '../lib/ai-workflow-i18n';
+import type {Language} from '../lib/i18n';
+interface Props{lang:Language}
+const {lang}=Astro.props,t=aiWorkflowWords(lang);
+---
+<dialog id="ai-workflow-dialog" aria-labelledby="ai-workflow-title" data-words={JSON.stringify(t)}>
+ <header class="json-header"><h2 id="ai-workflow-title">{t.title}</h2></header>
+ <div class="dialog-inner">
+  <p id="ai-workflow-draft" hidden>{t.draftHint}</p>
+  <fieldset id="ai-workflow-settings">
+   <label>{t.action}<select id="ai-workflow-action"><option value="board">{t.board}</option><option value="script">{t.script}</option><option value="image">{t.image}</option><option value="speech">{t.speech}</option></select></label>
+   <label>{t.model}<input id="ai-workflow-model" type="text" maxlength="150" value="gpt-5-mini" autocomplete="off" spellcheck="false"/></label>
+   <label id="ai-workflow-tokens-label">{t.tokens}<input id="ai-workflow-tokens" type="number" min="1024" max="65536" step="1024" value="32768"/></label>
+   <div id="ai-workflow-image-options" hidden>
+    <label>{t.target}<select id="ai-workflow-target"></select></label>
+    <label>{t.size}<select id="ai-workflow-size"><option>1024x1024</option><option>1024x1536</option><option>1536x1024</option></select></label>
+    <label>{t.quality}<select id="ai-workflow-quality"><option value="low">{t.low}</option><option value="medium" selected>{t.medium}</option><option value="high">{t.high}</option></select></label>
+    <p>{t.imageHint}</p>
+   </div>
+   <div id="ai-workflow-speech-options" hidden>
+    <label>{t.job}<select id="ai-workflow-job"></select></label>
+    <label>{t.voice}<input id="ai-workflow-voice" type="text" maxlength="100" list="ai-workflow-voices" autocomplete="off" spellcheck="false"/></label><datalist id="ai-workflow-voices"></datalist>
+    <button id="ai-workflow-load-voices" type="button">{t.voices}</button>
+    <p>{t.speechHint}</p><p id="ai-workflow-speech-estimate"></p><label>{t.speechText}<textarea id="ai-workflow-speech-text" rows="4" readonly></textarea></label>
+   </div>
+   <label id="ai-workflow-prompt-label">{t.prompt}<textarea id="ai-workflow-prompt" rows="4" maxlength="10000"></textarea></label>
+   <label id="ai-workflow-refs-label" class="ai-check"><input id="ai-workflow-refs" type="checkbox"/>{t.refs}</label>
+   <p class="ai-disclosure">{t.risk}</p>
+   <label class="ai-check"><input id="ai-workflow-consent" type="checkbox"/>{t.consent}</label>
+  </fieldset>
+  <p id="ai-workflow-status" role="status" aria-live="polite"></p>
+  <progress id="ai-workflow-progress" hidden></progress>
+  <p id="ai-workflow-cancel-hint" hidden>{t.cancelHint}</p>
+  <section id="ai-workflow-preview" hidden><h3>{t.preview}</h3><p id="ai-workflow-summary"></p><img id="ai-workflow-image-preview" alt={t.preview} hidden/><div id="ai-workflow-audios"></div><textarea id="ai-workflow-json-preview" rows="9" readonly spellcheck="false" aria-label={t.preview} hidden></textarea></section>
+  <div id="ai-workflow-error-box" hidden><label for="ai-workflow-error">{t.error}</label><textarea id="ai-workflow-error" rows="3" readonly></textarea></div>
+ </div>
+ <footer class="json-footer">
+  <button id="ai-workflow-close" type="button" title={t.close} aria-label={t.close}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+  <button id="ai-workflow-cancel" type="button" title={t.cancel} aria-label={t.cancel} hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v14H5Z"/></svg></button>
+  <button id="ai-workflow-start" type="button" title={t.start} aria-label={t.start}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 4 12 8-12 8Z"/></svg></button>
+  <button id="ai-workflow-apply" type="button" title={t.apply} aria-label={t.apply} disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L20 5"/></svg></button>
+ </footer>
+</dialog>

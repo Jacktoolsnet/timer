@@ -1,0 +1,85 @@
+import {test,expect,type Page} from './helpers/editor-test';
+import {demoProject,type Project} from '../src/lib/model';
+import {newStoryboard} from '../src/lib/storyboard';
+import {defaultNarration} from '../src/lib/audio';
+import {DEFAULT_PROJECT_URL} from '../src/lib/startup-project';
+import {readFile} from 'node:fs/promises';
+const password='Workflow-Fake-Password42!',openai='sk-FAKE-workflow-key',elevenlabs='el-FAKE-workflow-key';
+const cors={'access-control-allow-origin':'*','access-control-allow-headers':'*','access-control-allow-methods':'POST,GET,OPTIONS'};
+function fixture(){const p=demoProject(),b=newStoryboard('Space plan');b.story='A robot visits the moon.';b.shots=[{id:'shot',title:'Arrival',duration:3,action:'Land',camera:'Wide',audio:'',image:null,characters:[],settings:[],status:'approved',comments:[]}];b.approved=true;b.comments=[{id:'note',text:'Keep the robot blue',resolved:true,reply:'Done'}];p.storyboard=b;return p;}
+async function setup(page:Page,p=fixture(),lang='en'){
+ await page.route('https://api.openai.com/**',r=>r.fulfill({status:500,headers:cors,body:'Unexpected API call'}));
+ await page.route('https://api.elevenlabs.io/**',r=>r.fulfill({status:500,headers:cors,body:'Unexpected API call'}));
+ await page.route('**'+DEFAULT_PROJECT_URL,r=>r.fulfill({contentType:'application/json',body:JSON.stringify(p)}));
+ await page.goto('/'+lang+'/');await page.locator('#open-api-vault').click();await page.locator('#api-vault-password').fill(password);await page.locator('#api-vault-repeat').fill(password);await page.locator('#api-vault-openai').fill(openai);await page.locator('#api-vault-elevenlabs').fill(elevenlabs);await page.locator('#api-vault-consent').check();await page.locator('#api-vault-submit').click();await expect(page.locator('#open-api-vault')).toHaveAttribute('data-vault-state','unlocked');await page.locator('#api-vault-close').click();
+}
+async function exportProject(page:Page):Promise<Project>{const pending=page.waitForEvent('download');await page.locator('#save-project').click();return JSON.parse(await readFile((await(await pending).path())!,'utf8'));}
+const response=(text:string)=>({status:'completed',output:[{type:'message',content:[{type:'output_text',text}]}]});
+async function generate(page:Page){await page.locator('#ai-workflow-consent').check();await page.locator('#ai-workflow-start').click();}
+
+test('direct planning unlocks on demand, previews, applies and supports Undo without exporting credentials',async({page})=>{
+ await setup(page);const before=await exportProject(page);await page.locator('#open-api-vault').click();await page.locator('#api-vault-lock').click();await page.locator('#api-vault-close').click();let calls=0;
+ await page.route('https://api.openai.com/v1/responses',async r=>{if(r.request().method()==='OPTIONS'){await r.fulfill({headers:cors});return;}calls++;const raw=r.request().postData()!;for(const secret of [password,openai,elevenlabs])expect(raw).not.toContain(secret);expect(r.request().headers().authorization).toBe('Bearer '+openai);const input=JSON.parse(JSON.parse(raw).input[0].content[0].text);const data=input.storyboard;data.board.title='Moon adventure';data.board.approved=false;data.board.shots[0].status='draft';await r.fulfill({headers:cors,json:response(JSON.stringify(data))});});
+ await page.locator('#open-ai-workflow').click();await expect(page.locator('#ai-workflow-start')).toBeDisabled();expect(calls).toBe(0);await page.locator('#ai-workflow-prompt').fill('Make the story more exciting');await generate(page);await expect(page.locator('#api-vault-dialog')).toBeVisible();expect(calls).toBe(0);await page.locator('#api-vault-password').fill(password);await page.locator('#api-vault-submit').click();await expect(page.locator('#api-vault-dialog')).not.toBeVisible();await expect(page.locator('#ai-workflow-preview')).toBeVisible();expect(calls).toBe(1);await expect(page.locator('#project-title')).toHaveValue(before.title);await expect(page.locator('#ai-workflow-json-preview')).toHaveValue(/Moon adventure/);await page.locator('#ai-workflow-apply').click();
+ const after=await exportProject(page);expect(after.storyboard!.title).toBe('Moon adventure');expect(after.storyboard!.comments).toEqual(before.storyboard!.comments);expect(after.storyboard!.approved).toBe(false);expect(after.scenes).toEqual(before.scenes);for(const secret of [password,openai,elevenlabs])expect(JSON.stringify(after)).not.toContain(secret);await page.locator('#undo-project').click();expect((await exportProject(page)).storyboard!.title).toBe(before.storyboard!.title);
+});
+
+test('storyboard toolbar edits the unsaved draft, not the executable project',async({page})=>{
+ await setup(page);const before=await exportProject(page);
+ await page.route('https://api.openai.com/v1/responses',async r=>{if(r.request().method()==='OPTIONS'){await r.fulfill({headers:cors});return;}const input=JSON.parse(r.request().postDataJSON().input[0].content[0].text),data=input.storyboard;data.board.title='Draft revision';data.board.approved=false;data.board.shots[0].status='draft';await r.fulfill({headers:cors,json:response(JSON.stringify(data))});});
+ await page.locator('#open-storyboard').click();await page.locator('#storyboard-ai-open').click();await generate(page);await expect(page.locator('#ai-workflow-apply')).toBeEnabled();await page.locator('#ai-workflow-apply').click();await expect(page.locator('#storyboard-content')).toContainText('Draft revision');await page.locator('#storyboard-save').click();const after=await exportProject(page);expect(after.storyboard!.title).toBe('Draft revision');expect(after.scenes).toEqual(before.scenes);
+});
+
+test('SceneScript keeps approved storyboard and applies only on confirmation',async({page})=>{
+ await setup(page);const before=await exportProject(page);
+ await page.route('https://api.openai.com/v1/responses',async r=>{if(r.request().method()==='OPTIONS'){await r.fulfill({headers:cors});return;}const project=JSON.parse(r.request().postDataJSON().input[0].content[0].text).project;project.title='Generated film';project.storyboard=null;await r.fulfill({headers:cors,json:response(JSON.stringify(project))});});
+ await page.locator('#open-ai-workflow').click();await page.locator('#ai-workflow-action').selectOption('script');await generate(page);await expect(page.locator('#ai-workflow-apply')).toBeEnabled();await expect(page.locator('#project-title')).toHaveValue(before.title);await page.locator('#ai-workflow-apply').click();const after=await exportProject(page);expect(after.title).toBe('Generated film');expect(after.storyboard).toEqual(before.storyboard);await page.locator('#undo-project').click();await expect(page.locator('#project-title')).toHaveValue(before.title);
+});
+
+test('rejected and stale results show copyable errors without retry or overwriting',async({page})=>{
+ await setup(page);let calls=0;
+ await page.route('https://api.openai.com/v1/responses',async r=>{if(r.request().method()==='OPTIONS'){await r.fulfill({headers:cors});return;}calls++;await r.fulfill({status:429,headers:cors,json:{error:{message:openai}}});});
+ await page.locator('#open-ai-workflow').click();await generate(page);await expect(page.locator('#ai-workflow-error')).toHaveValue(/quota/);await expect(page.locator('#ai-workflow-error')).toHaveAttribute('readonly','');await expect(page.locator('#ai-workflow-apply')).toBeDisabled();expect(calls).toBe(1);await expect(page.locator('#ai-workflow-error')).not.toHaveValue(new RegExp(openai));
+ await page.route('https://api.openai.com/v1/responses',async r=>{if(r.request().method()==='OPTIONS'){await r.fulfill({headers:cors});return;}const data=JSON.parse(r.request().postDataJSON().input[0].content[0].text).storyboard;data.board.approved=false;await r.fulfill({headers:cors,json:response(JSON.stringify(data))});});
+ await generate(page);await expect(page.locator('#ai-workflow-apply')).toBeEnabled();await page.evaluate(()=>{const title=document.querySelector<HTMLInputElement>('#project-title')!;title.value='Concurrent';title.dispatchEvent(new Event('input',{bubbles:true}));});await page.locator('#ai-workflow-apply').click();await expect(page.locator('#ai-workflow-error')).toHaveValue(/changed/);await page.locator('#ai-workflow-close').click();await expect(page.locator('#project-title')).toHaveValue('Concurrent');
+});
+
+test('image API cover is previewed and stored only after apply',async({page})=>{
+ await setup(page);const before=await exportProject(page),png='iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aZ1sAAAAASUVORK5CYII=';
+ await page.route('https://api.openai.com/v1/images/generations',async r=>{if(r.request().method()==='OPTIONS'){await r.fulfill({headers:cors});return;}expect(r.request().postDataJSON().n).toBe(1);await r.fulfill({headers:cors,json:{data:[{b64_json:png}]}});});
+ await page.locator('#open-ai-workflow').click();await page.locator('#ai-workflow-action').selectOption('image');await page.locator('#ai-workflow-prompt').fill('Robot on the moon');await generate(page);await expect(page.locator('#ai-workflow-image-preview')).toBeVisible();await expect(page.locator('#ai-workflow-apply')).toBeEnabled();await page.locator('#ai-workflow-apply').click();const after=await exportProject(page);expect(after.thumbnail!.data).toBe('data:image/png;base64,'+png);expect(after.storyboard).toEqual(before.storyboard);
+});
+
+function wav(seconds:number){const length=16000*seconds,buffer=Buffer.alloc(44+length*2);buffer.write('RIFF');buffer.writeUInt32LE(buffer.length-8,4);buffer.write('WAVEfmt ',8);buffer.writeUInt32LE(16,16);buffer.writeUInt16LE(1,20);buffer.writeUInt16LE(1,22);buffer.writeUInt32LE(16000,24);buffer.writeUInt32LE(32000,28);buffer.writeUInt16LE(2,32);buffer.writeUInt16LE(16,34);buffer.write('data',36);buffer.writeUInt32LE(length*2,40);return buffer;}
+test('ElevenLabs speech uses selected voice and extends scenes based on decoded duration',async({page})=>{
+ const p=fixture();p.scenes[0].duration=.5;p.scenes[0].narration={...defaultNarration(),text:'Welcome to the moon.',instructions:'With excitement',speaker:'Pilot'};await setup(page,p);let calls=0;
+ await page.route('https://api.elevenlabs.io/v1/text-to-speech/Voice123?output_format=mp3_44100_128',async r=>{if(r.request().method()==='OPTIONS'){await r.fulfill({headers:cors});return;}calls++;expect(r.request().headers()['xi-api-key']).toBe(elevenlabs);expect(r.request().postDataJSON()).toEqual({text:'Welcome to the moon.',model_id:'eleven_multilingual_v2'});await r.fulfill({headers:cors,contentType:'audio/mpeg',body:wav(2)});});
+ await page.locator('#open-ai-workflow').click();await page.locator('#ai-workflow-action').selectOption('speech');await page.locator('#ai-workflow-voice').fill('Voice123');await generate(page);await expect(page.locator('#ai-workflow-apply')).toBeEnabled();await expect(page.locator('#ai-workflow-audios audio')).toHaveCount(1);expect(calls).toBe(1);await page.locator('#ai-workflow-apply').click();const after=await exportProject(page);expect(after.scenes[0].duration).toBeCloseTo(2);expect(after.audios[after.scenes[0].narration!.asset].duration).toBeCloseTo(2);
+});
+
+test('unapproved script generation is blocked locally before sending any request',async({page})=>{
+ const p=fixture();p.storyboard!.approved=false;await setup(page,p);let requests=0;page.on('request',r=>{if(r.method()==='POST'&&r.url().includes('api.openai.com'))requests++;});await page.locator('#open-ai-workflow').click();await page.locator('#ai-workflow-action').selectOption('script');await generate(page);await expect(page.locator('#ai-workflow-error')).toHaveValue(/approve/);expect(requests).toBe(0);await expect(page.locator('#ai-workflow-apply')).toBeDisabled();
+});
+
+test('cancelling an unlock request never calls the paid endpoint',async({page})=>{
+ await setup(page);await page.locator('#open-api-vault').click();await page.locator('#api-vault-lock').click();await page.locator('#api-vault-close').click();let requests=0;page.on('request',r=>{if(r.method()==='POST'&&r.url().includes('api.openai.com'))requests++;});await page.locator('#open-ai-workflow').click();await generate(page);await expect(page.locator('#api-vault-dialog')).toBeVisible();await page.locator('#api-vault-close').click();await expect(page.locator('#ai-workflow-error-box')).toBeVisible();await expect(page.locator('#ai-workflow-apply')).toBeDisabled();expect(requests).toBe(0);await page.locator('#ai-workflow-close').click();await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();
+});
+
+test('partial speech batches can be applied and missing-recording runs skip completed audio',async({page})=>{
+ const p=fixture();p.scenes[0].narration={...defaultNarration(),text:'First line'};p.scenes[1].narration={...defaultNarration(),text:'Second line'};await setup(page,p);const texts:string[]=[];
+ await page.route('https://api.elevenlabs.io/v1/text-to-speech/Voice123?output_format=mp3_44100_128',async r=>{if(r.request().method()==='OPTIONS'){await r.fulfill({headers:cors});return;}const text=r.request().postDataJSON().text;texts.push(text);if(text==='Second line'&&texts.length===2)await r.fulfill({headers:cors,status:429,body:'Limited'});else await r.fulfill({headers:cors,contentType:'audio/mpeg',body:wav(2)});});
+ await page.locator('#open-ai-workflow').click();await page.locator('#ai-workflow-action').selectOption('speech');await page.locator('#ai-workflow-voice').fill('Voice123');await generate(page);await expect(page.locator('#ai-workflow-status')).toHaveText(/Some recordings/);await expect(page.locator('#ai-workflow-apply')).toBeEnabled();await page.locator('#ai-workflow-apply').click();const partial=await exportProject(page);expect(partial.scenes[0].narration!.asset).toBeTruthy();expect(partial.scenes[1].narration!.asset).toBe('');
+ await page.locator('#open-ai-workflow').click();await page.locator('#ai-workflow-action').selectOption('speech');await generate(page);await expect(page.locator('#ai-workflow-status')).toHaveText(/Ready/);await page.locator('#ai-workflow-apply').click();expect(texts).toEqual(['First line','Second line','Second line']);const after=await exportProject(page);expect(after.scenes[1].narration!.asset).toBeTruthy();expect(Object.keys(after.audios)).toHaveLength(2);
+});
+
+test('generated subject sketches require fresh subject and dependent scene review',async({page})=>{
+ const p=fixture();p.storyboard!.characters=[{id:'robot',kind:'character',name:'Robot',description:'Blue robot',image:null,status:'approved',comments:[]}];p.storyboard!.shots[0].characters=['robot'];await setup(page,p);const png='iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aZ1sAAAAASUVORK5CYII=';
+ await page.route('https://api.openai.com/v1/images/generations',async r=>{if(r.request().method()==='OPTIONS'){await r.fulfill({headers:cors});return;}await r.fulfill({headers:cors,json:{data:[{b64_json:png}]}});});await page.locator('#open-ai-workflow').click();await page.locator('#ai-workflow-action').selectOption('image');await page.locator('#ai-workflow-target').selectOption('characters:robot');await generate(page);await expect(page.locator('#ai-workflow-apply')).toBeEnabled();await page.locator('#ai-workflow-apply').click();const after=await exportProject(page);expect(after.storyboard!.approved).toBe(false);expect(after.storyboard!.characters[0].status).toBe('draft');expect(after.storyboard!.shots[0].status).toBe('draft');expect(after.storyboard!.images[after.storyboard!.characters[0].image!].data).toContain('data:image/png');
+});
+
+
+for(const [lang,name,reply]of [['en','English','Understood'],['de','German','Verstanden'],['es','Spanish','Entendido'],['fr','French','Compris']])test(`AI language follows ${lang} app settings, not the English video`,async({page})=>{
+ const p=fixture();p.storyboard!.language='English';await setup(page,p,lang);let calls=0;
+ await page.route('https://api.openai.com/v1/responses',async r=>{if(r.request().method()==='OPTIONS'){await r.fulfill({headers:cors});return;}calls++;const body=r.request().postDataJSON();expect(body.instructions).toContain(`App reply language: ${name} (${lang}).`);expect(body.instructions).toContain('video/content language separate');const data=JSON.parse(body.input[0].content[0].text).storyboard;expect(data.board.language).toBe('English');data.board.approved=false;data.board.comments[0].reply=reply;await r.fulfill({headers:cors,json:response(JSON.stringify(data))});});
+ await page.locator('#open-ai-workflow').click();await generate(page);await expect(page.locator('#ai-workflow-apply')).toBeEnabled();await expect(page.locator('#ai-workflow-json-preview')).toHaveValue(new RegExp(reply));await page.locator('#ai-workflow-apply').click();const after=await exportProject(page);expect(after.storyboard!.language).toBe('English');expect(after.storyboard!.comments[0].reply).toBe(reply);expect(after.storyboard!.comments[0].text).toBe('Keep the robot blue');expect(calls).toBe(1);
+});

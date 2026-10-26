@@ -1,0 +1,33 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {demoProject} from '../src/lib/model.ts';
+import {newStoryboard,exportStoryboard} from '../src/lib/storyboard.ts';
+import {boardManifest,projectManifest,inputJson,acceptPlanning,acceptScript,acceptImage,boardReferences,requireApprovedBoard} from '../src/lib/ai-workflow.ts';
+const pixel='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aZ1sAAAAASUVORK5CYII=';
+function project(){const p=demoProject(),b=newStoryboard('Test');b.comments=[{id:'comment',text:'Keep this',resolved:true,reply:'Done'}];b.images.ref={name:'ref.png',data:pixel};b.characters=[{id:'hero',kind:'character',name:'Hero',description:'Robot',image:'ref',status:'approved',comments:[]}];b.shots=[{id:'shot',title:'Shot',duration:3,action:'Move',camera:'Wide',audio:'',image:'ref',characters:['hero'],settings:[],status:'approved',comments:[]}];b.approved=true;p.storyboard=b;return p;}
+test('manifest export strips media data without mutating source',()=>{
+ const p=project();p.thumbnail={name:'cover.png',data:pixel};const m=projectManifest(p);assert.equal(JSON.stringify(m).includes('base64'),false);assert.equal(p.thumbnail.data,pixel);assert.equal(p.storyboard!.images.ref.data,pixel);assert.equal(boardManifest(p.storyboard!).images.ref.name,'ref.png');
+ assert.throws(()=>inputJson({text:'x'.repeat(3*1024*1024)}),/maximum/);
+});
+test('planning preserves user comments/resolutions, rejects stale responses and cannot approve',()=>{
+ const p=project(),b=p.storyboard!,next=structuredClone(b);next.title='Changed';next.comments=[];next.approved=false;
+ const r=acceptPlanning(exportStoryboard(next),p,b);assert.equal(r.storyboard!.comments[0].text,'Keep this');assert.equal(r.storyboard!.comments[0].resolved,true);assert.equal(r.storyboard!.approved,false);assert.equal(r.storyboard!.characters[0].status,'draft');assert.equal(r.storyboard!.images.ref.data,pixel);assert.equal(r.scenes,p.scenes);assert.equal(b.title,'Test');next.revision++;assert.throws(()=>acceptPlanning(exportStoryboard(next),p,b),/outdated/);
+});
+test('script requires approval and restores source board and known media manifests',()=>{
+ const p=project();p.assets.pic={name:'pic.png',data:pixel};const raw=projectManifest(p);raw.title='Generated';raw.storyboard=null;const result=acceptScript(JSON.stringify(raw),p);assert.equal(result.storyboard!.id,p.storyboard!.id);assert.equal(result.storyboard!.approved,true);assert.equal(result.assets.pic.data,pixel);assert.equal(result.title,'Generated');
+ const bad=projectManifest(p);bad.assets={new:{name:'not embedded'}};assert.throws(()=>acceptScript(JSON.stringify(bad),p),/unknown media/);
+ p.storyboard!.approved=false;assert.throws(()=>requireApprovedBoard(p),/approve/);assert.throws(()=>acceptScript(JSON.stringify(raw),p),/approve/);
+});
+test('cover changes do not affect approval; sketches invalidate targeted subjects and dependent shots',()=>{
+ const p=project(),cover=acceptImage(p,pixel,null);assert.equal(cover.storyboard!.approved,true);assert.equal(cover.thumbnail!.data,pixel);
+ const sketch=acceptImage(p,pixel,{kind:'characters',id:'hero'});assert.equal(sketch.storyboard!.approved,false);assert.equal(sketch.storyboard!.characters[0].status,'draft');assert.equal(sketch.storyboard!.shots[0].status,'draft');assert.equal(sketch.storyboard!.revision,p.storyboard!.revision+1);assert.equal(p.storyboard!.approved,true);assert.deepEqual(sketch.storyboard!.comments,p.storyboard!.comments);
+});
+test('raster references keep IDs and are bounded',()=>{
+ const p=project();assert.deepEqual(boardReferences(p.storyboard),[{id:'ref',data:pixel}]);for(let i=0;i<8;i++)p.storyboard!.images['i'+i]={name:'x',data:pixel};assert.throws(()=>boardReferences(p.storyboard),/maximum/);
+});
+
+test('AI reply language is fixed by the UI locale, with independent video language and unchanged JSON syntax',async()=>{
+ const {aiLanguageInstruction}=await import('../src/lib/ai-language.ts');
+ for(const [code,name]of [['en','English'],['de','German'],['es','Spanish'],['fr','French']]){const instruction=aiLanguageInstruction(code);assert.ok(instruction.startsWith(`App reply language: ${name} (${code}).`));assert.match(instruction,/comment.reply/);assert.match(instruction,/video\/content language separate/);assert.match(instruction,/Never translate JSON property names/);assert.match(instruction,/Do not translate existing user-written/);}
+ assert.equal(aiLanguageInstruction('de-DE'),aiLanguageInstruction('de'));assert.equal(aiLanguageInstruction('unknown'),aiLanguageInstruction('en'));
+});

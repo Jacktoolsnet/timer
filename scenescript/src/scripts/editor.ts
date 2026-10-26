@@ -1,3 +1,4 @@
+import {installAiWorkflow} from './ai-workflow';
 import {installApiVault} from './api-vault';
 import {installStoryboardEditor} from './storyboard-editor';
 import type {MorphPreview} from './morph-preview';
@@ -1060,6 +1061,7 @@ $('next-scene').addEventListener('click',()=>skipScene(1));
 $('timeline').addEventListener('input',()=>{stop();time=Number(($('timeline') as HTMLInputElement).value);draw();});
 $('safe-toggle').addEventListener('change',()=>{$('safe-overlay').hidden=!($('safe-toggle') as HTMLInputElement).checked;});
 function replace(next:Project){fitSpeechDurations(next);stop();backgroundVideoNode=undefined;backgroundVideoAsset='';clearVideoURLs();clearAudioURLs();revision++;project=next;sceneIndex=0;selectedId='';time=0;dirty=false;selectedGroupId='';multiSelection.clear();history.reset(project);persist();refresh();status(t('ready'));}
+installAiWorkflow(()=>{const source=project,rev=revision;return {project:source,valid:()=>project===source&&revision===rev,preload,apply:next=>{stop();backgroundVideoNode=undefined;backgroundVideoAsset='';clearVideoURLs();clearAudioURLs();project=next;sceneIndex=0;time=0;selectedId='';selectedGroupId='';multiSelection.clear();changed();refresh();}};},stop);
 installStoryboardEditor(()=>({project,revision}),next=>{stop();project=next;changed();refresh();},stop);
 installStage3DEditor(()=>({project,index:sceneIndex,revision}),next=>{stop();project=next;changed();refresh();},next=>{replace(next);changed();},stop);
 const canReplace=()=>!dirty||confirm(t('unsaved'));

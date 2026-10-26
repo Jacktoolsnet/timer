@@ -89,3 +89,11 @@ test('key test feedback distinguishes restricted keys and clears stale or cancel
  mode='delayed';await page.locator('#api-vault-test-elevenlabs').click();await expect(result).toHaveAttribute('data-state','working');await expect.poll(()=>waiting).toBe(1);await page.locator('#api-vault-elevenlabs').fill('different-key');release();await expect(result).not.toBeVisible();
  await page.locator('#api-vault-test-elevenlabs').click();await expect(result).toHaveAttribute('data-state','working');await expect.poll(()=>waiting).toBe(2);await page.locator('#api-vault-close').click();release();await page.locator('#open-api-vault').click();await expect(result).not.toBeVisible();await expect(page.locator('#api-vault-elevenlabs')).toHaveValue('');expect(await raw(page)).toBeNull();
 });
+
+
+test('key storage consent is a keyboard-accessible slide switch and remains required',async({page})=>{
+ await start(page);await fillSetup(page);const toggle=page.getByRole('switch',{name:'Save these keys encrypted in this browser. Clearing browser data deletes this vault.',exact:true});
+ await expect(toggle).toBeChecked();await expect(toggle).toHaveAttribute('required','');await expect(page.locator('#api-vault-consent+.board-switch-track')).toBeVisible();
+ await toggle.focus();await page.keyboard.press('Space');await expect(toggle).not.toBeChecked();await page.locator('#api-vault-submit').click();expect(await raw(page)).toBeNull();
+ await toggle.focus();await page.keyboard.press('Space');await expect(toggle).toBeChecked();await page.locator('#api-vault-submit').click();await expect(page.locator('#open-api-vault')).toHaveAttribute('data-vault-state','unlocked');
+});

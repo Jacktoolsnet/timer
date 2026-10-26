@@ -2,8 +2,22 @@ import {testApiKey,type ApiKeyTestState} from '../lib/api-key-test';
 import {ApiVault,API_VAULT_KEY,VaultError,apiProviders,validVaultPassword,type ApiProvider} from '../lib/api-vault';
 import type {ApiVaultWords} from '../lib/api-vault-i18n';
 let current:ApiVault|undefined;
-/** Future provider integrations request a key here; provider generation is not implemented here. */
+/** Decrypt only on explicit provider actions; never put credentials into project state. */
 export function localApiVault(){if(!current)throw new VaultError('storage');return current;}
+export async function requestApiKey(provider:ApiProvider,signal:AbortSignal):Promise<string>{
+ signal.throwIfAborted();
+ if(current?.state==='unlocked'){const key=await current.getKey(provider);signal.throwIfAborted();if(key)return key;}
+ const dialog=document.getElementById('api-vault-dialog') as HTMLDialogElement;
+ if(dialog.open)throw new VaultError('locked');
+ return new Promise((resolve,reject)=>{
+  let settled=false;
+  const finish=(key?:string)=>{if(settled)return;settled=true;dialog.removeEventListener('vault-ready',ready);dialog.removeEventListener('close',closed);signal.removeEventListener('abort',aborted);if(key){dialog.close();resolve(key);}else reject(new VaultError('locked'));};
+  const ready=()=>{void (async()=>{try{const key=await current?.getKey(provider);if(!signal.aborted&&key)finish(key);}catch{/* Allow another unlock attempt. */}})();};
+  const closed=()=>finish();const aborted=()=>{finish();dialog.close();};
+  dialog.addEventListener('vault-ready',ready);dialog.addEventListener('close',closed);signal.addEventListener('abort',aborted,{once:true});
+  document.getElementById('open-api-vault')!.click();
+ });
+}
 export function installApiVault(onOpen:()=>void=()=>{}){
  const $=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(id) as T;
  const dialog=$<HTMLDialogElement>('api-vault-dialog'),words=JSON.parse(dialog.dataset.words!) as ApiVaultWords,form=$<HTMLFormElement>('api-vault-form'),open=$<HTMLButtonElement>('open-api-vault');
@@ -88,7 +102,7 @@ export function installApiVault(onOpen:()=>void=()=>{}){
    else if(mode==='locked')await vault.unlock(secret);
    else if(mode==='unlocked')await write(()=>{if(ticket!==operation)throw new VaultError('changed');return vault.update(patch);},abort.signal);
    else throw new VaultError('data');
-   if(ticket===operation){busy=false;paint(mode==='locked'?words.opened:words.saved);if(mode==='locked')inputs[0].focus();}
+   if(ticket===operation){busy=false;paint(mode==='locked'?words.opened:words.saved);if(mode==='locked')inputs[0].focus();dialog.dispatchEvent(new Event('vault-ready'));}
   }catch(e){if(ticket===operation){busy=false;paint();showError(e);}}
   finally{secret='';for(const p of apiProviders)delete patch[p];if(ticket===operation){busy=false;pending=undefined;}}
  });

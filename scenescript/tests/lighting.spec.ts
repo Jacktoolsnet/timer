@@ -1,3 +1,4 @@
+import {aiLanguageInstruction} from '../src/lib/ai-language';
 import {test,expect} from './helpers/editor-test';
 import {demoProject,newElement} from '../src/lib/model';
 import {defaultLighting} from '../src/lib/lighting';
@@ -52,7 +53,7 @@ test('all AI routes, copied guide and schema describe the current artistic forma
  const plain=await request.get('/ai.txt');expect(plain.ok()).toBe(true);expect(await plain.text()).toBe(aiGuide);
  const schema=await (await request.get('/schema.json')).json();for(const key of artisticEffectKeys)expect(schema.properties.scenes.items.properties.elements.items.properties[key]).toBeTruthy();
  await page.addInitScript(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async(text:string)=>{(window as any).guideJSON=text;}}}));
- for(const route of ['/ai/','/de/ai/','/en/ai/','/es/ai/','/fr/ai/']){await page.goto(route);expect(await page.locator('#ai-guide').textContent()).toBe(aiGuide);}
- await page.locator('#copy-guide').click();expect(await page.evaluate(()=>(window as any).guideJSON)).toBe(aiGuide);
+ for(const route of ['/ai/','/de/ai/','/en/ai/','/es/ai/','/fr/ai/']){await page.goto(route);expect(await page.locator('#ai-guide').textContent()).toBe(aiGuide+'\n'+aiLanguageInstruction(route.split('/')[1]==='ai'?'en':route.split('/')[1]));}
+ await page.locator('#copy-guide').click();expect(await page.evaluate(()=>(window as any).guideJSON)).toBe(aiGuide+'\n'+aiLanguageInstruction('fr'));
  await page.goto('/en/');await load(page,aiArtExample);await page.locator('#timeline').fill('1');await expect(page.locator('.lighting-svg')).toHaveCount(1);await expect(page.locator('.kaleidoscope-wedge')).toHaveCount(8);
 });

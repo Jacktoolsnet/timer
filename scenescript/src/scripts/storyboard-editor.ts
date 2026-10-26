@@ -1,3 +1,5 @@
+import {aiLanguageInstruction} from '../lib/ai-language';
+import {openAiWorkflow} from './ai-workflow';
 import type {Project} from '../lib/model';
 import {MAX_STORYBOARD_BYTES,newStoryboard,parseStoryboard,importStoryboard,exportStoryboard,storyboardGuide,canApproveStoryboard,invalidateStoryboardApprovals,type BoardReviewTarget,type BoardCharacter,type Storyboard,type BoardFormat,type BoardComment} from '../lib/storyboard';
 import type {storyboardWords} from '../lib/storyboard-i18n';
@@ -150,6 +152,7 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
  }
  const close=()=>{if(dirty&&!window.confirm(t.unsaved))return;session++;dialog.close();};
  document.getElementById('open-storyboard')!.addEventListener('click',()=>{stop();origin=context();board=origin.project.storyboard?structuredClone(origin.project.storyboard):newStoryboard(origin.project.title,origin.project.format);dirty=false;tab='story';selectedItems={};session++;clear();$<HTMLTextAreaElement>('json').value='';render();dialog.showModal();});
+ $('ai-open').addEventListener('click',()=>{try{check();const source=board,rev=board.revision,ticket=session;openAiWorkflow({project:{...origin.project,storyboard:board},draft:true,valid:()=>{try{check();return board===source&&board.revision===rev&&session===ticket;}catch{return false;}},apply:next=>{check();board=next.storyboard!;dirty=true;clear();render();}});}catch(e){error(e);}});
  $('close').addEventListener('click',close);dialog.addEventListener('cancel',e=>{e.preventDefault();close();});
  const tabs=Array.from($('tabs').querySelectorAll<HTMLButtonElement>('[role=tab]'));
  const activateTab=(button:HTMLButtonElement,focus=false)=>{tab=button.dataset.boardTab!;render();if(focus){button.focus();button.scrollIntoView({block:'nearest',inline:'nearest'});}};
@@ -160,7 +163,7 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
  $('approve').addEventListener('click',()=>{if(!canApproveStoryboard(board))return;touch();board.approved=true;review();});
  $('save').addEventListener('click',()=>{try{check();const validated=parseStoryboard(board);apply({...origin.project,storyboard:validated});dirty=false;session++;dialog.close();}catch(e){error(e);}});
  const copy=async(value:string)=>{const ticket=session;try{check();await navigator.clipboard.writeText(value);if(ticket===session&&dialog.open){clear();$('status').textContent=t.copied;}}catch(e){if(ticket===session&&dialog.open)error(e);}};
- $('guide').addEventListener('click',()=>void copy(storyboardGuide));$('feedback').addEventListener('click',()=>void copy(exportStoryboard(board)));
+ $('guide').addEventListener('click',()=>void copy(storyboardGuide+'\n'+aiLanguageInstruction(document.documentElement.lang)));$('feedback').addEventListener('click',()=>void copy(exportStoryboard(board)));
  $('download').addEventListener('click',()=>{try{check();const blob=new Blob([exportStoryboard(board,true)],{type:'application/json'}),url=URL.createObjectURL(blob),a=node('a');a.href=url;a.download='storyboard.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(e){error(e);}});
  const load=async(value:string,fromFile=false)=>{try{
   check();let next:Storyboard;

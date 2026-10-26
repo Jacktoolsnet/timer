@@ -995,8 +995,8 @@ independent geometric approximation of its proportions and material palette.
 ## Lokaler API-Schlüsseltresor (erste Ausbaustufe)
 
 Der Schlüssel-Button in der Projekt-Toolbar öffnet einen separaten Tresor für
-**eigene** OpenAI-/ElevenLabs-API-Keys. Diese Ausbaustufe unterstützt ausschließlich explizit gestartete Lese-Tests der
-Schlüssel; Storyboard-/Bild-/Spracherzeugung werden separat angeschlossen.
+**eigene** OpenAI-/ElevenLabs-API-Keys. Der KI-Workflow verwendet die Schlüssel für ausdrücklich gestartete Aufträge;
+Lese-Tests bleiben separat verfügbar.
 
 - Explizites Einrichten mit Speicherbestätigung; unabhängig von Projekt-Autosave.
 - Web Crypto: PBKDF2-HMAC-SHA-256 (600.000 Iterationen, 16-Byte-Zufallssalt),
@@ -1023,7 +1023,7 @@ Schlüssel; Storyboard-/Bild-/Spracherzeugung werden separat angeschlossen.
 Frontend, Browser-Erweiterungen, Passwortabgriff oder einem kompromittierten Gerät.
 JS-Strings und Browser-/Prozessspeicher lassen sich nicht zuverlässig sicher löschen;
 Puffer werden bestmöglich geleert und Referenzen verworfen. Nie zentrale Betreiberkeys
-in diesem Tresor verteilen. Beim späteren Anschluss nur feste Provider-Zieladressen,
+in diesem Tresor verteilen. Die Integration verwendet feste Provider-Zieladressen,
 keine Schlüssel in Logs/URLs/Prompts, eingeschränkte Rechte und Verbrauchslimits.
 
 Grundlagen: [Web Crypto](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/deriveKey),
@@ -1049,3 +1049,63 @@ abgebrochen und alte Ergebnisse verworfen. Timeout: 15 Sekunden, keine Wiederhol
 
 Grundlagen: [OpenAI-Modellliste](https://developers.openai.com/api/reference/resources/models/methods/list),
 [ElevenLabs-Benutzerabfrage](https://elevenlabs.io/docs/api-reference/user/get).
+
+
+### Direkter KI-Workflow
+
+Der Zauberstab in der Projekt-Toolbar öffnet den API-Workflow. Im Storyboard gibt
+es denselben Einstieg für den **noch ungespeicherten Entwurf**. Der JSON-Austausch
+bleibt als manuelle Alternative bestehen.
+
+- **Storyboard**: aktuelle Felder, Kommentare und Antworten gehen zusammen mit der
+  aktuellen Anleitung an OpenAI Responses. IDs/Revision und Nutzerkommentare werden
+  beim lokalen Import geschützt; die KI kann keine Freigaben erteilen.
+- **SceneScript**: setzt ein gespeichertes, vollständig freigegebenes Storyboard
+  voraus. Aktuelle SceneScript-Anleitung und Projekt-Medienmanifeste werden gesendet.
+  Lokale Mediendaten werden anhand bekannter IDs wiederhergestellt; das freigegebene
+  Storyboard bleibt unverändert erhalten. Neue Medien müssen valide eingebettet sein.
+- **Bilder**: ein Cover oder eine einzelne Storyboard-Skizze pro Aufruf über die
+  Images API. Textbasierte Generierung; bestehende Bildpixel werden hierfür nicht
+  übertragen. Neue Skizzen invalidieren betroffene Freigaben. Textaufträge können
+  auf Wunsch Raster-Skizzen mitsenden (bis 8 Bilder / 6 MiB Base64).
+- **Sprache**: ElevenLabs-Stimmen-ID eingeben oder die ersten 100 Stimmen laden;
+  einzelne Aufnahme oder alle fehlenden Aufnahmen mit dieser Stimme erzeugen.
+  Nur `narration.text` wird gesprochen, Regieanweisungen werden nicht automatisch
+  umgesetzt. Tatsächlich dekodierte Audiodauer verlängert Szenen bei Bedarf.
+  Nach einem Teilfehler können fertige Aufnahmen separat übernommen werden.
+- Modell-IDs sind editierbar (Startwerte `gpt-5-mini`, `gpt-image-2`,
+  `eleven_multilingual_v2`); Verfügbarkeit hängt vom eigenen Anbieterkonto ab.
+  Text-JSON-Modus ersetzt **keine** Schema-Garantie: Antworten werden lokal strikt
+  validiert; unvollständige, abgelehnte oder fehlerhafte Ergebnisse nicht übernommen.
+- Vor jedem Generieren: ausdrückliche Daten-/Kostenbestätigung; gesperrter Tresor
+  wird bei Bedarf geöffnet. Kein Passwort in API-Aufrufen, keine Credentials in
+  Projekt/History/Export/URLs/Prompts, keine Cookies/Referrer/Weiterleitungen/Retry.
+  Responses setzen `store:false`; dies ersetzt keine Anbieter-Aufbewahrungsrichtlinie.
+- Ergebnisse zuerst als Vorschau, erst **Übernehmen** ändert den Entwurf/das Projekt.
+  Projektübernahmen sind mit Undo rückgängig zu machen. Zwischenzeitliche Änderungen
+  machen Ergebnisse ungültig. Keine automatische Szenen-/Videoerzeugung nach Freigabe.
+- Abbrechen und ein Timeout nach 10 Minuten beenden das lokale Warten, garantieren
+  aber keine Stornierung oder Kostenfreiheit beim Anbieter. Kein automatischer Retry.
+- Textinput maximal 2 MiB ohne Medien; API-Responses sind begrenzt. Große bestehende
+  Projekte werden nicht mit sämtlichen Base64-Ressourcen hochgeladen. Manuelle
+  Import-/Exportwege bleiben verfügbar.
+
+API-Grundlagen: [OpenAI Responses](https://developers.openai.com/api/reference/resources/responses/methods/create),
+[Images](https://developers.openai.com/api/reference/resources/images/methods/generate),
+[ElevenLabs TTS](https://elevenlabs.io/docs/api-reference/text-to-speech/convert).
+Tests verwenden ausschließlich Fake-Keys und simulierte Anbieterantworten.
+
+
+#### Antwortsprache der KI
+
+Die App-Sprache (`html.lang`, nicht Browser-Sprache oder Sprache des Prompts)
+wird für jeden OpenAI-Text- und Bildauftrag als feste Sprachvorgabe mitgegeben.
+Das gilt auch für `comment.reply` und neu verfasste Planungsbeschreibungen.
+Eine ausdrücklich gewählte Videosprache bleibt davon unabhängig: z. B. deutsche
+Planung/Antworten für ein englisches Video. Bestehende Nutzertexte, freigegebene
+Inhalte, JSON-Schlüssel und IDs werden nicht automatisch übersetzt. ElevenLabs
+spricht weiterhin den gewählten Originaltext, ohne stillschweigende Übersetzung.
+Kopierte Storyboard-Anleitungen, lokalisierte KI-Anleitungsseiten und deren
+`/{lang}/ai.txt`-Downloads enthalten dieselbe Sprachvorgabe. Das neutrale `/ai.txt`
+bleibt die sprachunabhängige Formatspezifikation. Die Vorgabe steuert das Modell;
+eine automatische Spracherkennung oder Übersetzung seiner Antwort findet nicht statt.

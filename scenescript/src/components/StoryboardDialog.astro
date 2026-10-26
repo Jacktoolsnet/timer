@@ -1,8 +1,9 @@
 ---
+import {aiWorkflowWords} from '../lib/ai-workflow-i18n';
 import {storyboardWords} from '../lib/storyboard-i18n';
 import type {Language} from '../lib/i18n';
 interface Props{lang:Language}
-const {lang}=Astro.props,t=storyboardWords(lang);
+const {lang}=Astro.props,t=storyboardWords(lang),ai=aiWorkflowWords(lang);
 ---
 <dialog id="storyboard-dialog" aria-labelledby="storyboard-title" aria-describedby="storyboard-hint" data-words={JSON.stringify(t)}>
  <header class="json-header">
@@ -13,6 +14,7 @@ const {lang}=Astro.props,t=storyboardWords(lang);
    <button id="storyboard-download" class="board-icon" type="button" title={t.download} aria-label={t.download}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></svg></button>
    <span class="board-toolbar-divider" aria-hidden="true"></span>
    <button id="storyboard-file-open" class="board-icon" type="button" title={t.file} aria-label={t.file}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8V4h7l2 3h9v4M3 8h6l2 3h11l-3 9H3Z"/></svg></button>
+   <button id="storyboard-ai-open" class="board-icon" type="button" title={ai.title} aria-label={ai.title} aria-haspopup="dialog" aria-controls="ai-workflow-dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 20 12-12 4 4L8 24M14 3v4m-2-2h4M4 4v4M2 6h4"/></svg></button>
    <button id="storyboard-json-open" class="board-icon" type="button" title={t.exchange} aria-label={t.exchange} aria-controls="storyboard-exchange" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H6v6l-3 3 3 3v6h2M16 3h2v6l3 3-3 3v6h-2M10 9l4 3-4 3"/></svg></button>
    <span class="board-toolbar-divider" aria-hidden="true"></span>
    <button id="storyboard-approve" class="board-icon" aria-pressed="false" type="button" title={t.approve} aria-label={t.approve} aria-describedby="storyboard-approve-hint"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m7 12 3 3 7-7"/></svg></button>

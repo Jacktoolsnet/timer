@@ -24,7 +24,7 @@ const {lang}=Astro.props,t=apiVaultWords(lang);
     </div>)}
     <p class="small-hint">{t.testHint}</p>
    </div>
-   <label id="api-vault-consent-label" class="vault-consent"><input id="api-vault-consent" type="checkbox" required /><span>{t.consent}</span></label>
+   <label id="api-vault-consent-label" class="vault-consent board-approval-switch"><input id="api-vault-consent" type="checkbox" role="switch" required /><span class="board-switch-track" aria-hidden="true"></span><span>{t.consent}</span></label>
   </form>
   <section id="api-vault-reset-panel" class="vault-tile" hidden aria-labelledby="api-vault-reset-title"><h3 id="api-vault-reset-title">{t.resetTitle}</h3><p>{t.resetHint}</p><div class="compact-actions"><button id="api-vault-confirm-reset" type="button" class="danger">{t.resetConfirm}</button><button id="api-vault-reset-back" type="button">{t.back}</button></div></section>
  </div>
