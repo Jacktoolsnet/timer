@@ -266,7 +266,7 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
 .preview-expanded #wake-status:empty { display:none; }
 
 /* Theme-aware selects, including the popup in browsers supporting base-select. */
-:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog) select {
+:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog,#voice-picker-dialog) select {
  appearance:none;
  min-height:40px;
  padding:9px 34px 9px 12px;
@@ -280,16 +280,16 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
  font:inherit;
  transition:border-color .15s,background-color .15s;
 }
-:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog) select:hover { border-color:var(--accent); background-color:var(--accent-soft); }
-:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog) select:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
-:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog) select option { background:var(--surface); color:var(--text); padding:10px 12px; }
-[data-theme=dark] :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog) select { color-scheme:dark; }
+:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog,#voice-picker-dialog) select:hover { border-color:var(--accent); background-color:var(--accent-soft); }
+:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog,#voice-picker-dialog) select:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog,#voice-picker-dialog) select option { background:var(--surface); color:var(--text); padding:10px 12px; }
+[data-theme=dark] :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog,#voice-picker-dialog) select { color-scheme:dark; }
 @supports (appearance:base-select) {
- :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog) select,:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog) select::picker(select) { appearance:base-select; }
- :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog) select { background-image:none; padding-right:12px; }
- :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog) select::picker-icon { color:var(--accent); transition:rotate .15s; }
- :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog) select:open::picker-icon { rotate:180deg; }
- :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog) select::picker(select) {
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog,#voice-picker-dialog) select,:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog,#voice-picker-dialog) select::picker(select) { appearance:base-select; }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog,#voice-picker-dialog) select { background-image:none; padding-right:12px; }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog,#voice-picker-dialog) select::picker-icon { color:var(--accent); transition:rotate .15s; }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog,#voice-picker-dialog) select:open::picker-icon { rotate:180deg; }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog,#voice-picker-dialog) select::picker(select) {
   padding:6px;
   margin-top:6px;
   border:1px solid var(--line);
@@ -300,18 +300,18 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
   max-height:min(320px,60dvh);
   overflow:auto;
  }
- :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog) select option { min-height:40px; gap:10px; border-radius:8px; cursor:pointer; font:inherit; }
- :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog) select option:hover,:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog) select option:focus { background:var(--accent-soft); color:var(--accent); outline:none; }
- :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog) select option:checked { background:var(--accent-soft); color:var(--accent); font-weight:600; }
- :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog) select option::checkmark { color:var(--accent); }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog,#voice-picker-dialog) select option { min-height:40px; gap:10px; border-radius:8px; cursor:pointer; font:inherit; }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog,#voice-picker-dialog) select option:hover,:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog,#voice-picker-dialog) select option:focus { background:var(--accent-soft); color:var(--accent); outline:none; }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog,#voice-picker-dialog) select option:checked { background:var(--accent-soft); color:var(--accent); font-weight:600; }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog,#voice-picker-dialog) select option::checkmark { color:var(--accent); }
 }
 @media(prefers-reduced-motion:reduce) {
- :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog) select,:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog) select::picker-icon { transition:none; }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog,#voice-picker-dialog) select,:is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog,#voice-picker-dialog) select::picker-icon { transition:none; }
 }
 
 /* A consistent, lightweight chevron instead of the browser's picker glyph. */
 @supports (appearance:base-select) {
- :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog) select::picker-icon {
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog,#voice-picker-dialog) select::picker-icon {
   content:"";
   display:block;
   flex:0 0 8px;
@@ -325,11 +325,11 @@ body.editor-fullscreen #editor-fullscreen[aria-pressed=true] { background:var(--
   transform:translateY(-2px) rotate(45deg);
   rotate:0deg;
  }
- :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog) select:open::picker-icon { rotate:180deg; }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog,#voice-picker-dialog) select:open::picker-icon { rotate:180deg; }
 }
 
 @supports (appearance:base-select) {
- :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog) select { display:flex; align-items:center; gap:12px; }
+ :is(#editor,#simulation-dialog,#music-dialog,#project-video-dialog,#export-dialog,#crop-dialog,#panels-dialog,#camera-dialog,#stage3d-dialog,#storyboard-field-dialog,#ai-workflow-dialog,#voice-picker-dialog) select { display:flex; align-items:center; gap:12px; }
 }
 
 .number-stepper { display:grid; grid-template-columns:30px minmax(0,1fr) 30px; gap:4px; align-items:center; }
@@ -1172,3 +1172,20 @@ body.recording .comic-edit-overlay{display:none}
 #ai-workflow-load-voices{justify-self:start;padding:8px 12px;background:var(--surface);color:var(--accent);border:1px solid var(--line);border-radius:8px}
 #ai-workflow-apply{color:#23723c}
 [data-theme=dark] #ai-workflow-apply{color:#85d8a0}
+
+/* Shared ElevenLabs voice catalog, explicitly loaded and metadata-driven. */
+#voice-picker-dialog{width:min(850px,94vw);max-height:92dvh;overflow:hidden}
+#voice-picker-dialog[open]{display:flex;flex-direction:column}
+#voice-picker-dialog .json-header,#voice-picker-dialog .json-footer{flex-shrink:0}
+#voice-picker-dialog .dialog-inner{overflow:auto;min-height:0}
+#voice-picker-dialog [hidden]{display:none!important}
+.voice-picker-controls{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
+.voice-picker-controls label{display:grid;gap:6px;min-width:0}
+#voice-picker-search,#voice-picker-error{width:100%;box-sizing:border-box;min-height:42px;padding:10px;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:9px;font:inherit}
+#voice-picker-groups{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+#voice-picker-groups section{min-width:0}
+#voice-picker-groups button{display:grid;width:100%;gap:6px;padding:12px;margin-bottom:8px;text-align:left;overflow-wrap:anywhere;background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:10px;font:inherit}
+#voice-picker-groups button[aria-pressed=true]{border-color:var(--accent);background:var(--accent-soft)}
+#voice-picker-groups small{color:var(--muted)}
+#voice-picker-error{resize:vertical}
+@media(max-width:680px){#voice-picker-groups,.voice-picker-controls{grid-template-columns:1fr}}

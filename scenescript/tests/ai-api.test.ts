@@ -41,3 +41,11 @@ test('speech uses only narration text, voice in fixed path, xi-api-key and real 
 test('voice catalog whitelist and first page bound',async()=>{
  assert.deepEqual(await listAiVoices(key,signal(),mock({voices:[{voice_id:'Voice123',name:'Test',secret:key},{voice_id:'../evil',name:'No'}]})),[{id:'Voice123',name:'Test'}]);
 });
+
+test('voice pages expose only bounded metadata, retain pagination and never invent gender',async()=>{
+ const {listVoicePage}=await import('../src/lib/ai-api.ts');
+ const r=await listVoicePage(key,signal(),'a/b&c',async(url,init)=>{assert.equal(url,'https://api.elevenlabs.io/v2/voices?page_size=100&next_page_token=a%2Fb%26c');assert.equal((init?.headers as Record<string,string>)['xi-api-key'],key);return Response.json({voices:[{voice_id:'V1',name:'Name',labels:{gender:'male',language:'German',accent:'Berlin'},verified_languages:[{language:'en'}],secret:key},{voice_id:'V2',name:'Unknown female sounding',labels:{}},{voice_id:'V3',name:'Neutral',labels:{gender:'neutral'}}],has_more:true,next_page_token:'next'});});
+ assert.deepEqual(r,{voices:[{id:'V1',name:'Name',gender:'male',languages:['de','en'],accent:'Berlin'},{id:'V2',name:'Unknown female sounding',gender:'unknown',languages:[],accent:''},{id:'V3',name:'Neutral',gender:'neutral',languages:[],accent:''}],next:'next'});assert.ok(!JSON.stringify(r).includes(key));
+ await assert.rejects(listVoicePage(key,signal(),'',mock({voices:[],has_more:true})),AiApiError);
+ await assert.rejects(listVoicePage(key,signal(),'same',mock({voices:[],has_more:true,next_page_token:'same'})),AiApiError);
+});

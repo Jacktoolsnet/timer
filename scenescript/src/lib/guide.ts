@@ -688,8 +688,13 @@ Narration is imported speech, NOT speech generation or subtitle text. Each Proje
 and each Scene has ONE narration assignment; use scene assignments for separate
 files per scene, or a project assignment for one continuous voice track. Both may
 coexist/overlap; avoid doubling a voice. narration.text is the actual SCRIPT;
-instructions is delivery direction (never read aloud), speaker is a human-readable
-voice/character label, not a provider voice ID. These strings can be saved BEFORE
+instructions is delivery direction (never read aloud). Set speaker to the stable
+Storyboard character/object/setting ID to use its optional ElevenLabs voice
+assignment in the direct API workflow. A unique subject name is also recognized;
+For duplicate IDs/names, use characters:ID or settings:ID. Otherwise it is a
+human-readable speaker label and uses the selected fallback
+voice. Never put a provider voice ID into speaker. One narration assignment has
+one voice: split dialogue between different speakers into separate scenes. These strings can be saved BEFORE
 an audio file exists: omit asset or set asset:"". Empty/unassigned drafts are silent.
 
 External speech workflow (no cloud API/key needed):

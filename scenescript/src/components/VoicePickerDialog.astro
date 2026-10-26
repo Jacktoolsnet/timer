@@ -1,0 +1,18 @@
+---
+import type {Language} from '../lib/i18n';
+import {voicePickerWords} from '../lib/voice-picker-i18n';
+interface Props{lang:Language}
+const {lang}=Astro.props,t=voicePickerWords(lang);
+---
+<dialog id="voice-picker-dialog" aria-labelledby="voice-picker-title" data-words={JSON.stringify(t)}>
+ <header class="json-header"><h2 id="voice-picker-title">{t.title}</h2></header>
+ <div class="dialog-inner">
+  <p>{t.hint}</p><p id="voice-picker-language"></p>
+  <div class="voice-picker-controls"><label>{t.search}<input id="voice-picker-search" type="search" maxlength="200"/></label><label>{t.filter}<select id="voice-picker-filter"><option value="match">{t.match}</option><option value="all">{t.all}</option><option value="unknown">{t.unknownLanguage}</option></select></label></div>
+  <div class="compact-actions"><button id="voice-picker-load" type="button">{t.load}</button><button id="voice-picker-more" type="button" hidden>{t.more}</button></div>
+  <p id="voice-picker-status" role="status" aria-live="polite"></p><p id="voice-picker-selected"></p>
+  <div id="voice-picker-groups"></div>
+  <div id="voice-picker-error-box" hidden><label for="voice-picker-error">{t.error}</label><textarea id="voice-picker-error" rows="3" readonly></textarea></div>
+ </div>
+ <footer class="json-footer"><button id="voice-picker-close" type="button" title={t.close} aria-label={t.close}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button><div class="json-footer-actions"><button id="voice-picker-clear" type="button" title={t.clear} aria-label={t.clear}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/></svg></button><button id="voice-picker-apply" type="button" title={t.apply} aria-label={t.apply}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L20 5"/></svg></button></div></footer>
+</dialog>

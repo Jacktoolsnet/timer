@@ -1,9 +1,13 @@
+import {voicePickerWords} from '../lib/voice-picker-i18n';
+import type {Language} from '../lib/i18n';
+import {chooseElevenVoice} from './voice-picker';
+import {VoiceAssignmentError,speechVoice} from '../lib/voices';
 import {aiLanguageInstruction} from '../lib/ai-language';
 import type {Project} from '../lib/model';
 import {validateProject} from '../lib/model';
 import {storyboardGuide,type BoardReviewTarget} from '../lib/storyboard';
 import {boardManifest,projectManifest,inputJson,planningBoard,requireApprovedBoard,acceptPlanning,acceptScript,imagePrompt,acceptImage,boardReferences} from '../lib/ai-workflow';
-import {AiApiError,generateText,generateImage,generateSpeech,listAiVoices} from '../lib/ai-api';
+import {AiApiError,generateText,generateImage,generateSpeech} from '../lib/ai-api';
 import {speechJobs,attachSpeechFiles,type SpeechJob} from '../lib/speech-jobs';
 import {readAudioFile} from './audio';
 import {requestApiKey} from './api-vault';
@@ -21,7 +25,7 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void){
  let ctx:AiWorkflowContext,active:AbortController|undefined,candidate:Project|undefined,jobs:SpeechJob[]=[],session=0;
  const urls:string[]=[];
  function clearPreview(){candidate=undefined;apply.disabled=true;$('preview').hidden=true;$('image-preview').removeAttribute('src');$('image-preview').hidden=true;$<HTMLTextAreaElement>('json-preview').value='';$('json-preview').hidden=true;$('audios').replaceChildren();for(const url of urls)URL.revokeObjectURL(url);urls.length=0;}
- const error=(e:unknown)=>{let message:string;if(e instanceof AiApiError)message=e.code==='size'?t.sizeError:t[e.code];else if(e instanceof VaultError)message=t.locked;else message=e instanceof Error?e.message:t.response;$<HTMLTextAreaElement>('error').value=message;$('error-box').hidden=false;};
+ const error=(e:unknown)=>{let message:string;if(e instanceof AiApiError)message=e.code==='size'?t.sizeError:t[e.code];else if(e instanceof VoiceAssignmentError)message=voicePickerWords(document.documentElement.lang as Language)[e.code];else if(e instanceof VaultError)message=t.locked;else message=e instanceof Error?e.message:t.response;$<HTMLTextAreaElement>('error').value=message;$('error-box').hidden=false;};
  const check=()=>{if(!dialog.open||!ctx.valid())throw new Error(t.stale);};
  const busy=(value:boolean)=>{$<HTMLFieldSetElement>('settings').disabled=value;start.hidden=value;$('cancel').hidden=!value;$('progress').hidden=!value;$('cancel-hint').hidden=!value;apply.disabled=value||!candidate;start.disabled=!consent.checked;dialog.setAttribute('aria-busy',String(value));};
  function option(select:HTMLSelectElement,value:string,label:string){const o=document.createElement('option');o.value=value;o.textContent=label;select.append(o);}
@@ -50,11 +54,7 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void){
  document.getElementById('ai-speech-open')?.addEventListener('click',()=>openAiWorkflow(context(),'speech'));
  action.addEventListener('change',configure);jobsSelect.addEventListener('change',speechEstimate);
  $('settings').addEventListener('input',()=>{if(active)return;clearPreview();$('error-box').hidden=true;start.disabled=!consent.checked;});
- $('load-voices').addEventListener('click',async()=>{
-  if(active)return;const controller=new AbortController();active=controller;busy(true);$('error-box').hidden=true;let key='';
-  try{check();key=await requestApiKey('elevenlabs',controller.signal);check();const voices=await listAiVoices(key,controller.signal);check();const list=$('voices');list.replaceChildren();for(const voice of voices){const o=document.createElement('option');o.value=voice.id;o.label=voice.name;list.append(o);}$('status').textContent=`${voices.length} ${t.voiceCount}`;}
-  catch(e){error(e);}finally{key='';active=undefined;busy(false);}
- });
+ $('load-voices').addEventListener('click',async()=>{if(active)return;try{check();const selected=await chooseElevenVoice({language:ctx.project.storyboard?.language??document.documentElement.lang,valid:ctx.valid});if(selected===undefined)return;check();$<HTMLInputElement>('voice').value=selected?.id??'';clearPreview();}catch(e){error(e);}});
  start.addEventListener('click',async()=>{
   if(active||!consent.checked)return;clearPreview();$('error-box').hidden=true;
   const controller=new AbortController();active=controller;busy(true);const kind=action.value,source=ctx.project,sourceBoard=planningBoard(source,document.documentElement.lang);let key='';
@@ -76,7 +76,7 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void){
     const usage=new Map<string,number>();for(const n of [source.narration,...source.scenes.map(s=>s.narration)])if(n?.asset)usage.set(n.asset,(usage.get(n.asset)??0)+1);
     let extra=0;for(const j of selectedJobs){const n=j.scope==='project'?source.narration:source.scenes.find(s=>s.id===j.sceneId)?.narration;if(!n?.asset)extra++;else if((usage.get(n.asset)??0)>1){extra++;usage.set(n.asset,usage.get(n.asset)!-1);}}
     if(selectedJobs.length>30||Object.keys(source.audios).length+extra>30)throw new Error('Speech: maximum 30 audio assets');
-    if(!/^[a-zA-Z0-9_-]{1,100}$/.test($<HTMLInputElement>('voice').value.trim()))throw new Error(t.voice);
+    for(const job of selectedJobs)speechVoice(source.storyboard,job.speaker,$<HTMLInputElement>('voice').value);
    }
    $('status').textContent=t.unlock;key=await requestApiKey(kind==='speech'?'elevenlabs':'openai',controller.signal);check();controller.signal.throwIfAborted();$('status').textContent=t.working;
    if(kind==='board'||kind==='script'){
@@ -90,7 +90,7 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void){
     const progress=$<HTMLProgressElement>('progress');progress.max=selectedJobs.length;progress.value=0;
     for(const [i,job]of selectedJobs.entries()){
      check();controller.signal.throwIfAborted();key=await requestApiKey('elevenlabs',controller.signal);check();$('status').textContent=`${t.working} ${i+1} / ${selectedJobs.length} · ${job.name}`;
-     const blob=await generateSpeech(key,{voice:$<HTMLInputElement>('voice').value.trim(),model:model.value.trim(),text:job.text},controller.signal);check();const asset=await readAudioFile(new File([blob],job.audioName,{type:'audio/mpeg'}));check();
+     const blob=await generateSpeech(key,{voice:speechVoice(source.storyboard,job.speaker,$<HTMLInputElement>('voice').value),model:model.value.trim(),text:job.text},controller.signal);check();const asset=await readAudioFile(new File([blob],job.audioName,{type:'audio/mpeg'}));check();
      // Keep completed files for explicit partial apply even if the next request fails.
      files.push({name:job.audioName,asset});const p=validateProject(attachSpeechFiles(source,selectedJobs,files).project);preview(p,kind);
      const audio=document.createElement('audio'),label=document.createElement('p');label.textContent=job.name;audio.controls=true;const url=URL.createObjectURL(blob);urls.push(url);audio.src=url;$('audios').append(label,audio);progress.value=i+1;

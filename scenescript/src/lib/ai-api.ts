@@ -1,3 +1,5 @@
+import {voiceGender,type CatalogueVoice} from './voices.ts';
+import {videoLanguageCode} from './video-languages.ts';
 /** Browser-only provider calls. Never persist keys, log responses or retry paid requests. */
 export type AiErrorCode='auth'|'permission'|'limit'|'request'|'network'|'timeout'|'cancelled'|'response'|'size'|'incomplete';
 export class AiApiError extends Error{readonly code:AiErrorCode;constructor(code:AiErrorCode){super('AI: '+code);this.code=code;}}
@@ -50,4 +52,18 @@ export async function listAiVoices(key:string,signal:AbortSignal,fetcher:typeof 
  const r=json(await call('elevenlabs','/v2/voices?page_size=100',key,undefined,signal,2*MiB,fetcher));
  if(!Array.isArray(r?.voices))throw new AiApiError('response');
  return r.voices.filter((v:any)=>v&&typeof v.voice_id==='string'&&/^[a-zA-Z0-9_-]{1,100}$/.test(v.voice_id)&&typeof v.name==='string').slice(0,100).map((v:any)=>({id:v.voice_id,name:v.name.slice(0,200)}));
+}
+
+
+/** One explicit page; do not silently stop at 100 or fetch an unbounded catalog. */
+export async function listVoicePage(key:string,signal:AbortSignal,token='',fetcher:typeof fetch=fetch):Promise<{voices:CatalogueVoice[];next:string|null}>{
+ if(token.length>2000||/[\x00-\x1f]/.test(token))throw new AiApiError('request');
+ const path='/v2/voices?page_size=100'+(token?'&next_page_token='+encodeURIComponent(token):'');
+ const r=json(await call('elevenlabs',path,key,undefined,signal,2*MiB,fetcher));if(!Array.isArray(r?.voices))throw new AiApiError('response');
+ const voices:CatalogueVoice[]=r.voices.slice(0,100).filter((v:any)=>v&&typeof v.voice_id==='string'&&/^[a-zA-Z0-9_-]{1,100}$/.test(v.voice_id)&&typeof v.name==='string').map((v:any)=>{
+  const languageValues:unknown[]=[v.labels?.language,...(Array.isArray(v.verified_languages)?v.verified_languages.slice(0,100).map((x:any)=>x?.language):[])];
+  const languages=[...new Set(languageValues.filter((x):x is string=>typeof x==='string'&&x.length<=100).map(x=>videoLanguageCode(x)||(/^[a-z]{2,3}(-[a-zA-Z]{2,4})?$/.test(x)?x.split('-')[0]:null)).filter((x):x is string=>!!x))];
+  return {id:v.voice_id,name:v.name.slice(0,200),gender:voiceGender(v.labels?.gender),languages,accent:typeof v.labels?.accent==='string'?v.labels.accent.slice(0,200):''};
+ });
+ let next:string|null=null;if(r.has_more===true){if(typeof r.next_page_token!=='string'||!r.next_page_token||r.next_page_token.length>2000||r.next_page_token===token)throw new AiApiError('response');next=r.next_page_token;}return {voices,next};
 }

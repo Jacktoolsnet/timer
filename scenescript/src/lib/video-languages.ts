@@ -11,3 +11,10 @@ export function videoLanguageOptions(locale:string,current:string):[string,strin
  // Imported plans may use regional variants, custom values, or an empty field.
  if(!options.some(([value])=>value===current))options.push([current,current||'—']);return options;
 }
+
+/** Resolve saved English/native/UI language names without guessing unknown variants. */
+export function videoLanguageCode(value:string):string|null{
+ const key=value.trim().toLowerCase();
+ for(const [code,name]of languages){if(key===code||key===name.toLowerCase())return code;for(const locale of new Set(['en','de','es','fr',code]))if(new Intl.DisplayNames([locale],{type:'language'}).of(code)?.toLowerCase()===key)return code;}
+ return null;
+}

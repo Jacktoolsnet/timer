@@ -1,4 +1,5 @@
 ---
+import VoicePickerDialog from './VoicePickerDialog.astro';
 import AiWorkflowDialog from './AiWorkflowDialog.astro';
 import {aiWorkflowWords} from '../lib/ai-workflow-i18n';
 import ApiVaultDialog from './ApiVaultDialog.astro';
@@ -199,6 +200,7 @@ const {lang}=Astro.props,t=editorDictionary(lang),vault=apiVaultWords(lang),ai=a
  </dialog>
  <ApiVaultDialog lang={lang} />
  <AiWorkflowDialog lang={lang} />
+ <VoicePickerDialog lang={lang} />
  <StoryboardDialog lang={lang} />
  <ResourcesDialog lang={lang} />
  <Stage3DDialog lang={lang} />

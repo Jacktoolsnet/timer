@@ -45,3 +45,9 @@ test('new planning boards inherit app language without changing existing storybo
  const p=project();p.storyboard!.language='Japanese';assert.equal(planningBoard(p,'de').language,'Japanese');
  const options=videoLanguageOptions('de','Deutsch');assert.equal(options.find(([,label])=>label==='Deutsch')?.[0],'Deutsch');assert.equal(options.filter(([,label])=>label==='Deutsch').length,1);assert.ok(videoLanguageOptions('fr','Portuguese (Brazil)').some(([value])=>value==='Portuguese (Brazil)'));assert.ok(videoLanguageOptions('en','').some(([value])=>value===''));assert.equal(videoLanguageForLocale('de-DE'),'German');
 });
+
+test('speaker voices resolve stable subject IDs or unique names, with explicit fallback',async()=>{
+ const {speechVoice,voiceGender}=await import('../src/lib/voices.ts'),p=project();p.storyboard!.characters[0].voice={provider:'elevenlabs',id:'HeroVoice',name:'Hero'};p.storyboard!.settings=[{id:'set',name:'Narrator',description:'',image:null,comments:[],status:'draft',voice:{provider:'elevenlabs',id:'StageVoice',name:'Stage'}}];
+ assert.equal(speechVoice(p.storyboard,'hero','Fallback'),'HeroVoice');assert.equal(speechVoice(p.storyboard,'Hero','Fallback'),'HeroVoice');assert.equal(speechVoice(p.storyboard,'set',''),'StageVoice');assert.equal(speechVoice(p.storyboard,'Other','Fallback'),'Fallback');assert.throws(()=>speechVoice(p.storyboard,'Other',''),/assign/);
+ p.storyboard!.settings[0].name='Hero';assert.throws(()=>speechVoice(p.storyboard,'Hero','Fallback'),/ambiguous/);assert.equal(speechVoice(p.storyboard,'hero','Fallback'),'HeroVoice');p.storyboard!.settings[0].id='hero';assert.throws(()=>speechVoice(p.storyboard,'hero','Fallback'),/ambiguous/);assert.equal(speechVoice(p.storyboard,'characters:hero',''),'HeroVoice');assert.equal(speechVoice(p.storyboard,'settings:hero',''),'StageVoice');assert.equal(voiceGender('neutral'),'neutral');assert.equal(voiceGender('not set'),'unknown');
+});

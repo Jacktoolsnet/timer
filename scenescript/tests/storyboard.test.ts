@@ -81,3 +81,11 @@ test('space adventure example separates people and objects with explicit pending
   assert.equal(imported.comments[0].resolved,false);assert.equal(Object.keys(imported.images).length,8);
  }
 });
+
+test('optional ElevenLabs subject voices roundtrip, validate and survive AI feedback',()=>{
+ const b=example();b.characters[0].voice={provider:'elevenlabs',id:'HeroVoice',name:'Hero voice'};b.settings[0].voice={provider:'elevenlabs',id:'PlaceVoice',name:'Place voice'};
+ const parsed=parseStoryboard(b);assert.deepEqual(parsed.characters[0].voice,b.characters[0].voice);assert.deepEqual(importStoryboard(exportStoryboard(b,true),null).settings[0].voice,b.settings[0].voice);
+ const feedback=JSON.parse(exportStoryboard(b));delete feedback.board.characters[0].voice;feedback.board.settings[0].voice={provider:'elevenlabs',id:'ModelInvented',name:'No'};const imported=importStoryboard(JSON.stringify(feedback),b);assert.deepEqual(imported.characters[0].voice,b.characters[0].voice);assert.deepEqual(imported.settings[0].voice,b.settings[0].voice);
+ for(const voice of [{provider:'other',id:'Good',name:'No'},{provider:'elevenlabs',id:'../bad',name:'No'},{provider:'elevenlabs',id:'Good',name:'No',key:'secret'}]){const bad=structuredClone(b);(bad.characters[0] as any).voice=voice;assert.throws(()=>parseStoryboard(bad),/voice/);}
+ const p=demoProject();p.storyboard=b;assert.deepEqual(parseProject(JSON.stringify(p)).storyboard!.characters[0].voice,b.characters[0].voice);
+});

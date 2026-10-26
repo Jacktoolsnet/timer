@@ -1118,3 +1118,37 @@ Neue Downloads verwenden `<Titel>.scenescript` für ausführbare Projekte und
 es ist keine Konvertierung nötig. Die Dateiauswahl akzeptiert weiterhin bestehende
 `.json`-Dateien (einschließlich `.scenescript.json` und `.storyboard.json`).
 Bestehende Beispiel-URLs bleiben kompatibel und werden nicht umbenannt.
+
+### ElevenLabs-Stimmen im Storyboard
+
+Charaktere, Objekte und Kulissen haben eine optionale Stimmen-Kachel. Der Bleistift
+öffnet die gemeinsame Stimmenauswahl (auch über den Sprachbereich im KI-Workflow).
+Erst „Stimmen laden“ kontaktiert ElevenLabs mit dem entsperrten eigenen Schlüssel;
+dabei werden keine Projektinhalte oder Sprechtexte übertragen und keine Audios erzeugt.
+Pro ausdrücklich angeforderter Seite werden bis zu 100 Stimmen geladen, maximal
+1000 pro Dialog. „Weitere laden“ berücksichtigt die Pagination; es gibt keinen
+stillen Abbruch nach den ersten 100 Stimmen.
+
+- Sprachfilter anhand `labels.language` und `verified_languages`, voreingestellt
+  auf die Videosprache; alternativ alle Stimmen bzw. ohne Sprachangabe anzeigen.
+  Dies ist keine vollständige Kompatibilitätsprüfung: mehrsprachige Modelle können
+  Stimmen in anderen Sprachen verwenden, gegebenenfalls mit anderem Akzent.
+- Gruppen männlich, weiblich, neutral/androgyn und ohne Geschlechtsangabe nach
+  Anbieterlabel; Namen/Beschreibungen werden nicht zur Geschlechtsbestimmung benutzt.
+  „Neutral“ garantiert keinen Wechsel zwischen männlicher und weiblicher Stimme.
+- Die Zuordnung `{voice:{provider:"elevenlabs",id,name}}` ist optional und wird
+  mit Storyboard und Projekt gespeichert/exportiert. Sie enthält **keinen API-Key**.
+  Bestehende Zuordnungen bleiben beim KI-Feedback erhalten. Ändern/Entfernen verlangt
+  eine erneute Freigabe des Elements und seiner abhängigen Szenen.
+- Die KI kann `narration.speaker` auf die stabile Storyboard-Element-ID setzen
+  (bei Mehrdeutigkeit `characters:ID` oder `settings:ID`).
+  Eindeutige Namen werden ebenfalls erkannt; unbekannte Sprecher verwenden die
+  im Sprachdialog gewählte Ersatzstimme. Fehlende/mehrdeutige Zuordnungen werden
+  vor dem kostenpflichtigen Sammellauf geprüft. Eine Aufnahme hat genau eine Stimme;
+  Dialoge mit mehreren Sprechern in separate Szenen aufteilen.
+- Fertige Aufnahmen werden bei Stimmenänderungen nicht still neu berechnet;
+  bei Bedarf einen einzelnen Sprachauftrag ausdrücklich neu erzeugen.
+
+Grundlagen: [ElevenLabs-Stimmenliste](https://elevenlabs.io/docs/api-reference/voices/search),
+[Stimmen und Sprachen](https://elevenlabs.io/docs/product-guides/playground/text-to-speech).
+Alle Entwicklungstests verwenden Fake-Keys und simulierte Antworten.

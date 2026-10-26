@@ -1,3 +1,7 @@
+import {chooseElevenVoice} from './voice-picker';
+import type {VoiceAssignment} from '../lib/voices';
+import {voicePickerWords} from '../lib/voice-picker-i18n';
+import type {Language} from '../lib/i18n';
 import {videoLanguageForLocale,videoLanguageOptions} from '../lib/video-languages';
 import {aiLanguageInstruction} from '../lib/ai-language';
 import {openAiWorkflow} from './ai-workflow';
@@ -8,7 +12,7 @@ const $=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(
 export function installStoryboardEditor(context:()=>{project:Project;revision:number},apply:(p:Project)=>void,stop:()=>void){
  const dialog=$<HTMLDialogElement>('dialog'),t=JSON.parse(dialog.dataset.words!) as ReturnType<typeof storyboardWords>;
  const fieldDialog=$<HTMLDialogElement>('field-dialog'),exchange=$<HTMLDialogElement>('exchange');
- type FieldConfig={label:string;value:string|string[];kind?:'text'|'number'|'select'|'choices';max?:number;min?:number;limit?:number;required?:boolean;options?:[string,string][];shot?:string;target?:BoardReviewTarget;subjectKind?:boolean;newComment?:boolean;editComment?:boolean;newItem?:boolean;apply:(draft:Storyboard,value:string|string[])=>void};
+ type FieldConfig={label:string;value:string|string[];kind?:'text'|'number'|'select'|'choices'|'voice';max?:number;min?:number;limit?:number;required?:boolean;options?:[string,string][];shot?:string;target?:BoardReviewTarget;subjectKind?:boolean;newComment?:boolean;editComment?:boolean;newItem?:boolean;apply:(draft:Storyboard,value:string|string[])=>void};
  let edit:{config:FieldConfig;board:Storyboard;revision:number;session:number;focusKey:string}|null=null;
  const replaceDialog=$<HTMLDialogElement>('replace-dialog');
  let finishReplace:((accepted:boolean)=>void)|null=null;
@@ -43,6 +47,10 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
   if(id&&board.images[id]?.data){const img=node('img');img.src=board.images[id].data!;img.alt=alt;img.loading='lazy';img.className='board-sketch';const link=node('a',board.images[id].name);link.href=img.src;link.download=board.images[id].name;link.className='board-image-download';area.append(img,link);}else{const p=node('p',t.noImage);p.className='board-no-image';area.append(p);}
  }
  function openField(config:FieldConfig,key:string){
+  if(config.kind==='voice'){
+   const source=board,rev=board.revision,ticket=session,valid=()=>{try{check();return board===source&&board.revision===rev&&session===ticket;}catch{return false;}};
+   void (async()=>{try{check();const value=await chooseElevenVoice({language:board.language,current:JSON.parse(String(config.value))??undefined,valid});if(value===undefined)return;if(!valid())throw new Error(t.stale);if(JSON.stringify(value)===config.value)return;const draft=structuredClone(board);config.apply(draft,JSON.stringify(value));draft.revision++;invalidateStoryboardApprovals(draft,config.target);board=parseStoryboard(draft);dirty=true;render();}catch(e){error(e);}})();return;
+  }
   try{check();clear();edit={config,board,revision:board.revision,session,focusKey:key};$('field-heading').textContent=config.newComment?t.add:t.edit+': '+config.label;$('field-label').textContent=config.label;$('field-error').textContent='';
    const kind=config.kind??'text',text=$<HTMLTextAreaElement>('field-text'),number=$<HTMLInputElement>('field-number'),select=$<HTMLSelectElement>('field-select'),choices=$('field-choices');
    for(const [control,show]of [[text,kind==='text'],[number,kind==='number'],[select,kind==='select']] as const){control.hidden=!show;control.disabled=!show;}
@@ -132,6 +140,8 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
     heading(card,subject.name,{...textConfig(t.fieldTitle,subject.name,(b,v)=>{get(b).name=String(v);},200),target},kind+'-'+subject.id+'-name');
     if(kind==='characters'){const character=subject as BoardCharacter;field(card,t.category,character.kind==='object'?t.objectCategory:t.characterCategory,{label:t.category,value:character.kind,kind:'select',options:[['character',t.characterCategory],['object',t.objectCategory]],target,subjectKind:true,apply:(b,v)=>{b.characters.find(c=>c.id===subject.id)!.kind=v as BoardCharacter['kind'];}},kind+'-'+subject.id+'-kind');}
     picture(card,subject.image,subject.name,(b,v)=>{get(b).image=String(v)||null;},kind+'-'+subject.id+'-image',undefined,target);
+    const voiceWords=voicePickerWords(document.documentElement.lang as Language);
+    field(card,voiceWords.voice,subject.voice?subject.voice.name+' · '+subject.voice.id:voiceWords.none,{label:voiceWords.voice,value:JSON.stringify(subject.voice??null),kind:'voice',target,apply:(b,v)=>{const voice=JSON.parse(String(v)) as VoiceAssignment|null;if(voice)get(b).voice=voice;else delete get(b).voice;}},kind+'-'+subject.id+'-voice');
     field(card,t.description,subject.description,{...textConfig(t.description,subject.description,(b,v)=>{get(b).description=String(v);}),target},kind+'-'+subject.id+'-description');commentList(card,subject.comments,target);tileDetail(card);detail.append(card);
    }
    if(!subjects.length)detail.append(node('p',t.empty));

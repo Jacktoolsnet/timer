@@ -1,3 +1,4 @@
+import {installVoicePicker} from './voice-picker';
 import {installAiWorkflow} from './ai-workflow';
 import {installApiVault} from './api-vault';
 import {installStoryboardEditor} from './storyboard-editor';
@@ -64,6 +65,7 @@ const $=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(
 const words=JSON.parse($('editor').dataset.words!) as Record<EditorKey,string>;
 const t=(key:string)=>words[key as EditorKey]||key;
 installApiVault(()=>{stop();draw(false);});
+installVoicePicker();
 const keepScreenAwake=screenWakeLock($('wake-status'),'',t('wakeUnavailable'));
 const startup=getStartupProject();
 let project:Project=startup.project, sceneIndex=0, selectedId='',dirty=false,time=0,playing=false,recording=false;
