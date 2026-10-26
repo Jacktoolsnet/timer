@@ -35,7 +35,7 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,re
  function speechEstimate(){const selected=selectedSpeechJobs();$('speech-estimate').textContent=selected.length?`${selected.length} ${t.assignments} · ${selected.reduce((n,j)=>n+j.text.length,0)} ${t.characters}`:t.empty;$<HTMLTextAreaElement>('speech-text').value=selected.map(j=>j.text).join('\n\n');}
  function configure(){
   clearPreview();$('error-box').hidden=true;$('status').textContent='';consent.checked=false;const kind=action.value;modelPicker.configure(models[kind]);
-  $('text-options').hidden=kind==='image'||kind==='speech';$('content-options').hidden=kind==='speech';$('image-options').hidden=kind!=='image';$('speech-options').hidden=kind!=='speech';$('tokens-label').hidden=kind==='image'||kind==='speech';$('refs-label').hidden=kind==='image'||kind==='speech';$('prompt-label').hidden=kind==='speech';speechEstimate();busy(false);
+  $('text-options').hidden=kind==='image'||kind==='speech';$('content-options').hidden=kind==='speech';$('image-options').hidden=kind!=='image';$('speech-options').hidden=kind!=='speech';$('refs-label').hidden=kind==='image'||kind==='speech';$('prompt-label').hidden=kind==='speech';speechEstimate();busy(false);
  }
  function preview(p:Project,kind:string){
   check();candidate=p;$('preview').hidden=false;
@@ -89,7 +89,7 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,re
    }
    $('status').textContent=t.unlock;key=await requestApiKey(kind==='speech'?'elevenlabs':'openai',controller.signal);check();controller.signal.throwIfAborted();$('status').textContent=t.working;
    if(kind==='board'||kind==='script'){
-    const text=await generateText(key,{model:model.value.trim(),instructions,input:textInput,images:references,maxTokens:Number($<HTMLInputElement>('tokens').value),reasoning:modelPicker.reasoning},controller.signal);check();controller.signal.throwIfAborted();
+    const text=await generateText(key,{model:model.value.trim(),instructions,input:textInput,images:references,reasoning:modelPicker.reasoning},controller.signal);check();controller.signal.throwIfAborted();
     const p=kind==='board'?acceptPlanning(text,source,sourceBoard):acceptScript(text,source);
     if(kind==='script')await ctx.preload?.(p);else for(const a of Object.values(p.storyboard!.images))if(a.data&&!Object.values(sourceBoard.images).some(old=>old.data===a.data))await decodeImage(a.data);
     check();controller.signal.throwIfAborted();preview(p,kind);

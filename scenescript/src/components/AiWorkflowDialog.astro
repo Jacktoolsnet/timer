@@ -22,7 +22,6 @@ const {lang}=Astro.props,t=aiWorkflowWords(lang),m=aiModelWords(lang),l=aiWorkfl
    <section id="ai-workflow-text-options" class="ai-flow-tile" data-ai-tile="reasoning" aria-labelledby="ai-reasoning-heading"><h3 id="ai-reasoning-heading">{l.reasoning}</h3>
    <div class="ai-flow-fields">
    <div id="ai-workflow-reasoning-options"><label>{m.reasoning}<select id="ai-workflow-reasoning"></select></label></div>
-   <label id="ai-workflow-tokens-label">{t.tokens}<input id="ai-workflow-tokens" type="number" min="1024" max="65536" step="1024" value="32768"/></label>
    </div><details class="ai-flow-details"><summary>{l.details}</summary><p id="ai-workflow-reasoning-hint" class="small-hint"></p></details>
    </section>
    <section id="ai-workflow-image-options" class="ai-flow-tile" data-ai-tile="image" aria-labelledby="ai-image-heading" hidden><h3 id="ai-image-heading">{l.image}</h3>

@@ -1232,3 +1232,15 @@ Button kopiert ausschließlich den sichtbaren, bereinigten Fehlertext; bei fehle
 Clipboard-Rechten wird der Text für Strg+C / Cmd+C markiert. Keine automatischen
 Wiederholungen oder neuen Kosten. Abbruch kann Kosten beim Anbieter nicht rückgängig
 machen. Veraltete bzw. ungültige Ergebnisse werden weiterhin nicht übernommen.
+
+
+#### Kein manuelles Ausgabetoken-Limit
+
+Das Zahlenfeld für maximale Ausgabetokens entfällt. Textanfragen senden keinen
+zusätzlichen `max_output_tokens`-Parameter mehr; die Anwendung verwendet dafür die
+Anbietervorgaben statt eines selbst gesetzten Limits von 32.768 Tokens. Auch bei
+unbekannten Modell-IDs wird keine Grenze geraten. Das bedeutet **nicht unbegrenzt**:
+Anbieter-, Modell- und Kontextgrenzen, lokale Antwortgrößen und Timeouts bleiben
+bestehen. Reasoning verbraucht weiterhin Generierungstokens; größere Antworten
+können höhere Kosten verursachen. Unvollständige/ungültige Antworten werden nicht
+übernommen, aber auch nicht automatisch kostenpflichtig wiederholt oder fortgesetzt.

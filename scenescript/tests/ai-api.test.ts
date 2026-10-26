@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {generateText,generateImage,generateSpeech,listAiVoices,AiApiError} from '../src/lib/ai-api.ts';
 const key='fake-provider-key-NOT-REAL',signal=()=>new AbortController().signal;
-const request={model:'gpt-5-mini',instructions:'Return JSON.',input:'{"story":"test"}',maxTokens:2048};
+const request={model:'gpt-5-mini',instructions:'Return JSON.',input:'{"story":"test"}'};
 const completed=(text:string)=>({status:'completed',output:[{type:'reasoning',summary:[]},{type:'message',content:[{type:'output_text',text}]}]});
 const mock=(r:unknown)=>async()=>Response.json(r);
 test('Responses sends minimal fixed-origin request, secret only in header, no storage or retries',async()=>{
@@ -10,7 +10,7 @@ test('Responses sends minimal fixed-origin request, secret only in header, no st
  const result=await generateText(key,{...request,images:['data:image/png;base64,AAAA']},signal(),async(url,init)=>{
   calls++;assert.equal(url,'https://api.openai.com/v1/responses');assert.equal(init?.credentials,'omit');assert.equal(init?.redirect,'error');assert.equal(init?.cache,'no-store');assert.equal(init?.referrerPolicy,'no-referrer');
   assert.equal((init?.headers as Record<string,string>).Authorization,'Bearer '+key);assert.ok(!String(init?.body).includes(key));
-  const body=JSON.parse(String(init?.body));assert.equal(body.store,false);assert.equal(body.text.format.type,'json_object');assert.equal(body.max_output_tokens,2048);assert.equal(body.input[0].content[2].type,'input_image');
+  const body=JSON.parse(String(init?.body));assert.equal(body.store,false);assert.equal(body.text.format.type,'json_object');assert.ok(!Object.hasOwn(body,'max_output_tokens'));assert.equal(body.input[0].content[2].type,'input_image');
   return Response.json(completed('{"valid":true}'));
  });assert.deepEqual(JSON.parse(result),{valid:true});assert.equal(calls,1);
 });
@@ -75,4 +75,9 @@ test('JSON mode always includes an explicit JSON instruction inside input, even 
    assert.match(inputText,/Return exactly one valid JSON object/);return Response.json(completed('{"ok":true}'));
   });assert.deepEqual(JSON.parse(result),{ok:true});assert.equal(calls,1);
  }
+});
+
+
+test('text generation adds no application output-token cap, including for unknown models',async()=>{
+ for(const model of ['gpt-6.1-sol','gpt-5-mini','gpt-future-model'])await generateText(key,{...request,model},signal(),async(_,init)=>{const body=JSON.parse(String(init?.body));assert.ok(!Object.hasOwn(body,'max_output_tokens'));return Response.json(completed('{"ok":true}'));});
 });

@@ -1227,7 +1227,7 @@ body.recording .comic-edit-overlay{display:none}
 .ai-flow-wide{grid-column:1/-1}
 .ai-flow-tile>h3{margin:0;padding-bottom:10px;border-bottom:1px solid var(--line);color:var(--text);font-size:1rem}
 #ai-workflow-dialog .ai-flow-tile>p{margin:0}
-.ai-flow-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:end}
+.ai-flow-fields{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;align-items:start}
 .ai-flow-fields>*{min-width:0}
 .ai-flow-details{font-size:.8rem;color:var(--muted);line-height:1.6}
 .ai-flow-details>summary{cursor:pointer;color:var(--accent);width:fit-content}
@@ -1238,4 +1238,3 @@ body.recording .comic-edit-overlay{display:none}
 #ai-workflow-error-box{border-color:var(--danger,#c75050)}
 #ai-workflow-dialog #ai-workflow-image-options,#ai-workflow-dialog #ai-workflow-speech-options{display:flex;gap:14px}
 @media(max-width:800px){#ai-workflow-dialog{width:calc(100vw - 32px)}#ai-workflow-settings{grid-template-columns:minmax(0,1fr)}.ai-flow-tile{padding:14px}}
-@media(max-width:480px){.ai-flow-fields{grid-template-columns:minmax(0,1fr)}}
