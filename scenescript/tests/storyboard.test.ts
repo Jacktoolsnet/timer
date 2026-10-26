@@ -89,3 +89,23 @@ test('optional ElevenLabs subject voices roundtrip, validate and survive AI feed
  for(const voice of [{provider:'other',id:'Good',name:'No'},{provider:'elevenlabs',id:'../bad',name:'No'},{provider:'elevenlabs',id:'Good',name:'No',key:'secret'}]){const bad=structuredClone(b);(bad.characters[0] as any).voice=voice;assert.throws(()=>parseStoryboard(bad),/voice/);}
  const p=demoProject();p.storyboard=b;assert.deepEqual(parseProject(JSON.stringify(p)).storyboard!.characters[0].voice,b.characters[0].voice);
 });
+
+test('removing a unique storyboard image deletes only its asset and invalidates scene approval',async()=>{
+ const {removeStoryboardImage}=await import('../src/lib/storyboard-images.ts');
+ const board=example();for(const item of [...board.characters,...board.settings,...board.shots])item.status='approved';board.approved=true;
+ const before=JSON.stringify(board),shot=board.shots.at(-1)!;
+ const result=removeStoryboardImage(board,{kind:'shots',id:shot.id});
+ assert.equal(result.shots.at(-1)!.image,null);assert.equal(result.shots.at(-1)!.status,'draft');assert.equal(result.approved,false);
+ assert.equal(result.revision,board.revision+1);assert.ok(!Object.hasOwn(result.images,shot.image!));assert.deepEqual(result.images.start,board.images.start);
+ assert.equal(result.shots[0].status,'approved');assert.equal(JSON.stringify(board),before);
+});
+test('shared storyboard images survive removal from a subject and dependent scenes require review',async()=>{
+ const {removeStoryboardImage}=await import('../src/lib/storyboard-images.ts');
+ const board=example();for(const item of [...board.characters,...board.settings,...board.shots])item.status='approved';board.approved=true;
+ const result=removeStoryboardImage(board,{kind:'characters',id:board.characters[0].id});
+ assert.equal(result.characters[0].image,null);assert.equal(result.characters[0].status,'draft');assert.equal(result.characters[1].status,'approved');
+ assert.deepEqual(result.images.start,board.images.start);assert.equal(result.settings[0].image,'start');
+ for(const shot of result.shots)assert.equal(shot.status,'draft');
+ assert.equal(removeStoryboardImage(result,{kind:'characters',id:board.characters[0].id}),result);
+ assert.throws(()=>removeStoryboardImage(board,{kind:'shots',id:'missing'}));
+});

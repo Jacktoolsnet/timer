@@ -253,3 +253,45 @@ test('storyboard download uses its current title as a safe filename',async({page
 test('native storyboard extension and legacy JSON files both import',async({page})=>{
  for(const name of ['Plan.storyboard','Plan.storyboard.json']){await page.goto('/en/');await page.locator('#open-storyboard').click();await expect(page.locator('#storyboard-file')).toHaveAttribute('accept',/\.storyboard/);await page.locator('#storyboard-file').setInputFiles({name,mimeType:'application/octet-stream',buffer:Buffer.from(exportStoryboard(inflationStoryboard(),true))});await expect(page.locator('#storyboard-content')).toContainText(inflationStoryboard().title);await expect(page.locator('#storyboard-error-box')).not.toBeVisible();}
 });
+
+test('storyboard image viewer zooms, pans, fits and closes without changing the plan',async({page})=>{
+ await setup(page);await page.locator('[data-board-tab=shots]').click();
+ const enlarge=page.locator('.board-image-field .image-viewer-open');await expect(enlarge).toHaveAttribute('title','Bild vergrößern');await enlarge.click();
+ const viewer=page.locator('#image-viewer-dialog'),image=viewer.locator('img'),viewport=page.locator('#image-viewer-viewport');
+ await expect(viewer).toBeVisible();await expect(page.locator('#image-viewer-plus')).toBeEnabled();
+ const initial=await image.boundingBox();await page.locator('#image-viewer-plus').click();
+ await expect.poll(async()=>(await image.boundingBox())!.width).toBeGreaterThan(initial!.width);
+ await page.locator('#image-viewer-minus').click();await page.locator('#image-viewer-actual').click();
+ await expect(page.locator('#image-viewer-percent')).toHaveText('100 %');
+ for(let i=0;i<12;i++)await page.locator('#image-viewer-plus').click();
+ const rect=(await viewport.boundingBox())!,left=await viewport.evaluate(el=>el.scrollLeft);
+ await page.mouse.move(rect.x+rect.width/2,rect.y+rect.height/2);await page.mouse.down();await page.mouse.move(rect.x+rect.width/2-70,rect.y+rect.height/2-40,{steps:5});await page.mouse.up();
+ await expect.poll(()=>viewport.evaluate(el=>el.scrollLeft)).toBeGreaterThan(left);
+ const beforeWheel=await page.locator('#image-viewer-percent').textContent();await page.mouse.wheel(0,-100);
+ await expect(page.locator('#image-viewer-percent')).not.toHaveText(beforeWheel!);
+ await page.locator('#image-viewer-fit').click();const fit=await image.boundingBox();
+ expect(fit!.width).toBeLessThan(rect.width);expect(fit!.height).toBeLessThan(rect.height);
+ await page.keyboard.press('+');await expect.poll(async()=>(await image.boundingBox())!.width).toBeGreaterThan(fit!.width);
+ await page.keyboard.press('0');await expect.poll(async()=>Math.round((await image.boundingBox())!.width)).toBe(Math.round(fit!.width));
+ await page.keyboard.press('Escape');await expect(viewer).toHaveCount(0);await expect(enlarge).toBeFocused();await expect(page.locator('#storyboard-dialog')).toBeVisible();
+ await enlarge.click();await expect(page.locator('#image-viewer-dialog')).toBeVisible();await page.locator('#image-viewer-close').click();await expect(viewer).toHaveCount(0);
+ const download=page.waitForEvent('download');await page.locator('#storyboard-download').click();const result=JSON.parse(await readFile((await(await download).path())!,'utf8'));
+ expect(result.board).toEqual(fixture().storyboard);
+});
+
+test('image deletion uses its own confirmation overlay, preserves shared assets and saves only explicitly',async({page})=>{
+ await setup(page);let nativeDialogs=0;page.on('dialog',dialog=>{nativeDialogs++;void dialog.dismiss();});
+ await page.locator('[data-board-tab=shots]').click();
+ const remove=page.locator('.board-image-field .board-delete-image'),modal=page.locator('#storyboard-delete-image-dialog');
+ await remove.click();await expect(modal).toBeVisible();await expect(page.locator('#storyboard-delete-image-cancel')).toBeFocused();
+ await page.locator('#storyboard-delete-image-cancel').click();await expect(modal).toBeHidden();await expect(remove).toBeFocused();await expect(page.locator('.board-sketch')).toHaveCount(1);
+ await remove.click();await page.keyboard.press('Escape');await expect(modal).toBeHidden();await expect(page.locator('.board-sketch')).toHaveCount(1);
+ await remove.click();await page.locator('#storyboard-delete-image-apply').click();await expect(modal).toBeHidden();await expect(page.locator('.board-sketch')).toHaveCount(0);await expect(remove).toHaveCount(0);
+ const download=page.waitForEvent('download');await page.locator('#storyboard-download').click();const shared=JSON.parse(await readFile((await(await download).path())!,'utf8'));
+ expect(shared.board.shots[0].image).toBeNull();expect(shared.board.images.start.data).toBe(fixture().storyboard.images.start.data);
+ expect(shared.board.characters[0].image).toBe('start');
+ const last=fixture().storyboard.shots.at(-1)!;await page.locator('[data-board-item="'+last.id+'"]').click();await remove.click();await page.locator('#storyboard-delete-image-apply').click();
+ await page.locator('#storyboard-save').click();const saving=page.waitForEvent('download');await page.locator('#save-project').click();const saved=JSON.parse(await readFile((await(await saving).path())!,'utf8'));
+ expect(saved.storyboard.shots.at(-1).image).toBeNull();expect(saved.storyboard.images.finish).toBeUndefined();expect(saved.storyboard.images.start).toBeTruthy();expect(saved.scenes).toEqual(fixture().scenes);
+ await page.locator('#undo-project').click();await page.locator('#open-storyboard').click();await page.locator('[data-board-tab=shots]').click();await expect(page.locator('.board-sketch')).toHaveCount(1);expect(nativeDialogs).toBe(0);
+});

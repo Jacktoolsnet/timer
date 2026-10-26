@@ -1238,3 +1238,35 @@ body.recording .comic-edit-overlay{display:none}
 #ai-workflow-error-box{border-color:var(--danger,#c75050)}
 #ai-workflow-dialog #ai-workflow-image-options,#ai-workflow-dialog #ai-workflow-speech-options{display:flex;gap:14px}
 @media(max-width:800px){#ai-workflow-dialog{width:calc(100vw - 32px)}#ai-workflow-settings{grid-template-columns:minmax(0,1fr)}.ai-flow-tile{padding:14px}}
+
+/* Read-only, reusable storyboard / AI image inspection. */
+.image-viewer-open{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--text);cursor:pointer;flex:0 0 auto}
+.image-viewer-open svg,#image-viewer-dialog button svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#image-viewer-dialog{box-sizing:border-box;width:min(1400px,96vw);height:94dvh;max-width:96vw;max-height:94dvh;padding:0;border:1px solid var(--line);border-radius:16px;background:var(--surface);color:var(--text);overflow:hidden}
+#image-viewer-dialog[open]{display:flex;flex-direction:column}
+#image-viewer-dialog::backdrop{background:#000b;backdrop-filter:blur(4px)}
+#image-viewer-dialog header{padding:14px 20px;background:var(--accent-soft);border-bottom:1px solid var(--line)}
+#image-viewer-title{margin:0;font-size:1.1rem;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.image-viewer-toolbar{display:flex;align-items:center;justify-content:center;gap:10px;padding:10px;background:var(--accent-soft);border-bottom:1px solid var(--line)}
+#image-viewer-dialog button{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;width:40px;height:40px;padding:8px;background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:8px;cursor:pointer}
+#image-viewer-dialog button:disabled{opacity:.45;cursor:default}
+#image-viewer-dialog button:focus-visible,.image-viewer-open:focus-visible,#image-viewer-viewport:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+#image-viewer-percent{min-width:75px;text-align:center;font-variant-numeric:tabular-nums}
+#image-viewer-viewport{flex:1;min-height:0;min-width:0;overflow:auto;background:#111722;cursor:grab;touch-action:none;overscroll-behavior:contain}
+#image-viewer-viewport.dragging{cursor:grabbing}
+.image-viewer-surface{display:flex;align-items:center;justify-content:center;min-width:100%;min-height:100%}
+#image-viewer-dialog img{display:block;max-width:none;max-height:none;flex:none;user-select:none;pointer-events:none;object-fit:contain}
+#image-viewer-dialog footer{display:flex;align-items:center;gap:16px;padding:10px 16px;border-top:1px solid var(--line)}
+#image-viewer-dialog footer p{margin:0;font-size:.8rem;line-height:1.4}
+
+#storyboard-delete-image-dialog{box-sizing:border-box;width:min(560px,94vw);max-height:90dvh;padding:0;overflow:auto;border:1px solid var(--line);border-radius:16px;background:var(--surface);color:var(--text);box-shadow:0 24px 80px #0005}
+#storyboard-delete-image-dialog::backdrop{background:#0009;backdrop-filter:blur(3px)}
+#storyboard-delete-image-dialog header{padding:18px 22px;background:var(--accent-soft);border-bottom:1px solid var(--line)}
+#storyboard-delete-image-title{margin:0;font-size:1.15rem}
+#storyboard-delete-image-dialog .dialog-inner{padding:18px 22px;line-height:1.65;overflow-wrap:anywhere}
+#storyboard-delete-image-name{font-weight:600;margin-top:0}
+#storyboard-delete-image-dialog footer{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;padding:16px 22px;border-top:1px solid var(--line)}
+#storyboard-delete-image-dialog button{min-height:42px;padding:10px 16px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--text);font:inherit;cursor:pointer}
+#storyboard-delete-image-dialog #storyboard-delete-image-apply{background:#b83232;color:#fff;border-color:#b83232}
+#storyboard-delete-image-dialog button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+#storyboard-dialog .board-delete-image{color:#cf4545}

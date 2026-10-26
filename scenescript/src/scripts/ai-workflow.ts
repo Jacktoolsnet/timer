@@ -1,3 +1,4 @@
+import {imageViewerButton} from './image-viewer';
 import {imageSettings} from '../lib/ai-image-settings';
 import {installAiModelPicker} from './ai-model-picker';
 import {voicePickerWords} from '../lib/voice-picker-i18n';
@@ -22,12 +23,13 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,re
  const $=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById('ai-workflow-'+id) as T;
  const dialog=$<HTMLDialogElement>('dialog'),t=JSON.parse(dialog.dataset.words!) as ReturnType<typeof aiWorkflowWords>;
  const action=$<HTMLSelectElement>('action'),model=$<HTMLInputElement>('model'),prompt=$<HTMLTextAreaElement>('prompt'),consent=$<HTMLInputElement>('consent'),start=$<HTMLButtonElement>('start'),apply=$<HTMLButtonElement>('apply');
+ const enlargeImage=imageViewerButton(()=>({data:$<HTMLImageElement>('image-preview').src,name:t.preview}));enlargeImage.id='ai-workflow-image-enlarge';enlargeImage.hidden=true;$('image-preview').before(enlargeImage);
  const jobsSelect=$<HTMLSelectElement>('job'),targets=$<HTMLSelectElement>('target');
  const modelPicker=installAiModelPicker(action,model);
  const models:Record<string,string>={board:'gpt-5-mini',script:'gpt-5-mini',image:'gpt-image-2',speech:'eleven_multilingual_v2'};
  let ctx:AiWorkflowContext,active:AbortController|undefined,candidate:Project|undefined,jobs:SpeechJob[]=[],session=0,opening=false,generating=false;
  const urls:string[]=[];
- function clearPreview(){candidate=undefined;apply.disabled=true;$('preview').hidden=true;$('image-preview').removeAttribute('src');$('image-preview').hidden=true;$<HTMLTextAreaElement>('json-preview').value='';$('json-preview').hidden=true;$('audios').replaceChildren();for(const url of urls)URL.revokeObjectURL(url);urls.length=0;}
+ function clearPreview(){candidate=undefined;apply.disabled=true;$('preview').hidden=true;$('image-preview').removeAttribute('src');$('image-preview').hidden=true;enlargeImage.hidden=true;$<HTMLTextAreaElement>('json-preview').value='';$('json-preview').hidden=true;$('audios').replaceChildren();for(const url of urls)URL.revokeObjectURL(url);urls.length=0;}
  const error=(e:unknown)=>{let message:string;if(e instanceof AiApiError)message=e.code==='size'?t.sizeError:t[e.code];else if(e instanceof VoiceAssignmentError)message=voicePickerWords(document.documentElement.lang as Language)[e.code];else if(e instanceof VaultError)message=t.locked;else message=e instanceof Error?e.message:t.response;$<HTMLTextAreaElement>('error').value=message;$('copy-status').textContent='';$('error-box').hidden=false;};
  const check=()=>{if(!dialog.open||!ctx.valid())throw new Error(t.stale);};
  const busy=(value:boolean)=>{$<HTMLFieldSetElement>('settings').disabled=value;start.hidden=value;$('cancel').hidden=!value;$('progress').hidden=!value;$('cancel-hint').hidden=!value;apply.disabled=value||!candidate;start.disabled=!consent.checked;dialog.setAttribute('aria-busy',String(value));const running=value&&generating;dialog.classList.toggle('ai-running',running);$('spinner').hidden=!running;$('settings').hidden=running;if(running)dialog.querySelector('.dialog-inner')!.scrollTop=0;};
@@ -116,7 +118,7 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,re
     if(kind==='script')await ctx.preload?.(p);else for(const a of Object.values(p.storyboard!.images))if(a.data&&!Object.values(sourceBoard.images).some(old=>old.data===a.data))await decodeImage(a.data);
     check();controller.signal.throwIfAborted();preview(p,kind);
    }else if(kind==='image'){
-    const settings=currentImageSettings();let data=await generateImage(key,{model:model.value.trim(),prompt:imageText,size:settings.requestSize,quality:$<HTMLSelectElement>('quality').value},controller.signal);check();controller.signal.throwIfAborted();data=await fitImage(data,settings.size);check();controller.signal.throwIfAborted();const p=acceptImage(source,data,target);preview(p,kind);$<HTMLImageElement>('image-preview').src=data;$('image-preview').hidden=false;
+    const settings=currentImageSettings();let data=await generateImage(key,{model:model.value.trim(),prompt:imageText,size:settings.requestSize,quality:$<HTMLSelectElement>('quality').value},controller.signal);check();controller.signal.throwIfAborted();data=await fitImage(data,settings.size);check();controller.signal.throwIfAborted();const p=acceptImage(source,data,target);preview(p,kind);$<HTMLImageElement>('image-preview').src=data;$('image-preview').hidden=false;enlargeImage.hidden=false;
    }else{
     const progress=$<HTMLProgressElement>('progress');progress.max=selectedJobs.length;progress.value=0;
     for(const [i,job]of selectedJobs.entries()){

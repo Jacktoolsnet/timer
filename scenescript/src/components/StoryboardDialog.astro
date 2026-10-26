@@ -62,3 +62,9 @@ const {lang}=Astro.props,t=storyboardWords(lang),ai=aiWorkflowWords(lang);
  </div>
  <footer class="json-footer"><button id="storyboard-replace-cancel" type="button" autofocus>{t.cancel}</button><button id="storyboard-replace-apply" type="button">{t.replaceAction}</button></footer>
 </dialog>
+
+<dialog id="storyboard-delete-image-dialog" role="alertdialog" aria-labelledby="storyboard-delete-image-title" aria-describedby="storyboard-delete-image-hint">
+ <header class="json-header"><h2 id="storyboard-delete-image-title">{t.deleteImageTitle}</h2></header>
+ <div class="dialog-inner"><p id="storyboard-delete-image-name"></p><p id="storyboard-delete-image-hint">{t.deleteImageHint}</p></div>
+ <footer class="json-footer"><button id="storyboard-delete-image-cancel" type="button" autofocus>{t.cancel}</button><button id="storyboard-delete-image-apply" type="button">{t.deleteImage}</button></footer>
+</dialog>

@@ -1,3 +1,5 @@
+import {removeStoryboardImage} from '../lib/storyboard-images';
+import {imageViewerButton} from './image-viewer';
 import {chooseElevenVoice} from './voice-picker';
 import type {VoiceAssignment} from '../lib/voices';
 import {voicePickerWords} from '../lib/voice-picker-i18n';
@@ -28,6 +30,21 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
  $('replace-cancel').addEventListener('click',()=>finishReplace?.(false));
  $('replace-apply').addEventListener('click',()=>finishReplace?.(true));
  replaceDialog.addEventListener('cancel',e=>{e.preventDefault();finishReplace?.(false);});
+ const deleteImageDialog=$<HTMLDialogElement>('delete-image-dialog');
+ let pendingImage:{board:Storyboard;revision:number;session:number;target:BoardReviewTarget;focusKey:string;button:HTMLButtonElement}|undefined;
+ function closeDeleteImage(){
+  const pending=pendingImage;pendingImage=undefined;deleteImageDialog.close();
+  if(pending?.button.isConnected)pending.button.focus();
+  else if(pending)Array.from(document.querySelectorAll<HTMLButtonElement>('[data-board-edit]')).find(b=>b.dataset.boardEdit===pending.focusKey)?.focus();
+ }
+ $('delete-image-cancel').addEventListener('click',closeDeleteImage);
+ deleteImageDialog.addEventListener('cancel',event=>{event.preventDefault();closeDeleteImage();});
+ $('delete-image-apply').addEventListener('click',()=>{
+  const pending=pendingImage;if(!pending)return;
+  try{check();if(board!==pending.board||board.revision!==pending.revision||session!==pending.session)throw new Error(t.stale);
+   board=removeStoryboardImage(board,pending.target);dirty=true;render();closeDeleteImage();
+  }catch(e){closeDeleteImage();error(e);}
+ });
  let selectedItems:Record<string,string>={};
  let board:Storyboard,origin:ReturnType<typeof context>,dirty=false,tab='story',session=0;
  const check=()=>{const now=context();if(!dialog.open||now.project!==origin.project||now.revision!==origin.revision)throw new Error(t.stale);};
@@ -47,7 +64,13 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
  function picture(parent:HTMLElement,id:string|null,alt:string,apply:FieldConfig['apply'],key:string,shot?:string,target?:BoardReviewTarget){
   const area=node('section');area.className='board-image-field';parent.append(area);
   const row=node('div');row.className='board-field-heading';row.append(node('h4',t.sketch),pencil({label:t.sketch,value:id??'',kind:'select',options:[['',t.none],...Object.entries(board.images).map(([id,img]):[string,string]=>[id,img.name])],apply,shot,target},key));area.append(row);
-  if(id&&board.images[id]?.data){const img=node('img');img.src=board.images[id].data!;img.alt=alt;img.loading='lazy';img.className='board-sketch';const link=node('a',board.images[id].name);link.href=img.src;link.download=board.images[id].name;link.className='board-image-download';area.append(img,link);}else{const p=node('p',t.noImage);p.className='board-no-image';area.append(p);}
+  if(id&&board.images[id]?.data){const image=board.images[id],enlarge=imageViewerButton(()=>({data:image.data!,name:alt||image.name}));enlarge.classList.add('board-pencil');row.insertBefore(enlarge,row.lastElementChild);
+   const remove=node('button');remove.type='button';remove.className='board-pencil board-delete-image';remove.title=t.deleteImage;remove.setAttribute('aria-label',t.deleteImage);remove.setAttribute('aria-haspopup','dialog');remove.setAttribute('aria-controls','storyboard-delete-image-dialog');
+   const svg=document.createElementNS('http://www.w3.org/2000/svg','svg'),path=document.createElementNS(svg.namespaceURI,'path');svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('aria-hidden','true');path.setAttribute('d','M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7');svg.append(path);remove.append(svg);row.append(remove);
+   remove.addEventListener('click',()=>{try{check();const imageTarget=target??(shot?{kind:'shots' as const,id:shot}:undefined);if(!imageTarget)return;
+    pendingImage={board,revision:board.revision,session,target:imageTarget,focusKey:key,button:remove};$('delete-image-name').textContent=alt+' · '+image.name;deleteImageDialog.showModal();$('delete-image-cancel').focus();
+   }catch(e){error(e);}});
+   const img=node('img');img.src=image.data!;img.alt=alt;img.loading='lazy';img.className='board-sketch';const link=node('a',board.images[id].name);link.href=img.src;link.download=board.images[id].name;link.className='board-image-download';area.append(img,link);}else{const p=node('p',t.noImage);p.className='board-no-image';area.append(p);}
  }
  function openField(config:FieldConfig,key:string){
   if(config.kind==='voice'){
@@ -76,7 +99,7 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
   if(config.newComment||config.editComment)draft.approved=false;else invalidateStoryboardApprovals(draft,config.target??(config.shot?{kind:'shots',id:config.shot}:undefined));
   board=parseStoryboard(draft);dirty=true;if(config.subjectKind){tab=value==='object'?'objects':'characters';if(config.target)selectedItems[tab]=config.target.id;}if(config.newItem)selectedItems[tab]=sectionItems().at(-1)?.id??'';render();closeField();
  }catch(e){$('field-error').textContent=e instanceof Error?e.message:String(e);}});
- dialog.addEventListener('close',()=>{finishReplace?.(false);if(fieldDialog.open)closeField();if(exchange.open)exchange.close();});
+ dialog.addEventListener('close',()=>{if(deleteImageDialog.open)closeDeleteImage();finishReplace?.(false);if(fieldDialog.open)closeField();if(exchange.open)exchange.close();});
  function approvalSwitch(parent:HTMLElement,item:{status:'draft'|'approved'},name:string){
   const label=node('label'),input=node('input'),track=node('span');label.className='board-approval-switch';input.type='checkbox';input.setAttribute('role','switch');input.setAttribute('aria-description',name);input.checked=item.status==='approved';track.className='board-switch-track';track.setAttribute('aria-hidden','true');
   input.addEventListener('change',()=>{item.status=input.checked?'approved':'draft';touch();});label.append(input,track,node('span',t.approved));parent.append(label);
