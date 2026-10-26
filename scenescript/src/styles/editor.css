@@ -1314,3 +1314,5 @@ body.recording .comic-edit-overlay{display:none}
 #ai-workflow-dialog.ai-error-view>.json-footer{display:flex;justify-content:space-between}
 #ai-workflow-dialog.ai-error-view #ai-workflow-close{margin-left:auto;margin-right:0}
 #ai-workflow-copy-status{display:block;margin-top:8px;font-size:.8rem}
+
+#storyboard-script-action{display:inline-flex}

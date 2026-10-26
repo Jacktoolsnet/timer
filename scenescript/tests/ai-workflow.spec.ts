@@ -400,3 +400,20 @@ test('SceneScript restores storyboard image manifests as render assets and as an
  const result=await exportProject(page);expect(result.assets.frame.data).toBe(data);expect(result.scenes[0].backgroundAsset).toBe('frame');expect(result.thumbnail!.data).toBe(data);expect(result.storyboard).toEqual(p.storyboard);
  await page.locator('#undo-project').click();const original=await exportProject(page);expect(original.assets.frame).toBeUndefined();expect(original.storyboard!.images.frame.data).toBe(data);
 });
+
+test('SceneScript toolbar stays enabled after reload with a locked vault and requests its password',async({page})=>{
+ await setup(page);await page.reload();await expect(page.locator('#open-api-vault')).toHaveAttribute('data-vault-state','locked');
+ let calls=0;page.on('request',r=>{if(r.method()==='POST'&&r.url().includes('api.openai.com'))calls++;});
+ await page.locator('#open-storyboard').click();const button=page.locator('#storyboard-script-open');await expect(button).toBeEnabled();await expect(button).toHaveAttribute('title',/locked vault prompts for its password/);
+ await button.click();await expect(page.locator('#api-unlock-dialog')).toBeVisible();await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();await expect(page.locator('#ai-workflow-quick-confirm')).not.toBeVisible();expect(calls).toBe(0);
+ await page.locator('#api-unlock-close').click();await expect(button).toBeEnabled();await expect(page.locator('#storyboard-dialog')).toBeVisible();expect(calls).toBe(0);
+ await button.click();await page.locator('#api-unlock-password').fill('Wrong-Password42!');await page.locator('#api-unlock-submit').click();await expect(page.locator('#api-unlock-error')).toContainText('Incorrect password');
+ await page.locator('#api-unlock-password').fill(password);await page.locator('#api-unlock-submit').click();
+ await expect(page.locator('#api-unlock-dialog')).not.toBeVisible();await expect(page.locator('#ai-workflow-quick-confirm')).toBeVisible();await expect(page.locator('#ai-workflow-quick-summary')).toContainText('GPT-6.1 Sol');expect(calls).toBe(0);
+ await page.locator('#ai-workflow-quick-cancel').click();await expect(button).toBeEnabled();
+});
+test('fully approved items without overall storyboard approval explain why SceneScript is disabled',async({page})=>{
+ const p=fixture();p.storyboard!.approved=false;await setup(page,p);await page.locator('#open-storyboard').click();
+ await expect(page.locator('#storyboard-script-open')).toBeDisabled();await expect(page.locator('#storyboard-script-action')).toHaveAttribute('title',/Also approve the whole storyboard/);
+ await page.locator('#storyboard-approve').click();await expect(page.locator('#storyboard-script-open')).toBeEnabled();
+});
