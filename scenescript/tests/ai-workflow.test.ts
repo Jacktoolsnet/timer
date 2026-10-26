@@ -151,4 +151,7 @@ test('native animated 3D with camera movement and music satisfies structural che
  assert.deepEqual(reviewProduction(validateProject(p)),[]);
  p.scenes[0].stage3d!.actors[0].action='idle';p.scenes[0].stage3d!.actors[0].toX=0;p.scenes[0].stage3d!.camera.orbit=0;
  const codes=reviewProduction(validateProject(p)).map(i=>i.code);assert.ok(codes.includes('missingMotion'));assert.ok(codes.includes('missingCamera'));
+ p.music!.instruments.forEach(i=>i.volume=0);assert.ok(reviewProduction(validateProject(p)).some(i=>i.code==='missingMusic'));
+ p.storyboard!.production!.renderMode='2d';assert.ok(reviewProduction(validateProject(p)).some(i=>i.code==='unexpected3d'));
+
 });

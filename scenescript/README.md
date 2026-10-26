@@ -1329,3 +1329,26 @@ Existiert noch kein Cover, kann ein Thumbnail-Manifest mit dem exakten, eindeuti
 eines vorhandenen Rasterbilds wiederhergestellt werden. Unbekannte oder mehrdeutige Namen
 werden abgelehnt; ein bestehendes Cover hat Vorrang. Standalone-Exporte enthalten weiterhin
 echte Bilddaten. Dafür sind keine weiteren KI-Aufrufe erforderlich.
+
+#### Verbindliche Darstellung und Tonplanung
+Im Storyboard-Projekttab legen die Tiles „Darstellung“ und „Tonplanung“ optional
+`board.production:{renderMode:"auto"|"2d"|"3d"|"mixed",dialogue:boolean,music:boolean,sfx:boolean}`
+fest. „auto“/fehlend bedeutet nicht festgelegt, nicht automatisch 3D. Alte Dateien bleiben gültig.
+Explizite Produktionsvorgaben werden bei KI-Storyboard-Überarbeitungen erhalten; ändern kann sie
+der Nutzer im Editor. Änderungen erfordern wie andere Planänderungen eine neue Freigabe.
+
+Die SceneScript-Anfrage verlangt bei 3D tatsächliche Modellgeometrie, bewegte Figuren/Modelle und
+3D-Kameras. Bilder dienen als Designreferenzen, nicht als Ersatz für die Welt. Dialoge müssen als
+Sprechtexte mit Sprecherzuordnung angelegt sein; Musik als aktivierte native Projektmusik.
+Nach der Generierung prüft der Editor strukturell auf 3D-Geometrie, Bewegung, Kamerabewegung,
+2D/3D-Mix, Sprechtexte/fehlende Aufnahmen und Musik. Das ersetzt keine künstlerische oder
+semantische Vollständigkeitsprüfung. Warnungen stehen in der Vorschau; bei verletzten Vorgaben
+muss „trotzdem übernehmen“ ausdrücklich per Slide-Toggle bestätigt werden. Keine automatischen
+Wiederholungen und keine zusätzlichen kostenpflichtigen Audioaufrufe.
+
+Storyboard-Szenen haben optional `soundEffects:[description]` (max. 30, je 1000 Zeichen),
+editierbar als ein Geräuschauftrag pro Zeile. Diese Aufgaben bleiben im freigegebenen Storyboard
+und damit im SceneScript erhalten. Sie werden in Vorschau und Storyboard-Projekt als offene Aufgaben
+angezeigt: Beschreibungen sind **noch keine hörbaren Effekte**. Es gibt hier weiterhin keine
+automatische SFX-Erzeugung oder neue SFX-Wiedergabespur. Sprachdateien werden nach Übernahme
+wie bisher im separaten ElevenLabs-Workflow erzeugt; Szenendauern werden dort bei Bedarf angepasst.

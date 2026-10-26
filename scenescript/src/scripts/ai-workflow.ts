@@ -169,7 +169,7 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,re
     clearPreview();
    }
   }catch(e){error(e);if(kind==='speech'&&files.length&&ctx.valid())$('status').textContent=t.partial;else{$('status').textContent='';clearPreview();}}
-  finally{key='';active=undefined;generating=false;consent.checked=false;busy(false);$<HTMLProgressElement>('progress').removeAttribute('value');if(dialog.open&&!$('error-box').hidden)$('error-box').scrollIntoView({block:'nearest'});}
+  finally{key='';active=undefined;generating=false;consent.checked=false;busy(false);$<HTMLProgressElement>('progress').removeAttribute('value');if(dialog.open&&!$('error-box').hidden)$('error-box').scrollIntoView({block:'nearest'});else if(dialog.open&&candidate&&kind==='script')($('production-check').hidden?$('preview'):$('production-check')).scrollIntoView({block:'start'});}
  });
  $('copy-error').addEventListener('click',async()=>{
   const field=$<HTMLTextAreaElement>('error'),message=field.value,ticket=session;if(!message)return;

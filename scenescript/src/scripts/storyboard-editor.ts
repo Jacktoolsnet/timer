@@ -206,7 +206,7 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
     picture(card,shot.image,shot.title,(b,v)=>{get(b).image=String(v)||null;},shot.id+'-image',shot.id);
     field(card,t.shotDuration,shot.duration+' s',{label:t.shotDuration,value:String(shot.duration),kind:'number',limit:3600,shot:shot.id,apply:(b,v)=>{get(b).duration=Number(v);}},shot.id+'-duration');
     for(const key of ['action','camera','audio'] as const)field(card,t[key],shot[key],textConfig(t[key],shot[key],(b,v)=>{get(b)[key]=String(v);},10000,shot.id),shot.id+'-'+key);
-    field(card,t.soundEffects,(shot.soundEffects??[]).join('\n'),textConfig(t.soundEffects,(shot.soundEffects??[]).join('\n'),(b,v)=>{get(b).soundEffects=String(v).split('\n').map(s=>s.trim()).filter(Boolean);},10000,shot.id),shot.id+'-sound-effects');
+    field(card,t.soundEffects,(shot.soundEffects??[]).join('\n'),textConfig(t.soundEffects,(shot.soundEffects??[]).join('\n'),(b,v)=>{get(b).soundEffects=String(v).split('\n').map(s=>s.trim()).filter(Boolean);},30030,shot.id),shot.id+'-sound-effects');
     for(const category of ['characters','objects','settings'] as const){
      const kind=category==='settings'?'settings':'characters',subjects=kind==='settings'?board.settings:board.characters.filter(c=>c.kind===(category==='objects'?'object':'character')),ids=new Set(subjects.map(s=>s.id)),selected=shot[kind].filter(id=>ids.has(id));
      field(card,t[category],selected.map(id=>subjects.find(s=>s.id===id)?.name??id).join(', '),{label:t[category],value:selected,kind:'choices',options:subjects.map(s=>[s.id,s.name]),shot:shot.id,apply:(b,v)=>{get(b)[kind]=[...get(b)[kind].filter(id=>!ids.has(id)),...v as string[]];}},shot.id+'-'+category);
