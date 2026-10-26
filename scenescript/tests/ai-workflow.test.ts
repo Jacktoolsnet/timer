@@ -103,5 +103,11 @@ test('image references select related identities/equipment only, deduplicate ima
  const scene=imageGenerationReferences(p,{kind:'shots',id:'shot'});assert.deepEqual(scene.map(r=>r.imageId),['ref','place','machine']);assert.ok(!JSON.stringify(scene).includes('Unrelated'));
  b.characters[1].image='ref';assert.deepEqual(imageGenerationReferences(p,{kind:'shots',id:'shot'}).find(r=>r.imageId==='ref')!.subjects.map(s=>s.id),['hero','machine']);
  assert.deepEqual(imageGenerationReferences(p,null),[]);
- b.images.ref.data='data:image/png;base64,'+'A'.repeat(7*1024*1024);assert.throws(()=>imageGenerationReferences(p,{kind:'characters',id:'hero'}),/maximum/);
+ b.images.ref.data='data:image/png;base64,'+'A'.repeat(7*1024*1024);assert.equal(imageGenerationReferences(p,{kind:'characters',id:'hero'})[0].data,b.images.ref.data);
+});
+
+test('reference count limit remains explicit instead of silently dropping identities',async()=>{
+ const {imageGenerationReferences}=await import('../src/lib/storyboard-image-references.ts');const p=project(),b=p.storyboard!;
+ for(let i=0;i<9;i++){b.images['extra'+i]={name:'Extra.png',data:pixel};b.characters.push({id:'extra'+i,kind:'character',name:'Extra '+i,description:'Test',image:'extra'+i,status:'draft',comments:[]});b.shots[0].characters.push('extra'+i);}
+ assert.throws(()=>imageGenerationReferences(p,{kind:'shots',id:'shot'}),/maximum 8 images/);
 });

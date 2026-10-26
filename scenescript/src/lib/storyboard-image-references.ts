@@ -21,6 +21,6 @@ export function imageGenerationReferences(project:Project,target:BoardReviewTarg
   ref.subjects.push({kind,id:subject.id,name:subject.name});
  }
  const result=[...refs.values()];
- if(result.length>8||result.reduce((n,x)=>n+x.data.length,0)>6*1024*1024)throw new Error('Reference images: maximum 8 / 6 MiB. Reduce references or disable reference images.');
+ if(result.length>8)throw new Error('Reference images: maximum 8 images. Reduce references or disable reference images.');
  return result;
 }

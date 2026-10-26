@@ -333,3 +333,25 @@ test('scene previews rasterize SVG references locally and allow reference upload
  await page.locator('#storyboard-ai-open').click();await page.locator('#ai-workflow-action').selectOption('image');await page.locator('#ai-workflow-target').selectOption('shots:shot');await page.locator('#ai-workflow-image-refs').uncheck();await expect(page.locator('#ai-workflow-image-reference-summary')).toContainText('Reference images: 0');await generate(page);
  await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();expect(generations).toBe(1);
 });
+
+test('oversized reference sources are compressed to the shared upload budget without changing originals',async({page})=>{
+ const original=await page.evaluate(()=>{
+  const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=1024;const ctx=canvas.getContext('2d')!,pixels=ctx.createImageData(1024,1024);let seed=123456789;
+  for(let i=0;i<pixels.data.length;i+=4){for(let channel=0;channel<3;channel++){seed=(Math.imul(seed,1664525)+1013904223)>>>0;pixels.data[i+channel]=seed>>>24;}pixels.data[i+3]=i===0?0:255;}
+  ctx.putImageData(pixels,0,0);return canvas.toDataURL('image/png');
+ });
+ expect(original.length*2).toBeGreaterThan(6*1024*1024);
+ const p=quickImageProject(),b=p.storyboard!,png='iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aZ1sAAAAASUVORK5CYII=';
+ b.images={one:{name:'Pilot.png',data:original},two:{name:'Drone.png',data:original}};b.characters[0].image='one';b.characters[1].image='two';
+ await setup(page,p);let calls=0;
+ await page.route('https://api.openai.com/v1/images/edits',async r=>{if(r.request().method()==='OPTIONS'){await r.fulfill({headers:cors});return;}calls++;const body=r.request().postDataJSON();expect(body.images).toHaveLength(2);
+  expect(body.images.reduce((n:number,image:{image_url:string})=>n+image.image_url.length,0)).toBeLessThanOrEqual(6*1024*1024);
+  for(const ref of body.images){expect(ref.image_url).not.toBe(original);const details=await page.evaluate(async data=>{
+   const img=new Image();img.src=data;await img.decode();const c=document.createElement('canvas');c.width=img.naturalWidth;c.height=img.naturalHeight;const ctx=c.getContext('2d')!;ctx.drawImage(img,0,0);return {w:img.naturalWidth,h:img.naturalHeight,alpha:ctx.getImageData(0,0,1,1).data[3]};
+  },ref.image_url);expect(details.w).toBeLessThanOrEqual(1024);expect(details.h).toBeLessThanOrEqual(1024);expect(details.alpha).toBe(0);}
+  await r.fulfill({headers:cors,json:{data:[{b64_json:png}]}});});
+ await page.locator('#open-storyboard').click();await page.locator('[data-board-tab=shots]').click();await page.locator('.board-generate-image').click();
+ await expect(page.locator('#ai-workflow-quick-summary')).toContainText('Reference images: 2');await page.locator('#ai-workflow-quick-start').click();
+ await expect(page.locator('#storyboard-status')).toContainText('saved in the project');await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();
+ await page.locator('#storyboard-close').click();const saved=await exportProject(page);expect(saved.storyboard!.images.one.data).toBe(original);expect(saved.storyboard!.images.two.data).toBe(original);expect(calls).toBe(1);
+});

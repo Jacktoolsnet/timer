@@ -1294,8 +1294,11 @@ Die Bilderzeugung sendet standardmäßig passende vorhandene Bildreferenzen:
 - Cover: weiterhin textbasiert, kein automatischer Upload der gesamten Bildbibliothek.
 „Passende Referenzbilder mitsenden“ kann im normalen KI-Dialog ausgeschaltet werden.
 Anzahl und Namen werden vor der Anfrage angezeigt; der direkte KI-Button nutzt diese Standardwerte.
-Maximal acht eindeutige Referenzbilder / 6 MiB; bei Überschreitung keine kostenpflichtige Anfrage,
-kein stilles Weglassen. Sichere SVG-Skizzen werden lokal ohne Zuschnitt in PNG umgewandelt.
+Maximal acht eindeutige Referenzbilder / 6 MiB Upload. Die Quellen dürfen zusammen größer sein:
+Referenzen werden lokal proportional auf höchstens 1024 Pixel Kantenlänge verkleinert und bei Bedarf
+als WebP komprimiert bzw. weiter verkleinert, bis alle gemeinsam ins Budget passen. Sichere SVGs
+werden gerastert; Transparenz und Seitenverhältnis bleiben erhalten, Originalbilder unverändert.
+Bei mehr als acht Referenzen gibt es eine klare Fehlermeldung vor dem API-Aufruf, kein stilles Weglassen.
 Mit Referenzen wird `POST /v1/images/edits` mit JSON-`images:[{image_url:embeddedDataURL}]` verwendet;
 ohne Referenzen weiterhin `/v1/images/generations`. Kein Upload über Files API, keine externen URLs,
 keine automatischen Wiederholungen oder kostenpflichtigen Fallback-Aufrufe.
