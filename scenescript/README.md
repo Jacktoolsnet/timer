@@ -1109,3 +1109,12 @@ Kopierte Storyboard-Anleitungen, lokalisierte KI-Anleitungsseiten und deren
 `/{lang}/ai.txt`-Downloads enthalten dieselbe Sprachvorgabe. Das neutrale `/ai.txt`
 bleibt die sprachunabhängige Formatspezifikation. Die Vorgabe steuert das Modell;
 eine automatische Spracherkennung oder Übersetzung seiner Antwort findet nicht statt.
+
+
+### Projekt-Dateiendungen
+
+Neue Downloads verwenden `<Titel>.scenescript` für ausführbare Projekte und
+`<Storyboard-Titel>.storyboard` für Storyboards. Der Inhalt bleibt unverändert JSON;
+es ist keine Konvertierung nötig. Die Dateiauswahl akzeptiert weiterhin bestehende
+`.json`-Dateien (einschließlich `.scenescript.json` und `.storyboard.json`).
+Bestehende Beispiel-URLs bleiben kompatibel und werden nicht umbenannt.

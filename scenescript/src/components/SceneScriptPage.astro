@@ -17,7 +17,7 @@ const {lang}=Astro.props,t=editorDictionary(lang),vault=apiVaultWords(lang),ai=a
  <section class="scene-intro"><h1>{t.heading}</h1><p>{t.intro}</p></section>
  <div id="editor" inert aria-busy="true" class="app-shell" data-words={JSON.stringify(t)}>
   <section class="small-screen-note" aria-labelledby="tablet-heading"><h2 id="tablet-heading">{t.tabletRequired}</h2><p>{t.tabletHint}</p><a href={'/'+lang+'/ai/'}>{t.ai} ↗</a></section>
-  <input id="project-file" type="file" accept=".json,application/json" hidden />
+  <input id="project-file" type="file" accept=".scenescript,.json,application/json" hidden />
   <p id="editor-status" role="status" aria-live="polite"></p>
   <div class="studio-grid">
    <section class="studio-panel project-panel" id="project-panel">

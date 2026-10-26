@@ -25,7 +25,7 @@ const {lang}=Astro.props,t=storyboardWords(lang),ai=aiWorkflowWords(lang);
   <p id="storyboard-approve-hint" class="sr-only">{t.approveHint}</p>
   <nav id="storyboard-tabs" role="tablist" aria-label={t.title}>{(['story','characters','objects','settings','shots'] as const).map(key=><button id={"storyboard-tab-"+key} type="button" role="tab" data-board-tab={key} aria-controls="storyboard-content" aria-selected={key==='story'?'true':'false'} tabindex={key==='story'?0:-1}>{key==='story'?t.project:t[key]}</button>)}</nav>
   <div id="storyboard-content" role="tabpanel" aria-labelledby="storyboard-tab-story" tabindex="0"></div>
-  <input id="storyboard-file" type="file" accept="application/json,.json" hidden/>
+  <input id="storyboard-file" type="file" accept=".storyboard,.json,application/json" hidden/>
   <p id="storyboard-status" role="status" aria-live="polite"></p><div id="storyboard-error-box" hidden><label for="storyboard-error">{t.error}</label><textarea id="storyboard-error" rows="3" readonly></textarea></div>
  </div>
  <footer class="json-footer"><button id="storyboard-close" class="board-icon" type="button" title={t.close} aria-label={t.close}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button><button id="storyboard-save" class="board-icon" type="button" title={t.save} aria-label={t.save}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3h13l4 4v14H3V3Zm3 0v6h10V3M7 21v-8h10v8"/></svg></button></footer>

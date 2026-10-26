@@ -12,7 +12,7 @@ test('editor, image embedding and downloaded project round trip',async({page})=>
  await page.locator('#image-file').setInputFiles({name:'pixel.png',mimeType:'image/png',buffer:Buffer.from(pixel.split(',')[1],'base64')});
  await expect(page.locator('#asset-list img')).toHaveCount(1);
  await page.locator('#scene-form [name=backgroundAsset]').selectOption({label:'pixel.png'});
- const downloadEvent=page.waitForEvent('download');await page.locator('#save-project').click();const download=await downloadEvent;expect(download.suggestedFilename()).toBe('Mein-Film.scenescript.json');
+ const downloadEvent=page.waitForEvent('download');await page.locator('#save-project').click();const download=await downloadEvent;expect(download.suggestedFilename()).toBe('Mein-Film.scenescript');
  const path=await download.path();expect(path).toBeTruthy();await page.locator('#project-file').setInputFiles(path!);
  await expect(page.locator('#project-title')).toHaveValue('Mein Film');await expect(page.locator('#asset-list img')).toHaveCount(1);
  const json=JSON.parse(await exportedJSON(page));expect(json.assets[Object.keys(json.assets)[0]].data).toBe(pixel);expect(json.scenes[0].elements.at(-1).text).toBe('Hallo Welt');expect(errors).toEqual([]);
@@ -844,4 +844,10 @@ test('line drawing shapes follow the timeline forwards and backwards and survive
  const saved=JSON.parse(await exportedJSON(page));expect(saved.scenes[0].elements.at(-1).animation).toBe('draw');
  await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(saved));await page.locator('#import-json').click();
  await expect(page.locator('.shape-svg [data-draw-stroke]')).toHaveCount(1);
+});
+
+
+test('native SceneScript extension and legacy JSON files both import',async({page})=>{
+ await page.goto('/en/');await expect(page.locator('#project-file')).toHaveAttribute('accept',/\.scenescript/);
+ for(const name of ['Native.scenescript','Legacy.scenescript.json']){const p=demoProject();p.title=name;await page.locator('#project-file').setInputFiles({name,mimeType:'application/octet-stream',buffer:Buffer.from(JSON.stringify(p))});await expect(page.locator('#project-title')).toHaveValue(name);}
 });

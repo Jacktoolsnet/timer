@@ -168,7 +168,7 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
  $('save').addEventListener('click',()=>{try{check();const validated=parseStoryboard(board);apply({...origin.project,storyboard:validated});dirty=false;session++;dialog.close();}catch(e){error(e);}});
  const copy=async(value:string)=>{const ticket=session;try{check();await navigator.clipboard.writeText(value);if(ticket===session&&dialog.open){clear();$('status').textContent=t.copied;}}catch(e){if(ticket===session&&dialog.open)error(e);}};
  $('guide').addEventListener('click',()=>void copy(storyboardGuide+'\n'+aiLanguageInstruction(document.documentElement.lang)));$('feedback').addEventListener('click',()=>void copy(exportStoryboard(board)));
- $('download').addEventListener('click',()=>{try{check();const blob=new Blob([exportStoryboard(board,true)],{type:'application/json'}),url=URL.createObjectURL(blob),a=node('a');a.href=url;a.download='storyboard.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(e){error(e);}});
+ $('download').addEventListener('click',()=>{try{check();const blob=new Blob([exportStoryboard(board,true)],{type:'application/json'}),url=URL.createObjectURL(blob),a=node('a');a.href=url;const name=board.title.trim().replace(/[^\p{L}\p{N}_-]+/gu,'-').replace(/^-+|-+$/g,'').slice(0,80);a.download=(name||'storyboard')+'.storyboard';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(e){error(e);}});
  const load=async(value:string,fromFile=false)=>{try{
   check();let next:Storyboard;
   try{next=importStoryboard(value,!origin.project.storyboard&&!dirty&&!board.shots.length&&!board.characters.length&&!board.settings.length&&!board.comments.length?null:board);}

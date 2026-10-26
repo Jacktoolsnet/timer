@@ -240,3 +240,16 @@ for(const [locale,language]of [['en','English'],['de','German'],['es','Spanish']
 test('existing custom video languages survive the dropdown unchanged',async({page})=>{
  const p=fixture();p.storyboard.language='Portuguese (Brazil)';await page.route('**'+DEFAULT_PROJECT_URL,r=>r.fulfill({contentType:'application/json',body:JSON.stringify(p)}));await page.goto('/de/');await page.locator('#open-storyboard').click();await page.locator('[data-board-edit=language]').click();await expect(page.locator('#storyboard-field-select')).toHaveValue('Portuguese (Brazil)');await page.locator('#storyboard-field-apply').click();await page.locator('#storyboard-save').click();const pending=page.waitForEvent('download');await page.locator('#save-project').click();const downloaded=JSON.parse(await readFile((await(await pending).path())!,'utf8'));expect(downloaded.storyboard.language).toBe('Portuguese (Brazil)');
 });
+
+
+test('storyboard download uses its current title as a safe filename',async({page})=>{
+ await setup(page);
+ for(const [title,filename]of [['Mein Weltraumabenteuer','Mein-Weltraumabenteuer.storyboard'],['Roboter: Grüße / vom Mond?','Roboter-Grüße-vom-Mond.storyboard'],['   ','storyboard.storyboard']]){
+  await editText(page,'title',title);const pending=page.waitForEvent('download');await page.locator('#storyboard-download').click();const download=await pending;expect(download.suggestedFilename()).toBe(filename);const saved=JSON.parse(await readFile((await download.path())!,'utf8'));expect(saved.board.title).toBe(title);
+ }
+});
+
+
+test('native storyboard extension and legacy JSON files both import',async({page})=>{
+ for(const name of ['Plan.storyboard','Plan.storyboard.json']){await page.goto('/en/');await page.locator('#open-storyboard').click();await expect(page.locator('#storyboard-file')).toHaveAttribute('accept',/\.storyboard/);await page.locator('#storyboard-file').setInputFiles({name,mimeType:'application/octet-stream',buffer:Buffer.from(exportStoryboard(inflationStoryboard(),true))});await expect(page.locator('#storyboard-content')).toContainText(inflationStoryboard().title);await expect(page.locator('#storyboard-error-box')).not.toBeVisible();}
+});
