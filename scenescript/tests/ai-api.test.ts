@@ -49,3 +49,17 @@ test('voice pages expose only bounded metadata, retain pagination and never inve
  await assert.rejects(listVoicePage(key,signal(),'',mock({voices:[],has_more:true})),AiApiError);
  await assert.rejects(listVoicePage(key,signal(),'same',mock({voices:[],has_more:true,next_page_token:'same'})),AiApiError);
 });
+
+test('reasoning effort is model-dependent, omitted by default and sent as an API option',async()=>{
+ const {modelProfile,supportsReasoning,usableModel}=await import('../src/lib/ai-models.ts');assert.equal(supportsReasoning('gpt-6.1-sol','none'),false);assert.equal(supportsReasoning('gpt-6.1-sol','high'),true);assert.equal(supportsReasoning('gpt-6-luna','none'),true);assert.equal(supportsReasoning('gpt-5-mini','minimal'),true);assert.equal(supportsReasoning('unknown-model','low'),false);assert.equal(modelProfile('gpt-5-mini-2025-08-07')?.id,'gpt-5-mini');assert.equal(modelProfile('gpt-5-mini-extra'),undefined);assert.equal(usableModel({id:'text-embedding-3-small',name:'embedding'},'text'),false);assert.equal(usableModel({id:'gpt-image-2',name:'image'},'text'),false);assert.equal(usableModel({id:'ft:gpt-new:account:custom',name:'custom'},'text'),true);
+ await generateText(key,{...request,model:'gpt-6.1-sol',reasoning:'high'},signal(),async(_,init)=>{assert.deepEqual(JSON.parse(String(init?.body)).reasoning,{effort:'high'});return Response.json(completed('{}'));});
+ await generateText(key,request,signal(),async(_,init)=>{assert.ok(!('reasoning'in JSON.parse(String(init?.body))));return Response.json(completed('{}'));});
+ for(const [model,reasoning]of [['gpt-6.1-sol','none'],['gpt-5-mini','none'],['new-model','low'],['gpt-image-2',undefined]] as const){let calls=0;await assert.rejects(generateText(key,{...request,model,reasoning},signal(),async()=>{calls++;return Response.json(completed('{}'));}),AiApiError);assert.equal(calls,0);}
+});
+
+test('model catalogs are read-only, provider-specific, bounded and discard unrelated fields',async()=>{
+ const {listGenerationModels}=await import('../src/lib/ai-api.ts');
+ const openai=await listGenerationModels('openai',key,signal(),async(url,init)=>{assert.equal(url,'https://api.openai.com/v1/models');assert.equal(init?.method,'GET');assert.equal(init?.body,undefined);assert.equal((init?.headers as Record<string,string>).Authorization,'Bearer '+key);return Response.json({data:[{id:'gpt-6.1-sol',owned_by:key},{id:'gpt-6.1-sol'},{id:'unsafe id'},null]});});assert.deepEqual(openai,[{id:'gpt-6.1-sol',name:'gpt-6.1-sol'}]);
+ const eleven=await listGenerationModels('elevenlabs',key,signal(),async(url,init)=>{assert.equal(url,'https://api.elevenlabs.io/v1/models');assert.equal((init?.headers as Record<string,string>)['xi-api-key'],key);return Response.json([{model_id:'tts_model',name:'TTS',can_do_text_to_speech:true},{model_id:'vc_model',name:'VC',can_do_text_to_speech:false}]);});assert.deepEqual(eleven,[{id:'tts_model',name:'TTS'}]);
+ await assert.rejects(listGenerationModels('openai',key,signal(),mock({data:new Array(2001).fill({id:'model'})})),AiApiError);
+});

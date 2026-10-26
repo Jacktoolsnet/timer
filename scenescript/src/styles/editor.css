@@ -1189,3 +1189,9 @@ body.recording .comic-edit-overlay{display:none}
 #voice-picker-groups small{color:var(--muted)}
 #voice-picker-error{resize:vertical}
 @media(max-width:680px){#voice-picker-groups,.voice-picker-controls{grid-template-columns:1fr}}
+
+.ai-model-row{display:grid;grid-template-columns:minmax(0,1fr) 44px;align-items:end;gap:10px}
+#ai-workflow-model-load{display:grid;place-items:center;width:44px;height:44px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--accent)}
+#ai-workflow-model-load svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8}
+#ai-workflow-model-recommendation{padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--accent-soft)}
+#ai-workflow-use-recommendation{padding:8px 12px;background:var(--surface);color:var(--accent);border:1px solid var(--line);border-radius:8px}

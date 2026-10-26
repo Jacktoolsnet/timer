@@ -1,3 +1,4 @@
+import {installAiModelPicker} from './ai-model-picker';
 import {voicePickerWords} from '../lib/voice-picker-i18n';
 import type {Language} from '../lib/i18n';
 import {chooseElevenVoice} from './voice-picker';
@@ -7,7 +8,7 @@ import type {Project} from '../lib/model';
 import {validateProject} from '../lib/model';
 import {storyboardGuide,type BoardReviewTarget} from '../lib/storyboard';
 import {boardManifest,projectManifest,inputJson,planningBoard,requireApprovedBoard,acceptPlanning,acceptScript,imagePrompt,acceptImage,boardReferences} from '../lib/ai-workflow';
-import {AiApiError,generateText,generateImage,generateSpeech} from '../lib/ai-api';
+import {AiApiError,generateText,generateImage,generateSpeech,listGenerationModels} from '../lib/ai-api';
 import {speechJobs,attachSpeechFiles,type SpeechJob} from '../lib/speech-jobs';
 import {readAudioFile} from './audio';
 import {requestApiKey} from './api-vault';
@@ -21,6 +22,7 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void){
  const dialog=$<HTMLDialogElement>('dialog'),t=JSON.parse(dialog.dataset.words!) as ReturnType<typeof aiWorkflowWords>;
  const action=$<HTMLSelectElement>('action'),model=$<HTMLInputElement>('model'),prompt=$<HTMLTextAreaElement>('prompt'),consent=$<HTMLInputElement>('consent'),start=$<HTMLButtonElement>('start'),apply=$<HTMLButtonElement>('apply');
  const jobsSelect=$<HTMLSelectElement>('job'),targets=$<HTMLSelectElement>('target');
+ const modelPicker=installAiModelPicker(action,model);
  const models:Record<string,string>={board:'gpt-5-mini',script:'gpt-5-mini',image:'gpt-image-2',speech:'eleven_multilingual_v2'};
  let ctx:AiWorkflowContext,active:AbortController|undefined,candidate:Project|undefined,jobs:SpeechJob[]=[],session=0;
  const urls:string[]=[];
@@ -32,7 +34,7 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void){
  function selectedSpeechJobs(all=jobs){return jobsSelect.value==='missing'?all.filter(j=>!(j.scope==='project'?ctx.project.narration:ctx.project.scenes.find(s=>s.id===j.sceneId)?.narration)?.asset):all.filter(j=>j.stem===jobsSelect.value);}
  function speechEstimate(){const selected=selectedSpeechJobs();$('speech-estimate').textContent=selected.length?`${selected.length} ${t.assignments} · ${selected.reduce((n,j)=>n+j.text.length,0)} ${t.characters}`:t.empty;$<HTMLTextAreaElement>('speech-text').value=selected.map(j=>j.text).join('\n\n');}
  function configure(){
-  clearPreview();$('error-box').hidden=true;$('status').textContent='';consent.checked=false;const kind=action.value;model.value=models[kind];
+  clearPreview();$('error-box').hidden=true;$('status').textContent='';consent.checked=false;const kind=action.value;modelPicker.configure(models[kind]);
   $('image-options').hidden=kind!=='image';$('speech-options').hidden=kind!=='speech';$('tokens-label').hidden=kind==='image'||kind==='speech';$('refs-label').hidden=kind==='image'||kind==='speech';$('prompt-label').hidden=kind==='speech';speechEstimate();busy(false);
  }
  function preview(p:Project,kind:string){
@@ -44,7 +46,7 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void){
  async function decodeImage(data:string){const img=new Image();img.src=data;await img.decode();if(img.naturalWidth*img.naturalHeight>40000000)throw new Error('Image: maximum 40 megapixels');}
  function imageTarget():BoardReviewTarget|null{if(targets.value==='cover')return null;const [kind,id]=targets.value.split(':');if(!['characters','settings','shots'].includes(kind)||!id)throw new Error('Storyboard: select image target');return {kind:kind as BoardReviewTarget['kind'],id};}
  openWorkflow=(next,initial='board')=>{
-  if(dialog.open||active)return;stop();ctx=next;const ticket=++session;clearPreview();jobs=[];jobsSelect.replaceChildren();option(jobsSelect,'missing',t.all);targets.replaceChildren();if(!ctx.draft)option(targets,'cover',t.cover);
+  if(dialog.open||active)return;stop();ctx=next;const ticket=++session;modelPicker.reset();clearPreview();jobs=[];jobsSelect.replaceChildren();option(jobsSelect,'missing',t.all);targets.replaceChildren();if(!ctx.draft)option(targets,'cover',t.cover);
   const b=ctx.project.storyboard;for(const kind of ['characters','settings','shots'] as const)for(const item of b?.[kind]??[])option(targets,kind+':'+item.id,kind+' · '+('title'in item?item.title:item.name));
   for(const o of action.options)o.disabled=!!ctx.draft&&['script','speech'].includes(o.value);
   action.value=initial;prompt.value='';$('draft').hidden=!ctx.draft;$<HTMLInputElement>('refs').checked=false;$<HTMLSelectElement>('size').value=(b?.format??ctx.project.format)==='portrait'?'1024x1536':(b?.format??ctx.project.format)==='landscape'?'1536x1024':'1024x1024';configure();dialog.showModal();
@@ -54,6 +56,11 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void){
  document.getElementById('ai-speech-open')?.addEventListener('click',()=>openAiWorkflow(context(),'speech'));
  action.addEventListener('change',configure);jobsSelect.addEventListener('change',speechEstimate);
  $('settings').addEventListener('input',()=>{if(active)return;clearPreview();$('error-box').hidden=true;start.disabled=!consent.checked;});
+ $('model-load').addEventListener('click',async()=>{
+  if(active)return;const controller=new AbortController();active=controller;busy(true);$('error-box').hidden=true;$('model-status').textContent=modelPicker.loading;let key='';
+  try{check();const provider=action.value==='speech'?'elevenlabs':'openai';key=await requestApiKey(provider,controller.signal);check();const entries=await listGenerationModels(provider,key,controller.signal);check();controller.signal.throwIfAborted();modelPicker.accept(provider,entries);clearPreview();}
+  catch(e){$('model-status').textContent='';error(e);}finally{key='';active=undefined;busy(false);}
+ });
  $('load-voices').addEventListener('click',async()=>{if(active)return;try{check();const selected=await chooseElevenVoice({language:ctx.project.storyboard?.language??document.documentElement.lang,valid:ctx.valid});if(selected===undefined)return;check();$<HTMLInputElement>('voice').value=selected?.id??'';clearPreview();}catch(e){error(e);}});
  start.addEventListener('click',async()=>{
   if(active||!consent.checked)return;clearPreview();$('error-box').hidden=true;
@@ -80,7 +87,7 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void){
    }
    $('status').textContent=t.unlock;key=await requestApiKey(kind==='speech'?'elevenlabs':'openai',controller.signal);check();controller.signal.throwIfAborted();$('status').textContent=t.working;
    if(kind==='board'||kind==='script'){
-    const text=await generateText(key,{model:model.value.trim(),instructions,input:textInput,images:references,maxTokens:Number($<HTMLInputElement>('tokens').value)},controller.signal);check();controller.signal.throwIfAborted();
+    const text=await generateText(key,{model:model.value.trim(),instructions,input:textInput,images:references,maxTokens:Number($<HTMLInputElement>('tokens').value),reasoning:modelPicker.reasoning},controller.signal);check();controller.signal.throwIfAborted();
     const p=kind==='board'?acceptPlanning(text,source,sourceBoard):acceptScript(text,source);
     if(kind==='script')await ctx.preload?.(p);else for(const a of Object.values(p.storyboard!.images))if(a.data&&!Object.values(sourceBoard.images).some(old=>old.data===a.data))await decodeImage(a.data);
     check();controller.signal.throwIfAborted();preview(p,kind);
@@ -103,6 +110,6 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void){
  apply.addEventListener('click',()=>{if(active||!candidate)return;try{check();const next=candidate;ctx.apply(next);clearPreview();$('status').textContent=t.applied;dialog.close();}catch(e){clearPreview();error(e);}});
  const close=()=>{if(active){active.abort();return;}dialog.close();};
  $('cancel').addEventListener('click',()=>active?.abort());$('close').addEventListener('click',close);dialog.addEventListener('cancel',event=>{event.preventDefault();close();});
- dialog.addEventListener('close',()=>{session++;active?.abort();clearPreview();prompt.value='';consent.checked=false;});
+ dialog.addEventListener('close',()=>{session++;active?.abort();modelPicker.reset();clearPreview();prompt.value='';consent.checked=false;});
  window.addEventListener('pagehide',()=>{active?.abort();clearPreview();});
 }

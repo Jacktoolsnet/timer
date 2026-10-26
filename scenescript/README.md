@@ -1152,3 +1152,47 @@ stillen Abbruch nach den ersten 100 Stimmen.
 Grundlagen: [ElevenLabs-Stimmenliste](https://elevenlabs.io/docs/api-reference/voices/search),
 [Stimmen und Sprachen](https://elevenlabs.io/docs/product-guides/playground/text-to-speech).
 Alle Entwicklungstests verwenden Fake-Keys und simulierte Antworten.
+
+
+### Modellauswahl und Reasoning
+
+Der KI-Workflow bietet eine aufgabenspezifische Modell-Dropdownbox. Das Lade-Icon
+liest nach ausdrücklichem Klick die Modellliste des gewählten Anbieters über
+`GET /v1/models` mit dem eigenen Schlüssel. Dabei werden keine Projektinhalte
+übertragen und keine Inhalte erzeugt. OpenAI-IDs werden für Text bzw. Bilder
+gefiltert; ElevenLabs-Modelle benötigen `can_do_text_to_speech:true`.
+
+Vor dem Laden sind dokumentierte Vorschläge sichtbar, ausdrücklich ohne bestätigten
+Kontozugriff. Die gelesene Liste bestätigt weder Erzeugungsrechte noch Guthaben;
+OpenAI liefert darin keine vollständigen Fähigkeits- oder Reasoning-Metadaten.
+Unbekannte, mutmaßliche Text-/Bildmodelle sind als ungeprüft gekennzeichnet.
+Eigene IDs bleiben als Alternative bei eingeschränkten Leserechten möglich.
+Listen und Einstellungen bleiben nur im aktuellen Dialog, nicht in Local Storage,
+Projekt, Undo oder Export. Die bisherige Vorgabe `gpt-5-mini` bleibt erhalten.
+
+Dokumentierte Reasoning-Profile (Stand 26.10.2026) steuern die zulässigen Optionen:
+GPT-6.1 Sol und GPT-6 Astra `low,medium,high,xhigh,max`, GPT-6 Luna zusätzlich
+`none`, GPT-5.4 `none,low,medium,high,xhigh`, ursprüngliches GPT-5/Mini
+`minimal,low,medium,high`. Datierten Snapshots derselben bekannten Modell-ID wird
+das Familienprofil zugeordnet; unbekannte IDs verwenden ausschließlich Anbieterstandard.
+Anbieterstandard lässt `reasoning` im Request weg. Ausdrückliche Einstellungen
+werden über `reasoning:{effort:...}` übergeben und lokal auf Zulässigkeit geprüft.
+Bilder und ElevenLabs erhalten keine Reasoning-Parameter. Reasoning-Tokens teilen
+sich das Ausgabelimit mit der JSON-Antwort; höhere Stufen können Kosten/Latenz
+steigern und bei unzureichendem Limit zu unvollständigen Antworten führen.
+
+Die explizit übernehmbare App-Empfehlung ist GPT-6.1 Sol / Mittel für Storyboards
+und Sol / Hoch für komplexe SceneScripts. Das ist eine aus den Modellrollen
+abgeleitete Startempfehlung, kein projektbezogener Benchmark oder Erfolgsgarantie.
+Luna ist eine sparsame Option für einfache Änderungen; Astra für anspruchsvollste
+Aufgaben bei höherem Budget. Empfehlungen wechseln das Modell erst nach einem
+bewussten Klick; es gibt weder automatische kostenpflichtige Tests noch Retries.
+
+Quellen: [OpenAI-Modellliste](https://developers.openai.com/api/reference/resources/models/methods/list),
+[GPT-6.1 Sol](https://developers.openai.com/api/docs/models/gpt-6.1-sol),
+[GPT-6 Astra](https://developers.openai.com/api/docs/models/gpt-6-astra),
+[GPT-6 Luna](https://developers.openai.com/api/docs/models/gpt-6-luna),
+[GPT-5.4](https://developers.openai.com/api/docs/models/gpt-5.4),
+[GPT-5-Reasoning](https://developers.openai.com/cookbook/examples/gpt-5/gpt-5_new_params_and_tools),
+[ElevenLabs-Modelle](https://elevenlabs.io/docs/api-reference/models/list).
+Tests verwenden ausschließlich simulierte Antworten und Fake-Keys.
