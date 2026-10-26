@@ -20,14 +20,14 @@ async function generate(page:Page){await page.locator('#ai-workflow-consent').ch
 test('direct planning unlocks, returns a review draft and supports saving and Undo without exporting credentials',async({page})=>{
  await setup(page);const before=await exportProject(page);await page.locator('#open-api-vault').click();await page.locator('#api-vault-lock').click();await page.locator('#api-vault-close').click();let calls=0;
  await page.route('https://api.openai.com/v1/responses',async r=>{if(r.request().method()==='OPTIONS'){await r.fulfill({headers:cors});return;}calls++;const raw=r.request().postData()!;for(const secret of [password,openai,elevenlabs])expect(raw).not.toContain(secret);expect(r.request().headers().authorization).toBe('Bearer '+openai);const input=JSON.parse(JSON.parse(raw).input[0].content[0].text);const data=input.storyboard;data.board.title='Moon adventure';data.board.approved=false;data.board.shots[0].status='draft';await r.fulfill({headers:cors,json:response(JSON.stringify(data))});});
- await page.locator('#open-ai-workflow').click();await expect(page.locator('#api-unlock-dialog')).toBeVisible();await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();await expect(page.locator('#api-vault-dialog')).not.toBeVisible();await expect(page.locator('#api-unlock-password')).toBeFocused();expect(calls).toBe(0);await page.locator('#api-unlock-password').fill('wrong-password');await page.locator('#api-unlock-submit').click();await expect(page.locator('#api-unlock-error')).toContainText('Incorrect password');await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();await page.locator('#api-unlock-password').fill(password);await page.locator('#api-unlock-submit').click();await expect(page.locator('#api-unlock-dialog')).not.toBeVisible();await expect(page.locator('#api-unlock-password')).toHaveValue('');await expect(page.locator('#ai-workflow-start')).toBeDisabled();expect(calls).toBe(0);await page.locator('#ai-workflow-prompt').fill('Make the story more exciting');await generate(page);await expect(page.locator('#storyboard-dialog')).toBeVisible();await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();expect(calls).toBe(1);await expect(page.locator('#project-title')).toHaveValue(before.title);await expect(page.locator('#storyboard-content')).toContainText('Moon adventure');await page.locator('#storyboard-save').click();
+ await page.locator('#open-ai-workflow').click();await expect(page.locator('#api-unlock-dialog')).toBeVisible();await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();await expect(page.locator('#api-vault-dialog')).not.toBeVisible();await expect(page.locator('#api-unlock-password')).toBeFocused();expect(calls).toBe(0);await page.locator('#api-unlock-password').fill('wrong-password');await page.locator('#api-unlock-submit').click();await expect(page.locator('#api-unlock-error')).toContainText('Incorrect password');await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();await page.locator('#api-unlock-password').fill(password);await page.locator('#api-unlock-submit').click();await expect(page.locator('#api-unlock-dialog')).not.toBeVisible();await expect(page.locator('#api-unlock-password')).toHaveValue('');await expect(page.locator('#ai-workflow-start')).toBeDisabled();expect(calls).toBe(0);await page.locator('#ai-workflow-prompt').fill('Make the story more exciting');await generate(page);await expect(page.locator('#storyboard-dialog')).toBeVisible();await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();expect(calls).toBe(1);await expect(page.locator('#project-title')).toHaveValue(before.title);await expect(page.locator('#storyboard-content')).toContainText('Moon adventure');await page.locator('#storyboard-save').click();await expect(page.locator('#storyboard-dialog')).toBeVisible();await page.locator('#storyboard-close').click();
  const after=await exportProject(page);expect(after.storyboard!.title).toBe('Moon adventure');expect(after.storyboard!.comments).toEqual(before.storyboard!.comments);expect(after.storyboard!.approved).toBe(false);expect(after.scenes).toEqual(before.scenes);for(const secret of [password,openai,elevenlabs])expect(JSON.stringify(after)).not.toContain(secret);await page.locator('#undo-project').click();expect((await exportProject(page)).storyboard!.title).toBe(before.storyboard!.title);
 });
 
 test('storyboard toolbar edits the unsaved draft, not the executable project',async({page})=>{
  await setup(page);const before=await exportProject(page);
  await page.route('https://api.openai.com/v1/responses',async r=>{if(r.request().method()==='OPTIONS'){await r.fulfill({headers:cors});return;}const input=JSON.parse(r.request().postDataJSON().input[0].content[0].text),data=input.storyboard;data.board.title='Draft revision';data.board.approved=false;data.board.shots[0].status='draft';await r.fulfill({headers:cors,json:response(JSON.stringify(data))});});
- await page.locator('#open-storyboard').click();await page.locator('#storyboard-ai-open').click();await generate(page);await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();await expect(page.locator('#storyboard-content')).toContainText('Draft revision');await page.locator('#storyboard-save').click();const after=await exportProject(page);expect(after.storyboard!.title).toBe('Draft revision');expect(after.scenes).toEqual(before.scenes);
+ await page.locator('#open-storyboard').click();await page.locator('#storyboard-ai-open').click();await generate(page);await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();await expect(page.locator('#storyboard-content')).toContainText('Draft revision');await page.locator('#storyboard-save').click();await expect(page.locator('#storyboard-dialog')).toBeVisible();await page.locator('#storyboard-close').click();const after=await exportProject(page);expect(after.storyboard!.title).toBe('Draft revision');expect(after.scenes).toEqual(before.scenes);
 });
 
 test('SceneScript keeps approved storyboard and applies only on confirmation',async({page})=>{
@@ -75,14 +75,14 @@ test('partial speech batches can be applied and missing-recording runs skip comp
 
 test('generated subject sketches require fresh subject and dependent scene review',async({page})=>{
  const p=fixture();p.storyboard!.characters=[{id:'robot',kind:'character',name:'Robot',description:'Blue robot',image:null,status:'approved',comments:[]}];p.storyboard!.shots[0].characters=['robot'];await setup(page,p);const png='iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aZ1sAAAAASUVORK5CYII=';
- await page.route('https://api.openai.com/v1/images/generations',async r=>{if(r.request().method()==='OPTIONS'){await r.fulfill({headers:cors});return;}const prompt=r.request().postDataJSON().prompt;expect(prompt).toContain('ONLY the selected character');expect(prompt).toContain('Blue robot');expect(prompt).toContain('One character, one pose, one view');expect(prompt).not.toContain('A robot visits the moon.');expect(prompt).not.toContain('Always write AI-authored replies');expect(prompt).toContain('Produce an image, not a written reply');await r.fulfill({headers:cors,json:{data:[{b64_json:png}]}});});await page.locator('#open-ai-workflow').click();await page.locator('#ai-workflow-action').selectOption('image');await page.locator('#ai-workflow-target').selectOption('characters:robot');await generate(page);await expect(page.locator('#storyboard-dialog')).toBeVisible();await page.locator('#storyboard-save').click();const after=await exportProject(page);expect(after.storyboard!.approved).toBe(false);expect(after.storyboard!.characters[0].status).toBe('draft');expect(after.storyboard!.shots[0].status).toBe('draft');expect(after.storyboard!.images[after.storyboard!.characters[0].image!].data).toContain('data:image/png');
+ await page.route('https://api.openai.com/v1/images/generations',async r=>{if(r.request().method()==='OPTIONS'){await r.fulfill({headers:cors});return;}const prompt=r.request().postDataJSON().prompt;expect(prompt).toContain('ONLY the selected character');expect(prompt).toContain('Blue robot');expect(prompt).toContain('One character, one pose, one view');expect(prompt).not.toContain('A robot visits the moon.');expect(prompt).not.toContain('Always write AI-authored replies');expect(prompt).toContain('Produce an image, not a written reply');await r.fulfill({headers:cors,json:{data:[{b64_json:png}]}});});await page.locator('#open-ai-workflow').click();await page.locator('#ai-workflow-action').selectOption('image');await page.locator('#ai-workflow-target').selectOption('characters:robot');await generate(page);await expect(page.locator('#storyboard-dialog')).toBeVisible();await page.locator('#storyboard-save').click();await expect(page.locator('#storyboard-dialog')).toBeVisible();await page.locator('#storyboard-close').click();const after=await exportProject(page);expect(after.storyboard!.approved).toBe(false);expect(after.storyboard!.characters[0].status).toBe('draft');expect(after.storyboard!.shots[0].status).toBe('draft');expect(after.storyboard!.images[after.storyboard!.characters[0].image!].data).toContain('data:image/png');
 });
 
 
 for(const [lang,name,reply]of [['en','English','Understood'],['de','German','Verstanden'],['es','Spanish','Entendido'],['fr','French','Compris']])test(`AI language follows ${lang} app settings, not the English video`,async({page})=>{
  const p=fixture();p.storyboard!.language='English';await setup(page,p,lang);let calls=0;
  await page.route('https://api.openai.com/v1/responses',async r=>{if(r.request().method()==='OPTIONS'){await r.fulfill({headers:cors});return;}calls++;const body=r.request().postDataJSON();expect(body.instructions).toContain(`App reply language: ${name} (${lang}).`);expect(body.instructions).toContain('video/content language separate');const data=JSON.parse(body.input[0].content[0].text).storyboard;expect(data.board.language).toBe('English');data.board.approved=false;data.board.comments[0].reply=reply;await r.fulfill({headers:cors,json:response(JSON.stringify(data))});});
- await page.locator('#open-ai-workflow').click();await generate(page);await expect(page.locator('#storyboard-dialog')).toBeVisible();await page.locator('#storyboard-save').click();const after=await exportProject(page);expect(after.storyboard!.language).toBe('English');expect(after.storyboard!.comments[0].reply).toBe(reply);expect(after.storyboard!.comments[0].text).toBe('Keep the robot blue');expect(calls).toBe(1);
+ await page.locator('#open-ai-workflow').click();await generate(page);await expect(page.locator('#storyboard-dialog')).toBeVisible();await page.locator('#storyboard-save').click();await expect(page.locator('#storyboard-dialog')).toBeVisible();await page.locator('#storyboard-close').click();const after=await exportProject(page);expect(after.storyboard!.language).toBe('English');expect(after.storyboard!.comments[0].reply).toBe(reply);expect(after.storyboard!.comments[0].text).toBe('Keep the robot blue');expect(calls).toBe(1);
 });
 
 test('speech batches use different storyboard-assigned voices without a fallback',async({page})=>{
@@ -140,10 +140,10 @@ test('project changes during unlock cannot open a stale AI context',async({page}
 });
 
 
-test('Play shows only a spinner and cancel; success returns to the unsaved storyboard draft',async({page})=>{
+test('Play shows only a spinner and cancel; success saves the storyboard and returns to review',async({page})=>{
  await setup(page);let release!:()=>void;const gate=new Promise<void>(resolve=>release=resolve);
  await page.route('https://api.openai.com/v1/responses',async r=>{if(r.request().method()==='OPTIONS'){await r.fulfill({headers:cors});return;}await gate;const data=JSON.parse(r.request().postDataJSON().input[0].content[0].text).storyboard;data.board.title='AI review draft';data.board.approved=false;await r.fulfill({headers:cors,json:response(JSON.stringify(data))});});
- await page.locator('#open-storyboard').click();await page.locator('#storyboard-ai-open').click();await generate(page);await expect(page.locator('#ai-workflow-spinner')).toBeVisible();await expect(page.locator('#ai-workflow-settings')).not.toBeVisible();await expect(page.locator('#ai-workflow-dialog>.json-header')).not.toBeVisible();await expect(page.locator('#ai-workflow-start')).not.toBeVisible();await expect(page.locator('#ai-workflow-cancel')).toBeVisible();release();await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();await expect(page.locator('#storyboard-content')).toContainText('AI review draft');await expect(page.locator('#storyboard-approve')).toHaveAttribute('aria-pressed','false');page.once('dialog',d=>d.accept());await page.locator('#storyboard-close').click();await page.locator('#open-storyboard').click();await expect(page.locator('#storyboard-content')).toContainText('Space plan');await expect(page.locator('#storyboard-content')).not.toContainText('AI review draft');
+ await page.locator('#open-storyboard').click();await page.locator('#storyboard-ai-open').click();await generate(page);await expect(page.locator('#ai-workflow-spinner')).toBeVisible();await expect(page.locator('#ai-workflow-settings')).not.toBeVisible();await expect(page.locator('#ai-workflow-dialog>.json-header')).not.toBeVisible();await expect(page.locator('#ai-workflow-start')).not.toBeVisible();await expect(page.locator('#ai-workflow-cancel')).toBeVisible();release();await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();await expect(page.locator('#storyboard-content')).toContainText('AI review draft');await expect(page.locator('#storyboard-approve')).toHaveAttribute('aria-pressed','false');page.once('dialog',d=>d.accept());await page.locator('#storyboard-close').click();await page.locator('#open-storyboard').click();await expect(page.locator('#storyboard-content')).toContainText('AI review draft');
 });
 
 test('generation errors are shown and copied without leaking keys; denied clipboard selects the text',async({page})=>{
@@ -195,7 +195,7 @@ for(const [format,size]of [['landscape','1280x720'],['portrait','720x1280'],['sq
  await expect(page.locator('#ai-workflow-quality')).toHaveValue('high');await expect(page.locator('#ai-workflow-size')).toHaveValue('1536x864');
  await page.locator('#ai-workflow-target').selectOption('shots:shot');
  await expect(page.locator('#ai-workflow-quality')).toHaveValue('low');await expect(page.locator('#ai-workflow-size')).toHaveValue(size);await expect(page.locator('#ai-workflow-size')).toHaveAttribute('readonly','');
- await generate(page);await expect(page.locator('#storyboard-dialog')).toBeVisible();await page.locator('#storyboard-save').click();
+ await generate(page);await expect(page.locator('#storyboard-dialog')).toBeVisible();await page.locator('#storyboard-save').click();await expect(page.locator('#storyboard-dialog')).toBeVisible();await page.locator('#storyboard-close').click();
  const after=await exportProject(page),data=after.storyboard!.images[after.storyboard!.shots[0].image!].data!;
  expect(await page.evaluate(async data=>{const img=new Image();img.src=data;await img.decode();return [img.naturalWidth,img.naturalHeight];},data)).toEqual(size.split('x').map(Number));expect(calls).toBe(1);
 });
@@ -207,7 +207,78 @@ test('fixed-size image models use supported dimensions and crop to the project f
  await expect(page.locator('#ai-workflow-size')).toHaveValue('864x1536');
  await page.locator('#ai-workflow-target').selectOption('shots:shot');await page.locator('#ai-workflow-model-choice').selectOption('gpt-image-1.5');
  await expect(page.locator('#ai-workflow-size')).toHaveValue('720x1280');await expect(page.locator('#ai-workflow-quality')).toHaveValue('low');
- await generate(page);await expect(page.locator('#storyboard-dialog')).toBeVisible();await page.locator('#storyboard-save').click();
+ await generate(page);await expect(page.locator('#storyboard-dialog')).toBeVisible();await page.locator('#storyboard-save').click();await expect(page.locator('#storyboard-dialog')).toBeVisible();await page.locator('#storyboard-close').click();
  const after=await exportProject(page),data=after.storyboard!.images[after.storyboard!.shots[0].image!].data!;
  expect(await page.evaluate(async data=>{const img=new Image();img.src=data;await img.decode();return [img.naturalWidth,img.naturalHeight];},data)).toEqual([720,1280]);
+});
+
+function quickImageProject(){
+ const p=fixture(),b=p.storyboard!;b.characters=[{id:'hero',kind:'character',name:'Copper pilot',description:'Copper robot',image:null,status:'approved',comments:[]},{id:'prop',kind:'object',name:'Survey drone',description:'Small silver drone',image:null,status:'approved',comments:[]}];
+ b.settings=[{id:'moon',name:'Lunar base',description:'A crater with a landing pad',image:null,status:'approved',comments:[]}];b.shots[0].characters=['hero','prop'];b.shots[0].settings=['moon'];return p;
+}
+for(const [tab,kind,id,phrase]of [['characters','characters','hero','ONLY the selected character'],['objects','characters','prop','ONLY the selected object'],['settings','settings','moon','ONLY the selected setting'],['shots','shots','shot','ONE single-frame']] as const)test('inline AI preview uses the selected '+tab+' and defaults after explicit paid confirmation',async({page})=>{
+ const p=quickImageProject();await setup(page,p);let calls=0,release!:()=>void;const gate=new Promise<void>(r=>release=r),png='iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aZ1sAAAAASUVORK5CYII=';
+ await page.route('https://api.openai.com/v1/images/generations',async r=>{if(r.request().method()==='OPTIONS'){await r.fulfill({headers:cors});return;}calls++;expect(r.request().postDataJSON()).toMatchObject({model:'gpt-image-2',quality:'low',size:'1280x720',n:1});expect(r.request().postDataJSON().prompt).toContain(phrase);await gate;await r.fulfill({headers:cors,json:{data:[{b64_json:png}]}});});
+ await page.locator('#open-storyboard').click();await page.locator('[data-board-tab='+tab+']').click();const button=page.locator('.board-generate-image');
+ await expect(button).toHaveCount(1);await expect(button.locator('svg')).toHaveCount(1);await expect(button).toHaveAttribute('title','Generate preview with AI');
+ await button.click();await expect(page.locator('#ai-workflow-quick-confirm')).toBeVisible();await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();expect(calls).toBe(0);
+ await expect(page.locator('#ai-workflow-quick-summary')).toContainText('1280x720');await expect(page.locator('#ai-workflow-quick-hint')).toContainText('paid OpenAI');
+ await page.locator('#ai-workflow-quick-start').click();await expect(page.locator('#ai-workflow-spinner')).toBeVisible();await expect.poll(()=>calls).toBe(1);release();
+ await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();await expect(page.locator('#storyboard-dialog')).toBeVisible();await expect(page.locator('.board-sketch')).toHaveCount(1);
+ await page.locator('#storyboard-save').click();await expect(page.locator('#storyboard-dialog')).toBeVisible();await page.locator('#storyboard-close').click();const result=await exportProject(page),item=result.storyboard![kind].find(x=>x.id===id)!;
+ expect(item.image).toBeTruthy();expect(item.status).toBe('draft');expect(result.scenes).toEqual(p.scenes);expect(calls).toBe(1);
+});
+test('cancelling inline image confirmation sends no paid request and returns to the element',async({page})=>{
+ await setup(page,quickImageProject());let calls=0;page.on('request',r=>{if(r.method()==='POST'&&r.url().includes('api.openai.com'))calls++;});
+ await page.locator('#open-storyboard').click();await page.locator('[data-board-tab=characters]').click();const button=page.locator('.board-generate-image');
+ await button.click();await expect(page.locator('#ai-workflow-quick-confirm')).toBeVisible();await page.locator('#ai-workflow-quick-cancel').click();
+ await expect(page.locator('#ai-workflow-quick-confirm')).not.toBeVisible();await expect(button).toBeFocused();await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();
+ await button.click();await expect(page.locator('#ai-workflow-quick-confirm')).toBeVisible();await page.keyboard.press('Escape');await expect(page.locator('#ai-workflow-quick-confirm')).not.toBeVisible();expect(calls).toBe(0);
+});
+test('inline image generation unlocks the vault before paid confirmation',async({page})=>{
+ await setup(page,quickImageProject());await page.locator('#open-api-vault').click();await page.locator('#api-vault-lock').click();await page.locator('#api-vault-close').click();
+ await page.locator('#open-storyboard').click();await page.locator('[data-board-tab=characters]').click();await page.locator('.board-generate-image').click();
+ await expect(page.locator('#api-unlock-dialog')).toBeVisible();await expect(page.locator('#ai-workflow-quick-confirm')).not.toBeVisible();
+ await page.locator('#api-unlock-password').fill(password);await page.locator('#api-unlock-submit').click();await expect(page.locator('#ai-workflow-quick-confirm')).toBeVisible();await page.locator('#ai-workflow-quick-cancel').click();
+});
+
+test('running AI shows elapsed time and theme-aware Matrix rain, respects reduced motion and resets on retry',async({page},testInfo)=>{
+ await setup(page);let calls=0;const releases:(()=>void)[]=[];
+ await page.route('https://api.openai.com/v1/responses',async r=>{if(r.request().method()==='OPTIONS'){await r.fulfill({headers:cors});return;}calls++;await new Promise<void>(resolve=>releases.push(resolve));await r.fulfill({headers:cors,status:429,json:{error:{}}}).catch(()=>{});});
+ await page.locator('#open-ai-workflow').click();await generate(page);
+ const matrix=page.locator('#ai-workflow-matrix'),elapsed=page.locator('#ai-workflow-elapsed'),stream=matrix.locator('span').first();
+ await expect(matrix).toBeVisible();await expect(matrix).toHaveAttribute('aria-hidden','true');await expect(matrix.locator('span')).toHaveCount(18);
+ await expect(elapsed).toHaveAttribute('aria-live','off');await expect(elapsed).toHaveText('00:00');
+ await expect(elapsed).not.toHaveText('00:00',{timeout:3000});
+ await expect(stream).toHaveCSS('animation-name','ai-matrix-fall');
+ const original=await matrix.evaluate(e=>getComputedStyle(e).color);
+ await page.evaluate(()=>{document.documentElement.dataset.palette='blue';document.documentElement.dataset.theme='dark';});
+ await expect.poll(()=>matrix.evaluate(e=>getComputedStyle(e).color)).not.toBe(original);
+ expect(await matrix.evaluate(e=>{const probe=document.createElement('span');probe.style.color='var(--accent)';document.body.append(probe);const same=getComputedStyle(probe).color===getComputedStyle(e).color;probe.remove();return same;})).toBe(true);
+ await page.emulateMedia({reducedMotion:'reduce'});await expect(stream).toHaveCSS('animation-name','none');
+ const reducedTime=await elapsed.textContent();await expect(elapsed).not.toHaveText(reducedTime!,{timeout:3000});
+ await page.emulateMedia({reducedMotion:'no-preference'});await expect(stream).toHaveCSS('animation-name','ai-matrix-fall');
+ await page.locator('#ai-workflow-dialog').screenshot({path:'/tmp/scene-ai-matrix-'+testInfo.project.name+'.png'});
+ await expect.poll(()=>releases.length).toBe(1);releases[0]();
+ await expect(page.locator('#ai-workflow-error')).toHaveValue(/quota/);await expect(matrix).toBeHidden();const stopped=await elapsed.textContent();await page.waitForTimeout(1100);await expect(elapsed).toHaveText(stopped!);
+ await generate(page);await expect(elapsed).toHaveText('00:00');await expect(matrix).toBeVisible();await expect.poll(()=>calls).toBe(2);
+ await page.locator('#ai-workflow-cancel').click();await expect(matrix).toBeHidden();await expect(page.locator('#ai-workflow-error')).toHaveValue(/cancelled/);releases[1]?.();
+});
+
+test('each successful AI storyboard reply is saved without pressing Save and can be undone independently',async({page})=>{
+ await setup(page);let calls=0;
+ await page.route('https://api.openai.com/v1/responses',async r=>{if(r.request().method()==='OPTIONS'){await r.fulfill({headers:cors});return;}calls++;const data=JSON.parse(r.request().postDataJSON().input[0].content[0].text).storyboard;data.board.title='Automatically saved '+calls;data.board.approved=false;await r.fulfill({headers:cors,json:response(JSON.stringify(data))});});
+ await page.locator('#open-ai-workflow').click();await generate(page);
+ await expect(page.locator('#storyboard-content')).toContainText('Automatically saved 1');await expect(page.locator('#storyboard-status')).toContainText('saved in the project');
+ await page.locator('#storyboard-ai-open').click();await generate(page);await expect(page.locator('#storyboard-content')).toContainText('Automatically saved 2');
+ await page.locator('#storyboard-close').click();const after=await exportProject(page);expect(after.storyboard!.title).toBe('Automatically saved 2');expect(after.storyboard!.approved).toBe(false);
+ await page.locator('#undo-project').click();expect((await exportProject(page)).storyboard!.title).toBe('Automatically saved 1');
+ await page.locator('#undo-project').click();expect((await exportProject(page)).storyboard!.title).toBe('Space plan');expect(calls).toBe(2);
+});
+test('inline AI preview is saved automatically and survives closing without pressing Save',async({page})=>{
+ const p=quickImageProject();await setup(page,p);const png='iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aZ1sAAAAASUVORK5CYII=';
+ await page.route('https://api.openai.com/v1/images/generations',r=>r.fulfill({headers:cors,json:{data:[{b64_json:png}]}}));
+ await page.locator('#open-storyboard').click();await page.locator('[data-board-tab=characters]').click();await page.locator('.board-generate-image').click();await page.locator('#ai-workflow-quick-start').click();
+ await expect(page.locator('.board-sketch')).toHaveCount(1);await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();await expect(page.locator('#storyboard-status')).toContainText('saved in the project');
+ await page.locator('#storyboard-close').click();const result=await exportProject(page);expect(result.storyboard!.characters[0].image).toBeTruthy();expect(result.storyboard!.characters[0].status).toBe('draft');expect(result.scenes).toEqual(p.scenes);
 });

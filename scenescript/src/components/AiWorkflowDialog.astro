@@ -8,8 +8,9 @@ const {lang}=Astro.props,t=aiWorkflowWords(lang),m=aiModelWords(lang),l=aiWorkfl
 ---
 <dialog id="ai-workflow-dialog" aria-labelledby="ai-workflow-title" data-words={JSON.stringify(t)} data-model-words={JSON.stringify(m)}>
  <header class="json-header"><h2 id="ai-workflow-title">{t.title}</h2></header>
+ <div id="ai-workflow-matrix" aria-hidden="true" hidden></div>
  <div class="dialog-inner">
-  <div id="ai-workflow-spinner" role="status" hidden><span class="ai-progress-spinner" aria-hidden="true"></span><span class="sr-only">{t.working}</span></div>
+  <div id="ai-workflow-spinner" hidden><span class="ai-progress-spinner" aria-hidden="true"></span><span class="sr-only" role="status">{t.working}</span><div class="ai-elapsed"><span>{t.elapsed}</span><output id="ai-workflow-elapsed" role="timer" aria-live="off">00:00</output></div></div>
   <fieldset id="ai-workflow-settings">
    <section class="ai-flow-tile ai-flow-wide" data-ai-tile="task" aria-labelledby="ai-task-heading"><h3 id="ai-task-heading">{l.task}</h3>
    <p id="ai-workflow-draft" class="small-hint" hidden>{t.draftHint}</p>
@@ -59,4 +60,10 @@ const {lang}=Astro.props,t=aiWorkflowWords(lang),m=aiModelWords(lang),l=aiWorkfl
   <button id="ai-workflow-start" type="button" title={t.start} aria-label={t.start}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 4 12 8-12 8Z"/></svg></button>
   <button id="ai-workflow-apply" type="button" title={t.apply} aria-label={t.apply} disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L20 5"/></svg></button>
  </footer>
+</dialog>
+
+<dialog id="ai-workflow-quick-confirm" role="alertdialog" aria-labelledby="ai-workflow-quick-title" aria-describedby="ai-workflow-quick-hint">
+ <header><h2 id="ai-workflow-quick-title">{t.quickImageTitle}</h2></header>
+ <div class="dialog-inner"><p id="ai-workflow-quick-summary"></p><p id="ai-workflow-quick-hint">{t.quickImageHint}</p></div>
+ <footer><button id="ai-workflow-quick-cancel" type="button" title={t.close} aria-label={t.close} autofocus><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button><button id="ai-workflow-quick-start" type="button" title={t.start} aria-label={t.start}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L20 5"/></svg></button></footer>
 </dialog>

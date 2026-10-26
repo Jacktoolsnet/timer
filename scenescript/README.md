@@ -1082,7 +1082,7 @@ bleibt als manuelle Alternative bestehen.
   Projekt/History/Export/URLs/Prompts, keine Cookies/Referrer/Weiterleitungen/Retry.
   Responses setzen `store:false`; dies ersetzt keine Anbieter-Aufbewahrungsrichtlinie.
 - Storyboard-Ergebnisse und -Skizzen öffnen sich nach erfolgreicher Prüfung direkt
-  als **Storyboard-Entwurf**. Erst „Änderungen speichern“ schreibt ihn ins Projekt.
+  zur Prüfung im Storyboard und werden automatisch im aktuellen Projekt gespeichert.
   Ausführbare SceneScripts, Cover und Sprachaufnahmen bleiben zunächst Vorschauen
   und benötigen **Übernehmen**.
   Projektübernahmen sind mit Undo rückgängig zu machen. Zwischenzeitliche Änderungen
@@ -1217,13 +1217,13 @@ Storyboard-Entwürfe werden nicht als veralteter KI-Kontext geöffnet.
 
 #### Bearbeitungsansicht und Fehler
 
-Nach Play zeigt der KI-Workflow während der Erzeugung nur einen Spinner und einen
-Icon-Button zum Abbrechen. Einstellungen und Zwischenresultate bleiben ausgeblendet.
+Nach Play zeigt der KI-Workflow während der Erzeugung Spinner, verstrichene Zeit,
+Matrix-Hintergrund und einen Icon-Button zum Abbrechen. Einstellungen und Zwischenresultate bleiben ausgeblendet.
 Erfolgreiche Storyboard-Überarbeitungen und Storyboard-Skizzen kehren automatisch
-in den Storyboard-Editor zurück (bei Einstieg aus der Projekt-Toolbar als neuer
-ungespeicherter Entwurf). Es werden keine Freigaben automatisch erteilt und keine
-Projektdateien oder ausführbaren Szenen still überschrieben. Der Entwurf kann
-weiter geprüft, gespeichert oder verworfen werden. Skript-, Cover- und Sprach-
+in den Storyboard-Editor zurück und werden im aktuellen Projekt gespeichert.
+Es werden keine Freigaben automatisch erteilt und keine exportierten Projektdateien
+oder ausführbaren Szenen still überschrieben. Ergebnisse können weiter geprüft,
+bearbeitet oder per Undo zurückgenommen werden. Skript-, Cover- und Sprach-
 ergebnisse behalten die explizite Übernahme; teilfertige Sprachaufträge bleiben
 bei Fehlern manuell übernehmbar.
 
@@ -1254,3 +1254,11 @@ danach wird lokal mittig auf das Zielformat zugeschnitten. Dabei können Randdet
 Das Verkleinern oder Zuschneiden nach der Erzeugung spart keine API-Kosten. Kosten hängen von Modell,
 Qualität und Abrechnung des Anbieters ab; kleinere Auflösung allein ist keine Preisgarantie.
 Bereits vorhandene Bilder bleiben unverändert. Keine automatischen kostenpflichtigen Bildaufrufe.
+
+#### Storyboard speichern und KI-Ergebnisse
+„Änderungen speichern“ übernimmt das Storyboard ins aktuelle Projekt und lässt das Overlay offen.
+Erfolgreiche, validierte Storyboard- und Skizzen-Antworten aus dem API-Workflow werden automatisch
+im aktuellen Projekt gespeichert. Das gilt auch für den KI-Button direkt am Bildfeld.
+Freigaben bleiben explizit; fehlerhafte, abgebrochene oder veraltete Antworten werden nicht übernommen.
+Projektänderungen lassen sich rückgängig machen. Eine exportierte Datei auf der Festplatte wird dabei
+nicht automatisch überschrieben; dafür das SceneScript weiterhin explizit herunterladen.

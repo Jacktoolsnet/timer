@@ -1,3 +1,4 @@
+import {installAiProgress} from './ai-progress';
 import {imageViewerButton} from './image-viewer';
 import {imageSettings} from '../lib/ai-image-settings';
 import {installAiModelPicker} from './ai-model-picker';
@@ -17,11 +18,13 @@ import {ensureApiVaultUnlocked,requestApiKey} from './api-vault';
 import {VaultError} from '../lib/api-vault';
 import type {aiWorkflowWords} from '../lib/ai-workflow-i18n';
 export type AiWorkflowContext={project:Project;valid:()=>boolean;apply:(p:Project)=>void;preload?:(p:Project)=>Promise<void>;draft?:boolean};
-let openWorkflow:((context:AiWorkflowContext,action?:string)=>void)|undefined;
-export function openAiWorkflow(context:AiWorkflowContext,action='board'){openWorkflow?.(context,action);}
-export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,reviewStoryboard:(board:Storyboard)=>void){
+export type AiWorkflowOptions={imageTarget?:BoardReviewTarget;quickImage?:boolean};
+let openWorkflow:((context:AiWorkflowContext,action?:string,options?:AiWorkflowOptions)=>void)|undefined;
+export function openAiWorkflow(context:AiWorkflowContext,action='board',options:AiWorkflowOptions={}){openWorkflow?.(context,action,options);}
+export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,reviewStoryboard:(board:Storyboard,saved?:boolean)=>void){
  const $=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById('ai-workflow-'+id) as T;
  const dialog=$<HTMLDialogElement>('dialog'),t=JSON.parse(dialog.dataset.words!) as ReturnType<typeof aiWorkflowWords>;
+ const progressVisual=installAiProgress($('matrix'),$('elapsed'));
  const action=$<HTMLSelectElement>('action'),model=$<HTMLInputElement>('model'),prompt=$<HTMLTextAreaElement>('prompt'),consent=$<HTMLInputElement>('consent'),start=$<HTMLButtonElement>('start'),apply=$<HTMLButtonElement>('apply');
  const enlargeImage=imageViewerButton(()=>({data:$<HTMLImageElement>('image-preview').src,name:t.preview}));enlargeImage.id='ai-workflow-image-enlarge';enlargeImage.hidden=true;$('image-preview').before(enlargeImage);
  const jobsSelect=$<HTMLSelectElement>('job'),targets=$<HTMLSelectElement>('target');
@@ -32,7 +35,7 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,re
  function clearPreview(){candidate=undefined;apply.disabled=true;$('preview').hidden=true;$('image-preview').removeAttribute('src');$('image-preview').hidden=true;enlargeImage.hidden=true;$<HTMLTextAreaElement>('json-preview').value='';$('json-preview').hidden=true;$('audios').replaceChildren();for(const url of urls)URL.revokeObjectURL(url);urls.length=0;}
  const error=(e:unknown)=>{let message:string;if(e instanceof AiApiError)message=e.code==='size'?t.sizeError:t[e.code];else if(e instanceof VoiceAssignmentError)message=voicePickerWords(document.documentElement.lang as Language)[e.code];else if(e instanceof VaultError)message=t.locked;else message=e instanceof Error?e.message:t.response;$<HTMLTextAreaElement>('error').value=message;$('copy-status').textContent='';$('error-box').hidden=false;};
  const check=()=>{if(!dialog.open||!ctx.valid())throw new Error(t.stale);};
- const busy=(value:boolean)=>{$<HTMLFieldSetElement>('settings').disabled=value;start.hidden=value;$('cancel').hidden=!value;$('progress').hidden=!value;$('cancel-hint').hidden=!value;apply.disabled=value||!candidate;start.disabled=!consent.checked;dialog.setAttribute('aria-busy',String(value));const running=value&&generating;dialog.classList.toggle('ai-running',running);$('spinner').hidden=!running;$('settings').hidden=running;if(running)dialog.querySelector('.dialog-inner')!.scrollTop=0;};
+ const busy=(value:boolean)=>{$<HTMLFieldSetElement>('settings').disabled=value;start.hidden=value;$('cancel').hidden=!value;$('progress').hidden=!value;$('cancel-hint').hidden=!value;apply.disabled=value||!candidate;start.disabled=!consent.checked;dialog.setAttribute('aria-busy',String(value));const running=value&&generating;progressVisual.setRunning(running);dialog.classList.toggle('ai-running',running);$('spinner').hidden=!running;$('settings').hidden=running;if(running)dialog.querySelector('.dialog-inner')!.scrollTop=0;};
  function option(select:HTMLSelectElement,value:string,label:string){const o=document.createElement('option');o.value=value;o.textContent=label;select.append(o);}
  function selectedSpeechJobs(all=jobs){return jobsSelect.value==='missing'?all.filter(j=>!(j.scope==='project'?ctx.project.narration:ctx.project.scenes.find(s=>s.id===j.sceneId)?.narration)?.asset):all.filter(j=>j.stem===jobsSelect.value);}
  function speechEstimate(){const selected=selectedSpeechJobs();$('speech-estimate').textContent=selected.length?`${selected.length} ${t.assignments} · ${selected.reduce((n,j)=>n+j.text.length,0)} ${t.characters}`:t.empty;$<HTMLTextAreaElement>('speech-text').value=selected.map(j=>j.text).join('\n\n');}
@@ -68,12 +71,24 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,re
   return canvas.toDataURL('image/png');
  }
  function imageTarget():BoardReviewTarget|null{if(targets.value==='cover')return null;const [kind,id]=targets.value.split(':');if(!['characters','settings','shots'].includes(kind)||!id)throw new Error('Storyboard: select image target');return {kind:kind as BoardReviewTarget['kind'],id};}
- openWorkflow=async(next,initial='board')=>{
+ const quickDialog=$<HTMLDialogElement>('quick-confirm');
+ let finishQuick:((accepted:boolean)=>void)|undefined;
+ function confirmQuick(){return new Promise<boolean>(resolve=>{
+  finishQuick=accepted=>{finishQuick=undefined;quickDialog.close();resolve(accepted);};
+  const settings=currentImageSettings(),selected=targets.selectedOptions[0];
+  $('quick-summary').textContent=[selected?.textContent,model.value,settings.size,t.quality+': '+t.low].join(' · ');
+  quickDialog.showModal();$('quick-cancel').focus();
+ });}
+ $('quick-cancel').addEventListener('click',()=>finishQuick?.(false));
+ $('quick-start').addEventListener('click',()=>finishQuick?.(true));
+ quickDialog.addEventListener('cancel',e=>{e.preventDefault();finishQuick?.(false);});
+ quickDialog.addEventListener('close',()=>finishQuick?.(false));
+ openWorkflow=async(next,initial='board',options={})=>{
   if(dialog.open||active||opening)return;opening=true;stop();
   try{if(!await ensureApiVaultUnlocked()||!next.valid())return;ctx=next;const ticket=++session;modelPicker.reset();clearPreview();jobs=[];jobsSelect.replaceChildren();option(jobsSelect,'missing',t.all);targets.replaceChildren();if(!ctx.draft)option(targets,'cover',t.cover);
   const b=ctx.project.storyboard;for(const kind of ['characters','settings','shots'] as const)for(const item of b?.[kind]??[])option(targets,kind+':'+item.id,kind+' · '+('title'in item?item.title:item.name));
   for(const o of action.options)o.disabled=!!ctx.draft&&['script','speech'].includes(o.value);
-  action.value=initial;prompt.value='';$('draft').hidden=!ctx.draft;$<HTMLInputElement>('refs').checked=false;configure();dialog.showModal();
+  action.value=initial;if(options.imageTarget){targets.value=options.imageTarget.kind+':'+options.imageTarget.id;if(!targets.value)return;}prompt.value='';$('draft').hidden=!ctx.draft;$<HTMLInputElement>('refs').checked=false;configure();if(options.quickImage&&initial==='image'){if(!await confirmQuick()||!next.valid())return;dialog.showModal();consent.checked=true;start.disabled=false;start.click();return;}dialog.showModal();
   void speechJobs(ctx.project).then(value=>{if(ticket!==session||!dialog.open)return;jobs=value;for(const j of jobs)option(jobsSelect,j.stem,j.name+(j.speaker?' · '+j.speaker:''));speechEstimate();}).catch(error);
   }finally{opening=false;}
  };
@@ -133,7 +148,7 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,re
    if(candidate&&(kind==='board'||ctx.draft||kind==='image'&&target)){
     check();controller.signal.throwIfAborted();const next=candidate;
     if(ctx.draft){ctx.apply(next);dialog.close();}
-    else{dialog.close();try{reviewStoryboard(next.storyboard!);}catch(e){dialog.showModal();throw e;}}
+    else{ctx.apply(next);dialog.close();try{reviewStoryboard(next.storyboard!,true);}catch(e){dialog.showModal();throw e;}}
     clearPreview();
    }
   }catch(e){error(e);if(kind==='speech'&&files.length&&ctx.valid())$('status').textContent=t.partial;else{$('status').textContent='';clearPreview();}}
@@ -147,6 +162,6 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,re
  apply.addEventListener('click',()=>{if(active||!candidate)return;try{check();const next=candidate;ctx.apply(next);clearPreview();$('status').textContent=t.applied;dialog.close();}catch(e){clearPreview();error(e);}});
  const close=()=>{if(active){active.abort();return;}dialog.close();};
  $('cancel').addEventListener('click',()=>active?.abort());$('close').addEventListener('click',close);dialog.addEventListener('cancel',event=>{event.preventDefault();close();});
- dialog.addEventListener('close',()=>{if(dialog.open)return;session++;active?.abort();modelPicker.reset();clearPreview();prompt.value='';consent.checked=false;});
- window.addEventListener('pagehide',()=>{active?.abort();clearPreview();});
+ dialog.addEventListener('close',()=>{if(dialog.open)return;progressVisual.setRunning(false);session++;active?.abort();modelPicker.reset();clearPreview();prompt.value='';consent.checked=false;});
+ window.addEventListener('pagehide',()=>{progressVisual.setRunning(false);finishQuick?.(false);active?.abort();clearPreview();});
 }

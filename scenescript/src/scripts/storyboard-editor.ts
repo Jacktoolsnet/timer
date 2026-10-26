@@ -6,14 +6,14 @@ import {voicePickerWords} from '../lib/voice-picker-i18n';
 import type {Language} from '../lib/i18n';
 import {videoLanguageForLocale,videoLanguageOptions} from '../lib/video-languages';
 import {aiLanguageInstruction} from '../lib/ai-language';
-import {openAiWorkflow} from './ai-workflow';
+import {openAiWorkflow,type AiWorkflowOptions} from './ai-workflow';
 import type {Project} from '../lib/model';
 import {MAX_STORYBOARD_BYTES,newStoryboard,parseStoryboard,importStoryboard,exportStoryboard,storyboardGuide,canApproveStoryboard,invalidateStoryboardApprovals,type BoardReviewTarget,type BoardCharacter,type Storyboard,type BoardFormat,type BoardComment} from '../lib/storyboard';
 import type {storyboardWords} from '../lib/storyboard-i18n';
 const $=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById('storyboard-'+id) as T;
-let showAiStoryboard:((board:Storyboard)=>void)|undefined;
-/** Review generated planning data as an unsaved draft, never as executable video. */
-export function openStoryboardDraft(board:Storyboard){showAiStoryboard?.(board);}
+let showAiStoryboard:((board:Storyboard,saved?:boolean)=>void)|undefined;
+/** Review planning data; API results may already be saved, never approved automatically. */
+export function openStoryboardDraft(board:Storyboard,saved=false){showAiStoryboard?.(board,saved);}
 export function installStoryboardEditor(context:()=>{project:Project;revision:number},apply:(p:Project)=>void,stop:()=>void){
  const dialog=$<HTMLDialogElement>('dialog'),t=JSON.parse(dialog.dataset.words!) as ReturnType<typeof storyboardWords>;
  const fieldDialog=$<HTMLDialogElement>('field-dialog'),exchange=$<HTMLDialogElement>('exchange');
@@ -61,9 +61,24 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
  function field(parent:HTMLElement,label:string,value:string,config:FieldConfig,key:string){const area=node('section'),heading=node('div');area.className='board-field';heading.className='board-field-heading';heading.append(node('h4',label),pencil(config,key));area.append(heading,node('p',value||'—'));parent.append(area);}
  function heading(parent:HTMLElement,title:string,config:FieldConfig,key:string){const tile=node('section'),row=node('div');tile.className='board-detail-title';row.className='board-field-heading';row.append(node('h3',title),pencil(config,key));tile.append(row);parent.append(tile);}
  const textConfig=(label:string,value:string,apply:FieldConfig['apply'],max=10000,shot?:string):FieldConfig=>({label,value,apply,max,shot});
+ function saveBoard(next=board){
+  check();const validated=parseStoryboard(next);
+  if(JSON.stringify(validated)!==JSON.stringify(origin.project.storyboard))apply({...origin.project,storyboard:validated});
+  board=structuredClone(validated);origin=context();dirty=false;session++;
+ }
+ function runWorkflow(action='board',options:AiWorkflowOptions={}){
+  try{check();const source=board,rev=board.revision,ticket=session;
+   openAiWorkflow({project:{...origin.project,storyboard:board},draft:true,valid:()=>{try{check();return board===source&&board.revision===rev&&session===ticket;}catch{return false;}},apply:next=>{saveBoard(next.storyboard!);clear();render();$('status').textContent=t.saved;}},action,options);
+  }catch(e){error(e);}
+ }
  function picture(parent:HTMLElement,id:string|null,alt:string,apply:FieldConfig['apply'],key:string,shot?:string,target?:BoardReviewTarget){
   const area=node('section');area.className='board-image-field';parent.append(area);
   const row=node('div');row.className='board-field-heading';row.append(node('h4',t.sketch),pencil({label:t.sketch,value:id??'',kind:'select',options:[['',t.none],...Object.entries(board.images).map(([id,img]):[string,string]=>[id,img.name])],apply,shot,target},key));area.append(row);
+  const imageTarget=target??(shot?{kind:'shots' as const,id:shot}:undefined);
+  if(imageTarget){
+   const ai=node('button');ai.type='button';ai.className='board-pencil board-generate-image';ai.title=t.generatePreview;ai.setAttribute('aria-label',t.generatePreview);ai.setAttribute('aria-haspopup','dialog');ai.setAttribute('aria-controls','ai-workflow-quick-confirm');
+   const svg=document.createElementNS('http://www.w3.org/2000/svg','svg'),path=document.createElementNS(svg.namespaceURI,'path');svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('aria-hidden','true');path.setAttribute('d','m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5ZM20 2v4m-2-2h4');svg.append(path);ai.append(svg);ai.addEventListener('click',()=>runWorkflow('image',{imageTarget,quickImage:true}));row.insertBefore(ai,row.children[1]);
+  }
   if(id&&board.images[id]?.data){const image=board.images[id],enlarge=imageViewerButton(()=>({data:image.data!,name:alt||image.name}));enlarge.classList.add('board-pencil');row.insertBefore(enlarge,row.lastElementChild);
    const remove=node('button');remove.type='button';remove.className='board-pencil board-delete-image';remove.title=t.deleteImage;remove.setAttribute('aria-label',t.deleteImage);remove.setAttribute('aria-haspopup','dialog');remove.setAttribute('aria-controls','storyboard-delete-image-dialog');
    const svg=document.createElementNS('http://www.w3.org/2000/svg','svg'),path=document.createElementNS(svg.namespaceURI,'path');svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('aria-hidden','true');path.setAttribute('d','M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7');svg.append(path);remove.append(svg);row.append(remove);
@@ -191,10 +206,10 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
   }
  }
  const close=()=>{if(dirty&&!window.confirm(t.unsaved))return;session++;dialog.close();};
- const show=(draft?:Storyboard)=>{if(dialog.open)throw new Error(t.stale);stop();origin=context();board=draft?structuredClone(draft):origin.project.storyboard?structuredClone(origin.project.storyboard):newStoryboard(origin.project.title,origin.project.format,videoLanguageForLocale(document.documentElement.lang));dirty=!!draft;tab='story';selectedItems={};session++;clear();$<HTMLTextAreaElement>('json').value='';render();dialog.showModal();};
- showAiStoryboard=draft=>show(draft);
+ const show=(draft?:Storyboard,saved=false)=>{if(dialog.open)throw new Error(t.stale);stop();origin=context();board=draft?structuredClone(draft):origin.project.storyboard?structuredClone(origin.project.storyboard):newStoryboard(origin.project.title,origin.project.format,videoLanguageForLocale(document.documentElement.lang));dirty=!!draft&&!saved;tab='story';selectedItems={};session++;clear();$<HTMLTextAreaElement>('json').value='';render();dialog.showModal();};
+ showAiStoryboard=(draft,saved)=>{show(draft,saved);if(saved)$('status').textContent=t.saved;};
  document.getElementById('open-storyboard')!.addEventListener('click',()=>show());
- $('ai-open').addEventListener('click',()=>{try{check();const source=board,rev=board.revision,ticket=session;openAiWorkflow({project:{...origin.project,storyboard:board},draft:true,valid:()=>{try{check();return board===source&&board.revision===rev&&session===ticket;}catch{return false;}},apply:next=>{check();board=next.storyboard!;dirty=true;clear();render();}});}catch(e){error(e);}});
+ $('ai-open').addEventListener('click',()=>runWorkflow());
  $('close').addEventListener('click',close);dialog.addEventListener('cancel',e=>{e.preventDefault();close();});
  const tabs=Array.from($('tabs').querySelectorAll<HTMLButtonElement>('[role=tab]'));
  const activateTab=(button:HTMLButtonElement,focus=false)=>{tab=button.dataset.boardTab!;render();if(focus){button.focus();button.scrollIntoView({block:'nearest',inline:'nearest'});}};
@@ -203,7 +218,7 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
   button.addEventListener('keydown',event=>{if(event.altKey||event.ctrlKey||event.metaKey)return;const next=event.key==='ArrowRight'?(index+1)%tabs.length:event.key==='ArrowLeft'?(index+tabs.length-1)%tabs.length:event.key==='Home'?0:event.key==='End'?tabs.length-1:-1;if(next<0)return;event.preventDefault();activateTab(tabs[next],true);});
  }
  $('approve').addEventListener('click',()=>{if(!canApproveStoryboard(board))return;touch();board.approved=true;review();});
- $('save').addEventListener('click',()=>{try{check();const validated=parseStoryboard(board);apply({...origin.project,storyboard:validated});dirty=false;session++;dialog.close();}catch(e){error(e);}});
+ $('save').addEventListener('click',()=>{try{saveBoard();clear();$('status').textContent=t.saved;}catch(e){error(e);}});
  const copy=async(value:string)=>{const ticket=session;try{check();await navigator.clipboard.writeText(value);if(ticket===session&&dialog.open){clear();$('status').textContent=t.copied;}}catch(e){if(ticket===session&&dialog.open)error(e);}};
  $('guide').addEventListener('click',()=>void copy(storyboardGuide+'\n'+aiLanguageInstruction(document.documentElement.lang)));$('feedback').addEventListener('click',()=>void copy(exportStoryboard(board)));
  $('download').addEventListener('click',()=>{try{check();const blob=new Blob([exportStoryboard(board,true)],{type:'application/json'}),url=URL.createObjectURL(blob),a=node('a');a.href=url;const name=board.title.trim().replace(/[^\p{L}\p{N}_-]+/gu,'-').replace(/^-+|-+$/g,'').slice(0,80);a.download=(name||'storyboard')+'.storyboard';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(e){error(e);}});

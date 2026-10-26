@@ -1274,3 +1274,32 @@ body.recording .comic-edit-overlay{display:none}
 #storyboard-delete-image-dialog button{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;flex:0 0 auto;padding:9px}
 #storyboard-delete-image-dialog button svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 #storyboard-delete-image-dialog #storyboard-delete-image-cancel{margin-right:auto}
+
+#ai-workflow-quick-confirm{box-sizing:border-box;width:min(580px,94vw);max-height:90dvh;padding:0;overflow:auto;border:1px solid var(--line);border-radius:16px;background:var(--surface);color:var(--text)}
+#ai-workflow-quick-confirm::backdrop{background:#0009;backdrop-filter:blur(3px)}
+#ai-workflow-quick-confirm header{padding:18px 22px;background:var(--accent-soft);border-bottom:1px solid var(--line)}
+#ai-workflow-quick-title{margin:0;font-size:1.15rem}
+#ai-workflow-quick-confirm .dialog-inner{padding:18px 22px;line-height:1.65;overflow-wrap:anywhere}
+#ai-workflow-quick-summary{font-weight:600;margin-top:0}
+#ai-workflow-quick-confirm footer{display:flex;justify-content:space-between;gap:10px;padding:16px 22px;border-top:1px solid var(--line)}
+#ai-workflow-quick-confirm button{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--text);cursor:pointer}
+#ai-workflow-quick-confirm button svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#ai-workflow-quick-confirm #ai-workflow-quick-start{background:var(--accent);color:#fff}
+#ai-workflow-quick-confirm button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+#storyboard-dialog .board-generate-image{color:var(--accent)}
+#storyboard-dialog .board-image-field .board-field-heading{flex-wrap:wrap}
+
+/* Theme-aware Matrix rain, only while a paid AI generation is running. */
+#ai-workflow-dialog.ai-running{overflow:hidden;isolation:isolate}
+#ai-workflow-dialog.ai-running>.dialog-inner,#ai-workflow-dialog.ai-running>.json-footer{position:relative;z-index:1}
+#ai-workflow-matrix{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;user-select:none;color:var(--accent);background:var(--surface);opacity:.45;mask-image:linear-gradient(transparent,#000 15%,#000 85%,transparent)}
+#ai-workflow-matrix span{position:absolute;top:0;white-space:pre;font:14px/19px ui-monospace,monospace;opacity:.55;animation:ai-matrix-fall 10s linear infinite;text-shadow:0 0 6px var(--accent)}
+#ai-workflow-matrix span:nth-child(3n){opacity:.3}
+#ai-workflow-matrix[hidden] span{animation-play-state:paused}
+@keyframes ai-matrix-fall{from{transform:translateY(-100%)}to{transform:translateY(100%)}}
+#ai-workflow-spinner{gap:20px;padding:20px 8px}
+#ai-workflow-spinner .ai-progress-spinner{background:var(--surface);box-shadow:0 0 0 10px color-mix(in srgb,var(--surface) 85%,transparent)}
+.ai-elapsed{display:grid;gap:4px;justify-items:center;padding:8px 18px;border:1px solid var(--line);border-radius:12px;background:color-mix(in srgb,var(--surface) 94%,transparent);color:var(--text)}
+.ai-elapsed>span{font-size:.75rem;color:var(--muted)}
+#ai-workflow-elapsed{font:600 1.3rem/1.2 ui-monospace,monospace;font-variant-numeric:tabular-nums}
+@media(prefers-reduced-motion:reduce){#ai-workflow-matrix span{animation:none;transform:translateY(-35%);text-shadow:none}#ai-workflow-matrix{opacity:.15}}

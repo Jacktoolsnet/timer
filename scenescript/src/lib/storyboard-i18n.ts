@@ -1,5 +1,7 @@
 import type {Language} from './i18n';
 const words={
+ saved:['Storyboard im Projekt gespeichert.','Storyboard saved in the project.','Storyboard guardado en el proyecto.','Storyboard enregistré dans le projet.'],
+ generatePreview:['Vorschaubild mit KI erzeugen','Generate preview with AI','Generar vista previa con IA','Générer un aperçu avec l’IA'],
  deleteImage:['Bild löschen','Delete image','Eliminar imagen','Supprimer l’image'],
  deleteImageTitle:['Bild wirklich löschen?','Delete this image?','¿Eliminar esta imagen?','Supprimer cette image ?'],
  deleteImageHint:['Das Bild wird von diesem Element entfernt. Wird es noch anderswo verwendet, bleibt es dort erhalten. Sonst wird auch die Bilddatei aus dem Storyboard gelöscht. Betroffene Freigaben werden zurückgesetzt. Erst „Änderungen speichern“ übernimmt dies ins Projekt.','The image will be removed from this element. Other uses are preserved; if none remain, the image file is also deleted from the storyboard. Affected approvals are reset. Choose “Save changes” to apply this to the project.','Se quitará la imagen de este elemento. Se conservan otros usos; si no quedan, también se elimina el archivo del storyboard. Se restablecen las aprobaciones afectadas. Guarda los cambios para aplicarlos al proyecto.','L’image sera retirée de cet élément. Les autres utilisations sont conservées ; sinon, le fichier est également supprimé du storyboard. Les validations concernées sont réinitialisées. Enregistrez les modifications pour les appliquer au projet.'],

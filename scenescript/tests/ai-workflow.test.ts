@@ -79,3 +79,8 @@ test('image language guidance does not request planning text or JSON replies',as
   const text=aiImageLanguageInstruction(locale);assert.ok(text.includes(name));assert.match(text,/Produce an image, not a written reply/);assert.match(text,/specified video\/content language/);assert.doesNotMatch(text,/comment.reply|Always write AI-authored replies/);
  }
 });
+
+test('AI elapsed time uses whole seconds, includes hours and clamps negative durations',async()=>{
+ const {elapsedTime}=await import('../src/scripts/ai-progress.ts');
+ for(const [ms,expected]of [[0,'00:00'],[999,'00:00'],[1000,'00:01'],[65000,'01:05'],[3599999,'59:59'],[3600000,'01:00:00'],[3661000,'01:01:01'],[-1000,'00:00']] as const)assert.equal(elapsedTime(ms),expected);
+});
