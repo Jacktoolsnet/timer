@@ -1316,3 +1316,9 @@ body.recording .comic-edit-overlay{display:none}
 #ai-workflow-copy-status{display:block;margin-top:8px;font-size:.8rem}
 
 #storyboard-script-action{display:inline-flex}
+
+#ai-workflow-production-check{padding:14px;margin:14px 0;border:1px solid var(--accent);border-radius:10px;background:var(--accent-soft);color:var(--text)}
+#ai-workflow-production-check h4{margin:0 0 10px}
+#ai-workflow-production-issues,.board-production-tasks ul{padding-left:20px;line-height:1.6;overflow-wrap:anywhere}
+#ai-workflow-production-issues li{margin-bottom:8px}
+#ai-workflow-production-issues li[data-kind=warning]{font-weight:600}

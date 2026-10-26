@@ -40,7 +40,7 @@ export function imagePrompt(p:Project,target:BoardReviewTarget|null,request:stri
  }
  if(!b)throw new Error('Storyboard: missing');
  const item=b[target.kind].find(x=>x.id===target.id);if(!item)throw new Error('Storyboard: missing image target');
- const project={audience:b.audience,language:b.language,style:b.style,format:b.format,comments:comments(b.comments)};
+ const project={audience:b.audience,language:b.language,style:b.style,format:b.format,production:b.production,comments:comments(b.comments)};
  let task:string,context:unknown;
  if(target.kind==='shots'){
   const shot=b.shots.find(x=>x.id===target.id)!;

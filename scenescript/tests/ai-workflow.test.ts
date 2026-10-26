@@ -131,3 +131,24 @@ test('thumbnail manifests reject unknown or ambiguous names instead of choosing 
  const raw=projectManifest(p);raw.thumbnail={name:'ref.png'};assert.throws(()=>acceptScript(JSON.stringify(raw),p),/ambiguous media manifest name/);
  raw.thumbnail={name:'Missing.png'};assert.throws(()=>acceptScript(JSON.stringify(raw),p),/unknown manifest/);
 });
+
+test('production review flags slides in place of 3D, omitted sound and separately pending audio work',async()=>{
+ const {reviewProduction,productionInstructions}=await import('../src/lib/production-review.ts');
+ const p=project(),b=p.storyboard!;b.production={renderMode:'3d',dialogue:true,music:true,sfx:true};
+ let issues=reviewProduction(p);for(const code of ['missing3d','missingDialogue','missingMusic','sfxPlanMissing'])assert.ok(issues.some(i=>i.code===code),code);
+ b.shots[0].soundEffects=['Short warning beep','Coffee pouring'];
+ const {defaultNarration}=await import('../src/lib/audio.ts');p.scenes[0].narration={...defaultNarration(),text:'Break time?',speaker:'hero'};
+ issues=reviewProduction(p);assert.ok(issues.some(i=>i.code==='speechPending'&&i.pending));assert.equal(issues.filter(i=>i.code==='sfxPending').length,2);assert.ok(!issues.some(i=>i.code==='missingDialogue'));
+ const instructions=productionInstructions(b);for(const text of ['real 3D','NOT flat scene replacements','Scene.narration.text','enabled Project.music','no automatic SFX'])assert.ok(instructions.includes(text),text);
+});
+test('native animated 3D with camera movement and music satisfies structural checks',async()=>{
+ const {reviewProduction}=await import('../src/lib/production-review.ts');
+ const {defaultCharacter3D,defaultStage3D,defaultActor3D,defaultStageCamera3D}=await import('../src/lib/stage3d.ts');
+ const {defaultMusic}=await import('../src/lib/music.ts');const {validateProject}=await import('../src/lib/model.ts');
+ const p=project();p.storyboard!.production={renderMode:'3d',dialogue:false,music:true,sfx:false};
+ p.characters.hero=defaultCharacter3D();p.stages.room=defaultStage3D();const actor=defaultActor3D('hero');actor.toX=2;actor.action='walk';
+ p.scenes[0].stage3d={stage:'room',actors:[actor],camera:{...defaultStageCamera3D(),orbit:10}};p.music=defaultMusic();
+ assert.deepEqual(reviewProduction(validateProject(p)),[]);
+ p.scenes[0].stage3d!.actors[0].action='idle';p.scenes[0].stage3d!.actors[0].toX=0;p.scenes[0].stage3d!.camera.orbit=0;
+ const codes=reviewProduction(validateProject(p)).map(i=>i.code);assert.ok(codes.includes('missingMotion'));assert.ok(codes.includes('missingCamera'));
+});

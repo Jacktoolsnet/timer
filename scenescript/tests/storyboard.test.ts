@@ -126,3 +126,13 @@ test('changing fixed equipment invalidates dependent settings and their shots ev
  b.shots[0].characters=[];invalidateStoryboardApprovals(b,{kind:'characters',id:b.characters[0].id});
  assert.equal(b.settings[0].status,'draft');assert.equal(b.shots[0].status,'draft');assert.equal(b.characters[1].status,'approved');assert.equal(b.approved,false);
 });
+
+test('production choices and concrete SFX tasks validate, persist and remain authoritative during AI revisions',()=>{
+ const b=example();assert.equal(b.production,undefined);
+ b.production={renderMode:'3d',dialogue:true,music:true,sfx:true};b.shots[0].soundEffects=['A gentle confirmation beep at the machine.'];
+ const parsed=parseStoryboard(b);assert.deepEqual(parsed.production,b.production);assert.deepEqual(parsed.shots[0].soundEffects,b.shots[0].soundEffects);
+ const feedback=JSON.parse(exportStoryboard(parsed));feedback.board.production={renderMode:'2d',dialogue:false,music:false,sfx:false};delete feedback.board.shots[0].soundEffects;
+ const result=importStoryboard(JSON.stringify(feedback),parsed);assert.deepEqual(result.production,b.production);assert.deepEqual(result.shots[0].soundEffects,b.shots[0].soundEffects);
+ for(const production of [null,{renderMode:'4d',dialogue:true,music:true,sfx:true},{renderMode:'3d',dialogue:'yes',music:true,sfx:true}]){const bad=structuredClone(b);(bad as any).production=production;assert.throws(()=>parseStoryboard(bad),/production/);}
+ for(const effects of [[''],Array(31).fill('beep'),['x'.repeat(1001)]]){const bad=structuredClone(b);bad.shots[0].soundEffects=effects;assert.throws(()=>parseStoryboard(bad),/soundEffects/);}
+});

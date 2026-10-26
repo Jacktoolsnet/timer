@@ -1,10 +1,11 @@
 ---
 import {aiWorkflowLayoutWords} from '../lib/ai-workflow-layout-i18n';
 import {aiModelWords} from '../lib/ai-model-i18n';
+import {productionWords} from '../lib/production-i18n';
 import {aiWorkflowWords} from '../lib/ai-workflow-i18n';
 import type {Language} from '../lib/i18n';
 interface Props{lang:Language}
-const {lang}=Astro.props,t=aiWorkflowWords(lang),m=aiModelWords(lang),l=aiWorkflowLayoutWords(lang);
+const {lang}=Astro.props,pw=productionWords(lang),t=aiWorkflowWords(lang),m=aiModelWords(lang),l=aiWorkflowLayoutWords(lang);
 ---
 <dialog id="ai-workflow-dialog" aria-labelledby="ai-workflow-title" data-words={JSON.stringify(t)} data-model-words={JSON.stringify(m)}>
  <header class="json-header"><h2 id="ai-workflow-title">{t.title}</h2></header>
@@ -53,7 +54,7 @@ const {lang}=Astro.props,t=aiWorkflowWords(lang),m=aiModelWords(lang),l=aiWorkfl
   <p id="ai-workflow-status" role="status" aria-live="polite"></p>
   <progress id="ai-workflow-progress" hidden></progress>
   <p id="ai-workflow-cancel-hint" hidden>{t.cancelHint}</p>
-  <section id="ai-workflow-preview" class="ai-flow-tile" hidden><h3>{t.preview}</h3><p id="ai-workflow-summary"></p><img id="ai-workflow-image-preview" alt={t.preview} hidden/><div id="ai-workflow-audios"></div><textarea id="ai-workflow-json-preview" rows="9" readonly spellcheck="false" aria-label={t.preview} hidden></textarea></section>
+  <section id="ai-workflow-preview" class="ai-flow-tile" hidden><h3>{t.preview}</h3><p id="ai-workflow-summary"></p><img id="ai-workflow-image-preview" alt={t.preview} hidden/><section id="ai-workflow-production-check" hidden><h4>{pw.title}</h4><ul id="ai-workflow-production-issues"></ul><label id="ai-workflow-production-ack-label" class="ai-check board-approval-switch" hidden><input id="ai-workflow-production-ack" type="checkbox" role="switch"/><span class="board-switch-track" aria-hidden="true"></span><span>{pw.ack}</span></label></section><div id="ai-workflow-audios"></div><textarea id="ai-workflow-json-preview" rows="9" readonly spellcheck="false" aria-label={t.preview} hidden></textarea></section>
   <div id="ai-workflow-error-box" class="ai-flow-tile" role="alert" hidden><label for="ai-workflow-error">{t.error}</label><textarea id="ai-workflow-error" rows="3" readonly></textarea><span id="ai-workflow-copy-status" role="status" aria-live="polite"></span></div>
  </div>
  <footer class="json-footer">

@@ -118,11 +118,11 @@ test('comment resolution uses a keyboard-accessible slide toggle, persists and r
  await setup(page);await addComment(page,undefined,'Please check the lighting.');const comment=page.locator('.board-comment'),toggle=comment.getByRole('switch',{name:'Erledigt',exact:true});await expect(toggle).not.toBeChecked();await expect(comment.locator('.board-switch-track')).toBeVisible();await toggle.focus();await page.keyboard.press('Space');await expect(toggle).toBeChecked();await page.locator('#storyboard-save').click();await expect(page.locator('#storyboard-dialog')).toBeVisible();await page.locator('#storyboard-close').click();await page.locator('#open-storyboard').click();await expect(toggle).toBeChecked();await comment.getByRole('button',{name:'Kommentar bearbeiten',exact:true}).click();await page.locator('#storyboard-field-text').fill('Please also check the background.');await page.locator('#storyboard-field-apply').click();await expect(toggle).not.toBeChecked();await page.locator('#storyboard-feedback').click();const json=await copied(page);expect(json.board.comments[0].resolved).toBe(false);expect(json.board.comments[0].text).toBe('Please also check the background.');
 });
 test('project fields are separate responsive tiles with working edit actions and full-width story and comments',async({page})=>{
- await setup(page);const panel=page.getByRole('tabpanel'),grid=panel.locator('.board-project-grid');await expect(grid.locator(':scope>.board-project-tile')).toHaveCount(9);
+ await setup(page);const panel=page.getByRole('tabpanel'),grid=panel.locator('.board-project-grid');await expect(grid.locator(':scope>.board-project-tile')).toHaveCount(11);
  for(const key of ['title','story','message','audience','language','style','format','duration']){const tile=grid.locator(`[data-project-field=${key}]`);await expect(tile).toHaveCount(1);await expect(tile.locator(`[data-board-edit=${key}]`)).toHaveCount(1);expect(await tile.evaluate(e=>getComputedStyle(e).borderTopStyle)).toBe('solid');}
  const story=await grid.locator('[data-project-field=story]').boundingBox(),comments=await grid.locator('.board-comments').boundingBox(),container=await grid.boundingBox();expect(story!.width).toBeCloseTo(container!.width,0);expect(comments!.width).toBeCloseTo(container!.width,0);
  const audience=await grid.locator('[data-project-field=audience]').boundingBox();expect(audience!.width).toBeLessThan(container!.width);expect(await grid.evaluate(e=>e.scrollWidth)).toBeLessThanOrEqual(await grid.evaluate(e=>e.clientWidth));
- await editText(page,'message','A clear new message.');await expect(grid.locator('[data-project-field=message]')).toContainText('A clear new message.');await expect(grid.locator(':scope>.board-project-tile')).toHaveCount(9);
+ await editText(page,'message','A clear new message.');await expect(grid.locator('[data-project-field=message]')).toContainText('A clear new message.');await expect(grid.locator(':scope>.board-project-tile')).toHaveCount(11);
 });
 test('all comment sections use icon-only add overlays and delete buttons with confirmation',async({page})=>{
  await setup(page);await page.locator('[data-board-tab=characters]').click();await page.getByRole('button',{name:'Charakter hinzufügen',exact:true}).click();await page.locator('#storyboard-field-text').fill('Luna');await page.locator('#storyboard-field-apply').click();
@@ -337,4 +337,13 @@ test('SceneScript toolbar action requires the whole plan to be approved and rese
  await approveResources(page);await approveTab(page,'shots');await expect(script).toBeDisabled();
  await page.locator('#storyboard-approve').click();await expect(script).toBeEnabled();
  await page.locator('[data-board-tab=story]').click();await editText(page,'title','Changed plan');await expect(script).toBeDisabled();
+});
+
+test('production tiles edit render type, sound switches and concrete scene sound-effect tasks',async({page})=>{
+ await setup(page);await page.locator('[data-board-edit=render-mode]').click();await page.locator('#storyboard-field-select').selectOption('3d');await page.locator('#storyboard-field-apply').click();
+ await page.locator('[data-board-edit=sound-plan]').click();const toggles=page.locator('#storyboard-field-choices [role=switch]');await expect(toggles).toHaveCount(3);for(const toggle of await toggles.all())await toggle.check();await page.locator('#storyboard-field-apply').click();
+ await page.locator('[data-board-tab=shots]').click();const shot=fixture().storyboard.shots[0];await editText(page,shot.id+'-sound-effects','Gentle notification beep\nBottle on conveyor belt');
+ await page.locator('#storyboard-save').click();await page.locator('#storyboard-close').click();const download=page.waitForEvent('download');await page.locator('#save-project').click();
+ const saved=JSON.parse(await readFile((await(await download).path())!,'utf8'));expect(saved.storyboard.production).toEqual({renderMode:'3d',dialogue:true,music:true,sfx:true});expect(saved.storyboard.shots[0].soundEffects).toEqual(['Gentle notification beep','Bottle on conveyor belt']);expect(saved.storyboard.approved).toBe(false);
+ await page.locator('#open-storyboard').click();await expect(page.locator('.board-production-tasks')).toContainText('Gentle notification beep');
 });

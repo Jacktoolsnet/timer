@@ -3324,6 +3324,7 @@
         "comments"
       ],
       "properties": {
+        "soundEffects": {"type":"array","maxItems":30,"items":{"type":"string","minLength":1,"maxLength":1000}},
         "id": {
           "type": "string",
           "minLength": 1,
@@ -3417,6 +3418,7 @@
         }
       }
     },
+    "BoardProduction": {"type":"object","additionalProperties":false,"required":["renderMode","dialogue","music","sfx"],"properties":{"renderMode":{"enum":["auto","2d","3d","mixed"]},"dialogue":{"type":"boolean"},"music":{"type":"boolean"},"sfx":{"type":"boolean"}}},
     "Storyboard": {
       "type": "object",
       "additionalProperties": false,
@@ -3438,6 +3440,7 @@
         "approved"
       ],
       "properties": {
+        "production": {"$ref": "#/$defs/BoardProduction"},
         "format": {"enum": ["landscape", "portrait", "square"], "default": "landscape"},
         "id": {
           "type": "string",

@@ -32,19 +32,18 @@ video, simulations or 3D. A scene camera can visit comic panels, pause and zoom.
 Self-contained: no website/schema download needed. Read §§1–4 first, then needed
 features; §11 defines every field and §12 gives complete JSON examples.
 
-Optional planning: Project.storyboard stores a separate plan, never rendered. It can
-contain the whole story, target format, recurring characters/objects, settings, sketches
-and shots. Character/object tabs share board.characters: kind="character" or "object";
-shot.characters references either kind by ID. Storyboard format is planning-only and does not change Project.format.
-Use the Storyboard dialog’s separate instructions and feedback JSON for revisions;
-its envelope is NOT an executable Project. Preserve IDs, revision and user comments.
-Only users resolve comments and approve characters, settings, shots and plans. Approval does not generate video.
-When asked to generate a video from an approved plan, follow it and this specification;
-preserve its storyboard data and never silently replace an existing video. Omit
-storyboard (default null) for direct video creation. Plans allow at most 25 MiB total,
-100 images (8 MiB each); image references and subject IDs must resolve inside the plan.
-API results may reuse storyboard.images via assets[id]={name}; data is restored locally.
-A missing thumbnail can use {name} for a unique known raster. Standalone files must embed data.
+Optional planning: Project.storyboard is a non-rendered plan, not an executable Project.
+Preserve IDs, revision, user comments and storyboard data. Only users resolve comments
+and approve plans. board.characters stores kind="character" or "object"; shot.characters
+references either. setting.objects links fixed objects. Follow board.production and the
+approved story; 3d requires real models, actor animation and 3D cameras, not image slides.
+shot.soundEffects are pending SFX descriptions, not audible tracks. Dialogue needs
+Scene.narration text/speaker; music needs enabled Project.music. Speech files are a
+separate explicit generation step. Never pretend missing audio was produced.
+Storyboard.format is planning-only. Plans: 25 MiB, 100 images (8 MiB each), valid references.
+API-only: assets[id]={name} may reuse known storyboard images; missing thumbnails may
+use a unique known raster name. Standalone files must embed data. No invented Base64.
+Omit storyboard (default null) for direct video creation.
 
 Authoring workflow:
 - Reuse the user's topic, audience, aspect ratio, style and desired duration.

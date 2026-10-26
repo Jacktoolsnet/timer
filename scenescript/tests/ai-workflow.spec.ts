@@ -417,3 +417,15 @@ test('fully approved items without overall storyboard approval explain why Scene
  await expect(page.locator('#storyboard-script-open')).toBeDisabled();await expect(page.locator('#storyboard-script-action')).toHaveAttribute('title',/Also approve the whole storyboard/);
  await page.locator('#storyboard-approve').click();await expect(page.locator('#storyboard-script-open')).toBeEnabled();
 });
+
+test('3D and sound requirements reach the model, mismatches need explicit acknowledgement and pending tasks persist',async({page})=>{
+ const p=fixture();p.storyboard!.production={renderMode:'3d',dialogue:true,music:true,sfx:true};p.storyboard!.shots[0].soundEffects=['A short notification beep'];
+ await setup(page,p);let calls=0,voiceCalls=0;page.on('request',r=>{if(r.method()==='POST'&&r.url().includes('api.elevenlabs.io'))voiceCalls++;});
+ await page.route('https://api.openai.com/v1/responses',async r=>{if(r.request().method()==='OPTIONS'){await r.fulfill({headers:cors});return;}calls++;const body=r.request().postDataJSON();for(const text of ['Binding production requirements','real 3D characters','NOT flat scene replacements','Scene.narration.text','enabled Project.music'])expect(body.instructions).toContain(text);
+  const project=JSON.parse(body.input[0].content[0].text).project;await r.fulfill({headers:cors,json:response(JSON.stringify(project))});});
+ await page.locator('#open-ai-workflow').click();await page.locator('#ai-workflow-action').selectOption('script');await generate(page);
+ await expect(page.locator('#ai-workflow-production-check')).toBeVisible();await expect(page.locator('#ai-workflow-production-issues')).toContainText('Real 3D requested');await expect(page.locator('#ai-workflow-production-issues')).toContainText('Dialogue requested');await expect(page.locator('#ai-workflow-production-issues')).toContainText('Music requested');await expect(page.locator('#ai-workflow-production-issues')).toContainText('A short notification beep');
+ await expect(page.locator('#ai-workflow-apply')).toBeDisabled();await page.locator('#ai-workflow-production-ack').check();await expect(page.locator('#ai-workflow-apply')).toBeEnabled();await page.locator('#ai-workflow-apply').click();
+ const saved=await exportProject(page);expect(saved.storyboard!.production).toEqual(p.storyboard!.production);expect(saved.storyboard!.shots[0].soundEffects).toEqual(['A short notification beep']);expect(calls).toBe(1);expect(voiceCalls).toBe(0);
+ await page.locator('#open-storyboard').click();await expect(page.locator('.board-production-tasks')).toContainText('A short notification beep');
+});
