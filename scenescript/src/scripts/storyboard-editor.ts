@@ -1,3 +1,4 @@
+import {videoLanguageForLocale,videoLanguageOptions} from '../lib/video-languages';
 import {aiLanguageInstruction} from '../lib/ai-language';
 import {openAiWorkflow} from './ai-workflow';
 import type {Project} from '../lib/model';
@@ -114,7 +115,10 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
   const root=$('content');root.dataset.tab=tab;root.setAttribute('aria-labelledby','storyboard-tab-'+tab);root.replaceChildren();
   if(tab==='story'){
    const card=node('div');card.className='board-project-grid';field(card,t.fieldTitle,board.title,textConfig(t.fieldTitle,board.title,(b,v)=>{b.title=String(v);},200),'title');
-   for(const key of ['story','message','audience','language','style'] as const)field(card,t[key],board[key],textConfig(t[key],board[key],(b,v)=>{b[key]=String(v);},key==='story'?30000:key==='language'?200:10000),key);
+   for(const key of ['story','message','audience','language','style'] as const){
+    if(key==='language'){const options=videoLanguageOptions(document.documentElement.lang,board.language);field(card,t.language,options.find(([value])=>value===board.language)?.[1]??board.language,{label:t.language,value:board.language,kind:'select',options,apply:(b,v)=>{b.language=String(v);}},key);}
+    else field(card,t[key],board[key],textConfig(t[key],board[key],(b,v)=>{b[key]=String(v);},key==='story'?30000:10000),key);
+   }
    field(card,t.format,t[board.format],{label:t.format,value:board.format,kind:'select',options:(['landscape','portrait','square'] as const).map(f=>[f,t[f]]),apply:(b,v)=>{b.format=v as BoardFormat;}},'format');
    field(card,t.duration,board.duration+' s',{label:t.duration,value:String(board.duration),kind:'number',apply:(b,v)=>{b.duration=Number(v);}},'duration');
    commentList(card,board.comments);
@@ -151,7 +155,7 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
   }
  }
  const close=()=>{if(dirty&&!window.confirm(t.unsaved))return;session++;dialog.close();};
- document.getElementById('open-storyboard')!.addEventListener('click',()=>{stop();origin=context();board=origin.project.storyboard?structuredClone(origin.project.storyboard):newStoryboard(origin.project.title,origin.project.format);dirty=false;tab='story';selectedItems={};session++;clear();$<HTMLTextAreaElement>('json').value='';render();dialog.showModal();});
+ document.getElementById('open-storyboard')!.addEventListener('click',()=>{stop();origin=context();board=origin.project.storyboard?structuredClone(origin.project.storyboard):newStoryboard(origin.project.title,origin.project.format,videoLanguageForLocale(document.documentElement.lang));dirty=false;tab='story';selectedItems={};session++;clear();$<HTMLTextAreaElement>('json').value='';render();dialog.showModal();});
  $('ai-open').addEventListener('click',()=>{try{check();const source=board,rev=board.revision,ticket=session;openAiWorkflow({project:{...origin.project,storyboard:board},draft:true,valid:()=>{try{check();return board===source&&board.revision===rev&&session===ticket;}catch{return false;}},apply:next=>{check();board=next.storyboard!;dirty=true;clear();render();}});}catch(e){error(e);}});
  $('close').addEventListener('click',close);dialog.addEventListener('cancel',e=>{e.preventDefault();close();});
  const tabs=Array.from($('tabs').querySelectorAll<HTMLButtonElement>('[role=tab]'));

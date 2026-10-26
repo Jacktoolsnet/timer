@@ -57,7 +57,7 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void){
  });
  start.addEventListener('click',async()=>{
   if(active||!consent.checked)return;clearPreview();$('error-box').hidden=true;
-  const controller=new AbortController();active=controller;busy(true);const kind=action.value,source=ctx.project,sourceBoard=planningBoard(source);let key='';
+  const controller=new AbortController();active=controller;busy(true);const kind=action.value,source=ctx.project,sourceBoard=planningBoard(source,document.documentElement.lang);let key='';
   const files:Parameters<typeof attachSpeechFiles>[2]=[];let selectedJobs:SpeechJob[]=[];
   try{
    check();

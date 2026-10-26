@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {demoProject} from '../src/lib/model.ts';
 import {newStoryboard,exportStoryboard} from '../src/lib/storyboard.ts';
-import {boardManifest,projectManifest,inputJson,acceptPlanning,acceptScript,acceptImage,boardReferences,requireApprovedBoard} from '../src/lib/ai-workflow.ts';
+import {boardManifest,projectManifest,inputJson,acceptPlanning,acceptScript,acceptImage,boardReferences,requireApprovedBoard,imagePrompt,planningBoard} from '../src/lib/ai-workflow.ts';
 const pixel='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aZ1sAAAAASUVORK5CYII=';
 function project(){const p=demoProject(),b=newStoryboard('Test');b.comments=[{id:'comment',text:'Keep this',resolved:true,reply:'Done'}];b.images.ref={name:'ref.png',data:pixel};b.characters=[{id:'hero',kind:'character',name:'Hero',description:'Robot',image:'ref',status:'approved',comments:[]}];b.shots=[{id:'shot',title:'Shot',duration:3,action:'Move',camera:'Wide',audio:'',image:'ref',characters:['hero'],settings:[],status:'approved',comments:[]}];b.approved=true;p.storyboard=b;return p;}
 test('manifest export strips media data without mutating source',()=>{
@@ -30,4 +30,18 @@ test('AI reply language is fixed by the UI locale, with independent video langua
  const {aiLanguageInstruction}=await import('../src/lib/ai-language.ts');
  for(const [code,name]of [['en','English'],['de','German'],['es','Spanish'],['fr','French']]){const instruction=aiLanguageInstruction(code);assert.ok(instruction.startsWith(`App reply language: ${name} (${code}).`));assert.match(instruction,/comment.reply/);assert.match(instruction,/video\/content language separate/);assert.match(instruction,/Never translate JSON property names/);assert.match(instruction,/Do not translate existing user-written/);}
  assert.equal(aiLanguageInstruction('de-DE'),aiLanguageInstruction('de'));assert.equal(aiLanguageInstruction('unknown'),aiLanguageInstruction('en'));
+});
+
+
+test('cover and sketch generation retain the explicitly chosen video language',()=>{
+ const p=project();p.storyboard!.language='English';
+ for(const target of [null,{kind:'characters' as const,id:'hero'}])assert.match(imagePrompt(p,target,''),/"language":"English"/);
+});
+
+
+test('new planning boards inherit app language without changing existing storyboard language',async()=>{
+ const {videoLanguageForLocale,videoLanguageOptions}=await import('../src/lib/video-languages.ts');
+ for(const [locale,language]of [['en','English'],['de','German'],['es','Spanish'],['fr','French']]){const p=project();p.storyboard=null;assert.equal(planningBoard(p,locale).language,language);assert.equal(videoLanguageForLocale(locale),language);}
+ const p=project();p.storyboard!.language='Japanese';assert.equal(planningBoard(p,'de').language,'Japanese');
+ const options=videoLanguageOptions('de','Deutsch');assert.equal(options.find(([,label])=>label==='Deutsch')?.[0],'Deutsch');assert.equal(options.filter(([,label])=>label==='Deutsch').length,1);assert.ok(videoLanguageOptions('fr','Portuguese (Brazil)').some(([value])=>value==='Portuguese (Brazil)'));assert.ok(videoLanguageOptions('en','').some(([value])=>value===''));assert.equal(videoLanguageForLocale('de-DE'),'German');
 });

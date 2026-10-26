@@ -45,7 +45,7 @@ export function invalidateStoryboardApprovals(board:Storyboard,target?:BoardRevi
  const item=board[target.kind].find(item=>item.id===target.id);if(item)item.status='draft';
  if(target.kind!=='shots'){const kind=target.kind;for(const shot of board.shots)if(shot[kind].includes(target.id))shot.status='draft';}
 }
-export function newStoryboard(title:string,format:BoardFormat='landscape'):Storyboard{return {format,id:crypto.randomUUID(),revision:0,title,story:'',message:'',audience:'',language:'English',style:'',duration:30,comments:[],characters:[],settings:[],shots:[],images:{},approved:false};}
+export function newStoryboard(title:string,format:BoardFormat='landscape',language='English'):Storyboard{return {format,id:crypto.randomUUID(),revision:0,title,story:'',message:'',audience:'',language,style:'',duration:30,comments:[],characters:[],settings:[],shots:[],images:{},approved:false};}
 export function exportStoryboard(board:Storyboard,includeImages=false){const b=structuredClone(board);if(!includeImages)for(const image of Object.values(b.images))delete image.data;return JSON.stringify({kind:'scenescript-storyboard',version:'1.0',board:b},null,2);}
 /** Import only planning data. User feedback is authoritative; never mutate or replace executable scenes. */
 export function importStoryboard(input:string,current:Storyboard|null):Storyboard{
