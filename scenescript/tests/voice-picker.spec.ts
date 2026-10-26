@@ -28,3 +28,11 @@ test('cancel keeps assignments and approvals; explicit removal requires apply',a
 test('cancelled key unlock does not generate speech or assign a voice',async({page})=>{
  await setup(page);await page.evaluate(()=>document.querySelector<HTMLDialogElement>('#storyboard-dialog')!.close());await page.locator('#open-api-vault').click();await page.locator('#api-vault-lock').click();await page.locator('#api-vault-close').click();await page.locator('#open-storyboard').click();await openVoice(page,'characters','characters-robot');await page.locator('#voice-picker-load').click();await expect(page.locator('#api-vault-dialog')).toBeVisible();await page.locator('#api-vault-close').click();await expect(page.locator('#voice-picker-error')).toHaveValue(/Unlock/);await page.locator('#voice-picker-close').click();await expect(page.locator('.board-card')).toContainText('No voice assigned');
 });
+
+test('stale voice selection cannot overwrite a changed project',async({page})=>{
+ await setup(page);await openVoice(page,'characters','characters-robot');await page.locator('#voice-picker-load').click();await page.locator('[data-voice-id=MaleDE]').click();await page.evaluate(()=>{const input=document.querySelector<HTMLInputElement>('#project-title')!;input.value='Concurrent change';input.dispatchEvent(new Event('input',{bubbles:true}));});await page.locator('#voice-picker-apply').click();await expect(page.locator('#voice-picker-error')).toHaveValue(/changed/);await page.locator('#voice-picker-close').click();await expect(page.locator('.board-card')).toContainText('No voice assigned');
+});
+
+test('the speech workflow uses the same grouped picker for its fallback voice',async({page})=>{
+ await setup(page);await page.evaluate(()=>document.querySelector<HTMLDialogElement>('#storyboard-dialog')!.close());await page.locator('#open-ai-workflow').click();await page.locator('#ai-workflow-action').selectOption('speech');await page.locator('#ai-workflow-load-voices').click();await page.locator('#voice-picker-load').click();await page.locator('[data-voice-id=MaleDE]').click();await page.locator('#voice-picker-apply').click();await expect(page.locator('#ai-workflow-voice')).toHaveValue('MaleDE');await expect(page.locator('#ai-workflow-dialog')).toBeVisible();
+});

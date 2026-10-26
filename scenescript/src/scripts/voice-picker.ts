@@ -23,11 +23,11 @@ export function installVoicePicker(){
   if(!matches.length)groups.append(node('p',t.empty));$('more').hidden=!next||voices.length>=1000;$('status').textContent=voices.length>=1000?t.limit:`${matches.length} / ${voices.length}`;
  }
  const finish=(value?:VoiceAssignment|null)=>{const resolve=done;done=undefined;session++;active?.abort();active=undefined;dialog.close();voices=[];next=null;resolve?.(value);};
- picker=ctx=>{if(dialog.open)return Promise.resolve(undefined);context=ctx;voices=[];next=null;selected=ctx.current??null;session++;search.value='';filter.value=videoLanguageCode(ctx.language)?'match':'all';$('language').textContent=t.languageHint.replace('{language}',ctx.language||'—');$('error-box').hidden=true;busy(false);render();dialog.showModal();return new Promise(resolve=>done=resolve);};
+ picker=ctx=>{if(dialog.open)return Promise.resolve(undefined);context=ctx;voices=[];next=null;selected=ctx.current??null;session++;search.value='';filter.value=videoLanguageCode(ctx.language)?'match':'all';const code=videoLanguageCode(ctx.language),language=code?new Intl.DisplayNames([document.documentElement.lang||'en'],{type:'language'}).of(code):ctx.language;$('language').textContent=t.languageHint.replace('{language}',language||'—');$('error-box').hidden=true;busy(false);render();dialog.showModal();return new Promise(resolve=>done=resolve);};
  async function load(more:boolean){
   if(active||more&&!next)return;const controller=new AbortController(),ticket=session;active=controller;busy(true);$('error-box').hidden=true;$('status').textContent=t.busy;let key='';
   try{check();key=await requestApiKey('elevenlabs',controller.signal);check();const page=await listVoicePage(key,controller.signal,more?next!:'');controller.signal.throwIfAborted();check();if(ticket!==session)return;voices=[...new Map([...(more?voices:[]),...page.voices].map(v=>[v.id,v])).values()].slice(0,1000);next=page.next;render();}
-  catch(e){if(ticket===session&&!controller.signal.aborted){$('error-box').hidden=false;$<HTMLTextAreaElement>('error').value=e instanceof AiApiError?(e.code==='size'?errors.sizeError:errors[e.code]):e instanceof Error&&e.message===t.stale?t.stale:t.locked;}}
+  catch(e){if(ticket===session&&!controller.signal.aborted){$('status').textContent='';$('error-box').hidden=false;$<HTMLTextAreaElement>('error').value=e instanceof AiApiError?(e.code==='size'?errors.sizeError:errors[e.code]):e instanceof Error&&e.message===t.stale?t.stale:t.locked;}}
   finally{key='';if(ticket===session){active=undefined;busy(false);}}
  }
  $('load').addEventListener('click',()=>void load(false));$('more').addEventListener('click',()=>void load(true));filter.addEventListener('change',render);search.addEventListener('input',render);
