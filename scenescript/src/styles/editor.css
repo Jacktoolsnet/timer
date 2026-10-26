@@ -1270,3 +1270,7 @@ body.recording .comic-edit-overlay{display:none}
 #storyboard-delete-image-dialog #storyboard-delete-image-apply{background:#b83232;color:#fff;border-color:#b83232}
 #storyboard-delete-image-dialog button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 #storyboard-dialog .board-delete-image{color:#cf4545}
+
+#storyboard-delete-image-dialog button{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;flex:0 0 auto;padding:9px}
+#storyboard-delete-image-dialog button svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#storyboard-delete-image-dialog #storyboard-delete-image-cancel{margin-right:auto}

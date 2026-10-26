@@ -51,3 +51,31 @@ test('speaker voices resolve stable subject IDs or unique names, with explicit f
  assert.equal(speechVoice(p.storyboard,'hero','Fallback'),'HeroVoice');assert.equal(speechVoice(p.storyboard,'Hero','Fallback'),'HeroVoice');assert.equal(speechVoice(p.storyboard,'set',''),'StageVoice');assert.equal(speechVoice(p.storyboard,'Other','Fallback'),'Fallback');assert.throws(()=>speechVoice(p.storyboard,'Other',''),/assign/);
  p.storyboard!.settings[0].name='Hero';assert.throws(()=>speechVoice(p.storyboard,'Hero','Fallback'),/ambiguous/);assert.equal(speechVoice(p.storyboard,'hero','Fallback'),'HeroVoice');p.storyboard!.settings[0].id='hero';assert.throws(()=>speechVoice(p.storyboard,'hero','Fallback'),/ambiguous/);assert.equal(speechVoice(p.storyboard,'characters:hero',''),'HeroVoice');assert.equal(speechVoice(p.storyboard,'settings:hero',''),'StageVoice');assert.equal(voiceGender('neutral'),'neutral');assert.equal(voiceGender('not set'),'unknown');
 });
+
+test('reference prompts isolate a character, object or setting instead of requesting a full storyboard',()=>{
+ const p=project(),b=p.storyboard!;b.story='UNRELATED_WHOLE_PLOT';b.title='UNRELATED_PROJECT_HEADING';
+ b.characters.push({id:'prop',kind:'object',name:'PROP_NAME',description:'PROP_VISUAL',comments:[],image:null,status:'draft'});
+ b.settings=[{id:'place',name:'PLACE_NAME',description:'PLACE_VISUAL',comments:[],image:null,status:'draft'}];
+ b.shots[0].action='UNRELATED_SCENE_ACTION';b.shots[0].audio='AUDIO_NOT_FOR_IMAGE';
+ b.characters[0].comments=[{id:'detail',text:'Copper eyes',reply:'Keep both eyes visible',resolved:true}];
+ const hero=imagePrompt(p,{kind:'characters',id:'hero'},'Use soft light');
+ for(const text of ['ONLY the selected character','One character, one pose, one view','Robot','Copper eyes','Keep both eyes visible','Use soft light','No panels','no captions'])assert.ok(hero.toLowerCase().includes(text.toLowerCase()),text);
+ for(const text of ['UNRELATED_WHOLE_PLOT','UNRELATED_PROJECT_HEADING','UNRELATED_SCENE_ACTION','AUDIO_NOT_FOR_IMAGE','PROP_VISUAL','PLACE_VISUAL','base64','approved','voice'])assert.ok(!hero.includes(text),text);
+ const object=imagePrompt(p,{kind:'characters',id:'prop'},'');assert.match(object,/ONLY the selected object/);assert.match(object,/PROP_VISUAL/);assert.doesNotMatch(object,/Robot|PLACE_VISUAL/);
+ const setting=imagePrompt(p,{kind:'settings',id:'place'},'');assert.match(setting,/ONLY the selected setting/);assert.match(setting,/PLACE_VISUAL/);assert.doesNotMatch(setting,/Robot|PROP_VISUAL|UNRELATED_SCENE_ACTION/);
+});
+test('scene reference includes just the selected moment and its linked subjects, without audio or other scenes',()=>{
+ const p=project(),b=p.storyboard!;b.story='WHOLE_PLOT_NOT_NEEDED';b.characters.push({id:'other',kind:'character',name:'OTHER_CHARACTER',description:'Not present',image:null,status:'draft',comments:[]});
+ b.settings=[{id:'linked',name:'Hangar',description:'HANGAR_VISUAL',image:null,status:'draft',comments:[]},{id:'unrelated',name:'UNRELATED_PLACE',description:'Not here',image:null,status:'draft',comments:[]}];
+ b.shots[0].settings=['linked'];b.shots[0].audio='UNRELATED_AUDIO';b.shots.push({...b.shots[0],id:'other-shot',action:'OTHER_SCENE_ACTION'});
+ const prompt=imagePrompt(p,{kind:'shots',id:'shot'},'');
+ for(const text of ['ONE single-frame','Robot','HANGAR_VISUAL','Move','Wide'])assert.ok(prompt.includes(text),text);
+ for(const text of ['OTHER_CHARACTER','OTHER_SCENE_ACTION','UNRELATED_AUDIO','UNRELATED_PLACE','WHOLE_PLOT_NOT_NEEDED','base64'])assert.ok(!prompt.includes(text),text);
+ assert.throws(()=>imagePrompt(p,{kind:'characters',id:'missing'},''),/missing image target/);
+});
+test('image language guidance does not request planning text or JSON replies',async()=>{
+ const {aiImageLanguageInstruction}=await import('../src/lib/ai-language.ts');
+ for(const [locale,name]of [['de','German'],['en','English'],['es','Spanish'],['fr','French']]){
+  const text=aiImageLanguageInstruction(locale);assert.ok(text.includes(name));assert.match(text,/Produce an image, not a written reply/);assert.match(text,/specified video\/content language/);assert.doesNotMatch(text,/comment.reply|Always write AI-authored replies/);
+ }
+});

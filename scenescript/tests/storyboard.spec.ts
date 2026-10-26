@@ -284,6 +284,13 @@ test('image deletion uses its own confirmation overlay, preserves shared assets 
  await page.locator('[data-board-tab=shots]').click();
  const remove=page.locator('.board-image-field .board-delete-image'),modal=page.locator('#storyboard-delete-image-dialog');
  await remove.click();await expect(modal).toBeVisible();await expect(page.locator('#storyboard-delete-image-cancel')).toBeFocused();
+ const cancel=page.locator('#storyboard-delete-image-cancel'),confirm=page.locator('#storyboard-delete-image-apply');
+ await expect(cancel).toHaveAttribute('title','Abbrechen');await expect(confirm).toHaveAttribute('aria-label','Bild löschen');
+ await expect(cancel.locator('svg')).toHaveCount(1);await expect(confirm.locator('svg')).toHaveCount(1);
+ await expect(cancel).toHaveText('');await expect(confirm).toHaveText('');
+ expect((await cancel.boundingBox())!.x).toBeLessThan((await confirm.boundingBox())!.x);
+ const footer=(await modal.locator('footer').boundingBox())!;expect((await cancel.boundingBox())!.x-footer.x).toBeLessThan(25);
+
  await page.locator('#storyboard-delete-image-cancel').click();await expect(modal).toBeHidden();await expect(remove).toBeFocused();await expect(page.locator('.board-sketch')).toHaveCount(1);
  await remove.click();await page.keyboard.press('Escape');await expect(modal).toBeHidden();await expect(page.locator('.board-sketch')).toHaveCount(1);
  await remove.click();await page.locator('#storyboard-delete-image-apply').click();await expect(modal).toBeHidden();await expect(page.locator('.board-sketch')).toHaveCount(0);await expect(remove).toHaveCount(0);
