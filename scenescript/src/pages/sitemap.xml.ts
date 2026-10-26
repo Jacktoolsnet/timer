@@ -1,6 +1,15 @@
-import {languages} from '../lib/i18n';
-import {sitemapResponse} from '../lib/sitemap';
-export function GET({site}:{site:URL|undefined}){
- if(!site)throw new Error('Missing site');
- return sitemapResponse(['','ai/'].flatMap(route=>languages.map(lang=>({url:new URL('/'+lang+'/'+route,site),alternatives:[...languages.map(language=>({language,url:new URL('/'+language+'/'+route,site)})),{language:'x-default',url:new URL('/en/'+route,site)}]}))));
+import { languages } from '../lib/i18n';
+import { sitemapResponse } from '../lib/sitemap';
+export function GET({ site }: { site: URL | undefined }) {
+  if (!site) throw new Error('Configure astro.config.mjs site for the sitemap.');
+  // Include only canonical, indexable pages, including usage guides, but not redirects or noindex legal/privacy pages.
+  const modes = ['', 'ai', 'usage'];
+  const url = (language: string, mode: string) => new URL('/' + language + '/' + (mode ? mode + '/' : ''), site);
+  return sitemapResponse(modes.flatMap(mode => languages.map(language => ({
+    url: url(language, mode),
+    alternatives: [
+      ...languages.map(alternative => ({ language: alternative, url: url(alternative, mode) })),
+      { language: 'x-default', url: url('en', mode) },
+    ],
+  }))));
 }

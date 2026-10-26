@@ -11,6 +11,6 @@ const t=dictionaries[lang];
 const safety={title:lang==='es'?'Seguridad y comodidad':'Sécurité et confort',paragraphs:[t.firstHint,t.safePlace,t.holdsHint],items:t.safetyDetails};
 ---
 {lang==='de'||lang==='en'?<Original lang={lang}/>:
- <Layout lang={lang} title={title} description={title+' · Jacktools Breathe'} route="usage" noindex legal>
+ <Layout lang={lang} title={title} description={title+' · Jacktools Breathe'} route="usage" legal>
   <UsageTranslation tool="breathe" lang={lang} safety={safety}/>
  </Layout>}

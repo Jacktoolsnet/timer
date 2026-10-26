@@ -5,7 +5,7 @@ interface Props {lang:'de'|'en'}
 const {lang}=Astro.props,de=lang==='de';
 const title=de?'Nutzungshinweise':'Usage notes';
 ---
-<Layout lang={lang} title={title} description={title} route="usage" noindex legal>
+<Layout lang={lang} title={title} description={title} route="usage" legal>
  <article class="legal-page"><h1>{title}</h1><UsageLanguageNav lang={lang}/>
  <p>{de?'SceneScript erstellt animierte Szenen für Videoexport und Bildschirmaufnahmen. MP4-/WebM-Export erfolgt lokal im Browser; das Tool ist kein Screenrecorder.':'SceneScript creates animated scenes for video export and screen recording. MP4/WebM export runs locally in your browser; the tool is not a screen recorder.'}</p>
  <h2>{de?'Projekt erstellen und sichern':'Create and save a project'}</h2>

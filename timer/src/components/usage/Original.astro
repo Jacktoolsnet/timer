@@ -6,7 +6,7 @@ const { lang } = Astro.props;
 const de = lang === 'de';
 const title = de ? 'Nutzungshinweise' : 'Usage notes';
 ---
-<Layout lang={lang} title={title} description={de ? 'Hinweise zur kostenlosen Nutzung und den technischen Grenzen des JackTools Timers.' : 'Information about free use and the technical limitations of JackTools Timer.'} route="usage" noindex legal>
+<Layout lang={lang} title={title} description={de ? 'Hinweise zur kostenlosen Nutzung und den technischen Grenzen des JackTools Timers.' : 'Information about free use and the technical limitations of JackTools Timer.'} route="usage" legal>
   <article class="legal-page">
     <p class="eyebrow">JACKTOOLS.NET / {title.toUpperCase()}</p><h1>{title}</h1>
     <UsageLanguageNav lang={lang}/>

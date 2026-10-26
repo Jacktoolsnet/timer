@@ -4,16 +4,18 @@ All nine projects build `dist/sitemap.xml`. Deploy the complete `dist/` contents
 (including `robots.txt`) to the corresponding domain root:
 
 - https://jacktools.net/sitemap.xml — company homepage only
-- https://timer.jacktools.net/sitemap.xml — 4 languages × timer/Pomodoro/training
-- https://clock.jacktools.net/sitemap.xml — 4 languages
-- https://stopwatch.jacktools.net/sitemap.xml — 4 languages
-- https://calculator.jacktools.net/sitemap.xml — 4 languages (not deployed)
-- https://breathe.jacktools.net/sitemap.xml — 4 languages
-- https://relax.jacktools.net/sitemap.xml — 4 languages
-- https://lava.jacktools.net/sitemap.xml — 4 languages (not deployed)
-- https://scenescript.jacktools.net/sitemap.xml — 4 languages × editor/AI guide (not deployed)
+- https://timer.jacktools.net/sitemap.xml — 4 languages × timer/Pomodoro/training/usage
+- https://clock.jacktools.net/sitemap.xml — 4 languages × tool/usage
+- https://stopwatch.jacktools.net/sitemap.xml — 4 languages × tool/usage
+- https://calculator.jacktools.net/sitemap.xml — 4 languages × tool/usage (not deployed)
+- https://breathe.jacktools.net/sitemap.xml — 4 languages × tool/usage
+- https://relax.jacktools.net/sitemap.xml — 4 languages × tool/usage
+- https://lava.jacktools.net/sitemap.xml — 4 languages × tool/usage (not deployed)
+- https://scenescript.jacktools.net/sitemap.xml — 4 languages × editor/AI guide/usage (not deployed)
 
-Noindex legal pages, redirects and 404 pages are intentionally excluded.
+Usage guides for all eight tools are indexable and included in all four languages.
+Legal/privacy pages, company usage notes, redirects and 404 pages remain noindex
+and are intentionally excluded.
 Tool sitemaps contain reciprocal language alternatives plus English x-default.
 All generators use `site` from Astro config, XML escaping and readable indentation.
 XML needs no visual stylesheet for Google. In a static deployment, nginx/Apache

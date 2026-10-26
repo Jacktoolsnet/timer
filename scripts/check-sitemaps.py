@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Validate built sitemaps and their canonical/indexable targets, without dependencies.
-Run after building all eight projects: python3 scripts/check-sitemaps.py
+Run after building all nine projects: python3 scripts/check-sitemaps.py
 """
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -23,7 +23,7 @@ class Metadata(HTMLParser):
         if tag == 'meta' and a.get('name') == 'robots':
             self.noindex = 'noindex' in a.get('content', '')
 
-for project, host, count in [('timer', 'timer.jacktools.net', 12), ('clock', 'clock.jacktools.net', 4), ('stopwatch', 'stopwatch.jacktools.net', 4), ('calculator', 'calculator.jacktools.net', 4), ('company', 'jacktools.net', 1), ('breathe', 'breathe.jacktools.net', 4), ('relax', 'relax.jacktools.net', 4), ('lava', 'lava.jacktools.net', 4), ('scenescript', 'scenescript.jacktools.net', 8)]:
+for project, host, count in [('timer', 'timer.jacktools.net', 16), ('clock', 'clock.jacktools.net', 8), ('stopwatch', 'stopwatch.jacktools.net', 8), ('calculator', 'calculator.jacktools.net', 8), ('company', 'jacktools.net', 1), ('breathe', 'breathe.jacktools.net', 8), ('relax', 'relax.jacktools.net', 8), ('lava', 'lava.jacktools.net', 8), ('scenescript', 'scenescript.jacktools.net', 12)]:
     dist = ROOT / project / 'dist'
     raw = (dist / 'sitemap.xml').read_bytes()
     assert raw.startswith(b'<?xml version="1.0" encoding="UTF-8"?>\n'), project
@@ -50,6 +50,15 @@ for project, host, count in [('timer', 'timer.jacktools.net', 12), ('clock', 'cl
                     assert urlsplit(link.get('href')).path.startswith('/en/'), url
         else:
             assert not alternatives
+    if project != 'company':
+        for language in ['de', 'en', 'es', 'fr']:
+            assert f'https://{host}/{language}/usage/' in urls, project
+        for language in ['de', 'en']:
+            for route in ['legal', 'privacy']:
+                assert Metadata((dist / language / route / 'index.html').read_text()).noindex, (project, language, route)
+    else:
+        for route in ['impressum', 'datenschutz', 'nutzungshinweise']:
+            assert Metadata((dist / route / 'index.html').read_text()).noindex, route
     robots = (dist / 'robots.txt').read_text()
     if project != 'company' or 'Disallow: /' not in robots:
         assert 'Sitemap: https://' + host + '/sitemap.xml' in robots, project

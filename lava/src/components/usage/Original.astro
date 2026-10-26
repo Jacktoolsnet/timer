@@ -6,7 +6,7 @@ interface Props {lang:'de'|'en'}
 const {lang}=Astro.props;
 const de=lang==='de', t=usageCopy[lang];
 ---
-<Layout lang={lang} title={t.title} description={de?'Bedienung, Einstellungen und technische Grenzen der Jacktools-Lavalampe.':'Controls, preferences and technical limits of the Jacktools lava lamp.'} route="usage" noindex legal>
+<Layout lang={lang} title={t.title} description={de?'Bedienung, Einstellungen und technische Grenzen der Jacktools-Lavalampe.':'Controls, preferences and technical limits of the Jacktools lava lamp.'} route="usage" legal>
  <article class="legal-page">
   <h1>{t.title}</h1>
   <UsageLanguageNav lang={lang}/>

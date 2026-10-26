@@ -6,7 +6,7 @@ import {dictionaries} from '../../lib/relax-i18n';
 interface Props {lang:'de'|'en'}
 const {lang}=Astro.props,t=dictionaries[lang];
 ---
-<Layout lang={lang} title={t.usage} description={t.usage} route="usage" noindex legal>
+<Layout lang={lang} title={t.usage} description={t.usage} route="usage" legal>
  <article class="legal-page"><h1>{t.usage}</h1><UsageLanguageNav lang={lang}/>
  <p>{lang==='de'?'Stand: 8. Oktober 2026. Die deutsche Fassung ist die Originalfassung; Englisch ist eine Übersetzung.':'Last updated: 8 October 2026. German is the original; English is a translation.'}</p>
  <h2>{t.purpose}</h2><p>{t.usageBody}</p>

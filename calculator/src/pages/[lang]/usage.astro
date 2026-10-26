@@ -5,7 +5,7 @@ import {usageText} from '../../lib/usage-text';
 export function getStaticPaths(){return languages.map(lang=>({params:{lang},props:{lang}}));}
 const {lang}=Astro.props as {lang:Language};const u=usageText[lang];
 ---
-<Layout lang={lang} title={u.title} description={u.description} route="usage" noindex legal>
+<Layout lang={lang} title={u.title} description={u.description} route="usage" legal>
 <article class="legal-page usage-page">
  <p class="eyebrow">JACKTOOLS.NET / {u.title.toUpperCase()}</p><h1>{u.title}</h1>
  <nav class="legal-nav" aria-label={u.title}>{languages.map(language=><a href={'/'+language+'/usage/'} lang={language} hreflang={language} aria-current={language===lang?'page':undefined}>{languageNames[language]}</a>)}</nav>

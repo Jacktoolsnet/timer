@@ -2,8 +2,8 @@ import { languages } from '../lib/i18n';
 import { sitemapResponse } from '../lib/sitemap';
 export function GET({ site }: { site: URL | undefined }) {
   if (!site) throw new Error('Configure astro.config.mjs site for the sitemap.');
-  // Include only canonical, indexable pages, not redirects or noindex legal pages.
-  const modes = ['', 'pomodoro', 'training'];
+  // Include only canonical, indexable pages, including usage guides, but not redirects or noindex legal/privacy pages.
+  const modes = ['', 'pomodoro', 'training', 'usage'];
   const url = (language: string, mode: string) => new URL('/' + language + '/' + (mode ? mode + '/' : ''), site);
   return sitemapResponse(modes.flatMap(mode => languages.map(language => ({
     url: url(language, mode),
