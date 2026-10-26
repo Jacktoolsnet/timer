@@ -1309,7 +1309,9 @@ API-Format: [offizielle OpenAI-Dokumentation](https://developers.openai.com/api/
 Die Storyboard-Toolbar enthält einen eigenen Icon-Button „SceneScript aus freigegebenem Storyboard
 erstellen“. Er ist nur aktiv, wenn alle Charaktere, Objekte, Kulissen und Szenen sowie das gesamte
 Storyboard freigegeben und alle Kommentare erledigt sind. Der Button speichert den aktuellen
-freigegebenen Plan ins Projekt und öffnet den KI-Workflow direkt mit der Aufgabe SceneScript.
+freigegebenen Plan ins Projekt und startet nach einer kurzen Daten-/Kostenbestätigung direkt
+mit dem empfohlenen Modell und Denkaufwand (aktuell GPT-6.1 Sol / high). Der Einstellungsdialog
+entfällt; der allgemeine KI-Einstieg bleibt für abweichende Modell-/Denkaufwand-Einstellungen erhalten.
 Auch im allgemeinen KI-Einstieg aus einem vollständig freigegebenen Storyboard ist diese Aufgabe
 jetzt wählbar. Vor der kostenpflichtigen Anfrage gilt weiterhin die Daten-/Kostenbestätigung.
 Das ausführbare Ergebnis wird zunächst validiert und als Vorschau angeboten, nicht automatisch

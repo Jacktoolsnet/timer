@@ -367,12 +367,22 @@ test('approved storyboard entry permits SceneScript selection and applies the fu
  const generated=await exportProject(page);expect(generated.title).toBe('Generated from open storyboard');expect(generated.scenes[0].duration).toBe(4);expect(generated.storyboard).toEqual(before.storyboard);
  await page.locator('#undo-project').click();expect((await exportProject(page)).title).toBe(before.title);
 });
-test('dedicated storyboard toolbar button opens SceneScript task directly without a paid call',async({page})=>{
+test('dedicated storyboard toolbar button confirms the recommended SceneScript quick start without a paid call',async({page})=>{
  await setup(page);let calls=0;page.on('request',r=>{if(r.method()==='POST'&&r.url().includes('api.openai.com'))calls++;});
- await page.locator('#open-storyboard').click();await page.locator('#storyboard-script-open').click();await expect(page.locator('#ai-workflow-dialog')).toBeVisible();await expect(page.locator('#ai-workflow-action')).toHaveValue('script');
- await expect(page.locator('#ai-workflow-start')).toBeDisabled();expect(calls).toBe(0);await page.locator('#ai-workflow-close').click();await expect(page.locator('#storyboard-dialog')).toBeVisible();
+ await page.locator('#open-storyboard').click();await page.locator('#storyboard-script-open').click();await expect(page.locator('#ai-workflow-quick-confirm')).toBeVisible();await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();await expect(page.locator('#ai-workflow-quick-summary')).toContainText('GPT-6.1 Sol');
+ expect(calls).toBe(0);await page.locator('#ai-workflow-quick-cancel').click();await expect(page.locator('#storyboard-dialog')).toBeVisible();
 });
 test('unapproved storyboard entry keeps script selection and its toolbar button disabled',async({page})=>{
  const p=fixture();p.storyboard!.approved=false;await setup(page,p);await page.locator('#open-storyboard').click();await expect(page.locator('#storyboard-script-open')).toBeDisabled();
  await page.locator('#storyboard-ai-open').click();await expect(page.locator('#ai-workflow-action option[value=script]')).toHaveJSProperty('disabled',true);
+});
+
+test('SceneScript quick start sends the recommended model and effort then requires explicit project apply',async({page})=>{
+ await setup(page);let calls=0,release!:()=>void;const gate=new Promise<void>(resolve=>release=resolve);
+ await page.route('https://api.openai.com/v1/responses',async r=>{if(r.request().method()==='OPTIONS'){await r.fulfill({headers:cors});return;}calls++;const body=r.request().postDataJSON();expect(body.model).toBe('gpt-6.1-sol');expect(body.reasoning).toEqual({effort:'high'});
+ const p=JSON.parse(body.input[0].content[0].text).project;p.title='Quick-generated video';await gate;await r.fulfill({headers:cors,json:response(JSON.stringify(p))});});
+ await page.locator('#open-storyboard').click();await page.locator('#storyboard-script-open').click();await expect(page.locator('#ai-workflow-quick-summary')).toContainText('High');await expect(page.locator('#ai-workflow-quick-hint')).toContainText('charged');expect(calls).toBe(0);
+ await page.locator('#ai-workflow-quick-start').click();await expect(page.locator('#ai-workflow-spinner')).toBeVisible();await expect(page.locator('#ai-workflow-settings')).not.toBeVisible();await expect.poll(()=>calls).toBe(1);release();
+ await expect(page.locator('#ai-workflow-preview')).toBeVisible();await expect(page.locator('#ai-workflow-apply')).toBeEnabled();await expect(page.locator('#project-title')).not.toHaveValue('Quick-generated video');
+ await page.locator('#ai-workflow-apply').click();await expect(page.locator('#storyboard-dialog')).not.toBeVisible();await expect(page.locator('#project-title')).toHaveValue('Quick-generated video');expect(calls).toBe(1);
 });

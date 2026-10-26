@@ -25,8 +25,10 @@ export function installAiModelPicker(action:HTMLSelectElement,model:HTMLInputEle
  }
  choice.addEventListener('change',()=>{const custom=choice.value==='__manual';$('model-manual').hidden=!custom;if(!custom)model.value=choice.value;thinking();model.dispatchEvent(new Event('input',{bubbles:true}));if(custom)model.focus();});
  model.addEventListener('input',thinking);
- $('use-recommendation').addEventListener('click',()=>{const suggestion=suggestedModel(action.value);model.value=suggestion.id;choices();effort.value=suggestion.effort;model.dispatchEvent(new Event('input',{bubbles:true}));});
+ const useRecommendation=()=>{const suggestion=suggestedModel(action.value);model.value=suggestion.id;choices();effort.value=suggestion.effort;model.dispatchEvent(new Event('input',{bubbles:true}));};
+ $('use-recommendation').addEventListener('click',useRecommendation);
  return {
+  useRecommendation,
   configure(defaultModel:string){model.value=defaultModel;effort.value='';choices();$('model-status').textContent='';},
   reset(){lists.clear();},
   accept(which:'openai'|'elevenlabs',entries:ModelEntry[]){lists.set(which,entries);choices();const total=entries.filter(e=>usableModel(e,modelTask(action.value))).length;$('model-status').textContent=`${t.loaded}: ${total} / ${entries.length}`+(entries.some(e=>e.id===model.value)?'':' · '+t.unlisted);},

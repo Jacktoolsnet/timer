@@ -20,7 +20,7 @@ import {ensureApiVaultUnlocked,requestApiKey} from './api-vault';
 import {VaultError} from '../lib/api-vault';
 import type {aiWorkflowWords} from '../lib/ai-workflow-i18n';
 export type AiWorkflowContext={project:Project;valid:()=>boolean;apply:(p:Project)=>void;preload?:(p:Project)=>Promise<void>;draft?:boolean;applyScript?:(p:Project)=>void};
-export type AiWorkflowOptions={imageTarget?:BoardReviewTarget;quickImage?:boolean};
+export type AiWorkflowOptions={imageTarget?:BoardReviewTarget;quickImage?:boolean;quickScript?:boolean};
 let openWorkflow:((context:AiWorkflowContext,action?:string,options?:AiWorkflowOptions)=>void)|undefined;
 export function openAiWorkflow(context:AiWorkflowContext,action='board',options:AiWorkflowOptions={}){openWorkflow?.(context,action,options);}
 export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,reviewStoryboard:(board:Storyboard,saved?:boolean)=>void){
@@ -78,10 +78,12 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,re
  function imageTarget():BoardReviewTarget|null{if(targets.value==='cover')return null;const [kind,id]=targets.value.split(':');if(!['characters','settings','shots'].includes(kind)||!id)throw new Error('Storyboard: select image target');return {kind:kind as BoardReviewTarget['kind'],id};}
  const quickDialog=$<HTMLDialogElement>('quick-confirm');
  let finishQuick:((accepted:boolean)=>void)|undefined;
- function confirmQuick(){return new Promise<boolean>(resolve=>{
+ function confirmQuick(kind:'image'|'script'='image'){return new Promise<boolean>(resolve=>{
   finishQuick=accepted=>{finishQuick=undefined;quickDialog.close();resolve(accepted);};
-  const settings=currentImageSettings(),selected=targets.selectedOptions[0];
-  $('quick-summary').textContent=[selected?.textContent,model.value,settings.size,t.quality+': '+t.low,$('image-reference-summary').textContent].join(' · ');
+  $('quick-title').textContent=kind==='script'?t.quickScriptTitle:t.quickImageTitle;
+  $('quick-hint').textContent=kind==='script'?t.quickScriptHint:t.quickImageHint;
+  if(kind==='script')$('quick-summary').textContent=[ctx.project.storyboard?.title,$('model-advice').textContent].join(' · ');
+  else{const settings=currentImageSettings(),selected=targets.selectedOptions[0];$('quick-summary').textContent=[selected?.textContent,model.value,settings.size,t.quality+': '+t.low,$('image-reference-summary').textContent].join(' · ');}
   quickDialog.showModal();$('quick-cancel').focus();
  });}
  $('quick-cancel').addEventListener('click',()=>finishQuick?.(false));
@@ -93,7 +95,7 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,re
   try{if(!await ensureApiVaultUnlocked()||!next.valid())return;ctx=next;const ticket=++session;modelPicker.reset();clearPreview();jobs=[];jobsSelect.replaceChildren();option(jobsSelect,'missing',t.all);targets.replaceChildren();if(!ctx.draft)option(targets,'cover',t.cover);
   const b=ctx.project.storyboard;for(const kind of ['characters','settings','shots'] as const)for(const item of b?.[kind]??[])option(targets,kind+':'+item.id,kind+' · '+('title'in item?item.title:item.name));
   for(const o of action.options)o.disabled=!!ctx.draft&&(o.value==='speech'||o.value==='script'&&(!ctx.applyScript||!b?.approved||!canApproveStoryboard(b)));
-  action.value=initial;if(options.imageTarget){targets.value=options.imageTarget.kind+':'+options.imageTarget.id;if(!targets.value)return;}prompt.value='';$('draft').hidden=!ctx.draft;$<HTMLInputElement>('refs').checked=false;$<HTMLInputElement>('image-refs').checked=true;configure();if(options.quickImage&&initial==='image'){if(!await confirmQuick()||!next.valid())return;dialog.showModal();consent.checked=true;start.disabled=false;start.click();return;}dialog.showModal();
+  action.value=initial;if(options.imageTarget){targets.value=options.imageTarget.kind+':'+options.imageTarget.id;if(!targets.value)return;}prompt.value='';$('draft').hidden=!ctx.draft;$<HTMLInputElement>('refs').checked=false;$<HTMLInputElement>('image-refs').checked=true;configure();const quickScript=options.quickScript&&initial==='script';if(quickScript)modelPicker.useRecommendation();if(options.quickImage&&initial==='image'||quickScript){if(!await confirmQuick(quickScript?'script':'image')||!next.valid())return;dialog.showModal();consent.checked=true;start.disabled=false;start.click();return;}dialog.showModal();
   void speechJobs(ctx.project).then(value=>{if(ticket!==session||!dialog.open)return;jobs=value;for(const j of jobs)option(jobsSelect,j.stem,j.name+(j.speaker?' · '+j.speaker:''));speechEstimate();}).catch(error);
   }finally{opening=false;}
  };

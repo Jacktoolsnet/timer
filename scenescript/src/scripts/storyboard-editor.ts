@@ -213,7 +213,7 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
  showAiStoryboard=(draft,saved)=>{show(draft,saved);if(saved)$('status').textContent=t.saved;};
  document.getElementById('open-storyboard')!.addEventListener('click',()=>show());
  $('ai-open').addEventListener('click',()=>runWorkflow());
- $('script-open').addEventListener('click',()=>runWorkflow('script'));
+ $('script-open').addEventListener('click',()=>runWorkflow('script',{quickScript:true}));
  $('close').addEventListener('click',close);dialog.addEventListener('cancel',e=>{e.preventDefault();close();});
  const tabs=Array.from($('tabs').querySelectorAll<HTMLButtonElement>('[role=tab]'));
  const activateTab=(button:HTMLButtonElement,focus=false)=>{tab=button.dataset.boardTab!;render();if(focus){button.focus();button.scrollIntoView({block:'nearest',inline:'nearest'});}};
