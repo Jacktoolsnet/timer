@@ -111,3 +111,23 @@ test('reference count limit remains explicit instead of silently dropping identi
  for(let i=0;i<9;i++){b.images['extra'+i]={name:'Extra.png',data:pixel};b.characters.push({id:'extra'+i,kind:'character',name:'Extra '+i,description:'Test',image:'extra'+i,status:'draft',comments:[]});b.shots[0].characters.push('extra'+i);}
  assert.throws(()=>imageGenerationReferences(p,{kind:'shots',id:'shot'}),/maximum 8 images/);
 });
+
+test('script results can promote explicitly declared storyboard image manifests into render assets',()=>{
+ const p=project(),original=JSON.stringify(p),raw=structuredClone(projectManifest(p));
+ raw.assets={ref:{name:'ref.png'}};raw.scenes[0].backgroundAsset='ref';raw.thumbnail={name:'ref.png'};
+ const result=acceptScript(JSON.stringify(raw),p);
+ assert.equal(result.assets.ref.data,pixel);assert.equal(result.scenes[0].backgroundAsset,'ref');assert.equal(result.thumbnail!.data,pixel);
+ assert.deepEqual(JSON.parse(JSON.stringify(result.storyboard)),JSON.parse(JSON.stringify(p.storyboard)));assert.equal(JSON.stringify(p),original);
+ const audio=projectManifest(p);audio.audios={ref:{name:'ref.png'}};assert.throws(()=>acceptScript(JSON.stringify(audio),p),/audios: unknown media manifest/);
+ const unknown=projectManifest(p);unknown.assets={unknown:{name:'ref.png'}};assert.throws(()=>acceptScript(JSON.stringify(unknown),p),/assets: unknown media manifest unknown/);
+});
+test('project assets and cover take priority over colliding storyboard image manifests',()=>{
+ const p=project();p.storyboard!.images.ref.data='data:image/svg+xml;base64,'+btoa('<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>');p.assets.ref={name:'Canonical.png',data:pixel};p.thumbnail={name:'Cover.png',data:pixel};
+ const raw=projectManifest(p);raw.assets={ref:{name:'Wrong name.png'}};raw.thumbnail={name:'ref.png'};
+ const result=acceptScript(JSON.stringify(raw),p);assert.equal(result.assets.ref.name,'Canonical.png');assert.equal(result.thumbnail!.name,'Cover.png');
+});
+test('thumbnail manifests reject unknown or ambiguous names instead of choosing an arbitrary image',()=>{
+ const p=project();p.storyboard!.images.second={name:'ref.png',data:pixel};
+ const raw=projectManifest(p);raw.thumbnail={name:'ref.png'};assert.throws(()=>acceptScript(JSON.stringify(raw),p),/ambiguous media manifest name/);
+ raw.thumbnail={name:'Missing.png'};assert.throws(()=>acceptScript(JSON.stringify(raw),p),/unknown manifest/);
+});

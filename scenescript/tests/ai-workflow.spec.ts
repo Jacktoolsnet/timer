@@ -386,3 +386,17 @@ test('SceneScript quick start sends the recommended model and effort then requir
  await expect(page.locator('#ai-workflow-preview')).toBeVisible();await expect(page.locator('#ai-workflow-apply')).toBeEnabled();await expect(page.locator('#project-title')).not.toHaveValue('Quick-generated video');
  await page.locator('#ai-workflow-apply').click();await expect(page.locator('#storyboard-dialog')).not.toBeVisible();await expect(page.locator('#project-title')).toHaveValue('Quick-generated video');expect(calls).toBe(1);
 });
+
+test('SceneScript restores storyboard image manifests as render assets and as an unambiguous thumbnail',async({page})=>{
+ const p=fixture(),png='iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aZ1sAAAAASUVORK5CYII=',data='data:image/png;base64,'+png;
+ p.storyboard!.images.frame={name:'Approved scene.png',data};p.storyboard!.shots[0].image='frame';
+ await setup(page,p);await page.route('https://api.openai.com/v1/responses',async r=>{if(r.request().method()==='OPTIONS'){await r.fulfill({headers:cors});return;}
+  const project=JSON.parse(r.request().postDataJSON().input[0].content[0].text).project;
+  project.assets={frame:{name:'Approved scene.png'}};project.scenes[0].backgroundAsset='frame';project.thumbnail={name:'Approved scene.png'};project.storyboard=null;
+  expect(r.request().postDataJSON().instructions).toContain('Existing storyboard.images may also be reused as render assets');
+  await r.fulfill({headers:cors,json:response(JSON.stringify(project))});});
+ await page.locator('#open-ai-workflow').click();await page.locator('#ai-workflow-action').selectOption('script');await generate(page);
+ await expect(page.locator('#ai-workflow-preview')).toBeVisible();await expect(page.locator('#ai-workflow-error-box')).not.toBeVisible();await page.locator('#ai-workflow-apply').click();
+ const result=await exportProject(page);expect(result.assets.frame.data).toBe(data);expect(result.scenes[0].backgroundAsset).toBe('frame');expect(result.thumbnail!.data).toBe(data);expect(result.storyboard).toEqual(p.storyboard);
+ await page.locator('#undo-project').click();const original=await exportProject(page);expect(original.assets.frame).toBeUndefined();expect(original.storyboard!.images.frame.data).toBe(data);
+});

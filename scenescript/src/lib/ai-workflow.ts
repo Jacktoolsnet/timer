@@ -16,8 +16,16 @@ export function acceptPlanning(text:string,p:Project,source:Storyboard){return {
 /** Models may reference known media manifests, but cannot overwrite the approved source plan. */
 export function acceptScript(text:string,source:Project){
  requireApprovedBoard(source);const raw=JSON.parse(text);if(!raw||typeof raw!=='object'||Array.isArray(raw))throw new Error('SceneScript: expected project object');
- for(const kind of ['assets','audios','videos'] as const){const incoming=raw[kind];if(incoming===undefined)raw[kind]=source[kind];else{if(!incoming||typeof incoming!=='object'||Array.isArray(incoming))throw new Error(kind+': expected map');const restored=Object.assign(Object.create(null),source[kind]) as Record<string,unknown>;for(const [id,value]of Object.entries(incoming)){if(!value||typeof value!=='object'||Array.isArray(value))throw new Error(kind+': invalid resource');const v=value as Record<string,unknown>;if(!v.data){if(!Object.hasOwn(source[kind],id))throw new Error(kind+': unknown media manifest '+id);restored[id]=source[kind][id];}else restored[id]=value;}raw[kind]=restored;}}
- if(raw.thumbnail&&!raw.thumbnail.data){if(!source.thumbnail)throw new Error('thumbnail: unknown manifest');raw.thumbnail=source.thumbnail;}
+ for(const kind of ['assets','audios','videos'] as const){const incoming=raw[kind];if(incoming===undefined)raw[kind]=source[kind];else{if(!incoming||typeof incoming!=='object'||Array.isArray(incoming))throw new Error(kind+': expected map');const restored=Object.assign(Object.create(null),source[kind]) as Record<string,unknown>;for(const [id,value]of Object.entries(incoming)){if(!value||typeof value!=='object'||Array.isArray(value))throw new Error(kind+': invalid resource');const v=value as Record<string,unknown>;if(!v.data){const known=Object.hasOwn(source[kind],id)?source[kind][id]:kind==='assets'&&source.storyboard&&Object.hasOwn(source.storyboard.images,id)?source.storyboard.images[id]:undefined;if(!known?.data)throw new Error(kind+': unknown media manifest '+id);restored[id]=known;}else restored[id]=value;}raw[kind]=restored;}}
+ if(raw.thumbnail&&!raw.thumbnail.data){
+  if(source.thumbnail)raw.thumbnail=source.thumbnail;
+  else{
+   const images=Object.assign(Object.create(null),source.storyboard?.images??{},raw.assets) as Record<string,{name:string;data?:string}>;
+   const matching=Object.values(images).filter(a=>a.name===raw.thumbnail.name&&typeof a.data==='string'&&/^data:image\/(png|jpeg|webp);base64,/.test(a.data));
+   if(matching.length!==1)throw new Error(matching.length?'thumbnail: ambiguous media manifest name':'thumbnail: unknown manifest');
+   raw.thumbnail={name:matching[0].name,data:matching[0].data};
+  }
+ }
  if(!raw.thumbnail&&source.thumbnail)raw.thumbnail=source.thumbnail;
  raw.storyboard=source.storyboard;return validateProject(raw);
 }

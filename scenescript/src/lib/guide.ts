@@ -43,6 +43,8 @@ When asked to generate a video from an approved plan, follow it and this specifi
 preserve its storyboard data and never silently replace an existing video. Omit
 storyboard (default null) for direct video creation. Plans allow at most 25 MiB total,
 100 images (8 MiB each); image references and subject IDs must resolve inside the plan.
+API results may reuse storyboard.images via assets[id]={name}; data is restored locally.
+A missing thumbnail can use {name} for a unique known raster. Standalone files must embed data.
 
 Authoring workflow:
 - Reuse the user's topic, audience, aspect ratio, style and desired duration.

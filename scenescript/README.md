@@ -1318,3 +1318,14 @@ Das ausführbare Ergebnis wird zunächst validiert und als Vorschau angeboten, n
 als Storyboard-Antwort übernommen. Erst „Übernehmen“ ersetzt das aktuelle Projekt/Video, erhält
 das freigegebene Storyboard, schließt beide Dialoge und erlaubt Undo. Abbruch oder Schließen der
 Vorschau lässt das bestehende Video unverändert.
+
+#### Storyboard-Bilder als ausführbare Ressourcen übernehmen
+Beim API-Ergebnisimport dürfen `assets`-Manifeste mit einer vorhandenen Storyboard-Bild-ID
+auf deren eingebettete Bilddaten zurückgreifen. Nur ausdrücklich deklarierte Bilder werden
+übernommen; unbekannte IDs bleiben Fehler. Bestehende Projekt-Bildressourcen haben bei
+ID-Kollisionen Vorrang. Audio und Video können keine Storyboard-Bildmanifeste übernehmen.
+Das freigegebene Storyboard bleibt unverändert erhalten.
+Existiert noch kein Cover, kann ein Thumbnail-Manifest mit dem exakten, eindeutigen Namen
+eines vorhandenen Rasterbilds wiederhergestellt werden. Unbekannte oder mehrdeutige Namen
+werden abgelehnt; ein bestehendes Cover hat Vorrang. Standalone-Exporte enthalten weiterhin
+echte Bilddaten. Dafür sind keine weiteren KI-Aufrufe erforderlich.
