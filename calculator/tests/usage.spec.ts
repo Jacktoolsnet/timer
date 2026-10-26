@@ -5,7 +5,7 @@ test('usage notes are localized and linked in every supported language',async({p
  for(const [lang,title] of Object.entries(titles)){
   await page.goto('/'+lang+'/');const footer=page.locator('.site-footer a[href="/'+lang+'/usage/"]');await expect(footer).toHaveText(title);await footer.click();
   await expect(page).toHaveURL(new RegExp('/'+lang+'/usage/$'));await expect(page.getByRole('heading',{level:1})).toHaveText(title);await expect(page.locator('html')).toHaveAttribute('lang',lang);
-  await expect(page.locator('meta[name=robots]')).toHaveAttribute('content','noindex, follow');
+  await expect(page.locator('meta[name=robots][content*=noindex]')).toHaveCount(0);
   await expect(page.locator('.usage-page>section')).toHaveCount(10);await expect(page.locator('.usage-contents a')).toHaveCount(10);
   for(const link of await page.locator('.usage-contents a').all()){const target=await link.getAttribute('href');await expect(page.locator(target!)).toHaveCount(1);}
   for(const language of Object.keys(titles)){

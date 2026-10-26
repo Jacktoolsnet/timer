@@ -5,7 +5,7 @@ for(const lang of ['de','en']) {
   await page.goto('/'+lang+'/usage/');
   await expect(page.locator('.legal-page h2')).toHaveCount(11);
   await expect(page.locator('.legal-page')).toContainText('112');
-  await expect(page.locator('meta[name=robots]')).toHaveAttribute('content','noindex, follow');
+  await expect(page.locator('meta[name=robots][content*=noindex]')).toHaveCount(0);
   await expect(page.locator('.legal-page a[href^="#usage-"]')).toHaveCount(0);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  });

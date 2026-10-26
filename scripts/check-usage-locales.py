@@ -29,7 +29,7 @@ for tool in TOOLS:
         html=(dist/lang/'usage/index.html').read_text()
         page=Page(html)
         assert page.lang==lang,(tool,lang,'html lang')
-        assert page.noindex,(tool,lang,'indexing policy')
+        assert not page.noindex,(tool,lang,'indexing policy')
         assert len(page.content)>700,(tool,lang,'missing content')
         for other in LANGS:
             assert f'/{other}/usage/' in page.links,(tool,lang,other,'document navigation')
@@ -46,6 +46,6 @@ for tool in TOOLS:
         legal=Page((dist/lang/'privacy/index.html').read_text())
         assert 'es' not in legal.alternates and 'fr' not in legal.alternates,(tool,'privacy hreflang')
     sitemap=ET.fromstring((dist/'sitemap.xml').read_text())
-    assert all('/usage/' not in node.text for node in sitemap.findall('{*}url/{*}loc')),(tool,'noindex usage in sitemap')
+    assert sum(node.text.endswith('/usage/') for node in sitemap.findall('{*}url/{*}loc')) == len(LANGS),(tool,'usage pages in sitemap')
     print(f'{tool}: 4 usage languages, links, hreflang and bilingual legal pages OK')
 print('Validated 32 usage pages across 8 tools.')
