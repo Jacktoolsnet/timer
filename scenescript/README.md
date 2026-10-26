@@ -1352,3 +1352,13 @@ und damit im SceneScript erhalten. Sie werden in Vorschau und Storyboard-Projekt
 angezeigt: Beschreibungen sind **noch keine hörbaren Effekte**. Es gibt hier weiterhin keine
 automatische SFX-Erzeugung oder neue SFX-Wiedergabespur. Sprachdateien werden nach Übernahme
 wie bisher im separaten ElevenLabs-Workflow erzeugt; Szenendauern werden dort bei Bedarf angepasst.
+
+#### Skalierungs-Gelenke bei Geometrie-Instanzen
+Geometrie-Parts mit instances unterstützen jetzt auch motion:"scale"-Gelenke,
+einschließlich Mimik-/Sprachsteuerung und Keyframe-Animation. Jede Kopie wird um ihren
+eigenen Mittelpunkt skaliert; ihre lokalen Offsets bleiben unverändert. Nullskalierung
+blendet die Geometrie aus. Aktualisierungen sind absolut/deterministisch und erzeugen
+keine neuen Geometrien oder Materialien pro Frame. Instanzmatrizen und Bounding-Volumes
+werden nur bei geänderter Skalierung aktualisiert.
+Gruppenknoten und Profilflächen bleiben nicht instanzierbar; Limits für Parts, Kopien
+und Gelenke bleiben unverändert. Es werden keine KI-Bauteile oder Gelenke still entfernt.

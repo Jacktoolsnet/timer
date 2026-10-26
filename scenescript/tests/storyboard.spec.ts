@@ -341,7 +341,7 @@ test('SceneScript toolbar action requires the whole plan to be approved and rese
 
 test('production tiles edit render type, sound switches and concrete scene sound-effect tasks',async({page})=>{
  await setup(page);await page.locator('[data-board-edit=render-mode]').click();await page.locator('#storyboard-field-select').selectOption('3d');await page.locator('#storyboard-field-apply').click();
- await page.locator('[data-board-edit=sound-plan]').click();const toggles=page.locator('#storyboard-field-choices [role=switch]');await expect(toggles).toHaveCount(3);for(const toggle of await toggles.all())await toggle.check();await page.locator('#storyboard-field-apply').click();
+ await page.locator('[data-board-edit=sound-plan]').click();const toggles=page.locator('#storyboard-field-choices [role=switch]');await expect(toggles).toHaveCount(3);for(const toggle of await toggles.all()){await expect(toggle).toHaveCSS('opacity','0');await toggle.check();}await page.locator('#storyboard-field-apply').click();
  await page.locator('[data-board-tab=shots]').click();const shot=fixture().storyboard.shots[0];await editText(page,shot.id+'-sound-effects','Gentle notification beep\nBottle on conveyor belt');
  await page.locator('#storyboard-save').click();await page.locator('#storyboard-close').click();const download=page.waitForEvent('download');await page.locator('#save-project').click();
  const saved=JSON.parse(await readFile((await(await download).path())!,'utf8'));expect(saved.storyboard.production).toEqual({renderMode:'3d',dialogue:true,music:true,sfx:true});expect(saved.storyboard.shots[0].soundEffects).toEqual(['Gentle notification beep','Bottle on conveyor belt']);expect(saved.storyboard.approved).toBe(false);

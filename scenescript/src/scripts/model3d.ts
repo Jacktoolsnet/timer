@@ -10,7 +10,7 @@ type Storage={textures?:Map<string,THREE.Texture>;images?:Map<string,HTMLImageEl
 const sharedGeometries=new WeakMap<Storage,Map<string,THREE.BufferGeometry>>();
 /** Transform chain: position → pivot → XYZ rotation → -pivot → geometry/children. */
 export function createModel3D(model:Model3D,storage:Storage,palette:object={},events:readonly Effect3D[]=[],ownerAt?:(time:number)=>THREE.Matrix4){
- const root=new THREE.Group(),nodes=new Map<string,{anchor:THREE.Group;pivot:THREE.Group;content:THREE.Group;mesh?:THREE.Mesh;profile?:ReturnType<typeof createProfileGeometry3D>}>();
+ const root=new THREE.Group(),nodes=new Map<string,{anchor:THREE.Group;pivot:THREE.Group;content:THREE.Group;mesh?:THREE.Mesh;profile?:ReturnType<typeof createProfileGeometry3D>;instance?:{scale:THREE.Vector3;applied:THREE.Vector3;dummy:THREE.Object3D}}>();
  let geometries=sharedGeometries.get(storage);if(!geometries){geometries=new Map();sharedGeometries.set(storage,geometries);}
  for(const part of model.parts){
   const anchor=new THREE.Group(),pivot=new THREE.Group(),content=new THREE.Group();anchor.name=part.id;pivot.position.set(part.pivot.x,part.pivot.y,part.pivot.z);content.position.set(-part.pivot.x,-part.pivot.y,-part.pivot.z);anchor.add(pivot);pivot.add(content);nodes.set(part.id,{anchor,pivot,content});
@@ -34,7 +34,7 @@ export function createModel3D(model:Model3D,storage:Storage,palette:object={},ev
   };
   const material=part.extrusion?[makeMaterial(part.texture?.asset),makeMaterial(part.texture?.asset,part.extrusion.sideColor||color)]:part.texture&&Object.keys(part.texture.faces).length?textureFaces3D.map(face=>makeMaterial(part.texture!.faces[face]??part.texture!.asset)):makeMaterial(part.texture?.asset);
   const mesh=part.instances.length?new THREE.InstancedMesh(geometry,material,part.instances.length):new THREE.Mesh(geometry,material);mesh.name=part.id+'-geometry';
-  if(mesh instanceof THREE.InstancedMesh){const dummy=new THREE.Object3D();part.instances.forEach((position,i)=>{dummy.position.set(position.x,position.y,position.z);dummy.scale.set(part.size.x,part.size.y,part.size.z);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix);});}else mesh.scale.set(part.size.x,part.size.y,part.size.z);
+  if(mesh instanceof THREE.InstancedMesh){nodes.get(part.id)!.instance={scale:new THREE.Vector3(),applied:new THREE.Vector3(NaN,NaN,NaN),dummy:new THREE.Object3D()};if(part.joints.some(j=>j.motion==='scale'))mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);}else mesh.scale.set(part.size.x,part.size.y,part.size.z);
   nodes.get(part.id)!.mesh=mesh;content.add(mesh);
  }
  for(const part of model.parts)(part.parent?nodes.get(part.parent)!.content:root).add(nodes.get(part.id)!.anchor);
@@ -42,10 +42,14 @@ export function createModel3D(model:Model3D,storage:Storage,palette:object={},ev
  const updateBase=(overrides:Record<string,number>,motions:readonly ModelMotion3D[],time:number,controls:Partial<Record<typeof jointControls3D[number],number>>={})=>{
   effects?.reset();
   const values=modelPose3D(model,overrides,motions,time,controls);
-  for(const part of model.parts){const {anchor,pivot,mesh,profile}=nodes.get(part.id)!;if(mesh&&!(mesh instanceof THREE.InstancedMesh))mesh.scale.set(part.size.x,part.size.y,part.size.z);anchor.position.set(part.position.x,part.position.y,part.position.z);pivot.rotation.set(part.rotation.x*Math.PI/180,part.rotation.y*Math.PI/180,part.rotation.z*Math.PI/180);
-   for(const joint of part.joints){const value=values.get(joint.id)!;if(joint.motion==='translation')anchor.position[joint.axis]+=value;else if(joint.motion==='rotation')pivot.rotation[joint.axis]+=value*Math.PI/180;else if(joint.motion==='morph')profile?.update(value);else if(mesh)mesh.scale[joint.axis]*=value;}
+  for(const part of model.parts){const {anchor,pivot,mesh,profile,instance}=nodes.get(part.id)!;if(instance){instance.scale.set(part.size.x,part.size.y,part.size.z);mesh!.scale.set(1,1,1);}else if(mesh)mesh.scale.set(part.size.x,part.size.y,part.size.z);anchor.position.set(part.position.x,part.position.y,part.position.z);pivot.rotation.set(part.rotation.x*Math.PI/180,part.rotation.y*Math.PI/180,part.rotation.z*Math.PI/180);
+   for(const joint of part.joints){const value=values.get(joint.id)!;if(joint.motion==='translation')anchor.position[joint.axis]+=value;else if(joint.motion==='rotation')pivot.rotation[joint.axis]+=value*Math.PI/180;else if(joint.motion==='morph')profile?.update(value);else if(instance)instance.scale[joint.axis]*=value;else if(mesh)mesh.scale[joint.axis]*=value;}
+   if(instance&&mesh instanceof THREE.InstancedMesh&&!instance.scale.equals(instance.applied)){
+    part.instances.forEach((position,i)=>{instance.dummy.position.set(position.x,position.y,position.z);instance.dummy.scale.copy(instance.scale);instance.dummy.updateMatrix();mesh.setMatrixAt(i,instance.dummy.matrix);});
+    mesh.instanceMatrix.needsUpdate=true;mesh.computeBoundingBox();mesh.computeBoundingSphere();instance.applied.copy(instance.scale);
+   }
    if(profile&&!part.joints.some(j=>j.motion==='morph'))profile.update(0);
-   if(mesh)mesh.visible=mesh.scale.x>1e-5&&mesh.scale.y>1e-5&&mesh.scale.z>1e-5;
+   if(mesh){const scale=instance?.scale??mesh.scale;mesh.visible=scale.x>1e-5&&scale.y>1e-5&&scale.z>1e-5;}
   }
  };
  updateBase({},[],0);

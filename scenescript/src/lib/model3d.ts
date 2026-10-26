@@ -53,7 +53,7 @@ export function parseModel3D(value:unknown,path='model'):Model3D|null{
   if(!Array.isArray(rawInstances)||rawInstances.length>256)throw new Error(p+'.instances: maximum 256');
   if(shape==='group'&&parsedJoints.some(j=>j.motion==='scale'))throw new Error(p+'.joints: scale affects mesh geometry, not groups');
   if(rawInstances.length&&shape==='profile')throw new Error(p+'.instances: profiles cannot be instanced');
-  if(rawInstances.length&&(shape==='group'||parsedJoints.some(j=>j.motion==='scale')))throw new Error(p+'.instances: needs geometry without scale joints');
+  if(rawInstances.length&&shape==='group')throw new Error(p+'.instances: group nodes cannot be instanced; use geometry parts');
   const instances=rawInstances.map((v,i)=>vector(v,p+'.instances['+i+']',vector3D(),-50,50));
   const extrusion=parseExtrusion3D(v.extrusion,shape,p+'.extrusion');
   const profile=parseProfile3D(v.profile,shape,p+'.profile');

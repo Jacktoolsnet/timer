@@ -14,7 +14,7 @@ test('construction demo creates a real cover; model animation preview and indivi
 });
 test('invalid model JSON remains visible across selection changes and blocks stale apply/export',async({page})=>{
  await load(page);await page.locator('#open-stage3d').click();const input=page.locator('#stage3d-model'),original=await input.inputValue();
- await input.fill('{broken');await expect(input).toHaveAttribute('aria-invalid','true');await expect(page.locator('.model3d-error')).not.toBeEmpty();await expect(page.locator('.model3d-error')).toHaveCSS('user-select','text');
+ await input.fill('{broken');await expect(input).toHaveAttribute('aria-invalid','true');await expect(page.locator('.model3d-editor:has(#stage3d-model)>.model3d-error')).not.toBeEmpty();await expect(page.locator('.model3d-editor:has(#stage3d-model)>.model3d-error')).toHaveCSS('user-select','text');
  await page.locator('#stage3d-export').click();await expect(page.locator('#stage3d-status')).not.toBeEmpty();await page.locator('#stage3d-apply').click();await expect(page.locator('#stage3d-dialog')).toBeVisible();
  await page.locator('#stage3d-resource').selectOption('robot');await page.locator('#stage3d-resource').selectOption('truck');await expect(input).toHaveValue('{broken');
  await input.fill(original);await expect(input).not.toHaveAttribute('aria-invalid','true');await page.locator('#stage3d-apply').click();await expect(page.locator('#stage3d-dialog')).not.toBeVisible();
@@ -50,4 +50,26 @@ test('construction objects export as a short MP4',async({page})=>{
   const {validateProject}=await import(/* @vite-ignore */ '/src/lib/model.ts' as string),{exportVideo,exportSupported}=await import(/* @vite-ignore */ '/src/scripts/video-export.ts' as string);const p=validateProject(raw),s=p.scenes[0];s.duration=.3;s.elements=[];s.stage3d!.stageMotions!.forEach((m:any)=>m.duration=.3);s.stage3d!.actors.forEach((a:any)=>{a.duration=.3;a.expressions=[];a.motions.forEach((m:any)=>m.duration=.3);});const options={format:'mp4',resolution:480,fps:24,audio:false};if(!await exportSupported(p,options))return null;const blob=await exportVideo(p,options,new AbortController().signal,()=>{});return blob.size;
  },construction3DExample);
  test.skip(result===null,'No MP4 encoder');expect(result).toBeGreaterThan(1000);
+});
+
+test('instanced scale joints resize each copy without shifting offsets or drifting across updates',async({page})=>{
+ await page.goto('/en/');
+ const result=await page.evaluate(async()=>{
+  const {parseModel3D}=await import(/* @vite-ignore */ '/src/lib/model3d.ts' as string),{createModel3D}=await import(/* @vite-ignore */ '/src/scripts/model3d.ts' as string);
+  const model=parseModel3D({parts:[{id:'eyes',shape:'box',size:{x:.2,y:.3,z:.1},instances:[{x:-.4},{x:.4}],joints:[{id:'height',motion:'scale',axis:'y',min:0,max:2,value:1,control:'blink',target:0},{id:'width',motion:'scale',axis:'x',min:0,max:3,value:1}]}],animations:{close:{duration:2,tracks:[{joint:'height',keys:[{at:0,value:1},{at:1,value:0},{at:2,value:1}]}]}}})!;
+  const storage={geometries:new Set<any>(),materials:new Map<string,any>()},built=createModel3D(model,storage),mesh:any=built.root.getObjectByName('eyes-geometry');
+  const capture=()=>({matrices:Array.from(mesh.instanceMatrix.array) as number[],visible:mesh.visible,scale:mesh.scale.toArray(),version:mesh.instanceMatrix.version,bounds:[mesh.boundingBox.min.toArray(),mesh.boundingBox.max.toArray()],radius:mesh.boundingSphere.radius});
+  try{
+   const first=capture();built.update({height:2,width:3},[],0);const enlarged=capture();built.update({height:2,width:3},[],0);const repeated=capture();
+   built.update({},[],0,{blink:1});const shut=capture();built.update({},[],0);const rewind=capture();
+   const motions=[{animation:'close',at:0,duration:2,speed:1,loop:false,blend:0}];built.update({},motions,1);const animatedClosed=capture();built.update({},motions,0);const animatedReset=capture();
+   return {first,enlarged,repeated,shut,rewind,animatedClosed,animatedReset,geometries:storage.geometries.size,materials:storage.materials.size};
+  }finally{storage.geometries.forEach(g=>g.dispose());storage.materials.forEach(m=>m.dispose());}
+ });
+ const {first,enlarged,repeated,shut,rewind,animatedClosed,animatedReset}=result;
+ for(const offset of [0,16]){expect(first.matrices[offset]).toBeCloseTo(.2);expect(enlarged.matrices[offset]).toBeCloseTo(.6);expect(enlarged.matrices[offset+5]).toBeCloseTo(.6);expect(enlarged.matrices[offset+12]).toBeCloseTo(first.matrices[offset+12]);}
+ expect(first.matrices[12]).toBeCloseTo(-.4);expect(first.matrices[28]).toBeCloseTo(.4);
+ expect(enlarged.scale).toEqual([1,1,1]);expect(enlarged.bounds[0][0]).toBeCloseTo(-.7);expect(enlarged.bounds[1][0]).toBeCloseTo(.7);expect(enlarged.radius).toBeGreaterThan(first.radius);
+ expect(repeated.matrices).toEqual(enlarged.matrices);expect(repeated.version).toBe(enlarged.version);expect(shut.visible).toBe(false);expect(animatedClosed.visible).toBe(false);
+ expect(rewind.matrices).toEqual(first.matrices);expect(animatedReset.matrices).toEqual(first.matrices);expect(rewind.visible).toBe(true);expect(result.geometries).toBe(1);expect(result.materials).toBe(1);
 });

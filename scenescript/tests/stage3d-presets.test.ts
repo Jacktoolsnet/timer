@@ -43,9 +43,11 @@ test('editable pixel geometry reproduces all expression, blink and speech masks,
 test('scale, layered responses and geometry instances reject invalid or ambiguous definitions',()=>{
  const valid={parts:[{id:'eye',joints:[{id:'height',motion:'scale',axis:'y',min:0,max:2,responses:{happy:.7},control:'blink',target:0}]}]};
  const model=parseModel3D(valid)!;assert.equal(model.parts[0].joints[0].value,1);assert.equal(modelPose3D(model,{},[],0,{happy:1,blink:.5}).get('height'),.35);
- for(const mutate of [(m:any)=>m.parts[0].shape='group',(m:any)=>m.parts[0].joints[0].min=-1,(m:any)=>m.parts[0].joints[0].responses={execute:1},(m:any)=>m.parts[0].joints[0].responses={happy:3},(m:any)=>m.parts[0].instances=[{x:1}],(m:any)=>m.parts[0].palette='not an ID']){
+ for(const mutate of [(m:any)=>m.parts[0].shape='group',(m:any)=>m.parts[0].joints[0].min=-1,(m:any)=>m.parts[0].joints[0].responses={execute:1},(m:any)=>m.parts[0].joints[0].responses={happy:3},(m:any)=>m.parts[0].palette='not an ID']){
   const raw:any=structuredClone(valid);mutate(raw);assert.throws(()=>parseModel3D(raw));
  }
+ const instanced=parseModel3D({parts:[{...valid.parts[0],instances:[{x:-.3},{x:.3}]}]})!;assert.equal(instanced.parts[0].instances.length,2);
+ assert.throws(()=>parseModel3D({parts:[{id:'group',shape:'group',instances:[{x:1}]}]}),/group nodes cannot be instanced/);
  assert.throws(()=>parseModel3D({parts:[{id:'copies',instances:Array.from({length:257},()=>({}))}]}),/256/);
  assert.throws(()=>parseModel3D({parts:[{id:'copies',instances:[{x:Infinity}]}]}));
 });

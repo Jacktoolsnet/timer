@@ -381,8 +381,8 @@ Unrelated resources are NEVER overwritten.
 FREE CONSTRUCTION: Character3D.model / Stage3D.model = {parts:[...],animations:{...}}.
 model defines geometry; stage ground/sky remain. palette reads a resource hex field
 (e.g. headColor/blockColor), falling back to color.
-Parts.instances repeats geometry at ≤256 local offsets; no group/scale-joint
-instances. Size is per copy; copies count toward the scene budget.
+Parts.instances repeats geometry at ≤256 local offsets; no group/profile instances.
+Size/scale joints affect each copy, not offsets. Copies count toward the scene budget.
 Parts: unique id, parent="" for root or another part ID (any list order), shape
 group/box/sphere/cylinder/cone/plane/profile/extrusion. Group is invisible; primitives except profile are centered
 unit shapes scaled by size (diameters for sphere/cylinder/cone; cylinder/cone axis Y;
