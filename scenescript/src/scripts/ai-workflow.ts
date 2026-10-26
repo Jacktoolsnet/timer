@@ -6,30 +6,30 @@ import {VoiceAssignmentError,speechVoice} from '../lib/voices';
 import {aiLanguageInstruction} from '../lib/ai-language';
 import type {Project} from '../lib/model';
 import {validateProject} from '../lib/model';
-import {storyboardGuide,type BoardReviewTarget} from '../lib/storyboard';
+import {storyboardGuide,type Storyboard,type BoardReviewTarget} from '../lib/storyboard';
 import {boardManifest,projectManifest,inputJson,planningBoard,requireApprovedBoard,acceptPlanning,acceptScript,imagePrompt,acceptImage,boardReferences} from '../lib/ai-workflow';
 import {AiApiError,generateText,generateImage,generateSpeech,listGenerationModels} from '../lib/ai-api';
 import {speechJobs,attachSpeechFiles,type SpeechJob} from '../lib/speech-jobs';
 import {readAudioFile} from './audio';
-import {requestApiKey} from './api-vault';
+import {ensureApiVaultUnlocked,requestApiKey} from './api-vault';
 import {VaultError} from '../lib/api-vault';
 import type {aiWorkflowWords} from '../lib/ai-workflow-i18n';
 export type AiWorkflowContext={project:Project;valid:()=>boolean;apply:(p:Project)=>void;preload?:(p:Project)=>Promise<void>;draft?:boolean};
 let openWorkflow:((context:AiWorkflowContext,action?:string)=>void)|undefined;
 export function openAiWorkflow(context:AiWorkflowContext,action='board'){openWorkflow?.(context,action);}
-export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void){
+export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,reviewStoryboard:(board:Storyboard)=>void){
  const $=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById('ai-workflow-'+id) as T;
  const dialog=$<HTMLDialogElement>('dialog'),t=JSON.parse(dialog.dataset.words!) as ReturnType<typeof aiWorkflowWords>;
  const action=$<HTMLSelectElement>('action'),model=$<HTMLInputElement>('model'),prompt=$<HTMLTextAreaElement>('prompt'),consent=$<HTMLInputElement>('consent'),start=$<HTMLButtonElement>('start'),apply=$<HTMLButtonElement>('apply');
  const jobsSelect=$<HTMLSelectElement>('job'),targets=$<HTMLSelectElement>('target');
  const modelPicker=installAiModelPicker(action,model);
  const models:Record<string,string>={board:'gpt-5-mini',script:'gpt-5-mini',image:'gpt-image-2',speech:'eleven_multilingual_v2'};
- let ctx:AiWorkflowContext,active:AbortController|undefined,candidate:Project|undefined,jobs:SpeechJob[]=[],session=0;
+ let ctx:AiWorkflowContext,active:AbortController|undefined,candidate:Project|undefined,jobs:SpeechJob[]=[],session=0,opening=false,generating=false;
  const urls:string[]=[];
  function clearPreview(){candidate=undefined;apply.disabled=true;$('preview').hidden=true;$('image-preview').removeAttribute('src');$('image-preview').hidden=true;$<HTMLTextAreaElement>('json-preview').value='';$('json-preview').hidden=true;$('audios').replaceChildren();for(const url of urls)URL.revokeObjectURL(url);urls.length=0;}
- const error=(e:unknown)=>{let message:string;if(e instanceof AiApiError)message=e.code==='size'?t.sizeError:t[e.code];else if(e instanceof VoiceAssignmentError)message=voicePickerWords(document.documentElement.lang as Language)[e.code];else if(e instanceof VaultError)message=t.locked;else message=e instanceof Error?e.message:t.response;$<HTMLTextAreaElement>('error').value=message;$('error-box').hidden=false;};
+ const error=(e:unknown)=>{let message:string;if(e instanceof AiApiError)message=e.code==='size'?t.sizeError:t[e.code];else if(e instanceof VoiceAssignmentError)message=voicePickerWords(document.documentElement.lang as Language)[e.code];else if(e instanceof VaultError)message=t.locked;else message=e instanceof Error?e.message:t.response;$<HTMLTextAreaElement>('error').value=message;$('copy-status').textContent='';$('error-box').hidden=false;};
  const check=()=>{if(!dialog.open||!ctx.valid())throw new Error(t.stale);};
- const busy=(value:boolean)=>{$<HTMLFieldSetElement>('settings').disabled=value;start.hidden=value;$('cancel').hidden=!value;$('progress').hidden=!value;$('cancel-hint').hidden=!value;apply.disabled=value||!candidate;start.disabled=!consent.checked;dialog.setAttribute('aria-busy',String(value));};
+ const busy=(value:boolean)=>{$<HTMLFieldSetElement>('settings').disabled=value;start.hidden=value;$('cancel').hidden=!value;$('progress').hidden=!value;$('cancel-hint').hidden=!value;apply.disabled=value||!candidate;start.disabled=!consent.checked;dialog.setAttribute('aria-busy',String(value));const running=value&&generating;dialog.classList.toggle('ai-running',running);$('spinner').hidden=!running;$('settings').hidden=running;if(running)dialog.querySelector('.dialog-inner')!.scrollTop=0;};
  function option(select:HTMLSelectElement,value:string,label:string){const o=document.createElement('option');o.value=value;o.textContent=label;select.append(o);}
  function selectedSpeechJobs(all=jobs){return jobsSelect.value==='missing'?all.filter(j=>!(j.scope==='project'?ctx.project.narration:ctx.project.scenes.find(s=>s.id===j.sceneId)?.narration)?.asset):all.filter(j=>j.stem===jobsSelect.value);}
  function speechEstimate(){const selected=selectedSpeechJobs();$('speech-estimate').textContent=selected.length?`${selected.length} ${t.assignments} · ${selected.reduce((n,j)=>n+j.text.length,0)} ${t.characters}`:t.empty;$<HTMLTextAreaElement>('speech-text').value=selected.map(j=>j.text).join('\n\n');}
@@ -45,12 +45,14 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void){
  }
  async function decodeImage(data:string){const img=new Image();img.src=data;await img.decode();if(img.naturalWidth*img.naturalHeight>40000000)throw new Error('Image: maximum 40 megapixels');}
  function imageTarget():BoardReviewTarget|null{if(targets.value==='cover')return null;const [kind,id]=targets.value.split(':');if(!['characters','settings','shots'].includes(kind)||!id)throw new Error('Storyboard: select image target');return {kind:kind as BoardReviewTarget['kind'],id};}
- openWorkflow=(next,initial='board')=>{
-  if(dialog.open||active)return;stop();ctx=next;const ticket=++session;modelPicker.reset();clearPreview();jobs=[];jobsSelect.replaceChildren();option(jobsSelect,'missing',t.all);targets.replaceChildren();if(!ctx.draft)option(targets,'cover',t.cover);
+ openWorkflow=async(next,initial='board')=>{
+  if(dialog.open||active||opening)return;opening=true;stop();
+  try{if(!await ensureApiVaultUnlocked()||!next.valid())return;ctx=next;const ticket=++session;modelPicker.reset();clearPreview();jobs=[];jobsSelect.replaceChildren();option(jobsSelect,'missing',t.all);targets.replaceChildren();if(!ctx.draft)option(targets,'cover',t.cover);
   const b=ctx.project.storyboard;for(const kind of ['characters','settings','shots'] as const)for(const item of b?.[kind]??[])option(targets,kind+':'+item.id,kind+' · '+('title'in item?item.title:item.name));
   for(const o of action.options)o.disabled=!!ctx.draft&&['script','speech'].includes(o.value);
   action.value=initial;prompt.value='';$('draft').hidden=!ctx.draft;$<HTMLInputElement>('refs').checked=false;$<HTMLSelectElement>('size').value=(b?.format??ctx.project.format)==='portrait'?'1024x1536':(b?.format??ctx.project.format)==='landscape'?'1536x1024':'1024x1024';configure();dialog.showModal();
   void speechJobs(ctx.project).then(value=>{if(ticket!==session||!dialog.open)return;jobs=value;for(const j of jobs)option(jobsSelect,j.stem,j.name+(j.speaker?' · '+j.speaker:''));speechEstimate();}).catch(error);
+  }finally{opening=false;}
  };
  document.getElementById('open-ai-workflow')!.addEventListener('click',()=>openAiWorkflow(context()));
  document.getElementById('ai-speech-open')?.addEventListener('click',()=>openAiWorkflow(context(),'speech'));
@@ -64,7 +66,7 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void){
  $('load-voices').addEventListener('click',async()=>{if(active)return;try{check();const selected=await chooseElevenVoice({language:ctx.project.storyboard?.language??document.documentElement.lang,valid:ctx.valid});if(selected===undefined)return;check();$<HTMLInputElement>('voice').value=selected?.id??'';clearPreview();}catch(e){error(e);}});
  start.addEventListener('click',async()=>{
   if(active||!consent.checked)return;clearPreview();$('error-box').hidden=true;
-  const controller=new AbortController();active=controller;busy(true);const kind=action.value,source=ctx.project,sourceBoard=planningBoard(source,document.documentElement.lang);let key='';
+  const controller=new AbortController();active=controller;generating=true;busy(true);const kind=action.value,source=ctx.project,sourceBoard=planningBoard(source,document.documentElement.lang);let key='';
   const files:Parameters<typeof attachSpeechFiles>[2]=[];let selectedJobs:SpeechJob[]=[];
   try{
    check();
@@ -104,12 +106,23 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void){
     }
    }
    $('status').textContent=t.ready;
-  }catch(e){error(e);if(kind==='speech'&&files.length&&ctx.valid())$('status').textContent=t.partial;else clearPreview();}
-  finally{key='';active=undefined;consent.checked=false;busy(false);$<HTMLProgressElement>('progress').removeAttribute('value');}
+   if(candidate&&(kind==='board'||ctx.draft||kind==='image'&&target)){
+    check();controller.signal.throwIfAborted();const next=candidate;
+    if(ctx.draft){ctx.apply(next);dialog.close();}
+    else{dialog.close();try{reviewStoryboard(next.storyboard!);}catch(e){dialog.showModal();throw e;}}
+    clearPreview();
+   }
+  }catch(e){error(e);if(kind==='speech'&&files.length&&ctx.valid())$('status').textContent=t.partial;else{$('status').textContent='';clearPreview();}}
+  finally{key='';active=undefined;generating=false;consent.checked=false;busy(false);$<HTMLProgressElement>('progress').removeAttribute('value');if(dialog.open&&!$('error-box').hidden)$('error-box').scrollIntoView({block:'nearest'});}
+ });
+ $('copy-error').addEventListener('click',async()=>{
+  const field=$<HTMLTextAreaElement>('error'),message=field.value,ticket=session;if(!message)return;
+  try{await navigator.clipboard.writeText(message);if(ticket===session&&field.value===message)$('copy-status').textContent=t.copiedError;}
+  catch{if(ticket===session&&dialog.open&&field.value===message){field.focus();field.select();$('copy-status').textContent=t.copyFailed;}}
  });
  apply.addEventListener('click',()=>{if(active||!candidate)return;try{check();const next=candidate;ctx.apply(next);clearPreview();$('status').textContent=t.applied;dialog.close();}catch(e){clearPreview();error(e);}});
  const close=()=>{if(active){active.abort();return;}dialog.close();};
  $('cancel').addEventListener('click',()=>active?.abort());$('close').addEventListener('click',close);dialog.addEventListener('cancel',event=>{event.preventDefault();close();});
- dialog.addEventListener('close',()=>{session++;active?.abort();modelPicker.reset();clearPreview();prompt.value='';consent.checked=false;});
+ dialog.addEventListener('close',()=>{if(dialog.open)return;session++;active?.abort();modelPicker.reset();clearPreview();prompt.value='';consent.checked=false;});
  window.addEventListener('pagehide',()=>{active?.abort();clearPreview();});
 }

@@ -2,6 +2,9 @@ import {testApiKey,type ApiKeyTestState} from '../lib/api-key-test';
 import {ApiVault,API_VAULT_KEY,VaultError,apiProviders,validVaultPassword,type ApiProvider} from '../lib/api-vault';
 import type {ApiVaultWords} from '../lib/api-vault-i18n';
 let current:ApiVault|undefined;
+let unlockGate:(()=>Promise<boolean>)|undefined;
+/** Local-only entry gate: no provider call or key decryption is needed here. */
+export function ensureApiVaultUnlocked(){return unlockGate?.()??Promise.resolve(false);}
 /** Decrypt only on explicit provider actions; never put credentials into project state. */
 export function localApiVault(){if(!current)throw new VaultError('storage');return current;}
 export async function requestApiKey(provider:ApiProvider,signal:AbortSignal):Promise<string>{
@@ -65,7 +68,34 @@ export function installApiVault(onOpen:()=>void=()=>{}){
   $<HTMLButtonElement>('api-vault-confirm-reset').disabled=busy;
   dialog.setAttribute('aria-busy',String(busy));
  };
- const lock=()=>{operation++;pending?.abort();pending=undefined;busy=false;current?.lock();clear();message();paint();};
+ const unlockDialog=$<HTMLDialogElement>('api-unlock-dialog'),unlockPassword=$<HTMLInputElement>('api-unlock-password'),unlockError=$('api-unlock-error');
+ let gate:Promise<boolean>|undefined,finishGate:((ok:boolean)=>void)|undefined,unlockBusy=false,unlockAttempt=0;
+ const unlockPaint=()=>{unlockPassword.disabled=unlockBusy;$<HTMLButtonElement>('api-unlock-submit').disabled=unlockBusy;unlockDialog.setAttribute('aria-busy',String(unlockBusy));};
+ const unlockMessage=(text='')=>{unlockError.textContent=text;unlockError.hidden=!text;};
+ unlockGate=()=>{
+  if(gate)return gate;
+  try{if(connect().state==='unlocked')return Promise.resolve(true);}catch{/* Full settings report unavailable storage/crypto. */}
+  gate=new Promise<boolean>(resolve=>{
+   const cleanup=()=>{dialog.removeEventListener('vault-ready',ready);dialog.removeEventListener('close',closed);};
+   finishGate=(ok)=>{cleanup();unlockAttempt++;if(!ok&&unlockBusy)current?.lock();unlockBusy=false;unlockPassword.value='';unlockMessage();unlockPaint();if(unlockDialog.open)unlockDialog.close();if(ok&&dialog.open)dialog.close();finishGate=undefined;gate=undefined;paint();resolve(ok);};
+   const ready=()=>{try{if(connect().state==='unlocked')finishGate?.(true);}catch{/* The form shows the failure. */}};
+   const closed=()=>finishGate?.(false);
+   let locked=false;try{locked=connect().state==='locked';}catch{}
+   if(locked){onOpen();unlockPassword.value='';unlockMessage();unlockPaint();unlockDialog.showModal();unlockPassword.focus();}
+   else{dialog.addEventListener('vault-ready',ready);dialog.addEventListener('close',closed);if(!dialog.open)open.click();}
+  });
+  return gate;
+ };
+ $('api-unlock-form').addEventListener('submit',async event=>{
+  event.preventDefault();if(unlockBusy||!finishGate)return;let secret=unlockPassword.value;unlockPassword.value='';unlockMessage();const attempt=++unlockAttempt;unlockBusy=true;unlockPaint();
+  try{await connect().unlock(secret);if(attempt===unlockAttempt&&unlockDialog.open){unlockBusy=false;paint();finishGate?.(true);}}
+  catch(e){if(attempt===unlockAttempt){unlockMessage(e instanceof VaultError&&e.code==='credentials'?words.credentialsError:e instanceof VaultError&&e.code==='changed'?words.changedError:words.storageError);}}
+  finally{secret='';if(attempt===unlockAttempt){unlockBusy=false;unlockPaint();unlockPassword.focus();}}
+ });
+ $('api-unlock-close').addEventListener('click',()=>finishGate?.(false));
+ unlockDialog.addEventListener('cancel',event=>{event.preventDefault();finishGate?.(false);});
+ unlockDialog.addEventListener('close',()=>{if(!unlockDialog.open)finishGate?.(false);});
+ const lock=()=>{finishGate?.(false);operation++;pending?.abort();pending=undefined;busy=false;current?.lock();clear();message();paint();};
  // Serialize writers on modern browsers. The vault also checks its encrypted
  // snapshot before every commit, and invalidates sessions on cross-tab changes.
  const write=<T>(fn:()=>Promise<T>,signal:AbortSignal)=>{signal.throwIfAborted();return navigator.locks?navigator.locks.request(API_VAULT_KEY,{signal},fn):fn();};
@@ -119,7 +149,7 @@ export function installApiVault(onOpen:()=>void=()=>{}){
  });
  window.addEventListener('pagehide',lock);
  document.addEventListener('preferences-cleared',lock);
- window.addEventListener('storage',event=>{if(event.key===API_VAULT_KEY||event.key===null){operation++;pending?.abort();pending=undefined;busy=false;try{current?.refresh();}catch{}clear();message();paint();}});
+ window.addEventListener('storage',event=>{if(event.key===API_VAULT_KEY||event.key===null){finishGate?.(false);operation++;pending?.abort();pending=undefined;busy=false;try{current?.refresh();}catch{}clear();message();paint();}});
  const activity=(event:Event)=>{if(event.isTrusted&&!document.hidden)try{current?.touch();if(current&&current.state!==state){clear();message();paint();}}catch{lock();}};
  for(const name of ['pointerdown','keydown'])document.addEventListener(name,activity,{passive:true});
  const sync=()=>{try{const next=connect().state;if(next!==state){operation++;pending?.abort();pending=undefined;busy=false;clear();message();paint();}}catch{lock();}};

@@ -9,6 +9,9 @@ import type {Project} from '../lib/model';
 import {MAX_STORYBOARD_BYTES,newStoryboard,parseStoryboard,importStoryboard,exportStoryboard,storyboardGuide,canApproveStoryboard,invalidateStoryboardApprovals,type BoardReviewTarget,type BoardCharacter,type Storyboard,type BoardFormat,type BoardComment} from '../lib/storyboard';
 import type {storyboardWords} from '../lib/storyboard-i18n';
 const $=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById('storyboard-'+id) as T;
+let showAiStoryboard:((board:Storyboard)=>void)|undefined;
+/** Review generated planning data as an unsaved draft, never as executable video. */
+export function openStoryboardDraft(board:Storyboard){showAiStoryboard?.(board);}
 export function installStoryboardEditor(context:()=>{project:Project;revision:number},apply:(p:Project)=>void,stop:()=>void){
  const dialog=$<HTMLDialogElement>('dialog'),t=JSON.parse(dialog.dataset.words!) as ReturnType<typeof storyboardWords>;
  const fieldDialog=$<HTMLDialogElement>('field-dialog'),exchange=$<HTMLDialogElement>('exchange');
@@ -165,7 +168,9 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
   }
  }
  const close=()=>{if(dirty&&!window.confirm(t.unsaved))return;session++;dialog.close();};
- document.getElementById('open-storyboard')!.addEventListener('click',()=>{stop();origin=context();board=origin.project.storyboard?structuredClone(origin.project.storyboard):newStoryboard(origin.project.title,origin.project.format,videoLanguageForLocale(document.documentElement.lang));dirty=false;tab='story';selectedItems={};session++;clear();$<HTMLTextAreaElement>('json').value='';render();dialog.showModal();});
+ const show=(draft?:Storyboard)=>{if(dialog.open)throw new Error(t.stale);stop();origin=context();board=draft?structuredClone(draft):origin.project.storyboard?structuredClone(origin.project.storyboard):newStoryboard(origin.project.title,origin.project.format,videoLanguageForLocale(document.documentElement.lang));dirty=!!draft;tab='story';selectedItems={};session++;clear();$<HTMLTextAreaElement>('json').value='';render();dialog.showModal();};
+ showAiStoryboard=draft=>show(draft);
+ document.getElementById('open-storyboard')!.addEventListener('click',()=>show());
  $('ai-open').addEventListener('click',()=>{try{check();const source=board,rev=board.revision,ticket=session;openAiWorkflow({project:{...origin.project,storyboard:board},draft:true,valid:()=>{try{check();return board===source&&board.revision===rev&&session===ticket;}catch{return false;}},apply:next=>{check();board=next.storyboard!;dirty=true;clear();render();}});}catch(e){error(e);}});
  $('close').addEventListener('click',close);dialog.addEventListener('cancel',e=>{e.preventDefault();close();});
  const tabs=Array.from($('tabs').querySelectorAll<HTMLButtonElement>('[role=tab]'));

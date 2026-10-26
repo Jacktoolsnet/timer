@@ -13,7 +13,7 @@ export function installAiModelPicker(action:HTMLSelectElement,model:HTMLInputEle
   effort.replaceChildren();option(effort,'',t.auto);if(text)for(const value of profile?.efforts??[])option(effort,value,t[value]);
   effort.value=Array.from(effort.options).some(o=>o.value===previous)?previous:'';effort.disabled=!text||!profile?.efforts.length;
   $('reasoning-hint').textContent=profile?.efforts.length?t.reasonHint:t.unknown;
-  $('model-advice').textContent=action.value==='script'?t.recommendScript:t.recommendBoard;
+  const suggestion=suggestedModel(action.value);$('model-advice').textContent=(modelProfile(suggestion.id)?.name??suggestion.id)+' · '+t[suggestion.effort];
   const list=lists.get(provider());$<HTMLButtonElement>('use-recommendation').disabled=!!list&&!list.some(m=>m.id===suggestedModel(action.value).id);
  }
  function choices(){

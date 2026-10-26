@@ -8,14 +8,15 @@ const {lang}=Astro.props,t=aiWorkflowWords(lang),m=aiModelWords(lang);
 <dialog id="ai-workflow-dialog" aria-labelledby="ai-workflow-title" data-words={JSON.stringify(t)} data-model-words={JSON.stringify(m)}>
  <header class="json-header"><h2 id="ai-workflow-title">{t.title}</h2></header>
  <div class="dialog-inner">
+  <div id="ai-workflow-spinner" role="status" hidden><span class="ai-progress-spinner" aria-hidden="true"></span><span class="sr-only">{t.working}</span></div>
   <p id="ai-workflow-draft" hidden>{t.draftHint}</p>
   <fieldset id="ai-workflow-settings">
    <label>{t.action}<select id="ai-workflow-action"><option value="board">{t.board}</option><option value="script">{t.script}</option><option value="image">{t.image}</option><option value="speech">{t.speech}</option></select></label>
+   <div id="ai-workflow-model-recommendation"><p id="ai-workflow-model-advice"></p><button id="ai-workflow-use-recommendation" type="button" title={m.useRecommendation} aria-label={m.useRecommendation}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L20 5"/></svg></button></div>
    <div class="ai-model-row"><label>{m.choice}<select id="ai-workflow-model-choice"></select></label><button id="ai-workflow-model-load" type="button" title={m.load} aria-label={m.load}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></svg></button></div>
    <label id="ai-workflow-model-manual" hidden>{m.manual}<input id="ai-workflow-model" type="text" maxlength="150" value="gpt-5-mini" autocomplete="off" spellcheck="false"/></label>
    <p class="small-hint">{m.hint}</p><p id="ai-workflow-model-status" role="status" aria-live="polite"></p>
    <div id="ai-workflow-reasoning-options"><label>{m.reasoning}<select id="ai-workflow-reasoning"></select></label><p id="ai-workflow-reasoning-hint" class="small-hint"></p></div>
-   <div id="ai-workflow-model-recommendation"><p id="ai-workflow-model-advice"></p><button id="ai-workflow-use-recommendation" type="button">{m.useRecommendation}</button></div>
    <label id="ai-workflow-tokens-label">{t.tokens}<input id="ai-workflow-tokens" type="number" min="1024" max="65536" step="1024" value="32768"/></label>
    <div id="ai-workflow-image-options" hidden>
     <label>{t.target}<select id="ai-workflow-target"></select></label>
@@ -38,11 +39,11 @@ const {lang}=Astro.props,t=aiWorkflowWords(lang),m=aiModelWords(lang);
   <progress id="ai-workflow-progress" hidden></progress>
   <p id="ai-workflow-cancel-hint" hidden>{t.cancelHint}</p>
   <section id="ai-workflow-preview" hidden><h3>{t.preview}</h3><p id="ai-workflow-summary"></p><img id="ai-workflow-image-preview" alt={t.preview} hidden/><div id="ai-workflow-audios"></div><textarea id="ai-workflow-json-preview" rows="9" readonly spellcheck="false" aria-label={t.preview} hidden></textarea></section>
-  <div id="ai-workflow-error-box" hidden><label for="ai-workflow-error">{t.error}</label><textarea id="ai-workflow-error" rows="3" readonly></textarea></div>
+  <div id="ai-workflow-error-box" role="alert" hidden><label for="ai-workflow-error">{t.error}</label><textarea id="ai-workflow-error" rows="3" readonly></textarea><div class="ai-error-actions"><button id="ai-workflow-copy-error" type="button" title={t.copyError} aria-label={t.copyError}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h13v13H8ZM3 16V3h13"/></svg></button><span id="ai-workflow-copy-status" role="status" aria-live="polite"></span></div></div>
  </div>
  <footer class="json-footer">
   <button id="ai-workflow-close" type="button" title={t.close} aria-label={t.close}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
-  <button id="ai-workflow-cancel" type="button" title={t.cancel} aria-label={t.cancel} hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v14H5Z"/></svg></button>
+  <button id="ai-workflow-cancel" type="button" title={t.cancel+' — '+t.cancelHint} aria-label={t.cancel} hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v14H5Z"/></svg></button>
   <button id="ai-workflow-start" type="button" title={t.start} aria-label={t.start}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 4 12 8-12 8Z"/></svg></button>
   <button id="ai-workflow-apply" type="button" title={t.apply} aria-label={t.apply} disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L20 5"/></svg></button>
  </footer>

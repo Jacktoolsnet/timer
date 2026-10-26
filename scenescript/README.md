@@ -1081,7 +1081,10 @@ bleibt als manuelle Alternative bestehen.
   wird bei Bedarf geöffnet. Kein Passwort in API-Aufrufen, keine Credentials in
   Projekt/History/Export/URLs/Prompts, keine Cookies/Referrer/Weiterleitungen/Retry.
   Responses setzen `store:false`; dies ersetzt keine Anbieter-Aufbewahrungsrichtlinie.
-- Ergebnisse zuerst als Vorschau, erst **Übernehmen** ändert den Entwurf/das Projekt.
+- Storyboard-Ergebnisse und -Skizzen öffnen sich nach erfolgreicher Prüfung direkt
+  als **Storyboard-Entwurf**. Erst „Änderungen speichern“ schreibt ihn ins Projekt.
+  Ausführbare SceneScripts, Cover und Sprachaufnahmen bleiben zunächst Vorschauen
+  und benötigen **Übernehmen**.
   Projektübernahmen sind mit Undo rückgängig zu machen. Zwischenzeitliche Änderungen
   machen Ergebnisse ungültig. Keine automatische Szenen-/Videoerzeugung nach Freigabe.
 - Abbrechen und ein Timeout nach 10 Minuten beenden das lokale Warten, garantieren
@@ -1196,3 +1199,36 @@ Quellen: [OpenAI-Modellliste](https://developers.openai.com/api/reference/resour
 [GPT-5-Reasoning](https://developers.openai.com/cookbook/examples/gpt-5/gpt-5_new_params_and_tools),
 [ElevenLabs-Modelle](https://elevenlabs.io/docs/api-reference/models/list).
 Tests verwenden ausschließlich simulierte Antworten und Fake-Keys.
+
+#### Tresor vor dem KI-Workflow entsperren
+
+Beim Öffnen des KI-Workflows wird zuerst der lokale Tresorstatus geprüft. Ist er
+bereits entsperrt, öffnet sich der Workflow direkt. Andernfalls erscheint bei
+eingerichtetem Tresor ein kleines passwortbasiertes Entsperr-Overlay, noch ohne
+KI-Workflow im Hintergrund. Falsche Passwörter bleiben dort korrigierbar; Abbruch
+öffnet keinen Workflow und verwirft auch eine noch laufende Entschlüsselung.
+Fehlt ein Tresor oder ist er beschädigt, wird zunächst die bestehende Einrichtung
+bzw. Wiederherstellung angeboten. Erst nach erfolgreichem Einrichten/Entsperren
+öffnet sich der Workflow. Dies gilt auch für Storyboard-Entwürfe und den Spracheinstieg.
+Das Entsperren erfolgt ausschließlich lokal, sendet weder Passwort noch Schlüssel
+an Anbieter und startet keine Erzeugung. Zwischenzeitlich veränderte Projekte oder
+Storyboard-Entwürfe werden nicht als veralteter KI-Kontext geöffnet.
+
+
+#### Bearbeitungsansicht und Fehler
+
+Nach Play zeigt der KI-Workflow während der Erzeugung nur einen Spinner und einen
+Icon-Button zum Abbrechen. Einstellungen und Zwischenresultate bleiben ausgeblendet.
+Erfolgreiche Storyboard-Überarbeitungen und Storyboard-Skizzen kehren automatisch
+in den Storyboard-Editor zurück (bei Einstieg aus der Projekt-Toolbar als neuer
+ungespeicherter Entwurf). Es werden keine Freigaben automatisch erteilt und keine
+Projektdateien oder ausführbaren Szenen still überschrieben. Der Entwurf kann
+weiter geprüft, gespeichert oder verworfen werden. Skript-, Cover- und Sprach-
+ergebnisse behalten die explizite Übernahme; teilfertige Sprachaufträge bleiben
+bei Fehlern manuell übernehmbar.
+
+Fehler werden im Workflow sichtbar und kopierbar angezeigt. Der Clipboard-Icon-
+Button kopiert ausschließlich den sichtbaren, bereinigten Fehlertext; bei fehlenden
+Clipboard-Rechten wird der Text für Strg+C / Cmd+C markiert. Keine automatischen
+Wiederholungen oder neuen Kosten. Abbruch kann Kosten beim Anbieter nicht rückgängig
+machen. Veraltete bzw. ungültige Ergebnisse werden weiterhin nicht übernommen.

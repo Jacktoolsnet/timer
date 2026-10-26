@@ -34,3 +34,11 @@ const {lang}=Astro.props,t=apiVaultWords(lang);
   <button id="api-vault-submit" type="submit" form="api-vault-form" class="json-apply" title={t.create} aria-label={t.create}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></button>
  </div></footer>
 </dialog>
+
+<dialog id="api-unlock-dialog" aria-labelledby="api-unlock-title">
+ <form id="api-unlock-form" autocomplete="off">
+  <header class="json-header"><h2 id="api-unlock-title">{t.unlock}</h2></header>
+  <div class="dialog-inner"><p>{t.lockedError}</p><label for="api-unlock-password">{t.password}</label><input id="api-unlock-password" type="password" maxlength="256" autocomplete="current-password" spellcheck="false" required/><p id="api-unlock-error" role="alert" hidden></p></div>
+  <footer class="json-footer"><button id="api-unlock-close" type="button" title={t.close} aria-label={t.close}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button><button id="api-unlock-submit" type="submit" title={t.unlock} aria-label={t.unlock}><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0M12 14v3"/></svg></button></footer>
+ </form>
+</dialog>

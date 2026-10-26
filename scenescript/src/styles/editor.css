@@ -1194,5 +1194,28 @@ body.recording .comic-edit-overlay{display:none}
 .ai-model-row{display:grid;grid-template-columns:minmax(0,1fr) 44px;align-items:end;gap:10px}
 #ai-workflow-model-load{display:grid;place-items:center;width:44px;height:44px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--accent)}
 #ai-workflow-model-load svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8}
-#ai-workflow-model-recommendation{padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--accent-soft)}
-#ai-workflow-use-recommendation{padding:8px 12px;background:var(--surface);color:var(--accent);border:1px solid var(--line);border-radius:8px}
+#ai-workflow-model-recommendation{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--accent-soft)}
+#ai-workflow-use-recommendation{display:grid;place-items:center;flex-shrink:0;width:44px;height:44px;padding:10px;background:var(--surface);color:var(--accent);border:1px solid var(--line);border-radius:8px}
+
+/* Password-only gate before opening the AI workflow. */
+#api-unlock-dialog{width:min(420px,90vw);max-width:420px;max-height:90dvh;overflow:auto}
+#api-unlock-dialog form{margin:0}
+#api-unlock-dialog label{display:block;margin-bottom:8px}
+#api-unlock-password{width:100%;box-sizing:border-box;min-height:44px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font:inherit}
+#api-unlock-error{color:var(--danger,#c75050);white-space:pre-wrap;user-select:text}
+#api-unlock-dialog [hidden]{display:none!important}
+
+/* Generation mode: only activity indicator and an accessible cancel action. */
+#ai-workflow-dialog.ai-running{width:min(260px,90vw);max-width:260px}
+#ai-workflow-dialog.ai-running>.json-header,#ai-workflow-dialog.ai-running #ai-workflow-draft,#ai-workflow-dialog.ai-running #ai-workflow-status,#ai-workflow-dialog.ai-running #ai-workflow-progress,#ai-workflow-dialog.ai-running #ai-workflow-cancel-hint,#ai-workflow-dialog.ai-running #ai-workflow-preview,#ai-workflow-dialog.ai-running #ai-workflow-error-box,#ai-workflow-dialog.ai-running #ai-workflow-close,#ai-workflow-dialog.ai-running #ai-workflow-apply{display:none!important}
+#ai-workflow-spinner{display:grid;place-items:center;min-height:150px}
+.ai-progress-spinner{display:block;width:56px;height:56px;box-sizing:border-box;border:5px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:ai-spinner-turn .8s linear infinite}
+#ai-workflow-dialog.ai-running>.json-footer{justify-content:center;border-top:0;background:transparent;padding-top:0}
+@keyframes ai-spinner-turn{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.ai-progress-spinner{animation:none}}
+.ai-error-actions{display:flex;align-items:center;gap:10px;margin-top:10px}
+#ai-workflow-copy-error{display:grid;place-items:center;width:44px;height:44px;padding:10px;background:var(--surface);color:var(--accent);border:1px solid var(--line);border-radius:10px;flex-shrink:0}
+#ai-workflow-copy-error svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8}
+
+#ai-workflow-model-advice{margin:0;min-width:0;overflow-wrap:anywhere}
+#ai-workflow-use-recommendation svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8}
