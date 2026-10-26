@@ -991,3 +991,61 @@ overlapping bars: sans-serif stems, open counters, warm metallic caps, dark
 extruded sides and bright beveled edges. No image sprites, remote font or runtime
 font dependency. The generated cover has no recoverable exact font; this is an
 independent geometric approximation of its proportions and material palette.
+
+## Lokaler API-Schlüsseltresor (erste Ausbaustufe)
+
+Der Schlüssel-Button in der Projekt-Toolbar öffnet einen separaten Tresor für
+**eigene** OpenAI-/ElevenLabs-API-Keys. Diese Ausbaustufe unterstützt ausschließlich explizit gestartete Lese-Tests der
+Schlüssel; Storyboard-/Bild-/Spracherzeugung werden separat angeschlossen.
+
+- Explizites Einrichten mit Speicherbestätigung; unabhängig von Projekt-Autosave.
+- Web Crypto: PBKDF2-HMAC-SHA-256 (600.000 Iterationen, 16-Byte-Zufallssalt),
+  AES-256-GCM (frische 12-Byte-IV je Schreibvorgang, 128-Bit-Tag, feste Versions-AAD).
+- Nur ein begrenztes, versioniertes verschlüsseltes Envelope liegt unter
+  `jacktools.scenescript.api-vault.v1` in Local Storage. Es gibt keine Vault-Exporte.
+- Passwort: 12–256 Zeichen, Groß-/Kleinbuchstaben, Zahl und Sonderzeichen;
+  empfohlen sind einzigartige, längere Passwörter aus einem Passwortmanager.
+- Entsperrt bleibt nur der nicht exportierbare CryptoKey im tablokalen Arbeitsspeicher;
+  Provider-Keys werden bei Bedarf kurz entschlüsselt. Keine Speicherung im Projekt,
+  Undo-Verlauf oder Session Storage. Klartextfelder werden nach Verarbeitung,
+  Schließen und Sperren geleert. Tabwechsel allein behalten die Eingaben.
+- Sperre nach zehn Minuten Inaktivität und bei `pagehide`;
+  automatische Sperrprüfung auch bei Rückkehr in den Tab und beim Schlüsselzugriff. Andere Tabs invalidieren
+  bestehende Sitzungen bei Änderungen. Web Locks serialisieren Schreibzugriffe,
+  zusätzlich schützen Snapshot-/Operationsprüfungen vor veralteten Ergebnissen.
+- Reset benötigt kein Passwort, löscht nur den lokalen Tresor, nicht Projekte und
+  **widerruft keine Schlüssel beim Anbieter**. Vergessene Passwörter sind nicht
+  wiederherstellbar. Browserdatenlöschung entfernt ebenfalls den Tresor.
+- Speicherung ist herkunftsgebunden: localhost, andere Ports, Domains, Browser und
+  Geräte teilen den Tresor nicht. HTTPS oder vertrauenswürdiges localhost nötig.
+
+**Sicherheitsgrenze:** Schutz ruhender Daten, kein Schutz vor XSS, kompromittiertem
+Frontend, Browser-Erweiterungen, Passwortabgriff oder einem kompromittierten Gerät.
+JS-Strings und Browser-/Prozessspeicher lassen sich nicht zuverlässig sicher löschen;
+Puffer werden bestmöglich geleert und Referenzen verworfen. Nie zentrale Betreiberkeys
+in diesem Tresor verteilen. Beim späteren Anschluss nur feste Provider-Zieladressen,
+keine Schlüssel in Logs/URLs/Prompts, eingeschränkte Rechte und Verbrauchslimits.
+
+Grundlagen: [Web Crypto](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/deriveKey),
+[AES-GCM-IVs](https://developer.mozilla.org/en-US/docs/Web/API/AesGcmParams),
+[PBKDF2-Härtung](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html).
+
+
+### API-Key testen
+
+Pro Anbieter gibt es einen Icon-Button mit Tooltip. Er testet entweder den gerade
+eingegebenen (noch nicht gespeicherten) Key oder den Key aus dem entsperrten Tresor.
+Testen speichert nichts. Nur der jeweilige Key wird im Authentifizierungsheader
+an einen fest vorgegebenen HTTPS-Endpunkt geschickt: OpenAI `GET /v1/models`,
+ElevenLabs `GET /v1/user`. Keine Projektinhalte, kein Passwort, keine Erzeugung.
+Cookies, Referrer und Caching sind deaktiviert; Weiterleitungen werden abgelehnt.
+Antwortinhalte werden weder angezeigt noch dauerhaft gespeichert. Für 401 werden
+begrenzt Fehlerkennungen ausgewertet, um fehlende Rechte von Authentifizierungs-
+problemen zu unterscheiden. 403 (auch IP-/Regionsbeschränkungen), 429, Netzwerk-
+und Timeoutfehler sind kein pauschaler Beweis für einen ungültigen Key.
+Ein erfolgreicher Lesetest bestätigt **nicht** Erzeugungsrechte oder Guthaben.
+Nach Eingabeänderungen, Sperren, Schließen oder Reset werden laufende Tests
+abgebrochen und alte Ergebnisse verworfen. Timeout: 15 Sekunden, keine Wiederholungen.
+
+Grundlagen: [OpenAI-Modellliste](https://developers.openai.com/api/reference/resources/models/methods/list),
+[ElevenLabs-Benutzerabfrage](https://elevenlabs.io/docs/api-reference/user/get).

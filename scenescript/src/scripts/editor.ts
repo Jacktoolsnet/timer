@@ -1,3 +1,4 @@
+import {installApiVault} from './api-vault';
 import {installStoryboardEditor} from './storyboard-editor';
 import type {MorphPreview} from './morph-preview';
 import {removeTextureAsset3D} from '../lib/texture3d';
@@ -61,6 +62,7 @@ import type {EditorKey} from '../lib/editor-i18n';
 const $=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(id) as T;
 const words=JSON.parse($('editor').dataset.words!) as Record<EditorKey,string>;
 const t=(key:string)=>words[key as EditorKey]||key;
+installApiVault(()=>{stop();draw(false);});
 const keepScreenAwake=screenWakeLock($('wake-status'),'',t('wakeUnavailable'));
 const startup=getStartupProject();
 let project:Project=startup.project, sceneIndex=0, selectedId='',dirty=false,time=0,playing=false,recording=false;

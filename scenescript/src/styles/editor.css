@@ -1108,3 +1108,36 @@ body.recording .comic-edit-overlay{display:none}
 .board-library-list>li>.board-approval-switch{position:relative;display:flex;align-items:center;gap:8px;min-height:44px;margin:0;padding:4px 10px;border-top:1px solid var(--line);font-size:.75rem;cursor:pointer}
 .board-library-list>li>.board-approval-switch>input{position:absolute;left:10px;width:46px;height:26px;margin:0;opacity:0;cursor:pointer}
 .board-library-list .board-approval-switch>span:last-child{min-width:0;overflow-wrap:anywhere}
+
+/* Credential storage is application-level, not a project resource. */
+#api-vault-dialog { width:calc(100vw - 32px); max-width:640px; max-height:92dvh; overflow:hidden; }
+#api-vault-dialog[open] { display:flex; flex-direction:column; }
+#api-vault-dialog > .json-header,#api-vault-dialog > .json-footer { flex-shrink:0; }
+#api-vault-dialog .dialog-inner { min-height:0; overflow:auto; }
+.vault-content { display:grid; gap:14px; }
+#api-vault-dialog [hidden] { display:none !important; }
+.vault-content p { margin:0; overflow-wrap:anywhere; }
+.vault-notice { font-size:.9rem; line-height:1.55; padding:12px; border:1px solid var(--line); border-radius:12px; background:var(--accent-soft); }
+#api-vault-form { display:grid; gap:14px; }
+.vault-tile { padding:16px; border:1px solid var(--line); border-radius:14px; background:var(--surface); display:grid; gap:12px; }
+.vault-tile label { display:grid; gap:7px; }
+.vault-tile input { width:100%; min-width:0; box-sizing:border-box; min-height:42px; padding:9px 11px; border:1px solid var(--line); border-radius:8px; background:var(--bg); color:var(--text); font:inherit; }
+.vault-consent { display:flex; align-items:flex-start; gap:10px; font-size:.9rem; }
+.vault-consent input { width:auto; margin-top:4px; }
+#api-vault-error { color:var(--danger,#c75050); white-space:pre-wrap; user-select:text; }
+#api-vault-state { font-weight:600; }
+#open-api-vault[data-vault-state="unlocked"] { color:#338463; background:color-mix(in srgb,#63bf8f 16%,var(--surface)); }
+#api-vault-dialog .json-footer { justify-content:space-between; }
+
+.vault-provider { display:grid; gap:7px; }
+.vault-key-entry { display:flex; align-items:center; gap:8px; min-width:0; }
+.vault-key-entry input { flex:1; }
+.vault-key-entry button { flex-shrink:0; width:42px; height:42px; padding:9px; border:1px solid var(--line); border-radius:8px; background:var(--accent-soft); color:var(--accent); }
+.vault-key-entry svg { width:22px; height:22px; stroke:currentColor; stroke-width:1.8; fill:none; }
+.vault-test-result { font-size:.85rem; line-height:1.5; user-select:text; }
+.vault-test-result[data-state="ok"] { color:#32805a; }
+.vault-test-result:is([data-state="permission"],[data-state="rate"],[data-state="unavailable"]) { color:var(--accent); }
+.vault-test-result:is([data-state="auth"],[data-state="network"],[data-state="timeout"],[data-state="input"]) { color:var(--danger,#c75050); }
+
+[data-theme="dark"] .vault-test-result[data-state="ok"] { color:#86d6a9; }
+[data-theme="dark"] .vault-test-result:is([data-state="auth"],[data-state="network"],[data-state="timeout"],[data-state="input"]) { color:#ffaaaa; }

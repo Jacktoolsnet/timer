@@ -39,7 +39,7 @@ const dictionaries = {
     "creditAfter": "by",
     "privacyTitle": "Your browser. Your choice.",
     "privacyBody": "SceneScript is ad-free and tracking-free. Projects and images stay in your browser. Automatically saving drafts and preferences is optional and disabled by default. Video downloads may use temporary local files.",
-    "privacyNote": "Delete local preferences and the saved project draft here. Downloaded files are not deleted.",
+    "privacyNote": "Delete local preferences and the saved project draft here. Downloaded files are not deleted. Reset encrypted API keys separately in the API key vault.",
     "clear": "Delete preferences and local draft",
     "cleared": "Saved preferences deleted.",
     "storageError": "Browser storage is unavailable. Settings will work for this visit."
@@ -81,7 +81,7 @@ const dictionaries = {
     "creditAfter": "entwickelt von",
     "privacyTitle": "Dein Browser. Deine Entscheidung.",
     "privacyBody": "SceneScript ist werbe- und trackingfrei. Projekte und Bilder bleiben in deinem Browser. Automatisches Speichern von Entwürfen und Einstellungen ist optional und standardmäßig ausgeschaltet. Video-Downloads können temporäre lokale Dateien verwenden.",
-    "privacyNote": "Hier kannst du lokale Einstellungen und den gespeicherten Projektentwurf löschen. Bereits heruntergeladene Dateien bleiben erhalten.",
+    "privacyNote": "Hier kannst du lokale Einstellungen und den gespeicherten Projektentwurf löschen. Bereits heruntergeladene Dateien bleiben erhalten. Verschlüsselte API-Schlüssel separat im API-Schlüsseltresor zurücksetzen.",
     "clear": "Einstellungen und lokalen Entwurf löschen",
     "cleared": "Gespeicherte Einstellungen gelöscht.",
     "storageError": "Browserspeicher ist nicht verfügbar. Die Einstellungen gelten für diesen Besuch."
@@ -123,7 +123,7 @@ const dictionaries = {
     "creditAfter": "por",
     "privacyTitle": "Tu navegador. Tu decisión.",
     "privacyBody": "SceneScript no tiene publicidad ni seguimiento. Proyectos e imágenes permanecen en tu navegador. Guardar borradores y ajustes es opcional y está desactivado. Las descargas de vídeo pueden usar archivos locales temporales.",
-    "privacyNote": "Elimina aquí ajustes y borrador local. Los archivos descargados no se eliminan.",
+    "privacyNote": "Elimina aquí ajustes y borrador local. Los archivos descargados no se eliminan. Restablece las claves API cifradas por separado en su caja.",
     "clear": "Eliminar ajustes y borrador local",
     "cleared": "Preferencias guardadas eliminadas.",
     "storageError": "El almacenamiento no está disponible. Los ajustes se usarán durante esta visita."
@@ -165,7 +165,7 @@ const dictionaries = {
     "creditAfter": "par",
     "privacyTitle": "Votre navigateur. Votre choix.",
     "privacyBody": "SceneScript est sans publicité ni suivi. Projets et images restent dans votre navigateur. La sauvegarde automatique des brouillons et réglages est facultative et désactivée. Les téléchargements vidéo peuvent utiliser des fichiers locaux temporaires.",
-    "privacyNote": "Effacez ici les réglages et le brouillon local. Les fichiers téléchargés ne sont pas supprimés.",
+    "privacyNote": "Effacez ici les réglages et le brouillon local. Les fichiers téléchargés ne sont pas supprimés. Réinitialisez les clés API chiffrées séparément dans leur coffre.",
     "clear": "Effacer réglages et brouillon local",
     "cleared": "Préférences enregistrées supprimées.",
     "storageError": "Le stockage est indisponible. Les réglages restent actifs pour cette visite."

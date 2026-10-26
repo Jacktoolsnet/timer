@@ -1,0 +1,36 @@
+---
+import type {Language} from '../lib/i18n';
+import {apiVaultWords} from '../lib/api-vault-i18n';
+interface Props{lang:Language}
+const {lang}=Astro.props,t=apiVaultWords(lang);
+---
+<dialog id="api-vault-dialog" aria-labelledby="api-vault-title" aria-describedby="api-vault-hint" data-words={JSON.stringify(t)}>
+ <header class="json-header"><div><h2 id="api-vault-title">{t.title}</h2><p id="api-vault-hint">{t.hint}</p></div></header>
+ <div class="dialog-inner vault-content">
+  <p class="vault-notice">{t.risk}</p><p class="small-hint">{t.phase}</p>
+  <p id="api-vault-state" role="status" aria-live="polite"></p>
+  <p id="api-vault-error" role="alert" hidden></p>
+  <form id="api-vault-form" autocomplete="off">
+   <div id="api-vault-passwords" class="vault-tile">
+    <label>{t.password}<input id="api-vault-password" type="password" minlength="12" maxlength="256" autocomplete="new-password" spellcheck="false" required /></label>
+    <label id="api-vault-repeat-label">{t.repeat}<input id="api-vault-repeat" type="password" maxlength="256" autocomplete="new-password" spellcheck="false" required /></label>
+    <p id="api-vault-policy" class="small-hint">{t.policy}</p>
+   </div>
+   <div id="api-vault-providers" class="vault-tile">
+    {(['openai','elevenlabs'] as const).map(provider=><div class="vault-provider">
+     <label for={'api-vault-'+provider}>{t[provider]}<span id={'api-vault-'+provider+'-status'} class="small-hint"></span></label>
+     <div class="vault-key-entry"><input id={'api-vault-'+provider} type="password" maxlength="1024" autocomplete="off" spellcheck="false" autocapitalize="off" aria-describedby={'api-vault-'+provider+'-test-result'} /><button id={'api-vault-test-'+provider} type="button" title={t.testKey+': '+(provider==='openai'?'OpenAI':'ElevenLabs')} aria-label={t.testKey+': '+(provider==='openai'?'OpenAI':'ElevenLabs')}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3M8 14h8"/></svg></button></div>
+     <p id={'api-vault-'+provider+'-test-result'} class="vault-test-result" role="status" aria-live="polite" hidden></p>
+    </div>)}
+    <p class="small-hint">{t.testHint}</p>
+   </div>
+   <label id="api-vault-consent-label" class="vault-consent"><input id="api-vault-consent" type="checkbox" required /><span>{t.consent}</span></label>
+  </form>
+  <section id="api-vault-reset-panel" class="vault-tile" hidden aria-labelledby="api-vault-reset-title"><h3 id="api-vault-reset-title">{t.resetTitle}</h3><p>{t.resetHint}</p><div class="compact-actions"><button id="api-vault-confirm-reset" type="button" class="danger">{t.resetConfirm}</button><button id="api-vault-reset-back" type="button">{t.back}</button></div></section>
+ </div>
+ <footer class="json-footer"><button id="api-vault-close" type="button" title={t.close} aria-label={t.close}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button><div class="json-footer-actions">
+  <button id="api-vault-reset" type="button" title={t.reset} aria-label={t.reset}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/></svg></button>
+  <button id="api-vault-lock" type="button" title={t.lock} aria-label={t.lock}><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></svg></button>
+  <button id="api-vault-submit" type="submit" form="api-vault-form" class="json-apply" title={t.create} aria-label={t.create}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></button>
+ </div></footer>
+</dialog>
