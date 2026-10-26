@@ -109,3 +109,20 @@ test('shared storyboard images survive removal from a subject and dependent scen
  assert.equal(removeStoryboardImage(result,{kind:'characters',id:board.characters[0].id}),result);
  assert.throws(()=>removeStoryboardImage(board,{kind:'shots',id:'missing'}));
 });
+
+test('settings equipment is optional, roundtrips, and only references actual object IDs',()=>{
+ const board=example();assert.equal(board.settings[0].objects,undefined);
+ board.settings[0].objects=[board.characters[0].id];const parsed=parseStoryboard(board);assert.deepEqual(parsed.settings[0].objects,board.settings[0].objects);
+ const feedback=JSON.parse(exportStoryboard(parsed));delete feedback.board.settings[0].objects;
+ assert.deepEqual(importStoryboard(JSON.stringify(feedback),parsed).settings[0].objects,board.settings[0].objects);
+ for(const objects of [null,['missing'],[board.characters[0].id,board.characters[0].id]]){
+  const bad=structuredClone(board);(bad.settings[0] as any).objects=objects;assert.throws(()=>parseStoryboard(bad),/objects/);
+ }
+ const bad=structuredClone(board);bad.characters[0].kind='character';assert.throws(()=>parseStoryboard(bad),/objects.*missing reference/);
+});
+test('changing fixed equipment invalidates dependent settings and their shots even without a direct shot reference',()=>{
+ const b=example();b.settings[0].objects=[b.characters[0].id];
+ for(const item of [...b.characters,...b.settings,...b.shots])item.status='approved';b.approved=true;
+ b.shots[0].characters=[];invalidateStoryboardApprovals(b,{kind:'characters',id:b.characters[0].id});
+ assert.equal(b.settings[0].status,'draft');assert.equal(b.shots[0].status,'draft');assert.equal(b.characters[1].status,'approved');assert.equal(b.approved,false);
+});

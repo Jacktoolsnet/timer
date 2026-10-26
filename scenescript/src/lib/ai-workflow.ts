@@ -37,10 +37,10 @@ export function imagePrompt(p:Project,target:BoardReviewTarget|null,request:stri
  if(target.kind==='shots'){
   const shot=b.shots.find(x=>x.id===target.id)!;
   task='Create ONE single-frame scene illustration showing one representative instant of ONLY the selected scene. Follow its action and camera framing. Include only the characters, objects and setting needed for this selected instant; do not illustrate preceding or following scenes. ';
-  context={project,selectedScene:{id:shot.id,action:shot.action,camera:shot.camera,comments:comments(shot.comments)},charactersAndObjects:b.characters.filter(x=>shot.characters.includes(x.id)).map(x=>({...subject(x),kind:x.kind})),settings:b.settings.filter(x=>shot.settings.includes(x.id)).map(subject)};
+  context={project,selectedScene:{id:shot.id,action:shot.action,camera:shot.camera,comments:comments(shot.comments)},charactersAndObjects:b.characters.filter(x=>shot.characters.includes(x.id)).map(x=>({...subject(x),kind:x.kind})),settings:b.settings.filter(x=>shot.settings.includes(x.id)).map(x=>({...subject(x),objects:(x.objects??[]).map(id=>b.characters.find(c=>c.id===id)).filter((c):c is NonNullable<typeof c>=>!!c).map(c=>({...subject(c),kind:c.kind}))}))};
  }else if(target.kind==='settings'){
-  task='Create ONE environment reference image of ONLY the selected setting. Show its layout, atmosphere and visual details as a single coherent view. No character lineup and no depiction of the complete story. ';
-  context={project,selectedSetting:subject(item as Storyboard['settings'][number])};
+  task='Create ONE environment reference image of ONLY the selected setting. Show its layout, atmosphere and visual details as a single coherent view. Include the defined fixed equipment using its specific appearance. Empty set: NO people, customers, actors, handheld props or scene actions, even if the description mentions them for composition. No character lineup and no depiction of the complete story. ';
+  const setting=b.settings.find(x=>x.id===target.id)!;context={project,selectedSetting:subject(setting),fixedEquipment:b.characters.filter(c=>setting.objects?.includes(c.id)).map(c=>({...subject(c),kind:c.kind}))};
  }else{
   const character=b.characters.find(x=>x.id===target.id)!;
   task=character.kind==='object'

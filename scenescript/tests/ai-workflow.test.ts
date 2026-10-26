@@ -84,3 +84,24 @@ test('AI elapsed time uses whole seconds, includes hours and clamps negative dur
  const {elapsedTime}=await import('../src/scripts/ai-progress.ts');
  for(const [ms,expected]of [[0,'00:00'],[999,'00:00'],[1000,'00:01'],[65000,'01:05'],[3599999,'59:59'],[3600000,'01:00:00'],[3661000,'01:01:01'],[-1000,'00:00']] as const)assert.equal(elapsedTime(ms),expected);
 });
+
+test('setting prompts include only fixed equipment and explicitly prohibit actors, while scene prompts retain equipment',()=>{
+ const p=project(),b=p.storyboard!;
+ b.characters.push({id:'machine',kind:'object',name:'Return machine',description:'Grey front with a turquoise frame',image:'ref',status:'approved',comments:[]});
+ b.settings=[{id:'market',name:'Return area',description:'Customer in front of the machine',objects:['machine'],image:null,status:'draft',comments:[]}];b.shots[0].settings=['market'];
+ const setting=imagePrompt(p,{kind:'settings',id:'market'},'');
+ assert.match(setting,/Grey front with a turquoise frame/);assert.match(setting,/NO people, customers, actors/);assert.doesNotMatch(setting,/"name":"Hero"/);
+ assert.match(imagePrompt(p,{kind:'shots',id:'shot'},''),/Grey front with a turquoise frame/);
+});
+test('image references select related identities/equipment only, deduplicate images and bound uploads',async()=>{
+ const {imageGenerationReferences}=await import('../src/lib/storyboard-image-references.ts');
+ const p=project(),b=p.storyboard!;b.images.machine={name:'Machine.png',data:pixel};b.images.place={name:'Place.png',data:pixel};b.images.other={name:'Other.png',data:pixel};
+ b.characters.push({id:'machine',kind:'object',name:'Return machine',description:'Grey',image:'machine',status:'approved',comments:[]},{id:'other',kind:'character',name:'Unrelated',description:'Not in shot',image:'other',status:'draft',comments:[]});
+ b.settings=[{id:'market',name:'Market',description:'Bright',objects:['machine'],image:'place',status:'draft',comments:[]}];b.shots[0].settings=['market'];
+ assert.deepEqual(imageGenerationReferences(p,{kind:'settings',id:'market'}).map(r=>r.imageId),['machine']);
+ assert.deepEqual(imageGenerationReferences(p,{kind:'characters',id:'hero'}).map(r=>r.imageId),['ref']);
+ const scene=imageGenerationReferences(p,{kind:'shots',id:'shot'});assert.deepEqual(scene.map(r=>r.imageId),['ref','place','machine']);assert.ok(!JSON.stringify(scene).includes('Unrelated'));
+ b.characters[1].image='ref';assert.deepEqual(imageGenerationReferences(p,{kind:'shots',id:'shot'}).find(r=>r.imageId==='ref')!.subjects.map(s=>s.id),['hero','machine']);
+ assert.deepEqual(imageGenerationReferences(p,null),[]);
+ b.images.ref.data='data:image/png;base64,'+'A'.repeat(7*1024*1024);assert.throws(()=>imageGenerationReferences(p,{kind:'characters',id:'hero'}),/maximum/);
+});

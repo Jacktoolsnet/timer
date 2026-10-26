@@ -308,3 +308,28 @@ test('failed AI requests show only a compact error overlay with copy left and cl
  await close.click();await expect(dialog).not.toBeVisible();expect(calls).toBe(1);
  await page.locator('#open-ai-workflow').click();await expect(dialog).not.toHaveClass(/ai-error-view/);await expect(page.locator('#ai-workflow-settings')).toBeVisible();await expect(copy).not.toBeVisible();
 });
+
+test('setting preview sends equipment image pixels but neither customer nor previous setting images',async({page})=>{
+ const p=quickImageProject(),b=p.storyboard!,png='iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aZ1sAAAAASUVORK5CYII=';
+ b.images={object:{name:'Drone.png',data:'data:image/png;base64,'+png},person:{name:'Customer.png',data:'data:image/png;base64,'+png},old:{name:'Previous scene.png',data:'data:image/png;base64,'+png}};
+ b.characters[0].image='person';b.characters[1].image='object';b.settings[0].objects=['prop'];b.settings[0].image='old';
+ await setup(page,p);let calls=0;
+ await page.route('https://api.openai.com/v1/images/edits',async r=>{if(r.request().method()==='OPTIONS'){await r.fulfill({headers:cors});return;}calls++;const body=r.request().postDataJSON();
+  expect(body.images).toEqual([{image_url:'data:image/png;base64,'+png}]);expect(body.prompt).toContain('Small silver drone');expect(body.prompt).toContain('NO people, customers, actors');expect(body.prompt).not.toContain('Copper pilot');expect(body.prompt).toContain('"id":"prop"');
+  await r.fulfill({headers:cors,json:{data:[{b64_json:png}]}});});
+ await page.locator('#open-storyboard').click();await page.locator('[data-board-tab=settings]').click();await page.locator('.board-generate-image').click();
+ await expect(page.locator('#ai-workflow-quick-summary')).toContainText('Reference images: 1');await expect(page.locator('#ai-workflow-quick-hint')).toContainText('additional input costs');
+ await page.locator('#ai-workflow-quick-start').click();await expect(page.locator('#ai-workflow-quick-confirm')).not.toBeVisible();await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();await expect(page.locator('#storyboard-status')).toContainText('saved in the project');expect(calls).toBe(1);
+});
+test('scene previews rasterize SVG references locally and allow reference uploads to be disabled',async({page})=>{
+ const p=quickImageProject(),b=p.storyboard!,png='iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aZ1sAAAAASUVORK5CYII=';
+ b.images.svg={name:'Pilot.svg',data:'data:image/svg+xml;base64,'+Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="100" height="200"><rect width="100" height="200" fill="orange"/></svg>').toString('base64')};b.characters[0].image='svg';
+ await setup(page,p);let edits=0,generations=0;
+ await page.route('https://api.openai.com/v1/images/edits',async r=>{if(r.request().method()==='OPTIONS'){await r.fulfill({headers:cors});return;}edits++;const body=r.request().postDataJSON();expect(body.images).toHaveLength(1);expect(body.images[0].image_url).toMatch(/^data:image\/png;base64,/);
+  const dims=await page.evaluate(async data=>{const img=new Image();img.src=data;await img.decode();return [img.naturalWidth,img.naturalHeight];},body.images[0].image_url);expect(dims).toEqual([512,1024]);await r.fulfill({headers:cors,json:{data:[{b64_json:png}]}});});
+ await page.route('https://api.openai.com/v1/images/generations',async r=>{if(r.request().method()==='OPTIONS'){await r.fulfill({headers:cors});return;}generations++;expect(r.request().postDataJSON()).not.toHaveProperty('images');await r.fulfill({headers:cors,json:{data:[{b64_json:png}]}});});
+ await page.locator('#open-ai-workflow').click();await page.locator('#ai-workflow-action').selectOption('image');await page.locator('#ai-workflow-target').selectOption('shots:shot');await expect(page.locator('#ai-workflow-image-reference-summary')).toContainText('Reference images: 1');await generate(page);
+ await expect(page.locator('#storyboard-dialog')).toBeVisible();await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();expect(edits).toBe(1);
+ await page.locator('#storyboard-ai-open').click();await page.locator('#ai-workflow-action').selectOption('image');await page.locator('#ai-workflow-target').selectOption('shots:shot');await page.locator('#ai-workflow-image-refs').uncheck();await expect(page.locator('#ai-workflow-image-reference-summary')).toContainText('Reference images: 0');await generate(page);
+ await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();expect(generations).toBe(1);
+});

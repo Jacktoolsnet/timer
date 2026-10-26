@@ -8,7 +8,7 @@ import {videoLanguageForLocale,videoLanguageOptions} from '../lib/video-language
 import {aiLanguageInstruction} from '../lib/ai-language';
 import {openAiWorkflow,type AiWorkflowOptions} from './ai-workflow';
 import type {Project} from '../lib/model';
-import {MAX_STORYBOARD_BYTES,newStoryboard,parseStoryboard,importStoryboard,exportStoryboard,storyboardGuide,canApproveStoryboard,invalidateStoryboardApprovals,type BoardReviewTarget,type BoardCharacter,type Storyboard,type BoardFormat,type BoardComment} from '../lib/storyboard';
+import {MAX_STORYBOARD_BYTES,newStoryboard,parseStoryboard,importStoryboard,exportStoryboard,storyboardGuide,canApproveStoryboard,invalidateStoryboardApprovals,type BoardReviewTarget,type BoardSetting,type BoardCharacter,type Storyboard,type BoardFormat,type BoardComment} from '../lib/storyboard';
 import type {storyboardWords} from '../lib/storyboard-i18n';
 const $=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById('storyboard-'+id) as T;
 let showAiStoryboard:((board:Storyboard,saved?:boolean)=>void)|undefined;
@@ -179,7 +179,10 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
    const {sidebar,detail}=library(root,subjects);
    for(const subject of subjects.filter(s=>s.id===selectedItems[tab])){const card=node('article');card.className='board-card';const get=(b:Storyboard)=>b[kind].find(s=>s.id===subject.id)!,target:BoardReviewTarget={kind,id:subject.id};card.dataset.subjectId=subject.id;
     heading(card,subject.name,{...textConfig(t.fieldTitle,subject.name,(b,v)=>{get(b).name=String(v);},200),target},kind+'-'+subject.id+'-name');
-    if(kind==='characters'){const character=subject as BoardCharacter;field(card,t.category,character.kind==='object'?t.objectCategory:t.characterCategory,{label:t.category,value:character.kind,kind:'select',options:[['character',t.characterCategory],['object',t.objectCategory]],target,subjectKind:true,apply:(b,v)=>{b.characters.find(c=>c.id===subject.id)!.kind=v as BoardCharacter['kind'];}},kind+'-'+subject.id+'-kind');}
+    if(kind==='characters'){const character=subject as BoardCharacter;field(card,t.category,character.kind==='object'?t.objectCategory:t.characterCategory,{label:t.category,value:character.kind,kind:'select',options:[['character',t.characterCategory],['object',t.objectCategory]],target,subjectKind:true,apply:(b,v)=>{if(v==='character'&&b.settings.some(s=>s.objects?.includes(subject.id)))throw new Error(t.objectInUse);b.characters.find(c=>c.id===subject.id)!.kind=v as BoardCharacter['kind'];}},kind+'-'+subject.id+'-kind');}
+    if(kind==='settings'){const setting=subject as BoardSetting,objects=board.characters.filter(c=>c.kind==='object');
+     field(card,t.equipment,(setting.objects??[]).map(id=>objects.find(o=>o.id===id)?.name??id).join(', '),{label:t.equipment,value:setting.objects??[],kind:'choices',options:objects.map(o=>[o.id,o.name]),target,apply:(b,v)=>{b.settings.find(s=>s.id===subject.id)!.objects=v as string[];}},'settings-'+subject.id+'-objects');
+    }
     picture(card,subject.image,subject.name,(b,v)=>{get(b).image=String(v)||null;},kind+'-'+subject.id+'-image',undefined,target);
     const voiceWords=voicePickerWords(document.documentElement.lang as Language);
     field(card,voiceWords.voice,subject.voice?subject.voice.name+' · '+subject.voice.id:voiceWords.none,{label:voiceWords.voice,value:JSON.stringify(subject.voice??null),kind:'voice',target,apply:(b,v)=>{const voice=JSON.parse(String(v)) as VoiceAssignment|null;if(voice)get(b).voice=voice;else delete get(b).voice;}},kind+'-'+subject.id+'-voice');

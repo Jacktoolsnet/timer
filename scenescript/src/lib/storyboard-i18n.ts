@@ -1,5 +1,6 @@
 import type {Language} from './i18n';
 const words={
+ equipment:['Feste Ausstattung','Fixed equipment','Equipamiento fijo','Équipement fixe'],objectInUse:['Dieses Objekt ist noch als feste Ausstattung einer Kulisse zugeordnet. Bitte zuerst dort entfernen.','This object is still assigned as fixed equipment in a setting. Remove that assignment first.','Este objeto sigue asignado a un decorado. Elimina primero esa asignación.','Cet objet est encore associé à un décor. Retirez d’abord cette association.'],
  saved:['Storyboard im Projekt gespeichert.','Storyboard saved in the project.','Storyboard guardado en el proyecto.','Storyboard enregistré dans le projet.'],
  generatePreview:['Vorschaubild mit KI erzeugen','Generate preview with AI','Generar vista previa con IA','Générer un aperçu avec l’IA'],
  deleteImage:['Bild löschen','Delete image','Eliminar imagen','Supprimer l’image'],

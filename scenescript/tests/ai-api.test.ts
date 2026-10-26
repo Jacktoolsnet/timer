@@ -134,3 +134,18 @@ test('diagnostics redact secrets before truncation and discard control character
  const short=providerErrorDetails('elevenlabs',key,{detail:{message:'xi-api-key: OTHER_SECRET; Authorization: Bearer TOKEN sk-test-12345678'}});
  assert.ok(!short.includes('OTHER_SECRET'));assert.ok(!short.includes('TOKEN'));assert.ok(!short.includes('sk-test-12345678'));
 });
+
+test('image references use the official JSON edits endpoint, embedded image URLs and no automatic fallback',async()=>{
+ const images=['data:image/png;base64,AAAA','data:image/webp;base64,BBBB'];let calls=0;
+ await generateImage(key,{model:'gpt-image-2',prompt:'Recompose selected subjects',size:'1280x720',quality:'low',images},signal(),async(url,init)=>{
+  calls++;assert.equal(url,'https://api.openai.com/v1/images/edits');const body=JSON.parse(String(init?.body));
+  assert.deepEqual(body.images,images.map(image_url=>({image_url})));assert.equal(body.n,1);assert.equal(body.output_format,'png');assert.equal(body.size,'1280x720');assert.ok(!('input_fidelity'in body));
+  assert.equal(init?.credentials,'omit');return Response.json({data:[{b64_json:'AAAA'}]});
+ });assert.equal(calls,1);
+ calls=0;await assert.rejects(generateImage(key,{model:'gpt-image-2',prompt:'Sketch',size:'1280x720',quality:'low',images},signal(),async()=>{calls++;return Response.json({error:{message:'References rejected'}},{status:400});}),AiApiError);assert.equal(calls,1);
+});
+test('image generation refuses external URLs, SVG and excess reference data before any paid call',async()=>{
+ for(const images of [['https://evil.invalid/a.png'],['data:image/svg+xml;base64,AAAA'],Array(9).fill('data:image/png;base64,AAAA'),['data:image/png;base64,'+'A'.repeat(7*1024*1024)]]){
+  let calls=0;await assert.rejects(generateImage(key,{model:'gpt-image-2',prompt:'Sketch',size:'1280x720',quality:'low',images},signal(),async()=>{calls++;return Response.json({});}),AiApiError);assert.equal(calls,0);
+ }
+});

@@ -1277,3 +1277,27 @@ Fehler erscheinen als kompaktes Overlay ohne die normalen Workflow-Einstellungen
 Die untere Toolbar enthält links Kopieren und rechts Schließen (Icons mit Tooltips).
 Bei teilfertigen Sprachaufträgen führt das Schließen der Fehlermeldung zurück zur Vorschau
 der bereits erzeugten Dateien, damit diese weiterhin ausdrücklich übernommen werden können.
+
+#### Feste Ausstattung und Bildreferenzen im Storyboard
+Kulissen haben optional `objects:[objectId]`: feste Ausstattung aus `board.characters` mit
+`kind:"object"`. Im Kulissen-Tab öffnet der Bleistift bei „Feste Ausstattung“ eine Mehrfachauswahl.
+Charaktere gehören nicht zur Ausstattung; sie werden wie bisher direkt in Szenen zugeordnet.
+Kulissenbilder zeigen eine leere Umgebung mit der definierten Ausstattung, Szenenbilder einen
+einzelnen Moment mit den zugeordneten Figuren, Objekten und Kulissen.
+Alte Storyboards ohne `objects` bleiben gültig; es gibt keine automatische Zuordnung anhand von Namen.
+Änderungen an Ausstattungsobjekten setzen auch die Freigaben abhängiger Kulissen und Szenen zurück.
+
+Die Bilderzeugung sendet standardmäßig passende vorhandene Bildreferenzen:
+- Charakter/Objekt: das eigene vorhandene Referenzbild, sofern vorhanden.
+- Kulisse: die Bilder ihrer festen Ausstattung, nicht ihr bisheriges Kulissenbild oder fremde Figuren.
+- Szene: zugeordnete Figuren/Objekte, Kulissen und deren feste Ausstattung; nicht frühere Szenenbilder.
+- Cover: weiterhin textbasiert, kein automatischer Upload der gesamten Bildbibliothek.
+„Passende Referenzbilder mitsenden“ kann im normalen KI-Dialog ausgeschaltet werden.
+Anzahl und Namen werden vor der Anfrage angezeigt; der direkte KI-Button nutzt diese Standardwerte.
+Maximal acht eindeutige Referenzbilder / 6 MiB; bei Überschreitung keine kostenpflichtige Anfrage,
+kein stilles Weglassen. Sichere SVG-Skizzen werden lokal ohne Zuschnitt in PNG umgewandelt.
+Mit Referenzen wird `POST /v1/images/edits` mit JSON-`images:[{image_url:embeddedDataURL}]` verwendet;
+ohne Referenzen weiterhin `/v1/images/generations`. Kein Upload über Files API, keine externen URLs,
+keine automatischen Wiederholungen oder kostenpflichtigen Fallback-Aufrufe.
+Bildreferenzen verursachen zusätzliche Eingabekosten und garantieren keine vollständig identischen Figuren.
+API-Format: [offizielle OpenAI-Dokumentation](https://developers.openai.com/api/reference/resources/images/methods/edit).

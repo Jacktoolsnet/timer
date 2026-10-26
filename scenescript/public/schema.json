@@ -3256,6 +3256,7 @@
       }
     },
     "BoardVoice": {"type":"object","additionalProperties":false,"required":["provider","id","name"],"properties":{"provider":{"const":"elevenlabs"},"id":{"type":"string","minLength":1,"maxLength":100,"pattern":"^[a-zA-Z0-9_-]+$"},"name":{"type":"string","maxLength":200}}},
+    "BoardSetting": {"type": "object", "additionalProperties": false, "required": ["id", "name", "description", "image", "comments"], "properties": {"voice": {"anyOf": [{"$ref": "#/$defs/BoardVoice"}, {"type": "null"}]}, "status": {"enum": ["draft", "approved"], "default": "draft"}, "id": {"type": "string", "minLength": 1, "maxLength": 100, "pattern": "^[a-zA-Z0-9_-]+$"}, "name": {"type": "string", "maxLength": 200}, "description": {"type": "string", "maxLength": 10000}, "image": {"anyOf": [{"type": "string", "minLength": 1, "maxLength": 100, "pattern": "^[a-zA-Z0-9_-]+$"}, {"type": "null"}]}, "comments": {"type": "array", "maxItems": 100, "items": {"$ref": "#/$defs/BoardComment"}}, "objects": {"type": "array", "maxItems": 100, "uniqueItems": true, "items": {"type": "string", "minLength": 1, "maxLength": 100, "pattern": "^[a-zA-Z0-9_-]+$"}, "description": "Fixed equipment: references to board.characters with kind object, never people."}}},
     "BoardSubject": {
       "type": "object",
       "additionalProperties": false,
@@ -3496,7 +3497,7 @@
           "type": "array",
           "maxItems": 100,
           "items": {
-            "$ref": "#/$defs/BoardSubject"
+            "$ref": "#/$defs/BoardSetting"
           }
         },
         "shots": {

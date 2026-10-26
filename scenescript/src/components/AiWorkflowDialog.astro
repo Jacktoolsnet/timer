@@ -30,6 +30,8 @@ const {lang}=Astro.props,t=aiWorkflowWords(lang),m=aiModelWords(lang),l=aiWorkfl
     <label>{t.size}<input id="ai-workflow-size" type="text" readonly aria-describedby="ai-workflow-image-size-hint"/></label>
     <p id="ai-workflow-image-size-hint" class="small-hint">{t.imageSizeHint}</p>
     <label>{t.quality}<select id="ai-workflow-quality"><option value="low">{t.low}</option><option value="medium" selected>{t.medium}</option><option value="high">{t.high}</option></select></label>
+    <label class="ai-check board-approval-switch"><input id="ai-workflow-image-refs" type="checkbox" role="switch" checked/><span class="board-switch-track" aria-hidden="true"></span><span>{t.imageRefs}</span></label>
+    <p id="ai-workflow-image-reference-summary" class="small-hint"></p>
     <details class="ai-flow-details"><summary>{l.details}</summary><p class="small-hint">{t.imageHint}</p></details>
    </section>
    <section id="ai-workflow-speech-options" class="ai-flow-tile ai-flow-wide" data-ai-tile="speech" aria-labelledby="ai-speech-heading" hidden><h3 id="ai-speech-heading">{l.speech}</h3>

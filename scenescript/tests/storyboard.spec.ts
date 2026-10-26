@@ -319,3 +319,15 @@ test('manual approval edits after saving remain isolated until the next Save',as
  await toggle.check();page.once('dialog',dialog=>dialog.accept());await page.locator('#storyboard-close').click();
  await page.locator('#open-storyboard').click();await page.locator('[data-board-tab=objects]').click();await expect(toggle).not.toBeChecked();
 });
+
+test('settings offer fixed equipment from objects only and changes require review',async({page})=>{
+ await setup(page);await page.locator('[data-board-tab=settings]').click();
+ const setting=fixture().storyboard.settings[0],edit=page.locator('[data-board-edit="settings-'+setting.id+'-objects"]');
+ await edit.click();await expect(page.locator('#storyboard-field-heading')).toContainText('Feste Ausstattung');
+ const choices=page.locator('#storyboard-field-choices input');await expect(choices).toHaveCount(2);await choices.first().check();await page.locator('#storyboard-field-apply').click();
+ await expect(page.locator('#storyboard-content')).toContainText(fixture().storyboard.characters[0].name);await page.locator('#storyboard-save').click();await page.locator('#storyboard-close').click();
+ const pending=page.waitForEvent('download');await page.locator('#save-project').click();const saved=JSON.parse(await readFile((await(await pending).path())!,'utf8'));
+ expect(saved.storyboard.settings[0].objects).toEqual([fixture().storyboard.characters[0].id]);expect(saved.storyboard.settings[0].status).toBe('draft');expect(saved.scenes).toEqual(fixture().scenes);
+ await page.locator('#open-storyboard').click();await page.locator('[data-board-tab=objects]').click();const object=fixture().storyboard.characters[0];await page.locator('[data-board-edit="characters-'+object.id+'-kind"]').click();
+ await page.locator('#storyboard-field-select').selectOption('character');await page.locator('#storyboard-field-apply').click();await expect(page.locator('#storyboard-field-error')).toContainText('feste Ausstattung');
+});

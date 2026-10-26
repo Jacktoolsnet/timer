@@ -49,9 +49,13 @@ export async function generateText(key:string,request:TextRequest,signal:AbortSi
  if(!text||text.length>8*MiB)throw new AiApiError('response');
  try{JSON.parse(text);}catch{throw new AiApiError('response');}return text;
 }
-export async function generateImage(key:string,request:{model:string;prompt:string;size:string;quality:string},signal:AbortSignal,fetcher:typeof fetch=fetch){
+export async function generateImage(key:string,request:{model:string;prompt:string;size:string;quality:string;images?:string[]},signal:AbortSignal,fetcher:typeof fetch=fetch){
  if(!validImageSize(request.model,request.size)||!['low','medium','high'].includes(request.quality)||!request.prompt.trim()||request.prompt.length>32000)throw new AiApiError('request');
- const r=json(await call('openai','/v1/images/generations',key,{...request,model:id(request.model),n:1,output_format:'png'},signal,12*MiB,fetcher));
+ const {images=[],...options}=request;
+ if(images.length>8||images.reduce((n,x)=>n+x.length,0)>6*MiB||images.some(x=>!/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/]+={0,2}$/.test(x)))throw new AiApiError('size');
+ const body={...options,model:id(request.model),n:1,output_format:'png',...(images.length?{images:images.map(image_url=>({image_url}))}:{})};
+ if(new TextEncoder().encode(JSON.stringify(body)).length>10*MiB)throw new AiApiError('size');
+ const r=json(await call('openai',images.length?'/v1/images/edits':'/v1/images/generations',key,body,signal,12*MiB,fetcher));
  const data=r?.data?.[0]?.b64_json;if(typeof data!=='string'||!data||data.length>Math.ceil(8*MiB/3)*4||!/^[A-Za-z0-9+/]*={0,2}$/.test(data))throw new AiApiError('response');return 'data:image/png;base64,'+data;
 }
 export async function generateSpeech(key:string,request:{voice:string;model:string;text:string},signal:AbortSignal,fetcher:typeof fetch=fetch){
