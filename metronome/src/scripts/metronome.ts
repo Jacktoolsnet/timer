@@ -1,3 +1,4 @@
+import {enhanceClockSelects} from '../../../shared/preview-selects';
 import {defaults,normalize,pulseAt,tappedTempo,type Settings,type Accent} from '../lib/metronome';
 import {copy} from '../lib/metronome-i18n';
 import type {Language} from '../lib/i18n';
@@ -32,13 +33,14 @@ function sync(){
  document.querySelector<HTMLElement>('.gap-options')!.hidden=!settings.gap;
  stage.dataset.view=settings.view;stage.classList.toggle('reduced',settings.reduced||motion.matches);
  document.querySelectorAll<HTMLButtonElement>('[data-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===settings.view)));
+ document.querySelectorAll('#metronome-settings select').forEach(select=>select.dispatchEvent(new Event('options-sync')));
  drawBeats();
 }
 function silence(){for(const source of sources){try{source.stop();}catch{}}sources.clear();}
 function stop(message=t.ready){
  generation++;starting=false;running=false;window.clearInterval(interval);cancelAnimationFrame(animation);silence();events=[];displayedIndex=-1;
  $('start').textContent=`▶ ${t.start}`;$('start').setAttribute('aria-pressed','false');$('play-status').textContent=message;
- stage.classList.remove('gap-hidden');$('current-beat').textContent='1';$('bar-label').textContent=`${t.bar} 1`;
+ stage.classList.remove('gap-hidden');$('current-beat').textContent='1';$('current-bar').textContent='1';
  $('orbit-arm').style.transform='rotate(0deg)';$('pendulum-arm').style.transform='rotate(0deg)';
  document.querySelectorAll('#beat-buttons button').forEach(b=>b.classList.remove('active'));
 }
@@ -66,7 +68,7 @@ function render(){
  if(latest){
   displayedIndex=latest.index;const p=pulseAt(displayedIndex,settings);
   const hide=p.silent&&settings.hideGap;stage.classList.toggle('gap-hidden',hide);
-  $('current-beat').textContent=String(p.beat+1);$('bar-label').textContent=`${t.bar} ${p.bar+1}`;
+  $('current-beat').textContent=String(p.beat+1);$('current-bar').textContent=String(p.bar+1);
   // Status changes only per bar: no incessant live-region beat announcements.
   const label=p.silent?t.quiet:t.playing;if($('play-status').textContent!==label)$('play-status').textContent=label;
   document.querySelectorAll('#beat-buttons button').forEach((b,i)=>b.classList.toggle('active',!hide&&i===p.beat));
@@ -123,3 +125,7 @@ motion.addEventListener('change',()=>stage.classList.toggle('reduced',settings.r
 document.addEventListener('storage-enabled',save);
 // Clearing storage does not interrupt the current rhythm; it only removes persistence.
 sync();
+
+document.querySelector('#metronome-settings')?.addEventListener('submit',event=>event.preventDefault());
+
+enhanceClockSelects(document.querySelector<HTMLFormElement>('#metronome-settings')!);

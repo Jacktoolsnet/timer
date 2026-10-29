@@ -16,10 +16,10 @@ test('instrument, practice, persistence and focus',async({page})=>{
  await page.locator('#focus').click();await expect(page.locator('.site-header')).not.toBeVisible();
  await page.keyboard.press('Escape');await expect(page.locator('.site-header')).toBeVisible();
  await page.locator('#start').click();await expect(page.locator('#start')).toHaveAttribute('aria-pressed','false');
- await page.locator('.practice-panel summary').click();await page.locator('#gap').check();
+ await page.locator('#gap').check();
  await expect(page.locator('.gap-options')).toBeVisible();
  await page.locator('#audible-bars').fill('1');await page.locator('#audible-bars').press('Tab');
- await page.locator('#beats').selectOption('1');await page.locator('#hide-gap').check();
+ await page.locator('#trigger-beats').click();await page.locator('#options-beats [role=option]').filter({hasText:/^1✓$/}).click();await page.locator('#hide-gap').check();
  await page.locator('#start').click();await expect(page.locator('.instrument-stage')).toHaveClass(/gap-hidden/,{timeout:4000});
  await page.locator('#start').click();
  expect(await page.evaluate(()=>Object.keys(localStorage).filter(k=>k.startsWith('jacktools.metronome')))).toEqual([]);
@@ -53,7 +53,7 @@ test('audio uses clock-scheduled subdivisions and stops on inactivity',async({pa
    osc.start=(when=0)=>{(window as any).scheduled.push(when);start(when);};return osc;
   };
  });
- await page.goto('/en/');await page.locator('.practice-panel summary').click();await page.locator('#subdivision').selectOption('2');
+ await page.goto('/en/');await page.locator('#trigger-subdivision').click();await page.locator('#options-subdivision [role=option]').nth(1).click();
  await page.locator('#start').click();
  await expect.poll(()=>page.evaluate(()=>(window as any).scheduled.length)).toBeGreaterThan(3);
  const clicks:number[]=await page.evaluate(()=>(window as any).scheduled);
@@ -69,4 +69,68 @@ test('narrow screen with enlarged text stays within viewport',async({page})=>{
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  await page.locator('#palette-dropdown summary').click();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});
+test('pendulum readout stays inside its body',async({page})=>{
+ await page.goto('/de/');await page.locator('button[data-view="pendulum"]').click();
+ const body=await page.locator('.pendulum-case').boundingBox();
+ const readout=await page.locator('.beat-readout').boundingBox();
+ expect(body).not.toBeNull();expect(readout).not.toBeNull();
+ expect(readout!.x).toBeGreaterThan(body!.x);
+ expect(readout!.y).toBeGreaterThan(body!.y);
+ expect(readout!.x+readout!.width).toBeLessThan(body!.x+body!.width);
+ expect(readout!.y+readout!.height).toBeLessThan(body!.y+body!.height);
+ await expect(page.locator('#current-beat')).toBeVisible();await expect(page.locator('#bar-label')).toBeVisible();
+});
+
+test('pendulum tiles flank the pivot without covering it',async({page})=>{
+ await page.goto('/de/');await page.locator('button[data-view="pendulum"]').click();
+ const pivot=await page.locator('#pendulum-arm circle').boundingBox();
+ const left=await page.locator('.beat-tile').boundingBox();const right=await page.locator('#bar-label').boundingBox();
+ expect(left!.x+left!.width).toBeLessThan(pivot!.x);
+ expect(right!.x).toBeGreaterThan(pivot!.x+pivot!.width);
+ for(const tile of [left!,right!]){expect(tile.y).toBeLessThan(pivot!.y);expect(tile.y+tile.height).toBeGreaterThan(pivot!.y+pivot!.height);}
+});
+test('beat and bar numerals use a consistent monospace font',async({page})=>{
+ await page.goto('/de/');
+ for(const view of ['orbit','pendulum']){
+  await page.locator(`button[data-view="${view}"]`).click();
+  const style=await page.locator('#current-beat').evaluate(el=>{
+   const css=getComputedStyle(el);return {font:css.fontFamily,variant:css.fontVariantNumeric};
+  });
+  expect(style.font).toContain('monospace');expect(style.variant).toContain('lining-nums');expect(style.variant).toContain('tabular-nums');
+  if(view==='pendulum')expect(await page.locator('#current-bar').evaluate(el=>getComputedStyle(el).fontFamily)).toBe(style.font);
+ }
+});
+test('normal card matches the clock workspace width without enlarging the instrument',async({page})=>{
+ await page.setViewportSize({width:1440,height:1100});await page.goto('/de/');
+ const card=await page.locator('.metronome-card').boundingBox();
+ const stage=await page.locator('.instrument-stage').boundingBox();
+ expect(card!.width).toBe(1000);expect(stage!.width).toBe(350);
+ expect(stage!.x+stage!.width/2).toBeCloseTo(card!.x+card!.width/2,0);
+});
+test('settings are separate, grouped responsively and hidden in focus view',async({page})=>{
+ await page.goto('/de/');
+ const card=await page.locator('.metronome-card').boundingBox();const settings=await page.locator('.metronome-settings-card').boundingBox();
+ expect(settings!.y).toBeGreaterThan(card!.y+card!.height);expect(settings!.width).toBe(card!.width);
+ await expect(page.locator('.metronome-settings-group')).toHaveCount(3);
+ const groups=await page.locator('.metronome-settings-group').all();
+ const a=await groups[0].boundingBox(),b=await groups[1].boundingBox();
+ if(page.viewportSize()!.width>=1000){expect(b!.x).toBeGreaterThan(a!.x);expect(b!.y).toBeCloseTo(a!.y,0);}
+ else if(page.viewportSize()!.width<700)expect(b!.y).toBeGreaterThan(a!.y+a!.height);
+ await expect(page.locator('#gap')).toBeVisible();await page.locator('#gap').check();await expect(page.locator('#audible-bars')).toBeVisible();
+ await page.locator('#focus').click();await expect(page.locator('.metronome-settings-card')).not.toBeVisible();
+ await page.keyboard.press('Escape');await expect(page.locator('.metronome-settings-card')).toBeVisible();
+});
+
+test('styled dropdown lists support keyboard selection, dismissal and synchronized state',async({page})=>{
+ await page.goto('/de/');
+ const trigger=page.locator('#trigger-beats'),options=page.locator('#options-beats');
+ await trigger.click();await expect(options).toBeVisible();await expect(options.locator('[aria-selected=true]')).toContainText('4');
+ await page.keyboard.press('ArrowDown');await page.keyboard.press('Enter');
+ await expect(trigger).toHaveText('5');await expect(page.locator('#beats')).toHaveValue('5');await expect(page.locator('#beat-buttons button')).toHaveCount(5);
+ await trigger.press('ArrowDown');await expect(options).toBeVisible();await page.keyboard.press('Escape');await expect(options).toBeHidden();await expect(trigger).toBeFocused();
+ await trigger.click();await page.locator('#trigger-sound').click();await expect(options).toBeHidden();
+ await page.locator('#options-sound [role=option]').nth(2).click();await expect(page.locator('#sound')).toHaveValue('soft');
+ for(const id of ['gap','reduced']){const input=page.locator('#'+id);await expect(input).toHaveAttribute('role','switch');await input.check();await expect(input).toBeChecked();}
+ await page.locator('#hide-gap').check();await expect(page.locator('#hide-gap')).toBeChecked();
 });
