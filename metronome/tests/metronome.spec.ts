@@ -149,3 +149,31 @@ test('muted accent lettering fades and restores when enabled',async({page})=>{
  await expect(beat.locator('b')).toHaveCSS('opacity','0.4');await expect(beat.locator('span')).toHaveCSS('opacity','0.4');
  await beat.click();await expect(beat).toHaveAttribute('data-accent','2');await expect(beat.locator('b')).toHaveCSS('opacity','1');
 });
+test('beat strip and bouncing ball follow rhythm, subdivisions and reduced motion',async({page})=>{
+ await page.goto('/de/');await page.locator('button[data-view="strip"]').click();
+ await expect(page.locator('#beat-strip')).toBeVisible();await expect(page.locator('.strip-beat')).toHaveCount(4);
+ await page.locator('#trigger-subdivision').click();await page.locator('#options-subdivision [role=option]').nth(2).click();
+ await expect(page.locator('.strip-beat .subdivision-dots i')).toHaveCount(12);
+ await page.locator('#beat-buttons button').nth(1).click();await expect(page.locator('.strip-beat').nth(1)).toHaveAttribute('data-accent','0');
+ await page.locator('#start').click();await expect(page.locator('.strip-beat.active')).toHaveCount(1);
+ await page.locator('button[data-view="ball"]').click();await expect(page.locator('.ball-art')).toBeVisible();await expect(page.locator('#start')).toHaveAttribute('aria-pressed','true');
+ await expect.poll(async()=>Number(await page.locator('#bouncing-ball').getAttribute('cy'))).toBeLessThan(230);
+ await page.locator('#reduced').check();await expect(page.locator('#bouncing-ball')).toHaveAttribute('cy','238');
+ await page.locator('#start').click();await expect(page.locator('#bouncing-ball')).toHaveAttribute('cx','30');
+ await page.locator('#beats').fill('12');await page.locator('#beats').press('Tab');await expect(page.locator('.ball-station')).toHaveCount(12);
+ await page.locator('button[data-view="strip"]').click();await expect(page.locator('.strip-beat')).toHaveCount(12);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});
+test('new animations honor visual gaps and saved view selection',async({page})=>{
+ await page.goto('/de/');await page.locator('button[data-view="ball"]').click();
+ await page.locator('#palette-dropdown summary').click();await page.locator('#remember-preferences').check();await page.locator('#palette-dropdown summary').click();
+ await page.reload();await expect(page.locator('.instrument-stage')).toHaveAttribute('data-view','ball');
+ await page.locator('#beats').fill('1');await page.locator('#beats').press('Tab');await page.locator('#bpm').fill('120');await page.locator('#bpm').press('Tab');
+ await page.locator('#gap').check();await page.locator('#audible-bars').fill('1');await page.locator('#audible-bars').press('Tab');await page.locator('#hide-gap').check();
+ for(const view of ['ball','strip']){
+  await page.locator(`button[data-view="${view}"]`).click();await page.locator('#start').click();
+  await expect(page.locator('.instrument-stage')).toHaveClass(/gap-hidden/,{timeout:3000});
+  await expect(page.locator(view==='ball'?'#bouncing-ball':'#beat-strip')).toBeHidden();
+  await page.locator('#start').click();
+ }
+});

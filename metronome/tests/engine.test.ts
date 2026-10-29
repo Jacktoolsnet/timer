@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {defaults,normalize,pulseAt,tappedTempo} from '../src/lib/metronome.ts';
+import {defaults,normalize,pulseAt,tappedTempo,bouncePosition} from '../src/lib/metronome.ts';
 test('normalizes untrusted saved settings',()=>{
  const s=normalize({bpm:Infinity,beats:99,subdivision:7,volume:-2,accents:[0,2,8 as 0],audibleBars:0});
  assert.equal(s.bpm,90);assert.equal(s.beats,12);assert.equal(s.subdivision,1);assert.equal(s.volume,0);assert.deepEqual(s.accents.slice(0,4),[0,2,1,1]);assert.equal(s.audibleBars,1);
@@ -25,4 +25,11 @@ test('tap tempo handles insufficient taps, jitter and outliers',()=>{
  assert.equal(tappedTempo([0]),null);assert.equal(tappedTempo([0,500,1000,1500]),120);
  assert.equal(tappedTempo([0,500,1005,1500,3500]),119);
  assert.equal(tappedTempo([0,100]),300);assert.equal(tappedTempo([0,3000]),20);
+});
+
+test('new views normalize and ball contacts stations exactly on beats',()=>{
+ for(const view of ['strip','ball'] as const)assert.equal(normalize({view}).view,view);
+ assert.deepEqual(bouncePosition(0,4),{x:30,y:238});assert.deepEqual(bouncePosition(1,4),{x:130,y:238});
+ assert.deepEqual(bouncePosition(.5,4),{x:80,y:138});assert.deepEqual(bouncePosition(4,4),{x:30,y:238});
+ assert.deepEqual(bouncePosition(.5,1),{x:180,y:138});assert.deepEqual(bouncePosition(.5,4,true),{x:30,y:238});
 });

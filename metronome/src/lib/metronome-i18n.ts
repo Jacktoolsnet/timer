@@ -11,3 +11,6 @@ export const settingsCopy:Record<Language,{settings:string;rhythm:string;display
  es:{settings:'A tu gusto',rhythm:'Ritmo',display:'Visualización',practice:'Práctica con silencios'},
  fr:{settings:'À votre façon',rhythm:'Rythme',display:'Affichage',practice:'Pratique avec silences'}
 };
+export const animationCopy:Record<Language,{strip:string;ball:string}>={
+ en:{strip:'Beat strip',ball:'Bouncing ball'},de:{strip:'Beat-Leiste',ball:'Springender Ball'},es:{strip:'Barra de pulsos',ball:'Pelota saltarina'},fr:{strip:'Barre de temps',ball:'Balle rebondissante'}
+};

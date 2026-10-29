@@ -19,9 +19,10 @@ Browser tests use their own port 4347. Install Playwright Chromium if it is not 
 
 ## Version 1
 
-- Orbit and pendulum views driven by the audio clock; system reduced-motion preference plus an explicit less-movement setting.
+- Orbit, pendulum, beat-strip and bouncing-ball views driven by the audio clock; system reduced-motion preference plus an explicit less-movement setting.
 - 20–300 BPM, numeric input, slider, ±1 controls and median-filtered tap tempo.
 - 1–12 beats per bar; each beat cycles accented → normal → silent.
+- The beat strip highlights the current beat and subdivision; muted beats stay pale. The ball lands on numbered beat stations exactly on each beat, with a return hop at the bar boundary. Reduced motion replaces hopping with stationary beat-to-beat positions.
 - Equal subdivisions: 1, 2, 3 or 4 per beat. Silent beats mute subdivisions too.
 - Locally synthesized wood, digital and soft sounds, volume control and visual-only playback.
 - Gap practice: 1–16 audible bars followed by 1–8 silent bars, optionally without visual timing cues.

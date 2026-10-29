@@ -75,3 +75,27 @@
 .metronome-settings-card .number-stepper input::-webkit-inner-spin-button,.metronome-settings-card .number-stepper input::-webkit-outer-spin-button{appearance:none;margin:0}
 /* Fade only the muted beat's lettering; keep its control and focus ring clear. */
 .beat-buttons button[data-accent="0"]>b,.beat-buttons button[data-accent="0"]>span{opacity:.4}
+/* Additional clock-driven visual instruments. */
+.beat-strip,.ball-art{display:none}
+.instrument-stage[data-view=strip] .orbit-art,.instrument-stage[data-view=ball] .orbit-art{display:none}
+.instrument-stage[data-view=strip] .beat-strip{position:absolute;inset:52% 0 8%;display:grid;grid-template-columns:repeat(var(--beat-columns,4),minmax(0,1fr));gap:8px;align-content:center}
+.strip-beat{min-width:0;min-height:64px;padding:12px 4px;border:1px solid var(--line);border-radius:12px;background:var(--surface);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:var(--muted)}
+.strip-beat b{font:500 clamp(14px,6cqw,24px)/1 ui-monospace,Consolas,monospace;font-variant-numeric:lining-nums tabular-nums}
+.strip-beat[data-accent="2"]{border-color:var(--accent);color:var(--accent)}
+.strip-beat.active{background:var(--accent-soft);border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.strip-beat[data-accent="0"]{border-style:dashed}.strip-beat[data-accent="0"]>*,.ball-station[data-accent="0"]{opacity:.35}
+.subdivision-dots{display:flex;gap:3px}.subdivision-dots i{display:block;width:4px;height:4px;border-radius:50%;background:var(--accent);opacity:.2}.subdivision-dots i.active{opacity:1}
+.instrument-stage[data-view=strip] .beat-readout{inset:0 0 48%}
+.instrument-stage[data-view=strip] #current-beat{font-size:60px}
+.instrument-stage[data-view=ball] .ball-art{display:block}
+.instrument-stage[data-view=ball] .beat-readout{inset:3% 0 auto}
+.instrument-stage[data-view=ball] #current-beat{font-size:44px}
+.ball-floor{stroke:var(--line);stroke-width:1.5}
+.ball-station circle{fill:var(--accent);stroke:var(--surface);stroke-width:1}
+.ball-station text{fill:var(--muted);font:12px ui-monospace,Consolas,monospace;text-anchor:middle;stroke:none}
+.ball-station.active text{fill:var(--accent);font-weight:700}
+#bouncing-ball{fill:var(--accent)}#ball-shadow{fill:var(--accent);opacity:.25}
+.metronome-settings-card .view-picker{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;gap:4px}
+.metronome-settings-card .view-picker button{font-size:calc(12px * var(--font-scale,1));padding:10px 6px;overflow-wrap:anywhere}
+
+.instrument-stage{container-type:inline-size}

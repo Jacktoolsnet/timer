@@ -1,12 +1,13 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import {copy,settingsCopy} from '../lib/metronome-i18n';
+import {copy,settingsCopy,animationCopy} from '../lib/metronome-i18n';
 import type {Language} from '../lib/i18n';
 import '../styles/metronome.css';
 interface Props {lang:Language}
 const {lang}=Astro.props;
 const t=copy[lang];
 const groups=settingsCopy[lang];
+const animations=animationCopy[lang];
 ---
 <Layout lang={lang} title={t.title} description={t.intro} route="">
  <section class="intro"><p class="eyebrow">JACKTOOLS / {t.title}</p><h1>{t.heading}</h1><p class="intro-copy">{t.intro}</p></section>
@@ -15,6 +16,8 @@ const groups=settingsCopy[lang];
   <div class="instrument-stage" data-view="orbit" aria-hidden="true">
    <svg class="orbit-art" viewBox="0 0 360 360"><defs><radialGradient id="halo"><stop stop-color="currentColor" stop-opacity=".1"/><stop offset="1" stop-color="currentColor" stop-opacity="0"/></radialGradient></defs><circle cx="180" cy="180" r="176" fill="url(#halo)"/><circle class="outer-ring" cx="180" cy="180" r="145"/><circle class="inner-ring" cx="180" cy="180" r="120"/><g id="orbit-marks"></g><g id="orbit-arm"><circle class="orb-halo" cx="180" cy="35" r="16"/><circle class="orb" cx="180" cy="35" r="6"/></g></svg>
    <svg class="pendulum-art" viewBox="0 0 360 360"><path class="pendulum-case" d="M144 43h72l56 275H88Z"/><path class="pendulum-scale" d="M133 126h94m-101 34h108m-115 34h122m-129 34h136m-143 34h150"/><g id="pendulum-arm"><path d="M180 284V66"/><rect x="167" y="104" width="26" height="38" rx="8"/><circle cx="180" cy="284" r="9"/></g></svg>
+   <div class="beat-strip" id="beat-strip"></div>
+   <svg class="ball-art" viewBox="0 0 360 360"><path class="ball-floor" d="M18 250H342"/><g id="ball-stations"></g><ellipse id="ball-shadow" cx="30" cy="250" rx="14" ry="3"/><circle id="bouncing-ball" cx="30" cy="238" r="12"/></svg>
    <div class="beat-readout"><span class="beat-tile"><span class="beat-caption">{t.beat}</span><span id="current-beat">1</span></span><span id="bar-label"><span class="bar-caption">{t.bar}</span> <span id="current-bar">1</span></span></div>
   </div>
   <p id="play-status" role="status">{t.ready}</p>
@@ -39,7 +42,7 @@ const groups=settingsCopy[lang];
    </fieldset>
    <fieldset class="metronome-settings-group"><legend>{groups.display}</legend>
     <p class="view-label">{groups.display}</p>
-    <div class="view-picker" role="group" aria-label={groups.display}><button type="button" data-view="orbit" aria-pressed="true">{t.orbit}</button><button type="button" data-view="pendulum" aria-pressed="false">{t.pendulum}</button></div>
+    <div class="view-picker" role="group" aria-label={groups.display}><button type="button" data-view="orbit" aria-pressed="true">{t.orbit}</button><button type="button" data-view="pendulum" aria-pressed="false">{t.pendulum}</button><button type="button" data-view="strip" aria-pressed="false">{animations.strip}</button><button type="button" data-view="ball" aria-pressed="false">{animations.ball}</button></div>
     <label class="toggle-row"><span><strong>{t.reduced}</strong></span><input id="reduced" type="checkbox" role="switch"/><span class="toggle" aria-hidden="true"></span></label>
    </fieldset>
    <fieldset class="metronome-practice-group"><legend>{groups.practice}</legend>

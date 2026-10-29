@@ -1,5 +1,5 @@
 import {enhanceClockSelects} from '../../../shared/preview-selects';
-import {defaults,normalize,pulseAt,tappedTempo,type Settings,type Accent} from '../lib/metronome';
+import {defaults,normalize,pulseAt,tappedTempo,bouncePosition,type Settings,type Accent} from '../lib/metronome';
 import {copy} from '../lib/metronome-i18n';
 import type {Language} from '../lib/i18n';
 import {storageAllowed} from '../lib/storage';
@@ -18,12 +18,38 @@ const now=()=>context?.state==='running'?context.currentTime:performance.now()/1
 function save(){if(storageAllowed())try{localStorage.setItem(STORAGE_KEY,JSON.stringify(settings));}catch{ $('audio-error').textContent=t.saved; }}
 function drawBeats(){
  const buttons=$('beat-buttons');buttons.replaceChildren();const marks=$('orbit-marks');marks.replaceChildren();
+ const strip=$('beat-strip'),stations=$('ball-stations');strip.replaceChildren();stations.replaceChildren();
+ strip.style.setProperty('--beat-columns',String(Math.min(settings.beats,6)));
  settings.accents.forEach((accent,i)=>{
   const button=document.createElement('button');button.type='button';button.dataset.accent=String(accent);button.setAttribute('aria-label',`${t.beat} ${i+1}: ${t.states[accent]}`);
   const number=document.createElement('b');number.textContent=String(i+1);const symbol=document.createElement('span');symbol.textContent=['—','•','••'][accent];symbol.setAttribute('aria-hidden','true');button.append(number,symbol);
   button.addEventListener('click',()=>{settings.accents[i]=((accent+2)%3) as Accent;changed();});buttons.append(button);
   const a=i/settings.beats*Math.PI*2;const circle=document.createElementNS('http://www.w3.org/2000/svg','circle');circle.setAttribute('cx',String(180+145*Math.sin(a)));circle.setAttribute('cy',String(180-145*Math.cos(a)));circle.setAttribute('r',accent===2?'6':'4');circle.setAttribute('class','orbit-mark');circle.dataset.accent=String(accent);marks.append(circle);
+  const tile=document.createElement('div');tile.className='strip-beat';tile.dataset.accent=String(accent);
+  const digit=document.createElement('b');digit.textContent=String(i+1);tile.append(digit);
+  const dots=document.createElement('span');dots.className='subdivision-dots';
+  for(let sub=0;sub<settings.subdivision;sub++){const dot=document.createElement('i');dots.append(dot);}tile.append(dots);strip.append(tile);
+  const point=bouncePosition(i,settings.beats,true);
+  const group=document.createElementNS('http://www.w3.org/2000/svg','g');group.classList.add('ball-station');group.dataset.accent=String(accent);
+  const landing=document.createElementNS('http://www.w3.org/2000/svg','circle');landing.setAttribute('cx',String(point.x));landing.setAttribute('cy','250');landing.setAttribute('r',accent===2?'5':'3');
+  const label=document.createElementNS('http://www.w3.org/2000/svg','text');label.setAttribute('x',String(point.x));label.setAttribute('y','277');label.textContent=String(i+1);group.append(landing,label);stations.append(group);
+
  });
+ updateIndicators(displayedIndex);
+ moveBall(displayedIndex<0?0:displayedIndex/settings.subdivision);
+}
+function updateIndicators(index:number){
+ const pulse=index>=0?pulseAt(index,settings):null;
+ document.querySelectorAll<HTMLElement>('.strip-beat,.ball-station').forEach(el=>{
+  const siblings=[...el.parentElement!.children],active=!!pulse&&siblings.indexOf(el)===pulse.beat;
+  el.classList.toggle('active',active);
+  el.querySelectorAll('.subdivision-dots i').forEach((dot,sub)=>dot.classList.toggle('active',active&&sub===pulse!.sub));
+ });
+}
+function moveBall(position:number){
+ const point=bouncePosition(position,settings.beats,settings.reduced||motion.matches);
+ $('bouncing-ball').setAttribute('cx',String(point.x));$('bouncing-ball').setAttribute('cy',String(point.y));
+ $('ball-shadow').setAttribute('cx',String(point.x));$('ball-shadow').setAttribute('opacity',String(.12+.15*(point.y-138)/100));
 }
 function sync(){
  ($<HTMLInputElement>('bpm')).value=String(settings.bpm);($<HTMLInputElement>('tempo-range')).value=String(settings.bpm);
@@ -45,6 +71,7 @@ function stop(message=t.ready){
  stage.classList.remove('gap-hidden');$('current-beat').textContent='1';$('current-bar').textContent='1';
  $('orbit-arm').style.transform='rotate(0deg)';$('pendulum-arm').style.transform='rotate(0deg)';
  document.querySelectorAll('#beat-buttons button').forEach(b=>b.classList.remove('active'));
+ updateIndicators(-1);moveBall(0);
 }
 function sound(time:number,index:number){
  if(!context||context.state!=='running'||settings.sound==='silent'||settings.volume===0)return;
@@ -68,7 +95,7 @@ function render(){
  if(!running)return;const clock=now();let latest:typeof events[number]|undefined;
  while(events.length&&events[0].time<=clock) latest=events.shift();
  if(latest){
-  displayedIndex=latest.index;const p=pulseAt(displayedIndex,settings);
+  displayedIndex=latest.index;updateIndicators(displayedIndex);const p=pulseAt(displayedIndex,settings);
   const hide=p.silent&&settings.hideGap;stage.classList.toggle('gap-hidden',hide);
   $('current-beat').textContent=String(p.beat+1);$('current-bar').textContent=String(p.bar+1);
   // Status changes only per bar: no incessant live-region beat announcements.
@@ -77,6 +104,7 @@ function render(){
  }
  if(displayedIndex>=0){
   const beatPosition=Math.max(0,(clock-epoch)*settings.bpm/60);
+  moveBall(beatPosition);
   if(!(settings.reduced||motion.matches)){
    $('orbit-arm').style.transform=`rotate(${beatPosition/settings.beats*360}deg)`;
    document.querySelector('.orb-halo')!.setAttribute('r',String(13+9*Math.exp(-(beatPosition%1)*8)));
