@@ -3,7 +3,7 @@ import {demoProject} from '../src/lib/model';
 import {inflationStoryboard} from '../src/lib/inflation-storyboard';
 import {exportStoryboard} from '../src/lib/storyboard';
 import {DEFAULT_PROJECT_URL} from '../src/lib/startup-project';
-import {readFile} from 'node:fs/promises';
+import {readFile,writeFile} from 'node:fs/promises';
 const fixture=()=>({...demoProject(),storyboard:inflationStoryboard()});
 async function setup(page:import('@playwright/test').Page){
  await page.addInitScript(()=>localStorage.setItem('jacktools.scenescript.storage-consent.v1','yes'));
@@ -150,7 +150,7 @@ test('format dropdown and popup use the themed select design and remain hidden f
 });
 test('left lists show every item and live approval status; the selected detail uses property tiles and is remembered per tab',async({page})=>{
  await setup(page);await page.locator('[data-board-tab=objects]').click();await expect(page.locator('[data-board-item]')).toHaveCount(2);await expect(page.locator('.board-detail .board-card')).toHaveCount(1);await expect(page.locator('[data-board-item=chocolate]')).toHaveAttribute('aria-current','true');await expect(page.locator('[data-board-item=chocolate]')).toContainText('Entwurf');
- await page.locator('#storyboard-dialog>.dialog-inner').evaluate(e=>e.scrollTop=e.scrollHeight);await page.locator('[data-board-item=gold]').click();await expect(page.locator('.board-detail')).toContainText('Gold ingot / money');expect(await page.locator('#storyboard-dialog>.dialog-inner').evaluate(e=>e.scrollTop)).toBe(0);await expect(page.locator('.board-detail')).not.toContainText('Chocolate tablet');await expect(page.locator('.board-detail-grid>.board-detail-tile')).toHaveCount(6);await page.locator('[data-board-review]:has([aria-current=true])').getByRole('switch',{name:'Freigegeben',exact:true}).check();await expect(page.locator('[data-board-item=gold]')).toContainText('Freigegeben');
+ await page.locator('#storyboard-dialog>.dialog-inner').evaluate(e=>e.scrollTop=e.scrollHeight);await page.locator('[data-board-item=gold]').click();await expect(page.locator('.board-detail')).toContainText('Gold ingot / money');expect(await page.locator('#storyboard-dialog>.dialog-inner').evaluate(e=>e.scrollTop)).toBe(0);await expect(page.locator('.board-detail')).not.toContainText('Chocolate tablet');await expect(page.locator('.board-detail-grid>.board-detail-tile')).toHaveCount(11);await page.locator('[data-board-review]:has([aria-current=true])').getByRole('switch',{name:'Freigegeben',exact:true}).check();await expect(page.locator('[data-board-item=gold]')).toContainText('Freigegeben');
  await page.locator('[data-board-tab=settings]').click();await page.locator('[data-board-tab=objects]').click();await expect(page.locator('[data-board-item=gold]')).toHaveAttribute('aria-current','true');await page.locator('[data-board-item=gold]').focus();await page.keyboard.press('ArrowUp');await expect(page.locator('[data-board-item=chocolate]')).toBeFocused();await expect(page.locator('.board-detail')).toContainText('Chocolate tablet');
  const list=await page.locator('.board-library').boundingBox(),detail=await page.locator('.board-detail').boundingBox();expect(list!.x+list!.width).toBeLessThanOrEqual(detail!.x);expect(await page.locator('.board-browser').evaluate(e=>e.scrollWidth)).toBeLessThanOrEqual(await page.locator('.board-browser').evaluate(e=>e.clientWidth));
  await page.locator('[data-board-tab=shots]').click();await expect(page.locator('[data-board-item]')).toHaveCount(3);await page.locator('[data-board-item=payoff]').click();await expect(page.locator('.board-detail')).toContainText('Less chocolate, more money');await expect(page.locator('.board-card')).toHaveCount(1);
@@ -346,4 +346,23 @@ test('production tiles edit render type, sound switches and concrete scene sound
  await page.locator('#storyboard-save').click();await page.locator('#storyboard-close').click();const download=page.waitForEvent('download');await page.locator('#save-project').click();
  const saved=JSON.parse(await readFile((await(await download).path())!,'utf8'));expect(saved.storyboard.production).toEqual({renderMode:'3d',dialogue:true,music:true,sfx:true});expect(saved.storyboard.shots[0].soundEffects).toEqual(['Gentle notification beep','Bottle on conveyor belt']);expect(saved.storyboard.approved).toBe(false);
  await page.locator('#open-storyboard').click();await expect(page.locator('.board-production-tasks')).toContainText('Gentle notification beep');
+});
+
+test('rounded resource example has a real preview, camera controls and movement rehearsal without changing the video',async({page})=>{
+ await setup(page);await page.locator('[data-board-tab=characters]').click();await page.locator('[data-board-example=rounded]').click();
+ const card=page.locator('.board-card');await expect(card).toContainText('Abgerundete Figur');await expect(card).toContainText('Stilisiert · abgerundet');
+ const canvas=card.locator('.board-model-canvas canvas');await expect(canvas).toBeVisible();await expect(canvas).not.toHaveAttribute('data-stage3d-error','true');
+ await card.locator('.board-model-controls select').selectOption('wave');await card.getByRole('slider',{name:'Animationszeit',exact:true}).fill('1.5');await card.getByRole('slider',{name:'Ansicht drehen',exact:true}).fill('-25');
+ await card.getByRole('button',{name:'Abspielen / pausieren',exact:true}).click();await expect(card.getByRole('button',{name:'Abspielen / pausieren',exact:true})).toHaveAttribute('aria-pressed','true');
+ await card.getByRole('button',{name:'Abspielen / pausieren',exact:true}).click();
+ await writeFile('/tmp/scenescript-rounded-canvas-'+test.info().project.name+'.png',Buffer.from((await canvas.evaluate(c=>(c as HTMLCanvasElement).toDataURL())).split(',')[1],'base64'));
+ await card.screenshot({path:'/tmp/scenescript-rounded-'+test.info().project.name+'.png'});
+ await page.locator('#storyboard-save').click();await page.locator('#storyboard-close').click();const downloading=page.waitForEvent('download');await page.locator('#save-project').click();const file=await downloading;const p=JSON.parse(await readFile((await file.path())!,'utf8'));expect(p.scenes).toEqual(fixture().scenes);const subject=p.storyboard.characters.find((s:any)=>s.name==='Abgerundete Figur');expect(subject.design.mode).toBe('3d');expect(subject.model3d.parts.length).toBeGreaterThan(70);expect(subject.status).toBe('draft');
+ await page.locator('#open-storyboard').click();await page.locator('[data-board-tab=characters]').click();await expect(page.locator('.board-model-canvas canvas')).toBeVisible();
+});
+test('per-element appearance fields edit through themed overlays and persist without changing the executable scenes',async({page})=>{
+ await setup(page);await page.locator('[data-board-tab=objects]').click();
+ for(const [key,value]of [['mode','3d'],['style','natural'],['surface','mixed']]){await page.locator('[data-board-edit=characters-chocolate-'+key+']').click();await page.locator('#storyboard-field-select').selectOption(value);await page.locator('#storyboard-field-apply').click();}
+ await editText(page,'characters-chocolate-design-details','Rounded edges, no blocks.');await expect(page.locator('.board-card')).toContainText('Natürliche Proportionen · stilisiert');await expect(page.locator('[data-board-model=chocolate]')).toBeEnabled();
+ await page.locator('#storyboard-save').click();await page.locator('#storyboard-close').click();const downloading=page.waitForEvent('download');await page.locator('#save-project').click();const file=await downloading;const p=JSON.parse(await readFile((await file.path())!,'utf8'));expect(p.storyboard.characters[0].design).toEqual({mode:'3d',style:'natural',surface:'mixed',details:'Rounded edges, no blocks.'});expect(p.scenes).toEqual(fixture().scenes);
 });

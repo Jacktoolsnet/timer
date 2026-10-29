@@ -42,7 +42,7 @@ test('rejected and stale results show copyable errors without retry or overwriti
  await page.locator('#open-ai-workflow').click();await generate(page);await expect(page.locator('#ai-workflow-error')).toHaveValue(/quota/);await expect(page.locator('#ai-workflow-error')).toHaveAttribute('readonly','');await expect(page.locator('#ai-workflow-apply')).toBeDisabled();expect(calls).toBe(1);await expect(page.locator('#ai-workflow-error')).not.toHaveValue(new RegExp(openai));
  let release!:()=>void;const gate=new Promise<void>(resolve=>release=resolve);
  await page.route('https://api.openai.com/v1/responses',async r=>{if(r.request().method()==='OPTIONS'){await r.fulfill({headers:cors});return;}await gate;const data=JSON.parse(r.request().postDataJSON().input[0].content[0].text).storyboard;data.board.approved=false;await r.fulfill({headers:cors,json:response(JSON.stringify(data))});});
- await generate(page);await expect(page.locator('#ai-workflow-spinner')).toBeVisible();await page.evaluate(()=>{const title=document.querySelector<HTMLInputElement>('#project-title')!;title.value='Concurrent';title.dispatchEvent(new Event('input',{bubbles:true}));});release();await expect(page.locator('#ai-workflow-error')).toHaveValue(/changed/);await page.locator('#ai-workflow-close').click();await expect(page.locator('#project-title')).toHaveValue('Concurrent');
+ await page.locator('#ai-workflow-close').click();await page.locator('#open-ai-workflow').click();await generate(page);await expect(page.locator('#ai-workflow-spinner')).toBeVisible();await page.evaluate(()=>{const title=document.querySelector<HTMLInputElement>('#project-title')!;title.value='Concurrent';title.dispatchEvent(new Event('input',{bubbles:true}));});release();await expect(page.locator('#ai-workflow-error')).toHaveValue(/changed/);await page.locator('#ai-workflow-close').click();await expect(page.locator('#project-title')).toHaveValue('Concurrent');
 });
 
 test('image API cover is previewed and stored only after apply',async({page})=>{
@@ -428,4 +428,14 @@ test('3D and sound requirements reach the model, mismatches need explicit acknow
  await expect(page.locator('#ai-workflow-apply')).toBeDisabled();await page.locator('#ai-workflow-production-ack').check();await expect(page.locator('#ai-workflow-apply')).toBeEnabled();await page.locator('#ai-workflow-apply').click();
  const saved=await exportProject(page);expect(saved.storyboard!.production).toEqual(p.storyboard!.production);expect(saved.storyboard!.shots[0].soundEffects).toEqual(['A short notification beep']);expect(calls).toBe(1);expect(voiceCalls).toBe(0);
  await page.locator('#open-storyboard').click();await expect(page.locator('.board-production-tasks')).toContainText('A short notification beep');
+});
+
+test('targeted 3D model refinement previews geometry and only saves the chosen element after confirmation',async({page})=>{
+ const initial=fixture();initial.storyboard!.characters=[{id:'chocolate',kind:'object',status:'approved',name:'Chocolate',description:'A chocolate bar',image:null,comments:[]}];await setup(page,initial);let calls=0;await page.route('https://api.openai.com/v1/responses',async route=>{
+  if(route.request().method()==='OPTIONS'){await route.fulfill({headers:cors});return;}calls++;const body=route.request().postDataJSON(),input=JSON.parse(body.input[0].content[0].text);expect(input.target.id).toBe('chocolate');expect(input.request).toBe('Make the shape rounder');expect(input).not.toHaveProperty('storyboard');expect(body.instructions).toContain('ONLY the selected reusable');
+  await route.fulfill({headers:cors,json:response(JSON.stringify({model:{parts:[{id:'round',shape:'sphere',position:{y:1.5},size:{x:1,y:3,z:1},color:'#895236'}]}}))});
+ });
+ await page.locator('#open-storyboard').click();await page.locator('[data-board-tab=objects]').click();await page.locator('[data-board-model=chocolate]').click();await expect(page.locator('#ai-workflow-action')).toHaveValue('model');await page.locator('#ai-workflow-prompt').fill('Make the shape rounder');await generate(page);
+ await expect(page.locator('#ai-workflow-model-preview canvas')).toBeVisible();await expect(page.locator('#ai-workflow-dialog')).toBeVisible();await expect(page.locator('#ai-workflow-apply')).toBeEnabled();expect(calls).toBe(1);
+ await page.locator('#ai-workflow-apply').click();await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();await expect(page.locator('.board-model-canvas canvas')).toBeVisible();await page.locator('#storyboard-close').click();const p=await exportProject(page);expect(p.storyboard!.characters[0].model3d!.parts[0].id).toBe('round');expect(p.storyboard!.characters[0].status).toBe('draft');expect(p.scenes).toEqual(fixture().scenes);
 });

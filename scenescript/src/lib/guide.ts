@@ -26,35 +26,32 @@ const presetExamples=textPresets.map(preset=>{const e=applyTextPreset(newElement
 export const aiGuide = `# SceneScript 1.0 — complete authoring specification
 
 ## 1. Start here
-SceneScript turns JSON into an editable animated presentation/video in a browser.
-Projects contain sequential Scenes with layered text, images, shapes, bubbles,
-video, simulations or 3D. A scene camera can visit comic panels, pause and zoom.
-Self-contained: no website/schema download needed. Read §§1–4 first, then needed
-features; §11 defines every field and §12 gives complete JSON examples.
+SceneScript renders editable browser videos from JSON: sequential Scenes with layered
+text, images, shapes, bubbles, video, simulations and 3D. Read §§1–4, then needed
+features; §11 defines all fields, §12 has JSON examples. No downloads needed.
 
-Optional planning: Project.storyboard is a non-rendered plan, not an executable Project.
-Preserve IDs, revision, user comments and storyboard data. Only users resolve comments
-and approve plans. board.characters stores kind="character" or "object"; shot.characters
-references either. setting.objects links fixed objects. Follow board.production and the
-approved story; 3d requires real models, actor animation and 3D cameras, not image slides.
-shot.soundEffects are pending SFX descriptions, not audible tracks. Dialogue needs
-Scene.narration text/speaker; music needs enabled Project.music. Speech files are a
-separate explicit generation step. Never pretend missing audio was produced.
-Storyboard.format is planning-only. Plans: 25 MiB, 100 images (8 MiB each), valid references.
-API-only: assets[id]={name} may reuse known storyboard images; missing thumbnails may
-use a unique known raster name. Standalone files must embed data. No invented Base64.
-Omit storyboard (default null) for direct video creation.
+Optional Project.storyboard is a non-rendered plan. Preserve IDs, revision, comments
+and data; only users approve/resolve. board.characters contains character/object kinds;
+shot.characters references either, setting.objects fixed objects. Follow board.production:
+3d needs real geometry, animation and 3D cameras, not image slides. subject.design controls
+mode/style/surface. Rounded humans need rounded anatomy and facial details. Preserve
+approved model3d; use subject IDs in project.characters/stages. modelChat is edit history.
+shot.soundEffects are pending descriptions, NOT audible tracks. Dialogue needs
+Scene.narration text/speaker, music enabled Project.music; speech generation is separate.
+Storyboard.format is planning-only. Limits: 25 MiB, 100 images, 8 MiB/image.
+API-only: assets[id]={name} reuses known storyboard images; thumbnail may use a unique
+known raster name. Standalone files must embed data. Never invent Base64.
+Direct video creation may omit storyboard (null).
 
 Authoring workflow:
-- Reuse the user's topic, audience, aspect ratio, style and desired duration.
-  Ask only about materially missing details; if told not to ask, make reasonable
-  assumptions. Ordinary conversation is allowed while planning.
+- Follow the user's topic, audience, format, style and duration. Ask only about
+  material omissions; if told not to ask, make reasonable assumptions.
 - Identify the target audience FIRST: use the user's audience, or infer a plausible
   one from the requested video (language, interests, prior knowledge and needs).
   Shape the content AND YouTube publication copy for that audience; see §3.
-  Research relevant audience/search terms when browsing tools are available;
-  otherwise choose reasoned topic-relevant terms, never claim live trend research.
-- Arrange real content and reading time before adding effects. Omit unused fields.
+  Research audience/search terms when browsing is available; otherwise use
+  reasoned terms, never claim live trend research.
+- Plan content/timing before effects; omit unused fields.
 - Every completed video project MUST have a suitable cover in Project.thumbnail.
   Reuse a suitable supplied/existing cover; if missing, create a real thumbnail
   with available image-generation tools, matching the audience, topic and format.
@@ -62,12 +59,11 @@ Authoring workflow:
   output. A prompt, filename or invented Base64 is NOT a completed cover.
 - Resolve missing media with the user BEFORE final output. Never invent Base64.
 - Final deliverable: exactly ONE valid JSON object, with no Markdown fence,
-  introduction or explanation outside it. Do not output the notation from §11.
+  explanations outside it or §11 notation.
 
-Smallest useful example (copyable JSON; expanded examples are in §12):
+Minimal JSON (§12 has more examples):
 ${JSON.stringify(aiMinimalExample)}
-Examples demonstrate syntax, not finished publication packages: add audience-specific
-metadata and a real cover when authoring a completed video. Legacy imports may omit them.
+Examples show syntax; add metadata/cover for finished videos. Legacy imports may omit them.
 
 ## 2. Notation and universal rules
 The following is specification notation, NOT JSON syntax:

@@ -155,3 +155,12 @@ test('native animated 3D with camera movement and music satisfies structural che
  p.storyboard!.production!.renderMode='2d';assert.ok(reviewProduction(validateProject(p)).some(i=>i.code==='unexpected3d'));
 
 });
+
+import {roundedHumanModel} from '../src/lib/rounded-human.ts';
+import {defaultBoardDesign} from '../src/lib/storyboard-design.ts';
+test('approved storyboard models replace AI redesigns under stable render resource IDs',()=>{
+ const p=project();for(const s of [...p.storyboard!.characters,...p.storyboard!.settings,...p.storyboard!.shots])s.status='approved';p.storyboard!.approved=true;
+ const subject=p.storyboard!.characters[0];subject.design={...defaultBoardDesign(),mode:'3d'};subject.model3d=roundedHumanModel();
+ const raw=JSON.parse(JSON.stringify(p));raw.characters={[subject.id]:{name:'AI replacement',model:{parts:[{id:'block'}]}}};
+ const next=acceptScript(JSON.stringify(raw),p);assert.equal(next.characters[subject.id].name,subject.name);assert.deepEqual(next.characters[subject.id].model,subject.model3d);assert.deepEqual(JSON.parse(JSON.stringify(next.storyboard)),JSON.parse(JSON.stringify(p.storyboard)));
+});

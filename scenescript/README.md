@@ -1362,3 +1362,44 @@ keine neuen Geometrien oder Materialien pro Frame. Instanzmatrizen und Bounding-
 werden nur bei geänderter Skalierung aktualisiert.
 Gruppenknoten und Profilflächen bleiben nicht instanzierbar; Limits für Parts, Kopien
 und Gelenke bleiben unverändert. Es werden keine KI-Bauteile oder Gelenke still entfernt.
+
+#### Storyboard: vorbereitete 3D-Ressourcen
+
+Charaktere, Objekte und Kulissen besitzen optionale `design`-Vorgaben: Darstellung
+(Projekteinstellung/2D/3D), Stil (abgerundet, Block, Cartoon, natürliche Proportionen),
+Oberflächen (Farben/Texturen/beides) und Freitextdetails. Bestehende Projekte bleiben
+kompatibel. „Natürliche Proportionen“ bedeutet stilisierte Geometrie, nicht Fotorealismus.
+
+Im Charakter-Tab fügt der Plus-Icon-Button „Abgerundete Beispielfigur hinzufügen“ eine
+**zusätzliche**, frei definierte Figur hinzu: Gesicht mit Augen/Pupillen, Brauen, Nase,
+Mund, Ohren, Haaren, Kleidung, Händen sowie Ellenbogen-/Kniegelenken. Kein Defaultprojekt
+oder vorhandener Charakter wird ersetzt. In der echten 3D-Vorschau lassen sich Kamera,
+Animationsclip und Zeitpunkt einstellen sowie Bewegungen abspielen (Gehen/Winken/Mimik).
+Die Vorschau verwendet denselben Renderer wie der Film; sie verändert keine Filmszene.
+
+Der KI-Icon-Button beim Modell öffnet die gezielte Erstellung/Überarbeitung **nur dieses
+Elements** mit Modell-/Aufwandauswahl und ausdrücklicher Kostenbestätigung. Die aktuelle
+Geometrie und die letzten zehn Gesprächsschritte bilden den Kontext; die Antwort enthält
+eine Erklärung und das aktualisierte Modell. Ergebnisse werden zuerst als echte
+3D-Vorschau gezeigt und erst nach **Übernehmen** im Projekt-Storyboard gespeichert.
+Schließen verwirft die Vorschau. Übernahmen sind über das Projekt-Undo rückgängig zu
+machen. Allgemeine Storyboard-Überarbeitungen dürfen bestehende Designs/Modelle/
+Modell-Unterhaltungen nicht überschreiben. Geänderte Modelle verlieren ihre Freigabe,
+ebenso abhängige Szenen/Kulissen. Kein automatisches kostenpflichtiges Retry.
+
+Freigegebene `subject.model3d` werden bei der Script-Übernahme lokal unter der
+Subject-ID in `characters`/`stages` wiederhergestellt; die Film-KI soll diese IDs und
+vorbereiteten Clips verwenden. Die Umsetzungsprüfung meldet fehlende explizit geplante
+Modelle und unbenutzte freigegebene Ressourcen. Textur-IDs müssen auf vorhandene
+PNG/JPEG/WebP-Bilder in `board.images` zeigen; die Oberflächenwahl erzeugt nicht
+selbstständig Texturen. Beim Löschen eines Referenzbildes bleiben noch als Textur
+verwendete Bilddaten erhalten. Die Funktion garantiert keine automatische gestalterische
+Qualität: Modelle und Bewegungsclips sollten vor der Freigabe geprüft werden.
+
+Ein vollständiges, stilles Bewegungsbeispiel liegt unter
+`public/examples/rounded-character/rounded-character.scenescript` (Gehen/Winken/Mimik).
+Es ersetzt das Standardprojekt nicht. Reproduzierbar mit
+`node --experimental-strip-types scripts/generate-rounded-character-example.mjs`.
+Für Modelländerungen wird nur der relevante kanonische 3D-Anleitungsteil übertragen,
+nicht die gesamte Video-Anleitung. Passende Bildreferenzen können optional mitgesendet
+werden (lokal komprimiert; zusätzliche Anbieter-Eingabekosten).

@@ -1,4 +1,5 @@
 ---
+import {storyboardDesignWords} from '../lib/storyboard-design-i18n';
 import {aiWorkflowLayoutWords} from '../lib/ai-workflow-layout-i18n';
 import {aiModelWords} from '../lib/ai-model-i18n';
 import {productionWords} from '../lib/production-i18n';
@@ -15,7 +16,7 @@ const {lang}=Astro.props,pw=productionWords(lang),t=aiWorkflowWords(lang),m=aiMo
   <fieldset id="ai-workflow-settings">
    <section class="ai-flow-tile ai-flow-wide" data-ai-tile="task" aria-labelledby="ai-task-heading"><h3 id="ai-task-heading">{l.task}</h3>
    <p id="ai-workflow-draft" class="small-hint" hidden>{t.draftHint}</p>
-   <label>{t.action}<select id="ai-workflow-action"><option value="board">{t.board}</option><option value="script">{t.script}</option><option value="image">{t.image}</option><option value="speech">{t.speech}</option></select></label>
+   <label>{t.action}<select id="ai-workflow-action"><option value="model" disabled>{storyboardDesignWords(lang).modelTask}</option><option value="board">{t.board}</option><option value="script">{t.script}</option><option value="image">{t.image}</option><option value="speech">{t.speech}</option></select></label>
    <div id="ai-workflow-model-recommendation"><p id="ai-workflow-model-advice"></p><button id="ai-workflow-use-recommendation" type="button" title={m.useRecommendation} aria-label={m.useRecommendation}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L20 5"/></svg></button></div>
    <div class="ai-model-row"><label>{m.choice}<select id="ai-workflow-model-choice"></select></label><button id="ai-workflow-model-load" type="button" title={m.load} aria-label={m.load}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></svg></button></div>
    <label id="ai-workflow-model-manual" hidden>{m.manual}<input id="ai-workflow-model" type="text" maxlength="150" value="gpt-5-mini" autocomplete="off" spellcheck="false"/></label>

@@ -1,0 +1,6936 @@
+{
+  "storyboard": {
+    "format": "portrait",
+    "id": "rounded-human-study",
+    "revision": 0,
+    "title": "Rounded character — movement study",
+    "story": "Review a rounded human and test walking, waving and facial movement before producing a film.",
+    "message": "",
+    "audience": "",
+    "language": "English",
+    "style": "Rounded, stylized, detailed anatomy; no block style.",
+    "duration": 10.8,
+    "comments": [],
+    "characters": [
+      {
+        "design": {
+          "mode": "3d",
+          "style": "rounded",
+          "surface": "colors",
+          "details": ""
+        },
+        "model3d": {
+          "parts": [
+            {
+              "id": "body",
+              "parent": "",
+              "palette": "",
+              "instances": [],
+              "shape": "group",
+              "color": "#36a9e1",
+              "position": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+              },
+              "roughness": 0.78,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": [
+                {
+                  "responses": {},
+                  "id": "breath",
+                  "motion": "translation",
+                  "axis": "y",
+                  "min": 0,
+                  "max": 0.04,
+                  "value": 0,
+                  "control": "bob",
+                  "target": 0.04
+                }
+              ]
+            },
+            {
+              "id": "hips",
+              "parent": "body",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#314d65",
+              "position": {
+                "x": 0,
+                "y": 1.22,
+                "z": 0
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.65,
+                "y": 0.4,
+                "z": 0.4
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "jacket",
+              "parent": "body",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#dcaa38",
+              "position": {
+                "x": 0,
+                "y": 1.77,
+                "z": 0
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.76,
+                "y": 0.9,
+                "z": 0.43
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "shirt",
+              "parent": "body",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#f5ead9",
+              "position": {
+                "x": 0,
+                "y": 1.99,
+                "z": 0.202
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.2,
+                "y": 0.43,
+                "z": 0.045
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "button0",
+              "parent": "body",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#72512e",
+              "position": {
+                "x": 0.08,
+                "y": 1.88,
+                "z": 0.222
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.035,
+                "y": 0.035,
+                "z": 0.02
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "button1",
+              "parent": "body",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#72512e",
+              "position": {
+                "x": 0.08,
+                "y": 1.7599999999999998,
+                "z": 0.222
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.035,
+                "y": 0.035,
+                "z": 0.02
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "button2",
+              "parent": "body",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#72512e",
+              "position": {
+                "x": 0.08,
+                "y": 1.64,
+                "z": 0.222
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.035,
+                "y": 0.035,
+                "z": 0.02
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "button3",
+              "parent": "body",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#72512e",
+              "position": {
+                "x": 0.08,
+                "y": 1.52,
+                "z": 0.222
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.035,
+                "y": 0.035,
+                "z": 0.02
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "collarL",
+              "parent": "body",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#dcaa38",
+              "position": {
+                "x": -0.12350000000000001,
+                "y": 2.12,
+                "z": 0.2
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 25
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.19,
+                "y": 0.17,
+                "z": 0.07
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "collarR",
+              "parent": "body",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#dcaa38",
+              "position": {
+                "x": 0.12350000000000001,
+                "y": 2.12,
+                "z": 0.2
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": -25
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.19,
+                "y": 0.17,
+                "z": 0.07
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "neck",
+              "parent": "body",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#d99a76",
+              "position": {
+                "x": 0,
+                "y": 2.25,
+                "z": 0
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.24,
+                "y": 0.27,
+                "z": 0.24
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "head",
+              "parent": "body",
+              "palette": "",
+              "instances": [],
+              "shape": "group",
+              "color": "#36a9e1",
+              "position": {
+                "x": 0,
+                "y": 2.62,
+                "z": 0
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+              },
+              "roughness": 0.78,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": [
+                {
+                  "responses": {},
+                  "id": "nod",
+                  "motion": "rotation",
+                  "axis": "x",
+                  "min": -25,
+                  "max": 25,
+                  "value": 0,
+                  "control": "none",
+                  "target": 25
+                },
+                {
+                  "responses": {},
+                  "id": "look",
+                  "motion": "rotation",
+                  "axis": "y",
+                  "min": -45,
+                  "max": 45,
+                  "value": 0,
+                  "control": "none",
+                  "target": 45
+                }
+              ]
+            },
+            {
+              "id": "skull",
+              "parent": "head",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#d99a76",
+              "position": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.64,
+                "y": 0.74,
+                "z": 0.56
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "chin",
+              "parent": "head",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#d99a76",
+              "position": {
+                "x": 0,
+                "y": -0.23,
+                "z": 0.08
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.42,
+                "y": 0.24,
+                "z": 0.38
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "hairCap",
+              "parent": "head",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#493027",
+              "position": {
+                "x": 0,
+                "y": 0.24,
+                "z": -0.025
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.67,
+                "y": 0.38,
+                "z": 0.57
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "hairLock0",
+              "parent": "head",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#493027",
+              "position": {
+                "x": -0.27,
+                "y": 0.24,
+                "z": 0.215
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": -22
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.15,
+                "y": 0.23,
+                "z": 0.12
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "hairLock1",
+              "parent": "head",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#493027",
+              "position": {
+                "x": -0.185,
+                "y": 0.25514647772654214,
+                "z": 0.215
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": -22
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.15,
+                "y": 0.23,
+                "z": 0.12
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "hairLock2",
+              "parent": "head",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#493027",
+              "position": {
+                "x": -0.1,
+                "y": 0.25636735368286223,
+                "z": 0.215
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": -22
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.15,
+                "y": 0.23,
+                "z": 0.12
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "hairLock3",
+              "parent": "head",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#493027",
+              "position": {
+                "x": -0.015000000000000013,
+                "y": 0.2425401601450776,
+                "z": 0.215
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": -22
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.15,
+                "y": 0.23,
+                "z": 0.12
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "hairLock4",
+              "parent": "head",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#493027",
+              "position": {
+                "x": 0.07,
+                "y": 0.22637755508445728,
+                "z": 0.215
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": -22
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.15,
+                "y": 0.23,
+                "z": 0.12
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "hairLock5",
+              "parent": "head",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#493027",
+              "position": {
+                "x": 0.15500000000000003,
+                "y": 0.2227393630560635,
+                "z": 0.215
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": -22
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.15,
+                "y": 0.23,
+                "z": 0.12
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "hairLock6",
+              "parent": "head",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#493027",
+              "position": {
+                "x": 0.24,
+                "y": 0.23497052103241933,
+                "z": 0.215
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": -22
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.15,
+                "y": 0.23,
+                "z": 0.12
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "earL",
+              "parent": "head",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#d99a76",
+              "position": {
+                "x": -0.32,
+                "y": -0.025,
+                "z": 0
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.13,
+                "y": 0.23,
+                "z": 0.15
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "earInnerL",
+              "parent": "head",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#b9795d",
+              "position": {
+                "x": -0.32,
+                "y": -0.025,
+                "z": 0.065
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.065,
+                "y": 0.13,
+                "z": 0.035
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "cheekL",
+              "parent": "head",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#d99a76",
+              "position": {
+                "x": -0.1984,
+                "y": -0.12,
+                "z": 0.19
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.22,
+                "y": 0.2,
+                "z": 0.14
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "eyeWhiteL",
+              "parent": "head",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#fff7ed",
+              "position": {
+                "x": -0.1408,
+                "y": 0.035,
+                "z": 0.258
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.18,
+                "y": 0.145,
+                "z": 0.07
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": [
+                {
+                  "responses": {},
+                  "id": "blinkL",
+                  "motion": "scale",
+                  "axis": "y",
+                  "min": 0.03,
+                  "max": 1,
+                  "value": 1,
+                  "control": "blink",
+                  "target": 0.03
+                }
+              ]
+            },
+            {
+              "id": "irisL",
+              "parent": "head",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#466b5c",
+              "position": {
+                "x": -0.1408,
+                "y": 0.035,
+                "z": 0.295
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.08,
+                "y": 0.09,
+                "z": 0.025
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": [
+                {
+                  "responses": {},
+                  "id": "irisBlinkL",
+                  "motion": "scale",
+                  "axis": "y",
+                  "min": 0.03,
+                  "max": 1,
+                  "value": 1,
+                  "control": "blink",
+                  "target": 0.03
+                }
+              ]
+            },
+            {
+              "id": "pupilL",
+              "parent": "head",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#162329",
+              "position": {
+                "x": -0.1408,
+                "y": 0.035,
+                "z": 0.311
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.037,
+                "y": 0.06,
+                "z": 0.015
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": [
+                {
+                  "responses": {},
+                  "id": "pupilBlinkL",
+                  "motion": "scale",
+                  "axis": "y",
+                  "min": 0.03,
+                  "max": 1,
+                  "value": 1,
+                  "control": "blink",
+                  "target": 0.03
+                }
+              ]
+            },
+            {
+              "id": "eyeLightL",
+              "parent": "head",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#ffffff",
+              "position": {
+                "x": -0.1558,
+                "y": 0.06,
+                "z": 0.323
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.02,
+                "y": 0.02,
+                "z": 0.01
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": [
+                {
+                  "responses": {},
+                  "id": "lightBlinkL",
+                  "motion": "scale",
+                  "axis": "y",
+                  "min": 0.03,
+                  "max": 1,
+                  "value": 1,
+                  "control": "blink",
+                  "target": 0.03
+                }
+              ]
+            },
+            {
+              "id": "browL",
+              "parent": "head",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#493027",
+              "position": {
+                "x": -0.1408,
+                "y": 0.158,
+                "z": 0.263
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 7
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.19,
+                "y": 0.045,
+                "z": 0.045
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": [
+                {
+                  "responses": {},
+                  "id": "browLiftL",
+                  "motion": "translation",
+                  "axis": "y",
+                  "min": 0,
+                  "max": 0.06,
+                  "value": 0,
+                  "control": "surprised",
+                  "target": 0.06
+                }
+              ]
+            },
+            {
+              "id": "earR",
+              "parent": "head",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#d99a76",
+              "position": {
+                "x": 0.32,
+                "y": -0.025,
+                "z": 0
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.13,
+                "y": 0.23,
+                "z": 0.15
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "earInnerR",
+              "parent": "head",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#b9795d",
+              "position": {
+                "x": 0.32,
+                "y": -0.025,
+                "z": 0.065
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.065,
+                "y": 0.13,
+                "z": 0.035
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "cheekR",
+              "parent": "head",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#d99a76",
+              "position": {
+                "x": 0.1984,
+                "y": -0.12,
+                "z": 0.19
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.22,
+                "y": 0.2,
+                "z": 0.14
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "eyeWhiteR",
+              "parent": "head",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#fff7ed",
+              "position": {
+                "x": 0.1408,
+                "y": 0.035,
+                "z": 0.258
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.18,
+                "y": 0.145,
+                "z": 0.07
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": [
+                {
+                  "responses": {},
+                  "id": "blinkR",
+                  "motion": "scale",
+                  "axis": "y",
+                  "min": 0.03,
+                  "max": 1,
+                  "value": 1,
+                  "control": "blink",
+                  "target": 0.03
+                }
+              ]
+            },
+            {
+              "id": "irisR",
+              "parent": "head",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#466b5c",
+              "position": {
+                "x": 0.1408,
+                "y": 0.035,
+                "z": 0.295
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.08,
+                "y": 0.09,
+                "z": 0.025
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": [
+                {
+                  "responses": {},
+                  "id": "irisBlinkR",
+                  "motion": "scale",
+                  "axis": "y",
+                  "min": 0.03,
+                  "max": 1,
+                  "value": 1,
+                  "control": "blink",
+                  "target": 0.03
+                }
+              ]
+            },
+            {
+              "id": "pupilR",
+              "parent": "head",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#162329",
+              "position": {
+                "x": 0.1408,
+                "y": 0.035,
+                "z": 0.311
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.037,
+                "y": 0.06,
+                "z": 0.015
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": [
+                {
+                  "responses": {},
+                  "id": "pupilBlinkR",
+                  "motion": "scale",
+                  "axis": "y",
+                  "min": 0.03,
+                  "max": 1,
+                  "value": 1,
+                  "control": "blink",
+                  "target": 0.03
+                }
+              ]
+            },
+            {
+              "id": "eyeLightR",
+              "parent": "head",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#ffffff",
+              "position": {
+                "x": 0.12580000000000002,
+                "y": 0.06,
+                "z": 0.323
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.02,
+                "y": 0.02,
+                "z": 0.01
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": [
+                {
+                  "responses": {},
+                  "id": "lightBlinkR",
+                  "motion": "scale",
+                  "axis": "y",
+                  "min": 0.03,
+                  "max": 1,
+                  "value": 1,
+                  "control": "blink",
+                  "target": 0.03
+                }
+              ]
+            },
+            {
+              "id": "browR",
+              "parent": "head",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#493027",
+              "position": {
+                "x": 0.1408,
+                "y": 0.158,
+                "z": 0.263
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": -7
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.19,
+                "y": 0.045,
+                "z": 0.045
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": [
+                {
+                  "responses": {},
+                  "id": "browLiftR",
+                  "motion": "translation",
+                  "axis": "y",
+                  "min": 0,
+                  "max": 0.06,
+                  "value": 0,
+                  "control": "surprised",
+                  "target": 0.06
+                }
+              ]
+            },
+            {
+              "id": "noseBridge",
+              "parent": "head",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#d99a76",
+              "position": {
+                "x": 0,
+                "y": -0.025,
+                "z": 0.267
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.085,
+                "y": 0.2,
+                "z": 0.09
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "noseTip",
+              "parent": "head",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#d99a76",
+              "position": {
+                "x": 0,
+                "y": -0.1,
+                "z": 0.315
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.13,
+                "y": 0.1,
+                "z": 0.13
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "mouth",
+              "parent": "head",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#713c36",
+              "position": {
+                "x": 0,
+                "y": -0.205,
+                "z": 0.272
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.21,
+                "y": 0.045,
+                "z": 0.035
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": [
+                {
+                  "responses": {},
+                  "id": "mouthOpen",
+                  "motion": "scale",
+                  "axis": "y",
+                  "min": 1,
+                  "max": 3,
+                  "value": 1,
+                  "control": "speech",
+                  "target": 3
+                }
+              ]
+            },
+            {
+              "id": "lowerLip",
+              "parent": "head",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#bd705d",
+              "position": {
+                "x": 0,
+                "y": -0.235,
+                "z": 0.273
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.2,
+                "y": 0.035,
+                "z": 0.035
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "leftArm",
+              "parent": "body",
+              "palette": "",
+              "instances": [],
+              "shape": "group",
+              "color": "#36a9e1",
+              "position": {
+                "x": -0.43,
+                "y": 2.06,
+                "z": 0
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+              },
+              "roughness": 0.78,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": [
+                {
+                  "responses": {},
+                  "id": "leftArm",
+                  "motion": "rotation",
+                  "axis": "x",
+                  "min": -160,
+                  "max": 100,
+                  "value": 0,
+                  "control": "leftArm",
+                  "target": 100
+                },
+                {
+                  "responses": {},
+                  "id": "raiseL",
+                  "motion": "rotation",
+                  "axis": "z",
+                  "min": -150,
+                  "max": 150,
+                  "value": 0,
+                  "control": "none",
+                  "target": 150
+                }
+              ]
+            },
+            {
+              "id": "sleeveL",
+              "parent": "leftArm",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#dcaa38",
+              "position": {
+                "x": 0,
+                "y": -0.23,
+                "z": 0
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.27,
+                "y": 0.53,
+                "z": 0.29
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "elbowL",
+              "parent": "leftArm",
+              "palette": "",
+              "instances": [],
+              "shape": "group",
+              "color": "#36a9e1",
+              "position": {
+                "x": 0,
+                "y": -0.46,
+                "z": 0
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+              },
+              "roughness": 0.78,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": [
+                {
+                  "responses": {},
+                  "id": "elbowBendL",
+                  "motion": "rotation",
+                  "axis": "x",
+                  "min": -130,
+                  "max": 10,
+                  "value": 0,
+                  "control": "none",
+                  "target": 10
+                }
+              ]
+            },
+            {
+              "id": "forearmL",
+              "parent": "elbowL",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#dcaa38",
+              "position": {
+                "x": 0,
+                "y": -0.19,
+                "z": 0
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.23,
+                "y": 0.43,
+                "z": 0.25
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "cuffL",
+              "parent": "elbowL",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#bd8b2d",
+              "position": {
+                "x": 0,
+                "y": -0.37,
+                "z": 0
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.24,
+                "y": 0.09,
+                "z": 0.26
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "handL",
+              "parent": "elbowL",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#d99a76",
+              "position": {
+                "x": 0,
+                "y": -0.49,
+                "z": 0
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.21,
+                "y": 0.24,
+                "z": 0.15
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "thumbL",
+              "parent": "elbowL",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#d99a76",
+              "position": {
+                "x": 0.1,
+                "y": -0.46,
+                "z": 0.03
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.085,
+                "y": 0.15,
+                "z": 0.1
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "fingerL0",
+              "parent": "elbowL",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#d99a76",
+              "position": {
+                "x": -0.072,
+                "y": -0.61,
+                "z": 0
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.044,
+                "y": 0.13,
+                "z": 0.11
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "fingerL1",
+              "parent": "elbowL",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#d99a76",
+              "position": {
+                "x": -0.023999999999999994,
+                "y": -0.61,
+                "z": 0
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.044,
+                "y": 0.13,
+                "z": 0.11
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "fingerL2",
+              "parent": "elbowL",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#d99a76",
+              "position": {
+                "x": 0.024000000000000007,
+                "y": -0.61,
+                "z": 0
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.044,
+                "y": 0.13,
+                "z": 0.11
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "fingerL3",
+              "parent": "elbowL",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#d99a76",
+              "position": {
+                "x": 0.07200000000000002,
+                "y": -0.61,
+                "z": 0
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.044,
+                "y": 0.13,
+                "z": 0.11
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "leftLeg",
+              "parent": "body",
+              "palette": "",
+              "instances": [],
+              "shape": "group",
+              "color": "#36a9e1",
+              "position": {
+                "x": -0.19,
+                "y": 1.19,
+                "z": 0
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+              },
+              "roughness": 0.78,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": [
+                {
+                  "responses": {},
+                  "id": "leftLeg",
+                  "motion": "rotation",
+                  "axis": "x",
+                  "min": -80,
+                  "max": 80,
+                  "value": 0,
+                  "control": "leftLeg",
+                  "target": 80
+                }
+              ]
+            },
+            {
+              "id": "thighL",
+              "parent": "leftLeg",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#314d65",
+              "position": {
+                "x": 0,
+                "y": -0.24,
+                "z": 0
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.29,
+                "y": 0.55,
+                "z": 0.32
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "kneeL",
+              "parent": "leftLeg",
+              "palette": "",
+              "instances": [],
+              "shape": "group",
+              "color": "#36a9e1",
+              "position": {
+                "x": 0,
+                "y": -0.49,
+                "z": 0
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+              },
+              "roughness": 0.78,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": [
+                {
+                  "responses": {},
+                  "id": "kneeBendL",
+                  "motion": "rotation",
+                  "axis": "x",
+                  "min": 0,
+                  "max": 110,
+                  "value": 0,
+                  "control": "none",
+                  "target": 110
+                }
+              ]
+            },
+            {
+              "id": "shinL",
+              "parent": "kneeL",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#314d65",
+              "position": {
+                "x": 0,
+                "y": -0.24,
+                "z": 0
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.24,
+                "y": 0.52,
+                "z": 0.27
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "shoeL",
+              "parent": "kneeL",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#443a35",
+              "position": {
+                "x": 0,
+                "y": -0.59,
+                "z": 0.07
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.29,
+                "y": 0.2,
+                "z": 0.48
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "soleL",
+              "parent": "kneeL",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#c4b5a1",
+              "position": {
+                "x": 0,
+                "y": -0.67,
+                "z": 0.07
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.3,
+                "y": 0.06,
+                "z": 0.49
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "rightArm",
+              "parent": "body",
+              "palette": "",
+              "instances": [],
+              "shape": "group",
+              "color": "#36a9e1",
+              "position": {
+                "x": 0.43,
+                "y": 2.06,
+                "z": 0
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+              },
+              "roughness": 0.78,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": [
+                {
+                  "responses": {},
+                  "id": "rightArm",
+                  "motion": "rotation",
+                  "axis": "x",
+                  "min": -160,
+                  "max": 100,
+                  "value": 0,
+                  "control": "rightArm",
+                  "target": 100
+                },
+                {
+                  "responses": {},
+                  "id": "raiseR",
+                  "motion": "rotation",
+                  "axis": "z",
+                  "min": -150,
+                  "max": 150,
+                  "value": 0,
+                  "control": "none",
+                  "target": 150
+                }
+              ]
+            },
+            {
+              "id": "sleeveR",
+              "parent": "rightArm",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#dcaa38",
+              "position": {
+                "x": 0,
+                "y": -0.23,
+                "z": 0
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.27,
+                "y": 0.53,
+                "z": 0.29
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "elbowR",
+              "parent": "rightArm",
+              "palette": "",
+              "instances": [],
+              "shape": "group",
+              "color": "#36a9e1",
+              "position": {
+                "x": 0,
+                "y": -0.46,
+                "z": 0
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+              },
+              "roughness": 0.78,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": [
+                {
+                  "responses": {},
+                  "id": "elbowBendR",
+                  "motion": "rotation",
+                  "axis": "x",
+                  "min": -130,
+                  "max": 10,
+                  "value": 0,
+                  "control": "none",
+                  "target": 10
+                }
+              ]
+            },
+            {
+              "id": "forearmR",
+              "parent": "elbowR",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#dcaa38",
+              "position": {
+                "x": 0,
+                "y": -0.19,
+                "z": 0
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.23,
+                "y": 0.43,
+                "z": 0.25
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "cuffR",
+              "parent": "elbowR",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#bd8b2d",
+              "position": {
+                "x": 0,
+                "y": -0.37,
+                "z": 0
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.24,
+                "y": 0.09,
+                "z": 0.26
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "handR",
+              "parent": "elbowR",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#d99a76",
+              "position": {
+                "x": 0,
+                "y": -0.49,
+                "z": 0
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.21,
+                "y": 0.24,
+                "z": 0.15
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "thumbR",
+              "parent": "elbowR",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#d99a76",
+              "position": {
+                "x": -0.1,
+                "y": -0.46,
+                "z": 0.03
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.085,
+                "y": 0.15,
+                "z": 0.1
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "fingerR0",
+              "parent": "elbowR",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#d99a76",
+              "position": {
+                "x": -0.072,
+                "y": -0.61,
+                "z": 0
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.044,
+                "y": 0.13,
+                "z": 0.11
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "fingerR1",
+              "parent": "elbowR",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#d99a76",
+              "position": {
+                "x": -0.023999999999999994,
+                "y": -0.61,
+                "z": 0
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.044,
+                "y": 0.13,
+                "z": 0.11
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "fingerR2",
+              "parent": "elbowR",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#d99a76",
+              "position": {
+                "x": 0.024000000000000007,
+                "y": -0.61,
+                "z": 0
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.044,
+                "y": 0.13,
+                "z": 0.11
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "fingerR3",
+              "parent": "elbowR",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#d99a76",
+              "position": {
+                "x": 0.07200000000000002,
+                "y": -0.61,
+                "z": 0
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.044,
+                "y": 0.13,
+                "z": 0.11
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "rightLeg",
+              "parent": "body",
+              "palette": "",
+              "instances": [],
+              "shape": "group",
+              "color": "#36a9e1",
+              "position": {
+                "x": 0.19,
+                "y": 1.19,
+                "z": 0
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+              },
+              "roughness": 0.78,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": [
+                {
+                  "responses": {},
+                  "id": "rightLeg",
+                  "motion": "rotation",
+                  "axis": "x",
+                  "min": -80,
+                  "max": 80,
+                  "value": 0,
+                  "control": "rightLeg",
+                  "target": 80
+                }
+              ]
+            },
+            {
+              "id": "thighR",
+              "parent": "rightLeg",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#314d65",
+              "position": {
+                "x": 0,
+                "y": -0.24,
+                "z": 0
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.29,
+                "y": 0.55,
+                "z": 0.32
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "kneeR",
+              "parent": "rightLeg",
+              "palette": "",
+              "instances": [],
+              "shape": "group",
+              "color": "#36a9e1",
+              "position": {
+                "x": 0,
+                "y": -0.49,
+                "z": 0
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+              },
+              "roughness": 0.78,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": [
+                {
+                  "responses": {},
+                  "id": "kneeBendR",
+                  "motion": "rotation",
+                  "axis": "x",
+                  "min": 0,
+                  "max": 110,
+                  "value": 0,
+                  "control": "none",
+                  "target": 110
+                }
+              ]
+            },
+            {
+              "id": "shinR",
+              "parent": "kneeR",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#314d65",
+              "position": {
+                "x": 0,
+                "y": -0.24,
+                "z": 0
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.24,
+                "y": 0.52,
+                "z": 0.27
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "shoeR",
+              "parent": "kneeR",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#443a35",
+              "position": {
+                "x": 0,
+                "y": -0.59,
+                "z": 0.07
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.29,
+                "y": 0.2,
+                "z": 0.48
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            },
+            {
+              "id": "soleR",
+              "parent": "kneeR",
+              "palette": "",
+              "instances": [],
+              "shape": "sphere",
+              "color": "#c4b5a1",
+              "position": {
+                "x": 0,
+                "y": -0.67,
+                "z": 0.07
+              },
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "pivot": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "size": {
+                "x": 0.3,
+                "y": 0.06,
+                "z": 0.49
+              },
+              "roughness": 0.65,
+              "metalness": 0.08,
+              "opacity": 1,
+              "joints": []
+            }
+          ],
+          "animations": {
+            "walk": {
+              "duration": 1.2,
+              "tracks": [
+                {
+                  "joint": "leftLeg",
+                  "keys": [
+                    {
+                      "at": 0,
+                      "value": 0
+                    },
+                    {
+                      "at": 0.3,
+                      "value": -25
+                    },
+                    {
+                      "at": 0.6,
+                      "value": 0
+                    },
+                    {
+                      "at": 0.8999999999999999,
+                      "value": 25
+                    },
+                    {
+                      "at": 1.2,
+                      "value": 0
+                    }
+                  ],
+                  "easing": "ease-in-out"
+                },
+                {
+                  "joint": "rightLeg",
+                  "keys": [
+                    {
+                      "at": 0,
+                      "value": 0
+                    },
+                    {
+                      "at": 0.3,
+                      "value": 25
+                    },
+                    {
+                      "at": 0.6,
+                      "value": 0
+                    },
+                    {
+                      "at": 0.8999999999999999,
+                      "value": -25
+                    },
+                    {
+                      "at": 1.2,
+                      "value": 0
+                    }
+                  ],
+                  "easing": "ease-in-out"
+                },
+                {
+                  "joint": "leftArm",
+                  "keys": [
+                    {
+                      "at": 0,
+                      "value": 0
+                    },
+                    {
+                      "at": 0.3,
+                      "value": 20
+                    },
+                    {
+                      "at": 0.6,
+                      "value": 0
+                    },
+                    {
+                      "at": 0.8999999999999999,
+                      "value": -20
+                    },
+                    {
+                      "at": 1.2,
+                      "value": 0
+                    }
+                  ],
+                  "easing": "ease-in-out"
+                },
+                {
+                  "joint": "rightArm",
+                  "keys": [
+                    {
+                      "at": 0,
+                      "value": 0
+                    },
+                    {
+                      "at": 0.3,
+                      "value": -20
+                    },
+                    {
+                      "at": 0.6,
+                      "value": 0
+                    },
+                    {
+                      "at": 0.8999999999999999,
+                      "value": 20
+                    },
+                    {
+                      "at": 1.2,
+                      "value": 0
+                    }
+                  ],
+                  "easing": "ease-in-out"
+                },
+                {
+                  "joint": "kneeBendL",
+                  "keys": [
+                    {
+                      "at": 0,
+                      "value": 0
+                    },
+                    {
+                      "at": 0.3,
+                      "value": 28
+                    },
+                    {
+                      "at": 0.6,
+                      "value": 0
+                    },
+                    {
+                      "at": 0.8999999999999999,
+                      "value": 5
+                    },
+                    {
+                      "at": 1.2,
+                      "value": 0
+                    }
+                  ],
+                  "easing": "ease-in-out"
+                },
+                {
+                  "joint": "kneeBendR",
+                  "keys": [
+                    {
+                      "at": 0,
+                      "value": 0
+                    },
+                    {
+                      "at": 0.3,
+                      "value": 5
+                    },
+                    {
+                      "at": 0.6,
+                      "value": 0
+                    },
+                    {
+                      "at": 0.8999999999999999,
+                      "value": 28
+                    },
+                    {
+                      "at": 1.2,
+                      "value": 0
+                    }
+                  ],
+                  "easing": "ease-in-out"
+                },
+                {
+                  "joint": "elbowBendL",
+                  "keys": [
+                    {
+                      "at": 0,
+                      "value": -12
+                    },
+                    {
+                      "at": 0.3,
+                      "value": -25
+                    },
+                    {
+                      "at": 0.6,
+                      "value": -12
+                    },
+                    {
+                      "at": 0.8999999999999999,
+                      "value": -15
+                    },
+                    {
+                      "at": 1.2,
+                      "value": -12
+                    }
+                  ],
+                  "easing": "ease-in-out"
+                },
+                {
+                  "joint": "elbowBendR",
+                  "keys": [
+                    {
+                      "at": 0,
+                      "value": -12
+                    },
+                    {
+                      "at": 0.3,
+                      "value": -15
+                    },
+                    {
+                      "at": 0.6,
+                      "value": -12
+                    },
+                    {
+                      "at": 0.8999999999999999,
+                      "value": -25
+                    },
+                    {
+                      "at": 1.2,
+                      "value": -12
+                    }
+                  ],
+                  "easing": "ease-in-out"
+                }
+              ]
+            },
+            "wave": {
+              "duration": 3,
+              "tracks": [
+                {
+                  "joint": "raiseR",
+                  "keys": [
+                    {
+                      "at": 0,
+                      "value": 0
+                    },
+                    {
+                      "at": 0.75,
+                      "value": -120
+                    },
+                    {
+                      "at": 1.5,
+                      "value": -120
+                    },
+                    {
+                      "at": 2.25,
+                      "value": -120
+                    },
+                    {
+                      "at": 3,
+                      "value": 0
+                    }
+                  ],
+                  "easing": "ease-in-out"
+                },
+                {
+                  "joint": "elbowBendR",
+                  "keys": [
+                    {
+                      "at": 0,
+                      "value": 0
+                    },
+                    {
+                      "at": 0.75,
+                      "value": -25
+                    },
+                    {
+                      "at": 1.5,
+                      "value": -65
+                    },
+                    {
+                      "at": 2.25,
+                      "value": -25
+                    },
+                    {
+                      "at": 3,
+                      "value": 0
+                    }
+                  ],
+                  "easing": "ease-in-out"
+                },
+                {
+                  "joint": "look",
+                  "keys": [
+                    {
+                      "at": 0,
+                      "value": 0
+                    },
+                    {
+                      "at": 0.75,
+                      "value": 12
+                    },
+                    {
+                      "at": 1.5,
+                      "value": 8
+                    },
+                    {
+                      "at": 2.25,
+                      "value": 12
+                    },
+                    {
+                      "at": 3,
+                      "value": 0
+                    }
+                  ],
+                  "easing": "ease-in-out"
+                }
+              ]
+            },
+            "face": {
+              "duration": 3,
+              "tracks": [
+                {
+                  "joint": "blinkL",
+                  "keys": [
+                    {
+                      "at": 0,
+                      "value": 1
+                    },
+                    {
+                      "at": 0.75,
+                      "value": 0.03
+                    },
+                    {
+                      "at": 1.5,
+                      "value": 1
+                    },
+                    {
+                      "at": 2.25,
+                      "value": 1
+                    },
+                    {
+                      "at": 3,
+                      "value": 1
+                    }
+                  ],
+                  "easing": "ease-in-out"
+                },
+                {
+                  "joint": "blinkR",
+                  "keys": [
+                    {
+                      "at": 0,
+                      "value": 1
+                    },
+                    {
+                      "at": 0.75,
+                      "value": 0.03
+                    },
+                    {
+                      "at": 1.5,
+                      "value": 1
+                    },
+                    {
+                      "at": 2.25,
+                      "value": 1
+                    },
+                    {
+                      "at": 3,
+                      "value": 1
+                    }
+                  ],
+                  "easing": "ease-in-out"
+                },
+                {
+                  "joint": "irisBlinkL",
+                  "keys": [
+                    {
+                      "at": 0,
+                      "value": 1
+                    },
+                    {
+                      "at": 0.75,
+                      "value": 0.03
+                    },
+                    {
+                      "at": 1.5,
+                      "value": 1
+                    },
+                    {
+                      "at": 2.25,
+                      "value": 1
+                    },
+                    {
+                      "at": 3,
+                      "value": 1
+                    }
+                  ],
+                  "easing": "ease-in-out"
+                },
+                {
+                  "joint": "irisBlinkR",
+                  "keys": [
+                    {
+                      "at": 0,
+                      "value": 1
+                    },
+                    {
+                      "at": 0.75,
+                      "value": 0.03
+                    },
+                    {
+                      "at": 1.5,
+                      "value": 1
+                    },
+                    {
+                      "at": 2.25,
+                      "value": 1
+                    },
+                    {
+                      "at": 3,
+                      "value": 1
+                    }
+                  ],
+                  "easing": "ease-in-out"
+                },
+                {
+                  "joint": "pupilBlinkL",
+                  "keys": [
+                    {
+                      "at": 0,
+                      "value": 1
+                    },
+                    {
+                      "at": 0.75,
+                      "value": 0.03
+                    },
+                    {
+                      "at": 1.5,
+                      "value": 1
+                    },
+                    {
+                      "at": 2.25,
+                      "value": 1
+                    },
+                    {
+                      "at": 3,
+                      "value": 1
+                    }
+                  ],
+                  "easing": "ease-in-out"
+                },
+                {
+                  "joint": "pupilBlinkR",
+                  "keys": [
+                    {
+                      "at": 0,
+                      "value": 1
+                    },
+                    {
+                      "at": 0.75,
+                      "value": 0.03
+                    },
+                    {
+                      "at": 1.5,
+                      "value": 1
+                    },
+                    {
+                      "at": 2.25,
+                      "value": 1
+                    },
+                    {
+                      "at": 3,
+                      "value": 1
+                    }
+                  ],
+                  "easing": "ease-in-out"
+                },
+                {
+                  "joint": "lightBlinkL",
+                  "keys": [
+                    {
+                      "at": 0,
+                      "value": 1
+                    },
+                    {
+                      "at": 0.75,
+                      "value": 0.03
+                    },
+                    {
+                      "at": 1.5,
+                      "value": 1
+                    },
+                    {
+                      "at": 2.25,
+                      "value": 1
+                    },
+                    {
+                      "at": 3,
+                      "value": 1
+                    }
+                  ],
+                  "easing": "ease-in-out"
+                },
+                {
+                  "joint": "lightBlinkR",
+                  "keys": [
+                    {
+                      "at": 0,
+                      "value": 1
+                    },
+                    {
+                      "at": 0.75,
+                      "value": 0.03
+                    },
+                    {
+                      "at": 1.5,
+                      "value": 1
+                    },
+                    {
+                      "at": 2.25,
+                      "value": 1
+                    },
+                    {
+                      "at": 3,
+                      "value": 1
+                    }
+                  ],
+                  "easing": "ease-in-out"
+                },
+                {
+                  "joint": "mouthOpen",
+                  "keys": [
+                    {
+                      "at": 0,
+                      "value": 1
+                    },
+                    {
+                      "at": 0.75,
+                      "value": 1
+                    },
+                    {
+                      "at": 1.5,
+                      "value": 2.5
+                    },
+                    {
+                      "at": 2.25,
+                      "value": 1.5
+                    },
+                    {
+                      "at": 3,
+                      "value": 1
+                    }
+                  ],
+                  "easing": "ease-in-out"
+                },
+                {
+                  "joint": "nod",
+                  "keys": [
+                    {
+                      "at": 0,
+                      "value": 0
+                    },
+                    {
+                      "at": 0.75,
+                      "value": 8
+                    },
+                    {
+                      "at": 1.5,
+                      "value": -5
+                    },
+                    {
+                      "at": 2.25,
+                      "value": 4
+                    },
+                    {
+                      "at": 3,
+                      "value": 0
+                    }
+                  ],
+                  "easing": "ease-in-out"
+                }
+              ]
+            }
+          }
+        },
+        "status": "draft",
+        "id": "rounded_human",
+        "name": "Rounded character",
+        "description": "Brown hair, expressive face with eyes, nose, mouth and ears. Mustard jacket and blue trousers. Articulated elbows and knees.",
+        "image": null,
+        "comments": [],
+        "kind": "character"
+      }
+    ],
+    "settings": [],
+    "shots": [
+      {
+        "id": "test_walk",
+        "title": "Walk",
+        "duration": 3.6,
+        "action": "Inspect the walk clip.",
+        "camera": "Neutral studio view.",
+        "audio": "Silent movement test.",
+        "image": null,
+        "characters": [
+          "rounded_human"
+        ],
+        "settings": [],
+        "status": "draft",
+        "comments": []
+      },
+      {
+        "id": "test_wave",
+        "title": "Wave",
+        "duration": 3.6,
+        "action": "Inspect the wave clip.",
+        "camera": "Neutral studio view.",
+        "audio": "Silent movement test.",
+        "image": null,
+        "characters": [
+          "rounded_human"
+        ],
+        "settings": [],
+        "status": "draft",
+        "comments": []
+      },
+      {
+        "id": "test_face",
+        "title": "Face",
+        "duration": 3.6,
+        "action": "Inspect the face clip.",
+        "camera": "Neutral studio view.",
+        "audio": "Silent movement test.",
+        "image": null,
+        "characters": [
+          "rounded_human"
+        ],
+        "settings": [],
+        "status": "draft",
+        "comments": []
+      }
+    ],
+    "images": {},
+    "approved": false,
+    "production": {
+      "renderMode": "3d",
+      "dialogue": false,
+      "music": false,
+      "sfx": false
+    }
+  },
+  "groups3d": {},
+  "characters": {
+    "rounded_human": {
+      "model": {
+        "parts": [
+          {
+            "id": "body",
+            "parent": "",
+            "palette": "",
+            "instances": [],
+            "shape": "group",
+            "color": "#36a9e1",
+            "position": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 1,
+              "y": 1,
+              "z": 1
+            },
+            "roughness": 0.78,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": [
+              {
+                "responses": {},
+                "id": "breath",
+                "motion": "translation",
+                "axis": "y",
+                "min": 0,
+                "max": 0.04,
+                "value": 0,
+                "control": "bob",
+                "target": 0.04
+              }
+            ]
+          },
+          {
+            "id": "hips",
+            "parent": "body",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#314d65",
+            "position": {
+              "x": 0,
+              "y": 1.22,
+              "z": 0
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.65,
+              "y": 0.4,
+              "z": 0.4
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "jacket",
+            "parent": "body",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#dcaa38",
+            "position": {
+              "x": 0,
+              "y": 1.77,
+              "z": 0
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.76,
+              "y": 0.9,
+              "z": 0.43
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "shirt",
+            "parent": "body",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#f5ead9",
+            "position": {
+              "x": 0,
+              "y": 1.99,
+              "z": 0.202
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.2,
+              "y": 0.43,
+              "z": 0.045
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "button0",
+            "parent": "body",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#72512e",
+            "position": {
+              "x": 0.08,
+              "y": 1.88,
+              "z": 0.222
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.035,
+              "y": 0.035,
+              "z": 0.02
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "button1",
+            "parent": "body",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#72512e",
+            "position": {
+              "x": 0.08,
+              "y": 1.7599999999999998,
+              "z": 0.222
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.035,
+              "y": 0.035,
+              "z": 0.02
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "button2",
+            "parent": "body",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#72512e",
+            "position": {
+              "x": 0.08,
+              "y": 1.64,
+              "z": 0.222
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.035,
+              "y": 0.035,
+              "z": 0.02
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "button3",
+            "parent": "body",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#72512e",
+            "position": {
+              "x": 0.08,
+              "y": 1.52,
+              "z": 0.222
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.035,
+              "y": 0.035,
+              "z": 0.02
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "collarL",
+            "parent": "body",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#dcaa38",
+            "position": {
+              "x": -0.12350000000000001,
+              "y": 2.12,
+              "z": 0.2
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 25
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.19,
+              "y": 0.17,
+              "z": 0.07
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "collarR",
+            "parent": "body",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#dcaa38",
+            "position": {
+              "x": 0.12350000000000001,
+              "y": 2.12,
+              "z": 0.2
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": -25
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.19,
+              "y": 0.17,
+              "z": 0.07
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "neck",
+            "parent": "body",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#d99a76",
+            "position": {
+              "x": 0,
+              "y": 2.25,
+              "z": 0
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.24,
+              "y": 0.27,
+              "z": 0.24
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "head",
+            "parent": "body",
+            "palette": "",
+            "instances": [],
+            "shape": "group",
+            "color": "#36a9e1",
+            "position": {
+              "x": 0,
+              "y": 2.62,
+              "z": 0
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 1,
+              "y": 1,
+              "z": 1
+            },
+            "roughness": 0.78,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": [
+              {
+                "responses": {},
+                "id": "nod",
+                "motion": "rotation",
+                "axis": "x",
+                "min": -25,
+                "max": 25,
+                "value": 0,
+                "control": "none",
+                "target": 25
+              },
+              {
+                "responses": {},
+                "id": "look",
+                "motion": "rotation",
+                "axis": "y",
+                "min": -45,
+                "max": 45,
+                "value": 0,
+                "control": "none",
+                "target": 45
+              }
+            ]
+          },
+          {
+            "id": "skull",
+            "parent": "head",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#d99a76",
+            "position": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.64,
+              "y": 0.74,
+              "z": 0.56
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "chin",
+            "parent": "head",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#d99a76",
+            "position": {
+              "x": 0,
+              "y": -0.23,
+              "z": 0.08
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.42,
+              "y": 0.24,
+              "z": 0.38
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "hairCap",
+            "parent": "head",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#493027",
+            "position": {
+              "x": 0,
+              "y": 0.24,
+              "z": -0.025
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.67,
+              "y": 0.38,
+              "z": 0.57
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "hairLock0",
+            "parent": "head",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#493027",
+            "position": {
+              "x": -0.27,
+              "y": 0.24,
+              "z": 0.215
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": -22
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.15,
+              "y": 0.23,
+              "z": 0.12
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "hairLock1",
+            "parent": "head",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#493027",
+            "position": {
+              "x": -0.185,
+              "y": 0.25514647772654214,
+              "z": 0.215
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": -22
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.15,
+              "y": 0.23,
+              "z": 0.12
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "hairLock2",
+            "parent": "head",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#493027",
+            "position": {
+              "x": -0.1,
+              "y": 0.25636735368286223,
+              "z": 0.215
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": -22
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.15,
+              "y": 0.23,
+              "z": 0.12
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "hairLock3",
+            "parent": "head",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#493027",
+            "position": {
+              "x": -0.015000000000000013,
+              "y": 0.2425401601450776,
+              "z": 0.215
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": -22
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.15,
+              "y": 0.23,
+              "z": 0.12
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "hairLock4",
+            "parent": "head",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#493027",
+            "position": {
+              "x": 0.07,
+              "y": 0.22637755508445728,
+              "z": 0.215
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": -22
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.15,
+              "y": 0.23,
+              "z": 0.12
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "hairLock5",
+            "parent": "head",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#493027",
+            "position": {
+              "x": 0.15500000000000003,
+              "y": 0.2227393630560635,
+              "z": 0.215
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": -22
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.15,
+              "y": 0.23,
+              "z": 0.12
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "hairLock6",
+            "parent": "head",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#493027",
+            "position": {
+              "x": 0.24,
+              "y": 0.23497052103241933,
+              "z": 0.215
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": -22
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.15,
+              "y": 0.23,
+              "z": 0.12
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "earL",
+            "parent": "head",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#d99a76",
+            "position": {
+              "x": -0.32,
+              "y": -0.025,
+              "z": 0
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.13,
+              "y": 0.23,
+              "z": 0.15
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "earInnerL",
+            "parent": "head",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#b9795d",
+            "position": {
+              "x": -0.32,
+              "y": -0.025,
+              "z": 0.065
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.065,
+              "y": 0.13,
+              "z": 0.035
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "cheekL",
+            "parent": "head",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#d99a76",
+            "position": {
+              "x": -0.1984,
+              "y": -0.12,
+              "z": 0.19
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.22,
+              "y": 0.2,
+              "z": 0.14
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "eyeWhiteL",
+            "parent": "head",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#fff7ed",
+            "position": {
+              "x": -0.1408,
+              "y": 0.035,
+              "z": 0.258
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.18,
+              "y": 0.145,
+              "z": 0.07
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": [
+              {
+                "responses": {},
+                "id": "blinkL",
+                "motion": "scale",
+                "axis": "y",
+                "min": 0.03,
+                "max": 1,
+                "value": 1,
+                "control": "blink",
+                "target": 0.03
+              }
+            ]
+          },
+          {
+            "id": "irisL",
+            "parent": "head",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#466b5c",
+            "position": {
+              "x": -0.1408,
+              "y": 0.035,
+              "z": 0.295
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.08,
+              "y": 0.09,
+              "z": 0.025
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": [
+              {
+                "responses": {},
+                "id": "irisBlinkL",
+                "motion": "scale",
+                "axis": "y",
+                "min": 0.03,
+                "max": 1,
+                "value": 1,
+                "control": "blink",
+                "target": 0.03
+              }
+            ]
+          },
+          {
+            "id": "pupilL",
+            "parent": "head",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#162329",
+            "position": {
+              "x": -0.1408,
+              "y": 0.035,
+              "z": 0.311
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.037,
+              "y": 0.06,
+              "z": 0.015
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": [
+              {
+                "responses": {},
+                "id": "pupilBlinkL",
+                "motion": "scale",
+                "axis": "y",
+                "min": 0.03,
+                "max": 1,
+                "value": 1,
+                "control": "blink",
+                "target": 0.03
+              }
+            ]
+          },
+          {
+            "id": "eyeLightL",
+            "parent": "head",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#ffffff",
+            "position": {
+              "x": -0.1558,
+              "y": 0.06,
+              "z": 0.323
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.02,
+              "y": 0.02,
+              "z": 0.01
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": [
+              {
+                "responses": {},
+                "id": "lightBlinkL",
+                "motion": "scale",
+                "axis": "y",
+                "min": 0.03,
+                "max": 1,
+                "value": 1,
+                "control": "blink",
+                "target": 0.03
+              }
+            ]
+          },
+          {
+            "id": "browL",
+            "parent": "head",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#493027",
+            "position": {
+              "x": -0.1408,
+              "y": 0.158,
+              "z": 0.263
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 7
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.19,
+              "y": 0.045,
+              "z": 0.045
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": [
+              {
+                "responses": {},
+                "id": "browLiftL",
+                "motion": "translation",
+                "axis": "y",
+                "min": 0,
+                "max": 0.06,
+                "value": 0,
+                "control": "surprised",
+                "target": 0.06
+              }
+            ]
+          },
+          {
+            "id": "earR",
+            "parent": "head",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#d99a76",
+            "position": {
+              "x": 0.32,
+              "y": -0.025,
+              "z": 0
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.13,
+              "y": 0.23,
+              "z": 0.15
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "earInnerR",
+            "parent": "head",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#b9795d",
+            "position": {
+              "x": 0.32,
+              "y": -0.025,
+              "z": 0.065
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.065,
+              "y": 0.13,
+              "z": 0.035
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "cheekR",
+            "parent": "head",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#d99a76",
+            "position": {
+              "x": 0.1984,
+              "y": -0.12,
+              "z": 0.19
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.22,
+              "y": 0.2,
+              "z": 0.14
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "eyeWhiteR",
+            "parent": "head",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#fff7ed",
+            "position": {
+              "x": 0.1408,
+              "y": 0.035,
+              "z": 0.258
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.18,
+              "y": 0.145,
+              "z": 0.07
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": [
+              {
+                "responses": {},
+                "id": "blinkR",
+                "motion": "scale",
+                "axis": "y",
+                "min": 0.03,
+                "max": 1,
+                "value": 1,
+                "control": "blink",
+                "target": 0.03
+              }
+            ]
+          },
+          {
+            "id": "irisR",
+            "parent": "head",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#466b5c",
+            "position": {
+              "x": 0.1408,
+              "y": 0.035,
+              "z": 0.295
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.08,
+              "y": 0.09,
+              "z": 0.025
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": [
+              {
+                "responses": {},
+                "id": "irisBlinkR",
+                "motion": "scale",
+                "axis": "y",
+                "min": 0.03,
+                "max": 1,
+                "value": 1,
+                "control": "blink",
+                "target": 0.03
+              }
+            ]
+          },
+          {
+            "id": "pupilR",
+            "parent": "head",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#162329",
+            "position": {
+              "x": 0.1408,
+              "y": 0.035,
+              "z": 0.311
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.037,
+              "y": 0.06,
+              "z": 0.015
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": [
+              {
+                "responses": {},
+                "id": "pupilBlinkR",
+                "motion": "scale",
+                "axis": "y",
+                "min": 0.03,
+                "max": 1,
+                "value": 1,
+                "control": "blink",
+                "target": 0.03
+              }
+            ]
+          },
+          {
+            "id": "eyeLightR",
+            "parent": "head",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#ffffff",
+            "position": {
+              "x": 0.12580000000000002,
+              "y": 0.06,
+              "z": 0.323
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.02,
+              "y": 0.02,
+              "z": 0.01
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": [
+              {
+                "responses": {},
+                "id": "lightBlinkR",
+                "motion": "scale",
+                "axis": "y",
+                "min": 0.03,
+                "max": 1,
+                "value": 1,
+                "control": "blink",
+                "target": 0.03
+              }
+            ]
+          },
+          {
+            "id": "browR",
+            "parent": "head",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#493027",
+            "position": {
+              "x": 0.1408,
+              "y": 0.158,
+              "z": 0.263
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": -7
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.19,
+              "y": 0.045,
+              "z": 0.045
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": [
+              {
+                "responses": {},
+                "id": "browLiftR",
+                "motion": "translation",
+                "axis": "y",
+                "min": 0,
+                "max": 0.06,
+                "value": 0,
+                "control": "surprised",
+                "target": 0.06
+              }
+            ]
+          },
+          {
+            "id": "noseBridge",
+            "parent": "head",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#d99a76",
+            "position": {
+              "x": 0,
+              "y": -0.025,
+              "z": 0.267
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.085,
+              "y": 0.2,
+              "z": 0.09
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "noseTip",
+            "parent": "head",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#d99a76",
+            "position": {
+              "x": 0,
+              "y": -0.1,
+              "z": 0.315
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.13,
+              "y": 0.1,
+              "z": 0.13
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "mouth",
+            "parent": "head",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#713c36",
+            "position": {
+              "x": 0,
+              "y": -0.205,
+              "z": 0.272
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.21,
+              "y": 0.045,
+              "z": 0.035
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": [
+              {
+                "responses": {},
+                "id": "mouthOpen",
+                "motion": "scale",
+                "axis": "y",
+                "min": 1,
+                "max": 3,
+                "value": 1,
+                "control": "speech",
+                "target": 3
+              }
+            ]
+          },
+          {
+            "id": "lowerLip",
+            "parent": "head",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#bd705d",
+            "position": {
+              "x": 0,
+              "y": -0.235,
+              "z": 0.273
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.2,
+              "y": 0.035,
+              "z": 0.035
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "leftArm",
+            "parent": "body",
+            "palette": "",
+            "instances": [],
+            "shape": "group",
+            "color": "#36a9e1",
+            "position": {
+              "x": -0.43,
+              "y": 2.06,
+              "z": 0
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 1,
+              "y": 1,
+              "z": 1
+            },
+            "roughness": 0.78,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": [
+              {
+                "responses": {},
+                "id": "leftArm",
+                "motion": "rotation",
+                "axis": "x",
+                "min": -160,
+                "max": 100,
+                "value": 0,
+                "control": "leftArm",
+                "target": 100
+              },
+              {
+                "responses": {},
+                "id": "raiseL",
+                "motion": "rotation",
+                "axis": "z",
+                "min": -150,
+                "max": 150,
+                "value": 0,
+                "control": "none",
+                "target": 150
+              }
+            ]
+          },
+          {
+            "id": "sleeveL",
+            "parent": "leftArm",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#dcaa38",
+            "position": {
+              "x": 0,
+              "y": -0.23,
+              "z": 0
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.27,
+              "y": 0.53,
+              "z": 0.29
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "elbowL",
+            "parent": "leftArm",
+            "palette": "",
+            "instances": [],
+            "shape": "group",
+            "color": "#36a9e1",
+            "position": {
+              "x": 0,
+              "y": -0.46,
+              "z": 0
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 1,
+              "y": 1,
+              "z": 1
+            },
+            "roughness": 0.78,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": [
+              {
+                "responses": {},
+                "id": "elbowBendL",
+                "motion": "rotation",
+                "axis": "x",
+                "min": -130,
+                "max": 10,
+                "value": 0,
+                "control": "none",
+                "target": 10
+              }
+            ]
+          },
+          {
+            "id": "forearmL",
+            "parent": "elbowL",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#dcaa38",
+            "position": {
+              "x": 0,
+              "y": -0.19,
+              "z": 0
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.23,
+              "y": 0.43,
+              "z": 0.25
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "cuffL",
+            "parent": "elbowL",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#bd8b2d",
+            "position": {
+              "x": 0,
+              "y": -0.37,
+              "z": 0
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.24,
+              "y": 0.09,
+              "z": 0.26
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "handL",
+            "parent": "elbowL",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#d99a76",
+            "position": {
+              "x": 0,
+              "y": -0.49,
+              "z": 0
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.21,
+              "y": 0.24,
+              "z": 0.15
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "thumbL",
+            "parent": "elbowL",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#d99a76",
+            "position": {
+              "x": 0.1,
+              "y": -0.46,
+              "z": 0.03
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.085,
+              "y": 0.15,
+              "z": 0.1
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "fingerL0",
+            "parent": "elbowL",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#d99a76",
+            "position": {
+              "x": -0.072,
+              "y": -0.61,
+              "z": 0
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.044,
+              "y": 0.13,
+              "z": 0.11
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "fingerL1",
+            "parent": "elbowL",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#d99a76",
+            "position": {
+              "x": -0.023999999999999994,
+              "y": -0.61,
+              "z": 0
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.044,
+              "y": 0.13,
+              "z": 0.11
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "fingerL2",
+            "parent": "elbowL",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#d99a76",
+            "position": {
+              "x": 0.024000000000000007,
+              "y": -0.61,
+              "z": 0
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.044,
+              "y": 0.13,
+              "z": 0.11
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "fingerL3",
+            "parent": "elbowL",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#d99a76",
+            "position": {
+              "x": 0.07200000000000002,
+              "y": -0.61,
+              "z": 0
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.044,
+              "y": 0.13,
+              "z": 0.11
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "leftLeg",
+            "parent": "body",
+            "palette": "",
+            "instances": [],
+            "shape": "group",
+            "color": "#36a9e1",
+            "position": {
+              "x": -0.19,
+              "y": 1.19,
+              "z": 0
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 1,
+              "y": 1,
+              "z": 1
+            },
+            "roughness": 0.78,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": [
+              {
+                "responses": {},
+                "id": "leftLeg",
+                "motion": "rotation",
+                "axis": "x",
+                "min": -80,
+                "max": 80,
+                "value": 0,
+                "control": "leftLeg",
+                "target": 80
+              }
+            ]
+          },
+          {
+            "id": "thighL",
+            "parent": "leftLeg",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#314d65",
+            "position": {
+              "x": 0,
+              "y": -0.24,
+              "z": 0
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.29,
+              "y": 0.55,
+              "z": 0.32
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "kneeL",
+            "parent": "leftLeg",
+            "palette": "",
+            "instances": [],
+            "shape": "group",
+            "color": "#36a9e1",
+            "position": {
+              "x": 0,
+              "y": -0.49,
+              "z": 0
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 1,
+              "y": 1,
+              "z": 1
+            },
+            "roughness": 0.78,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": [
+              {
+                "responses": {},
+                "id": "kneeBendL",
+                "motion": "rotation",
+                "axis": "x",
+                "min": 0,
+                "max": 110,
+                "value": 0,
+                "control": "none",
+                "target": 110
+              }
+            ]
+          },
+          {
+            "id": "shinL",
+            "parent": "kneeL",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#314d65",
+            "position": {
+              "x": 0,
+              "y": -0.24,
+              "z": 0
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.24,
+              "y": 0.52,
+              "z": 0.27
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "shoeL",
+            "parent": "kneeL",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#443a35",
+            "position": {
+              "x": 0,
+              "y": -0.59,
+              "z": 0.07
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.29,
+              "y": 0.2,
+              "z": 0.48
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "soleL",
+            "parent": "kneeL",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#c4b5a1",
+            "position": {
+              "x": 0,
+              "y": -0.67,
+              "z": 0.07
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.3,
+              "y": 0.06,
+              "z": 0.49
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "rightArm",
+            "parent": "body",
+            "palette": "",
+            "instances": [],
+            "shape": "group",
+            "color": "#36a9e1",
+            "position": {
+              "x": 0.43,
+              "y": 2.06,
+              "z": 0
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 1,
+              "y": 1,
+              "z": 1
+            },
+            "roughness": 0.78,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": [
+              {
+                "responses": {},
+                "id": "rightArm",
+                "motion": "rotation",
+                "axis": "x",
+                "min": -160,
+                "max": 100,
+                "value": 0,
+                "control": "rightArm",
+                "target": 100
+              },
+              {
+                "responses": {},
+                "id": "raiseR",
+                "motion": "rotation",
+                "axis": "z",
+                "min": -150,
+                "max": 150,
+                "value": 0,
+                "control": "none",
+                "target": 150
+              }
+            ]
+          },
+          {
+            "id": "sleeveR",
+            "parent": "rightArm",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#dcaa38",
+            "position": {
+              "x": 0,
+              "y": -0.23,
+              "z": 0
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.27,
+              "y": 0.53,
+              "z": 0.29
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "elbowR",
+            "parent": "rightArm",
+            "palette": "",
+            "instances": [],
+            "shape": "group",
+            "color": "#36a9e1",
+            "position": {
+              "x": 0,
+              "y": -0.46,
+              "z": 0
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 1,
+              "y": 1,
+              "z": 1
+            },
+            "roughness": 0.78,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": [
+              {
+                "responses": {},
+                "id": "elbowBendR",
+                "motion": "rotation",
+                "axis": "x",
+                "min": -130,
+                "max": 10,
+                "value": 0,
+                "control": "none",
+                "target": 10
+              }
+            ]
+          },
+          {
+            "id": "forearmR",
+            "parent": "elbowR",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#dcaa38",
+            "position": {
+              "x": 0,
+              "y": -0.19,
+              "z": 0
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.23,
+              "y": 0.43,
+              "z": 0.25
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "cuffR",
+            "parent": "elbowR",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#bd8b2d",
+            "position": {
+              "x": 0,
+              "y": -0.37,
+              "z": 0
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.24,
+              "y": 0.09,
+              "z": 0.26
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "handR",
+            "parent": "elbowR",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#d99a76",
+            "position": {
+              "x": 0,
+              "y": -0.49,
+              "z": 0
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.21,
+              "y": 0.24,
+              "z": 0.15
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "thumbR",
+            "parent": "elbowR",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#d99a76",
+            "position": {
+              "x": -0.1,
+              "y": -0.46,
+              "z": 0.03
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.085,
+              "y": 0.15,
+              "z": 0.1
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "fingerR0",
+            "parent": "elbowR",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#d99a76",
+            "position": {
+              "x": -0.072,
+              "y": -0.61,
+              "z": 0
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.044,
+              "y": 0.13,
+              "z": 0.11
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "fingerR1",
+            "parent": "elbowR",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#d99a76",
+            "position": {
+              "x": -0.023999999999999994,
+              "y": -0.61,
+              "z": 0
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.044,
+              "y": 0.13,
+              "z": 0.11
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "fingerR2",
+            "parent": "elbowR",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#d99a76",
+            "position": {
+              "x": 0.024000000000000007,
+              "y": -0.61,
+              "z": 0
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.044,
+              "y": 0.13,
+              "z": 0.11
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "fingerR3",
+            "parent": "elbowR",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#d99a76",
+            "position": {
+              "x": 0.07200000000000002,
+              "y": -0.61,
+              "z": 0
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.044,
+              "y": 0.13,
+              "z": 0.11
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "rightLeg",
+            "parent": "body",
+            "palette": "",
+            "instances": [],
+            "shape": "group",
+            "color": "#36a9e1",
+            "position": {
+              "x": 0.19,
+              "y": 1.19,
+              "z": 0
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 1,
+              "y": 1,
+              "z": 1
+            },
+            "roughness": 0.78,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": [
+              {
+                "responses": {},
+                "id": "rightLeg",
+                "motion": "rotation",
+                "axis": "x",
+                "min": -80,
+                "max": 80,
+                "value": 0,
+                "control": "rightLeg",
+                "target": 80
+              }
+            ]
+          },
+          {
+            "id": "thighR",
+            "parent": "rightLeg",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#314d65",
+            "position": {
+              "x": 0,
+              "y": -0.24,
+              "z": 0
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.29,
+              "y": 0.55,
+              "z": 0.32
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "kneeR",
+            "parent": "rightLeg",
+            "palette": "",
+            "instances": [],
+            "shape": "group",
+            "color": "#36a9e1",
+            "position": {
+              "x": 0,
+              "y": -0.49,
+              "z": 0
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 1,
+              "y": 1,
+              "z": 1
+            },
+            "roughness": 0.78,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": [
+              {
+                "responses": {},
+                "id": "kneeBendR",
+                "motion": "rotation",
+                "axis": "x",
+                "min": 0,
+                "max": 110,
+                "value": 0,
+                "control": "none",
+                "target": 110
+              }
+            ]
+          },
+          {
+            "id": "shinR",
+            "parent": "kneeR",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#314d65",
+            "position": {
+              "x": 0,
+              "y": -0.24,
+              "z": 0
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.24,
+              "y": 0.52,
+              "z": 0.27
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "shoeR",
+            "parent": "kneeR",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#443a35",
+            "position": {
+              "x": 0,
+              "y": -0.59,
+              "z": 0.07
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.29,
+              "y": 0.2,
+              "z": 0.48
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          },
+          {
+            "id": "soleR",
+            "parent": "kneeR",
+            "palette": "",
+            "instances": [],
+            "shape": "sphere",
+            "color": "#c4b5a1",
+            "position": {
+              "x": 0,
+              "y": -0.67,
+              "z": 0.07
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 0.3,
+              "y": 0.06,
+              "z": 0.49
+            },
+            "roughness": 0.65,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          }
+        ],
+        "animations": {
+          "walk": {
+            "duration": 1.2,
+            "tracks": [
+              {
+                "joint": "leftLeg",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": 0
+                  },
+                  {
+                    "at": 0.3,
+                    "value": -25
+                  },
+                  {
+                    "at": 0.6,
+                    "value": 0
+                  },
+                  {
+                    "at": 0.8999999999999999,
+                    "value": 25
+                  },
+                  {
+                    "at": 1.2,
+                    "value": 0
+                  }
+                ],
+                "easing": "ease-in-out"
+              },
+              {
+                "joint": "rightLeg",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": 0
+                  },
+                  {
+                    "at": 0.3,
+                    "value": 25
+                  },
+                  {
+                    "at": 0.6,
+                    "value": 0
+                  },
+                  {
+                    "at": 0.8999999999999999,
+                    "value": -25
+                  },
+                  {
+                    "at": 1.2,
+                    "value": 0
+                  }
+                ],
+                "easing": "ease-in-out"
+              },
+              {
+                "joint": "leftArm",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": 0
+                  },
+                  {
+                    "at": 0.3,
+                    "value": 20
+                  },
+                  {
+                    "at": 0.6,
+                    "value": 0
+                  },
+                  {
+                    "at": 0.8999999999999999,
+                    "value": -20
+                  },
+                  {
+                    "at": 1.2,
+                    "value": 0
+                  }
+                ],
+                "easing": "ease-in-out"
+              },
+              {
+                "joint": "rightArm",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": 0
+                  },
+                  {
+                    "at": 0.3,
+                    "value": -20
+                  },
+                  {
+                    "at": 0.6,
+                    "value": 0
+                  },
+                  {
+                    "at": 0.8999999999999999,
+                    "value": 20
+                  },
+                  {
+                    "at": 1.2,
+                    "value": 0
+                  }
+                ],
+                "easing": "ease-in-out"
+              },
+              {
+                "joint": "kneeBendL",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": 0
+                  },
+                  {
+                    "at": 0.3,
+                    "value": 28
+                  },
+                  {
+                    "at": 0.6,
+                    "value": 0
+                  },
+                  {
+                    "at": 0.8999999999999999,
+                    "value": 5
+                  },
+                  {
+                    "at": 1.2,
+                    "value": 0
+                  }
+                ],
+                "easing": "ease-in-out"
+              },
+              {
+                "joint": "kneeBendR",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": 0
+                  },
+                  {
+                    "at": 0.3,
+                    "value": 5
+                  },
+                  {
+                    "at": 0.6,
+                    "value": 0
+                  },
+                  {
+                    "at": 0.8999999999999999,
+                    "value": 28
+                  },
+                  {
+                    "at": 1.2,
+                    "value": 0
+                  }
+                ],
+                "easing": "ease-in-out"
+              },
+              {
+                "joint": "elbowBendL",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": -12
+                  },
+                  {
+                    "at": 0.3,
+                    "value": -25
+                  },
+                  {
+                    "at": 0.6,
+                    "value": -12
+                  },
+                  {
+                    "at": 0.8999999999999999,
+                    "value": -15
+                  },
+                  {
+                    "at": 1.2,
+                    "value": -12
+                  }
+                ],
+                "easing": "ease-in-out"
+              },
+              {
+                "joint": "elbowBendR",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": -12
+                  },
+                  {
+                    "at": 0.3,
+                    "value": -15
+                  },
+                  {
+                    "at": 0.6,
+                    "value": -12
+                  },
+                  {
+                    "at": 0.8999999999999999,
+                    "value": -25
+                  },
+                  {
+                    "at": 1.2,
+                    "value": -12
+                  }
+                ],
+                "easing": "ease-in-out"
+              }
+            ]
+          },
+          "wave": {
+            "duration": 3,
+            "tracks": [
+              {
+                "joint": "raiseR",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": 0
+                  },
+                  {
+                    "at": 0.75,
+                    "value": -120
+                  },
+                  {
+                    "at": 1.5,
+                    "value": -120
+                  },
+                  {
+                    "at": 2.25,
+                    "value": -120
+                  },
+                  {
+                    "at": 3,
+                    "value": 0
+                  }
+                ],
+                "easing": "ease-in-out"
+              },
+              {
+                "joint": "elbowBendR",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": 0
+                  },
+                  {
+                    "at": 0.75,
+                    "value": -25
+                  },
+                  {
+                    "at": 1.5,
+                    "value": -65
+                  },
+                  {
+                    "at": 2.25,
+                    "value": -25
+                  },
+                  {
+                    "at": 3,
+                    "value": 0
+                  }
+                ],
+                "easing": "ease-in-out"
+              },
+              {
+                "joint": "look",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": 0
+                  },
+                  {
+                    "at": 0.75,
+                    "value": 12
+                  },
+                  {
+                    "at": 1.5,
+                    "value": 8
+                  },
+                  {
+                    "at": 2.25,
+                    "value": 12
+                  },
+                  {
+                    "at": 3,
+                    "value": 0
+                  }
+                ],
+                "easing": "ease-in-out"
+              }
+            ]
+          },
+          "face": {
+            "duration": 3,
+            "tracks": [
+              {
+                "joint": "blinkL",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": 1
+                  },
+                  {
+                    "at": 0.75,
+                    "value": 0.03
+                  },
+                  {
+                    "at": 1.5,
+                    "value": 1
+                  },
+                  {
+                    "at": 2.25,
+                    "value": 1
+                  },
+                  {
+                    "at": 3,
+                    "value": 1
+                  }
+                ],
+                "easing": "ease-in-out"
+              },
+              {
+                "joint": "blinkR",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": 1
+                  },
+                  {
+                    "at": 0.75,
+                    "value": 0.03
+                  },
+                  {
+                    "at": 1.5,
+                    "value": 1
+                  },
+                  {
+                    "at": 2.25,
+                    "value": 1
+                  },
+                  {
+                    "at": 3,
+                    "value": 1
+                  }
+                ],
+                "easing": "ease-in-out"
+              },
+              {
+                "joint": "irisBlinkL",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": 1
+                  },
+                  {
+                    "at": 0.75,
+                    "value": 0.03
+                  },
+                  {
+                    "at": 1.5,
+                    "value": 1
+                  },
+                  {
+                    "at": 2.25,
+                    "value": 1
+                  },
+                  {
+                    "at": 3,
+                    "value": 1
+                  }
+                ],
+                "easing": "ease-in-out"
+              },
+              {
+                "joint": "irisBlinkR",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": 1
+                  },
+                  {
+                    "at": 0.75,
+                    "value": 0.03
+                  },
+                  {
+                    "at": 1.5,
+                    "value": 1
+                  },
+                  {
+                    "at": 2.25,
+                    "value": 1
+                  },
+                  {
+                    "at": 3,
+                    "value": 1
+                  }
+                ],
+                "easing": "ease-in-out"
+              },
+              {
+                "joint": "pupilBlinkL",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": 1
+                  },
+                  {
+                    "at": 0.75,
+                    "value": 0.03
+                  },
+                  {
+                    "at": 1.5,
+                    "value": 1
+                  },
+                  {
+                    "at": 2.25,
+                    "value": 1
+                  },
+                  {
+                    "at": 3,
+                    "value": 1
+                  }
+                ],
+                "easing": "ease-in-out"
+              },
+              {
+                "joint": "pupilBlinkR",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": 1
+                  },
+                  {
+                    "at": 0.75,
+                    "value": 0.03
+                  },
+                  {
+                    "at": 1.5,
+                    "value": 1
+                  },
+                  {
+                    "at": 2.25,
+                    "value": 1
+                  },
+                  {
+                    "at": 3,
+                    "value": 1
+                  }
+                ],
+                "easing": "ease-in-out"
+              },
+              {
+                "joint": "lightBlinkL",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": 1
+                  },
+                  {
+                    "at": 0.75,
+                    "value": 0.03
+                  },
+                  {
+                    "at": 1.5,
+                    "value": 1
+                  },
+                  {
+                    "at": 2.25,
+                    "value": 1
+                  },
+                  {
+                    "at": 3,
+                    "value": 1
+                  }
+                ],
+                "easing": "ease-in-out"
+              },
+              {
+                "joint": "lightBlinkR",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": 1
+                  },
+                  {
+                    "at": 0.75,
+                    "value": 0.03
+                  },
+                  {
+                    "at": 1.5,
+                    "value": 1
+                  },
+                  {
+                    "at": 2.25,
+                    "value": 1
+                  },
+                  {
+                    "at": 3,
+                    "value": 1
+                  }
+                ],
+                "easing": "ease-in-out"
+              },
+              {
+                "joint": "mouthOpen",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": 1
+                  },
+                  {
+                    "at": 0.75,
+                    "value": 1
+                  },
+                  {
+                    "at": 1.5,
+                    "value": 2.5
+                  },
+                  {
+                    "at": 2.25,
+                    "value": 1.5
+                  },
+                  {
+                    "at": 3,
+                    "value": 1
+                  }
+                ],
+                "easing": "ease-in-out"
+              },
+              {
+                "joint": "nod",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": 0
+                  },
+                  {
+                    "at": 0.75,
+                    "value": 8
+                  },
+                  {
+                    "at": 1.5,
+                    "value": -5
+                  },
+                  {
+                    "at": 2.25,
+                    "value": 4
+                  },
+                  {
+                    "at": 3,
+                    "value": 0
+                  }
+                ],
+                "easing": "ease-in-out"
+              }
+            ]
+          }
+        }
+      },
+      "expression": "neutral",
+      "style": "classic",
+      "name": "Rounded character",
+      "bodyColor": "#36a9e1",
+      "headColor": "#dde7ed",
+      "limbColor": "#64748b",
+      "accentColor": "#ffe066",
+      "height": 3
+    }
+  },
+  "stages": {
+    "studio": {
+      "paths": {},
+      "model": {
+        "parts": [
+          {
+            "id": "empty",
+            "parent": "",
+            "palette": "",
+            "instances": [],
+            "shape": "group",
+            "color": "#36a9e1",
+            "position": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "pivot": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "size": {
+              "x": 1,
+              "y": 1,
+              "z": 1
+            },
+            "roughness": 0.78,
+            "metalness": 0.08,
+            "opacity": 1,
+            "joints": []
+          }
+        ],
+        "animations": {}
+      },
+      "name": "Neutral studio",
+      "skyColor": "#dce8ee",
+      "groundColor": "#c5ccd1",
+      "blockColor": "#e6bd7a"
+    }
+  },
+  "audios": {},
+  "narration": null,
+  "audioDucking": false,
+  "thumbnail": null,
+  "videos": {},
+  "backgroundVideo": null,
+  "music": null,
+  "backgroundSimulation": null,
+  "version": "1.0",
+  "title": "Rounded character — movement study",
+  "description": "A freely editable stylized human, prepared in the storyboard before filmmaking.",
+  "firstComment": "",
+  "hashtags": "",
+  "format": "portrait",
+  "assets": {},
+  "scenes": [
+    {
+      "morph": null,
+      "stage3d": {
+        "stage": "studio",
+        "camera": {
+          "fov": 38,
+          "yaw": 18,
+          "pitch": 9,
+          "distance": 7,
+          "targetX": 0,
+          "targetY": 1.5,
+          "targetZ": 0,
+          "orbit": 0,
+          "follow": null,
+          "keys": []
+        },
+        "actors": [
+          {
+            "path": null,
+            "joints": {},
+            "motions": [
+              {
+                "animation": "walk",
+                "at": 0,
+                "duration": 3.6,
+                "loop": true,
+                "speed": 1,
+                "blend": 0
+              }
+            ],
+            "y": 0,
+            "pitch": 0,
+            "roll": 0,
+            "speech": null,
+            "expressions": [],
+            "actions": [],
+            "id": "actor",
+            "character": "rounded_human",
+            "x": 0,
+            "z": 0,
+            "toX": 0,
+            "toZ": 0,
+            "rotation": 0,
+            "scale": 1,
+            "action": "idle",
+            "at": 0,
+            "duration": 3.6
+          }
+        ],
+        "stageJoints": {},
+        "stageMotions": [],
+        "groups": []
+      },
+      "camera": null,
+      "groups": [],
+      "narration": null,
+      "id": "test_walk",
+      "name": "Scene",
+      "duration": 3.6,
+      "backgroundEnabled": true,
+      "backgroundOpacity": 1,
+      "backgroundGradient": null,
+      "background": "#263b42",
+      "backgroundAsset": "",
+      "transition": "none",
+      "transitionDuration": 0.5,
+      "elements": []
+    },
+    {
+      "morph": null,
+      "stage3d": {
+        "stage": "studio",
+        "camera": {
+          "fov": 38,
+          "yaw": 18,
+          "pitch": 9,
+          "distance": 7,
+          "targetX": 0,
+          "targetY": 1.5,
+          "targetZ": 0,
+          "orbit": 0,
+          "follow": null,
+          "keys": []
+        },
+        "actors": [
+          {
+            "path": null,
+            "joints": {},
+            "motions": [
+              {
+                "animation": "wave",
+                "at": 0,
+                "duration": 3.6,
+                "loop": false,
+                "speed": 1,
+                "blend": 0
+              }
+            ],
+            "y": 0,
+            "pitch": 0,
+            "roll": 0,
+            "speech": null,
+            "expressions": [],
+            "actions": [],
+            "id": "actor",
+            "character": "rounded_human",
+            "x": 0,
+            "z": 0,
+            "toX": 0,
+            "toZ": 0,
+            "rotation": 0,
+            "scale": 1,
+            "action": "idle",
+            "at": 0,
+            "duration": 3.6
+          }
+        ],
+        "stageJoints": {},
+        "stageMotions": [],
+        "groups": []
+      },
+      "camera": null,
+      "groups": [],
+      "narration": null,
+      "id": "test_wave",
+      "name": "Scene",
+      "duration": 3.6,
+      "backgroundEnabled": true,
+      "backgroundOpacity": 1,
+      "backgroundGradient": null,
+      "background": "#263b42",
+      "backgroundAsset": "",
+      "transition": "none",
+      "transitionDuration": 0.5,
+      "elements": []
+    },
+    {
+      "morph": null,
+      "stage3d": {
+        "stage": "studio",
+        "camera": {
+          "fov": 38,
+          "yaw": 0,
+          "pitch": 9,
+          "distance": 5,
+          "targetX": 0,
+          "targetY": 2.3,
+          "targetZ": 0,
+          "orbit": 0,
+          "follow": null,
+          "keys": []
+        },
+        "actors": [
+          {
+            "path": null,
+            "joints": {},
+            "motions": [
+              {
+                "animation": "face",
+                "at": 0,
+                "duration": 3.6,
+                "loop": false,
+                "speed": 1,
+                "blend": 0
+              }
+            ],
+            "y": 0,
+            "pitch": 0,
+            "roll": 0,
+            "speech": null,
+            "expressions": [],
+            "actions": [],
+            "id": "actor",
+            "character": "rounded_human",
+            "x": 0,
+            "z": 0,
+            "toX": 0,
+            "toZ": 0,
+            "rotation": 0,
+            "scale": 1,
+            "action": "idle",
+            "at": 0,
+            "duration": 3.6
+          }
+        ],
+        "stageJoints": {},
+        "stageMotions": [],
+        "groups": []
+      },
+      "camera": null,
+      "groups": [],
+      "narration": null,
+      "id": "test_face",
+      "name": "Scene",
+      "duration": 3.6,
+      "backgroundEnabled": true,
+      "backgroundOpacity": 1,
+      "backgroundGradient": null,
+      "background": "#263b42",
+      "backgroundAsset": "",
+      "transition": "none",
+      "transitionDuration": 0.5,
+      "elements": []
+    }
+  ]
+}

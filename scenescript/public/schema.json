@@ -3226,6 +3226,8 @@
       },
       "$comment": "Runtime additionally requires first at=0, strictly ordered arrivals after previous holds, scene duration bounds and x+width/y+width<=100."
     },
+    "BoardModelChat":{"type":"object","additionalProperties":false,"required":["request","reply"],"properties":{"request":{"type":"string","maxLength":10000},"reply":{"type":"string","maxLength":5000}}},
+    "BoardDesign": {"type":"object","additionalProperties":false,"required":["mode","style","surface","details"],"properties":{"mode":{"enum":["inherit","2d","3d"]},"style":{"enum":["rounded","block","cartoon","natural"]},"surface":{"enum":["colors","textures","mixed"]},"details":{"type":"string","maxLength":10000}}},
     "BoardComment": {
       "type": "object",
       "additionalProperties": false,
@@ -3256,7 +3258,7 @@
       }
     },
     "BoardVoice": {"type":"object","additionalProperties":false,"required":["provider","id","name"],"properties":{"provider":{"const":"elevenlabs"},"id":{"type":"string","minLength":1,"maxLength":100,"pattern":"^[a-zA-Z0-9_-]+$"},"name":{"type":"string","maxLength":200}}},
-    "BoardSetting": {"type": "object", "additionalProperties": false, "required": ["id", "name", "description", "image", "comments"], "properties": {"voice": {"anyOf": [{"$ref": "#/$defs/BoardVoice"}, {"type": "null"}]}, "status": {"enum": ["draft", "approved"], "default": "draft"}, "id": {"type": "string", "minLength": 1, "maxLength": 100, "pattern": "^[a-zA-Z0-9_-]+$"}, "name": {"type": "string", "maxLength": 200}, "description": {"type": "string", "maxLength": 10000}, "image": {"anyOf": [{"type": "string", "minLength": 1, "maxLength": 100, "pattern": "^[a-zA-Z0-9_-]+$"}, {"type": "null"}]}, "comments": {"type": "array", "maxItems": 100, "items": {"$ref": "#/$defs/BoardComment"}}, "objects": {"type": "array", "maxItems": 100, "uniqueItems": true, "items": {"type": "string", "minLength": 1, "maxLength": 100, "pattern": "^[a-zA-Z0-9_-]+$"}, "description": "Fixed equipment: references to board.characters with kind object, never people."}}},
+    "BoardSetting": {"type": "object", "additionalProperties": false, "required": ["id", "name", "description", "image", "comments"], "properties": {"modelChat":{"type":"array","maxItems":10,"items":{"$ref":"#/$defs/BoardModelChat"}},"design":{"$ref":"#/$defs/BoardDesign"},"model3d":{"$ref":"#/$defs/model3D"},"voice": {"anyOf": [{"$ref": "#/$defs/BoardVoice"}, {"type": "null"}]}, "status": {"enum": ["draft", "approved"], "default": "draft"}, "id": {"type": "string", "minLength": 1, "maxLength": 100, "pattern": "^[a-zA-Z0-9_-]+$"}, "name": {"type": "string", "maxLength": 200}, "description": {"type": "string", "maxLength": 10000}, "image": {"anyOf": [{"type": "string", "minLength": 1, "maxLength": 100, "pattern": "^[a-zA-Z0-9_-]+$"}, {"type": "null"}]}, "comments": {"type": "array", "maxItems": 100, "items": {"$ref": "#/$defs/BoardComment"}}, "objects": {"type": "array", "maxItems": 100, "uniqueItems": true, "items": {"type": "string", "minLength": 1, "maxLength": 100, "pattern": "^[a-zA-Z0-9_-]+$"}, "description": "Fixed equipment: references to board.characters with kind object, never people."}}},
     "BoardSubject": {
       "type": "object",
       "additionalProperties": false,
@@ -3267,7 +3269,7 @@
         "image",
         "comments"
       ],
-      "properties": {
+      "properties": {"modelChat":{"type":"array","maxItems":10,"items":{"$ref":"#/$defs/BoardModelChat"}},"design":{"$ref":"#/$defs/BoardDesign"},"model3d":{"$ref":"#/$defs/model3D"},
         "voice": {"anyOf":[{"$ref":"#/$defs/BoardVoice"},{"type":"null"}]},
         "status": {"enum": ["draft", "approved"], "default": "draft"},
         "id": {
@@ -3306,7 +3308,7 @@
         }
       }
     },
-    "BoardCharacter": {"type":"object","additionalProperties":false,"required":["id","name","description","image","comments"],"properties":{"voice":{"anyOf":[{"$ref":"#/$defs/BoardVoice"},{"type":"null"}]},"status":{"enum":["draft","approved"],"default":"draft"},"id":{"type":"string","minLength":1,"maxLength":100,"pattern":"^[a-zA-Z0-9_-]+$"},"name":{"type":"string","maxLength":200},"description":{"type":"string","maxLength":10000},"image":{"anyOf":[{"type":"string","minLength":1,"maxLength":100,"pattern":"^[a-zA-Z0-9_-]+$"},{"type":"null"}]},"comments":{"type":"array","maxItems":100,"items":{"$ref":"#/$defs/BoardComment"}},"kind":{"enum":["character","object"],"default":"character"}}},
+    "BoardCharacter": {"type":"object","additionalProperties":false,"required":["id","name","description","image","comments"],"properties":{"modelChat":{"type":"array","maxItems":10,"items":{"$ref":"#/$defs/BoardModelChat"}},"design":{"$ref":"#/$defs/BoardDesign"},"model3d":{"$ref":"#/$defs/model3D"},"voice":{"anyOf":[{"$ref":"#/$defs/BoardVoice"},{"type":"null"}]},"status":{"enum":["draft","approved"],"default":"draft"},"id":{"type":"string","minLength":1,"maxLength":100,"pattern":"^[a-zA-Z0-9_-]+$"},"name":{"type":"string","maxLength":200},"description":{"type":"string","maxLength":10000},"image":{"anyOf":[{"type":"string","minLength":1,"maxLength":100,"pattern":"^[a-zA-Z0-9_-]+$"},{"type":"null"}]},"comments":{"type":"array","maxItems":100,"items":{"$ref":"#/$defs/BoardComment"}},"kind":{"enum":["character","object"],"default":"character"}}},
     "BoardShot": {
       "type": "object",
       "additionalProperties": false,

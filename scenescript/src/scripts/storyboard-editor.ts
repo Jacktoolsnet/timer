@@ -1,3 +1,7 @@
+import {defaultBoardDesign} from '../lib/storyboard-design';
+import {roundedHumanModel} from '../lib/rounded-human';
+import {storyboardDesignWords} from '../lib/storyboard-design-i18n';
+import {storyboardModelView} from './storyboard-model-view';
 import {reviewProduction} from '../lib/production-review';
 import {productionWords,productionIssueText} from '../lib/production-i18n';
 import {removeStoryboardImage} from '../lib/storyboard-images';
@@ -47,6 +51,8 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
    board=removeStoryboardImage(board,pending.target);dirty=true;render();closeDeleteImage();
   }catch(e){closeDeleteImage();error(e);}
  });
+ let disposeModelView:(()=>void)|undefined;
+ const dw=storyboardDesignWords(document.documentElement.lang);
  let selectedItems:Record<string,string>={};
  let board:Storyboard,origin:ReturnType<typeof context>,dirty=false,tab='story',session=0;
  const check=()=>{const now=context();if(!dialog.open||now.project!==origin.project||now.revision!==origin.revision)throw new Error(t.stale);};
@@ -116,7 +122,7 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
   if(config.newComment||config.editComment)draft.approved=false;else invalidateStoryboardApprovals(draft,config.target??(config.shot?{kind:'shots',id:config.shot}:undefined));
   board=parseStoryboard(draft);dirty=true;if(config.subjectKind){tab=value==='object'?'objects':'characters';if(config.target)selectedItems[tab]=config.target.id;}if(config.newItem)selectedItems[tab]=sectionItems().at(-1)?.id??'';render();closeField();
  }catch(e){$('field-error').textContent=e instanceof Error?e.message:String(e);}});
- dialog.addEventListener('close',()=>{if(deleteImageDialog.open)closeDeleteImage();finishReplace?.(false);if(fieldDialog.open)closeField();if(exchange.open)exchange.close();});
+ dialog.addEventListener('close',()=>{disposeModelView?.();disposeModelView=undefined;if(deleteImageDialog.open)closeDeleteImage();finishReplace?.(false);if(fieldDialog.open)closeField();if(exchange.open)exchange.close();});
  function approvalSwitch(parent:HTMLElement,item:{status:'draft'|'approved'},name:string){
   const label=node('label'),input=node('input'),track=node('span');label.className='board-approval-switch';input.type='checkbox';input.setAttribute('role','switch');input.setAttribute('aria-description',name);input.checked=item.status==='approved';track.className='board-switch-track';track.setAttribute('aria-hidden','true');
   input.addEventListener('change',()=>{item.status=input.checked?'approved':'draft';touch();});label.append(input,track,node('span',t.approved));parent.append(label);
@@ -161,7 +167,7 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
   card.classList.add('board-detail-grid');for(const child of Array.from(card.children)){child.classList.add('board-detail-tile');const key=child.querySelector<HTMLElement>('[data-board-edit]')?.dataset.boardEdit;if(key)child.setAttribute('data-detail-field',key);}
  }
 
- function render(){
+ function render(){disposeModelView?.();disposeModelView=undefined;
   review();for(const b of document.querySelectorAll<HTMLButtonElement>('[data-board-tab]')){const selected=b.dataset.boardTab===tab;b.setAttribute('aria-selected',String(selected));b.tabIndex=selected?0:-1;}
   const root=$('content');root.dataset.tab=tab;root.setAttribute('aria-labelledby','storyboard-tab-'+tab);root.replaceChildren();
   if(tab==='story'){
@@ -191,13 +197,26 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
     if(kind==='settings'){const setting=subject as BoardSetting,objects=board.characters.filter(c=>c.kind==='object');
      field(card,t.equipment,(setting.objects??[]).map(id=>objects.find(o=>o.id===id)?.name??id).join(', '),{label:t.equipment,value:setting.objects??[],kind:'choices',options:objects.map(o=>[o.id,o.name]),target,apply:(b,v)=>{b.settings.find(s=>s.id===subject.id)!.objects=v as string[];}},'settings-'+subject.id+'-objects');
     }
+    const design=subject.design??defaultBoardDesign();
+    for(const [key,label,options]of [
+     ['mode',dw.mode,[['inherit',dw.inherit],['2d','2D'],['3d','3D']]],
+     ['style',dw.style,[['rounded',dw.rounded],['block',dw.block],['cartoon',dw.cartoon],['natural',dw.natural]]],
+     ['surface',dw.surface,[['colors',dw.colors],['textures',dw.textures],['mixed',dw.mixed]]]
+    ] as const){field(card,label,options.find(([id])=>id===design[key])![1],{label,value:design[key],kind:'select',options:options.map(([a,b])=>[a,b]),target,apply:(b,v)=>{get(b).design={...design,[key]:v};}},kind+'-'+subject.id+'-'+key);}
+    field(card,dw.details,design.details,{...textConfig(dw.details,design.details,(b,v)=>{get(b).design={...design,details:String(v)};}),target},kind+'-'+subject.id+'-design-details');
+    const modelTile=node('section');modelTile.className='board-field board-model-tile';const row=node('div');row.className='board-field-heading';row.append(node('h4',dw.model));
+    const modelButton=commentButton(dw.create,'m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5Z');modelButton.dataset.boardModel=subject.id;
+    const effectiveMode=design.mode==='inherit'?board.production?.renderMode:design.mode;modelButton.disabled=effectiveMode==='2d';modelButton.addEventListener('click',()=>runWorkflow('model',{resourceTarget:target}));row.append(modelButton);modelTile.append(row,node('p',subject.model3d?dw.hint:dw.none));
+    if(design.surface!=='colors')modelTile.append(node('p',dw.textureHint));
+    if(subject.modelChat?.length){const history=node('details');history.append(node('summary',dw.conversation));for(const entry of subject.modelChat){history.append(node('p',entry.request),node('p',entry.reply));}modelTile.append(history);}
+    if(subject.model3d)disposeModelView=storyboardModelView(modelTile,subject,kind==='settings',board);card.append(modelTile);
     picture(card,subject.image,subject.name,(b,v)=>{get(b).image=String(v)||null;},kind+'-'+subject.id+'-image',undefined,target);
     const voiceWords=voicePickerWords(document.documentElement.lang as Language);
     field(card,voiceWords.voice,subject.voice?subject.voice.name+' · '+subject.voice.id:voiceWords.none,{label:voiceWords.voice,value:JSON.stringify(subject.voice??null),kind:'voice',target,apply:(b,v)=>{const voice=JSON.parse(String(v)) as VoiceAssignment|null;if(voice)get(b).voice=voice;else delete get(b).voice;}},kind+'-'+subject.id+'-voice');
     field(card,t.description,subject.description,{...textConfig(t.description,subject.description,(b,v)=>{get(b).description=String(v);}),target},kind+'-'+subject.id+'-description');commentList(card,subject.comments,target);tileDetail(card);detail.append(card);
    }
    if(!subjects.length)detail.append(node('p',t.empty));
-   const addLabel=tab==='settings'?t.addSetting:tab==='objects'?t.addObject:t.addCharacter,add=node('button',addLabel);add.type='button';add.className='board-add-item';add.dataset.boardEdit='add-'+tab;add.disabled=board[kind].length>=100;add.addEventListener('click',()=>openField({label:addLabel,value:'',max:200,required:true,newItem:true,apply:(b,v)=>{const subject={status:'draft' as const,id:crypto.randomUUID(),name:String(v),description:'',image:null,comments:[]};if(kind==='settings')b.settings.push(subject);else b.characters.push({...subject,kind:category});}},'add-'+tab));sidebar.append(add);
+   const addLabel=tab==='settings'?t.addSetting:tab==='objects'?t.addObject:t.addCharacter,add=node('button',addLabel);add.type='button';add.className='board-add-item';add.dataset.boardEdit='add-'+tab;add.disabled=board[kind].length>=100;add.addEventListener('click',()=>openField({label:addLabel,value:'',max:200,required:true,newItem:true,apply:(b,v)=>{const subject={status:'draft' as const,id:crypto.randomUUID(),name:String(v),description:'',image:null,comments:[]};if(kind==='settings')b.settings.push(subject);else b.characters.push({...subject,kind:category});}},'add-'+tab));sidebar.append(add);if(tab==='characters'){const example=commentButton(dw.example,'M12 3v18M3 12h18');example.dataset.boardExample='rounded';example.disabled=board.characters.length>=100;example.addEventListener('click',()=>{try{check();const draft=structuredClone(board),id='rounded-'+crypto.randomUUID();draft.characters.push({id,kind:'character',status:'draft',name:dw.exampleName,description:dw.exampleDescription,image:null,comments:[],design:{...defaultBoardDesign(),mode:'3d'},model3d:roundedHumanModel()});draft.revision++;draft.approved=false;board=parseStoryboard(draft);dirty=true;selectedItems.characters=id;render();}catch(e){error(e);}});sidebar.append(example);}
   }else{
    const {sidebar,detail}=library(root,board.shots);
    for(const [i,shot]of board.shots.entries()){if(shot.id!==selectedItems[tab])continue;
@@ -214,7 +233,7 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
     commentList(card,shot.comments,{kind:'shots',id:shot.id});tileDetail(card);detail.append(card);
    }
    if(!board.shots.length)detail.append(node('p',t.empty));
-   const add=node('button',t.addShot);add.type='button';add.className='board-add-item';add.dataset.boardEdit='add-shots';add.disabled=board.shots.length>=100;add.addEventListener('click',()=>openField({label:t.addShot,value:'',max:200,required:true,newItem:true,apply:(b,v)=>{b.shots.push({id:crypto.randomUUID(),title:String(v),duration:3,action:'',camera:'',audio:'',image:null,characters:[],settings:[],status:'draft',comments:[]});}},'add-shots'));sidebar.append(add);
+   const add=node('button',t.addShot);add.type='button';add.className='board-add-item';add.dataset.boardEdit='add-shots';add.disabled=board.shots.length>=100;add.addEventListener('click',()=>openField({label:t.addShot,value:'',max:200,required:true,newItem:true,apply:(b,v)=>{b.shots.push({id:crypto.randomUUID(),title:String(v),duration:3,action:'',camera:'',audio:'',image:null,characters:[],settings:[],status:'draft',comments:[]});}},'add-shots'));sidebar.append(add);if(tab==='characters'){const example=commentButton(dw.example,'M12 3v18M3 12h18');example.dataset.boardExample='rounded';example.disabled=board.characters.length>=100;example.addEventListener('click',()=>{try{check();const draft=structuredClone(board),id='rounded-'+crypto.randomUUID();draft.characters.push({id,kind:'character',status:'draft',name:dw.exampleName,description:dw.exampleDescription,image:null,comments:[],design:{...defaultBoardDesign(),mode:'3d'},model3d:roundedHumanModel()});draft.revision++;draft.approved=false;board=parseStoryboard(draft);dirty=true;selectedItems.characters=id;render();}catch(e){error(e);}});sidebar.append(example);}
   }
  }
  const close=()=>{if(dirty&&!window.confirm(t.unsaved))return;session++;dialog.close();};

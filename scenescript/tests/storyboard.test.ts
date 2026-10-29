@@ -136,3 +136,46 @@ test('production choices and concrete SFX tasks validate, persist and remain aut
  for(const production of [null,{renderMode:'4d',dialogue:true,music:true,sfx:true},{renderMode:'3d',dialogue:'yes',music:true,sfx:true}]){const bad=structuredClone(b);(bad as any).production=production;assert.throws(()=>parseStoryboard(bad),/production/);}
  for(const effects of [[''],Array(31).fill('beep'),['x'.repeat(1001)]]){const bad=structuredClone(b);bad.shots[0].soundEffects=effects;assert.throws(()=>parseStoryboard(bad),/soundEffects/);}
 });
+
+import {roundedHumanModel} from '../src/lib/rounded-human.ts';
+import {defaultBoardDesign} from '../src/lib/storyboard-design.ts';
+import {acceptBoardModel,modelRequestData} from '../src/lib/storyboard-resources.ts';
+import {removeStoryboardImage} from '../src/lib/storyboard-images.ts';
+test('subject design and rounded models are portable, bounded and survive general AI revisions unchanged',()=>{
+ const b=example(),s=b.characters[0];s.design={...defaultBoardDesign(),mode:'3d'};s.model3d=roundedHumanModel();
+ assert.ok(s.model3d.parts.length>70);assert.ok(s.model3d.parts.filter(p=>p.shape==='sphere').length>60);for(const id of ['noseTip','mouth','earL','eyeWhiteR','kneeL','elbowR'])assert.ok(s.model3d.parts.some(p=>p.id===id));
+ assert.deepEqual(parseStoryboard(JSON.parse(JSON.stringify(b))),b);
+ const feedback=JSON.parse(exportStoryboard(b));delete feedback.board.characters[0].design;feedback.board.characters[0].model3d.parts[0].color='#ffffff';
+ const revised=importStoryboard(JSON.stringify(feedback),b);assert.deepEqual(revised.characters[0].design,s.design);assert.deepEqual(revised.characters[0].model3d,s.model3d);
+ for(const bad of [null,{}, {...s.design,mode:'mixed'}, {...s.design,style:'photoreal'}, {...s.design,details:'a'.repeat(10001)}])assert.throws(()=>parseStoryboard({...b,characters:[{...s,design:bad}]}));
+ assert.throws(()=>parseStoryboard({...b,characters:[{...s,model3d:null}]}),/geometry/);
+});
+test('targeted model changes only replace the selected geometry and reset dependent approvals',()=>{
+ const p=demoProject();p.storyboard=example();const b=p.storyboard;for(const s of [...b.characters,...b.settings,...b.shots])s.status='approved';b.approved=true;
+ const original=JSON.stringify(p),target={kind:'characters' as const,id:b.characters[0].id},model=roundedHumanModel();const next=acceptBoardModel(JSON.stringify({model}),p,target);
+ assert.equal(JSON.stringify(p),original);assert.deepEqual(next.scenes,p.scenes);assert.equal(next.storyboard!.approved,false);assert.equal(next.storyboard!.characters[0].status,'draft');assert.equal(next.storyboard!.characters[1].status,'approved');assert.deepEqual(next.storyboard!.characters[0].model3d,model);
+ const request=modelRequestData(next.storyboard!,target,'Narrower shoulders');assert.equal(request.request,'Narrower shoulders');assert.equal(request.target.id,target.id);assert.ok(!('shots'in request));
+ for(const text of ['{}','{"model":null}','{"model":{"parts":[]}}','{"model":{},"project":{}}'])assert.throws(()=>acceptBoardModel(text,p,target));
+ assert.throws(()=>acceptBoardModel(JSON.stringify({model:{parts:[{id:'part',texture:{asset:'missing'}}]}}),p,target),/missing asset/);
+});
+test('deleting a preview retains image data still used by a reviewed model texture',()=>{
+ const b=example(),s=b.characters[0];const image='texture';b.images[image]={name:'texture.png',data:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aZ1sAAAAASUVORK5CYII='};s.image=image;s.model3d=roundedHumanModel();s.model3d.parts[1].texture={asset:image,faces:{},repeat:{x:1,y:1},offset:{x:0,y:0},rotation:0};
+ const next=removeStoryboardImage(b,{kind:'characters',id:s.id});assert.equal(next.characters[0].image,null);assert.deepEqual(next.images[image],b.images[image]);
+});
+test('model conversations are bounded, persisted and protected from general planning edits',()=>{
+ const p=demoProject();p.storyboard=example();const target={kind:'characters' as const,id:p.storyboard.characters[0].id};
+ const next=acceptBoardModel(JSON.stringify({model:roundedHumanModel(),reply:'Die Schultern sind jetzt schmaler.'}),p,target,'Schultern schmaler');
+ const subject=next.storyboard!.characters[0];assert.deepEqual(subject.modelChat,[{request:'Schultern schmaler',reply:'Die Schultern sind jetzt schmaler.'}]);
+ const feedback=JSON.parse(exportStoryboard(next.storyboard!));feedback.board.characters[0].modelChat=[];assert.deepEqual(importStoryboard(JSON.stringify(feedback),next.storyboard).characters[0].modelChat,subject.modelChat);
+ const invalid=structuredClone(next.storyboard!);invalid.characters[0].modelChat=Array(11).fill({request:'x',reply:'y'});assert.throws(()=>parseStoryboard(invalid),/maximum|expected array/);
+ subject.design={...defaultBoardDesign(),surface:'colors'};const model=roundedHumanModel();model.parts[1].texture={asset:'missing',faces:{},repeat:{x:1,y:1},offset:{x:0,y:0},rotation:0};assert.throws(()=>acceptBoardModel(JSON.stringify({model}),next,target),/colors-only/);
+});
+
+import {storyboardModelGuide} from '../src/lib/storyboard-model-guide.ts';
+test('targeted model instructions reuse canonical geometry definitions without the full film guide',()=>{
+ const guide=storyboardModelGuide();assert.ok(guide.length<15000);for(const marker of ['Part3D','Joint3D','Texture3D','Model3D','Extrusion3D','FREE CONSTRUCTION:','4096 keys total','NOT JSON syntax'])assert.ok(guide.includes(marker),marker);assert.ok(!guide.includes('YouTube publication package'));assert.ok(!guide.includes('Project.scenes plays'));
+});
+test('rounded movement-study project bundles the same freely editable model and three actual 3D clips',()=>{
+ const p=parseProject(readFileSync(new URL('../public/examples/rounded-character/rounded-character.scenescript',import.meta.url),'utf8'));
+ assert.equal(p.scenes.length,3);assert.deepEqual(p.characters.rounded_human.model,roundedHumanModel());assert.deepEqual(p.storyboard!.characters[0].model3d,roundedHumanModel());assert.equal(p.storyboard!.approved,false);assert.deepEqual(p.scenes.map(s=>s.stage3d!.actors[0].motions[0].animation),['walk','wave','face']);
+});

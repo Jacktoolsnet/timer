@@ -1,11 +1,12 @@
 import type {Model3D} from './model3d.ts';
 import type {Project} from './model.ts';
 import type {Storyboard} from './storyboard.ts';
-export type ProductionIssue={code:'unspecified'|'unexpected3d'|'missing3d'|'missing2d'|'missingMotion'|'missingCamera'|'missingDialogue'|'speechPending'|'missingMusic'|'sfxPending'|'sfxPlanMissing';detail?:string;pending?:boolean};
+export type ProductionIssue={code:'missingModel'|'unusedResource'|'unspecified'|'unexpected3d'|'missing3d'|'missing2d'|'missingMotion'|'missingCamera'|'missingDialogue'|'speechPending'|'missingMusic'|'sfxPending'|'sfxPlanMissing';detail?:string;pending?:boolean};
 /** Structural checks only, not a guarantee of artistic quality or semantic completeness. */
 export function reviewProduction(p:Project,board:Storyboard|null=p.storyboard):ProductionIssue[]{
- const plan=board?.production;if(!plan)return [];
- const issues:ProductionIssue[]=[];
+ const plan=board?.production,issues:ProductionIssue[]=[];
+ if(board){for(const [kind,items]of [['characters',board.characters],['settings',board.settings]] as const){for(const s of items){if(!board.shots.some(shot=>shot[kind].includes(s.id)))continue;const mode=s.design?.mode==='inherit'?plan?.renderMode:s.design?.mode;if(mode==='3d'&&!s.model3d)issues.push({code:'missingModel',detail:s.name});if(s.status==='approved'&&s.model3d&&!p.scenes.some(scene=>kind==='settings'?scene.stage3d?.stage===s.id:scene.stage3d?.actors.some(a=>a.character===s.id)))issues.push({code:'unusedResource',detail:s.name});}}}
+ if(!plan)return issues;
  const solid=(model:Model3D|null|undefined)=>model?.parts.some(part=>part.shape!=='plane'&&part.shape!=='group'&&part.opacity>0&&part.size.x>0&&part.size.y>0&&part.size.z>0)??false;
  const worlds=p.scenes.filter(s=>s.stage3d&&(s.stage3d.actors.some(a=>solid(p.characters[a.character]?.model))||(s.stage3d.groups?.length??0)>0||solid(p.stages[s.stage3d.stage]?.model)));
  if(plan.renderMode==='auto')issues.push({code:'unspecified'});
@@ -31,8 +32,8 @@ export function reviewProduction(p:Project,board:Storyboard|null=p.storyboard):P
  return issues;
 }
 export function productionInstructions(board:Storyboard){
- const p=board.production;if(!p)return '';
- return 'Binding production requirements: '+JSON.stringify(p)+'. '+
+ const p=board.production;const resources=[...board.characters,...board.settings].filter(s=>s.status==='approved'&&s.model3d);const design=' Respect each subject.design (mode, style, surface, details); rounded/natural humans must not become Roblox/block figures. Approved subject.model3d geometry is binding and restored locally under the same subject ID in project.characters or project.stages. Reference those exact IDs in actors/stages; do not duplicate or redesign reviewed resources. Existing clips and joints are the movement vocabulary. '+(resources.length?'Reviewed model IDs: '+resources.map(s=>s.id).join(', ')+'. ':'');if(!p)return design;
+ return design+'Binding production requirements: '+JSON.stringify(p)+'. '+
  ((p.renderMode==='3d'||p.renderMode==='mixed')?'Build real 3D characters and stages with model.parts geometry, scene.stage3d actors, meaningful motion and 3D camera movement. Storyboard images are design references, NOT flat scene replacements or image-plane stand-ins. Text overlays are allowed only when planned. ':'')+
  (p.renderMode==='mixed'?'Combine actual 3D with deliberate 2D elements. ':'')+
  (p.dialogue?'Create literal dialogue in Scene.narration.text with stable speaker IDs/assigned voices; split executable scenes for speaker changes. Do not substitute dialogue with subtitles. For speaking 3D actors bind speech to scene narration for audio-driven lip movement. Missing recordings remain pending for the separate paid speech workflow; do not invent audio Base64. ':'')+
