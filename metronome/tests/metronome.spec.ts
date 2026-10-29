@@ -19,7 +19,7 @@ test('instrument, practice, persistence and focus',async({page})=>{
  await page.locator('#gap').check();
  await expect(page.locator('.gap-options')).toBeVisible();
  await page.locator('#audible-bars').fill('1');await page.locator('#audible-bars').press('Tab');
- await page.locator('#trigger-beats').click();await page.locator('#options-beats [role=option]').filter({hasText:/^1✓$/}).click();await page.locator('#hide-gap').check();
+ await page.locator('#beats').fill('1');await page.locator('#beats').press('Tab');await page.locator('#hide-gap').check();
  await page.locator('#start').click();await expect(page.locator('.instrument-stage')).toHaveClass(/gap-hidden/,{timeout:4000});
  await page.locator('#start').click();
  expect(await page.evaluate(()=>Object.keys(localStorage).filter(k=>k.startsWith('jacktools.metronome')))).toEqual([]);
@@ -124,13 +124,28 @@ test('settings are separate, grouped responsively and hidden in focus view',asyn
 
 test('styled dropdown lists support keyboard selection, dismissal and synchronized state',async({page})=>{
  await page.goto('/de/');
- const trigger=page.locator('#trigger-beats'),options=page.locator('#options-beats');
- await trigger.click();await expect(options).toBeVisible();await expect(options.locator('[aria-selected=true]')).toContainText('4');
+ const trigger=page.locator('#trigger-subdivision'),options=page.locator('#options-subdivision');
+ await trigger.click();await expect(options).toBeVisible();await expect(options.locator('[aria-selected=true]')).toContainText('Grundschlag');
  await page.keyboard.press('ArrowDown');await page.keyboard.press('Enter');
- await expect(trigger).toHaveText('5');await expect(page.locator('#beats')).toHaveValue('5');await expect(page.locator('#beat-buttons button')).toHaveCount(5);
+ await expect(trigger).toHaveText('Achtel · 2');await expect(page.locator('#subdivision')).toHaveValue('2');
  await trigger.press('ArrowDown');await expect(options).toBeVisible();await page.keyboard.press('Escape');await expect(options).toBeHidden();await expect(trigger).toBeFocused();
  await trigger.click();await page.locator('#trigger-sound').click();await expect(options).toBeHidden();
  await page.locator('#options-sound [role=option]').nth(2).click();await expect(page.locator('#sound')).toHaveValue('soft');
  for(const id of ['gap','reduced']){const input=page.locator('#'+id);await expect(input).toHaveAttribute('role','switch');await input.check();await expect(input).toBeChecked();}
  await page.locator('#hide-gap').check();await expect(page.locator('#hide-gap')).toBeChecked();
+});
+
+test('beats stepper supports buttons, direct entry and limits',async({page})=>{
+ await page.goto('/de/');await page.locator('#beats-plus').click();await expect(page.locator('#beats')).toHaveValue('5');await expect(page.locator('#beat-buttons button')).toHaveCount(5);
+ await page.locator('#beats-minus').click();await expect(page.locator('#beats')).toHaveValue('4');
+ await page.locator('#beats').fill('1');await page.locator('#beats').press('Tab');await expect(page.locator('#beats-minus')).toBeDisabled();
+ await page.locator('#beats').fill('99');await page.locator('#beats').press('Tab');await expect(page.locator('#beats')).toHaveValue('12');await expect(page.locator('#beats-plus')).toBeDisabled();await expect(page.locator('#beat-buttons button')).toHaveCount(12);
+});
+test('muted accent lettering fades and restores when enabled',async({page})=>{
+ await page.goto('/de/');
+ const beat=page.locator('#beat-buttons button').first();
+ await beat.click();await beat.click();
+ await expect(beat).toHaveAttribute('data-accent','0');
+ await expect(beat.locator('b')).toHaveCSS('opacity','0.4');await expect(beat.locator('span')).toHaveCSS('opacity','0.4');
+ await beat.click();await expect(beat).toHaveAttribute('data-accent','2');await expect(beat.locator('b')).toHaveCSS('opacity','1');
 });

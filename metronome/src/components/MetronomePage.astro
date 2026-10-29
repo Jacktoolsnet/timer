@@ -28,7 +28,7 @@ const groups=settingsCopy[lang];
   <h2 id="metronome-settings-title">{groups.settings}</h2>
   <form id="metronome-settings">
    <fieldset class="metronome-settings-group"><legend>{groups.rhythm}</legend>
-    <label>{t.beats}<select id="beats" name="beats">{Array.from({length:12},(_,i)=><option value={i+1} selected={i===3}>{i+1}</option>)}</select></label>
+    <div class="beats-field"><label for="beats">{t.beats}</label><div class="number-stepper"><button type="button" id="beats-minus" aria-label={t.beats+' −1'}>−</button><input id="beats" name="beats" type="number" min="1" max="12" step="1" value="4" inputmode="numeric"/><button type="button" id="beats-plus" aria-label={t.beats+' +1'}>+</button></div></div>
     <label>{t.subdivision}<select id="subdivision" name="subdivision">{t.subOptions.map((label,i)=><option value={i+1}>{label}</option>)}</select></label>
     <p class="accents-label" id="accents-label">{t.accents}</p>
     <div id="beat-buttons" class="beat-buttons" role="group" aria-labelledby="accents-label"></div><p class="form-hint">{t.accentHint}</p>

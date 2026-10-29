@@ -34,6 +34,8 @@ function sync(){
  stage.dataset.view=settings.view;stage.classList.toggle('reduced',settings.reduced||motion.matches);
  document.querySelectorAll<HTMLButtonElement>('[data-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===settings.view)));
  document.querySelectorAll('#metronome-settings select').forEach(select=>select.dispatchEvent(new Event('options-sync')));
+ ($<HTMLButtonElement>('beats-minus')).disabled=settings.beats<=1;
+ ($<HTMLButtonElement>('beats-plus')).disabled=settings.beats>=12;
  drawBeats();
 }
 function silence(){for(const source of sources){try{source.stop();}catch{}}sources.clear();}
@@ -129,3 +131,5 @@ sync();
 document.querySelector('#metronome-settings')?.addEventListener('submit',event=>event.preventDefault());
 
 enhanceClockSelects(document.querySelector<HTMLFormElement>('#metronome-settings')!);
+
+for(const [id,step] of [['beats-minus',-1],['beats-plus',1]] as const) $(id).addEventListener('click',()=>{settings.beats+=step;changed();});

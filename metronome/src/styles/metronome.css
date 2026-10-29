@@ -67,3 +67,11 @@
 .metronome-settings-card .toggle:after{width:18px;height:18px;top:3px;left:3px}
 .metronome-settings-card .toggle-row input:checked+.toggle:after{left:21px}
 @media(prefers-reduced-motion:no-preference){.metronome-settings-card .toggle{transition:background .18s ease}.metronome-settings-card .toggle:after{transition:left .18s ease}}
+.beats-field{display:flex;flex-direction:column;gap:8px;margin:15px 0;font-size:calc(14px * var(--font-scale,1))}
+.metronome-settings-card .number-stepper{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;gap:4px;align-items:center}
+.metronome-settings-card .number-stepper button{display:grid;place-items:center;min-height:46px;padding:0;border:1px solid var(--line);border-radius:10px;background:var(--accent-soft);color:var(--accent);font:inherit;font-size:20px}
+.metronome-settings-card .number-stepper button:hover:not(:disabled){border-color:var(--accent)}
+.metronome-settings-card .number-stepper input{appearance:textfield;min-height:46px;padding:10px 4px;font-size:calc(16px * var(--font-scale,1));font-variant-numeric:lining-nums tabular-nums}
+.metronome-settings-card .number-stepper input::-webkit-inner-spin-button,.metronome-settings-card .number-stepper input::-webkit-outer-spin-button{appearance:none;margin:0}
+/* Fade only the muted beat's lettering; keep its control and focus ring clear. */
+.beat-buttons button[data-accent="0"]>b,.beat-buttons button[data-accent="0"]>span{opacity:.4}
