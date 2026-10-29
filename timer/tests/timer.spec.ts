@@ -287,8 +287,8 @@ test('style, appearance and manual language restore on the next visit without an
   await page.locator('#clear-storage').click();
   expect(await page.evaluate(() => localStorage.getItem('jacktools.timer.appearance.v1'))).toBeNull();
   await page.reload();
-  await expect(page.locator('html')).toHaveAttribute('data-style', 'warm');
-  await expect(page.locator('html')).toHaveAttribute('data-palette', 'terracotta');
+  await expect(page.locator('html')).toHaveAttribute('data-style', 'technical');
+  await expect(page.locator('html')).toHaveAttribute('data-palette', 'green');
 });
 
 test('four icon styles fit one row and keep accessible names', async ({ page }) => {

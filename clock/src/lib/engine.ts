@@ -3,7 +3,7 @@ export type Phase = 'focus' | 'short' | 'long';
 export const colorSchemes = ['terracotta', 'blue', 'green', 'orange', 'red', 'violet', 'teal', 'rose'] as const;
 export type ColorScheme = typeof colorSchemes[number];
 export type Settings = { countdown: number; focus: number; short: number; long: number; rounds: number; sound: boolean; awake: boolean; dark: boolean; colorScheme: ColorScheme };
-export const defaults: Settings = { countdown: 300, focus: 25, short: 5, long: 15, rounds: 4, sound: true, awake: true, dark: false, colorScheme: 'terracotta' };
+export const defaults: Settings = { countdown: 300, focus: 25, short: 5, long: 15, rounds: 4, sound: true, awake: true, dark: true, colorScheme: 'green' };
 export const STORAGE_KEY = 'jacktools.clock.settings.v1';
 export function sanitizeSettings(input: unknown): Settings {
   const value = (input && typeof input === 'object' ? input : {}) as Partial<Settings>;
@@ -16,7 +16,7 @@ export function sanitizeSettings(input: unknown): Settings {
     short: number('short', 1, 60), long: number('long', 1, 120), rounds: number('rounds', 1, 12),
     sound: typeof value.sound === 'boolean' ? value.sound : defaults.sound,
     awake: typeof value.awake === 'boolean' ? value.awake : defaults.awake,
-    dark: value.dark === true,
+    dark: typeof value.dark === 'boolean' ? value.dark : defaults.dark,
     colorScheme: colorSchemes.includes(value.colorScheme as ColorScheme) ? value.colorScheme! : defaults.colorScheme,
   };
 }

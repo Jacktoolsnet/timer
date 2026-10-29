@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 test('homepage, preferences, opt-in and legal links', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
-  await page.goto('/');
+  await page.goto('/de/');
   await expect(page.locator('h1')).toContainText('Online-Tools');
   await expect(page.locator('html')).toHaveAttribute('data-palette', 'green');
   await expect(page.locator('html')).toHaveAttribute('data-style', 'technical');
@@ -40,20 +40,20 @@ test('homepage, preferences, opt-in and legal links', async ({ page }) => {
   expect(errors).toEqual([]);
 });
 test('settings keyboard and non-persisted appearance', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/de/');
   await page.getByLabel('Einstellungen', { exact: true }).focus();
   await page.keyboard.press('Enter');
   await expect(page.locator('#palette-dropdown')).toHaveAttribute('open', '');
   await page.keyboard.press('Escape');
   await expect(page.locator('#palette-dropdown')).not.toHaveAttribute('open');
   await page.getByLabel('Einstellungen', { exact: true }).click();
-  await page.locator('#theme').click();
+  await page.locator('#theme-light').click();
   await page.reload();
-  await expect(page.locator('html')).not.toHaveAttribute('data-theme', 'dark');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
 });
 
  test('timer and clock cards stack preview above copy', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/de/');
   for (const card of await page.locator('.timer-feature').all()) {
     const preview = await card.locator('.timer-preview').boundingBox();
     const copy = await card.locator('.product-copy').boundingBox();
@@ -64,7 +64,7 @@ test('settings keyboard and non-persisted appearance', async ({ page }) => {
 });
 
 test('timer and clock are adjacent on desktop and stacked on mobile', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/de/');
   const timer = await page.locator('.time-tools-grid > .timer-feature').nth(0).boundingBox();
   const clock = await page.locator('.clock-feature').boundingBox();
   if (page.viewportSize()!.width > 760) {
@@ -77,7 +77,7 @@ test('timer and clock are adjacent on desktop and stacked on mobile', async ({ p
 
 test('Relax card and random spotlight link to the new tool',async({page})=>{
  await page.addInitScript(()=>{Math.random=()=>.6;});
- await page.goto('/');
+ await page.goto('/de/');
  await expect(page.locator('#company-spotlight')).toHaveAttribute('data-tool','relax');
  await expect(page.locator('#company-spotlight .text-link')).toHaveAttribute('href','https://relax.jacktools.net/de/');
  await expect(page.locator('#company-spotlight .company-relax-scene')).toBeVisible();
@@ -88,11 +88,11 @@ test('Relax card and random spotlight link to the new tool',async({page})=>{
 });
 
 test('company masthead is sticky and section links remain visible on mobile', async ({page}) => {
-  await page.goto('/');
+  await page.goto('/de/');
   await expect(page.locator('.header-nav a')).toHaveCount(2);
   await expect(page.locator('.header-nav')).toBeVisible();
-  await page.locator('.header-nav a[href="/#tools"]').click();
-  await expect(page.locator('.header-nav a[href="/#tools"]')).toHaveAttribute('aria-current','location');
+  await page.locator('.header-nav a[href="/de/#tools"]').click();
+  await expect(page.locator('.header-nav a[href="/de/#tools"]')).toHaveAttribute('aria-current','location');
   const header=await page.locator('.site-header').boundingBox();
   expect(Math.abs(header!.y)).toBeLessThan(1);
   const section=await page.locator('#tools').boundingBox();

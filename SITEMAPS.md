@@ -3,7 +3,7 @@
 All nine projects build `dist/sitemap.xml`. Deploy the complete `dist/` contents
 (including `robots.txt`) to the corresponding domain root:
 
-- https://jacktools.net/sitemap.xml — company homepage only
+- https://jacktools.net/sitemap.xml — 4 localized company homepages
 - https://timer.jacktools.net/sitemap.xml — 4 languages × timer/Pomodoro/training/usage
 - https://clock.jacktools.net/sitemap.xml — 4 languages × tool/usage
 - https://stopwatch.jacktools.net/sitemap.xml — 4 languages × tool/usage

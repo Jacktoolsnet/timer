@@ -36,7 +36,7 @@ const paletteDropdown = document.querySelector<HTMLDetailsElement>('#palette-dro
 const paletteTrigger = paletteDropdown.querySelector('summary')!;
 const paletteInputs = paletteDropdown.querySelectorAll<HTMLInputElement>('[name=colorScheme]');
 function syncPalette() {
-  const selected = document.documentElement.dataset.palette || 'terracotta';
+  const selected = document.documentElement.dataset.palette || 'green';
   paletteInputs.forEach(input => { input.checked = input.value === selected; });
 }
 syncPalette();
@@ -87,8 +87,8 @@ function persistAppearance(language?: string) {
     localStorage.setItem(APPEARANCE_KEY, JSON.stringify({
       language: language || (['en','de','es','fr'].includes(saved?.language) ? saved.language : document.documentElement.lang),
       dark: document.documentElement.dataset.theme === 'dark',
-      colorScheme: document.documentElement.dataset.palette || 'terracotta',
-      style: document.documentElement.dataset.style || 'warm',
+      colorScheme: document.documentElement.dataset.palette || 'green',
+      style: document.documentElement.dataset.style || 'technical',
       fontSize: Number(document.documentElement.dataset.fontSize || 0),
     }));
   } catch {

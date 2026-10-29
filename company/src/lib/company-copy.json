@@ -1,0 +1,872 @@
+{
+  "KLEINE TOOLS. GROSSE IDEEN.": {
+    "en": "SMALL TOOLS. BIG IDEAS.",
+    "es": "PEQUEÑAS HERRAMIENTAS. GRANDES IDEAS.",
+    "fr": "PETITS OUTILS. GRANDES IDÉES."
+  },
+  "Online-Tools": {
+    "en": "Online tools",
+    "es": "Herramientas online",
+    "fr": "Outils en ligne"
+  },
+  "für deinen": {
+    "en": "for your",
+    "es": "para tu",
+    "fr": "pour votre"
+  },
+  "Alltag.": {
+    "en": "everyday life.",
+    "es": "día a día.",
+    "fr": "quotidien."
+  },
+  "Weniger Ablenkung. Mehr Möglichkeiten.": {
+    "en": "Less distraction. More possibilities.",
+    "es": "Menos distracciones. Más posibilidades.",
+    "fr": "Moins de distractions. Plus de possibilités."
+  },
+  "Ein guter Helfer muss nicht kompliziert sein. Entdecke Tools für konzentrierte Momente, neue Routinen und Nachrichten, die ihren Platz in der Welt finden.": {
+    "en": "A useful helper need not be complicated. Discover tools for focused moments, new routines and messages that find their place in the world.",
+    "es": "Una buena herramienta no tiene por qué ser complicada. Descubre herramientas para concentrarte, crear rutinas y dejar mensajes que encuentran su lugar en el mundo.",
+    "fr": "Un outil utile n’a pas besoin d’être compliqué. Découvrez des outils pour vous concentrer, créer des habitudes et laisser des messages qui trouvent leur place dans le monde."
+  },
+  "Unsere Tools entdecken": {
+    "en": "Discover our tools",
+    "es": "Descubre nuestras herramientas",
+    "fr": "Découvrir nos outils"
+  },
+  "Direkt zum Timer ↗": {
+    "en": "Open the timer ↗",
+    "es": "Ir al temporizador ↗",
+    "fr": "Ouvrir le minuteur ↗"
+  },
+  "Für deinen Browser gemacht. In deinem Stil gestaltet.": {
+    "en": "Made for your browser. Styled your way.",
+    "es": "Para tu navegador. A tu estilo.",
+    "fr": "Pour votre navigateur. À votre goût."
+  },
+  "EIN MOMENT FÜR DICH": {
+    "en": "A MOMENT FOR YOU",
+    "es": "UN MOMENTO PARA TI",
+    "fr": "UN MOMENT POUR VOUS"
+  },
+  "FOKUS": {
+    "en": "FOCUS",
+    "es": "CONCENTRACIÓN",
+    "fr": "CONCENTRATION"
+  },
+  "Eine Sache nach der anderen.": {
+    "en": "One thing at a time.",
+    "es": "Una cosa cada vez.",
+    "fr": "Une chose à la fois."
+  },
+  "◷ Zeit für Fokus": {
+    "en": "◷ Time to focus",
+    "es": "◷ Tiempo para concentrarte",
+    "fr": "◷ Le temps de se concentrer"
+  },
+  "↗ Raum für Ideen": {
+    "en": "↗ Space for ideas",
+    "es": "↗ Espacio para ideas",
+    "fr": "↗ De la place pour les idées"
+  },
+  "Weniger ist manchmal genau richtig.": {
+    "en": "Sometimes less is just right.",
+    "es": "A veces, menos es justo lo que necesitas.",
+    "fr": "Parfois, moins suffit."
+  },
+  "Einatmen": {
+    "en": "Breathe in",
+    "es": "Inhala",
+    "fr": "Inspirez"
+  },
+  "DEIN RECHENWEG": {
+    "en": "YOUR CALCULATION",
+    "es": "TUS CÁLCULOS",
+    "fr": "VOTRE CALCUL"
+  },
+  "Startwert": {
+    "en": "Starting value",
+    "es": "Valor inicial",
+    "fr": "Valeur initiale"
+  },
+  "Ergebnis": {
+    "en": "Result",
+    "es": "Resultado",
+    "fr": "Résultat"
+  },
+  "MessageDrop": {
+    "en": "MessageDrop",
+    "es": "MessageDrop",
+    "fr": "MessageDrop"
+  },
+  "Ein Ort. Eine Nachricht.": {
+    "en": "One place. One message.",
+    "es": "Un lugar. Un mensaje.",
+    "fr": "Un lieu. Un message."
+  },
+  "DIE JACKTOOLS.NET-FAMILIE": {
+    "en": "THE JACKTOOLS.NET FAMILY",
+    "es": "LA FAMILIA JACKTOOLS.NET",
+    "fr": "LA FAMILLE JACKTOOLS.NET"
+  },
+  "Online-Tools für Zeit, Fokus und Entspannung": {
+    "en": "Online tools for time, focus and relaxation",
+    "es": "Herramientas online para el tiempo, la concentración y la relajación",
+    "fr": "Outils en ligne pour le temps, la concentration et la détente"
+  },
+  "Wähle den passenden Helfer – direkt im Browser, ohne Anmeldung.": {
+    "en": "Choose your helper – right in your browser, no sign-up.",
+    "es": "Elige tu herramienta: en el navegador, sin registro.",
+    "fr": "Choisissez votre outil – dans le navigateur, sans inscription."
+  },
+  "Timer": {
+    "en": "Timer",
+    "es": "Temporizador",
+    "fr": "Minuteur"
+  },
+  "Uhr": {
+    "en": "Clock",
+    "es": "Reloj",
+    "fr": "Horloge"
+  },
+  "Stoppuhr": {
+    "en": "Stopwatch",
+    "es": "Cronómetro",
+    "fr": "Chronomètre"
+  },
+  "Taschenrechner": {
+    "en": "Calculator",
+    "es": "Calculadora",
+    "fr": "Calculatrice"
+  },
+  "Atemübungen": {
+    "en": "Breathing exercises",
+    "es": "Ejercicios de respiración",
+    "fr": "Exercices de respiration"
+  },
+  "Naturgeräusche": {
+    "en": "Nature sounds",
+    "es": "Sonidos de la naturaleza",
+    "fr": "Sons de la nature"
+  },
+  "ZEIT & FOKUS": {
+    "en": "TIME & FOCUS",
+    "es": "TIEMPO Y CONCENTRACIÓN",
+    "fr": "TEMPS ET CONCENTRATION"
+  },
+  "Online-Timer": {
+    "en": "Online timer",
+    "es": "Temporizador online",
+    "fr": "Minuteur en ligne"
+  },
+  "Stelle einen Countdown ein, plane Fokuszeiten mit Pomodoro oder wiederhole Aktivphasen und Pausen mit dem Intervalltimer. Für Küche, Lernen und eigene Routinen.": {
+    "en": "Set a countdown, plan focus sessions with Pomodoro or repeat activity and rest with the interval timer. For cooking, studying and your own routines.",
+    "es": "Configura una cuenta atrás, planifica sesiones Pomodoro o alterna actividad y descanso con el temporizador de intervalos. Para cocinar, estudiar y tus rutinas.",
+    "fr": "Réglez un compte à rebours, planifiez des sessions Pomodoro ou alternez activité et repos avec le minuteur d’intervalles. Pour cuisiner, étudier et créer vos habitudes."
+  },
+  "Countdown für kleine und große Vorhaben": {
+    "en": "Countdowns for small and big plans",
+    "es": "Cuentas atrás para planes pequeños y grandes",
+    "fr": "Des comptes à rebours pour tous vos projets"
+  },
+  "Pomodoro für Fokus und regelmäßige Pausen": {
+    "en": "Pomodoro for focus and regular breaks",
+    "es": "Pomodoro para concentrarte y descansar regularmente",
+    "fr": "Pomodoro pour se concentrer et faire des pauses régulières"
+  },
+  "Intervalltimer für Aktivphasen und Pausen": {
+    "en": "Interval timer for activity and breaks",
+    "es": "Temporizador de intervalos para actividad y pausas",
+    "fr": "Minuteur d’intervalles pour l’activité et les pauses"
+  },
+  "Countdown-Timer öffnen": {
+    "en": "Open countdown timer",
+    "es": "Abrir temporizador",
+    "fr": "Ouvrir le compte à rebours"
+  },
+  "Kostenlos · ohne Benutzerkonto · direkt im Browser": {
+    "en": "Free · no account · right in your browser",
+    "es": "Gratis · sin cuenta · en el navegador",
+    "fr": "Gratuit · sans compte · dans le navigateur"
+  },
+  "Countdown": {
+    "en": "Countdown",
+    "es": "Cuenta atrás",
+    "fr": "Compte à rebours"
+  },
+  "Pomodoro": {
+    "en": "Pomodoro",
+    "es": "Pomodoro",
+    "fr": "Pomodoro"
+  },
+  "Intervall": {
+    "en": "Intervals",
+    "es": "Intervalos",
+    "fr": "Intervalles"
+  },
+  "FOKUSZEIT": {
+    "en": "FOCUS TIME",
+    "es": "TIEMPO DE CONCENTRACIÓN",
+    "fr": "TEMPS DE CONCENTRATION"
+  },
+  "Runde 1 von 4": {
+    "en": "Round 1 of 4",
+    "es": "Ronda 1 de 4",
+    "fr": "Tour 1 sur 4"
+  },
+  "Deine Zeit. Dein Rhythmus.": {
+    "en": "Your time. Your rhythm.",
+    "es": "Tu tiempo. Tu ritmo.",
+    "fr": "Votre temps. Votre rythme."
+  },
+  "UHRZEIT & DATUM": {
+    "en": "TIME & DATE",
+    "es": "HORA Y FECHA",
+    "fr": "HEURE ET DATE"
+  },
+  "Online-Uhr mit Datum": {
+    "en": "Online clock with date",
+    "es": "Reloj online con fecha",
+    "fr": "Horloge en ligne avec date"
+  },
+  "Zeige die Uhrzeit analog, digital oder mit Klappzahlen an. Wähle Datum, Zeitzone und Design – für Schreibtisch, Küche oder Unterricht.": {
+    "en": "Display the time with analogue, digital or flip digits. Choose your date, time zone and design – for your desk, kitchen or classroom.",
+    "es": "Muestra la hora con agujas, dígitos o números abatibles. Elige fecha, zona horaria y diseño para el escritorio, la cocina o el aula.",
+    "fr": "Affichez l’heure avec des aiguilles, des chiffres ou des volets. Choisissez la date, le fuseau horaire et le style pour le bureau, la cuisine ou la classe."
+  },
+  "Analog, digital oder mit animierten Klappzahlen": {
+    "en": "Analogue, digital or animated flip digits",
+    "es": "Analógico, digital o con números abatibles animados",
+    "fr": "Aiguilles, chiffres ou volets animés"
+  },
+  "Kalenderblatt und weitere Datumsansichten": {
+    "en": "Calendar sheet and other date displays",
+    "es": "Calendario y otras vistas de fecha",
+    "fr": "Feuillet de calendrier et autres affichages de date"
+  },
+  "Zeitzonen, Fokusansicht und optionales Bildschirm-Wachhalten": {
+    "en": "Time zones, focus view and optional screen wake lock",
+    "es": "Zonas horarias, modo enfoque y pantalla activa opcional",
+    "fr": "Fuseaux horaires, mode concentration et maintien de l’écran actif en option"
+  },
+  "Online-Uhr öffnen": {
+    "en": "Open online clock",
+    "es": "Abrir reloj online",
+    "fr": "Ouvrir l’horloge"
+  },
+  "Analog": {
+    "en": "Analogue",
+    "es": "Analógico",
+    "fr": "Analogique"
+  },
+  "Digital": {
+    "en": "Digital",
+    "es": "Digital",
+    "fr": "Numérique"
+  },
+  "Klappzahlen": {
+    "en": "Flip digits",
+    "es": "Números abatibles",
+    "fr": "Volets"
+  },
+  "OKTOBER": {
+    "en": "OCTOBER",
+    "es": "OCTUBRE",
+    "fr": "OCTOBRE"
+  },
+  "Montag · 2026": {
+    "en": "Monday · 2026",
+    "es": "Lunes · 2026",
+    "fr": "Lundi · 2026"
+  },
+  "Deine Uhr. Dein Stil.": {
+    "en": "Your clock. Your style.",
+    "es": "Tu reloj. Tu estilo.",
+    "fr": "Votre horloge. Votre style."
+  },
+  "ZEITMESSUNG & RUNDEN": {
+    "en": "TIMING & LAPS",
+    "es": "TIEMPO Y VUELTAS",
+    "fr": "MESURE DU TEMPS ET TOURS"
+  },
+  "Online-Stoppuhr mit Rundenzeiten": {
+    "en": "Online stopwatch with lap times",
+    "es": "Cronómetro online con tiempos por vuelta",
+    "fr": "Chronomètre en ligne avec temps par tour"
+  },
+  "Miss verstrichene Zeit, halte einzelne Runden fest und vergleiche Runden- und Gesamtzeiten. Für Übungen, Lernaufgaben oder kleine Experimente.": {
+    "en": "Measure elapsed time, record laps and compare lap and total times. For exercises, study tasks and small experiments.",
+    "es": "Mide el tiempo transcurrido, registra vueltas y compara tiempos parciales y totales. Para ejercicios, estudio y pequeños experimentos.",
+    "fr": "Mesurez le temps écoulé, enregistrez des tours et comparez les temps partiels et totaux. Pour les exercices, les études et les petites expériences."
+  },
+  "Starten, pausieren und ohne Zeitverlust fortsetzen": {
+    "en": "Start, pause and resume without losing time",
+    "es": "Inicia, pausa y continúa sin perder el tiempo medido",
+    "fr": "Démarrer, mettre en pause et reprendre sans perdre le temps mesuré"
+  },
+  "Rundenzeiten kopieren oder als CSV exportieren": {
+    "en": "Copy lap times or export them as CSV",
+    "es": "Copia tiempos por vuelta o expórtalos como CSV",
+    "fr": "Copier les temps par tour ou les exporter en CSV"
+  },
+  "Analoge, digitale oder kombinierte Anzeige und Fokusansicht": {
+    "en": "Analogue, digital or combined display and focus view",
+    "es": "Vista analógica, digital o combinada y modo enfoque",
+    "fr": "Affichage analogique, numérique ou combiné et mode concentration"
+  },
+  "Stoppuhr öffnen": {
+    "en": "Open stopwatch",
+    "es": "Abrir cronómetro",
+    "fr": "Ouvrir le chronomètre"
+  },
+  "Runden": {
+    "en": "Laps",
+    "es": "Vueltas",
+    "fr": "Tours"
+  },
+  "CSV-Export": {
+    "en": "CSV export",
+    "es": "Exportar CSV",
+    "fr": "Export CSV"
+  },
+  "VERSTRICHENE ZEIT": {
+    "en": "ELAPSED TIME",
+    "es": "TIEMPO TRANSCURRIDO",
+    "fr": "TEMPS ÉCOULÉ"
+  },
+  "Runde 2": {
+    "en": "Lap 2",
+    "es": "Vuelta 2",
+    "fr": "Tour 2"
+  },
+  "Runde 1": {
+    "en": "Lap 1",
+    "es": "Vuelta 1",
+    "fr": "Tour 1"
+  },
+  "RECHNEN & NACHVOLLZIEHEN": {
+    "en": "CALCULATE & UNDERSTAND",
+    "es": "CALCULAR Y COMPRENDER",
+    "fr": "CALCULER ET COMPRENDRE"
+  },
+  "Online-Taschenrechner mit Rechenstreifen": {
+    "en": "Online calculator with calculation tape",
+    "es": "Calculadora online con historial editable",
+    "fr": "Calculatrice en ligne avec bande de calcul"
+  },
+  "Behalte deinen Rechenweg im Blick. Jeder Schritt nutzt das vorherige Ergebnis und lässt sich benennen, bearbeiten, verschieben oder deaktivieren.": {
+    "en": "Keep track of your calculations. Each step uses the previous result and can be named, edited, moved or disabled.",
+    "es": "Sigue tus cálculos paso a paso. Cada paso usa el resultado anterior y se puede nombrar, editar, mover o desactivar.",
+    "fr": "Gardez une vue d’ensemble de vos calculs. Chaque étape utilise le résultat précédent et peut être nommée, modifiée, déplacée ou désactivée."
+  },
+  "Prozentwerte, Aufschläge und Steuern berechnen": {
+    "en": "Calculate percentages, markups and taxes",
+    "es": "Calcula porcentajes, recargos e impuestos",
+    "fr": "Calculer des pourcentages, des majorations et des taxes"
+  },
+  "Rechenschritte ändern und Ergebnisse neu berechnen lassen": {
+    "en": "Edit steps and automatically recalculate results",
+    "es": "Edita los pasos y recalcula los resultados automáticamente",
+    "fr": "Modifier les étapes et recalculer automatiquement les résultats"
+  },
+  "Berechnungen als Datei speichern, wieder öffnen oder drucken": {
+    "en": "Save calculations as files, reopen or print them",
+    "es": "Guarda los cálculos en archivos, vuelve a abrirlos o imprímelos",
+    "fr": "Enregistrer les calculs, les rouvrir ou les imprimer"
+  },
+  "Taschenrechner öffnen": {
+    "en": "Open calculator",
+    "es": "Abrir calculadora",
+    "fr": "Ouvrir la calculatrice"
+  },
+  "Rechenstreifen": {
+    "en": "Calculation tape",
+    "es": "Historial de cálculo",
+    "fr": "Bande de calcul"
+  },
+  "Prozent": {
+    "en": "Percentages",
+    "es": "Porcentajes",
+    "fr": "Pourcentages"
+  },
+  "Drucken": {
+    "en": "Print",
+    "es": "Imprimir",
+    "fr": "Imprimer"
+  },
+  "Schritt für Schritt. Klar und nachvollziehbar.": {
+    "en": "Step by step. Clear and understandable.",
+    "es": "Paso a paso. Claro y comprensible.",
+    "fr": "Pas à pas. Clair et compréhensible."
+  },
+  "ATEM & RUHE": {
+    "en": "BREATH & CALM",
+    "es": "RESPIRACIÓN Y CALMA",
+    "fr": "RESPIRATION ET CALME"
+  },
+  "Breathe – Atemübungen online": {
+    "en": "Breathe – breathing exercises online",
+    "es": "Breathe – ejercicios de respiración online",
+    "fr": "Breathe – exercices de respiration en ligne"
+  },
+  "Breathe begleitet deine ruhige Pause mit einem sanften Atemrhythmus. Folge dem wachsenden und schrumpfenden Kreis – in deinem Tempo und ohne Druck.": {
+    "en": "Breathe accompanies your quiet break with a gentle breathing rhythm. Follow the growing and shrinking circle at your own pace, without pressure.",
+    "es": "Breathe acompaña tu pausa con un ritmo de respiración suave. Sigue el círculo que crece y se contrae, a tu ritmo y sin presión.",
+    "fr": "Breathe accompagne votre pause avec un rythme respiratoire doux. Suivez le cercle qui grandit et rétrécit, à votre rythme et sans pression."
+  },
+  "Quadratatmen, 4–7–8 und weitere einstellbare Atemmuster": {
+    "en": "Box breathing, 4–7–8 and other adjustable patterns",
+    "es": "Respiración cuadrada, 4–7–8 y otros patrones ajustables",
+    "fr": "Respiration carrée, 4–7–8 et autres rythmes réglables"
+  },
+  "Optionales Atemrauschen und sanfte Phasensignale": {
+    "en": "Optional breathing noise and gentle phase cues",
+    "es": "Sonido de respiración y señales suaves opcionales",
+    "fr": "Souffle sonore et signaux de phase doux en option"
+  },
+  "Fokusansicht, Vollbild und optionales Bildschirm-Wachhalten": {
+    "en": "Focus view, fullscreen and optional screen wake lock",
+    "es": "Modo enfoque, pantalla completa y pantalla activa opcional",
+    "fr": "Mode concentration, plein écran et maintien de l’écran actif en option"
+  },
+  "Atemübungen öffnen": {
+    "en": "Open breathing exercises",
+    "es": "Abrir ejercicios de respiración",
+    "fr": "Ouvrir les exercices de respiration"
+  },
+  "Atme nur so, wie es angenehm ist. Ein Entspannungstool, kein medizinisches Angebot.": {
+    "en": "Only breathe as feels comfortable. A relaxation tool, not a medical service.",
+    "es": "Respira solo de forma cómoda. Una herramienta de relajación, no un servicio médico.",
+    "fr": "Respirez uniquement de façon confortable. Un outil de détente, pas un service médical."
+  },
+  "Quadratatmen": {
+    "en": "Box breathing",
+    "es": "Respiración cuadrada",
+    "fr": "Respiration carrée"
+  },
+  "Dein Rhythmus": {
+    "en": "Your rhythm",
+    "es": "Tu ritmo",
+    "fr": "Votre rythme"
+  },
+  "Dein Atem. Dein Tempo.": {
+    "en": "Your breath. Your pace.",
+    "es": "Tu respiración. Tu ritmo.",
+    "fr": "Votre souffle. Votre rythme."
+  },
+  "KLANG & ENTSPANNUNG": {
+    "en": "SOUND & RELAXATION",
+    "es": "SONIDO Y RELAJACIÓN",
+    "fr": "SON ET DÉTENTE"
+  },
+  "Relax – Naturgeräusche und Klänge": {
+    "en": "Relax – nature sounds and soundscapes",
+    "es": "Relax – sonidos de la naturaleza y paisajes sonoros",
+    "fr": "Relax – sons de la nature et ambiances sonores"
+  },
+  "Stelle dir deine eigene Klanglandschaft zusammen. Sanfte Instrumente und Naturgeräusche treffen auf ruhige, farbige Animationen – zum Zuhören, Zuschauen und Abschalten.": {
+    "en": "Create your own soundscape. Gentle instruments and nature sounds meet calm, colourful animations – listen, watch and unwind.",
+    "es": "Crea tu paisaje sonoro. Instrumentos suaves y sonidos naturales se combinan con animaciones tranquilas y coloridas para escuchar, observar y desconectar.",
+    "fr": "Créez votre ambiance sonore. Instruments doux et sons naturels se mêlent à des animations calmes et colorées pour écouter, regarder et décompresser."
+  },
+  "Sieben Instrumente: vom Windspiel bis zu Klangschalen, Harfe und Gong": {
+    "en": "Seven instruments: from wind chimes to singing bowls, harp and gong",
+    "es": "Siete instrumentos: desde campanillas hasta cuencos, arpa y gong",
+    "fr": "Sept instruments : des carillons aux bols chantants, à la harpe et au gong"
+  },
+  "Regen, Wind, Rauschen, Lagerfeuer und Meeresrauschen frei kombinieren": {
+    "en": "Combine rain, wind, noise, campfire and ocean sounds",
+    "es": "Combina lluvia, viento, ruido, hoguera y olas del mar",
+    "fr": "Combiner pluie, vent, bruit, feu de camp et vagues"
+  },
+  "Klang-Presets, eigene Lautstärken und einzeln schaltbare Animationen": {
+    "en": "Sound presets, individual volumes and switchable animations",
+    "es": "Preajustes, volúmenes independientes y animaciones opcionales",
+    "fr": "Préréglages sonores, volumes individuels et animations activables"
+  },
+  "Fokusansicht und Schlafmodus mit sanftem Ausblenden bei begrenzter Dauer": {
+    "en": "Focus view and sleep mode with a gentle timed fade-out",
+    "es": "Modo enfoque y modo sueño con fundido gradual temporizado",
+    "fr": "Mode concentration et mode sommeil avec fondu progressif temporisé"
+  },
+  "Naturgeräusche öffnen": {
+    "en": "Open nature sounds",
+    "es": "Abrir sonidos de la naturaleza",
+    "fr": "Ouvrir les sons de la nature"
+  },
+  "Kostenlos · ohne Werbung · ohne Tracking · direkt im Browser": {
+    "en": "Free · no ads · no tracking · right in your browser",
+    "es": "Gratis · sin anuncios · sin rastreo · en el navegador",
+    "fr": "Gratuit · sans publicité · sans suivi · dans le navigateur"
+  },
+  "Höre leise und so, wie es angenehm ist. Ein Entspannungstool, kein medizinisches Angebot.": {
+    "en": "Listen quietly and comfortably. A relaxation tool, not a medical service.",
+    "es": "Escucha a volumen bajo y de forma cómoda. Una herramienta de relajación, no un servicio médico.",
+    "fr": "Écoutez doucement et confortablement. Un outil de détente, pas un service médical."
+  },
+  "Instrumente": {
+    "en": "Instruments",
+    "es": "Instrumentos",
+    "fr": "Instruments"
+  },
+  "Naturklänge": {
+    "en": "Nature sounds",
+    "es": "Sonidos naturales",
+    "fr": "Sons naturels"
+  },
+  "Deine Mischung": {
+    "en": "Your mix",
+    "es": "Tu mezcla",
+    "fr": "Votre mélange"
+  },
+  "Zuhören. Zuschauen. Zur Ruhe kommen.": {
+    "en": "Listen. Watch. Unwind.",
+    "es": "Escucha. Observa. Relájate.",
+    "fr": "Écouter. Regarder. Se détendre."
+  },
+  "ORTE & NACHRICHTEN": {
+    "en": "PLACES & MESSAGES",
+    "es": "LUGARES Y MENSAJES",
+    "fr": "LIEUX ET MESSAGES"
+  },
+  "MessageDrop – Nachrichten auf der Karte": {
+    "en": "MessageDrop – messages on the map",
+    "es": "MessageDrop – mensajes en el mapa",
+    "fr": "MessageDrop – messages sur la carte"
+  },
+  "Die Welt hat etwas zu erzählen. Hinterlasse Nachrichten an realen Orten auf einer globalen Karte und entdecke, was andere dort teilen.": {
+    "en": "The world has stories to tell. Leave messages at real places on a global map and discover what others share there.",
+    "es": "El mundo tiene historias que contar. Deja mensajes en lugares reales de un mapa global y descubre lo que comparten los demás.",
+    "fr": "Le monde a des histoires à raconter. Laissez des messages dans des lieux réels sur une carte mondiale et découvrez ce que les autres y partagent."
+  },
+  "MessageDrop öffnen": {
+    "en": "Open MessageDrop",
+    "es": "Abrir MessageDrop",
+    "fr": "Ouvrir MessageDrop"
+  },
+  "Fehlt dir ein Helfer?": {
+    "en": "Missing a helper?",
+    "es": "¿Te falta una herramienta?",
+    "fr": "Il vous manque un outil ?"
+  },
+  "Wir entwickeln die Sammlung weiter. Teile uns mit, welches Tool deinen Alltag leichter machen würde.": {
+    "en": "We keep developing this collection. Tell us which tool would make your everyday life easier.",
+    "es": "Seguimos ampliando la colección. Cuéntanos qué herramienta haría tu día a día más fácil.",
+    "fr": "Nous enrichissons cette collection. Dites-nous quel outil faciliterait votre quotidien."
+  },
+  "Eine Idee vorschlagen ↗": {
+    "en": "Suggest an idea ↗",
+    "es": "Proponer una idea ↗",
+    "fr": "Proposer une idée ↗"
+  },
+  "DIE IDEE DAHINTER": {
+    "en": "THE IDEA BEHIND IT",
+    "es": "LA IDEA DETRÁS",
+    "fr": "L’IDÉE DERRIÈRE"
+  },
+  "Tools sollen helfen.": {
+    "en": "Tools should help.",
+    "es": "Las herramientas deben ayudar.",
+    "fr": "Les outils doivent aider."
+  },
+  "Nicht im Weg stehen.": {
+    "en": "Not get in your way.",
+    "es": "No estorbar.",
+    "fr": "Pas vous gêner."
+  },
+  "Wir mögen klare Oberflächen, sinnvolle Funktionen und die Freiheit, Dinge auf die eigene Art zu machen. Deshalb kannst du auch diese Seite anpassen: Farbe, Stil, Hell- oder Dunkelmodus und Schriftgröße findest du oben im Einstellungsmenü.": {
+    "en": "We like clear interfaces, useful features and the freedom to do things your way. You can customise this page too: find colour, style, light or dark mode and font size in the settings menu above.",
+    "es": "Nos gustan las interfaces claras, las funciones útiles y la libertad de hacer las cosas a tu manera. También puedes personalizar esta página: color, estilo, modo claro u oscuro y tamaño de letra en los ajustes de arriba.",
+    "fr": "Nous aimons les interfaces claires, les fonctions utiles et la liberté de faire les choses à sa façon. Personnalisez aussi cette page : couleurs, style, mode clair ou sombre et taille du texte dans les paramètres en haut."
+  },
+  "01 / EINFACH": {
+    "en": "01 / SIMPLE",
+    "es": "01 / SENCILLO",
+    "fr": "01 / SIMPLE"
+  },
+  "Weniger drumherum.": {
+    "en": "Less clutter.",
+    "es": "Menos complicaciones.",
+    "fr": "Moins de superflu."
+  },
+  "Das Wesentliche im Mittelpunkt. Damit du schnell findest, was du brauchst.": {
+    "en": "The essentials come first, so you can quickly find what you need.",
+    "es": "Lo esencial primero, para encontrar rápido lo que necesitas.",
+    "fr": "L’essentiel d’abord, pour trouver rapidement ce dont vous avez besoin."
+  },
+  "02 / PERSÖNLICH": {
+    "en": "02 / PERSONAL",
+    "es": "02 / PERSONAL",
+    "fr": "02 / PERSONNEL"
+  },
+  "So, wie du es magst.": {
+    "en": "Just the way you like it.",
+    "es": "Tal como te gusta.",
+    "fr": "Comme vous l’aimez."
+  },
+  "Ein ruhiges Design, das sich deinen Vorlieben anpassen lässt.": {
+    "en": "A calm design that adapts to your preferences.",
+    "es": "Un diseño tranquilo que se adapta a tus preferencias.",
+    "fr": "Un design calme qui s’adapte à vos préférences."
+  },
+  "03 / NEUGIERIG": {
+    "en": "03 / CURIOUS",
+    "es": "03 / CURIOSO",
+    "fr": "03 / CURIEUX"
+  },
+  "Immer Raum für Ideen.": {
+    "en": "Always room for ideas.",
+    "es": "Siempre hay espacio para ideas.",
+    "fr": "Toujours de la place pour les idées."
+  },
+  "Aus kleinen Gedanken können hilfreiche Tools werden. Wir bleiben neugierig.": {
+    "en": "Small thoughts can become useful tools. We stay curious.",
+    "es": "Las pequeñas ideas pueden convertirse en herramientas útiles. Seguimos explorando.",
+    "fr": "De petites idées peuvent devenir des outils utiles. Nous restons curieux."
+  },
+  "Online-Tools: Timer, Uhr & Entspannung": {
+    "en": "Online tools: timers, clocks & relaxation",
+    "es": "Herramientas online: tiempo y relajación",
+    "fr": "Outils en ligne : minuteurs, horloges et détente"
+  },
+  "Kostenlose Online-Tools ohne Anmeldung: Countdown, Pomodoro, Intervalltimer, Uhr, Stoppuhr und Taschenrechner sowie Atemübungen mit Breathe und Naturgeräusche mit Relax.": {
+    "en": "Free online tools without sign-up: countdowns, Pomodoro, interval timers, clocks, a stopwatch and calculator, plus breathing exercises and nature sounds.",
+    "es": "Herramientas online gratis sin registro: cuenta atrás, Pomodoro, intervalos, reloj, cronómetro y calculadora, además de ejercicios de respiración y sonidos naturales.",
+    "fr": "Des outils en ligne gratuits sans inscription : compte à rebours, Pomodoro, intervalles, horloge, chronomètre et calculatrice, ainsi que respiration et sons naturels."
+  },
+  "Illustration: Zeit für das Wesentliche": {
+    "en": "Illustration: time for what matters",
+    "es": "Ilustración: tiempo para lo importante",
+    "fr": "Illustration : du temps pour l’essentiel"
+  },
+  "Toolübersicht": {
+    "en": "Tool directory",
+    "es": "Directorio de herramientas",
+    "fr": "Répertoire des outils"
+  },
+  "Statische Vorschau des Timers": {
+    "en": "Static preview of the timer",
+    "es": "Vista estática del temporizador",
+    "fr": "Aperçu statique du minuteur"
+  },
+  "Statische Vorschau der Uhr: analoges Zifferblatt und Kalenderblatt": {
+    "en": "Static clock preview: analogue dial and calendar sheet",
+    "es": "Vista estática del reloj: esfera analógica y calendario",
+    "fr": "Aperçu statique de l’horloge : cadran et calendrier"
+  },
+  "Statische Vorschau der Stoppuhr mit Zeitmessung und zwei Rundenzeiten": {
+    "en": "Static stopwatch preview with elapsed time and two laps",
+    "es": "Vista estática del cronómetro con tiempo y dos vueltas",
+    "fr": "Aperçu statique du chronomètre avec temps et deux tours"
+  },
+  "Statische Vorschau eines Rechenstreifens: 100 plus 20 Prozent ergibt 120, anschließend plus 20 Prozent ergibt 144": {
+    "en": "Static calculation tape: 100 plus 20 percent is 120; adding another 20 percent gives 144",
+    "es": "Historial estático: 100 más un 20 por ciento son 120; otro 20 por ciento da 144",
+    "fr": "Bande de calcul statique : 100 plus 20 pour cent font 120 ; encore 20 pour cent donnent 144"
+  },
+  "Statische Vorschau von Breathe: Verlaufskreis mit Atemphase und äußerem Fortschrittsring": {
+    "en": "Static Breathe preview: breathing phase with an outer progress ring",
+    "es": "Vista estática de Breathe: fase respiratoria y anillo de progreso",
+    "fr": "Aperçu statique de Breathe : phase respiratoire et anneau de progression"
+  },
+  "Statische Vorschau von Relax: farbige Formen und sanfte Meereswellen": {
+    "en": "Static Relax preview: colourful shapes and gentle ocean waves",
+    "es": "Vista estática de Relax: formas de colores y olas suaves",
+    "fr": "Aperçu statique de Relax : formes colorées et vagues douces"
+  },
+  "Stilisierte Karte mit MessageDrop-Markern für Nachrichten, Bilder und Orte": {
+    "en": "Stylized map with MessageDrop markers for messages, images and places",
+    "es": "Mapa estilizado con marcadores de MessageDrop para mensajes, imágenes y lugares",
+    "fr": "Carte stylisée avec marqueurs MessageDrop pour les messages, images et lieux"
+  },
+  "Zeit für das Wesentliche.": {
+    "en": "Time for what matters.",
+    "es": "Tiempo para lo importante.",
+    "fr": "Du temps pour l’essentiel."
+  },
+  "Countdown, Pomodoro oder automatische Intervalle: Plane konzentrierte Arbeit, Pausen und eigene Routinen mit einem anpassbaren Online-Timer.": {
+    "en": "Countdown, Pomodoro or automatic intervals: plan focused work, breaks and your own routines with a customizable online timer.",
+    "es": "Cuenta atrás, Pomodoro o intervalos automáticos: planifica trabajo, pausas y rutinas con un temporizador online personalizable.",
+    "fr": "Compte à rebours, Pomodoro ou intervalles automatiques : planifiez travail, pauses et habitudes avec un minuteur personnalisable."
+  },
+  "Direkt zum Timer": {
+    "en": "Open the timer",
+    "es": "Ir al temporizador",
+    "fr": "Ouvrir le minuteur"
+  },
+  "Fokus und Pausen": {
+    "en": "Focus and breaks",
+    "es": "Concentración y pausas",
+    "fr": "Concentration et pauses"
+  },
+  "Deine Zeit. Auf einen Blick.": {
+    "en": "Your time. At a glance.",
+    "es": "Tu hora. De un vistazo.",
+    "fr": "Votre heure. En un coup d’œil."
+  },
+  "Analog, digital oder mit Klappzahlen: Gestalte deine Uhr so, wie sie zu deinem Alltag passt – mit Datum, Zeitzonen und Fokusansicht.": {
+    "en": "Analogue, digital or flip digits: style your clock to suit your everyday life, with dates, time zones and focus view.",
+    "es": "Con agujas, dígitos o números abatibles: personaliza el reloj con fecha, zonas horarias y modo enfoque.",
+    "fr": "Aiguilles, chiffres ou volets : adaptez votre horloge avec date, fuseaux horaires et mode concentration."
+  },
+  "Direkt zur Uhr": {
+    "en": "Open the clock",
+    "es": "Ir al reloj",
+    "fr": "Ouvrir l’horloge"
+  },
+  "Uhrzeit und Datum": {
+    "en": "Time and date",
+    "es": "Hora y fecha",
+    "fr": "Heure et date"
+  },
+  "Online-Stoppuhr": {
+    "en": "Online stopwatch",
+    "es": "Cronómetro online",
+    "fr": "Chronomètre en ligne"
+  },
+  "Jeder Moment zählt.": {
+    "en": "Every moment counts.",
+    "es": "Cada momento cuenta.",
+    "fr": "Chaque instant compte."
+  },
+  "Behalte verstrichene Zeit und Runden im Blick. Eine übersichtliche Stoppuhr für deine kleinen und großen Vorhaben, direkt im Browser.": {
+    "en": "Keep track of elapsed time and laps. A clear stopwatch for your small and big plans, right in your browser.",
+    "es": "Sigue el tiempo y las vueltas con un cronómetro claro para tus planes, directamente en el navegador.",
+    "fr": "Suivez le temps et les tours avec un chronomètre clair pour tous vos projets, dans le navigateur."
+  },
+  "Direkt zur Stoppuhr": {
+    "en": "Open the stopwatch",
+    "es": "Ir al cronómetro",
+    "fr": "Ouvrir le chronomètre"
+  },
+  "Zeit im Blick": {
+    "en": "Time in view",
+    "es": "El tiempo a la vista",
+    "fr": "Le temps en vue"
+  },
+  "Starten. Stoppen. Überblick behalten.": {
+    "en": "Start. Stop. Stay in control.",
+    "es": "Inicia. Detén. Mantén el control.",
+    "fr": "Démarrer. Arrêter. Garder le contrôle."
+  },
+  "Breathe": {
+    "en": "Breathe",
+    "es": "Breathe",
+    "fr": "Breathe"
+  },
+  "Ein Atemzug. Ein Moment für dich.": {
+    "en": "One breath. A moment for you.",
+    "es": "Una respiración. Un momento para ti.",
+    "fr": "Un souffle. Un moment pour vous."
+  },
+  "Nimm dir eine ruhige Pause. Breathe begleitet dich mit einstellbaren Atemmustern, einer sanften Kreisanimation und optionalen Atemgeräuschen – ohne Druck.": {
+    "en": "Take a quiet break. Breathe guides you with adjustable breathing patterns, a gentle circle animation and optional breathing sounds, without pressure.",
+    "es": "Haz una pausa tranquila. Breathe te guía con patrones ajustables, un círculo suave y sonidos respiratorios opcionales, sin presión.",
+    "fr": "Faites une pause calme. Breathe vous guide avec des rythmes réglables, un cercle doux et des sons respiratoires en option, sans pression."
+  },
+  "Direkt zu Breathe": {
+    "en": "Open Breathe",
+    "es": "Ir a Breathe",
+    "fr": "Ouvrir Breathe"
+  },
+  "Atme sanft und so, wie es angenehm ist.": {
+    "en": "Breathe gently, only as feels comfortable.",
+    "es": "Respira suavemente, solo como te resulte cómodo.",
+    "fr": "Respirez doucement, uniquement de façon confortable."
+  },
+  "Relax": {
+    "en": "Relax",
+    "es": "Relax",
+    "fr": "Relax"
+  },
+  "Ruhige Klänge. Dein Moment.": {
+    "en": "Calm sounds. Your moment.",
+    "es": "Sonidos tranquilos. Tu momento.",
+    "fr": "Des sons calmes. Votre moment."
+  },
+  "Gestalte deine eigene Klanglandschaft: sanfte Instrumente, Sommerregen, Wind, Lagerfeuer und Meeresrauschen. Dazu ruhige Animationen – ganz nach deinem Geschmack.": {
+    "en": "Create your own soundscape with gentle instruments, summer rain, wind, campfire and ocean sounds. Add calm animations to suit your taste.",
+    "es": "Crea tu paisaje sonoro con instrumentos suaves, lluvia, viento, hoguera y olas. Añade animaciones tranquilas a tu gusto.",
+    "fr": "Créez votre ambiance avec instruments doux, pluie, vent, feu et vagues. Ajoutez des animations calmes selon vos envies."
+  },
+  "Direkt zu Relax": {
+    "en": "Open Relax",
+    "es": "Ir a Relax",
+    "fr": "Ouvrir Relax"
+  },
+  "Klänge und sanfte Bewegung": {
+    "en": "Sounds and gentle movement",
+    "es": "Sonidos y movimiento suave",
+    "fr": "Sons et mouvements doux"
+  },
+  "Die Welt hat etwas zu erzählen.": {
+    "en": "The world has stories to tell.",
+    "es": "El mundo tiene historias que contar.",
+    "fr": "Le monde a des histoires à raconter."
+  },
+  "Hinterlasse Nachrichten an realen Orten auf einer globalen Karte und entdecke, was andere dort teilen. Raum für Nachrichten, Bilder und neue Perspektiven.": {
+    "en": "Leave messages at real places on a global map and discover what others share. Space for messages, images and new perspectives.",
+    "es": "Deja mensajes en lugares reales de un mapa global y descubre lo que otros comparten. Espacio para mensajes, imágenes y nuevas perspectivas.",
+    "fr": "Laissez des messages dans des lieux réels sur une carte mondiale et découvrez les autres contributions. De la place pour de nouvelles perspectives."
+  },
+  "Direkt zu MessageDrop": {
+    "en": "Open MessageDrop",
+    "es": "Ir a MessageDrop",
+    "fr": "Ouvrir MessageDrop"
+  },
+  "Orte und Nachrichten": {
+    "en": "Places and messages",
+    "es": "Lugares y mensajes",
+    "fr": "Lieux et messages"
+  },
+  "Nachrichten, die ihren Platz finden.": {
+    "en": "Messages that find their place.",
+    "es": "Mensajes que encuentran su lugar.",
+    "fr": "Des messages qui trouvent leur place."
+  },
+  "Jeder Rechenschritt bleibt nachvollziehbar.": {
+    "en": "Every calculation stays clear.",
+    "es": "Cada cálculo sigue siendo claro.",
+    "fr": "Chaque calcul reste compréhensible."
+  },
+  "Rechne mit einem editierbaren Rechenstreifen: Prozentwerte, Aufschläge und Steuern lassen sich Schritt für Schritt verfolgen, ändern und als Datei sichern.": {
+    "en": "Calculate with an editable tape: follow percentages, markups and taxes step by step, make changes and save your work as a file.",
+    "es": "Calcula con un historial editable: sigue porcentajes, recargos e impuestos paso a paso, haz cambios y guarda el trabajo en un archivo.",
+    "fr": "Calculez avec une bande modifiable : suivez pourcentages, majorations et taxes, apportez des changements et enregistrez le tout."
+  },
+  "Direkt zum Taschenrechner": {
+    "en": "Open the calculator",
+    "es": "Ir a la calculadora",
+    "fr": "Ouvrir la calculatrice"
+  },
+  "Rechnen mit Überblick": {
+    "en": "Calculations at a glance",
+    "es": "Cálculos de un vistazo",
+    "fr": "Les calculs en un coup d’œil"
+  },
+  "Deine Zahlen. Dein Rechenweg.": {
+    "en": "Your numbers. Your calculations.",
+    "es": "Tus números. Tus cálculos.",
+    "fr": "Vos chiffres. Votre calcul."
+  },
+  "IM SPOTLIGHT · ": {
+    "en": "IN THE SPOTLIGHT · ",
+    "es": "EN PRIMER PLANO · ",
+    "fr": "À LA UNE · "
+  },
+  "Statische Vorschau: ": {
+    "en": "Static preview: ",
+    "es": "Vista estática: ",
+    "fr": "Aperçu statique : "
+  },
+  "Fokuszeit": {
+    "en": "Focus time",
+    "es": "Tiempo de concentración",
+    "fr": "Temps de concentration"
+  },
+  "Verstrichene Zeit": {
+    "en": "Elapsed time",
+    "es": "Tiempo transcurrido",
+    "fr": "Temps écoulé"
+  }
+}

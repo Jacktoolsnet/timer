@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 test('the randomly selected spotlight retains a descriptive main heading',async({page},info)=>{
- await page.goto('/');
+ await page.goto('/de/');
  await expect(page).toHaveTitle('Online-Tools: Timer, Uhr & Entspannung · Jacktools.net');
  await expect(page.locator('h1')).toHaveCount(1);
  await expect(page.locator('h1')).toContainText('Online-Tools');

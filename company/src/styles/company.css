@@ -140,3 +140,17 @@ html { scroll-padding-top:calc(var(--masthead-height,150px) + 16px); }
 }
 @media(forced-colors:active) { .header-nav-links a[aria-current] { outline:2px solid Highlight; outline-offset:-3px; } }
 @media print { .site-shell > .site-header { display:none!important; } }
+
+/* Localized headings must also fit narrow screens at the largest text size. */
+.company-hero .hero-copy { min-width:0; }
+.company-hero h1 { overflow-wrap:anywhere; }
+@media(max-width:760px) { .company-hero { grid-template-columns:minmax(0,1fr); } }
+/* Closed native disclosures must not contribute hidden menu overflow. */
+.palette-dropdown:not([open]) > .preferences-panel { display:none; }
+@media(max-width:760px) {
+  .site-header .preferences-panel { position:fixed; left:16px; right:16px; width:calc(100vw - 32px); max-width:calc(100vw - 32px); min-width:0; }
+  .preferences-panel .preferences-heading { min-width:0; }
+  .preferences-panel #preferences-close { flex-shrink:0; }
+  .preferences-panel .language-menu { min-width:0; }
+}
+.section-heading h2,.idea-section h2 { overflow-wrap:anywhere; }

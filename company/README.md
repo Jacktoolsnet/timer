@@ -21,7 +21,7 @@ npm run dev
 
 - Deutschsprachige Startseite mit Timer, MessageDrop und einem Platzhalter für weitere Tools.
 - Acht Farben, vier Stile, Hell/Dunkel und Schriftgröße 100–130 %.
-- Standard: Grün und Technisch; gespeicherte Benutzereinstellungen haben Vorrang.
+- Standard: Grün, Technisch und Dunkelmodus; gespeicherte Benutzereinstellungen haben Vorrang.
 - Stilisierte SVG-Karte mit Designfarben und drei Original-Markern aus dem MessageDrop-Frontend (`public/markers/`).
 - Originales Jacktools-Icon von jacktools.net lokal als PNG eingebunden (Header und Favicon).
 - Speicherung nur nach aktiver Auswahl; eigene `jacktools.company.*`-Schlüssel.
@@ -80,3 +80,20 @@ Die Hauptseite verlinkt weiterhin die echten Subdomains; Kurzadressen kommen
 nicht in die Sitemap. Nach dem Upload z. B. mit
 `curl -I https://jacktools.net/clock` prüfen: bei aktiven Serverregeln werden
 `301` und `Location: https://clock.jacktools.net/` erwartet.
+
+## Languages
+
+The homepages `/de/`, `/en/`, `/es/` and `/fr/` share a single component and complete
+build-time translations (`company-copy.json`). Header/footer and privacy/settings
+controls use `company-ui.ts`. German source text is the editorial base.
+
+Opening `/` selects the primary browser language (regional variants included),
+with English for unsupported languages. Direct localized links are never
+redirected. The root renders English HTML as a no-JavaScript fallback.
+Language tiles live in Settings; switching preserves the current section and,
+when storage is enabled, appearance. Language-specific tool links, canonical URLs,
+reciprocal hreflang and the sitemap are generated with the selected language.
+
+Company legal documents remain the existing German originals. Other languages
+label those links `(DE)` rather than pretending that translations exist. Language
+tiles on a legal page lead to the chosen localized homepage.

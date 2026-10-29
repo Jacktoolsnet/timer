@@ -23,7 +23,7 @@ class Metadata(HTMLParser):
         if tag == 'meta' and a.get('name') == 'robots':
             self.noindex = 'noindex' in a.get('content', '')
 
-for project, host, count in [('timer', 'timer.jacktools.net', 16), ('clock', 'clock.jacktools.net', 8), ('stopwatch', 'stopwatch.jacktools.net', 8), ('calculator', 'calculator.jacktools.net', 8), ('company', 'jacktools.net', 1), ('breathe', 'breathe.jacktools.net', 8), ('relax', 'relax.jacktools.net', 8), ('lava', 'lava.jacktools.net', 8), ('scenescript', 'scenescript.jacktools.net', 12)]:
+for project, host, count in [('timer', 'timer.jacktools.net', 16), ('clock', 'clock.jacktools.net', 8), ('stopwatch', 'stopwatch.jacktools.net', 8), ('calculator', 'calculator.jacktools.net', 8), ('company', 'jacktools.net', 4), ('breathe', 'breathe.jacktools.net', 8), ('relax', 'relax.jacktools.net', 8), ('lava', 'lava.jacktools.net', 8), ('scenescript', 'scenescript.jacktools.net', 12)]:
     dist = ROOT / project / 'dist'
     raw = (dist / 'sitemap.xml').read_bytes()
     assert raw.startswith(b'<?xml version="1.0" encoding="UTF-8"?>\n'), project
@@ -41,15 +41,12 @@ for project, host, count in [('timer', 'timer.jacktools.net', 16), ('clock', 'cl
         meta = Metadata(target.read_text())
         assert meta.canonical == url and not meta.noindex, (url, meta.canonical, meta.noindex)
         alternatives = entry.findall('x:link', NS)
-        if project != 'company':
-            assert {link.get('hreflang') for link in alternatives} == {'en', 'de', 'es', 'fr', 'x-default'}, url
-            assert len(alternatives) == 5, url
-            for link in alternatives:
-                assert link.get('rel') == 'alternate' and link.get('href') in urls, link.attrib
-                if link.get('hreflang') == 'x-default':
-                    assert urlsplit(link.get('href')).path.startswith('/en/'), url
-        else:
-            assert not alternatives
+        assert {link.get('hreflang') for link in alternatives} == {'en', 'de', 'es', 'fr', 'x-default'}, url
+        assert len(alternatives) == 5, url
+        for link in alternatives:
+            assert link.get('rel') == 'alternate' and link.get('href') in urls, link.attrib
+            if link.get('hreflang') == 'x-default':
+                assert urlsplit(link.get('href')).path.startswith('/en/'), url
     if project != 'company':
         for language in ['de', 'en', 'es', 'fr']:
             assert f'https://{host}/{language}/usage/' in urls, project

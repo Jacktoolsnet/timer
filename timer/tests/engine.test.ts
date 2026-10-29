@@ -70,9 +70,9 @@ test('palette settings accept supported values and migrate old preferences safel
   for (const colorScheme of ['terracotta', 'blue', 'green', 'orange', 'red', 'violet', 'teal', 'rose']) {
     assert.equal(sanitizeSettings({ colorScheme }).colorScheme, colorScheme);
   }
-  assert.equal(sanitizeSettings({ remember: true }).colorScheme, 'terracotta');
-  assert.equal(sanitizeSettings({ colorScheme: 'unknown' }).colorScheme, 'terracotta');
-  assert.equal(sanitizeSettings({ colorScheme: null }).colorScheme, 'terracotta');
+  assert.equal(sanitizeSettings({ remember: true }).colorScheme, 'green');
+  assert.equal(sanitizeSettings({ colorScheme: 'unknown' }).colorScheme, 'green');
+  assert.equal(sanitizeSettings({ colorScheme: null }).colorScheme, 'green');
 });
 
 test('Pomodoro hides seconds until the last minute unless enabled',()=>{

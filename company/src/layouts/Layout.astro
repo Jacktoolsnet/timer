@@ -4,31 +4,36 @@ import BrandIcon from '../../../shared/BrandIcon.astro';
 import '../styles/global.css';
 import '../styles/company.css';
 import { colorSchemes } from '../lib/appearance';
-import { getDictionary, type Language } from '../lib/i18n';
+import { languages, languageNames, type Language } from '../lib/i18n';
+import { getCompanyDictionary } from '../lib/company-ui';
 interface Props { lang: Language; title: string; description: string; route: string; noindex?: boolean; legal?: boolean }
 const { lang, title, description, noindex = false, legal = false } = Astro.props;
-const t = { ...getDictionary(lang),
-  supportTitle: 'Kleine Tools. Gemeinsam möglich.',
-  supportBody: 'Du magst unsere Projekte? Mit einem Kaffee kannst du unsere Arbeit unterstützen.',
-  rememberHint: 'Optional: Farbe, Stil, Hell-/Dunkelmodus und Schriftgröße in diesem Browser für spätere Besuche speichern. Keine Übertragung an uns. Ausschalten oder lokale Einstellungen löschen entfernt die Daten. Ohne Auswahl gelten Änderungen nur auf der aktuellen Seite.',
-  privacyBody: 'Diese Homepage verwendet keine Analyse- oder Trackingskripte. Dauerhaftes Speichern deiner Anzeigeeinstellungen ist optional und standardmäßig ausgeschaltet. Sie werden nicht an uns gesendet.',
-  privacyNote: 'Hier kannst du die lokal gespeicherten Einstellungen dieser Homepage löschen. Die Einstellungen des Timers bleiben davon unberührt.',
-};
-const canonical = new URL(Astro.url.pathname, Astro.site);
+const t = getCompanyDictionary(lang);
+const home = '/' + lang + '/';
+const canonical = new URL(Astro.url.pathname === '/' ? '/en/' : Astro.url.pathname, Astro.site);
 
 ---
 <!doctype html>
-<html lang={lang} data-palette="green" data-style="technical" data-font-size="0">
+<html lang={lang} data-palette="green" data-style="technical" data-theme="dark" data-font-size="0">
   <head>
     <meta charset="UTF-8" />
+    {Astro.url.pathname === '/' && <script is:inline>
+      const browserLanguage = (navigator.languages?.[0] || navigator.language || 'en').toLowerCase().split(/[-_]/)[0];
+      const language = ['de','en','es','fr'].includes(browserLanguage) ? browserLanguage : 'en';
+      window.location.replace('/' + language + '/' + window.location.search + window.location.hash);
+    </script>}
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
-    <meta name="theme-color" content="#e9eef3" />
+    <meta name="theme-color" content="#080e16" />
     <meta name="color-scheme" content="light dark" />
     {noindex && <meta name="robots" content="noindex, follow" />}
     <title>{title} · Jacktools.net</title>
     <link rel="icon" type="image/svg+xml" href="/jacktools-icon.svg" />
     <link rel="canonical" href={canonical} />
+    {!legal && <>
+      {languages.map(language => <link rel="alternate" hreflang={language} href={new URL('/'+language+'/',Astro.site)} />)}
+      <link rel="alternate" hreflang="x-default" href={new URL('/en/',Astro.site)} />
+    </>}
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title + ' · JackTools.Net'} />
     <meta property="og:description" content={description} />
@@ -50,7 +55,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <a class="skip-link" href="#main">{lang === 'de' ? 'Zum Inhalt' : lang === 'es' ? 'Ir al contenido' : lang === 'fr' ? 'Aller au contenu' : 'Skip to content'}</a>
     <div class="site-shell">
       <header class="site-header">
-        <a class="brand" href={'/'} aria-label="Jacktools Startseite">
+        <a class="brand" href={home} aria-label={t.home}>
           <span class="brand-icon"><BrandIcon tool="company"/></span>
           <span class="brand-wordmark">jacktools<span class="brand-dot">.</span>net</span>
         </a>
@@ -61,11 +66,20 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
             </summary>
             <div class="palette-menu preferences-panel">
               <div class="preferences-heading"><h2>{t.menuSettings}</h2><button id="preferences-close" type="button" aria-label={t.close}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+              <section class="preferences-language" aria-labelledby="language-heading">
+                <h3 id="language-heading">{t.language}</h3>
+                <nav class="language-menu" aria-label={t.language}>
+                  {languages.map(language => <a href={'/'+language+'/'} lang={language} hreflang={language} aria-current={language===lang?'page':undefined}>
+                    <span>{languageNames[language]}</span>
+                    {language===lang && <svg class="language-check" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4 10-10"/></svg>}
+                  </a>)}
+                </nav>
+              </section>
               <section class="preferences-theme" aria-labelledby="appearance-heading">
                 <h3 id="appearance-heading">{t.appearance}</h3>
                 <div class="theme-segments" role="group" aria-label={t.appearance}>
-                  <button type="button" id="theme-light" class="theme-light" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg>{t.lightMode}</button>
-                  <button type="button" id="theme" class="theme-dark" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15.3A8.6 8.6 0 0 1 8.7 4 8.6 8.6 0 1 0 20 15.3Z"/></svg>{t.darkMode}</button>
+                  <button type="button" id="theme-light" class="theme-light" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg>{t.lightMode}</button>
+                  <button type="button" id="theme" class="theme-dark" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15.3A8.6 8.6 0 0 1 8.7 4 8.6 8.6 0 1 0 20 15.3Z"/></svg>{t.darkMode}</button>
                 </div>
               </section>
             <fieldset class="palette-grid">
@@ -97,7 +111,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
           </details>
 
         </div>
-        <nav class="header-nav" aria-label="Hauptnavigation"><div class="header-nav-links"><a href="/#tools">Tools</a><a href="/#idee">Unsere Idee</a></div></nav>
+        <nav class="header-nav" aria-label={t.navigation}><div class="header-nav-links"><a href={home+'#tools'}>{t.tools}</a><a href={home+'#idee'}>{t.idea}</a></div></nav>
       </header>
       <main id="main"><slot /></main>
       <footer class="site-footer">
@@ -107,8 +121,8 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
             <a class="support-coffee" href="https://buymeacoffee.com/jacktoolsnet" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer"><span aria-hidden="true">☕</span>{t.supportCoffee}<span aria-hidden="true">↗</span></a>
           </div>
         </section>
-        <div><a class="footer-brand" href={'/'}>jacktools.net</a><p>{t.footer}</p></div>
-        <nav aria-label={t.legal}><a href="/impressum/">{t.legal}{!['de','en'].includes(lang) && ' (EN)'}</a><a href="/datenschutz/">{t.privacy}{!['de','en'].includes(lang) && ' (EN)'}</a><a href="/nutzungshinweise/">{t.usage}{!['de','en'].includes(lang) && ' (EN)'}</a><button id="privacy-open">{t.preferences}</button></nav>
+        <div><a class="footer-brand" href={home}>jacktools.net</a><p>{t.footer}</p></div>
+        <nav aria-label={t.legal}><a href="/impressum/">{t.legal}{lang !== 'de' && ' (DE)'}</a><a href="/datenschutz/">{t.privacy}{lang !== 'de' && ' (DE)'}</a><a href="/nutzungshinweise/">{t.usage}{lang !== 'de' && ' (DE)'}</a><button id="privacy-open">{t.preferences}</button></nav>
         <p class="footer-credit">{t.creditBefore} ❤️ ☕ {t.creditAnd} 🍫 {t.creditAfter} <a href="https://jacktools.net" rel="noreferrer" referrerpolicy="no-referrer"><strong>jacktools.net</strong></a></p>
       </footer>
     </div>

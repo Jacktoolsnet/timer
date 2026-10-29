@@ -9,7 +9,7 @@ const cards=[
  ['messagedrop','MessageDrop – Nachrichten auf der Karte','https://app.messagedrop.de'],
 ] as const;
 test('all published tools have permanent descriptive cards and matching structured data',async({page},info)=>{
- await page.goto('/');
+ await page.goto('/de/');
  await expect(page.locator('.time-tools-grid > article')).toHaveCount(7);
  const graph=await page.locator('script[type="application/ld+json"]').evaluateAll(els=>els.flatMap(el=>JSON.parse(el.textContent!)['@graph']||[]));
  const items=graph.find(x=>x['@type']==='ItemList').itemListElement;
@@ -32,7 +32,7 @@ test('all published tools have permanent descriptive cards and matching structur
 test.describe('without JavaScript',()=>{
  test.use({javaScriptEnabled:false});
  test('the directory including the stopwatch is present in static HTML',async({page})=>{
-  await page.goto('/');
+  await page.goto('/de/');
   await expect(page.locator('.time-tools-grid > article')).toHaveCount(7);
   await expect(page.locator('#online-stoppuhr .tool-open')).toHaveAttribute('href','https://stopwatch.jacktools.net/de/');
   await page.locator('.tool-shortcuts a[href="#online-stoppuhr"]').click();
@@ -42,7 +42,7 @@ test.describe('without JavaScript',()=>{
 
 test('calculator has a calculation preview in its card and spotlight',async({page},info)=>{
  await page.addInitScript(()=>{Math.random=()=>.99;});
- await page.goto('/');
+ await page.goto('/de/');
  await expect(page.locator('#company-spotlight')).toHaveAttribute('data-tool','calculator');
  await expect(page.locator('#company-spotlight .company-calculation')).toBeVisible();
  await expect(page.locator('#company-spotlight .text-link')).toHaveAttribute('href','https://calculator.jacktools.net/de/');

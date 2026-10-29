@@ -12,7 +12,7 @@ try {
   settings = saved;
 } catch { /* Storage is optional. */ }
 settings.dark = document.documentElement.dataset.theme === 'dark';
-settings.colorScheme = (document.documentElement.dataset.palette || 'terracotta') as ColorScheme;
+settings.colorScheme = (document.documentElement.dataset.palette || 'green') as ColorScheme;
 const timer = new Timer(app.dataset.mode as Mode, settings);
 const form = $<HTMLFormElement>('settings-form');
 const field = (name: string) => form.elements.namedItem(name) as HTMLInputElement;

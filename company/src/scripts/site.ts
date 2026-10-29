@@ -73,6 +73,12 @@ paletteDropdown.addEventListener('focusout', event => {
 });
 
 const languageLinks = [...document.querySelectorAll<HTMLAnchorElement>('.language-menu a')];
+languageLinks.forEach(link => {
+  const target = new URL(link.href);
+  target.search = location.search;
+  if (document.getElementById(location.hash.slice(1))) target.hash = location.hash;
+  link.href = target.href;
+});
 document.querySelector('#preferences-close')?.addEventListener('click', () => {
   paletteDropdown.open = false;
   paletteTrigger.focus();
@@ -82,9 +88,8 @@ const APPEARANCE_KEY = 'jacktools.company.appearance.v1';
 function persistAppearance(language?: string) {
   if (!storageAllowed()) return;
   try {
-    const saved = JSON.parse(localStorage.getItem(APPEARANCE_KEY) || 'null');
     localStorage.setItem(APPEARANCE_KEY, JSON.stringify({
-      language: language || (['en','de','es','fr'].includes(saved?.language) ? saved.language : document.documentElement.lang),
+      language: language || document.documentElement.lang,
       dark: document.documentElement.dataset.theme === 'dark',
       colorScheme: document.documentElement.dataset.palette || 'green',
       style: document.documentElement.dataset.style || 'technical',
