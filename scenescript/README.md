@@ -1403,3 +1403,24 @@ Es ersetzt das Standardprojekt nicht. Reproduzierbar mit
 Für Modelländerungen wird nur der relevante kanonische 3D-Anleitungsteil übertragen,
 nicht die gesamte Video-Anleitung. Passende Bildreferenzen können optional mitgesendet
 werden (lokal komprimiert; zusätzliche Anbieter-Eingabekosten).
+
+Ungültige, vollständig empfangene 3D-Modellantworten werden im KI-Dialog bis zum
+Schließen der Nachbearbeitung im Arbeitsspeicher behalten. Nach dem Schließen der
+kompakten Fehlermeldung kann die Originalantwort heruntergeladen oder das JSON lokal
+bearbeitet und erneut geprüft werden — ohne API-Aufruf. Ein ausdrücklich betätigter
+Reparaturbutton hebt ausschließlich positive Maße kleiner als `0.01` auf `0.01` an
+und zeigt die Änderungen. Null, negative/zu große Maße und falsche Typen werden nicht
+erraten oder stillschweigend korrigiert. Vollständige Validierung, Modellvorschau und
+explizites Übernehmen bleiben erforderlich. Kein automatisches kostenpflichtiges Retry.
+Bereits vor dieser Änderung verworfene Antworten lassen sich damit nicht nachträglich
+wiederherstellen.
+
+Gelenksteuerung: `min/max` begrenzen weiterhin die tatsächliche Pose. Bei den signierten
+Bewegungssignalen `leftArm/rightArm/leftLeg/rightLeg/wave/bob` ist `target` ein
+Umrechnungsfaktor (z. B. 180 für radians/PI), kein direkt anzufahrender Winkel. Er darf
+innerhalb der globalen Bewegungsgrenzen außerhalb von `min/max` liegen; die ausgewertete
+Pose wird abschließend begrenzt. Ruhewerte, Animationsschlüssel, Ausdrucksziele und andere
+Control-Targets bleiben innerhalb der Gelenkgrenzen. Im Nachbearbeitungsdialog kann ein
+separater, ausdrücklich ausgelöster Reparaturbutton ungültige Targets begrenzen, ohne
+Gelenklimits oder Animationsschlüssel umzuschreiben. Gültige Bewegungsfaktoren bleiben
+unverändert. Erneute Prüfung/Vorschau und Übernahme erfolgen ohne weitere API-Anfrage.

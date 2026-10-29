@@ -26,9 +26,7 @@ const presetExamples=textPresets.map(preset=>{const e=applyTextPreset(newElement
 export const aiGuide = `# SceneScript 1.0 — complete authoring specification
 
 ## 1. Start here
-SceneScript renders editable browser videos from JSON: sequential Scenes with layered
-text, images, shapes, bubbles, video, simulations and 3D. Read §§1–4, then needed
-features; §11 defines all fields, §12 has JSON examples. No downloads needed.
+SceneScript renders JSON videos with 2D/3D layers. Read §§1–4; §11 lists fields, §12 examples.
 
 Optional Project.storyboard is a non-rendered plan. Preserve IDs, revision, comments
 and data; only users approve/resolve. board.characters contains character/object kinds;
@@ -63,7 +61,7 @@ Authoring workflow:
 
 Minimal JSON (§12 has more examples):
 ${JSON.stringify(aiMinimalExample)}
-Examples show syntax; add metadata/cover for finished videos. Legacy imports may omit them.
+Examples show syntax. Legacy imports may omit them.
 
 ## 2. Notation and universal rules
 The following is specification notation, NOT JSON syntax:
@@ -400,6 +398,8 @@ NOT mesh size. Translation joints use PARENT axes. Actor height/3 and scale
 multiply the model; y/pitch/roll add to x/z/rotation. Breathing needs a bob driver.
 Joints: unique id/model, motion rotation(default)/translation/scale/morph; axis x(default)/y/z.
 min/max REQUIRED; value:0(scale:1), inside bounds; target:max.
+Signed drivers use target as gain: it may exceed joint limits within motion bounds.
+Other targets stay within min/max; final poses always clamp to min/max.
 Bounds:rotation±3600°, translation±50, scale0–50; morph0–1 (profile only, axis:y).
 Scale multiplies only that mesh axis, never children; 0 hides the mesh, no groups.
 One joint per motion+axis per part. These are kinematic limits, NOT physics.
@@ -444,7 +444,7 @@ limb movement. Migrated figures include these drivers plus named walk/wave clips
 Actor joint.control: none(default), mouth=max(speech,surprised), speech=audio-only,
 happy/sad/angry/surprised/blink=expression weight. Additional signed drivers:
 leftArm/rightArm/leftLeg/rightLeg = action pose radians/PI; wave = arm-Z radians/
-(PI/2); bob = breathing/walking height/.1. Use rotation target 180 for limbs,
+(PI/2); bob = breathing/walking height/.1. Signed-driver target is gain, not a pose. Use 180 for limbs,
 90 for wave, translation target .1 for bob. Expression/audio weights are 0–1,
 signed drivers -1–1. control blends sampled value toward target by this weight.
 responses maps signals to targets: add (target-base)*weight, then primary control,

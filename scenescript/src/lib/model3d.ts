@@ -7,6 +7,12 @@ export type Vector3D={x:number;y:number;z:number};
 export const vector3D=(value=0):Vector3D=>({x:value,y:value,z:value});
 export const shapes3D=['group','box','sphere','cylinder','cone','plane','profile','extrusion'] as const;
 export const jointControls3D=['none','mouth','speech','happy','sad','angry','surprised','blink','leftArm','rightArm','leftLeg','rightLeg','wave','bob'] as const;
+export const signedJointControls3D=['leftArm','rightArm','leftLeg','rightLeg','wave','bob'] as const;
+/** Signed action drivers use target as a calibration gain; the final pose is still clamped. */
+export function jointTargetBounds3D(control:string,motion:string,min:number,max:number):[number,number]{
+ if(!(signedJointControls3D as readonly string[]).includes(control))return [min,max];
+ const bound=motion==='rotation'?3600:motion==='morph'?1:50;return [motion==='scale'||motion==='morph'?0:-bound,bound];
+}
 export type Joint3D={id:string;motion:'rotation'|'translation'|'scale'|'morph';axis:'x'|'y'|'z';min:number;max:number;value:number;control:typeof jointControls3D[number];target:number;responses:Partial<Record<typeof jointControls3D[number],number>>};
 export type Part3D={extrusion?:Extrusion3D;profile?:Profile3D;texture?:Texture3D;finish?:'standard'|'polished'|'glass';id:string;parent:string;palette:string;instances:Vector3D[];shape:typeof shapes3D[number];position:Vector3D;rotation:Vector3D;pivot:Vector3D;size:Vector3D;color:string;roughness:number;metalness:number;opacity:number;joints:Joint3D[]};
 export type JointKey3D={at:number;value:number};
@@ -19,7 +25,7 @@ export const defaultPart3D=():Part3D=>({id:'part',parent:'',palette:'',instances
 export const defaultModelMotion3D=():ModelMotion3D=>({animation:'',at:0,duration:1,speed:1,loop:false,blend:.2});
 const obj=(v:unknown,p:string)=>{if(!v||typeof v!=='object'||Array.isArray(v))throw new Error(p+': expected object');return v as Record<string,unknown>;};
 const fields=(v:Record<string,unknown>,allowed:string[],p:string)=>{for(const k of Object.keys(v))if(!allowed.includes(k))throw new Error(p+'.'+k+': unknown field');};
-const num=(v:unknown,p:string,min:number,max:number)=>{if(typeof v!=='number'||!Number.isFinite(v)||v<min||v>max)throw new Error(p+': expected number '+min+'–'+max);return v;};
+const num=(v:unknown,p:string,min:number,max:number)=>{if(typeof v!=='number'||!Number.isFinite(v)||v<min||v>max)throw new Error(p+': expected number '+min+'–'+max+'; received '+(typeof v==='number'?String(v):v===null?'null':typeof v));return v;};
 const id=(v:unknown,p:string)=>{if(typeof v!=='string'||v.length>100||!/^[a-zA-Z0-9_-]+$/.test(v))throw new Error(p+': invalid identifier');return v;};
 const choice=<T extends string>(v:unknown,values:readonly T[],p:string):T=>{if(!values.includes(v as T))throw new Error(p+': '+values.join(', '));return v as T;};
 function vector(v:unknown,p:string,fallback:Vector3D,min:number,max:number):Vector3D{
@@ -47,7 +53,8 @@ export function parseModel3D(value:unknown,path='model'):Model3D|null{
    const min=num(v.min,path+'.min',motion==='scale'||motion==='morph'?0:-bound,bound),max=num(v.max,path+'.max',min,bound),rest=num(v.value===undefined?(motion==='scale'?1:0):v.value,path+'.value',min,max);
    const responseValues=obj(v.responses===undefined?{}:v.responses,path+'.responses'),responses:Joint3D['responses']={};
    for(const [name,value]of Object.entries(responseValues)){choice(name,jointControls3D,path+'.responses');if(name==='none')throw new Error(path+'.responses.none: no signal');Object.defineProperty(responses,name,{value:num(value,path+'.responses.'+name,min,max),enumerable:true,writable:true,configurable:true});}
-   const joint:Joint3D={responses,id:jointId,motion,axis,min,max,value:rest,control:choice(v.control===undefined?'none':v.control,jointControls3D,path+'.control'),target:num(v.target===undefined?max:v.target,path+'.target',min,max)};joints.set(jointId,joint);return joint;
+   const control=choice(v.control===undefined?'none':v.control,jointControls3D,path+'.control'),[targetMin,targetMax]=jointTargetBounds3D(control,motion,min,max);
+   const joint:Joint3D={responses,id:jointId,motion,axis,min,max,value:rest,control,target:num(v.target===undefined?max:v.target,path+'.target',targetMin,targetMax)};joints.set(jointId,joint);return joint;
   });
   const palette=get('palette')===''?'':id(get('palette'),p+'.palette'),rawInstances=get('instances');
   if(!Array.isArray(rawInstances)||rawInstances.length>256)throw new Error(p+'.instances: maximum 256');

@@ -1,4 +1,4 @@
-import {acceptBoardModel,modelRequestData,boardModelInstructions,resourceSubject} from '../lib/storyboard-resources';
+import {acceptBoardModel,modelRequestData,boardModelInstructions,resourceSubject,repairTinyBoardModelSizes,repairBoardJointTargets} from '../lib/storyboard-resources';
 import {storyboardDesignWords} from '../lib/storyboard-design-i18n';
 import {storyboardModelView} from './storyboard-model-view';
 import {reviewProduction,productionInstructions} from '../lib/production-review';
@@ -40,6 +40,20 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,re
  let resourceTarget:BoardReviewTarget|undefined,disposeModelPreview:(()=>void)|undefined;
  const dw=storyboardDesignWords(document.documentElement.lang);
  const modelPreview=document.createElement('div');modelPreview.id='ai-workflow-model-preview';$('preview').append(modelPreview);
+ let retainedModel:{text:string;request:string;target:BoardReviewTarget}|undefined;
+ const recovery=document.createElement('section');recovery.id='ai-workflow-model-recovery';recovery.className='ai-flow-tile';recovery.hidden=true;
+ const recoveryHint=document.createElement('p'),recoveryText=document.createElement('textarea'),recoveryTools=document.createElement('div'),recoveryStatus=document.createElement('p');
+ recoveryHint.textContent=dw.repairHint;recoveryText.id='ai-workflow-model-recovery-json';recoveryText.rows=14;recoveryText.maxLength=8*1024*1024;recoveryText.spellcheck=false;recoveryText.setAttribute('aria-label',dw.repairModel);recoveryStatus.setAttribute('role','status');recoveryTools.className='board-model-controls';
+ const recoveryButton=(id:string,title:string,path:string,click:()=>void)=>{const button=document.createElement('button'),svg=document.createElementNS('http://www.w3.org/2000/svg','svg'),line=document.createElementNS(svg.namespaceURI,'path');button.id='ai-workflow-model-'+id;button.type='button';button.title=title;button.setAttribute('aria-label',title);svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('aria-hidden','true');line.setAttribute('d',path);svg.append(line);button.append(svg);button.onclick=click;recoveryTools.append(button);return button;};
+ recovery.append(recoveryHint,recoveryText,recoveryTools,recoveryStatus);$('preview').before(recovery);
+ function resetRecovery(){retainedModel=undefined;recovery.hidden=true;recoveryText.value='';recoveryStatus.textContent='';dialog.classList.remove('ai-recovery-view');}
+ function showRecovery(){dialog.classList.remove('ai-error-view');dialog.classList.add('ai-recovery-view');$('title').textContent=dw.repairModel;$('error-box').hidden=true;$('status').textContent='';recovery.hidden=false;recoveryText.focus();}
+ function validateRetained(){if(active||!retainedModel)return;clearPreview();try{check();const p=acceptBoardModel(recoveryText.value,ctx.project,retainedModel.target,retainedModel.request);preview(p,'model');recoveryStatus.textContent=dw.localReady;}catch(e){error(e);}}
+ recoveryText.addEventListener('input',()=>{clearPreview();recoveryStatus.textContent='';});
+ recoveryButton('validate-local',dw.validateLocal,'m5 12 4 4L20 5',validateRetained);
+ recoveryButton('repair-sizes',dw.repairSizes,'M4 20 20 4M4 13v7h7M14 4h6v6',()=>{if(active||!retainedModel)return;try{const result=repairTinyBoardModelSizes(recoveryText.value);if(!result.changes.length){recoveryStatus.textContent=dw.noSizeRepairs;return;}recoveryText.value=result.text;validateRetained();recoveryStatus.textContent=result.changes.join('\n')+'\n'+recoveryStatus.textContent;}catch(e){error(e);}});
+ recoveryButton('repair-joints',dw.repairJoints,'M4 12h16M8 6v12m8-12v12',()=>{if(active||!retainedModel)return;try{const result=repairBoardJointTargets(recoveryText.value);if(!result.changes.length){recoveryStatus.textContent=dw.noJointRepairs;return;}recoveryText.value=result.text;validateRetained();recoveryStatus.textContent=result.changes.join('\n')+'\n'+recoveryStatus.textContent;}catch(e){error(e);}});
+ recoveryButton('download-response',dw.downloadResponse,'M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4',()=>{if(!retainedModel)return;const url=URL.createObjectURL(new Blob([retainedModel.text],{type:'application/json'})),link=document.createElement('a');link.href=url;link.download='model-response.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
  let requiresProductionAck=false;
  let ctx:AiWorkflowContext,active:AbortController|undefined,candidate:Project|undefined,jobs:SpeechJob[]=[],session=0,opening=false,generating=false;
  const urls:string[]=[];
@@ -63,7 +77,7 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,re
   }catch(e){$('image-reference-summary').textContent=e instanceof Error?e.message:'';}
  }
  function configure(){
-  clearPreview();dialog.classList.remove('ai-error-view');$('title').textContent=t.title;$('error-box').hidden=true;$('status').textContent='';consent.checked=false;const kind=action.value;modelPicker.configure(models[kind]);
+  resetRecovery();clearPreview();dialog.classList.remove('ai-error-view');$('title').textContent=t.title;$('error-box').hidden=true;$('status').textContent='';consent.checked=false;const kind=action.value;modelPicker.configure(models[kind]);
   $('planning-image-hint').hidden=kind!=='board';$('text-options').hidden=kind==='image'||kind==='speech';$('content-options').hidden=kind==='speech';$('image-options').hidden=kind!=='image';$('speech-options').hidden=kind!=='speech';$('refs-label').hidden=kind==='image'||kind==='speech';$('prompt-label').hidden=kind==='speech';if(kind==='model'&&resourceTarget&&ctx.project.storyboard){const subject=resourceSubject(ctx.project.storyboard,resourceTarget);$('status').textContent=dw.target+': '+subject.name;}configureImage(true);speechEstimate();busy(false);
  }
  function preview(p:Project,kind:string){
@@ -127,8 +141,8 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,re
  });
  $('load-voices').addEventListener('click',async()=>{if(active)return;try{check();const selected=await chooseElevenVoice({language:ctx.project.storyboard?.language??document.documentElement.lang,valid:ctx.valid});if(selected===undefined)return;check();$<HTMLInputElement>('voice').value=selected?.id??'';clearPreview();}catch(e){error(e);}});
  start.addEventListener('click',async()=>{
-  if(active||!consent.checked)return;clearPreview();$('error-box').hidden=true;
-  const controller=new AbortController();active=controller;generating=true;busy(true);const kind=action.value,source=ctx.project,sourceBoard=planningBoard(source,document.documentElement.lang);let key='';
+  if(active||!consent.checked)return;resetRecovery();clearPreview();$('error-box').hidden=true;
+  const controller=new AbortController();active=controller;generating=true;busy(true);const kind=action.value,source=ctx.project,sourceBoard=planningBoard(source,document.documentElement.lang);let key='',receivedModel='';
   const files:Parameters<typeof attachSpeechFiles>[2]=[];let selectedJobs:SpeechJob[]=[];
   try{
    check();
@@ -153,7 +167,7 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,re
    }
    $('status').textContent=t.unlock;key=await requestApiKey(kind==='speech'?'elevenlabs':'openai',controller.signal);check();controller.signal.throwIfAborted();$('status').textContent=t.working;
    if(kind==='board'||kind==='script'||kind==='model'){
-    const text=await generateText(key,{model:model.value.trim(),instructions,input:textInput,images:references,reasoning:modelPicker.reasoning},controller.signal);check();controller.signal.throwIfAborted();
+    const text=await generateText(key,{model:model.value.trim(),instructions,input:textInput,images:references,reasoning:modelPicker.reasoning},controller.signal);if(kind==='model')receivedModel=text;check();controller.signal.throwIfAborted();
     const p=kind==='model'?acceptBoardModel(text,source,resourceTarget!,prompt.value):kind==='board'?acceptPlanning(text,source,sourceBoard):acceptScript(text,source);
     if(kind==='script')await ctx.preload?.(p);else for(const a of Object.values(p.storyboard!.images))if(a.data&&!Object.values(sourceBoard.images).some(old=>old.data===a.data))await decodeImage(a.data);
     check();controller.signal.throwIfAborted();preview(p,kind);
@@ -176,7 +190,7 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,re
     else{ctx.apply(next);dialog.close();try{reviewStoryboard(next.storyboard!,true);}catch(e){dialog.showModal();throw e;}}
     clearPreview();
    }
-  }catch(e){error(e);if(kind==='speech'&&files.length&&ctx.valid())$('status').textContent=t.partial;else{$('status').textContent='';clearPreview();}}
+  }catch(e){error(e);if(kind==='speech'&&files.length&&ctx.valid())$('status').textContent=t.partial;else{$('status').textContent='';clearPreview();if(kind==='model'&&receivedModel&&resourceTarget){retainedModel={text:receivedModel,request:prompt.value,target:resourceTarget};recoveryText.value=receivedModel;}}}
   finally{key='';active=undefined;generating=false;consent.checked=false;busy(false);$<HTMLProgressElement>('progress').removeAttribute('value');if(dialog.open&&!$('error-box').hidden)$('error-box').scrollIntoView({block:'nearest'});else if(dialog.open&&candidate&&kind==='script')($('production-check').hidden?$('preview'):$('production-check')).scrollIntoView({block:'start'});}
  });
  $('copy-error').addEventListener('click',async()=>{
@@ -186,8 +200,8 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,re
  });
  $('production-ack').addEventListener('change',()=>{apply.disabled=!!active||!candidate||requiresProductionAck&&!$<HTMLInputElement>('production-ack').checked;});
  apply.addEventListener('click',()=>{if(active||!candidate||requiresProductionAck&&!$<HTMLInputElement>('production-ack').checked)return;try{check();const next=candidate;if(action.value==='script'&&ctx.applyScript)ctx.applyScript(next);else ctx.apply(next);clearPreview();$('status').textContent=t.applied;dialog.close();}catch(e){clearPreview();error(e);}});
- const close=()=>{if(active){active.abort();return;}if(dialog.classList.contains('ai-error-view')&&candidate&&action.value==='speech'){dialog.classList.remove('ai-error-view');$('title').textContent=t.title;$('error-box').hidden=true;return;}dialog.close();};
+ const close=()=>{if(active){active.abort();return;}if(dialog.classList.contains('ai-error-view')&&retainedModel){showRecovery();return;}if(dialog.classList.contains('ai-error-view')&&candidate&&action.value==='speech'){dialog.classList.remove('ai-error-view');$('title').textContent=t.title;$('error-box').hidden=true;return;}dialog.close();};
  $('cancel').addEventListener('click',()=>active?.abort());$('close').addEventListener('click',close);dialog.addEventListener('cancel',event=>{event.preventDefault();close();});
- dialog.addEventListener('close',()=>{if(dialog.open)return;progressVisual.setRunning(false);session++;active?.abort();modelPicker.reset();clearPreview();prompt.value='';consent.checked=false;});
- window.addEventListener('pagehide',()=>{progressVisual.setRunning(false);finishQuick?.(false);active?.abort();clearPreview();});
+ dialog.addEventListener('close',()=>{if(dialog.open)return;resetRecovery();progressVisual.setRunning(false);session++;active?.abort();modelPicker.reset();clearPreview();prompt.value='';consent.checked=false;});
+ window.addEventListener('pagehide',()=>{progressVisual.setRunning(false);finishQuick?.(false);active?.abort();resetRecovery();clearPreview();});
 }

@@ -1335,3 +1335,7 @@ body.recording .comic-edit-overlay{display:none}
 .board-model-controls input[type=range]{width:100%;accent-color:var(--accent)}
 .board-model-controls select{max-width:100%;min-width:130px}
 #ai-workflow-model-preview:empty{display:none}
+#ai-workflow-dialog.ai-recovery-view #ai-workflow-settings,#ai-workflow-dialog.ai-recovery-view #ai-workflow-start{display:none!important}
+#ai-workflow-model-recovery-json{width:100%;box-sizing:border-box;resize:vertical;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:12px;font:12px/1.5 monospace}
+#ai-workflow-model-recovery [role=status]{white-space:pre-wrap;overflow-wrap:anywhere}
+#ai-workflow-model-recovery button svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}

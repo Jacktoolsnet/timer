@@ -83,3 +83,14 @@ test('optical finishes are strictly optional, validated and portable without alt
  for(const finish of [null,1,true,'mirror','<script>'])assert.throws(()=>parseModel3D({parts:[{id:'bad',finish}]}),/finish/);
  assert.throws(()=>parseModelMotions3D([{animation:'swing',duration:1,finish:'glass'}],parseModel3D(simple()),2,'motions'),/unknown field/);
 });
+test('signed action targets are calibration gains, while physical poses and animation keys remain bounded',()=>{
+ const raw={parts:[{id:'arm',joints:[{id:'shoulder',motion:'rotation',axis:'x',min:-55,max:55,value:0,control:'leftArm',target:180}]}]};
+ const model=parseModel3D(raw)!;
+ assert.equal(modelPose3D(model,{},[],0,{leftArm:.2}).get('shoulder'),36);
+ assert.equal(modelPose3D(model,{},[],0,{leftArm:1}).get('shoulder'),55);
+ assert.equal(modelPose3D(model,{},[],0,{leftArm:-1}).get('shoulder'),-55);
+ for(const control of ['leftArm','rightArm','leftLeg','rightLeg','wave','bob'])assert.equal(parseModel3D({parts:[{id:'part',joints:[{...raw.parts[0].joints[0],control}]}]})!.parts[0].joints[0].target,180);
+ for(const control of ['none','mouth','speech','happy'])assert.throws(()=>parseModel3D({parts:[{id:'part',joints:[{...raw.parts[0].joints[0],control}]}]}),/target: expected number -55–55/);
+ assert.throws(()=>parseModel3D({parts:[{id:'part',joints:[{...raw.parts[0].joints[0],target:3601}]}]}),/target/);
+ assert.throws(()=>parseModel3D({...raw,animations:{invalid:{duration:1,tracks:[{joint:'shoulder',keys:[{at:0,value:180}]}]}}}),/value/);
+});

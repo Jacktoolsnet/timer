@@ -179,3 +179,22 @@ test('rounded movement-study project bundles the same freely editable model and 
  const p=parseProject(readFileSync(new URL('../public/examples/rounded-character/rounded-character.scenescript',import.meta.url),'utf8'));
  assert.equal(p.scenes.length,3);assert.deepEqual(p.characters.rounded_human.model,roundedHumanModel());assert.deepEqual(p.storyboard!.characters[0].model3d,roundedHumanModel());assert.equal(p.storyboard!.approved,false);assert.deepEqual(p.scenes.map(s=>s.stage3d!.actors[0].motions[0].animation),['walk','wave','face']);
 });
+
+import {repairTinyBoardModelSizes,boardModelInstructions} from '../src/lib/storyboard-resources.ts';
+test('explicit local size repair only raises tiny positive dimensions, never guesses other geometry changes',()=>{
+ const raw={reply:'Small facial details',model:{parts:[{id:'detail',size:{x:.005,y:.001,z:.01}},{id:'invalid',size:{x:0,y:-.01,z:51}},{id:'string',size:{x:'0.005'}}]}};
+ const original=JSON.stringify(raw),fixed=repairTinyBoardModelSizes(original),next=JSON.parse(fixed.text);assert.equal(JSON.stringify(raw),original);assert.equal(fixed.changes.length,2);assert.deepEqual(next.model.parts[0].size,{x:.01,y:.01,z:.01});assert.deepEqual(next.model.parts[1],raw.model.parts[1]);assert.deepEqual(next.model.parts[2],raw.model.parts[2]);assert.equal(repairTinyBoardModelSizes(fixed.text).text,fixed.text);
+ assert.match(boardModelInstructions,/0.01 to 50 inclusive/);assert.match(boardModelInstructions,/For group nodes omit size/);
+ const p=demoProject();p.storyboard=example();const target={kind:'characters' as const,id:p.storyboard.characters[0].id};const tiny=JSON.stringify({model:{parts:[{id:'detail',size:{x:.005}}]}});
+ assert.throws(()=>acceptBoardModel(tiny,p,target),/size.x: expected number 0.01–50; received 0.005/);assert.equal(acceptBoardModel(repairTinyBoardModelSizes(tiny).text,p,target).storyboard!.characters[0].model3d!.parts[0].size.x,.01);
+ assert.throws(()=>repairTinyBoardModelSizes('{'));assert.throws(()=>repairTinyBoardModelSizes('{"model":{"parts":[]}}'));
+});
+
+import {repairBoardJointTargets} from '../src/lib/storyboard-resources.ts';
+test('explicit joint repair preserves valid action gains, limits and animation keys',()=>{
+ const joint={id:'hinge',min:-55,max:55,value:0,target:180};
+ const raw={model:{parts:[{id:'arm',joints:[{...joint,control:'leftArm'},{...joint,id:'other',axis:'y',control:'none'},{...joint,id:'lower',axis:'z',control:'mouth',target:-180}]}],animations:{}}};
+ const original=JSON.stringify(raw),fixed=repairBoardJointTargets(original),next=JSON.parse(fixed.text);assert.equal(JSON.stringify(raw),original);assert.equal(fixed.changes.length,2);assert.equal(next.model.parts[0].joints[0].target,180);assert.equal(next.model.parts[0].joints[1].target,55);assert.equal(next.model.parts[0].joints[2].target,-55);assert.equal(repairBoardJointTargets(fixed.text).text,fixed.text);
+ const p=demoProject();p.storyboard=example();assert.doesNotThrow(()=>acceptBoardModel(fixed.text,p,{kind:'characters',id:p.storyboard!.characters[0].id}));
+ const invalid={model:{parts:[{id:'bad',joints:[{...joint,min:100,max:0},{...joint,min:-4000},{...joint,target:'180'}]}]}};const untouched=JSON.stringify(invalid);assert.equal(repairBoardJointTargets(untouched).text,untouched);
+});
