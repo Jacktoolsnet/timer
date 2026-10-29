@@ -50,7 +50,7 @@ export function roundedHumanModel():Model3D{
  const track=(joint:string,values:number[],duration:number)=>({joint,easing:'ease-in-out',keys:values.map((value,i)=>({at:i*duration/(values.length-1),value}))});
  return parseModel3D({parts,animations:{
   walk:{duration:1.2,tracks:[track('leftLeg',[0,-25,0,25,0],1.2),track('rightLeg',[0,25,0,-25,0],1.2),track('leftArm',[0,20,0,-20,0],1.2),track('rightArm',[0,-20,0,20,0],1.2),track('kneeBendL',[0,28,0,5,0],1.2),track('kneeBendR',[0,5,0,28,0],1.2),track('elbowBendL',[-12,-25,-12,-15,-12],1.2),track('elbowBendR',[-12,-15,-12,-25,-12],1.2)]},
-  wave:{duration:3,tracks:[track('raiseR',[0,-120,-120,-120,0],3),track('elbowBendR',[0,-25,-65,-25,0],3),track('look',[0,12,8,12,0],3)]},
+  wave:{duration:3,tracks:[track('raiseR',[0,120,120,120,0],3),track('elbowBendR',[0,-25,-65,-25,0],3),track('look',[0,12,8,12,0],3)]},
   face:{duration:3,tracks:[track('blinkL',[1,.03,1,1,1],3),track('blinkR',[1,.03,1,1,1],3),track('irisBlinkL',[1,.03,1,1,1],3),track('irisBlinkR',[1,.03,1,1,1],3),track('pupilBlinkL',[1,.03,1,1,1],3),track('pupilBlinkR',[1,.03,1,1,1],3),track('lightBlinkL',[1,.03,1,1,1],3),track('lightBlinkR',[1,.03,1,1,1],3),track('mouthOpen',[1,1,2.5,1.5,1],3),track('nod',[0,8,-5,4,0],3)]}
  }})!;
 }
