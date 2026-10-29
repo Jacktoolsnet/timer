@@ -54,7 +54,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
           <span class="brand-icon"><BrandIcon tool="company"/></span>
           <span class="brand-wordmark">jacktools<span class="brand-dot">.</span>net</span>
         </a>
-        <div class="header-tools"><nav class="header-nav" aria-label="Hauptnavigation"><a href="/#tools">Tools</a><a href="/#idee">Unsere Idee</a></nav>
+        <div class="header-tools">
           <details class="palette-dropdown" id="palette-dropdown">
             <summary class="preferences-trigger" aria-label={t.menuSettings} title={t.menuSettings}>
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 3-.5 2-2 .9-1.8-.6-2 3.4 1.5 1.4v2.8L3.7 14l2 3.4 1.8-.6 2 .9.5 2.3h4l.5-2.3 2-.9 1.8.6 2-3.4-1.5-1.1v-2.8l1.5-1.4-2-3.4-1.8.6-2-.9L14 3Z"/><circle cx="12" cy="11.5" r="3"/></svg>
@@ -97,6 +97,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
           </details>
 
         </div>
+        <nav class="header-nav" aria-label="Hauptnavigation"><div class="header-nav-links"><a href="/#tools">Tools</a><a href="/#idee">Unsere Idee</a></div></nav>
       </header>
       <main id="main"><slot /></main>
       <footer class="site-footer">

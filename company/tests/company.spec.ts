@@ -86,3 +86,18 @@ test('Relax card and random spotlight link to the new tool',async({page})=>{
  await expect(page.locator('.relax-feature')).toContainText('Lagerfeuer');
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });
+
+test('company masthead is sticky and section links remain visible on mobile', async ({page}) => {
+  await page.goto('/');
+  await expect(page.locator('.header-nav a')).toHaveCount(2);
+  await expect(page.locator('.header-nav')).toBeVisible();
+  await page.locator('.header-nav a[href="/#tools"]').click();
+  await expect(page.locator('.header-nav a[href="/#tools"]')).toHaveAttribute('aria-current','location');
+  const header=await page.locator('.site-header').boundingBox();
+  expect(Math.abs(header!.y)).toBeLessThan(1);
+  const section=await page.locator('#tools').boundingBox();
+  expect(section!.y).toBeGreaterThanOrEqual(header!.height);
+  await page.getByLabel('Einstellungen',{exact:true}).click();
+  await expect(page.locator('.preferences-panel')).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});

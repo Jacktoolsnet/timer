@@ -140,3 +140,29 @@ remember.addEventListener('change', () => {
     document.querySelector('#storage-status')!.textContent = document.querySelector<HTMLElement>('#clear-storage')!.dataset.error!;
   }
 });
+
+// Keep section anchors and preferences clear of the sticky masthead.
+const masthead = document.querySelector<HTMLElement>('.site-header');
+const sectionLinks = [...document.querySelectorAll<HTMLAnchorElement>('.header-nav a')];
+const sections = sectionLinks.map(link => ({link, section:document.getElementById(new URL(link.href).hash.slice(1))}));
+function syncSectionNavigation() {
+  const boundary = (masthead?.getBoundingClientRect().height || 0) + 40;
+  const current = sections.filter(item => item.section && item.section.getBoundingClientRect().top <= boundary).at(-1);
+  sectionLinks.forEach(link => {
+    if (current?.link === link) link.setAttribute('aria-current','location');
+    else link.removeAttribute('aria-current');
+  });
+}
+if (masthead) {
+  const measureMasthead = () => {
+    document.documentElement.style.setProperty('--masthead-height', `${masthead.getBoundingClientRect().height}px`);
+    syncSectionNavigation();
+  };
+  new ResizeObserver(measureMasthead).observe(masthead);
+  measureMasthead();
+}
+let navigationFrame = 0;
+window.addEventListener('scroll', () => {
+  if (navigationFrame) return;
+  navigationFrame = requestAnimationFrame(() => { navigationFrame = 0; syncSectionNavigation(); });
+}, {passive:true});
