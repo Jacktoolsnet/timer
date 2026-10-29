@@ -75,7 +75,7 @@
       "name": "Build: Alle Seiten",
       "type": "node-terminal",
       "request": "launch",
-      "command": "npm --prefix company run build && npm --prefix timer run build && npm --prefix clock run build && npm --prefix metronome run build && npm --prefix stopwatch run build && npm --prefix breathe run build && npm --prefix relax run build && npm --prefix calculator run build && npm --prefix scenescript run build && npm --prefix lava run build",
+      "command": "npm --prefix company run build && npm --prefix timer run build && npm --prefix clock run build && npm --prefix metronome run build && npm --prefix stopwatch run build && npm --prefix breathe run build && npm --prefix relax run build && npm --prefix calculator run build && npm --prefix scenescript run build && npm --prefix lava run build && python3 scripts/package-dist.py",
       "cwd": "${workspaceFolder}"
     }
   ]
