@@ -1,4 +1,4 @@
-// Build all eight tools first. Uses local static servers, not deployed sites.
+// Build all nine tools first. Uses local static servers, not deployed sites.
 import {createRequire} from 'node:module';
 import {spawn} from 'node:child_process';
 import {createServer} from 'node:net';
@@ -7,7 +7,7 @@ import {fileURLToPath} from 'node:url';
 import assert from 'node:assert/strict';
 const require=createRequire(new URL('../company/package.json',import.meta.url));
 const {chromium}=require('@playwright/test');
-const projects=['timer','clock','stopwatch','calculator','breathe','relax','lava','scenescript'];
+const projects=['metronome','timer','clock','stopwatch','calculator','breathe','relax','lava','scenescript'];
 const browser=await chromium.launch({headless:true});
 let checked=0;
 try {

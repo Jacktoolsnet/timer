@@ -1,0 +1,13 @@
+/* Consistent breathing room inside every masthead, independent of page gutters. */
+@media screen {
+ body .site-shell > header.site-header {
+  padding-inline:clamp(12px,2vw,28px);
+ }
+ body .site-header > .brand { min-width:0; flex-shrink:1; }
+ body .site-header .brand-wordmark { min-width:0; overflow:hidden; text-overflow:ellipsis; }
+ body .site-header > .header-tools { flex-shrink:0; }
+}
+@media screen and (max-width:400px) {
+ /* Keep the complete brand and 44px settings target at enlarged text sizes. */
+ body .site-header .brand-product { display:none; }
+}
