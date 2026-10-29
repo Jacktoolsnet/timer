@@ -75,15 +75,11 @@
       "name": "Build: MessageDrop",
       "type": "node",
       "request": "launch",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": [
-        "run",
-        "build"
-      ],
-      "cwd": "${workspaceFolder}/../messagedrop/platform/messagedrop",
+      "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
-      "autoAttachChildProcesses": false
+      "autoAttachChildProcesses": false,
+      "program": "${workspaceFolder}/scripts/build-messagedrop.mjs"
     },
     {
       "name": "Build: Alle Seiten",

@@ -58,3 +58,16 @@ Auch direkt im Terminal nutzbar:
 node scripts/build-all.mjs
 node --test scripts/build-all.test.mjs
 ```
+
+## MessageDrop einzeln bauen
+
+**Build: MessageDrop** baut die benachbarte öffentliche Astro-Website unter
+`../messagedrop/platform/messagedrop/` und erstellt danach
+`../messagedrop/platform/messagedrop/dist/messagedrop-deploy.zip`.
+Die Angular-App wird nicht gebaut. Der Gesamtbuild der zehn Jacktools-Seiten
+bleibt unverändert. Auch dieser Einzelbuild meldet `[FERTIG]` oder `[FEHLER]`.
+
+```sh
+node scripts/build-messagedrop.mjs
+python3 scripts/package-dist.py messagedrop  # nur vorhandenen Build verpacken
+```

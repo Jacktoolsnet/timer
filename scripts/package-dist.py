@@ -13,6 +13,9 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[1]
 PROJECTS = ('company', 'timer', 'clock', 'metronome', 'stopwatch', 'breathe',
             'relax', 'calculator', 'scenescript', 'lava')
+PROJECT_DIRS = {project: ROOT / project for project in PROJECTS}
+# Optional neighboring website; intentionally not part of the default full build.
+PROJECT_DIRS['messagedrop'] = ROOT.parent / 'messagedrop/platform/messagedrop'
 
 
 def package_dist(dist: Path, project: str) -> Path:
@@ -49,17 +52,17 @@ def main() -> None:
     parser.add_argument('projects', nargs='*', help='Project names; default: all static tools')
     args = parser.parse_args()
     projects = list(dict.fromkeys(args.projects or PROJECTS))
-    unknown = set(projects) - set(PROJECTS)
+    unknown = set(projects) - set(PROJECT_DIRS)
     if unknown:
         parser.error('Unknown projects: ' + ', '.join(sorted(unknown)))
     # Fail before packaging anything if a selected build is missing.
     for project in projects:
-        if not (ROOT / project / 'dist' / 'index.html').is_file():
+        if not (PROJECT_DIRS[project] / 'dist' / 'index.html').is_file():
             parser.error(f'{project}: missing dist/index.html; build the project first')
     for project in projects:
         print(f'{project}: ZIP wird erstellt …', flush=True)
-        archive = package_dist(ROOT / project / 'dist', project)
-        print(f'{project}: {archive.relative_to(ROOT)} ({archive.stat().st_size / 1024 / 1024:.2f} MiB)')
+        archive = package_dist(PROJECT_DIRS[project] / 'dist', project)
+        print(f'{project}: {os.path.relpath(archive, ROOT)} ({archive.stat().st_size / 1024 / 1024:.2f} MiB)')
 
 
 if __name__ == '__main__':
