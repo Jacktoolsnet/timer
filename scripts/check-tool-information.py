@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
 LANGS = ['de', 'en', 'es', 'fr']
-TOOLS = {'timer':['','pomodoro','training'],'clock':[''],'stopwatch':[''],'breathe':[''],'relax':[''],'calculator':[''],'scenescript':[''],'lava':['']}
+TOOLS = {'metronome':[''],'timer':['','pomodoro','training'],'clock':[''],'stopwatch':[''],'breathe':[''],'relax':[''],'calculator':[''],'scenescript':[''],'lava':['']}
 PUBLISHED = {'timer','clock','stopwatch','breathe','relax','calculator'}
 
 class Information(HTMLParser):

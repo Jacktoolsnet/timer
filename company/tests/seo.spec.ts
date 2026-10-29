@@ -5,7 +5,7 @@ test('the randomly selected spotlight retains a descriptive main heading',async(
  await expect(page.locator('h1')).toHaveCount(1);
  await expect(page.locator('h1')).toContainText('Online-Tools');
  await expect(page.locator('.hero-slogan')).toBeVisible();
- for(const id of ['timer','clock','stopwatch','breathe','relax','message','calculator']){
+ for(const id of ['timer','clock','stopwatch','breathe','relax','message','calculator','metronome']){
   await page.evaluate(id=>{
    const template=document.querySelector<HTMLTemplateElement>(`template[data-spotlight="${id}"]`)!;
    document.getElementById('company-spotlight')!.replaceChildren(template.content.cloneNode(true));

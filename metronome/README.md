@@ -43,3 +43,29 @@ Changing tabs, locking the device, suspending audio or a prolonged scheduler sta
 Run `npm ci && npm run build`, then upload the **complete contents of `dist/`** to the subdomain's document root on the existing 1blu Ubuntu/Plesk setup. No Node process is needed on the server. Configure DNS/HTTPS and serve `sitemap.xml` as `application/xml`; retain `robots.txt` and localized directory indexes. Check inherited operator/privacy details against the actual hosting configuration before publication.
 
 The build does not deploy anything. No hosting or DNS changes have been performed.
+
+## Search metadata and publication checklist
+
+Main pages use shared localized SEO titles, H1s and descriptions; usage guides have their own unique titles/descriptions in DE/EN/ES/FR. Visible tool facts and JSON-LD `WebApplication` metadata come from the same shared source, with free pricing, real features and no invented reviews or ratings. Six localized FAQs explain BPM, accents, subdivisions, background playback, optional storage and wake-lock limits. These are normal readable HTML, not an eligibility claim for FAQ rich results. All content is statically rendered, including without JavaScript.
+
+Checks from the repository root after building:
+
+```sh
+python3 scripts/check-seo.py metronome
+python3 scripts/check-tool-information.py
+python3 scripts/check-sitemaps.py
+python3 scripts/check-social-previews.py
+```
+
+The SEO checker accepts project names to audit a single build without unrelated projects' metadata affecting the result.
+
+After actual deployment:
+
+1. Check HTTPS and HTTP 200 for localized pages, social artwork, robots.txt and sitemap.xml. Verify that the server serves XML correctly and does not replace missing assets with HTML.
+2. Verify the `https://metronome.jacktools.net/` Search Console property and submit `https://metronome.jacktools.net/sitemap.xml`.
+3. Use URL Inspection and the Rich Results Test on deployed pages. Structured data does not guarantee special search presentation; no rating data is fabricated to satisfy rich-result requirements.
+4. Once the subdomain is publicly deployed, mark `toolRoutes.metronome.published` true for related-tool listings. The company tile, random spotlight and shortcut are already prepared in source; deploy the company build together with the metronome. It remains false for now to avoid linking users of existing tools to an unpublished subdomain.
+
+No deployment, Search Console verification/submission, or live indexing check was performed.
+
+Guidance: [Google: software application structured data](https://developers.google.com/search/docs/appearance/structured-data/software-app), [Google: localized page versions](https://developers.google.com/search/docs/specialty/international/localized-versions).

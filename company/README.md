@@ -97,3 +97,9 @@ reciprocal hreflang and the sitemap are generated with the selected language.
 Company legal documents remain the existing German originals. Other languages
 label those links `(DE)` rather than pretending that translations exist. Language
 tiles on a legal page lead to the chosen localized homepage.
+
+## Metronom-Integration
+
+Das Metronom hat eine eigene Kachel (`#online-metronom`), einen Eintrag in den Sprunglinks und im `ItemList`-Schema sowie eine achte Variante der zufälligen Spotlight-Auswahl. Kachel und Spotlight verwenden dieselbe statische Orbit-Vorschau; es werden keine Metronom-Skripte geladen und keine Töne abgespielt. Texte und Ziel-URLs sind für DE/EN/ES/FR lokalisiert. `/metronome` ist als fester Tool-Kurzlink vorbereitet, inklusive generierter Hosting-Regeln.
+
+Company- und Metronom-Build gemeinsam veröffentlichen, damit die neuen Links ein erreichbares Ziel haben. Es wurde nichts deployed. Für einen isolierten Testserver kann `COMPANY_TEST_PORT=4349 CI=1 npm run test:e2e` verwendet werden.

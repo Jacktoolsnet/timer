@@ -6,11 +6,12 @@ const cards=[
  ['taschenrechner','Online-Taschenrechner mit Rechenstreifen','https://calculator.jacktools.net/de/'],
  ['atemuebungen','Breathe – Atemübungen online','https://breathe.jacktools.net/de/'],
  ['naturgeraeusche','Relax – Naturgeräusche und Klänge','https://relax.jacktools.net/de/'],
+ ['online-metronom','Online-Metronom mit Tap Tempo','https://metronome.jacktools.net/de/'],
  ['messagedrop','MessageDrop – Nachrichten auf der Karte','https://app.messagedrop.de'],
 ] as const;
 test('all published tools have permanent descriptive cards and matching structured data',async({page},info)=>{
  await page.goto('/de/');
- await expect(page.locator('.time-tools-grid > article')).toHaveCount(7);
+ await expect(page.locator('.time-tools-grid > article')).toHaveCount(8);
  const graph=await page.locator('script[type="application/ld+json"]').evaluateAll(els=>els.flatMap(el=>JSON.parse(el.textContent!)['@graph']||[]));
  const items=graph.find(x=>x['@type']==='ItemList').itemListElement;
  expect(items).toHaveLength(cards.length);
@@ -33,7 +34,7 @@ test.describe('without JavaScript',()=>{
  test.use({javaScriptEnabled:false});
  test('the directory including the stopwatch is present in static HTML',async({page})=>{
   await page.goto('/de/');
-  await expect(page.locator('.time-tools-grid > article')).toHaveCount(7);
+  await expect(page.locator('.time-tools-grid > article')).toHaveCount(8);
   await expect(page.locator('#online-stoppuhr .tool-open')).toHaveAttribute('href','https://stopwatch.jacktools.net/de/');
   await page.locator('.tool-shortcuts a[href="#online-stoppuhr"]').click();
   await expect(page).toHaveURL(/#online-stoppuhr$/);
@@ -41,11 +42,25 @@ test.describe('without JavaScript',()=>{
 });
 
 test('calculator has a calculation preview in its card and spotlight',async({page},info)=>{
- await page.addInitScript(()=>{Math.random=()=>.99;});
+ await page.addInitScript(()=>{Math.random=()=>.8;});
  await page.goto('/de/');
  await expect(page.locator('#company-spotlight')).toHaveAttribute('data-tool','calculator');
  await expect(page.locator('#company-spotlight .company-calculation')).toBeVisible();
  await expect(page.locator('#company-spotlight .text-link')).toHaveAttribute('href','https://calculator.jacktools.net/de/');
  await expect(page.locator('#taschenrechner .company-calculation')).toContainText('144,00');
  await page.locator('#taschenrechner').screenshot({path:`/tmp/company-calculator-card-${info.project.name}.png`});
+});
+
+test('metronome tile and random spotlight are localized and share the Orbit preview',async({page})=>{
+ await page.addInitScript(()=>{Math.random=()=>.99;});
+ for(const lang of ['de','en','es','fr']){
+  await page.goto('/'+lang+'/');
+  await expect(page.locator('#company-spotlight')).toHaveAttribute('data-tool','metronome');
+  await expect(page.locator('#company-spotlight .text-link')).toHaveAttribute('href',`https://metronome.jacktools.net/${lang}/`);
+  await expect(page.locator('#company-spotlight .company-metronome-orbit')).toBeVisible();
+  const card=page.locator('#online-metronom');await expect(card.locator('.tool-open')).toHaveAttribute('href',`https://metronome.jacktools.net/${lang}/`);
+  await expect(card.locator('.company-metronome-tempo')).toContainText('90');await expect(card.locator('.company-metronome-beats span')).toHaveCount(4);
+  await expect(page.locator('h1')).toHaveCount(1);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ }
 });

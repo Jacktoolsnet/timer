@@ -154,3 +154,7 @@ html { scroll-padding-top:calc(var(--masthead-height,150px) + 16px); }
   .preferences-panel .language-menu { min-width:0; }
 }
 .section-heading h2,.idea-section h2 { overflow-wrap:anywhere; }
+/* A shared, static Orbit preview for the metronome tile and random hero. */
+.metronome-preview{display:flex;flex-direction:column;align-items:center;gap:12px}
+.spotlight-metronome .company-metronome-scene{width:min(68%,260px)}
+.spotlight-metronome .art-footnote{padding-inline:12px}

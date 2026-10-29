@@ -1,8 +1,15 @@
 /** Descriptive search metadata and visible headings for the published tools. */
 type Language = 'de' | 'en' | 'es' | 'fr';
-type Tool = 'countdown' | 'pomodoro' | 'interval' | 'clock' | 'stopwatch' | 'breathe' | 'relax' | 'lava';
+type Tool = 'metronome' | 'countdown' | 'pomodoro' | 'interval' | 'clock' | 'stopwatch' | 'breathe' | 'relax' | 'lava';
 type Copy = { title: string; heading: string; description: string };
 export const toolSeo: Record<Tool, Record<Language, Copy>> = {
+ metronome: {
+  de:{title:'Online-Metronom – kostenlos mit Tap Tempo',heading:'Online-Metronom für deinen Rhythmus',description:'Übe mit 20–300 BPM, Tap Tempo, eigenen Akzenten und Unterteilungen. Kostenloses Online-Metronom mit vier Ansichten, Lückenmodus und Fokusansicht. Ohne Anmeldung.'},
+  en:{title:'Free online metronome with tap tempo',heading:'Online metronome for your rhythm',description:'Practice at 20–300 BPM with tap tempo, custom accents and subdivisions. Free online metronome with four visual modes, gap practice and focus view. No sign-up.'},
+  es:{title:'Metrónomo online gratis con tap tempo',heading:'Metrónomo online para encontrar tu ritmo',description:'Practica entre 20 y 300 BPM con tap tempo, acentos y subdivisiones. Metrónomo online gratis con cuatro vistas, práctica con silencios y modo de enfoque. Sin registro.'},
+  fr:{title:'Métronome en ligne gratuit avec tap tempo',heading:'Métronome en ligne pour votre rythme',description:'Travaillez de 20 à 300 BPM avec tap tempo, accents et subdivisions. Métronome gratuit avec quatre vues, pratique avec silences et vue concentration. Sans inscription.'},
+ },
+
  lava: {
   de:{"title": "Lavalampe online – animierte Lava", "heading": "Online-Lavalampe zum Entspannen", "description": "Beobachte weich fließende Lava in neun Farbwelten inklusive Regenbogen und Metallen. Passe Tempo und Helligkeit an und nutze die Fokusansicht. Kostenlos im Browser, ohne Anmeldung."},
   en:{"title": "Online lava lamp – flowing animation", "heading": "Online lava lamp for a quiet break", "description": "Watch softly flowing lava in nine colour palettes including rainbow and metals. Adjust speed and brightness or switch to focus view. Free in your browser, with no sign-up."},

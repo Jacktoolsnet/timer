@@ -6,10 +6,15 @@ from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import urlsplit
 import json
+import sys
 import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
-PROJECTS = ['company', 'timer', 'clock', 'stopwatch', 'breathe', 'relax', 'lava']
+PROJECTS = ['metronome', 'company', 'timer', 'clock', 'stopwatch', 'breathe', 'relax', 'lava']
+EXPECTED_PAGES = {'metronome':8,'company':4,'timer':16,'clock':8,'stopwatch':8,'breathe':8,'relax':8,'lava':8}
+if sys.argv[1:]:
+    assert all(project in PROJECTS for project in sys.argv[1:]), 'Unknown project'
+    PROJECTS = list(dict.fromkeys(sys.argv[1:]))
 
 class Metadata(HTMLParser):
     def __init__(self, html):
@@ -92,5 +97,5 @@ for project in PROJECTS:
                 assert all(feature in meta.visible for feature in schema['featureList']), (url, 'schema features must be visible')
         seen_titles.add(meta.title); seen_descriptions.add(meta.description); pages += 1
         print(f'OK {url}: {meta.title}')
-assert pages == 33, pages
+assert pages == sum(EXPECTED_PAGES[project] for project in PROJECTS), pages
 print(f'Validated {pages} canonical pages across {len(PROJECTS)} configured projects.')

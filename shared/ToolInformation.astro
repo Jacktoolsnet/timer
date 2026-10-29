@@ -7,7 +7,7 @@ const url=toolUrl(tool,lang);
 const schema={
  '@context':'https://schema.org','@type':'WebApplication','@id':url+'#application',
  name:c.name,description:c.summary,url,inLanguage:lang,operatingSystem:'Any',
- applicationCategory:tool==='scenescript'?'MultimediaApplication':tool==='breathe'||tool==='relax'||tool==='lava'?'LifestyleApplication':'UtilitiesApplication',
+ applicationCategory:tool==='scenescript'||tool==='metronome'?'MultimediaApplication':tool==='breathe'||tool==='relax'||tool==='lava'?'LifestyleApplication':'UtilitiesApplication',
  isAccessibleForFree:true,offers:{'@type':'Offer',price:'0',priceCurrency:'EUR'},
  featureList:c.features,browserRequirements:'Requires JavaScript',
  publisher:{'@type':'Organization','@id':'https://jacktools.net/#organization',name:'Jacktools',url:'https://jacktools.net/'},

@@ -8,6 +8,7 @@ test('company language tiles translate content, tool links and metadata',async({
   await expect(page.locator('h1')).toContainText(heading);
   await expect(page.locator('link[rel=canonical]')).toHaveAttribute('href','https://jacktools.net/'+lang+'/');
   await expect(page.locator('link[rel=alternate][hreflang]')).toHaveCount(5);
+  await expect(page.locator('#online-metronom .tool-open')).toHaveAttribute('href','https://metronome.jacktools.net/'+lang+'/');
   await expect(page.locator('#online-timer .tool-open')).toHaveAttribute('href','https://timer.jacktools.net/'+lang+'/');
   await page.locator('#palette-dropdown > summary').click();
   await expect(page.locator('.preferences-language a')).toHaveCount(4);

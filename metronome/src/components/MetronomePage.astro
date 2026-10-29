@@ -1,4 +1,7 @@
 ---
+import ToolInformation from '../../../shared/ToolInformation.astro';
+import {toolSeo} from '../../../shared/seo';
+import {seoCopy} from '../lib/seo';
 import {backgrounds,backgroundCopy} from '../lib/backgrounds';
 import Layout from '../layouts/Layout.astro';
 import {copy,settingsCopy,animationCopy} from '../lib/metronome-i18n';
@@ -10,9 +13,10 @@ const t=copy[lang];
 const groups=settingsCopy[lang];
 const animations=animationCopy[lang];
 const background=backgroundCopy[lang];
+const seo=toolSeo.metronome[lang],content=seoCopy[lang];
 ---
-<Layout lang={lang} title={t.title} description={t.intro} route="">
- <section class="intro"><p class="eyebrow">JACKTOOLS / {t.title}</p><h1>{t.heading}</h1><p class="intro-copy">{t.intro}</p></section>
+<Layout lang={lang} title={seo.title} description={seo.description} route="">
+ <section class="intro"><p class="eyebrow">JACKTOOLS / {t.title}</p><h1>{seo.heading}</h1><p class="intro-copy">{seo.description}</p></section>
  <section id="metronome-app" class="metronome-card" aria-label={t.title}>
   <div class="instrument-top"><button id="focus" aria-pressed="false">{t.focus} ⛶</button></div>
   <div class="instrument-stage" data-view="orbit" aria-hidden="true">
@@ -57,7 +61,9 @@ const background=backgroundCopy[lang];
   </form>
  </aside>
  <p class="local-note">{t.local}</p>
+ <ToolInformation tool="metronome" lang={lang}/>
  <section class="guide metronome-guide"><div class="guide-heading"><h2>{t.guide}</h2></div><div class="guide-grid">{t.steps.map((step,i)=><article><span class="step-number">0{i+1}</span><h3>{step}</h3><p>{t.tips[i]}</p></article>)}</div><p class="timing-note">{t.note} {t.saved}</p></section>
+ <section class="faq" aria-labelledby="metronome-faq-title"><h2 id="metronome-faq-title">{content.faqTitle}</h2>{content.faq.map(([question,answer])=><details><summary>{question}<span aria-hidden="true">+</span></summary><p>{answer}</p></details>)}<p class="usage-link"><a href={'/'+lang+'/usage/'}>{content.guideLink} →</a></p></section>
  <noscript><p class="notice">{t.js}</p></noscript>
  <script src="../scripts/metronome.ts"></script>
 </Layout>

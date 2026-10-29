@@ -868,5 +868,90 @@
     "en": "Elapsed time",
     "es": "Tiempo transcurrido",
     "fr": "Temps écoulé"
+  },
+  "Metronom": {
+    "en": "Metronome",
+    "es": "Metrónomo",
+    "fr": "Métronome"
+  },
+  "Finde deinen Rhythmus.": {
+    "en": "Find your rhythm.",
+    "es": "Encuentra tu ritmo.",
+    "fr": "Trouvez votre rythme."
+  },
+  "Übe mit 20–300 BPM, Tap Tempo und eigenen Akzenten. Vier klare Animationen und ein Lückenmodus helfen dir, deinen Rhythmus zu finden und zu halten.": {
+    "en": "Practice at 20–300 BPM with tap tempo and custom accents. Four clear animations and gap practice help you find and keep your rhythm.",
+    "es": "Practica entre 20 y 300 BPM con tap tempo y acentos propios. Cuatro animaciones claras y la práctica con silencios te ayudan a encontrar y mantener tu ritmo.",
+    "fr": "Travaillez de 20 à 300 BPM avec tap tempo et accents personnalisés. Quatre animations claires et la pratique avec silences vous aident à trouver et garder votre rythme."
+  },
+  "Direkt zum Metronom": {
+    "en": "Open the metronome",
+    "es": "Ir al metrónomo",
+    "fr": "Ouvrir le métronome"
+  },
+  "Dein Rhythmus. Dein Tempo.": {
+    "en": "Your rhythm. Your tempo.",
+    "es": "Tu ritmo. Tu tempo.",
+    "fr": "Votre rythme. Votre tempo."
+  },
+  "Höre den Schlag. Sieh den ganzen Takt.": {
+    "en": "Hear the beat. See the whole bar.",
+    "es": "Escucha el pulso. Ve el compás completo.",
+    "fr": "Écoutez le battement. Voyez toute la mesure."
+  },
+  "Online-Metronom mit Tap Tempo": {
+    "en": "Online metronome with tap tempo",
+    "es": "Metrónomo online con tap tempo",
+    "fr": "Métronome en ligne avec tap tempo"
+  },
+  "MUSIK & RHYTHMUS": {
+    "en": "MUSIC & RHYTHM",
+    "es": "MÚSICA Y RITMO",
+    "fr": "MUSIQUE ET RYTHME"
+  },
+  "Übe dein Tempo und Taktgefühl mit einem Metronom, das du hören und sehen kannst. Wähle eigene Akzente und Unterteilungen – für Instrument, Gesang und Rhythmusübungen.": {
+    "en": "Practice your tempo and sense of rhythm with a metronome you can hear and see. Choose your accents and subdivisions for instrumental, vocal and rhythm practice.",
+    "es": "Practica el tempo y el sentido del ritmo con un metrónomo que puedes oír y ver. Elige acentos y subdivisiones para practicar instrumentos, canto y ritmo.",
+    "fr": "Travaillez le tempo et le sens du rythme avec un métronome à écouter et à regarder. Choisissez vos accents et subdivisions pour les instruments, le chant et les exercices rythmiques."
+  },
+  "20–300 BPM, Tap Tempo und 1–12 Schläge pro Takt": {
+    "en": "20–300 BPM, tap tempo and 1–12 beats per bar",
+    "es": "20–300 BPM, tap tempo y de 1 a 12 pulsos por compás",
+    "fr": "20–300 BPM, tap tempo et de 1 à 12 temps par mesure"
+  },
+  "Orbit, Pendel, Beat-Leiste und springender Ball": {
+    "en": "Orbit, pendulum, beat strip and bouncing ball",
+    "es": "Órbita, péndulo, barra de pulsos y pelota saltarina",
+    "fr": "Orbite, pendule, barre de temps et balle rebondissante"
+  },
+  "Lückenmodus zum Üben mit hörbaren und stummen Takten": {
+    "en": "Gap practice with audible and silent bars",
+    "es": "Práctica con compases audibles y silenciosos",
+    "fr": "Pratique avec mesures audibles et silencieuses"
+  },
+  "Fokusansicht mit optionalen statischen Hintergründen": {
+    "en": "Focus view with optional static backgrounds",
+    "es": "Vista de enfoque con fondos estáticos opcionales",
+    "fr": "Vue concentration avec fonds statiques facultatifs"
+  },
+  "Metronom öffnen": {
+    "en": "Open metronome",
+    "es": "Abrir metrónomo",
+    "fr": "Ouvrir le métronome"
+  },
+  "Statische Vorschau des Metronoms: Orbit mit vier Schlägen und 90 BPM": {
+    "en": "Static metronome preview: orbit with four beats at 90 BPM",
+    "es": "Vista estática del metrónomo: órbita con cuatro pulsos a 90 BPM",
+    "fr": "Aperçu statique du métronome : orbite à quatre temps et 90 BPM"
+  },
+  "Takt 1": {
+    "en": "Bar 1",
+    "es": "Compás 1",
+    "fr": "Mesure 1"
+  },
+  "Kostenlose Online-Tools ohne Anmeldung: Timer, Uhr, Stoppuhr, Metronom mit Tap Tempo und Taschenrechner sowie Atemübungen mit Breathe und Naturgeräusche mit Relax.": {
+    "en": "Free online tools with no sign-up: timer, clock, stopwatch, metronome with tap tempo and calculator, plus breathing exercises with Breathe and nature sounds with Relax.",
+    "es": "Herramientas online gratis sin registro: temporizador, reloj, cronómetro, metrónomo con tap tempo y calculadora, además de respiración con Breathe y sonidos naturales con Relax.",
+    "fr": "Outils en ligne gratuits sans inscription : minuteur, horloge, chronomètre, métronome avec tap tempo et calculatrice, respiration avec Breathe et sons naturels avec Relax."
   }
 }

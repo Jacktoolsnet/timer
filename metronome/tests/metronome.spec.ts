@@ -2,7 +2,7 @@ import {test,expect} from '@playwright/test';
 test('instrument, practice, persistence and focus',async({page})=>{
  const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));
  await page.goto('/de/');
- await expect(page.locator('h1')).toHaveText('Finde deinen Rhythmus.');
+ await expect(page.locator('h1')).toHaveText('Online-Metronom für deinen Rhythmus');
  await expect(page.locator('#beat-buttons button')).toHaveCount(4);
  await expect(page.locator('#beat-buttons button').first()).toHaveAttribute('aria-label','Schlag 1: Betont');
  await page.locator('#beat-buttons button').first().click();
@@ -271,4 +271,27 @@ test('tap and keyboard hints are on the usage page instead of the instrument',as
   await page.goto('/'+lang+'/usage/');await expect(page.locator('.legal-page section')).toHaveCount(4);
  }
  await page.goto('/de/usage/');await expect(page.locator('.legal-page')).toContainText('Mehrmals tippen · Taste T');await expect(page.locator('.legal-page')).toContainText('Leertaste: Start / Stopp');
+});
+test('localized search metadata and application facts are present without JavaScript',async({browser})=>{
+ const context=await browser.newContext({javaScriptEnabled:false,baseURL:'http://127.0.0.1:4347'});const page=await context.newPage();
+ const titles=new Set<string>(),descriptions=new Set<string>();
+ for(const lang of ['de','en','es','fr']){
+  for(const route of ['','usage/']){
+   const path=`/${lang}/${route}`,url='https://metronome.jacktools.net'+path;
+   await page.goto(path);
+   const title=await page.title(),description=await page.locator('meta[name=description]').getAttribute('content');
+   expect(titles.has(title)).toBe(false);titles.add(title);expect(descriptions.has(description!)).toBe(false);descriptions.add(description!);
+   expect(description!.length).toBeGreaterThanOrEqual(70);await expect(page.locator('h1')).toHaveCount(1);
+   await expect(page.locator('link[rel=canonical]')).toHaveAttribute('href',url);await expect(page.locator('html')).toHaveAttribute('lang',lang);
+   await expect(page.locator('link[rel=alternate][hreflang]')).toHaveCount(5);
+   await expect(page.locator('link[hreflang=x-default]')).toHaveAttribute('href',`https://metronome.jacktools.net/en/${route}`);
+   if(!route){
+    const app=JSON.parse(await page.locator('script[type="application/ld+json"]').textContent()||'{}');
+    expect(app['@type']).toBe('WebApplication');expect(app.url).toBe(url);expect(app.inLanguage).toBe(lang);expect(app.offers.price).toBe('0');expect(app.isAccessibleForFree).toBe(true);expect(app.aggregateRating).toBeUndefined();
+    const facts=page.locator('[data-tool-information=metronome]');await expect(facts).toContainText(app.description);for(const feature of app.featureList)await expect(facts).toContainText(feature);
+    await expect(page.locator('.faq details')).toHaveCount(6);await expect(page.locator('.usage-link a')).toHaveAttribute('href',path+'usage/');
+   }
+  }
+ }
+ await context.close();
 });

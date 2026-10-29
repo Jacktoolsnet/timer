@@ -151,3 +151,5 @@ body.focus-view .metronome-card .instrument-controls #play-status{flex-basis:100
 @media(max-width:500px){body.focus-view .instrument-controls{width:calc(100% - 24px)}}
 @media(max-height:600px) and (min-width:600px){body.focus-view .instrument-controls{width:100%}body.focus-view .transport>button{flex:1 1 0;width:0;padding:10px 12px}}
 #play-status:empty{display:none}
+
+.usage-link{text-align:center;margin:24px 0;font-size:calc(13px * var(--font-scale,1));line-height:1.8}.usage-link a{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
