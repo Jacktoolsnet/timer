@@ -19,7 +19,7 @@ async function checkHtml(directory) {
   const html=await readFile(url,'utf8');
   const root=html.match(/<html\b[^>]*>/)?.[0]||'';
   if(!root.includes('data-font-size'))continue; // minimal redirect pages have no themed UI
-  for(const attr of ['data-palette="green"','data-style="technical"','data-theme="dark"'])assert(root.includes(attr),url.pathname+': '+attr);
+  for(const attr of ['data-palette="green"','data-style="technical"','data-theme-mode="auto"'])assert(root.includes(attr),url.pathname+': '+attr);
   htmlCount++;
  }
 }
@@ -36,28 +36,58 @@ try {
    for(let i=0;i<100;i++){try{await new Promise((resolve,reject)=>get(base,res=>{res.resume();res.on('end',resolve);}).on('error',reject));ready=true;break;}catch{}await new Promise(resolve=>setTimeout(resolve,50));}
    assert(ready,project+': static server did not start');
    for(const viewport of [{width:1440,height:1000},{width:390,height:844}]) {
-    const context=await browser.newContext({viewport});const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
+    const context=await browser.newContext({viewport,colorScheme:'light'});const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
     const state=()=>page.evaluate(()=>({...document.documentElement.dataset}));
     await page.goto(base+'/de/');
     let appearance=await state();
-    assert.equal(appearance.theme,'dark',project);assert.equal(appearance.palette,'green',project);assert.equal(appearance.style,'technical',project);
+    assert.equal(appearance.themeMode,'auto',project);assert.equal(appearance.theme,'light',project);assert.equal(appearance.palette,'green',project);assert.equal(appearance.style,'technical',project);
     assert.equal(await page.evaluate(()=>localStorage.length),0,project+': defaults must not write storage');
     await page.locator('#palette-dropdown > summary').click();
-    assert.equal(await page.locator('#theme').getAttribute('aria-pressed'),'true',project);
+    assert.equal(await page.locator('#theme').getAttribute('aria-pressed'),'false',project);
+    assert.equal(await page.locator('#theme-auto').getAttribute('aria-pressed'),'true',project);
     assert.equal(await page.locator('#theme-light').getAttribute('aria-pressed'),'false',project);
     assert(await page.locator('[name=colorScheme][value=green]').isChecked(),project);
     assert(await page.locator('[name=visualStyle][value=technical]').isChecked(),project);
+    await page.emulateMedia({colorScheme:'dark'});
+    await page.waitForFunction(()=>document.documentElement.dataset.theme==='dark');
+    assert.equal((await state()).themeMode,'auto',project);
+    assert.equal(await page.evaluate(()=>localStorage.length),0,project+': OS changes must not write storage');
     await page.locator('#remember-preferences').check();
     await page.locator('#theme-light').click();await page.locator('[name=colorScheme][value=blue]').check();await page.locator('[name=visualStyle][value=soft]').check();
     await page.reload();appearance=await state();
     assert.equal(appearance.theme,'light',project+': preserve saved light mode');assert.equal(appearance.palette,'blue',project);assert.equal(appearance.style,'soft',project);
+    await page.emulateMedia({colorScheme:'light'});
+    await page.emulateMedia({colorScheme:'dark'});
+    assert.equal((await state()).theme,'light',project+': manual choice ignores OS changes');
+    await page.locator('#palette-dropdown > summary').click();
+    await page.locator('#theme-auto').click();
+    await page.reload();
+    assert.equal((await state()).themeMode,'auto',project+': saved Auto remains Auto');
+    await page.emulateMedia({colorScheme:'light'});
+    await page.waitForFunction(()=>document.documentElement.dataset.theme==='light');
+    await page.reload();
+    assert.equal((await state()).theme,'light',project+': stale resolved dark value must not override Auto');
+    await page.emulateMedia({colorScheme:'dark'});
+    await page.waitForFunction(()=>document.documentElement.dataset.theme==='dark');
+    // Migrate the original boolean format without overriding a saved light choice.
+    await page.evaluate(namespace=>localStorage.setItem(namespace+'.appearance.v1',JSON.stringify({dark:false,colorScheme:'blue',style:'soft'})),namespace);
+    await page.reload();
+    assert.equal((await state()).themeMode,'light',project+': legacy saved light preference');
+    assert.equal((await state()).theme,'light',project);
     await page.evaluate(namespace=>localStorage.removeItem(namespace+'.storage-consent.v1'),namespace);
     await page.reload();appearance=await state();
-    assert.equal(appearance.theme,'dark',project+': ignore saved appearance without consent');assert.equal(appearance.palette,'green',project);assert.equal(appearance.style,'technical',project);
+    assert.equal(appearance.themeMode,'auto',project+': ignore saved appearance without consent');assert.equal(appearance.theme,'dark',project);assert.equal(appearance.palette,'green',project);assert.equal(appearance.style,'technical',project);
     assert.deepEqual(errors,[],project+': browser errors');
     await context.close();checks++;
-    console.log(`${project} ${viewport.width}px: defaults and saved overrides OK`);
+    console.log(`${project} ${viewport.width}px: Auto/system changes, persistence, manual overrides and migration OK`);
    }
+   const noScript=await browser.newContext({javaScriptEnabled:false,colorScheme:'dark'});
+   const fallback=await noScript.newPage();await fallback.goto(base+'/de/');
+   const darkBg=await fallback.evaluate(()=>getComputedStyle(document.documentElement).getPropertyValue('--bg').trim());
+   await fallback.emulateMedia({colorScheme:'light'});
+   const lightBg=await fallback.evaluate(()=>getComputedStyle(document.documentElement).getPropertyValue('--bg').trim());
+   assert.notEqual(darkBg,lightBg,project+': no-JavaScript system preference');
+   await noScript.close();
   }finally{server.kill();}
  }
 }finally{await browser.close();}

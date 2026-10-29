@@ -1,0 +1,6 @@
+---
+interface Props { lang:'de'|'en'|'es'|'fr' }
+const {lang}=Astro.props;
+const labels={de:'Systemeinstellung übernehmen',en:'Follow system appearance',es:'Seguir la apariencia del sistema',fr:'Suivre l’apparence du système'};
+---
+<button type="button" id="theme-auto" aria-pressed="true" title={labels[lang]} aria-label={'Auto – '+labels[lang]}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h18v13H3zM8 21h8M12 17v4"/></svg>Auto</button>

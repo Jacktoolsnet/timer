@@ -47,9 +47,10 @@ test('settings keyboard and non-persisted appearance', async ({ page }) => {
   await page.keyboard.press('Escape');
   await expect(page.locator('#palette-dropdown')).not.toHaveAttribute('open');
   await page.getByLabel('Einstellungen', { exact: true }).click();
-  await page.locator('#theme-light').click();
+  await page.locator('#theme').click();
   await page.reload();
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await expect(page.locator('html')).toHaveAttribute('data-theme-mode', 'auto');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
 });
 
  test('timer and clock cards stack preview above copy', async ({ page }) => {

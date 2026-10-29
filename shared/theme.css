@@ -1,0 +1,8 @@
+/* Selection follows the preference, not the current OS-derived light/dark state. */
+.theme-segments :is(#theme,#theme-light,#theme-auto) { min-width:0; background:transparent; color:var(--muted); box-shadow:none; }
+.theme-segments :is(#theme,#theme-light,#theme-auto)[aria-pressed=true] { background:var(--surface); color:var(--accent); box-shadow:0 1px 4px #0001; }
+@media(max-width:400px) { .theme-segments button { flex-direction:column; gap:4px; } }
+/* No-JavaScript fallback for the default green/technical appearance. */
+@media screen and (prefers-color-scheme:dark) {
+ :root[data-theme-mode=auto]:not([data-theme]) { --bg:#080e16; --surface:#101c28; --text:#e2edf7; --muted:#9cb2c8; --line:#2b4358; --track:#20374a; --accent:#b0d975; --accent-soft:#283f24; --green:#a3b997; color-scheme:dark; }
+}

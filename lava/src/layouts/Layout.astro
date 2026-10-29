@@ -1,4 +1,7 @@
 ---
+import ThemeInit from '../../../shared/ThemeInit.astro';
+import AutoThemeButton from '../../../shared/AutoThemeButton.astro';
+import '../../../shared/theme.css';
 import SocialMeta from '../../../shared/SocialMeta.astro';
 import BrandIcon from '../../../shared/BrandIcon.astro';
 import '../styles/global.css';
@@ -12,7 +15,7 @@ const canonical = new URL(Astro.url.pathname === '/' ? '/en/' : Astro.url.pathna
 const alternateLanguages = legal && route !== 'usage' ? (['en', 'de'] as const) : languages;
 ---
 <!doctype html>
-<html lang={lang} data-palette="green" data-style="technical" data-theme="dark" data-font-size="0">
+<html lang={lang} data-palette="green" data-style="technical" data-theme-mode="auto" data-font-size="0">
   <head>
     <meta charset="UTF-8" />
     {Astro.url.pathname === '/' && <script is:inline>
@@ -49,13 +52,13 @@ const alternateLanguages = legal && route !== 'usage' ? (['en', 'de'] as const) 
       try {
         const saved = JSON.parse(localStorage.getItem('jacktools.lava.storage-consent.v1') === 'yes' ? localStorage.getItem('jacktools.lava.appearance.v1') || 'null' : 'null');
         if (saved) {
-          if (typeof saved.dark === 'boolean') document.documentElement.dataset.theme = saved.dark ? 'dark' : 'light';
           if (['terracotta', 'blue', 'green', 'orange', 'red', 'violet', 'teal', 'rose'].includes(saved.colorScheme)) document.documentElement.dataset.palette = saved.colorScheme;
           if (Number.isInteger(saved.fontSize) && saved.fontSize >= 0 && saved.fontSize <= 3) document.documentElement.dataset.fontSize = String(saved.fontSize);
           if (['warm', 'minimal', 'technical', 'soft'].includes(saved.style)) document.documentElement.dataset.style = saved.style;
         }
       } catch {}
     </script>
+    <ThemeInit namespace="jacktools.lava" />
   </head>
   <body class:list={{ "legal-document": legal }}>
     <a class="skip-link" href="#main">{lang === 'de' ? 'Zum Inhalt' : lang === 'es' ? 'Ir al contenido' : lang === 'fr' ? 'Aller au contenu' : 'Skip to content'}</a>
@@ -85,8 +88,9 @@ const alternateLanguages = legal && route !== 'usage' ? (['en', 'de'] as const) 
               <section class="preferences-theme" aria-labelledby="appearance-heading">
                 <h3 id="appearance-heading">{t.appearance}</h3>
                 <div class="theme-segments" role="group" aria-label={t.appearance}>
+                  <AutoThemeButton lang={lang} />
                   <button type="button" id="theme-light" class="theme-light" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg>{t.lightMode}</button>
-                  <button type="button" id="theme" class="theme-dark" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15.3A8.6 8.6 0 0 1 8.7 4 8.6 8.6 0 1 0 20 15.3Z"/></svg>{t.darkMode}</button>
+                  <button type="button" id="theme" class="theme-dark" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15.3A8.6 8.6 0 0 1 8.7 4 8.6 8.6 0 1 0 20 15.3Z"/></svg>{t.darkMode}</button>
                 </div>
               </section>
             <fieldset class="palette-grid">

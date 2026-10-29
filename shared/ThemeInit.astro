@@ -1,0 +1,24 @@
+---
+interface Props { namespace:string }
+const {namespace}=Astro.props;
+---
+<script is:inline define:vars={{ namespace }}>
+(() => {
+  let mode = 'auto';
+  try {
+    if (localStorage.getItem(namespace + '.storage-consent.v1') === 'yes') {
+      try {
+        const legacy = JSON.parse(localStorage.getItem(namespace + '.settings.v1') || 'null');
+        if (legacy?.remember === true && typeof legacy.dark === 'boolean') mode = legacy.dark ? 'dark' : 'light';
+      } catch {}
+      try {
+        const saved = JSON.parse(localStorage.getItem(namespace + '.appearance.v1') || 'null');
+        if (['auto','light','dark'].includes(saved?.themeMode)) mode = saved.themeMode;
+        else if (typeof saved?.dark === 'boolean') mode = saved.dark ? 'dark' : 'light';
+      } catch {}
+    }
+  } catch {}
+  document.documentElement.dataset.themeMode = mode;
+  document.documentElement.dataset.theme = mode === 'dark' || (mode === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+})();
+</script>

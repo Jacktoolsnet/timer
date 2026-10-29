@@ -1,21 +1,7 @@
+import { initializeTheme } from '../../../shared/theme';
 import { storageAllowed, CONSENT_KEY } from '../lib/storage';
 import { type ColorScheme } from '../lib/appearance';
-const theme = document.querySelector<HTMLButtonElement>('#theme')!;
-const lightTheme = document.querySelector<HTMLButtonElement>('#theme-light')!;
-function syncTheme() {
-  const dark = document.documentElement.dataset.theme === 'dark';
-  theme.setAttribute('aria-pressed', String(dark));
-  lightTheme.setAttribute('aria-pressed', String(!dark));
-}
-function setTheme(dark: boolean) {
-  document.documentElement.dataset.theme = dark ? 'dark' : 'light';
-  syncTheme();
-  persistAppearance();
-  document.dispatchEvent(new CustomEvent('theme-change', { detail: dark }));
-}
-syncTheme();
-theme.addEventListener('click', () => setTheme(true));
-lightTheme.addEventListener('click', () => setTheme(false));
+initializeTheme(() => persistAppearance());
 const dialog = document.querySelector<HTMLDialogElement>('#privacy-dialog')!;
 document.querySelector('#privacy-open')?.addEventListener('click', () => dialog.showModal());
 document.querySelector('#clear-storage')?.addEventListener('click', e => {
@@ -90,6 +76,7 @@ function persistAppearance(language?: string) {
   try {
     localStorage.setItem(APPEARANCE_KEY, JSON.stringify({
       language: language || document.documentElement.lang,
+      themeMode: document.documentElement.dataset.themeMode || 'auto',
       dark: document.documentElement.dataset.theme === 'dark',
       colorScheme: document.documentElement.dataset.palette || 'green',
       style: document.documentElement.dataset.style || 'technical',
