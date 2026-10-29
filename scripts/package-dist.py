@@ -57,6 +57,7 @@ def main() -> None:
         if not (ROOT / project / 'dist' / 'index.html').is_file():
             parser.error(f'{project}: missing dist/index.html; build the project first')
     for project in projects:
+        print(f'{project}: ZIP wird erstellt …', flush=True)
         archive = package_dist(ROOT / project / 'dist', project)
         print(f'{project}: {archive.relative_to(ROOT)} ({archive.stat().st_size / 1024 / 1024:.2f} MiB)')
 

@@ -1,7 +1,7 @@
 # Build und Upload-Archive
 
 VS Code → **Ausführen und Debuggen → Build: Alle Seiten** baut alle zehn Projekte
-nacheinander. Nur nach erfolgreichen Builds erzeugt `scripts/package-dist.py`
+nacheinander über `scripts/build-all.mjs`. Nur nach erfolgreichen Builds erzeugt `scripts/package-dist.py`
 für jedes Projekt ein ZIP direkt im jeweiligen `dist/`-Ordner, zum Beispiel
 `metronome/dist/metronome-deploy.zip` oder `company/dist/company-deploy.zip`.
 
@@ -38,4 +38,23 @@ Dabei wird nicht neu gebaut. Tests für den Packer:
 
 ```sh
 python3 -B -m unittest discover -s scripts -p 'test_package_dist.py'
+```
+
+## Fortschritt und Abschluss
+
+Der Gesamtbuild läuft in VS Code als eigener Node-Prozess statt als dauerhaft
+offene Debug-Terminal-Sitzung. Die Ausgabe bleibt als Protokoll im Terminal stehen;
+der Build-Prozess und seine Debug-Sitzung können regulär enden.
+
+- `[1/11] START Build: company` und danach `OK` zeigen den aktuellen Schritt.
+- Bei 15 Sekunden ohne Ausgabe erscheint `[AKTIV] … läuft weiterhin …`.
+- Erst nach allen Builds und ZIPs erscheint deutlich `[FERTIG]` mit Dauer und Exit-Code 0.
+- Fehler führen zu `[FEHLER]`, einem Exit-Code ungleich 0 und sofortigem Abbruch;
+  es wird keine Erfolgsmeldung ausgegeben.
+
+Auch direkt im Terminal nutzbar:
+
+```sh
+node scripts/build-all.mjs
+node --test scripts/build-all.test.mjs
 ```

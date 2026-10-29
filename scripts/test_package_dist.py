@@ -49,10 +49,15 @@ class PackageDistTests(unittest.TestCase):
 
     def test_build_all_packages_the_same_projects_after_successful_builds(self):
         launch = json.loads((module.ROOT / '.vscode/launch.json').read_text())
-        command = next(item['command'] for item in launch['configurations'] if item['name'] == 'Build: Alle Seiten')
-        self.assertTrue(command.endswith(' && python3 scripts/package-dist.py'))
+        config = next(item for item in launch['configurations'] if item['name'] == 'Build: Alle Seiten')
+        self.assertEqual(config['type'], 'node')
+        self.assertEqual(config['program'], '${workspaceFolder}/scripts/build-all.mjs')
+        self.assertFalse(config['autoAttachChildProcesses'])
+        runner = (module.ROOT / 'scripts/build-all.mjs').read_text()
         for project in module.PROJECTS:
-            self.assertIn(f'npm --prefix {project} run build', command)
+            self.assertIn("'" + project + "'", runner)
+        self.assertIn("'scripts/package-dist.py'", runner)
+
 
 
 if __name__ == '__main__':
