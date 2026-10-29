@@ -28,9 +28,9 @@ export const aiGuide = `# SceneScript 1.0 — complete authoring specification
 ## 1. Start here
 SceneScript renders JSON videos with 2D/3D layers. Read §§1–4; §11 lists fields, §12 examples.
 
-Optional Project.storyboard is a non-rendered plan. Preserve IDs, revision, comments
-and data; only users approve/resolve. board.characters contains character/object kinds;
-shot.characters references either, setting.objects fixed objects. Follow board.production:
+Optional storyboard is a non-rendered plan. Preserve data/IDs/revision/comments; users
+approve/resolve. board.characters stores characters/objects; shots reference them.
+setting.objects holds fixed objects. Follow board.production:
 3d needs real geometry, animation and 3D cameras, not image slides. subject.design controls
 mode/style/surface; the selected style overrides old appearance. Preserve
 approved model3d; use subject IDs in project.characters/stages. modelChat is edit history.
@@ -46,8 +46,7 @@ Authoring workflow:
 - Identify the target audience FIRST: use the user's audience, or infer a plausible
   one from the requested video (language, interests, prior knowledge and needs).
   Shape the content AND YouTube publication copy for that audience; see §3.
-  Research audience/search terms when browsing is available; otherwise use
-  reasoned terms, never claim live trend research.
+  Research terms if possible; otherwise use reasoned terms, never claim live trend research.
 - Every completed video project MUST have a suitable cover in Project.thumbnail.
   Reuse a suitable supplied/existing cover; if missing, create a real thumbnail
   with available image-generation tools, matching the audience, topic and format.
@@ -152,9 +151,8 @@ YouTube publication package (populate for completed videos, not only when asked)
   Write a compelling, clear audience-specific hook/video promise, with natural
   relevant search terms. Keep it truthful; no misleading clickbait or guarantees.
 - Project.description is the proposed YOUTUBE DESCRIPTION, not a scene-by-scene
-  synopsis, production notes or an explanation of how the animation works. Open
-  with why this audience should watch, then useful context and the video's value;
-  add a suitable call to action only when helpful. It must still match the video.
+  synopsis or production notes. Lead with audience value, then useful context
+  and an optional call to action. Match the actual video.
 - Project.hashtags: select a small focused set of relevant topic/audience hashtags
   to support discovery, not generic tag stuffing or invented trending claims.
   hashtags is a comma-separated STRING (e.g. "#Topic, #Audience"), not an array.
@@ -376,9 +374,11 @@ model defines geometry; stage ground/sky remain. palette reads a resource hex fi
 Parts.instances repeats geometry at ≤256 local offsets; no group/profile instances.
 Size/scale joints affect each copy, not offsets. Copies count toward the scene budget.
 Parts: unique id, parent="" for root or another part ID (any list order), shape
-group/box/sphere/cylinder/cone/plane/profile/extrusion. Group is invisible; primitives except profile are centered
+group/box/sphere/capsule/cylinder/cone/plane/profile/extrusion. Group is invisible; primitives except profile are centered
 unit shapes scaled by size (diameters for sphere/cylinder/cone; cylinder/cone axis Y;
 plane: XY, faces ±Z, size.z ignored). Materials are per part.
+capsule is a centered unit rounded limb along Y. smooth:true raises primitive tessellation.
+Box roundness:0–0.49 rounds edges independent of finish; matte clothing need not shine.
 profile: closed extruded area, bottom at local y:0, x:−.5..+.5, z:±.5.
 profile:{heights:[...],target:[...]}:2–32 normalized heights0–1 at equal X spacing;
 target defaults heights, same length. Smooth shape-preserving interpolation, no overshoot.

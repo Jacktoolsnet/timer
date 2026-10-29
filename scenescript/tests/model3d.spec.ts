@@ -73,3 +73,13 @@ test('instanced scale joints resize each copy without shifting offsets or drifti
  expect(repeated.matrices).toEqual(enlarged.matrices);expect(repeated.version).toBe(enlarged.version);expect(shut.visible).toBe(false);expect(animatedClosed.visible).toBe(false);
  expect(rewind.matrices).toEqual(first.matrices);expect(animatedReset.matrices).toEqual(first.matrices);expect(rewind.visible).toBe(true);expect(result.geometries).toBe(1);expect(result.materials).toBe(1);
 });
+test('capsules have unit bounds and matte rounded boxes cache separately from hard boxes',async({page})=>{
+ await page.goto('/en/');const result=await page.evaluate(async()=>{
+  const {parseModel3D}=await import(/* @vite-ignore */ '/src/lib/model3d.ts' as string),{createModel3D}=await import(/* @vite-ignore */ '/src/scripts/model3d.ts' as string);
+  const storage={geometries:new Set<any>(),materials:new Map<string,any>()};
+  const model=parseModel3D({parts:[{id:'limb',shape:'capsule',smooth:true},{id:'coat',roundness:.1,smooth:true,roughness:.9},{id:'hard'},{id:'coat2',roundness:.1,smooth:true}]})!;
+  const built=createModel3D(model,storage),limb=built.root.getObjectByName('limb-geometry') as any,coat=built.root.getObjectByName('coat-geometry') as any,hard=built.root.getObjectByName('hard-geometry') as any,coat2=built.root.getObjectByName('coat2-geometry') as any;
+  limb.geometry.computeBoundingBox();const box=limb.geometry.boundingBox,bounds=[box.max.x-box.min.x,box.max.y-box.min.y,box.max.z-box.min.z];
+  for(let i=0;i<20;i++)built.update({},[],i/10);const answer={bounds,matte:coat.material.roughness,physical:coat.material.isMeshPhysicalMaterial??false,roundDifferent:coat.geometry!==hard.geometry,roundShared:coat.geometry===coat2.geometry,geometries:storage.geometries.size};storage.geometries.forEach(g=>g.dispose());storage.materials.forEach(m=>m.dispose());return answer;
+ });for(const dimension of result.bounds)expect(dimension).toBeCloseTo(1,5);expect(result.matte).toBe(.9);expect(result.physical).toBe(false);expect(result.roundDifferent).toBe(true);expect(result.roundShared).toBe(true);expect(result.geometries).toBe(3);
+});

@@ -1286,6 +1286,8 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "roundness":{"type":"number","minimum":0,"maximum":0.49,"description":"Box edge radius in unit geometry; independent of material finish."},
+        "smooth":{"type":"boolean","default":false,"description":"Higher curve tessellation for box/sphere/capsule/cylinder/cone; false by default."},
         "id": {
           "type": "string",
           "maxLength": 100,
@@ -1302,6 +1304,7 @@
             "group",
             "box",
             "sphere",
+            "capsule",
             "cylinder",
             "cone",
             "plane",

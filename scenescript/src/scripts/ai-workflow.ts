@@ -1,4 +1,4 @@
-import {acceptBoardModel,modelRequestData,boardModelInstructions,resourceSubject,repairTinyBoardModelSizes,repairBoardJointTargets,modelNeedsRestyle} from '../lib/storyboard-resources';
+import {acceptBoardModel,modelRequestData,boardModelInstructions,resourceSubject,repairTinyBoardModelSizes,repairBoardJointTargets,modelNeedsRestyle,modelSurfaceStatus} from '../lib/storyboard-resources';
 import {storyboardDesignWords} from '../lib/storyboard-design-i18n';
 import {storyboardModelView} from './storyboard-model-view';
 import {reviewProduction,productionInstructions} from '../lib/production-review';
@@ -84,7 +84,7 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,re
   check();candidate=p;$('preview').hidden=false;
   const b=p.storyboard;$('summary').textContent=kind==='board'&&b?`${b.title} · ${b.shots.length} ${t.scenes} · ${b.duration} s`:kind==='script'?`${p.title} · ${p.scenes.length} ${t.scenes} · ${p.scenes.reduce((n,s)=>n+s.duration,0).toFixed(1)} s`:kind==='speech'?`${p.scenes.reduce((n,s)=>n+s.duration,0).toFixed(1)} s`:t.ready;
   if(kind==='board'||kind==='script'){const textarea=$<HTMLTextAreaElement>('json-preview');textarea.value=JSON.stringify(kind==='board'?boardManifest(b!):projectManifest(p),null,2);textarea.hidden=false;}
-  if(kind==='model'&&resourceTarget&&b){const subject=resourceSubject(b,resourceTarget);$('summary').textContent=subject.name+(subject.modelChat?.at(-1)?.reply?' — '+subject.modelChat.at(-1)!.reply:'')+(modelNeedsRestyle(subject)?' — '+dw.styleUnchanged:'');disposeModelPreview=storyboardModelView(modelPreview,subject,resourceTarget.kind==='settings',b);}
+  if(kind==='model'&&resourceTarget&&b){const subject=resourceSubject(b,resourceTarget);$('summary').textContent=subject.name+(subject.modelChat?.at(-1)?.reply?' — '+subject.modelChat.at(-1)!.reply:'')+(modelNeedsRestyle(subject)?' — '+dw.styleUnchanged:'');const surface=modelSurfaceStatus(subject),usage=document.createElement('p');usage.dataset.modelTextureUsage='true';usage.textContent=dw.textureUsage+': '+surface.parts+' / '+surface.images+(surface.missing?' — '+dw.missingTextures:'');modelPreview.append(usage);disposeModelPreview=storyboardModelView(modelPreview,subject,resourceTarget.kind==='settings',b);}
   if(kind==='script'){
    const issues=reviewProduction(p),pw=productionWords(document.documentElement.lang);
    requiresProductionAck=issues.some(i=>!i.pending);$('production-check').hidden=!issues.length;

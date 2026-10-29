@@ -1,4 +1,5 @@
-import {modelNeedsRestyle} from '../lib/storyboard-resources';
+import {createFabricTexture} from './fabric-texture';
+import {modelNeedsRestyle,modelSurfaceStatus} from '../lib/storyboard-resources';
 import {defaultBoardDesign} from '../lib/storyboard-design';
 import {roundedHumanModel} from '../lib/rounded-human';
 import {storyboardDesignWords} from '../lib/storyboard-design-i18n';
@@ -209,7 +210,13 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
     const modelButton=commentButton(dw.create,'m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5Z');modelButton.dataset.boardModel=subject.id;
     const effectiveMode=design.mode==='inherit'?board.production?.renderMode:design.mode;modelButton.disabled=effectiveMode==='2d';modelButton.addEventListener('click',()=>runWorkflow('model',{resourceTarget:target}));row.append(modelButton);modelTile.append(row,node('p',subject.model3d?dw.hint:dw.none));
     if(modelNeedsRestyle(subject)){const notice=node('p',dw.stylePending);notice.className='small-hint';notice.dataset.boardStylePending=subject.id;modelTile.append(notice);}
-    if(design.surface!=='colors')modelTile.append(node('p',dw.textureHint));
+    if(design.surface!=='colors'){
+     modelTile.append(node('p',dw.textureHint));const available=Object.keys(board.images).some(id=>id.startsWith('material-fabric-'));
+     const fabric=commentButton(available?dw.fabricReady:dw.fabric,'M4 4h16v16H4Zm0 5h16M4 15h16M9 4v16m6-16v16');fabric.dataset.boardFabric=subject.id;fabric.disabled=available||Object.keys(board.images).length>=100;
+     fabric.addEventListener('click',()=>{try{check();const draft=structuredClone(board);draft.images['material-fabric-'+crypto.randomUUID()]=createFabricTexture();draft.revision++;draft.approved=false;board=parseStoryboard(draft);dirty=true;render();}catch(e){error(e);}});row.append(fabric);
+    }
+    if(subject.model3d){const surface=modelSurfaceStatus(subject),usage=node('p',dw.textureUsage+': '+surface.parts+' / '+surface.images);usage.dataset.boardTextureUsage=subject.id;modelTile.append(usage);if(surface.missing){const warning=node('p',dw.missingTextures);warning.setAttribute('role','status');warning.dataset.boardTextureMissing=subject.id;modelTile.append(warning);}}
+
     if(subject.modelChat?.length){const history=node('details');history.append(node('summary',dw.conversation));for(const entry of subject.modelChat){history.append(node('p',entry.request),node('p',entry.reply));}modelTile.append(history);}
     if(subject.model3d)disposeModelView=storyboardModelView(modelTile,subject,kind==='settings',board);card.append(modelTile);
     picture(card,subject.image,subject.name,(b,v)=>{get(b).image=String(v)||null;},kind+'-'+subject.id+'-image',undefined,target);

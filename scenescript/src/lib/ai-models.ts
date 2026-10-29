@@ -17,6 +17,6 @@ export const modelProfiles:readonly ModelProfile[]=[
 ];
 export function modelProfile(id:string){return modelProfiles.find(p=>p.id===id||id.startsWith(p.id+'-')&&/^\d{4}-\d{2}-\d{2}$/.test(id.slice(p.id.length+1)));}
 export function modelTask(action:string):ModelTask{return action==='image'?'image':action==='speech'?'speech':'text';}
-export function suggestedModel(action:string){return {id:'gpt-6.1-sol',effort:(action==='script'?'high':'medium') as ReasoningEffort};}
+export function suggestedModel(action:string){return {id:'gpt-6.1-sol',effort:(action==='script'||action==='model'?'high':'medium') as ReasoningEffort};}
 export function usableModel(entry:ModelEntry,task:ModelTask){const profile=modelProfile(entry.id);if(profile)return profile.task===task;if(task==='image')return /^gpt-image-/.test(entry.id)&&!/^gpt-image-1(?:-|$)/.test(entry.id);if(task==='speech')return true;const base=entry.id.startsWith('ft:')?entry.id.split(':')[1]:entry.id;return /^(gpt-|o[1-9])/.test(base)&&!/image|audio|realtime|transcribe|tts|search|deep-research|codex|chat-latest|instruct|(?:^|-)pro(?:-|$)/.test(base);}
 export function supportsReasoning(model:string,effort:ReasoningEffort){return modelProfile(model)?.efforts.includes(effort)??false;}

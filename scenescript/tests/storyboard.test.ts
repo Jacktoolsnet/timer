@@ -211,3 +211,14 @@ test('selected styles explicitly trigger redesign rather than preserving old rou
  const feedback=JSON.parse(exportStoryboard(changed.storyboard!));feedback.board.characters[0].modelDesign.style='natural';assert.equal(importStoryboard(JSON.stringify(feedback),changed.storyboard).characters[0].modelDesign!.style,'block');
  const legacy=structuredClone(s);delete legacy.modelDesign;assert.equal(modelNeedsRestyle(legacy),true);delete legacy.model3d;assert.equal(modelNeedsRestyle(legacy),false);
 });
+
+import {modelSurfaceStatus} from '../src/lib/storyboard-resources.ts';
+import {suggestedModel} from '../src/lib/ai-models.ts';
+test('natural models recommend high reasoning, anatomical smoothness and explicit material texture use',()=>{
+ assert.equal(suggestedModel('model').effort,'high');assert.equal(suggestedModel('board').effort,'medium');
+ const b=example(),s=b.characters[0];s.design={...defaultBoardDesign(),style:'natural',surface:'mixed'};s.model3d=roundedHumanModel();
+ assert.equal(modelSurfaceStatus(s).missing,true);assert.equal(modelSurfaceStatus(s).parts,0);
+ const request=modelRequestData(b,{kind:'characters',id:s.id},'');for(const word of ['smooth:true','capsules','roundness','pockets','clearance','clip extremes'])assert.ok(request.styleBrief.includes(word),word);
+ s.model3d.parts[1].texture={asset:'fabric',faces:{},repeat:{x:3,y:3},offset:{x:0,y:0},rotation:0};assert.deepEqual(modelSurfaceStatus(s),{missing:false,parts:1,images:1});
+ s.design.surface='colors';delete s.model3d.parts[1].texture;assert.equal(modelSurfaceStatus(s).missing,false);
+});

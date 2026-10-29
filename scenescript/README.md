@@ -1439,3 +1439,22 @@ Neugestaltung. Erst der Modell-KI-Button startet den Auftrag nach Kostenbestäti
 Unveränderte oder lediglich umgefärbte Modellformen bestätigen einen gewünschten
 Stilwechsel nicht automatisch; die Vorschau weist darauf hin. Das ist eine begrenzte
 strukturelle Erkennung, keine automatische Beurteilung künstlerischer Stiltreue.
+
+Natürliche Modelle: Der Modell-Workflow empfiehlt jetzt wie die Script-Erstellung
+`high` statt `medium` (manuell änderbar, potenziell höhere Kosten/Laufzeit).
+`shape:"capsule"` ist eine zentrierte, Y-ausgerichtete Einheitskapsel; `size` bestimmt
+wie bei den übrigen Grundformen die Außenmaße. `smooth:true` erhöht die Kurvenauflösung
+von Box/Kugel/Kapsel/Zylinder/Kegel. Standardauflösung bestehender Modelle bleibt gleich.
+Box-`roundness` (0–0.49 in Einheitsgeometrie) erlaubt matte, weichkantige Kleidung ohne
+polierten Glanz. Ohne Angabe bleibt das bisherige Finish-Verhalten erhalten.
+KI-Vorgaben verlangen natürlichere Übergänge, korrekt außen platzierte Taschen/Träger
+und Prüfung der Bewegungs-Endlagen. Dies ist **keine** automatische Kollisionssimulation.
+
+Die Modellvorschau zählt tatsächlich texturierte sichtbare Bauteile und Bildtexturen.
+Bei gewünschten, aber fehlenden Texturen erscheint ein Hinweis; Farbe/Glanz zählen
+nicht als Bildtextur. Bei Texturen/beidem bietet der Modellbereich einen Icon-Button
+für eine lokal erzeugte, wiederverwendbare, nahtlose Graustufen-Stofftextur (256×256 PNG,
+keine KI-/Netzwerkkosten). Sie wird in `board.images` gespeichert und ist beim nächsten
+Modellauftrag als Materialtextur verfügbar. Die KI muss sie anschließend sinnvoll
+Bauteilen zuordnen; die Erzeugung allein verändert keine Modelle. Ein Porträt oder
+Kulissenbild soll nicht versehentlich als Kleidungsstoff verwendet werden.

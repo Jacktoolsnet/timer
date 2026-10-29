@@ -5,7 +5,7 @@ import {parseTexture3D,type Texture3D} from './texture3d.ts';
 /** Declarative, bounded construction vocabulary. No executable code or external URLs. */
 export type Vector3D={x:number;y:number;z:number};
 export const vector3D=(value=0):Vector3D=>({x:value,y:value,z:value});
-export const shapes3D=['group','box','sphere','cylinder','cone','plane','profile','extrusion'] as const;
+export const shapes3D=['group','box','sphere','capsule','cylinder','cone','plane','profile','extrusion'] as const;
 export const jointControls3D=['none','mouth','speech','happy','sad','angry','surprised','blink','leftArm','rightArm','leftLeg','rightLeg','wave','bob'] as const;
 export const signedJointControls3D=['leftArm','rightArm','leftLeg','rightLeg','wave','bob'] as const;
 /** Signed action drivers use target as a calibration gain; the final pose is still clamped. */
@@ -14,7 +14,7 @@ export function jointTargetBounds3D(control:string,motion:string,min:number,max:
  const bound=motion==='rotation'?3600:motion==='morph'?1:50;return [motion==='scale'||motion==='morph'?0:-bound,bound];
 }
 export type Joint3D={id:string;motion:'rotation'|'translation'|'scale'|'morph';axis:'x'|'y'|'z';min:number;max:number;value:number;control:typeof jointControls3D[number];target:number;responses:Partial<Record<typeof jointControls3D[number],number>>};
-export type Part3D={extrusion?:Extrusion3D;profile?:Profile3D;texture?:Texture3D;finish?:'standard'|'polished'|'glass';id:string;parent:string;palette:string;instances:Vector3D[];shape:typeof shapes3D[number];position:Vector3D;rotation:Vector3D;pivot:Vector3D;size:Vector3D;color:string;roughness:number;metalness:number;opacity:number;joints:Joint3D[]};
+export type Part3D={roundness?:number;smooth?:boolean;extrusion?:Extrusion3D;profile?:Profile3D;texture?:Texture3D;finish?:'standard'|'polished'|'glass';id:string;parent:string;palette:string;instances:Vector3D[];shape:typeof shapes3D[number];position:Vector3D;rotation:Vector3D;pivot:Vector3D;size:Vector3D;color:string;roughness:number;metalness:number;opacity:number;joints:Joint3D[]};
 export type JointKey3D={at:number;value:number};
 export type JointTrack3D={joint:string;keys:JointKey3D[];easing:'linear'|'ease-in-out'};
 export type ModelAnimation3D={duration:number;tracks:JointTrack3D[]};
@@ -38,7 +38,7 @@ export function parseModel3D(value:unknown,path='model'):Model3D|null{
  if(!Array.isArray(v.parts)||!v.parts.length||v.parts.length>512)throw new Error(path+'.parts: expected 1–512 parts');
  const ids=new Set<string>(),joints=new Map<string,Joint3D>();let jointCount=0;
  const parts:Part3D[]=v.parts.map((value,index)=>{
-  const p=path+'.parts['+index+']',v=obj(value,p),d=defaultPart3D();fields(v,[...Object.keys(d),'finish','texture','profile','extrusion'],p);
+  const p=path+'.parts['+index+']',v=obj(value,p),d=defaultPart3D();fields(v,[...Object.keys(d),'roundness','smooth','finish','texture','profile','extrusion'],p);
   const get=(key:keyof Part3D)=>v[key]===undefined?d[key]:v[key],partId=id(v.id,p+'.id');if(ids.has(partId))throw new Error(p+'.id: duplicate part');ids.add(partId);
   const parent=get('parent')===''?'':id(v.parent,p+'.parent'),shape=choice(get('shape'),shapes3D,p+'.shape');
   const color=get('color');if(typeof color!=='string'||!/^#[a-f\d]{6}$/i.test(color))throw new Error(p+'.color: expected #RRGGBB');
@@ -65,8 +65,11 @@ export function parseModel3D(value:unknown,path='model'):Model3D|null{
   const extrusion=parseExtrusion3D(v.extrusion,shape,p+'.extrusion');
   const profile=parseProfile3D(v.profile,shape,p+'.profile');
   const texture=parseTexture3D(v.texture,shape,p+'.texture');
+  if(v.roundness!==undefined&&(shape!=='box'||typeof v.roundness!=='number'||!Number.isFinite(v.roundness)||v.roundness<0||v.roundness>.49))throw new Error(p+'.roundness: box only, expected number 0–0.49');
+  if(v.smooth!==undefined&&typeof v.smooth!=='boolean')throw new Error(p+'.smooth: expected boolean');
+  if(v.smooth===true&&!['box','sphere','capsule','cylinder','cone'].includes(shape))throw new Error(p+'.smooth: requires primitive geometry');
   const finish=choice(v.finish===undefined?'standard':v.finish,['standard','polished','glass'],p+'.finish');
-  return {...(extrusion?{extrusion}:{}),...(profile?{profile}:{}),...(texture?{texture}:{}),...(finish==='standard'?{}:{finish}),id:partId,parent,palette,instances,shape,color,position:vector(v.position,p+'.position',d.position,-50,50),rotation:vector(v.rotation,p+'.rotation',d.rotation,-360,360),pivot:vector(v.pivot,p+'.pivot',d.pivot,-50,50),size:vector(v.size,p+'.size',d.size,.01,50),roughness:num(get('roughness'),p+'.roughness',0,1),metalness:num(get('metalness'),p+'.metalness',0,1),opacity:num(get('opacity'),p+'.opacity',0,1),joints:parsedJoints};
+  return {...(v.roundness===undefined?{}:{roundness:v.roundness as number}),...(v.smooth===true?{smooth:true}:{}),...(extrusion?{extrusion}:{}),...(profile?{profile}:{}),...(texture?{texture}:{}),...(finish==='standard'?{}:{finish}),id:partId,parent,palette,instances,shape,color,position:vector(v.position,p+'.position',d.position,-50,50),rotation:vector(v.rotation,p+'.rotation',d.rotation,-360,360),pivot:vector(v.pivot,p+'.pivot',d.pivot,-50,50),size:vector(v.size,p+'.size',d.size,.01,50),roughness:num(get('roughness'),p+'.roughness',0,1),metalness:num(get('metalness'),p+'.metalness',0,1),opacity:num(get('opacity'),p+'.opacity',0,1),joints:parsedJoints};
  });
  if(parts.reduce((n,p)=>n+(p.extrusion?[p.extrusion.contour,...p.extrusion.holes].reduce((m,r)=>m+r.length,0):0),0)>16000)throw new Error(path+': maximum 16000 extrusion points per model');
  const parents=new Map(parts.map(p=>[p.id,p.parent]));

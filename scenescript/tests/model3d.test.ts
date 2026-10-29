@@ -94,3 +94,9 @@ test('signed action targets are calibration gains, while physical poses and anim
  assert.throws(()=>parseModel3D({parts:[{id:'part',joints:[{...raw.parts[0].joints[0],target:3601}]}]}),/target/);
  assert.throws(()=>parseModel3D({...raw,animations:{invalid:{duration:1,tracks:[{joint:'shoulder',keys:[{at:0,value:180}]}]}}}),/value/);
 });
+test('soft matte boxes and smooth capsules are optional, strict and preserve legacy defaults',()=>{
+ const model=parseModel3D({parts:[{id:'sleeve',shape:'capsule',smooth:true},{id:'coat',shape:'box',roundness:.12,smooth:true,roughness:.9}]})!;
+ assert.equal(model.parts[0].shape,'capsule');assert.equal(model.parts[0].smooth,true);assert.equal(model.parts[1].roundness,.12);assert.equal(model.parts[1].finish,undefined);
+ const legacy=parseModel3D({parts:[{id:'legacy'}]})!.parts[0];assert.equal(legacy.roundness,undefined);assert.equal(legacy.smooth,undefined);
+ for(const part of [{id:'bad',roundness:-.1},{id:'bad',roundness:.5},{id:'bad',shape:'sphere',roundness:.1},{id:'bad',smooth:'true'},{id:'bad',shape:'plane',smooth:true}])assert.throws(()=>parseModel3D({parts:[part]}));
+});
