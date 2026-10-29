@@ -31,3 +31,13 @@ test('cancellation stops an active subprocess',async()=>{
  setTimeout(()=>controller.abort(),100);
  await assert.rejects(running,error=>error.exitCode===130);
 });
+test('a quiet subprocess prints a running indication and then exits normally',async(t)=>{
+ const logs=[];
+ t.mock.method(console,'log',message=>logs.push(message));
+ await runCommand(process.execPath,['-e','setTimeout(()=>{},150)'],'quiet',{quietMs:25});
+ assert.ok(logs.some(message=>message.includes('[AKTIV] quiet läuft weiterhin')));
+});
+test('an already cancelled command never starts',async()=>{
+ const controller=new AbortController();controller.abort();
+ await assert.rejects(runCommand('/nonexistent/never-started',[],'cancel',{signal:controller.signal}),error=>error.exitCode===130);
+});
