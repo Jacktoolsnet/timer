@@ -199,3 +199,24 @@ test('removed animations are absent and old saved selections recover safely',asy
  await expect(page.locator('.waves-art,.chase-art')).toHaveCount(0);
  await page.locator('#focus').click();await page.keyboard.press('Space');await expect(page.locator('#start')).toHaveAttribute('aria-pressed','true');await expect(page.locator('body')).toHaveClass(/focus-view/);
 });
+test('static background picker, softening and storage work in normal and focus views',async({page})=>{
+ await page.goto('/de/');await expect(page.locator('#metronome-app')).toHaveAttribute('data-background','none');await expect(page.locator('#background-controls')).toBeHidden();
+ await page.locator('#trigger-background').click();await expect(page.locator('#options-background img')).toHaveCount(12);
+ await page.locator('#options-background [role=option]').filter({hasText:'Wald'}).click();await expect(page.locator('#metronome-app')).toHaveAttribute('data-background','forest');
+ await expect(page.locator('#background-controls')).toBeVisible();await expect(page.locator('#trigger-background img')).toHaveAttribute('src','/backgrounds/forest.svg');
+ await page.locator('#background-fade').fill('85');await expect(page.locator('#background-fade-value')).toHaveText('85 %');
+ expect(await page.locator('#metronome-app').evaluate(el=>getComputedStyle(el,'::before').backgroundImage)).toContain('/backgrounds/forest.svg');
+ await page.locator('#start').click();await expect(page.locator('#bar-label')).not.toHaveText('Takt 1',{timeout:5000});
+ await page.locator('#trigger-background').click();await page.locator('#options-background [role=option]').filter({hasText:'Meer'}).click();await expect(page.locator('#start')).toHaveAttribute('aria-pressed','true');await expect(page.locator('#bar-label')).not.toHaveText('Takt 1');
+ await page.locator('#focus').click();expect(await page.locator('#metronome-app').evaluate(el=>getComputedStyle(el,'::before').backgroundImage)).toContain('/backgrounds/sea.svg');
+ await page.keyboard.press('Escape');await page.locator('#start').click();
+ await page.locator('#palette-dropdown summary').click();await page.locator('#remember-preferences').check();await page.reload();
+ await expect(page.locator('#background')).toHaveValue('sea');await expect(page.locator('#background-fade')).toHaveValue('85');
+ await page.locator('#trigger-background').click();await page.locator('#options-background [role=option]').filter({hasText:'Kein Hintergrund'}).click();
+ await expect(page.locator('#background-controls')).toBeHidden();expect(await page.locator('#metronome-app').evaluate(el=>getComputedStyle(el,'::before').backgroundImage)).toBe('none');
+});
+test('all background artwork is local and static',async({page})=>{
+ await page.goto('/en/');
+ const paths=await page.locator('#background option[data-preview]').evaluateAll(options=>options.map(el=>(el as HTMLOptionElement).dataset.preview!));
+ for(const path of paths){const response=await page.request.get(path);expect(response.status()).toBe(200);expect(await response.text()).not.toMatch(/<animate|<script|@keyframes|<image|<foreignObject/i);}
+});

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" role="img" aria-labelledby="title description">
+  <title id="title">Wolkenhimmel</title>
+  <desc id="description">Ein heller, weiter Himmel mit weich geschwungenen Wolkenbändern.</desc>
+  <defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0.000" stop-color="#8eafc1"/><stop offset="0.500" stop-color="#c9d8db"/><stop offset="1.000" stop-color="#e8dfcd"/></linearGradient></defs>
+  
+<rect width="1600" height="1000" fill="url(#sky)"/>
+<circle cx="1280" cy="210" r="100" fill="#f3ead9" opacity=".45"/>
+<g fill="#f0efdf">
+<path d="M-180 230Q-35 172 120 210Q200 117 330 172Q455 110 555 206Q695 178 820 245Q290 290-180 265Z" opacity=".32"/>
+<path d="M960 435Q1060 375 1155 408Q1260 312 1380 389Q1510 350 1710 430V475Q1300 498 960 455Z" opacity=".3"/>
+<path d="M-100 810Q170 685 405 752Q520 672 690 740Q840 715 1000 797Q1300 770 1680 839V1000H-100Z" opacity=".46"/>
+<path d="M-100 897Q250 808 580 870Q940 815 1180 898Q1390 840 1680 920V1000H-100Z" opacity=".52"/>
+</g>
+
+</svg>

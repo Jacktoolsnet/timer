@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" role="img" aria-labelledby="title description">
+  <title id="title">Stilles Meer</title>
+  <desc id="description">Ein weiter Horizont mit sanften Wellen und einem sandfarbenen Ufer.</desc>
+  <defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0.000" stop-color="#dddcd2"/><stop offset="1.000" stop-color="#b5cace"/></linearGradient><linearGradient id="water" x1="0" y1="0" x2="0" y2="1"><stop offset="0.000" stop-color="#87aeb2"/><stop offset="1.000" stop-color="#3c777e"/></linearGradient><linearGradient id="sand" x1="0" y1="0" x2="0" y2="1"><stop offset="0.000" stop-color="#bcae94"/><stop offset="1.000" stop-color="#decdb1"/></linearGradient></defs>
+  
+<rect width="1600" height="1000" fill="url(#sky)"/>
+<circle cx="1200" cy="260" r="72" fill="#f3e7cf" opacity=".62"/>
+<path d="M0 490H1600V1000H0Z" fill="url(#water)"/>
+<path d="M0 491H1600" stroke="#e0e6df" stroke-width="3" opacity=".4"/>
+<g fill="none" stroke="#d5e2dc" stroke-linecap="round">
+<path d="M80 580Q300 565 520 583M800 568Q1120 550 1440 573" opacity=".22" stroke-width="3"/>
+<path d="M-50 667Q250 640 600 665T1650 650" opacity=".18" stroke-width="4"/>
+<path d="M-50 765Q240 712 680 761T1650 730" opacity=".28" stroke-width="5"/>
+</g>
+<path d="M0 900Q310 780 765 865T1600 814V1000H0Z" fill="url(#sand)"/>
+<path d="M0 889Q310 769 765 854T1600 803" fill="none" stroke="#edf0dd" stroke-width="8" opacity=".65"/>
+
+</svg>

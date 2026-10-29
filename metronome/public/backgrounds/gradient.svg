@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" role="img" aria-labelledby="title description">
+  <title id="title">Fließende Farben</title>
+  <desc id="description">Ein ruhiger abstrakter Farbverlauf mit sanften Flächen in Salbei, Sand und gedecktem Lavendel.</desc>
+  <defs>
+    <linearGradient id="base" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#b3c6b8"/><stop offset=".5" stop-color="#dad7c8"/><stop offset="1" stop-color="#a7a8bd"/></linearGradient>
+    <radialGradient id="warm" cx="0" cy="0" r="1" gradientTransform="translate(1350 140) scale(1050 780)" gradientUnits="userSpaceOnUse"><stop stop-color="#f0d7b4" stop-opacity=".8"/><stop offset="1" stop-color="#f0d7b4" stop-opacity="0"/></radialGradient>
+    <radialGradient id="sage" cx="0" cy="0" r="1" gradientTransform="translate(140 850) scale(1060 790)" gradientUnits="userSpaceOnUse"><stop stop-color="#608f87" stop-opacity=".65"/><stop offset="1" stop-color="#608f87" stop-opacity="0"/></radialGradient>
+    <radialGradient id="lavender" cx="0" cy="0" r="1" gradientTransform="translate(1500 970) scale(860 670)" gradientUnits="userSpaceOnUse"><stop stop-color="#8a8bab" stop-opacity=".52"/><stop offset="1" stop-color="#8a8bab" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#base)"/>
+  <rect width="1600" height="1000" fill="url(#warm)"/>
+  <rect width="1600" height="1000" fill="url(#sage)"/>
+  <rect width="1600" height="1000" fill="url(#lavender)"/>
+</svg>

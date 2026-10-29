@@ -20,6 +20,7 @@ Browser tests use their own port 4347. Install Playwright Chromium if it is not 
 ## Version 1
 
 - Orbit, pendulum, beat-strip and bouncing-ball views driven by the audio clock; system reduced-motion preference plus an explicit less-movement setting.
+- Optional static backgrounds: the twelve local Clock motifs with thumbnail previews and theme-aware image softening (45–95%, default 70%). Available in normal and focus views; no background by default, no seasonal simulation or location access. Changes do not interrupt playback.
 - 20–300 BPM, numeric input, slider, ±1 controls and median-filtered tap tempo.
 - 1–12 beats per bar; each beat cycles accented → normal → silent.
 - The beat strip highlights the current beat and subdivision; muted beats stay pale. The ball lands on numbered beat stations exactly on each beat, with a return hop at the bar boundary. Reduced motion replaces hopping with stationary beat-to-beat positions.

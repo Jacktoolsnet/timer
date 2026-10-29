@@ -1,4 +1,5 @@
 ---
+import {backgrounds,backgroundCopy} from '../lib/backgrounds';
 import Layout from '../layouts/Layout.astro';
 import {copy,settingsCopy,animationCopy} from '../lib/metronome-i18n';
 import type {Language} from '../lib/i18n';
@@ -8,6 +9,7 @@ const {lang}=Astro.props;
 const t=copy[lang];
 const groups=settingsCopy[lang];
 const animations=animationCopy[lang];
+const background=backgroundCopy[lang];
 ---
 <Layout lang={lang} title={t.title} description={t.intro} route="">
  <section class="intro"><p class="eyebrow">JACKTOOLS / {t.title}</p><h1>{t.heading}</h1><p class="intro-copy">{t.intro}</p></section>
@@ -43,6 +45,8 @@ const animations=animationCopy[lang];
    <fieldset class="metronome-settings-group"><legend>{groups.display}</legend>
     <p class="view-label">{groups.display}</p>
     <div class="view-picker" role="group" aria-label={groups.display}><button type="button" data-view="orbit" aria-pressed="true">{t.orbit}</button><button type="button" data-view="pendulum" aria-pressed="false">{t.pendulum}</button><button type="button" data-view="strip" aria-pressed="false">{animations.strip}</button><button type="button" data-view="ball" aria-pressed="false">{animations.ball}</button></div>
+    <label>{background.label}<select id="background" name="background"><option value="none">{background.none}</option>{backgrounds.map((id,index)=><option value={id} data-preview={'/backgrounds/'+id+'.svg'}>{background.names[index]}</option>)}</select></label>
+    <div id="background-controls" hidden><label for="background-fade">{background.strength}<output id="background-fade-value" for="background-fade">70 %</output></label><input id="background-fade" type="range" min="45" max="95" step="1" value="70" aria-describedby="background-hint"/><p class="form-hint" id="background-hint">{background.hint}</p></div>
     <label class="toggle-row"><span><strong>{t.reduced}</strong></span><input id="reduced" type="checkbox" role="switch"/><span class="toggle" aria-hidden="true"></span></label>
    </fieldset>
    <fieldset class="metronome-practice-group"><legend>{groups.practice}</legend>

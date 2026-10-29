@@ -52,7 +52,17 @@ function moveBall(position:number){
  $('bouncing-ball').setAttribute('cx',String(point.x));$('bouncing-ball').setAttribute('cy',String(point.y));
  $('ball-shadow').setAttribute('cx',String(point.x));$('ball-shadow').setAttribute('opacity',String(.12+.15*(point.y-138)/100));
 }
+function applyBackground(){
+ const card=$('metronome-app');card.dataset.background=settings.background;
+ card.style.setProperty('--metronome-background',settings.background==='none'?'none':`url("/backgrounds/${settings.background}.svg")`);
+ card.style.setProperty('--background-fade',`${settings.backgroundFade}%`);
+ ($<HTMLSelectElement>('background')).value=settings.background;
+ ($<HTMLInputElement>('background-fade')).value=String(settings.backgroundFade);
+ ($<HTMLOutputElement>('background-fade-value')).value=`${settings.backgroundFade} %`;
+ $('background-controls').hidden=settings.background==='none';
+}
 function sync(){
+ applyBackground();
  ($<HTMLInputElement>('bpm')).value=String(settings.bpm);($<HTMLInputElement>('tempo-range')).value=String(settings.bpm);
  for(const [id,key] of [['beats','beats'],['subdivision','subdivision'],['sound','sound'],['audible-bars','audibleBars'],['silent-bars','silentBars']] as const) ($<HTMLInputElement>(id)).value=String(settings[key]);
  ($<HTMLInputElement>('volume')).value=String(Math.round(settings.volume*100));
@@ -170,3 +180,6 @@ document.querySelector('#metronome-settings')?.addEventListener('submit',event=>
 enhanceClockSelects(document.querySelector<HTMLFormElement>('#metronome-settings')!);
 
 for(const [id,step] of [['beats-minus',-1],['beats-plus',1]] as const) $(id).addEventListener('click',()=>{settings.beats+=step;changed();});
+
+$('background').addEventListener('change',()=>{settings.background=($<HTMLSelectElement>('background')).value as Settings['background'];changed(false);});
+$('background-fade').addEventListener('input',()=>{settings.backgroundFade=Number(($<HTMLInputElement>('background-fade')).value);settings=normalize(settings);applyBackground();save();});

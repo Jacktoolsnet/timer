@@ -99,3 +99,18 @@
 .metronome-settings-card .view-picker button{font-size:calc(12px * var(--font-scale,1));padding:10px 6px;overflow-wrap:anywhere}
 
 .instrument-stage{container-type:inline-size}
+/* Local, static Clock-family artwork. Only the rhythm itself moves. */
+.metronome-card{position:relative;isolation:isolate}
+.metronome-card[data-background]:not([data-background=none])::before{content:'';position:absolute;inset:0;z-index:-1;border-radius:inherit;pointer-events:none;background-image:linear-gradient(color-mix(in srgb,var(--surface) var(--background-fade,70%),transparent),color-mix(in srgb,var(--surface) var(--background-fade,70%),transparent)),var(--metronome-background);background-size:cover;background-position:center}
+.metronome-card[data-background]:not([data-background=none]) .instrument-stage{background:radial-gradient(ellipse,color-mix(in srgb,var(--surface) 85%,transparent),color-mix(in srgb,var(--surface) 55%,transparent) 45%,transparent 72%);border-radius:24px}
+.metronome-card[data-background]:not([data-background=none]) :is(#play-status,.instrument-hint,.keyboard-hint,#audio-error){width:fit-content;max-width:100%;margin-inline:auto;background:color-mix(in srgb,var(--surface) 92%,transparent);padding:4px 10px;border-radius:10px}
+.metronome-card[data-background]:not([data-background=none]) #audio-error:empty{display:none}
+.metronome-card[data-background]:not([data-background=none]) #focus{background:color-mix(in srgb,var(--surface) 95%,transparent);border:1px solid var(--line)}
+.metronome-card[data-background]:not([data-background=none]) .tempo-control label{padding:4px 12px;border-radius:12px;background:color-mix(in srgb,var(--surface) 95%,transparent)}
+.metronome-card[data-background]:not([data-background=none]) .beat-readout{text-shadow:0 1px 3px var(--surface),0 0 8px var(--surface)}
+.clock-background-thumbnail{width:56px;height:35px;flex:0 0 56px;object-fit:cover;border-radius:5px;border:1px solid var(--line)}
+.clock-background-thumbnail[hidden]{display:none}
+.clock-select-options button>span:not(.option-check){flex:1}
+#background-controls{margin:15px 0}#background-controls[hidden]{display:none}
+#background-controls>label{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:calc(14px * var(--font-scale,1));margin-bottom:8px}
+#background-fade-value{white-space:nowrap;font-size:calc(12px * var(--font-scale,1));color:var(--muted)}

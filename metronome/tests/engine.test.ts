@@ -37,3 +37,8 @@ test('new views normalize and ball contacts stations exactly on beats',()=>{
 test('removed saved views fall back to orbit',()=>{
  for(const view of ['waves','chase'])assert.equal(normalize({view} as unknown as Parameters<typeof normalize>[0]).view,'orbit');
 });
+test('background settings default safely and validate saved values',()=>{
+ assert.equal(normalize({}).background,'none');assert.equal(normalize({}).backgroundFade,70);
+ assert.equal(normalize({background:'forest',backgroundFade:200}).background,'forest');assert.equal(normalize({backgroundFade:200}).backgroundFade,95);
+ assert.equal(normalize({background:'https://example.com/image'} as unknown as Parameters<typeof normalize>[0]).background,'none');assert.equal(normalize({backgroundFade:-100}).backgroundFade,45);
+});

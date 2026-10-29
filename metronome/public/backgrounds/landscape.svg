@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" role="img" aria-labelledby="title description">
+  <title id="title">Sanfte Hügellandschaft</title>
+  <desc id="description">Salbeigrüne Hügel unter einem warmen Morgenhimmel.</desc>
+  <defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0.000" stop-color="#e6daca"/><stop offset="1.000" stop-color="#c3cec5"/></linearGradient><linearGradient id="land" x1="0" y1="0" x2="0" y2="1"><stop offset="0.000" stop-color="#648477"/><stop offset="1.000" stop-color="#314f4a"/></linearGradient></defs>
+  
+<rect width="1600" height="1000" fill="url(#sky)"/>
+<circle cx="1230" cy="240" r="85" fill="#f7ead2" opacity=".65"/>
+<path d="M0 620Q230 450 470 575T950 550T1600 515V1000H0Z" fill="#a5b6a2"/>
+<path d="M0 740Q270 525 620 690T1200 640T1600 665V1000H0Z" fill="#819c8c"/>
+<path d="M0 835Q350 720 750 805T1600 740V1000H0Z" fill="url(#land)"/>
+<path d="M-80 925Q320 795 710 882T1700 875" fill="none" stroke="#a7b09a" stroke-opacity=".24" stroke-width="3"/>
+
+</svg>

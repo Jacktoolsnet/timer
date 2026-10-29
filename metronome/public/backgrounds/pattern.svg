@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" role="img" aria-labelledby="title description">
+  <title id="title">Geometrische Ruhe</title>
+  <desc id="description">Ein zurückhaltendes, regelmäßiges Bogenmuster in warmen Naturtönen.</desc>
+  <defs><linearGradient id="base" x1="0" y1="0" x2="0" y2="1"><stop offset="0.000" stop-color="#e2d8c6"/><stop offset="1.000" stop-color="#bdc5b5"/></linearGradient><pattern id="arches" width="160" height="160" patternUnits="userSpaceOnUse"><g fill="none" stroke="#677c70" stroke-width="1.5" opacity=".22"><path d="M0 160V80a80 80 0 0 1 160 0v80M20 160V80a60 60 0 0 1 120 0v80M40 160V80a40 40 0 0 1 80 0v80M60 160V80a20 20 0 0 1 40 0v80"/></g></pattern></defs>
+  <rect width="1600" height="1000" fill="url(#base)"/><rect width="1600" height="1000" fill="url(#arches)"/>
+</svg>
