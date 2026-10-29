@@ -1,4 +1,4 @@
-import {acceptBoardModel,modelRequestData,boardModelInstructions,resourceSubject,repairTinyBoardModelSizes,repairBoardJointTargets} from '../lib/storyboard-resources';
+import {acceptBoardModel,modelRequestData,boardModelInstructions,resourceSubject,repairTinyBoardModelSizes,repairBoardJointTargets,modelNeedsRestyle} from '../lib/storyboard-resources';
 import {storyboardDesignWords} from '../lib/storyboard-design-i18n';
 import {storyboardModelView} from './storyboard-model-view';
 import {reviewProduction,productionInstructions} from '../lib/production-review';
@@ -84,7 +84,7 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,re
   check();candidate=p;$('preview').hidden=false;
   const b=p.storyboard;$('summary').textContent=kind==='board'&&b?`${b.title} · ${b.shots.length} ${t.scenes} · ${b.duration} s`:kind==='script'?`${p.title} · ${p.scenes.length} ${t.scenes} · ${p.scenes.reduce((n,s)=>n+s.duration,0).toFixed(1)} s`:kind==='speech'?`${p.scenes.reduce((n,s)=>n+s.duration,0).toFixed(1)} s`:t.ready;
   if(kind==='board'||kind==='script'){const textarea=$<HTMLTextAreaElement>('json-preview');textarea.value=JSON.stringify(kind==='board'?boardManifest(b!):projectManifest(p),null,2);textarea.hidden=false;}
-  if(kind==='model'&&resourceTarget&&b){const subject=resourceSubject(b,resourceTarget);$('summary').textContent=subject.name+(subject.modelChat?.at(-1)?.reply?' — '+subject.modelChat.at(-1)!.reply:'');disposeModelPreview=storyboardModelView(modelPreview,subject,resourceTarget.kind==='settings',b);}
+  if(kind==='model'&&resourceTarget&&b){const subject=resourceSubject(b,resourceTarget);$('summary').textContent=subject.name+(subject.modelChat?.at(-1)?.reply?' — '+subject.modelChat.at(-1)!.reply:'')+(modelNeedsRestyle(subject)?' — '+dw.styleUnchanged:'');disposeModelPreview=storyboardModelView(modelPreview,subject,resourceTarget.kind==='settings',b);}
   if(kind==='script'){
    const issues=reviewProduction(p),pw=productionWords(document.documentElement.lang);
    requiresProductionAck=issues.some(i=>!i.pending);$('production-check').hidden=!issues.length;
@@ -148,7 +148,7 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,re
    check();
    // Validate locally before a paid request. Freeze all inputs while the request runs.
    let textInput='',instructions='',references:string[]=[],target:BoardReviewTarget|null=null,imageText='';
-   if(kind==='model'){if(!source.storyboard||!resourceTarget)throw new Error(dw.missing);instructions=(await import('../lib/storyboard-model-guide')).storyboardModelGuide()+'\n'+boardModelInstructions+'\n'+aiLanguageInstruction(document.documentElement.lang);textInput=inputJson(modelRequestData(source.storyboard,resourceTarget,prompt.value));if($<HTMLInputElement>('refs').checked){const refs=imageGenerationReferences(source,resourceTarget);if(refs.length){references=await prepareImageReferences(refs,controller.signal);check();controller.signal.throwIfAborted();instructions+='\nThe attached images are visual identity references for the selected resource, not images to place on flat substitute planes. Use actual geometry. Reference order: '+inputJson(refs.map(r=>r.subjects));}}}
+   if(kind==='model'){if(!source.storyboard||!resourceTarget)throw new Error(dw.missing);instructions=(await import('../lib/storyboard-model-guide')).storyboardModelGuide()+'\n'+boardModelInstructions+'\n'+aiLanguageInstruction(document.documentElement.lang);textInput=inputJson(modelRequestData(source.storyboard,resourceTarget,prompt.value));if($<HTMLInputElement>('refs').checked){const refs=imageGenerationReferences(source,resourceTarget);if(refs.length){references=await prepareImageReferences(refs,controller.signal);check();controller.signal.throwIfAborted();instructions+='\nThe attached images are visual identity references for the selected resource, not images to place on flat substitute planes. Use actual geometry. Preserve identity and distinctive colors, but adapt all shapes/proportions to the current selected style even if reference images show another style. Reference order: '+inputJson(refs.map(r=>r.subjects));}}}
    else if(kind==='board'||kind==='script'){
     const plan=kind==='script'?requireApprovedBoard(source):sourceBoard;
     const refs=$<HTMLInputElement>('refs').checked?boardReferences(plan):[];references=refs.map(r=>r.data);

@@ -32,7 +32,7 @@ Optional Project.storyboard is a non-rendered plan. Preserve IDs, revision, comm
 and data; only users approve/resolve. board.characters contains character/object kinds;
 shot.characters references either, setting.objects fixed objects. Follow board.production:
 3d needs real geometry, animation and 3D cameras, not image slides. subject.design controls
-mode/style/surface. Rounded humans need rounded anatomy and facial details. Preserve
+mode/style/surface; the selected style overrides old appearance. Preserve
 approved model3d; use subject IDs in project.characters/stages. modelChat is edit history.
 shot.soundEffects are pending descriptions, NOT audible tracks. Dialogue needs
 Scene.narration text/speaker, music enabled Project.music; speech generation is separate.
@@ -42,14 +42,12 @@ known raster name. Standalone files must embed data. Never invent Base64.
 Direct video creation may omit storyboard (null).
 
 Authoring workflow:
-- Follow the user's topic, audience, format, style and duration. Ask only about
-  material omissions; if told not to ask, make reasonable assumptions.
+- Follow the user's topic, audience, format, style and duration; clarify material omissions.
 - Identify the target audience FIRST: use the user's audience, or infer a plausible
   one from the requested video (language, interests, prior knowledge and needs).
   Shape the content AND YouTube publication copy for that audience; see §3.
   Research audience/search terms when browsing is available; otherwise use
   reasoned terms, never claim live trend research.
-- Plan content/timing before effects; omit unused fields.
 - Every completed video project MUST have a suitable cover in Project.thumbnail.
   Reuse a suitable supplied/existing cover; if missing, create a real thumbnail
   with available image-generation tools, matching the audience, topic and format.

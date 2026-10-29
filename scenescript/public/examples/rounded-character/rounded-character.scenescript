@@ -13,6 +13,12 @@
     "comments": [],
     "characters": [
       {
+        "modelDesign": {
+          "mode": "3d",
+          "style": "rounded",
+          "surface": "colors",
+          "details": ""
+        },
         "design": {
           "mode": "3d",
           "style": "rounded",

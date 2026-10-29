@@ -1424,3 +1424,18 @@ Control-Targets bleiben innerhalb der Gelenkgrenzen. Im Nachbearbeitungsdialog k
 separater, ausdrücklich ausgelöster Reparaturbutton ungültige Targets begrenzen, ohne
 Gelenklimits oder Animationsschlüssel umzuschreiben. Gültige Bewegungsfaktoren bleiben
 unverändert. Erneute Prüfung/Vorschau und Übernahme erfolgen ohne weitere API-Anfrage.
+
+Stilwechsel bei Modellen: `subject.modelDesign` protokolliert die Einstellungen der
+letzten übernommenen Generierung. Abweichender Stil bzw. Oberflächenmodus erzeugt einen
+expliziten `restyle`-Auftrag mit eigener Silhouetten-/Proportionsvorgabe für Block,
+abgerundet, Cartoon oder natürliche Proportionen. Die alten Geometrien dienen dann nur
+als Identitäts-/Rigreferenz und müssen nicht erhalten bleiben. Alte Gesprächsschritte
+werden bei diesem Auftrag nicht als widersprechende Stilvorgaben mitgeschickt. Die
+aktuell gewählte Darstellung hat Vorrang vor alten Bildern, Projektstil und Beschreibungen.
+Legacy-Modelle ohne Herkunftseinstellungen werden bei der ersten expliziten Bearbeitung
+neu dem gewählten Stil zugeordnet. Der Stilwechsel allein führt keine kostenpflichtige
+Anfrage aus und verändert keine bestehende Geometrie: die Vorschau markiert ausstehende
+Neugestaltung. Erst der Modell-KI-Button startet den Auftrag nach Kostenbestätigung.
+Unveränderte oder lediglich umgefärbte Modellformen bestätigen einen gewünschten
+Stilwechsel nicht automatisch; die Vorschau weist darauf hin. Das ist eine begrenzte
+strukturelle Erkennung, keine automatische Beurteilung künstlerischer Stiltreue.

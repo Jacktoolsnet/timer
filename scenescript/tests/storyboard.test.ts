@@ -198,3 +198,16 @@ test('explicit joint repair preserves valid action gains, limits and animation k
  const p=demoProject();p.storyboard=example();assert.doesNotThrow(()=>acceptBoardModel(fixed.text,p,{kind:'characters',id:p.storyboard!.characters[0].id}));
  const invalid={model:{parts:[{id:'bad',joints:[{...joint,min:100,max:0},{...joint,min:-4000},{...joint,target:'180'}]}]}};const untouched=JSON.stringify(invalid);assert.equal(repairBoardJointTargets(untouched).text,untouched);
 });
+
+import {modelNeedsRestyle} from '../src/lib/storyboard-resources.ts';
+test('selected styles explicitly trigger redesign rather than preserving old rounded geometry and conversation',()=>{
+ const b=example(),s=b.characters[0];s.design={...defaultBoardDesign(),mode:'3d'};s.modelDesign={...s.design};s.model3d=roundedHumanModel();s.modelChat=[{request:'Keep it rounded',reply:'Rounded model'}];
+ const target={kind:'characters' as const,id:s.id};assert.equal(modelRequestData(b,target,'Smaller nose').operation,'refine');
+ for(const style of ['block','cartoon','natural'] as const){s.design.style=style;const request=modelRequestData(b,target,'');assert.equal(request.operation,'restyle');assert.equal(request.target.design.style,style);assert.deepEqual(request.target.conversation,[]);assert.ok(request.styleBrief.startsWith(style==='block'?'BLOCK':style==='cartoon'?'CARTOON':'NATURAL'));assert.ok(request.target.model);assert.equal(modelNeedsRestyle(s),true);}
+ const p=demoProject();p.storyboard=b;s.design.style='block';
+ const unchanged=acceptBoardModel(JSON.stringify({model:s.model3d,reply:'Now block style'}),p,target);assert.equal(unchanged.storyboard!.characters[0].modelDesign!.style,'rounded');assert.equal(modelNeedsRestyle(unchanged.storyboard!.characters[0]),true);
+ const recolored=structuredClone(s.model3d);recolored.parts[1].color='#ff0000';assert.equal(modelNeedsRestyle(acceptBoardModel(JSON.stringify({model:recolored}),p,target).storyboard!.characters[0]),true);
+ const changed=acceptBoardModel(JSON.stringify({model:{parts:[{id:'block_body',shape:'box'}]}}),p,target);assert.equal(changed.storyboard!.characters[0].modelDesign!.style,'block');assert.equal(modelNeedsRestyle(changed.storyboard!.characters[0]),false);
+ const feedback=JSON.parse(exportStoryboard(changed.storyboard!));feedback.board.characters[0].modelDesign.style='natural';assert.equal(importStoryboard(JSON.stringify(feedback),changed.storyboard).characters[0].modelDesign!.style,'block');
+ const legacy=structuredClone(s);delete legacy.modelDesign;assert.equal(modelNeedsRestyle(legacy),true);delete legacy.model3d;assert.equal(modelNeedsRestyle(legacy),false);
+});
