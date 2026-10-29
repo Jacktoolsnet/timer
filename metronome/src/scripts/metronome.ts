@@ -1,11 +1,14 @@
 import {enhanceClockSelects} from '../../../shared/preview-selects';
 import {defaults,normalize,pulseAt,tappedTempo,bouncePosition,type Settings,type Accent} from '../lib/metronome';
-import {copy} from '../lib/metronome-i18n';
+import {copy,wakeCopy} from '../lib/metronome-i18n';
+import {screenWakeLock} from '../lib/wake-lock';
 import type {Language} from '../lib/i18n';
 import {storageAllowed} from '../lib/storage';
 import {STORAGE_KEY} from '../lib/engine';
 const t=copy[document.documentElement.lang as Language]||copy.en;
 const $=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(id) as T;
+const wakeText=wakeCopy[document.documentElement.lang as Language]||wakeCopy.en;
+const wake=screenWakeLock($('wake-status'),'',wakeText.unavailable);
 let settings:Settings=normalize(defaults);
 try { if(storageAllowed()) settings=normalize(JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')); }catch{}
 let running=false,starting=false,generation=0,context:AudioContext|undefined;
@@ -76,7 +79,7 @@ function sync(){
  drawBeats();
 }
 function silence(){for(const source of sources){try{source.stop();}catch{}}sources.clear();}
-function stop(message=t.ready){
+function stop(message=''){
  generation++;starting=false;running=false;window.clearInterval(interval);cancelAnimationFrame(animation);silence();events=[];displayedIndex=-1;
  $('start').textContent=`▶ ${t.start}`;$('start').setAttribute('aria-pressed','false');$('play-status').textContent=message;
  stage.classList.remove('gap-hidden');$('current-beat').textContent='1';$('current-bar').textContent='1';
@@ -110,7 +113,7 @@ function render(){
   const hide=p.silent&&settings.hideGap;stage.classList.toggle('gap-hidden',hide);
   $('current-beat').textContent=String(p.beat+1);$('current-bar').textContent=String(p.bar+1);
   // Status changes only per bar: no incessant live-region beat announcements.
-  const label=p.silent?t.quiet:t.playing;if($('play-status').textContent!==label)$('play-status').textContent=label;
+  const label=p.silent?t.quiet:'';if($('play-status').textContent!==label)$('play-status').textContent=label;
   document.querySelectorAll('#beat-buttons button').forEach((b,i)=>b.classList.toggle('active',!hide&&i===p.beat));
  }
  if(displayedIndex>=0){
@@ -136,7 +139,7 @@ async function start(){
  }
  if(token!==generation||document.hidden){starting=false;return;}
  starting=false;running=true;epoch=now()+.05;nextTime=epoch;nextIndex=0;displayedIndex=-1;events=[];
- $('start').textContent=`■ ${t.stop}`;$('start').setAttribute('aria-pressed','true');$('play-status').textContent=t.playing;
+ $('start').textContent=`■ ${t.stop}`;$('start').setAttribute('aria-pressed','true');$('play-status').textContent='';
  schedule();interval=window.setInterval(schedule,25);animation=requestAnimationFrame(render);
 }
 function changed(restart=true){settings=normalize(settings);save();sync();if((running||starting)&&restart){stop();void start();}}
@@ -153,7 +156,7 @@ $('sound').addEventListener('change',()=>{settings.sound=($<HTMLSelectElement>('
 $('volume').addEventListener('input',()=>{settings.volume=Number(($<HTMLInputElement>('volume')).value)/100;save();});
 for(const [id,key] of [['gap','gap'],['hide-gap','hideGap'],['reduced','reduced']] as const) $(id).addEventListener('change',()=>{settings[key]=($<HTMLInputElement>(id)).checked;changed(key!=='reduced');});
 for(const button of document.querySelectorAll<HTMLButtonElement>('button[data-view]'))button.addEventListener('click',()=>{settings.view=button.dataset.view as Settings['view'];changed(false);});
-function focus(value:boolean){document.body.classList.toggle('focus-view',value);$('focus').setAttribute('aria-pressed',String(value));$('focus').textContent=`${value?t.exit:t.focus} ⛶`;}
+function focus(value:boolean){wake(value);document.body.classList.toggle('focus-view',value);$('focus').setAttribute('aria-pressed',String(value));$('focus').textContent=`${value?t.exit:t.focus} ⛶`;}
 $('focus').addEventListener('click',()=>focus(!document.body.classList.contains('focus-view')));
 // Keep focus visible for keyboard users, but reserve Space here for playback.
 // Enter still activates the focus button normally.
@@ -183,3 +186,5 @@ for(const [id,step] of [['beats-minus',-1],['beats-plus',1]] as const) $(id).add
 
 $('background').addEventListener('change',()=>{settings.background=($<HTMLSelectElement>('background')).value as Settings['background'];changed(false);});
 $('background-fade').addEventListener('input',()=>{settings.backgroundFade=Number(($<HTMLInputElement>('background-fade')).value);settings=normalize(settings);applyBackground();save();});
+
+window.addEventListener('pageshow',()=>wake(document.body.classList.contains('focus-view')));

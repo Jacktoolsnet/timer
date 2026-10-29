@@ -27,8 +27,10 @@ Browser tests use their own port 4347. Install Playwright Chromium if it is not 
 - Equal subdivisions: 1, 2, 3 or 4 per beat. Silent beats mute subdivisions too.
 - Locally synthesized wood, digital and soft sounds, volume control and visual-only playback.
 - Gap practice: 1–16 audible bars followed by 1–8 silent bars, optionally without visual timing cues.
-- Focus view, keyboard shortcuts, DE/EN/ES/FR interfaces and usage guides, DE/EN legal/privacy pages.
+- Full-viewport focus view with floating controls (side-by-side in short landscape layouts), keyboard shortcuts, DE/EN/ES/FR interfaces and usage guides, DE/EN legal/privacy pages.
 - Settings are kept only for the current page unless browser storage is explicitly enabled in the shared settings menu. Disabling or clearing it deletes all tool-specific keys. Playback never resumes automatically after reload.
+
+Focus view automatically requests a Screen Wake Lock, even while playback is stopped. Leaving focus or hiding/unloading the page releases it; returning to a visible focus view requests it again. Requires browser support and a secure context (HTTPS or localhost); system policies or battery-saving settings may reject or release it. A visible status reports availability. This is not a guarantee against manual locking or device sleep.
 
 ## Timing and lifecycle
 

@@ -14,3 +14,9 @@ export const settingsCopy:Record<Language,{settings:string;rhythm:string;display
 export const animationCopy:Record<Language,{strip:string;ball:string}>={
  en:{strip:'Beat strip',ball:'Bouncing ball'},de:{strip:'Beat-Leiste',ball:'Springender Ball'},es:{strip:'Barra de pulsos',ball:'Pelota saltarina'},fr:{strip:'Barre de temps',ball:'Balle rebondissante'}
 };
+export const wakeCopy:Record<Language,{active:string;unavailable:string}>={
+ de:{active:'Display bleibt in der Fokusansicht wach.',unavailable:'Display-Wachhalten ist nicht verfügbar oder wurde beendet. Prüfe gegebenenfalls deine Geräteeinstellungen.'},
+ en:{active:'Screen stays awake in focus view.',unavailable:'Keeping the screen awake is unavailable or was interrupted. Check your device settings if needed.'},
+ es:{active:'La pantalla permanece encendida en la vista de enfoque.',unavailable:'No se puede mantener la pantalla encendida o se interrumpió. Revisa los ajustes del dispositivo.'},
+ fr:{active:'L’écran reste allumé en vue concentration.',unavailable:'Le maintien de l’écran allumé est indisponible ou interrompu. Vérifiez les réglages de l’appareil.'}
+};

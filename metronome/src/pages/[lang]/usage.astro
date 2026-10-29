@@ -5,4 +5,4 @@ import {copy} from '../../lib/metronome-i18n';
 export function getStaticPaths(){return languages.map(lang=>({params:{lang},props:{lang}}));}
 const {lang}=Astro.props;const t=copy[lang as keyof typeof copy];
 ---
-<Layout lang={lang} title={t.usage} description={t.intro} route="usage" legal><article class="legal-page"><p class="eyebrow">JACKTOOLS / METRONOME</p><h1>{t.usage}</h1>{t.steps.map((step,i)=><section><h2>{step}</h2><p>{t.tips[i]}</p></section>)}<p>{t.note}</p><p>{t.saved}</p><a href={'/'+lang+'/'}>← {t.back}</a></article></Layout>
+<Layout lang={lang} title={t.usage} description={t.intro} route="usage" legal><article class="legal-page"><p class="eyebrow">JACKTOOLS / METRONOME</p><h1>{t.usage}</h1>{t.steps.map((step,i)=><section><h2>{step}</h2><p>{t.tips[i]}</p></section>)}<section><h2>{t.tap}</h2><p>{t.tapHint}</p><p>{t.statusHint}</p></section><p>{t.note}</p><p>{t.saved}</p><a href={'/'+lang+'/'}>← {t.back}</a></article></Layout>

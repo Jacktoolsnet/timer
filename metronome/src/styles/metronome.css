@@ -8,7 +8,6 @@
 .instrument-stage svg{stroke:none}
 .legal-page h1{overflow-wrap:anywhere}
 .focus-view.focus-cursor-hidden,.focus-view.focus-cursor-hidden *{cursor:none!important}
-@media(max-height:600px) and (min-width:680px){.focus-view .metronome-card{max-width:1000px;display:grid;grid-template-columns:1fr 1fr;gap:6px 28px;align-items:center}.focus-view .instrument-top{grid-column:1/-1}.focus-view .instrument-stage{grid-column:1;grid-row:2/9;width:min(45vh,300px)}.focus-view .tempo-slider{margin:4px auto}.focus-view .beat-buttons{margin:6px 0}.focus-view #play-status{margin:0}.focus-view #audio-error{grid-column:2}}
 @media(max-width:400px){.site-header .brand-product{display:none}.site-header .brand{min-width:0}.instrument-top{flex-wrap:wrap}.practice-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.practice-grid select{width:100%;min-width:0}}
 /* Separate, grouped settings card, matching the Clock tool's layout. */
 .instrument-top{justify-content:flex-end}
@@ -114,3 +113,41 @@
 #background-controls{margin:15px 0}#background-controls[hidden]{display:none}
 #background-controls>label{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:calc(14px * var(--font-scale,1));margin-bottom:8px}
 #background-fade-value{white-space:nowrap;font-size:calc(12px * var(--font-scale,1));color:var(--muted)}
+.instrument-controls{display:contents}
+#wake-status{font-size:calc(11px * var(--font-scale,1));line-height:1.5;color:var(--muted);text-align:center;margin:8px auto 0;max-width:48rem}
+#wake-status:empty{display:none}
+/* Full-viewport focus canvas, with Clock-style floating controls. */
+body.focus-view{overflow:hidden}
+body.focus-view .site-shell{width:100%;max-width:none;padding:0}
+body.focus-view main{display:block;min-height:0;height:100dvh}
+body.focus-view .metronome-card{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;max-width:none;height:100dvh;min-height:0;margin:0;padding:76px 12px 220px;border:0;border-radius:0;box-shadow:none;overflow:hidden;background:var(--surface)}
+body.focus-view .instrument-top{position:absolute;top:max(12px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));z-index:5}
+body.focus-view #focus{background:color-mix(in srgb,var(--surface) 95%,transparent);border:1px solid var(--line);border-radius:12px;min-height:44px}
+body.focus-view .instrument-stage{flex-shrink:0;width:min(700px,calc(100vw - 24px),calc(100dvh - 280px));margin:0 auto}
+body.focus-view .instrument-controls{position:absolute;bottom:max(12px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:3;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:10px 20px;width:max-content;max-width:calc(100% - 24px);padding:12px 16px;border:1px solid var(--line);border-radius:18px;background:color-mix(in srgb,var(--surface) 94%,transparent);backdrop-filter:blur(12px)}
+body.focus-view .instrument-controls #play-status{width:100%;margin:0;padding:0;min-height:0;background:none;font-size:12px}
+body.focus-view .tempo-control{gap:12px}body.focus-view .tempo-control input{font-size:36px}
+body.focus-view .tempo-control button{width:40px;height:40px;font-size:22px}
+body.focus-view .metronome-card .tempo-control label{background:none;padding:0}
+body.focus-view .transport{gap:8px}body.focus-view .transport button{min-width:110px;min-height:44px;font-size:13px}
+body.focus-view :is(.tempo-slider,.instrument-hint,.keyboard-hint){display:none}
+body.focus-view :is(#audio-error,#wake-status){width:100%;max-width:48rem;margin:0;padding:0;background:none;font-size:11px}
+body.focus-view :is(#audio-error,#wake-status):empty{display:none}
+body.focus-view #current-beat{font-size:clamp(48px,20cqw,140px)}
+body.focus-view .instrument-stage[data-view=pendulum] #current-beat,body.focus-view .instrument-stage[data-view=pendulum] #current-bar{font-size:clamp(18px,6cqw,38px)}
+body.focus-view .instrument-stage[data-view=pendulum] :is(.beat-caption,.bar-caption){font-size:clamp(8px,2.4cqw,14px)}
+body.focus-view .instrument-stage[data-view=ball] #current-beat{font-size:clamp(36px,13cqw,70px)}
+body.focus-view .instrument-stage #bar-label{font-size:clamp(10px,3cqw,16px)}
+body.focus-view .instrument-stage[data-view=pendulum] #bar-label{font-size:inherit}
+@media(max-width:500px){body.focus-view .instrument-controls{gap:8px;padding:10px 12px;width:calc(100% - 24px)}body.focus-view .transport{width:100%}body.focus-view .transport button{flex:1;min-width:0}}
+@media(max-height:600px) and (min-width:600px){
+ body.focus-view .metronome-card{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:24px;padding:64px 24px 16px}
+ body.focus-view .instrument-stage{grid-column:1;width:min(100%,calc(100dvh - 90px))}
+ body.focus-view .instrument-controls{position:static;grid-column:2;transform:none;max-width:100%;width:100%;padding:12px;gap:8px}
+ body.focus-view .transport{width:100%}body.focus-view .transport button{flex:1;min-width:0}
+}
+body.focus-view .instrument-controls{width:min(760px,calc(100% - 24px))}
+body.focus-view .metronome-card .instrument-controls #play-status{flex-basis:100%;width:100%;margin:0;padding:0;background:none}
+@media(max-width:500px){body.focus-view .instrument-controls{width:calc(100% - 24px)}}
+@media(max-height:600px) and (min-width:600px){body.focus-view .instrument-controls{width:100%}body.focus-view .transport>button{flex:1 1 0;width:0;padding:10px 12px}}
+#play-status:empty{display:none}

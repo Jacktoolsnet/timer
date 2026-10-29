@@ -220,3 +220,55 @@ test('all background artwork is local and static',async({page})=>{
  const paths=await page.locator('#background option[data-preview]').evaluateAll(options=>options.map(el=>(el as HTMLOptionElement).dataset.preview!));
  for(const path of paths){const response=await page.request.get(path);expect(response.status()).toBe(200);expect(await response.text()).not.toMatch(/<animate|<script|@keyframes|<image|<foreignObject/i);}
 });
+test('focus spans the viewport and keeps controls on screen',async({page})=>{
+ await page.goto('/de/');
+ for(const size of [page.viewportSize()!,{width:844,height:390}]){
+  await page.setViewportSize(size);await page.locator('#focus').click();
+  const card=await page.locator('.metronome-card').boundingBox(),controls=await page.locator('.instrument-controls').boundingBox();
+  expect(card!.x).toBe(0);expect(card!.y).toBe(0);expect(card!.width).toBe(size.width);expect(card!.height).toBe(size.height);
+  expect(controls!.x).toBeGreaterThanOrEqual(0);expect(controls!.y).toBeGreaterThanOrEqual(0);expect(controls!.x+controls!.width).toBeLessThanOrEqual(size.width);expect(controls!.y+controls!.height).toBeLessThanOrEqual(size.height);
+  await page.keyboard.press('Escape');
+ }
+});
+test('focus wake lock releases on exit and hidden page, reacquires when visible',async({page})=>{
+ await page.addInitScript(()=>{
+  (window as any).locks=[];
+  Object.defineProperty(navigator,'wakeLock',{configurable:true,value:{request:async(type:string)=>{
+   if(type!=='screen')throw new Error('wrong type');
+   const lock=new EventTarget() as any;lock.released=false;lock.release=async()=>{lock.released=true;lock.dispatchEvent(new Event('release'));};
+   (window as any).locks.push(lock);return lock;
+  }}});
+ });
+ await page.goto('/de/');expect(await page.evaluate(()=>(window as any).locks.length)).toBe(0);
+ await page.locator('#focus').click();await expect.poll(()=>page.evaluate(()=>(window as any).locks.length)).toBe(1);await expect(page.locator('#wake-status')).toBeHidden();
+ await page.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,value:true});document.dispatchEvent(new Event('visibilitychange'));});
+ expect(await page.evaluate(()=>(window as any).locks[0].released)).toBe(true);
+ await page.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,value:false});document.dispatchEvent(new Event('visibilitychange'));});
+ await expect.poll(()=>page.evaluate(()=>(window as any).locks.length)).toBe(2);
+ await page.keyboard.press('Escape');expect(await page.evaluate(()=>(window as any).locks[1].released)).toBe(true);await expect(page.locator('#wake-status')).toBeEmpty();
+});
+test('wake-lock rejection does not prevent playback or leaving focus',async({page})=>{
+ await page.addInitScript(()=>Object.defineProperty(navigator,'wakeLock',{configurable:true,value:{request:async()=>{throw new Error('denied');}}}));
+ await page.goto('/de/');await page.locator('#focus').click();await expect(page.locator('#wake-status')).toContainText('nicht verfügbar');
+ await page.keyboard.press('Space');await expect(page.locator('#start')).toHaveAttribute('aria-pressed','true');await page.keyboard.press('Escape');await expect(page.locator('body')).not.toHaveClass(/focus-view/);
+});
+test('pending wake lock is released if focus is left before resolution',async({page})=>{
+ await page.addInitScript(()=>Object.defineProperty(navigator,'wakeLock',{configurable:true,value:{request:()=>new Promise(resolve=>{
+  (window as any).resolveWake=()=>{const lock=new EventTarget() as any;lock.release=async()=>{(window as any).released=true;};resolve(lock);};
+ })}}));
+ await page.goto('/de/');await page.locator('#focus').click();await page.keyboard.press('Escape');
+ await page.evaluate(()=>(window as any).resolveWake());await expect.poll(()=>page.evaluate(()=>(window as any).released)).toBe(true);await expect(page.locator('#wake-status')).toBeEmpty();
+});
+test('routine ready and running status text stays hidden',async({page})=>{
+ await page.goto('/de/');await expect(page.locator('#play-status')).toBeHidden();
+ await page.locator('#start').click();await expect(page.locator('#start')).toHaveAttribute('aria-pressed','true');await expect(page.locator('#play-status')).toBeEmpty();await expect(page.locator('#play-status')).toBeHidden();
+ await page.locator('#focus').click();await expect(page.locator('#play-status')).toBeHidden();
+ await page.keyboard.press('Space');await expect(page.locator('#start')).toHaveAttribute('aria-pressed','false');await expect(page.locator('#play-status')).toBeHidden();
+});
+test('tap and keyboard hints are on the usage page instead of the instrument',async({page})=>{
+ for(const lang of ['de','en','es','fr']){
+  await page.goto('/'+lang+'/');await expect(page.locator('.instrument-hint,.keyboard-hint')).toHaveCount(0);
+  await page.goto('/'+lang+'/usage/');await expect(page.locator('.legal-page section')).toHaveCount(4);
+ }
+ await page.goto('/de/usage/');await expect(page.locator('.legal-page')).toContainText('Mehrmals tippen · Taste T');await expect(page.locator('.legal-page')).toContainText('Leertaste: Start / Stopp');
+});

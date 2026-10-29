@@ -22,12 +22,13 @@ const background=backgroundCopy[lang];
    <svg class="ball-art" viewBox="0 0 360 360"><path class="ball-floor" d="M18 250H342"/><g id="ball-stations"></g><ellipse id="ball-shadow" cx="30" cy="250" rx="14" ry="3"/><circle id="bouncing-ball" cx="30" cy="238" r="12"/></svg>
    <div class="beat-readout"><span class="beat-tile"><span class="beat-caption">{t.beat}</span><span id="current-beat">1</span></span><span id="bar-label"><span class="bar-caption">{t.bar}</span> <span id="current-bar">1</span></span></div>
   </div>
-  <p id="play-status" role="status">{t.ready}</p>
+  <div class="instrument-controls">
+  <p id="play-status" role="status"></p>
   <div class="tempo-control"><button id="slower" aria-label={t.tempo+' −1'}>−</button><label><span class="sr-only">{t.tempo}</span><input id="bpm" type="number" min="20" max="300" step="1" value="90" inputmode="numeric"/><span>BPM</span></label><button id="faster" aria-label={t.tempo+' +1'}>+</button></div>
   <input class="tempo-slider" id="tempo-range" type="range" min="20" max="300" value="90" aria-label={t.tempo}/>
   <div class="transport"><button class="primary" id="start" aria-pressed="false">▶ {t.start}</button><button class="secondary" id="tap">{t.tap}<span id="tap-count"></span></button></div>
-  <p class="instrument-hint">{t.tapHint}</p>
-  <p class="keyboard-hint">{t.statusHint}</p><p id="audio-error" role="status"></p>
+  <p id="audio-error" role="status"></p><p id="wake-status" role="status"></p>
+  </div>
  </section>
  <aside class="settings-card metronome-settings-card" aria-labelledby="metronome-settings-title">
   <h2 id="metronome-settings-title">{groups.settings}</h2>
