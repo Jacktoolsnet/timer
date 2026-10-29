@@ -170,10 +170,32 @@ test('new animations honor visual gaps and saved view selection',async({page})=>
  await page.reload();await expect(page.locator('.instrument-stage')).toHaveAttribute('data-view','ball');
  await page.locator('#beats').fill('1');await page.locator('#beats').press('Tab');await page.locator('#bpm').fill('120');await page.locator('#bpm').press('Tab');
  await page.locator('#gap').check();await page.locator('#audible-bars').fill('1');await page.locator('#audible-bars').press('Tab');await page.locator('#hide-gap').check();
- for(const view of ['ball','strip']){
+ for(const view of ['ball','strip'] as const){
   await page.locator(`button[data-view="${view}"]`).click();await page.locator('#start').click();
   await expect(page.locator('.instrument-stage')).toHaveClass(/gap-hidden/,{timeout:3000});
-  await expect(page.locator(view==='ball'?'#bouncing-ball':'#beat-strip')).toBeHidden();
+  await expect(page.locator(({ball:'#bouncing-ball',strip:'#beat-strip'})[view]!)).toBeHidden();
   await page.locator('#start').click();
  }
+});
+
+test('Space controls playback after entering focus without activating the focus button',async({page})=>{
+ await page.goto('/de/');await page.locator('#focus').click();
+ await expect(page.locator('body')).toHaveClass(/focus-view/);
+ await page.keyboard.press('Space');await expect(page.locator('#start')).toHaveAttribute('aria-pressed','true');
+ await expect(page.locator('body')).toHaveClass(/focus-view/);
+ await page.keyboard.down('Space');await page.keyboard.down('Space');await page.keyboard.up('Space');
+ await expect(page.locator('#start')).toHaveAttribute('aria-pressed','false');await expect(page.locator('body')).toHaveClass(/focus-view/);
+ await page.keyboard.press('Escape');await expect(page.locator('body')).not.toHaveClass(/focus-view/);
+ await page.locator('#focus').focus();await page.keyboard.press('Enter');await expect(page.locator('body')).toHaveClass(/focus-view/);
+ await page.keyboard.press('Space');await expect(page.locator('#start')).toHaveAttribute('aria-pressed','true');await expect(page.locator('body')).toHaveClass(/focus-view/);
+ await page.keyboard.press('Enter');await expect(page.locator('body')).not.toHaveClass(/focus-view/);
+});
+
+test('removed animations are absent and old saved selections recover safely',async({page})=>{
+ await page.goto('/de/');
+ await page.evaluate(()=>{localStorage.setItem('jacktools.metronome.storage-consent.v1','yes');localStorage.setItem('jacktools.metronome.settings.v1',JSON.stringify({view:'waves'}));});
+ await page.reload();await expect(page.locator('.instrument-stage')).toHaveAttribute('data-view','orbit');
+ await expect(page.locator('button[data-view]')).toHaveCount(4);
+ await expect(page.locator('.waves-art,.chase-art')).toHaveCount(0);
+ await page.locator('#focus').click();await page.keyboard.press('Space');await expect(page.locator('#start')).toHaveAttribute('aria-pressed','true');await expect(page.locator('body')).toHaveClass(/focus-view/);
 });

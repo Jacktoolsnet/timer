@@ -34,6 +34,7 @@ function drawBeats(){
   const landing=document.createElementNS('http://www.w3.org/2000/svg','circle');landing.setAttribute('cx',String(point.x));landing.setAttribute('cy','250');landing.setAttribute('r',accent===2?'5':'3');
   const label=document.createElementNS('http://www.w3.org/2000/svg','text');label.setAttribute('x',String(point.x));label.setAttribute('y','277');label.textContent=String(i+1);group.append(landing,label);stations.append(group);
 
+
  });
  updateIndicators(displayedIndex);
  moveBall(displayedIndex<0?0:displayedIndex/settings.subdivision);
@@ -130,7 +131,8 @@ async function start(){
 }
 function changed(restart=true){settings=normalize(settings);save();sync();if((running||starting)&&restart){stop();void start();}}
 function tempo(value:number){if(!Number.isFinite(value)){sync();return;}settings.bpm=value;changed();}
-$('start').addEventListener('click',()=>{if(running||starting)stop();else void start();});
+function togglePlayback(){if(running||starting)stop();else void start();}
+$('start').addEventListener('click',togglePlayback);
 $('bpm').addEventListener('change',()=>tempo(Number(($<HTMLInputElement>('bpm')).value)||settings.bpm));
 $('tempo-range').addEventListener('input',()=>tempo(Number(($<HTMLInputElement>('tempo-range')).value)));
 $('slower').addEventListener('click',()=>tempo(settings.bpm-1));$('faster').addEventListener('click',()=>tempo(settings.bpm+1));
@@ -143,10 +145,17 @@ for(const [id,key] of [['gap','gap'],['hide-gap','hideGap'],['reduced','reduced'
 for(const button of document.querySelectorAll<HTMLButtonElement>('button[data-view]'))button.addEventListener('click',()=>{settings.view=button.dataset.view as Settings['view'];changed(false);});
 function focus(value:boolean){document.body.classList.toggle('focus-view',value);$('focus').setAttribute('aria-pressed',String(value));$('focus').textContent=`${value?t.exit:t.focus} ⛶`;}
 $('focus').addEventListener('click',()=>focus(!document.body.classList.contains('focus-view')));
+// Keep focus visible for keyboard users, but reserve Space here for playback.
+// Enter still activates the focus button normally.
+$('focus').addEventListener('keydown',event=>{
+ if(event.code!=='Space'||event.altKey||event.ctrlKey||event.metaKey||document.querySelector('dialog[open]'))return;
+ event.preventDefault();event.stopPropagation();
+ if(!event.repeat)togglePlayback();
+});
 window.addEventListener('keydown',event=>{
  if(event.key==='Escape'){focus(false);return;}
  if(event.altKey||event.ctrlKey||event.metaKey||event.repeat||document.querySelector('dialog[open]')|| (event.target instanceof Element&&event.target.closest('input,select,textarea,button,a,summary,[contenteditable=true]')))return;
- if(event.code==='Space'){event.preventDefault();if(running||starting)stop();else void start();}
+ if(event.code==='Space'){event.preventDefault();togglePlayback();}
  if(event.key.toLowerCase()==='t'){event.preventDefault();tap();}
 });
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&(running||starting))stop(t.paused);});

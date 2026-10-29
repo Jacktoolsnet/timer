@@ -27,3 +27,4 @@ export function bouncePosition(position:number,beats:number,reduced=false){
  const station=(beat:number)=>beats===1?180:30+300*(beat%beats)/(beats-1);
  return {x:reduced?station(whole):station(whole)+(station(whole+1)-station(whole))*fraction,y:238-(reduced?0:100*4*fraction*(1-fraction))};
 }
+

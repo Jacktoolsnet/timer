@@ -33,3 +33,7 @@ test('new views normalize and ball contacts stations exactly on beats',()=>{
  assert.deepEqual(bouncePosition(.5,4),{x:80,y:138});assert.deepEqual(bouncePosition(4,4),{x:30,y:238});
  assert.deepEqual(bouncePosition(.5,1),{x:180,y:138});assert.deepEqual(bouncePosition(.5,4,true),{x:30,y:238});
 });
+
+test('removed saved views fall back to orbit',()=>{
+ for(const view of ['waves','chase'])assert.equal(normalize({view} as unknown as Parameters<typeof normalize>[0]).view,'orbit');
+});
