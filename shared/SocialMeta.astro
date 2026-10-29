@@ -1,0 +1,22 @@
+---
+import { socialArtwork, type SocialProject } from './social';
+interface Props { project:SocialProject; title:string; description:string; lang?:'de'|'en'|'es'|'fr' }
+const {project,title,description,lang='en'}=Astro.props;
+const artwork=socialArtwork[project];
+const image=new URL('/social/'+project+'.png',Astro.site);
+const alt=(project==='company'?'JackTools.Net':'JackTools.Net '+artwork.name)+' – '+artwork.descriptions[lang];
+const locales={de:'de_DE',en:'en_GB',es:'es_ES',fr:'fr_FR'};
+---
+<meta property="og:site_name" content={project==='company'?'JackTools.Net':'JackTools.Net '+artwork.name}/>
+<meta property="og:locale" content={locales[lang]}/>
+<meta property="og:image" content={image}/>
+<meta property="og:image:secure_url" content={image}/>
+<meta property="og:image:type" content="image/png"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
+<meta property="og:image:alt" content={alt}/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content={title}/>
+<meta name="twitter:description" content={description}/>
+<meta name="twitter:image" content={image}/>
+<meta name="twitter:image:alt" content={alt}/>

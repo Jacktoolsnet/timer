@@ -1,4 +1,5 @@
 ---
+import SocialMeta from '../../../shared/SocialMeta.astro';
 import BrandIcon from '../../../shared/BrandIcon.astro';
 import '../styles/global.css';
 import { colorSchemes } from '../lib/engine';
@@ -37,9 +38,10 @@ const alternateLanguages = legal && route !== 'usage' ? (['en', 'de'] as const) 
     {alternateLanguages.map(l => <link rel="alternate" hreflang={l} href={new URL('/' + l + '/' + (route ? route + '/' : ''), Astro.site)} />)}
     <link rel="alternate" hreflang="x-default" href={new URL('/en/' + (route ? route + '/' : ''), Astro.site)} />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content={title + ' · Jacktools'} />
+    <meta property="og:title" content={title + ' · JackTools.Net'} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
+    <SocialMeta project="calculator" title={title + ' · JackTools.Net'} description={description} lang={lang} />
     <script is:inline>
       try {
         const s = JSON.parse(localStorage.getItem('jacktools.calculator.storage-consent.v1') === 'yes' ? localStorage.getItem('jacktools.calculator.settings.v1') || 'null' : 'null');

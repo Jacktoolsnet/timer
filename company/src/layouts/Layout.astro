@@ -1,4 +1,5 @@
 ---
+import SocialMeta from '../../../shared/SocialMeta.astro';
 import BrandIcon from '../../../shared/BrandIcon.astro';
 import '../styles/global.css';
 import '../styles/company.css';
@@ -29,9 +30,10 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <link rel="icon" type="image/svg+xml" href="/jacktools-icon.svg" />
     <link rel="canonical" href={canonical} />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content={title + ' · Jacktools'} />
+    <meta property="og:title" content={title + ' · JackTools.Net'} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
+    <SocialMeta project="company" title={title + ' · JackTools.Net'} description={description} lang={lang} />
     <script is:inline>
       try {
         const saved = JSON.parse(localStorage.getItem('jacktools.company.storage-consent.v1') === 'yes' ? localStorage.getItem('jacktools.company.appearance.v1') || 'null' : 'null');
