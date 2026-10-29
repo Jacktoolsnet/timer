@@ -1,8 +1,9 @@
 /** Stable social artwork; intentionally independent of saved appearance settings. */
-export const socialProjects = ['company','timer','clock','stopwatch','calculator','breathe','relax','lava','scenescript'] as const;
+export const socialProjects = ['metronome','company','timer','clock','stopwatch','calculator','breathe','relax','lava','scenescript'] as const;
 export type SocialProject = typeof socialProjects[number];
 type Language = 'de' | 'en' | 'es' | 'fr';
 export const socialArtwork: Record<SocialProject, {name:string; tagline:string; accent:string; descriptions:Record<Language,string>}> = {
+ metronome:{name:'Metronome',tagline:'Hear the beat. See the whole bar.',accent:'#416b4b',descriptions:{de:'Metronom mit Orbit-Ansicht, Tempo und vier Zählzeiten',en:'Metronome with orbit view, tempo and four beats',es:'Metrónomo con órbita, tempo y cuatro pulsos',fr:'Métronome avec orbite, tempo et quatre temps'}},
  company:{name:'JackTools.Net',tagline:'Small tools. More possibilities.',accent:'#416b4b',descriptions:{de:'Übersicht der JackTools.Net-Tools',en:'An overview of the JackTools.Net tools',es:'Una vista general de las herramientas de JackTools.Net',fr:'Un aperçu des outils JackTools.Net'}},
  timer:{name:'Timer',tagline:'Your time. Your rhythm.',accent:'#a64d35',descriptions:{de:'Timer-Vorschau mit einem 25-Minuten-Countdown',en:'Timer preview with a 25-minute countdown',es:'Vista del temporizador con una cuenta atrás de 25 minutos',fr:'Aperçu du minuteur avec un compte à rebours de 25 minutes'}},
  clock:{name:'Clock',tagline:'Your time. At a glance.',accent:'#416b4b',descriptions:{de:'Analoge Uhr und digitale Zeitanzeige',en:'An analogue clock and a digital time display',es:'Un reloj analógico y una pantalla de hora digital',fr:'Une horloge analogique et un affichage numérique'}},

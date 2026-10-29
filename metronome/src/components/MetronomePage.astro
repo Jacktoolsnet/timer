@@ -1,0 +1,40 @@
+---
+import Layout from '../layouts/Layout.astro';
+import {copy} from '../lib/metronome-i18n';
+import type {Language} from '../lib/i18n';
+import '../styles/metronome.css';
+interface Props {lang:Language}
+const {lang}=Astro.props;
+const t=copy[lang];
+---
+<Layout lang={lang} title={t.title} description={t.intro} route="">
+ <section class="intro"><p class="eyebrow">JACKTOOLS / {t.title}</p><h1>{t.heading}</h1><p class="intro-copy">{t.intro}</p></section>
+ <section id="metronome-app" class="metronome-card" aria-label={t.title}>
+  <div class="instrument-top"><div class="view-picker" role="group" aria-label={lang==='de'?'Visualisierung':t.title}><button data-view="orbit" aria-pressed="true">{t.orbit}</button><button data-view="pendulum" aria-pressed="false">{t.pendulum}</button></div><button id="focus" aria-pressed="false">{t.focus} ⛶</button></div>
+  <div class="instrument-stage" data-view="orbit" aria-hidden="true">
+   <svg class="orbit-art" viewBox="0 0 360 360"><defs><radialGradient id="halo"><stop stop-color="currentColor" stop-opacity=".1"/><stop offset="1" stop-color="currentColor" stop-opacity="0"/></radialGradient></defs><circle cx="180" cy="180" r="176" fill="url(#halo)"/><circle class="outer-ring" cx="180" cy="180" r="145"/><circle class="inner-ring" cx="180" cy="180" r="120"/><g id="orbit-marks"></g><g id="orbit-arm"><circle class="orb-halo" cx="180" cy="35" r="16"/><circle class="orb" cx="180" cy="35" r="6"/></g></svg>
+   <svg class="pendulum-art" viewBox="0 0 360 360"><path class="pendulum-case" d="M144 43h72l56 275H88Z"/><path class="pendulum-scale" d="M133 126h94m-101 34h108m-115 34h122m-129 34h136m-143 34h150"/><g id="pendulum-arm"><path d="M180 284V66"/><rect x="167" y="104" width="26" height="38" rx="8"/><circle cx="180" cy="284" r="9"/></g></svg>
+   <div class="beat-readout"><span id="current-beat">1</span><span id="bar-label">{t.bar} 1</span></div>
+  </div>
+  <p id="play-status" role="status">{t.ready}</p>
+  <div class="tempo-control"><button id="slower" aria-label={t.tempo+' −1'}>−</button><label><span class="sr-only">{t.tempo}</span><input id="bpm" type="number" min="20" max="300" step="1" value="90" inputmode="numeric"/><span>BPM</span></label><button id="faster" aria-label={t.tempo+' +1'}>+</button></div>
+  <input class="tempo-slider" id="tempo-range" type="range" min="20" max="300" value="90" aria-label={t.tempo}/>
+  <div class="transport"><button class="primary" id="start" aria-pressed="false">▶ {t.start}</button><button class="secondary" id="tap">{t.tap}<span id="tap-count"></span></button></div>
+  <p class="instrument-hint">{t.tapHint}</p>
+  <div class="rhythm-row"><label for="beats">{t.beats}</label><select id="beats">{Array.from({length:12},(_,i)=><option value={i+1} selected={i===3}>{i+1}</option>)}</select><span class="rhythm-caption">{t.accents}</span></div>
+  <div id="beat-buttons" class="beat-buttons" role="group" aria-label={t.accents}></div><p class="instrument-hint">{t.accentHint}</p>
+  <details class="practice-panel"><summary>{t.options}<span aria-hidden="true">＋</span></summary><div class="practice-grid">
+   <label>{t.subdivision}<select id="subdivision">{t.subOptions.map((label,i)=><option value={i+1}>{label}</option>)}</select></label>
+   <label>{t.sound}<select id="sound">{['wood','digital','soft','silent'].map((value,i)=><option value={value}>{t.sounds[i]}</option>)}</select></label>
+   <label class="volume-label">{t.volume}<input id="volume" type="range" min="0" max="100" value="50"/></label>
+   <label class="check-label"><input id="reduced" type="checkbox"/>{t.reduced}</label>
+   <label class="check-label full"><input id="gap" type="checkbox"/>{t.gap}</label>
+   <div class="gap-options full" hidden><label>{t.audibleBars}<input id="audible-bars" type="number" min="1" max="16" value="3"/></label><label>{t.silentBars}<input id="silent-bars" type="number" min="1" max="8" value="1"/></label><label class="check-label full"><input id="hide-gap" type="checkbox"/>{t.hideGap}</label></div>
+  </div></details>
+  <p class="keyboard-hint">{t.statusHint}</p><p id="audio-error" role="status"></p>
+ </section>
+ <p class="local-note">{t.local}</p>
+ <section class="guide metronome-guide"><div class="guide-heading"><h2>{t.guide}</h2></div><div class="guide-grid">{t.steps.map((step,i)=><article><span class="step-number">0{i+1}</span><h3>{step}</h3><p>{t.tips[i]}</p></article>)}</div><p class="timing-note">{t.note} {t.saved}</p></section>
+ <noscript><p class="notice">{t.js}</p></noscript>
+ <script src="../scripts/metronome.ts"></script>
+</Layout>

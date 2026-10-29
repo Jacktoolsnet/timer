@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build all nine projects first, then verify social metadata and local PNG assets."""
+"""Build all ten projects first, then verify social metadata and local PNG assets."""
 from pathlib import Path
 from html.parser import HTMLParser
 from urllib.parse import urlsplit
@@ -7,7 +7,7 @@ import struct
 import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
-PROJECTS = ['company','timer','clock','stopwatch','calculator','breathe','relax','lava','scenescript']
+PROJECTS = ['metronome','company','timer','clock','stopwatch','calculator','breathe','relax','lava','scenescript']
 class Metadata(HTMLParser):
     def __init__(self, html):
         super().__init__()

@@ -1,6 +1,6 @@
 # Sitemaps and Search Console
 
-All nine projects build `dist/sitemap.xml`. Deploy the complete `dist/` contents
+All ten projects build `dist/sitemap.xml`. Deploy the complete `dist/` contents
 (including `robots.txt`) to the corresponding domain root:
 
 - https://jacktools.net/sitemap.xml — 4 localized company homepages
@@ -8,12 +8,13 @@ All nine projects build `dist/sitemap.xml`. Deploy the complete `dist/` contents
 - https://clock.jacktools.net/sitemap.xml — 4 languages × tool/usage
 - https://stopwatch.jacktools.net/sitemap.xml — 4 languages × tool/usage
 - https://calculator.jacktools.net/sitemap.xml — 4 languages × tool/usage (not deployed)
+- https://metronome.jacktools.net/sitemap.xml — 4 languages × tool/usage (not deployed)
 - https://breathe.jacktools.net/sitemap.xml — 4 languages × tool/usage
 - https://relax.jacktools.net/sitemap.xml — 4 languages × tool/usage
 - https://lava.jacktools.net/sitemap.xml — 4 languages × tool/usage (not deployed)
 - https://scenescript.jacktools.net/sitemap.xml — 4 languages × editor/AI guide/usage (not deployed)
 
-Usage guides for all eight tools are indexable and included in all four languages.
+Usage guides for all nine tools are indexable and included in all four languages.
 Legal/privacy pages, company usage notes, redirects and 404 pages remain noindex
 and are intentionally excluded.
 Tool sitemaps contain reciprocal language alternatives plus English x-default.
