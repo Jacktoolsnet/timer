@@ -44,3 +44,15 @@ test('unavailable WebGL reports an error without blocking the editor or disablin
  const error=await page.evaluate(async url=>{const {parseProject}=await import(/* @vite-ignore */ '/src/lib/model.ts' as string),{exportStill}=await import(/* @vite-ignore */ '/src/scripts/still-export.ts' as string);try{await exportStill(parseProject(await(await fetch(url)).text()),1,new AbortController().signal);return 'unexpected success';}catch(error){return (error as Error).message;}},url);expect(error).toContain('WebGL is not available');
  await page.locator('[data-stage2d-field=enabled]').uncheck();await expect(page.locator('#stage .stage2d-canvas')).toHaveCount(0);await expect(page.locator('#scene-form [name=name]')).toBeEnabled();
 });
+
+test('German demo storyboard contains the story, subjects and four timed shots without auto-approval',async({page})=>{
+ await ready(page);await page.locator('#open-storyboard').click();await expect(page.locator('#storyboard-dialog')).toBeVisible();
+ await expect(page.locator('[data-project-field=story]')).toContainText('Ein kleiner, freundlicher Roboter');await expect(page.locator('[data-project-field=language]')).toContainText('Deutsch');await expect(page.locator('[data-project-field=duration]')).toContainText('16 s');
+ await expect(page.locator('#storyboard-approve')).toHaveAttribute('aria-pressed','false');await expect(page.locator('#storyboard-script-open')).toBeDisabled();
+ for(const [tab,count,first] of [['characters',1,'Der Lichtsammler'],['objects',1,'Der Lichtfunke'],['settings',2,'Der grüne Waldweg'],['shots',4,'Ankommen']] as const){
+  await page.locator('[data-board-tab='+tab+']').click();await expect(page.locator('[data-board-item]')).toHaveCount(count);await expect(page.locator('#storyboard-content .board-card')).toContainText(first);
+ }
+ await page.locator('[data-board-item=transformation]').click();await expect(page.locator('[data-shot-id=transformation]')).toContainText('ein kleiner Funke.');
+ const pending=page.waitForEvent('download');await page.locator('#storyboard-download').click();const file=await pending,exported=JSON.parse(await readFile((await file.path())!,'utf8'));expect(exported.board.language).toBe('Deutsch');expect(exported.board.shots.map((s:any)=>s.duration)).toEqual([4,3,4,5]);expect(exported.board.approved).toBe(false);
+ await page.locator('#storyboard-close').click();await expect(page.locator('#stage .stage2d-canvas')).toHaveAttribute('data-stage2d-time','0');
+});

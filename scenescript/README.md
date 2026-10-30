@@ -1510,3 +1510,16 @@ Dauer wieder geöffnet. Zwei ältere Kamera-Browsertests erwarten einen DOM-Baum
 nach dem Frame-Export, obwohl dieser bereits vorher aufgeräumt wurde; beide
 scheitern unverändert auch mit dem ursprünglichen ExportRenderer aus HEAD
 (auf Desktop und Tablet). Deren Erwartungen wurden hier nicht verändert.
+
+Das Lichtsammler-Standardprojekt enthält außerdem ein ausgefülltes deutsches
+Storyboard: Geschichte, Botschaft, Zielgruppe, Stil und stumme 2D-Produktion;
+einen Roboter, den Lichtfunken als Objekt, Waldweg und Nachtgarten sowie vier
+Zeitabschnitte (4 + 3 + 4 + 5 Sekunden). Die Abschnitte beschreiben die bestehende
+durchgehende Animation einschließlich Gestik, Sprung, Kamera und Schlusstexten.
+Es sind Planungsabschnitte, nicht vier zusätzliche ausführbare Szenen.
+Figuren, Schauplätze, Einstellungen und Gesamtplan bleiben bewusst Entwürfe;
+Freigabe und anschließende KI-Generierung liegen weiterhin beim Nutzer.
+Storyboard-Quelle: `src/lib/light-collector-storyboard.ts`; das Standard-JSON
+wird zusammen mit dem Projekt über `npm run example:light-collector` erzeugt.
+Bereits gespeicherte Entwürfe werden nicht nachträglich verändert; zum Öffnen
+der aktualisierten Vorlage „Standardprojekt laden“ wählen.
