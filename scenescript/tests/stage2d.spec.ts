@@ -89,7 +89,7 @@ test('2D resource overlay shares the 3D layout and previews only the selected re
  const dialog=page.locator('#stage2d-dialog'),canvas=dialog.locator('#stage2d-resource-preview canvas');
  await expect(canvas).toHaveAttribute('data-stage2d-time','0');
  await expect(canvas).toHaveAttribute('data-stage2d-actors','1');
- await expect(dialog.locator('#stage2d-fields > fieldset > legend')).toHaveText(['Allgemein','Aussehen','Soundeffekte']);
+ await expect(dialog.locator('#stage2d-fields > fieldset > legend')).toHaveText(['Allgemein','Aussehen']);
  await expect(dialog.locator('.stage3d-color-swatch output').first()).toHaveText('#F28B70');
  const layout=await dialog.evaluate(el=>({
   width:el.getBoundingClientRect().width,
@@ -234,4 +234,28 @@ test('2D resource sounds edit independently from instance mute and export even w
   scene.stage2d!.actors[0].sound={muted:true,volume:1,pitch:0};return {peak,hasAudio,mutedHasAudio:exportHasAudio(p),mutedScore:objectSoundScore2D(p)};
  },url);
  expect(result.hasAudio).toBe(true);expect(result.peak).toBeGreaterThan(.001);expect(result.mutedHasAudio).toBe(false);expect(result.mutedScore).toBeNull();
+});
+
+test('resource sound cards are grouped, two-column when spacious, and fit narrow dialogs',async({page},info)=>{
+ await ready(page);await page.locator('#open-stage2d').click();
+ const panel=page.locator('.stage2d-sounds');await expect(panel.locator('.stage2d-sound-card')).toHaveCount(4);
+ await expect(panel.locator('.stage2d-sound-card').first().locator('h4')).toHaveText(['Zuordnung','Auslösung & Zeitpunkt','Lautstärke']);
+ const layout=await panel.evaluate(el=>{const grid=el.querySelector('.stage2d-sound-cards')!,cards=[...grid.children].map(card=>card.getBoundingClientRect());return {columns:getComputedStyle(grid).gridTemplateColumns.split(' ').length,available:grid.clientWidth,first:cards[0].x,second:cards[1].x,fits:el.scrollWidth<=el.clientWidth+1};});
+ expect(layout.fits).toBe(true);expect(layout.columns).toBe(layout.available>=616?2:1);
+ if(layout.columns===2)expect(layout.second).toBeGreaterThan(layout.first);
+ await panel.scrollIntoViewIfNeeded();await info.attach('sound-settings',{body:await panel.screenshot(),contentType:'image/png'});
+});
+
+test('all ten storyboard references display and survive the portable project download',async({page})=>{
+ await ready(page);await page.locator('#open-storyboard').click();
+ for(const [tab,ids]of [['characters',['collector','butterfly']],['objects',['spark','flower']],['settings',['forest','night-garden']],['shots',['arrival','discovery','catch','transformation']]] as const){
+  await page.locator('[data-board-tab='+tab+']').click();
+  for(const id of ids){
+   await page.locator('[data-board-item='+id+']').click();
+   const reference=page.locator('.board-image-field img');await expect(reference).toHaveCount(1);await expect(reference).toBeVisible();
+   await expect.poll(()=>reference.evaluate((image:HTMLImageElement)=>image.complete&&image.naturalWidth===960&&image.naturalHeight===540)).toBe(true);
+  }
+ }
+ await page.locator('#storyboard-close').click();const pending=page.waitForEvent('download');await page.locator('#save-project').click();
+ const p=JSON.parse(await readFile((await(await pending).path())!,'utf8'));expect(Object.keys(p.storyboard.images)).toHaveLength(10);expect([...p.storyboard.characters,...p.storyboard.settings,...p.storyboard.shots].every((item:any)=>p.storyboard.images[item.image].data.startsWith('data:image/webp;base64,'))).toBe(true);
 });

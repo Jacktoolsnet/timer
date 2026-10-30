@@ -18,6 +18,7 @@
     "example:race": "node --experimental-strip-types scripts/generate-race-example.mjs",
     "test:e2e": "playwright test",
     "example:free2d": "node --experimental-strip-types scripts/generate-free2d-example.mjs",
+    "example:light-collector:references": "node scripts/generate-light-collector-references.mjs",
     "example:light-collector": "node --experimental-strip-types scripts/generate-light-collector.mjs"
   },
   "dependencies": {

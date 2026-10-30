@@ -927,6 +927,22 @@ body.recording .comic-edit-overlay{display:none}
 #stage3d-scene-settings{margin-top:20px;padding:14px;border:1px solid var(--line);border-radius:12px}
 #stage3d-scene-settings summary{cursor:pointer;color:var(--accent);font-weight:600}
 #stage3d-scene-settings h3{font-size:.95rem}
+/* Object sound bindings use the full editor width, independent of the preview column. */
+.stage2d-sounds{grid-column:1/-1;min-width:0;margin:0;padding:16px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.stage2d-sounds legend{padding-inline:6px;color:var(--muted);font-size:.85rem;font-weight:600}
+.stage2d-sound-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px;align-items:start}
+.stage2d-sound-card{min-width:0;margin:0;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.stage2d-sound-card>legend{color:var(--text);overflow-wrap:anywhere}
+.stage2d-sound-group+.stage2d-sound-group{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.stage2d-sound-group h4{margin:0 0 10px;color:var(--muted);font-size:.8rem;font-weight:600}
+.stage2d-sounds label{margin:0;min-width:0;font-size:.85rem;overflow-wrap:anywhere}
+.stage2d-sound-name{grid-column:1/-1}
+.stage2d-sound-actions{display:flex;justify-content:flex-end;margin-top:12px}
+.stage2d-sound-footer{display:flex;align-items:flex-start;gap:12px;margin-top:16px}
+.stage2d-sound-footer details{flex:1;min-width:0}
+.stage2d-sound-footer summary{cursor:pointer;color:var(--muted);font-size:.85rem}
+.stage2d-sound-footer textarea{width:100%;margin-top:12px}
+@media(max-width:430px){.stage2d-sounds .stage3d-field-grid{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:1000px){.stage3d-resource-editor{grid-template-columns:minmax(0,1fr)}.stage3d-resource-preview-card{grid-row:1;max-width:480px;width:100%}}
 @media(max-width:650px){.stage3d-grid{grid-template-columns:minmax(0,1fr)}}
 

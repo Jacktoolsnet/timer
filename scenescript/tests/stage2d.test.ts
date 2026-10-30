@@ -208,3 +208,17 @@ test('sound bindings reject malformed definitions and unbounded emission while l
  const sound=defaultSound2D();sound.trigger='repeat';sound.interval=.08;p.objects2d.collector.sounds=[sound];p.scenes[0].stage2d!.actors[0].actions=[{...defaultAction2D('wave'),duration:3600}];
  assert.throws(()=>validateProject(p),/maximum 10000/);
 });
+
+test('all demo storyboard subjects, settings and shots have portable matching reference images',()=>{
+ const p=validateProject(lightCollectorProject()),board=p.storyboard!;
+ const items=[...board.characters,...board.settings,...board.shots];assert.equal(items.length,10);assert.equal(Object.keys(board.images).length,10);
+ for(const item of items){
+  assert.equal(item.image,'reference-'+item.id);const image=board.images[item.image!]!;
+  assert.equal(image.name,item.id+'.webp');assert.ok(image.data!.startsWith('data:image/webp;base64,'));
+  const bytes=Buffer.from(image.data!.split(',')[1],'base64');assert.ok(bytes.length>1000);assert.equal(bytes.subarray(0,4).toString(),'RIFF');
+  assert.deepEqual(bytes,readFileSync(new URL('../public/examples/light-collector-storyboard/'+image.name,import.meta.url)));
+  assert.equal(item.status,'draft');
+ }
+ const restored=importStoryboard(exportStoryboard(board,true),null);assert.deepEqual(restored.images,board.images);assert.equal(restored.approved,false);
+ const compact=JSON.parse(exportStoryboard(board));assert.ok(Object.values(compact.board.images).every((image:any)=>image.data===undefined));
+});
