@@ -1,14 +1,16 @@
 import {test,expect} from './helpers/editor-test';
+import {roundedHumanModel} from '../src/lib/rounded-human';
+import {defaultBoardDesign} from '../src/lib/storyboard-design';
 import {demoProject} from '../src/lib/model';
 import {inflationStoryboard} from '../src/lib/inflation-storyboard';
 import {exportStoryboard} from '../src/lib/storyboard';
 import {DEFAULT_PROJECT_URL} from '../src/lib/startup-project';
 import {readFile,writeFile} from 'node:fs/promises';
 const fixture=()=>({...demoProject(),storyboard:inflationStoryboard()});
-async function setup(page:import('@playwright/test').Page){
+async function setup(page:import('@playwright/test').Page,project=fixture()){
  await page.addInitScript(()=>localStorage.setItem('jacktools.scenescript.storage-consent.v1','yes'));
  await page.addInitScript(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async(value:string)=>{(window as any).boardCopied=value;}}}));
- await page.route('**'+DEFAULT_PROJECT_URL,route=>route.fulfill({contentType:'application/json',body:JSON.stringify(fixture())}));await page.goto('/de/');await page.locator('#open-storyboard').click();
+ await page.route('**'+DEFAULT_PROJECT_URL,route=>route.fulfill({contentType:'application/json',body:JSON.stringify(project)}));await page.goto('/de/');await page.locator('#open-storyboard').click();
 }
 async function approveTab(page:import('@playwright/test').Page,kind:string){await page.locator(`[data-board-tab=${kind}]`).click();const ids=await page.locator('[data-board-item]').evaluateAll(buttons=>buttons.map(b=>(b as HTMLElement).dataset.boardItem!));for(const id of ids){await page.locator(`[data-board-item="${id}"]`).click();await page.locator('[data-board-review]:has([aria-current=true])').getByRole('switch',{name:'Freigegeben',exact:true}).check();}if(ids.length)await page.locator(`[data-board-item="${ids[0]}"]`).click();}
 async function approveResources(page:import('@playwright/test').Page){for(const kind of ['characters','objects','settings'])await approveTab(page,kind);}
@@ -348,8 +350,13 @@ test('production tiles edit render type, sound switches and concrete scene sound
  await page.locator('#open-storyboard').click();await expect(page.locator('.board-production-tasks')).toContainText('Gentle notification beep');
 });
 
-test('rounded resource example has a real preview, camera controls and movement rehearsal without changing the video',async({page})=>{
- await setup(page);await page.locator('[data-board-tab=characters]').click();await page.locator('[data-board-example=rounded]').click();
+test('existing rounded resource has a real preview, camera controls and movement rehearsal without changing the video',async({page})=>{
+ const project=fixture(),design={...defaultBoardDesign(),mode:'3d' as const};
+ project.storyboard.characters.push({id:'rounded-test',kind:'character',status:'draft',name:'Abgerundete Figur',description:'Test character',image:null,comments:[],design,modelDesign:{...design},model3d:roundedHumanModel()});
+ await setup(page,project);await page.locator('[data-board-tab=characters]').click();
+ await expect(page.locator('[data-board-example=rounded]')).toHaveCount(0);
+ await expect(page.locator('[data-board-edit=add-characters]')).toBeVisible();
+ await page.locator('[data-board-item=rounded-test]').click();
  const card=page.locator('.board-card');await expect(card).toContainText('Abgerundete Figur');await expect(card).toContainText('Stilisiert · abgerundet');
  const canvas=card.locator('.board-model-canvas canvas');await expect(canvas).toBeVisible();await expect(canvas).not.toHaveAttribute('data-stage3d-error','true');
  await card.locator('.board-model-controls select').selectOption('wave');await card.getByRole('slider',{name:'Animationszeit',exact:true}).fill('1.5');await card.getByRole('slider',{name:'Ansicht drehen',exact:true}).fill('-25');
