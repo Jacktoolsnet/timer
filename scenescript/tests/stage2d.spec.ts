@@ -89,7 +89,7 @@ test('2D resource overlay shares the 3D layout and previews only the selected re
  const dialog=page.locator('#stage2d-dialog'),canvas=dialog.locator('#stage2d-resource-preview canvas');
  await expect(canvas).toHaveAttribute('data-stage2d-time','0');
  await expect(canvas).toHaveAttribute('data-stage2d-actors','1');
- await expect(dialog.locator('#stage2d-fields legend')).toHaveText(['Allgemein','Aussehen']);
+ await expect(dialog.locator('#stage2d-fields > fieldset > legend')).toHaveText(['Allgemein','Aussehen','Soundeffekte']);
  await expect(dialog.locator('.stage3d-color-swatch output').first()).toHaveText('#F28B70');
  const layout=await dialog.evaluate(el=>({
   width:el.getBoundingClientRect().width,
@@ -169,7 +169,7 @@ test('free vector bird and city animate deterministically in scene preview and e
   const p=parseProject(await(await fetch('/examples/light-collector.scenescript.json')).text()),m=new ExportMedia(p,new AbortController().signal),r=new ExportRenderer(p,m);
   try{const canvas=await r.frame(.5,1920,1080);return canvas.toDataURL();}finally{r.dispose();m.dispose();}
  });expect(exported).toBe(first);
- await page.locator('#open-stage2d').click();await expect(page.locator('[data-stage2d-field=resource-type]')).toHaveValue('custom');await expect(page.locator('#stage2d-fields textarea')).toHaveValue(/"wing"/);
+ await page.locator('#open-stage2d').click();await expect(page.locator('[data-stage2d-field=resource-type]')).toHaveValue('custom');await expect(page.locator('#stage2d-fields textarea[aria-label="Bauteile & Animationen (JSON)"]')).toHaveValue(/"wing"/);
 });
 
 test('butterflies emerge at the star burst and follow wobbling flowers into a separate night scene',async({page},info)=>{
@@ -208,13 +208,30 @@ test('demo soundtrack has audible music and synchronized synthesized effects in 
    let peak=0,delta=0,repeat=0;for(const value of whole)peak=Math.max(peak,Math.abs(value));for(let i=0;i<contact.length;i++){delta=Math.max(delta,Math.abs(contact[i]-whole[(i<48000?8*48000+i:22*48000+8*48000+i-48000)]));repeat=Math.max(repeat,Math.abs(contact[i]-again[i]));}
    const effects=[];
    for(const id of ['sfx-steps','sfx-air','sfx-sparkle','sfx-wings','sfx-bloom']){
-    const isolated=structuredClone(p);isolated.music!.notes=isolated.music!.notes.filter(note=>note.instrument===id);
+    const isolated=structuredClone(p);isolated.music=null;for(const object of Object.values(isolated.objects2d) as any[])object.sounds=object.sounds?.filter((sound:any)=>sound.instrument.id===id);
     const r=new ExportAudio(isolated,media,22);effects.push({id,rms:rms(await r.chunk(0,22))});
    }
-   return {peak,delta,repeat,effects,sections:[rms(whole.slice(24000,4*48000)),rms(whole.slice(8*48000,10*48000)),rms(whole.slice(17*48000,21*48000))],end:whole.slice(-480).reduce((max,value)=>Math.max(max,Math.abs(value)),0)};
+   return {peak,delta,repeat,effects,sections:[rms(whole.slice(24000,4*48000)),rms(whole.slice(8*48000,10*48000)),rms(whole.slice(17*48000,21*48000))],end:whole.slice(-480).reduce((max:number,value:number)=>Math.max(max,Math.abs(value)),0)};
   }finally{media.dispose();}
  },url);
  expect(audio.peak).toBeGreaterThan(.01);expect(audio.peak).toBeLessThan(.95);expect(audio.delta).toBeLessThan(.000001);expect(audio.repeat).toBe(0);expect(audio.end).toBeLessThan(.00002);
  for(const energy of audio.sections)expect(energy).toBeGreaterThan(.001);
  for(const effect of audio.effects)expect(effect.rms,effect.id).toBeGreaterThan(.00001);
+});
+
+test('2D resource sounds edit independently from instance mute and export even without music',async({page})=>{
+ test.setTimeout(90000);await ready(page);
+ await page.locator('#open-stage2d').click();const volume=page.locator('[data-stage2d-field=sound-0-volume]');await expect(volume).toHaveValue('0.75');await volume.fill('0.3');await volume.dispatchEvent('change');
+ await page.locator('#stage2d-dialog').getByRole('button',{name:'Schließen',exact:true}).click();await page.locator('#undo-project').click();await page.locator('#open-stage2d').click();await expect(volume).toHaveValue('0.75');await page.locator('#stage2d-dialog').getByRole('button',{name:'Schließen',exact:true}).click();
+ await page.locator('[data-stage2d-field=collector-sound-muted]').check();
+ const pending=page.waitForEvent('download');await page.locator('#save-project').click();const saved=JSON.parse(await readFile((await(await pending).path())!,'utf8'));expect(saved.scenes[0].stage2d.actors[0].sound.muted).toBe(true);expect(saved.objects2d.collector.sounds[0].instrument.volume).toBe(.75);expect(saved.music.notes.some((note:any)=>note.instrument==='sfx-steps')).toBe(false);
+ const result=await page.evaluate(async url=>{
+  const {parseProject,validateProject}=await import(/* @vite-ignore */ '/src/lib/model.ts' as string),{defaultAction2D}=await import(/* @vite-ignore */ '/src/lib/stage2d.ts' as string),{defaultSound2D,objectSoundScore2D}=await import(/* @vite-ignore */ '/src/lib/sound2d.ts' as string),{exportHasAudio,exportVideo}=await import(/* @vite-ignore */ '/src/scripts/video-export.ts' as string);
+  const p=parseProject(await(await fetch(url)).text());p.music=null;p.storyboard=null;p.scenes=p.scenes.slice(0,1);const scene=p.scenes[0];scene.duration=1;scene.stage2d!.camera=[];scene.stage2d!.actors=scene.stage2d!.actors.slice(0,1);scene.stage2d!.actors[0].actions=[{...defaultAction2D('wave'),at:.1,duration:.5}];p.objects2d.collector.sounds=[defaultSound2D()];validateProject(p);
+  const hasAudio=exportHasAudio(p),blob=await exportVideo(p,{format:'webm',resolution:480,fps:24,audio:true},new AbortController().signal,()=>{});
+  const moduleURL=performance.getEntriesByType('resource').map(e=>e.name).find(n=>n.includes('/mediabunny.js?v='))!,m=await import(/* @vite-ignore */ moduleURL),input=new m.Input({formats:m.ALL_FORMATS,source:new m.BlobSource(blob)});
+  let peak=0;try{const track=await input.getPrimaryAudioTrack();for await(const item of new m.AudioBufferSink(track).buffers())for(const value of item.buffer.getChannelData(0))peak=Math.max(peak,Math.abs(value));}finally{input.dispose();}
+  scene.stage2d!.actors[0].sound={muted:true,volume:1,pitch:0};return {peak,hasAudio,mutedHasAudio:exportHasAudio(p),mutedScore:objectSoundScore2D(p)};
+ },url);
+ expect(result.hasAudio).toBe(true);expect(result.peak).toBeGreaterThan(.001);expect(result.mutedHasAudio).toBe(false);expect(result.mutedScore).toBeNull();
 });

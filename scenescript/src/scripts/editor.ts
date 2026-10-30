@@ -1,3 +1,4 @@
+import {objectSoundScore2D} from '../lib/sound2d';
 import {retimeStage2D} from '../lib/stage2d';
 import {createStage2DView,prepareStage2DPreview,type Stage2DView} from './stage2d-preview';
 import {stage2DFields,stage2DTimeline,installStage2DEditor} from './stage2d-editor';
@@ -458,7 +459,7 @@ simulationDialog.addEventListener('close',()=>{simulationDraft=undefined;});
 const musicDialog=$('music-dialog') as HTMLDialogElement;
 let musicDraft:Music|undefined,instrumentIndex=0,notePage=0;
 const narrationPlayer=new NarrationPlayer();
-const musicPlayer=new MusicPlayer(),previewMusic=new MusicPlayer();
+const soundPlayer=new MusicPlayer(),musicPlayer=new MusicPlayer(),previewMusic=new MusicPlayer();
 let previewListening=false,previewTimer:ReturnType<typeof setTimeout>|undefined;
 function stopMusicPreview(){previewMusic.stop();previewListening=false;clearTimeout(previewTimer);const b=$('listen-music');b.title=t('listen');b.setAttribute('aria-label',b.title);b.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 4 12 8-12 8Z"/></svg>';}
 
@@ -1030,7 +1031,7 @@ function draw(follow=true){
  ($('next-scene') as HTMLButtonElement).disabled=sceneIndex===project.scenes.length-1;
  }
 }
-function stop(){playbackPreparation?.abort();playbackPreparation=undefined;preparingPlayback=false;document.querySelectorAll('video').forEach(v=>v.pause());clearTimeout(recordingRestartTimer);recordingRestartTimer=undefined;playbackAttempt++;musicPlayer.stop();narrationPlayer.stop();document.querySelectorAll('audio').forEach(a=>a.pause());playing=false;cancelAnimationFrame(frame);keepScreenAwake(false);}
+function stop(){playbackPreparation?.abort();playbackPreparation=undefined;preparingPlayback=false;document.querySelectorAll('video').forEach(v=>v.pause());clearTimeout(recordingRestartTimer);recordingRestartTimer=undefined;playbackAttempt++;musicPlayer.stop();soundPlayer.stop();narrationPlayer.stop();document.querySelectorAll('audio').forEach(a=>a.pause());playing=false;cancelAnimationFrame(frame);keepScreenAwake(false);}
 function previewVideoPlayhead(){
  const candidates:{video:HTMLVideoElement;settings:VideoSettings;origin:number}[]=[];
  for(const view of views)if(view.video&&view.element.video&&view.node.style.visibility!=='hidden')candidates.push({video:view.video,settings:view.element.video,origin:offset(sceneIndex)+view.element.at});
@@ -1039,14 +1040,14 @@ function previewVideoPlayhead(){
  for(const {video,settings,origin} of candidates){const value=videoPlayhead(video,settings,origin,time);if(value!==null)return value;}
  return null;
 }
-function tick(now:number){time=Math.min(total(),musicPlayer.playhead()??narrationPlayer.playhead()??previewVideoPlayhead()??(baseTime+(now-started)/1000));baseTime=time;started=now;draw();if(time>=total()){
+function tick(now:number){time=Math.min(total(),musicPlayer.playhead()??soundPlayer.playhead()??narrationPlayer.playhead()??previewVideoPlayhead()??(baseTime+(now-started)/1000));baseTime=time;started=now;draw();if(time>=total()){
  stop();draw();if(recording)recordingRestartTimer=setTimeout(()=>{
   recordingRestartTimer=undefined;if(!recording||playing)return;
   document.body.classList.add('recording-ready');setRecordingStart(true);$('recording-start').hidden=false;
  },3000);return;
 }frame=requestAnimationFrame(tick);}
 function play(){
- if(countdownTimer||playing)return;stopAudioPreviews();if(project.music?.enabled)void musicPlayer.unlock().catch(()=>{});document.querySelectorAll('video').forEach(v=>v.pause());clearTimeout(recordingRestartTimer);recordingRestartTimer=undefined;if(recording){document.body.classList.remove('recording-ready');$('recording-start').hidden=true;}if(time>=total())time=0;playing=true;keepScreenAwake(true);const attempt=++playbackAttempt;
+ if(countdownTimer||playing)return;stopAudioPreviews();if(Object.values(project.objects2d).some(object=>object.sounds?.length))void soundPlayer.unlock().catch(()=>{});if(project.music?.enabled)void musicPlayer.unlock().catch(()=>{});document.querySelectorAll('video').forEach(v=>v.pause());clearTimeout(recordingRestartTimer);recordingRestartTimer=undefined;if(recording){document.body.classList.remove('recording-ready');$('recording-start').hidden=true;}if(time>=total())time=0;playing=true;keepScreenAwake(true);const attempt=++playbackAttempt;
  preparingPlayback=true;const preparation=new AbortController();playbackPreparation=preparation;
  // Build the playing scene once, but keep its video paused while it buffers.
  // The first playback tick reuses these same, already prepared video nodes.
@@ -1059,7 +1060,8 @@ function play(){
  void Promise.all([project.scenes.some(s=>s.stage2d)?prepareStage2DPreview():Promise.resolve(),prepare,Promise.all(videos.map(v=>prepareVideo(v,preparation.signal))),morphReady,project.scenes.some(s=>s.stage3d)?prepareStage3DPreview(project,()=>preparation.signal.throwIfAborted(),project.scenes[currentAt.index].stage3d??undefined):Promise.resolve()]).then(async([,buffers])=>{
   if(!playing||attempt!==playbackAttempt)return;
   if(project.music?.enabled){try{await musicPlayer.start(project.music,time,total(),t=>buffers?duckGain(project,t,clips):1);}catch{showToast(t('audioError'),'warning');}}
-  if(!playing||attempt!==playbackAttempt)return;if(buffers)narrationPlayer.start(project,musicPlayer.playhead()??time,buffers);begin();
+  if(!playing||attempt!==playbackAttempt)return;const sounds=objectSoundScore2D(project);if(sounds){try{await soundPlayer.start(sounds,time,total(),t=>buffers?duckGain(project,t,clips):1,()=>musicPlayer.playhead());}catch{showToast(t('audioError'),'warning');}}
+  if(!playing||attempt!==playbackAttempt)return;if(buffers)narrationPlayer.start(project,musicPlayer.playhead()??soundPlayer.playhead()??time,buffers);begin();
  }).catch(error=>{if(preparation.signal.aborted||attempt!==playbackAttempt)return;stop();draw();showToast(t('previewPrepareError')+' '+(error as Error).message,'warning');});
 }
 $('play').addEventListener('click',()=>{if(playing){stop();draw();}else play();});
@@ -1202,7 +1204,7 @@ $('focus').addEventListener('click',async()=>{
 function startCountdown(){
  if(!recording||!document.body.classList.contains('recording-ready')||($('start-recording') as HTMLButtonElement).disabled)return;
  if(narrationClips(project).length)void narrationPlayer.unlock().catch(()=>showToast(t('audioError'),'warning'));
- if(project.music?.enabled)void musicPlayer.unlock().catch(()=>showToast(t('audioError'),'warning'));
+ if(Object.values(project.objects2d).some(object=>object.sounds?.length))void soundPlayer.unlock().catch(()=>{});if(project.music?.enabled)void musicPlayer.unlock().catch(()=>showToast(t('audioError'),'warning'));
  clearTimeout(recordingRestartTimer);recordingRestartTimer=undefined;time=0;draw();
  document.body.classList.remove('recording-ready','controls-visible');clearTimeout(controlsTimer);
  $('recording-start').hidden=true;$('start-recording').blur();keepScreenAwake(true);

@@ -1,3 +1,4 @@
+import {objectSoundScore2D,defaultSound2D} from '../src/lib/sound2d.ts';
 import {retimeMusicScene} from '../src/lib/music.ts';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
@@ -173,14 +174,37 @@ test('demo contains a deterministic native soundtrack and action-synchronous, ed
  const {lightCollectorMusic,LIGHT_COLLECTOR_SFX}=await import('../src/lib/light-collector-audio.ts');
  const {reviewProduction}=await import('../src/lib/production-review.ts');
  const p=validateProject(lightCollectorProject()),music=p.music!;
- assert.deepEqual(music,lightCollectorMusic());assert.equal(music.mode,'score');assert.equal(music.instruments.length,8);
+ assert.deepEqual(music,lightCollectorMusic());assert.equal(music.mode,'score');assert.equal(music.instruments.length,5);
  assert.deepEqual(p.storyboard!.production,{renderMode:'2d',dialogue:false,music:true,sfx:true});
- assert.ok(music.notes.some(n=>n.instrument==='sfx-sparkle'&&n.at===BUTTERFLY_BIRTH.at));
- for(const landing of GARDEN_LANDINGS)assert.ok(music.notes.some(n=>n.instrument==='sfx-bloom'&&n.at===landing.at));
+ const effects=objectSoundScore2D(p)!;assert.ok(effects.notes.some(n=>n.instrument===JSON.stringify(['spark','burst-light'])&&n.at===BUTTERFLY_BIRTH.at));
+ for(const landing of GARDEN_LANDINGS)assert.ok(effects.notes.some(n=>n.instrument===JSON.stringify(['flower','landing'])&&n.at===landing.at));
  assert.ok(music.notes.some(n=>n.at===19.3));assert.equal(music.fadeOut,1.25);assert.equal(p.narration,null);
  assert.deepEqual(reviewProduction(p),[]);
- const silent=structuredClone(p);silent.music!.notes=silent.music!.notes.filter(n=>n.instrument!=='sfx-bloom');
+ const silent=structuredClone(p);silent.objects2d.flower.sounds=[];
  assert.ok(reviewProduction(silent).some(issue=>issue.code==='sfxPending'&&issue.detail!.includes(LIGHT_COLLECTOR_SFX.bloom)));
- const muted=structuredClone(p);muted.music!.instruments.find(i=>i.id==='sfx-wings')!.volume=0;
+ const muted=structuredClone(p);muted.objects2d.butterfly.sounds![0].instrument.volume=0;
  assert.ok(reviewProduction(muted).some(issue=>issue.code==='sfxPending'&&issue.detail!.includes(LIGHT_COLLECTOR_SFX.wings)));
+});
+
+test('object sound bindings follow reused instances, action timing, muting and resource changes',()=>{
+ const p=lightCollectorProject();p.music=null;
+ const key=JSON.stringify(['flower','landing']),flower=p.scenes[0].stage2d!.actors.find(a=>a.id==='flower-blue')!;
+ const before=objectSoundScore2D(p)!;assert.equal(before.notes.filter(n=>n.instrument===key).length,6);
+ assert.ok(before.notes.every(n=>n.at<17)); // Perched closing actors never replay landing sounds.
+ flower.actions[0].at=12;let score=objectSoundScore2D(p)!;assert.ok(score.notes.some(n=>n.instrument===key&&n.at===12));
+ flower.sound={muted:true,volume:1,pitch:0};score=objectSoundScore2D(p)!;assert.equal(score.notes.filter(n=>n.instrument===key).length,4);
+ flower.sound={muted:false,volume:.5,pitch:12};score=objectSoundScore2D(p)!;const note=score.notes.find(n=>n.instrument===key&&n.at===12)!;assert.equal(note.pitch,88);assert.equal(note.velocity,.4);
+ const copy=structuredClone(flower);copy.id='another-flower';copy.actions[0].at=10;p.scenes[0].stage2d!.actors.push(copy);
+ assert.ok(objectSoundScore2D(p)!.notes.some(n=>n.instrument===key&&n.at===10));
+ p.objects2d.flower.sounds![0].instrument.volume=.2;assert.equal(objectSoundScore2D(p)!.instruments.find(i=>i.id===key)!.volume,.2);
+ assert.deepEqual(parseProject(JSON.stringify(p)),validateProject(p));
+});
+test('sound bindings reject malformed definitions and unbounded emission while legacy resources stay silent',()=>{
+ assert.equal(objectSoundScore2D(demoProject()),null);
+ for(const mutate of [(p:any)=>p.objects2d.flower.sounds[0].phase=NaN,(p:any)=>p.objects2d.flower.sounds[0].interval=0,(p:any)=>p.objects2d.flower.sounds[0].trigger='steps',(p:any)=>p.objects2d.flower.sounds[0].clip='missing',(p:any)=>p.objects2d.flower.sounds[0].instrument.code='bad',(p:any)=>p.objects2d.flower.sounds[0].notes[0].instrument='bad',(p:any)=>p.scenes[0].stage2d.actors[0].sound={volume:2},(p:any)=>p.scenes[0].stage2d.actors[0].sound={pitch:1.5},(p:any)=>p.objects2d.flower.sounds.push(p.objects2d.flower.sounds[0])]){
+  const p=lightCollectorProject();mutate(p);assert.throws(()=>validateProject(p));
+ }
+ const p=lightCollectorProject();p.music=null;p.scenes=p.scenes.slice(0,1);p.scenes[0].duration=3600;
+ const sound=defaultSound2D();sound.trigger='repeat';sound.interval=.08;p.objects2d.collector.sounds=[sound];p.scenes[0].stage2d!.actors[0].actions=[{...defaultAction2D('wave'),duration:3600}];
+ assert.throws(()=>validateProject(p),/maximum 10000/);
 });

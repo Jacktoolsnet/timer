@@ -39,6 +39,23 @@ stage iris transitions (still camera-aligned, below ending text). Actions: move/
 in scene seconds, toX/toY, height (0..110) and target (instance ID for attach).
 Walk/wave/jump support robots and custom articulated objects. Custom clips use
 actions:[{type:"play",clip:"name",at,duration}]; walk/wave/jump may specify clip too.
+Object2D.sounds optionally contains up to 8 reusable synthesized sound bindings:
+{id,name,action,clip:"",trigger:"start"|"repeat"|"steps",phase:0,interval:0.43,stride:35,
+instrument:(native Music instrument),notes:[{at:0,duration:0.15,pitch:79,velocity:0.7}]}.
+phase is a fraction (0..1) of the matched action duration, never an absolute scene time.
+clip filters an animation clip (required for play). start fires once at phase; repeat
+fires at interval seconds until the action ends; steps is only for walk and follows
+eased travel distance at each stride. Notes have relative at (0..4 seconds), duration
+(.05..16), MIDI pitch 21..108 and velocity 0..1. All instrument parameters are editable.
+Actor.sound:{muted:false,volume:1,pitch:0} optionally controls only that instance's sounds
+(pitch is a semitone offset -24..24). Object appearance and sounds remain reusable.
+Recompute events from actions: moving or retiming an action also moves its sounds;
+cloning a resource/instance copies bindings, not fixed global notes. Muted/invisible
+instances emit no new sounds. Do not duplicate object SFX in Project.music. Music,
+ambience and scene transition cues stay in Project.music. Up to 10000 emitted object
+sound notes / 64 simultaneous voices per project; keep effects sparse. Exact sound
+binding names can match storyboard soundEffects tasks. Preserve sounds when editing
+or regenerating geometry/animation clips.
 Idle plays automatically. Scene.stage2d.stageClip optionally chooses a set clip.
 Attach links a non-robot to another robot or custom target with a "hand" anchor. attach.burst:false suppresses contact particles for gentle landings.
 No self/invalid targets or overlapping position actions. Same-type legacy actions

@@ -1,6 +1,184 @@
 {
   "objects2d": {
     "collector": {
+      "sounds": [
+        {
+          "id": "steps",
+          "name": "Weiche Roboter-Schritte",
+          "action": "walk",
+          "clip": "",
+          "trigger": "steps",
+          "phase": 0,
+          "interval": 0.43,
+          "stride": 35,
+          "instrument": {
+            "id": "sfx-steps",
+            "name": "Weiche Roboter-Schritte",
+            "wave": "triangle",
+            "partials": [
+              {
+                "ratio": 1,
+                "gain": 1
+              }
+            ],
+            "attack": 0.003,
+            "decay": 0.065,
+            "sustain": 0.03,
+            "release": 0.09,
+            "volume": 0.75,
+            "filter": "lowpass",
+            "cutoff": 600,
+            "resonance": 0.7,
+            "echo": {
+              "delay": 0.25,
+              "feedback": 0.2,
+              "mix": 0
+            },
+            "reverb": 0
+          },
+          "notes": [
+            {
+              "at": 0,
+              "duration": 0.075,
+              "pitch": 43,
+              "velocity": 0.6
+            }
+          ]
+        },
+        {
+          "id": "crouch",
+          "name": "Weiche Roboter-Schritte",
+          "action": "jump",
+          "clip": "",
+          "trigger": "start",
+          "phase": 0.11666666666666665,
+          "interval": 0.43,
+          "stride": 35,
+          "instrument": {
+            "id": "sfx-steps",
+            "name": "Weiche Roboter-Schritte",
+            "wave": "triangle",
+            "partials": [
+              {
+                "ratio": 1,
+                "gain": 1
+              }
+            ],
+            "attack": 0.003,
+            "decay": 0.065,
+            "sustain": 0.03,
+            "release": 0.09,
+            "volume": 0.75,
+            "filter": "lowpass",
+            "cutoff": 600,
+            "resonance": 0.7,
+            "echo": {
+              "delay": 0.25,
+              "feedback": 0.2,
+              "mix": 0
+            },
+            "reverb": 0
+          },
+          "notes": [
+            {
+              "at": 0,
+              "duration": 0.12,
+              "pitch": 43,
+              "velocity": 0.38
+            }
+          ]
+        },
+        {
+          "id": "takeoff",
+          "name": "Luftiger Sprung und Sternenstaub",
+          "action": "jump",
+          "clip": "",
+          "trigger": "start",
+          "phase": 0.2333333333333333,
+          "interval": 0.43,
+          "stride": 35,
+          "instrument": {
+            "id": "sfx-air",
+            "name": "Luftiger Sprung und Sternenstaub",
+            "wave": "noise",
+            "partials": [
+              {
+                "ratio": 1,
+                "gain": 1
+              },
+              {
+                "ratio": 2,
+                "gain": 0.15
+              }
+            ],
+            "attack": 0.09,
+            "decay": 0.18,
+            "sustain": 0.12,
+            "release": 0.35,
+            "volume": 0.45,
+            "filter": "bandpass",
+            "cutoff": 1400,
+            "resonance": 0.8,
+            "echo": {
+              "delay": 0.25,
+              "feedback": 0.2,
+              "mix": 0
+            },
+            "reverb": 0.12
+          },
+          "notes": [
+            {
+              "at": 0,
+              "duration": 0.32,
+              "pitch": 60,
+              "velocity": 0.65
+            }
+          ]
+        },
+        {
+          "id": "landing",
+          "name": "Weiche Roboter-Schritte",
+          "action": "jump",
+          "clip": "",
+          "trigger": "start",
+          "phase": 0.6666666666666666,
+          "interval": 0.43,
+          "stride": 35,
+          "instrument": {
+            "id": "sfx-steps",
+            "name": "Weiche Roboter-Schritte",
+            "wave": "triangle",
+            "partials": [
+              {
+                "ratio": 1,
+                "gain": 1
+              }
+            ],
+            "attack": 0.003,
+            "decay": 0.065,
+            "sustain": 0.03,
+            "release": 0.09,
+            "volume": 0.75,
+            "filter": "lowpass",
+            "cutoff": 600,
+            "resonance": 0.7,
+            "echo": {
+              "delay": 0.25,
+              "feedback": 0.2,
+              "mix": 0
+            },
+            "reverb": 0
+          },
+          "notes": [
+            {
+              "at": 0,
+              "duration": 0.16,
+              "pitch": 36,
+              "velocity": 0.8
+            }
+          ]
+        }
+      ],
       "name": "Der Lichtsammler",
       "kind": "robot",
       "color": "#f28b70",
@@ -8,6 +186,187 @@
       "shape": "star"
     },
     "spark": {
+      "sounds": [
+        {
+          "id": "glimmer",
+          "name": "Helles Sternenfunkeln",
+          "action": "float",
+          "clip": "",
+          "trigger": "repeat",
+          "phase": 0,
+          "interval": 1.1,
+          "stride": 35,
+          "instrument": {
+            "id": "sfx-sparkle",
+            "name": "Helles Sternenfunkeln",
+            "wave": "sine",
+            "partials": [
+              {
+                "ratio": 1,
+                "gain": 1
+              },
+              {
+                "ratio": 2,
+                "gain": 0.24
+              },
+              {
+                "ratio": 2.71,
+                "gain": 0.12
+              }
+            ],
+            "attack": 0.004,
+            "decay": 0.5,
+            "sustain": 0.05,
+            "release": 1.1,
+            "volume": 0.72,
+            "filter": "lowpass",
+            "cutoff": 5000,
+            "resonance": 0.7,
+            "echo": {
+              "delay": 0.19,
+              "feedback": 0.22,
+              "mix": 0.15
+            },
+            "reverb": 0.26
+          },
+          "notes": [
+            {
+              "at": 0,
+              "duration": 0.12,
+              "pitch": 84,
+              "velocity": 0.22
+            }
+          ]
+        },
+        {
+          "id": "burst-air",
+          "name": "Luftiger Sprung und Sternenstaub",
+          "action": "fade",
+          "clip": "",
+          "trigger": "start",
+          "phase": 0,
+          "interval": 0.43,
+          "stride": 35,
+          "instrument": {
+            "id": "sfx-air",
+            "name": "Luftiger Sprung und Sternenstaub",
+            "wave": "noise",
+            "partials": [
+              {
+                "ratio": 1,
+                "gain": 1
+              },
+              {
+                "ratio": 2,
+                "gain": 0.15
+              }
+            ],
+            "attack": 0.09,
+            "decay": 0.18,
+            "sustain": 0.12,
+            "release": 0.35,
+            "volume": 0.45,
+            "filter": "bandpass",
+            "cutoff": 1400,
+            "resonance": 0.8,
+            "echo": {
+              "delay": 0.25,
+              "feedback": 0.2,
+              "mix": 0
+            },
+            "reverb": 0.12
+          },
+          "notes": [
+            {
+              "at": 0,
+              "duration": 0.24,
+              "pitch": 60,
+              "velocity": 0.82
+            }
+          ]
+        },
+        {
+          "id": "burst-light",
+          "name": "Helles Sternenfunkeln",
+          "action": "fade",
+          "clip": "",
+          "trigger": "start",
+          "phase": 0,
+          "interval": 0.43,
+          "stride": 35,
+          "instrument": {
+            "id": "sfx-sparkle",
+            "name": "Helles Sternenfunkeln",
+            "wave": "sine",
+            "partials": [
+              {
+                "ratio": 1,
+                "gain": 1
+              },
+              {
+                "ratio": 2,
+                "gain": 0.24
+              },
+              {
+                "ratio": 2.71,
+                "gain": 0.12
+              }
+            ],
+            "attack": 0.004,
+            "decay": 0.5,
+            "sustain": 0.05,
+            "release": 1.1,
+            "volume": 0.72,
+            "filter": "lowpass",
+            "cutoff": 5000,
+            "resonance": 0.7,
+            "echo": {
+              "delay": 0.19,
+              "feedback": 0.22,
+              "mix": 0.15
+            },
+            "reverb": 0.26
+          },
+          "notes": [
+            {
+              "at": 0,
+              "duration": 0.13,
+              "pitch": 84,
+              "velocity": 0.95
+            },
+            {
+              "at": 0.095,
+              "duration": 0.13,
+              "pitch": 88,
+              "velocity": 0.65
+            },
+            {
+              "at": 0.19,
+              "duration": 0.13,
+              "pitch": 91,
+              "velocity": 0.65
+            },
+            {
+              "at": 0.28500000000000003,
+              "duration": 0.13,
+              "pitch": 96,
+              "velocity": 0.65
+            },
+            {
+              "at": 0.38,
+              "duration": 0.13,
+              "pitch": 93,
+              "velocity": 0.65
+            },
+            {
+              "at": 0.475,
+              "duration": 0.13,
+              "pitch": 88,
+              "velocity": 0.65
+            }
+          ]
+        }
+      ],
       "name": "Lichtfunke",
       "kind": "spark",
       "color": "#fff5c0",
@@ -15,6 +374,55 @@
       "shape": "star"
     },
     "butterfly": {
+      "sounds": [
+        {
+          "id": "wings",
+          "name": "Zarter Schmetterlingsflug",
+          "action": "play",
+          "clip": "fly",
+          "trigger": "repeat",
+          "phase": 0,
+          "interval": 0.46,
+          "stride": 35,
+          "instrument": {
+            "id": "sfx-wings",
+            "name": "Zarter Schmetterlingsflug",
+            "wave": "noise",
+            "partials": [
+              {
+                "ratio": 1,
+                "gain": 1
+              },
+              {
+                "ratio": 2,
+                "gain": 0.15
+              }
+            ],
+            "attack": 0.018,
+            "decay": 0.035,
+            "sustain": 0.02,
+            "release": 0.045,
+            "volume": 0.17,
+            "filter": "highpass",
+            "cutoff": 3600,
+            "resonance": 0.8,
+            "echo": {
+              "delay": 0.25,
+              "feedback": 0.2,
+              "mix": 0
+            },
+            "reverb": 0
+          },
+          "notes": [
+            {
+              "at": 0,
+              "duration": 0.055,
+              "pitch": 72,
+              "velocity": 0.42
+            }
+          ]
+        }
+      ],
       "model": {
         "width": 92,
         "height": 82,
@@ -1123,6 +1531,65 @@
       "shape": "star"
     },
     "flower": {
+      "sounds": [
+        {
+          "id": "landing",
+          "name": "Sanfte Blütenlandung",
+          "action": "play",
+          "clip": "landing",
+          "trigger": "start",
+          "phase": 0,
+          "interval": 0.43,
+          "stride": 35,
+          "instrument": {
+            "id": "sfx-bloom",
+            "name": "Sanfte Blütenlandung",
+            "wave": "sine",
+            "partials": [
+              {
+                "ratio": 1,
+                "gain": 1
+              },
+              {
+                "ratio": 2.92,
+                "gain": 0.17
+              },
+              {
+                "ratio": 5.3,
+                "gain": 0.08
+              }
+            ],
+            "attack": 0.004,
+            "decay": 0.28,
+            "sustain": 0.08,
+            "release": 0.55,
+            "volume": 0.65,
+            "filter": "lowpass",
+            "cutoff": 3800,
+            "resonance": 0.7,
+            "echo": {
+              "delay": 0.28,
+              "feedback": 0.2,
+              "mix": 0.1
+            },
+            "reverb": 0.18
+          },
+          "notes": [
+            {
+              "at": 0,
+              "duration": 0.15,
+              "pitch": 76,
+              "velocity": 0.8
+            },
+            {
+              "at": 0.22,
+              "duration": 0.1,
+              "pitch": 72,
+              "velocity": 0.32
+            }
+          ]
+        }
+      ],
       "model": {
         "width": 140,
         "height": 180,
@@ -1824,7 +2291,7 @@
     "message": "Neugier und eine kleine mutige Geste können die Welt in einem neuen Licht erscheinen lassen. Ein kleiner Funke kann eine große Veränderung auslösen.",
     "audience": "Deutschsprachige Kinder, Familien und Menschen, die kurze, freundliche Animationsgeschichten mögen. Die Handlung soll auch ohne Ton und ohne Vorwissen verständlich sein.",
     "language": "Deutsch",
-    "style": "Querformat 16:9. Poetische, stilisierte 2D-Puppenanimation aus Vektorformen: gedeckte Waldgrün- und Petroltöne, eine warme korallfarbene Figur und ein cremegelber Lichtakzent. Weiche Bewegungsübergänge, deutliche Posen, lebendige Gelenkgestik, Einfedern vor dem Sprung, leichtes Stauchen und Strecken sowie gedämpftes Nachschwingen. Mehrere Hintergrundebenen erzeugen durch unterschiedlich starke Verschiebung räumliche Tiefe. Vier Storyboard-Abschnitte verteilen sich auf zwei echte Filmszenen mit insgesamt 22 Sekunden: Waldweg (0–17 Sekunden, die ersten drei Abschnitte) und Nachtgarten (17–22 Sekunden, Schlussabschnitt). Eine 1,8 Sekunden lange Szenen-Überblendung verbindet beide ohne harten Schnitt. Die Schlussbotschaft besteht aus normalen, einzeln bearbeitbaren Textelementen der zweiten Szene, nicht aus einer internen Bühnen-Einblendung. Die Umsetzung verwendet wiederverwendbare Bühnen in project.stages2d und Objekte in project.objects2d. Jede Szene referenziert diese Ressourcen in stage2d.stage und stage2d.actors; Aktionen und Kamera gehören zur Szene. Normale Zusatzebenen sind darüber möglich. Schmetterlinge und Blumen sind frei aufgebaute 2D-Vektorressourcen mit wiederverwendbaren Animationsclips: Flügelschlag, Erscheinen, Landen und gedämpftes Nachfedern. Flugwege, Geburt am Sternkontakt und die drei Landungszeitpunkte sind Szenenchoreografie, nicht fest in die Ressource eingebaute absolute Filmzeiten. Alle drei Schmetterlinge teilen eine Objektressource, alle drei Blumen eine weitere; Farbe und Größe unterscheiden die Instanzen. Beide Szenen verwenden dieselben Blumen- und Schmetterlingsressourcen. Im Nachtgarten sitzen die Schmetterlinge von Beginn an auf den Blüten; Geburt, Flug und Landung werden dort nicht wiederholt. Keine echte 3D-Darstellung. Eine eigens komponierte, ruhige C-Dur-Musik trägt die Handlung: Harfenmotiv, warme Flächen und sanfter Bass; beim Sternkontakt helles Funkeln, beim Flug sehr leises Flügelrascheln, bei den drei Landungen weiche Klangtupfer. Schritte und Sprung bleiben freundlich und zurückhaltend, keine lauten Knalle. Der Wechsel zum Nachtgarten erhält einen luftigen Übergang; zur Schlussbotschaft erklingen drei warme Glockentöne. Musik und Effekte sind als native, bearbeitbare Partitur in Project.music angelegt; die Instrumentnamen entsprechen den soundEffects-Einträgen. Keine Sprache. Zum Ende sanft ausblenden.",
+    "style": "Querformat 16:9. Poetische, stilisierte 2D-Puppenanimation aus Vektorformen: gedeckte Waldgrün- und Petroltöne, eine warme korallfarbene Figur und ein cremegelber Lichtakzent. Weiche Bewegungsübergänge, deutliche Posen, lebendige Gelenkgestik, Einfedern vor dem Sprung, leichtes Stauchen und Strecken sowie gedämpftes Nachschwingen. Mehrere Hintergrundebenen erzeugen durch unterschiedlich starke Verschiebung räumliche Tiefe. Vier Storyboard-Abschnitte verteilen sich auf zwei echte Filmszenen mit insgesamt 22 Sekunden: Waldweg (0–17 Sekunden, die ersten drei Abschnitte) und Nachtgarten (17–22 Sekunden, Schlussabschnitt). Eine 1,8 Sekunden lange Szenen-Überblendung verbindet beide ohne harten Schnitt. Die Schlussbotschaft besteht aus normalen, einzeln bearbeitbaren Textelementen der zweiten Szene, nicht aus einer internen Bühnen-Einblendung. Die Umsetzung verwendet wiederverwendbare Bühnen in project.stages2d und Objekte in project.objects2d. Jede Szene referenziert diese Ressourcen in stage2d.stage und stage2d.actors; Aktionen und Kamera gehören zur Szene. Normale Zusatzebenen sind darüber möglich. Schmetterlinge und Blumen sind frei aufgebaute 2D-Vektorressourcen mit wiederverwendbaren Animationsclips: Flügelschlag, Erscheinen, Landen und gedämpftes Nachfedern. Flugwege, Geburt am Sternkontakt und die drei Landungszeitpunkte sind Szenenchoreografie, nicht fest in die Ressource eingebaute absolute Filmzeiten. Alle drei Schmetterlinge teilen eine Objektressource, alle drei Blumen eine weitere; Farbe und Größe unterscheiden die Instanzen. Beide Szenen verwenden dieselben Blumen- und Schmetterlingsressourcen. Im Nachtgarten sitzen die Schmetterlinge von Beginn an auf den Blüten; Geburt, Flug und Landung werden dort nicht wiederholt. Keine echte 3D-Darstellung. Eine eigens komponierte, ruhige C-Dur-Musik trägt die Handlung: Harfenmotiv, warme Flächen und sanfter Bass; beim Sternkontakt helles Funkeln, beim Flug sehr leises Flügelrascheln, bei den drei Landungen weiche Klangtupfer. Schritte und Sprung bleiben freundlich und zurückhaltend, keine lauten Knalle. Der Wechsel zum Nachtgarten erhält einen luftigen Übergang; zur Schlussbotschaft erklingen drei warme Glockentöne. Musik und Szenenübergangsklänge liegen in Project.music. Objektbezogene Geräusche liegen als wiederverwendbare Soundbindungen in objects2d: Roboter an Gehen und Sprungphasen, Stern an Schweben und Auflösen, Schmetterling an den Clip fly, Blume an den Clip landing. Das Verschieben einer Aktion verschiebt ihren Klang automatisch; die zweite Szene startet keine Landungen erneut. Instanzen dürfen Lautstärke, Stummschaltung und Tonhöhe überschreiben. Die Namen der Soundbindungen entsprechen den soundEffects-Einträgen. Keine Sprache. Zum Ende sanft ausblenden.",
     "duration": 22,
     "comments": [],
     "characters": [
@@ -3950,31 +4417,6 @@
         "reverb": 0.26
       },
       {
-        "id": "sfx-steps",
-        "name": "Weiche Roboter-Schritte",
-        "wave": "triangle",
-        "partials": [
-          {
-            "ratio": 1,
-            "gain": 1
-          }
-        ],
-        "attack": 0.003,
-        "decay": 0.065,
-        "sustain": 0.03,
-        "release": 0.09,
-        "volume": 0.75,
-        "filter": "lowpass",
-        "cutoff": 600,
-        "resonance": 0.7,
-        "echo": {
-          "delay": 0.25,
-          "feedback": 0.2,
-          "mix": 0
-        },
-        "reverb": 0
-      },
-      {
         "id": "sfx-air",
         "name": "Luftiger Sprung und Sternenstaub",
         "wave": "noise",
@@ -4002,68 +4444,6 @@
           "mix": 0
         },
         "reverb": 0.12
-      },
-      {
-        "id": "sfx-wings",
-        "name": "Zarter Schmetterlingsflug",
-        "wave": "noise",
-        "partials": [
-          {
-            "ratio": 1,
-            "gain": 1
-          },
-          {
-            "ratio": 2,
-            "gain": 0.15
-          }
-        ],
-        "attack": 0.018,
-        "decay": 0.035,
-        "sustain": 0.02,
-        "release": 0.045,
-        "volume": 0.17,
-        "filter": "highpass",
-        "cutoff": 3600,
-        "resonance": 0.8,
-        "echo": {
-          "delay": 0.25,
-          "feedback": 0.2,
-          "mix": 0
-        },
-        "reverb": 0
-      },
-      {
-        "id": "sfx-bloom",
-        "name": "Sanfte Blütenlandung",
-        "wave": "sine",
-        "partials": [
-          {
-            "ratio": 1,
-            "gain": 1
-          },
-          {
-            "ratio": 2.92,
-            "gain": 0.17
-          },
-          {
-            "ratio": 5.3,
-            "gain": 0.08
-          }
-        ],
-        "attack": 0.004,
-        "decay": 0.28,
-        "sustain": 0.08,
-        "release": 0.55,
-        "volume": 0.65,
-        "filter": "lowpass",
-        "cutoff": 3800,
-        "resonance": 0.7,
-        "echo": {
-          "delay": 0.28,
-          "feedback": 0.2,
-          "mix": 0.1
-        },
-        "reverb": 0.18
       }
     ],
     "notes": [
@@ -4103,46 +4483,11 @@
         "velocity": 0.55
       },
       {
-        "instrument": "sfx-steps",
-        "at": 0.8929843434142639,
-        "duration": 0.075,
-        "pitch": 43,
-        "velocity": 0.6
-      },
-      {
-        "instrument": "sfx-steps",
-        "at": 1.2183386645908285,
-        "duration": 0.075,
-        "pitch": 40,
-        "velocity": 0.6
-      },
-      {
         "instrument": "harp",
         "at": 1.35,
         "duration": 0.36,
         "pitch": 76,
         "velocity": 0.55
-      },
-      {
-        "instrument": "sfx-steps",
-        "at": 1.4910881170350876,
-        "duration": 0.075,
-        "pitch": 43,
-        "velocity": 0.6
-      },
-      {
-        "instrument": "sfx-steps",
-        "at": 1.7426273830137688,
-        "duration": 0.075,
-        "pitch": 40,
-        "velocity": 0.6
-      },
-      {
-        "instrument": "sfx-steps",
-        "at": 1.9872561118246266,
-        "duration": 0.075,
-        "pitch": 43,
-        "velocity": 0.6
       },
       {
         "instrument": "harp",
@@ -4152,46 +4497,11 @@
         "velocity": 0.55
       },
       {
-        "instrument": "sfx-steps",
-        "at": 2.235643341744526,
-        "duration": 0.075,
-        "pitch": 40,
-        "velocity": 0.6
-      },
-      {
-        "instrument": "sfx-steps",
-        "at": 2.5003405565475076,
-        "duration": 0.075,
-        "pitch": 43,
-        "velocity": 0.6
-      },
-      {
-        "instrument": "sfx-steps",
-        "at": 2.8049712652892596,
-        "duration": 0.075,
-        "pitch": 40,
-        "velocity": 0.38
-      },
-      {
         "instrument": "harp",
         "at": 3,
         "duration": 0.36,
         "pitch": 76,
         "velocity": 0.55
-      },
-      {
-        "instrument": "sfx-steps",
-        "at": 3.2429428352618745,
-        "duration": 0.075,
-        "pitch": 43,
-        "velocity": 0.38
-      },
-      {
-        "instrument": "sfx-sparkle",
-        "at": 3.8,
-        "duration": 0.12,
-        "pitch": 84,
-        "velocity": 0.28
       },
       {
         "instrument": "pad",
@@ -4229,13 +4539,6 @@
         "velocity": 0.55
       },
       {
-        "instrument": "sfx-sparkle",
-        "at": 4.65,
-        "duration": 0.12,
-        "pitch": 88,
-        "velocity": 0.28
-      },
-      {
         "instrument": "harp",
         "at": 5.15,
         "duration": 0.36,
@@ -4243,32 +4546,11 @@
         "velocity": 0.55
       },
       {
-        "instrument": "sfx-sparkle",
-        "at": 5.75,
-        "duration": 0.12,
-        "pitch": 91,
-        "velocity": 0.28
-      },
-      {
         "instrument": "harp",
         "at": 6,
         "duration": 0.36,
         "pitch": 79,
         "velocity": 0.55
-      },
-      {
-        "instrument": "sfx-steps",
-        "at": 6.95,
-        "duration": 0.12,
-        "pitch": 43,
-        "velocity": 0.38
-      },
-      {
-        "instrument": "sfx-air",
-        "at": 7.3,
-        "duration": 0.32,
-        "pitch": 60,
-        "velocity": 0.65
       },
       {
         "instrument": "pad",
@@ -4299,102 +4581,11 @@
         "velocity": 0.5
       },
       {
-        "instrument": "sfx-air",
-        "at": 8.05,
-        "duration": 0.24,
-        "pitch": 60,
-        "velocity": 0.82
-      },
-      {
-        "instrument": "sfx-sparkle",
-        "at": 8.05,
-        "duration": 0.13,
-        "pitch": 84,
-        "velocity": 0.95
-      },
-      {
-        "instrument": "sfx-sparkle",
-        "at": 8.145000000000001,
-        "duration": 0.13,
-        "pitch": 88,
-        "velocity": 0.65
-      },
-      {
-        "instrument": "sfx-sparkle",
-        "at": 8.24,
-        "duration": 0.13,
-        "pitch": 91,
-        "velocity": 0.65
-      },
-      {
         "instrument": "harp",
         "at": 8.3,
         "duration": 0.36,
         "pitch": 81,
         "velocity": 0.55
-      },
-      {
-        "instrument": "sfx-sparkle",
-        "at": 8.335,
-        "duration": 0.13,
-        "pitch": 96,
-        "velocity": 0.65
-      },
-      {
-        "instrument": "sfx-wings",
-        "at": 8.4,
-        "duration": 0.055,
-        "pitch": 72,
-        "velocity": 0.42
-      },
-      {
-        "instrument": "sfx-sparkle",
-        "at": 8.430000000000001,
-        "duration": 0.13,
-        "pitch": 93,
-        "velocity": 0.65
-      },
-      {
-        "instrument": "sfx-wings",
-        "at": 8.47,
-        "duration": 0.055,
-        "pitch": 72,
-        "velocity": 0.42
-      },
-      {
-        "instrument": "sfx-sparkle",
-        "at": 8.525,
-        "duration": 0.13,
-        "pitch": 88,
-        "velocity": 0.65
-      },
-      {
-        "instrument": "sfx-wings",
-        "at": 8.56,
-        "duration": 0.055,
-        "pitch": 72,
-        "velocity": 0.42
-      },
-      {
-        "instrument": "sfx-steps",
-        "at": 8.6,
-        "duration": 0.16,
-        "pitch": 36,
-        "velocity": 0.8
-      },
-      {
-        "instrument": "sfx-wings",
-        "at": 8.83,
-        "duration": 0.055,
-        "pitch": 72,
-        "velocity": 0.42
-      },
-      {
-        "instrument": "sfx-wings",
-        "at": 8.955,
-        "duration": 0.055,
-        "pitch": 72,
-        "velocity": 0.42
       },
       {
         "instrument": "harp",
@@ -4404,95 +4595,11 @@
         "velocity": 0.55
       },
       {
-        "instrument": "sfx-wings",
-        "at": 9.1,
-        "duration": 0.055,
-        "pitch": 72,
-        "velocity": 0.42
-      },
-      {
-        "instrument": "sfx-wings",
-        "at": 9.26,
-        "duration": 0.055,
-        "pitch": 72,
-        "velocity": 0.42
-      },
-      {
-        "instrument": "sfx-wings",
-        "at": 9.44,
-        "duration": 0.055,
-        "pitch": 72,
-        "velocity": 0.42
-      },
-      {
-        "instrument": "sfx-wings",
-        "at": 9.64,
-        "duration": 0.055,
-        "pitch": 72,
-        "velocity": 0.42
-      },
-      {
-        "instrument": "sfx-wings",
-        "at": 9.69,
-        "duration": 0.055,
-        "pitch": 72,
-        "velocity": 0.42
-      },
-      {
-        "instrument": "sfx-wings",
-        "at": 9.925,
-        "duration": 0.055,
-        "pitch": 72,
-        "velocity": 0.42
-      },
-      {
         "instrument": "harp",
         "at": 10,
         "duration": 0.36,
         "pitch": 76,
         "velocity": 0.55
-      },
-      {
-        "instrument": "sfx-wings",
-        "at": 10.12,
-        "duration": 0.055,
-        "pitch": 72,
-        "velocity": 0.42
-      },
-      {
-        "instrument": "sfx-wings",
-        "at": 10.18,
-        "duration": 0.055,
-        "pitch": 72,
-        "velocity": 0.42
-      },
-      {
-        "instrument": "sfx-wings",
-        "at": 10.41,
-        "duration": 0.055,
-        "pitch": 72,
-        "velocity": 0.42
-      },
-      {
-        "instrument": "sfx-wings",
-        "at": 10.55,
-        "duration": 0.055,
-        "pitch": 72,
-        "velocity": 0.42
-      },
-      {
-        "instrument": "sfx-wings",
-        "at": 10.72,
-        "duration": 0.055,
-        "pitch": 72,
-        "velocity": 0.42
-      },
-      {
-        "instrument": "sfx-wings",
-        "at": 10.895,
-        "duration": 0.055,
-        "pitch": 72,
-        "velocity": 0.42
       },
       {
         "instrument": "harp",
@@ -4502,81 +4609,11 @@
         "velocity": 0.55
       },
       {
-        "instrument": "sfx-wings",
-        "at": 10.98,
-        "duration": 0.055,
-        "pitch": 72,
-        "velocity": 0.42
-      },
-      {
-        "instrument": "sfx-wings",
-        "at": 11.26,
-        "duration": 0.055,
-        "pitch": 72,
-        "velocity": 0.42
-      },
-      {
-        "instrument": "sfx-wings",
-        "at": 11.38,
-        "duration": 0.055,
-        "pitch": 72,
-        "velocity": 0.42
-      },
-      {
-        "instrument": "sfx-wings",
-        "at": 11.41,
-        "duration": 0.055,
-        "pitch": 72,
-        "velocity": 0.42
-      },
-      {
         "instrument": "harp",
         "at": 11.7,
         "duration": 0.36,
         "pitch": 72,
         "velocity": 0.55
-      },
-      {
-        "instrument": "sfx-wings",
-        "at": 11.8,
-        "duration": 0.055,
-        "pitch": 72,
-        "velocity": 0.42
-      },
-      {
-        "instrument": "sfx-wings",
-        "at": 11.84,
-        "duration": 0.055,
-        "pitch": 72,
-        "velocity": 0.42
-      },
-      {
-        "instrument": "sfx-wings",
-        "at": 11.865,
-        "duration": 0.055,
-        "pitch": 72,
-        "velocity": 0.42
-      },
-      {
-        "instrument": "sfx-wings",
-        "at": 12.27,
-        "duration": 0.055,
-        "pitch": 72,
-        "velocity": 0.42
-      },
-      {
-        "instrument": "sfx-wings",
-        "at": 12.34,
-        "duration": 0.055,
-        "pitch": 72,
-        "velocity": 0.42
-      },
-      {
-        "instrument": "sfx-wings",
-        "at": 12.35,
-        "duration": 0.055,
-        "pitch": 72,
-        "velocity": 0.42
       },
       {
         "instrument": "pad",
@@ -4614,81 +4651,11 @@
         "velocity": 0.55
       },
       {
-        "instrument": "sfx-wings",
-        "at": 12.7,
-        "duration": 0.055,
-        "pitch": 72,
-        "velocity": 0.42
-      },
-      {
-        "instrument": "sfx-wings",
-        "at": 12.835,
-        "duration": 0.055,
-        "pitch": 72,
-        "velocity": 0.42
-      },
-      {
-        "instrument": "sfx-wings",
-        "at": 12.88,
-        "duration": 0.055,
-        "pitch": 72,
-        "velocity": 0.42
-      },
-      {
-        "instrument": "sfx-wings",
-        "at": 13.13,
-        "duration": 0.055,
-        "pitch": 72,
-        "velocity": 0.42
-      },
-      {
-        "instrument": "sfx-wings",
-        "at": 13.32,
-        "duration": 0.055,
-        "pitch": 72,
-        "velocity": 0.42
-      },
-      {
         "instrument": "harp",
         "at": 13.4,
         "duration": 0.36,
         "pitch": 79,
         "velocity": 0.55
-      },
-      {
-        "instrument": "sfx-wings",
-        "at": 13.42,
-        "duration": 0.055,
-        "pitch": 72,
-        "velocity": 0.42
-      },
-      {
-        "instrument": "sfx-bloom",
-        "at": 13.75,
-        "duration": 0.15,
-        "pitch": 76,
-        "velocity": 0.8
-      },
-      {
-        "instrument": "sfx-wings",
-        "at": 13.805,
-        "duration": 0.055,
-        "pitch": 72,
-        "velocity": 0.42
-      },
-      {
-        "instrument": "sfx-wings",
-        "at": 13.96,
-        "duration": 0.055,
-        "pitch": 72,
-        "velocity": 0.42
-      },
-      {
-        "instrument": "sfx-bloom",
-        "at": 13.97,
-        "duration": 0.1,
-        "pitch": 72,
-        "velocity": 0.32
       },
       {
         "instrument": "harp",
@@ -4698,46 +4665,11 @@
         "velocity": 0.55
       },
       {
-        "instrument": "sfx-bloom",
-        "at": 14.5,
-        "duration": 0.15,
-        "pitch": 79,
-        "velocity": 0.8
-      },
-      {
-        "instrument": "sfx-wings",
-        "at": 14.5,
-        "duration": 0.055,
-        "pitch": 72,
-        "velocity": 0.42
-      },
-      {
-        "instrument": "sfx-bloom",
-        "at": 14.72,
-        "duration": 0.1,
-        "pitch": 76,
-        "velocity": 0.32
-      },
-      {
         "instrument": "harp",
         "at": 15.1,
         "duration": 0.36,
         "pitch": 74,
         "velocity": 0.55
-      },
-      {
-        "instrument": "sfx-bloom",
-        "at": 15.25,
-        "duration": 0.15,
-        "pitch": 84,
-        "velocity": 0.8
-      },
-      {
-        "instrument": "sfx-bloom",
-        "at": 15.47,
-        "duration": 0.1,
-        "pitch": 79,
-        "velocity": 0.32
       },
       {
         "instrument": "harp",
@@ -4994,6 +4926,11 @@
             ]
           },
           {
+            "sound": {
+              "muted": false,
+              "volume": 1,
+              "pitch": 0
+            },
             "id": "flower-blue",
             "name": "Rosa Blume",
             "object": "flower",
@@ -5019,6 +4956,11 @@
             ]
           },
           {
+            "sound": {
+              "muted": false,
+              "volume": 1,
+              "pitch": 3
+            },
             "id": "flower-gold",
             "name": "Goldene Blume",
             "object": "flower",
@@ -5044,6 +4986,11 @@
             ]
           },
           {
+            "sound": {
+              "muted": false,
+              "volume": 1,
+              "pitch": 8
+            },
             "id": "flower-rose",
             "name": "Lila Blume",
             "object": "flower",
@@ -5571,6 +5518,11 @@
         "stageClip": "",
         "actors": [
           {
+            "sound": {
+              "muted": false,
+              "volume": 1,
+              "pitch": 0
+            },
             "id": "flower-blue",
             "name": "Rosa Blume",
             "object": "flower",
@@ -5584,6 +5536,11 @@
             "actions": []
           },
           {
+            "sound": {
+              "muted": false,
+              "volume": 1,
+              "pitch": 3
+            },
             "id": "flower-gold",
             "name": "Goldene Blume",
             "object": "flower",
@@ -5597,6 +5554,11 @@
             "actions": []
           },
           {
+            "sound": {
+              "muted": false,
+              "volume": 1,
+              "pitch": 8
+            },
             "id": "flower-rose",
             "name": "Lila Blume",
             "object": "flower",

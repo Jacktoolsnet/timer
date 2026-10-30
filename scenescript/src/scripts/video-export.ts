@@ -1,3 +1,4 @@
+import {objectSoundScore2D} from '../lib/sound2d';
 import {narrationClips} from '../lib/audio';
 import {Output,Mp4OutputFormat,WebMOutputFormat,StreamTarget,CanvasSource,AudioSampleSource,AudioSample,canEncodeVideo,canEncodeAudio} from 'mediabunny';
 import type {Project} from '../lib/model';
@@ -8,7 +9,7 @@ export type {ExportOptions} from '../lib/export-plan';
 import {ExportMedia} from './export-media';
 import {ExportRenderer} from './export-renderer';
 import {ExportAudio} from './export-audio';
-export function exportHasAudio(p:Project){return Boolean(narrationClips(p).length||p.music?.enabled&&p.music.volume>0||p.backgroundVideo?.asset&&!p.backgroundVideo.muted&&p.backgroundVideo.volume>0||p.scenes.some(s=>s.elements.some(e=>e.type==='video'&&e.video?.asset&&!e.video.muted&&e.video.volume>0)));}
+export function exportHasAudio(p:Project){return Boolean(objectSoundScore2D(p)||narrationClips(p).length||p.music?.enabled&&p.music.volume>0||p.backgroundVideo?.asset&&!p.backgroundVideo.muted&&p.backgroundVideo.volume>0||p.scenes.some(s=>s.elements.some(e=>e.type==='video'&&e.video?.asset&&!e.video.muted&&e.video.volume>0)));}
 const audioConfig={sampleRate:48000,numberOfChannels:2,bitrate:128000};
 let aacFallback:Promise<void>|undefined;
 async function ensureAacEncoder(){

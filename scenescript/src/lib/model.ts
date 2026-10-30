@@ -1,3 +1,4 @@
+import {objectSoundScore2D} from './sound2d.ts';
 import {parseStage2D,parseLibrary2D,parseObject2D,parseStage2DResource,upgradeLegacy2D,type Object2D,type Stage2DResource,type Stage2D} from './stage2d.ts';
 import {parseStoryboard,type Storyboard} from './storyboard.ts';
 import {parseMorph,type Morph} from './morph.ts';
@@ -157,7 +158,8 @@ function readProject(input:unknown):Project {
  });
  const backgroundSimulation=parseSimulation(p.backgroundSimulation,'backgroundSimulation');
  for(const [i,s] of scenes.entries())if(s.elements.reduce((n,e)=>n+(e.type==='simulation'?e.simulation!.count:0),backgroundSimulation?.count??0)>5000)throw new Error('scenes['+i+']: maximum 5000 simulated particles including project background');
- return {objects2d,stages2d,storyboard:p.storyboard==null?null:parseStoryboard(p.storyboard,false,one(p.format,Object.keys(formats) as (keyof typeof formats)[],'format')),groups3d,characters,stages,audios,narration:parseNarration(p.narration,audios,scenes.reduce((n,s)=>n+s.duration,0)),audioDucking:(p.audioDucking??false) as boolean,thumbnail,videos,backgroundVideo:parseVideo(p.backgroundVideo,videos,'backgroundVideo'),music:parseMusic(p.music,scenes.reduce((n,s)=>n+s.duration,0)),backgroundSimulation,version:'1.0',title:str(p.title,'title',200),description:str(p.description===undefined?'':p.description,'description',5000),firstComment:str(p.firstComment===undefined?'':p.firstComment,'firstComment',5000),hashtags:str(p.hashtags===undefined?'':p.hashtags,'hashtags',2000),format:one(p.format,['landscape','portrait','square'] as const,'format'),assets,scenes};
+ const result:Project={objects2d,stages2d,storyboard:p.storyboard==null?null:parseStoryboard(p.storyboard,false,one(p.format,Object.keys(formats) as (keyof typeof formats)[],'format')),groups3d,characters,stages,audios,narration:parseNarration(p.narration,audios,scenes.reduce((n,s)=>n+s.duration,0)),audioDucking:(p.audioDucking??false) as boolean,thumbnail,videos,backgroundVideo:parseVideo(p.backgroundVideo,videos,'backgroundVideo'),music:parseMusic(p.music,scenes.reduce((n,s)=>n+s.duration,0)),backgroundSimulation,version:'1.0',title:str(p.title,'title',200),description:str(p.description===undefined?'':p.description,'description',5000),firstComment:str(p.firstComment===undefined?'':p.firstComment,'firstComment',5000),hashtags:str(p.hashtags===undefined?'':p.hashtags,'hashtags',2000),format:one(p.format,['landscape','portrait','square'] as const,'format'),assets,scenes};
+ objectSoundScore2D(result);return result;
 }
 export function locateTime(project:Project,time:number):{index:number;local:number;ended:boolean}{
  let offset=0;for(let i=0;i<project.scenes.length;i++){const duration=project.scenes[i].duration;if(time<offset+duration)return {index:i,local:Math.max(0,time-offset),ended:false};offset+=duration;}

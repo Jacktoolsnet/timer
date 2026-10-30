@@ -1,4 +1,4 @@
-import {lightCollectorMusic} from './light-collector-audio.ts';
+import {lightCollectorMusic,lightCollectorSounds2D} from './light-collector-audio.ts';
 import {lightCollectorStoryboard} from './light-collector-storyboard.ts';
 import {demoProject,newScene,newElement,type Project} from './model.ts';
 import {defaultStage2D,defaultAction2D} from './stage2d.ts';
@@ -7,6 +7,8 @@ import {lightCollectorGarden2D,LIGHT_COLLECTOR_DURATION} from './light-collector
 export function lightCollectorProject():Project{
  const project=demoProject(),scene=newScene('light-collector'),closing=newScene('night-garden'),resources=lightCollectorGarden2D();
  const ending=resources.shot.ending!,split=17;
+ for(const [id,sounds]of Object.entries(lightCollectorSounds2D()))resources.objects2d[id].sounds=sounds;
+ resources.shot.actors.filter(actor=>actor.object==='flower').forEach((actor,i)=>actor.sound={muted:false,volume:1,pitch:[0,3,8][i]});
  scene.name='Der Lichtsammler – Waldweg';scene.duration=split;scene.transition='none';scene.background='#123c37';scene.stage2d=resources.shot;
  // Scene changes belong to the project timeline, not to a hidden backdrop/text cue.
  scene.stage2d.transition=null;scene.stage2d.ending=null;

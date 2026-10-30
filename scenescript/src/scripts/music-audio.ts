@@ -33,11 +33,11 @@ export class MusicPlayer{
  async unlock(){this.context??=new AudioContext();await this.context.resume();if(this.context.state!=='running')throw new Error('Audio unavailable');}
  playhead(){return this.active&&this.context?this.base+Math.max(0,this.context.currentTime-this.anchor):null;}
  stop(){this.generation++;this.active=false;clearInterval(this.timer);for(const s of this.sources){try{s.stop();}catch{}s.disconnect();}this.sources=[];this.limiter?.disconnect();this.limiter=undefined;this.bus?.disconnect();this.bus=undefined;}
- async start(m:Music,time:number,total:number,gainAt:(time:number)=>number=()=>1){
+ async start(m:Music,time:number,total:number,gainAt:(time:number)=>number=()=>1,clock?:()=>number|null){
   this.stop();const generation=this.generation;await this.unlock();const c=this.context!;
   const buffer=(n:Note)=>{const i=m.instruments.find(i=>i.id===n.instrument)!;const key=JSON.stringify([i,n.pitch,n.duration,m.seed]);let p=this.cache.get(key);if(!p){if(this.cache.size>=32){const oldest=this.cache.keys().next().value!;this.cache.delete(oldest);this.cacheBytes.delete(oldest);}p=renderNote(i,n,m.seed);this.cache.set(key,p);p.then(b=>{if(!this.cache.has(key))return;this.cacheBytes.set(key,b.length*b.numberOfChannels*4);while([...this.cacheBytes.values()].reduce((s,v)=>s+v,0)>32*1024*1024&&this.cache.size>1){const oldest=this.cache.keys().next().value!;this.cache.delete(oldest);this.cacheBytes.delete(oldest);}}).catch(()=>this.cache.delete(key));}return p;};
   const initial=musicEvents(m,total,time,time+.1);await Promise.all(initial.map(buffer));if(generation!==this.generation)return;
-  this.base=time;this.anchor=c.currentTime+.03;this.active=true;const bus=c.createGain(),limiter=c.createDynamicsCompressor();this.bus=bus;this.limiter=limiter;bus.connect(limiter).connect(c.destination);
+  time=clock?.()??time;this.base=time;this.anchor=c.currentTime+.03;this.active=true;const bus=c.createGain(),limiter=c.createDynamicsCompressor();this.bus=bus;this.limiter=limiter;bus.connect(limiter).connect(c.destination);
   const scheduled=new Map<string,number>();
   const schedule=()=>{if(generation!==this.generation)return;const now=this.playhead()!;bus.gain.setValueAtTime(musicGainAt(m,now,total)*gainAt(now),c.currentTime);
    for(const [id,end] of scheduled)if(end<now)scheduled.delete(id);
