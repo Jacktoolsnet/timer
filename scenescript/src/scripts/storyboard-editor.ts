@@ -1,3 +1,4 @@
+import {importStoryboardResource,MAX_RESOURCE_IMPORT_BYTES} from '../lib/storyboard-resource-import';
 import {model2DNeedsRestyle} from '../lib/storyboard-model2d';
 import {storyboardModel2DView} from './storyboard-model2d-view';
 import {boardResource2D,boardResourceModes} from '../lib/storyboard-resource-preview';
@@ -86,6 +87,26 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
   try{check();if(action==='script'&&(!board.approved||!canApproveStoryboard(board)))return;if(action==='script')saveBoard();const source=board,rev=board.revision,ticket=session,main=scriptContext?.();
    openAiWorkflow({project:{...origin.project,storyboard:board},draft:true,preload:main?.preload,applyScript:main?next=>{check();if(!main.valid())throw new Error(t.stale);main.apply(next);dirty=false;session++;dialog.close();}:undefined,valid:()=>{try{check();return board===source&&board.revision===rev&&session===ticket;}catch{return false;}},apply:next=>{saveBoard(next.storyboard!);clear();render();$('status').textContent=t.saved;}},action,options);
   }catch(e){error(e);}
+ }
+ let resourceImportAttempt=0;
+ function resourceImportButton(row:HTMLElement,target:BoardReviewTarget,dimension:'2d'|'3d'){
+  const words=storyboardResourceWords(document.documentElement.lang),button=commentButton(dimension==='2d'?words.import2d:words.import3d,'M12 16V3m-5 5 5-5 5 5M4 14v7h16v-7'),input=node('input');
+  button.dataset.boardImportResource=dimension;button.dataset.resourceSubject=target.id;
+  input.type='file';input.accept='.json,application/json';input.hidden=true;input.dataset.boardResourceFile=dimension;input.dataset.resourceSubject=target.id;
+  let selected:{board:Storyboard;revision:number;session:number;attempt:number}|undefined;
+  button.addEventListener('click',()=>{try{check();selected={board,revision:board.revision,session,attempt:++resourceImportAttempt};input.click();}catch(e){error(e);}});
+  input.addEventListener('change',async()=>{
+   const file=input.files?.[0],selection=selected;input.value='';selected=undefined;if(!file||!selection)return;
+   try{
+    check();if(file.size>MAX_RESOURCE_IMPORT_BYTES)throw Error('Resource JSON: maximum 8 MiB');
+    const text=await file.text();
+    check();if(selection.attempt!==resourceImportAttempt||selection.session!==session||selection.board!==board||selection.revision!==board.revision||!button.isConnected)throw Error(t.stale);
+    const next=importStoryboardResource(text,{...origin.project,storyboard:board},target,dimension);
+    board=next.storyboard!;dirty=true;clear();render();$('status').textContent=words.imported;
+    dialog.querySelector<HTMLButtonElement>('[data-board-import-resource="'+dimension+'"][data-resource-subject="'+target.id+'"]')?.focus();
+   }catch(e){if(dialog.open&&selection.session===session)error(e);}
+  });
+  row.append(button,input);
  }
  function picture(parent:HTMLElement,id:string|null,alt:string,apply:FieldConfig['apply'],key:string,shot?:string,target?:BoardReviewTarget){
   const area=node('section');area.className='board-image-field';parent.append(area);
@@ -208,7 +229,7 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
      const rw=storyboardResourceWords(document.documentElement.lang),tile=node('section'),row=node('div');
      tile.className='board-field board-resource2d-tile';tile.dataset.boardResource2d=subject.id;
      row.className='board-field-heading';row.append(node('h4',rw.resource));
-     const generate=commentButton(rw.create,'m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5Z');generate.dataset.boardModel2d=subject.id;generate.addEventListener('click',()=>runWorkflow('model',{resourceTarget:target,resourceDimension:'2d'}));row.append(generate);tile.append(row);visuals.append(tile);
+     const generate=commentButton(rw.create,'m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5Z');generate.dataset.boardModel2d=subject.id;generate.addEventListener('click',()=>runWorkflow('model',{resourceTarget:target,resourceDimension:'2d'}));row.append(generate);resourceImportButton(row,target,'2d');tile.append(row);visuals.append(tile);
      const association=boardResource2D(origin.project,subject,kind==='settings'),library=origin.project[association.kind];
      const options:[string,string][]=[['',t.none],...Object.entries(library).map(([id,r]):[string,string]=>[id,r.name])];
      if(subject.resource2d&&!association.resource)options.push([subject.resource2d,subject.resource2d+' — '+rw.missing]);
@@ -237,7 +258,7 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
     if(modes.includes('3d')){
     const modelTile=node('section');modelTile.className='board-field board-model-tile';const row=node('div');row.className='board-field-heading';row.append(node('h4',dw.model));
     const modelButton=commentButton(dw.create,'m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5Z');modelButton.dataset.boardModel=subject.id;
-    const effectiveMode=design.mode==='inherit'?board.production?.renderMode:design.mode;modelButton.disabled=effectiveMode==='2d';modelButton.addEventListener('click',()=>runWorkflow('model',{resourceTarget:target}));row.append(modelButton);modelTile.append(row,node('p',subject.model3d?dw.hint:dw.none));
+    const effectiveMode=design.mode==='inherit'?board.production?.renderMode:design.mode;modelButton.disabled=effectiveMode==='2d';modelButton.addEventListener('click',()=>runWorkflow('model',{resourceTarget:target}));row.append(modelButton);resourceImportButton(row,target,'3d');modelTile.append(row,node('p',subject.model3d?dw.hint:dw.none));
     if(modelNeedsRestyle(subject)){const notice=node('p',dw.stylePending);notice.className='small-hint';notice.dataset.boardStylePending=subject.id;modelTile.append(notice);}
     if(design.surface!=='colors'){
      modelTile.append(node('p',dw.textureHint));const available=Object.keys(board.images).some(id=>id.startsWith('material-fabric-'));

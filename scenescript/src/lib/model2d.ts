@@ -38,7 +38,7 @@ export function parseModel2D(value:unknown,path='model2d'):Model2D{
   out.parallax=num(o.parallax,p+'.parallax',0,2);out.layer=one(o.layer,['background','foreground'],p+'.layer');
   out.points=list(o.points,p+'.points',1024).map(v=>num(v,p+'.points',-8192,8192));
   if(out.shape==='polygon'&&(out.points.length<6||out.points.length%2))throw Error(p+': polygon requires coordinate pairs (3+ vertices)');
-  out.path=list(o.path,p+'.path',512).map((v,i)=>{const cp=p+'.path['+i+']',c=object(v,cp);keys(c,['op','values'],cp);const op=one(c.op,['M','L','Q','C','Z'],cp+'.op'),values=list(c.values??[],cp+'.values',6).map(v=>num(v,cp,-8192,8192));if(values.length!==({M:2,L:2,Q:4,C:6,Z:0}[op]))throw Error(cp+': invalid command arity');return {op,values};});
+  out.path=list(o.path,p+'.path',512).map((v,i)=>{const cp=p+'.path['+i+']',c=object(v,cp);keys(c,['op','values'],cp);const op=one(c.op,['M','L','Q','C','Z'],cp+'.op'),values=list(c.values??[],cp+'.values',6).map(v=>num(v,cp,-8192,8192));if(values.length!==({M:2,L:2,Q:4,C:6,Z:0}[op]))throw Error(cp+': invalid command arity for '+op+' in part '+JSON.stringify(out.id)+'; expected '+({M:2,L:2,Q:4,C:6,Z:0}[op])+' values, got '+values.length+'. M/L: 2, Q: 4, C: 6, Z: 0. Do not discard coordinates; verify the intended curve command.');return {op,values};});
   if(out.shape==='path'&&(!out.path.length||out.path[0].op!=='M'))throw Error(p+': path must start with M');
   budget+=out.path.length+out.points.length+1;if(budget>8192)throw Error(path+': geometry budget exceeded');
   return out;

@@ -1,3 +1,5 @@
+import {importStoryboardResource,MAX_RESOURCE_IMPORT_BYTES} from '../src/lib/storyboard-resource-import.ts';
+import {birdModel2D,cityModel2D} from '../src/lib/free2d-example.ts';
 import {readFileSync} from 'node:fs';
 import {test} from 'node:test';import assert from 'node:assert/strict';
 import {parseStoryboard,newStoryboard,importStoryboard,exportStoryboard,canApproveStoryboard,invalidateStoryboardApprovals,storyboardGuide} from '../src/lib/storyboard.ts';
@@ -264,4 +266,26 @@ test('storyboard guide documents exact format enum values separately from aspect
  assert.ok(storyboardGuide.includes('JSON enum: "landscape"|"portrait"|"square"'));
  assert.ok(storyboardGuide.includes('never part of the value'));
  for(const format of ['landscape','portrait','square'] as const)assert.equal(parseStoryboard({...example(),format}).format,format);
+});
+
+test('resource JSON import accepts raw models and AI envelopes, scoped to a single draft subject',()=>{
+ for(const dimension of ['2d','3d'] as const)for(const kind of ['characters','settings'] as const){
+  const p=demoProject();p.storyboard=example();const b=p.storyboard;
+  for(const s of [...b.characters,...b.settings,...b.shots])s.status='approved';b.approved=true;
+  const subject=b[kind][0];subject.design={...defaultBoardDesign(),mode:dimension};
+  const target={kind,id:subject.id},model=dimension==='3d'?roundedHumanModel():kind==='settings'?cityModel2D():birdModel2D(),before=JSON.stringify(p);
+  for(const envelope of [false,true]){
+   const text=JSON.stringify(envelope?{model,reply:'Imported Mila'}:model),next=importStoryboardResource('\uFEFF'+text,p,target,dimension),changed=next.storyboard![kind][0];
+   assert.deepEqual(dimension==='2d'?changed.model2d:changed.model3d,model);assert.equal(changed.status,'draft');assert.equal(next.storyboard!.approved,false);assert.deepEqual(next.scenes,p.scenes);assert.deepEqual(next.objects2d,p.objects2d);assert.deepEqual(next.characters,p.characters);assert.equal(JSON.stringify(p),before);
+   assert.equal(changed.name,subject.name);assert.deepEqual(changed.comments,subject.comments);
+  }
+ }
+});
+test('invalid resource imports leave the source intact and never repair malformed curves silently',()=>{
+ const p=demoProject();p.storyboard=example();const target={kind:'characters' as const,id:p.storyboard.characters[0].id},before=JSON.stringify(p);
+ const bad=birdModel2D();bad.parts[2].path[2]={op:'Q',values:[1,2,3,4,5,6]};
+ for(const text of ['null','[]','not JSON',JSON.stringify({model:bad}),JSON.stringify({...birdModel2D(),unexpected:true}),' '.repeat(MAX_RESOURCE_IMPORT_BYTES+1)])assert.throws(()=>importStoryboardResource(text,p,target,'2d'));
+ assert.throws(()=>importStoryboardResource(JSON.stringify(birdModel2D()),p,{kind:'settings',id:p.storyboard!.settings[0].id},'2d'),/960/);
+ assert.throws(()=>importStoryboardResource(JSON.stringify(birdModel2D()),p,target,'3d'));
+ assert.equal(JSON.stringify(p),before);
 });

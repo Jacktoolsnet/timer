@@ -252,3 +252,12 @@ test('approved demo script import accepts redundant built-in walk clips without 
  const result=acceptScript(JSON.stringify(raw),p);assert.equal(result.scenes[0].stage2d!.actors[0].actions[0].clip,'');assert.deepEqual(result.objects2d,acceptScript(JSON.stringify(projectManifest(p)),p).objects2d);assert.equal(JSON.stringify(p),before);
  const custom=structuredClone(p);custom.storyboard!.characters[0].model2d=birdModel2D();const actual=animationResources2D(custom);assert.equal(actual.objects2d.collector.kind,'custom');assert.ok(actual.objects2d.collector.clips.includes('fly'));assert.ok(!actual.objects2d.collector.clips.includes('walk'));
 });
+
+test('2D path arity errors identify the part, opcode and expected coordinate count',()=>{
+ const model=birdModel2D();
+ model.parts[0].shape='path';model.parts[0].path=[{op:'M',values:[7,4]},{op:'Q',values:[-20,5,-43,-5,-47,-28]}];
+ assert.throws(()=>parseModel2D(model,'resource.model'),/resource\.model\.parts\[0\]\.path\[1\]: invalid command arity for Q in part .*expected 4 values, got 6/);
+ // A cubic curve uses both control points and the endpoint without discarding values.
+ model.parts[0].path[1].op='C';assert.deepEqual(parseModel2D(model).parts[0].path[1],{op:'C',values:[-20,5,-43,-5,-47,-28]});
+ assert.ok(model2DInstructions.includes('Never label a six-value cubic curve Q; use C'));
+});

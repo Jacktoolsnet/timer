@@ -1,3 +1,5 @@
+import {birdModel2D,cityModel2D} from '../src/lib/free2d-example';
+import {newStoryboard} from '../src/lib/storyboard';
 import {test,expect} from './helpers/editor-test';
 import {roundedHumanModel} from '../src/lib/rounded-human';
 import {defaultBoardDesign} from '../src/lib/storyboard-design';
@@ -80,7 +82,8 @@ test('global actions form a fixed icon toolbar with localized tooltips and an ic
  }
  const save=page.locator('#storyboard-save');await expect(save).toHaveAttribute('title','Änderungen speichern');await expect(save).toHaveAttribute('aria-label','Änderungen speichern');expect((await save.textContent())?.trim()).toBe('');await expect(save.locator('svg')).toHaveCount(1);
  await toolbar.locator('#storyboard-feedback').click();expect((await copied(page)).board.title).toBe('Inflation Explained with Chocolate');
- await expect(toolbar.locator('#storyboard-json-open')).toHaveAttribute('aria-haspopup','dialog');await toolbar.locator('#storyboard-json-open').click();await expect(page.getByRole('dialog',{name:'Austausch mit der KI',exact:true})).toBeVisible();await expect(page.locator('#storyboard-json')).toBeFocused();await page.locator('#storyboard-exchange-close').click();await expect(page.locator('#storyboard-json')).not.toBeVisible();await expect(toolbar.locator('#storyboard-json-open')).toBeFocused();
+ await expect(toolbar.locator('#storyboard-file-open + #storyboard-json-open')).toHaveAttribute('aria-label','JSON einfügen');
+ await expect(toolbar.locator('#storyboard-json-open')).toHaveAttribute('aria-haspopup','dialog');await toolbar.locator('#storyboard-json-open').click();await expect(page.getByRole('dialog',{name:'JSON einfügen',exact:true})).toBeVisible();await expect(page.locator('#storyboard-json')).toBeFocused();await page.locator('#storyboard-exchange-close').click();await expect(page.locator('#storyboard-json')).not.toBeVisible();await expect(toolbar.locator('#storyboard-json-open')).toBeFocused();
  await page.locator('[data-board-tab=shots]').click();await page.locator('.board-card').last().getByRole('button',{name:'Kommentar hinzufügen',exact:true}).scrollIntoViewIfNeeded();
  const bounds=await toolbar.boundingBox(),footer=await save.boundingBox();expect(bounds!.y).toBeGreaterThanOrEqual(0);expect(footer!.y+footer!.height).toBeLessThanOrEqual(page.viewportSize()!.height);await expect(page.locator('#storyboard-dialog>.json-footer #storyboard-close')).toBeVisible();const closeBounds=await page.locator('#storyboard-close').boundingBox();expect(closeBounds!.x).toBeLessThan(footer!.x);expect(closeBounds!.y).toBe(footer!.y);await expect(page.locator('#storyboard-close')).toHaveAttribute('title','Schließen');
  expect(await toolbar.evaluate(e=>e.scrollWidth)).toBeLessThanOrEqual(await toolbar.evaluate(e=>e.clientWidth));expect((await save.boundingBox())!.width).toBe(44);
@@ -372,4 +375,25 @@ test('per-element appearance fields edit through themed overlays and persist wit
  for(const [key,value]of [['mode','3d'],['style','natural'],['surface','mixed']]){await page.locator('[data-board-edit=characters-chocolate-'+key+']').click();await page.locator('#storyboard-field-select').selectOption(value);await page.locator('#storyboard-field-apply').click();}
  await editText(page,'characters-chocolate-design-details','Rounded edges, no blocks.');await expect(page.locator('.board-card')).toContainText('Natürliche Proportionen · stilisiert');await expect(page.locator('[data-board-model=chocolate]')).toBeEnabled();
  await page.locator('#storyboard-save').click();await page.locator('#storyboard-close').click();const downloading=page.waitForEvent('download');await page.locator('#save-project').click();const file=await downloading;const p=JSON.parse(await readFile((await file.path())!,'utf8'));expect(p.storyboard.characters[0].design).toEqual({mode:'3d',style:'natural',surface:'mixed',details:'Rounded edges, no blocks.'});expect(p.scenes).toEqual(fixture().scenes);
+});
+
+for(const dimension of ['2d','3d'] as const)test('local '+dimension+' JSON imports for characters, objects and settings are validated, reviewable and undoable',async({page})=>{
+ const project=fixture(),board=newStoryboard('Resource imports');project.storyboard=board;board.production={renderMode:dimension,dialogue:false,music:false,sfx:false};
+ const subject=(id:string,name:string)=>({id,name,description:name,image:null,status:'approved' as const,comments:[],design:{...defaultBoardDesign(),mode:dimension}});
+ board.characters=[{...subject('mila','Mila'),kind:'character'},{...subject('lamp','Lamp'),kind:'object'}];board.settings=[subject('room','Room')];board.shots=[{id:'shot',title:'Scene',duration:3,action:'Mila looks at the lamp.',camera:'Wide',audio:'',image:null,characters:['mila','lamp'],settings:['room'],status:'approved',comments:[]}];board.approved=true;
+ await setup(page,project);let requests=0;await page.route('https://api.openai.com/**',route=>{requests++;return route.abort();});
+ const choose=async(tab:string,id:string,text:string)=>{
+  await page.locator('[data-board-tab='+tab+']').click();const button=page.locator('[data-board-import-resource="'+dimension+'"][data-resource-subject="'+id+'"]');await expect(button.locator('svg')).toHaveCount(1);
+  const pending=page.waitForEvent('filechooser');await button.click();await(await pending).setFiles({name:'resource.json',mimeType:'application/json',buffer:Buffer.from(text)});
+ };
+ for(const [tab,id]of [['characters','mila'],['objects','lamp'],['settings','room']]){
+  const model=dimension==='2d'?(tab==='settings'?cityModel2D():birdModel2D()):{parts:[{id:'imported-part',shape:'box'}],animations:{}};
+  await choose(tab,id,JSON.stringify(tab==='objects'?model:{reply:'Imported resource',model}));await expect(page.locator('#storyboard-status')).toContainText('Ressource importiert');
+  await page.locator('#storyboard-feedback').click();const result=(await copied(page)).board,kind=tab==='settings'?'settings':'characters',item=result[kind].find((s:any)=>s.id===id);
+  expect(item[dimension==='2d'?'model2d':'model3d'].parts.length).toBeGreaterThan(0);expect(item.status).toBe('draft');expect(result.approved).toBe(false);expect(result.shots[0].status).toBe('draft');
+ }
+ await page.locator('#storyboard-feedback').click();const beforeBad=(await copied(page)).board;
+ await choose('characters','mila','{"model":{"parts":[]}}');await expect(page.locator('#storyboard-error-box')).toBeVisible();await page.locator('#storyboard-feedback').click();expect((await copied(page)).board).toEqual(beforeBad);
+ await page.locator('#storyboard-save').click();await page.locator('#storyboard-close').click();const pending=page.waitForEvent('download');await page.locator('#save-project').click();const saved=JSON.parse(await readFile((await(await pending).path())!,'utf8'));expect(saved.scenes).toEqual(project.scenes);expect(saved.storyboard.characters[0][dimension==='2d'?'model2d':'model3d']).toBeTruthy();expect(requests).toBe(0);
+ await page.locator('#undo-project').click();await page.locator('#open-storyboard').click();await page.locator('#storyboard-feedback').click();expect((await copied(page)).board.characters[0][dimension==='2d'?'model2d':'model3d']).toBeUndefined();
 });
