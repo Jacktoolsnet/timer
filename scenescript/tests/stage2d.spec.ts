@@ -127,6 +127,8 @@ test('storyboard shows sketch first and real 2D resource previews for characters
   await expect(visuals.locator(':scope > section').first()).toHaveClass(/board-image-field/);
   await expect(canvas).toHaveAttribute('data-stage2d-time','0');
   await expect(canvas).toHaveAttribute('data-stage2d-actors',actors);
+  await expect(canvas).toHaveAttribute('data-stage2d-isolated',tab==='settings'?'false':'true');
+  expect(await canvas.evaluate((c:HTMLCanvasElement)=>c.getContext('2d')!.getImageData(0,0,1,1).data[3])).toBe(tab==='settings'?255:0);
   await expect(visuals.locator('[data-board-resource2d='+id+']')).toBeVisible();
   await expect(visuals.locator('.board-model-tile')).toHaveCount(0);
   const layout=await visuals.evaluate(el=>{
@@ -272,4 +274,20 @@ test('demo TikTok cover downloads independently in 9:16 while the YouTube cover 
  await expect.poll(()=>image.evaluate((img:HTMLImageElement)=>[img.naturalWidth,img.naturalHeight])).toEqual([1080,1920]);
  const pending=page.waitForEvent('download');await page.locator('#save-tiktok-thumbnail').click();expect((await pending).suggestedFilename()).toBe('der-kleine-lichtsammler-tiktok-cover.png');
  await expect(page.locator('#project-format')).toHaveValue('landscape');await expect.poll(()=>page.locator('#thumbnail-content img').evaluate((img:HTMLImageElement)=>[img.naturalWidth,img.naturalHeight])).toEqual([1280,720]);
+});
+
+test('isolated custom object previews are transparent and never change normal scene rendering',async({page})=>{
+ await ready(page);
+ const result=await page.evaluate(async url=>{
+  const {Stage2DRenderer}=await import(/* @vite-ignore */ '/src/scripts/stage2d.ts' as string),{resourcePreview2D}=await import(/* @vite-ignore */ '/src/lib/stage2d-resource-preview.ts' as string),{parseProject}=await import(/* @vite-ignore */ '/src/lib/model.ts' as string),{birdModel2D}=await import(/* @vite-ignore */ '/src/lib/free2d-example.ts' as string),{defaultObject2D}=await import(/* @vite-ignore */ '/src/lib/stage2d.ts' as string);
+  const p=parseProject(await(await fetch(url)).text());p.objects2d.bird={...defaultObject2D('custom'),model:birdModel2D()};const original=JSON.stringify(p),renderer=await new Stage2DRenderer().init(),canvas=document.createElement('canvas');
+  const stats=()=>{const pixels=canvas.getContext('2d')!.getImageData(0,0,640,480).data;let transparent=0,visible=0;for(let i=3;i<pixels.length;i+=4){if(pixels[i]===0)transparent++;else visible++;}return {transparent,visible};};
+  try{
+   const scene=p.scenes[0];renderer.render(scene.stage2d!,scene.duration,1,640,480,canvas,p);const before=canvas.toDataURL();
+   const sample=resourcePreview2D(p,'objects2d','bird','fly')!;renderer.render(sample.shot,sample.duration,.5,640,480,canvas,sample.resources,sample.isolated);const object=stats();
+   const stage=resourcePreview2D(p,'stages2d','forest')!;renderer.render(stage.shot,stage.duration,0,640,480,canvas,stage.resources,stage.isolated);const background=stats();
+   renderer.render(scene.stage2d!,scene.duration,1,640,480,canvas,p);return {object,background,sceneUnchanged:before===canvas.toDataURL(),dataUnchanged:original===JSON.stringify(p)};
+  }finally{renderer.dispose();}
+ },url);
+ expect(result.object.transparent).toBeGreaterThan(640*480*.75);expect(result.object.visible).toBeGreaterThan(100);expect(result.background.transparent).toBe(0);expect(result.sceneUnchanged).toBe(true);expect(result.dataUnchanged).toBe(true);
 });

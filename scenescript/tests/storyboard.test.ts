@@ -254,11 +254,11 @@ test('storyboard previews resolve actual typed resources and honor explicit and 
  assert.deepEqual(boardResourceModes(p,b,subject,false),['2d','3d']);
 });
 test('isolated 2D resource previews do not mutate libraries or inherit scene animation',()=>{
- const p=lightCollectorProject(),before=JSON.stringify(p),sample=resourcePreview2D(p,'objects2d','collector')!;
+ const p=lightCollectorProject(),before=JSON.stringify(p),sample=resourcePreview2D(p,'objects2d','collector')!;assert.equal(sample.isolated,true);
  assert.equal(sample.shot.actors.length,1);assert.deepEqual(sample.shot.actors[0].actions,[]);assert.deepEqual(sample.shot.camera,[]);
  assert.equal(sample.shot.transition,null);assert.equal(sample.shot.ending,null);
  sample.resources.objects2d.preview.color='#123456';assert.equal(JSON.stringify(p),before);
- const stage=resourcePreview2D(p,'stages2d','night-garden')!;assert.equal(stage.shot.actors.length,0);assert.equal(stage.resources.stages2d.preview.preset,'night-garden');
+ const stage=resourcePreview2D(p,'stages2d','night-garden')!;assert.equal(stage.isolated,false);assert.equal(stage.shot.actors.length,0);assert.equal(stage.resources.stages2d.preview.preset,'night-garden');
  assert.equal(resourcePreview2D(p,'objects2d','missing'),null);
 });
 
