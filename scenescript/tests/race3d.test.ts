@@ -1,3 +1,4 @@
+import {lightCollectorProject} from '../src/lib/light-collector-example.ts';
 import {test} from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';
 import {race3DExample,raceProgress3D,raceDuration3D} from '../src/lib/race3d-example.ts';
 import {raceEffectsWav} from '../src/lib/race3d-audio.ts';
@@ -26,7 +27,7 @@ test('startup prioritizes saved work, handles corrupt storage and failed default
  const p=demoProject();p.title='My saved work';let calls=0;const load=async()=>{calls++;return validateProject(race3DExample);};const recovered=await resolveStartupProject(JSON.stringify(p),load);assert.equal(recovered.project.title,p.title);assert.ok(recovered.recovered);assert.equal(calls,0);
  const fresh=await resolveStartupProject(null,load);assert.equal(fresh.project.title,race3DExample.title);assert.equal(calls,1);assert.equal(fresh.error,false);
  const corrupt=await resolveStartupProject('{invalid',load);assert.ok(corrupt.error);assert.equal(corrupt.project.title,race3DExample.title);
- const failed=await resolveStartupProject(null,async()=>{throw Error('offline');});assert.ok(failed.error);assert.equal(failed.project.title,demoProject().title);
+ const failed=await resolveStartupProject(null,async()=>{throw Error('offline');});assert.ok(failed.error);assert.equal(failed.project.title,lightCollectorProject().title);
 });
 test('production track has a separated spiral, banked curves and entirely above-ground road meshes',async()=>{
  const {racePath3D:route,raceRoadParts3D:road,raceRoadWidth3D:width,spiralEntryIndex3D:entry,spiralExitIndex3D:exit,raceJumpGap3D:gap,raceRoadSamples3D:samples}=await import('../src/lib/race3d-track.ts');

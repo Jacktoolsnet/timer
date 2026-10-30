@@ -1,8 +1,10 @@
+import {fileURLToPath} from 'node:url';
 import {test,expect} from '@playwright/test';
 const url='/examples/space-adventure-storyboard/space-adventure.scenescript.json';
+async function loadSpace(page:any){await page.locator('#project-file').setInputFiles(fileURLToPath(new URL('../public'+url,import.meta.url)));await expect(page.locator('#project-title')).toHaveValue('Six Targets. One Escape. | Space Adventure');}
 test('space adventure imports as a video project with all nine scenes and the approved storyboard',async({page})=>{
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/en/');await expect(page.locator('#editor')).toHaveAttribute('data-ready','true');
+ await page.goto('/en/');await expect(page.locator('#editor')).toHaveAttribute('data-ready','true');await loadSpace(page);
  await expect(page.locator('#project-title')).toHaveValue('Six Targets. One Escape. | Space Adventure');
  await expect(page.locator('#scene-list li')).toHaveCount(9);await expect(page.locator('#timeline')).toHaveAttribute('max','28.6');
  await page.locator('#timeline').fill('4');await expect(page.locator('#stage')).toContainText('DESTROY ALL');
@@ -12,11 +14,11 @@ test('space adventure imports as a video project with all nine scenes and the ap
  for(const toggle of await page.locator('[data-board-review]').getByRole('switch').all())await expect(toggle).toBeChecked();
  await page.locator('#storyboard-close').click();
  page.on('dialog',d=>d.accept());await page.locator('#new-project').click();await expect(page.locator('#scene-list li')).toHaveCount(1);
- await page.locator('#load-default-project').click();await expect(page.locator('#project-title')).toHaveValue('Six Targets. One Escape. | Space Adventure');await expect(page.locator('#scene-list li')).toHaveCount(9);
+ await page.locator('#load-default-project').click();await expect(page.locator('#project-title')).toHaveValue('Der kleine Lichtsammler');await expect(page.locator('#scene-list li')).toHaveCount(1);
  expect(errors).toEqual([]);
 });
 test('native space animation renders each beat and deterministic reverse seeks including its synthesized audio',async({page},info)=>{
- test.setTimeout(120000);await page.goto('/en/');await expect(page.locator('#editor')).toHaveAttribute('data-ready','true');
+ test.setTimeout(120000);await page.goto('/en/');await expect(page.locator('#editor')).toHaveAttribute('data-ready','true');await loadSpace(page);
  const frames=await page.evaluate(async url=>{
   const {parseProject}=await import(/* @vite-ignore */ '/src/lib/model.ts' as string),{ExportMedia}=await import(/* @vite-ignore */ '/src/scripts/export-media.ts' as string),{ExportRenderer}=await import(/* @vite-ignore */ '/src/scripts/export-renderer.ts' as string),{ExportAudio}=await import(/* @vite-ignore */ '/src/scripts/export-audio.ts' as string);
   const p=parseProject(await(await fetch(url)).text()),m=new ExportMedia(p,new AbortController().signal),r=new ExportRenderer(p,m),audio=new ExportAudio(p,m,28.6);
@@ -30,7 +32,7 @@ test('native space animation renders each beat and deterministic reverse seeks i
 });
 
 test('cockpit displays change with timeline time and stay deterministic when seeking backwards',async({page},info)=>{
- test.setTimeout(120000);await page.goto('/en/');await expect(page.locator('#editor')).toHaveAttribute('data-ready','true');
+ test.setTimeout(120000);await page.goto('/en/');await expect(page.locator('#editor')).toHaveAttribute('data-ready','true');await loadSpace(page);
  await page.locator('#timeline').fill('15.2');await expect(page.locator('#stage')).toContainText('TARGETS  3 / 6');
  await page.locator('#timeline').fill('16.15');await expect(page.locator('#stage')).toContainText('FIRING');
  await page.locator('#timeline').fill('16.6');await expect(page.locator('#stage')).toContainText('TARGET DESTROYED');await expect(page.locator('#stage')).toContainText('TARGETS  4 / 6');
@@ -45,7 +47,7 @@ test('cockpit displays change with timeline time and stay deterministic when see
 });
 
 test('Play keeps the opening wormhole rendering after 3D playback preparation',async({page})=>{
- test.setTimeout(90000);await page.goto('/en/');await expect(page.locator('#editor')).toHaveAttribute('data-ready','true');
+ test.setTimeout(90000);await page.goto('/en/');await expect(page.locator('#editor')).toHaveAttribute('data-ready','true');await loadSpace(page);
  // Start through the actual transport, not ExportRenderer or a paused seek.
  // Other textured shots must not evict the active world during preparation.
  const result=await page.evaluate(()=>new Promise<{time:number;error:boolean;changed:boolean}>((resolve,reject)=>{

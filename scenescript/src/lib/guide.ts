@@ -26,6 +26,16 @@ const presetExamples=textPresets.map(preset=>{const e=applyTextPreset(newElement
 export const aiGuide = `# SceneScript 1.0 — complete authoring specification
 
 ## 1. Start here
+
+2D puppet preset: scenes[].stage2d may be null or an object with
+preset:"light-collector", bodyColor/accentColor (#RRGGBB), endingTitle/endingSubtitle
+(max 80 characters each), walk/wave/jump/night/cameraMotion (booleans, default true),
+and jumpHeight (0–110, default 100). This is the first prepared puppet scene,
+not an arbitrary rig editor. The complete walk, gesture, jump and iris choreography
+is retimed proportionally to scene.duration (16 seconds in the shipped default).
+The 960×540 composition is fitted inside all project formats without cropping;
+normal scene elements render above it. See /examples/light-collector.scenescript.json.
+No executable code or external scene URLs are accepted in stage2d.
 SceneScript renders JSON videos with 2D/3D layers. Read §§1–4; §11 lists fields, §12 examples.
 
 Optional storyboard is a non-rendered plan. Preserve data/IDs/revision/comments; users

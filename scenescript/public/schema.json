@@ -85,6 +85,7 @@
         "type": "object",
         "additionalProperties": false,
         "properties": {
+          "stage2d": {"anyOf": [{"$ref": "#/$defs/stage2D"}, {"type": "null"}], "default": null},
           "stage3d": {
             "anyOf": [
               {
@@ -1097,6 +1098,7 @@
   "title": "SceneScript 1.0",
   "$comment": "Runtime validation additionally enforces unique IDs, resolved asset references, element.at <= scene.duration, total UTF-8 file size and image decoding / dimensions. Do not include $schema in project data. Comic cross-references, until relative to at/scene duration, safe geometry and text overflow are runtime checks, not structural schema constraints.",
   "$defs": {
+    "stage2D": {"type": "object", "additionalProperties": false, "properties": {"preset": {"const": "light-collector", "default": "light-collector"}, "bodyColor": {"type": "string", "pattern": "^#[0-9a-fA-F]{6}$", "default": "#f28b70"}, "accentColor": {"type": "string", "pattern": "^#[0-9a-fA-F]{6}$", "default": "#fff5c0"}, "endingTitle": {"type": "string", "maxLength": 80, "default": "Manchmal genügt"}, "endingSubtitle": {"type": "string", "maxLength": 80, "default": "ein kleiner Funke."}, "walk": {"type": "boolean", "default": true}, "wave": {"type": "boolean", "default": true}, "jump": {"type": "boolean", "default": true}, "night": {"type": "boolean", "default": true}, "cameraMotion": {"type": "boolean", "default": true}, "jumpHeight": {"type": "number", "minimum": 0, "maximum": 110, "default": 100}}},
     "vector3D": {
       "type": "object",
       "additionalProperties": false,

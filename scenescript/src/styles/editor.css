@@ -1339,3 +1339,15 @@ body.recording .comic-edit-overlay{display:none}
 #ai-workflow-model-recovery-json{width:100%;box-sizing:border-box;resize:vertical;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:12px;font:12px/1.5 monospace}
 #ai-workflow-model-recovery [role=status]{white-space:pre-wrap;overflow-wrap:anywhere}
 #ai-workflow-model-recovery button svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* Prepared 2D motion chapters: click to inspect, no draggable keyframe affordance. */
+.stage2d-track .timeline-bar{cursor:pointer;background:color-mix(in srgb,#87ac74 40%,var(--surface));padding:0}
+[data-stage2d-editor] input[type=checkbox]{width:auto;align-self:flex-start}
+
+[data-stage2d-editor]{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;min-width:0;margin:0;padding:12px;border:1px solid var(--line);border-radius:8px}
+[data-stage2d-editor] legend{font-size:calc(12px * var(--font-scale,1));color:var(--text);padding:0 5px}
+[data-stage2d-editor] .small-hint{grid-column:1/-1;margin:0}
+[data-stage2d-editor] label{margin:0}
+[data-stage2d-editor] label:has(input[type=checkbox]){flex-direction:row;align-items:center;justify-content:space-between}
+[data-stage2d-editor] label:first-of-type{grid-column:1/-1}
+@media(max-width:900px){[data-stage2d-editor]{grid-template-columns:1fr}}

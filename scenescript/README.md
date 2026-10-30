@@ -1458,3 +1458,55 @@ keine KI-/Netzwerkkosten). Sie wird in `board.images` gespeichert und ist beim n
 Modellauftrag als Materialtextur verfügbar. Die KI muss sie anschließend sinnvoll
 Bauteilen zuordnen; die Erzeugung allein verändert keine Modelle. Ein Porträt oder
 Kulissenbild soll nicht versehentlich als Kleidungsstoff verwendet werden.
+
+## 2D-Puppenanimation und neues Standardprojekt: Lichtsammler
+
+Beim ersten Start ohne gespeicherten Entwurf öffnet SceneScript jetzt
+`/examples/light-collector.scenescript.json`: die 16-sekündige PixiJS-Animation
+„Der kleine Lichtsammler“. Auch bei fehlgeschlagenem Download steht dasselbe
+Projekt lokal als Fallback bereit. Gespeicherte Arbeit wird **nicht** überschrieben;
+über „Standardprojekt laden“ lässt sich die Demo ausdrücklich öffnen.
+„Neues Projekt“ bleibt eine leere, frei gestaltbare Szene.
+
+Das Projekt enthält eine echte, strikt validierte `scenes[].stage2d`-Konfiguration,
+keinen eingebetteten Film und kein ausführbares Script. Die erste Puppenvorlage
+heißt `light-collector`. Im Szeneninspektor können Figuren-/Funkenfarbe und beide
+Schlusstextzeilen geändert werden. Gangzyklus, Winken, Sprung/Funkenfang,
+Kamerafahrt/Parallaxe und Nachtgarten/Irisblende sind einzeln schaltbar;
+die Sprunghöhe ist einstellbar. Die Szenendauer skaliert die komplette Choreografie.
+Die vorbereiteten Bewegungen erscheinen als anklickbare Kapitelspuren in der
+Timeline; ihre einzelnen Keys sind noch nicht frei verschiebbar.
+
+Dieselbe Vorlage kann in jeder leeren Szene aktiviert werden. Normale Text-,
+Bild- und andere Elemente lassen sich darüberlegen. Die 960×540-Komposition
+wird ohne Beschnitt in Landschaft, Hochformat und Quadrat eingepasst.
+
+Vorschau, Kameravorschau, PNG/Kontaktbögen und Videoexport verwenden dieselbe
+absolute Zeitberechnung und Pixi-Zeichenlogik. Reine 2D-Vorlagen gehen direkt
+als Canvas-Frames in den Export; gemischte Szenen nutzen den bestehenden
+Compositor. PixiJS wird nur für Szenen mit `stage2d` geladen. Pro Vorschau bzw.
+Export gibt es einen eigenen WebGL-Kontext und einen begrenzten Szenencache.
+Audio funktioniert weiterhin über die bestehende Pipeline; das Standardprojekt
+selbst ist stumm.
+
+**Umfang:** erste parametrisierbare 2D-Puppenvorlage, noch kein allgemeiner
+Rig-/Keyframe-Editor. Three.js und bestehende 2D-Elemente bleiben verfügbar.
+Die ursprüngliche isolierte Studie liegt weiterhin unter
+`experiments/pixi-feasibility/`.
+
+```sh
+npm run example:light-collector # Standard-JSON aus der Factory neu erzeugen
+npm test
+npx playwright test tests/stage2d.spec.ts
+npm run build
+```
+
+Validierung der ersten Integration: Build ohne Fehler, 330 Unit-Tests erfolgreich,
+Desktop-/Tablet-Browsertests für Standardprojekt, Änderungen und Undo/Redo,
+JSON-Roundtrip, Kapitelspuren, Wiedergabe, identische Vorschau-/Exportpixel,
+Overlays, Formatwechsel und Cachewechsel. Zusätzlich wurde das vollständige
+16-Sekunden-Standardprojekt als WebM (480p/24 fps) exportiert und mit korrekter
+Dauer wieder geöffnet. Zwei ältere Kamera-Browsertests erwarten einen DOM-Baum
+nach dem Frame-Export, obwohl dieser bereits vorher aufgeräumt wurde; beide
+scheitern unverändert auch mit dem ursprünglichen ExportRenderer aus HEAD
+(auf Desktop und Tablet). Deren Erwartungen wurden hier nicht verändert.

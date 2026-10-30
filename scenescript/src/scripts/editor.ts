@@ -1,3 +1,5 @@
+import {createStage2DView,prepareStage2DPreview,type Stage2DView} from './stage2d-preview';
+import {stage2DFields,stage2DTimeline} from './stage2d-editor';
 import {installVoicePicker} from './voice-picker';
 import {installAiWorkflow,type AiWorkflowContext} from './ai-workflow';
 import {installApiVault} from './api-vault';
@@ -168,6 +170,7 @@ function renderTimeline(){
   });
   bar.addEventListener('keydown',event=>{if(!['ArrowLeft','ArrowRight'].includes(event.key)||playing||recording)return;event.preventDefault();if(group){selectedId='';selectedGroupId=item.id;}else{selectedGroupId='';selectedId=item.id;}renderElements();const mode=((event.target as HTMLElement).dataset.intervalMode||'move') as 'move'|'start'|'end';const next=editInterval(item.at,item.until,s.duration,(event.key==='ArrowLeft'?-1:1)*(event.shiftKey?1:.1),mode,($('timeline-snap') as HTMLInputElement).checked);Object.assign(item,next);changed();renderForms();host.querySelector<HTMLElement>('[data-track-id="'+item.id+'"] [data-interval-mode="'+mode+'"]')?.focus();draw(false);});
  };
+ stage2DTimeline(host,s,document.documentElement.lang,seek);
  for(const g of s.groups){row(g,true);if(!collapsedGroups.has(g.id))for(const id of g.members){const e=s.elements.find(e=>e.id===id);if(e)row(e,false,true);}}
  for(const e of s.elements)if(!s.groups.some(g=>g.members.includes(e.id)))row(e,false);
  host.style.setProperty('--playhead',Math.max(0,Math.min(100,(time-offset(sceneIndex))/s.duration*100))+'%');host.scrollTop=scrollTop;
@@ -560,6 +563,7 @@ function renderForms(){
  richEditor?.dispose();richEditor=undefined;
  const form=$('scene-form');form.replaceChildren();const s=current();
  field(form,'name',s.name,'text',v=>updateScene('name',v));field(form,'duration',s.duration,'number',v=>updateScene('duration',v),undefined,Math.max(.1,sceneSpeechMinimum(s,project)),3600);
+ stage2DFields(form,s,document.documentElement.lang,rebuild=>{stop();changed();if(rebuild)renderForms();draw(false);});
  field(form,'backgroundEnabled',s.backgroundEnabled,'checkbox',v=>updateScene('backgroundEnabled',v));
  field(form,'backgroundOpacity',s.backgroundOpacity,'number',v=>updateScene('backgroundOpacity',v),undefined,0,1);
  field(form,'background',s.background,'color',v=>updateScene('background',v));gradientFields(form,'backgroundGradient',s.backgroundGradient,s.background,v=>updateScene('backgroundGradient',v));field(form,'backgroundAsset',s.backgroundAsset,'select',v=>updateScene('backgroundAsset',v),['',...Object.keys(project.assets)]);
@@ -917,7 +921,7 @@ function syncProjectSimulation(){
  projectSimulation?.draw(time);
 }
 let transitionBlack:HTMLDivElement|undefined;
-let stageKey='',views:SceneView[]=[],incomingLayer:HTMLDivElement|undefined,incomingWorld:HTMLDivElement|undefined,incomingSvgBackground:SVGSVGElement|undefined,incomingStage3D:Stage3DView|undefined,outgoingStage3D:Stage3DView|undefined,outgoingLayer:HTMLDivElement|undefined;
+let stageKey='',views:SceneView[]=[],incomingLayer:HTMLDivElement|undefined,incomingWorld:HTMLDivElement|undefined,incomingSvgBackground:SVGSVGElement|undefined,incomingStage3D:Stage3DView|undefined,outgoingStage3D:Stage3DView|undefined,incomingStage2D:Stage2DView|undefined,outgoingStage2D:Stage2DView|undefined,outgoingLayer:HTMLDivElement|undefined;
 function createSceneLayer(scene:Scene,index:number,interactive:boolean,forceWorld=false){
  const backgroundOpacity=scene.backgroundEnabled?scene.backgroundOpacity:0;
  const viewport=document.createElement('div');viewport.style.isolation='isolate';viewport.className='scene-layer';viewport.dataset.sceneIndex=String(index);const layer=document.createElement('div');layer.className='scene-camera-world';viewport.append(layer);layer.style.background=backgroundOpacity===1?gradientCSS(scene.backgroundGradient,scene.background):'transparent';if(!scene.camera&&!forceWorld&&!scene.elements.some(e=>e.exposure.enabled)){viewport.style.background=layer.style.background;layer.style.background='transparent';}
@@ -929,6 +933,7 @@ function createSceneLayer(scene:Scene,index:number,interactive:boolean,forceWorl
  let svgBackground:SVGSVGElement|undefined;
  if(scene.backgroundAsset&&project.assets[scene.backgroundAsset].data.startsWith('data:image/svg+xml;')){svgBackground=createSvgImage(project.assets[scene.backgroundAsset].data,'cover',true);const background=document.createElement('div');background.className='scene-background';background.append(svgBackground);backgroundHost.append(background);}
  else if(scene.backgroundAsset){const image=document.createElement('img');image.className='scene-background';image.src=project.assets[scene.backgroundAsset].data;image.alt='';backgroundHost.append(image);}
+ const stage2d=scene.stage2d?createStage2DView(scene.stage2d,scene.duration,w,h,error=>status(error.message)):undefined;if(stage2d)layer.append(stage2d.canvas);
  const stage3d=scene.stage3d?createStage3DView(project,scene.stage3d,w,h,error=>status(error.message)):undefined;if(stage3d)layer.append(stage3d.canvas);
  scene.elements.forEach(e=>{
    const node=document.createElement('div');node.dataset.elementId=e.id;node.dataset.space=e.space;node.className='scene-element'+(interactive&&!playing&&(e.id===selectedId||scene.groups.some(g=>g.id===selectedGroupId&&g.members.includes(e.id)))?' selected':'');
@@ -947,7 +952,7 @@ function createSceneLayer(scene:Scene,index:number,interactive:boolean,forceWorl
    node.addEventListener('click',()=>{if(!interactive||playing||recording)return;selectedGroupId='';selectedId=e.id;renderForms();renderElements();draw();});
    layer.append(node);sceneViews.push({element:e,node,text,svg,simulation,video,bubble,scene});
  });
- return {layer:viewport,world:layer,views:sceneViews,svgBackground,stage3d};
+ return {layer:viewport,world:layer,views:sceneViews,svgBackground,stage3d,stage2d};
 }
 function updateSceneViews(sceneViews:SceneView[],local:number,opacity=1,cameraEnabled=true,cameraOverride:Camera|null|undefined=undefined){
  sceneViews.forEach(({element,node,text,svg,simulation,video,bubble,scene})=>{
@@ -989,11 +994,11 @@ function draw(follow=true){
  const key=`${revision}:${at.index}:${project.format}:${playing}:${recording}:${selectedId}:${selectedGroupId}:${showPrevious}:${cameraOverview}`;
  if(stageKey!==key){
   if(morphRevision!==revision){morphPreview?.dispose();morphPreview=undefined;morphPreviewReady=undefined;}
-  incomingStage3D?.dispose();incomingStage3D=undefined;outgoingStage3D?.dispose();outgoingStage3D=undefined;
+  incomingStage2D?.dispose();incomingStage2D=undefined;outgoingStage2D?.dispose();outgoingStage2D=undefined;incomingStage3D?.dispose();incomingStage3D=undefined;outgoingStage3D?.dispose();outgoingStage3D=undefined;
   stageKey=key;stage.querySelectorAll<HTMLVideoElement>('video:not(.project-video-canvas)').forEach(v=>v.pause());for(const child of Array.from(stage.children))if(child!==projectSimulation?.canvas&&child!==backgroundVideoNode)child.remove();if(projectSimulation&&projectSimulation.canvas.parentElement!==stage)stage.prepend(projectSimulation.canvas);if(backgroundVideoNode&&backgroundVideoNode.parentElement!==stage){if(projectSimulation)projectSimulation.canvas.after(backgroundVideoNode);else stage.prepend(backgroundVideoNode);}outgoingLayer=undefined;transitionBlack=undefined;
   if((projectSimulation||backgroundVideoNode)&&s.transition==='through-black'){transitionBlack=document.createElement('div');transitionBlack.className='project-transition-black';stage.append(transitionBlack);}stage.style.background=projectSimulation||backgroundVideoNode||layered||s.backgroundGradient||!s.backgroundEnabled||s.backgroundOpacity<1?'#000000':s.background;resize();
-  if(showPrevious){const previous=project.scenes[at.index-1],view=createSceneLayer(previous,at.index-1,false);outgoingLayer=view.layer;view.world.style.transform=cameraTransform(cameraOverview&&!playing&&!recording?null:previous.camera,previous.duration,formats[project.format][0],formats[project.format][1]);stage.append(view.layer);updateSceneViews(view.views,previous.duration,1,!(cameraOverview&&!playing&&!recording));seekSvg(view.svgBackground,previous.duration);outgoingStage3D=view.stage3d;outgoingStage3D?.draw(previous.duration);}
-  const view=createSceneLayer(s,at.index,true);incomingLayer=view.layer;incomingWorld=view.world;incomingSvgBackground=view.svgBackground;incomingStage3D=view.stage3d;views=view.views;stage.append(view.layer);
+  if(showPrevious){const previous=project.scenes[at.index-1],view=createSceneLayer(previous,at.index-1,false);outgoingLayer=view.layer;view.world.style.transform=cameraTransform(cameraOverview&&!playing&&!recording?null:previous.camera,previous.duration,formats[project.format][0],formats[project.format][1]);stage.append(view.layer);updateSceneViews(view.views,previous.duration,1,!(cameraOverview&&!playing&&!recording));seekSvg(view.svgBackground,previous.duration);outgoingStage3D=view.stage3d;outgoingStage3D?.draw(previous.duration);outgoingStage2D=view.stage2d;outgoingStage2D?.draw(previous.duration);}
+  const view=createSceneLayer(s,at.index,true);incomingLayer=view.layer;incomingWorld=view.world;incomingSvgBackground=view.svgBackground;incomingStage3D=view.stage3d;incomingStage2D=view.stage2d;views=view.views;stage.append(view.layer);
   const morphIndex=s.transition==='morph'&&showPrevious?at.index:project.scenes[at.index+1]?.transition==='morph'?at.index+1:-1;
   if(morphIndex>0)void ensureMorphPreview().then(async view=>{await view.ready(morphIndex);if(stageKey===key&&s.transition==='morph'&&showPrevious){stage.append(view.canvas);view.draw(time);}}).catch(error=>{if((error as Error).name!=='AbortError')status((error as Error).message);});
  }
@@ -1004,7 +1009,7 @@ function draw(follow=true){
  // Preserve the existing fade-in semantics over the incoming background color.
  const sceneOpacity=s.transition==='fade'&&playing?Math.min(1,at.local/s.transitionDuration):1;
  const backgroundImage=incomingLayer?.querySelector<HTMLElement|SVGElement>('.scene-background');if(backgroundImage)backgroundImage.style.opacity=String(sceneOpacity);
- seekSvg(incomingSvgBackground,at.local);incomingStage3D?.draw(at.local);
+ seekSvg(incomingSvgBackground,at.local);incomingStage3D?.draw(at.local);incomingStage2D?.draw(at.local);
  if(s.transition==='morph'&&showPrevious&&morphPreview?.canvas.isConnected)morphPreview.draw(time);
  updateSceneViews(views,at.local,sceneOpacity,!(cameraOverview&&!playing&&!recording));
  stage.querySelector('.motion-path-overlay')?.remove();stage.querySelector('.comic-edit-overlay')?.remove();
@@ -1050,7 +1055,7 @@ function play(){
  const videos=[...(backgroundVideoNode?[backgroundVideoNode]:[]),...views.filter(v=>v.video&&v.node.style.visibility!=='hidden').map(v=>v.video!)];
  const currentAt=locateTime(project,time),morphIndex=project.scenes[currentAt.index].transition==='morph'&&currentAt.index>0?currentAt.index:project.scenes[currentAt.index+1]?.transition==='morph'?currentAt.index+1:-1;
  const morphReady=morphIndex>0?ensureMorphPreview().then(view=>view.ready(morphIndex)):Promise.resolve();
- void Promise.all([prepare,Promise.all(videos.map(v=>prepareVideo(v,preparation.signal))),morphReady,project.scenes.some(s=>s.stage3d)?prepareStage3DPreview(project,()=>preparation.signal.throwIfAborted(),project.scenes[currentAt.index].stage3d??undefined):Promise.resolve()]).then(async([buffers])=>{
+ void Promise.all([project.scenes.some(s=>s.stage2d)?prepareStage2DPreview():Promise.resolve(),prepare,Promise.all(videos.map(v=>prepareVideo(v,preparation.signal))),morphReady,project.scenes.some(s=>s.stage3d)?prepareStage3DPreview(project,()=>preparation.signal.throwIfAborted(),project.scenes[currentAt.index].stage3d??undefined):Promise.resolve()]).then(async([,buffers])=>{
   if(!playing||attempt!==playbackAttempt)return;
   if(project.music?.enabled){try{await musicPlayer.start(project.music,time,total(),t=>buffers?duckGain(project,t,clips):1);}catch{showToast(t('audioError'),'warning');}}
   if(!playing||attempt!==playbackAttempt)return;if(buffers)narrationPlayer.start(project,musicPlayer.playhead()??time,buffers);begin();
@@ -1402,14 +1407,14 @@ function renderCameraPreview(){
  cameraPreviewView=createSceneLayer(cameraTarget,sceneIndex,false,true);root.append(cameraPreviewView.layer);cameraPreviewView.views.forEach(v=>v.video?.addEventListener('loadeddata',renderCameraPreview,{once:true}));}
  cameraPreviewSimulation?.draw(offset(sceneIndex)+local);
  if(cameraPreviewVideo&&project.backgroundVideo?.asset)syncVideo(cameraPreviewVideo,{...project.backgroundVideo,muted:true},project.videos[project.backgroundVideo.asset].duration,offset(sceneIndex)+local,false,false);
- const view=cameraPreviewView;view.world.style.transform=cameraTransform(cameraFrameOverview?null:camera,local,w,h);updateSceneViews(view.views,local,cameraTarget.transition==='fade'?Math.min(1,local/cameraTarget.transitionDuration):1,!cameraFrameOverview,camera);seekSvg(view.svgBackground,local);view.stage3d?.draw(local);$('camera-time-label').textContent=local.toFixed(2)+' s';renderCameraFrame();
+ const view=cameraPreviewView;view.world.style.transform=cameraTransform(cameraFrameOverview?null:camera,local,w,h);updateSceneViews(view.views,local,cameraTarget.transition==='fade'?Math.min(1,local/cameraTarget.transitionDuration):1,!cameraFrameOverview,camera);seekSvg(view.svgBackground,local);view.stage3d?.draw(local);view.stage2d?.draw(local);$('camera-time-label').textContent=local.toFixed(2)+' s';renderCameraFrame();
  const last=cameraDraft?.stations.at(-1);($('camera-add') as HTMLButtonElement).disabled=!last||cameraDraft!.stations.length>=32||last.at+last.hold>=cameraTarget.duration;
 }
 $('camera-form').addEventListener('submit',e=>e.preventDefault());$('camera-time').addEventListener('input',()=>{cancelAnimationFrame(cameraPreviewFrame);cameraPreviewFrame=0;cameraPlayLabel(false);renderCameraPreview();});
 $('camera-add').addEventListener('click',()=>{const last=cameraDraft?.stations.at(-1);if(!last||!cameraTarget||last.at+last.hold>=cameraTarget.duration||cameraDraft!.stations.length>=32)return;cameraDraft!.stations.push({...last,at:Math.min(cameraTarget.duration,last.at+last.hold+Math.max(.1,(cameraTarget.duration-last.at-last.hold)/2)),hold:0});renderCameraForm();renderCameraPreview();});
 $('camera-reset').addEventListener('click',()=>{cameraDraft=null;renderCameraForm();renderCameraPreview();});
 $('close-camera').addEventListener('click',()=>cameraDialog.close());
-cameraDialog.addEventListener('close',()=>{cancelAnimationFrame(cameraPreviewFrame);cameraPreviewFrame=0;cameraPlayLabel(false);$('camera-preview').querySelectorAll('video').forEach(v=>v.pause());$('camera-preview').replaceChildren();cameraPreviewView=undefined;cameraPreviewSimulation=undefined;cameraPreviewVideo=undefined;cameraTarget=undefined;cameraProject=undefined;});
+cameraDialog.addEventListener('close',()=>{cancelAnimationFrame(cameraPreviewFrame);cameraPreviewFrame=0;cameraPlayLabel(false);$('camera-preview').querySelectorAll('video').forEach(v=>v.pause());$('camera-preview').replaceChildren();cameraPreviewView?.stage2d?.dispose();cameraPreviewView?.stage3d?.dispose();cameraPreviewView=undefined;cameraPreviewSimulation=undefined;cameraPreviewVideo=undefined;cameraTarget=undefined;cameraProject=undefined;});
 $('apply-camera').addEventListener('click',()=>{if(!cameraTarget||cameraProject!==project)return;try{cameraTarget.camera=parseCamera(cameraDraft,cameraTarget.duration);changed();cameraDialog.close();refresh();}catch(error){showToast((error as Error).message,'error');}});
 function cameraPlayLabel(active:boolean){const b=$('camera-play');b.title=t(active?'pause':'play');b.setAttribute('aria-label',b.title);b.innerHTML=active?'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4v16M16 4v16"/></svg>':'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 4 12 8-12 8Z"/></svg>';}
 $('camera-play').addEventListener('click',()=>{if(cameraPreviewFrame){cancelAnimationFrame(cameraPreviewFrame);cameraPreviewFrame=0;cameraPlayLabel(false);renderCameraFrame();return;}if(!cameraTarget)return;const input=$('camera-time') as HTMLInputElement;if(Number(input.value)>=cameraTarget.duration)input.value='0';cameraPlayLabel(true);const started=performance.now(),base=Number(input.value),duration=cameraTarget.duration;const tick=(now:number)=>{input.value=String(Math.min(duration,base+(now-started)/1000));renderCameraPreview();cameraPreviewFrame=Number(input.value)<duration&&cameraDialog.open?requestAnimationFrame(tick):0;if(!cameraPreviewFrame){cameraPlayLabel(false);renderCameraFrame();}};cameraPreviewFrame=requestAnimationFrame(tick);});
