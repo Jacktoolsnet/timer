@@ -26,7 +26,7 @@ export function createModel2DView(model:Model2D,color='#79a8cb',accent='#fff5c0'
   const pose=Array.isArray(clip)?poseClipsModel2D(model,clip):poseModel2D(model,clip,time);
   for(const part of model.parts){
    const node=nodes.get(part.id)!,p=pose.get(part.id)!;node.position.set(p.x,p.y);node.angle=p.rotation;node.scale.set(p.scaleX,p.scaleY);node.alpha=p.opacity;
-   if(camera&&!part.parent){node.x=p.x*camera.zoom+camera.x*part.parallax-(camera.zoom-1)*480;node.y=p.y*camera.zoom+camera.y*part.parallax-(camera.zoom-1)*270;node.scale.set(p.scaleX*camera.zoom,p.scaleY*camera.zoom);}
+   if(camera&&!part.parent){node.x=p.x*camera.zoom+camera.x*part.parallax-(camera.zoom-1)*model.width/2;node.y=p.y*camera.zoom+camera.y*part.parallax-(camera.zoom-1)*model.height/2;node.scale.set(p.scaleX*camera.zoom,p.scaleY*camera.zoom);}
   }
  }};
 }

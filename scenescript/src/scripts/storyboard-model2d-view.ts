@@ -1,3 +1,4 @@
+import {stageFrame2D} from '../lib/stage2d-frame';
 import {storyboardResourceWords} from '../lib/storyboard-resource-i18n';
 import {createStage2DView} from './stage2d-preview';
 import {resourcePreview2D} from '../lib/stage2d-resource-preview';
@@ -8,8 +9,9 @@ import type {Resources2D} from '../lib/stage2d';
 /** Same absolute-time renderer for rehearsal, scene playback and export. */
 export function storyboardModel2DView(host:HTMLElement,source:Resources2D,subject:BoardSubject,setting:boolean,controls=true,width=640,height=480){
  const library=previewLibrary2D(source,subject,setting),kind=setting?'stages2d':'objects2d',id=subject.resource2d??subject.id,resource=library[kind][id];
+ if(setting&&resource&&'preset' in resource){const frame=stageFrame2D(resource),fit=Math.min(width/frame.width,height/frame.height);width=Math.round(frame.width*fit);height=Math.round(frame.height*fit);}
  const t=storyboardDesignWords(document.documentElement.lang),figure=document.createElement('div'),tools=document.createElement('div'),message=document.createElement('p');
- figure.className='board-model-canvas board-resource2d-canvas';tools.className='board-model-controls';message.setAttribute('role','status');
+ figure.className='board-model-canvas board-resource2d-canvas';figure.dataset.previewWidth=String(width);figure.dataset.previewHeight=String(height);figure.style.aspectRatio=width+'/'+height;tools.className='board-model-controls';message.setAttribute('role','status');
  const clip=document.createElement('select');clip.setAttribute('aria-label',storyboardResourceWords(document.documentElement.lang).clip);clip.add(new Option(t.still,''));
  for(const name of Object.keys(resource?.model?.animations??{}))clip.add(new Option(name,name));
  const play=document.createElement('button');play.type='button';play.textContent='▶';play.title=t.play;play.setAttribute('aria-label',t.play);play.setAttribute('aria-pressed','false');

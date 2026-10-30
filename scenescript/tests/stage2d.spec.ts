@@ -1,6 +1,8 @@
+import {DEFAULT_PROJECT_URL} from '../src/lib/startup-project';
 import {test,expect} from '@playwright/test';
 import {readFile} from 'node:fs/promises';
 const url='/examples/light-collector.scenescript.json';
+test.beforeEach(async({page})=>{await page.route('**'+DEFAULT_PROJECT_URL,route=>route.fulfill({contentType:'application/json',path:'public/examples/light-collector.scenescript.json'}));});
 async function ready(page:any){await page.goto('/de/');await expect(page.locator('#editor')).toHaveAttribute('data-ready','true');await expect(page.locator('#stage .stage2d-canvas')).toHaveAttribute('data-stage2d-time','0');}
 test('2D resources and independent instances edit, roundtrip and support undo',async({page})=>{
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());await ready(page);

@@ -34,7 +34,7 @@ test('old bundled presets upgrade once without mutating the source or discarding
  const before=JSON.stringify(raw),p=validateProject(raw),s=p.scenes[0].stage2d!;assert.equal(JSON.stringify(raw),before);assert.equal(p.objects2d[s.actors[0].object].color,'#123456');assert.ok(!s.actors[0].actions.some(a=>a.type==='wave'));assert.equal(s.ending!.title,'Hallo');assert.equal(s.actors[1].actions[0].duration,8);assert.deepEqual(validateProject(p),p);
 });
 test('shipped project, schema defaults, recovery and German storyboard stay in sync',async()=>{
- const p=lightCollectorProject(),shipped=parseProject(readFileSync(new URL('../public'+DEFAULT_PROJECT_URL,import.meta.url),'utf8'));assert.deepEqual(shipped,validateProject(p));
+ const p=lightCollectorProject(),shipped=parseProject(readFileSync(new URL('../public/examples/light-collector.scenescript.json',import.meta.url),'utf8'));assert.deepEqual(shipped,validateProject(p));
  const schema=JSON.parse(readFileSync(new URL('../public/schema.json',import.meta.url),'utf8'));for(const [key,value]of Object.entries(defaultStage2D()))assert.deepEqual(schema.$defs.stage2D.properties[key].default,value);
  const board=parseStoryboard(p.storyboard);assert.equal(board.language,'Deutsch');assert.equal(board.duration,22);assert.deepEqual(board.shots.map(s=>s.duration),[4,3,10,5]);assert.ok(board.style.includes('project.stages2d'));assert.ok(board.shots.at(-1)!.action.includes(p.scenes[1].elements.find(e=>e.id==='closing-subtitle')!.text));assert.equal(board.approved,false);
  assert.equal(importStoryboard(exportStoryboard(board),board).shots.length,4);
@@ -71,7 +71,7 @@ test('model2D rejects unsupported code, invalid hierarchy, geometry, tracks and 
   (m:any)=>m.animations.fly.tracks.push(m.animations.fly.tracks[0]),
   (m:any)=>m.parts=Array.from({length:257},(_,i)=>({...m.parts[0],id:'p'+i}))
  ]){const m=birdModel2D();mutate(m);assert.throws(()=>parseModel2D(m));}
- const p=free2DProject();p.stages2d.city.model=birdModel2D();assert.throws(()=>validateProject(p),/960/);
+ const p=free2DProject();p.stages2d.city.model=birdModel2D();assert.throws(()=>validateProject(p),/origin 0,0/);
  p.stages2d.city.model=cityModel2D();p.scenes[0].stage2d!.actors[0].actions[0].clip='missing';assert.throws(()=>validateProject(p),/clip/);
 });
 test('2D model AI is targeted, validated, review-only and protected from general AI revisions',()=>{
@@ -260,4 +260,21 @@ test('2D path arity errors identify the part, opcode and expected coordinate cou
  // A cubic curve uses both control points and the endpoint without discarding values.
  model.parts[0].path[1].op='C';assert.deepEqual(parseModel2D(model).parts[0].path[1],{op:'C',values:[-20,5,-43,-5,-47,-28]});
  assert.ok(model2DInstructions.includes('Never label a six-value cubic curve Q; use C'));
+});
+
+test('portrait start project has seven native full-frame stages and editable resource instances',async()=>{
+ const {stageFrame2D,formatFrame2D}=await import('../src/lib/stage2d-frame.ts'),{reviewProduction}=await import('../src/lib/production-review.ts');
+ const p=parseProject(readFileSync(new URL('../public'+DEFAULT_PROJECT_URL,import.meta.url),'utf8'));
+ assert.equal(p.format,'portrait');assert.equal(p.storyboard!.format,'portrait');assert.equal(p.scenes.length,7);assert.equal(p.storyboard!.approved,false);
+ assert.deepEqual(formatFrame2D('square'),{width:720,height:720});
+ for(const s of p.scenes)assert.deepEqual(stageFrame2D(p.stages2d[s.stage2d!.stage]),{width:540,height:960});
+ assert.ok(!reviewProduction(p).some(i=>i.code==='stageFormat'||i.code==='formatMismatch'));
+ p.format='landscape';const issues=reviewProduction(p);assert.ok(issues.some(i=>i.code==='formatMismatch'));assert.ok(issues.some(i=>i.code==='stageFormat'));
+ p.format='portrait';const stage=Object.values(p.stages2d)[0];stage.model!.originX=1;assert.throws(()=>validateProject(p),/origin 0,0/);
+});
+test('model reconstruction sends own setting sketch first, without changing sketch generation references',async()=>{
+ const {modelGenerationReferences,imageGenerationReferences}=await import('../src/lib/storyboard-image-references.ts'),{model2DRequest}=await import('../src/lib/storyboard-model2d.ts');
+ const p=parseProject(readFileSync(new URL('../public'+DEFAULT_PROJECT_URL,import.meta.url),'utf8')),target={kind:'settings' as const,id:'bedroom'},own=p.storyboard!.settings[0].image!;
+ const refs=modelGenerationReferences(p,target);assert.equal(refs[0].imageId,own);assert.equal(new Set(refs.map(r=>r.imageId)).size,refs.length);assert.ok(!imageGenerationReferences(p,target).some(r=>r.imageId===own));
+ const request=model2DRequest(p,target,'An Skizze anpassen');assert.deepEqual(request.authoringFrame,{width:540,height:960});assert.equal(request.project.format,'portrait');
 });

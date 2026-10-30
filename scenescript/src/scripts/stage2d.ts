@@ -1,3 +1,4 @@
+import {stageFrame2D} from '../lib/stage2d-frame';
 import {Application} from 'pixi.js';
 import type {Stage2D,Resources2D} from '../lib/stage2d';
 import {createStage2DScene} from './stage2d-scene';
@@ -21,7 +22,7 @@ export class Stage2DRenderer{
    world=createStage2DScene(structuredClone(used),structuredClone(shot),isolated);this.worlds.set(key,world);
   }
   this.app.stage.removeChildren();this.app.stage.addChild(world.root);
-  const scale=Math.min(width/960,height/540);world.root.scale.set(scale);world.root.position.set((width-960*scale)/2,(height-540*scale)/2);
+  const frame=stageFrame2D(resources.stages2d[shot.stage]),scale=Math.min(width/frame.width,height/frame.height);world.root.scale.set(scale);world.root.position.set((width-frame.width*scale)/2,(height-frame.height*scale)/2);
   if(this.app.screen.width!==width||this.app.screen.height!==height)this.app.renderer.resize(width,height);
   this.app.renderer.background.alpha=isolated?0:1;
   world.setResolution(scale);world.draw(Math.max(0,Math.min(duration,time)));this.app.render();

@@ -32,7 +32,7 @@ export const aiGuide = `# SceneScript 1.0 — complete authoring specification
 skyColor,groundColor}; Project.objects2d maps IDs to {name,kind:"robot"|"spark"|"shape"|"custom",
 color,accentColor,shape:"rectangle"|"ellipse"|"star"}. Custom resources require model (native vector parts and reusable animation clips).
 Scene.stage2d references stage and actors. Each actor has a unique scene-local id,
-object resource ID, name, x/y in 960x540 design pixels, scale, rotation, opacity,
+object resource ID, name, x/y in the selected stage frame (legacy presets: 960x540), scale, rotation, opacity,
 optional color override (null inherits) and actions. Reuse an object resource for
 independent instances. actor.layer defaults to world; foreground keeps an actor above
 stage iris transitions (still camera-aligned, below ending text). Actions: move/walk/wave/jump/float/attach/fade/play with at/duration

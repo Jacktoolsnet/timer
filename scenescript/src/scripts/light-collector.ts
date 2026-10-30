@@ -21,7 +21,7 @@ export function createBackdrop2D(resource:Stage2DResource){
 const root=new Container();
 if(resource.preset==='custom'&&resource.model){
  const view=createModel2DView(resource.model,resource.groundColor,resource.skyColor),world=new Container();root.addChild(view.root);view.root.addChildAt(world,1);
- return {root,world,draw(t:number,camera:{x:number;y:number;zoom:number},clip='idle'){view.draw(t,[{clip:'idle',time:t},...(clip&&clip!=='idle'?[{clip,time:t}]:[])],camera);world.scale.set(camera.zoom);world.position.set(camera.x-(camera.zoom-1)*480,camera.y-(camera.zoom-1)*270);}};
+ return {root,world,draw(t:number,camera:{x:number;y:number;zoom:number},clip='idle'){view.draw(t,[{clip:'idle',time:t},...(clip&&clip!=='idle'?[{clip,time:t}]:[])],camera);world.scale.set(camera.zoom);world.position.set(camera.x-(camera.zoom-1)*resource.model!.width/2,camera.y-(camera.zoom-1)*resource.model!.height/2);}};
 }
 if(resource.preset==='night-garden'){
 const night=root;const world=new Container();rect(night,0,0,W,H,resource.skyColor);ellipse(night,750,115,47,47,0xf5e9b4);ellipse(night,765,100,43,43,resource.skyColor);

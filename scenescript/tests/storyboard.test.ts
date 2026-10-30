@@ -270,7 +270,7 @@ test('storyboard guide documents exact format enum values separately from aspect
 
 test('resource JSON import accepts raw models and AI envelopes, scoped to a single draft subject',()=>{
  for(const dimension of ['2d','3d'] as const)for(const kind of ['characters','settings'] as const){
-  const p=demoProject();p.storyboard=example();const b=p.storyboard;
+  const p=demoProject();p.storyboard=example();const b=p.storyboard;b.format='landscape';
   for(const s of [...b.characters,...b.settings,...b.shots])s.status='approved';b.approved=true;
   const subject=b[kind][0];subject.design={...defaultBoardDesign(),mode:dimension};
   const target={kind,id:subject.id},model=dimension==='3d'?roundedHumanModel():kind==='settings'?cityModel2D():birdModel2D(),before=JSON.stringify(p);

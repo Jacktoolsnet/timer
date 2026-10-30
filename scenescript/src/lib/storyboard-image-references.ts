@@ -24,3 +24,11 @@ export function imageGenerationReferences(project:Project,target:BoardReviewTarg
  if(result.length>8)throw new Error('Reference images: maximum 8 images. Reduce references or disable reference images.');
  return result;
 }
+
+/** Model reconstruction needs the selected setting itself, unlike creation of a new sketch. */
+export function modelGenerationReferences(project:Project,target:BoardReviewTarget):ImageReference[]{
+ const b=project.storyboard,subject=b?.[target.kind].find(s=>s.id===target.id),image=subject?.image?b?.images[subject.image]:undefined;
+ const own:ImageReference[]=subject&&image?.data?[{imageId:subject.image!,name:image.name,data:image.data,subjects:[{kind:target.kind==='settings'?'setting':target.kind==='characters'&&'kind'in subject?String(subject.kind):target.kind,id:subject.id,name:'name'in subject?subject.name:subject.title}]}]:[];
+ const refs=[...own,...imageGenerationReferences(project,target)],unique=[...new Map(refs.map(r=>[r.imageId,r])).values()];
+ if(unique.length>8)throw Error('Model references: maximum 8 images including the selected resource');return unique;
+}

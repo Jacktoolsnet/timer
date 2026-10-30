@@ -1,3 +1,4 @@
+import {stageFrame2D} from '../lib/stage2d-frame';
 import {resourceViewerButton} from './resource-viewer';
 import {storyboardModel2DView} from './storyboard-model2d-view';
 import {defaultSound2D} from '../lib/sound2d';
@@ -169,7 +170,8 @@ export function installStage2DEditor(get:()=>{project:Project;index:number},comm
   const host=document.createElement('div');host.id='stage2d-resource-preview';
   const status=document.createElement('p');status.id='stage2d-resource-preview-status';status.setAttribute('role','status');status.setAttribute('aria-live','polite');card.append(caption,host,status);editor.append(card);if(audioPanel)editor.append(audioPanel);
   const sample=resourcePreview2D(p,kind,selected)!;
-  preview=createStage2DView(sample.resources,sample.shot,sample.duration,640,480,error=>{status.textContent=error.message;},sample.isolated);preview.canvas.setAttribute('aria-label',shared.resourcePreview+' · '+resource.name);host.append(preview.canvas);preview.draw(0);
+  const frame=stageFrame2D(sample.resources.stages2d.preview),fit=Math.min(640/frame.width,480/frame.height),width=sample.isolated?640:Math.round(frame.width*fit),height=sample.isolated?480:Math.round(frame.height*fit);host.style.aspectRatio=width+'/'+height;
+  preview=createStage2DView(sample.resources,sample.shot,sample.duration,width,height,error=>{status.textContent=error.message;},sample.isolated);preview.canvas.setAttribute('aria-label',shared.resourcePreview+' · '+resource.name);host.append(preview.canvas);preview.draw(0);
 
  }
 }

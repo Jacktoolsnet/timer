@@ -19,11 +19,11 @@ function openResourceViewer(name:string,mount:Mount,opener:HTMLButtonElement){
  minus.id='resource-viewer-minus';plus.id='resource-viewer-plus';fit.id='resource-viewer-fit';close.id='resource-viewer-close';percent.id='resource-viewer-percent';percent.setAttribute('aria-live','polite');toolbar.className='resource-viewer-toolbar';toolbar.append(minus,percent,plus,fit);
  viewport.id='resource-viewer-viewport';viewport.tabIndex=0;viewport.setAttribute('aria-label',t.hint);surface.className='resource-viewer-surface';surface.append(host);viewport.append(surface);footer.append(close);dialog.append(header,toolbar,viewport,footer);document.body.append(dialog);
  let dispose=()=>{},scale=1,fitted=true,drag:{id:number;x:number;y:number;left:number;top:number}|undefined;
- let figure:HTMLElement|null=null;
- const fitScale=()=>Math.max(.1,Math.min((viewport.clientWidth-24)/640,(viewport.clientHeight-24)/480));
+ let figure:HTMLElement|null=null;let width=640,height=480;
+ const fitScale=()=>Math.max(.1,Math.min((viewport.clientWidth-24)/width,(viewport.clientHeight-24)/height));
  function draw(next:number,center=false){
   if(!figure)return;const x=(viewport.scrollLeft+viewport.clientWidth/2)/Math.max(1,surface.offsetWidth),y=(viewport.scrollTop+viewport.clientHeight/2)/Math.max(1,surface.offsetHeight);
-  scale=Math.max(.1,Math.min(8,next));figure.style.width=640*scale+'px';figure.style.height=480*scale+'px';surface.style.width=Math.max(viewport.clientWidth,640*scale+24)+'px';surface.style.height=Math.max(viewport.clientHeight,480*scale+24)+'px';percent.value=Math.round(scale/fitScale()*100)+' %';viewport.scrollLeft=center?(surface.offsetWidth-viewport.clientWidth)/2:x*surface.offsetWidth-viewport.clientWidth/2;viewport.scrollTop=center?(surface.offsetHeight-viewport.clientHeight)/2:y*surface.offsetHeight-viewport.clientHeight/2;
+  scale=Math.max(.1,Math.min(8,next));figure.style.width=width*scale+'px';figure.style.height=height*scale+'px';surface.style.width=Math.max(viewport.clientWidth,width*scale+24)+'px';surface.style.height=Math.max(viewport.clientHeight,height*scale+24)+'px';percent.value=Math.round(scale/fitScale()*100)+' %';viewport.scrollLeft=center?(surface.offsetWidth-viewport.clientWidth)/2:x*surface.offsetWidth-viewport.clientWidth/2;viewport.scrollTop=center?(surface.offsetHeight-viewport.clientHeight)/2:y*surface.offsetHeight-viewport.clientHeight/2;
  }
  const zoom=(factor:number)=>{fitted=false;draw(scale*factor);},reset=()=>{fitted=true;draw(fitScale(),true);};
  minus.onclick=()=>zoom(1/1.25);plus.onclick=()=>zoom(1.25);fit.onclick=reset;close.onclick=()=>dialog.close();
@@ -36,6 +36,6 @@ function openResourceViewer(name:string,mount:Mount,opener:HTMLButtonElement){
  const owner=opener.closest('dialog'),observer=new MutationObserver(()=>{if(dialog.open&&(!opener.isConnected||owner&&!owner.open))dialog.close();});observer.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['open']});
  dialog.addEventListener('close',()=>{resize.disconnect();observer.disconnect();dispose();dialog.remove();if(opener.isConnected)opener.focus();},{once:true});
  dialog.showModal();
- try{dispose=mount(host);figure=host.querySelector('.board-model-canvas');for(const child of Array.from(host.children))if(child!==figure)footer.append(child);resize.observe(viewport);reset();}catch(error){const message=document.createElement('p');message.setAttribute('role','alert');message.textContent=(error as Error).message;footer.append(message);}
+ try{dispose=mount(host);figure=host.querySelector('.board-model-canvas');width=Number(figure?.dataset.previewWidth)||640;height=Number(figure?.dataset.previewHeight)||480;for(const child of Array.from(host.children))if(child!==figure)footer.append(child);resize.observe(viewport);reset();}catch(error){const message=document.createElement('p');message.setAttribute('role','alert');message.textContent=(error as Error).message;footer.append(message);}
  close.focus();
 }
