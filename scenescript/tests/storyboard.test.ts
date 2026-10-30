@@ -33,7 +33,7 @@ test('planning format is portable, validated and independent from the video; old
  const p=demoProject();p.format='portrait';p.storyboard=example();p.storyboard.format='square';assert.equal(validateProject(p).format,'portrait');assert.equal(parseProject(JSON.stringify(p)).storyboard!.format,'square');
  const legacy:any=JSON.parse(JSON.stringify(p));delete legacy.storyboard.format;assert.equal(parseProject(JSON.stringify(legacy)).storyboard!.format,'portrait');assert.equal(parseStoryboard(legacy.storyboard).format,'landscape');
  const old=example();old.format='square';const feedback=JSON.parse(exportStoryboard(old));delete feedback.board.format;assert.equal(importStoryboard(JSON.stringify(feedback),old).format,'square');
- for(const bad of [null,'wide',16,{},''])assert.throws(()=>parseStoryboard({...old,format:bad}),/format/);
+ for(const bad of [null,'wide',16,{},'','landscape 16:9','portrait 9:16','square 1:1'])assert.throws(()=>parseStoryboard({...old,format:bad}),/format/);
 });
 test('all subject and shot approvals are required; old plans load safely with fresh subject reviews',()=>{
  const board=example();for(const shot of board.shots)shot.status='approved';assert.equal(canApproveStoryboard(board),false);for(const subject of board.characters)subject.status='approved';assert.equal(canApproveStoryboard(board),false);for(const setting of board.settings)setting.status='approved';assert.equal(canApproveStoryboard(board),true);board.approved=true;assert.equal(parseStoryboard(board).approved,true);
@@ -258,4 +258,10 @@ test('isolated 2D resource previews do not mutate libraries or inherit scene ani
  sample.resources.objects2d.preview.color='#123456';assert.equal(JSON.stringify(p),before);
  const stage=resourcePreview2D(p,'stages2d','night-garden')!;assert.equal(stage.shot.actors.length,0);assert.equal(stage.resources.stages2d.preview.preset,'night-garden');
  assert.equal(resourcePreview2D(p,'objects2d','missing'),null);
+});
+
+test('storyboard guide documents exact format enum values separately from aspect ratios',()=>{
+ assert.ok(storyboardGuide.includes('JSON enum: "landscape"|"portrait"|"square"'));
+ assert.ok(storyboardGuide.includes('never part of the value'));
+ for(const format of ['landscape','portrait','square'] as const)assert.equal(parseStoryboard({...example(),format}).format,format);
 });
