@@ -1459,67 +1459,88 @@ Modellauftrag als Materialtextur verfügbar. Die KI muss sie anschließend sinnv
 Bauteilen zuordnen; die Erzeugung allein verändert keine Modelle. Ein Porträt oder
 Kulissenbild soll nicht versehentlich als Kleidungsstoff verwendet werden.
 
-## 2D-Puppenanimation und neues Standardprojekt: Lichtsammler
+## Wiederverwendbare 2D-Ressourcen und Standardprojekt „Lichtsammler“
 
-Beim ersten Start ohne gespeicherten Entwurf öffnet SceneScript jetzt
-`/examples/light-collector.scenescript.json`: die 16-sekündige PixiJS-Animation
-„Der kleine Lichtsammler“. Auch bei fehlgeschlagenem Download steht dasselbe
-Projekt lokal als Fallback bereit. Gespeicherte Arbeit wird **nicht** überschrieben;
-über „Standardprojekt laden“ lässt sich die Demo ausdrücklich öffnen.
-„Neues Projekt“ bleibt eine leere, frei gestaltbare Szene.
+Das Standardprojekt enthält die 16-sekündige Animation samt deutschem Storyboard.
+„Standardprojekt laden“ öffnet die aktuelle Fassung; gespeicherte Entwürfe haben
+weiterhin Vorrang. „Neues Projekt“ bleibt leer. Alte gebündelte Lichtsammler-
+Konfigurationen werden beim Import einmalig in Ressourcen und Instanzen umgewandelt.
 
-Das Projekt enthält eine echte, strikt validierte `scenes[].stage2d`-Konfiguration,
-keinen eingebetteten Film und kein ausführbares Script. Die erste Puppenvorlage
-heißt `light-collector`. Im Szeneninspektor können Figuren-/Funkenfarbe und beide
-Schlusstextzeilen geändert werden. Gangzyklus, Winken, Sprung/Funkenfang,
-Kamerafahrt/Parallaxe und Nachtgarten/Irisblende sind einzeln schaltbar;
-die Sprunghöhe ist einstellbar. Die Szenendauer skaliert die komplette Choreografie.
-Die vorbereiteten Bewegungen erscheinen als anklickbare Kapitelspuren in der
-Timeline; ihre einzelnen Keys sind noch nicht frei verschiebbar.
+### Projektressourcen statt einer fest verdrahteten Filmschablone
 
-Dieselbe Vorlage kann in jeder leeren Szene aktiviert werden. Normale Text-,
-Bild- und andere Elemente lassen sich darüberlegen. Die 960×540-Komposition
-wird ohne Beschnitt in Landschaft, Hochformat und Quadrat eingepasst.
+- `Project.stages2d`: benannte Bühnen (`forest`, `night-garden`) mit Himmel-/Bodenfarbe.
+- `Project.objects2d`: benannte Roboter, Lichtfunken und Formobjekte (Rechteck,
+  Ellipse, Stern) mit Grund- und Akzentfarbe. Ein Robotertyp liefert ein vorbereitetes
+  Gelenkrig und die Bewegungsbausteine, aber **keine** filmbezogenen Zeitpunkte.
+- `Scene.stage2d.stage`: Ressourcen-ID der Bühne; mehrere Szenen können dieselbe
+  Bühne verwenden oder auf unterschiedliche Bühnen verweisen.
+- `Scene.stage2d.actors`: eigenständige Instanzen mit ID, Objektressourcen-ID,
+  Position in 960×540-Entwurfspixeln, Größe, Drehung, Deckkraft und optionaler
+  eigener Farbe (`null` übernimmt die Ressourcenfarbe).
+- `actor.actions`: `move`, `walk`, `wave`, `jump`, `float`, `attach`, `fade`, jeweils
+  mit Start/Dauer in Szenensekunden. `toX/toY` geben absolute Bewegungsziele an;
+  `height` steuert Sprung bzw. Schweben. `attach.target` referenziert eine andere
+  Roboterinstanz in derselben Szene und heftet ein Nicht-Roboterobjekt an ihre
+  rechte Hand. Kein Zugriff auf Ressourcen oder Instanzen über Prototypen.
+- `Scene.stage2d.camera`: zeitlich aufsteigende Kamera-Keys mit `at/x/y/zoom`.
+  `transition` wählt eine weitere Bühnenressource für eine Irisblende;
+  `ending` enthält den Schlusstext. Diese Regie gehört der Szene, nicht der Bühne.
+
+Die zwei Bühnen, der Roboter und der Funke des Standardprojekts sind damit
+gewöhnliche Ressourcen. Der Roboter weiß weder, wann er springt, noch, welches
+Objekt in dieser Geschichte eingefangen wird. Mehrere Roboter können dieselbe
+Definition teilen und trotzdem andere Farben, Positionen und Aktionen haben.
+Die aktuelle Geometrie stammt weiterhin aus vorbereiteten Rigs und Formen;
+ein freier Vektor-/Rig-Editor ist noch nicht enthalten.
+
+### Bedienung
+
+„2D-Ressourcen“ in der Projektverwaltung öffnet die Bühnen-/Objektbibliothek.
+Ressourcen lassen sich anlegen, umbenennen, bearbeiten, duplizieren und in der
+aktuellen Szene verwenden. Referenzierte Ressourcen können nicht versehentlich
+entfernt werden. Änderungen wirken auf alle Referenzen; Rückgängig/Wiederholen
+nutzen die vorhandene Projekthistorie.
+
+Der Szeneninspektor wählt die Bühne und bearbeitet einzelne Instanzen und deren
+Aktionen. Instanzen und Aktionen sind aufklappbar; Instanzen können dupliziert
+oder – soweit nicht als Anheftziel verwendet – entfernt werden. Die Timeline
+zeigt anklickbare Aktionsspuren. Ihre Start-/Endwerte werden im Inspektor geändert,
+nicht durch vorgetäuschte Keyframe-Ziehgriffe. Eine Änderung der Szenendauer im
+Editor skaliert die zugehörigen 2D-Zeitwerte proportional.
+
+Alle nativen Checkboxen der Anwendung erscheinen nun als Slide-Toggles, auch
+nachträglich erzeugte Dialogfelder. Vorhandene individuelle Switches behalten
+nur eine sichtbare Spur. Native Checkbox-Semantik, Labels, Tastaturbedienung,
+Fokus-/Disabled-Zustände sowie reduzierte Bewegung bleiben erhalten.
+
+### Darstellung, Grenzen und Prüfung
 
 Vorschau, Kameravorschau, PNG/Kontaktbögen und Videoexport verwenden dieselbe
-absolute Zeitberechnung und Pixi-Zeichenlogik. Reine 2D-Vorlagen gehen direkt
-als Canvas-Frames in den Export; gemischte Szenen nutzen den bestehenden
-Compositor. PixiJS wird nur für Szenen mit `stage2d` geladen. Pro Vorschau bzw.
-Export gibt es einen eigenen WebGL-Kontext und einen begrenzten Szenencache.
-Audio funktioniert weiterhin über die bestehende Pipeline; das Standardprojekt
-selbst ist stumm.
+absolute Zeitberechnung und Pixi-Zeichenlogik. Die Entwurfskomposition wird in
+alle Seitenverhältnisse eingepasst. Normale Szenelemente können darüberliegen;
+Three.js bleibt unabhängig verfügbar. Reine 2D-Szenen liefern direkte Canvas-
+Frames; gemischte Szenen nutzen den vorhandenen Compositor. Ressourcen und
+Szenen werden im begrenzten Renderer-Cache als unveränderliche Snapshots gehalten.
+Dadurch bleiben auch nach direkten Editoränderungen und Undo alte Cache-Einträge
+konsistent. Nach einer Cache-Neuanlage tolerieren Bildtests maximal einen
+RGBA-Kanalwert Rundungsabweichung an GPU-Antialias-Kanten; wiederholtes Seeking
+im selben Eintrag bleibt pixelgleich.
 
-**Umfang:** erste parametrisierbare 2D-Puppenvorlage, noch kein allgemeiner
-Rig-/Keyframe-Editor. Three.js und bestehende 2D-Elemente bleiben verfügbar.
-Die ursprüngliche isolierte Studie liegt weiterhin unter
-`experiments/pixi-feasibility/`.
+Maximal 50 Bühnen und 50 Objekttypen, 30 Instanzen je Szene und 50 Aktionen je
+Instanz. Referenzen, Aktionsarten, Zeitgrenzen, überlappende gleiche Aktionen,
+Positionsaktionen und Anheftziele werden strikt geprüft. Code oder externe URLs
+sind keine Ressourcen. Das Beispiel ist weiterhin stumm. Der deutsche
+Storyboard-Entwurf wird nicht automatisch freigegeben und beschreibt dieselben
+vier Zeitabschnitte (4 + 3 + 4 + 5 Sekunden), nicht vier harte Filmschnitte.
 
 ```sh
-npm run example:light-collector # Standard-JSON aus der Factory neu erzeugen
+npm run example:light-collector
 npm test
 npx playwright test tests/stage2d.spec.ts
 npm run build
 ```
 
-Validierung der ersten Integration: Build ohne Fehler, 330 Unit-Tests erfolgreich,
-Desktop-/Tablet-Browsertests für Standardprojekt, Änderungen und Undo/Redo,
-JSON-Roundtrip, Kapitelspuren, Wiedergabe, identische Vorschau-/Exportpixel,
-Overlays, Formatwechsel und Cachewechsel. Zusätzlich wurde das vollständige
-16-Sekunden-Standardprojekt als WebM (480p/24 fps) exportiert und mit korrekter
-Dauer wieder geöffnet. Zwei ältere Kamera-Browsertests erwarten einen DOM-Baum
-nach dem Frame-Export, obwohl dieser bereits vorher aufgeräumt wurde; beide
-scheitern unverändert auch mit dem ursprünglichen ExportRenderer aus HEAD
-(auf Desktop und Tablet). Deren Erwartungen wurden hier nicht verändert.
-
-Das Lichtsammler-Standardprojekt enthält außerdem ein ausgefülltes deutsches
-Storyboard: Geschichte, Botschaft, Zielgruppe, Stil und stumme 2D-Produktion;
-einen Roboter, den Lichtfunken als Objekt, Waldweg und Nachtgarten sowie vier
-Zeitabschnitte (4 + 3 + 4 + 5 Sekunden). Die Abschnitte beschreiben die bestehende
-durchgehende Animation einschließlich Gestik, Sprung, Kamera und Schlusstexten.
-Es sind Planungsabschnitte, nicht vier zusätzliche ausführbare Szenen.
-Figuren, Schauplätze, Einstellungen und Gesamtplan bleiben bewusst Entwürfe;
-Freigabe und anschließende KI-Generierung liegen weiterhin beim Nutzer.
-Storyboard-Quelle: `src/lib/light-collector-storyboard.ts`; das Standard-JSON
-wird zusammen mit dem Projekt über `npm run example:light-collector` erzeugt.
-Bereits gespeicherte Entwürfe werden nicht nachträglich verändert; zum Öffnen
-der aktualisierten Vorlage „Standardprojekt laden“ wählen.
+Die zwei älteren Kamera-Browsertests mit Zugriff auf einen bereits aufgeräumten
+Export-DOM scheiterten auch vor dieser Änderung; deren Erwartungen wurden hier
+nicht geändert. Die isolierte ursprüngliche Studie liegt weiter unter
+`experiments/pixi-feasibility/`.

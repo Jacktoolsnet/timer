@@ -1,16 +1,68 @@
-/** First reusable 2D puppet scene. Data only: imported projects never execute code. */
-export type Stage2D={preset:'light-collector';bodyColor:string;accentColor:string;endingTitle:string;endingSubtitle:string;walk:boolean;wave:boolean;jump:boolean;night:boolean;cameraMotion:boolean;jumpHeight:number};
-export function defaultStage2D():Stage2D{return {preset:'light-collector',bodyColor:'#f28b70',accentColor:'#fff5c0',endingTitle:'Manchmal genügt',endingSubtitle:'ein kleiner Funke.',walk:true,wave:true,jump:true,night:true,cameraMotion:true,jumpHeight:100};}
-export function parseStage2D(value:unknown,path='stage2d'):Stage2D|null{
- if(value==null)return null;
- if(typeof value!=='object'||Array.isArray(value))throw new Error(path+': expected object');
- const raw=value as Record<string,unknown>,defaults=defaultStage2D();
- for(const key of Object.keys(raw))if(!Object.hasOwn(defaults,key))throw new Error(path+'.'+key+': unknown field');
- const out={...defaults,...raw};
- if(out.preset!=='light-collector')throw new Error(path+'.preset: expected light-collector');
- for(const key of ['bodyColor','accentColor'] as const)if(typeof out[key]!=='string'||!/^#[a-f\d]{6}$/i.test(out[key]))throw new Error(path+'.'+key+': expected #RRGGBB');
- for(const key of ['endingTitle','endingSubtitle'] as const)if(typeof out[key]!=='string'||out[key].length>80)throw new Error(path+'.'+key+': expected text (max 80)');
- for(const key of ['walk','wave','jump','night','cameraMotion'] as const)if(typeof out[key]!=='boolean')throw new Error(path+'.'+key+': expected boolean');
- if(typeof out.jumpHeight!=='number'||!Number.isFinite(out.jumpHeight)||out.jumpHeight<0||out.jumpHeight>110)throw new Error(path+'.jumpHeight: expected number 0–110');
- return out as Stage2D;
+/** Reusable data-only 2D resources; timing and placement belong exclusively to scenes. */
+export type Stage2DResource={name:string;preset:'forest'|'night-garden';skyColor:string;groundColor:string};
+export type Object2D={name:string;kind:'robot'|'spark'|'shape';color:string;accentColor:string;shape:'rectangle'|'ellipse'|'star'};
+export const actions2D=['move','walk','wave','jump','float','attach','fade'] as const;
+export type Action2D={type:typeof actions2D[number];at:number;duration:number;toX:number;toY:number;height:number;target:string};
+export type Actor2D={id:string;name:string;object:string;x:number;y:number;scale:number;rotation:number;opacity:number;color:string|null;actions:Action2D[]};
+export type CameraKey2D={at:number;x:number;y:number;zoom:number};
+export type Stage2D={stage:string;actors:Actor2D[];camera:CameraKey2D[];transition:{stage:string;at:number;duration:number;x:number;y:number}|null;ending:{title:string;subtitle:string;at:number;duration:number}|null};
+export type Resources2D={stages2d:Record<string,Stage2DResource>;objects2d:Record<string,Object2D>};
+export function defaultStage2DResource(preset:Stage2DResource['preset']='forest'):Stage2DResource{return {name:preset==='forest'?'Waldweg':'Nachtgarten',preset,skyColor:preset==='forest'?'#205a50':'#132d39',groundColor:preset==='forest'?'#244e43':'#183c40'};}
+export function defaultObject2D(kind:Object2D['kind']='robot'):Object2D{return {name:kind==='robot'?'Roboter':kind==='spark'?'Lichtfunke':'Formobjekt',kind,color:kind==='robot'?'#f28b70':kind==='spark'?'#fff5c0':'#79a8cb',accentColor:'#fff5c0',shape:'star'};}
+export function defaultAction2D(type:Action2D['type']='wave'):Action2D{return {type,at:0,duration:1,toX:470,toY:425,height:type==='float'?9:100,target:''};}
+export function defaultActor2D(object:string,id:string=crypto.randomUUID()):Actor2D{return {id,name:'Instanz',object,x:470,y:425,scale:1,rotation:0,opacity:1,color:null,actions:[]};}
+export function defaultStage2D(stage='forest'):Stage2D{return {stage,actors:[],camera:[],transition:null,ending:null};}
+const obj=(v:unknown,p:string):Record<string,unknown>=>{if(!v||typeof v!=='object'||Array.isArray(v))throw Error(p+': expected object');return v as Record<string,unknown>;};
+const keys=(v:Record<string,unknown>,allowed:string[],p:string)=>{for(const k of Object.keys(v))if(!allowed.includes(k))throw Error(p+'.'+k+': unknown field');};
+const text=(v:unknown,p:string,max=200)=>{if(typeof v!=='string'||v.length>max)throw Error(p+': expected text (max '+max+')');return v;};
+const id=(v:unknown,p:string)=>{const s=text(v,p,100);if(!/^[a-zA-Z0-9_-]+$/.test(s))throw Error(p+': invalid ID');return s;};
+const num=(v:unknown,p:string,min:number,max:number)=>{if(typeof v!=='number'||!Number.isFinite(v)||v<min||v>max)throw Error(p+': expected number '+min+'–'+max);return v;};
+const color=(v:unknown,p:string)=>{const s=text(v,p,7);if(!/^#[a-f\d]{6}$/i.test(s))throw Error(p+': expected #RRGGBB');return s;};
+const one=<T extends string>(v:unknown,choices:readonly T[],p:string):T=>{if(!choices.includes(v as T))throw Error(p+': '+choices.join(', '));return v as T;};
+export function parseStage2DResource(value:unknown,path='stage2dResource'):Stage2DResource{const raw=obj(value,path);keys(raw,Object.keys(defaultStage2DResource()),path);const preset=one(raw.preset??'forest',['forest','night-garden'],path+'.preset'),o={...defaultStage2DResource(preset),...raw};return {name:text(o.name,path+'.name'),preset:one(o.preset,['forest','night-garden'],path+'.preset'),skyColor:color(o.skyColor,path+'.skyColor'),groundColor:color(o.groundColor,path+'.groundColor')};}
+export function parseObject2D(value:unknown,path='object2d'):Object2D{const raw=obj(value,path);keys(raw,Object.keys(defaultObject2D()),path);const kind=one(raw.kind??'robot',['robot','spark','shape'],path+'.kind'),o={...defaultObject2D(kind),...raw};return {name:text(o.name,path+'.name'),kind,color:color(o.color,path+'.color'),accentColor:color(o.accentColor,path+'.accentColor'),shape:one(o.shape,['rectangle','ellipse','star'],path+'.shape')};}
+export function parseLibrary2D<T>(value:unknown,parse:(v:unknown,p:string)=>T,path:string):Record<string,T>{const raw=obj(value??{},path),out:Record<string,T>=Object.create(null);if(Object.keys(raw).length>50)throw Error(path+': maximum 50');for(const [key,v]of Object.entries(raw))out[id(key,path)]=parse(v,path+'.'+key);return out;}
+export function parseStage2D(value:unknown,path='stage2d',resources:Resources2D={stages2d:{},objects2d:{}},duration=3600):Stage2D|null{
+ if(value==null)return null;const raw=obj(value,path);keys(raw,Object.keys(defaultStage2D()),path);const o={...defaultStage2D(),...raw};
+ const stageRef=(v:unknown,p:string)=>{const s=id(v,p);if(!Object.hasOwn(resources.stages2d,s))throw Error(p+': missing stage '+s);return s;};
+ if(!Array.isArray(o.actors)||o.actors.length>30)throw Error(path+'.actors: maximum 30');
+ const ids=new Set<string>();
+ const actors:Actor2D[]=o.actors.map((value,i)=>{const p=path+'.actors['+i+']',raw=obj(value,p);keys(raw,Object.keys(defaultActor2D('object','actor')),p);const o={...defaultActor2D('object','actor'),...raw},aid=id(raw.id,p+'.id'),object=id(raw.object,p+'.object');if(ids.has(aid))throw Error(p+': duplicate instance ID');ids.add(aid);if(!Object.hasOwn(resources.objects2d,object))throw Error(p+': missing object '+object);
+ if(!Array.isArray(o.actions)||o.actions.length>50)throw Error(p+'.actions: maximum 50');
+ const actions=o.actions.map((v,i)=>{const ap=p+'.actions['+i+']',a=obj(v,ap);keys(a,Object.keys(defaultAction2D()),ap);const type=one(a.type??'wave',actions2D,ap+'.type'),n={...defaultAction2D(type),...a},at=num(n.at,ap+'.at',0,duration),span=num(n.duration,ap+'.duration',.01,3600);if(at+span>duration+1e-7)throw Error(ap+': action exceeds scene duration');return {type:one(n.type,actions2D,ap+'.type'),at,duration:span,toX:num(n.toX,ap+'.toX',-2000,3000),toY:num(n.toY,ap+'.toY',-2000,3000),height:num(n.height,ap+'.height',0,110),target:n.target===''?'':id(n.target,ap+'.target')};});
+ for(const type of actions2D){const tracks=actions.filter(a=>a.type===type).sort((a,b)=>a.at-b.at);if(tracks.some((a,i)=>i>0&&a.at<tracks[i-1].at+tracks[i-1].duration-1e-7))throw Error(p+': overlapping '+type+' actions');}
+ const moves=actions.filter(a=>a.type==='walk'||a.type==='move').sort((a,b)=>a.at-b.at);if(moves.some((a,i)=>i>0&&a.at<moves[i-1].at+moves[i-1].duration-1e-7))throw Error(p+': overlapping position actions');
+ if(resources.objects2d[object].kind!=='robot'&&actions.some(a=>a.type==='walk'||a.type==='wave'||a.type==='jump'))throw Error(p+': walk/wave/jump require a robot resource');
+ return {id:aid,name:text(o.name,p+'.name'),object,x:num(o.x,p+'.x',-2000,3000),y:num(o.y,p+'.y',-2000,3000),scale:num(o.scale,p+'.scale',.1,4),rotation:num(o.rotation,p+'.rotation',-360,360),opacity:num(o.opacity,p+'.opacity',0,1),color:o.color===null?null:color(o.color,p+'.color'),actions};});
+ for(const actor of actors)for(const action of actor.actions)if(action.type==='attach'){const target=actors.find(a=>a.id===action.target);if(!target||target.id===actor.id||resources.objects2d[target.object].kind!=='robot'||resources.objects2d[actor.object].kind==='robot')throw Error(path+': attach requires a different robot target and a non-robot source');}
+ if(!Array.isArray(o.camera)||o.camera.length>32)throw Error(path+'.camera: maximum 32');
+ const camera=o.camera.map((v,i)=>{const p=path+'.camera['+i+']',c=obj(v,p);keys(c,['at','x','y','zoom'],p);return {at:num(c.at,p+'.at',0,duration),x:num(c.x??0,p+'.x',-1000,1000),y:num(c.y??0,p+'.y',-1000,1000),zoom:num(c.zoom??1,p+'.zoom',.25,3)};});if(camera.some((c,i)=>i>0&&c.at<=camera[i-1].at))throw Error(path+'.camera: keys must be strictly ordered');
+ let transition:Stage2D['transition']=null,ending:Stage2D['ending']=null;
+ const interval=(o:Record<string,unknown>,p:string)=>{const at=num(o.at,p+'.at',0,duration),span=num(o.duration,p+'.duration',.01,3600);if(at+span>duration+1e-7)throw Error(p+': exceeds scene duration');return {at,duration:span};};
+ if(o.transition!=null){const p=path+'.transition',v=obj(o.transition,p);keys(v,['stage','at','duration','x','y'],p);transition={stage:stageRef(v.stage,p+'.stage'),...interval(v,p),x:num(v.x??550,p+'.x',0,960),y:num(v.y??290,p+'.y',0,540)};}
+ if(o.ending!=null){const p=path+'.ending',v=obj(o.ending,p);keys(v,['title','subtitle','at','duration'],p);ending={title:text(v.title,p+'.title',80),subtitle:text(v.subtitle,p+'.subtitle',80),...interval(v,p)};}
+ return {stage:stageRef(o.stage,path+'.stage'),actors,camera,transition,ending};
+}
+export function retimeStage2D(shot:Stage2D,ratio:number){for(const a of shot.actors)for(const c of a.actions){c.at*=ratio;c.duration*=ratio;}for(const c of shot.camera)c.at*=ratio;for(const c of [shot.transition,shot.ending])if(c){c.at*=ratio;c.duration*=ratio;}}
+/** Deterministic default resource/scene composition; usable in any project. */
+export function lightCollector2D():Resources2D&{shot:Stage2D}{
+ const robot=defaultActor2D('collector','collector');robot.name='Lichtsammler';robot.x=145;
+ robot.actions=[{...defaultAction2D('walk'),at:.2,duration:3.4,toX:470,toY:425},{...defaultAction2D('wave'),at:4.1,duration:2.3},{...defaultAction2D('jump'),at:6.6,duration:3,height:100,toX:562,toY:425}];
+ const spark=defaultActor2D('spark','spark');spark.name='Lichtfunke';spark.x=610;spark.y=220;spark.actions=[{...defaultAction2D('float'),duration:16,height:9},{...defaultAction2D('attach'),at:7.65,duration:.4,target:'collector'},{...defaultAction2D('fade'),at:9.3,duration:1.4}];
+ return {stages2d:{forest:defaultStage2DResource(),'night-garden':defaultStage2DResource('night-garden')},objects2d:{collector:{...defaultObject2D(),name:'Der Lichtsammler'},spark:defaultObject2D('spark')},shot:{stage:'forest',actors:[robot,spark],camera:[{at:0,x:0,y:0,zoom:1},{at:3.6,x:-65,y:0,zoom:1},{at:6.2,x:-91,y:0,zoom:1.12},{at:11.2,x:-91,y:0,zoom:1.04}],transition:{stage:'night-garden',at:10.6,duration:1.8,x:550,y:290},ending:{title:'Manchmal genügt',subtitle:'ein kleiner Funke.',at:12.1,duration:1.2}}};
+}
+/** One-way upgrade of the former bundled preset. No executable scenes are rewritten otherwise. */
+export function upgradeLegacy2D<T>(input:T):T{
+ if(!input||typeof input!=='object')return input;const p=input as Record<string,unknown>;if(!Array.isArray(p.scenes))return input;
+ let changed=false;const stages={...obj(p.stages2d??{},'stages2d')},objects={...obj(p.objects2d??{},'objects2d')};
+ const scenes=p.scenes.map((v,i)=>{if(!v||typeof v!=='object')return v;const scene=v as Record<string,unknown>,s=scene.stage2d as Record<string,unknown>|undefined;if(!s||s.preset!=='light-collector')return v;
+ const allowed=['preset','bodyColor','accentColor','endingTitle','endingSubtitle','walk','wave','jump','night','cameraMotion','jumpHeight'];keys(s,allowed,'legacy stage2d');const d=lightCollector2D(),prefix='legacy2d'+i+'-',stage=prefix+'forest',night=prefix+'night',robot=prefix+'robot',spark=prefix+'spark';for(const id of [stage,night])if(Object.hasOwn(stages,id))throw Error('legacy stage2d: resource ID collision');for(const id of [robot,spark])if(Object.hasOwn(objects,id))throw Error('legacy stage2d: resource ID collision');
+ for(const k of ['bodyColor','accentColor'])if(s[k]!==undefined)color(s[k],'legacy stage2d.'+k);for(const k of ['endingTitle','endingSubtitle'])if(s[k]!==undefined)text(s[k],'legacy stage2d.'+k,80);if(s.jumpHeight!==undefined)num(s.jumpHeight,'legacy stage2d.jumpHeight',0,110);
+ for(const k of ['walk','wave','jump','night','cameraMotion'])if(s[k]!==undefined&&typeof s[k]!=='boolean')throw Error('legacy stage2d.'+k+': expected boolean');
+ stages[stage]=d.stages2d.forest;stages[night]=d.stages2d['night-garden'];objects[robot]={...d.objects2d.collector,color:s.bodyColor??d.objects2d.collector.color};objects[spark]={...d.objects2d.spark,color:s.accentColor??d.objects2d.spark.color};const shot=d.shot;shot.stage=stage;shot.actors[0].object=robot;shot.actors[1].object=spark;
+ shot.actors[0].actions=shot.actors[0].actions.filter(a=>s[a.type]!==false);if(s.jumpHeight!==undefined)for(const a of shot.actors[0].actions)if(a.type==='jump')a.height=num(s.jumpHeight,'legacy stage2d.jumpHeight',0,110);
+ if(s.walk===false)shot.actors[0].x=470;if(s.jump===false)shot.actors[1].actions=shot.actors[1].actions.filter(a=>a.type!=='attach');
+ if(s.cameraMotion===false)shot.camera=[];if(s.night===false){shot.transition=null;shot.ending=null;}else{shot.transition!.stage=night;shot.ending!.title=text(s.endingTitle??shot.ending!.title,'legacy stage2d.endingTitle',80);shot.ending!.subtitle=text(s.endingSubtitle??shot.ending!.subtitle,'legacy stage2d.endingSubtitle',80);}
+ retimeStage2D(shot,typeof scene.duration==='number'?scene.duration/16:5/16);changed=true;return {...scene,stage2d:shot};});
+ return changed?{...p,stages2d:stages,objects2d:objects,scenes} as T:input;
 }

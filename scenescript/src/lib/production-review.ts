@@ -18,7 +18,7 @@ export function reviewProduction(p:Project,board:Storyboard|null=p.storyboard):P
    if(!worlds.some(s=>{const c=s.stage3d!.camera;return c.orbit!==0||!!c.follow||(c.keys?.length??0)>1;}))issues.push({code:'missingCamera'});
   }
  }
- if(plan.renderMode==='mixed'&&!p.scenes.some(s=>s.elements.some(e=>e.type==='text'||e.type==='image'||e.type==='shape')))issues.push({code:'missing2d'});
+ if(plan.renderMode==='mixed'&&!p.scenes.some(s=>s.stage2d||s.elements.some(e=>e.type==='text'||e.type==='image'||e.type==='shape')))issues.push({code:'missing2d'});
  const narration=[p.narration,...p.scenes.map(s=>s.narration)].filter(n=>n?.text.trim());
  if(plan.dialogue){
   if(!narration.length)issues.push({code:'missingDialogue'});
@@ -33,7 +33,7 @@ export function reviewProduction(p:Project,board:Storyboard|null=p.storyboard):P
 }
 export function productionInstructions(board:Storyboard){
  const p=board.production;const resources=[...board.characters,...board.settings].filter(s=>s.status==='approved'&&s.model3d);const design=' Respect each subject.design (mode, style, surface, details); rounded/natural humans must not become Roblox/block figures. Approved subject.model3d geometry is binding and restored locally under the same subject ID in project.characters or project.stages. Reference those exact IDs in actors/stages; do not duplicate or redesign reviewed resources. Existing clips and joints are the movement vocabulary. '+(resources.length?'Reviewed model IDs: '+resources.map(s=>s.id).join(', ')+'. ':'');if(!p)return design;
- return design+'Binding production requirements: '+JSON.stringify(p)+'. '+
+ return design+((p.renderMode==='2d'||p.renderMode==='mixed')?'For 2D use Project.objects2d and Project.stages2d as reusable resource libraries. Reference object IDs from Scene.stage2d.actors with unique scene-local instance IDs. Keep appearance in resources and timing, placement, actions, camera and stage transitions in scenes. Reuse matching storyboard subject IDs when creating resources. Do not return the old bundled light-collector preset. ':'')+'Binding production requirements: '+JSON.stringify(p)+'. '+
  ((p.renderMode==='3d'||p.renderMode==='mixed')?'Build real 3D characters and stages with model.parts geometry, scene.stage3d actors, meaningful motion and 3D camera movement. Storyboard images are design references, NOT flat scene replacements or image-plane stand-ins. Text overlays are allowed only when planned. ':'')+
  (p.renderMode==='mixed'?'Combine actual 3D with deliberate 2D elements. ':'')+
  (p.dialogue?'Create literal dialogue in Scene.narration.text with stable speaker IDs/assigned voices; split executable scenes for speaker changes. Do not substitute dialogue with subtitles. For speaking 3D actors bind speech to scene narration for audio-driven lip movement. Missing recordings remain pending for the separate paid speech workflow; do not invent audio Base64. ':'')+

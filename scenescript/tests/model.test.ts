@@ -496,7 +496,7 @@ test('self-contained AI guide covers every schema object and field with unique t
  for(const type of guideTypes){assert.deepEqual(type.fields,Object.keys(type.schema.properties!));assert.ok(guideFieldCatalog.includes(type.name+'\n'));for(const field of type.fields)assert.match(guideFieldCatalog,new RegExp('  '+field+'!?: '));}
  assert.match(guideFieldCatalog,/TextRun\n  text!:[\s\S]*?font: Font = inherit Element.font/);
  assert.match(guideFieldCatalog,/fontSize: num\[1\.\.500\] = 90; bubble:48/);
- assert.match(aiGuide,/specification notation, NOT JSON syntax/);assert.ok(!aiGuide.includes('JSON.stringify'));assert.ok(new TextEncoder().encode(aiGuide).length<90000,'keep the full copy/paste guide compact');
+ assert.match(aiGuide,/specification notation, NOT JSON syntax/);assert.ok(!aiGuide.includes('JSON.stringify'));assert.ok(new TextEncoder().encode(aiGuide).length<92000,'keep the full copy/paste guide compact');
 });
 test('AI guide prioritizes audience-specific YouTube copy and real covers',()=>{
  assert.match(aiGuide,/Identify the target audience FIRST/);

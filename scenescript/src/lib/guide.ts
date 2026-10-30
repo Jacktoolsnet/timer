@@ -27,15 +27,22 @@ export const aiGuide = `# SceneScript 1.0 — complete authoring specification
 
 ## 1. Start here
 
-2D puppet preset: scenes[].stage2d may be null or an object with
-preset:"light-collector", bodyColor/accentColor (#RRGGBB), endingTitle/endingSubtitle
-(max 80 characters each), walk/wave/jump/night/cameraMotion (booleans, default true),
-and jumpHeight (0–110, default 100). This is the first prepared puppet scene,
-not an arbitrary rig editor. The complete walk, gesture, jump and iris choreography
-is retimed proportionally to scene.duration (16 seconds in the shipped default).
-The 960×540 composition is fitted inside all project formats without cropping;
-normal scene elements render above it. See /examples/light-collector.scenescript.json.
-No executable code or external scene URLs are accepted in stage2d.
+2D resources: Project.stages2d maps IDs to {name,preset:"forest"|"night-garden",
+skyColor,groundColor}; Project.objects2d maps IDs to {name,kind:"robot"|"spark"|"shape",
+color,accentColor,shape:"rectangle"|"ellipse"|"star"}. Resources contain no timing.
+Scene.stage2d references stage and actors. Each actor has a unique scene-local id,
+object resource ID, name, x/y in 960x540 design pixels, scale, rotation, opacity,
+optional color override (null inherits) and actions. Reuse an object resource for
+independent instances. Actions: move/walk/wave/jump/float/attach/fade with at/duration
+in scene seconds, toX/toY, height (0..110) and target (instance ID for attach).
+Walk/wave/jump require robot resources; attach links a non-robot to another robot's
+right hand. No self/invalid targets, overlapping same-type or position actions.
+Scene camera is a strictly time-ordered list of {at,x,y,zoom}. Optional transition
+{stage,at,duration,x,y} reveals another stage through an iris. Optional ending
+{title,subtitle,at,duration} contains scene-local closing text, never resource data.
+All intervals must fit scene.duration. Resources max 50 each; actors max 30/scene;
+actions max 50/actor. No executable code/URLs. Old bundled presets upgrade on import.
+See /examples/light-collector.scenescript.json. Normal elements render above 2D.
 SceneScript renders JSON videos with 2D/3D layers. Read §§1–4; §11 lists fields, §12 examples.
 
 Optional storyboard is a non-rendered plan. Preserve data/IDs/revision/comments; users

@@ -1351,3 +1351,32 @@ body.recording .comic-edit-overlay{display:none}
 [data-stage2d-editor] label:has(input[type=checkbox]){flex-direction:row;align-items:center;justify-content:space-between}
 [data-stage2d-editor] label:first-of-type{grid-column:1/-1}
 @media(max-width:900px){[data-stage2d-editor]{grid-template-columns:1fr}}
+/* All native checkboxes, including dynamically created dialogs, use slide toggles.
+   Existing custom switches keep their single track and their original native input. */
+body input[type=checkbox]:not(.safe-switch input):not(.board-approval-switch input):not(.storage-switch input){
+ appearance:none!important;-webkit-appearance:none!important;box-sizing:border-box!important;
+ width:44px!important;min-width:44px!important;max-width:44px!important;height:26px!important;min-height:26px!important;
+ flex:0 0 44px!important;border:1px solid var(--line)!important;border-radius:999px!important;padding:0!important;margin:0!important;
+ background-color:var(--muted,#75857e)!important;background-image:radial-gradient(circle,#fff 65%,transparent 70%)!important;
+ background-size:20px 20px!important;background-repeat:no-repeat!important;background-position:2px center!important;
+ cursor:pointer;vertical-align:middle;transition:background-position .16s ease,background-color .16s ease;
+}
+body input[type=checkbox]:checked:not(.safe-switch input):not(.board-approval-switch input):not(.storage-switch input){background-color:var(--accent,#3f735b)!important;background-position:21px center!important}
+body input[type=checkbox]:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+body input[type=checkbox]:disabled{opacity:.45;cursor:not-allowed}
+@media(prefers-reduced-motion:reduce){body input[type=checkbox]{transition:none!important}}
+@media(forced-colors:active){body input[type=checkbox]:not(.safe-switch input):not(.board-approval-switch input):not(.storage-switch input){background-color:Canvas!important;background-image:none!important;border:2px solid ButtonText!important}body input[type=checkbox]:checked:not(.safe-switch input):not(.board-approval-switch input):not(.storage-switch input){background-color:Highlight!important;outline:2px solid Highlight}}
+#stage2d-dialog{width:min(860px,95vw);max-height:90dvh;box-sizing:border-box;padding:24px;color:var(--text);background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:auto}
+#stage2d-dialog::backdrop{background:#0008}
+#stage2d-dialog p{font-size:13px;line-height:1.6}
+.resources2d-grid{display:grid;grid-template-columns:minmax(180px,1fr) minmax(0,2fr);gap:20px;margin-bottom:18px}
+#stage2d-dialog label{display:grid;gap:6px;margin-bottom:12px;font-size:13px}
+#stage2d-dialog input,#stage2d-dialog select{width:100%;box-sizing:border-box;min-height:40px;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px}
+#stage2d-dialog button,[data-stage2d-editor] button{padding:8px 12px;margin:4px;border:1px solid var(--line);border-radius:8px;background:var(--accent-soft);color:var(--text);font:inherit;cursor:pointer}
+[data-stage2d-editor] fieldset{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;min-width:0;border:1px solid var(--line);border-radius:8px}
+[data-stage2d-editor] [role=alert]{grid-column:1/-1;color:var(--accent);overflow-wrap:anywhere}
+@media(max-width:900px){.resources2d-grid{grid-template-columns:1fr}[data-stage2d-editor] fieldset{grid-template-columns:1fr}}
+[data-stage2d-editor] details{grid-column:1/-1;min-width:0;border:1px solid var(--line);border-radius:8px;padding:8px}
+[data-stage2d-editor] summary{cursor:pointer;font-size:13px;font-weight:600;padding:5px}
+[data-stage2d-editor] details>fieldset{margin-top:10px;border:0;padding:5px}
+[data-stage2d-editor] label:has(>input[type=checkbox]),#stage2d-dialog label:has(>input[type=checkbox]){min-height:44px}

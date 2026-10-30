@@ -1,4 +1,34 @@
 {
+  "objects2d": {
+    "collector": {
+      "name": "Der Lichtsammler",
+      "kind": "robot",
+      "color": "#f28b70",
+      "accentColor": "#fff5c0",
+      "shape": "star"
+    },
+    "spark": {
+      "name": "Lichtfunke",
+      "kind": "spark",
+      "color": "#fff5c0",
+      "accentColor": "#fff5c0",
+      "shape": "star"
+    }
+  },
+  "stages2d": {
+    "forest": {
+      "name": "Waldweg",
+      "preset": "forest",
+      "skyColor": "#205a50",
+      "groundColor": "#244e43"
+    },
+    "night-garden": {
+      "name": "Nachtgarten",
+      "preset": "night-garden",
+      "skyColor": "#132d39",
+      "groundColor": "#183c40"
+    }
+  },
   "storyboard": {
     "format": "landscape",
     "id": "light-collector-storyboard",
@@ -8,7 +38,7 @@
     "message": "Neugier und eine kleine mutige Geste können die Welt in einem neuen Licht erscheinen lassen. Ein kleiner Funke kann eine große Veränderung auslösen.",
     "audience": "Deutschsprachige Kinder, Familien und Menschen, die kurze, freundliche Animationsgeschichten mögen. Die Handlung soll auch ohne Ton und ohne Vorwissen verständlich sein.",
     "language": "Deutsch",
-    "style": "Querformat 16:9. Poetische, stilisierte 2D-Puppenanimation aus Vektorformen: gedeckte Waldgrün- und Petroltöne, eine warme korallfarbene Figur und ein cremegelber Lichtakzent. Weiche Bewegungsübergänge, deutliche Posen, lebendige Gelenkgestik, Einfedern vor dem Sprung, leichtes Stauchen und Strecken sowie gedämpftes Nachschwingen. Mehrere Hintergrundebenen erzeugen durch unterschiedlich starke Verschiebung räumliche Tiefe. Vier zeitliche Abschnitte bilden eine einzige durchgehende 16-Sekunden-Komposition, keine vier harten Filmschnitte. Die vorhandene Umsetzung verwendet die vorbereitete 2D-Bühne stage2d.preset=\"light-collector\"; normale Zusatzebenen sind darüber möglich. Keine echte 3D-Darstellung und kein Ton.",
+    "style": "Querformat 16:9. Poetische, stilisierte 2D-Puppenanimation aus Vektorformen: gedeckte Waldgrün- und Petroltöne, eine warme korallfarbene Figur und ein cremegelber Lichtakzent. Weiche Bewegungsübergänge, deutliche Posen, lebendige Gelenkgestik, Einfedern vor dem Sprung, leichtes Stauchen und Strecken sowie gedämpftes Nachschwingen. Mehrere Hintergrundebenen erzeugen durch unterschiedlich starke Verschiebung räumliche Tiefe. Vier zeitliche Abschnitte bilden eine einzige durchgehende 16-Sekunden-Komposition, keine vier harten Filmschnitte. Die Umsetzung verwendet wiederverwendbare Bühnen in project.stages2d und Objekte in project.objects2d. Die Szene referenziert diese Ressourcen in stage2d.stage und stage2d.actors; Aktionen und Kamera gehören zur Szene. Normale Zusatzebenen sind darüber möglich. Keine echte 3D-Darstellung und kein Ton.",
     "duration": 16,
     "comments": [],
     "characters": [
@@ -183,17 +213,128 @@
   "scenes": [
     {
       "stage2d": {
-        "preset": "light-collector",
-        "bodyColor": "#f28b70",
-        "accentColor": "#fff5c0",
-        "endingTitle": "Manchmal genügt",
-        "endingSubtitle": "ein kleiner Funke.",
-        "walk": true,
-        "wave": true,
-        "jump": true,
-        "night": true,
-        "cameraMotion": true,
-        "jumpHeight": 100
+        "stage": "forest",
+        "actors": [
+          {
+            "id": "collector",
+            "name": "Lichtsammler",
+            "object": "collector",
+            "x": 145,
+            "y": 425,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "color": null,
+            "actions": [
+              {
+                "type": "walk",
+                "at": 0.2,
+                "duration": 3.4,
+                "toX": 470,
+                "toY": 425,
+                "height": 100,
+                "target": ""
+              },
+              {
+                "type": "wave",
+                "at": 4.1,
+                "duration": 2.3,
+                "toX": 470,
+                "toY": 425,
+                "height": 100,
+                "target": ""
+              },
+              {
+                "type": "jump",
+                "at": 6.6,
+                "duration": 3,
+                "toX": 562,
+                "toY": 425,
+                "height": 100,
+                "target": ""
+              }
+            ]
+          },
+          {
+            "id": "spark",
+            "name": "Lichtfunke",
+            "object": "spark",
+            "x": 610,
+            "y": 220,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "color": null,
+            "actions": [
+              {
+                "type": "float",
+                "at": 0,
+                "duration": 16,
+                "toX": 470,
+                "toY": 425,
+                "height": 9,
+                "target": ""
+              },
+              {
+                "type": "attach",
+                "at": 7.65,
+                "duration": 0.4,
+                "toX": 470,
+                "toY": 425,
+                "height": 100,
+                "target": "collector"
+              },
+              {
+                "type": "fade",
+                "at": 9.3,
+                "duration": 1.4,
+                "toX": 470,
+                "toY": 425,
+                "height": 100,
+                "target": ""
+              }
+            ]
+          }
+        ],
+        "camera": [
+          {
+            "at": 0,
+            "x": 0,
+            "y": 0,
+            "zoom": 1
+          },
+          {
+            "at": 3.6,
+            "x": -65,
+            "y": 0,
+            "zoom": 1
+          },
+          {
+            "at": 6.2,
+            "x": -91,
+            "y": 0,
+            "zoom": 1.12
+          },
+          {
+            "at": 11.2,
+            "x": -91,
+            "y": 0,
+            "zoom": 1.04
+          }
+        ],
+        "transition": {
+          "stage": "night-garden",
+          "at": 10.6,
+          "duration": 1.8,
+          "x": 550,
+          "y": 290
+        },
+        "ending": {
+          "title": "Manchmal genügt",
+          "subtitle": "ein kleiner Funke.",
+          "at": 12.1,
+          "duration": 1.2
+        }
       },
       "morph": null,
       "stage3d": null,

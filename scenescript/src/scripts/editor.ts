@@ -1,5 +1,6 @@
+import {retimeStage2D} from '../lib/stage2d';
 import {createStage2DView,prepareStage2DPreview,type Stage2DView} from './stage2d-preview';
-import {stage2DFields,stage2DTimeline} from './stage2d-editor';
+import {stage2DFields,stage2DTimeline,installStage2DEditor} from './stage2d-editor';
 import {installVoicePicker} from './voice-picker';
 import {installAiWorkflow,type AiWorkflowContext} from './ai-workflow';
 import {installApiVault} from './api-vault';
@@ -500,7 +501,7 @@ $('listen-music').addEventListener('click',()=>{
  }catch(error){stopMusicPreview();showToast((error as Error).message,'error');}
 });
 
-function updateScene(key:keyof Scene,value:unknown){const previous=current()[key];(current() as unknown as Record<string,unknown>)[key]=value;try{if(key==='duration'){const check=structuredClone(project);fitSpeechDurations(check);if(check.scenes.some((s,i)=>s.duration!==project.scenes[i].duration))throw new Error(t('speechDurationFloor'));}validateProject(project);stop();time=offset(sceneIndex);changed();draw();if((key==='background'||key==='backgroundGradient'||key==='backgroundEnabled')&&richEditor)richEditor.editor.style.background=current().backgroundEnabled?gradientCSS(current().backgroundGradient,current().background):'#000000';if(key==='name'||key==='duration')renderSceneLabels();}catch(error){(current() as unknown as Record<string,unknown>)[key]=previous;status(t('error')+' '+(error as Error).message);renderForms();}}
+function updateScene(key:keyof Scene,value:unknown){const previous=current()[key],old2d=structuredClone(current().stage2d);if(key==='duration'&&current().stage2d&&typeof value==='number')retimeStage2D(current().stage2d!,value/current().duration);(current() as unknown as Record<string,unknown>)[key]=value;try{if(key==='duration'){const check=structuredClone(project);fitSpeechDurations(check);if(check.scenes.some((s,i)=>s.duration!==project.scenes[i].duration))throw new Error(t('speechDurationFloor'));}validateProject(project);stop();time=offset(sceneIndex);changed();draw();if((key==='background'||key==='backgroundGradient'||key==='backgroundEnabled')&&richEditor)richEditor.editor.style.background=current().backgroundEnabled?gradientCSS(current().backgroundGradient,current().background):'#000000';if(key==='name'||key==='duration')renderSceneLabels();if(key==='duration')renderForms();}catch(error){current().stage2d=old2d;(current() as unknown as Record<string,unknown>)[key]=previous;status(t('error')+' '+(error as Error).message);renderForms();}}
 function renderSceneLabels(){const buttons=$('scene-list').querySelectorAll('button');project.scenes.forEach((s,i)=>{buttons[i].textContent=`${i+1}. ${s.name} · ${s.duration}s`;buttons[i].title=buttons[i].textContent||'';});}
 let richEditor:ReturnType<typeof richTextEditor>|undefined;
 function updateElement(key:keyof Element,value:unknown){
@@ -563,7 +564,7 @@ function renderForms(){
  richEditor?.dispose();richEditor=undefined;
  const form=$('scene-form');form.replaceChildren();const s=current();
  field(form,'name',s.name,'text',v=>updateScene('name',v));field(form,'duration',s.duration,'number',v=>updateScene('duration',v),undefined,Math.max(.1,sceneSpeechMinimum(s,project)),3600);
- stage2DFields(form,s,document.documentElement.lang,rebuild=>{stop();changed();if(rebuild)renderForms();draw(false);});
+ stage2DFields(form,s,project,document.documentElement.lang,rebuild=>{stop();changed();if(rebuild)renderForms();draw(false);});
  field(form,'backgroundEnabled',s.backgroundEnabled,'checkbox',v=>updateScene('backgroundEnabled',v));
  field(form,'backgroundOpacity',s.backgroundOpacity,'number',v=>updateScene('backgroundOpacity',v),undefined,0,1);
  field(form,'background',s.background,'color',v=>updateScene('background',v));gradientFields(form,'backgroundGradient',s.backgroundGradient,s.background,v=>updateScene('backgroundGradient',v));field(form,'backgroundAsset',s.backgroundAsset,'select',v=>updateScene('backgroundAsset',v),['',...Object.keys(project.assets)]);
@@ -933,7 +934,7 @@ function createSceneLayer(scene:Scene,index:number,interactive:boolean,forceWorl
  let svgBackground:SVGSVGElement|undefined;
  if(scene.backgroundAsset&&project.assets[scene.backgroundAsset].data.startsWith('data:image/svg+xml;')){svgBackground=createSvgImage(project.assets[scene.backgroundAsset].data,'cover',true);const background=document.createElement('div');background.className='scene-background';background.append(svgBackground);backgroundHost.append(background);}
  else if(scene.backgroundAsset){const image=document.createElement('img');image.className='scene-background';image.src=project.assets[scene.backgroundAsset].data;image.alt='';backgroundHost.append(image);}
- const stage2d=scene.stage2d?createStage2DView(scene.stage2d,scene.duration,w,h,error=>status(error.message)):undefined;if(stage2d)layer.append(stage2d.canvas);
+ const stage2d=scene.stage2d?createStage2DView(project,scene.stage2d,scene.duration,w,h,error=>status(error.message)):undefined;if(stage2d)layer.append(stage2d.canvas);
  const stage3d=scene.stage3d?createStage3DView(project,scene.stage3d,w,h,error=>status(error.message)):undefined;if(stage3d)layer.append(stage3d.canvas);
  scene.elements.forEach(e=>{
    const node=document.createElement('div');node.dataset.elementId=e.id;node.dataset.space=e.space;node.className='scene-element'+(interactive&&!playing&&(e.id===selectedId||scene.groups.some(g=>g.id===selectedGroupId&&g.members.includes(e.id)))?' selected':'');
@@ -1071,10 +1072,11 @@ function replace(next:Project){fitSpeechDurations(next);stop();backgroundVideoNo
 const aiProjectContext:()=>AiWorkflowContext=()=>{const source=project,rev=revision;return {project:source,valid:()=>project===source&&revision===rev,preload,apply:next=>{stop();backgroundVideoNode=undefined;backgroundVideoAsset='';clearVideoURLs();clearAudioURLs();project=next;sceneIndex=0;time=0;selectedId='';selectedGroupId='';multiSelection.clear();changed();refresh();}};};
 installAiWorkflow(aiProjectContext,stop,openStoryboardDraft);
 installStoryboardEditor(()=>({project,revision}),next=>{stop();project=next;changed();refresh();},stop,aiProjectContext);
+installStage2DEditor(()=>({project,index:sceneIndex}),next=>{stop();project=next;changed();refresh();},stop);
 installStage3DEditor(()=>({project,index:sceneIndex,revision}),next=>{stop();project=next;changed();refresh();},next=>{replace(next);changed();},stop);
 const canReplace=()=>!dirty||confirm(t('unsaved'));
 $('load-default-project').addEventListener('click',async()=>{if(!canReplace())return;const origin=project,version=revision,button=$('load-default-project') as HTMLButtonElement;button.disabled=true;try{const next=await loadDefaultProject();if(project!==origin||revision!==version){showToast(t('defaultStale'),'warning');return;}replace(next);changed();}catch(error){showToast(t('defaultLoadError')+' '+(error as Error).message,'error');}finally{button.disabled=false;}});
-$('new-project').addEventListener('click',()=>{if(canReplace()){replace({storyboard:null,groups3d:{},characters:{},stages:{},version:'1.0',title:'SceneScript',description:'',firstComment:'',hashtags:'',thumbnail:null,audios:{},narration:null,audioDucking:false,format:'landscape',backgroundSimulation:null,backgroundVideo:null,videos:{},music:null,assets:{},scenes:[newScene()]});changed();}});
+$('new-project').addEventListener('click',()=>{if(canReplace()){replace({objects2d:{},stages2d:{},storyboard:null,groups3d:{},characters:{},stages:{},version:'1.0',title:'SceneScript',description:'',firstComment:'',hashtags:'',thumbnail:null,audios:{},narration:null,audioDucking:false,format:'landscape',backgroundSimulation:null,backgroundVideo:null,videos:{},music:null,assets:{},scenes:[newScene()]});changed();}});
 $('toggle-project').addEventListener('click',()=>{
  const button=$('toggle-project'),collapsed=button.getAttribute('aria-expanded')==='true';
  $('project-panel').classList.toggle('project-collapsed',collapsed);
