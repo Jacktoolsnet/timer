@@ -50,7 +50,7 @@ approve/resolve. board.characters stores characters/objects; shots reference the
 setting.objects holds fixed objects. Follow board.production:
 3d needs real geometry, animation and 3D cameras, not image slides. subject.design controls
 mode/style/surface; the selected style overrides old appearance. Preserve
-approved model3d; use subject IDs in project.characters/stages. modelChat is edit history.
+approved model3d; use subject IDs in project.characters/stages. subject.resource2d associates an existing project.objects2d resource (character/object) or project.stages2d resource (setting); omitted uses the subject ID, null means unassigned. Preserve these associations. modelChat is edit history.
 shot.soundEffects are pending descriptions, NOT audible tracks. Dialogue needs
 Scene.narration text/speaker, music enabled Project.music; speech generation is separate.
 Storyboard.format is planning-only. Limits: 25 MiB, 100 images, 8 MiB/image.

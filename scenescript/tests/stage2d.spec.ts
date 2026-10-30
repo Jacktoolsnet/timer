@@ -117,3 +117,39 @@ test('2D resource overlay shares the 3D layout and previews only the selected re
  await page.keyboard.press('Escape');
  await expect(dialog).not.toBeVisible();
 });
+
+test('storyboard shows sketch first and real 2D resource previews for characters, objects and settings',async({page})=>{
+ await ready(page);await page.locator('#open-storyboard').click();
+ for(const [tab,id,actors]of [['characters','collector','1'],['objects','spark','1'],['settings','forest','0']] as const){
+  await page.locator('[data-board-tab='+tab+']').click();
+  const visuals=page.locator('.board-visuals'),canvas=visuals.locator('.board-resource2d-canvas canvas');
+  await expect(visuals.locator(':scope > section').first()).toHaveClass(/board-image-field/);
+  await expect(canvas).toHaveAttribute('data-stage2d-time','0');
+  await expect(canvas).toHaveAttribute('data-stage2d-actors',actors);
+  await expect(visuals.locator('[data-board-resource2d='+id+']')).toBeVisible();
+  await expect(visuals.locator('.board-model-tile')).toHaveCount(0);
+  const layout=await visuals.evaluate(el=>{
+   const sketch=el.children[0].getBoundingClientRect(),resource=el.children[1].getBoundingClientRect();
+   return {beside:Math.abs(sketch.top-resource.top)<2,wide:el.getBoundingClientRect().width>=740,overflow:el.scrollWidth>el.clientWidth+1,sketchLeft:sketch.left,resourceLeft:resource.left};
+  });
+  expect(layout.beside).toBe(layout.wide);expect(layout.overflow).toBe(false);if(layout.wide)expect(layout.sketchLeft).toBeLessThan(layout.resourceLeft);
+ }
+ await page.locator('[data-board-item=night-garden]').click();
+ await expect(page.locator('.board-resource2d-canvas canvas')).toHaveAttribute('aria-label','2D-Ressource · Nachtgarten');
+ await page.locator('#storyboard-close').click();
+ await expect(page.locator('#stage .stage2d-canvas')).toHaveAttribute('data-stage2d-time','0');
+});
+
+test('storyboard 2D resource assignment persists, can be cleared, and follows representation settings',async({page})=>{
+ await ready(page);await page.locator('#open-storyboard').click();await page.locator('[data-board-tab=characters]').click();
+ const key='characters-collector-',visuals=page.locator('.board-visuals'),canvas=visuals.locator('.board-resource2d-canvas canvas');
+ const choose=async(field:string,value:string)=>{await page.locator('[data-board-edit="'+key+field+'"]').click();await page.locator('#storyboard-field-select').selectOption(value);await page.locator('#storyboard-field-apply').click();};
+ await choose('resource2d','');await expect(canvas).toHaveCount(0);await expect(visuals).toContainText('Keine zugeordnete 2D-Ressource vorhanden.');
+ await choose('resource2d','spark');await expect(canvas).toHaveAttribute('aria-label','2D-Ressource · Lichtfunke');
+ await choose('mode','3d');await expect(visuals.locator('.board-resource2d-tile')).toHaveCount(0);await expect(visuals.locator('.board-model-tile h4')).toHaveText('3D-Ressource');
+ await choose('mode','inherit');await expect(canvas).toHaveAttribute('aria-label','2D-Ressource · Lichtfunke');await expect(visuals.locator('.board-model-tile')).toHaveCount(0);
+ await page.locator('#storyboard-save').click();await page.locator('#storyboard-close').click();
+ const pending=page.waitForEvent('download');await page.locator('#save-project').click();const saved=JSON.parse(await readFile((await(await pending).path())!,'utf8'));
+ expect(saved.storyboard.characters[0].resource2d).toBe('spark');expect(saved.scenes[0].stage2d.actors[0].object).toBe('collector');expect(saved.objects2d.collector.color).toBe('#f28b70');
+ await page.locator('#open-storyboard').click();await page.locator('[data-board-tab=characters]').click();await expect(canvas).toHaveAttribute('aria-label','2D-Ressource · Lichtfunke');
+});

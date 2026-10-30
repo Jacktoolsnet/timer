@@ -222,3 +222,40 @@ test('natural models recommend high reasoning, anatomical smoothness and explici
  s.model3d.parts[1].texture={asset:'fabric',faces:{},repeat:{x:3,y:3},offset:{x:0,y:0},rotation:0};assert.deepEqual(modelSurfaceStatus(s),{missing:false,parts:1,images:1});
  s.design.surface='colors';delete s.model3d.parts[1].texture;assert.equal(modelSurfaceStatus(s).missing,false);
 });
+
+import {boardResource2D,boardResourceModes} from '../src/lib/storyboard-resource-preview.ts';
+import {resourcePreview2D} from '../src/lib/stage2d-resource-preview.ts';
+import {lightCollectorProject} from '../src/lib/light-collector-example.ts';
+test('2D storyboard resource associations persist, validate and survive AI revisions',()=>{
+ const p=lightCollectorProject(),b=p.storyboard!,subject=b.characters[0];
+ subject.resource2d='spark';
+ const parsed=parseProject(JSON.stringify(p));assert.equal(parsed.storyboard!.characters[0].resource2d,'spark');
+ const incoming=JSON.parse(exportStoryboard(b));delete incoming.board.characters[0].resource2d;
+ assert.equal(importStoryboard(JSON.stringify(incoming),b).characters[0].resource2d,'spark');
+ subject.resource2d=null;assert.equal(parseStoryboard(b).characters[0].resource2d,null);
+ incoming.board.characters[0].resource2d='collector';assert.equal(importStoryboard(JSON.stringify(incoming),b).characters[0].resource2d,null);
+ subject.resource2d='bad reference';assert.throws(()=>parseStoryboard(b),/resource2d/);
+});
+test('storyboard previews resolve actual typed resources and honor explicit and inherited modes',()=>{
+ const p=lightCollectorProject(),b=p.storyboard!,subject=b.characters[0],setting=b.settings[0];
+ assert.equal(boardResource2D(p,subject,false).resource,p.objects2d.collector);
+ assert.equal(boardResource2D(p,setting,true).resource,p.stages2d.forest);
+ assert.equal(boardResource2D(p,setting,false).resource,null);
+ assert.deepEqual(boardResourceModes(p,b,subject,false),['2d']);
+ subject.design={...defaultBoardDesign(),mode:'inherit'};b.production!.renderMode='3d';
+ assert.deepEqual(boardResourceModes(p,b,subject,false),['3d']);
+ subject.design.mode='2d';assert.deepEqual(boardResourceModes(p,b,subject,false),['2d']);
+ subject.resource2d=null;assert.equal(boardResource2D(p,subject,false).resource,null);
+ subject.resource2d='deleted-resource';assert.equal(boardResource2D(p,subject,false).resource,null);
+ delete subject.resource2d;subject.id='not-a-resource';subject.name=p.objects2d.collector.name;assert.equal(boardResource2D(p,subject,false).resource,null);
+ subject.design.mode='inherit';subject.id='collector';subject.model3d=roundedHumanModel();b.production!.renderMode='mixed';
+ assert.deepEqual(boardResourceModes(p,b,subject,false),['2d','3d']);
+});
+test('isolated 2D resource previews do not mutate libraries or inherit scene animation',()=>{
+ const p=lightCollectorProject(),before=JSON.stringify(p),sample=resourcePreview2D(p,'objects2d','collector')!;
+ assert.equal(sample.shot.actors.length,1);assert.deepEqual(sample.shot.actors[0].actions,[]);assert.deepEqual(sample.shot.camera,[]);
+ assert.equal(sample.shot.transition,null);assert.equal(sample.shot.ending,null);
+ sample.resources.objects2d.preview.color='#123456';assert.equal(JSON.stringify(p),before);
+ const stage=resourcePreview2D(p,'stages2d','night-garden')!;assert.equal(stage.shot.actors.length,0);assert.equal(stage.resources.stages2d.preview.preset,'night-garden');
+ assert.equal(resourcePreview2D(p,'objects2d','missing'),null);
+});

@@ -1,3 +1,7 @@
+import {boardResource2D,boardResourceModes} from '../lib/storyboard-resource-preview';
+import {resourcePreview2D} from '../lib/stage2d-resource-preview';
+import {createStage2DView} from './stage2d-preview';
+import {storyboardResourceWords} from '../lib/storyboard-resource-i18n';
 import {createFabricTexture} from './fabric-texture';
 import {modelNeedsRestyle,modelSurfaceStatus} from '../lib/storyboard-resources';
 import {defaultBoardDesign} from '../lib/storyboard-design';
@@ -52,7 +56,8 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
    board=removeStoryboardImage(board,pending.target);dirty=true;render();closeDeleteImage();
   }catch(e){closeDeleteImage();error(e);}
  });
- let disposeModelView:(()=>void)|undefined;
+ const resourceViewDisposers:(()=>void)[]=[];
+ const disposeResourceViews=()=>{for(const dispose of resourceViewDisposers.splice(0))dispose();};
  const dw=storyboardDesignWords(document.documentElement.lang);
  let selectedItems:Record<string,string>={};
  let board:Storyboard,origin:ReturnType<typeof context>,dirty=false,tab='story',session=0;
@@ -123,7 +128,7 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
   if(config.newComment||config.editComment)draft.approved=false;else invalidateStoryboardApprovals(draft,config.target??(config.shot?{kind:'shots',id:config.shot}:undefined));
   board=parseStoryboard(draft);dirty=true;if(config.subjectKind){tab=value==='object'?'objects':'characters';if(config.target)selectedItems[tab]=config.target.id;}if(config.newItem)selectedItems[tab]=sectionItems().at(-1)?.id??'';render();closeField();
  }catch(e){$('field-error').textContent=e instanceof Error?e.message:String(e);}});
- dialog.addEventListener('close',()=>{disposeModelView?.();disposeModelView=undefined;if(deleteImageDialog.open)closeDeleteImage();finishReplace?.(false);if(fieldDialog.open)closeField();if(exchange.open)exchange.close();});
+ dialog.addEventListener('close',()=>{disposeResourceViews();if(deleteImageDialog.open)closeDeleteImage();finishReplace?.(false);if(fieldDialog.open)closeField();if(exchange.open)exchange.close();});
  function approvalSwitch(parent:HTMLElement,item:{status:'draft'|'approved'},name:string){
   const label=node('label'),input=node('input'),track=node('span');label.className='board-approval-switch';input.type='checkbox';input.setAttribute('role','switch');input.setAttribute('aria-description',name);input.checked=item.status==='approved';track.className='board-switch-track';track.setAttribute('aria-hidden','true');
   input.addEventListener('change',()=>{item.status=input.checked?'approved':'draft';touch();});label.append(input,track,node('span',t.approved));parent.append(label);
@@ -168,7 +173,7 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
   card.classList.add('board-detail-grid');for(const child of Array.from(card.children)){child.classList.add('board-detail-tile');const key=child.querySelector<HTMLElement>('[data-board-edit]')?.dataset.boardEdit;if(key)child.setAttribute('data-detail-field',key);}
  }
 
- function render(){disposeModelView?.();disposeModelView=undefined;
+ function render(){disposeResourceViews();
   review();for(const b of document.querySelectorAll<HTMLButtonElement>('[data-board-tab]')){const selected=b.dataset.boardTab===tab;b.setAttribute('aria-selected',String(selected));b.tabIndex=selected?0:-1;}
   const root=$('content');root.dataset.tab=tab;root.setAttribute('aria-labelledby','storyboard-tab-'+tab);root.replaceChildren();
   if(tab==='story'){
@@ -194,6 +199,26 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
    const {sidebar,detail}=library(root,subjects);
    for(const subject of subjects.filter(s=>s.id===selectedItems[tab])){const card=node('article');card.className='board-card';const get=(b:Storyboard)=>b[kind].find(s=>s.id===subject.id)!,target:BoardReviewTarget={kind,id:subject.id};card.dataset.subjectId=subject.id;
     heading(card,subject.name,{...textConfig(t.fieldTitle,subject.name,(b,v)=>{get(b).name=String(v);},200),target},kind+'-'+subject.id+'-name');
+    const visuals=node('div');visuals.className='board-visuals';card.append(visuals);
+    picture(visuals,subject.image,subject.name,(b,v)=>{get(b).image=String(v)||null;},kind+'-'+subject.id+'-image',undefined,target);
+    const modes=boardResourceModes(origin.project,board,subject,kind==='settings');
+    if(modes.includes('2d')){
+     const rw=storyboardResourceWords(document.documentElement.lang),tile=node('section'),row=node('div');
+     tile.className='board-field board-resource2d-tile';tile.dataset.boardResource2d=subject.id;
+     row.className='board-field-heading';row.append(node('h4',rw.resource));tile.append(row);visuals.append(tile);
+     const association=boardResource2D(origin.project,subject,kind==='settings'),library=origin.project[association.kind];
+     const options:[string,string][]=[['',t.none],...Object.entries(library).map(([id,r]):[string,string]=>[id,r.name])];
+     if(subject.resource2d&&!association.resource)options.push([subject.resource2d,subject.resource2d+' — '+rw.missing]);
+     row.append(pencil({label:rw.assign,value:association.resource?association.id!:subject.resource2d??'',kind:'select',options,target,apply:(b,v)=>{get(b).resource2d=String(v)||null;}},kind+'-'+subject.id+'-resource2d'));
+     const sample=association.resource&&association.id?resourcePreview2D(origin.project,association.kind,association.id):null;
+     if(sample){
+      tile.append(node('p',association.resource!.name));
+      const figure=node('div'),message=node('p');figure.className='board-model-canvas board-resource2d-canvas';message.setAttribute('role','status');tile.append(figure,message);
+      const view=createStage2DView(sample.resources,sample.shot,sample.duration,640,480,e=>{message.textContent=e.message;});
+      view.canvas.setAttribute('aria-label',rw.resource+' · '+association.resource!.name);figure.append(view.canvas);view.draw(0);resourceViewDisposers.push(()=>view.dispose());
+      const hint=node('p',rw.hint);hint.className='small-hint';tile.append(hint);
+     }else tile.append(node('p',subject.resource2d?rw.missing:rw.none));
+    }
     if(kind==='characters'){const character=subject as BoardCharacter;field(card,t.category,character.kind==='object'?t.objectCategory:t.characterCategory,{label:t.category,value:character.kind,kind:'select',options:[['character',t.characterCategory],['object',t.objectCategory]],target,subjectKind:true,apply:(b,v)=>{if(v==='character'&&b.settings.some(s=>s.objects?.includes(subject.id)))throw new Error(t.objectInUse);b.characters.find(c=>c.id===subject.id)!.kind=v as BoardCharacter['kind'];}},kind+'-'+subject.id+'-kind');}
     if(kind==='settings'){const setting=subject as BoardSetting,objects=board.characters.filter(c=>c.kind==='object');
      field(card,t.equipment,(setting.objects??[]).map(id=>objects.find(o=>o.id===id)?.name??id).join(', '),{label:t.equipment,value:setting.objects??[],kind:'choices',options:objects.map(o=>[o.id,o.name]),target,apply:(b,v)=>{b.settings.find(s=>s.id===subject.id)!.objects=v as string[];}},'settings-'+subject.id+'-objects');
@@ -205,6 +230,7 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
      ['surface',dw.surface,[['colors',dw.colors],['textures',dw.textures],['mixed',dw.mixed]]]
     ] as const){field(card,label,options.find(([id])=>id===design[key])![1],{label,value:design[key],kind:'select',options:options.map(([a,b])=>[a,b]),target,apply:(b,v)=>{get(b).design={...design,[key]:v};}},kind+'-'+subject.id+'-'+key);}
     field(card,dw.details,design.details,{...textConfig(dw.details,design.details,(b,v)=>{get(b).design={...design,details:String(v)};}),target},kind+'-'+subject.id+'-design-details');
+    if(modes.includes('3d')){
     const modelTile=node('section');modelTile.className='board-field board-model-tile';const row=node('div');row.className='board-field-heading';row.append(node('h4',dw.model));
     const modelButton=commentButton(dw.create,'m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5Z');modelButton.dataset.boardModel=subject.id;
     const effectiveMode=design.mode==='inherit'?board.production?.renderMode:design.mode;modelButton.disabled=effectiveMode==='2d';modelButton.addEventListener('click',()=>runWorkflow('model',{resourceTarget:target}));row.append(modelButton);modelTile.append(row,node('p',subject.model3d?dw.hint:dw.none));
@@ -217,8 +243,8 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
     if(subject.model3d){const surface=modelSurfaceStatus(subject),usage=node('p',dw.textureUsage+': '+surface.parts+' / '+surface.images);usage.dataset.boardTextureUsage=subject.id;modelTile.append(usage);if(surface.missing){const warning=node('p',dw.missingTextures);warning.setAttribute('role','status');warning.dataset.boardTextureMissing=subject.id;modelTile.append(warning);}}
 
     if(subject.modelChat?.length){const history=node('details');history.append(node('summary',dw.conversation));for(const entry of subject.modelChat){history.append(node('p',entry.request),node('p',entry.reply));}modelTile.append(history);}
-    if(subject.model3d)disposeModelView=storyboardModelView(modelTile,subject,kind==='settings',board);card.append(modelTile);
-    picture(card,subject.image,subject.name,(b,v)=>{get(b).image=String(v)||null;},kind+'-'+subject.id+'-image',undefined,target);
+    if(subject.model3d)resourceViewDisposers.push(storyboardModelView(modelTile,subject,kind==='settings',board));visuals.append(modelTile);
+    }
     const voiceWords=voicePickerWords(document.documentElement.lang as Language);
     field(card,voiceWords.voice,subject.voice?subject.voice.name+' · '+subject.voice.id:voiceWords.none,{label:voiceWords.voice,value:JSON.stringify(subject.voice??null),kind:'voice',target,apply:(b,v)=>{const voice=JSON.parse(String(v)) as VoiceAssignment|null;if(voice)get(b).voice=voice;else delete get(b).voice;}},kind+'-'+subject.id+'-voice');
     field(card,t.description,subject.description,{...textConfig(t.description,subject.description,(b,v)=>{get(b).description=String(v);}),target},kind+'-'+subject.id+'-description');commentList(card,subject.comments,target);tileDetail(card);detail.append(card);

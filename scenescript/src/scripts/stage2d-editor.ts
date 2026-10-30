@@ -1,7 +1,8 @@
+import {resourcePreview2D} from '../lib/stage2d-resource-preview';
 import {stage3DWords} from '../lib/stage3d-i18n';
 import {createStage2DView,type Stage2DView} from './stage2d-preview';
 import {actorFrame2D,cameraFrame2D} from '../lib/motion2d';
-import {actions2D,defaultAction2D,defaultActor2D,defaultObject2D,defaultStage2D,defaultStage2DResource,lightCollector2D,parseStage2D,type Actor2D,type Resources2D} from '../lib/stage2d';
+import {actions2D,defaultAction2D,defaultActor2D,defaultObject2D,defaultStage2D,defaultStage2DResource,lightCollector2D,parseStage2D,type Actor2D} from '../lib/stage2d';
 import {validateProject,type Project,type Scene} from '../lib/model';
 const translations={
  de:{title:'2D-Bühne und Instanzen',resources:'2D-Ressourcen',enabled:'2D-Szene aktivieren',stage:'Bühne',objects:'Objekte',stages:'Bühnen',name:'Name',kind:'Objekttyp',preset:'Bühnentyp',color:'Grundfarbe',accentColor:'Akzentfarbe',skyColor:'Himmelsfarbe',groundColor:'Bodenfarbe',shape:'Form',actor:'Instanz',object:'Objektressource',add:'Hinzufügen',duplicate:'Duplizieren',remove:'Entfernen',use:'In dieser Szene verwenden',close:'Schließen',override:'Eigene Instanzfarbe',scale:'Größe',rotation:'Drehung',opacity:'Deckkraft',action:'Aktion',at:'Start (s)',duration:'Dauer (s)',toX:'Ziel X',toY:'Ziel Y',height:'Höhe',target:'Zielinstanz (rechte Hand)',camera:'Kamera / Parallaxe',zoom:'Zoom',transition:'Irisübergang',ending:'Schlusstext',titleLine:'Zeile 1',subtitle:'Zeile 2',referenced:'Die Ressource oder Instanz wird noch verwendet.',hint:'Ressourcen definieren das Aussehen. Jede Szene besitzt unabhängige Instanzen, Aktionen und Kamera-Keys. Änderungen werden sofort gespeichert und können rückgängig gemacht werden.',empty:'Noch keine Ressource. Über „2D-Ressourcen“ anlegen.',robot:'Roboter',spark:'Lichtfunke',forest:'Waldweg','night-garden':'Nachtgarten',rectangle:'Rechteck',ellipse:'Ellipse',star:'Stern',move:'Bewegen',walk:'Gehen',wave:'Winken',jump:'Springen',float:'Schweben',attach:'An Hand anheften',fade:'Ausblenden'},
@@ -131,11 +132,8 @@ export function installStage2DEditor(get:()=>{project:Project;index:number},comm
   const caption=document.createElement('figcaption');caption.textContent=shared.resourcePreview;
   const host=document.createElement('div');host.id='stage2d-resource-preview';
   const status=document.createElement('p');status.id='stage2d-resource-preview-status';status.setAttribute('role','status');status.setAttribute('aria-live','polite');card.append(caption,host,status);editor.append(card);
-  // Isolated sample: no scene actions, overrides or camera keys affect this resource view.
-  const resources:Resources2D={stages2d:{preview:kind==='stages2d'?structuredClone(p.stages2d[selected]):defaultStage2DResource()},objects2d:kind==='objects2d'?{preview:structuredClone(p.objects2d[selected])}:{}};
-  const shot=defaultStage2D('preview');
-  if(kind==='objects2d'){const actor=defaultActor2D('preview','preview');actor.x=480;actor.y=p.objects2d[selected].kind==='robot'?425:270;actor.scale=p.objects2d[selected].kind==='robot'?1.8:2;shot.actors.push(actor);}
-  preview=createStage2DView(resources,shot,1,640,480,error=>{status.textContent=error.message;});preview.canvas.setAttribute('aria-label',shared.resourcePreview+' · '+resource.name);host.append(preview.canvas);preview.draw(0);
+  const sample=resourcePreview2D(p,kind,selected)!;
+  preview=createStage2DView(sample.resources,sample.shot,sample.duration,640,480,error=>{status.textContent=error.message;});preview.canvas.setAttribute('aria-label',shared.resourcePreview+' · '+resource.name);host.append(preview.canvas);preview.draw(0);
 
  }
 }
