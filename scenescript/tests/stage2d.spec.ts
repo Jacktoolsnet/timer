@@ -59,7 +59,7 @@ test('resource edits propagate, referenced deletion is blocked, and new shape re
  await ready(page);await page.locator('#timeline').fill('4.9');const before=await page.locator('#stage .stage2d-canvas').evaluate((c:HTMLCanvasElement)=>c.toDataURL());
  await page.locator('#open-stage2d').click();await expect(page.locator('#stage2d-dialog')).toBeVisible();await page.locator('[data-stage2d-field=resource-color]').fill('#4488ff');await page.locator('[data-stage2d-field=resource-color]').dispatchEvent('change');await page.locator('#stage2d-dialog').getByRole('button',{name:'Schließen',exact:true}).click();
  await expect.poll(()=>page.locator('#stage .stage2d-canvas').evaluate((c:HTMLCanvasElement)=>c.toDataURL())).not.toBe(before);await page.locator('#undo-project').click();await expect.poll(()=>page.locator('#stage .stage2d-canvas').evaluate((c:HTMLCanvasElement)=>c.toDataURL())).toBe(before);
- await page.locator('#open-stage2d').click();await page.locator('#stage2d-dialog').getByRole('button',{name:'Entfernen',exact:true}).click();await expect(page.locator('#stage2d-dialog [role=status]')).toContainText('noch verwendet');
+ await page.locator('#open-stage2d').click();await page.locator('#stage2d-dialog').getByRole('button',{name:'Entfernen',exact:true}).click();await expect(page.locator('#stage2d-status')).toContainText('noch verwendet');
  await page.locator('#stage2d-dialog').getByRole('button',{name:'Hinzufügen',exact:true}).click();await page.locator('[data-stage2d-field=resource-type]').selectOption('shape');await page.locator('#stage2d-dialog').getByRole('button',{name:'In dieser Szene verwenden',exact:true}).click();await page.locator('#stage2d-dialog').getByRole('button',{name:'Schließen',exact:true}).click();await expect(page.locator('#stage .stage2d-canvas')).toHaveAttribute('data-stage2d-actors','3');
 });
 test('all checkbox presentations are slide toggles and native keyboard operation is retained',async({page})=>{
@@ -77,4 +77,43 @@ test('new action types and camera keys can be added through the UI and scene dur
  await page.locator('[data-stage2d-editor]').getByRole('button',{name:'Kamera / Parallaxe +',exact:true}).click();await expect(page.locator('[data-stage2d-field^="camera-"][data-stage2d-field$="-at"]')).toHaveCount(5);
  await page.locator('#scene-form [name=duration]').fill('8');await page.locator('#scene-form [name=duration]').dispatchEvent('change');await expect(page.locator('#timeline')).toHaveAttribute('max','8');
  const pending=page.waitForEvent('download');await page.locator('#save-project').click();const file=await pending,p=JSON.parse(await readFile((await file.path())!,'utf8'));expect(p.scenes[0].stage2d.actors[1].actions[0].duration).toBe(8);expect(p.scenes[0].stage2d.camera).toHaveLength(5);expect(p.scenes[0].stage2d.actors[1].actions[3].at).toBeCloseTo(4.025);
+});
+
+test('2D resource overlay shares the 3D layout and previews only the selected resource',async({page})=>{
+ await ready(page);
+ await page.locator('#open-stage3d').click();
+ const reference=await page.locator('#stage3d-dialog').evaluate(el=>({width:el.getBoundingClientRect().width,header:getComputedStyle(el.querySelector('.json-header')!).padding,library:getComputedStyle(el.querySelector('.stage3d-library')!).borderRadius}));
+ await page.locator('#stage3d-close').click();
+ await page.locator('#open-stage2d').click();
+ const dialog=page.locator('#stage2d-dialog'),canvas=dialog.locator('#stage2d-resource-preview canvas');
+ await expect(canvas).toHaveAttribute('data-stage2d-time','0');
+ await expect(canvas).toHaveAttribute('data-stage2d-actors','1');
+ await expect(dialog.locator('#stage2d-fields legend')).toHaveText(['Allgemein','Aussehen']);
+ await expect(dialog.locator('.stage3d-color-swatch output').first()).toHaveText('#F28B70');
+ const layout=await dialog.evaluate(el=>({
+  width:el.getBoundingClientRect().width,
+  header:getComputedStyle(el.querySelector('.json-header')!).padding,
+  library:getComputedStyle(el.querySelector('.stage3d-library')!).borderRadius,
+  fits:el.getBoundingClientRect().left>=0&&el.getBoundingClientRect().right<=innerWidth&&el.getBoundingClientRect().bottom<=innerHeight,
+  overflow:el.querySelector('.dialog-inner')!.scrollWidth<=el.querySelector('.dialog-inner')!.clientWidth+1,
+  buttons:[...el.querySelectorAll('button')].every(b=>!!b.querySelector('svg')&&!!b.title&&b.title===b.getAttribute('aria-label')&&b.getBoundingClientRect().width>=44&&b.getBoundingClientRect().height>=44)
+ }));
+ expect({width:layout.width,header:layout.header,library:layout.library}).toEqual(reference);
+ expect(layout.fits&&layout.overflow&&layout.buttons).toBe(true);
+ const first=await canvas.evaluate(el=>(el as HTMLCanvasElement).toDataURL());
+ await dialog.locator('[data-stage2d-field=resource-color]').fill('#4488ff');
+ await dialog.locator('[data-stage2d-field=resource-color]').dispatchEvent('change');
+ await expect(canvas).toHaveAttribute('data-stage2d-time','0');
+ await expect(dialog.locator('.stage3d-color-swatch output').first()).toHaveText('#4488FF');
+ expect(await canvas.evaluate(el=>(el as HTMLCanvasElement).toDataURL())).not.toBe(first);
+ await dialog.locator('[data-stage2d-field=resource]').selectOption('spark');
+ await expect(canvas).toHaveAttribute('aria-label','Ressourcenvorschau · Lichtfunke');
+ await dialog.locator('[data-stage2d-field=resource-kind]').selectOption('stages2d');
+ await expect(canvas).toHaveAttribute('data-stage2d-actors','0');
+ await dialog.getByRole('button',{name:'Schließen',exact:true}).click();
+ await expect(dialog).not.toBeVisible();
+ await page.locator('#open-stage2d').click();
+ await expect(canvas).toHaveAttribute('data-stage2d-time','0');
+ await page.keyboard.press('Escape');
+ await expect(dialog).not.toBeVisible();
 });

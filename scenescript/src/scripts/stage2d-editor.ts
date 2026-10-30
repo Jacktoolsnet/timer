@@ -1,5 +1,7 @@
+import {stage3DWords} from '../lib/stage3d-i18n';
+import {createStage2DView,type Stage2DView} from './stage2d-preview';
 import {actorFrame2D,cameraFrame2D} from '../lib/motion2d';
-import {actions2D,defaultAction2D,defaultActor2D,defaultObject2D,defaultStage2D,defaultStage2DResource,lightCollector2D,parseStage2D,type Actor2D} from '../lib/stage2d';
+import {actions2D,defaultAction2D,defaultActor2D,defaultObject2D,defaultStage2D,defaultStage2DResource,lightCollector2D,parseStage2D,type Actor2D,type Resources2D} from '../lib/stage2d';
 import {validateProject,type Project,type Scene} from '../lib/model';
 const translations={
  de:{title:'2D-Bühne und Instanzen',resources:'2D-Ressourcen',enabled:'2D-Szene aktivieren',stage:'Bühne',objects:'Objekte',stages:'Bühnen',name:'Name',kind:'Objekttyp',preset:'Bühnentyp',color:'Grundfarbe',accentColor:'Akzentfarbe',skyColor:'Himmelsfarbe',groundColor:'Bodenfarbe',shape:'Form',actor:'Instanz',object:'Objektressource',add:'Hinzufügen',duplicate:'Duplizieren',remove:'Entfernen',use:'In dieser Szene verwenden',close:'Schließen',override:'Eigene Instanzfarbe',scale:'Größe',rotation:'Drehung',opacity:'Deckkraft',action:'Aktion',at:'Start (s)',duration:'Dauer (s)',toX:'Ziel X',toY:'Ziel Y',height:'Höhe',target:'Zielinstanz (rechte Hand)',camera:'Kamera / Parallaxe',zoom:'Zoom',transition:'Irisübergang',ending:'Schlusstext',titleLine:'Zeile 1',subtitle:'Zeile 2',referenced:'Die Ressource oder Instanz wird noch verwendet.',hint:'Ressourcen definieren das Aussehen. Jede Szene besitzt unabhängige Instanzen, Aktionen und Kamera-Keys. Änderungen werden sofort gespeichert und können rückgängig gemacht werden.',empty:'Noch keine Ressource. Über „2D-Ressourcen“ anlegen.',robot:'Roboter',spark:'Lichtfunke',forest:'Waldweg','night-garden':'Nachtgarten',rectangle:'Rechteck',ellipse:'Ellipse',star:'Stern',move:'Bewegen',walk:'Gehen',wave:'Winken',jump:'Springen',float:'Schweben',attach:'An Hand anheften',fade:'Ausblenden'},
@@ -68,18 +70,72 @@ export function stage2DTimeline(host:HTMLElement,scene:Scene,language:string,see
 }
 export function installStage2DEditor(get:()=>{project:Project;index:number},commit:(p:Project)=>void,stop:()=>void){
  const w=words(document.documentElement.lang),launch=button(w.resources,()=>{stop();render();dialog.showModal();});launch.id='open-stage2d';launch.setAttribute('aria-haspopup','dialog');launch.setAttribute('aria-controls','stage2d-dialog');const icon=document.createElementNS('http://www.w3.org/2000/svg','svg'),path=document.createElementNS('http://www.w3.org/2000/svg','path');icon.setAttribute('viewBox','0 0 24 24');icon.setAttribute('aria-hidden','true');path.setAttribute('d','M3 5h18v14H3ZM7 14l3-4 4 5 3-3 3 5M7 8h.01');icon.append(path);launch.prepend(icon);document.getElementById('open-stage3d')!.before(launch);
- const dialog=document.createElement('dialog');dialog.id='stage2d-dialog';dialog.setAttribute('aria-labelledby','stage2d-title');const heading=document.createElement('h2');heading.id='stage2d-title';heading.textContent=w.resources;const hint=document.createElement('p');hint.textContent=w.hint;const body=document.createElement('div');body.className='resources2d-grid';const message=document.createElement('p');message.setAttribute('role','status');dialog.append(heading,hint,body,message,button(w.close,()=>dialog.close()));document.body.append(dialog);
+ const shared=stage3DWords[document.documentElement.lang as keyof typeof stage3DWords]??stage3DWords.en;
+ const dialog=document.createElement('dialog');dialog.id='stage2d-dialog';dialog.setAttribute('aria-labelledby','stage2d-title');
+ const header=document.createElement('header');header.className='json-header';
+ const heading=document.createElement('h2');heading.id='stage2d-title';heading.textContent=w.resources;
+ const hint=document.createElement('p');hint.textContent=({
+  de:'Wiederverwendbare 2D-Objekte und Bühnen für unabhängige Szenenauftritte.',
+  en:'Reusable 2D objects and stages for independent scene instances.',
+  es:'Objetos y escenarios 2D reutilizables para instancias independientes.',
+  fr:'Objets et décors 2D réutilisables pour des instances indépendantes.'
+ }[document.documentElement.lang]??'Reusable 2D objects and stages for independent scene instances.');
+ const headerContent=document.createElement('div');headerContent.append(heading,hint);header.append(headerContent);
+ const inner=document.createElement('div');inner.className='dialog-inner';
+ const body=document.createElement('div');body.className='stage3d-grid';
+ const message=document.createElement('p');message.id='stage2d-status';message.setAttribute('role','status');message.setAttribute('aria-live','polite');
+ inner.append(message,body);
+ const paths={
+  add:'M12 5v14M5 12h14',
+  duplicate:'M8 8h12v12H8ZM4 16H3V3h13v1',
+  remove:'M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7',
+  use:'M4 4h16v16H4M8 12h8M12 8l4 4-4 4',
+  close:'M6 6l12 12M6 18 18 6'
+ };
+ function action(label:string,path:string,run:()=>void){
+  const b=button(label,run);b.textContent='';b.title=label;b.setAttribute('aria-label',label);
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg'),line=document.createElementNS('http://www.w3.org/2000/svg','path');
+  svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('aria-hidden','true');svg.setAttribute('fill','none');svg.setAttribute('stroke','currentColor');svg.setAttribute('stroke-width','1.8');svg.setAttribute('stroke-linecap','round');svg.setAttribute('stroke-linejoin','round');line.setAttribute('d',path);svg.append(line);b.append(svg);return b;
+ }
+ const footer=document.createElement('footer');footer.className='json-footer stage3d-actions';footer.append(action(w.close,paths.close,()=>dialog.close()));
+ dialog.append(header,inner,footer);document.body.append(dialog);
+ let preview:Stage2DView|undefined;
+ dialog.addEventListener('close',()=>{preview?.dispose();preview=undefined;});
+ function resourceField(parent:HTMLElement,key:string,title:string,value:string,save:(value:any)=>void|boolean,choices?:[string,string][]){
+  const input=field(parent,key,title,value,save,choices),label=input.parentElement!;
+  if(input instanceof HTMLInputElement&&input.type==='color'){
+   const swatch=document.createElement('span');swatch.className='stage3d-color-swatch';const output=document.createElement('output');output.textContent=value.toUpperCase();
+   label.append(swatch);swatch.append(input,output);input.addEventListener('input',()=>{output.textContent=input.value.toUpperCase();});
+  }else label.classList.add('stage3d-name-field');
+ }
+ function fieldGroup(parent:HTMLElement,title:string){const f=group(parent,title),grid=document.createElement('div');grid.className='stage3d-field-grid';f.append(grid);return grid;}
  let kind:'objects2d'|'stages2d'='objects2d',selected='';
  const apply=(fn:(p:Project)=>void)=>{try{const next=structuredClone(get().project);fn(next);const parsed=validateProject(next);commit(parsed);message.textContent='';render();return true;}catch(e){message.textContent=(e as Error).message;return false;}};
- function render(){body.replaceChildren();const p=get().project,sidebar=document.createElement('section'),detail=document.createElement('section');body.append(sidebar,detail);field(sidebar,'resource-kind',w.resources,kind,v=>{kind=v;selected='';render();},[['objects2d',w.objects],['stages2d',w.stages]]);
+ function render(){preview?.dispose();preview=undefined;body.replaceChildren();const p=get().project,sidebar=document.createElement('section'),detail=document.createElement('section');sidebar.className='stage3d-library';detail.className='stage3d-details';body.append(sidebar,detail);field(sidebar,'resource-kind',shared.kind,kind,v=>{kind=v;selected='';render();},[['objects2d',w.objects],['stages2d',w.stages]]);
   const library=p[kind];if(!Object.hasOwn(library,selected))selected=Object.keys(library)[0]??'';
   field(sidebar,'resource',kind==='objects2d'?w.objects:w.stages,selected,v=>{selected=v;render();},entries(library));
-  sidebar.append(button(w.add,()=>apply(next=>{selected=crypto.randomUUID();if(kind==='objects2d')next.objects2d[selected]=defaultObject2D();else next.stages2d[selected]=defaultStage2DResource();})));if(!selected){detail.textContent=w.empty;return;}
+  const actions=document.createElement('div');actions.className='stage3d-actions';sidebar.append(actions);
+  actions.append(action(w.add,paths.add,()=>apply(next=>{selected=crypto.randomUUID();if(kind==='objects2d')next.objects2d[selected]=defaultObject2D();else next.stages2d[selected]=defaultStage2DResource();})));if(!selected){detail.textContent=w.empty;return;}
   const resource=library[selected];
-  sidebar.append(button(w.duplicate,()=>apply(next=>{const id=crypto.randomUUID();Object.assign(next[kind],{[id]:{...next[kind][selected],name:resource.name+' II'}});selected=id;})),button(w.remove,()=>apply(next=>{if(next.scenes.some(s=>kind==='objects2d'?s.stage2d?.actors.some(a=>a.object===selected):s.stage2d?.stage===selected||s.stage2d?.transition?.stage===selected))throw Error(w.referenced);delete next[kind][selected];selected='';})),button(w.use,()=>apply(next=>{const scene=next.scenes[get().index];if(kind==='stages2d'){scene.stage2d??=defaultStage2D(selected);scene.stage2d.stage=selected;}else{if(!Object.keys(next.stages2d).length)throw Error(w.empty);scene.stage2d??=defaultStage2D(Object.keys(next.stages2d)[0]);const a=defaultActor2D(selected);a.name=resource.name;scene.stage2d.actors.push(a);}})));
+  actions.append(action(w.duplicate,paths.duplicate,()=>apply(next=>{const id=crypto.randomUUID();Object.assign(next[kind],{[id]:{...next[kind][selected],name:resource.name+' II'}});selected=id;})),action(w.remove,paths.remove,()=>apply(next=>{if(next.scenes.some(s=>kind==='objects2d'?s.stage2d?.actors.some(a=>a.object===selected):s.stage2d?.stage===selected||s.stage2d?.transition?.stage===selected))throw Error(w.referenced);delete next[kind][selected];selected='';})),action(w.use,paths.use,()=>apply(next=>{const scene=next.scenes[get().index];if(kind==='stages2d'){scene.stage2d??=defaultStage2D(selected);scene.stage2d.stage=selected;}else{if(!Object.keys(next.stages2d).length)throw Error(w.empty);scene.stage2d??=defaultStage2D(Object.keys(next.stages2d)[0]);const a=defaultActor2D(selected);a.name=resource.name;scene.stage2d.actors.push(a);}})));
   const set=(key:string,value:unknown)=>{if((get().project[kind][selected] as unknown as Record<string,unknown>)[key]===value)return;return apply(next=>Object.assign(next[kind][selected],{[key]:value}));};
-  field(detail,'resource-name',w.name,resource.name,v=>set('name',v));
-  if(kind==='objects2d'){const r=p.objects2d[selected];field(detail,'resource-type',w.kind,r.kind,v=>set('kind',v),[['robot',w.robot],['spark',w.spark],['shape',w.shape]]);field(detail,'resource-color',w.color,r.color,v=>set('color',v));field(detail,'resource-accentColor',w.accentColor,r.accentColor,v=>set('accentColor',v));if(r.kind==='shape')field(detail,'resource-shape',w.shape,r.shape,v=>set('shape',v),[['rectangle',w.rectangle],['ellipse',w.ellipse],['star',w.star]]);}
-  else{const r=p.stages2d[selected];field(detail,'resource-preset',w.preset,r.preset,v=>apply(next=>Object.assign(next.stages2d[selected],defaultStage2DResource(v),{name:resource.name})),[['forest',w.forest],['night-garden',w['night-garden']]]);field(detail,'resource-skyColor',w.skyColor,r.skyColor,v=>set('skyColor',v));field(detail,'resource-groundColor',w.groundColor,r.groundColor,v=>set('groundColor',v));}
+  const detailHeading=document.createElement('header');detailHeading.className='stage3d-detail-heading';const title=document.createElement('h3'),id=document.createElement('span');title.textContent=(kind==='objects2d'?w.object:w.stage)+' · '+resource.name;id.id='stage2d-detail-id';id.textContent=selected;detailHeading.append(title,id);detail.append(detailHeading);
+  const editor=document.createElement('div');editor.className='stage3d-resource-editor';detail.append(editor);
+  const fields=document.createElement('div');fields.id='stage2d-fields';editor.append(fields);
+  const general=fieldGroup(fields,shared.general),appearance=fieldGroup(fields,shared.appearance);
+  resourceField(general,'resource-name',w.name,resource.name,v=>set('name',v));
+  if(kind==='objects2d'){const r=p.objects2d[selected];resourceField(appearance,'resource-type',w.kind,r.kind,v=>set('kind',v),[['robot',w.robot],['spark',w.spark],['shape',w.shape]]);resourceField(appearance,'resource-color',w.color,r.color,v=>set('color',v));resourceField(appearance,'resource-accentColor',w.accentColor,r.accentColor,v=>set('accentColor',v));if(r.kind==='shape')resourceField(appearance,'resource-shape',w.shape,r.shape,v=>set('shape',v),[['rectangle',w.rectangle],['ellipse',w.ellipse],['star',w.star]]);}
+  else{const r=p.stages2d[selected];resourceField(appearance,'resource-preset',w.preset,r.preset,v=>apply(next=>Object.assign(next.stages2d[selected],defaultStage2DResource(v),{name:resource.name})),[['forest',w.forest],['night-garden',w['night-garden']]]);resourceField(appearance,'resource-skyColor',w.skyColor,r.skyColor,v=>set('skyColor',v));resourceField(appearance,'resource-groundColor',w.groundColor,r.groundColor,v=>set('groundColor',v));}
+  const note=document.createElement('p');note.className='small-hint';note.textContent=w.hint;detail.append(note);
+  const card=document.createElement('figure');card.className='stage3d-resource-preview-card';
+  const caption=document.createElement('figcaption');caption.textContent=shared.resourcePreview;
+  const host=document.createElement('div');host.id='stage2d-resource-preview';
+  const status=document.createElement('p');status.id='stage2d-resource-preview-status';status.setAttribute('role','status');status.setAttribute('aria-live','polite');card.append(caption,host,status);editor.append(card);
+  // Isolated sample: no scene actions, overrides or camera keys affect this resource view.
+  const resources:Resources2D={stages2d:{preview:kind==='stages2d'?structuredClone(p.stages2d[selected]):defaultStage2DResource()},objects2d:kind==='objects2d'?{preview:structuredClone(p.objects2d[selected])}:{}};
+  const shot=defaultStage2D('preview');
+  if(kind==='objects2d'){const actor=defaultActor2D('preview','preview');actor.x=480;actor.y=p.objects2d[selected].kind==='robot'?425:270;actor.scale=p.objects2d[selected].kind==='robot'?1.8:2;shot.actors.push(actor);}
+  preview=createStage2DView(resources,shot,1,640,480,error=>{status.textContent=error.message;});preview.canvas.setAttribute('aria-label',shared.resourcePreview+' · '+resource.name);host.append(preview.canvas);preview.draw(0);
+
  }
 }
