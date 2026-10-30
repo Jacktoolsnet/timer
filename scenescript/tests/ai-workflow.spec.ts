@@ -518,3 +518,26 @@ test('2D setting AI creates a free city, cancellation keeps old resources and in
  await page.locator('#ai-workflow-close').click();await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();await page.locator('#storyboard-close').click();
  const saved=await exportProject(page);expect(saved.storyboard!.settings[0].model2d).toBeUndefined();expect(saved.stages2d).toEqual(p.stages2d);
 });
+
+test('script requests distinguish built-in actions from custom clips and accept redundant walk labels',async({page})=>{
+ const {lightCollector2D}=await import('../src/lib/stage2d'),p=fixture(),resources=lightCollector2D();p.objects2d=resources.objects2d;p.stages2d=resources.stages2d;p.scenes[0].stage2d=resources.shot;p.scenes[0].duration=16;p.scenes[0].elements=[];await setup(page,p);let calls=0;
+ await page.route('https://api.openai.com/v1/responses',async route=>{
+  if(route.request().method()==='OPTIONS'){await route.fulfill({headers:cors});return;}calls++;
+  const body=route.request().postDataJSON(),input=JSON.parse(body.input[0].content[0].text);expect(input.animationResources2d.objects2d.collector.kind).toBe('robot');expect(input.animationResources2d.objects2d.collector.clips).toEqual([]);expect(input.animationResources2d.objects2d.collector.actions).toContain('walk');expect(body.instructions).toContain('NOT {type:"play",clip:"walk"}');
+  input.project.scenes[0].stage2d.actors[0].actions[0].clip='walk';await route.fulfill({headers:cors,json:response(JSON.stringify(input.project))});
+ });
+ await page.locator('#open-ai-workflow').click();await page.locator('#ai-workflow-action').selectOption('script');await generate(page);await expect(page.locator('#ai-workflow-apply')).toBeEnabled();await page.locator('#ai-workflow-apply').click();const saved=await exportProject(page);expect(saved.scenes[0].stage2d!.actors[0].actions[0].clip).toBe('');expect(calls).toBe(1);
+});
+
+test('failed script JSON is visible, downloadable and locally repairable without another API call',async({page})=>{
+ const {lightCollector2D}=await import('../src/lib/stage2d'),p=fixture(),resources=lightCollector2D();p.objects2d=resources.objects2d;p.stages2d=resources.stages2d;p.scenes[0].stage2d=resources.shot;p.scenes[0].duration=16;p.scenes[0].elements=[];await setup(page,p);let calls=0,original='';
+ await page.route('https://api.openai.com/v1/responses',async route=>{
+  if(route.request().method()==='OPTIONS'){await route.fulfill({headers:cors});return;}calls++;
+  const raw=JSON.parse(route.request().postDataJSON().input[0].content[0].text).project;raw.title='Recovered script';raw.scenes[0].stage2d.actors[0].actions[0].clip='invented-walk';original=JSON.stringify(raw);await route.fulfill({headers:cors,json:response(original)});
+ });
+ await page.locator('#open-ai-workflow').click();await page.locator('#ai-workflow-action').selectOption('script');await generate(page);await expect(page.locator('#ai-workflow-error')).toHaveValue(/missing animation clip "invented-walk".*collector/);const json=page.locator('#ai-workflow-script-response-json');await expect(json).toBeVisible();await expect(json).toHaveValue(original);await expect(page.locator('#project-title')).toHaveValue(p.title);
+ const download=page.waitForEvent('download');await page.locator('#ai-workflow-script-response-download').click();const file=await download;expect(file.suggestedFilename()).toBe('scenescript-response.json');expect(await readFile((await file.path())!,'utf8')).toBe(original);
+ await page.locator('#ai-workflow-script-response-validate').click();await expect(page.locator('#ai-workflow-error')).toHaveValue(/invented-walk/);expect(calls).toBe(1);
+ const fixed=JSON.parse(original);fixed.scenes[0].stage2d.actors[0].actions[0].clip='walk';await json.fill(JSON.stringify(fixed));await page.locator('#ai-workflow-script-response-validate').click();await expect(page.locator('#ai-workflow-apply')).toBeEnabled();await expect(page.locator('#ai-workflow-error-box')).not.toBeVisible();await expect(page.locator('#project-title')).toHaveValue(p.title);expect(calls).toBe(1);
+ await page.locator('#ai-workflow-apply').click();const saved=await exportProject(page);expect(saved.title).toBe('Recovered script');expect(saved.scenes[0].stage2d!.actors[0].actions[0].clip).toBe('');await page.locator('#open-ai-workflow').click();await expect(page.locator('#ai-workflow-script-response')).toBeHidden();expect(calls).toBe(1);
+});
