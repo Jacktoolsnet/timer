@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Der kleine Lichtsammler · SceneScript Motion Study</title><link rel="stylesheet" href="demo.css"></head>
+<body><main>
+<header><a class="brand" href="/">SCENE<span>SCRIPT</span><b> / MOTION LAB</b></a><span class="badge">PIXIJS · 2D STUDIE 01</span></header>
+<section class="intro"><div><p class="eyebrow">EINE KLEINE GESCHICHTE IN BEWEGUNG</p><h1>Der kleine Lichtsammler<span>.</span></h1></div><p class="lede">Eine Figur. Ein Funke. Ein neuer Blick auf die Welt.<br>Prototyp für die gestalterischen Möglichkeiten von SceneScript.</p></section>
+<section class="player" aria-label="Animationsdemo">
+<div id="stage" role="img" aria-label="Ein korallfarbener Roboter entdeckt ein schwebendes Licht, winkt, springt danach und verwandelt seine Umgebung in einen leuchtenden Nachtgarten."><div id="loading" role="status">Der Lichtsammler macht sich bereit …</div><span class="stage-label">01 / THE LIGHT COLLECTOR</span><span class="stage-note">Vollständig aus animierten Vektorformen</span></div>
+<div class="transport"><button id="play" aria-label="Animation pausieren">Pause</button><button id="restart" aria-label="Von vorne abspielen">↺</button><output id="clock" for="scrub">00.0 / 16.0 s</output><input id="scrub" type="range" min="0" max="16" value="0" step="0.01" aria-label="Zeitpunkt der Animation"><label class="speed">Tempo <select id="speed" aria-label="Abspielgeschwindigkeit"><option value="0.5">0,5×</option><option value="1" selected>1×</option><option value="1.5">1,5×</option></select></label><label class="loop"><input id="loop" type="checkbox" checked> Loop</label><button id="still">PNG</button></div>
+</section>
+<nav class="chapters" aria-label="Animationsabschnitte"><button data-time="0.8"><span>01 · 0–4 S</span><strong>Ankommen</strong><small>Gangzyklus & Parallaxe</small></button><button data-time="4.6"><span>02 · 4–7 S</span><strong>Entdecken</strong><small>Blick & Gelenkgestik</small></button><button data-time="8.1"><span>03 · 7–11 S</span><strong>Den Funken fangen</strong><small>Antizipation & Squash / Stretch</small></button><button data-time="12.8"><span>04 · 11–16 S</span><strong>Die Welt verändert sich</strong><small>Irisblende & Lichtpartikel</small></button></nav>
+<footer><p><span class="dot"></span><span id="beat" role="status">Ankommen</span></p><p>Experiment · noch nicht mit dem SceneScript-Editor verbunden · ohne Ton</p></footer>
+<p class="hint">Die Zeitleiste lässt sich frei vor- und zurückziehen. Alle Bewegungen werden aus dem gewählten Zeitpunkt berechnet, nicht aus vorherigen Frames.</p>
+</main><script type="module" src="demo.mjs"></script></body></html>

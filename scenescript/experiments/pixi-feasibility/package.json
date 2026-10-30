@@ -1,0 +1,15 @@
+{
+  "name": "scenescript-pixi-feasibility",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node check.mjs",
+    "demo": "node serve.mjs",
+    "test:demo": "node demo-check.mjs"
+  },
+  "dependencies": {
+    "pixi.js": "8.22.0",
+    "three": "0.186.1",
+    "playwright": "1.63.0"
+  }
+}
