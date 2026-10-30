@@ -11,7 +11,7 @@ export function createStage2DScene(resources:Resources2D,shot:Stage2D){
  const texts:Text[]=[];const collect=(node:Container)=>{if(node instanceof Text)texts.push(node);for(const child of node.children)collect(child);};collect(root);
  const handAt=(id:string,time:number)=>{const actor=actors.find(a=>a.instance.id===id)!;actor.view.draw(actorFrame2D(actor.instance,time),time);return base.world.toLocal(actor.view.hand!.toGlobal({x:0,y:29}));};
  return {root,setResolution(resolution:number){for(const text of texts)text.resolution=Math.max(1,resolution);},draw(time:number){
-  base.draw(time,cameraFrame2D(shot.camera,time));incoming?.draw(time,{x:0,y:0,zoom:1});
+  base.draw(time,cameraFrame2D(shot.camera,time),shot.stageClip||'idle');incoming?.draw(time,{x:0,y:0,zoom:1});
   for(const actor of actors)actor.view.draw(actorFrame2D(actor.instance,time),time);
   for(const actor of actors){const links=actor.instance.actions.filter(a=>a.type==='attach'&&time>=a.at).sort((a,b)=>a.at-b.at);if(!links.length){actor.view.burst({x:0,y:0},-1);continue;}
    const frame=actorFrame2D(actor.instance,time);let x=frame.x,y=frame.y;

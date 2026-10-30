@@ -475,3 +475,46 @@ test('natural material workflow recommends high effort, offers local fabric and 
  await page.locator('#open-storyboard').click();await page.locator('[data-board-tab=characters]').click();await page.locator('[data-board-fabric=customer]').click();await expect(page.locator('[data-board-fabric=customer]')).toBeDisabled();expect(calls).toBe(0);
  await page.locator('[data-board-model=customer]').click();await expect(page.locator('#ai-workflow-reasoning')).toHaveValue('high');await generate(page);await expect(page.locator('[data-model-texture-usage]')).toContainText('1 / 1');await expect(page.locator('#ai-workflow-model-preview canvas')).toHaveAttribute('data-stage3d-time','0');await page.locator('#ai-workflow-apply').click();await expect(page.locator('[data-board-texture-usage=customer]')).toContainText('1 / 1');await expect(page.locator('[data-board-texture-missing]')).toHaveCount(0);await page.locator('#storyboard-close').click();const saved=await exportProject(page);expect(Object.keys(saved.storyboard!.images).some(id=>id.startsWith('material-fabric-'))).toBe(true);expect(calls).toBe(1);
 });
+
+test('targeted 2D AI builds a freely jointed bird, rehearses clips and only saves after confirmation',async({page})=>{
+ const {lightCollectorProject}=await import('../src/lib/light-collector-example'),{birdModel2D}=await import('../src/lib/free2d-example');
+ const p=lightCollectorProject();await setup(page,p,'de');let calls=0;
+ await page.route('https://api.openai.com/v1/responses',async route=>{
+  if(route.request().method()==='OPTIONS'){await route.fulfill({headers:cors});return;}
+  calls++;const body=route.request().postDataJSON(),input=JSON.parse(body.input[0].content[0].text);
+  expect(body.instructions).toContain('2D vector resource');expect(body.instructions).toContain('parent IDs and pivots');
+  expect(input.target.id).toBe('collector');expect(input.target.description).toContain('Roboter');expect(input.request).toBe('Ein blauer Vogel statt eines Roboters');
+  expect(input).not.toHaveProperty('scenes');expect(route.request().postData()).not.toContain(password);
+  await route.fulfill({headers:cors,json:response(JSON.stringify({reply:'Ein gegliederter Vogel mit Flügelschlag.',model:birdModel2D()}))});
+ });
+ await page.locator('#open-storyboard').click();await page.locator('[data-board-tab=characters]').click();await page.locator('[data-board-model2d=collector]').click();
+ await expect(page.locator('#ai-workflow-action')).toHaveValue('model');await expect(page.locator('#ai-workflow-start')).toBeDisabled();expect(calls).toBe(0);
+ await page.locator('#ai-workflow-prompt').fill('Ein blauer Vogel statt eines Roboters');await generate(page);
+ const preview=page.locator('#ai-workflow-model-preview'),canvas=preview.locator('canvas');
+ await expect(canvas).toHaveAttribute('data-stage2d-time','0');await expect(page.locator('#ai-workflow-apply')).toBeEnabled();
+ await preview.locator('select').selectOption('fly');await preview.getByRole('slider',{name:'Animationszeit',exact:true}).fill('0.5');await expect(canvas).toHaveAttribute('data-stage2d-time','0.5');
+ await preview.getByRole('button',{name:'Abspielen / pausieren',exact:true}).click();await expect(preview.getByRole('button',{name:'Abspielen / pausieren',exact:true})).toHaveAttribute('aria-pressed','true');
+ await preview.getByRole('button',{name:'Abspielen / pausieren',exact:true}).click();expect(calls).toBe(1);
+ await page.locator('#ai-workflow-apply').click();await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();
+ await expect(page.locator('.board-resource2d-canvas canvas')).toHaveAttribute('data-stage2d-time','0');
+ await page.locator('#storyboard-close').click();const saved=await exportProject(page);
+ expect(saved.storyboard!.characters[0].model2d!.parts.find(p=>p.id==='wing')!.shape).toBe('path');expect(saved.storyboard!.characters[0].model2dChat![0].reply).toContain('Vogel');
+ expect(saved.storyboard!.characters[0].status).toBe('draft');expect(saved.scenes).toEqual(p.scenes);expect(saved.objects2d).toEqual(p.objects2d);
+});
+
+test('2D setting AI creates a free city, cancellation keeps old resources and invalid replies can be fixed locally',async({page})=>{
+ const {lightCollectorProject}=await import('../src/lib/light-collector-example'),{birdModel2D,cityModel2D}=await import('../src/lib/free2d-example');
+ const p=lightCollectorProject();await setup(page,p);let calls=0;
+ await page.route('https://api.openai.com/v1/responses',async route=>{
+  if(route.request().method()==='OPTIONS'){await route.fulfill({headers:cors});return;}
+  calls++;expect(JSON.parse(route.request().postDataJSON().input[0].content[0].text).target.kind).toBe('settings');
+  await route.fulfill({headers:cors,json:response(JSON.stringify({model:birdModel2D()}))});
+ });
+ await page.locator('#open-storyboard').click();await page.locator('[data-board-tab=settings]').click();await page.locator('[data-board-model2d=forest]').click();await generate(page);
+ await expect(page.locator('#ai-workflow-error')).toHaveValue(/960/);await page.locator('#ai-workflow-close').click();await expect(page.locator('#ai-workflow-model-recovery')).toBeVisible();
+ await expect(page.locator('#ai-workflow-model-repair-sizes')).not.toBeVisible();
+ await page.locator('#ai-workflow-model-recovery-json').fill(JSON.stringify({model:cityModel2D()}));
+ await page.locator('#ai-workflow-model-validate-local').click();await expect(page.locator('#ai-workflow-model-preview canvas')).toHaveAttribute('data-stage2d-actors','0');expect(calls).toBe(1);
+ await page.locator('#ai-workflow-close').click();await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();await page.locator('#storyboard-close').click();
+ const saved=await exportProject(page);expect(saved.storyboard!.settings[0].model2d).toBeUndefined();expect(saved.stages2d).toEqual(p.stages2d);
+});

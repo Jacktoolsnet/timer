@@ -1,3 +1,4 @@
+import {createModel2DView} from './model2d-view';
 import {Container,Graphics,Text,FillGradient,type ColorSource} from 'pixi.js';
 import type {Object2D,Stage2DResource,Actor2D} from '../lib/stage2d';
 import type {actorFrame2D} from '../lib/motion2d';
@@ -18,6 +19,10 @@ root.position.set(x,y);root.scale.set(size);parent.addChild(root);const stem=new
 export {label};
 export function createBackdrop2D(resource:Stage2DResource){
 const root=new Container();
+if(resource.preset==='custom'&&resource.model){
+ const view=createModel2DView(resource.model,resource.groundColor,resource.skyColor),world=new Container();root.addChild(view.root);view.root.addChildAt(world,1);
+ return {root,world,draw(t:number,camera:{x:number;y:number;zoom:number},clip='idle'){view.draw(t,[{clip:'idle',time:t},...(clip&&clip!=='idle'?[{clip,time:t}]:[])],camera);world.scale.set(camera.zoom);world.position.set(camera.x-(camera.zoom-1)*480,camera.y-(camera.zoom-1)*270);}};
+}
 if(resource.preset==='night-garden'){
 const night=root;const world=new Container();rect(night,0,0,W,H,resource.skyColor);ellipse(night,750,115,47,47,0xf5e9b4);ellipse(night,765,100,43,43,resource.skyColor);
 for(let i=0;i<45;i++)ellipse(night,rand(i+400)*W,40+rand(i+500)*310,i%5===0?2:1,i%5===0?2:1,0xb8d4cb).alpha=.3+rand(i+600)*.6;
@@ -43,7 +48,11 @@ return {root,world,draw(t:number,camera:{x:number;y:number;zoom:number}){const z
 export function createObjectView2D(resource:Object2D,instance:Actor2D){
 const host=new Container(),node=new Container();host.addChild(node);const color=instance.color??resource.color;
 let hand:Container|undefined;let animate:(frame:ReturnType<typeof actorFrame2D>,t:number)=>void=()=>{};
-if(resource.kind==='robot'){
+if(resource.kind==='custom'&&resource.model){
+ const view=createModel2DView(resource.model,color,resource.accentColor);node.addChild(view.root);
+ const anchor=view.nodes.get('hand');if(anchor){hand=new Container();hand.y=-29;anchor.addChild(hand);}
+ animate=(_,t)=>{const actions=instance.actions.filter(a=>t>=a.at&&t<=a.at+a.duration&&Object.hasOwn(resource.model!.animations,a.clip||a.type)).sort((a,b)=>a.at-b.at);view.draw(t,[{clip:'idle',time:t},...actions.map(a=>({clip:a.clip||a.type,time:t-a.at}))]);};
+}else if(resource.kind==='robot'){
 const light=shade(color,.32),dark=shade(color,-.14),handColor=shade(color,.45);
 const shadow=ellipse(node,0,0,40,8,0x10382f);shadow.alpha=.35;
 // A small articulated puppet. Each limb is a transform hierarchy, not a single image.

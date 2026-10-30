@@ -1,3 +1,4 @@
+import {model2DGuide} from './storyboard-model2d.ts';
 import {aiModel3DExample} from './model3d-example.ts';
 import {aiAction3DExample} from './stage3d-example.ts';
 import {formats,newElement} from './model.ts';
@@ -27,22 +28,31 @@ export const aiGuide = `# SceneScript 1.0 — complete authoring specification
 
 ## 1. Start here
 
-2D resources: Project.stages2d maps IDs to {name,preset:"forest"|"night-garden",
-skyColor,groundColor}; Project.objects2d maps IDs to {name,kind:"robot"|"spark"|"shape",
-color,accentColor,shape:"rectangle"|"ellipse"|"star"}. Resources contain no timing.
+2D resources: Project.stages2d maps IDs to {name,preset:"forest"|"night-garden"|"custom",
+skyColor,groundColor}; Project.objects2d maps IDs to {name,kind:"robot"|"spark"|"shape"|"custom",
+color,accentColor,shape:"rectangle"|"ellipse"|"star"}. Custom resources require model (native vector parts and reusable animation clips).
 Scene.stage2d references stage and actors. Each actor has a unique scene-local id,
 object resource ID, name, x/y in 960x540 design pixels, scale, rotation, opacity,
 optional color override (null inherits) and actions. Reuse an object resource for
-independent instances. Actions: move/walk/wave/jump/float/attach/fade with at/duration
+independent instances. Actions: move/walk/wave/jump/float/attach/fade/play with at/duration
 in scene seconds, toX/toY, height (0..110) and target (instance ID for attach).
-Walk/wave/jump require robot resources; attach links a non-robot to another robot's
-right hand. No self/invalid targets, overlapping same-type or position actions.
+Walk/wave/jump support robots and custom articulated objects. Custom clips use
+actions:{type:"play",clip:"name",at,duration}; walk/wave/jump may specify clip too.
+Idle plays automatically. Scene.stage2d.stageClip optionally chooses a set clip.
+Attach links a non-robot to another robot or custom target with a "hand" anchor. No self/invalid targets, overlapping same-type or position actions.
 Scene camera is a strictly time-ordered list of {at,x,y,zoom}. Optional transition
 {stage,at,duration,x,y} reveals another stage through an iris. Optional ending
 {title,subtitle,at,duration} contains scene-local closing text, never resource data.
 All intervals must fit scene.duration. Resources max 50 each; actors max 30/scene;
 actions max 50/actor. No executable code/URLs. Old bundled presets upgrade on import.
-See /examples/light-collector.scenescript.json. Normal elements render above 2D.
+Reviewed storyboard subject.model2d is binding geometry: restore under resource2d
+(or subject ID), in objects2d for characters/objects, stages2d for settings.
+Use these exact IDs in actors/stage references, never redesign approved geometry.
+
+### Free 2D resource geometry and clips
+${model2DGuide}
+
+Examples: /examples/light-collector.scenescript.json (legacy puppet) and /examples/free-vector-2d.scenescript.json (free vector bird/city). Normal elements render above 2D.
 SceneScript renders JSON videos with 2D/3D layers. Read §§1–4; §11 lists fields, §12 examples.
 
 Optional storyboard is a non-rendered plan. Preserve data/IDs/revision/comments; users

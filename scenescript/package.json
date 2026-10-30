@@ -17,6 +17,7 @@
     "example:space": "node --experimental-strip-types scripts/generate-space-adventure.mjs",
     "example:race": "node --experimental-strip-types scripts/generate-race-example.mjs",
     "test:e2e": "playwright test",
+    "example:free2d": "node --experimental-strip-types scripts/generate-free2d-example.mjs",
     "example:light-collector": "node --experimental-strip-types scripts/generate-light-collector.mjs"
   },
   "dependencies": {

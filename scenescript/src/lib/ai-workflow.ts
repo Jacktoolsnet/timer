@@ -1,3 +1,4 @@
+import {restoreBoardModels2D} from './storyboard-model2d.ts';
 import {defaultBoardDesign,modelStyleBriefs} from './storyboard-design.ts';
 import {restoreBoardResources} from './storyboard-resources.ts';
 import {videoLanguageForLocale} from './video-languages.ts';
@@ -29,7 +30,7 @@ export function acceptScript(text:string,source:Project){
   }
  }
  if(!raw.thumbnail&&source.thumbnail)raw.thumbnail=source.thumbnail;
- restoreBoardResources(raw,source);raw.storyboard=source.storyboard;return validateProject(raw);
+ restoreBoardResources(raw,source);restoreBoardModels2D(raw,source);raw.storyboard=source.storyboard;return validateProject(raw);
 }
 export function imagePrompt(p:Project,target:BoardReviewTarget|null,request:string){
  const b=p.storyboard;

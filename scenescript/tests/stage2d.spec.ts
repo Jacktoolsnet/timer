@@ -153,3 +153,20 @@ test('storyboard 2D resource assignment persists, can be cleared, and follows re
  expect(saved.storyboard.characters[0].resource2d).toBe('spark');expect(saved.scenes[0].stage2d.actors[0].object).toBe('collector');expect(saved.objects2d.collector.color).toBe('#f28b70');
  await page.locator('#open-storyboard').click();await page.locator('[data-board-tab=characters]').click();await expect(canvas).toHaveAttribute('aria-label','2D-Ressource · Lichtfunke');
 });
+
+test('free vector bird and city animate deterministically in scene preview and export',async({page})=>{
+ const {free2DProject}=await import('../src/lib/free2d-example'),p=free2DProject();
+ await page.route('**'+url,r=>r.fulfill({contentType:'application/json',body:JSON.stringify(p)}));
+ await page.goto('/de/');await expect(page.locator('#editor')).toHaveAttribute('data-ready','true');
+ const canvas=page.locator('#stage .stage2d-canvas');await expect(canvas).toHaveAttribute('data-stage2d-stage','city');
+ await page.locator('#timeline').fill('0.5');await expect(canvas).toHaveAttribute('data-stage2d-time','0.5');
+ const first=await canvas.evaluate(c=>(c as HTMLCanvasElement).toDataURL());
+ await page.locator('#timeline').fill('0.1');await expect(canvas).toHaveAttribute('data-stage2d-time','0.1');expect(await canvas.evaluate(c=>(c as HTMLCanvasElement).toDataURL())).not.toBe(first);
+ await page.locator('#timeline').fill('0.5');await expect(canvas).toHaveAttribute('data-stage2d-time','0.5');expect(await canvas.evaluate(c=>(c as HTMLCanvasElement).toDataURL())).toBe(first);
+ const exported=await page.evaluate(async()=>{
+  const {parseProject}=await import(/* @vite-ignore */ '/src/lib/model.ts' as string),{ExportMedia}=await import(/* @vite-ignore */ '/src/scripts/export-media.ts' as string),{ExportRenderer}=await import(/* @vite-ignore */ '/src/scripts/export-renderer.ts' as string);
+  const p=parseProject(await(await fetch('/examples/light-collector.scenescript.json')).text()),m=new ExportMedia(p,new AbortController().signal),r=new ExportRenderer(p,m);
+  try{const canvas=await r.frame(.5,1920,1080);return canvas.toDataURL();}finally{r.dispose();m.dispose();}
+ });expect(exported).toBe(first);
+ await page.locator('#open-stage2d').click();await expect(page.locator('[data-stage2d-field=resource-type]')).toHaveValue('custom');await expect(page.locator('#stage2d-fields textarea')).toHaveValue(/"wing"/);
+});

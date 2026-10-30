@@ -1,0 +1,776 @@
+{
+  "objects2d": {
+    "bird": {
+      "model": {
+        "width": 240,
+        "height": 240,
+        "originX": 120,
+        "originY": 200,
+        "parts": [
+          {
+            "id": "body",
+            "parent": null,
+            "shape": "ellipse",
+            "x": 38,
+            "y": 55,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 155,
+            "height": 115,
+            "radius": 0,
+            "fill": "#5f9dc5",
+            "stroke": "#204761",
+            "strokeWidth": 3,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "tail",
+            "parent": null,
+            "shape": "polygon",
+            "x": 36,
+            "y": 118,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 100,
+            "height": 100,
+            "radius": 0,
+            "fill": "#36779e",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 1,
+            "points": [
+              0,
+              0,
+              -35,
+              -20,
+              -25,
+              23,
+              20,
+              0
+            ],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "wing",
+            "parent": null,
+            "shape": "path",
+            "x": 65,
+            "y": 110,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 100,
+            "height": 100,
+            "radius": 0,
+            "fill": "#badde4",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 1,
+            "points": [],
+            "path": [
+              {
+                "op": "M",
+                "values": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "op": "C",
+                "values": [
+                  30,
+                  -65,
+                  100,
+                  -90,
+                  120,
+                  -65
+                ]
+              },
+              {
+                "op": "Q",
+                "values": [
+                  115,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "op": "Z",
+                "values": []
+              }
+            ],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -70,
+            "rotationMax": 40,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "head",
+            "parent": null,
+            "shape": "group",
+            "x": 154,
+            "y": 70,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 100,
+            "height": 100,
+            "radius": 0,
+            "fill": "#79a8cb",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "face",
+            "parent": "head",
+            "shape": "ellipse",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 62,
+            "height": 62,
+            "radius": 0,
+            "fill": "#5f9dc5",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "eye",
+            "parent": "head",
+            "shape": "ellipse",
+            "x": 38,
+            "y": 15,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 9,
+            "height": 12,
+            "radius": 0,
+            "fill": "#102a43",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "beak",
+            "parent": "head",
+            "shape": "polygon",
+            "x": 58,
+            "y": 28,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 100,
+            "height": 100,
+            "radius": 0,
+            "fill": "#f2be66",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 1,
+            "points": [
+              0,
+              0,
+              25,
+              10,
+              0,
+              15
+            ],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "hand",
+            "parent": null,
+            "shape": "group",
+            "x": 120,
+            "y": 170,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 100,
+            "height": 100,
+            "radius": 0,
+            "fill": "#79a8cb",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          }
+        ],
+        "animations": {
+          "idle": {
+            "duration": 2,
+            "loop": true,
+            "tracks": [
+              {
+                "part": "head",
+                "property": "rotation",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": -4,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 1,
+                    "value": 4,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 2,
+                    "value": -4,
+                    "easing": "smooth"
+                  }
+                ]
+              }
+            ]
+          },
+          "fly": {
+            "duration": 1,
+            "loop": true,
+            "tracks": [
+              {
+                "part": "wing",
+                "property": "rotation",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": -55,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 0.5,
+                    "value": 25,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 1,
+                    "value": -55,
+                    "easing": "smooth"
+                  }
+                ]
+              }
+            ]
+          },
+          "blink": {
+            "duration": 0.4,
+            "loop": false,
+            "tracks": [
+              {
+                "part": "eye",
+                "property": "scaleY",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": 1,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 0.2,
+                    "value": 0.1,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 0.4,
+                    "value": 1,
+                    "easing": "smooth"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "name": "Blauer Vogel",
+      "kind": "custom",
+      "color": "#f28b70",
+      "accentColor": "#fff5c0",
+      "shape": "star"
+    }
+  },
+  "stages2d": {
+    "city": {
+      "model": {
+        "width": 960,
+        "height": 540,
+        "originX": 0,
+        "originY": 0,
+        "parts": [
+          {
+            "id": "sky",
+            "parent": null,
+            "shape": "rectangle",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 960,
+            "height": 540,
+            "radius": 0,
+            "fill": "#f3dfc6",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 0,
+            "layer": "background"
+          },
+          {
+            "id": "sun",
+            "parent": null,
+            "shape": "ellipse",
+            "x": 720,
+            "y": 45,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 110,
+            "height": 110,
+            "radius": 0,
+            "fill": "#fff6ce",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 0.1,
+            "layer": "background"
+          },
+          {
+            "id": "houses",
+            "parent": null,
+            "shape": "group",
+            "x": 60,
+            "y": 160,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 100,
+            "height": 100,
+            "radius": 0,
+            "fill": "#79a8cb",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 0.35,
+            "layer": "background"
+          },
+          {
+            "id": "left",
+            "parent": "houses",
+            "shape": "rectangle",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 180,
+            "height": 280,
+            "radius": 12,
+            "fill": "#c48282",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "roof",
+            "parent": "houses",
+            "shape": "polygon",
+            "x": -15,
+            "y": 0,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 100,
+            "height": 100,
+            "radius": 0,
+            "fill": "#6d5d7d",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 1,
+            "points": [
+              0,
+              0,
+              105,
+              -85,
+              210,
+              0
+            ],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "window",
+            "parent": "houses",
+            "shape": "rectangle",
+            "x": 60,
+            "y": 80,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 55,
+            "height": 90,
+            "radius": 25,
+            "fill": "#ffedaf",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "shop",
+            "parent": null,
+            "shape": "rectangle",
+            "x": 520,
+            "y": 235,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 340,
+            "height": 200,
+            "radius": 0,
+            "fill": "#92b8ae",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 0.6,
+            "layer": "background"
+          },
+          {
+            "id": "sign",
+            "parent": null,
+            "shape": "text",
+            "x": 570,
+            "y": 265,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 220,
+            "height": 60,
+            "radius": 0,
+            "fill": "#294e50",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "Bäckerei",
+            "fontSize": 32,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 0.6,
+            "layer": "background"
+          },
+          {
+            "id": "road",
+            "parent": null,
+            "shape": "rectangle",
+            "x": 0,
+            "y": 435,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 960,
+            "height": 105,
+            "radius": 0,
+            "fill": "#797d8c",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "foreground",
+            "parent": null,
+            "shape": "path",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 100,
+            "height": 100,
+            "radius": 0,
+            "fill": null,
+            "stroke": "#4b5c61",
+            "strokeWidth": 10,
+            "opacity": 1,
+            "points": [],
+            "path": [
+              {
+                "op": "M",
+                "values": [
+                  30,
+                  540
+                ]
+              },
+              {
+                "op": "Q",
+                "values": [
+                  45,
+                  390,
+                  80,
+                  365
+                ]
+              }
+            ],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1.3,
+            "layer": "foreground"
+          }
+        ],
+        "animations": {
+          "idle": {
+            "duration": 4,
+            "loop": true,
+            "tracks": [
+              {
+                "part": "window",
+                "property": "opacity",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": 0.6,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 2,
+                    "value": 1,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 4,
+                    "value": 0.6,
+                    "easing": "smooth"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "name": "Stadt mit Bäckerei",
+      "preset": "custom",
+      "skyColor": "#205a50",
+      "groundColor": "#244e43"
+    }
+  },
+  "storyboard": null,
+  "groups3d": {},
+  "characters": {},
+  "stages": {},
+  "audios": {},
+  "narration": null,
+  "audioDucking": false,
+  "thumbnail": null,
+  "videos": {},
+  "backgroundVideo": null,
+  "music": null,
+  "backgroundSimulation": null,
+  "version": "1.0",
+  "title": "Der Vogel über der Stadt",
+  "description": "",
+  "firstComment": "",
+  "hashtags": "",
+  "format": "landscape",
+  "assets": {},
+  "scenes": [
+    {
+      "stage2d": {
+        "stage": "city",
+        "stageClip": "",
+        "actors": [
+          {
+            "id": "bird",
+            "name": "Instanz",
+            "object": "bird",
+            "x": 350,
+            "y": 320,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "color": null,
+            "actions": [
+              {
+                "type": "play",
+                "clip": "fly",
+                "at": 0,
+                "duration": 6,
+                "toX": 470,
+                "toY": 425,
+                "height": 100,
+                "target": ""
+              }
+            ]
+          }
+        ],
+        "camera": [],
+        "transition": null,
+        "ending": null
+      },
+      "morph": null,
+      "stage3d": null,
+      "camera": null,
+      "groups": [],
+      "narration": null,
+      "id": "intro",
+      "name": "A new idea",
+      "duration": 6,
+      "backgroundEnabled": true,
+      "backgroundOpacity": 1,
+      "backgroundGradient": null,
+      "background": "#263b42",
+      "backgroundAsset": "",
+      "transition": "fade",
+      "transitionDuration": 0.5,
+      "elements": []
+    }
+  ]
+}

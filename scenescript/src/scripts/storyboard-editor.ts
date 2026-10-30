@@ -1,3 +1,5 @@
+import {model2DNeedsRestyle} from '../lib/storyboard-model2d';
+import {storyboardModel2DView} from './storyboard-model2d-view';
 import {boardResource2D,boardResourceModes} from '../lib/storyboard-resource-preview';
 import {resourcePreview2D} from '../lib/stage2d-resource-preview';
 import {createStage2DView} from './stage2d-preview';
@@ -205,17 +207,19 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
     if(modes.includes('2d')){
      const rw=storyboardResourceWords(document.documentElement.lang),tile=node('section'),row=node('div');
      tile.className='board-field board-resource2d-tile';tile.dataset.boardResource2d=subject.id;
-     row.className='board-field-heading';row.append(node('h4',rw.resource));tile.append(row);visuals.append(tile);
+     row.className='board-field-heading';row.append(node('h4',rw.resource));
+     const generate=commentButton(rw.create,'m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5Z');generate.dataset.boardModel2d=subject.id;generate.addEventListener('click',()=>runWorkflow('model',{resourceTarget:target,resourceDimension:'2d'}));row.append(generate);tile.append(row);visuals.append(tile);
      const association=boardResource2D(origin.project,subject,kind==='settings'),library=origin.project[association.kind];
      const options:[string,string][]=[['',t.none],...Object.entries(library).map(([id,r]):[string,string]=>[id,r.name])];
      if(subject.resource2d&&!association.resource)options.push([subject.resource2d,subject.resource2d+' — '+rw.missing]);
-     row.append(pencil({label:rw.assign,value:association.resource?association.id!:subject.resource2d??'',kind:'select',options,target,apply:(b,v)=>{get(b).resource2d=String(v)||null;}},kind+'-'+subject.id+'-resource2d'));
-     const sample=association.resource&&association.id?resourcePreview2D(origin.project,association.kind,association.id):null;
+     row.append(pencil({label:rw.assign,value:association.resource?association.id!:subject.resource2d??'',kind:'select',options,target,apply:(b,v)=>{get(b).resource2d=String(v)||null;delete get(b).model2d;delete get(b).model2dDesign;delete get(b).model2dChat;}},kind+'-'+subject.id+'-resource2d'));
+     const sample=association.resource&&association.id?resourcePreview2D({...origin.project,[association.kind]:{...origin.project[association.kind],[association.id]:association.resource}},association.kind,association.id):null;
      if(sample){
-      tile.append(node('p',association.resource!.name));
-      const figure=node('div'),message=node('p');figure.className='board-model-canvas board-resource2d-canvas';message.setAttribute('role','status');tile.append(figure,message);
+      tile.append(node('p',association.resource!.name));if(model2DNeedsRestyle(subject)){const notice=node('p',dw.stylePending);notice.className='small-hint';tile.append(notice);}
+      if(association.resource!.model){resourceViewDisposers.push(storyboardModel2DView(tile,origin.project,subject,kind==='settings'));}
+      else{const figure=node('div'),message=node('p');figure.className='board-model-canvas board-resource2d-canvas';message.setAttribute('role','status');tile.append(figure,message);
       const view=createStage2DView(sample.resources,sample.shot,sample.duration,640,480,e=>{message.textContent=e.message;});
-      view.canvas.setAttribute('aria-label',rw.resource+' · '+association.resource!.name);figure.append(view.canvas);view.draw(0);resourceViewDisposers.push(()=>view.dispose());
+      view.canvas.setAttribute('aria-label',rw.resource+' · '+association.resource!.name);figure.append(view.canvas);view.draw(0);resourceViewDisposers.push(()=>view.dispose());}
       const hint=node('p',rw.hint);hint.className='small-hint';tile.append(hint);
      }else tile.append(node('p',subject.resource2d?rw.missing:rw.none));
     }
