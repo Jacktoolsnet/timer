@@ -229,7 +229,7 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
      const rw=storyboardResourceWords(document.documentElement.lang),tile=node('section'),row=node('div');
      tile.className='board-field board-resource2d-tile';tile.dataset.boardResource2d=subject.id;
      row.className='board-field-heading';row.append(node('h4',rw.resource));
-     const generate=commentButton(rw.create,'m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5Z');generate.dataset.boardModel2d=subject.id;generate.addEventListener('click',()=>runWorkflow('model',{resourceTarget:target,resourceDimension:'2d'}));row.append(generate);resourceImportButton(row,target,'2d');tile.append(row);visuals.append(tile);
+     const generate=commentButton(rw.create,'m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5Z');generate.dataset.boardModel2d=subject.id;generate.addEventListener('click',()=>runWorkflow('model',{resourceTarget:target,resourceDimension:'2d',quickModel:true}));row.append(generate);resourceImportButton(row,target,'2d');tile.append(row);visuals.append(tile);
      const association=boardResource2D(origin.project,subject,kind==='settings'),library=origin.project[association.kind];
      const options:[string,string][]=[['',t.none],...Object.entries(library).map(([id,r]):[string,string]=>[id,r.name])];
      if(subject.resource2d&&!association.resource)options.push([subject.resource2d,subject.resource2d+' — '+rw.missing]);
@@ -258,7 +258,7 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
     if(modes.includes('3d')){
     const modelTile=node('section');modelTile.className='board-field board-model-tile';const row=node('div');row.className='board-field-heading';row.append(node('h4',dw.model));
     const modelButton=commentButton(dw.create,'m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5Z');modelButton.dataset.boardModel=subject.id;
-    const effectiveMode=design.mode==='inherit'?board.production?.renderMode:design.mode;modelButton.disabled=effectiveMode==='2d';modelButton.addEventListener('click',()=>runWorkflow('model',{resourceTarget:target}));row.append(modelButton);resourceImportButton(row,target,'3d');modelTile.append(row,node('p',subject.model3d?dw.hint:dw.none));
+    const effectiveMode=design.mode==='inherit'?board.production?.renderMode:design.mode;modelButton.disabled=effectiveMode==='2d';modelButton.addEventListener('click',()=>runWorkflow('model',{resourceTarget:target,quickModel:true}));row.append(modelButton);resourceImportButton(row,target,'3d');modelTile.append(row,node('p',subject.model3d?dw.hint:dw.none));
     if(modelNeedsRestyle(subject)){const notice=node('p',dw.stylePending);notice.className='small-hint';notice.dataset.boardStylePending=subject.id;modelTile.append(notice);}
     if(design.surface!=='colors'){
      modelTile.append(node('p',dw.textureHint));const available=Object.keys(board.images).some(id=>id.startsWith('material-fabric-'));

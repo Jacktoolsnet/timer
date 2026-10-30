@@ -31,7 +31,7 @@ import {ensureApiVaultUnlocked,requestApiKey} from './api-vault';
 import {VaultError} from '../lib/api-vault';
 import type {aiWorkflowWords} from '../lib/ai-workflow-i18n';
 export type AiWorkflowContext={project:Project;valid:()=>boolean;apply:(p:Project)=>void;preload?:(p:Project)=>Promise<void>;draft?:boolean;applyScript?:(p:Project)=>void};
-export type AiWorkflowOptions={publishingPlatform?:PublishingPlatform;resourceDimension?:'2d'|'3d';resourceTarget?:BoardReviewTarget;imageTarget?:BoardReviewTarget;quickImage?:boolean;quickScript?:boolean};
+export type AiWorkflowOptions={publishingPlatform?:PublishingPlatform;resourceDimension?:'2d'|'3d';resourceTarget?:BoardReviewTarget;imageTarget?:BoardReviewTarget;quickImage?:boolean;quickScript?:boolean;quickModel?:boolean};
 let openWorkflow:((context:AiWorkflowContext,action?:string,options?:AiWorkflowOptions)=>void)|undefined;
 export function openAiWorkflow(context:AiWorkflowContext,action='board',options:AiWorkflowOptions={}){openWorkflow?.(context,action,options);}
 export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,reviewStoryboard:(board:Storyboard,saved?:boolean)=>void){
@@ -45,6 +45,7 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,re
  const modelAction=action.querySelector<HTMLOptionElement>('option[value=model]')!,modelActionLabel=modelAction.textContent;
  const modelPicker=installAiModelPicker(action,model);
  const models:Record<string,string>={publishing:'gpt-5-mini',model:'gpt-6.1-sol',board:'gpt-5-mini',script:'gpt-5-mini',image:'gpt-image-2',speech:'eleven_multilingual_v2'};
+ let quickModel=false;
  let publishingPlatform:PublishingPlatform|undefined;
  let resourceDimension:'2d'|'3d'='3d';
  let resourceTarget:BoardReviewTarget|undefined,disposeModelPreview:(()=>void)|undefined;
@@ -134,11 +135,12 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,re
  function imageTarget():BoardReviewTarget|null{if(targets.value==='cover')return null;const [kind,id]=targets.value.split(':');if(!['characters','settings','shots'].includes(kind)||!id)throw new Error('Storyboard: select image target');return {kind:kind as BoardReviewTarget['kind'],id};}
  const quickDialog=$<HTMLDialogElement>('quick-confirm');
  let finishQuick:((accepted:boolean)=>void)|undefined;
- function confirmQuick(kind:'image'|'script'='image'){return new Promise<boolean>(resolve=>{
+ function confirmQuick(kind:'image'|'script'|'model'='image'){return new Promise<boolean>(resolve=>{
   finishQuick=accepted=>{finishQuick=undefined;quickDialog.close();resolve(accepted);};
-  $('quick-title').textContent=kind==='script'?t.quickScriptTitle:t.quickImageTitle;
-  $('quick-hint').textContent=kind==='script'?t.quickScriptHint:t.quickImageHint;
-  if(kind==='script')$('quick-summary').textContent=[ctx.project.storyboard?.title,$('model-advice').textContent,ctx.project.storyboard?.production?.renderMode?.toUpperCase()??productionWords(document.documentElement.lang).unspecified].join(' · ');
+  $('quick-title').textContent=kind==='model'?t.quickModelTitle:kind==='script'?t.quickScriptTitle:t.quickImageTitle;
+  $('quick-hint').textContent=kind==='model'?t.quickModelHint:kind==='script'?t.quickScriptHint:t.quickImageHint;
+  if(kind==='model'&&resourceTarget&&ctx.project.storyboard){const subject=resourceSubject(ctx.project.storyboard,resourceTarget),refs=imageGenerationReferences(ctx.project,resourceTarget);$('quick-summary').textContent=[subject.name,resourceDimension.toUpperCase(),$('model-advice').textContent,t.imageReferenceCount+': '+refs.length].join(' · ');}
+  else if(kind==='script')$('quick-summary').textContent=[ctx.project.storyboard?.title,$('model-advice').textContent,ctx.project.storyboard?.production?.renderMode?.toUpperCase()??productionWords(document.documentElement.lang).unspecified].join(' · ');
   else{const settings=currentImageSettings(),selected=targets.selectedOptions[0];$('quick-summary').textContent=[selected?.textContent,model.value,settings.size,t.quality+': '+t.low,$('image-reference-summary').textContent].join(' · ');}
   quickDialog.showModal();$('quick-cancel').focus();
  });}
@@ -148,10 +150,10 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,re
  quickDialog.addEventListener('close',()=>finishQuick?.(false));
  openWorkflow=async(next,initial='board',options={})=>{
   if(dialog.open||active||opening)return;opening=true;stop();
-  try{if(!await ensureApiVaultUnlocked()||!next.valid())return;ctx=next;publishingPlatform=options.publishingPlatform;resourceTarget=options.resourceTarget;resourceDimension=options.resourceDimension??'3d';const ticket=++session;modelPicker.reset();clearPreview();jobs=[];jobsSelect.replaceChildren();option(jobsSelect,'missing',t.all);targets.replaceChildren();if(!ctx.draft)option(targets,'cover',t.cover);
+  try{if(!await ensureApiVaultUnlocked()||!next.valid())return;ctx=next;quickModel=!!options.quickModel&&initial==='model';publishingPlatform=options.publishingPlatform;resourceTarget=options.resourceTarget;resourceDimension=options.resourceDimension??'3d';const ticket=++session;modelPicker.reset();clearPreview();jobs=[];jobsSelect.replaceChildren();option(jobsSelect,'missing',t.all);targets.replaceChildren();if(!ctx.draft)option(targets,'cover',t.cover);
   const b=ctx.project.storyboard;for(const kind of ['characters','settings','shots'] as const)for(const item of b?.[kind]??[])option(targets,kind+':'+item.id,kind+' · '+('title'in item?item.title:item.name));
   for(const o of action.options)o.disabled=o.value==='model'?!resourceTarget:!!ctx.draft&&(o.value==='publishing'||o.value==='speech'||o.value==='script'&&(!ctx.applyScript||!b?.approved||!canApproveStoryboard(b)));
-  action.value=initial;if(options.imageTarget){targets.value=options.imageTarget.kind+':'+options.imageTarget.id;if(!targets.value)return;}prompt.value='';$('draft').hidden=!ctx.draft;$<HTMLInputElement>('refs').checked=initial==='model';$<HTMLInputElement>('image-refs').checked=true;configure();if(initial==='model')modelPicker.useRecommendation();const quickScript=options.quickScript&&initial==='script';if(quickScript)modelPicker.useRecommendation();if(options.quickImage&&initial==='image'||quickScript){if(!await confirmQuick(quickScript?'script':'image')||!next.valid())return;dialog.showModal();consent.checked=true;start.disabled=false;start.click();return;}dialog.showModal();
+  action.value=initial;if(options.imageTarget){targets.value=options.imageTarget.kind+':'+options.imageTarget.id;if(!targets.value)return;}prompt.value='';$('draft').hidden=!ctx.draft;$<HTMLInputElement>('refs').checked=initial==='model';$<HTMLInputElement>('image-refs').checked=true;configure();if(initial==='model')modelPicker.useRecommendation();const quickScript=options.quickScript&&initial==='script';if(quickScript)modelPicker.useRecommendation();if(options.quickImage&&initial==='image'||quickScript||quickModel){if(!await confirmQuick(quickModel?'model':quickScript?'script':'image')||!next.valid())return;dialog.showModal();consent.checked=true;start.disabled=false;start.click();return;}dialog.showModal();
   void speechJobs(ctx.project).then(value=>{if(ticket!==session||!dialog.open)return;jobs=value;for(const j of jobs)option(jobsSelect,j.stem,j.name+(j.speaker?' · '+j.speaker:''));speechEstimate();}).catch(error);
   }finally{opening=false;}
  };
@@ -202,7 +204,7 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,re
     const text=await generateText(key,{model:model.value.trim(),instructions,input:textInput,images:references,reasoning:modelPicker.reasoning},controller.signal);if(kind==='model')receivedModel=text;if(kind==='script')receivedScript=text;check();controller.signal.throwIfAborted();
     const p=kind==='publishing'?acceptPlatformPublishing(text,source,publishingPlatform):kind==='model'?(resourceDimension==='2d'?acceptBoardModel2D:acceptBoardModel)(text,source,resourceTarget!,prompt.value):kind==='board'?acceptPlanning(text,source,sourceBoard):acceptScript(text,source);
     if(kind==='script')await ctx.preload?.(p);else if(kind!=='publishing')for(const a of Object.values(p.storyboard!.images))if(a.data&&!Object.values(sourceBoard.images).some(old=>old.data===a.data))await decodeImage(a.data);
-    check();controller.signal.throwIfAborted();preview(p,kind);
+    check();controller.signal.throwIfAborted();if(kind==='model'&&quickModel)candidate=p;else preview(p,kind);
    }else if(kind==='image'){
     const settings=currentImageSettings();let data=await generateImage(key,{model:model.value.trim(),prompt:imageText,size:settings.requestSize,quality:$<HTMLSelectElement>('quality').value,images:references},controller.signal);check();controller.signal.throwIfAborted();data=await fitImage(data,settings.size);check();controller.signal.throwIfAborted();const p=acceptImage(source,data,target);preview(p,kind);$<HTMLImageElement>('image-preview').src=data;$('image-preview').hidden=false;enlargeImage.hidden=false;
    }else{
@@ -216,7 +218,7 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,re
     }
    }
    $('status').textContent=t.ready;
-   if(candidate&&kind!=='model'&&kind!=='publishing'&&(kind==='board'||ctx.draft&&kind!=='script'||kind==='image'&&target)){
+   if(candidate&&(kind!=='model'||quickModel)&&kind!=='publishing'&&(kind==='board'||ctx.draft&&kind!=='script'||kind==='image'&&target)){
     check();controller.signal.throwIfAborted();const next=candidate;
     if(ctx.draft){ctx.apply(next);dialog.close();}
     else{ctx.apply(next);dialog.close();try{reviewStoryboard(next.storyboard!,true);}catch(e){dialog.showModal();throw e;}}

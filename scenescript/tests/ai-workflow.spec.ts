@@ -15,7 +15,7 @@ async function setup(page:Page,p=fixture(),lang='en'){
 }
 async function exportProject(page:Page):Promise<Project>{const pending=page.waitForEvent('download');await page.locator('#save-project').click();return JSON.parse(await readFile((await(await pending).path())!,'utf8'));}
 const response=(text:string)=>({status:'completed',output:[{type:'message',content:[{type:'output_text',text}]}]});
-async function generate(page:Page){await page.locator('#ai-workflow-consent').check();await page.locator('#ai-workflow-start').click();}
+async function generate(page:Page){if(await page.locator('#ai-workflow-quick-confirm').isVisible()){await page.locator('#ai-workflow-quick-start').click();return;}await page.locator('#ai-workflow-consent').check();await page.locator('#ai-workflow-start').click();}
 
 test('direct planning unlocks, returns a review draft and supports saving and Undo without exporting credentials',async({page})=>{
  await setup(page);const before=await exportProject(page);await page.locator('#open-api-vault').click();await page.locator('#api-vault-lock').click();await page.locator('#api-vault-close').click();let calls=0;
@@ -430,14 +430,13 @@ test('3D and sound requirements reach the model, mismatches need explicit acknow
  await page.locator('#open-storyboard').click();await expect(page.locator('.board-production-tasks')).toContainText('A short notification beep');
 });
 
-test('targeted 3D model refinement previews geometry and only saves the chosen element after confirmation',async({page})=>{
+test('quick 3D model refinement uses recommended settings and saves only the chosen element',async({page})=>{
  const initial=fixture();initial.storyboard!.characters=[{id:'chocolate',kind:'object',status:'approved',name:'Chocolate',description:'A chocolate bar',image:null,comments:[]}];await setup(page,initial);let calls=0;await page.route('https://api.openai.com/v1/responses',async route=>{
-  if(route.request().method()==='OPTIONS'){await route.fulfill({headers:cors});return;}calls++;const body=route.request().postDataJSON(),input=JSON.parse(body.input[0].content[0].text);expect(input.target.id).toBe('chocolate');expect(input.request).toBe('Make the shape rounder');expect(input).not.toHaveProperty('storyboard');expect(body.instructions).toContain('ONLY the selected reusable');
+  if(route.request().method()==='OPTIONS'){await route.fulfill({headers:cors});return;}calls++;const body=route.request().postDataJSON(),input=JSON.parse(body.input[0].content[0].text);expect(input.target.id).toBe('chocolate');expect(input.request).toBe('');expect(body.model).toBe('gpt-6.1-sol');expect(body.reasoning.effort).toBe('high');expect(input).not.toHaveProperty('storyboard');expect(body.instructions).toContain('ONLY the selected reusable');
   await route.fulfill({headers:cors,json:response(JSON.stringify({model:{parts:[{id:'round',shape:'sphere',position:{y:1.5},size:{x:1,y:3,z:1},color:'#895236'}]}}))});
  });
- await page.locator('#open-storyboard').click();await page.locator('[data-board-tab=objects]').click();await page.locator('[data-board-model=chocolate]').click();await expect(page.locator('#ai-workflow-action')).toHaveValue('model');await page.locator('#ai-workflow-prompt').fill('Make the shape rounder');await generate(page);
- await expect(page.locator('#ai-workflow-model-preview canvas')).toBeVisible();await expect(page.locator('#ai-workflow-dialog')).toBeVisible();await expect(page.locator('#ai-workflow-apply')).toBeEnabled();expect(calls).toBe(1);
- await page.locator('#ai-workflow-apply').click();await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();await expect(page.locator('.board-model-canvas canvas')).toBeVisible();await page.locator('#storyboard-close').click();const p=await exportProject(page);expect(p.storyboard!.characters[0].model3d!.parts[0].id).toBe('round');expect(p.storyboard!.characters[0].status).toBe('draft');expect(p.scenes).toEqual(fixture().scenes);
+ await page.locator('#open-storyboard').click();await page.locator('[data-board-tab=objects]').click();await page.locator('[data-board-model=chocolate]').click();await expect(page.locator('#ai-workflow-quick-confirm')).toBeVisible();await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();await expect(page.locator('#ai-workflow-quick-summary')).toContainText('GPT-6.1 Sol');expect(calls).toBe(0);await generate(page);
+await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();await expect(page.locator('.board-model-canvas canvas')).toBeVisible();await page.locator('#storyboard-close').click();const p=await exportProject(page);expect(p.storyboard!.characters[0].model3d!.parts[0].id).toBe('round');expect(p.storyboard!.characters[0].status).toBe('draft');expect(p.scenes).toEqual(fixture().scenes);
 });
 
 test('invalid model replies are retained for explicit local repair, download and apply without another paid call',async({page})=>{
@@ -457,8 +456,8 @@ for(const control of ['leftArm','none'])test('joint target 180 with limits ±55:
  const p=fixture();p.storyboard!.characters=[{id:'customer',kind:'character',status:'approved',name:'Customer',description:'Rounded human',image:null,comments:[]}];await setup(page,p);let calls=0;
  await page.route('https://api.openai.com/v1/responses',async route=>{if(route.request().method()==='OPTIONS'){await route.fulfill({headers:cors});return;}calls++;await route.fulfill({headers:cors,json:response(JSON.stringify({model:{parts:[{id:'arm',position:{y:1.5},joints:[{id:'shoulder',min:-55,max:55,control,target:180}]}]}}))});});
  await page.locator('#open-storyboard').click();await page.locator('[data-board-tab=characters]').click();await page.locator('[data-board-model=customer]').click();await generate(page);
- if(control==='none'){await expect(page.locator('#ai-workflow-error')).toHaveValue(/target: expected number -55–55; received 180/);await page.locator('#ai-workflow-close').click();await page.locator('#ai-workflow-model-repair-joints').click();}
- await expect(page.locator('#ai-workflow-model-preview canvas')).toBeVisible();await expect(page.locator('#ai-workflow-apply')).toBeEnabled();await page.locator('#ai-workflow-apply').click();await page.locator('#storyboard-close').click();const saved=await exportProject(page),joint=saved.storyboard!.characters[0].model3d!.parts[0].joints[0];expect(joint.min).toBe(-55);expect(joint.max).toBe(55);expect(joint.target).toBe(control==='leftArm'?180:55);expect(calls).toBe(1);
+ if(control==='none'){await expect(page.locator('#ai-workflow-error')).toHaveValue(/target: expected number -55–55; received 180/);await page.locator('#ai-workflow-close').click();await page.locator('#ai-workflow-model-repair-joints').click();await expect(page.locator('#ai-workflow-model-preview canvas')).toBeVisible();await expect(page.locator('#ai-workflow-apply')).toBeEnabled();await page.locator('#ai-workflow-apply').click();}else await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();
+await page.locator('#storyboard-close').click();const saved=await exportProject(page),joint=saved.storyboard!.characters[0].model3d!.parts[0].joints[0];expect(joint.min).toBe(-55);expect(joint.max).toBe(55);expect(joint.target).toBe(control==='leftArm'?180:55);expect(calls).toBe(1);
 });
 
 test('changing a resource style requests explicit redesign, marks the old preview and saves the generated style',async({page})=>{
@@ -467,36 +466,35 @@ test('changing a resource style requests explicit redesign, marks the old previe
  await page.route('https://api.openai.com/v1/responses',async route=>{if(route.request().method()==='OPTIONS'){await route.fulfill({headers:cors});return;}calls++;const body=route.request().postDataJSON(),input=JSON.parse(body.input[0].content[0].text);expect(input.operation).toBe('restyle');expect(input.styleBrief).toContain('BLOCK STYLE');expect(input.target.design.style).toBe('block');expect(input.target.previousModelDesign.style).toBe('rounded');expect(input.target.conversation).toEqual([]);expect(body.instructions).toContain('visibly REDESIGN');await route.fulfill({headers:cors,json:response(JSON.stringify({reply:'Angular block geometry',model:{parts:[{id:'block_body',shape:'box',position:{y:1.5},size:{x:1,y:3,z:1}}]}}))});});
  await page.locator('#open-storyboard').click();await page.locator('[data-board-tab=characters]').click();await expect(page.locator('[data-board-style-pending]')).toHaveCount(0);
  await page.locator('[data-board-edit=characters-customer-style]').click();await page.locator('#storyboard-field-select').selectOption('block');await page.locator('#storyboard-field-apply').click();await expect(page.locator('[data-board-style-pending=customer]')).toBeVisible();
- await page.locator('[data-board-model=customer]').click();await generate(page);await expect(page.locator('#ai-workflow-model-preview canvas')).toBeVisible();await page.locator('#ai-workflow-apply').click();await expect(page.locator('[data-board-style-pending]')).toHaveCount(0);await page.locator('#storyboard-close').click();const saved=await exportProject(page);expect(saved.storyboard!.characters[0].modelDesign!.style).toBe('block');expect(saved.storyboard!.characters[0].model3d!.parts[0].shape).toBe('box');expect(calls).toBe(1);
+ await page.locator('[data-board-model=customer]').click();await generate(page);await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();await expect(page.locator('[data-board-style-pending]')).toHaveCount(0);await page.locator('#storyboard-close').click();const saved=await exportProject(page);expect(saved.storyboard!.characters[0].modelDesign!.style).toBe('block');expect(saved.storyboard!.characters[0].model3d!.parts[0].shape).toBe('box');expect(calls).toBe(1);
 });
 test('natural material workflow recommends high effort, offers local fabric and shows actual texture usage',async({page})=>{
  const p=fixture();p.storyboard!.approved=false;p.storyboard!.characters=[{id:'customer',kind:'character',status:'draft',name:'Customer',description:'Human in a jacket',image:null,comments:[],design:{mode:'3d',style:'natural',surface:'mixed',details:''}}];await setup(page,p);let calls=0;
  await page.route('https://api.openai.com/v1/responses',async route=>{if(route.request().method()==='OPTIONS'){await route.fulfill({headers:cors});return;}calls++;const body=route.request().postDataJSON(),input=JSON.parse(body.input[0].content[0].text);expect(body.reasoning.effort).toBe('high');const id=Object.keys(input.availableTextures).find(id=>id.startsWith('material-fabric-'));expect(id).toBeTruthy();expect(input.availableTextures[id!].purpose).toBe('seamless fabric material');await route.fulfill({headers:cors,json:response(JSON.stringify({model:{parts:[{id:'sleeve',shape:'capsule',smooth:true,position:{y:1.5},texture:{asset:id},color:'#bb9933',roughness:.9}]}}))});});
  await page.locator('#open-storyboard').click();await page.locator('[data-board-tab=characters]').click();await page.locator('[data-board-fabric=customer]').click();await expect(page.locator('[data-board-fabric=customer]')).toBeDisabled();expect(calls).toBe(0);
- await page.locator('[data-board-model=customer]').click();await expect(page.locator('#ai-workflow-reasoning')).toHaveValue('high');await generate(page);await expect(page.locator('[data-model-texture-usage]')).toContainText('1 / 1');await expect(page.locator('#ai-workflow-model-preview canvas')).toHaveAttribute('data-stage3d-time','0');await page.locator('#ai-workflow-apply').click();await expect(page.locator('[data-board-texture-usage=customer]')).toContainText('1 / 1');await expect(page.locator('[data-board-texture-missing]')).toHaveCount(0);await page.locator('#storyboard-close').click();const saved=await exportProject(page);expect(Object.keys(saved.storyboard!.images).some(id=>id.startsWith('material-fabric-'))).toBe(true);expect(calls).toBe(1);
+ await page.locator('[data-board-model=customer]').click();await expect(page.locator('#ai-workflow-quick-confirm')).toBeVisible();await generate(page);await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();await expect(page.locator('[data-board-texture-usage=customer]')).toContainText('1 / 1');await expect(page.locator('[data-board-texture-missing]')).toHaveCount(0);await page.locator('#storyboard-close').click();const saved=await exportProject(page);expect(Object.keys(saved.storyboard!.images).some(id=>id.startsWith('material-fabric-'))).toBe(true);expect(calls).toBe(1);
 });
 
-test('targeted 2D AI builds a freely jointed bird, rehearses clips and only saves after confirmation',async({page})=>{
+test('quick 2D AI builds a freely jointed bird and rehearses clips directly in the storyboard',async({page})=>{
  const {lightCollectorProject}=await import('../src/lib/light-collector-example'),{birdModel2D}=await import('../src/lib/free2d-example');
  const p=lightCollectorProject();await setup(page,p,'de');let calls=0;
  await page.route('https://api.openai.com/v1/responses',async route=>{
   if(route.request().method()==='OPTIONS'){await route.fulfill({headers:cors});return;}
   calls++;const body=route.request().postDataJSON(),input=JSON.parse(body.input[0].content[0].text);
   expect(body.instructions).toContain('2D vector resource');expect(body.instructions).toContain('parent IDs and pivots');
-  expect(input.target.id).toBe('collector');expect(input.target.description).toContain('Roboter');expect(input.request).toBe('Ein blauer Vogel statt eines Roboters');
+  expect(input.target.id).toBe('collector');expect(input.target.description).toContain('Roboter');expect(input.request).toBe('');expect(body.model).toBe('gpt-6.1-sol');expect(body.reasoning.effort).toBe('high');
   expect(input).not.toHaveProperty('scenes');expect(route.request().postData()).not.toContain(password);
   await route.fulfill({headers:cors,json:response(JSON.stringify({reply:'Ein gegliederter Vogel mit Flügelschlag.',model:birdModel2D()}))});
  });
  await page.locator('#open-storyboard').click();await page.locator('[data-board-tab=characters]').click();await page.locator('[data-board-model2d=collector]').click();
- await expect(page.locator('#ai-workflow-action')).toHaveValue('model');await expect(page.locator('#ai-workflow-start')).toBeDisabled();expect(calls).toBe(0);
- await page.locator('#ai-workflow-prompt').fill('Ein blauer Vogel statt eines Roboters');await generate(page);
- const preview=page.locator('#ai-workflow-model-preview'),canvas=preview.locator('canvas');
- await expect(canvas).toHaveAttribute('data-stage2d-time','0');await expect(page.locator('#ai-workflow-apply')).toBeEnabled();
+ await expect(page.locator('#ai-workflow-quick-confirm')).toBeVisible();await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();expect(calls).toBe(0);
+ await generate(page);await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();
+ const preview=page.locator('.board-resource2d-tile'),canvas=preview.locator('canvas');
+ await expect(canvas).toHaveAttribute('data-stage2d-time','0');
  await preview.locator('select').selectOption('fly');await preview.getByRole('slider',{name:'Animationszeit',exact:true}).fill('0.5');await expect(canvas).toHaveAttribute('data-stage2d-time','0.5');
  await preview.getByRole('button',{name:'Abspielen / pausieren',exact:true}).click();await expect(preview.getByRole('button',{name:'Abspielen / pausieren',exact:true})).toHaveAttribute('aria-pressed','true');
  await preview.getByRole('button',{name:'Abspielen / pausieren',exact:true}).click();expect(calls).toBe(1);
- await page.locator('#ai-workflow-apply').click();await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();
- await expect(page.locator('.board-resource2d-canvas canvas')).toHaveAttribute('data-stage2d-time','0');
+ await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();
  await page.locator('#storyboard-close').click();const saved=await exportProject(page);
  expect(saved.storyboard!.characters[0].model2d!.parts.find(p=>p.id==='wing')!.shape).toBe('path');expect(saved.storyboard!.characters[0].model2dChat![0].reply).toContain('Vogel');
  expect(saved.storyboard!.characters[0].status).toBe('draft');expect(saved.scenes).toEqual(p.scenes);expect(saved.objects2d).toEqual(p.objects2d);
