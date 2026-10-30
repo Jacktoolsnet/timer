@@ -222,3 +222,16 @@ test('all demo storyboard subjects, settings and shots have portable matching re
  const restored=importStoryboard(exportStoryboard(board,true),null);assert.deepEqual(restored.images,board.images);assert.equal(restored.approved,false);
  const compact=JSON.parse(exportStoryboard(board));assert.ok(Object.values(compact.board.images).every((image:any)=>image.data===undefined));
 });
+
+test('demo publication copy and portable 16:9 cover are filled without changing the film',async()=>{
+ const {lightCollectorPublishing}=await import('../src/lib/light-collector-publishing.ts'),{lightCollectorCoverProject}=await import('../src/lib/light-collector-cover.ts');
+ const p=validateProject(lightCollectorProject());assert.equal(p.description,lightCollectorPublishing.description);assert.equal(p.firstComment,lightCollectorPublishing.firstComment);assert.equal(p.hashtags,lightCollectorPublishing.hashtags);
+ assert.ok(lightCollectorPublishing.shortDescription.length<=160);assert.match(p.description,/2D-Animations-Kurzfilm/);assert.match(p.description,/22-sekündige/);assert.match(p.description,/jacktools.net/);assert.ok(p.firstComment.includes('?'));
+ const tags=p.hashtags.split(/\s+/);assert.equal(tags.length,new Set(tags).size);assert.ok(tags.length<=12&&tags.every(tag=>/^#[A-Za-z0-9]+$/.test(tag)));
+ const image=p.thumbnail!,bytes=Buffer.from(image.data.split(',')[1],'base64');assert.equal(image.name,'der-kleine-lichtsammler-cover.png');assert.ok(image.data.startsWith('data:image/png;base64,'));assert.equal(bytes.subarray(1,4).toString(),'PNG');assert.equal(bytes.readUInt32BE(16),1280);assert.equal(bytes.readUInt32BE(20),720);
+ assert.deepEqual(bytes,readFileSync(new URL('../public/examples/'+image.name,import.meta.url)));
+ const before=JSON.stringify(p),poster=validateProject(lightCollectorCoverProject(p));assert.equal(JSON.stringify(p),before);assert.equal(p.scenes.length,2);assert.equal(p.scenes.reduce((sum,s)=>sum+s.duration,0),22);
+ assert.equal(poster.scenes.length,1);assert.equal(poster.thumbnail,null);assert.equal(objectSoundScore2D(poster),null);assert.equal(poster.storyboard,null);
+ assert.ok(poster.scenes[0].elements.some(e=>e.text==='Der kleine\nLichtsammler'));
+ const notes=readFileSync(new URL('../public/examples/light-collector-publishing.md',import.meta.url),'utf8');for(const text of [p.description,p.firstComment,p.hashtags,lightCollectorPublishing.shortDescription,image.name])assert.ok(notes.includes(text));
+});

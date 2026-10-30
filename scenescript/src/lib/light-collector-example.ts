@@ -1,3 +1,5 @@
+import cover from './light-collector-cover.json' with {type:'json'};
+import {lightCollectorPublishing} from './light-collector-publishing.ts';
 import {lightCollectorMusic,lightCollectorSounds2D} from './light-collector-audio.ts';
 import {lightCollectorStoryboard} from './light-collector-storyboard.ts';
 import {demoProject,newScene,newElement,type Project} from './model.ts';
@@ -33,5 +35,5 @@ export function lightCollectorProject():Project{
  const caption=text('closing-caption','Kleine Schlusszeile','jacktools.net',52.5,24,'#91b7ac');caption.font='Arial';caption.x=98/9.6;caption.height=5;
  const rule=newElement('shape','closing-rule');Object.assign(rule,{name:'Feine Abschlusslinie',x:10,y:48.5,width:27.2,height:.37,fillColor:'#f7b89a',color:'#f7b89a',borderWidth:0,at:ending.at-split,animationDuration:ending.duration});
  closing.elements=[title,subtitle,rule,caption];
- return {...project,music:lightCollectorMusic(),objects2d:resources.objects2d,stages2d:resources.stages2d,storyboard:lightCollectorStoryboard(),title:'Der kleine Lichtsammler',description:'Ein kleiner Roboter entdeckt einen Funken. Beim Berühren des Sterns entstehen drei Schmetterlinge. Sie fliegen zu Blumen, deren Blüten sanft nachfedern. Zwei bearbeitbare Szenen führen vom Waldweg in einen leuchtenden Nachtgarten.',scenes:[scene,closing]};
+ return {...project,music:lightCollectorMusic(),objects2d:resources.objects2d,stages2d:resources.stages2d,storyboard:lightCollectorStoryboard(),title:'Der kleine Lichtsammler',description:lightCollectorPublishing.description,firstComment:lightCollectorPublishing.firstComment,hashtags:lightCollectorPublishing.hashtags,thumbnail:{...cover},scenes:[scene,closing]};
 }
