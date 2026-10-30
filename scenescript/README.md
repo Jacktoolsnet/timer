@@ -1544,3 +1544,28 @@ Die zwei älteren Kamera-Browsertests mit Zugriff auf einen bereits aufgeräumte
 Export-DOM scheiterten auch vor dieser Änderung; deren Erwartungen wurden hier
 nicht geändert. Die isolierte ursprüngliche Studie liegt weiter unter
 `experiments/pixi-feasibility/`.
+
+### Portrait 2D start project
+
+The default is `public/examples/mila-halloween.scenescript.json`: seven editable
+9:16 scenes reconstructed from the supplied Mila storyboard, with separate prop
+and character resources. This is a **technical composition sample**, not an
+approved final film: art direction, lighting, contacts, narration and SFX still
+need review. Existing saved projects are not replaced; use “Load start project”.
+
+Custom stage models use their declared native frame. Model generation requests
+540×960 for portrait, 960×540 for landscape and 720×720 for square, and sends the
+selected setting's own sketch before equipment references. Wrong target frames
+are rejected on resource generation/import; legacy mismatches remain readable
+and are flagged in production review rather than silently cropped. Preview and
+export share the same native-frame renderer. Changing a project format alone
+does not recompose old resources or camera positions.
+
+Rebuild this sample without paid AI calls (the input file remains unchanged):
+
+```sh
+node --experimental-strip-types scripts/generate-mila-portrait.mjs --source '/path/to/original.scenescript'
+```
+
+Reference images in the example are reduced WebP copies to stay within browser
+save limits. Full-resolution originals remain in the input file.
