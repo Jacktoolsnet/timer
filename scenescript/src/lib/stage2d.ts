@@ -34,7 +34,7 @@ export function parseStage2D(value:unknown,path='stage2d',resources:Resources2D=
  for(const type of actions2D.filter(type=>type!=='play')){const tracks=actions.filter(a=>a.type===type).sort((a,b)=>a.at-b.at);if(tracks.some((a,i)=>i>0&&a.at<tracks[i-1].at+tracks[i-1].duration-1e-7))throw Error(p+': overlapping '+type+' actions');}
  const play=actions.filter(a=>a.type==='play');
  for(const [i,a]of play.entries())for(const b of play.slice(i+1)){
-  if(a.at>=b.at+b.duration||b.at>=a.at+a.duration)continue;
+  if(a.at>=b.at+b.duration-1e-7||b.at>=a.at+a.duration-1e-7)continue;
   const channels=new Set(resources.objects2d[object].model!.animations[a.clip].tracks.map(t=>t.part+':'+t.property));
   if(resources.objects2d[object].model!.animations[b.clip].tracks.some(t=>channels.has(t.part+':'+t.property)))throw Error(p+': overlapping animation property tracks');
  }

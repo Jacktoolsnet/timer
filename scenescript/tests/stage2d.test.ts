@@ -153,10 +153,17 @@ test('demo separates the forest action and editable night-garden closing into re
  assert.equal(p.scenes.length,2);assert.deepEqual(p.scenes.map(s=>s.duration),[17,5]);
  assert.equal(forest.stage2d!.stage,'forest');assert.equal(night.stage2d!.stage,'night-garden');
  for(const scene of p.scenes){assert.equal(scene.stage2d!.transition,null);assert.equal(scene.stage2d!.ending,null);}
+ assert.equal(night.elements.find(e=>e.id==='closing-caption')!.text,'jacktools.net');assert.ok(p.storyboard!.shots.at(-1)!.action.includes('jacktools.net'));
  assert.equal(night.transition,'crossfade');assert.equal(night.stage2d!.actors.length,6);
  assert.ok(night.stage2d!.actors.every(a=>a.object==='flower'||a.object==='butterfly'));
  for(const actor of night.stage2d!.actors){assert.ok(actor.actions.every(a=>a.type==='attach'&&!a.burst));}
  const title=night.elements.find(e=>e.id==='closing-title')!;assert.equal(title.type,'text');assert.equal(title.text,'Manchmal genügt');
  title.text='Meine eigene Botschaft';assert.equal(parseProject(JSON.stringify(p)).scenes[1].elements[0].text,title.text);
  assert.ok(p.storyboard!.style.includes('zwei echte Filmszenen'));
+});
+
+test('shortening the forest scene preserves adjacent clip boundaries and leaves the closing independent',()=>{
+ const p=lightCollectorProject(),closing=structuredClone(p.scenes[1]);
+ retimeStage2D(p.scenes[0].stage2d!,8/p.scenes[0].duration);p.scenes[0].duration=8;
+ assert.doesNotThrow(()=>validateProject(p));assert.deepEqual(p.scenes[1],closing);
 });

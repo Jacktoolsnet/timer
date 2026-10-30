@@ -14,7 +14,7 @@ test('space adventure imports as a video project with all nine scenes and the ap
  for(const toggle of await page.locator('[data-board-review]').getByRole('switch').all())await expect(toggle).toBeChecked();
  await page.locator('#storyboard-close').click();
  page.on('dialog',d=>d.accept());await page.locator('#new-project').click();await expect(page.locator('#scene-list li')).toHaveCount(1);
- await page.locator('#load-default-project').click();await expect(page.locator('#project-title')).toHaveValue('Der kleine Lichtsammler');await expect(page.locator('#scene-list li')).toHaveCount(1);
+ await page.locator('#load-default-project').click();await expect(page.locator('#project-title')).toHaveValue('Der kleine Lichtsammler');await expect(page.locator('#scene-list li')).toHaveCount(2);
  expect(errors).toEqual([]);
 });
 test('native space animation renders each beat and deterministic reverse seeks including its synthesized audio',async({page},info)=>{
