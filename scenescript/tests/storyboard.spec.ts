@@ -362,9 +362,11 @@ test('existing rounded resource has a real preview, camera controls and movement
  await page.locator('[data-board-item=rounded-test]').click();
  const card=page.locator('.board-card');await expect(card).toContainText('Abgerundete Figur');await expect(card).toContainText('Stilisiert · abgerundet');
  const canvas=card.locator('.board-model-canvas canvas');await expect(canvas).toBeVisible();await expect(canvas).not.toHaveAttribute('data-stage3d-error','true');
- await card.locator('.board-model-controls select').selectOption('wave');await card.getByRole('slider',{name:'Animationszeit',exact:true}).fill('1.5');await card.getByRole('slider',{name:'Ansicht drehen',exact:true}).fill('-25');
- await card.getByRole('button',{name:'Abspielen / pausieren',exact:true}).click();await expect(card.getByRole('button',{name:'Abspielen / pausieren',exact:true})).toHaveAttribute('aria-pressed','true');
- await card.getByRole('button',{name:'Abspielen / pausieren',exact:true}).click();
+ await expect(card.locator('.board-model-controls')).toHaveCount(0);await card.locator('.resource-viewer-open').click();const viewer=page.locator('#resource-viewer-dialog');
+ await viewer.locator('.board-model-controls select').selectOption('wave');await viewer.getByRole('slider',{name:'Animationszeit',exact:true}).fill('1.5');await viewer.getByRole('slider',{name:'Ansicht drehen',exact:true}).fill('-25');
+ await viewer.getByRole('button',{name:'Abspielen / pausieren',exact:true}).click();await expect(viewer.getByRole('button',{name:'Abspielen / pausieren',exact:true})).toHaveAttribute('aria-pressed','true');
+ await viewer.getByRole('button',{name:'Abspielen / pausieren',exact:true}).click();
+ await page.locator('#resource-viewer-plus').click();await expect(page.locator('#resource-viewer-percent')).not.toHaveText('100 %');await page.locator('#resource-viewer-fit').click();await expect(page.locator('#resource-viewer-percent')).toHaveText('100 %');await page.keyboard.press('Escape');await expect(viewer).toHaveCount(0);await expect(card.locator('.resource-viewer-open')).toBeFocused();
  await writeFile('/tmp/scenescript-rounded-canvas-'+test.info().project.name+'.png',Buffer.from((await canvas.evaluate(c=>(c as HTMLCanvasElement).toDataURL())).split(',')[1],'base64'));
  await card.screenshot({path:'/tmp/scenescript-rounded-'+test.info().project.name+'.png'});
  await page.locator('#storyboard-save').click();await page.locator('#storyboard-close').click();const downloading=page.waitForEvent('download');await page.locator('#save-project').click();const file=await downloading;const p=JSON.parse(await readFile((await file.path())!,'utf8'));expect(p.scenes).toEqual(fixture().scenes);const subject=p.storyboard.characters.find((s:any)=>s.name==='Abgerundete Figur');expect(subject.design.mode).toBe('3d');expect(subject.model3d.parts.length).toBeGreaterThan(70);expect(subject.status).toBe('draft');
@@ -427,4 +429,19 @@ test('all storyboard libraries fill the available height and scroll independentl
   const leftScroll=await list.evaluate(el=>el.scrollTop);await detail.evaluate(el=>el.scrollTop=el.scrollHeight);expect(await detail.evaluate(el=>el.scrollTop)).toBeGreaterThan(0);expect(await list.evaluate(el=>el.scrollTop)).toBe(leftScroll);
   await list.locator('[data-board-item]').last().click();await expect(page.locator('[data-board-item][aria-current=true]')).toHaveAttribute('data-board-item',tab==='characters'?'character-44':tab==='objects'?'object-44':tab==='settings'?'setting-44':'shot-44');expect(await detail.evaluate(el=>el.scrollTop)).toBe(0);expect(await list.evaluate(el=>el.scrollTop)).toBeGreaterThan(0);await expect(page.locator('.board-library .board-add-item')).toBeVisible();
  }
+});
+
+test('2D and 3D project resources open an independent zoomable preview from their toolbars',async({page})=>{
+ const {defaultObject2D}=await import('../src/lib/stage2d'),{birdModel2D}=await import('../src/lib/free2d-example'),{defaultCharacter3D}=await import('../src/lib/stage3d');
+ const {defaultGroup3D}=await import('../src/lib/group3d');
+ const project=fixture();project.objects2d.bird={...defaultObject2D('custom'),name:'Bird',model:birdModel2D()};project.characters.person={...defaultCharacter3D(),name:'Person',model:roundedHumanModel()};project.groups3d.people={...defaultGroup3D(),characters:['person'],count:2,animation:'wave'};await setup(page,project);await page.locator('#storyboard-close').click();
+ for(const dimension of ['2d','3d']){
+  await page.locator('#open-stage'+dimension.slice(0,1)+'d').click();const parent=page.locator('#stage'+dimension.slice(0,1)+'d-dialog'),button=parent.locator('.resource-viewer-open');await expect(button).toBeVisible();await button.click();
+  const viewer=page.locator('#resource-viewer-dialog');await expect(viewer).toBeVisible();await expect(viewer.locator('canvas')).toBeVisible();await expect(viewer.locator('.board-model-controls')).toBeVisible();await page.locator('#resource-viewer-plus').click();await expect(page.locator('#resource-viewer-percent')).not.toHaveText('100 %');await page.locator('#resource-viewer-fit').click();await expect(page.locator('#resource-viewer-percent')).toHaveText('100 %');
+  expect(await viewer.evaluate(el=>el.scrollWidth<=el.clientWidth)).toBe(true);await page.locator('#resource-viewer-close').click();await expect(viewer).toHaveCount(0);await expect(button).toBeFocused();await expect(parent).toBeVisible();await parent.locator('footer button').first().click();
+ }
+ await page.locator('#open-stage3d').click();await page.locator('#stage3d-kind').selectOption('group');await page.locator('#stage3d-resource-enlarge').click();
+ const groupViewer=page.locator('#resource-viewer-dialog');await expect(groupViewer.locator('canvas')).toHaveAttribute('data-stage3d-time','0');await groupViewer.getByRole('slider',{name:'Animationszeit',exact:true}).fill('1.5');await expect(groupViewer.locator('canvas')).toHaveAttribute('data-stage3d-time','1.5');
+ await groupViewer.locator('canvas').evaluate(c=>(window as any).closedResourceCanvas=c);await groupViewer.getByRole('button',{name:'Abspielen / pausieren',exact:true}).click();await page.keyboard.press('Escape');await expect(groupViewer).toHaveCount(0);expect(await page.evaluate(()=>(window as any).closedResourceCanvas.width)).toBe(0);await page.locator('#stage3d-close').click();
+ const pending=page.waitForEvent('download');await page.locator('#save-project').click();const saved=JSON.parse(await readFile((await(await pending).path())!,'utf8'));expect(saved.scenes).toEqual(project.scenes);expect(saved.objects2d).toEqual(project.objects2d);expect(saved.characters).toEqual(project.characters);
 });

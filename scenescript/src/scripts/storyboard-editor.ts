@@ -1,3 +1,4 @@
+import {resourceViewerButton} from './resource-viewer';
 import {importStoryboardResource,MAX_RESOURCE_IMPORT_BYTES} from '../lib/storyboard-resource-import';
 import {model2DNeedsRestyle} from '../lib/storyboard-model2d';
 import {storyboardModel2DView} from './storyboard-model2d-view';
@@ -236,8 +237,9 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
      row.append(pencil({label:rw.assign,value:association.resource?association.id!:subject.resource2d??'',kind:'select',options,target,apply:(b,v)=>{get(b).resource2d=String(v)||null;delete get(b).model2d;delete get(b).model2dDesign;delete get(b).model2dChat;}},kind+'-'+subject.id+'-resource2d'));
      const sample=association.resource&&association.id?resourcePreview2D({...origin.project,[association.kind]:{...origin.project[association.kind],[association.id]:association.resource}},association.kind,association.id):null;
      if(sample){
+      const enlarge=resourceViewerButton(subject.name,host=>storyboardModel2DView(host,origin.project,subject,kind==='settings',true,1280,960));enlarge.classList.add('board-comment-action');row.append(enlarge);
       tile.append(node('p',association.resource!.name));if(model2DNeedsRestyle(subject)){const notice=node('p',dw.stylePending);notice.className='small-hint';tile.append(notice);}
-      if(association.resource!.model){resourceViewDisposers.push(storyboardModel2DView(tile,origin.project,subject,kind==='settings'));}
+      if(association.resource!.model){resourceViewDisposers.push(storyboardModel2DView(tile,origin.project,subject,kind==='settings',false));}
       else{const figure=node('div'),message=node('p');figure.className='board-model-canvas board-resource2d-canvas';message.setAttribute('role','status');tile.append(figure,message);
       const view=createStage2DView(sample.resources,sample.shot,sample.duration,640,480,e=>{message.textContent=e.message;},sample.isolated);
       view.canvas.setAttribute('aria-label',rw.resource+' · '+association.resource!.name);figure.append(view.canvas);view.draw(0);resourceViewDisposers.push(()=>view.dispose());}
@@ -268,7 +270,7 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
     if(subject.model3d){const surface=modelSurfaceStatus(subject),usage=node('p',dw.textureUsage+': '+surface.parts+' / '+surface.images);usage.dataset.boardTextureUsage=subject.id;modelTile.append(usage);if(surface.missing){const warning=node('p',dw.missingTextures);warning.setAttribute('role','status');warning.dataset.boardTextureMissing=subject.id;modelTile.append(warning);}}
 
     if(subject.modelChat?.length){const history=node('details');history.append(node('summary',dw.conversation));for(const entry of subject.modelChat){history.append(node('p',entry.request),node('p',entry.reply));}modelTile.append(history);}
-    if(subject.model3d)resourceViewDisposers.push(storyboardModelView(modelTile,subject,kind==='settings',board));visuals.append(modelTile);
+    if(subject.model3d){const enlarge=resourceViewerButton(subject.name,host=>storyboardModelView(host,subject,kind==='settings',board,true,1280,960));enlarge.classList.add('board-comment-action');row.append(enlarge);resourceViewDisposers.push(storyboardModelView(modelTile,subject,kind==='settings',board,false));}visuals.append(modelTile);
     }
     const voiceWords=voicePickerWords(document.documentElement.lang as Language);
     field(card,voiceWords.voice,subject.voice?subject.voice.name+' · '+subject.voice.id:voiceWords.none,{label:voiceWords.voice,value:JSON.stringify(subject.voice??null),kind:'voice',target,apply:(b,v)=>{const voice=JSON.parse(String(v)) as VoiceAssignment|null;if(voice)get(b).voice=voice;else delete get(b).voice;}},kind+'-'+subject.id+'-voice');

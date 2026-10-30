@@ -1,3 +1,6 @@
+import {resourceViewerButton} from './resource-viewer';
+import {storyboardModelView} from './storyboard-model-view';
+import {newStoryboard} from '../lib/storyboard';
 import {installTextureEditor} from './stage3d-textures';
 import {validateTextureAssets3D} from '../lib/texture3d';
 import {parseGroup3D,defaultGroup3D,defaultGroupPlacement3D} from '../lib/group3d';
@@ -53,8 +56,9 @@ export function installStage3DEditor(context:()=>{project:Project;index:number;r
    }catch(error){message.textContent=(error as Error).message;}
   });
  }
+ const enlarge=resourceViewerButton('',host=>{const value=library()[chosen()],board=newStoryboard(value.name);board.images=draft.assets;return storyboardModelView(host,{id:chosen(),name:value.name,description:'',image:null,status:'draft',comments:[],...('model' in value&&value.model?{model3d:value.model}:{})},kind()==='stage',board,true,1280,960,value,kind(),draft.characters);});enlarge.id='stage3d-resource-enlarge';$('export').after(enlarge);
  function fields(){
-  const value=library()[chosen()] as Character3D|Stage3D,host=$('fields');host.replaceChildren();$<HTMLButtonElement>('export').disabled=!value;$<HTMLButtonElement>('remove').disabled=!value;updateResourceTitle();queueResourcePreview();
+  const value=library()[chosen()] as Character3D|Stage3D,host=$('fields');host.replaceChildren();$<HTMLButtonElement>('export').disabled=!value;$<HTMLButtonElement>('remove').disabled=!value;updateResourceTitle();enlarge.disabled=!value;queueResourcePreview();
   if(!value){host.textContent=words.empty;return;}
   if(kind()==='group'){
    const resourceKey='group:'+chosen(),section=document.createElement('details'),title=document.createElement('summary'),input=document.createElement('textarea'),message=document.createElement('p'),help=document.createElement('p'),time=document.createElement('input'),label=document.createElement('label');

@@ -1,3 +1,5 @@
+import {resourceViewerButton} from './resource-viewer';
+import {storyboardModel2DView} from './storyboard-model2d-view';
 import {defaultSound2D} from '../lib/sound2d';
 import {resourcePreview2D} from '../lib/stage2d-resource-preview';
 import {stage3DWords} from '../lib/stage3d-i18n';
@@ -126,6 +128,7 @@ export function installStage2DEditor(get:()=>{project:Project;index:number},comm
   const actions=document.createElement('div');actions.className='stage3d-actions';sidebar.append(actions);
   actions.append(action(w.add,paths.add,()=>apply(next=>{selected=crypto.randomUUID();if(kind==='objects2d')next.objects2d[selected]=defaultObject2D();else next.stages2d[selected]=defaultStage2DResource();})));if(!selected){detail.textContent=w.empty;return;}
   const resource=library[selected];
+  const enlarge=resourceViewerButton(resource.name,host=>storyboardModel2DView(host,p,{id:selected,resource2d:selected,name:resource.name,description:'',image:null,status:'draft',comments:[]},kind==='stages2d',true,1280,960));enlarge.id='stage2d-resource-enlarge';actions.append(enlarge);
   actions.append(action(w.duplicate,paths.duplicate,()=>apply(next=>{const id=crypto.randomUUID();Object.assign(next[kind],{[id]:{...next[kind][selected],name:resource.name+' II'}});selected=id;})),action(w.remove,paths.remove,()=>apply(next=>{if(next.scenes.some(s=>kind==='objects2d'?s.stage2d?.actors.some(a=>a.object===selected):s.stage2d?.stage===selected||s.stage2d?.transition?.stage===selected))throw Error(w.referenced);delete next[kind][selected];selected='';})),action(w.use,paths.use,()=>apply(next=>{const scene=next.scenes[get().index];if(kind==='stages2d'){scene.stage2d??=defaultStage2D(selected);scene.stage2d.stage=selected;}else{if(!Object.keys(next.stages2d).length)throw Error(w.empty);scene.stage2d??=defaultStage2D(Object.keys(next.stages2d)[0]);const a=defaultActor2D(selected);a.name=resource.name;scene.stage2d.actors.push(a);}})));
   const set=(key:string,value:unknown)=>{if((get().project[kind][selected] as unknown as Record<string,unknown>)[key]===value)return;return apply(next=>Object.assign(next[kind][selected],{[key]:value}));};
   const detailHeading=document.createElement('header');detailHeading.className='stage3d-detail-heading';const title=document.createElement('h3'),id=document.createElement('span');title.textContent=(kind==='objects2d'?w.object:w.stage)+' · '+resource.name;id.id='stage2d-detail-id';id.textContent=selected;detailHeading.append(title,id);detail.append(detailHeading);

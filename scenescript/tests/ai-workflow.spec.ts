@@ -489,12 +489,13 @@ test('quick 2D AI builds a freely jointed bird and rehearses clips directly in t
  await page.locator('#open-storyboard').click();await page.locator('[data-board-tab=characters]').click();await page.locator('[data-board-model2d=collector]').click();
  await expect(page.locator('#ai-workflow-quick-confirm')).toBeVisible();await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();expect(calls).toBe(0);
  await generate(page);await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();
- const preview=page.locator('.board-resource2d-tile'),canvas=preview.locator('canvas');
+ const tile=page.locator('.board-resource2d-tile');await expect(tile.locator('.board-model-controls')).toHaveCount(0);await tile.locator('.resource-viewer-open').click();const preview=page.locator('#resource-viewer-dialog'),canvas=preview.locator('canvas');
  await expect(canvas).toHaveAttribute('data-stage2d-time','0');
  await preview.locator('select').selectOption('fly');await preview.getByRole('slider',{name:'Animationszeit',exact:true}).fill('0.5');await expect(canvas).toHaveAttribute('data-stage2d-time','0.5');
  await preview.getByRole('button',{name:'Abspielen / pausieren',exact:true}).click();await expect(preview.getByRole('button',{name:'Abspielen / pausieren',exact:true})).toHaveAttribute('aria-pressed','true');
  await preview.getByRole('button',{name:'Abspielen / pausieren',exact:true}).click();expect(calls).toBe(1);
  await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();
+ await page.keyboard.press('Escape');await expect(page.locator('#resource-viewer-dialog')).toHaveCount(0);
  await page.locator('#storyboard-close').click();const saved=await exportProject(page);
  expect(saved.storyboard!.characters[0].model2d!.parts.find(p=>p.id==='wing')!.shape).toBe('path');expect(saved.storyboard!.characters[0].model2dChat![0].reply).toContain('Vogel');
  expect(saved.storyboard!.characters[0].status).toBe('draft');expect(saved.scenes).toEqual(p.scenes);expect(saved.objects2d).toEqual(p.objects2d);
@@ -560,4 +561,13 @@ for(const platform of ['youtube','tiktok'] as const)test(platform+' icon generat
  await button.click();await expect(page.locator('#ai-workflow-action')).toHaveValue('publishing');await generate(page);await expect(page.locator('#ai-workflow-apply')).toBeEnabled();
  const preview=JSON.parse(await page.locator('#ai-workflow-json-preview').inputValue());expect(Object.keys(preview)).toEqual([platform]);await page.locator('#ai-workflow-apply').click();
  const after=await exportProject(page);expect(after.publishing![platform]).toMatchObject(profile);expect(after.publishing![other]).toEqual(before.publishing![other]);expect(after.scenes).toEqual(before.scenes);expect(after.thumbnail).toEqual(before.thumbnail);
+});
+
+for(const dimension of ['2d','3d'] as const)test('quick '+dimension+' resource confirmation can be cancelled without any API call',async({page})=>{
+ const p=fixture();p.storyboard!.approved=false;p.storyboard!.production={renderMode:dimension,dialogue:false,music:false,sfx:false};p.storyboard!.characters=[{id:'mila',kind:'character',name:'Mila',description:'A curious child',image:null,status:'draft',comments:[]}];await setup(page,p);let calls=0;
+ await page.route('https://api.openai.com/**',route=>{calls++;return route.abort();});
+ await page.locator('#open-storyboard').click();await page.locator('[data-board-tab=characters]').click();const button=page.locator(dimension==='2d'?'[data-board-model2d=mila]':'[data-board-model=mila]');
+ await button.click();await expect(page.locator('#ai-workflow-quick-confirm')).toBeVisible();await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();await expect(page.locator('#ai-workflow-quick-summary')).toContainText('Mila');await expect(page.locator('#ai-workflow-quick-summary')).toContainText(dimension.toUpperCase());await expect(page.locator('#ai-workflow-quick-summary')).toContainText('GPT-6.1 Sol');await expect(page.locator('#ai-workflow-quick-hint')).toContainText('recommended model and reasoning');
+ await page.locator('#ai-workflow-quick-cancel').click();await expect(button).toBeFocused();await expect(page.locator('#ai-workflow-dialog')).not.toBeVisible();expect(calls).toBe(0);
+ await button.click();await expect(page.locator('#ai-workflow-quick-confirm')).toBeVisible();await page.keyboard.press('Escape');await expect(page.locator('#ai-workflow-quick-confirm')).not.toBeVisible();expect(calls).toBe(0);
 });
