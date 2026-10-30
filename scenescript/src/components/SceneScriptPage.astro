@@ -50,17 +50,17 @@ const {lang}=Astro.props,t=editorDictionary(lang),pub=publishingWords(lang),vaul
     <div class="project-metadata">
 <label>{t.title}<span class="project-copy-field"><input id="project-title" type="text" maxlength="200" /><button id="copy-project-title" type="button" title={t.copy+": "+t.title} aria-label={t.copy+": "+t.title}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h13v13H8ZM3 16V3h13" /></svg></button></span></label>
     <label>{t.format}<select id="project-format"><option value="landscape">{t.landscape}</option><option value="portrait">{t.portrait}</option><option value="square">{t.square}</option></select></label>
-<section class="publishing-profile project-metadata-wide" aria-labelledby="youtube-heading"><h3 id="youtube-heading">YouTube</h3>
+<section class="publishing-profile project-metadata-wide" aria-labelledby="youtube-heading"><div class="publishing-heading"><h3 id="youtube-heading">YouTube</h3><button id="generate-youtube-publishing" class="publishing-ai" type="button" title={pub.generateYouTube} aria-label={pub.generateYouTube} aria-haspopup="dialog" aria-controls="ai-workflow-dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 20 12-12 4 4L8 24M14 3v4m-2-2h4M4 4v4M2 6h4"/></svg></button></div>
 <label>{pub.title}<span class="project-copy-field"><input id="youtube-title" type="text" maxlength="200" /><button id="copy-youtube-title" type="button" title={t.copy+": "+pub.title} aria-label={t.copy+": "+pub.title}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h13v13H8ZM3 16V3h13" /></svg></button></span></label>
 <label>{pub.description}<span class="project-copy-field"><textarea id="project-description" rows="3" maxlength="5000"></textarea><button id="copy-project-description" type="button" title={t.copy+": "+pub.description} aria-label={t.copy+": "+pub.description}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h13v13H8ZM3 16V3h13" /></svg></button></span></label>
 <label>{pub.comment}<span class="project-copy-field"><textarea id="project-firstComment" rows="3" maxlength="5000"></textarea><button id="copy-project-firstComment" type="button" title={t.copy+": "+pub.comment} aria-label={t.copy+": "+pub.comment}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h13v13H8ZM3 16V3h13" /></svg></button></span></label>
 <label>{pub.tags}<span class="project-copy-field"><input id="project-hashtags" type="text" maxlength="2000" /><button id="copy-project-hashtags" type="button" title={t.copy+": "+pub.tags} aria-label={t.copy+": "+pub.tags}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h13v13H8ZM3 16V3h13" /></svg></button></span></label>
-<p class="small-hint">{pub.tagsHint}</p></section>
-<section class="publishing-profile project-metadata-wide" aria-labelledby="tiktok-heading"><h3 id="tiktok-heading">TikTok</h3>
+</section>
+<section class="publishing-profile project-metadata-wide" aria-labelledby="tiktok-heading"><div class="publishing-heading"><h3 id="tiktok-heading">TikTok</h3><button id="generate-tiktok-publishing" class="publishing-ai" type="button" title={pub.generateTikTok} aria-label={pub.generateTikTok} aria-haspopup="dialog" aria-controls="ai-workflow-dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 20 12-12 4 4L8 24M14 3v4m-2-2h4M4 4v4M2 6h4"/></svg></button></div>
 <label>{pub.caption}<span class="project-copy-field"><textarea id="tiktok-description" rows="3" maxlength="5000"></textarea><button id="copy-tiktok-description" type="button" title={t.copy+": "+pub.caption} aria-label={t.copy+": "+pub.caption}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h13v13H8ZM3 16V3h13" /></svg></button></span></label>
 <label>{pub.comment}<span class="project-copy-field"><textarea id="tiktok-firstComment" rows="3" maxlength="5000"></textarea><button id="copy-tiktok-firstComment" type="button" title={t.copy+": "+pub.comment} aria-label={t.copy+": "+pub.comment}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h13v13H8ZM3 16V3h13" /></svg></button></span></label>
 </section>
-<button id="generate-publishing" class="project-metadata-wide" type="button">{pub.generate}</button>
+
     </div>
 
     <div class="project-assets">

@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {demoProject,validateProject,parseProject,projectJsonBytes} from '../src/lib/model.ts';
-import {publishingFor,parsePublishing,acceptPublishing} from '../src/lib/publishing.ts';
+import {publishingFor,parsePublishing,acceptPublishing,acceptPlatformPublishing,platformPublishingInstructions} from '../src/lib/publishing.ts';
 import {projectManifest} from '../src/lib/ai-workflow.ts';
 import {lightCollectorProject} from '../src/lib/light-collector-example.ts';
 test('legacy hashtags migrate into descriptions, not YouTube tags, without modifying old files',()=>{
@@ -25,4 +25,17 @@ test('AI publication changes only text and cannot replace covers or the film',()
  const p=lightCollectorProject(),before=JSON.stringify(p),text={youtube:{title:'New title',description:'Longer film description #Animation',firstComment:'Your favourite?',tags:'Film, Animation'},tiktok:{description:'A little spark! #Film',firstComment:'✨ or 🦋?'}};
  const next=acceptPublishing(JSON.stringify(text),p);assert.equal(JSON.stringify(p),before);assert.strictEqual(next.scenes,p.scenes);assert.strictEqual(next.storyboard,p.storyboard);assert.strictEqual(next.thumbnail,p.thumbnail);assert.deepEqual(next.publishing!.tiktok.cover,p.publishing!.tiktok.cover);assert.equal(next.publishing!.youtube.title,'New title');validateProject(next);
  for(const bad of [{...text,scenes:[]},{...text,tiktok:{...text.tiktok,cover:null}},{...text,youtube:{...text.youtube,tags:'#Wrong'}},{...text,youtube:{...text.youtube,extra:'bad'}}])assert.throws(()=>acceptPublishing(JSON.stringify(bad),p));
+});
+
+test('platform-specific generation preserves the other profile and rejects cross-platform changes',()=>{
+ const p=lightCollectorProject(),before=JSON.stringify(p);
+ for(const platform of ['youtube','tiktok'] as const){
+  const other=platform==='youtube'?'tiktok':'youtube',profile=platform==='youtube'?{title:'New YouTube title',description:'New description',firstComment:'New comment',tags:'Film, Animation'}:{description:'New TikTok caption',firstComment:'New comment'};
+  const next=acceptPlatformPublishing(JSON.stringify({[platform]:profile}),p,platform);
+  assert.deepEqual(next.publishing![other],p.publishing![other]);assert.equal(next.publishing![platform].description,profile.description);assert.strictEqual(next.scenes,p.scenes);assert.deepEqual(next.publishing!.tiktok.cover,p.publishing!.tiktok.cover);
+  assert.throws(()=>acceptPlatformPublishing(JSON.stringify({[other]:profile}),p,platform));
+  assert.throws(()=>acceptPlatformPublishing(JSON.stringify({[platform]:profile,[other]:profile}),p,platform));
+  assert.ok(platformPublishingInstructions(platform).includes('Only return the '+platform+' profile'));
+ }
+ assert.equal(JSON.stringify(p),before);
 });

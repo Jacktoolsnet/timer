@@ -1373,7 +1373,7 @@ $('start-export').addEventListener('click',async()=>{
  finally{if(timingInterval!==undefined)clearInterval(timingInterval);timing?.stop(performance.now());paintTiming(true);exportController=undefined;controls.forEach(n=>n.disabled=false);setExportRunning(false);keepScreenAwake(false);}
 });
 
-$('generate-publishing').addEventListener('click',()=>openAiWorkflow(aiProjectContext(),'publishing'));
+for(const platform of ['youtube','tiktok'] as const)$('generate-'+platform+'-publishing').addEventListener('click',()=>openAiWorkflow(aiProjectContext(),'publishing',{publishingPlatform:platform}));
 for(const id of ['project-title','youtube-title','project-description','project-firstComment','project-hashtags','tiktok-description','tiktok-firstComment'] as const){
  const input=$(id) as HTMLInputElement|HTMLTextAreaElement;
  if(id!=='project-title')input.addEventListener('input',()=>{

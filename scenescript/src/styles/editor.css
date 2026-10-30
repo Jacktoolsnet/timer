@@ -1413,3 +1413,7 @@ body input[type=checkbox]:disabled{opacity:.45;cursor:not-allowed}
 .publishing-profile h3,.publishing-profile p{margin:0}
 :is(#thumbnail-content,#tiktok-thumbnail-content){display:flex;flex-direction:column;align-items:center;gap:10px;min-width:0}
 .thumbnail-preview.portrait-cover{width:min(100%,180px);aspect-ratio:9/16}
+
+.publishing-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.publishing-ai{display:inline-grid;place-items:center;flex:0 0 44px;width:44px;height:44px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--accent-soft);color:var(--accent)}
+.publishing-ai svg{display:block;width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}

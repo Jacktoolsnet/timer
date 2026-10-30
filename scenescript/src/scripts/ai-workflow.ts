@@ -1,4 +1,5 @@
-import {publishingFor,publishingInstructions,acceptPublishing} from '../lib/publishing';
+import {publishingWords} from '../lib/publishing-i18n';
+import {publishingFor,platformPublishingInstructions,acceptPlatformPublishing,type PublishingPlatform} from '../lib/publishing';
 import {animationResources2D} from '../lib/stage2d-capabilities';
 import {acceptBoardModel2D,model2DNeedsRestyle,model2DInstructions,model2DRequest} from '../lib/storyboard-model2d';
 import {storyboardModel2DView} from './storyboard-model2d-view';
@@ -30,7 +31,7 @@ import {ensureApiVaultUnlocked,requestApiKey} from './api-vault';
 import {VaultError} from '../lib/api-vault';
 import type {aiWorkflowWords} from '../lib/ai-workflow-i18n';
 export type AiWorkflowContext={project:Project;valid:()=>boolean;apply:(p:Project)=>void;preload?:(p:Project)=>Promise<void>;draft?:boolean;applyScript?:(p:Project)=>void};
-export type AiWorkflowOptions={resourceDimension?:'2d'|'3d';resourceTarget?:BoardReviewTarget;imageTarget?:BoardReviewTarget;quickImage?:boolean;quickScript?:boolean};
+export type AiWorkflowOptions={publishingPlatform?:PublishingPlatform;resourceDimension?:'2d'|'3d';resourceTarget?:BoardReviewTarget;imageTarget?:BoardReviewTarget;quickImage?:boolean;quickScript?:boolean};
 let openWorkflow:((context:AiWorkflowContext,action?:string,options?:AiWorkflowOptions)=>void)|undefined;
 export function openAiWorkflow(context:AiWorkflowContext,action='board',options:AiWorkflowOptions={}){openWorkflow?.(context,action,options);}
 export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,reviewStoryboard:(board:Storyboard,saved?:boolean)=>void){
@@ -40,9 +41,11 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,re
  const action=$<HTMLSelectElement>('action'),model=$<HTMLInputElement>('model'),prompt=$<HTMLTextAreaElement>('prompt'),consent=$<HTMLInputElement>('consent'),start=$<HTMLButtonElement>('start'),apply=$<HTMLButtonElement>('apply');
  const enlargeImage=imageViewerButton(()=>({data:$<HTMLImageElement>('image-preview').src,name:t.preview}));enlargeImage.id='ai-workflow-image-enlarge';enlargeImage.hidden=true;$('image-preview').before(enlargeImage);
  const jobsSelect=$<HTMLSelectElement>('job'),targets=$<HTMLSelectElement>('target');
+ const publishingAction=action.querySelector<HTMLOptionElement>('option[value=publishing]')!,publishingActionLabel=publishingAction.textContent;
  const modelAction=action.querySelector<HTMLOptionElement>('option[value=model]')!,modelActionLabel=modelAction.textContent;
  const modelPicker=installAiModelPicker(action,model);
  const models:Record<string,string>={publishing:'gpt-5-mini',model:'gpt-6.1-sol',board:'gpt-5-mini',script:'gpt-5-mini',image:'gpt-image-2',speech:'eleven_multilingual_v2'};
+ let publishingPlatform:PublishingPlatform|undefined;
  let resourceDimension:'2d'|'3d'='3d';
  let resourceTarget:BoardReviewTarget|undefined,disposeModelPreview:(()=>void)|undefined;
  const dw=storyboardDesignWords(document.documentElement.lang);
@@ -98,13 +101,13 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,re
  function configure(){
   modelAction.textContent=resourceDimension==='2d'?storyboardResourceWords(document.documentElement.lang).create:modelActionLabel;
   for(const id of ['repair-sizes','repair-joints'])$<HTMLButtonElement>('model-'+id).hidden=resourceDimension==='2d';
-  resetRecovery();clearPreview();dialog.classList.remove('ai-error-view');$('title').textContent=t.title;$('error-box').hidden=true;$('status').textContent='';consent.checked=false;const kind=action.value;modelPicker.configure(models[kind]);
+  resetRecovery();clearPreview();dialog.classList.remove('ai-error-view');$('title').textContent=t.title;$('error-box').hidden=true;$('status').textContent='';consent.checked=false;publishingAction.textContent=publishingPlatform?publishingWords(document.documentElement.lang)[publishingPlatform==='youtube'?'generateYouTube':'generateTikTok']:publishingActionLabel;const kind=action.value;modelPicker.configure(models[kind]);
   $('planning-image-hint').hidden=kind!=='board';$('text-options').hidden=kind==='image'||kind==='speech';$('content-options').hidden=kind==='speech';$('image-options').hidden=kind!=='image';$('speech-options').hidden=kind!=='speech';$('refs-label').hidden=kind==='image'||kind==='speech'||kind==='publishing';$('prompt-label').hidden=kind==='speech';if(kind==='model'&&resourceTarget&&ctx.project.storyboard){const subject=resourceSubject(ctx.project.storyboard,resourceTarget);$('status').textContent=dw.target+': '+subject.name;}configureImage(true);speechEstimate();busy(false);
  }
  function preview(p:Project,kind:string){
   check();candidate=p;$('preview').hidden=false;
   const b=p.storyboard;$('summary').textContent=kind==='board'&&b?`${b.title} · ${b.shots.length} ${t.scenes} · ${b.duration} s`:kind==='script'?`${p.title} · ${p.scenes.length} ${t.scenes} · ${p.scenes.reduce((n,s)=>n+s.duration,0).toFixed(1)} s`:kind==='speech'?`${p.scenes.reduce((n,s)=>n+s.duration,0).toFixed(1)} s`:t.ready;
-  if(kind==='publishing'){const textarea=$<HTMLTextAreaElement>('json-preview');const ptext=publishingFor(p);textarea.value=JSON.stringify({youtube:ptext.youtube,tiktok:{description:ptext.tiktok.description,firstComment:ptext.tiktok.firstComment}},null,2);textarea.hidden=false;}
+  if(kind==='publishing'){const textarea=$<HTMLTextAreaElement>('json-preview');const ptext=publishingFor(p);const profiles={youtube:ptext.youtube,tiktok:{description:ptext.tiktok.description,firstComment:ptext.tiktok.firstComment}};textarea.value=JSON.stringify(publishingPlatform?{[publishingPlatform]:profiles[publishingPlatform]}:profiles,null,2);textarea.hidden=false;}
   if(kind==='board'||kind==='script'){const textarea=$<HTMLTextAreaElement>('json-preview');textarea.value=JSON.stringify(kind==='board'?boardManifest(b!):projectManifest(p),null,2);textarea.hidden=false;}
   if(kind==='model'&&resourceTarget&&b&&resourceDimension==='2d'){const subject=resourceSubject(b,resourceTarget);$('summary').textContent=subject.name+(subject.model2dChat?.at(-1)?.reply?' — '+subject.model2dChat.at(-1)!.reply:'')+(model2DNeedsRestyle(subject)?' — '+dw.styleUnchanged:'');disposeModelPreview=storyboardModel2DView(modelPreview,p,subject,resourceTarget.kind==='settings');}
   else if(kind==='model'&&resourceTarget&&b){const subject=resourceSubject(b,resourceTarget);$('summary').textContent=subject.name+(subject.modelChat?.at(-1)?.reply?' — '+subject.modelChat.at(-1)!.reply:'')+(modelNeedsRestyle(subject)?' — '+dw.styleUnchanged:'');const surface=modelSurfaceStatus(subject),usage=document.createElement('p');usage.dataset.modelTextureUsage='true';usage.textContent=dw.textureUsage+': '+surface.parts+' / '+surface.images+(surface.missing?' — '+dw.missingTextures:'');modelPreview.append(usage);disposeModelPreview=storyboardModelView(modelPreview,subject,resourceTarget.kind==='settings',b);}
@@ -145,7 +148,7 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,re
  quickDialog.addEventListener('close',()=>finishQuick?.(false));
  openWorkflow=async(next,initial='board',options={})=>{
   if(dialog.open||active||opening)return;opening=true;stop();
-  try{if(!await ensureApiVaultUnlocked()||!next.valid())return;ctx=next;resourceTarget=options.resourceTarget;resourceDimension=options.resourceDimension??'3d';const ticket=++session;modelPicker.reset();clearPreview();jobs=[];jobsSelect.replaceChildren();option(jobsSelect,'missing',t.all);targets.replaceChildren();if(!ctx.draft)option(targets,'cover',t.cover);
+  try{if(!await ensureApiVaultUnlocked()||!next.valid())return;ctx=next;publishingPlatform=options.publishingPlatform;resourceTarget=options.resourceTarget;resourceDimension=options.resourceDimension??'3d';const ticket=++session;modelPicker.reset();clearPreview();jobs=[];jobsSelect.replaceChildren();option(jobsSelect,'missing',t.all);targets.replaceChildren();if(!ctx.draft)option(targets,'cover',t.cover);
   const b=ctx.project.storyboard;for(const kind of ['characters','settings','shots'] as const)for(const item of b?.[kind]??[])option(targets,kind+':'+item.id,kind+' · '+('title'in item?item.title:item.name));
   for(const o of action.options)o.disabled=o.value==='model'?!resourceTarget:!!ctx.draft&&(o.value==='publishing'||o.value==='speech'||o.value==='script'&&(!ctx.applyScript||!b?.approved||!canApproveStoryboard(b)));
   action.value=initial;if(options.imageTarget){targets.value=options.imageTarget.kind+':'+options.imageTarget.id;if(!targets.value)return;}prompt.value='';$('draft').hidden=!ctx.draft;$<HTMLInputElement>('refs').checked=initial==='model';$<HTMLInputElement>('image-refs').checked=true;configure();if(initial==='model')modelPicker.useRecommendation();const quickScript=options.quickScript&&initial==='script';if(quickScript)modelPicker.useRecommendation();if(options.quickImage&&initial==='image'||quickScript){if(!await confirmQuick(quickScript?'script':'image')||!next.valid())return;dialog.showModal();consent.checked=true;start.disabled=false;start.click();return;}dialog.showModal();
@@ -177,7 +180,7 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,re
     if($<HTMLInputElement>('refs').checked){const refs=imageGenerationReferences(source,resourceTarget);if(refs.length){references=await prepareImageReferences(refs,controller.signal);check();controller.signal.throwIfAborted();instructions+='\nAttached images guide identity, silhouette, colors and appearance. Reconstruct editable vector parts and joints, not a flat picture. Reference order: '+inputJson(refs.map(r=>r.subjects));}}
    }
    else if(kind==='model'){if(!source.storyboard||!resourceTarget)throw new Error(dw.missing);instructions=(await import('../lib/storyboard-model-guide')).storyboardModelGuide()+'\n'+boardModelInstructions+'\n'+aiLanguageInstruction(document.documentElement.lang);textInput=inputJson(modelRequestData(source.storyboard,resourceTarget,prompt.value));if($<HTMLInputElement>('refs').checked){const refs=imageGenerationReferences(source,resourceTarget);if(refs.length){references=await prepareImageReferences(refs,controller.signal);check();controller.signal.throwIfAborted();instructions+='\nThe attached images are visual identity references for the selected resource, not images to place on flat substitute planes. Use actual geometry. Preserve identity and distinctive colors, but adapt all shapes/proportions to the current selected style even if reference images show another style. Reference order: '+inputJson(refs.map(r=>r.subjects));}}}
-   else if(kind==='publishing'){instructions=publishingInstructions+'\n'+aiLanguageInstruction(document.documentElement.lang);textInput=inputJson({request:prompt.value,project:projectManifest(source)});}
+   else if(kind==='publishing'){instructions=platformPublishingInstructions(publishingPlatform)+'\n'+aiLanguageInstruction(document.documentElement.lang);textInput=inputJson({request:prompt.value,project:projectManifest(source)});}
    else if(kind==='board'||kind==='script'){
     const plan=kind==='script'?requireApprovedBoard(source):sourceBoard;
     const refs=$<HTMLInputElement>('refs').checked?boardReferences(plan):[];references=refs.map(r=>r.data);
@@ -197,7 +200,7 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,re
    $('status').textContent=t.unlock;key=await requestApiKey(kind==='speech'?'elevenlabs':'openai',controller.signal);check();controller.signal.throwIfAborted();$('status').textContent=t.working;
    if(kind==='board'||kind==='script'||kind==='model'||kind==='publishing'){
     const text=await generateText(key,{model:model.value.trim(),instructions,input:textInput,images:references,reasoning:modelPicker.reasoning},controller.signal);if(kind==='model')receivedModel=text;if(kind==='script')receivedScript=text;check();controller.signal.throwIfAborted();
-    const p=kind==='publishing'?acceptPublishing(text,source):kind==='model'?(resourceDimension==='2d'?acceptBoardModel2D:acceptBoardModel)(text,source,resourceTarget!,prompt.value):kind==='board'?acceptPlanning(text,source,sourceBoard):acceptScript(text,source);
+    const p=kind==='publishing'?acceptPlatformPublishing(text,source,publishingPlatform):kind==='model'?(resourceDimension==='2d'?acceptBoardModel2D:acceptBoardModel)(text,source,resourceTarget!,prompt.value):kind==='board'?acceptPlanning(text,source,sourceBoard):acceptScript(text,source);
     if(kind==='script')await ctx.preload?.(p);else if(kind!=='publishing')for(const a of Object.values(p.storyboard!.images))if(a.data&&!Object.values(sourceBoard.images).some(old=>old.data===a.data))await decodeImage(a.data);
     check();controller.signal.throwIfAborted();preview(p,kind);
    }else if(kind==='image'){

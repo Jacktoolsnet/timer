@@ -25,3 +25,17 @@ export function acceptPublishing(text:string,source:Project):Project{
  const publishing=parsePublishing({...raw,tiktok:{...raw.tiktok,cover:publishingFor(source).tiktok.cover}});
  return {...source,publishing};
 }
+
+export type PublishingPlatform='youtube'|'tiktok';
+export function platformPublishingInstructions(platform?:PublishingPlatform):string{
+ if(!platform)return publishingInstructions;
+ const example=platform==='youtube'?{youtube:{title:'...',description:'...',firstComment:'...',tags:'tag one, tag two'}}:{tiktok:{description:'...',firstComment:'...'}};
+ return publishingInstructions.replace('Create distinct publication copy for YouTube and TikTok','Create publication copy only for '+(platform==='youtube'?'YouTube':'TikTok')).replace(/Return JSON only: .*?\. YouTube:/,'Return JSON only: '+JSON.stringify(example)+'. YouTube:')+' Only return the '+platform+' profile. The other platform must remain unchanged.';
+}
+export function acceptPlatformPublishing(text:string,source:Project,platform?:PublishingPlatform):Project{
+ if(!platform)return acceptPublishing(text,source);
+ const raw=JSON.parse(text);
+ if(!raw||typeof raw!=='object'||Array.isArray(raw)||Object.keys(raw).length!==1||!Object.hasOwn(raw,platform))throw Error('Publishing: expected only '+platform+' profile');
+ const current=publishingFor(source);
+ return acceptPublishing(JSON.stringify(platform==='youtube'?{youtube:raw.youtube,tiktok:{description:current.tiktok.description,firstComment:current.tiktok.firstComment}}:{youtube:current.youtube,tiktok:raw.tiktok}),source);
+}
