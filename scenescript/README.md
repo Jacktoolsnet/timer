@@ -1569,3 +1569,55 @@ node --experimental-strip-types scripts/generate-mila-portrait.mjs --source '/pa
 
 Reference images in the example are reduced WebP copies to stay within browser
 save limits. Full-resolution originals remain in the input file.
+
+### Shared art direction and visual correction
+
+`storyboard.look` optionally contains four shared text constraints (max 2000
+characters each): `palette`, `perspective`, `lighting`, `atmosphere`. Edit them
+in the Storyboard story tab. They are portable and included in sketch, 2D/3D
+resource and script requests. User-authored look fields survive planning feedback;
+changing them invalidates approvals, but does not silently repaint existing models.
+
+Vector parts optionally support:
+
+```json
+{
+  "id": "moonlight",
+  "shape": "ellipse",
+  "width": 300,
+  "height": 160,
+  "opacity": 0.3,
+  "blend": "screen",
+  "gradient": {
+    "type": "radial", "x0": 0.5, "y0": 0.5, "x1": 1, "y1": 0.5,
+    "stops": [{"at": 0, "color": "#8899bb"}, {"at": 1, "color": "#000000"}]
+  }
+}
+```
+
+`gradient` overrides fill; linear/radial endpoints are normalized to the shape's
+bounds. Radial center is `(x0,y0)`, radius is distance to `(x1,y1)`. Stops strictly
+increase from 0 to 1 (2–8 colors). `blend` is normal/screen/multiply/add.
+`shadow:{color,opacity,x,y,blur}` adds a local silhouette shadow following the
+part's rig. `blur` softens the shape itself. These paint effects apply to vector
+shapes, not group/text; blur is 0–24, shadow offsets ±100, max 16 blurred effects
+per model. Soft effects scale with output/camera transforms. For floor contacts,
+use a separate soft ellipse prop, not a permanent background inside a character.
+This is authored lighting, not a physical light solver or automatic cast shadow.
+All effects use the same renderer for playback, resource previews and exports.
+
+“Compare sketch & render” is available on 2D resources and storyboard shots.
+Resource comparisons isolate the selected resource; shot comparisons use the
+actual composed/export-rendered scene at the chosen local time. Executable scene
+IDs must match storyboard shot IDs (script generation now requests this). No
+paid calls occur on opening, scrubbing or saving feedback. A correction request
+includes the shared look, selected notes, reference sketch and current render;
+the last two attached images identify this pair. Uploads share the existing
+8-image/6 MiB budget. The normal recommended-model confirmation, stale-result
+checks and draft/review rules still apply. Shot script corrections require an
+approved plan; otherwise save feedback, review/approve and generate again.
+There is no automatic scoring or unbounded paid retry loop.
+
+The Mila start project demonstrates shared night colors, editable gradients,
+moonlight overlays and contact shadows. Its full-resolution input remains intact;
+comparison renders are ephemeral and never added to project media or downloads.

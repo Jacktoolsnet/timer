@@ -43,7 +43,7 @@ export function parseModel2D(value:unknown,path='model2d'):Model2D{
   out.fill=paint(o.fill,p+'.fill');out.stroke=paint(o.stroke,p+'.stroke');out.strokeWidth=num(o.strokeWidth,p+'.strokeWidth',0,100);
   out.text=text(o.text,p+'.text',500);textBudget+=out.text.length;if(textBudget>4000)throw Error(path+': text budget exceeded');out.fontSize=num(o.fontSize,p+'.fontSize',1,200);if(out.shape==='text'){const area=out.text.length*out.fontSize*out.fontSize;textArea+=area;if(area>262144||textArea>2000000)throw Error(path+': text rendering budget exceeded');}
   out.parallax=num(o.parallax,p+'.parallax',0,2);out.layer=one(o.layer,['background','foreground'],p+'.layer');
-  if((out.gradient||out.shadow||out.blur)&&['group','text'].includes(out.shape))throw Error(p+': paint effects require vector geometry');
+  if((out.gradient||out.shadow||out.blur!==undefined||out.blend!==undefined)&&['group','text'].includes(out.shape))throw Error(p+': paint effects require vector geometry');
   out.points=list(o.points,p+'.points',1024).map(v=>num(v,p+'.points',-8192,8192));
   if(out.shape==='polygon'&&(out.points.length<6||out.points.length%2))throw Error(p+': polygon requires coordinate pairs (3+ vertices)');
   out.path=list(o.path,p+'.path',512).map((v,i)=>{const cp=p+'.path['+i+']',c=object(v,cp);keys(c,['op','values'],cp);const op=one(c.op,['M','L','Q','C','Z'],cp+'.op'),values=list(c.values??[],cp+'.values',6).map(v=>num(v,cp,-8192,8192));if(values.length!==({M:2,L:2,Q:4,C:6,Z:0}[op]))throw Error(cp+': invalid command arity for '+op+' in part '+JSON.stringify(out.id)+'; expected '+({M:2,L:2,Q:4,C:6,Z:0}[op])+' values, got '+values.length+'. M/L: 2, Q: 4, C: 6, Z: 0. Do not discard coordinates; verify the intended curve command.');return {op,values};});
