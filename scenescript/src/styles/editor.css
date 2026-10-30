@@ -1417,3 +1417,6 @@ body input[type=checkbox]:disabled{opacity:.45;cursor:not-allowed}
 .publishing-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .publishing-ai{display:inline-grid;place-items:center;flex:0 0 44px;width:44px;height:44px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--accent-soft);color:var(--accent)}
 .publishing-ai svg{display:block;width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+
+/* Transparency grid is UI-only: never part of a resource or exported scene. */
+.stage2d-canvas.stage2d-isolated{background-color:var(--surface,#18202b);background-image:linear-gradient(45deg,#80808022 25%,transparent 25%),linear-gradient(-45deg,#80808022 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#80808022 75%),linear-gradient(-45deg,transparent 75%,#80808022 75%);background-size:24px 24px;background-position:0 0,0 12px,12px -12px,-12px 0}

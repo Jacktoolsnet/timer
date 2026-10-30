@@ -166,7 +166,7 @@ export function installStage2DEditor(get:()=>{project:Project;index:number},comm
   const host=document.createElement('div');host.id='stage2d-resource-preview';
   const status=document.createElement('p');status.id='stage2d-resource-preview-status';status.setAttribute('role','status');status.setAttribute('aria-live','polite');card.append(caption,host,status);editor.append(card);if(audioPanel)editor.append(audioPanel);
   const sample=resourcePreview2D(p,kind,selected)!;
-  preview=createStage2DView(sample.resources,sample.shot,sample.duration,640,480,error=>{status.textContent=error.message;});preview.canvas.setAttribute('aria-label',shared.resourcePreview+' · '+resource.name);host.append(preview.canvas);preview.draw(0);
+  preview=createStage2DView(sample.resources,sample.shot,sample.duration,640,480,error=>{status.textContent=error.message;},sample.isolated);preview.canvas.setAttribute('aria-label',shared.resourcePreview+' · '+resource.name);host.append(preview.canvas);preview.draw(0);
 
  }
 }

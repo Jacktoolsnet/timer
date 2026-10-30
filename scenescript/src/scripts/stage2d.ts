@@ -8,24 +8,26 @@ export class Stage2DRenderer{
  private lost=false;
  private onLost=(event:Event)=>{event.preventDefault();this.lost=true;};
  async init(){
-  try{await this.app.init({width:960,height:540,resolution:1,antialias:true,preference:['webgl'],autoStart:false,preserveDrawingBuffer:true,background:'#123c37'});}
+  try{await this.app.init({width:960,height:540,resolution:1,antialias:true,preference:['webgl'],autoStart:false,preserveDrawingBuffer:true,background:'#123c37',backgroundAlpha:0});}
   catch{throw new Error('2D: WebGL is not available on this device.');}
   this.app.canvas.addEventListener('webglcontextlost',this.onLost);return this;
  }
- render(shot:Stage2D,duration:number,time:number,width:number,height:number,target:HTMLCanvasElement,resources:Resources2D){
+ render(shot:Stage2D,duration:number,time:number,width:number,height:number,target:HTMLCanvasElement,resources:Resources2D,isolated=false){
   if(this.lost)throw new Error('2D: graphics context unavailable.');
   const used={stages2d:Object.fromEntries([shot.stage,...(shot.transition?[shot.transition.stage]:[])].map(id=>[id,resources.stages2d[id]])),objects2d:Object.fromEntries(shot.actors.map(a=>[a.object,resources.objects2d[a.object]]))};
-  const key=JSON.stringify([shot,duration,used]);let world=this.worlds.get(key);
+  const key=JSON.stringify([shot,duration,used,isolated]);let world=this.worlds.get(key);
   if(!world){
    if(this.worlds.size>=2){const [oldKey,old]=this.worlds.entries().next().value!;this.app.stage.removeChild(old.root);old.root.destroy({children:true,texture:true,textureSource:true});this.worlds.delete(oldKey);}
-   world=createStage2DScene(structuredClone(used),structuredClone(shot));this.worlds.set(key,world);
+   world=createStage2DScene(structuredClone(used),structuredClone(shot),isolated);this.worlds.set(key,world);
   }
   this.app.stage.removeChildren();this.app.stage.addChild(world.root);
   const scale=Math.min(width/960,height/540);world.root.scale.set(scale);world.root.position.set((width-960*scale)/2,(height-540*scale)/2);
   if(this.app.screen.width!==width||this.app.screen.height!==height)this.app.renderer.resize(width,height);
+  this.app.renderer.background.alpha=isolated?0:1;
   world.setResolution(scale);world.draw(Math.max(0,Math.min(duration,time)));this.app.render();
   if(target.width!==width)target.width=width;if(target.height!==height)target.height=height;
   const context=target.getContext('2d');if(!context)throw new Error('2D: canvas unavailable.');context.clearRect(0,0,width,height);context.drawImage(this.app.canvas,0,0);
+  target.dataset.stage2dIsolated=String(isolated);
   target.dataset.stage2dTime=String(time);target.dataset.stage2dStage=shot.stage;target.dataset.stage2dActors=String(shot.actors.length);
  }
  dispose(){this.app.canvas.removeEventListener('webglcontextlost',this.onLost);this.app.stage.removeChildren();for(const world of this.worlds.values())world.root.destroy({children:true,texture:true,textureSource:true});this.worlds.clear();this.app.destroy(true,{children:true});}

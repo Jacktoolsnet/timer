@@ -239,7 +239,7 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
       tile.append(node('p',association.resource!.name));if(model2DNeedsRestyle(subject)){const notice=node('p',dw.stylePending);notice.className='small-hint';tile.append(notice);}
       if(association.resource!.model){resourceViewDisposers.push(storyboardModel2DView(tile,origin.project,subject,kind==='settings'));}
       else{const figure=node('div'),message=node('p');figure.className='board-model-canvas board-resource2d-canvas';message.setAttribute('role','status');tile.append(figure,message);
-      const view=createStage2DView(sample.resources,sample.shot,sample.duration,640,480,e=>{message.textContent=e.message;});
+      const view=createStage2DView(sample.resources,sample.shot,sample.duration,640,480,e=>{message.textContent=e.message;},sample.isolated);
       view.canvas.setAttribute('aria-label',rw.resource+' · '+association.resource!.name);figure.append(view.canvas);view.draw(0);resourceViewDisposers.push(()=>view.dispose());}
       const hint=node('p',rw.hint);hint.className='small-hint';tile.append(hint);
      }else tile.append(node('p',subject.resource2d?rw.missing:rw.none));

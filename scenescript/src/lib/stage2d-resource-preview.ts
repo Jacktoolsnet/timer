@@ -16,5 +16,5 @@ export function resourcePreview2D(source:Resources2D,kind:'stages2d'|'objects2d'
   if(clip&&model?.animations[clip])actor.actions=[{...defaultAction2D('play'),clip,duration}];
   shot.actors.push(actor);
  }else if(clip&&model?.animations[clip])shot.stageClip=clip;
- return {resources,shot,duration};
+ return {resources,shot,duration,isolated:kind==='objects2d'};
 }

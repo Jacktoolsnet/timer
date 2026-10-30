@@ -3,8 +3,9 @@ import type {Resources2D,Stage2D} from '../lib/stage2d';
 import {actorFrame2D,cameraFrame2D,ease2D,mix2D} from '../lib/motion2d';
 import {createBackdrop2D,createObjectView2D,label} from './light-collector';
 /** Compose resources into independent instances. No story-specific schedules live in the renderer. */
-export function createStage2DScene(resources:Resources2D,shot:Stage2D){
- const foreground=new Container(),root=new Container(),base=createBackdrop2D(resources.stages2d[shot.stage]);root.addChild(base.root);
+export function createStage2DScene(resources:Resources2D,shot:Stage2D,isolated=false){
+ const foreground=new Container(),root=new Container(),empty=new Container();
+ const base=isolated?{root:empty,world:empty,draw:(_time:number,_camera:{x:number;y:number;zoom:number},_clip?:string)=>{}}:createBackdrop2D(resources.stages2d[shot.stage]);root.addChild(base.root);
  const actors=shot.actors.map(instance=>({instance,view:createObjectView2D(resources.objects2d[instance.object],instance)}));for(const actor of actors){actor.view.host.label=actor.instance.id;actor.view.node.label='actor-pose';(actor.instance.layer==='foreground'?foreground:base.world).addChild(actor.view.host);}
  const incoming=shot.transition?createBackdrop2D(resources.stages2d[shot.transition.stage]):undefined;const mask=new Graphics();if(incoming){root.addChild(incoming.root);incoming.root.addChild(mask);incoming.root.mask=mask;}
  root.addChild(foreground);
