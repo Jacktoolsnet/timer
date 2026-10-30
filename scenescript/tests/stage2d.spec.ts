@@ -161,7 +161,7 @@ test('storyboard 2D resource assignment persists, can be cleared, and follows re
 
 test('free vector bird and city animate deterministically in scene preview and export',async({page})=>{
  const {free2DProject}=await import('../src/lib/free2d-example'),p=free2DProject();
- await page.route('**'+url,r=>r.fulfill({contentType:'application/json',body:JSON.stringify(p)}));
+ for(const path of [url,DEFAULT_PROJECT_URL])await page.route('**'+path,r=>r.fulfill({contentType:'application/json',body:JSON.stringify(p)}));
  await page.goto('/de/');await expect(page.locator('#editor')).toHaveAttribute('data-ready','true');
  const canvas=page.locator('#stage .stage2d-canvas');await expect(canvas).toHaveAttribute('data-stage2d-stage','city');
  await page.locator('#timeline').fill('0.5');await expect(canvas).toHaveAttribute('data-stage2d-time','0.5');

@@ -39,34 +39,24 @@ stage iris transitions (still camera-aligned, below ending text). Actions: move/
 in scene seconds, toX/toY, height (0..110) and target (instance ID for attach).
 Walk/wave/jump support robots and custom articulated objects. Custom clips use
 actions:[{type:"play",clip:"name",at,duration}]; walk/wave/jump may specify clip too.
-IMPORTANT: kind:"robot", "spark" and "shape" are built-in resources, NOT custom models.
-Their actions use clip:"" (or omit clip). A built-in robot walks with
-{type:"walk",at:0,duration:3,toX:470,toY:425}, NOT {type:"play",clip:"walk"}.
-Only kind:"custom" has named clips, and every nonempty clip must exist in the
-FINAL resource.model.animations after approved storyboard resources are restored.
-Never invent clip names or add clips to approved geometry in the generated project:
-those resources are restored locally, replacing your resource definition. Read
-animationResources2d in the request for the effective resource IDs, kinds and clips.
-If a needed custom clip is absent, use supported scene motion or report that the
-resource needs a separate animation edit; do not reference a nonexistent clip.
+Built-in robot/spark/shape resources use clip:"" (or omit). Robot walking:
+{type:"walk",at:0,duration:3,toX:470,toY:425}, never play:"walk".
+Only custom resources have named clips. Every nonempty clip must exist in FINAL
+resource.model.animations: approved storyboard geometry is restored locally and
+replaces generated definitions. Read animationResources2d for effective IDs/kinds/
+clips; if missing, use scene motion or request a separate resource animation edit.
 Object2D.sounds optionally contains up to 8 reusable synthesized sound bindings:
 {id,name,action,clip:"",trigger:"start"|"repeat"|"steps",phase:0,interval:0.43,stride:35,
 instrument:(native Music instrument),notes:[{at:0,duration:0.15,pitch:79,velocity:0.7}]}.
-phase is a fraction (0..1) of the matched action duration, never an absolute scene time.
-clip filters an animation clip (required for play). start fires once at phase; repeat
-fires at interval seconds until the action ends; steps is only for walk and follows
-eased travel distance at each stride. Notes have relative at (0..4 seconds), duration
-(.05..16), MIDI pitch 21..108 and velocity 0..1. All instrument parameters are editable.
-Actor.sound:{muted:false,volume:1,pitch:0} optionally controls only that instance's sounds
-(pitch is a semitone offset -24..24). Object appearance and sounds remain reusable.
-Recompute events from actions: moving or retiming an action also moves its sounds;
-cloning a resource/instance copies bindings, not fixed global notes. Muted/invisible
-instances emit no new sounds. Do not duplicate object SFX in Project.music. Music,
-ambience and scene transition cues stay in Project.music. Up to 10000 emitted object
-sound notes / 64 simultaneous voices per project; keep effects sparse. Exact sound
-binding names can match storyboard soundEffects tasks. Preserve sounds when editing
-or regenerating geometry/animation clips.
-Idle plays automatically. Scene.stage2d.stageClip optionally chooses a set clip.
+phase: fraction 0..1 of action duration. clip filters a named clip (required for play).
+start fires once, repeat at interval seconds, steps at eased walk distance/stride.
+Notes: relative at0..4s, duration.05..16s, pitch21..108, velocity0..1.
+Actor.sound:{muted:false,volume:1,pitch:0} controls this instance (pitch±24 semitones).
+Actions/retiming drive sounds; cloning copies bindings. Invisible/muted actors emit
+no new events. Do not duplicate object SFX in Project.music; keep accompaniment and
+transition cues there. Max10000 object notes/64 simultaneous voices; effects sparse.
+Exact binding names may match storyboard soundEffects tasks. Preserve sounds during
+geometry edits. Idle plays automatically. Scene.stage2d.stageClip optionally chooses a set clip.
 Attach links a non-robot to another robot or custom target with a "hand" anchor. attach.burst:false suppresses contact particles for gentle landings.
 No self/invalid targets or overlapping position actions. Same-type legacy actions
 must not overlap; play clips may overlap only on disjoint animated properties.
@@ -93,7 +83,7 @@ mode/style/surface; the selected style overrides old appearance. Preserve
 approved model3d; use subject IDs in project.characters/stages. subject.resource2d associates an existing project.objects2d resource (character/object) or project.stages2d resource (setting); omitted uses the subject ID, null means unassigned. Preserve these associations. modelChat is edit history.
 shot.soundEffects are pending descriptions, NOT audible tracks. Dialogue needs
 Scene.narration text/speaker, music enabled Project.music; speech generation is separate.
-Storyboard.format is planning-only. Limits: 25 MiB, 100 images, 8 MiB/image.
+Storyboard.format sets the generation target; existing scenes are not recomposed automatically. Shared board.look guides palette, perspective, lighting and atmosphere. Limits: 25 MiB, 100 images, 8 MiB/image.
 API-only: assets[id]={name} reuses known storyboard images; thumbnail may use a unique
 known raster name. Standalone files must embed data. Never invent Base64.
 Direct video creation may omit storyboard (null).

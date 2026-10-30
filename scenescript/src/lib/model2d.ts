@@ -3,7 +3,9 @@ export type Paint2D=string|null;
 export const properties2D=['x','y','rotation','scaleX','scaleY','opacity'] as const;
 export type Property2D=typeof properties2D[number];
 export type PathCommand2D={op:'M'|'L'|'Q'|'C'|'Z';values:number[]};
-export type Part2D={
+export type Gradient2D={type:"linear"|"radial";x0:number;y0:number;x1:number;y1:number;stops:{at:number;color:string}[]};
+export type Shadow2D={color:string;opacity:number;x:number;y:number;blur:number};
+export type Part2D={gradient?:Gradient2D;shadow?:Shadow2D;blend?:"normal"|"screen"|"multiply"|"add";blur?:number;
  id:string;parent:string|null;shape:'group'|'rectangle'|'ellipse'|'polygon'|'path'|'text';
  x:number;y:number;rotation:number;scaleX:number;scaleY:number;pivotX:number;pivotY:number;
  width:number;height:number;radius:number;fill:Paint2D;stroke:Paint2D;strokeWidth:number;opacity:number;
@@ -23,9 +25,14 @@ const paint=(v:unknown,p:string):Paint2D=>{if(v===null)return null;const s=text(
 export function defaultPart2D(id='part'):Part2D{return {id,parent:null,shape:'rectangle',x:0,y:0,rotation:0,scaleX:1,scaleY:1,pivotX:0,pivotY:0,width:100,height:100,radius:0,fill:'#79a8cb',stroke:null,strokeWidth:0,opacity:1,points:[],path:[],text:'',fontSize:24,rotationMin:-360,rotationMax:360,parallax:1,layer:'background'};}
 export function parseModel2D(value:unknown,path='model2d'):Model2D{
  const raw=object(value,path);keys(raw,['width','height','originX','originY','parts','animations'],path);
- let budget=0,textBudget=0,textArea=0;
+ let budget=0,textBudget=0,textArea=0,filters=0;
  const parts=list(raw.parts,path+'.parts',256).map((value,i)=>{
-  const p=path+'.parts['+i+']',raw=object(value,p);keys(raw,Object.keys(defaultPart2D()),p);const o={...defaultPart2D(),...raw},out=defaultPart2D(id(raw.id,p+'.id'));
+  const p=path+'.parts['+i+']',raw=object(value,p);keys(raw,[...Object.keys(defaultPart2D()),"gradient","shadow","blend","blur"],p);const o={...defaultPart2D(),...raw},out=defaultPart2D(id(raw.id,p+'.id'));
+  if(raw.gradient!==undefined){const g=object(raw.gradient,p+'.gradient');keys(g,['type','x0','y0','x1','y1','stops'],p+'.gradient');const stops=list(g.stops,p+'.gradient.stops',8).map(v=>{const q=object(v,p);keys(q,['at','color'],p);const color=paint(q.color,p);if(!color||!color.startsWith('#'))throw Error(p+': gradient color requires #RRGGBB');return {at:num(q.at,p,0,1),color};});if(stops.length<2||stops[0].at!==0||stops.at(-1)!.at!==1||stops.some((q,i)=>i>0&&q.at<=stops[i-1].at))throw Error(p+': gradient stops must increase from 0 to 1');out.gradient={type:one(g.type,['linear','radial'],p),x0:num(g.x0,p,0,1),y0:num(g.y0,p,0,1),x1:num(g.x1,p,0,1),y1:num(g.y1,p,0,1),stops};if(out.gradient.x0===out.gradient.x1&&out.gradient.y0===out.gradient.y1)throw Error(p+': gradient needs nonzero extent');}
+  if(raw.shadow!==undefined){const q=object(raw.shadow,p+'.shadow');keys(q,['color','opacity','x','y','blur'],p+'.shadow');const color=paint(q.color,p);if(!color||!color.startsWith('#'))throw Error(p+': shadow color requires #RRGGBB');out.shadow={color,opacity:num(q.opacity,p,0,1),x:num(q.x,p,-100,100),y:num(q.y,p,-100,100),blur:num(q.blur,p,0,24)};if(out.shadow.blur>0)filters++;}
+  if(raw.blend!==undefined)out.blend=one(raw.blend,['normal','screen','multiply','add'] as const,p+'.blend');
+  if(raw.blur!==undefined){out.blur=num(raw.blur,p+'.blur',0,24);if(out.blur>0)filters++;}
+  if(filters>16)throw Error(path+': maximum 16 blurred effects');
   out.parent=o.parent===null?null:id(o.parent,p+'.parent');out.shape=one(o.shape,['group','rectangle','ellipse','polygon','path','text'],p+'.shape');
   for(const key of ['x','y','pivotX','pivotY'] as const)out[key]=num(o[key],p+'.'+key,-8192,8192);
   for(const key of ['width','height'] as const)out[key]=num(o[key],p+'.'+key,.01,4096);
@@ -36,6 +43,7 @@ export function parseModel2D(value:unknown,path='model2d'):Model2D{
   out.fill=paint(o.fill,p+'.fill');out.stroke=paint(o.stroke,p+'.stroke');out.strokeWidth=num(o.strokeWidth,p+'.strokeWidth',0,100);
   out.text=text(o.text,p+'.text',500);textBudget+=out.text.length;if(textBudget>4000)throw Error(path+': text budget exceeded');out.fontSize=num(o.fontSize,p+'.fontSize',1,200);if(out.shape==='text'){const area=out.text.length*out.fontSize*out.fontSize;textArea+=area;if(area>262144||textArea>2000000)throw Error(path+': text rendering budget exceeded');}
   out.parallax=num(o.parallax,p+'.parallax',0,2);out.layer=one(o.layer,['background','foreground'],p+'.layer');
+  if((out.gradient||out.shadow||out.blur)&&['group','text'].includes(out.shape))throw Error(p+': paint effects require vector geometry');
   out.points=list(o.points,p+'.points',1024).map(v=>num(v,p+'.points',-8192,8192));
   if(out.shape==='polygon'&&(out.points.length<6||out.points.length%2))throw Error(p+': polygon requires coordinate pairs (3+ vertices)');
   out.path=list(o.path,p+'.path',512).map((v,i)=>{const cp=p+'.path['+i+']',c=object(v,cp);keys(c,['op','values'],cp);const op=one(c.op,['M','L','Q','C','Z'],cp+'.op'),values=list(c.values??[],cp+'.values',6).map(v=>num(v,cp,-8192,8192));if(values.length!==({M:2,L:2,Q:4,C:6,Z:0}[op]))throw Error(cp+': invalid command arity for '+op+' in part '+JSON.stringify(out.id)+'; expected '+({M:2,L:2,Q:4,C:6,Z:0}[op])+' values, got '+values.length+'. M/L: 2, Q: 4, C: 6, Z: 0. Do not discard coordinates; verify the intended curve command.');return {op,values};});

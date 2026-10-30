@@ -250,6 +250,7 @@ test('approved demo script import accepts redundant built-in walk clips without 
  const before=JSON.stringify(p),caps=animationResources2D(p);assert.equal(caps.objects2d.collector.kind,'robot');assert.deepEqual(caps.objects2d.collector.clips,[]);assert.ok(caps.objects2d.collector.actions.includes('walk'));assert.ok(!caps.objects2d.collector.actions.includes('play'));assert.ok(caps.objects2d.butterfly.clips.includes('fly'));assert.ok(caps.objects2d.flower.clips.includes('landing'));
  const raw=projectManifest(p);raw.scenes=structuredClone(raw.scenes);raw.scenes[0].stage2d!.actors[0].actions[0].clip='walk';
  const result=acceptScript(JSON.stringify(raw),p);assert.equal(result.scenes[0].stage2d!.actors[0].actions[0].clip,'');assert.deepEqual(result.objects2d,acceptScript(JSON.stringify(projectManifest(p)),p).objects2d);assert.equal(JSON.stringify(p),before);
+ const wrongFormat=structuredClone(p);wrongFormat.storyboard!.format='portrait';assert.throws(()=>acceptScript(JSON.stringify(projectManifest(p)),wrongFormat),/expected storyboard format portrait/);
  const custom=structuredClone(p);custom.storyboard!.characters[0].model2d=birdModel2D();const actual=animationResources2D(custom);assert.equal(actual.objects2d.collector.kind,'custom');assert.ok(actual.objects2d.collector.clips.includes('fly'));assert.ok(!actual.objects2d.collector.clips.includes('walk'));
 });
 
@@ -277,4 +278,22 @@ test('model reconstruction sends own setting sketch first, without changing sket
  const p=parseProject(readFileSync(new URL('../public'+DEFAULT_PROJECT_URL,import.meta.url),'utf8')),target={kind:'settings' as const,id:'bedroom'},own=p.storyboard!.settings[0].image!;
  const refs=modelGenerationReferences(p,target);assert.equal(refs[0].imageId,own);assert.equal(new Set(refs.map(r=>r.imageId)).size,refs.length);assert.ok(!imageGenerationReferences(p,target).some(r=>r.imageId===own));
  const request=model2DRequest(p,target,'An Skizze anpassen');assert.deepEqual(request.authoringFrame,{width:540,height:960});assert.equal(request.project.format,'portrait');
+ const {acceptBoardModel2D}=await import('../src/lib/storyboard-model2d.ts');const wrong=structuredClone(p.storyboard!.settings[0].model2d!);wrong.width=960;wrong.height=540;assert.throws(()=>acceptBoardModel2D(JSON.stringify({model:wrong}),p,target),/expected 540×960/);
+});
+
+test('bounded 2D paint effects validate and survive portable roundtrips',()=>{
+ const gradient={type:'linear',x0:0,y0:0,x1:1,y1:1,stops:[{at:0,color:'#151b2b'},{at:1,color:'#8899bb'}]},shadow={color:'#090e1a',opacity:.4,x:2,y:5,blur:7};
+ const raw={parts:[{id:'lit',shape:'rectangle',gradient,shadow,blend:'screen',blur:2}]},m=parseModel2D(raw);assert.deepEqual(m.parts[0].gradient,gradient);assert.deepEqual(parseModel2D(JSON.parse(JSON.stringify(m))),m);
+ for(const stops of [[{at:0,color:'red'},{at:1,color:'#ffffff'}],[{at:0,color:'#000000'},{at:0,color:'#ffffff'}],[{at:.1,color:'#000000'},{at:1,color:'#ffffff'}]])assert.throws(()=>parseModel2D({parts:[{id:'p',gradient:{...gradient,stops}}]}));
+ assert.throws(()=>parseModel2D({parts:[{id:'p',gradient:{...gradient,x1:0,y1:0}}]}),/extent/);assert.throws(()=>parseModel2D({parts:[{id:'p',shadow:{...shadow,blur:25}}]}));assert.throws(()=>parseModel2D({parts:[{id:'p',blend:'arbitrary'}]}));
+ assert.throws(()=>parseModel2D({parts:Array.from({length:17},(_,i)=>({id:'p'+i,blur:1}))}),/16 blurred/);assert.throws(()=>parseModel2D({parts:[{id:'group',shape:'group',shadow},{id:'body'}]}),/vector geometry/);
+ const original=parseModel2D({parts:[{id:'old'}]});assert.ok(!('gradient'in original.parts[0]));
+});
+test('shared look is portable and reaches image, 2D and 3D model requests',async()=>{
+ const {model2DRequest}=await import('../src/lib/storyboard-model2d.ts'),{modelRequestData}=await import('../src/lib/storyboard-resources.ts'),{imagePrompt}=await import('../src/lib/ai-workflow.ts');
+ const p=parseProject(readFileSync(new URL('../public'+DEFAULT_PROJECT_URL,import.meta.url),'utf8')),look=p.storyboard!.look!;assert.ok(look.palette&&look.perspective&&look.lighting&&look.atmosphere);const target={kind:'settings' as const,id:'bedroom'};
+ assert.deepEqual(model2DRequest(p,target,'').project.look,look);assert.deepEqual(modelRequestData(p.storyboard!,target,'').project.look,look);assert.ok(imagePrompt(p,target,'').includes(look.atmosphere));
+ assert.deepEqual(importStoryboard(exportStoryboard(p.storyboard!,true),null).look,look);const incoming=JSON.parse(exportStoryboard(p.storyboard!));incoming.board.look.palette='unrequested replacement';assert.deepEqual(importStoryboard(JSON.stringify(incoming),p.storyboard!).look,look);
+ assert.throws(()=>parseStoryboard({...p.storyboard,look:{...look,extra:'no'}}),/unknown field/);assert.throws(()=>parseStoryboard({...p.storyboard,look:{...look,lighting:'x'.repeat(2001)}}),/max 2000/);
+ assert.ok(Object.values(p.stages2d).some(s=>s.model!.parts.some(part=>part.gradient)));assert.ok(Object.values(p.objects2d).some(o=>o.model!.parts.some(part=>part.blur)));
 });

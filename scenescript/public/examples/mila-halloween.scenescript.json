@@ -166,7 +166,24 @@
             "rotationMin": -360,
             "rotationMax": 360,
             "parallax": 1,
-            "layer": "background"
+            "layer": "background",
+            "gradient": {
+              "type": "linear",
+              "x0": 0,
+              "y0": 0,
+              "x1": 1,
+              "y1": 1,
+              "stops": [
+                {
+                  "at": 0,
+                  "color": "#357D87"
+                },
+                {
+                  "at": 1,
+                  "color": "#265a61"
+                }
+              ]
+            }
           },
           {
             "id": "leftTrouserUpperShade",
@@ -1034,7 +1051,24 @@
             "rotationMin": -360,
             "rotationMax": 360,
             "parallax": 1,
-            "layer": "background"
+            "layer": "background",
+            "gradient": {
+              "type": "linear",
+              "x0": 0,
+              "y0": 0,
+              "x1": 1,
+              "y1": 1,
+              "stops": [
+                {
+                  "at": 0,
+                  "color": "#357D87"
+                },
+                {
+                  "at": 1,
+                  "color": "#265a61"
+                }
+              ]
+            }
           },
           {
             "id": "rightTrouserUpperShade",
@@ -3593,7 +3627,24 @@
             "rotationMin": -360,
             "rotationMax": 360,
             "parallax": 1,
-            "layer": "background"
+            "layer": "background",
+            "gradient": {
+              "type": "linear",
+              "x0": 0,
+              "y0": 0,
+              "x1": 1,
+              "y1": 1,
+              "stops": [
+                {
+                  "at": 0,
+                  "color": "#357D87"
+                },
+                {
+                  "at": 1,
+                  "color": "#265a61"
+                }
+              ]
+            }
           },
           {
             "id": "shirtSideShade",
@@ -4876,7 +4927,24 @@
             "rotationMin": -360,
             "rotationMax": 360,
             "parallax": 1,
-            "layer": "background"
+            "layer": "background",
+            "gradient": {
+              "type": "linear",
+              "x0": 0,
+              "y0": 0,
+              "x1": 1,
+              "y1": 1,
+              "stops": [
+                {
+                  "at": 0,
+                  "color": "#B97957"
+                },
+                {
+                  "at": 1,
+                  "color": "#85573f"
+                }
+              ]
+            }
           },
           {
             "id": "faceShade",
@@ -10238,7 +10306,24 @@
             "rotationMin": -360,
             "rotationMax": 360,
             "parallax": 1,
-            "layer": "background"
+            "layer": "background",
+            "gradient": {
+              "type": "linear",
+              "x0": 0,
+              "y0": 0,
+              "x1": 1,
+              "y1": 1,
+              "stops": [
+                {
+                  "at": 0,
+                  "color": "#9274B9"
+                },
+                {
+                  "at": 1,
+                  "color": "#695485"
+                }
+              ]
+            }
           },
           {
             "id": "body_side_shadow",
@@ -28083,7 +28168,24 @@
             "rotationMin": -360,
             "rotationMax": 360,
             "parallax": 1,
-            "layer": "background"
+            "layer": "background",
+            "gradient": {
+              "type": "linear",
+              "x0": 0,
+              "y0": 0,
+              "x1": 1,
+              "y1": 1,
+              "stops": [
+                {
+                  "at": 0,
+                  "color": "#AF542E"
+                },
+                {
+                  "at": 1,
+                  "color": "#7e3c21"
+                }
+              ]
+            }
           },
           {
             "id": "rib_outer_left",
@@ -29965,6 +30067,51 @@
       "color": "#79a8cb",
       "accentColor": "#fff5c0",
       "shape": "star"
+    },
+    "contact-shadow": {
+      "model": {
+        "width": 180,
+        "height": 38,
+        "originX": 90,
+        "originY": 19,
+        "parts": [
+          {
+            "id": "contact",
+            "parent": null,
+            "shape": "ellipse",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 180,
+            "height": 38,
+            "radius": 0,
+            "fill": "#090e1a",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 0.45,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background",
+            "blend": "multiply",
+            "blur": 7
+          }
+        ],
+        "animations": {}
+      },
+      "name": "Weicher Kontaktschatten",
+      "kind": "custom",
+      "color": "#79a8cb",
+      "accentColor": "#fff5c0",
+      "shape": "star"
     }
   },
   "stages2d": {
@@ -30000,7 +30147,24 @@
             "rotationMin": -360,
             "rotationMax": 360,
             "parallax": 1,
-            "layer": "background"
+            "layer": "background",
+            "gradient": {
+              "type": "linear",
+              "x0": 0,
+              "y0": 0,
+              "x1": 1,
+              "y1": 1,
+              "stops": [
+                {
+                  "at": 0,
+                  "color": "#101525"
+                },
+                {
+                  "at": 1,
+                  "color": "#29364e"
+                }
+              ]
+            }
           },
           {
             "id": "room_wall",
@@ -30054,7 +30218,24 @@
             "rotationMin": -360,
             "rotationMax": 360,
             "parallax": 1,
-            "layer": "background"
+            "layer": "background",
+            "gradient": {
+              "type": "linear",
+              "x0": 0,
+              "y0": 0,
+              "x1": 1,
+              "y1": 1,
+              "stops": [
+                {
+                  "at": 0,
+                  "color": "#101525"
+                },
+                {
+                  "at": 1,
+                  "color": "#29364e"
+                }
+              ]
+            }
           },
           {
             "id": "wall_left_return",
@@ -30827,7 +31008,24 @@
             "rotationMin": -360,
             "rotationMax": 360,
             "parallax": 1,
-            "layer": "background"
+            "layer": "background",
+            "gradient": {
+              "type": "linear",
+              "x0": 0,
+              "y0": 0,
+              "x1": 1,
+              "y1": 1,
+              "stops": [
+                {
+                  "at": 0,
+                  "color": "#252636"
+                },
+                {
+                  "at": 1,
+                  "color": "#101521"
+                }
+              ]
+            }
           },
           {
             "id": "floor_board_back",
@@ -31339,7 +31537,14 @@
             "rotationMin": -360,
             "rotationMax": 360,
             "parallax": 1,
-            "layer": "background"
+            "layer": "background",
+            "shadow": {
+              "color": "#080d19",
+              "opacity": 0.45,
+              "x": 0,
+              "y": 12,
+              "blur": 8
+            }
           },
           {
             "id": "rug_field",
@@ -31555,6 +31760,51 @@
             "rotationMax": 360,
             "parallax": 1,
             "layer": "background"
+          },
+          {
+            "id": "moonlight-pool",
+            "parent": null,
+            "shape": "ellipse",
+            "x": 180,
+            "y": 720,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 350,
+            "height": 190,
+            "radius": 0,
+            "fill": "#000000",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 0.34,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background",
+            "gradient": {
+              "type": "radial",
+              "x0": 0.5,
+              "y0": 0,
+              "x1": 1,
+              "y1": 1,
+              "stops": [
+                {
+                  "at": 0,
+                  "color": "#506480"
+                },
+                {
+                  "at": 1,
+                  "color": "#000000"
+                }
+              ]
+            },
+            "blend": "screen"
           }
         ],
         "animations": {}
@@ -31596,7 +31846,24 @@
             "rotationMin": -360,
             "rotationMax": 360,
             "parallax": 1,
-            "layer": "background"
+            "layer": "background",
+            "gradient": {
+              "type": "linear",
+              "x0": 0,
+              "y0": 0,
+              "x1": 1,
+              "y1": 1,
+              "stops": [
+                {
+                  "at": 0,
+                  "color": "#10162b"
+                },
+                {
+                  "at": 1,
+                  "color": "#30384e"
+                }
+              ]
+            }
           },
           {
             "id": "night_sky",
@@ -34098,7 +34365,24 @@
               "rotationMin": -360,
               "rotationMax": 360,
               "parallax": 1,
-              "layer": "background"
+              "layer": "background",
+              "gradient": {
+                "type": "linear",
+                "x0": 0,
+                "y0": 0,
+                "x1": 1,
+                "y1": 1,
+                "stops": [
+                  {
+                    "at": 0,
+                    "color": "#357D87"
+                  },
+                  {
+                    "at": 1,
+                    "color": "#265a61"
+                  }
+                ]
+              }
             },
             {
               "id": "leftTrouserUpperShade",
@@ -34966,7 +35250,24 @@
               "rotationMin": -360,
               "rotationMax": 360,
               "parallax": 1,
-              "layer": "background"
+              "layer": "background",
+              "gradient": {
+                "type": "linear",
+                "x0": 0,
+                "y0": 0,
+                "x1": 1,
+                "y1": 1,
+                "stops": [
+                  {
+                    "at": 0,
+                    "color": "#357D87"
+                  },
+                  {
+                    "at": 1,
+                    "color": "#265a61"
+                  }
+                ]
+              }
             },
             {
               "id": "rightTrouserUpperShade",
@@ -37525,7 +37826,24 @@
               "rotationMin": -360,
               "rotationMax": 360,
               "parallax": 1,
-              "layer": "background"
+              "layer": "background",
+              "gradient": {
+                "type": "linear",
+                "x0": 0,
+                "y0": 0,
+                "x1": 1,
+                "y1": 1,
+                "stops": [
+                  {
+                    "at": 0,
+                    "color": "#357D87"
+                  },
+                  {
+                    "at": 1,
+                    "color": "#265a61"
+                  }
+                ]
+              }
             },
             {
               "id": "shirtSideShade",
@@ -38808,7 +39126,24 @@
               "rotationMin": -360,
               "rotationMax": 360,
               "parallax": 1,
-              "layer": "background"
+              "layer": "background",
+              "gradient": {
+                "type": "linear",
+                "x0": 0,
+                "y0": 0,
+                "x1": 1,
+                "y1": 1,
+                "stops": [
+                  {
+                    "at": 0,
+                    "color": "#B97957"
+                  },
+                  {
+                    "at": 1,
+                    "color": "#85573f"
+                  }
+                ]
+              }
             },
             {
               "id": "faceShade",
@@ -44190,7 +44525,24 @@
               "rotationMin": -360,
               "rotationMax": 360,
               "parallax": 1,
-              "layer": "background"
+              "layer": "background",
+              "gradient": {
+                "type": "linear",
+                "x0": 0,
+                "y0": 0,
+                "x1": 1,
+                "y1": 1,
+                "stops": [
+                  {
+                    "at": 0,
+                    "color": "#9274B9"
+                  },
+                  {
+                    "at": 1,
+                    "color": "#695485"
+                  }
+                ]
+              }
             },
             {
               "id": "body_side_shadow",
@@ -62155,7 +62507,24 @@
               "rotationMin": -360,
               "rotationMax": 360,
               "parallax": 1,
-              "layer": "background"
+              "layer": "background",
+              "gradient": {
+                "type": "linear",
+                "x0": 0,
+                "y0": 0,
+                "x1": 1,
+                "y1": 1,
+                "stops": [
+                  {
+                    "at": 0,
+                    "color": "#AF542E"
+                  },
+                  {
+                    "at": 1,
+                    "color": "#7e3c21"
+                  }
+                ]
+              }
             },
             {
               "id": "rib_outer_left",
@@ -64092,7 +64461,24 @@
               "rotationMin": -360,
               "rotationMax": 360,
               "parallax": 1,
-              "layer": "background"
+              "layer": "background",
+              "gradient": {
+                "type": "linear",
+                "x0": 0,
+                "y0": 0,
+                "x1": 1,
+                "y1": 1,
+                "stops": [
+                  {
+                    "at": 0,
+                    "color": "#101525"
+                  },
+                  {
+                    "at": 1,
+                    "color": "#29364e"
+                  }
+                ]
+              }
             },
             {
               "id": "room_wall",
@@ -64146,7 +64532,24 @@
               "rotationMin": -360,
               "rotationMax": 360,
               "parallax": 1,
-              "layer": "background"
+              "layer": "background",
+              "gradient": {
+                "type": "linear",
+                "x0": 0,
+                "y0": 0,
+                "x1": 1,
+                "y1": 1,
+                "stops": [
+                  {
+                    "at": 0,
+                    "color": "#101525"
+                  },
+                  {
+                    "at": 1,
+                    "color": "#29364e"
+                  }
+                ]
+              }
             },
             {
               "id": "wall_left_return",
@@ -64919,7 +65322,24 @@
               "rotationMin": -360,
               "rotationMax": 360,
               "parallax": 1,
-              "layer": "background"
+              "layer": "background",
+              "gradient": {
+                "type": "linear",
+                "x0": 0,
+                "y0": 0,
+                "x1": 1,
+                "y1": 1,
+                "stops": [
+                  {
+                    "at": 0,
+                    "color": "#252636"
+                  },
+                  {
+                    "at": 1,
+                    "color": "#101521"
+                  }
+                ]
+              }
             },
             {
               "id": "floor_board_back",
@@ -65431,7 +65851,14 @@
               "rotationMin": -360,
               "rotationMax": 360,
               "parallax": 1,
-              "layer": "background"
+              "layer": "background",
+              "shadow": {
+                "color": "#080d19",
+                "opacity": 0.45,
+                "x": 0,
+                "y": 12,
+                "blur": 8
+              }
             },
             {
               "id": "rug_field",
@@ -65647,6 +66074,51 @@
               "rotationMax": 360,
               "parallax": 1,
               "layer": "background"
+            },
+            {
+              "id": "moonlight-pool",
+              "parent": null,
+              "shape": "ellipse",
+              "x": 180,
+              "y": 720,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "pivotX": 0,
+              "pivotY": 0,
+              "width": 350,
+              "height": 190,
+              "radius": 0,
+              "fill": "#000000",
+              "stroke": null,
+              "strokeWidth": 0,
+              "opacity": 0.34,
+              "points": [],
+              "path": [],
+              "text": "",
+              "fontSize": 24,
+              "rotationMin": -360,
+              "rotationMax": 360,
+              "parallax": 1,
+              "layer": "background",
+              "gradient": {
+                "type": "radial",
+                "x0": 0.5,
+                "y0": 0,
+                "x1": 1,
+                "y1": 1,
+                "stops": [
+                  {
+                    "at": 0,
+                    "color": "#506480"
+                  },
+                  {
+                    "at": 1,
+                    "color": "#000000"
+                  }
+                ]
+              },
+              "blend": "screen"
             }
           ],
           "animations": {}
@@ -65712,7 +66184,24 @@
               "rotationMin": -360,
               "rotationMax": 360,
               "parallax": 1,
-              "layer": "background"
+              "layer": "background",
+              "gradient": {
+                "type": "linear",
+                "x0": 0,
+                "y0": 0,
+                "x1": 1,
+                "y1": 1,
+                "stops": [
+                  {
+                    "at": 0,
+                    "color": "#10162b"
+                  },
+                  {
+                    "at": 1,
+                    "color": "#30384e"
+                  }
+                ]
+              }
             },
             {
               "id": "night_sky",
@@ -68279,6 +68768,12 @@
       }
     },
     "approved": false,
+    "look": {
+      "palette": "Nachtblau #151b2b, Petrol #285466, gedämpftes Lavendel #59436d; Mondlicht #8ba5d2 und kleine warme Akzente #e6b778. Haut- und Kleidungsfarben als Identitätsmerkmale erhalten.",
+      "perspective": "Gemütlicher Innenraum in Dreiviertelperspektive, Bett links unten, hohes Fenster rechts, sichtbarer Holzboden mit Tiefenlinien und weichem Teppich. Figuren nicht flach an die Wand kleben.",
+      "lighting": "Kühles Mondlicht vom Fenster rechts oben; weiche Verläufe auf Wand und Boden, dunkle Kontaktschatten unter Bett und Figuren. Laterne als kleiner warmer Akzent. Keine grellen Vollflächen.",
+      "atmosphere": "Ruhige, liebevolle Halloween-Bilderbuchstimmung, dunkle aber lesbare Silhouetten; Geborgenheit statt Horror. Skizzen für Raumgefühl und Beleuchtung verbindlich verwenden."
+    },
     "production": {
       "renderMode": "2d",
       "dialogue": false,
@@ -68414,6 +68909,19 @@
         "stage": "bedroom",
         "stageClip": "",
         "actors": [
+          {
+            "id": "actor-contact-shadow",
+            "name": "Weicher Kontaktschatten",
+            "object": "contact-shadow",
+            "layer": "world",
+            "x": 225,
+            "y": 870,
+            "scale": 1.1578947368421053,
+            "rotation": 0,
+            "opacity": 1,
+            "color": null,
+            "actions": []
+          },
           {
             "id": "actor-window",
             "name": "Schlafzimmerfenster",
@@ -68562,6 +69070,19 @@
         "stage": "bedroom",
         "stageClip": "",
         "actors": [
+          {
+            "id": "actor-contact-shadow",
+            "name": "Weicher Kontaktschatten",
+            "object": "contact-shadow",
+            "layer": "world",
+            "x": 225,
+            "y": 870,
+            "scale": 1.1578947368421053,
+            "rotation": 0,
+            "opacity": 1,
+            "color": null,
+            "actions": []
+          },
           {
             "id": "actor-window",
             "name": "Schlafzimmerfenster",
@@ -68868,6 +69389,32 @@
         "stageClip": "",
         "actors": [
           {
+            "id": "actor-contact-shadow",
+            "name": "Weicher Kontaktschatten",
+            "object": "contact-shadow",
+            "layer": "world",
+            "x": 225,
+            "y": 870,
+            "scale": 1.1578947368421053,
+            "rotation": 0,
+            "opacity": 1,
+            "color": null,
+            "actions": []
+          },
+          {
+            "id": "actor-contact-shadow-2",
+            "name": "Weicher Kontaktschatten",
+            "object": "contact-shadow",
+            "layer": "world",
+            "x": 438,
+            "y": 895,
+            "scale": 0.5789473684210527,
+            "rotation": 0,
+            "opacity": 1,
+            "color": null,
+            "actions": []
+          },
+          {
             "id": "actor-window",
             "name": "Schlafzimmerfenster",
             "object": "window",
@@ -69009,6 +69556,32 @@
         "stageClip": "",
         "actors": [
           {
+            "id": "actor-contact-shadow",
+            "name": "Weicher Kontaktschatten",
+            "object": "contact-shadow",
+            "layer": "world",
+            "x": 225,
+            "y": 870,
+            "scale": 1.1578947368421053,
+            "rotation": 0,
+            "opacity": 1,
+            "color": null,
+            "actions": []
+          },
+          {
+            "id": "actor-contact-shadow-2",
+            "name": "Weicher Kontaktschatten",
+            "object": "contact-shadow",
+            "layer": "world",
+            "x": 438,
+            "y": 895,
+            "scale": 0.5789473684210527,
+            "rotation": 0,
+            "opacity": 1,
+            "color": null,
+            "actions": []
+          },
+          {
             "id": "actor-window",
             "name": "Schlafzimmerfenster",
             "object": "window",
@@ -69149,6 +69722,32 @@
         "stage": "bedroom",
         "stageClip": "",
         "actors": [
+          {
+            "id": "actor-contact-shadow",
+            "name": "Weicher Kontaktschatten",
+            "object": "contact-shadow",
+            "layer": "world",
+            "x": 225,
+            "y": 870,
+            "scale": 1.1578947368421053,
+            "rotation": 0,
+            "opacity": 1,
+            "color": null,
+            "actions": []
+          },
+          {
+            "id": "actor-contact-shadow-2",
+            "name": "Weicher Kontaktschatten",
+            "object": "contact-shadow",
+            "layer": "world",
+            "x": 438,
+            "y": 895,
+            "scale": 0.5789473684210527,
+            "rotation": 0,
+            "opacity": 1,
+            "color": null,
+            "actions": []
+          },
           {
             "id": "actor-window",
             "name": "Schlafzimmerfenster",
@@ -69537,6 +70136,32 @@
         "stage": "bedroom",
         "stageClip": "",
         "actors": [
+          {
+            "id": "actor-contact-shadow",
+            "name": "Weicher Kontaktschatten",
+            "object": "contact-shadow",
+            "layer": "world",
+            "x": 225,
+            "y": 870,
+            "scale": 1.1578947368421053,
+            "rotation": 0,
+            "opacity": 1,
+            "color": null,
+            "actions": []
+          },
+          {
+            "id": "actor-contact-shadow-2",
+            "name": "Weicher Kontaktschatten",
+            "object": "contact-shadow",
+            "layer": "world",
+            "x": 438,
+            "y": 895,
+            "scale": 0.5789473684210527,
+            "rotation": 0,
+            "opacity": 1,
+            "color": null,
+            "actions": []
+          },
           {
             "id": "actor-window",
             "name": "Schlafzimmerfenster",

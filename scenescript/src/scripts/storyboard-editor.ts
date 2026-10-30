@@ -1,3 +1,5 @@
+import {storyboardCompareButton} from './storyboard-compare';
+import {lookWords} from '../lib/storyboard-look-i18n';
 import {resourceViewerButton} from './resource-viewer';
 import {importStoryboardResource,MAX_RESOURCE_IMPORT_BYTES} from '../lib/storyboard-resource-import';
 import {model2DNeedsRestyle} from '../lib/storyboard-model2d';
@@ -84,6 +86,7 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
   if(JSON.stringify(validated)!==JSON.stringify(origin.project.storyboard))apply({...origin.project,storyboard:validated});
   board=structuredClone(validated);origin=context();dirty=false;session++;
  }
+ function compare(target:BoardReviewTarget){const source=board,rev=board.revision,ticket=session;const valid=()=>{try{check();return dialog.open&&board===source&&board.revision===rev&&session===ticket;}catch{return false;}};return storyboardCompareButton({...origin.project,storyboard:board},target,valid,notes=>{if(!valid())return;const item=board[target.kind].find(s=>s.id===target.id)!;if(item.comments.length>=100){error(Error('Maximum 100 comments'));return;}item.comments.push({id:crypto.randomUUID(),text:notes,resolved:false,reply:''});invalidateStoryboardApprovals(board,target);touch();render();},(notes,comparison)=>{if(valid())runWorkflow(target.kind==='shots'?'script':'model',{initialPrompt:notes,comparison,...(target.kind==='shots'?{quickScript:true}:{quickModel:true,resourceTarget:target,resourceDimension:'2d'})});});}
  function runWorkflow(action='board',options:AiWorkflowOptions={}){
   try{check();if(action==='script'&&(!board.approved||!canApproveStoryboard(board)))return;if(action==='script')saveBoard();const source=board,rev=board.revision,ticket=session,main=scriptContext?.();
    openAiWorkflow({project:{...origin.project,storyboard:board},draft:true,preload:main?.preload,applyScript:main?next=>{check();if(!main.valid())throw new Error(t.stale);main.apply(next);dirty=false;session++;dialog.close();}:undefined,valid:()=>{try{check();return board===source&&board.revision===rev&&session===ticket;}catch{return false;}},apply:next=>{saveBoard(next.storyboard!);clear();render();$('status').textContent=t.saved;}},action,options);
@@ -206,6 +209,7 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
     if(key==='language'){const options=videoLanguageOptions(document.documentElement.lang,board.language);field(card,t.language,options.find(([value])=>value===board.language)?.[1]??board.language,{label:t.language,value:board.language,kind:'select',options,apply:(b,v)=>{b.language=String(v);}},key);}
     else field(card,t[key],board[key],textConfig(t[key],board[key],(b,v)=>{b[key]=String(v);},key==='story'?30000:10000),key);
    }
+   const lw=lookWords(document.documentElement.lang);for(const key of ['palette','perspective','lighting','atmosphere'] as const)field(card,lw[key],board.look?.[key]??'',textConfig(lw[key],board.look?.[key]??'',(b,v)=>{b.look={palette:'',perspective:'',lighting:'',atmosphere:'',...b.look,[key]:String(v)};},2000),'look-'+key);
    field(card,t.format,t[board.format],{label:t.format,value:board.format,kind:'select',options:(['landscape','portrait','square'] as const).map(f=>[f,t[f]]),apply:(b,v)=>{b.format=v as BoardFormat;}},'format');
    const production=board.production??{renderMode:'auto' as const,dialogue:false,music:false,sfx:false},modeOptions:[string,string][]=[['auto',t.modeAuto],['2d',t.mode2d],['3d',t.mode3d],['mixed',t.modeMixed]];
    field(card,t.renderMode,modeOptions.find(([v])=>v===production.renderMode)![1],{label:t.renderMode,value:production.renderMode,kind:'select',options:modeOptions,apply:(b,v)=>{b.production={...production,renderMode:v as typeof production.renderMode};}},'render-mode');
@@ -237,7 +241,7 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
      row.append(pencil({label:rw.assign,value:association.resource?association.id!:subject.resource2d??'',kind:'select',options,target,apply:(b,v)=>{get(b).resource2d=String(v)||null;delete get(b).model2d;delete get(b).model2dDesign;delete get(b).model2dChat;}},kind+'-'+subject.id+'-resource2d'));
      const sample=association.resource&&association.id?resourcePreview2D({...origin.project,[association.kind]:{...origin.project[association.kind],[association.id]:association.resource}},association.kind,association.id):null;
      if(sample){
-      const enlarge=resourceViewerButton(subject.name,host=>storyboardModel2DView(host,origin.project,subject,kind==='settings',true,1280,960));enlarge.classList.add('board-comment-action');row.append(enlarge);
+      const enlarge=resourceViewerButton(subject.name,host=>storyboardModel2DView(host,origin.project,subject,kind==='settings',true,1280,960));enlarge.classList.add('board-comment-action');row.append(enlarge,compare(target));
       tile.append(node('p',association.resource!.name));if(model2DNeedsRestyle(subject)){const notice=node('p',dw.stylePending);notice.className='small-hint';tile.append(notice);}
       if(association.resource!.model){resourceViewDisposers.push(storyboardModel2DView(tile,origin.project,subject,kind==='settings',false));}
       else{const figure=node('div'),message=node('p');figure.className='board-model-canvas board-resource2d-canvas';message.setAttribute('role','status');tile.append(figure,message);
@@ -283,7 +287,7 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
    for(const [i,shot]of board.shots.entries()){if(shot.id!==selectedItems[tab])continue;
     const card=node('article');card.className='board-card';card.dataset.shotId=shot.id;const get=(b:Storyboard)=>b.shots.find(s=>s.id===shot.id)!;
     heading(card,`${i+1}. ${shot.title} · ${shot.duration} s`,textConfig(t.fieldTitle,shot.title,(b,v)=>{get(b).title=String(v);},200,shot.id),shot.id+'-title');
-    picture(card,shot.image,shot.title,(b,v)=>{get(b).image=String(v)||null;},shot.id+'-image',shot.id);
+    picture(card,shot.image,shot.title,(b,v)=>{get(b).image=String(v)||null;},shot.id+'-image',shot.id);card.append(compare({kind:'shots',id:shot.id}));
     field(card,t.shotDuration,shot.duration+' s',{label:t.shotDuration,value:String(shot.duration),kind:'number',limit:3600,shot:shot.id,apply:(b,v)=>{get(b).duration=Number(v);}},shot.id+'-duration');
     for(const key of ['action','camera','audio'] as const)field(card,t[key],shot[key],textConfig(t[key],shot[key],(b,v)=>{get(b)[key]=String(v);},10000,shot.id),shot.id+'-'+key);
     field(card,t.soundEffects,(shot.soundEffects??[]).join('\n'),textConfig(t.soundEffects,(shot.soundEffects??[]).join('\n'),(b,v)=>{get(b).soundEffects=String(v).split('\n').map(s=>s.trim()).filter(Boolean);},30030,shot.id),shot.id+'-sound-effects');

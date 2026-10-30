@@ -31,7 +31,7 @@ import {ensureApiVaultUnlocked,requestApiKey} from './api-vault';
 import {VaultError} from '../lib/api-vault';
 import type {aiWorkflowWords} from '../lib/ai-workflow-i18n';
 export type AiWorkflowContext={project:Project;valid:()=>boolean;apply:(p:Project)=>void;preload?:(p:Project)=>Promise<void>;draft?:boolean;applyScript?:(p:Project)=>void};
-export type AiWorkflowOptions={publishingPlatform?:PublishingPlatform;resourceDimension?:'2d'|'3d';resourceTarget?:BoardReviewTarget;imageTarget?:BoardReviewTarget;quickImage?:boolean;quickScript?:boolean;quickModel?:boolean};
+export type AiWorkflowOptions={initialPrompt?:string;comparison?:{reference:string;rendered:string;time:number};publishingPlatform?:PublishingPlatform;resourceDimension?:'2d'|'3d';resourceTarget?:BoardReviewTarget;imageTarget?:BoardReviewTarget;quickImage?:boolean;quickScript?:boolean;quickModel?:boolean};
 let openWorkflow:((context:AiWorkflowContext,action?:string,options?:AiWorkflowOptions)=>void)|undefined;
 export function openAiWorkflow(context:AiWorkflowContext,action='board',options:AiWorkflowOptions={}){openWorkflow?.(context,action,options);}
 export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,reviewStoryboard:(board:Storyboard,saved?:boolean)=>void){
@@ -48,7 +48,7 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,re
  let quickModel=false;
  let publishingPlatform:PublishingPlatform|undefined;
  let resourceDimension:'2d'|'3d'='3d';
- let resourceTarget:BoardReviewTarget|undefined,disposeModelPreview:(()=>void)|undefined;
+ let comparison:AiWorkflowOptions['comparison'];let resourceTarget:BoardReviewTarget|undefined,disposeModelPreview:(()=>void)|undefined;
  const dw=storyboardDesignWords(document.documentElement.lang);
  const modelPreview=document.createElement('div');modelPreview.id='ai-workflow-model-preview';$('preview').append(modelPreview);
  let retainedModel:{text:string;request:string;target:BoardReviewTarget}|undefined;
@@ -150,10 +150,10 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,re
  quickDialog.addEventListener('close',()=>finishQuick?.(false));
  openWorkflow=async(next,initial='board',options={})=>{
   if(dialog.open||active||opening)return;opening=true;stop();
-  try{if(!await ensureApiVaultUnlocked()||!next.valid())return;ctx=next;quickModel=!!options.quickModel&&initial==='model';publishingPlatform=options.publishingPlatform;resourceTarget=options.resourceTarget;resourceDimension=options.resourceDimension??'3d';const ticket=++session;modelPicker.reset();clearPreview();jobs=[];jobsSelect.replaceChildren();option(jobsSelect,'missing',t.all);targets.replaceChildren();if(!ctx.draft)option(targets,'cover',t.cover);
+  try{if(!await ensureApiVaultUnlocked()||!next.valid())return;ctx=next;comparison=options.comparison;quickModel=!!options.quickModel&&initial==='model';publishingPlatform=options.publishingPlatform;resourceTarget=options.resourceTarget;resourceDimension=options.resourceDimension??'3d';const ticket=++session;modelPicker.reset();clearPreview();jobs=[];jobsSelect.replaceChildren();option(jobsSelect,'missing',t.all);targets.replaceChildren();if(!ctx.draft)option(targets,'cover',t.cover);
   const b=ctx.project.storyboard;for(const kind of ['characters','settings','shots'] as const)for(const item of b?.[kind]??[])option(targets,kind+':'+item.id,kind+' · '+('title'in item?item.title:item.name));
   for(const o of action.options)o.disabled=o.value==='model'?!resourceTarget:!!ctx.draft&&(o.value==='publishing'||o.value==='speech'||o.value==='script'&&(!ctx.applyScript||!b?.approved||!canApproveStoryboard(b)));
-  action.value=initial;if(options.imageTarget){targets.value=options.imageTarget.kind+':'+options.imageTarget.id;if(!targets.value)return;}prompt.value='';$('draft').hidden=!ctx.draft;$<HTMLInputElement>('refs').checked=initial==='model';$<HTMLInputElement>('image-refs').checked=true;configure();if(initial==='model')modelPicker.useRecommendation();const quickScript=options.quickScript&&initial==='script';if(quickScript)modelPicker.useRecommendation();if(options.quickImage&&initial==='image'||quickScript||quickModel){if(!await confirmQuick(quickModel?'model':quickScript?'script':'image')||!next.valid())return;dialog.showModal();consent.checked=true;start.disabled=false;start.click();return;}dialog.showModal();
+  action.value=initial;if(options.imageTarget){targets.value=options.imageTarget.kind+':'+options.imageTarget.id;if(!targets.value)return;}prompt.value=options.initialPrompt??'';$('draft').hidden=!ctx.draft;$<HTMLInputElement>('refs').checked=initial==='model';$<HTMLInputElement>('image-refs').checked=true;configure();if(initial==='model')modelPicker.useRecommendation();const quickScript=options.quickScript&&initial==='script';if(quickScript)modelPicker.useRecommendation();if(options.quickImage&&initial==='image'||quickScript||quickModel){if(!await confirmQuick(quickModel?'model':quickScript?'script':'image')||!next.valid())return;dialog.showModal();consent.checked=true;start.disabled=false;start.click();return;}dialog.showModal();
   void speechJobs(ctx.project).then(value=>{if(ticket!==session||!dialog.open)return;jobs=value;for(const j of jobs)option(jobsSelect,j.stem,j.name+(j.speaker?' · '+j.speaker:''));speechEstimate();}).catch(error);
   }finally{opening=false;}
  };
@@ -199,6 +199,7 @@ export function installAiWorkflow(context:()=>AiWorkflowContext,stop:()=>void,re
     if(selectedJobs.length>30||Object.keys(source.audios).length+extra>30)throw new Error('Speech: maximum 30 audio assets');
     for(const job of selectedJobs)speechVoice(source.storyboard,job.speaker,$<HTMLInputElement>('voice').value);
    }
+   if(comparison&&(kind==='model'||kind==='script')){const refs=await prepareImageReferences([{imageId:'review-reference',name:'reference.png',data:comparison.reference,subjects:[]},{imageId:'review-render',name:'render.png',data:comparison.rendered,subjects:[]}],controller.signal);check();references=[...references.slice(0,6),...refs];instructions+='\nVisual correction: the LAST TWO images are the reference sketch (desired art direction) and current render (diagnostic only), at '+comparison.time+' seconds. Compare palette, spatial depth, light, atmosphere and silhouette. Apply only requested corrections, preserve unrelated identities, rig/clip IDs and reviewed geometry. Do not copy current-render defects or embed these images. Report remaining limitations honestly.';}
    $('status').textContent=t.unlock;key=await requestApiKey(kind==='speech'?'elevenlabs':'openai',controller.signal);check();controller.signal.throwIfAborted();$('status').textContent=t.working;
    if(kind==='board'||kind==='script'||kind==='model'||kind==='publishing'){
     const text=await generateText(key,{model:model.value.trim(),instructions,input:textInput,images:references,reasoning:modelPicker.reasoning},controller.signal);if(kind==='model')receivedModel=text;if(kind==='script')receivedScript=text;check();controller.signal.throwIfAborted();
