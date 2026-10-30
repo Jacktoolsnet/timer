@@ -1,16 +1,16 @@
 import {parseModel2D} from './model2d.ts';
-import {defaultObject2D,defaultStage2DResource,type Resources2D} from './stage2d.ts';
+import {defaultObject2D,defaultStage2DResource,type Resources2D,type Object2D,type Stage2DResource} from './stage2d.ts';
 import {defaultBoardDesign} from './storyboard-design.ts';
 import {parseStoryboard,invalidateStoryboardApprovals,type BoardSubject,type BoardReviewTarget} from './storyboard.ts';
 import {resourceSubject} from './storyboard-resources.ts';
 import type {Project} from './model.ts';
-export function boardDefinition2D(subject:BoardSubject,setting:boolean){
+export function boardDefinition2D(subject:BoardSubject,setting:boolean,base?:Object2D|Stage2DResource){
  if(!subject.model2d)return null;
- return setting?{...defaultStage2DResource(),name:subject.name,preset:'custom' as const,model:subject.model2d}:{...defaultObject2D(),name:subject.name,kind:'custom' as const,model:subject.model2d};
+ return setting?{...defaultStage2DResource(),...(base&&'preset' in base?base:{}),name:subject.name,preset:'custom' as const,model:subject.model2d}:{...defaultObject2D(),...(base&&'kind' in base?base:{}),name:subject.name,kind:'custom' as const,model:subject.model2d};
 }
 export function model2DRequest(project:Project,target:BoardReviewTarget,request:string){
  const board=project.storyboard!,s=resourceSubject(board,target),setting=target.kind==='settings',library=setting?project.stages2d:project.objects2d,id=s.resource2d??s.id,existing=s.model2d??(Object.hasOwn(library,id)?library[id].model:null);
- return {request,operation:!existing?'create':s.model2d&&model2DNeedsRestyle(s)?'restyle':'refine',target:{kind:target.kind,id:s.id,name:s.name,description:s.description,design:s.design??defaultBoardDesign(),comments:s.comments,model:existing??null,conversation:model2DNeedsRestyle(s)?[]:s.model2dChat??[]},project:{style:board.style},coordinateSystem:setting?'960×540, origin 0,0':'Declared width/height, origin usually bottom center. Local +Y points down.'};
+ return {request,operation:!existing?'create':s.model2d&&model2DNeedsRestyle(s)?'restyle':'refine',target:{kind:target.kind,id:s.id,name:s.name,description:s.description,design:s.design??defaultBoardDesign(),comments:s.comments,model:existing??null,conversation:model2DNeedsRestyle(s)?[]:s.model2dChat??[]},project:{style:board.style},palette:Object.hasOwn(library,id)?Object.fromEntries(Object.entries(library[id]).filter(([key])=>['color','accentColor','skyColor','groundColor'].includes(key))):null,coordinateSystem:setting?'960×540, origin 0,0':'Declared width/height, origin usually bottom center. Local +Y points down.'};
 }
 export function acceptBoardModel2D(text:string,project:Project,target:BoardReviewTarget,request=''):Project{
  if(!project.storyboard)throw Error('Storyboard: missing');
@@ -38,7 +38,7 @@ export function restoreBoardModels2D(raw:Record<string,any>,project:Project){
    if(s.status!=='approved'||effective==='3d')continue;
    const id=s.model2d?s.resource2d??s.id:s.resource2d===undefined?s.id:s.resource2d;
    if(!id)continue;
-   const definition=boardDefinition2D(s,kind==='stages2d')??(Object.hasOwn(project[kind],id)?project[kind][id]:null);
+   const definition=boardDefinition2D(s,kind==='stages2d',Object.hasOwn(project[kind],id)?project[kind][id]:undefined)??(Object.hasOwn(project[kind],id)?project[kind][id]:null);
    if(!definition)continue;
    const signature=JSON.stringify(Object.fromEntries(Object.entries(definition).filter(([key])=>key!=='name')));if(restored.has(id)){if(restored.get(id)!==signature)throw Error('2D resource: conflicting approved definitions for '+id);continue;}restored.set(id,signature);
    if(!raw[kind])raw[kind]={};if(typeof raw[kind]!=='object'||Array.isArray(raw[kind]))throw Error(kind+': expected map');
@@ -53,7 +53,7 @@ export function model2DNeedsRestyle(subject:BoardSubject){
 }
 
 export function previewLibrary2D(project:Resources2D,subject:BoardSubject,setting:boolean){
- const kind=setting?'stages2d':'objects2d',id=subject.resource2d??subject.id,definition=boardDefinition2D(subject,setting);
+ const kind=setting?'stages2d':'objects2d',id=subject.resource2d??subject.id,definition=boardDefinition2D(subject,setting,Object.hasOwn(project[kind],id)?project[kind][id]:undefined);
  return definition?{...project,[kind]:{...project[kind],[id]:definition}}:project;
 }
 export const model2DInstructions=`Create or refine ONLY the selected reusable SceneScript 2D vector resource, never executable code, SVG strings, a project or a reference picture. Return JSON {"reply":"brief explanation in the app language","model":{...}}.

@@ -13,6 +13,1792 @@
       "color": "#fff5c0",
       "accentColor": "#fff5c0",
       "shape": "star"
+    },
+    "butterfly": {
+      "model": {
+        "width": 92,
+        "height": 82,
+        "originX": 46,
+        "originY": 64,
+        "parts": [
+          {
+            "id": "insect",
+            "parent": null,
+            "shape": "group",
+            "x": 46,
+            "y": 44,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 100,
+            "height": 100,
+            "radius": 0,
+            "fill": "#79a8cb",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "left",
+            "parent": "insect",
+            "shape": "group",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 100,
+            "height": 100,
+            "radius": 0,
+            "fill": "#79a8cb",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "left-wing",
+            "parent": "left",
+            "shape": "path",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 100,
+            "height": 100,
+            "radius": 0,
+            "fill": "$color",
+            "stroke": "#fff0c7",
+            "strokeWidth": 1.1,
+            "opacity": 1,
+            "points": [],
+            "path": [
+              {
+                "op": "M",
+                "values": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "op": "C",
+                "values": [
+                  -16,
+                  -38,
+                  -43,
+                  -35,
+                  -37,
+                  -8
+                ]
+              },
+              {
+                "op": "C",
+                "values": [
+                  -49,
+                  18,
+                  -16,
+                  29,
+                  0,
+                  5
+                ]
+              },
+              {
+                "op": "Q",
+                "values": [
+                  -7,
+                  1,
+                  0,
+                  0
+                ]
+              },
+              {
+                "op": "Z",
+                "values": []
+              }
+            ],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "left-shine",
+            "parent": "left",
+            "shape": "path",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 100,
+            "height": 100,
+            "radius": 0,
+            "fill": "#fff9dd",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 0.24,
+            "points": [],
+            "path": [
+              {
+                "op": "M",
+                "values": [
+                  -5,
+                  -4
+                ]
+              },
+              {
+                "op": "C",
+                "values": [
+                  -16,
+                  -29,
+                  -33,
+                  -30,
+                  -30,
+                  -14
+                ]
+              },
+              {
+                "op": "Q",
+                "values": [
+                  -20,
+                  -20,
+                  -5,
+                  -4
+                ]
+              },
+              {
+                "op": "Z",
+                "values": []
+              }
+            ],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "left-veins",
+            "parent": "left",
+            "shape": "path",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 100,
+            "height": 100,
+            "radius": 0,
+            "fill": null,
+            "stroke": "#315c59",
+            "strokeWidth": 0.9,
+            "opacity": 0.45,
+            "points": [],
+            "path": [
+              {
+                "op": "M",
+                "values": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "op": "Q",
+                "values": [
+                  -16,
+                  -8,
+                  -28,
+                  -21
+                ]
+              },
+              {
+                "op": "M",
+                "values": [
+                  -1,
+                  4
+                ]
+              },
+              {
+                "op": "Q",
+                "values": [
+                  -16,
+                  8,
+                  -29,
+                  13
+                ]
+              }
+            ],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "left-dot-0",
+            "parent": "left",
+            "shape": "ellipse",
+            "x": -31,
+            "y": -14,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 4,
+            "height": 4,
+            "radius": 0,
+            "fill": "$accent",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 0.85,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "left-dot-1",
+            "parent": "left",
+            "shape": "ellipse",
+            "x": -29,
+            "y": 8,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 4,
+            "height": 4,
+            "radius": 0,
+            "fill": "$accent",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 0.85,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "left-dot-2",
+            "parent": "left",
+            "shape": "ellipse",
+            "x": -20,
+            "y": 16,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 4,
+            "height": 4,
+            "radius": 0,
+            "fill": "$accent",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 0.85,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "right",
+            "parent": "insect",
+            "shape": "group",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "scaleX": -1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 100,
+            "height": 100,
+            "radius": 0,
+            "fill": "#79a8cb",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "right-wing",
+            "parent": "right",
+            "shape": "path",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 100,
+            "height": 100,
+            "radius": 0,
+            "fill": "$color",
+            "stroke": "#fff0c7",
+            "strokeWidth": 1.1,
+            "opacity": 1,
+            "points": [],
+            "path": [
+              {
+                "op": "M",
+                "values": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "op": "C",
+                "values": [
+                  -16,
+                  -38,
+                  -43,
+                  -35,
+                  -37,
+                  -8
+                ]
+              },
+              {
+                "op": "C",
+                "values": [
+                  -49,
+                  18,
+                  -16,
+                  29,
+                  0,
+                  5
+                ]
+              },
+              {
+                "op": "Q",
+                "values": [
+                  -7,
+                  1,
+                  0,
+                  0
+                ]
+              },
+              {
+                "op": "Z",
+                "values": []
+              }
+            ],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "right-shine",
+            "parent": "right",
+            "shape": "path",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 100,
+            "height": 100,
+            "radius": 0,
+            "fill": "#fff9dd",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 0.24,
+            "points": [],
+            "path": [
+              {
+                "op": "M",
+                "values": [
+                  -5,
+                  -4
+                ]
+              },
+              {
+                "op": "C",
+                "values": [
+                  -16,
+                  -29,
+                  -33,
+                  -30,
+                  -30,
+                  -14
+                ]
+              },
+              {
+                "op": "Q",
+                "values": [
+                  -20,
+                  -20,
+                  -5,
+                  -4
+                ]
+              },
+              {
+                "op": "Z",
+                "values": []
+              }
+            ],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "right-veins",
+            "parent": "right",
+            "shape": "path",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 100,
+            "height": 100,
+            "radius": 0,
+            "fill": null,
+            "stroke": "#315c59",
+            "strokeWidth": 0.9,
+            "opacity": 0.45,
+            "points": [],
+            "path": [
+              {
+                "op": "M",
+                "values": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "op": "Q",
+                "values": [
+                  -16,
+                  -8,
+                  -28,
+                  -21
+                ]
+              },
+              {
+                "op": "M",
+                "values": [
+                  -1,
+                  4
+                ]
+              },
+              {
+                "op": "Q",
+                "values": [
+                  -16,
+                  8,
+                  -29,
+                  13
+                ]
+              }
+            ],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "right-dot-0",
+            "parent": "right",
+            "shape": "ellipse",
+            "x": -31,
+            "y": -14,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 4,
+            "height": 4,
+            "radius": 0,
+            "fill": "$accent",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 0.85,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "right-dot-1",
+            "parent": "right",
+            "shape": "ellipse",
+            "x": -29,
+            "y": 8,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 4,
+            "height": 4,
+            "radius": 0,
+            "fill": "$accent",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 0.85,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "right-dot-2",
+            "parent": "right",
+            "shape": "ellipse",
+            "x": -20,
+            "y": 16,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 4,
+            "height": 4,
+            "radius": 0,
+            "fill": "$accent",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 0.85,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "body",
+            "parent": "insect",
+            "shape": "ellipse",
+            "x": -4,
+            "y": -18,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 8,
+            "height": 38,
+            "radius": 0,
+            "fill": "#294d49",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "head",
+            "parent": "insect",
+            "shape": "ellipse",
+            "x": -5,
+            "y": -23,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 10,
+            "height": 10,
+            "radius": 0,
+            "fill": "#355b52",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "antennae",
+            "parent": "insect",
+            "shape": "path",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 100,
+            "height": 100,
+            "radius": 0,
+            "fill": null,
+            "stroke": "#31554e",
+            "strokeWidth": 1.3,
+            "opacity": 1,
+            "points": [],
+            "path": [
+              {
+                "op": "M",
+                "values": [
+                  -2,
+                  -20
+                ]
+              },
+              {
+                "op": "Q",
+                "values": [
+                  -12,
+                  -36,
+                  -15,
+                  -30
+                ]
+              },
+              {
+                "op": "M",
+                "values": [
+                  2,
+                  -20
+                ]
+              },
+              {
+                "op": "Q",
+                "values": [
+                  12,
+                  -36,
+                  15,
+                  -30
+                ]
+              }
+            ],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "back-light",
+            "parent": "insect",
+            "shape": "ellipse",
+            "x": -1.2,
+            "y": -13,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 2.4,
+            "height": 16,
+            "radius": 0,
+            "fill": "#fff2c2",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 0.65,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          }
+        ],
+        "animations": {
+          "idle": {
+            "duration": 2.4,
+            "loop": true,
+            "tracks": [
+              {
+                "part": "left",
+                "property": "scaleX",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": 0.7,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 1.2,
+                    "value": 0.88,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 2.4,
+                    "value": 0.7,
+                    "easing": "smooth"
+                  }
+                ]
+              },
+              {
+                "part": "right",
+                "property": "scaleX",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": -0.7,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 1.2,
+                    "value": -0.88,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 2.4,
+                    "value": -0.7,
+                    "easing": "smooth"
+                  }
+                ]
+              },
+              {
+                "part": "left",
+                "property": "rotation",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": -5,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 1.2,
+                    "value": 4,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 2.4,
+                    "value": -5,
+                    "easing": "smooth"
+                  }
+                ]
+              },
+              {
+                "part": "right",
+                "property": "rotation",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": 5,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 1.2,
+                    "value": -4,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 2.4,
+                    "value": 5,
+                    "easing": "smooth"
+                  }
+                ]
+              }
+            ]
+          },
+          "fly": {
+            "duration": 0.34,
+            "loop": true,
+            "tracks": [
+              {
+                "part": "left",
+                "property": "scaleX",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": 0.18,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 0.17,
+                    "value": 1,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 0.34,
+                    "value": 0.18,
+                    "easing": "smooth"
+                  }
+                ]
+              },
+              {
+                "part": "right",
+                "property": "scaleX",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": -0.18,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 0.17,
+                    "value": -1,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 0.34,
+                    "value": -0.18,
+                    "easing": "smooth"
+                  }
+                ]
+              },
+              {
+                "part": "left",
+                "property": "rotation",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": -5,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 0.17,
+                    "value": 4,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 0.34,
+                    "value": -5,
+                    "easing": "smooth"
+                  }
+                ]
+              },
+              {
+                "part": "right",
+                "property": "rotation",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": 5,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 0.17,
+                    "value": -4,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 0.34,
+                    "value": 5,
+                    "easing": "smooth"
+                  }
+                ]
+              }
+            ]
+          },
+          "hidden": {
+            "duration": 0.1,
+            "loop": false,
+            "tracks": [
+              {
+                "part": "insect",
+                "property": "opacity",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": 0,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 0.1,
+                    "value": 0,
+                    "easing": "smooth"
+                  }
+                ]
+              }
+            ]
+          },
+          "emerge": {
+            "duration": 0.3,
+            "loop": false,
+            "tracks": [
+              {
+                "part": "insect",
+                "property": "opacity",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": 0,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 0.12,
+                    "value": 1,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 0.3,
+                    "value": 1,
+                    "easing": "smooth"
+                  }
+                ]
+              },
+              {
+                "part": "insect",
+                "property": "scaleX",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": 0.12,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 0.19,
+                    "value": 1.12,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 0.3,
+                    "value": 1,
+                    "easing": "smooth"
+                  }
+                ]
+              },
+              {
+                "part": "insect",
+                "property": "scaleY",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": 0.12,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 0.19,
+                    "value": 1.12,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 0.3,
+                    "value": 1,
+                    "easing": "smooth"
+                  }
+                ]
+              }
+            ]
+          },
+          "alight": {
+            "duration": 0.7,
+            "loop": false,
+            "tracks": [
+              {
+                "part": "left",
+                "property": "scaleX",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": 0.18,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 0.23,
+                    "value": 1,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 0.46,
+                    "value": 0.5,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 0.7,
+                    "value": 0.74,
+                    "easing": "smooth"
+                  }
+                ]
+              },
+              {
+                "part": "right",
+                "property": "scaleX",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": -0.18,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 0.23,
+                    "value": -1,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 0.46,
+                    "value": -0.5,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 0.7,
+                    "value": -0.74,
+                    "easing": "smooth"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "name": "Lichtschmetterling",
+      "kind": "custom",
+      "color": "#8dd9df",
+      "accentColor": "#fff1c5",
+      "shape": "star"
+    },
+    "flower": {
+      "model": {
+        "width": 140,
+        "height": 180,
+        "originX": 70,
+        "originY": 180,
+        "parts": [
+          {
+            "id": "ground-shadow",
+            "parent": null,
+            "shape": "ellipse",
+            "x": 36,
+            "y": 176,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 68,
+            "height": 8,
+            "radius": 0,
+            "fill": "#103d37",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 0.3,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "plant",
+            "parent": null,
+            "shape": "group",
+            "x": 70,
+            "y": 180,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 100,
+            "height": 100,
+            "radius": 0,
+            "fill": "#79a8cb",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -12,
+            "rotationMax": 12,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "stem",
+            "parent": "plant",
+            "shape": "path",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 100,
+            "height": 100,
+            "radius": 0,
+            "fill": null,
+            "stroke": "#72a77b",
+            "strokeWidth": 4,
+            "opacity": 1,
+            "points": [],
+            "path": [
+              {
+                "op": "M",
+                "values": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "op": "C",
+                "values": [
+                  -8,
+                  -36,
+                  8,
+                  -70,
+                  0,
+                  -102
+                ]
+              }
+            ],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "left-leaf",
+            "parent": "plant",
+            "shape": "path",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 100,
+            "height": 100,
+            "radius": 0,
+            "fill": "#55926c",
+            "stroke": "#8fba83",
+            "strokeWidth": 1,
+            "opacity": 1,
+            "points": [],
+            "path": [
+              {
+                "op": "M",
+                "values": [
+                  -1,
+                  -34
+                ]
+              },
+              {
+                "op": "C",
+                "values": [
+                  -37,
+                  -65,
+                  -46,
+                  -32,
+                  -1,
+                  -34
+                ]
+              },
+              {
+                "op": "Z",
+                "values": []
+              }
+            ],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "right-leaf",
+            "parent": "plant",
+            "shape": "path",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 100,
+            "height": 100,
+            "radius": 0,
+            "fill": "#6caa78",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 1,
+            "points": [],
+            "path": [
+              {
+                "op": "M",
+                "values": [
+                  0,
+                  -57
+                ]
+              },
+              {
+                "op": "C",
+                "values": [
+                  28,
+                  -87,
+                  45,
+                  -60,
+                  0,
+                  -57
+                ]
+              },
+              {
+                "op": "Z",
+                "values": []
+              }
+            ],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "bloom",
+            "parent": "plant",
+            "shape": "group",
+            "x": 0,
+            "y": -102,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 100,
+            "height": 100,
+            "radius": 0,
+            "fill": "#79a8cb",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "petal-0",
+            "parent": "bloom",
+            "shape": "ellipse",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 14,
+            "pivotY": 36,
+            "width": 28,
+            "height": 44,
+            "radius": 0,
+            "fill": "$color",
+            "stroke": "#ffe8c9",
+            "strokeWidth": 0.8,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "petal-1",
+            "parent": "bloom",
+            "shape": "ellipse",
+            "x": 0,
+            "y": 0,
+            "rotation": 60,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 14,
+            "pivotY": 36,
+            "width": 28,
+            "height": 44,
+            "radius": 0,
+            "fill": "$color",
+            "stroke": "#ffe8c9",
+            "strokeWidth": 0.8,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "petal-2",
+            "parent": "bloom",
+            "shape": "ellipse",
+            "x": 0,
+            "y": 0,
+            "rotation": 120,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 14,
+            "pivotY": 36,
+            "width": 28,
+            "height": 44,
+            "radius": 0,
+            "fill": "$color",
+            "stroke": "#ffe8c9",
+            "strokeWidth": 0.8,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "petal-3",
+            "parent": "bloom",
+            "shape": "ellipse",
+            "x": 0,
+            "y": 0,
+            "rotation": 180,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 14,
+            "pivotY": 36,
+            "width": 28,
+            "height": 44,
+            "radius": 0,
+            "fill": "$color",
+            "stroke": "#ffe8c9",
+            "strokeWidth": 0.8,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "petal-4",
+            "parent": "bloom",
+            "shape": "ellipse",
+            "x": 0,
+            "y": 0,
+            "rotation": 240,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 14,
+            "pivotY": 36,
+            "width": 28,
+            "height": 44,
+            "radius": 0,
+            "fill": "$color",
+            "stroke": "#ffe8c9",
+            "strokeWidth": 0.8,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "petal-5",
+            "parent": "bloom",
+            "shape": "ellipse",
+            "x": 0,
+            "y": 0,
+            "rotation": 300,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 14,
+            "pivotY": 36,
+            "width": 28,
+            "height": 44,
+            "radius": 0,
+            "fill": "$color",
+            "stroke": "#ffe8c9",
+            "strokeWidth": 0.8,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "center-shadow",
+            "parent": "bloom",
+            "shape": "ellipse",
+            "x": -13,
+            "y": -12,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 26,
+            "height": 26,
+            "radius": 0,
+            "fill": "#b98b58",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "center",
+            "parent": "bloom",
+            "shape": "ellipse",
+            "x": -11,
+            "y": -12,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 22,
+            "height": 22,
+            "radius": 0,
+            "fill": "#ffe09c",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "hand",
+            "parent": "bloom",
+            "shape": "group",
+            "x": 0,
+            "y": -4,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 100,
+            "height": 100,
+            "radius": 0,
+            "fill": "#79a8cb",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "pollen-0",
+            "parent": "bloom",
+            "shape": "ellipse",
+            "x": -5,
+            "y": -6,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 2.5,
+            "height": 2.5,
+            "radius": 0,
+            "fill": "#bf8a57",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "pollen-1",
+            "parent": "bloom",
+            "shape": "ellipse",
+            "x": 3,
+            "y": -4,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 2.5,
+            "height": 2.5,
+            "radius": 0,
+            "fill": "#bf8a57",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "pollen-2",
+            "parent": "bloom",
+            "shape": "ellipse",
+            "x": -1,
+            "y": 2,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 2.5,
+            "height": 2.5,
+            "radius": 0,
+            "fill": "#bf8a57",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          }
+        ],
+        "animations": {
+          "idle": {
+            "duration": 4,
+            "loop": true,
+            "tracks": [
+              {
+                "part": "plant",
+                "property": "rotation",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": -0.7,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 2,
+                    "value": 0.7,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 4,
+                    "value": -0.7,
+                    "easing": "smooth"
+                  }
+                ]
+              }
+            ]
+          },
+          "landing": {
+            "duration": 1.4,
+            "loop": false,
+            "tracks": [
+              {
+                "part": "plant",
+                "property": "rotation",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": 0,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 0.14,
+                    "value": -6,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 0.35,
+                    "value": 4,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 0.62,
+                    "value": -2.3,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 0.9,
+                    "value": 1.2,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 1.16,
+                    "value": -0.45,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 1.4,
+                    "value": 0,
+                    "easing": "smooth"
+                  }
+                ]
+              },
+              {
+                "part": "bloom",
+                "property": "rotation",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": 0,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 0.14,
+                    "value": 5,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 0.35,
+                    "value": -3,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 0.62,
+                    "value": 1.6,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 0.9,
+                    "value": -0.6,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 1.4,
+                    "value": 0,
+                    "easing": "smooth"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "name": "Wiesenblume",
+      "kind": "custom",
+      "color": "#efa5bd",
+      "accentColor": "#fff5c0",
+      "shape": "star"
     }
   },
   "stages2d": {
@@ -34,12 +1820,12 @@
     "id": "light-collector-storyboard",
     "revision": 0,
     "title": "Der kleine Lichtsammler",
-    "story": "Ein kleiner, freundlicher Roboter kommt auf einem Waldweg an. Zwischen den Pflanzen entdeckt er einen schwebenden Lichtfunken. Er bleibt neugierig stehen, legt den Kopf schief und winkt dem Licht zu. Nach einem kurzen Einfedern springt er nach dem Funken und fängt ihn mit der ausgestreckten Hand. Lichtpartikel stieben auseinander; der Roboter landet weich und schwingt noch etwas nach. Ausgehend vom eingefangenen Licht öffnet sich eine kreisförmige Blende: Der Wald verwandelt sich in einen ruhigen Nachtgarten mit Mondsichel und schwebenden Glühwürmchen. Zum Abschluss erscheint die Botschaft: „Manchmal genügt ein kleiner Funke.“",
+    "story": "Ein kleiner, freundlicher Roboter kommt auf einem Waldweg an. Zwischen den Pflanzen und drei Blumen entdeckt er einen schwebenden Lichtstern. Er bleibt neugierig stehen, legt den Kopf schief und winkt dem Licht zu. Nach einem kurzen Einfedern springt er nach dem Stern und berührt ihn mit der ausgestreckten Hand. Genau beim Kontakt explodiert der Stern sanft in goldene Lichtpartikel; aus demselben Punkt entfalten sich drei Schmetterlinge in Blau, Gold und Rosa. Der Roboter landet weich und beobachtet sie. Die Schmetterlinge fliegen mit schnellen Flügelschlägen auf unterschiedlichen, geschwungenen Wegen durch die Szene. Nacheinander lassen sie sich auf einer rosa, einer goldenen und einer lilafarbenen Blüte nieder. Jede Blume reagiert erst auf ihre eigene Landung: Stiel und Blütenkopf wackeln kurz, federn gedämpft nach und beruhigen sich. Die Schmetterlinge bleiben auf den bewegten Blüten sitzen und öffnen ihre Flügel nun nur noch langsam. Eine weiche Überblendung führt in eine zweite Szene, den Nachtgarten. Der Roboter ist dort nicht mehr zu sehen. Blumen und Schmetterlinge bleiben im Vordergrund sichtbar. Zum Abschluss erscheint links die Botschaft: „Manchmal genügt ein kleiner Funke.“",
     "message": "Neugier und eine kleine mutige Geste können die Welt in einem neuen Licht erscheinen lassen. Ein kleiner Funke kann eine große Veränderung auslösen.",
     "audience": "Deutschsprachige Kinder, Familien und Menschen, die kurze, freundliche Animationsgeschichten mögen. Die Handlung soll auch ohne Ton und ohne Vorwissen verständlich sein.",
     "language": "Deutsch",
-    "style": "Querformat 16:9. Poetische, stilisierte 2D-Puppenanimation aus Vektorformen: gedeckte Waldgrün- und Petroltöne, eine warme korallfarbene Figur und ein cremegelber Lichtakzent. Weiche Bewegungsübergänge, deutliche Posen, lebendige Gelenkgestik, Einfedern vor dem Sprung, leichtes Stauchen und Strecken sowie gedämpftes Nachschwingen. Mehrere Hintergrundebenen erzeugen durch unterschiedlich starke Verschiebung räumliche Tiefe. Vier zeitliche Abschnitte bilden eine einzige durchgehende 16-Sekunden-Komposition, keine vier harten Filmschnitte. Die Umsetzung verwendet wiederverwendbare Bühnen in project.stages2d und Objekte in project.objects2d. Die Szene referenziert diese Ressourcen in stage2d.stage und stage2d.actors; Aktionen und Kamera gehören zur Szene. Normale Zusatzebenen sind darüber möglich. Keine echte 3D-Darstellung und kein Ton.",
-    "duration": 16,
+    "style": "Querformat 16:9. Poetische, stilisierte 2D-Puppenanimation aus Vektorformen: gedeckte Waldgrün- und Petroltöne, eine warme korallfarbene Figur und ein cremegelber Lichtakzent. Weiche Bewegungsübergänge, deutliche Posen, lebendige Gelenkgestik, Einfedern vor dem Sprung, leichtes Stauchen und Strecken sowie gedämpftes Nachschwingen. Mehrere Hintergrundebenen erzeugen durch unterschiedlich starke Verschiebung räumliche Tiefe. Vier Storyboard-Abschnitte verteilen sich auf zwei echte Filmszenen mit insgesamt 22 Sekunden: Waldweg (0–17 Sekunden, die ersten drei Abschnitte) und Nachtgarten (17–22 Sekunden, Schlussabschnitt). Eine 1,8 Sekunden lange Szenen-Überblendung verbindet beide ohne harten Schnitt. Die Schlussbotschaft besteht aus normalen, einzeln bearbeitbaren Textelementen der zweiten Szene, nicht aus einer internen Bühnen-Einblendung. Die Umsetzung verwendet wiederverwendbare Bühnen in project.stages2d und Objekte in project.objects2d. Jede Szene referenziert diese Ressourcen in stage2d.stage und stage2d.actors; Aktionen und Kamera gehören zur Szene. Normale Zusatzebenen sind darüber möglich. Schmetterlinge und Blumen sind frei aufgebaute 2D-Vektorressourcen mit wiederverwendbaren Animationsclips: Flügelschlag, Erscheinen, Landen und gedämpftes Nachfedern. Flugwege, Geburt am Sternkontakt und die drei Landungszeitpunkte sind Szenenchoreografie, nicht fest in die Ressource eingebaute absolute Filmzeiten. Alle drei Schmetterlinge teilen eine Objektressource, alle drei Blumen eine weitere; Farbe und Größe unterscheiden die Instanzen. Beide Szenen verwenden dieselben Blumen- und Schmetterlingsressourcen. Im Nachtgarten sitzen die Schmetterlinge von Beginn an auf den Blüten; Geburt, Flug und Landung werden dort nicht wiederholt. Keine echte 3D-Darstellung und kein Ton.",
+    "duration": 22,
     "comments": [],
     "characters": [
       {
@@ -67,7 +1853,1823 @@
         "status": "draft",
         "id": "spark",
         "name": "Der Lichtfunke",
-        "description": "Ein kleiner vierzackiger Lichtstern in #fff5c0 mit weißem Kern, zartem hellem Schein und einigen umlaufenden Lichtpunkten. Er schwebt leicht auf und ab. Wiederkehrendes Requisit ohne Gesicht, Stimme oder eigene menschliche Persönlichkeit. Beim Einfangen trifft der Stern die ausgestreckte Hand; ein kurzer Partikelstoß macht den Kontakt sichtbar.",
+        "description": "Ein kleiner vierzackiger Lichtstern in #fff5c0 mit weißem Kern, zartem hellem Schein und einigen umlaufenden Lichtpunkten. Er schwebt leicht auf und ab. Wiederkehrendes Requisit ohne Gesicht, Stimme oder eigene menschliche Persönlichkeit. Bei etwa 8,05 Sekunden berührt der Stern die ausgestreckte Hand. Ein goldener Partikelstoß lässt ihn wie eine sanfte Lichtexplosion aufgehen; der Stern verblasst unmittelbar danach innerhalb von 0,32 Sekunden. Genau aus diesem Kontaktpunkt erscheinen drei Schmetterlinge, nicht schon vorher und nicht aus einer anderen Ecke des Bildes.",
+        "image": null,
+        "comments": [],
+        "kind": "object"
+      },
+      {
+        "model2d": {
+          "width": 92,
+          "height": 82,
+          "originX": 46,
+          "originY": 64,
+          "parts": [
+            {
+              "id": "insect",
+              "parent": null,
+              "shape": "group",
+              "x": 46,
+              "y": 44,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "pivotX": 0,
+              "pivotY": 0,
+              "width": 100,
+              "height": 100,
+              "radius": 0,
+              "fill": "#79a8cb",
+              "stroke": null,
+              "strokeWidth": 0,
+              "opacity": 1,
+              "points": [],
+              "path": [],
+              "text": "",
+              "fontSize": 24,
+              "rotationMin": -360,
+              "rotationMax": 360,
+              "parallax": 1,
+              "layer": "background"
+            },
+            {
+              "id": "left",
+              "parent": "insect",
+              "shape": "group",
+              "x": 0,
+              "y": 0,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "pivotX": 0,
+              "pivotY": 0,
+              "width": 100,
+              "height": 100,
+              "radius": 0,
+              "fill": "#79a8cb",
+              "stroke": null,
+              "strokeWidth": 0,
+              "opacity": 1,
+              "points": [],
+              "path": [],
+              "text": "",
+              "fontSize": 24,
+              "rotationMin": -360,
+              "rotationMax": 360,
+              "parallax": 1,
+              "layer": "background"
+            },
+            {
+              "id": "left-wing",
+              "parent": "left",
+              "shape": "path",
+              "x": 0,
+              "y": 0,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "pivotX": 0,
+              "pivotY": 0,
+              "width": 100,
+              "height": 100,
+              "radius": 0,
+              "fill": "$color",
+              "stroke": "#fff0c7",
+              "strokeWidth": 1.1,
+              "opacity": 1,
+              "points": [],
+              "path": [
+                {
+                  "op": "M",
+                  "values": [
+                    0,
+                    0
+                  ]
+                },
+                {
+                  "op": "C",
+                  "values": [
+                    -16,
+                    -38,
+                    -43,
+                    -35,
+                    -37,
+                    -8
+                  ]
+                },
+                {
+                  "op": "C",
+                  "values": [
+                    -49,
+                    18,
+                    -16,
+                    29,
+                    0,
+                    5
+                  ]
+                },
+                {
+                  "op": "Q",
+                  "values": [
+                    -7,
+                    1,
+                    0,
+                    0
+                  ]
+                },
+                {
+                  "op": "Z",
+                  "values": []
+                }
+              ],
+              "text": "",
+              "fontSize": 24,
+              "rotationMin": -360,
+              "rotationMax": 360,
+              "parallax": 1,
+              "layer": "background"
+            },
+            {
+              "id": "left-shine",
+              "parent": "left",
+              "shape": "path",
+              "x": 0,
+              "y": 0,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "pivotX": 0,
+              "pivotY": 0,
+              "width": 100,
+              "height": 100,
+              "radius": 0,
+              "fill": "#fff9dd",
+              "stroke": null,
+              "strokeWidth": 0,
+              "opacity": 0.24,
+              "points": [],
+              "path": [
+                {
+                  "op": "M",
+                  "values": [
+                    -5,
+                    -4
+                  ]
+                },
+                {
+                  "op": "C",
+                  "values": [
+                    -16,
+                    -29,
+                    -33,
+                    -30,
+                    -30,
+                    -14
+                  ]
+                },
+                {
+                  "op": "Q",
+                  "values": [
+                    -20,
+                    -20,
+                    -5,
+                    -4
+                  ]
+                },
+                {
+                  "op": "Z",
+                  "values": []
+                }
+              ],
+              "text": "",
+              "fontSize": 24,
+              "rotationMin": -360,
+              "rotationMax": 360,
+              "parallax": 1,
+              "layer": "background"
+            },
+            {
+              "id": "left-veins",
+              "parent": "left",
+              "shape": "path",
+              "x": 0,
+              "y": 0,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "pivotX": 0,
+              "pivotY": 0,
+              "width": 100,
+              "height": 100,
+              "radius": 0,
+              "fill": null,
+              "stroke": "#315c59",
+              "strokeWidth": 0.9,
+              "opacity": 0.45,
+              "points": [],
+              "path": [
+                {
+                  "op": "M",
+                  "values": [
+                    0,
+                    0
+                  ]
+                },
+                {
+                  "op": "Q",
+                  "values": [
+                    -16,
+                    -8,
+                    -28,
+                    -21
+                  ]
+                },
+                {
+                  "op": "M",
+                  "values": [
+                    -1,
+                    4
+                  ]
+                },
+                {
+                  "op": "Q",
+                  "values": [
+                    -16,
+                    8,
+                    -29,
+                    13
+                  ]
+                }
+              ],
+              "text": "",
+              "fontSize": 24,
+              "rotationMin": -360,
+              "rotationMax": 360,
+              "parallax": 1,
+              "layer": "background"
+            },
+            {
+              "id": "left-dot-0",
+              "parent": "left",
+              "shape": "ellipse",
+              "x": -31,
+              "y": -14,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "pivotX": 0,
+              "pivotY": 0,
+              "width": 4,
+              "height": 4,
+              "radius": 0,
+              "fill": "$accent",
+              "stroke": null,
+              "strokeWidth": 0,
+              "opacity": 0.85,
+              "points": [],
+              "path": [],
+              "text": "",
+              "fontSize": 24,
+              "rotationMin": -360,
+              "rotationMax": 360,
+              "parallax": 1,
+              "layer": "background"
+            },
+            {
+              "id": "left-dot-1",
+              "parent": "left",
+              "shape": "ellipse",
+              "x": -29,
+              "y": 8,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "pivotX": 0,
+              "pivotY": 0,
+              "width": 4,
+              "height": 4,
+              "radius": 0,
+              "fill": "$accent",
+              "stroke": null,
+              "strokeWidth": 0,
+              "opacity": 0.85,
+              "points": [],
+              "path": [],
+              "text": "",
+              "fontSize": 24,
+              "rotationMin": -360,
+              "rotationMax": 360,
+              "parallax": 1,
+              "layer": "background"
+            },
+            {
+              "id": "left-dot-2",
+              "parent": "left",
+              "shape": "ellipse",
+              "x": -20,
+              "y": 16,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "pivotX": 0,
+              "pivotY": 0,
+              "width": 4,
+              "height": 4,
+              "radius": 0,
+              "fill": "$accent",
+              "stroke": null,
+              "strokeWidth": 0,
+              "opacity": 0.85,
+              "points": [],
+              "path": [],
+              "text": "",
+              "fontSize": 24,
+              "rotationMin": -360,
+              "rotationMax": 360,
+              "parallax": 1,
+              "layer": "background"
+            },
+            {
+              "id": "right",
+              "parent": "insect",
+              "shape": "group",
+              "x": 0,
+              "y": 0,
+              "rotation": 0,
+              "scaleX": -1,
+              "scaleY": 1,
+              "pivotX": 0,
+              "pivotY": 0,
+              "width": 100,
+              "height": 100,
+              "radius": 0,
+              "fill": "#79a8cb",
+              "stroke": null,
+              "strokeWidth": 0,
+              "opacity": 1,
+              "points": [],
+              "path": [],
+              "text": "",
+              "fontSize": 24,
+              "rotationMin": -360,
+              "rotationMax": 360,
+              "parallax": 1,
+              "layer": "background"
+            },
+            {
+              "id": "right-wing",
+              "parent": "right",
+              "shape": "path",
+              "x": 0,
+              "y": 0,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "pivotX": 0,
+              "pivotY": 0,
+              "width": 100,
+              "height": 100,
+              "radius": 0,
+              "fill": "$color",
+              "stroke": "#fff0c7",
+              "strokeWidth": 1.1,
+              "opacity": 1,
+              "points": [],
+              "path": [
+                {
+                  "op": "M",
+                  "values": [
+                    0,
+                    0
+                  ]
+                },
+                {
+                  "op": "C",
+                  "values": [
+                    -16,
+                    -38,
+                    -43,
+                    -35,
+                    -37,
+                    -8
+                  ]
+                },
+                {
+                  "op": "C",
+                  "values": [
+                    -49,
+                    18,
+                    -16,
+                    29,
+                    0,
+                    5
+                  ]
+                },
+                {
+                  "op": "Q",
+                  "values": [
+                    -7,
+                    1,
+                    0,
+                    0
+                  ]
+                },
+                {
+                  "op": "Z",
+                  "values": []
+                }
+              ],
+              "text": "",
+              "fontSize": 24,
+              "rotationMin": -360,
+              "rotationMax": 360,
+              "parallax": 1,
+              "layer": "background"
+            },
+            {
+              "id": "right-shine",
+              "parent": "right",
+              "shape": "path",
+              "x": 0,
+              "y": 0,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "pivotX": 0,
+              "pivotY": 0,
+              "width": 100,
+              "height": 100,
+              "radius": 0,
+              "fill": "#fff9dd",
+              "stroke": null,
+              "strokeWidth": 0,
+              "opacity": 0.24,
+              "points": [],
+              "path": [
+                {
+                  "op": "M",
+                  "values": [
+                    -5,
+                    -4
+                  ]
+                },
+                {
+                  "op": "C",
+                  "values": [
+                    -16,
+                    -29,
+                    -33,
+                    -30,
+                    -30,
+                    -14
+                  ]
+                },
+                {
+                  "op": "Q",
+                  "values": [
+                    -20,
+                    -20,
+                    -5,
+                    -4
+                  ]
+                },
+                {
+                  "op": "Z",
+                  "values": []
+                }
+              ],
+              "text": "",
+              "fontSize": 24,
+              "rotationMin": -360,
+              "rotationMax": 360,
+              "parallax": 1,
+              "layer": "background"
+            },
+            {
+              "id": "right-veins",
+              "parent": "right",
+              "shape": "path",
+              "x": 0,
+              "y": 0,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "pivotX": 0,
+              "pivotY": 0,
+              "width": 100,
+              "height": 100,
+              "radius": 0,
+              "fill": null,
+              "stroke": "#315c59",
+              "strokeWidth": 0.9,
+              "opacity": 0.45,
+              "points": [],
+              "path": [
+                {
+                  "op": "M",
+                  "values": [
+                    0,
+                    0
+                  ]
+                },
+                {
+                  "op": "Q",
+                  "values": [
+                    -16,
+                    -8,
+                    -28,
+                    -21
+                  ]
+                },
+                {
+                  "op": "M",
+                  "values": [
+                    -1,
+                    4
+                  ]
+                },
+                {
+                  "op": "Q",
+                  "values": [
+                    -16,
+                    8,
+                    -29,
+                    13
+                  ]
+                }
+              ],
+              "text": "",
+              "fontSize": 24,
+              "rotationMin": -360,
+              "rotationMax": 360,
+              "parallax": 1,
+              "layer": "background"
+            },
+            {
+              "id": "right-dot-0",
+              "parent": "right",
+              "shape": "ellipse",
+              "x": -31,
+              "y": -14,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "pivotX": 0,
+              "pivotY": 0,
+              "width": 4,
+              "height": 4,
+              "radius": 0,
+              "fill": "$accent",
+              "stroke": null,
+              "strokeWidth": 0,
+              "opacity": 0.85,
+              "points": [],
+              "path": [],
+              "text": "",
+              "fontSize": 24,
+              "rotationMin": -360,
+              "rotationMax": 360,
+              "parallax": 1,
+              "layer": "background"
+            },
+            {
+              "id": "right-dot-1",
+              "parent": "right",
+              "shape": "ellipse",
+              "x": -29,
+              "y": 8,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "pivotX": 0,
+              "pivotY": 0,
+              "width": 4,
+              "height": 4,
+              "radius": 0,
+              "fill": "$accent",
+              "stroke": null,
+              "strokeWidth": 0,
+              "opacity": 0.85,
+              "points": [],
+              "path": [],
+              "text": "",
+              "fontSize": 24,
+              "rotationMin": -360,
+              "rotationMax": 360,
+              "parallax": 1,
+              "layer": "background"
+            },
+            {
+              "id": "right-dot-2",
+              "parent": "right",
+              "shape": "ellipse",
+              "x": -20,
+              "y": 16,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "pivotX": 0,
+              "pivotY": 0,
+              "width": 4,
+              "height": 4,
+              "radius": 0,
+              "fill": "$accent",
+              "stroke": null,
+              "strokeWidth": 0,
+              "opacity": 0.85,
+              "points": [],
+              "path": [],
+              "text": "",
+              "fontSize": 24,
+              "rotationMin": -360,
+              "rotationMax": 360,
+              "parallax": 1,
+              "layer": "background"
+            },
+            {
+              "id": "body",
+              "parent": "insect",
+              "shape": "ellipse",
+              "x": -4,
+              "y": -18,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "pivotX": 0,
+              "pivotY": 0,
+              "width": 8,
+              "height": 38,
+              "radius": 0,
+              "fill": "#294d49",
+              "stroke": null,
+              "strokeWidth": 0,
+              "opacity": 1,
+              "points": [],
+              "path": [],
+              "text": "",
+              "fontSize": 24,
+              "rotationMin": -360,
+              "rotationMax": 360,
+              "parallax": 1,
+              "layer": "background"
+            },
+            {
+              "id": "head",
+              "parent": "insect",
+              "shape": "ellipse",
+              "x": -5,
+              "y": -23,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "pivotX": 0,
+              "pivotY": 0,
+              "width": 10,
+              "height": 10,
+              "radius": 0,
+              "fill": "#355b52",
+              "stroke": null,
+              "strokeWidth": 0,
+              "opacity": 1,
+              "points": [],
+              "path": [],
+              "text": "",
+              "fontSize": 24,
+              "rotationMin": -360,
+              "rotationMax": 360,
+              "parallax": 1,
+              "layer": "background"
+            },
+            {
+              "id": "antennae",
+              "parent": "insect",
+              "shape": "path",
+              "x": 0,
+              "y": 0,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "pivotX": 0,
+              "pivotY": 0,
+              "width": 100,
+              "height": 100,
+              "radius": 0,
+              "fill": null,
+              "stroke": "#31554e",
+              "strokeWidth": 1.3,
+              "opacity": 1,
+              "points": [],
+              "path": [
+                {
+                  "op": "M",
+                  "values": [
+                    -2,
+                    -20
+                  ]
+                },
+                {
+                  "op": "Q",
+                  "values": [
+                    -12,
+                    -36,
+                    -15,
+                    -30
+                  ]
+                },
+                {
+                  "op": "M",
+                  "values": [
+                    2,
+                    -20
+                  ]
+                },
+                {
+                  "op": "Q",
+                  "values": [
+                    12,
+                    -36,
+                    15,
+                    -30
+                  ]
+                }
+              ],
+              "text": "",
+              "fontSize": 24,
+              "rotationMin": -360,
+              "rotationMax": 360,
+              "parallax": 1,
+              "layer": "background"
+            },
+            {
+              "id": "back-light",
+              "parent": "insect",
+              "shape": "ellipse",
+              "x": -1.2,
+              "y": -13,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "pivotX": 0,
+              "pivotY": 0,
+              "width": 2.4,
+              "height": 16,
+              "radius": 0,
+              "fill": "#fff2c2",
+              "stroke": null,
+              "strokeWidth": 0,
+              "opacity": 0.65,
+              "points": [],
+              "path": [],
+              "text": "",
+              "fontSize": 24,
+              "rotationMin": -360,
+              "rotationMax": 360,
+              "parallax": 1,
+              "layer": "background"
+            }
+          ],
+          "animations": {
+            "idle": {
+              "duration": 2.4,
+              "loop": true,
+              "tracks": [
+                {
+                  "part": "left",
+                  "property": "scaleX",
+                  "keys": [
+                    {
+                      "at": 0,
+                      "value": 0.7,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 1.2,
+                      "value": 0.88,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 2.4,
+                      "value": 0.7,
+                      "easing": "smooth"
+                    }
+                  ]
+                },
+                {
+                  "part": "right",
+                  "property": "scaleX",
+                  "keys": [
+                    {
+                      "at": 0,
+                      "value": -0.7,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 1.2,
+                      "value": -0.88,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 2.4,
+                      "value": -0.7,
+                      "easing": "smooth"
+                    }
+                  ]
+                },
+                {
+                  "part": "left",
+                  "property": "rotation",
+                  "keys": [
+                    {
+                      "at": 0,
+                      "value": -5,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 1.2,
+                      "value": 4,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 2.4,
+                      "value": -5,
+                      "easing": "smooth"
+                    }
+                  ]
+                },
+                {
+                  "part": "right",
+                  "property": "rotation",
+                  "keys": [
+                    {
+                      "at": 0,
+                      "value": 5,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 1.2,
+                      "value": -4,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 2.4,
+                      "value": 5,
+                      "easing": "smooth"
+                    }
+                  ]
+                }
+              ]
+            },
+            "fly": {
+              "duration": 0.34,
+              "loop": true,
+              "tracks": [
+                {
+                  "part": "left",
+                  "property": "scaleX",
+                  "keys": [
+                    {
+                      "at": 0,
+                      "value": 0.18,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 0.17,
+                      "value": 1,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 0.34,
+                      "value": 0.18,
+                      "easing": "smooth"
+                    }
+                  ]
+                },
+                {
+                  "part": "right",
+                  "property": "scaleX",
+                  "keys": [
+                    {
+                      "at": 0,
+                      "value": -0.18,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 0.17,
+                      "value": -1,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 0.34,
+                      "value": -0.18,
+                      "easing": "smooth"
+                    }
+                  ]
+                },
+                {
+                  "part": "left",
+                  "property": "rotation",
+                  "keys": [
+                    {
+                      "at": 0,
+                      "value": -5,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 0.17,
+                      "value": 4,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 0.34,
+                      "value": -5,
+                      "easing": "smooth"
+                    }
+                  ]
+                },
+                {
+                  "part": "right",
+                  "property": "rotation",
+                  "keys": [
+                    {
+                      "at": 0,
+                      "value": 5,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 0.17,
+                      "value": -4,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 0.34,
+                      "value": 5,
+                      "easing": "smooth"
+                    }
+                  ]
+                }
+              ]
+            },
+            "hidden": {
+              "duration": 0.1,
+              "loop": false,
+              "tracks": [
+                {
+                  "part": "insect",
+                  "property": "opacity",
+                  "keys": [
+                    {
+                      "at": 0,
+                      "value": 0,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 0.1,
+                      "value": 0,
+                      "easing": "smooth"
+                    }
+                  ]
+                }
+              ]
+            },
+            "emerge": {
+              "duration": 0.3,
+              "loop": false,
+              "tracks": [
+                {
+                  "part": "insect",
+                  "property": "opacity",
+                  "keys": [
+                    {
+                      "at": 0,
+                      "value": 0,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 0.12,
+                      "value": 1,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 0.3,
+                      "value": 1,
+                      "easing": "smooth"
+                    }
+                  ]
+                },
+                {
+                  "part": "insect",
+                  "property": "scaleX",
+                  "keys": [
+                    {
+                      "at": 0,
+                      "value": 0.12,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 0.19,
+                      "value": 1.12,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 0.3,
+                      "value": 1,
+                      "easing": "smooth"
+                    }
+                  ]
+                },
+                {
+                  "part": "insect",
+                  "property": "scaleY",
+                  "keys": [
+                    {
+                      "at": 0,
+                      "value": 0.12,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 0.19,
+                      "value": 1.12,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 0.3,
+                      "value": 1,
+                      "easing": "smooth"
+                    }
+                  ]
+                }
+              ]
+            },
+            "alight": {
+              "duration": 0.7,
+              "loop": false,
+              "tracks": [
+                {
+                  "part": "left",
+                  "property": "scaleX",
+                  "keys": [
+                    {
+                      "at": 0,
+                      "value": 0.18,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 0.23,
+                      "value": 1,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 0.46,
+                      "value": 0.5,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 0.7,
+                      "value": 0.74,
+                      "easing": "smooth"
+                    }
+                  ]
+                },
+                {
+                  "part": "right",
+                  "property": "scaleX",
+                  "keys": [
+                    {
+                      "at": 0,
+                      "value": -0.18,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 0.23,
+                      "value": -1,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 0.46,
+                      "value": -0.5,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 0.7,
+                      "value": -0.74,
+                      "easing": "smooth"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "model2dDesign": {
+          "mode": "2d",
+          "style": "cartoon",
+          "surface": "colors",
+          "details": "Stilisierte zweidimensionale Vektorformen mit weichen Rundungen, klaren Silhouetten und flächigen Farben. Keine 3D-Modelle, keine fotorealistischen Texturen."
+        },
+        "resource2d": "butterfly",
+        "design": {
+          "mode": "2d",
+          "style": "cartoon",
+          "surface": "colors",
+          "details": "Stilisierte zweidimensionale Vektorformen mit weichen Rundungen, klaren Silhouetten und flächigen Farben. Keine 3D-Modelle, keine fotorealistischen Texturen."
+        },
+        "status": "draft",
+        "id": "butterfly",
+        "name": "Die Lichtschmetterlinge",
+        "description": "Drei kleine, zarte Schmetterlinge aus derselben wiederverwendbaren 2D-Ressource. Abgerundete, fein geäderte obere und untere Flügelflächen mit cremefarbenen Lichtpunkten, ein schmaler dunkelgrüner Körper und zwei geschwungene Fühler. Instanzen: Blau, Gold und Rosa, jeweils leicht andere Größe. Zunächst am Berührungspunkt des Sterns verborgen; ab etwa 8,05 Sekunden in kurzem Lichtaufblühen erscheinen. Im Flug schnelle, weich wechselnde Flügelschläge und leichtes Auf-und-ab; nach dem Landen langsamere Flügelbewegungen. Flugrouten und Landungen gehören zur Szene. Die drei vollständigen Landungen liegen bei 13,75, 14,5 und 15,25 Sekunden.",
+        "image": null,
+        "comments": [],
+        "kind": "character"
+      },
+      {
+        "model2d": {
+          "width": 140,
+          "height": 180,
+          "originX": 70,
+          "originY": 180,
+          "parts": [
+            {
+              "id": "ground-shadow",
+              "parent": null,
+              "shape": "ellipse",
+              "x": 36,
+              "y": 176,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "pivotX": 0,
+              "pivotY": 0,
+              "width": 68,
+              "height": 8,
+              "radius": 0,
+              "fill": "#103d37",
+              "stroke": null,
+              "strokeWidth": 0,
+              "opacity": 0.3,
+              "points": [],
+              "path": [],
+              "text": "",
+              "fontSize": 24,
+              "rotationMin": -360,
+              "rotationMax": 360,
+              "parallax": 1,
+              "layer": "background"
+            },
+            {
+              "id": "plant",
+              "parent": null,
+              "shape": "group",
+              "x": 70,
+              "y": 180,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "pivotX": 0,
+              "pivotY": 0,
+              "width": 100,
+              "height": 100,
+              "radius": 0,
+              "fill": "#79a8cb",
+              "stroke": null,
+              "strokeWidth": 0,
+              "opacity": 1,
+              "points": [],
+              "path": [],
+              "text": "",
+              "fontSize": 24,
+              "rotationMin": -12,
+              "rotationMax": 12,
+              "parallax": 1,
+              "layer": "background"
+            },
+            {
+              "id": "stem",
+              "parent": "plant",
+              "shape": "path",
+              "x": 0,
+              "y": 0,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "pivotX": 0,
+              "pivotY": 0,
+              "width": 100,
+              "height": 100,
+              "radius": 0,
+              "fill": null,
+              "stroke": "#72a77b",
+              "strokeWidth": 4,
+              "opacity": 1,
+              "points": [],
+              "path": [
+                {
+                  "op": "M",
+                  "values": [
+                    0,
+                    0
+                  ]
+                },
+                {
+                  "op": "C",
+                  "values": [
+                    -8,
+                    -36,
+                    8,
+                    -70,
+                    0,
+                    -102
+                  ]
+                }
+              ],
+              "text": "",
+              "fontSize": 24,
+              "rotationMin": -360,
+              "rotationMax": 360,
+              "parallax": 1,
+              "layer": "background"
+            },
+            {
+              "id": "left-leaf",
+              "parent": "plant",
+              "shape": "path",
+              "x": 0,
+              "y": 0,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "pivotX": 0,
+              "pivotY": 0,
+              "width": 100,
+              "height": 100,
+              "radius": 0,
+              "fill": "#55926c",
+              "stroke": "#8fba83",
+              "strokeWidth": 1,
+              "opacity": 1,
+              "points": [],
+              "path": [
+                {
+                  "op": "M",
+                  "values": [
+                    -1,
+                    -34
+                  ]
+                },
+                {
+                  "op": "C",
+                  "values": [
+                    -37,
+                    -65,
+                    -46,
+                    -32,
+                    -1,
+                    -34
+                  ]
+                },
+                {
+                  "op": "Z",
+                  "values": []
+                }
+              ],
+              "text": "",
+              "fontSize": 24,
+              "rotationMin": -360,
+              "rotationMax": 360,
+              "parallax": 1,
+              "layer": "background"
+            },
+            {
+              "id": "right-leaf",
+              "parent": "plant",
+              "shape": "path",
+              "x": 0,
+              "y": 0,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "pivotX": 0,
+              "pivotY": 0,
+              "width": 100,
+              "height": 100,
+              "radius": 0,
+              "fill": "#6caa78",
+              "stroke": null,
+              "strokeWidth": 0,
+              "opacity": 1,
+              "points": [],
+              "path": [
+                {
+                  "op": "M",
+                  "values": [
+                    0,
+                    -57
+                  ]
+                },
+                {
+                  "op": "C",
+                  "values": [
+                    28,
+                    -87,
+                    45,
+                    -60,
+                    0,
+                    -57
+                  ]
+                },
+                {
+                  "op": "Z",
+                  "values": []
+                }
+              ],
+              "text": "",
+              "fontSize": 24,
+              "rotationMin": -360,
+              "rotationMax": 360,
+              "parallax": 1,
+              "layer": "background"
+            },
+            {
+              "id": "bloom",
+              "parent": "plant",
+              "shape": "group",
+              "x": 0,
+              "y": -102,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "pivotX": 0,
+              "pivotY": 0,
+              "width": 100,
+              "height": 100,
+              "radius": 0,
+              "fill": "#79a8cb",
+              "stroke": null,
+              "strokeWidth": 0,
+              "opacity": 1,
+              "points": [],
+              "path": [],
+              "text": "",
+              "fontSize": 24,
+              "rotationMin": -360,
+              "rotationMax": 360,
+              "parallax": 1,
+              "layer": "background"
+            },
+            {
+              "id": "petal-0",
+              "parent": "bloom",
+              "shape": "ellipse",
+              "x": 0,
+              "y": 0,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "pivotX": 14,
+              "pivotY": 36,
+              "width": 28,
+              "height": 44,
+              "radius": 0,
+              "fill": "$color",
+              "stroke": "#ffe8c9",
+              "strokeWidth": 0.8,
+              "opacity": 1,
+              "points": [],
+              "path": [],
+              "text": "",
+              "fontSize": 24,
+              "rotationMin": -360,
+              "rotationMax": 360,
+              "parallax": 1,
+              "layer": "background"
+            },
+            {
+              "id": "petal-1",
+              "parent": "bloom",
+              "shape": "ellipse",
+              "x": 0,
+              "y": 0,
+              "rotation": 60,
+              "scaleX": 1,
+              "scaleY": 1,
+              "pivotX": 14,
+              "pivotY": 36,
+              "width": 28,
+              "height": 44,
+              "radius": 0,
+              "fill": "$color",
+              "stroke": "#ffe8c9",
+              "strokeWidth": 0.8,
+              "opacity": 1,
+              "points": [],
+              "path": [],
+              "text": "",
+              "fontSize": 24,
+              "rotationMin": -360,
+              "rotationMax": 360,
+              "parallax": 1,
+              "layer": "background"
+            },
+            {
+              "id": "petal-2",
+              "parent": "bloom",
+              "shape": "ellipse",
+              "x": 0,
+              "y": 0,
+              "rotation": 120,
+              "scaleX": 1,
+              "scaleY": 1,
+              "pivotX": 14,
+              "pivotY": 36,
+              "width": 28,
+              "height": 44,
+              "radius": 0,
+              "fill": "$color",
+              "stroke": "#ffe8c9",
+              "strokeWidth": 0.8,
+              "opacity": 1,
+              "points": [],
+              "path": [],
+              "text": "",
+              "fontSize": 24,
+              "rotationMin": -360,
+              "rotationMax": 360,
+              "parallax": 1,
+              "layer": "background"
+            },
+            {
+              "id": "petal-3",
+              "parent": "bloom",
+              "shape": "ellipse",
+              "x": 0,
+              "y": 0,
+              "rotation": 180,
+              "scaleX": 1,
+              "scaleY": 1,
+              "pivotX": 14,
+              "pivotY": 36,
+              "width": 28,
+              "height": 44,
+              "radius": 0,
+              "fill": "$color",
+              "stroke": "#ffe8c9",
+              "strokeWidth": 0.8,
+              "opacity": 1,
+              "points": [],
+              "path": [],
+              "text": "",
+              "fontSize": 24,
+              "rotationMin": -360,
+              "rotationMax": 360,
+              "parallax": 1,
+              "layer": "background"
+            },
+            {
+              "id": "petal-4",
+              "parent": "bloom",
+              "shape": "ellipse",
+              "x": 0,
+              "y": 0,
+              "rotation": 240,
+              "scaleX": 1,
+              "scaleY": 1,
+              "pivotX": 14,
+              "pivotY": 36,
+              "width": 28,
+              "height": 44,
+              "radius": 0,
+              "fill": "$color",
+              "stroke": "#ffe8c9",
+              "strokeWidth": 0.8,
+              "opacity": 1,
+              "points": [],
+              "path": [],
+              "text": "",
+              "fontSize": 24,
+              "rotationMin": -360,
+              "rotationMax": 360,
+              "parallax": 1,
+              "layer": "background"
+            },
+            {
+              "id": "petal-5",
+              "parent": "bloom",
+              "shape": "ellipse",
+              "x": 0,
+              "y": 0,
+              "rotation": 300,
+              "scaleX": 1,
+              "scaleY": 1,
+              "pivotX": 14,
+              "pivotY": 36,
+              "width": 28,
+              "height": 44,
+              "radius": 0,
+              "fill": "$color",
+              "stroke": "#ffe8c9",
+              "strokeWidth": 0.8,
+              "opacity": 1,
+              "points": [],
+              "path": [],
+              "text": "",
+              "fontSize": 24,
+              "rotationMin": -360,
+              "rotationMax": 360,
+              "parallax": 1,
+              "layer": "background"
+            },
+            {
+              "id": "center-shadow",
+              "parent": "bloom",
+              "shape": "ellipse",
+              "x": -13,
+              "y": -12,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "pivotX": 0,
+              "pivotY": 0,
+              "width": 26,
+              "height": 26,
+              "radius": 0,
+              "fill": "#b98b58",
+              "stroke": null,
+              "strokeWidth": 0,
+              "opacity": 1,
+              "points": [],
+              "path": [],
+              "text": "",
+              "fontSize": 24,
+              "rotationMin": -360,
+              "rotationMax": 360,
+              "parallax": 1,
+              "layer": "background"
+            },
+            {
+              "id": "center",
+              "parent": "bloom",
+              "shape": "ellipse",
+              "x": -11,
+              "y": -12,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "pivotX": 0,
+              "pivotY": 0,
+              "width": 22,
+              "height": 22,
+              "radius": 0,
+              "fill": "#ffe09c",
+              "stroke": null,
+              "strokeWidth": 0,
+              "opacity": 1,
+              "points": [],
+              "path": [],
+              "text": "",
+              "fontSize": 24,
+              "rotationMin": -360,
+              "rotationMax": 360,
+              "parallax": 1,
+              "layer": "background"
+            },
+            {
+              "id": "hand",
+              "parent": "bloom",
+              "shape": "group",
+              "x": 0,
+              "y": -4,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "pivotX": 0,
+              "pivotY": 0,
+              "width": 100,
+              "height": 100,
+              "radius": 0,
+              "fill": "#79a8cb",
+              "stroke": null,
+              "strokeWidth": 0,
+              "opacity": 1,
+              "points": [],
+              "path": [],
+              "text": "",
+              "fontSize": 24,
+              "rotationMin": -360,
+              "rotationMax": 360,
+              "parallax": 1,
+              "layer": "background"
+            },
+            {
+              "id": "pollen-0",
+              "parent": "bloom",
+              "shape": "ellipse",
+              "x": -5,
+              "y": -6,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "pivotX": 0,
+              "pivotY": 0,
+              "width": 2.5,
+              "height": 2.5,
+              "radius": 0,
+              "fill": "#bf8a57",
+              "stroke": null,
+              "strokeWidth": 0,
+              "opacity": 1,
+              "points": [],
+              "path": [],
+              "text": "",
+              "fontSize": 24,
+              "rotationMin": -360,
+              "rotationMax": 360,
+              "parallax": 1,
+              "layer": "background"
+            },
+            {
+              "id": "pollen-1",
+              "parent": "bloom",
+              "shape": "ellipse",
+              "x": 3,
+              "y": -4,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "pivotX": 0,
+              "pivotY": 0,
+              "width": 2.5,
+              "height": 2.5,
+              "radius": 0,
+              "fill": "#bf8a57",
+              "stroke": null,
+              "strokeWidth": 0,
+              "opacity": 1,
+              "points": [],
+              "path": [],
+              "text": "",
+              "fontSize": 24,
+              "rotationMin": -360,
+              "rotationMax": 360,
+              "parallax": 1,
+              "layer": "background"
+            },
+            {
+              "id": "pollen-2",
+              "parent": "bloom",
+              "shape": "ellipse",
+              "x": -1,
+              "y": 2,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "pivotX": 0,
+              "pivotY": 0,
+              "width": 2.5,
+              "height": 2.5,
+              "radius": 0,
+              "fill": "#bf8a57",
+              "stroke": null,
+              "strokeWidth": 0,
+              "opacity": 1,
+              "points": [],
+              "path": [],
+              "text": "",
+              "fontSize": 24,
+              "rotationMin": -360,
+              "rotationMax": 360,
+              "parallax": 1,
+              "layer": "background"
+            }
+          ],
+          "animations": {
+            "idle": {
+              "duration": 4,
+              "loop": true,
+              "tracks": [
+                {
+                  "part": "plant",
+                  "property": "rotation",
+                  "keys": [
+                    {
+                      "at": 0,
+                      "value": -0.7,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 2,
+                      "value": 0.7,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 4,
+                      "value": -0.7,
+                      "easing": "smooth"
+                    }
+                  ]
+                }
+              ]
+            },
+            "landing": {
+              "duration": 1.4,
+              "loop": false,
+              "tracks": [
+                {
+                  "part": "plant",
+                  "property": "rotation",
+                  "keys": [
+                    {
+                      "at": 0,
+                      "value": 0,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 0.14,
+                      "value": -6,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 0.35,
+                      "value": 4,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 0.62,
+                      "value": -2.3,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 0.9,
+                      "value": 1.2,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 1.16,
+                      "value": -0.45,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 1.4,
+                      "value": 0,
+                      "easing": "smooth"
+                    }
+                  ]
+                },
+                {
+                  "part": "bloom",
+                  "property": "rotation",
+                  "keys": [
+                    {
+                      "at": 0,
+                      "value": 0,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 0.14,
+                      "value": 5,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 0.35,
+                      "value": -3,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 0.62,
+                      "value": 1.6,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 0.9,
+                      "value": -0.6,
+                      "easing": "smooth"
+                    },
+                    {
+                      "at": 1.4,
+                      "value": 0,
+                      "easing": "smooth"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "model2dDesign": {
+          "mode": "2d",
+          "style": "cartoon",
+          "surface": "colors",
+          "details": "Stilisierte zweidimensionale Vektorformen mit weichen Rundungen, klaren Silhouetten und flächigen Farben. Keine 3D-Modelle, keine fotorealistischen Texturen."
+        },
+        "resource2d": "flower",
+        "design": {
+          "mode": "2d",
+          "style": "cartoon",
+          "surface": "colors",
+          "details": "Stilisierte zweidimensionale Vektorformen mit weichen Rundungen, klaren Silhouetten und flächigen Farben. Keine 3D-Modelle, keine fotorealistischen Texturen."
+        },
+        "status": "draft",
+        "id": "flower",
+        "name": "Die Wiesenblumen",
+        "description": "Drei Blumen am rechten Wegesrand aus derselben wiederverwendbaren 2D-Ressource: rosa, goldene und lilafarbene Blüten mit sechs weich gerundeten Blütenblättern, warmgelber Mitte, kleinen Pollenpunkten, einem schlanken gebogenen Stiel und zwei grünen Blättern. Sie stehen von Anfang an sichtbar, ohne den Laufweg des Roboters oder den späteren Schlusstext links zu verdecken. Stiel und Blütenkopf besitzen eine gemeinsame bewegliche Hierarchie; der Anker hand liegt im Blütenzentrum. Beim Aufsetzen des jeweils zugehörigen Schmetterlings neigt sich die Blume zuerst leicht, schwingt etwa 1,4 Sekunden gedämpft nach und kommt wieder zur Ruhe. Der Schmetterling folgt dem bewegten Blütenzentrum, statt daneben in der Luft stehen zu bleiben. Keine neue Explosion beim Landen: attach.burst:false.",
         "image": null,
         "comments": [],
         "kind": "object"
@@ -84,7 +3686,7 @@
         "status": "draft",
         "id": "forest",
         "name": "Der grüne Waldweg",
-        "description": "Ein ruhiger, grafisch vereinfachter Wald in gedeckten Grün- und Petroltönen. Gestaffelte Hügel, weiche längliche Baumkronen und schlanke Baumstämme bilden mehrere Tiefenebenen. Am unteren Bildrand verläuft ein breiter Weg mit wenigen flachen Steinen. Kleine Blätterpflanzen säumen den Boden; größere dunkle Pflanzen rahmen den Vordergrund ein. Eine helle runde Himmelsfläche scheint teilweise durch die Baumkronen. Viel freie Bildfläche für eine klar lesbare Silhouette.",
+        "description": "Ein ruhiger, grafisch vereinfachter Wald in gedeckten Grün- und Petroltönen. Gestaffelte Hügel, weiche längliche Baumkronen und schlanke Baumstämme bilden mehrere Tiefenebenen. Am unteren Bildrand verläuft ein breiter Weg mit wenigen flachen Steinen. Kleine Blätterpflanzen säumen den Boden; größere dunkle Pflanzen rahmen den Vordergrund ein. Eine helle runde Himmelsfläche scheint teilweise durch die Baumkronen. Viel freie Bildfläche für eine klar lesbare Silhouette. Drei farbige Wiesenblumen stehen rechts am Weg; sie sind unabhängige Szeneninstanzen, nicht in den Hintergrund gemalt.",
         "image": null,
         "comments": []
       },
@@ -109,13 +3711,14 @@
         "id": "arrival",
         "title": "Ankommen",
         "duration": 4,
-        "action": "0–4 Sekunden: Der Lichtsammler läuft von links zur Bildmitte. Arme und Beine bewegen sich gegenläufig; Hüfte und Knie knicken sichtbar ein. Der Körper hebt und senkt sich mit den Schritten, Kopf und Antenne bewegen sich leicht mit. Der Schatten bleibt am Boden. Ab etwa Sekunde 3 verlangsamt sich der Gang, bis die Figur bei etwa 3,6 Sekunden steht. Der Funke schwebt bereits rechts oberhalb der Figur. Pflanzen wiegen sich dezent.",
+        "action": "0–4 Sekunden: Der Lichtsammler läuft von links zur Bildmitte. Arme und Beine bewegen sich gegenläufig; Hüfte und Knie knicken sichtbar ein. Der Körper hebt und senkt sich mit den Schritten, Kopf und Antenne bewegen sich leicht mit. Der Schatten bleibt am Boden. Ab etwa Sekunde 3 verlangsamt sich der Gang, bis die Figur bei etwa 3,6 Sekunden steht. Der Funke schwebt bereits rechts oberhalb der Figur. Pflanzen und die drei Blumen rechts wiegen sich dezent. Noch keine Schmetterlinge zeigen; sie entstehen erst beim späteren Sternkontakt.",
         "camera": "Weite, seitliche Ansicht. Eine sanfte horizontale Kamerafahrt begleitet die Figur. Ferne Hügel verschieben sich weniger als Bäume und Vordergrundpflanzen. Zum Ende beginnt ein behutsames Heranfahren; Figur und Licht bleiben vollständig sichtbar.",
         "audio": "Stumm: keine Dialoge, kein Sprecher, keine Musik und keine Geräusche.",
         "image": null,
         "characters": [
           "collector",
-          "spark"
+          "spark",
+          "flower"
         ],
         "settings": [
           "forest"
@@ -134,7 +3737,8 @@
         "image": null,
         "characters": [
           "collector",
-          "spark"
+          "spark",
+          "flower"
         ],
         "settings": [
           "forest"
@@ -145,19 +3749,20 @@
       {
         "soundEffects": [],
         "id": "catch",
-        "title": "Den Funken fangen",
-        "duration": 4,
-        "action": "7–11 Sekunden: Das Einfedern wird bis etwa 7,3 Sekunden abgeschlossen. Dann springt der Lichtsammler in einem weichen Bogen etwas nach rechts oben und streckt die Hand nach dem Funken aus. Der Körper streckt sich während des Sprungs leicht. Um etwa 8,05 Sekunden trifft das Licht die Hand; kleine helle Partikel stieben auseinander und sinken aus. Die Landung um 8,6 Sekunden wird durch kurzes Stauchen und gedämpftes Nachschwingen abgefedert; die Antenne schwingt nach. Der eingefangene Funke verblasst bis etwa 10,7 Sekunden. Ab etwa 10,6 Sekunden beginnt an seiner Bildposition eine kreisförmige Öffnung in die nächtliche Welt.",
-        "camera": "Gleiche seitliche Komposition ohne Schnitt. Sprung, Antennenspitze und ausgestreckte Hand dürfen nicht angeschnitten werden. Während der Landung fährt die Kamera sanft wieder etwas zurück. Die kreisförmige Blende wächst aus dem Bereich des Lichtkontakts.",
+        "title": "Der Stern wird zu Schmetterlingen",
+        "duration": 10,
+        "action": "7–17 Sekunden: Der Roboter federt ein und springt nach rechts oben. Um genau 8,05 Sekunden trifft der Stern seine ausgestreckte Hand. An diesem Kontaktpunkt entsteht ein warmer goldener Partikelstoß; der Stern löst sich innerhalb von etwa 0,32 Sekunden auf. Drei kleine Schmetterlinge erscheinen aus demselben Punkt, leicht um Bruchteile einer Sekunde versetzt, und entfalten ihre Flügel. Der Roboter landet um etwa 8,6 Sekunden weich und winkt ihnen zwischen 10,1 und 12,4 Sekunden noch einmal zu. Blau, Gold und Rosa fliegen auf unterschiedlichen Bögen durch die Szene; schnelle Flügelschläge und ein kleines Auf-und-ab vermeiden starre, geradlinige Bewegung. Die Anflüge verlangsamen sich. Blau landet bei 13,75 Sekunden auf der rosa Blume, Gold bei 14,5 auf der goldenen und Rosa bei 15,25 auf der lilafarbenen. Jede Landung löst nur an der zugehörigen Blume ein etwa 1,4 Sekunden langes, kleiner werdendes Wackeln aus. Die Schmetterlinge bleiben am Blütenzentrum verankert und werden mitbewegt; keine Kontakt-Partikelstöße bei den Landungen. Danach sitzen sie ruhig und bewegen die Flügel langsam.",
+        "camera": "Die seitliche Komposition bleibt kontinuierlich. Kontaktpunkt und Lichtexplosion müssen vollständig im Bild liegen. Anschließend langsam zur weiteren Ansicht öffnen, damit alle drei Flugwege und Blumen rechts gut erkennbar sind. Kein Szenenwechsel, bevor die letzte Blume ausgeschwungen ist.",
         "audio": "Stumm: keine Dialoge, kein Sprecher, keine Musik und keine Geräusche.",
         "image": null,
         "characters": [
           "collector",
-          "spark"
+          "spark",
+          "butterfly",
+          "flower"
         ],
         "settings": [
-          "forest",
-          "night-garden"
+          "forest"
         ],
         "status": "draft",
         "comments": []
@@ -165,18 +3770,17 @@
       {
         "soundEffects": [],
         "id": "transformation",
-        "title": "Ein kleiner Funke verändert die Welt",
+        "title": "Ein kleiner Funke schenkt neues Leben",
         "duration": 5,
-        "action": "11–16 Sekunden: Die bereits begonnene kreisförmige Blende wächst weiter und gibt bis etwa Sekunde 12,4 den Nachtgarten vollständig frei. Wald und Roboter werden von der neuen Ansicht verdeckt. Glühwürmchen schweben und pulsieren sanft. Ab etwa 12,1 Sekunden erscheinen links zwei Zeilen: „Manchmal genügt“ und „ein kleiner Funke.“. Die zweite Zeile ist etwas größer und wärmer gefärbt; darunter liegt eine feine geschwungene Linie. Eine kleine ergänzende Zeile lautet „GESTIK / GEWICHT / ATMOSPHÄRE“. Bis zum Ende bei Sekunde 16 bleibt die Botschaft ruhig und gut lesbar stehen. Kein erneuter Sprung zum Anfang innerhalb des exportierten Films.",
-        "camera": "Die Irisblende ist der einzige große Ansichtswechsel. Danach ruhige, weite Schlusskomposition: Text links, Mondsichel rechts oben, Pflanzen unten. Kleine Bewegungen nur in Pflanzen und Glühwürmchen.",
+        "action": "17–22 Sekunden: Hier beginnt eine eigene, fünf Sekunden lange Szene „Ein kleiner Funke – Nachtgarten“. Eine 1,8 Sekunden lange Szenen-Überblendung gibt den Nachtgarten frei. Diese Szene verwendet die Nachtgarten-Bühne und enthält keinen Roboter und keinen Stern. Die drei Blumen mit ihren darauf sitzenden Schmetterlingen bleiben rechts im Vordergrund sichtbar; die Tiere sind bereits auf den Blumen verankert, ohne erneuten Flug oder Landung. Glühwürmchen schweben und pulsieren sanft. Ab etwa 19,3 Sekunden erscheinen links zwei Zeilen: „Manchmal genügt“ und „ein kleiner Funke.“. Die zweite Zeile ist etwas größer und wärmer gefärbt; darunter liegt eine feine Linie. Beide Textzeilen und die kleine ergänzende Zeile sind normale, frei bearbeitbare Textelemente dieser zweiten Szene. Eine kleine ergänzende Zeile lautet „GESTIK / GEWICHT / ATMOSPHÄRE“. Bis zum Ende bei Sekunde 22 bleibt die Botschaft ruhig und lesbar. Kein erneuter Sprung zum Anfang innerhalb des exportierten Films.",
+        "camera": "Die weiche Überblendung zwischen den beiden echten Szenen ist der einzige große Ansichtswechsel. Danach ruhige Schlusskomposition: Text links, Mondsichel rechts oben, Blumen und Schmetterlinge rechts unten. Nur langsame Flügelbewegungen, sanftes Wiegen und Glühwürmchenlicht.",
         "audio": "Stumm: keine Dialoge, kein Sprecher, keine Musik und keine Geräusche.",
         "image": null,
         "characters": [
-          "collector",
-          "spark"
+          "butterfly",
+          "flower"
         ],
         "settings": [
-          "forest",
           "night-garden"
         ],
         "status": "draft",
@@ -205,7 +3809,7 @@
   "backgroundSimulation": null,
   "version": "1.0",
   "title": "Der kleine Lichtsammler",
-  "description": "Ein kleiner Roboter entdeckt einen Funken. Eine 2D-Puppenanimation mit Gestik, Sprung und einem leuchtenden Nachtgarten.",
+  "description": "Ein kleiner Roboter entdeckt einen Funken. Beim Berühren des Sterns entstehen drei Schmetterlinge. Sie fliegen zu Blumen, deren Blüten sanft nachfedern. Zwei bearbeitbare Szenen führen vom Waldweg in einen leuchtenden Nachtgarten.",
   "firstComment": "",
   "hashtags": "",
   "format": "landscape",
@@ -214,11 +3818,13 @@
     {
       "stage2d": {
         "stage": "forest",
+        "stageClip": "",
         "actors": [
           {
             "id": "collector",
             "name": "Lichtsammler",
             "object": "collector",
+            "layer": "world",
             "x": 145,
             "y": 425,
             "scale": 1,
@@ -228,6 +3834,8 @@
             "actions": [
               {
                 "type": "walk",
+                "clip": "",
+                "burst": true,
                 "at": 0.2,
                 "duration": 3.4,
                 "toX": 470,
@@ -237,6 +3845,8 @@
               },
               {
                 "type": "wave",
+                "clip": "",
+                "burst": true,
                 "at": 4.1,
                 "duration": 2.3,
                 "toX": 470,
@@ -246,9 +3856,22 @@
               },
               {
                 "type": "jump",
+                "clip": "",
+                "burst": true,
                 "at": 6.6,
                 "duration": 3,
                 "toX": 562,
+                "toY": 425,
+                "height": 100,
+                "target": ""
+              },
+              {
+                "type": "wave",
+                "clip": "",
+                "burst": true,
+                "at": 10.1,
+                "duration": 2.3,
+                "toX": 470,
                 "toY": 425,
                 "height": 100,
                 "target": ""
@@ -259,6 +3882,7 @@
             "id": "spark",
             "name": "Lichtfunke",
             "object": "spark",
+            "layer": "world",
             "x": 610,
             "y": 220,
             "scale": 1,
@@ -268,6 +3892,8 @@
             "actions": [
               {
                 "type": "float",
+                "clip": "",
+                "burst": true,
                 "at": 0,
                 "duration": 16,
                 "toX": 470,
@@ -277,6 +3903,8 @@
               },
               {
                 "type": "attach",
+                "clip": "",
+                "burst": true,
                 "at": 7.65,
                 "duration": 0.4,
                 "toX": 470,
@@ -286,12 +3914,527 @@
               },
               {
                 "type": "fade",
-                "at": 9.3,
+                "clip": "",
+                "burst": true,
+                "at": 8.05,
+                "duration": 0.32,
+                "toX": 470,
+                "toY": 425,
+                "height": 100,
+                "target": ""
+              }
+            ]
+          },
+          {
+            "id": "flower-blue",
+            "name": "Rosa Blume",
+            "object": "flower",
+            "layer": "foreground",
+            "x": 654,
+            "y": 452,
+            "scale": 0.85,
+            "rotation": 0,
+            "opacity": 1,
+            "color": "#efa5bd",
+            "actions": [
+              {
+                "type": "play",
+                "clip": "landing",
+                "burst": true,
+                "at": 13.75,
                 "duration": 1.4,
                 "toX": 470,
                 "toY": 425,
                 "height": 100,
                 "target": ""
+              }
+            ]
+          },
+          {
+            "id": "flower-gold",
+            "name": "Goldene Blume",
+            "object": "flower",
+            "layer": "foreground",
+            "x": 780,
+            "y": 465,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "color": "#f2cb79",
+            "actions": [
+              {
+                "type": "play",
+                "clip": "landing",
+                "burst": true,
+                "at": 14.5,
+                "duration": 1.4,
+                "toX": 470,
+                "toY": 425,
+                "height": 100,
+                "target": ""
+              }
+            ]
+          },
+          {
+            "id": "flower-rose",
+            "name": "Lila Blume",
+            "object": "flower",
+            "layer": "foreground",
+            "x": 894,
+            "y": 448,
+            "scale": 0.9,
+            "rotation": 0,
+            "opacity": 1,
+            "color": "#b9a4df",
+            "actions": [
+              {
+                "type": "play",
+                "clip": "landing",
+                "burst": true,
+                "at": 15.25,
+                "duration": 1.4,
+                "toX": 470,
+                "toY": 425,
+                "height": 100,
+                "target": ""
+              }
+            ]
+          },
+          {
+            "id": "butterfly-blue",
+            "name": "Blauer Schmetterling",
+            "object": "butterfly",
+            "layer": "foreground",
+            "x": 587.5899171472884,
+            "y": 160.10624036879545,
+            "scale": 0.66,
+            "rotation": 0,
+            "opacity": 1,
+            "color": "#8dd9df",
+            "actions": [
+              {
+                "type": "play",
+                "clip": "hidden",
+                "burst": true,
+                "at": 0,
+                "duration": 8.05,
+                "toX": 470,
+                "toY": 425,
+                "height": 100,
+                "target": ""
+              },
+              {
+                "type": "play",
+                "clip": "emerge",
+                "burst": true,
+                "at": 8.05,
+                "duration": 0.3,
+                "toX": 470,
+                "toY": 425,
+                "height": 100,
+                "target": ""
+              },
+              {
+                "type": "play",
+                "clip": "fly",
+                "burst": true,
+                "at": 8.05,
+                "duration": 5.35,
+                "toX": 470,
+                "toY": 425,
+                "height": 100,
+                "target": ""
+              },
+              {
+                "type": "play",
+                "clip": "alight",
+                "burst": true,
+                "at": 13.4,
+                "duration": 0.7,
+                "toX": 470,
+                "toY": 425,
+                "height": 100,
+                "target": ""
+              },
+              {
+                "type": "float",
+                "clip": "",
+                "burst": true,
+                "at": 8.05,
+                "duration": 5.35,
+                "toX": 470,
+                "toY": 425,
+                "height": 5,
+                "target": ""
+              },
+              {
+                "type": "move",
+                "clip": "",
+                "burst": true,
+                "at": 8.05,
+                "duration": 0.8916666666666666,
+                "toX": 650,
+                "toY": 105,
+                "height": 100,
+                "target": ""
+              },
+              {
+                "type": "move",
+                "clip": "",
+                "burst": true,
+                "at": 8.941666666666666,
+                "duration": 0.8916666666666666,
+                "toX": 760,
+                "toY": 160,
+                "height": 100,
+                "target": ""
+              },
+              {
+                "type": "move",
+                "clip": "",
+                "burst": true,
+                "at": 9.833333333333334,
+                "duration": 0.8916666666666666,
+                "toX": 700,
+                "toY": 232,
+                "height": 100,
+                "target": ""
+              },
+              {
+                "type": "move",
+                "clip": "",
+                "burst": true,
+                "at": 10.725000000000001,
+                "duration": 0.8916666666666666,
+                "toX": 600,
+                "toY": 285,
+                "height": 100,
+                "target": ""
+              },
+              {
+                "type": "move",
+                "clip": "",
+                "burst": true,
+                "at": 11.616666666666667,
+                "duration": 0.8916666666666666,
+                "toX": 660,
+                "toY": 320,
+                "height": 100,
+                "target": ""
+              },
+              {
+                "type": "move",
+                "clip": "",
+                "burst": true,
+                "at": 12.508333333333333,
+                "duration": 0.8916666666666666,
+                "toX": 654,
+                "toY": 347.9,
+                "height": 100,
+                "target": ""
+              },
+              {
+                "type": "attach",
+                "clip": "",
+                "burst": false,
+                "at": 13.4,
+                "duration": 0.35,
+                "toX": 470,
+                "toY": 425,
+                "height": 100,
+                "target": "flower-blue"
+              }
+            ]
+          },
+          {
+            "id": "butterfly-gold",
+            "name": "Goldener Schmetterling",
+            "object": "butterfly",
+            "layer": "foreground",
+            "x": 587.5899171472884,
+            "y": 160.10624036879545,
+            "scale": 0.6,
+            "rotation": 0,
+            "opacity": 1,
+            "color": "#f4cf82",
+            "actions": [
+              {
+                "type": "play",
+                "clip": "hidden",
+                "burst": true,
+                "at": 0,
+                "duration": 8.120000000000001,
+                "toX": 470,
+                "toY": 425,
+                "height": 100,
+                "target": ""
+              },
+              {
+                "type": "play",
+                "clip": "emerge",
+                "burst": true,
+                "at": 8.120000000000001,
+                "duration": 0.3,
+                "toX": 470,
+                "toY": 425,
+                "height": 100,
+                "target": ""
+              },
+              {
+                "type": "play",
+                "clip": "fly",
+                "burst": true,
+                "at": 8.120000000000001,
+                "duration": 6.029999999999999,
+                "toX": 470,
+                "toY": 425,
+                "height": 100,
+                "target": ""
+              },
+              {
+                "type": "play",
+                "clip": "alight",
+                "burst": true,
+                "at": 14.15,
+                "duration": 0.7,
+                "toX": 470,
+                "toY": 425,
+                "height": 100,
+                "target": ""
+              },
+              {
+                "type": "float",
+                "clip": "",
+                "burst": true,
+                "at": 8.120000000000001,
+                "duration": 6.029999999999999,
+                "toX": 470,
+                "toY": 425,
+                "height": 7,
+                "target": ""
+              },
+              {
+                "type": "move",
+                "clip": "",
+                "burst": true,
+                "at": 8.120000000000001,
+                "duration": 1.005,
+                "toX": 550,
+                "toY": 112,
+                "height": 100,
+                "target": ""
+              },
+              {
+                "type": "move",
+                "clip": "",
+                "burst": true,
+                "at": 9.125,
+                "duration": 1.005,
+                "toX": 595,
+                "toY": 225,
+                "height": 100,
+                "target": ""
+              },
+              {
+                "type": "move",
+                "clip": "",
+                "burst": true,
+                "at": 10.13,
+                "duration": 1.005,
+                "toX": 735,
+                "toY": 265,
+                "height": 100,
+                "target": ""
+              },
+              {
+                "type": "move",
+                "clip": "",
+                "burst": true,
+                "at": 11.135000000000002,
+                "duration": 1.005,
+                "toX": 825,
+                "toY": 295,
+                "height": 100,
+                "target": ""
+              },
+              {
+                "type": "move",
+                "clip": "",
+                "burst": true,
+                "at": 12.14,
+                "duration": 1.005,
+                "toX": 780,
+                "toY": 325,
+                "height": 100,
+                "target": ""
+              },
+              {
+                "type": "move",
+                "clip": "",
+                "burst": true,
+                "at": 13.145,
+                "duration": 1.005,
+                "toX": 780,
+                "toY": 345,
+                "height": 100,
+                "target": ""
+              },
+              {
+                "type": "attach",
+                "clip": "",
+                "burst": false,
+                "at": 14.15,
+                "duration": 0.35,
+                "toX": 470,
+                "toY": 425,
+                "height": 100,
+                "target": "flower-gold"
+              }
+            ]
+          },
+          {
+            "id": "butterfly-rose",
+            "name": "Rosafarbener Schmetterling",
+            "object": "butterfly",
+            "layer": "foreground",
+            "x": 587.5899171472884,
+            "y": 160.10624036879545,
+            "scale": 0.56,
+            "rotation": 0,
+            "opacity": 1,
+            "color": "#f0a8cc",
+            "actions": [
+              {
+                "type": "play",
+                "clip": "hidden",
+                "burst": true,
+                "at": 0,
+                "duration": 8.21,
+                "toX": 470,
+                "toY": 425,
+                "height": 100,
+                "target": ""
+              },
+              {
+                "type": "play",
+                "clip": "emerge",
+                "burst": true,
+                "at": 8.21,
+                "duration": 0.3,
+                "toX": 470,
+                "toY": 425,
+                "height": 100,
+                "target": ""
+              },
+              {
+                "type": "play",
+                "clip": "fly",
+                "burst": true,
+                "at": 8.21,
+                "duration": 6.6899999999999995,
+                "toX": 470,
+                "toY": 425,
+                "height": 100,
+                "target": ""
+              },
+              {
+                "type": "play",
+                "clip": "alight",
+                "burst": true,
+                "at": 14.9,
+                "duration": 0.7,
+                "toX": 470,
+                "toY": 425,
+                "height": 100,
+                "target": ""
+              },
+              {
+                "type": "float",
+                "clip": "",
+                "burst": true,
+                "at": 8.21,
+                "duration": 6.6899999999999995,
+                "toX": 470,
+                "toY": 425,
+                "height": 9,
+                "target": ""
+              },
+              {
+                "type": "move",
+                "clip": "",
+                "burst": true,
+                "at": 8.21,
+                "duration": 1.115,
+                "toX": 630,
+                "toY": 78,
+                "height": 100,
+                "target": ""
+              },
+              {
+                "type": "move",
+                "clip": "",
+                "burst": true,
+                "at": 9.325000000000001,
+                "duration": 1.115,
+                "toX": 865,
+                "toY": 135,
+                "height": 100,
+                "target": ""
+              },
+              {
+                "type": "move",
+                "clip": "",
+                "burst": true,
+                "at": 10.440000000000001,
+                "duration": 1.115,
+                "toX": 820,
+                "toY": 215,
+                "height": 100,
+                "target": ""
+              },
+              {
+                "type": "move",
+                "clip": "",
+                "burst": true,
+                "at": 11.555,
+                "duration": 1.115,
+                "toX": 930,
+                "toY": 265,
+                "height": 100,
+                "target": ""
+              },
+              {
+                "type": "move",
+                "clip": "",
+                "burst": true,
+                "at": 12.670000000000002,
+                "duration": 1.115,
+                "toX": 892,
+                "toY": 318,
+                "height": 100,
+                "target": ""
+              },
+              {
+                "type": "move",
+                "clip": "",
+                "burst": true,
+                "at": 13.785,
+                "duration": 1.115,
+                "toX": 894,
+                "toY": 338.6,
+                "height": 100,
+                "target": ""
+              },
+              {
+                "type": "attach",
+                "clip": "",
+                "burst": false,
+                "at": 14.9,
+                "duration": 0.35,
+                "toX": 470,
+                "toY": 425,
+                "height": 100,
+                "target": "flower-rose"
               }
             ]
           }
@@ -316,25 +4459,26 @@
             "zoom": 1.12
           },
           {
-            "at": 11.2,
-            "x": -91,
+            "at": 10.8,
+            "x": -75,
             "y": 0,
             "zoom": 1.04
+          },
+          {
+            "at": 13.2,
+            "x": -35,
+            "y": 0,
+            "zoom": 1
+          },
+          {
+            "at": 17,
+            "x": -35,
+            "y": 0,
+            "zoom": 1
           }
         ],
-        "transition": {
-          "stage": "night-garden",
-          "at": 10.6,
-          "duration": 1.8,
-          "x": 550,
-          "y": 290
-        },
-        "ending": {
-          "title": "Manchmal genügt",
-          "subtitle": "ein kleiner Funke.",
-          "at": 12.1,
-          "duration": 1.2
-        }
+        "transition": null,
+        "ending": null
       },
       "morph": null,
       "stage3d": null,
@@ -342,8 +4486,8 @@
       "groups": [],
       "narration": null,
       "id": "light-collector",
-      "name": "Der kleine Lichtsammler",
-      "duration": 16,
+      "name": "Der Lichtsammler – Waldweg",
+      "duration": 17,
       "backgroundEnabled": true,
       "backgroundOpacity": 1,
       "backgroundGradient": null,
@@ -352,6 +4496,779 @@
       "transition": "none",
       "transitionDuration": 0.5,
       "elements": []
+    },
+    {
+      "stage2d": {
+        "stage": "night-garden",
+        "stageClip": "",
+        "actors": [
+          {
+            "id": "flower-blue",
+            "name": "Rosa Blume",
+            "object": "flower",
+            "layer": "foreground",
+            "x": 654,
+            "y": 452,
+            "scale": 0.85,
+            "rotation": 0,
+            "opacity": 1,
+            "color": "#efa5bd",
+            "actions": []
+          },
+          {
+            "id": "flower-gold",
+            "name": "Goldene Blume",
+            "object": "flower",
+            "layer": "foreground",
+            "x": 780,
+            "y": 465,
+            "scale": 1,
+            "rotation": 0,
+            "opacity": 1,
+            "color": "#f2cb79",
+            "actions": []
+          },
+          {
+            "id": "flower-rose",
+            "name": "Lila Blume",
+            "object": "flower",
+            "layer": "foreground",
+            "x": 894,
+            "y": 448,
+            "scale": 0.9,
+            "rotation": 0,
+            "opacity": 1,
+            "color": "#b9a4df",
+            "actions": []
+          },
+          {
+            "id": "butterfly-blue",
+            "name": "Blauer Schmetterling",
+            "object": "butterfly",
+            "layer": "foreground",
+            "x": 654,
+            "y": 361.9,
+            "scale": 0.66,
+            "rotation": 0,
+            "opacity": 1,
+            "color": "#8dd9df",
+            "actions": [
+              {
+                "type": "attach",
+                "clip": "",
+                "burst": false,
+                "at": 0,
+                "duration": 0.01,
+                "toX": 470,
+                "toY": 425,
+                "height": 100,
+                "target": "flower-blue"
+              }
+            ]
+          },
+          {
+            "id": "butterfly-gold",
+            "name": "Goldener Schmetterling",
+            "object": "butterfly",
+            "layer": "foreground",
+            "x": 780,
+            "y": 359,
+            "scale": 0.6,
+            "rotation": 0,
+            "opacity": 1,
+            "color": "#f4cf82",
+            "actions": [
+              {
+                "type": "attach",
+                "clip": "",
+                "burst": false,
+                "at": 0,
+                "duration": 0.01,
+                "toX": 470,
+                "toY": 425,
+                "height": 100,
+                "target": "flower-gold"
+              }
+            ]
+          },
+          {
+            "id": "butterfly-rose",
+            "name": "Rosafarbener Schmetterling",
+            "object": "butterfly",
+            "layer": "foreground",
+            "x": 894,
+            "y": 352.6,
+            "scale": 0.56,
+            "rotation": 0,
+            "opacity": 1,
+            "color": "#f0a8cc",
+            "actions": [
+              {
+                "type": "attach",
+                "clip": "",
+                "burst": false,
+                "at": 0,
+                "duration": 0.01,
+                "toX": 470,
+                "toY": 425,
+                "height": 100,
+                "target": "flower-rose"
+              }
+            ]
+          }
+        ],
+        "camera": [
+          {
+            "at": 0,
+            "x": -35,
+            "y": 0,
+            "zoom": 1
+          }
+        ],
+        "transition": null,
+        "ending": null
+      },
+      "morph": null,
+      "stage3d": null,
+      "camera": null,
+      "groups": [],
+      "narration": null,
+      "id": "night-garden",
+      "name": "Ein kleiner Funke – Nachtgarten",
+      "duration": 5,
+      "backgroundEnabled": true,
+      "backgroundOpacity": 1,
+      "backgroundGradient": null,
+      "background": "#102c38",
+      "backgroundAsset": "",
+      "transition": "crossfade",
+      "transitionDuration": 1.8,
+      "elements": [
+        {
+          "lighting": {
+            "enabled": false,
+            "strength": 0.85,
+            "color": "#fff1cf",
+            "ambient": 0.3,
+            "centerX": 35,
+            "centerY": 25,
+            "radius": 70,
+            "angle": -135,
+            "speed": 0,
+            "orbit": 0,
+            "shadowColor": "#000000",
+            "shadowOpacity": 0.45,
+            "shadowDistance": 24,
+            "shadowBlur": 12
+          },
+          "kaleidoscope": {
+            "enabled": false,
+            "segments": 8,
+            "rotation": 0,
+            "speed": 15,
+            "zoom": 1.5,
+            "centerX": 50,
+            "centerY": 50
+          },
+          "print": {
+            "enabled": false,
+            "style": "dots",
+            "size": 16,
+            "angle": 45,
+            "ink": "#18232b",
+            "paper": "#fff2d6",
+            "strength": 1
+          },
+          "glitch": {
+            "enabled": false,
+            "strength": 16,
+            "channelShift": 5,
+            "bands": 8,
+            "rate": 6,
+            "seed": 17
+          },
+          "reveal": {
+            "enabled": false,
+            "type": "left-to-right",
+            "easing": "ease-in-out",
+            "delay": 0,
+            "duration": 1.5,
+            "originX": 50,
+            "originY": 50,
+            "strokes": 5,
+            "roughness": 20,
+            "seed": 17
+          },
+          "afterimages": {
+            "enabled": false,
+            "count": 4,
+            "spacing": 0.08,
+            "opacity": 0.45,
+            "tint": false,
+            "color": "#66ccff"
+          },
+          "stopMotion": {
+            "enabled": false,
+            "fps": 12,
+            "jitter": 1.5,
+            "rotation": 0.35,
+            "seed": 17
+          },
+          "paper": {
+            "enabled": false,
+            "edge": "torn",
+            "color": "#f4ecd8",
+            "padding": 16,
+            "roughness": 8,
+            "texture": 0.18,
+            "shadow": 12,
+            "seed": 17
+          },
+          "exposure": {
+            "enabled": false,
+            "mode": "screen",
+            "strength": 0.65
+          },
+          "liquid": {
+            "enabled": false,
+            "style": "water",
+            "strength": 24,
+            "wavelength": 120,
+            "speed": 1
+          },
+          "textGradient": null,
+          "textEffects": {
+            "outline": {
+              "enabled": false,
+              "color": "#000000",
+              "width": 2
+            },
+            "glow": {
+              "enabled": false,
+              "color": "#ff66cc",
+              "intensity": 16
+            },
+            "shadow": {
+              "enabled": false,
+              "color": "#000000",
+              "blur": 6,
+              "x": 4,
+              "y": 4,
+              "opacity": 0.7
+            }
+          },
+          "space": "scene",
+          "crop": null,
+          "placement": null,
+          "id": "closing-title",
+          "bubble": null,
+          "anchors": {},
+          "until": null,
+          "exitAnimation": "none",
+          "exitDuration": 0.5,
+          "motionPath": null,
+          "video": null,
+          "simulation": null,
+          "name": "Schlusstitel",
+          "type": "text",
+          "text": "Manchmal genügt",
+          "runs": [],
+          "asset": "",
+          "x": 9.791666666666668,
+          "y": 27,
+          "width": 70,
+          "height": 10,
+          "fillGradient": null,
+          "color": "#e7eed9",
+          "fillColor": "#ffffff",
+          "borderColor": "none",
+          "borderWidth": 4,
+          "shapeType": "rectangle",
+          "borderStyle": "solid",
+          "font": "Georgia",
+          "fontSize": 78,
+          "align": "left",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "opacity": 1,
+          "rotation": 0,
+          "radius": 0,
+          "fit": "contain",
+          "animation": "fade",
+          "at": 2.3000000000000007,
+          "animationDuration": 1.2
+        },
+        {
+          "lighting": {
+            "enabled": false,
+            "strength": 0.85,
+            "color": "#fff1cf",
+            "ambient": 0.3,
+            "centerX": 35,
+            "centerY": 25,
+            "radius": 70,
+            "angle": -135,
+            "speed": 0,
+            "orbit": 0,
+            "shadowColor": "#000000",
+            "shadowOpacity": 0.45,
+            "shadowDistance": 24,
+            "shadowBlur": 12
+          },
+          "kaleidoscope": {
+            "enabled": false,
+            "segments": 8,
+            "rotation": 0,
+            "speed": 15,
+            "zoom": 1.5,
+            "centerX": 50,
+            "centerY": 50
+          },
+          "print": {
+            "enabled": false,
+            "style": "dots",
+            "size": 16,
+            "angle": 45,
+            "ink": "#18232b",
+            "paper": "#fff2d6",
+            "strength": 1
+          },
+          "glitch": {
+            "enabled": false,
+            "strength": 16,
+            "channelShift": 5,
+            "bands": 8,
+            "rate": 6,
+            "seed": 17
+          },
+          "reveal": {
+            "enabled": false,
+            "type": "left-to-right",
+            "easing": "ease-in-out",
+            "delay": 0,
+            "duration": 1.5,
+            "originX": 50,
+            "originY": 50,
+            "strokes": 5,
+            "roughness": 20,
+            "seed": 17
+          },
+          "afterimages": {
+            "enabled": false,
+            "count": 4,
+            "spacing": 0.08,
+            "opacity": 0.45,
+            "tint": false,
+            "color": "#66ccff"
+          },
+          "stopMotion": {
+            "enabled": false,
+            "fps": 12,
+            "jitter": 1.5,
+            "rotation": 0.35,
+            "seed": 17
+          },
+          "paper": {
+            "enabled": false,
+            "edge": "torn",
+            "color": "#f4ecd8",
+            "padding": 16,
+            "roughness": 8,
+            "texture": 0.18,
+            "shadow": 12,
+            "seed": 17
+          },
+          "exposure": {
+            "enabled": false,
+            "mode": "screen",
+            "strength": 0.65
+          },
+          "liquid": {
+            "enabled": false,
+            "style": "water",
+            "strength": 24,
+            "wavelength": 120,
+            "speed": 1
+          },
+          "textGradient": null,
+          "textEffects": {
+            "outline": {
+              "enabled": false,
+              "color": "#000000",
+              "width": 2
+            },
+            "glow": {
+              "enabled": false,
+              "color": "#ff66cc",
+              "intensity": 16
+            },
+            "shadow": {
+              "enabled": false,
+              "color": "#000000",
+              "blur": 6,
+              "x": 4,
+              "y": 4,
+              "opacity": 0.7
+            }
+          },
+          "space": "scene",
+          "crop": null,
+          "placement": null,
+          "id": "closing-subtitle",
+          "bubble": null,
+          "anchors": {},
+          "until": null,
+          "exitAnimation": "none",
+          "exitDuration": 0.5,
+          "motionPath": null,
+          "video": null,
+          "simulation": null,
+          "name": "Schlussbotschaft",
+          "type": "text",
+          "text": "ein kleiner Funke.",
+          "runs": [],
+          "asset": "",
+          "x": 9.791666666666668,
+          "y": 36.8,
+          "width": 70,
+          "height": 10,
+          "fillGradient": null,
+          "color": "#ffd6a5",
+          "fillColor": "#ffffff",
+          "borderColor": "none",
+          "borderWidth": 4,
+          "shapeType": "rectangle",
+          "borderStyle": "solid",
+          "font": "Georgia",
+          "fontSize": 90,
+          "align": "left",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "opacity": 1,
+          "rotation": 0,
+          "radius": 0,
+          "fit": "contain",
+          "animation": "fade",
+          "at": 2.3000000000000007,
+          "animationDuration": 1.2
+        },
+        {
+          "lighting": {
+            "enabled": false,
+            "strength": 0.85,
+            "color": "#fff1cf",
+            "ambient": 0.3,
+            "centerX": 35,
+            "centerY": 25,
+            "radius": 70,
+            "angle": -135,
+            "speed": 0,
+            "orbit": 0,
+            "shadowColor": "#000000",
+            "shadowOpacity": 0.45,
+            "shadowDistance": 24,
+            "shadowBlur": 12
+          },
+          "kaleidoscope": {
+            "enabled": false,
+            "segments": 8,
+            "rotation": 0,
+            "speed": 15,
+            "zoom": 1.5,
+            "centerX": 50,
+            "centerY": 50
+          },
+          "print": {
+            "enabled": false,
+            "style": "dots",
+            "size": 16,
+            "angle": 45,
+            "ink": "#18232b",
+            "paper": "#fff2d6",
+            "strength": 1
+          },
+          "glitch": {
+            "enabled": false,
+            "strength": 16,
+            "channelShift": 5,
+            "bands": 8,
+            "rate": 6,
+            "seed": 17
+          },
+          "reveal": {
+            "enabled": false,
+            "type": "left-to-right",
+            "easing": "ease-in-out",
+            "delay": 0,
+            "duration": 1.5,
+            "originX": 50,
+            "originY": 50,
+            "strokes": 5,
+            "roughness": 20,
+            "seed": 17
+          },
+          "afterimages": {
+            "enabled": false,
+            "count": 4,
+            "spacing": 0.08,
+            "opacity": 0.45,
+            "tint": false,
+            "color": "#66ccff"
+          },
+          "stopMotion": {
+            "enabled": false,
+            "fps": 12,
+            "jitter": 1.5,
+            "rotation": 0.35,
+            "seed": 17
+          },
+          "paper": {
+            "enabled": false,
+            "edge": "torn",
+            "color": "#f4ecd8",
+            "padding": 16,
+            "roughness": 8,
+            "texture": 0.18,
+            "shadow": 12,
+            "seed": 17
+          },
+          "exposure": {
+            "enabled": false,
+            "mode": "screen",
+            "strength": 0.65
+          },
+          "liquid": {
+            "enabled": false,
+            "style": "water",
+            "strength": 24,
+            "wavelength": 120,
+            "speed": 1
+          },
+          "textGradient": null,
+          "textEffects": {
+            "outline": {
+              "enabled": false,
+              "color": "#000000",
+              "width": 2
+            },
+            "glow": {
+              "enabled": false,
+              "color": "#ff66cc",
+              "intensity": 16
+            },
+            "shadow": {
+              "enabled": false,
+              "color": "#000000",
+              "blur": 6,
+              "x": 4,
+              "y": 4,
+              "opacity": 0.7
+            }
+          },
+          "space": "scene",
+          "crop": null,
+          "placement": null,
+          "id": "closing-rule",
+          "bubble": null,
+          "anchors": {},
+          "until": null,
+          "exitAnimation": "none",
+          "exitDuration": 0.5,
+          "motionPath": null,
+          "video": null,
+          "simulation": null,
+          "name": "Feine Abschlusslinie",
+          "type": "shape",
+          "text": "",
+          "runs": [],
+          "asset": "",
+          "x": 10,
+          "y": 48.5,
+          "width": 27.2,
+          "height": 0.37,
+          "fillGradient": null,
+          "color": "#f7b89a",
+          "fillColor": "#f7b89a",
+          "borderColor": "none",
+          "borderWidth": 0,
+          "shapeType": "rectangle",
+          "borderStyle": "solid",
+          "font": "Arial",
+          "fontSize": 90,
+          "align": "center",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "opacity": 1,
+          "rotation": 0,
+          "radius": 0,
+          "fit": "contain",
+          "animation": "fade",
+          "at": 2.3000000000000007,
+          "animationDuration": 1.2
+        },
+        {
+          "lighting": {
+            "enabled": false,
+            "strength": 0.85,
+            "color": "#fff1cf",
+            "ambient": 0.3,
+            "centerX": 35,
+            "centerY": 25,
+            "radius": 70,
+            "angle": -135,
+            "speed": 0,
+            "orbit": 0,
+            "shadowColor": "#000000",
+            "shadowOpacity": 0.45,
+            "shadowDistance": 24,
+            "shadowBlur": 12
+          },
+          "kaleidoscope": {
+            "enabled": false,
+            "segments": 8,
+            "rotation": 0,
+            "speed": 15,
+            "zoom": 1.5,
+            "centerX": 50,
+            "centerY": 50
+          },
+          "print": {
+            "enabled": false,
+            "style": "dots",
+            "size": 16,
+            "angle": 45,
+            "ink": "#18232b",
+            "paper": "#fff2d6",
+            "strength": 1
+          },
+          "glitch": {
+            "enabled": false,
+            "strength": 16,
+            "channelShift": 5,
+            "bands": 8,
+            "rate": 6,
+            "seed": 17
+          },
+          "reveal": {
+            "enabled": false,
+            "type": "left-to-right",
+            "easing": "ease-in-out",
+            "delay": 0,
+            "duration": 1.5,
+            "originX": 50,
+            "originY": 50,
+            "strokes": 5,
+            "roughness": 20,
+            "seed": 17
+          },
+          "afterimages": {
+            "enabled": false,
+            "count": 4,
+            "spacing": 0.08,
+            "opacity": 0.45,
+            "tint": false,
+            "color": "#66ccff"
+          },
+          "stopMotion": {
+            "enabled": false,
+            "fps": 12,
+            "jitter": 1.5,
+            "rotation": 0.35,
+            "seed": 17
+          },
+          "paper": {
+            "enabled": false,
+            "edge": "torn",
+            "color": "#f4ecd8",
+            "padding": 16,
+            "roughness": 8,
+            "texture": 0.18,
+            "shadow": 12,
+            "seed": 17
+          },
+          "exposure": {
+            "enabled": false,
+            "mode": "screen",
+            "strength": 0.65
+          },
+          "liquid": {
+            "enabled": false,
+            "style": "water",
+            "strength": 24,
+            "wavelength": 120,
+            "speed": 1
+          },
+          "textGradient": null,
+          "textEffects": {
+            "outline": {
+              "enabled": false,
+              "color": "#000000",
+              "width": 2
+            },
+            "glow": {
+              "enabled": false,
+              "color": "#ff66cc",
+              "intensity": 16
+            },
+            "shadow": {
+              "enabled": false,
+              "color": "#000000",
+              "blur": 6,
+              "x": 4,
+              "y": 4,
+              "opacity": 0.7
+            }
+          },
+          "space": "scene",
+          "crop": null,
+          "placement": null,
+          "id": "closing-caption",
+          "bubble": null,
+          "anchors": {},
+          "until": null,
+          "exitAnimation": "none",
+          "exitDuration": 0.5,
+          "motionPath": null,
+          "video": null,
+          "simulation": null,
+          "name": "Kleine Schlusszeile",
+          "type": "text",
+          "text": "GESTIK  /  GEWICHT  /  ATMOSPHÄRE",
+          "runs": [],
+          "asset": "",
+          "x": 10.208333333333334,
+          "y": 52.5,
+          "width": 70,
+          "height": 5,
+          "fillGradient": null,
+          "color": "#91b7ac",
+          "fillColor": "#ffffff",
+          "borderColor": "none",
+          "borderWidth": 4,
+          "shapeType": "rectangle",
+          "borderStyle": "solid",
+          "font": "Arial",
+          "fontSize": 24,
+          "align": "left",
+          "bold": false,
+          "italic": false,
+          "underline": false,
+          "strikethrough": false,
+          "opacity": 1,
+          "rotation": 0,
+          "radius": 0,
+          "fit": "contain",
+          "animation": "fade",
+          "at": 2.3000000000000007,
+          "animationDuration": 1.2
+        }
+      ]
     }
   ]
 }

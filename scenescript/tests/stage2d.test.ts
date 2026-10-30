@@ -8,17 +8,17 @@ import {demoProject,parseProject,validateProject} from '../src/lib/model.ts';
 import {DEFAULT_PROJECT_URL,resolveStartupProject} from '../src/lib/startup-project.ts';
 import {parseStoryboard,exportStoryboard,importStoryboard} from '../src/lib/storyboard.ts';
 test('2D libraries are separate from scene instances, portable and independently reusable',()=>{
- const p=lightCollectorProject(),s=p.scenes[0],shot=s.stage2d!;assert.equal(Object.keys(p.stages2d).length,2);assert.equal(Object.keys(p.objects2d).length,2);
+ const p=lightCollectorProject(),s=p.scenes[0],shot=s.stage2d!;assert.equal(Object.keys(p.stages2d).length,2);assert.equal(Object.keys(p.objects2d).length,4);
  assert.ok(!('actors' in p.stages2d.forest));assert.ok(!('actions' in p.objects2d.collector));assert.ok(!('ending' in p.objects2d.collector));
  const second=structuredClone(shot.actors[0]);second.id='blue';second.color='#4488ff';second.x=740;second.actions=[{...defaultAction2D('wave'),at:1,duration:2}];shot.actors.push(second);
  const scene=structuredClone(s);scene.id='second';scene.stage2d!.stage='night-garden';p.scenes.push(scene);
- const next=parseProject(JSON.stringify(p));assert.equal(next.scenes[0].stage2d!.actors[2].object,'collector');assert.equal(next.scenes[1].stage2d!.stage,'night-garden');assert.equal(next.objects2d.collector.color,'#f28b70');
+ const next=parseProject(JSON.stringify(p));assert.equal(next.scenes[0].stage2d!.actors.at(-1)!.object,'collector');assert.equal(next.scenes.at(-1)!.stage2d!.stage,'night-garden');assert.equal(next.objects2d.collector.color,'#f28b70');
  assert.equal(actorFrame2D(second,2).wave,1);assert.equal(actorFrame2D(shot.actors[0],2).wave,0);assert.deepEqual(validateProject(p),next);
  assert.equal(validateProject(demoProject()).scenes[0].stage2d,null);
 });
 test('strict references, finite bounds, action budgets and attachment rules are enforced',()=>{
  const good=lightCollectorProject();
- for(const mutate of [(p:any)=>p.scenes[0].stage2d.stage='missing',(p:any)=>p.scenes[0].stage2d.transition.stage='missing',(p:any)=>p.scenes[0].stage2d.actors[0].object='missing',(p:any)=>p.scenes[0].stage2d.actors[1].actions[1].target='spark',(p:any)=>p.scenes[0].stage2d.actors[1].actions[1].target='missing',(p:any)=>p.scenes[0].stage2d.actors.push(p.scenes[0].stage2d.actors[0]),(p:any)=>p.scenes[0].stage2d.actors[0].actions[0].duration=50,(p:any)=>p.scenes[0].stage2d.actors[0].scale=NaN,(p:any)=>p.objects2d.collector.code='alert(1)',(p:any)=>p.stages2d.forest.preset='code',(p:any)=>p.scenes[0].stage2d.camera.reverse(),(p:any)=>p.scenes[0].stage2d.actors[0].actions.push({...defaultAction2D('wave'),at:4.1}),(p:any)=>p.objects2d.collector.kind='shape']){const p=structuredClone(good);mutate(p);assert.throws(()=>validateProject(p));}
+ for(const mutate of [(p:any)=>p.scenes[0].stage2d.stage='missing',(p:any)=>p.scenes[1].stage2d.stage='missing',(p:any)=>p.scenes[0].stage2d.actors[0].object='missing',(p:any)=>p.scenes[0].stage2d.actors[1].actions[1].target='spark',(p:any)=>p.scenes[0].stage2d.actors[1].actions[1].target='missing',(p:any)=>p.scenes[0].stage2d.actors.push(p.scenes[0].stage2d.actors[0]),(p:any)=>p.scenes[0].stage2d.actors[0].actions[0].duration=50,(p:any)=>p.scenes[0].stage2d.actors[0].scale=NaN,(p:any)=>p.objects2d.collector.code='alert(1)',(p:any)=>p.stages2d.forest.preset='code',(p:any)=>p.scenes[0].stage2d.camera.reverse(),(p:any)=>p.scenes[0].stage2d.actors[0].actions.push({...defaultAction2D('wave'),at:4.1}),(p:any)=>p.objects2d.collector.kind='shape']){const p=structuredClone(good);mutate(p);assert.throws(()=>validateProject(p));}
  const sources:Record<string,unknown>=Object.create(null);Object.assign(sources,{'constructor':{...defaultObject2D()}});const p=demoProject();p.objects2d=sources as any;assert.ok(Object.hasOwn(validateProject(p).objects2d,'constructor'));const shot=defaultStage2D('constructor');assert.throws(()=>parseStage2D(shot,'shot',good));
 });
 test('actions and camera are absolute, retiming is explicit, and repeated poses do not accumulate state',()=>{
@@ -34,7 +34,7 @@ test('old bundled presets upgrade once without mutating the source or discarding
 test('shipped project, schema defaults, recovery and German storyboard stay in sync',async()=>{
  const p=lightCollectorProject(),shipped=parseProject(readFileSync(new URL('../public'+DEFAULT_PROJECT_URL,import.meta.url),'utf8'));assert.deepEqual(shipped,validateProject(p));
  const schema=JSON.parse(readFileSync(new URL('../public/schema.json',import.meta.url),'utf8'));for(const [key,value]of Object.entries(defaultStage2D()))assert.deepEqual(schema.$defs.stage2D.properties[key].default,value);
- const board=parseStoryboard(p.storyboard);assert.equal(board.language,'Deutsch');assert.equal(board.duration,16);assert.deepEqual(board.shots.map(s=>s.duration),[4,3,4,5]);assert.ok(board.style.includes('project.stages2d'));assert.ok(board.shots.at(-1)!.action.includes(p.scenes[0].stage2d!.ending!.subtitle));assert.equal(board.approved,false);
+ const board=parseStoryboard(p.storyboard);assert.equal(board.language,'Deutsch');assert.equal(board.duration,22);assert.deepEqual(board.shots.map(s=>s.duration),[4,3,10,5]);assert.ok(board.style.includes('project.stages2d'));assert.ok(board.shots.at(-1)!.action.includes(p.scenes[1].elements.find(e=>e.id==='closing-subtitle')!.text));assert.equal(board.approved,false);
  assert.equal(importStoryboard(exportStoryboard(board),board).shots.length,4);
  let called=false;const saved=await resolveStartupProject(JSON.stringify(demoProject()),async()=>{called=true;return p;});assert.equal(called,false);assert.ok(saved.recovered);const fallback=await resolveStartupProject(null,async()=>{throw Error('offline');});assert.equal(fallback.project.storyboard!.language,'Deutsch');
 });
@@ -94,6 +94,7 @@ test('2D review restores approved existing associations and rejects incompatible
  assert.throws(()=>restoreBoardModels2D({},p),/conflicting/);
 });
 
+import {boardResource2D} from '../src/lib/storyboard-resource-preview.ts';
 import {defaultModel2D} from '../src/lib/model2d.ts';
 import {defaultStage2DResource,parseObject2D,parseStage2DResource} from '../src/lib/stage2d.ts';
 import {model2DNeedsRestyle} from '../src/lib/storyboard-model2d.ts';
@@ -123,4 +124,39 @@ test('idle, locomotion and independent facial clips compose without resetting un
  const p=free2DProject(),actor=p.scenes[0].stage2d!.actors[0];
  actor.actions.push({...defaultAction2D('play'),clip:'blink',at:1,duration:.4});assert.doesNotThrow(()=>validateProject(p));
  actor.actions.push({...defaultAction2D('play'),clip:'fly',at:1,duration:1});assert.throws(()=>validateProject(p),/overlapping animation property/);
+});
+
+import {lightCollectorGarden2D,GARDEN_LANDINGS,BUTTERFLY_BIRTH,LIGHT_COLLECTOR_DURATION} from '../src/lib/light-collector-garden.ts';
+test('expanded demo has reusable butterflies and flowers with contact-timed births and independent landings',()=>{
+ const p=lightCollectorProject(),d=lightCollectorGarden2D(),shot=d.shot;
+ assert.equal(p.scenes.reduce((sum,scene)=>sum+scene.duration,0),LIGHT_COLLECTOR_DURATION);assert.equal(shot.actors.length,8);
+ const butterflies=shot.actors.filter(a=>a.object==='butterfly'),flowers=shot.actors.filter(a=>a.object==='flower');
+ assert.equal(butterflies.length,3);assert.equal(flowers.length,3);
+ for(const [i,landing]of GARDEN_LANDINGS.entries()){
+  const actor=butterflies[i],hidden=actor.actions.find(a=>a.clip==='hidden')!,birth=actor.actions.find(a=>a.clip==='emerge')!,attach=actor.actions.find(a=>a.type==='attach')!,flower=flowers[i];
+  assert.equal(actor.x,BUTTERFLY_BIRTH.x);assert.equal(actor.y,BUTTERFLY_BIRTH.y);assert.equal(hidden.duration,birth.at);assert.ok(birth.at>=BUTTERFLY_BIRTH.at);
+  const sample=(time:number)=>poseClipsModel2D(d.objects2d.butterfly.model!,[{clip:'idle',time},...actor.actions.filter(a=>a.type==='play'&&time>=a.at&&time<=a.at+a.duration).map(a=>({clip:a.clip,time:time-a.at}))]);
+  assert.equal(sample(birth.at-.01).get('insect')!.opacity,0);assert.equal(sample(birth.at+.31).get('insect')!.opacity,1);
+  assert.equal(attach.target,flower.id);assert.equal(attach.burst,false);assert.ok(Math.abs(attach.at+attach.duration-landing.at)<1e-9);
+  assert.equal(flower.actions[0].at,landing.at);assert.equal(flower.actions[0].clip,'landing');assert.equal(actor.layer,'foreground');assert.equal(flower.layer,'foreground');
+ }
+ assert.ok(Math.max(...GARDEN_LANDINGS.map(l=>l.at+1.4))<shot.transition!.at);
+ assert.equal(shot.actors[1].actions.find(a=>a.type==='fade')!.at,BUTTERFLY_BIRTH.at);
+ assert.equal(p.storyboard!.duration,p.scenes.reduce((sum,scene)=>sum+scene.duration,0));assert.deepEqual(p.storyboard!.shots.map(s=>s.duration),[4,3,10,5]);
+ assert.match(p.storyboard!.story,/Schmetterlinge/);assert.match(p.storyboard!.story,/wackeln/);
+ for(const id of ['butterfly','flower']){const subject=p.storyboard!.characters.find(s=>s.id===id)!;assert.equal(subject.resource2d,id);assert.deepEqual(subject.model2d,p.objects2d[id].model);assert.equal(subject.status,'draft');const resource=boardResource2D(p,subject,false).resource;assert.ok(resource&&'color' in resource);assert.equal(resource.color,p.objects2d[id].color);}
+ const bad=lightCollectorProject();bad.scenes[0].stage2d!.actors[2].layer='unknown' as any;assert.throws(()=>validateProject(bad),/layer/);
+});
+
+test('demo separates the forest action and editable night-garden closing into real scenes',()=>{
+ const p=validateProject(lightCollectorProject()),[forest,night]=p.scenes;
+ assert.equal(p.scenes.length,2);assert.deepEqual(p.scenes.map(s=>s.duration),[17,5]);
+ assert.equal(forest.stage2d!.stage,'forest');assert.equal(night.stage2d!.stage,'night-garden');
+ for(const scene of p.scenes){assert.equal(scene.stage2d!.transition,null);assert.equal(scene.stage2d!.ending,null);}
+ assert.equal(night.transition,'crossfade');assert.equal(night.stage2d!.actors.length,6);
+ assert.ok(night.stage2d!.actors.every(a=>a.object==='flower'||a.object==='butterfly'));
+ for(const actor of night.stage2d!.actors){assert.ok(actor.actions.every(a=>a.type==='attach'&&!a.burst));}
+ const title=night.elements.find(e=>e.id==='closing-title')!;assert.equal(title.type,'text');assert.equal(title.text,'Manchmal genügt');
+ title.text='Meine eigene Botschaft';assert.equal(parseProject(JSON.stringify(p)).scenes[1].elements[0].text,title.text);
+ assert.ok(p.storyboard!.style.includes('zwei echte Filmszenen'));
 });

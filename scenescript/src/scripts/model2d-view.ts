@@ -6,7 +6,7 @@ export function createModel2DView(model:Model2D,color='#79a8cb',accent='#fff5c0'
  background.position.set(-model.originX,-model.originY);foreground.position.copyFrom(background.position);
  const paint=(value:Paint2D)=>value==='$color'?color:value==='$accent'?accent:value;
  for(const part of model.parts){
-  const node=new Container();node.pivot.set(part.pivotX,part.pivotY);nodes.set(part.id,node);
+  const node=new Container();node.label=part.id;node.pivot.set(part.pivotX,part.pivotY);nodes.set(part.id,node);
   if(part.shape==='text'){
    const lines=part.text.split('\n'),size=Math.max(.25,Math.min(part.fontSize,part.width/(Math.max(1,...lines.map(s=>s.length))*1.2),part.height/(lines.length*1.5)));
    const label=new Text({text:part.text,style:{fontFamily:'Arial',fontSize:size,fill:paint(part.fill)??'#000000'}});
