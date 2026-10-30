@@ -235,3 +235,20 @@ test('demo publication copy and portable 16:9 cover are filled without changing 
  assert.ok(poster.scenes[0].elements.some(e=>e.text==='Der kleine\nLichtsammler'));
  const notes=readFileSync(new URL('../public/examples/light-collector-publishing.md',import.meta.url),'utf8');for(const text of [p.description,p.firstComment,p.hashtags,lightCollectorPublishing.shortDescription,image.name])assert.ok(notes.includes(text));
 });
+
+test('built-in action-name clips normalize losslessly, but missing custom or play clips stay errors',()=>{
+ const p=lightCollectorProject(),actor=p.scenes[0].stage2d!.actors[0],original=structuredClone(actor.actions);
+ for(const action of actor.actions)action.clip=action.type;
+ const normalized=validateProject(p);assert.deepEqual(normalized.scenes[0].stage2d!.actors[0].actions,original);assert.equal(actor.actions[0].clip,'walk');
+ actor.actions[0].clip='invented-walk';assert.throws(()=>validateProject(p),/missing animation clip "invented-walk".*collector.*robot.*no named animation clips/);
+ actor.actions[0]={...defaultAction2D('play'),clip:'walk',at:0,duration:1};assert.throws(()=>validateProject(p),/play requires a custom model clip/);
+ const custom=free2DProject();custom.scenes[0].stage2d!.actors[0].actions=[{...defaultAction2D('play'),clip:'missing',duration:1}];assert.throws(()=>validateProject(custom),/missing animation clip "missing".*Available clips:.*fly/);
+});
+test('approved demo script import accepts redundant built-in walk clips without altering reviewed resources',async()=>{
+ const {acceptScript,projectManifest}=await import('../src/lib/ai-workflow.ts'),{animationResources2D}=await import('../src/lib/stage2d-capabilities.ts');
+ const p=lightCollectorProject(),board=p.storyboard!;for(const item of [...board.characters,...board.settings,...board.shots])item.status='approved';board.approved=true;
+ const before=JSON.stringify(p),caps=animationResources2D(p);assert.equal(caps.objects2d.collector.kind,'robot');assert.deepEqual(caps.objects2d.collector.clips,[]);assert.ok(caps.objects2d.collector.actions.includes('walk'));assert.ok(!caps.objects2d.collector.actions.includes('play'));assert.ok(caps.objects2d.butterfly.clips.includes('fly'));assert.ok(caps.objects2d.flower.clips.includes('landing'));
+ const raw=projectManifest(p);raw.scenes=structuredClone(raw.scenes);raw.scenes[0].stage2d!.actors[0].actions[0].clip='walk';
+ const result=acceptScript(JSON.stringify(raw),p);assert.equal(result.scenes[0].stage2d!.actors[0].actions[0].clip,'');assert.deepEqual(result.objects2d,acceptScript(JSON.stringify(projectManifest(p)),p).objects2d);assert.equal(JSON.stringify(p),before);
+ const custom=structuredClone(p);custom.storyboard!.characters[0].model2d=birdModel2D();const actual=animationResources2D(custom);assert.equal(actual.objects2d.collector.kind,'custom');assert.ok(actual.objects2d.collector.clips.includes('fly'));assert.ok(!actual.objects2d.collector.clips.includes('walk'));
+});

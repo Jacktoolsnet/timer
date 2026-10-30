@@ -1332,6 +1332,12 @@ body.recording .comic-edit-overlay{display:none}
 #ai-workflow-dialog.ai-error-view #ai-workflow-error{min-height:120px;max-height:50dvh;resize:vertical;color:var(--text)}
 #ai-workflow-dialog.ai-error-view>.json-footer{display:flex;justify-content:space-between}
 #ai-workflow-dialog.ai-error-view #ai-workflow-close{margin-left:auto;margin-right:0}
+#ai-workflow-script-response{margin-top:16px;min-width:0}
+#ai-workflow-script-response summary{font-weight:600;cursor:pointer;color:var(--accent)}
+#ai-workflow-script-response p{font-size:.85rem;color:var(--muted);line-height:1.5}
+#ai-workflow-script-response-json{width:100%;min-height:140px;max-height:35dvh;font:12px/1.5 monospace;resize:vertical}
+.ai-script-response-tools{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.ai-script-response-tools button{min-height:44px}
 #ai-workflow-copy-status{display:block;margin-top:8px;font-size:.8rem}
 
 #storyboard-script-action{display:inline-flex}

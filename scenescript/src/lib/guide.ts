@@ -39,6 +39,16 @@ stage iris transitions (still camera-aligned, below ending text). Actions: move/
 in scene seconds, toX/toY, height (0..110) and target (instance ID for attach).
 Walk/wave/jump support robots and custom articulated objects. Custom clips use
 actions:[{type:"play",clip:"name",at,duration}]; walk/wave/jump may specify clip too.
+IMPORTANT: kind:"robot", "spark" and "shape" are built-in resources, NOT custom models.
+Their actions use clip:"" (or omit clip). A built-in robot walks with
+{type:"walk",at:0,duration:3,toX:470,toY:425}, NOT {type:"play",clip:"walk"}.
+Only kind:"custom" has named clips, and every nonempty clip must exist in the
+FINAL resource.model.animations after approved storyboard resources are restored.
+Never invent clip names or add clips to approved geometry in the generated project:
+those resources are restored locally, replacing your resource definition. Read
+animationResources2d in the request for the effective resource IDs, kinds and clips.
+If a needed custom clip is absent, use supported scene motion or report that the
+resource needs a separate animation edit; do not reference a nonexistent clip.
 Object2D.sounds optionally contains up to 8 reusable synthesized sound bindings:
 {id,name,action,clip:"",trigger:"start"|"repeat"|"steps",phase:0,interval:0.43,stride:35,
 instrument:(native Music instrument),notes:[{at:0,duration:0.15,pitch:79,velocity:0.7}]}.
