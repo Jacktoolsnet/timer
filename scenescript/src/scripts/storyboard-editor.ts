@@ -28,7 +28,7 @@ const $=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(
 let showAiStoryboard:((board:Storyboard,saved?:boolean)=>void)|undefined;
 /** Review planning data; API results may already be saved, never approved automatically. */
 export function openStoryboardDraft(board:Storyboard,saved=false){showAiStoryboard?.(board,saved);}
-export function installStoryboardEditor(context:()=>{project:Project;revision:number},apply:(p:Project)=>void,stop:()=>void,scriptContext?:()=>AiWorkflowContext){
+export function installStoryboardEditor(context:()=>{project:Project;revision:number},apply:(p:Project)=>void,stop:()=>void,scriptContext?:()=>AiWorkflowContext,downloadProject?:()=>void){
  const dialog=$<HTMLDialogElement>('dialog'),t=JSON.parse(dialog.dataset.words!) as ReturnType<typeof storyboardWords>;
  const fieldDialog=$<HTMLDialogElement>('field-dialog'),exchange=$<HTMLDialogElement>('exchange');
  type FieldConfig={switches?:boolean;label:string;value:string|string[];kind?:'text'|'number'|'select'|'choices'|'voice';max?:number;min?:number;limit?:number;required?:boolean;options?:[string,string][];shot?:string;target?:BoardReviewTarget;subjectKind?:boolean;newComment?:boolean;editComment?:boolean;newItem?:boolean;apply:(draft:Storyboard,value:string|string[])=>void};
@@ -198,7 +198,7 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
 
  function render(){disposeResourceViews();
   review();for(const b of document.querySelectorAll<HTMLButtonElement>('[data-board-tab]')){const selected=b.dataset.boardTab===tab;b.setAttribute('aria-selected',String(selected));b.tabIndex=selected?0:-1;}
-  const root=$('content');root.dataset.tab=tab;root.setAttribute('aria-labelledby','storyboard-tab-'+tab);root.replaceChildren();
+  const root=$('content');root.dataset.tab=tab;root.setAttribute('aria-labelledby','storyboard-tab-'+tab);root.replaceChildren();root.scrollTop=0;
   if(tab==='story'){
    const card=node('div');card.className='board-project-grid';field(card,t.fieldTitle,board.title,textConfig(t.fieldTitle,board.title,(b,v)=>{b.title=String(v);},200),'title');
    for(const key of ['story','message','audience','language','style'] as const){
@@ -310,6 +310,8 @@ export function installStoryboardEditor(context:()=>{project:Project;revision:nu
  }
  $('approve').addEventListener('click',()=>{if(!canApproveStoryboard(board))return;touch();board.approved=true;review();});
  $('save').addEventListener('click',()=>{try{saveBoard();clear();$('status').textContent=t.saved;}catch(e){error(e);}});
+ $<HTMLButtonElement>('save-project').disabled=!downloadProject;
+ $('save-project').addEventListener('click',()=>{try{if(!downloadProject)return;saveBoard();clear();render();downloadProject();$('status').textContent=t.projectDownloadStarted;}catch(e){error(e);}});
  const copy=async(value:string)=>{const ticket=session;try{check();await navigator.clipboard.writeText(value);if(ticket===session&&dialog.open){clear();$('status').textContent=t.copied;}}catch(e){if(ticket===session&&dialog.open)error(e);}};
  $('guide').addEventListener('click',()=>void copy(storyboardGuide+'\n'+aiLanguageInstruction(document.documentElement.lang)));$('feedback').addEventListener('click',()=>void copy(exportStoryboard(board)));
  $('download').addEventListener('click',()=>{try{check();const blob=new Blob([exportStoryboard(board,true)],{type:'application/json'}),url=URL.createObjectURL(blob),a=node('a');a.href=url;const name=board.title.trim().replace(/[^\p{L}\p{N}_-]+/gu,'-').replace(/^-+|-+$/g,'').slice(0,80);a.download=(name||'storyboard')+'.storyboard';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(e){error(e);}});

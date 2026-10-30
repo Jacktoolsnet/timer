@@ -73,7 +73,7 @@ test('field overlays detect concurrent edits and keep user input available',asyn
  await setup(page);await page.locator('[data-board-edit=story]').click();await page.locator('#storyboard-field-text').fill('My unsaved text');await page.evaluate(()=>{const title=document.getElementById('project-title') as HTMLInputElement;title.value='Changed outside';title.dispatchEvent(new Event('input',{bubbles:true}));});await page.locator('#storyboard-field-apply').click();await expect(page.locator('#storyboard-field-error')).toContainText('inzwischen geändert');await expect(page.locator('#storyboard-field-text')).toHaveValue('My unsaved text');await page.locator('#storyboard-field-cancel').click();await expect(page.locator('#storyboard-dialog')).toBeVisible();
 });
 test('global actions form a fixed icon toolbar with localized tooltips and an icon-only save footer',async({page})=>{
- await setup(page);await expect(page.locator('[data-board-tab=story]')).toHaveText('Projekt');await expect(page.locator('[data-board-edit=story]')).toHaveAttribute('title','Bearbeiten: Ganze Geschichte');const toolbar=page.getByRole('toolbar',{name:'Storyboard-Aktionen'});await expect(toolbar).toBeVisible();await expect(toolbar.locator('button')).toHaveCount(8);await expect(page.locator('#storyboard-state')).toHaveCount(0);await expect(page.locator('#storyboard-review')).toHaveCount(0);expect(await page.locator('#storyboard-approve-hint').evaluate(e=>e.getBoundingClientRect().height)).toBeLessThanOrEqual(1);
+ await setup(page);await expect(page.locator('[data-board-tab=story]')).toHaveText('Projekt');await expect(page.locator('[data-board-edit=story]')).toHaveAttribute('title','Bearbeiten: Ganze Geschichte');const toolbar=page.getByRole('toolbar',{name:'Storyboard-Aktionen'});await expect(toolbar).toBeVisible();await expect(toolbar.locator('button')).toHaveCount(9);await expect(page.locator('#storyboard-state')).toHaveCount(0);await expect(page.locator('#storyboard-review')).toHaveCount(0);expect(await page.locator('#storyboard-approve-hint').evaluate(e=>e.getBoundingClientRect().height)).toBeLessThanOrEqual(1);
  const header=page.locator('#storyboard-dialog>.json-header'),hint=page.locator('#storyboard-hint');const toolbarBounds=await toolbar.boundingBox(),headerBounds=await header.boundingBox(),hintBounds=await hint.boundingBox();
  expect(toolbarBounds!.y).toBeGreaterThanOrEqual(hintBounds!.y+hintBounds!.height);expect(Math.abs(toolbarBounds!.y+toolbarBounds!.height-(headerBounds!.y+headerBounds!.height-1))).toBeLessThan(2);
  expect(await toolbar.evaluate(e=>getComputedStyle(e).backgroundColor)).not.toBe(await header.evaluate(e=>getComputedStyle(e).backgroundColor));
@@ -396,4 +396,35 @@ for(const dimension of ['2d','3d'] as const)test('local '+dimension+' JSON impor
  await choose('characters','mila','{"model":{"parts":[]}}');await expect(page.locator('#storyboard-error-box')).toBeVisible();await page.locator('#storyboard-feedback').click();expect((await copied(page)).board).toEqual(beforeBad);
  await page.locator('#storyboard-save').click();await page.locator('#storyboard-close').click();const pending=page.waitForEvent('download');await page.locator('#save-project').click();const saved=JSON.parse(await readFile((await(await pending).path())!,'utf8'));expect(saved.scenes).toEqual(project.scenes);expect(saved.storyboard.characters[0][dimension==='2d'?'model2d':'model3d']).toBeTruthy();expect(requests).toBe(0);
  await page.locator('#undo-project').click();await page.locator('#open-storyboard').click();await page.locator('#storyboard-feedback').click();expect((await copied(page)).board.characters[0][dimension==='2d'?'model2d':'model3d']).toBeUndefined();
+});
+
+test('toolbar saves the current storyboard and downloads the whole project in one action',async({page})=>{
+ await setup(page);const original=fixture();await editText(page,'story','Mila discovers a tiny light.');
+ const button=page.locator('#storyboard-toolbar #storyboard-save-project');await expect(button).toHaveAttribute('aria-label','Storyboard übernehmen und Projektdatei speichern');
+ const pending=page.waitForEvent('download');await button.click();const file=await pending;expect(file.suggestedFilename()).toMatch(/\.scenescript$/);
+ const saved=JSON.parse(await readFile((await file.path())!,'utf8'));expect(saved.storyboard.story).toBe('Mila discovers a tiny light.');expect(saved.scenes).toEqual(original.scenes);expect(saved.assets).toEqual(original.assets);expect(saved.storyboard.images).toEqual(original.storyboard.images);
+ await expect(page.locator('#storyboard-dialog')).toBeVisible();await expect(page.locator('#storyboard-status')).toContainText('Download der Projektdatei gestartet');await page.locator('#storyboard-close').click();await page.locator('#open-storyboard').click();await expect(page.locator('#storyboard-content')).toContainText('Mila discovers a tiny light.');
+ await page.locator('#storyboard-close').click();await page.locator('#undo-project').click();await page.locator('#open-storyboard').click();await expect(page.locator('#storyboard-content')).not.toContainText('Mila discovers a tiny light.');
+});
+test('combined save rejects stale storyboard edits without downloading or replacing the project',async({page})=>{
+ await setup(page);await editText(page,'story','Unsaved draft');let downloads=0;page.on('download',()=>downloads++);
+ await page.evaluate(()=>{const title=document.querySelector<HTMLInputElement>('#project-title')!;title.value='Concurrent title';title.dispatchEvent(new Event('input',{bubbles:true}));});
+ await page.locator('#storyboard-save-project').click();await expect(page.locator('#storyboard-error')).toHaveValue(/inzwischen geändert/);expect(downloads).toBe(0);await expect(page.locator('#storyboard-content')).toContainText('Unsaved draft');
+});
+
+test('all storyboard libraries fill the available height and scroll independently from details',async({page})=>{
+ const project=fixture(),board=project.storyboard;
+ const subject=(id:string,name:string)=>({id,name,description:'A detailed description. '.repeat(300),image:null,status:'draft' as const,comments:[]});
+ board.characters=[...Array.from({length:45},(_,i)=>({...subject('character-'+i,'Character '+i),kind:'character' as const})),...Array.from({length:45},(_,i)=>({...subject('object-'+i,'Object '+i),kind:'object' as const}))];
+ board.settings=Array.from({length:45},(_,i)=>subject('setting-'+i,'Setting '+i));
+ board.shots=Array.from({length:45},(_,i)=>({id:'shot-'+i,title:'Scene '+i,duration:3,action:'A detailed action. '.repeat(300),camera:'Wide',audio:'',image:null,characters:[],settings:[],status:'draft' as const,comments:[]}));board.approved=false;
+ await setup(page,project);
+ for(const tab of ['characters','objects','settings','shots']){
+  await page.locator('[data-board-tab='+tab+']').click();const list=page.locator('.board-library-list'),detail=page.locator('.board-detail');
+  const sizes=await page.locator('.board-browser').evaluate(el=>{const rect=el.getBoundingClientRect(),library=el.querySelector('.board-library')!.getBoundingClientRect(),detail=el.querySelector('.board-detail')!.getBoundingClientRect(),list=el.querySelector('.board-library-list')!;return {height:rect.height,library:library.height,detail:detail.height,listHeight:list.clientHeight,listScroll:list.scrollHeight,overflow:el.scrollWidth>el.clientWidth+1};});
+  expect(Math.abs(sizes.height-sizes.library)).toBeLessThan(2);expect(Math.abs(sizes.height-sizes.detail)).toBeLessThan(2);expect(sizes.height).toBeGreaterThan(200);expect(sizes.listScroll).toBeGreaterThan(sizes.listHeight);expect(sizes.overflow).toBe(false);
+  await list.evaluate(el=>el.scrollTop=el.scrollHeight);expect(await list.evaluate(el=>el.scrollTop)).toBeGreaterThan(0);expect(await detail.evaluate(el=>el.scrollTop)).toBe(0);
+  const leftScroll=await list.evaluate(el=>el.scrollTop);await detail.evaluate(el=>el.scrollTop=el.scrollHeight);expect(await detail.evaluate(el=>el.scrollTop)).toBeGreaterThan(0);expect(await list.evaluate(el=>el.scrollTop)).toBe(leftScroll);
+  await list.locator('[data-board-item]').last().click();await expect(page.locator('[data-board-item][aria-current=true]')).toHaveAttribute('data-board-item',tab==='characters'?'character-44':tab==='objects'?'object-44':tab==='settings'?'setting-44':'shot-44');expect(await detail.evaluate(el=>el.scrollTop)).toBe(0);expect(await list.evaluate(el=>el.scrollTop)).toBeGreaterThan(0);await expect(page.locator('.board-library .board-add-item')).toBeVisible();
+ }
 });
