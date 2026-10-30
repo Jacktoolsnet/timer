@@ -1,4 +1,5 @@
 ---
+import {publishingWords} from '../lib/publishing-i18n';
 import VoicePickerDialog from './VoicePickerDialog.astro';
 import AiWorkflowDialog from './AiWorkflowDialog.astro';
 import {aiWorkflowWords} from '../lib/ai-workflow-i18n';
@@ -12,7 +13,7 @@ import Layout from '../layouts/Layout.astro';
 import { editorDictionary } from '../lib/editor-i18n';
 import type {Language} from '../lib/i18n';
 interface Props {lang:Language}
-const {lang}=Astro.props,t=editorDictionary(lang),vault=apiVaultWords(lang),ai=aiWorkflowWords(lang);
+const {lang}=Astro.props,t=editorDictionary(lang),pub=publishingWords(lang),vault=apiVaultWords(lang),ai=aiWorkflowWords(lang);
 ---
 <Layout lang={lang} title={"SceneScript — " + t.heading} description={t.intro} route="">
  <section class="scene-intro"><h1>{t.heading}</h1><p>{t.intro}</p></section>
@@ -49,16 +50,29 @@ const {lang}=Astro.props,t=editorDictionary(lang),vault=apiVaultWords(lang),ai=a
     <div class="project-metadata">
 <label>{t.title}<span class="project-copy-field"><input id="project-title" type="text" maxlength="200" /><button id="copy-project-title" type="button" title={t.copy+": "+t.title} aria-label={t.copy+": "+t.title}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h13v13H8ZM3 16V3h13" /></svg></button></span></label>
     <label>{t.format}<select id="project-format"><option value="landscape">{t.landscape}</option><option value="portrait">{t.portrait}</option><option value="square">{t.square}</option></select></label>
-    <div class="project-metadata-wide"><label>{t.projectDescription}<span class="project-copy-field"><textarea id="project-description" rows="3" maxlength="5000"></textarea><button id="copy-project-description" type="button" title={t.copy+": "+t.projectDescription} aria-label={t.copy+": "+t.projectDescription}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h13v13H8ZM3 16V3h13" /></svg></button></span></label></div>
-    <div class="project-metadata-wide"><label>{t.projectFirstComment}<span class="project-copy-field"><textarea id="project-firstComment" rows="3" maxlength="5000"></textarea><button id="copy-project-firstComment" type="button" title={t.copy+": "+t.projectFirstComment} aria-label={t.copy+": "+t.projectFirstComment}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h13v13H8ZM3 16V3h13" /></svg></button></span></label></div>
-    <div class="project-metadata-wide"><label>{t.projectHashtags}<span class="project-copy-field"><input id="project-hashtags" type="text" maxlength="2000" placeholder="#SceneScript, #Video" /><button id="copy-project-hashtags" type="button" title={t.copy+": "+t.projectHashtags} aria-label={t.copy+": "+t.projectHashtags}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h13v13H8ZM3 16V3h13" /></svg></button></span></label></div>
+<section class="publishing-profile project-metadata-wide" aria-labelledby="youtube-heading"><h3 id="youtube-heading">YouTube</h3>
+<label>{pub.title}<span class="project-copy-field"><input id="youtube-title" type="text" maxlength="200" /><button id="copy-youtube-title" type="button" title={t.copy+": "+pub.title} aria-label={t.copy+": "+pub.title}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h13v13H8ZM3 16V3h13" /></svg></button></span></label>
+<label>{pub.description}<span class="project-copy-field"><textarea id="project-description" rows="3" maxlength="5000"></textarea><button id="copy-project-description" type="button" title={t.copy+": "+pub.description} aria-label={t.copy+": "+pub.description}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h13v13H8ZM3 16V3h13" /></svg></button></span></label>
+<label>{pub.comment}<span class="project-copy-field"><textarea id="project-firstComment" rows="3" maxlength="5000"></textarea><button id="copy-project-firstComment" type="button" title={t.copy+": "+pub.comment} aria-label={t.copy+": "+pub.comment}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h13v13H8ZM3 16V3h13" /></svg></button></span></label>
+<label>{pub.tags}<span class="project-copy-field"><input id="project-hashtags" type="text" maxlength="2000" /><button id="copy-project-hashtags" type="button" title={t.copy+": "+pub.tags} aria-label={t.copy+": "+pub.tags}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h13v13H8ZM3 16V3h13" /></svg></button></span></label>
+<p class="small-hint">{pub.tagsHint}</p></section>
+<section class="publishing-profile project-metadata-wide" aria-labelledby="tiktok-heading"><h3 id="tiktok-heading">TikTok</h3>
+<label>{pub.caption}<span class="project-copy-field"><textarea id="tiktok-description" rows="3" maxlength="5000"></textarea><button id="copy-tiktok-description" type="button" title={t.copy+": "+pub.caption} aria-label={t.copy+": "+pub.caption}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h13v13H8ZM3 16V3h13" /></svg></button></span></label>
+<label>{pub.comment}<span class="project-copy-field"><textarea id="tiktok-firstComment" rows="3" maxlength="5000"></textarea><button id="copy-tiktok-firstComment" type="button" title={t.copy+": "+pub.comment} aria-label={t.copy+": "+pub.comment}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h13v13H8ZM3 16V3h13" /></svg></button></span></label>
+</section>
+<button id="generate-publishing" class="project-metadata-wide" type="button">{pub.generate}</button>
     </div>
 
     <div class="project-assets">
      <section class="media-gallery-tile" aria-labelledby="thumbnail-heading">
-      <div class="panel-heading"><h2 id="thumbnail-heading">{t.thumbnail}</h2><button id="import-thumbnail" class="gallery-import" type="button" title={t.importThumbnail} aria-label={t.importThumbnail}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button></div>
-      <p class="small-hint">{t.thumbnailHint}</p><div id="thumbnail-content"></div>
+      <div class="panel-heading"><h2 id="thumbnail-heading">{pub.coverYoutube}</h2><button id="import-thumbnail" class="gallery-import" type="button" title={t.importThumbnail} aria-label={t.importThumbnail}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button></div>
+      <p class="small-hint">{pub.coverHint}</p><div id="thumbnail-content"></div>
       <input id="thumbnail-file" type="file" accept="image/png,image/jpeg,image/webp" hidden />
+     </section>
+     <section class="media-gallery-tile" aria-labelledby="tiktok-cover-heading">
+      <div class="panel-heading"><h2 id="tiktok-cover-heading">{pub.coverTiktok}</h2><button id="import-tiktok-thumbnail" class="gallery-import" type="button" title={t.importThumbnail} aria-label={t.importThumbnail+" TikTok"}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button></div>
+      <p class="small-hint">{pub.coverHint}</p><div id="tiktok-thumbnail-content"></div>
+      <input id="tiktok-thumbnail-file" type="file" accept="image/png,image/jpeg,image/webp" hidden />
      </section>
      <div class="resource-launchers">
       <button id="open-storyboard" type="button" aria-haspopup="dialog" aria-controls="storyboard-dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h18v16H3ZM3 10h18M11 10v10"/></svg><span>Storyboard</span></button>

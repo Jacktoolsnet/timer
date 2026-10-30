@@ -1,9 +1,10 @@
+import {publishingFor} from '../lib/publishing';
 import {objectSoundScore2D} from '../lib/sound2d';
 import {retimeStage2D} from '../lib/stage2d';
 import {createStage2DView,prepareStage2DPreview,type Stage2DView} from './stage2d-preview';
 import {stage2DFields,stage2DTimeline,installStage2DEditor} from './stage2d-editor';
 import {installVoicePicker} from './voice-picker';
-import {installAiWorkflow,type AiWorkflowContext} from './ai-workflow';
+import {openAiWorkflow,installAiWorkflow,type AiWorkflowContext} from './ai-workflow';
 import {installApiVault} from './api-vault';
 import {installStoryboardEditor,openStoryboardDraft} from './storyboard-editor';
 import type {MorphPreview} from './morph-preview';
@@ -104,11 +105,19 @@ document.querySelectorAll<HTMLAnchorElement>('.language-menu a').forEach(link=>l
 function button(text:string,action:()=>void){const b=document.createElement('button');b.type='button';b.textContent=text;b.addEventListener('click',action);return b;}
 function selectScene(index:number){selectedGroupId='';multiSelection.clear();stop();sceneIndex=index;selectedId='';time=offset(index);refresh();}
 function refresh(){
- ($('project-title') as HTMLInputElement).value=project.title;($('project-description') as HTMLTextAreaElement).value=project.description;($('project-firstComment') as HTMLTextAreaElement).value=project.firstComment;($('project-hashtags') as HTMLInputElement).value=project.hashtags;($('project-format') as HTMLSelectElement).value=project.format;
+ const publication=publishingFor(project);
+ ($('project-title') as HTMLInputElement).value=project.title;
+ ($('youtube-title') as HTMLInputElement).value=publication.youtube.title;
+ ($('project-description') as HTMLTextAreaElement).value=publication.youtube.description;
+ ($('project-firstComment') as HTMLTextAreaElement).value=publication.youtube.firstComment;
+ ($('project-hashtags') as HTMLInputElement).value=publication.youtube.tags;
+ ($('tiktok-description') as HTMLTextAreaElement).value=publication.tiktok.description;
+ ($('tiktok-firstComment') as HTMLTextAreaElement).value=publication.tiktok.firstComment;
+ ($('project-format') as HTMLSelectElement).value=project.format;
  const list=$('scene-list'),scrollTop=list.scrollTop;list.replaceChildren();
  project.scenes.forEach((s,i)=>{const li=document.createElement('li'),b=button(`${i+1}. ${s.name} · ${s.duration}s`,()=>selectScene(i));b.title=b.textContent||'';b.setAttribute('aria-current',String(i===sceneIndex));li.append(b);list.append(li);});list.scrollTop=scrollTop;
  ($('delete-scene') as HTMLButtonElement).disabled=project.scenes.length===1;($('scene-up') as HTMLButtonElement).disabled=sceneIndex===0;($('scene-down') as HTMLButtonElement).disabled=sceneIndex===project.scenes.length-1;($('add-scene') as HTMLButtonElement).disabled=project.scenes.length>=100;
- renderForms();renderElements();renderAssets();renderThumbnail();renderAudios();historyButtons();renderTimeline();draw();
+ renderForms();renderElements();renderAssets();renderThumbnail();renderThumbnail('tiktok-');renderAudios();historyButtons();renderTimeline();draw();
 }
 function renderElements(){
  ($('open-panels') as HTMLButtonElement).disabled=!Object.keys(project.assets).length;
@@ -252,15 +261,15 @@ function replaceMediaButton(id:string,kind:'image'|'video'){
  b.title=t('replaceMedia');b.setAttribute('aria-label',b.title);b.dataset.replaceMedia=id;
  b.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h15m-4-4 4 4-4 4M20 16H5m4-4-4 4 4 4"/></svg>';return b;
 }
-let thumbnailImportAttempt=0;
-function renderThumbnail(){
- const host=$('thumbnail-content');host.replaceChildren();const asset=project.thumbnail;
+const thumbnailImportAttempt={'':0,'tiktok-':0};
+function renderThumbnail(prefix:''|'tiktok-'=''){
+ const host=$(prefix+'thumbnail-content');host.replaceChildren();const asset=prefix?project.publishing?.tiktok.cover:project.thumbnail;
  if(!asset){const hint=document.createElement('p');hint.className='small-hint';hint.textContent=t('thumbnailEmpty');host.append(hint);return;}
- const preview=button('',()=>previewAsset(asset));preview.className='thumbnail-preview';preview.title=t('imagePreview')+': '+asset.name;preview.setAttribute('aria-label',preview.title);const image=document.createElement('img');image.src=asset.data;image.alt='';preview.append(image);
+ const preview=button('',()=>previewAsset(asset));preview.className='thumbnail-preview'+(prefix?' portrait-cover':'');preview.title=t('imagePreview')+': '+asset.name;preview.setAttribute('aria-label',preview.title);const image=document.createElement('img');image.src=asset.data;image.alt='';preview.append(image);
  const name=document.createElement('span');name.className='thumbnail-name';name.textContent=asset.name;name.title=asset.name;
  const actions=document.createElement('div');actions.className='thumbnail-actions';
- const save=button('',()=>downloadAsset(asset));save.id='save-thumbnail';save.title=t('saveThumbnail');save.setAttribute('aria-label',save.title);save.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 15v6h16v-6"/></svg>';
- const remove=button('',()=>{const target=project;askDelete(asset.name,'thumbnail',()=>{if(project!==target||project.thumbnail!==asset)return;thumbnailImportAttempt++;project.thumbnail=null;changed();renderThumbnail();$('import-thumbnail').focus();});});remove.id='delete-thumbnail';remove.title=t('remove')+': '+t('thumbnail');remove.setAttribute('aria-label',remove.title);remove.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/></svg>';
+ const save=button('',()=>downloadAsset(asset));save.id='save-'+prefix+'thumbnail';save.title=t('saveThumbnail');save.setAttribute('aria-label',save.title);save.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 15v6h16v-6"/></svg>';
+ const remove=button('',()=>{const target=project;askDelete(asset.name,'thumbnail',()=>{if(project!==target||(prefix?project.publishing?.tiktok.cover:project.thumbnail)!==asset)return;thumbnailImportAttempt[prefix]++;if(prefix){project.publishing??=publishingFor(project);project.publishing.tiktok.cover=null;}else project.thumbnail=null;changed();renderThumbnail(prefix);$('import-'+prefix+'thumbnail').focus();});});remove.id='delete-'+prefix+'thumbnail';remove.title=t('remove')+': '+t('thumbnail');remove.setAttribute('aria-label',remove.title);remove.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/></svg>';
  actions.append(save,remove);host.append(preview,name,actions);
 }
 const audioURLs=new Map<string,string>();
@@ -1146,14 +1155,16 @@ $('paste-json').addEventListener('click',async()=>{
 });
 $('import-json').addEventListener('click',async()=>{try{const next=parseProject(($('json-input') as HTMLTextAreaElement).value);await preload(next);if(canReplace()){replace(next);dialog.close();showToast(t('loaded'),'success');}}catch(error){jsonStatus(t('error')+' '+(error as Error).message,true);}});
 
-$('import-thumbnail').onclick=()=>($('thumbnail-file') as HTMLInputElement).click();
-($('thumbnail-file') as HTMLInputElement).onchange=async()=>{
- const input=$('thumbnail-file') as HTMLInputElement,file=input.files?.[0];input.value='';if(!file)return;const target=project,attempt=++thumbnailImportAttempt;
+for(const prefix of ['','tiktok-'] as const){
+$('import-'+prefix+'thumbnail').onclick=()=>($(prefix+'thumbnail-file') as HTMLInputElement).click();
+($(prefix+'thumbnail-file') as HTMLInputElement).onchange=async()=>{
+ const input=$(prefix+'thumbnail-file') as HTMLInputElement,file=input.files?.[0];input.value='';if(!file)return;const target=project,attempt=++thumbnailImportAttempt[prefix];
  try{if(file.size>MAX_IMAGE_BYTES)throw new Error('Image: maximum 8 MiB');if(!['image/png','image/jpeg','image/webp'].includes(file.type))throw new Error('PNG / JPEG / WebP');
   const data=await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=()=>reject(new Error('Image read failed'));reader.readAsDataURL(file);});
-  const thumbnail={name:file.name.slice(0,200),data};await decodeImage(data);if(project!==target||attempt!==thumbnailImportAttempt)return;validateProject({...target,thumbnail});project.thumbnail=thumbnail;changed();renderThumbnail();
- }catch(error){if(project===target&&attempt===thumbnailImportAttempt)status(t('error')+' '+(error as Error).message);}
+  const thumbnail={name:file.name.slice(0,200),data};await decodeImage(data);if(project!==target||attempt!==thumbnailImportAttempt[prefix])return;const publication=publishingFor(target);if(prefix)publication.tiktok.cover=thumbnail;validateProject({...target,...(prefix?{publishing:publication}:{thumbnail})});if(prefix)project.publishing=publication;else project.thumbnail=thumbnail;changed();renderThumbnail(prefix);
+ }catch(error){if(project===target&&attempt===thumbnailImportAttempt[prefix])status(t('error')+' '+(error as Error).message);}
 };
+}
 const resourcesDialog=$('resources-dialog') as HTMLDialogElement;
 $('open-resources').addEventListener('click',()=>{stop();stopAudioPreviews();draw(false);$('resources-status').textContent='';resourcesDialog.showModal();});
 $('close-resources').addEventListener('click',()=>resourcesDialog.close());
@@ -1162,7 +1173,7 @@ $('gallery-import-image').onclick=()=>($('image-file') as HTMLInputElement).clic
 async function decodeImage(data:string){const image=new Image();image.src=data;await image.decode();if(!image.naturalWidth||!image.naturalHeight)throw new Error('Image: invalid dimensions');if(image.naturalWidth*image.naturalHeight>40_000_000)throw new Error('Image: maximum 40 megapixels');}
 async function preload(p:Project){
  // Decode sequentially: parallel media decoding can multiply peak memory use.
- for(const a of [...Object.values(p.assets),...(p.thumbnail?[p.thumbnail]:[])])await decodeImage(a.data);
+ for(const a of [...Object.values(p.assets),...(p.thumbnail?[p.thumbnail]:[]),...(p.publishing?.tiktok.cover?[p.publishing.tiktok.cover]:[])])await decodeImage(a.data);
  for(const a of Object.values(p.videos)){const actual=await inspectVideo(a.data);if(Math.abs(actual-a.duration)>.2)throw new Error('Video: duration does not match file');}
  for(const a of Object.values(p.audios)){const actual=(await decodeAudio(a)).duration;if(Math.abs(actual-a.duration)>.2)throw new Error('Audio: duration does not match file');}
 }
@@ -1362,10 +1373,20 @@ $('start-export').addEventListener('click',async()=>{
  finally{if(timingInterval!==undefined)clearInterval(timingInterval);timing?.stop(performance.now());paintTiming(true);exportController=undefined;controls.forEach(n=>n.disabled=false);setExportRunning(false);keepScreenAwake(false);}
 });
 
-for(const key of ['title','description','firstComment','hashtags'] as const){
- const input=$(key==='description'?'project-description':'project-'+key) as HTMLInputElement|HTMLTextAreaElement;
- if(key!=='title')input.addEventListener('input',()=>{project[key]=input.value;changed();});
- $('copy-project-'+key).addEventListener('click',async()=>{
+$('generate-publishing').addEventListener('click',()=>openAiWorkflow(aiProjectContext(),'publishing'));
+for(const id of ['project-title','youtube-title','project-description','project-firstComment','project-hashtags','tiktok-description','tiktok-firstComment'] as const){
+ const input=$(id) as HTMLInputElement|HTMLTextAreaElement;
+ if(id!=='project-title')input.addEventListener('input',()=>{
+  project.publishing??=publishingFor(project);const p=project.publishing;
+  if(id==='youtube-title')p.youtube.title=input.value;
+  if(id==='project-description')p.youtube.description=input.value;
+  if(id==='project-firstComment')p.youtube.firstComment=input.value;
+  if(id==='project-hashtags'){input.value=input.value.replace(/#/g,'');p.youtube.tags=input.value;}
+  if(id==='tiktok-description')p.tiktok.description=input.value;
+  if(id==='tiktok-firstComment')p.tiktok.firstComment=input.value;
+  changed();
+ });
+ $('copy-'+id).addEventListener('click',async()=>{
   try{await navigator.clipboard.writeText(input.value);showToast(t('copied'),'success');}
   catch{input.focus();input.select();showToast(t('projectCopyDenied'),'warning');}
  });

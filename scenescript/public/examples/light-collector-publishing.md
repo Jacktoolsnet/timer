@@ -4,7 +4,7 @@
 
 Ein Roboter verwandelt einen Lichtstern in Schmetterlinge: ein magischer 2D-Animations-Kurzfilm mit Musik, Blumen und kleinen Wundern.
 
-## Projektbeschreibung
+## YouTube-Beschreibung inklusive Hashtags
 
 Der kleine Lichtsammler: ein magischer 2D-Animations-Kurzfilm über einen neugierigen Roboter, einen leuchtenden Stern und drei bunte Schmetterlinge.
 
@@ -14,20 +14,38 @@ Die 22-sekündige 2D-Animation verbindet liebevolle Figuren, sanfte Musik und fe
 
 Erstellt mit SceneScript und PixiJS. Mehr kreative Projekte: jacktools.net
 
-## Erster Kommentar
+#2DAnimation #Animationsfilm #Kurzfilm #Roboter #Schmetterlinge #Kinderfilm #Animationsgeschichte #SceneScript #JackTools
+
+## YouTube: erster Kommentar
 
 Manchmal genügt ein kleiner Funke. ✨ Welche kleine Begegnung hat Deinen Tag schon einmal heller gemacht? Schreib es in die Kommentare!
 
 Was gefällt Dir am besten: der neugierige Roboter, die leuchtenden Schmetterlinge oder die tanzenden Blumen?
 
-## Hashtags
+## YouTube-Tags (kommagetrennt, ohne #)
 
-#2DAnimation #Animationsfilm #Kurzfilm #Roboter #Schmetterlinge #Kinderfilm #Animationsgeschichte #SceneScript #JackTools
+2D Animation, Animationsfilm, Kurzfilm, kleiner Roboter, Schmetterlinge, magische Geschichte, Kinderfilm, Familienfilm, SceneScript, PixiJS, jacktools.net
 
-## Cover
+## YouTube-Cover (16:9)
 
 ![Der kleine Lichtsammler – Roboter, Lichtstern und Schmetterlinge im Wald](der-kleine-lichtsammler-cover.png)
 
 1280 × 720 Pixel, PNG, 16:9. Aus den tatsächlichen 2D-Ressourcen komponiert; als Projekt-Cover eingebettet.
+
+## TikTok-Caption inklusive Hashtags
+
+Er berührt einen Stern … und plötzlich fliegen Schmetterlinge durch den Wald. ✨🦋 Ein kleiner Roboter, tanzende Blumen und 22 Sekunden Magie. Welcher Moment gefällt Dir am besten?
+
+#2DAnimation #Kurzfilm #Roboter #Schmetterlinge #SceneScript
+
+## TikTok: erster Kommentar
+
+Team Lichtstern ✨ oder Team Schmetterling 🦋?
+
+## TikTok-Cover (9:16)
+
+![Der kleine Lichtsammler – Hochformat](der-kleine-lichtsammler-tiktok-cover.png)
+
+1080 × 1920 Pixel, PNG. Separat herunterladen und manuell hochladen; das Filmformat bleibt unverändert.
 
 Die Texte und Hashtags sind thematisch abgestimmt, garantieren aber keine Suchplatzierungen oder Reichweite. Es wurde nichts veröffentlicht.

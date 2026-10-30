@@ -660,9 +660,9 @@ test('image replacement keeps the asset ID, name, all references and element set
 
 test('publication fields save, load and copy independently with denial fallback',async({page})=>{
  await page.goto('/en/');await page.evaluate(()=>{Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async(text:string)=>{(window as any).copiedProjectText=text;}}});});
- const fields={title:'Video title',description:'First line\nSecond line',firstComment:'What do you think?\nShare your ideas!',hashtags:'#Video, #SceneScript, #Ideas'};
+ const fields={title:'Video title',description:'First line\nSecond line',firstComment:'What do you think?\nShare your ideas!',hashtags:'Video, SceneScript, Ideas'};
  for(const [key,value] of Object.entries(fields)){await page.locator('#project-'+key).fill(value);await page.locator('#copy-project-'+key).click();expect(await page.evaluate(()=>(window as any).copiedProjectText)).toBe(value);await expect(page.locator('.app-toast[data-kind=success]')).toHaveText('Copied.');}
- const saved=JSON.parse(await exportedJSON(page));expect(saved).toMatchObject(fields);
+ const saved=JSON.parse(await exportedJSON(page));expect(saved.title).toBe(fields.title);expect(saved.publishing.youtube).toMatchObject({description:fields.description,firstComment:fields.firstComment,tags:fields.hashtags});
  await page.locator('#project-description').fill('Changed');page.on('dialog',dialog=>dialog.accept());await page.locator('#open-json').click();await page.locator('#json-input').fill(JSON.stringify(saved));await page.locator('#import-json').click();
  for(const [key,value] of Object.entries(fields))await expect(page.locator('#project-'+key)).toHaveValue(value);
  await page.evaluate(()=>{Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async()=>{throw new Error('denied');}}});});await page.locator('#copy-project-description').click();await expect(page.locator('.app-toast[data-kind=warning]')).toContainText('field is selected');
@@ -676,7 +676,7 @@ test('toolbar copies complete project JSON and offers manual copying on clipboar
  await page.locator('#image-file').setInputFiles({name:'pixel.png',mimeType:'image/png',buffer:Buffer.from(pixel.split(',')[1],'base64')});
  await page.evaluate(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async(text:string)=>{(window as any).projectJsonClipboard=text;}}}));
  await page.locator('#copy-project-json').click();await expect(page.locator('.app-toast[data-kind=success]')).toHaveText('Project JSON copied.');
- const copied=await page.evaluate(()=>(window as any).projectJsonClipboard);const project=JSON.parse(copied);expect(project).toMatchObject({title:'Clipboard project',description:'Description',hashtags:'#Video, #SceneScript'});expect(Object.values(project.assets).map((a:any)=>a.data)).toEqual([pixel]);expect(project.scenes).toHaveLength(2);
+ const copied=await page.evaluate(()=>(window as any).projectJsonClipboard);const project=JSON.parse(copied);expect(project.title).toBe('Clipboard project');expect(project.publishing.youtube).toMatchObject({description:'Description',tags:'Video, SceneScript'});expect(Object.values(project.assets).map((a:any)=>a.data)).toEqual([pixel]);expect(project.scenes).toHaveLength(2);
  await expect(page.locator('#editor-status')).toHaveText('Unsaved changes');expect(JSON.parse(await exportedJSON(page))).toEqual(project);
  await page.evaluate(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async()=>{throw new Error('denied');}}}));await page.locator('#copy-project-json').click();await expect(page.locator('#json-dialog')).toBeVisible();await expect(page.locator('#json-copy-status')).toContainText('project JSON is selected');
  expect(await page.locator('#json-input').evaluate((el:HTMLTextAreaElement)=>el.value.slice(el.selectionStart,el.selectionEnd))).toBe(copied);await page.locator('#close-json').click();await expect(page.locator('#project-title')).toHaveValue('Clipboard project');await expect(page.locator('#copy-project-json')).toBeEnabled();
@@ -850,4 +850,25 @@ test('line drawing shapes follow the timeline forwards and backwards and survive
 test('native SceneScript extension and legacy JSON files both import',async({page})=>{
  await page.goto('/en/');await expect(page.locator('#project-file')).toHaveAttribute('accept',/\.scenescript/);
  for(const name of ['Native.scenescript','Legacy.scenescript.json']){const p=demoProject();p.title=name;await page.locator('#project-file').setInputFiles({name,mimeType:'application/octet-stream',buffer:Buffer.from(JSON.stringify(p))});await expect(page.locator('#project-title')).toHaveValue(name);}
+});
+
+test('platform metadata fields copy separately and persist without changing the film format',async({page})=>{
+ await page.addInitScript(()=>localStorage.setItem('jacktools.scenescript.storage-consent.v1','yes'));
+ await page.goto('/de/');await page.evaluate(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async(text:string)=>{(window as any).copiedProjectText=text;}}}));
+ const fields={'youtube-title':'Unser Film auf YouTube','project-description':'Lange Beschreibung #Animation','project-firstComment':'Was gefällt Dir?','project-hashtags':'Animation, Roboter','tiktok-description':'Ein Funke verändert alles! ✨ #Kurzfilm','tiktok-firstComment':'✨ oder 🦋?'};
+ for(const [id,value]of Object.entries(fields)){await page.locator('#'+id).fill(value);await page.locator('#copy-'+id).click();expect(await page.evaluate(()=>(window as any).copiedProjectText)).toBe(value);}
+ const saved=JSON.parse(await exportedJSON(page));expect(saved.publishing.youtube.title).toBe(fields['youtube-title']);expect(saved.title).not.toBe(fields['youtube-title']);expect(saved.publishing.tiktok.description).toBe(fields['tiktok-description']);expect(saved.format).toBe('landscape');
+ await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('jacktools.scenescript.project.v1')??'{}').publishing?.tiktok.firstComment)).toBe(fields['tiktok-firstComment']);
+ await page.reload();for(const [id,value]of Object.entries(fields))await expect(page.locator('#'+id)).toHaveValue(value);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();
+});
+
+test('portrait cover imports independently and survives export and removal Undo',async({page})=>{
+ await page.goto('/en/');
+ const upload={name:'tiktok.png',mimeType:'image/png',buffer:Buffer.from(pixel.split(',')[1],'base64')};
+ await page.locator('#thumbnail-file').setInputFiles({...upload,name:'youtube.png'});await expect(page.locator('#thumbnail-content img')).toHaveAttribute('src',pixel);
+ await page.locator('#tiktok-thumbnail-file').setInputFiles(upload);await expect(page.locator('#tiktok-thumbnail-content img')).toHaveAttribute('src',pixel);
+ const saved=JSON.parse(await exportedJSON(page));expect(saved.thumbnail.name).toBe('youtube.png');expect(saved.publishing.tiktok.cover).toEqual({name:'tiktok.png',data:pixel});
+ await page.locator('#delete-tiktok-thumbnail').click();await page.locator('#confirm-delete').click();await expect(page.locator('#tiktok-thumbnail-content img')).toHaveCount(0);await expect(page.locator('#thumbnail-content img')).toHaveCount(1);
+ await page.locator('#undo-project').click();await expect(page.locator('#tiktok-thumbnail-content img')).toHaveAttribute('src',pixel);
 });

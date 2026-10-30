@@ -203,23 +203,22 @@ transparent stops reveal underlying layers. angle follows CSS (0 up, 90 right);
 radial/conic x/y is the center, radial reaches the farthest corner. No repeating
 or animated gradients. Background images draw above scene color/gradient.
 
-YouTube publication package (populate for completed videos, not only when asked):
-- Project.title is the proposed YOUTUBE TITLE, not an internal project label.
-  Write a compelling, clear audience-specific hook/video promise, with natural
-  relevant search terms. Keep it truthful; no misleading clickbait or guarantees.
-- Project.description is the proposed YOUTUBE DESCRIPTION, not a scene-by-scene
-  synopsis or production notes. Lead with audience value, then useful context
-  and an optional call to action. Match the actual video.
-- Project.hashtags: select a small focused set of relevant topic/audience hashtags
-  to support discovery, not generic tag stuffing or invented trending claims.
-  hashtags is a comma-separated STRING (e.g. "#Topic, #Audience"), not an array.
-- Project.firstComment: a ready-to-paste audience engagement starter when useful.
-- Project.thumbnail: the actual cover/YouTube thumbnail. It MUST be present for a
-  completed video; create one if no suitable cover exists (workflow in §1).
-  Use an independent raster {name,data}, never an asset ID/SVG or a prompt.
-These are plain publication texts and a cover saved in JSON for manual use on
-YouTube, not scene text, video-container metadata, automatically posted comments
-or uploads. The thumbnail is never rendered in video. See §8 for media limits.
+YouTube and TikTok copy:
+- Project.title remains the project label. Optional Project.publishing contains
+  youtube:{title,description,firstComment,tags} and
+  tiktok:{description,firstComment,cover}. All texts are strings.
+- Write separate platform-specific descriptions, with a few relevant hashtags
+  included directly in each description. Do not simply copy the long YouTube
+  description to TikTok. Stay truthful.
+- youtube.tags is exclusively a comma-separated keyword string WITHOUT #.
+  Legacy Project.hashtags is NOT this tags field.
+- Project.thumbnail is the independent YouTube 16:9 raster cover; TikTok's
+  independent 9:16 raster cover is publishing.tiktok.cover ({name,data} or null).
+  Preserve covers; never invent Base64.
+- Project.description/firstComment/hashtags are legacy fields.
+  Profiles are restored locally during script generation; use the dedicated
+  publication-copy task for new text.
+Manual copy/download only; no uploads or video metadata. Covers never render in film.
 
 ## 4. Timeline, entry/exit and scene transitions
 Times reset to zero at each scene; Project duration=sum(scene.duration).

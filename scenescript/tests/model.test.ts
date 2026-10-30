@@ -25,7 +25,7 @@ const serialize=(value:unknown)=>JSON.stringify(value);
 test('complete demo round trips and schema covers every exported field',()=>{
  const p=demoProject();assert.deepEqual(JSON.parse(serialize(parseProject(serialize(p)))),p);
  const schema=JSON.parse(readFileSync(new URL('../public/schema.json',import.meta.url),'utf8'));
- assert.deepEqual(Object.keys(p).sort(),Object.keys(schema.properties).sort());
+ assert.deepEqual([...Object.keys(p),'publishing'].sort(),Object.keys(schema.properties).sort()); // publishing is optional for older projects
  assert.deepEqual(Object.keys(p.scenes[0]).sort(),Object.keys(schema.properties.scenes.items.properties).sort());
  assert.deepEqual(Object.keys(p.scenes[0].elements[0]).sort(),Object.keys(schema.properties.scenes.items.properties.elements.items.properties).sort());
 });
@@ -500,9 +500,9 @@ test('self-contained AI guide covers every schema object and field with unique t
 });
 test('AI guide prioritizes audience-specific YouTube copy and real covers',()=>{
  assert.match(aiGuide,/Identify the target audience FIRST/);
- assert.match(aiGuide,/Project\.title is the proposed YOUTUBE TITLE, not an internal project label/);
- assert.match(aiGuide,/Project\.description is the proposed YOUTUBE DESCRIPTION, not a scene-by-scene/);
- assert.match(aiGuide,/Project\.hashtags: select a small focused set/);
+ assert.match(aiGuide,/Project\.title remains the project label/);
+ assert.match(aiGuide,/separate platform-specific descriptions/);
+ assert.match(aiGuide,/youtube\.tags is exclusively a comma-separated keyword string WITHOUT #/);
  assert.match(aiGuide,/never claim live trend research/);
  assert.match(aiGuide,/Every completed video project MUST have a suitable cover in Project\.thumbnail/);
  assert.match(aiGuide,/Reuse a suitable supplied\/existing cover; if missing, create a real thumbnail/);

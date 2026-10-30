@@ -1,3 +1,4 @@
+import {publishingFor} from '../src/lib/publishing.ts';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {demoProject} from '../src/lib/model.ts';
@@ -163,4 +164,10 @@ test('approved storyboard models replace AI redesigns under stable render resour
  const subject=p.storyboard!.characters[0];subject.design={...defaultBoardDesign(),mode:'3d'};subject.model3d=roundedHumanModel();
  const raw=JSON.parse(JSON.stringify(p));raw.characters={[subject.id]:{name:'AI replacement',model:{parts:[{id:'block'}]}}};
  const next=acceptScript(JSON.stringify(raw),p);assert.equal(next.characters[subject.id].name,subject.name);assert.deepEqual(next.characters[subject.id].model,subject.model3d);assert.deepEqual(JSON.parse(JSON.stringify(next.storyboard)),JSON.parse(JSON.stringify(p.storyboard)));
+});
+
+test('script generation restores publication profiles and both covers from local data',()=>{
+ const p=project();p.thumbnail={name:'youtube.png',data:pixel};p.publishing=publishingFor(p);p.publishing.youtube.title='Prepared publication title';p.publishing.tiktok.cover={name:'tiktok.png',data:pixel};
+ const manifest=projectManifest(p);assert.equal(JSON.stringify(manifest).includes('base64'),false);
+ const incoming={...manifest,publishing:undefined},result=acceptScript(JSON.stringify(incoming),p);assert.deepEqual(result.publishing,p.publishing);assert.deepEqual(result.thumbnail,p.thumbnail);
 });

@@ -44,3 +44,5 @@ Der Cover-Generator aktualisiert die PNG-Datei, das eingebettete Cover in
 `src/lib/light-collector-cover.json` und das Startprojekt. `npm run example:light-collector`
 paketiert die vorhandenen Referenzen, das Cover und die Veröffentlichungstexte neu,
 ohne Bilder neu zu rendern. Es wird nichts automatisch veröffentlicht.
+
+Die Projektveröffentlichung enthält getrennte YouTube- und TikTok-Texte, YouTube-Tags ohne # sowie zwei native Cover: `der-kleine-lichtsammler-cover.png` (1280×720) und `der-kleine-lichtsammler-tiktok-cover.png` (1080×1920). `npm run example:light-collector:cover` rendert beide Varianten. Keine automatische Veröffentlichung; das Filmformat bleibt unverändert.

@@ -5,3 +5,9 @@ export const lightCollectorPublishing={
  firstComment:'Manchmal genügt ein kleiner Funke. ✨ Welche kleine Begegnung hat Deinen Tag schon einmal heller gemacht? Schreib es in die Kommentare!\n\nWas gefällt Dir am besten: der neugierige Roboter, die leuchtenden Schmetterlinge oder die tanzenden Blumen?',
  hashtags:'#2DAnimation #Animationsfilm #Kurzfilm #Roboter #Schmetterlinge #Kinderfilm #Animationsgeschichte #SceneScript #JackTools'
 };
+
+export const lightCollectorYoutubeTags='2D Animation, Animationsfilm, Kurzfilm, kleiner Roboter, Schmetterlinge, magische Geschichte, Kinderfilm, Familienfilm, SceneScript, PixiJS, jacktools.net';
+export const lightCollectorTiktok={
+ description:'Er berührt einen Stern … und plötzlich fliegen Schmetterlinge durch den Wald. ✨🦋 Ein kleiner Roboter, tanzende Blumen und 22 Sekunden Magie. Welcher Moment gefällt Dir am besten?\n\n#2DAnimation #Kurzfilm #Roboter #Schmetterlinge #SceneScript',
+ firstComment:'Team Lichtstern ✨ oder Team Schmetterling 🦋?'
+};

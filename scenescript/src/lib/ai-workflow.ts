@@ -1,3 +1,4 @@
+import {publishingManifest} from './publishing.ts';
 import {restoreBoardModels2D} from './storyboard-model2d.ts';
 import {defaultBoardDesign,modelStyleBriefs} from './storyboard-design.ts';
 import {restoreBoardResources} from './storyboard-resources.ts';
@@ -10,7 +11,7 @@ export function boardManifest(b:Storyboard){return {...b,images:Object.fromEntri
 /** Strip media before serializing, avoiding huge Base64 request bodies or deep copies. */
 export function projectManifest(p:Project){
  const media=(map:Project['assets']|Project['audios']|Project['videos'])=>Object.fromEntries(Object.entries(map).map(([id,a])=>[id,Object.fromEntries(Object.entries(a).filter(([k])=>k!=='data'))]));
- return {...p,storyboard:p.storyboard?boardManifest(p.storyboard):null,thumbnail:p.thumbnail?{name:p.thumbnail.name}:null,assets:media(p.assets),audios:media(p.audios),videos:media(p.videos)};
+ return {...p,...(p.publishing?{publishing:publishingManifest(p)}:{}),storyboard:p.storyboard?boardManifest(p.storyboard):null,thumbnail:p.thumbnail?{name:p.thumbnail.name}:null,assets:media(p.assets),audios:media(p.audios),videos:media(p.videos)};
 }
 export function inputJson(data:unknown){const text=JSON.stringify(data);if(new TextEncoder().encode(text).length>2*MiB)throw new Error('AI input: maximum 2 MiB of text. Reduce the project or use the manual workflow.');return text;}
 export function planningBoard(p:Project,appLocale='en'){return p.storyboard??newStoryboard(p.title,p.format,videoLanguageForLocale(appLocale));}
@@ -19,6 +20,7 @@ export function acceptPlanning(text:string,p:Project,source:Storyboard){return {
 /** Models may reference known media manifests, but cannot overwrite the approved source plan. */
 export function acceptScript(text:string,source:Project){
  requireApprovedBoard(source);const raw=JSON.parse(text);if(!raw||typeof raw!=='object'||Array.isArray(raw))throw new Error('SceneScript: expected project object');
+ if(source.publishing)raw.publishing=structuredClone(source.publishing);else delete raw.publishing;
  for(const kind of ['assets','audios','videos'] as const){const incoming=raw[kind];if(incoming===undefined)raw[kind]=source[kind];else{if(!incoming||typeof incoming!=='object'||Array.isArray(incoming))throw new Error(kind+': expected map');const restored=Object.assign(Object.create(null),source[kind]) as Record<string,unknown>;for(const [id,value]of Object.entries(incoming)){if(!value||typeof value!=='object'||Array.isArray(value))throw new Error(kind+': invalid resource');const v=value as Record<string,unknown>;if(!v.data){const known=Object.hasOwn(source[kind],id)?source[kind][id]:kind==='assets'&&source.storyboard&&Object.hasOwn(source.storyboard.images,id)?source.storyboard.images[id]:undefined;if(!known?.data)throw new Error(kind+': unknown media manifest '+id);restored[id]=known;}else restored[id]=value;}raw[kind]=restored;}}
  if(raw.thumbnail&&!raw.thumbnail.data){
   if(source.thumbnail)raw.thumbnail=source.thumbnail;

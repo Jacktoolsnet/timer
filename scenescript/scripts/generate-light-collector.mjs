@@ -12,23 +12,37 @@ await writeFile(new URL('../public/examples/light-collector-publishing.md',impor
 
 ${lightCollectorPublishing.shortDescription}
 
-## Projektbeschreibung
+## YouTube-Beschreibung inklusive Hashtags
 
-${project.description}
+${project.publishing.youtube.description}
 
-## Erster Kommentar
+## YouTube: erster Kommentar
 
 ${project.firstComment}
 
-## Hashtags
+## YouTube-Tags (kommagetrennt, ohne #)
 
-${project.hashtags}
+${project.publishing.youtube.tags}
 
-## Cover
+## YouTube-Cover (16:9)
 
 ![Der kleine Lichtsammler – Roboter, Lichtstern und Schmetterlinge im Wald](${project.thumbnail?.name??'der-kleine-lichtsammler-cover.png'})
 
 1280 × 720 Pixel, PNG, 16:9. Aus den tatsächlichen 2D-Ressourcen komponiert; als Projekt-Cover eingebettet.
+
+## TikTok-Caption inklusive Hashtags
+
+${project.publishing.tiktok.description}
+
+## TikTok: erster Kommentar
+
+${project.publishing.tiktok.firstComment}
+
+## TikTok-Cover (9:16)
+
+![Der kleine Lichtsammler – Hochformat](${project.publishing.tiktok.cover?.name??''})
+
+1080 × 1920 Pixel, PNG. Separat herunterladen und manuell hochladen; das Filmformat bleibt unverändert.
 
 Die Texte und Hashtags sind thematisch abgestimmt, garantieren aber keine Suchplatzierungen oder Reichweite. Es wurde nichts veröffentlicht.
 `);

@@ -261,8 +261,15 @@ test('all ten storyboard references display and survive the portable project dow
 });
 
 test('publication fields and the full-size cover are prefilled and downloadable',async({page})=>{
- await ready(page);await expect(page.locator('#project-description')).toHaveValue(/2D-Animations-Kurzfilm/);await expect(page.locator('#project-firstComment')).toHaveValue(/Welche kleine Begegnung/);await expect(page.locator('#project-hashtags')).toHaveValue(/#2DAnimation/);
+ await ready(page);await expect(page.locator('#project-description')).toHaveValue(/2D-Animations-Kurzfilm/);await expect(page.locator('#project-firstComment')).toHaveValue(/Welche kleine Begegnung/);await expect(page.locator('#project-hashtags')).toHaveValue(/2D Animation, Animationsfilm/);
  const image=page.locator('#thumbnail-content img');await expect(image).toHaveCount(1);await expect.poll(()=>image.evaluate((img:HTMLImageElement)=>img.complete&&img.naturalWidth===1280&&img.naturalHeight===720)).toBe(true);
  const download=page.waitForEvent('download');await page.locator('#save-thumbnail').click();const file=await download;expect(file.suggestedFilename()).toBe('der-kleine-lichtsammler-cover.png');const bytes=await readFile((await file.path())!);expect(bytes.subarray(1,4).toString()).toBe('PNG');
  const saved=page.waitForEvent('download');await page.locator('#save-project').click();const p=JSON.parse(await readFile((await(await saved).path())!,'utf8'));expect(p.thumbnail.data).toBe('data:image/png;base64,'+bytes.toString('base64'));expect(p.description).toContain('SceneScript und PixiJS');expect(p.scenes).toHaveLength(2);
+});
+
+test('demo TikTok cover downloads independently in 9:16 while the YouTube cover stays 16:9',async({page})=>{
+ await ready(page);const image=page.locator('#tiktok-thumbnail-content img');await expect(image).toHaveAttribute('src',/^data:image\/png;base64,/);
+ await expect.poll(()=>image.evaluate((img:HTMLImageElement)=>[img.naturalWidth,img.naturalHeight])).toEqual([1080,1920]);
+ const pending=page.waitForEvent('download');await page.locator('#save-tiktok-thumbnail').click();expect((await pending).suggestedFilename()).toBe('der-kleine-lichtsammler-tiktok-cover.png');
+ await expect(page.locator('#project-format')).toHaveValue('landscape');await expect.poll(()=>page.locator('#thumbnail-content img').evaluate((img:HTMLImageElement)=>[img.naturalWidth,img.naturalHeight])).toEqual([1280,720]);
 });
