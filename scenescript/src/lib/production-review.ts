@@ -1,3 +1,4 @@
+import {musicEvents} from './music.ts';
 import type {Model3D} from './model3d.ts';
 import type {Project} from './model.ts';
 import type {Storyboard} from './storyboard.ts';
@@ -26,8 +27,20 @@ export function reviewProduction(p:Project,board:Storyboard|null=p.storyboard):P
  }
  if(plan.music&&(!p.music?.enabled||p.music.volume<=0||!p.music.instruments.some(i=>i.volume>0)||(p.music.mode==='score'&&!p.music.notes.some(n=>n.velocity>0))))issues.push({code:'missingMusic'});
  if(plan.sfx){
-  const tasks=board!.shots.flatMap(s=>(s.soundEffects??[]).map(description=>({code:'sfxPending' as const,detail:s.title+': '+description,pending:true})));
-  issues.push(...(tasks.length?tasks:[{code:'sfxPlanMissing' as const}]));
+  // Native score instruments can implement synthesized SFX without a recording.
+  // Exact task/name binding plus an audible event in the shot is structural evidence,
+  // not a judgement of sound quality. Unmatched descriptions stay pending as before.
+  let start=0,count=0;const total=p.scenes.reduce((sum,scene)=>sum+scene.duration,0);
+  for(const shot of board!.shots){
+   const end=start+shot.duration;
+   for(const description of shot.soundEffects??[]){
+    count++;const music=p.music;
+    const audible=music?.enabled&&music.mode==='score'&&music.volume>0&&music.instruments.some(instrument=>instrument.name===description&&instrument.volume>0&&musicEvents(music,total,start,end).some(note=>note.instrument===instrument.id&&note.at>=start&&note.at<end&&note.velocity>0));
+    if(!audible)issues.push({code:'sfxPending',detail:shot.title+': '+description,pending:true});
+   }
+   start=end;
+  }
+  if(!count)issues.push({code:'sfxPlanMissing'});
  }
  return issues;
 }
@@ -38,5 +51,5 @@ export function productionInstructions(board:Storyboard){
  (p.renderMode==='mixed'?'Combine actual 3D with deliberate 2D elements. ':'')+
  (p.dialogue?'Create literal dialogue in Scene.narration.text with stable speaker IDs/assigned voices; split executable scenes for speaker changes. Do not substitute dialogue with subtitles. For speaking 3D actors bind speech to scene narration for audio-driven lip movement. Missing recordings remain pending for the separate paid speech workflow; do not invent audio Base64. ':'')+
  (p.music?'Include audible enabled Project.music using native generated music or a valid score, not merely a textual music description. ':'')+
- (p.sfx?'Preserve shot.soundEffects as concrete pending SFX tasks. This editor has no automatic SFX generation/playback track; never claim these descriptions are already audible. ':'');
+ (p.sfx?'Preserve shot.soundEffects as concrete pending SFX tasks. For synthesized SFX you may use native Project.music in score mode: give each SFX instrument exactly the corresponding soundEffects description as its name and schedule audible notes within that storyboard shot. Keep a musical accompaniment as well when music is required. Unmatched descriptions remain pending; never claim descriptions alone are audible. There is no automatic SFX recording generation track. ':'');
 }

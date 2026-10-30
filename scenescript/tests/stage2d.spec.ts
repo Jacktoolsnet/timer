@@ -24,7 +24,7 @@ test('common renderer produces repeatable export frames, overlays and actual Web
   // Existing text layers still composite above the new canvas, including during fades.
   const text=newElement('text','overlay');text.text='PIX I 2D';text.animation='none';p.scenes[0].elements=[text];p.scenes[0].transition='fade';
   const mm=new ExportMedia(p,new AbortController().signal),rr=new ExportRenderer(p,mm);let overlay='';try{const c=await rr.frame(4.9,640,360);overlay=c.toDataURL();c.width=0;c.height=0;}finally{rr.dispose();mm.dispose();}
-  p.scenes[0].elements=[];p.scenes[0].transition='none';const {retimeStage2D}=await import(/* @vite-ignore */ '/src/lib/stage2d.ts' as string);retimeStage2D(p.scenes[0].stage2d!,.5/p.scenes[0].duration);p.scenes[0].duration=.5;p.scenes=p.scenes.slice(0,1);
+  p.scenes[0].elements=[];p.scenes[0].transition='none';const {retimeStage2D}=await import(/* @vite-ignore */ '/src/lib/stage2d.ts' as string);retimeStage2D(p.scenes[0].stage2d!,.5/p.scenes[0].duration);p.scenes[0].duration=.5;p.scenes=p.scenes.slice(0,1);p.music=null;
   const blob=await exportVideo(p,{format:'webm',resolution:480,fps:24,audio:false},new AbortController().signal,()=>{});
   const video=document.createElement('video'),src=URL.createObjectURL(blob);let duration=0;try{video.src=src;await new Promise((resolve,reject)=>{video.onloadedmetadata=resolve;video.onerror=reject;});duration=video.duration;}finally{URL.revokeObjectURL(src);}
   return {previewMatches,frames,overlay,size:blob.size,type:blob.type,duration,leaked:document.querySelectorAll('[data-export-renderer]').length};
@@ -193,4 +193,28 @@ test('butterflies emerge at the star burst and follow wobbling flowers into a se
  expect(data.frames[3].png).toBe(data.frames.at(-1)!.png);
  for(const frame of data.frames.slice(0,-1))await info.attach('Schmetterlinge-'+frame.time,{body:Buffer.from(frame.png.split(',')[1],'base64'),contentType:'image/png'});
  await page.locator('#timeline').fill('20.5');await expect(page.locator('#stage .stage2d-canvas')).toHaveAttribute('data-stage2d-time','3.5');
+});
+
+test('demo soundtrack has audible music and synchronized synthesized effects in playback and export',async({page})=>{
+ test.setTimeout(90000);
+ await page.addInitScript(`window.demoAudioStarts=0;const start=AudioBufferSourceNode.prototype.start;AudioBufferSourceNode.prototype.start=function(...args){window.demoAudioStarts++;return start.apply(this,args);};`);
+ await ready(page);await page.locator('#play').click();await expect.poll(()=>page.evaluate('window.demoAudioStarts')).toBeGreaterThan(0);await page.locator('#play').click();
+ const audio=await page.evaluate(async url=>{
+  const {parseProject}=await import(/* @vite-ignore */ '/src/lib/model.ts' as string),{ExportMedia}=await import(/* @vite-ignore */ '/src/scripts/export-media.ts' as string),{ExportAudio}=await import(/* @vite-ignore */ '/src/scripts/export-audio.ts' as string);
+  const p=parseProject(await(await fetch(url)).text()),media=new ExportMedia(p,new AbortController().signal),renderer=new ExportAudio(p,media,22);
+  const rms=(data:Float32Array)=>Math.sqrt(data.reduce((sum,value)=>sum+value*value,0)/data.length);
+  try{
+   const whole=await renderer.chunk(0,22),contact=await renderer.chunk(8,9),again=await renderer.chunk(8,9);
+   let peak=0,delta=0,repeat=0;for(const value of whole)peak=Math.max(peak,Math.abs(value));for(let i=0;i<contact.length;i++){delta=Math.max(delta,Math.abs(contact[i]-whole[(i<48000?8*48000+i:22*48000+8*48000+i-48000)]));repeat=Math.max(repeat,Math.abs(contact[i]-again[i]));}
+   const effects=[];
+   for(const id of ['sfx-steps','sfx-air','sfx-sparkle','sfx-wings','sfx-bloom']){
+    const isolated=structuredClone(p);isolated.music!.notes=isolated.music!.notes.filter(note=>note.instrument===id);
+    const r=new ExportAudio(isolated,media,22);effects.push({id,rms:rms(await r.chunk(0,22))});
+   }
+   return {peak,delta,repeat,effects,sections:[rms(whole.slice(24000,4*48000)),rms(whole.slice(8*48000,10*48000)),rms(whole.slice(17*48000,21*48000))],end:whole.slice(-480).reduce((max,value)=>Math.max(max,Math.abs(value)),0)};
+  }finally{media.dispose();}
+ },url);
+ expect(audio.peak).toBeGreaterThan(.01);expect(audio.peak).toBeLessThan(.95);expect(audio.delta).toBeLessThan(.000001);expect(audio.repeat).toBe(0);expect(audio.end).toBeLessThan(.00002);
+ for(const energy of audio.sections)expect(energy).toBeGreaterThan(.001);
+ for(const effect of audio.effects)expect(effect.rms,effect.id).toBeGreaterThan(.00001);
 });

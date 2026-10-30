@@ -1,3 +1,4 @@
+import {retimeMusicScene} from '../src/lib/music.ts';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -164,6 +165,22 @@ test('demo separates the forest action and editable night-garden closing into re
 
 test('shortening the forest scene preserves adjacent clip boundaries and leaves the closing independent',()=>{
  const p=lightCollectorProject(),closing=structuredClone(p.scenes[1]);
- retimeStage2D(p.scenes[0].stage2d!,8/p.scenes[0].duration);p.scenes[0].duration=8;
+ retimeStage2D(p.scenes[0].stage2d!,8/p.scenes[0].duration);retimeMusicScene(p.music,0,17,8);p.scenes[0].duration=8;
  assert.doesNotThrow(()=>validateProject(p));assert.deepEqual(p.scenes[1],closing);
+});
+
+test('demo contains a deterministic native soundtrack and action-synchronous, editable SFX',async()=>{
+ const {lightCollectorMusic,LIGHT_COLLECTOR_SFX}=await import('../src/lib/light-collector-audio.ts');
+ const {reviewProduction}=await import('../src/lib/production-review.ts');
+ const p=validateProject(lightCollectorProject()),music=p.music!;
+ assert.deepEqual(music,lightCollectorMusic());assert.equal(music.mode,'score');assert.equal(music.instruments.length,8);
+ assert.deepEqual(p.storyboard!.production,{renderMode:'2d',dialogue:false,music:true,sfx:true});
+ assert.ok(music.notes.some(n=>n.instrument==='sfx-sparkle'&&n.at===BUTTERFLY_BIRTH.at));
+ for(const landing of GARDEN_LANDINGS)assert.ok(music.notes.some(n=>n.instrument==='sfx-bloom'&&n.at===landing.at));
+ assert.ok(music.notes.some(n=>n.at===19.3));assert.equal(music.fadeOut,1.25);assert.equal(p.narration,null);
+ assert.deepEqual(reviewProduction(p),[]);
+ const silent=structuredClone(p);silent.music!.notes=silent.music!.notes.filter(n=>n.instrument!=='sfx-bloom');
+ assert.ok(reviewProduction(silent).some(issue=>issue.code==='sfxPending'&&issue.detail!.includes(LIGHT_COLLECTOR_SFX.bloom)));
+ const muted=structuredClone(p);muted.music!.instruments.find(i=>i.id==='sfx-wings')!.volume=0;
+ assert.ok(reviewProduction(muted).some(issue=>issue.code==='sfxPending'&&issue.detail!.includes(LIGHT_COLLECTOR_SFX.wings)));
 });

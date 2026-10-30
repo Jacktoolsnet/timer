@@ -11,3 +11,11 @@ test('instrument parameters, notes and references validated',()=>{
 test('generated query windows preserve deterministic music and effect tails',()=>{const m=defaultMusic();const all=musicEvents(m,60,0,60);assert.deepEqual(musicEvents(m,60,0,60),all);const later=musicEvents(m,60,10,12);assert(later.some(n=>n.at<10));assert(later.every(n=>all.some(a=>a.eventId===n.eventId&&a.pitch===n.pitch)));m.seed=42;assert.notDeepEqual(musicEvents(m,60,0,60),all);});
 test('ADSR, fades and tuning',()=>{const i=presetInstrument();assert.equal(envelopeAt(i,2,0),0);assert.equal(envelopeAt(i,2,i.attack),1);assert.equal(envelopeAt(i,2,2+i.release),0);const m=defaultMusic();assert.equal(musicGainAt(m,0,20),0);assert.equal(musicGainAt(m,20,20),0);assert.equal(musicGainAt(m,10,20),m.volume);assert.equal(pitchFrequency(69),440);});
 test('generated music enforces bounded polyphony for long releases',()=>{const m=defaultMusic('uplifting');m.tempo=180;for(const i of m.instruments){i.release=5;i.echo.mix=.5;i.echo.delay=1;}assert.throws(()=>parseMusic(m,120),/overlapping/);});
+
+test('scene retiming scales local score notes and shifts later cues without invalid short SFX',async()=>{
+ const {retimeMusicScene}=await import('../src/lib/music.ts');
+ const m=defaultMusic();m.mode='score';m.notes=[{instrument:'pad',at:1,duration:1,pitch:60,velocity:.5},{instrument:'pad',at:5,duration:.05,pitch:72,velocity:.8},{instrument:'pad',at:8,duration:1,pitch:64,velocity:.5}];
+ retimeMusicScene(m,4,4,2);assert.deepEqual(m.notes.map(n=>[n.at,n.duration]),[[1,1],[4.5,.05],[6,1]]);assert.doesNotThrow(()=>parseMusic(m,8));
+ retimeMusicScene(null,0,4,2);
+ const generated=defaultMusic(),copy=structuredClone(generated);retimeMusicScene(generated,0,4,2);assert.deepEqual(generated,copy);
+});

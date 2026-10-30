@@ -90,3 +90,13 @@ export function musicEvents(m:Music,total:number,from:number,to:number):MusicEve
  }
  return events.sort((a,b)=>a.at-b.at);
 }
+
+/** Keep a native score aligned when one scene is stretched; shift later cues intact. */
+export function retimeMusicScene(music:Music|null,start:number,previous:number,next:number){
+ if(!music||music.mode!=='score')return;
+ const end=start+previous,ratio=next/previous,delta=next-previous;
+ for(const note of music.notes){
+  if(note.at>=end)note.at+=delta;
+  else if(note.at>=start){note.at=start+(note.at-start)*ratio;note.duration=Math.max(.05,Math.min(16,note.duration*ratio));}
+ }
+}
