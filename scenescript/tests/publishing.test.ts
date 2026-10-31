@@ -39,3 +39,11 @@ test('platform-specific generation preserves the other profile and rejects cross
  }
  assert.equal(JSON.stringify(p),before);
 });
+
+
+test('Halloween starter has distinct English YouTube and TikTok copy without translating its German storyboard',async()=>{
+ const {halloweenHeartProject}=await import('../src/lib/halloween-heart-example.ts'),{DEFAULT_PROJECT_URL}=await import('../src/lib/startup-project.ts');
+ const p=validateProject(halloweenHeartProject()),profiles=publishingFor(p);assert.equal(p.title,'Halloween mit Herz');assert.equal(p.storyboard!.language,'English');assert.ok(p.storyboard!.story.includes('Arbeitsbeschreibungen im Storyboard bleiben auf Deutsch'));
+ assert.match(profiles.youtube.title,/Did You Know Halloween/);assert.match(profiles.youtube.description,/Irish tradition/);assert.match(profiles.youtube.firstComment,/What is your favourite/);assert.match(profiles.tiktok.description,/make it romantic/);assert.match(profiles.tiktok.firstComment,/First time hearing/);assert.notEqual(profiles.youtube.description,profiles.tiktok.description);assert.ok(profiles.youtube.tags.includes(', '));assert.ok(!profiles.youtube.tags.includes('#'));assert.ok(profiles.youtube.description.includes('#Halloween'));assert.ok(profiles.tiktok.description.includes('#Halloween'));assert.equal(profiles.tiktok.cover,null);
+ const bundled=parseProject(readFileSync(new URL('../public'+DEFAULT_PROJECT_URL,import.meta.url),'utf8'));assert.deepEqual(bundled.publishing,p.publishing);assert.equal(bundled.narration,null);
+});

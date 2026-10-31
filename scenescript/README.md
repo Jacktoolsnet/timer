@@ -1633,7 +1633,7 @@ subjects/shots are drafts; no approval or final movie is fabricated. The one
 executable scene is explicitly a resource workspace with a draft notice.
 
 No narration, voice assignment or speech-service call is used. Hook, cultural
-fact and final greeting are German screen-text instructions; future instrumental
+fact and final greeting are English screen-text instructions (video language English, planning descriptions German); future instrumental
 music/SFX remain plans, not falsely claimed recordings. The old Mila and Light
 Collector examples remain available; saved projects are never overwritten.
 Use “Load start project” to switch an existing editor session.
