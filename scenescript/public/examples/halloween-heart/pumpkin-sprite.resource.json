@@ -1,5 +1,5 @@
 {
-  "reply": "Bildbasierter Kürbis: Originalillustration mit separatem Kerzenflackern. Nur diese Ressource wird importiert; bestehende Szenen und andere Ressourcen bleiben unverändert.",
+  "reply": "Bildbasierter Kürbis: Originalillustration mit separatem Kerzenflackern und Kontaktschatten. Nur diese Ressource wird importiert; bestehende Szenen und andere Ressourcen bleiben unverändert.",
   "model": {
     "images": {
       "pumpkin": {
@@ -12,6 +12,51 @@
     "originX": 150,
     "originY": 240,
     "parts": [
+      {
+        "id": "pumpkin-contact",
+        "parent": null,
+        "shape": "ellipse",
+        "x": 48,
+        "y": 224,
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "pivotX": 0,
+        "pivotY": 0,
+        "width": 212,
+        "height": 22,
+        "radius": 0,
+        "fill": "#000000",
+        "stroke": null,
+        "strokeWidth": 0,
+        "opacity": 0.3,
+        "points": [],
+        "path": [],
+        "text": "",
+        "fontSize": 24,
+        "rotationMin": -360,
+        "rotationMax": 360,
+        "parallax": 1,
+        "layer": "background",
+        "gradient": {
+          "type": "radial",
+          "x0": 0.5,
+          "y0": 0.5,
+          "x1": 1,
+          "y1": 0.5,
+          "stops": [
+            {
+              "at": 0,
+              "color": "#211408"
+            },
+            {
+              "at": 1,
+              "color": "#ffffff"
+            }
+          ]
+        },
+        "blend": "multiply"
+      },
       {
         "id": "illustration",
         "parent": null,

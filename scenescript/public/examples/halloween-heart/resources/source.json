@@ -1,0 +1,1008 @@
+{
+  "provenance": {
+    "title": "Halloween mit Herz",
+    "sourceSha256": "be67032290f4f9f104501cbff6bc9066c101c8dcd94b7ac1b47a2a8e6c84cec6",
+    "notes": "Resources and score imported from the user project. Cleaned background plates, steam-free cup and separate hand layers are derived image edits; original upload remains unchanged."
+  },
+  "objects2d": {
+    "pumpkin": {
+      "model": {
+        "images": {
+          "pumpkin": {
+            "name": "pumpkin.webp",
+            "file": "pumpkin.webp"
+          }
+        },
+        "width": 300,
+        "height": 250,
+        "originX": 150,
+        "originY": 240,
+        "parts": [
+          {
+            "id": "illustration",
+            "parent": null,
+            "shape": "sprite",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 300,
+            "height": 250,
+            "radius": 0,
+            "fill": null,
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background",
+            "image": "pumpkin"
+          },
+          {
+            "id": "candlelight",
+            "parent": null,
+            "shape": "group",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 100,
+            "height": 100,
+            "radius": 0,
+            "fill": null,
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 0.015,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "left-eye-light",
+            "parent": "candlelight",
+            "shape": "ellipse",
+            "x": 81,
+            "y": 119,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 60,
+            "height": 49,
+            "radius": 0,
+            "fill": "#000000",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background",
+            "gradient": {
+              "type": "radial",
+              "x0": 0.5,
+              "y0": 0.5,
+              "x1": 1,
+              "y1": 0.5,
+              "stops": [
+                {
+                  "at": 0,
+                  "color": "#ffcb63"
+                },
+                {
+                  "at": 1,
+                  "color": "#000000"
+                }
+              ]
+            },
+            "blend": "screen"
+          },
+          {
+            "id": "right-eye-light",
+            "parent": "candlelight",
+            "shape": "ellipse",
+            "x": 167,
+            "y": 108,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 60,
+            "height": 51,
+            "radius": 0,
+            "fill": "#000000",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background",
+            "gradient": {
+              "type": "radial",
+              "x0": 0.5,
+              "y0": 0.5,
+              "x1": 1,
+              "y1": 0.5,
+              "stops": [
+                {
+                  "at": 0,
+                  "color": "#ffcb63"
+                },
+                {
+                  "at": 1,
+                  "color": "#000000"
+                }
+              ]
+            },
+            "blend": "screen"
+          },
+          {
+            "id": "smile-light",
+            "parent": "candlelight",
+            "shape": "ellipse",
+            "x": 123,
+            "y": 173,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 83,
+            "height": 24,
+            "radius": 0,
+            "fill": "#000000",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background",
+            "gradient": {
+              "type": "radial",
+              "x0": 0.5,
+              "y0": 0.5,
+              "x1": 1,
+              "y1": 0.5,
+              "stops": [
+                {
+                  "at": 0,
+                  "color": "#ffcb63"
+                },
+                {
+                  "at": 1,
+                  "color": "#000000"
+                }
+              ]
+            },
+            "blend": "screen"
+          }
+        ],
+        "animations": {
+          "idle": {
+            "duration": 3.5,
+            "loop": true,
+            "tracks": [
+              {
+                "part": "candlelight",
+                "property": "opacity",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": 0.015,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 1,
+                    "value": 0.065,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 1.7,
+                    "value": 0.025,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 2.5,
+                    "value": 0.055,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 3.5,
+                    "value": 0.015,
+                    "easing": "smooth"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "name": "Kürbislaterne mit Herzaugen",
+      "kind": "custom",
+      "color": "#79a8cb",
+      "accentColor": "#fff5c0",
+      "shape": "star"
+    },
+    "bread": {
+      "model": {
+        "images": {
+          "reference": {
+            "name": "bread.webp",
+            "file": "bread.webp"
+          }
+        },
+        "width": 320,
+        "height": 230,
+        "originX": 160,
+        "originY": 230,
+        "parts": [
+          {
+            "id": "artwork",
+            "parent": null,
+            "shape": "sprite",
+            "x": 0,
+            "y": 18.914646996838798,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 320,
+            "height": 211.0853530031612,
+            "radius": 0,
+            "fill": "#79a8cb",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background",
+            "image": "reference"
+          }
+        ],
+        "animations": {}
+      },
+      "name": "Barmbrack – irisches Früchtebrot",
+      "kind": "custom",
+      "color": "#79a8cb",
+      "accentColor": "#fff5c0",
+      "shape": "star"
+    },
+    "ring": {
+      "model": {
+        "images": {
+          "reference": {
+            "name": "ring.webp",
+            "file": "ring.webp"
+          }
+        },
+        "width": 160,
+        "height": 180,
+        "originX": 80,
+        "originY": 180,
+        "parts": [
+          {
+            "id": "artwork",
+            "parent": null,
+            "shape": "sprite",
+            "x": 0,
+            "y": 9.022298456260728,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 160,
+            "height": 170.97770154373927,
+            "radius": 0,
+            "fill": "#79a8cb",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background",
+            "image": "reference"
+          },
+          {
+            "id": "glint",
+            "parent": null,
+            "shape": "group",
+            "x": 50.3,
+            "y": 53.6,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 100,
+            "height": 100,
+            "radius": 0,
+            "fill": "#79a8cb",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 0.08,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "glintVertical",
+            "parent": "glint",
+            "shape": "ellipse",
+            "x": -0.45,
+            "y": -3.7,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 0.9,
+            "height": 7.4,
+            "radius": 0,
+            "fill": "#FFF0CF",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 0.85,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background",
+            "blend": "screen"
+          },
+          {
+            "id": "glintHorizontal",
+            "parent": "glint",
+            "shape": "ellipse",
+            "x": -3,
+            "y": -0.4,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 6,
+            "height": 0.8,
+            "radius": 0,
+            "fill": "#FFF0CF",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 0.65,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background",
+            "blend": "screen"
+          }
+        ],
+        "animations": {
+          "idle": {
+            "duration": 4.8,
+            "loop": true,
+            "tracks": [
+              {
+                "part": "glint",
+                "property": "opacity",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": 0.08,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 1.8,
+                    "value": 0.08,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 2.25,
+                    "value": 0.48,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 2.9,
+                    "value": 0.08,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 4.8,
+                    "value": 0.08,
+                    "easing": "smooth"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "name": "Goldener Ring",
+      "kind": "custom",
+      "color": "#79a8cb",
+      "accentColor": "#fff5c0",
+      "shape": "star"
+    },
+    "cup": {
+      "model": {
+        "images": {
+          "reference": {
+            "name": "cup.webp",
+            "file": "cup.webp"
+          }
+        },
+        "width": 240,
+        "height": 240,
+        "originX": 120,
+        "originY": 240,
+        "parts": [
+          {
+            "id": "artwork",
+            "parent": null,
+            "shape": "sprite",
+            "x": 0,
+            "y": 13.68171021377671,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 240,
+            "height": 226.3182897862233,
+            "radius": 0,
+            "fill": "#79a8cb",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background",
+            "image": "reference"
+          }
+        ],
+        "animations": {}
+      },
+      "name": "Teetasse mit Untertasse",
+      "kind": "custom",
+      "color": "#79a8cb",
+      "accentColor": "#fff5c0",
+      "shape": "star"
+    },
+    "hands": {
+      "name": "Zwei sich berührende Hände",
+      "kind": "custom",
+      "color": "#79a8cb",
+      "accentColor": "#fff5c0",
+      "shape": "star"
+    }
+  },
+  "stages2d": {
+    "cottage": {
+      "model": {
+        "images": {
+          "reference": {
+            "name": "cottage.webp",
+            "file": "cottage.webp"
+          }
+        },
+        "width": 540,
+        "height": 960,
+        "originX": 0,
+        "originY": 0,
+        "parts": [
+          {
+            "id": "artwork",
+            "parent": null,
+            "shape": "sprite",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 540,
+            "height": 960,
+            "radius": 0,
+            "fill": "#79a8cb",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background",
+            "image": "reference"
+          }
+        ],
+        "animations": {}
+      },
+      "name": "Irisches Cottage bei Mondschein",
+      "preset": "custom",
+      "skyColor": "#132d39",
+      "groundColor": "#183c40"
+    },
+    "table": {
+      "model": {
+        "images": {
+          "reference": {
+            "name": "table.webp",
+            "file": "table.webp"
+          }
+        },
+        "width": 540,
+        "height": 960,
+        "originX": 0,
+        "originY": 0,
+        "parts": [
+          {
+            "id": "artwork",
+            "parent": null,
+            "shape": "sprite",
+            "x": 0,
+            "y": 0,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 0,
+            "pivotY": 0,
+            "width": 540,
+            "height": 960,
+            "radius": 0,
+            "fill": "#79a8cb",
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background",
+            "image": "reference"
+          }
+        ],
+        "animations": {}
+      },
+      "name": "Kerzenschein am Holztisch",
+      "preset": "custom",
+      "skyColor": "#132d39",
+      "groundColor": "#183c40"
+    }
+  },
+  "music": {
+    "enabled": true,
+    "mode": "score",
+    "style": "calm",
+    "tempo": 72,
+    "key": 57,
+    "seed": 1,
+    "volume": 0.6,
+    "fadeIn": 0.8,
+    "fadeOut": 2.5,
+    "instruments": [
+      {
+        "id": "warm-pad",
+        "name": "Warme, ruhige Akkordflächen",
+        "wave": "sine",
+        "partials": [
+          {
+            "ratio": 1,
+            "gain": 1
+          },
+          {
+            "ratio": 2,
+            "gain": 0.15
+          },
+          {
+            "ratio": 3,
+            "gain": 0.04
+          }
+        ],
+        "attack": 0.9,
+        "decay": 0.8,
+        "sustain": 0.55,
+        "release": 1,
+        "volume": 0.23,
+        "filter": "lowpass",
+        "cutoff": 1700,
+        "resonance": 0.7,
+        "echo": {
+          "delay": 0.25,
+          "feedback": 0.2,
+          "mix": 0
+        },
+        "reverb": 0.2
+      },
+      {
+        "id": "soft-harp",
+        "name": "Sparsame, sanfte Zupfmelodie",
+        "wave": "triangle",
+        "partials": [
+          {
+            "ratio": 1,
+            "gain": 1
+          },
+          {
+            "ratio": 2,
+            "gain": 0.2
+          },
+          {
+            "ratio": 3,
+            "gain": 0.06
+          }
+        ],
+        "attack": 0.015,
+        "decay": 0.65,
+        "sustain": 0.05,
+        "release": 1.3,
+        "volume": 0.16,
+        "filter": "lowpass",
+        "cutoff": 2400,
+        "resonance": 0.7,
+        "echo": {
+          "delay": 0.25,
+          "feedback": 0.2,
+          "mix": 0
+        },
+        "reverb": 0.2
+      },
+      {
+        "id": "soft-bass",
+        "name": "Leises Bassfundament",
+        "wave": "sine",
+        "partials": [
+          {
+            "ratio": 1,
+            "gain": 1
+          }
+        ],
+        "attack": 0.5,
+        "decay": 0.6,
+        "sustain": 0.5,
+        "release": 0.8,
+        "volume": 0.13,
+        "filter": "lowpass",
+        "cutoff": 450,
+        "resonance": 0.7,
+        "echo": {
+          "delay": 0.25,
+          "feedback": 0.2,
+          "mix": 0
+        },
+        "reverb": 0.05
+      },
+      {
+        "id": "autumn-night",
+        "name": "Sehr leises Herbstlaub und sanfter Nachtwind",
+        "wave": "noise",
+        "partials": [
+          {
+            "ratio": 1,
+            "gain": 1
+          }
+        ],
+        "attack": 1.1,
+        "decay": 0.4,
+        "sustain": 0.45,
+        "release": 0.55,
+        "volume": 0.09,
+        "filter": "lowpass",
+        "cutoff": 1100,
+        "resonance": 0.5,
+        "echo": {
+          "delay": 0.25,
+          "feedback": 0.2,
+          "mix": 0
+        },
+        "reverb": 0.06
+      }
+    ],
+    "notes": [
+      {
+        "instrument": "warm-pad",
+        "at": 0,
+        "duration": 7.5,
+        "pitch": 57,
+        "velocity": 0.48
+      },
+      {
+        "instrument": "warm-pad",
+        "at": 0,
+        "duration": 7.5,
+        "pitch": 60,
+        "velocity": 0.4
+      },
+      {
+        "instrument": "warm-pad",
+        "at": 0,
+        "duration": 7.5,
+        "pitch": 64,
+        "velocity": 0.35
+      },
+      {
+        "instrument": "soft-bass",
+        "at": 0,
+        "duration": 6.5,
+        "pitch": 45,
+        "velocity": 0.4
+      },
+      {
+        "instrument": "autumn-night",
+        "at": 0,
+        "duration": 3.7,
+        "pitch": 48,
+        "velocity": 0.5
+      },
+      {
+        "instrument": "soft-harp",
+        "at": 0.9,
+        "duration": 1.1,
+        "pitch": 76,
+        "velocity": 0.46
+      },
+      {
+        "instrument": "soft-harp",
+        "at": 3.2,
+        "duration": 1.1,
+        "pitch": 72,
+        "velocity": 0.4
+      },
+      {
+        "instrument": "soft-harp",
+        "at": 5.5,
+        "duration": 1.1,
+        "pitch": 69,
+        "velocity": 0.42
+      },
+      {
+        "instrument": "warm-pad",
+        "at": 8,
+        "duration": 7.5,
+        "pitch": 53,
+        "velocity": 0.46
+      },
+      {
+        "instrument": "warm-pad",
+        "at": 8,
+        "duration": 7.5,
+        "pitch": 57,
+        "velocity": 0.4
+      },
+      {
+        "instrument": "warm-pad",
+        "at": 8,
+        "duration": 7.5,
+        "pitch": 60,
+        "velocity": 0.35
+      },
+      {
+        "instrument": "soft-bass",
+        "at": 8,
+        "duration": 6.5,
+        "pitch": 41,
+        "velocity": 0.38
+      },
+      {
+        "instrument": "soft-harp",
+        "at": 8.9,
+        "duration": 1.1,
+        "pitch": 72,
+        "velocity": 0.4
+      },
+      {
+        "instrument": "soft-harp",
+        "at": 11.8,
+        "duration": 1.1,
+        "pitch": 69,
+        "velocity": 0.36
+      },
+      {
+        "instrument": "soft-harp",
+        "at": 13.8,
+        "duration": 1.1,
+        "pitch": 65,
+        "velocity": 0.38
+      },
+      {
+        "instrument": "warm-pad",
+        "at": 16,
+        "duration": 7.5,
+        "pitch": 55,
+        "velocity": 0.44
+      },
+      {
+        "instrument": "warm-pad",
+        "at": 16,
+        "duration": 7.5,
+        "pitch": 60,
+        "velocity": 0.38
+      },
+      {
+        "instrument": "warm-pad",
+        "at": 16,
+        "duration": 7.5,
+        "pitch": 64,
+        "velocity": 0.34
+      },
+      {
+        "instrument": "soft-bass",
+        "at": 16,
+        "duration": 6.5,
+        "pitch": 48,
+        "velocity": 0.36
+      },
+      {
+        "instrument": "soft-harp",
+        "at": 16.9,
+        "duration": 1.1,
+        "pitch": 67,
+        "velocity": 0.4
+      },
+      {
+        "instrument": "soft-harp",
+        "at": 19.2,
+        "duration": 1.1,
+        "pitch": 76,
+        "velocity": 0.34
+      },
+      {
+        "instrument": "soft-harp",
+        "at": 21.5,
+        "duration": 1.1,
+        "pitch": 72,
+        "velocity": 0.4
+      },
+      {
+        "instrument": "warm-pad",
+        "at": 24,
+        "duration": 8,
+        "pitch": 57,
+        "velocity": 0.46
+      },
+      {
+        "instrument": "warm-pad",
+        "at": 24,
+        "duration": 8,
+        "pitch": 60,
+        "velocity": 0.39
+      },
+      {
+        "instrument": "warm-pad",
+        "at": 24,
+        "duration": 8,
+        "pitch": 64,
+        "velocity": 0.34
+      },
+      {
+        "instrument": "soft-bass",
+        "at": 24,
+        "duration": 7,
+        "pitch": 45,
+        "velocity": 0.38
+      },
+      {
+        "instrument": "soft-harp",
+        "at": 24.9,
+        "duration": 1.1,
+        "pitch": 76,
+        "velocity": 0.38
+      },
+      {
+        "instrument": "autumn-night",
+        "at": 26,
+        "duration": 6,
+        "pitch": 48,
+        "velocity": 0.5
+      },
+      {
+        "instrument": "soft-harp",
+        "at": 27.2,
+        "duration": 1.1,
+        "pitch": 72,
+        "velocity": 0.36
+      },
+      {
+        "instrument": "soft-harp",
+        "at": 29.5,
+        "duration": 1.6,
+        "pitch": 69,
+        "velocity": 0.36
+      }
+    ]
+  },
+  "imageDimensions": {
+    "bread": {
+      "width": 720,
+      "height": 475
+    },
+    "ring": {
+      "width": 583,
+      "height": 623
+    },
+    "cup": {
+      "width": 720,
+      "height": 490
+    },
+    "cottage": {
+      "width": 720,
+      "height": 1280
+    },
+    "table": {
+      "width": 720,
+      "height": 1280
+    },
+    "hand-left": {
+      "width": 720,
+      "height": 480
+    },
+    "hand-right": {
+      "width": 720,
+      "height": 470
+    }
+  }
+}
