@@ -2668,7 +2668,7 @@
     "message": "Halloween hat auch eine romantische Seite: ein kleines Stück Brauchtum, Wärme und ein herzlicher Gruß.",
     "audience": "Englischsprachige TikTok-Zuschauer, die romantische Herbststimmung, kleine Kulturgeschichten und schöne, ruhige Bilder mögen. Verständlich auch vollständig ohne Ton.",
     "language": "English",
-    "style": "Malerische romantische 2D-Bilderbuchwelt, natürliche Proportionen, warme Materialien und dezente Animation. Kein Horror, keine niedlichen Roboter, keine alte Mila-Handlung.",
+    "style": "Malerische romantische Bilderbuchwelt mit natürlichen Proportionen, hochwertiger Bildtextur und gezielter 2D-Animation. Keine Präsentationsfolien, kein Horror, keine Sprecherstimme.",
     "duration": 28,
     "comments": [
       {
@@ -2691,7 +2691,7 @@
           "mode": "2d",
           "style": "natural",
           "surface": "mixed",
-          "details": "Kleine orange Kürbislaterne mit freundlichem Lächeln, Herzaugen und dunklem gebogenem Stiel. Originalillustration als bildbasierte Ressource erhalten: Glanz, Textur und kräftiges Orange nicht durch eine Vektornachzeichnung ersetzen. Nur die zusätzliche Lichtebene flackert; Körper bleibt vollständig deckend. Kein Horror. Transparenter Objekt-Hintergrund ohne eingebauten Boden. Kontaktschatten erst in der Szene platzieren; gemeinsame Farb- und Lichtvorgaben einhalten."
+          "details": "Kleine orange Kürbislaterne mit freundlichem Lächeln, Herzaugen und dunklem gebogenem Stiel. Originalillustration als bildbasierte Ressource erhalten: Glanz, Textur und kräftiges Orange nicht durch eine Vektornachzeichnung ersetzen. Nur die zusätzliche Lichtebene flackert; Körper bleibt vollständig deckend. Kein Horror. Bildbasierte Illustration und eigenständige Animationsebenen erhalten. Transparenter Hintergrund, keine eingebauten Kulissen."
         },
         "status": "draft",
         "id": "pumpkin",
@@ -2707,12 +2707,12 @@
           "mode": "2d",
           "style": "natural",
           "surface": "mixed",
-          "details": "Goldbrauner Rosinenlaib mit einer sichtbaren Scheibe. Der Ring auf der Skizze ist ein getrenntes Szenenobjekt und darf nicht ins Brotmodell eingebrannt werden. Transparenter Objekt-Hintergrund ohne eingebauten Boden. Kontaktschatten erst in der Szene platzieren; gemeinsame Farb- und Lichtvorgaben einhalten."
+          "details": "Goldbraunes irisches Rosinenbrot mit einer sichtbaren Scheibe. Bereinigte Bildressource aus dem hochgeladenen Projekt: kein eingebrannter Ring; dieser bleibt eine separate Objektressource. Bildbasierte Illustration und eigenständige Animationsebenen erhalten. Transparenter Hintergrund, keine eingebauten Kulissen."
         },
         "status": "draft",
         "id": "bread",
         "name": "Barmbrack – irisches Früchtebrot",
-        "description": "Goldbrauner Rosinenlaib mit einer sichtbaren Scheibe. Der Ring auf der Skizze ist ein getrenntes Szenenobjekt und darf nicht ins Brotmodell eingebrannt werden.",
+        "description": "Goldbraunes irisches Rosinenbrot mit einer sichtbaren Scheibe. Bereinigte Bildressource aus dem hochgeladenen Projekt: kein eingebrannter Ring; dieser bleibt eine separate Objektressource.",
         "image": "reference-bread",
         "comments": [],
         "kind": "object"
@@ -2723,7 +2723,7 @@
           "mode": "2d",
           "style": "natural",
           "surface": "mixed",
-          "details": "Schlichter goldener Ring ohne Edelstein oder Gravur, freie transparente Mitte und ein kleiner animierbarer Lichtreflex. Als Brauchtumssymbol zeigen, nicht zum Essen. Transparenter Objekt-Hintergrund ohne eingebauten Boden. Kontaktschatten erst in der Szene platzieren; gemeinsame Farb- und Lichtvorgaben einhalten."
+          "details": "Schlichter goldener Ring ohne Edelstein oder Gravur, freie transparente Mitte und ein kleiner animierbarer Lichtreflex. Als Brauchtumssymbol zeigen, nicht zum Essen. Bildbasierte Illustration und eigenständige Animationsebenen erhalten. Transparenter Hintergrund, keine eingebauten Kulissen."
         },
         "status": "draft",
         "id": "ring",
@@ -2739,7 +2739,7 @@
           "mode": "2d",
           "style": "natural",
           "surface": "mixed",
-          "details": "Elfenbeinfarbene Keramiktasse mit dunkelgrünen Blättern, Goldrand und feinem Dampf. Dieselbe Ressource im späteren Film zweimal instanziieren. Transparenter Objekt-Hintergrund ohne eingebauten Boden. Kontaktschatten erst in der Szene platzieren; gemeinsame Farb- und Lichtvorgaben einhalten."
+          "details": "Elfenbeinfarbene, petrolgrün/goldene Tasse aus der hochgeladenen Ressource; dampffreie Bildbasis mit drei separaten aufsteigenden Dampfschleiern. Körper bleibt unbewegt. Bildbasierte Illustration und eigenständige Animationsebenen erhalten. Transparenter Hintergrund, keine eingebauten Kulissen."
         },
         "status": "draft",
         "id": "cup",
@@ -2755,7 +2755,7 @@
           "mode": "2d",
           "style": "natural",
           "surface": "mixed",
-          "details": "Zwei erwachsene Hände ohne Gesichter: links heller warmer Hautton und violetter Strickärmel, rechts dunklerer warmer Hautton und petrolfarbener Ärmel. Getrennte Armgruppen; sanfte Berührung statt komplizierter Fingerchoreografie. Transparenter Objekt-Hintergrund ohne eingebauten Boden. Kontaktschatten erst in der Szene platzieren; gemeinsame Farb- und Lichtvorgaben einhalten."
+          "details": "Zwei getrennte malerische Bildebenen: helle Hand mit violettem Strickärmel links, dunklere Hand mit Petrolärmel rechts. Clip touch führt sie wirklich zusammen; danach ruhige Berührung ohne Körperpulsieren. Bildbasierte Illustration und eigenständige Animationsebenen erhalten. Transparenter Hintergrund, keine eingebauten Kulissen."
         },
         "status": "draft",
         "id": "hands",
@@ -2773,7 +2773,7 @@
           "mode": "2d",
           "style": "natural",
           "surface": "mixed",
-          "details": "Native Bühne 540×960 mit Ursprung 0,0. Vertikale steinerne Cottage-Landschaft mit schiefergedecktem Dach, warmem Fenster und geschwungenem Gartenweg. Haus, Garten und Fenster sind feste Kulisse; Kürbislaterne bleibt separates Objekt. Referenzbild enthält zur Orientierung auch separat platzierte Requisiten; diese nicht doppelt in die Kulisse einbauen."
+          "details": "Bereinigte Bildkulisse 540×960, Ursprung 0,0. Nur feste Raum- bzw. Gartenelemente. Bewegliche Requisiten gehören ausschließlich in die Szenen als getrennte Ressourcen, nicht in dieses Hintergrundbild."
         },
         "status": "draft",
         "id": "cottage",
@@ -2781,9 +2781,7 @@
         "description": "Vertikale steinerne Cottage-Landschaft mit schiefergedecktem Dach, warmem Fenster und geschwungenem Gartenweg. Haus, Garten und Fenster sind feste Kulisse; Kürbislaterne bleibt separates Objekt. Die aktuelle Bildressource ist eine bereinigte leere Kulisse ohne eingebrannte bewegliche Requisiten.",
         "image": "reference-cottage",
         "comments": [],
-        "objects": [
-          "pumpkin"
-        ]
+        "objects": []
       },
       {
         "resource2d": "table",
@@ -2791,7 +2789,7 @@
           "mode": "2d",
           "style": "natural",
           "surface": "mixed",
-          "details": "Native Bühne 540×960 mit Ursprung 0,0. Gemütlicher Innenraum mit hohem Bogenfenster, dunkler Wand, Kerze, zwei Stühlen und perspektivischem Holztisch. Tisch und Stühle sind feste Ausstattung; Brot, Ring, Tassen, Hände und Kürbis bleiben separate Objekte. Referenzbild enthält zur Orientierung auch separat platzierte Requisiten; diese nicht doppelt in die Kulisse einbauen."
+          "details": "Bereinigte Bildkulisse 540×960, Ursprung 0,0. Nur feste Raum- bzw. Gartenelemente. Bewegliche Requisiten gehören ausschließlich in die Szenen als getrennte Ressourcen, nicht in dieses Hintergrundbild."
         },
         "status": "draft",
         "id": "table",
@@ -2799,12 +2797,7 @@
         "description": "Gemütlicher Innenraum mit hohem Bogenfenster, dunkler Wand, Kerze, zwei Stühlen und perspektivischem Holztisch. Tisch und Stühle sind feste Ausstattung; Brot, Ring, Tassen, Hände und Kürbis bleiben separate Objekte. Die aktuelle Bildressource ist eine bereinigte leere Kulisse ohne eingebrannte bewegliche Requisiten.",
         "image": "reference-table",
         "comments": [],
-        "objects": [
-          "pumpkin",
-          "bread",
-          "ring",
-          "cup"
-        ]
+        "objects": []
       }
     ],
     "shots": [
@@ -2982,7 +2975,7 @@
       "palette": "Nachtblau #151b2b, gedämpftes Violett #59436d, Petrol #285466, bernsteinfarbenes Kerzenlicht #e6b778 und Elfenbein #fff0cf.",
       "perspective": "Durchgehend 9:16 und glaubhafte Dreiviertelperspektive: tief gestaffelte Cottage-Außenansicht, innen ein hölzerner Tisch mit sichtbarer Fläche. Ruhiger dunkler Bereich im oberen Bildviertel für Text; wichtige Details nicht am rechten oder unteren TikTok-UI-Rand.",
       "lighting": "Kühles Mondlicht von rechts, warmes Kerzenlicht von links; weiche Kontaktschatten, subtile Verläufe und kleine goldene Reflexe. Keine grellen Vollflächen oder unmotivierten Lichteffekte.",
-      "atmosphere": "Liebevolle, ruhige Herbstnacht; Geborgenheit und romantische Nähe statt Schrecken. Skizzen geben Materialgefühl, Farbstimmung und Raumtiefe vor; Vektormodelle sind bearbeitbare Entwürfe, keine fertige malerische Umsetzung."
+      "atmosphere": "Liebevolle, ruhige Herbstnacht mit warmem Kerzenlicht und kühler Mondnacht. Originalillustrationen als Bildressourcen erhalten; Bewegung entsteht durch getrennte Licht-, Dampf-, Hand- und Requisitenebenen. Keine flächige Vektornachzeichnung, kein Körperpulsieren, keine doppelten Gegenstände in Kulisse und Objektebene."
     },
     "production": {
       "renderMode": "2d",
