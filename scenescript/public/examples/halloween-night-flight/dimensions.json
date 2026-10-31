@@ -38,5 +38,25 @@
   "reindeer-leg-lower": {
     "width": 320,
     "height": 264
+  },
+  "spider-body": {
+    "width": 475,
+    "height": 640
+  },
+  "spider-leg": {
+    "width": 321,
+    "height": 384
+  },
+  "child-skeleton": {
+    "width": 384,
+    "height": 768
+  },
+  "child-witch": {
+    "width": 384,
+    "height": 768
+  },
+  "child-vampire": {
+    "width": 384,
+    "height": 768
   }
 }
