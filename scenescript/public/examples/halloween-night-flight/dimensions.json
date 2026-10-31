@@ -14,5 +14,9 @@
   "santa": {
     "width": 960,
     "height": 640
+  },
+  "bat-face": {
+    "width": 768,
+    "height": 702
   }
 }

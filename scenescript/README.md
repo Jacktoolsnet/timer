@@ -1805,3 +1805,21 @@ covers are embedded (TikTok 9:16 and YouTube 16:9).
 WebP/WAV assets without generation calls. `scripts/generate-santa-demo-voice.py`
 optionally regenerates the synthetic demo voice using the system eSpeak NG library.
 Artwork prompts and provenance are in `public/examples/halloween-night-flight/README.md`.
+
+The bat now turns toward the lens in the second scene: the non-looping `approach`
+clip grows an independent root to 10× while `idle` keeps both wings flapping.
+A separate textured frontal face with amber eyes and small fangs fades in near
+the camera. The foreground actor flies above the lens and is fully outside the
+frame before Santa arrives; other bat instances retain their small idle pose.
+
+Seasonal greetings remain editable text: “Happy Halloween!” uses locally bundled
+Creepster in glowing pumpkin orange; “Christmas is coming!” uses locally bundled
+Mountains of Christmas Bold in warm ivory/gold. Regular and bold Christmas fonts
+are available in the editor; preview/export use the same local font-loading path.
+Sources and original redistribution licenses are in `public/fonts/README.md`.
+
+Aurora motion uses traveling phase-offset waves across 24 overlapping soft light
+pleats, four drifting ribbons and six broad folds. Height, length and brightness
+move independently. All aurora geometry stays below y=285, including conservative
+blur bounds; the moon disc above it is not tinted or covered by these layers.
+The 8-second loop closes seamlessly, including in the spider's `lower` clip.

@@ -1,5 +1,5 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';
-import {parseProject,projectJsonBytes} from '../src/lib/model.ts';import {DEFAULT_PROJECT_URL} from '../src/lib/startup-project.ts';import {poseModel2D} from '../src/lib/model2d.ts';import {actorFrame2D} from '../src/lib/motion2d.ts';import {narrationClips} from '../src/lib/audio.ts';import {reviewProduction} from '../src/lib/production-review.ts';import {objectSoundScore2D} from '../src/lib/sound2d.ts';
+import {parseProject,projectJsonBytes} from '../src/lib/model.ts';import {DEFAULT_PROJECT_URL} from '../src/lib/startup-project.ts';import {poseModel2D,poseClipsModel2D} from '../src/lib/model2d.ts';import {actorFrame2D} from '../src/lib/motion2d.ts';import {narrationClips} from '../src/lib/audio.ts';import {reviewProduction} from '../src/lib/production-review.ts';import {objectSoundScore2D} from '../src/lib/sound2d.ts';
 const load=()=>parseProject(readFileSync('public'+DEFAULT_PROJECT_URL,'utf8'));
 test('new independent default is a portable 22-second portrait Halloween/Christmas film with a German board and English text',()=>{
  assert.equal(DEFAULT_PROJECT_URL,'/examples/halloween-night-flight.scenescript.json');const p=load(),b=p.storyboard!;assert.equal(p.title,'Halloween After Dark');assert.equal(p.format,'portrait');assert.equal(b.format,'portrait');assert.equal(b.language,'English');assert.equal(b.duration,22);assert.equal(p.scenes.reduce((t,s)=>t+s.duration,0),22);assert.equal(p.scenes.length,4);assert.deepEqual(b.shots.map(s=>s.id),p.scenes.map(s=>s.id));assert.equal(b.approved,false);assert.match(b.story,/Arbeitsbeschreibungen bleiben auf Deutsch/);assert.deepEqual(reviewProduction(p),[]);
@@ -31,4 +31,34 @@ test('Santa keeps his voice but has no long internal Ho-ho-ho pauses',()=>{
  const p=load(),wav=Buffer.from(p.audios['santa-laugh'].data.split(',')[1],'base64'),rate=wav.readUInt32LE(24),step=Math.round(rate*.01),rms:number[]=[];
  for(let i=44;i+step*2<=wav.length;i+=step*2){let sum=0;for(let k=0;k<step;k++){const v=wav.readInt16LE(i+k*2);sum+=v*v;}rms.push(Math.sqrt(sum/step));}
  const first=rms.findIndex(v=>v>130),last=rms.findLastIndex(v=>v>130);assert.ok(first>=0&&last>first);let run=0,longest=0;for(const v of rms.slice(first,last+1)){run=v<130?run+1:0;longest=Math.max(longest,run);}assert.ok(longest*.01<.16,'internal pauses must stay below 160 ms, not the former 770 ms');
+});
+
+test('bat approaches the lens, reveals textured face, keeps flapping and flies fully out before Santa',()=>{
+ const p=load(),bat=p.objects2d.bat.model!,scene=p.scenes[1],a=scene.stage2d!.actors.find(a=>a.object==='bat')!;
+ assert.equal(a.layer,'foreground');assert.ok(a.actions.some(a=>a.type==='play'&&a.clip==='approach'&&a.duration===5));assert.equal(bat.animations.approach.loop,false);
+ const idle=poseModel2D(bat,'idle',3.6);assert.equal(idle.get('flight')!.scaleX,1);assert.equal(idle.get('close-face')!.opacity,0);
+ let previous=0;for(const t of [0,1.8,2.5,3.1,3.6,4.05]){const pose=poseModel2D(bat,'approach',t);assert.ok(pose.get('flight')!.scaleX>=previous);previous=pose.get('flight')!.scaleX;assert.equal(pose.get('flight')!.scaleX,pose.get('flight')!.scaleY);}assert.equal(previous,10);
+ const near=poseClipsModel2D(bat,[{clip:'idle',time:3.6},{clip:'approach',time:3.6}]);assert.equal(near.get('close-face')!.opacity,1);assert.equal(near.get('body')!.opacity,0);assert.ok(near.get('left-wing')!.scaleY<1);assert.ok(bat.parts.some(p=>p.id==='close-face-art'&&p.shape==='sprite'));assert.ok(bat.images!.art.data!.startsWith('data:image/webp;base64,'));
+ assert.ok(Math.abs(actorFrame2D(a,4.05).x-270)<1);assert.ok(actorFrame2D(a,5).y+90*a.scale*10<0);assert.equal(p.scenes[0].stage2d!.actors.find(a=>a.object==='bat')!.actions.some(a=>a.clip==='approach'),false);assert.match(p.storyboard!.shots[1].action,/auf die Kamera|zur Kamera/);
+});
+
+test('seasonal greetings remain editable with distinct locally bundled display fonts and effects',()=>{
+ const p=load(),s=p.scenes.at(-1)!,h=s.elements.find(e=>e.id==='happy')!,c=s.elements.find(e=>e.id==='christmas')!;
+ assert.equal(h.type,'text');assert.equal(c.type,'text');assert.equal(h.font,'Creepster');assert.equal(h.color,'#ffa947');assert.equal(h.textEffects.glow.enabled,true);assert.equal(c.font,'Mountains of Christmas');assert.equal(c.bold,true);assert.equal(c.color,'#fff1c1');assert.equal(c.textEffects.outline.enabled,true);assert.notEqual(h.font,c.font);assert.ok(c.y+c.height<=40);assert.match(p.storyboard!.shots.at(-1)!.action,/Typografie:/);
+ for(const file of ['Creepster-Regular.ttf','MountainsofChristmas-Regular.ttf','MountainsofChristmas-Bold.ttf']){const bytes=readFileSync('public/fonts/'+file);assert.ok(bytes.length>10000);assert.equal(bytes.readUInt32BE(0),0x00010000);}
+});
+
+test('aurora curtains ripple in phased waves, loop seamlessly and conservatively leave the moon unobscured',()=>{
+ const p=load(),m=p.stages2d.forest.model!,aurora=m.parts.filter(p=>p.id.startsWith('aurora-'));
+ assert.equal(aurora.filter(p=>p.id.startsWith('aurora-pleat-')).length,24);
+ for(const clip of ['idle','lower'])for(const part of aurora){
+  const tracks=m.animations[clip].tracks.filter(t=>t.part===part.id),values=(property:string,base:number)=>tracks.find(t=>t.property===property)?.keys.map(k=>k.value)??[base];
+  const ys=part.shape==='path'?part.path.flatMap(c=>c.values.filter((_,i)=>i%2===1)):[0,part.height],localMin=Math.min(...ys),minY=Math.min(...values('y',part.y)),maxScale=Math.max(...values('scaleY',part.scaleY));
+  assert.equal(part.parent,null);assert.equal(part.pivotY,0);assert.equal(part.rotation,0);assert.ok(!tracks.some(t=>t.property==='rotation'));
+  assert.ok(minY+Math.min(0,localMin*maxScale)-3*(part.blur??0)>=285,part.id+' must stay below the protected moon area, including blur');
+ }
+ const start=poseModel2D(m,'idle',0),end=poseModel2D(m,'idle',8),a=poseModel2D(m,'idle',.5),b=poseModel2D(m,'idle',3.5);
+ for(const part of aurora)for(const key of ['x','y','scaleY','opacity'] as const)assert.ok(Math.abs(start.get(part.id)![key]-end.get(part.id)![key])<1e-8);
+ for(let i=0;i<24;i++){const id='aurora-pleat-'+i;assert.notEqual(a.get(id)!.scaleY,b.get(id)!.scaleY);assert.ok(m.animations.idle.tracks.filter(t=>t.part===id).length===4);}
+ assert.notEqual(a.get('aurora-pleat-0')!.scaleY,a.get('aurora-pleat-1')!.scaleY);
 });

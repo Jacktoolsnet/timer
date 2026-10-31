@@ -1,4 +1,4 @@
-/* Self-hosted script fonts, licensed under SIL OFL 1.1; see public/fonts. */
+/* Self-hosted script/display fonts; original OFL/Apache licenses in public/fonts. */
 @font-face {
   font-family: "Allura";
   src: url("/fonts/Allura-Regular.ttf") format("truetype");
@@ -25,5 +25,27 @@
   src: url("/fonts/Sacramento-Regular.ttf") format("truetype");
   font-style: normal;
   font-weight: 400;
+  font-display: block;
+}
+
+@font-face {
+  font-family: "Creepster";
+  src: url("/fonts/Creepster-Regular.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+}
+@font-face {
+  font-family: "Mountains of Christmas";
+  src: url("/fonts/MountainsofChristmas-Regular.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+}
+@font-face {
+  font-family: "Mountains of Christmas";
+  src: url("/fonts/MountainsofChristmas-Bold.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 700;
   font-display: block;
 }

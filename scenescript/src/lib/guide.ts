@@ -170,16 +170,16 @@ for other types, but those may do nothing visually. In particular draw is visual
 shape-only; paper, afterimages and particle exits have STRICT type limits (§7).
 
 Typography:
-- Text is textContent, never HTML/Markdown. Newlines and whitespace are preserved;
-  normal wrapping occurs at break opportunities; long words may be clipped.
-- Text is vertically centered; align sets horizontal alignment. No auto-fit,
-  automatic font shrinking, text padding or lineHeight field exists for ordinary
-  text; bubbles have their own padding/lineHeight. Size boxes generously.
-- Nonempty runs replaces text with concatenated run.text; <=2000 runs and <=10000
-  total UTF-16 units. Omitted run styles INHERIT actual element styles, not static
-  font/color/bold defaults. All formatting fields remain validated.
-- Allura, Great Vibes, Parisienne and Sacramento are bundled; other fonts are local
-  system fonts and can fall back. Font enum:
+- Plain text only, never HTML/Markdown. Preserve whitespace/newlines; wrap at
+  break opportunities; long words can clip.
+- Vertically centered; align is horizontal. Ordinary text has NO auto-fit,
+  font shrinking, padding or lineHeight. Size boxes generously. Bubbles have
+  separate padding/lineHeight.
+- Nonempty runs replaces text with concatenated run.text; <=2000 runs, <=10000
+  UTF-16 units. Omitted run styles inherit actual Element styles, not defaults.
+- Allura, Great Vibes, Parisienne and Sacramento are bundled; so are Creepster
+  (Halloween) and Mountains of Christmas (regular/bold). Other fonts use local
+  system fallbacks. Font enum:
   ${guideFonts}
 - Element.textGradient colors glyphs, not the box; overrides element/run colors
   visually, but retained colors must still validate. Each run/wrapped fragment

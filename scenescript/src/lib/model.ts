@@ -33,8 +33,8 @@ import {validateImage} from './image-assets.ts';
 import {validateTextureAssets3D} from './texture3d.ts';
 export {validateImage,MAX_IMAGE_BYTES} from './image-assets.ts';
 export const formats = { landscape: [1920,1080], portrait: [1080,1920], square: [1080,1080] } as const;
-// System fonts use local fallbacks; the four script families are bundled with the site.
-export const fonts = ['Arial','Georgia','Verdana','Courier New','Helvetica','Tahoma','Trebuchet MS','Segoe UI','Times New Roman','Palatino Linotype','Garamond','Consolas','Lucida Console','Impact','Arial Black','Comic Sans MS','Allura','Great Vibes','Parisienne','Sacramento'] as const;
+// System fonts use local fallbacks; script and seasonal display families are bundled with the site.
+export const fonts = ['Arial','Georgia','Verdana','Courier New','Helvetica','Tahoma','Trebuchet MS','Segoe UI','Times New Roman','Palatino Linotype','Garamond','Consolas','Lucida Console','Impact','Arial Black','Comic Sans MS','Allura','Great Vibes','Parisienne','Sacramento','Creepster','Mountains of Christmas'] as const;
 export const animations = ['none','fade','slide-left','slide-up','zoom','typewriter','pan','draw'] as const;
 export const exitAnimations=['none','fade','slide-left','slide-right','slide-up','slide-down','zoom-out','particles-dust','particles-sparks','particles-confetti'] as const;
 export const shapeTypes=['rectangle','ellipse','triangle','diamond','star','arrow'] as const;

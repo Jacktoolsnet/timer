@@ -727,9 +727,9 @@ test('recording fills the viewport and hides all editor panels and preview contr
  }
 });
 
-test('bundled script fonts load and survive project export and import',async({page})=>{
+test('bundled script and seasonal fonts load and survive project export and import',async({page})=>{
  await page.goto('/en/');await page.locator('#element-list button').first().click();
- for(const font of ['Allura','Great Vibes','Parisienne','Sacramento']){
+ for(const font of ['Allura','Great Vibes','Parisienne','Sacramento','Creepster','Mountains of Christmas']){
   await page.locator('#element-form [name=font]').selectOption(font);
   const loaded=await page.evaluate(async family=>{
    const faces=await document.fonts.load('48px "'+family+'"','ÄÖÜ äöü ß');

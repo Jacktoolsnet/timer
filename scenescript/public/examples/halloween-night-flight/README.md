@@ -30,3 +30,17 @@ Use case: stylized-concept. Asset: transparent cutout for animated holiday film.
 
 
 Lighting revision: all added northern-light ribbons/folds and stronger pumpkin firelight/spill are native editable vector layers and tracks, not new raster generations. No visible flame geometry, full-frame strobe or destructive repainting of the original art. Covers were re-rendered from the revised film.
+
+## Bat camera fly-by revision
+
+`bat-face.webp`: new transparent painterly frontal bat head/upper torso, generated with built-in imagegen (not the CLI), alpha retained, downscaled to 768px. Embedded as a separate detail sprite inside the bat resource; independently flapping native wings and their finger/vein geometry remain editable. The `approach` clip scales the bat only, not the scene camera, and reveals the face. The actual scene actor then exits above the lens. The first, distant bat is unaffected. The storyboard links this new close-up reference.
+
+### Final bat-face generation prompt
+
+Use case: stylized-concept. Asset: isolated transparent character head and upper torso for a close-up in a richly painterly Halloween animated film. A genuinely BAT-LIKE spooky vampire bat looking straight into the camera, not a cat: large thin translucent leathery bat ears with rounded angular tips, wrinkled short broad leaf-shaped bat nose, textured charcoal and deep plum fur, luminous amber eyes with sinister eyebrows, mouth slightly open showing TWO small ivory vampire fangs, a little dark furry chest tapering naturally below. Slightly frightening but magical and cinematic, no blood or gore. Beautiful realistic-painterly animated movie material detail, violet moon rim light, amber light on face. Entire ears and head visible, centered symmetrical frontal composition, real transparent background, NO wings (added separately for animation), no scene, no moon, no ground, no words, no borders. Not a flat vector icon and not cute cat anatomy.
+
+Aurora motion revision: 24 overlapping feathered light pleats now carry phase-offset
+traveling waves (position, length and brightness), complemented by independently
+drifting ribbons/folds. All primitives stay below y=285 including blur extent;
+no restoration image or opaque moon mask is pasted over the sky. Moon protection
+is checked by conservative geometry bounds and native-rendered on/off pixel comparisons.
