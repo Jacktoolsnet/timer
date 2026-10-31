@@ -14,8 +14,21 @@ test('independent wing/leg/light tracks and real flight paths exist; spider thre
  const witch=scene.stage2d!.actors.find(a=>a.object==='witch')!;assert.ok(actorFrame2D(witch,0).x>540);assert.ok(actorFrame2D(witch,5).x<0);const startSanta=p.scenes[2].stage2d!.actors.find(a=>a.object==='santa')!,endSanta=p.scenes[3].stage2d!.actors.find(a=>a.object==='santa')!;const end=actorFrame2D(startSanta,5);assert.equal(end.x,endSanta.x);assert.equal(end.y,endSanta.y);assert.ok(actorFrame2D(endSanta,7).x<0);
 });
 test('Santa is genuinely embedded audible speech, ducked over native music and matched reusable effects',()=>{
- const p=load(),clips=narrationClips(p);assert.equal(clips.length,1);assert.equal(clips[0].settings.text,'Ho! Ho! Ho!');assert.equal(clips[0].at,10.85);assert.ok(clips[0].duration>3&&clips[0].duration<4);assert.equal(p.audioDucking,true);const wav=Buffer.from(p.audios['santa-laugh'].data.split(',')[1],'base64');assert.equal(wav.toString('ascii',0,4),'RIFF');assert.equal(wav.toString('ascii',8,12),'WAVE');let peak=0;for(let i=44;i+1<wav.length;i+=2)peak=Math.max(peak,Math.abs(wav.readInt16LE(i)));assert.ok(peak>3000);assert.ok(peak<32767);assert.ok(p.music!.notes.some(n=>n.instrument==='bells'&&n.at>=12));assert.ok(p.music!.notes.some(n=>n.instrument==='spooky'&&n.at<10));assert.ok(objectSoundScore2D(p)!.notes.some(n=>n.at>=5&&n.at<10));
+ const p=load(),clips=narrationClips(p);assert.equal(clips.length,1);assert.equal(clips[0].settings.text,'Ho! Ho! Ho!');assert.equal(clips[0].at,10.85);assert.ok(clips[0].duration>1.5&&clips[0].duration<2.7);assert.equal(p.audioDucking,true);const wav=Buffer.from(p.audios['santa-laugh'].data.split(',')[1],'base64');assert.equal(wav.toString('ascii',0,4),'RIFF');assert.equal(wav.toString('ascii',8,12),'WAVE');let peak=0;for(let i=44;i+1<wav.length;i+=2)peak=Math.max(peak,Math.abs(wav.readInt16LE(i)));assert.ok(peak>3000);assert.ok(peak<32767);assert.ok(p.music!.notes.some(n=>n.instrument==='bells'&&n.at>=12));assert.ok(p.music!.notes.some(n=>n.instrument==='spooky'&&n.at<10));assert.ok(objectSoundScore2D(p)!.notes.some(n=>n.at>=5&&n.at<10));
 });
 test('final English greeting is editable, large, safe and given a full reading interval',()=>{
  const p=load(),s=p.scenes.at(-1)!,texts=s.elements.filter(e=>e.type==='text');assert.deepEqual(texts.map(e=>e.text),['Happy Halloween!','But don’t forget…','Christmas is coming!','Ho ho ho!']);assert.ok(s.duration>=7);for(const e of texts){assert.ok(e.fontSize>=50);assert.ok(e.x>=8&&e.x+e.width<=88);assert.ok(e.y>=10&&e.y+e.height<=50);assert.ok(e.until!-e.at>=5);}
+});
+
+test('firelight is irregular and stronger without visible flames; aurora has independent moving bands and folds',()=>{
+ const p=load(),pumpkin=p.objects2d.pumpkin.model!,stage=p.stages2d.forest.model!;
+ assert.ok(!pumpkin.parts.some(p=>p.id.includes('flame')));assert.ok(pumpkin.parts.some(p=>p.id==='outer-firelight'));
+ const fire=pumpkin.animations.idle.tracks.find(t=>t.part==='fire')!;assert.ok(fire.keys.length>=12);assert.ok(Math.max(...fire.keys.map(k=>k.value))>=.7);assert.ok(Math.min(...fire.keys.map(k=>k.value))>=.2);
+ assert.equal(stage.parts.filter(p=>p.id.startsWith('aurora-ribbon-')).length,4);assert.equal(stage.parts.filter(p=>p.id.startsWith('aurora-fold-')).length,6);
+ for(const clip of ['idle','lower']){const a=poseModel2D(stage,clip,.1),b=poseModel2D(stage,clip,3.7);for(let i=0;i<4;i++){const id='aurora-ribbon-'+i;assert.notEqual(a.get(id)!.opacity,b.get(id)!.opacity);assert.notEqual(a.get(id)!.scaleY,b.get(id)!.scaleY);}}
+});
+test('Santa keeps his voice but has no long internal Ho-ho-ho pauses',()=>{
+ const p=load(),wav=Buffer.from(p.audios['santa-laugh'].data.split(',')[1],'base64'),rate=wav.readUInt32LE(24),step=Math.round(rate*.01),rms:number[]=[];
+ for(let i=44;i+step*2<=wav.length;i+=step*2){let sum=0;for(let k=0;k<step;k++){const v=wav.readInt16LE(i+k*2);sum+=v*v;}rms.push(Math.sqrt(sum/step));}
+ const first=rms.findIndex(v=>v>130),last=rms.findLastIndex(v=>v>130);assert.ok(first>=0&&last>first);let run=0,longest=0;for(const v of rms.slice(first,last+1)){run=v<130?run+1:0;longest=Math.max(longest,run);}assert.ok(longest*.01<.16,'internal pauses must stay below 160 ms, not the former 770 ms');
 });

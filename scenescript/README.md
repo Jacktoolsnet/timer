@@ -1788,13 +1788,15 @@ open the new default in an existing browser session.
 Four editable scenes: glowing pumpkin and bat; witch fly-by and dangling spider;
 Santa's arrival; English Halloween/Christmas greeting. Two independently flapping
 bat wings, eight spider legs and a synchronized thread, moving fog and moonbeams,
-light masks, reflections and particle wakes animate separately from the textured
+strong irregular firelight masks (no visible flames), synchronized warm reflections,
+soft animated teal/violet aurora ribbons and vertical folds, and particle wakes animate separately from the textured
 illustrations. No background or characters are baked into a finished video.
 German storyboard descriptions link the reusable resources and references;
 all on-screen and publishing text is English. Approval states remain draft.
 
 Santa's **Ho! Ho! Ho!** is a real embedded WAV, locally synthesized with eSpeak NG,
-not a human performance, voice clone or paid API call. Replace it in the audio
+not a human performance, voice clone or paid API call. Long punctuation pauses
+are compressed without changing the deep voice; the three Hos now take about 2.3 seconds. Replace it in the audio
 editor for a more natural performance. Native instrumental music switches to
 Christmas bells and is automatically ducked under the voice. Both downloadable
 covers are embedded (TikTok 9:16 and YouTube 16:9).

@@ -5,7 +5,7 @@ New assets for the separate Halloween/Christmas starter; the older romantic proj
 - `forest.webp`, `pumpkin.webp`, `witch.webp`, `santa.webp`: generated with the built-in imagegen tool, then downscaled and encoded as WebP. Original alpha is retained on the three cutouts. The forest is full-bleed 9:16.
 - `reference-bat.webp`, `reference-spider.webp`: still renders of the native editable resource geometry.
 - `cover-tiktok.webp`, `cover-youtube.webp`: rendered from this film (native captions included); YouTube cover adds a layout around the portrait frame, not letterboxing in the actual film.
-- `santa-ho-ho-ho.wav`: original locally synthesized eSpeak NG demonstration voice, English “Ho! Ho! Ho!”, not a recording of an identifiable person. Optional reproducible source: `scripts/generate-santa-demo-voice.py`. No external stock music or voice rights are claimed. Music and effects use the project's editable native score.
+- `santa-ho-ho-ho.wav`: original locally synthesized eSpeak NG demonstration voice, English “Ho! Ho! Ho!”, not a recording of an identifiable person. Long internal pauses are compressed to roughly 90 ms; the voice timbre and syllables are retained. Optional reproducible source: `scripts/generate-santa-demo-voice.py`. No external stock music or voice rights are claimed. Music and effects use the project's editable native score.
 
 The JSON package is self-contained and needs no API key or remote asset at playback.
 All generated art was inspected before packaging. Full-resolution generation originals remain in CODEX_HOME, but the project references only committed embedded assets.
@@ -28,3 +28,5 @@ Use case: stylized-concept. Asset: transparent flying character sprite for anima
 
 Use case: stylized-concept. Asset: transparent cutout for animated holiday film. Santa Claus with a jovial face and voluminous white beard in a luxurious red gold sleigh loaded with gifts, TWO flying reindeer pulling in front on the LEFT, facing LEFT in dynamic side three-quarter flight. Golden reins connect them, reindeer legs stretched in midair, red glowing nose on lead deer. Clear coherent complete sleigh team silhouette, not a collection of separate items. Premium painterly animated movie style, exquisite warm golden bells and rich red velvet, icy blue rim lighting. Entire team visible incl antlers and runners, isolated on actual transparent background, no snow ground, no scenery, no text.
 
+
+Lighting revision: all added northern-light ribbons/folds and stronger pumpkin firelight/spill are native editable vector layers and tracks, not new raster generations. No visible flame geometry, full-frame strobe or destructive repainting of the original art. Covers were re-rendered from the revised film.
