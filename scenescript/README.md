@@ -1829,3 +1829,17 @@ at (270,154). The non-looping `moon-flight` clip mirrors rider, lantern and wake
 together, then scales both axes proportionally down to 0.006 before fading the
 tiny distant silhouette. Scene actions own the path; normal resource idle and
 Santa's sleigh are unchanged.
+
+Santa is now a layered 2D puppet, not a wobbling team bitmap. His larger sleigh
+stops at (270,610) after 1.85 seconds and remains fixed throughout the greeting.
+Each of two reindeer has four upper/lower leg joints with textured sprite segments;
+body movement is local to the animals. Santa has an independent waving arm,
+blinking eyelids, brows and a mouth clip keyed from the actual embedded WAV's
+40 ms RMS energy windows. Speech starts at scene time 2.1 (global 12.1 s), after
+arrival. Mouth rests closed during silent gaps and the unvoiced final greeting.
+The idle period of 2.5 s joins continuously across the 5-second arrival scene.
+Original and revised art plus prompts/provenance remain in the example directory.
+
+The 2D mouth keys are baked by the offline packager for this recording; replacing
+the recording requires regenerating those keys. This is not a new universal
+runtime lip-sync system for arbitrary 2D models.

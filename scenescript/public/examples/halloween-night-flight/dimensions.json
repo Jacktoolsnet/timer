@@ -18,5 +18,25 @@
   "bat-face": {
     "width": 768,
     "height": 702
+  },
+  "santa-sleigh": {
+    "width": 737,
+    "height": 768
+  },
+  "reindeer-body": {
+    "width": 640,
+    "height": 426
+  },
+  "santa-wave-arm": {
+    "width": 384,
+    "height": 360
+  },
+  "reindeer-leg-upper": {
+    "width": 320,
+    "height": 264
+  },
+  "reindeer-leg-lower": {
+    "width": 320,
+    "height": 264
   }
 }
