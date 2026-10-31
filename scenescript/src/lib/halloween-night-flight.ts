@@ -171,7 +171,7 @@ export function halloweenNightFlight(art:FlightAssets,references:Storyboard['ima
  for(const scene of [third,last]){
   const pumpkin=scene.stage2d!.actors.find(a=>a.object==='pumpkin')!;pumpkin.y=833;pumpkin.scale=.62;pumpkin.layer='foreground';
   scene.elements.push(caption(scene===last?'happy':'meeting-happy','Happy Halloween!',10,108,12,.1,scene.duration-.3,'Creepster','#ffa947'));
-  const title=scene.elements.find(e=>e.type==='text')!;title.until=scene.duration;title.exitAnimation='none';if(scene===last){title.at=0;title.animation='none';}title.textEffects.outline={enabled:true,color:'#261023',width:1.6};title.textEffects.glow={enabled:true,color:'#c76113',intensity:10};
+  const title=scene.elements.find(e=>e.type==='text')!;title.until=null;title.exitAnimation='none';if(scene===last){title.at=0;title.animation='none';}title.textEffects.outline={enabled:true,color:'#261023',width:1.6};title.textEffects.glow={enabled:true,color:'#c76113',intensity:10};
  }
  // Caption contrast is a gradient scrim, never a full-width letterbox bar.
  for(const s of p.scenes)if(s.elements.length){const e=newElement('shape',s.id+'-caption-shade');Object.assign(e,{name:'Weicher Textkontrast',x:0,y:4,width:100,height:32,color:'#100c22',borderColor:'none',opacity:.58,animation:'none',fillGradient:{type:'linear',angle:180,x:50,y:0,stops:[{color:'#100c22',position:0,opacity:1},{color:'#100c22',position:65,opacity:.5},{color:'#100c22',position:100,opacity:0}]}});s.elements.unshift(e);}

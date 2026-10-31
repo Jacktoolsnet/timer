@@ -14,7 +14,7 @@ test('independent wing/leg/light tracks and real flight paths exist; spider thre
  const witch=scene.stage2d!.actors.find(a=>a.object==='witch')!;assert.ok(actorFrame2D(witch,0).x<0);assert.equal(actorFrame2D(witch,5).x,270);assert.equal(actorFrame2D(witch,5).y,154);
 });
 test('final English greeting is editable, large, safe and held for one second after the children arrive',()=>{
- const p=load(),s=p.scenes.at(-1)!,texts=s.elements.filter(e=>e.type==='text');assert.deepEqual(texts.map(e=>e.text),['Happy Halloween!']);assert.equal(s.duration,1);for(const e of texts){assert.ok(e.fontSize>=50);assert.ok(e.x>=8&&e.x+e.width<=88);assert.ok(e.y>=10&&e.y+e.height<=50);assert.equal(e.until!-e.at,1);}
+ const p=load(),s=p.scenes.at(-1)!,texts=s.elements.filter(e=>e.type==='text');assert.deepEqual(texts.map(e=>e.text),['Happy Halloween!']);assert.equal(s.duration,1);for(const e of texts){assert.ok(e.fontSize>=50);assert.ok(e.x>=8&&e.x+e.width<=88);assert.ok(e.y>=10&&e.y+e.height<=50);assert.equal(e.until,null);}
 });
 
 test('firelight is irregular and stronger without visible flames; aurora has independent moving bands and folds',()=>{
@@ -130,8 +130,8 @@ test('bat identity, position, scale and every model part remain continuous acros
 });
 test('Happy Halloween stays fully opaque through the meeting/greeting cut and to the final frame',()=>{
  const p=load(),a=p.scenes[2],b=p.scenes[3],out=a.elements.find(e=>e.id==='meeting-happy')!,incoming=b.elements.find(e=>e.id==='happy')!;
- for(const t of [a.duration-.3,a.duration-.1,a.duration-.000001]){const state=animationState(out,t,540,960,a.duration);assert.equal(state.visible,true);assert.equal(state.opacity,1);}
- for(const t of [0,.05,.15,.5,.9,.999999]){const state=animationState(incoming,t,540,960,b.duration);assert.equal(state.visible,true);assert.equal(state.opacity,1);}
+ for(const t of [a.duration-.3,a.duration-.1,a.duration-.000001,a.duration]){const state=animationState(out,t,540,960,a.duration);assert.equal(state.visible,true);assert.equal(state.opacity,1);}
+ for(const t of [0,.05,.15,.5,.9,.999999,1]){const state=animationState(incoming,t,540,960,b.duration);assert.equal(state.visible,true);assert.equal(state.opacity,1);}
  for(const key of ['text','font','fontSize','color','x','y','width','height','textEffects'] as const)assert.deepEqual(out[key],incoming[key]);
 });
 
