@@ -17,12 +17,11 @@ test('final English greeting is editable, large, safe and held for one second af
  const p=load(),s=p.scenes.at(-1)!,texts=s.elements.filter(e=>e.type==='text');assert.deepEqual(texts.map(e=>e.text),['Happy Halloween!']);assert.equal(s.duration,1);for(const e of texts){assert.ok(e.fontSize>=50);assert.ok(e.x>=8&&e.x+e.width<=88);assert.ok(e.y>=10&&e.y+e.height<=50);assert.equal(e.until,null);}
 });
 
-test('firelight is irregular and stronger without visible flames; aurora has independent moving bands and folds',()=>{
- const p=load(),pumpkin=p.objects2d.pumpkin.model!,stage=p.stages2d.forest.model!;
+test('firelight is irregular and stronger without visible flames',()=>{
+ const p=load(),pumpkin=p.objects2d.pumpkin.model!;
  assert.ok(!pumpkin.parts.some(p=>p.id.includes('flame')));assert.ok(pumpkin.parts.some(p=>p.id==='outer-firelight'));
  const fire=pumpkin.animations.idle.tracks.find(t=>t.part==='fire')!;assert.ok(fire.keys.length>=12);assert.ok(Math.max(...fire.keys.map(k=>k.value))>=.7);assert.ok(Math.min(...fire.keys.map(k=>k.value))>=.2);
- assert.equal(stage.parts.filter(p=>p.id.startsWith('aurora-ribbon-')).length,4);assert.equal(stage.parts.filter(p=>p.id.startsWith('aurora-fold-')).length,6);
- for(const clip of ['idle','lower']){const a=poseModel2D(stage,clip,.1),b=poseModel2D(stage,clip,3.7);for(let i=0;i<4;i++){const id='aurora-ribbon-'+i;assert.notEqual(a.get(id)!.opacity,b.get(id)!.opacity);assert.notEqual(a.get(id)!.scaleY,b.get(id)!.scaleY);}}
+
 });
 
 test('bat approaches the lens, reveals textured face, keeps flapping and flies fully out before the children',()=>{
@@ -38,19 +37,13 @@ test('Halloween greeting stays editable, orange and glowing in the same font as 
  const p=load(),h=p.scenes.at(-1)!.elements.find(e=>e.id==='happy')!;assert.equal(h.type,'text');assert.equal(h.font,'Creepster');assert.equal(h.color,'#ffa947');assert.equal(h.textEffects.glow.enabled,true);assert.equal(h.textEffects.outline.enabled,true);assert.match(p.storyboard!.shots.at(-1)!.action,/Typografie:/);
 });
 
-test('aurora curtains ripple in phased waves, loop seamlessly and conservatively leave the moon unobscured',()=>{
- const p=load(),m=p.stages2d.forest.model!,aurora=m.parts.filter(p=>p.id.startsWith('aurora-'));
- assert.equal(aurora.filter(p=>p.id.startsWith('aurora-pleat-')).length,24);
- for(const clip of ['idle','lower'])for(const part of aurora){
-  const tracks=m.animations[clip].tracks.filter(t=>t.part===part.id),values=(property:string,base:number)=>tracks.find(t=>t.property===property)?.keys.map(k=>k.value)??[base];
-  const ys=part.shape==='path'?part.path.flatMap(c=>c.values.filter((_,i)=>i%2===1)):[0,part.height],localMin=Math.min(...ys),minY=Math.min(...values('y',part.y)),maxScale=Math.max(...values('scaleY',part.scaleY));
-  assert.equal(part.parent,null);assert.equal(part.pivotY,0);assert.equal(part.rotation,0);assert.ok(!tracks.some(t=>t.property==='rotation'));
-  assert.ok(minY+Math.min(0,localMin*maxScale)-3*(part.blur??0)>=285,part.id+' must stay below the protected moon area, including blur');
- }
- const start=poseModel2D(m,'idle',0),end=poseModel2D(m,'idle',8),a=poseModel2D(m,'idle',.5),b=poseModel2D(m,'idle',3.5);
- for(const part of aurora)for(const key of ['x','y','scaleY','opacity'] as const)assert.ok(Math.abs(start.get(part.id)![key]-end.get(part.id)![key])<1e-8);
- for(let i=0;i<24;i++){const id='aurora-pleat-'+i;assert.notEqual(a.get(id)!.scaleY,b.get(id)!.scaleY);assert.ok(m.animations.idle.tracks.filter(t=>t.part===id).length===4);}
- assert.notEqual(a.get('aurora-pleat-0')!.scaleY,a.get('aurora-pleat-1')!.scaleY);
+test('forest has no northern lights but retains moonlight, mist, motes and animated pumpkin spill',()=>{
+ const p=load(),m=p.stages2d.forest.model!;
+ assert.ok(!m.parts.some(p=>p.id.startsWith('aurora-')));
+ for(const clip of Object.values(m.animations))assert.ok(!clip.tracks.some(t=>t.part.startsWith('aurora-')));
+ assert.equal(m.parts.filter(p=>p.id.startsWith('moon-ray-')).length,3);assert.equal(m.parts.filter(p=>p.id.startsWith('mist-')).length,5);assert.equal(m.parts.filter(p=>p.id.startsWith('mote-')).length,26);
+ for(const clip of ['idle','opening','lower']){const a=poseModel2D(m,clip,.5),b=poseModel2D(m,clip,3.5);assert.notEqual(a.get('mist-0')!.x,b.get('mist-0')!.x);assert.notEqual(a.get('moon-aura')!.opacity,b.get('moon-aura')!.opacity);assert.notEqual(a.get('pumpkin-reflection')!.opacity,b.get('pumpkin-reflection')!.opacity);}
+ assert.match(p.storyboard!.look!.lighting,/ohne Nordlichter/);
 });
 
 test('witch enters from the left, faces her flight direction and recedes proportionally to the moon',()=>{
@@ -141,4 +134,15 @@ test('film ends exactly one second after the last child finishes entering, with 
  assert.ok(Math.abs(meeting.duration+greeting.duration-arrival-1)<1e-8);assert.equal(greeting.duration,1);
  const duration=p.scenes.reduce((sum,s)=>sum+s.duration,0);assert.equal(duration,14.8);assert.equal(p.storyboard!.duration,duration);
  for(const note of p.music!.notes)assert.ok(note.at+note.duration<=duration+1e-8);
+});
+
+test('captions have no translucent background shapes that darken the moon',()=>{
+ const p=load();for(const scene of p.scenes){assert.ok(!scene.elements.some(e=>e.id.endsWith('caption-shade')));assert.ok(scene.elements.every(e=>e.type==='text'));}
+ const title=p.scenes[3].elements.find(e=>e.id==='happy')!;assert.equal(title.textEffects.outline.enabled,true);assert.equal(title.textEffects.shadow.enabled,true);
+});
+
+test('pumpkin keeps the same position, size and orientation in every scene, including the children entrance',()=>{
+ const p=load(),poses=p.scenes.map(s=>{const a=s.stage2d!.actors.find(a=>a.object==='pumpkin')!;return {object:a.object,x:a.x,y:a.y,scale:a.scale,rotation:a.rotation,opacity:a.opacity};});
+ for(const pose of poses)assert.deepEqual(pose,{object:'pumpkin',x:270,y:800,scale:.78,rotation:0,opacity:1});
+ for(const scene of p.scenes){const a=scene.stage2d!.actors.find(a=>a.object==='pumpkin')!;assert.equal(a.actions.length,0);assert.equal(scene.stage2d!.stage,'forest');}
 });
