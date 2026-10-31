@@ -1690,8 +1690,8 @@ or a painted checkerboard. Transparent input is reused locally, with transparent
 padding cropped and only GPU-budget resizing when necessary. Cropped derivatives
 use PNG or smaller maximum-quality WebP to avoid inflating saved projects; the
 original reference remains unchanged. If an object sketch
-is opaque, the confirmation discloses at most one additional `gpt-image-2` high
-quality image-edit call requesting a transparent PNG. Returned alpha is checked;
+is opaque, the confirmation discloses at most one additional `gpt-image-1.5` high
+quality image-edit call with `input_fidelity: "high"` requesting a transparent PNG. Returned alpha is checked;
 a failed opaque-input cutout stops before the text-model call and never becomes a rectangular
 object. No automatic retries, chroma-key guessing or vector fallback. Cutout edits
 can still change details: review the result, especially faces/fine silhouettes.
@@ -1728,3 +1728,9 @@ the text call consumes that same one-edit budget; a second required cleanup stop
 with an error, never an automatic second charge. This semantic decision is still
 AI judgment, so review the result. Existing image resources and targeted comparison
 corrections are not silently re-extracted.
+
+Transparent resource extraction uses GPT Image 1.5 explicitly, not GPT Image 2
+whose transparent-background preview may be unavailable for a given API account.
+The confirmation names this dedicated model; ordinary sketch generation and text
+model recommendations are unchanged. Provider rejection stops without automatic
+retry or model fallback. Account access is not assumed or tested by local mocks.

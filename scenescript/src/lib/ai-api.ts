@@ -49,9 +49,10 @@ export async function generateText(key:string,request:TextRequest,signal:AbortSi
  if(!text||text.length>8*MiB)throw new AiApiError('response');
  try{JSON.parse(text);}catch{throw new AiApiError('response');}return text;
 }
-export async function generateImage(key:string,request:{model:string;prompt:string;size:string;quality:string;background?:'transparent'|'opaque';images?:string[]},signal:AbortSignal,fetcher:typeof fetch=fetch){
+export async function generateImage(key:string,request:{model:string;prompt:string;size:string;quality:string;background?:'transparent'|'opaque';input_fidelity?:'high'|'low';images?:string[]},signal:AbortSignal,fetcher:typeof fetch=fetch){
  if(!validImageSize(request.model,request.size)||!['low','medium','high'].includes(request.quality)||!request.prompt.trim()||request.prompt.length>32000)throw new AiApiError('request');
  if(request.background!==undefined&&!['transparent','opaque'].includes(request.background))throw new AiApiError('request');
+ if(request.input_fidelity!==undefined&&(!['high','low'].includes(request.input_fidelity)||request.model!=='gpt-image-1.5'||!request.images?.length))throw new AiApiError('request');
  const {images=[],...options}=request;
  if(images.length>8||images.reduce((n,x)=>n+x.length,0)>6*MiB||images.some(x=>!/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/]+={0,2}$/.test(x)))throw new AiApiError('size');
  const body={...options,model:id(request.model),n:1,output_format:'png',...(images.length?{images:images.map(image_url=>({image_url}))}:{})};

@@ -150,7 +150,12 @@ test('image generation refuses external URLs, SVG and excess reference data befo
  }
 });
 test('transparent image edit explicitly requests alpha PNG and rejects unknown background values before calling API',async()=>{
- const args={model:'gpt-image-2',prompt:'Cut out selected bread',size:'1024x1024',quality:'high',background:'transparent' as const,images:['data:image/png;base64,AAAA']};let calls=0;
- await generateImage(key,args,signal(),async(url,init)=>{calls++;assert.equal(url,'https://api.openai.com/v1/images/edits');const b=JSON.parse(String(init?.body));assert.equal(b.background,'transparent');assert.equal(b.output_format,'png');assert.equal(b.quality,'high');assert.equal(b.images[0].image_url,args.images[0]);return Response.json({data:[{b64_json:'AAAA'}]});});assert.equal(calls,1);
+ const args={model:'gpt-image-1.5',input_fidelity:'high' as const,prompt:'Cut out selected bread',size:'1024x1024',quality:'high',background:'transparent' as const,images:['data:image/png;base64,AAAA']};let calls=0;
+ await generateImage(key,args,signal(),async(url,init)=>{calls++;assert.equal(url,'https://api.openai.com/v1/images/edits');const b=JSON.parse(String(init?.body));assert.equal(b.model,'gpt-image-1.5');assert.equal(b.input_fidelity,'high');assert.equal(b.background,'transparent');assert.equal(b.output_format,'png');assert.equal(b.quality,'high');assert.equal(b.images[0].image_url,args.images[0]);return Response.json({data:[{b64_json:'AAAA'}]});});assert.equal(calls,1);
  await assert.rejects(generateImage(key,{...args,background:'checkerboard' as 'transparent'},signal(),async()=>{calls++;return Response.json({});}),AiApiError);assert.equal(calls,1);
+});
+test('high-fidelity alpha extraction uses supported edit settings only and never retries a background rejection',async()=>{
+ const {artworkEditSettings}=await import('../src/lib/storyboard-art2d.ts');const args={...artworkEditSettings,prompt:'Isolate only the selected object',images:['data:image/png;base64,AAAA']};let calls=0;
+ await assert.rejects(generateImage(key,args,signal(),async(_url,init)=>{calls++;const body=JSON.parse(String(init?.body));assert.equal(body.model,'gpt-image-1.5');assert.equal(body.input_fidelity,'high');return Response.json({error:{message:'Transparent background is not supported for this model.',param:'background',code:'invalid_value'}},{status:400});}),e=>e instanceof AiApiError&&e.details.includes('Transparent background'));assert.equal(calls,1);
+ for(const request of [{...args,model:'gpt-image-2'},{...args,images:[]}])await assert.rejects(generateImage(key,request,signal(),async()=>{calls++;return Response.json({});}),AiApiError);assert.equal(calls,1);
 });
