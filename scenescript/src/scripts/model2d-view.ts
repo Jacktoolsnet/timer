@@ -1,14 +1,17 @@
-import {Container,Graphics,Text,FillGradient,BlurFilter} from 'pixi.js';
+import {Container,Graphics,Text,FillGradient,BlurFilter,Sprite,type Texture,type DestroyOptions} from 'pixi.js';
 import {poseClipsModel2D,poseModel2D,type Model2D,type Paint2D} from '../lib/model2d';
+/** Scene cleanup must not destroy the renderer-owned shared image texture. */
+class ResourceSprite extends Sprite{override destroy(options:DestroyOptions=false){super.destroy({...((typeof options==='object'&&options)||{}),texture:false,textureSource:false});}}
 /** Render only the validated vector vocabulary. No eval, HTML, external URLs or SVG strings. */
-export function createModel2DView(model:Model2D,color='#79a8cb',accent='#fff5c0'){
+export function createModel2DView(model:Model2D,color='#79a8cb',accent='#fff5c0',textureFor?:(data:string)=>Texture){
  const root=new Container(),background=new Container(),foreground=new Container(),nodes=new Map<string,Container>();root.addChild(background,foreground);
  background.position.set(-model.originX,-model.originY);foreground.position.copyFrom(background.position);
  const blur=(g:Graphics,strength:number)=>{if(strength){const filter=new BlurFilter({strength,quality:4});g.filters=[filter];g.once('destroyed',()=>filter.destroy());}};
  const paint=(value:Paint2D)=>value==='$color'?color:value==='$accent'?accent:value;
  for(const part of model.parts){
   const node=new Container();node.label=part.id;node.pivot.set(part.pivotX,part.pivotY);nodes.set(part.id,node);
-  if(part.shape==='text'){
+  if(part.shape==='sprite'){const data=model.images?.[part.image!]?.data;if(!data||!textureFor)throw Error('2D sprite: embedded image was not prepared');const sprite=new ResourceSprite(textureFor(data));sprite.width=part.width;sprite.height=part.height;sprite.blendMode=part.blend??'normal';node.addChild(sprite);}
+  else if(part.shape==='text'){
    const lines=part.text.split('\n'),size=Math.max(.25,Math.min(part.fontSize,part.width/(Math.max(1,...lines.map(s=>s.length))*1.2),part.height/(lines.length*1.5)));
    const label=new Text({text:part.text,style:{fontFamily:'Arial',fontSize:size,fill:paint(part.fill)??'#000000'}});
    const fit=Math.min(1,part.width/Math.max(1,label.width),part.height/Math.max(1,label.height));label.scale.set(fit);node.addChild(label);

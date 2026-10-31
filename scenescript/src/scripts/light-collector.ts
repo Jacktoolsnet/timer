@@ -1,5 +1,5 @@
 import {createModel2DView} from './model2d-view';
-import {Container,Graphics,Text,FillGradient,type ColorSource} from 'pixi.js';
+import {Container,Graphics,Text,FillGradient,type ColorSource,type Texture} from 'pixi.js';
 import type {Object2D,Stage2DResource,Actor2D} from '../lib/stage2d';
 import type {actorFrame2D} from '../lib/motion2d';
 const W=960,H=540,TAU=Math.PI*2;
@@ -17,10 +17,10 @@ function plant(parent:Container,x:number,y:number,size:number,color:ColorSource,
 root.position.set(x,y);root.scale.set(size);parent.addChild(root);const stem=new Graphics().moveTo(0,0).quadraticCurveTo(-8*side,-45,8*side,-102).stroke({color,width:3});root.addChild(stem);for(let i=0;i<4;i++){const leaf=new Graphics().moveTo(0,0).bezierCurveTo(-34,-23,-43,8,0,0).fill(color);leaf.position.set((i%2?-1:1)*3,-22-i*19);leaf.rotation=i%2?Math.PI*.12:Math.PI*.95;root.addChild(leaf);}return root;}
 
 export {label};
-export function createBackdrop2D(resource:Stage2DResource){
+export function createBackdrop2D(resource:Stage2DResource,textureFor?:(data:string)=>Texture){
 const root=new Container();
 if(resource.preset==='custom'&&resource.model){
- const view=createModel2DView(resource.model,resource.groundColor,resource.skyColor),world=new Container();root.addChild(view.root);view.root.addChildAt(world,1);
+ const view=createModel2DView(resource.model,resource.groundColor,resource.skyColor,textureFor),world=new Container();root.addChild(view.root);view.root.addChildAt(world,1);
  return {root,world,draw(t:number,camera:{x:number;y:number;zoom:number},clip='idle'){view.draw(t,[{clip:'idle',time:t},...(clip&&clip!=='idle'?[{clip,time:t}]:[])],camera);world.scale.set(camera.zoom);world.position.set(camera.x-(camera.zoom-1)*resource.model!.width/2,camera.y-(camera.zoom-1)*resource.model!.height/2);}};
 }
 if(resource.preset==='night-garden'){
@@ -45,11 +45,11 @@ for(const [i,x] of [-90,75,790,1030].entries())plants.push(plant(foreground,x,56
 
 return {root,world,draw(t:number,camera:{x:number;y:number;zoom:number}){const zoom=camera.zoom;world.scale.set(zoom);world.position.set(camera.x-(zoom-1)*432,camera.y-(zoom-1)*378);far.x=camera.x*.12;middle.x=camera.x*.4;foreground.x=camera.x*1.35;for(let i=0;i<plants.length;i++)plants[i].rotation=Math.sin(t*1.6+i)*.035;}};
 }
-export function createObjectView2D(resource:Object2D,instance:Actor2D){
+export function createObjectView2D(resource:Object2D,instance:Actor2D,textureFor?:(data:string)=>Texture){
 const host=new Container(),node=new Container();host.addChild(node);const color=instance.color??resource.color;
 let hand:Container|undefined;let animate:(frame:ReturnType<typeof actorFrame2D>,t:number)=>void=()=>{};
 if(resource.kind==='custom'&&resource.model){
- const view=createModel2DView(resource.model,color,resource.accentColor);node.addChild(view.root);
+ const view=createModel2DView(resource.model,color,resource.accentColor,textureFor);node.addChild(view.root);
  const anchor=view.nodes.get('hand');if(anchor){hand=new Container();hand.y=-29;anchor.addChild(hand);}
  animate=(_,t)=>{const actions=instance.actions.filter(a=>t>=a.at&&t<=a.at+a.duration&&Object.hasOwn(resource.model!.animations,a.clip||a.type)).sort((a,b)=>a.at-b.at);view.draw(t,[{clip:'idle',time:t},...actions.map(a=>({clip:a.clip||a.type,time:t-a.at}))]);};
 }else if(resource.kind==='robot'){

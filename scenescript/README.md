@@ -1647,3 +1647,36 @@ The generator reuses committed WebP files. Full-resolution generation originals
 remain in the image-generation output folder, never in project download paths.
 The folklore source and “custom, not real prediction” wording are stored in the
 storyboard comments: https://dublincastle.ie/halloween-in-old-ireland/ .
+
+#### Image-backed 2D pilot: pumpkin lantern
+
+The pumpkin now preserves the original transparent WebP illustration as a sprite:
+its saturated skin, texture and highlights are not approximated with flat vectors.
+Only a separate, subtle vector candlelight overlay animates. The other four object
+resources and both stages are unchanged. This is illustrated 2D animation, not an
+automatically reconstructed 3D mesh or a rig with independently moving painted parts.
+
+For an already edited/approved project, import
+`public/examples/halloween-heart/pumpkin-sprite.resource.json` with the pumpkin's
+**2D resource → Import JSON** button. This replaces only that resource and resets
+its affected approvals normally; it does not replace the storyboard or other
+resources. Loading the start project instead opens the new planning draft.
+
+Custom models can combine vectors with `shape: "sprite"` parts. A sprite uses
+`image: "localId"`, `width` and `height`; its pixels come from the model-local
+`images: {localId: {name: "Pumpkin", data: "data:image/webp;base64,…"}}` map.
+PNG, JPEG and WebP are embedded in portable saves; external URLs and SVG are not
+accepted. Hierarchy, transforms, opacity and blend modes work as usual, without
+raster tinting. Gradients, blur and shadows belong on separate vector parts, not
+on the sprite. Missing/invalid images report an error rather than silently
+substituting a simplified vector. Models allow eight images / 8 MiB decoded file
+payload; rendering allows 4 megapixels per image (4096 maximum edge), 32 distinct
+images and 16 megapixels resident per scene/cache.
+
+AI/feedback manifests contain image IDs and names, not duplicated Base64. Known
+image data is restored locally on acceptance; unknown image manifests are rejected.
+`Stage2DRenderer.renderAsync()` decodes embedded images before rendering and owns
+shared textures independently of scene instances. Resource previews, comparisons
+and video export all await this path. The synchronous `render()` remains available
+for existing vector-only callers. Disposing a scene cannot destroy another
+instance's shared sprite texture.

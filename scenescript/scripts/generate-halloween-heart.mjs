@@ -15,3 +15,5 @@ const browser=await chromium.launch();try{const page=await browser.newPage();
  }
 }finally{await browser.close();}
 const project=validateProject(halloweenHeartProject(images));if(projectJsonBytes(project)>4*1024*1024)throw Error('Starter exceeds the autosave budget');await writeFile(new URL('../public/examples/halloween-heart.scenescript.json',import.meta.url),JSON.stringify(project,null,2)+'\n');console.log('Halloween mit Herz:',project.storyboard.shots.length,'planned shots,',Object.keys(images).length,'references,',Object.keys(project.objects2d).length,'objects,',Object.keys(project.stages2d).length,'stages;',projectJsonBytes(project),'bytes');
+
+await writeFile(new URL('../public/examples/halloween-heart/pumpkin-sprite.resource.json',import.meta.url),JSON.stringify({reply:'Bildbasierter Kürbis: Originalillustration mit separatem Kerzenflackern. Nur diese Ressource wird importiert; bestehende Szenen und andere Ressourcen bleiben unverändert.',model:project.objects2d.pumpkin.model},null,2)+'\n');

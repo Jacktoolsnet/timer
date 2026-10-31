@@ -1,3 +1,4 @@
+import {Model2DTextures} from './model2d-textures';
 import {stageFrame2D} from '../lib/stage2d-frame';
 import {Application} from 'pixi.js';
 import type {Stage2D,Resources2D} from '../lib/stage2d';
@@ -6,6 +7,10 @@ import {createStage2DScene} from './stage2d-scene';
 export class Stage2DRenderer{
  private app=new Application();
  private worlds=new Map<string,ReturnType<typeof createStage2DScene>>();
+ private disposed=false;
+ private queue:Promise<unknown>=Promise.resolve();
+ private textures=new Model2DTextures(()=>this.clearWorlds());
+ private clearWorlds(){this.app.stage.removeChildren();for(const world of this.worlds.values())world.root.destroy({children:true,texture:true,textureSource:true});this.worlds.clear();}
  private lost=false;
  private onLost=(event:Event)=>{event.preventDefault();this.lost=true;};
  async init(){
@@ -13,13 +18,17 @@ export class Stage2DRenderer{
   catch{throw new Error('2D: WebGL is not available on this device.');}
   this.app.canvas.addEventListener('webglcontextlost',this.onLost);return this;
  }
+ /** Serialize image preparation and rendering across shared resource previews. */
+ renderAsync(shot:Stage2D,duration:number,time:number,width:number,height:number,target:HTMLCanvasElement,resources:Resources2D,isolated=false){
+  const task=this.queue.then(async()=>{if(this.disposed)throw Error('2D renderer disposed');await this.textures.prepare(resources,shot);if(this.disposed)throw Error('2D renderer disposed');this.render(shot,duration,time,width,height,target,resources,isolated);});this.queue=task.catch(()=>{});return task;
+ }
  render(shot:Stage2D,duration:number,time:number,width:number,height:number,target:HTMLCanvasElement,resources:Resources2D,isolated=false){
-  if(this.lost)throw new Error('2D: graphics context unavailable.');
+  if(this.disposed)throw Error('2D renderer disposed');if(this.lost)throw new Error('2D: graphics context unavailable.');
   const used={stages2d:Object.fromEntries([shot.stage,...(shot.transition?[shot.transition.stage]:[])].map(id=>[id,resources.stages2d[id]])),objects2d:Object.fromEntries(shot.actors.map(a=>[a.object,resources.objects2d[a.object]]))};
   const key=JSON.stringify([shot,duration,used,isolated]);let world=this.worlds.get(key);
   if(!world){
    if(this.worlds.size>=2){const [oldKey,old]=this.worlds.entries().next().value!;this.app.stage.removeChild(old.root);old.root.destroy({children:true,texture:true,textureSource:true});this.worlds.delete(oldKey);}
-   world=createStage2DScene(structuredClone(used),structuredClone(shot),isolated);this.worlds.set(key,world);
+   world=createStage2DScene(structuredClone(used),structuredClone(shot),isolated,this.textures.get);this.worlds.set(key,world);
   }
   this.app.stage.removeChildren();this.app.stage.addChild(world.root);
   const frame=stageFrame2D(resources.stages2d[shot.stage]),scale=Math.min(width/frame.width,height/frame.height);world.root.scale.set(scale);world.root.position.set((width-frame.width*scale)/2,(height-frame.height*scale)/2);
@@ -31,5 +40,5 @@ export class Stage2DRenderer{
   target.dataset.stage2dIsolated=String(isolated);
   target.dataset.stage2dTime=String(time);target.dataset.stage2dStage=shot.stage;target.dataset.stage2dActors=String(shot.actors.length);
  }
- dispose(){this.app.canvas.removeEventListener('webglcontextlost',this.onLost);this.app.stage.removeChildren();for(const world of this.worlds.values())world.root.destroy({children:true,texture:true,textureSource:true});this.worlds.clear();this.app.destroy(true,{children:true});}
+ dispose(){if(this.disposed)return;this.disposed=true;this.app.canvas.removeEventListener('webglcontextlost',this.onLost);this.clearWorlds();this.textures.dispose();this.app.destroy(true,{children:true});}
 }

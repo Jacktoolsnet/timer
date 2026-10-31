@@ -1,3 +1,5 @@
+import {validateImage} from './image-assets.ts';
+import {base64ByteLength} from './data-size.ts';
 /** Declarative, bounded vector puppets and layered sets. No scripts, URLs or SVG execution. */
 export type Paint2D=string|null;
 export const properties2D=['x','y','rotation','scaleX','scaleY','opacity'] as const;
@@ -5,15 +7,16 @@ export type Property2D=typeof properties2D[number];
 export type PathCommand2D={op:'M'|'L'|'Q'|'C'|'Z';values:number[]};
 export type Gradient2D={type:"linear"|"radial";x0:number;y0:number;x1:number;y1:number;stops:{at:number;color:string}[]};
 export type Shadow2D={color:string;opacity:number;x:number;y:number;blur:number};
-export type Part2D={gradient?:Gradient2D;shadow?:Shadow2D;blend?:"normal"|"screen"|"multiply"|"add";blur?:number;
- id:string;parent:string|null;shape:'group'|'rectangle'|'ellipse'|'polygon'|'path'|'text';
+export type Image2D={name:string;data?:string};
+export type Part2D={image?:string;gradient?:Gradient2D;shadow?:Shadow2D;blend?:"normal"|"screen"|"multiply"|"add";blur?:number;
+ id:string;parent:string|null;shape:'group'|'rectangle'|'ellipse'|'polygon'|'path'|'text'|'sprite';
  x:number;y:number;rotation:number;scaleX:number;scaleY:number;pivotX:number;pivotY:number;
  width:number;height:number;radius:number;fill:Paint2D;stroke:Paint2D;strokeWidth:number;opacity:number;
  points:number[];path:PathCommand2D[];text:string;fontSize:number;
  rotationMin:number;rotationMax:number;parallax:number;layer:'background'|'foreground';
 };
 export type Clip2D={duration:number;loop:boolean;tracks:{part:string;property:Property2D;keys:{at:number;value:number;easing:'linear'|'smooth'|'step'}[]}[]};
-export type Model2D={width:number;height:number;originX:number;originY:number;parts:Part2D[];animations:Record<string,Clip2D>};
+export type Model2D={images?:Record<string,Image2D>;width:number;height:number;originX:number;originY:number;parts:Part2D[];animations:Record<string,Clip2D>};
 const object=(v:unknown,p:string):Record<string,unknown>=>{if(!v||typeof v!=='object'||Array.isArray(v))throw Error(p+': expected object');return v as Record<string,unknown>;};
 const keys=(o:Record<string,unknown>,allowed:string[],p:string)=>{for(const k of Object.keys(o))if(!allowed.includes(k))throw Error(p+'.'+k+': unknown field');};
 const num=(v:unknown,p:string,min:number,max:number)=>{if(typeof v!=='number'||!Number.isFinite(v)||v<min||v>max)throw Error(p+': expected '+min+'–'+max);return v;};
@@ -23,17 +26,22 @@ const one=<T extends string>(v:unknown,choices:readonly T[],p:string):T=>{if(!ch
 const list=(v:unknown,p:string,max:number)=>{if(!Array.isArray(v)||v.length>max)throw Error(p+': expected array, max '+max);return v as unknown[];};
 const paint=(v:unknown,p:string):Paint2D=>{if(v===null)return null;const s=text(v,p);if(!/^#[\da-f]{6}$/i.test(s)&&s!=='$color'&&s!=='$accent')throw Error(p+': #RRGGBB, $color, $accent or null');return s;};
 export function defaultPart2D(id='part'):Part2D{return {id,parent:null,shape:'rectangle',x:0,y:0,rotation:0,scaleX:1,scaleY:1,pivotX:0,pivotY:0,width:100,height:100,radius:0,fill:'#79a8cb',stroke:null,strokeWidth:0,opacity:1,points:[],path:[],text:'',fontSize:24,rotationMin:-360,rotationMax:360,parallax:1,layer:'background'};}
-export function parseModel2D(value:unknown,path='model2d'):Model2D{
- const raw=object(value,path);keys(raw,['width','height','originX','originY','parts','animations'],path);
+export function parseModel2D(value:unknown,path='model2d',manifest=false):Model2D{
+ const raw=object(value,path);keys(raw,['width','height','originX','originY','parts','animations','images'],path);
+ const images:Record<string,Image2D>=Object.create(null);let imageBytes=0;
+ if(raw.images!==undefined){const map=object(raw.images,path+'.images');if(Object.keys(map).length>8)throw Error(path+': maximum 8 images');for(const [key,value]of Object.entries(map)){id(key,path+'.images');const p=path+'.images.'+key,v=object(value,p);keys(v,['name','data'],p);const name=text(v.name,p+'.name',200);if(v.data===undefined&&manifest)images[key]={name};else{const data=validateImage(v.data,p+'.data');if(data.startsWith('data:image/svg'))throw Error(p+': sprites require raster PNG/JPEG/WebP');imageBytes+=base64ByteLength(data.slice(data.indexOf(',')+1));if(imageBytes>8*1024*1024)throw Error(path+': image budget 8 MiB exceeded');images[key]={name,data};}}}
  let budget=0,textBudget=0,textArea=0,filters=0;
  const parts=list(raw.parts,path+'.parts',256).map((value,i)=>{
-  const p=path+'.parts['+i+']',raw=object(value,p);keys(raw,[...Object.keys(defaultPart2D()),"gradient","shadow","blend","blur"],p);const o={...defaultPart2D(),...raw},out=defaultPart2D(id(raw.id,p+'.id'));
+  const p=path+'.parts['+i+']',raw=object(value,p);keys(raw,[...Object.keys(defaultPart2D()),"gradient","shadow","blend","blur","image"],p);const o={...defaultPart2D(),...raw},out=defaultPart2D(id(raw.id,p+'.id'));
   if(raw.gradient!==undefined){const g=object(raw.gradient,p+'.gradient');keys(g,['type','x0','y0','x1','y1','stops'],p+'.gradient');const stops=list(g.stops,p+'.gradient.stops',8).map(v=>{const q=object(v,p);keys(q,['at','color'],p);const color=paint(q.color,p);if(!color||!color.startsWith('#'))throw Error(p+': gradient color requires #RRGGBB');return {at:num(q.at,p,0,1),color};});if(stops.length<2||stops[0].at!==0||stops.at(-1)!.at!==1||stops.some((q,i)=>i>0&&q.at<=stops[i-1].at))throw Error(p+': gradient stops must increase from 0 to 1');out.gradient={type:one(g.type,['linear','radial'],p),x0:num(g.x0,p,0,1),y0:num(g.y0,p,0,1),x1:num(g.x1,p,0,1),y1:num(g.y1,p,0,1),stops};if(out.gradient.x0===out.gradient.x1&&out.gradient.y0===out.gradient.y1)throw Error(p+': gradient needs nonzero extent');}
   if(raw.shadow!==undefined){const q=object(raw.shadow,p+'.shadow');keys(q,['color','opacity','x','y','blur'],p+'.shadow');const color=paint(q.color,p);if(!color||!color.startsWith('#'))throw Error(p+': shadow color requires #RRGGBB');out.shadow={color,opacity:num(q.opacity,p,0,1),x:num(q.x,p,-100,100),y:num(q.y,p,-100,100),blur:num(q.blur,p,0,24)};if(out.shadow.blur>0)filters++;}
   if(raw.blend!==undefined)out.blend=one(raw.blend,['normal','screen','multiply','add'] as const,p+'.blend');
   if(raw.blur!==undefined){out.blur=num(raw.blur,p+'.blur',0,24);if(out.blur>0)filters++;}
   if(filters>16)throw Error(path+': maximum 16 blurred effects');
-  out.parent=o.parent===null?null:id(o.parent,p+'.parent');out.shape=one(o.shape,['group','rectangle','ellipse','polygon','path','text'],p+'.shape');
+  out.parent=o.parent===null?null:id(o.parent,p+'.parent');out.shape=one(o.shape,['group','rectangle','ellipse','polygon','path','text','sprite'],p+'.shape');
+  if(raw.image!==undefined){if(out.shape!=='sprite')throw Error(p+': image is only valid for sprite');out.image=id(raw.image,p+'.image');}
+  if(out.shape==='sprite'&&(!out.image||!Object.hasOwn(images,out.image)))throw Error(p+': missing embedded sprite image');
+  if(out.shape==='sprite'&&(out.gradient||out.shadow||out.blur!==undefined))throw Error(p+': sprite paint effects are not supported; use separate vector light layers');
   for(const key of ['x','y','pivotX','pivotY'] as const)out[key]=num(o[key],p+'.'+key,-8192,8192);
   for(const key of ['width','height'] as const)out[key]=num(o[key],p+'.'+key,.01,4096);
   for(const key of ['rotation','rotationMin','rotationMax'] as const)out[key]=num(o[key],p+'.'+key,-3600,3600);
@@ -69,7 +77,7 @@ export function parseModel2D(value:unknown,path='model2d'):Model2D{
   });
   animations[name]={duration,loop:c.loop===true,tracks};
  }
- return {width:num(raw.width??240,path+'.width',1,4096),height:num(raw.height??320,path+'.height',1,4096),originX:num(raw.originX??120,path+'.originX',-4096,4096),originY:num(raw.originY??320,path+'.originY',-4096,4096),parts,animations};
+ return {...(raw.images!==undefined?{images}:{}),width:num(raw.width??240,path+'.width',1,4096),height:num(raw.height??320,path+'.height',1,4096),originX:num(raw.originX??120,path+'.originX',-4096,4096),originY:num(raw.originY??320,path+'.originY',-4096,4096),parts,animations};
 }
 /** Absolute time sampling: replay, seeking and export never depend on previous poses. */
 export function poseModel2D(model:Model2D,clip:string|null,time:number){

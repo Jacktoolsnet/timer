@@ -1,14 +1,14 @@
 import {stageFrame2D} from '../lib/stage2d-frame';
-import {Container,Graphics,Text,BlurFilter} from 'pixi.js';
+import {Container,Graphics,Text,BlurFilter,type Texture} from 'pixi.js';
 import type {Resources2D,Stage2D} from '../lib/stage2d';
 import {actorFrame2D,cameraFrame2D,ease2D,mix2D} from '../lib/motion2d';
 import {createBackdrop2D,createObjectView2D,label} from './light-collector';
 /** Compose resources into independent instances. No story-specific schedules live in the renderer. */
-export function createStage2DScene(resources:Resources2D,shot:Stage2D,isolated=false){
+export function createStage2DScene(resources:Resources2D,shot:Stage2D,isolated=false,textureFor?:(data:string)=>Texture){
  const foreground=new Container(),root=new Container(),empty=new Container();
- const base=isolated?{root:empty,world:empty,draw:(_time:number,_camera:{x:number;y:number;zoom:number},_clip?:string)=>{}}:createBackdrop2D(resources.stages2d[shot.stage]);root.addChild(base.root);
- const actors=shot.actors.map(instance=>({instance,view:createObjectView2D(resources.objects2d[instance.object],instance)}));for(const actor of actors){actor.view.host.label=actor.instance.id;actor.view.node.label='actor-pose';(actor.instance.layer==='foreground'?foreground:base.world).addChild(actor.view.host);}
- const incoming=shot.transition?createBackdrop2D(resources.stages2d[shot.transition.stage]):undefined;const mask=new Graphics();if(incoming){root.addChild(incoming.root);incoming.root.addChild(mask);incoming.root.mask=mask;}
+ const base=isolated?{root:empty,world:empty,draw:(_time:number,_camera:{x:number;y:number;zoom:number},_clip?:string)=>{}}:createBackdrop2D(resources.stages2d[shot.stage],textureFor);root.addChild(base.root);
+ const actors=shot.actors.map(instance=>({instance,view:createObjectView2D(resources.objects2d[instance.object],instance,textureFor)}));for(const actor of actors){actor.view.host.label=actor.instance.id;actor.view.node.label='actor-pose';(actor.instance.layer==='foreground'?foreground:base.world).addChild(actor.view.host);}
+ const incoming=shot.transition?createBackdrop2D(resources.stages2d[shot.transition.stage],textureFor):undefined;const mask=new Graphics();if(incoming){root.addChild(incoming.root);incoming.root.addChild(mask);incoming.root.mask=mask;}
  root.addChild(foreground);
  const ending=new Container();root.addChild(ending);if(shot.ending){label(ending,shot.ending.title,94,154,39,0xe7eed9);label(ending,shot.ending.subtitle,94,202,45,0xffd6a5);ending.addChild(new Graphics().moveTo(96,264).bezierCurveTo(185,256,271,271,357,260).stroke({color:0xf7b89a,width:2}));label(ending,'GESTIK  /  GEWICHT  /  ATMOSPHÄRE',98,289,12,0x91b7ac);}
  const effects:{node:Container;filter:BlurFilter;strength:number}[]=[];const texts:Text[]=[];const collect=(node:Container)=>{if(node instanceof Text)texts.push(node);for(const filter of node.filters??[])if(filter instanceof BlurFilter)effects.push({node,filter,strength:filter.strength});for(const child of node.children)collect(child);};collect(root);

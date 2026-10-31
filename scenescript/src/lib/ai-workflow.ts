@@ -1,3 +1,4 @@
+import {model2DManifest,restoreModel2DImages} from './model2d-images.ts';
 import {publishingManifest} from './publishing.ts';
 import {restoreBoardModels2D} from './storyboard-model2d.ts';
 import {defaultBoardDesign,modelStyleBriefs} from './storyboard-design.ts';
@@ -7,11 +8,12 @@ import {validateProject,type Project} from './model.ts';
 import {newStoryboard,importStoryboard,canApproveStoryboard,invalidateStoryboardApprovals,parseStoryboard,type Storyboard,type BoardReviewTarget} from './storyboard.ts';
 import {validateImage} from './image-assets.ts';
 const MiB=1024*1024;
-export function boardManifest(b:Storyboard){return {...b,images:Object.fromEntries(Object.entries(b.images).map(([id,a])=>[id,{name:a.name}]))};}
+export function boardManifest(b:Storyboard){return {...b,characters:b.characters.map(s=>s.model2d?{...s,model2d:model2DManifest(s.model2d)}:s),settings:b.settings.map(s=>s.model2d?{...s,model2d:model2DManifest(s.model2d)}:s),images:Object.fromEntries(Object.entries(b.images).map(([id,a])=>[id,{name:a.name}]))};}
 /** Strip media before serializing, avoiding huge Base64 request bodies or deep copies. */
 export function projectManifest(p:Project){
  const media=(map:Project['assets']|Project['audios']|Project['videos'])=>Object.fromEntries(Object.entries(map).map(([id,a])=>[id,Object.fromEntries(Object.entries(a).filter(([k])=>k!=='data'))]));
- return {...p,...(p.publishing?{publishing:publishingManifest(p)}:{}),storyboard:p.storyboard?boardManifest(p.storyboard):null,thumbnail:p.thumbnail?{name:p.thumbnail.name}:null,assets:media(p.assets),audios:media(p.audios),videos:media(p.videos)};
+ const library=(map:Project['objects2d']|Project['stages2d'])=>Object.fromEntries(Object.entries(map).map(([id,r])=>[id,r.model?{...r,model:model2DManifest(r.model)}:r]));
+ return {...p,objects2d:library(p.objects2d),stages2d:library(p.stages2d),...(p.publishing?{publishing:publishingManifest(p)}:{}),storyboard:p.storyboard?boardManifest(p.storyboard):null,thumbnail:p.thumbnail?{name:p.thumbnail.name}:null,assets:media(p.assets),audios:media(p.audios),videos:media(p.videos)};
 }
 export function inputJson(data:unknown){const text=JSON.stringify(data);if(new TextEncoder().encode(text).length>2*MiB)throw new Error('AI input: maximum 2 MiB of text. Reduce the project or use the manual workflow.');return text;}
 export function planningBoard(p:Project,appLocale='en'){return p.storyboard??newStoryboard(p.title,p.format,videoLanguageForLocale(appLocale));}
@@ -33,7 +35,7 @@ export function acceptScript(text:string,source:Project){
   }
  }
  if(!raw.thumbnail&&source.thumbnail)raw.thumbnail=source.thumbnail;
- restoreBoardResources(raw,source);restoreBoardModels2D(raw,source);raw.storyboard=source.storyboard;return validateProject(raw);
+ restoreBoardResources(raw,source);restoreBoardModels2D(raw,source);for(const kind of ['objects2d','stages2d'] as const)for(const [id,r]of Object.entries(raw[kind]??{}) as [string,any][])if(r?.model)r.model=restoreModel2DImages(r.model,Object.hasOwn(source[kind],id)?source[kind][id].model:undefined);raw.storyboard=source.storyboard;return validateProject(raw);
 }
 export function imagePrompt(p:Project,target:BoardReviewTarget|null,request:string){
  const b=p.storyboard;
