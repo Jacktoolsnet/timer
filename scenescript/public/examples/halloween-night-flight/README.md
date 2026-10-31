@@ -44,3 +44,8 @@ traveling waves (position, length and brightness), complemented by independently
 drifting ribbons/folds. All primitives stay below y=285 including blur extent;
 no restoration image or opaque moon mask is pasted over the sky. Moon protection
 is checked by conservative geometry bounds and native-rendered on/off pixel comparisons.
+
+Witch direction/depth revision: the existing transparent art is unchanged. A native
+`moon-flight` clip mirrors the entire rider/lantern/wake around the model origin,
+shrinks it proportionally, and fades only the distant silhouette. Three scene
+movement segments lead from offscreen left to the moon. No new raster generation.

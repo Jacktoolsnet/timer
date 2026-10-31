@@ -2289,8 +2289,35 @@
         "originY": 103.33333333333333,
         "parts": [
           {
-            "id": "rider",
+            "id": "moon-flight-root",
             "parent": null,
+            "shape": "group",
+            "x": 155,
+            "y": 103.33333333333333,
+            "rotation": 0,
+            "scaleX": 1,
+            "scaleY": 1,
+            "pivotX": 155,
+            "pivotY": 103.33333333333333,
+            "width": 100,
+            "height": 100,
+            "radius": 0,
+            "fill": null,
+            "stroke": null,
+            "strokeWidth": 0,
+            "opacity": 1,
+            "points": [],
+            "path": [],
+            "text": "",
+            "fontSize": 24,
+            "rotationMin": -360,
+            "rotationMax": 360,
+            "parallax": 1,
+            "layer": "background"
+          },
+          {
+            "id": "rider",
+            "parent": "moon-flight-root",
             "shape": "group",
             "x": 0,
             "y": 0,
@@ -2345,7 +2372,7 @@
           },
           {
             "id": "wake-0",
-            "parent": null,
+            "parent": "moon-flight-root",
             "shape": "ellipse",
             "x": 280,
             "y": 119.86666666666665,
@@ -2390,7 +2417,7 @@
           },
           {
             "id": "wake-1",
-            "parent": null,
+            "parent": "moon-flight-root",
             "shape": "ellipse",
             "x": 303,
             "y": 147.30936920960167,
@@ -2435,7 +2462,7 @@
           },
           {
             "id": "wake-2",
-            "parent": null,
+            "parent": "moon-flight-root",
             "shape": "ellipse",
             "x": 326,
             "y": 102.12278782932779,
@@ -2480,7 +2507,7 @@
           },
           {
             "id": "wake-3",
-            "parent": null,
+            "parent": "moon-flight-root",
             "shape": "ellipse",
             "x": 349,
             "y": 103.89678593133513,
@@ -2525,7 +2552,7 @@
           },
           {
             "id": "wake-4",
-            "parent": null,
+            "parent": "moon-flight-root",
             "shape": "ellipse",
             "x": 372,
             "y": 147.93633715557974,
@@ -2570,7 +2597,7 @@
           },
           {
             "id": "wake-5",
-            "parent": null,
+            "parent": "moon-flight-root",
             "shape": "ellipse",
             "x": 395,
             "y": 117.68728417327418,
@@ -2615,7 +2642,7 @@
           },
           {
             "id": "wake-6",
-            "parent": null,
+            "parent": "moon-flight-root",
             "shape": "ellipse",
             "x": 418,
             "y": 93.20613942239103,
@@ -2660,7 +2687,7 @@
           },
           {
             "id": "wake-7",
-            "parent": null,
+            "parent": "moon-flight-root",
             "shape": "ellipse",
             "x": 301,
             "y": 139.28418977036807,
@@ -2705,7 +2732,7 @@
           },
           {
             "id": "wake-8",
-            "parent": null,
+            "parent": "moon-flight-root",
             "shape": "ellipse",
             "x": 324,
             "y": 133.97222864342683,
@@ -2750,7 +2777,7 @@
           },
           {
             "id": "wake-9",
-            "parent": null,
+            "parent": "moon-flight-root",
             "shape": "ellipse",
             "x": 347,
             "y": 91.32878151929901,
@@ -2795,7 +2822,7 @@
           },
           {
             "id": "wake-10",
-            "parent": null,
+            "parent": "moon-flight-root",
             "shape": "ellipse",
             "x": 370,
             "y": 124.21310574689227,
@@ -2840,7 +2867,7 @@
           },
           {
             "id": "wake-11",
-            "parent": null,
+            "parent": "moon-flight-root",
             "shape": "ellipse",
             "x": 393,
             "y": 145.59423499874484,
@@ -2885,7 +2912,7 @@
           },
           {
             "id": "wake-12",
-            "parent": null,
+            "parent": "moon-flight-root",
             "shape": "ellipse",
             "x": 416,
             "y": 98.88531874138361,
@@ -2930,7 +2957,7 @@
           },
           {
             "id": "wake-13",
-            "parent": null,
+            "parent": "moon-flight-root",
             "shape": "ellipse",
             "x": 299,
             "y": 107.70520010054294,
@@ -2975,7 +3002,7 @@
           },
           {
             "id": "wake-14",
-            "parent": null,
+            "parent": "moon-flight-root",
             "shape": "ellipse",
             "x": 322,
             "y": 148.71136510912393,
@@ -3020,7 +3047,7 @@
           },
           {
             "id": "wake-15",
-            "parent": null,
+            "parent": "moon-flight-root",
             "shape": "ellipse",
             "x": 345,
             "y": 113.37775310124955,
@@ -3779,6 +3806,161 @@
                   {
                     "at": 2,
                     "value": 390,
+                    "easing": "smooth"
+                  }
+                ]
+              }
+            ]
+          },
+          "moon-flight": {
+            "duration": 5,
+            "loop": false,
+            "tracks": [
+              {
+                "part": "moon-flight-root",
+                "property": "scaleX",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": -1,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 1.1,
+                    "value": -1,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 1.35,
+                    "value": -0.95,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 2.4,
+                    "value": -0.48,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 3.35,
+                    "value": -0.17,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 4.35,
+                    "value": -0.028,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 4.8,
+                    "value": -0.006,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 5,
+                    "value": -0.006,
+                    "easing": "smooth"
+                  }
+                ]
+              },
+              {
+                "part": "moon-flight-root",
+                "property": "scaleY",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": 1,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 1.1,
+                    "value": 1,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 1.35,
+                    "value": 0.95,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 2.4,
+                    "value": 0.48,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 3.35,
+                    "value": 0.17,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 4.35,
+                    "value": 0.028,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 4.8,
+                    "value": 0.006,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 5,
+                    "value": 0.006,
+                    "easing": "smooth"
+                  }
+                ]
+              },
+              {
+                "part": "moon-flight-root",
+                "property": "rotation",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": 0,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 1.1,
+                    "value": 0,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 2.4,
+                    "value": -18,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 3.35,
+                    "value": -12,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 5,
+                    "value": -12,
+                    "easing": "smooth"
+                  }
+                ]
+              },
+              {
+                "part": "moon-flight-root",
+                "property": "opacity",
+                "keys": [
+                  {
+                    "at": 0,
+                    "value": 1,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 4.4,
+                    "value": 1,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 4.9,
+                    "value": 0,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 5,
+                    "value": 0,
                     "easing": "smooth"
                   }
                 ]
@@ -38084,7 +38266,7 @@
     "id": "halloween-night-flight",
     "revision": 0,
     "title": "Halloween After Dark",
-    "story": "Eine mystische Halloween-Nacht wird lebendig: Flackernder Kürbis, Fledermaus, fliegende Hexe und abseilende Spinne. Die Fledermaus fliegt zum Abschluss direkt auf die Kamera zu, zeigt kurz ihr gruseliges Gesicht und fliegt über die Linse hinaus. Dann erscheinen goldene Funken und Schlittenglocken: Santa fliegt viel zu früh mit seinem Rentierschlitten herein und lacht hörbar „Ho ho ho!“ in enger Folge ohne lange Pausen. Der englische Schlussgruß verbindet Halloween mit der nahenden Weihnachtszeit. Arbeitsbeschreibungen bleiben auf Deutsch.",
+    "story": "Eine mystische Halloween-Nacht wird lebendig: Flackernder Kürbis, Fledermaus, eine von links zum Mond fliegende und in der Ferne verschwindende Hexe und abseilende Spinne. Die Fledermaus fliegt zum Abschluss direkt auf die Kamera zu, zeigt kurz ihr gruseliges Gesicht und fliegt über die Linse hinaus. Dann erscheinen goldene Funken und Schlittenglocken: Santa fliegt viel zu früh mit seinem Rentierschlitten herein und lacht hörbar „Ho ho ho!“ in enger Folge ohne lange Pausen. Der englische Schlussgruß verbindet Halloween mit der nahenden Weihnachtszeit. Arbeitsbeschreibungen bleiben auf Deutsch.",
     "message": "Happy Halloween! But don’t forget… Christmas is coming! Ho ho ho!",
     "audience": "TikTok und YouTube Shorts; märchenhaft-gruselig, humorvoll, ohne Gewalt.",
     "language": "English",
@@ -38137,12 +38319,12 @@
           "mode": "2d",
           "style": "rounded",
           "surface": "colors",
-          "details": "Malerische Hexe auf einem Besen mit violettem Umhang und grüner Laterne. Vollständige Überquerung vor dem Mond, leichtes Neigen, eigene magische Partikelspur."
+          "details": "Malerische Hexe auf einem Besen mit violettem Umhang und grüner Laterne. Fliegt von links herein, steigt zum Mond auf und wird perspektivisch immer kleiner, bis sie dort verschwindet. Clip moon-flight spiegelt Hexe, Laterne und nachlaufende Partikel gemeinsam nach rechts; das vollständige Ensemble schrumpft um denselben Mittelpunkt, ohne das Bild zu verzerren. Leichtes Neigen und eigene magische Partikelspur bleiben erhalten."
         },
         "status": "draft",
         "id": "witch",
         "name": "Fliegende Hexe",
-        "description": "Malerische Hexe auf einem Besen mit violettem Umhang und grüner Laterne. Vollständige Überquerung vor dem Mond, leichtes Neigen, eigene magische Partikelspur.",
+        "description": "Malerische Hexe auf einem Besen mit violettem Umhang und grüner Laterne. Fliegt von links herein, steigt zum Mond auf und wird perspektivisch immer kleiner, bis sie dort verschwindet. Clip moon-flight spiegelt Hexe, Laterne und nachlaufende Partikel gemeinsam nach rechts; das vollständige Ensemble schrumpft um denselben Mittelpunkt, ohne das Bild zu verzerren. Leichtes Neigen und eigene magische Partikelspur bleiben erhalten.",
         "image": "reference-witch",
         "comments": [],
         "kind": "character"
@@ -38225,7 +38407,7 @@
         "id": "visitors",
         "title": "Hexenflug und Spinnenfaden",
         "duration": 5,
-        "action": "Die Hexe fliegt von rechts vor dem Mond hindurch nach links aus dem Bild. Grüne Zauberpartikel folgen ihr. Gleichzeitig seilt sich rechts eine Spinne ab, bewegt alle acht Beine und zieht sich wieder hoch. Ihr separater Faden verändert synchron seine Länge. Die Fledermaus dreht ab 1,8 Sekunden zur Kamera, wächst mit Clip approach bis zur Nahaufnahme und zeigt kurz leuchtende Augen und kleine Fangzähne. Sie fliegt ab 4,15 Sekunden über die Linse aus dem Bild. Als Vordergrundinstanz überdeckt sie die entfernte Hexe räumlich korrekt. Hier keinen Text über die Aktion setzen.",
+        "action": "Die Hexe fliegt von links ins Bild (Beginn x=-250, y=470), wird kurz groß sichtbar und steigt dann in einer Bogenbahn zum Mond (x=270, y=154). Clip moon-flight spiegelt die vollständige Ressource nach rechts; Hexe, Laterne und grüne Funkenspur werden proportional immer kleiner. Erst in der Ferne am Mond verblasst die wenige Pixel kleine Silhouette vollständig. Kein seitlicher Abflug und kein plötzliches Verschwinden in voller Größe. Gleichzeitig seilt sich rechts eine Spinne ab, bewegt alle acht Beine und zieht sich wieder hoch. Ihr separater Faden verändert synchron seine Länge. Die Fledermaus dreht ab 1,8 Sekunden zur Kamera, wächst mit Clip approach bis zur Nahaufnahme und zeigt kurz leuchtende Augen und kleine Fangzähne. Sie fliegt ab 4,15 Sekunden über die Linse aus dem Bild. Als Vordergrundinstanz überdeckt sie die entfernte Hexe räumlich korrekt. Hier keinen Text über die Aktion setzen.",
         "camera": "Stabile vertikale Filmkomposition; Bewegung durch Figuren und getrennte Licht-/Nebelebenen, kein hektisches Kamera-Zoomen.",
         "audio": "Mystisches Instrumental mit Nachtwind; ab dem Santa-Auftritt Weihnachtsglocken.",
         "image": "reference-forest",
@@ -39539,8 +39721,8 @@
             "name": "witch",
             "object": "witch",
             "layer": "world",
-            "x": 745,
-            "y": 330,
+            "x": -250,
+            "y": 470,
             "scale": 1.1,
             "rotation": 0,
             "opacity": 1,
@@ -39551,9 +39733,9 @@
                 "clip": "",
                 "burst": true,
                 "at": 0.15,
-                "duration": 2.3,
-                "toX": 280,
-                "toY": 310,
+                "duration": 1.2,
+                "toX": 160,
+                "toY": 395,
                 "height": 100,
                 "target": ""
               },
@@ -39561,10 +39743,32 @@
                 "type": "move",
                 "clip": "",
                 "burst": true,
-                "at": 2.45,
-                "duration": 2.55,
-                "toX": -260,
-                "toY": 440,
+                "at": 1.35,
+                "duration": 2,
+                "toX": 270,
+                "toY": 210,
+                "height": 100,
+                "target": ""
+              },
+              {
+                "type": "move",
+                "clip": "",
+                "burst": true,
+                "at": 3.35,
+                "duration": 1.35,
+                "toX": 270,
+                "toY": 154,
+                "height": 100,
+                "target": ""
+              },
+              {
+                "type": "play",
+                "clip": "moon-flight",
+                "burst": true,
+                "at": 0,
+                "duration": 5,
+                "toX": 470,
+                "toY": 425,
                 "height": 100,
                 "target": ""
               }

@@ -1823,3 +1823,9 @@ pleats, four drifting ribbons and six broad folds. Height, length and brightness
 move independently. All aurora geometry stays below y=285, including conservative
 blur bounds; the moon disc above it is not tinted or covered by these layers.
 The 8-second loop closes seamlessly, including in the spider's `lower` clip.
+
+The witch now enters from the left, banks upward and recedes toward the moon
+at (270,154). The non-looping `moon-flight` clip mirrors rider, lantern and wake
+together, then scales both axes proportionally down to 0.006 before fading the
+tiny distant silhouette. Scene actions own the path; normal resource idle and
+Santa's sleigh are unchanged.

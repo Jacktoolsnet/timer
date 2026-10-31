@@ -24,3 +24,11 @@ test('aurora visibly travels below the moon without changing any pixels of the l
   }finally{r.dispose();}
  });expect(out.moonMax).toBeLessThanOrEqual(1);expect(out.light).toBeGreaterThan(1);expect(out.movement).toBeGreaterThan(1);for(const[i,data]of out.images.entries())await info.attach('Moving aurora with clear moon '+i,{body:Buffer.from(data.split(',')[1],'base64'),contentType:'image/png'});
 });
+
+test('witch preview shrinks rider and magical wake together and leaves no visible residue at the moon',async({page})=>{
+ test.setTimeout(120000);await page.goto('/de/');await expect(page.locator('#editor')).toHaveAttribute('data-ready','true');const frames=await page.evaluate(async()=>{
+  const {parseProject}=await import(/* @vite-ignore */ '/src/lib/model.ts' as string),{resourcePreview2D}=await import(/* @vite-ignore */ '/src/lib/stage2d-resource-preview.ts' as string),{Stage2DRenderer}=await import(/* @vite-ignore */ '/src/scripts/stage2d.ts' as string);
+  const p=parseProject(await(await fetch('/examples/halloween-night-flight.scenescript.json')).text()),s=resourcePreview2D(p,'objects2d','witch','moon-flight')!,r=await new Stage2DRenderer().init(),c=document.createElement('canvas'),out:{width:number;height:number;pixels:number}[]=[];
+  try{for(const t of [1,3.35,5]){await r.renderAsync(s.shot,s.duration,t,960,540,c,s.resources,true);const data=c.getContext('2d')!.getImageData(0,0,960,540).data;let minX=960,minY=540,maxX=-1,maxY=-1,pixels=0;for(let y=0;y<540;y++)for(let x=0;x<960;x++)if(data[(y*960+x)*4+3]>8){pixels++;minX=Math.min(minX,x);maxX=Math.max(maxX,x);minY=Math.min(minY,y);maxY=Math.max(maxY,y);}out.push({width:Math.max(0,maxX-minX+1),height:Math.max(0,maxY-minY+1),pixels});}return out;}finally{r.dispose();}
+ });expect(frames[0].pixels).toBeGreaterThan(10000);expect(frames[1].width).toBeLessThan(frames[0].width*.3);expect(frames[1].height).toBeLessThan(frames[0].height*.4);expect(frames[1].pixels).toBeGreaterThan(100);expect(frames[2]).toEqual({width:0,height:0,pixels:0});
+});
