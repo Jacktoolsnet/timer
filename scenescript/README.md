@@ -1622,9 +1622,9 @@ The Mila start project demonstrates shared night colors, editable gradients,
 moonlight overlays and contact shadows. Its full-resolution input remains intact;
 comparison renders are ephemeral and never added to project media or downloads.
 
-### Current default: Halloween mit Herz (planning first)
+### Earlier planning example: Halloween mit Herz
 
-`public/examples/halloween-heart.scenescript.json` is a new German 9:16 planning
+`public/examples/halloween-heart-planning.scenescript.json` is the German 9:16 planning
 project, not the finished video: six storyboard shots / 32 planned seconds, ten
 embedded concept references, two custom 540×960 stages and five reusable editable
 2D object drafts (pumpkin lantern, barmbrack, gold ring, teacup, touching hands).
@@ -1734,3 +1734,44 @@ whose transparent-background preview may be unavailable for a given API account.
 The confirmation names this dedicated model; ordinary sketch generation and text
 model recommendations are unchanged. Provider rejection stops without automatic
 retry or model fallback. Account access is not assumed or tested by local mocks.
+
+
+### Current default: directed Halloween mit Herz (28 seconds)
+
+The default `public/examples/halloween-heart.scenescript.json` now contains six
+executable portrait scenes, not just the resource workspace. It reuses the user's
+API-generated pumpkin, bread, ring, cup identity and instrumental score. Curated
+source metadata and portable bitmap derivatives are committed under
+`public/examples/halloween-heart/resources/`; the uploaded original is untouched.
+The source SHA-256 is recorded in `resources/source.json` (no machine-local paths,
+credentials or external runtime image URLs). The older planning-only example
+remains available explicitly; it is also the fixture for initial authoring tests.
+
+The two backgrounds were image-edited into clean plates without baked movable
+props. A steam-free cup and two independent hand layers preserve the established
+look while allowing actual upward steam and an approach/contact/hold performance.
+The pumpkin retains its original image with separate candlelight. Contact shadows,
+subtle practical lights and a few drifting exterior leaves are declarative 2D
+parts, not a pre-rendered video. The ring is revealed once at a stable tabletop
+position; subsequent table shots retain prop coordinates and camera endpoints.
+
+Typography combines the already bundled Allura display family with readable Arial
+supporting text, a soft full-width upper gradient rather than opaque panels, and
+explicit fade-out times for every caption. Only exterior/interior changes dissolve;
+new captions wait until those image dissolves finish, and outgoing captions have
+already disappeared. The full hook appears in the first shot, the Irish tradition
+begins in the second, and a dedicated greeting ends with a short black hold. Video
+and publication copy remain English, storyboard working descriptions German, with
+no voice assignment, narration or speech API. Review states remain drafts; the
+prebuilt movie is available independently of storyboard approval.
+
+Storyboard subjects link the authoritative project libraries through `resource2d`
+instead of duplicating every embedded bitmap/model in the board. Full project
+saves remain portable and below the existing 4 MiB autosave budget. Rebuild both
+examples with `npm run example:halloween-heart`; this only packages committed
+assets and makes no AI calls. The metadata is authoring input, not a standalone
+SceneScript resource import. The standalone pumpkin JSON import is regenerated too.
+
+Saved user projects still take precedence. To see this version in an existing
+editor session use **Load start project** deliberately; simply refreshing must
+not overwrite saved work. All six scene texts and reusable resources remain editable.

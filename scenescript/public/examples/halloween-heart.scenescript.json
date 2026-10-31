@@ -2850,7 +2850,7 @@
       },
       {
         "soundEffects": [
-          "Ein einzelner dezenter heller Klang am Ringreflex"
+          "Leiser goldener Lichtreflex"
         ],
         "id": "tradition",
         "title": "Ein Ring im Barmbrack",
@@ -2872,9 +2872,7 @@
         "comments": []
       },
       {
-        "soundEffects": [
-          "Ein einzelner dezenter heller Klang am Ringreflex"
-        ],
+        "soundEffects": [],
         "id": "meaning",
         "title": "Ein altes Hochzeitsorakel",
         "duration": 5,
@@ -3871,7 +3869,7 @@
           "x": 8,
           "y": 14,
           "width": 82,
-          "height": 13,
+          "height": 16,
           "fillGradient": null,
           "color": "#fff0d5",
           "fillColor": "#ffffff",
@@ -6591,7 +6589,7 @@
           "x": 8,
           "y": 15,
           "width": 82,
-          "height": 13,
+          "height": 16,
           "fillGradient": null,
           "color": "#e9bd7c",
           "fillColor": "#ffffff",
