@@ -7,7 +7,7 @@ import {defaultStage2D,defaultObject2D,defaultActor2D,defaultAction2D,parseStage
 import {actorFrame2D,cameraFrame2D} from '../src/lib/motion2d.ts';
 import {lightCollectorProject} from '../src/lib/light-collector-example.ts';
 import {demoProject,parseProject,validateProject} from '../src/lib/model.ts';
-import {DEFAULT_PROJECT_URL,resolveStartupProject} from '../src/lib/startup-project.ts';
+import {resolveStartupProject} from '../src/lib/startup-project.ts';
 import {parseStoryboard,exportStoryboard,importStoryboard} from '../src/lib/storyboard.ts';
 test('2D libraries are separate from scene instances, portable and independently reusable',()=>{
  const p=lightCollectorProject(),s=p.scenes[0],shot=s.stage2d!;assert.equal(Object.keys(p.stages2d).length,2);assert.equal(Object.keys(p.objects2d).length,4);
@@ -265,7 +265,7 @@ test('2D path arity errors identify the part, opcode and expected coordinate cou
 
 test('portrait start project has seven native full-frame stages and editable resource instances',async()=>{
  const {stageFrame2D,formatFrame2D}=await import('../src/lib/stage2d-frame.ts'),{reviewProduction}=await import('../src/lib/production-review.ts');
- const p=parseProject(readFileSync(new URL('../public'+DEFAULT_PROJECT_URL,import.meta.url),'utf8'));
+ const p=parseProject(readFileSync(new URL('../public/examples/mila-halloween.scenescript.json',import.meta.url),'utf8'));
  assert.equal(p.format,'portrait');assert.equal(p.storyboard!.format,'portrait');assert.equal(p.scenes.length,7);assert.equal(p.storyboard!.approved,false);
  assert.deepEqual(formatFrame2D('square'),{width:720,height:720});
  for(const s of p.scenes)assert.deepEqual(stageFrame2D(p.stages2d[s.stage2d!.stage]),{width:540,height:960});
@@ -275,7 +275,7 @@ test('portrait start project has seven native full-frame stages and editable res
 });
 test('model reconstruction sends own setting sketch first, without changing sketch generation references',async()=>{
  const {modelGenerationReferences,imageGenerationReferences}=await import('../src/lib/storyboard-image-references.ts'),{model2DRequest}=await import('../src/lib/storyboard-model2d.ts');
- const p=parseProject(readFileSync(new URL('../public'+DEFAULT_PROJECT_URL,import.meta.url),'utf8')),target={kind:'settings' as const,id:'bedroom'},own=p.storyboard!.settings[0].image!;
+ const p=parseProject(readFileSync(new URL('../public/examples/mila-halloween.scenescript.json',import.meta.url),'utf8')),target={kind:'settings' as const,id:'bedroom'},own=p.storyboard!.settings[0].image!;
  const refs=modelGenerationReferences(p,target);assert.equal(refs[0].imageId,own);assert.equal(new Set(refs.map(r=>r.imageId)).size,refs.length);assert.ok(!imageGenerationReferences(p,target).some(r=>r.imageId===own));
  const request=model2DRequest(p,target,'An Skizze anpassen');assert.deepEqual(request.authoringFrame,{width:540,height:960});assert.equal(request.project.format,'portrait');
  const {acceptBoardModel2D}=await import('../src/lib/storyboard-model2d.ts');const wrong=structuredClone(p.storyboard!.settings[0].model2d!);wrong.width=960;wrong.height=540;assert.throws(()=>acceptBoardModel2D(JSON.stringify({model:wrong}),p,target),/expected 540×960/);
@@ -291,9 +291,20 @@ test('bounded 2D paint effects validate and survive portable roundtrips',()=>{
 });
 test('shared look is portable and reaches image, 2D and 3D model requests',async()=>{
  const {model2DRequest}=await import('../src/lib/storyboard-model2d.ts'),{modelRequestData}=await import('../src/lib/storyboard-resources.ts'),{imagePrompt}=await import('../src/lib/ai-workflow.ts');
- const p=parseProject(readFileSync(new URL('../public'+DEFAULT_PROJECT_URL,import.meta.url),'utf8')),look=p.storyboard!.look!;assert.ok(look.palette&&look.perspective&&look.lighting&&look.atmosphere);const target={kind:'settings' as const,id:'bedroom'};
+ const p=parseProject(readFileSync(new URL('../public/examples/mila-halloween.scenescript.json',import.meta.url),'utf8')),look=p.storyboard!.look!;assert.ok(look.palette&&look.perspective&&look.lighting&&look.atmosphere);const target={kind:'settings' as const,id:'bedroom'};
  assert.deepEqual(model2DRequest(p,target,'').project.look,look);assert.deepEqual(modelRequestData(p.storyboard!,target,'').project.look,look);assert.ok(imagePrompt(p,target,'').includes(look.atmosphere));
  assert.deepEqual(importStoryboard(exportStoryboard(p.storyboard!,true),null).look,look);const incoming=JSON.parse(exportStoryboard(p.storyboard!));incoming.board.look.palette='unrequested replacement';assert.deepEqual(importStoryboard(JSON.stringify(incoming),p.storyboard!).look,look);
  assert.throws(()=>parseStoryboard({...p.storyboard,look:{...look,extra:'no'}}),/unknown field/);assert.throws(()=>parseStoryboard({...p.storyboard,look:{...look,lighting:'x'.repeat(2001)}}),/max 2000/);
  assert.ok(Object.values(p.stages2d).some(s=>s.model!.parts.some(part=>part.gradient)));assert.ok(Object.values(p.objects2d).some(o=>o.model!.parts.some(part=>part.blur)));
+});
+
+test('new Halloween-with-heart default is a voice-free planning draft with ten portable references and separate 2D resources',async()=>{
+ const {DEFAULT_PROJECT_URL}=await import('../src/lib/startup-project.ts'),{halloweenHeartProject}=await import('../src/lib/halloween-heart-example.ts');assert.equal(DEFAULT_PROJECT_URL,'/examples/halloween-heart.scenescript.json');
+ const p=parseProject(readFileSync(new URL('../public'+DEFAULT_PROJECT_URL,import.meta.url),'utf8')),b=p.storyboard!;assert.equal(p.title,'Halloween mit Herz');assert.equal(p.format,'portrait');assert.equal(b.format,'portrait');assert.equal(b.duration,32);assert.equal(b.shots.length,6);assert.equal(b.shots.reduce((n,s)=>n+s.duration,0),32);assert.equal(b.approved,false);assert.equal(b.production!.dialogue,false);assert.equal(p.narration,null);assert.equal(p.music,null);assert.equal(Object.keys(p.audios).length,0);
+ assert.equal(Object.keys(p.objects2d).length,5);assert.equal(Object.keys(p.stages2d).length,2);assert.equal(Object.keys(b.images).length,10);assert.ok(b.shots[0].action.includes('Hast du gewusst'));assert.ok(b.shots.at(-1)!.action.includes('Ein zauberhaftes Halloween'));assert.ok(b.comments.some(c=>c.text.includes('dublincastle.ie')));
+ for(const item of [...b.characters,...b.settings,...b.shots]){assert.equal(item.status,'draft');assert.ok(item.image&&b.images[item.image].data?.startsWith('data:image/webp;base64,'));}
+ for(const s of b.settings){assert.deepEqual([s.model2d!.width,s.model2d!.height,s.model2d!.originX,s.model2d!.originY],[540,960,0,0]);assert.deepEqual(s.model2d,p.stages2d[s.id].model);}
+ for(const c of b.characters){assert.equal(c.kind,'object');assert.equal(c.voice,undefined);assert.deepEqual(c.model2d,p.objects2d[c.id].model);}
+ for(const [id,a]of Object.entries(b.images)){assert.deepEqual(Buffer.from(a.data!.split(',')[1],'base64'),readFileSync(new URL('../public/examples/halloween-heart/references/'+id.replace('reference-','')+'.webp',import.meta.url)));}
+ assert.equal(p.scenes.length,1);assert.equal(p.scenes[0].id,'storyboard-workspace');assert.ok(p.scenes[0].elements.some(e=>e.text.includes('Storyboard-Entwurf')));assert.ok(p.scenes.every(s=>!s.narration));assert.ok(Buffer.byteLength(JSON.stringify(p))<4*1024*1024);assert.deepEqual(parseProject(JSON.stringify(p)),p);assert.equal(validateProject(halloweenHeartProject()).title,p.title);
 });

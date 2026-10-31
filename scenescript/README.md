@@ -1547,7 +1547,7 @@ nicht geändert. Die isolierte ursprüngliche Studie liegt weiter unter
 
 ### Portrait 2D start project
 
-The default is `public/examples/mila-halloween.scenescript.json`: seven editable
+The earlier portrait composition example is `public/examples/mila-halloween.scenescript.json`: seven editable
 9:16 scenes reconstructed from the supplied Mila storyboard, with separate prop
 and character resources. This is a **technical composition sample**, not an
 approved final film: art direction, lighting, contacts, narration and SFX still
@@ -1621,3 +1621,29 @@ There is no automatic scoring or unbounded paid retry loop.
 The Mila start project demonstrates shared night colors, editable gradients,
 moonlight overlays and contact shadows. Its full-resolution input remains intact;
 comparison renders are ephemeral and never added to project media or downloads.
+
+### Current default: Halloween mit Herz (planning first)
+
+`public/examples/halloween-heart.scenescript.json` is a new German 9:16 planning
+project, not the finished video: six storyboard shots / 32 planned seconds, ten
+embedded concept references, two custom 540×960 stages and five reusable editable
+2D object drafts (pumpkin lantern, barmbrack, gold ring, teacup, touching hands).
+The cup is intended for two instances, not duplicated model definitions. All
+subjects/shots are drafts; no approval or final movie is fabricated. The one
+executable scene is explicitly a resource workspace with a draft notice.
+
+No narration, voice assignment or speech-service call is used. Hook, cultural
+fact and final greeting are German screen-text instructions; future instrumental
+music/SFX remain plans, not falsely claimed recordings. The old Mila and Light
+Collector examples remain available; saved projects are never overwritten.
+Use “Load start project” to switch an existing editor session.
+
+The references are newly generated concept illustrations. They guide composition,
+materials, lighting and mood; native vector resources are editable first drafts,
+not pixel-identical copies. Whole-shot references are portrait; isolated object
+references can have other aspect ratios. Rebuild the portable JSON without an API
+call with `node --experimental-strip-types scripts/generate-halloween-heart.mjs`.
+The generator reuses committed WebP files. Full-resolution generation originals
+remain in the image-generation output folder, never in project download paths.
+The folklore source and “custom, not real prediction” wording are stored in the
+storyboard comments: https://dublincastle.ie/halloween-in-old-ireland/ .

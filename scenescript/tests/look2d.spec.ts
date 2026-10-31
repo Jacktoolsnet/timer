@@ -1,7 +1,8 @@
+import {DEFAULT_PROJECT_URL} from '../src/lib/startup-project';
 import {test,expect,type Page} from '@playwright/test';
 import {readFile} from 'node:fs/promises';
 const cors={'access-control-allow-origin':'*','access-control-allow-headers':'*','access-control-allow-methods':'POST,GET,OPTIONS'};
-async function ready(page:Page){await page.route('https://api.openai.com/**',r=>r.fulfill({status:500,headers:cors,body:'Unexpected API call'}));await page.goto('/de/');await expect(page.locator('#editor')).toHaveAttribute('data-ready','true');await page.locator('#open-storyboard').click();}
+async function ready(page:Page){await page.route('**'+DEFAULT_PROJECT_URL,r=>r.fulfill({contentType:'application/json',path:'public/examples/mila-halloween.scenescript.json'}));await page.route('https://api.openai.com/**',r=>r.fulfill({status:500,headers:cors,body:'Unexpected API call'}));await page.goto('/de/');await expect(page.locator('#editor')).toHaveAttribute('data-ready','true');await page.locator('#open-storyboard').click();}
 async function saved(page:Page){await page.locator('#storyboard-save').click();await page.locator('#storyboard-close').click();const download=page.waitForEvent('download');await page.locator('#save-project').click();return JSON.parse(await readFile((await(await download).path())!,'utf8'));}
 test('shared look edits persist and scene comparison stores targeted feedback without paid calls',async({page})=>{
  let requests=0;page.on('request',r=>{if(r.url().startsWith('https://api.openai.com')&&r.method()==='POST')requests++;});await ready(page);

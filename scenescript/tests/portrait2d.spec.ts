@@ -1,6 +1,7 @@
+import {DEFAULT_PROJECT_URL} from '../src/lib/startup-project';
 import {test,expect} from '@playwright/test';
 test('native portrait default fills frames, matches preview and exports portrait video',async({page},info)=>{
- test.setTimeout(120000);await page.goto('/de/');await expect(page.locator('#editor')).toHaveAttribute('data-ready','true');await expect(page.locator('#project-title')).toHaveValue('Das Monster unter dem Bett hat auch Angst');
+ test.setTimeout(120000);await page.route('**'+DEFAULT_PROJECT_URL,r=>r.fulfill({contentType:'application/json',path:'public/examples/mila-halloween.scenescript.json'}));await page.goto('/de/');await expect(page.locator('#editor')).toHaveAttribute('data-ready','true');await expect(page.locator('#project-title')).toHaveValue('Das Monster unter dem Bett hat auch Angst');
  const result=await page.evaluate(async()=>{
   const {parseProject}=await import(/* @vite-ignore */ '/src/lib/model.ts' as string),{ExportMedia}=await import(/* @vite-ignore */ '/src/scripts/export-media.ts' as string),{ExportRenderer}=await import(/* @vite-ignore */ '/src/scripts/export-renderer.ts' as string),{exportVideo}=await import(/* @vite-ignore */ '/src/scripts/video-export.ts' as string),{retimeStage2D}=await import(/* @vite-ignore */ '/src/lib/stage2d.ts' as string);
   const p=parseProject(await(await fetch('/examples/mila-halloween.scenescript.json')).text()),m=new ExportMedia(p,new AbortController().signal),r=new ExportRenderer(p,m),collage=document.createElement('canvas');collage.width=7*270;collage.height=480;let time=0,matches=false;const corners:number[][]=[];
