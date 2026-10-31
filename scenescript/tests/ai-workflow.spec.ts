@@ -477,7 +477,8 @@ test('natural material workflow recommends high effort, offers local fabric and 
 
 test('quick 2D AI builds a freely jointed bird and rehearses clips directly in the storyboard',async({page})=>{
  const {lightCollectorProject}=await import('../src/lib/light-collector-example'),{birdModel2D}=await import('../src/lib/free2d-example');
- const p=lightCollectorProject();await setup(page,p,'de');let calls=0;
+ // Vector authoring is the explicit no-sketch path; sketch-backed authoring has its own suite.
+ const p=lightCollectorProject();p.storyboard!.characters.find(s=>s.id==='collector')!.image=null;await setup(page,p,'de');let calls=0;
  await page.route('https://api.openai.com/v1/responses',async route=>{
   if(route.request().method()==='OPTIONS'){await route.fulfill({headers:cors});return;}
   calls++;const body=route.request().postDataJSON(),input=JSON.parse(body.input[0].content[0].text);
@@ -503,7 +504,7 @@ test('quick 2D AI builds a freely jointed bird and rehearses clips directly in t
 
 test('2D setting AI creates a free city, cancellation keeps old resources and invalid replies can be fixed locally',async({page})=>{
  const {lightCollectorProject}=await import('../src/lib/light-collector-example'),{birdModel2D,cityModel2D}=await import('../src/lib/free2d-example');
- const p=lightCollectorProject();await setup(page,p);let calls=0;
+ const p=lightCollectorProject();p.storyboard!.settings.find(s=>s.id==='forest')!.image=null;await setup(page,p);let calls=0;
  await page.route('https://api.openai.com/v1/responses',async route=>{
   if(route.request().method()==='OPTIONS'){await route.fulfill({headers:cors});return;}
   calls++;expect(JSON.parse(route.request().postDataJSON().input[0].content[0].text).target.kind).toBe('settings');

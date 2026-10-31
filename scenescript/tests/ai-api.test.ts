@@ -149,3 +149,8 @@ test('image generation refuses external URLs, SVG and excess reference data befo
   let calls=0;await assert.rejects(generateImage(key,{model:'gpt-image-2',prompt:'Sketch',size:'1280x720',quality:'low',images},signal(),async()=>{calls++;return Response.json({});}),AiApiError);assert.equal(calls,0);
  }
 });
+test('transparent image edit explicitly requests alpha PNG and rejects unknown background values before calling API',async()=>{
+ const args={model:'gpt-image-2',prompt:'Cut out selected bread',size:'1024x1024',quality:'high',background:'transparent' as const,images:['data:image/png;base64,AAAA']};let calls=0;
+ await generateImage(key,args,signal(),async(url,init)=>{calls++;assert.equal(url,'https://api.openai.com/v1/images/edits');const b=JSON.parse(String(init?.body));assert.equal(b.background,'transparent');assert.equal(b.output_format,'png');assert.equal(b.quality,'high');assert.equal(b.images[0].image_url,args.images[0]);return Response.json({data:[{b64_json:'AAAA'}]});});assert.equal(calls,1);
+ await assert.rejects(generateImage(key,{...args,background:'checkerboard' as 'transparent'},signal(),async()=>{calls++;return Response.json({});}),AiApiError);assert.equal(calls,1);
+});

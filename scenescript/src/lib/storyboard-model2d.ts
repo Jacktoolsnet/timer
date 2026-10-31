@@ -14,13 +14,14 @@ export function model2DRequest(project:Project,target:BoardReviewTarget,request:
  const board=project.storyboard!,s=resourceSubject(board,target),setting=target.kind==='settings',library=setting?project.stages2d:project.objects2d,id=s.resource2d??s.id,existing=s.model2d??(Object.hasOwn(library,id)?library[id].model:null);
  return {request,operation:!existing?'create':s.model2d&&model2DNeedsRestyle(s)?'restyle':'refine',target:{kind:target.kind,id:s.id,name:s.name,description:s.description,design:s.design??defaultBoardDesign(),comments:s.comments,model:existing?model2DManifest(existing):null,conversation:model2DNeedsRestyle(s)?[]:s.model2dChat??[]},project:{look:board.look??null,style:board.style,format:board.format},authoringFrame:formatFrame2D(board.format),palette:Object.hasOwn(library,id)?Object.fromEntries(Object.entries(library[id]).filter(([key])=>['color','accentColor','skyColor','groundColor'].includes(key))):null,coordinateSystem:setting?JSON.stringify({...formatFrame2D(board.format),originX:0,originY:0}):'Declared width/height, origin usually bottom center. Local +Y points down.'};
 }
-export function acceptBoardModel2D(text:string,project:Project,target:BoardReviewTarget,request=''):Project{
+export function acceptBoardModel2D(text:string,project:Project,target:BoardReviewTarget,request='',preserveArtwork=false):Project{
  if(!project.storyboard)throw Error('Storyboard: missing');
  const raw=JSON.parse(text);if(!raw||typeof raw!=='object'||Array.isArray(raw)||Object.keys(raw).some(k=>!['model','reply'].includes(k)))throw Error('2D resource: expected {model,reply?}');
  if(raw.reply!==undefined&&(typeof raw.reply!=='string'||raw.reply.length>5000))throw Error('2D resource.reply: expected text (max 5000)');
  const subjectSource=resourceSubject(project.storyboard,target),library=target.kind==='settings'?project.stages2d:project.objects2d,id=subjectSource.resource2d??subjectSource.id;const existing=subjectSource.model2d??(Object.hasOwn(library,id)?library[id].model:undefined);
  const model=parseModel2D(restoreModel2DImages(raw.model,existing),'resource.model');
  if(target.kind==='settings'){const frame=formatFrame2D(project.storyboard.format);if(model.width!==frame.width||model.height!==frame.height||model.originX!==0||model.originY!==0)throw Error('2D setting: expected '+frame.width+'×'+frame.height+' with origin 0,0 for '+project.storyboard.format);}
+ if(preserveArtwork){const image=existing?.parts.find(p=>p.shape==='sprite')?.image,base=image?existing?.images?.[image]:undefined;if(!image||!base?.data||model.images?.[image]?.data!==base.data||!model.parts.some(p=>p.shape==='sprite'&&p.image===image&&p.opacity>0))throw Error('2D artwork: preserve the supplied visible reference sprite and its image manifest; do not replace it with vectors');}
  const board=structuredClone(project.storyboard),subject=resourceSubject(board,target);
  if(subject.design?.mode==='3d'||(!subject.design||subject.design.mode==='inherit')&&board.production?.renderMode==='3d')throw Error('2D resource: 3D selected');
  const previous=subject.model2d,changedStyle=!!previous&&model2DNeedsRestyle(subject);

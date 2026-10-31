@@ -332,3 +332,22 @@ test('standalone pumpkin sprite import changes only its resource draft and depen
  const p=parseProject(readFileSync(new URL('../public/examples/halloween-heart.scenescript.json',import.meta.url),'utf8')),b=p.storyboard!;b.characters.find(s=>s.id==='pumpkin')!.model2d=heartPumpkinModel();for(const item of [...b.characters,...b.settings,...b.shots])item.status='approved';for(const c of b.comments)c.resolved=true;b.approved=true;const before=JSON.stringify(p);
  const next=importStoryboardResource(readFileSync(new URL('../public/examples/halloween-heart/pumpkin-sprite.resource.json',import.meta.url),'utf8'),p,{kind:'characters',id:'pumpkin'},'2d');assert.ok(next.storyboard!.characters.find(s=>s.id==='pumpkin')!.model2d!.parts.some(p=>p.shape==='sprite'));assert.equal(next.storyboard!.characters.find(s=>s.id==='pumpkin')!.status,'draft');assert.ok(next.storyboard!.characters.filter(s=>s.id!=='pumpkin').every(s=>s.status==='approved'));assert.equal(next.storyboard!.approved,false);assert.deepEqual(next.scenes,p.scenes);assert.deepEqual(next.publishing,p.publishing);assert.equal(JSON.stringify(p),before);
 });
+
+import {artworkSource2D,seedArtwork2D} from '../src/lib/storyboard-art2d.ts';
+test('2D artwork seed uses only the selected sketch, preserves originals and restores image manifests after AI generation',()=>{
+ const p=parseProject(readFileSync('public/examples/halloween-heart.scenescript.json','utf8')),target={kind:'characters',id:'bread'} as const;
+ const before=JSON.stringify(p),selected=artworkSource2D(p,target)!;assert.ok(selected);assert.equal(selected.image.name,p.storyboard!.images[p.storyboard!.characters.find(s=>s.id===target.id)!.image!].name);
+ const seeded=seedArtwork2D(p,target,{name:'Bread · 2D',data:selected.image.data!},{width:800,height:400}),subject=seeded.storyboard!.characters.find(s=>s.id===target.id)!;
+ assert.equal(JSON.stringify(p),before);assert.equal(seeded.objects2d,p.objects2d);assert.equal(seeded.storyboard!.images,p.storyboard!.images);assert.equal(subject.model2d!.parts[0].shape,'sprite');assert.equal(subject.model2d!.parts[0].width/subject.model2d!.parts[0].height,2);assert.equal(artworkSource2D(seeded,target),null);
+ const request=model2DRequest(seeded,target,'steam');assert.ok(!JSON.stringify(request).includes('data:image'));assert.deepEqual(request.target.model!.images!.reference,{name:'Bread · 2D'});
+ const accepted=acceptBoardModel2D(JSON.stringify({model:request.target.model}),seeded,target,'steam',true);assert.equal(accepted.storyboard!.characters.find(s=>s.id===target.id)!.model2d!.images!.reference.data,selected.image.data);assert.equal(accepted.storyboard!.characters.find(s=>s.id===target.id)!.status,'draft');
+ const wrong=structuredClone(request.target.model!);wrong.parts=[{...wrong.parts[0],shape:'rectangle'}];delete wrong.parts[0].image;
+ assert.throws(()=>acceptBoardModel2D(JSON.stringify({model:wrong}),seeded,target,'steam',true),/preserve.*reference sprite/);
+ assert.equal(JSON.stringify(p),before);assert.equal(artworkSource2D(p,{kind:'characters',id:'pumpkin'}),null);
+ const noSketch=structuredClone(p);noSketch.storyboard!.characters.find(s=>s.id===target.id)!.image=null;assert.equal(artworkSource2D(noSketch,target),null);
+});
+test('2D setting artwork covers portrait frame, preserves original image and does not import equipment as its base',()=>{
+ const p=parseProject(readFileSync('public/examples/halloween-heart.scenescript.json','utf8')),s=p.storyboard!.settings[0],target={kind:'settings',id:s.id} as const,art=artworkSource2D(p,target)!;
+ assert.equal(art.image,p.storyboard!.images[s.image!]);const seeded=seedArtwork2D(p,target,{name:'Setting',data:art.image.data!},{width:1920,height:1080}),model=seeded.storyboard!.settings[0].model2d!;
+ assert.deepEqual([model.width,model.height,model.originX,model.originY],[540,960,0,0]);const sprite=model.parts[0];assert.ok(sprite.width>=540&&sprite.height>=960);assert.equal(sprite.width/sprite.height,1920/1080);assert.equal(sprite.x,(540-sprite.width)/2);
+});

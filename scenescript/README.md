@@ -1680,3 +1680,51 @@ shared textures independently of scene instances. Resource previews, comparisons
 and video export all await this path. The synchronous `render()` remains available
 for existing vector-only callers. Disposing a scene cannot destroy another
 instance's shared sprite texture.
+
+#### Sketch-to-sprite API authoring
+
+The ordinary storyboard **2D resource AI** quick start now seeds the selected
+subject's own sketch as embedded artwork before asking the text model for effects
+and animation. Objects and characters require real alpha, not a neutral background
+or a painted checkerboard. Transparent input is reused locally, with transparent
+padding cropped and only GPU-budget resizing when necessary. Cropped derivatives
+use PNG or smaller maximum-quality WebP to avoid inflating saved projects; the
+original reference remains unchanged. If an object sketch
+is opaque, the confirmation discloses at most one additional `gpt-image-2` high
+quality image-edit call requesting a transparent PNG. Returned alpha is checked;
+a failed opaque-input cutout stops before the text-model call and never becomes a rectangular
+object. No automatic retries, chroma-key guessing or vector fallback. Cutout edits
+can still change details: review the result, especially faces/fine silhouettes.
+See the [official image-edit API background options](https://developers.openai.com/api/reference/resources/images/methods/edit).
+
+Settings instead retain their atmosphere as full-frame artwork, center cover-cropped
+to the storyboard format without stretching or letterboxing. Check the crop; a
+portrait setting sketch gives better framing than a landscape reference. Equipment
+and other subjects are not selected as substitute bases. Already image-backed
+resources keep their existing artwork, effects and animation structure on later
+requests. Sketch/render *comparison corrections* preserve the current resource's
+structure instead of silently converting existing vector rigs. Without an own
+sketch (or with reference use disabled in the advanced workflow), vector authoring
+remains available. This does not automatically produce independently articulated
+painted limbs; separate image layers are needed for those.
+
+Only the AI input is seeded: original sketches, the live library and approvals are
+unchanged until a valid response is accepted. Canonical image bytes are stored locally, with only
+manifests in the text JSON. The sprite is also attached as a visual API input.
+Acceptance rejects an omitted/replaced base sprite; retained-response local repair
+keeps the ephemeral seed, so correcting JSON does not require another paid request.
+A successful response applies only the selected draft resource and invalidates its
+dependent approvals as before. No existing project/default artwork is regenerated
+merely by opening the editor. Existing image resources are not automatically
+replaced when a sketch is changed; review/re-author them deliberately.
+
+The new-resource text response also includes `artworkEdit:boolean`: the model
+inspects the actual artwork for unrelated content, not just alpha. For example,
+the bread sketch includes a gold ring which the description declares a separate
+scene object. If flagged, a single cleanup edit removes that content while keeping
+the original sketch intact. The cleaned image is contain-fitted back into the seed
+canvas so effects retain their coordinate system. A cutout already performed before
+the text call consumes that same one-edit budget; a second required cleanup stops
+with an error, never an automatic second charge. This semantic decision is still
+AI judgment, so review the result. Existing image resources and targeted comparison
+corrections are not silently re-extracted.
