@@ -1,5 +1,8 @@
 import {test,expect} from '@playwright/test';import {readFile} from 'node:fs/promises';
-test('directed Halloween default opens six scenes and reusable imported resources without voice, auto-approval or paid calls',async({page})=>{
+import {DEFAULT_PROJECT_URL} from '../src/lib/startup-project';
+// This is the preserved romantic example, not the current starter.
+test.beforeEach(async({page})=>{await page.route('**'+DEFAULT_PROJECT_URL,r=>r.fulfill({contentType:'application/json',path:'public/examples/halloween-heart.scenescript.json'}));});
+test('preserved romantic Halloween example opens six scenes and reusable imported resources without voice, auto-approval or paid calls',async({page})=>{
  const errors:string[]=[];let paid=0;page.on('pageerror',e=>errors.push(e.message));await page.route('https://api.openai.com/**',r=>{paid++;return r.abort();});await page.route('https://api.elevenlabs.io/**',r=>{paid++;return r.abort();});
  await page.goto('/de/');await expect(page.locator('#editor')).toHaveAttribute('data-ready','true');await expect(page.locator('#project-title')).toHaveValue('Halloween mit Herz');await expect(page.locator('#scene-list button')).toHaveCount(6);await expect(page.locator('#stage .stage2d-canvas')).toHaveAttribute('data-stage2d-stage','cottage');
  await page.locator('#open-storyboard').click();await expect(page.locator('#storyboard-content')).toContainText('romantischer');await page.locator('[data-board-tab=settings]').click();for(const id of ['cottage','table']){await page.locator('[data-board-item='+id+']').click();await expect(page.locator('[data-board-resource2d='+id+'] canvas')).toHaveAttribute('data-stage2d-time','0');}

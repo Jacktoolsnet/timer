@@ -1,6 +1,6 @@
 import {lightCollectorProject} from './light-collector-example.ts';
 import {parseProject,type Project} from './model.ts';
-export const DEFAULT_PROJECT_URL='/examples/halloween-heart.scenescript.json';
+export const DEFAULT_PROJECT_URL='/examples/halloween-night-flight.scenescript.json';
 export type StartupProject={project:Project;recovered:boolean;error:boolean};
 let initial:StartupProject|undefined;
 export const setStartupProject=(value:StartupProject)=>{initial=value;};

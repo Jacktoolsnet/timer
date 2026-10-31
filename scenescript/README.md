@@ -1736,9 +1736,9 @@ model recommendations are unchanged. Provider rejection stops without automatic
 retry or model fallback. Account access is not assumed or tested by local mocks.
 
 
-### Current default: directed Halloween mit Herz (28 seconds)
+### Preserved example: directed Halloween mit Herz (28 seconds)
 
-The default `public/examples/halloween-heart.scenescript.json` now contains six
+The example `public/examples/halloween-heart.scenescript.json` contains six
 executable portrait scenes, not just the resource workspace. It reuses the user's
 API-generated pumpkin, bread, ring, cup identity and instrumental score. Curated
 source metadata and portable bitmap derivatives are committed under
@@ -1775,3 +1775,31 @@ SceneScript resource import. The standalone pumpkin JSON import is regenerated t
 Saved user projects still take precedence. To see this version in an existing
 editor session use **Load start project** deliberately; simply refreshing must
 not overwrite saved work. All six scene texts and reusable resources remain editable.
+
+
+### Current default: Halloween After Dark (22 seconds)
+
+`public/examples/halloween-night-flight.scenescript.json` is a separate finished
+portrait starter (540×960 authoring, 1080×1920 output). The previous romantic
+film and its planning version are unchanged and still loadable as files.
+Saved work takes precedence; use **Beispiel / Startprojekt laden** to explicitly
+open the new default in an existing browser session.
+
+Four editable scenes: glowing pumpkin and bat; witch fly-by and dangling spider;
+Santa's arrival; English Halloween/Christmas greeting. Two independently flapping
+bat wings, eight spider legs and a synchronized thread, moving fog and moonbeams,
+light masks, reflections and particle wakes animate separately from the textured
+illustrations. No background or characters are baked into a finished video.
+German storyboard descriptions link the reusable resources and references;
+all on-screen and publishing text is English. Approval states remain draft.
+
+Santa's **Ho! Ho! Ho!** is a real embedded WAV, locally synthesized with eSpeak NG,
+not a human performance, voice clone or paid API call. Replace it in the audio
+editor for a more natural performance. Native instrumental music switches to
+Christmas bells and is automatically ducked under the voice. Both downloadable
+covers are embedded (TikTok 9:16 and YouTube 16:9).
+
+`npm run example:halloween-night-flight` deterministically repackages committed
+WebP/WAV assets without generation calls. `scripts/generate-santa-demo-voice.py`
+optionally regenerates the synthetic demo voice using the system eSpeak NG library.
+Artwork prompts and provenance are in `public/examples/halloween-night-flight/README.md`.
