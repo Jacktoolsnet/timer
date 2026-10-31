@@ -2303,8 +2303,23 @@
                     "easing": "smooth"
                   },
                   {
-                    "at": 5,
+                    "at": 4.35,
                     "value": 0.75,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 4.75,
+                    "value": 1,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 4.875,
+                    "value": 0.14,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 5,
+                    "value": 1,
                     "easing": "smooth"
                   }
                 ]
@@ -2394,8 +2409,23 @@
                     "easing": "smooth"
                   },
                   {
-                    "at": 5,
+                    "at": 4.35,
                     "value": -18,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 4.75,
+                    "value": -8,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 4.875,
+                    "value": 22,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 5,
+                    "value": -8,
                     "easing": "smooth"
                   }
                 ]
@@ -2420,8 +2450,18 @@
                     "easing": "smooth"
                   },
                   {
-                    "at": 5,
+                    "at": 4.35,
                     "value": 0.18,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 4.75,
+                    "value": 1,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 5,
+                    "value": 1,
                     "easing": "smooth"
                   }
                 ]
@@ -2511,8 +2551,23 @@
                     "easing": "smooth"
                   },
                   {
-                    "at": 5,
+                    "at": 4.35,
                     "value": 0.75,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 4.75,
+                    "value": 1,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 4.875,
+                    "value": 0.14,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 5,
+                    "value": 1,
                     "easing": "smooth"
                   }
                 ]
@@ -2602,8 +2657,23 @@
                     "easing": "smooth"
                   },
                   {
-                    "at": 5,
+                    "at": 4.35,
                     "value": 18,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 4.75,
+                    "value": 8,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 4.875,
+                    "value": -22,
+                    "easing": "smooth"
+                  },
+                  {
+                    "at": 5,
+                    "value": 8,
                     "easing": "smooth"
                   }
                 ]
@@ -2628,35 +2698,19 @@
                     "easing": "smooth"
                   },
                   {
-                    "at": 5,
+                    "at": 4.35,
                     "value": 0.18,
                     "easing": "smooth"
-                  }
-                ]
-              },
-              {
-                "part": "flight",
-                "property": "opacity",
-                "keys": [
-                  {
-                    "at": 0,
-                    "value": 1,
-                    "easing": "linear"
                   },
                   {
-                    "at": 4.35,
+                    "at": 4.75,
                     "value": 1,
-                    "easing": "linear"
-                  },
-                  {
-                    "at": 4.6,
-                    "value": 0,
-                    "easing": "linear"
+                    "easing": "smooth"
                   },
                   {
                     "at": 5,
-                    "value": 0,
-                    "easing": "linear"
+                    "value": 1,
+                    "easing": "smooth"
                   }
                 ]
               }
@@ -52208,11 +52262,11 @@
     "audience": "TikTok und YouTube Shorts; märchenhaft-gruselig, humorvoll, ohne Gewalt.",
     "language": "English",
     "style": "Hochwertige malerische Filmwelt mit satten Texturen und vielen getrennten Animationsebenen. Kein Foliensatz, keine Balken, keine flächige Nachzeichnung der Illustrationen.",
-    "duration": 22,
+    "duration": 14.8,
     "comments": [
       {
         "id": "children-note",
-        "text": "Drei eigenständige Kinderressourcen mit transparenten Kostümtexturen, separaten Einlaufbahnen und wiederverwendbaren walk-Clips. Schlussbild schließt positionsgenau an. Referenzen und Freigaben bleiben zur eigenen Prüfung offen.",
+        "text": "Drei eigenständige Kinderressourcen mit transparenten Kostümtexturen, separaten Einlaufbahnen und wiederverwendbaren walk-Clips. Schlussbild schließt positionsgenau an und dauert nur eine Sekunde nach Ankunft des letzten Kindes. Referenzen und Freigaben bleiben zur eigenen Prüfung offen.",
         "resolved": false,
         "reply": ""
       }
@@ -52240,12 +52294,12 @@
           "mode": "2d",
           "style": "rounded",
           "surface": "colors",
-          "details": "Kleine dunkle Fledermaus. Zwei getrennte Flügel schlagen viermal pro Sekunde. Sie fliegt zuerst in einem Bogen auf die Anfangsschrift, faltet die Flügel ein und sitzt dort. Clip perch blendet sie am Ende synchron mit Schrift und angehängtem Spinnennetz aus. Im zweiten Bild fliegt sie direkt auf die Kamera zu und wird stark größer; ein malerisch texturiertes gruseliges Fledermausgesicht mit leuchtenden Augen und kleinen Fangzähnen wird sichtbar. Anschließend fliegt sie knapp über die Kamera hinaus. Clip approach läuft zusätzlich zum Flügelschlag; keine Blut- oder Blitz-Effekte."
+          "details": "Kleine dunkle Fledermaus. Zwei getrennte Flügel schlagen viermal pro Sekunde. Sie fliegt zuerst in einem Bogen auf die Anfangsschrift, faltet die Flügel ein und sitzt dort. Clip perch lässt sie sitzen und anschließend mit erneutem Flügelschlag abheben, während Schrift und Spinnennetz ausblenden. Dieselbe Fledermaus setzt ihren Flug im nächsten Bild ohne Positions-, Größen- oder Posensprung fort. Im zweiten Bild fliegt sie direkt auf die Kamera zu und wird stark größer; ein malerisch texturiertes gruseliges Fledermausgesicht mit leuchtenden Augen und kleinen Fangzähnen wird sichtbar. Anschließend fliegt sie knapp über die Kamera hinaus. Clip approach läuft zusätzlich zum Flügelschlag; keine Blut- oder Blitz-Effekte."
         },
         "status": "draft",
         "id": "bat",
         "name": "Fledermaus",
-        "description": "Kleine dunkle Fledermaus. Zwei getrennte Flügel schlagen viermal pro Sekunde. Sie fliegt zuerst in einem Bogen auf die Anfangsschrift, faltet die Flügel ein und sitzt dort. Clip perch blendet sie am Ende synchron mit Schrift und angehängtem Spinnennetz aus. Im zweiten Bild fliegt sie direkt auf die Kamera zu und wird stark größer; ein malerisch texturiertes gruseliges Fledermausgesicht mit leuchtenden Augen und kleinen Fangzähnen wird sichtbar. Anschließend fliegt sie knapp über die Kamera hinaus. Clip approach läuft zusätzlich zum Flügelschlag; keine Blut- oder Blitz-Effekte.",
+        "description": "Kleine dunkle Fledermaus. Zwei getrennte Flügel schlagen viermal pro Sekunde. Sie fliegt zuerst in einem Bogen auf die Anfangsschrift, faltet die Flügel ein und sitzt dort. Clip perch lässt sie sitzen und anschließend mit erneutem Flügelschlag abheben, während Schrift und Spinnennetz ausblenden. Dieselbe Fledermaus setzt ihren Flug im nächsten Bild ohne Positions-, Größen- oder Posensprung fort. Im zweiten Bild fliegt sie direkt auf die Kamera zu und wird stark größer; ein malerisch texturiertes gruseliges Fledermausgesicht mit leuchtenden Augen und kleinen Fangzähnen wird sichtbar. Anschließend fliegt sie knapp über die Kamera hinaus. Clip approach läuft zusätzlich zum Flügelschlag; keine Blut- oder Blitz-Effekte.",
         "image": "reference-bat-face",
         "comments": [],
         "kind": "character"
@@ -52355,7 +52409,7 @@
         "id": "awakening",
         "title": "Der Wald erwacht",
         "duration": 5,
-        "action": "Sofort lebendige Atmosphäre: Kürbis glüht wie von einem kräftigen Feuer im Inneren; keine Flammen zeigen. Unregelmäßiges Licht aus Augen und Mund und synchroner Bodenschein. Unterhalb des freien Mondes wandern türkis-violette Nordlichter: 24 Lichtfalten bewegen sich phasenversetzt in Höhe, Länge und Helligkeit, darüber laufen Wellen durch die Bänder, Nebel zieht vorbei. Eine kleine Fledermaus fliegt von links in einem Bogen zum Anfangstext und landet nach 2,1 Sekunden auf dem letzten Wort der ersten Zeile (x=399, y=128; Füße an der Buchstabenoberkante). Dort faltet sie die Flügel ein und bleibt sitzen. Ein feines Spinnennetz hängt rechts an der Schrift. Ab 4,35 Sekunden blenden Schrift, Netz und Fledermaus synchron linear bis 4,6 Sekunden vollständig aus; kein separater Abflug. Englischer Hook in derselben Creepster-Schrift wie der Halloween-Schlussgruß: A little Halloween magic…",
+        "action": "Sofort lebendige Atmosphäre: Kürbis glüht wie von einem kräftigen Feuer im Inneren; keine Flammen zeigen. Unregelmäßiges Licht aus Augen und Mund und synchroner Bodenschein. Unterhalb des freien Mondes wandern türkis-violette Nordlichter: 24 Lichtfalten bewegen sich phasenversetzt in Höhe, Länge und Helligkeit, darüber laufen Wellen durch die Bänder, Nebel zieht vorbei. Eine kleine Fledermaus fliegt von links in einem Bogen zum Anfangstext und landet nach 2,1 Sekunden auf dem letzten Wort der ersten Zeile (x=399, y=128; Füße an der Buchstabenoberkante). Dort faltet sie die Flügel ein und bleibt sitzen. Ein feines Spinnennetz hängt rechts an der Schrift. Ab 4,35 Sekunden blenden nur Schrift und Netz bis 4,6 Sekunden aus. Die Fledermaus bleibt sichtbar, entfaltet die Flügel und hebt nach x=365, y=210 ab. Genau dort beginnt im folgenden Bild derselbe Flug mit unveränderter Größe und Pose; keine zweite Fledermaus. Englischer Hook in derselben Creepster-Schrift wie der Halloween-Schlussgruß: A little Halloween magic…",
         "camera": "Stabile vertikale Filmkomposition; Bewegung durch Figuren und getrennte Licht-/Nebelebenen, kein hektisches Kamera-Zoomen.",
         "audio": "Mystisches Instrumental mit Nachtwind und verspielten Kalimba-Zauberfunken; keine Sprache.",
         "image": "reference-forest",
@@ -52376,7 +52430,7 @@
         "id": "visitors",
         "title": "Hexenflug und Spinnenfaden",
         "duration": 5,
-        "action": "Die Hexe fliegt von links ins Bild (Beginn x=-250, y=470), wird kurz groß sichtbar und steigt dann in einer Bogenbahn zum Mond (x=270, y=154). Clip moon-flight spiegelt die vollständige Ressource nach rechts; Hexe, Laterne und grüne Funkenspur werden proportional immer kleiner. Erst in der Ferne am Mond verblasst die wenige Pixel kleine Silhouette vollständig. Kein seitlicher Abflug und kein plötzliches Verschwinden in voller Größe. Gleichzeitig seilt sich rechts eine Spinne ab, bewegt alle acht Beine und zieht sich wieder hoch. Ihr separater Faden verändert synchron seine Länge. Die Fledermaus dreht ab 1,8 Sekunden zur Kamera, wächst mit Clip approach bis zur Nahaufnahme und zeigt kurz leuchtende Augen und kleine Fangzähne. Sie fliegt ab 4,15 Sekunden über die Linse aus dem Bild. Als Vordergrundinstanz überdeckt sie die entfernte Hexe räumlich korrekt. Hier keinen Text über die Aktion setzen.",
+        "action": "Die Hexe fliegt von links ins Bild (Beginn x=-250, y=470), wird kurz groß sichtbar und steigt dann in einer Bogenbahn zum Mond (x=270, y=154). Clip moon-flight spiegelt die vollständige Ressource nach rechts; Hexe, Laterne und grüne Funkenspur werden proportional immer kleiner. Erst in der Ferne am Mond verblasst die wenige Pixel kleine Silhouette vollständig. Kein seitlicher Abflug und kein plötzliches Verschwinden in voller Größe. Gleichzeitig seilt sich rechts eine Spinne ab, bewegt alle acht Beine und zieht sich wieder hoch. Ihr separater Faden verändert synchron seine Länge. Dieselbe Fledermaus vom Anfangstext startet nahtlos bei x=365, y=210, ohne neuen Einflug von rechts. Sie dreht ab 1,8 Sekunden zur Kamera, wächst mit Clip approach bis zur Nahaufnahme und zeigt kurz leuchtende Augen und kleine Fangzähne. Sie fliegt ab 4,15 Sekunden über die Linse aus dem Bild. Als Vordergrundinstanz überdeckt sie die entfernte Hexe räumlich korrekt. Hier keinen Text über die Aktion setzen.",
         "camera": "Stabile vertikale Filmkomposition; Bewegung durch Figuren und getrennte Licht-/Nebelebenen, kein hektisches Kamera-Zoomen.",
         "audio": "Mystisches Instrumental mit Nachtwind und verspielten Kalimba-Zauberfunken; keine Sprache.",
         "image": "reference-forest",
@@ -52396,7 +52450,7 @@
         "soundEffects": [],
         "id": "meeting",
         "title": "Die Kinder treffen sich",
-        "duration": 5,
+        "duration": 3.8,
         "action": "Drei gut gelaunte, gruselig geschminkte Kinder treten auf: Skelettkind von links, kleine Hexe und Vampirkind zeitversetzt von rechts. Sie kommen unter dem Happy-Halloween-Schriftzug zusammen. Eigene Bewegungsbahnen und rhythmisches Wippen beim Eintritt, Füße auf gleicher Bodenhöhe. Der Vordergrundkürbis glüht weiter. Keine Stimme; das mystische Instrumental wird freundlich-verspielter, mit eigener Halloween-Melodie.",
         "camera": "Stabile vertikale Filmkomposition; Bewegung durch Figuren und getrennte Licht-/Nebelebenen, kein hektisches Kamera-Zoomen.",
         "audio": "Mystisches Instrumental mit Nachtwind und verspielten Kalimba-Zauberfunken; keine Sprache.",
@@ -52417,8 +52471,8 @@
         "soundEffects": [],
         "id": "greeting",
         "title": "Happy Halloween im Mondwald",
-        "duration": 7,
-        "action": "Anschluss ohne Positionssprung: Die Kinder stehen bei x=145, 270 und 395 unter dem Happy-Halloween-Gruß, Köpfe etwa auf Höhe y=400. Leichte einzelne Körperbewegungen, keine erneute Einlaufbewegung und kein Herausrutschen. Der Mond bleibt sichtbar. Typografie: Happy Halloween! als editierbarer Creepster-Text in Kürbisorange mit sanftem Glühen; kein weiterer Schlusstext. Nebel, Nordlichter und Kürbislicht bewegen sich weiter. Mindestens sieben Sekunden Schlussbild.",
+        "duration": 1,
+        "action": "Anschluss ohne Positionssprung: Die Kinder stehen bei x=145, 270 und 395 unter dem Happy-Halloween-Gruß, Köpfe etwa auf Höhe y=400. Leichte einzelne Körperbewegungen, keine erneute Einlaufbewegung und kein Herausrutschen. Der Mond bleibt sichtbar. Typografie: Happy Halloween! als editierbarer Creepster-Text in Kürbisorange mit sanftem Glühen; kein weiterer Schlusstext. Nebel, Nordlichter und Kürbislicht bewegen sich weiter. Genau eine Sekunde Schlussbild nach Abschluss der letzten Einlaufanimation (3,8 Sekunden nach Beginn der Kindersequenz); danach endet das Video bei insgesamt 14,8 Sekunden. Der Happy-Halloween-Schriftzug bleibt ab der Begegnung bis zum Videoende durchgängig sichtbar: kein Ausblenden am Szenenende und kein erneutes Einblenden im Schlussbild.",
         "camera": "Stabile vertikale Filmkomposition; Bewegung durch Figuren und getrennte Licht-/Nebelebenen, kein hektisches Kamera-Zoomen.",
         "audio": "Mystisches Instrumental mit Nachtwind und verspielten Kalimba-Zauberfunken; keine Sprache.",
         "image": "reference-forest",
@@ -52900,28 +52954,28 @@
       {
         "instrument": "moon",
         "at": 12,
-        "duration": 3,
+        "duration": 2.8000000000000007,
         "pitch": 48,
         "velocity": 0.45
       },
       {
         "instrument": "moon",
         "at": 12,
-        "duration": 3,
+        "duration": 2.8000000000000007,
         "pitch": 55,
         "velocity": 0.45
       },
       {
         "instrument": "moon",
         "at": 12,
-        "duration": 3,
+        "duration": 2.8000000000000007,
         "pitch": 60,
         "velocity": 0.45
       },
       {
         "instrument": "moon",
         "at": 12,
-        "duration": 3,
+        "duration": 2.8000000000000007,
         "pitch": 67,
         "velocity": 0.45
       },
@@ -52965,181 +53019,6 @@
         "at": 14.26,
         "duration": 0.15,
         "pitch": 79,
-        "velocity": 0.42
-      },
-      {
-        "instrument": "spooky",
-        "at": 14.72,
-        "duration": 0.15,
-        "pitch": 84,
-        "velocity": 0.49
-      },
-      {
-        "instrument": "spooky",
-        "at": 15.180000000000001,
-        "duration": 0.15,
-        "pitch": 79,
-        "velocity": 0.35
-      },
-      {
-        "instrument": "spooky",
-        "at": 15.64,
-        "duration": 0.15,
-        "pitch": 76,
-        "velocity": 0.42
-      },
-      {
-        "instrument": "moon",
-        "at": 16,
-        "duration": 3,
-        "pitch": 48,
-        "velocity": 0.45
-      },
-      {
-        "instrument": "moon",
-        "at": 16,
-        "duration": 3,
-        "pitch": 55,
-        "velocity": 0.45
-      },
-      {
-        "instrument": "moon",
-        "at": 16,
-        "duration": 3,
-        "pitch": 60,
-        "velocity": 0.45
-      },
-      {
-        "instrument": "moon",
-        "at": 16,
-        "duration": 3,
-        "pitch": 67,
-        "velocity": 0.45
-      },
-      {
-        "instrument": "wind",
-        "at": 16,
-        "duration": 2,
-        "pitch": 48,
-        "velocity": 0.3
-      },
-      {
-        "instrument": "spooky",
-        "at": 16.1,
-        "duration": 0.15,
-        "pitch": 79,
-        "velocity": 0.49
-      },
-      {
-        "instrument": "spooky",
-        "at": 16.560000000000002,
-        "duration": 0.15,
-        "pitch": 72,
-        "velocity": 0.35
-      },
-      {
-        "instrument": "spooky",
-        "at": 17.02,
-        "duration": 0.15,
-        "pitch": 79,
-        "velocity": 0.42
-      },
-      {
-        "instrument": "spooky",
-        "at": 17.48,
-        "duration": 0.15,
-        "pitch": 84,
-        "velocity": 0.49
-      },
-      {
-        "instrument": "spooky",
-        "at": 17.94,
-        "duration": 0.15,
-        "pitch": 79,
-        "velocity": 0.35
-      },
-      {
-        "instrument": "spooky",
-        "at": 18.400000000000002,
-        "duration": 0.15,
-        "pitch": 76,
-        "velocity": 0.42
-      },
-      {
-        "instrument": "spooky",
-        "at": 18.86,
-        "duration": 0.15,
-        "pitch": 79,
-        "velocity": 0.49
-      },
-      {
-        "instrument": "spooky",
-        "at": 19.32,
-        "duration": 0.15,
-        "pitch": 72,
-        "velocity": 0.35
-      },
-      {
-        "instrument": "spooky",
-        "at": 19.78,
-        "duration": 0.15,
-        "pitch": 79,
-        "velocity": 0.42
-      },
-      {
-        "instrument": "moon",
-        "at": 20,
-        "duration": 2,
-        "pitch": 48,
-        "velocity": 0.45
-      },
-      {
-        "instrument": "moon",
-        "at": 20,
-        "duration": 2,
-        "pitch": 55,
-        "velocity": 0.45
-      },
-      {
-        "instrument": "moon",
-        "at": 20,
-        "duration": 2,
-        "pitch": 60,
-        "velocity": 0.45
-      },
-      {
-        "instrument": "moon",
-        "at": 20,
-        "duration": 2,
-        "pitch": 67,
-        "velocity": 0.45
-      },
-      {
-        "instrument": "wind",
-        "at": 20,
-        "duration": 2,
-        "pitch": 48,
-        "velocity": 0.3
-      },
-      {
-        "instrument": "spooky",
-        "at": 20.240000000000002,
-        "duration": 0.15,
-        "pitch": 84,
-        "velocity": 0.49
-      },
-      {
-        "instrument": "spooky",
-        "at": 20.7,
-        "duration": 0.15,
-        "pitch": 79,
-        "velocity": 0.35
-      },
-      {
-        "instrument": "spooky",
-        "at": 21.16,
-        "duration": 0.15,
-        "pitch": 76,
         "velocity": 0.42
       }
     ]
@@ -53213,6 +53092,17 @@
                 "duration": 5,
                 "toX": 470,
                 "toY": 425,
+                "height": 100,
+                "target": ""
+              },
+              {
+                "type": "move",
+                "clip": "",
+                "burst": true,
+                "at": 4.35,
+                "duration": 0.65,
+                "toX": 365,
+                "toY": 210,
                 "height": 100,
                 "target": ""
               }
@@ -53598,9 +53488,9 @@
             "name": "bat",
             "object": "bat",
             "layer": "foreground",
-            "x": 570,
-            "y": 360,
-            "scale": 0.47,
+            "x": 365,
+            "y": 210,
+            "scale": 0.55,
             "rotation": 0,
             "opacity": 1,
             "color": null,
@@ -53916,7 +53806,7 @@
       "narration": null,
       "id": "meeting",
       "name": "Die Kinder treffen sich",
-      "duration": 5,
+      "duration": 3.8,
       "backgroundEnabled": true,
       "backgroundOpacity": 1,
       "backgroundGradient": null,
@@ -54222,8 +54112,8 @@
           "id": "meeting-happy",
           "bubble": null,
           "anchors": {},
-          "until": 4.7,
-          "exitAnimation": "fade",
+          "until": 3.8,
+          "exitAnimation": "none",
           "exitDuration": 0.25,
           "motionPath": null,
           "video": null,
@@ -54330,7 +54220,7 @@
       "narration": null,
       "id": "greeting",
       "name": "Happy Halloween im Mondwald",
-      "duration": 7,
+      "duration": 1,
       "backgroundEnabled": true,
       "backgroundOpacity": 1,
       "backgroundGradient": null,
@@ -54636,8 +54526,8 @@
           "id": "happy",
           "bubble": null,
           "anchors": {},
-          "until": 6.7,
-          "exitAnimation": "fade",
+          "until": 1,
+          "exitAnimation": "none",
           "exitDuration": 0.25,
           "motionPath": null,
           "video": null,
@@ -54669,8 +54559,8 @@
           "rotation": 0,
           "radius": 0,
           "fit": "contain",
-          "animation": "fade",
-          "at": 0.1,
+          "animation": "none",
+          "at": 0,
           "animationDuration": 0.3
         }
       ]
