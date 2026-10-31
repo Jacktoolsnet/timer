@@ -237,15 +237,23 @@ function askDelete(name:string,kind:'scene'|'image'|'video'|'thumbnail'|'audio'|
 $('cancel-delete').addEventListener('click',()=>deleteDialog.close());
 $('confirm-delete').addEventListener('click',()=>{const action=pendingDelete;pendingDelete=undefined;deleteDialog.close();action?.();});
 deleteDialog.addEventListener('close',()=>{pendingDelete=undefined;});
-function downloadAsset(asset:{name:string;data:string}){
+async function downloadAsset(asset:{name:string;data:string},asPng=false){
  try{
   const [header,encoded]=asset.data.split(','),mime=header.slice(5,header.indexOf(';'));
   const extension=({'image/png':'png','image/jpeg':'jpg','image/webp':'webp','image/svg+xml':'svg'} as Record<string,string>)[mime];
   if(!extension)throw new Error('Unsupported image format');
   const bytes=Uint8Array.from(atob(encoded),character=>character.charCodeAt(0));
-  const url=URL.createObjectURL(new Blob([bytes],{type:mime})),link=document.createElement('a');
+  let blob=new Blob([bytes],{type:mime});
+  if(asPng&&mime!=='image/png'){
+   const image=new Image();image.src=asset.data;await image.decode();
+   if(!image.naturalWidth||!image.naturalHeight||image.naturalWidth*image.naturalHeight>40_000_000)throw new Error('Image: invalid dimensions or maximum 40 megapixels');
+   const canvas=document.createElement('canvas');canvas.width=image.naturalWidth;canvas.height=image.naturalHeight;
+   try{const context=canvas.getContext('2d');if(!context)throw new Error('Image: canvas unavailable');context.drawImage(image,0,0);blob=await new Promise<Blob>((resolve,reject)=>canvas.toBlob(result=>result&&result.type==='image/png'?resolve(result):reject(new Error('PNG export failed')),'image/png'));}
+   finally{canvas.width=0;canvas.height=0;}
+  }
+  const url=URL.createObjectURL(blob),link=document.createElement('a');
   const name=asset.name.replace(/\.(png|jpe?g|webp|svg)$/i,'').replace(/[<>:"/\\|?*\x00-\x1f]/g,'-').trim().replace(/[. ]+$/g,'').slice(0,160)||'image';
-  link.href=url;link.download=name+'.'+extension;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  link.href=url;link.download=name+'.'+(asPng?'png':extension);link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
  }catch(error){status(t('error')+' '+(error as Error).message);}
 }
 const assetPreviewDialog=$('asset-preview-dialog') as HTMLDialogElement;
@@ -268,7 +276,7 @@ function renderThumbnail(prefix:''|'tiktok-'=''){
  const preview=button('',()=>previewAsset(asset));preview.className='thumbnail-preview'+(prefix?' portrait-cover':'');preview.title=t('imagePreview')+': '+asset.name;preview.setAttribute('aria-label',preview.title);const image=document.createElement('img');image.src=asset.data;image.alt='';preview.append(image);
  const name=document.createElement('span');name.className='thumbnail-name';name.textContent=asset.name;name.title=asset.name;
  const actions=document.createElement('div');actions.className='thumbnail-actions';
- const save=button('',()=>downloadAsset(asset));save.id='save-'+prefix+'thumbnail';save.title=t('saveThumbnail');save.setAttribute('aria-label',save.title);save.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 15v6h16v-6"/></svg>';
+ const save=button('',()=>{void downloadAsset(asset,true);});save.id='save-'+prefix+'thumbnail';save.title=t('saveThumbnail')+' (PNG)';save.setAttribute('aria-label',save.title);save.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 15v6h16v-6"/></svg>';
  const remove=button('',()=>{const target=project;askDelete(asset.name,'thumbnail',()=>{if(project!==target||(prefix?project.publishing?.tiktok.cover:project.thumbnail)!==asset)return;thumbnailImportAttempt[prefix]++;if(prefix){project.publishing??=publishingFor(project);project.publishing.tiktok.cover=null;}else project.thumbnail=null;changed();renderThumbnail(prefix);$('import-'+prefix+'thumbnail').focus();});});remove.id='delete-'+prefix+'thumbnail';remove.title=t('remove')+': '+t('thumbnail');remove.setAttribute('aria-label',remove.title);remove.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/></svg>';
  actions.append(save,remove);host.append(preview,name,actions);
 }
