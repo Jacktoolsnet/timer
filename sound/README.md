@@ -184,3 +184,11 @@ pitch offset. Every style's Random Play palette now includes compatible vocal
 colours (solo, choir or pad), not just the instruments in its starting pattern.
 For a deliberate listening comparison, use the Pop starting pattern: track 7 is
 Solo Voice. These are wordless synthesized vowels, not realistic recorded singing.
+
+Every style now starts with a compatible wordless vocal on one of its eight tracks,
+not just a vocal option in the evolution pool. Existing main instrumental parts
+remain in place. Dance/groove styles use shorter, tighter solo phrases; Jazz,
+Coffeehouse and Lo-Fi use softer, breathier articulation; Classical uses choir,
+Ambient/Focus/Drum & Bass use vocal pads. Vocal buffer cache keys include style so
+articulation cannot leak across presets. Saved custom tracks still take precedence;
+load/reset a starting pattern to hear its updated vocal arrangement.

@@ -199,6 +199,13 @@ body:not(.focus-view) .sound-top{margin-bottom:20px}
 .note-effect-control output{font-variant-numeric:tabular-nums;color:var(--text)}
 
 .sound-adjustments{display:grid;gap:12px;flex-basis:100%;min-width:0}
-.sound-transport .sound-adjustments :is(.pitch-control,.note-effect-control){display:grid;grid-template-columns:100px minmax(60px,110px) auto;justify-content:start;align-items:center;gap:8px;margin:0}
+.sound-transport .sound-adjustments :is(.pitch-control,.note-effect-control){display:grid;grid-template-columns:100px minmax(0,1fr) 80px;justify-content:stretch;align-items:center;gap:8px;margin:0}
 .sound-transport .sound-adjustments input{grid-column:2;grid-row:1;width:100%;min-width:0;margin:0}
 .sound-transport .sound-adjustments output{grid-column:3;grid-row:1;min-width:0;white-space:nowrap}
+
+@media(max-width:480px){
+ .sound-transport .sound-adjustments :is(.pitch-control,.note-effect-control){grid-template-columns:minmax(0,1fr) 80px}
+ .sound-adjustments label>span{grid-column:1/-1}
+ .sound-transport .sound-adjustments input{grid-column:1;grid-row:2}
+ .sound-transport .sound-adjustments output{grid-column:2;grid-row:2}
+}

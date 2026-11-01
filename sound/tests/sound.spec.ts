@@ -778,3 +778,13 @@ test('note glow control sits directly below pitch in the playback controls',asyn
  expect(Math.abs(glow.x-pitch.x)).toBeLessThan(2);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });
+
+test('pitch and glow sliders use the available width',async({page})=>{
+ await page.goto('/de/');
+ const group=(await page.locator('.sound-adjustments').boundingBox())!;
+ const pitch=(await page.locator('#transpose').boundingBox())!,glow=(await page.locator('#note-effect').boundingBox())!;
+ expect(pitch.width).toBeGreaterThan(150);expect(Math.abs(pitch.width-glow.width)).toBeLessThan(2);
+ const value=(await page.locator('#transpose-value').boundingBox())!;
+ expect(Math.abs(value.x+value.width-(group.x+group.width))).toBeLessThan(3);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});

@@ -33,3 +33,15 @@ test('random style palettes can reach compatible wordless voices',async()=>{
  for(const style of styleIds)expect(evolutionPalette(style).some(id=>(vocalInstruments as readonly string[]).includes(id))).toBe(true);
  expect(presets.pop.parts.find(p=>p.instrument==='voice')!.volume).toBeGreaterThanOrEqual(.4);
 });
+
+test('every starting style has an audible wordless vocal and its own articulation',async()=>{
+ const {styleIds,partsForStyle}=await import('../src/lib/presets');
+ const {vocalCharacter}=await import('../src/lib/vocal');
+ for(const style of styleIds){
+  const parts=partsForStyle(style),voices=parts.filter(p=>(vocalInstruments as readonly string[]).includes(p.instrument));
+  expect(parts).toHaveLength(8);expect(voices.length).toBeGreaterThan(0);
+  expect(voices.some(v=>v.steps.length>0&&(v.volume??0)>=.2)).toBe(true);
+ }
+ expect(vocalCharacter('house').duration).toBeLessThan(vocalCharacter('coffeehouse').duration);
+ expect(vocalCharacter('jazz').air).toBeGreaterThan(vocalCharacter('house').air);
+});

@@ -1,7 +1,7 @@
 import {noteGlow} from '../lib/note-glow';
 import {continueBow} from '../lib/bowed';
 import {developmentPlan,developmentGain,accompanimentMotif,registerArc,registerNote,type DevelopmentPlan} from '../lib/development';
-import {vocalInstruments,vocalWave,vowelPosition,vocalFundamental,type VocalInstrument} from '../lib/vocal';
+import {vocalInstruments,vocalWave,vowelPosition,vocalFundamental,vocalCharacter,type VocalInstrument} from '../lib/vocal';
 import {voiceRecipe} from '../lib/voice-recipes';
 import {acousticInstruments,acousticWave,type AcousticInstrument} from '../lib/acoustic';
 import {spaceProfile,stereoPosition,sectionExpression} from '../lib/space';
@@ -368,11 +368,12 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
   // Three touch layers: stronger hits excite more upper partials, not just more volume.
   const layer=Math.max(0,Math.min(2,Math.round(velocity*tr.volume*2)));
   const brightness=(profile.warm?.2:.4)+layer*.2;
-  const vowel=evolving?vowelPosition(step/16,expressionSeed):id==='voice'?0:id==='choir'?.5:1;
-  const key=[id,frequency.toFixed(4),ctx.sampleRate,vocal?vowel:brightness].join(':');
+  const character=vocalCharacter(currentStyle);
+  const vowel=evolving?vowelPosition(step/16,expressionSeed):id==='voice'?character.vowel:id==='choir'?.5:1;
+  const key=[id,frequency.toFixed(4),ctx.sampleRate,vocal?currentStyle+':'+vowel:brightness].join(':');
   let buffer=acousticCache.get(key);
   if(!buffer){
-   const samples=vocal?vocalWave(id as VocalInstrument,frequency,ctx.sampleRate,vowel):acousticWave(acoustic,frequency,ctx.sampleRate,brightness);
+   const samples=vocal?vocalWave(id as VocalInstrument,frequency,ctx.sampleRate,vowel,character):acousticWave(acoustic,frequency,ctx.sampleRate,brightness);
    buffer=ctx.createBuffer(1,samples.length,ctx.sampleRate);buffer.getChannelData(0).set(samples);
    if(acousticCache.size>=40)acousticCache.delete(acousticCache.keys().next().value!);
    acousticCache.set(key,buffer);

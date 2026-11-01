@@ -1,3 +1,4 @@
+import type {StyleId} from './presets';
 export const vocalInstruments=['voice','choir','vocalpad'] as const;
 export type VocalInstrument=typeof vocalInstruments[number];
 /** Keep generated registers in a useful singing range, before manual transposition. */
@@ -7,15 +8,21 @@ export function vocalFundamental(note:number){
  while(frequency<110)frequency*=2;
  return frequency;
 }
+export function vocalCharacter(style:StyleId){
+ const rhythmic=['electronic','house','funk','hiphop','sport','reggae','drumandbass'].includes(style);
+ const intimate=['jazz','coffeehouse','lofi'].includes(style);
+ return {vowel:intimate?.4:rhythmic?.9:0,duration:rhythmic?.72:intimate?1.35:1.25,
+  attack:rhythmic?.025:intimate?.075:.055,air:intimate?.012:rhythmic?.004:.008};
+}
 const vowels=[[800,1150,2800],[450,800,2830],[325,700,2530]];
 /** A slow Ah–Oh–Uh trajectory, independent of randomness at individual note attacks. */
 export function vowelPosition(bar:number,seed:number){return Math.round((1-Math.cos(bar*Math.PI/16+seed))*8)/8;}
 /** Harmonic glottal source shaped by vowel resonances, not speech or voice recordings. */
-export function vocalWave(id:VocalInstrument,frequency:number,sampleRate:number,vowel:number):Float32Array{
+export function vocalWave(id:VocalInstrument,frequency:number,sampleRate:number,vowel:number,character?:ReturnType<typeof vocalCharacter>):Float32Array{
  const position=Math.max(0,Math.min(2,vowel)),index=Math.min(1,Math.floor(position)),mix=position-index;
  const formants=vowels[index].map((f,i)=>f*(1-mix)+vowels[index+1][i]*mix);
- const seconds=id==='voice'?1.25:id==='choir'?1.85:2.3;
- const attack=id==='voice'?.055:id==='choir'?.16:.32,release=id==='voice'?.2:.4;
+ const seconds=id==='voice'?(character?.duration??1.25):id==='choir'?1.85:2.3;
+ const attack=id==='voice'?(character?.attack??.055):id==='choir'?.16:.32,release=id==='voice'?.2:.4;
  const data=new Float32Array(Math.ceil(seconds*sampleRate));
  const detunes=id==='voice'?[1]:[.997,1.003];
  const modes=detunes.flatMap(detune=>Array.from({length:Math.min(24,Math.floor(sampleRate*.43/frequency))},(_,i)=>{
@@ -39,7 +46,7 @@ export function vocalWave(id:VocalInstrument,frequency:number,sampleRate:number,
    if(i%256===0){const norm=Math.hypot(m.s,m.c);m.s/=norm;m.c/=norm;}
   }
   noise=(Math.imul(noise,1664525)+1013904223)|0;
-  data[i]=(value+noise/2147483648*(id==='voice'?.008:.004))*onset*Math.min(1,(seconds-t)/release);
+  data[i]=(value+noise/2147483648*(id==='voice'?(character?.air??.008):.004))*onset*Math.min(1,(seconds-t)/release);
  }
  let peak=0;for(const v of data)peak=Math.max(peak,Math.abs(v));
  const scale=peak? .65/peak:0;
