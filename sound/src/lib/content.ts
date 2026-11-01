@@ -1,7 +1,7 @@
 export const content={
  de:{
   title:'Online-Musik-Sequencer & generative Musik – JackTools Sound',
-  description:'Erstelle Musik im Browser: Orbit-Sequencer mit Zeichensteuerung, zehn Musikstilen und Zufalls-Play mit Songstruktur. Kostenlos, ohne Anmeldung und ohne Installation.',
+  description:'Erstelle Musik im Browser: Orbit-Sequencer mit Zeichensteuerung, sechzehn Musikstilen und Zufalls-Play mit Songstruktur. Kostenlos, ohne Anmeldung und ohne Installation.',
   faqTitle:'Fragen zum Online-Musik-Sequencer',guide:'Nutzungshinweise und Bedienung',back:'Zurück zum Soundtool',
   faq:[
    ['Welche Musikrichtungen kann ich ausprobieren?','Electronic, House, Pop, Rock, Klassik, Jazz & Blues, Coffeehouse, Ambient, Fokus und Sport. Die Presets laden unterschiedliche Instrumente, Tempi und Muster. Die Bezeichnungen Fokus und Sport sind Klangvorschläge für diese Situationen, keine Wirkungsversprechen.'],
@@ -20,7 +20,7 @@ export const content={
  },
  en:{
   title:'Online music sequencer & generative music – JackTools Sound',
-  description:'Create music in your browser: an orbit sequencer with drawing controls, ten styles and Random Play song structures. Free, no account or installation needed.',
+  description:'Create music in your browser: an orbit sequencer with drawing controls, sixteen styles and Random Play song structures. Free, no account or installation needed.',
   faqTitle:'Online music sequencer questions',guide:'Usage notes and controls',back:'Back to the sound tool',
   faq:[
    ['Which music styles are available?','Electronic, House, Pop, Rock, Classical, Jazz & Blues, Coffeehouse, Ambient, Focus and Sport. Each preset loads its own instruments, tempo and pattern. Focus and Sport describe suggested sound characters, not guaranteed effects.'],
@@ -39,7 +39,7 @@ export const content={
  },
  es:{
   title:'Secuenciador musical online y música generativa – JackTools Sound',
-  description:'Crea música en el navegador con órbitas, dibujos, diez estilos y estructuras musicales aleatorias. Gratis, sin registro ni instalación.',
+  description:'Crea música en el navegador con órbitas, dibujos, dieciséis estilos y estructuras musicales aleatorias. Gratis, sin registro ni instalación.',
   faqTitle:'Preguntas sobre el secuenciador online',guide:'Instrucciones y controles',back:'Volver a Sound',
   faq:[
    ['¿Qué estilos hay?','Electrónica, House, Pop, Rock, Clásica, Jazz y blues, Café, Ambient, Concentración y Deporte. Cada preset carga instrumentos, tempo y patrones propios. Concentración y Deporte son propuestas sonoras, no promesas de efectos.'],
@@ -58,7 +58,7 @@ export const content={
  },
  fr:{
   title:'Séquenceur musical en ligne et musique générative – JackTools Sound',
-  description:'Créez de la musique dans le navigateur : orbites, dessin, dix styles et structures génératives. Gratuit, sans compte ni installation.',
+  description:'Créez de la musique dans le navigateur : orbites, dessin, seize styles et structures génératives. Gratuit, sans compte ni installation.',
   faqTitle:'Questions sur le séquenceur en ligne',guide:'Instructions et commandes',back:'Retour à Sound',
   faq:[
    ['Quels styles sont disponibles ?', 'Électronique, House, Pop, Rock, Classique, Jazz & blues, Café, Ambient, Concentration et Sport. Chaque preset charge ses instruments, tempo et motifs. Concentration et Sport décrivent des propositions sonores, sans effet garanti.'],

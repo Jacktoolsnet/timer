@@ -97,3 +97,12 @@ and panners are disconnected after their sources end. Random Play gradually open
 the filter over the two bars before a chorus and settles over its first two bars,
 with a small dynamic breath rather than a volume boost. Drawn motifs are unchanged;
 visual hit energy follows the same dynamics. No additional animation is forced on.
+
+Six additional styles bring the total to sixteen: Hip-Hop/Rap (88 BPM, swung
+backbeat and synth bass), Lo-Fi (74 BPM, softened piano and loose swing), Funk
+(108 BPM, syncopated bass/guitar), Reggae/Dub (76 BPM, one-drop and offbeat chops
+with stronger echo), Drum & Bass (168 BPM, broken drums and sparse pads), and
+Latin/Bossa Nova (104 BPM, interlocking rim/shaker and warm guitar).
+Each uses the same drawing, song and Random Play engines. Random instrument
+morphs retain percussion/melody roles in these styles. Rap is instrumental,
+not generated vocals. Ambient, Focus and Sport remain at the end of the list.

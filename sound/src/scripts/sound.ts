@@ -379,7 +379,8 @@ function evolveJourney(time:number){
   const chosen=tonal.find(({tr})=>tr.morph)||tonal[Math.floor(Math.random()*tonal.length)];
   const palette=[...new Set(presets[currentStyle].parts.map(part=>part.instrument))];
   const percussion=['kick','snare','hat','clap','tom','rim','shaker'];
-  const alternatives=palette.filter(id=>id!==chosen.tr.instrument&&(currentStyle!=='sport'||percussion.includes(id)===percussion.includes(chosen.tr.instrument)));
+  const preserveRoles=['sport','hiphop','lofi','funk','reggae','drumandbass','latin'].includes(currentStyle);
+  const alternatives=palette.filter(id=>id!==chosen.tr.instrument&&(!preserveRoles||percussion.includes(id)===percussion.includes(chosen.tr.instrument)));
   if(!chosen.tr.morph&&alternatives.length)chosen.tr.morph={to:alternatives[Math.floor(Math.random()*alternatives.length)],progress:0,from:0,at:time,duration:0};
   const length=journeyLength()+((currentStyle==='focus'||currentStyle==='coffeehouse')?2:0);
   journey={track:chosen.index,cycle:chosen.tr.morph?Math.round(chosen.tr.morph.progress*length):0,length,

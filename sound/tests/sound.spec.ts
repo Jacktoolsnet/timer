@@ -172,7 +172,7 @@ test('ambient canvas renders without blocking the instrument',async({page})=>{
 test('style presets change instruments and defer live changes to a bar',async({page})=>{
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/de/');
- await expect(page.locator('.style-tile')).toHaveCount(10);
+ await expect(page.locator('.style-tile')).toHaveCount(16);
  const choose=(id:string)=>page.locator('[data-style-preset='+id+']').click();
  await choose('classical');
  await expect(page.locator('[data-style-preset=classical]')).toHaveAttribute('aria-pressed','true');
@@ -626,4 +626,23 @@ test('sound defaults to dark and respects saved theme choices',async({page})=>{
  await expect(page.locator('html')).toHaveAttribute('data-theme','light');
  await page.emulateMedia({colorScheme:'dark'});
  await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
+});
+
+test('new genres support random playback and live drawing',async({page})=>{
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/de/');
+ for(const [id,bpm] of [['hiphop','88'],['lofi','74'],['funk','108'],['reggae','76'],['drumandbass','168'],['latin','104']]){
+  await page.locator('[data-style-preset="'+id+'"]').click();
+  await expect(page.locator('#tempo')).toHaveValue(bpm);
+  await page.locator('#evolve').click();
+  await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
+  await expect(page.locator('#song-structure')).toBeVisible();
+  const canvas=page.locator('#drawing');await canvas.scrollIntoViewIfNeeded();
+  const rect=(await canvas.boundingBox())!;
+  await page.mouse.move(rect.x+rect.width*.2,rect.y+rect.height*.8);
+  await page.mouse.down();await page.mouse.move(rect.x+rect.width*.6,rect.y+rect.height*.75,{steps:8});await page.mouse.up();
+  await page.locator('#play').click();
+  await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false');
+ }
+ expect(errors).toEqual([]);
 });
