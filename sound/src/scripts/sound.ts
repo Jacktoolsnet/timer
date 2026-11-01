@@ -17,9 +17,11 @@ const language=document.documentElement.lang as keyof typeof styleCopy;
 let currentStyle:StyleId='electronic',pendingStyle:StyleId|null=null;
 let evolving=false,evolutionStep=Infinity;
 function setEvolution(on:boolean){
+ if(evolving&&!on)tracks.forEach(tr=>{if(tr.directionMode!=='random')tr.pendingDirection=tr.directionMode==='reverse'?-1:1;});
  evolving=on;evolutionStep=on?nextEvolutionStep(step):Infinity;
  $('#evolve').setAttribute('aria-pressed',String(on));labelAction('#evolve',on?t.evolveStop:t.evolve);
  $('#evolution-status').textContent='';
+ sync();
 }
 const events:{time:number;step:number;notes:{track:number;beat:number;velocity:number}[]}[]=[];
 function labelAction(selector:string,label:string){const button=$(selector);button.setAttribute('aria-label',label);button.setAttribute('title',label);}
@@ -77,10 +79,12 @@ function sync(){
   const row=$<HTMLElement>('[data-track="'+i+'"]');
   row.dataset.enabled=String(tr.enabled);row.dataset.phase=String(tr.phase);row.dataset.direction=String(tr.direction);
   const direction=row.querySelector<HTMLSelectElement>('.track-direction')!;
-  direction.value=tr.directionMode;direction.disabled=tr.instrument==='kick';
+  direction.value=evolving?'random':tr.directionMode;direction.disabled=evolving||tr.instrument==='kick';
   direction.dispatchEvent(new Event('options-sync'));
   const trigger=row.querySelector<HTMLButtonElement>('[id="trigger-direction-'+i+'"]');
   if(trigger)trigger.disabled=direction.disabled;
+  const dynamics=row.querySelector<HTMLInputElement>('.random-dynamics')!;
+  dynamics.checked=evolving||tr.randomDynamics;dynamics.disabled=evolving;
   row.querySelector<HTMLInputElement>('.track-enabled')!.checked=tr.enabled;
   row.querySelector<HTMLInputElement>('.mute')!.checked=tr.mute;
   row.querySelector<HTMLInputElement>('.track-volume')!.value=String(tr.volume);
@@ -176,7 +180,7 @@ function voice(i:number,time:number,beat:number,velocity:number){
  }
 }
 function shiftRandomOrbit(){
- const eligible=tracks.filter(tr=>tr.enabled&&!tr.mute&&tr.instrument!=='kick');
+ const eligible=tracks.filter(tr=>tr.enabled&&!tr.mute&&(evolving||tr.instrument!=='kick'));
  if(!eligible.length)return;
  const tr=eligible[Math.floor(Math.random()*eligible.length)];
  // Whole sequencer subdivisions preserve the common tempo and bar length.
@@ -186,11 +190,29 @@ function shiftRandomOrbit(){
 }
 function applyDirections(randomize=false){
  tracks.forEach(tr=>{
-  if(tr.instrument==='kick'){tr.direction=1;tr.directionMode='forward';tr.pendingDirection=null;return;}
+  if(tr.instrument==='kick'&&!evolving){tr.direction=1;tr.directionMode='forward';tr.pendingDirection=null;return;}
   if(tr.pendingDirection!==null){tr.direction=tr.pendingDirection;tr.pendingDirection=null;}
-  if(randomize&&tr.enabled&&!tr.mute&&tr.directionMode==='random'&&Math.random()<.4){tr.direction*=-1;tr.hits.fill(-Infinity);}
+  if(randomize&&tr.enabled&&!tr.mute&&(evolving||tr.directionMode==='random')&&Math.random()<.4){tr.direction*=-1;tr.hits.fill(-Infinity);}
  });
  sync();
+}
+function evolveSound(){
+ const eligible=tracks.filter(tr=>tr.enabled&&!tr.mute&&tr.volume>0);
+ if(eligible.length){
+  const tr=eligible[Math.floor(Math.random()*eligible.length)];
+  tr.pitch=Math.floor(Math.random()*presets[currentStyle].scale.length);
+  // Stay inside the chosen genre's palette; replace at most one instrument per change.
+  if(Math.random()<.35){
+   const palette=[...new Set(presets[currentStyle].parts.map(part=>part.instrument))];
+   const alternatives=palette.filter(id=>id!==tr.instrument);
+   if(alternatives.length)tr.instrument=alternatives[Math.floor(Math.random()*alternatives.length)];
+  }
+ }
+ if(Math.random()<.2){
+  const target=presets[currentStyle].bpm;
+  bpm=Math.max(40,Math.min(180,Math.round(target*(.94+Math.random()*.12))));
+  $<HTMLInputElement>('#tempo').value=String(bpm);$('#tempo-value').textContent=bpm+' BPM';
+ }
 }
 function schedule(){
  if(!audio||!playing)return;
@@ -199,14 +221,14 @@ function schedule(){
   if(step%16===0)applyDirections();
   if(pendingStyle&&step%16===0)applyStyle(pendingStyle);
   if(evolving&&step%16===0&&step>=evolutionStep){
-   evolvePattern(tracks,Math.random,presets[currentStyle].grid);shiftRandomOrbit();applyDirections(true);evolveAnimations();
+   evolvePattern(tracks,Math.random,presets[currentStyle].grid);shiftRandomOrbit();applyDirections(true);evolveSound();evolveAnimations();
    if(currentStyle==='classical'||currentStyle==='ambient'){const melodic=tracks.filter(tr=>tr.enabled&&!tr.mute&&!['kick','snare','hat','clap','tom','rim','shaker'].includes(tr.instrument));if(melodic.length){const tr=melodic[Math.floor(Math.random()*melodic.length)];tr.pitch=(tr.pitch+1)%presets[currentStyle].scale.length;}}sync();evolutionStep=nextEvolutionStep(step);
   }
   const s=step%16,notes:{track:number;beat:number;velocity:number}[]=[];
   tracks.forEach((tr,i)=>{
    const beat=((tr.direction*s+tr.phase)%16+16)%16;
    if(tr.enabled&&!tr.mute&&tr.volume>0&&tr.points[beat]){
-    const velocity=tr.randomDynamics?.45+Math.random()*.55:1;
+    const velocity=(evolving||tr.randomDynamics)?.45+Math.random()*.55:1;
     voice(i,nextTime,beat,velocity);notes.push({track:i,beat,velocity});
    }
   });
@@ -294,6 +316,7 @@ $('#focus').addEventListener('click',()=>focus(!document.body.classList.contains
 document.addEventListener('keydown',e=>{if(e.key==='Escape')focus(false);});
 function position(e:PointerEvent,c:HTMLCanvasElement){const r=c.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*c.width,y:(e.clientY-r.top)/r.height*c.height};}
 orbit.addEventListener('pointerdown',e=>{
+ if(!orbitAnimation)return;
  const p=position(e,orbit),x=p.x-350,y=p.y-350,r=Math.hypot(x,y);
  const active=activeTracks();if(!active.length)return;
  const nearest=active.map((entry,rank)=>({...entry,distance:Math.abs(r-radius(rank,active.length))})).sort((a,b)=>a.distance-b.distance)[0];
@@ -335,13 +358,14 @@ function renderAtmosphere(time:number,dark:boolean){
  const masterLevel=Number($<HTMLInputElement>('#volume').value);
  const beats=time*bpm/60,still=reduced.matches||!playing;
  const centeredBands=backgroundMode==='aurora'||backgroundMode==='waves';
- let orbitX=w/2,orbitY=h/2;
+ let orbitX=w/2,orbitY=h/2,orbitHeight=h*.7;
  if(centeredBands){
   // Follow the actual on-screen orbit, including responsive layout and focus transitions.
   const target=orbit.getBoundingClientRect(),backdrop=atmosphere.getBoundingClientRect();
   if(backdrop.width&&backdrop.height){
    orbitX=(target.left+target.width/2-backdrop.left)/backdrop.width*w;
    orbitY=(target.top+target.height/2-backdrop.top)/backdrop.height*h;
+   orbitHeight=target.height/backdrop.height*h;
   }
  }
  const profile={
@@ -375,7 +399,7 @@ function renderAtmosphere(time:number,dark:boolean){
     ac.lineWidth=5+ribbon*3;ac.beginPath();
     for(let n=0;n<=40;n++){
      const px=n/40*w;
-     const py=orbitY+(rank-(active.length-1)/2)*9+(ribbon-1)*5+Math.sin((px-orbitX)/w*6+phase+ribbon*.25)*(20+pulse*35);
+     const py=orbitY+(rank-(active.length-1)/2)*orbitHeight*.045+(ribbon-1)*orbitHeight*.02+Math.sin((px-orbitX)/w*6+phase+ribbon*.25)*orbitHeight*(.09+pulse*.12);
      if(n===0)ac.moveTo(px,py);else ac.lineTo(px,py);
     }
     ac.stroke();
@@ -397,7 +421,7 @@ function renderAtmosphere(time:number,dark:boolean){
     ac.beginPath();
     for(let n=0;n<=64;n++){
      const px=n/64*w;
-     const py=orbitY+(rank-(active.length-1)/2)*8+(wave-1)*9+Math.sin((px-orbitX)/w*9-phase*3+index)*(10+pulse*40);
+     const py=orbitY+(rank-(active.length-1)/2)*orbitHeight*.035+(wave-1)*orbitHeight*.025+Math.sin((px-orbitX)/w*9-phase*3+index)*orbitHeight*(.065+pulse*.14);
      if(n===0)ac.moveTo(px,py);else ac.lineTo(px,py);
     }
     ac.stroke();
@@ -573,7 +597,7 @@ function frame(now:number){
  const angle=playing&&orbitAnimation?Math.max(0,(time-anchor)/(60/bpm*4))*Math.PI*2:0;
  const visualMaster=Math.min(1,Number($<HTMLInputElement>('#volume').value)/.3);
  const active=activeTracks();
- active.forEach(({tr},rank)=>{
+ if(orbitAnimation)active.forEach(({tr},rank)=>{
   const r=radius(rank,active.length);oc.beginPath();oc.arc(350,350,r,0,Math.PI*2);oc.strokeStyle=tr.color+(dark?'55':'99');oc.lineWidth=dark?1:1.4;oc.stroke();
   // Each orbit carries a continuous comet; audible notes briefly boost its glow.
   if(playing&&orbitAnimation&&!reduced.matches){

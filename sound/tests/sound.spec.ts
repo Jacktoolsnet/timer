@@ -309,7 +309,7 @@ test('manual volume and random dynamics control actual note gain',async({page})=
  await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
  await page.locator('#play').click();
 });
-test('manual and random direction changes preserve the kick pulse',async({page})=>{
+test('manual and automatic direction changes apply at bar boundaries',async({page})=>{
  await page.addInitScript(()=>{Math.random=()=>0;});
  await page.goto('/de/');
  const row=page.locator('[data-track="1"]');
@@ -326,7 +326,6 @@ test('manual and random direction changes preserve the kick pulse',async({page})
  await row.locator('.track-direction').selectOption('random',{force:true});
  await page.locator('#evolve').click();
  await expect(row).toHaveAttribute('data-direction','-1',{timeout:6000});
- await expect(page.locator('[data-track="0"]')).toHaveAttribute('data-direction','1');
  await page.locator('#play').click();
  await page.locator('#reset').click();
  await expect(row).toHaveAttribute('data-direction','1');
@@ -420,4 +419,29 @@ test('separate animation panel offers orbit variants and hides in focus',async({
  await page.locator('#focus').click();await expect(page.locator('.animations-tile')).toBeHidden();
  await page.locator('#focus').click();await expect(page.locator('.animations-tile')).toBeVisible();
  await page.locator('#play').click();expect(errors).toEqual([]);
+});
+test('random play enables directions and dynamics without per-track setup',async({page})=>{
+ await page.addInitScript(()=>{Math.random=()=>0;});
+ await page.goto('/de/');
+ await page.locator('#tempo').fill('180');await page.locator('#tempo').dispatchEvent('input');
+ await page.locator('#evolve').click();
+ await expect(page.locator('[data-track="1"] .track-direction')).toHaveValue('random');
+ await expect(page.locator('[data-track="1"] .random-dynamics')).toBeChecked();
+ await expect(page.locator('[data-track="1"]')).toHaveAttribute('data-direction','-1',{timeout:6000});
+ await expect(page.locator('[data-track="5"]')).toHaveAttribute('data-enabled','false');
+ await page.locator('#evolve').click();
+ await expect(page.locator('[data-track="1"] .track-direction')).toHaveValue('forward');
+ await expect(page.locator('[data-track="1"] .random-dynamics')).not.toBeChecked();
+});
+test('orbit off removes tracks and nodes without hiding centre or backdrop',async({page})=>{
+ await page.goto('/de/');
+ await page.locator('[data-orbit-mode=off]').click();
+ const outerPixels=()=>page.locator('#orbit').evaluate((c:HTMLCanvasElement)=>c.getContext('2d')!.getImageData(0,0,c.width,200).data.some((value,index)=>index%4===3&&value>0));
+ await expect.poll(outerPixels).toBe(false);
+ await expect(page.locator('#sound-atmosphere')).toBeVisible();
+ await expect(page.locator('[data-center-mode=ring]')).toHaveAttribute('aria-pressed','true');
+ const centrePixels=()=>page.locator('#orbit').evaluate((c:HTMLCanvasElement)=>c.getContext('2d')!.getImageData(285,285,130,130).data.some((value,index)=>index%4===3&&value>0));
+ await expect.poll(centrePixels).toBe(true);
+ await page.locator('[data-orbit-mode=comet]').click();
+ await expect.poll(outerPixels).toBe(true);
 });
