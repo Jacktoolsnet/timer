@@ -1,0 +1,78 @@
+export const content={
+ de:{
+  title:'Online-Musik-Sequencer & generative Musik – JackTools Sound',
+  description:'Erstelle Musik im Browser: Orbit-Sequencer mit Zeichensteuerung, zehn Musikstilen und Zufalls-Play mit Songstruktur. Kostenlos, ohne Anmeldung und ohne Installation.',
+  faqTitle:'Fragen zum Online-Musik-Sequencer',guide:'Nutzungshinweise und Bedienung',back:'Zurück zum Soundtool',
+  faq:[
+   ['Welche Musikrichtungen kann ich ausprobieren?','Electronic, House, Pop, Rock, Klassik, Jazz & Blues, Coffeehouse, Ambient, Fokus und Sport. Die Presets laden unterschiedliche Instrumente, Tempi und Muster. Die Bezeichnungen Fokus und Sport sind Klangvorschläge für diese Situationen, keine Wirkungsversprechen.'],
+   ['Wie entsteht die Musik im Zufallsmodus?','Zufalls-Play entwickelt eine Songstruktur mit Strophen und wiederkehrenden Refrains. Klangfarben verändern sich über mehrere Zyklen; Melodiemotive bleiben an gemeinsame Harmonien gebunden. Zeichnen erlaubt eigene Eingriffe, während die Musik weiterläuft.'],
+   ['Kann ich die Musik ohne Animationen hören?','Ja. Orbit, Zentrumsanimation und Hintergrund lassen sich unabhängig auswählen oder ausschalten. Eine Zufällig-Kachel erlaubt automatische Variantenwechsel. Fest gewählte und ausgeschaltete Varianten bleiben erhalten.'],
+   ['Bleiben meine musikalischen Einstellungen gespeichert?','Nur mit aktivierter Option „Einstellungen auf diesem Gerät merken“. Gespeichert werden unter anderem Musikstil, Instrumente, Klangpunkte und Animationen lokal in deinem Browser. Musik und Zufalls-Play starten beim Neuladen nicht automatisch.']
+  ],
+  sections:[
+   ['Musik starten und einen Stil wählen','Starte mit niedriger Lautstärke. Die Play-Taste spielt einen Loop, Zufalls-Play entwickelt zusätzlich eine Songstruktur. Unter den Instrumenten wählst du einen Stil; während der Wiedergabe wird der Wechsel zum nächsten Takt übernommen.'],
+   ['Mit Finger oder Maus eingreifen','Die horizontale Position auf der Zeichenfläche bestimmt die Stelle im Loop. Die Höhe wählt eine Instrumentenbahn und formt das Melodiemotiv. Übermalen schaltet Punkte einmal pro Zeichengeste an oder aus. Bei Percussion wird zusätzlich eine nahe melodische Bahn beeinflusst.'],
+   ['Instrumente und Dynamik bearbeiten','Klappe eine Instrumentenbahn auf, um Instrument, Lautstärke, Laufrichtung, Klangpunkte und Zufallsdynamik einzustellen. Fünf Bahnen sind anfangs aktiv, bis zu acht sind möglich. Zufalls-Play übernimmt musikalische Variationen automatisch; deaktivierte oder stumme Bahnen bleiben geschützt.'],
+   ['Songstruktur und Refrains','Die Anzeige unter den Steuerelementen zeigt den aktuellen Songteil. Refrain-Motive kehren zurück. Zeichnest du während eines Refrains, wird der bearbeitete Hook für seine nächste Wiederkehr übernommen. Nach dem Ausklang entwickelt sich die nächste Form.'],
+   ['Animationen und Fokusansicht','Wähle Orbit, Zentrum und Hintergrund unabhängig im Bereich Animationen. Zufällig wechselt Varianten auch beim normalen Play. In der Fokusansicht werden nach drei Sekunden ohne Eingabe die Steuerelemente ausgeblendet. Bewegen, Berühren oder Tastatureingabe holt sie zurück; Esc verlässt den Fokus. Vollbild und Wachhalten des Bildschirms sind browserabhängig.'],
+   ['Speichern und Wiedergabegrenzen','Aktiviere optional „Einstellungen auf diesem Gerät merken“ im Einstellungsmenü. Ausschalten oder Löschen lokaler Einstellungen entfernt die gespeicherten Daten. Beim Tabwechsel oder einer Gerätesperre wird pausiert. Aufnahme und Audioexport sind nicht vorhanden; alle Klänge sind synthetisch.']
+  ]
+ },
+ en:{
+  title:'Online music sequencer & generative music – JackTools Sound',
+  description:'Create music in your browser: an orbit sequencer with drawing controls, ten styles and Random Play song structures. Free, no account or installation needed.',
+  faqTitle:'Online music sequencer questions',guide:'Usage notes and controls',back:'Back to the sound tool',
+  faq:[
+   ['Which music styles are available?','Electronic, House, Pop, Rock, Classical, Jazz & Blues, Coffeehouse, Ambient, Focus and Sport. Each preset loads its own instruments, tempo and pattern. Focus and Sport describe suggested sound characters, not guaranteed effects.'],
+   ['How does Random Play create music?','It develops verses and returning choruses within a song structure. Timbres evolve over several cycles and melodic motifs stay within shared harmonies. Drawing lets you intervene while music continues.'],
+   ['Can I listen without animations?','Yes. Orbit, centre and background visuals can be selected independently or switched off. Random tiles allow automatic variation; fixed and Off choices are respected.'],
+   ['Are my musical settings saved?','Only with Remember settings on this device enabled. Music style, instruments, beat points and animation choices are stored locally in your browser. Reloading never starts playback or Random Play automatically.']
+  ],
+  sections:[
+   ['Start music and choose a style','Begin at low volume. Play runs a loop; Random Play also develops a song structure. Choose a style above the instruments. During playback, changes take effect at the next bar.'],
+   ['Intervene with a finger or mouse','Horizontal drawing position selects a place in the loop. Height selects an instrument orbit and shapes its melodic motif. Drawing toggles each point once per gesture. Percussion gestures also affect a nearby melodic orbit.'],
+   ['Edit instruments and dynamics','Expand an instrument to set its sound, volume, direction, beat points and random dynamics. Five orbits start enabled, with up to eight available. Random Play handles musical variation automatically; disabled or muted tracks remain protected.'],
+   ['Song structure and returning choruses','The readout below the controls identifies the current section. Chorus motifs return later; drawing in a chorus updates its hook for the next reprise. A new form develops after the outro.'],
+   ['Animations and focus view','Select orbit, centre and background independently in Animations. Random variants also change during normal playback. After three seconds without input, focus view hides controls. Pointer, touch or keyboard activity restores them; Escape exits focus. Fullscreen and keeping the screen awake depend on the browser.'],
+   ['Saving and playback limits','Optionally enable Remember settings on this device in Settings. Disabling storage or deleting local preferences removes saved data. Switching tabs or locking your device pauses playback. Recording and audio export are not included; all sounds are synthesized.']
+  ]
+ },
+ es:{
+  title:'Secuenciador musical online y música generativa – JackTools Sound',
+  description:'Crea música en el navegador con órbitas, dibujos, diez estilos y estructuras musicales aleatorias. Gratis, sin registro ni instalación.',
+  faqTitle:'Preguntas sobre el secuenciador online',guide:'Instrucciones y controles',back:'Volver a Sound',
+  faq:[
+   ['¿Qué estilos hay?','Electrónica, House, Pop, Rock, Clásica, Jazz y blues, Café, Ambient, Concentración y Deporte. Cada preset carga instrumentos, tempo y patrones propios. Concentración y Deporte son propuestas sonoras, no promesas de efectos.'],
+   ['¿Cómo se genera la música aleatoria?','Se desarrollan estrofas y estribillos recurrentes. Los timbres evolucionan durante varios ciclos y los motivos siguen armonías compartidas. Puedes intervenir dibujando sin detener la música.'],
+   ['¿Puedo escuchar sin animaciones?','Sí. Órbita, centro y fondo se seleccionan por separado o se desactivan. Las opciones aleatorias cambian automáticamente; las selecciones fijas y desactivadas se respetan.'],
+   ['¿Se guardan mis ajustes?','Solo al activar Recordar ajustes en este dispositivo. Estilo, instrumentos, puntos y animaciones se guardan localmente. Recargar nunca inicia la música automáticamente.']
+  ],
+  sections:[
+   ['Iniciar y elegir estilo','Empieza con poco volumen. Reproducir activa un bucle; la reproducción aleatoria también crea una estructura musical. Elige el estilo sobre los instrumentos. Durante la reproducción cambia en el próximo compás.'],
+   ['Dibujar música','La posición horizontal elige un lugar del bucle. La altura selecciona una órbita y forma el motivo melódico. Cada punto cambia una sola vez por gesto. En percusión también se modifica una órbita melódica cercana.'],
+   ['Instrumentos y dinámica','Despliega un instrumento para ajustar sonido, volumen, dirección, puntos y dinámica aleatoria. Hay cinco órbitas activas inicialmente y hasta ocho disponibles. El modo aleatorio varía la música sin activar pistas deshabilitadas o silenciadas.'],
+   ['Estructura y estribillos','El indicador muestra la sección actual. Los estribillos vuelven; dibujar durante uno actualiza el motivo que regresará. Tras el final se desarrolla una nueva estructura.'],
+   ['Animaciones y enfoque','Elige órbita, centro y fondo independientemente. Las variantes aleatorias también cambian con la reproducción normal. Tras tres segundos sin interacción, el enfoque oculta los controles. Mover, tocar o usar el teclado los recupera; Esc sale del enfoque. Pantalla completa y bloqueo de suspensión dependen del navegador.'],
+   ['Guardar y límites','Activa opcionalmente Recordar ajustes en este dispositivo en Ajustes. Desactivarlo o borrar preferencias elimina los datos. Cambiar de pestaña o bloquear el dispositivo pausa la música. No hay grabación ni exportación; todos los sonidos son sintetizados.']
+  ]
+ },
+ fr:{
+  title:'Séquenceur musical en ligne et musique générative – JackTools Sound',
+  description:'Créez de la musique dans le navigateur : orbites, dessin, dix styles et structures génératives. Gratuit, sans compte ni installation.',
+  faqTitle:'Questions sur le séquenceur en ligne',guide:'Instructions et commandes',back:'Retour à Sound',
+  faq:[
+   ['Quels styles sont disponibles ?', 'Électronique, House, Pop, Rock, Classique, Jazz & blues, Café, Ambient, Concentration et Sport. Chaque preset charge ses instruments, tempo et motifs. Concentration et Sport décrivent des propositions sonores, sans effet garanti.'],
+   ['Comment fonctionne la lecture aléatoire ?', 'Elle développe couplets et refrains récurrents. Les timbres évoluent sur plusieurs cycles et les motifs suivent des harmonies communes. Vous pouvez intervenir par le dessin sans arrêter la musique.'],
+   ['Peut-on écouter sans animations ?', 'Oui. Orbite, centre et fond se choisissent séparément ou se désactivent. Les variantes aléatoires changent automatiquement ; les choix fixes et désactivés restent respectés.'],
+   ['Mes réglages sont-ils enregistrés ?', 'Seulement si Mémoriser les réglages sur cet appareil est activé. Style, instruments, points et animations restent stockés localement. Recharger ne lance jamais la musique automatiquement.']
+  ],
+  sections:[
+   ['Démarrer et choisir un style','Commencez à faible volume. Lecture joue une boucle ; la lecture aléatoire développe aussi une structure musicale. Choisissez le style au-dessus des instruments. Pendant la lecture, il change à la prochaine mesure.'],
+   ['Dessiner la musique','La position horizontale choisit un endroit de la boucle. La hauteur sélectionne une orbite et façonne le motif mélodique. Chaque point bascule une seule fois par geste. Sur une piste de percussion, une orbite mélodique proche est aussi modifiée.'],
+   ['Instruments et dynamique','Dépliez un instrument pour régler son timbre, volume, sens, points et dynamique aléatoire. Cinq orbites sont actives au départ, jusqu’à huit sont disponibles. Le mode aléatoire ne réactive pas les pistes désactivées ou muettes.'],
+   ['Structure et refrains','L’indicateur montre la section actuelle. Les refrains reviennent ; dessiner pendant un refrain met à jour son motif pour la prochaine reprise. Une nouvelle forme se développe après le final.'],
+   ['Animations et concentration','Choisissez orbite, centre et fond indépendamment. Les variantes aléatoires changent aussi en lecture normale. Après trois secondes sans saisie, la vue concentration masque les commandes. Mouvement, toucher ou clavier les réaffichent ; Échap quitte la vue. Plein écran et maintien de l’écran allumé dépendent du navigateur.'],
+   ['Enregistrer et limites','Activez facultativement Mémoriser les réglages sur cet appareil dans les paramètres. Désactiver ou effacer les préférences supprime les données. Changer d’onglet ou verrouiller l’appareil met en pause. Aucun enregistrement ni export audio ; tous les sons sont synthétisés.']
+  ]
+ }
+};

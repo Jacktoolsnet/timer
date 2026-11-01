@@ -591,3 +591,17 @@ test('a drawn refrain motif returns on the next chorus',async({page})=>{
  await expect(track).toHaveAttribute('data-motif',hook!);
  await page.locator('#play').click();
 });
+for(const lang of ['de','en','es','fr'])test('localized overview, metadata and separate usage guide '+lang,async({page})=>{
+ await page.goto('/'+lang+'/');
+ await expect(page.locator('[data-tool-information=sound]')).toBeVisible();
+ await expect(page.locator('.sound-faq details')).toHaveCount(4);
+ const schema=await page.locator('script[type="application/ld+json"]').evaluateAll(scripts=>scripts.map(s=>JSON.parse(s.textContent||'{}')));
+ expect(schema.some(s=>s['@type']==='WebApplication'&&s.applicationCategory==='MultimediaApplication')).toBe(true);
+ await expect(page.locator('.usage-link a')).toHaveAttribute('href','/'+lang+'/usage/');
+ await page.locator('#focus').click();
+ await expect(page.locator('[data-tool-information=sound]')).toBeHidden();
+ await expect(page.locator('.sound-faq')).toBeHidden();
+ await page.locator('#focus').click();
+ await page.locator('.usage-link a').click();
+ await expect(page.locator('.legal-page>section')).toHaveCount(6);
+});

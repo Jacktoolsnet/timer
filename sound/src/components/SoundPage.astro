@@ -3,6 +3,8 @@ import {instrumentIds,instrumentNames,instrumentLabel,defaultInstruments,trackLa
 import {songCopy} from '../lib/song';
 import {styleIds,styleCopy} from '../lib/presets';
 import BackgroundIcon from './BackgroundIcon.astro';
+import ToolInformation from '../../../shared/ToolInformation.astro';
+import {content} from '../lib/content';
 import OrbitIcon from './OrbitIcon.astro';
 import CenterIcon from './CenterIcon.astro';
 import StyleIcon from './StyleIcon.astro';
@@ -12,10 +14,10 @@ import {copy,animationCopy,dynamicsCopy,directionCopy,centerCopy,backgroundCopy,
 import type {Language} from '../lib/i18n';
 import '../styles/sound.css';
 interface Props {lang:Language}
-const {lang}=Astro.props,t=copy[lang];
+const {lang}=Astro.props,t=copy[lang],info=content[lang];
 const instrumentsTitle={de:'Instrumente',en:'Instruments',es:'Instrumentos',fr:'Instruments'};
 ---
-<Layout lang={lang} title={'JackTools Sound – '+t.title} description={t.description} route="">
+<Layout lang={lang} title={info.title} description={info.description} route="">
 <section class="intro"><p class="eyebrow">JACKTOOLS / SOUND · PROTOTYPE</p><h1>{t.title}</h1><p class="intro-copy">{t.description}</p></section>
 <section class="sound-app" id="sound-app">
  <canvas id="sound-atmosphere" width="1100" height="760" aria-hidden="true"></canvas>
@@ -33,6 +35,6 @@ const instrumentsTitle={de:'Instrumente',en:'Instruments',es:'Instrumentos',fr:'
 <section class="instruments-tile" aria-labelledby="instruments-title"><h2 id="instruments-title">{instrumentsTitle[lang]}</h2><div class="style-controls"><div class="style-tiles" role="group" aria-label={styleCopy[lang].label}>{styleIds.map((id,i)=><button type="button" class="style-tile" data-style-preset={id} aria-pressed={id==='electronic'?"true":"false"} aria-describedby="style-status"><span class="style-icon"><StyleIcon name={id}/></span><span>{styleCopy[lang].names[i]}</span><span class="style-check" aria-hidden="true">✓</span></button>)}</div><p>{styleCopy[lang].hint}</p></div><p id="style-status" role="status"></p>
  <div class="instrument-list">{defaultInstruments.map((id,i)=>{const name=instrumentNames[lang][instrumentIds.indexOf(id)];return <details class="instrument" data-track={i} data-enabled={i<5?"true":"false"}><summary><span class={'dot dot-'+i}></span><span class="instrument-name">{name}</span><span class="count"></span></summary><div class="track-settings"><label>{trackLabels[lang].enable}<span class="sound-switch"><input class="track-enabled" type="checkbox" role="switch" checked={i<5}/><span class="sound-switch-track" aria-hidden="true"></span></span></label><label>{instrumentLabel[lang]}<select class="instrument-select" name={`instrument-${i}`}>{instrumentIds.map((id,n)=><option value={id} selected={id===defaultInstruments[i]}>{instrumentNames[lang][n]}</option>)}</select></label><label>{directionCopy[lang].label}<select class="track-direction" name={`direction-${i}`}>{(['forward','reverse','random'] as const).map(mode=><option value={mode}>{directionCopy[lang][mode]}</option>)}</select></label><label>{t.mute}<span class="sound-switch"><input type="checkbox" class="mute" role="switch"/><span class="sound-switch-track" aria-hidden="true"></span></span></label><label class="track-volume-label"><span>{t.volume}</span><output class="track-volume-value">65 %</output><input class="track-volume" type="range" min="0" max="1" step=".05" value=".65"/></label><label title={dynamicsCopy[lang].hint}>{dynamicsCopy[lang].random}<span class="sound-switch"><input class="random-dynamics" type="checkbox" role="switch"/><span class="sound-switch-track" aria-hidden="true"></span></span></label><div class="steps" role="group" aria-label={name}>{Array.from({length:16},(_,s)=><button data-step={s} aria-label={name+' · '+(s+1)} aria-pressed="false">{s+1}</button>)}</div></div></details>})}</div>
 </section>
-<section class="guide"><h2>{t.guide}</h2><p>{t.body}</p><p>{t.help}</p><p>{t.note}</p><p>{t.privacy}</p></section>
+<ToolInformation tool="sound" lang={lang}/><section class="faq sound-faq" aria-labelledby="sound-faq-title"><h2 id="sound-faq-title">{info.faqTitle}</h2>{info.faq.map(([question,answer])=><details><summary>{question}</summary><p>{answer}</p></details>)}<p class="usage-link"><a href={`/${lang}/usage/`}>{info.guide} →</a></p></section>
 <script src="../scripts/sound.ts"></script>
 </Layout>
