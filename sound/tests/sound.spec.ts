@@ -45,7 +45,7 @@ test('all instruments can replace a track without losing points',async({page})=>
  await page.locator('#play').click();
  const select=track.locator('select');
  const ids=await select.locator('option').evaluateAll(options=>options.map(o=>(o as HTMLOptionElement).value));
- expect(ids).toHaveLength(14);
+ expect(ids).toHaveLength(18);
  for(const id of ids){
   await select.selectOption(id,{force:true});
   await expect(track.locator('.count')).toHaveText(count!);
@@ -167,5 +167,95 @@ test('ambient canvas renders without blocking the instrument',async({page})=>{
  await page.emulateMedia({reducedMotion:'reduce'});
  await page.locator('#play').click();await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
  await page.locator('#focus').click();await expect(page.locator('#sound-atmosphere')).toBeVisible();
+ await page.locator('#play').click();
+});
+test('style presets change instruments and defer live changes to a bar',async({page})=>{
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/de/');
+ await expect(page.locator('.style-tile')).toHaveCount(6);
+ const choose=(id:string)=>page.locator('[data-style-preset='+id+']').click();
+ await choose('classical');
+ await expect(page.locator('[data-style-preset=classical]')).toHaveAttribute('aria-pressed','true');
+ await expect(page.locator('[data-style-preset=electronic]')).toHaveAttribute('aria-pressed','false');
+ await expect(page.locator('[data-track="0"] .instrument-name')).toHaveText('Klavier');
+ await expect(page.locator('#tempo')).toHaveValue('76');
+ await expect(page.locator('[data-track="1"] .instrument-name')).toHaveText('Streicher');
+ await choose('house');
+ await expect(page.locator('#tempo')).toHaveValue('124');
+ await expect(page.locator('.instrument[data-enabled=true]')).toHaveCount(6);
+ await page.locator('#play').click();
+ await choose('rock');
+ await expect(page.locator('#style-status')).not.toBeEmpty();
+ await expect(page.locator('#tempo')).toHaveValue('124');
+ await expect(page.locator('#tempo')).toHaveValue('118',{timeout:5000});
+ await expect(page.locator('#style-status')).toBeEmpty();
+ await page.locator('#play').click();
+ for(const id of ['pop','ambient','electronic']){
+  await choose(id);
+  await page.locator('#play').click();await page.waitForTimeout(150);await page.locator('#play').click();
+ }
+ expect(errors).toEqual([]);
+});
+test('focus idle stage enlarges orbit and restores controls on activity',async({page})=>{
+ await page.addInitScript(()=>{
+  // Test the equally supported fullscreen-denied fallback deterministically.
+  Element.prototype.requestFullscreen=async()=>{throw Error('Not allowed');};
+  const state={requests:0,releases:0};(window as any).idleWake=state;
+  Object.defineProperty(navigator,'wakeLock',{value:{request:async()=>{
+   state.requests++;const sentinel=new EventTarget() as any;
+   sentinel.release=async()=>{state.releases++;sentinel.dispatchEvent(new Event('release'));};return sentinel;
+  }}});
+ });
+ await page.goto('/de/');await page.locator('#focus').click();
+ const before=await page.locator('.orbit-wrap').boundingBox();
+ await expect(page.locator('body')).toHaveClass(/focus-idle/,{timeout:5000});
+ await expect(page.locator('.flow-side')).toBeHidden();
+ await expect(page.locator('#focus')).toBeHidden();
+ await page.waitForTimeout(750);
+ const after=await page.locator('.orbit-wrap').boundingBox();
+ expect(after!.width).toBeGreaterThan(before!.width);
+ const viewport=page.viewportSize()!;
+ expect(Math.abs(after!.x+after!.width/2-viewport.width/2)).toBeLessThan(3);
+ expect(Math.abs(after!.y+after!.height/2-viewport.height/2)).toBeLessThan(3);
+ expect(await page.evaluate(()=>(window as any).idleWake)).toEqual({requests:1,releases:0});
+ await page.mouse.move(12,12);
+ await expect(page.locator('.flow-side')).toBeVisible();
+ await expect(page.locator('body')).not.toHaveClass(/focus-idle/);
+ await expect(page.locator('body')).toHaveClass(/focus-idle/,{timeout:5000});
+ await page.keyboard.press('Tab');await expect(page.locator('.flow-side')).toBeVisible();
+ await page.locator('#focus').click();
+ await expect(page.locator('body')).not.toHaveClass(/focus-view/);
+ await expect.poll(()=>page.evaluate(()=>(window as any).idleWake.releases)).toBe(1);
+});
+test('focus requests fullscreen and exits it on leaving',async({page})=>{
+ await page.addInitScript(()=>{
+  let element:Element|null=null;(window as any).fullscreenCalls={enter:0,exit:0};
+  Object.defineProperty(document,'fullscreenElement',{get:()=>element});
+  Element.prototype.requestFullscreen=async()=>{
+   (window as any).fullscreenCalls.enter++;element=document.documentElement;document.dispatchEvent(new Event('fullscreenchange'));
+  };
+  document.exitFullscreen=async()=>{
+   (window as any).fullscreenCalls.exit++;element=null;document.dispatchEvent(new Event('fullscreenchange'));
+  };
+ });
+ await page.goto('/de/');await page.locator('#focus').click();
+ await expect.poll(()=>page.evaluate(()=>(window as any).fullscreenCalls.enter)).toBe(1);
+ await page.locator('#focus').click();
+ await expect.poll(()=>page.evaluate(()=>(window as any).fullscreenCalls.exit)).toBe(1);
+ await page.locator('#focus').click();
+ await page.evaluate(()=>document.exitFullscreen());
+ await expect(page.locator('body')).not.toHaveClass(/focus-view/);
+});
+test('background follows applied style and remains still for reduced motion',async({page})=>{
+ await page.goto('/de/');
+ for(const style of ['electronic','house','pop','rock','classical','ambient']){
+  await page.locator('[data-style-preset='+style+']').click();
+  await expect(page.locator('#sound-atmosphere')).toHaveAttribute('data-style',style);
+ }
+ await page.emulateMedia({reducedMotion:'reduce'});
+ await page.locator('#play').click();
+ const pixels=()=>page.locator('#sound-atmosphere').evaluate((canvas:HTMLCanvasElement)=>canvas.toDataURL());
+ const first=await pixels();await page.waitForTimeout(350);
+ expect(await pixels()).toBe(first);
  await page.locator('#play').click();
 });

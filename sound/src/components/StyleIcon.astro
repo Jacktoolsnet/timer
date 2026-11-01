@@ -1,0 +1,14 @@
+---
+import type {StyleId} from '../lib/presets';
+interface Props {name:StyleId}
+const {name}=Astro.props;
+const paths={
+ electronic:'M4 14v-4m4 10V4m4 13V7m4 15V2m4 14V8',
+ house:'m3 11 9-8 9 8M5 10v11h14V10M9 17v-3m3 5v-7m3 5v-3',
+ pop:'m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9Z',
+ rock:'m14 4 2 2m-3 1 4 4M15 8l5-5 1 1-5 5M13 9c-3-2-5-1-5 2-4-1-7 4-4 7s8 0 7-4c3 0 4-2 2-5Zm-6 5 3 3',
+ classical:'M4 4h16v16H4ZM4 14h16M8 14v6m4-6v6m4-6v6M8 4v6m4-6v6m4-6v6',
+ ambient:'M3 9c3-5 6 5 9 0s6 5 9 0M3 15c3-5 6 5 9 0s6 5 9 0'
+};
+---
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d={paths[name]}/></svg>
