@@ -14,7 +14,7 @@ export const presets:Record<StyleId,Preset>={
  ambient:{bpm:56,scale:[0,2,4,7,9],melody:[0,2,1,3,2,4,1,0],grid:quarters,density:.14,parts:[part('pad',[0,8],0,.4),part('bells',[6],2,.3),part('kalimba',[2,10],1,.4),part('strings',[0],3,.3),part('piano',[4,12],0,.35)]},
  focus:{bpm:80,scale:[0,2,4,7,9],melody:[0,0,1,0,2,1,0,0],grid:quarters,density:.14,parts:[part('pad',[0,8],0,.3),part('bass',[0,8],0,.3),part('pluck',[2,10],1,.3),part('shaker',[4,12],0,.18),part('kalimba',[6,14],0,.25)]},
  sport:{bpm:136,scale:[0,3,5,7,10],melody:[0,0,2,0,3,2,0,2],grid:eighths,density:.32,parts:[part('kick',quarters,0,.65),part('snare',[4,12],0,.5),part('hat',eighths,0,.4),part('synthbass',[0,3,6,8,11,14],0,.5),part('pluck',[2,6,10,14],2,.4),part('clap',[12],0,.3)]},
- jazz:{bpm:92,swing:.2,scale:[0,3,5,6,7,10],melody:[0,2,4,3,2,1,4,2],grid:eighths,density:.23,parts:[part('piano',[0,6,10,14],1,.45),part('bass',quarters,0,.45),part('hat',[0,6,8,14],0,.24),part('snare',[4,12],0,.23),part('organ',[0,8],2,.22)]},
+ jazz:{bpm:92,swing:.2,scale:[0,2,4,7,9],melody:[0,1,2,3,2,1,0,2],grid:eighths,density:.23,parts:[part('piano',[0,6,10,14],1,.45),part('bass',quarters,0,.45),part('hat',[0,6,8,14],0,.24),part('snare',[4,12],0,.23),part('organ',[0,8],2,.22)]},
  coffeehouse:{bpm:78,swing:.12,scale:[0,2,3,4,7,9],melody:[0,1,3,1,4,3,1,0],grid:eighths,density:.18,parts:[part('piano',[0,4,10,14],0,.35),part('guitar',[2,6,10,14],1,.3),part('bass',[0,8],0,.35),part('shaker',[2,6,10,14],0,.16),part('organ',[0],2,.18)]}
 };
 export const styleCopy={

@@ -1,3 +1,4 @@
+import {jazzSemitones} from '../lib/jazz-harmony';
 import {storageAllowed} from '../lib/storage';
 import {STORAGE_KEY} from '../lib/engine';
 import {decodeSettings,type SoundSettings} from '../lib/sound-settings';
@@ -194,7 +195,10 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
  const ended=()=>{if(--sources===0)bus.disconnect();};
  const preset=presets[currentStyle],offset=preset.melody[Math.floor(beat/2)%preset.melody.length];
  const scaleIndex=tr.pitch+offset;
- const note=261.626*2**((preset.scale[scaleIndex%preset.scale.length]+12*Math.floor(scaleIndex/preset.scale.length))/12);
+ const semitones=currentStyle==='jazz'
+  ?jazzSemitones(Math.floor(step/16),beat,id,tr.pitch)
+  :preset.scale[scaleIndex%preset.scale.length]+12*Math.floor(scaleIndex/preset.scale.length);
+ const note=261.626*2**(semitones/12);
  function tone(freq:number,duration:number,level:number,type:OscillatorType='sine',end?:number,attack=.004){
   const osc=ctx.createOscillator(),gain=ctx.createGain();sources++;
   // Retain an instrument's deliberately slow attack while warming sharp plucks.

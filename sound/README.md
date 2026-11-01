@@ -62,3 +62,5 @@ Style-specific synthesized timbre profiles now shape brightness and transients. 
 
 
 Remember settings now persists versioned music/tool settings alongside appearance: style, tempo, master and track volumes, eight instrument/point configurations, direction modes, phases, random dynamics, current timbre blend and animation selections (including Random/Off). Restore validates local data and requires consent. It never starts playback, Random Play, fullscreen or focus automatically. Turning consent off or clearing local settings removes the record and cancels queued saves. Storage failures do not prevent playing. Drawn light trails are never saved.
+
+Jazz harmony now shares a 12-bar I–IV–V frame across melodic voices, favouring sixth/ninth chord tones instead of freely combining the minor-blues tritone. Bass follows root/fifth/sixth walking figures, organ sustains the shared root and piano/guitar use chord-tone melodies. Swing stays unchanged; this deliberately favours a softer lounge-jazz sound over tense blue-note combinations.
