@@ -2,7 +2,7 @@ export type AcousticInstrument='piano'|'guitar'|'bass'|'strings'|'marimba'|'kali
 export const acousticInstruments:readonly string[]=['piano','guitar','bass','strings','marimba','kalimba','saxophone','harp','doublebass','epiano'];
 /** Local physical/modal synthesis, not recordings. Fixed excitation makes caching safe. */
 export function acousticWave(id:AcousticInstrument,frequency:number,sampleRate:number,brightness:number):Float32Array{
- const seconds=id==='strings'?2.2:id==='harp'?2.4:id==='piano'||id==='epiano'?1.8:id==='guitar'?1.4:id==='saxophone'?1.2: .9;
+ const seconds=id==='strings'?2.2:id==='harp'?2.4:id==='piano'?2.2:id==='epiano'?2.6:id==='kalimba'?1.5:id==='guitar'?1.4:id==='saxophone'?1.2: .9;
  const data=new Float32Array(Math.ceil(sampleRate*seconds));
  const bright=Math.max(0,Math.min(1,brightness));
  if(['guitar','bass','harp','doublebass'].includes(id)){
@@ -33,10 +33,10 @@ export function acousticWave(id:AcousticInstrument,frequency:number,sampleRate:n
    const angle=2*Math.PI*frequency*ratio*stretch/sampleRate;
    return {s:0,c:1,sin:Math.sin(angle),cos:Math.cos(angle),angle,
     amplitude:h===0?1:wind?Math.pow(.7+bright*.1,h)*(h===2?1.15:1):id==='epiano'?[1,.24,.12,.035+bright*.04][h]:Math.pow(strings?.36+bright*.16:.45+bright*.22,h)/(strings?Math.sqrt(ratio):1),
-    decay:strings||wind?1:Math.exp(-1/(sampleRate*((id==='piano'?.65:.3)/(1+h*.65))))};
+    decay:strings||wind?1:Math.exp(-1/(sampleRate*(id==='marimba'?[.32,.045,.022][h]:id==='kalimba'?[.6,.18,.085,.04][h]:id==='epiano'?[1.1,.5,.28,.12][h]:(.85*Math.pow(220/frequency,.22))/(1+h*.8))))};
   });
   let attack=0;
-  const attackStep=1-Math.exp(-1/(sampleRate*(strings?.22:wind?.045:.003)));
+  const attackStep=1-Math.exp(-1/(sampleRate*(strings?.22:wind?.045:id==='epiano'?.007:.003)));
   for(let i=0;i<data.length;i++){
    const t=i/sampleRate;
    attack+=(1-attack)*attackStep;
@@ -60,6 +60,7 @@ export function acousticWave(id:AcousticInstrument,frequency:number,sampleRate:n
  // Fixed peak ceiling, smooth final release, no discontinuity at buffer end.
  let peak=0;for(const value of data)peak=Math.max(peak,Math.abs(value));
  const gain=peak>0?.7/peak:0;
- for(let i=0;i<data.length;i++)data[i]*=gain*Math.min(1,(data.length-1-i)/(sampleRate*.025));
+ const tail=id==='piano'||id==='epiano'?.12:id==='kalimba'?.07:.025;
+ for(let i=0;i<data.length;i++)data[i]*=gain*Math.min(1,(data.length-1-i)/(sampleRate*tail));
  return data;
 }

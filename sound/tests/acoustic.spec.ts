@@ -14,3 +14,10 @@ test('touch changes acoustic spectrum without unbounded peaks',()=>{
   expect(soft.some((value,i)=>Math.abs(value-hard[i])>.001)).toBe(true);
  }
 });
+
+test('electric piano sustains while marimba stays woody and short',()=>{
+ const sr=22050,piano=acousticWave('epiano',220,sr,.5),marimba=acousticWave('marimba',220,sr,.5);
+ const rms=(data:Float32Array,a:number,b:number)=>{let sum=0;for(let i=Math.floor(a*sr);i<Math.floor(b*sr);i++)sum+=data[i]**2;return Math.sqrt(sum/((b-a)*sr));};
+ expect(rms(piano,.5,.6)).toBeGreaterThan(rms(marimba,.5,.6)*1.5);
+ expect(piano.length).toBeGreaterThan(marimba.length);
+});

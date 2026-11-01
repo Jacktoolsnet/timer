@@ -788,3 +788,20 @@ test('pitch and glow sliders use the available width',async({page})=>{
  expect(Math.abs(value.x+value.width-(group.x+group.width))).toBeLessThan(3);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });
+
+test('wind, organ and pad sustain through dense notes, pitch changes and clear',async({page})=>{
+ test.setTimeout(40000);
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/de/');
+ for(const id of ['saxophone','organ','pad']){
+  await page.locator('#reset').click();
+  await page.locator('select[name="instrument-0"]').selectOption(id,{force:true});
+  await page.locator('#tempo').fill('180');await page.locator('#tempo').dispatchEvent('input');
+  await page.locator('#play').click();await page.waitForTimeout(1100);
+  await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
+  await page.locator('#transpose').fill('-12');await page.locator('#transpose').dispatchEvent('input');
+  await page.waitForTimeout(400);await page.locator('#clear').click();await page.waitForTimeout(200);
+  await page.locator('#play').click();
+ }
+ expect(errors).toEqual([]);
+});

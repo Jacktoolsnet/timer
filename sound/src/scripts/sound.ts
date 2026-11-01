@@ -1,8 +1,9 @@
+import {mixLevels} from '../lib/mixing';
 import {sustainedInstruments,phraseActive,phraseHold,type SustainedInstrument} from '../lib/phrasing';
 import {createSustainedVoice} from '../lib/sustained-voice';
 import {noteGlow} from '../lib/note-glow';
-import {developmentPlan,developmentGain,accompanimentMotif,registerArc,registerNote,type DevelopmentPlan} from '../lib/development';
-import {vocalInstruments,vocalWave,vowelPosition,vocalFundamental,vocalCharacter,type VocalInstrument} from '../lib/vocal';
+import {developmentPlan,accompanimentMotif,registerArc,registerNote,type DevelopmentPlan} from '../lib/development';
+import {vocalInstruments,vowelPosition,vocalFundamental,vocalCharacter} from '../lib/vocal';
 import {voiceRecipe} from '../lib/voice-recipes';
 import {acousticInstruments,acousticWave,type AcousticInstrument} from '../lib/acoustic';
 import {spaceProfile,stereoPosition,sectionExpression} from '../lib/space';
@@ -36,6 +37,8 @@ let audio:AudioContext|undefined, master:GainNode|undefined, playing=false,timer
 let space:ReturnType<typeof createAudioSpace>|undefined;
 const acousticCache=new Map<string,AudioBuffer>();
 let noiseBuffer:AudioBuffer|undefined;
+const liveMix=tracks.map(()=>new Set<GainNode>());
+let currentMix=tracks.map(()=>1);
 const sustained=new Map<string,{track:number;id:SustainedInstrument;voice:ReturnType<typeof createSustainedVoice>}>();
 let visualStep=0,visualTime=0,visualDuration=.15;
 function playbackAngle(time:number){return (visualStep+Math.max(0,Math.min(1,(time-visualTime)/visualDuration)))/16*Math.PI*2;}
@@ -124,7 +127,13 @@ function setEvolution(on:boolean){
  if(on!==evolving){arrangement=null;development=null;drawnUntil.fill(0);}
  if(evolving&&!on)tracks.forEach(tr=>{if(tr.directionMode!=='random')tr.pendingDirection=tr.directionMode==='reverse'?-1:1;});
  if(on&&!evolving)startSong(playing?Math.ceil(step/16):0);
- if(!on){song=null;$('#song-structure').hidden=true;}
+ if(!on){
+  currentMix=tracks.map(()=>1);
+  if(audio)liveMix.forEach(nodes=>nodes.forEach(node=>{
+   node.gain.cancelAndHoldAtTime(audio!.currentTime);
+   node.gain.setTargetAtTime(1,audio!.currentTime,.15);
+  }));
+  song=null;$('#song-structure').hidden=true;}
  evolving=on;evolutionStep=on?nextMusicStep(playing?step:0):Infinity;
  $('#evolve').setAttribute('aria-pressed',String(on));labelAction('#evolve',on?t.evolveStop:t.evolve);
  $('#evolution-status').textContent='';
@@ -315,7 +324,10 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
  const pan=ctx.createStereoPanner(),hallSend=ctx.createGain(),echoSend=ctx.createGain();
  pan.pan.setValueAtTime(stereoPosition(id,i,bar,expressionSeed),time);
  pan.pan.linearRampToValueAtTime(stereoPosition(id,i,bar+1,expressionSeed),time+60/bpm*4);
- bus.connect(pan);pan.connect(master);
+ const fader=ctx.createGain();fader.gain.setValueAtTime(evolving?currentMix[i]:1,time);
+ liveMix[i].add(fader);
+ bus.connect(fader);fader.connect(pan);pan.connect(master);
+ const cleanVoice=()=>{liveMix[i].delete(fader);bus.disconnect();fader.disconnect();pan.disconnect();hallSend.disconnect();echoSend.disconnect();};
  if(space){
   const room=spaceProfile(currentStyle),foundation=['kick','bass','synthbass','doublebass'].includes(id);
   hallSend.gain.value=foundation?.008:room.hall;
@@ -325,7 +337,7 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
   space.delay.delayTime.setTargetAtTime(60/bpm*.75,time,.15);
  }
  let sources=0;
- const ended=()=>{if(--sources===0){bus.disconnect();pan.disconnect();hallSend.disconnect();echoSend.disconnect();}};
+ const ended=()=>{if(--sources===0)cleanVoice();};
  const semitones=currentStyle==='jazz'
   ?jazzSemitones(harmonyBar(),beat,id,phrase?.pitch??tr.pitch,motif)
   :melodicSemitones(currentStyle,harmonyBar(),beat,id,phrase?.pitch??tr.pitch,motif);
@@ -366,33 +378,31 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
  }
  if((sustainedInstruments as readonly string[]).includes(id)){
   const key=i+':'+id,previous=sustained.get(key);
-  const frequency=vocal?vocalFundamental(261.626*2**(voiced/12))*2**(transpose/12):note;
+  const frequency=vocal?vocalFundamental(261.626*2**(voiced/12))*2**(transpose/12):id==='organ'?note/2:note;
   const character=vocalCharacter(currentStyle),vowel=evolving?vowelPosition(step/16,expressionSeed):character.vowel;
   const hold=phraseHold(phrase?.points||tr.points,beat,tr.direction,60/bpm/4,presets[currentStyle].swing||0,step%16);
-  const level=tr.volume*velocity*(id==='voice'?.25:id==='strings'?.15:.18);
+  const level=tr.volume*velocity*(id==='voice'?.25:id==='strings'?.15:id==='saxophone'?.23:id==='organ'?.16:id==='pad'?.13:.18);
   if(previous?.voice.canContinue(time)){
    previous.voice.note(time,frequency,level,hold,vowel);
-   bus.disconnect();pan.disconnect();hallSend.disconnect();echoSend.disconnect();return;
+   cleanVoice();return;
   }
   previous?.voice.release(time);
   const entry={track:i,id:id as SustainedInstrument,voice:null as unknown as ReturnType<typeof createSustainedVoice>};
   entry.voice=createSustainedVoice(ctx,bus,entry.id,frequency,time,level,hold,vowel,()=>{
-   bus.disconnect();pan.disconnect();hallSend.disconnect();echoSend.disconnect();
+   cleanVoice();
    if(sustained.get(key)===entry)sustained.delete(key);
   });
   sustained.set(key,entry);return;
  }
- if(acousticInstruments.includes(id)||vocal){
-  const acoustic=id as AcousticInstrument,frequency=vocal?vocalFundamental(261.626*2**(voiced/12))*2**(transpose/12):(id==='bass'||id==='doublebass')?note/4:id==='guitar'?note/2:note;
+ if(acousticInstruments.includes(id)){
+  const acoustic=id as AcousticInstrument,frequency=(id==='bass'||id==='doublebass')?note/4:id==='guitar'?note/2:note;
   // Three touch layers: stronger hits excite more upper partials, not just more volume.
   const layer=Math.max(0,Math.min(2,Math.round(velocity*tr.volume*2)));
   const brightness=(profile.warm?.2:.4)+layer*.2;
-  const character=vocalCharacter(currentStyle);
-  const vowel=evolving?vowelPosition(step/16,expressionSeed):id==='voice'?character.vowel:id==='choir'?.5:1;
-  const key=[id,frequency.toFixed(4),ctx.sampleRate,vocal?currentStyle+':'+vowel:brightness].join(':');
+  const key=[id,frequency.toFixed(4),ctx.sampleRate,brightness].join(':');
   let buffer=acousticCache.get(key);
   if(!buffer){
-   const samples=vocal?vocalWave(id as VocalInstrument,frequency,ctx.sampleRate,vowel,character):acousticWave(acoustic,frequency,ctx.sampleRate,brightness);
+   const samples=acousticWave(acoustic,frequency,ctx.sampleRate,brightness);
    buffer=ctx.createBuffer(1,samples.length,ctx.sampleRate);buffer.getChannelData(0).set(samples);
    if(acousticCache.size>=40)acousticCache.delete(acousticCache.keys().next().value!);
    acousticCache.set(key,buffer);
@@ -506,6 +516,10 @@ function schedule(){
   if(evolving&&(!development||step-development.start>=128)){
    development=developmentPlan(tracks,step,development);
   }
+  const chorus=song?.form[song.index].kind==='chorus';
+  const chorusRelief=chorus?songMix(nextTime):song?.previous==='chorus'?1-songMix(nextTime):0;
+  currentMix=evolving?mixLevels(tracks,development,step,chorusRelief,drawnUntil):tracks.map(()=>1);
+  liveMix.forEach((nodes,index)=>nodes.forEach(node=>node.gain.setTargetAtTime(currentMix[index],nextTime,.09)));
   const s=step%16,notes:{track:number;beat:number;velocity:number}[]=[];
   tracks.forEach((tr,i)=>{
    const beat=((tr.direction*s+tr.phase)%16+16)%16;
@@ -518,18 +532,14 @@ function schedule(){
     }
     const extra=evolving&&arrangement&&!protectedDrawing
      &&ornamentAt(arrangement,i,step,beat,tr.direction,tr.points);
-    const chorus=song?.form[song.index].kind==='chorus';
     if(evolving&&development&&!protectedDrawing&&!chorus&&i===development.variation
      &&isMelodic(tr.instrument)&&Math.floor((step-development.start)/16)%2===1&&s===4)return;
     if(!tr.points[beat]&&!old?.points[beat]&&!extra)return;
     const dynamics=evolving?approach(tr.scheduledVelocity,.65+Math.random()*.35,.06):tr.randomDynamics?.45+Math.random()*.55:1;
     tr.scheduledVelocity=dynamics;
-    const chorusRelief=chorus?songMix(nextTime):song?.previous==='chorus'?1-songMix(nextTime):0;
-    const emphasis=evolving&&development&&!protectedDrawing&&dialogueInstrument(tr.instrument)
-     ?developmentGain(development,i,step,chorusRelief):1;
     const foundation=['kick','bass','synthbass','doublebass'].includes(tr.instrument)||!!tr.morph&&['kick','bass','synthbass','doublebass'].includes(tr.morph.to);
     const breath=evolving&&arrangement&&!protectedDrawing&&!foundation?breathGain(arrangement,i,step):1;
-    const velocity=dynamics*songLevel(nextTime,tr.instrument)*emphasis*breath*songExpression().gain*(extra?.45:1),mix=evolving?songMix(nextTime):1;
+    const velocity=dynamics*songLevel(nextTime,tr.instrument)*breath*songExpression().gain*(extra?.45:1),mix=evolving?songMix(nextTime):1;
     if(velocity<=.0001)return;
     const joined=(sustainedInstruments as readonly string[]).includes(tr.instrument)
      &&(!tr.morph||(sustainedInstruments as readonly string[]).includes(tr.morph.to));
@@ -540,7 +550,7 @@ function schedule(){
      if(old&&old.points[beat]&&mix<1)voice(i,nextTime,beat,velocity*(1-mix),old);
      if((tr.points[beat]||extra)&&mix>0)voice(i,nextTime,beat,velocity*mix);
     }
-    notes.push({track:i,beat,velocity});
+    if(velocity*currentMix[i]>.0001)notes.push({track:i,beat,velocity:velocity*currentMix[i]});
    }
   });
   const swing=presets[currentStyle].swing||0;

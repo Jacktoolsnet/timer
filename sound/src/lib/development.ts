@@ -5,7 +5,7 @@ export type DevelopmentTrack={instrument:string;enabled:boolean;mute:boolean;vol
 export type DevelopmentPlan={start:number;lead:number;previousLead:number;rest:number;variation:number};
 const smooth=(x:number)=>{const p=Math.max(0,Math.min(1,x));return p*p*(3-2*p);};
 export function developmentPlan(tracks:readonly DevelopmentTrack[],start:number,previous:DevelopmentPlan|null,random=Math.random):DevelopmentPlan{
- const available=tracks.map((tr,i)=>({tr,i})).filter(({tr})=>tr.enabled&&!tr.mute&&tr.volume>0&&tr.points.some(Boolean)&&dialogueInstrument(tr.instrument));
+ const available=tracks.map((tr,i)=>({tr,i})).filter(({tr})=>tr.enabled&&!tr.mute&&tr.volume>0&&tr.points.some(Boolean)&&(dialogueInstrument(tr.instrument)||tr.instrument==='strings'));
  const choose=(items:typeof available)=>items.length?items[Math.min(items.length-1,Math.floor(random()*items.length))].i:-1;
  const lead=choose(available.filter(({i})=>i!==previous?.lead));
  const selectedLead=lead<0?(available[0]?.i??-1):lead;
@@ -14,8 +14,9 @@ export function developmentPlan(tracks:readonly DevelopmentTrack[],start:number,
  return {start,lead:selectedLead,previousLead:previous?.lead??selectedLead,rest,variation:choose(tracks.map((tr,i)=>({tr,i})).filter(({tr,i})=>i!==rest&&i!==selectedLead&&tr.enabled&&!tr.mute&&tr.volume>0&&tr.points.some(Boolean)&&isMelodic(tr.instrument)))};
 }
 export function developmentGain(plan:DevelopmentPlan,track:number,step:number,chorus:boolean|number){
- const elapsed=(step-plan.start)/16,transition=smooth(elapsed/2);
- const old=track===plan.previousLead?1:.72,next=track===plan.lead?1:.72;
+ const elapsed=(step-plan.start)/16,transition=smooth(elapsed/4);
+ const backing=.32+(track%3)*.06;
+ const old=track===plan.previousLead?1:backing,next=track===plan.lead?1:backing;
  let gain=old+(next-old)*transition;
  if(track===plan.rest){
   // Four-bar absence, with half-bar fades; accompaniment, not the foundation.

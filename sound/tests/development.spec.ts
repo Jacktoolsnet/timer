@@ -15,7 +15,7 @@ test('lead rotates and longer rests exclude foundations and disabled tracks',()=
 test('lead handover is continuous and does not amplify',()=>{
  const plan={start:128,lead:3,previousLead:2,rest:-1,variation:4};
  expect(developmentGain(plan,2,128,false)).toBe(1);
- expect(developmentGain(plan,3,128,false)).toBe(.72);
+ expect(developmentGain(plan,3,128,false)).toBe(.32);
  for(let s=128;s<160;s++){
   expect(Math.abs(developmentGain(plan,2,s,false)-developmentGain(plan,2,s+1,false))).toBeLessThan(.02);
  }
@@ -57,6 +57,6 @@ test('silent patterns cannot become leads and chorus release can be crossfaded',
  expect(empty.lead).toBe(-1);expect(empty.rest).toBe(-1);expect(empty.variation).toBe(-1);
  const plan={start:0,lead:0,previousLead:0,rest:1,variation:2};
  expect(developmentGain(plan,1,64,0)).toBe(0);
- expect(developmentGain(plan,1,64,.5)).toBeCloseTo(.36);
- expect(developmentGain(plan,1,64,1)).toBeCloseTo(.72);
+ expect(developmentGain(plan,1,64,.5)).toBeCloseTo(.19);
+ expect(developmentGain(plan,1,64,1)).toBeCloseTo(.38);
 });

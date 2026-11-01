@@ -27,7 +27,7 @@ test('live sustained voices render joined notes without a new attack or endless 
   const url='/src/lib/sustained-voice.ts';
   const {createSustainedVoice}=await import(url);
   const results=[];
-  for(const id of ['voice','strings']){
+  for(const id of ['voice','strings','saxophone','organ','pad']){
    const sr=22050,ctx=new OfflineAudioContext(1,sr*3,sr);let ended=0;
    const voice=createSustainedVoice(ctx,ctx.destination,id,220,.01,.2,.5,0,()=>ended++);
    voice.note(.4,246.94,.2,.5,.2);voice.note(.8,261.63,.2,.5,.4);

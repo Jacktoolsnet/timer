@@ -16,8 +16,6 @@ export function voiceRecipe(id:InstrumentId,warm:boolean,decay:number):VoiceReci
   case 'synthbass':return {tones:[partial(.25,.36,.14,{type:'sawtooth',attack:.006}),partial(.125,.42,.12,{attack:.008}),partial(.2504,.22,.025,{type:'triangle',attack:.009})],noise:[]};
   case 'bells':return {tones:[partial(2,warm?.9:1.5,.14,{attack:.002}),partial(5.52,warm?.22:.45,warm?.018:.032,{attack:.001}),partial(8.1,.12,.008,{attack:.001})],noise:[]};
   case 'pluck':return {tones:[partial(1,.32*decay,.14,{type:'triangle',attack:.003}),partial(2,.12*decay,warm?.02:.04,{attack:.002}),partial(3,.055,.012,{attack:.002})],noise:[]};
-  case 'organ':return {tones:[partial(1,.7,.12,{attack:.018,sustain:.85}),partial(2,.7,.045,{attack:.022,sustain:.8}),partial(3,.68,.027,{attack:.02,sustain:.8}),partial(.5,.68,.024,{attack:.025,sustain:.85})],noise:[]};
-  case 'pad':return {tones:[partial(.999,1.95,.075,{type:'triangle',attack:.32,sustain:.65}),partial(1.001,2.05,.065,{attack:.38,sustain:.7}),partial(2,1.85,.018,{attack:.42,sustain:.55})],noise:[]};
   default:return {tones:[],noise:[]};
  }
 }

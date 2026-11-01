@@ -202,3 +202,25 @@ Random Play gives solo voice two-bar phrases/two-bar breaths (three bars/one in 
 chorus), and strings a bow rest once per eight bars; newly drawn tracks bypass these
 rests for two bars. Normal Play follows the user's points without automatic phrase
 rests. Mute, disable, clear, instrument/style changes and Stop release held sources.
+
+Random Play mixing is now more pronounced: leads (including bowed strings) trade
+prominence over four bars; melodic accompaniment runs around 32–44% of its manual
+ceiling, pads sit further back, and percussion/bass have slower role-appropriate
+level variation. A fresh drawing gesture briefly takes priority and ducks competing
+parts, then hands the mix back over its last protected bar. Every live voice has
+an attenuating fader ahead of dry and effect sends, updated smoothly by the scheduler,
+so even long held vocals/strings change level without retriggering. Visual hit energy
+uses the same mix levels. User volume settings are never overwritten or boosted;
+normal Play restores unity faders and disabled/muted/empty tracks stay protected.
+
+The articulation audit now covers every instrument family explicitly. Saxophone
+uses a live reed-like source with broad body resonance, quiet filtered breath,
+delayed vibrato, 65 ms legato transitions and automatic breathing space in Random
+Play. Organ holds a drawbar-like harmonic mixture without vibrato or audible
+portamento; Soft Pad uses slow, detuned sustained layers. These voices share
+swing-aware gates, smooth live faders and reliable releases on Stop/mute/clear.
+Piano has register-dependent harmonic decay; electric piano keeps a longer soft
+body and shorter tine partials; marimba's high modes die quickly for a woodier
+strike, while kalimba's tines ring longer. Plucked guitar/bass/harp retain their
+separate string models; percussion, bells and electronic plucks retain distinct
+transients rather than being made universally legato.
