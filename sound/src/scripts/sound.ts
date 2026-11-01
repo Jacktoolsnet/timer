@@ -45,7 +45,7 @@ function saveSettings(){
    background:backgroundChoice,center:centerChoice,orbit:orbitChoice,
    tracks:tracks.map(tr=>({
     enabled:tr.enabled,mute:tr.mute,instrument:tr.instrument,points:[...tr.points],volume:tr.volume,pitch:tr.pitch,
-    phase:tr.phase,direction:tr.direction,directionMode:tr.directionMode,randomDynamics:tr.randomDynamics,
+    phase:tr.phase,direction:evolving&&tr.directionMode!=='random'?(tr.directionMode==='reverse'?-1:1):(tr.pendingDirection??tr.direction),directionMode:tr.directionMode,randomDynamics:tr.randomDynamics,
     morph:tr.morph?{to:tr.morph.to,progress:currentMorph(tr,audio?.currentTime||0)}:null
    }))
   };
@@ -74,28 +74,28 @@ let backgroundMode:'clouds'|'aurora'|'stars'|'waves'|'off'='clouds';
 let orbitMode:'comet'|'dot'|'pulse'|'off'='comet';
 let orbitAnimation=true;
 let centerMode:'ring'|'filled'|'sine'|'bars'|'sun'|'off'='ring';
-let centerChoice:typeof centerMode|'random'=centerMode;
-let backgroundChoice:typeof backgroundMode|'random'=backgroundMode;
-let orbitChoice:typeof orbitMode|'random'=orbitMode;
+let centerChoice:SoundSettings['center']=centerMode;
+let backgroundChoice:SoundSettings['background']=backgroundMode;
+let orbitChoice:SoundSettings['orbit']=orbitMode;
 let animationStep=Infinity;
 function pickVariant<T extends string>(modes:readonly T[],current:T):T{
  const choices=modes.filter(mode=>mode!==current);
  return choices[Math.floor(Math.random()*choices.length)];
 }
-function selectCenterMode(choice:typeof centerChoice){
+function selectCenterMode(choice:SoundSettings['center']){
  centerChoice=choice;
  centerMode=choice==='random'?pickVariant(currentStyle==='focus'?['ring','filled','sine']:currentStyle==='sport'?['ring','bars','sun']:['ring','filled','sine','bars','sun'],centerMode):choice;
  orbit.dataset.centerVariant=centerMode;persistSettings();
  document.querySelectorAll<HTMLButtonElement>('[data-center-mode]').forEach(tile=>tile.setAttribute('aria-pressed',String(tile.dataset.centerMode===choice)));
 }
-function selectBackgroundMode(choice:typeof backgroundChoice){
+function selectBackgroundMode(choice:SoundSettings['background']){
  backgroundChoice=choice;persistSettings();
  backgroundMode=choice==='random'?pickVariant(['clouds','aurora','stars','waves'] as const,backgroundMode):choice;
  document.querySelectorAll<HTMLButtonElement>('[data-background-mode]').forEach(tile=>tile.setAttribute('aria-pressed',String(tile.dataset.backgroundMode===choice)));
  atmosphere.hidden=backgroundMode==='off';atmosphere.dataset.mode=backgroundMode;
  if(backgroundMode==='off')ac.clearRect(0,0,atmosphere.width,atmosphere.height);
 }
-function selectOrbitMode(choice:typeof orbitChoice){
+function selectOrbitMode(choice:SoundSettings['orbit']){
  orbitChoice=choice;persistSettings();
  orbitMode=choice==='random'?pickVariant(['comet','dot','pulse'] as const,orbitMode):choice;
  orbitAnimation=orbitMode!=='off';orbit.dataset.animated=String(orbitAnimation);orbit.dataset.mode=orbitMode;

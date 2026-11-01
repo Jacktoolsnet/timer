@@ -111,7 +111,7 @@ const canonical = new URL(Astro.url.pathname === '/' ? '/en/' : Astro.url.pathna
               <input id="font-size" type="range" min="0" max="3" step="1" value="0" aria-valuetext="100 %" />
               <div class="font-size-steps" aria-hidden="true"><span>100 %</span><span>110 %</span><span>120 %</span><span>130 %</span></div>
             </div>
-            <div class="storage-choice"><label><span class="storage-switch"><input type="checkbox" role="switch" id="remember-preferences" aria-describedby="remember-hint" /><span class="storage-switch-track" aria-hidden="true"></span></span> <span>{t.rememberPreferences}</span></label><p id="remember-hint">{t.rememberHint}</p><p id="storage-status" role="status"></p></div>
+            <div class="storage-choice"><label><span class="storage-switch"><input type="checkbox" role="switch" id="remember-preferences" /><span class="storage-switch-track" aria-hidden="true"></span></span> <span>{t.rememberPreferences}</span></label><p id="storage-status" role="status"></p></div>
             </div>
           </details>
 

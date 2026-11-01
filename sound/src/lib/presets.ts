@@ -1,5 +1,5 @@
 import type {InstrumentId} from './instruments';
-export const styleIds=['electronic','house','pop','rock','classical','ambient','focus','sport','jazz','coffeehouse'] as const;
+export const styleIds=['electronic','house','pop','rock','classical','jazz','coffeehouse','ambient','focus','sport'] as const;
 export type StyleId=typeof styleIds[number];
 type Part={instrument:InstrumentId;steps:number[];pitch?:number;volume?:number};
 type Preset={swing?:number;bpm:number;scale:number[];melody:number[];parts:Part[];grid:number[];density:number};
@@ -18,8 +18,8 @@ export const presets:Record<StyleId,Preset>={
  coffeehouse:{bpm:78,swing:.12,scale:[0,2,3,4,7,9],melody:[0,1,3,1,4,3,1,0],grid:eighths,density:.18,parts:[part('piano',[0,4,10,14],0,.35),part('guitar',[2,6,10,14],1,.3),part('bass',[0,8],0,.35),part('shaker',[2,6,10,14],0,.16),part('organ',[0],2,.18)]}
 };
 export const styleCopy={
- de:{label:'Musikstil',names:['Electronic','House','Pop','Rock','Klassik','Ambient','Fokus','Sport','Jazz & Blues','Coffeehouse'],pending:'Stilwechsel zum nächsten Takt',hint:'Lädt Instrumente, Tempo und ein neues Startmuster. Alle Klänge sind synthetisch erzeugt.'},
- en:{label:'Music style',names:['Electronic','House','Pop','Rock','Classical','Ambient','Focus','Sport','Jazz & Blues','Coffeehouse'],pending:'Style changes at the next bar',hint:'Loads instruments, tempo and a new starting pattern. All sounds are synthesized.'},
- es:{label:'Estilo musical',names:['Electrónica','House','Pop','Rock','Clásica','Ambient','Concentración','Deporte','Jazz y blues','Café'],pending:'El estilo cambia en el próximo compás',hint:'Carga instrumentos, tempo y un patrón nuevo. Todos los sonidos son sintetizados.'},
- fr:{label:'Style musical',names:['Électronique','House','Pop','Rock','Classique','Ambient','Concentration','Sport','Jazz & blues','Café'],pending:'Le style change à la prochaine mesure',hint:'Charge les instruments, le tempo et un nouveau motif. Tous les sons sont synthétisés.'}
+ de:{label:'Musikstil',names:['Electronic','House','Pop','Rock','Klassik','Jazz & Blues','Coffeehouse','Ambient','Fokus','Sport'],pending:'Stilwechsel zum nächsten Takt',hint:'Lädt Instrumente, Tempo und ein neues Startmuster. Alle Klänge sind synthetisch erzeugt.'},
+ en:{label:'Music style',names:['Electronic','House','Pop','Rock','Classical','Jazz & Blues','Coffeehouse','Ambient','Focus','Sport'],pending:'Style changes at the next bar',hint:'Loads instruments, tempo and a new starting pattern. All sounds are synthesized.'},
+ es:{label:'Estilo musical',names:['Electrónica','House','Pop','Rock','Clásica','Jazz y blues','Café','Ambient','Concentración','Deporte'],pending:'El estilo cambia en el próximo compás',hint:'Carga instrumentos, tempo y un patrón nuevo. Todos los sonidos son sintetizados.'},
+ fr:{label:'Style musical',names:['Électronique','House','Pop','Rock','Classique','Jazz & blues','Café','Ambient','Concentration','Sport'],pending:'Le style change à la prochaine mesure',hint:'Charge les instruments, le tempo et un nouveau motif. Tous les sons sont synthétisés.'}
 };
