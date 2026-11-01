@@ -166,3 +166,6 @@ body:not(.focus-view) .sound-top{margin-bottom:20px}
 @media(max-width:800px){.animations-tile{padding:16px;border-radius:18px;margin-top:20px}}
 
 #orbit[data-mode=off]{cursor:default}
+
+.style-tiles{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:600px){.style-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}

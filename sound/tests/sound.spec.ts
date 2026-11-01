@@ -172,7 +172,7 @@ test('ambient canvas renders without blocking the instrument',async({page})=>{
 test('style presets change instruments and defer live changes to a bar',async({page})=>{
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/de/');
- await expect(page.locator('.style-tile')).toHaveCount(6);
+ await expect(page.locator('.style-tile')).toHaveCount(10);
  const choose=(id:string)=>page.locator('[data-style-preset='+id+']').click();
  await choose('classical');
  await expect(page.locator('[data-style-preset=classical]')).toHaveAttribute('aria-pressed','true');
@@ -250,7 +250,7 @@ test('background follows applied style and remains still for reduced motion',asy
  await page.goto('/de/');
  for(const style of ['electronic','house','pop','rock','classical','ambient']){
   await page.locator('[data-style-preset='+style+']').click();
-  await expect(page.locator('#sound-atmosphere')).toHaveAttribute('data-style',style);
+  await expect(page.locator('#sound-atmosphere')).toHaveAttribute('data-mode','clouds');
  }
  await page.emulateMedia({reducedMotion:'reduce'});
  await page.locator('#play').click();
@@ -270,7 +270,7 @@ test('animation switches are independent and do not stop playback',async({page})
  const image=()=>page.locator('#orbit').evaluate((canvas:HTMLCanvasElement)=>canvas.toDataURL());
  const first=await image();await page.waitForTimeout(250);expect(await image()).toBe(first);
  await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
- await page.locator('[data-background-mode=auto]').click();
+ await page.locator('[data-background-mode=clouds]').click();
  await expect(page.locator('#sound-atmosphere')).toBeVisible();
  await expect(page.locator('[data-orbit-mode=off]')).toHaveAttribute('aria-pressed','true');
  await page.locator('[data-orbit-mode=comet]').click();
@@ -353,9 +353,9 @@ test('background tiles offer style, light clouds and off independently',async({p
  await page.locator('[data-background-mode=off]').click();
  await expect(page.locator('#sound-atmosphere')).toBeHidden();
  await expect(page.locator('[data-center-mode=ring]')).toHaveAttribute('aria-pressed','true');
- await page.locator('[data-background-mode=auto]').click();
+ await page.locator('[data-background-mode=clouds]').click();
  await expect(page.locator('#sound-atmosphere')).toBeVisible();
- await expect(page.locator('#sound-atmosphere')).toHaveAttribute('data-style','rock');
+ await expect(page.locator('#sound-atmosphere')).toHaveAttribute('data-mode','clouds');
 });
 test('all six centre tiles render and respect reduced motion',async({page})=>{
  await page.goto('/de/');
@@ -381,9 +381,9 @@ test('random animation tiles work with normal play and preserve explicit choices
  await page.locator('[data-orbit-mode=off]').click();
  await page.locator('#play').click();
  await expect(page.locator('#orbit')).toHaveAttribute('data-center-variant','ring');
- await expect(page.locator('#sound-atmosphere')).toHaveAttribute('data-mode','auto');
- await expect(page.locator('#orbit')).toHaveAttribute('data-center-variant','filled',{timeout:6000});
  await expect(page.locator('#sound-atmosphere')).toHaveAttribute('data-mode','clouds');
+ await expect(page.locator('#orbit')).toHaveAttribute('data-center-variant','filled',{timeout:6000});
+ await expect(page.locator('#sound-atmosphere')).toHaveAttribute('data-mode','aurora');
  await expect(page.locator('[data-center-mode=random]')).toHaveAttribute('aria-pressed','true');
  await expect(page.locator('[data-orbit-mode=off]')).toHaveAttribute('aria-pressed','true');
  await page.locator('[data-center-mode=sun]').click();
@@ -397,7 +397,7 @@ test('random animation tiles work with normal play and preserve explicit choices
 test('new background variants are selectable and render during playback',async({page})=>{
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/de/');
- await expect(page.locator('[data-background-mode]')).toHaveCount(7);
+ await expect(page.locator('[data-background-mode]')).toHaveCount(6);
  await page.locator('#play').click();
  for(const mode of ['aurora','stars','waves']){
   await page.locator('[data-background-mode='+mode+']').click();
@@ -466,4 +466,36 @@ test('musical journey morphs over multiple cycles with bounded tempo steps',asyn
  await expect(track.locator('.instrument-name')).toHaveText('Kick');
  await expect(track.locator('.instrument-name')).toHaveText('Snare',{timeout:6000});
  await page.locator('#play').click();
+});
+test('focus and sport presets load and preserve explicit visual selections',async({page})=>{
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/de/');
+ await page.locator('[data-background-mode=stars]').click();
+ await page.locator('[data-center-mode=filled]').click();
+ await page.locator('[data-style-preset=focus]').click();
+ await expect(page.locator('#tempo')).toHaveValue('80');
+ await expect(page.locator('[data-track="0"] .instrument-name')).toHaveText('Flächenklang');
+ await expect(page.locator('[data-background-mode=stars]')).toHaveAttribute('aria-pressed','true');
+ await expect(page.locator('[data-center-mode=filled]')).toHaveAttribute('aria-pressed','true');
+ await page.locator('[data-background-mode=clouds]').click();
+ await page.locator('#play').click();await page.waitForTimeout(150);await page.locator('#play').click();
+ await page.locator('[data-style-preset=sport]').click();
+ await expect(page.locator('#tempo')).toHaveValue('136');
+ await expect(page.locator('[data-track="0"] .instrument-name')).toHaveText('Kick');
+ await expect(page.locator('.instrument[data-enabled=true]')).toHaveCount(6);
+ await page.locator('#evolve').click();await page.waitForTimeout(150);await page.locator('#play').click();
+ expect(errors).toEqual([]);
+});
+test('jazz and coffeehouse provide blues scales and audible swing presets',async({page})=>{
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/de/');
+ await page.locator('[data-style-preset=jazz]').click();
+ await expect(page.locator('#tempo')).toHaveValue('92');
+ await expect(page.locator('[data-track="0"] .instrument-name')).toHaveText('Klavier');
+ await page.locator('#play').click();await page.waitForTimeout(500);await page.locator('#play').click();
+ await page.locator('[data-style-preset=coffeehouse]').click();
+ await expect(page.locator('#tempo')).toHaveValue('78');
+ await expect(page.locator('[data-track="1"] .instrument-name')).toHaveText('Gitarre');
+ await page.locator('#evolve').click();await page.waitForTimeout(300);await page.locator('#play').click();
+ expect(errors).toEqual([]);
 });
