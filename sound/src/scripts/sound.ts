@@ -31,46 +31,41 @@ let backgroundMode:'auto'|'clouds'|'aurora'|'stars'|'waves'|'off'='auto';
 let orbitMode:'comet'|'dot'|'pulse'|'off'='comet';
 let orbitAnimation=true;
 let centerMode:'ring'|'filled'|'sine'|'bars'|'sun'|'off'='ring';
-function selectCenterMode(mode:typeof centerMode){
- centerMode=mode;
- document.querySelectorAll<HTMLButtonElement>('[data-center-mode]').forEach(tile=>tile.setAttribute('aria-pressed',String(tile.dataset.centerMode===mode)));
+let centerChoice:typeof centerMode|'random'=centerMode;
+let backgroundChoice:typeof backgroundMode|'random'=backgroundMode;
+let orbitChoice:typeof orbitMode|'random'=orbitMode;
+let animationStep=Infinity;
+function pickVariant<T extends string>(modes:readonly T[],current:T):T{
+ const choices=modes.filter(mode=>mode!==current);
+ return choices[Math.floor(Math.random()*choices.length)];
 }
-function selectBackgroundMode(mode:typeof backgroundMode){
- backgroundMode=mode;
- document.querySelectorAll<HTMLButtonElement>('[data-background-mode]').forEach(tile=>tile.setAttribute('aria-pressed',String(tile.dataset.backgroundMode===mode)));
- atmosphere.hidden=mode==='off';atmosphere.dataset.mode=mode;
- if(mode==='off')ac.clearRect(0,0,atmosphere.width,atmosphere.height);
+function selectCenterMode(choice:typeof centerChoice){
+ centerChoice=choice;
+ centerMode=choice==='random'?pickVariant(['ring','filled','sine','bars','sun'] as const,centerMode):choice;
+ orbit.dataset.centerVariant=centerMode;
+ document.querySelectorAll<HTMLButtonElement>('[data-center-mode]').forEach(tile=>tile.setAttribute('aria-pressed',String(tile.dataset.centerMode===choice)));
 }
-document.querySelectorAll<HTMLButtonElement>('[data-center-mode]').forEach(button=>button.addEventListener('click',()=>{
- selectCenterMode(button.dataset.centerMode as typeof centerMode);
-}));
-document.querySelectorAll<HTMLButtonElement>('[data-background-mode]').forEach(button=>button.addEventListener('click',()=>{
- selectBackgroundMode(button.dataset.backgroundMode as typeof backgroundMode);
-}));
+function selectBackgroundMode(choice:typeof backgroundChoice){
+ backgroundChoice=choice;
+ backgroundMode=choice==='random'?pickVariant(['auto','clouds','aurora','stars','waves'] as const,backgroundMode):choice;
+ document.querySelectorAll<HTMLButtonElement>('[data-background-mode]').forEach(tile=>tile.setAttribute('aria-pressed',String(tile.dataset.backgroundMode===choice)));
+ atmosphere.hidden=backgroundMode==='off';atmosphere.dataset.mode=backgroundMode;
+ if(backgroundMode==='off')ac.clearRect(0,0,atmosphere.width,atmosphere.height);
+}
+function selectOrbitMode(choice:typeof orbitChoice){
+ orbitChoice=choice;
+ orbitMode=choice==='random'?pickVariant(['comet','dot','pulse'] as const,orbitMode):choice;
+ orbitAnimation=orbitMode!=='off';orbit.dataset.animated=String(orbitAnimation);orbit.dataset.mode=orbitMode;
+ document.querySelectorAll<HTMLButtonElement>('[data-orbit-mode]').forEach(tile=>tile.setAttribute('aria-pressed',String(tile.dataset.orbitMode===choice)));
+}
+document.querySelectorAll<HTMLButtonElement>('[data-center-mode]').forEach(button=>button.addEventListener('click',()=>selectCenterMode(button.dataset.centerMode as typeof centerChoice)));
+document.querySelectorAll<HTMLButtonElement>('[data-background-mode]').forEach(button=>button.addEventListener('click',()=>selectBackgroundMode(button.dataset.backgroundMode as typeof backgroundChoice)));
+document.querySelectorAll<HTMLButtonElement>('[data-orbit-mode]').forEach(button=>button.addEventListener('click',()=>selectOrbitMode(button.dataset.orbitMode as typeof orbitChoice)));
 function evolveAnimations(){
- // Manual Off is an explicit opt-out. Random selection never turns anything off or on.
- if(Math.random()>=.5)return;
- const choices:(()=>void)[]=[];
- if(centerMode!=='off')choices.push(()=>{
-  const modes=(['ring','filled','sine','bars','sun'] as const).filter(mode=>mode!==centerMode);
-  selectCenterMode(modes[Math.floor(Math.random()*modes.length)]);
- });
- if(backgroundMode!=='off')choices.push(()=>{
-  const modes=(['auto','clouds','aurora','stars','waves'] as const).filter(mode=>mode!==backgroundMode);
-  selectBackgroundMode(modes[Math.floor(Math.random()*modes.length)]);
- });
- if(orbitMode!=='off')choices.push(()=>{
-  const modes=(['comet','dot','pulse'] as const).filter(mode=>mode!==orbitMode);
-  selectOrbitMode(modes[Math.floor(Math.random()*modes.length)]);
- });
- if(choices.length)choices[Math.floor(Math.random()*choices.length)]();
+ if(centerChoice==='random')selectCenterMode('random');
+ if(backgroundChoice==='random')selectBackgroundMode('random');
+ if(orbitChoice==='random')selectOrbitMode('random');
 }
-function selectOrbitMode(mode:typeof orbitMode){
- orbitMode=mode;orbitAnimation=mode!=='off';
- orbit.dataset.animated=String(orbitAnimation);orbit.dataset.mode=mode;
- document.querySelectorAll<HTMLButtonElement>('[data-orbit-mode]').forEach(tile=>tile.setAttribute('aria-pressed',String(tile.dataset.orbitMode===mode)));
-}
-document.querySelectorAll<HTMLButtonElement>('[data-orbit-mode]').forEach(button=>button.addEventListener('click',()=>selectOrbitMode(button.dataset.orbitMode as typeof orbitMode)));
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 function activeTracks(){return tracks.map((tr,index)=>({tr,index})).filter(({tr})=>tr.enabled);}
 function radius(rank:number,count:number){return 300-rank*(184/Math.max(1,count-1));}
@@ -219,9 +214,12 @@ function schedule(){
  if(nextTime<audio.currentTime-.1){stop();return;}
  while(nextTime<audio.currentTime+.1){
   if(step%16===0)applyDirections();
+  if(step%16===0&&step>=animationStep){
+   evolveAnimations();animationStep=nextEvolutionStep(step);
+  }
   if(pendingStyle&&step%16===0)applyStyle(pendingStyle);
   if(evolving&&step%16===0&&step>=evolutionStep){
-   evolvePattern(tracks,Math.random,presets[currentStyle].grid);shiftRandomOrbit();applyDirections(true);evolveSound();evolveAnimations();
+   evolvePattern(tracks,Math.random,presets[currentStyle].grid);shiftRandomOrbit();applyDirections(true);evolveSound();
    if(currentStyle==='classical'||currentStyle==='ambient'){const melodic=tracks.filter(tr=>tr.enabled&&!tr.mute&&!['kick','snare','hat','clap','tom','rim','shaker'].includes(tr.instrument));if(melodic.length){const tr=melodic[Math.floor(Math.random()*melodic.length)];tr.pitch=(tr.pitch+1)%presets[currentStyle].scale.length;}}sync();evolutionStep=nextEvolutionStep(step);
   }
   const s=step%16,notes:{track:number;beat:number;velocity:number}[]=[];
@@ -249,7 +247,7 @@ async function start(){
   if(!master){master=audio.createGain();const compressor=audio.createDynamicsCompressor();master.connect(compressor);compressor.connect(audio.destination);}
   await audio.resume();if(document.hidden)return;
   master.gain.setValueAtTime(Number($<HTMLInputElement>('#volume').value),audio.currentTime);
-  playing=true;step=0;nextTime=audio.currentTime+.05;anchor=nextTime;
+  playing=true;step=0;evolveAnimations();animationStep=nextEvolutionStep(0);nextTime=audio.currentTime+.05;anchor=nextTime;
   labelAction('#play',t.pause);$('#play').setAttribute('aria-pressed','true');$('#audio-status').textContent='';
   schedule();timer=setInterval(schedule,25);
  }catch{$('#audio-status').textContent=t.error;stop();}

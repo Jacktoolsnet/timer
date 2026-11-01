@@ -1,7 +1,7 @@
 ---
-interface Props {name:'comet'|'dot'|'pulse'|'off'}
+interface Props {name:'comet'|'dot'|'pulse'|'off'|'random'}
 const {name}=Astro.props;
 ---
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-{name==='comet'?<><path d="M3 17 9 11M3 11l4-4m4 14 4-4"/><circle cx="15" cy="9" r="5"/></>:name==='dot'?<><circle cx="12" cy="12" r="9"/><circle cx="18" cy="6" r="3" fill="currentColor"/></>:name==='pulse'?<><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="7"/><path d="M12 1a11 11 0 0 1 11 11M12 23A11 11 0 0 1 1 12"/></>:<><circle cx="12" cy="12" r="9"/><path d="m6 6 12 12"/></>}
+{name==='random'?<><path d="M3 6h3c5 0 7 12 12 12h3m-4-4 4 4-4 4M3 18h3c2 0 3-2 4-4m4-4c1-2 2-4 4-4h3m-4-4 4 4-4 4"/></>:name==='comet'?<><path d="M3 17 9 11M3 11l4-4m4 14 4-4"/><circle cx="15" cy="9" r="5"/></>:name==='dot'?<><circle cx="12" cy="12" r="9"/><circle cx="18" cy="6" r="3" fill="currentColor"/></>:name==='pulse'?<><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="7"/><path d="M12 1a11 11 0 0 1 11 11M12 23A11 11 0 0 1 1 12"/></>:<><circle cx="12" cy="12" r="9"/><path d="m6 6 12 12"/></>}
 </svg>

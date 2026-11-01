@@ -359,7 +359,7 @@ test('background tiles offer style, light clouds and off independently',async({p
 });
 test('all six centre tiles render and respect reduced motion',async({page})=>{
  await page.goto('/de/');
- await expect(page.locator('[data-center-mode]')).toHaveCount(6);
+ await expect(page.locator('[data-center-mode]')).toHaveCount(7);
  await page.emulateMedia({reducedMotion:'reduce'});
  await page.locator('[data-orbit-mode=off]').click();
  await page.locator('#play').click();
@@ -372,27 +372,32 @@ test('all six centre tiles render and respect reduced motion',async({page})=>{
  }
  await page.locator('#play').click();
 });
-test('evolution changes animations but respects every off setting',async({page})=>{
+test('random animation tiles work with normal play and preserve explicit choices',async({page})=>{
  await page.addInitScript(()=>{Math.random=()=>0;});
  await page.goto('/de/');
  await page.locator('#tempo').fill('180');await page.locator('#tempo').dispatchEvent('input');
+ await page.locator('[data-center-mode=random]').click();
+ await page.locator('[data-background-mode=random]').click();
  await page.locator('[data-orbit-mode=off]').click();
- await page.locator('#evolve').click();
- await expect(page.locator('[data-center-mode=filled]')).toHaveAttribute('aria-pressed','true',{timeout:6000});
- await page.locator('[data-center-mode=off]').click();
- await expect(page.locator('[data-background-mode=clouds]')).toHaveAttribute('aria-pressed','true',{timeout:6000});
- await page.locator('[data-background-mode=off]').click();
- await page.waitForTimeout(3000);
- await expect(page.locator('[data-center-mode=off]')).toHaveAttribute('aria-pressed','true');
- await expect(page.locator('[data-background-mode=off]')).toHaveAttribute('aria-pressed','true');
- await expect(page.locator('#sound-atmosphere')).toBeHidden();
+ await page.locator('#play').click();
+ await expect(page.locator('#orbit')).toHaveAttribute('data-center-variant','ring');
+ await expect(page.locator('#sound-atmosphere')).toHaveAttribute('data-mode','auto');
+ await expect(page.locator('#orbit')).toHaveAttribute('data-center-variant','filled',{timeout:6000});
+ await expect(page.locator('#sound-atmosphere')).toHaveAttribute('data-mode','clouds');
+ await expect(page.locator('[data-center-mode=random]')).toHaveAttribute('aria-pressed','true');
  await expect(page.locator('[data-orbit-mode=off]')).toHaveAttribute('aria-pressed','true');
+ await page.locator('[data-center-mode=sun]').click();
+ await page.locator('[data-background-mode=off]').click();
+ await page.locator('#evolve').click();
+ await page.waitForTimeout(3000);
+ await expect(page.locator('[data-center-mode=sun]')).toHaveAttribute('aria-pressed','true');
+ await expect(page.locator('[data-background-mode=off]')).toHaveAttribute('aria-pressed','true');
  await page.locator('#play').click();
 });
 test('new background variants are selectable and render during playback',async({page})=>{
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/de/');
- await expect(page.locator('[data-background-mode]')).toHaveCount(6);
+ await expect(page.locator('[data-background-mode]')).toHaveCount(7);
  await page.locator('#play').click();
  for(const mode of ['aurora','stars','waves']){
   await page.locator('[data-background-mode='+mode+']').click();

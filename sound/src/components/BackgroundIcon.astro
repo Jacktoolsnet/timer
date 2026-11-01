@@ -1,7 +1,7 @@
 ---
-interface Props {name:'auto'|'clouds'|'aurora'|'stars'|'waves'|'off'}
+interface Props {name:'auto'|'clouds'|'aurora'|'stars'|'waves'|'off'|'random'}
 const {name}=Astro.props;
 ---
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-{name==='aurora'?<><path d="M3 18V8l4-4v10l5-8v12l5-13v10l4-5v8"/></>:name==='stars'?<><path d="m12 3 2 6 6 2-6 2-2 6-2-6-6-2 6-2ZM4 3v3M2.5 4.5h3M20 17v4m-2-2h4"/></>:name==='waves'?<><path d="M2 6c4-5 6 5 10 0s6 5 10 0M2 12c4-5 6 5 10 0s6 5 10 0M2 18c4-5 6 5 10 0s6 5 10 0"/></>:name==='auto'?<><path d="M4 15V9m4 10V5m4 11V8m4 13V3m4 12V9"/></>:name==='clouds'?<><path d="M7 18a4 4 0 1 1-1-7 6 6 0 0 1 11-2 4.5 4.5 0 1 1 1 9Z"/><path d="M8 14c2-2 4 2 7 0"/></>:<><circle cx="12" cy="12" r="9"/><path d="m6 6 12 12"/></>}
+{name==='random'?<><path d="M3 6h3c5 0 7 12 12 12h3m-4-4 4 4-4 4M3 18h3c2 0 3-2 4-4m4-4c1-2 2-4 4-4h3m-4-4 4 4-4 4"/></>:name==='aurora'?<><path d="M3 18V8l4-4v10l5-8v12l5-13v10l4-5v8"/></>:name==='stars'?<><path d="m12 3 2 6 6 2-6 2-2 6-2-6-6-2 6-2ZM4 3v3M2.5 4.5h3M20 17v4m-2-2h4"/></>:name==='waves'?<><path d="M2 6c4-5 6 5 10 0s6 5 10 0M2 12c4-5 6 5 10 0s6 5 10 0M2 18c4-5 6 5 10 0s6 5 10 0"/></>:name==='auto'?<><path d="M4 15V9m4 10V5m4 11V8m4 13V3m4 12V9"/></>:name==='clouds'?<><path d="M7 18a4 4 0 1 1-1-7 6 6 0 0 1 11-2 4.5 4.5 0 1 1 1 9Z"/><path d="M8 14c2-2 4 2 7 0"/></>:<><circle cx="12" cy="12" r="9"/><path d="m6 6 12 12"/></>}
 </svg>

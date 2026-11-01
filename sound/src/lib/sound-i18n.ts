@@ -27,22 +27,22 @@ export const directionCopy={
 };
 
 export const centerCopy={
- de:{ring:'Pulsring',filled:'Gefüllter Ring',sine:'Sinuskurve',bars:'Balken',sun:'Klangsonne',off:'Aus'},
- en:{ring:'Pulse ring',filled:'Filled ring',sine:'Sine wave',bars:'Bars',sun:'Sound sun',off:'Off'},
- es:{ring:'Anillo pulsante',filled:'Anillo relleno',sine:'Onda sinusoidal',bars:'Barras',sun:'Sol sonoro',off:'Desactivado'},
- fr:{ring:'Anneau pulsant',filled:'Anneau plein',sine:'Sinusoïde',bars:'Barres',sun:'Soleil sonore',off:'Désactivé'}
+ de:{random:'Zufällig',ring:'Pulsring',filled:'Gefüllter Ring',sine:'Sinuskurve',bars:'Balken',sun:'Klangsonne',off:'Aus'},
+ en:{random:'Random',ring:'Pulse ring',filled:'Filled ring',sine:'Sine wave',bars:'Bars',sun:'Sound sun',off:'Off'},
+ es:{random:'Aleatorio',ring:'Anillo pulsante',filled:'Anillo relleno',sine:'Onda sinusoidal',bars:'Barras',sun:'Sol sonoro',off:'Desactivado'},
+ fr:{random:'Aléatoire',ring:'Anneau pulsant',filled:'Anneau plein',sine:'Sinusoïde',bars:'Barres',sun:'Soleil sonore',off:'Désactivé'}
 };
 
 export const backgroundCopy={
- de:{aurora:'Polarlicht',stars:'Sternenfeld',waves:'Klangwellen',auto:'Musikstil',clouds:'Lichtwolken',off:'Aus'},
- en:{aurora:'Aurora',stars:'Starfield',waves:'Sound waves',auto:'Music style',clouds:'Light clouds',off:'Off'},
- es:{aurora:'Aurora',stars:'Estrellas',waves:'Ondas sonoras',auto:'Estilo musical',clouds:'Nubes de luz',off:'Desactivado'},
- fr:{aurora:'Aurore',stars:'Étoiles',waves:'Ondes sonores',auto:'Style musical',clouds:'Nuages lumineux',off:'Désactivé'}
+ de:{random:'Zufällig',aurora:'Polarlicht',stars:'Sternenfeld',waves:'Klangwellen',auto:'Musikstil',clouds:'Lichtwolken',off:'Aus'},
+ en:{random:'Random',aurora:'Aurora',stars:'Starfield',waves:'Sound waves',auto:'Music style',clouds:'Light clouds',off:'Off'},
+ es:{random:'Aleatorio',aurora:'Aurora',stars:'Estrellas',waves:'Ondas sonoras',auto:'Estilo musical',clouds:'Nubes de luz',off:'Desactivado'},
+ fr:{random:'Aléatoire',aurora:'Aurore',stars:'Étoiles',waves:'Ondes sonores',auto:'Style musical',clouds:'Nuages lumineux',off:'Désactivé'}
 };
 
 export const orbitCopy={
- de:{title:'Animationen',comet:'Schweif',dot:'Lichtpunkt',pulse:'Puls-Halo',off:'Aus'},
- en:{title:'Animations',comet:'Comet trail',dot:'Light dot',pulse:'Pulse halo',off:'Off'},
- es:{title:'Animaciones',comet:'Estela',dot:'Punto de luz',pulse:'Halo pulsante',off:'Desactivado'},
- fr:{title:'Animations',comet:'Traînée',dot:'Point lumineux',pulse:'Halo pulsant',off:'Désactivé'}
+ de:{random:'Zufällig',title:'Animationen',comet:'Schweif',dot:'Lichtpunkt',pulse:'Puls-Halo',off:'Aus'},
+ en:{random:'Random',title:'Animations',comet:'Comet trail',dot:'Light dot',pulse:'Pulse halo',off:'Off'},
+ es:{random:'Aleatorio',title:'Animaciones',comet:'Estela',dot:'Punto de luz',pulse:'Halo pulsante',off:'Desactivado'},
+ fr:{random:'Aléatoire',title:'Animations',comet:'Traînée',dot:'Point lumineux',pulse:'Halo pulsant',off:'Désactivé'}
 };
