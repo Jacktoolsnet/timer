@@ -5,12 +5,14 @@
 .header-focus-actions>button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .header-focus-actions svg{width:22px;height:22px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .site-header #hide-focus-controls{display:none}
-body.focus-view .site-header #hide-focus-controls{display:inline-flex}
-body.focus-view .site-shell>.site-header:has(.header-focus-actions){display:flex!important;position:fixed;top:max(12px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));left:auto;z-index:60;width:auto;max-width:calc(100vw - 24px);height:auto;min-height:0;margin:0;padding:0;border:0;background:transparent;box-shadow:none}
-body.focus-view .site-header:has(.header-focus-actions)>.brand,
-body.focus-view .site-header:has(.header-focus-actions) .header-tools>:not(.header-focus-actions){display:none!important}
-body.focus-view .site-header:has(.header-focus-actions) .header-tools{display:flex;margin:0;padding:0}
+body:is(.focus-view,.editor-fullscreen:not(.recording)) .site-header #hide-focus-controls{display:inline-flex}
+body:is(.focus-view,.editor-fullscreen:not(.recording)) .site-shell>.site-header:has(.header-focus-actions){display:flex!important;position:fixed;top:max(12px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));left:auto;z-index:60;width:auto;max-width:calc(100vw - 24px);height:auto;min-height:0;margin:0;padding:0;border:0;background:transparent;box-shadow:none}
+body:is(.focus-view,.editor-fullscreen:not(.recording)) .site-header:has(.header-focus-actions)>.brand,
+body:is(.focus-view,.editor-fullscreen:not(.recording)) .site-header:has(.header-focus-actions) .header-tools>:not(.header-focus-actions){display:none!important}
+body:is(.focus-view,.editor-fullscreen:not(.recording)) .site-header:has(.header-focus-actions) .header-tools{display:flex;margin:0;padding:0}
 body.focus-view .header-focus-actions>button{box-shadow:0 4px 18px #0002}
-body.focus-view.focus-cursor-hidden .site-header:has(.header-focus-actions),
+body.focus-view.focus-cursor-hidden .site-header:has(.header-focus-actions):not(:has(:focus-visible)),
 body.focus-view.focus-idle .site-header:has(.header-focus-actions){opacity:0;visibility:hidden;pointer-events:none}
 @media(max-width:680px){.header-focus-actions>button{padding:9px}.header-focus-actions>button>span{display:none}}
+
+@media print{body:is(.focus-view,.editor-fullscreen:not(.recording)) .site-shell>.site-header:has(.header-focus-actions){display:none!important}}

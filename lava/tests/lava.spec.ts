@@ -39,11 +39,12 @@ test('static fallback when WebGL is unavailable',async({page})=>{
 test('focus label and palette-aware sliders',async({page})=>{
  await page.goto('/de/');
  await expect(page.locator('#lava-fullscreen')).toHaveText('Fokusansicht');
- await expect(page.locator('#lava-stage #lava-fullscreen')).toBeVisible();
+ await expect(page.locator('.site-header #lava-fullscreen')).toBeVisible();
  await expect(page.locator('#lava-stage #lava-toggle')).toHaveAccessibleName('Starten');
- const stage=await page.locator('#lava-stage').boundingBox();
+ const stage=await page.locator('.site-header').boundingBox();
  const focus=await page.locator('#lava-fullscreen').boundingBox();
- expect(focus!.x+focus!.width).toBeGreaterThan(stage!.x+stage!.width-30);
+ expect(focus!.x).toBeGreaterThan(stage!.x);
+ expect(focus!.x+focus!.width).toBeLessThanOrEqual(stage!.x+stage!.width);
  expect(focus!.y).toBeLessThan(stage!.y+30);
  const slider=page.locator('#lava-speed');
  const initial=await slider.evaluate(el=>getComputedStyle(el).accentColor);

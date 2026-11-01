@@ -1,4 +1,4 @@
-import {test,expect} from '@playwright/test';
+import {test,expect} from './helpers/editor-test';
 test('focus action belongs to the header and stays reachable',async({page})=>{
  await page.addInitScript(()=>{Element.prototype.requestFullscreen=async()=>{throw Error('Fullscreen denied');};});
  await page.goto('/de/');

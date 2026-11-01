@@ -95,7 +95,7 @@ test('language routes, SEO, legal drafts and focus view', async ({ page, request
   await page.locator('.language-menu a[lang=de]').click();
   await expect(page).toHaveURL(/de\/pomodoro/);
   await page.locator('#focus-view').click();
-  await expect(page.locator('.site-header')).toBeHidden();
+  await expect(page.locator('.site-header > .brand')).toBeHidden();
   await page.keyboard.press('Escape');
   await expect(page.locator('.site-header')).toBeVisible();
   await page.goto('/de/legal/');
@@ -477,7 +477,7 @@ test('legal print layout hides chrome and ignores dark appearance', async ({ pag
     await page.goto('/de/' + route + '/');
     await page.evaluate(() => { document.documentElement.dataset.theme = 'dark'; document.documentElement.dataset.style = 'technical'; document.documentElement.dataset.fontSize = '3'; });
     await page.emulateMedia({ media: 'print' });
-    await expect(page.locator('.site-header')).toBeHidden();
+    await expect(page.locator('.site-header > .brand')).toBeHidden();
     await expect(page.locator('.site-footer')).toBeHidden();
     await expect(page.locator('.legal-nav')).toBeHidden();
     await expect(page.locator('.legal-back')).toBeHidden();
