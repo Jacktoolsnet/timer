@@ -81,3 +81,19 @@ track therefore remains effective; no extra notes are inserted into silent
 patterns. Existing song transitions and remembered refrains remain intact.
 Slow, phase-offset filter and attack variations gently evolve timbre during
 Random Play without boosting volume. Normal playback keeps its fixed timbre.
+
+Random Play chooses restrained arrangement variations every four bars: at most one
+non-foundation track takes a softly faded one-bar breath, and another may play
+one quiet neighbouring note near the phrase end. Bass and kick never take these
+breaks; muted, disabled and cleared tracks are respected. These are playback-only
+variations, not changes to stored patterns or chorus memories. Drawing or editing
+a step protects its track for two bars so the intervention is heard immediately.
+
+All playback now has restrained style-aware room reverb and a filtered dotted-eighth
+echo, generated locally with a shared procedural convolution room. Slow, narrow
+stereo motion keeps kick and bass centred. Effect returns pass through the master
+gain and compressor, so stopping/master mute also silences tails. Voice sends
+and panners are disconnected after their sources end. Random Play gradually opens
+the filter over the two bars before a chorus and settles over its first two bars,
+with a small dynamic breath rather than a volume boost. Drawn motifs are unchanged;
+visual hit energy follows the same dynamics. No additional animation is forced on.

@@ -611,3 +611,19 @@ for(const lang of ['de','en','es','fr'])test('localized overview, metadata and s
  await page.locator('.usage-link a').click();
  await expect(page.locator('.legal-page>section')).toHaveCount(6);
 });
+
+test('sound defaults to dark and respects saved theme choices',async({page})=>{
+ await page.emulateMedia({colorScheme:'light'});
+ await page.goto('/de/');
+ await expect(page.locator('html')).toHaveAttribute('data-theme-mode','dark');
+ await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
+ await page.addInitScript(()=>{
+  localStorage.setItem('jacktools.sound.storage-consent.v1','yes');
+  localStorage.setItem('jacktools.sound.appearance.v1',JSON.stringify({themeMode:'auto'}));
+ });
+ await page.reload();
+ await expect(page.locator('html')).toHaveAttribute('data-theme-mode','auto');
+ await expect(page.locator('html')).toHaveAttribute('data-theme','light');
+ await page.emulateMedia({colorScheme:'dark'});
+ await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
+});

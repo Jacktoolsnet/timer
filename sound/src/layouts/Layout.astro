@@ -16,7 +16,7 @@ const canonical = new URL(Astro.url.pathname === '/' ? '/en/' : Astro.url.pathna
 const alternateLanguages = legal && route !== 'usage' ? (['en', 'de'] as const) : languages;
 ---
 <!doctype html>
-<html lang={lang} data-palette="green" data-style="technical" data-theme-mode="auto" data-font-size="0">
+<html lang={lang} data-palette="green" data-style="technical" data-theme-mode="dark" data-theme="dark" data-font-size="0">
   <head>
     <meta charset="UTF-8" />
     {Astro.url.pathname === '/' && <script is:inline>
@@ -59,7 +59,7 @@ const alternateLanguages = legal && route !== 'usage' ? (['en', 'de'] as const) 
         }
       } catch {}
     </script>
-    <ThemeInit namespace="jacktools.sound" />
+    <ThemeInit namespace="jacktools.sound" defaultMode="dark" />
   </head>
   <body class:list={{ "legal-document": legal }}>
     <a class="skip-link" href="#main">{lang === 'de' ? 'Zum Inhalt' : lang === 'es' ? 'Ir al contenido' : lang === 'fr' ? 'Aller au contenu' : 'Skip to content'}</a>

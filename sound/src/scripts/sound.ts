@@ -1,3 +1,6 @@
+import {spaceProfile,stereoPosition,sectionExpression} from '../lib/space';
+import {createAudioSpace} from '../lib/audio-space';
+import {arrangementPlan,breathGain,ornamentAt,type ArrangementPlan} from '../lib/arrangement';
 import {dialogueInstrument,answerMotif,dialogueGain,timbreMotion} from '../lib/expression';
 import {songForm,copyPhrases,sectionGain,songCopy,type Phrase,type Section,type SongPart} from '../lib/song';
 import {makeMotif,varyMotif,melodicSemitones,isMelodic,gestureDegree} from '../lib/harmony';
@@ -22,11 +25,14 @@ const colors=['#21bed1','#a482ed','#f0788c','#d8a847','#48bca0','#e68a44','#779c
 const lightColors=['#00869b','#7845c7','#cf3659','#a66a08','#078565','#bd5715','#3d66c5','#b0399c'];
 const tracks=colors.map((color,i)=>({color,motif:makeMotif(presets.electronic.melody),phase:0,direction:1,directionMode:'forward',pendingDirection:null as number|null,randomDynamics:false,lastVelocity:1,scheduledVelocity:1,morph:null as {to:InstrumentId;progress:number;from:number;at:number;duration:number}|null,hitVelocities:Array<number>(16).fill(1),enabled:i<5,instrument:defaultInstruments[i],points:Array.from({length:16},(_,s)=>i===0?s%4===0:i===1?s%8===4:i===2?s%2===0:i===3?s%8===0:i===4?s%5===0:false),mute:false,volume:.65,pitch:0,flash:Array(16).fill(-100),hits:Array<number>(16).fill(-Infinity)}));
 let audio:AudioContext|undefined, master:GainNode|undefined, playing=false,timer:ReturnType<typeof setInterval>|undefined,nextTime=0,step=0,bpm=100;
+let space:ReturnType<typeof createAudioSpace>|undefined;
 let visualStep=0,visualTime=0,visualDuration=.15;
 function playbackAngle(time:number){return (visualStep+Math.max(0,Math.min(1,(time-visualTime)/visualDuration)))/16*Math.PI*2;}
 const language=document.documentElement.lang as keyof typeof styleCopy;
 let currentStyle:StyleId='electronic',pendingStyle:StyleId|null=null;
 let evolving=false,evolutionStep=Infinity;
+let arrangement:ArrangementPlan|null=null;
+const drawnUntil=tracks.map(()=>0);
 let journey:{track:number;cycle:number;length:number;pitch:number;tempo:number}|null=null;
 let song:{
  form:Section[];index:number;startBar:number;previous:SongPart|null;
@@ -75,6 +81,11 @@ function songBoundary(time:number,bar:number){
 function songMix(time:number){
  return song?.from?Math.max(0,Math.min(1,(time-song.fadeAt)/song.fadeDuration)):1;
 }
+function songExpression(){
+ if(!evolving||!song)return {cutoff:1,gain:1};
+ const part=song.form[song.index];
+ return sectionExpression(part.kind,song.form[song.index+1]?.kind,step/16-song.startBar,part.bars);
+}
 function songLevel(time:number,instrument:string){
  if(!evolving||!song)return 1;
  const part=song.form[song.index],elapsedBars=Math.max(0,step/16-song.startBar);
@@ -82,6 +93,7 @@ function songLevel(time:number,instrument:string){
  return song.previous?sectionGain(song.previous,instrument,1)*(1-mix)+to*mix:to;
 }
 function rememberDrawing(track:number){
+ drawnUntil[track]=step+32;
  if(!evolving||!song)return;
  const kind=song.form[song.index].kind;
  const update=(memory:Phrase[])=>{memory[track]=copyPhrases([tracks[track]])[0];};
@@ -96,6 +108,7 @@ function nextMusicStep(current:number){
  return nextEvolutionStep(current);
 }
 function setEvolution(on:boolean){
+ if(on!==evolving)arrangement=null;
  if(evolving&&!on)tracks.forEach(tr=>{if(tr.directionMode!=='random')tr.pendingDirection=tr.directionMode==='reverse'?-1:1;});
  if(on&&!evolving)startSong(playing?Math.ceil(step/16):0);
  if(!on){song=null;$('#song-structure').hidden=true;}
@@ -268,6 +281,7 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
  const role=expressive?dialogueRole(i):-1;
  const bar=step/16;
  const motion=evolving?timbreMotion(bar,expressionSeed,i):{cutoff:1,attack:1};
+ const expression=songExpression();
  // Answers follow the current (including drawn or crossfading) phrase, not a stale copy.
  const leader=role===1?tracks.find(tr=>tr.enabled&&!tr.mute&&tr.volume>0&&dialogueInstrument(tr.instrument)):undefined;
  const ownMotif=phrase?.motif||tr.motif;
@@ -275,10 +289,22 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
 
  // One shared low-pass per voice keeps harmonic layers coherent and softens metallic edges.
  const bus=ctx.createBiquadFilter();bus.type='lowpass';bus.Q.value=.55;
- bus.frequency.setValueAtTime(profile.cutoff*motion.cutoff,time);
- bus.frequency.exponentialRampToValueAtTime(profile.cutoff*(evolving?timbreMotion(bar+.25,expressionSeed,i).cutoff:1),time+.15);bus.connect(master);
+ bus.frequency.setValueAtTime(profile.cutoff*motion.cutoff*expression.cutoff,time);
+ bus.frequency.exponentialRampToValueAtTime(profile.cutoff*(evolving?timbreMotion(bar+.25,expressionSeed,i).cutoff:1)*expression.cutoff,time+.15);
+ const pan=ctx.createStereoPanner(),hallSend=ctx.createGain(),echoSend=ctx.createGain();
+ pan.pan.setValueAtTime(stereoPosition(id,i,bar,expressionSeed),time);
+ pan.pan.linearRampToValueAtTime(stereoPosition(id,i,bar+1,expressionSeed),time+60/bpm*4);
+ bus.connect(pan);pan.connect(master);
+ if(space){
+  const room=spaceProfile(currentStyle),foundation=['kick','bass','synthbass'].includes(id);
+  hallSend.gain.value=foundation?.008:room.hall;
+  echoSend.gain.value=foundation?0:room.echo;
+  pan.connect(hallSend);hallSend.connect(space.hall);
+  pan.connect(echoSend);echoSend.connect(space.delay);
+  space.delay.delayTime.setTargetAtTime(60/bpm*.75,time,.15);
+ }
  let sources=0;
- const ended=()=>{if(--sources===0)bus.disconnect();};
+ const ended=()=>{if(--sources===0){bus.disconnect();pan.disconnect();hallSend.disconnect();echoSend.disconnect();}};
  const semitones=currentStyle==='jazz'
   ?jazzSemitones(harmonyBar(),beat,id,phrase?.pitch??tr.pitch,motif)
   :melodicSemitones(currentStyle,harmonyBar(),beat,id,phrase?.pitch??tr.pitch,motif);
@@ -411,19 +437,30 @@ function schedule(){
    evolveJourney(nextTime);evolutionStep=nextMusicStep(step);
   }
   if(song?.from&&songMix(nextTime)>=1)song.from=null;
+  if(evolving&&step%64===0){
+   // New restrained choices per phrase; never edit stored patterns or refrains.
+   arrangement=arrangementPlan(tracks,step);
+  }
+
   const s=step%16,notes:{track:number;beat:number;velocity:number}[]=[];
   tracks.forEach((tr,i)=>{
    const beat=((tr.direction*s+tr.phase)%16+16)%16;
    if(tr.enabled&&!tr.mute&&tr.volume>0){
     const old=evolving&&song?.from?song.from[i]:null;
-    if(!tr.points[beat]&&!old?.points[beat])return;
+    const protectedDrawing=step<drawnUntil[i];
+    const extra=evolving&&arrangement&&!protectedDrawing
+     &&ornamentAt(arrangement,i,step,beat,tr.direction,tr.points);
+    if(!tr.points[beat]&&!old?.points[beat]&&!extra)return;
     const dynamics=evolving?approach(tr.scheduledVelocity,.65+Math.random()*.35,.06):tr.randomDynamics?.45+Math.random()*.55:1;
     tr.scheduledVelocity=dynamics;
     const role=evolving&&dialogueInstrument(tr.instrument)?dialogueRole(i):-1;
     const emphasis=role===0||role===1?dialogueGain(step/16,role):1;
-    const velocity=dynamics*songLevel(nextTime,tr.instrument)*emphasis,mix=evolving?songMix(nextTime):1;
+    const foundation=['kick','bass','synthbass'].includes(tr.instrument)||!!tr.morph&&['kick','bass','synthbass'].includes(tr.morph.to);
+    const breath=evolving&&arrangement&&!protectedDrawing&&!foundation?breathGain(arrangement,i,step):1;
+    const velocity=dynamics*songLevel(nextTime,tr.instrument)*emphasis*breath*songExpression().gain*(extra?.45:1),mix=evolving?songMix(nextTime):1;
+    if(velocity<=.0001)return;
     if(old&&old.points[beat]&&mix<1)voice(i,nextTime,beat,velocity*(1-mix),old);
-    if(tr.points[beat]&&mix>0)voice(i,nextTime,beat,velocity*mix);
+    if((tr.points[beat]||extra)&&mix>0)voice(i,nextTime,beat,velocity*mix);
     notes.push({track:i,beat,velocity});
    }
   });
@@ -443,7 +480,7 @@ async function start(){
  if(starting)return;starting=true;
  try{
   audio??=new AudioContext();
-  if(!master){master=audio.createGain();const compressor=audio.createDynamicsCompressor();master.connect(compressor);compressor.connect(audio.destination);}
+  if(!master){master=audio.createGain();const compressor=audio.createDynamicsCompressor();master.connect(compressor);compressor.connect(audio.destination);space=createAudioSpace(audio,master);}
   await audio.resume();if(document.hidden)return;
   master.gain.setValueAtTime(Number($<HTMLInputElement>('#volume').value),audio.currentTime);
   playing=true;step=0;evolveAnimations();animationStep=nextEvolutionStep(0);nextTime=audio.currentTime+.05;visualStep=0;visualTime=nextTime;visualDuration=60/bpm/4;
@@ -469,7 +506,7 @@ $<HTMLInputElement>('#tempo').addEventListener('input',e=>{bpm=Number((e.target 
 $<HTMLInputElement>('#volume').addEventListener('input',e=>{if(master&&audio&&playing)master.gain.setTargetAtTime(Number((e.target as HTMLInputElement).value),audio.currentTime,.02);persistSettings();});
 $('#clear').addEventListener('click',()=>{tracks.forEach(tr=>tr.points.fill(false));sync();});
 function applyStyle(id:StyleId){
- currentStyle=id;pendingStyle=null;journey=null;const preset=presets[id];
+ currentStyle=id;pendingStyle=null;journey=null;arrangement=null;const preset=presets[id];
  tracks.forEach((tr,i)=>{
   const part=preset.parts[i];tr.enabled=!!part;tr.motif=makeMotif(preset.melody);tr.morph=null;tr.scheduledVelocity=1;tr.phase=0;tr.direction=1;tr.directionMode='forward';tr.pendingDirection=null;tr.instrument=part?.instrument||defaultInstruments[i];
   tr.points=Array.from({length:16},(_,s)=>!!part?.steps.includes(s));tr.pitch=part?.pitch||0;tr.volume=part?.volume??.55;tr.mute=false;tr.lastVelocity=1;tr.hitVelocities.fill(1);tr.flash.fill(-100);tr.hits.fill(-Infinity);

@@ -1,10 +1,10 @@
 ---
-interface Props { namespace:string }
-const {namespace}=Astro.props;
+interface Props { namespace:string; defaultMode?:'auto'|'light'|'dark' }
+const {namespace,defaultMode='auto'}=Astro.props;
 ---
-<script is:inline define:vars={{ namespace }}>
+<script is:inline define:vars={{ namespace, defaultMode }}>
 (() => {
-  let mode = 'auto';
+  let mode = defaultMode;
   try {
     if (localStorage.getItem(namespace + '.storage-consent.v1') === 'yes') {
       try {
