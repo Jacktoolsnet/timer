@@ -2,11 +2,11 @@ import {isMelodic} from './harmony';
 export type SongPart='intro'|'verse'|'chorus'|'bridge'|'outro';
 export type Section={kind:SongPart;bars:number};
 export type Phrase={points:boolean[];motif:number[];pitch:number};
-export function songForm(random=Math.random):Section[]{
- const verseBars=random()<.5?8:12,chorusBars=random()<.65?8:12;
+export function songForm(random=Math.random,dance=false):Section[]{
+ const verseBars=random()<.5?8:dance?16:12,chorusBars=random()<.65?8:dance?16:12;
  const form:Section[]=[{kind:'intro',bars:4},{kind:'verse',bars:verseBars},{kind:'chorus',bars:chorusBars},
   {kind:'verse',bars:verseBars},{kind:'chorus',bars:chorusBars}];
- if(random()<.75)form.push({kind:'bridge',bars:random()<.5?4:8},{kind:'chorus',bars:chorusBars});
+ if(random()<.75)form.push({kind:'bridge',bars:dance?8:random()<.5?4:8},{kind:'chorus',bars:chorusBars});
  form.push({kind:'outro',bars:4});return form;
 }
 export function copyPhrases(tracks:readonly Phrase[]):Phrase[]{

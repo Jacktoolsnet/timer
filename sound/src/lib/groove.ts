@@ -1,8 +1,10 @@
+import {dances,type DanceId} from './dances';
 import {presets,type StyleId} from './presets';
 export const grooveChoices=['auto','discofox','waltz','chacha'] as const;
 export type GrooveChoice=typeof grooveChoices[number];
-export type Groove={choice:GrooveChoice;style:StyleId;beats:3|4;steps:12|16;swing:number;grid:number[]};
-export function resolveGroove(style:StyleId,choice:GrooveChoice):Groove{
+export type Groove={choice:GrooveChoice;style:StyleId;beats:2|3|4;steps:8|12|16;dance?:DanceId;swing:number;grid:number[]};
+export function resolveGroove(style:StyleId,choice:GrooveChoice,dance?:DanceId|null):Groove{
+ if(dance){const d=dances[dance];return {choice:'auto',style,dance,beats:d.beats,steps:d.beats*4 as 8|12|16,swing:d.preset.swing||0,grid:d.preset.grid};}
  const steps=choice==='waltz'||choice==='auto'&&presets[style].beats===3?12:16;
  return {choice,style,beats:steps===12?3:4,steps,swing:choice==='auto'?(presets[style].swing||0):0,
   grid:choice==='auto'?presets[style].grid.filter(n=>n<steps):Array.from({length:steps},(_,i)=>i)};
@@ -20,8 +22,9 @@ export function grooveAnchored(id:string){return !['melody','sustain'].includes(
 export function groovePattern(groove:Groove,id:string):number[]{
  const role=grooveRole(id);
  if(groove.choice==='auto'){
-  const exact=presets[groove.style].parts.find(p=>p.instrument===id);
-  const related=presets[groove.style].parts.find(p=>grooveRole(p.instrument)===role);
+  const preset=groove.dance?dances[groove.dance].preset:presets[groove.style];
+  const exact=preset.parts.find(p=>p.instrument===id);
+  const related=preset.parts.find(p=>grooveRole(p.instrument)===role);
   return [...(exact||related||{steps:[0,8]}).steps];
  }
  const patterns:Record<string,number[]>=groove.choice==='waltz'
@@ -33,6 +36,7 @@ export function groovePattern(groove:Groove,id:string):number[]{
 }
 export function grooveAnchors(groove:Groove,id:string){return grooveAnchored(id)?groovePattern(groove,id):[];}
 export function grooveAccent(groove:Groove,id:string,beat:number){
+ if(groove.dance)return dances[groove.dance].accents[beat%dances[groove.dance].accents.length];
  const role=grooveRole(id),quarter=Math.floor(beat/4),sub=beat%4;
  if(groove.beats===3)return role==='chords'?(quarter===0?.65:.94):quarter===0?1:sub===0?.72:.55;
  if(groove.choice==='chacha')return [0,12,14].includes(beat)?1:sub===0?.85:.64;
@@ -47,6 +51,7 @@ export function grooveAccent(groove:Groove,id:string,beat:number){
 }
 export function grooveMutationGrid(groove:Groove,id:string){
  const role=grooveRole(id);
+ if(groove.dance&&grooveAnchored(id))return groovePattern(groove,id);
  if(role==='kick'&&(groove.choice!=='auto'||['house','sport','reggae'].includes(groove.style)))return groovePattern(groove,id);
  if(groove.beats===3&&role==='bass')return groovePattern(groove,id);
  if(groove.beats===3&&role==='chords')return [4,8];

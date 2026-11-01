@@ -1,3 +1,4 @@
+import {danceIds,type DanceId} from './dances';
 import {grooveChoices,type GrooveChoice} from './groove';
 import {instrumentIds,type InstrumentId} from './instruments';
 import {styleIds,type StyleId} from './presets';
@@ -10,7 +11,7 @@ export type SavedTrack={
  morph:{to:InstrumentId;progress:number}|null;
 };
 export type SoundSettings={
- version:1;style:StyleId;groove?:GrooveChoice;bpm:number;volume:number;transpose?:number;noteEffect?:number;tracks:SavedTrack[];
+ version:1;style:StyleId;dance?:DanceId|null;groove?:GrooveChoice;bpm:number;volume:number;transpose?:number;noteEffect?:number;tracks:SavedTrack[];
  background:typeof backgroundModes[number];center:typeof centerModes[number];orbit:typeof orbitModes[number];
 };
 const number=(v:unknown,min:number,max:number)=>typeof v==='number'&&Number.isFinite(v)&&v>=min&&v<=max;
@@ -19,11 +20,12 @@ const member=(values:readonly string[],v:unknown)=>typeof v==='string'&&values.i
 export function decodeSettings(raw:string|null):SoundSettings|null{
  try{
   const s=JSON.parse(raw||'null');
-  if(!s||s.version!==1||!member(styleIds,s.style)||!number(s.bpm,40,180)||!number(s.volume,0,.7)
+  if(!s||s.version!==1||!member(styleIds,s.style)||!number(s.bpm,40,220)||!number(s.volume,0,.7)
    ||!member(backgroundModes,s.background)||!member(centerModes,s.center)||!member(orbitModes,s.orbit)
    ||!Array.isArray(s.tracks)||s.tracks.length!==8)return null;
   if(s.transpose!==undefined&&(!number(s.transpose,-12,12)||!Number.isInteger(s.transpose)))return null;
   if(s.noteEffect!==undefined&&!number(s.noteEffect,0,1.5))return null;
+  if(s.dance!==undefined&&s.dance!==null&&!member(danceIds,s.dance))return null;
   if(s.groove!==undefined&&!member(grooveChoices,s.groove))return null;
   for(const tr of s.tracks){
    if(!tr||typeof tr.enabled!=='boolean'||typeof tr.mute!=='boolean'||typeof tr.randomDynamics!=='boolean'

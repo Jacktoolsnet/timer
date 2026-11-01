@@ -1,0 +1,19 @@
+---
+import type {DanceId} from '../lib/dances';
+interface Props{name:DanceId}
+const {name}=Astro.props;
+const paths:Record<DanceId,string>={
+ slowwaltz:'M5 20V5m7 15V11m7 9v-9M3 3h4',
+ tango:'m3 19 6-6-3-4 5-5m-1 16 6-6-3-4 5-5M17 3h4v4',
+ viennese:'M12 3a9 9 0 1 1-9 9M3 3v9h9M12 7v5l4 3',
+ slowfox:'M3 15c4-12 6 12 10 0s6 0 8 0M5 4h3m8 16h3',
+ quickstep:'m3 17 5-10 4 10 5-10M15 3h6v6M4 21h16',
+ samba:'M3 8c3-5 6 5 9 0s6 5 9 0M3 16c3-5 6 5 9 0s6 5 9 0M8 4v16m8-16v16',
+ chacha:'M3 18V9m5 9V9m5 9V3m4 15v-6m4 6V3',
+ rumba:'M12 20S2 14 3 8s7-5 9-1c2-4 8-5 9 1s-9 12-9 12Z',
+ pasodoble:'M4 20V4l15 4-15 5M11 13l8 7M3 21h9',
+ jive:'m4 19 4-13 4 13 4-13 4 13M3 3h4m10 0h4',
+ discofox:'M12 2a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm0 0v18M3 11h18M5 5l14 12M5 17 19 5'
+};
+---
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={paths[name]}/></svg>

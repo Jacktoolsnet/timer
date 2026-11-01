@@ -232,3 +232,17 @@ Music style includes Style default, Discofox, Waltz and Cha-cha-cha tiles. Style
 ### Slow Waltz style
 
 Slow Waltz defaults to 86 BPM and a native 3/4 meter with Style default selected. Its eight acoustic-leaning tracks combine double bass on beat one, piano/guitar on beats two and three, connected strings, harp and a restrained choir. Major harmonies move every four bars. Random journeys take 6–8 evolution cycles, with small pitch steps and a 78–96 BPM tempo target; evolution happens every 4–8 bars. Explicit dance-groove overrides remain user-controlled. The style, groove and drawings use the existing optional local settings storage.
+
+### Dances
+
+The separate Dances tile contains the five Standard dances, five Latin dances and Discofox. These are synthesized **ballroom interpretations**, not authentic recordings or exhaustive representations of regional traditions. Each dance defines eight instrument parts, characteristic onset patterns, accents, swing, meter and a fixed starting tempo. Quarter-note BPM is used throughout (not bars/minute): Slow Waltz 86, Tango 128 (4/4 notation), Viennese Waltz 180, Slowfox 116, Quickstep 200, Samba 100 (2/4), Cha-cha-cha 124, Rumba 100, Paso Doble 120 (2/4), Jive 168, Discofox 120. The shared tempo slider now reaches 220 BPM; manual changes remain possible.
+
+Selecting a dance applies its whole setup at the next bar and locks the free groove controls while active. Selecting a music style or Free music leaves dance mode. Reset retains the selected dance. Optional settings store the dance without autoplay, including 200 BPM Quickstep. Existing settings remain compatible.
+
+Dance Random Play keeps the user's tempo and the first four foundational tracks stable: no automatic instrument morphs, phase/direction changes, pattern mutation, phrase rests or section fades on those tracks. Melody/accompaniment variations and song structures remain generative, using 4/8/16-bar sections instead of 12-bar sections. Drawing over a foundation track edits a nearby melodic accompaniment instead, preserving the dance pulse. Explicit instrument/point editing, clear, enable, mute and track-volume controls remain available for intentional overrides.
+
+#### Dance sources
+
+- [WDSF Standard, Latin and 10Dance](https://www.worlddancesport.org/Standard-Latin-10Dance) — group membership.
+- [WDC Competition Rules, June 2024](https://www.wdcdance.com/wp-content/uploads/2024/06/WDC-Competition-Rules-June-2024-1.pdf), [UConn Ballroom music guide](https://www.uconnballroom.com/members/ballroom-playlists) — tempo references, converted to quarter-note BPM; presets are practice suggestions, not competition certification.
+- [STSV Standard dances](https://www.dancesport.ch/en/standardtaenze/), [STSV Latin dances](https://www.dancesport.ch/en/lateintaenze/), [ISTD Modern Ballroom](https://www.istd.org/dance/dance-genres/modern-ballroom/), [Stanford: English ballroom style](https://socialdance.stanford.edu/syllabi/English_ballroom_style.htm) — ballroom context and historical influences. The cultural captions deliberately distinguish ballroom adaptations from their broader roots.

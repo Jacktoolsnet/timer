@@ -2,7 +2,7 @@ import type {InstrumentId} from './instruments';
 export const styleIds=['electronic','house','pop','rock','classical','slowwaltz','jazz','coffeehouse','hiphop','lofi','funk','reggae','drumandbass','latin','ambient','focus','sport'] as const;
 export type StyleId=typeof styleIds[number];
 type Part={instrument:InstrumentId;steps:number[];pitch?:number;volume?:number};
-type Preset={beats?:3|4;swing?:number;bpm:number;scale:number[];melody:number[];parts:Part[];grid:number[];density:number};
+export type Preset={beats?:3|4;swing?:number;bpm:number;scale:number[];melody:number[];parts:Part[];grid:number[];density:number};
 const part=(instrument:InstrumentId,steps:number[],pitch=0,volume=.55):Part=>({instrument,steps,pitch,volume});
 const quarters=[0,4,8,12],eighths=[0,2,4,6,8,10,12,14];
 export const presets:Record<StyleId,Preset>={
