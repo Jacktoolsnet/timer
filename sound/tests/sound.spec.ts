@@ -557,3 +557,37 @@ test('drawing reshapes a melodic motif in electronic and jazz styles',async({pag
   await page.locator('#play').click();await page.waitForTimeout(100);await page.locator('#play').click();
  }
 });
+test('random play creates and advances a song while normal play stays a loop',async({page})=>{
+ await page.addInitScript(()=>{Math.random=()=>0;});
+ await page.goto('/de/');
+ await expect(page.locator('#song-structure')).toBeHidden();
+ await page.locator('#tempo').fill('180');await page.locator('#tempo').dispatchEvent('input');
+ await page.locator('#evolve').click();
+ await expect(page.locator('#song-structure')).toBeVisible();
+ await expect(page.locator('#song-structure')).toHaveAttribute('data-part','intro');
+ await expect(page.locator('#song-parts .song-part')).toHaveCount(8);
+ await expect(page.locator('#song-label')).toHaveText('Intro');
+ await expect(page.locator('#song-structure')).toHaveAttribute('data-part','verse',{timeout:10000});
+ await expect(page.locator('#song-label')).toHaveText('Strophe');
+ await page.locator('#evolve').click();
+ await expect(page.locator('#song-structure')).toBeHidden();
+ await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
+ await page.locator('#play').click();
+});
+test('a drawn refrain motif returns on the next chorus',async({page})=>{
+ test.setTimeout(90000);
+ await page.addInitScript(()=>{Math.random=()=>0;});
+ await page.goto('/de/');
+ await page.locator('#tempo').fill('180');await page.locator('#tempo').dispatchEvent('input');
+ await page.locator('#evolve').click();
+ await expect(page.locator('#song-structure')).toHaveAttribute('data-part','chorus',{timeout:30000});
+ await page.locator('#drawing').scrollIntoViewIfNeeded();
+ const r=await page.locator('#drawing').boundingBox();if(!r)throw Error('No pad');
+ await page.mouse.move(r.x+r.width*.4,r.y+r.height*.81);await page.mouse.down();await page.mouse.up();
+ const track=page.locator('[data-track="4"]'),hook=await track.getAttribute('data-motif');
+ expect(hook!.split(',')[3]).toBe('4');
+ await expect(page.locator('#song-structure')).toHaveAttribute('data-part','verse',{timeout:25000});
+ await expect(page.locator('#song-structure')).toHaveAttribute('data-part','chorus',{timeout:25000});
+ await expect(track).toHaveAttribute('data-motif',hook!);
+ await page.locator('#play').click();
+});
