@@ -190,6 +190,15 @@ body:not(.focus-view) .sound-top{margin-bottom:20px}
 .focus-view .music-tile{display:none}
 @media(max-width:800px){.music-tile{padding:16px;border-radius:18px;margin-top:20px}}
 
-.sound-transport .pitch-control{display:grid;grid-template-columns:auto minmax(80px,1fr);gap:6px 10px;align-items:center}
+.sound-transport .pitch-control{display:grid;grid-template-columns:auto minmax(80px,110px) auto;gap:6px 10px;align-items:center}
 .sound-transport .pitch-control input{width:100%;min-width:0}
-.sound-transport .pitch-control output{grid-column:2;min-width:0;font-variant-numeric:tabular-nums}
+.sound-transport .pitch-control output{grid-column:auto;min-width:0;white-space:nowrap;font-variant-numeric:tabular-nums}
+
+.note-effect-control{display:grid;grid-template-columns:1fr auto;align-items:center;gap:10px;margin-top:18px;font-size:13px;color:var(--muted)}
+.note-effect-control input{grid-column:1/-1;width:100%;margin:0;accent-color:var(--accent)}
+.note-effect-control output{font-variant-numeric:tabular-nums;color:var(--text)}
+
+.sound-adjustments{display:grid;gap:12px;flex-basis:100%;min-width:0}
+.sound-transport .sound-adjustments :is(.pitch-control,.note-effect-control){display:grid;grid-template-columns:100px minmax(60px,110px) auto;justify-content:start;align-items:center;gap:8px;margin:0}
+.sound-transport .sound-adjustments input{grid-column:2;grid-row:1;width:100%;min-width:0;margin:0}
+.sound-transport .sound-adjustments output{grid-column:3;grid-row:1;min-width:0;white-space:nowrap}

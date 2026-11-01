@@ -744,3 +744,37 @@ test('quiet orbit notes light up on playback hits',async({page})=>{
  }),{timeout:4000,intervals:[20,40,80]}).toBe(true);
  await page.locator('#play').click();
 });
+
+test('note glow strength persists and random play does not override it',async({page})=>{
+ await page.goto('/de/');
+ const slider=page.locator('#note-effect');
+ await expect(slider).toHaveValue('100');
+ await page.locator('#palette-dropdown summary').click();
+ await page.locator('#remember-preferences').check();await page.locator('#preferences-close').click();
+ await slider.fill('150');await slider.dispatchEvent('input');
+ await expect(page.locator('#note-effect-value')).toHaveText('150 %');
+ await page.waitForTimeout(350);await page.reload();
+ await expect(slider).toHaveValue('150');
+ await slider.fill('0');await slider.dispatchEvent('input');
+ await page.locator('#evolve').click();await expect(slider).toHaveValue('0');
+ await page.locator('#play').click();
+ await expect(page.locator('#volume')).toHaveValue('0.3');
+});
+
+test('semitone value sits to the right of the pitch slider',async({page})=>{
+ await page.goto('/de/');
+ const slider=(await page.locator('#transpose').boundingBox())!,output=(await page.locator('#transpose-value').boundingBox())!;
+ expect(output.x).toBeGreaterThanOrEqual(slider.x+slider.width);
+ expect(Math.abs(output.y+output.height/2-slider.y-slider.height/2)).toBeLessThan(3);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});
+
+test('note glow control sits directly below pitch in the playback controls',async({page})=>{
+ await page.goto('/de/');
+ await expect(page.locator('.sound-transport #note-effect')).toBeVisible();
+ await expect(page.locator('.animations-tile #note-effect')).toHaveCount(0);
+ const pitch=(await page.locator('#transpose').boundingBox())!,glow=(await page.locator('#note-effect').boundingBox())!;
+ expect(glow.y).toBeGreaterThan(pitch.y+pitch.height);
+ expect(Math.abs(glow.x-pitch.x)).toBeLessThan(2);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});

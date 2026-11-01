@@ -175,3 +175,12 @@ crossfade over 220 ms; long gaps and large pitch jumps start a fresh bow. Contin
 are bounded in time/rate to avoid extending an exhausted buffer. Stop clears active
 bow states and fades their sources, so replay starts cleanly. Plucked strings,
 percussion and other voices retain their separate articulation.
+
+Wordless vocals now retain at least a 3 kHz filter cutoff so vowel formants are not
+lost in warm style filters. Solo voice has a short mouth-opening articulation,
+delayed vibrato and a clearer mix; Pop's solo track starts at 45% instead of 25%.
+Generated vocal fundamentals are octave-folded into 110–440 Hz before the manual
+pitch offset. Every style's Random Play palette now includes compatible vocal
+colours (solo, choir or pad), not just the instruments in its starting pattern.
+For a deliberate listening comparison, use the Pop starting pattern: track 7 is
+Solo Voice. These are wordless synthesized vowels, not realistic recorded singing.

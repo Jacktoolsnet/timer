@@ -1,7 +1,7 @@
 import {noteGlow} from '../lib/note-glow';
 import {continueBow} from '../lib/bowed';
 import {developmentPlan,developmentGain,accompanimentMotif,registerArc,registerNote,type DevelopmentPlan} from '../lib/development';
-import {vocalInstruments,vocalWave,vowelPosition,type VocalInstrument} from '../lib/vocal';
+import {vocalInstruments,vocalWave,vowelPosition,vocalFundamental,type VocalInstrument} from '../lib/vocal';
 import {voiceRecipe} from '../lib/voice-recipes';
 import {acousticInstruments,acousticWave,type AcousticInstrument} from '../lib/acoustic';
 import {spaceProfile,stereoPosition,sectionExpression} from '../lib/space';
@@ -16,7 +16,7 @@ import {STORAGE_KEY} from '../lib/engine';
 import {decodeSettings,type SoundSettings} from '../lib/sound-settings';
 import {soundProfiles} from '../lib/sound-profiles';
 import {approach,journeyLength,morphWeights} from '../lib/journey';
-import {presets,partsForStyle,styleCopy,type StyleId} from '../lib/presets';
+import {presets,partsForStyle,evolutionPalette,styleCopy,type StyleId} from '../lib/presets';
 import {screenWakeLock} from '../lib/wake-lock';
 import {evolvePattern,nextEvolutionStep} from '../lib/evolution';
 import {enhanceClockSelects} from '../../../shared/preview-selects';
@@ -40,7 +40,7 @@ let visualStep=0,visualTime=0,visualDuration=.15;
 function playbackAngle(time:number){return (visualStep+Math.max(0,Math.min(1,(time-visualTime)/visualDuration)))/16*Math.PI*2;}
 const language=document.documentElement.lang as keyof typeof styleCopy;
 let currentStyle:StyleId='electronic',pendingStyle:StyleId|null=null;
-let transpose=0;
+let transpose=0,noteEffect=1;
 let evolving=false,evolutionStep=Infinity;
 let arrangement:ArrangementPlan|null=null;
 let development:DevelopmentPlan|null=null;
@@ -135,7 +135,7 @@ function saveSettings(){
  if(!persistenceReady||!storageAllowed())return;
  try{
   const snapshot:SoundSettings={
-   version:1,style:currentStyle,bpm,transpose,volume:Number($<HTMLInputElement>('#volume').value),
+   version:1,style:currentStyle,bpm,transpose,noteEffect,volume:Number($<HTMLInputElement>('#volume').value),
    background:backgroundChoice,center:centerChoice,orbit:orbitChoice,
    tracks:tracks.map(tr=>({
     enabled:tr.enabled,mute:tr.mute,instrument:tr.instrument,points:[...tr.points],motif:[...tr.motif],volume:tr.volume,pitch:tr.pitch,
@@ -291,6 +291,8 @@ function voice(i:number,time:number,beat:number,velocity:number,phrase?:Phrase){
 function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:InstrumentId,phrase?:Phrase){
  const tr=tracks[i];if(!audio||!master||!tr.enabled||tr.mute||tr.volume===0)return;
  const ctx=audio,profile=soundProfiles[currentStyle];
+ const vocal=(vocalInstruments as readonly string[]).includes(id);
+ const cutoff=vocal?Math.max(3000,profile.cutoff):profile.cutoff;
  const expressive=evolving&&dialogueInstrument(id);
  const role=expressive?dialogueRole(i):-1;
  const bar=step/16;
@@ -307,8 +309,8 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
 
  // One shared low-pass per voice keeps harmonic layers coherent and softens metallic edges.
  const bus=ctx.createBiquadFilter();bus.type='lowpass';bus.Q.value=.55;
- bus.frequency.setValueAtTime(profile.cutoff*motion.cutoff*expression.cutoff,time);
- bus.frequency.exponentialRampToValueAtTime(profile.cutoff*(evolving?timbreMotion(bar+.25,expressionSeed,i).cutoff:1)*expression.cutoff,time+.15);
+ bus.frequency.setValueAtTime(cutoff*motion.cutoff*expression.cutoff,time);
+ bus.frequency.exponentialRampToValueAtTime(cutoff*(evolving?timbreMotion(bar+.25,expressionSeed,i).cutoff:1)*expression.cutoff,time+.15);
  const pan=ctx.createStereoPanner(),hallSend=ctx.createGain(),echoSend=ctx.createGain();
  pan.pan.setValueAtTime(stereoPosition(id,i,bar,expressionSeed),time);
  pan.pan.linearRampToValueAtTime(stereoPosition(id,i,bar+1,expressionSeed),time+60/bpm*4);
@@ -361,9 +363,8 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
   source.connect(filter);filter.connect(gain);gain.connect(bus);source.start(at,Math.random()*(1-duration-.02));source.stop(at+duration+.02);
   source.onended=()=>{source.disconnect();filter.disconnect();gain.disconnect();ended();};
  }
- const vocal=(vocalInstruments as readonly string[]).includes(id);
  if(acousticInstruments.includes(id)||vocal){
-  const acoustic=id as AcousticInstrument,frequency=(id==='bass'||id==='doublebass')?note/4:id==='guitar'||vocal?note/2:note;
+  const acoustic=id as AcousticInstrument,frequency=vocal?vocalFundamental(261.626*2**(voiced/12))*2**(transpose/12):(id==='bass'||id==='doublebass')?note/4:id==='guitar'?note/2:note;
   // Three touch layers: stronger hits excite more upper partials, not just more volume.
   const layer=Math.max(0,Math.min(2,Math.round(velocity*tr.volume*2)));
   const brightness=(profile.warm?.2:.4)+layer*.2;
@@ -377,7 +378,7 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
    acousticCache.set(key,buffer);
   }
   const previous=id==='strings'?bows.get(i):undefined;
-  const level=tr.volume*velocity*(vocal?.2:id==='strings'?.18:.28);
+  const level=tr.volume*velocity*(id==='voice'?.3:vocal?.23:id==='strings'?.18:.28);
   if(previous&&continueBow(previous.last,previous.started,time,bpm,frequency/previous.base)){
    // Pitch glides under one bow; no repeated amplitude attack or stack of identical strings.
    previous.source.playbackRate.cancelAndHoldAtTime(time);
@@ -431,7 +432,7 @@ function evolveJourney(time:number){
   const tonal=eligible.filter(({tr})=>currentStyle!=='sport'||tr.instrument!=='kick');
   if(!tonal.length)return;
   const chosen=tonal.find(({tr})=>tr.morph)||tonal[Math.floor(Math.random()*tonal.length)];
-  const palette=[...new Set(partsForStyle(currentStyle).map(part=>part.instrument))];
+  const palette=evolutionPalette(currentStyle);
   const percussion=['kick','snare','hat','clap','tom','rim','shaker'];
   const preserveRoles=['sport','hiphop','lofi','funk','reggae','drumandbass','latin'].includes(currentStyle);
   const alternatives=palette.filter(id=>id!==chosen.tr.instrument&&(!preserveRoles||percussion.includes(id)===percussion.includes(chosen.tr.instrument)));
@@ -566,6 +567,14 @@ $('#play').addEventListener('click',()=>playing?stop():void start());
 document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();});
 window.addEventListener('pagehide',stop);
 $<HTMLInputElement>('#tempo').addEventListener('input',e=>{bpm=Number((e.target as HTMLInputElement).value);$('#tempo-value').textContent=bpm+' BPM';persistSettings();});
+function syncNoteEffect(){
+ const text=Math.round(noteEffect*100)+' %';
+ $<HTMLInputElement>('#note-effect').value=String(Math.round(noteEffect*100));
+ $('#note-effect-value').textContent=text;$('#note-effect').setAttribute('aria-valuetext',text);
+}
+$<HTMLInputElement>('#note-effect').addEventListener('input',e=>{
+ noteEffect=Number((e.target as HTMLInputElement).value)/100;syncNoteEffect();persistSettings();
+});
 function syncTranspose(){
  const text=(transpose>0?'+':'')+transpose+' '+pitchCopy[language].unit;
  $<HTMLInputElement>('#transpose').value=String(transpose);
@@ -900,7 +909,7 @@ function frame(now:number){
   }
   for(let s=0;s<16;s++){
    const a=s/16*Math.PI*2-Math.PI/2,x=350+Math.cos(a)*r,y=350+Math.sin(a)*r;
-   const pulse=noteGlow((time-tr.hits[s])*1000,tr.volume*tr.hitVelocities[s]*visualMaster,playing&&orbitAnimation&&!tr.mute&&tr.volume>0&&visualMaster>0,reduced.matches),on=tr.points[s];
+   const pulse=noteGlow((time-tr.hits[s])*1000,tr.volume*tr.hitVelocities[s]*visualMaster,playing&&orbitAnimation&&!tr.mute&&tr.volume>0&&visualMaster>0,reduced.matches,noteEffect),on=tr.points[s];
    oc.globalAlpha=tr.mute?.28:1;oc.shadowColor=tr.color;oc.shadowBlur=on?(dark?15:6)+pulse*22:0;
    oc.beginPath();oc.arc(x,y,on?5+pulse*5:3,0,Math.PI*2);oc.fillStyle=on?tr.color:(dark?'#101c28':'#fcfdf8');oc.fill();oc.strokeStyle=tr.color;oc.stroke();oc.shadowBlur=0;
    if(pulse>0){
@@ -933,7 +942,7 @@ function restoreSettings(){
  if(!storageAllowed())return;
  try{
   const saved=decodeSettings(localStorage.getItem(STORAGE_KEY));if(!saved)return;
-  applyStyle(saved.style);bpm=saved.bpm;transpose=saved.transpose??0;syncTranspose();
+  applyStyle(saved.style);bpm=saved.bpm;transpose=saved.transpose??0;syncTranspose();noteEffect=saved.noteEffect??1;syncNoteEffect();
   $<HTMLInputElement>('#tempo').value=String(bpm);$('#tempo-value').textContent=bpm+' BPM';
   $<HTMLInputElement>('#volume').value=String(saved.volume);
   saved.tracks.forEach((source,i)=>{

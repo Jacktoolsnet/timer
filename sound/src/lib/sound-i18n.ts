@@ -53,3 +53,5 @@ export const pitchCopy={
  es:{label:'Altura tonal',unit:'semitonos'},
  fr:{label:'Hauteur',unit:'demi-tons'}
 };
+
+export const noteEffectCopy={de:'Notenleuchten',en:'Note glow',es:'Brillo de las notas',fr:'Éclat des notes'};

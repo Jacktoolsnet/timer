@@ -20,3 +20,16 @@ test('vowels change the spectrum and evolve slowly',()=>{
   expect(Math.abs(v-vowelPosition(bar+.25,1))).toBeLessThanOrEqual(.125);
  }
 });
+
+test('singing stays in a formant-friendly register before manual pitch shifts',async()=>{
+ const {vocalFundamental}=await import('../src/lib/vocal');
+ for(const note of [65.4,130.8,261.6,523.2,1046.4,2092.8]){
+  const frequency=vocalFundamental(note);
+  expect(frequency).toBeGreaterThanOrEqual(110);expect(frequency).toBeLessThanOrEqual(440);
+ }
+});
+test('random style palettes can reach compatible wordless voices',async()=>{
+ const {styleIds,evolutionPalette,presets}=await import('../src/lib/presets');
+ for(const style of styleIds)expect(evolutionPalette(style).some(id=>(vocalInstruments as readonly string[]).includes(id))).toBe(true);
+ expect(presets.pop.parts.find(p=>p.instrument==='voice')!.volume).toBeGreaterThanOrEqual(.4);
+});
