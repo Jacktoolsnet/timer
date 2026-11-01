@@ -180,3 +180,5 @@ body:not(.focus-view) .sound-top{margin-bottom:20px}
 
 .sound-faq{max-width:1000px;margin:0 auto 56px}.sound-faq h2{font-size:26px}.sound-faq summary{font-weight:600;line-height:1.6;cursor:pointer;padding:16px 0}.sound-faq details{border-bottom:1px solid var(--line)}.sound-faq p{color:var(--muted);line-height:1.8}.sound-faq .usage-link a{color:var(--accent);text-decoration:underline}
 .focus-view .sound-faq{display:none}
+
+#hide-focus-controls{display:none}.focus-view #hide-focus-controls{display:inline-flex;background:var(--surface);box-shadow:0 4px 18px #0002}.focus-view .sound-top{gap:10px}

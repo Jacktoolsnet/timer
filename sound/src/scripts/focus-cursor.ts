@@ -1,5 +1,4 @@
-/** Focus view becomes an orbit-only stage after ten seconds without input. */
-let idleTimer:number|undefined;
+/** Focus controls are hidden explicitly and restored by user activity. */
 let focused=document.body.classList.contains('focus-view');
 const pointers=new Set<number>();
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
@@ -54,16 +53,15 @@ function setIdle(idle:boolean){
 window.addEventListener('resize',()=>{orbitMotion?.cancel();clearControlMotion();});
 reduced.addEventListener('change',()=>{orbitMotion?.cancel();clearControlMotion();});
 function activity(){
- if(idleTimer!==undefined){window.clearTimeout(idleTimer);idleTimer=undefined;}
  setIdle(false);document.body.classList.remove('focus-cursor-hidden');
- if(!document.body.classList.contains('focus-view')||document.hidden||pointers.size)return;
- idleTimer=window.setTimeout(()=>{
-  idleTimer=undefined;
-  if(document.body.classList.contains('focus-view')&&!document.hidden&&!pointers.size&&!document.querySelector('dialog[open]')){
-   setIdle(true);
-  }
- },10000);
 }
+document.querySelector('#hide-focus-controls')?.addEventListener('click',()=>{
+ if(document.body.classList.contains('focus-view')){
+  (document.activeElement as HTMLElement|null)?.blur();
+  setIdle(true);
+ }
+});
+
 document.addEventListener('pointermove',activity,{passive:true});
 document.addEventListener('pointerdown',e=>{
  const wasIdle=document.body.classList.contains('focus-idle');
