@@ -156,7 +156,7 @@ $('sound').addEventListener('change',()=>{settings.sound=($<HTMLSelectElement>('
 $('volume').addEventListener('input',()=>{settings.volume=Number(($<HTMLInputElement>('volume')).value)/100;save();});
 for(const [id,key] of [['gap','gap'],['hide-gap','hideGap'],['reduced','reduced']] as const) $(id).addEventListener('change',()=>{settings[key]=($<HTMLInputElement>(id)).checked;changed(key!=='reduced');});
 for(const button of document.querySelectorAll<HTMLButtonElement>('button[data-view]'))button.addEventListener('click',()=>{settings.view=button.dataset.view as Settings['view'];changed(false);});
-function focus(value:boolean){wake(value);document.body.classList.toggle('focus-view',value);$('focus').setAttribute('aria-pressed',String(value));$('focus').textContent=`${value?t.exit:t.focus} ⛶`;}
+function focus(value:boolean){wake(value);document.body.classList.toggle('focus-view',value);$('focus').setAttribute('aria-pressed',String(value));const label=value?t.exit:t.focus;$('focus').querySelector('span')!.textContent=label;$('focus').setAttribute('aria-label',label);$('focus').title=label;}
 $('focus').addEventListener('click',()=>focus(!document.body.classList.contains('focus-view')));
 // Keep focus visible for keyboard users, but reserve Space here for playback.
 // Enter still activates the focus button normally.

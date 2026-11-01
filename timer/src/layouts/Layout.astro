@@ -6,6 +6,7 @@ import SocialMeta from '../../../shared/SocialMeta.astro';
 import BrandIcon from '../../../shared/BrandIcon.astro';
 import '../styles/global.css';
 import '../../../shared/sticky-header.css';
+import '../../../shared/header-focus.css';
 import '../../../shared/header-spacing.css';
 import { colorSchemes } from '../lib/engine';
 import { getDictionary, languages, languageNames, type Language } from '../lib/i18n';
@@ -76,6 +77,7 @@ const alternateLanguages = legal && route !== 'usage' ? (['en', 'de'] as const) 
           <span class="brand-wordmark">jacktools<span class="brand-dot">.</span>net<span class="brand-product">/timer</span></span>
         </a>
         <div class="header-tools">
+          <slot name="header-focus" />
           <details class="palette-dropdown" id="palette-dropdown">
             <summary class="preferences-trigger" aria-label={t.menuSettings} title={t.menuSettings}>
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 3-.5 2-2 .9-1.8-.6-2 3.4 1.5 1.4v2.8L3.7 14l2 3.4 1.8-.6 2 .9.5 2.3h4l.5-2.3 2-.9 1.8.6 2-3.4-1.5-1.1v-2.8l1.5-1.4-2-3.4-1.8.6-2-.9L14 3Z"/><circle cx="12" cy="11.5" r="3"/></svg>

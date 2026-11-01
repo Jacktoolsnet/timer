@@ -17,12 +17,12 @@ function setIdle(idle:boolean){
  const from=orbit.getBoundingClientRect();
  orbitMotion?.cancel();orbitMotion=undefined;clearControlMotion();
  const animate=focused&&!reduced.matches&&!document.hidden;
- const controls=[...document.querySelectorAll<HTMLElement>('.sound-top,.flow-side')];
+ const controls=[...document.querySelectorAll<HTMLElement>('.header-focus-actions,.flow-side')];
  if(animate&&idle){
   controls.forEach(control=>{
    const rect=control.getBoundingClientRect(),style=getComputedStyle(control);
    const ghost=control.cloneNode(true) as HTMLElement;
-   ghost.className='focus-control-ghost';ghost.removeAttribute('id');
+   ghost.className=control.className+' focus-control-ghost';ghost.removeAttribute('id');
    ghost.querySelectorAll('[id]').forEach(element=>element.removeAttribute('id'));
    ghost.setAttribute('aria-hidden','true');ghost.inert=true;
    Object.assign(ghost.style,{position:'fixed',left:rect.left+'px',top:rect.top+'px',width:rect.width+'px',height:rect.height+'px',display:style.display,boxSizing:'border-box',zIndex:'50',pointerEvents:'none',margin:'0'});

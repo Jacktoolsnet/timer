@@ -26,12 +26,13 @@ const sheddingCopy={de:['Bläschen ablösen','Beim Ziehen einer großen Lavablas
 const settingsTitle={de:'Einstellungen',en:'Settings',es:'Ajustes',fr:'Réglages'}[lang];
 ---
 <Layout lang={lang} title={seo.title} description={seo.description} route="">
+<div slot="header-focus" class="header-focus-actions"><button class="icon-text" aria-label={t[12]} title={t[12]} id="lava-fullscreen" data-error={t[13]}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg><span>{t[12]}</span></button></div>
 <section class="lava-intro"><p class="eyebrow">JACKTOOLS / RELAX</p><h1>{seo.heading}</h1><p class="lava-tagline">{t[1]}</p><p class="intro-copy">{seo.description}</p></section>
 <section class="lava-tool" aria-label={t[0]}>
  <div class="lava-stage" id="lava-stage">
   <div class="ambient" aria-hidden="true"></div>
   <div class="lava-liquid" aria-hidden="true"><canvas id="lava-canvas"></canvas><canvas id="lava-trail-canvas"></canvas><div class="fallback"><i></i><i></i><i></i></div></div>
-  <button class="stage-focus" id="lava-fullscreen" data-error={t[13]}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg><span>{t[12]}</span></button>
+  
   <button class="stage-play" id="lava-toggle" data-start={t[10]} data-pause={t[11]} aria-label={t[10]} title={t[10]} aria-pressed="false"><svg class="play-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 11 7-11 7Z"/></svg><svg class="pause-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14"/></svg></button>
 
   <button class="fullscreen-exit" id="exit-fullscreen" aria-label={lang === 'de' ? 'Fokus verlassen' : lang === 'es' ? 'Salir del enfoque' : lang === 'fr' ? 'Quitter la concentration' : 'Leave focus'}>×</button>
