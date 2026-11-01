@@ -197,6 +197,7 @@ test('style presets change instruments and defer live changes to a bar',async({p
  expect(errors).toEqual([]);
 });
 test('focus idle stage enlarges orbit and restores controls on activity',async({page})=>{
+ test.setTimeout(40000);
  await page.addInitScript(()=>{
   // Test the equally supported fullscreen-denied fallback deterministically.
   Element.prototype.requestFullscreen=async()=>{throw Error('Not allowed');};
@@ -208,7 +209,10 @@ test('focus idle stage enlarges orbit and restores controls on activity',async({
  });
  await page.goto('/de/');await page.locator('#focus').click();
  const before=await page.locator('.orbit-wrap').boundingBox();
- await expect(page.locator('body')).toHaveClass(/focus-idle/,{timeout:5000});
+ await page.waitForTimeout(3500);
+ await expect(page.locator('.flow-side')).toBeVisible();
+ await expect(page.locator('body')).not.toHaveClass(/focus-idle/);
+ await expect(page.locator('body')).toHaveClass(/focus-idle/,{timeout:12000});
  await expect(page.locator('.flow-side')).toBeHidden();
  await expect(page.locator('#focus')).toBeHidden();
  await page.waitForTimeout(750);
@@ -221,7 +225,7 @@ test('focus idle stage enlarges orbit and restores controls on activity',async({
  await page.mouse.move(12,12);
  await expect(page.locator('.flow-side')).toBeVisible();
  await expect(page.locator('body')).not.toHaveClass(/focus-idle/);
- await expect(page.locator('body')).toHaveClass(/focus-idle/,{timeout:5000});
+ await expect(page.locator('body')).toHaveClass(/focus-idle/,{timeout:12000});
  await page.keyboard.press('Tab');await expect(page.locator('.flow-side')).toBeVisible();
  await page.locator('#focus').click();
  await expect(page.locator('body')).not.toHaveClass(/focus-view/);

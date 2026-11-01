@@ -1,4 +1,4 @@
-/** Focus view becomes an orbit-only stage after three seconds without input. */
+/** Focus view becomes an orbit-only stage after ten seconds without input. */
 let idleTimer:number|undefined;
 let focused=document.body.classList.contains('focus-view');
 const pointers=new Set<number>();
@@ -62,7 +62,7 @@ function activity(){
   if(document.body.classList.contains('focus-view')&&!document.hidden&&!pointers.size&&!document.querySelector('dialog[open]')){
    setIdle(true);
   }
- },3000);
+ },10000);
 }
 document.addEventListener('pointermove',activity,{passive:true});
 document.addEventListener('pointerdown',e=>{
