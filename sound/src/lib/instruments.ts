@@ -9,4 +9,4 @@ export const instrumentNames={
 };
 export const instrumentLabel={de:'Instrument',en:'Instrument',es:'Instrumento',fr:'Instrument'};
 
-export const trackLabels={de:{enable:'Bahn aktivieren',hint:'Fünf Bahnen zum Start. Schalte bis zu drei weitere hinzu.'},en:{enable:'Enable orbit',hint:'Start with five orbits. Enable up to three more.'},es:{enable:'Activar órbita',hint:'Empieza con cinco órbitas. Activa hasta tres más.'},fr:{enable:'Activer l’orbite',hint:'Commence avec cinq orbites. Active jusqu’à trois de plus.'}};
+export const trackLabels={de:{enable:'Bahn aktivieren',hint:'Alle acht Bahnen sind zum Start aktiv.'},en:{enable:'Enable orbit',hint:'All eight orbits start enabled.'},es:{enable:'Activar órbita',hint:'Las ocho órbitas están activas al inicio.'},fr:{enable:'Activer l’orbite',hint:'Les huit orbites sont actives au départ.'}};

@@ -13,7 +13,7 @@ import {STORAGE_KEY} from '../lib/engine';
 import {decodeSettings,type SoundSettings} from '../lib/sound-settings';
 import {soundProfiles} from '../lib/sound-profiles';
 import {approach,journeyLength,morphWeights} from '../lib/journey';
-import {presets,styleCopy,type StyleId} from '../lib/presets';
+import {presets,partsForStyle,styleCopy,type StyleId} from '../lib/presets';
 import {screenWakeLock} from '../lib/wake-lock';
 import {evolvePattern,nextEvolutionStep} from '../lib/evolution';
 import {enhanceClockSelects} from '../../../shared/preview-selects';
@@ -26,7 +26,8 @@ const oc=orbit.getContext('2d')!,dc=drawing.getContext('2d')!;
 const atmosphere=$<HTMLCanvasElement>('#sound-atmosphere'),ac=atmosphere.getContext('2d')!;
 const colors=['#21bed1','#a482ed','#f0788c','#d8a847','#48bca0','#e68a44','#779cf5','#dc7bcb'];
 const lightColors=['#00869b','#7845c7','#cf3659','#a66a08','#078565','#bd5715','#3d66c5','#b0399c'];
-const tracks=colors.map((color,i)=>({color,motif:makeMotif(presets.electronic.melody),phase:0,direction:1,directionMode:'forward',pendingDirection:null as number|null,randomDynamics:false,lastVelocity:1,scheduledVelocity:1,morph:null as {to:InstrumentId;progress:number;from:number;at:number;duration:number}|null,hitVelocities:Array<number>(16).fill(1),enabled:i<5,instrument:defaultInstruments[i],points:Array.from({length:16},(_,s)=>i===0?s%4===0:i===1?s%8===4:i===2?s%2===0:i===3?s%8===0:i===4?s%5===0:false),mute:false,volume:.65,pitch:0,flash:Array(16).fill(-100),hits:Array<number>(16).fill(-Infinity)}));
+const initialParts=partsForStyle('electronic');
+const tracks=colors.map((color,i)=>({color,motif:makeMotif(presets.electronic.melody),phase:0,direction:1,directionMode:'forward',pendingDirection:null as number|null,randomDynamics:false,lastVelocity:1,scheduledVelocity:1,morph:null as {to:InstrumentId;progress:number;from:number;at:number;duration:number}|null,hitVelocities:Array<number>(16).fill(1),enabled:true,instrument:initialParts[i].instrument,points:Array.from({length:16},(_,s)=>initialParts[i].steps.includes(s)),mute:false,volume:initialParts[i].volume??.55,pitch:0,flash:Array(16).fill(-100),hits:Array<number>(16).fill(-Infinity)}));
 let audio:AudioContext|undefined, master:GainNode|undefined, playing=false,timer:ReturnType<typeof setInterval>|undefined,nextTime=0,step=0,bpm=100;
 let space:ReturnType<typeof createAudioSpace>|undefined;
 const acousticCache=new Map<string,AudioBuffer>();
@@ -392,7 +393,7 @@ function evolveJourney(time:number){
   const tonal=eligible.filter(({tr})=>currentStyle!=='sport'||tr.instrument!=='kick');
   if(!tonal.length)return;
   const chosen=tonal.find(({tr})=>tr.morph)||tonal[Math.floor(Math.random()*tonal.length)];
-  const palette=[...new Set(presets[currentStyle].parts.map(part=>part.instrument))];
+  const palette=[...new Set(partsForStyle(currentStyle).map(part=>part.instrument))];
   const percussion=['kick','snare','hat','clap','tom','rim','shaker'];
   const preserveRoles=['sport','hiphop','lofi','funk','reggae','drumandbass','latin'].includes(currentStyle);
   const alternatives=palette.filter(id=>id!==chosen.tr.instrument&&(!preserveRoles||percussion.includes(id)===percussion.includes(chosen.tr.instrument)));
@@ -522,9 +523,9 @@ $<HTMLInputElement>('#tempo').addEventListener('input',e=>{bpm=Number((e.target 
 $<HTMLInputElement>('#volume').addEventListener('input',e=>{if(master&&audio&&playing)master.gain.setTargetAtTime(Number((e.target as HTMLInputElement).value),audio.currentTime,.02);persistSettings();});
 $('#clear').addEventListener('click',()=>{tracks.forEach(tr=>tr.points.fill(false));sync();});
 function applyStyle(id:StyleId){
- currentStyle=id;pendingStyle=null;journey=null;arrangement=null;const preset=presets[id];
+ currentStyle=id;pendingStyle=null;journey=null;arrangement=null;const preset=presets[id],parts=partsForStyle(id);
  tracks.forEach((tr,i)=>{
-  const part=preset.parts[i];tr.enabled=!!part;tr.motif=makeMotif(preset.melody);tr.morph=null;tr.scheduledVelocity=1;tr.phase=0;tr.direction=1;tr.directionMode='forward';tr.pendingDirection=null;tr.instrument=part?.instrument||defaultInstruments[i];
+  const part=parts[i];tr.enabled=true;tr.motif=makeMotif(preset.melody);tr.morph=null;tr.scheduledVelocity=1;tr.phase=0;tr.direction=1;tr.directionMode='forward';tr.pendingDirection=null;tr.instrument=part?.instrument||defaultInstruments[i];
   tr.points=Array.from({length:16},(_,s)=>!!part?.steps.includes(s));tr.pitch=part?.pitch||0;tr.volume=part?.volume??.55;tr.mute=false;tr.lastVelocity=1;tr.hitVelocities.fill(1);tr.flash.fill(-100);tr.hits.fill(-Infinity);
  });
  bpm=preset.bpm;$<HTMLInputElement>('#tempo').value=String(bpm);$('#tempo-value').textContent=bpm+' BPM';

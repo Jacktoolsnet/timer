@@ -54,11 +54,11 @@ test('all instruments can replace a track without losing points',async({page})=>
  await page.locator('#play').click();
  expect(errors).toEqual([]);
 });
-test('eight optional orbits and drawing on added tracks',async({page})=>{
+test('eight default orbits and drawing on added tracks',async({page})=>{
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/de/');
  await expect(page.locator('.instrument')).toHaveCount(8);
- await expect(page.locator('.instrument[data-enabled=true]')).toHaveCount(5);
+ await expect(page.locator('.instrument[data-enabled=true]')).toHaveCount(8);
  for(let i=5;i<8;i++){
   const row=page.locator('[data-track="'+i+'"]');
   await row.locator('summary').click();await row.locator('.track-enabled').check();
@@ -182,7 +182,7 @@ test('style presets change instruments and defer live changes to a bar',async({p
  await expect(page.locator('[data-track="1"] .instrument-name')).toHaveText('Streicher');
  await choose('house');
  await expect(page.locator('#tempo')).toHaveValue('124');
- await expect(page.locator('.instrument[data-enabled=true]')).toHaveCount(6);
+ await expect(page.locator('.instrument[data-enabled=true]')).toHaveCount(8);
  await page.locator('#play').click();
  await choose('rock');
  await expect(page.locator('#style-status')).not.toBeEmpty();
@@ -488,7 +488,7 @@ test('focus and sport presets load and preserve explicit visual selections',asyn
  await page.locator('[data-style-preset=sport]').click();
  await expect(page.locator('#tempo')).toHaveValue('136');
  await expect(page.locator('[data-track="0"] .instrument-name')).toHaveText('Kick');
- await expect(page.locator('.instrument[data-enabled=true]')).toHaveCount(6);
+ await expect(page.locator('.instrument[data-enabled=true]')).toHaveCount(8);
  await page.locator('#evolve').click();await page.waitForTimeout(150);await page.locator('#play').click();
  expect(errors).toEqual([]);
 });
@@ -678,4 +678,19 @@ test('drawing reshapes the solo voice during random playback',async({page})=>{
  await expect(track).not.toHaveAttribute('data-motif',before!);
  await page.locator('#play').click();
  expect(errors).toEqual([]);
+});
+
+test('music, instruments and animations have separate labelled tiles',async({page})=>{
+ await page.goto('/de/');
+ await expect(page.locator('.music-tile h2')).toHaveText('Musikrichtung');
+ await expect(page.locator('.music-tile .style-tile')).toHaveCount(16);
+ await expect(page.locator('.instruments-tile h2')).toHaveText('Instrumente');
+ await expect(page.locator('.instruments-tile .style-tile')).toHaveCount(0);
+ await expect(page.locator('.instruments-tile .instrument')).toHaveCount(8);
+ const order=await page.locator('.music-tile,.instruments-tile,.animations-tile').evaluateAll(tiles=>tiles.map(tile=>tile.className));
+ expect(order).toEqual(['music-tile','instruments-tile','animations-tile']);
+ await page.locator('#focus').click();
+ for(const tile of ['.music-tile','.instruments-tile','.animations-tile'])await expect(page.locator(tile)).toBeHidden();
+ await page.locator('#focus').click();
+ for(const tile of ['.music-tile','.instruments-tile','.animations-tile'])await expect(page.locator(tile)).toBeVisible();
 });

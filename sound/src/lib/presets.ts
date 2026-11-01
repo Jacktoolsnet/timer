@@ -29,3 +29,18 @@ export const styleCopy={
  es:{label:'Estilo musical',names:['Electrónica','House','Pop','Rock','Clásica','Jazz y blues','Café','Hip-hop / Rap','Lo-fi','Funk','Reggae / Dub','Drum & Bass','Latin / Bossa Nova','Ambient','Concentración','Deporte'],pending:'El estilo cambia en el próximo compás',hint:'Carga instrumentos, tempo y un patrón nuevo. Todos los sonidos son sintetizados.'},
  fr:{label:'Style musical',names:['Électronique','House','Pop','Rock','Classique','Jazz & blues','Café','Hip-hop / Rap','Lo-fi','Funk','Reggae / Dub','Drum & Bass','Latin / Bossa Nova','Ambient','Concentration','Sport'],pending:'Le style change à la prochaine mesure',hint:'Charge les instruments, le tempo et un nouveau motif. Tous les sons sont synthétisés.'}
 };
+
+/** Complete all eight orbits without turning supporting voices into a wall of notes. */
+export function partsForStyle(style:StyleId):Part[]{
+ const preset=presets[style],parts=preset.parts.map(p=>({...p,steps:[...p.steps]}));
+ const supporting=style==='electronic'
+  ?['bells','kalimba','pad'] as InstrumentId[]
+  :preset.parts.filter(p=>!['kick','snare','hat','clap','tom','rim','shaker','bass','synthbass','doublebass'].includes(p.instrument)).map(p=>p.instrument);
+ const count=parts.length;
+ while(parts.length<8){
+  const offset=parts.length-count,instrument=supporting[offset%supporting.length]||'pluck';
+  const grid=preset.grid;
+  parts.push(part(instrument,[grid[(offset*3+1)%grid.length]],offset%2, .2));
+ }
+ return parts;
+}

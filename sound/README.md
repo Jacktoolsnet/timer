@@ -12,7 +12,7 @@ Node >=24.17 and npm >=9.6.5, as in metronome.
 Upload the contents of dist/ to the subdomain document root. No server process is needed. Not deployed automatically.
 
 ## Playing
-Press Play to enable audio. One orbit = four beats, sixteen steps. Eight available orbits, five enabled initially. Expand a track and toggle “Enable orbit” to add or remove it; points are preserved while disabled. Orbit spacing and drawing zones adapt to enabled tracks.
+Press Play to enable audio. One orbit = four beats, sixteen steps. All eight orbits are enabled initially. Expand a track and toggle “Enable orbit” to add or remove it; points are preserved while disabled. Orbit spacing and drawing zones adapt to enabled tracks.
 Draw on Flow: vertical position selects the instrument, horizontal position the beat; drawing toggles each touched beat once per gesture; quick motion also toggles an adjacent beat, turns change the pentatonic marimba pitch. The trail fades; the pattern remains.
 Click orbit points or expand an instrument for keyboard-accessible step controls, mute and volume.
 Focus exits via its button or Escape. Playback pauses on hidden tabs. Reduced-motion preference suppresses waves and wedge trails.
@@ -145,3 +145,8 @@ act as sustained harmony and solo voice participates in call/response. Pop adds 
 quiet solo voice, Classical a choir and Ambient a vocal pad. All three are selectable
 on any orbit, translated and covered by existing optional settings persistence.
 No text, speech service, voice cloning, recordings or remote downloads are used.
+
+All style presets now enable eight tracks. Added supporting tracks start with one
+quiet, style-aligned note each; primary preset rhythms are unchanged. Random Play
+can develop these tracks without requiring manual activation. Restored settings
+still retain every saved enabled/mute choice; playback does not re-enable tracks.

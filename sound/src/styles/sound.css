@@ -182,3 +182,10 @@ body:not(.focus-view) .sound-top{margin-bottom:20px}
 .focus-view .sound-faq{display:none}
 
 #hide-focus-controls{display:none}.focus-view #hide-focus-controls{display:inline-flex;background:var(--surface);box-shadow:0 4px 18px #0002}.focus-view .sound-top{gap:10px}
+
+.music-tile{border:1px solid var(--line);border-radius:28px;background:var(--surface);padding:24px;box-shadow:0 24px 80px #0000000a;max-width:1240px;margin:24px auto 0}
+.music-tile>h2{font-size:18px;font-weight:500;margin:0 0 20px;color:var(--text)}
+.music-tile .style-controls{margin:0;padding:0;border:0}
+.music-tile #style-status:empty{display:none}
+.focus-view .music-tile{display:none}
+@media(max-width:800px){.music-tile{padding:16px;border-radius:18px;margin-top:20px}}
