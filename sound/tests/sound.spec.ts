@@ -43,7 +43,7 @@ test('all instruments can replace a track without losing points',async({page})=>
  await page.locator('#tempo').fill('180');
  await page.locator('#tempo').dispatchEvent('input');
  await page.locator('#play').click();
- const select=track.locator('select');
+ const select=track.locator('.instrument-select');
  const ids=await select.locator('option').evaluateAll(options=>options.map(o=>(o as HTMLOptionElement).value));
  expect(ids).toHaveLength(18);
  for(const id of ids){
@@ -88,10 +88,10 @@ test('styled dropdown keyboard selection and slide toggles',async({page})=>{
  await page.goto('/de/');
  const row=page.locator('[data-track="0"]');
  await row.locator('summary').click();
- const trigger=row.locator('.clock-select-trigger');
+ const trigger=row.locator('#trigger-instrument-0');
  await expect(trigger).toHaveAccessibleName(/Instrument.*Kick/);
  await trigger.click();
- await expect(row.locator('[role=listbox]')).toBeVisible();
+ await expect(row.locator('#options-instrument-0')).toBeVisible();
  await page.keyboard.press('End');await page.keyboard.press('Enter');
  await expect(row.locator('.instrument-name')).toHaveText('Flächenklang');
  await expect(trigger).toHaveAttribute('aria-expanded','false');
@@ -257,5 +257,90 @@ test('background follows applied style and remains still for reduced motion',asy
  const pixels=()=>page.locator('#sound-atmosphere').evaluate((canvas:HTMLCanvasElement)=>canvas.toDataURL());
  const first=await pixels();await page.waitForTimeout(350);
  expect(await pixels()).toBe(first);
+ await page.locator('#play').click();
+});
+test('animation switches are independent and do not stop playback',async({page})=>{
+ await page.goto('/de/');await page.locator('#play').click();
+ await page.locator('#background-animation').uncheck();
+ await expect(page.locator('#sound-atmosphere')).toBeHidden();
+ await page.locator('#orbit-animation').uncheck();
+ await page.locator('#center-animation').uncheck();
+ await expect(page.locator('#orbit')).toHaveAttribute('data-animated','false');
+ await page.waitForTimeout(100);
+ const image=()=>page.locator('#orbit').evaluate((canvas:HTMLCanvasElement)=>canvas.toDataURL());
+ const first=await image();await page.waitForTimeout(250);expect(await image()).toBe(first);
+ await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
+ await page.locator('#background-animation').check();
+ await expect(page.locator('#sound-atmosphere')).toBeVisible();
+ await expect(page.locator('#orbit-animation')).not.toBeChecked();
+ await page.locator('#orbit-animation').check();
+ await expect(page.locator('#orbit')).toHaveAttribute('data-animated','true');
+ await page.locator('#play').click();
+});
+test('random patterns offset orbits and reset restores alignment',async({page})=>{
+ await page.addInitScript(()=>{Math.random=()=>.5;});
+ await page.goto('/de/');
+ await page.locator('#random').click();
+ await expect(page.locator('[data-track="0"]')).toHaveAttribute('data-phase','0');
+ await expect(page.locator('[data-track="1"]')).toHaveAttribute('data-phase','4');
+ await page.locator('#reset').click();
+ for(let i=0;i<8;i++)await expect(page.locator('[data-track="'+i+'"]')).toHaveAttribute('data-phase','0');
+});
+test('manual volume and random dynamics control actual note gain',async({page})=>{
+ await page.addInitScript(()=>{
+  Math.random=()=>0;(window as any).noteGains=[];
+  const original=AudioParam.prototype.exponentialRampToValueAtTime;
+  AudioParam.prototype.exponentialRampToValueAtTime=function(value:number,time:number){
+   if(value>.001&&value<1)(window as any).noteGains.push(value);
+   return original.call(this,value,time);
+  };
+ });
+ await page.goto('/de/');await page.locator('#clear').click();
+ const row=page.locator('[data-track="0"]');
+ await row.locator('summary').click();await row.locator('[data-step="0"]').click();
+ await row.locator('.track-volume').fill('0.8');await row.locator('.track-volume').dispatchEvent('input');
+ await expect(row.locator('.track-volume-value')).toHaveText('80 %');
+ await page.locator('#tempo').fill('180');await page.locator('#tempo').dispatchEvent('input');
+ await page.locator('#play').click();
+ await expect.poll(()=>page.evaluate(()=>(window as any).noteGains.some((n:number)=>Math.abs(n-.24)<.00001))).toBe(true);
+ await row.locator('.track-volume').fill('0.4');await row.locator('.track-volume').dispatchEvent('input');
+ await row.locator('.random-dynamics').check();
+ await expect.poll(()=>page.evaluate(()=>(window as any).noteGains.some((n:number)=>Math.abs(n-.054)<.00001)),{timeout:5000}).toBe(true);
+ await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
+ await page.locator('#play').click();
+});
+test('manual and random direction changes preserve the kick pulse',async({page})=>{
+ await page.addInitScript(()=>{Math.random=()=>0;});
+ await page.goto('/de/');
+ const row=page.locator('[data-track="1"]');
+ await row.locator('summary').click();
+ await row.locator('.track-direction').selectOption('reverse',{force:true});
+ await expect(row).toHaveAttribute('data-direction','-1');
+ await expect(page.locator('[id="trigger-direction-0"]')).toBeDisabled();
+ await page.locator('#tempo').fill('180');await page.locator('#tempo').dispatchEvent('input');
+ await page.locator('#play').click();
+ await page.waitForTimeout(150);
+ await row.locator('.track-direction').selectOption('forward',{force:true});
+ await expect(row).toHaveAttribute('data-direction','-1');
+ await expect(row).toHaveAttribute('data-direction','1',{timeout:4000});
+ await row.locator('.track-direction').selectOption('random',{force:true});
+ await page.locator('#evolve').click();
+ await expect(row).toHaveAttribute('data-direction','-1',{timeout:6000});
+ await expect(page.locator('[data-track="0"]')).toHaveAttribute('data-direction','1');
+ await page.locator('#play').click();
+ await page.locator('#reset').click();
+ await expect(row).toHaveAttribute('data-direction','1');
+});
+test('centre animation is independently switchable',async({page})=>{
+ await page.goto('/de/');
+ const alpha=()=>page.locator('#orbit').evaluate((c:HTMLCanvasElement)=>c.getContext('2d')!.getImageData(350,350,1,1).data[3]);
+ await expect.poll(alpha).toBeGreaterThan(0);
+ await page.locator('#center-animation').uncheck();
+ await expect.poll(alpha).toBe(0);
+ await page.locator('#play').click();
+ await page.locator('#orbit-animation').uncheck();
+ await page.locator('#center-animation').check();
+ await expect.poll(alpha).toBeGreaterThan(0);
+ await expect(page.locator('#orbit-animation')).not.toBeChecked();
  await page.locator('#play').click();
 });

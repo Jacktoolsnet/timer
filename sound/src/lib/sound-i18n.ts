@@ -4,3 +4,24 @@ export const copy = {
  es: {wakeUnavailable:'No se puede mantener la pantalla encendida. El navegador debe admitir esta función mediante HTTPS o localhost; el ahorro de energía puede impedirlo.',evolve:'Iniciar evolución aleatoria',evolveStop:'Detener evolución aleatoria',evolveHint:'Evolución activa: algunos puntos cambian cada 2–8 compases.',title:'Dibuja tu ritmo',description:'Crea patrones de luz y sonido con cada movimiento. Un secuenciador orbital creativo en tu navegador.',play:'Reproducir',pause:'Pausa',focus:'Vista de enfoque',exit:'Salir del enfoque',random:'Patrón aleatorio',clear:'Borrar puntos',draw:'Tu movimiento. Tu sonido.',hint:'Dibuja aquí con el dedo o el ratón',guide:'Del movimiento a la música',body:'La altura del gesto elige un instrumento. La posición horizontal coloca un pulso en el círculo. Dibujar activa o desactiva puntos, una vez por gesto. Los movimientos rápidos afectan a más puntos; las curvas cambian el tono de la marimba. La estela desaparece, pero tu ritmo permanece.',note:'Pulsa Reproducir. Empieza con un volumen bajo. Una vuelta equivale a cuatro pulsos. El sonido se pausa al cambiar de pestaña.',volume:'Volumen',tempo:'Tempo',mute:'Silenciar',steps:'Puntos sonoros',privacy:'Sin cuenta ni seguimiento. Los dibujos y sonidos permanecen en tu navegador.',error:'No se pudo iniciar el audio. Inténtalo de nuevo o usa otro navegador.',reset:'Patrón inicial',help:'Pulsa los puntos orbitales o los botones accesibles de cada instrumento.',instruments:['Bombo','Caja','Charles','Bajo','Marimba']},
  fr: {wakeUnavailable:'Impossible de garder l’écran allumé. Le navigateur doit prendre en charge cette fonction via HTTPS ou localhost ; l’économie d’énergie peut l’empêcher.',evolve:'Démarrer l’évolution aléatoire',evolveStop:'Arrêter l’évolution aléatoire',evolveHint:'Évolution active : quelques points changent tous les 2 à 8 cycles.',title:'Dessine ton rythme',description:'Crée des motifs lumineux et sonores à chaque mouvement. Un séquenceur orbital créatif dans ton navigateur.',play:'Lecture',pause:'Pause',focus:'Vue concentration',exit:'Quitter la concentration',random:'Motif aléatoire',clear:'Effacer les points',draw:'Ton mouvement. Ton son.',hint:'Dessine ici avec le doigt ou la souris',guide:'Du mouvement à la musique',body:'La hauteur du geste choisit un instrument. La position horizontale place un temps sur le cercle. Dessiner active ou désactive les points, une fois par geste. Les mouvements rapides affectent plus de points ; les courbes changent la hauteur du marimba. La traînée disparaît, mais ton rythme reste.',note:'Appuie sur Lecture. Commence à faible volume. Un tour correspond à quatre temps. Le son se met en pause en changeant d’onglet.',volume:'Volume',tempo:'Tempo',mute:'Couper le son',steps:'Points sonores',privacy:'Sans compte ni suivi. Dessins et sons restent dans ton navigateur.',error:'Impossible de démarrer le son. Réessaie ou utilise un autre navigateur.',reset:'Motif initial',help:'Clique sur les points orbitaux ou utilise les boutons accessibles de chaque instrument.',instruments:['Grosse caisse','Caisse claire','Charleston','Basse','Marimba']}
 };
+
+export const animationCopy={
+ de:{center:'Zentrumsanimation',background:'Hintergrundanimation',orbit:'Orbit-Animation'},
+ en:{center:'Centre animation',background:'Background animation',orbit:'Orbit animation'},
+ es:{center:'Animación central',background:'Animación de fondo',orbit:'Animación orbital'},
+ fr:{center:'Animation centrale',background:'Animation de fond',orbit:'Animation orbitale'}
+};
+
+export const dynamicsCopy={
+ de:{random:'Zufallsdynamik',hint:'Variiert die Anschlagstärke bis zur eingestellten Lautstärke.'},
+ en:{random:'Random dynamics',hint:'Varies note strength up to the selected volume.'},
+ es:{random:'Dinámica aleatoria',hint:'Varía la intensidad hasta el volumen seleccionado.'},
+ fr:{random:'Dynamique aléatoire',hint:'Fait varier l’intensité jusqu’au volume choisi.'}
+};
+
+export const directionCopy={
+ de:{label:'Laufrichtung',forward:'Vorwärts',reverse:'Rückwärts',random:'Zufällig'},
+ en:{label:'Direction',forward:'Forward',reverse:'Reverse',random:'Random'},
+ es:{label:'Dirección',forward:'Adelante',reverse:'Atrás',random:'Aleatoria'},
+ fr:{label:'Sens de lecture',forward:'Avant',reverse:'Arrière',random:'Aléatoire'}
+};

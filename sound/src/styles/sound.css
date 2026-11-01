@@ -20,8 +20,8 @@
 
 /* Playback controls belong to the playing surface; track editing sits below it. */
 .flow-side .sound-transport{margin-top:18px;padding-top:18px;gap:10px}
-.flow-side .sound-transport label{flex:1 1 100%;justify-content:space-between}
-.flow-side .sound-transport label input{flex:1;min-width:60px;max-width:200px}
+.flow-side .sound-transport label{flex:1 1 100%;display:grid;grid-template-columns:max-content minmax(60px,1fr) auto;justify-content:start;gap:12px}
+.flow-side .sound-transport label input{width:100%;min-width:0;max-width:none;margin:0}
 .flow-side .sound-transport button{flex:1 1 auto}
 .instruments-tile>.instrument-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;border-top:1px solid var(--line);padding-top:18px;margin-top:18px;align-items:start}
 .instruments-tile>.instrument-list .instrument{min-width:0}
@@ -131,3 +131,16 @@
 /* Keep the focus exit action anchored to the screen, clear of the instrument. */
 .focus-view .sound-top{position:fixed;top:max(12px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));left:auto;z-index:40;width:auto;margin:0}
 .focus-view .sound-top #focus{background:var(--surface);box-shadow:0 4px 18px #0002}
+
+.animation-switches{display:grid;gap:12px;margin-top:20px;padding-top:16px;border-top:1px solid var(--line)}
+.animation-switches>label{display:flex;align-items:center;justify-content:space-between;gap:16px;color:var(--muted);font-size:12px;cursor:pointer}
+#sound-atmosphere[hidden]{display:none}
+
+.track-volume-value{margin-left:auto;color:var(--accent);font-size:12px;font-variant-numeric:tabular-nums}
+.instruments-tile>.instrument-list .track-volume-label{display:grid;grid-template-columns:1fr auto;gap:8px}
+.track-volume-label .track-volume{grid-column:1/-1;margin:0;accent-color:var(--accent)}
+
+.clock-select-trigger:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
+
+/* Separate the focus action from the drawing pad in the regular layout. */
+body:not(.focus-view) .sound-top{margin-bottom:20px}
