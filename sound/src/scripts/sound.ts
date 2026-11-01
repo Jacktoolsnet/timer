@@ -1,3 +1,4 @@
+import {vocalInstruments,vocalWave,vowelPosition,type VocalInstrument} from '../lib/vocal';
 import {voiceRecipe} from '../lib/voice-recipes';
 import {acousticInstruments,acousticWave,type AcousticInstrument} from '../lib/acoustic';
 import {spaceProfile,stereoPosition,sectionExpression} from '../lib/space';
@@ -343,21 +344,23 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
   source.connect(filter);filter.connect(gain);gain.connect(bus);source.start(at,Math.random()*(1-duration-.02));source.stop(at+duration+.02);
   source.onended=()=>{source.disconnect();filter.disconnect();gain.disconnect();ended();};
  }
- if(acousticInstruments.includes(id)){
-  const acoustic=id as AcousticInstrument,frequency=(id==='bass'||id==='doublebass')?note/4:id==='guitar'?note/2:note;
+ const vocal=(vocalInstruments as readonly string[]).includes(id);
+ if(acousticInstruments.includes(id)||vocal){
+  const acoustic=id as AcousticInstrument,frequency=(id==='bass'||id==='doublebass')?note/4:id==='guitar'||vocal?note/2:note;
   // Three touch layers: stronger hits excite more upper partials, not just more volume.
   const layer=Math.max(0,Math.min(2,Math.round(velocity*tr.volume*2)));
   const brightness=(profile.warm?.2:.4)+layer*.2;
-  const key=[id,frequency.toFixed(4),ctx.sampleRate,brightness].join(':');
+  const vowel=evolving?vowelPosition(step/16,expressionSeed):id==='voice'?0:id==='choir'?.5:1;
+  const key=[id,frequency.toFixed(4),ctx.sampleRate,vocal?vowel:brightness].join(':');
   let buffer=acousticCache.get(key);
   if(!buffer){
-   const samples=acousticWave(acoustic,frequency,ctx.sampleRate,brightness);
+   const samples=vocal?vocalWave(id as VocalInstrument,frequency,ctx.sampleRate,vowel):acousticWave(acoustic,frequency,ctx.sampleRate,brightness);
    buffer=ctx.createBuffer(1,samples.length,ctx.sampleRate);buffer.getChannelData(0).set(samples);
    if(acousticCache.size>=40)acousticCache.delete(acousticCache.keys().next().value!);
    acousticCache.set(key,buffer);
   }
   const source=ctx.createBufferSource(),gain=ctx.createGain();sources++;
-  source.buffer=buffer;gain.gain.setValueAtTime(tr.volume*velocity*(id==='strings'?.18:.28),time);
+  source.buffer=buffer;gain.gain.setValueAtTime(tr.volume*velocity*(vocal?.2:id==='strings'?.18:.28),time);
   source.connect(gain);gain.connect(bus);source.start(time);
   source.onended=()=>{source.disconnect();gain.disconnect();ended();};
   return;

@@ -1,11 +1,11 @@
-export const instrumentIds=['kick','snare','hat','bass','marimba','clap','tom','rim','shaker','bells','kalimba','pluck','synthbass','piano','strings','guitar','organ','pad','saxophone','harp','doublebass','epiano'] as const;
+export const instrumentIds=['kick','snare','hat','bass','marimba','clap','tom','rim','shaker','bells','kalimba','pluck','synthbass','piano','strings','guitar','organ','pad','saxophone','harp','doublebass','epiano','voice','choir','vocalpad'] as const;
 export type InstrumentId=typeof instrumentIds[number];
 export const defaultInstruments:InstrumentId[]=['kick','snare','hat','bass','marimba','bells','kalimba','pad'];
 export const instrumentNames={
- de:['Kick','Snare','Hi-Hat','Bass','Marimba','Clap','Tom','Rimshot','Shaker','Glockenspiel','Kalimba','Pluck-Synth','Synth-Bass','Klavier','Streicher','Gitarre','Orgel','Flächenklang','Saxofon','Harfe','Kontrabass','E-Piano'],
- en:['Kick','Snare','Hi-hat','Bass','Marimba','Clap','Tom','Rimshot','Shaker','Glockenspiel','Kalimba','Pluck synth','Synth bass','Piano','Strings','Guitar','Organ','Soft pad','Saxophone','Harp','Double bass','Electric piano'],
- es:['Bombo','Caja','Charles','Bajo','Marimba','Palmas','Tom','Golpe de aro','Shaker','Glockenspiel','Kalimba','Sintetizador pulsado','Bajo sintético','Piano','Cuerdas','Guitarra','Órgano','Pad suave','Saxofón','Arpa','Contrabajo','Piano eléctrico'],
- fr:['Grosse caisse','Caisse claire','Charleston','Basse','Marimba','Clap','Tom','Rimshot','Shaker','Glockenspiel','Kalimba','Synthé pincé','Basse synthé','Piano','Cordes','Guitare','Orgue','Nappe douce','Saxophone','Harpe','Contrebasse','Piano électrique']
+ de:['Kick','Snare','Hi-Hat','Bass','Marimba','Clap','Tom','Rimshot','Shaker','Glockenspiel','Kalimba','Pluck-Synth','Synth-Bass','Klavier','Streicher','Gitarre','Orgel','Flächenklang','Saxofon','Harfe','Kontrabass','E-Piano','Solo-Stimme','Chor','Vocal-Pad'],
+ en:['Kick','Snare','Hi-hat','Bass','Marimba','Clap','Tom','Rimshot','Shaker','Glockenspiel','Kalimba','Pluck synth','Synth bass','Piano','Strings','Guitar','Organ','Soft pad','Saxophone','Harp','Double bass','Electric piano','Solo voice','Choir','Vocal pad'],
+ es:['Bombo','Caja','Charles','Bajo','Marimba','Palmas','Tom','Golpe de aro','Shaker','Glockenspiel','Kalimba','Sintetizador pulsado','Bajo sintético','Piano','Cuerdas','Guitarra','Órgano','Pad suave','Saxofón','Arpa','Contrabajo','Piano eléctrico','Voz solista','Coro','Pad vocal'],
+ fr:['Grosse caisse','Caisse claire','Charleston','Basse','Marimba','Clap','Tom','Rimshot','Shaker','Glockenspiel','Kalimba','Synthé pincé','Basse synthé','Piano','Cordes','Guitare','Orgue','Nappe douce','Saxophone','Harpe','Contrebasse','Piano électrique','Voix solo','Chœur','Nappe vocale']
 };
 export const instrumentLabel={de:'Instrument',en:'Instrument',es:'Instrumento',fr:'Instrument'};
 

@@ -45,7 +45,7 @@ test('all instruments can replace a track without losing points',async({page})=>
  await page.locator('#play').click();
  const select=track.locator('.instrument-select');
  const ids=await select.locator('option').evaluateAll(options=>options.map(o=>(o as HTMLOptionElement).value));
- expect(ids).toHaveLength(22);
+ expect(ids).toHaveLength(25);
  for(const id of ids){
   await select.selectOption(id,{force:true});
   await expect(track.locator('.count')).toHaveText(count!);
@@ -647,12 +647,12 @@ test('new genres support random playback and live drawing',async({page})=>{
  expect(errors).toEqual([]);
 });
 
-test('all twenty-two instruments play through the complete audio graph',async({page})=>{
+test('all twenty-five instruments play through the complete audio graph',async({page})=>{
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/de/');
  const select=page.locator('select[name="instrument-0"]');
  const ids=await select.locator('option').evaluateAll(options=>options.map(option=>(option as HTMLOptionElement).value));
- expect(ids).toHaveLength(22);
+ expect(ids).toHaveLength(25);
  for(const id of ids){
   await select.selectOption(id,{force:true});
   await page.locator('#play').click();
@@ -661,5 +661,21 @@ test('all twenty-two instruments play through the complete audio graph',async({p
   await expect(page.locator('#audio-status')).toBeEmpty();
   await page.locator('#play').click();
  }
+ expect(errors).toEqual([]);
+});
+
+test('drawing reshapes the solo voice during random playback',async({page})=>{
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/de/');
+ await page.locator('select[name="instrument-0"]').selectOption('voice',{force:true});
+ const track=page.locator('.instrument').first(),before=await track.getAttribute('data-motif');
+ await page.locator('#evolve').click();
+ await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
+ const canvas=page.locator('#drawing');await canvas.scrollIntoViewIfNeeded();
+ const r=(await canvas.boundingBox())!;
+ await page.mouse.move(r.x+r.width*.08,r.y+r.height*.01);
+ await page.mouse.down();await page.mouse.move(r.x+r.width*.2,r.y+r.height*.02,{steps:6});await page.mouse.up();
+ await expect(track).not.toHaveAttribute('data-motif',before!);
+ await page.locator('#play').click();
  expect(errors).toEqual([]);
 });

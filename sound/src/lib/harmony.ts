@@ -23,7 +23,7 @@ export function melodicSemitones(style:StyleId,bar:number,beat:number,instrument
  if(instrument==='bass'||instrument==='synthbass'||instrument==='doublebass'){
   return root+(beat%8===0?0:[0,7,12,7,12][motif[Math.floor(beat/2)%motif.length]]);
  }
- if(instrument==='pad'||instrument==='strings'||instrument==='organ')return root+[0,third,7,12,third][motif[Math.floor(beat/2)%motif.length]];
+ if(instrument==='pad'||instrument==='strings'||instrument==='organ'||instrument==='choir'||instrument==='vocalpad')return root+[0,third,7,12,third][motif[Math.floor(beat/2)%motif.length]];
  const degree=(motif[Math.floor(beat/2)%motif.length]+Math.max(0,pitch))%5;
  return root+[0,third,7,12,12+third][degree];
 }

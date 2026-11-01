@@ -135,3 +135,13 @@ on every orbit. The double bass follows bass harmony, stays centred and is exclu
 from melodic call/response and arrangement rests. Existing instrument IDs and saved
 selections are unchanged. These are synthesized approximations, not sampled acoustic
 recordings; saxophone notes do not yet use inter-note legato.
+
+Wordless Solo Voice, Choir and Vocal Pad expand the selection to 25. A harmonic
+glottal source is shaped by interpolated Ah/Oh/Uh formants, with tapered breath,
+gentle delayed vibrato and soft release. Choir/pad use two slightly detuned layers.
+Random Play slowly changes the vowel between notes; normal Play retains a fixed
+vowel character. Melodies and drawing use the existing harmonic engine; choir/pad
+act as sustained harmony and solo voice participates in call/response. Pop adds a
+quiet solo voice, Classical a choir and Ambient a vocal pad. All three are selectable
+on any orbit, translated and covered by existing optional settings persistence.
+No text, speech service, voice cloning, recordings or remote downloads are used.
