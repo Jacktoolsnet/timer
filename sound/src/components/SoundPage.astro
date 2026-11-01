@@ -1,4 +1,6 @@
 ---
+import {instrumentIds,instrumentNames,instrumentLabel,defaultInstruments,trackLabels} from '../lib/instruments';
+import ActionIcon from './ActionIcon.astro';
 import Layout from '../layouts/Layout.astro';
 import {copy} from '../lib/sound-i18n';
 import type {Language} from '../lib/i18n';
@@ -9,12 +11,13 @@ const {lang}=Astro.props,t=copy[lang];
 <Layout lang={lang} title={'JackTools Sound – '+t.title} description={t.description} route="">
 <section class="intro"><p class="eyebrow">JACKTOOLS / SOUND · PROTOTYPE</p><h1>{t.title}</h1><p class="intro-copy">{t.description}</p></section>
 <section class="sound-app" id="sound-app">
- <div class="sound-top"><span class="eyebrow">ORBIT / 01</span><button id="focus" aria-pressed="false">{t.focus} ⛶</button></div>
+ <div class="sound-top"><button id="focus" class="icon-action" aria-label={t.focus} title={t.focus} aria-pressed="false"><ActionIcon name="focus"/><ActionIcon name="exit"/></button></div>
  <div class="sound-grid">
-  <div class="orbit-wrap"><canvas id="orbit" width="700" height="700" aria-label={t.steps}></canvas><span class="orbit-caption">JACKTOOLS SOUND</span></div>
-  <div class="flow-side"><div class="flow-title"><h2>{t.draw}</h2><span>FLOW / 02</span></div><div class="draw-wrap"><canvas id="drawing" width="700" height="440" aria-label={t.hint}></canvas><span id="draw-hint">{t.hint}</span></div><div class="instrument-list">{t.instruments.map((name,i)=><details class="instrument" data-track={i}><summary><span class={'dot dot-'+i}></span>{name}<span class="count"></span></summary><div class="track-settings"><label>{t.mute}<input type="checkbox" class="mute"/></label><label>{t.volume}<input class="track-volume" type="range" min="0" max="1" step=".05" value=".65"/></label><div class="steps" role="group" aria-label={name}>{Array.from({length:16},(_,s)=><button data-step={s} aria-label={name+' · '+(s+1)} aria-pressed="false">{s+1}</button>)}</div></div></details>)}</div></div>
+  <div class="orbit-wrap"><canvas id="orbit" width="700" height="700" aria-label={t.steps}></canvas></div>
+  <div class="flow-side"><div class="draw-wrap"><canvas id="drawing" width="700" height="440" aria-label={t.hint}></canvas><span id="draw-hint">{t.hint}</span></div><div class="sound-transport"><button id="play" class="primary icon-action" aria-label={t.play} title={t.play} aria-pressed="false"><ActionIcon name="play"/><ActionIcon name="pause"/></button><label>{t.tempo}<input id="tempo" type="range" min="40" max="180" value="100"/><output id="tempo-value">100 BPM</output></label><label>{t.volume}<input id="volume" type="range" min="0" max=".7" step=".01" value=".3"/></label><button id="random" class="icon-action" aria-label={t.random} title={t.random}><ActionIcon name="random"/></button><button id="reset" class="icon-action" aria-label={t.reset} title={t.reset}><ActionIcon name="reset"/></button><button id="clear" class="icon-action" aria-label={t.clear} title={t.clear}><ActionIcon name="clear"/></button></div></div>
  </div>
- <div class="sound-transport"><button id="play" class="primary" aria-pressed="false">▶ {t.play}</button><label>{t.tempo}<input id="tempo" type="range" min="40" max="180" value="100"/><output id="tempo-value">100 BPM</output></label><label>{t.volume}<input id="volume" type="range" min="0" max=".7" step=".01" value=".3"/></label><button id="random">{t.random} ↗</button><button id="reset">{t.reset}</button><button id="clear">{t.clear}</button></div>
+ <p class="orbit-options-hint">{trackLabels[lang].hint}</p>
+ <div class="instrument-list">{defaultInstruments.map((id,i)=>{const name=instrumentNames[lang][instrumentIds.indexOf(id)];return <details class="instrument" data-track={i} data-enabled={i<5?"true":"false"}><summary><span class={'dot dot-'+i}></span><span class="instrument-name">{name}</span><span class="count"></span></summary><div class="track-settings"><label>{trackLabels[lang].enable}<span class="sound-switch"><input class="track-enabled" type="checkbox" role="switch" checked={i<5}/><span class="sound-switch-track" aria-hidden="true"></span></span></label><label>{instrumentLabel[lang]}<select class="instrument-select" name={`instrument-${i}`}>{instrumentIds.map((id,n)=><option value={id} selected={id===defaultInstruments[i]}>{instrumentNames[lang][n]}</option>)}</select></label><label>{t.mute}<span class="sound-switch"><input type="checkbox" class="mute" role="switch"/><span class="sound-switch-track" aria-hidden="true"></span></span></label><label>{t.volume}<input class="track-volume" type="range" min="0" max="1" step=".05" value=".65"/></label><div class="steps" role="group" aria-label={name}>{Array.from({length:16},(_,s)=><button data-step={s} aria-label={name+' · '+(s+1)} aria-pressed="false">{s+1}</button>)}</div></div></details>})}</div>
  <p id="audio-status" role="status"></p>
 </section>
 <section class="guide"><h2>{t.guide}</h2><p>{t.body}</p><p>{t.help}</p><p>{t.note}</p><p>{t.privacy}</p></section>

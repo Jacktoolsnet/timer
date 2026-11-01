@@ -1,1 +1,81 @@
 .sound-app{border:1px solid var(--line);border-radius:28px;background:var(--surface);padding:24px;box-shadow:0 24px 80px #0000000a;max-width:1240px;margin:0 auto}.sound-top{display:flex;align-items:center;justify-content:space-between}.sound-top button,.sound-transport button{border:1px solid var(--line);border-radius:12px;padding:12px 16px;background:var(--bg);color:var(--text);cursor:pointer}.sound-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:28px;align-items:center}.orbit-wrap{position:relative;min-width:0}.orbit-wrap canvas{width:100%;display:block;aspect-ratio:1;cursor:crosshair}.orbit-caption{position:absolute;bottom:7%;left:0;right:0;text-align:center;font-size:9px;letter-spacing:4px;color:var(--muted);pointer-events:none}.flow-title{display:flex;justify-content:space-between;align-items:center;gap:15px}.flow-title h2{font-size:18px;font-weight:500}.flow-title>span{font-size:9px;letter-spacing:2px;color:var(--muted)}.draw-wrap{position:relative;background:var(--bg);border:1px solid var(--line);border-radius:18px;overflow:hidden}.draw-wrap:before{content:'';position:absolute;inset:0;background-image:radial-gradient(var(--muted) .7px,transparent .7px);background-size:20px 20px;opacity:.12;pointer-events:none}#drawing{width:100%;aspect-ratio:700/440;display:block;touch-action:none;cursor:crosshair}#draw-hint{position:absolute;inset:0;display:grid;place-content:center;color:var(--muted);font-size:13px;pointer-events:none}.instrument-list{margin-top:15px}.instrument{border-bottom:1px solid var(--line);font-size:13px}.instrument summary{padding:12px 3px;cursor:pointer;display:flex;align-items:center;gap:12px}.dot{width:8px;height:8px;border-radius:50%;background:var(--sound-color);box-shadow:0 0 12px var(--sound-color)}.dot-0{--sound-color:#21bed1}.dot-1{--sound-color:#a482ed}.dot-2{--sound-color:#f0788c}.dot-3{--sound-color:#d8a847}.dot-4{--sound-color:#48bca0}.count{margin-left:auto;color:var(--muted);font-variant-numeric:tabular-nums}.track-settings{padding:8px 0 15px}.track-settings label{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.steps{display:grid;grid-template-columns:repeat(8,1fr);gap:4px}.steps button{border:1px solid var(--line);background:var(--bg);color:var(--muted);border-radius:5px;min-height:30px;cursor:pointer}.steps button[aria-pressed=true]{background:var(--accent);color:var(--surface)}.sound-transport{display:flex;flex-wrap:wrap;align-items:center;gap:12px;border-top:1px solid var(--line);padding-top:22px}.sound-transport label{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)}.sound-transport input{width:100px;accent-color:var(--accent)}.sound-transport .primary{background:var(--accent);color:var(--surface);min-width:140px}.sound-transport output{min-width:70px}.guide{max-width:840px;margin:65px auto;line-height:1.8;color:var(--muted)}.guide h2{color:var(--text)}#audio-status:empty{display:none}.focus-view .sound-app{min-height:100dvh;border:0;border-radius:0;display:flex;flex-direction:column;justify-content:center}.focus-view .sound-grid{width:100%}.focus-view .site-shell{max-width:1440px}.focus-view .sound-top{margin-bottom:10px}button:focus-visible,canvas:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:4px}@media(max-width:800px){.sound-grid{grid-template-columns:1fr;gap:0}.sound-app{padding:16px;border-radius:18px}.orbit-wrap{max-width:520px;width:100%;margin:auto}.flow-side{margin-bottom:24px}.sound-transport{gap:10px}.sound-transport label{flex-wrap:wrap}.intro h1{font-size:40px}.focus-view .sound-app{padding:12px}.focus-view .orbit-wrap{max-width:390px}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+
+/* Saturated ink-like instrument colours on light surfaces; retain neon at night. */
+:root[data-theme=light] .dot-0{--sound-color:#00869b}
+:root[data-theme=light] .dot-1{--sound-color:#7845c7}
+:root[data-theme=light] .dot-2{--sound-color:#cf3659}
+:root[data-theme=light] .dot-3{--sound-color:#a66a08}
+:root[data-theme=light] .dot-4{--sound-color:#078565}
+@media(prefers-color-scheme:light){
+ :root:not([data-theme]) .dot-0{--sound-color:#00869b}
+ :root:not([data-theme]) .dot-1{--sound-color:#7845c7}
+ :root:not([data-theme]) .dot-2{--sound-color:#cf3659}
+ :root:not([data-theme]) .dot-3{--sound-color:#a66a08}
+ :root:not([data-theme]) .dot-4{--sound-color:#078565}
+}
+
+.sound-top{justify-content:flex-end}
+
+.instrument-select{max-width:65%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text);font:inherit}
+
+/* Playback controls belong to the playing surface; track editing sits below it. */
+.flow-side .sound-transport{margin-top:18px;padding-top:18px;gap:10px}
+.flow-side .sound-transport label{flex:1 1 100%;justify-content:space-between}
+.flow-side .sound-transport label input{flex:1;min-width:60px;max-width:200px}
+.flow-side .sound-transport button{flex:1 1 auto}
+.sound-app>.instrument-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;border-top:1px solid var(--line);padding-top:18px;margin-top:18px;align-items:start}
+.sound-app>.instrument-list .instrument{min-width:0}
+.sound-app>.instrument-list .instrument summary{gap:8px;flex-wrap:wrap}
+.sound-app>.instrument-list .track-settings label{gap:8px;flex-wrap:wrap}
+.sound-app>.instrument-list .track-volume{min-width:0;width:100%}
+.sound-app>.instrument-list .instrument-select{max-width:100%;width:100%;min-width:0}
+.sound-app>.instrument-list .steps{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:1000px){.sound-app>.instrument-list{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:600px){.sound-app>.instrument-list{grid-template-columns:1fr}.sound-app>.instrument-list .steps{grid-template-columns:repeat(8,minmax(0,1fr))}}
+
+/* Icon actions keep translated accessible names and native tooltips. */
+.sound-app .icon-action{display:inline-flex;align-items:center;justify-content:center;width:46px;height:46px;min-width:46px;padding:11px;flex:0 0 46px;border-radius:12px}
+.icon-action svg{width:22px;height:22px;flex-shrink:0}
+#play [data-icon=pause],#focus [data-icon=exit]{display:none}
+#play[aria-pressed=true] [data-icon=play],#focus[aria-pressed=true] [data-icon=focus]{display:none}
+#play[aria-pressed=true] [data-icon=pause],#focus[aria-pressed=true] [data-icon=exit]{display:block}
+
+.dot-5{--sound-color:#e68a44}.dot-6{--sound-color:#779cf5}.dot-7{--sound-color:#dc7bcb}
+:root[data-theme=light] .dot-5{--sound-color:#bd5715}
+:root[data-theme=light] .dot-6{--sound-color:#3d66c5}
+:root[data-theme=light] .dot-7{--sound-color:#b0399c}
+@media(prefers-color-scheme:light){
+ :root:not([data-theme]) .dot-5{--sound-color:#bd5715}
+ :root:not([data-theme]) .dot-6{--sound-color:#3d66c5}
+ :root:not([data-theme]) .dot-7{--sound-color:#b0399c}
+}
+.instrument[data-enabled=false] summary{opacity:.55}
+.instrument[data-enabled=false] .dot{box-shadow:none}
+.orbit-options-hint{font-size:12px;color:var(--muted);margin:20px 0 0}
+.focus-view .orbit-options-hint{display:none}
+
+/* Theme-aware select controls and fully styled option panels. */
+.clock-select-field{min-width:0;margin:0 0 16px}
+.clock-select-field>span{display:block;margin-bottom:8px;color:var(--muted);font-size:12px}
+.clock-select{position:relative;min-width:0}
+.clock-select-trigger{width:100%;min-height:44px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--text);font:inherit;text-align:left;cursor:pointer}
+.clock-select-trigger>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.clock-select-chevron{width:18px;height:18px;flex-shrink:0;fill:none;stroke:var(--muted);stroke-width:1.8}
+.clock-select-trigger[aria-expanded=true]{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.clock-select-trigger[aria-expanded=true] .clock-select-chevron{transform:rotate(180deg)}
+.clock-select-options{position:absolute;top:calc(100% + 6px);left:0;z-index:30;min-width:100%;width:max-content;max-width:min(280px,calc(100vw - 64px));max-height:260px;overflow-y:auto;overscroll-behavior:contain;padding:6px;border:1px solid var(--line);border-radius:14px;background:var(--surface);box-shadow:0 14px 38px #0003;scrollbar-width:thin;scrollbar-color:var(--accent) var(--bg)}
+.clock-select-options[hidden]{display:none}
+.clock-select-options button{width:100%;min-height:40px;display:flex;align-items:center;justify-content:space-between;gap:18px;border:0;border-radius:8px;padding:9px 10px;text-align:left;font:inherit;background:transparent;color:var(--text);cursor:pointer}
+.clock-select-options button:hover,.clock-select-options button:focus-visible{background:var(--accent-soft);color:var(--accent);outline:2px solid var(--accent);outline-offset:-2px}
+.clock-select-options button[aria-selected=true]{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.option-check{visibility:hidden;color:var(--accent)}
+[aria-selected=true]>.option-check{visibility:visible}
+.sound-app>.instrument-list .instrument{overflow:visible}
+.sound-switch{position:relative;display:inline-flex;width:44px;height:26px;flex:0 0 44px}
+.sound-switch input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;z-index:1;cursor:pointer}
+.sound-switch-track{position:absolute;inset:0;border-radius:99px;background:var(--track);border:1px solid var(--muted);pointer-events:none}
+.sound-switch-track:after{content:'';position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;background:var(--muted);box-shadow:0 1px 3px #0002}
+.sound-switch input:checked+.sound-switch-track{background:var(--accent);border-color:var(--accent)}
+.sound-switch input:checked+.sound-switch-track:after{transform:translateX(18px);background:var(--surface)}
+.sound-switch input:focus-visible+.sound-switch-track{outline:3px solid var(--accent);outline-offset:3px}
+@media(prefers-reduced-motion:no-preference){.sound-switch-track,.sound-switch-track:after{transition:background .18s,transform .18s}.clock-select-chevron{transition:transform .15s}}
