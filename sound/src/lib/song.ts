@@ -14,7 +14,7 @@ export function copyPhrases(tracks:readonly Phrase[]):Phrase[]{
 }
 export function sectionGain(kind:SongPart,instrument:string,progress:number):number{
  const p=Math.max(0,Math.min(1,progress));
- const melodic=isMelodic(instrument),bass=instrument==='bass'||instrument==='synthbass';
+ const melodic=isMelodic(instrument),bass=instrument==='bass'||instrument==='synthbass'||instrument==='doublebass';
  switch(kind){
   case 'intro':return (bass?.3:melodic?.36:.12)+p*(melodic?.3:.34);
   case 'verse':return melodic?.7:.6;

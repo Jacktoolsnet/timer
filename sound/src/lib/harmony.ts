@@ -20,7 +20,7 @@ export function chordFor(style:StyleId,bar:number):{root:number;third:number}{
 /** Shared chords and short repeated phrases keep independent orbits consonant. */
 export function melodicSemitones(style:StyleId,bar:number,beat:number,instrument:string,pitch:number,motif:readonly number[]):number{
  const {root,third}=chordFor(style,bar);
- if(instrument==='bass'||instrument==='synthbass'){
+ if(instrument==='bass'||instrument==='synthbass'||instrument==='doublebass'){
   return root+(beat%8===0?0:[0,7,12,7,12][motif[Math.floor(beat/2)%motif.length]]);
  }
  if(instrument==='pad'||instrument==='strings'||instrument==='organ')return root+[0,third,7,12,third][motif[Math.floor(beat/2)%motif.length]];

@@ -2,7 +2,7 @@ import {isMelodic} from './harmony';
 
 /** Keep bass and sustained harmony independent of the melodic conversation. */
 export function dialogueInstrument(instrument:string){
- return isMelodic(instrument)&&!['bass','synthbass','pad','strings','organ'].includes(instrument);
+ return isMelodic(instrument)&&!['bass','synthbass','doublebass','pad','strings','organ'].includes(instrument);
 }
 
 /** Respond to the live motif, preserving its contour with one gentle resolution. */

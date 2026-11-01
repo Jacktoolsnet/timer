@@ -1,3 +1,5 @@
+import {voiceRecipe} from '../lib/voice-recipes';
+import {acousticInstruments,acousticWave,type AcousticInstrument} from '../lib/acoustic';
 import {spaceProfile,stereoPosition,sectionExpression} from '../lib/space';
 import {createAudioSpace} from '../lib/audio-space';
 import {arrangementPlan,breathGain,ornamentAt,type ArrangementPlan} from '../lib/arrangement';
@@ -26,6 +28,8 @@ const lightColors=['#00869b','#7845c7','#cf3659','#a66a08','#078565','#bd5715','
 const tracks=colors.map((color,i)=>({color,motif:makeMotif(presets.electronic.melody),phase:0,direction:1,directionMode:'forward',pendingDirection:null as number|null,randomDynamics:false,lastVelocity:1,scheduledVelocity:1,morph:null as {to:InstrumentId;progress:number;from:number;at:number;duration:number}|null,hitVelocities:Array<number>(16).fill(1),enabled:i<5,instrument:defaultInstruments[i],points:Array.from({length:16},(_,s)=>i===0?s%4===0:i===1?s%8===4:i===2?s%2===0:i===3?s%8===0:i===4?s%5===0:false),mute:false,volume:.65,pitch:0,flash:Array(16).fill(-100),hits:Array<number>(16).fill(-Infinity)}));
 let audio:AudioContext|undefined, master:GainNode|undefined, playing=false,timer:ReturnType<typeof setInterval>|undefined,nextTime=0,step=0,bpm=100;
 let space:ReturnType<typeof createAudioSpace>|undefined;
+const acousticCache=new Map<string,AudioBuffer>();
+let noiseBuffer:AudioBuffer|undefined;
 let visualStep=0,visualTime=0,visualDuration=.15;
 function playbackAngle(time:number){return (visualStep+Math.max(0,Math.min(1,(time-visualTime)/visualDuration)))/16*Math.PI*2;}
 const language=document.documentElement.lang as keyof typeof styleCopy;
@@ -296,7 +300,7 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
  pan.pan.linearRampToValueAtTime(stereoPosition(id,i,bar+1,expressionSeed),time+60/bpm*4);
  bus.connect(pan);pan.connect(master);
  if(space){
-  const room=spaceProfile(currentStyle),foundation=['kick','bass','synthbass'].includes(id);
+  const room=spaceProfile(currentStyle),foundation=['kick','bass','synthbass','doublebass'].includes(id);
   hallSend.gain.value=foundation?.008:room.hall;
   echoSend.gain.value=foundation?0:room.echo;
   pan.connect(hallSend);hallSend.connect(space.hall);
@@ -309,56 +313,64 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
   ?jazzSemitones(harmonyBar(),beat,id,phrase?.pitch??tr.pitch,motif)
   :melodicSemitones(currentStyle,harmonyBar(),beat,id,phrase?.pitch??tr.pitch,motif);
  const note=261.626*2**(semitones/12);
- function tone(freq:number,duration:number,level:number,type:OscillatorType='sine',end?:number,attack=.004){
+ function tone(freq:number,duration:number,level:number,type:OscillatorType='sine',end?:number,attack=.004,glide=.18,sustain?:number){
   const osc=ctx.createOscillator(),gain=ctx.createGain();sources++;
   // Retain an instrument's deliberately slow attack while warming sharp plucks.
   if(attack===.004)attack*=profile.attack*motion.attack;
   osc.type=type;osc.frequency.setValueAtTime(freq,time);
-  if(end)osc.frequency.exponentialRampToValueAtTime(end,time+Math.min(duration,.18));
-  gain.gain.setValueAtTime(.0001,time);gain.gain.exponentialRampToValueAtTime(Math.max(.0002,level*tr.volume*velocity),time+attack);gain.gain.exponentialRampToValueAtTime(.0001,time+duration);
+  if(end)osc.frequency.exponentialRampToValueAtTime(end,time+Math.min(duration,glide));
+  const peak=Math.max(.0002,level*tr.volume*velocity);
+  gain.gain.setValueAtTime(.0001,time);gain.gain.exponentialRampToValueAtTime(peak,time+attack);
+  if(sustain!==undefined){
+   const release=id==='pad'?.45:.07;
+   gain.gain.exponentialRampToValueAtTime(Math.max(.0001,peak*sustain),time+attack+(duration-attack-release)*.35);
+   gain.gain.setValueAtTime(Math.max(.0001,peak*sustain),time+duration-release);
+  }
+  gain.gain.exponentialRampToValueAtTime(.0001,time+duration);
   osc.connect(gain);gain.connect(bus);osc.start(time);osc.stop(time+duration+.02);
   osc.onended=()=>{osc.disconnect();gain.disconnect();ended();};
  }
- function noise(duration:number,level:number,frequency:number,type:BiquadFilterType='highpass',offset=0){
+ function noise(duration:number,level:number,frequency:number,type:BiquadFilterType='highpass',offset=0,attack=.001){
   sources++;
-  const buffer=ctx.createBuffer(1,Math.ceil(ctx.sampleRate*duration),ctx.sampleRate),data=buffer.getChannelData(0);
-  for(let n=0;n<data.length;n++)data[n]=Math.random()*2-1;
+  if(!noiseBuffer||noiseBuffer.sampleRate!==ctx.sampleRate){
+   noiseBuffer=ctx.createBuffer(1,ctx.sampleRate,ctx.sampleRate);
+   const data=noiseBuffer.getChannelData(0);
+   for(let n=0;n<data.length;n++)data[n]=Math.random()*2-1;
+  }
   const source=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),gain=ctx.createGain(),at=time+offset;
-  source.buffer=buffer;filter.type=type;filter.frequency.value=frequency;filter.Q.value=.7;
-  gain.gain.setValueAtTime(Math.max(.0002,level*tr.volume*velocity),at);gain.gain.exponentialRampToValueAtTime(.0001,at+duration);
-  source.connect(filter);filter.connect(gain);gain.connect(bus);source.start(at);source.stop(at+duration+.02);
+  source.buffer=noiseBuffer;filter.type=type;filter.frequency.value=frequency;filter.Q.value=.7;
+  gain.gain.setValueAtTime(.0001,at);gain.gain.exponentialRampToValueAtTime(Math.max(.0002,level*tr.volume*velocity),at+attack);gain.gain.exponentialRampToValueAtTime(.0001,at+duration);
+  source.connect(filter);filter.connect(gain);gain.connect(bus);source.start(at,Math.random()*(1-duration-.02));source.stop(at+duration+.02);
   source.onended=()=>{source.disconnect();filter.disconnect();gain.disconnect();ended();};
  }
- switch(id){
-  case 'kick':tone(145,.28,.3,'sine',43);break;
-  case 'snare':noise(.16,.3,1400);tone(180,.09,.1,'triangle');break;
-  case 'hat':noise(.055,.12,7000);break;
-  case 'clap':for(let n=0;n<3;n++)noise(n===2?.14:.025,.18,1400,'bandpass',n*.018);break;
-  case 'tom':tone(210,.36,.32,'sine',85);break;
-  case 'rim':tone(820,.035,.17,'triangle');tone(1730,.025,.09);break;
-  case 'shaker':noise(.09,.18,5000,'bandpass');break;
-  case 'bass':tone(note/4,.4,.3,'triangle');break;
-  case 'synthbass':tone(note/4,.34,.18,'sawtooth');tone(note/8,.4,.13);break;
-  case 'marimba':tone(note,.45*profile.decay,.27);tone(note*4,.075,profile.warm?.018:.045);break;
-  case 'bells':tone(note*2,profile.warm?.75:1.5,.17);tone(note*5.52,profile.warm?.25:.8,profile.warm?.02:.05);break;
-  case 'kalimba':tone(note,.48*profile.decay,.23,'triangle');tone(note*2.76,.065,profile.warm?.035:.065);break;
-  case 'pluck':tone(note,.25*profile.decay,.18,'triangle');tone(note*2,.09,profile.warm?.025:.07);break;
-  case 'piano':
-   // Strong fundamental/body, rapidly fading upper harmonics: less bell, more felt/wood.
-   tone(note,.85*profile.decay,.2,'triangle',undefined,profile.warm?.012:.006);
-   tone(note*1.001,1.05*profile.decay,.055,'sine',undefined,.01);
-   tone(note*2,.3*profile.decay,.04);tone(note*3,.14,.012);break;
-  case 'strings':
-   for(const detune of [.997,1.003]){tone(note*detune,1.65,.065,'triangle',undefined,.2);tone(note*2*detune,1.5,.025,'sine',undefined,.25);}break;
-  case 'guitar':
-   // Warm plucked body, with a short pick transient instead of lingering glassy partials.
-   tone(note/2,.6*profile.decay,.2,'triangle',undefined,.008);
-   tone(note,.24,.045);tone(note*1.5,.12,profile.warm?.018:.04);
-   if(!profile.warm)tone(note/2,.18,.025,'sawtooth');break;
-  case 'organ':
-   tone(note,.65,.13,'sine',undefined,.025);tone(note*2,.65,.06,'sine',undefined,.025);tone(note*3,.65,.035,'sine',undefined,.025);break;
-  case 'pad':tone(note,1.8,.09,'sine',undefined,.28);tone(note*1.002,1.8,.07,'triangle',undefined,.28);break;
+ if(acousticInstruments.includes(id)){
+  const acoustic=id as AcousticInstrument,frequency=(id==='bass'||id==='doublebass')?note/4:id==='guitar'?note/2:note;
+  // Three touch layers: stronger hits excite more upper partials, not just more volume.
+  const layer=Math.max(0,Math.min(2,Math.round(velocity*tr.volume*2)));
+  const brightness=(profile.warm?.2:.4)+layer*.2;
+  const key=[id,frequency.toFixed(4),ctx.sampleRate,brightness].join(':');
+  let buffer=acousticCache.get(key);
+  if(!buffer){
+   const samples=acousticWave(acoustic,frequency,ctx.sampleRate,brightness);
+   buffer=ctx.createBuffer(1,samples.length,ctx.sampleRate);buffer.getChannelData(0).set(samples);
+   if(acousticCache.size>=40)acousticCache.delete(acousticCache.keys().next().value!);
+   acousticCache.set(key,buffer);
+  }
+  const source=ctx.createBufferSource(),gain=ctx.createGain();sources++;
+  source.buffer=buffer;gain.gain.setValueAtTime(tr.volume*velocity*(id==='strings'?.18:.28),time);
+  source.connect(gain);gain.connect(bus);source.start(time);
+  source.onended=()=>{source.disconnect();gain.disconnect();ended();};
+  return;
  }
+ const recipe=voiceRecipe(id,profile.warm,profile.decay);
+ for(const spec of recipe.tones){
+  const frequency=spec.hz??note*(spec.ratio??1);
+  // Do not fold ultrasonic bell/metal partials back into the audible range.
+  if(frequency>=ctx.sampleRate*.45)continue;
+  tone(frequency,spec.duration,spec.level,spec.type,spec.endHz,spec.attack??.004,spec.glide,spec.sustain);
+ }
+ for(const spec of recipe.noise)noise(spec.duration,spec.level,spec.frequency,spec.type,spec.offset,spec.attack);
+
 }
 function applyDirections(randomize=false){
  tracks.forEach(tr=>{
@@ -456,7 +468,7 @@ function schedule(){
     tr.scheduledVelocity=dynamics;
     const role=evolving&&dialogueInstrument(tr.instrument)?dialogueRole(i):-1;
     const emphasis=role===0||role===1?dialogueGain(step/16,role):1;
-    const foundation=['kick','bass','synthbass'].includes(tr.instrument)||!!tr.morph&&['kick','bass','synthbass'].includes(tr.morph.to);
+    const foundation=['kick','bass','synthbass','doublebass'].includes(tr.instrument)||!!tr.morph&&['kick','bass','synthbass','doublebass'].includes(tr.morph.to);
     const breath=evolving&&arrangement&&!protectedDrawing&&!foundation?breathGain(arrangement,i,step):1;
     const velocity=dynamics*songLevel(nextTime,tr.instrument)*emphasis*breath*songExpression().gain*(extra?.45:1),mix=evolving?songMix(nextTime):1;
     if(velocity<=.0001)return;

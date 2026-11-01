@@ -3,7 +3,7 @@ const roots=[0,0,0,0,5,5,0,0,7,5,0,7];
 const melody=[0,4,7,9,14,9,7,4];
 export function jazzSemitones(bar:number,beat:number,instrument:string,pitch:number,motif?:readonly number[]):number{
  const root=roots[((bar%12)+12)%12];
- if(instrument==='bass'||instrument==='synthbass'){
+ if(instrument==='bass'||instrument==='synthbass'||instrument==='doublebass'){
   return root+(motif&&beat%8!==0?[0,7,9,12,7][motif[Math.floor(beat/2)%motif.length]]:[0,7,9,7][Math.floor(beat/4)%4]);
  }
  if(instrument==='organ'||instrument==='pad'||instrument==='strings')return root+(motif?[0,4,7,9,12][motif[Math.floor(beat/2)%motif.length]]:0);

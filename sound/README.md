@@ -106,3 +106,32 @@ Latin/Bossa Nova (104 BPM, interlocking rim/shaker and warm guitar).
 Each uses the same drawing, song and Random Play engines. Random instrument
 morphs retain percussion/melody roles in these styles. Rap is instrumental,
 not generated vocals. Ambient, Focus and Sport remain at the end of the list.
+
+Acoustic voices now use local procedural models instead of plain triangle layers:
+fractional-delay plucked strings for guitar/bass, decaying harmonic modes for
+piano, marimba and kalimba, and bowed harmonics with a slow attack, release and
+restrained vibrato for strings. Velocity selects softer/brighter excitation
+layers. A bounded 40-buffer cache avoids repeatedly synthesizing the same note;
+oscillator recurrences keep synthesis costs low. These remain synthesized sounds,
+not recordings of real instruments. Percussion and electronic voices are unchanged.
+
+The remaining twelve voice recipes were reviewed as well. Drums now have distinct
+body/transient layers, a faster kick/tom pitch settling, a staggered filtered clap,
+short metallic hi-hat components and softer shaker onset. Noise has a short attack
+rather than jumping from silence; a shared noise buffer avoids per-hit allocations.
+Synth bass and pluck retain their electronic character with quieter supporting
+partials. Bells have shorter upper modes; organ and pad use sustain/release
+envelopes rather than immediately fading like struck instruments. Above-Nyquist
+modal partials are omitted. All eighteen instrument paths have browser smoke tests;
+these checks validate rendering/runtime, not a substitute for listening.
+
+Four additional synthesized instruments bring the selection to 22, with names in
+all four languages: saxophone (reed-like harmonics, tapered breath and delayed
+vibrato), harp (longer plucked-string resonance), double bass (damped low strings)
+and electric piano (soft body and short tine partials). Jazz adds saxophone and
+double bass; Coffeehouse uses electric piano/double bass, Lo-Fi and Hip-Hop use
+electric piano, and Classical/Ambient add harp. Manual selection remains available
+on every orbit. The double bass follows bass harmony, stays centred and is excluded
+from melodic call/response and arrangement rests. Existing instrument IDs and saved
+selections are unchanged. These are synthesized approximations, not sampled acoustic
+recordings; saxophone notes do not yet use inter-note legato.

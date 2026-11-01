@@ -45,7 +45,7 @@ test('all instruments can replace a track without losing points',async({page})=>
  await page.locator('#play').click();
  const select=track.locator('.instrument-select');
  const ids=await select.locator('option').evaluateAll(options=>options.map(o=>(o as HTMLOptionElement).value));
- expect(ids).toHaveLength(18);
+ expect(ids).toHaveLength(22);
  for(const id of ids){
   await select.selectOption(id,{force:true});
   await expect(track.locator('.count')).toHaveText(count!);
@@ -643,6 +643,23 @@ test('new genres support random playback and live drawing',async({page})=>{
   await page.mouse.down();await page.mouse.move(rect.x+rect.width*.6,rect.y+rect.height*.75,{steps:8});await page.mouse.up();
   await page.locator('#play').click();
   await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false');
+ }
+ expect(errors).toEqual([]);
+});
+
+test('all twenty-two instruments play through the complete audio graph',async({page})=>{
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/de/');
+ const select=page.locator('select[name="instrument-0"]');
+ const ids=await select.locator('option').evaluateAll(options=>options.map(option=>(option as HTMLOptionElement).value));
+ expect(ids).toHaveLength(22);
+ for(const id of ids){
+  await select.selectOption(id,{force:true});
+  await page.locator('#play').click();
+  await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
+  await page.waitForTimeout(160);
+  await expect(page.locator('#audio-status')).toBeEmpty();
+  await page.locator('#play').click();
  }
  expect(errors).toEqual([]);
 });
