@@ -541,3 +541,19 @@ test('music preferences are not stored without consent',async({page})=>{
  expect(await page.evaluate(()=>localStorage.getItem('jacktools.sound.settings.v1'))).toBeNull();
  await page.reload();await expect(page.locator('[data-style-preset=electronic]')).toHaveAttribute('aria-pressed','true');
 });
+test('drawing reshapes a melodic motif in electronic and jazz styles',async({page})=>{
+ await page.goto('/de/');
+ for(const style of ['electronic','jazz']){
+  if(style==='jazz')await page.locator('[data-style-preset=jazz]').click();
+  const index=style==='jazz'?0:4;
+  const row=page.locator('[data-track="'+index+'"]'),before=await row.getAttribute('data-motif');
+  await page.locator('#drawing').scrollIntoViewIfNeeded();
+  const r=await page.locator('#drawing').boundingBox();if(!r)throw Error('No drawing surface');
+  // Near the top of this track's band maps to a high, consonant phrase degree.
+  await page.mouse.move(r.x+r.width*.4,r.y+r.height*(index+.05)/5);
+  await page.mouse.down();await page.mouse.up();
+  await expect(row).not.toHaveAttribute('data-motif',before!);
+  expect((await row.getAttribute('data-motif'))!.split(',')[3]).toBe('4');
+  await page.locator('#play').click();await page.waitForTimeout(100);await page.locator('#play').click();
+ }
+});

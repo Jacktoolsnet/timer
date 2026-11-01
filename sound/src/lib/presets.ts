@@ -6,7 +6,7 @@ type Preset={swing?:number;bpm:number;scale:number[];melody:number[];parts:Part[
 const part=(instrument:InstrumentId,steps:number[],pitch=0,volume=.55):Part=>({instrument,steps,pitch,volume});
 const quarters=[0,4,8,12],eighths=[0,2,4,6,8,10,12,14];
 export const presets:Record<StyleId,Preset>={
- electronic:{bpm:100,scale:[0,3,5,7,10],melody:[0],grid:Array.from({length:16},(_,i)=>i),density:.23,parts:[part('kick',quarters),part('snare',[4,12]),part('hat',eighths),part('bass',[0,8]),part('marimba',[0,5,10,15])]},
+ electronic:{bpm:100,scale:[0,3,5,7,10],melody:[0,1,2,1,0,2,1,0],grid:Array.from({length:16},(_,i)=>i),density:.23,parts:[part('kick',quarters),part('snare',[4,12]),part('hat',eighths),part('bass',[0,8]),part('marimba',[0,5,10,15])]},
  house:{bpm:124,scale:[0,3,5,7,10],melody:[0,0,2,0,3,2,1,2],grid:eighths,density:.3,parts:[part('kick',quarters),part('clap',[4,12]),part('hat',[2,6,10,14]),part('synthbass',[0,3,6,8,11,14]),part('pluck',[2,6,10,14],2),part('pad',[0,8],0,.35)]},
  pop:{bpm:108,scale:[0,2,4,7,9],melody:[0,1,2,1,3,2,1,0],grid:eighths,density:.25,parts:[part('kick',[0,6,8]),part('snare',[4,12]),part('shaker',eighths),part('bass',quarters),part('piano',[0,4,6,8,12,14]),part('guitar',[2,6,10,14],2,.4)]},
  rock:{bpm:118,scale:[0,3,5,7,10],melody:[0,0,3,2,0,0,2,3],grid:eighths,density:.32,parts:[part('kick',[0,6,8,10]),part('snare',[4,12]),part('hat',eighths),part('bass',[0,2,6,8,10,14]),part('guitar',[0,6,8,14],0,.45),part('tom',[15],0,.4)]},
