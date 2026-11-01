@@ -325,7 +325,7 @@ test('manual and automatic direction changes apply at bar boundaries',async({pag
  await expect(row).toHaveAttribute('data-direction','1',{timeout:4000});
  await row.locator('.track-direction').selectOption('random',{force:true});
  await page.locator('#evolve').click();
- await expect(row).toHaveAttribute('data-direction','-1',{timeout:6000});
+ await expect(page.locator('.instrument').nth(2)).toHaveAttribute('data-direction','-1',{timeout:6000});
  await page.locator('#play').click();
  await page.locator('#reset').click();
  await expect(row).toHaveAttribute('data-direction','1');
@@ -432,7 +432,7 @@ test('random play enables directions and dynamics without per-track setup',async
  await page.locator('#evolve').click();
  await expect(page.locator('[data-track="1"] .track-direction')).toHaveValue('random');
  await expect(page.locator('[data-track="1"] .random-dynamics')).toBeChecked();
- await expect(page.locator('[data-track="1"]')).toHaveAttribute('data-direction','-1',{timeout:6000});
+ await expect(page.locator('.instrument').nth(2)).toHaveAttribute('data-direction','-1',{timeout:6000});
  await expect(page.locator('[data-track="5"]')).toHaveAttribute('data-enabled','false');
  await page.locator('#evolve').click();
  await expect(page.locator('[data-track="1"] .track-direction')).toHaveValue('forward');
@@ -449,4 +449,21 @@ test('orbit off removes tracks and nodes without hiding centre or backdrop',asyn
  await expect.poll(centrePixels).toBe(true);
  await page.locator('[data-orbit-mode=comet]').click();
  await expect.poll(outerPixels).toBe(true);
+});
+test('musical journey morphs over multiple cycles with bounded tempo steps',async({page})=>{
+ await page.addInitScript(()=>{Math.random=()=>0;});
+ await page.goto('/de/');
+ await page.locator('#tempo').fill('180');await page.locator('#tempo').dispatchEvent('input');
+ await page.locator('#evolve').click();
+ const track=page.locator('[data-track="0"]');
+ await expect(track).toHaveAttribute('data-morph','0.25',{timeout:6000});
+ await expect(track.locator('.instrument-name')).toHaveText('Kick');
+ await expect(page.locator('#tempo')).toHaveValue('178');
+ await expect(track).toHaveAttribute('data-morph','0.5',{timeout:6000});
+ await expect(track.locator('.instrument-name')).toHaveText('Kick');
+ await expect(page.locator('#tempo')).toHaveValue('176');
+ await expect(track).toHaveAttribute('data-morph','0.75',{timeout:6000});
+ await expect(track.locator('.instrument-name')).toHaveText('Kick');
+ await expect(track.locator('.instrument-name')).toHaveText('Snare',{timeout:6000});
+ await page.locator('#play').click();
 });

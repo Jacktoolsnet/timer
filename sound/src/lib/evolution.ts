@@ -3,7 +3,7 @@ type Track={enabled:boolean;mute:boolean;instrument:string;points:boolean[]};
 export function nextEvolutionStep(step:number,random= Math.random):number{
  return (Math.floor(step/16)+2+Math.floor(random()*7))*16;
 }
-export function evolvePattern(tracks:Track[],random=Math.random,grid:number[]=Array.from({length:16},(_,i)=>i)):number{
+export function evolvePattern(tracks:Track[],random=Math.random,grid:number[]=Array.from({length:16},(_,i)=>i),maximum=3):number{
  const candidates=tracks.flatMap((tr,i)=>{
   if(!tr.enabled||tr.mute)return [];
   const count=tr.points.filter(Boolean).length;
@@ -14,7 +14,7 @@ export function evolvePattern(tracks:Track[],random=Math.random,grid:number[]=Ar
    return [{i,s}];
   });
  });
- const amount=Math.min(candidates.length,1+Math.floor(random()*3));
+ const amount=Math.min(candidates.length,1+Math.floor(random()*maximum));
  let changed=0;
  for(let n=0;n<amount;n++){
   const index=Math.floor(random()*candidates.length);
