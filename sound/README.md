@@ -192,3 +192,13 @@ Coffeehouse and Lo-Fi use softer, breathier articulation; Classical uses choir,
 Ambient/Focus/Drum & Bass use vocal pads. Vocal buffer cache keys include style so
 articulation cannot leak across presets. Saved custom tracks still take precedence;
 load/reset a starting pattern to hear its updated vocal arrangement.
+
+Wordless voices and bowed strings now use live sustained oscillator voices rather
+than restarting a short audio buffer for every point. Held envelopes bridge nearby
+notes, with gentle 100 ms pitch glides and vowel transitions independent of pitch;
+a phrase can extend without replaying its onset. Swing-aware gates preserve nearby
+long eighths but leave real gaps silent. Choir and Vocal Pad share this articulation.
+Random Play gives solo voice two-bar phrases/two-bar breaths (three bars/one in a
+chorus), and strings a bow rest once per eight bars; newly drawn tracks bypass these
+rests for two bars. Normal Play follows the user's points without automatic phrase
+rests. Mute, disable, clear, instrument/style changes and Stop release held sources.
