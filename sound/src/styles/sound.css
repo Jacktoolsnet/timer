@@ -129,5 +129,5 @@
 @media(max-width:800px){.focus-view:not(.focus-idle) .orbit-wrap{max-width:min(520px,65dvh)}}
 
 /* Keep the focus exit action anchored to the screen, clear of the instrument. */
-.focus-view .sound-top{position:fixed;top:max(12px,env(safe-area-inset-top));left:max(12px,env(safe-area-inset-left));z-index:40;width:auto;margin:0}
+.focus-view .sound-top{position:fixed;top:max(12px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));left:auto;z-index:40;width:auto;margin:0}
 .focus-view .sound-top #focus{background:var(--surface);box-shadow:0 4px 18px #0002}
