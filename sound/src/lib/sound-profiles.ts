@@ -11,6 +11,7 @@ export const soundProfiles:Record<StyleId,{cutoff:number;attack:number;decay:num
  house:{cutoff:7000,attack:1,decay:.85,warm:false},
  pop:{cutoff:4800,attack:1.3,decay:.9,warm:false},
  rock:{cutoff:5500,attack:1,decay:.8,warm:false},
+ slowwaltz:{cutoff:3000,attack:2.1,decay:1.2,warm:true},
  classical:{cutoff:3600,attack:1.7,decay:1.1,warm:true},
  ambient:{cutoff:2600,attack:2.2,decay:1.4,warm:true},
  focus:{cutoff:1900,attack:2.5,decay:1.2,warm:true},

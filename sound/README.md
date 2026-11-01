@@ -228,3 +228,7 @@ transients rather than being made universally legato.
 ### Meter & groove
 
 Music style includes Style default, Discofox, Waltz and Cha-cha-cha tiles. Style default keeps the selected genre’s pattern, swing and accents. Discofox and Cha-cha-cha use distinct 4/4 rhythm templates; Waltz uses true 3/4 (12 sixteenth steps, one orbit per bar). Drawing, direction, phrase holds, song sections, evolution intervals and animation angles follow the active meter. Changes during playback wait for a bar boundary and rebuild the rhythm. Random evolution protects active rhythmic anchors and keeps foundation tracks aligned; drawing can still toggle anchors. Explicit groove choices survive style changes and are stored with optional local preferences. Track storage retains 16 positions for backward compatibility; inactive positions are hidden in 3/4.
+
+### Slow Waltz style
+
+Slow Waltz defaults to 86 BPM and a native 3/4 meter with Style default selected. Its eight acoustic-leaning tracks combine double bass on beat one, piano/guitar on beats two and three, connected strings, harp and a restrained choir. Major harmonies move every four bars. Random journeys take 6–8 evolution cycles, with small pitch steps and a 78–96 BPM tempo target; evolution happens every 4–8 bars. Explicit dance-groove overrides remain user-controlled. The style, groove and drawings use the existing optional local settings storage.

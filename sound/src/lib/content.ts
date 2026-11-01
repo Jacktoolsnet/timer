@@ -1,17 +1,17 @@
 export const content={
  de:{
   title:'Online-Musik-Sequencer & generative Musik – JackTools Sound',
-  description:'Erstelle Musik im Browser: Orbit-Sequencer mit Zeichensteuerung, sechzehn Musikstilen und Zufalls-Play mit Songstruktur. Kostenlos, ohne Anmeldung und ohne Installation.',
+  description:'Erstelle Musik im Browser: Orbit-Sequencer mit Zeichensteuerung, siebzehn Musikstilen und Zufalls-Play mit Songstruktur. Kostenlos, ohne Anmeldung und ohne Installation.',
   faqTitle:'Fragen zum Online-Musik-Sequencer',guide:'Nutzungshinweise und Bedienung',back:'Zurück zum Soundtool',
   faq:[
-   ['Welche Musikrichtungen kann ich ausprobieren?','Electronic, House, Pop, Rock, Klassik, Jazz & Blues, Coffeehouse, Ambient, Fokus und Sport. Die Presets laden unterschiedliche Instrumente, Tempi und Muster. Die Bezeichnungen Fokus und Sport sind Klangvorschläge für diese Situationen, keine Wirkungsversprechen.'],
+   ['Welche Musikrichtungen kann ich ausprobieren?','Electronic, House, Pop, Rock, Klassik, Langsamer Walzer, Jazz & Blues, Coffeehouse, Ambient, Fokus und Sport. Die Presets laden unterschiedliche Instrumente, Tempi und Muster. Die Bezeichnungen Fokus und Sport sind Klangvorschläge für diese Situationen, keine Wirkungsversprechen.'],
    ['Wie entsteht die Musik im Zufallsmodus?','Zufalls-Play entwickelt eine Songstruktur mit Strophen und wiederkehrenden Refrains. Klangfarben verändern sich über mehrere Zyklen; Melodiemotive bleiben an gemeinsame Harmonien gebunden. Zeichnen erlaubt eigene Eingriffe, während die Musik weiterläuft.'],
    ['Kann ich die Musik ohne Animationen hören?','Ja. Orbit, Zentrumsanimation und Hintergrund lassen sich unabhängig auswählen oder ausschalten. Eine Zufällig-Kachel erlaubt automatische Variantenwechsel. Fest gewählte und ausgeschaltete Varianten bleiben erhalten.'],
    ['Bleiben meine musikalischen Einstellungen gespeichert?','Nur mit aktivierter Option „Einstellungen auf diesem Gerät merken“. Gespeichert werden unter anderem Musikstil, Instrumente, Klangpunkte und Animationen lokal in deinem Browser. Musik und Zufalls-Play starten beim Neuladen nicht automatisch.']
   ],
   sections:[
    ['Musik starten und einen Stil wählen','Starte mit niedriger Lautstärke. Die Play-Taste spielt einen Loop, Zufalls-Play entwickelt zusätzlich eine Songstruktur. Im Bereich Musikrichtung wählst du einen Stil; während der Wiedergabe wird der Wechsel zum nächsten Takt übernommen.'],
-   ['Takt und Groove wählen','Unter Musikrichtung findest du Takt & Groove: Stiltypisch übernimmt den Rhythmus des Musikstils. Discofox und Cha-Cha-Cha bieten eigene 4/4-Muster; Walzer spielt im 3/4-Takt. Ein Orbit entspricht einem Takt mit 16 beziehungsweise 12 Sechzehntelpositionen. Wechsel werden während der Wiedergabe zum nächsten Takt übernommen. Zufalls-Play variiert um die rhythmischen Anker; durch Zeichnen kannst du auch diese selbst ändern.'],
+   ['Takt und Groove wählen','Unter Musikrichtung findest du Takt & Groove: Stiltypisch übernimmt den Rhythmus des Musikstils. Discofox und Cha-Cha-Cha bieten eigene 4/4-Muster; Walzer und die Musikrichtung Langsamer Walzer mit stiltypischem Groove spielen im 3/4-Takt. Ein Orbit entspricht einem Takt mit 16 beziehungsweise 12 Sechzehntelpositionen. Wechsel werden während der Wiedergabe zum nächsten Takt übernommen. Zufalls-Play variiert um die rhythmischen Anker; durch Zeichnen kannst du auch diese selbst ändern.'],
    ['Mit Finger oder Maus eingreifen','Die horizontale Position auf der Zeichenfläche bestimmt die Stelle im Loop. Die Höhe wählt eine Instrumentenbahn und formt das Melodiemotiv. Übermalen schaltet Punkte einmal pro Zeichengeste an oder aus. Bei Percussion wird zusätzlich eine nahe melodische Bahn beeinflusst.'],
    ['Instrumente und Dynamik bearbeiten','Klappe eine Instrumentenbahn auf, um Instrument, Lautstärke, Laufrichtung, Klangpunkte und Zufallsdynamik einzustellen. Der Regler Tonhöhe verschiebt alle melodischen Instrumente um bis zu eine Oktave nach oben oder unten; das Schlagzeug bleibt unverändert. Alle acht Bahnen sind anfangs aktiv und können einzeln deaktiviert werden. Zufalls-Play übernimmt musikalische Variationen automatisch; deaktivierte oder stumme Bahnen bleiben geschützt.'],
    ['Songstruktur und Refrains','Die Anzeige unter den Steuerelementen zeigt den aktuellen Songteil. Refrain-Motive kehren zurück. Zeichnest du während eines Refrains, wird der bearbeitete Hook für seine nächste Wiederkehr übernommen. Nach dem Ausklang entwickelt sich die nächste Form.'],
@@ -21,17 +21,17 @@ export const content={
  },
  en:{
   title:'Online music sequencer & generative music – JackTools Sound',
-  description:'Create music in your browser: an orbit sequencer with drawing controls, sixteen styles and Random Play song structures. Free, no account or installation needed.',
+  description:'Create music in your browser: an orbit sequencer with drawing controls, seventeen styles and Random Play song structures. Free, no account or installation needed.',
   faqTitle:'Online music sequencer questions',guide:'Usage notes and controls',back:'Back to the sound tool',
   faq:[
-   ['Which music styles are available?','Electronic, House, Pop, Rock, Classical, Jazz & Blues, Coffeehouse, Ambient, Focus and Sport. Each preset loads its own instruments, tempo and pattern. Focus and Sport describe suggested sound characters, not guaranteed effects.'],
+   ['Which music styles are available?','Electronic, House, Pop, Rock, Classical, Slow Waltz, Jazz & Blues, Coffeehouse, Ambient, Focus and Sport. Each preset loads its own instruments, tempo and pattern. Focus and Sport describe suggested sound characters, not guaranteed effects.'],
    ['How does Random Play create music?','It develops verses and returning choruses within a song structure. Timbres evolve over several cycles and melodic motifs stay within shared harmonies. Drawing lets you intervene while music continues.'],
    ['Can I listen without animations?','Yes. Orbit, centre and background visuals can be selected independently or switched off. Random tiles allow automatic variation; fixed and Off choices are respected.'],
    ['Are my musical settings saved?','Only with Remember settings on this device enabled. Music style, instruments, beat points and animation choices are stored locally in your browser. Reloading never starts playback or Random Play automatically.']
   ],
   sections:[
    ['Start music and choose a style','Begin at low volume. Play runs a loop; Random Play also develops a song structure. Choose a style above the instruments. During playback, changes take effect at the next bar.'],
-   ['Choose meter and groove','Under Music style, Meter & groove offers Style default, Discofox, Waltz and Cha-cha-cha. Style default follows the genre; the dance grooves have distinct patterns and accents. Waltz uses 3/4 with twelve sixteenth-note positions per orbit; the other choices use 4/4 with sixteen. Live changes take effect at the next bar. Random Play varies around rhythmic anchors; drawing can change those anchors too.'],
+   ['Choose meter and groove','Under Music style, Meter & groove offers Style default, Discofox, Waltz and Cha-cha-cha. Style default follows the genre; the dance grooves have distinct patterns and accents. Waltz and the Slow Waltz style with its default groove use 3/4 with twelve sixteenth-note positions per orbit; the other choices use 4/4 with sixteen. Live changes take effect at the next bar. Random Play varies around rhythmic anchors; drawing can change those anchors too.'],
    ['Intervene with a finger or mouse','Horizontal drawing position selects a place in the loop. Height selects an instrument orbit and shapes its melodic motif. Drawing toggles each point once per gesture. Percussion gestures also affect a nearby melodic orbit.'],
    ['Edit instruments and dynamics','Expand an instrument to set its sound, volume, direction, beat points and random dynamics. The Pitch slider transposes melodic instruments up or down by one octave; drums stay unchanged. All eight orbits start enabled and can be disabled individually. Random Play handles musical variation automatically; disabled or muted tracks remain protected.'],
    ['Song structure and returning choruses','The readout below the controls identifies the current section. Chorus motifs return later; drawing in a chorus updates its hook for the next reprise. A new form develops after the outro.'],
@@ -41,17 +41,17 @@ export const content={
  },
  es:{
   title:'Secuenciador musical online y música generativa – JackTools Sound',
-  description:'Crea música en el navegador con órbitas, dibujos, dieciséis estilos y estructuras musicales aleatorias. Gratis, sin registro ni instalación.',
+  description:'Crea música en el navegador con órbitas, dibujos, diecisiete estilos y estructuras musicales aleatorias. Gratis, sin registro ni instalación.',
   faqTitle:'Preguntas sobre el secuenciador online',guide:'Instrucciones y controles',back:'Volver a Sound',
   faq:[
-   ['¿Qué estilos hay?','Electrónica, House, Pop, Rock, Clásica, Jazz y blues, Café, Ambient, Concentración y Deporte. Cada preset carga instrumentos, tempo y patrones propios. Concentración y Deporte son propuestas sonoras, no promesas de efectos.'],
+   ['¿Qué estilos hay?','Electrónica, House, Pop, Rock, Clásica, Vals lento, Jazz y blues, Café, Ambient, Concentración y Deporte. Cada preset carga instrumentos, tempo y patrones propios. Concentración y Deporte son propuestas sonoras, no promesas de efectos.'],
    ['¿Cómo se genera la música aleatoria?','Se desarrollan estrofas y estribillos recurrentes. Los timbres evolucionan durante varios ciclos y los motivos siguen armonías compartidas. Puedes intervenir dibujando sin detener la música.'],
    ['¿Puedo escuchar sin animaciones?','Sí. Órbita, centro y fondo se seleccionan por separado o se desactivan. Las opciones aleatorias cambian automáticamente; las selecciones fijas y desactivadas se respetan.'],
    ['¿Se guardan mis ajustes?','Solo al activar Recordar ajustes en este dispositivo. Estilo, instrumentos, puntos y animaciones se guardan localmente. Recargar nunca inicia la música automáticamente.']
   ],
   sections:[
    ['Iniciar y elegir estilo','Empieza con poco volumen. Reproducir activa un bucle; la reproducción aleatoria también crea una estructura musical. Elige el estilo sobre los instrumentos. Durante la reproducción cambia en el próximo compás.'],
-   ['Elegir compás y groove','En Estilo musical puedes elegir Según el estilo, Discofox, Vals o Cha-cha-chá. Cada groove tiene patrones y acentos propios. El vals usa 3/4 con doce posiciones de semicorchea por órbita; los demás usan 4/4 con dieciséis. Durante la reproducción, el cambio se aplica en el próximo compás. El modo aleatorio conserva los apoyos rítmicos, que también puedes modificar dibujando.'],
+   ['Elegir compás y groove','En Estilo musical puedes elegir Según el estilo, Discofox, Vals o Cha-cha-chá. Cada groove tiene patrones y acentos propios. El vals y el estilo Vals lento con su groove predeterminado usan 3/4 con doce posiciones de semicorchea por órbita; los demás usan 4/4 con dieciséis. Durante la reproducción, el cambio se aplica en el próximo compás. El modo aleatorio conserva los apoyos rítmicos, que también puedes modificar dibujando.'],
    ['Dibujar música','La posición horizontal elige un lugar del bucle. La altura selecciona una órbita y forma el motivo melódico. Cada punto cambia una sola vez por gesto. En percusión también se modifica una órbita melódica cercana.'],
    ['Instrumentos y dinámica','Despliega un instrumento para ajustar sonido, volumen, dirección, puntos y dinámica aleatoria. El control Altura tonal transpone los instrumentos melódicos hasta una octava arriba o abajo; la percusión no cambia. Las ocho órbitas están activas inicialmente y pueden desactivarse individualmente. El modo aleatorio varía la música sin activar pistas deshabilitadas o silenciadas.'],
    ['Estructura y estribillos','El indicador muestra la sección actual. Los estribillos vuelven; dibujar durante uno actualiza el motivo que regresará. Tras el final se desarrolla una nueva estructura.'],
@@ -61,17 +61,17 @@ export const content={
  },
  fr:{
   title:'Séquenceur musical en ligne et musique générative – JackTools Sound',
-  description:'Créez de la musique dans le navigateur : orbites, dessin, seize styles et structures génératives. Gratuit, sans compte ni installation.',
+  description:'Créez de la musique dans le navigateur : orbites, dessin, dix-sept styles et structures génératives. Gratuit, sans compte ni installation.',
   faqTitle:'Questions sur le séquenceur en ligne',guide:'Instructions et commandes',back:'Retour à Sound',
   faq:[
-   ['Quels styles sont disponibles ?', 'Électronique, House, Pop, Rock, Classique, Jazz & blues, Café, Ambient, Concentration et Sport. Chaque preset charge ses instruments, tempo et motifs. Concentration et Sport décrivent des propositions sonores, sans effet garanti.'],
+   ['Quels styles sont disponibles ?', 'Électronique, House, Pop, Rock, Classique, Valse lente, Jazz & blues, Café, Ambient, Concentration et Sport. Chaque preset charge ses instruments, tempo et motifs. Concentration et Sport décrivent des propositions sonores, sans effet garanti.'],
    ['Comment fonctionne la lecture aléatoire ?', 'Elle développe couplets et refrains récurrents. Les timbres évoluent sur plusieurs cycles et les motifs suivent des harmonies communes. Vous pouvez intervenir par le dessin sans arrêter la musique.'],
    ['Peut-on écouter sans animations ?', 'Oui. Orbite, centre et fond se choisissent séparément ou se désactivent. Les variantes aléatoires changent automatiquement ; les choix fixes et désactivés restent respectés.'],
    ['Mes réglages sont-ils enregistrés ?', 'Seulement si Mémoriser les réglages sur cet appareil est activé. Style, instruments, points et animations restent stockés localement. Recharger ne lance jamais la musique automatiquement.']
   ],
   sections:[
    ['Démarrer et choisir un style','Commencez à faible volume. Lecture joue une boucle ; la lecture aléatoire développe aussi une structure musicale. Choisissez le style au-dessus des instruments. Pendant la lecture, il change à la prochaine mesure.'],
-   ['Choisir mesure et groove','Sous Style musical, choisissez Selon le style, Discofox, Valse ou Cha-cha-cha. Chaque groove possède ses motifs et accents. La valse utilise une mesure à 3/4 avec douze positions de doubles croches par orbite ; les autres utilisent 4/4 avec seize positions. En lecture, le changement attend la prochaine mesure. Le mode aléatoire conserve les appuis rythmiques, modifiables aussi par le dessin.'],
+   ['Choisir mesure et groove','Sous Style musical, choisissez Selon le style, Discofox, Valse ou Cha-cha-cha. Chaque groove possède ses motifs et accents. La valse et le style Valse lente avec son groove par défaut utilisent une mesure à 3/4 avec douze positions de doubles croches par orbite ; les autres utilisent 4/4 avec seize positions. En lecture, le changement attend la prochaine mesure. Le mode aléatoire conserve les appuis rythmiques, modifiables aussi par le dessin.'],
    ['Dessiner la musique','La position horizontale choisit un endroit de la boucle. La hauteur sélectionne une orbite et façonne le motif mélodique. Chaque point bascule une seule fois par geste. Sur une piste de percussion, une orbite mélodique proche est aussi modifiée.'],
    ['Instruments et dynamique','Dépliez un instrument pour régler son timbre, volume, sens, points et dynamique aléatoire. Le curseur Hauteur transpose les instruments mélodiques jusqu’à une octave vers le haut ou le bas ; les percussions restent inchangées. Les huit orbites sont actives au départ et peuvent être désactivées individuellement. Le mode aléatoire ne réactive pas les pistes désactivées ou muettes.'],
    ['Structure et refrains','L’indicateur montre la section actuelle. Les refrains reviennent ; dessiner pendant un refrain met à jour son motif pour la prochaine reprise. Une nouvelle forme se développe après le final.'],

@@ -3,7 +3,7 @@ export const grooveChoices=['auto','discofox','waltz','chacha'] as const;
 export type GrooveChoice=typeof grooveChoices[number];
 export type Groove={choice:GrooveChoice;style:StyleId;beats:3|4;steps:12|16;swing:number;grid:number[]};
 export function resolveGroove(style:StyleId,choice:GrooveChoice):Groove{
- const steps=choice==='waltz'?12:16;
+ const steps=choice==='waltz'||choice==='auto'&&presets[style].beats===3?12:16;
  return {choice,style,beats:steps===12?3:4,steps,swing:choice==='auto'?(presets[style].swing||0):0,
   grid:choice==='auto'?presets[style].grid.filter(n=>n<steps):Array.from({length:steps},(_,i)=>i)};
 }
@@ -34,7 +34,7 @@ export function groovePattern(groove:Groove,id:string):number[]{
 export function grooveAnchors(groove:Groove,id:string){return grooveAnchored(id)?groovePattern(groove,id):[];}
 export function grooveAccent(groove:Groove,id:string,beat:number){
  const role=grooveRole(id),quarter=Math.floor(beat/4),sub=beat%4;
- if(groove.choice==='waltz')return role==='chords'?(quarter===0?.65:.94):quarter===0?1:sub===0?.72:.55;
+ if(groove.beats===3)return role==='chords'?(quarter===0?.65:.94):quarter===0?1:sub===0?.72:.55;
  if(groove.choice==='chacha')return [0,12,14].includes(beat)?1:sub===0?.85:.64;
  if(groove.choice==='discofox')return role==='hat'?(sub===2?1:.55):sub===0?1:.65;
  const style=groove.style;
@@ -48,8 +48,9 @@ export function grooveAccent(groove:Groove,id:string,beat:number){
 export function grooveMutationGrid(groove:Groove,id:string){
  const role=grooveRole(id);
  if(role==='kick'&&(groove.choice!=='auto'||['house','sport','reggae'].includes(groove.style)))return groovePattern(groove,id);
- if(groove.choice==='waltz'&&role==='chords')return [4,8];
- if(groove.choice==='waltz'&&role==='backbeat')return [4,7,8,11];
+ if(groove.beats===3&&role==='bass')return groovePattern(groove,id);
+ if(groove.beats===3&&role==='chords')return [4,8];
+ if(groove.beats===3&&role==='backbeat')return [4,7,8,11];
  if(groove.choice==='discofox'&&role==='backbeat')return [3,4,11,12];
  return groove.grid;
 }

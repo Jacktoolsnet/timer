@@ -10,9 +10,9 @@ export function varyMotif(motif:number[],random=Math.random):void{
  motif[index]=Math.max(0,Math.min(4,motif[index]+direction));
 }
 export function chordFor(style:StyleId,bar:number):{root:number;third:number}{
- const slow=style==='ambient'||style==='focus'||style==='coffeehouse';
+ const slow=style==='slowwaltz'||style==='ambient'||style==='focus'||style==='coffeehouse';
  const index=Math.floor(bar/(slow?4:2))%4;
- const major=['pop','classical','ambient','focus','coffeehouse','lofi','funk','reggae','latin'].includes(style);
+ const major=['pop','classical','slowwaltz','ambient','focus','coffeehouse','lofi','funk','reggae','latin'].includes(style);
  const roots=major?[0,5,9,7]:[0,8,5,7];
  const thirds=major?[4,4,3,4]:[3,4,3,3];
  return {root:roots[index],third:thirds[index]};

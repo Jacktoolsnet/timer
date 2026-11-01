@@ -125,7 +125,7 @@ function rememberDrawing(track:number){
  if(song.from)update(song.from);
 }
 function nextMusicStep(current:number){
- if(currentStyle==='focus'||currentStyle==='coffeehouse')return (Math.floor(current/stepsPerBar())+4+Math.floor(Math.random()*5))*stepsPerBar();
+ if(currentStyle==='focus'||currentStyle==='coffeehouse'||currentStyle==='slowwaltz')return (Math.floor(current/stepsPerBar())+4+Math.floor(Math.random()*5))*stepsPerBar();
  if(currentStyle==='sport')return (Math.floor(current/stepsPerBar())+2+Math.floor(Math.random()*5))*stepsPerBar();
  return nextEvolutionStep(current,Math.random,stepsPerBar());
 }
@@ -456,10 +456,10 @@ function evolveJourney(time:number){
   const chosen=tonal.find(({tr})=>tr.morph)||tonal[Math.floor(Math.random()*tonal.length)];
   const alternatives=alternativesFor(chosen.tr.instrument);
   if(!chosen.tr.morph&&alternatives.length)chosen.tr.morph={to:alternatives[Math.floor(Math.random()*alternatives.length)],progress:0,from:0,at:time,duration:0};
-  const length=journeyLength()+((currentStyle==='focus'||currentStyle==='coffeehouse')?2:0);
+  const length=journeyLength()+((currentStyle==='focus'||currentStyle==='coffeehouse'||currentStyle==='slowwaltz')?2:0);
   journey={track:chosen.index,cycle:chosen.tr.morph?Math.round(chosen.tr.morph.progress*length):0,length,
-   pitch:Math.max(0,Math.min(presets[currentStyle].scale.length-1,chosen.tr.pitch+(Math.random()<.5?-1:1)*((currentStyle==='focus'||currentStyle==='coffeehouse')?1:2))),
-   tempo:Math.max(40,Math.min(180,Math.round(bpm*(.94+Math.random()*.12))))};
+   pitch:Math.max(0,Math.min(presets[currentStyle].scale.length-1,chosen.tr.pitch+(Math.random()<.5?-1:1)*((currentStyle==='focus'||currentStyle==='coffeehouse'||currentStyle==='slowwaltz')?1:2))),
+   tempo:Math.max(currentStyle==='slowwaltz'?78:40,Math.min(currentStyle==='slowwaltz'?96:180,Math.round(bpm*(.94+Math.random()*.12))))};
  }
  const plan=journey,tr=tracks[plan.track];
  plan.cycle++;
@@ -480,7 +480,7 @@ function evolveJourney(time:number){
  }
  // Phase OR direction: at most one more track, never the timbre/rhythm track.
  const motion=eligible.filter(({index})=>index!==plan.track&&index!==changedTrack&&!grooveAnchored(tracks[index].instrument));
- if(motion.length&&Math.random()<(currentStyle==='focus'?.15:currentStyle==='sport'?.2:.4)){
+ if(motion.length&&Math.random()<((currentStyle==='focus'||currentStyle==='slowwaltz')?.15:currentStyle==='sport'?.2:.4)){
   const selected=motion[Math.floor(Math.random()*motion.length)].tr;
   if(Math.random()<.5)selected.direction*=-1;
   else selected.phase=(selected.phase+(Math.random()<.5?-1:1)+stepsPerBar())%stepsPerBar();

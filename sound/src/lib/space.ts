@@ -1,7 +1,7 @@
 import type {StyleId} from './presets';
 import type {SongPart} from './song';
 export function spaceProfile(style:StyleId){
- const spacious=['ambient','classical'].includes(style),intimate=['focus','coffeehouse','jazz','hiphop','lofi','funk','latin'].includes(style);
+ const spacious=['ambient','classical','slowwaltz'].includes(style),intimate=['focus','coffeehouse','jazz','hiphop','lofi','funk','latin'].includes(style);
  return {hall:spacious?.15:intimate?.075:.09,echo:style==='reggae'?.095:spacious?.075:intimate?.035:.055,decay:spacious?1.8:intimate?.8:1.1};
 }
 export function stereoPosition(instrument:string,track:number,bar:number,seed:number){
