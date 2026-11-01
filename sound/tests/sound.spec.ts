@@ -556,7 +556,7 @@ test('drawing reshapes a melodic motif in electronic and jazz styles',async({pag
   await page.locator('#drawing').scrollIntoViewIfNeeded();
   const r=await page.locator('#drawing').boundingBox();if(!r)throw Error('No drawing surface');
   // Near the top of this track's band maps to a high, consonant phrase degree.
-  await page.mouse.move(r.x+r.width*.4,r.y+r.height*(index+.05)/5);
+  await page.mouse.move(r.x+r.width*.4,r.y+r.height*(index+.05)/8);
   await page.mouse.down();await page.mouse.up();
   await expect(row).not.toHaveAttribute('data-motif',before!);
   expect((await row.getAttribute('data-motif'))!.split(',')[3]).toBe('4');
@@ -589,7 +589,7 @@ test('a drawn refrain motif returns on the next chorus',async({page})=>{
  await expect(page.locator('#song-structure')).toHaveAttribute('data-part','chorus',{timeout:30000});
  await page.locator('#drawing').scrollIntoViewIfNeeded();
  const r=await page.locator('#drawing').boundingBox();if(!r)throw Error('No pad');
- await page.mouse.move(r.x+r.width*.4,r.y+r.height*.81);await page.mouse.down();await page.mouse.up();
+ await page.mouse.move(r.x+r.width*.4,r.y+r.height*(4+.05)/8);await page.mouse.down();await page.mouse.up();
  const track=page.locator('[data-track="4"]'),hook=await track.getAttribute('data-motif');
  expect(hook!.split(',')[3]).toBe('4');
  await expect(page.locator('#song-structure')).toHaveAttribute('data-part','verse',{timeout:25000});
@@ -693,4 +693,54 @@ test('music, instruments and animations have separate labelled tiles',async({pag
  for(const tile of ['.music-tile','.instruments-tile','.animations-tile'])await expect(page.locator(tile)).toBeHidden();
  await page.locator('#focus').click();
  for(const tile of ['.music-tile','.instruments-tile','.animations-tile'])await expect(page.locator(tile)).toBeVisible();
+});
+
+test('global octave slider persists and remains under user control in random play',async({page})=>{
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/de/');
+ const slider=page.locator('#transpose');
+ await expect(slider).toHaveValue('0');
+ await expect(slider).toHaveAttribute('min','-12');await expect(slider).toHaveAttribute('max','12');
+ await page.locator('#palette-dropdown summary').click();
+ await page.locator('#remember-preferences').check();await page.locator('#preferences-close').click();
+ await slider.fill('-12');await slider.dispatchEvent('input');
+ await expect(page.locator('#transpose-value')).toHaveText('-12 Halbtöne');
+ await page.waitForTimeout(350);await page.reload();
+ await expect(slider).toHaveValue('-12');
+ await page.locator('[data-style-preset=pop]').click();
+ await expect(slider).toHaveValue('-12');
+ await page.locator('#evolve').click();
+ await slider.fill('12');await slider.dispatchEvent('input');
+ await expect(slider).toHaveAttribute('aria-valuetext','+12 Halbtöne');
+ await page.locator('#play').click();
+ expect(errors).toEqual([]);
+});
+
+test('dense strings remain playable through legato, transposition and restart',async({page})=>{
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/de/');
+ await page.locator('select[name="instrument-0"]').selectOption('strings',{force:true});
+ await page.locator('#tempo').fill('180');await page.locator('#tempo').dispatchEvent('input');
+ await page.locator('#play').click();
+ await page.waitForTimeout(1600);
+ await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
+ await page.locator('#transpose').fill('12');await page.locator('#transpose').dispatchEvent('input');
+ await page.waitForTimeout(700);
+ await page.locator('#play').click();await page.locator('#play').click();
+ await page.waitForTimeout(700);
+ await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
+ await page.locator('#play').click();expect(errors).toEqual([]);
+});
+
+test('quiet orbit notes light up on playback hits',async({page})=>{
+ await page.goto('/de/');
+ const row=page.locator('.instrument').first();
+ await row.locator('summary').click();
+ await row.locator('.track-volume').fill('0.05');await row.locator('.track-volume').dispatchEvent('input');
+ await page.locator('#play').click();
+ await expect.poll(()=>page.locator('#orbit').evaluate((canvas:HTMLCanvasElement)=>{
+  const [r,g,b]=canvas.getContext('2d')!.getImageData(350,50,1,1).data;
+  return r>130&&g>190&&b>190;
+ }),{timeout:4000,intervals:[20,40,80]}).toBe(true);
+ await page.locator('#play').click();
 });

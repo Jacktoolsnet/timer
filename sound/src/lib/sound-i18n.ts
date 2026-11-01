@@ -46,3 +46,10 @@ export const orbitCopy={
  es:{random:'Aleatorio',title:'Animaciones',comet:'Estela',dot:'Punto de luz',pulse:'Halo pulsante',off:'Desactivado'},
  fr:{random:'Aléatoire',title:'Animations',comet:'Traînée',dot:'Point lumineux',pulse:'Halo pulsant',off:'Désactivé'}
 };
+
+export const pitchCopy={
+ de:{label:'Tonhöhe',unit:'Halbtöne'},
+ en:{label:'Pitch',unit:'semitones'},
+ es:{label:'Altura tonal',unit:'semitonos'},
+ fr:{label:'Hauteur',unit:'demi-tons'}
+};

@@ -1,12 +1,15 @@
+import {noteGlow} from '../lib/note-glow';
+import {continueBow} from '../lib/bowed';
+import {developmentPlan,developmentGain,accompanimentMotif,registerArc,registerNote,type DevelopmentPlan} from '../lib/development';
 import {vocalInstruments,vocalWave,vowelPosition,type VocalInstrument} from '../lib/vocal';
 import {voiceRecipe} from '../lib/voice-recipes';
 import {acousticInstruments,acousticWave,type AcousticInstrument} from '../lib/acoustic';
 import {spaceProfile,stereoPosition,sectionExpression} from '../lib/space';
 import {createAudioSpace} from '../lib/audio-space';
 import {arrangementPlan,breathGain,ornamentAt,type ArrangementPlan} from '../lib/arrangement';
-import {dialogueInstrument,answerMotif,dialogueGain,timbreMotion} from '../lib/expression';
+import {dialogueInstrument,answerMotif,timbreMotion} from '../lib/expression';
 import {songForm,copyPhrases,sectionGain,songCopy,type Phrase,type Section,type SongPart} from '../lib/song';
-import {makeMotif,varyMotif,melodicSemitones,isMelodic,gestureDegree} from '../lib/harmony';
+import {makeMotif,varyMotif,chordFor,melodicSemitones,isMelodic,gestureDegree} from '../lib/harmony';
 import {jazzSemitones} from '../lib/jazz-harmony';
 import {storageAllowed} from '../lib/storage';
 import {STORAGE_KEY} from '../lib/engine';
@@ -18,7 +21,7 @@ import {screenWakeLock} from '../lib/wake-lock';
 import {evolvePattern,nextEvolutionStep} from '../lib/evolution';
 import {enhanceClockSelects} from '../../../shared/preview-selects';
 import {defaultInstruments,instrumentIds,instrumentNames,type InstrumentId} from '../lib/instruments';
-import {copy} from '../lib/sound-i18n';
+import {copy,pitchCopy} from '../lib/sound-i18n';
 const t=copy[document.documentElement.lang as keyof typeof copy]||copy.en;
 const $=<T extends HTMLElement>(s:string)=>document.querySelector<T>(s)!;
 const orbit=$<HTMLCanvasElement>('#orbit'), drawing=$<HTMLCanvasElement>('#drawing');
@@ -32,12 +35,15 @@ let audio:AudioContext|undefined, master:GainNode|undefined, playing=false,timer
 let space:ReturnType<typeof createAudioSpace>|undefined;
 const acousticCache=new Map<string,AudioBuffer>();
 let noiseBuffer:AudioBuffer|undefined;
+const bows=new Map<number,{source:AudioBufferSourceNode;gain:GainNode;base:number;started:number;last:number}>();
 let visualStep=0,visualTime=0,visualDuration=.15;
 function playbackAngle(time:number){return (visualStep+Math.max(0,Math.min(1,(time-visualTime)/visualDuration)))/16*Math.PI*2;}
 const language=document.documentElement.lang as keyof typeof styleCopy;
 let currentStyle:StyleId='electronic',pendingStyle:StyleId|null=null;
+let transpose=0;
 let evolving=false,evolutionStep=Infinity;
 let arrangement:ArrangementPlan|null=null;
+let development:DevelopmentPlan|null=null;
 const drawnUntil=tracks.map(()=>0);
 let journey:{track:number;cycle:number;length:number;pitch:number;tempo:number}|null=null;
 let song:{
@@ -114,7 +120,7 @@ function nextMusicStep(current:number){
  return nextEvolutionStep(current);
 }
 function setEvolution(on:boolean){
- if(on!==evolving)arrangement=null;
+ if(on!==evolving){arrangement=null;development=null;drawnUntil.fill(0);}
  if(evolving&&!on)tracks.forEach(tr=>{if(tr.directionMode!=='random')tr.pendingDirection=tr.directionMode==='reverse'?-1:1;});
  if(on&&!evolving)startSong(playing?Math.ceil(step/16):0);
  if(!on){song=null;$('#song-structure').hidden=true;}
@@ -129,7 +135,7 @@ function saveSettings(){
  if(!persistenceReady||!storageAllowed())return;
  try{
   const snapshot:SoundSettings={
-   version:1,style:currentStyle,bpm,volume:Number($<HTMLInputElement>('#volume').value),
+   version:1,style:currentStyle,bpm,transpose,volume:Number($<HTMLInputElement>('#volume').value),
    background:backgroundChoice,center:centerChoice,orbit:orbitChoice,
    tracks:tracks.map(tr=>({
     enabled:tr.enabled,mute:tr.mute,instrument:tr.instrument,points:[...tr.points],motif:[...tr.motif],volume:tr.volume,pitch:tr.pitch,
@@ -263,9 +269,11 @@ tracks.forEach((tr,i)=>{
 });
 let expressionSeed=Math.random()*Math.PI*2;
 function dialogueRole(index:number){
- const melodic=tracks.map((tr,i)=>({tr,i})).filter(({tr})=>tr.enabled&&!tr.mute&&tr.volume>0&&dialogueInstrument(tr.instrument));
+ const melodic=tracks.map((tr,i)=>({tr,i})).filter(({tr})=>tr.enabled&&!tr.mute&&tr.volume>0&&tr.points.some(Boolean)&&dialogueInstrument(tr.instrument));
  // No extra notes or tracks: existing patterns and user silences remain intact.
  if(melodic.length<2)return -1;
+ const lead=development?melodic.findIndex(({i})=>i===development!.lead):0;
+ if(lead>0)melodic.unshift(...melodic.splice(lead,1));
  return melodic.findIndex(({i})=>i===index);
 }
 function harmonyBar(){return evolving&&song?Math.max(0,Math.floor(step/16)-song.startBar):Math.floor(step/16);}
@@ -289,9 +297,13 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
  const motion=evolving?timbreMotion(bar,expressionSeed,i):{cutoff:1,attack:1};
  const expression=songExpression();
  // Answers follow the current (including drawn or crossfading) phrase, not a stale copy.
- const leader=role===1?tracks.find(tr=>tr.enabled&&!tr.mute&&tr.volume>0&&dialogueInstrument(tr.instrument)):undefined;
- const ownMotif=phrase?.motif||tr.motif;
- const motif=leader?answerMotif(ownMotif,leader.motif):ownMotif;
+ const leader=role===1?tracks.find((tr,index)=>tr.enabled&&!tr.mute&&tr.volume>0&&dialogueInstrument(tr.instrument)&&dialogueRole(index)===0):undefined;
+ const sourceMotif=phrase?.motif||tr.motif;
+ const protectedDrawing=step<drawnUntil[i];
+ const kind=song?.form[song.index].kind||'verse';
+ const ownMotif=evolving&&development&&!protectedDrawing
+  ?accompanimentMotif(sourceMotif,development,i,step,kind):sourceMotif;
+ const motif=leader&&!protectedDrawing?answerMotif(ownMotif,leader.motif):ownMotif;
 
  // One shared low-pass per voice keeps harmonic layers coherent and softens metallic edges.
  const bus=ctx.createBiquadFilter();bus.type='lowpass';bus.Q.value=.55;
@@ -314,7 +326,11 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
  const semitones=currentStyle==='jazz'
   ?jazzSemitones(harmonyBar(),beat,id,phrase?.pitch??tr.pitch,motif)
   :melodicSemitones(currentStyle,harmonyBar(),beat,id,phrase?.pitch??tr.pitch,motif);
- const note=261.626*2**(semitones/12);
+ const chord=chordFor(currentStyle,harmonyBar());
+ const jazzRoot=jazzSemitones(harmonyBar(),0,'bass',0);
+ const register=evolving&&!protectedDrawing&&dialogueInstrument(id)?registerArc(step/16):0;
+ const voiced=registerNote(semitones,register,currentStyle==='jazz'?jazzRoot:chord.root,currentStyle==='jazz'?[0,2,4,7,9]:[0,chord.third,7]);
+ const note=261.626*2**((voiced+(isMelodic(id)?transpose:0))/12);
  function tone(freq:number,duration:number,level:number,type:OscillatorType='sine',end?:number,attack=.004,glide=.18,sustain?:number){
   const osc=ctx.createOscillator(),gain=ctx.createGain();sources++;
   // Retain an instrument's deliberately slow attack while warming sharp plucks.
@@ -360,10 +376,32 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
    if(acousticCache.size>=40)acousticCache.delete(acousticCache.keys().next().value!);
    acousticCache.set(key,buffer);
   }
+  const previous=id==='strings'?bows.get(i):undefined;
+  const level=tr.volume*velocity*(vocal?.2:id==='strings'?.18:.28);
+  if(previous&&continueBow(previous.last,previous.started,time,bpm,frequency/previous.base)){
+   // Pitch glides under one bow; no repeated amplitude attack or stack of identical strings.
+   previous.source.playbackRate.cancelAndHoldAtTime(time);
+   previous.source.playbackRate.exponentialRampToValueAtTime(frequency/previous.base,time+.1);
+   previous.gain.gain.cancelAndHoldAtTime(time);
+   previous.gain.gain.linearRampToValueAtTime(level,time+.08);
+   previous.last=time;
+   bus.disconnect();pan.disconnect();hallSend.disconnect();echoSend.disconnect();
+   return;
+  }
   const source=ctx.createBufferSource(),gain=ctx.createGain();sources++;
-  source.buffer=buffer;gain.gain.setValueAtTime(tr.volume*velocity*(vocal?.2:id==='strings'?.18:.28),time);
-  source.connect(gain);gain.connect(bus);source.start(time);
-  source.onended=()=>{source.disconnect();gain.disconnect();ended();};
+  if(previous){
+   previous.gain.gain.cancelAndHoldAtTime(time);
+   previous.gain.gain.linearRampToValueAtTime(0,time+.22);
+   previous.source.stop(time+.23);
+  }
+  source.buffer=buffer;gain.gain.setValueAtTime(id==='strings'&&previous?0:level,time);
+  if(id==='strings'&&previous)gain.gain.linearRampToValueAtTime(level,time+.22);
+  source.connect(gain);gain.connect(bus);source.start(time,id==='strings'&&previous?.22:0);
+  if(id==='strings')bows.set(i,{source,gain,base:frequency,started:time,last:time});
+  source.onended=()=>{
+   if(bows.get(i)?.source===source)bows.delete(i);
+   source.disconnect();gain.disconnect();ended();
+  };
   return;
  }
  const recipe=voiceRecipe(id,profile.warm,profile.decay);
@@ -459,6 +497,9 @@ function schedule(){
    arrangement=arrangementPlan(tracks,step);
   }
 
+  if(evolving&&(!development||step-development.start>=128)){
+   development=developmentPlan(tracks,step,development);
+  }
   const s=step%16,notes:{track:number;beat:number;velocity:number}[]=[];
   tracks.forEach((tr,i)=>{
    const beat=((tr.direction*s+tr.phase)%16+16)%16;
@@ -467,11 +508,15 @@ function schedule(){
     const protectedDrawing=step<drawnUntil[i];
     const extra=evolving&&arrangement&&!protectedDrawing
      &&ornamentAt(arrangement,i,step,beat,tr.direction,tr.points);
+    const chorus=song?.form[song.index].kind==='chorus';
+    if(evolving&&development&&!protectedDrawing&&!chorus&&i===development.variation
+     &&isMelodic(tr.instrument)&&Math.floor((step-development.start)/16)%2===1&&s===4)return;
     if(!tr.points[beat]&&!old?.points[beat]&&!extra)return;
     const dynamics=evolving?approach(tr.scheduledVelocity,.65+Math.random()*.35,.06):tr.randomDynamics?.45+Math.random()*.55:1;
     tr.scheduledVelocity=dynamics;
-    const role=evolving&&dialogueInstrument(tr.instrument)?dialogueRole(i):-1;
-    const emphasis=role===0||role===1?dialogueGain(step/16,role):1;
+    const chorusRelief=chorus?songMix(nextTime):song?.previous==='chorus'?1-songMix(nextTime):0;
+    const emphasis=evolving&&development&&!protectedDrawing&&dialogueInstrument(tr.instrument)
+     ?developmentGain(development,i,step,chorusRelief):1;
     const foundation=['kick','bass','synthbass','doublebass'].includes(tr.instrument)||!!tr.morph&&['kick','bass','synthbass','doublebass'].includes(tr.morph.to);
     const breath=evolving&&arrangement&&!protectedDrawing&&!foundation?breathGain(arrangement,i,step):1;
     const velocity=dynamics*songLevel(nextTime,tr.instrument)*emphasis*breath*songExpression().gain*(extra?.45:1),mix=evolving?songMix(nextTime):1;
@@ -487,6 +532,7 @@ function schedule(){
  }
 }
 function stop(){
+ bows.forEach(bow=>{bow.gain.gain.cancelScheduledValues(audio?.currentTime||0);bow.gain.gain.setTargetAtTime(0,audio?.currentTime||0,.015);bow.source.stop((audio?.currentTime||0)+.08);});bows.clear();
  setEvolution(false);playing=false;if(timer)clearInterval(timer);timer=undefined;events.length=0;tracks.forEach(tr=>tr.hits.fill(-Infinity));
  if(master&&audio){master.gain.cancelScheduledValues(audio.currentTime);master.gain.setTargetAtTime(0,audio.currentTime,.01);}
  applyDirections();if(pendingStyle)applyStyle(pendingStyle);
@@ -520,10 +566,18 @@ $('#play').addEventListener('click',()=>playing?stop():void start());
 document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();});
 window.addEventListener('pagehide',stop);
 $<HTMLInputElement>('#tempo').addEventListener('input',e=>{bpm=Number((e.target as HTMLInputElement).value);$('#tempo-value').textContent=bpm+' BPM';persistSettings();});
+function syncTranspose(){
+ const text=(transpose>0?'+':'')+transpose+' '+pitchCopy[language].unit;
+ $<HTMLInputElement>('#transpose').value=String(transpose);
+ $('#transpose').setAttribute('aria-valuetext',text);$('#transpose-value').textContent=text;
+}
+$<HTMLInputElement>('#transpose').addEventListener('input',e=>{
+ transpose=Number((e.target as HTMLInputElement).value);syncTranspose();persistSettings();
+});
 $<HTMLInputElement>('#volume').addEventListener('input',e=>{if(master&&audio&&playing)master.gain.setTargetAtTime(Number((e.target as HTMLInputElement).value),audio.currentTime,.02);persistSettings();});
 $('#clear').addEventListener('click',()=>{tracks.forEach(tr=>tr.points.fill(false));sync();});
 function applyStyle(id:StyleId){
- currentStyle=id;pendingStyle=null;journey=null;arrangement=null;const preset=presets[id],parts=partsForStyle(id);
+ currentStyle=id;pendingStyle=null;journey=null;arrangement=null;development=null;const preset=presets[id],parts=partsForStyle(id);
  tracks.forEach((tr,i)=>{
   const part=parts[i];tr.enabled=true;tr.motif=makeMotif(preset.melody);tr.morph=null;tr.scheduledVelocity=1;tr.phase=0;tr.direction=1;tr.directionMode='forward';tr.pendingDirection=null;tr.instrument=part?.instrument||defaultInstruments[i];
   tr.points=Array.from({length:16},(_,s)=>!!part?.steps.includes(s));tr.pitch=part?.pitch||0;tr.volume=part?.volume??.55;tr.mute=false;tr.lastVelocity=1;tr.hitVelocities.fill(1);tr.flash.fill(-100);tr.hits.fill(-Infinity);
@@ -846,10 +900,21 @@ function frame(now:number){
   }
   for(let s=0;s<16;s++){
    const a=s/16*Math.PI*2-Math.PI/2,x=350+Math.cos(a)*r,y=350+Math.sin(a)*r;
-   const pulse=reduced.matches||!orbitAnimation?0:Math.max(0,1-(now-tr.flash[s])/550)*tr.volume*tr.hitVelocities[s]*visualMaster,on=tr.points[s];
+   const pulse=noteGlow((time-tr.hits[s])*1000,tr.volume*tr.hitVelocities[s]*visualMaster,playing&&orbitAnimation&&!tr.mute&&tr.volume>0&&visualMaster>0,reduced.matches),on=tr.points[s];
    oc.globalAlpha=tr.mute?.28:1;oc.shadowColor=tr.color;oc.shadowBlur=on?(dark?15:6)+pulse*22:0;
-   oc.beginPath();oc.arc(x,y,on?5+pulse*3:3,0,Math.PI*2);oc.fillStyle=on?tr.color:(dark?'#101c28':'#fcfdf8');oc.fill();oc.strokeStyle=tr.color;oc.stroke();oc.shadowBlur=0;
-   if(pulse>0){oc.beginPath();oc.arc(x,y,10+(1-pulse)*18,0,Math.PI*2);oc.strokeStyle=tr.color;oc.globalAlpha=pulse*.6;oc.stroke();}
+   oc.beginPath();oc.arc(x,y,on?5+pulse*5:3,0,Math.PI*2);oc.fillStyle=on?tr.color:(dark?'#101c28':'#fcfdf8');oc.fill();oc.strokeStyle=tr.color;oc.stroke();oc.shadowBlur=0;
+   if(pulse>0){
+    // Broad coloured bloom plus a bright core makes quiet hits clearly readable.
+    const haloRadius=12+pulse*22;
+    const halo=oc.createRadialGradient(x,y,2,x,y,haloRadius);
+    halo.addColorStop(0,tr.color+'dd');halo.addColorStop(.35,tr.color+'99');halo.addColorStop(1,tr.color+'00');
+    oc.globalAlpha=pulse;oc.fillStyle=halo;oc.beginPath();oc.arc(x,y,haloRadius,0,Math.PI*2);oc.fill();
+    oc.shadowColor=tr.color;oc.shadowBlur=(dark?38:20)*pulse;
+    oc.globalAlpha=Math.min(1,pulse*1.8);oc.fillStyle=dark?'#f5ffff':'#ffffff';
+    oc.beginPath();oc.arc(x,y,3+pulse*4,0,Math.PI*2);oc.fill();oc.shadowBlur=0;
+    oc.beginPath();oc.arc(x,y,13+(1-pulse)*22,0,Math.PI*2);
+    oc.strokeStyle=tr.color;oc.lineWidth=1.5+pulse*2.5;oc.globalAlpha=Math.min(1,pulse*1.3);oc.stroke();oc.lineWidth=1;
+   }
    oc.globalAlpha=1;
   }
  });
@@ -868,7 +933,7 @@ function restoreSettings(){
  if(!storageAllowed())return;
  try{
   const saved=decodeSettings(localStorage.getItem(STORAGE_KEY));if(!saved)return;
-  applyStyle(saved.style);bpm=saved.bpm;
+  applyStyle(saved.style);bpm=saved.bpm;transpose=saved.transpose??0;syncTranspose();
   $<HTMLInputElement>('#tempo').value=String(bpm);$('#tempo-value').textContent=bpm+' BPM';
   $<HTMLInputElement>('#volume').value=String(saved.volume);
   saved.tracks.forEach((source,i)=>{

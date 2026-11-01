@@ -9,7 +9,7 @@ export type SavedTrack={
  morph:{to:InstrumentId;progress:number}|null;
 };
 export type SoundSettings={
- version:1;style:StyleId;bpm:number;volume:number;tracks:SavedTrack[];
+ version:1;style:StyleId;bpm:number;volume:number;transpose?:number;tracks:SavedTrack[];
  background:typeof backgroundModes[number];center:typeof centerModes[number];orbit:typeof orbitModes[number];
 };
 const number=(v:unknown,min:number,max:number)=>typeof v==='number'&&Number.isFinite(v)&&v>=min&&v<=max;
@@ -21,6 +21,7 @@ export function decodeSettings(raw:string|null):SoundSettings|null{
   if(!s||s.version!==1||!member(styleIds,s.style)||!number(s.bpm,40,180)||!number(s.volume,0,.7)
    ||!member(backgroundModes,s.background)||!member(centerModes,s.center)||!member(orbitModes,s.orbit)
    ||!Array.isArray(s.tracks)||s.tracks.length!==8)return null;
+  if(s.transpose!==undefined&&(!number(s.transpose,-12,12)||!Number.isInteger(s.transpose)))return null;
   for(const tr of s.tracks){
    if(!tr||typeof tr.enabled!=='boolean'||typeof tr.mute!=='boolean'||typeof tr.randomDynamics!=='boolean'
     ||!member(instrumentIds,tr.instrument)||!number(tr.volume,0,1)||!number(tr.pitch,0,24)||!Number.isInteger(tr.pitch)

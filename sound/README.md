@@ -150,3 +150,28 @@ All style presets now enable eight tracks. Added supporting tracks start with on
 quiet, style-aligned note each; primary preset rhythms are unchanged. Random Play
 can develop these tracks without requiring manual activation. Restored settings
 still retain every saved enabled/mute choice; playback does not re-enable tracks.
+
+Long-form Random Play development now operates above the short evolution cycles.
+Every eight bars, a different audible melodic orbit can take the lead, crossfading
+its prominence over two bars. With enough melodic voices, one accompaniment takes
+a four-bar rest with soft edges; rests dissolve smoothly into a chorus. Another
+accompaniment (including bass or sustained voices) can thin its rhythm and answer
+with a related one-note motif variation on alternating phrases. All variations are
+playback-only; they never replace saved patterns or chorus memories. A 36-bar
+register arc rises and falls one shared-chord step every four bars, up to an octave,
+rather than applying arbitrary chromatic shifts. Bass, percussion and sustained
+harmony retain their register. Drawn tracks bypass these layers for two bars;
+disabled, muted and empty tracks stay protected. Normal Play remains a fixed loop.
+
+The global Pitch slider shifts melodic instruments from -12 to +12 semitones.
+Percussion is unchanged. The offset applies on top of the generated melody/register
+arc, remains under manual control across style changes and Random Play, and is
+saved only with storage consent. Legacy settings without the field default to zero.
+
+Strings now have a slower bow onset, softer upper harmonics, restrained delayed
+vibrato and a smooth 650 ms release. Neighbouring notes share a bow with a 100 ms
+pitch glide rather than reattacking/stacking a full sample on every hit. Bow refreshes
+crossfade over 220 ms; long gaps and large pitch jumps start a fresh bow. Continuations
+are bounded in time/rate to avoid extending an exhausted buffer. Stop clears active
+bow states and fades their sources, so replay starts cleanly. Plucked strings,
+percussion and other voices retain their separate articulation.

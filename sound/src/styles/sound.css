@@ -189,3 +189,7 @@ body:not(.focus-view) .sound-top{margin-bottom:20px}
 .music-tile #style-status:empty{display:none}
 .focus-view .music-tile{display:none}
 @media(max-width:800px){.music-tile{padding:16px;border-radius:18px;margin-top:20px}}
+
+.sound-transport .pitch-control{display:grid;grid-template-columns:auto minmax(80px,1fr);gap:6px 10px;align-items:center}
+.sound-transport .pitch-control input{width:100%;min-width:0}
+.sound-transport .pitch-control output{grid-column:2;min-width:0;font-variant-numeric:tabular-nums}

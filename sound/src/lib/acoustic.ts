@@ -32,15 +32,15 @@ export function acousticWave(id:AcousticInstrument,frequency:number,sampleRate:n
    const stretch=id==='piano'?Math.sqrt(1+.00012*ratio*ratio):1;
    const angle=2*Math.PI*frequency*ratio*stretch/sampleRate;
    return {s:0,c:1,sin:Math.sin(angle),cos:Math.cos(angle),angle,
-    amplitude:h===0?1:wind?Math.pow(.7+bright*.1,h)*(h===2?1.15:1):id==='epiano'?[1,.24,.12,.035+bright*.04][h]:Math.pow(.45+bright*.22,h)/(strings?Math.sqrt(ratio):1),
+    amplitude:h===0?1:wind?Math.pow(.7+bright*.1,h)*(h===2?1.15:1):id==='epiano'?[1,.24,.12,.035+bright*.04][h]:Math.pow(strings?.36+bright*.16:.45+bright*.22,h)/(strings?Math.sqrt(ratio):1),
     decay:strings||wind?1:Math.exp(-1/(sampleRate*((id==='piano'?.65:.3)/(1+h*.65))))};
   });
   let attack=0;
-  const attackStep=1-Math.exp(-1/(sampleRate*(strings?.13:wind?.045:.003)));
+  const attackStep=1-Math.exp(-1/(sampleRate*(strings?.22:wind?.045:.003)));
   for(let i=0;i<data.length;i++){
    const t=i/sampleRate;
    attack+=(1-attack)*attackStep;
-   const vibrato=strings||wind?.002*Math.sin(2*Math.PI*5.1*t)*Math.min(1,t/.4):0;
+   const vibrato=strings||wind?(strings?.0012:.002)*Math.sin(2*Math.PI*5.1*t)*Math.max(0,Math.min(1,(t-.15)/.5)):0;
    let value=0;
    for(const mode of modes){
     value+=mode.s*mode.amplitude;
@@ -50,10 +50,11 @@ export function acousticWave(id:AcousticInstrument,frequency:number,sampleRate:n
     mode.c=mode.c*cos-mode.s*sin;mode.s=next;mode.amplitude*=mode.decay;
     if((strings||wind)&&i%256===0){const norm=Math.hypot(mode.s,mode.c);mode.s/=norm;mode.c/=norm;}
    }
-   const release=strings?.4:wind?.18:0;
+   const release=strings?.65:wind?.18:0;
    // Deterministic breath noise, tapered with the reed rather than an exposed hiss.
    const breath=wind?.012*Math.sin(i*1.731)*Math.sin(i*.827):0;
-   data[i]=(value+breath)*attack*(release?Math.min(1,(seconds-t)/release):1);
+   const tail=release?Math.min(1,(seconds-t)/release):1;
+   data[i]=(value+breath)*attack*(strings?tail*tail*(3-2*tail):tail);
   }
  }
  // Fixed peak ceiling, smooth final release, no discontinuity at buffer end.
