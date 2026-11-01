@@ -72,3 +72,12 @@ Drawing now edits the repeating melodic motif directly: horizontal position sele
 ## Generative song form
 Random Play now creates an endless sequence of song forms: Intro → Verse → Chorus → Verse → Chorus → optional Bridge/Chorus → Outro. Verse/chorus lengths vary in 4-bar blocks; a new random form grows from the current music after the outro. Section-specific instrumentation levels make verses restrained, choruses full and bridges contrasting; the outro fades toward the next intro. Phrase and level changes blend over two bars without changing the user's master/track settings.
 Chorus point/motif/pitch snapshots are recalled on each return; verse material evolves separately. Drawing or manually editing points in a refrain updates its memory, so the edited hook returns. Existing multi-cycle timbre journeys continue underneath. A localized section/bar readout is shown only while Random Play is active, and hides with the focus controls. Normal Play remains a loop. Song progression itself is not persisted or auto-started.
+
+Random Play also adds a gentle melodic conversation when at least two unmuted,
+audible melodic tracks are available (excluding bass and sustained harmony).
+The first two trade emphasis over four bars; the answer retains its own live
+motif and moves only its final degree towards the question. Drawing on either
+track therefore remains effective; no extra notes are inserted into silent
+patterns. Existing song transitions and remembered refrains remain intact.
+Slow, phase-offset filter and attack variations gently evolve timbre during
+Random Play without boosting volume. Normal playback keeps its fixed timbre.

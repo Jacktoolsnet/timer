@@ -1,3 +1,4 @@
+import {dialogueInstrument,answerMotif,dialogueGain,timbreMotion} from '../lib/expression';
 import {songForm,copyPhrases,sectionGain,songCopy,type Phrase,type Section,type SongPart} from '../lib/song';
 import {makeMotif,varyMotif,melodicSemitones,isMelodic,gestureDegree} from '../lib/harmony';
 import {jazzSemitones} from '../lib/jazz-harmony';
@@ -241,6 +242,13 @@ tracks.forEach((tr,i)=>{
   if(!tr.randomDynamics){tr.lastVelocity=1;tr.hitVelocities.fill(1);}persistSettings();
  });
 });
+let expressionSeed=Math.random()*Math.PI*2;
+function dialogueRole(index:number){
+ const melodic=tracks.map((tr,i)=>({tr,i})).filter(({tr})=>tr.enabled&&!tr.mute&&tr.volume>0&&dialogueInstrument(tr.instrument));
+ // No extra notes or tracks: existing patterns and user silences remain intact.
+ if(melodic.length<2)return -1;
+ return melodic.findIndex(({i})=>i===index);
+}
 function harmonyBar(){return evolving&&song?Math.max(0,Math.floor(step/16)-song.startBar):Math.floor(step/16);}
 function currentMorph(tr:typeof tracks[number],time:number){
  const m=tr.morph;if(!m)return 0;
@@ -256,19 +264,29 @@ function voice(i:number,time:number,beat:number,velocity:number,phrase?:Phrase){
 function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:InstrumentId,phrase?:Phrase){
  const tr=tracks[i];if(!audio||!master||!tr.enabled||tr.mute||tr.volume===0)return;
  const ctx=audio,profile=soundProfiles[currentStyle];
+ const expressive=evolving&&dialogueInstrument(id);
+ const role=expressive?dialogueRole(i):-1;
+ const bar=step/16;
+ const motion=evolving?timbreMotion(bar,expressionSeed,i):{cutoff:1,attack:1};
+ // Answers follow the current (including drawn or crossfading) phrase, not a stale copy.
+ const leader=role===1?tracks.find(tr=>tr.enabled&&!tr.mute&&tr.volume>0&&dialogueInstrument(tr.instrument)):undefined;
+ const ownMotif=phrase?.motif||tr.motif;
+ const motif=leader?answerMotif(ownMotif,leader.motif):ownMotif;
+
  // One shared low-pass per voice keeps harmonic layers coherent and softens metallic edges.
  const bus=ctx.createBiquadFilter();bus.type='lowpass';bus.Q.value=.55;
- bus.frequency.value=profile.cutoff;bus.connect(master);
+ bus.frequency.setValueAtTime(profile.cutoff*motion.cutoff,time);
+ bus.frequency.exponentialRampToValueAtTime(profile.cutoff*(evolving?timbreMotion(bar+.25,expressionSeed,i).cutoff:1),time+.15);bus.connect(master);
  let sources=0;
  const ended=()=>{if(--sources===0)bus.disconnect();};
  const semitones=currentStyle==='jazz'
-  ?jazzSemitones(harmonyBar(),beat,id,phrase?.pitch??tr.pitch,phrase?.motif||tr.motif)
-  :melodicSemitones(currentStyle,harmonyBar(),beat,id,phrase?.pitch??tr.pitch,phrase?.motif||tr.motif);
+  ?jazzSemitones(harmonyBar(),beat,id,phrase?.pitch??tr.pitch,motif)
+  :melodicSemitones(currentStyle,harmonyBar(),beat,id,phrase?.pitch??tr.pitch,motif);
  const note=261.626*2**(semitones/12);
  function tone(freq:number,duration:number,level:number,type:OscillatorType='sine',end?:number,attack=.004){
   const osc=ctx.createOscillator(),gain=ctx.createGain();sources++;
   // Retain an instrument's deliberately slow attack while warming sharp plucks.
-  if(attack===.004)attack*=profile.attack;
+  if(attack===.004)attack*=profile.attack*motion.attack;
   osc.type=type;osc.frequency.setValueAtTime(freq,time);
   if(end)osc.frequency.exponentialRampToValueAtTime(end,time+Math.min(duration,.18));
   gain.gain.setValueAtTime(.0001,time);gain.gain.exponentialRampToValueAtTime(Math.max(.0002,level*tr.volume*velocity),time+attack);gain.gain.exponentialRampToValueAtTime(.0001,time+duration);
@@ -401,7 +419,9 @@ function schedule(){
     if(!tr.points[beat]&&!old?.points[beat])return;
     const dynamics=evolving?approach(tr.scheduledVelocity,.65+Math.random()*.35,.06):tr.randomDynamics?.45+Math.random()*.55:1;
     tr.scheduledVelocity=dynamics;
-    const velocity=dynamics*songLevel(nextTime,tr.instrument),mix=evolving?songMix(nextTime):1;
+    const role=evolving&&dialogueInstrument(tr.instrument)?dialogueRole(i):-1;
+    const emphasis=role===0||role===1?dialogueGain(step/16,role):1;
+    const velocity=dynamics*songLevel(nextTime,tr.instrument)*emphasis,mix=evolving?songMix(nextTime):1;
     if(old&&old.points[beat]&&mix<1)voice(i,nextTime,beat,velocity*(1-mix),old);
     if(tr.points[beat]&&mix>0)voice(i,nextTime,beat,velocity*mix);
     notes.push({track:i,beat,velocity});
