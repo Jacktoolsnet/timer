@@ -261,19 +261,19 @@ test('background follows applied style and remains still for reduced motion',asy
 });
 test('animation switches are independent and do not stop playback',async({page})=>{
  await page.goto('/de/');await page.locator('#play').click();
- await page.locator('#background-animation').uncheck();
+ await page.locator('[data-background-mode=off]').click();
  await expect(page.locator('#sound-atmosphere')).toBeHidden();
- await page.locator('#orbit-animation').uncheck();
- await page.locator('#center-animation').uncheck();
+ await page.locator('[data-orbit-mode=off]').click();
+ await page.locator('[data-center-mode=off]').click();
  await expect(page.locator('#orbit')).toHaveAttribute('data-animated','false');
  await page.waitForTimeout(100);
  const image=()=>page.locator('#orbit').evaluate((canvas:HTMLCanvasElement)=>canvas.toDataURL());
  const first=await image();await page.waitForTimeout(250);expect(await image()).toBe(first);
  await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
- await page.locator('#background-animation').check();
+ await page.locator('[data-background-mode=auto]').click();
  await expect(page.locator('#sound-atmosphere')).toBeVisible();
- await expect(page.locator('#orbit-animation')).not.toBeChecked();
- await page.locator('#orbit-animation').check();
+ await expect(page.locator('[data-orbit-mode=off]')).toHaveAttribute('aria-pressed','true');
+ await page.locator('[data-orbit-mode=comet]').click();
  await expect(page.locator('#orbit')).toHaveAttribute('data-animated','true');
  await page.locator('#play').click();
 });
@@ -333,14 +333,91 @@ test('manual and random direction changes preserve the kick pulse',async({page})
 });
 test('centre animation is independently switchable',async({page})=>{
  await page.goto('/de/');
- const alpha=()=>page.locator('#orbit').evaluate((c:HTMLCanvasElement)=>c.getContext('2d')!.getImageData(350,350,1,1).data[3]);
+ const alpha=()=>page.locator('#orbit').evaluate((c:HTMLCanvasElement)=>c.getContext('2d')!.getImageData(285,285,130,130).data.some((value,index)=>index%4===3&&value>0)?1:0);
  await expect.poll(alpha).toBeGreaterThan(0);
- await page.locator('#center-animation').uncheck();
+ await page.locator('[data-center-mode=off]').click();
  await expect.poll(alpha).toBe(0);
  await page.locator('#play').click();
- await page.locator('#orbit-animation').uncheck();
- await page.locator('#center-animation').check();
+ await page.locator('[data-orbit-mode=off]').click();
+ await page.locator('[data-center-mode=sun]').click();
  await expect.poll(alpha).toBeGreaterThan(0);
- await expect(page.locator('#orbit-animation')).not.toBeChecked();
+ await expect(page.locator('[data-orbit-mode=off]')).toHaveAttribute('aria-pressed','true');
  await page.locator('#play').click();
+});
+test('background tiles offer style, light clouds and off independently',async({page})=>{
+ await page.goto('/de/');
+ await page.locator('[data-background-mode=clouds]').click();
+ await expect(page.locator('#sound-atmosphere')).toHaveAttribute('data-mode','clouds');
+ await expect(page.locator('[data-background-mode=clouds]')).toHaveAttribute('aria-pressed','true');
+ await page.locator('[data-style-preset=rock]').click();
+ await expect(page.locator('#sound-atmosphere')).toHaveAttribute('data-mode','clouds');
+ await page.locator('[data-background-mode=off]').click();
+ await expect(page.locator('#sound-atmosphere')).toBeHidden();
+ await expect(page.locator('[data-center-mode=ring]')).toHaveAttribute('aria-pressed','true');
+ await page.locator('[data-background-mode=auto]').click();
+ await expect(page.locator('#sound-atmosphere')).toBeVisible();
+ await expect(page.locator('#sound-atmosphere')).toHaveAttribute('data-style','rock');
+});
+test('all six centre tiles render and respect reduced motion',async({page})=>{
+ await page.goto('/de/');
+ await expect(page.locator('[data-center-mode]')).toHaveCount(6);
+ await page.emulateMedia({reducedMotion:'reduce'});
+ await page.locator('[data-orbit-mode=off]').click();
+ await page.locator('#play').click();
+ for(const mode of ['filled','sine','bars','sun','ring']){
+  await page.locator('[data-center-mode='+mode+']').click();
+  await expect(page.locator('[data-center-mode='+mode+']')).toHaveAttribute('aria-pressed','true');
+  await page.waitForTimeout(100);
+  const snapshot=()=>page.locator('#orbit').evaluate((c:HTMLCanvasElement)=>c.toDataURL());
+  const before=await snapshot();await page.waitForTimeout(100);expect(await snapshot()).toBe(before);
+ }
+ await page.locator('#play').click();
+});
+test('evolution changes animations but respects every off setting',async({page})=>{
+ await page.addInitScript(()=>{Math.random=()=>0;});
+ await page.goto('/de/');
+ await page.locator('#tempo').fill('180');await page.locator('#tempo').dispatchEvent('input');
+ await page.locator('[data-orbit-mode=off]').click();
+ await page.locator('#evolve').click();
+ await expect(page.locator('[data-center-mode=filled]')).toHaveAttribute('aria-pressed','true',{timeout:6000});
+ await page.locator('[data-center-mode=off]').click();
+ await expect(page.locator('[data-background-mode=clouds]')).toHaveAttribute('aria-pressed','true',{timeout:6000});
+ await page.locator('[data-background-mode=off]').click();
+ await page.waitForTimeout(3000);
+ await expect(page.locator('[data-center-mode=off]')).toHaveAttribute('aria-pressed','true');
+ await expect(page.locator('[data-background-mode=off]')).toHaveAttribute('aria-pressed','true');
+ await expect(page.locator('#sound-atmosphere')).toBeHidden();
+ await expect(page.locator('[data-orbit-mode=off]')).toHaveAttribute('aria-pressed','true');
+ await page.locator('#play').click();
+});
+test('new background variants are selectable and render during playback',async({page})=>{
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/de/');
+ await expect(page.locator('[data-background-mode]')).toHaveCount(6);
+ await page.locator('#play').click();
+ for(const mode of ['aurora','stars','waves']){
+  await page.locator('[data-background-mode='+mode+']').click();
+  await expect(page.locator('#sound-atmosphere')).toHaveAttribute('data-mode',mode);
+  await page.waitForTimeout(150);
+ }
+ await page.emulateMedia({reducedMotion:'reduce'});
+ await page.waitForTimeout(100);
+ const pixels=()=>page.locator('#sound-atmosphere').evaluate((c:HTMLCanvasElement)=>c.toDataURL());
+ const first=await pixels();await page.waitForTimeout(150);expect(await pixels()).toBe(first);
+ await page.locator('#play').click();expect(errors).toEqual([]);
+});
+test('separate animation panel offers orbit variants and hides in focus',async({page})=>{
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/de/');
+ await expect(page.locator('.animations-tile .animation-category')).toHaveCount(3);
+ await expect(page.locator('.sound-app [data-center-mode]')).toHaveCount(0);
+ await page.locator('#play').click();
+ for(const mode of ['dot','pulse','comet','off']){
+  await page.locator('[data-orbit-mode='+mode+']').click();
+  await expect(page.locator('#orbit')).toHaveAttribute('data-mode',mode);
+  await page.waitForTimeout(100);
+ }
+ await page.locator('#focus').click();await expect(page.locator('.animations-tile')).toBeHidden();
+ await page.locator('#focus').click();await expect(page.locator('.animations-tile')).toBeVisible();
+ await page.locator('#play').click();expect(errors).toEqual([]);
 });

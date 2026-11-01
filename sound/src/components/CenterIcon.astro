@@ -1,0 +1,7 @@
+---
+interface Props {name:'ring'|'filled'|'sine'|'bars'|'sun'|'off'}
+const {name}=Astro.props;
+---
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+{name==='filled'?<><circle cx="12" cy="12" r="7" stroke-width="5"/></>:name==='sine'?<path d="M2 12c3-14 7-14 10 0s7 14 10 0"/>:name==='bars'?<path d="M4 15V9m4 10V5m4 17V2m4 17V5m4 10V9"/>:name==='ring'?<><circle cx="12" cy="12" r="7"/><path d="M12 2v3m10 7h-3M12 22v-3M2 12h3"/></>:name==='sun'?<><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></>:<><circle cx="12" cy="12" r="9"/><path d="m6 6 12 12"/></>}
+</svg>

@@ -25,19 +25,50 @@ const events:{time:number;step:number;notes:{track:number;beat:number;velocity:n
 function labelAction(selector:string,label:string){const button=$(selector);button.setAttribute('aria-label',label);button.setAttribute('title',label);}
 const wake=screenWakeLock($('#wake-status'),'',t.wakeUnavailable);
 window.addEventListener('pageshow',()=>wake(document.body.classList.contains('focus-view')));
-let backgroundAnimation=true,orbitAnimation=true,centerAnimation=true;
-$<HTMLInputElement>('#center-animation').addEventListener('change',e=>{
- centerAnimation=(e.target as HTMLInputElement).checked;
-});
-$<HTMLInputElement>('#background-animation').addEventListener('change',e=>{
- backgroundAnimation=(e.target as HTMLInputElement).checked;
- atmosphere.hidden=!backgroundAnimation;
- if(!backgroundAnimation)ac.clearRect(0,0,atmosphere.width,atmosphere.height);
-});
-$<HTMLInputElement>('#orbit-animation').addEventListener('change',e=>{
- orbitAnimation=(e.target as HTMLInputElement).checked;
- orbit.dataset.animated=String(orbitAnimation);
-});
+let backgroundMode:'auto'|'clouds'|'aurora'|'stars'|'waves'|'off'='auto';
+let orbitMode:'comet'|'dot'|'pulse'|'off'='comet';
+let orbitAnimation=true;
+let centerMode:'ring'|'filled'|'sine'|'bars'|'sun'|'off'='ring';
+function selectCenterMode(mode:typeof centerMode){
+ centerMode=mode;
+ document.querySelectorAll<HTMLButtonElement>('[data-center-mode]').forEach(tile=>tile.setAttribute('aria-pressed',String(tile.dataset.centerMode===mode)));
+}
+function selectBackgroundMode(mode:typeof backgroundMode){
+ backgroundMode=mode;
+ document.querySelectorAll<HTMLButtonElement>('[data-background-mode]').forEach(tile=>tile.setAttribute('aria-pressed',String(tile.dataset.backgroundMode===mode)));
+ atmosphere.hidden=mode==='off';atmosphere.dataset.mode=mode;
+ if(mode==='off')ac.clearRect(0,0,atmosphere.width,atmosphere.height);
+}
+document.querySelectorAll<HTMLButtonElement>('[data-center-mode]').forEach(button=>button.addEventListener('click',()=>{
+ selectCenterMode(button.dataset.centerMode as typeof centerMode);
+}));
+document.querySelectorAll<HTMLButtonElement>('[data-background-mode]').forEach(button=>button.addEventListener('click',()=>{
+ selectBackgroundMode(button.dataset.backgroundMode as typeof backgroundMode);
+}));
+function evolveAnimations(){
+ // Manual Off is an explicit opt-out. Random selection never turns anything off or on.
+ if(Math.random()>=.5)return;
+ const choices:(()=>void)[]=[];
+ if(centerMode!=='off')choices.push(()=>{
+  const modes=(['ring','filled','sine','bars','sun'] as const).filter(mode=>mode!==centerMode);
+  selectCenterMode(modes[Math.floor(Math.random()*modes.length)]);
+ });
+ if(backgroundMode!=='off')choices.push(()=>{
+  const modes=(['auto','clouds','aurora','stars','waves'] as const).filter(mode=>mode!==backgroundMode);
+  selectBackgroundMode(modes[Math.floor(Math.random()*modes.length)]);
+ });
+ if(orbitMode!=='off')choices.push(()=>{
+  const modes=(['comet','dot','pulse'] as const).filter(mode=>mode!==orbitMode);
+  selectOrbitMode(modes[Math.floor(Math.random()*modes.length)]);
+ });
+ if(choices.length)choices[Math.floor(Math.random()*choices.length)]();
+}
+function selectOrbitMode(mode:typeof orbitMode){
+ orbitMode=mode;orbitAnimation=mode!=='off';
+ orbit.dataset.animated=String(orbitAnimation);orbit.dataset.mode=mode;
+ document.querySelectorAll<HTMLButtonElement>('[data-orbit-mode]').forEach(tile=>tile.setAttribute('aria-pressed',String(tile.dataset.orbitMode===mode)));
+}
+document.querySelectorAll<HTMLButtonElement>('[data-orbit-mode]').forEach(button=>button.addEventListener('click',()=>selectOrbitMode(button.dataset.orbitMode as typeof orbitMode)));
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 function activeTracks(){return tracks.map((tr,index)=>({tr,index})).filter(({tr})=>tr.enabled);}
 function radius(rank:number,count:number){return 300-rank*(184/Math.max(1,count-1));}
@@ -168,7 +199,7 @@ function schedule(){
   if(step%16===0)applyDirections();
   if(pendingStyle&&step%16===0)applyStyle(pendingStyle);
   if(evolving&&step%16===0&&step>=evolutionStep){
-   evolvePattern(tracks,Math.random,presets[currentStyle].grid);shiftRandomOrbit();applyDirections(true);
+   evolvePattern(tracks,Math.random,presets[currentStyle].grid);shiftRandomOrbit();applyDirections(true);evolveAnimations();
    if(currentStyle==='classical'||currentStyle==='ambient'){const melodic=tracks.filter(tr=>tr.enabled&&!tr.mute&&!['kick','snare','hat','clap','tom','rim','shaker'].includes(tr.instrument));if(melodic.length){const tr=melodic[Math.floor(Math.random()*melodic.length)];tr.pitch=(tr.pitch+1)%presets[currentStyle].scale.length;}}sync();evolutionStep=nextEvolutionStep(step);
   }
   const s=step%16,notes:{track:number;beat:number;velocity:number}[]=[];
@@ -298,9 +329,21 @@ function renderAtmosphere(time:number,dark:boolean){
  const w=atmosphere.width,h=atmosphere.height;
  ac.clearRect(0,0,w,h);
  atmosphere.dataset.style=currentStyle;
+ const visualStyle=backgroundMode==='auto'?currentStyle:'ambient';
+ atmosphere.dataset.mode=backgroundMode;
  const active=activeTracks().filter(({tr})=>!tr.mute&&tr.volume>0);
  const masterLevel=Number($<HTMLInputElement>('#volume').value);
  const beats=time*bpm/60,still=reduced.matches||!playing;
+ const centeredBands=backgroundMode==='aurora'||backgroundMode==='waves';
+ let orbitX=w/2,orbitY=h/2;
+ if(centeredBands){
+  // Follow the actual on-screen orbit, including responsive layout and focus transitions.
+  const target=orbit.getBoundingClientRect(),backdrop=atmosphere.getBoundingClientRect();
+  if(backdrop.width&&backdrop.height){
+   orbitX=(target.left+target.width/2-backdrop.left)/backdrop.width*w;
+   orbitY=(target.top+target.height/2-backdrop.top)/backdrop.height*h;
+  }
+ }
  const profile={
   electronic:{speed:.09,size:210,power:1},
   house:{speed:.12,size:200,power:1.15},
@@ -308,24 +351,58 @@ function renderAtmosphere(time:number,dark:boolean){
   rock:{speed:.16,size:180,power:1.1},
   classical:{speed:.035,size:265,power:.65},
   ambient:{speed:.018,size:330,power:.55}
- }[currentStyle];
- for(const {tr,index} of active){
+ }[visualStyle];
+ for(const [rank,{tr,index}] of active.entries()){
   const phase=still?tr.pitch*.3:beats*profile.speed+tr.pitch*.3;
   const x=w*(.18+.64*(.5+.5*Math.sin(index*2.4+phase)));
-  const y=h*(.2+.6*(.5+.5*Math.cos(index*1.7+phase*.73)));
+  const y=centeredBands?orbitY+Math.cos(index*1.7+phase*.73)*28:h*(.2+.6*(.5+.5*Math.cos(index*1.7+phase*.73)));
   const age=time-Math.max(...tr.hits);
-  const decay=currentStyle==='ambient'?1.5:currentStyle==='classical'?2.2:4;
+  const decay=visualStyle==='ambient'?1.5:visualStyle==='classical'?2.2:4;
   const hit=playing&&age>=0&&age<2?Math.exp(-age*decay):0;
   const energy=tr.volume*tr.lastVelocity*Math.min(1,masterLevel/.3);
   const pulse=reduced.matches?0:hit*energy;
   const size=profile.size+pulse*95+(still?0:Math.sin(beats*profile.speed*3+index)*20);
-  ac.globalAlpha=(dark?.13:.065)+pulse*(dark?.24:.12)*profile.power;
+  ac.globalAlpha=((dark?.13:.065)+pulse*(dark?.24:.12)*profile.power)*(centeredBands?.4:1);
   const glow=ac.createRadialGradient(x,y,0,x,y,size);
   glow.addColorStop(0,tr.color);glow.addColorStop(.4,tr.color+'99');glow.addColorStop(1,tr.color+'00');
   ac.fillStyle=glow;ac.fillRect(x-size,y-size,size*2,size*2);
   if(still)continue;
   ac.strokeStyle=tr.color;ac.fillStyle=tr.color;ac.lineWidth=2;
-  if(currentStyle==='classical'){
+  if(backgroundMode==='aurora'){
+   // Translucent curtains sway gently and lift with note energy.
+   ac.globalAlpha=(dark?.028:.02)+pulse*.06;
+   for(let ribbon=0;ribbon<3;ribbon++){
+    ac.lineWidth=5+ribbon*3;ac.beginPath();
+    for(let n=0;n<=40;n++){
+     const px=n/40*w;
+     const py=orbitY+(rank-(active.length-1)/2)*9+(ribbon-1)*5+Math.sin((px-orbitX)/w*6+phase+ribbon*.25)*(20+pulse*35);
+     if(n===0)ac.moveTo(px,py);else ac.lineTo(px,py);
+    }
+    ac.stroke();
+   }
+  }else if(backgroundMode==='stars'){
+   // Stable seeds avoid random per-frame flicker; movement and twinkle follow tempo.
+   for(let star=0;star<10;star++){
+    const seed=index*17+star*7;
+    const sx=((Math.sin(seed*12.3)*.5+.5)*w+(still?0:beats*(1+index*.2)))%w;
+    const sy=(Math.cos(seed*5.7)*.5+.5)*h;
+    const twinkle=.5+.5*Math.sin(seed+beats*.45);
+    ac.globalAlpha=(dark?.16:.12)+twinkle*.12+pulse*.35;
+    const radius=1.2+twinkle*.6+pulse*2;
+    ac.beginPath();ac.arc(sx,sy,radius,0,Math.PI*2);ac.fill();
+   }
+  }else if(backgroundMode==='waves'){
+   ac.globalAlpha=(dark?.035:.025)+pulse*.075;ac.lineWidth=1+pulse*1.5;
+   for(let wave=0;wave<3;wave++){
+    ac.beginPath();
+    for(let n=0;n<=64;n++){
+     const px=n/64*w;
+     const py=orbitY+(rank-(active.length-1)/2)*8+(wave-1)*9+Math.sin((px-orbitX)/w*9-phase*3+index)*(10+pulse*40);
+     if(n===0)ac.moveTo(px,py);else ac.lineTo(px,py);
+    }
+    ac.stroke();
+   }
+  }else if(visualStyle==='classical'){
    // Long, quiet ribbons, more like a conductor's gesture than a drum pulse.
    ac.globalAlpha=(dark?.07:.04)+pulse*.12;
    for(let ribbon=0;ribbon<2;ribbon++){
@@ -334,18 +411,18 @@ function renderAtmosphere(time:number,dark:boolean){
     ac.bezierCurveTo(w*.25,y-100-Math.sin(phase)*55,w*.65,y+130+offset,w+40,y-40+offset);
     ac.stroke();
    }
-  }else if(currentStyle==='ambient'){
+  }else if(visualStyle==='ambient'){
    // Broad, slow breathing halos; no sharp percussive accents.
    ac.globalAlpha=(dark?.035:.025)+pulse*.07;
    ac.lineWidth=10;ac.beginPath();
    ac.ellipse(x,y,size*.85,size*.5,phase*.1,0,Math.PI*2);ac.stroke();
   }else if(pulse>.015){
    ac.globalAlpha=pulse*(dark?.25:.15)*profile.power;
-   if(currentStyle==='house'){
+   if(visualStyle==='house'){
     for(let ring=0;ring<2;ring++){
      ac.beginPath();ac.arc(x,y,55+age*190+ring*32,0,Math.PI*2);ac.stroke();
     }
-   }else if(currentStyle==='pop'){
+   }else if(visualStyle==='pop'){
     // Four-point sparkles fan out from an audible note.
     for(let spark=0;spark<3;spark++){
      const theta=spark*Math.PI*2/3+index;
@@ -354,7 +431,7 @@ function renderAtmosphere(time:number,dark:boolean){
      ac.quadraticCurveTo(sx+2,sy+2,sx,sy+r);ac.quadraticCurveTo(sx-2,sy+2,sx-r,sy);
      ac.quadraticCurveTo(sx-2,sy-2,sx,sy-r);ac.fill();
     }
-   }else if(currentStyle==='rock'){
+   }else if(visualStyle==='rock'){
     ac.lineWidth=2+pulse*3;ac.beginPath();
     for(let n=0;n<=24;n++){
      const px=x-220+n*440/24;
@@ -368,6 +445,69 @@ function renderAtmosphere(time:number,dark:boolean){
   }
  }
  ac.globalAlpha=1;ac.lineWidth=1;
+}
+/** Coloured segments breathe together, with stronger local accents on note hits. */
+function renderPulseRing(time:number,dark:boolean){
+ const active=activeTracks().filter(({tr})=>!tr.mute&&tr.volume>0);
+ if(!active.length)return;
+ const motion=playing&&!reduced.matches,masterLevel=Math.min(1,Number($<HTMLInputElement>('#volume').value)/.3);
+ const energies=active.map(({tr})=>{
+  const age=time-Math.max(...tr.hits);
+  return motion&&age>=0&&age<.8?Math.exp(-age*5)*tr.volume*tr.lastVelocity*masterLevel:0;
+ });
+ const power=Math.min(1,energies.reduce((a,b)=>a+b,0));
+ const radius=23+power*18;
+ active.forEach(({tr},index)=>{
+  const energy=energies[index],angle=index/active.length*Math.PI*2-Math.PI/2;
+  const span=Math.PI*2/active.length,gap=active.length===1?0:.06;
+  oc.beginPath();oc.arc(350,350,radius+energy*9,angle+gap,angle+span-gap);
+  oc.lineCap='round';oc.lineWidth=3+energy*6;oc.strokeStyle=tr.color;
+  oc.globalAlpha=.3+energy*.7;oc.shadowColor=tr.color;
+  oc.shadowBlur=reduced.matches?0:(dark?7:2)+energy*22;oc.stroke();
+ });
+ oc.shadowBlur=0;oc.globalAlpha=1;oc.lineWidth=1;oc.lineCap='butt';
+}
+/** Alternate centre views share the audible note envelope, never the raw wall clock. */
+function renderCenterVariant(time:number,dark:boolean,mode:'filled'|'sine'|'bars'){
+ const active=activeTracks().filter(({tr})=>!tr.mute&&tr.volume>0);
+ if(!active.length)return;
+ const motion=playing&&!reduced.matches;
+ const masterLevel=Math.min(1,Number($<HTMLInputElement>('#volume').value)/.3);
+ const values=active.map(({tr})=>{
+  const age=time-Math.max(...tr.hits);
+  const energy=motion&&age>=0&&age<.8?Math.exp(-age*5)*tr.volume*tr.lastVelocity*masterLevel:0;
+  return {tr,energy};
+ });
+ const power=Math.min(1,values.reduce((sum,v)=>sum+v.energy,0));
+ values.forEach(({tr,energy},i)=>{
+  oc.strokeStyle=tr.color;oc.fillStyle=tr.color;
+  oc.shadowColor=tr.color;oc.shadowBlur=reduced.matches?0:(dark?6:2)+energy*18;
+  oc.globalAlpha=.35+energy*.65;
+  if(mode==='filled'){
+   const span=Math.PI*2/values.length,start=i*span-Math.PI/2,gap=values.length===1?0:.025;
+   const outer=31+power*23+energy*9,inner=outer*.42;
+   oc.beginPath();oc.arc(350,350,outer,start+gap,start+span-gap);
+   oc.arc(350,350,inner,start+span-gap,start+gap,true);oc.closePath();oc.fill();
+  }else if(mode==='sine'){
+   const amplitude=3+energy*32;
+   const phase=motion?time*bpm/60*Math.PI:0;
+   oc.lineWidth=1.5+energy*2;oc.beginPath();
+   for(let n=0;n<=96;n++){
+    const x=-76+n*152/96;
+    const envelope=Math.sin(n/96*Math.PI);
+    const y=Math.sin(n/96*Math.PI*(3+tr.pitch*.35)-phase+i*.7)*amplitude*envelope;
+    if(n===0)oc.moveTo(350+x,350+y);else oc.lineTo(350+x,350+y);
+   }
+   oc.stroke();
+  }else{
+   const width=Math.min(12,120/values.length-5),spacing=width+5;
+   const x=350+(i-(values.length-1)/2)*spacing;
+   const height=7+energy*85;
+   oc.lineCap='round';oc.lineWidth=width;
+   oc.beginPath();oc.moveTo(x,350-height/2);oc.lineTo(x,350+height/2);oc.stroke();
+  }
+ });
+ oc.shadowBlur=0;oc.globalAlpha=1;oc.lineWidth=1;oc.lineCap='butt';
 }
 /** A small organic light surface follows the orbit heads and audible note energy. */
 function renderCenter(time:number,dark:boolean){
@@ -428,7 +568,7 @@ function frame(now:number){
  while(events.length&&events[0].time<=time){const ev=events.shift()!;anchor=ev.time-ev.step*60/bpm/4;ev.notes.forEach(({track,beat,velocity})=>{const tr=tracks[track];if(tr.enabled&&!tr.mute&&tr.volume>0){tr.flash[beat]=now;tr.hits[beat]=ev.time;tr.hitVelocities[beat]=velocity;tr.lastVelocity=velocity;}});}
  const dark=document.documentElement.dataset.theme==='dark'||(!document.documentElement.dataset.theme&&matchMedia('(prefers-color-scheme: dark)').matches);
  tracks.forEach((tr,i)=>{tr.color=(dark?colors:lightColors)[i];});
- if(backgroundAnimation)renderAtmosphere(time,dark);
+ if(backgroundMode!=='off')renderAtmosphere(time,dark);
  oc.clearRect(0,0,700,700);
  const angle=playing&&orbitAnimation?Math.max(0,(time-anchor)/(60/bpm*4))*Math.PI*2:0;
  const visualMaster=Math.min(1,Number($<HTMLInputElement>('#volume').value)/.3);
@@ -444,7 +584,7 @@ function frame(now:number){
    const muted=tr.mute||tr.volume===0;
    const brightness=(muted?.1:(dark?.18:.23)+(dark?.25:.3)*level)+pulse*.65;
    oc.lineCap='round';
-   for(let n=segments;n>0;n--){
+   if(orbitMode==='comet')for(let n=segments;n>0;n--){
     const strength=Math.pow(1-n/(segments+1),1.5)*brightness;
     oc.beginPath();oc.arc(350,350,r,head-tr.direction*n*length/segments,head-tr.direction*(n-1)*length/segments,tr.direction<0);
     oc.strokeStyle=tr.color;oc.lineWidth=4+pulse*3;oc.globalAlpha=strength;
@@ -453,6 +593,11 @@ function frame(now:number){
    oc.shadowBlur=dark?8+pulse*12:3;oc.globalAlpha=Math.min(1,brightness+.15);
    oc.beginPath();oc.arc(350+Math.cos(head)*r,350+Math.sin(head)*r,3.2+pulse*2,0,Math.PI*2);
    oc.fillStyle=tr.color;oc.fill();
+   if(orbitMode==='pulse'){
+    oc.shadowBlur=0;oc.lineWidth=1.5+pulse;oc.globalAlpha=.25+pulse*.55;
+    oc.beginPath();oc.arc(350+Math.cos(head)*r,350+Math.sin(head)*r,8+pulse*15,0,Math.PI*2);
+    oc.strokeStyle=tr.color;oc.stroke();
+   }
    oc.globalAlpha=1;oc.shadowBlur=0;oc.lineCap='butt';oc.lineWidth=1;
   }
   for(let s=0;s<16;s++){
@@ -465,7 +610,9 @@ function frame(now:number){
   }
  });
 
- if(centerAnimation)renderCenter(time,dark);
+ if(centerMode==='sun')renderCenter(time,dark);
+ else if(centerMode==='ring')renderPulseRing(time,dark);
+ else if(centerMode!=='off')renderCenterVariant(time,dark,centerMode);
  dc.clearRect(0,0,700,440);trail=trail.filter(p=>now-p.time<2200);
  for(let n=1;n<trail.length;n++){const a=trail[n-1],b=trail[n];if(b.start)continue;dc.globalAlpha=Math.max(0,1-(now-b.time)/2200);const color=dark?b.color:lightColors[colors.indexOf(b.color)];dc.strokeStyle=color;dc.shadowColor=color;dc.shadowBlur=reduced.matches?0:dark?16:7;dc.lineWidth=3;dc.lineCap='round';dc.beginPath();dc.moveTo(a.x,a.y);dc.lineTo(b.x,b.y);dc.stroke();}
  dc.globalAlpha=1;dc.shadowBlur=0;
