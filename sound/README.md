@@ -12,7 +12,7 @@ Node >=24.17 and npm >=9.6.5, as in metronome.
 Upload the contents of dist/ to the subdomain document root. No server process is needed. Not deployed automatically.
 
 ## Playing
-Press Play to enable audio. One orbit = four beats, sixteen steps. All eight orbits are enabled initially. Expand a track and toggle “Enable orbit” to add or remove it; points are preserved while disabled. Orbit spacing and drawing zones adapt to enabled tracks.
+Press Play to enable audio. One orbit = one bar: four beats / sixteen sixteenth-note positions, or three beats / twelve positions for Waltz. All eight orbits are enabled initially. Expand a track and toggle “Enable orbit” to add or remove it; points are preserved while disabled. Orbit spacing and drawing zones adapt to enabled tracks.
 Draw on Flow: vertical position selects the instrument, horizontal position the beat; drawing toggles each touched beat once per gesture; quick motion also toggles an adjacent beat, turns change the pentatonic marimba pitch. The trail fades; the pattern remains.
 Click orbit points or expand an instrument for keyboard-accessible step controls, mute and volume.
 Focus exits via its button or Escape. Playback pauses on hidden tabs. Reduced-motion preference suppresses waves and wedge trails.
@@ -29,7 +29,7 @@ Focus view requests a screen wake lock (HTTPS/localhost and browser support requ
 The atmospheric canvas behind the playing surface uses the active orbit colours, scheduled note hits, track/master volume and current tempo for drifting light clouds and expanding waves. Muted/disabled tracks do not contribute; reduced motion disables drift, pulses and waves while retaining a static colour wash.
 
 ## Music styles
-Choose Electronic, House, Pop, Rock, Classical or Ambient above the instruments. A preset replaces the eight-track setup (including enabled states, instrument choices, levels and pattern), tempo, scale and melodic contour. While playing it is queued for the next 16-step bar boundary; a later selection replaces the queued one. Reset restores the selected preset. Random patterns and ongoing evolution use its rhythmic grid and density; Classical/Ambient evolution can shift melodic pitches within the selected scale. All instruments remain freely selectable.
+Choose Electronic, House, Pop, Rock, Classical or Ambient above the instruments. A preset replaces the eight-track setup (including enabled states, instrument choices, levels and pattern), tempo, scale and melodic contour. While playing it is queued for the next bar boundary; a later selection replaces the queued one. Reset restores the selected preset. Random patterns and ongoing evolution use its rhythmic grid and density; Classical/Ambient evolution can shift melodic pitches within the selected scale. All instruments remain freely selectable.
 Piano, strings, guitar and organ are additive synthesized approximations, not recorded acoustic instruments. No remote samples, downloads or additional dependencies.
 
 Focus requests browser fullscreen on user activation, with a normal focus-view fallback if unsupported or denied. The Hide controls button hides controls and the drawing surface and the orbit fills the centre of the viewport. Activity restores the normal focus layout; the first touch in idle view only wakes it. Held pointers do not trigger idle mode. Escape or leaving fullscreen exits focus. The screen wake lock remains requested throughout idle focus mode.
@@ -40,7 +40,7 @@ Random patterns also assign phase offsets to non-kick tracks. Each evolution gen
 
 Each instrument has manual volume with a percentage readout and an optional Random dynamics slide toggle (off by default). When enabled, each scheduled note gets a random velocity from 45% to 100% of the selected track volume. The master gain is never randomized. Note gain, orbit hit pulses, comet glow and atmospheric pulse energy share that velocity. Switches remain session-only and are independent of random pattern evolution.
 
-Each non-kick track can play Forward, Reverse or Random. Reverse traverses the 16 steps backwards and reverses the comet and its trail together. Manual changes while playing are applied at a bar boundary. Random-mode tracks have a 40% reversal chance during each evolution; fixed modes never reverse automatically. Kick direction is locked forward. Resetting a preset restores forward playback.
+Each non-kick track can play Forward, Reverse or Random. Reverse traverses the active 12 or 16 steps backwards and reverses the comet and its trail together. Manual changes while playing are applied at a bar boundary. Random-mode tracks have a 40% reversal chance during each evolution; fixed modes never reverse automatically. Kick direction is locked forward. Resetting a preset restores forward playback.
 
 The old centre dot is replaced by an independently switchable Centre animation. Its soft contour follows the direction and phase of each active, audible track; note hits, pitch and gain increase the local radial height and determine the dominant blended colours. The shape stays inside the innermost orbit. Reduced motion keeps it static; disabling it removes the centre artwork entirely.
 
@@ -224,3 +224,7 @@ body and shorter tine partials; marimba's high modes die quickly for a woodier
 strike, while kalimba's tines ring longer. Plucked guitar/bass/harp retain their
 separate string models; percussion, bells and electronic plucks retain distinct
 transients rather than being made universally legato.
+
+### Meter & groove
+
+Music style includes Style default, Discofox, Waltz and Cha-cha-cha tiles. Style default keeps the selected genre’s pattern, swing and accents. Discofox and Cha-cha-cha use distinct 4/4 rhythm templates; Waltz uses true 3/4 (12 sixteenth steps, one orbit per bar). Drawing, direction, phrase holds, song sections, evolution intervals and animation angles follow the active meter. Changes during playback wait for a bar boundary and rebuild the rhythm. Random evolution protects active rhythmic anchors and keeps foundation tracks aligned; drawing can still toggle anchors. Explicit groove choices survive style changes and are stored with optional local preferences. Track storage retains 16 positions for backward compatibility; inactive positions are hidden in 3/4.

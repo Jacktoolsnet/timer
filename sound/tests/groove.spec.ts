@@ -1,0 +1,64 @@
+import {test,expect} from '@playwright/test';
+import {resolveGroove,groovePattern,grooveAccent,randomGroovePattern,grooveMutationGrid,grooveAnchors} from '../src/lib/groove';
+import {phraseHold} from '../src/lib/phrasing';
+import {evolvePattern,nextEvolutionStep} from '../src/lib/evolution';
+test('waltz is genuinely three quarter beats with twelve sixteenth steps',()=>{
+ const g=resolveGroove('classical','waltz');expect(g.beats).toBe(3);expect(g.steps).toBe(12);
+ expect(groovePattern(g,'bass')).toEqual([0]);expect(groovePattern(g,'piano')).toEqual([4,8]);
+ expect(grooveAccent(g,'bass',0)).toBeGreaterThan(grooveAccent(g,'bass',4));
+ const points=Array.from({length:16},(_,s)=>s===0||s===11);
+ expect(phraseHold(points,11,1,.125,0,11,12)).toBeCloseTo(.16);
+ expect(phraseHold(points,0,-1,.125,0,0,12)).toBeCloseTo(.16);
+ expect(12*(60/120/4)).toBe(1.5);expect(nextEvolutionStep(12,()=>0,12)).toBe(36);
+});
+test('dance grooves share a meter but not rhythmic fingerprints',()=>{
+ const disco=resolveGroove('pop','discofox'),cha=resolveGroove('latin','chacha');
+ expect(disco.steps).toBe(16);expect(cha.steps).toBe(16);
+ expect(groovePattern(disco,'kick')).toEqual([0,4,8,12]);
+ expect(groovePattern(cha,'piano')).toEqual([0,4,8,12,14]);
+ expect(groovePattern(disco,'bass')).not.toEqual(groovePattern(cha,'bass'));
+ expect(grooveAccent(cha,'piano',14)).toBeGreaterThan(grooveAccent(cha,'piano',10));
+});
+test('genre timing retains swing and offbeat identity without modifying user points',()=>{
+ expect(resolveGroove('jazz','auto').swing).toBe(.2);
+ const reggae=resolveGroove('reggae','auto');
+ expect(grooveAccent(reggae,'guitar',2)).toBeGreaterThan(grooveAccent(reggae,'guitar',0));
+ expect(groovePattern(reggae,'kick')).toEqual([8]);
+ const g=resolveGroove('classical','waltz');
+ const track={instrument:'piano',enabled:true,mute:false,points:randomGroovePattern(g,'piano',.3,()=>1)};
+ for(let i=0;i<100;i++)evolvePattern([track],Math.random,grooveMutationGrid(g,'piano'),1,id=>grooveAnchors(g,id),12);
+ expect(track.points[4]).toBe(true);expect(track.points[8]).toBe(true);expect(track.points.slice(12).some(Boolean)).toBe(false);
+ track.points[4]=false;evolvePattern([track],()=>.99,[],1,id=>grooveAnchors(g,id),12);expect(track.points[4]).toBe(false);
+});
+test('waltz meter, painting and optional persistence work together',async({page})=>{
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/de/');
+ await page.locator('[data-groove=waltz]').click();
+ await expect(page.locator('#meter-value')).toHaveText('3/4');
+ await expect(page.locator('#orbit')).toHaveAttribute('data-steps','12');
+ const row=page.locator('.instrument').first();await row.locator('summary').click();
+ await expect(row.locator('[data-step]:visible')).toHaveCount(12);
+ await expect(row.locator('.count')).toHaveText('1 / 12');
+ await page.locator('#palette-dropdown summary').click();await page.locator('#remember-preferences').check();await page.locator('#preferences-close').click();
+ const pad=page.locator('#drawing');await pad.scrollIntoViewIfNeeded();const rect=(await pad.boundingBox())!;
+ await page.mouse.move(rect.x+rect.width*.96,rect.y+rect.height*.02);await page.mouse.down();await page.mouse.up();
+ await expect(row.locator('[data-step="11"]')).toHaveAttribute('aria-pressed','true');
+ await page.waitForTimeout(350);await page.reload();
+ await expect(page.locator('#meter-value')).toHaveText('3/4');
+ await expect(page.locator('.instrument').first().locator('.count')).toHaveText('2 / 12');
+ await page.locator('#evolve').click();await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
+ await expect(page.locator('#song-structure')).toHaveAttribute('data-part','verse',{timeout:14000});
+ await page.locator('#play').click();expect(errors).toEqual([]);
+});
+test('live groove changes wait for a bar and styles preserve explicit meter',async({page})=>{
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/de/');
+ await page.locator('#tempo').fill('180');await page.locator('#tempo').dispatchEvent('input');await page.locator('#play').click();
+ await page.locator('[data-groove=waltz]').click();await expect(page.locator('#meter-value')).toHaveText('3/4',{timeout:3000});
+ await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
+ await page.locator('#play').click();
+ await page.locator('[data-style-preset=jazz]').click();await expect(page.locator('#meter-value')).toHaveText('3/4');
+ await page.locator('[data-groove=chacha]').click();await expect(page.locator('#meter-value')).toHaveText('4/4');
+ await page.locator('[data-groove=auto]').click();await expect(page.locator('#orbit')).toHaveAttribute('data-steps','16');
+ expect(errors).toEqual([]);
+});

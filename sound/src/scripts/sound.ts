@@ -1,3 +1,4 @@
+import {resolveGroove,grooveCopy,groovePattern,grooveMutationGrid,grooveAnchors,grooveAnchored,grooveRole,grooveAccent,randomGroovePattern,type GrooveChoice} from '../lib/groove';
 import {mixLevels} from '../lib/mixing';
 import {sustainedInstruments,phraseActive,phraseHold,type SustainedInstrument} from '../lib/phrasing';
 import {createSustainedVoice} from '../lib/sustained-voice';
@@ -41,9 +42,14 @@ const liveMix=tracks.map(()=>new Set<GainNode>());
 let currentMix=tracks.map(()=>1);
 const sustained=new Map<string,{track:number;id:SustainedInstrument;voice:ReturnType<typeof createSustainedVoice>}>();
 let visualStep=0,visualTime=0,visualDuration=.15;
-function playbackAngle(time:number){return (visualStep+Math.max(0,Math.min(1,(time-visualTime)/visualDuration)))/16*Math.PI*2;}
+function playbackAngle(time:number){return (visualStep+Math.max(0,Math.min(1,(time-visualTime)/visualDuration)))/stepsPerBar()*Math.PI*2;}
 const language=document.documentElement.lang as keyof typeof styleCopy;
 let currentStyle:StyleId='electronic',pendingStyle:StyleId|null=null;
+let grooveChoice:GrooveChoice='auto',pendingGroove:GrooveChoice|null=null;
+let groove=resolveGroove(currentStyle,grooveChoice);
+function stepsPerBar(){return groove.steps;}
+function musicalStep(){return step/stepsPerBar()*16;}
+
 let transpose=0,noteEffect=1;
 let evolving=false,evolutionStep=Infinity;
 let arrangement:ArrangementPlan|null=null;
@@ -83,7 +89,7 @@ function songBoundary(time:number,bar:number){
    startSong(bar);
   }
   const current=song!;
-  current.previous=previous;current.from=from;current.fadeAt=time;current.fadeDuration=60/bpm*8;
+  current.previous=previous;current.from=from;current.fadeAt=time;current.fadeDuration=60/bpm*groove.beats*2;
   const next=current.form[current.index].kind;
   const remembered=next==='chorus'?current.chorus:next==='verse'?current.verse:null;
   if(remembered)tracks.forEach((tr,i)=>{
@@ -100,16 +106,16 @@ function songMix(time:number){
 function songExpression(){
  if(!evolving||!song)return {cutoff:1,gain:1};
  const part=song.form[song.index];
- return sectionExpression(part.kind,song.form[song.index+1]?.kind,step/16-song.startBar,part.bars);
+ return sectionExpression(part.kind,song.form[song.index+1]?.kind,step/stepsPerBar()-song.startBar,part.bars);
 }
 function songLevel(time:number,instrument:string){
  if(!evolving||!song)return 1;
- const part=song.form[song.index],elapsedBars=Math.max(0,step/16-song.startBar);
+ const part=song.form[song.index],elapsedBars=Math.max(0,step/stepsPerBar()-song.startBar);
  const to=sectionGain(part.kind,instrument,elapsedBars/part.bars),mix=songMix(time);
  return song.previous?sectionGain(song.previous,instrument,1)*(1-mix)+to*mix:to;
 }
 function rememberDrawing(track:number){
- drawnUntil[track]=step+32;
+ drawnUntil[track]=musicalStep()+32;
  if(!evolving||!song)return;
  const kind=song.form[song.index].kind;
  const update=(memory:Phrase[])=>{memory[track]=copyPhrases([tracks[track]])[0];};
@@ -119,14 +125,14 @@ function rememberDrawing(track:number){
  if(song.from)update(song.from);
 }
 function nextMusicStep(current:number){
- if(currentStyle==='focus'||currentStyle==='coffeehouse')return (Math.floor(current/16)+4+Math.floor(Math.random()*5))*16;
- if(currentStyle==='sport')return (Math.floor(current/16)+2+Math.floor(Math.random()*5))*16;
- return nextEvolutionStep(current);
+ if(currentStyle==='focus'||currentStyle==='coffeehouse')return (Math.floor(current/stepsPerBar())+4+Math.floor(Math.random()*5))*stepsPerBar();
+ if(currentStyle==='sport')return (Math.floor(current/stepsPerBar())+2+Math.floor(Math.random()*5))*stepsPerBar();
+ return nextEvolutionStep(current,Math.random,stepsPerBar());
 }
 function setEvolution(on:boolean){
  if(on!==evolving){arrangement=null;development=null;drawnUntil.fill(0);}
  if(evolving&&!on)tracks.forEach(tr=>{if(tr.directionMode!=='random')tr.pendingDirection=tr.directionMode==='reverse'?-1:1;});
- if(on&&!evolving)startSong(playing?Math.ceil(step/16):0);
+ if(on&&!evolving)startSong(playing?Math.ceil(step/stepsPerBar()):0);
  if(!on){
   currentMix=tracks.map(()=>1);
   if(audio)liveMix.forEach(nodes=>nodes.forEach(node=>{
@@ -145,7 +151,7 @@ function saveSettings(){
  if(!persistenceReady||!storageAllowed())return;
  try{
   const snapshot:SoundSettings={
-   version:1,style:currentStyle,bpm,transpose,noteEffect,volume:Number($<HTMLInputElement>('#volume').value),
+   version:1,style:currentStyle,groove:grooveChoice,bpm,transpose,noteEffect,volume:Number($<HTMLInputElement>('#volume').value),
    background:backgroundChoice,center:centerChoice,orbit:orbitChoice,
    tracks:tracks.map(tr=>({
     enabled:tr.enabled,mute:tr.mute,instrument:tr.instrument,points:[...tr.points],motif:[...tr.motif],volume:tr.volume,pitch:tr.pitch,
@@ -239,8 +245,8 @@ function sync(){
   row.querySelector('.instrument-name')!.textContent=name;
   row.querySelector('.steps')!.setAttribute('aria-label',name);
   row.querySelectorAll('[data-step]').forEach((b,s)=>b.setAttribute('aria-label',name+' · '+(s+1)));
-  row.querySelector('.count')!.textContent=tr.points.filter(Boolean).length+' / 16';
-  row.querySelectorAll<HTMLButtonElement>('[data-step]').forEach((b,s)=>b.setAttribute('aria-pressed',String(tr.points[s])));
+  row.querySelector('.count')!.textContent=tr.points.slice(0,stepsPerBar()).filter(Boolean).length+' / '+stepsPerBar();
+  row.querySelectorAll<HTMLButtonElement>('[data-step]').forEach((b,s)=>{b.hidden=s>=stepsPerBar();b.disabled=s>=stepsPerBar();b.setAttribute('aria-pressed',String(tr.points[s]));});
  });
  persistSettings();
 }
@@ -266,7 +272,7 @@ tracks.forEach((tr,i)=>{
   if(!playing){if(tr.pendingDirection!==null)tr.direction=tr.pendingDirection;tr.pendingDirection=null;}
   sync();
  });
- row.querySelectorAll<HTMLButtonElement>('[data-step]').forEach((b,s)=>b.addEventListener('click',()=>{tr.points[s]=!tr.points[s];rememberDrawing(i);sync();}));
+ row.querySelectorAll<HTMLButtonElement>('[data-step]').forEach((b,s)=>b.addEventListener('click',()=>{if(s>=stepsPerBar())return;tr.points[s]=!tr.points[s];rememberDrawing(i);sync();}));
  row.querySelector<HTMLInputElement>('.mute')!.addEventListener('change',e=>{tr.mute=(e.target as HTMLInputElement).checked;persistSettings();});
  row.querySelector<HTMLInputElement>('.track-volume')!.addEventListener('input',e=>{
   tr.volume=Number((e.target as HTMLInputElement).value);
@@ -286,7 +292,7 @@ function dialogueRole(index:number){
  if(lead>0)melodic.unshift(...melodic.splice(lead,1));
  return melodic.findIndex(({i})=>i===index);
 }
-function harmonyBar(){return evolving&&song?Math.max(0,Math.floor(step/16)-song.startBar):Math.floor(step/16);}
+function harmonyBar(){return evolving&&song?Math.max(0,Math.floor(step/stepsPerBar())-song.startBar):Math.floor(step/stepsPerBar());}
 function currentMorph(tr:typeof tracks[number],time:number){
  const m=tr.morph;if(!m)return 0;
  const fraction=m.duration?Math.max(0,Math.min(1,(time-m.at)/m.duration)):1;
@@ -305,16 +311,16 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
  const cutoff=vocal?Math.max(3000,profile.cutoff):profile.cutoff;
  const expressive=evolving&&dialogueInstrument(id);
  const role=expressive?dialogueRole(i):-1;
- const bar=step/16;
+ const bar=step/stepsPerBar();
  const motion=evolving?timbreMotion(bar,expressionSeed,i):{cutoff:1,attack:1};
  const expression=songExpression();
  // Answers follow the current (including drawn or crossfading) phrase, not a stale copy.
  const leader=role===1?tracks.find((tr,index)=>tr.enabled&&!tr.mute&&tr.volume>0&&dialogueInstrument(tr.instrument)&&dialogueRole(index)===0):undefined;
  const sourceMotif=phrase?.motif||tr.motif;
- const protectedDrawing=step<drawnUntil[i];
+ const protectedDrawing=musicalStep()<drawnUntil[i];
  const kind=song?.form[song.index].kind||'verse';
  const ownMotif=evolving&&development&&!protectedDrawing
-  ?accompanimentMotif(sourceMotif,development,i,step,kind):sourceMotif;
+  ?accompanimentMotif(sourceMotif,development,i,musicalStep(),kind):sourceMotif;
  const motif=leader&&!protectedDrawing?answerMotif(ownMotif,leader.motif):ownMotif;
 
  // One shared low-pass per voice keeps harmonic layers coherent and softens metallic edges.
@@ -343,7 +349,7 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
   :melodicSemitones(currentStyle,harmonyBar(),beat,id,phrase?.pitch??tr.pitch,motif);
  const chord=chordFor(currentStyle,harmonyBar());
  const jazzRoot=jazzSemitones(harmonyBar(),0,'bass',0);
- const register=evolving&&!protectedDrawing&&dialogueInstrument(id)?registerArc(step/16):0;
+ const register=evolving&&!protectedDrawing&&dialogueInstrument(id)?registerArc(step/stepsPerBar()):0;
  const voiced=registerNote(semitones,register,currentStyle==='jazz'?jazzRoot:chord.root,currentStyle==='jazz'?[0,2,4,7,9]:[0,chord.third,7]);
  const note=261.626*2**((voiced+(isMelodic(id)?transpose:0))/12);
  function tone(freq:number,duration:number,level:number,type:OscillatorType='sine',end?:number,attack=.004,glide=.18,sustain?:number){
@@ -379,8 +385,8 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
  if((sustainedInstruments as readonly string[]).includes(id)){
   const key=i+':'+id,previous=sustained.get(key);
   const frequency=vocal?vocalFundamental(261.626*2**(voiced/12))*2**(transpose/12):id==='organ'?note/2:note;
-  const character=vocalCharacter(currentStyle),vowel=evolving?vowelPosition(step/16,expressionSeed):character.vowel;
-  const hold=phraseHold(phrase?.points||tr.points,beat,tr.direction,60/bpm/4,presets[currentStyle].swing||0,step%16);
+  const character=vocalCharacter(currentStyle),vowel=evolving?vowelPosition(step/stepsPerBar(),expressionSeed):character.vowel;
+  const hold=phraseHold(phrase?.points||tr.points,beat,tr.direction,60/bpm/4,groove.swing,step%stepsPerBar(),stepsPerBar());
   const level=tr.volume*velocity*(id==='voice'?.25:id==='strings'?.15:id==='saxophone'?.23:id==='organ'?.16:id==='pad'?.13:.18);
   if(previous?.voice.canContinue(time)){
    previous.voice.note(time,frequency,level,hold,vowel);
@@ -438,13 +444,17 @@ function evolveJourney(time:number){
  if(journey&&!eligible.some(({index})=>index===journey!.track))journey=null;
  if(!journey){
   // Resume a partially mixed colour after a pause instead of dropping it.
-  const tonal=eligible.filter(({tr})=>currentStyle!=='sport'||tr.instrument!=='kick');
-  if(!tonal.length)return;
-  const chosen=tonal.find(({tr})=>tr.morph)||tonal[Math.floor(Math.random()*tonal.length)];
   const palette=evolutionPalette(currentStyle);
-  const percussion=['kick','snare','hat','clap','tom','rim','shaker'];
-  const preserveRoles=['sport','hiphop','lofi','funk','reggae','drumandbass','latin'].includes(currentStyle);
-  const alternatives=palette.filter(id=>id!==chosen.tr.instrument&&(!preserveRoles||percussion.includes(id)===percussion.includes(chosen.tr.instrument)));
+  const alternativesFor=(instrument:InstrumentId)=>palette.filter(id=>{
+   if(id===instrument)return false;
+   const role=grooveRole(instrument),next=grooveRole(id);
+   return ['kick','backbeat','hat','bass'].includes(role)?next===role:!['kick','backbeat','hat','bass'].includes(next);
+  });
+  // Do not spend an entire journey trying to replace a foundation with no compatible timbre.
+  const compatible=eligible.filter(({tr})=>tr.morph||alternativesFor(tr.instrument).length);
+  const tonal=compatible.length?compatible:eligible;
+  const chosen=tonal.find(({tr})=>tr.morph)||tonal[Math.floor(Math.random()*tonal.length)];
+  const alternatives=alternativesFor(chosen.tr.instrument);
   if(!chosen.tr.morph&&alternatives.length)chosen.tr.morph={to:alternatives[Math.floor(Math.random()*alternatives.length)],progress:0,from:0,at:time,duration:0};
   const length=journeyLength()+((currentStyle==='focus'||currentStyle==='coffeehouse')?2:0);
   journey={track:chosen.index,cycle:chosen.tr.morph?Math.round(chosen.tr.morph.progress*length):0,length,
@@ -454,7 +464,7 @@ function evolveJourney(time:number){
  const plan=journey,tr=tracks[plan.track];
  plan.cycle++;
  if(tr.morph){
-  tr.morph.from=currentMorph(tr,time);tr.morph.at=time;tr.morph.duration=60/bpm*4;
+  tr.morph.from=currentMorph(tr,time);tr.morph.at=time;tr.morph.duration=60/bpm*groove.beats;
   tr.morph.progress=Math.min(1,plan.cycle/plan.length);
  }
  tr.pitch=approach(tr.pitch,plan.pitch,1);
@@ -466,14 +476,14 @@ function evolveJourney(time:number){
  let changedTrack=-1;
  if(rhythm.length){
   const selected=rhythm[Math.floor(Math.random()*rhythm.length)];
-  evolvePattern([selected.tr],Math.random,presets[currentStyle].grid,1);changedTrack=selected.index;
+  evolvePattern([selected.tr],Math.random,grooveMutationGrid(groove,selected.tr.instrument),1,id=>grooveAnchors(groove,id),stepsPerBar());changedTrack=selected.index;
  }
  // Phase OR direction: at most one more track, never the timbre/rhythm track.
- const motion=eligible.filter(({index})=>index!==plan.track&&index!==changedTrack&&(currentStyle!=='sport'||tracks[index].instrument!=='kick'));
+ const motion=eligible.filter(({index})=>index!==plan.track&&index!==changedTrack&&!grooveAnchored(tracks[index].instrument));
  if(motion.length&&Math.random()<(currentStyle==='focus'?.15:currentStyle==='sport'?.2:.4)){
   const selected=motion[Math.floor(Math.random()*motion.length)].tr;
   if(Math.random()<.5)selected.direction*=-1;
-  else selected.phase=(selected.phase+(Math.random()<.5?-1:1)+16)%16;
+  else selected.phase=(selected.phase+(Math.random()<.5?-1:1)+stepsPerBar())%stepsPerBar();
   selected.hits.fill(-Infinity);
  }
  if(plan.cycle>=plan.length){
@@ -494,52 +504,53 @@ function schedule(){
  });
  if(nextTime<audio.currentTime-.1){stop();return;}
  while(nextTime<audio.currentTime+.1){
+  if(pendingGroove&&step%stepsPerBar()===0)configureGroove(pendingGroove,true);
   let finishedMorph=false;
   tracks.forEach(tr=>{if(tr.morph&&tr.morph.progress===1&&currentMorph(tr,nextTime)>=1){
    tr.instrument=tr.morph.to;tr.morph=null;finishedMorph=true;
   }});
   if(finishedMorph)sync();
-  if(step%16===0){applyDirections();songBoundary(nextTime,Math.floor(step/16));}
-  if(step%16===0&&step>=animationStep){
-   evolveAnimations();animationStep=nextEvolutionStep(step);
+  if(step%stepsPerBar()===0){applyDirections();songBoundary(nextTime,Math.floor(step/stepsPerBar()));}
+  if(step%stepsPerBar()===0&&step>=animationStep){
+   evolveAnimations();animationStep=nextEvolutionStep(step,Math.random,stepsPerBar());
   }
-  if(pendingStyle&&step%16===0)applyStyle(pendingStyle);
-  if(evolving&&step%16===0&&step>=evolutionStep){
+  if(pendingStyle&&step%stepsPerBar()===0)applyStyle(pendingStyle);
+  if(evolving&&step%stepsPerBar()===0&&step>=evolutionStep){
    evolveJourney(nextTime);evolutionStep=nextMusicStep(step);
   }
   if(song?.from&&songMix(nextTime)>=1)song.from=null;
-  if(evolving&&step%64===0){
+  if(evolving&&step%(stepsPerBar()*4)===0){
    // New restrained choices per phrase; never edit stored patterns or refrains.
-   arrangement=arrangementPlan(tracks,step);
+   arrangement=arrangementPlan(tracks,musicalStep());
   }
 
-  if(evolving&&(!development||step-development.start>=128)){
-   development=developmentPlan(tracks,step,development);
+  if(evolving&&(!development||musicalStep()-development.start>=128)){
+   development=developmentPlan(tracks,musicalStep(),development);
   }
   const chorus=song?.form[song.index].kind==='chorus';
   const chorusRelief=chorus?songMix(nextTime):song?.previous==='chorus'?1-songMix(nextTime):0;
-  currentMix=evolving?mixLevels(tracks,development,step,chorusRelief,drawnUntil):tracks.map(()=>1);
+  currentMix=evolving?mixLevels(tracks,development,musicalStep(),chorusRelief,drawnUntil):tracks.map(()=>1);
   liveMix.forEach((nodes,index)=>nodes.forEach(node=>node.gain.setTargetAtTime(currentMix[index],nextTime,.09)));
-  const s=step%16,notes:{track:number;beat:number;velocity:number}[]=[];
+  const s=step%stepsPerBar(),notes:{track:number;beat:number;velocity:number}[]=[];
   tracks.forEach((tr,i)=>{
-   const beat=((tr.direction*s+tr.phase)%16+16)%16;
+   const beat=((tr.direction*s+tr.phase)%stepsPerBar()+stepsPerBar())%stepsPerBar();
    if(tr.enabled&&!tr.mute&&tr.volume>0){
     const old=evolving&&song?.from?song.from[i]:null;
-    const protectedDrawing=step<drawnUntil[i];
-    if(!phraseActive(tr.instrument,step,i,song?.form[song.index].kind==='chorus',evolving,protectedDrawing)){
+    const protectedDrawing=musicalStep()<drawnUntil[i];
+    if(!phraseActive(tr.instrument,musicalStep(),i,song?.form[song.index].kind==='chorus',evolving,protectedDrawing)){
      const key=i+':'+tr.instrument,held=sustained.get(key);
      if(held){held.voice.release(nextTime);sustained.delete(key);}return;
     }
     const extra=evolving&&arrangement&&!protectedDrawing
-     &&ornamentAt(arrangement,i,step,beat,tr.direction,tr.points);
+     &&ornamentAt(arrangement,i,musicalStep(),beat,tr.direction,tr.points,stepsPerBar());
     if(evolving&&development&&!protectedDrawing&&!chorus&&i===development.variation
-     &&isMelodic(tr.instrument)&&Math.floor((step-development.start)/16)%2===1&&s===4)return;
+     &&isMelodic(tr.instrument)&&Math.floor((musicalStep()-development.start)/16)%2===1&&s===4)return;
     if(!tr.points[beat]&&!old?.points[beat]&&!extra)return;
     const dynamics=evolving?approach(tr.scheduledVelocity,.65+Math.random()*.35,.06):tr.randomDynamics?.45+Math.random()*.55:1;
     tr.scheduledVelocity=dynamics;
     const foundation=['kick','bass','synthbass','doublebass'].includes(tr.instrument)||!!tr.morph&&['kick','bass','synthbass','doublebass'].includes(tr.morph.to);
-    const breath=evolving&&arrangement&&!protectedDrawing&&!foundation?breathGain(arrangement,i,step):1;
-    const velocity=dynamics*songLevel(nextTime,tr.instrument)*breath*songExpression().gain*(extra?.45:1),mix=evolving?songMix(nextTime):1;
+    const breath=evolving&&arrangement&&!protectedDrawing&&!foundation?breathGain(arrangement,i,musicalStep()):1;
+    const velocity=grooveAccent(groove,tr.instrument,beat)*dynamics*songLevel(nextTime,tr.instrument)*breath*songExpression().gain*(extra?.45:1),mix=evolving?songMix(nextTime):1;
     if(velocity<=.0001)return;
     const joined=(sustainedInstruments as readonly string[]).includes(tr.instrument)
      &&(!tr.morph||(sustainedInstruments as readonly string[]).includes(tr.morph.to));
@@ -553,7 +564,7 @@ function schedule(){
     if(velocity*currentMix[i]>.0001)notes.push({track:i,beat,velocity:velocity*currentMix[i]});
    }
   });
-  const swing=presets[currentStyle].swing||0;
+  const swing=groove.swing;
   const duration=60/bpm/4*(s%4<2?1+swing:1-swing);
   events.push({time:nextTime,step:s,duration,notes});nextTime+=duration;step++;
  }
@@ -562,7 +573,7 @@ function stop(){
  sustained.forEach(entry=>entry.voice.release(audio?.currentTime||0));sustained.clear();
  setEvolution(false);playing=false;if(timer)clearInterval(timer);timer=undefined;events.length=0;tracks.forEach(tr=>tr.hits.fill(-Infinity));
  if(master&&audio){master.gain.cancelScheduledValues(audio.currentTime);master.gain.setTargetAtTime(0,audio.currentTime,.01);}
- applyDirections();if(pendingStyle)applyStyle(pendingStyle);
+ applyDirections();if(pendingStyle)applyStyle(pendingStyle);if(pendingGroove){configureGroove(pendingGroove,true);sync();}
  labelAction('#play',t.play);$('#play').setAttribute('aria-pressed','false');
 }
 let starting=false;
@@ -573,7 +584,7 @@ async function start(){
   if(!master){master=audio.createGain();const compressor=audio.createDynamicsCompressor();master.connect(compressor);compressor.connect(audio.destination);space=createAudioSpace(audio,master);}
   await audio.resume();if(document.hidden)return;
   master.gain.setValueAtTime(Number($<HTMLInputElement>('#volume').value),audio.currentTime);
-  playing=true;step=0;evolveAnimations();animationStep=nextEvolutionStep(0);nextTime=audio.currentTime+.05;visualStep=0;visualTime=nextTime;visualDuration=60/bpm/4;
+  playing=true;step=0;evolveAnimations();animationStep=nextEvolutionStep(0,Math.random,stepsPerBar());nextTime=audio.currentTime+.05;visualStep=0;visualTime=nextTime;visualDuration=60/bpm/4;
   labelAction('#play',t.pause);$('#play').setAttribute('aria-pressed','true');$('#audio-status').textContent='';
   schedule();timer=setInterval(schedule,25);
  }catch{$('#audio-status').textContent=t.error;stop();}
@@ -586,13 +597,48 @@ $('#evolve').addEventListener('click',async()=>{
   setEvolution(true);await start();if(!playing)setEvolution(false);
  }else{
   setEvolution(true);
-  if(song){song.previous='chorus';song.from=copyPhrases(tracks);song.fadeAt=audio!.currentTime;song.fadeDuration=60/bpm*8;}
+  if(song){song.previous='chorus';song.from=copyPhrases(tracks);song.fadeAt=audio!.currentTime;song.fadeDuration=60/bpm*groove.beats*2;}
  }
 });
 $('#play').addEventListener('click',()=>playing?stop():void start());
 document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();});
 window.addEventListener('pagehide',stop);
 $<HTMLInputElement>('#tempo').addEventListener('input',e=>{bpm=Number((e.target as HTMLInputElement).value);$('#tempo-value').textContent=bpm+' BPM';persistSettings();});
+function syncGroove(){
+ document.querySelectorAll<HTMLButtonElement>('[data-groove]').forEach(button=>{
+  button.setAttribute('aria-pressed',String(button.dataset.groove===grooveChoice));
+  button.classList.toggle('is-pending',button.dataset.groove===pendingGroove);
+ });
+ $('#meter-value').textContent=groove.beats+'/4';
+ $('#groove-pending').textContent=pendingGroove?grooveCopy[language].pending:'';
+ $('#sound-app').dataset.steps=String(stepsPerBar());
+ $('#orbit').dataset.steps=String(stepsPerBar());
+}
+function configureGroove(choice:GrooveChoice,rebuild:boolean){
+ const old=stepsPerBar(),bar=step/old;
+ grooveChoice=choice;pendingGroove=null;groove=resolveGroove(currentStyle,choice);
+ step=Math.round(bar*stepsPerBar());
+ if(Number.isFinite(evolutionStep))evolutionStep=Math.ceil(evolutionStep/old)*stepsPerBar();
+ if(Number.isFinite(animationStep))animationStep=Math.ceil(animationStep/old)*stepsPerBar();
+ if(rebuild){
+  sustained.forEach(entry=>entry.voice.release(playing?nextTime:audio?.currentTime||0));sustained.clear();
+  tracks.forEach(tr=>{
+   const pattern=groovePattern(groove,tr.instrument);
+   tr.points=Array.from({length:16},(_,i)=>i<stepsPerBar()&&pattern.includes(i));
+   tr.phase=grooveAnchored(tr.instrument)?0:tr.phase%stepsPerBar();
+   if(grooveAnchored(tr.instrument)){tr.direction=1;tr.pendingDirection=null;}
+   tr.hits.fill(-Infinity);tr.flash.fill(-100);
+  });
+  if(song){song.chorus=copyPhrases(tracks);song.verse=null;song.from=null;}
+ }
+ syncGroove();
+}
+document.querySelectorAll<HTMLButtonElement>('[data-groove]').forEach(button=>button.addEventListener('click',()=>{
+ const choice=button.dataset.groove as GrooveChoice;
+ if(choice===grooveChoice){pendingGroove=null;syncGroove();return;}
+ if(playing){pendingGroove=choice;syncGroove();}
+ else{configureGroove(choice,true);sync();}
+}));
 function syncNoteEffect(){
  const text=Math.round(noteEffect*100)+' %';
  $<HTMLInputElement>('#note-effect').value=String(Math.round(noteEffect*100));
@@ -618,9 +664,10 @@ function applyStyle(id:StyleId){
   const part=parts[i];tr.enabled=true;tr.motif=makeMotif(preset.melody);tr.morph=null;tr.scheduledVelocity=1;tr.phase=0;tr.direction=1;tr.directionMode='forward';tr.pendingDirection=null;tr.instrument=part?.instrument||defaultInstruments[i];
   tr.points=Array.from({length:16},(_,s)=>!!part?.steps.includes(s));tr.pitch=part?.pitch||0;tr.volume=part?.volume??.55;tr.mute=false;tr.lastVelocity=1;tr.hitVelocities.fill(1);tr.flash.fill(-100);tr.hits.fill(-Infinity);
  });
+ configureGroove(grooveChoice,grooveChoice!=='auto');
  bpm=preset.bpm;$<HTMLInputElement>('#tempo').value=String(bpm);$('#tempo-value').textContent=bpm+' BPM';
  syncStyleTiles();
- if(evolving){evolutionStep=nextMusicStep(step);startSong(Math.floor(step/16));}
+ if(evolving){evolutionStep=nextMusicStep(step);startSong(Math.floor(step/stepsPerBar()));}
  evolveAnimations(false);
  $('#style-status').textContent='';sync();
 }
@@ -639,7 +686,7 @@ document.querySelectorAll<HTMLButtonElement>('[data-style-preset]').forEach(butt
 $('#reset').addEventListener('click',()=>{const id=pendingStyle||currentStyle;if(playing){pendingStyle=id;$('#style-status').textContent=styleCopy[language].pending;}else applyStyle(id);});
 $('#random').addEventListener('click',()=>{
  const preset=presets[currentStyle];journey=null;
- tracks.forEach(tr=>{if(!tr.enabled)return;tr.morph=null;tr.points=tr.points.map((_,s)=>tr.instrument==='kick'&&s%4===0?true:preset.grid.includes(s)&&Math.random()<preset.density);tr.pitch=Math.floor(Math.random()*preset.scale.length);tr.phase=tr.instrument==='kick'?0:Math.floor(Math.random()*8);tr.hits.fill(-Infinity);});sync();
+ tracks.forEach(tr=>{if(!tr.enabled)return;tr.morph=null;tr.points=randomGroovePattern(groove,tr.instrument,preset.density);tr.pitch=Math.floor(Math.random()*preset.scale.length);tr.phase=grooveAnchored(tr.instrument)?0:Math.floor(Math.random()*groove.beats)*4;tr.hits.fill(-Infinity);});sync();
 });
 let ownsFullscreen=false;
 function focus(on:boolean,requestFullscreen=true){
@@ -669,7 +716,7 @@ orbit.addEventListener('pointerdown',e=>{
  const nearest=active.map((entry,rank)=>({...entry,distance:Math.abs(r-radius(rank,active.length))})).sort((a,b)=>a.distance-b.distance)[0];
  if(nearest.distance>Math.min(19,92/Math.max(1,active.length-1)))return;
  const i=nearest.index;
- const s=Math.round(((Math.atan2(y,x)+Math.PI/2+Math.PI*2)%(Math.PI*2))/(Math.PI*2)*16)%16;
+ const s=Math.round(((Math.atan2(y,x)+Math.PI/2+Math.PI*2)%(Math.PI*2))/(Math.PI*2)*stepsPerBar())%stepsPerBar();
  tracks[i].points[s]=!tracks[i].points[s];rememberDrawing(i);sync();
 });
 type Trail={x:number;y:number;time:number;start:boolean;color:string};
@@ -681,7 +728,7 @@ function togglePaintedStep(track:number,step:number,now:number){
 let trail:Trail[]=[],active:number|null=null,last:Trail|undefined,lastStamp=0;
 function paint(e:PointerEvent,first=false){
  const active=activeTracks();if(!active.length)return;
- const p=position(e,drawing),now=performance.now(),i=active[Math.min(active.length-1,Math.max(0,Math.floor(p.y/drawing.height*active.length)))].index,s=Math.min(15,Math.max(0,Math.floor(p.x/drawing.width*16)));
+ const p=position(e,drawing),now=performance.now(),i=active[Math.min(active.length-1,Math.max(0,Math.floor(p.y/drawing.height*active.length)))].index,s=Math.min(stepsPerBar()-1,Math.max(0,Math.floor(p.x/drawing.width*stepsPerBar())));
  const speed=last?Math.hypot(p.x-last.x,p.y-last.y)/Math.max(1,now-last.time):0;
  const point={...p,time:now,start:first,color:colors[i]};
  // Drawing edits a phrase note, not a global pitch offset that can wrap abruptly.
@@ -694,7 +741,7 @@ function paint(e:PointerEvent,first=false){
   if(journey?.track===target.index)journey.pitch=0;rememberDrawing(target.index);
  }
  trail.push(point);if(trail.length>1500)trail.shift();
- if(first||now-lastStamp>35){togglePaintedStep(i,s,now);if(speed>1.6)togglePaintedStep(i,(s+1)%16,now);lastStamp=now;rememberDrawing(i);sync();}
+ if(first||now-lastStamp>35){togglePaintedStep(i,s,now);if(speed>1.6)togglePaintedStep(i,(s+1)%stepsPerBar(),now);lastStamp=now;rememberDrawing(i);sync();}
  last=point;$('#draw-hint').style.display='none';
 }
 drawing.addEventListener('pointerdown',e=>{if(active!==null)return;active=e.pointerId;paintedSteps.clear();drawing.setPointerCapture(active);last=undefined;paint(e,true);});
@@ -855,7 +902,7 @@ function renderCenter(time:number,dark:boolean){
   const hit=motion&&age>=0&&age<.85?Math.exp(-age*5.5):0;
   const energy=tr.volume*tr.lastVelocity*masterLevel;
   const pitch=tr.pitch/Math.max(1,presets[currentStyle].scale.length-1);
-  return {color:tr.color,angle:tr.direction*turn+tr.phase/16*Math.PI*2-Math.PI/2,
+  return {color:tr.color,angle:tr.direction*turn+tr.phase/stepsPerBar()*Math.PI*2-Math.PI/2,
    strength:hit*energy,height:hit*energy*(65+pitch*40),index};
  });
  const dominant=[...sources].sort((a,b)=>b.strength-a.strength);
@@ -914,7 +961,7 @@ function frame(now:number){
    const age=time-Math.max(...tr.hits);
    const level=tr.volume*tr.lastVelocity*visualMaster;
    const pulse=!tr.mute&&tr.volume>0&&age>=0&&age<.65?Math.pow(1-age/.65,.8)*level:0;
-   const head=tr.direction*angle+tr.phase/16*Math.PI*2-Math.PI/2,length=.85,segments=32;
+   const head=tr.direction*angle+tr.phase/stepsPerBar()*Math.PI*2-Math.PI/2,length=.85,segments=32;
    const muted=tr.mute||tr.volume===0;
    const brightness=(muted?.1:(dark?.18:.23)+(dark?.25:.3)*level)+pulse*.65;
    oc.lineCap='round';
@@ -934,8 +981,8 @@ function frame(now:number){
    }
    oc.globalAlpha=1;oc.shadowBlur=0;oc.lineCap='butt';oc.lineWidth=1;
   }
-  for(let s=0;s<16;s++){
-   const a=s/16*Math.PI*2-Math.PI/2,x=350+Math.cos(a)*r,y=350+Math.sin(a)*r;
+  for(let s=0;s<stepsPerBar();s++){
+   const a=s/stepsPerBar()*Math.PI*2-Math.PI/2,x=350+Math.cos(a)*r,y=350+Math.sin(a)*r;
    const pulse=noteGlow((time-tr.hits[s])*1000,tr.volume*tr.hitVelocities[s]*visualMaster,playing&&orbitAnimation&&!tr.mute&&tr.volume>0&&visualMaster>0,reduced.matches,noteEffect),on=tr.points[s];
    oc.globalAlpha=tr.mute?.28:1;oc.shadowColor=tr.color;oc.shadowBlur=on?(dark?15:6)+pulse*22:0;
    oc.beginPath();oc.arc(x,y,on?5+pulse*5:3,0,Math.PI*2);oc.fillStyle=on?tr.color:(dark?'#101c28':'#fcfdf8');oc.fill();oc.strokeStyle=tr.color;oc.stroke();oc.shadowBlur=0;
@@ -969,7 +1016,7 @@ function restoreSettings(){
  if(!storageAllowed())return;
  try{
   const saved=decodeSettings(localStorage.getItem(STORAGE_KEY));if(!saved)return;
-  applyStyle(saved.style);bpm=saved.bpm;transpose=saved.transpose??0;syncTranspose();noteEffect=saved.noteEffect??1;syncNoteEffect();
+  applyStyle(saved.style);configureGroove(saved.groove??'auto',false);bpm=saved.bpm;transpose=saved.transpose??0;syncTranspose();noteEffect=saved.noteEffect??1;syncNoteEffect();
   $<HTMLInputElement>('#tempo').value=String(bpm);$('#tempo-value').textContent=bpm+' BPM';
   $<HTMLInputElement>('#volume').value=String(saved.volume);
   saved.tracks.forEach((source,i)=>{
@@ -982,4 +1029,4 @@ function restoreSettings(){
   selectCenterMode(saved.center);selectBackgroundMode(saved.background);selectOrbitMode(saved.orbit);
  }catch{}
 }
-restoreSettings();sync();persistenceReady=true;requestAnimationFrame(frame);
+restoreSettings();syncGroove();sync();persistenceReady=true;requestAnimationFrame(frame);

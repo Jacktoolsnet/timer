@@ -1,0 +1,12 @@
+---
+import type {GrooveChoice} from '../lib/groove';
+interface Props {name:GrooveChoice}
+const {name}=Astro.props;
+const paths={
+ auto:'M4 7h16M4 12h16M4 17h16M8 4v6m8-1v6m-5-1v6',
+ discofox:'M4 18V6m5 12V6m6 12V6m5 12V6',
+ waltz:'M5 19V5m7 14V10m7 9v-9',
+ chacha:'M3 18V8m5 10V8m5 10V4m4 14v-7m4 7V4'
+};
+---
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d={paths[name]}/></svg>

@@ -209,3 +209,15 @@ body:not(.focus-view) .sound-top{margin-bottom:20px}
  .sound-transport .sound-adjustments input{grid-column:1;grid-row:2}
  .sound-transport .sound-adjustments output{grid-column:2;grid-row:2}
 }
+
+.groove-controls{margin-top:22px;padding-top:20px;border-top:1px solid var(--line)}
+.groove-controls h3{font-size:14px;font-weight:500;margin:0 0 12px}
+.groove-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.groove-tile{display:flex;align-items:center;justify-content:center;gap:10px;padding:14px 10px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--muted);font:inherit;font-size:13px}
+.groove-tile svg{width:24px;height:24px;flex-shrink:0}
+.groove-tile.is-pending{border-style:dashed;border-color:var(--accent);color:var(--accent)}
+.groove-tile:hover{border-color:var(--accent);color:var(--text)}
+.groove-tile[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+#groove-status{display:flex;gap:12px;font-size:12px;color:var(--muted);margin:12px 0 0}
+.steps button[hidden]{display:none}
+@media(max-width:600px){.groove-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}

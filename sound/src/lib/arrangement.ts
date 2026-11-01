@@ -17,7 +17,7 @@ export function breathGain(plan:ArrangementPlan,track:number,step:number){
  return elapsed<4?1-elapsed/4:elapsed>12?(elapsed-12)/4:0;
 }
 /** Only a phrase-ending neighbour of an existing note; never revive a cleared pattern. */
-export function ornamentAt(plan:ArrangementPlan,track:number,step:number,beat:number,direction:number,points:readonly boolean[]){
- if(track!==plan.ornament||step-plan.start!==62||points[beat])return false;
- return points[(beat-direction+16)%16]||points[(beat-2*direction+32)%16];
+export function ornamentAt(plan:ArrangementPlan,track:number,step:number,beat:number,direction:number,points:readonly boolean[],steps=16){
+ if(track!==plan.ornament||Math.floor(step-plan.start)!==62||points[beat])return false;
+ return points[(beat-direction+steps)%steps]||points[(beat-2*direction+steps*2)%steps];
 }

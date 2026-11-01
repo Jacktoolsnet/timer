@@ -93,7 +93,7 @@ test('styled dropdown keyboard selection and slide toggles',async({page})=>{
  await trigger.click();
  await expect(row.locator('#options-instrument-0')).toBeVisible();
  await page.keyboard.press('End');await page.keyboard.press('Enter');
- await expect(row.locator('.instrument-name')).toHaveText('Flächenklang');
+ await expect(row.locator('.instrument-name')).toHaveText('Vocal-Pad');
  await expect(trigger).toHaveAttribute('aria-expanded','false');
  await trigger.press('ArrowDown');await page.keyboard.press('Escape');
  await expect(trigger).toBeFocused();
@@ -288,7 +288,8 @@ test('random patterns offset orbits and reset restores alignment',async({page})=
  await page.goto('/de/');
  await page.locator('#random').click();
  await expect(page.locator('[data-track="0"]')).toHaveAttribute('data-phase','0');
- await expect(page.locator('[data-track="1"]')).toHaveAttribute('data-phase','4');
+ await expect(page.locator('[data-track="1"]')).toHaveAttribute('data-phase','0');
+ await expect(page.locator('[data-track="4"]')).toHaveAttribute('data-phase','8');
  await page.locator('#reset').click();
  for(let i=0;i<8;i++)await expect(page.locator('[data-track="'+i+'"]')).toHaveAttribute('data-phase','0');
 });
@@ -308,10 +309,10 @@ test('manual volume and random dynamics control actual note gain',async({page})=
  await expect(row.locator('.track-volume-value')).toHaveText('80 %');
  await page.locator('#tempo').fill('180');await page.locator('#tempo').dispatchEvent('input');
  await page.locator('#play').click();
- await expect.poll(()=>page.evaluate(()=>(window as any).noteGains.some((n:number)=>Math.abs(n-.24)<.00001))).toBe(true);
+ await expect.poll(()=>page.evaluate(()=>(window as any).noteGains.some((n:number)=>Math.abs(n-.232)<.00001))).toBe(true);
  await row.locator('.track-volume').fill('0.4');await row.locator('.track-volume').dispatchEvent('input');
  await row.locator('.random-dynamics').check();
- await expect.poll(()=>page.evaluate(()=>(window as any).noteGains.some((n:number)=>Math.abs(n-.054)<.00001)),{timeout:5000}).toBe(true);
+ await expect.poll(()=>page.evaluate(()=>(window as any).noteGains.some((n:number)=>Math.abs(n-.0522)<.00001)),{timeout:5000}).toBe(true);
  await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
  await page.locator('#play').click();
 });
@@ -331,7 +332,7 @@ test('manual and automatic direction changes apply at bar boundaries',async({pag
  await expect(row).toHaveAttribute('data-direction','1',{timeout:4000});
  await row.locator('.track-direction').selectOption('random',{force:true});
  await page.locator('#evolve').click();
- await expect(page.locator('.instrument').nth(2)).toHaveAttribute('data-direction','-1',{timeout:6000});
+ await expect(page.locator('.instrument').nth(5)).toHaveAttribute('data-direction','-1',{timeout:6000});
  await page.locator('#play').click();
  await page.locator('#reset').click();
  await expect(row).toHaveAttribute('data-direction','1');
@@ -438,8 +439,8 @@ test('random play enables directions and dynamics without per-track setup',async
  await page.locator('#evolve').click();
  await expect(page.locator('[data-track="1"] .track-direction')).toHaveValue('random');
  await expect(page.locator('[data-track="1"] .random-dynamics')).toBeChecked();
- await expect(page.locator('.instrument').nth(2)).toHaveAttribute('data-direction','-1',{timeout:6000});
- await expect(page.locator('[data-track="5"]')).toHaveAttribute('data-enabled','false');
+ await expect(page.locator('.instrument').nth(5)).toHaveAttribute('data-direction','-1',{timeout:6000});
+ await expect(page.locator('[data-track="5"]')).toHaveAttribute('data-enabled','true');
  await page.locator('#evolve').click();
  await expect(page.locator('[data-track="1"] .track-direction')).toHaveValue('forward');
  await expect(page.locator('[data-track="1"] .random-dynamics')).not.toBeChecked();
@@ -461,16 +462,16 @@ test('musical journey morphs over multiple cycles with bounded tempo steps',asyn
  await page.goto('/de/');
  await page.locator('#tempo').fill('180');await page.locator('#tempo').dispatchEvent('input');
  await page.locator('#evolve').click();
- const track=page.locator('[data-track="0"]');
+ const track=page.locator('[data-track="4"]');
  await expect(track).toHaveAttribute('data-morph','0.25',{timeout:6000});
- await expect(track.locator('.instrument-name')).toHaveText('Kick');
+ await expect(track.locator('.instrument-name')).toHaveText('Marimba');
  await expect(page.locator('#tempo')).toHaveValue('178');
  await expect(track).toHaveAttribute('data-morph','0.5',{timeout:6000});
- await expect(track.locator('.instrument-name')).toHaveText('Kick');
+ await expect(track.locator('.instrument-name')).toHaveText('Marimba');
  await expect(page.locator('#tempo')).toHaveValue('176');
  await expect(track).toHaveAttribute('data-morph','0.75',{timeout:6000});
- await expect(track.locator('.instrument-name')).toHaveText('Kick');
- await expect(track.locator('.instrument-name')).toHaveText('Snare',{timeout:6000});
+ await expect(track.locator('.instrument-name')).toHaveText('Marimba');
+ await expect(track.locator('.instrument-name')).toHaveText('Solo-Stimme',{timeout:6000});
  await page.locator('#play').click();
 });
 test('focus and sport presets load and preserve explicit visual selections',async({page})=>{
