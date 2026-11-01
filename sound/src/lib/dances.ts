@@ -1,3 +1,4 @@
+import {tangoBassSteps,tangoChordSteps} from './tango';
 import {presets,type Preset,type StyleId} from './presets';
 import type {InstrumentId} from './instruments';
 export const danceIds=['slowwaltz','tango','viennese','slowfox','quickstep','samba','chacha','rumba','pasodoble','jive','discofox'] as const;
@@ -11,17 +12,17 @@ function dance(group:Dance['group'],style:StyleId,beats:Dance['beats'],bpm:numbe
 /** Synthesized ballroom interpretations, not recordings or replicas of regional traditions.
  * Tempo is quarter notes/minute (not measures/minute). Sources: see README Dance sources. */
 export const dances:Record<DanceId,Dance>={
- slowwaltz:{group:'standard',style:'slowwaltz',beats:3,preset:presets.slowwaltz,accents:[1,.55,.55,.55,.72,.55,.55,.55,.72,.55,.55,.55]},
- tango:dance('standard','classical',4,128,[p('doublebass',[0,6,8,12,14],.5),p('piano',[0,6,8,12,14],.42),p('rim',[0,4,8,12],.24),p('guitar',[0,6,8,14],.3),p('organ',[0,6,8,14],.22),p('strings',[0,8,14],.3),p('piano',[2,6,10,14],.25,1),p('choir',[0],.12)],[1,.5,.65,.5,.85,.5,.95,.5,1,.5,.65,.5,.9,.5,.95,.5]),
- viennese:dance('standard','classical',3,180,[p('doublebass',[0],.46),p('piano',[4,8],.42),p('guitar',[4,8],.2),p('harp',[0,4,8],.2),p('strings',[0,4,8],.32),p('piano',[0,6,10],.26,1),p('choir',[0],.16),p('strings',[0,6],.2,2)],[1,.5,.6,.5,.78,.5,.6,.5,.78,.5,.6,.5]),
- slowfox:dance('standard','jazz',4,116,[p('doublebass',q,.45),p('rim',[4,12],.18),p('shaker',e,.16),p('guitar',[4,12],.25),p('piano',[0,6,10,14],.36),p('saxophone',[0,6,10,14],.28),p('strings',[0,8],.2),p('voice',[0,10],.2)],[.9,.5,.7,.5,1,.5,.75,.5,.9,.5,.7,.5,1,.5,.75,.5],.12),
- quickstep:dance('standard','jazz',4,200,[p('doublebass',q,.45),p('snare',[4,12],.28),p('hat',[2,6,10,14],.22),p('guitar',[0,4,8,12],.25),p('piano',[0,3,6,8,11,14],.35),p('saxophone',[2,6,10,14],.26),p('pluck',[0,6,8,14],.17),p('voice',[0,10],.16)],[.9,.5,.75,.6,1,.5,.8,.6,.9,.5,.75,.6,1,.5,.8,.6],.1),
- samba:dance('latin','latin',2,100,[p('kick',[0,4],.44),p('shaker',[0,2,3,4,6,7],.23),p('rim',[0,3,6],.3),p('bass',[0,3,4,6],.42),p('guitar',[0,3,6],.32),p('piano',[2,4,7],.25),p('marimba',[0,3,6],.22),p('voice',[0,6],.2)],[.8,.5,.6,.9,1,.5,.9,.7]),
- chacha:dance('latin','latin',4,124,[p('kick',[0,8],.38),p('rim',[0,6,12],.3),p('shaker',e,.2),p('bass',[0,6,8,14],.43),p('piano',[0,4,8,12,14],.4),p('guitar',[4,8,12,14],.26),p('marimba',[4,8,12,14],.24),p('voice',[0,8],.2)],[.85,.5,.65,.5,.95,.5,.7,.5,.95,.5,.7,.5,1,.5,1,.5]),
- rumba:dance('latin','latin',4,100,[p('rim',[0,6,12],.26),p('shaker',[0,2,4,6,8,10,12,14],.16),p('bass',[6,12],.45),p('guitar',[0,6,10,14],.33),p('piano',[4,8,12],.34),p('strings',[0,8],.24),p('saxophone',[4,8,12],.23),p('voice',[0,8],.2)],[.65,.5,.55,.5,1,.5,.75,.5,.95,.5,.65,.5,.9,.5,.7,.5]),
- pasodoble:dance('latin','classical',2,120,[p('kick',[0,4],.48),p('snare',[2,6],.34),p('clap',[0,4],.24),p('doublebass',[0,4],.42),p('guitar',[0,2,4,6],.35),p('saxophone',[0,4,6],.3),p('strings',[0,4],.3),p('choir',[0],.2)],[1,.55,.8,.6,.9,.55,.85,.6]),
- jive:dance('latin','rock',4,168,[p('kick',[0,8],.45),p('snare',[4,12],.4),p('hat',e,.24),p('doublebass',q,.45),p('piano',[0,3,6,8,11,14],.33),p('guitar',[4,12],.32),p('saxophone',[0,6,10,14],.28),p('voice',[0,10],.2)],[.85,.5,.75,.6,1,.5,.8,.6,.85,.5,.75,.6,1,.5,.8,.6],.2),
- discofox:dance('social','pop',4,120,[p('kick',q,.5),p('clap',[4,12],.35),p('hat',[2,6,10,14],.25),p('synthbass',[0,4,8,12],.43),p('epiano',[2,6,10,14],.3),p('guitar',[2,6,10,14],.26),p('strings',[0,8],.22),p('voice',[0,6,10],.23)],[1,.5,.8,.5,1,.5,.8,.5,1,.5,.8,.5,1,.5,.8,.5])
+ slowwaltz:{group:'standard',style:'slowwaltz',beats:3,preset:presets.slowwaltz,accents:[1,.55,.55,.55,.94,.55,.55,.55,.94,.55,.55,.55]},
+ tango:dance('standard','classical',4,128,[p('doublebass',tangoBassSteps,.64),p('piano',tangoChordSteps,.52),p('rim',[0,8],.14),p('guitar',tangoChordSteps,.2),p('organ',[0,8],.15),p('strings',[0,8],.18),p('piano',[0,6,10,14],.2,1),p('choir',[0],.12)],[1,.45,.55,.45,.88,.45,.78,.45,1,.45,.55,.45,.94,.45,.55,.45]),
+ viennese:dance('standard','classical',3,180,[p('doublebass',[0],.68),p('piano',[4,8],.54),p('guitar',[4,8],.19),p('harp',[4,8],.12),p('strings',[0,4,8],.22),p('piano',[0,6,10],.18,1),p('choir',[0],.13),p('strings',[0,6],.14,2)],[1,.5,.6,.5,.94,.5,.6,.5,.94,.5,.6,.5]),
+ slowfox:dance('standard','jazz',4,116,[p('doublebass',q,.6),p('rim',[4,12],.23),p('shaker',e,.18),p('guitar',[4,12],.4),p('piano',[0,6,10,14],.25),p('saxophone',[0,6,10,14],.23),p('strings',[0,8],.16),p('voice',[0,10],.18)],[.9,.5,.7,.5,1,.5,.75,.5,.9,.5,.7,.5,1,.5,.75,.5],.16),
+ quickstep:dance('standard','jazz',4,200,[p('doublebass',q,.61),p('snare',[4,12],.3),p('hat',[2,6,10,14],.25),p('guitar',q,.41),p('piano',[0,3,6,8,11,14],.25),p('saxophone',[2,6,10,14],.2),p('pluck',[0,6,8,14],.15),p('voice',[0,10],.15)],[.9,.5,.75,.6,1,.5,.8,.6,.9,.5,.75,.6,1,.5,.8,.6],.12),
+ samba:dance('latin','latin',2,100,[p('kick',[0,4],.51),p('bass',[0,3,4,7],.56),p('rim',[0,3,6],.34),p('shaker',[0,2,3,4,6,7],.3),p('guitar',[0,3,6],.26),p('piano',[2,4,7],.22),p('marimba',[0,3,6],.18),p('voice',[0,6],.18)],[.8,.5,.6,.9,1,.5,.9,.7]),
+ chacha:dance('latin','latin',4,124,[p('piano',[0,4,8,12,14],.53),p('bass',[0,6,8,14],.55),p('rim',[0,6,12],.3),p('shaker',e,.24),p('guitar',[4,8,12,14],.22),p('marimba',[4,8,12,14],.2),p('strings',[0,8],.14),p('voice',[0,8],.18)],[.9,.5,.65,.5,.95,.5,.7,.5,.95,.5,.7,.5,1,.5,1,.5]),
+ rumba:dance('latin','latin',4,100,[p('guitar',[4,8,12],.52),p('bass',[6,12],.56),p('rim',[0,6,12],.25),p('shaker',e,.18),p('piano',[4,8,12],.25),p('strings',[0,8],.19),p('saxophone',[4,8,12],.2),p('voice',[0,8],.18)],[.6,.5,.55,.5,1,.5,.75,.5,.95,.5,.65,.5,.9,.5,.7,.5]),
+ pasodoble:dance('latin','classical',2,120,[p('kick',[0,4],.56),p('snare',[0,2,4,6],.38),p('guitar',[0,4],.46),p('doublebass',[0,4],.57),p('guitar',[0,2,4,6],.22),p('saxophone',[0,4,6],.25),p('strings',[0,4],.23),p('choir',[0],.18)],[1,.55,.8,.6,.94,.55,.85,.6]),
+ jive:dance('latin','rock',4,168,[p('kick',[0,8],.5),p('snare',[4,12],.43),p('piano',[0,6,8,14],.48),p('doublebass',q,.59),p('hat',e,.22),p('guitar',[4,12],.24),p('saxophone',[0,6,10,14],.22),p('voice',[0,10],.18)],[.85,.5,.75,.6,1,.5,.8,.6,.85,.5,.75,.6,1,.5,.8,.6],.28),
+ discofox:dance('social','pop',4,120,[p('kick',q,.56),p('clap',[4,12],.39),p('epiano',[2,6,10,14],.46),p('synthbass',q,.54),p('hat',[2,6,10,14],.23),p('guitar',[2,6,10,14],.2),p('strings',[0,8],.17),p('voice',[0,6,10],.2)],[1,.5,.8,.5,1,.5,.8,.5,1,.5,.8,.5,1,.5,.8,.5])
 };
 export const danceFoundation=(id:DanceId|null,index:number)=>id!==null&&index<4;
 export function dancePoints(id:DanceId,index:number){return Array.from({length:16},(_,s)=>dances[id].preset.parts[index].steps.includes(s));}

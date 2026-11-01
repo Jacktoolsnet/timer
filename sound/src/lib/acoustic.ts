@@ -1,8 +1,9 @@
 export type AcousticInstrument='piano'|'guitar'|'bass'|'strings'|'marimba'|'kalimba'|'saxophone'|'harp'|'doublebass'|'epiano';
 export const acousticInstruments:readonly string[]=['piano','guitar','bass','strings','marimba','kalimba','saxophone','harp','doublebass','epiano'];
 /** Local physical/modal synthesis, not recordings. Fixed excitation makes caching safe. */
-export function acousticWave(id:AcousticInstrument,frequency:number,sampleRate:number,brightness:number):Float32Array{
- const seconds=id==='strings'?2.2:id==='harp'?2.4:id==='piano'?2.2:id==='epiano'?2.6:id==='kalimba'?1.5:id==='guitar'?1.4:id==='saxophone'?1.2: .9;
+export function acousticWave(id:AcousticInstrument,frequency:number,sampleRate:number,brightness:number,maximumSeconds?:number):Float32Array{
+ const naturalSeconds=id==='strings'?2.2:id==='harp'?2.4:id==='piano'?2.2:id==='epiano'?2.6:id==='kalimba'?1.5:id==='guitar'?1.4:id==='saxophone'?1.2: .9;
+ const seconds=Math.min(naturalSeconds,maximumSeconds??naturalSeconds);
  const data=new Float32Array(Math.ceil(sampleRate*seconds));
  const bright=Math.max(0,Math.min(1,brightness));
  if(['guitar','bass','harp','doublebass'].includes(id)){

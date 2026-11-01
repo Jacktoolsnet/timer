@@ -246,3 +246,30 @@ Dance Random Play keeps the user's tempo and the first four foundational tracks 
 - [WDSF Standard, Latin and 10Dance](https://www.worlddancesport.org/Standard-Latin-10Dance) — group membership.
 - [WDC Competition Rules, June 2024](https://www.wdcdance.com/wp-content/uploads/2024/06/WDC-Competition-Rules-June-2024-1.pdf), [UConn Ballroom music guide](https://www.uconnballroom.com/members/ballroom-playlists) — tempo references, converted to quarter-note BPM; presets are practice suggestions, not competition certification.
 - [STSV Standard dances](https://www.dancesport.ch/en/standardtaenze/), [STSV Latin dances](https://www.dancesport.ch/en/lateintaenze/), [ISTD Modern Ballroom](https://www.istd.org/dance/dance-genres/modern-ballroom/), [Stanford: English ballroom style](https://socialdance.stanford.edu/syllabi/English_ballroom_style.htm) — ballroom context and historical influences. The cultural captions deliberately distinguish ballroom adaptations from their broader roots.
+
+### Articulated waltz pulse
+
+Waltz bass-on-one and sparse piano/guitar/harp accompaniment on beats two and three use an explicit **bass–chord–chord** articulation. The downbeat adds a quiet octave for small-speaker audibility; the two chord strokes use close-position root/third/fifth voicings rather than unrelated lead-motif notes. Short tempo-relative buffers leave genuine gaps between beats, with reduced hall and no echo on these strokes. Strings and melody lines retain their sustained/expressive behavior. The first four slow/Viennese waltz preset tracks now reinforce this pulse; Random Play keeps sparse waltz pulse tracks present instead of morphing, resting or fading them away. Free-mode drawing, manual volumes, mute and transposition remain user-controlled. Saved custom track patterns are not overwritten; Reset loads the revised preset arrangement.
+
+### Tango and Viennese attack clarity
+
+Tango now separates a regular quarter-note marcato bass from a dotted 3–1–2–2 eighth-note chord figure (onsets 0/6/8/12 in four-quarter notation). Bass alternates root/fifth; piano and guitar use short minor-chord strokes with a particularly short pickup. Echo is disabled on these pulse voices, and sustained backing is quieter. This is a ballroom-oriented synthesis choice, not a claim that all tango traditions share one pattern. Background on the habanera/milonga influence: [Library of Congress, Tango](https://blogs.loc.gov/nls-music-notes/2022/09/celebrating-national-hispanic-heritage-month-in-2022-with-tango/).
+
+Viennese Waltz has a separate crisper pulse envelope than Slow Waltz, stronger bass/chord preset levels and quieter sustained backing. Both Tango and Viennese Waltz gently attenuate non-foundation tracks during rhythmic attacks, in normal and random playback, without increasing master volume or overriding manual mute/volume settings. Transpose remains active. Reset or reselect the dance to load its revised onset pattern and instrument levels; saved custom patterns are intentionally preserved.
+
+### Distinct rhythm articulation for the other eight dances
+
+The first four protected tracks carry each dance's signature, with true acoustic triads, tempo-relative note gates, role-specific accents, reduced reverb and no pulse echo. Lead instruments keep their expressive/sustained behavior. Background attenuation briefly makes room for rhythmic attacks without exceeding manual volume ceilings.
+
+- **Slowfox:** flowing walking bass, soft backbeat and longer guitar chord strokes; moderate swing.
+- **Quickstep:** brisk walking bass, short chord strokes and short snare tails; lighter swing than Jive.
+- **Ballroom Samba:** duple pulse, short bass pickups on the last sixteenth before each beat, stronger second-beat kick and differentiated shaker accents.
+- **Cha-cha-cha:** piano in the foundation makes 4-&-1 explicit across the bar line, with anticipatory bass and dry percussion.
+- **International-style Rumba:** guitar chords on 2, 3 and 4; the fourth stroke holds across 1, with quieter percussion instead of a new strong chord on 1.
+- **Paso Doble:** firm duple march, alternating root/fifth bass, guitar chords and differentiated snare strokes.
+- **Jive:** stronger long/short subdivision, boogie bass contour, syncopated piano and a clear backbeat; harmony uses the major-chord family rather than the free Rock preset's minor family.
+- **Discofox:** four-on-the-floor kick, backbeat claps, short offbeat electric-piano chords and an articulated electronic octave bass.
+
+The rhythm renderer applies only in these dance modes, and only to supported instruments on foundation tracks. Free music, Tango and both waltzes retain their existing articulation paths. Rhythm-specific percussion shortening clones recipes rather than modifying shared instrument definitions. Reselect a dance or Reset to load revised track assignments; existing saved custom arrangements are not overwritten.
+
+Context for the ballroom adaptations and distinctions: [WDO education](https://worlddanceorganisation.com/wdo_education), [DTV dance overview](https://www.tanzsport.de/de/service/downloads-und-formulare/presse?cid=44439&file=files%2Ftanzsport%2Fdownloads%2Fpresse%2FDTV-Pressemappe-2023-03-30.pdf). These are synthesized practice-oriented arrangements, not a claim to reproduce complete regional musical traditions or every dance figure's timing.

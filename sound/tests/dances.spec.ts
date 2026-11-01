@@ -49,7 +49,7 @@ test('random dance keeps pulse and tempo while drawing edits melodic accompanime
  await page.addInitScript(()=>{Math.random=()=>0;});const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/de/');
  await page.locator('[data-dance=jive]').click();
  const patterns=await page.locator('.instrument').evaluateAll(rows=>rows.slice(0,4).map(row=>Array.from(row.querySelectorAll('[data-step]')).map(b=>b.getAttribute('aria-pressed'))));
- const melody=page.locator('[data-track="4"]'),before=await melody.getAttribute('data-motif');
+ const melody=page.locator('[data-track="5"]'),before=await melody.getAttribute('data-motif');
  await page.locator('#evolve').click();
  const pad=page.locator('#drawing');await pad.scrollIntoViewIfNeeded();const r=(await pad.boundingBox())!;
  await page.mouse.move(r.x+r.width*.9,r.y+r.height*.02);await page.mouse.down();await page.mouse.up();

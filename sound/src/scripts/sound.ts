@@ -1,3 +1,6 @@
+import {danceRhythmRole,danceRhythmWave,rhythmDrums,rhythmClarity,isRhythmDance,type PulseInstrument} from '../lib/dance-rhythm';
+import {tangoPulseRole,tangoPulseWave,dancePulseClarity} from '../lib/tango';
+import {waltzPulseRole,waltzPulseWave} from '../lib/waltz';
 import {dances,danceIds,danceCopy,danceFoundation,dancePoints,type DanceId} from '../lib/dances';
 import {resolveGroove,grooveCopy,groovePattern,grooveMutationGrid,grooveAnchors,grooveAnchored,grooveRole,grooveAccent,randomGroovePattern,type GrooveChoice} from '../lib/groove';
 import {mixLevels} from '../lib/mixing';
@@ -49,6 +52,8 @@ let currentStyle:StyleId='electronic',pendingStyle:StyleId|null=null;
 let currentDance:DanceId|null=null,pendingDance:DanceId|null=null;
 function currentPreset(){return currentDance?dances[currentDance].preset:presets[currentStyle];}
 function rhythmTrack(i:number){return danceFoundation(currentDance,i);}
+function waltzPulse(i:number){return waltzPulseRole(groove.beats,tracks[i].instrument,tracks[i].points);}
+function pulseTrack(i:number){return rhythmTrack(i)||waltzPulse(i)!==null;}
 let grooveChoice:GrooveChoice='auto',pendingGroove:GrooveChoice|null=null;
 let groove=resolveGroove(currentStyle,grooveChoice);
 function stepsPerBar(){return groove.steps;}
@@ -311,7 +316,9 @@ function voice(i:number,time:number,beat:number,velocity:number,phrase?:Phrase){
 function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:InstrumentId,phrase?:Phrase){
  const tr=tracks[i];if(!audio||!master||!tr.enabled||tr.mute||tr.volume===0)return;
  const ctx=audio,profile=soundProfiles[currentStyle];
- const harmonicStyle:StyleId=currentDance?['tango','pasodoble'].includes(currentDance)?'electronic':currentStyle==='jazz'?'pop':currentStyle:currentStyle;
+ const tango=tangoPulseRole(currentDance,i,id),crisp=currentDance==='viennese',dancePulse=danceRhythmRole(currentDance,i,id);
+ const pulse=dancePulse||tango||waltzPulseRole(groove.beats,id,phrase?.points||tr.points);
+ const harmonicStyle:StyleId=currentDance?['tango','pasodoble'].includes(currentDance)?'electronic':currentStyle==='jazz'||currentDance==='jive'?'pop':currentStyle:currentStyle;
  const vocal=(vocalInstruments as readonly string[]).includes(id);
  const cutoff=vocal?Math.max(3000,profile.cutoff):profile.cutoff;
  const expressive=evolving&&dialogueInstrument(id);
@@ -335,14 +342,14 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
  const pan=ctx.createStereoPanner(),hallSend=ctx.createGain(),echoSend=ctx.createGain();
  pan.pan.setValueAtTime(stereoPosition(id,i,bar,expressionSeed),time);
  pan.pan.linearRampToValueAtTime(stereoPosition(id,i,bar+1,expressionSeed),time+60/bpm*4);
- const fader=ctx.createGain();fader.gain.setValueAtTime(evolving?currentMix[i]:1,time);
+ const fader=ctx.createGain();fader.gain.setValueAtTime(currentMix[i],time);
  liveMix[i].add(fader);
  bus.connect(fader);fader.connect(pan);pan.connect(master);
  const cleanVoice=()=>{liveMix[i].delete(fader);bus.disconnect();fader.disconnect();pan.disconnect();hallSend.disconnect();echoSend.disconnect();};
  if(space){
   const room=spaceProfile(currentStyle),foundation=['kick','bass','synthbass','doublebass'].includes(id);
-  hallSend.gain.value=foundation?.008:room.hall;
-  echoSend.gain.value=foundation?0:room.echo;
+  hallSend.gain.value=foundation?.008:pulse?.025:room.hall;
+  echoSend.gain.value=foundation||pulse?0:room.echo;
   pan.connect(hallSend);hallSend.connect(space.hall);
   pan.connect(echoSend);echoSend.connect(space.delay);
   space.delay.delayTime.setTargetAtTime(60/bpm*.75,time,.15);
@@ -405,15 +412,15 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
   });
   sustained.set(key,entry);return;
  }
- if(acousticInstruments.includes(id)){
+ if(dancePulse||acousticInstruments.includes(id)){
   const acoustic=id as AcousticInstrument,frequency=(id==='bass'||id==='doublebass')?note/4:id==='guitar'?note/2:note;
   // Three touch layers: stronger hits excite more upper partials, not just more volume.
   const layer=Math.max(0,Math.min(2,Math.round(velocity*tr.volume*2)));
   const brightness=(profile.warm?.2:.4)+layer*.2;
-  const key=[id,frequency.toFixed(4),ctx.sampleRate,brightness].join(':');
+  const key=(pulse?[dancePulse?currentDance:tango?'tango':'waltz',id,pulse,chord.root,chord.third,transpose,bpm,ctx.sampleRate,brightness,crisp,tango||dancePulse?beat:0]:[id,frequency.toFixed(4),ctx.sampleRate,brightness]).join(':');
   let buffer=acousticCache.get(key);
   if(!buffer){
-   const samples=acousticWave(acoustic,frequency,ctx.sampleRate,brightness);
+   const samples=dancePulse&&isRhythmDance(currentDance)?danceRhythmWave(currentDance,id as PulseInstrument,dancePulse,chord.root,chord.third,transpose,bpm,beat,ctx.sampleRate,brightness):tango?tangoPulseWave(acoustic,tango,chord.root,chord.third,transpose,bpm,beat,ctx.sampleRate,brightness):pulse?waltzPulseWave(acoustic,pulse,chord.root,chord.third,transpose,bpm,ctx.sampleRate,brightness,crisp):acousticWave(acoustic,frequency,ctx.sampleRate,brightness);
    buffer=ctx.createBuffer(1,samples.length,ctx.sampleRate);buffer.getChannelData(0).set(samples);
    if(acousticCache.size>=40)acousticCache.delete(acousticCache.keys().next().value!);
    acousticCache.set(key,buffer);
@@ -425,7 +432,7 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
   source.onended=()=>{source.disconnect();gain.disconnect();ended();};
   return;
  }
- const recipe=voiceRecipe(id,profile.warm,profile.decay);
+ const recipe=rhythmDrums(currentDance,i,id,bpm,voiceRecipe(id,profile.warm,profile.decay));
  for(const spec of recipe.tones){
   const frequency=spec.hz??note*(spec.ratio??1);
   // Do not fold ultrasonic bell/metal partials back into the audible range.
@@ -445,7 +452,7 @@ function applyDirections(randomize=false){
  sync();
 }
 function evolveJourney(time:number){
- const eligible=tracks.map((tr,index)=>({tr,index})).filter(({tr,index})=>tr.enabled&&!tr.mute&&tr.volume>0&&!rhythmTrack(index));
+ const eligible=tracks.map((tr,index)=>({tr,index})).filter(({tr,index})=>tr.enabled&&!tr.mute&&tr.volume>0&&!pulseTrack(index));
  if(!eligible.length)return;
  if(journey&&!eligible.some(({index})=>index===journey!.track))journey=null;
  if(!journey){
@@ -535,28 +542,30 @@ function schedule(){
   }
   const chorus=song?.form[song.index].kind==='chorus';
   const chorusRelief=chorus?songMix(nextTime):song?.previous==='chorus'?1-songMix(nextTime):0;
-  currentMix=evolving?mixLevels(tracks,development,musicalStep(),chorusRelief,drawnUntil).map((gain,i)=>rhythmTrack(i)?.9:gain):tracks.map(()=>1);
+  const s=step%stepsPerBar();
+  currentMix=evolving?mixLevels(tracks,development,musicalStep(),chorusRelief,drawnUntil).map((gain,i)=>pulseTrack(i)?.9:gain):tracks.map(()=>1);
+  currentMix=currentMix.map((gain,i)=>gain*dancePulseClarity(currentDance,i,s)*rhythmClarity(currentDance,i,s));
   liveMix.forEach((nodes,index)=>nodes.forEach(node=>node.gain.setTargetAtTime(currentMix[index],nextTime,.09)));
-  const s=step%stepsPerBar(),notes:{track:number;beat:number;velocity:number}[]=[];
+  const notes:{track:number;beat:number;velocity:number}[]=[];
   tracks.forEach((tr,i)=>{
    const beat=((tr.direction*s+tr.phase)%stepsPerBar()+stepsPerBar())%stepsPerBar();
    if(tr.enabled&&!tr.mute&&tr.volume>0){
-    const old=evolving&&!rhythmTrack(i)&&song?.from?song.from[i]:null;
+    const old=evolving&&!pulseTrack(i)&&song?.from?song.from[i]:null;
     const protectedDrawing=musicalStep()<drawnUntil[i];
-    if(!rhythmTrack(i)&&!phraseActive(tr.instrument,musicalStep(),i,song?.form[song.index].kind==='chorus',evolving,protectedDrawing)){
+    if(!pulseTrack(i)&&!phraseActive(tr.instrument,musicalStep(),i,song?.form[song.index].kind==='chorus',evolving,protectedDrawing)){
      const key=i+':'+tr.instrument,held=sustained.get(key);
      if(held){held.voice.release(nextTime);sustained.delete(key);}return;
     }
-    const extra=evolving&&!rhythmTrack(i)&&arrangement&&!protectedDrawing
+    const extra=evolving&&!pulseTrack(i)&&arrangement&&!protectedDrawing
      &&ornamentAt(arrangement,i,musicalStep(),beat,tr.direction,tr.points,stepsPerBar());
-    if(evolving&&!rhythmTrack(i)&&development&&!protectedDrawing&&!chorus&&i===development.variation
+    if(evolving&&!pulseTrack(i)&&development&&!protectedDrawing&&!chorus&&i===development.variation
      &&isMelodic(tr.instrument)&&Math.floor((musicalStep()-development.start)/16)%2===1&&s===4)return;
     if(!tr.points[beat]&&!old?.points[beat]&&!extra)return;
-    const dynamics=rhythmTrack(i)?1:evolving?approach(tr.scheduledVelocity,.65+Math.random()*.35,.06):tr.randomDynamics?.45+Math.random()*.55:1;
+    const dynamics=pulseTrack(i)?1:evolving?approach(tr.scheduledVelocity,.65+Math.random()*.35,.06):tr.randomDynamics?.45+Math.random()*.55:1;
     tr.scheduledVelocity=dynamics;
-    const foundation=rhythmTrack(i)||['kick','bass','synthbass','doublebass'].includes(tr.instrument)||!!tr.morph&&['kick','bass','synthbass','doublebass'].includes(tr.morph.to);
+    const foundation=pulseTrack(i)||['kick','bass','synthbass','doublebass'].includes(tr.instrument)||!!tr.morph&&['kick','bass','synthbass','doublebass'].includes(tr.morph.to);
     const breath=evolving&&arrangement&&!protectedDrawing&&!foundation?breathGain(arrangement,i,musicalStep()):1;
-    const velocity=grooveAccent(groove,tr.instrument,beat)*dynamics*(rhythmTrack(i)?1:songLevel(nextTime,tr.instrument))*breath*songExpression().gain*(extra?.45:1),mix=evolving&&!rhythmTrack(i)?songMix(nextTime):1;
+    const velocity=grooveAccent(groove,tr.instrument,beat,i)*dynamics*(pulseTrack(i)?1:songLevel(nextTime,tr.instrument))*breath*songExpression().gain*(extra?.45:1),mix=evolving&&!pulseTrack(i)?songMix(nextTime):1;
     if(velocity<=.0001)return;
     const joined=(sustainedInstruments as readonly string[]).includes(tr.instrument)
      &&(!tr.morph||(sustainedInstruments as readonly string[]).includes(tr.morph.to));
