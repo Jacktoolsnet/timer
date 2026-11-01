@@ -1,0 +1,8 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import {languages} from '../../lib/i18n';
+import {copy} from '../../lib/sound-i18n';
+export function getStaticPaths(){return languages.map(lang=>({params:{lang},props:{lang}}));}
+const {lang}=Astro.props,t=copy[lang];
+---
+<Layout lang={lang} title={t.guide} description={t.description} route="usage"><article class="legal-page"><h1>{t.guide}</h1><p>{t.body}</p><p>{t.help}</p><p>{t.note}</p><p>{t.privacy}</p><a href={'/'+lang+'/'}>← JackTools Sound</a></article></Layout>
