@@ -1,3 +1,7 @@
+import {storageAllowed} from '../lib/storage';
+import {STORAGE_KEY} from '../lib/engine';
+import {decodeSettings,type SoundSettings} from '../lib/sound-settings';
+import {soundProfiles} from '../lib/sound-profiles';
 import {approach,journeyLength,morphWeights} from '../lib/journey';
 import {presets,styleCopy,type StyleId} from '../lib/presets';
 import {screenWakeLock} from '../lib/wake-lock';
@@ -32,6 +36,36 @@ function setEvolution(on:boolean){
  $('#evolution-status').textContent='';
  sync();
 }
+let persistenceReady=false,saveTimer:ReturnType<typeof setTimeout>|undefined;
+function saveSettings(){
+ if(!persistenceReady||!storageAllowed())return;
+ try{
+  const snapshot:SoundSettings={
+   version:1,style:currentStyle,bpm,volume:Number($<HTMLInputElement>('#volume').value),
+   background:backgroundChoice,center:centerChoice,orbit:orbitChoice,
+   tracks:tracks.map(tr=>({
+    enabled:tr.enabled,mute:tr.mute,instrument:tr.instrument,points:[...tr.points],volume:tr.volume,pitch:tr.pitch,
+    phase:tr.phase,direction:tr.direction,directionMode:tr.directionMode,randomDynamics:tr.randomDynamics,
+    morph:tr.morph?{to:tr.morph.to,progress:currentMorph(tr,audio?.currentTime||0)}:null
+   }))
+  };
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(snapshot));
+ }catch{
+  const status=document.querySelector('#storage-status');
+  if(status)status.textContent=document.querySelector<HTMLElement>('#clear-storage')?.dataset.error||'';
+ }
+}
+function persistSettings(){
+ if(!persistenceReady||!storageAllowed())return;
+ if(saveTimer)clearTimeout(saveTimer);
+ saveTimer=setTimeout(()=>{saveTimer=undefined;saveSettings();},250);
+}
+document.addEventListener('storage-enabled',saveSettings);
+document.addEventListener('preferences-cleared',()=>{
+ if(saveTimer)clearTimeout(saveTimer);saveTimer=undefined;
+ try{localStorage.removeItem(STORAGE_KEY);}catch{}
+});
+window.addEventListener('pagehide',()=>{if(saveTimer)clearTimeout(saveTimer);saveTimer=undefined;saveSettings();});
 const events:{time:number;step:number;duration:number;notes:{track:number;beat:number;velocity:number}[]}[]=[];
 function labelAction(selector:string,label:string){const button=$(selector);button.setAttribute('aria-label',label);button.setAttribute('title',label);}
 const wake=screenWakeLock($('#wake-status'),'',t.wakeUnavailable);
@@ -51,18 +85,18 @@ function pickVariant<T extends string>(modes:readonly T[],current:T):T{
 function selectCenterMode(choice:typeof centerChoice){
  centerChoice=choice;
  centerMode=choice==='random'?pickVariant(currentStyle==='focus'?['ring','filled','sine']:currentStyle==='sport'?['ring','bars','sun']:['ring','filled','sine','bars','sun'],centerMode):choice;
- orbit.dataset.centerVariant=centerMode;
+ orbit.dataset.centerVariant=centerMode;persistSettings();
  document.querySelectorAll<HTMLButtonElement>('[data-center-mode]').forEach(tile=>tile.setAttribute('aria-pressed',String(tile.dataset.centerMode===choice)));
 }
 function selectBackgroundMode(choice:typeof backgroundChoice){
- backgroundChoice=choice;
+ backgroundChoice=choice;persistSettings();
  backgroundMode=choice==='random'?pickVariant(['clouds','aurora','stars','waves'] as const,backgroundMode):choice;
  document.querySelectorAll<HTMLButtonElement>('[data-background-mode]').forEach(tile=>tile.setAttribute('aria-pressed',String(tile.dataset.backgroundMode===choice)));
  atmosphere.hidden=backgroundMode==='off';atmosphere.dataset.mode=backgroundMode;
  if(backgroundMode==='off')ac.clearRect(0,0,atmosphere.width,atmosphere.height);
 }
 function selectOrbitMode(choice:typeof orbitChoice){
- orbitChoice=choice;
+ orbitChoice=choice;persistSettings();
  orbitMode=choice==='random'?pickVariant(['comet','dot','pulse'] as const,orbitMode):choice;
  orbitAnimation=orbitMode!=='off';orbit.dataset.animated=String(orbitAnimation);orbit.dataset.mode=orbitMode;
  document.querySelectorAll<HTMLButtonElement>('[data-orbit-mode]').forEach(tile=>tile.setAttribute('aria-pressed',String(tile.dataset.orbitMode===choice)));
@@ -104,6 +138,7 @@ function sync(){
   row.querySelector('.count')!.textContent=tr.points.filter(Boolean).length+' / 16';
   row.querySelectorAll<HTMLButtonElement>('[data-step]').forEach((b,s)=>b.setAttribute('aria-pressed',String(tr.points[s])));
  });
+ persistSettings();
 }
 tracks.forEach((tr,i)=>{
  const row=$<HTMLElement>('[data-track="'+i+'"]');
@@ -128,14 +163,14 @@ tracks.forEach((tr,i)=>{
   sync();
  });
  row.querySelectorAll<HTMLButtonElement>('[data-step]').forEach((b,s)=>b.addEventListener('click',()=>{tr.points[s]=!tr.points[s];sync();}));
- row.querySelector<HTMLInputElement>('.mute')!.addEventListener('change',e=>tr.mute=(e.target as HTMLInputElement).checked);
+ row.querySelector<HTMLInputElement>('.mute')!.addEventListener('change',e=>{tr.mute=(e.target as HTMLInputElement).checked;persistSettings();});
  row.querySelector<HTMLInputElement>('.track-volume')!.addEventListener('input',e=>{
   tr.volume=Number((e.target as HTMLInputElement).value);
-  row.querySelector('.track-volume-value')!.textContent=Math.round(tr.volume*100)+' %';
+  row.querySelector('.track-volume-value')!.textContent=Math.round(tr.volume*100)+' %';persistSettings();
  });
  row.querySelector<HTMLInputElement>('.random-dynamics')!.addEventListener('change',e=>{
   tr.randomDynamics=(e.target as HTMLInputElement).checked;
-  if(!tr.randomDynamics){tr.lastVelocity=1;tr.hitVelocities.fill(1);}
+  if(!tr.randomDynamics){tr.lastVelocity=1;tr.hitVelocities.fill(1);}persistSettings();
  });
 });
 function currentMorph(tr:typeof tracks[number],time:number){
@@ -151,26 +186,34 @@ function voice(i:number,time:number,beat:number,velocity:number){
 }
 function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:InstrumentId){
  const tr=tracks[i];if(!audio||!master||!tr.enabled||tr.mute||tr.volume===0)return;
- const ctx=audio,bus=master;
+ const ctx=audio,profile=soundProfiles[currentStyle];
+ // One shared low-pass per voice keeps harmonic layers coherent and softens metallic edges.
+ const bus=ctx.createBiquadFilter();bus.type='lowpass';bus.Q.value=.55;
+ bus.frequency.value=profile.cutoff;bus.connect(master);
+ let sources=0;
+ const ended=()=>{if(--sources===0)bus.disconnect();};
  const preset=presets[currentStyle],offset=preset.melody[Math.floor(beat/2)%preset.melody.length];
  const scaleIndex=tr.pitch+offset;
  const note=261.626*2**((preset.scale[scaleIndex%preset.scale.length]+12*Math.floor(scaleIndex/preset.scale.length))/12);
  function tone(freq:number,duration:number,level:number,type:OscillatorType='sine',end?:number,attack=.004){
-  const osc=ctx.createOscillator(),gain=ctx.createGain();
+  const osc=ctx.createOscillator(),gain=ctx.createGain();sources++;
+  // Retain an instrument's deliberately slow attack while warming sharp plucks.
+  if(attack===.004)attack*=profile.attack;
   osc.type=type;osc.frequency.setValueAtTime(freq,time);
   if(end)osc.frequency.exponentialRampToValueAtTime(end,time+Math.min(duration,.18));
   gain.gain.setValueAtTime(.0001,time);gain.gain.exponentialRampToValueAtTime(Math.max(.0002,level*tr.volume*velocity),time+attack);gain.gain.exponentialRampToValueAtTime(.0001,time+duration);
   osc.connect(gain);gain.connect(bus);osc.start(time);osc.stop(time+duration+.02);
-  osc.onended=()=>{osc.disconnect();gain.disconnect();};
+  osc.onended=()=>{osc.disconnect();gain.disconnect();ended();};
  }
  function noise(duration:number,level:number,frequency:number,type:BiquadFilterType='highpass',offset=0){
+  sources++;
   const buffer=ctx.createBuffer(1,Math.ceil(ctx.sampleRate*duration),ctx.sampleRate),data=buffer.getChannelData(0);
   for(let n=0;n<data.length;n++)data[n]=Math.random()*2-1;
   const source=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),gain=ctx.createGain(),at=time+offset;
   source.buffer=buffer;filter.type=type;filter.frequency.value=frequency;filter.Q.value=.7;
   gain.gain.setValueAtTime(Math.max(.0002,level*tr.volume*velocity),at);gain.gain.exponentialRampToValueAtTime(.0001,at+duration);
   source.connect(filter);filter.connect(gain);gain.connect(bus);source.start(at);source.stop(at+duration+.02);
-  source.onended=()=>{source.disconnect();filter.disconnect();gain.disconnect();};
+  source.onended=()=>{source.disconnect();filter.disconnect();gain.disconnect();ended();};
  }
  switch(id){
   case 'kick':tone(145,.28,.3,'sine',43);break;
@@ -182,16 +225,22 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
   case 'shaker':noise(.09,.18,5000,'bandpass');break;
   case 'bass':tone(note/4,.4,.3,'triangle');break;
   case 'synthbass':tone(note/4,.34,.18,'sawtooth');tone(note/8,.4,.13);break;
-  case 'marimba':tone(note,.8,.3);tone(note*4,.12,.06);break;
-  case 'bells':tone(note*2,1.5,.19);tone(note*5.52,.8,.06);break;
-  case 'kalimba':tone(note,.65,.23);tone(note*2.76,.09,.1);break;
-  case 'pluck':tone(note,.25,.18,'triangle');tone(note*2,.1,.08);break;
+  case 'marimba':tone(note,.45*profile.decay,.27);tone(note*4,.075,profile.warm?.018:.045);break;
+  case 'bells':tone(note*2,profile.warm?.75:1.5,.17);tone(note*5.52,profile.warm?.25:.8,profile.warm?.02:.05);break;
+  case 'kalimba':tone(note,.48*profile.decay,.23,'triangle');tone(note*2.76,.065,profile.warm?.035:.065);break;
+  case 'pluck':tone(note,.25*profile.decay,.18,'triangle');tone(note*2,.09,profile.warm?.025:.07);break;
   case 'piano':
-   tone(note,1.15,.2);tone(note*2,.6,.08);tone(note*3,.25,.035);break;
+   // Strong fundamental/body, rapidly fading upper harmonics: less bell, more felt/wood.
+   tone(note,.85*profile.decay,.2,'triangle',undefined,profile.warm?.012:.006);
+   tone(note*1.001,1.05*profile.decay,.055,'sine',undefined,.01);
+   tone(note*2,.3*profile.decay,.04);tone(note*3,.14,.012);break;
   case 'strings':
    for(const detune of [.997,1.003]){tone(note*detune,1.65,.065,'triangle',undefined,.2);tone(note*2*detune,1.5,.025,'sine',undefined,.25);}break;
   case 'guitar':
-   tone(note/2,.5,.19,'triangle');tone(note,.32,.075);tone(note*1.5,.2,.045);break;
+   // Warm plucked body, with a short pick transient instead of lingering glassy partials.
+   tone(note/2,.6*profile.decay,.2,'triangle',undefined,.008);
+   tone(note,.24,.045);tone(note*1.5,.12,profile.warm?.018:.04);
+   if(!profile.warm)tone(note/2,.18,.025,'sawtooth');break;
   case 'organ':
    tone(note,.65,.13,'sine',undefined,.025);tone(note*2,.65,.06,'sine',undefined,.025);tone(note*3,.65,.035,'sine',undefined,.025);break;
   case 'pad':tone(note,1.8,.09,'sine',undefined,.28);tone(note*1.002,1.8,.07,'triangle',undefined,.28);break;
@@ -314,8 +363,8 @@ $('#evolve').addEventListener('click',async()=>{
 $('#play').addEventListener('click',()=>playing?stop():void start());
 document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();});
 window.addEventListener('pagehide',stop);
-$<HTMLInputElement>('#tempo').addEventListener('input',e=>{bpm=Number((e.target as HTMLInputElement).value);$('#tempo-value').textContent=bpm+' BPM';});
-$<HTMLInputElement>('#volume').addEventListener('input',e=>{if(master&&audio&&playing)master.gain.setTargetAtTime(Number((e.target as HTMLInputElement).value),audio.currentTime,.02);});
+$<HTMLInputElement>('#tempo').addEventListener('input',e=>{bpm=Number((e.target as HTMLInputElement).value);$('#tempo-value').textContent=bpm+' BPM';persistSettings();});
+$<HTMLInputElement>('#volume').addEventListener('input',e=>{if(master&&audio&&playing)master.gain.setTargetAtTime(Number((e.target as HTMLInputElement).value),audio.currentTime,.02);persistSettings();});
 $('#clear').addEventListener('click',()=>{tracks.forEach(tr=>tr.points.fill(false));sync();});
 function applyStyle(id:StyleId){
  currentStyle=id;pendingStyle=null;journey=null;const preset=presets[id];
@@ -652,4 +701,21 @@ function frame(now:number){
  requestAnimationFrame(frame);
 }
 enhanceClockSelects($('.instruments-tile') as HTMLFormElement);
-sync();requestAnimationFrame(frame);
+function restoreSettings(){
+ if(!storageAllowed())return;
+ try{
+  const saved=decodeSettings(localStorage.getItem(STORAGE_KEY));if(!saved)return;
+  applyStyle(saved.style);bpm=saved.bpm;
+  $<HTMLInputElement>('#tempo').value=String(bpm);$('#tempo-value').textContent=bpm+' BPM';
+  $<HTMLInputElement>('#volume').value=String(saved.volume);
+  saved.tracks.forEach((source,i)=>{
+   const tr=tracks[i];
+   tr.enabled=source.enabled;tr.mute=source.mute;tr.instrument=source.instrument;tr.points=[...source.points];
+   tr.volume=source.volume;tr.pitch=source.pitch;tr.phase=source.phase;tr.direction=source.direction;
+   tr.directionMode=source.directionMode;tr.randomDynamics=source.randomDynamics;
+   tr.morph=source.morph?{...source.morph,from:source.morph.progress,at:0,duration:0}:null;
+  });
+  selectCenterMode(saved.center);selectBackgroundMode(saved.background);selectOrbitMode(saved.orbit);
+ }catch{}
+}
+restoreSettings();sync();persistenceReady=true;requestAnimationFrame(frame);
