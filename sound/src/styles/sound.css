@@ -23,15 +23,15 @@
 .flow-side .sound-transport label{flex:1 1 100%;justify-content:space-between}
 .flow-side .sound-transport label input{flex:1;min-width:60px;max-width:200px}
 .flow-side .sound-transport button{flex:1 1 auto}
-.sound-app>.instrument-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;border-top:1px solid var(--line);padding-top:18px;margin-top:18px;align-items:start}
-.sound-app>.instrument-list .instrument{min-width:0}
-.sound-app>.instrument-list .instrument summary{gap:8px;flex-wrap:wrap}
-.sound-app>.instrument-list .track-settings label{gap:8px;flex-wrap:wrap}
-.sound-app>.instrument-list .track-volume{min-width:0;width:100%}
-.sound-app>.instrument-list .instrument-select{max-width:100%;width:100%;min-width:0}
-.sound-app>.instrument-list .steps{grid-template-columns:repeat(4,minmax(0,1fr))}
-@media(max-width:1000px){.sound-app>.instrument-list{grid-template-columns:repeat(3,minmax(0,1fr))}}
-@media(max-width:600px){.sound-app>.instrument-list{grid-template-columns:1fr}.sound-app>.instrument-list .steps{grid-template-columns:repeat(8,minmax(0,1fr))}}
+.instruments-tile>.instrument-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;border-top:1px solid var(--line);padding-top:18px;margin-top:18px;align-items:start}
+.instruments-tile>.instrument-list .instrument{min-width:0}
+.instruments-tile>.instrument-list .instrument summary{gap:8px;flex-wrap:wrap}
+.instruments-tile>.instrument-list .track-settings label{gap:8px;flex-wrap:wrap}
+.instruments-tile>.instrument-list .track-volume{min-width:0;width:100%}
+.instruments-tile>.instrument-list .instrument-select{max-width:100%;width:100%;min-width:0}
+.instruments-tile>.instrument-list .steps{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:1000px){.instruments-tile>.instrument-list{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:600px){.instruments-tile>.instrument-list{grid-template-columns:1fr}.instruments-tile>.instrument-list .steps{grid-template-columns:repeat(8,minmax(0,1fr))}}
 
 /* Icon actions keep translated accessible names and native tooltips. */
 .sound-app .icon-action{display:inline-flex;align-items:center;justify-content:center;width:46px;height:46px;min-width:46px;padding:11px;flex:0 0 46px;border-radius:12px}
@@ -70,7 +70,7 @@
 .clock-select-options button[aria-selected=true]{background:var(--accent-soft);color:var(--accent);font-weight:600}
 .option-check{visibility:hidden;color:var(--accent)}
 [aria-selected=true]>.option-check{visibility:visible}
-.sound-app>.instrument-list .instrument{overflow:visible}
+.instruments-tile>.instrument-list .instrument{overflow:visible}
 .sound-switch{position:relative;display:inline-flex;width:44px;height:26px;flex:0 0 44px}
 .sound-switch input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;z-index:1;cursor:pointer}
 .sound-switch-track{position:absolute;inset:0;border-radius:99px;background:var(--track);border:1px solid var(--muted);pointer-events:none}
@@ -79,3 +79,23 @@
 .sound-switch input:checked+.sound-switch-track:after{transform:translateX(18px);background:var(--surface)}
 .sound-switch input:focus-visible+.sound-switch-track{outline:3px solid var(--accent);outline-offset:3px}
 @media(prefers-reduced-motion:no-preference){.sound-switch-track,.sound-switch-track:after{transition:background .18s,transform .18s}.clock-select-chevron{transition:transform .15s}}
+
+#evolve[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+#evolution-status{font-size:12px;color:var(--accent);line-height:1.6}
+#evolution-status:empty{display:none}
+
+.instruments-tile{border:1px solid var(--line);border-radius:28px;background:var(--surface);padding:24px;box-shadow:0 24px 80px #0000000a;max-width:1240px;margin:24px auto 0}
+.instruments-tile h2{font-size:18px;font-weight:500;margin:0 0 20px;color:var(--text)}
+.instruments-tile>.instrument-list{margin:0;padding:0;border-top:0}
+.focus-view .instruments-tile{display:none}
+@media(max-width:800px){.instruments-tile{padding:16px;border-radius:18px;margin-top:20px}}
+
+#wake-status:empty{display:none}
+#wake-status{font-size:12px;line-height:1.6;color:var(--muted)}
+
+/* Ambient colour stays behind the instrument, never over its controls. */
+.sound-app{position:relative;isolation:isolate;overflow:hidden}
+#sound-atmosphere{position:absolute;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;border-radius:inherit}
+.sound-app>.sound-top,.sound-app>.sound-grid{position:relative}
+.draw-wrap{background:color-mix(in srgb,var(--bg) 82%,transparent)}
+@media(prefers-reduced-motion:reduce){#sound-atmosphere{opacity:.65}}

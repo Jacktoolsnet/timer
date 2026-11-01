@@ -1,5 +1,5 @@
 ---
-interface Props {name:'play'|'pause'|'focus'|'exit'|'random'|'reset'|'clear'}
+interface Props {name:'play'|'pause'|'focus'|'exit'|'random'|'reset'|'clear'|'evolve'}
 const {name}=Astro.props;
 const paths={
  play:'m8 5 11 7-11 7Z',
@@ -8,6 +8,7 @@ const paths={
  exit:'M3 8h5V3m8 0v5h5M8 21v-5H3m18 0h-5v5',
  random:'M3 6h3c5 0 7 12 12 12h3m-4-4 4 4-4 4M3 18h3c2 0 3-2 4-4m4-4c1-2 2-4 4-4h3m-4-4 4 4-4 4',
  reset:'M3 10a9 9 0 1 1 2 8M3 3v7h7',
+ evolve:'M8 4 19 12 8 20ZM3 3v5h5M21 21v-5h-5',
  clear:'M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7'
 };
 ---

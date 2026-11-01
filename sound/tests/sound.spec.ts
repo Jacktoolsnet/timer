@@ -21,8 +21,11 @@ test('drawing, audio and appearance',async({page},info)=>{
  await page.locator('#theme').click();
  await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
  await page.locator('#preferences-close').click();
+ await expect(page.locator('.instruments-tile')).toBeVisible();
  await page.locator('#focus').click();await expect(page.locator('body')).toHaveClass(/focus-view/);
+ await expect(page.locator('.instruments-tile')).toBeHidden();
  await page.locator('#focus').click();
+ await expect(page.locator('.instruments-tile')).toBeVisible();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();
  await page.screenshot({path:'test-results/'+info.project.name+'.png',fullPage:true});
  expect(errors).toEqual([]);
@@ -98,4 +101,71 @@ test('styled dropdown keyboard selection and slide toggles',async({page})=>{
  await mute.check();await expect(mute).toBeChecked();
  await mute.uncheck();await expect(mute).not.toBeChecked();
  await expect(mute).toHaveAttribute('role','switch');
+});
+test('drawing toggles points only once per gesture',async({page})=>{
+ await page.goto('/de/');await page.locator('#clear').click();
+ await page.locator('#drawing').scrollIntoViewIfNeeded();
+ const r=await page.locator('#drawing').boundingBox();if(!r)throw Error('No drawing');
+ const x=r.x+r.width*.4,y=r.y+r.height*.08;
+ await page.mouse.move(x,y);await page.mouse.down();
+ for(let n=0;n<4;n++){await page.waitForTimeout(45);await page.mouse.move(x+(n%2),y);}
+ await page.mouse.up();
+ await expect(page.locator('[data-track="0"] .count')).toHaveText('1 / 16');
+ await page.mouse.move(x,y);await page.mouse.down();await page.mouse.up();
+ await expect(page.locator('[data-track="0"] .count')).toHaveText('0 / 16');
+});
+test('random evolution starts playback and can stop without pausing',async({page})=>{
+ await page.addInitScript(()=>{Math.random=()=>0;});
+ await page.goto('/de/');
+ const points=()=>page.locator('[data-step]').evaluateAll(buttons=>buttons.map(b=>b.getAttribute('aria-pressed')).join(','));
+ const initial=await points();
+ await page.locator('#tempo').fill('180');await page.locator('#tempo').dispatchEvent('input');
+ await page.locator('#evolve').click();
+ await expect(page.locator('#evolve')).toHaveAttribute('aria-pressed','true');
+ await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
+ await page.waitForTimeout(500);expect(await points()).toBe(initial);
+ await expect.poll(points,{timeout:6000}).not.toBe(initial);
+ await page.locator('#evolve').click();
+ await expect(page.locator('#evolve')).toHaveAttribute('aria-pressed','false');
+ await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
+ const frozen=await points();await page.waitForTimeout(3000);expect(await points()).toBe(frozen);
+ await page.locator('#evolve').click();await page.locator('#play').click();
+ await expect(page.locator('#evolve')).toHaveAttribute('aria-pressed','false');
+ await expect(page.locator('#evolution-status')).toBeEmpty();
+});
+test('focus requests and releases screen wake lock',async({page})=>{
+ await page.addInitScript(()=>{
+  const state={requests:0,releases:0};(window as any).wakeTest=state;
+  Object.defineProperty(navigator,'wakeLock',{configurable:true,value:{request:async(type:string)=>{
+   if(type!=='screen')throw Error('Unexpected lock type');
+   state.requests++;
+   const sentinel=new EventTarget() as any;
+   sentinel.release=async()=>{state.releases++;sentinel.dispatchEvent(new Event('release'));};
+   return sentinel;
+  }}});
+ });
+ await page.goto('/de/');
+ await page.locator('#focus').click();
+ await expect.poll(()=>page.evaluate(()=>(window as any).wakeTest.requests)).toBe(1);
+ await expect(page.locator('#wake-status')).toBeEmpty();
+ await page.keyboard.press('Escape');
+ await expect.poll(()=>page.evaluate(()=>(window as any).wakeTest.releases)).toBe(1);
+ await page.locator('#focus').click();
+ await expect.poll(()=>page.evaluate(()=>(window as any).wakeTest.requests)).toBe(2);
+});
+test('wake lock rejection displays a localized warning',async({page})=>{
+ await page.addInitScript(()=>Object.defineProperty(navigator,'wakeLock',{configurable:true,value:{request:async()=>{throw Error('Denied');}}}));
+ await page.goto('/de/');await page.locator('#focus').click();
+ await expect(page.locator('#wake-status')).toContainText('Bildschirm');
+ await page.locator('#focus').click();await expect(page.locator('#wake-status')).toBeEmpty();
+});
+test('ambient canvas renders without blocking the instrument',async({page})=>{
+ await page.goto('/de/');
+ await expect(page.locator('#sound-atmosphere')).toHaveAttribute('aria-hidden','true');
+ await expect(page.locator('#sound-atmosphere')).toHaveCSS('pointer-events','none');
+ await expect.poll(()=>page.locator('#sound-atmosphere').evaluate((c:HTMLCanvasElement)=>c.getContext('2d')!.getImageData(0,0,c.width,c.height).data.some((value,index)=>index%4===3&&value>0)?1:0)).toBeGreaterThan(0);
+ await page.emulateMedia({reducedMotion:'reduce'});
+ await page.locator('#play').click();await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
+ await page.locator('#focus').click();await expect(page.locator('#sound-atmosphere')).toBeVisible();
+ await page.locator('#play').click();
 });
