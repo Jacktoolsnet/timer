@@ -22,7 +22,7 @@ function setIdle(idle:boolean){
   controls.forEach(control=>{
    const rect=control.getBoundingClientRect(),style=getComputedStyle(control);
    const ghost=control.cloneNode(true) as HTMLElement;
-   ghost.className=control.className+' focus-control-ghost';ghost.removeAttribute('id');
+   ghost.className=control.classList.contains('header-focus-actions')?'header-focus-actions focus-control-ghost':'focus-control-ghost';ghost.removeAttribute('id');
    ghost.querySelectorAll('[id]').forEach(element=>element.removeAttribute('id'));
    ghost.setAttribute('aria-hidden','true');ghost.inert=true;
    Object.assign(ghost.style,{position:'fixed',left:rect.left+'px',top:rect.top+'px',width:rect.width+'px',height:rect.height+'px',display:style.display,boxSizing:'border-box',zIndex:'50',pointerEvents:'none',margin:'0'});

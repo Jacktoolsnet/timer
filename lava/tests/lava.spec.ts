@@ -45,7 +45,8 @@ test('focus label and palette-aware sliders',async({page})=>{
  const focus=await page.locator('#lava-fullscreen').boundingBox();
  expect(focus!.x).toBeGreaterThan(stage!.x);
  expect(focus!.x+focus!.width).toBeLessThanOrEqual(stage!.x+stage!.width);
- expect(focus!.y).toBeLessThan(stage!.y+30);
+ expect(focus!.y).toBeGreaterThanOrEqual(stage!.y);
+ expect(focus!.y+focus!.height).toBeLessThanOrEqual(stage!.y+stage!.height);
  const slider=page.locator('#lava-speed');
  const initial=await slider.evaluate(el=>getComputedStyle(el).accentColor);
  await page.locator('#palette-dropdown summary').click();
