@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 import {readFile} from 'node:fs/promises';
-import {tapNoteAt,tapNoteY,tapNoteKey,tapNoteSemitones} from '../src/lib/tap-notes';
+import {tapNoteAt,tapNoteY,tapNoteKey,tapNoteSemitones,tapNoteDegree} from '../src/lib/tap-notes';
 import {emptyRhythm,recordRhythmHit,cloneRhythm,remeterRhythm} from '../src/lib/tap-rhythm';
 import {decodeSettings} from '../src/lib/sound-settings';
 import {partsForStyle,styleIds} from '../src/lib/presets';
@@ -16,6 +16,9 @@ test('eight diatonic positions span one octave; touch and top-row keys agree wit
  for(const style of styleIds)for(let bar=0;bar<16;bar++){
   const notes=Array.from({length:8},(_,n)=>tapNoteSemitones(style,bar,n));
   expect(notes[7]-notes[0]).toBe(12);
+  notes.forEach((pitch,degree)=>expect(tapNoteDegree(style,bar,pitch)).toBe(degree));
+  expect(tapNoteDegree(style,bar,notes[0]-12)).toBe(0);
+  expect(tapNoteDegree(style,bar,notes[7]+12)).toBe(7);
   for(let n=1;n<8;n++)expect([1,2]).toContain(notes[n]-notes[n-1]);
  }
 });
@@ -146,4 +149,25 @@ test('Enter accepts tapped notes; Escape restores them without leaving focus vie
  await expect(pad).toHaveAttribute('data-music-level','1');
  await expect(page.locator('body')).toHaveClass(/focus-view/);
  await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
+});
+
+for(const mode of ['play','evolve'])test(`generated notes show their pitch from the first loop in ${mode}, without any recorded taps`,async({page})=>{
+ await page.goto('/de/');
+ const data=fixture() as any;data.bpm=180;delete data.pad;
+ data.tracks[4].instrument='pluck';data.tracks[4].motif=[0,0,1,1,2,2,3,3];
+ data.tracks[4].points=Array.from({length:16},(_,i)=>i%4===0);
+ data.tracks[0].points=Array.from({length:16},(_,i)=>i%4===0);
+ await page.locator('#files-open').click();
+ await page.locator('#json-file').setInputFiles({name:'generated.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(data))});
+ await page.locator('#files-close').click();await page.locator('[data-pad-mode=rhythm]').click();
+ await page.evaluate(()=>{
+  const zone=document.querySelector<HTMLElement>('#rhythm-zones>[data-lane="4"]')!;
+  (window as any).generatedDegrees=[];
+  new MutationObserver(()=>{(window as any).generatedDegrees.push(Number(zone.dataset.playedNote));}).observe(zone,{attributes:true,attributeFilter:['data-played-note']});
+ });
+ await page.locator('#'+mode).click();
+ await expect.poll(async()=>page.evaluate(()=>new Set((window as any).generatedDegrees).size),{timeout:10000}).toBeGreaterThan(1);
+ const pad=page.locator('#drawing');await expect(pad).toHaveAttribute('data-rhythm-hits','0');
+ await expect(page.locator('#rhythm-zones>[data-lane="0"]')).not.toHaveAttribute('data-played-note');
+ if(mode==='play')await expect.poll(async()=>page.evaluate(()=>[0,2,4,7].every(n=>(window as any).generatedDegrees.includes(n))),{timeout:10000}).toBe(true);
 });

@@ -17,3 +17,14 @@ export function tapNoteKey(code:string,key:string){
  const digit=/^Digit[1-8]$/.test(code)?Number(code.slice(-1)):/^[1-8]$/.test(key)?Number(key):0;
  return digit?digit-1:null;
 }
+
+/** Project the synthesized melodic pitch onto the same eight bands used for tapping.
+ * Notes outside the displayed octave stay at the nearest edge, never wrap down. */
+export function tapNoteDegree(style:StyleId,bar:number,semitones:number){
+ let nearest=0,distance=Infinity;
+ for(let degree=0;degree<8;degree++){
+  const delta=Math.abs(tapNoteSemitones(style,bar,degree)-semitones);
+  if(delta<distance){nearest=degree;distance=delta;}
+ }
+ return nearest;
+}

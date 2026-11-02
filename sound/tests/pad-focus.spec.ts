@@ -76,7 +76,9 @@ test('all eight outer previews continue showing scheduled music while the select
  await expect.poll(()=>page.locator('#drawing').evaluate((canvas)=>{
   const c=canvas as HTMLCanvasElement,ctx=c.getContext('2d')!,r=c.getBoundingClientRect();
   return [...document.querySelectorAll('#rhythm-zones>[data-lane]')].filter(zone=>{
-   const b=zone.getBoundingClientRect(),x=Math.floor((b.left+b.width/2-r.left)/r.width*c.width),y=Math.floor((b.top+b.height/2-r.top)/r.height*c.height);
+   const b=zone.getBoundingClientRect(),note=(zone as HTMLElement).dataset.playedNote;
+   const height=note===undefined ? .5 : (7-Number(note)+.5)/8;
+   const x=Math.floor((b.left+b.width/2-r.left)/r.width*c.width),y=Math.floor((b.top+b.height*height-r.top)/r.height*c.height);
    return ctx.getImageData(x,y,1,1).data[3]>0;
   }).length;
  })).toBe(9);
@@ -97,4 +99,20 @@ test('percussion companion gain is genuinely quieter without changing the select
   return rms(48000)/rms(96000);
  });
  expect(ratio).toBeCloseTo(.4,2);
+});
+
+test('rhythm pads have more desktop space, without a visible instruction or progress bar',async({page})=>{
+ await page.goto('/de/');await page.locator('[data-pad-mode=rhythm]').click();
+ await expect(page.locator('#rhythm-progress')).toBeHidden();
+ const status=await page.locator('#rhythm-status').boundingBox();
+ expect(status!.width).toBeLessThanOrEqual(1);expect(status!.height).toBeLessThanOrEqual(1);
+ const pad=(await page.locator('.draw-wrap').boundingBox())!;
+ expect(pad.width).toBeGreaterThan(250);
+ if(test.info().project.name==='desktop'){
+  const orbit=(await page.locator('.orbit-wrap').boundingBox())!;
+  expect(Math.abs(pad.width-orbit.width)).toBeLessThan(3);
+ }
+ await page.keyboard.press('Numpad5');await page.keyboard.press('1');
+ await expect(page.locator('#drawing')).toHaveAttribute('data-rhythm-hits','1');
+ await page.keyboard.press('Enter');await expect(page.locator('#rhythm-progress')).toBeHidden();
 });

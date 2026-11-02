@@ -1,4 +1,4 @@
-import {tapNoteAt,tapNoteY,tapNoteKey,tapNoteSemitones} from '../lib/tap-notes';
+import {tapNoteAt,tapNoteY,tapNoteKey,tapNoteSemitones,tapNoteDegree} from '../lib/tap-notes';
 import {wavSupported,createWavRecording} from '../lib/wav-export';
 import {fileCopy} from '../lib/file-copy';
 import {mp4Type,createMp4Recording,paintVideo} from '../lib/video-export';
@@ -518,11 +518,13 @@ function currentMorph(tr:typeof tracks[number],time:number){
 function voice(i:number,time:number,beat:number,velocity:number,phrase?:Phrase){
  const tr=tracks[i];
  const weights=tr.morph?morphWeights(currentMorph(tr,time)):[1,0];
- if(weights[0]>.0001)voiceInstrument(i,time,beat,velocity*weights[0],tr.instrument,phrase);
- if(tr.morph&&weights[1]>.0001)voiceInstrument(i,time,beat,velocity*weights[1],tr.morph.to,phrase);
+ const first=weights[0]>.0001?voiceInstrument(i,time,beat,velocity*weights[0],tr.instrument,phrase):null;
+ const second=tr.morph&&weights[1]>.0001?voiceInstrument(i,time,beat,velocity*weights[1],tr.morph.to,phrase):null;
+ // During timbre morphs the louder voice supplies the displayed pitch.
+ return weights[1]>weights[0]?second:first;
 }
-function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:InstrumentId,phrase?:Phrase,tapped=false,tapHold=0,tapNote:number|null=null){
- const tr=tracks[i];const musicBeat=beat/tr.slots*stepsPerBar();if(!audio||!master||!tr.enabled||tr.mute||tr.volume===0)return;
+function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:InstrumentId,phrase?:Phrase,tapped=false,tapHold=0,tapNote:number|null=null):number|null{
+ const tr=tracks[i];const musicBeat=beat/tr.slots*stepsPerBar();if(!audio||!master||!tr.enabled||tr.mute||tr.volume===0)return null;
  const ctx=audio,profile=soundProfiles[currentStyle];
  const explicitNote=tapped&&tapNote!==null;
  const tango=explicitNote?null:tangoPulseRole(currentDance,i,id),crisp=currentDance==='viennese',dancePulse=explicitNote?null:danceRhythmRole(currentDance,i,id);
@@ -574,6 +576,7 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
  const jazzRoot=jazzSemitones(harmonyBar(),0,'bass',0);
  const register=evolving&&!protectedDrawing&&dialogueInstrument(id)?registerArc(step/stepsPerBar()):0;
  const voiced=explicitNote?tapNoteSemitones(harmonicStyle,harmonyBar(),tapNote):registerNote(semitones,register,harmonicStyle==='jazz'?jazzRoot:chord.root,harmonicStyle==='jazz'?[0,2,4,7,9]:[0,chord.third,7]);
+ const visualNote=isMelodic(id)?explicitNote?tapNote:tapNoteDegree(harmonicStyle,harmonyBar(),voiced):null;
  const note=261.626*2**((voiced+(isMelodic(id)?transpose:0))/12);
  function tone(freq:number,duration:number,level:number,type:OscillatorType='sine',end?:number,attack=.004,glide=.18,sustain?:number){
   const osc=ctx.createOscillator(),gain=ctx.createGain();sources++;
@@ -615,7 +618,7 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
   const level=tr.volume*velocity*(id==='voice'?.25:id==='strings'?.15:id==='saxophone'?.23:id==='organ'?.16:id==='pad'?.13:.18);
   if(articulation.legato&&previous?.voice.canContinue(time)){
    previous.voice.note(time,frequency,level,hold,vowel);
-   cleanVoice();return;
+   cleanVoice();return visualNote;
   }
   if(articulation.legato)previous?.voice.release(time);
   const entry={track:i,time,id:id as SustainedInstrument,voice:null as unknown as ReturnType<typeof createSustainedVoice>};
@@ -623,7 +626,7 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
    cleanVoice();
    if(sustained.get(key)===entry)sustained.delete(key);
   },articulation.voice);
-  sustained.set(key,entry);return;
+  sustained.set(key,entry);return visualNote;
  }
  if(dancePulse||acousticInstruments.includes(id)){
   const acoustic=id as AcousticInstrument,frequency=(id==='bass'||id==='doublebass')?note/4:id==='guitar'?note/2:note;
@@ -644,7 +647,7 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
   source.buffer=buffer;gain.gain.setValueAtTime(level,time);
   source.connect(gain);gain.connect(bus);source.start(time);
   source.onended=()=>{source.disconnect();gain.disconnect();ended();};
-  return;
+  return visualNote;
  }
  const recipe=rhythmDrums(currentDance,i,id,bpm,voiceRecipe(id,profile.warm,profile.decay));
  for(const spec of recipe.tones){
@@ -655,17 +658,18 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
  }
  for(const spec of recipe.noise)noise(spec.duration,spec.level,spec.frequency,spec.type,spec.offset,spec.attack);
 
+ return visualNote;
 }
 function playTapped(lane:RhythmLane,time:number,clockStep:number){
  const tr=tracks[lane];if(!audio||!tr.enabled||tr.mute||tr.volume<=0)return;
  const beat=Math.floor((clockStep%stepsPerBar())/stepsPerBar()*tr.slots)%tr.slots;
  const noteSlot=((clockStep-(tapPattern.start??0))%(tapPattern.beats*8)+tapPattern.beats*8)%(tapPattern.beats*8);
- const tapNote=isMelodic(tr.instrument)?tapPattern.notes[lane][noteSlot]:null;
+ let tapNote=isMelodic(tr.instrument)?tapPattern.notes[lane][noteSlot]:null;
  if(percussion.has(tr.instrument))rhythmPlayer?.hit(lane,time,tr.instrument,tr.volume);
  else{
   const row=tapPattern.hits[lane],offset=((clockStep-(tapPattern.start??0))%row.length+row.length)%row.length;
   let gap=1;while(gap<row.length&&!row[(offset+gap)%row.length])gap++;
-  voiceInstrument(lane,time,beat,1,tr.instrument,undefined,true,Math.min(60/bpm*2,gap*60/bpm/4*.92),tapNote);
+  tapNote=voiceInstrument(lane,time,beat,1,tr.instrument,undefined,true,Math.min(60/bpm*2,gap*60/bpm/4*.92),tapNote);
  }
  events.push({time,step:clockStep%stepsPerBar(),duration:60/bpm/4,clock:false,notes:[{track:lane,beat,velocity:1,note:tapNote}]});
  events.sort((a,b)=>a.time-b.time);
@@ -822,14 +826,16 @@ function schedule(){
     if(velocity<=.0001)return;
     const joined=(sustainedInstruments as readonly string[]).includes(tr.instrument)
      &&(!tr.morph||(sustainedInstruments as readonly string[]).includes(tr.morph.to));
+    let note:number|null=null;
     if(joined&&old?.points[beat]&&tr.points[beat]&&mix>0&&mix<1){
      // One connected line: don't schedule two competing gain envelopes on the same voice.
-     voice(i,time,beat,velocity,mix<.5?old:undefined);
+     note=voice(i,time,beat,velocity,mix<.5?old:undefined);
     }else{
-     if(old&&old.points[beat]&&mix<1)voice(i,time,beat,velocity*(1-mix),old);
-     if((tr.points[beat]||extra)&&mix>0)voice(i,time,beat,velocity*mix);
+     const previous=old&&old.points[beat]&&mix<1?voice(i,time,beat,velocity*(1-mix),old):null;
+     const current=(tr.points[beat]||extra)&&mix>0?voice(i,time,beat,velocity*mix):null;
+     note=current!==null&&(mix>=.5||previous===null)?current:previous;
     }
-    if(velocity*currentMix[i]>.0001)events.push({time,step:s,duration,clock:false,notes:[{track:i,beat,velocity:velocity*currentMix[i]}]});
+    if(velocity*currentMix[i]>.0001)events.push({time,step:s,duration,clock:false,notes:[{track:i,beat,velocity:velocity*currentMix[i],note}]});
    }
    };playNote();
   }});
