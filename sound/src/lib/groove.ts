@@ -54,6 +54,8 @@ export function grooveAccent(groove:Groove,id:string,beat:number,index?:number){
 }
 export function grooveMutationGrid(groove:Groove,id:string){
  const role=grooveRole(id);
+ // A quiet, dependable pulse under the piano: no random drum fills or extra bass attacks.
+ if(groove.style==='focus'&&groove.choice==='auto'&&!groove.dance&&['kick','hat','backbeat','bass'].includes(role))return groovePattern(groove,id);
  if(groove.dance&&grooveAnchored(id))return groovePattern(groove,id);
  if(role==='kick'&&(groove.choice!=='auto'||['house','sport','reggae'].includes(groove.style)))return groovePattern(groove,id);
  if(groove.beats===3&&role==='bass')return groovePattern(groove,id);

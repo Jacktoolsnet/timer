@@ -21,7 +21,7 @@ export const presets:Record<StyleId,Preset>={
  drumandbass:{bpm:168,scale:[0,3,5,7,10],melody:[0,1,2,0,3,2,1,0],grid:Array.from({length:16},(_,i)=>i),density:.29,parts:[part('kick',[0,6,10],0,.55),part('snare',[4,12],0,.46),part('hat',[0,2,3,6,8,10,11,14],0,.22),part('synthbass',[0,6,8,10],0,.42),part('pad',[0],1,.25),part('pluck',[2,10],2,.26),part('vocalpad',[0,8],0,.26)]},
  latin:{bpm:104,scale:[0,2,4,7,9],melody:[0,1,2,1,3,2,1,0],grid:eighths,density:.25,parts:[part('kick',[0,8],0,.32),part('rim',[0,6,12],0,.28),part('shaker',eighths,0,.17),part('bass',[0,6,8,14],0,.4),part('guitar',[0,3,6,10,12],1,.34),part('piano',[2,8,14],0,.25),part('voice',[0,6,14],0,.3)]},
  ambient:{bpm:56,scale:[0,2,4,7,9],melody:[0,2,1,3,2,4,1,0],grid:quarters,density:.14,parts:[part('pad',[0,8],0,.4),part('bells',[6],2,.3),part('harp',[2,10],1,.4),part('strings',[0],3,.3),part('piano',[4,12],0,.35),part('vocalpad',[0,8],0,.2)]},
- focus:{bpm:80,scale:[0,2,4,7,9],melody:[0,0,1,0,2,1,0,0],grid:quarters,density:.14,parts:[part('pad',[0,8],0,.3),part('bass',[0,8],0,.3),part('pluck',[2,10],1,.3),part('shaker',[4,12],0,.18),part('kalimba',[6,14],0,.25),part('vocalpad',[0],0,.2)]},
+ focus:{bpm:76,scale:[0,2,4,7,9],melody:[0,1,2,1,1,2,1,0],grid:eighths,density:.12,parts:[part('piano',eighths,0,.46),part('kick',quarters,0,.18),part('shaker',[2,6,10,14],0,.09),part('bass',[0,8],0,.22),part('strings',[0,8],0,.18),part('epiano',[0,8],0,.16),part('harp',[6,14],0,.1),part('vocalpad',[0],0,.08)]},
  sport:{bpm:136,scale:[0,3,5,7,10],melody:[0,0,2,0,3,2,0,2],grid:eighths,density:.32,parts:[part('kick',quarters,0,.65),part('snare',[4,12],0,.5),part('hat',eighths,0,.4),part('synthbass',[0,3,6,8,11,14],0,.5),part('pluck',[2,6,10,14],2,.4),part('clap',[12],0,.3),part('voice',[2,10],0,.3)]},
  jazz:{bpm:92,swing:.2,scale:[0,2,4,7,9],melody:[0,1,2,3,2,1,0,2],grid:eighths,density:.23,parts:[part('piano',[0,6,10,14],1,.45),part('doublebass',quarters,0,.45),part('hat',[0,6,8,14],0,.24),part('snare',[4,12],0,.23),part('organ',[0,8],2,.18),part('saxophone',[2,6,10,14],0,.32),part('voice',[0,6,14],0,.32)]},
  coffeehouse:{bpm:78,swing:.12,scale:[0,2,3,4,7,9],melody:[0,1,3,1,4,3,1,0],grid:eighths,density:.18,parts:[part('epiano',[0,4,10,14],0,.35),part('guitar',[2,6,10,14],1,.3),part('doublebass',[0,8],0,.35),part('shaker',[2,6,10,14],0,.16),part('organ',[0],2,.18),part('voice',[2,10],0,.28)]}
@@ -54,7 +54,7 @@ export function partsForStyle(style:StyleId,preset:Preset=presets[style]):Part[]
   lofi:part('guitar',[6,14],1,.13),funk:part('clap',[12],0,.13),
   reggae:part('epiano',[2,10],1,.14),drumandbass:part('shaker',[6,14],0,.13),
   latin:part('harp',[6,14],1,.15),ambient:part('organ',[0],1,.13),
-  focus:part('harp',[6,14],1,.12),sport:part('shaker',[2,6,10,14],0,.16)
+  focus:part('pad',[0],0,.1),sport:part('shaker',[2,6,10,14],0,.16)
  };
  if(parts.length===8){const extra=ninth[style];parts.push({...extra,steps:extra.steps.filter(s=>s<(preset.beats??4)*4)});}
  return parts;

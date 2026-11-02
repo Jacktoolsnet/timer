@@ -59,7 +59,7 @@ let currentDance:DanceId|null=null,pendingDance:DanceId|null=null;
 function currentPreset(){return currentDance?dances[currentDance].preset:presets[currentStyle];}
 function rhythmTrack(i:number){return danceFoundation(currentDance,i);}
 function waltzPulse(i:number){return tracks[i].slots===stepsPerBar()?waltzPulseRole(groove.beats,tracks[i].instrument,tracks[i].points):null;}
-function pulseTrack(i:number){return rhythmTrack(i)||waltzPulse(i)!==null;}
+function pulseTrack(i:number){return rhythmTrack(i)||waltzPulse(i)!==null||(currentStyle==='focus'&&groove.choice==='auto'&&!currentDance&&['kick','shaker','bass'].includes(tracks[i].instrument));}
 let grooveChoice:GrooveChoice='auto',pendingGroove:GrooveChoice|null=null;
 let groove=resolveGroove(currentStyle,grooveChoice);
 function stepsPerBar(){return groove.steps;}
@@ -192,7 +192,7 @@ function applyGrid(index:number,choice:GridChoice,slots:GridSize){
  if(song)for(const memory of [song.chorus,song.verse,song.from])if(memory){const p=memory[index];p.points=remapPoints(p.points,p.slots??old,slots);p.slots=slots;}
 }
 function gridCandidates(){
- return tracks.map((tr,index)=>({tr,index})).filter(({tr,index})=>tr.enabled&&!tr.mute&&tr.volume>0&&!protectedRhythmTrack(index)&&tr.grid==='auto'&&tr.pendingGrid===null&&musicalStep()>=drawnUntil[index]&&![...padGestures.values()].some(g=>g.target===index||padLocation(g.startX,g.startY)?.index===index)&&canEvolveGrid(tr.instrument,pulseTrack(index))&&(!tr.morph||canEvolveGrid(tr.morph.to,false)));
+ return tracks.map((tr,index)=>({tr,index})).filter(({tr,index})=>tr.enabled&&!tr.mute&&tr.volume>0&&!protectedRhythmTrack(index)&&tr.grid==='auto'&&tr.pendingGrid===null&&musicalStep()>=drawnUntil[index]&&![...padGestures.values()].some(g=>g.target===index||padLocation(g.startX,g.startY)?.index===index)&&!(currentStyle==='focus'&&index===0)&&canEvolveGrid(tr.instrument,pulseTrack(index))&&(!tr.morph||canEvolveGrid(tr.morph.to,false)));
 }
 function varyGrid(index:number,initial=false){
  const tr=tracks[index],old=tr.slots;
@@ -668,7 +668,7 @@ function evolveJourney(time:number){
   const length=journeyLength()+((currentStyle==='focus'||currentStyle==='coffeehouse'||currentStyle==='slowwaltz')?2:0);
   journey={track:chosen.index,cycle:chosen.tr.morph?Math.round(chosen.tr.morph.progress*length):0,length,
    pitch:Math.max(0,Math.min(currentPreset().scale.length-1,chosen.tr.pitch+(Math.random()<.5?-1:1)*((currentStyle==='focus'||currentStyle==='coffeehouse'||currentStyle==='slowwaltz')?1:2))),
-   tempo:Math.max(currentStyle==='slowwaltz'?78:40,Math.min(currentStyle==='slowwaltz'?96:180,Math.round(bpm*(.94+Math.random()*.12))))};
+   tempo:Math.max(currentStyle==='slowwaltz'?78:currentStyle==='focus'?68:40,Math.min(currentStyle==='slowwaltz'?96:currentStyle==='focus'?84:180,Math.round(bpm*(.94+Math.random()*.12))))};
  }
  const plan=journey,tr=tracks[plan.track];
  plan.cycle++;
@@ -747,6 +747,9 @@ function schedule(){
   const s=step%stepsPerBar();
   const performance=evolving?mixLevels(tracks,development,musicalStep(),chorusRelief,drawnUntil):tracks.map(()=>1);
   const performed=performance.map((gain,i)=>{
+   // Focus keeps the melody present: rotating leads and section changes are gentle,
+   // otherwise a quiet kick can become the foreground when the piano is ducked.
+   if(currentStyle==='focus')return pulseTrack(i)?1:(.7+.3*gain)*(evolving?.8+.2*songLevel(nextTime,tracks[i].instrument):1);
    if(currentStyle==='slowwaltz'){
     // Sections shape the whole waltz, not just its melody against an unchanging loud pulse.
     return slowWaltzMix(pulseTrack(i)?1:gain,waltzPulse(i))*(evolving?songLevel(nextTime,tracks[i].instrument):1);

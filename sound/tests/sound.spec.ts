@@ -484,8 +484,8 @@ test('focus and sport presets load and preserve explicit visual selections',asyn
  await page.locator('[data-background-mode=stars]').click();
  await page.locator('[data-center-mode=filled]').click();
  await page.locator('[data-style-preset=focus]').click();
- await expect(page.locator('#tempo')).toHaveValue('80');
- await expect(page.locator('[data-track="0"] .instrument-name')).toHaveText('Flächenklang');
+ await expect(page.locator('#tempo')).toHaveValue('76');
+ await expect(page.locator('[data-track="0"] .instrument-name')).toHaveText('Klavier');
  await expect(page.locator('[data-background-mode=stars]')).toHaveAttribute('aria-pressed','true');
  await expect(page.locator('[data-center-mode=filled]')).toHaveAttribute('aria-pressed','true');
  await page.locator('[data-background-mode=clouds]').click();
