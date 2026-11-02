@@ -12,6 +12,7 @@ export type SavedTrack={
  morph:{to:InstrumentId;progress:number}|null;
 };
 export type SoundSettings={
+ pad?:{mode:'draw'|'rhythm';beats:2|3|4;hits:boolean[][]};
  version:1;style:StyleId;dance?:DanceId|null;groove?:GrooveChoice;bpm:number;volume:number;transpose?:number;noteEffect?:number;tracks:SavedTrack[];
  background:typeof backgroundModes[number];center:typeof centerModes[number];orbit:typeof orbitModes[number];
 };
@@ -28,6 +29,11 @@ export function decodeSettings(raw:string|null):SoundSettings|null{
   if(s.noteEffect!==undefined&&!number(s.noteEffect,0,1.5))return null;
   if(s.dance!==undefined&&s.dance!==null&&!member(danceIds,s.dance))return null;
   if(s.groove!==undefined&&!member(grooveChoices,s.groove))return null;
+  if(s.pad!==undefined){
+   if(!s.pad||!member(['draw','rhythm'],s.pad.mode)||![2,3,4].includes(s.pad.beats)
+    ||!Array.isArray(s.pad.hits)||s.pad.hits.length!==3
+    ||s.pad.hits.some((lane:unknown)=>!Array.isArray(lane)||lane.length!==s.pad.beats*8||lane.some((on:unknown)=>typeof on!=='boolean')))return null;
+  }
   for(const tr of s.tracks){
    if(tr?.grid!==undefined&&tr.grid!=='auto'&&!(gridSizes as readonly unknown[]).includes(tr.grid))return null;
    if(tr?.slots!==undefined&&!(gridSizes as readonly unknown[]).includes(tr.slots))return null;

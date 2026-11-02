@@ -243,3 +243,21 @@ body:not(.focus-view) .sound-top{margin-bottom:20px}
 
 /* Keep legacy rhythm controls available internally, but out of the simplified UI. */
 .groove-controls[hidden],.dances-tile[hidden]{display:none!important}
+
+/* Shared drawing / multi-touch rhythm surface. */
+.pad-mode-controls{display:flex;gap:8px;margin:0 0 12px}
+.pad-mode-controls button,.rhythm-actions button{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);border-radius:12px;padding:10px 14px;min-height:44px;background:var(--bg);color:var(--text);cursor:pointer;font:inherit;font-size:12px}
+.pad-mode-controls button{flex:1}
+.pad-mode-controls button[aria-pressed=true]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 18%,var(--bg));color:var(--text);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 25%,transparent)}
+.pad-mode-controls svg,.rhythm-actions svg{width:19px;height:19px;flex:none}
+#rhythm-zones{position:absolute;inset:0;pointer-events:none;display:grid;grid-template-rows:repeat(3,1fr)}
+#rhythm-zones[hidden],#rhythm-controls[hidden]{display:none}
+#rhythm-zones span{border-bottom:1px solid var(--line);padding:10px 14px;font-size:11px;letter-spacing:.08em;color:var(--muted);background:linear-gradient(100deg,color-mix(in srgb,var(--lane) 9%,transparent),transparent)}
+#rhythm-zones [data-lane="0"]{--lane:#a482ed}#rhythm-zones [data-lane="1"]{--lane:#f0788c}#rhythm-zones [data-lane="2"]{--lane:#21bed1;border-bottom:0}
+#drawing{position:relative}
+.rhythm-actions{display:flex;gap:8px}.rhythm-actions button:first-child{flex:1}
+#rhythm-status{font-size:12px;line-height:1.5;color:var(--muted);margin:10px 2px}
+#rhythm-progress{width:100%;height:7px;accent-color:var(--accent);margin-bottom:14px}
+
+.rhythm-actions{flex-wrap:wrap}.rhythm-actions #rhythm-done{flex:1 1 100%;border-color:var(--accent);background:color-mix(in srgb,var(--accent) 18%,var(--bg))}
+.rhythm-actions #rhythm-record{flex:1}.rhythm-actions button:disabled{opacity:.45;cursor:default}

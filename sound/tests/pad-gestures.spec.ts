@@ -50,7 +50,7 @@ test('cancellation and preset changes never turn an unfinished touch into a tap'
 });
 
 test('keyboard taps and holds work in three-quarter meter without changing the dance foundation',async({page})=>{
- await page.goto('/de/');await page.locator('[data-dance=viennese]').click();const pad=page.locator('#drawing');
+ await page.goto('/de/');await page.locator('[data-dance=viennese]').evaluate((button:HTMLButtonElement)=>button.click());const pad=page.locator('#drawing');
  const before=await page.locator('.instrument').evaluateAll(rows=>rows.slice(0,4).map(row=>Array.from(row.querySelectorAll('[data-step]')).map(b=>b.getAttribute('aria-pressed'))));
  await pad.focus();await page.keyboard.press('ArrowUp');await page.keyboard.press('ArrowUp');await page.keyboard.press('ArrowUp');await page.keyboard.press('ArrowUp');await page.keyboard.down(' ');await page.waitForTimeout(1100);await page.keyboard.up(' ');
  expect(await page.locator('.instrument').evaluateAll(rows=>rows.slice(0,4).map(row=>Array.from(row.querySelectorAll('[data-step]')).map(b=>b.getAttribute('aria-pressed'))))).toEqual(before);

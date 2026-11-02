@@ -1,6 +1,8 @@
+import {emptyRhythm,hasRhythm,rhythmLane,recordRhythmHit,rhythmHitsAt,finishRhythm,replacingRhythmLane,resetRhythmSession,remeterRhythm,rhythmCopy,type RhythmLane} from '../lib/tap-rhythm';
+import {createRhythmPlayer} from '../lib/rhythm-player';
 import {performanceGate} from '../lib/performance';
 import {gridEvolutionPlan,enrichGrid,variedGrid,gridSizes,gridCopy,remapPoints,gridEvents,gridPhraseHold,swingPosition,gridFractionAtTime,canEvolveGrid,type GridChoice,type GridSize} from '../lib/track-grid';
-import {HOLD_DELAY,RING_FADE,gestureMode,holdSteps,ringAppearance,type GestureMode} from '../lib/pad-gestures';
+import {gestureCopy,HOLD_DELAY,RING_FADE,gestureMode,holdSteps,ringAppearance,type GestureMode} from '../lib/pad-gestures';
 import {danceRhythmRole,danceRhythmWave,rhythmDrums,rhythmClarity,isRhythmDance,type PulseInstrument} from '../lib/dance-rhythm';
 import {tangoPulseRole,tangoPulseWave,dancePulseClarity} from '../lib/tango';
 import {waltzPulseRole,waltzPulseWave,slowWaltzSwell,slowWaltzMix} from '../lib/waltz';
@@ -59,6 +61,61 @@ function pulseTrack(i:number){return rhythmTrack(i)||waltzPulse(i)!==null;}
 let grooveChoice:GrooveChoice='auto',pendingGroove:GrooveChoice|null=null;
 let groove=resolveGroove(currentStyle,grooveChoice);
 function stepsPerBar(){return groove.steps;}
+let padMode:'draw'|'rhythm'='draw';
+let tapPattern=emptyRhythm(groove.beats);
+let rhythmEditing=false,orbitBus:GainNode|undefined;
+let rhythmPlayer:ReturnType<typeof createRhythmPlayer>|undefined;
+let rhythmStarting:Promise<void>|null=null,rhythmGeneration=0;
+const rhythmClock:{step:number;time:number;duration:number}[]=[];
+const rhythmVisual:{time:number;lane:RhythmLane}[]=[];
+const percussion=new Set(['kick','snare','hat','clap','tom','rim','shaker']);
+const rhythmColors=[1,2,0];
+function audibleMixTracks(){return hasRhythm(tapPattern)?tracks.map(tr=>percussion.has(tr.instrument)?{...tr,mute:true}:tr):tracks;}
+function rhythmPosition(time=audio?.currentTime||0){
+ const clock=[...rhythmClock].reverse().find(entry=>entry.time<=time)||rhythmClock[0];
+ return clock?Math.max(0,clock.step+(time-clock.time)/clock.duration):0;
+}
+function syncRhythmUi(){
+ const text=rhythmCopy[language],active=padMode==='rhythm';
+ document.querySelectorAll<HTMLButtonElement>('[data-pad-mode]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.padMode===padMode)));
+ $('#rhythm-zones').hidden=!active;$('#rhythm-controls').hidden=!active;
+ $('#gesture-help').textContent=active?text.help:gestureCopy[language].help;
+ $('#gesture-keyboard').textContent=active?text.keyboard:gestureCopy[language].keyboard;
+ const hint=active?text.hint:gestureCopy[language].hint;
+ $('#draw-hint').textContent=hint;drawing.setAttribute('aria-label',hint);
+ const status=active&&rhythmEditing&&hasRhythm(tapPattern)?text.editing:tapPattern.state==='armed'?text.armed:tapPattern.state==='recording'?text.recording:playing?text.loop:text.paused;
+ if($('#rhythm-status').textContent!==status)$('#rhythm-status').textContent=status;
+ drawing.dataset.mode=padMode;drawing.dataset.rhythmState=tapPattern.state;
+ drawing.dataset.rhythmHits=String(tapPattern.hits.reduce((n,lane)=>n+lane.filter(Boolean).length,0));
+ drawing.dataset.rhythmPattern=JSON.stringify(tapPattern.hits);
+ $('#rhythm-clear').toggleAttribute('disabled',!hasRhythm(tapPattern));
+ $('#rhythm-done').toggleAttribute('disabled',!hasRhythm(tapPattern)||!rhythmEditing);
+ const musicLevel=active&&rhythmEditing ? .28 : 1;
+ drawing.dataset.musicLevel=String(musicLevel);drawing.dataset.rhythmEditing=String(rhythmEditing);
+ if(audio&&orbitBus)orbitBus.gain.setTargetAtTime(musicLevel,audio.currentTime,.18);
+}
+function resetTapRhythm(){
+ rhythmGeneration++;rhythmPlayer?.stop();rhythmVisual.length=0;
+ rhythmEditing=padMode==='rhythm';tapPattern=emptyRhythm(groove.beats);cancelPadGestures();syncRhythmUi();persistSettings();
+}
+async function tapRhythm(lane:RhythmLane,pressed:number){
+ const generation=rhythmGeneration;
+ if(!playing){
+  rhythmStarting??=start().finally(()=>{rhythmStarting=null;});
+  await rhythmStarting;
+ }
+ if(!playing||!audio||generation!==rhythmGeneration)return;
+ const at=audio.currentTime-Math.max(0,performance.now()-pressed)/1000,position=rhythmPosition(at);
+ const replacing=replacingRhythmLane(tapPattern,position,lane);
+ // Cancel only this lane's already queued hits; the other fingers/loops keep playing.
+ rhythmPlayer?.cancelLane(lane,replacing?-Infinity:audio.currentTime);
+ for(let i=rhythmVisual.length-1;i>=0;i--)if(rhythmVisual[i].lane===lane&&rhythmVisual[i].time>=audio.currentTime)rhythmVisual.splice(i,1);
+ rhythmEditing=true;
+ recordRhythmHit(tapPattern,position,lane);
+ rhythmPlayer?.hit(lane,audio.currentTime+.004);
+ syncRhythmUi();persistSettings();
+}
+
 function musicalStep(){return step/stepsPerBar()*16;}
 function trackSteps(i:number){return tracks[i].slots;}
 function trackAngle(i:number,time:number){
@@ -194,7 +251,7 @@ function setEvolution(on:boolean){
  if(evolving&&!on)tracks.forEach(tr=>{if(tr.directionMode!=='random')tr.pendingDirection=tr.directionMode==='reverse'?-1:1;});
  if(on&&!evolving)startSong(playing?Math.ceil(step/stepsPerBar()):0);
  if(!on){
-  currentMix=currentStyle==='slowwaltz'?balancedMix(tracks,tracks.map((_,i)=>slowWaltzMix(1,waltzPulse(i)))):tracks.map(()=>1);
+  currentMix=currentStyle==='slowwaltz'?balancedMix(audibleMixTracks(),tracks.map((_,i)=>slowWaltzMix(1,waltzPulse(i)))):tracks.map(()=>1);
   if(audio)liveMix.forEach((nodes,i)=>nodes.forEach(node=>{
    node.gain.cancelAndHoldAtTime(audio!.currentTime);
    node.gain.setTargetAtTime(currentMix[i],audio!.currentTime,.15);
@@ -213,6 +270,7 @@ function saveSettings(){
   const snapshot:SoundSettings={
    version:1,style:currentStyle,dance:currentDance,groove:grooveChoice,bpm,transpose,noteEffect,volume:Number($<HTMLInputElement>('#volume').value),
    background:backgroundChoice,center:centerChoice,orbit:orbitChoice,
+   pad:{mode:padMode,beats:tapPattern.beats,hits:tapPattern.hits.map(lane=>[...lane])},
    tracks:tracks.map(tr=>({
     grid:tr.grid,slots:tr.slots,enabled:tr.enabled,mute:tr.mute,instrument:tr.instrument,points:[...tr.points],motif:[...tr.motif],volume:tr.volume,pitch:tr.pitch,
     phase:tr.phase,direction:evolving&&tr.directionMode!=='random'?(tr.directionMode==='reverse'?-1:1):(tr.pendingDirection??tr.direction),directionMode:tr.directionMode,randomDynamics:tr.randomDynamics,
@@ -374,6 +432,7 @@ function voice(i:number,time:number,beat:number,velocity:number,phrase?:Phrase){
  if(tr.morph&&weights[1]>.0001)voiceInstrument(i,time,beat,velocity*weights[1],tr.morph.to,phrase);
 }
 function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:InstrumentId,phrase?:Phrase){
+ if(hasRhythm(tapPattern)&&percussion.has(id))return;
  const tr=tracks[i];const musicBeat=beat/tr.slots*stepsPerBar();if(!audio||!master||!tr.enabled||tr.mute||tr.volume===0)return;
  const ctx=audio,profile=soundProfiles[currentStyle];
  const tango=tangoPulseRole(currentDance,i,id),crisp=currentDance==='viennese',dancePulse=danceRhythmRole(currentDance,i,id);
@@ -404,7 +463,7 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
  pan.pan.linearRampToValueAtTime(stereoPosition(id,i,bar+1,expressionSeed),time+60/bpm*4);
  const fader=ctx.createGain();fader.gain.setValueAtTime(currentMix[i],time);
  liveMix[i].add(fader);
- bus.connect(fader);fader.connect(pan);pan.connect(master);
+ bus.connect(fader);fader.connect(pan);pan.connect(orbitBus!);
  const cleanVoice=()=>{liveMix[i].delete(fader);bus.disconnect();fader.disconnect();pan.disconnect();hallSend.disconnect();echoSend.disconnect();};
  if(space){
   const room=spaceProfile(currentStyle),foundation=['kick','bass','synthbass','doublebass'].includes(id);
@@ -614,14 +673,19 @@ function schedule(){
    }
    return evolving?(pulseTrack(i)?1:gain*songLevel(nextTime,tracks[i].instrument)):1;
   });
-  currentMix=balancedMix(tracks,performed).map((gain,i)=>gain*songFade(nextTime)*(currentStyle==='slowwaltz'&&!pulseTrack(i)?slowWaltzSwell(s/4):1)*dancePulseClarity(currentDance,i,s)*rhythmClarity(currentDance,i,s));
+  currentMix=balancedMix(audibleMixTracks(),performed).map((gain,i)=>gain*songFade(nextTime)*(currentStyle==='slowwaltz'&&!pulseTrack(i)?slowWaltzSwell(s/4):1)*dancePulseClarity(currentDance,i,s)*rhythmClarity(currentDance,i,s));
   liveMix.forEach((nodes,index)=>nodes.forEach(node=>node.gain.setTargetAtTime(currentMix[index],nextTime,.09)));
   const duration=60/bpm/4*(s%4<2?1+groove.swing:1-groove.swing);
+  rhythmClock.push({step,time:nextTime,duration});if(rhythmClock.length>128)rhythmClock.shift();
+  for(const lane of rhythmHitsAt(tapPattern,step)){
+   rhythmPlayer?.hit(lane,nextTime);rhythmVisual.push({time:nextTime,lane});
+  }
   events.push({time:nextTime,step:s,duration,notes:[]});
   tracks.forEach((tr,i)=>{for(const due of gridEvents(tr.slots,stepsPerBar(),s,groove.beats,groove.swing)){
    const beat=((tr.direction*due.index+tr.phase)%tr.slots+tr.slots)%tr.slots,time=nextTime+due.offset*60/bpm/4;
    const playNote=()=>{
    if(tr.enabled&&!tr.mute&&tr.volume>0){
+    if(hasRhythm(tapPattern)&&percussion.has(tr.instrument))return;
     const old=evolving&&!pulseTrack(i)&&song?.from?song.from[i]:null;
     const protectedDrawing=musicalStep()<drawnUntil[i];
     if(!pulseTrack(i)&&!phraseActive(tr.instrument,musicalStep(),i,song?.form[song.index].kind==='chorus',evolving,protectedDrawing)){
@@ -656,11 +720,13 @@ function schedule(){
  }
 }
 function stop(){
+ rhythmGeneration++;rhythmPlayer?.stop();rhythmVisual.length=0;finishRhythm(tapPattern);
  cancelPadGestures();
  sustained.forEach(entry=>entry.voice.release(audio?.currentTime||0));sustained.clear();
  setEvolution(false);playing=false;if(timer)clearInterval(timer);timer=undefined;events.length=0;tracks.forEach(tr=>tr.hits.fill(-Infinity));
  if(master&&audio){master.gain.cancelScheduledValues(audio.currentTime);master.gain.setTargetAtTime(0,audio.currentTime,.01);}
  applyPendingGrids();applyDirections();if(pendingStyle)applyStyle(pendingStyle,pendingDance);if(pendingGroove){configureGroove(pendingGroove,true);sync();}
+ syncRhythmUi();
  labelAction('#play',t.play);$('#play').setAttribute('aria-pressed','false');
 }
 let starting=false;
@@ -668,12 +734,15 @@ async function start(){
  if(starting)return;starting=true;
  try{
   audio??=new AudioContext();
-  if(!master){master=audio.createGain();const compressor=audio.createDynamicsCompressor();master.connect(compressor);compressor.connect(audio.destination);space=createAudioSpace(audio,master);}
+  if(!master){master=audio.createGain();const compressor=audio.createDynamicsCompressor();master.connect(compressor);compressor.connect(audio.destination);orbitBus=audio.createGain();orbitBus.connect(master);space=createAudioSpace(audio,orbitBus);}
+  rhythmPlayer??=createRhythmPlayer(audio,master);
   await audio.resume();if(document.hidden)return;
   master.gain.setValueAtTime(Number($<HTMLInputElement>('#volume').value),audio.currentTime);
+  rhythmClock.length=0;rhythmVisual.length=0;
+  if(hasRhythm(tapPattern)){finishRhythm(tapPattern);tapPattern.start=0;resetRhythmSession(tapPattern);}
   playing=true;step=0;evolveAnimations();animationStep=nextEvolutionStep(0,Math.random,stepsPerBar());nextTime=audio.currentTime+.05;visualStep=0;visualTime=nextTime;visualDuration=60/bpm/4;
   labelAction('#play',t.pause);$('#play').setAttribute('aria-pressed','true');$('#audio-status').textContent='';
-  schedule();timer=setInterval(schedule,25);
+  syncRhythmUi();schedule();timer=setInterval(schedule,25);
  }catch{$('#audio-status').textContent=t.error;stop();}
  finally{starting=false;}
 }
@@ -707,6 +776,10 @@ function configureGroove(choice:GrooveChoice,rebuild:boolean){
  const old=stepsPerBar(),bar=step/old;
  grooveChoice=currentDance?'auto':choice;pendingGroove=null;groove=resolveGroove(currentStyle,choice,currentDance);
  step=Math.round(bar*stepsPerBar());
+ if(old!==stepsPerBar()){
+  remeterRhythm(tapPattern,groove.beats,Math.floor(step/stepsPerBar())*stepsPerBar());
+  rhythmClock.length=0;rhythmVisual.length=0;syncRhythmUi();persistSettings();
+ }
  if(Number.isFinite(evolutionStep))evolutionStep=Math.ceil(evolutionStep/old)*stepsPerBar();
  if(Number.isFinite(animationStep))animationStep=Math.ceil(animationStep/old)*stepsPerBar();
  tracks.forEach((tr,i)=>{
@@ -751,7 +824,7 @@ $<HTMLInputElement>('#transpose').addEventListener('input',e=>{
  transpose=Number((e.target as HTMLInputElement).value);syncTranspose();persistSettings();
 });
 $<HTMLInputElement>('#volume').addEventListener('input',e=>{if(master&&audio&&playing)master.gain.setTargetAtTime(Number((e.target as HTMLInputElement).value),audio.currentTime,.02);persistSettings();});
-$('#clear').addEventListener('click',()=>{cancelPadGestures();tracks.forEach(tr=>tr.points.fill(false));sync();});
+$('#clear').addEventListener('click',()=>{resetTapRhythm();cancelPadGestures();tracks.forEach(tr=>tr.points.fill(false));sync();});
 function applyStyle(id:StyleId,dance:DanceId|null=null){
  // Tango is a visible music style backed by the existing protected marcato arrangement.
  if(id==='tango'||dance==='tango'){id='tango';dance='tango';}
@@ -894,15 +967,18 @@ function applyHold(g:PadGesture,now:number){
 }
 function beginPadGesture(id:number,x:number,y:number,clientX:number,clientY:number){
  if(padGestures.has(id)||padGestures.size>=10)return;
- const location=padLocation(x,y);if(!location)return;
- const now=performance.now(),ring:PadRing={x,y,color:colors[location.index],started:now,released:null,duration:0};
+ const location=padLocation(x,y);if(!location&&padMode==='draw')return;
+ const lane=rhythmLane(y,drawing.height);
+ const now=performance.now(),ring:PadRing={x,y,color:colors[padMode==='rhythm'?rhythmColors[lane]:location!.index],started:now,released:null,duration:0};
  if(padRings.length>=32){const released=padRings.findIndex(r=>r.released!==null);if(released>=0)padRings.splice(released,1);}
  padRings.push(ring);
- padGestures.set(id,{id,x,y,startX:x,startY:y,clientX,clientY,started:now,mode:'pending',painted:new Set(),lastStamp:0,applied:0,target:null,originStep:location.step,ring});
+ padGestures.set(id,{id,x,y,startX:x,startY:y,clientX,clientY,started:now,mode:'pending',painted:new Set(),lastStamp:0,applied:0,target:null,originStep:location?.step??0,ring});
+ if(padMode==='rhythm')void tapRhythm(lane,now);
  keyboardPoint={x,y};$('#draw-hint').style.display='none';syncPadState();
 }
 function movePadGesture(id:number,x:number,y:number,clientX:number,clientY:number){
  const g=padGestures.get(id);if(!g)return;
+ if(padMode==='rhythm')return;
  const now=performance.now(),mode=gestureMode(g.mode,Math.hypot(clientX-g.clientX,clientY-g.clientY),now-g.started);
  if(mode==='drawing'){
   if(g.mode!=='drawing'){
@@ -917,8 +993,8 @@ function movePadGesture(id:number,x:number,y:number,clientX:number,clientY:numbe
 function finishPadGesture(id:number,cancel=false){
  const g=padGestures.get(id);if(!g)return;
  const now=performance.now();
- if(!cancel&&g.mode==='drawing')paint(g,g.x,g.y,now,true);
- if(!cancel&&g.mode!=='drawing'){
+ if(padMode==='draw'&&!cancel&&g.mode==='drawing')paint(g,g.x,g.y,now,true);
+ if(padMode==='draw'&&!cancel&&g.mode!=='drawing'){
   if(now-g.started>=HOLD_DELAY)applyHold(g,now);
   else paint(g,g.startX,g.startY,now,true);
  }
@@ -932,6 +1008,17 @@ function syncPadState(){
  drawing.dataset.pointers=String(padGestures.size);
  drawing.dataset.input=[...padGestures.values()].some(g=>g.mode==='drawing')?'drawing':[...padGestures.values()].some(g=>g.mode==='holding')?'holding':padGestures.size?'pending':'idle';
 }
+document.querySelectorAll<HTMLButtonElement>('[data-pad-mode]').forEach(button=>button.addEventListener('click',()=>{
+ rhythmGeneration++;cancelPadGestures();padMode=button.dataset.padMode as typeof padMode;rhythmEditing=padMode==='rhythm';syncRhythmUi();persistSettings();
+}));
+$('#rhythm-done').addEventListener('click',()=>{
+ cancelPadGestures();rhythmGeneration++;rhythmEditing=false;finishRhythm(tapPattern);
+ // Accept even a short take now, without waiting for a further two-bar recording pass.
+ tapPattern.laneStart.fill(null);syncRhythmUi();persistSettings();
+});
+$('#rhythm-record').addEventListener('click',resetTapRhythm);
+$('#rhythm-clear').addEventListener('click',resetTapRhythm);
+syncRhythmUi();
 drawing.addEventListener('contextmenu',e=>e.preventDefault());
 drawing.addEventListener('pointerdown',e=>{
  if(e.button!==0)return;e.preventDefault();const p=position(e,drawing);
@@ -950,6 +1037,18 @@ window.addEventListener('pointerup',e=>finishPadGesture(e.pointerId));
 window.addEventListener('pointercancel',e=>finishPadGesture(e.pointerId,true));
 window.addEventListener('blur',cancelPadGestures);
 drawing.addEventListener('keydown',e=>{
+ if(padMode==='rhythm'){
+  if(['1','2','3',' ','Enter'].includes(e.key)){
+   e.preventDefault();if(e.repeat)return;
+   const lane=(['1','2','3'].includes(e.key)?Number(e.key)-1:rhythmLane(keyboardPoint.y,drawing.height)) as RhythmLane;
+   const id=-(lane+2);beginPadGesture(id,350,(lane+.5)*drawing.height/3,0,0);finishPadGesture(id);return;
+  }
+  if(e.key.startsWith('Arrow')){
+   e.preventDefault();const lane=rhythmLane(keyboardPoint.y,drawing.height);
+   keyboardPoint={x:350,y:(Math.max(0,Math.min(2,lane+(e.key==='ArrowUp'?-1:e.key==='ArrowDown'?1:0)))+.5)*drawing.height/3};return;
+  }
+ }
+
  if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){
   e.preventDefault();if(padGestures.has(-1))return;
   const active=activeTracks(),location=padLocation(keyboardPoint.x,keyboardPoint.y);if(!location)return;
@@ -964,7 +1063,7 @@ drawing.addEventListener('keydown',e=>{
 drawing.addEventListener('keyup',e=>{if(e.key===' '){e.preventDefault();finishPadGesture(-1);}});
 drawing.addEventListener('blur',()=>finishPadGesture(-1,true));
 function renderPadGestures(now:number,dark:boolean){
- for(const g of padGestures.values())if(g.mode!=='drawing'&&now-g.started>=HOLD_DELAY){g.mode='holding';applyHold(g,now);}
+ for(const g of padGestures.values())if(padMode==='draw'&&g.mode!=='drawing'&&now-g.started>=HOLD_DELAY){g.mode='holding';applyHold(g,now);}
  syncPadState();padRings=padRings.filter(r=>r.released===null||now-r.released<RING_FADE);
  drawing.dataset.rings=String(padRings.length);
  for(const ring of padRings){
@@ -1240,8 +1339,20 @@ function frame(now:number){
  const previousTrail=new Map<number,Trail>();
  for(const b of trail){const a=previousTrail.get(b.pointer);previousTrail.set(b.pointer,b);if(!a||b.start)continue;dc.globalAlpha=Math.max(0,1-(now-b.time)/2200);const color=dark?b.color:lightColors[colors.indexOf(b.color)];dc.strokeStyle=color;dc.shadowColor=color;dc.shadowBlur=reduced.matches?0:dark?16:7;dc.lineWidth=3;dc.lineCap='round';dc.beginPath();dc.moveTo(a.x,a.y);dc.lineTo(b.x,b.y);dc.stroke();}
  dc.globalAlpha=1;dc.shadowBlur=0;
+ if(playing&&tapPattern.state==='recording'&&tapPattern.start!==null&&rhythmPosition()>=tapPattern.start+tapPattern.beats*8){
+  finishRhythm(tapPattern);syncRhythmUi();persistSettings();
+ }
+ const progress=$<HTMLProgressElement>('#rhythm-progress');progress.max=tapPattern.beats*8;
+ progress.value=tapPattern.state==='armed'?0:tapPattern.state==='loop'?progress.max:Math.max(0,rhythmPosition()-(tapPattern.start??0));
+ while(rhythmVisual.length&&rhythmVisual[0].time<=time){
+  const hit=rhythmVisual.shift()!;
+  if(padMode==='rhythm'){
+   padRings.push({x:350,y:(hit.lane+.5)*drawing.height/3,color:colors[rhythmColors[hit.lane]],started:now,released:now,duration:160});
+   if(padRings.length>32)padRings.shift();
+  }
+ }
  renderPadGestures(now,dark);
- if(!trail.length&&!padGestures.size&&!padRings.length)$('#draw-hint').style.display='';
+ if(!trail.length&&!padGestures.size&&!padRings.length)$('#draw-hint').style.display=padMode==='rhythm'&&hasRhythm(tapPattern)?'none':'';
  requestAnimationFrame(frame);
 }
 enhanceClockSelects($('.instruments-tile') as HTMLFormElement);
@@ -1260,6 +1371,12 @@ function restoreSettings(){
    tr.directionMode=source.directionMode;tr.randomDynamics=source.randomDynamics;
    tr.morph=source.morph?{...source.morph,from:source.morph.progress,at:0,duration:0}:null;
   });
+  if(saved.pad){
+   padMode=saved.pad.mode;tapPattern=emptyRhythm(saved.pad.beats);
+   tapPattern.hits=saved.pad.hits.map(lane=>[...lane]);finishRhythm(tapPattern);
+   tapPattern.start=hasRhythm(tapPattern)?0:null;
+   remeterRhythm(tapPattern,groove.beats,0);syncRhythmUi();
+  }
   selectCenterMode(saved.center);selectBackgroundMode(saved.background);selectOrbitMode(saved.orbit);
  }catch{}
 }
