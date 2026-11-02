@@ -51,6 +51,13 @@ const vocalPalette:Record<StyleId,InstrumentId[]>={
  jazz:['voice'],coffeehouse:['voice'],ambient:['choir','vocalpad'],focus:['vocalpad'],sport:['voice'],
  hiphop:['voice'],lofi:['voice'],funk:['voice'],reggae:['voice'],drumandbass:['vocalpad'],latin:['voice']
 };
+/** Curated additional colours: manual choices stay unrestricted and use style-specific articulation. */
+const colourPalette:Partial<Record<StyleId,InstrumentId[]>>={
+ electronic:['pluck'],house:['epiano','organ','strings'],pop:['epiano','strings','saxophone'],
+ rock:['organ','epiano'],classical:['organ'],jazz:['epiano','guitar'],coffeehouse:['piano','saxophone'],
+ funk:['saxophone','epiano'],latin:['saxophone','epiano'],lofi:['piano'],reggae:['epiano'],
+ ambient:['epiano'],focus:['harp','epiano'],sport:['organ']
+};
 export function evolutionPalette(style:StyleId):InstrumentId[]{
- return [...new Set([...partsForStyle(style).map(part=>part.instrument),...vocalPalette[style]])];
+ return [...new Set([...partsForStyle(style).map(part=>part.instrument),...vocalPalette[style],...(colourPalette[style]||[])])];
 }

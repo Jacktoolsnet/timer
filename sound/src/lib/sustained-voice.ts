@@ -1,3 +1,4 @@
+import type {VoiceArticulation} from './performance';
 import type {SustainedInstrument} from './phrasing';
 export function sustainedProfile(id:SustainedInstrument){
  if(id==='saxophone')return {attack:.055,release:.24,glide:.065,vibrato:.0022,rate:5.3};
@@ -9,10 +10,10 @@ export function sustainedProfile(id:SustainedInstrument){
  return {attack:.08,release:.3,glide:.1,vibrato:.0015,rate:5};
 }
 const breathBuffers=new WeakMap<BaseAudioContext,AudioBuffer>();
-export function createSustainedVoice(ctx:AudioContext,destination:AudioNode,id:SustainedInstrument,frequency:number,time:number,level:number,hold:number,vowel:number,onEnded:()=>void){
+export function createSustainedVoice(ctx:AudioContext,destination:AudioNode,id:SustainedInstrument,frequency:number,time:number,level:number,hold:number,vowel:number,onEnded:()=>void,articulation:VoiceArticulation={}){
  const gain=ctx.createGain(),vibrato=ctx.createOscillator(),depth=ctx.createGain();
  const strings=id==='strings',pad=id==='vocalpad'||id==='pad',choir=id==='choir',wind=id==='saxophone',organ=id==='organ';
- const profile=sustainedProfile(id),{attack,release}=profile;
+ const profile={...sustainedProfile(id),...articulation},{attack,release}=profile;
  const real=new Float32Array(25),imag=new Float32Array(25);
  for(let h=1;h<imag.length;h++)imag[h]=organ?([.2,1,0,.38,0,.22,0,.12][h-1]||0):strings?Math.pow(.55,h-1)/Math.sqrt(h):wind?1/Math.pow(h,.85):id==='pad'?Math.pow(.45,h-1):1/Math.pow(h,1.1);
  const wave=ctx.createPeriodicWave(real,imag);
@@ -67,8 +68,9 @@ export function createSustainedVoice(ctx:AudioContext,destination:AudioNode,id:S
  function envelope(at:number,target:number,duration:number,first=false){
   const peak=Math.max(.0001,target);
   gain.gain.cancelAndHoldAtTime(at);
-  gain.gain.linearRampToValueAtTime(peak,at+(first?attack:.1));
-  until=at+Math.max(duration,attack+.05);
+  const rise=articulation.detached?Math.min(attack,duration*.5):first?attack:.1;
+  gain.gain.linearRampToValueAtTime(peak,at+rise);
+  until=at+Math.max(duration,articulation.detached?rise+.003:attack+.05);
   gain.gain.setValueAtTime(peak,until);
   gain.gain.linearRampToValueAtTime(0,until+release);
   stopAt(until+release+.02);
@@ -84,7 +86,7 @@ export function createSustainedVoice(ctx:AudioContext,destination:AudioNode,id:S
   filters.forEach(filter=>filter.disconnect());routes.forEach(route=>route.disconnect());onEnded();
  };});
  return {
-  canContinue(at:number){return alive&&at>=last&&at<=until+.035;},
+  canContinue(at:number){return !articulation.detached&&alive&&at>=last&&at<=until+.035;},
   note(at:number,hz:number,target:number,duration:number,position:number){
    oscillators.forEach(({osc,detune})=>{
     osc.frequency.cancelAndHoldAtTime(at);
@@ -95,8 +97,9 @@ export function createSustainedVoice(ctx:AudioContext,destination:AudioNode,id:S
   },
   release(at:number){
    if(!alive)return;
-   gain.gain.cancelAndHoldAtTime(at);gain.gain.linearRampToValueAtTime(0,at+.12);
-   stopAt(at+.14);until=at;
+   const tail=Math.min(.12,release);
+   gain.gain.cancelAndHoldAtTime(at);gain.gain.linearRampToValueAtTime(0,at+tail);
+   stopAt(at+tail+.02);until=at;
   }
  };
 }

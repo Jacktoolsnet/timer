@@ -1,3 +1,4 @@
+import {performanceGate} from '../lib/performance';
 import {variedGrid,gridSizes,gridCopy,remapPoints,gridEvents,gridPhraseHold,swingPosition,gridFractionAtTime,canEvolveGrid,type GridChoice,type GridSize} from '../lib/track-grid';
 import {HOLD_DELAY,RING_FADE,gestureMode,holdSteps,ringAppearance,type GestureMode} from '../lib/pad-gestures';
 import {danceRhythmRole,danceRhythmWave,rhythmDrums,rhythmClarity,isRhythmDance,type PulseInstrument} from '../lib/dance-rhythm';
@@ -431,18 +432,19 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
   const frequency=vocal?vocalFundamental(261.626*2**(voiced/12))*2**(transpose/12):id==='organ'?note/2:note;
   const character=vocalCharacter(currentStyle),vowel=evolving?vowelPosition(step/stepsPerBar(),expressionSeed):character.vowel;
   const clock=((beat-tr.phase)*tr.direction+tr.slots*2)%tr.slots;
-  const hold=tr.slots===stepsPerBar()?phraseHold(phrase?.points||tr.points,beat,tr.direction,60/bpm/4,groove.swing,clock,tr.slots):gridPhraseHold(phrase?.points||tr.points,beat,clock,tr.direction,tr.slots,groove.beats,bpm,groove.swing);
+  const bridge=tr.slots===stepsPerBar()?phraseHold(phrase?.points||tr.points,beat,tr.direction,60/bpm/4,groove.swing,clock,tr.slots):gridPhraseHold(phrase?.points||tr.points,beat,clock,tr.direction,tr.slots,groove.beats,bpm,groove.swing);
+  const articulation=performanceGate(currentStyle,id as SustainedInstrument,bridge,60/bpm,currentDance),hold=articulation.hold;
   const level=tr.volume*velocity*(id==='voice'?.25:id==='strings'?.15:id==='saxophone'?.23:id==='organ'?.16:id==='pad'?.13:.18);
-  if(previous?.voice.canContinue(time)){
+  if(articulation.legato&&previous?.voice.canContinue(time)){
    previous.voice.note(time,frequency,level,hold,vowel);
    cleanVoice();return;
   }
-  previous?.voice.release(time);
+  if(articulation.legato)previous?.voice.release(time);
   const entry={track:i,id:id as SustainedInstrument,voice:null as unknown as ReturnType<typeof createSustainedVoice>};
   entry.voice=createSustainedVoice(ctx,bus,entry.id,frequency,time,level,hold,vowel,()=>{
    cleanVoice();
    if(sustained.get(key)===entry)sustained.delete(key);
-  });
+  },articulation.voice);
   sustained.set(key,entry);return;
  }
  if(dancePulse||acousticInstruments.includes(id)){
