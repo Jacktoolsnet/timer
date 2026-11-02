@@ -1,7 +1,12 @@
 ---
-interface Props {name:'play'|'pause'|'focus'|'exit'|'random'|'reset'|'clear'|'evolve'|'hide'|'draw'|'rhythm'|'record'|'done'|'cancel'}
+interface Props {name:'play'|'pause'|'focus'|'exit'|'random'|'reset'|'clear'|'evolve'|'hide'|'draw'|'rhythm'|'record'|'done'|'cancel'|'files'|'download'|'upload'|'video'|'stop'}
 const {name}=Astro.props;
 const paths={
+ files:'M3 7h7l2 2h9v11H3ZM3 7V4h7l2 3',
+ download:'M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5',
+ upload:'M12 16V4m-5 5 5-5 5 5M4 16v5h16v-5',
+ video:'M3 6h12v12H3Zm12 4 6-3v10l-6-3',
+ stop:'M6 6h12v12H6Z',
  cancel:'m6 6 12 12M18 6 6 18',
  done:'m5 12 4 4L19 6',
  draw:'m4 16 12-12 4 4L8 20H4Zm10-10 4 4',

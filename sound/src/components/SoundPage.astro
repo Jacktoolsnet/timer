@@ -1,4 +1,5 @@
 ---
+import {fileCopy} from '../lib/file-copy';
 import {padNumbers} from '../lib/orbit-layout';
 import {gridCopy,gridSizes} from '../lib/track-grid';
 import {rhythmCopy} from '../lib/tap-rhythm';
@@ -22,13 +23,19 @@ import {copy,pitchCopy,noteEffectCopy,animationCopy,dynamicsCopy,directionCopy,c
 import type {Language} from '../lib/i18n';
 import '../styles/sound.css';
 interface Props {lang:Language}
-const {lang}=Astro.props,t=copy[lang],info=content[lang];
+const {lang}=Astro.props,t=copy[lang],info=content[lang],files=fileCopy[lang];
 const hideControls={de:'Steuerelemente ausblenden',en:'Hide controls',es:'Ocultar controles',fr:'Masquer les commandes'};
 const musicTitle={de:'Musikrichtung',en:'Music style',es:'Estilo musical',fr:'Style musical'};
 const instrumentsTitle={de:'Instrumente',en:'Instruments',es:'Instrumentos',fr:'Instruments'};
 ---
 <Layout lang={lang} title={info.title} description={info.description} route="">
-<div slot="header-focus" class="header-focus-actions"><button id="hide-focus-controls" class="icon-action" aria-label={hideControls[lang]} title={hideControls[lang]}><ActionIcon name="hide"/></button><button id="focus" class="icon-action" aria-label={t.focus} title={t.focus} aria-pressed="false"><ActionIcon name="focus"/><ActionIcon name="exit"/></button></div>
+<div slot="header-focus" class="header-focus-actions"><button id="files-open" type="button" aria-label={files.title} title={files.title} aria-haspopup="dialog"><ActionIcon name="files"/></button><button id="hide-focus-controls" class="icon-action" aria-label={hideControls[lang]} title={hideControls[lang]}><ActionIcon name="hide"/></button><button id="focus" class="icon-action" aria-label={t.focus} title={t.focus} aria-pressed="false"><ActionIcon name="focus"/><ActionIcon name="exit"/></button></div>
+<dialog id="files-dialog" aria-labelledby="files-title">
+ <div class="files-heading"><h2 id="files-title">{files.title}</h2><button id="files-close" class="icon-action" aria-label={files.close} title={files.close}><ActionIcon name="cancel"/></button></div>
+ <section><h3>{files.json}</h3><p>{files.jsonHint}</p><div class="file-actions"><button id="json-export" class="icon-action" aria-label={files.export} title={files.export}><ActionIcon name="download"/></button><button id="json-import" class="icon-action" aria-label={files.import} title={files.import}><ActionIcon name="upload"/></button></div><input id="json-file" type="file" accept=".json,application/json" hidden/><p id="file-status" role="status"></p></section>
+ <section><h3>{files.video}</h3><p>{files.videoHint}</p><button id="video-record" class="icon-action" aria-label={files.record} title={files.record} aria-pressed="false"><ActionIcon name="video"/></button><p id="video-support" role="status"></p></section>
+</dialog>
+<aside id="video-session" hidden aria-label={files.video}><span id="video-status" role="status"></span><output id="video-time" aria-live="off" aria-label={files.recording}>00:00</output><button id="video-stop" class="icon-action" aria-label={files.stop} title={files.stop}><ActionIcon name="stop"/></button><a id="video-download" hidden>{files.download}</a><button id="video-dismiss" class="icon-action" aria-label={files.close} title={files.close} hidden><ActionIcon name="cancel"/></button></aside>
 <section class="intro"><p class="eyebrow">JACKTOOLS / SOUND · PROTOTYPE</p><h1>{t.title}</h1><p class="intro-copy">{t.description}</p></section>
 <section class="sound-app" id="sound-app">
  <canvas id="sound-atmosphere" width="1100" height="760" aria-hidden="true"></canvas>

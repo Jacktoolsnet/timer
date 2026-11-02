@@ -20,7 +20,7 @@ export const content={
    ['Instrumente und Dynamik bearbeiten','Klappe eine Instrumentenbahn auf, um Instrument, Lautstärke, Laufrichtung, Klangpunkte und Zufallsdynamik einzustellen. Der Regler Tonhöhe verschiebt alle melodischen Instrumente um bis zu eine Oktave nach oben oder unten; das Schlagzeug bleibt unverändert. Alle neun Bahnen sind anfangs aktiv und können einzeln deaktiviert werden. Zufalls-Play übernimmt musikalische Variationen automatisch; deaktivierte oder stumme Bahnen bleiben geschützt.'],
    ['Songstruktur und Refrains','Die Anzeige unter den Steuerelementen zeigt den aktuellen Songteil. Refrain-Motive kehren zurück. Zeichnest du während eines Refrains, wird der bearbeitete Hook für seine nächste Wiederkehr übernommen. Nach dem Ausklang entwickelt sich die nächste Form.'],
    ['Animationen und Fokusansicht','Wähle Orbit, Zentrum und Hintergrund unabhängig im Bereich Animationen. Zufällig wechselt Varianten auch beim normalen Play. In der Fokusansicht kannst du die Steuerelemente über den Button „Steuerelemente ausblenden“ verbergen. Bewegen, Berühren oder Tastatureingabe holt sie zurück; Esc verlässt den Fokus. Vollbild und Wachhalten des Bildschirms sind browserabhängig.'],
-   ['Speichern und Wiedergabegrenzen','Aktiviere optional „Einstellungen auf diesem Gerät merken“ im Einstellungsmenü. Ausschalten oder Löschen lokaler Einstellungen entfernt die gespeicherten Daten. Beim Tabwechsel oder einer Gerätesperre wird pausiert. Audioaufnahme und Audioexport sind nicht vorhanden; alle Klänge sind synthetisch.']
+   ['Speichern und Wiedergabegrenzen','Aktiviere optional „Einstellungen auf diesem Gerät merken“ im Einstellungsmenü. Ausschalten oder Löschen lokaler Einstellungen entfernt die gespeicherten Daten. Beim Tabwechsel oder einer Gerätesperre wird pausiert. JSON sichert Stücke als Datei. Eine MP4-Aufnahme enthält Bild und Ton, sofern der Browser dies unterstützt; alle Klänge sind synthetisch.']
   ]
  },
  en:{
@@ -44,7 +44,7 @@ export const content={
    ['Edit instruments and dynamics','Expand an instrument to set its sound, volume, direction, beat points and random dynamics. The Pitch slider transposes melodic instruments up or down by one octave; drums stay unchanged. All nine orbits start enabled and can be disabled individually. Random Play handles musical variation automatically; disabled or muted tracks remain protected.'],
    ['Song structure and returning choruses','The readout below the controls identifies the current section. Chorus motifs return later; drawing in a chorus updates its hook for the next reprise. A new form develops after the outro.'],
    ['Animations and focus view','Select orbit, centre and background independently in Animations. Random variants also change during normal playback. In focus view, use the Hide controls button to hide the controls. Pointer, touch or keyboard activity restores them; Escape exits focus. Fullscreen and keeping the screen awake depend on the browser.'],
-   ['Saving and playback limits','Optionally enable Remember settings on this device in Settings. Disabling storage or deleting local preferences removes saved data. Switching tabs or locking your device pauses playback. Audio recording and export are not included; all sounds are synthesized.']
+   ['Saving and playback limits','Optionally enable Remember settings on this device in Settings. Disabling storage or deleting local preferences removes saved data. Switching tabs or locking your device pauses playback. Save pieces as JSON files. MP4 recording includes video and audio where supported by the browser; all sounds are synthesized.']
   ]
  },
  es:{
@@ -68,7 +68,7 @@ export const content={
    ['Instrumentos y dinámica','Despliega un instrumento para ajustar sonido, volumen, dirección, puntos y dinámica aleatoria. El control Altura tonal transpone los instrumentos melódicos hasta una octava arriba o abajo; la percusión no cambia. Las nueve órbitas están activas inicialmente y pueden desactivarse individualmente. El modo aleatorio varía la música sin activar pistas deshabilitadas o silenciadas.'],
    ['Estructura y estribillos','El indicador muestra la sección actual. Los estribillos vuelven; dibujar durante uno actualiza el motivo que regresará. Tras el final se desarrolla una nueva estructura.'],
    ['Animaciones y enfoque','Elige órbita, centro y fondo independientemente. Las variantes aleatorias también cambian con la reproducción normal. En la vista de enfoque, usa el botón Ocultar controles para ocultarlos. Mover, tocar o usar el teclado los recupera; Esc sale del enfoque. Pantalla completa y bloqueo de suspensión dependen del navegador.'],
-   ['Guardar y límites','Activa opcionalmente Recordar ajustes en este dispositivo en Ajustes. Desactivarlo o borrar preferencias elimina los datos. Cambiar de pestaña o bloquear el dispositivo pausa la música. No hay grabación ni exportación de audio; todos los sonidos son sintetizados.']
+   ['Guardar y límites','Activa opcionalmente Recordar ajustes en este dispositivo en Ajustes. Desactivarlo o borrar preferencias elimina los datos. Cambiar de pestaña o bloquear el dispositivo pausa la música. Guarda piezas en JSON. La grabación MP4 incluye vídeo y audio si el navegador lo permite; todos los sonidos son sintetizados.']
   ]
  },
  fr:{
@@ -92,7 +92,7 @@ export const content={
    ['Instruments et dynamique','Dépliez un instrument pour régler son timbre, volume, sens, points et dynamique aléatoire. Le curseur Hauteur transpose les instruments mélodiques jusqu’à une octave vers le haut ou le bas ; les percussions restent inchangées. Les neuf orbites sont actives au départ et peuvent être désactivées individuellement. Le mode aléatoire ne réactive pas les pistes désactivées ou muettes.'],
    ['Structure et refrains','L’indicateur montre la section actuelle. Les refrains reviennent ; dessiner pendant un refrain met à jour son motif pour la prochaine reprise. Une nouvelle forme se développe après le final.'],
    ['Animations et concentration','Choisissez orbite, centre et fond indépendamment. Les variantes aléatoires changent aussi en lecture normale. En vue concentration, utilisez le bouton Masquer les commandes pour les cacher. Mouvement, toucher ou clavier les réaffichent ; Échap quitte la vue. Plein écran et maintien de l’écran allumé dépendent du navigateur.'],
-   ['Enregistrer et limites','Activez facultativement Mémoriser les réglages sur cet appareil dans les paramètres. Désactiver ou effacer les préférences supprime les données. Changer d’onglet ou verrouiller l’appareil met en pause. Aucun enregistrement audio ni export audio ; tous les sons sont synthétisés.']
+   ['Enregistrer et limites','Activez facultativement Mémoriser les réglages sur cet appareil dans les paramètres. Désactiver ou effacer les préférences supprime les données. Changer d’onglet ou verrouiller l’appareil met en pause. Les morceaux peuvent être sauvegardés en JSON. L’enregistrement MP4 inclut image et son si le navigateur le permet ; tous les sons sont synthétisés.']
   ]
  }
 };

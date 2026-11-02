@@ -1,8 +1,9 @@
 ---
+import {fileCopy} from '../../lib/file-copy';
 import Layout from '../../layouts/Layout.astro';
 import {languages} from '../../lib/i18n';
 import {content} from '../../lib/content';
 export function getStaticPaths(){return languages.map(lang=>({params:{lang},props:{lang}}));}
-const {lang}=Astro.props,t=content[lang];
+const {lang}=Astro.props,t=content[lang],files=fileCopy[lang];
 ---
-<Layout lang={lang} title={t.guide+' – JackTools Sound'} description={t.description} route="usage"><article class="legal-page"><h1>{t.guide}</h1>{t.sections.map(([heading,body])=><section><h2>{heading}</h2><p>{body}</p></section>)}<a href={'/'+lang+'/'}>← {t.back}</a></article></Layout>
+<Layout lang={lang} title={t.guide+' – JackTools Sound'} description={t.description} route="usage"><article class="legal-page"><h1>{t.guide}</h1>{t.sections.map(([heading,body])=><section><h2>{heading}</h2><p>{body}</p></section>)}<section><h2>{files.json}</h2><p>{files.title}: {files.jsonHint}</p></section><section><h2>{files.video}</h2><p>{files.videoHint}</p><p>{files.unsupported}</p></section><a href={'/'+lang+'/'}>← {t.back}</a></article></Layout>
