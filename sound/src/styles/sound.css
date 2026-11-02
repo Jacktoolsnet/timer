@@ -359,7 +359,7 @@ body:not(.focus-view) .sound-top{margin-bottom:20px}
 #files-dialog #recording-options label:last-of-type{border-bottom:0}
 #files-dialog .recording-start-hint{font-size:12px;margin:10px 0 0;padding-top:12px;border-top:1px solid var(--line)}
 .recording-format-heading{font-size:13px;font-weight:650;color:var(--accent);margin:22px 0 12px}
-.recording-formats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.recording-formats{display:grid;align-items:start;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .recording-format{border:1px solid var(--line);border-radius:14px;padding:16px;background:var(--bg);min-width:0}
 .recording-format h4{font-size:14px;margin:0}
 #files-dialog .recording-format>p{font-size:12px;margin:10px 0 14px}
