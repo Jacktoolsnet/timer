@@ -1,6 +1,6 @@
 export const instrumentIds=['kick','snare','hat','bass','marimba','clap','tom','rim','shaker','bells','kalimba','pluck','synthbass','piano','strings','guitar','organ','pad','saxophone','harp','doublebass','epiano','voice','choir','vocalpad'] as const;
 export type InstrumentId=typeof instrumentIds[number];
-export const defaultInstruments:InstrumentId[]=['kick','snare','hat','bass','marimba','bells','kalimba','pad'];
+export const defaultInstruments:InstrumentId[]=['kick','snare','hat','bass','marimba','bells','kalimba','pad','pluck'];
 export const instrumentNames={
  de:['Kick','Snare','Hi-Hat','Bass','Marimba','Clap','Tom','Rimshot','Shaker','Glockenspiel','Kalimba','Pluck-Synth','Synth-Bass','Klavier','Streicher','Gitarre','Orgel','Flächenklang','Saxofon','Harfe','Kontrabass','E-Piano','Solo-Stimme','Chor','Vocal-Pad'],
  en:['Kick','Snare','Hi-hat','Bass','Marimba','Clap','Tom','Rimshot','Shaker','Glockenspiel','Kalimba','Pluck synth','Synth bass','Piano','Strings','Guitar','Organ','Soft pad','Saxophone','Harp','Double bass','Electric piano','Solo voice','Choir','Vocal pad'],
@@ -9,4 +9,4 @@ export const instrumentNames={
 };
 export const instrumentLabel={de:'Instrument',en:'Instrument',es:'Instrumento',fr:'Instrument'};
 
-export const trackLabels={de:{enable:'Bahn aktivieren',hint:'Alle acht Bahnen sind zum Start aktiv.'},en:{enable:'Enable orbit',hint:'All eight orbits start enabled.'},es:{enable:'Activar órbita',hint:'Las ocho órbitas están activas al inicio.'},fr:{enable:'Activer l’orbite',hint:'Les huit orbites sont actives au départ.'}};
+export const trackLabels={de:{enable:'Bahn aktivieren',hint:'Alle neun Bahnen sind zum Start aktiv.'},en:{enable:'Enable orbit',hint:'All nine orbits start enabled.'},es:{enable:'Activar órbita',hint:'Las nueve órbitas están activas al inicio.'},fr:{enable:'Activer l’orbite',hint:'Les neuf orbites sont actives au départ.'}};

@@ -1,3 +1,7 @@
+import {ORBIT_COUNT} from './orbit-layout';
+import {makeMotif} from './harmony';
+import {resolveGroove} from './groove';
+import {partsForStyle} from './presets';
 import {gridSizes,type GridChoice,type GridSize} from './track-grid';
 import {danceIds,type DanceId} from './dances';
 import {grooveChoices,type GrooveChoice} from './groove';
@@ -13,7 +17,7 @@ export type SavedTrack={
 };
 export type SoundSettings={
  pad?:{mode:'draw'|'rhythm';beats:2|3|4;hits:boolean[][]};
- version:1;style:StyleId;dance?:DanceId|null;groove?:GrooveChoice;bpm:number;volume:number;transpose?:number;noteEffect?:number;tracks:SavedTrack[];
+ version:2;style:StyleId;dance?:DanceId|null;groove?:GrooveChoice;bpm:number;volume:number;transpose?:number;noteEffect?:number;tracks:SavedTrack[];
  background:typeof backgroundModes[number];center:typeof centerModes[number];orbit:typeof orbitModes[number];
 };
 const number=(v:unknown,min:number,max:number)=>typeof v==='number'&&Number.isFinite(v)&&v>=min&&v<=max;
@@ -22,16 +26,16 @@ const member=(values:readonly string[],v:unknown)=>typeof v==='string'&&values.i
 export function decodeSettings(raw:string|null):SoundSettings|null{
  try{
   const s=JSON.parse(raw||'null');
-  if(!s||s.version!==1||!member(styleIds,s.style)||!number(s.bpm,40,220)||!number(s.volume,0,.7)
+  if(!s||![1,2].includes(s.version)||!member(styleIds,s.style)||!number(s.bpm,40,220)||!number(s.volume,0,.7)
    ||!member(backgroundModes,s.background)||!member(centerModes,s.center)||!member(orbitModes,s.orbit)
-   ||!Array.isArray(s.tracks)||s.tracks.length!==8)return null;
+   ||!Array.isArray(s.tracks)||!(s.version===1?[8,9]:[ORBIT_COUNT]).includes(s.tracks.length))return null;
   if(s.transpose!==undefined&&(!number(s.transpose,-12,12)||!Number.isInteger(s.transpose)))return null;
   if(s.noteEffect!==undefined&&!number(s.noteEffect,0,1.5))return null;
   if(s.dance!==undefined&&s.dance!==null&&!member(danceIds,s.dance))return null;
   if(s.groove!==undefined&&!member(grooveChoices,s.groove))return null;
   if(s.pad!==undefined){
    if(!s.pad||!member(['draw','rhythm'],s.pad.mode)||![2,3,4].includes(s.pad.beats)
-    ||!Array.isArray(s.pad.hits)||s.pad.hits.length!==3
+    ||!Array.isArray(s.pad.hits)||!(s.version===1?[3,ORBIT_COUNT]:[ORBIT_COUNT]).includes(s.pad.hits.length)
     ||s.pad.hits.some((lane:unknown)=>!Array.isArray(lane)||lane.length!==s.pad.beats*8||lane.some((on:unknown)=>typeof on!=='boolean')))return null;
   }
   for(const tr of s.tracks){
@@ -46,6 +50,22 @@ export function decodeSettings(raw:string|null):SoundSettings|null{
    if(tr.motif!==undefined&&(!Array.isArray(tr.motif)||tr.motif.length!==8||tr.motif.some((n:unknown)=>!number(n,0,4)||!Number.isInteger(n))))return null;
    if(tr.morph!==null&&(!tr.morph||!member(instrumentIds,tr.morph.to)||!number(tr.morph.progress,0,1)))return null;
   }
+  if(s.tracks.length===8){
+   const extra=partsForStyle(s.style)[8],slots=resolveGroove(s.style,s.groove??'auto',s.dance??null).steps;
+   s.tracks.push({grid:'auto',slots,enabled:true,mute:false,instrument:extra.instrument,
+    points:Array.from({length:16},(_,i)=>i<slots&&extra.steps.includes(i)),motif:makeMotif([0,1,2,1,0,2,1,0]),
+    volume:extra.volume??.15,pitch:extra.pitch??0,phase:0,direction:1,directionMode:'forward',randomDynamics:false,morph:null});
+  }
+  if(s.pad?.hits.length===3){
+   const rows=Array.from({length:ORBIT_COUNT},()=>Array<boolean>(s.pad.beats*8).fill(false)),used=new Set<number>();
+   ['hat','snare','kick'].forEach((id,lane)=>{
+    const found=s.tracks.findIndex((tr:SavedTrack,i:number)=>!used.has(i)&&tr.instrument===id);
+    const fallback=[2,1,0][lane],index=found>=0?found:!used.has(fallback)?fallback:s.tracks.findIndex((_:SavedTrack,i:number)=>!used.has(i));used.add(index);
+    rows[index]=s.pad.hits[lane];
+   });
+   s.pad.hits=rows;
+  }
+  s.version=2;
   return s as SoundSettings;
  }catch{return null;}
 }

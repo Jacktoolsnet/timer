@@ -34,7 +34,7 @@ test('all new pulse voices remain finite, gated and subordinate to user volume',
     expect(wave.length/22050).toBeCloseTo(rhythmDuration(dance,role,preset.bpm,step),3);
    }
   });
-  for(let s=0;s<16;s++)for(let i=0;i<8;i++){
+  for(let s=0;s<16;s++)for(let i=0;i<9;i++){
    const gain=rhythmClarity(dance,i,s);expect(gain).toBeGreaterThan(0);expect(gain).toBeLessThanOrEqual(1);if(i<4)expect(gain).toBe(1);
   }
  }
@@ -50,7 +50,7 @@ for(const [dance,index] of cases)test('actual '+dance+' track '+index+' keeps ch
   AudioBufferSourceNode.prototype.start=function(when=0,...args:any[]){(window as any).pulseEvents.push({time:when,duration:this.buffer?.duration||0});return start.call(this,when,...args);};
  });
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/de/');await page.locator('[data-dance="'+dance+'"]').click();
- for(let i=0;i<8;i++){const row=page.locator('[data-track="'+i+'"]');await row.locator('summary').click();if(i!==index)await row.locator('.mute').check();}
+ for(let i=0;i<9;i++){const row=page.locator('[data-track="'+i+'"]');await row.locator('summary').click();if(i!==index)await row.locator('.mute').check();}
  const preset=dances[dance].preset,part=preset.parts[index],role=danceRhythmRole(dance,index,part.instrument)!;
  // Include the next bar's first attack to check 4-&-1 and each pattern's wrap gap.
  const steps=[...part.steps,part.steps[0]+dances[dance].beats*4],swing=preset.swing||0;

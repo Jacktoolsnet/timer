@@ -1,14 +1,15 @@
 import {test,expect} from '@playwright/test';
 import {partsForStyle,presets,styleIds} from '../src/lib/presets';
-test('all styles fill eight tracks with quiet sparse accompaniment',()=>{
+test('all styles fill nine tracks with quiet sparse accompaniment',()=>{
  for(const style of styleIds){
   const original=JSON.stringify(presets[style]),parts=partsForStyle(style);
-  expect(parts).toHaveLength(8);
+  expect(parts).toHaveLength(9);
   expect(parts.slice(0,presets[style].parts.length)).toEqual(presets[style].parts);
-  for(const extra of parts.slice(presets[style].parts.length)){
+  for(const extra of parts.slice(presets[style].parts.length,8)){
    expect(extra.steps).toHaveLength(1);expect(extra.volume).toBeLessThanOrEqual(.2);
    expect(presets[style].grid).toContain(extra.steps[0]);
   }
+  expect(parts[8].volume).toBeLessThanOrEqual(.2);expect(parts[8].steps.length).toBeGreaterThan(0);expect(parts[8].steps.length).toBeLessThanOrEqual(4);
   parts[0].steps.push(15);expect(JSON.stringify(presets[style])).toBe(original);
  }
 });

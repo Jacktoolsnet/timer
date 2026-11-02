@@ -20,7 +20,7 @@ test('tango has a clear marcato bass and dotted chord pattern, not a cloud of lo
 test('Viennese pulse is shorter and accompaniment yields at attacks without changing user ceilings',()=>{
  for(const role of ['bass','chord'] as const)expect(waltzPulseDuration(role,180,true)).toBeLessThan(waltzPulseDuration(role,180));
  expect(dances.viennese.preset.parts[0].volume).toBeGreaterThan(dances.slowwaltz.preset.parts[0].volume!);
- for(const dance of ['tango','viennese',null])for(let i=0;i<8;i++)for(let step=0;step<16;step++){
+ for(const dance of ['tango','viennese',null])for(let i=0;i<9;i++)for(let step=0;step<16;step++){
   const gain=dancePulseClarity(dance,i,step);expect(gain).toBeGreaterThan(0);expect(gain).toBeLessThanOrEqual(1);
   if(i<4||!dance)expect(gain).toBe(1);
  }
@@ -50,7 +50,7 @@ test('actual tango accompaniment keeps the new rhythm in normal and random play'
   AudioBufferSourceNode.prototype.start=function(when=0,...args:any[]){(window as any).pulseEvents.push({time:when,duration:this.buffer?.duration||0});return start.call(this,when,...args);};
  });
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/de/');await page.locator('[data-style-preset=tango]').click();
- for(let i=0;i<8;i++){const row=page.locator('[data-track="'+i+'"]');await row.locator('summary').click();await row.locator('.mute').check();}
+ for(let i=0;i<9;i++){const row=page.locator('[data-track="'+i+'"]');await row.locator('summary').click();await row.locator('.mute').check();}
  for(const index of [0,1]){
   const row=page.locator('[data-track="'+index+'"]');await row.locator('.mute').uncheck();
   for(const button of ['#play','#evolve']){
@@ -77,7 +77,7 @@ test('actual Viennese playback uses the crisper bass and chord envelopes',async(
  // Dance controls are intentionally hidden; verify the retained legacy audio engine directly.
  await expect(page.locator('.dances-tile')).toBeHidden();
  await page.locator('[data-dance=viennese]').evaluate((button:HTMLButtonElement)=>button.click());
- for(let i=2;i<8;i++){const row=page.locator('[data-track="'+i+'"]');await row.locator('summary').click();await row.locator('.mute').check();}
+ for(let i=2;i<9;i++){const row=page.locator('[data-track="'+i+'"]');await row.locator('summary').click();await row.locator('.mute').check();}
  await page.locator('#play').click();await expect.poll(()=>page.evaluate(()=>(window as any).pulseEvents.length)).toBeGreaterThanOrEqual(3);
  const events=await page.evaluate(()=>(window as any).pulseEvents.slice(0,3));
  expect(events[0].duration).toBeCloseTo(waltzPulseDuration('bass',180,true),3);expect(events[1].duration).toBeCloseTo(waltzPulseDuration('chord',180,true),3);

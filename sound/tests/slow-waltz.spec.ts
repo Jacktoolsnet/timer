@@ -7,7 +7,7 @@ import {chordFor} from '../src/lib/harmony';
 test('slow waltz has its own acoustic palette, native meter and stable dance foundation',()=>{
  const p=presets.slowwaltz,g=resolveGroove('slowwaltz','auto'),parts=partsForStyle('slowwaltz');
  expect(p.bpm).toBe(86);expect(g.beats).toBe(3);expect(g.steps).toBe(12);expect(g.swing).toBe(0);
- expect(parts).toHaveLength(8);expect(parts.map(p=>p.instrument)).toEqual(expect.arrayContaining(['doublebass','piano','strings','harp','choir']));
+ expect(parts).toHaveLength(9);expect(parts.map(p=>p.instrument)).toEqual(expect.arrayContaining(['doublebass','piano','strings','harp','choir']));
  expect(parts.every(p=>p.steps.every(s=>s<12))).toBe(true);
  expect(groovePattern(g,'doublebass')).toEqual([0]);expect(groovePattern(g,'piano')).toEqual([4,8]);
  expect(grooveAccent(g,'doublebass',0)).toBeGreaterThan(grooveAccent(g,'doublebass',4));

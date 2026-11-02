@@ -56,26 +56,26 @@ test('all instruments can replace a track without losing points',async({page})=>
  await page.locator('#play').click();
  expect(errors).toEqual([]);
 });
-test('eight default orbits and drawing on added tracks',async({page})=>{
+test('nine default orbits and drawing on added tracks',async({page})=>{
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/de/');
- await expect(page.locator('.instrument')).toHaveCount(8);
- await expect(page.locator('.instrument[data-enabled=true]')).toHaveCount(8);
- for(let i=5;i<8;i++){
+ await expect(page.locator('.instrument')).toHaveCount(9);
+ await expect(page.locator('.instrument[data-enabled=true]')).toHaveCount(9);
+ for(let i=5;i<9;i++){
   const row=page.locator('[data-track="'+i+'"]');
   await row.locator('summary').click();await row.locator('.track-enabled').check();
  }
- await expect(page.locator('.instrument[data-enabled=true]')).toHaveCount(8);
+ await expect(page.locator('.instrument[data-enabled=true]')).toHaveCount(9);
  await page.locator('#clear').click();
  await page.locator('#drawing').scrollIntoViewIfNeeded();
  const r=await page.locator('#drawing').boundingBox();if(!r)throw Error('No drawing surface');
  await page.mouse.move(r.x+r.width*.6,r.y+r.height*.95);await page.mouse.down();await page.mouse.up();
- await expect(page.locator('[data-track="7"] .count')).not.toHaveText('0 / 16');
- await page.locator('[data-track="7"] .track-enabled').uncheck();
- await expect(page.locator('[data-track="7"]')).toHaveAttribute('data-enabled','false');
- await page.locator('[data-track="7"] .track-enabled').check();
- await expect(page.locator('[data-track="7"] .count')).not.toHaveText('0 / 16');
- for(let i=0;i<8;i++){
+ await expect(page.locator('[data-track="8"] .count')).not.toHaveText('0 / 16');
+ await page.locator('[data-track="8"] .track-enabled').uncheck();
+ await expect(page.locator('[data-track="8"]')).toHaveAttribute('data-enabled','false');
+ await page.locator('[data-track="8"] .track-enabled').check();
+ await expect(page.locator('[data-track="8"] .count')).not.toHaveText('0 / 16');
+ for(let i=0;i<9;i++){
   const row=page.locator('[data-track="'+i+'"]');
   if(!(await row.getAttribute('open')!==null))await row.locator('summary').click();
   await row.locator('.track-enabled').uncheck();
@@ -185,7 +185,7 @@ test('style presets change instruments and defer live changes to a bar',async({p
  await expect(page.locator('[data-track="1"] .instrument-name')).toHaveText('Streicher');
  await choose('house');
  await expect(page.locator('#tempo')).toHaveValue('124');
- await expect(page.locator('.instrument[data-enabled=true]')).toHaveCount(8);
+ await expect(page.locator('.instrument[data-enabled=true]')).toHaveCount(9);
  await page.locator('#play').click();
  await choose('rock');
  await expect(page.locator('#style-status')).not.toBeEmpty();
@@ -295,7 +295,7 @@ test('random patterns offset orbits and reset restores alignment',async({page})=
  const slots=Number(await page.locator('[data-track="4"]').getAttribute('data-slots'));
  await expect(page.locator('[data-track="4"]')).toHaveAttribute('data-phase',String(slots/2));
  await page.locator('#reset').click();
- for(let i=0;i<8;i++)await expect(page.locator('[data-track="'+i+'"]')).toHaveAttribute('data-phase','0');
+ for(let i=0;i<9;i++)await expect(page.locator('[data-track="'+i+'"]')).toHaveAttribute('data-phase','0');
 });
 test('manual volume and random dynamics control actual note gain',async({page})=>{
  await page.addInitScript(()=>{
@@ -493,7 +493,7 @@ test('focus and sport presets load and preserve explicit visual selections',asyn
  await page.locator('[data-style-preset=sport]').click();
  await expect(page.locator('#tempo')).toHaveValue('136');
  await expect(page.locator('[data-track="0"] .instrument-name')).toHaveText('Kick');
- await expect(page.locator('.instrument[data-enabled=true]')).toHaveCount(8);
+ await expect(page.locator('.instrument[data-enabled=true]')).toHaveCount(9);
  await page.locator('#evolve').click();await page.waitForTimeout(150);await page.locator('#play').click();
  expect(errors).toEqual([]);
 });
@@ -561,7 +561,7 @@ test('drawing reshapes a melodic motif in electronic and jazz styles',async({pag
   await page.locator('#drawing').scrollIntoViewIfNeeded();
   const r=await page.locator('#drawing').boundingBox();if(!r)throw Error('No drawing surface');
   // Near the top of this track's band maps to a high, consonant phrase degree.
-  await page.mouse.move(r.x+r.width*.4,r.y+r.height*(index+.05)/8);
+  await page.mouse.move(r.x+r.width*.4,r.y+r.height*(index+.05)/9);
   await page.mouse.down();await page.mouse.up();
   await expect(row).not.toHaveAttribute('data-motif',before!);
   expect((await row.getAttribute('data-motif'))!.split(',')[3]).toBe('4');
@@ -594,7 +594,7 @@ test('a drawn refrain motif returns on the next chorus',async({page})=>{
  await expect(page.locator('#song-structure')).toHaveAttribute('data-part','chorus',{timeout:30000});
  await page.locator('#drawing').scrollIntoViewIfNeeded();
  const r=await page.locator('#drawing').boundingBox();if(!r)throw Error('No pad');
- await page.mouse.move(r.x+r.width*.4,r.y+r.height*(4+.05)/8);await page.mouse.down();await page.mouse.up();
+ await page.mouse.move(r.x+r.width*.4,r.y+r.height*(4+.05)/9);await page.mouse.down();await page.mouse.up();
  const track=page.locator('[data-track="4"]'),hook=await track.getAttribute('data-motif');
  const slots=Number(await track.getAttribute('data-slots')),degreeIndex=Math.floor(Math.floor(.4*slots)/slots*8);
  expect(hook!.split(',')[degreeIndex]).toBe('4');
@@ -693,7 +693,7 @@ test('music, instruments and animations have separate labelled tiles',async({pag
  await expect(page.locator('.music-tile .style-tile')).toHaveCount(styleIds.length);
  await expect(page.locator('.instruments-tile h2')).toHaveText('Instrumente');
  await expect(page.locator('.instruments-tile .style-tile')).toHaveCount(0);
- await expect(page.locator('.instruments-tile .instrument')).toHaveCount(8);
+ await expect(page.locator('.instruments-tile .instrument')).toHaveCount(9);
  const order=await page.locator('.music-tile,.instruments-tile,.animations-tile').evaluateAll(tiles=>tiles.map(tile=>tile.className));
  expect(order).toEqual(['music-tile','instruments-tile','animations-tile']);
  await page.locator('#focus').click();

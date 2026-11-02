@@ -59,7 +59,7 @@ test('actual playback schedules short ONE-two-three buffers in normal and random
   };
  });
  await page.goto('/de/');await page.locator('[data-style-preset=slowwaltz]').click();
- for(let i=2;i<8;i++){const row=page.locator('[data-track="'+i+'"]');await row.locator('summary').click();await row.locator('.mute').check();}
+ for(let i=2;i<9;i++){const row=page.locator('[data-track="'+i+'"]');await row.locator('summary').click();await row.locator('.mute').check();}
  for(const button of ['#play','#evolve']){
   await page.evaluate(()=>(window as any).pulseEvents=[]);await page.locator(button).click();
   await expect.poll(()=>page.evaluate(()=>(window as any).pulseEvents.length),{timeout:4000}).toBeGreaterThanOrEqual(3);

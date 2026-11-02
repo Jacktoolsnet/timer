@@ -1,13 +1,15 @@
+import {ORBIT_COUNT,padAt,type OrbitPad} from './orbit-layout';
 /** Only the orbit bus is ducked; live and looped drums stay on the unducked master. */
 export const RHYTHM_EDIT_MUSIC_LEVEL=.1;
+/** Legacy drum order only; matrix pads take their live instrument from the matching orbit. */
 export const rhythmInstruments=['hat','snare','kick'] as const;
-export type RhythmLane=0|1|2;
+export type RhythmLane=OrbitPad;
 export type TapRhythm={beats:2|3|4;start:number|null;state:'armed'|'recording'|'loop';hits:boolean[][];lastTap:(number|null)[];laneStart:(number|null)[];liveStep:(number|null)[]};
 export function emptyRhythm(beats:2|3|4):TapRhythm{
- return {beats,start:null,state:'armed',hits:rhythmInstruments.map(()=>Array<boolean>(beats*8).fill(false)),lastTap:[null,null,null],laneStart:[null,null,null],liveStep:[null,null,null]};
+ return {beats,start:null,state:'armed',hits:Array.from({length:ORBIT_COUNT},()=>Array<boolean>(beats*8).fill(false)),lastTap:Array(ORBIT_COUNT).fill(null),laneStart:Array(ORBIT_COUNT).fill(null),liveStep:Array(ORBIT_COUNT).fill(null)};
 }
 export function hasRhythm(rhythm:TapRhythm){return rhythm.hits.some(lane=>lane.some(Boolean));}
-export function rhythmLane(y:number,height:number):RhythmLane{return Math.max(0,Math.min(2,Math.floor(y/height*3))) as RhythmLane;}
+export const rhythmLane=padAt;
 export function replacingRhythmLane(rhythm:TapRhythm,position:number,lane:RhythmLane){
  const last=rhythm.lastTap[lane];
  return rhythm.hits[lane].some(Boolean)&&(last===null||position-last>rhythm.beats*8+.5);
@@ -31,6 +33,15 @@ export function rhythmHitsAt(rhythm:TapRhythm,step:number):RhythmLane[]{
   &&(rhythm.laneStart[i]===null||step>=rhythm.laneStart[i]!+length)
   &&rhythm.liveStep[i]!==step?[i as RhythmLane]:[]);
 }
+export function rhythmBarPoints(rhythm:TapRhythm,lane:RhythmLane,barStart:number,slots:number){
+ const points=Array<boolean>(16).fill(false),steps=rhythm.beats*4,length=steps*2;
+ if(rhythm.start===null)return points;
+ for(let s=0;s<steps;s++){
+  const at=((barStart+s-rhythm.start)%length+length)%length;
+  if(rhythm.hits[lane][at])points[Math.floor(s/steps*slots)]=true;
+ }
+ return points;
+}
 /** Clock and editing activity are transient, never part of saved patterns. */
 export function resetRhythmSession(rhythm:TapRhythm){
  rhythm.lastTap.fill(null);rhythm.laneStart.fill(null);rhythm.liveStep.fill(null);
@@ -44,8 +55,8 @@ export function remeterRhythm(rhythm:TapRhythm,beats:2|3|4,start:number){
  rhythm.beats=beats;rhythm.hits=result.hits;resetRhythmSession(rhythm);finishRhythm(rhythm);rhythm.start=hasRhythm(rhythm)?start:null;
 }
 export const rhythmCopy={
- de:{group:'Flächenmodus',draw:'Zeichnen',rhythm:'Rhythmus',record:'Neu aufnehmen',clear:'Rhythmus löschen',hint:'Klopfe Deinen Rhythmus',help:'Oben Hi-Hat · Mitte Snare · unten Bassdrum. Mehrere Finger gleichzeitig sind möglich. Spiele die Instrumente nacheinander ein: Dein Zweitakt-Muster wird laufend ergänzt. Nach mehr als zwei Takten Klopfpause ersetzt der nächste Schlag nur die betroffene Spur. Beim Einspielen ist die Orbit-Musik leiser. Fertig übernehmen bringt sie sanft zurück. Dein Rhythmus bleibt auch bei Zufalls-Play erhalten.',keyboard:'Tastatur: 1 = Hi-Hat, 2 = Snare, 3 = Bassdrum. Pfeile wählen einen Bereich; Leertaste oder Enter schlägt an.',armed:'Bereit · erster Schlag startet die Zweitakt-Aufnahme',recording:'Aufnahme · zwei Takte',loop:'Dein Rhythmus läuft · tippen zum Weiterbearbeiten',done:'Fertig übernehmen',editing:'Spuren nacheinander einklopfen · Fertig übernimmt den Rhythmus',paused:'Rhythmus gespeichert · mit Play fortsetzen',progress:'Zweitakt-Aufnahme',lanes:['Hi-Hat','Snare','Bassdrum']},
- en:{group:'Pad mode',draw:'Draw',rhythm:'Rhythm',record:'Record again',clear:'Clear rhythm',hint:'Tap your rhythm',help:'Top: hi-hat · middle: snare · bottom: kick. Use several fingers at once. Build the two-bar loop one instrument at a time. New hits add to it; after more than two bars without tapping that instrument, its next hit replaces only that lane. Orbit music is quieter while editing. Finish restores it smoothly. Random Play keeps your rhythm.',keyboard:'Keyboard: 1 = hi-hat, 2 = snare, 3 = kick. Arrows choose an area; Space or Enter plays a hit.',armed:'Ready · first hit starts a two-bar recording',recording:'Recording · two bars',loop:'Your rhythm is looping · tap to edit again',done:'Finish',editing:'Add one instrument at a time · Finish accepts your rhythm',paused:'Rhythm retained · press Play to continue',progress:'Two-bar recording',lanes:['Hi-hat','Snare','Kick']},
- es:{group:'Modo del área',draw:'Dibujar',rhythm:'Ritmo',record:'Grabar de nuevo',clear:'Borrar ritmo',hint:'Toca tu ritmo',help:'Arriba: hi-hat · centro: caja · abajo: bombo. Puedes usar varios dedos a la vez. Construye el bucle de dos compases instrumento por instrumento. Los golpes se añaden; tras más de dos compases sin tocar ese instrumento, el siguiente golpe sustituye solo esa pista. La música del órbit está más baja al editar. Finalizar recupera su volumen suavemente. El modo aleatorio conserva tu ritmo.',keyboard:'Teclado: 1 = hi-hat, 2 = caja, 3 = bombo. Las flechas eligen una zona; Espacio o Intro toca un golpe.',armed:'Listo · el primer golpe inicia dos compases',recording:'Grabando · dos compases',loop:'Tu ritmo se repite · toca para editar',done:'Finalizar',editing:'Añade un instrumento a la vez · Finalizar acepta tu ritmo',paused:'Ritmo conservado · pulsa Play para continuar',progress:'Grabación de dos compases',lanes:['Hi-hat','Caja','Bombo']},
- fr:{group:'Mode de la surface',draw:'Dessiner',rhythm:'Rythme',record:'Réenregistrer',clear:'Effacer le rythme',hint:'Jouez votre rythme',help:'En haut : charleston · au milieu : caisse claire · en bas : grosse caisse. Plusieurs doigts peuvent jouer ensemble. Construisez la boucle de deux mesures instrument par instrument. Les coups s’ajoutent ; après plus de deux mesures sans jouer un instrument, le coup suivant remplace seulement sa piste. La musique des orbites baisse pendant la saisie. Terminer rétablit doucement son volume. La lecture aléatoire conserve votre rythme.',keyboard:'Clavier : 1 = charleston, 2 = caisse claire, 3 = grosse caisse. Les flèches choisissent une zone ; Espace ou Entrée joue un coup.',armed:'Prêt · le premier coup lance deux mesures',recording:'Enregistrement · deux mesures',loop:'Votre rythme tourne · touchez pour modifier',done:'Terminer',editing:'Ajoutez les instruments un par un · Terminer valide le rythme',paused:'Rythme conservé · appuyez sur Play pour continuer',progress:'Enregistrement de deux mesures',lanes:['Charleston','Caisse claire','Grosse caisse']}
+ de:{group:'Flächenmodus',draw:'Zeichnen',rhythm:'Rhythmus',record:'Neu aufnehmen',clear:'Rhythmus löschen',hint:'Klopfe Deinen Rhythmus',keyboard:'Ziffernblock oder Zahlen 1–9: oben 7–8–9, Mitte 4–5–6, unten 1–2–3. Pfeile wählen ein Pad; Leertaste oder Enter spielt es. Gleichzeitige Tasten sind möglich.',armed:'Bereit · erster Schlag startet die Zweitakt-Aufnahme',recording:'Aufnahme · zwei Takte',loop:'Dein Rhythmus läuft · tippen zum Weiterbearbeiten',done:'Fertig übernehmen',editing:'Spuren nacheinander einklopfen · Fertig übernimmt den Rhythmus',paused:'Rhythmus gespeichert · mit Play fortsetzen',progress:'Zweitakt-Aufnahme'},
+ en:{group:'Pad mode',draw:'Draw',rhythm:'Rhythm',record:'Record again',clear:'Clear rhythm',hint:'Tap your rhythm',keyboard:'Numpad or numbers 1–9: top 7–8–9, middle 4–5–6, bottom 1–2–3. Arrows select a pad; Space or Enter plays it. Simultaneous keys work.',armed:'Ready · first hit starts a two-bar recording',recording:'Recording · two bars',loop:'Your rhythm is looping · tap to edit again',done:'Finish',editing:'Add one instrument at a time · Finish accepts your rhythm',paused:'Rhythm retained · press Play to continue',progress:'Two-bar recording'},
+ es:{group:'Modo del área',draw:'Dibujar',rhythm:'Ritmo',record:'Grabar de nuevo',clear:'Borrar ritmo',hint:'Toca tu ritmo',keyboard:'Teclado numérico o números 1–9: arriba 7–8–9, centro 4–5–6, abajo 1–2–3. Las flechas eligen un pad; Espacio o Intro lo toca. Puedes pulsar varias teclas.',armed:'Listo · el primer golpe inicia dos compases',recording:'Grabando · dos compases',loop:'Tu ritmo se repite · toca para editar',done:'Finalizar',editing:'Añade un instrumento a la vez · Finalizar acepta tu ritmo',paused:'Ritmo conservado · pulsa Play para continuar',progress:'Grabación de dos compases'},
+ fr:{group:'Mode de la surface',draw:'Dessiner',rhythm:'Rythme',record:'Réenregistrer',clear:'Effacer le rythme',hint:'Jouez votre rythme',keyboard:'Pavé numérique ou chiffres 1–9 : en haut 7–8–9, au milieu 4–5–6, en bas 1–2–3. Les flèches choisissent un pad ; Espace ou Entrée le joue. Les touches simultanées fonctionnent.',armed:'Prêt · le premier coup lance deux mesures',recording:'Enregistrement · deux mesures',loop:'Votre rythme tourne · touchez pour modifier',done:'Terminer',editing:'Ajoutez les instruments un par un · Terminer valide le rythme',paused:'Rythme conservé · appuyez sur Play pour continuer',progress:'Enregistrement de deux mesures'}
 };

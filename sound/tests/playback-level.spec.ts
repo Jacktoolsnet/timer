@@ -44,7 +44,7 @@ for(const ensemble of [false,true])test('actual output reference matches both pl
   await page.locator(button).click();await page.waitForTimeout(200);
   levels.push(await page.evaluate(async()=>{
    const a=(window as any).__output as AnalyserNode,data=new Float32Array(a.fftSize);let sum=0,count=0;
-   for(let n=0;n<50;n++){a.getFloatTimeDomainData(data);for(const value of data){sum+=value*value;count++;}await new Promise(resolve=>setTimeout(resolve,30));}
+   for(let n=0;n<134;n++){a.getFloatTimeDomainData(data);for(const value of data){sum+=value*value;count++;}await new Promise(resolve=>setTimeout(resolve,30));}
    return Math.sqrt(sum/count);
   }));await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');await page.locator('#play').click();await page.waitForTimeout(500);
  }

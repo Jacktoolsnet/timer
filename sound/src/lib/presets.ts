@@ -33,9 +33,9 @@ export const styleCopy={
  fr:{label:'Style musical',names:['Électronique','House','Pop','Rock','Classique','Valse lente','Tango','Jazz & blues','Café','Hip-hop / Rap','Lo-fi','Funk','Reggae / Dub','Drum & Bass','Latin / Bossa Nova','Ambient','Concentration','Sport'],pending:'Le style change à la prochaine mesure',hint:'Charge les instruments, le tempo et un nouveau motif. Tous les sons sont synthétisés.'}
 };
 
-/** Complete all eight orbits without turning supporting voices into a wall of notes. */
-export function partsForStyle(style:StyleId):Part[]{
- const preset=presets[style],parts=preset.parts.map(p=>({...p,steps:[...p.steps]}));
+/** Complete all nine orbits without turning supporting voices into a wall of notes. */
+export function partsForStyle(style:StyleId,preset:Preset=presets[style]):Part[]{
+ const parts=preset.parts.map(p=>({...p,steps:[...p.steps]}));
  const supporting=style==='electronic'
   ?['bells','kalimba','pad'] as InstrumentId[]
   :preset.parts.filter(p=>!['kick','snare','hat','clap','tom','rim','shaker','bass','synthbass','doublebass'].includes(p.instrument)).map(p=>p.instrument);
@@ -45,6 +45,18 @@ export function partsForStyle(style:StyleId):Part[]{
   const grid=preset.grid;
   parts.push(part(instrument,[grid[(offset*3+1)%grid.length]],offset%2, .2));
  }
+ const ninth:Record<StyleId,Part>={
+  electronic:part('pluck',[2,10],1,.17),house:part('epiano',[6,14],1,.16),
+  pop:part('strings',[0,8],1,.16),rock:part('organ',[0,8],1,.15),
+  classical:part('harp',[2,10],2,.18),slowwaltz:part('harp',[2,10],1,.14),
+  tango:part('strings',[2,10],1,.15),jazz:part('guitar',[2,10],1,.16),
+  coffeehouse:part('piano',[6,14],1,.15),hiphop:part('pluck',[6,14],1,.16),
+  lofi:part('guitar',[6,14],1,.13),funk:part('clap',[12],0,.13),
+  reggae:part('epiano',[2,10],1,.14),drumandbass:part('shaker',[6,14],0,.13),
+  latin:part('harp',[6,14],1,.15),ambient:part('organ',[0],1,.13),
+  focus:part('harp',[6,14],1,.12),sport:part('shaker',[2,6,10,14],0,.16)
+ };
+ if(parts.length===8){const extra=ninth[style];parts.push({...extra,steps:extra.steps.filter(s=>s<(preset.beats??4)*4)});}
  return parts;
 }
 

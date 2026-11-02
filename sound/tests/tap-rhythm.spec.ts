@@ -18,7 +18,7 @@ test('two-bar recording quantizes independent fingers, loops without doubling an
   finishRhythm(rhythm);expect(rhythm.state).toBe('loop');
   expect(recordRhythmHit(rhythm,6+length,2)).toBe(true);expect(rhythm.hits[2][2]).toBe(true);
  }
- expect(rhythmLane(-100,440)).toBe(0);expect(rhythmLane(220,440)).toBe(1);expect(rhythmLane(900,440)).toBe(2);
+ expect(rhythmLane(-100,-100,700,440)).toBe(0);expect(rhythmLane(350,220,700,440)).toBe(4);expect(rhythmLane(900,900,700,440)).toBe(8);
 });
 
 test('sequential overdubs keep other lanes and replace only an instrument resumed after a long pause',()=>{
@@ -64,7 +64,7 @@ test('actual multi-touch recording loops audible drums, keeps melody intact and 
  await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[a,b]});
  await expect(pad).toHaveAttribute('data-pointers','2');await expect(pad).toHaveAttribute('data-rhythm-hits','2');
  const pattern=await pad.getAttribute('data-rhythm-pattern');const hits=JSON.parse(pattern!);
- expect(hits[0][0]).toBe(true);expect(hits[2][0]).toBe(true);
+ expect(hits[0][0]).toBe(true);expect(hits[8][0]).toBe(true);
  await page.waitForTimeout(350);await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[a]});
  await expect(pad).toHaveAttribute('data-pointers','1');await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
  await expect(pad).toHaveAttribute('data-rhythm-state','loop',{timeout:4500});
@@ -83,28 +83,29 @@ test('actual multi-touch recording loops audible drums, keeps melody intact and 
  await page.locator('#play').click();await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false');
  await page.locator('[data-pad-mode=rhythm]').click();await expect(pad).toHaveAttribute('data-rhythm-state','loop');
  await page.locator('#rhythm-record').click();await expect(pad).toHaveAttribute('data-rhythm-state','armed');await expect(pad).toHaveAttribute('data-rhythm-hits','0');
- await pad.focus();await page.keyboard.press('2');await expect(pad).toHaveAttribute('data-rhythm-hits','1');
+ await pad.focus();await page.keyboard.press('8');await expect(pad).toHaveAttribute('data-rhythm-hits','1');
  await page.locator('#rhythm-clear').click();await expect(pad).toHaveAttribute('data-rhythm-hits','0');expect(errors).toEqual([]);
 });
 
-test('rhythm replaces automatic percussion without rewriting the instrument tracks',async({page})=>{
+test('each recorded rhythm replaces only its matching orbit without rewriting instrument patterns',async({page})=>{
  await page.addInitScript(()=>{
   (window as any).kicks=[];
   const frequencies=new WeakMap<AudioParam,number>(),set=AudioParam.prototype.setValueAtTime;
   AudioParam.prototype.setValueAtTime=function(value:number,time:number){frequencies.set(this,value);return set.call(this,value,time);};
   const start=OscillatorNode.prototype.start;
-  OscillatorNode.prototype.start=function(when=0){if(frequencies.get(this.frequency)===145)(window as any).kicks.push(when);return start.call(this,when);};
+  OscillatorNode.prototype.start=function(when=0){if(frequencies.get(this.frequency)===6450)(window as any).kicks.push(when);return start.call(this,when);};
  });
  await page.goto('/de/');await page.locator('[data-pad-mode=rhythm]').click();
- const before=await page.locator('[data-track="0"] .count').textContent();
- await page.locator('#drawing').focus();await page.keyboard.press('1');
+ const before=await page.locator('[data-track="2"] .count').textContent();
+ await page.locator('#drawing').focus();await page.keyboard.press('9');
  await expect(page.locator('#drawing')).toHaveAttribute('data-rhythm-hits','1');
  await page.waitForTimeout(1700);
  // At most the downbeat already queued before the first tap can remain.
- expect(await page.evaluate(()=>(window as any).kicks.length)).toBeLessThanOrEqual(1);
- await expect(page.locator('[data-track="0"] .count')).toHaveText(before!);
+ expect(await page.evaluate(()=>(window as any).kicks.length)).toBeLessThanOrEqual(2);
+ await expect(page.locator('[data-track="2"] .count')).toHaveText(before!);
+ const monitored=await page.evaluate(()=>(window as any).kicks.length);
  await page.locator('#rhythm-clear').click();await page.waitForTimeout(800);
- expect(await page.evaluate(()=>(window as any).kicks.length)).toBeGreaterThanOrEqual(1);
+ expect(await page.evaluate(()=>(window as any).kicks.length)).toBeGreaterThan(monitored);
 });
 
 for(const lang of ['de','en','es','fr'])test('rhythm controls and reduced-motion feedback are accessible '+lang,async({page})=>{
@@ -116,10 +117,10 @@ for(const lang of ['de','en','es','fr'])test('rhythm controls and reduced-motion
   expect(label).toBeTruthy();await expect(button).toHaveAttribute('title',label!);
   await expect(button).toHaveText('');await expect(button.locator('svg')).toHaveCount(1);
  }
- await expect(page.locator('#rhythm-zones span')).toHaveCount(3);
+ await expect(page.locator('#rhythm-zones>[data-lane]')).toHaveCount(9);
  await expect(page.locator('#gesture-help')).toBeHidden();
  await expect(page.locator('#drawing')).toHaveAttribute('aria-describedby','gesture-keyboard');
- await page.locator('#drawing').focus();await page.keyboard.press('3');
+ await page.locator('#drawing').focus();await page.keyboard.press('7');
  await expect(page.locator('#drawing')).toHaveAttribute('data-rhythm-hits','1');
  await page.locator('#play').click();await expect(page.locator('#rhythm-status')).not.toBeEmpty();
  await page.locator('[data-pad-mode=draw]').click();await expect(page.locator('#gesture-help')).toBeVisible();
@@ -130,14 +131,14 @@ for(const lang of ['de','en','es','fr'])test('rhythm controls and reduced-motion
 
 test('saved rhythm is validated, opt-in and never autoplays',async({page})=>{
  await page.goto('/de/');
- await page.locator('[data-pad-mode=rhythm]').click();await page.locator('#drawing').focus();await page.keyboard.press('3');
+ await page.locator('[data-pad-mode=rhythm]').click();await page.locator('#drawing').focus();await page.keyboard.press('7');
  await page.locator('#play').click();
  expect(await page.evaluate(()=>localStorage.getItem('jacktools.sound.settings.v1'))).toBeNull();
  const pattern=await page.locator('#drawing').getAttribute('data-rhythm-pattern');
  await page.locator('#palette-dropdown summary').click();await page.locator('#remember-preferences').check();await page.locator('#preferences-close').click();
  await expect.poll(()=>page.evaluate(()=>localStorage.getItem('jacktools.sound.settings.v1'))).not.toBeNull();
  const raw=await page.evaluate(()=>localStorage.getItem('jacktools.sound.settings.v1'));
- const saved=decodeSettings(raw)!;expect(saved.pad?.hits[2][0]).toBe(true);
+ const saved=decodeSettings(raw)!;expect(saved.pad?.hits[0][0]).toBe(true);
  expect(decodeSettings(JSON.stringify({...saved,pad:{...saved.pad,hits:[[]]}}))).toBeNull();
  await page.reload();
  await expect(page.locator('#drawing')).toHaveAttribute('data-mode','rhythm');await expect(page.locator('#drawing')).toHaveAttribute('data-rhythm-pattern',pattern!);
@@ -165,18 +166,18 @@ test('sequential input ducks orbit music and Finish restores the same bus withou
  await page.locator('#tempo').fill('220');await page.locator('#tempo').dispatchEvent('input');
  await page.locator('[data-pad-mode=rhythm]').click();
  const pad=page.locator('#drawing'),volume=await page.locator('#volume').inputValue();
- await pad.focus();await page.keyboard.press('3');await page.waitForTimeout(180);await page.keyboard.press('3');
- const bass=JSON.parse((await pad.getAttribute('data-rhythm-pattern'))!)[2];
+ await pad.focus();await page.keyboard.press('7');await page.waitForTimeout(180);await page.keyboard.press('7');
+ const bass=JSON.parse((await pad.getAttribute('data-rhythm-pattern'))!)[0];
  await expect(pad).toHaveAttribute('data-music-level','0.1');
  await page.waitForTimeout(2500);
- await pad.focus();await page.keyboard.press('2');await page.waitForTimeout(200);await page.keyboard.press('2');
+ await pad.focus();await page.keyboard.press('8');await page.waitForTimeout(200);await page.keyboard.press('8');
  let pattern=JSON.parse((await pad.getAttribute('data-rhythm-pattern'))!);
- expect(pattern[2]).toEqual(bass);expect(pattern[1].filter(Boolean).length).toBeGreaterThanOrEqual(1);
+ expect(pattern[0]).toEqual(bass);expect(pattern[1].filter(Boolean).length).toBeGreaterThanOrEqual(1);
  const snare=pattern[1];
  // Bass has now been untouched for more than two bars: its next take replaces bass alone.
- await page.keyboard.press('3');
+ await page.keyboard.press('7');
  pattern=JSON.parse((await pad.getAttribute('data-rhythm-pattern'))!);
- expect(pattern[2].filter(Boolean)).toHaveLength(1);expect(pattern[1]).toEqual(snare);
+ expect(pattern[0].filter(Boolean)).toHaveLength(1);expect(pattern[1]).toEqual(snare);
  await page.locator('#rhythm-done').click();
  await expect(pad).toHaveAttribute('data-rhythm-editing','false');await expect(pad).toHaveAttribute('data-music-level','1');
  await expect(page.locator('#volume')).toHaveValue(volume);await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
@@ -184,7 +185,7 @@ test('sequential input ducks orbit music and Finish restores the same bus withou
  expect(fades.some((e:any)=>e.value===.1)).toBe(true);expect(fades.at(-1)).toEqual({value:1,constant:.18});
  await page.waitForTimeout(500);await expect(pad).toHaveAttribute('data-rhythm-pattern',JSON.stringify(pattern));
  // Starting a new edit ducks again; returning to Draw restores without erasing the loop.
- await pad.focus();await page.keyboard.press('1');await expect(pad).toHaveAttribute('data-music-level','0.1');
+ await pad.focus();await page.keyboard.press('9');await expect(pad).toHaveAttribute('data-music-level','0.1');
  await page.locator('[data-pad-mode=draw]').click();await expect(pad).toHaveAttribute('data-music-level','1');
 });
 

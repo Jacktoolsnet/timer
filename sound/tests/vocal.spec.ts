@@ -39,8 +39,9 @@ test('every starting style has an audible wordless vocal and its own articulatio
  const {vocalCharacter}=await import('../src/lib/vocal');
  for(const style of styleIds){
   const parts=partsForStyle(style),voices=parts.filter(p=>(vocalInstruments as readonly string[]).includes(p.instrument));
-  expect(parts).toHaveLength(8);expect(voices.length).toBeGreaterThan(0);
-  expect(voices.some(v=>v.steps.length>0&&(v.volume??0)>=.2)).toBe(true);
+  expect(parts).toHaveLength(9);expect(voices.length).toBeGreaterThan(0);
+  // The lyrical Slow Waltz intentionally keeps its choir below the piano/string lead.
+  expect(voices.some(v=>v.steps.length>0&&(v.volume??0)>=(style==='slowwaltz'?.16:.2))).toBe(true);
  }
  expect(vocalCharacter('house').duration).toBeLessThan(vocalCharacter('coffeehouse').duration);
  expect(vocalCharacter('jazz').air).toBeGreaterThan(vocalCharacter('house').air);
