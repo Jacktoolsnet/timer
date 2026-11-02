@@ -1,4 +1,3 @@
-import {tangoBassSteps,tangoChordSteps} from './tango';
 import {presets,type Preset,type StyleId} from './presets';
 import type {InstrumentId} from './instruments';
 export const danceIds=['slowwaltz','tango','viennese','slowfox','quickstep','samba','chacha','rumba','pasodoble','jive','discofox'] as const;
@@ -13,7 +12,7 @@ function dance(group:Dance['group'],style:StyleId,beats:Dance['beats'],bpm:numbe
  * Tempo is quarter notes/minute (not measures/minute). Sources: see README Dance sources. */
 export const dances:Record<DanceId,Dance>={
  slowwaltz:{group:'standard',style:'slowwaltz',beats:3,preset:presets.slowwaltz,accents:[1,.55,.55,.55,.94,.55,.55,.55,.94,.55,.55,.55]},
- tango:dance('standard','classical',4,128,[p('doublebass',tangoBassSteps,.64),p('piano',tangoChordSteps,.52),p('rim',[0,8],.14),p('guitar',tangoChordSteps,.2),p('organ',[0,8],.15),p('strings',[0,8],.18),p('piano',[0,6,10,14],.2,1),p('choir',[0],.12)],[1,.45,.55,.45,.88,.45,.78,.45,1,.45,.55,.45,.94,.45,.55,.45]),
+ tango:{group:'standard',style:'tango',beats:4,preset:presets.tango,accents:[1,.45,.55,.45,.88,.45,.78,.45,1,.45,.55,.45,.94,.45,.55,.45]},
  viennese:dance('standard','classical',3,180,[p('doublebass',[0],.68),p('piano',[4,8],.54),p('guitar',[4,8],.19),p('harp',[4,8],.12),p('strings',[0,4,8],.22),p('piano',[0,6,10],.18,1),p('choir',[0],.13),p('strings',[0,6],.14,2)],[1,.5,.6,.5,.94,.5,.6,.5,.94,.5,.6,.5]),
  slowfox:dance('standard','jazz',4,116,[p('doublebass',q,.6),p('rim',[4,12],.23),p('shaker',e,.18),p('guitar',[4,12],.4),p('piano',[0,6,10,14],.25),p('saxophone',[0,6,10,14],.23),p('strings',[0,8],.16),p('voice',[0,10],.18)],[.9,.5,.7,.5,1,.5,.75,.5,.9,.5,.7,.5,1,.5,.75,.5],.16),
  quickstep:dance('standard','jazz',4,200,[p('doublebass',q,.61),p('snare',[4,12],.3),p('hat',[2,6,10,14],.25),p('guitar',q,.41),p('piano',[0,3,6,8,11,14],.25),p('saxophone',[2,6,10,14],.2),p('pluck',[0,6,8,14],.15),p('voice',[0,10],.15)],[.9,.5,.75,.6,1,.5,.8,.6,.9,.5,.75,.6,1,.5,.8,.6],.12),

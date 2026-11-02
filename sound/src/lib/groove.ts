@@ -5,6 +5,7 @@ export const grooveChoices=['auto','discofox','waltz','chacha'] as const;
 export type GrooveChoice=typeof grooveChoices[number];
 export type Groove={choice:GrooveChoice;style:StyleId;beats:2|3|4;steps:8|12|16;dance?:DanceId;swing:number;grid:number[]};
 export function resolveGroove(style:StyleId,choice:GrooveChoice,dance?:DanceId|null):Groove{
+ if(style==='tango')dance='tango';
  if(dance){const d=dances[dance];return {choice:'auto',style,dance,beats:d.beats,steps:d.beats*4 as 8|12|16,swing:d.preset.swing||0,grid:d.preset.grid};}
  const steps=choice==='waltz'||choice==='auto'&&presets[style].beats===3?12:16;
  return {choice,style,beats:steps===12?3:4,steps,swing:choice==='auto'?(presets[style].swing||0):0,

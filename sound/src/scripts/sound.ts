@@ -722,6 +722,8 @@ $<HTMLInputElement>('#transpose').addEventListener('input',e=>{
 $<HTMLInputElement>('#volume').addEventListener('input',e=>{if(master&&audio&&playing)master.gain.setTargetAtTime(Number((e.target as HTMLInputElement).value),audio.currentTime,.02);persistSettings();});
 $('#clear').addEventListener('click',()=>{cancelPadGestures();tracks.forEach(tr=>tr.points.fill(false));sync();});
 function applyStyle(id:StyleId,dance:DanceId|null=null){
+ // Tango is a visible music style backed by the existing protected marcato arrangement.
+ if(id==='tango'||dance==='tango'){id='tango';dance='tango';}
  cancelPadGestures();
  sustained.forEach(entry=>entry.voice.release(audio?.currentTime||0));sustained.clear();
  currentStyle=id;currentDance=dance;pendingStyle=null;pendingDance=null;journey=null;arrangement=null;development=null;
@@ -740,8 +742,8 @@ function applyStyle(id:StyleId,dance:DanceId|null=null){
 }
 function syncStyleTiles(){
  document.querySelectorAll<HTMLButtonElement>('[data-style-preset]').forEach(button=>{
-  button.setAttribute('aria-pressed',String(!currentDance&&button.dataset.stylePreset===currentStyle));
-  button.classList.toggle('is-pending',!pendingDance&&button.dataset.stylePreset===pendingStyle);
+  button.setAttribute('aria-pressed',String((!currentDance||currentStyle==='tango')&&button.dataset.stylePreset===currentStyle));
+  button.classList.toggle('is-pending',(!pendingDance||pendingStyle==='tango')&&button.dataset.stylePreset===pendingStyle);
  });
 }
 function syncDanceTiles(){
@@ -754,14 +756,14 @@ function syncDanceTiles(){
  $('#sound-app').dataset.activeDance=currentDance||'';
 }
 document.querySelectorAll<HTMLButtonElement>('button[data-dance]').forEach(button=>button.addEventListener('click',()=>{
- const dance=(button.dataset.dance||null) as DanceId|null,id=dance?dances[dance].style:currentStyle;
+ const dance=(button.dataset.dance||null) as DanceId|null,id=dance?dances[dance].style:currentStyle==='tango'?'electronic':currentStyle;
  if(playing){pendingStyle=id;pendingDance=dance;syncStyleTiles();syncDanceTiles();}
  else applyStyle(id,dance);
 }));
 document.querySelectorAll<HTMLButtonElement>('[data-style-preset]').forEach(button=>button.addEventListener('click',()=>{
- const id=button.dataset.stylePreset as StyleId;
- if(id===currentStyle&&!currentDance){pendingStyle=null;pendingDance=null;$('#style-status').textContent='';syncStyleTiles();syncDanceTiles();return;}
- if(playing){pendingStyle=id;pendingDance=null;$('#style-status').textContent=styleCopy[language].pending;syncStyleTiles();syncDanceTiles();}
+ const id=button.dataset.stylePreset as StyleId,dance=id==='tango'?'tango':null;
+ if(id===currentStyle&&currentDance===dance){pendingStyle=null;pendingDance=null;$('#style-status').textContent='';syncStyleTiles();syncDanceTiles();return;}
+ if(playing){pendingStyle=id;pendingDance=dance;$('#style-status').textContent=styleCopy[language].pending;syncStyleTiles();syncDanceTiles();}
  else applyStyle(id);
 }));
 $('#reset').addEventListener('click',()=>{const id=pendingStyle||currentStyle,dance=pendingStyle?pendingDance:currentDance;if(playing){pendingStyle=id;pendingDance=dance;$('#style-status').textContent=styleCopy[language].pending;}else applyStyle(id,dance);});

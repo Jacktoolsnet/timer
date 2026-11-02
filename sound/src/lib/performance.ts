@@ -4,7 +4,7 @@ import type {SustainedInstrument} from './phrasing';
 export type VoiceArticulation={attack?:number;release?:number;glide?:number;vibrato?:number;detached?:boolean};
 /** Performance choices, not restrictions on the user's manual instrument selection. */
 export function performanceProfile(style:StyleId,id:SustainedInstrument,dance: DanceId|null=null){
- const rhythmic=dance?['quickstep','jive','samba','chacha','pasodoble','discofox','tango'].includes(dance):['electronic','house','sport','drumandbass','funk','reggae','hiphop'].includes(style);
+ const rhythmic=dance?['quickstep','jive','samba','chacha','pasodoble','discofox','tango'].includes(dance):['electronic','house','sport','drumandbass','funk','reggae','hiphop','tango'].includes(style);
  const detached=rhythmic&&['saxophone','strings','organ'].includes(id);
  const voice:VoiceArticulation=detached
   ?{detached:true,attack:id==='organ'?.008:id==='strings'?.018:.012,release:id==='strings'?.035:.025,glide:.004,vibrato:id==='organ'?0:.0003}

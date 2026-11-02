@@ -49,7 +49,7 @@ test('actual tango accompaniment keeps the new rhythm in normal and random play'
   (window as any).pulseEvents=[];const start=AudioBufferSourceNode.prototype.start;
   AudioBufferSourceNode.prototype.start=function(when=0,...args:any[]){(window as any).pulseEvents.push({time:when,duration:this.buffer?.duration||0});return start.call(this,when,...args);};
  });
- const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/de/');await page.locator('[data-dance=tango]').click();
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/de/');await page.locator('[data-style-preset=tango]').click();
  for(let i=0;i<8;i++){const row=page.locator('[data-track="'+i+'"]');await row.locator('summary').click();await row.locator('.mute').check();}
  for(const index of [0,1]){
   const row=page.locator('[data-track="'+index+'"]');await row.locator('.mute').uncheck();

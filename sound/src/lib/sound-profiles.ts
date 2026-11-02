@@ -16,6 +16,7 @@ export const soundProfiles:Record<StyleId,{cutoff:number;attack:number;decay:num
  ambient:{cutoff:2600,attack:2.2,decay:1.4,warm:true},
  focus:{cutoff:1900,attack:2.5,decay:1.2,warm:true},
  sport:{cutoff:6500,attack:1,decay:.8,warm:false},
+ tango:{cutoff:3600,attack:1.3,decay:.65,warm:true},
  jazz:{cutoff:2300,attack:2,decay:.85,warm:true},
  coffeehouse:{cutoff:1750,attack:2.8,decay:.9,warm:true}
 };

@@ -1,3 +1,4 @@
+import {styleIds} from '../src/lib/presets';
 import {content} from '../src/lib/content';
 import {test,expect} from '@playwright/test';
 test('drawing, audio and appearance',async({page},info)=>{
@@ -174,7 +175,7 @@ test('ambient canvas renders without blocking the instrument',async({page})=>{
 test('style presets change instruments and defer live changes to a bar',async({page})=>{
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/de/');
- await expect(page.locator('.style-tile')).toHaveCount(17);
+ await expect(page.locator('.style-tile')).toHaveCount(styleIds.length);
  const choose=(id:string)=>page.locator('[data-style-preset='+id+']').click();
  await choose('classical');
  await expect(page.locator('[data-style-preset=classical]')).toHaveAttribute('aria-pressed','true');
@@ -689,7 +690,7 @@ test('drawing reshapes the solo voice during random playback',async({page})=>{
 test('music, instruments and animations have separate labelled tiles',async({page})=>{
  await page.goto('/de/');
  await expect(page.locator('.music-tile h2')).toHaveText('Musikrichtung');
- await expect(page.locator('.music-tile .style-tile')).toHaveCount(17);
+ await expect(page.locator('.music-tile .style-tile')).toHaveCount(styleIds.length);
  await expect(page.locator('.instruments-tile h2')).toHaveText('Instrumente');
  await expect(page.locator('.instruments-tile .style-tile')).toHaveCount(0);
  await expect(page.locator('.instruments-tile .instrument')).toHaveCount(8);

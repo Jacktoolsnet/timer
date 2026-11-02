@@ -1,5 +1,6 @@
+import {tangoBassSteps,tangoChordSteps} from './tango';
 import type {InstrumentId} from './instruments';
-export const styleIds=['electronic','house','pop','rock','classical','slowwaltz','jazz','coffeehouse','hiphop','lofi','funk','reggae','drumandbass','latin','ambient','focus','sport'] as const;
+export const styleIds=['electronic','house','pop','rock','classical','slowwaltz','tango','jazz','coffeehouse','hiphop','lofi','funk','reggae','drumandbass','latin','ambient','focus','sport'] as const;
 export type StyleId=typeof styleIds[number];
 type Part={instrument:InstrumentId;steps:number[];pitch?:number;volume?:number};
 export type Preset={beats?:3|4;swing?:number;bpm:number;scale:number[];melody:number[];parts:Part[];grid:number[];density:number};
@@ -12,6 +13,7 @@ export const presets:Record<StyleId,Preset>={
  rock:{bpm:118,scale:[0,3,5,7,10],melody:[0,0,3,2,0,0,2,3],grid:eighths,density:.32,parts:[part('kick',[0,6,8,10]),part('snare',[4,12]),part('hat',eighths),part('bass',[0,2,6,8,10,14]),part('guitar',[0,6,8,14],0,.45),part('tom',[15],0,.4),part('voice',[0,6,12],0,.36)]},
  classical:{bpm:76,scale:[0,2,4,5,7,9,11],melody:[0,2,4,2,1,3,5,3],grid:[0,2,4,6,8,10,12,14],density:.2,parts:[part('piano',eighths),part('strings',[0,8],2,.35),part('bass',[0,8],0,.4),part('harp',[4,12],4,.25),part('piano',[0,4,8,12],4,.35),part('choir',[0,8],0,.2)]},
  slowwaltz:{beats:3,bpm:86,scale:[0,2,4,5,7,9,11],melody:[0,1,2,2,1,0,1,0],grid:[0,2,4,6,8,10],density:.14,parts:[part('doublebass',[0],0,.62),part('piano',[4,8],0,.5),part('guitar',[4,8],0,.18),part('harp',[4,8],0,.13),part('piano',[0,6,10],1,.22),part('choir',[0],0,.2),part('strings',[0,4,8],0,.24),part('strings',[0,6],2,.16)]},
+ tango:{bpm:128,swing:0,scale:[0,2,3,5,7,8,10],melody:[0,2,1,0,3,2,1,0],grid:eighths,density:.17,parts:[part('doublebass',tangoBassSteps,0,.64),part('piano',tangoChordSteps,0,.52),part('rim',[0,8],0,.14),part('guitar',tangoChordSteps,0,.2),part('organ',[0,8],0,.15),part('strings',[0,8],0,.18),part('piano',[0,6,10,14],1,.2),part('choir',[0],0,.12)]},
  hiphop:{bpm:88,swing:.12,scale:[0,3,5,7,10],melody:[0,0,2,1,0,3,1,0],grid:eighths,density:.24,parts:[part('kick',[0,7,10],0,.62),part('snare',[4,12],0,.48),part('hat',[0,2,6,8,10,14],0,.25),part('synthbass',[0,7,10],0,.48),part('epiano',[0,6,10],0,.34),part('organ',[0,8],1,.18),part('voice',[0,10],0,.32)]},
  lofi:{bpm:74,swing:.18,scale:[0,2,4,7,9],melody:[0,1,2,1,0,2,1,0],grid:eighths,density:.18,parts:[part('kick',[0,6,10],0,.44),part('rim',[4,12],0,.28),part('shaker',[0,2,6,8,10,14],0,.15),part('bass',[0,7,8],0,.35),part('epiano',[0,6,10,14],1,.32),part('guitar',[2,10],0,.22),part('voice',[2,10],0,.28)]},
  funk:{bpm:108,swing:.06,scale:[0,2,4,7,9],melody:[0,2,0,1,3,1,2,0],grid:Array.from({length:16},(_,i)=>i),density:.3,parts:[part('kick',[0,3,6,10],0,.52),part('snare',[4,12],0,.42),part('hat',[0,2,3,6,8,10,11,14],0,.23),part('bass',[0,3,6,7,10,14],0,.5),part('guitar',[2,6,10,14],1,.3),part('organ',[3,11],0,.24),part('voice',[3,10,14],0,.32)]},
@@ -25,10 +27,10 @@ export const presets:Record<StyleId,Preset>={
  coffeehouse:{bpm:78,swing:.12,scale:[0,2,3,4,7,9],melody:[0,1,3,1,4,3,1,0],grid:eighths,density:.18,parts:[part('epiano',[0,4,10,14],0,.35),part('guitar',[2,6,10,14],1,.3),part('doublebass',[0,8],0,.35),part('shaker',[2,6,10,14],0,.16),part('organ',[0],2,.18),part('voice',[2,10],0,.28)]}
 };
 export const styleCopy={
- de:{label:'Musikstil',names:['Electronic','House','Pop','Rock','Klassik','Langsamer Walzer','Jazz & Blues','Coffeehouse','Hip-Hop / Rap','Lo-Fi','Funk','Reggae / Dub','Drum & Bass','Latin / Bossa Nova','Ambient','Fokus','Sport'],pending:'Stilwechsel zum nächsten Takt',hint:'Lädt Instrumente, Tempo und ein neues Startmuster. Alle Klänge sind synthetisch erzeugt.'},
- en:{label:'Music style',names:['Electronic','House','Pop','Rock','Classical','Slow Waltz','Jazz & Blues','Coffeehouse','Hip-Hop / Rap','Lo-Fi','Funk','Reggae / Dub','Drum & Bass','Latin / Bossa Nova','Ambient','Focus','Sport'],pending:'Style changes at the next bar',hint:'Loads instruments, tempo and a new starting pattern. All sounds are synthesized.'},
- es:{label:'Estilo musical',names:['Electrónica','House','Pop','Rock','Clásica','Vals lento','Jazz y blues','Café','Hip-hop / Rap','Lo-fi','Funk','Reggae / Dub','Drum & Bass','Latin / Bossa Nova','Ambient','Concentración','Deporte'],pending:'El estilo cambia en el próximo compás',hint:'Carga instrumentos, tempo y un patrón nuevo. Todos los sonidos son sintetizados.'},
- fr:{label:'Style musical',names:['Électronique','House','Pop','Rock','Classique','Valse lente','Jazz & blues','Café','Hip-hop / Rap','Lo-fi','Funk','Reggae / Dub','Drum & Bass','Latin / Bossa Nova','Ambient','Concentration','Sport'],pending:'Le style change à la prochaine mesure',hint:'Charge les instruments, le tempo et un nouveau motif. Tous les sons sont synthétisés.'}
+ de:{label:'Musikstil',names:['Electronic','House','Pop','Rock','Klassik','Langsamer Walzer','Tango','Jazz & Blues','Coffeehouse','Hip-Hop / Rap','Lo-Fi','Funk','Reggae / Dub','Drum & Bass','Latin / Bossa Nova','Ambient','Fokus','Sport'],pending:'Stilwechsel zum nächsten Takt',hint:'Lädt Instrumente, Tempo und ein neues Startmuster. Alle Klänge sind synthetisch erzeugt.'},
+ en:{label:'Music style',names:['Electronic','House','Pop','Rock','Classical','Slow Waltz','Tango','Jazz & Blues','Coffeehouse','Hip-Hop / Rap','Lo-Fi','Funk','Reggae / Dub','Drum & Bass','Latin / Bossa Nova','Ambient','Focus','Sport'],pending:'Style changes at the next bar',hint:'Loads instruments, tempo and a new starting pattern. All sounds are synthesized.'},
+ es:{label:'Estilo musical',names:['Electrónica','House','Pop','Rock','Clásica','Vals lento','Tango','Jazz y blues','Café','Hip-hop / Rap','Lo-fi','Funk','Reggae / Dub','Drum & Bass','Latin / Bossa Nova','Ambient','Concentración','Deporte'],pending:'El estilo cambia en el próximo compás',hint:'Carga instrumentos, tempo y un patrón nuevo. Todos los sonidos son sintetizados.'},
+ fr:{label:'Style musical',names:['Électronique','House','Pop','Rock','Classique','Valse lente','Tango','Jazz & blues','Café','Hip-hop / Rap','Lo-fi','Funk','Reggae / Dub','Drum & Bass','Latin / Bossa Nova','Ambient','Concentration','Sport'],pending:'Le style change à la prochaine mesure',hint:'Charge les instruments, le tempo et un nouveau motif. Tous les sons sont synthétisés.'}
 };
 
 /** Complete all eight orbits without turning supporting voices into a wall of notes. */
@@ -47,7 +49,7 @@ export function partsForStyle(style:StyleId):Part[]{
 }
 
 const vocalPalette:Record<StyleId,InstrumentId[]>={
- electronic:['voice','vocalpad'],house:['voice'],pop:['voice'],rock:['voice'],classical:['choir'],slowwaltz:['choir'],
+ electronic:['voice','vocalpad'],house:['voice'],pop:['voice'],rock:['voice'],classical:['choir'],slowwaltz:['choir'],tango:['choir'],
  jazz:['voice'],coffeehouse:['voice'],ambient:['choir','vocalpad'],focus:['vocalpad'],sport:['voice'],
  hiphop:['voice'],lofi:['voice'],funk:['voice'],reggae:['voice'],drumandbass:['vocalpad'],latin:['voice']
 };

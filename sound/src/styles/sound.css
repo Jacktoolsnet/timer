@@ -240,3 +240,6 @@ body:not(.focus-view) .sound-top{margin-bottom:20px}
 #drawing{user-select:none;-webkit-touch-callout:none}
 
 .grid-status{margin:0 0 12px;color:var(--muted);font-size:11px;line-height:1.5}.grid-status:empty{display:none}#sound-app .clock-select-trigger:disabled{opacity:.55;cursor:not-allowed}
+
+/* Keep legacy rhythm controls available internally, but out of the simplified UI. */
+.groove-controls[hidden],.dances-tile[hidden]{display:none!important}
