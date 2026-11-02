@@ -1,5 +1,5 @@
 import {ORBIT_COUNT,padAt,type OrbitPad} from './orbit-layout';
-/** Only the orbit bus is ducked; live and looped drums stay on the unducked master. */
+/** Companion parts fade to this level while the selected pad stays at its normal level. */
 export const RHYTHM_EDIT_MUSIC_LEVEL=.1;
 /** Legacy drum order only; matrix pads take their live instrument from the matching orbit. */
 export const rhythmInstruments=['hat','snare','kick'] as const;

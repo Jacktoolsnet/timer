@@ -19,7 +19,7 @@ test('JSON round trip preserves nine tracks, melody, custom rhythm, levels and a
  await page.locator('[data-center-mode=bars]').click();
  await page.locator('[data-orbit-mode=pulse]').click();
  await page.locator('[data-pad-mode=rhythm]').click();
- await page.keyboard.press('Numpad9');
+ await page.keyboard.press('Numpad9');await page.keyboard.press('Numpad9');
  await expect(page.locator('#drawing')).toHaveAttribute('data-rhythm-hits','1');
  await page.locator('#rhythm-done').click();await page.locator('#play').click();
  await page.locator('#files-open').click();

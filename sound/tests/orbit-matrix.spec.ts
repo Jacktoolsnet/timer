@@ -37,18 +37,21 @@ test('legacy eight-track pieces gain a ninth voice without overwriting custom tr
  expect(unmatched.pad!.hits.flat().filter(Boolean)).toHaveLength(3);
 });
 
-test('all nine orbit instruments play from the numpad, with independent simultaneous keys and repeat suppression',async({page})=>{
+test('all nine orbit instruments play from the numpad, through focused selection with repeat suppression',async({page})=>{
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/de/');await page.locator('#clear').click();await expect(page.locator('.instrument')).toHaveCount(9);
  await page.locator('[data-pad-mode=rhythm]').click();
  const pad=page.locator('#drawing');
  await expect(page.locator('#rhythm-zones>[data-lane]')).toHaveCount(9);
- // Keep focus on the mode button: number keys do not require canvas focus.
- await page.keyboard.down('Numpad7');await page.keyboard.down('Numpad9');
- await expect(pad).toHaveAttribute('data-pointers','2');await expect(pad).toHaveAttribute('data-rhythm-hits','2');
- await page.keyboard.down('Numpad7');await expect(pad).toHaveAttribute('data-rhythm-hits','2');
- await page.keyboard.up('Numpad9');await expect(pad).toHaveAttribute('data-pointers','1');await page.keyboard.up('Numpad7');
- for(const number of [8,4,5,6,1,2,3])await page.keyboard.press('Numpad'+number);
+ // Each orbit is selected once, then played and explicitly accepted.
+ for(const number of padNumbers){
+  await page.keyboard.press('Numpad'+number);
+  await page.keyboard.down('Numpad'+number);
+  await expect(pad).toHaveAttribute('data-pointers','1');
+  await page.keyboard.down('Numpad'+number); // repeat is suppressed
+  await page.keyboard.up('Numpad'+number);
+  await page.locator('#rhythm-done').click();
+ }
  await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
  await expect(pad).toHaveAttribute('data-rhythm-hits','9');await expect(pad).toHaveAttribute('data-pointers','0');
  const hits=JSON.parse((await pad.getAttribute('data-rhythm-pattern'))!);
@@ -58,7 +61,7 @@ test('all nine orbit instruments play from the numpad, with independent simultan
   await expect(page.locator('#rhythm-zones>[data-lane="'+i+'"] .pad-instrument')).toHaveText(name!);
   await expect(page.locator('#gesture-keyboard')).toContainText(padNumbers[i]+': '+name);
  }
- await page.locator('#rhythm-done').click();await expect(pad).toHaveAttribute('data-music-level','1');
+ await expect(pad).toHaveAttribute('data-music-level','1');
  await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
  await page.locator('.flow-side').screenshot({path:'test-results/orbit-matrix-'+test.info().project.name+'.png'});
  expect(errors).toEqual([]);
@@ -72,7 +75,7 @@ test('matrix follows manual instrument choices and disables silent pads; random 
  await page.locator('#tempo').fill('220');await page.locator('#tempo').dispatchEvent('input');
  await page.locator('[data-pad-mode=rhythm]').click();
  const pad=page.locator('#drawing');await expect(page.locator('[data-lane="8"] .pad-instrument')).toHaveText('Klavier');
- await page.keyboard.press('Numpad3');await expect(pad).toHaveAttribute('data-rhythm-hits','1');
+ await page.keyboard.press('Numpad3');await page.keyboard.press('Numpad3');await expect(pad).toHaveAttribute('data-rhythm-hits','1');
  const grid=await row.getAttribute('data-slots'),pattern=await pad.getAttribute('data-rhythm-pattern');
  await page.locator('#evolve').click();await page.waitForTimeout(3000);
  await expect(row.locator('.instrument-select')).toHaveValue('piano');await expect(row).toHaveAttribute('data-slots',grid!);
@@ -87,6 +90,7 @@ test('numpad works with Num Lock off but never intercepts settings fields or mod
  await page.locator('#tempo').focus();await page.keyboard.press('Numpad1');
  const pad=page.locator('#drawing');await expect(pad).toHaveAttribute('data-rhythm-hits','0');await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false');
  await pad.focus();await page.keyboard.press('Control+7');await expect(pad).toHaveAttribute('data-rhythm-hits','0');
+ await page.keyboard.press('Numpad1');
  await pad.evaluate(el=>{
   el.dispatchEvent(new KeyboardEvent('keydown',{code:'Numpad1',key:'End',bubbles:true,cancelable:true}));
   el.dispatchEvent(new KeyboardEvent('keyup',{code:'Numpad1',key:'End',bubbles:true,cancelable:true}));
@@ -105,6 +109,7 @@ test('melodic and sustained pads produce sound even when their original orbit pa
  await page.goto('/de/');await page.locator('#clear').click();
  const row=page.locator('[data-track="8"]');await row.locator('summary').click();
  await page.locator('[data-pad-mode=rhythm]').click();
+ await page.keyboard.press('Numpad3');
  for(const instrument of ['piano','strings','saxophone','voice','organ','tom','rim','shaker','clap']){
   expect(instrumentIds).toContain(instrument);
   await row.locator('.instrument-select').selectOption(instrument,{force:true});
@@ -117,10 +122,10 @@ test('melodic and sustained pads produce sound even when their original orbit pa
 
 
 test('brief main-thread stalls during matrix input never stop playback or replay stale ticks in a burst',async({page})=>{
- await page.goto('/de/');await page.locator('[data-pad-mode=rhythm]').click();await page.keyboard.press('Numpad7');
+ await page.goto('/de/');await page.locator('[data-pad-mode=rhythm]').click();await page.keyboard.press('Numpad7');await page.keyboard.press('Numpad7');
  await page.evaluate(()=>{const until=performance.now()+260;while(performance.now()<until){/* Simulate cold synthesis / UI work. */}});
  await page.waitForTimeout(200);await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
- await page.keyboard.press('Numpad8');await expect(page.locator('#drawing')).toHaveAttribute('data-rhythm-hits','2');
+ await page.locator('#rhythm-done').click();await page.keyboard.press('Numpad8');await page.keyboard.press('Numpad8');await expect(page.locator('#drawing')).toHaveAttribute('data-rhythm-hits','2');
  await page.locator('#rhythm-done').click();await expect(page.locator('#drawing')).toHaveAttribute('data-music-level','1');
 });
 

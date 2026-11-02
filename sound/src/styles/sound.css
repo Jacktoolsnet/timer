@@ -293,3 +293,11 @@ body:not(.focus-view) .sound-top{margin-bottom:20px}
 
 #recording-sessions{position:fixed;bottom:max(18px,env(safe-area-inset-bottom));right:max(18px,env(safe-area-inset-right));z-index:80;max-width:calc(100vw - 36px);display:flex;flex-direction:column;gap:10px;pointer-events:none}
 #recording-sessions>aside{position:static;max-width:100%;pointer-events:auto}
+
+/* Select first, then edit one large pad while eight live companions surround it. */
+#rhythm-zones{display:block}
+#rhythm-zones>span{position:absolute;box-sizing:border-box;border:1px solid var(--line)!important;border-radius:8px;transition:left .3s ease,top .3s ease,width .3s ease,height .3s ease,background .3s ease;overflow:hidden}
+#rhythm-zones[data-focused=true]>span{padding:5px;flex-direction:column;gap:2px;align-items:center;text-align:center;font-size:10px}
+#rhythm-zones[data-focused=true]>[data-selected=true]{border:2px solid var(--lane)!important;border-radius:18px;padding:14px;font-size:16px;background:linear-gradient(145deg,color-mix(in srgb,var(--lane) 20%,transparent),transparent);box-shadow:inset 0 0 28px color-mix(in srgb,var(--lane) 15%,transparent)}
+#rhythm-zones [data-selected=true] b{font-size:22px}
+@media(prefers-reduced-motion:reduce){#rhythm-zones>span{transition:none}}
