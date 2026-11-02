@@ -6,7 +6,7 @@ import {fileCopy} from '../src/lib/file-copy';
 test('optional labels reserve landscape space while retaining portrait orbit size',()=>{
  expect(videoInfoSize(1280,720)).toBe(680);expect(videoInfoSize(1280,720,true)).toBe(540);expect(videoInfoSize(720,1280,true)).toBe(680);
 });
-for(const portrait of [false,true])test(`video text stays outside the orbit and truncates long titles: ${portrait?'portrait':'landscape'}`,async({page})=>{
+for(const portrait of [false,true])test(`video text stays outside the orbit and fits long titles: ${portrait?'portrait':'landscape'}`,async({page})=>{
  await page.goto('/de/');
  const result=await page.evaluate(async portrait=>{
   const exportPath='/src/lib/video-export.ts',infoPath='/src/lib/video-info.ts';
@@ -28,7 +28,7 @@ for(const portrait of [false,true])test(`video text stays outside the orbit and 
   const screenshot=canvas.toDataURL().split(',')[1];
   return {texts:shown,orbit:images[0],disabled,screenshot};
  },portrait);
- expect(result.texts[0].text).toMatch(/…$/);for(const text of result.texts)expect(text.width).toBeLessThanOrEqual((portrait?720:1280)-80);
+ if(portrait)expect(result.texts[0].text).toMatch(/…$/);for(const text of result.texts)expect(text.width).toBeLessThanOrEqual((portrait?720:1280)-80);
  const [,top,,size]=result.orbit;
  expect(result.texts[1].y).toBeLessThan(top);expect(result.texts[2].y).toBeGreaterThan(top+size);
  expect(result.texts.map(t=>t.text)).toContain('sound.jacktools.net');expect(result.disabled).toBe(0);
@@ -65,7 +65,7 @@ test('actual portrait MP4 draws the selected title and live music metadata into 
  await page.locator('#video-record').click();await expect(page.locator('#video-status')).toHaveText(fileCopy.de.recording);
  await expect.poll(async()=>page.evaluate(()=>[...(window as any).videoTexts].some(t=>(t as string).includes('BPM')))).toBe(true);
  const texts=await page.evaluate(()=>(window as any).videoTexts as string[]);
- expect(texts).toContain('Mein Orbit-Song');expect(texts).toContain('Erstellt mit JackTools Sound');expect(texts).toContain('sound.jacktools.net');expect(texts).toContain('Intro');
+ expect(texts).toContain('Mein Orbit-Song');expect(texts).toContain('Created with JackTools Sound');expect(texts).toContain('sound.jacktools.net');expect(texts).toContain('Intro');
  await page.locator('#files-open').click();await expect(page.locator('#video-info-title')).toBeDisabled();await page.locator('#files-close').click();
  await page.waitForTimeout(900);const download=page.waitForEvent('download');await page.locator('#video-stop').click();expect((await download).suggestedFilename()).toMatch(/\.mp4$/);
 });

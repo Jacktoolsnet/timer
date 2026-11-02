@@ -1,5 +1,6 @@
+import type {Language} from '../lib/i18n';
 import {videoAnimationPlan,videoAnimationKeys,type VideoAnimationSettings,type VideoAnimationKey} from '../lib/video-animations';
-import {defaultVideoInfo,videoInfoCopy,type VideoInfoSettings} from '../lib/video-info';
+import {defaultVideoInfo,videoInfoCopy,defaultVideoTitle,type VideoInfoSettings} from '../lib/video-info';
 import {recordingCopy} from '../lib/recording-copy';
 import {instrumentGroups,pickerCopy,type InstrumentGroup} from '../lib/instrument-picker';
 import {tapNoteAt,tapNoteY,tapNoteKey,tapNoteSemitones,tapNoteDegree} from '../lib/tap-notes';
@@ -1032,6 +1033,7 @@ function applyStyle(id:StyleId,dance:DanceId|null=null){
  $('#style-status').textContent='';sync();
 }
 function syncStyleTiles(){
+ $<HTMLInputElement>('#video-info-title').placeholder=defaultVideoTitle(styleCopy[captionLanguage()].names[styleIds.indexOf(currentStyle)]);
  document.querySelectorAll<HTMLButtonElement>('[data-style-preset]').forEach(button=>{
   button.setAttribute('aria-pressed',String((!currentDance||currentStyle==='tango')&&button.dataset.stylePreset===currentStyle));
   button.classList.toggle('is-pending',(!pendingDance||pendingStyle==='tango')&&button.dataset.stylePreset===pendingStyle);
@@ -1680,6 +1682,7 @@ enhanceClockSelects($('.instruments-tile') as HTMLFormElement);
 function applySettings(saved:SoundSettings){
  for(const key of videoAnimationKeys)$<HTMLInputElement>('#video-animation-'+key).checked=saved.recording?.animations?.[key]??false;
  const videoInfo=saved.recording?.videoInfo??defaultVideoInfo;
+ $<HTMLInputElement>('#video-caption-language input[value="'+(videoInfo.language??'en')+'"]').checked=true;
  $<HTMLInputElement>('#video-info-title').value=videoInfo.title;
  for(const key of ['enabled','showTitle','style','tempo','section','signature'] as const)$<HTMLInputElement>('#video-info-'+key).checked=videoInfo[key];syncVideoInfo();
  $<HTMLInputElement>('#video-format input[value="'+(saved.recording?.videoFormat??'landscape')+'"]').checked=true;syncVideoFormat();
@@ -1782,11 +1785,12 @@ async function startRecordedMusic(options:RecordingStart){
 }
 function chosenVideoAnimations():VideoAnimationSettings{return {center:$<HTMLInputElement>('#video-animation-center').checked,orbit:$<HTMLInputElement>('#video-animation-orbit').checked,background:$<HTMLInputElement>('#video-animation-background').checked};}
 for(const key of videoAnimationKeys)$('#video-animation-'+key).addEventListener('change',persistSettings);
+function captionLanguage():Language{return $<HTMLInputElement>('#video-caption-language input:checked').value as Language;}
 function chosenVideoInfo():VideoInfoSettings{
- return {enabled:$<HTMLInputElement>('#video-info-enabled').checked,title:$<HTMLInputElement>('#video-info-title').value.slice(0,80),showTitle:$<HTMLInputElement>('#video-info-showTitle').checked,style:$<HTMLInputElement>('#video-info-style').checked,tempo:$<HTMLInputElement>('#video-info-tempo').checked,section:$<HTMLInputElement>('#video-info-section').checked,signature:$<HTMLInputElement>('#video-info-signature').checked};
+ return {language:captionLanguage(),enabled:$<HTMLInputElement>('#video-info-enabled').checked,title:$<HTMLInputElement>('#video-info-title').value.slice(0,80),showTitle:$<HTMLInputElement>('#video-info-showTitle').checked,style:$<HTMLInputElement>('#video-info-style').checked,tempo:$<HTMLInputElement>('#video-info-tempo').checked,section:$<HTMLInputElement>('#video-info-section').checked,signature:$<HTMLInputElement>('#video-info-signature').checked};
 }
 function syncVideoInfo(){
- const info=chosenVideoInfo();$('#video-info-options').hidden=!info.enabled;
+ const info=chosenVideoInfo();$<HTMLInputElement>('#video-info-title').placeholder=defaultVideoTitle(styleCopy[captionLanguage()].names[styleIds.indexOf(currentStyle)]);$('#video-info-options').hidden=!info.enabled;
  $<HTMLInputElement>('#video-info-title').disabled=!info.enabled||!info.showTitle;
 }
 document.querySelectorAll<HTMLInputElement>('.video-info input').forEach(input=>input.addEventListener(input.type==='text'?'input':'change',()=>{syncVideoInfo();persistSettings();}));
@@ -1846,10 +1850,12 @@ $('#video-record').addEventListener('click',async()=>{
   if(!audio||!recordingOutput)throw Error('Audio unavailable');
   videoRecording=createMp4Recording({
    audio,output:recordingOutput,durationSeconds:options.durationSeconds,format:options.videoFormat,
-   paint:ctx=>paintVideo(ctx,orbit,atmosphere,backgroundMode!=='off',{settings:options.videoInfo,content:{
-    style:styleCopy[language].names[styleIds.indexOf(currentStyle)],tempo:bpm+' BPM',
-    section:evolving&&song?songCopy[language][song.form[song.index].kind]:'',signature:videoInfoCopy[language].credit
-   }}),
+   paint:ctx=>{
+    const lang=options.videoInfo.language??'en',style=styleCopy[lang].names[styleIds.indexOf(currentStyle)];
+    paintVideo(ctx,orbit,atmosphere,backgroundMode!=='off',{settings:{...options.videoInfo,title:options.videoInfo.title.trim()?options.videoInfo.title:defaultVideoTitle(style)},content:{
+     style,tempo:bpm+' BPM',section:evolving&&song?songCopy[lang][song.form[song.index].kind]:'',signature:videoInfoCopy[lang].credit
+    }});
+   },
    ready:(blob,limited)=>{
     if(captureFailed)return;
     finishVideoUi();videoUrl=URL.createObjectURL(blob);

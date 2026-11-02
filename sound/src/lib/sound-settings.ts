@@ -37,6 +37,7 @@ export function decodeSettings(raw:string|null):SoundSettings|null{
   if(s.recording?.videoFormat!==undefined&&!member(['landscape','portrait'],s.recording.videoFormat))return null;
   if(s.recording?.videoInfo!==undefined){
    const info=s.recording.videoInfo;
+   if(info?.language!==undefined&&!member(['en','de','es','fr'],info.language))return null;
    if(!info||Array.isArray(info)||typeof info.title!=='string'||info.title.length>80
     ||['enabled','showTitle','style','tempo','section','signature'].some(key=>typeof info[key]!=='boolean'))return null;
   }

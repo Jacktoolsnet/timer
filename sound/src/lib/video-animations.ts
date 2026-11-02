@@ -6,9 +6,9 @@ export const defaultVideoAnimations:VideoAnimationSettings={center:false,orbit:f
  * Percent-based timing gives short clips energy without making long sessions frantic. */
 export function videoAnimationPlan(seconds:number,random=Math.random):Record<VideoAnimationKey,number[]>{
  const duration=Math.max(60,Math.min(600,Number.isFinite(seconds)?seconds:600))*1000;
- return Object.fromEntries(videoAnimationKeys.map(key=>{
+ return Object.fromEntries(videoAnimationKeys.map((key,layer)=>{
   const count=6+Math.min(3,Math.floor(random()*4));
-  return [key,Array.from({length:count},(_,i)=>duration*(.07+.86*(i+.2+random()*.6)/count))];
+  return [key,Array.from({length:count},(_,i)=>duration*(.07+.86*(i+.15+layer*.22+random()*.15)/count))];
  })) as Record<VideoAnimationKey,number[]>;
 }
 export const videoAnimationCopy={

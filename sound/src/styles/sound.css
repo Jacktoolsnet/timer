@@ -393,3 +393,10 @@ body:not(.focus-view) .sound-top{margin-bottom:20px}
 .video-animation-options{font-size:12px;border-top:1px solid var(--line);padding-top:12px;margin:14px 0}
 .video-animation-options summary{cursor:pointer;line-height:1.5;padding:4px 0}
 #files-dialog .video-animation-options p{font-size:12px}
+#video-caption-language{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;border:0;margin:0 0 14px;padding:0;min-width:0}
+#video-caption-language legend{font-size:12px;margin-bottom:8px;color:var(--muted);padding:0}
+.video-language-tile{position:relative;display:grid;place-items:center;min-height:40px;border:1px solid var(--line);border-radius:8px;background:var(--surface);cursor:pointer;font-size:12px}
+.video-language-tile input{position:absolute;inset:0;opacity:0;width:100%;height:100%;margin:0;cursor:pointer}
+.video-language-tile:has(input:checked){border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--surface))}
+.video-language-tile:has(input:focus-visible){outline:3px solid var(--accent);outline-offset:2px}
+.video-language-tile:has(input:disabled){opacity:.5}
