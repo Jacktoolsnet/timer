@@ -1,5 +1,5 @@
 import type {StyleId} from './presets';
-export const percussion=['kick','snare','hat','clap','tom','rim','shaker'] as const;
+export const percussion=['kick','snare','hat','clap','tom','rim','shaker','conga'] as const;
 export function isMelodic(instrument:string){return !(percussion as readonly string[]).includes(instrument);}
 export function makeMotif(melody:readonly number[]):number[]{
  return Array.from({length:8},(_,i)=>Math.max(0,Math.min(4,melody[i%melody.length]||0)));
@@ -20,10 +20,10 @@ export function chordFor(style:StyleId,bar:number):{root:number;third:number}{
 /** Shared chords and short repeated phrases keep independent orbits consonant. */
 export function melodicSemitones(style:StyleId,bar:number,beat:number,instrument:string,pitch:number,motif:readonly number[]):number{
  const {root,third}=chordFor(style,bar);
- if(instrument==='bass'||instrument==='synthbass'||instrument==='doublebass'){
+ if(instrument==='bass'||instrument==='synthbass'||instrument==='doublebass'||instrument==='acidbass'){
   return root+(beat%8===0?0:[0,7,12,7,12][motif[Math.floor(beat/2)%motif.length]]);
  }
- if(instrument==='pad'||instrument==='strings'||instrument==='organ'||instrument==='choir'||instrument==='vocalpad')return root+[0,third,7,12,third][motif[Math.floor(beat/2)%motif.length]];
+ if(instrument==='pad'||instrument==='strings'||instrument==='organ'||instrument==='choir'||instrument==='vocalpad'||instrument==='shimmer'||instrument==='cello')return root+[0,third,7,12,third][motif[Math.floor(beat/2)%motif.length]];
  const degree=(motif[Math.floor(beat/2)%motif.length]+Math.max(0,pitch))%5;
  return root+[0,third,7,12,12+third][degree];
 }

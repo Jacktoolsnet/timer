@@ -3,6 +3,17 @@ import type {InstrumentId} from '../lib/instruments';
 interface Props {name:InstrumentId}
 const {name}=Astro.props;
 const paths:Record<InstrumentId,string>={
+ flute:'m4 20 16-16M2 18l4 4M17 3l4 4m-11 6 2 2m1-5 2 2m1-5 2 2',
+ clarinet:'m9 3 3 3v10l4 5H8l3-5V6L8 4m4 5h3m-3 4h3',
+ trumpet:'M3 10h12l6-5v14l-6-5H3Zm4 0V6m4 4V6M5 6h4m0 0h4M4 14v4h9v-4',
+ horn:'M9 8c-8 0-8 13 0 13 7 0 7-10 1-10-4 0-4 7 0 7M9 8h6l5-5v12l-5-4M7 6V3m4 3V3',
+ analoglead:'M2 16 7 5l5 14 5-14 5 11M3 22h18',
+ acidbass:'M2 16h5V7h5v9h5V7h5M4 3h3m4 0h3m4 0h3M4 21h16',
+ shimmer:'M2 11c4-7 6 7 10 0s6 7 10 0M2 17c4-7 6 7 10 0s6 7 10 0M12 2v4m-2-2h4',
+ cello:'M12 2v13m-3-9h6M9 8c-4 0-1 5-4 8-2 5 16 5 14 0-3-3 0-8-4-8M12 20v3M3 4l18 15',
+ vibraphone:'M3 6h18M4 6v11m4-11v9m4-9v8m4-8v9m4-9v11M4 20h16M6 17v5m12-5v5',
+ conga:'M5 5h14l-2 16H7ZM5 5a7 2 0 1 0 14 0 7 2 0 1 0-14 0M8 9l1 9m7-9-1 9',
+
  kick:'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm0 5v8m-4-4h8',
  snare:'M3 8h18v9H3Zm0 0 4-3h10l4 3M7 8v9m5-9v9m5-9v9M5 21l4-4m10 4-4-4',
  hat:'M2 10h20M4 10l8-4 8 4M12 3v18m-5 0h10',

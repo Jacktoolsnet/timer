@@ -1,12 +1,12 @@
 import type {InstrumentId} from './instruments';
 export const instrumentGroups={
- drums:['kick','snare','hat','clap','tom','rim','shaker'],
- bass:['bass','synthbass','doublebass'],
- keys:['piano','epiano','organ','marimba','kalimba','bells'],
- strings:['strings','guitar','harp'],
- winds:['saxophone'],
+ drums:['kick','snare','hat','clap','tom','rim','shaker','conga'],
+ bass:['bass','synthbass','doublebass','acidbass'],
+ keys:['piano','epiano','organ','marimba','kalimba','bells','vibraphone'],
+ strings:['strings','guitar','harp','cello'],
+ winds:['saxophone','flute','clarinet','trumpet','horn'],
  voices:['voice','choir','vocalpad'],
- synths:['pluck','pad']
+ synths:['pluck','pad','analoglead','shimmer']
 } satisfies Record<string,InstrumentId[]>;
 export type InstrumentGroup=keyof typeof instrumentGroups;
 export const pickerCopy={

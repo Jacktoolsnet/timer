@@ -14,7 +14,7 @@ for(const lang of ['de','en','es','fr'])test(`selected-pad tools and grouped til
  await expect(page.locator('#pad-mute')).toHaveAttribute('title',/.+/);
  await page.locator('#pad-instrument').click();const dialog=page.locator('#instrument-dialog');
  await expect(dialog).toBeVisible();await expect(dialog.getByRole('tab')).toHaveCount(7);
- await expect(dialog.locator('[data-pick-instrument]')).toHaveCount(25);
+ await expect(dialog.locator('[data-pick-instrument]')).toHaveCount(instrumentIds.length);
  await expect(dialog.locator('[data-pick-instrument=marimba]')).toHaveAttribute('aria-pressed','true');
  await dialog.getByRole('tab',{selected:true}).focus();await page.keyboard.press('End');
  await expect(dialog.locator('[data-instrument-group=synths]')).toBeFocused();

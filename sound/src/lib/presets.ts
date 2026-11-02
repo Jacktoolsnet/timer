@@ -38,7 +38,7 @@ export function partsForStyle(style:StyleId,preset:Preset=presets[style]):Part[]
  const parts=preset.parts.map(p=>({...p,steps:[...p.steps]}));
  const supporting=style==='electronic'
   ?['bells','kalimba','pad'] as InstrumentId[]
-  :preset.parts.filter(p=>!['kick','snare','hat','clap','tom','rim','shaker','bass','synthbass','doublebass'].includes(p.instrument)).map(p=>p.instrument);
+  :preset.parts.filter(p=>!['kick','snare','hat','clap','tom','rim','shaker','conga','bass','synthbass','doublebass','acidbass'].includes(p.instrument)).map(p=>p.instrument);
  const count=parts.length;
  while(parts.length<8){
   const offset=parts.length-count,instrument=supporting[offset%supporting.length]||'pluck';
@@ -67,10 +67,14 @@ const vocalPalette:Record<StyleId,InstrumentId[]>={
 };
 /** Curated additional colours: manual choices stay unrestricted and use style-specific articulation. */
 const colourPalette:Partial<Record<StyleId,InstrumentId[]>>={
- electronic:['pluck'],house:['epiano','organ','strings'],pop:['epiano','strings','saxophone'],
- rock:['organ','epiano'],classical:['organ'],jazz:['epiano','guitar'],coffeehouse:['piano','saxophone'],
- funk:['saxophone','epiano'],latin:['saxophone','epiano'],lofi:['piano'],reggae:['epiano'],
- ambient:['epiano'],focus:['harp','epiano'],sport:['organ']
+ electronic:['pluck','analoglead','acidbass','shimmer'],house:['epiano','organ','strings','analoglead','shimmer'],
+ pop:['epiano','strings','saxophone','flute','trumpet','analoglead'],rock:['organ','epiano','cello','analoglead'],
+ classical:['organ','flute','clarinet','horn','cello'],slowwaltz:['flute','clarinet','cello'],tango:['cello','clarinet'],
+ jazz:['epiano','guitar','clarinet','trumpet','vibraphone'],coffeehouse:['piano','saxophone','flute','vibraphone'],
+ funk:['saxophone','epiano','trumpet','conga','analoglead'],latin:['saxophone','epiano','flute','conga'],
+ lofi:['piano','vibraphone','cello'],reggae:['epiano','trumpet','conga'],hiphop:['analoglead','acidbass'],
+ drumandbass:['analoglead','acidbass','shimmer'],ambient:['epiano','flute','horn','cello','shimmer'],
+ focus:['harp','epiano','flute','cello','vibraphone','shimmer'],sport:['organ','analoglead','acidbass']
 };
 export function evolutionPalette(style:StyleId):InstrumentId[]{
  return [...new Set([...partsForStyle(style).map(part=>part.instrument),...vocalPalette[style],...(colourPalette[style]||[])])];

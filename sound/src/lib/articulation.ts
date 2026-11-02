@@ -4,5 +4,6 @@ export const instrumentFamily:Record<InstrumentId,'percussion'|'plucked'|'struck
  kick:'percussion',snare:'percussion',hat:'percussion',clap:'percussion',tom:'percussion',rim:'percussion',shaker:'percussion',
  bass:'plucked',doublebass:'plucked',guitar:'plucked',harp:'plucked',kalimba:'plucked',
  piano:'struck',epiano:'struck',marimba:'struck',bells:'struck',pluck:'plucked',synthbass:'plucked',
+ conga:'percussion',vibraphone:'struck',acidbass:'plucked',analoglead:'keys',shimmer:'pad',cello:'bowed',flute:'wind',clarinet:'wind',trumpet:'wind',horn:'wind',
  strings:'bowed',saxophone:'wind',organ:'keys',pad:'pad',voice:'vocal',choir:'vocal',vocalpad:'pad'
 };

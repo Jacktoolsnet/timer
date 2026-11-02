@@ -16,7 +16,7 @@ test('every remaining instrument has bounded envelopes and a distinct recipe',()
    expect(spec.sustain).toBeLessThanOrEqual(1);expect(spec.duration-spec.attack!).toBeGreaterThan(id==='pad'?.45:.07);
   }
  }
- expect(signatures.size).toBe(10);
+ expect(signatures.size).toBe(instrumentIds.filter(id=>!acousticInstruments.includes(id)&&!(sustainedInstruments as readonly string[]).includes(id)).length);
 });
 test('drum attacks, kick pitch drop and shaker onset keep their own character',()=>{
  expect(voiceRecipe('kick',false,1).tones[0].glide).toBeLessThan(.06);

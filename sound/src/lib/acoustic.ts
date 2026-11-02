@@ -1,8 +1,8 @@
-export type AcousticInstrument='piano'|'guitar'|'bass'|'strings'|'marimba'|'kalimba'|'saxophone'|'harp'|'doublebass'|'epiano';
-export const acousticInstruments:readonly string[]=['piano','guitar','bass','strings','marimba','kalimba','saxophone','harp','doublebass','epiano'];
+export type AcousticInstrument='piano'|'guitar'|'bass'|'strings'|'marimba'|'kalimba'|'saxophone'|'harp'|'doublebass'|'epiano'|'vibraphone';
+export const acousticInstruments:readonly string[]=['piano','guitar','bass','strings','marimba','kalimba','saxophone','harp','doublebass','epiano','vibraphone'];
 /** Local physical/modal synthesis, not recordings. Fixed excitation makes caching safe. */
 export function acousticWave(id:AcousticInstrument,frequency:number,sampleRate:number,brightness:number,maximumSeconds?:number):Float32Array{
- const naturalSeconds=id==='strings'?2.2:id==='harp'?2.4:id==='piano'?2.2:id==='epiano'?2.6:id==='kalimba'?1.5:id==='guitar'?1.4:id==='saxophone'?1.2: .9;
+ const naturalSeconds=id==='vibraphone'?2.8:id==='strings'?2.2:id==='harp'?2.4:id==='piano'?2.2:id==='epiano'?2.6:id==='kalimba'?1.5:id==='guitar'?1.4:id==='saxophone'?1.2: .9;
  const seconds=Math.min(naturalSeconds,maximumSeconds??naturalSeconds);
  const data=new Float32Array(Math.ceil(sampleRate*seconds));
  const bright=Math.max(0,Math.min(1,brightness));
@@ -27,14 +27,14 @@ export function acousticWave(id:AcousticInstrument,frequency:number,sampleRate:n
    data[i]=filtered*(1-Math.exp(-t/ .002))*Math.exp(-t/(id==='bass'?.45:id==='doublebass'?.38:id==='harp'?1.6:.7));
   }
  }else{
-  const ratios=id==='saxophone'?[1,2,3,4,5,6,7,8]:id==='epiano'?[1,2,3,7]:id==='marimba'?[1,4,9.9]:id==='kalimba'?[1,2,2.98,5.1]:[1,2,3,4,5,6];
+  const ratios=id==='vibraphone'?[1,4,10]:id==='saxophone'?[1,2,3,4,5,6,7,8]:id==='epiano'?[1,2,3,7]:id==='marimba'?[1,4,9.9]:id==='kalimba'?[1,2,2.98,5.1]:[1,2,3,4,5,6];
   const strings=id==='strings',wind=id==='saxophone';
   const modes=ratios.filter(ratio=>ratio*frequency<sampleRate*.45).map((ratio,h)=>{
    const stretch=id==='piano'?Math.sqrt(1+.00012*ratio*ratio):1;
    const angle=2*Math.PI*frequency*ratio*stretch/sampleRate;
    return {s:0,c:1,sin:Math.sin(angle),cos:Math.cos(angle),angle,
-    amplitude:h===0?1:wind?Math.pow(.7+bright*.1,h)*(h===2?1.15:1):id==='epiano'?[1,.24,.12,.035+bright*.04][h]:Math.pow(strings?.36+bright*.16:.45+bright*.22,h)/(strings?Math.sqrt(ratio):1),
-    decay:strings||wind?1:Math.exp(-1/(sampleRate*(id==='marimba'?[.32,.045,.022][h]:id==='kalimba'?[.6,.18,.085,.04][h]:id==='epiano'?[1.1,.5,.28,.12][h]:(.85*Math.pow(220/frequency,.22))/(1+h*.8))))};
+    amplitude:id==='vibraphone'?[1,.16,.035][h]:h===0?1:wind?Math.pow(.7+bright*.1,h)*(h===2?1.15:1):id==='epiano'?[1,.24,.12,.035+bright*.04][h]:Math.pow(strings?.36+bright*.16:.45+bright*.22,h)/(strings?Math.sqrt(ratio):1),
+    decay:strings||wind?1:Math.exp(-1/(sampleRate*(id==='vibraphone'?[1.45,.4,.14][h]:id==='marimba'?[.32,.045,.022][h]:id==='kalimba'?[.6,.18,.085,.04][h]:id==='epiano'?[1.1,.5,.28,.12][h]:(.85*Math.pow(220/frequency,.22))/(1+h*.8))))};
   });
   let attack=0;
   const attackStep=1-Math.exp(-1/(sampleRate*(strings?.22:wind?.045:id==='epiano'?.007:.003)));
@@ -55,7 +55,7 @@ export function acousticWave(id:AcousticInstrument,frequency:number,sampleRate:n
    // Deterministic breath noise, tapered with the reed rather than an exposed hiss.
    const breath=wind?.012*Math.sin(i*1.731)*Math.sin(i*.827):0;
    const tail=release?Math.min(1,(seconds-t)/release):1;
-   data[i]=(value+breath)*attack*(strings?tail*tail*(3-2*tail):tail);
+   data[i]=(value+breath)*(id==='vibraphone'?.88+.12*Math.cos(2*Math.PI*5.8*t):1)*attack*(strings?tail*tail*(3-2*tail):tail);
   }
  }
  // Fixed peak ceiling, smooth final release, no discontinuity at buffer end.

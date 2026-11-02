@@ -5,7 +5,7 @@ export function spaceProfile(style:StyleId){
  return {hall:spacious?.15:intimate?.075:.09,echo:style==='reggae'?.095:spacious?.075:intimate?.035:.055,decay:spacious?1.8:intimate?.8:1.1};
 }
 export function stereoPosition(instrument:string,track:number,bar:number,seed:number){
- if(['kick','bass','synthbass','doublebass'].includes(instrument))return 0;
+ if(['kick','bass','synthbass','doublebass','acidbass'].includes(instrument))return 0;
  return .22*Math.sin(seed+track*1.7+bar*Math.PI/24);
 }
 const smooth=(x:number)=>{const p=Math.max(0,Math.min(1,x));return p*p*(3-2*p);};

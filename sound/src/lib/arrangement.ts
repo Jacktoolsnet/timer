@@ -6,7 +6,7 @@ export function arrangementPlan(tracks:readonly ArrangementTrack[],start:number,
  const pick=(items:typeof active)=>items.length?items[Math.min(items.length-1,Math.floor(random()*items.length))].index:-1;
  // Never remove the pulse/bass foundation or the only accompaniment.
  const rest=active.length>=3&&random()<.65?pick(active.filter(({track})=>dialogueInstrument(track.instrument)||['hat','shaker'].includes(track.instrument))):-1;
- const ornament=random()<.65?pick(active.filter(({track,index})=>index!==rest&&(dialogueInstrument(track.instrument)||['snare','rim','tom','shaker'].includes(track.instrument)))):-1;
+ const ornament=random()<.65?pick(active.filter(({track,index})=>index!==rest&&(dialogueInstrument(track.instrument)||['snare','rim','tom','shaker','conga'].includes(track.instrument)))):-1;
  return {start,rest,ornament};
 }
 /** One short breath, softly entering and leaving silence within a single bar. */

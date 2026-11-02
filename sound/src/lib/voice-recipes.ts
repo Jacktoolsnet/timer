@@ -15,6 +15,8 @@ export function voiceRecipe(id:InstrumentId,warm:boolean,decay:number):VoiceReci
   case 'tom':return {tones:[tone(175,.4,.24,{endHz:113,glide:.055,attack:.002}),tone(267,.18,.055,{attack:.003})],noise:[{duration:.018,level:.025,frequency:1600,type:'bandpass',attack:.001}]};
   case 'rim':return {tones:[tone(760,.038,.13,{attack:.001}),tone(1680,.022,.07,{attack:.001}),tone(2390,.013,.025,{attack:.001})],noise:[]};
   case 'shaker':return {tones:[],noise:[{duration:.095,level:.14,frequency:4800,type:'bandpass',attack:.012},{duration:.035,level:.035,frequency:7200,offset:.018,attack:.008}]};
+  case 'conga':return {tones:[tone(220,.25,.2,{endHz:168,glide:.04,attack:.002}),tone(340,.12,.055,{endHz:285,glide:.035,attack:.002})],noise:[{duration:.025,level:.035,frequency:1200,type:'bandpass',attack:.001}]};
+  case 'acidbass':return {tones:[partial(.25,.3,.12,{type:'sawtooth',attack:.005}),partial(.125,.34,.06,{type:'triangle',attack:.007})],noise:[]};
   case 'synthbass':return {tones:[partial(.25,.36,.14,{type:'sawtooth',attack:.006}),partial(.125,.42,.12,{attack:.008}),partial(.2504,.22,.025,{type:'triangle',attack:.009})],noise:[]};
   case 'bells':return {tones:[partial(2,warm?.9:1.5,.14,{attack:.002}),partial(5.52,warm?.22:.45,warm?.018:.032,{attack:.001}),partial(8.1,.12,.008,{attack:.001})],noise:[]};
   case 'pluck':return {tones:[partial(1,.32*decay,.14,{type:'triangle',attack:.003}),partial(2,.12*decay,warm?.02:.04,{attack:.002}),partial(3,.055,.012,{attack:.002})],noise:[]};

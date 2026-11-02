@@ -110,7 +110,7 @@ let rhythmEditing=false,orbitBus:GainNode|undefined,tapBus:GainNode|undefined;
 let rhythmPlayer:ReturnType<typeof createRhythmPlayer>|undefined;
 let rhythmStarting:Promise<void>|null=null,rhythmGeneration=0;
 const rhythmClock:{step:number;time:number;duration:number}[]=[];
-const percussion=new Set(['kick','snare','hat','clap','tom','rim','shaker']);
+const percussion=new Set(['kick','snare','hat','clap','tom','rim','shaker','conga']);
 const rhythmColors=tracks.map((_,i)=>i);
 const tappedVoices=new Set<{track:number;time:number;fader:GainNode}>();
 const heldRhythmKeys=new Map<string,number>();
@@ -566,6 +566,7 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
  const bus=ctx.createBiquadFilter();bus.type='lowpass';bus.Q.value=.55;
  bus.frequency.setValueAtTime(cutoff*motion.cutoff*expression.cutoff,time);
  bus.frequency.exponentialRampToValueAtTime(cutoff*(evolving?timbreMotion(bar+.25,expressionSeed,i).cutoff:1)*expression.cutoff,time+.15);
+ if(id==='acidbass'){bus.frequency.cancelScheduledValues(time);bus.Q.setValueAtTime(5,time);bus.frequency.setValueAtTime(Math.min(cutoff,3600),time);bus.frequency.exponentialRampToValueAtTime(230,time+.22);}
  const pan=ctx.createStereoPanner(),hallSend=ctx.createGain(),echoSend=ctx.createGain();
  pan.pan.setValueAtTime(stereoPosition(id,i,bar,expressionSeed),time);
  pan.pan.linearRampToValueAtTime(stereoPosition(id,i,bar+1,expressionSeed),time+60/bpm*4);
@@ -576,7 +577,7 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
  const cleanVoice=()=>{editFaders[i].delete(edit);edit.disconnect();tappedVoices.delete(tapEntry);liveMix[i].delete(fader);bus.disconnect();fader.disconnect();pan.disconnect();hallSend.disconnect();echoSend.disconnect();};
  const roomSpace=tapped?tapSpace:space;
  if(roomSpace){
-  const room=spaceProfile(currentStyle),foundation=['kick','bass','synthbass','doublebass'].includes(id);
+  const room=spaceProfile(currentStyle),foundation=['kick','bass','synthbass','doublebass','acidbass'].includes(id);
   hallSend.gain.value=foundation?.008:pulse?.025:room.hall;
   echoSend.gain.value=foundation||pulse?0:room.echo;
   pan.connect(hallSend);hallSend.connect(roomSpace.hall);
@@ -626,12 +627,12 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
  }
  if((sustainedInstruments as readonly string[]).includes(id)){
   const key=(tapped?'tap:':'')+i+':'+id,previous=sustained.get(key);
-  const frequency=vocal?(explicitNote?261.626*2**(voiced/12)/2:vocalFundamental(261.626*2**(voiced/12)))*2**(transpose/12):id==='organ'?note/2:note;
+  const frequency=vocal?(explicitNote?261.626*2**(voiced/12)/2:vocalFundamental(261.626*2**(voiced/12)))*2**(transpose/12):id==='organ'||id==='cello'||id==='horn'?note/2:note;
   const character=vocalCharacter(currentStyle),vowel=evolving?vowelPosition(step/stepsPerBar(),expressionSeed):character.vowel;
   const clock=((beat-tr.phase)*tr.direction+tr.slots*2)%tr.slots;
   const bridge=tapped?tapHold:tr.slots===stepsPerBar()?phraseHold(phrase?.points||tr.points,beat,tr.direction,60/bpm/4,groove.swing,clock,tr.slots):gridPhraseHold(phrase?.points||tr.points,beat,clock,tr.direction,tr.slots,groove.beats,bpm,groove.swing);
   const articulation=performanceGate(currentStyle,id as SustainedInstrument,bridge,60/bpm,currentDance),hold=articulation.hold;
-  const level=tr.volume*velocity*(id==='voice'?.25:id==='strings'?.15:id==='saxophone'?.23:id==='organ'?.16:id==='pad'?.13:.18);
+  const level=tr.volume*velocity*(id==='voice'?.25:id==='strings'||id==='cello'?.15:id==='saxophone'?.23:id==='organ'?.16:id==='pad'?.13:.18);
   if(articulation.legato&&previous?.voice.canContinue(time)){
    previous.voice.note(time,frequency,level,hold,vowel);
    cleanVoice();return visualNote;
@@ -836,7 +837,7 @@ function schedule(){
     if(!tr.points[beat]&&!old?.points[beat]&&!extra)return;
     const dynamics=pulseTrack(i)?1:evolving?performanceVelocity(tr.scheduledVelocity):tr.randomDynamics?.45+Math.random()*.55:1;
     tr.scheduledVelocity=dynamics;
-    const foundation=pulseTrack(i)||['kick','bass','synthbass','doublebass'].includes(tr.instrument)||!!tr.morph&&['kick','bass','synthbass','doublebass'].includes(tr.morph.to);
+    const foundation=pulseTrack(i)||['kick','bass','synthbass','doublebass','acidbass'].includes(tr.instrument)||!!tr.morph&&['kick','bass','synthbass','doublebass','acidbass'].includes(tr.morph.to);
     const breath=evolving&&arrangement&&!protectedDrawing&&!foundation?breathGain(arrangement,i,musicalStep()):1;
     const velocity=grooveAccent(groove,tr.instrument,(pulseTrack(i)?due.index:beat)/tr.slots*stepsPerBar(),i)*dynamics*breath*songExpression().gain*(extra?.45:1),mix=evolving&&!pulseTrack(i)?songMix(time):1;
     if(velocity<=.0001)return;
