@@ -110,9 +110,10 @@ test('each recorded rhythm replaces only its matching orbit without rewriting in
 
 for(const lang of ['de','en','es','fr'])test('rhythm controls and reduced-motion feedback are accessible '+lang,async({page})=>{
  await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/'+lang+'/');
+ await expect(page.locator('#draw-hint')).toHaveCount(0);
  await page.locator('[data-pad-mode=rhythm]').click();
  await expect(page.locator('#rhythm-status')).not.toBeEmpty();await expect(page.locator('#gesture-keyboard')).toContainText('1');
- for(const selector of ['[data-pad-mode=draw]','[data-pad-mode=rhythm]','#rhythm-done','#rhythm-record','#rhythm-clear']){
+ for(const selector of ['[data-pad-mode=draw]','[data-pad-mode=rhythm]','#rhythm-done','#rhythm-cancel','#rhythm-record','#rhythm-clear']){
   const button=page.locator(selector),label=await button.getAttribute('aria-label');
   expect(label).toBeTruthy();await expect(button).toHaveAttribute('title',label!);
   await expect(button).toHaveText('');await expect(button.locator('svg')).toHaveCount(1);
@@ -132,7 +133,7 @@ for(const lang of ['de','en','es','fr'])test('rhythm controls and reduced-motion
 test('saved rhythm is validated, opt-in and never autoplays',async({page})=>{
  await page.goto('/de/');
  await page.locator('[data-pad-mode=rhythm]').click();await page.locator('#drawing').focus();await page.keyboard.press('7');
- await page.locator('#play').click();
+ await page.locator('#rhythm-done').click();await page.locator('#play').click();
  expect(await page.evaluate(()=>localStorage.getItem('jacktools.sound.settings.v1'))).toBeNull();
  const pattern=await page.locator('#drawing').getAttribute('data-rhythm-pattern');
  await page.locator('#palette-dropdown summary').click();await page.locator('#remember-preferences').check();await page.locator('#preferences-close').click();

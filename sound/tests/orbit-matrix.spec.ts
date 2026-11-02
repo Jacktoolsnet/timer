@@ -56,6 +56,7 @@ test('all nine orbit instruments play from the numpad, with independent simultan
  for(let i=0;i<9;i++){
   const name=await page.locator('[data-track="'+i+'"] .instrument-name').textContent();
   await expect(page.locator('#rhythm-zones>[data-lane="'+i+'"] .pad-instrument')).toHaveText(name!);
+  await expect(page.locator('#gesture-keyboard')).toContainText(padNumbers[i]+': '+name);
  }
  await page.locator('#rhythm-done').click();await expect(pad).toHaveAttribute('data-music-level','1');
  await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');

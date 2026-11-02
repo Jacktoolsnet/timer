@@ -1,7 +1,8 @@
 ---
-interface Props {name:'play'|'pause'|'focus'|'exit'|'random'|'reset'|'clear'|'evolve'|'hide'|'draw'|'rhythm'|'record'|'done'}
+interface Props {name:'play'|'pause'|'focus'|'exit'|'random'|'reset'|'clear'|'evolve'|'hide'|'draw'|'rhythm'|'record'|'done'|'cancel'}
 const {name}=Astro.props;
 const paths={
+ cancel:'m6 6 12 12M18 6 6 18',
  done:'m5 12 4 4L19 6',
  draw:'m4 16 12-12 4 4L8 20H4Zm10-10 4 4',
  rhythm:'M5 10v4m5-8v12m5-15v18m5-12v6',

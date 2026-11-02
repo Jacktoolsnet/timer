@@ -343,3 +343,9 @@ Opt-in settings version 2 stores nine validated tracks and nine rhythm rows; tra
 
 
 The shared kick recipe now has a slightly longer 48 Hz low tail, a stronger 65 Hz body and a short 176→110 Hz triangle layer for audible punch on small speakers. The main peak remains .29, and the total envelope stays below .36 seconds to avoid a boomy sustained bass. Orbit playback and the pad use the same richer base recipe; the pad retains its existing gain offset without duplicating the body partial. Groove timing, master volume and the other drum recipes are unchanged.
+
+
+### Cancel rhythm recording
+Rhythm editing is transactional. Entering Rhythm or tapping again after accepting snapshots the previous pattern; Record again/Clear rhythm checkpoints the current non-empty take before clearing it, including a take never explicitly finished. Repeated resets of an empty draft never overwrite that undo snapshot. The icon-only Cancel action restores all prior rhythm rows and the timing/timbre settings of touched orbits, cancels queued draft voices/visuals, and smoothly restores normal backing volume without stopping the transport. The retained custom orbits remain protected from random timbre/grid changes while a replacement draft is empty.
+
+Finish or returning to Draw accepts the draft, retaining the existing drawing workflow. Until acceptance, consent-based storage writes the previous pattern and prior timing/timbre values for touched tracks; reload therefore cannot replace the last accepted rhythm with an accidental empty take. Stop/restart rebases both clocks and preserves the cancel option; a deliberate style change or global Clear discards the undo snapshot rather than allowing a stale arrangement to be restored. The snapshot is session-only and independent copies prevent overdubs from mutating it. Cancel labels and usage instructions are available in all four languages.
