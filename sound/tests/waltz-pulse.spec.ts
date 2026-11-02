@@ -1,7 +1,9 @@
 import {test,expect} from '@playwright/test';
-import {waltzPulseRole,waltzVoicing,waltzPulseDuration,waltzPulseWave} from '../src/lib/waltz';
+import {waltzPulseRole,waltzVoicing,waltzPulseDuration,waltzPulseWave,slowWaltzSwell,slowWaltzMix} from '../src/lib/waltz';
 import {presets} from '../src/lib/presets';
 import {dances} from '../src/lib/dances';
+import {balancedMix} from '../src/lib/mixing';
+import {sectionGain} from '../src/lib/song';
 const points=(steps:number[])=>Array.from({length:16},(_,s)=>steps.includes(s));
 test('waltz accompaniment separates a bass downbeat from two real close-position chords',()=>{
  expect(waltzPulseRole(3,'doublebass',points([0]))).toBe('bass');
@@ -56,7 +58,7 @@ test('actual playback schedules short ONE-two-three buffers in normal and random
    return start.call(this,when,...args);
   };
  });
- await page.goto('/de/');await page.locator('[data-dance=slowwaltz]').click();
+ await page.goto('/de/');await page.locator('[data-style-preset=slowwaltz]').click();
  for(let i=2;i<8;i++){const row=page.locator('[data-track="'+i+'"]');await row.locator('summary').click();await row.locator('.mute').check();}
  for(const button of ['#play','#evolve']){
   await page.evaluate(()=>(window as any).pulseEvents=[]);await page.locator(button).click();
@@ -64,7 +66,39 @@ test('actual playback schedules short ONE-two-three buffers in normal and random
   const events=await page.evaluate(()=>(window as any).pulseEvents.slice(0,3)),beat=60/86;
   expect(events[1].time-events[0].time).toBeCloseTo(beat,3);expect(events[2].time-events[1].time).toBeCloseTo(beat,3);
   expect(events[0].duration).toBeCloseTo(waltzPulseDuration('bass',86),3);
-  expect(events[1].duration).toBeCloseTo(waltzPulseDuration('chord',86),3);expect(events[2].duration).toBeCloseTo(events[1].duration,4);
+  expect(events[1].duration).toBeCloseTo(waltzPulseDuration('chord',86,false,4),3);expect(events[2].duration).toBeCloseTo(waltzPulseDuration('chord',86,false,8),4);
   await page.locator('#play').click();
  }
+});
+
+test('slow waltz lifts the second chord, settles the third, and keeps Vienna and the bass unchanged',()=>{
+ const grounded=waltzVoicing('chord',0,4,0,'piano',8),lifted=waltzVoicing('chord',0,4,0,'piano',4);
+ expect(lifted[0].frequency).toBeGreaterThan(grounded[0].frequency);expect(lifted.at(-1)!.frequency).toBeGreaterThan(grounded.at(-1)!.frequency);
+ expect(waltzPulseDuration('chord',86,false,8)).toBeLessThan(waltzPulseDuration('chord',86,false,4));
+ expect(waltzPulseDuration('chord',180,true,8)).toBe(waltzPulseDuration('chord',180,true,4));
+ expect(waltzPulseDuration('bass',86,false,8)).toBe(waltzPulseDuration('bass',86,false,4));
+ expect(slowWaltzSwell(1.8)).toBeGreaterThan(slowWaltzSwell(0));expect(slowWaltzSwell(2.9)).toBeLessThan(slowWaltzSwell(2.2));expect(slowWaltzSwell(3)).toBeCloseTo(slowWaltzSwell(0));
+ const up=waltzPulseWave('piano','chord',0,4,0,86,22050,.4,false,4),down=waltzPulseWave('piano','chord',0,4,0,86,22050,.4,false,8);
+ expect(up.length).toBeGreaterThan(down.length);for(const wave of [up,down]){expect(wave.every(Number.isFinite)).toBe(true);expect(wave[0]).toBe(0);expect(Math.abs(wave.at(-1)!)).toBeLessThan(.00001);}
+});
+
+
+test('slow waltz keeps a lyrical foreground in normal play and every random song section',()=>{
+ const tracks=presets.slowwaltz.parts.map(p=>({instrument:p.instrument,points:points(p.steps),slots:12,volume:p.volume!,enabled:true,mute:false}));
+ const roles=tracks.map(tr=>waltzPulseRole(3,tr.instrument,tr.points));
+ expect(tracks[4].volume).toBeGreaterThan(tracks[1].volume);
+ expect(tracks[4].points[2]).toBe(true); // a melodic pickup, not another chord stroke
+ for(const section of [null,'intro','verse','chorus','bridge','outro'] as const){
+  const raw=tracks.map((tr,i)=>slowWaltzMix(roles[i]?1:section?.32:1,roles[i])*(section?sectionGain(section,tr.instrument,.5):1));
+  const gains=balancedMix(tracks,raw);
+  // Even a backing melody stays ahead of the chord fader; the pulse remains audible.
+  expect(gains[4]).toBeGreaterThan(gains[1]);
+  expect(gains[0]).toBeGreaterThan(0);
+  const energy=(levels:number[])=>tracks.reduce((sum,tr,i)=>sum+tr.volume**2*tr.points.filter(Boolean).length/12*levels[i]**2,0);
+  expect(energy(gains)).toBeCloseTo(energy(tracks.map(()=>1)),8);
+ }
+ expect(slowWaltzMix(0,null)).toBe(0);expect(slowWaltzMix(0,'chord')).toBe(0);
+ expect(slowWaltzMix(1,null)).toBeGreaterThan(slowWaltzMix(.32,null));
+ const muted=tracks.map(tr=>({...tr,mute:true}));
+ expect(balancedMix(muted,muted.map(()=>1))).toEqual(muted.map(()=>0));
 });

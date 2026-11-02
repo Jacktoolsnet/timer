@@ -40,6 +40,7 @@ export function grooveAnchors(groove:Groove,id:string){return grooveAnchored(id)
 export function grooveAccent(groove:Groove,id:string,beat:number,index?:number){
  if(groove.dance)return rhythmAccent(groove.dance,index,id,beat,dances[groove.dance].accents[Math.floor(beat)%dances[groove.dance].accents.length]);
  const role=grooveRole(id),quarter=Math.floor(beat/4),sub=beat%4;
+ if(groove.beats===3&&groove.style==='slowwaltz'&&role==='chords')return quarter===0?.65:quarter===1?1:.86;
  if(groove.beats===3)return role==='chords'?(quarter===0?.65:.94):quarter===0?1:sub===0?.72:.55;
  if(groove.choice==='chacha')return [0,12,14].includes(beat)?1:sub===0?.85:.64;
  if(groove.choice==='discofox')return role==='hat'?(sub===2?1:.55):sub===0?1:.65;

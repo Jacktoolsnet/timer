@@ -3,7 +3,7 @@ import {gridEvolutionPlan,enrichGrid,variedGrid,gridSizes,gridCopy,remapPoints,g
 import {HOLD_DELAY,RING_FADE,gestureMode,holdSteps,ringAppearance,type GestureMode} from '../lib/pad-gestures';
 import {danceRhythmRole,danceRhythmWave,rhythmDrums,rhythmClarity,isRhythmDance,type PulseInstrument} from '../lib/dance-rhythm';
 import {tangoPulseRole,tangoPulseWave,dancePulseClarity} from '../lib/tango';
-import {waltzPulseRole,waltzPulseWave} from '../lib/waltz';
+import {waltzPulseRole,waltzPulseWave,slowWaltzSwell,slowWaltzMix} from '../lib/waltz';
 import {dances,danceIds,danceCopy,danceFoundation,dancePoints,type DanceId} from '../lib/dances';
 import {resolveGroove,grooveCopy,groovePattern,grooveMutationGrid,grooveAnchors,grooveAnchored,grooveRole,grooveAccent,randomGroovePattern,type GrooveChoice} from '../lib/groove';
 import {mixLevels,balancedMix,performanceVelocity} from '../lib/mixing';
@@ -194,10 +194,10 @@ function setEvolution(on:boolean){
  if(evolving&&!on)tracks.forEach(tr=>{if(tr.directionMode!=='random')tr.pendingDirection=tr.directionMode==='reverse'?-1:1;});
  if(on&&!evolving)startSong(playing?Math.ceil(step/stepsPerBar()):0);
  if(!on){
-  currentMix=tracks.map(()=>1);
-  if(audio)liveMix.forEach(nodes=>nodes.forEach(node=>{
+  currentMix=currentStyle==='slowwaltz'?balancedMix(tracks,tracks.map((_,i)=>slowWaltzMix(1,waltzPulse(i)))):tracks.map(()=>1);
+  if(audio)liveMix.forEach((nodes,i)=>nodes.forEach(node=>{
    node.gain.cancelAndHoldAtTime(audio!.currentTime);
-   node.gain.setTargetAtTime(1,audio!.currentTime,.15);
+   node.gain.setTargetAtTime(currentMix[i],audio!.currentTime,.15);
   }));
   song=null;gridEvolutionBar=Infinity;$('#song-structure').hidden=true;}
  evolving=on;evolutionStep=on?nextMusicStep(playing?step:0):Infinity;
@@ -479,10 +479,11 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
   // Three touch layers: stronger hits excite more upper partials, not just more volume.
   const layer=Math.max(0,Math.min(2,Math.round(velocity*tr.volume*2)));
   const brightness=(profile.warm?.2:.4)+layer*.2;
-  const key=(pulse?[dancePulse?currentDance:tango?'tango':'waltz',id,pulse,chord.root,chord.third,transpose,bpm,ctx.sampleRate,brightness,crisp,tango||dancePulse?beat:0]:[id,frequency.toFixed(4),ctx.sampleRate,brightness]).join(':');
+  const pulseStep=((beat-tr.phase)*tr.direction+tr.slots*2)%tr.slots;
+  const key=(pulse?[dancePulse?currentDance:tango?'tango':'waltz',id,pulse,chord.root,chord.third,transpose,bpm,ctx.sampleRate,brightness,crisp,tango||dancePulse?beat:!crisp?pulseStep:0]:[id,frequency.toFixed(4),ctx.sampleRate,brightness]).join(':');
   let buffer=acousticCache.get(key);
   if(!buffer){
-   const samples=dancePulse&&isRhythmDance(currentDance)?danceRhythmWave(currentDance,id as PulseInstrument,dancePulse,chord.root,chord.third,transpose,bpm,beat,ctx.sampleRate,brightness):tango?tangoPulseWave(acoustic,tango,chord.root,chord.third,transpose,bpm,beat,ctx.sampleRate,brightness):pulse?waltzPulseWave(acoustic,pulse,chord.root,chord.third,transpose,bpm,ctx.sampleRate,brightness,crisp):acousticWave(acoustic,frequency,ctx.sampleRate,brightness);
+   const samples=dancePulse&&isRhythmDance(currentDance)?danceRhythmWave(currentDance,id as PulseInstrument,dancePulse,chord.root,chord.third,transpose,bpm,beat,ctx.sampleRate,brightness):tango?tangoPulseWave(acoustic,tango,chord.root,chord.third,transpose,bpm,beat,ctx.sampleRate,brightness):pulse?waltzPulseWave(acoustic,pulse,chord.root,chord.third,transpose,bpm,ctx.sampleRate,brightness,crisp,pulseStep):acousticWave(acoustic,frequency,ctx.sampleRate,brightness);
    buffer=ctx.createBuffer(1,samples.length,ctx.sampleRate);buffer.getChannelData(0).set(samples);
    if(acousticCache.size>=40)acousticCache.delete(acousticCache.keys().next().value!);
    acousticCache.set(key,buffer);
@@ -605,9 +606,15 @@ function schedule(){
   const chorus=song?.form[song.index].kind==='chorus';
   const chorusRelief=chorus?songMix(nextTime):song?.previous==='chorus'?1-songMix(nextTime):0;
   const s=step%stepsPerBar();
-  const performed=evolving?mixLevels(tracks,development,musicalStep(),chorusRelief,drawnUntil)
-   .map((gain,i)=>(pulseTrack(i)?1:gain*songLevel(nextTime,tracks[i].instrument))):tracks.map(()=>1);
-  currentMix=balancedMix(tracks,performed).map((gain,i)=>gain*songFade(nextTime)*dancePulseClarity(currentDance,i,s)*rhythmClarity(currentDance,i,s));
+  const performance=evolving?mixLevels(tracks,development,musicalStep(),chorusRelief,drawnUntil):tracks.map(()=>1);
+  const performed=performance.map((gain,i)=>{
+   if(currentStyle==='slowwaltz'){
+    // Sections shape the whole waltz, not just its melody against an unchanging loud pulse.
+    return slowWaltzMix(pulseTrack(i)?1:gain,waltzPulse(i))*(evolving?songLevel(nextTime,tracks[i].instrument):1);
+   }
+   return evolving?(pulseTrack(i)?1:gain*songLevel(nextTime,tracks[i].instrument)):1;
+  });
+  currentMix=balancedMix(tracks,performed).map((gain,i)=>gain*songFade(nextTime)*(currentStyle==='slowwaltz'&&!pulseTrack(i)?slowWaltzSwell(s/4):1)*dancePulseClarity(currentDance,i,s)*rhythmClarity(currentDance,i,s));
   liveMix.forEach((nodes,index)=>nodes.forEach(node=>node.gain.setTargetAtTime(currentMix[index],nextTime,.09)));
   const duration=60/bpm/4*(s%4<2?1+groove.swing:1-groove.swing);
   events.push({time:nextTime,step:s,duration,notes:[]});
@@ -630,7 +637,7 @@ function schedule(){
     tr.scheduledVelocity=dynamics;
     const foundation=pulseTrack(i)||['kick','bass','synthbass','doublebass'].includes(tr.instrument)||!!tr.morph&&['kick','bass','synthbass','doublebass'].includes(tr.morph.to);
     const breath=evolving&&arrangement&&!protectedDrawing&&!foundation?breathGain(arrangement,i,musicalStep()):1;
-    const velocity=grooveAccent(groove,tr.instrument,beat/tr.slots*stepsPerBar(),i)*dynamics*breath*songExpression().gain*(extra?.45:1),mix=evolving&&!pulseTrack(i)?songMix(time):1;
+    const velocity=grooveAccent(groove,tr.instrument,(pulseTrack(i)?due.index:beat)/tr.slots*stepsPerBar(),i)*dynamics*breath*songExpression().gain*(extra?.45:1),mix=evolving&&!pulseTrack(i)?songMix(time):1;
     if(velocity<=.0001)return;
     const joined=(sustainedInstruments as readonly string[]).includes(tr.instrument)
      &&(!tr.morph||(sustainedInstruments as readonly string[]).includes(tr.morph.to));
