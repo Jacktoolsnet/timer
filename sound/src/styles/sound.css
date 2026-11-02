@@ -306,3 +306,11 @@ body:not(.focus-view) .sound-top{margin-bottom:20px}
 .controls-tile label{font-size:13px;color:var(--muted);min-width:0}
 .controls-tile input[type=range]{accent-color:var(--accent)}
 .controls-tile .sound-adjustments{gap:16px;min-width:0}
+
+.note-bands{display:none;position:absolute;inset:0;pointer-events:none}
+#rhythm-zones>[data-selected=true][data-melodic=true] .note-bands{display:grid;grid-template-rows:repeat(8,1fr)}
+.note-bands>span{position:relative;display:flex;justify-content:flex-end;align-items:center;padding-right:10px;border-bottom:1px solid color-mix(in srgb,var(--lane) 18%,transparent)}
+.note-bands>span:last-child{border-bottom:0}
+#rhythm-zones .note-bands b{font-size:11px;opacity:.8}
+.note-bands:before{content:'';position:absolute;left:0;right:0;top:calc(var(--note-row,4)*12.5%);height:12.5%;background:color-mix(in srgb,var(--lane) 12%,transparent);transition:top .12s ease}
+@media(prefers-reduced-motion:reduce){.note-bands:before{transition:none}}

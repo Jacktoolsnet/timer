@@ -4,13 +4,13 @@ export const RHYTHM_EDIT_MUSIC_LEVEL=.4;
 /** Legacy drum order only; matrix pads take their live instrument from the matching orbit. */
 export const rhythmInstruments=['hat','snare','kick'] as const;
 export type RhythmLane=OrbitPad;
-export type TapRhythm={beats:2|3|4;start:number|null;state:'armed'|'recording'|'loop';hits:boolean[][];lastTap:(number|null)[];laneStart:(number|null)[];liveStep:(number|null)[]};
+export type TapRhythm={beats:2|3|4;start:number|null;state:'armed'|'recording'|'loop';hits:boolean[][];notes:(number|null)[][];lastTap:(number|null)[];laneStart:(number|null)[];liveStep:(number|null)[]};
 export function emptyRhythm(beats:2|3|4):TapRhythm{
- return {beats,start:null,state:'armed',hits:Array.from({length:ORBIT_COUNT},()=>Array<boolean>(beats*8).fill(false)),lastTap:Array(ORBIT_COUNT).fill(null),laneStart:Array(ORBIT_COUNT).fill(null),liveStep:Array(ORBIT_COUNT).fill(null)};
+ return {beats,start:null,state:'armed',hits:Array.from({length:ORBIT_COUNT},()=>Array<boolean>(beats*8).fill(false)),notes:Array.from({length:ORBIT_COUNT},()=>Array<number|null>(beats*8).fill(null)),lastTap:Array(ORBIT_COUNT).fill(null),laneStart:Array(ORBIT_COUNT).fill(null),liveStep:Array(ORBIT_COUNT).fill(null)};
 }
 /** Snapshot editing state without sharing mutable rows or transient activity arrays. */
 export function cloneRhythm(rhythm:TapRhythm):TapRhythm{
- return {...rhythm,hits:rhythm.hits.map(row=>[...row]),lastTap:[...rhythm.lastTap],laneStart:[...rhythm.laneStart],liveStep:[...rhythm.liveStep]};
+ return {...rhythm,hits:rhythm.hits.map(row=>[...row]),notes:rhythm.notes.map(row=>[...row]),lastTap:[...rhythm.lastTap],laneStart:[...rhythm.laneStart],liveStep:[...rhythm.liveStep]};
 }
 export function hasRhythm(rhythm:TapRhythm){return rhythm.hits.some(lane=>lane.some(Boolean));}
 export const rhythmLane=padAt;
@@ -21,14 +21,15 @@ export function replacingRhythmLane(rhythm:TapRhythm,position:number,lane:Rhythm
 /** Overdub on a fixed two-bar clock. A pause longer than two bars starts a fresh take
  * on that instrument only; other lanes and the loop's phase are never reset.
  */
-export function recordRhythmHit(rhythm:TapRhythm,position:number,lane:RhythmLane){
- if(!Number.isFinite(position))return false;
+export function recordRhythmHit(rhythm:TapRhythm,position:number,lane:RhythmLane,note:number|null=null){
+ if(!Number.isFinite(position)||(note!==null&&(!Number.isInteger(note)||note<0||note>7)))return false;
  const at=Math.max(0,Math.round(position)),length=rhythm.beats*8;
  if(rhythm.start===null){rhythm.start=at;rhythm.state='recording';}
  const fresh=replacingRhythmLane(rhythm,position,lane)||!rhythm.hits[lane].some(Boolean);
- if(fresh){rhythm.hits[lane].fill(false);rhythm.laneStart[lane]=at;}
+ if(fresh){rhythm.hits[lane].fill(false);rhythm.notes[lane].fill(null);rhythm.laneStart[lane]=at;}
  rhythm.lastTap[lane]=position;rhythm.liveStep[lane]=at;
- rhythm.hits[lane][((at-rhythm.start)%length+length)%length]=true;return true;
+ const slot=((at-rhythm.start)%length+length)%length;
+ rhythm.hits[lane][slot]=true;rhythm.notes[lane][slot]=note;return true;
 }
 export function rhythmHitsAt(rhythm:TapRhythm,step:number):RhythmLane[]{
  if(rhythm.start===null||step<rhythm.start)return [];
@@ -55,8 +56,8 @@ export function finishRhythm(rhythm:TapRhythm){rhythm.state=hasRhythm(rhythm)?'l
 export function remeterRhythm(rhythm:TapRhythm,beats:2|3|4,start:number){
  if(beats===rhythm.beats)return;
  const old=rhythm.beats*4,result=emptyRhythm(beats);
- rhythm.hits.forEach((lane,i)=>lane.forEach((on,s)=>{if(on)result.hits[i][Math.floor(s/old)*beats*4+Math.min(beats*4-1,Math.round(s%old/old*beats*4))]=true;}));
- rhythm.beats=beats;rhythm.hits=result.hits;resetRhythmSession(rhythm);finishRhythm(rhythm);rhythm.start=hasRhythm(rhythm)?start:null;
+ rhythm.hits.forEach((lane,i)=>lane.forEach((on,s)=>{if(on){const at=Math.floor(s/old)*beats*4+Math.min(beats*4-1,Math.round(s%old/old*beats*4));result.hits[i][at]=true;result.notes[i][at]=rhythm.notes[i][s];}}));
+ rhythm.beats=beats;rhythm.hits=result.hits;rhythm.notes=result.notes;resetRhythmSession(rhythm);finishRhythm(rhythm);rhythm.start=hasRhythm(rhythm)?start:null;
 }
 export const rhythmCopy={
  de:{group:'Flächenmodus',draw:'Zeichnen',rhythm:'Rhythmus',record:'Neu aufnehmen',clear:'Rhythmus löschen',hint:'Klopfe Deinen Rhythmus',keyboard:'Ziffernblock oder Zahlen 1–9: oben 7–8–9, Mitte 4–5–6, unten 1–2–3. Pfeile wählen ein Pad; Leertaste oder Enter spielt es. Gleichzeitige Tasten sind möglich.',armed:'Bereit · erster Schlag startet die Zweitakt-Aufnahme',recording:'Aufnahme · zwei Takte',loop:'Dein Rhythmus läuft · tippen zum Weiterbearbeiten',cancel:'Aufnahme abbrechen',done:'Fertig übernehmen',editing:'Spuren nacheinander einklopfen · Fertig übernimmt den Rhythmus',paused:'Rhythmus gespeichert · mit Play fortsetzen',progress:'Zweitakt-Aufnahme'},

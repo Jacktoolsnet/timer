@@ -16,7 +16,7 @@ export type SavedTrack={
  morph:{to:InstrumentId;progress:number}|null;
 };
 export type SoundSettings={
- pad?:{mode:'draw'|'rhythm';beats:2|3|4;hits:boolean[][]};
+ pad?:{mode:'draw'|'rhythm';beats:2|3|4;hits:boolean[][];notes?:(number|null)[][]};
  version:2;style:StyleId;dance?:DanceId|null;groove?:GrooveChoice;bpm:number;volume:number;transpose?:number;noteEffect?:number;tracks:SavedTrack[];
  background:typeof backgroundModes[number];center:typeof centerModes[number];orbit:typeof orbitModes[number];
 };
@@ -37,6 +37,9 @@ export function decodeSettings(raw:string|null):SoundSettings|null{
    if(!s.pad||!member(['draw','rhythm'],s.pad.mode)||![2,3,4].includes(s.pad.beats)
     ||!Array.isArray(s.pad.hits)||!(s.version===1?[3,ORBIT_COUNT]:[ORBIT_COUNT]).includes(s.pad.hits.length)
     ||s.pad.hits.some((lane:unknown)=>!Array.isArray(lane)||lane.length!==s.pad.beats*8||lane.some((on:unknown)=>typeof on!=='boolean')))return null;
+   if(s.pad.notes!==undefined&&(!Array.isArray(s.pad.notes)||s.pad.notes.length!==s.pad.hits.length
+    ||s.pad.notes.some((row:unknown,i:number)=>!Array.isArray(row)||row.length!==s.pad.beats*8
+     ||row.some((note:unknown,j:number)=>note!==null&&(!number(note,0,7)||!Number.isInteger(note)||!s.pad.hits[i][j])))))return null;
   }
   for(const tr of s.tracks){
    if(tr?.grid!==undefined&&tr.grid!=='auto'&&!(gridSizes as readonly unknown[]).includes(tr.grid))return null;
@@ -58,12 +61,14 @@ export function decodeSettings(raw:string|null):SoundSettings|null{
   }
   if(s.pad?.hits.length===3){
    const rows=Array.from({length:ORBIT_COUNT},()=>Array<boolean>(s.pad.beats*8).fill(false)),used=new Set<number>();
+   const noteRows=Array.from({length:ORBIT_COUNT},()=>Array<number|null>(s.pad.beats*8).fill(null));
    ['hat','snare','kick'].forEach((id,lane)=>{
     const found=s.tracks.findIndex((tr:SavedTrack,i:number)=>!used.has(i)&&tr.instrument===id);
     const fallback=[2,1,0][lane],index=found>=0?found:!used.has(fallback)?fallback:s.tracks.findIndex((_:SavedTrack,i:number)=>!used.has(i));used.add(index);
     rows[index]=s.pad.hits[lane];
+    if(s.pad.notes)noteRows[index]=s.pad.notes[lane];
    });
-   s.pad.hits=rows;
+   s.pad.hits=rows;if(s.pad.notes)s.pad.notes=noteRows;
   }
   s.version=2;
   return s as SoundSettings;
