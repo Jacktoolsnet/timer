@@ -1,3 +1,5 @@
+import {videoAnimationPlan,videoAnimationKeys,type VideoAnimationSettings,type VideoAnimationKey} from '../lib/video-animations';
+import {defaultVideoInfo,videoInfoCopy,type VideoInfoSettings} from '../lib/video-info';
 import {recordingCopy} from '../lib/recording-copy';
 import {instrumentGroups,pickerCopy,type InstrumentGroup} from '../lib/instrument-picker';
 import {tapNoteAt,tapNoteY,tapNoteKey,tapNoteSemitones,tapNoteDegree} from '../lib/tap-notes';
@@ -35,7 +37,7 @@ import {STORAGE_KEY} from '../lib/engine';
 import {decodeSettings,type SoundSettings} from '../lib/sound-settings';
 import {soundProfiles} from '../lib/sound-profiles';
 import {approach,journeyLength,morphWeights} from '../lib/journey';
-import {presets,partsForStyle,evolutionPalette,styleCopy,type StyleId} from '../lib/presets';
+import {presets,partsForStyle,evolutionPalette,styleCopy,styleIds,type StyleId} from '../lib/presets';
 import {screenWakeLock} from '../lib/wake-lock';
 import {evolvePattern,nextEvolutionStep} from '../lib/evolution';
 import {enhanceClockSelects} from '../../../shared/preview-selects';
@@ -53,6 +55,7 @@ const tracks=colors.map((color,i)=>({color,grid:'auto' as GridChoice,slots:16 as
 let audio:AudioContext|undefined, master:GainNode|undefined, playing=false,timer:ReturnType<typeof setInterval>|undefined,nextTime=0,step=0,bpm=100;
 let recordingOutput:DynamicsCompressorNode|undefined;
 let recordingGeneration=0;
+let videoAnimationRun:{start:number;flags:VideoAnimationSettings;plan:Record<VideoAnimationKey,number[]>;next:Record<VideoAnimationKey,number>;changed:Set<VideoAnimationKey>}|null=null;
 let videoRecording:ReturnType<typeof createMp4Recording>|null=null;
 let wavRecording:Awaited<ReturnType<typeof createWavRecording>>|null=null;
 let space:ReturnType<typeof createAudioSpace>|undefined,tapSpace:ReturnType<typeof createAudioSpace>|undefined;
@@ -364,7 +367,7 @@ function snapshotSettings(includeDraft=false):SoundSettings{
  return {
    version:2,style:currentStyle,dance:currentDance,groove:grooveChoice,bpm,transpose,noteEffect,volume:Number($<HTMLInputElement>('#volume').value),
    background:backgroundChoice,center:centerChoice,orbit:orbitChoice,
-   recording:{restart:$<HTMLInputElement>('#recording-restart').checked,random:$<HTMLInputElement>('#recording-random').checked,fullscreen:$<HTMLInputElement>('#recording-fullscreen').checked,minutes:Number($<HTMLInputElement>('#recording-duration').value),videoFormat:chosenVideoFormat()},
+   recording:{restart:$<HTMLInputElement>('#recording-restart').checked,random:$<HTMLInputElement>('#recording-random').checked,fullscreen:$<HTMLInputElement>('#recording-fullscreen').checked,minutes:Number($<HTMLInputElement>('#recording-duration').value),videoFormat:chosenVideoFormat(),videoInfo:chosenVideoInfo(),animations:chosenVideoAnimations()},
    pad:{mode:padMode,beats:(backup??tapPattern).beats,hits:(backup??tapPattern).hits.map(lane=>[...lane]),notes:(backup??tapPattern).notes.map(lane=>[...lane])},
    tracks:tracks.map((live,i)=>{const tr=backup&&rhythmTouched.has(i)&&rhythmTrackBackup?{...live,...rhythmTrackBackup[i]}:live;return ({
     grid:tr.grid,slots:tr.slots,enabled:tr.enabled,mute:tr.mute,instrument:tr.instrument,points:[...tr.points],motif:[...tr.motif],volume:tr.volume,pitch:tr.pitch,
@@ -432,9 +435,32 @@ document.querySelectorAll<HTMLButtonElement>('[data-center-mode]').forEach(butto
 document.querySelectorAll<HTMLButtonElement>('[data-background-mode]').forEach(button=>button.addEventListener('click',()=>selectBackgroundMode(button.dataset.backgroundMode as typeof backgroundChoice)));
 document.querySelectorAll<HTMLButtonElement>('[data-orbit-mode]').forEach(button=>button.addEventListener('click',()=>selectOrbitMode(button.dataset.orbitMode as typeof orbitChoice)));
 function evolveAnimations(includeBackground=true){
- if(centerChoice==='random')selectCenterMode('random');
- if(includeBackground&&backgroundChoice==='random')selectBackgroundMode('random');
- if(orbitChoice==='random')selectOrbitMode('random');
+ if(centerChoice==='random'&&!videoAnimationRun?.flags.center)selectCenterMode('random');
+ if(includeBackground&&backgroundChoice==='random'&&!videoAnimationRun?.flags.background)selectBackgroundMode('random');
+ if(orbitChoice==='random'&&!videoAnimationRun?.flags.orbit)selectOrbitMode('random');
+}
+function advanceVideoAnimations(now:number){
+ const run=videoAnimationRun;if(!run||videoRecording?.state!=='recording')return;
+ for(const key of videoAnimationKeys){
+  if(!run.flags[key])continue;
+  const times=run.plan[key];let due=false;
+  while(run.next[key]<times.length&&now-run.start>=times[run.next[key]]){run.next[key]++;due=true;}
+  if(!due)continue; // A stalled tab skips missed changes rather than flashing through them.
+  if(key==='center'&&centerMode!=='off'){
+   centerMode=pickVariant(['ring','filled','sun','sine','bars'],centerMode);orbit.dataset.centerVariant=centerMode;run.changed.add(key);
+  }else if(key==='orbit'&&orbitMode!=='off'){
+   orbitMode=pickVariant(['comet','dot','pulse'],orbitMode);orbit.dataset.mode=orbitMode;run.changed.add(key);
+  }else if(key==='background'&&backgroundMode!=='off'){
+   backgroundMode=pickVariant(['clouds','aurora','stars','waves'],backgroundMode);atmosphere.dataset.mode=backgroundMode;run.changed.add(key);
+  }
+ }
+}
+function endVideoAnimations(){
+ const run=videoAnimationRun;videoAnimationRun=null;if(!run)return;
+ // Temporary video variants never overwrite fixed/random/off choices or saved settings.
+ if(run.changed.has('center'))selectCenterMode(centerChoice);
+ if(run.changed.has('orbit'))selectOrbitMode(orbitChoice);
+ if(run.changed.has('background'))selectBackgroundMode(backgroundChoice);
 }
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 function activeTracks(){return tracks.map((tr,index)=>({tr,index})).filter(({tr})=>tr.enabled);}
@@ -1564,6 +1590,7 @@ function renderCenter(time:number,dark:boolean){
  oc.globalAlpha=1;oc.lineWidth=1;
 }
 function frame(now:number){
+ advanceVideoAnimations(now);
  const time=audio?.currentTime||0;
  while(events.length&&events[0].time<=time){const ev=events.shift()!;if(ev.clock!==false){visualStep=ev.step;visualTime=ev.time;visualDuration=ev.duration;}ev.notes.forEach(({track,beat,velocity,note})=>{const tr=tracks[track];if(tr.enabled&&!tr.mute&&tr.volume>0){tr.flash[beat]=now;tr.hits[beat]=ev.time;tr.hitVelocities[beat]=velocity;tr.lastVelocity=velocity;
    if(note!==undefined&&note!==null){
@@ -1651,6 +1678,10 @@ function frame(now:number){
 }
 enhanceClockSelects($('.instruments-tile') as HTMLFormElement);
 function applySettings(saved:SoundSettings){
+ for(const key of videoAnimationKeys)$<HTMLInputElement>('#video-animation-'+key).checked=saved.recording?.animations?.[key]??false;
+ const videoInfo=saved.recording?.videoInfo??defaultVideoInfo;
+ $<HTMLInputElement>('#video-info-title').value=videoInfo.title;
+ for(const key of ['enabled','showTitle','style','tempo','section','signature'] as const)$<HTMLInputElement>('#video-info-'+key).checked=videoInfo[key];syncVideoInfo();
  $<HTMLInputElement>('#video-format input[value="'+(saved.recording?.videoFormat??'landscape')+'"]').checked=true;syncVideoFormat();
  $<HTMLInputElement>('#recording-duration').value=String(saved.recording?.minutes??10);syncRecordingDuration();
  for(const option of ['restart','random','fullscreen'] as const)$<HTMLInputElement>('#recording-'+option).checked=saved.recording?.[option]??false;
@@ -1718,9 +1749,9 @@ fileInput.addEventListener('change',async()=>{
  }catch{$('#file-status').textContent=files.error;}
  finally{importBusy=false;syncFileButtons();}
 });
-type RecordingStart={restart:boolean;random:boolean;generation:number;durationSeconds:number;videoFormat:VideoFormat};
+type RecordingStart={restart:boolean;random:boolean;generation:number;durationSeconds:number;videoFormat:VideoFormat;videoInfo:VideoInfoSettings;animations:VideoAnimationSettings};
 async function prepareRecording():Promise<RecordingStart>{
- const options={restart:$<HTMLInputElement>('#recording-restart').checked,random:$<HTMLInputElement>('#recording-random').checked,durationSeconds:Number($<HTMLInputElement>('#recording-duration').value)*60,videoFormat:chosenVideoFormat(),generation:recordingGeneration};
+ const options={restart:$<HTMLInputElement>('#recording-restart').checked,random:$<HTMLInputElement>('#recording-random').checked,durationSeconds:Number($<HTMLInputElement>('#recording-duration').value)*60,videoFormat:chosenVideoFormat(),videoInfo:chosenVideoInfo(),animations:chosenVideoAnimations(),generation:recordingGeneration};
  // Both requests must be initiated before awaiting anything, inside the button gesture.
  let fullscreen:Promise<void>|undefined;
  try{if($<HTMLInputElement>('#recording-fullscreen').checked)fullscreen=focus(true);}catch{/* Focus view remains available when fullscreen is denied. */}
@@ -1749,6 +1780,16 @@ async function startRecordedMusic(options:RecordingStart){
   if(!playing||options.generation!==recordingGeneration)throw Error('Music unavailable');
  }
 }
+function chosenVideoAnimations():VideoAnimationSettings{return {center:$<HTMLInputElement>('#video-animation-center').checked,orbit:$<HTMLInputElement>('#video-animation-orbit').checked,background:$<HTMLInputElement>('#video-animation-background').checked};}
+for(const key of videoAnimationKeys)$('#video-animation-'+key).addEventListener('change',persistSettings);
+function chosenVideoInfo():VideoInfoSettings{
+ return {enabled:$<HTMLInputElement>('#video-info-enabled').checked,title:$<HTMLInputElement>('#video-info-title').value.slice(0,80),showTitle:$<HTMLInputElement>('#video-info-showTitle').checked,style:$<HTMLInputElement>('#video-info-style').checked,tempo:$<HTMLInputElement>('#video-info-tempo').checked,section:$<HTMLInputElement>('#video-info-section').checked,signature:$<HTMLInputElement>('#video-info-signature').checked};
+}
+function syncVideoInfo(){
+ const info=chosenVideoInfo();$('#video-info-options').hidden=!info.enabled;
+ $<HTMLInputElement>('#video-info-title').disabled=!info.enabled||!info.showTitle;
+}
+document.querySelectorAll<HTMLInputElement>('.video-info input').forEach(input=>input.addEventListener(input.type==='text'?'input':'change',()=>{syncVideoInfo();persistSettings();}));
 function chosenVideoFormat():VideoFormat{return $<HTMLInputElement>('#video-format input:checked').value as VideoFormat;}
 function syncVideoFormat(){
  const {width,height}=videoDimensions(chosenVideoFormat());$('#video-resolution').textContent=width+' × '+height;
@@ -1770,7 +1811,8 @@ function syncFileButtons(){
  labelAction('#wav-record',wavActive?files.stop:files.wavRecord);
  $('#files-open').dataset.recording=String(videoBusy||wavBusy);
  $<HTMLInputElement>('#recording-duration').disabled=videoBusy||wavBusy||importBusy;
- for(const input of document.querySelectorAll<HTMLInputElement>('#video-format input'))input.disabled=videoBusy||wavBusy||importBusy;
+ for(const input of document.querySelectorAll<HTMLInputElement>('#video-format input,.video-info input,.video-animation-options input'))input.disabled=videoBusy||wavBusy||importBusy;
+ if(!videoBusy&&!wavBusy&&!importBusy)syncVideoInfo();
  for(const option of ['restart','random','fullscreen'])$<HTMLInputElement>('#recording-'+option).disabled=videoBusy||wavBusy||importBusy||(option==='random'&&!$<HTMLInputElement>('#recording-restart').checked);
 }
 function finishVideoRecording(){
@@ -1780,6 +1822,7 @@ function finishVideoRecording(){
  videoRecording.stop();syncFileButtons();
 }
 function finishVideoUi(){
+ endVideoAnimations();
  videoRecording=null;videoBusy=false;
  if(videoTimer)clearInterval(videoTimer);videoTimer=undefined;
  $('#video-stop').hidden=true;$('#video-dismiss').hidden=false;
@@ -1803,7 +1846,10 @@ $('#video-record').addEventListener('click',async()=>{
   if(!audio||!recordingOutput)throw Error('Audio unavailable');
   videoRecording=createMp4Recording({
    audio,output:recordingOutput,durationSeconds:options.durationSeconds,format:options.videoFormat,
-   paint:ctx=>paintVideo(ctx,orbit,atmosphere,backgroundMode!=='off'),
+   paint:ctx=>paintVideo(ctx,orbit,atmosphere,backgroundMode!=='off',{settings:options.videoInfo,content:{
+    style:styleCopy[language].names[styleIds.indexOf(currentStyle)],tempo:bpm+' BPM',
+    section:evolving&&song?songCopy[language][song.form[song.index].kind]:'',signature:videoInfoCopy[language].credit
+   }}),
    ready:(blob,limited)=>{
     if(captureFailed)return;
     finishVideoUi();videoUrl=URL.createObjectURL(blob);
@@ -1814,6 +1860,7 @@ $('#video-record').addEventListener('click',async()=>{
    error:()=>{if(captureFailed)return;finishVideoUi();$('#video-status').textContent=files.videoError;}
   });
   if(videoRecording?.state!=='recording')throw Error('Recorder unavailable');
+  videoAnimationRun={start:performance.now(),flags:options.animations,plan:videoAnimationPlan(options.durationSeconds),next:{center:0,orbit:0,background:0},changed:new Set()};
   await startRecordedMusic(options);
   videoStarted=performance.now();$('#video-time').textContent='00:00';$('#video-time').hidden=false;
   videoTimer=setInterval(()=>{

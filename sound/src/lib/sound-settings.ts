@@ -1,3 +1,5 @@
+import type {VideoAnimationSettings} from './video-animations';
+import type {VideoInfoSettings} from './video-info';
 import {ORBIT_COUNT} from './orbit-layout';
 import {makeMotif} from './harmony';
 import {resolveGroove} from './groove';
@@ -16,7 +18,7 @@ export type SavedTrack={
  morph:{to:InstrumentId;progress:number}|null;
 };
 export type SoundSettings={
- recording?:{restart:boolean;random:boolean;fullscreen:boolean;minutes?:number;videoFormat?:'landscape'|'portrait'};
+ recording?:{restart:boolean;random:boolean;fullscreen:boolean;minutes?:number;videoFormat?:'landscape'|'portrait';videoInfo?:VideoInfoSettings;animations?:VideoAnimationSettings};
  pad?:{mode:'draw'|'rhythm';beats:2|3|4;hits:boolean[][];notes?:(number|null)[][]};
  version:2;style:StyleId;dance?:DanceId|null;groove?:GrooveChoice;bpm:number;volume:number;transpose?:number;noteEffect?:number;tracks:SavedTrack[];
  background:typeof backgroundModes[number];center:typeof centerModes[number];orbit:typeof orbitModes[number];
@@ -33,6 +35,12 @@ export function decodeSettings(raw:string|null):SoundSettings|null{
   if(s.recording!==undefined&&(!s.recording||Array.isArray(s.recording)||['restart','random','fullscreen'].some(key=>typeof s.recording[key]!=='boolean')))return null;
   if(s.recording?.minutes!==undefined&&(!number(s.recording.minutes,1,10)||!Number.isInteger(s.recording.minutes)))return null;
   if(s.recording?.videoFormat!==undefined&&!member(['landscape','portrait'],s.recording.videoFormat))return null;
+  if(s.recording?.videoInfo!==undefined){
+   const info=s.recording.videoInfo;
+   if(!info||Array.isArray(info)||typeof info.title!=='string'||info.title.length>80
+    ||['enabled','showTitle','style','tempo','section','signature'].some(key=>typeof info[key]!=='boolean'))return null;
+  }
+  if(s.recording?.animations!==undefined&&(!s.recording.animations||Array.isArray(s.recording.animations)||['center','orbit','background'].some(key=>typeof s.recording.animations[key]!=='boolean')))return null;
   if(s.transpose!==undefined&&(!number(s.transpose,-12,12)||!Number.isInteger(s.transpose)))return null;
   if(s.noteEffect!==undefined&&!number(s.noteEffect,0,1.5))return null;
   if(s.dance!==undefined&&s.dance!==null&&!member(danceIds,s.dance))return null;

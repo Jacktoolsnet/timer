@@ -1,5 +1,6 @@
 import {test,expect} from '@playwright/test';
 import {readFile} from 'node:fs/promises';
+import {defaultVideoInfo} from '../src/lib/video-info';
 import {decodeSettings} from '../src/lib/sound-settings';
 import {fileCopy} from '../src/lib/file-copy';
 for(const random of [false,true])test(`WAV restart records half a second of silence then starts ${random?'Random':'normal'} Play from the beginning`,async({page})=>{
@@ -51,7 +52,7 @@ test('MP4 begins before the newly scheduled first beat; fullscreen denial falls 
 test('cancel during delayed WAV preparation never launches music or downloads a partial take',async({page})=>{
  await page.addInitScript(()=>{
   const load=AudioWorklet.prototype.addModule;
-  AudioWorklet.prototype.addModule=async function(url,options){await new Promise(r=>setTimeout(r,500));return load.call(this,url,options);};
+  AudioWorklet.prototype.addModule=async function(url,options){await new Promise(r=>setTimeout(r,1500));return load.call(this,url,options);};
  });
  const downloads:string[]=[];page.on('download',d=>downloads.push(d.suggestedFilename()));
  await page.goto('/de/');await page.locator('#files-open').click();await page.locator('#recording-restart').check();
@@ -75,7 +76,7 @@ test('recording options round-trip in JSON and reject malformed switches without
  for(const option of ['restart','random','fullscreen'])await page.locator('#recording-'+option).check();
  const download=page.waitForEvent('download');await page.locator('#json-export').click();
  const raw=await readFile((await(await download).path())!,'utf8');
- expect(decodeSettings(raw)!.recording).toEqual({restart:true,random:true,fullscreen:true,minutes:10,videoFormat:'landscape'});
+ expect(decodeSettings(raw)!.recording).toEqual({restart:true,random:true,fullscreen:true,minutes:10,videoFormat:'landscape',videoInfo:defaultVideoInfo,animations:{center:false,orbit:false,background:false}});
  for(const value of [null,[],{},'yes',{restart:'true',random:false,fullscreen:false}]){
   const bad=JSON.parse(raw);bad.recording=value;expect(decodeSettings(JSON.stringify(bad))).toBeNull();
  }

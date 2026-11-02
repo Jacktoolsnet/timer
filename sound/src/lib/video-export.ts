@@ -1,3 +1,4 @@
+import {videoInfoSize,paintVideoInfo,type VideoInfoSettings,type VideoInfoContent} from './video-info';
 import {recordingSeconds} from './recording-duration';
 /** Native MP4 only: never rename a WebM recording to .mp4. No microphone/screen permissions. */
 export const MP4_TYPES=[
@@ -60,9 +61,9 @@ export function createMp4Recording(options:{
  };
 }
 /** Same canvases as the live view, reframed around the orbit; no DOM or user controls. */
-export function paintVideo(ctx:CanvasRenderingContext2D,orbit:HTMLCanvasElement,background:HTMLCanvasElement,showBackground:boolean){
+export function paintVideo(ctx:CanvasRenderingContext2D,orbit:HTMLCanvasElement,background:HTMLCanvasElement,showBackground:boolean,info?:{settings:VideoInfoSettings;content:VideoInfoContent}){
  const style=getComputedStyle(document.documentElement);
- const width=ctx.canvas.width,height=ctx.canvas.height,size=Math.max(1,Math.min(width,height)-40),cx=width/2,cy=height/2;
+ const width=ctx.canvas.width,height=ctx.canvas.height,size=videoInfoSize(width,height,info?.settings.enabled),cx=width/2,cy=height/2;
  ctx.fillStyle=style.getPropertyValue('--surface').trim()||'#080e16';ctx.fillRect(0,0,width,height);
  if(showBackground){
   const o=orbit.getBoundingClientRect(),b=background.getBoundingClientRect();
@@ -76,4 +77,5 @@ export function paintVideo(ctx:CanvasRenderingContext2D,orbit:HTMLCanvasElement,
   }
  }
  ctx.drawImage(orbit,cx-size/2,cy-size/2,size,size);
+ if(info)paintVideoInfo(ctx,info.settings,info.content);
 }
