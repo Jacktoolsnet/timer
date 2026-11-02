@@ -204,14 +204,13 @@ rests for two bars. Normal Play follows the user's points without automatic phra
 rests. Mute, disable, clear, instrument/style changes and Stop release held sources.
 
 Random Play mixing is now more pronounced: leads (including bowed strings) trade
-prominence over four bars; melodic accompaniment runs around 32–44% of its manual
-ceiling, pads sit further back, and percussion/bass have slower role-appropriate
+prominence over four bars; raw melodic accompaniment levels run around 32–44% of
+the lead before common level compensation, pads sit further back, and percussion/bass have slower role-appropriate
 level variation. A fresh drawing gesture briefly takes priority and ducks competing
 parts, then hands the mix back over its last protected bar. Every live voice has
-an attenuating fader ahead of dry and effect sends, updated smoothly by the scheduler,
+a performance fader ahead of dry and effect sends, updated smoothly by the scheduler,
 so even long held vocals/strings change level without retriggering. Visual hit energy
-uses the same mix levels. User volume settings are never overwritten or boosted;
-normal Play restores unity faders and disabled/muted/empty tracks stay protected.
+uses the same mix levels. User volume settings are never overwritten. A shared feed-forward mix balance compensates the combined performance/section attenuation, preserving relative fader roles without a Random Play loudness penalty. Normal Play uses the same balancing path (unity for an unmodified mix). Disabled/muted/empty tracks stay protected.
 
 The articulation audit now covers every instrument family explicitly. Saxophone
 uses a live reed-like source with broad body resonance, quiet filtered breath,
@@ -259,7 +258,7 @@ Viennese Waltz has a separate crisper pulse envelope than Slow Waltz, stronger b
 
 ### Distinct rhythm articulation for the other eight dances
 
-The first four protected tracks carry each dance's signature, with true acoustic triads, tempo-relative note gates, role-specific accents, reduced reverb and no pulse echo. Lead instruments keep their expressive/sustained behavior. Background attenuation briefly makes room for rhythmic attacks without exceeding manual volume ceilings.
+The first four protected tracks carry each dance's signature, with true acoustic triads, tempo-relative note gates, role-specific accents, reduced reverb and no pulse echo. Lead instruments keep their expressive/sustained behavior. Background attenuation briefly makes room for rhythmic attacks without changing user volume settings.
 
 - **Slowfox:** flowing walking bass, soft backbeat and longer guitar chord strokes; moderate swing.
 - **Quickstep:** brisk walking bass, short chord strokes and short snare tails; lighter swing than Jive.
@@ -289,7 +288,7 @@ Each track has an Automatic / 4 / 8 / 12 / 16 note-grid selector. One revolution
 
 The scheduler enumerates actual onset times within each native sixteenth interval rather than rounding triplets to sixteenths. Swing applies to compatible binary subdivisions only; cross-grids remain evenly spaced. Comet positions use the inverse of each grid’s timing, so note flashes and the head remain aligned. Sustained-voice gates use the target grid and actual swung spacing, including reverse playback and phase offsets. Drawing, taps, holds and keyboard editing use the destination track’s resolution. Held quarter-note figures snap to the closest available positions in a cross-grid.
 
-Random Play starts with varied grids on eligible Automatic melodic tracks, choosing underrepresented resolutions independently per track. During playback this initial shuffle waits for the next bar. The Random Pattern button also varies eligible grids. Every second evolution cycle changes at most one eligible accompaniment grid, instead of waiting until a whole timbre journey has finished. Fixed choices, muted/disabled/recently drawn tracks, bass, percussion, native waltz pulse parts and dance foundation tracks are excluded. The first four dance grids are locked to their native meter. Free-mode users may manually select any grid even for drums or bass. Controls, pending/locked feedback and usage notes are translated in all four languages. Grid choices and effective Automatic resolutions are saved only with storage consent; pending changes and visual effects are transient.
+Random Play starts with varied grids on eligible Automatic melodic tracks, choosing underrepresented resolutions independently per track. During playback this initial shuffle waits for the next bar. The Random Pattern button also varies eligible grids. A dedicated bar clock, independent of timbre journeys, changes up to two eligible grids every 1–2 bars in energetic styles or 2–3 bars elsewhere. Calm styles change one every 3–4 bars. Least-recently changed tracks get priority. Diversity is measured among audible melodic tracks rather than fixed drum/bass grids; startup may retain an already underrepresented grid so all four resolutions can coexist. Expanding grids adds up to two style-compatible neighbouring onsets, with a 65% density ceiling, so finer grids are audibly used rather than merely showing more empty dots. Empty/cleared tracks remain silent; chorus memory follows generated changes. Fixed choices, muted/disabled/recently drawn tracks, bass, percussion, native waltz pulse parts and dance foundation tracks are excluded. The first four dance grids are locked to their native meter. Free-mode users may manually select any grid even for drums or bass. Controls, pending/locked feedback and usage notes are translated in all four languages. Grid choices and effective Automatic resolutions are saved only with storage consent; pending changes and visual effects are transient.
 
 
 ### Style-aware instrumental performance
@@ -304,3 +303,17 @@ Dance identity takes priority: Quickstep, Jive, Samba, Cha-Cha, Paso Doble, Disc
 ### Simplified visible controls
 
 The Meter & Groove controls and the complete Dances tile are hidden in every language and in focus view. Music-style selection and style-derived rhythm remain available. The existing rhythm engine, hidden DOM hooks and saved-setting compatibility are retained; this is a UI simplification, not deletion of the underlying dance/groove functionality. Usage notes no longer direct visitors to the hidden sections.
+
+
+### Tango in the main music-style grid
+
+Tango is now an eighteenth music style, available in all four languages without reopening the hidden dance or groove sections. The visible style and legacy Tango arrangement share one preset (128 quarter-note BPM, straight 4/4). It reuses the tested short marcato renderer: alternating root/fifth double bass at 0/4/8/12, accented piano/guitar chords at 0/6/8/12, a shorter pickup at step 6, and restrained rim accents. Strings and organ use the style-aware articulated performance introduced above; melody yields slightly at rhythmic attacks.
+
+Internally the style activates the existing Tango rhythm protection. Random Play keeps the first four foundation patterns, direction, grid and chosen tempo stable while varying melodic accompaniment and song sections. Drawing over the foundation is routed to accompaniment. Selecting another visible music style exits this protection; live changes wait for a bar boundary. Optional storage restores the selected Tango tile without autoplay and understands legacy Tango dance settings. This is the existing synthesized ballroom-inspired marcato arrangement, not a universal rhythm prescription or an authentic bandoneon recording.
+
+
+### Equal playback-mode reference level
+
+Both buttons use the same master gain and output compressor. The scheduler now combines automatic mix and section factors before a volume-/note-density-weighted power balance, instead of multiplying an unbalanced section reduction into every note's permanent attack level. Held voices use the same live faders, so toggling evolution does not strand a quiet intro envelope. Relative lead/backing balance, drawing priority and phrase rests remain musical choices. Automatic velocity varies around 1 (0.85–1.15) rather than always attenuating (previously 0.65–1). Optional manually selected random dynamics in normal Play is unchanged.
+
+This is deterministic feed-forward balancing, not audio AGC or LUFS metering; timbre, texture and the number of sounding notes can still change perceived loudness musically. The explicit outro fade and the next intro's recovery remain outside normalization. Silence, muted/disabled/cleared tracks and manual master/track volume are never normalized up as audio noise. Relative faders can exceed unity as compensation; the shared compressor remains downstream, with no mode-specific master boost or saved-setting change.

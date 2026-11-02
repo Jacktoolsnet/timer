@@ -1,3 +1,4 @@
+import type {StyleId} from './presets';
 export const gridSizes=[4,8,12,16] as const;
 export type GridSize=typeof gridSizes[number];
 export type GridChoice='auto'|GridSize;
@@ -36,11 +37,37 @@ export function canEvolveGrid(instrument:string,protectedTrack:boolean){
  return !protectedTrack&&!['kick','snare','clap','tom','rim','hat','shaker','bass','synthbass','doublebass'].includes(instrument);
 }
 /** Prefer underrepresented grids, never copying one shared random choice to every track. */
-export function variedGrid(current:GridSize,others:readonly number[],random=Math.random):GridSize{
- const choices=gridSizes.filter(size=>size!==current);
+export function variedGrid(current:GridSize,others:readonly number[],random=Math.random,allowCurrent=false):GridSize{
+ const choices=gridSizes.filter(size=>allowCurrent||size!==current);
  const count=(size:number)=>others.filter(other=>other===size).length;
- const least=Math.min(...choices.map(count)),balanced=choices.filter(size=>count(size)===least);
+ const least=Math.min(...choices.map(count));
+ let balanced=choices.filter(size=>count(size)===least);
+ // Retain the current grid only when it is uniquely useful for overall diversity.
+ if(balanced.length>1)balanced=balanced.filter(size=>size!==current);
  return balanced[Math.floor(random()*balanced.length)];
+}
+/** Independent rhythm development: two orbits every 1–3 bars, gentler in calm styles. */
+export function gridEvolutionPlan(style:StyleId,bar:number,candidates:readonly {index:number;last:number}[],random=Math.random){
+ const calm=['ambient','focus','coffeehouse','classical','slowwaltz'].includes(style);
+ const fast=['electronic','house','sport','drumandbass','funk'].includes(style);
+ const pool=[...candidates],indices:number[]=[];
+ for(let n=0;n<Math.min(calm?1:2,candidates.length);n++){
+  const oldest=Math.min(...pool.map(c=>c.last)),ties=pool.filter(c=>c.last===oldest);
+  const chosen=ties[Math.floor(random()*ties.length)];indices.push(chosen.index);pool.splice(pool.indexOf(chosen),1);
+ }
+ return {indices,nextBar:bar+(calm?3:fast?1:2)+Math.floor(random()*2)};
+}
+/** When a grid expands, actually use a few of the new subdivisions, not just more empty dots. */
+export function enrichGrid(points:readonly boolean[],from:number,to:number,allowed:readonly number[],random=Math.random){
+ const result=[...points],active=result.slice(0,to).filter(Boolean).length;
+ if(to<=from||!active)return result;
+ let pool=[...new Set(allowed)].filter(s=>Number.isInteger(s)&&s>=0&&s<to&&!result[s]);
+ const amount=Math.max(0,Math.min(2,Math.floor(to*.65)-active,pool.length));
+ for(let n=0;n<amount;n++){
+  const near=pool.filter(s=>result[(s+1)%to]||result[(s+to-1)%to]);
+  const choices=near.length?near:pool,s=choices[Math.floor(random()*choices.length)];result[s]=true;pool=pool.filter(candidate=>candidate!==s);
+ }
+ return result;
 }
 export const gridCopy={
  de:{label:'Notenraster',auto:'Automatisch',pending:'Wechsel zum nächsten Takt',locked:'Tanzrhythmus: Raster bleibt geschützt.'},

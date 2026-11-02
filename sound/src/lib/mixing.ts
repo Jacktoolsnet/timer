@@ -22,3 +22,25 @@ export function mixLevels(tracks:readonly DevelopmentTrack[],plan:DevelopmentPla
   return Math.max(0,Math.min(1,gain));
  });
 }
+
+/** Preserve relative performance levels without making the whole Random Play mix quieter.
+ * Weights follow user volumes and note density, not the number of enabled rows alone.
+ * This is feed-forward mix balancing, not AGC: silence and the user's master volume are untouched.
+ */
+export function balancedMix(tracks:readonly (DevelopmentTrack&{slots?:number})[],levels:readonly number[]):number[]{
+ let reference=0,performed=0;
+ tracks.forEach((track,i)=>{
+  if(!available(track))return;
+  const slots=track.slots??16,density=track.points.slice(0,slots).filter(Boolean).length/slots;
+  const weight=track.volume**2*density;
+  reference+=weight;performed+=weight*(levels[i]??0)**2;
+ });
+ if(reference===0||performed<1e-12)return levels.map(()=>0);
+ const trim=Math.sqrt(reference/performed);
+ return tracks.map((track,i)=>available(track)?Math.max(0,levels[i]??0)*trim:0);
+}
+/** Random automatic touches vary around unity, rather than having a built-in downward bias. */
+export function performanceVelocity(previous:number,random=Math.random){
+ const target=.85+random()*.3;
+ return previous+Math.max(-.06,Math.min(.06,target-previous));
+}

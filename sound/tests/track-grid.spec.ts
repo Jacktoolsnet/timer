@@ -1,5 +1,5 @@
 import {test,expect,type Page} from '@playwright/test';
-import {variedGrid,gridSizes,gridEvents,swingPosition,gridFractionAtTime,gridPhraseHold,remapPoints,canEvolveGrid,gridCopy} from '../src/lib/track-grid';
+import {gridEvolutionPlan,enrichGrid,variedGrid,gridSizes,gridEvents,swingPosition,gridFractionAtTime,gridPhraseHold,remapPoints,canEvolveGrid,gridCopy} from '../src/lib/track-grid';
 import {holdSteps} from '../src/lib/pad-gestures';
 import {resolveGroove,grooveAccent} from '../src/lib/groove';
 import {danceIds} from '../src/lib/dances';
@@ -70,8 +70,9 @@ test('drawing, tapping, holding and keyboard wrap use the selected grid',async({
  await page.mouse.move(r.x+r.width*.1,r.y+r.height*.03);await page.mouse.down();for(let n=2;n<9;n++)await page.mouse.move(r.x+r.width*n/10,r.y+r.height*.03,{steps:2});await page.mouse.up();
  expect(await row(page,0).locator('[data-step][aria-pressed=true]').count()).toBeLessThanOrEqual(4);await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false');
 });
+// Hidden dance controls are invoked only to regression-test the retained legacy rhythm engine.
 test('dance foundation grids lock while routed taps use the melodic target grid',async({page})=>{
- await page.goto('/de/');await page.locator('[data-dance=samba]').click();await grid(page,4,'12');
+ await page.goto('/de/');await page.locator('[data-dance=samba]').evaluate((button:HTMLButtonElement)=>button.click());await grid(page,4,'12');
  for(let i=0;i<4;i++){await expect(row(page,i).locator('.track-grid')).toBeDisabled();await expect(row(page,i)).toHaveAttribute('data-slots','8');}
  const before=await row(page,0).locator('.count').textContent();
  const pad=page.locator('#drawing');await pad.scrollIntoViewIfNeeded();const r=(await pad.boundingBox())!;await page.mouse.click(r.x+r.width*.95,r.y+r.height*.03);
@@ -110,10 +111,10 @@ test('Random Play changes an automatic melodic grid, not fixed grids or bass and
  test.setTimeout(30000);await page.addInitScript(()=>{Math.random=()=>0;});await page.goto('/de/');
  await page.locator('#palette-dropdown summary').click();await page.locator('#remember-preferences').check();await page.locator('#preferences-close').click();
  await grid(page,6,'8');await page.locator('#tempo').fill('180');await page.locator('#tempo').dispatchEvent('input');await page.locator('#evolve').click();
- await expect(row(page,4)).toHaveAttribute('data-slots','4');await expect(row(page,5)).toHaveAttribute('data-slots','12');await expect(row(page,7)).toHaveAttribute('data-slots','4');
- await expect(row(page,5)).toHaveAttribute('data-slots','8',{timeout:15000});await expect(row(page,5)).toHaveAttribute('data-grid','auto');
- for(let i=0;i<4;i++)await expect(row(page,i)).toHaveAttribute('data-slots','16');await expect(row(page,6)).toHaveAttribute('data-slots','8');await expect(row(page,6)).toHaveAttribute('data-grid','8');await page.locator('#play').click();
- await page.waitForTimeout(350);await page.reload();await expect(row(page,5)).toHaveAttribute('data-slots','8');await expect(row(page,5)).toHaveAttribute('data-grid','auto');await expect(row(page,6)).toHaveAttribute('data-slots','8');await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false');
+ await expect(row(page,4)).toHaveAttribute('data-slots','4');await expect(row(page,5)).toHaveAttribute('data-slots','12');await expect(row(page,7)).toHaveAttribute('data-slots','16');
+ await expect(row(page,5)).toHaveAttribute('data-slots','4',{timeout:5000});await expect(row(page,5)).toHaveAttribute('data-grid','auto');
+ await page.locator('#play').click();for(let i=0;i<4;i++)await expect(row(page,i)).toHaveAttribute('data-slots','16');await expect(row(page,6)).toHaveAttribute('data-slots','8');await expect(row(page,6)).toHaveAttribute('data-grid','8');
+ await page.waitForTimeout(350);await page.reload();await expect(row(page,5)).toHaveAttribute('data-slots','4');await expect(row(page,5)).toHaveAttribute('data-grid','auto');await expect(row(page,6)).toHaveAttribute('data-slots','8');await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false');
 });
 for(const lang of ['en','es','fr'] as const)test('grid controls localized '+lang,async({page})=>{
  await page.goto('/'+lang+'/');await row(page,4).locator('summary').click();await expect(page.locator('#caption-grid-4')).toHaveText(gridCopy[lang].label);await expect(page.locator('#trigger-grid-4')).toHaveText(gridCopy[lang].auto);
@@ -135,6 +136,38 @@ test('initial random grids preserve fixed, muted, disabled and dance foundation 
   const enabled=document.querySelector<HTMLInputElement>('[data-track="6"] .track-enabled')!;enabled.checked=false;enabled.dispatchEvent(new Event('change'));
  });
  await page.locator('#evolve').click();await expect(row(page,7)).not.toHaveAttribute('data-slots','16');await expect(row(page,4)).toHaveAttribute('data-slots','8');for(const i of [0,1,2,3,5,6])await expect(row(page,i)).toHaveAttribute('data-slots','16');await page.locator('#play').click();
- await page.locator('[data-dance=samba]').click();await page.locator('#evolve').click();for(let i=0;i<4;i++)await expect(row(page,i)).toHaveAttribute('data-slots','8');
+ await page.locator('[data-dance=samba]').evaluate((button:HTMLButtonElement)=>button.click());await page.locator('#evolve').click();for(let i=0;i<4;i++)await expect(row(page,i)).toHaveAttribute('data-slots','8');
  const sizes=await page.locator('.instrument').evaluateAll(rows=>rows.slice(4).map(row=>Number((row as HTMLElement).dataset.slots)));expect(new Set(sizes).size).toBeGreaterThan(1);await page.locator('#play').click();
+});
+
+test('startup uses all four grids among four melodic orbits instead of avoiding the native drum grid',()=>{
+ for(const value of [0,.25,.5,.99]){
+  expect(variedGrid(16,[8],()=>value,true)).not.toBe(16);
+  const slots=[16,16,16,16] as (4|8|12|16)[];
+  for(let i=0;i<slots.length;i++)slots[i]=variedGrid(slots[i],slots.filter((_,j)=>i!==j),()=>value,true);
+  expect([...slots].sort((a,b)=>a-b)).toEqual([4,8,12,16]);
+ }
+});
+test('a dedicated grid clock changes two least-recent melodic tracks and calm styles stay gentler',()=>{
+ let candidates=[{index:4,last:1},{index:5,last:2},{index:6,last:3},{index:7,last:4}];
+ const a=gridEvolutionPlan('electronic',0,candidates,()=>0);expect(a).toEqual({indices:[4,5],nextBar:1});
+ candidates=candidates.map(c=>a.indices.includes(c.index)?{...c,last:10}:c);
+ expect(gridEvolutionPlan('electronic',1,candidates,()=>0).indices).toEqual([6,7]);
+ expect(gridEvolutionPlan('focus',0,candidates,()=>0)).toEqual({indices:[6],nextBar:3});
+ expect(gridEvolutionPlan('jazz',0,candidates,()=>.99).nextBar).toBe(3);expect(gridEvolutionPlan('tango',4,[],()=>0)).toEqual({indices:[],nextBar:6});
+});
+test('finer grids add bounded audible subdivisions while preserving existing, silent and coarse patterns',()=>{
+ const original=Array<boolean>(16).fill(false);original[0]=original[4]=true;
+ const expanded=enrichGrid(original,4,8,Array.from({length:8},(_,i)=>i),()=>0);
+ expect(expanded[0]).toBe(true);expect(expanded[4]).toBe(true);expect(expanded.filter(Boolean).length).toBe(4);expect(original.filter(Boolean).length).toBe(2);
+ expect(enrichGrid(original,8,4,[0,1,2,3])).toEqual(original);expect(enrichGrid(Array(16).fill(false),4,16,[0,1,2,3])).toEqual(Array(16).fill(false));
+ const allowed=enrichGrid(original,4,8,[2,6],()=>0);expect(allowed[2]).toBe(true);expect(allowed[6]).toBe(true);expect(allowed[1]).toBe(false);
+ const dense=Array.from({length:16},(_,s)=>s<5);expect(enrichGrid(dense,4,8,[5,6,7]).filter(Boolean).length).toBe(5);
+});
+test('four melodic orbits start diverse and two vary by the first bar, independently of timbre evolution',async({page})=>{
+ await page.addInitScript(()=>{Math.random=()=>0;});await page.goto('/de/');await page.locator('#tempo').fill('180');await page.locator('#tempo').dispatchEvent('input');await page.locator('#evolve').click();
+ const sizes=()=>page.locator('.instrument').evaluateAll(rows=>rows.slice(4).map(row=>Number((row as HTMLElement).dataset.slots)));
+ await expect.poll(sizes).toEqual([4,8,12,16]);await expect.poll(sizes,{timeout:4000}).toEqual([8,4,12,16]);
+ // First timbre journey starts only after two bars; grid development already ran after one.
+ await expect(row(page,4)).toHaveAttribute('data-morph','');await expect(row(page,4).locator('.count')).toHaveText('5 / 8');await page.locator('#play').click();
 });

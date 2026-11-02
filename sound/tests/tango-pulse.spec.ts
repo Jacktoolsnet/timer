@@ -73,7 +73,10 @@ test('actual Viennese playback uses the crisper bass and chord envelopes',async(
   (window as any).pulseEvents=[];const start=AudioBufferSourceNode.prototype.start;
   AudioBufferSourceNode.prototype.start=function(when=0,...args:any[]){(window as any).pulseEvents.push({time:when,duration:this.buffer?.duration||0});return start.call(this,when,...args);};
  });
- await page.goto('/de/');await page.locator('[data-dance=viennese]').click();
+ await page.goto('/de/');
+ // Dance controls are intentionally hidden; verify the retained legacy audio engine directly.
+ await expect(page.locator('.dances-tile')).toBeHidden();
+ await page.locator('[data-dance=viennese]').evaluate((button:HTMLButtonElement)=>button.click());
  for(let i=2;i<8;i++){const row=page.locator('[data-track="'+i+'"]');await row.locator('summary').click();await row.locator('.mute').check();}
  await page.locator('#play').click();await expect.poll(()=>page.evaluate(()=>(window as any).pulseEvents.length)).toBeGreaterThanOrEqual(3);
  const events=await page.evaluate(()=>(window as any).pulseEvents.slice(0,3));

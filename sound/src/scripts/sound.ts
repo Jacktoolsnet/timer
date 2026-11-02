@@ -1,12 +1,12 @@
 import {performanceGate} from '../lib/performance';
-import {variedGrid,gridSizes,gridCopy,remapPoints,gridEvents,gridPhraseHold,swingPosition,gridFractionAtTime,canEvolveGrid,type GridChoice,type GridSize} from '../lib/track-grid';
+import {gridEvolutionPlan,enrichGrid,variedGrid,gridSizes,gridCopy,remapPoints,gridEvents,gridPhraseHold,swingPosition,gridFractionAtTime,canEvolveGrid,type GridChoice,type GridSize} from '../lib/track-grid';
 import {HOLD_DELAY,RING_FADE,gestureMode,holdSteps,ringAppearance,type GestureMode} from '../lib/pad-gestures';
 import {danceRhythmRole,danceRhythmWave,rhythmDrums,rhythmClarity,isRhythmDance,type PulseInstrument} from '../lib/dance-rhythm';
 import {tangoPulseRole,tangoPulseWave,dancePulseClarity} from '../lib/tango';
 import {waltzPulseRole,waltzPulseWave} from '../lib/waltz';
 import {dances,danceIds,danceCopy,danceFoundation,dancePoints,type DanceId} from '../lib/dances';
 import {resolveGroove,grooveCopy,groovePattern,grooveMutationGrid,grooveAnchors,grooveAnchored,grooveRole,grooveAccent,randomGroovePattern,type GrooveChoice} from '../lib/groove';
-import {mixLevels} from '../lib/mixing';
+import {mixLevels,balancedMix,performanceVelocity} from '../lib/mixing';
 import {sustainedInstruments,phraseActive,phraseHold,type SustainedInstrument} from '../lib/phrasing';
 import {createSustainedVoice} from '../lib/sustained-voice';
 import {noteGlow} from '../lib/note-glow';
@@ -76,15 +76,35 @@ function applyGrid(index:number,choice:GridChoice,slots:GridSize){
  if(song)for(const memory of [song.chorus,song.verse,song.from])if(memory){const p=memory[index];p.points=remapPoints(p.points,p.slots??old,slots);p.slots=slots;}
 }
 function gridCandidates(){
- return tracks.map((tr,index)=>({tr,index})).filter(({tr,index})=>tr.enabled&&!tr.mute&&tr.volume>0&&tr.grid==='auto'&&tr.pendingGrid===null&&musicalStep()>=drawnUntil[index]&&canEvolveGrid(tr.instrument,pulseTrack(index))&&(!tr.morph||canEvolveGrid(tr.morph.to,false)));
+ return tracks.map((tr,index)=>({tr,index})).filter(({tr,index})=>tr.enabled&&!tr.mute&&tr.volume>0&&tr.grid==='auto'&&tr.pendingGrid===null&&musicalStep()>=drawnUntil[index]&&![...padGestures.values()].some(g=>g.target===index||padLocation(g.startX,g.startY)?.index===index)&&canEvolveGrid(tr.instrument,pulseTrack(index))&&(!tr.morph||canEvolveGrid(tr.morph.to,false)));
 }
-function varyGrid(index:number){applyGrid(index,'auto',variedGrid(tracks[index].slots,tracks.filter((_,i)=>i!==index&&tracks[i].enabled).map(tr=>tr.slots)));}
-function shuffleGrids(){gridCandidates().forEach(({index})=>varyGrid(index));pendingGridShuffle=false;sync();}
+function varyGrid(index:number,initial=false){
+ const tr=tracks[index],old=tr.slots;
+ // Compare audible melodic orbits, not the four deliberately fixed drum/bass grids.
+ const others=tracks.filter((other,i)=>i!==index&&other.enabled&&!other.mute&&other.volume>0&&canEvolveGrid(other.instrument,pulseTrack(i))).map(other=>other.slots);
+ applyGrid(index,'auto',variedGrid(old,others,Math.random,initial));
+ if(!initial){
+  const allowed=grooveMutationGrid(groove,tr.instrument).map(s=>Math.round(s/stepsPerBar()*tr.slots)%tr.slots);
+  tr.points=enrichGrid(tr.points,old,tr.slots,allowed);
+  if(song?.form[song.index].kind==='chorus')song.chorus[index]=copyPhrases([tr])[0];
+ }
+ gridLastChange[index]=++gridChangeSerial;
+}
+function shuffleGrids(){
+ gridCandidates().forEach(({index})=>varyGrid(index,true));pendingGridShuffle=false;
+ gridEvolutionBar=evolving?gridEvolutionPlan(currentStyle,Math.floor(step/stepsPerBar()),[]).nextBar:Infinity;sync();
+}
+function evolveGrids(bar:number){
+ const plan=gridEvolutionPlan(currentStyle,bar,gridCandidates().map(({index})=>({index,last:gridLastChange[index]})));
+ plan.indices.forEach(index=>varyGrid(index));gridEvolutionBar=plan.nextBar;if(plan.indices.length)sync();
+}
 function applyPendingGrids(){let changed=false;tracks.forEach((tr,i)=>{if(tr.pendingGrid!==null){applyGrid(i,tr.pendingGrid,tr.pendingSlots!);changed=true;}});if(changed)sync();}
 
 
 let transpose=0,noteEffect=1;
 let evolving=false,evolutionStep=Infinity,pendingGridShuffle=false;
+let gridEvolutionBar=Infinity,gridChangeSerial=0;
+const gridLastChange=tracks.map(()=>0);
 let arrangement:ArrangementPlan|null=null;
 let development:DevelopmentPlan|null=null;
 const drawnUntil=tracks.map(()=>0);
@@ -144,8 +164,15 @@ function songExpression(){
 function songLevel(time:number,instrument:string){
  if(!evolving||!song)return 1;
  const part=song.form[song.index],elapsedBars=Math.max(0,step/stepsPerBar()-song.startBar);
- const to=sectionGain(part.kind,instrument,elapsedBars/part.bars),mix=songMix(time);
- return song.previous?sectionGain(song.previous,instrument,1)*(1-mix)+to*mix:to;
+ const to=sectionGain(part.kind,instrument,part.kind==='outro'?0:elapsedBars/part.bars),mix=songMix(time);
+ return song.previous?sectionGain(song.previous,instrument,song.previous==='outro'?0:1)*(1-mix)+to*mix:to;
+}
+/** A deliberate outro remains a fade; it must not be canceled by mix balancing. */
+function songFade(time:number){
+ if(!evolving||!song)return 1;
+ const part=song.form[song.index];
+ if(part.kind==='outro')return Math.max(0,Math.min(1,1-(step/stepsPerBar()-song.startBar)/part.bars));
+ return song.previous==='outro'?songMix(time):1;
 }
 function rememberDrawing(track:number){
  drawnUntil[track]=musicalStep()+32;
@@ -172,7 +199,7 @@ function setEvolution(on:boolean){
    node.gain.cancelAndHoldAtTime(audio!.currentTime);
    node.gain.setTargetAtTime(1,audio!.currentTime,.15);
   }));
-  song=null;$('#song-structure').hidden=true;}
+  song=null;gridEvolutionBar=Infinity;$('#song-structure').hidden=true;}
  evolving=on;evolutionStep=on?nextMusicStep(playing?step:0):Infinity;
  $('#evolve').setAttribute('aria-pressed',String(on));labelAction('#evolve',on?t.evolveStop:t.evolve);
  $('#evolution-status').textContent='';
@@ -534,11 +561,6 @@ function evolveJourney(time:number){
   else selected.phase=(selected.phase+(Math.random()<.5?-1:1)+selected.slots)%selected.slots;
   selected.hits.fill(-Infinity);
  }
- // Develop one grid every other cycle, rather than waiting for a whole timbre journey.
- if(plan.cycle%2===0){
-  const candidates=gridCandidates().filter(({index})=>index!==plan.track);
-  if(candidates.length)varyGrid(candidates[Math.floor(Math.random()*candidates.length)].index);
- }
  if(plan.cycle>=plan.length)journey=null;
  if(song&&song.form[song.index].kind==='chorus'){
   tracks.forEach((tr,i)=>{tr.motif=[...song!.chorus[i].motif];tr.points=remapPoints(song!.chorus[i].points,song!.chorus[i].slots??tr.slots,tr.slots);tr.pitch=song!.chorus[i].pitch;});
@@ -567,6 +589,7 @@ function schedule(){
   }
   if(pendingStyle&&step%stepsPerBar()===0)applyStyle(pendingStyle,pendingDance);
   if(pendingGridShuffle&&step%stepsPerBar()===0)shuffleGrids();
+  if(evolving&&step%stepsPerBar()===0&&step/stepsPerBar()>=gridEvolutionBar)evolveGrids(step/stepsPerBar());
   if(evolving&&step%stepsPerBar()===0&&step>=evolutionStep){
    evolveJourney(nextTime);evolutionStep=nextMusicStep(step);
   }
@@ -582,8 +605,9 @@ function schedule(){
   const chorus=song?.form[song.index].kind==='chorus';
   const chorusRelief=chorus?songMix(nextTime):song?.previous==='chorus'?1-songMix(nextTime):0;
   const s=step%stepsPerBar();
-  currentMix=evolving?mixLevels(tracks,development,musicalStep(),chorusRelief,drawnUntil).map((gain,i)=>pulseTrack(i)?.9:gain):tracks.map(()=>1);
-  currentMix=currentMix.map((gain,i)=>gain*dancePulseClarity(currentDance,i,s)*rhythmClarity(currentDance,i,s));
+  const performed=evolving?mixLevels(tracks,development,musicalStep(),chorusRelief,drawnUntil)
+   .map((gain,i)=>(pulseTrack(i)?1:gain*songLevel(nextTime,tracks[i].instrument))):tracks.map(()=>1);
+  currentMix=balancedMix(tracks,performed).map((gain,i)=>gain*songFade(nextTime)*dancePulseClarity(currentDance,i,s)*rhythmClarity(currentDance,i,s));
   liveMix.forEach((nodes,index)=>nodes.forEach(node=>node.gain.setTargetAtTime(currentMix[index],nextTime,.09)));
   const duration=60/bpm/4*(s%4<2?1+groove.swing:1-groove.swing);
   events.push({time:nextTime,step:s,duration,notes:[]});
@@ -602,11 +626,11 @@ function schedule(){
     if(evolving&&!pulseTrack(i)&&development&&!protectedDrawing&&!chorus&&i===development.variation
      &&isMelodic(tr.instrument)&&Math.floor((musicalStep()-development.start)/16)%2===1&&s===4)return;
     if(!tr.points[beat]&&!old?.points[beat]&&!extra)return;
-    const dynamics=pulseTrack(i)?1:evolving?approach(tr.scheduledVelocity,.65+Math.random()*.35,.06):tr.randomDynamics?.45+Math.random()*.55:1;
+    const dynamics=pulseTrack(i)?1:evolving?performanceVelocity(tr.scheduledVelocity):tr.randomDynamics?.45+Math.random()*.55:1;
     tr.scheduledVelocity=dynamics;
     const foundation=pulseTrack(i)||['kick','bass','synthbass','doublebass'].includes(tr.instrument)||!!tr.morph&&['kick','bass','synthbass','doublebass'].includes(tr.morph.to);
     const breath=evolving&&arrangement&&!protectedDrawing&&!foundation?breathGain(arrangement,i,musicalStep()):1;
-    const velocity=grooveAccent(groove,tr.instrument,beat/tr.slots*stepsPerBar(),i)*dynamics*(pulseTrack(i)?1:songLevel(time,tr.instrument))*breath*songExpression().gain*(extra?.45:1),mix=evolving&&!pulseTrack(i)?songMix(time):1;
+    const velocity=grooveAccent(groove,tr.instrument,beat/tr.slots*stepsPerBar(),i)*dynamics*breath*songExpression().gain*(extra?.45:1),mix=evolving&&!pulseTrack(i)?songMix(time):1;
     if(velocity<=.0001)return;
     const joined=(sustainedInstruments as readonly string[]).includes(tr.instrument)
      &&(!tr.morph||(sustainedInstruments as readonly string[]).includes(tr.morph.to));
@@ -1159,7 +1183,7 @@ function frame(now:number){
   // Each orbit carries a continuous comet; audible notes briefly boost its glow.
   if(playing&&orbitAnimation&&!reduced.matches){
    const age=time-Math.max(...tr.hits);
-   const level=tr.volume*tr.lastVelocity*visualMaster;
+   const level=Math.min(1,tr.volume*tr.lastVelocity*visualMaster);
    const pulse=!tr.mute&&tr.volume>0&&age>=0&&age<.65?Math.pow(1-age/.65,.8)*level:0;
    const head=tr.direction*trackAngle(index,time)+tr.phase/tr.slots*Math.PI*2-Math.PI/2,length=.85,segments=32;
    const muted=tr.mute||tr.volume===0;
