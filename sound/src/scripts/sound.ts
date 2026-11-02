@@ -1,3 +1,4 @@
+import {wavSupported,createWavRecording} from '../lib/wav-export';
 import {fileCopy} from '../lib/file-copy';
 import {mp4Type,createMp4Recording,paintVideo} from '../lib/video-export';
 import {padNumbers,padCenter,padForKey} from '../lib/orbit-layout';
@@ -49,6 +50,7 @@ const tracks=colors.map((color,i)=>({color,grid:'auto' as GridChoice,slots:16 as
 let audio:AudioContext|undefined, master:GainNode|undefined, playing=false,timer:ReturnType<typeof setInterval>|undefined,nextTime=0,step=0,bpm=100;
 let recordingOutput:DynamicsCompressorNode|undefined;
 let videoRecording:ReturnType<typeof createMp4Recording>|null=null;
+let wavRecording:Awaited<ReturnType<typeof createWavRecording>>|null=null;
 let space:ReturnType<typeof createAudioSpace>|undefined,tapSpace:ReturnType<typeof createAudioSpace>|undefined;
 const acousticCache=new Map<string,AudioBuffer>();
 let noiseBuffer:AudioBuffer|undefined;
@@ -123,11 +125,9 @@ function syncRhythmUi(){
  const text=rhythmCopy[language],active=padMode==='rhythm';
  document.querySelectorAll<HTMLButtonElement>('[data-pad-mode]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.padMode===padMode)));
  $('#rhythm-zones').hidden=!active;$('#rhythm-controls').hidden=!active;
- $('#gesture-help').hidden=active;
- $('#gesture-help').textContent=active?'':gestureCopy[language].help;
- drawing.setAttribute('aria-describedby',active?'gesture-keyboard':'gesture-help gesture-keyboard');
+ drawing.setAttribute('aria-describedby','gesture-keyboard');
  const keyNames=tracks.map((tr,i)=>padNumbers[i]+': '+instrumentNames[language][instrumentIds.indexOf(tr.instrument)]).join('; ');
- $('#gesture-keyboard').textContent=active?text.keyboard+' '+keyNames:gestureCopy[language].keyboard;
+ $('#gesture-keyboard').textContent=active?text.keyboard+' '+keyNames:gestureCopy[language].help+' '+gestureCopy[language].keyboard;
  const hint=active?text.hint:gestureCopy[language].hint;
  drawing.setAttribute('aria-label',hint);
  const status=active&&rhythmEditing&&hasRhythm(tapPattern)?text.editing:tapPattern.state==='armed'?text.armed:tapPattern.state==='recording'?text.recording:playing?text.loop:text.paused;
@@ -359,7 +359,7 @@ document.addEventListener('preferences-cleared',()=>{
  if(saveTimer)clearTimeout(saveTimer);saveTimer=undefined;
  try{localStorage.removeItem(STORAGE_KEY);}catch{}
 });
-window.addEventListener('pagehide',()=>{finishVideoRecording();if(saveTimer)clearTimeout(saveTimer);saveTimer=undefined;saveSettings();});
+window.addEventListener('pagehide',()=>{finishVideoRecording();finishWavRecording();if(saveTimer)clearTimeout(saveTimer);saveTimer=undefined;saveSettings();});
 const events:{time:number;step:number;duration:number;clock?:boolean;notes:{track:number;beat:number;velocity:number}[]}[]=[];
 function labelAction(selector:string,label:string){const button=$(selector);button.setAttribute('aria-label',label);button.setAttribute('title',label);}
 const wake=screenWakeLock($('#wake-status'),'',t.wakeUnavailable);
@@ -810,7 +810,7 @@ function schedule(){
  }
 }
 function stop(){
- finishVideoRecording();
+ finishVideoRecording();finishWavRecording();
  rhythmGeneration++;rhythmPlayer?.stop();cancelTappedVoices();finishRhythm(tapPattern);
  cancelPadGestures();
  sustained.forEach(entry=>entry.voice.release(audio?.currentTime||0));sustained.clear();
@@ -1516,6 +1516,7 @@ restoreSettings();syncGroove();syncDanceTiles();sync();persistenceReady=true;req
 // File operations do not require persistent-storage consent and never contact a server.
 const files=fileCopy[language]||fileCopy.en;
 const filesDialog=$<HTMLDialogElement>('#files-dialog'),fileInput=$<HTMLInputElement>('#json-file');
+let wavBusy=false,wavAbort:AbortController|null=null,wavUrl:string|null=null,wavTimer:ReturnType<typeof setInterval>|undefined;
 let importBusy=false,videoBusy=false,videoUrl:string|null=null,videoTimer:ReturnType<typeof setInterval>|undefined;
 let videoStarted=0;
 const fileName=(extension:string)=>'jacktools-sound-'+new Date().toISOString().replace(/[:.]/g,'-')+'.'+extension;
@@ -1534,7 +1535,7 @@ $('#json-export').addEventListener('click',()=>{
 });
 $('#json-import').addEventListener('click',()=>fileInput.click());
 fileInput.addEventListener('change',async()=>{
- const file=fileInput.files?.[0];fileInput.value='';if(!file||importBusy||videoBusy)return;
+ const file=fileInput.files?.[0];fileInput.value='';if(!file||importBusy||videoBusy||wavBusy)return;
  importBusy=true;syncFileButtons();
  try{
   if(file.size>1024*1024){$('#file-status').textContent=files.invalid;return;}
@@ -1545,11 +1546,14 @@ fileInput.addEventListener('change',async()=>{
  finally{importBusy=false;syncFileButtons();}
 });
 function syncFileButtons(){
- $<HTMLButtonElement>('#json-import').disabled=importBusy||videoBusy;
+ $<HTMLButtonElement>('#json-import').disabled=importBusy||videoBusy||wavBusy;
  const active=videoRecording?.state==='recording';
- $<HTMLButtonElement>('#video-record').disabled=importBusy||(videoBusy&&!active)||!mp4Type();
+ $<HTMLButtonElement>('#video-record').disabled=importBusy||wavBusy||(videoBusy&&!active)||!mp4Type();
  labelAction('#video-record',active?files.stop:files.record);
- $('#files-open').dataset.recording=String(videoBusy);
+ const wavActive=wavRecording?.state==='recording';
+ $<HTMLButtonElement>('#wav-record').disabled=importBusy||videoBusy||(wavBusy&&!wavActive)||!wavSupported();
+ labelAction('#wav-record',wavActive?files.stop:files.wavRecord);
+ $('#files-open').dataset.recording=String(videoBusy||wavBusy);
 }
 function finishVideoRecording(){
  if(!videoRecording)return;
@@ -1571,7 +1575,7 @@ $('#video-dismiss').addEventListener('click',()=>{clearVideoDownload();$('#video
 $('#video-stop').addEventListener('click',finishVideoRecording);
 $('#video-record').addEventListener('click',async()=>{
  if(videoRecording?.state==='recording'){finishVideoRecording();filesDialog.close();return;}
- if(videoBusy||importBusy||!mp4Type())return;
+ if(videoBusy||wavBusy||importBusy||!mp4Type())return;
  videoBusy=true;syncFileButtons();clearVideoDownload();
  $('#video-status').textContent=files.preparing;$('#video-session').hidden=false;
  $('#video-dismiss').hidden=true;$('#video-stop').hidden=true;
@@ -1600,6 +1604,56 @@ $('#video-record').addEventListener('click',async()=>{
  }catch{finishVideoUi();$('#video-time').hidden=true;$('#video-status').textContent=files.videoError;}
 });
 if(!mp4Type())$('#video-support').textContent=files.unsupported;
+if(!wavSupported())$('#wav-support').textContent=files.wavUnsupported;
 syncFileButtons();
 
-window.addEventListener('beforeunload',event=>{if(videoBusy)event.preventDefault();});
+window.addEventListener('beforeunload',event=>{if(videoBusy||wavBusy)event.preventDefault();});
+
+
+function finishWavRecording(){
+ if(!wavRecording){if(wavBusy)wavAbort?.abort();return;}
+ $('#wav-status').textContent=files.wavPreparing;
+ $<HTMLButtonElement>('#wav-stop').disabled=true;
+ wavRecording.stop();syncFileButtons();
+}
+function finishWavUi(){
+ wavRecording=null;wavBusy=false;wavAbort=null;
+ if(wavTimer)clearInterval(wavTimer);wavTimer=undefined;
+ $('#wav-stop').hidden=true;$('#wav-dismiss').hidden=false;
+ $('#wav-record').setAttribute('aria-pressed','false');syncFileButtons();
+}
+function clearWavDownload(){
+ if(wavUrl)URL.revokeObjectURL(wavUrl);wavUrl=null;
+ $('#wav-download').removeAttribute('href');$('#wav-download').hidden=true;
+}
+$('#wav-dismiss').addEventListener('click',()=>{clearWavDownload();$('#wav-session').hidden=true;});
+$('#wav-stop').addEventListener('click',finishWavRecording);
+$('#wav-record').addEventListener('click',async()=>{
+ if(wavRecording?.state==='recording'){finishWavRecording();filesDialog.close();return;}
+ if(wavBusy||videoBusy||importBusy||!wavSupported())return;
+ wavBusy=true;const controller=new AbortController();wavAbort=controller;
+ syncFileButtons();clearWavDownload();$('#wav-support').textContent='';
+ $('#wav-status').textContent=files.wavPreparing;$('#wav-session').hidden=false;
+ $('#wav-dismiss').hidden=true;$('#wav-stop').hidden=true;$('#wav-time').hidden=true;
+ try{
+  if(!playing)await start();
+  if(!audio||!recordingOutput||!playing||document.hidden||controller.signal.aborted)throw Error('Audio unavailable');
+  wavRecording=await createWavRecording({
+   audio,output:recordingOutput,signal:controller.signal,
+   ready:(blob,limited)=>{
+    finishWavUi();wavUrl=URL.createObjectURL(blob);
+    const link=$<HTMLAnchorElement>('#wav-download');link.href=wavUrl;link.download=fileName('wav');link.hidden=false;
+    $('#wav-status').textContent=limited?files.wavLimit:files.wavReady;link.click();
+   },
+   error:()=>{finishWavUi();$('#wav-status').textContent=files.wavError;$('#wav-support').textContent=files.wavError;}
+  });
+  const began=performance.now();$('#wav-time').textContent='00:00';$('#wav-time').hidden=false;
+  wavTimer=setInterval(()=>{
+   const seconds=Math.floor((performance.now()-began)/1000);
+   $('#wav-time').textContent=String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');
+  },500);
+  $('#wav-status').textContent=files.wavRecording;$('#wav-stop').hidden=false;
+  $<HTMLButtonElement>('#wav-stop').disabled=false;
+  $('#wav-record').setAttribute('aria-pressed','true');syncFileButtons();filesDialog.close();
+ }catch{finishWavUi();$('#wav-time').hidden=true;const message=controller.signal.aborted?files.wavCancelled:files.wavError;$('#wav-status').textContent=message;$('#wav-support').textContent=message;}
+});

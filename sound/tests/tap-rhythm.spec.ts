@@ -119,12 +119,12 @@ for(const lang of ['de','en','es','fr'])test('rhythm controls and reduced-motion
   await expect(button).toHaveText('');await expect(button.locator('svg')).toHaveCount(1);
  }
  await expect(page.locator('#rhythm-zones>[data-lane]')).toHaveCount(9);
- await expect(page.locator('#gesture-help')).toBeHidden();
+ await expect(page.locator('#gesture-help')).toHaveCount(0);
  await expect(page.locator('#drawing')).toHaveAttribute('aria-describedby','gesture-keyboard');
  await page.locator('#drawing').focus();await page.keyboard.press('7');
  await expect(page.locator('#drawing')).toHaveAttribute('data-rhythm-hits','1');
  await page.locator('#play').click();await expect(page.locator('#rhythm-status')).not.toBeEmpty();
- await page.locator('[data-pad-mode=draw]').click();await expect(page.locator('#gesture-help')).toBeVisible();
+ await page.locator('[data-pad-mode=draw]').click();await expect(page.locator('#gesture-help')).toHaveCount(0);
  await page.goto('/'+lang+'/usage/');
  const title={de:'Eigenen Rhythmus einklopfen',en:'Tap your own rhythm',es:'Toca tu propio ritmo',fr:'Jouer votre propre rythme'}[lang]!;
  await expect(page.getByRole('heading',{name:title,exact:true})).toBeVisible();

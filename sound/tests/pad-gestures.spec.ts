@@ -59,7 +59,7 @@ test('keyboard taps and holds work in three-quarter meter without changing the d
 
 for(const lang of ['de','en','es','fr'])test('gesture guidance and reduced motion stay accessible '+lang,async({page})=>{
  await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/'+lang+'/');
- const pad=page.locator('#drawing');await expect(pad).toHaveAttribute('tabindex','0');await expect(page.locator('#gesture-help')).not.toBeEmpty();await expect(page.locator('#gesture-keyboard')).not.toBeEmpty();
+ const pad=page.locator('#drawing');await expect(pad).toHaveAttribute('tabindex','0');await expect(page.locator('#gesture-help')).toHaveCount(0);await expect(page.locator('#gesture-keyboard')).not.toBeEmpty();
  await pad.focus();await page.keyboard.press('Enter');await expect(pad).toHaveAttribute('data-pointers','0');expect(Number(await pad.getAttribute('data-rings'))).toBeGreaterThan(0);
 });
 
