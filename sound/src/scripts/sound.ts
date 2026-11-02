@@ -79,7 +79,7 @@ function beginRhythmEdit(){
 function acceptRhythmEdit(){rhythmBackup=null;rhythmTrackBackup=null;rhythmTouched.clear();}
 function cancelRhythmEdit(){
  if(!rhythmBackup)return;
- rhythmGeneration++;cancelPadGestures();rhythmPlayer?.stop();cancelTappedVoices();rhythmVisual.length=0;
+ rhythmGeneration++;cancelPadGestures();rhythmPlayer?.stop();cancelTappedVoices();
  const changed=tracks.map((_,i)=>tappedTrack(i)||rhythmBackup!.hits[i].some(Boolean));
  tapPattern=rhythmBackup;
  if(rhythmTrackBackup)for(const index of rhythmTouched)Object.assign(tracks[index],rhythmTrackBackup[index]);
@@ -96,7 +96,6 @@ let rhythmEditing=false,orbitBus:GainNode|undefined;
 let rhythmPlayer:ReturnType<typeof createRhythmPlayer>|undefined;
 let rhythmStarting:Promise<void>|null=null,rhythmGeneration=0;
 const rhythmClock:{step:number;time:number;duration:number}[]=[];
-const rhythmVisual:{time:number;lane:RhythmLane}[]=[];
 const percussion=new Set(['kick','snare','hat','clap','tom','rim','shaker']);
 const rhythmColors=tracks.map((_,i)=>i);
 const tappedVoices=new Set<{track:number;time:number;fader:GainNode}>();
@@ -146,7 +145,7 @@ function syncRhythmUi(){
  if(audio&&orbitBus)orbitBus.gain.setTargetAtTime(musicLevel,audio.currentTime,.18);
 }
 function resetTapRhythm(){
- rhythmGeneration++;rhythmPlayer?.stop();cancelTappedVoices();rhythmVisual.length=0;
+ rhythmGeneration++;rhythmPlayer?.stop();cancelTappedVoices();
  rhythmEditing=padMode==='rhythm';tapPattern=emptyRhythm(groove.beats);cancelPadGestures();syncRhythmUi();persistSettings();
 }
 async function tapRhythm(lane:RhythmLane,pressed:number){
@@ -170,7 +169,6 @@ async function tapRhythm(lane:RhythmLane,pressed:number){
  tr.direction=1;tr.phase=0;tr.pendingDirection=null;
  liveMix[lane].forEach(node=>{node.gain.cancelScheduledValues(audio!.currentTime);node.gain.setTargetAtTime(0,audio!.currentTime,.006);});
  sustained.forEach((entry,key)=>{if(entry.track===lane&&!key.startsWith('tap:')){entry.voice.release(audio!.currentTime);sustained.delete(key);}});
- for(let i=rhythmVisual.length-1;i>=0;i--)if(rhythmVisual[i].lane===lane&&rhythmVisual[i].time>=audio.currentTime)rhythmVisual.splice(i,1);
  rhythmEditing=true;
  recordRhythmHit(tapPattern,position,lane);
  playTapped(lane,audio.currentTime+.004,Math.max(0,Math.round(position)));
@@ -760,7 +758,7 @@ function schedule(){
   const duration=60/bpm/4*(s%4<2?1+groove.swing:1-groove.swing);
   rhythmClock.push({step,time:nextTime,duration});if(rhythmClock.length>128)rhythmClock.shift();
   for(const lane of rhythmHitsAt(tapPattern,step)){
-   playTapped(lane,nextTime,step);rhythmVisual.push({time:nextTime,lane});
+   playTapped(lane,nextTime,step);
   }
   events.push({time:nextTime,step:s,duration,notes:[]});
   tracks.forEach((tr,i)=>{for(const due of gridEvents(tr.slots,stepsPerBar(),s,groove.beats,groove.swing)){
@@ -802,7 +800,7 @@ function schedule(){
  }
 }
 function stop(){
- rhythmGeneration++;rhythmPlayer?.stop();cancelTappedVoices();rhythmVisual.length=0;finishRhythm(tapPattern);
+ rhythmGeneration++;rhythmPlayer?.stop();cancelTappedVoices();finishRhythm(tapPattern);
  cancelPadGestures();
  sustained.forEach(entry=>entry.voice.release(audio?.currentTime||0));sustained.clear();
  setEvolution(false);playing=false;if(timer)clearInterval(timer);timer=undefined;events.length=0;tracks.forEach(tr=>tr.hits.fill(-Infinity));
@@ -820,7 +818,7 @@ async function start(){
   rhythmPlayer??=createRhythmPlayer(audio,master);
   await audio.resume();if(document.hidden)return;
   master.gain.setValueAtTime(Number($<HTMLInputElement>('#volume').value),audio.currentTime);
-  rhythmClock.length=0;rhythmVisual.length=0;
+  rhythmClock.length=0;
   if(hasRhythm(tapPattern)){finishRhythm(tapPattern);tapPattern.start=0;resetRhythmSession(tapPattern);}
   if(rhythmBackup&&hasRhythm(rhythmBackup)){finishRhythm(rhythmBackup);rhythmBackup.start=0;resetRhythmSession(rhythmBackup);}
   playing=true;step=0;evolveAnimations();animationStep=nextEvolutionStep(0,Math.random,stepsPerBar());nextTime=audio.currentTime+.05;visualStep=0;visualTime=nextTime;visualDuration=60/bpm/4;
@@ -862,7 +860,7 @@ function configureGroove(choice:GrooveChoice,rebuild:boolean){
  if(old!==stepsPerBar()){
   remeterRhythm(tapPattern,groove.beats,Math.floor(step/stepsPerBar())*stepsPerBar());
   if(rhythmBackup)remeterRhythm(rhythmBackup,groove.beats,Math.floor(step/stepsPerBar())*stepsPerBar());
-  rhythmClock.length=0;rhythmVisual.length=0;syncRhythmUi();persistSettings();
+  rhythmClock.length=0;syncRhythmUi();persistSettings();
  }
  if(Number.isFinite(evolutionStep))evolutionStep=Math.ceil(evolutionStep/old)*stepsPerBar();
  if(Number.isFinite(animationStep))animationStep=Math.ceil(animationStep/old)*stepsPerBar();
@@ -1001,7 +999,7 @@ orbit.addEventListener('pointerdown',e=>{
  tracks[i].points[s]=!tracks[i].points[s];rememberDrawing(i);sync();
 });
 type Trail={x:number;y:number;time:number;start:boolean;color:string;pointer:number};
-type PadRing={x:number;y:number;color:string;started:number;released:number|null;duration:number};
+type PadRing={x:number;y:number;color:string;started:number;released:number|null;duration:number;strength?:number};
 type PadGesture={id:number;x:number;y:number;startX:number;startY:number;clientX:number;clientY:number;started:number;mode:GestureMode;painted:Set<string>;last?:Trail;lastStamp:number;applied:number;target:number|null;originStep:number;ring:PadRing};
 const padGestures=new Map<number,PadGesture>();
 let trail:Trail[]=[],padRings:PadRing[]=[];
@@ -1181,7 +1179,7 @@ function renderPadGestures(now:number,dark:boolean){
  drawing.dataset.rings=String(padRings.length);
  for(const ring of padRings){
   const elapsed=ring.released===null?now-ring.started:ring.duration,age=ring.released===null?null:now-ring.released;
-  const {radius,alpha}=ringAppearance(elapsed,age,reduced.matches),color=dark?ring.color:lightColors[colors.indexOf(ring.color)];
+  const {radius,alpha:baseAlpha}=ringAppearance(elapsed,age,reduced.matches),alpha=baseAlpha*(ring.strength??1),color=dark?ring.color:lightColors[colors.indexOf(ring.color)];
   dc.save();dc.globalAlpha=alpha;
   const glow=dc.createRadialGradient(ring.x,ring.y,0,ring.x,ring.y,radius*1.6);
   glow.addColorStop(0,color+'b3');glow.addColorStop(.45,color+'55');glow.addColorStop(1,color+'00');
@@ -1390,7 +1388,12 @@ function renderCenter(time:number,dark:boolean){
 }
 function frame(now:number){
  const time=audio?.currentTime||0;
- while(events.length&&events[0].time<=time){const ev=events.shift()!;if(ev.clock!==false){visualStep=ev.step;visualTime=ev.time;visualDuration=ev.duration;}ev.notes.forEach(({track,beat,velocity})=>{const tr=tracks[track];if(tr.enabled&&!tr.mute&&tr.volume>0){tr.flash[beat]=now;tr.hits[beat]=ev.time;tr.hitVelocities[beat]=velocity;tr.lastVelocity=velocity;}});}
+ while(events.length&&events[0].time<=time){const ev=events.shift()!;if(ev.clock!==false){visualStep=ev.step;visualTime=ev.time;visualDuration=ev.duration;}ev.notes.forEach(({track,beat,velocity})=>{const tr=tracks[track];if(tr.enabled&&!tr.mute&&tr.volume>0){tr.flash[beat]=now;tr.hits[beat]=ev.time;tr.hitVelocities[beat]=velocity;tr.lastVelocity=velocity;
+   // Share the audible onset clock with the orbit, for automatic and recorded notes alike.
+   if(padMode==='rhythm'&&playing&&Number($<HTMLInputElement>('#volume').value)>0){
+    padRings.push({...padCenter(track as RhythmLane,drawing.width,drawing.height),color:colors[track],started:now,released:now,duration:160,strength:Math.min(1,.35+tr.volume*velocity)});
+    if(padRings.length>32)padRings.shift();
+   }}});}
  const dark=document.documentElement.dataset.theme==='dark'||(!document.documentElement.dataset.theme&&matchMedia('(prefers-color-scheme: dark)').matches);
  tracks.forEach((tr,i)=>{tr.color=(dark?colors:lightColors)[i];});
  if(lastPadDark!==dark){
@@ -1461,13 +1464,6 @@ function frame(now:number){
  }
  const progress=$<HTMLProgressElement>('#rhythm-progress');progress.max=tapPattern.beats*8;
  progress.value=tapPattern.state==='armed'?0:tapPattern.state==='loop'?progress.max:Math.max(0,rhythmPosition()-(tapPattern.start??0));
- while(rhythmVisual.length&&rhythmVisual[0].time<=time){
-  const hit=rhythmVisual.shift()!;
-  if(padMode==='rhythm'){
-   padRings.push({...padCenter(hit.lane,drawing.width,drawing.height),color:colors[rhythmColors[hit.lane]],started:now,released:now,duration:160});
-   if(padRings.length>32)padRings.shift();
-  }
- }
  renderPadGestures(now,dark);
  requestAnimationFrame(frame);
 }

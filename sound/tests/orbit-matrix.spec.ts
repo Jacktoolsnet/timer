@@ -123,3 +123,23 @@ test('brief main-thread stalls during matrix input never stop playback or replay
  await page.keyboard.press('Numpad8');await expect(page.locator('#drawing')).toHaveAttribute('data-rhythm-hits','2');
  await page.locator('#rhythm-done').click();await expect(page.locator('#drawing')).toHaveAttribute('data-music-level','1');
 });
+
+test('automatic orbit notes light up all matching matrix cells without tapping',async({page})=>{
+ await page.goto('/de/');
+ await page.locator('#clear').click();
+ for(let i=0;i<9;i++){
+  const track=page.locator('[data-track="'+i+'"]');
+  await track.locator('summary').click();
+  await track.locator('[data-step="0"]').click();
+ }
+ await page.locator('[data-pad-mode=rhythm]').click();
+ await expect(page.locator('#drawing')).toHaveAttribute('data-rhythm-hits','0');
+ await page.locator('#play').click();
+ // Each cell centre gets the coloured bloom from its own audible orbit onset.
+ await expect.poll(()=>page.locator('#drawing').evaluate((canvas)=>{
+  const c=canvas as HTMLCanvasElement,ctx=c.getContext('2d')!;
+  return Array.from({length:9},(_,i)=>ctx.getImageData(Math.round((i%3+.5)*c.width/3),Math.round((Math.floor(i/3)+.5)*c.height/3),1,1).data[3]>0).filter(Boolean).length;
+ })).toBe(9);
+ await expect(page.locator('#drawing')).toHaveAttribute('data-rhythm-hits','0');
+ await page.locator('#play').click();
+});
