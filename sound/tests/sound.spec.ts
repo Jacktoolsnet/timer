@@ -124,8 +124,9 @@ test('random evolution starts playback and can stop without pausing',async({page
  await page.locator('#evolve').click();
  await expect(page.locator('#evolve')).toHaveAttribute('aria-pressed','true');
  await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
- await page.waitForTimeout(500);expect(await points()).toBe(initial);
- await expect.poll(points,{timeout:6000}).not.toBe(initial);
+ await expect.poll(points).not.toBe(initial);const shuffled=await points();
+ await page.waitForTimeout(500);expect(await points()).toBe(shuffled);
+ await expect.poll(points,{timeout:6000}).not.toBe(shuffled);
  await page.locator('#evolve').click();
  await expect(page.locator('#evolve')).toHaveAttribute('aria-pressed','false');
  await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
@@ -290,7 +291,8 @@ test('random patterns offset orbits and reset restores alignment',async({page})=
  await page.locator('#random').click();
  await expect(page.locator('[data-track="0"]')).toHaveAttribute('data-phase','0');
  await expect(page.locator('[data-track="1"]')).toHaveAttribute('data-phase','0');
- await expect(page.locator('[data-track="4"]')).toHaveAttribute('data-phase','8');
+ const slots=Number(await page.locator('[data-track="4"]').getAttribute('data-slots'));
+ await expect(page.locator('[data-track="4"]')).toHaveAttribute('data-phase',String(slots/2));
  await page.locator('#reset').click();
  for(let i=0;i<8;i++)await expect(page.locator('[data-track="'+i+'"]')).toHaveAttribute('data-phase','0');
 });
@@ -593,7 +595,8 @@ test('a drawn refrain motif returns on the next chorus',async({page})=>{
  const r=await page.locator('#drawing').boundingBox();if(!r)throw Error('No pad');
  await page.mouse.move(r.x+r.width*.4,r.y+r.height*(4+.05)/8);await page.mouse.down();await page.mouse.up();
  const track=page.locator('[data-track="4"]'),hook=await track.getAttribute('data-motif');
- expect(hook!.split(',')[3]).toBe('4');
+ const slots=Number(await track.getAttribute('data-slots')),degreeIndex=Math.floor(Math.floor(.4*slots)/slots*8);
+ expect(hook!.split(',')[degreeIndex]).toBe('4');
  await expect(page.locator('#song-structure')).toHaveAttribute('data-part','verse',{timeout:25000});
  await expect(page.locator('#song-structure')).toHaveAttribute('data-part','chorus',{timeout:25000});
  await expect(track).toHaveAttribute('data-motif',hook!);
