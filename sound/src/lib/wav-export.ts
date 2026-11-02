@@ -1,3 +1,4 @@
+import {recordingSeconds} from './recording-duration';
 /** Original PCM/WAVE writer. No encoder dependency; stereo signed 16-bit little-endian. */
 export function wavHeader(sampleRate:number,frames:number){
  const bytes=frames*4;
@@ -61,7 +62,7 @@ function loadModule(audio:AudioContext){
  return loaded;
 }
 export async function createWavRecording(options:{
- audio:AudioContext;output:AudioNode;signal?:AbortSignal;
+ audio:AudioContext;output:AudioNode;durationSeconds?:number;signal?:AbortSignal;
  ready:(blob:Blob,limited:boolean)=>void;error:()=>void;
 }){
  if(!wavSupported())throw Error('AudioWorklet unavailable');
@@ -69,7 +70,7 @@ export async function createWavRecording(options:{
  checkAbort();await loadModule(options.audio);checkAbort();
  const node=new AudioWorkletNode(options.audio,'jacktools-wav-capture',{
   numberOfInputs:1,numberOfOutputs:1,outputChannelCount:[2],channelCount:2,channelCountMode:'explicit',
-  processorOptions:{maxFrames:Math.min(Math.floor(options.audio.sampleRate*600),Math.floor(256*1024*1024/4))}
+  processorOptions:{maxFrames:Math.min(Math.floor(options.audio.sampleRate*recordingSeconds(options.durationSeconds)),Math.floor(256*1024*1024/4))}
  });
  const silent=options.audio.createGain();silent.gain.value=0;
  const chunks:ArrayBuffer[]=[];let bytes=0,connected=false,closed=false,stopping=false;

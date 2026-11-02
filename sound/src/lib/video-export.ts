@@ -1,3 +1,4 @@
+import {recordingSeconds} from './recording-duration';
 /** Native MP4 only: never rename a WebM recording to .mp4. No microphone/screen permissions. */
 export const MP4_TYPES=[
  'video/mp4;codecs=avc1.42001f,mp4a.40.2',
@@ -10,7 +11,7 @@ export function mp4Type(){
  return MP4_TYPES.find(type=>MediaRecorder.isTypeSupported(type))??null;
 }
 export function createMp4Recording(options:{
- audio:AudioContext;output:AudioNode;paint:(ctx:CanvasRenderingContext2D)=>void;
+ audio:AudioContext;output:AudioNode;durationSeconds?:number;paint:(ctx:CanvasRenderingContext2D)=>void;
  ready:(blob:Blob,limited:boolean)=>void;error:()=>void;
 }){
  const mimeType=mp4Type();if(!mimeType)throw Error('MP4 unsupported');
@@ -48,7 +49,7 @@ export function createMp4Recording(options:{
   options.ready(blob,limited);
  };
  try{options.output.connect(destination);connected=true;recorder.start(1000);}catch(error){cleanup();throw error;}
- timeout=setTimeout(()=>{limited=true;stop();},10*60*1000);
+ timeout=setTimeout(()=>{limited=true;stop();},recordingSeconds(options.durationSeconds)*1000);
  let lastFrame=-Infinity;
  return {
   stop,

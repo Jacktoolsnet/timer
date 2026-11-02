@@ -1,3 +1,4 @@
+import {recordingCopy} from '../lib/recording-copy';
 import {instrumentGroups,pickerCopy,type InstrumentGroup} from '../lib/instrument-picker';
 import {tapNoteAt,tapNoteY,tapNoteKey,tapNoteSemitones,tapNoteDegree} from '../lib/tap-notes';
 import {wavSupported,createWavRecording} from '../lib/wav-export';
@@ -363,7 +364,7 @@ function snapshotSettings(includeDraft=false):SoundSettings{
  return {
    version:2,style:currentStyle,dance:currentDance,groove:grooveChoice,bpm,transpose,noteEffect,volume:Number($<HTMLInputElement>('#volume').value),
    background:backgroundChoice,center:centerChoice,orbit:orbitChoice,
-   recording:{restart:$<HTMLInputElement>('#recording-restart').checked,random:$<HTMLInputElement>('#recording-random').checked,fullscreen:$<HTMLInputElement>('#recording-fullscreen').checked},
+   recording:{restart:$<HTMLInputElement>('#recording-restart').checked,random:$<HTMLInputElement>('#recording-random').checked,fullscreen:$<HTMLInputElement>('#recording-fullscreen').checked,minutes:Number($<HTMLInputElement>('#recording-duration').value)},
    pad:{mode:padMode,beats:(backup??tapPattern).beats,hits:(backup??tapPattern).hits.map(lane=>[...lane]),notes:(backup??tapPattern).notes.map(lane=>[...lane])},
    tracks:tracks.map((live,i)=>{const tr=backup&&rhythmTouched.has(i)&&rhythmTrackBackup?{...live,...rhythmTrackBackup[i]}:live;return ({
     grid:tr.grid,slots:tr.slots,enabled:tr.enabled,mute:tr.mute,instrument:tr.instrument,points:[...tr.points],motif:[...tr.motif],volume:tr.volume,pitch:tr.pitch,
@@ -1650,6 +1651,7 @@ function frame(now:number){
 }
 enhanceClockSelects($('.instruments-tile') as HTMLFormElement);
 function applySettings(saved:SoundSettings){
+ $<HTMLInputElement>('#recording-duration').value=String(saved.recording?.minutes??10);syncRecordingDuration();
  for(const option of ['restart','random','fullscreen'] as const)$<HTMLInputElement>('#recording-'+option).checked=saved.recording?.[option]??false;
   applyStyle(saved.style,saved.dance??null);configureGroove(saved.groove??'auto',false);bpm=saved.bpm;transpose=saved.transpose??0;syncTranspose();noteEffect=saved.noteEffect??1;syncNoteEffect();
   $<HTMLInputElement>('#tempo').value=String(bpm);$('#tempo-value').textContent=bpm+' BPM';
@@ -1715,9 +1717,9 @@ fileInput.addEventListener('change',async()=>{
  }catch{$('#file-status').textContent=files.error;}
  finally{importBusy=false;syncFileButtons();}
 });
-type RecordingStart={restart:boolean;random:boolean;generation:number};
+type RecordingStart={restart:boolean;random:boolean;generation:number;durationSeconds:number};
 async function prepareRecording():Promise<RecordingStart>{
- const options={restart:$<HTMLInputElement>('#recording-restart').checked,random:$<HTMLInputElement>('#recording-random').checked,generation:recordingGeneration};
+ const options={restart:$<HTMLInputElement>('#recording-restart').checked,random:$<HTMLInputElement>('#recording-random').checked,durationSeconds:Number($<HTMLInputElement>('#recording-duration').value)*60,generation:recordingGeneration};
  // Both requests must be initiated before awaiting anything, inside the button gesture.
  let fullscreen:Promise<void>|undefined;
  try{if($<HTMLInputElement>('#recording-fullscreen').checked)fullscreen=focus(true);}catch{/* Focus view remains available when fullscreen is denied. */}
@@ -1746,6 +1748,11 @@ async function startRecordedMusic(options:RecordingStart){
   if(!playing||options.generation!==recordingGeneration)throw Error('Music unavailable');
  }
 }
+function syncRecordingDuration(){
+ const text=$<HTMLInputElement>('#recording-duration').value+' '+recordingCopy[language].minutes;
+ $('#recording-duration-value').textContent=text;$('#recording-duration').setAttribute('aria-valuetext',text);
+}
+$('#recording-duration').addEventListener('input',()=>{syncRecordingDuration();persistSettings();});
 for(const option of ['restart','random','fullscreen'])$('#recording-'+option).addEventListener('change',()=>{syncFileButtons();persistSettings();});
 function syncFileButtons(){
  $<HTMLButtonElement>('#json-import').disabled=importBusy||videoBusy||wavBusy;
@@ -1756,6 +1763,7 @@ function syncFileButtons(){
  $<HTMLButtonElement>('#wav-record').disabled=importBusy||videoBusy||(wavBusy&&!wavActive)||!wavSupported();
  labelAction('#wav-record',wavActive?files.stop:files.wavRecord);
  $('#files-open').dataset.recording=String(videoBusy||wavBusy);
+ $<HTMLInputElement>('#recording-duration').disabled=videoBusy||wavBusy||importBusy;
  for(const option of ['restart','random','fullscreen'])$<HTMLInputElement>('#recording-'+option).disabled=videoBusy||wavBusy||importBusy||(option==='random'&&!$<HTMLInputElement>('#recording-restart').checked);
 }
 function finishVideoRecording(){
@@ -1787,7 +1795,7 @@ $('#video-record').addEventListener('click',async()=>{
   const options=await prepareRecording();
   if(!audio||!recordingOutput)throw Error('Audio unavailable');
   videoRecording=createMp4Recording({
-   audio,output:recordingOutput,
+   audio,output:recordingOutput,durationSeconds:options.durationSeconds,
    paint:ctx=>paintVideo(ctx,orbit,atmosphere,backgroundMode!=='off'),
    ready:(blob,limited)=>{
     if(captureFailed)return;
@@ -1847,7 +1855,7 @@ $('#wav-record').addEventListener('click',async()=>{
   const options=await prepareRecording();
   if(!audio||!recordingOutput||controller.signal.aborted)throw Error('Audio unavailable');
   wavRecording=await createWavRecording({
-   audio,output:recordingOutput,signal:controller.signal,
+   audio,output:recordingOutput,durationSeconds:options.durationSeconds,signal:controller.signal,
    ready:(blob,limited)=>{
     if(captureFailed)return;
     finishWavUi();wavUrl=URL.createObjectURL(blob);

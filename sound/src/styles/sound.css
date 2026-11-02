@@ -341,3 +341,34 @@ body:not(.focus-view) .sound-top{margin-bottom:20px}
 #recording-options label{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:14px;font-size:13px;line-height:1.5}
 #recording-options .sound-switch{flex-shrink:0}
 #recording-options p{margin-top:0}
+
+/* Files are project data; recording is a distinct two-step workflow. */
+#files-dialog{width:min(720px,calc(100vw - 32px));padding:0 24px 24px}
+#files-dialog>.files-heading{position:sticky;top:0;z-index:2;background:var(--surface);padding:20px 0 16px;border-bottom:1px solid var(--line);margin-bottom:20px}
+#files-dialog section{border:0;margin:0;padding:0}
+#files-dialog .file-project{padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--bg);margin-bottom:26px}
+.file-card-heading{display:flex;align-items:center;gap:10px;min-width:0}
+.file-type-badge{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;min-width:44px;min-height:32px;padding:0 7px;box-sizing:border-box;border-radius:8px;font-size:11px;font-weight:750;letter-spacing:1px;color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--surface))}
+.file-heading-icon{display:grid;place-items:center;color:var(--accent)}
+#files-dialog .file-recording{padding-top:22px;border-top:2px solid var(--line)}
+#files-dialog .file-recording> .file-card-heading h3{font-size:19px}
+#files-dialog .recording-shared-hint{margin:6px 0 18px}
+#files-dialog #recording-options{margin:0;padding:8px 16px 16px;border-radius:14px;background:color-mix(in srgb,var(--accent) 4%,var(--bg))}
+#recording-options legend{font-size:13px;color:var(--accent)}
+#files-dialog #recording-options label{padding:10px 0;margin:0;border-bottom:1px solid var(--line)}
+#files-dialog #recording-options label:last-of-type{border-bottom:0}
+#files-dialog .recording-start-hint{font-size:12px;margin:10px 0 0;padding-top:12px;border-top:1px solid var(--line)}
+.recording-format-heading{font-size:13px;font-weight:650;color:var(--accent);margin:22px 0 12px}
+.recording-formats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.recording-format{border:1px solid var(--line);border-radius:14px;padding:16px;background:var(--bg);min-width:0}
+.recording-format h4{font-size:14px;margin:0}
+#files-dialog .recording-format>p{font-size:12px;margin:10px 0 14px}
+#files-dialog .recording-launch{width:54px;height:48px;border-color:color-mix(in srgb,var(--accent) 50%,var(--line));background:color-mix(in srgb,var(--accent) 14%,var(--surface));color:var(--accent)}
+#files-dialog .recording-launch[aria-pressed=true]{color:#e35168;border-color:currentColor}
+.file-details{margin-top:14px;font-size:12px;color:var(--muted)}
+.file-details summary{cursor:pointer;padding:4px 0;min-height:24px;line-height:24px}
+#files-dialog .file-details p{font-size:12px;margin:8px 0 0}
+@media(max-width:540px){#files-dialog{padding:0 16px 16px}.recording-formats{grid-template-columns:1fr}#files-dialog>.files-heading{padding-top:16px}}
+#files-dialog #recording-options label.recording-duration-label{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:14px 0 4px}
+#recording-duration{grid-column:1/-1;width:100%;min-width:0;margin:0;accent-color:var(--accent);cursor:pointer}
+#recording-duration-value{font-variant-numeric:tabular-nums;color:var(--accent);white-space:nowrap}
