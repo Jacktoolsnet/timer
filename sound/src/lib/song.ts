@@ -23,6 +23,12 @@ export function sectionGain(kind:SongPart,instrument:string,progress:number):num
   case 'outro':return (melodic?.7:.6)*(1-p);
  }
 }
+/** Fade between complete songs only outside video capture. Section mixing stays musical. */
+export function songTransitionGain(kind:SongPart,previous:SongPart|null,progress:number,mix:number,videoRecording=false):number{
+ if(videoRecording)return 1;
+ if(kind==='outro')return Math.max(0,Math.min(1,1-progress));
+ return previous==='outro'?Math.max(0,Math.min(1,mix)):1;
+}
 export const songCopy={
  de:{title:'Songstruktur',intro:'Intro',verse:'Strophe',chorus:'Refrain',bridge:'Bridge',outro:'Ausklang',bar:'Takt'},
  en:{title:'Song structure',intro:'Intro',verse:'Verse',chorus:'Chorus',bridge:'Bridge',outro:'Outro',bar:'Bar'},

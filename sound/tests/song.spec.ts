@@ -1,5 +1,5 @@
 import {test,expect} from '@playwright/test';
-import {songForm,sectionGain,copyPhrases} from '../src/lib/song';
+import {songForm,sectionGain,copyPhrases,songTransitionGain} from '../src/lib/song';
 test('song forms have returning choruses, verses and optional contrast',()=>{
  for(const value of [0,.5,.99]){
   const form=songForm(()=>value);
@@ -21,4 +21,25 @@ test('remembered refrain phrases are not mutated by later loop edits',()=>{
  expect(refrain[0].points[0]).toBe(true);expect(refrain[0].motif[1]).toBe(1);
  const reprise=copyPhrases(refrain);reprise[0].motif[0]=3;
  expect(refrain[0].motif[0]).toBe(0);
+});
+
+test('video capture keeps full transition gain through the outro and the next intro',()=>{
+ for(let i=0;i<=100;i++){
+  const progress=i/100;
+  expect(songTransitionGain('outro','chorus',progress,1,true)).toBe(1);
+  expect(songTransitionGain('intro','outro',progress,progress,true)).toBe(1);
+ }
+});
+test('ordinary playback retains deliberate fades, and stopping capture restores normal behavior',()=>{
+ expect(songTransitionGain('outro','chorus',0,1)).toBe(1);
+ expect(songTransitionGain('outro','chorus',.5,1)).toBe(.5);
+ expect(songTransitionGain('outro','chorus',1,1)).toBe(0);
+ expect(songTransitionGain('intro','outro',0,0)).toBe(0);
+ expect(songTransitionGain('intro','outro',.5,.5)).toBe(.5);
+ expect(songTransitionGain('intro','outro',1,1)).toBe(1);
+ expect(songTransitionGain('outro','chorus',.75,1,true)).toBe(1);
+ expect(songTransitionGain('outro','chorus',.75,1,false)).toBe(.25);
+ for(const kind of ['intro','verse','chorus','bridge'] as const){
+  expect(songTransitionGain(kind,'verse',.5,1,false)).toBe(1);
+ }
 });

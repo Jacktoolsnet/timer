@@ -30,7 +30,7 @@ import {spaceProfile,stereoPosition,sectionExpression} from '../lib/space';
 import {createAudioSpace} from '../lib/audio-space';
 import {arrangementPlan,breathGain,ornamentAt,type ArrangementPlan} from '../lib/arrangement';
 import {dialogueInstrument,answerMotif,timbreMotion} from '../lib/expression';
-import {songForm,copyPhrases,sectionGain,songCopy,type Phrase,type Section,type SongPart} from '../lib/song';
+import {songForm,copyPhrases,sectionGain,songTransitionGain,songCopy,type Phrase,type Section,type SongPart} from '../lib/song';
 import {makeMotif,varyMotif,chordFor,melodicSemitones,isMelodic,gestureDegree} from '../lib/harmony';
 import {jazzSemitones} from '../lib/jazz-harmony';
 import {storageAllowed} from '../lib/storage';
@@ -323,12 +323,11 @@ function songLevel(time:number,instrument:string){
  const to=sectionGain(part.kind,instrument,part.kind==='outro'?0:elapsedBars/part.bars),mix=songMix(time);
  return song.previous?sectionGain(song.previous,instrument,song.previous==='outro'?0:1)*(1-mix)+to*mix:to;
 }
-/** A deliberate outro remains a fade; it must not be canceled by mix balancing. */
+/** Keep video sessions continuous: no outro fade or restart fade-in within a take. */
 function songFade(time:number){
  if(!evolving||!song)return 1;
  const part=song.form[song.index];
- if(part.kind==='outro')return Math.max(0,Math.min(1,1-(step/stepsPerBar()-song.startBar)/part.bars));
- return song.previous==='outro'?songMix(time):1;
+ return songTransitionGain(part.kind,song.previous,(step/stepsPerBar()-song.startBar)/part.bars,songMix(time),videoRecording?.state==='recording');
 }
 function rememberDrawing(track:number){
  drawnUntil[track]=musicalStep()+32;
