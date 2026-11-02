@@ -172,6 +172,7 @@ body:not(.focus-view) .sound-top{margin-bottom:20px}
 
 #song-structure{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
 #song-structure[hidden]{display:none}
+.focus-view #song-structure{display:none}
 .song-readout{display:flex;justify-content:space-between;gap:16px;margin-bottom:10px;font-size:12px}
 #song-label{font-weight:600;color:var(--accent)}#song-bar{color:var(--muted);font-variant-numeric:tabular-nums}
 #song-parts{display:flex;flex-wrap:wrap;gap:5px}
@@ -199,15 +200,15 @@ body:not(.focus-view) .sound-top{margin-bottom:20px}
 .note-effect-control output{font-variant-numeric:tabular-nums;color:var(--text)}
 
 .sound-adjustments{display:grid;gap:12px;flex-basis:100%;min-width:0}
-.sound-transport .sound-adjustments :is(.pitch-control,.note-effect-control){display:grid;grid-template-columns:100px minmax(0,1fr) 80px;justify-content:stretch;align-items:center;gap:8px;margin:0}
-.sound-transport .sound-adjustments input{grid-column:2;grid-row:1;width:100%;min-width:0;margin:0}
-.sound-transport .sound-adjustments output{grid-column:3;grid-row:1;min-width:0;white-space:nowrap}
+.flow-side .sound-transport :is(.transport-range,.pitch-control,.note-effect-control){display:grid;grid-template-columns:100px minmax(0,1fr) 90px;justify-content:stretch;align-items:center;gap:8px;margin:0}
+.flow-side .sound-transport :is(.transport-range,.pitch-control,.note-effect-control) input{grid-column:2;grid-row:1;width:100%;min-width:0;margin:0}
+.flow-side .sound-transport :is(.transport-range,.pitch-control,.note-effect-control) output{grid-column:3;grid-row:1;min-width:0;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 
 @media(max-width:480px){
- .sound-transport .sound-adjustments :is(.pitch-control,.note-effect-control){grid-template-columns:minmax(0,1fr) 80px}
- .sound-adjustments label>span{grid-column:1/-1}
- .sound-transport .sound-adjustments input{grid-column:1;grid-row:2}
- .sound-transport .sound-adjustments output{grid-column:2;grid-row:2}
+ .flow-side .sound-transport :is(.transport-range,.pitch-control,.note-effect-control){grid-template-columns:minmax(0,1fr) 90px}
+ .flow-side .sound-transport :is(.transport-range,.pitch-control,.note-effect-control)>span{grid-column:1;grid-row:1}
+ .flow-side .sound-transport :is(.transport-range,.pitch-control,.note-effect-control) input{grid-column:1/-1;grid-row:2}
+ .flow-side .sound-transport :is(.transport-range,.pitch-control,.note-effect-control) output{grid-column:2;grid-row:1}
 }
 
 .groove-controls{margin-top:22px;padding-top:20px;border-top:1px solid var(--line)}

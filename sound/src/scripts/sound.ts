@@ -907,7 +907,13 @@ function syncTranspose(){
 $<HTMLInputElement>('#transpose').addEventListener('input',e=>{
  transpose=Number((e.target as HTMLInputElement).value);syncTranspose();persistSettings();
 });
-$<HTMLInputElement>('#volume').addEventListener('input',e=>{if(master&&audio&&playing)master.gain.setTargetAtTime(Number((e.target as HTMLInputElement).value),audio.currentTime,.02);persistSettings();});
+function syncVolume(){
+ const slider=$<HTMLInputElement>('#volume');
+ const value=Math.round(Number(slider.value)/Number(slider.max)*100)+' %';
+ $('#volume-value').textContent=value;slider.setAttribute('aria-valuetext',value);
+}
+syncVolume();
+$<HTMLInputElement>('#volume').addEventListener('input',e=>{syncVolume();if(master&&audio&&playing)master.gain.setTargetAtTime(Number((e.target as HTMLInputElement).value),audio.currentTime,.02);persistSettings();});
 $('#clear').addEventListener('click',()=>{acceptRhythmEdit();resetTapRhythm();cancelPadGestures();tracks.forEach(tr=>tr.points.fill(false));sync();});
 function applyStyle(id:StyleId,dance:DanceId|null=null){
  acceptRhythmEdit();
@@ -1472,7 +1478,7 @@ function restoreSettings(){
   const saved=decodeSettings(localStorage.getItem(STORAGE_KEY));if(!saved)return;
   applyStyle(saved.style,saved.dance??null);configureGroove(saved.groove??'auto',false);bpm=saved.bpm;transpose=saved.transpose??0;syncTranspose();noteEffect=saved.noteEffect??1;syncNoteEffect();
   $<HTMLInputElement>('#tempo').value=String(bpm);$('#tempo-value').textContent=bpm+' BPM';
-  $<HTMLInputElement>('#volume').value=String(saved.volume);
+  $<HTMLInputElement>('#volume').value=String(saved.volume);syncVolume();
   saved.tracks.forEach((source,i)=>{
    const tr=tracks[i];
    tr.grid=rhythmTrack(i)?'auto':source.grid??'auto';tr.slots=rhythmTrack(i)?stepsPerBar():source.slots??(tr.grid==='auto'?stepsPerBar():tr.grid);

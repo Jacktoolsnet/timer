@@ -812,3 +812,32 @@ test('wind, organ and pad sustain through dense notes, pitch changes and clear',
  }
  expect(errors).toEqual([]);
 });
+
+
+test('song section readout stays hidden throughout focus mode, including section changes',async({page})=>{
+ await page.goto('/de/');await page.locator('#tempo').fill('220');await page.locator('#tempo').dispatchEvent('input');
+ await page.locator('#evolve').click();
+ const song=page.locator('#song-structure');
+ await expect(song).toBeVisible();await expect(song).toHaveAttribute('data-part','intro');
+ await page.locator('#focus').click();await expect(song).toBeHidden();
+ await expect(song).toHaveAttribute('data-part','verse',{timeout:10000});await expect(song).toBeHidden();
+ await page.locator('#focus').click();await expect(song).toBeVisible();
+ await expect(song).toHaveAttribute('data-part','verse');
+});
+
+test('transport sliders have aligned edges and live volume percentage',async({page})=>{
+ await page.goto('/de/');
+ const selectors=['#tempo','#volume','#transpose','#note-effect'];
+ const boxes=await Promise.all(selectors.map(selector=>page.locator(selector).boundingBox()));
+ for(const box of boxes){
+  expect(box).not.toBeNull();
+  expect(Math.abs(box!.x-boxes[0]!.x)).toBeLessThan(1);
+  expect(Math.abs(box!.width-boxes[0]!.width)).toBeLessThan(1);
+ }
+ for(const [value,percent] of [['0','0 %'],['0.56','80 %'],['0.7','100 %']]){
+  await page.locator('#volume').fill(value);
+  await page.locator('#volume').dispatchEvent('input');
+  await expect(page.locator('#volume-value')).toHaveText(percent);
+  await expect(page.locator('#volume')).toHaveAttribute('aria-valuetext',percent);
+ }
+});
