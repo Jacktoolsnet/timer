@@ -1,6 +1,6 @@
 import {test,expect,type Page} from '@playwright/test';
 async function tapOrbit(page:Page,x:number,y:number){
- const orbit=page.locator('#orbit'),b=(await orbit.boundingBox())!;
+ const orbit=page.locator('#orbit');await orbit.scrollIntoViewIfNeeded();const b=(await orbit.boundingBox())!;
  if(test.info().project.name==='mobile')await page.touchscreen.tap(b.x+x/700*b.width,b.y+y/700*b.height);
  else await orbit.click({position:{x:x/700*b.width,y:y/700*b.height}});
 }
