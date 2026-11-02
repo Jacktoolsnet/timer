@@ -16,6 +16,7 @@ export type SavedTrack={
  morph:{to:InstrumentId;progress:number}|null;
 };
 export type SoundSettings={
+ recording?:{restart:boolean;random:boolean;fullscreen:boolean};
  pad?:{mode:'draw'|'rhythm';beats:2|3|4;hits:boolean[][];notes?:(number|null)[][]};
  version:2;style:StyleId;dance?:DanceId|null;groove?:GrooveChoice;bpm:number;volume:number;transpose?:number;noteEffect?:number;tracks:SavedTrack[];
  background:typeof backgroundModes[number];center:typeof centerModes[number];orbit:typeof orbitModes[number];
@@ -29,6 +30,7 @@ export function decodeSettings(raw:string|null):SoundSettings|null{
   if(!s||![1,2].includes(s.version)||!member(styleIds,s.style)||!number(s.bpm,40,220)||!number(s.volume,0,.7)
    ||!member(backgroundModes,s.background)||!member(centerModes,s.center)||!member(orbitModes,s.orbit)
    ||!Array.isArray(s.tracks)||!(s.version===1?[8,9]:[ORBIT_COUNT]).includes(s.tracks.length))return null;
+  if(s.recording!==undefined&&(!s.recording||Array.isArray(s.recording)||['restart','random','fullscreen'].some(key=>typeof s.recording[key]!=='boolean')))return null;
   if(s.transpose!==undefined&&(!number(s.transpose,-12,12)||!Number.isInteger(s.transpose)))return null;
   if(s.noteEffect!==undefined&&!number(s.noteEffect,0,1.5))return null;
   if(s.dance!==undefined&&s.dance!==null&&!member(danceIds,s.dance))return null;

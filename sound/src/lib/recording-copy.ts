@@ -1,0 +1,6 @@
+export const recordingCopy={
+ de:{title:'Aufnahmestart',restart:'Musik mit Aufnahme neu starten',hint:'Die Aufnahme beginnt zuerst. Nach 0,5 Sekunden startet das aktuelle Stück von vorne. Ohne Neustart wird eine laufende Wiedergabe unverändert aufgenommen.',random:'Zufalls-Play verwenden',fullscreen:'Vor Aufnahme in Vollbild wechseln'},
+ en:{title:'Recording start',restart:'Restart music with recording',hint:'Recording starts first. After 0.5 seconds the current piece starts from the beginning. Without restart, ongoing playback is recorded unchanged.',random:'Use Random Play',fullscreen:'Enter fullscreen before recording'},
+ es:{title:'Inicio de grabación',restart:'Reiniciar música al grabar',hint:'Primero empieza la grabación. Tras 0,5 segundos la pieza actual empieza desde el principio. Sin reinicio se conserva la reproducción en curso.',random:'Usar reproducción aleatoria',fullscreen:'Pantalla completa antes de grabar'},
+ fr:{title:'Début de l’enregistrement',restart:'Relancer la musique avec l’enregistrement',hint:'L’enregistrement démarre en premier. Après 0,5 seconde, le morceau actuel reprend depuis le début. Sans relance, la lecture en cours reste inchangée.',random:'Utiliser la lecture aléatoire',fullscreen:'Passer en plein écran avant d’enregistrer'}
+};

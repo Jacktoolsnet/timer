@@ -51,6 +51,7 @@ const initialParts=partsForStyle('electronic');
 const tracks=colors.map((color,i)=>({color,grid:'auto' as GridChoice,slots:16 as GridSize,pendingGrid:null as GridChoice|null,pendingSlots:null as GridSize|null,motif:makeMotif(presets.electronic.melody),phase:0,direction:1,directionMode:'forward',pendingDirection:null as number|null,randomDynamics:false,lastVelocity:1,scheduledVelocity:1,morph:null as {to:InstrumentId;progress:number;from:number;at:number;duration:number}|null,hitVelocities:Array<number>(16).fill(1),enabled:true,instrument:initialParts[i].instrument,points:Array.from({length:16},(_,s)=>initialParts[i].steps.includes(s)),mute:false,volume:initialParts[i].volume??.55,pitch:initialParts[i].pitch??0,flash:Array(16).fill(-100),hits:Array<number>(16).fill(-Infinity)}));
 let audio:AudioContext|undefined, master:GainNode|undefined, playing=false,timer:ReturnType<typeof setInterval>|undefined,nextTime=0,step=0,bpm=100;
 let recordingOutput:DynamicsCompressorNode|undefined;
+let recordingGeneration=0;
 let videoRecording:ReturnType<typeof createMp4Recording>|null=null;
 let wavRecording:Awaited<ReturnType<typeof createWavRecording>>|null=null;
 let space:ReturnType<typeof createAudioSpace>|undefined,tapSpace:ReturnType<typeof createAudioSpace>|undefined;
@@ -362,6 +363,7 @@ function snapshotSettings(includeDraft=false):SoundSettings{
  return {
    version:2,style:currentStyle,dance:currentDance,groove:grooveChoice,bpm,transpose,noteEffect,volume:Number($<HTMLInputElement>('#volume').value),
    background:backgroundChoice,center:centerChoice,orbit:orbitChoice,
+   recording:{restart:$<HTMLInputElement>('#recording-restart').checked,random:$<HTMLInputElement>('#recording-random').checked,fullscreen:$<HTMLInputElement>('#recording-fullscreen').checked},
    pad:{mode:padMode,beats:(backup??tapPattern).beats,hits:(backup??tapPattern).hits.map(lane=>[...lane]),notes:(backup??tapPattern).notes.map(lane=>[...lane])},
    tracks:tracks.map((live,i)=>{const tr=backup&&rhythmTouched.has(i)&&rhythmTrackBackup?{...live,...rhythmTrackBackup[i]}:live;return ({
     grid:tr.grid,slots:tr.slots,enabled:tr.enabled,mute:tr.mute,instrument:tr.instrument,points:[...tr.points],motif:[...tr.motif],volume:tr.volume,pitch:tr.pitch,
@@ -859,8 +861,8 @@ function schedule(){
   events.sort((a,b)=>a.time-b.time);nextTime+=duration;step++;
  }
 }
-function stop(){
- finishVideoRecording();finishWavRecording();
+function stop(finishRecordings=true){
+ if(finishRecordings){recordingGeneration++;finishVideoRecording();finishWavRecording();}
  rhythmGeneration++;rhythmPlayer?.stop();cancelTappedVoices();finishRhythm(tapPattern);
  cancelPadGestures();
  sustained.forEach(entry=>entry.voice.release(audio?.currentTime||0));sustained.clear();
@@ -870,19 +872,25 @@ function stop(){
  syncRhythmUi();
  labelAction('#play',t.play);$('#play').setAttribute('aria-pressed','false');
 }
-let starting=false;
-async function start(){
- if(starting)return;starting=true;
- try{
+async function ensureAudio(){
   audio??=new AudioContext();
   if(!master){master=audio.createGain();const compressor=audio.createDynamicsCompressor();master.connect(compressor);compressor.connect(audio.destination);recordingOutput=compressor;orbitBus=audio.createGain();orbitBus.connect(master);space=createAudioSpace(audio,orbitBus);tapBus=audio.createGain();tapBus.connect(master);tapSpace=createAudioSpace(audio,tapBus);}
   rhythmPlayer??=createRhythmPlayer(audio,tapBus!);
-  await audio.resume();if(document.hidden)return;
-  master.gain.setValueAtTime(Number($<HTMLInputElement>('#volume').value),audio.currentTime);
+ await audio.resume();
+}
+let starting=false;
+async function start(delay=.05,valid=()=>true){
+ if(starting)return;starting=true;
+ try{
+  await ensureAudio();if(document.hidden||!valid())return;
+  if(!audio||!master)return;
+  master.gain.cancelScheduledValues(audio.currentTime);
+  if(delay>.05)master.gain.setValueAtTime(0,audio.currentTime);
+  master.gain.setValueAtTime(Number($<HTMLInputElement>('#volume').value),audio.currentTime+(delay>.05?delay:0));
   rhythmClock.length=0;
   if(hasRhythm(tapPattern)){finishRhythm(tapPattern);tapPattern.start=0;resetRhythmSession(tapPattern);}
   if(rhythmBackup&&hasRhythm(rhythmBackup)){finishRhythm(rhythmBackup);rhythmBackup.start=0;resetRhythmSession(rhythmBackup);}
-  playing=true;step=0;evolveAnimations();animationStep=nextEvolutionStep(0,Math.random,stepsPerBar());nextTime=audio.currentTime+.05;visualStep=0;visualTime=nextTime;visualDuration=60/bpm/4;
+  playing=true;step=0;evolveAnimations();animationStep=nextEvolutionStep(0,Math.random,stepsPerBar());nextTime=audio.currentTime+delay;visualStep=0;visualTime=nextTime;visualDuration=60/bpm/4;
   labelAction('#play',t.pause);$('#play').setAttribute('aria-pressed','true');$('#audio-status').textContent='';
   syncRhythmUi();schedule();timer=setInterval(schedule,25);
  }catch{$('#audio-status').textContent=t.error;stop();}
@@ -900,7 +908,7 @@ $('#evolve').addEventListener('click',async()=>{
 });
 $('#play').addEventListener('click',()=>playing?stop():void start());
 document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();});
-window.addEventListener('pagehide',stop);
+window.addEventListener('pagehide',()=>stop());
 $<HTMLInputElement>('#tempo').addEventListener('input',e=>{bpm=Number((e.target as HTMLInputElement).value);$('#tempo-value').textContent=bpm+' BPM';persistSettings();});
 function syncGroove(){
  document.querySelectorAll<HTMLButtonElement>('[data-groove]').forEach(button=>{
@@ -1035,7 +1043,7 @@ function focus(on:boolean,requestFullscreen=true){
  $('#focus').setAttribute('aria-pressed',String(on));labelAction('#focus',on?t.exit:t.focus);
  if(on&&requestFullscreen&&!document.fullscreenElement&&document.documentElement.requestFullscreen){
   // Request directly inside the user gesture; denial falls back to the page's focus view.
-  void document.documentElement.requestFullscreen().then(()=>{
+  return document.documentElement.requestFullscreen().then(()=>{
    ownsFullscreen=true;
    if(!document.body.classList.contains('focus-view')&&document.fullscreenElement)void document.exitFullscreen().catch(()=>{});
   }).catch(()=>{});
@@ -1642,6 +1650,7 @@ function frame(now:number){
 }
 enhanceClockSelects($('.instruments-tile') as HTMLFormElement);
 function applySettings(saved:SoundSettings){
+ for(const option of ['restart','random','fullscreen'] as const)$<HTMLInputElement>('#recording-'+option).checked=saved.recording?.[option]??false;
   applyStyle(saved.style,saved.dance??null);configureGroove(saved.groove??'auto',false);bpm=saved.bpm;transpose=saved.transpose??0;syncTranspose();noteEffect=saved.noteEffect??1;syncNoteEffect();
   $<HTMLInputElement>('#tempo').value=String(bpm);$('#tempo-value').textContent=bpm+' BPM';
   $<HTMLInputElement>('#volume').value=String(saved.volume);syncVolume();
@@ -1706,6 +1715,38 @@ fileInput.addEventListener('change',async()=>{
  }catch{$('#file-status').textContent=files.error;}
  finally{importBusy=false;syncFileButtons();}
 });
+type RecordingStart={restart:boolean;random:boolean;generation:number};
+async function prepareRecording():Promise<RecordingStart>{
+ const options={restart:$<HTMLInputElement>('#recording-restart').checked,random:$<HTMLInputElement>('#recording-random').checked,generation:recordingGeneration};
+ // Both requests must be initiated before awaiting anything, inside the button gesture.
+ let fullscreen:Promise<void>|undefined;
+ try{if($<HTMLInputElement>('#recording-fullscreen').checked)fullscreen=focus(true);}catch{/* Focus view remains available when fullscreen is denied. */}
+ if(options.restart){
+  stop(false);
+  if(audio&&master){
+   master.gain.cancelScheduledValues(audio.currentTime);master.gain.setValueAtTime(0,audio.currentTime);
+   liveMix.forEach(nodes=>{nodes.forEach(node=>{node.gain.cancelScheduledValues(audio!.currentTime);node.gain.setValueAtTime(0,audio!.currentTime);});nodes.clear();});
+   space?.dispose();tapSpace?.dispose();space=createAudioSpace(audio,orbitBus!);tapSpace=createAudioSpace(audio,tapBus!);
+  }
+ }
+ const ready=options.restart?ensureAudio():!playing?start():ensureAudio();
+ await Promise.all([fullscreen,ready]);
+ if(options.generation!==recordingGeneration||document.hidden||!audio||!recordingOutput)throw Error('Recording cancelled');
+ // Let the focus/fullscreen geometry reach the paint pass before video capture.
+ await new Promise<void>(resolve=>{const timeout=setTimeout(resolve,120);requestAnimationFrame(()=>{clearTimeout(timeout);resolve();});});
+ if(options.generation!==recordingGeneration||document.hidden)throw Error('Recording cancelled');
+ return options;
+}
+async function startRecordedMusic(options:RecordingStart){
+ if(options.generation!==recordingGeneration||document.hidden)throw Error('Recording cancelled');
+ if(options.restart){
+  if(playing)throw Error('Playback changed during recording preparation');
+  setEvolution(options.random);
+  await start(.5,()=>options.generation===recordingGeneration);
+  if(!playing||options.generation!==recordingGeneration)throw Error('Music unavailable');
+ }
+}
+for(const option of ['restart','random','fullscreen'])$('#recording-'+option).addEventListener('change',()=>{syncFileButtons();persistSettings();});
 function syncFileButtons(){
  $<HTMLButtonElement>('#json-import').disabled=importBusy||videoBusy||wavBusy;
  const active=videoRecording?.state==='recording';
@@ -1715,9 +1756,10 @@ function syncFileButtons(){
  $<HTMLButtonElement>('#wav-record').disabled=importBusy||videoBusy||(wavBusy&&!wavActive)||!wavSupported();
  labelAction('#wav-record',wavActive?files.stop:files.wavRecord);
  $('#files-open').dataset.recording=String(videoBusy||wavBusy);
+ for(const option of ['restart','random','fullscreen'])$<HTMLInputElement>('#recording-'+option).disabled=videoBusy||wavBusy||importBusy||(option==='random'&&!$<HTMLInputElement>('#recording-restart').checked);
 }
 function finishVideoRecording(){
- if(!videoRecording)return;
+ if(!videoRecording){if(videoBusy)recordingGeneration++;return;}
  $('#video-status').textContent=files.preparing;
  $<HTMLButtonElement>('#video-stop').disabled=true;
  videoRecording.stop();syncFileButtons();
@@ -1739,21 +1781,25 @@ $('#video-record').addEventListener('click',async()=>{
  if(videoBusy||wavBusy||importBusy||!mp4Type())return;
  videoBusy=true;syncFileButtons();clearVideoDownload();
  $('#video-status').textContent=files.preparing;$('#video-session').hidden=false;
- $('#video-dismiss').hidden=true;$('#video-stop').hidden=true;
+ $('#video-dismiss').hidden=true;$('#video-stop').hidden=false;$<HTMLButtonElement>('#video-stop').disabled=false;
+ let captureFailed=false;
  try{
-  if(!playing)await start();
-  if(!audio||!recordingOutput||!playing||document.hidden)throw Error('Audio unavailable');
+  const options=await prepareRecording();
+  if(!audio||!recordingOutput)throw Error('Audio unavailable');
   videoRecording=createMp4Recording({
    audio,output:recordingOutput,
    paint:ctx=>paintVideo(ctx,orbit,atmosphere,backgroundMode!=='off'),
    ready:(blob,limited)=>{
+    if(captureFailed)return;
     finishVideoUi();videoUrl=URL.createObjectURL(blob);
     const link=$<HTMLAnchorElement>('#video-download');link.href=videoUrl;link.download=fileName('mp4');link.hidden=false;
     $('#video-status').textContent=limited?files.limit:files.ready;
     link.click();
    },
-   error:()=>{finishVideoUi();$('#video-status').textContent=files.videoError;}
+   error:()=>{if(captureFailed)return;finishVideoUi();$('#video-status').textContent=files.videoError;}
   });
+  if(videoRecording?.state!=='recording')throw Error('Recorder unavailable');
+  await startRecordedMusic(options);
   videoStarted=performance.now();$('#video-time').textContent='00:00';$('#video-time').hidden=false;
   videoTimer=setInterval(()=>{
    const seconds=Math.floor((performance.now()-videoStarted)/1000);
@@ -1762,7 +1808,7 @@ $('#video-record').addEventListener('click',async()=>{
   $('#video-status').textContent=files.recording;$('#video-stop').hidden=false;
   $<HTMLButtonElement>('#video-stop').disabled=false;
   $('#video-record').setAttribute('aria-pressed','true');syncFileButtons();filesDialog.close();
- }catch{finishVideoUi();$('#video-time').hidden=true;$('#video-status').textContent=files.videoError;}
+ }catch{captureFailed=true;videoRecording?.stop();finishVideoUi();$('#video-time').hidden=true;$('#video-status').textContent=files.videoError;}
 });
 if(!mp4Type())$('#video-support').textContent=files.unsupported;
 if(!wavSupported())$('#wav-support').textContent=files.wavUnsupported;
@@ -1772,7 +1818,7 @@ window.addEventListener('beforeunload',event=>{if(videoBusy||wavBusy)event.preve
 
 
 function finishWavRecording(){
- if(!wavRecording){if(wavBusy)wavAbort?.abort();return;}
+ if(!wavRecording){if(wavBusy){recordingGeneration++;wavAbort?.abort();}return;}
  $('#wav-status').textContent=files.wavPreparing;
  $<HTMLButtonElement>('#wav-stop').disabled=true;
  wavRecording.stop();syncFileButtons();
@@ -1795,19 +1841,23 @@ $('#wav-record').addEventListener('click',async()=>{
  wavBusy=true;const controller=new AbortController();wavAbort=controller;
  syncFileButtons();clearWavDownload();$('#wav-support').textContent='';
  $('#wav-status').textContent=files.wavPreparing;$('#wav-session').hidden=false;
- $('#wav-dismiss').hidden=true;$('#wav-stop').hidden=true;$('#wav-time').hidden=true;
+ $('#wav-dismiss').hidden=true;$('#wav-stop').hidden=false;$<HTMLButtonElement>('#wav-stop').disabled=false;$('#wav-time').hidden=true;
+ let captureFailed=false;
  try{
-  if(!playing)await start();
-  if(!audio||!recordingOutput||!playing||document.hidden||controller.signal.aborted)throw Error('Audio unavailable');
+  const options=await prepareRecording();
+  if(!audio||!recordingOutput||controller.signal.aborted)throw Error('Audio unavailable');
   wavRecording=await createWavRecording({
    audio,output:recordingOutput,signal:controller.signal,
    ready:(blob,limited)=>{
+    if(captureFailed)return;
     finishWavUi();wavUrl=URL.createObjectURL(blob);
     const link=$<HTMLAnchorElement>('#wav-download');link.href=wavUrl;link.download=fileName('wav');link.hidden=false;
     $('#wav-status').textContent=limited?files.wavLimit:files.wavReady;link.click();
    },
-   error:()=>{finishWavUi();$('#wav-status').textContent=files.wavError;$('#wav-support').textContent=files.wavError;}
+   error:()=>{if(captureFailed)return;finishWavUi();$('#wav-status').textContent=files.wavError;$('#wav-support').textContent=files.wavError;}
   });
+  if(wavRecording?.state!=='recording')throw Error('Recorder unavailable');
+  await startRecordedMusic(options);
   const began=performance.now();$('#wav-time').textContent='00:00';$('#wav-time').hidden=false;
   wavTimer=setInterval(()=>{
    const seconds=Math.floor((performance.now()-began)/1000);
@@ -1816,5 +1866,5 @@ $('#wav-record').addEventListener('click',async()=>{
   $('#wav-status').textContent=files.wavRecording;$('#wav-stop').hidden=false;
   $<HTMLButtonElement>('#wav-stop').disabled=false;
   $('#wav-record').setAttribute('aria-pressed','true');syncFileButtons();filesDialog.close();
- }catch{finishWavUi();$('#wav-time').hidden=true;const message=controller.signal.aborted?files.wavCancelled:files.wavError;$('#wav-status').textContent=message;$('#wav-support').textContent=message;}
+ }catch{captureFailed=true;wavRecording?.stop();finishWavUi();$('#wav-time').hidden=true;const message=controller.signal.aborted?files.wavCancelled:files.wavError;$('#wav-status').textContent=message;$('#wav-support').textContent=message;}
 });

@@ -336,3 +336,8 @@ body:not(.focus-view) .sound-top{margin-bottom:20px}
 #instrument-dialog .instrument-group-tabs button[aria-selected=true]{border-color:var(--line);border-top-color:var(--picker-color,var(--accent));border-bottom-color:var(--surface);background:var(--surface);color:var(--text);font-weight:650}
 #instrument-dialog .instrument-group-tabs button:hover{color:var(--text);border-top-color:var(--picker-color,var(--accent))}
 #instrument-dialog .instrument-group-tabs button:focus-visible{outline-offset:-4px}
+#recording-options{border:1px solid var(--line);border-radius:14px;margin:20px 0 0;padding:14px;min-width:0}
+#recording-options legend{font-weight:650;padding:0 6px;font-size:14px}
+#recording-options label{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:14px;font-size:13px;line-height:1.5}
+#recording-options .sound-switch{flex-shrink:0}
+#recording-options p{margin-top:0}

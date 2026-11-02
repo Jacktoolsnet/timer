@@ -1,4 +1,5 @@
 ---
+import {recordingCopy} from '../lib/recording-copy';
 import InstrumentIcon from './InstrumentIcon.astro';
 import {instrumentGroups,pickerCopy,type InstrumentGroup} from '../lib/instrument-picker';
 import {fileCopy} from '../lib/file-copy';
@@ -37,6 +38,7 @@ const instrumentsTitle={de:'Instrumente',en:'Instruments',es:'Instrumentos',fr:'
 <dialog id="files-dialog" aria-labelledby="files-title">
  <div class="files-heading"><h2 id="files-title">{files.title}</h2><button id="files-close" class="icon-action" aria-label={files.close} title={files.close}><ActionIcon name="cancel"/></button></div>
  <section><h3>{files.json}</h3><p>{files.jsonHint}</p><div class="file-actions"><button id="json-export" class="icon-action" aria-label={files.export} title={files.export}><ActionIcon name="download"/></button><button id="json-import" class="icon-action" aria-label={files.import} title={files.import}><ActionIcon name="upload"/></button></div><input id="json-file" type="file" accept=".json,application/json" hidden/><p id="file-status" role="status"></p></section>
+ <fieldset id="recording-options"><legend>{recordingCopy[lang].title}</legend><p>{recordingCopy[lang].hint}</p>{(['restart','random','fullscreen'] as const).map(option=><label>{recordingCopy[lang][option]}<span class="sound-switch"><input id={`recording-${option}`} type="checkbox" role="switch" disabled={option==='random'}/><span class="sound-switch-track" aria-hidden="true"></span></span></label>)}</fieldset>
  <section><h3>{files.wavTitle}</h3><p>{files.wavHint}</p><button id="wav-record" class="icon-action" aria-label={files.wavRecord} title={files.wavRecord} aria-pressed="false"><ActionIcon name="audio"/></button><p id="wav-support" role="status"></p></section>
  <section><h3>{files.video}</h3><p>{files.videoHint}</p><button id="video-record" class="icon-action" aria-label={files.record} title={files.record} aria-pressed="false"><ActionIcon name="video"/></button><p id="video-support" role="status"></p></section>
 </dialog>

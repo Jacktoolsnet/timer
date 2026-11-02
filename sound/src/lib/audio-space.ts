@@ -15,5 +15,5 @@ export function createAudioSpace(ctx:AudioContext,master:GainNode){
  const delay=ctx.createDelay(2),feedback=ctx.createGain(),filter=ctx.createBiquadFilter(),echoReturn=ctx.createGain();
  feedback.gain.value=.22;filter.type='lowpass';filter.frequency.value=2400;echoReturn.gain.value=.65;
  delay.connect(filter);filter.connect(feedback);feedback.connect(delay);filter.connect(echoReturn);echoReturn.connect(master);
- return {hall,delay};
+ return {hall,delay,dispose(){hall.disconnect();hallReturn.disconnect();delay.disconnect();filter.disconnect();feedback.disconnect();echoReturn.disconnect();}};
 }
