@@ -10,12 +10,14 @@ export function mp4Type(){
  if(typeof MediaRecorder==='undefined'||typeof MediaRecorder.isTypeSupported!=='function'||typeof HTMLCanvasElement.prototype.captureStream!=='function')return null;
  return MP4_TYPES.find(type=>MediaRecorder.isTypeSupported(type))??null;
 }
+export type VideoFormat='landscape'|'portrait';
+export function videoDimensions(format:VideoFormat='landscape'){return format==='portrait'?{width:720,height:1280}:{width:1280,height:720};}
 export function createMp4Recording(options:{
- audio:AudioContext;output:AudioNode;durationSeconds?:number;paint:(ctx:CanvasRenderingContext2D)=>void;
+ audio:AudioContext;output:AudioNode;durationSeconds?:number;format?:VideoFormat;paint:(ctx:CanvasRenderingContext2D)=>void;
  ready:(blob:Blob,limited:boolean)=>void;error:()=>void;
 }){
  const mimeType=mp4Type();if(!mimeType)throw Error('MP4 unsupported');
- const canvas=document.createElement('canvas');canvas.width=1280;canvas.height=720;
+ const canvas=document.createElement('canvas'),dimensions=videoDimensions(options.format);canvas.width=dimensions.width;canvas.height=dimensions.height;
  const ctx=canvas.getContext('2d',{alpha:false});if(!ctx)throw Error('Canvas unavailable');
  options.paint(ctx);
  const stream=canvas.captureStream(30);
@@ -60,15 +62,18 @@ export function createMp4Recording(options:{
 /** Same canvases as the live view, reframed around the orbit; no DOM or user controls. */
 export function paintVideo(ctx:CanvasRenderingContext2D,orbit:HTMLCanvasElement,background:HTMLCanvasElement,showBackground:boolean){
  const style=getComputedStyle(document.documentElement);
- ctx.fillStyle=style.getPropertyValue('--surface').trim()||'#080e16';ctx.fillRect(0,0,1280,720);
+ const width=ctx.canvas.width,height=ctx.canvas.height,size=Math.max(1,Math.min(width,height)-40),cx=width/2,cy=height/2;
+ ctx.fillStyle=style.getPropertyValue('--surface').trim()||'#080e16';ctx.fillRect(0,0,width,height);
  if(showBackground){
   const o=orbit.getBoundingClientRect(),b=background.getBoundingClientRect();
   if(o.width&&b.width&&b.height){
-   const scale=680/o.width;
+   const ox=o.left+o.width/2,oy=o.top+o.height/2;
+   // Cover the frame while keeping the background's orbit centre aligned with the video.
+   const scale=Math.max(size/o.width,cx/Math.max(1,ox-b.left),cx/Math.max(1,b.right-ox),cy/Math.max(1,oy-b.top),cy/Math.max(1,b.bottom-oy));
    ctx.save();ctx.globalAlpha=Number(getComputedStyle(background).opacity);
-   ctx.drawImage(background,640+(b.left-o.left-o.width/2)*scale,360+(b.top-o.top-o.height/2)*scale,b.width*scale,b.height*scale);
+   ctx.drawImage(background,cx+(b.left-ox)*scale,cy+(b.top-oy)*scale,b.width*scale,b.height*scale);
    ctx.restore();
   }
  }
- ctx.drawImage(orbit,300,20,680,680);
+ ctx.drawImage(orbit,cx-size/2,cy-size/2,size,size);
 }

@@ -3,7 +3,7 @@ import {instrumentGroups,pickerCopy,type InstrumentGroup} from '../lib/instrumen
 import {tapNoteAt,tapNoteY,tapNoteKey,tapNoteSemitones,tapNoteDegree} from '../lib/tap-notes';
 import {wavSupported,createWavRecording} from '../lib/wav-export';
 import {fileCopy} from '../lib/file-copy';
-import {mp4Type,createMp4Recording,paintVideo} from '../lib/video-export';
+import {mp4Type,createMp4Recording,paintVideo,videoDimensions,type VideoFormat} from '../lib/video-export';
 import {padNumbers,padForKey,padBounds,focusedPadCenter,focusedPadAt,padFocusCopy} from '../lib/orbit-layout';
 import {RHYTHM_EDIT_MUSIC_LEVEL,cloneRhythm,emptyRhythm,hasRhythm,rhythmLane,recordRhythmHit,rhythmHitsAt,finishRhythm,rhythmBarPoints,replacingRhythmLane,resetRhythmSession,remeterRhythm,rhythmCopy,type RhythmLane} from '../lib/tap-rhythm';
 import {createRhythmPlayer} from '../lib/rhythm-player';
@@ -364,7 +364,7 @@ function snapshotSettings(includeDraft=false):SoundSettings{
  return {
    version:2,style:currentStyle,dance:currentDance,groove:grooveChoice,bpm,transpose,noteEffect,volume:Number($<HTMLInputElement>('#volume').value),
    background:backgroundChoice,center:centerChoice,orbit:orbitChoice,
-   recording:{restart:$<HTMLInputElement>('#recording-restart').checked,random:$<HTMLInputElement>('#recording-random').checked,fullscreen:$<HTMLInputElement>('#recording-fullscreen').checked,minutes:Number($<HTMLInputElement>('#recording-duration').value)},
+   recording:{restart:$<HTMLInputElement>('#recording-restart').checked,random:$<HTMLInputElement>('#recording-random').checked,fullscreen:$<HTMLInputElement>('#recording-fullscreen').checked,minutes:Number($<HTMLInputElement>('#recording-duration').value),videoFormat:chosenVideoFormat()},
    pad:{mode:padMode,beats:(backup??tapPattern).beats,hits:(backup??tapPattern).hits.map(lane=>[...lane]),notes:(backup??tapPattern).notes.map(lane=>[...lane])},
    tracks:tracks.map((live,i)=>{const tr=backup&&rhythmTouched.has(i)&&rhythmTrackBackup?{...live,...rhythmTrackBackup[i]}:live;return ({
     grid:tr.grid,slots:tr.slots,enabled:tr.enabled,mute:tr.mute,instrument:tr.instrument,points:[...tr.points],motif:[...tr.motif],volume:tr.volume,pitch:tr.pitch,
@@ -1651,6 +1651,7 @@ function frame(now:number){
 }
 enhanceClockSelects($('.instruments-tile') as HTMLFormElement);
 function applySettings(saved:SoundSettings){
+ $<HTMLInputElement>('#video-format input[value="'+(saved.recording?.videoFormat??'landscape')+'"]').checked=true;syncVideoFormat();
  $<HTMLInputElement>('#recording-duration').value=String(saved.recording?.minutes??10);syncRecordingDuration();
  for(const option of ['restart','random','fullscreen'] as const)$<HTMLInputElement>('#recording-'+option).checked=saved.recording?.[option]??false;
   applyStyle(saved.style,saved.dance??null);configureGroove(saved.groove??'auto',false);bpm=saved.bpm;transpose=saved.transpose??0;syncTranspose();noteEffect=saved.noteEffect??1;syncNoteEffect();
@@ -1717,9 +1718,9 @@ fileInput.addEventListener('change',async()=>{
  }catch{$('#file-status').textContent=files.error;}
  finally{importBusy=false;syncFileButtons();}
 });
-type RecordingStart={restart:boolean;random:boolean;generation:number;durationSeconds:number};
+type RecordingStart={restart:boolean;random:boolean;generation:number;durationSeconds:number;videoFormat:VideoFormat};
 async function prepareRecording():Promise<RecordingStart>{
- const options={restart:$<HTMLInputElement>('#recording-restart').checked,random:$<HTMLInputElement>('#recording-random').checked,durationSeconds:Number($<HTMLInputElement>('#recording-duration').value)*60,generation:recordingGeneration};
+ const options={restart:$<HTMLInputElement>('#recording-restart').checked,random:$<HTMLInputElement>('#recording-random').checked,durationSeconds:Number($<HTMLInputElement>('#recording-duration').value)*60,videoFormat:chosenVideoFormat(),generation:recordingGeneration};
  // Both requests must be initiated before awaiting anything, inside the button gesture.
  let fullscreen:Promise<void>|undefined;
  try{if($<HTMLInputElement>('#recording-fullscreen').checked)fullscreen=focus(true);}catch{/* Focus view remains available when fullscreen is denied. */}
@@ -1748,6 +1749,11 @@ async function startRecordedMusic(options:RecordingStart){
   if(!playing||options.generation!==recordingGeneration)throw Error('Music unavailable');
  }
 }
+function chosenVideoFormat():VideoFormat{return $<HTMLInputElement>('#video-format input:checked').value as VideoFormat;}
+function syncVideoFormat(){
+ const {width,height}=videoDimensions(chosenVideoFormat());$('#video-resolution').textContent=width+' × '+height;
+}
+document.querySelectorAll<HTMLInputElement>('#video-format input').forEach(input=>input.addEventListener('change',()=>{syncVideoFormat();persistSettings();}));
 function syncRecordingDuration(){
  const text=$<HTMLInputElement>('#recording-duration').value+' '+recordingCopy[language].minutes;
  $('#recording-duration-value').textContent=text;$('#recording-duration').setAttribute('aria-valuetext',text);
@@ -1764,6 +1770,7 @@ function syncFileButtons(){
  labelAction('#wav-record',wavActive?files.stop:files.wavRecord);
  $('#files-open').dataset.recording=String(videoBusy||wavBusy);
  $<HTMLInputElement>('#recording-duration').disabled=videoBusy||wavBusy||importBusy;
+ for(const input of document.querySelectorAll<HTMLInputElement>('#video-format input'))input.disabled=videoBusy||wavBusy||importBusy;
  for(const option of ['restart','random','fullscreen'])$<HTMLInputElement>('#recording-'+option).disabled=videoBusy||wavBusy||importBusy||(option==='random'&&!$<HTMLInputElement>('#recording-restart').checked);
 }
 function finishVideoRecording(){
@@ -1795,7 +1802,7 @@ $('#video-record').addEventListener('click',async()=>{
   const options=await prepareRecording();
   if(!audio||!recordingOutput)throw Error('Audio unavailable');
   videoRecording=createMp4Recording({
-   audio,output:recordingOutput,durationSeconds:options.durationSeconds,
+   audio,output:recordingOutput,durationSeconds:options.durationSeconds,format:options.videoFormat,
    paint:ctx=>paintVideo(ctx,orbit,atmosphere,backgroundMode!=='off'),
    ready:(blob,limited)=>{
     if(captureFailed)return;

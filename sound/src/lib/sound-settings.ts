@@ -16,7 +16,7 @@ export type SavedTrack={
  morph:{to:InstrumentId;progress:number}|null;
 };
 export type SoundSettings={
- recording?:{restart:boolean;random:boolean;fullscreen:boolean;minutes?:number};
+ recording?:{restart:boolean;random:boolean;fullscreen:boolean;minutes?:number;videoFormat?:'landscape'|'portrait'};
  pad?:{mode:'draw'|'rhythm';beats:2|3|4;hits:boolean[][];notes?:(number|null)[][]};
  version:2;style:StyleId;dance?:DanceId|null;groove?:GrooveChoice;bpm:number;volume:number;transpose?:number;noteEffect?:number;tracks:SavedTrack[];
  background:typeof backgroundModes[number];center:typeof centerModes[number];orbit:typeof orbitModes[number];
@@ -32,6 +32,7 @@ export function decodeSettings(raw:string|null):SoundSettings|null{
    ||!Array.isArray(s.tracks)||!(s.version===1?[8,9]:[ORBIT_COUNT]).includes(s.tracks.length))return null;
   if(s.recording!==undefined&&(!s.recording||Array.isArray(s.recording)||['restart','random','fullscreen'].some(key=>typeof s.recording[key]!=='boolean')))return null;
   if(s.recording?.minutes!==undefined&&(!number(s.recording.minutes,1,10)||!Number.isInteger(s.recording.minutes)))return null;
+  if(s.recording?.videoFormat!==undefined&&!member(['landscape','portrait'],s.recording.videoFormat))return null;
   if(s.transpose!==undefined&&(!number(s.transpose,-12,12)||!Number.isInteger(s.transpose)))return null;
   if(s.noteEffect!==undefined&&!number(s.noteEffect,0,1.5))return null;
   if(s.dance!==undefined&&s.dance!==null&&!member(danceIds,s.dance))return null;
