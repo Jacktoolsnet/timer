@@ -1,3 +1,4 @@
+import {instrumentGroups,pickerCopy,type InstrumentGroup} from '../lib/instrument-picker';
 import {tapNoteAt,tapNoteY,tapNoteKey,tapNoteSemitones,tapNoteDegree} from '../lib/tap-notes';
 import {wavSupported,createWavRecording} from '../lib/wav-export';
 import {fileCopy} from '../lib/file-copy';
@@ -75,12 +76,12 @@ let selectedPad:RhythmLane|null=null,padSwitchBlocked=false;
 const padNotes=Array<number>(9).fill(3);
 let nextRhythmKeyId=-20;
 const editFaders=tracks.map(()=>new Set<GainNode>());
-function editLevel(i:number){return rhythmEditing&&selectedPad!==null&&selectedPad!==i?RHYTHM_EDIT_MUSIC_LEVEL:1;}
+function editLevel(i:number){if(tracks[i].mute)return 0;return rhythmEditing&&selectedPad!==null&&selectedPad!==i?RHYTHM_EDIT_MUSIC_LEVEL:1;}
 function padPoint(lane:RhythmLane){return focusedPadCenter(lane,drawing.width,drawing.height,selectedPad);}
 let tapPattern=emptyRhythm(groove.beats);
 let rhythmBackup:ReturnType<typeof cloneRhythm>|null=null;
 function snapshotRhythmTrack(tr:typeof tracks[number]){
- return {instrument:tr.instrument,points:[...tr.points],phase:tr.phase,direction:tr.direction,directionMode:tr.directionMode,
+ return {instrument:tr.instrument,mute:tr.mute,points:[...tr.points],phase:tr.phase,direction:tr.direction,directionMode:tr.directionMode,
   pendingDirection:tr.pendingDirection,grid:tr.grid,slots:tr.slots,pendingGrid:tr.pendingGrid,pendingSlots:tr.pendingSlots,morph:tr.morph?{...tr.morph}:null};
 }
 let rhythmTrackBackup:ReturnType<typeof snapshotRhythmTrack>[]|null=null;
@@ -156,6 +157,12 @@ function syncRhythmUi(){
   const b=padBounds(i as RhythmLane,100,100,selectedPad);
   zone.style.left=b.x+'%';zone.style.top=b.y+'%';zone.style.width=b.width+'%';zone.style.height=b.height+'%';
  });
+ $('#pad-instrument-actions').hidden=selectedPad===null;
+ if(selectedPad!==null){
+  const muted=tracks[selectedPad].mute;
+  $('#pad-mute').setAttribute('aria-pressed',String(muted));
+  labelAction('#pad-mute',pickerCopy[language][muted?'unmute':'mute']);
+ }else if($<HTMLDialogElement>('#instrument-dialog').open)$<HTMLDialogElement>('#instrument-dialog').close();
  $('#rhythm-record').toggleAttribute('disabled',selectedPad===null);
  $('#rhythm-clear').toggleAttribute('disabled',selectedPad===null||!tapPattern.hits[selectedPad].some(Boolean));
  $('#rhythm-done').toggleAttribute('disabled',!rhythmEditing);
@@ -467,6 +474,7 @@ tracks.forEach((tr,i)=>{
   tr.enabled=(e.target as HTMLInputElement).checked;if(!tr.enabled){cancelTappedVoices(i);rhythmPlayer?.cancelLane(i as RhythmLane,-Infinity);}tr.flash.fill(-100);tr.hits.fill(-Infinity);sync();
  });
  row.querySelector<HTMLSelectElement>('.instrument-select')!.addEventListener('change',e=>{
+  if(selectedPad===i){beginRhythmEdit();rhythmTouched.add(i);}
   cancelTappedVoices(i);rhythmPlayer?.cancelLane(i as RhythmLane,-Infinity);
   tr.instrument=(e.target as HTMLSelectElement).value as InstrumentId;
   tr.morph=null;if(journey?.track===i)journey=null;
@@ -490,7 +498,15 @@ tracks.forEach((tr,i)=>{
   if(playing){tr.pendingGrid=choice;tr.pendingSlots=slots;}else applyGrid(i,choice,slots);sync();
  });
  row.querySelectorAll<HTMLButtonElement>('[data-step]').forEach((b,s)=>b.addEventListener('click',()=>{if(s>=tr.slots)return;tr.points[s]=!tr.points[s];rememberDrawing(i);sync();}));
- row.querySelector<HTMLInputElement>('.mute')!.addEventListener('change',e=>{tr.mute=(e.target as HTMLInputElement).checked;if(tr.mute)cancelTappedVoices(i);syncRhythmUi();persistSettings();});
+ row.querySelector<HTMLInputElement>('.mute')!.addEventListener('change',e=>{
+  if(selectedPad===i){beginRhythmEdit();rhythmTouched.add(i);}
+  tr.mute=(e.target as HTMLInputElement).checked;
+  if(tr.mute){
+   cancelTappedVoices(i);rhythmPlayer?.cancelLane(i as RhythmLane,-Infinity);
+   sustained.forEach((entry,key)=>{if(entry.track===i&&audio){entry.voice.release(audio.currentTime);sustained.delete(key);}});
+  }
+  syncRhythmUi();persistSettings();
+ });
  row.querySelector<HTMLInputElement>('.track-volume')!.addEventListener('input',e=>{
   tr.volume=Number((e.target as HTMLInputElement).value);if(tr.volume===0)cancelTappedVoices(i);syncRhythmUi();
   row.querySelector('.track-volume-value')!.textContent=Math.round(tr.volume*100)+' %';persistSettings();
@@ -1030,7 +1046,7 @@ document.addEventListener('fullscreenchange',()=>{
  if(!document.fullscreenElement&&ownsFullscreen){ownsFullscreen=false;focus(false,false);}
 });
 $('#focus').addEventListener('click',()=>focus(!document.body.classList.contains('focus-view')));
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.querySelector('#files-dialog[open]')&&!(padMode==='rhythm'&&selectedPad!==null))focus(false);});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.querySelector('dialog[open]')&&!(padMode==='rhythm'&&selectedPad!==null))focus(false);});
 function position(e:PointerEvent,c:HTMLCanvasElement){const r=c.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*c.width,y:(e.clientY-r.top)/r.height*c.height};}
 orbit.addEventListener('pointerdown',e=>{
  if(!orbitAnimation)return;
@@ -1157,6 +1173,52 @@ $('#rhythm-done').addEventListener('click',()=>{
  tapPattern.laneStart.fill(null);syncRhythmUi();persistSettings();
 });
 $('#rhythm-cancel').addEventListener('click',cancelRhythmEdit);
+$('#pad-mute').addEventListener('click',()=>{
+ if(selectedPad===null)return;
+ const input=$<HTMLInputElement>('[data-track="'+selectedPad+'"] .mute');
+ input.checked=!tracks[selectedPad].mute;input.dispatchEvent(new Event('change',{bubbles:true}));
+});
+const instrumentDialog=$<HTMLDialogElement>('#instrument-dialog');
+function showInstrumentGroup(group:InstrumentGroup,moveFocus=false){
+ document.querySelectorAll<HTMLButtonElement>('[data-instrument-group]').forEach(tab=>{
+  const active=tab.dataset.instrumentGroup===group;
+  tab.setAttribute('aria-selected',String(active));tab.tabIndex=active?0:-1;
+  if(active&&moveFocus)tab.focus();
+ });
+ for(const name of Object.keys(instrumentGroups))$('#instrument-panel-'+name).hidden=name!==group;
+}
+$('#pad-instrument').addEventListener('click',()=>{
+ if(selectedPad===null)return;cancelPadGestures();
+ const tr=tracks[selectedPad];
+ $('#instrument-picker-track').textContent=padNumbers[selectedPad]+' · '+instrumentNames[language][instrumentIds.indexOf(tr.instrument)];
+ instrumentDialog.style.setProperty('--picker-color',tr.color);
+ document.querySelectorAll<HTMLButtonElement>('[data-pick-instrument]').forEach(tile=>tile.setAttribute('aria-pressed',String(tile.dataset.pickInstrument===tr.instrument)));
+ const group=(Object.keys(instrumentGroups) as InstrumentGroup[]).find(name=>(instrumentGroups[name] as readonly string[]).includes(tr.instrument))!;
+ showInstrumentGroup(group);instrumentDialog.showModal();
+ instrumentDialog.querySelector<HTMLElement>('[role=tab][aria-selected=true]')?.scrollIntoView({block:'nearest',inline:'nearest'});
+ instrumentDialog.querySelector<HTMLButtonElement>('[aria-pressed=true]')?.focus();
+});
+$('#instrument-picker-close').addEventListener('click',()=>instrumentDialog.close());
+instrumentDialog.addEventListener('click',event=>{
+ if(event.target!==instrumentDialog)return;
+ const r=instrumentDialog.getBoundingClientRect();
+ if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)instrumentDialog.close();
+});
+document.querySelectorAll<HTMLButtonElement>('[data-instrument-group]').forEach(tab=>{
+ tab.addEventListener('click',()=>showInstrumentGroup(tab.dataset.instrumentGroup as InstrumentGroup));
+ tab.addEventListener('keydown',event=>{
+  const groups=Object.keys(instrumentGroups) as InstrumentGroup[],index=groups.indexOf(tab.dataset.instrumentGroup as InstrumentGroup);
+  const next=event.key==='Home'?0:event.key==='End'?groups.length-1:event.key==='ArrowRight'?(index+1)%groups.length:event.key==='ArrowLeft'?(index+groups.length-1)%groups.length:null;
+  if(next===null)return;event.preventDefault();showInstrumentGroup(groups[next],true);
+ });
+});
+document.querySelectorAll<HTMLButtonElement>('[data-pick-instrument]').forEach(tile=>tile.addEventListener('click',()=>{
+ if(selectedPad===null){instrumentDialog.close();return;}
+ const select=$<HTMLSelectElement>('[data-track="'+selectedPad+'"] .instrument-select');
+ select.value=tile.dataset.pickInstrument!;select.dispatchEvent(new Event('change',{bubbles:true}));
+ instrumentDialog.close();
+}));
+
 function beginReplacementTake(){
  if(selectedPad===null)return;
  cancelPadGestures();rhythmGeneration++;beginRhythmEdit();rhythmTouched.add(selectedPad);
@@ -1167,7 +1229,7 @@ function beginReplacementTake(){
  rhythmEditing=true;syncRhythmUi();persistSettings();
 }
 function selectRhythmPad(lane:RhythmLane){
- const tr=tracks[lane];if(!tr.enabled||tr.mute||tr.volume<=0)return false;
+ const tr=tracks[lane];if(!tr.enabled)return false;
  if(selectedPad===lane)return true;
  if(selectedPad!==null&&rhythmTouched.size){padSwitchBlocked=true;syncRhythmUi();return false;}
  if(selectedPad!==null)cancelRhythmEdit();

@@ -1,0 +1,33 @@
+---
+import type {InstrumentId} from '../lib/instruments';
+interface Props {name:InstrumentId}
+const {name}=Astro.props;
+const paths:Record<InstrumentId,string>={
+ kick:'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm0 5v8m-4-4h8',
+ snare:'M3 8h18v9H3Zm0 0 4-3h10l4 3M7 8v9m5-9v9m5-9v9M5 21l4-4m10 4-4-4',
+ hat:'M2 10h20M4 10l8-4 8 4M12 3v18m-5 0h10',
+ clap:'M7 13V6a1 1 0 0 1 2 0v5-7a1 1 0 0 1 2 0v7-8a1 1 0 0 1 2 0v8-6a1 1 0 0 1 2 0v9l3-2 2 2-6 7H9l-6-7 2-2 2 2',
+ tom:'M4 6h16v13H4ZM4 10h16M8 10v9m8-9v9',
+ rim:'M4 12a8 5 0 1 0 16 0 8 5 0 1 0-16 0m1-9 14 14',
+ shaker:'m4 9 5-5 11 11-5 5ZM7 6l11 11M5 11l2 2m2 2 2 2',
+ bass:'M10 12 17 3l3 2-8 9c3 6-5 10-8 6s0-9 6-8Zm-3 4 3 2',
+ synthbass:'M3 16h4V7h5v9h5V7h4M3 21h18',
+ doublebass:'M12 2v13m-3-9h6M9 10c-5 1-1 5-4 7-2 4 12 6 14 0-3-2 1-6-4-7M12 20v3',
+ piano:'M3 5h18v15H3Zm0 9h18M7 14v6m5-6v6m5-6v6M7 5v5m5-5v5m5-5v5',
+ epiano:'M2 6h20v12H2Zm4 0v7m4-7v7m4-7v7m4-7v7M6 18v3m12-3v3',
+ organ:'M3 20h18M5 16V7h3v9m2 0V3h4v13m2 0V7h3v9M5 20v-4h14v4',
+ marimba:'m3 7 18-3M5 7v13m4-14v12m4-13v11m4-12v10m4-11v9',
+ kalimba:'M5 5h14v16H5Zm3-3v11m4-11v14m4-14v11M10 18h4',
+ bells:'M5 17h14l-3-5V8a4 4 0 0 0-8 0v4Zm5 3h4M12 2v2',
+ strings:'m8 3 8 18M14 4c5 1-1 5 3 7 5 3-2 12-7 8-5 0-8-5-5-8 4-1 2-7 7-7m-3 9 5 5',
+ guitar:'m11 12 7-9 3 2-8 9c4 6-5 10-9 6s0-11 7-8Zm-5 3 4 4',
+ harp:'M5 3h15L9 21H5Zm4 1v13m4-13v8m4-8v3',
+ saxophone:'M11 3h6l-2 3v9c0 7-11 7-11 0V9l5 2v4c0 3 3 3 3 0V6Zm5 6h3m-3 4h3',
+ voice:'M9 3h6v10a3 3 0 0 1-6 0ZM5 11v2a7 7 0 0 0 14 0v-2M12 20v3M8 23h8',
+ choir:'M9 8a3 3 0 1 0 6 0 3 3 0 1 0-6 0M6 21v-4a6 6 0 0 1 12 0v4M3 7a2 2 0 1 0 0 4m18-4a2 2 0 1 1 0 4M2 14v6m20-6v6',
+ vocalpad:'M9 4h6v8a3 3 0 0 1-6 0ZM3 18c3-4 6 4 9 0s6 4 9 0M3 22h18',
+ pluck:'M3 17 8 5l4 14 4-12 5 10',
+ pad:'M2 9c3-6 7 6 10 0s7 6 10 0M2 16c3-6 7 6 10 0s7 6 10 0'
+};
+---
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d={paths[name]}/></svg>
