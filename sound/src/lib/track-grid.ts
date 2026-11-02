@@ -6,7 +6,7 @@ export function remapPoints(points:readonly boolean[],from:number,to:number):boo
  for(let s=0;s<from;s++)if(points[s])result[Math.round(s/from*to)%to]=true;
  return result;
 }
-/** Wall-clock sixteenth position within the bar. Triplet/cross grids stay straight. */
+/** Swung position in the same grid units. Triplet/cross grids stay straight. */
 export function swingPosition(position:number,slots:number,beats:number,swing:number){
  if(!swing||slots%(beats*2)!==0)return position;
  const quarter=position/(slots/beats),whole=Math.floor(quarter),part=quarter-whole;
@@ -34,6 +34,13 @@ export function gridPhraseHold(points:readonly boolean[],index:number,clock:numb
 }
 export function canEvolveGrid(instrument:string,protectedTrack:boolean){
  return !protectedTrack&&!['kick','snare','clap','tom','rim','hat','shaker','bass','synthbass','doublebass'].includes(instrument);
+}
+/** Prefer underrepresented grids, never copying one shared random choice to every track. */
+export function variedGrid(current:GridSize,others:readonly number[],random=Math.random):GridSize{
+ const choices=gridSizes.filter(size=>size!==current);
+ const count=(size:number)=>others.filter(other=>other===size).length;
+ const least=Math.min(...choices.map(count)),balanced=choices.filter(size=>count(size)===least);
+ return balanced[Math.floor(random()*balanced.length)];
 }
 export const gridCopy={
  de:{label:'Notenraster',auto:'Automatisch',pending:'Wechsel zum nächsten Takt',locked:'Tanzrhythmus: Raster bleibt geschützt.'},

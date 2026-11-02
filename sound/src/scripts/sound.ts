@@ -1,4 +1,4 @@
-import {gridSizes,gridCopy,remapPoints,gridEvents,gridPhraseHold,swingPosition,gridFractionAtTime,canEvolveGrid,type GridChoice,type GridSize} from '../lib/track-grid';
+import {variedGrid,gridSizes,gridCopy,remapPoints,gridEvents,gridPhraseHold,swingPosition,gridFractionAtTime,canEvolveGrid,type GridChoice,type GridSize} from '../lib/track-grid';
 import {HOLD_DELAY,RING_FADE,gestureMode,holdSteps,ringAppearance,type GestureMode} from '../lib/pad-gestures';
 import {danceRhythmRole,danceRhythmWave,rhythmDrums,rhythmClarity,isRhythmDance,type PulseInstrument} from '../lib/dance-rhythm';
 import {tangoPulseRole,tangoPulseWave,dancePulseClarity} from '../lib/tango';
@@ -48,13 +48,12 @@ const liveMix=tracks.map(()=>new Set<GainNode>());
 let currentMix=tracks.map(()=>1);
 const sustained=new Map<string,{track:number;id:SustainedInstrument;voice:ReturnType<typeof createSustainedVoice>}>();
 let visualStep=0,visualTime=0,visualDuration=.15;
-function playbackAngle(time:number){return (visualStep+Math.max(0,Math.min(1,(time-visualTime)/visualDuration)))/stepsPerBar()*Math.PI*2;}
 const language=document.documentElement.lang as keyof typeof styleCopy;
 let currentStyle:StyleId='electronic',pendingStyle:StyleId|null=null;
 let currentDance:DanceId|null=null,pendingDance:DanceId|null=null;
 function currentPreset(){return currentDance?dances[currentDance].preset:presets[currentStyle];}
 function rhythmTrack(i:number){return danceFoundation(currentDance,i);}
-function waltzPulse(i:number){return waltzPulseRole(groove.beats,tracks[i].instrument,tracks[i].points);}
+function waltzPulse(i:number){return tracks[i].slots===stepsPerBar()?waltzPulseRole(groove.beats,tracks[i].instrument,tracks[i].points):null;}
 function pulseTrack(i:number){return rhythmTrack(i)||waltzPulse(i)!==null;}
 let grooveChoice:GrooveChoice='auto',pendingGroove:GrooveChoice|null=null;
 let groove=resolveGroove(currentStyle,grooveChoice);
@@ -67,18 +66,24 @@ function trackAngle(i:number,time:number){
  return gridFractionAtTime(real,trackSteps(i),groove.beats,groove.swing)*Math.PI*2;
 }
 function applyGrid(index:number,choice:GridChoice,slots:GridSize){
- const tr=tracks[index],old=tr.slots;cancelPadGestures();
+ const tr=tracks[index],old=tr.slots;
+ if([...padGestures.values()].some(g=>g.target===index||padLocation(g.startX,g.startY)?.index===index))cancelPadGestures();
  if(rhythmTrack(index)){choice='auto';slots=stepsPerBar();}
  tr.points=remapPoints(tr.points,old,slots);tr.phase=Math.round(tr.phase/old*slots)%slots;
  tr.grid=choice;tr.slots=slots;tr.pendingGrid=null;tr.pendingSlots=null;tr.hits.fill(-Infinity);tr.flash.fill(-100);
  sustained.forEach((entry,key)=>{if(entry.track===index){entry.voice.release(playing?nextTime:audio?.currentTime||0);sustained.delete(key);}});
  if(song)for(const memory of [song.chorus,song.verse,song.from])if(memory){const p=memory[index];p.points=remapPoints(p.points,p.slots??old,slots);p.slots=slots;}
 }
+function gridCandidates(){
+ return tracks.map((tr,index)=>({tr,index})).filter(({tr,index})=>tr.enabled&&!tr.mute&&tr.volume>0&&tr.grid==='auto'&&tr.pendingGrid===null&&musicalStep()>=drawnUntil[index]&&canEvolveGrid(tr.instrument,pulseTrack(index))&&(!tr.morph||canEvolveGrid(tr.morph.to,false)));
+}
+function varyGrid(index:number){applyGrid(index,'auto',variedGrid(tracks[index].slots,tracks.filter((_,i)=>i!==index&&tracks[i].enabled).map(tr=>tr.slots)));}
+function shuffleGrids(){gridCandidates().forEach(({index})=>varyGrid(index));pendingGridShuffle=false;sync();}
 function applyPendingGrids(){let changed=false;tracks.forEach((tr,i)=>{if(tr.pendingGrid!==null){applyGrid(i,tr.pendingGrid,tr.pendingSlots!);changed=true;}});if(changed)sync();}
 
 
 let transpose=0,noteEffect=1;
-let evolving=false,evolutionStep=Infinity;
+let evolving=false,evolutionStep=Infinity,pendingGridShuffle=false;
 let arrangement:ArrangementPlan|null=null;
 let development:DevelopmentPlan|null=null;
 const drawnUntil=tracks.map(()=>0);
@@ -157,7 +162,7 @@ function nextMusicStep(current:number){
  return nextEvolutionStep(current,Math.random,stepsPerBar());
 }
 function setEvolution(on:boolean){
- if(on!==evolving){arrangement=null;development=null;drawnUntil.fill(0);}
+ if(on!==evolving){arrangement=null;development=null;drawnUntil.fill(0);pendingGridShuffle=on;}
  if(evolving&&!on)tracks.forEach(tr=>{if(tr.directionMode!=='random')tr.pendingDirection=tr.directionMode==='reverse'?-1:1;});
  if(on&&!evolving)startSong(playing?Math.ceil(step/stepsPerBar()):0);
  if(!on){
@@ -305,6 +310,7 @@ tracks.forEach((tr,i)=>{
  });
  row.querySelector<HTMLSelectElement>('.track-grid')!.addEventListener('change',e=>{
   if(rhythmTrack(i))return;const value=(e.target as HTMLSelectElement).value,choice:GridChoice=value==='auto'?'auto':Number(value) as GridSize,slots=choice==='auto'?stepsPerBar():choice;
+  if(!(gridSizes as readonly number[]).includes(slots))return;
   if(playing){tr.pendingGrid=choice;tr.pendingSlots=slots;}else applyGrid(i,choice,slots);sync();
  });
  row.querySelectorAll<HTMLButtonElement>('[data-step]').forEach((b,s)=>b.addEventListener('click',()=>{if(s>=tr.slots)return;tr.points[s]=!tr.points[s];rememberDrawing(i);sync();}));
@@ -343,7 +349,7 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
  const tr=tracks[i];const musicBeat=beat/tr.slots*stepsPerBar();if(!audio||!master||!tr.enabled||tr.mute||tr.volume===0)return;
  const ctx=audio,profile=soundProfiles[currentStyle];
  const tango=tangoPulseRole(currentDance,i,id),crisp=currentDance==='viennese',dancePulse=danceRhythmRole(currentDance,i,id);
- const pulse=dancePulse||tango||waltzPulseRole(groove.beats,id,phrase?.points||tr.points);
+ const pulse=dancePulse||tango||(tr.slots===stepsPerBar()?waltzPulseRole(groove.beats,id,phrase?.points||tr.points):null);
  const harmonicStyle:StyleId=currentDance?['tango','pasodoble'].includes(currentDance)?'electronic':currentStyle==='jazz'||currentDance==='jive'?'pop':currentStyle:currentStyle;
  const vocal=(vocalInstruments as readonly string[]).includes(id);
  const cutoff=vocal?Math.max(3000,profile.cutoff):profile.cutoff;
@@ -526,11 +532,12 @@ function evolveJourney(time:number){
   else selected.phase=(selected.phase+(Math.random()<.5?-1:1)+selected.slots)%selected.slots;
   selected.hits.fill(-Infinity);
  }
- if(plan.cycle>=plan.length){
-  const candidates=eligible.filter(({tr,index})=>tr.grid==='auto'&&tr.pendingGrid===null&&index!==plan.track&&musicalStep()>=drawnUntil[index]&&canEvolveGrid(tr.instrument,pulseTrack(index)));
-  if(candidates.length&&Math.random()<.5){const selected=candidates[Math.floor(Math.random()*candidates.length)],sizes=gridSizes.filter(n=>n!==selected.tr.slots);applyGrid(selected.index,'auto',sizes[Math.floor(Math.random()*sizes.length)]);}
-  journey=null;
+ // Develop one grid every other cycle, rather than waiting for a whole timbre journey.
+ if(plan.cycle%2===0){
+  const candidates=gridCandidates().filter(({index})=>index!==plan.track);
+  if(candidates.length)varyGrid(candidates[Math.floor(Math.random()*candidates.length)].index);
  }
+ if(plan.cycle>=plan.length)journey=null;
  if(song&&song.form[song.index].kind==='chorus'){
   tracks.forEach((tr,i)=>{tr.motif=[...song!.chorus[i].motif];tr.points=remapPoints(song!.chorus[i].points,song!.chorus[i].slots??tr.slots,tr.slots);tr.pitch=song!.chorus[i].pitch;});
  }
@@ -557,6 +564,7 @@ function schedule(){
    evolveAnimations();animationStep=nextEvolutionStep(step,Math.random,stepsPerBar());
   }
   if(pendingStyle&&step%stepsPerBar()===0)applyStyle(pendingStyle,pendingDance);
+  if(pendingGridShuffle&&step%stepsPerBar()===0)shuffleGrids();
   if(evolving&&step%stepsPerBar()===0&&step>=evolutionStep){
    evolveJourney(nextTime);evolutionStep=nextMusicStep(step);
   }
@@ -724,7 +732,7 @@ function applyStyle(id:StyleId,dance:DanceId|null=null){
  configureGroove(grooveChoice,grooveChoice!=='auto');
  bpm=preset.bpm;$<HTMLInputElement>('#tempo').value=String(bpm);$('#tempo-value').textContent=bpm+' BPM';
  syncStyleTiles();syncDanceTiles();
- if(evolving){evolutionStep=nextMusicStep(step);startSong(Math.floor(step/stepsPerBar()));}
+ if(evolving){pendingGridShuffle=true;evolutionStep=nextMusicStep(step);startSong(Math.floor(step/stepsPerBar()));}
  evolveAnimations(false);
  $('#style-status').textContent='';sync();
 }
@@ -757,6 +765,7 @@ document.querySelectorAll<HTMLButtonElement>('[data-style-preset]').forEach(butt
 $('#reset').addEventListener('click',()=>{const id=pendingStyle||currentStyle,dance=pendingStyle?pendingDance:currentDance;if(playing){pendingStyle=id;pendingDance=dance;$('#style-status').textContent=styleCopy[language].pending;}else applyStyle(id,dance);});
 $('#random').addEventListener('click',()=>{
  const preset=currentPreset();journey=null;
+ if(playing)pendingGridShuffle=true;else shuffleGrids();
  tracks.forEach((tr,i)=>{if(!tr.enabled)return;if(currentDance&&rhythmTrack(i)){tr.points=dancePoints(currentDance,i);tr.phase=0;tr.direction=1;return;}tr.morph=null;tr.points=remapPoints(randomGroovePattern(groove,tr.instrument,preset.density),stepsPerBar(),tr.slots);tr.pitch=Math.floor(Math.random()*preset.scale.length);tr.phase=grooveAnchored(tr.instrument)?0:Math.round(Math.floor(Math.random()*groove.beats)/groove.beats*tr.slots)%tr.slots;tr.hits.fill(-Infinity);});sync();
 });
 let ownsFullscreen=false;
@@ -910,7 +919,8 @@ drawing.addEventListener('keydown',e=>{
   e.preventDefault();if(padGestures.has(-1))return;
   const active=activeTracks(),location=padLocation(keyboardPoint.x,keyboardPoint.y);if(!location)return;
   const rank=Math.max(0,Math.min(active.length-1,location.rank+(e.key==='ArrowDown'?1:e.key==='ArrowUp'?-1:0)));
-  const s=(location.step+(e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:0)+trackSteps(active[rank].index))%trackSteps(active[rank].index);
+  const slots=trackSteps(active[rank].index),base=rank===location.rank?location.step:Math.min(slots-1,Math.floor(keyboardPoint.x/drawing.width*slots));
+  const s=(base+(e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:0)+slots)%slots;
   keyboardPoint={x:(s+.5)/trackSteps(active[rank].index)*drawing.width,y:(rank+.5)/active.length*drawing.height};return;
  }
  if(e.key!==' '&&e.key!=='Enter')return;e.preventDefault();if(e.repeat)return;
@@ -1083,14 +1093,13 @@ function renderCenter(time:number,dark:boolean){
  const active=activeTracks().filter(({tr})=>!tr.mute&&tr.volume>0);
  if(!active.length)return;
  const motion=playing&&!reduced.matches;
- const turn=motion?playbackAngle(time):0;
  const masterLevel=Math.min(1,Number($<HTMLInputElement>('#volume').value)/.3);
- const sources=active.map(({tr},index)=>{
+ const sources=active.map(({tr,index})=>{
   const age=time-Math.max(...tr.hits);
   const hit=motion&&age>=0&&age<.85?Math.exp(-age*5.5):0;
   const energy=tr.volume*tr.lastVelocity*masterLevel;
   const pitch=tr.pitch/Math.max(1,currentPreset().scale.length-1);
-  return {color:tr.color,angle:tr.direction*turn+tr.phase/tr.slots*Math.PI*2-Math.PI/2,
+  return {color:tr.color,angle:tr.direction*(motion?trackAngle(index,time):0)+tr.phase/tr.slots*Math.PI*2-Math.PI/2,
    strength:hit*energy,height:hit*energy*(65+pitch*40),index};
  });
  const dominant=[...sources].sort((a,b)=>b.strength-a.strength);
@@ -1139,10 +1148,9 @@ function frame(now:number){
  tracks.forEach((tr,i)=>{tr.color=(dark?colors:lightColors)[i];});
  if(backgroundMode!=='off')renderAtmosphere(time,dark);
  oc.clearRect(0,0,700,700);
- const angle=playing&&orbitAnimation?playbackAngle(time):0;
  const visualMaster=Math.min(1,Number($<HTMLInputElement>('#volume').value)/.3);
  const active=activeTracks();
- if(orbitAnimation)active.forEach(({tr},rank)=>{
+ if(orbitAnimation)active.forEach(({tr,index},rank)=>{
   const r=radius(rank,active.length);oc.beginPath();oc.arc(350,350,r,0,Math.PI*2);oc.strokeStyle=tr.color+(dark?'55':'99');oc.lineWidth=dark?1:1.4;oc.stroke();
   // Each orbit carries a continuous comet; audible notes briefly boost its glow.
   if(playing&&orbitAnimation&&!reduced.matches){
@@ -1212,8 +1220,8 @@ function restoreSettings(){
   saved.tracks.forEach((source,i)=>{
    const tr=tracks[i];
    tr.grid=rhythmTrack(i)?'auto':source.grid??'auto';tr.slots=rhythmTrack(i)?stepsPerBar():source.slots??(tr.grid==='auto'?stepsPerBar():tr.grid);
-   tr.enabled=source.enabled;tr.mute=source.mute;tr.instrument=source.instrument;tr.points=[...source.points];tr.motif=source.motif?[...source.motif]:makeMotif(presets[saved.style].melody);
-   tr.volume=source.volume;tr.pitch=source.pitch;tr.phase=source.phase;tr.direction=source.direction;
+   tr.enabled=source.enabled;tr.mute=source.mute;tr.instrument=source.instrument;tr.points=source.points.map((point,s)=>s<tr.slots&&point);tr.motif=source.motif?[...source.motif]:makeMotif(presets[saved.style].melody);
+   tr.volume=source.volume;tr.pitch=source.pitch;tr.phase=source.phase%tr.slots;tr.direction=source.direction;
    tr.directionMode=source.directionMode;tr.randomDynamics=source.randomDynamics;
    tr.morph=source.morph?{...source.morph,from:source.morph.progress,at:0,duration:0}:null;
   });

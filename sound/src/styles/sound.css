@@ -238,3 +238,5 @@ body:not(.focus-view) .sound-top{margin-bottom:20px}
 .gesture-help{font-size:12px;line-height:1.5;color:var(--muted);margin:10px 2px 18px}.gesture-keyboard{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}#drawing:focus-visible{outline-offset:-4px}
 
 #drawing{user-select:none;-webkit-touch-callout:none}
+
+.grid-status{margin:0 0 12px;color:var(--muted);font-size:11px;line-height:1.5}.grid-status:empty{display:none}#sound-app .clock-select-trigger:disabled{opacity:.55;cursor:not-allowed}

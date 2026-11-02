@@ -1,3 +1,4 @@
+import {content} from '../src/lib/content';
 import {test,expect} from '@playwright/test';
 test('drawing, audio and appearance',async({page},info)=>{
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
@@ -610,7 +611,8 @@ for(const lang of ['de','en','es','fr'])test('localized overview, metadata and s
  await expect(page.locator('.sound-faq')).toBeHidden();
  await page.locator('#focus').click();
  await page.locator('.usage-link a').click();
- await expect(page.locator('.legal-page>section')).toHaveCount(6);
+ await expect(page.locator('.legal-page>section')).toHaveCount(content[lang as keyof typeof content].sections.length);
+ await expect(page.locator('.legal-page>section').first().locator('h2')).toHaveText(content[lang as keyof typeof content].sections[0][0]);
 });
 
 test('sound defaults to dark and respects saved theme choices',async({page})=>{
