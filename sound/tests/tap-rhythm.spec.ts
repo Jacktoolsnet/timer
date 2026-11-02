@@ -1,5 +1,7 @@
 import {test,expect} from '@playwright/test';
 import {emptyRhythm,recordRhythmHit,rhythmHitsAt,finishRhythm,remeterRhythm,rhythmLane,hasRhythm,replacingRhythmLane,resetRhythmSession} from '../src/lib/tap-rhythm';
+import {tapDrumRecipe} from '../src/lib/rhythm-player';
+import {voiceRecipe} from '../src/lib/voice-recipes';
 import {decodeSettings} from '../src/lib/sound-settings';
 
 test('two-bar recording quantizes independent fingers, loops without doubling and never changes tempo',()=>{
@@ -109,10 +111,21 @@ for(const lang of ['de','en','es','fr'])test('rhythm controls and reduced-motion
  await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/'+lang+'/');
  await page.locator('[data-pad-mode=rhythm]').click();
  await expect(page.locator('#rhythm-status')).not.toBeEmpty();await expect(page.locator('#gesture-keyboard')).toContainText('1');
+ for(const selector of ['[data-pad-mode=draw]','[data-pad-mode=rhythm]','#rhythm-done','#rhythm-record','#rhythm-clear']){
+  const button=page.locator(selector),label=await button.getAttribute('aria-label');
+  expect(label).toBeTruthy();await expect(button).toHaveAttribute('title',label!);
+  await expect(button).toHaveText('');await expect(button.locator('svg')).toHaveCount(1);
+ }
  await expect(page.locator('#rhythm-zones span')).toHaveCount(3);
+ await expect(page.locator('#gesture-help')).toBeHidden();
+ await expect(page.locator('#drawing')).toHaveAttribute('aria-describedby','gesture-keyboard');
  await page.locator('#drawing').focus();await page.keyboard.press('3');
  await expect(page.locator('#drawing')).toHaveAttribute('data-rhythm-hits','1');
  await page.locator('#play').click();await expect(page.locator('#rhythm-status')).not.toBeEmpty();
+ await page.locator('[data-pad-mode=draw]').click();await expect(page.locator('#gesture-help')).toBeVisible();
+ await page.goto('/'+lang+'/usage/');
+ const title={de:'Eigenen Rhythmus einklopfen',en:'Tap your own rhythm',es:'Toca tu propio ritmo',fr:'Jouer votre propre rythme'}[lang]!;
+ await expect(page.getByRole('heading',{name:title,exact:true})).toBeVisible();
 });
 
 test('saved rhythm is validated, opt-in and never autoplays',async({page})=>{
@@ -143,7 +156,7 @@ test('sequential input ducks orbit music and Finish restores the same bus withou
   let bus:AudioParam|undefined;
   const target=AudioParam.prototype.setTargetAtTime;
   AudioParam.prototype.setTargetAtTime=function(value:number,time:number,constant:number){
-   if(value===.28)bus=this;
+   if(value===.1)bus=this;
    if(this===bus)(window as any).orbitFade.push({value,constant});
    return target.call(this,value,time,constant);
   };
@@ -154,7 +167,7 @@ test('sequential input ducks orbit music and Finish restores the same bus withou
  const pad=page.locator('#drawing'),volume=await page.locator('#volume').inputValue();
  await pad.focus();await page.keyboard.press('3');await page.waitForTimeout(180);await page.keyboard.press('3');
  const bass=JSON.parse((await pad.getAttribute('data-rhythm-pattern'))!)[2];
- await expect(pad).toHaveAttribute('data-music-level','0.28');
+ await expect(pad).toHaveAttribute('data-music-level','0.1');
  await page.waitForTimeout(2500);
  await pad.focus();await page.keyboard.press('2');await page.waitForTimeout(200);await page.keyboard.press('2');
  let pattern=JSON.parse((await pad.getAttribute('data-rhythm-pattern'))!);
@@ -168,9 +181,44 @@ test('sequential input ducks orbit music and Finish restores the same bus withou
  await expect(pad).toHaveAttribute('data-rhythm-editing','false');await expect(pad).toHaveAttribute('data-music-level','1');
  await expect(page.locator('#volume')).toHaveValue(volume);await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
  const fades=await page.evaluate(()=>(window as any).orbitFade);
- expect(fades.some((e:any)=>e.value===.28)).toBe(true);expect(fades.at(-1)).toEqual({value:1,constant:.18});
+ expect(fades.some((e:any)=>e.value===.1)).toBe(true);expect(fades.at(-1)).toEqual({value:1,constant:.18});
  await page.waitForTimeout(500);await expect(pad).toHaveAttribute('data-rhythm-pattern',JSON.stringify(pattern));
  // Starting a new edit ducks again; returning to Draw restores without erasing the loop.
- await pad.focus();await page.keyboard.press('1');await expect(pad).toHaveAttribute('data-music-level','0.28');
+ await pad.focus();await page.keyboard.press('1');await expect(pad).toHaveAttribute('data-music-level','0.1');
  await page.locator('[data-pad-mode=draw]').click();await expect(pad).toHaveAttribute('data-music-level','1');
+});
+
+
+test('pad kick and hi-hat have more presence while the snare and orbit recipes remain unchanged',()=>{
+ const kick=tapDrumRecipe(2),hat=tapDrumRecipe(0),snare=tapDrumRecipe(1);
+ expect(kick.tones[0].level).toBeCloseTo(voiceRecipe('kick',false,1).tones[0].level*1.35);
+ expect(kick.tones.some(t=>t.hz===176&&t.type==='triangle')).toBe(true);
+ expect(hat.noise[0].level).toBeCloseTo(voiceRecipe('hat',false,1).noise[0].level*1.8);
+ expect(hat.noise[0].frequency).toBe(5000);
+ expect(snare).toEqual(voiceRecipe('snare',false,1));
+ expect(voiceRecipe('kick',false,1).tones).toHaveLength(3);
+ expect(voiceRecipe('hat',false,1).noise[0].frequency).toBe(6500);
+});
+
+test('all three rhythm instruments retain the same rendered level on every loop pass',async({page})=>{
+ await page.goto('/de/');
+ const levels=await page.evaluate(async()=>{
+  const url='/src/lib/rhythm-player.ts',{createRhythmPlayer}=await import(url),results=[];
+  for(const lane of [0,1,2]){
+   const sr=48000,ctx=new OfflineAudioContext(1,sr*2,sr),player=createRhythmPlayer(ctx,ctx.destination);
+   for(const time of [.05,.65,1.25])player.hit(lane,time);
+   const data=(await ctx.startRendering()).getChannelData(0);
+   const rms=(time:number)=>{
+    let power=0;const start=Math.round(time*sr),length=Math.round(.4*sr);
+    for(let n=start;n<start+length;n++)power+=data[n]**2;
+    return Math.sqrt(power/length);
+   };
+   results.push([.05,.65,1.25].map(rms));
+  }
+  return results;
+ });
+ for(const passes of levels){
+  expect(passes[0]).toBeGreaterThan(.001); // Non-silent; absolute RMS depends on each drum’s decay.
+  for(const level of passes.slice(1))expect(Math.abs(20*Math.log10(level/passes[0]))).toBeLessThan(1);
+ }
 });

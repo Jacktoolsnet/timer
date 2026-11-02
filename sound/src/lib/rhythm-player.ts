@@ -1,7 +1,15 @@
 import {voiceRecipe} from './voice-recipes';
 import {rhythmInstruments,type RhythmLane} from './tap-rhythm';
+// Pad-only voicing: leave style-specific orbit instruments and the already clear snare alone.
+export function tapDrumRecipe(lane:RhythmLane){
+ const recipe=voiceRecipe(rhythmInstruments[lane],false,1),gain=lane===0?1.8:lane===2?1.35:1;
+ return {
+  tones:recipe.tones.map(tone=>({...tone,level:tone.level*gain})),
+  noise:recipe.noise.map(burst=>({...burst,level:burst.level*gain,...(lane===0?{frequency:5000,duration:.09}:{})}))
+ };
+}
 /** Reuse our drum recipes on the shared master, independent of random track/timbre changes. */
-export function createRhythmPlayer(ctx:AudioContext,output:AudioNode){
+export function createRhythmPlayer(ctx:BaseAudioContext,output:AudioNode){
  const active=new Map<AudioScheduledSourceNode,{lane:RhythmLane;time:number}>();
  const noise=ctx.createBuffer(1,ctx.sampleRate,ctx.sampleRate),data=noise.getChannelData(0);
  for(let n=0;n<data.length;n++)data[n]=Math.random()*2-1;
@@ -18,7 +26,7 @@ export function createRhythmPlayer(ctx:AudioContext,output:AudioNode){
  return {
   hit(lane:RhythmLane,time:number){
    if(active.size>96)return;
-   const at=Math.max(ctx.currentTime,time),recipe=voiceRecipe(rhythmInstruments[lane],false,1);
+   const at=Math.max(ctx.currentTime,time),recipe=tapDrumRecipe(lane);
    for(const tone of recipe.tones){
     const osc=ctx.createOscillator();osc.type=tone.type||'sine';osc.frequency.setValueAtTime(tone.hz!,at);
     if(tone.endHz)osc.frequency.exponentialRampToValueAtTime(tone.endHz,at+Math.min(tone.duration,tone.glide??.18));

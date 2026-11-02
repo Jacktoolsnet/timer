@@ -255,9 +255,11 @@ body:not(.focus-view) .sound-top{margin-bottom:20px}
 #rhythm-zones span{border-bottom:1px solid var(--line);padding:10px 14px;font-size:11px;letter-spacing:.08em;color:var(--muted);background:linear-gradient(100deg,color-mix(in srgb,var(--lane) 9%,transparent),transparent)}
 #rhythm-zones [data-lane="0"]{--lane:#a482ed}#rhythm-zones [data-lane="1"]{--lane:#f0788c}#rhythm-zones [data-lane="2"]{--lane:#21bed1;border-bottom:0}
 #drawing{position:relative}
-.rhythm-actions{display:flex;gap:8px}.rhythm-actions button:first-child{flex:1}
+.rhythm-actions{display:flex;gap:8px}.rhythm-actions button{flex:1;min-width:44px}
 #rhythm-status{font-size:12px;line-height:1.5;color:var(--muted);margin:10px 2px}
 #rhythm-progress{width:100%;height:7px;accent-color:var(--accent);margin-bottom:14px}
 
-.rhythm-actions{flex-wrap:wrap}.rhythm-actions #rhythm-done{flex:1 1 100%;border-color:var(--accent);background:color-mix(in srgb,var(--accent) 18%,var(--bg))}
+.rhythm-actions{flex-wrap:wrap}.rhythm-actions #rhythm-done{flex:1;border-color:var(--accent);background:color-mix(in srgb,var(--accent) 18%,var(--bg))}
 .rhythm-actions #rhythm-record{flex:1}.rhythm-actions button:disabled{opacity:.45;cursor:default}
+
+#rhythm-controls{margin-top:14px}

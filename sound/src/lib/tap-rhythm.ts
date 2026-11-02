@@ -1,3 +1,5 @@
+/** Only the orbit bus is ducked; live and looped drums stay on the unducked master. */
+export const RHYTHM_EDIT_MUSIC_LEVEL=.1;
 export const rhythmInstruments=['hat','snare','kick'] as const;
 export type RhythmLane=0|1|2;
 export type TapRhythm={beats:2|3|4;start:number|null;state:'armed'|'recording'|'loop';hits:boolean[][];lastTap:(number|null)[];laneStart:(number|null)[];liveStep:(number|null)[]};

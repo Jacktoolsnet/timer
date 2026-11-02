@@ -1,4 +1,4 @@
-import {emptyRhythm,hasRhythm,rhythmLane,recordRhythmHit,rhythmHitsAt,finishRhythm,replacingRhythmLane,resetRhythmSession,remeterRhythm,rhythmCopy,type RhythmLane} from '../lib/tap-rhythm';
+import {RHYTHM_EDIT_MUSIC_LEVEL,emptyRhythm,hasRhythm,rhythmLane,recordRhythmHit,rhythmHitsAt,finishRhythm,replacingRhythmLane,resetRhythmSession,remeterRhythm,rhythmCopy,type RhythmLane} from '../lib/tap-rhythm';
 import {createRhythmPlayer} from '../lib/rhythm-player';
 import {performanceGate} from '../lib/performance';
 import {gridEvolutionPlan,enrichGrid,variedGrid,gridSizes,gridCopy,remapPoints,gridEvents,gridPhraseHold,swingPosition,gridFractionAtTime,canEvolveGrid,type GridChoice,type GridSize} from '../lib/track-grid';
@@ -79,7 +79,9 @@ function syncRhythmUi(){
  const text=rhythmCopy[language],active=padMode==='rhythm';
  document.querySelectorAll<HTMLButtonElement>('[data-pad-mode]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.padMode===padMode)));
  $('#rhythm-zones').hidden=!active;$('#rhythm-controls').hidden=!active;
- $('#gesture-help').textContent=active?text.help:gestureCopy[language].help;
+ $('#gesture-help').hidden=active;
+ $('#gesture-help').textContent=active?'':gestureCopy[language].help;
+ drawing.setAttribute('aria-describedby',active?'gesture-keyboard':'gesture-help gesture-keyboard');
  $('#gesture-keyboard').textContent=active?text.keyboard:gestureCopy[language].keyboard;
  const hint=active?text.hint:gestureCopy[language].hint;
  $('#draw-hint').textContent=hint;drawing.setAttribute('aria-label',hint);
@@ -90,7 +92,7 @@ function syncRhythmUi(){
  drawing.dataset.rhythmPattern=JSON.stringify(tapPattern.hits);
  $('#rhythm-clear').toggleAttribute('disabled',!hasRhythm(tapPattern));
  $('#rhythm-done').toggleAttribute('disabled',!hasRhythm(tapPattern)||!rhythmEditing);
- const musicLevel=active&&rhythmEditing ? .28 : 1;
+ const musicLevel=active&&rhythmEditing ? RHYTHM_EDIT_MUSIC_LEVEL : 1;
  drawing.dataset.musicLevel=String(musicLevel);drawing.dataset.rhythmEditing=String(rhythmEditing);
  if(audio&&orbitBus)orbitBus.gain.setTargetAtTime(musicLevel,audio.currentTime,.18);
 }

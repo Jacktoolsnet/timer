@@ -24,3 +24,13 @@ test('drum attacks, kick pitch drop and shaker onset keep their own character',(
  expect(voiceRecipe('shaker',true,1).noise[0].attack).toBeGreaterThan(voiceRecipe('hat',true,1).noise[0].attack!);
  expect(sustainedInstruments as readonly string[]).toContain('organ');
 });
+
+
+test('kick has a fuller bass body and audible punch without raising its main peak',()=>{
+ const kick=voiceRecipe('kick',false,1);
+ expect(kick.tones[0].level).toBe(.29);expect(kick.tones[0].endHz).toBe(48);
+ expect(kick.tones[1].hz).toBe(65);expect(kick.tones[1].level).toBe(.08);
+ expect(kick.tones[1].duration).toBe(.24);
+ expect(kick.tones[2].type).toBe('triangle');expect(kick.tones[2].endHz).toBe(110);
+ expect(kick.tones.every(t=>t.duration<=.36)).toBe(true);
+});

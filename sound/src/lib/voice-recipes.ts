@@ -6,7 +6,9 @@ export function voiceRecipe(id:InstrumentId,warm:boolean,decay:number):VoiceReci
  const tone=(hz:number,duration:number,level:number,extra:Partial<ToneRecipe>={}):ToneRecipe=>({hz,duration,level,...extra});
  const partial=(ratio:number,duration:number,level:number,extra:Partial<ToneRecipe>={}):ToneRecipe=>({ratio,duration,level,...extra});
  switch(id){
-  case 'kick':return {tones:[tone(145,.32,.29,{endHz:44,glide:.045,attack:.002}),tone(65,.14,.035,{attack:.003})],noise:[]};
+  // A focused pitch drop, a fuller low body and a short audible upper-body layer.
+  // Keep the main peak and fast attack: more weight, not a blanket volume increase.
+  case 'kick':return {tones:[tone(145,.36,.29,{endHz:48,glide:.05,attack:.002}),tone(65,.24,.08,{attack:.003}),tone(176,.13,.06,{type:'triangle',endHz:110,glide:.045,attack:.002})],noise:[]};
   case 'snare':return {tones:[tone(185,.12,.085,{endHz:155,glide:.07,attack:.002}),tone(330,.065,.035,{attack:.001})],noise:[{duration:.17,level:.24,frequency:1900,type:'highpass',attack:.001}]};
   case 'hat':return {tones:[tone(6450,.025,.018,{type:'square',attack:.001}),tone(8910,.02,.01,{type:'square',attack:.001})],noise:[{duration:.065,level:.095,frequency:6500,attack:.001}]};
   case 'clap':return {tones:[],noise:[0,.012,.026].map((offset,i)=>({duration:i===2?.16:.02,level:i===2?.14:.11,frequency:1400,type:'bandpass' as const,offset,attack:.001}))};
