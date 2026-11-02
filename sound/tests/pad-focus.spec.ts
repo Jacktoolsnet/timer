@@ -31,8 +31,8 @@ test('entering Rhythm keeps normal mix; selecting enlarges one pad without recor
  await clickPad(page,0);
  await expect(drawing).toHaveAttribute('data-selected-pad','0');
  await expect(drawing).toHaveAttribute('data-rhythm-hits','0');
- await expect(drawing).toHaveAttribute('data-music-level','0.1');
- await expect(drawing).toHaveAttribute('data-lane-levels','1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1');
+ await expect(drawing).toHaveAttribute('data-music-level','0.4');
+ await expect(drawing).toHaveAttribute('data-lane-levels','1,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4');
  await page.waitForTimeout(350);
  const big=(await page.locator('#rhythm-zones>[data-lane="0"]').boundingBox())!,box=(await drawing.boundingBox())!;
  expect(big.width/box.width).toBeCloseTo(.6,2);expect(big.height/box.height).toBeCloseTo(.6,2);
@@ -90,11 +90,11 @@ test('percussion companion gain is genuinely quieter without changing the select
  const ratio=await page.evaluate(async()=>{
   const path='/src/lib/rhythm-player.ts',module=await import(path);
   const ctx=new OfflineAudioContext(2,48000*3,48000),player=module.createRhythmPlayer(ctx,ctx.destination);
-  player.setLaneLevel(0,.1);player.setLaneLevel(1,1);
+  player.setLaneLevel(0,.4);player.setLaneLevel(1,1);
   player.hit(0,1,'kick',.5);player.hit(1,2,'kick',.5);
   const buffer=await ctx.startRendering(),data=buffer.getChannelData(0);
   const rms=(start:number)=>{let sum=0;for(let i=start;i<start+19200;i++)sum+=data[i]**2;return Math.sqrt(sum/19200);};
   return rms(48000)/rms(96000);
  });
- expect(ratio).toBeCloseTo(.1,2);
+ expect(ratio).toBeCloseTo(.4,2);
 });

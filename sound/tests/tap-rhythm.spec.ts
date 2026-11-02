@@ -161,7 +161,7 @@ test('sequential selected input ducks companions and Finish restores their level
   let bus:AudioParam|undefined;
   const target=AudioParam.prototype.setTargetAtTime;
   AudioParam.prototype.setTargetAtTime=function(value:number,time:number,constant:number){
-   if(value===.1)bus=this;
+   if(value===.4)bus=this;
    if(this===bus)(window as any).orbitFade.push({value,constant});
    return target.call(this,value,time,constant);
   };
@@ -172,7 +172,7 @@ test('sequential selected input ducks companions and Finish restores their level
  const pad=page.locator('#drawing'),volume=await page.locator('#volume').inputValue();
  await pad.focus();await page.keyboard.press('7');await page.waitForTimeout(180);await page.keyboard.press('7');
  const bass=JSON.parse((await pad.getAttribute('data-rhythm-pattern'))!)[0];
- await expect(pad).toHaveAttribute('data-music-level','0.1');
+ await expect(pad).toHaveAttribute('data-music-level','0.4');
  await page.locator('#rhythm-done').click();await page.waitForTimeout(2500);
  await pad.focus();await page.keyboard.press('8');await page.keyboard.press('8');await page.waitForTimeout(200);await page.keyboard.press('8');
  let pattern=JSON.parse((await pad.getAttribute('data-rhythm-pattern'))!);
@@ -187,10 +187,10 @@ test('sequential selected input ducks companions and Finish restores their level
  await expect(pad).toHaveAttribute('data-rhythm-editing','false');await expect(pad).toHaveAttribute('data-music-level','1');
  await expect(page.locator('#volume')).toHaveValue(volume);await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
  const fades=await page.evaluate(()=>(window as any).orbitFade);
- expect(fades.some((e:any)=>e.value===.1)).toBe(true);expect(fades.at(-1).value).toBe(1);
+ expect(fades.some((e:any)=>e.value===.4)).toBe(true);expect(fades.at(-1).value).toBe(1);
  await page.waitForTimeout(500);await expect(pad).toHaveAttribute('data-rhythm-pattern',JSON.stringify(pattern));
  // Selecting a new edit ducks again; leaving without new hits preserves accepted loops.
- await pad.focus();await page.keyboard.press('9');await expect(pad).toHaveAttribute('data-music-level','0.1');
+ await pad.focus();await page.keyboard.press('9');await expect(pad).toHaveAttribute('data-music-level','0.4');
  await page.locator('[data-pad-mode=draw]').click();await expect(pad).toHaveAttribute('data-music-level','1');
 });
 

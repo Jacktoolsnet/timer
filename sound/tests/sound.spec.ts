@@ -776,9 +776,9 @@ test('semitone value sits to the right of the pitch slider',async({page})=>{
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });
 
-test('note glow control sits directly below pitch in the playback controls',async({page})=>{
+test('note glow control sits directly below pitch in the settings tile',async({page})=>{
  await page.goto('/de/');
- await expect(page.locator('.sound-transport #note-effect')).toBeVisible();
+ await expect(page.locator('.controls-tile #note-effect')).toBeVisible();
  await expect(page.locator('.animations-tile #note-effect')).toHaveCount(0);
  const pitch=(await page.locator('#transpose').boundingBox())!,glow=(await page.locator('#note-effect').boundingBox())!;
  expect(glow.y).toBeGreaterThan(pitch.y+pitch.height);

@@ -1,6 +1,6 @@
 import {ORBIT_COUNT,padAt,type OrbitPad} from './orbit-layout';
 /** Companion parts fade to this level while the selected pad stays at its normal level. */
-export const RHYTHM_EDIT_MUSIC_LEVEL=.1;
+export const RHYTHM_EDIT_MUSIC_LEVEL=.4;
 /** Legacy drum order only; matrix pads take their live instrument from the matching orbit. */
 export const rhythmInstruments=['hat','snare','kick'] as const;
 export type RhythmLane=OrbitPad;

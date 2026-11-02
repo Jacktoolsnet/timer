@@ -1032,7 +1032,7 @@ type PadRing={x:number;y:number;color:string;started:number;released:number|null
 type PadGesture={id:number;x:number;y:number;startX:number;startY:number;clientX:number;clientY:number;started:number;mode:GestureMode;painted:Set<string>;last?:Trail;lastStamp:number;applied:number;target:number|null;originStep:number;ring:PadRing};
 const padGestures=new Map<number,PadGesture>();
 let trail:Trail[]=[],padRings:PadRing[]=[];
-let keyboardPoint={x:350,y:220},padSyncPending=false;
+let keyboardPoint={x:drawing.width/2,y:drawing.height/2},padSyncPending=false;
 function schedulePadSync(){if(padSyncPending)return;padSyncPending=true;requestAnimationFrame(()=>{padSyncPending=false;sync();});}
 function padLocation(x:number,y:number){
  const active=activeTracks();if(!active.length)return null;
@@ -1504,7 +1504,7 @@ function frame(now:number){
  if(centerMode==='sun')renderCenter(time,dark);
  else if(centerMode==='ring')renderPulseRing(time,dark);
  else if(centerMode!=='off')renderCenterVariant(time,dark,centerMode);
- dc.clearRect(0,0,700,440);trail=trail.filter(p=>now-p.time<2200);
+ dc.clearRect(0,0,drawing.width,drawing.height);trail=trail.filter(p=>now-p.time<2200);
  const previousTrail=new Map<number,Trail>();
  for(const b of trail){const a=previousTrail.get(b.pointer);previousTrail.set(b.pointer,b);if(!a||b.start)continue;dc.globalAlpha=Math.max(0,1-(now-b.time)/2200);const color=dark?b.color:lightColors[colors.indexOf(b.color)];dc.strokeStyle=color;dc.shadowColor=color;dc.shadowBlur=reduced.matches?0:dark?16:7;dc.lineWidth=3;dc.lineCap='round';dc.beginPath();dc.moveTo(a.x,a.y);dc.lineTo(b.x,b.y);dc.stroke();}
  dc.globalAlpha=1;dc.shadowBlur=0;
