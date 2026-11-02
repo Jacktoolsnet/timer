@@ -1,3 +1,4 @@
+import {gridSizes,type GridChoice,type GridSize} from './track-grid';
 import {danceIds,type DanceId} from './dances';
 import {grooveChoices,type GrooveChoice} from './groove';
 import {instrumentIds,type InstrumentId} from './instruments';
@@ -6,7 +7,7 @@ export const backgroundModes=['clouds','aurora','stars','waves','off','random'] 
 export const centerModes=['ring','filled','sine','bars','sun','off','random'] as const;
 export const orbitModes=['comet','dot','pulse','off','random'] as const;
 export type SavedTrack={
- enabled:boolean;mute:boolean;instrument:InstrumentId;points:boolean[];motif?:number[];volume:number;pitch:number;phase:number;
+ grid?:GridChoice;slots?:GridSize;enabled:boolean;mute:boolean;instrument:InstrumentId;points:boolean[];motif?:number[];volume:number;pitch:number;phase:number;
  direction:number;directionMode:string;randomDynamics:boolean;
  morph:{to:InstrumentId;progress:number}|null;
 };
@@ -28,6 +29,9 @@ export function decodeSettings(raw:string|null):SoundSettings|null{
   if(s.dance!==undefined&&s.dance!==null&&!member(danceIds,s.dance))return null;
   if(s.groove!==undefined&&!member(grooveChoices,s.groove))return null;
   for(const tr of s.tracks){
+   if(tr?.grid!==undefined&&tr.grid!=='auto'&&!(gridSizes as readonly unknown[]).includes(tr.grid))return null;
+   if(tr?.slots!==undefined&&!(gridSizes as readonly unknown[]).includes(tr.slots))return null;
+   if(typeof tr?.grid==='number'&&tr.slots!==undefined&&tr.grid!==tr.slots)return null;
    if(!tr||typeof tr.enabled!=='boolean'||typeof tr.mute!=='boolean'||typeof tr.randomDynamics!=='boolean'
     ||!member(instrumentIds,tr.instrument)||!number(tr.volume,0,1)||!number(tr.pitch,0,24)||!Number.isInteger(tr.pitch)
     ||!number(tr.phase,0,15)||!Number.isInteger(tr.phase)||![1,-1].includes(tr.direction)

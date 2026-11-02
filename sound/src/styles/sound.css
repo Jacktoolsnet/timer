@@ -234,3 +234,7 @@ body:not(.focus-view) .sound-top{margin-bottom:20px}
 .dance-tile.is-pending,.dance-free.is-pending{border:1px dashed var(--accent)}.groove-tile:disabled{opacity:.45;cursor:not-allowed}
 .focus-view .dances-tile{display:none}
 @media(max-width:600px){.dances-tile{padding:18px}.dance-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}.dance-tile{padding:12px;grid-template-columns:24px 1fr;gap:4px 8px;font-size:13px}.dance-tile svg{width:23px;height:23px}}
+
+.gesture-help{font-size:12px;line-height:1.5;color:var(--muted);margin:10px 2px 18px}.gesture-keyboard{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}#drawing:focus-visible{outline-offset:-4px}
+
+#drawing{user-select:none;-webkit-touch-callout:none}
