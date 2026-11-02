@@ -1050,15 +1050,46 @@ $('#focus').addEventListener('click',()=>focus(!document.body.classList.contains
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.querySelector('dialog[open]')&&!(padMode==='rhythm'&&selectedPad!==null))focus(false);});
 function position(e:PointerEvent,c:HTMLCanvasElement){const r=c.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*c.width,y:(e.clientY-r.top)/r.height*c.height};}
 orbit.addEventListener('pointerdown',e=>{
- if(!orbitAnimation)return;
+ if(e.button!==0)return;
  const p=position(e,orbit),x=p.x-350,y=p.y-350,r=Math.hypot(x,y);
- const active=activeTracks();if(!active.length)return;
- const nearest=active.map((entry,rank)=>({...entry,distance:Math.abs(r-radius(rank,active.length))})).sort((a,b)=>a.distance-b.distance)[0];
- if(nearest.distance>Math.min(19,92/Math.max(1,active.length-1)))return;
- const i=nearest.index;
- const s=Math.round(((Math.atan2(y,x)+Math.PI/2+Math.PI*2)%(Math.PI*2))/(Math.PI*2)*trackSteps(i))%trackSteps(i);
- if(rhythmTrack(i))return;
- tracks[i].points[s]=!tracks[i].points[s];rememberDrawing(i);sync();
+ // Independent of orbit visibility and active tracks; leave note hit-testing untouched.
+ if(r<=80){
+  e.preventDefault();
+  const variants=['ring','filled','sun','sine','bars'] as const;
+  selectCenterMode(variants[(variants.indexOf(centerMode as typeof variants[number])+1)%variants.length]);
+  return;
+ }
+ if(r>320)return; // Outside the orbit belongs to the background shortcut.
+ e.preventDefault();
+ const active=activeTracks();
+ let hit:{index:number;step:number;distance:number}|null=null;
+ if(orbitAnimation)active.forEach(({index},rank)=>{
+  const ringRadius=radius(rank,active.length),slots=trackSteps(index);
+  for(let step=0;step<slots;step++){
+   const angle=step/slots*Math.PI*2-Math.PI/2;
+   const distance=Math.hypot(x-Math.cos(angle)*ringRadius,y-Math.sin(angle)*ringRadius);
+   if(distance<=Math.min(14,92/Math.max(1,active.length-1))&&(!hit||distance<hit.distance))hit={index,step,distance};
+  }
+ });
+ if(hit){
+  const {index,step}=hit;
+  // Locked dance points still consume the tap, without unexpectedly switching animations.
+  if(rhythmTrack(index))return;
+  tracks[index].points[step]=!tracks[index].points[step];rememberDrawing(index);sync();return;
+ }
+ const variants=['comet','dot','pulse'] as const;
+ selectOrbitMode(variants[(variants.findIndex(mode=>mode===orbitMode)+1)%variants.length]);
+});
+$('#sound-app').addEventListener('pointerdown',e=>{
+ if(e.button!==0||e.defaultPrevented||document.querySelector('dialog[open]'))return;
+ const target=e.target as HTMLElement;
+ // Only the free canvas/background surfaces, never drawing, controls or status text.
+ if(!target.matches('#sound-app,.sound-grid,.orbit-wrap,#orbit,#sound-atmosphere'))return;
+ const point=position(e,orbit);
+ if(Math.hypot(point.x-350,point.y-350)<=320)return;
+ e.preventDefault();
+ const variants=['clouds','aurora','stars','waves'] as const;
+ selectBackgroundMode(variants[(variants.findIndex(mode=>mode===backgroundMode)+1)%variants.length]);
 });
 type Trail={x:number;y:number;time:number;start:boolean;color:string;pointer:number};
 type PadRing={x:number;y:number;color:string;started:number;released:number|null;duration:number;strength?:number;lane?:RhythmLane;note?:number|null};
