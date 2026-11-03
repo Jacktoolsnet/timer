@@ -1,3 +1,4 @@
+import {ORBIT_OUTER_RADIUS} from '../src/lib/orbit-layout';
 import {styleIds} from '../src/lib/presets';
 import {content} from '../src/lib/content';
 import {test,expect} from '@playwright/test';
@@ -746,10 +747,10 @@ test('quiet orbit notes light up on playback hits',async({page})=>{
  await row.locator('summary').click();
  await row.locator('.track-volume').fill('0.05');await row.locator('.track-volume').dispatchEvent('input');
  await page.locator('#play').click();
- await expect.poll(()=>page.locator('#orbit').evaluate((canvas:HTMLCanvasElement)=>{
-  const [r,g,b]=canvas.getContext('2d')!.getImageData(350,50,1,1).data;
+ await expect.poll(()=>page.locator('#orbit').evaluate((canvas:HTMLCanvasElement,outerRadius:number)=>{
+  const [r,g,b]=canvas.getContext('2d')!.getImageData(350,350-outerRadius,1,1).data;
   return r>130&&g>190&&b>190;
- }),{timeout:4000,intervals:[20,40,80]}).toBe(true);
+ },ORBIT_OUTER_RADIUS),{timeout:4000,intervals:[20,40,80]}).toBe(true);
  await page.locator('#play').click();
 });
 

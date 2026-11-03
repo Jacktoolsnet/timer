@@ -29,7 +29,7 @@ export function createRhythmPlayer(ctx:BaseAudioContext,output:AudioNode){
  return {
   setLaneLevel(lane:RhythmLane,level:number){laneMix[lane].gain.setTargetAtTime(level,ctx.currentTime,.08);},
   hit(lane:RhythmLane,time:number,id:InstrumentId=rhythmInstruments[lane%3],volume=.55){
-   if(active.size>96)return;
+   if(active.size>96)return 0;
    const at=Math.max(ctx.currentTime,time),recipe=tapInstrumentRecipe(id);
    for(const tone of recipe.tones){
     const osc=ctx.createOscillator();osc.type=tone.type||'sine';osc.frequency.setValueAtTime(tone.hz!,at);
@@ -42,6 +42,7 @@ export function createRhythmPlayer(ctx:BaseAudioContext,output:AudioNode){
     const start=at+(burst.offset||0);
     connect(source,envelope(start,burst.duration,burst.attack??.001,burst.level,volume),start,burst.duration,lane,filter);
    }
+   return Math.max(0,...recipe.tones.map(tone=>tone.duration),...recipe.noise.map(burst=>(burst.offset||0)+burst.duration));
   },
   cancelLane(lane:RhythmLane,after:number){
    for(const [source,event] of active)if(event.lane===lane&&event.time>=after){

@@ -1,3 +1,4 @@
+import {ORBIT_OUTER_RADIUS} from '../src/lib/orbit-layout';
 import {test,expect,type Page} from '@playwright/test';
 async function tapBackground(page:Page,touch=false){
  const orbit=page.locator('#orbit'),b=(await orbit.boundingBox())!;
@@ -29,7 +30,7 @@ test('drawing, controls, centre, orbit notes and secondary clicks do not change 
  await page.goto('/de/');await page.locator('#drawing').click();await page.locator('[data-pad-mode=rhythm]').click();
  const orbit=page.locator('#orbit'),b=(await orbit.boundingBox())!;
  await orbit.click({position:{x:b.width/2,y:b.height/2}});
- await orbit.click({position:{x:b.width/2,y:50/700*b.height}}); // Outermost orbit note
+ await orbit.click({position:{x:b.width/2,y:(350-ORBIT_OUTER_RADIUS)/700*b.height}}); // Outermost orbit note
  await orbit.click({button:'right',position:{x:8,y:8}});await page.keyboard.press('Escape');
  await expect(page.locator('[data-background-mode=clouds]')).toHaveAttribute('aria-pressed','true');
  await page.locator('[data-background-mode=random]').click();

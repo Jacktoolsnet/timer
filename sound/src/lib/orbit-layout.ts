@@ -1,4 +1,11 @@
 export const ORBIT_COUNT=9;
+export const ORBIT_OUTER_RADIUS=316;
+export const ORBIT_INNER_RADIUS=100;
+export const ORBIT_HIT_RADIUS=ORBIT_OUTER_RADIUS+18;
+/** Use more of the canvas: nine rings now have 27 px spacing instead of 23. */
+export function orbitRadius(rank:number,count:number){return ORBIT_OUTER_RADIUS-rank*(ORBIT_OUTER_RADIUS-ORBIT_INNER_RADIUS)/Math.max(1,count-1);}
+export function orbitHitTolerance(count:number){return Math.min(14,(ORBIT_OUTER_RADIUS-ORBIT_INNER_RADIUS)/Math.max(1,count-1)/2);}
+
 export const padNumbers=[7,8,9,4,5,6,1,2,3] as const;
 export type OrbitPad=0|1|2|3|4|5|6|7|8;
 export function padAt(x:number,y:number,width:number,height:number):OrbitPad{
