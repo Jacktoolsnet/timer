@@ -1,3 +1,4 @@
+import {paintSoundFlower} from '../lib/sound-flower';
 import {paintConstellation} from '../lib/constellation';
 import {paintNoteStream,type StreamPreview} from '../lib/note-stream';
 import {LandscapeHistory,paintLandscape} from '../lib/landscape';
@@ -500,7 +501,7 @@ function pickVariant<T extends string>(modes:readonly T[],current:T):T{
 }
 function selectVisualization(mode:VisualizationMode){
  if(visualization!==mode){landscape.clear();streamCache=null;}visualization=mode;orbit.dataset.visualization=mode;
- orbit.setAttribute('aria-label',mode==='constellation'?visualizationCopy[language].constellationDescription:mode==='stream'?visualizationCopy[language].streamDescription:mode==='landscape'?visualizationCopy[language].description:t.steps);
+ orbit.setAttribute('aria-label',mode==='flower'?visualizationCopy[language].flowerDescription:mode==='constellation'?visualizationCopy[language].constellationDescription:mode==='stream'?visualizationCopy[language].streamDescription:mode==='landscape'?visualizationCopy[language].description:t.steps);
  document.querySelectorAll<HTMLButtonElement>('button[data-visualization]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.visualization===mode)));
  document.querySelectorAll<HTMLButtonElement>('[data-orbit-mode],[data-center-mode]').forEach(button=>{
   button.disabled=mode!=='orbit';if(button.disabled)button.title=visualizationCopy[language].orbitOnly;else button.removeAttribute('title');
@@ -1956,6 +1957,7 @@ function frame(now:number){
  oc.clearRect(0,0,700,700);
  const visualMaster=Math.min(1,Number($<HTMLInputElement>('#volume').value)/.3);
  const active=activeTracks();
+ if(visualization==='flower')paintSoundFlower(oc,landscape,active.map(({tr,index})=>({index,label:String(padNumbers[index]),color:tr.color,volume:tr.volume,mute:tr.mute||tr.volume===0,pitched:isMelodic(tr.instrument)})),time,dark,playing,reduced.matches,visualMaster,noteEffect);
  if(visualization==='constellation')paintConstellation(oc,landscape,active.map(({tr,index})=>({index,label:String(padNumbers[index]),color:tr.color,volume:tr.volume,mute:tr.mute||tr.volume===0,pitched:isMelodic(tr.instrument)})),time,dark,playing,reduced.matches,visualMaster,noteEffect);
  if(visualization==='landscape')paintLandscape(oc,landscape,active.map(({tr,index})=>({index,label:String(padNumbers[index]),color:tr.color,volume:tr.volume,mute:tr.mute||tr.volume===0,pitched:isMelodic(tr.instrument)})),time,bpm,groove.beats,dark,playing,reduced.matches,visualMaster,noteEffect);
  if(visualization==='stream'){
