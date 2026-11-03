@@ -5,15 +5,22 @@ import {videoAnimationCopy,videoAnimationPlan,videoAnimationKeys} from '../src/l
 import {decodeSettings} from '../src/lib/sound-settings';
 import {defaultVideoTitle} from '../src/lib/video-info';
 import {fileCopy} from '../src/lib/file-copy';
-test('independent change plans scale with video length and keep changes away from the endpoints',()=>{
- const short=videoAnimationPlan(60,()=>.5),long=videoAnimationPlan(600,()=>.5);
+test('social-video changes begin early, stay frequent in long takes and never interrupt a crossfade',()=>{
  expect(defaultVideoTitle('Jazz & Blues')).toBe('Random Jazz & Blues Sound Session');
- for(const key of videoAnimationKeys){
-  expect(short[key].length).toBeGreaterThanOrEqual(6);expect(short[key].length).toBeLessThanOrEqual(9);
-  expect(short[key][0]).toBeGreaterThan(4000);expect(short[key].at(-1)!).toBeLessThan(57000);
-  short[key].forEach((time,i)=>{expect(long[key][i]).toBeCloseTo(time*10);if(i)expect(time-short[key][i-1]).toBeGreaterThan(3000);});
+ for(const seconds of [60,180,600])for(const random of [()=>0,()=>.5,()=>1]){
+  const plan=videoAnimationPlan(seconds,random),all=videoAnimationKeys.flatMap(key=>plan[key]).sort((a,b)=>a-b);
+  expect(all[0]).toBeGreaterThanOrEqual(1800);expect(all[0]).toBeLessThanOrEqual(2400);
+  expect(all.at(-1)!).toBeLessThan(seconds*1000-1800);
+  all.forEach((time,i)=>{if(i)expect(time-all[i-1]).toBeGreaterThanOrEqual(1250);});
+  for(const key of videoAnimationKeys){
+   expect(plan[key].length).toBeGreaterThanOrEqual(Math.floor(seconds/7));
+   plan[key].forEach((time,i)=>{if(i){expect(time-plan[key][i-1]).toBeGreaterThanOrEqual(5000);expect(time-plan[key][i-1]).toBeLessThanOrEqual(6000);}});
+  }
  }
- expect(new Set(videoAnimationKeys.map(key=>short[key][0])).size).toBe(4);
+ const single=videoAnimationPlan(60,()=>.5,{visualization:true});
+ expect(single.center).toEqual([]);expect(single.background).toEqual([]);expect(single.orbit).toEqual([]);
+ single.visualization.forEach((time,i)=>{if(i)expect(time-single.visualization[i-1]).toBe(4250);});
+ expect(videoAnimationKeys.flatMap(key=>videoAnimationPlan(60,()=>.5,{})[key])).toEqual([]);
 });
 async function options(page:Page){
  await page.locator('#files-open').click();test.skip(await page.locator('#video-record').isDisabled(),'No native MP4');
@@ -32,8 +39,8 @@ test('video changes all selected layers temporarily, independently of normal Pla
  await clock(page);await page.goto('/de/');await options(page);
  await page.locator('#video-record').click();await expect(page.locator('#video-status')).toHaveText(fileCopy.de.recording);
  await page.evaluate(()=>(window as any).videoAdvance=7000);
- await expect.poll(async()=>page.locator('#orbit').getAttribute('data-center-variant')).not.toBe('ring');
- // Other layer schedules have not reached their later first change yet (deterministic plan below is not required).
+ await expect.poll(async()=>page.locator('#orbit').getAttribute('data-visualization')).not.toBe('orbit');
+ // Advance further to verify the other enabled layers and restoration too.
  await page.evaluate(()=>(window as any).videoAdvance=32000);
  await expect.poll(async()=>page.locator('#orbit').getAttribute('data-visualization')).not.toBe('orbit');
  await expect.poll(async()=>page.locator('#orbit').getAttribute('data-mode')).not.toBe('comet');
@@ -80,7 +87,7 @@ test('automatic title follows the style, but changing styles never overwrites cu
  });
  await page.goto('/de/');await page.locator('#files-open').click();await page.locator('#video-info-enabled').check();
  await page.locator('#video-info-title').fill('Mein eigener Titel');await page.locator('#files-close').click();
- await page.locator('[data-style-preset=jazz]').click();await page.locator('#files-open').click();
+ await page.locator('#animation-settings-open').click();await page.locator('[data-animation-open=music]').click();await page.locator('[data-style-preset=jazz]').click();await page.locator('#animation-settings-close').click();await page.locator('#files-open').click();
  await expect(page.locator('#video-info-title')).toHaveValue('Mein eigener Titel');
  await expect(page.locator('#video-info-title')).toHaveAttribute('placeholder','Random Jazz & Blues Sound Session');
  test.skip(await page.locator('#video-record').isDisabled(),'No native MP4');
@@ -88,4 +95,16 @@ test('automatic title follows the style, but changing styles never overwrites cu
  await page.locator('#video-record').click();await expect(page.locator('#video-status')).toHaveText(fileCopy.de.recording);
  await expect.poll(async()=>page.evaluate(()=>(window as any).captionTexts.includes('Random Jazz & Blues Sound Session'))).toBe(true);
  await page.waitForTimeout(600);const download=page.waitForEvent('download');await page.locator('#video-stop').click();await download;
+});
+
+test('a single enabled centre layer changes early while the other video layers stay fixed',async({page})=>{
+ await clock(page);await page.goto('/de/');await options(page);
+ for(const key of ['visualization','orbit','background'])await page.locator('#video-animation-'+key).uncheck();
+ const originalOrbitMode=await page.locator('#orbit').getAttribute('data-mode');
+ await page.locator('#video-record').click();await expect(page.locator('#video-status')).toHaveText(fileCopy.de.recording);
+ await page.evaluate(()=>(window as any).videoAdvance=3000);
+ await expect(page.locator('#orbit')).not.toHaveAttribute('data-center-variant','ring');
+ await expect(page.locator('#orbit')).toHaveAttribute('data-visualization','orbit');expect(await page.locator('#orbit').getAttribute('data-mode')).toBe(originalOrbitMode);
+ const download=page.waitForEvent('download');await page.locator('#video-stop').click();await download;
+ await expect(page.locator('#orbit')).toHaveAttribute('data-center-variant','ring');
 });

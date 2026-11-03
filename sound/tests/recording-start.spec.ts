@@ -76,7 +76,7 @@ test('recording options round-trip in JSON and reject malformed switches without
  for(const option of ['restart','random','fullscreen'])await page.locator('#recording-'+option).check();
  const download=page.waitForEvent('download');await page.locator('#json-export').click();
  const raw=await readFile((await(await download).path())!,'utf8');
- expect(decodeSettings(raw)!.recording).toEqual({restart:true,random:true,fullscreen:true,minutes:10,videoFormat:'landscape',videoInfo:defaultVideoInfo,animations:{center:false,orbit:false,background:false,visualization:false}});
+ expect(decodeSettings(raw)!.recording).toEqual({restart:true,random:true,fullscreen:true,minutes:10,videoFormat:'landscape',videoPad:'none',videoInfo:defaultVideoInfo,animations:{center:false,orbit:false,background:false,visualization:false}});
  for(const value of [null,[],{},'yes',{restart:'true',random:false,fullscreen:false}]){
   const bad=JSON.parse(raw);bad.recording=value;expect(decodeSettings(JSON.stringify(bad))).toBeNull();
  }

@@ -1,3 +1,5 @@
+import {RadarHistory,paintOrbitRadar,radarStrength,radarPoint} from '../lib/orbit-radar';
+import {paintVideoPad,type VideoPadMode} from '../lib/video-pad';
 import {rateWindow,rateGridEvents,randomTrackRate,trackRateCopy,type TrackRate,type TrackRateChoice} from '../lib/track-rate';
 import {CanvasTransition} from '../lib/canvas-transition';
 import {paintRiverDelta} from '../lib/river-delta';
@@ -88,7 +90,7 @@ let visualization:VisualizationMode='orbit';
 let landscapeVariant:LandscapeVariant='rivers';
 let streamVariant:StreamVariant='notes';
 let constellationVariant:ConstellationVariant='stars';
-const landscape=new LandscapeHistory();
+const landscape=new LandscapeHistory(),radar=new RadarHistory();
 let streamRevision=0,streamCache:{key:string;scores:NoteScore[]}|null=null;
 let currentDance:DanceId|null=null,pendingDance:DanceId|null=null;
 function currentPreset(){return currentDance?dances[currentDance].preset:presets[currentStyle];}
@@ -433,7 +435,7 @@ function snapshotSettings(includeDraft=false):SoundSettings{
  return {
    version:2,style:currentStyle,dance:currentDance,groove:grooveChoice,bpm,transpose,noteEffect,volume:Number($<HTMLInputElement>('#volume').value),
    ...(videoAnimationRun?.changed.has('visualization')?videoAnimationRun.original:{visualization,landscapeVariant,streamVariant,constellationVariant}),background:backgroundChoice,center:centerChoice,flowerCenter:flowerCenterChoice,orbit:orbitChoice,
-   recording:{restart:$<HTMLInputElement>('#recording-restart').checked,random:$<HTMLInputElement>('#recording-random').checked,fullscreen:$<HTMLInputElement>('#recording-fullscreen').checked,minutes:Number($<HTMLInputElement>('#recording-duration').value),videoFormat:chosenVideoFormat(),videoInfo:chosenVideoInfo(),animations:chosenVideoAnimations()},
+   recording:{restart:$<HTMLInputElement>('#recording-restart').checked,random:$<HTMLInputElement>('#recording-random').checked,fullscreen:$<HTMLInputElement>('#recording-fullscreen').checked,minutes:Number($<HTMLInputElement>('#recording-duration').value),videoFormat:chosenVideoFormat(),videoPad:chosenVideoPad(),videoInfo:chosenVideoInfo(),animations:chosenVideoAnimations()},
    pad:{mode:padMode,beats:(backup??tapPattern).beats,hits:(backup??tapPattern).hits.map(lane=>[...lane]),notes:(backup??tapPattern).notes.map(lane=>[...lane])},
    tracks:tracks.map((live,i)=>{const tr=backup&&rhythmTouched.has(i)&&rhythmTrackBackup?{...live,...rhythmTrackBackup[i]}:live;return ({
     score:(()=>{const score=!includeDraft&&scoreSelection===i?scoreBackup:tr.score;return score===null?null:cloneScore(score);})(),rate:tr.pendingRate??tr.rate,rateChoice:tr.rateChoice,grid:tr.grid,slots:tr.slots,enabled:tr.enabled,mute:tr.mute,instrument:tr.instrument,groups:cloneNoteGroups(tr.groups),points:[...tr.points],motif:[...tr.motif],volume:tr.volume,pitch:tr.pitch,
@@ -527,7 +529,7 @@ function labelAction(selector:string,label:string){const button=$(selector);butt
 const wake=screenWakeLock($('#wake-status'),'',t.wakeUnavailable);
 window.addEventListener('pageshow',()=>wake(document.body.classList.contains('focus-view')));
 let backgroundMode:'clouds'|'aurora'|'stars'|'waves'|'off'='clouds';
-let orbitMode:'comet'|'dot'|'pulse'|'off'='comet';
+let orbitMode:'comet'|'dot'|'pulse'|'radar'|'off'='comet';
 let orbitAnimation=true;
 let centerMode:'ring'|'filled'|'sine'|'bars'|'sun'|'off'='ring';
 let centerChoice:SoundSettings['center']=centerMode;
@@ -598,7 +600,7 @@ function selectBackgroundMode(choice:SoundSettings['background']){
 }
 function selectOrbitMode(choice:SoundSettings['orbit']){
  orbitChoice=choice;persistSettings();
- orbitMode=choice==='random'?pickVariant(['comet','dot','pulse'] as const,orbitMode):choice;
+ orbitMode=choice==='random'?pickVariant(['comet','dot','pulse','radar'] as const,orbitMode):choice;
  orbitAnimation=orbitMode!=='off';orbit.dataset.animated=String(orbitAnimation);orbit.dataset.mode=orbitMode;
  document.querySelectorAll<HTMLButtonElement>('[data-orbit-mode]').forEach(tile=>tile.setAttribute('aria-pressed',String(tile.dataset.orbitMode===choice)));
 }
@@ -632,7 +634,7 @@ function advanceVideoAnimations(now:number){
   }else if(key==='center'&&visualization==='orbit'&&centerMode!=='off'){
    centerMode=pickVariant(['ring','filled','sun','sine','bars'],centerMode);orbit.dataset.centerVariant=centerMode;run.changed.add(key);
   }else if(key==='orbit'&&orbitMode!=='off'){
-   orbitMode=pickVariant(['comet','dot','pulse'],orbitMode);orbit.dataset.mode=orbitMode;run.changed.add(key);
+   orbitMode=pickVariant(['comet','dot','pulse','radar'],orbitMode);orbit.dataset.mode=orbitMode;run.changed.add(key);
   }else if(key==='background'&&backgroundMode!=='off'){
    backgroundMode=pickVariant(['clouds','aurora','stars','waves'],backgroundMode);atmosphere.dataset.mode=backgroundMode;run.changed.add(key);
   }
@@ -1120,7 +1122,7 @@ function streamFrame(time:number){
 const scoreHits=new Map<string,number>();
 function silenceScoreLane(index:number){
  streamRevision++;
- landscape.release(index,audio?.currentTime??0);
+ landscape.release(index,audio?.currentTime??0);radar.clear(index);
  cancelGroupNotes(index);groupDisplays[index].clear();noteShapes[index].clear();
  for(const key of scoreHits.keys())if(key.startsWith(index+':'))scoreHits.delete(key);
  events.forEach(e=>e.notes=e.notes.filter(n=>n.track!==index));
@@ -1300,7 +1302,7 @@ function schedule(){
  flushGroupNotes();events.sort((a,b)=>a.time-b.time);
 }
 function stop(finishRecordings=true){
- landscape.clear();streamCache=null;
+ landscape.clear();radar.clear();streamCache=null;
  chordVoicings.clear();scoreHits.clear();
  cancelGroupNotes();groupDisplays.forEach(row=>row.forEach(g=>g.members.forEach(n=>n.played=false)));
  if(finishRecordings){recordingGeneration++;finishVideoRecording();finishWavRecording();}
@@ -1423,9 +1425,9 @@ function syncVolume(){
 }
 syncVolume();
 $<HTMLInputElement>('#volume').addEventListener('input',e=>{syncVolume();if(master&&audio&&playing)master.gain.setTargetAtTime(Number((e.target as HTMLInputElement).value),audio.currentTime,.02);persistSettings();});
-$('#clear').addEventListener('click',()=>{landscape.clear();noteEditor?.cancel();tracks.forEach(tr=>tr.score=null);acceptRhythmEdit();resetTapRhythm();selectedPad=null;padSwitchBlocked=false;rhythmEditing=false;cancelPadGestures();tracks.forEach(tr=>{tr.points.fill(false);tr.groups=emptyNoteGroups();});cancelGroupNotes();groupDisplays.forEach(d=>d.clear());noteShapes.forEach(notes=>notes.clear());sync();});
+$('#clear').addEventListener('click',()=>{landscape.clear();radar.clear();noteEditor?.cancel();tracks.forEach(tr=>tr.score=null);acceptRhythmEdit();resetTapRhythm();selectedPad=null;padSwitchBlocked=false;rhythmEditing=false;cancelPadGestures();tracks.forEach(tr=>{tr.points.fill(false);tr.groups=emptyNoteGroups();});cancelGroupNotes();groupDisplays.forEach(d=>d.clear());noteShapes.forEach(notes=>notes.clear());sync();});
 function applyStyle(id:StyleId,dance:DanceId|null=null){
- landscape.clear();
+ landscape.clear();radar.clear();
  noteEditor?.cancel();tracks.forEach(tr=>tr.score=null);
  chordVoicings.clear();
  cancelGroupNotes();groupDisplays.forEach(d=>d.clear());
@@ -1522,6 +1524,15 @@ orbit.addEventListener('pointerdown',e=>{
  let hit:{index:number;step:number;distance:number;group?:boolean}|null=null;
  if(orbitAnimation)active.forEach(({index},rank)=>{
   const ringRadius=radius(rank,active.length),slots=trackSteps(index);
+  if(orbitMode==='radar'){
+   const tr=tracks[index],master=Math.min(1,Number($<HTMLInputElement>('#volume').value)/.3);if(!playing||tr.mute||tr.volume<=0||master<=0)return;
+   for(const echo of radar.notes(index)){
+    if(radarStrength((audio?.currentTime??0)-echo.at,echo.level*tr.volume*master,noteEffect)<.04)continue;
+    const point=radarPoint(ringRadius,echo),distance=Math.hypot(p.x-point.x,p.y-point.y);
+    if(distance<=orbitHitTolerance(active.length)&&(!hit||distance<hit.distance))hit={index,step:echo.beat,distance};
+   }
+   return;
+  }
   for(let step=0;step<slots;step++){
    const angle=orbitNoteAngle(index,step),gridAngle=step/slots*Math.PI*2-Math.PI/2;
    const distance=Math.min(Math.hypot(x-Math.cos(angle)*ringRadius,y-Math.sin(angle)*ringRadius),Math.hypot(x-Math.cos(gridAngle)*ringRadius,y-Math.sin(gridAngle)*ringRadius));
@@ -1539,7 +1550,7 @@ orbit.addEventListener('pointerdown',e=>{
   if(rhythmTrack(index))return;
   tracks[index].points[step]=!tracks[index].points[step];rememberDrawing(index);sync();return;
  }
- const variants=['comet','dot','pulse'] as const;
+ const variants=['comet','dot','pulse','radar'] as const;
  selectOrbitMode(variants[(variants.findIndex(mode=>mode===orbitMode)+1)%variants.length]);
 });
 $('#sound-app').addEventListener('pointerdown',e=>{
@@ -2024,6 +2035,7 @@ function frame(now:number){
  advanceVideoAnimations(now);
  const time=audio?.currentTime||0;
  while(events.length&&events[0].time<=time){const ev=events.shift()!;ev.notes.forEach(({track,beat,velocity,note,pitch,length,angle,joinedFrom,group,member,scorePoint})=>{if(scorePoint)scoreHits.set(scorePoint,ev.time);const tr=tracks[track];if(tr.enabled&&!tr.mute&&tr.volume>0){tr.flash[beat]=now;tr.hits[beat]=ev.time;tr.hitVelocities[beat]=velocity;tr.lastVelocity=velocity;
+   radar.record(track,{at:ev.time,beat,angle:angle??orbitNoteAngle(track,beat),level:velocity,direction:tr.direction,kind:group?.kind,member,count:group?.members.length});
    {
     const scoreKey=scorePoint?.split(':').map(Number),score=scoreKey&&tr.score?.[scoreKey[1]],first=scoreKey?.[2]===0;
     const seconds=60/bpm*groove.beats*2/trackRate(track);
@@ -2067,7 +2079,9 @@ function frame(now:number){
   paintNoteStream(oc,landscape,active.map(({tr,index})=>({index,label:String(padNumbers[index]),name:instrumentNames[language][instrumentIds.indexOf(tr.instrument)],color:tr.color,volume:tr.volume,mute:tr.mute||tr.volume===0,pitched:isMelodic(tr.instrument)})),scene.previews,scene.time,scene.barStart,bpm,groove.beats,dark,playing,reduced.matches,visualMaster,noteEffect,streamVariant);
  }
  if(visualization==='orbit'&&orbitAnimation)active.forEach(({tr,index},rank)=>{
-  const r=radius(rank,active.length);oc.beginPath();oc.arc(350,350,r,0,Math.PI*2);oc.strokeStyle=tr.color+(dark?'55':'99');oc.lineWidth=dark?1:1.4;oc.stroke();
+  const r=radius(rank,active.length);
+  if(orbitMode==='radar'){paintOrbitRadar(oc,radar.notes(index),r,tr.color,time,playing?tr.volume*visualMaster:0,tr.mute||tr.volume===0,dark,reduced.matches,noteEffect);return;}
+  oc.beginPath();oc.arc(350,350,r,0,Math.PI*2);oc.strokeStyle=tr.color+(dark?'55':'99');oc.lineWidth=dark?1:1.4;oc.stroke();
   // Each orbit carries a continuous comet; audible notes briefly boost its glow.
   if(playing&&orbitAnimation&&!reduced.matches){
    const age=time-Math.max(...tr.hits);
@@ -2168,6 +2182,7 @@ function applySettings(saved:SoundSettings){
  $<HTMLInputElement>('#video-info-title').value=videoInfo.title;
  for(const key of ['enabled','showTitle','style','tempo','section','signature'] as const)$<HTMLInputElement>('#video-info-'+key).checked=videoInfo[key];syncVideoInfo();
  $<HTMLInputElement>('#video-format input[value="'+(saved.recording?.videoFormat??'landscape')+'"]').checked=true;syncVideoFormat();
+ $<HTMLInputElement>('#video-pad input[value="'+(saved.recording?.videoPad??'none')+'"]').checked=true;
  $<HTMLInputElement>('#recording-duration').value=String(saved.recording?.minutes??10);syncRecordingDuration();
  for(const option of ['restart','random','fullscreen'] as const)$<HTMLInputElement>('#recording-'+option).checked=saved.recording?.[option]??false;
   applyStyle(saved.style,saved.dance??null);configureGroove(saved.groove??'auto',false);bpm=saved.bpm;transpose=saved.transpose??0;syncTranspose();noteEffect=saved.noteEffect??1;syncNoteEffect();
@@ -2237,9 +2252,9 @@ fileInput.addEventListener('change',async()=>{
  }catch{$('#file-status').textContent=files.error;}
  finally{importBusy=false;syncFileButtons();}
 });
-type RecordingStart={restart:boolean;random:boolean;generation:number;durationSeconds:number;videoFormat:VideoFormat;videoInfo:VideoInfoSettings;animations:VideoAnimationSettings};
+type RecordingStart={restart:boolean;random:boolean;generation:number;durationSeconds:number;videoFormat:VideoFormat;videoPad:VideoPadMode;videoInfo:VideoInfoSettings;animations:VideoAnimationSettings};
 async function prepareRecording():Promise<RecordingStart>{
- const options={restart:$<HTMLInputElement>('#recording-restart').checked,random:$<HTMLInputElement>('#recording-random').checked,durationSeconds:Number($<HTMLInputElement>('#recording-duration').value)*60,videoFormat:chosenVideoFormat(),videoInfo:chosenVideoInfo(),animations:chosenVideoAnimations(),generation:recordingGeneration};
+ const options={restart:$<HTMLInputElement>('#recording-restart').checked,random:$<HTMLInputElement>('#recording-random').checked,durationSeconds:Number($<HTMLInputElement>('#recording-duration').value)*60,videoFormat:chosenVideoFormat(),videoPad:chosenVideoPad(),videoInfo:chosenVideoInfo(),animations:chosenVideoAnimations(),generation:recordingGeneration};
  // Both requests must be initiated before awaiting anything, inside the button gesture.
  let fullscreen:Promise<void>|undefined;
  try{if($<HTMLInputElement>('#recording-fullscreen').checked)fullscreen=focus(true);}catch{/* Focus view remains available when fullscreen is denied. */}
@@ -2279,6 +2294,8 @@ function syncVideoInfo(){
  $<HTMLInputElement>('#video-info-title').disabled=!info.enabled||!info.showTitle;
 }
 document.querySelectorAll<HTMLInputElement>('.video-info input').forEach(input=>input.addEventListener(input.type==='text'?'input':'change',()=>{syncVideoInfo();persistSettings();}));
+function chosenVideoPad():VideoPadMode{return $<HTMLInputElement>('#video-pad input:checked').value as VideoPadMode;}
+document.querySelectorAll<HTMLInputElement>('#video-pad input').forEach(input=>input.addEventListener('change',persistSettings));
 function chosenVideoFormat():VideoFormat{return $<HTMLInputElement>('#video-format input:checked').value as VideoFormat;}
 function syncVideoFormat(){
  const {width,height}=videoDimensions(chosenVideoFormat());$('#video-resolution').textContent=width+' × '+height;
@@ -2300,7 +2317,7 @@ function syncFileButtons(){
  labelAction('#wav-record',wavActive?files.stop:files.wavRecord);
  $('#files-open').dataset.recording=String(videoBusy||wavBusy);
  $<HTMLInputElement>('#recording-duration').disabled=videoBusy||wavBusy||importBusy;
- for(const input of document.querySelectorAll<HTMLInputElement>('#video-format input,.video-info input,.video-animation-options input'))input.disabled=videoBusy||wavBusy||importBusy;
+ for(const input of document.querySelectorAll<HTMLInputElement>('#video-format input,#video-pad input,.video-info input,.video-animation-options input'))input.disabled=videoBusy||wavBusy||importBusy;
  if(!videoBusy&&!wavBusy&&!importBusy)syncVideoInfo();
  for(const option of ['restart','random','fullscreen'])$<HTMLInputElement>('#recording-'+option).disabled=videoBusy||wavBusy||importBusy||(option==='random'&&!$<HTMLInputElement>('#recording-restart').checked);
 }
@@ -2333,13 +2350,25 @@ $('#video-record').addEventListener('click',async()=>{
  try{
   const options=await prepareRecording();
   if(!audio||!recordingOutput)throw Error('Audio unavailable');
+  const padCanvas=options.videoPad==='none'?undefined:document.createElement('canvas');
+  if(padCanvas){padCanvas.width=padCanvas.height=700;padCanvas.dataset.videoPad=options.videoPad;}
+  const padContext=padCanvas?.getContext('2d');
+  if(padCanvas&&!padContext)throw Error('Pad canvas unavailable');
   videoRecording=createMp4Recording({
    audio,output:recordingOutput,durationSeconds:options.durationSeconds,format:options.videoFormat,
    paint:ctx=>{
     const lang=options.videoInfo.language??'en',style=styleCopy[lang].names[styleIds.indexOf(currentStyle)];
+    if(padContext){
+     const time=audio?.currentTime??0,dark=document.documentElement.dataset.theme==='dark'||(!document.documentElement.dataset.theme&&matchMedia('(prefers-color-scheme: dark)').matches);
+     paintVideoPad(padContext,options.videoPad as 'tap'|'notes',tracks.map((tr,index)=>({
+      index,name:instrumentNames[lang][instrumentIds.indexOf(tr.instrument)],color:tr.color,pitched:isMelodic(tr.instrument),muted:!tr.enabled||tr.mute||tr.volume<=0,
+      score:previewScore(index),position:playing?scorePosition(time,index):0,
+      hits:playing?landscape.notes(index).slice(-64).filter(n=>!n.pulseOnly&&n.at<=time&&time-n.at<1.2).map(n=>({age:time-n.at,pitch:n.pitch,degree:isMelodic(tr.instrument)?tapNoteDegree(currentStyle,harmonyBar(),n.pitch):null,level:n.level*tr.volume*Math.min(1,Number($<HTMLInputElement>('#volume').value)/.3),position:scorePosition(n.at,index)})):[]
+     })),options.videoPad==='tap'?selectedPad:scoreSelection,dark,reduced.matches);
+    }
     paintVideo(ctx,orbit,atmosphere,!atmosphere.hidden,{settings:{...options.videoInfo,title:options.videoInfo.title.trim()?options.videoInfo.title:defaultVideoTitle(style)},content:{
      style,tempo:bpm+' BPM',section:evolving&&song?songCopy[lang][song.form[song.index].kind]:'',signature:videoInfoCopy[lang].credit
-    }});
+    }},padCanvas);
    },
    ready:(blob,limited)=>{
     if(captureFailed)return;
@@ -2351,7 +2380,7 @@ $('#video-record').addEventListener('click',async()=>{
    error:()=>{if(captureFailed)return;finishVideoUi();$('#video-status').textContent=files.videoError;}
   });
   if(videoRecording?.state!=='recording')throw Error('Recorder unavailable');
-  videoAnimationRun={start:performance.now(),flags:options.animations,plan:videoAnimationPlan(options.durationSeconds),next:{center:0,orbit:0,background:0,visualization:0},changed:new Set(),original:{visualization,landscapeVariant,streamVariant,constellationVariant}};
+  videoAnimationRun={start:performance.now(),flags:options.animations,plan:videoAnimationPlan(options.durationSeconds,Math.random,options.animations),next:{center:0,orbit:0,background:0,visualization:0},changed:new Set(),original:{visualization,landscapeVariant,streamVariant,constellationVariant}};
   await startRecordedMusic(options);
   videoStarted=performance.now();$('#video-time').textContent='00:00';$('#video-time').hidden=false;
   videoTimer=setInterval(()=>{

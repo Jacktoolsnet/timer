@@ -36,7 +36,7 @@ for(const lang of ['de','en','es','fr'] as const)test('localized music settings 
  await expect(page.locator('[data-style-preset]')).toHaveCount(styleIds.length);await page.locator('[data-style-preset=sport]').click();await expect(page.locator('[data-style-preset=sport]')).toHaveAttribute('aria-pressed','true');
  const size=await page.locator('#animation-settings').boundingBox();expect(Math.abs(size!.height-size!.width)).toBeLessThan(2);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBe(0);
- await page.locator('#palette-dropdown summary').click();await page.locator('#theme-light').click();await page.locator('#preferences-close').click();
+ await page.locator('#focus').click();await page.locator('#palette-dropdown summary').click();await page.locator('#theme-light').click();await page.locator('#preferences-close').click();await page.locator('#focus').click();
  await expect(page.locator('[data-style-preset=sport]')).toBeVisible();await page.locator('#animation-settings-back').click();await page.locator('[data-animation-open=controls]').click();
  await expect(page.locator('#transpose')).toBeVisible();await page.locator('#animation-settings-close').click();await expect(page.locator('#drawing')).toBeVisible();
 });

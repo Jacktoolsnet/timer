@@ -422,7 +422,7 @@ The MP4 card offers a master video-info switch plus individually selectable cust
 Captions are drawn into the capture canvas only, not the live focus view or WAV. Portrait retains the 680-pixel orbit and places text in its unused vertical space; landscape uses a 540-pixel orbit with separate header/footer bands. Long Unicode titles are fitted with an ellipsis using bounded measurement, and outlined/shadowed light text stays readable without opaque boxes. All controls and credits are localized into the four existing languages; the tool credit can be disabled independently.
 
 ### Duration-aware video animation changes
-Three opt-in switches in the MP4 card independently randomize centre, orbit and background during capture. Each layer gets six to nine staggered change times distributed across the chosen 1–10 minute length. Normal and Random Play use the same video pacing; music-driven random animation scheduling yields to an enabled video layer. Explicit Off stays Off. Temporary variants do not alter fixed/random/off choices or saved settings, and touched layers restore their selected modes when capture finishes or fails. WAV is unaffected. The validated optional `recording.animations` object persists with project/settings data.
+Four opt-in switches in the MP4 card randomize centre, orbit, background and visualization during capture. Enabled layers share frequent staggered changes throughout the chosen 1–10 minute length. Normal and Random Play use the same video pacing; music-driven random animation scheduling yields to an enabled video layer. Explicit Off stays Off. Temporary variants do not alter fixed/random/off choices or saved settings, and touched layers restore their selected modes when capture finishes or fails. WAV is unaffected. The validated optional `recording.animations` object persists with project/settings data.
 
 An empty custom video-title field now means automatic naming: `Random <localized music style> Sound Session`. The field displays that default as its placeholder, and the capture follows style changes; any non-empty custom title remains untouched.
 
@@ -529,7 +529,7 @@ Video captions now use a separately selected language (English default, with Ger
 - Rendering is bounded to the latest 64 events per track and a 4.2-second cloud lifetime. Mute, volume, master, playback and glow control emissions. Reduced motion retains stationary fading clouds without sparks. Focus mode and MP4 use the same live canvas.
 
 ### Video visualization changes and crossfades
-- MP4 animation options include an opt-in random visualization switch (all four languages). Its independent schedule follows recording duration, cycling between the five views and their landscape/stream/constellation variants. Original selections restore after recording; temporary views do not leak into JSON or browser preferences. Old projects without this optional flag remain valid and default to off.
+- MP4 animation options include an opt-in random visualization switch (all four languages). It shares the staggered video schedule, cycling between the five views and their landscape/stream/constellation variants. Original selections restore after recording; temporary views do not leak into JSON or browser preferences. Old projects without this optional flag remain valid and default to off.
 - Foreground and background changes use an eased 1.1-second canvas crossfade. One reusable snapshot per layer blends into the live incoming animation; rapid changes resume from the current blended image. These are real canvas pixels, so MP4 exports contain the same transition, including fading backgrounds off.
 - Reduced motion skips crossfades. Audible note history is retained across views and collected in Orbit too, so incoming visualizations can immediately represent already-played music. Audio timing and synthesis are unchanged.
 
@@ -542,3 +542,17 @@ Video captions now use a separately selected language (English default, with Ger
 ### Unified inline settings
 - Tempo & sound and Music style now live beside Sound animation and Background animation in the four-tile settings home, not in separate sections below the instrument. The existing controls/IDs and event handlers are reused without duplicate inputs or changes to music/export/storage formats.
 - Settings subpages keep the square input surface: sliders fit the panel, styles use a scrollable three-column grid, and Back/Escape restore the settings home. The original input mode is retained when closing. All four languages, themes, focus mode and live MP4 adjustment remain supported.
+
+### Optional pads in MP4
+- Video layout offers Visualization only (unchanged default), Tap pad, or Note pad in all four languages. The optional validated `recording.videoPad` field round-trips through JSON and opt-in storage; legacy files default to none. Selection is frozen for a take.
+- Pad video renders directly from the same accepted/draft score, actual audible-event history, track colours, mute/volume and local clocks. Tap view mirrors the 3×3/focused-pad layout; notes show score previews or the selected pitch/time grid with eight companions. It remains live while input/settings surfaces are hidden, without DOM screenshots, microphone capture or new dependencies. Editor buttons and settings are not included.
+- Portrait places the visual above the pad; landscape places them side by side. With a pad, all enabled captions—including provenance and signature—move into a reserved header above both surfaces. Without a pad, the prior layout is unchanged. Recording continues even when the expanded note editor hides the on-page visual.
+
+### Faster social-video visual development
+- Enabled video layers now share a staggered cadence, starting after 1.8–2.4 seconds. With all four options enabled, each layer changes about every 5–6 seconds; with only one enabled it changes every 3–5.5 seconds. Long recordings gain more changes rather than stretching the same few scenes across minutes.
+- A 1.25-second minimum between changes lets the existing 1.1-second crossfade finish. Disabled layers receive no scheduled changes; the intro/outro retain a brief hold. Playback/audio, manual choices and post-recording restoration are unchanged.
+
+### Orbit radar
+- Orbit settings offer Radar alongside Comet, Dot and Pulse in all four languages. Radar also participates in manual tap cycling, random animation choice and randomized video changes, and round-trips as orbit: radar in JSON/opt-in preferences.
+- Only actual sounded notes create phosphor-like points and short directional trails; there are no persistent orbit rings, silent grid points or idle sweep heads. Every echo fades completely within 2.4 seconds. Grouped/chord voices keep their distinct head positions. Centre/background remain independent.
+- A bounded per-track audible-event history supports timing, direction and dynamics without new audio or musical randomness. Volume, mute and note-glow strength are respected; reduced motion uses stationary fading points without halos or trails. Only visible radar points participate in note hit testing. Focus and MP4 use the same canvas and crossfades.

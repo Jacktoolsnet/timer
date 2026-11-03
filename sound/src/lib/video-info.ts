@@ -9,8 +9,22 @@ export const videoInfoCopy={
  fr:{language:'Langue de la vidéo',randomNotice:'Mélodies créées avec le hasard',syntheticNotice:'Tous les sons sont synthétisés',label:'Afficher les infos dans la vidéo',title:'Titre du morceau',placeholder:'Le titre de ton morceau',showTitle:'Afficher le titre',style:'Style musical',tempo:'Tempo',section:'Section du morceau',signature:'Signature de l’outil',credit:'Créé avec JackTools Sound'}
 };
 export function videoInfoSize(width:number,height:number,enabled=false){return Math.max(1,Math.min(width,height)- (enabled&&width>height?180:40));}
+function topInfoLines(settings:VideoInfoSettings,content:VideoInfoContent,portrait:boolean){
+ const copy=videoInfoCopy[settings.language??'en'];
+ const rows:{text:string;size:number;leading:number;bold?:boolean;tint?:'accent'|'muted'}[]=[];
+ if(settings.showTitle&&settings.title.trim())rows.push({text:settings.title,size:portrait?28:26,leading:36,bold:true,tint:'accent'});
+ const meta=[settings.style?content.style:'',settings.tempo?content.tempo:''].filter(Boolean).join(' · ');
+ if(meta)rows.push({text:meta,size:portrait?18:16,leading:24});
+ rows.push({text:copy.randomNotice,size:14,leading:20,tint:'muted'},{text:copy.syntheticNotice,size:14,leading:20,tint:'muted'});
+ if(settings.section&&content.section)rows.push({text:content.section,size:17,leading:24});
+ if(settings.signature)rows.push({text:content.signature,size:14,leading:20,tint:'accent'},{text:'sound.jacktools.net',size:13,leading:18,tint:'muted'});
+ return rows;
+}
+export function videoTopInfoHeight(settings:VideoInfoSettings,content:VideoInfoContent,portrait:boolean){
+ return settings.enabled?24+topInfoLines(settings,content,portrait).reduce((sum,row)=>sum+row.leading,0):0;
+}
 /** Canvas-only captions, with bounded single lines and contrast independent of the live theme. */
-export function paintVideoInfo(ctx:CanvasRenderingContext2D,settings:VideoInfoSettings,content:VideoInfoContent){
+export function paintVideoInfo(ctx:CanvasRenderingContext2D,settings:VideoInfoSettings,content:VideoInfoContent,placement:'split'|'top'='split'){
  if(!settings.enabled)return;
  const {width,height}=ctx.canvas,portrait=height>width,maxWidth=width-80;
  const theme=getComputedStyle(document.documentElement),body=getComputedStyle(document.body);
@@ -37,6 +51,13 @@ export function paintVideoInfo(ctx:CanvasRenderingContext2D,settings:VideoInfoSe
   ctx.shadowColor=dark?'rgba(0,0,0,.9)':'rgba(255,255,255,.9)';ctx.shadowBlur=10;
   ctx.strokeText(text,width/2,y);ctx.fillText(text,width/2,y);ctx.shadowBlur=0;
  };
+ if(placement==='top'){
+  let y=12;
+  for(const row of topInfoLines(settings,content,portrait)){
+   y+=row.leading;line(row.text,y-5,row.size,row.bold,row.tint==='accent'?accent:row.tint==='muted'?muted:textColor);
+  }
+  ctx.restore();return;
+ }
  if(settings.showTitle)line(settings.title,portrait?height*.13:34,portrait?34:26,true,accent);
  const meta=[settings.style?content.style:'',settings.tempo?content.tempo:''].filter(Boolean).join(' · ');
  line(meta,portrait?height*.17:64,portrait?21:17);

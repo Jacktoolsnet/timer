@@ -10,9 +10,9 @@ async function tapFreeOrbit(page:Page){
  const a=-Math.PI/2+Math.PI/16;
  await tapOrbit(page,350+Math.cos(a)*200,350+Math.sin(a)*200);
 }
-test('free inner orbit space cycles the three styles without editing notes, centre or background',async({page})=>{
+test('free inner orbit space cycles the four styles without editing notes, centre or background',async({page})=>{
  await page.goto('/de/');const before=await page.locator('.steps button[aria-pressed=true]').count();
- for(const mode of ['dot','pulse','comet']){
+ for(const mode of ['dot','pulse','radar','comet']){
   await tapFreeOrbit(page);
   await expect(page.locator('[data-orbit-mode='+mode+']')).toHaveAttribute('aria-pressed','true');
   await expect(page.locator('#orbit')).toHaveAttribute('data-mode',mode);
@@ -39,8 +39,8 @@ test('hidden orbit restarts on a free tap; random advances from its current styl
  await page.locator('#play').click(); // Random animation choices may update when starting.
  const started=await page.locator('#orbit').getAttribute('data-mode');expect(current).toBeTruthy();
  await page.locator('#focus').click();await tapFreeOrbit(page);
- const modes=['comet','dot','pulse'];
- await expect(page.locator('[data-orbit-mode='+modes[(modes.indexOf(started!)+1)%3]+']')).toHaveAttribute('aria-pressed','true');
+ const modes=['comet','dot','pulse','radar'];
+ await expect(page.locator('[data-orbit-mode='+modes[(modes.indexOf(started!)+1)%modes.length]+']')).toHaveAttribute('aria-pressed','true');
  await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');await expect(page.locator('body')).toHaveClass(/focus-view/);
 });
 

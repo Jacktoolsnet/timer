@@ -41,10 +41,10 @@ export const backgroundCopy={
 };
 
 export const orbitCopy={
- de:{random:'Zufällig',title:'Animationen',comet:'Schweif',dot:'Lichtpunkt',pulse:'Puls-Halo',off:'Aus'},
- en:{random:'Random',title:'Animations',comet:'Comet trail',dot:'Light dot',pulse:'Pulse halo',off:'Off'},
- es:{random:'Aleatorio',title:'Animaciones',comet:'Estela',dot:'Punto de luz',pulse:'Halo pulsante',off:'Desactivado'},
- fr:{random:'Aléatoire',title:'Animations',comet:'Traînée',dot:'Point lumineux',pulse:'Halo pulsant',off:'Désactivé'}
+ de:{radar:'Radar',random:'Zufällig',title:'Animationen',comet:'Schweif',dot:'Lichtpunkt',pulse:'Puls-Halo',off:'Aus'},
+ en:{radar:'Radar',random:'Random',title:'Animations',comet:'Comet trail',dot:'Light dot',pulse:'Pulse halo',off:'Off'},
+ es:{radar:'Radar',random:'Aleatorio',title:'Animaciones',comet:'Estela',dot:'Punto de luz',pulse:'Halo pulsante',off:'Desactivado'},
+ fr:{radar:'Radar',random:'Aléatoire',title:'Animations',comet:'Traînée',dot:'Point lumineux',pulse:'Halo pulsant',off:'Désactivé'}
 };
 
 export const pitchCopy={

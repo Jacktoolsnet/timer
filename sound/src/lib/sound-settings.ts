@@ -1,3 +1,4 @@
+import {videoPadModes,type VideoPadMode} from './video-pad';
 import {trackRates,type TrackRate,type TrackRateChoice} from './track-rate';
 import {constellationVariants,type ConstellationVariant,streamVariants,type StreamVariant,landscapeVariants,type LandscapeVariant,visualizationModes,type VisualizationMode} from './visualization';
 import {validScore,type NoteScore} from './note-score';
@@ -15,7 +16,7 @@ import {instrumentIds,type InstrumentId} from './instruments';
 import {styleIds,type StyleId} from './presets';
 export const backgroundModes=['clouds','aurora','stars','waves','off','random'] as const;
 export const centerModes=['ring','filled','sine','bars','sun','off','random'] as const;
-export const orbitModes=['comet','dot','pulse','off','random'] as const;
+export const orbitModes=['comet','dot','pulse','radar','off','random'] as const;
 export type SavedTrack={
  rate?:TrackRate;rateChoice?:TrackRateChoice;
  score?:NoteScore|null;
@@ -30,7 +31,7 @@ export type SoundSettings={
  streamVariant?:StreamVariant;
  constellationVariant?:ConstellationVariant;
  flowerCenter?:typeof centerModes[number];
- recording?:{restart:boolean;random:boolean;fullscreen:boolean;minutes?:number;videoFormat?:'landscape'|'portrait';videoInfo?:VideoInfoSettings;animations?:VideoAnimationSettings};
+ recording?:{restart:boolean;random:boolean;fullscreen:boolean;minutes?:number;videoFormat?:'landscape'|'portrait';videoPad?:VideoPadMode;videoInfo?:VideoInfoSettings;animations?:VideoAnimationSettings};
  pad?:{mode:'draw'|'rhythm'|'notes';beats:2|3|4;hits:boolean[][];notes?:(number|null)[][]};
  version:2;style:StyleId;dance?:DanceId|null;groove?:GrooveChoice;bpm:number;volume:number;transpose?:number;noteEffect?:number;tracks:SavedTrack[];
  background:typeof backgroundModes[number];center:typeof centerModes[number];orbit:typeof orbitModes[number];
@@ -52,6 +53,7 @@ export function decodeSettings(raw:string|null):SoundSettings|null{
   if(s.recording!==undefined&&(!s.recording||Array.isArray(s.recording)||['restart','random','fullscreen'].some(key=>typeof s.recording[key]!=='boolean')))return null;
   if(s.recording?.minutes!==undefined&&(!number(s.recording.minutes,1,10)||!Number.isInteger(s.recording.minutes)))return null;
   if(s.recording?.videoFormat!==undefined&&!member(['landscape','portrait'],s.recording.videoFormat))return null;
+  if(s.recording?.videoPad!==undefined&&!member(videoPadModes,s.recording.videoPad))return null;
   if(s.recording?.videoInfo!==undefined){
    const info=s.recording.videoInfo;
    if(info?.language!==undefined&&!member(['en','de','es','fr'],info.language))return null;

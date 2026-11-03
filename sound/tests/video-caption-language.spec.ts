@@ -4,7 +4,7 @@ import {videoInfoCopy} from '../src/lib/video-info';
 import {decodeSettings} from '../src/lib/sound-settings';
 import {fileCopy} from '../src/lib/file-copy';
 test('video language defaults to English independently of the page and preserves custom titles',async({page})=>{
- await page.goto('/de/');await page.locator('[data-style-preset=classical]').click();await page.locator('#files-open').click();await page.locator('#video-info-enabled').check();
+ await page.goto('/de/');await page.locator('#animation-settings-open').click();await page.locator('[data-animation-open=music]').click();await page.locator('[data-style-preset=classical]').click();await page.locator('#animation-settings-close').click();await page.locator('#files-open').click();await page.locator('#video-info-enabled').check();
  await expect(page.locator('#video-caption-language input[value=en]')).toBeChecked();
  await expect(page.locator('#video-info-title')).toHaveAttribute('placeholder','Random Classical Sound Session');
  await page.locator('#video-caption-language input[value=fr]').check();await expect(page.locator('#video-info-title')).toHaveAttribute('placeholder','Random Classique Sound Session');
@@ -36,7 +36,7 @@ for(const lang of ['en','de','es','fr'] as const)test(`actual MP4 includes trans
   const fill=CanvasRenderingContext2D.prototype.fillText;(window as any).texts=[];
   CanvasRenderingContext2D.prototype.fillText=function(text,x,y,...rest){if(this.canvas.width===720&&this.canvas.height===1280)(window as any).texts.push(text);return fill.call(this,text,x,y,...rest);};
  });
- await page.goto('/de/');await page.locator('[data-style-preset=classical]').click();await page.locator('#files-open').click();test.skip(await page.locator('#video-record').isDisabled(),'No native MP4');
+ await page.goto('/de/');await page.locator('#animation-settings-open').click();await page.locator('[data-animation-open=music]').click();await page.locator('[data-style-preset=classical]').click();await page.locator('#animation-settings-close').click();await page.locator('#files-open').click();test.skip(await page.locator('#video-record').isDisabled(),'No native MP4');
  await page.locator('#video-info-enabled').check();await page.locator('#video-caption-language input[value='+lang+']').check();await page.locator('#video-format input[value=portrait]').check();
  await page.locator('#video-record').click();await expect(page.locator('#video-status')).toHaveText(fileCopy.de.recording);
  await expect.poll(async()=>page.evaluate(text=>(window as any).texts.includes(text),videoInfoCopy[lang].syntheticNotice)).toBe(true);

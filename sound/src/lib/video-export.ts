@@ -1,4 +1,4 @@
-import {videoInfoSize,paintVideoInfo,type VideoInfoSettings,type VideoInfoContent} from './video-info';
+import {videoTopInfoHeight,videoInfoSize,paintVideoInfo,type VideoInfoSettings,type VideoInfoContent} from './video-info';
 import {recordingSeconds} from './recording-duration';
 /** Native MP4 only: never rename a WebM recording to .mp4. No microphone/screen permissions. */
 export const MP4_TYPES=[
@@ -60,22 +60,36 @@ export function createMp4Recording(options:{
   get state(){return recorder.state;}
  };
 }
+export function videoPadLayout(width:number,height:number,header=0){
+ const portrait=height>width,gap=16,padding=20,available=height-header-padding*2;
+ const size=Math.max(1,Math.min(portrait?width-padding*2:(width-padding*2-gap)/2,portrait?(available-gap)/2:available));
+ const top=header+padding+(available-(portrait?size*2+gap:size))/2;
+ return portrait?{orbit:{x:(width-size)/2,y:top,size},pad:{x:(width-size)/2,y:top+size+gap,size}}:
+  {orbit:{x:(width-gap)/2-size,y:top,size},pad:{x:(width+gap)/2,y:top,size}};
+}
 /** Same canvases as the live view, reframed around the orbit; no DOM or user controls. */
-export function paintVideo(ctx:CanvasRenderingContext2D,orbit:HTMLCanvasElement,background:HTMLCanvasElement,showBackground:boolean,info?:{settings:VideoInfoSettings;content:VideoInfoContent}){
+export function paintVideo(ctx:CanvasRenderingContext2D,orbit:HTMLCanvasElement,background:HTMLCanvasElement,showBackground:boolean,info?:{settings:VideoInfoSettings;content:VideoInfoContent},pad?:HTMLCanvasElement){
  const style=getComputedStyle(document.documentElement);
- const width=ctx.canvas.width,height=ctx.canvas.height,size=videoInfoSize(width,height,info?.settings.enabled),cx=width/2,cy=height/2;
+ const width=ctx.canvas.width,height=ctx.canvas.height,layout=pad?videoPadLayout(width,height,info?videoTopInfoHeight(info.settings,info.content,height>width):0):null;
+ const size=layout?.orbit.size??videoInfoSize(width,height,info?.settings.enabled),cx=layout?layout.orbit.x+size/2:width/2,cy=layout?layout.orbit.y+size/2:height/2;
  ctx.fillStyle=style.getPropertyValue('--surface').trim()||'#080e16';ctx.fillRect(0,0,width,height);
  if(showBackground){
   const o=orbit.getBoundingClientRect(),b=background.getBoundingClientRect();
   if(o.width&&b.width&&b.height){
    const ox=o.left+o.width/2,oy=o.top+o.height/2;
    // Cover the frame while keeping the background's orbit centre aligned with the video.
-   const scale=Math.max(size/o.width,cx/Math.max(1,ox-b.left),cx/Math.max(1,b.right-ox),cy/Math.max(1,oy-b.top),cy/Math.max(1,b.bottom-oy));
+   const scale=Math.max(size/o.width,cx/Math.max(1,ox-b.left),(width-cx)/Math.max(1,b.right-ox),cy/Math.max(1,oy-b.top),(height-cy)/Math.max(1,b.bottom-oy));
    ctx.save();ctx.globalAlpha=Number(getComputedStyle(background).opacity);
    ctx.drawImage(background,cx+(b.left-ox)*scale,cy+(b.top-oy)*scale,b.width*scale,b.height*scale);
    ctx.restore();
+  }else{
+   // The note editor may temporarily hide the on-page orbit. Capture continues.
+   const scale=Math.max(width/background.width,height/background.height);
+   ctx.save();ctx.globalAlpha=Number(getComputedStyle(background).opacity);
+   ctx.drawImage(background,(width-background.width*scale)/2,(height-background.height*scale)/2,background.width*scale,background.height*scale);ctx.restore();
   }
  }
  ctx.drawImage(orbit,cx-size/2,cy-size/2,size,size);
- if(info)paintVideoInfo(ctx,info.settings,info.content);
+ if(pad&&layout)ctx.drawImage(pad,layout.pad.x,layout.pad.y,layout.pad.size,layout.pad.size);
+ if(info)paintVideoInfo(ctx,info.settings,info.content,pad?'top':'split');
 }

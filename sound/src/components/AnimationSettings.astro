@@ -54,7 +54,7 @@ const {lang}=Astro.props,c=animationSettingsCopy[lang];
   </div>
  </div>
  <div data-animation-panel="orbit-trail" data-panel-title={animationCopy[lang].orbit} hidden>
-  <div class="center-tiles" role="group" aria-label={animationCopy[lang].orbit}>{(['comet','dot','pulse','random','off'] as const).map(mode=><button type="button" class="center-tile" data-orbit-mode={mode} aria-pressed={mode==='comet'?"true":"false"}><OrbitIcon name={mode}/><span>{orbitCopy[lang][mode]}</span></button>)}</div>
+  <div class="center-tiles" role="group" aria-label={animationCopy[lang].orbit}>{(['comet','dot','pulse','radar','random','off'] as const).map(mode=><button type="button" class="center-tile" data-orbit-mode={mode} aria-pressed={mode==='comet'?"true":"false"}><OrbitIcon name={mode}/><span>{orbitCopy[lang][mode]}</span></button>)}</div>
  </div>
  <div data-animation-panel="orbit-center" data-panel-title={animationCopy[lang].center} hidden>
   <div class="center-tiles" role="group" aria-label={animationCopy[lang].center}>{(['ring','filled','sun','sine','bars','random','off'] as const).map(mode=><button type="button" class="center-tile" data-center-mode={mode} aria-pressed={mode==='ring'?"true":"false"}><CenterIcon name={mode}/><span>{centerCopy[lang][mode]}</span></button>)}</div>
