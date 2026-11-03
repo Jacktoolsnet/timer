@@ -57,6 +57,8 @@ test('wider ring spacing preserves the centre, outer margins and distinct note h
 });
 test('all nine widened rings toggle their own note without changing centre or background',async({page})=>{
  await page.goto('/de/');
+ // Isolate ring hit geometry from group-member targets, which intentionally toggle their parent.
+ await page.locator('.instrument-select').evaluateAll(selects=>selects.forEach(select=>select.dispatchEvent(new Event('change',{bubbles:true}))));
  for(let index=0;index<ORBIT_COUNT;index++){
   const note=page.locator(`[data-track="${index}"] [data-step="8"]`),before=await note.getAttribute('aria-pressed');
   await tapOrbit(page,350,350+orbitRadius(index,ORBIT_COUNT));

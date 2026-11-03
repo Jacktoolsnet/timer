@@ -76,11 +76,11 @@ for(const action of ['play','evolve'])test(`production ${action} onsets and disp
  const angle=noteTimingAngle(4,16,0,1,noteTimingOffset('jazz','pluck',0,4,100,16,4,false,Math.PI),2.4,4,.2);
  await expect.poll(()=>page.evaluate((a:number)=>(window as any).shapes.some((s:any)=>s.width===5.5&&Math.abs(s.a-a)<1e-5),angle)).toBe(true);
 });
-for(const direction of [1,-1])test(`only genuinely legato voices receive visible connections, direction ${direction}`,async({page},testInfo)=>{
+for(const direction of [1,-1])test(`legato and detached voices keep their note heads without connector lines, direction ${direction}`,async({page},testInfo)=>{
  await spy(page);const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/de/');await load(page,'jazz','saxophone',direction);await page.locator('#play').click();
- await expect.poll(()=>page.evaluate(()=>(window as any).shapes.filter((s:any)=>s.width===1.8).length)).toBeGreaterThan(0);
+ await expect.poll(()=>page.evaluate(()=>(window as any).shapes.filter((s:any)=>s.width===5.5).length)).toBeGreaterThan(0);await page.waitForTimeout(650);
  const joins=await page.evaluate(()=>(window as any).shapes.filter((s:any)=>s.width===1.8));
- expect(joins.every((j:any)=>j.reverse===(direction===-1))).toBe(true);
+ expect(joins).toHaveLength(0);
  await page.locator('#orbit').screenshot({path:testInfo.outputPath('legato-orbit.png')});
  await page.locator('#play').click();await load(page,'electronic','saxophone',direction);await page.locator('#play').click();await page.waitForTimeout(1100);
  expect(await page.evaluate(()=>(window as any).shapes.some((s:any)=>s.width===1.8))).toBe(false);

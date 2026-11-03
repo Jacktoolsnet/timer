@@ -1,3 +1,4 @@
+import {validNoteGroups,type NoteGroups} from './note-groups';
 import type {VideoAnimationSettings} from './video-animations';
 import type {VideoInfoSettings} from './video-info';
 import {ORBIT_COUNT} from './orbit-layout';
@@ -13,6 +14,7 @@ export const backgroundModes=['clouds','aurora','stars','waves','off','random'] 
 export const centerModes=['ring','filled','sine','bars','sun','off','random'] as const;
 export const orbitModes=['comet','dot','pulse','off','random'] as const;
 export type SavedTrack={
+ groups?:NoteGroups;
  grid?:GridChoice;slots?:GridSize;enabled:boolean;mute:boolean;instrument:InstrumentId;points:boolean[];motif?:number[];volume:number;pitch:number;phase:number;
  direction:number;directionMode:string;randomDynamics:boolean;
  morph:{to:InstrumentId;progress:number}|null;
@@ -54,7 +56,10 @@ export function decodeSettings(raw:string|null):SoundSettings|null{
     ||s.pad.notes.some((row:unknown,i:number)=>!Array.isArray(row)||row.length!==s.pad.beats*8
      ||row.some((note:unknown,j:number)=>note!==null&&(!number(note,0,7)||!Number.isInteger(note)||!s.pad.hits[i][j])))))return null;
   }
+  let groupCount=0;
   for(const tr of s.tracks){
+   if(tr?.groups!==undefined){if(!validNoteGroups(tr.groups,tr.instrument))return null;groupCount+=tr.groups.filter(Boolean).length;}
+   if(groupCount>6)return null;
    if(tr?.grid!==undefined&&tr.grid!=='auto'&&!(gridSizes as readonly unknown[]).includes(tr.grid))return null;
    if(tr?.slots!==undefined&&!(gridSizes as readonly unknown[]).includes(tr.slots))return null;
    if(typeof tr?.grid==='number'&&tr.slots!==undefined&&tr.grid!==tr.slots)return null;
