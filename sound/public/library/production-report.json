@@ -1,14 +1,14 @@
 {
   "classical-canon": {
-    "transferredSourceNotes": 414,
-    "source": "canon.mid",
-    "sha256": "1358ba0799aeb727be0ef155fc9090ea55762a3b41f85d3dbb02918f4ac66515",
-    "sourceNotes": 138,
-    "outputNotes": 987,
-    "boundaryRearticulations": 3,
-    "bars": 60,
-    "durationSeconds": 189.47,
-    "scope": "Full 44-bar violin source; free three-voice canon, ground and coda. Not the complete original score."
+    "transferredSourceNotes": 1956,
+    "source": "canon-original.mid",
+    "sha256": "953b73e270117d388e9ef1a76f8b9e97ff640d1400768849f41a3cf71c59cbc1",
+    "sourceNotes": 1956,
+    "outputNotes": 1956,
+    "boundaryRearticulations": 0,
+    "bars": 58,
+    "durationSeconds": 253.09,
+    "scope": "Complete four-part Canon score: three violins and bass, with original entrances and ending; no invented voices or coda. Synthesized interpretation."
   },
   "classical-nachtmusik": {
     "transferredSourceNotes": 5390,

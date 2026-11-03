@@ -577,13 +577,14 @@ Video captions now use a separately selected language (English default, with Ger
 ### Curated song productions
 
 The four style folders each offer three deterministic v3 productions in native
-meter, with complete cited score-event sequences where possible. Canon is a free
-canonic production from a full violin source; Ode a hymn-theme setting, not the
-complete symphony. Meter, duration and exact scope appear in the dialog.
+meter, with complete cited score-event sequences where possible. The first Canon
+now retains the complete four-part source for three violins and bass; only the House Canon remains a free canonic production. Ode is a hymn-theme
+setting, not the complete symphony. Meter, duration and exact scope appear in the dialog.
 See [public/library/SOURCES.md](public/library/SOURCES.md) for licences, production
 details and limitations. Regenerate offline with python3 scripts/build-song-library.py.
 Optional LilyPond repeat unfolding is documented in scripts/scores/README.md.
-Standalone Morning Light is unchanged. Retain Canon's CC BY 3.0 attribution.
+Standalone Morning Light is unchanged. Retain both Canon editions' attribution: CC BY 4.0 for Classical (Mutopia 2047),
+CC BY 3.0 for House (Mutopia 1700).
 
 ### Native meters (Song Script v3)
 

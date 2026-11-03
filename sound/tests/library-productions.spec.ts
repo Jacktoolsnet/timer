@@ -20,7 +20,7 @@ test('all productions are complete-source native-meter data, with bounded scores
   const production=report[entry.id as keyof typeof report];
   const source=await readFile(new URL('../scripts/scores/'+production.source,import.meta.url));
   expect(createHash('sha256').update(source).digest('hex')).toBe(production.sha256);
-  const copies=entry.id.includes('canon')?3:entry.id==='house-ode'?2:1;
+  const copies=entry.id==='house-canon'?3:entry.id==='house-ode'?2:1;
   expect(production.transferredSourceNotes).toBe(production.sourceNotes*copies);
   const notes=song.scenes.flatMap(s=>s.parts.flatMap(p=>p.notes));
   expect(notes.length).toBe(production.outputNotes);
@@ -29,12 +29,44 @@ test('all productions are complete-source native-meter data, with bounded scores
    expect(validScore(scriptScore(part,0,song.seed,song.meter)),entry.id+': '+scene.name+': '+part.track).toBe(true);
   }
   expect(new Set(notes.map(n=>n.velocity)).size).toBeGreaterThan(12);
-  expect(song.rights.license).toContain(entry.id.includes('canon')?'CC BY 3.0':'Public Domain');
+  expect(song.rights.license).toContain(entry.id==='classical-canon'?'CC BY 4.0':entry.id==='house-canon'?'CC BY 3.0':'Public Domain');
   expect(entry.scopeLabel.de).not.toContain('4/4');
  }
  const gymno=catalog.find(e=>e.id==='lofi-gymnopedie')!;expect(gymno.bars).toBe(78);
  expect((await load('/library/house-elise.song.json')).version).toBe(3);
 });
+
+test('first Canon retains every original four-part note, entrance, register and ending',async()=>{
+ const song=await load('/library/classical-canon.song.json');
+ if(song.version!==3)throw Error('Expected native score');
+ expect(song.tracks.map(t=>[t.id,t.instrument])).toEqual([['violin1','strings'],['violin2','strings'],['violin3','strings'],['basso','cello']]);
+ expect(song.bpm).toBe(55);expect(song.meter).toMatchObject({numerator:4,denominator:4});
+ const source=JSON.parse(execFileSync('python3',['-B','-c',[
+  'import sys,json,pathlib',
+  "sys.path.insert(0,'scripts')",
+  'from score_midi import read_score',
+  "s=read_score(pathlib.Path('scripts/scores/canon-original.mid'))",
+  "print(json.dumps([t['notes'] for t in s['tracks']]))"
+ ].join('\n')],{cwd:new URL('..',import.meta.url),encoding:'utf8'})) as number[][][];
+ for(let track=0;track<4;track++){
+  const id=song.tracks[track].id;
+  const actual=song.scenes.flatMap((scene,index)=>(scene.parts.find(p=>p.track===id)?.notes??[]).map(n=>[index*8+n.at,n.duration,Number(n.pitch)+60-(track===3?12:0)]));
+  const expected=source[track];
+  expect(actual.length).toBe(expected.length);
+  for(let n=0;n<actual.length;n++){
+   expect(actual[n][0]).toBeCloseTo(expected[n][0],6);
+   expect(actual[n][2]).toBe(expected[n][2]);
+   expect(actual[n][1]).toBeCloseTo(expected[n][1]*.97,5);
+  }
+ }
+ const starts=song.tracks.map(t=>song.scenes.flatMap((s,i)=>(s.parts.find(p=>p.track===t.id)?.notes??[]).map(n=>i*8+n.at))[0]);
+ expect(starts).toEqual([8,16,24,0]);
+ expect(report['classical-canon'].boundaryRearticulations).toBe(0);
+ expect(song.scenes.flatMap(s=>s.parts.flatMap(p=>p.notes))).toHaveLength(1956);
+ expect(song.rights.arrangement).toContain('Michael Fischer v. Mollard');
+ expect(song.rights.source).toMatch(/id=2047$/);
+});
+
 test('offline generator is byte-for-byte reproducible from vendored score inputs',async()=>{
  const paths=[...catalog.map(e=>'../public'+e.path),'../public/library/catalog.json','../public/library/production-report.json'];
  const before=await Promise.all(paths.map(async p=>createHash('sha256').update(await readFile(new URL(p,import.meta.url))).digest('hex')));

@@ -2,20 +2,20 @@
   {
     "id": "classical-canon",
     "style": "classical",
-    "title": "Canon in D · Canonic Lights",
+    "title": "Canon in D · 3 Violinen und Basso",
     "composer": "Johann Pachelbel (1653–1706)",
     "path": "/library/classical-canon.song.json",
-    "source": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=1700",
+    "source": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=2047",
     "originalMeter": "4/4",
     "arrangementMeter": "4/4",
-    "bars": 60,
-    "durationSeconds": 189,
-    "scope": "Full 44-bar violin source; free three-voice canon, ground and coda. Not the complete original score.",
+    "bars": 58,
+    "durationSeconds": 253,
+    "scope": "Complete four-part Canon score: three violins and bass, with original entrances and ending; no invented voices or coda. Synthesized interpretation.",
     "scopeLabel": {
-      "de": "Freie dreistimmige Kanonfassung aus der vollständigen Violinstimme, mit Bass und Coda; keine Original-Gesamtpartitur.",
-      "en": "Full 44-bar violin source; free three-voice canon, ground and coda. Not the complete original score.",
-      "es": "Canon libre a tres voces de la fuente completa para violín; no es la partitura original completa.",
-      "fr": "Canon libre à trois voix à partir de la partie complète de violon ; pas la partition originale intégrale."
+      "de": "Vollständige Partitur für drei Violinen und Bass, mit originalen Einsätzen und Schluss; keine erfundenen Stimmen oder Coda. Synthetische Interpretation.",
+      "en": "Complete four-part Canon score: three violins and bass, with original entrances and ending; no invented voices or coda. Synthesized interpretation.",
+      "es": "Partitura completa para tres violines y bajo, con entradas y final originales; sin voces ni coda inventadas. Interpretación sintetizada.",
+      "fr": "Partition complète pour trois violons et basse, entrées et fin originales ; aucune voix ni coda inventée. Interprétation synthétique."
     }
   },
   {

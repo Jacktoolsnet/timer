@@ -242,7 +242,7 @@ body:not(.focus-view) .sound-top{margin-bottom:20px}
 /* Shared drawing / multi-touch rhythm surface. */
 .pad-mode-controls{display:flex;gap:8px;margin:0 0 12px}
 .pad-mode-controls button,.rhythm-actions button{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);border-radius:12px;padding:10px 14px;min-height:44px;background:var(--bg);color:var(--text);cursor:pointer;font:inherit;font-size:12px}
-.pad-mode-controls button{flex:1}
+.pad-mode-controls button{flex:1;min-width:0;padding:10px 8px}
 .pad-mode-controls button[aria-pressed=true]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 18%,var(--bg));color:var(--text);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 25%,transparent)}
 .pad-mode-controls svg,.rhythm-actions svg{width:19px;height:19px;flex:none}
 #rhythm-zones{position:absolute;inset:0;pointer-events:none;display:grid;grid-template:repeat(3,1fr)/repeat(3,minmax(0,1fr))}
@@ -514,3 +514,5 @@ body.score-expanded{overflow:hidden}
 .library-rights{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;margin-block:12px}
 /* Native-meter tempo labels include the beat unit; keep the slider usable on mobile. */
 .controls-tile #tempo-value{white-space:normal;overflow-wrap:anywhere;line-height:1.4;font-size:12px}
+
+@media(max-width:360px){.pad-mode-controls{gap:4px}}

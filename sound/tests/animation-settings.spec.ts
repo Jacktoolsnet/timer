@@ -12,7 +12,7 @@ async function exported(page:Page){
 test('settings replace scattered controls, navigate live and leave music and input mode untouched',async({page})=>{
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/de/');
  await expect(page.locator('.orbit-wrap button[data-visualization]')).toHaveCount(0);await expect(page.locator('.animations-tile')).toHaveCount(0);
- await expect(page.locator('.pad-mode-controls button')).toHaveCount(4);
+ await expect(page.locator('.pad-mode-controls button')).toHaveCount(5);
  const before=await exported(page);await page.locator('[data-pad-mode=rhythm]').click();await page.locator('#play').click();
  await page.locator('#animation-settings-open').click();
  await expect(page.locator('[data-animation-panel=home]')).toBeVisible();await expect(page.locator('[data-animation-panel=sound]')).toBeHidden();
@@ -111,4 +111,44 @@ test('animation changes stay available during MP4 recording, without capturing t
  expect(bytes.subarray(4,8).toString()).toBe('ftyp');expect(bytes.includes(Buffer.from('vide'))).toBe(true);expect(bytes.includes(Buffer.from('soun'))).toBe(true);
  expect(new Set(await page.evaluate(()=>(window as any).videoSources))).toEqual(new Set(['orbit','sound-atmosphere']));
  const saved=await exported(page);expect(saved.visualization).toBe('flower');expect(saved.background).toBe('stars');
+});
+
+test('fourth button opens music directly, switches roots and restores input and focus without changing playback',async({page})=>{
+ await page.goto('/de/');
+ await expect(page.locator('.pad-mode-controls > button')).toHaveCount(5);
+ expect(await page.locator('.pad-mode-controls > button').evaluateAll(buttons=>buttons.map(button=>(button as HTMLElement).dataset.padMode||(button as HTMLElement).id)))
+  .toEqual(['draw','rhythm','notes','music-settings-open','animation-settings-open']);
+ await page.locator('[data-pad-mode=rhythm]').click();await page.locator('#play').click();
+ await page.locator('#music-settings-open').click();
+ await expect(page.locator('[data-animation-panel=music]')).toBeVisible();
+ await expect(page.locator('#animation-settings-back')).toBeHidden();
+ await expect(page.locator('#music-settings-open')).toHaveAttribute('aria-pressed','true');
+ await expect(page.locator('#animation-settings-open')).toHaveAttribute('aria-pressed','false');
+ await expect(page.locator('[data-pad-mode=rhythm]')).toHaveAttribute('aria-pressed','false');
+ await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
+ await page.locator('[data-library-open=classical]').click();await expect(page.locator('#song-library-dialog')).toBeVisible();
+ await page.keyboard.press('Escape');await expect(page.locator('#song-library-dialog')).toBeHidden();
+ await expect(page.locator('[data-animation-panel=music]')).toBeVisible();
+ await page.keyboard.press('Escape');await expect(page.locator('#animation-settings')).toBeHidden();
+ await expect(page.locator('#music-settings-open')).toBeFocused();
+ await expect(page.locator('[data-pad-mode=rhythm]')).toHaveAttribute('aria-pressed','true');
+ await page.locator('#music-settings-open').click();await page.locator('#animation-settings-open').click();
+ await expect(page.locator('[data-animation-panel=home]')).toBeVisible();
+ await expect(page.locator('#music-settings-open')).toHaveAttribute('aria-pressed','false');
+ await expect(page.locator('#animation-settings-open')).toHaveAttribute('aria-pressed','true');
+ await page.locator('#music-settings-open').click();await page.locator('#music-settings-open').click();
+ await expect(page.locator('#animation-settings')).toBeHidden();
+ await page.locator('#music-settings-open').click();await page.locator('[data-pad-mode=notes]').click();
+ await expect(page.locator('#animation-settings')).toBeHidden();await expect(page.locator('#note-editor')).toBeVisible();
+ await expect(page.locator('#music-settings-open')).toHaveAttribute('aria-pressed','false');
+});
+
+for(const language of ['de','en','es','fr'] as const)test('direct music button is localized and fits a 320px screen: '+language,async({page})=>{
+ await page.setViewportSize({width:320,height:760});await page.goto('/'+language+'/');
+ const button=page.locator('#music-settings-open'),c=animationSettingsCopy[language];
+ await expect(button).toHaveAccessibleName(c.music);await expect(button).toHaveAttribute('title',c.music);
+ await button.click();await expect(page.locator('#animation-settings-title')).toHaveText(c.music);
+ expect(await page.locator('.pad-mode-controls').evaluate(el=>el.scrollWidth<=el.clientWidth)).toBe(true);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ await page.locator('#animation-settings-close').click();await expect(button).toBeFocused();
 });

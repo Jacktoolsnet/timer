@@ -16,6 +16,8 @@ export function animationSettingsActive(){return document.getElementById('animat
 export function installAnimationSettings(activate:(view:'orbit'|'flower'|'landscape'|'stream'|'constellation')=>void,onOpen:()=>void,onClose:()=>void){
  const surface=document.querySelector<HTMLElement>('#animation-settings')!;
  const opener=document.querySelector<HTMLButtonElement>('#animation-settings-open')!;
+ const musicOpener=document.querySelector<HTMLButtonElement>('#music-settings-open')!;
+ let activeOpener=opener,rootPanel:Panel='home';
  const back=document.querySelector<HTMLButtonElement>('#animation-settings-back')!;
  const title=document.querySelector<HTMLElement>('#animation-settings-title')!;
  const side=surface.closest<HTMLElement>('.flow-side')!;
@@ -27,20 +29,25 @@ export function installAnimationSettings(activate:(view:'orbit'|'flower'|'landsc
    el.hidden=el.dataset.animationPanel!==next;
    if(!el.hidden)title.textContent=el.dataset.panelTitle!;
   });
-  back.hidden=next==='home';surface.scrollTop=0;
+  back.hidden=next==='home'||next===rootPanel;surface.scrollTop=0;
   if(focus)title.focus({preventScroll:true});
  }
  function close(focus=true){
   if(!animationSettingsActive())return;
-  surface.hidden=true;side.classList.remove('animation-settings-active');opener.setAttribute('aria-pressed','false');
+  surface.hidden=true;side.classList.remove('animation-settings-active');opener.setAttribute('aria-pressed','false');musicOpener.setAttribute('aria-pressed','false');
   onClose();
-  if(focus)opener.focus({preventScroll:true});
+  if(focus)activeOpener.focus({preventScroll:true});
  }
- opener.addEventListener('click',()=>{
-  if(animationSettingsActive()){close();return;}
-  onOpen();show('home',false);syncAnimationSettings();surface.hidden=false;side.classList.add('animation-settings-active');opener.setAttribute('aria-pressed','true');
+ function openRoot(button:HTMLButtonElement,next:'home'|'music'){
+  if(animationSettingsActive()&&activeOpener===button){close();return;}
+  onOpen();activeOpener=button;rootPanel=next;show(next,false);syncAnimationSettings();
+  surface.hidden=false;side.classList.add('animation-settings-active');
+  opener.setAttribute('aria-pressed',String(button===opener));
+  musicOpener.setAttribute('aria-pressed',String(button===musicOpener));
   document.querySelectorAll<HTMLButtonElement>('[data-pad-mode]').forEach(button=>button.setAttribute('aria-pressed','false'));
- });
+ }
+ opener.addEventListener('click',()=>openRoot(opener,'home'));
+ musicOpener.addEventListener('click',()=>openRoot(musicOpener,'music'));
  surface.querySelectorAll<HTMLButtonElement>('[data-animation-open]').forEach(button=>button.addEventListener('click',()=>show(button.dataset.animationOpen as Panel)));
  for(const view of ['orbit','flower','landscape','stream','constellation'] as const)document.querySelector('#'+view+'-settings-open')!.addEventListener('click',()=>{activate(view);show(view);});
  back.addEventListener('click',()=>show(parent(panel)));
@@ -50,6 +57,6 @@ export function installAnimationSettings(activate:(view:'orbit'|'flower'|'landsc
  document.addEventListener('keydown',event=>{
   if(event.key!=='Escape'||!animationSettingsActive()||document.querySelector('dialog[open]'))return;
   event.preventDefault();event.stopPropagation();
-  if(panel==='home')close();else show(parent(panel));
+  if(panel==='home'||panel===rootPanel)close();else show(parent(panel));
  },{capture:true});
 }
