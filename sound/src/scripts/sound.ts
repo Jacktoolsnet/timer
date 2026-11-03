@@ -2035,7 +2035,7 @@ function frame(now:number){
  advanceVideoAnimations(now);
  const time=audio?.currentTime||0;
  while(events.length&&events[0].time<=time){const ev=events.shift()!;ev.notes.forEach(({track,beat,velocity,note,pitch,length,angle,joinedFrom,group,member,scorePoint})=>{if(scorePoint)scoreHits.set(scorePoint,ev.time);const tr=tracks[track];if(tr.enabled&&!tr.mute&&tr.volume>0){tr.flash[beat]=now;tr.hits[beat]=ev.time;tr.hitVelocities[beat]=velocity;tr.lastVelocity=velocity;
-   radar.record(track,{at:ev.time,beat,angle:angle??orbitNoteAngle(track,beat),level:velocity,direction:tr.direction,kind:group?.kind,member,count:group?.members.length});
+   radar.record(track,{at:ev.time,beat,angle:angle??orbitNoteAngle(track,beat),level:velocity,direction:tr.direction,kind:group?.kind,member,count:group?.members.length,motion:{turnSeconds:60/bpm*groove.beats/trackRate(track),clock:localTrackBars(track,ev.time),slots:tr.slots,beats:groove.beats,swing:groove.swing}});
    {
     const scoreKey=scorePoint?.split(':').map(Number),score=scoreKey&&tr.score?.[scoreKey[1]],first=scoreKey?.[2]===0;
     const seconds=60/bpm*groove.beats*2/trackRate(track);

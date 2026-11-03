@@ -1,6 +1,7 @@
 import {test,expect,type Page} from '@playwright/test';
 import {readFile} from 'node:fs/promises';
-import {RadarHistory,radarStrength,radarLifetime,radarPoint,paintOrbitRadar,type RadarNote} from '../src/lib/orbit-radar';
+import {RadarHistory,radarStrength,radarLifetime,radarPoint,radarSweep,paintOrbitRadar,type RadarNote} from '../src/lib/orbit-radar';
+import {gridFractionAtTime} from '../src/lib/track-grid';
 import {partsForStyle} from '../src/lib/presets';
 import {decodeSettings} from '../src/lib/sound-settings';
 import {orbitCopy} from '../src/lib/sound-i18n';
@@ -17,20 +18,44 @@ test('radar echoes follow real onsets, decay completely and keep bounded indepen
  expect(radarPoint(200,{...note,kind:'chord',member:0,count:3}).radius).toBeLessThan(radarPoint(200,{...note,kind:'chord',member:2,count:3}).radius);
  h.clear(0);expect(h.notes(0)).toEqual([]);
 });
+test('radar light moves on after the hit with a growing trailing echo in either direction',()=>{
+ const note:RadarNote={at:1,beat:0,angle:-Math.PI/2,level:1,direction:1,
+  motion:{turnSeconds:4,clock:0,slots:16,beats:4,swing:0}};
+ expect(radarSweep(note,1)).toEqual({angle:note.angle,length:0});
+ for(const direction of [1,-1]){
+  const moving={...note,direction},early=radarSweep(moving,1.1),later=radarSweep(moving,1.5);
+  expect((early.angle-note.angle)*direction).toBeCloseTo(Math.PI*.05);
+  expect((later.angle-early.angle)*direction).toBeGreaterThan(0);
+  expect(early.angle-direction*early.length).toBeCloseTo(note.angle);
+  expect(later.length).toBe(.72);
+ }
+ const fast={...note,motion:{...note.motion!,turnSeconds:2}};
+ expect(radarSweep(fast,1.1).angle-note.angle).toBeCloseTo(2*(radarSweep(note,1.1).angle-note.angle));
+ const swung={...note,motion:{...note.motion!,clock:.1,swing:.3}};
+ expect(radarSweep(swung,1.5).angle-note.angle).toBeCloseTo((gridFractionAtTime(.225,16,4,.3)-gridFractionAtTime(.1,16,4,.3))*Math.PI*2);
+ const history=new RadarHistory();history.record(0,note);note.motion!.turnSeconds=99;
+ expect(history.notes(0)[0].motion!.turnSeconds).toBe(4);
+});
 test('radar draws no idle geometry, honours silence and directions, and reduces motion to fading points',()=>{
  const notes:RadarNote[]=[{at:1,beat:0,angle:0,level:.8,direction:1}];
  function draw(time:number,{gain=1,muted=false,reduced=false,effect=1,direction=1}={}){
-  let circles=0,halos=0;const counterclockwise:boolean[]=[];
+  let circles=0,halos=0;const counterclockwise:boolean[]=[],arcs:number[][]=[];
   const ctx={save(){},restore(){},beginPath(){},fill(){},stroke(){},
    createRadialGradient(){halos++;return {addColorStop(){}};},
-   arc(_x:number,_y:number,r:number,_a:number,_b:number,ccw=false){if(r>100)counterclockwise.push(ccw);else circles++;}} as unknown as CanvasRenderingContext2D;
+   arc(_x:number,_y:number,r:number,_a:number,_b:number,ccw=false){if(r>100){counterclockwise.push(ccw);arcs.push([_a,_b]);}else circles++;}} as unknown as CanvasRenderingContext2D;
   paintOrbitRadar(ctx,notes.map(n=>({...n,direction})),200,'#55ccff',time,gain,muted,true,reduced,effect);
-  return {circles,halos,counterclockwise};
+  return {circles,halos,counterclockwise,arcs};
  }
  expect(draw(.9).circles).toBe(0);expect(draw(1.1).halos).toBe(1);expect(draw(1+radarLifetime).circles).toBe(0);
- expect(draw(1.1,{direction:-1}).counterclockwise.every(Boolean)).toBe(true);
+ for(const direction of [1,-1]){
+  const result=draw(1.1,{direction});
+  expect(result.counterclockwise.every(v=>v===(direction<0))).toBe(true);
+  expect(result.arcs[0][0]).toBeCloseTo(0);
+  expect(result.arcs.at(-1)![1]*direction).toBeCloseTo(Math.PI*.1);
+  expect(result.arcs.every(([start,end])=>(end-start)*direction>0)).toBe(true);
+ }
  const reduced=draw(1.1,{reduced:true});expect(reduced.halos).toBe(0);expect(reduced.counterclockwise).toEqual([]);expect(reduced.circles).toBe(2);
- for(const options of [{gain:0},{muted:true},{effect:0}])expect(draw(1.1,options)).toEqual({circles:0,halos:0,counterclockwise:[]});
+ for(const options of [{gain:0},{muted:true},{effect:0}])expect(draw(1.1,options)).toEqual({circles:0,halos:0,counterclockwise:[],arcs:[]});
 });
 function fixture(){return {version:2,style:'electronic',bpm:40,volume:.3,center:'off',background:'off',orbit:'radar',tracks:partsForStyle('electronic').map((_p,i)=>({enabled:i===0,mute:false,instrument:'kick',groups:Array(16).fill(null),points:Array.from({length:16},(_,s)=>s===0),slots:16,grid:16,pitch:12,volume:.6,phase:0,direction:1,directionMode:'forward',randomDynamics:false,morph:null}))};}
 async function load(page:Page,data:unknown){await page.locator('#files-open').click();await page.locator('#json-file').setInputFiles({name:'radar.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(data))});await page.locator('#files-close').click();}
