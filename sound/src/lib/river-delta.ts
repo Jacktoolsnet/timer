@@ -45,6 +45,8 @@ export function deltaFanWidth(count:number,fraction:number,energy:number){
  const opening=smooth((fraction-deltaSplit)/(1-deltaSplit)),river=.75+clamp(energy,0,1.5)*6;
  return river+opening*(Math.max(32,Math.min(126,460/Math.max(1,count)*.85))+clamp(energy,0,1.5)*16-river);
 }
+/** Spatial diffusion: sharp at the split, fully feathered before reaching the sea. */
+export function deltaDiffusion(fraction:number){return smooth((fraction-.5)/.45);}
 /** Create and use the gradient within the same transform, retaining a soft elliptical edge. */
 function colourWash(ctx:CanvasRenderingContext2D,x:number,y:number,rx:number,ry:number,color:string,opacity:number){
  if(opacity<=0)return;
@@ -96,10 +98,23 @@ export function paintRiverDelta(ctx:CanvasRenderingContext2D,history:LandscapeHi
   // Each river opens into a filled fan. Neighbouring fans overlap before joining the sea.
   const fan=samples.slice(36).map(v=>({...deltaPoint(rank,tracks.length,v.f,v.pitch,0,flow),width:deltaFanWidth(tracks.length,v.f,v.level)}));
   const fanPaint=ctx.createLinearGradient(230,0,482,0);
-  fanPaint.addColorStop(0,tr.color+'00');fanPaint.addColorStop(.12,tr.color+'dd');fanPaint.addColorStop(.5,tr.color+'b0');fanPaint.addColorStop(1,tr.color+'30');
+  fanPaint.addColorStop(0,tr.color+'00');fanPaint.addColorStop(.24,tr.color+'00');fanPaint.addColorStop(.55,tr.color+'65');fanPaint.addColorStop(.8,tr.color+'90');fanPaint.addColorStop(1,tr.color+'30');
   ctx.fillStyle=fanPaint;ctx.shadowBlur=0;ctx.globalAlpha=tr.mute?.025:dark?.52:.62;ribbon(ctx,fan,false);
+  // Overlapping feathered colour deposits progressively replace the crisp fan.
+  // Their radii grow downstream and extend across the mouth, without a shared
+  // clipping edge. No full-canvas blur or per-frame offscreen allocations needed.
+  for(let k=0;k<=12;k++){
+   const f=.52+k*.045,diffusion=deltaDiffusion(f);
+   const value=history.sample(tr.index,reduced?time:time-travel*Math.min(1,f));
+   const p=deltaPoint(rank,tracks.length,f,tr.pitched?value.pitch:12,0,flow);
+   const width=deltaFanWidth(tracks.length,f,value.level*gain);
+   colourWash(ctx,p.x-Math.max(0,f-1)*420,p.y,14+diffusion*45,width*(.7+diffusion*.7),tr.color,
+    (tr.mute?.008:dark?.15:.18)*diffusion);
+  }
   // Keep only faint channels inside the colour surface to suggest the direction of flow.
-  ctx.fillStyle=gradient;ctx.strokeStyle=gradient;ctx.globalAlpha=tr.mute?.05:dark?.14:.18;
+  const channelPaint=ctx.createLinearGradient(230,0,482,0);
+  channelPaint.addColorStop(0,tr.color+'00');channelPaint.addColorStop(.3,tr.color+'00');channelPaint.addColorStop(.7,tr.color+'80');channelPaint.addColorStop(1,tr.color);
+  ctx.fillStyle=channelPaint;ctx.strokeStyle=channelPaint;ctx.globalAlpha=tr.mute?.05:dark?.14:.18;
   for(const branch of [-1,0,1])ribbon(ctx,points(branch,36,91));
   ctx.shadowBlur=0;
   if(!reduced&&gain>0)for(const note of history.notes(tr.index).slice(-64)){
@@ -112,7 +127,7 @@ export function paintRiverDelta(ctx:CanvasRenderingContext2D,history:LandscapeHi
      const f=from+(head-from)*k/24,value=landscapeValue(note,time-travel*f);
      points.push(deltaPoint(rank,tracks.length,f,tr.pitched?value.pitch:12,branch,flow));
     }
-    ctx.strokeStyle=tr.color;ctx.globalAlpha=clamp(note.level*gain*.3,0,.45);ctx.lineWidth=2+note.level*gain*3;
+    ctx.strokeStyle=channelPaint;ctx.globalAlpha=clamp(note.level*gain*.3,0,.45);ctx.lineWidth=2+note.level*gain*3;
     ctx.beginPath();curve(ctx,points);ctx.stroke();
    }
    if(age>travel)continue;

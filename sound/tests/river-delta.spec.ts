@@ -1,6 +1,6 @@
 import {test,expect,type Page} from '@playwright/test';
 import {readFile} from 'node:fs/promises';
-import {deltaMixedColor,deltaFanWidth,deltaPoint,deltaSplit,deltaBranch,deltaSeaLevel,paintRiverDelta} from '../src/lib/river-delta';
+import {deltaDiffusion,deltaMixedColor,deltaFanWidth,deltaPoint,deltaSplit,deltaBranch,deltaSeaLevel,paintRiverDelta} from '../src/lib/river-delta';
 import {LandscapeHistory,landscapeWindow} from '../src/lib/landscape';
 import {partsForStyle} from '../src/lib/presets';
 import {decodeSettings} from '../src/lib/sound-settings';
@@ -31,6 +31,14 @@ test('filled fans overlap into a surface and the common sea mixes colours by per
  expect(deltaFanWidth(9,1,0)*2).toBeGreaterThan(460/9*.82);
  expect(deltaFanWidth(9,1,1)).toBeGreaterThan(deltaFanWidth(9,1,0));
  for(let count=1;count<=9;count++)for(let k=0;k<=20;k++)expect(deltaFanWidth(count,k/20,1.5)).toBeLessThanOrEqual(150);
+});
+test('delta softening increases smoothly downstream and finishes before the mouth',()=>{
+ expect(deltaDiffusion(deltaSplit)).toBe(0);expect(deltaDiffusion(.5)).toBe(0);
+ expect(deltaDiffusion(.95)).toBeCloseTo(1);expect(deltaDiffusion(1.1)).toBe(1);
+ for(let k=1;k<=100;k++){
+  const before=deltaDiffusion((k-1)/100),after=deltaDiffusion(k/100);
+  expect(after).toBeGreaterThanOrEqual(before);expect(after-before).toBeLessThan(.034);
+ }
 });
 test('the sea receives only already-performed envelopes after the tempo-based journey',()=>{
  const h=new LandscapeHistory();h.record(0,{at:1,pitch:0,level:.2,length:2,glide:true,curve:[{offset:0,pitch:0,level:.2},{offset:1,pitch:12,level:1}]});
