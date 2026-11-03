@@ -37,7 +37,8 @@ export function createSustainedVoice(ctx:AudioContext,destination:AudioNode,id:S
  const wave=ctx.createPeriodicWave(real,imag);
  const oscillators=(strings||choir||pad?[.9985,1.0015]:[1]).map(detune=>{
   const osc=ctx.createOscillator();osc.setPeriodicWave(wave);
-  osc.frequency.setValueAtTime(frequency*detune,time);
+  osc.frequency.setValueAtTime(frequency*detune*2**((profile.scoop??0)/12),time);
+  if(profile.scoop)osc.frequency.exponentialRampToValueAtTime(frequency*detune,time+.085);
   return {osc,detune};
  });
  const filters:BiquadFilterNode[]=[],routes:GainNode[]=[];

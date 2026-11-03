@@ -1,7 +1,7 @@
 import type {StyleId} from './presets';
 import type {DanceId} from './dances';
 import type {SustainedInstrument} from './phrasing';
-export type VoiceArticulation={attack?:number;release?:number;glide?:number;vibrato?:number;detached?:boolean};
+export type VoiceArticulation={scoop?:number;attack?:number;release?:number;glide?:number;vibrato?:number;detached?:boolean};
 /** Performance choices, not restrictions on the user's manual instrument selection. */
 export function performanceProfile(style:StyleId,id:SustainedInstrument,dance: DanceId|null=null){
  const rhythmic=dance?['quickstep','jive','samba','chacha','pasodoble','discofox','tango'].includes(dance):['electronic','house','sport','drumandbass','funk','reggae','hiphop','tango'].includes(style);

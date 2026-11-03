@@ -1,3 +1,4 @@
+import {genreGroupCount,groupAnchorWeight,phraseContour,responsePhrase,phraseBreath,conversationLevel,phraseNoteAllowed,leadChord,instrumentGroup,windScoop,firstPhraseAttack,ornamentPitch} from '../lib/musicality';
 import {paintNoteGroup,groupMemberPoint} from '../lib/note-group-view';
 import {emptyNoteGroups,cloneNoteGroups,autoGroupCapable,chordCapable,makeNoteGroup,groupKindFor,groupDensity,groupPitch,groupHarmony,noteGroupWindow,groupOffset,type NoteGroup} from '../lib/note-groups';
 import {noteTimingOffset,noteTimingAngle,type NoteJoin} from '../lib/note-timing';
@@ -33,7 +34,7 @@ import {acousticInstruments,acousticWave,type AcousticInstrument} from '../lib/a
 import {spaceProfile,stereoPosition,sectionExpression} from '../lib/space';
 import {createAudioSpace} from '../lib/audio-space';
 import {arrangementPlan,breathGain,ornamentAt,type ArrangementPlan} from '../lib/arrangement';
-import {dialogueInstrument,answerMotif,timbreMotion} from '../lib/expression';
+import {dialogueInstrument,timbreMotion} from '../lib/expression';
 import {songForm,copyPhrases,sectionGain,songTransitionGain,songCopy,type Phrase,type Section,type SongPart} from '../lib/song';
 import {makeMotif,varyMotif,chordFor,melodicSemitones,isMelodic,gestureDegree} from '../lib/harmony';
 import {jazzSemitones} from '../lib/jazz-harmony';
@@ -408,7 +409,9 @@ document.addEventListener('preferences-cleared',()=>{
 window.addEventListener('pagehide',()=>{finishVideoRecording();finishWavRecording();if(saveTimer)clearTimeout(saveTimer);saveTimer=undefined;saveSettings();});
 type PlayedNote={note:number|null;pitch?:number;length:number;joinedFrom?:NoteJoin};
 const noteShapes=tracks.map(()=>new Map<number,{length:number;barSeconds:number;instrument:InstrumentId;slots:number;style:StyleId;time:number;angle:number;direction:number;phase:number;joinedFrom?:NoteJoin}>());
-type GroupVoice={tone:number;base?:number;root:number;third:number;gate:number;channel:string;bar:number;kind:'run'|'chord'};
+type ChordVoicing={tones:number[];previous?:number[];result?:number[]};
+const chordVoicings=new Map<string,number[]>();
+type GroupVoice={ornamentAnchor?:{pitch?:number};ornamentTarget?:number;member?:number;voicing?:ChordVoicing;ornament?:'grace'|'trill';tone:number;base?:number;root:number;third:number;gate:number;channel:string;bar:number;kind:'run'|'chord'};
 type GroupDisplay={stamp:number;anchor:number;kind:'run'|'chord';definition:NoteGroup;instrument:InstrumentId;slots:number;phase:number;direction:number;style:StyleId;members:{time:number;angle:number;length:number;velocity:number;note:number|null;played:boolean}[]};
 const groupDisplays=tracks.map(()=>new Map<number,GroupDisplay>());
 let pendingGroupNotes:{track:number;time:number;valid:()=>boolean;run:()=>void}[]=[];
@@ -427,10 +430,12 @@ function addNoteGroup(index:number,kind?:'run'|'chord'){
  const candidates=tr.points.map((on,beat)=>({on,beat,window:noteGroupWindow(tr.points,beat,tr.slots,tr.direction,tr.phase,groove.beats,bpm,groove.swing)}))
   .filter(p=>p.on&&p.beat<tr.slots&&p.window>=.19);
  if(!candidates.length)return;
- const target=candidates[Math.floor(Math.random()*candidates.length)];
+ const weights=candidates.map(p=>groupAnchorWeight(currentStyle,p.beat,tr.slots,groove.beats));
+ let draw=Math.random()*weights.reduce((sum,n)=>sum+n,0),target=candidates.at(-1)!;
+ for(let i=0;i<candidates.length;i++){draw-=weights[i];if(draw<0){target=candidates[i];break;}}
  const selected=kind??groupKindFor(currentStyle,tr.instrument);
- const count=selected==='chord'?3:target.window>=.42?4:target.window>=.29?3:2;
- tr.groups=emptyNoteGroups();tr.groups[target.beat]=makeNoteGroup(selected,count);
+ const count=genreGroupCount(currentStyle,selected,target.window>=.42?4:target.window>=.29?3:2);
+ tr.groups=emptyNoteGroups();tr.groups[target.beat]=instrumentGroup(makeNoteGroup(selected,count),tr.instrument,currentStyle,phraseContour(currentStyle,step/stepsPerBar()).energy,groove.beats);
  cancelGroupNotes(index);groupDisplays[index].clear();
 }
 function evolveNoteGroups(){
@@ -612,11 +617,13 @@ tracks.forEach((tr,i)=>{
  });
 });
 let expressionSeed=Math.random()*Math.PI*2;
+function musicalFoundation(index:number){return pulseTrack(index)||['kick','bass','synthbass','doublebass','acidbass'].includes(tracks[index].instrument);}
 function dialogueRole(index:number){
- const melodic=tracks.map((tr,i)=>({tr,i})).filter(({tr})=>tr.enabled&&!tr.mute&&tr.volume>0&&tr.points.some(Boolean)&&dialogueInstrument(tr.instrument));
+ const melodic=tracks.map((tr,i)=>({tr,i})).filter(({tr,i})=>tr.enabled&&!tr.mute&&tr.volume>0&&tr.points.some(Boolean)&&dialogueInstrument(tr.instrument)&&!pulseTrack(i)&&!protectedRhythmTrack(i));
  // No extra notes or tracks: existing patterns and user silences remain intact.
  if(melodic.length<2)return -1;
- const lead=development?melodic.findIndex(({i})=>i===development!.lead):0;
+ const drawn=melodic.map(({i})=>i).filter(i=>musicalStep()<drawnUntil[i]).sort((a,b)=>drawnUntil[b]-drawnUntil[a])[0];
+ const lead=drawn!==undefined?melodic.findIndex(({i})=>i===drawn):development?melodic.findIndex(({i})=>i===development!.lead):0;
  if(lead>0)melodic.unshift(...melodic.splice(lead,1));
  return melodic.findIndex(({i})=>i===index);
 }
@@ -643,10 +650,12 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
  const harmonicStyle:StyleId=currentDance?['tango','pasodoble'].includes(currentDance)?'electronic':currentStyle==='jazz'||currentDance==='jive'?'pop':currentStyle:currentStyle;
  const vocal=(vocalInstruments as readonly string[]).includes(id);
  const cutoff=vocal?Math.max(3000,profile.cutoff):profile.cutoff;
- const expressive=evolving&&!tapped&&dialogueInstrument(id);
+ const expressive=!tapped&&!pulseTrack(i)&&dialogueInstrument(id);
  const role=expressive?dialogueRole(i):-1;
  const bar=step/stepsPerBar();
- const motion=evolving?timbreMotion(bar,expressionSeed,i):{cutoff:1,attack:1};
+ const arc=phraseContour(currentStyle,bar);
+ const motion=tapped?{cutoff:1,attack:1}:timbreMotion(bar,expressionSeed,i);
+ if(!tapped&&!musicalFoundation(i))motion.cutoff*=arc.cutoff;
  const expression=tapped?{gain:1,cutoff:1}:songExpression();
  // Answers follow the current (including drawn or crossfading) phrase, not a stale copy.
  const leader=role===1?tracks.find((tr,index)=>tr.enabled&&!tr.mute&&tr.volume>0&&dialogueInstrument(tr.instrument)&&dialogueRole(index)===0):undefined;
@@ -655,7 +664,7 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
  const kind=song?.form[song.index].kind||'verse';
  const ownMotif=evolving&&development&&!protectedDrawing
   ?accompanimentMotif(sourceMotif,development,i,musicalStep(),kind):sourceMotif;
- const motif=leader&&!protectedDrawing?answerMotif(ownMotif,leader.motif):ownMotif;
+ const motif=leader&&!protectedDrawing?responsePhrase(ownMotif,leader.motif,bar):ownMotif;
 
  // One shared low-pass per voice keeps harmonic layers coherent and softens metallic edges.
  const bus=ctx.createBiquadFilter();bus.type='lowpass';bus.Q.value=.55;
@@ -686,9 +695,18 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
   :melodicSemitones(harmonicStyle,(group?.bar??harmonyBar()),musicBeat,id,phrase?.pitch??tr.pitch,motif);
  const chord=chordFor(harmonicStyle,(group?.bar??harmonyBar()));
  const jazzRoot=jazzSemitones((group?.bar??harmonyBar()),0,'bass',0);
- const register=evolving&&!protectedDrawing&&dialogueInstrument(id)?registerArc(step/stepsPerBar()):0;
+ const register=!protectedDrawing&&dialogueInstrument(id)?(evolving?registerArc(bar):0)+arc.register:0;
  const baseVoiced=explicitNote?tapNoteSemitones(harmonicStyle,(group?.bar??harmonyBar()),tapNote):registerNote(semitones,register,harmonicStyle==='jazz'?jazzRoot:chord.root,harmonicStyle==='jazz'?[0,2,4,7,9]:[0,chord.third,7]);
- const voiced=group&&isMelodic(id)?groupPitch(group.base??baseVoiced,group.root,group.third,group.tone):baseVoiced;
+ if(group?.voicing&&!group.voicing.result){
+  const raw=group.voicing.tones.map(tone=>groupPitch(baseVoiced,group.root,group.third,tone));
+  group.voicing.result=leadChord(raw,group.voicing.previous);
+ }
+ let voiced=group?.voicing?.result?.[group.member??0]??(group&&isMelodic(id)?groupPitch(group.base??baseVoiced,group.root,group.third,group.tone):baseVoiced);
+ if(group?.ornament&&group.ornamentAnchor){
+  group.ornamentAnchor.pitch??=groupPitch(baseVoiced,group.root,group.third,0);
+  const degree=group.ornament==='trill'?group.tone:(group.ornamentTarget??1)-group.tone;
+  voiced=ornamentPitch(group.ornamentAnchor.pitch,group.root,group.third,degree);
+ }
  const visualNote=isMelodic(id)?explicitNote?tapNote:tapNoteDegree(harmonicStyle,(group?.bar??harmonyBar()),voiced):null;
  const note=261.626*2**((voiced+(isMelodic(id)?transpose:0))/12);
  function tone(freq:number,duration:number,level:number,type:OscillatorType='sine',end?:number,attack=.004,glide=.18,sustain?:number){
@@ -730,7 +748,9 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
   const clock=((beat-tr.phase)*tr.direction+tr.slots*2)%tr.slots;
   const bridge=tapped?tapHold:tr.slots===stepsPerBar()?phraseHold(phrase?.points||tr.points,beat,tr.direction,60/bpm/4,groove.swing,clock,tr.slots):gridPhraseHold(phrase?.points||tr.points,beat,clock,tr.direction,tr.slots,groove.beats,bpm,groove.swing);
   const articulation=performanceGate(currentStyle,id as SustainedInstrument,bridge,60/bpm,currentDance),hold=group?Math.max(.008,group.gate,group.kind==='chord'?(articulation.voice.attack??sustainedProfile(id as SustainedInstrument).attack)+.05:0):articulation.hold;
-  if(group?.kind==='run'){articulation.legato=false;articulation.voice={...articulation.voice,detached:true,attack:Math.min(.015,hold*.4),release:.025,glide:.004};}
+  if(group?.kind==='run'&&group.ornament!=='trill'){articulation.legato=false;articulation.voice={...articulation.voice,detached:true,attack:Math.min(.015,hold*.4),release:.025,glide:.004};}
+  if(group?.ornament==='trill'){articulation.legato=true;articulation.voice={...articulation.voice,detached:false,attack:Math.min(.035,hold*.4),release:.06,glide:.008};}
+  if(!group&&!tapped&&!protectedDrawing){const scoop=windScoop(currentStyle,id,bar,firstPhraseAttack(phrase?.points||tr.points,beat,tr.slots,tr.direction,tr.phase)?0:1);if(scoop)articulation.voice={...articulation.voice,scoop};}
   const level=tr.volume*velocity*(id==='voice'?.25:id==='strings'||id==='cello'?.15:id==='saxophone'?.23:id==='organ'?.16:id==='pad'?.13:.18);
   if(articulation.legato&&previous?.voice.canContinue(time)){
    const joinedFrom={beat:previous.beat,time:previous.lastTime};
@@ -783,6 +803,9 @@ function playNoteGroup(index:number,beat:number,time:number,nominalTime:number,v
  const tr=tracks[index],id=tr.instrument,slots=tr.slots,phase=tr.phase,direction=tr.direction,style=currentStyle;
  const bar=harmonyBar(),harmony=groupHarmony(style,bar),barSeconds=60/bpm*groove.beats;
  const window=noteGroupWindow(tr.points,beat,slots,direction,phase,groove.beats,bpm,groove.swing);
+ const voicingKey=index+':'+id+':'+style;
+ const voicing:ChordVoicing|undefined=group.kind==='chord'&&group.notes.every((n,i)=>n.tone===i)?{tones:group.notes.map(n=>n.tone),previous:chordVoicings.get(voicingKey)}:undefined;
+ const ornamentAnchor=group.ornament?{}:undefined;
  const trim=group.kind==='chord'?1/Math.sqrt(group.notes.length):.88;
  const display:GroupDisplay={stamp:time,anchor:beat,kind:group.kind,definition:group,instrument:id,slots,phase,direction,style,
   members:group.notes.map(n=>({time:time+groupOffset(n.offset,group.notes.length,groove.swing)*window,
@@ -793,11 +816,13 @@ function playNoteGroup(index:number,beat:number,time:number,nominalTime:number,v
  let base:number|undefined;
  const play=(member:number)=>{
   if(!valid()||!audio)return;
+  const scheduledBar=step/stepsPerBar()+(display.members[member].time-nextTime)/(60/bpm*groove.beats);
+  if(trackBreath(index,scheduledBar))return;
   const n=group.notes[member],at=member>0&&group.kind==='chord'?display.members[0].time:Math.max(audio.currentTime+.002,display.members[member].time);
-  const options:GroupVoice={tone:n.tone,base,root:harmony.root,third:harmony.third,gate:n.gate*window,channel:group.kind==='chord'?String(member):'run',bar,kind:group.kind};
+  const options:GroupVoice={ornamentAnchor,ornamentTarget:group.notes.at(-1)!.tone,member,voicing,ornament:group.ornament,tone:n.tone,base,root:harmony.root,third:harmony.third,gate:n.gate*window,channel:group.kind==='chord'?String(member):'run',bar,kind:group.kind};
   const played=voice(index,at,beat,velocity*n.velocity*trim,undefined,options);
   if(!played)return;
-  if(member===0){base=played.pitch;display.stamp=at;}
+  if(member===0){base=played.pitch;display.stamp=at;if(voicing?.result)chordVoicings.set(voicingKey,[...voicing.result]);}
   const angle=noteTimingAngle(beat,slots,phase,direction,at-nominalTime,barSeconds,groove.beats,groove.swing);
   display.members[member]={time:at,angle,length:played.length,velocity:velocity*n.velocity*trim*currentMix[index],note:played.note,played:false};
   events.push({time:at,step:step%stepsPerBar(),duration:60/bpm/4,clock:false,
@@ -896,6 +921,10 @@ function evolveJourney(time:number){
  }
  sync();
 }
+function trackBreath(index:number,bar:number){
+ if(pulseTrack(index)||protectedRhythmTrack(index)||musicalStep()<drawnUntil[index])return false;
+ return phraseBreath(currentStyle,bar,dialogueRole(index));
+}
 function schedule(){
  if(!audio||!playing)return;
  sustained.forEach((entry,key)=>{
@@ -942,6 +971,7 @@ function schedule(){
   const s=step%stepsPerBar();
   const performance=evolving?mixLevels(tracks,development,musicalStep(),chorusRelief,drawnUntil):tracks.map(()=>1);
   const performed=performance.map((gain,i)=>{
+   if(!pulseTrack(i)&&!protectedRhythmTrack(i)&&musicalStep()>=drawnUntil[i])gain*=conversationLevel(step/stepsPerBar(),dialogueRole(i));
    // Focus keeps the melody present: rotating leads and section changes are gentle,
    // otherwise a quiet kick can become the foreground when the piano is ducked.
    if(currentStyle==='focus')return pulseTrack(i)?1:(.7+.3*gain)*(evolving?.8+.2*songLevel(nextTime,tracks[i].instrument):1);
@@ -949,7 +979,7 @@ function schedule(){
     // Sections shape the whole waltz, not just its melody against an unchanging loud pulse.
     return slowWaltzMix(pulseTrack(i)?1:gain,waltzPulse(i))*(evolving?songLevel(nextTime,tracks[i].instrument):1);
    }
-   return evolving?(pulseTrack(i)?1:gain*songLevel(nextTime,tracks[i].instrument)):1;
+   return evolving?(pulseTrack(i)?1:gain*songLevel(nextTime,tracks[i].instrument)):gain;
   });
   currentMix=balancedMix(audibleMixTracks(),performed).map((gain,i)=>gain*songFade(nextTime)*(currentStyle==='slowwaltz'&&!pulseTrack(i)?slowWaltzSwell(s/4):1)*dancePulseClarity(currentDance,i,s)*rhythmClarity(currentDance,i,s));
   liveMix.forEach((nodes,index)=>nodes.forEach(node=>node.gain.setTargetAtTime(currentMix[index],nextTime,.09)));
@@ -969,6 +999,11 @@ function schedule(){
     if(tappedTrack(i))return;
     const old=evolving&&!pulseTrack(i)&&song?.from?song.from[i]:null;
     const protectedDrawing=musicalStep()<drawnUntil[i];
+    if(!protectedDrawing&&trackBreath(i,step/stepsPerBar())){
+     sustained.forEach((entry,key)=>{if(entry.track===i&&entry.time<=time){entry.voice.release(time);sustained.delete(key);}});return;
+    }
+    if(!protectedDrawing&&!musicalFoundation(i)&&tracks.filter(t=>t.enabled&&!t.mute&&t.volume>0&&t.points.some(Boolean)).length>=3
+     &&!phraseNoteAllowed(currentStyle,step/stepsPerBar(),i,beat/tr.slots*stepsPerBar(),dialogueRole(i)))return;
     if(!pulseTrack(i)&&!phraseActive(tr.instrument,musicalStep(),i,song?.form[song.index].kind==='chorus',evolving,protectedDrawing)){
      const key=i+':'+tr.instrument,held=sustained.get(key);
      if(held){held.voice.release(time);sustained.delete(key);}return;
@@ -982,7 +1017,8 @@ function schedule(){
     tr.scheduledVelocity=dynamics;
     const foundation=pulseTrack(i)||['kick','bass','synthbass','doublebass','acidbass'].includes(tr.instrument)||!!tr.morph&&['kick','bass','synthbass','doublebass','acidbass'].includes(tr.morph.to);
     const breath=evolving&&arrangement&&!protectedDrawing&&!foundation?breathGain(arrangement,i,musicalStep()):1;
-    const velocity=grooveAccent(groove,tr.instrument,(pulseTrack(i)?due.index:beat)/tr.slots*stepsPerBar(),i)*dynamics*breath*songExpression().gain*(extra?.45:1),mix=evolving&&!pulseTrack(i)?songMix(time):1;
+    const arcVelocity=!musicalFoundation(i)&&!protectedDrawing?phraseContour(currentStyle,step/stepsPerBar()).velocity:1;
+    const velocity=arcVelocity*grooveAccent(groove,tr.instrument,(pulseTrack(i)?due.index:beat)/tr.slots*stepsPerBar(),i)*dynamics*breath*songExpression().gain*(extra?.45:1),mix=evolving&&!pulseTrack(i)?songMix(time):1;
     if(velocity<=.0001)return;
     const group=usableGroup(i,beat);
     if(group&&!old){playNoteGroup(i,beat,time,nominalTime,velocity,group);return;}
@@ -1006,6 +1042,7 @@ function schedule(){
  flushGroupNotes();events.sort((a,b)=>a.time-b.time);
 }
 function stop(finishRecordings=true){
+ chordVoicings.clear();
  cancelGroupNotes();groupDisplays.forEach(row=>row.forEach(g=>g.members.forEach(n=>n.played=false)));
  if(finishRecordings){recordingGeneration++;finishVideoRecording();finishWavRecording();}
  rhythmGeneration++;rhythmPlayer?.stop();cancelTappedVoices();finishRhythm(tapPattern);
@@ -1129,6 +1166,7 @@ syncVolume();
 $<HTMLInputElement>('#volume').addEventListener('input',e=>{syncVolume();if(master&&audio&&playing)master.gain.setTargetAtTime(Number((e.target as HTMLInputElement).value),audio.currentTime,.02);persistSettings();});
 $('#clear').addEventListener('click',()=>{acceptRhythmEdit();resetTapRhythm();selectedPad=null;padSwitchBlocked=false;rhythmEditing=false;cancelPadGestures();tracks.forEach(tr=>{tr.points.fill(false);tr.groups=emptyNoteGroups();});cancelGroupNotes();groupDisplays.forEach(d=>d.clear());noteShapes.forEach(notes=>notes.clear());sync();});
 function applyStyle(id:StyleId,dance:DanceId|null=null){
+ chordVoicings.clear();
  cancelGroupNotes();groupDisplays.forEach(d=>d.clear());
  noteShapes.forEach(notes=>notes.clear());
  acceptRhythmEdit();
