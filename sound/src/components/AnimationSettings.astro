@@ -1,0 +1,36 @@
+---
+import type {Language} from '../lib/i18n';
+import {animationSettingsCopy} from '../lib/animation-settings';
+import {animationCopy,orbitCopy,centerCopy,backgroundCopy} from '../lib/sound-i18n';
+import {visualizationCopy} from '../lib/visualization';
+import VisualizationPicker from './VisualizationPicker.astro';
+import ActionIcon from './ActionIcon.astro';
+import OrbitIcon from './OrbitIcon.astro';
+import CenterIcon from './CenterIcon.astro';
+import BackgroundIcon from './BackgroundIcon.astro';
+interface Props {lang:Language}
+const {lang}=Astro.props,c=animationSettingsCopy[lang];
+---
+<dialog id="animation-settings-dialog" aria-labelledby="animation-settings-title">
+ <div class="animation-settings-heading">
+  <button type="button" id="animation-settings-back" class="settings-icon" aria-label={c.back} title={c.back} hidden><ActionIcon name="back"/></button>
+  <h2 id="animation-settings-title" tabindex="-1">{c.title}</h2>
+  <button type="button" id="animation-settings-close" class="settings-icon" aria-label={c.close} title={c.close}><ActionIcon name="cancel"/></button>
+ </div>
+ <div data-animation-panel="home" data-panel-title={c.title}>
+  <div class="animation-settings-home">
+   <button type="button" class="animation-home-tile" data-animation-open="sound"><ActionIcon name="audio"/><span>{c.sound}</span><small id="animation-current-sound">{visualizationCopy[lang].orbit}</small></button>
+   <button type="button" class="animation-home-tile" data-animation-open="background"><BackgroundIcon name="clouds"/><span>{c.background}</span><small id="animation-current-background">{backgroundCopy[lang].clouds}</small></button>
+  </div>
+ </div>
+ <div data-animation-panel="sound" data-panel-title={c.sound} hidden><VisualizationPicker lang={lang}/></div>
+ <div data-animation-panel="orbit" data-panel-title={c.orbit} hidden>
+  <div class="animation-settings-orbit">
+   <article class="animation-category"><h3>{animationCopy[lang].orbit}</h3><div class="center-tiles" role="group" aria-label={animationCopy[lang].orbit}>{(['comet','dot','pulse','random','off'] as const).map(mode=><button type="button" class="center-tile" data-orbit-mode={mode} aria-pressed={mode==='comet'?"true":"false"}><OrbitIcon name={mode}/><span>{orbitCopy[lang][mode]}</span></button>)}</div></article>
+   <article class="animation-category"><h3>{animationCopy[lang].center}</h3><div class="center-tiles" role="group" aria-label={animationCopy[lang].center}>{(['ring','filled','sun','sine','bars','random','off'] as const).map(mode=><button type="button" class="center-tile" data-center-mode={mode} aria-pressed={mode==='ring'?"true":"false"}><CenterIcon name={mode}/><span>{centerCopy[lang][mode]}</span></button>)}</div></article>
+  </div>
+ </div>
+ <div data-animation-panel="background" data-panel-title={c.background} hidden>
+  <div class="center-tiles" role="group" aria-label={c.background}>{(['clouds','aurora','stars','waves','random','off'] as const).map(mode=><button type="button" class="center-tile" data-background-mode={mode} aria-pressed={mode==='clouds'?"true":"false"}><BackgroundIcon name={mode}/><span>{backgroundCopy[lang][mode]}</span></button>)}</div>
+ </div>
+</dialog>

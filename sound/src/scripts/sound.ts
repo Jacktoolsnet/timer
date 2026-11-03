@@ -1,3 +1,4 @@
+import {installAnimationSettings,syncAnimationSettings} from './animation-settings';
 import {paintSoundFlower} from '../lib/sound-flower';
 import {paintConstellation} from '../lib/constellation';
 import {paintNoteStream,type StreamPreview} from '../lib/note-stream';
@@ -503,6 +504,7 @@ function selectVisualization(mode:VisualizationMode){
  if(visualization!==mode){landscape.clear();streamCache=null;}visualization=mode;orbit.dataset.visualization=mode;
  orbit.setAttribute('aria-label',mode==='flower'?visualizationCopy[language].flowerDescription:mode==='constellation'?visualizationCopy[language].constellationDescription:mode==='stream'?visualizationCopy[language].streamDescription:mode==='landscape'?visualizationCopy[language].description:t.steps);
  document.querySelectorAll<HTMLButtonElement>('button[data-visualization]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.visualization===mode)));
+ syncAnimationSettings();
  document.querySelectorAll<HTMLButtonElement>('[data-orbit-mode],[data-center-mode]').forEach(button=>{
   button.disabled=mode!=='orbit';if(button.disabled)button.title=visualizationCopy[language].orbitOnly;else button.removeAttribute('title');
  });
@@ -519,6 +521,7 @@ function selectBackgroundMode(choice:SoundSettings['background']){
  backgroundChoice=choice;persistSettings();
  backgroundMode=choice==='random'?pickVariant(['clouds','aurora','stars','waves'] as const,backgroundMode):choice;
  document.querySelectorAll<HTMLButtonElement>('[data-background-mode]').forEach(tile=>tile.setAttribute('aria-pressed',String(tile.dataset.backgroundMode===choice)));
+ syncAnimationSettings();
  atmosphere.hidden=backgroundMode==='off';atmosphere.dataset.mode=backgroundMode;
  if(backgroundMode==='off')ac.clearRect(0,0,atmosphere.width,atmosphere.height);
 }
@@ -531,6 +534,7 @@ function selectOrbitMode(choice:SoundSettings['orbit']){
 document.querySelectorAll<HTMLButtonElement>('[data-center-mode]').forEach(button=>button.addEventListener('click',()=>selectCenterMode(button.dataset.centerMode as typeof centerChoice)));
 document.querySelectorAll<HTMLButtonElement>('[data-background-mode]').forEach(button=>button.addEventListener('click',()=>selectBackgroundMode(button.dataset.backgroundMode as typeof backgroundChoice)));
 document.querySelectorAll<HTMLButtonElement>('[data-orbit-mode]').forEach(button=>button.addEventListener('click',()=>selectOrbitMode(button.dataset.orbitMode as typeof orbitChoice)));
+installAnimationSettings(()=>selectVisualization('orbit'));
 function evolveAnimations(includeBackground=true){
  if(centerChoice==='random'&&!videoAnimationRun?.flags.center)selectCenterMode('random');
  if(includeBackground&&backgroundChoice==='random'&&!videoAnimationRun?.flags.background)selectBackgroundMode('random');
