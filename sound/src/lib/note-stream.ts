@@ -2,7 +2,7 @@ import {landscapeValue} from './landscape';
 import type {StreamVariant} from './visualization';
 import type {NoteScore} from './note-score';
 import type {LandscapeHistory,LandscapeNote,LandscapeTrack} from './landscape';
-export type StreamPreview={index:number;at:number;notes:NoteScore;glide?:boolean};
+export type StreamPreview={index:number;at:number;notes:NoteScore;cycleSeconds?:number;glide?:boolean};
 export type StreamTrack=LandscapeTrack&{name?:string};
 export const streamPlot={left:76,strike:174,right:658,top:88,bottom:614};
 const clamp=(n:number,min:number,max:number)=>Math.max(min,Math.min(max,n));
@@ -11,7 +11,7 @@ export function streamX(at:number,time:number,barSeconds:number){return streamPl
 export function streamPitchY(pitch:number,base:number,spacing:number,pitched=true){return base-(pitched?clamp((pitch-12)/18,-1,1)*spacing*.34:0);}
 /** Project existing patterns only; these previews never schedule or synthesize sound. */
 export function streamPreviewNotes(preview:StreamPreview,barSeconds:number,time:number){
- const cycle=barSeconds*2,notes:LandscapeNote[]=[];
+ const cycle=preview.cycleSeconds??barSeconds*2,notes:LandscapeNote[]=[];
  for(let repeat=0;repeat<=1;repeat++)for(const note of preview.notes){
   const at=preview.at+repeat*cycle+note.start*cycle;
   if(at<time-1e-7||at>time+barSeconds+.04)continue;

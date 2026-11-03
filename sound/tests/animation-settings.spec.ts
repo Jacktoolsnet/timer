@@ -101,6 +101,10 @@ test('animation changes stay available during MP4 recording, without capturing t
  await page.locator('button[data-visualization=flower]').click();await page.waitForTimeout(700);
  await expect(page.locator('#video-stop')).toBeAttached();await expect(page.locator('#orbit')).toHaveAttribute('data-visualization','flower');
  await page.locator('#animation-settings-back').click();await page.locator('[data-animation-open=background]').click();await page.locator('[data-background-mode=stars]').click();
+ await page.locator('#animation-settings-back').click();await page.locator('[data-animation-open=controls]').click();
+ await page.locator('#volume').fill('0.35');await page.locator('#volume').dispatchEvent('input');await expect(page.locator('#volume-value')).toHaveText('50 %');
+ await page.locator('#animation-settings-back').click();await page.locator('[data-animation-open=music]').click();await page.locator('[data-style-preset=focus]').click();
+ await expect(page.locator('[data-style-preset=focus]')).toHaveAttribute('aria-pressed','true',{timeout:7000});
  await page.locator('#animation-settings-close').click();
  await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');await expect(page.locator('#sound-atmosphere')).toHaveAttribute('data-mode','stars');
  const pending=page.waitForEvent('download');await page.locator('#video-stop').click();const bytes=await readFile((await(await pending).path())!);

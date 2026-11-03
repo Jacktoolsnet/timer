@@ -532,3 +532,13 @@ Video captions now use a separately selected language (English default, with Ger
 - MP4 animation options include an opt-in random visualization switch (all four languages). Its independent schedule follows recording duration, cycling between the five views and their landscape/stream/constellation variants. Original selections restore after recording; temporary views do not leak into JSON or browser preferences. Old projects without this optional flag remain valid and default to off.
 - Foreground and background changes use an eased 1.1-second canvas crossfade. One reusable snapshot per layer blends into the live incoming animation; rapid changes resume from the current blended image. These are real canvas pixels, so MP4 exports contain the same transition, including fading backgrounds off.
 - Reduced motion skips crossfades. Audible note history is retained across views and collected in Orbit too, so incoming visualizations can immediately represent already-played music. Audio timing and synthesis are unchanged.
+
+### Independent track rates
+- Each instrument has a localized Track speed control: Automatic, ½×, 1× or 2×, also available in the instrument picker. Automatic starts at 1× for standard presets; Random Play favours slower sustained melodies and occasional faster percussion/arpeggios, retaining a steady kick/bass foundation. Explicit choices are never randomized.
+- Rational local clocks share the global tempo and swing. Pending changes commit at a shared two-bar boundary, where all three rates align; gradual random development revisits one eligible automatic track every eight bars. User drawings and edited scores are protected from random rate changes.
+- Pattern onsets, groups, sustained gates, editor scores, comet positions, note durations and note-stream previews use the local rate. Audible-event visualizations and exports follow the resulting sound, without pitch-shifting instruments.
+- Manually tapped loops retain their recorded timing and are excluded from rate changes. Optional validated per-track `rate` and `rateChoice` round-trip through JSON/opt-in storage; old projects default to 1×/Automatic.
+
+### Unified inline settings
+- Tempo & sound and Music style now live beside Sound animation and Background animation in the four-tile settings home, not in separate sections below the instrument. The existing controls/IDs and event handlers are reused without duplicate inputs or changes to music/export/storage formats.
+- Settings subpages keep the square input surface: sliders fit the panel, styles use a scrollable three-column grid, and Back/Escape restore the settings home. The original input mode is retained when closing. All four languages, themes, focus mode and live MP4 adjustment remain supported.

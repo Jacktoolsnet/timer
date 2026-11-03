@@ -3,6 +3,7 @@ import type {Language} from '../lib/i18n';
 import {animationSettingsCopy} from '../lib/animation-settings';
 import {animationCopy,orbitCopy,centerCopy,backgroundCopy} from '../lib/sound-i18n';
 import {constellationVariantCopy,streamVariantCopy,landscapeVariantCopy,visualizationCopy} from '../lib/visualization';
+import StyleIcon from './StyleIcon.astro';
 import VisualizationPicker from './VisualizationPicker.astro';
 import ActionIcon from './ActionIcon.astro';
 import OrbitIcon from './OrbitIcon.astro';
@@ -19,10 +20,14 @@ const {lang}=Astro.props,c=animationSettingsCopy[lang];
  </div>
  <div data-animation-panel="home" data-panel-title={c.title}>
   <div class="animation-settings-home">
+   <button type="button" class="animation-home-tile" data-animation-open="controls"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3 6h6m4 0h8M3 12h12m4 0h2M3 18h2m4 0h12"/><circle cx="11" cy="6" r="2"/><circle cx="17" cy="12" r="2"/><circle cx="7" cy="18" r="2"/></svg><span>{c.controls}</span></button>
+   <button type="button" class="animation-home-tile" data-animation-open="music"><StyleIcon name="classical"/><span>{c.music}</span><small id="animation-current-music"></small></button>
    <button type="button" class="animation-home-tile" data-animation-open="sound"><ActionIcon name="audio"/><span>{c.sound}</span><small id="animation-current-sound">{visualizationCopy[lang].orbit}</small></button>
    <button type="button" class="animation-home-tile" data-animation-open="background"><BackgroundIcon name="clouds"/><span>{c.background}</span><small id="animation-current-background">{backgroundCopy[lang].clouds}</small></button>
   </div>
  </div>
+ <div data-animation-panel="controls" data-panel-title={c.controls} hidden><div class="settings-content"><slot name="controls"/></div></div>
+ <div data-animation-panel="music" data-panel-title={c.music} hidden><div class="settings-content"><slot name="music"/></div></div>
  <div data-animation-panel="sound" data-panel-title={c.sound} hidden><VisualizationPicker lang={lang}/></div>
  <div data-animation-panel="constellation" data-panel-title={c.constellation} hidden>
   <div class="center-tiles" role="group" aria-label={c.constellation}>

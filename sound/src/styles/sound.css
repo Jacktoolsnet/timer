@@ -464,3 +464,20 @@ body.score-expanded{overflow:hidden}
 @keyframes animation-settings-enter{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
 @media(max-width:600px){#animation-settings :is(.animation-home-tile,button[data-visualization],.center-tile){font-size:10px;gap:5px;padding:7px 3px}.animation-settings-heading h2{font-size:13px}#animation-settings :is(.animation-home-tile,button[data-visualization],.center-tile)>svg{width:24px;height:24px}.animation-home-tile small{font-size:9px}}
 @media(prefers-reduced-motion:reduce){#animation-settings [data-animation-panel]{animation:none}}
+
+.picker-rate-label{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:12px 0}.picker-rate-label select{min-width:130px}.rate-status,#picker-rate-status{font-size:11px;color:var(--muted);line-height:1.5}
+
+/* Musical controls share the inline settings surface, including focus and recording. */
+#animation-settings .animation-settings-home{grid-template:repeat(2,minmax(0,1fr))/repeat(2,minmax(0,1fr))}
+#animation-settings .settings-content{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:4px}
+#animation-settings :is(.controls-tile,.music-tile){display:block;border:0;border-radius:0;background:transparent;box-shadow:none;padding:10px 2px;margin:0;max-width:none;min-width:0}
+#animation-settings :is(#controls-title,#music-title){display:none}
+#animation-settings .style-tiles{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+#animation-settings .style-tile{min-height:96px;padding:10px 5px;gap:7px;font-size:11px;border-radius:12px}
+#animation-settings .style-icon{width:36px;height:36px}
+#animation-settings .style-icon svg{width:25px;height:25px}
+#animation-settings .style-controls>p{font-size:11px;line-height:1.5}
+@media(max-width:600px){#animation-settings .style-tile{min-height:88px;font-size:10px}#animation-settings .style-check{right:4px;top:3px}}
+#animation-settings .settings-content:has(>.controls-tile){display:flex;flex-direction:column}
+#animation-settings .controls-tile{flex-shrink:0;margin-block:auto}
+#animation-settings .controls-tile :is(.slider-controls,.sound-adjustments){gap:24px}

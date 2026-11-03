@@ -1,3 +1,4 @@
+import {trackRates,type TrackRate,type TrackRateChoice} from './track-rate';
 import {constellationVariants,type ConstellationVariant,streamVariants,type StreamVariant,landscapeVariants,type LandscapeVariant,visualizationModes,type VisualizationMode} from './visualization';
 import {validScore,type NoteScore} from './note-score';
 import {validNoteGroups,type NoteGroups} from './note-groups';
@@ -16,6 +17,7 @@ export const backgroundModes=['clouds','aurora','stars','waves','off','random'] 
 export const centerModes=['ring','filled','sine','bars','sun','off','random'] as const;
 export const orbitModes=['comet','dot','pulse','off','random'] as const;
 export type SavedTrack={
+ rate?:TrackRate;rateChoice?:TrackRateChoice;
  score?:NoteScore|null;
  groups?:NoteGroups;
  grid?:GridChoice;slots?:GridSize;enabled:boolean;mute:boolean;instrument:InstrumentId;points:boolean[];motif?:number[];volume:number;pitch:number;phase:number;
@@ -72,6 +74,8 @@ export function decodeSettings(raw:string|null):SoundSettings|null{
   }
   let groupCount=0;
   for(const tr of s.tracks){
+   if(tr?.rate!==undefined&&!(trackRates as readonly unknown[]).includes(tr.rate))return null;
+   if(tr?.rateChoice!==undefined&&tr.rateChoice!=='auto'&&!(trackRates as readonly unknown[]).includes(tr.rateChoice))return null;
    if(tr?.score!==undefined&&tr.score!==null&&!validScore(tr.score))return null;
    if(tr?.groups!==undefined){if(!validNoteGroups(tr.groups,tr.instrument))return null;groupCount+=tr.groups.filter(Boolean).length;}
    if(groupCount>6)return null;

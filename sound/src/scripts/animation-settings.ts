@@ -1,7 +1,8 @@
-type Panel='home'|'sound'|'constellation'|'stream'|'landscape'|'orbit'|'orbit-trail'|'orbit-center'|'flower'|'background';
+type Panel='home'|'controls'|'music'|'sound'|'constellation'|'stream'|'landscape'|'orbit'|'orbit-trail'|'orbit-center'|'flower'|'background';
 
 export function syncAnimationSettings(){
  for(const [summary,selector] of [
+  ['animation-current-music','button[data-style-preset][aria-pressed=true]>span:nth-child(2)'],
   ['animation-current-sound','button[data-visualization][aria-pressed=true] span'],
   ['animation-current-background','button[data-background-mode][aria-pressed=true] span']
  ]){
@@ -21,7 +22,7 @@ export function installAnimationSettings(activate:(view:'orbit'|'flower'|'landsc
  let panel:Panel='home';
  const parent=(value:Panel):Panel=>value==='orbit-trail'||value==='orbit-center'?'orbit':value==='orbit'||value==='flower'||value==='landscape'||value==='stream'||value==='constellation'?'sound':'home';
  function show(next:Panel,focus=true){
-  panel=next;
+  panel=next;syncAnimationSettings();
   surface.querySelectorAll<HTMLElement>('[data-animation-panel]').forEach(el=>{
    el.hidden=el.dataset.animationPanel!==next;
    if(!el.hidden)title.textContent=el.dataset.panelTitle!;
