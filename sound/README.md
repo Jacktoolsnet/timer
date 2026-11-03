@@ -517,3 +517,8 @@ Video captions now use a separately selected language (English default, with Ger
 - Delta channels now fan out into broad translucent filled surfaces. Their widening overlaps adjacent instrument colours and dissolves into the mouth; internal channels are deliberately faint.
 - The sea is a continuous colour field rather than separate wave lines. Its common base colour is an order-independent RGB mixture weighted by arriving performed energy; broad overlapping colour plumes retain the incoming river hues and gently diffuse across the shared surface. Muted/zero-volume tracks do not contribute to the mixture.
 - Short arrivals now spread as soft filled colour blooms instead of outlined rings. Existing timing, controls, themes, reduced motion, persistence, audio and video capture are unchanged. Tests cover bounded fan widths, mixed hues/weights, and substantial filled pixel coverage in both themes.
+
+### Dissolving note stream
+- The note-stream tile has an inline settings gear with Notes (unchanged default) and Particle clouds, localized in all four languages. Optional validated `streamVariant: 'notes'|'clouds'` round-trips through JSON and opt-in browser storage; legacy sessions keep Notes.
+- In cloud mode, actual heard events dissolve at the strike line into deterministic, bounded particles that spread, drift left and fade. Held/gliding notes release particles along their duration and pitch/velocity curve. Forecasts never emit particles, and music/random generation is unchanged.
+- Muted/zero-volume tracks and disabled glow emit nothing; reduced motion uses stationary fading points. The same canvas is used in focus mode and MP4 recordings.

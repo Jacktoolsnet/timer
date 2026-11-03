@@ -4,7 +4,7 @@ import {paintSoundFlower} from '../lib/sound-flower';
 import {paintConstellation} from '../lib/constellation';
 import {paintNoteStream,type StreamPreview} from '../lib/note-stream';
 import {LandscapeHistory,paintLandscape} from '../lib/landscape';
-import {landscapeVariantCopy,type LandscapeVariant,visualizationCopy,type VisualizationMode} from '../lib/visualization';
+import {streamVariantCopy,type StreamVariant,landscapeVariantCopy,type LandscapeVariant,visualizationCopy,type VisualizationMode} from '../lib/visualization';
 import {cloneScore,type NoteScore,type ScoreNote} from '../lib/note-score';
 import {createNoteEditor} from './note-editor';
 import {genreGroupCount,groupAnchorWeight,phraseContour,responsePhrase,phraseBreath,conversationLevel,phraseNoteAllowed,leadChord,instrumentGroup,windScoop,firstPhraseAttack,ornamentPitch} from '../lib/musicality';
@@ -85,6 +85,7 @@ const language=document.documentElement.lang as keyof typeof styleCopy;
 let currentStyle:StyleId='electronic',pendingStyle:StyleId|null=null;
 let visualization:VisualizationMode='orbit';
 let landscapeVariant:LandscapeVariant='rivers';
+let streamVariant:StreamVariant='notes';
 const landscape=new LandscapeHistory();
 let streamRevision=0,streamCache:{key:string;scores:NoteScore[]}|null=null;
 let currentDance:DanceId|null=null,pendingDance:DanceId|null=null;
@@ -396,7 +397,7 @@ function snapshotSettings(includeDraft=false):SoundSettings{
  const backup=includeDraft?null:rhythmBackup;
  return {
    version:2,style:currentStyle,dance:currentDance,groove:grooveChoice,bpm,transpose,noteEffect,volume:Number($<HTMLInputElement>('#volume').value),
-   visualization,landscapeVariant,background:backgroundChoice,center:centerChoice,flowerCenter:flowerCenterChoice,orbit:orbitChoice,
+   visualization,landscapeVariant,streamVariant,background:backgroundChoice,center:centerChoice,flowerCenter:flowerCenterChoice,orbit:orbitChoice,
    recording:{restart:$<HTMLInputElement>('#recording-restart').checked,random:$<HTMLInputElement>('#recording-random').checked,fullscreen:$<HTMLInputElement>('#recording-fullscreen').checked,minutes:Number($<HTMLInputElement>('#recording-duration').value),videoFormat:chosenVideoFormat(),videoInfo:chosenVideoInfo(),animations:chosenVideoAnimations()},
    pad:{mode:padMode,beats:(backup??tapPattern).beats,hits:(backup??tapPattern).hits.map(lane=>[...lane]),notes:(backup??tapPattern).notes.map(lane=>[...lane])},
    tracks:tracks.map((live,i)=>{const tr=backup&&rhythmTouched.has(i)&&rhythmTrackBackup?{...live,...rhythmTrackBackup[i]}:live;return ({
@@ -505,8 +506,8 @@ function pickVariant<T extends string>(modes:readonly T[],current:T):T{
  return choices[Math.floor(Math.random()*choices.length)];
 }
 function selectVisualization(mode:VisualizationMode){
- if(visualization!==mode){landscape.clear();streamCache=null;}visualization=mode;orbit.dataset.visualization=mode;orbit.dataset.landscapeVariant=landscapeVariant;orbit.dataset.flowerCenterVariant=flowerCenterMode;
- orbit.setAttribute('aria-label',mode==='flower'?visualizationCopy[language].flowerDescription:mode==='constellation'?visualizationCopy[language].constellationDescription:mode==='stream'?visualizationCopy[language].streamDescription:mode==='landscape'?(landscapeVariant==='delta'?landscapeVariantCopy[language].description:visualizationCopy[language].description):t.steps);
+ if(visualization!==mode){landscape.clear();streamCache=null;}visualization=mode;orbit.dataset.visualization=mode;orbit.dataset.landscapeVariant=landscapeVariant;orbit.dataset.streamVariant=streamVariant;orbit.dataset.flowerCenterVariant=flowerCenterMode;
+ orbit.setAttribute('aria-label',mode==='flower'?visualizationCopy[language].flowerDescription:mode==='constellation'?visualizationCopy[language].constellationDescription:mode==='stream'?(streamVariant==='clouds'?streamVariantCopy[language].description:visualizationCopy[language].streamDescription):mode==='landscape'?(landscapeVariant==='delta'?landscapeVariantCopy[language].description:visualizationCopy[language].description):t.steps);
  document.querySelectorAll<HTMLButtonElement>('button[data-visualization]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.visualization===mode)));
  syncAnimationSettings();
  document.querySelectorAll<HTMLButtonElement>('[data-orbit-mode],[data-center-mode]').forEach(button=>{
@@ -515,6 +516,13 @@ function selectVisualization(mode:VisualizationMode){
  persistSettings();
 }
 document.querySelectorAll<HTMLButtonElement>('button[data-visualization]').forEach(button=>button.addEventListener('click',()=>selectVisualization(button.dataset.visualization as VisualizationMode)));
+function selectStreamVariant(choice:StreamVariant){
+ streamVariant=choice;orbit.dataset.streamVariant=choice;
+ document.querySelectorAll<HTMLButtonElement>('button[data-stream-variant]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.streamVariant===choice)));
+ if(visualization==='stream')orbit.setAttribute('aria-label',choice==='clouds'?streamVariantCopy[language].description:visualizationCopy[language].streamDescription);
+ persistSettings();
+}
+document.querySelectorAll<HTMLButtonElement>('button[data-stream-variant]').forEach(button=>button.addEventListener('click',()=>selectStreamVariant(button.dataset.streamVariant as StreamVariant)));
 function selectLandscapeVariant(choice:LandscapeVariant){
  landscapeVariant=choice;orbit.dataset.landscapeVariant=choice;
  document.querySelectorAll<HTMLButtonElement>('button[data-landscape-variant]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.landscapeVariant===choice)));
@@ -1988,7 +1996,7 @@ function frame(now:number){
  if(visualization==='landscape')(landscapeVariant==='delta'?paintRiverDelta:paintLandscape)(oc,landscape,active.map(({tr,index})=>({index,label:String(padNumbers[index]),color:tr.color,volume:tr.volume,mute:tr.mute||tr.volume===0,pitched:isMelodic(tr.instrument)})),time,bpm,groove.beats,dark,playing,reduced.matches,visualMaster,noteEffect);
  if(visualization==='stream'){
   const scene=streamFrame(time);
-  paintNoteStream(oc,landscape,active.map(({tr,index})=>({index,label:String(padNumbers[index]),name:instrumentNames[language][instrumentIds.indexOf(tr.instrument)],color:tr.color,volume:tr.volume,mute:tr.mute||tr.volume===0,pitched:isMelodic(tr.instrument)})),scene.previews,scene.time,scene.barStart,bpm,groove.beats,dark,playing,reduced.matches,visualMaster,noteEffect);
+  paintNoteStream(oc,landscape,active.map(({tr,index})=>({index,label:String(padNumbers[index]),name:instrumentNames[language][instrumentIds.indexOf(tr.instrument)],color:tr.color,volume:tr.volume,mute:tr.mute||tr.volume===0,pitched:isMelodic(tr.instrument)})),scene.previews,scene.time,scene.barStart,bpm,groove.beats,dark,playing,reduced.matches,visualMaster,noteEffect,streamVariant);
  }
  if(visualization==='orbit'&&orbitAnimation)active.forEach(({tr,index},rank)=>{
   const r=radius(rank,active.length);oc.beginPath();oc.arc(350,350,r,0,Math.PI*2);oc.strokeStyle=tr.color+(dark?'55':'99');oc.lineWidth=dark?1:1.4;oc.stroke();
@@ -2113,7 +2121,7 @@ function applySettings(saved:SoundSettings){
    remeterRhythm(tapPattern,groove.beats,0);syncRhythmUi();
   }
   syncRhythmUi();
-  selectLandscapeVariant(saved.landscapeVariant??'rivers');selectCenterMode(saved.center);selectFlowerCenterMode(saved.flowerCenter??'ring');selectBackgroundMode(saved.background);selectOrbitMode(saved.orbit);selectVisualization(saved.visualization??'orbit');
+  selectStreamVariant(saved.streamVariant??'notes');selectLandscapeVariant(saved.landscapeVariant??'rivers');selectCenterMode(saved.center);selectFlowerCenterMode(saved.flowerCenter??'ring');selectBackgroundMode(saved.background);selectOrbitMode(saved.orbit);selectVisualization(saved.visualization??'orbit');
 
  syncGroove();syncDanceTiles();sync();
 }

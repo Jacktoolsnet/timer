@@ -1,3 +1,5 @@
+import {landscapeValue} from './landscape';
+import type {StreamVariant} from './visualization';
 import type {NoteScore} from './note-score';
 import type {LandscapeHistory,LandscapeNote,LandscapeTrack} from './landscape';
 export type StreamPreview={index:number;at:number;notes:NoteScore;glide?:boolean};
@@ -18,7 +20,19 @@ export function streamPreviewNotes(preview:StreamPreview,barSeconds:number,time:
  }
  return notes;
 }
-export function paintNoteStream(ctx:CanvasRenderingContext2D,history:LandscapeHistory,tracks:StreamTrack[],previews:StreamPreview[],time:number,barStart:number,bpm:number,beats:number,dark:boolean,playing:boolean,reduced:boolean,master:number,effect=1){
+/** Deterministic, bounded particles: rendering never consumes musical randomness. */
+export function streamCloud(age:number,seed:number,level:number,reduced=false){
+ if(age<0||age>=1.8||level<=0)return [];
+ const hash=(n:number)=>{const v=Math.sin(seed*12.9898+n*78.233)*43758.5453;return v-Math.floor(v);};
+ const fade=Math.pow(1-age/1.8,1.6),spread=reduced?3:3+age*28;
+ return Array.from({length:reduced?4:10},(_,i)=>({
+  x:reduced?-2-hash(i)*7:-age*(48+hash(i)*86)-hash(i+31)*6,
+  y:(hash(i+11)-.5)*spread*2,
+  radius:(.8+hash(i+21)*1.6)*(.65+Math.sqrt(level)*.65),
+  alpha:clamp(level,0,1)*fade*(.4+hash(i+41)*.6)
+ }));
+}
+export function paintNoteStream(ctx:CanvasRenderingContext2D,history:LandscapeHistory,tracks:StreamTrack[],previews:StreamPreview[],time:number,barStart:number,bpm:number,beats:number,dark:boolean,playing:boolean,reduced:boolean,master:number,effect=1,variant:StreamVariant='notes'){
  const {left,strike,right,top,bottom}=streamPlot,barSeconds=60/bpm*beats,spacing=(bottom-top)/Math.max(1,tracks.length);
  ctx.save();ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';ctx.lineCap='round';ctx.lineJoin='round';
  // Lanes and subdivisions give even quiet music a readable rhythmic framework.
@@ -34,7 +48,7 @@ export function paintNoteStream(ctx:CanvasRenderingContext2D,history:LandscapeHi
   ctx.beginPath();ctx.moveTo(x,top-8);ctx.lineTo(x,bottom+5);ctx.stroke();
   if(x>strike+12){ctx.globalAlpha=.6;ctx.fillStyle=dark?'#b6d2e8':'#36566f';ctx.font='10px system-ui';ctx.textAlign='center';ctx.fillText(String(((quarter%beats)+beats)%beats+1),x,top-18);}
  }
- ctx.save();ctx.beginPath();ctx.rect(left,top-3,right-left,bottom-top+6);ctx.clip();
+ ctx.save();ctx.beginPath();ctx.rect(variant==='clouds'?strike:left,top-3,right-(variant==='clouds'?strike:left),bottom-top+6);ctx.clip();
  for(const [rank,tr] of tracks.entries()){
   const base=top+(rank+.5)*spacing;
   const draw=(note:LandscapeNote,forecast:boolean)=>{
@@ -75,6 +89,33 @@ export function paintNoteStream(ctx:CanvasRenderingContext2D,history:LandscapeHi
   for(const note of history.notes(tr.index))draw(note,false);
  }
  ctx.restore();
+ // Actual sound, not the provisional preview, releases particles at the line.
+ if(variant==='clouds'&&playing&&master>0&&effect>0){
+  ctx.save();ctx.beginPath();ctx.rect(8,top-30,strike-6,bottom-top+60);ctx.clip();
+  for(const [rank,tr] of tracks.entries()){
+   if(tr.mute||tr.volume<=0)continue;
+   const base=top+(rank+.5)*spacing;
+   for(const note of history.notes(tr.index).slice(-64)){
+    if(note.pulseOnly||time<note.at||time-note.at>note.length+1.8)continue;
+    // Sample held/gliding notes as they cross, so their whole length dissolves.
+    // Only recent emissions are evaluated; no growing particle arrays or timers.
+    const envelope={...note,joined:true};
+    const first=Math.max(0,Math.ceil((time-note.at-1.8)/.12));
+    const last=Math.min(Math.floor(note.length/.12),Math.floor((time-note.at)/.12));
+    for(let k=first;k<=last;k++){
+     const at=note.at+k*.12,age=time-at,value=landscapeValue(envelope,at);
+     const level=clamp(value.level*tr.volume*master*effect,0,1.5);
+     const y=streamPitchY(value.pitch,base,spacing,tr.pitched);
+     ctx.fillStyle=tr.color;ctx.shadowColor=tr.color;ctx.shadowBlur=reduced?0:dark?5:2;
+     for(const particle of streamCloud(age,note.at*37+tr.index*101+k,level,reduced)){
+      ctx.globalAlpha=particle.alpha*(dark?1:.85);
+      ctx.beginPath();ctx.arc(strike+particle.x,y+particle.y,particle.radius,0,Math.PI*2);ctx.fill();
+     }
+    }
+   }
+  }
+  ctx.restore();
+ }
  // A single bright, shared strike line, without a sweeping pointer.
  ctx.globalAlpha=dark?.8:.65;ctx.strokeStyle=dark?'#e3f6ff':'#254e67';ctx.lineWidth=1.7;ctx.shadowBlur=0;ctx.beginPath();ctx.moveTo(strike,top-10);ctx.lineTo(strike,bottom+10);ctx.stroke();
  ctx.restore();

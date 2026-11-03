@@ -16,3 +16,12 @@ export const landscapeVariantCopy={
  es:{rivers:'Ríos',delta:'Delta fluvial',description:'Delta fluvial: los ríos de color se ramifican hacia la izquierda y desembocan en un mar sonoro común. Las notas reales viajan como luces y generan ondas al llegar. No se añaden sonidos.'},
  fr:{rivers:'Rivières',delta:'Delta fluvial',description:'Delta fluvial : les rivières colorées se ramifient vers la gauche et rejoignent une mer sonore commune. Les notes jouées voyagent en lumière et créent des vagues à leur arrivée. Aucun son supplémentaire n’est produit.'}
 } as const;
+
+export const streamVariants=['notes','clouds'] as const;
+export type StreamVariant=typeof streamVariants[number];
+export const streamVariantCopy={
+ de:{notes:'Noten',clouds:'Punktewolken',description:'Notenstrom mit Punktewolken: Gespielte Noten lösen sich an der Spiellinie in farbige Partikel auf, driften auseinander und verblassen nach links.'},
+ en:{notes:'Notes',clouds:'Particle clouds',description:'Note stream with particle clouds: played notes dissolve at the play line into coloured particles, spread apart and fade to the left.'},
+ es:{notes:'Notas',clouds:'Nubes de puntos',description:'Las notas se disuelven en partículas de colores al llegar a la línea, se dispersan y desaparecen hacia la izquierda.'},
+ fr:{notes:'Notes',clouds:'Nuages de points',description:'Les notes jouées se dissolvent en particules colorées à la ligne, se dispersent et disparaissent vers la gauche.'}
+} as const;

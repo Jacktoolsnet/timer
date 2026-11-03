@@ -1,4 +1,4 @@
-type Panel='home'|'sound'|'landscape'|'orbit'|'orbit-trail'|'orbit-center'|'flower'|'background';
+type Panel='home'|'sound'|'stream'|'landscape'|'orbit'|'orbit-trail'|'orbit-center'|'flower'|'background';
 
 export function syncAnimationSettings(){
  for(const [summary,selector] of [
@@ -12,14 +12,14 @@ export function syncAnimationSettings(){
 
 export function animationSettingsActive(){return document.getElementById('animation-settings')?.hidden===false;}
 
-export function installAnimationSettings(activate:(view:'orbit'|'flower'|'landscape')=>void,onOpen:()=>void,onClose:()=>void){
+export function installAnimationSettings(activate:(view:'orbit'|'flower'|'landscape'|'stream')=>void,onOpen:()=>void,onClose:()=>void){
  const surface=document.querySelector<HTMLElement>('#animation-settings')!;
  const opener=document.querySelector<HTMLButtonElement>('#animation-settings-open')!;
  const back=document.querySelector<HTMLButtonElement>('#animation-settings-back')!;
  const title=document.querySelector<HTMLElement>('#animation-settings-title')!;
  const side=surface.closest<HTMLElement>('.flow-side')!;
  let panel:Panel='home';
- const parent=(value:Panel):Panel=>value==='orbit-trail'||value==='orbit-center'?'orbit':value==='orbit'||value==='flower'||value==='landscape'?'sound':'home';
+ const parent=(value:Panel):Panel=>value==='orbit-trail'||value==='orbit-center'?'orbit':value==='orbit'||value==='flower'||value==='landscape'||value==='stream'?'sound':'home';
  function show(next:Panel,focus=true){
   panel=next;
   surface.querySelectorAll<HTMLElement>('[data-animation-panel]').forEach(el=>{
@@ -41,7 +41,7 @@ export function installAnimationSettings(activate:(view:'orbit'|'flower'|'landsc
   document.querySelectorAll<HTMLButtonElement>('[data-pad-mode]').forEach(button=>button.setAttribute('aria-pressed','false'));
  });
  surface.querySelectorAll<HTMLButtonElement>('[data-animation-open]').forEach(button=>button.addEventListener('click',()=>show(button.dataset.animationOpen as Panel)));
- for(const view of ['orbit','flower','landscape'] as const)document.querySelector('#'+view+'-settings-open')!.addEventListener('click',()=>{activate(view);show(view);});
+ for(const view of ['orbit','flower','landscape','stream'] as const)document.querySelector('#'+view+'-settings-open')!.addEventListener('click',()=>{activate(view);show(view);});
  back.addEventListener('click',()=>show(parent(panel)));
  document.querySelector('#animation-settings-close')!.addEventListener('click',()=>close());
  // Switching to an input mode is ordinary inline navigation, not dismissal of a modal.
