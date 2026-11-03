@@ -162,9 +162,9 @@ def build(entry):
      transfer('warmth',t['notes'],select=lambda n:n[2]>=48)
      transfer('upright',t['notes'],select=lambda n:n[2]<48)
   end=score['end']+offset
-  scope='Complete 16-bar Prelude with quarter-note pickup; PD helper edition, historical scan comparison pending. Coffeehouse preview, not an approved edition.'
-  if key=='schumann-foreign':scope='Complete 22-bar piece, both historical repeats played (AABB, 44 bars); four source voices. PD helper notation; scan reconciliation pending.'
-  elif key=='brahms-waltz':scope='Complete 44-bar played solo Waltz, including written-out opening repeat and triplet coda. PD Joseffy/Rude helper notation; not a first-edition replica.'
+  scope='Complete 16-bar Prelude with quarter-note pickup; Coffeehouse interpretation from the credited notation.'
+  if key=='schumann-foreign':scope='Complete 22-bar piece, both repeats played (AABB, 44 bars); four source voices, Coffeehouse interpretation.'
+  elif key=='brahms-waltz':scope='Complete 44-bar played solo Waltz, including written-out opening repeat and triplet coda. From the credited Joseffy/Rude notation.'
  else:
   track('lead','pluck' if style=='house' else 'piano' if style in ('classical','jazz') else 'epiano',.43 if style!='house' else .36)
   track('inner','piano' if style in ('classical','jazz','house') else 'epiano',.28 if style!='house' else .22)
@@ -248,7 +248,7 @@ def build(entry):
  rights=dict(
   composition=f"{work['title']} — {work['composer']}; original composition public domain in Germany.",
   arrangement='AI-assisted full-source production; native meter; source voices retained. See library/SOURCES.md for exact scope.',
-  recording='Synthesized in jacktools Sound; no external audio recording.',
+  recording='Created with jacktools Sound and synthetic instruments; no external audio recording.',
   license='Source score: Public Domain. Project arrangement/recording: no separate usage license granted.',
   source=page)
  if key=='canon-original':
@@ -259,10 +259,10 @@ def build(entry):
   rights['license']='Violin source CC BY 3.0: https://creativecommons.org/licenses/by/3.0/ ; no separate license granted for project additions.'
  elif key=='chopin-a':
   rights['composition']='Prélude op.28/7 — Frédéric Chopin (1810–1849); original public domain.'
-  rights['arrangement']='Coffeehouse preview; complete PD notation by Magnus Lewis-Smith, Mutopia 470 (Peters). Historical scan comparison pending; see docs.'
+  rights['arrangement']='Coffeehouse interpretation. Notation: Magnus Lewis-Smith, Mutopia 470 (2015), Edition Peters.'
  elif key in ('schumann-foreign','brahms-waltz'):
   rights['composition']=f"{work['title']} — {work['composer']}; original public domain."
-  rights['arrangement']=('Full AABB, 4 voices; PD helper Ying-Chun Liu, Mutopia 354 (1900 edition). Coffeehouse; historical detail review pending.' if key=='schumann-foreign' else 'Full solo Waltz; PD helper Brian D. Rude, Mutopia 794 (Joseffy). Coffeehouse balance; historical detail review pending.')
+  rights['arrangement']=('Coffeehouse, AABB, 4 voices. Notation: Ying-Chun Liu, Mutopia 354 (2006), Leichte Stucke (1900).' if key=='schumann-foreign' else 'Coffeehouse solo Waltz. Notation: Brian D. Rude, Mutopia 794 (2006), R. Joseffy edition.')
  assert all(len(v)<=160 for v in rights.values()),rights
  assert len('\n'.join(rights.values()))<=550,(id,sum(map(len,rights.values())))
  song=dict(format='jacktools-song',version=3,title=f"{work['title']} — {style.title()}",rights=rights,

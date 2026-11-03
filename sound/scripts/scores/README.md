@@ -13,6 +13,27 @@ solely from that scan or an approved first-edition reproduction: full historical
 reconciliation and listening acceptance remain pending. See
 `docs/COFFEEHOUSE_PREVIEW.de.md` for the exact production scope and limitations.
 
+## Additional Schumann and Brahms Coffeehouse inputs
+
+`schumann-foreign-edition/original.ly`: Ying-Chun Liu, Mutopia 354, Public Domain,
+source "Leichte Stucke, 1900". `performance.ly` is syntax-converted for LilyPond
+2.24, with the four musical voices isolated into separate MIDI staves and
+engraving-only staff changes removed. `schumann-foreign.mid` is the complete
+22-bar single pass (240 events). `coffeehouse-score-form.py` assembles BOTH
+historical repeat signs into AABB: `schumann-foreign.performance.mid`, 44 bars,
+480 events. No notes cross the section cuts. No original source file is replaced.
+
+`brahms-waltz-edition/original.ly`: Brian D. Rude, Mutopia 794, Public Domain,
+source "Ed. R. Joseffy". `performance.ly` is syntax-converted for LilyPond 2.24.
+`brahms-waltz.mid` contains the helper's full 44-bar played form, 720 events,
+including the written-out opening repeat and triplet coda. Editorial ornament
+and rhythmic readings are not claimed as exact first-edition readings.
+
+Both `.source.json` files pin the original notation download and its SHA-256,
+historical evidence reference and remaining comparison limits. Rebuild with
+`python3 scripts/rebuild-coffeehouse-score.py`; no remote MIDI or recordings.
+See `docs/COFFEEHOUSE_PRODUCTIONS.de.md` for production scope and limitations.
+
 ## Existing library inputs
 
 Symbolic score events, **not audio recordings or commercial MIDI performances**.

@@ -5,9 +5,9 @@
   "rights": {
     "composition": "Canon in D — Johann Pachelbel (1653–1706); Originalkomposition gemeinfrei in Deutschland.",
     "arrangement": "KI-gestützte Bearbeitung „Morning Light“; keine fremde Bearbeitung als Vorlage angegeben.",
-    "recording": "Mit jacktools Sound synthetisiert; keine fremde Tonaufnahme verwendet.",
-    "license": "Bearbeitung und Aufnahme: keine gesonderte Nutzungslizenz erteilt; Rechte nicht abschließend geprüft.",
-    "source": "Grundlage: Pachelbels Canon in D; Quellenhinweis ist keine weltweite Rechtegarantie."
+    "recording": "Mit jacktools Sound und synthetischen Instrumenten erzeugt; keine fremde Tonaufnahme verwendet.",
+    "license": "Bearbeitung und Aufnahme: keine gesonderte Nutzungslizenz erteilt.",
+    "source": "Originalkomposition: Johann Pachelbel, Canon in D."
   },
   "bpm": 72,
   "style": "classical",

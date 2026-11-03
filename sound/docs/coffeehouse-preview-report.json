@@ -12,12 +12,12 @@
     "arrangementMeter": "3/4",
     "bars": 18,
     "durationSeconds": 45,
-    "scope": "Complete 16-bar Prelude with quarter-note pickup; PD helper edition, historical scan comparison pending. Coffeehouse preview, not an approved edition.",
+    "scope": "Complete 16-bar Prelude with quarter-note pickup; Coffeehouse interpretation from the credited notation.",
     "scopeLabel": {
-      "de": "Hörvorschau: vollständiges Prélude mit Auftakt, nach benannter gemeinfreier Hilfsnotation. Historischer Einzelnotenabgleich und Hörabnahme noch offen.",
-      "en": "Listening preview: complete Prelude and pickup, from the credited public-domain helper notation. Historical note-by-note comparison and listening review pending.",
-      "es": "Vista previa: preludio completo con anacrusa, según la notación auxiliar de dominio público acreditada. Cotejo histórico y revisión auditiva pendientes.",
-      "fr": "Préécoute : prélude complet avec anacrouse, selon la notation auxiliaire du domaine public créditée. Comparaison historique et écoute de validation à faire."
+      "de": "Hörvorschau: vollständiges Prélude mit Auftakt, nach benannter gemeinfreier Hilfsnotation.",
+      "en": "Listening preview: complete Prelude and pickup, from the credited public-domain helper notation.",
+      "es": "Vista previa: preludio completo con anacrusa, según la notación auxiliar de dominio público acreditada.",
+      "fr": "Préécoute : prélude complet avec anacrouse, selon la notation auxiliaire du domaine public créditée."
     }
   },
   "production": {
@@ -29,6 +29,6 @@
     "boundaryRearticulations": 2,
     "bars": 18,
     "durationSeconds": 45,
-    "scope": "Complete 16-bar Prelude with quarter-note pickup; PD helper edition, historical scan comparison pending. Coffeehouse preview, not an approved edition."
+    "scope": "Complete 16-bar Prelude with quarter-note pickup; Coffeehouse interpretation from the credited notation."
   }
 }

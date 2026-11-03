@@ -1,5 +1,9 @@
 # Erste abspielbare Coffeehouse-Vorschau
 
+> Aktualisierung der Quellenanzeige: Öffentliche Rechtefelder wurden vereinheitlicht;
+> Angaben zur Bytegleichheit früherer Arbeitsstände beziehen sich seitdem auf
+> die Musikdaten ohne Rechtefelder. Siehe [Anzeige und Audit](SONG_PROVENANCE_DISPLAY.de.md).
+
 **Chopin: Prélude A-Dur, op.28 Nr.7 – vollständig, 45 Sekunden einschließlich Transportausklang.**
 
 [Song-JSON](../public/examples/coffeehouse-chopin-prelude-a.preview.song.json)
@@ -63,9 +67,9 @@ python3 sound/scripts/rebuild-coffeehouse-score.py
 
 Die Produktionszahlen und der MIDI-Hash stehen in `coffeehouse-preview-report.json`.
 Die separate Vorschau-Erzeugung schreibt weder Katalog noch vorhandene Songs um.
-Danach folgen die vollständigen Schumann- und Brahms-Fassungen; erst das geprüfte
-Dreierpaket wird als abgenommen geführt. Weitere abspielbare Vorschauen können
-bereits vorher im Coffeehouse-Overlay ergänzt werden.
+Die vollständigen [Schumann- und Brahms-Fassungen](COFFEEHOUSE_PRODUCTIONS.de.md)
+sind inzwischen ebenfalls im Coffeehouse-Overlay abspielbar. Die historische
+Detailabnahme ist weiterhin von der direkten Hörbarkeit getrennt.
 
 ## Technischer Prüfstand – 03.11.2026
 

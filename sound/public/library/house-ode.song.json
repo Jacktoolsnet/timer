@@ -5,7 +5,7 @@
   "rights": {
     "composition": "Ode an die Freude · Hymnenthema — L. van Beethoven (1770–1827); original composition public domain in Germany.",
     "arrangement": "AI-assisted full-source production; native meter; source voices retained. See library/SOURCES.md for exact scope.",
-    "recording": "Synthesized in jacktools Sound; no external audio recording.",
+    "recording": "Created with jacktools Sound and synthetic instruments; no external audio recording.",
     "license": "Source score: Public Domain. Project arrangement/recording: no separate usage license granted.",
     "source": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=528"
   },

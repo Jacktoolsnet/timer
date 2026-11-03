@@ -1053,5 +1053,7 @@
         }
       ]
     }
-  ]
+  ],
+  "playablePreviewSlots": 3,
+  "remainingUnproducedSlots": 39
 }

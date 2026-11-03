@@ -14,11 +14,15 @@ nicht die Begründung der Gemeinfreiheit.
 ## Umfang und Status
 
 - 18 Musikrichtungen im lokalen Preset-Modell, also 54 Zielplätze.
-- 12 Plätze existieren bereits; 42 neue Plätze fehlen.
+- 12 Bestandsstücke und drei vollständige neue Coffeehouse-Fassungen sind abspielbar.
+  39 weitere neue Plätze sind noch zu produzieren; die editorische Detailabnahme
+  der drei neuen Fassungen bleibt davon getrennt.
 - Diese Datei und die JSON-Planung sind **keine Rechtefreigabe**.
-- Alle 42 neuen Titel sind musikalische Kandidaten. Bei den ersten drei sind
+- 39 weitere Titel bleiben musikalische Kandidaten. Bei den ersten drei sind
   konkrete historische IMSLP-Ausgaben heruntergeladen, Titel- und Notenseiten
-  betrachtet und lokal gesichert. Notenübertragung und regionale Schlussprüfung stehen aus.
+  betrachtet und lokal gesichert. Die Noten sind aus benannten PD-Hilfsnotationen
+  vollständig spielbar umgesetzt; historischer Einzelnotenabgleich und regionale
+  Schlussprüfung stehen aus.
 - Noch keine neuen Bibliothekseinträge freigegeben. Für Chopin op.28/7 gibt es
   jetzt eine [vollständige abspielbare Coffeehouse-Vorschau](COFFEEHOUSE_PREVIEW.de.md),
   ausdrücklich mit benannter PD-Hilfsnotation und noch offenem historischem Einzelnotenabgleich.
@@ -89,7 +93,8 @@ als vollständiges mehrsätziges Werk ausgegeben.
 - Auf IMSLP als **Public Domain** bezeichnet; Metadaten am 03.11.2026 gelesen.
 - **Erledigt:** PDF heruntergeladen; Titelseite und Notenseite betrachtet,
   Seitenzuordnung und SHA-256 im [Belegmanifest](sources/coffeehouse/manifest.json).
-- **Offen:** vollständige Notenerfassung, Abgleich, regionale Schlussprüfung und Produktion.
+- **Spielbar umgesetzt:** vollständige PD-Hilfsnotation, Coffeehouse-Mix und Overlay-Auswahl.
+- **Offen:** historischer Einzelnotenabgleich, regionale Schlussprüfung und abschließende editorische Abnahme.
 - Kein modernes MIDI derselben Werkseite ungeprüft übernehmen.
 
 ### Frédéric Chopin — Prélude A-Dur · op.28 Nr.7
@@ -100,7 +105,8 @@ als vollständiges mehrsätziges Werk ausgegeben.
 - Auf IMSLP als **Public Domain** bezeichnet; Metadaten am 03.11.2026 gelesen.
 - **Erledigt:** PDF heruntergeladen; Titelseite und Notenseite betrachtet,
   Seitenzuordnung und SHA-256 im [Belegmanifest](sources/coffeehouse/manifest.json).
-- **Offen:** vollständige Notenerfassung, Abgleich, regionale Schlussprüfung und Produktion.
+- **Spielbar umgesetzt:** vollständige PD-Hilfsnotation, Coffeehouse-Mix und Overlay-Auswahl.
+- **Offen:** historischer Einzelnotenabgleich, regionale Schlussprüfung und abschließende editorische Abnahme.
 - Kein modernes MIDI derselben Werkseite ungeprüft übernehmen.
 
 ### Johannes Brahms — Walzer As-Dur · op.39 Nr.15
@@ -111,7 +117,8 @@ als vollständiges mehrsätziges Werk ausgegeben.
 - Auf IMSLP als **Public Domain** bezeichnet; Metadaten am 03.11.2026 gelesen.
 - **Erledigt:** PDF heruntergeladen; Titelseite und Notenseite betrachtet,
   Seitenzuordnung und SHA-256 im [Belegmanifest](sources/coffeehouse/manifest.json).
-- **Offen:** vollständige Notenerfassung, Abgleich, regionale Schlussprüfung und Produktion.
+- **Spielbar umgesetzt:** vollständige PD-Hilfsnotation, Coffeehouse-Mix und Overlay-Auswahl.
+- **Offen:** historischer Einzelnotenabgleich, regionale Schlussprüfung und abschließende editorische Abnahme.
 - Kein modernes MIDI derselben Werkseite ungeprüft übernehmen.
 
 **Datierung Brahms:** IMSLP nennt 1866 für die Erstausgabe; das betrachtete

@@ -5,7 +5,7 @@
   "rights": {
     "composition": "Träumerei — Robert Schumann (1810–1856); original composition public domain in Germany.",
     "arrangement": "AI-assisted full-source production; native meter; source voices retained. See library/SOURCES.md for exact scope.",
-    "recording": "Synthesized in jacktools Sound; no external audio recording.",
+    "recording": "Created with jacktools Sound and synthetic instruments; no external audio recording.",
     "license": "Source score: Public Domain. Project arrangement/recording: no separate usage license granted.",
     "source": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=504"
   },

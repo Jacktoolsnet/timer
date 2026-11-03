@@ -1,0 +1,204 @@
+{
+  "asOf": "2026-11-03",
+  "purpose": "Previous bundled rights metadata and non-rights hashes before public display cleanup; not a clearance or new licence.",
+  "songs": [
+    {
+      "path": "public/examples/coffeehouse-brahms-waltz.preview.song.json",
+      "previousRights": {
+        "composition": "Walzer As-Dur · op.39/15 — Johannes Brahms (1833–1897); original public domain.",
+        "arrangement": "Full solo Waltz; PD helper Brian D. Rude, Mutopia 794 (Joseffy). Coffeehouse balance; historical detail review pending.",
+        "recording": "Synthesized in jacktools Sound; no external audio recording.",
+        "license": "Source score: Public Domain. Project arrangement/recording: no separate usage license granted.",
+        "source": "https://imslp.org/wiki/Special:ReverseLookup/138189"
+      },
+      "musicSha256": "cee762739afb706194a1138764ffb5e8f177a7d52e700100370716b4cd44eb45"
+    },
+    {
+      "path": "public/examples/coffeehouse-chopin-prelude-a.preview.song.json",
+      "previousRights": {
+        "composition": "Prélude op.28/7 — Frédéric Chopin (1810–1849); original public domain.",
+        "arrangement": "Coffeehouse preview; complete PD notation by Magnus Lewis-Smith, Mutopia 470 (Peters). Historical scan comparison pending; see docs.",
+        "recording": "Synthesized in jacktools Sound; no external audio recording.",
+        "license": "Source score: Public Domain. Project arrangement/recording: no separate usage license granted.",
+        "source": "https://imslp.org/wiki/Special:ReverseLookup/85374"
+      },
+      "musicSha256": "582334d950a6566e6893c7c16dbcf7457f6026db4401d1b67eda1ade6b7e1edd"
+    },
+    {
+      "path": "public/examples/coffeehouse-schumann-foreign.preview.song.json",
+      "previousRights": {
+        "composition": "Von fremden Ländern und Menschen · op.15/1 — Robert Schumann (1810–1856); original public domain.",
+        "arrangement": "Full AABB, 4 voices; PD helper Ying-Chun Liu, Mutopia 354 (1900 edition). Coffeehouse; historical detail review pending.",
+        "recording": "Synthesized in jacktools Sound; no external audio recording.",
+        "license": "Source score: Public Domain. Project arrangement/recording: no separate usage license granted.",
+        "source": "https://imslp.org/wiki/Special:ReverseLookup/03060"
+      },
+      "musicSha256": "0f8ef8ba64e991d9993e2c7a864ab3d4190bf08260f69db3cf559755b102b64b"
+    },
+    {
+      "path": "public/examples/meter-study-6-8.song.json",
+      "previousRights": {
+        "composition": "Original 6/8 meter study; AI-assisted example; rights unverified.",
+        "arrangement": "Newly authored jacktools demonstration; no external arrangement used.",
+        "recording": "Synthesized with jacktools Sound; no third-party recording supplied.",
+        "license": "Unverified; no usage permission or public-domain status confirmed.",
+        "source": "Project-authored educational JSON; no external musical source."
+      },
+      "musicSha256": "ecfd551d8e1bb466e33b8a779f525313b08b22b9ca0216e7774e84be7a56fcef"
+    },
+    {
+      "path": "public/examples/pachelbel-canon-morning-light.song.json",
+      "previousRights": {
+        "composition": "Canon in D — Johann Pachelbel (1653–1706); Originalkomposition gemeinfrei in Deutschland.",
+        "arrangement": "KI-gestützte Bearbeitung „Morning Light“; keine fremde Bearbeitung als Vorlage angegeben.",
+        "recording": "Mit jacktools Sound synthetisiert; keine fremde Tonaufnahme verwendet.",
+        "license": "Bearbeitung und Aufnahme: keine gesonderte Nutzungslizenz erteilt; Rechte nicht abschließend geprüft.",
+        "source": "Grundlage: Pachelbels Canon in D; Quellenhinweis ist keine weltweite Rechtegarantie."
+      },
+      "musicSha256": "5a9add3300013010e63c6c7207a4f5e7760721f6d5c705faa2f8f901b8ea1a9a"
+    },
+    {
+      "path": "public/examples/sunlit-session.song.json",
+      "previousRights": {
+        "composition": "Sunlit Session — KI-gestützt erstellte instrumentale Beispielkomposition.",
+        "arrangement": "Für jacktools Sound erstellt; keine fremde Bearbeitung als Vorlage angegeben.",
+        "recording": "Mit jacktools Sound synthetisiert; keine fremde Tonaufnahme verwendet.",
+        "license": "Keine gesonderte Nutzungslizenz erteilt; Rechte nicht abschließend geprüft.",
+        "source": "Projekteigenes Song-Skript; kein Nachweis einer externen musikalischen Vorlage hinterlegt."
+      },
+      "musicSha256": "36f69347837960a3dfe85a03428b01a4e8c732c3a2b31d87b08c5cbc8bdc7d25"
+    },
+    {
+      "path": "public/library/classical-canon.song.json",
+      "previousRights": {
+        "composition": "Canon in D · 3 Violinen und Basso — Johann Pachelbel (1653–1706); original composition public domain in Germany.",
+        "arrangement": "Full 4-part score; Michael Fischer v. Mollard, Mutopia 2047 (2015). Synthesized strings/cello; balance and articulation adapted.",
+        "recording": "Synthesized in jacktools Sound; no external audio recording.",
+        "license": "Score CC BY 4.0: https://creativecommons.org/licenses/by/4.0/ ; no separate license granted for project additions.",
+        "source": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=2047"
+      },
+      "musicSha256": "effe0eeb112e46271269e683505b381f3f8555bfdeccd862315769a19560f232"
+    },
+    {
+      "path": "public/library/classical-nachtmusik.song.json",
+      "previousRights": {
+        "composition": "Eine kleine Nachtmusik · I — W. A. Mozart (1756–1791); original composition public domain in Germany.",
+        "arrangement": "AI-assisted full-source production; native meter; source voices retained. See library/SOURCES.md for exact scope.",
+        "recording": "Synthesized in jacktools Sound; no external audio recording.",
+        "license": "Source score: Public Domain. Project arrangement/recording: no separate usage license granted.",
+        "source": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=900"
+      },
+      "musicSha256": "c357defdfa34947f7f8a6fc0a6244ac1906262447c4bac65bfe3de7de054e383"
+    },
+    {
+      "path": "public/library/classical-turca.song.json",
+      "previousRights": {
+        "composition": "Rondo alla turca — W. A. Mozart (1756–1791); original composition public domain in Germany.",
+        "arrangement": "AI-assisted full-source production; native meter; source voices retained. See library/SOURCES.md for exact scope.",
+        "recording": "Synthesized in jacktools Sound; no external audio recording.",
+        "license": "Source score: Public Domain. Project arrangement/recording: no separate usage license granted.",
+        "source": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=108"
+      },
+      "musicSha256": "5646d5f99f80c54798f9e991db1bf86bb99f34be5e3bf8ada893542d12d644a3"
+    },
+    {
+      "path": "public/library/house-canon.song.json",
+      "previousRights": {
+        "composition": "Canon in D · Canonic Lights — Johann Pachelbel (1653–1706); original composition public domain in Germany.",
+        "arrangement": "Free canon from full violin edition: Jim Paterson / Anonymous, Mutopia 1700 (2009); added voices, ground, coda and new production.",
+        "recording": "Synthesized in jacktools Sound; no external audio recording.",
+        "license": "Violin source CC BY 3.0: https://creativecommons.org/licenses/by/3.0/ ; no separate license granted for project additions.",
+        "source": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=1700"
+      },
+      "musicSha256": "93dbe8294a55639d59ce25d5341d5a6c3d121f6db1e1cddd0c5e94a3767edd41"
+    },
+    {
+      "path": "public/library/house-elise.song.json",
+      "previousRights": {
+        "composition": "Für Elise — L. van Beethoven (1770–1827); original composition public domain in Germany.",
+        "arrangement": "AI-assisted full-source production; native meter; source voices retained. See library/SOURCES.md for exact scope.",
+        "recording": "Synthesized in jacktools Sound; no external audio recording.",
+        "license": "Source score: Public Domain. Project arrangement/recording: no separate usage license granted.",
+        "source": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=931"
+      },
+      "musicSha256": "3b030f6e5a0688c0b76e4712212a0eadc19496d4df36883456b9333b518b8b27"
+    },
+    {
+      "path": "public/library/house-ode.song.json",
+      "previousRights": {
+        "composition": "Ode an die Freude · Hymnenthema — L. van Beethoven (1770–1827); original composition public domain in Germany.",
+        "arrangement": "AI-assisted full-source production; native meter; source voices retained. See library/SOURCES.md for exact scope.",
+        "recording": "Synthesized in jacktools Sound; no external audio recording.",
+        "license": "Source score: Public Domain. Project arrangement/recording: no separate usage license granted.",
+        "source": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=528"
+      },
+      "musicSha256": "86a194616423c49cf1b92a01f3348d77d62e0f6e7dc45d1c2fcb9121b2c6045c"
+    },
+    {
+      "path": "public/library/jazz-easy-winners.song.json",
+      "previousRights": {
+        "composition": "The Easy Winners — Scott Joplin (1868–1917); original composition public domain in Germany.",
+        "arrangement": "AI-assisted full-source production; native meter; source voices retained. See library/SOURCES.md for exact scope.",
+        "recording": "Synthesized in jacktools Sound; no external audio recording.",
+        "license": "Source score: Public Domain. Project arrangement/recording: no separate usage license granted.",
+        "source": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=352"
+      },
+      "musicSha256": "1da71568d304ebcffc781e394b790004b06a0fe0065730e7afd212b3699d7b34"
+    },
+    {
+      "path": "public/library/jazz-entertainer.song.json",
+      "previousRights": {
+        "composition": "The Entertainer — Scott Joplin (1868–1917); original composition public domain in Germany.",
+        "arrangement": "AI-assisted full-source production; native meter; source voices retained. See library/SOURCES.md for exact scope.",
+        "recording": "Synthesized in jacktools Sound; no external audio recording.",
+        "license": "Source score: Public Domain. Project arrangement/recording: no separate usage license granted.",
+        "source": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=263"
+      },
+      "musicSha256": "ba46fb62fa8357a095864dc31babd08746d58da95e2ce77aa58bcffd1a2a5338"
+    },
+    {
+      "path": "public/library/jazz-maple-leaf.song.json",
+      "previousRights": {
+        "composition": "Maple Leaf Rag — Scott Joplin (1868–1917); original composition public domain in Germany.",
+        "arrangement": "AI-assisted full-source production; native meter; source voices retained. See library/SOURCES.md for exact scope.",
+        "recording": "Synthesized in jacktools Sound; no external audio recording.",
+        "license": "Source score: Public Domain. Project arrangement/recording: no separate usage license granted.",
+        "source": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=23"
+      },
+      "musicSha256": "e13683cde9fa9b98e2c58c3d3092ba47995c53362ebb68d04020a12cf9dc5b36"
+    },
+    {
+      "path": "public/library/lofi-gymnopedie.song.json",
+      "previousRights": {
+        "composition": "Gymnopédie No. 1 — Erik Satie (1866–1925); original composition public domain in Germany.",
+        "arrangement": "AI-assisted full-source production; native meter; source voices retained. See library/SOURCES.md for exact scope.",
+        "recording": "Synthesized in jacktools Sound; no external audio recording.",
+        "license": "Source score: Public Domain. Project arrangement/recording: no separate usage license granted.",
+        "source": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=37"
+      },
+      "musicSha256": "72fbd9173c49f6f95af352fb1fdc42b88796752a148c6a77ab583d2e0a9fd8bd"
+    },
+    {
+      "path": "public/library/lofi-prelude.song.json",
+      "previousRights": {
+        "composition": "Prélude e-Moll · op. 28/4 — Frédéric Chopin (1810–1849); original composition public domain in Germany.",
+        "arrangement": "AI-assisted full-source production; native meter; source voices retained. See library/SOURCES.md for exact scope.",
+        "recording": "Synthesized in jacktools Sound; no external audio recording.",
+        "license": "Source score: Public Domain. Project arrangement/recording: no separate usage license granted.",
+        "source": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=468"
+      },
+      "musicSha256": "4cf6aaf19240d1cbc677d8460f7b57e7828b5e1ba3c1081c2bf461f47347b22c"
+    },
+    {
+      "path": "public/library/lofi-traeumerei.song.json",
+      "previousRights": {
+        "composition": "Träumerei — Robert Schumann (1810–1856); original composition public domain in Germany.",
+        "arrangement": "AI-assisted full-source production; native meter; source voices retained. See library/SOURCES.md for exact scope.",
+        "recording": "Synthesized in jacktools Sound; no external audio recording.",
+        "license": "Source score: Public Domain. Project arrangement/recording: no separate usage license granted.",
+        "source": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=504"
+      },
+      "musicSha256": "b6fd4f25d6d618f7df574934cb8c6cfe5a32de6aa892aeed9cc6ce2a67003076"
+    }
+  ]
+}

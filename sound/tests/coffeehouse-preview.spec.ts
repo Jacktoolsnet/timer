@@ -23,7 +23,8 @@ test('complete short Prelude: native meter, pickup, ending, credits and no inven
  expect(report.production.sourceNotes).toBe(168);expect(report.production.transferredSourceNotes).toBe(168);
  expect(report.production.outputNotes).toBe(170);expect(report.production.boundaryRearticulations).toBe(2);
  expect(song.rights.arrangement).toContain('Magnus Lewis-Smith');
- expect(song.rights.arrangement).toContain('comparison pending');
+ expect(song.rights.arrangement).toContain('Edition Peters');
+ expect(song.rights.arrangement).not.toContain('pending');
  expect(catalog.some(e=>e.id==='coffeehouse-chopin-prelude-a')).toBe(false);
 });
 

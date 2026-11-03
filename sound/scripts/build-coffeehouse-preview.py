@@ -27,10 +27,10 @@ def build():
     filename = 'coffeehouse-chopin-prelude-a.preview.song.json'
     entry.update(path='/examples/' + filename, bars=18, durationSeconds=45)
     entry['scopeLabel'] = dict(
-        de='Hörvorschau: vollständiges Prélude mit Auftakt, nach benannter gemeinfreier Hilfsnotation. Historischer Einzelnotenabgleich und Hörabnahme noch offen.',
-        en='Listening preview: complete Prelude and pickup, from the credited public-domain helper notation. Historical note-by-note comparison and listening review pending.',
-        es='Vista previa: preludio completo con anacrusa, según la notación auxiliar de dominio público acreditada. Cotejo histórico y revisión auditiva pendientes.',
-        fr='Préécoute : prélude complet avec anacrouse, selon la notation auxiliaire du domaine public créditée. Comparaison historique et écoute de validation à faire.')
+        de='Hörvorschau: vollständiges Prélude mit Auftakt, nach benannter gemeinfreier Hilfsnotation.',
+        en='Listening preview: complete Prelude and pickup, from the credited public-domain helper notation.',
+        es='Vista previa: preludio completo con anacrusa, según la notación auxiliar de dominio público acreditada.',
+        fr='Préécoute : prélude complet avec anacrouse, selon la notation auxiliaire du domaine public créditée.')
     report = {**production.REPORT['coffeehouse-chopin-prelude-a'], 'bars': 18, 'durationSeconds': 45}
     return song, dict(status='preview_not_approved', catalogPublished=False, entry=entry, production=report)
 
@@ -44,10 +44,10 @@ def build_addition(key, identifier, bpm):
     song['title'] = production.WORKS[key]['title'] + ' — Coffeehouse'
     entry['path'] = '/examples/' + filename
     entry['scopeLabel'] = dict(
-        de=('Vollständiges Stück, beide Wiederholungen (AABB), vier Stimmen; warmer Coffeehouse-Mix. Historischer Detailabgleich offen.' if key=='schumann-foreign' else 'Vollständige Walzer-Solofassung mit Eröffnungswiederholung und Triolen-Coda; Coffeehouse-Mix nach benannter PD-Hilfsnotation. Historischer Detailabgleich offen.'),
+        de=('Vollständiges Stück, beide Wiederholungen (AABB), vier Stimmen; warmer Coffeehouse-Mix.' if key=='schumann-foreign' else 'Vollständige Walzer-Solofassung mit Eröffnungswiederholung und Triolen-Coda; Coffeehouse-Mix nach benannter PD-Hilfsnotation.'),
         en=entry['scope'],
-        es='Pieza completa con repeticiones y final, mezcla Coffeehouse según la notación auxiliar acreditada de dominio público. Cotejo histórico detallado pendiente.',
-        fr='Pièce complète avec reprises et fin, mix Coffeehouse selon la notation auxiliaire du domaine public créditée. Comparaison historique détaillée à faire.')
+        es='Pieza completa con repeticiones y final, mezcla Coffeehouse según la notación auxiliar acreditada de dominio público.',
+        fr='Pièce complète avec reprises et fin, mix Coffeehouse selon la notation auxiliaire du domaine public créditée.')
     return song, dict(status='preview_not_approved', catalogPublished=False, overlaySelectable=True, entry=entry, production=production.REPORT[identifier])
 
 
