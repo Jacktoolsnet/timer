@@ -1,10 +1,10 @@
 import {chooseAnimation} from './animation-helpers';
 import {test,expect,type Page} from '@playwright/test';
-import {constellationStar,constellationLights,paintConstellation} from '../src/lib/constellation';
+import {nebulaClouds,constellationStar,constellationLights,paintConstellation} from '../src/lib/constellation';
 import {LandscapeHistory} from '../src/lib/landscape';
 import {partsForStyle} from '../src/lib/presets';
 import {decodeSettings} from '../src/lib/sound-settings';
-import {visualizationCopy} from '../src/lib/visualization';
+import {constellationVariantCopy,visualizationCopy} from '../src/lib/visualization';
 import {readFile} from 'node:fs/promises';
 
 test('stable bounded stars distinguish pitches, chord heads and instrument groups',()=>{
@@ -92,8 +92,54 @@ test('localized selector fits mobile in both themes and reduced motion omits hal
  await expect(page.locator('#orbit')).toHaveAttribute('aria-label',visualizationCopy.fr.constellationDescription);
 });
 test('native MP4 captures the constellation canvas with audio',async({page})=>{
- test.setTimeout(45000);await spy(page);await page.goto('/de/');await load(page,fixture());await page.locator('#files-open').click();
+ test.setTimeout(45000);await spy(page);await page.goto('/de/');await load(page,{...fixture(),constellationVariant:'nebula'});await page.locator('#files-open').click();
  test.skip(await page.locator('#video-record').isDisabled(),'No native MP4 encoder');
  await page.locator('#video-record').click();await page.waitForTimeout(1500);const pending=page.waitForEvent('download');await page.locator('#video-stop').click();
  const bytes=await readFile((await (await pending).path())!);expect(bytes.subarray(4,8).toString()).toBe('ftyp');expect(bytes.includes(Buffer.from('vide'))).toBe(true);expect(bytes.includes(Buffer.from('soun'))).toBe(true);expect(await page.evaluate(()=>(window as any).starHalos)).toBeGreaterThan(0);
+});
+
+test('nebula is deterministic, follows heard chord voices and fades without musical random state',()=>{
+ const h=new LandscapeHistory();for(const pitch of [0,7])h.record(0,{at:1,pitch,level:.8,length:.1});
+ const snapshot=JSON.stringify(h.notes(0));
+ expect(nebulaClouds(h,0,.9,1)).toEqual([]);expect(nebulaClouds(h,0,1.1,0)).toEqual([]);
+ const early=nebulaClouds(h,0,1.1,1),late=nebulaClouds(h,0,2,1);
+ expect(early).toHaveLength(6);expect(early).toEqual(nebulaClouds(h,0,1.1,1));
+ expect(new Set(early.map(p=>p.x)).size).toBe(6);
+ for(let i=0;i<early.length;i++){expect(late[i].radius).toBeGreaterThan(early[i].radius);expect(late[i].alpha).toBeLessThan(early[i].alpha);}
+ expect(nebulaClouds(h,0,5.4,1)).toEqual([]);
+ expect(nebulaClouds(h,0,1.1,1,true).map(p=>[p.x,p.y,p.radius])).toEqual(nebulaClouds(h,0,1.2,1,true).map(p=>[p.x,p.y,p.radius]));
+ expect(JSON.stringify(h.notes(0))).toBe(snapshot);
+ h.record(1,{at:1,pitch:0,level:.3,length:2,glide:true,curve:[{offset:0,pitch:0,level:.3},{offset:1,pitch:12,level:1}]});
+ expect(nebulaClouds(h,1,2,1).length).toBeGreaterThan(3);
+});
+test('nebula clouds honour mute, levels, playback and glow',()=>{
+ const h=new LandscapeHistory();h.record(0,{at:1,pitch:7,level:.8,length:.1});
+ function draw({mute=false,volume=1,master=1,effect=1,playing=true,reduced=false}={}){
+  let clouds=0;const ctx={save(){},restore(){},beginPath(){},moveTo(){},lineTo(){},stroke(){},fill(){},fillText(){},arc(){},
+   createRadialGradient(_x:number,_y:number,_r:number,_xx:number,_yy:number,r:number){if(r>40)clouds++;return {addColorStop(){}};}} as unknown as CanvasRenderingContext2D;
+  paintConstellation(ctx,h,[{index:0,color:'#55ccff',volume,mute,pitched:true}],1.5,true,playing,reduced,master,effect,'nebula');
+  return clouds;
+ }
+ expect(draw()).toBeGreaterThan(0);expect(draw({reduced:true})).toBeGreaterThan(0);
+ for(const options of [{mute:true},{volume:0},{master:0},{effect:0},{playing:false}])expect(draw(options)).toBe(0);
+});
+test('nebula settings preserve music, round-trip JSON, restore with consent and default old files to stars',async({page})=>{
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/de/');await load(page,fixture());const before=await exported(page);
+ await chooseAnimation(page,'button[data-constellation-variant=nebula]');await expect(page.locator('#orbit')).toHaveAttribute('data-constellation-variant','nebula');
+ const saved=await exported(page);expect(saved.constellationVariant).toBe('nebula');expect(saved.tracks).toEqual(before.tracks);
+ expect(decodeSettings(JSON.stringify({...saved,constellationVariant:'invalid'}))).toBeNull();
+ await page.locator('#palette-dropdown summary').click();await page.locator('#remember-preferences').check();await page.locator('#preferences-close').click();
+ await page.reload();await expect(page.locator('#orbit')).toHaveAttribute('data-constellation-variant','nebula');await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false');
+ await load(page,fixture());await expect(page.locator('#orbit')).toHaveAttribute('data-constellation-variant','stars');expect(errors).toEqual([]);
+});
+test('nebula tiles are localized, fit mobile and remain available in focus with reduced motion',async({page})=>{
+ await page.setViewportSize({width:390,height:844});await page.emulateMedia({reducedMotion:'reduce'});
+ for(const lang of ['de','en','es','fr'] as const){
+  await page.goto('/'+lang+'/');await chooseAnimation(page,'button[data-constellation-variant=nebula]');
+  await expect(page.locator('button[data-constellation-variant=nebula]')).toContainText(constellationVariantCopy[lang].nebula);
+  await expect(page.locator('#orbit')).toHaveAttribute('aria-label',constellationVariantCopy[lang].description);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBe(0);
+ }
+ await page.locator('#focus').click();await page.locator('#hide-focus-controls').click();await expect(page.locator('#orbit')).toBeVisible();
+ await expect(page.locator('#orbit')).toHaveAttribute('data-constellation-variant','nebula');
 });

@@ -4,7 +4,7 @@ import {paintSoundFlower} from '../lib/sound-flower';
 import {paintConstellation} from '../lib/constellation';
 import {paintNoteStream,type StreamPreview} from '../lib/note-stream';
 import {LandscapeHistory,paintLandscape} from '../lib/landscape';
-import {streamVariantCopy,type StreamVariant,landscapeVariantCopy,type LandscapeVariant,visualizationCopy,type VisualizationMode} from '../lib/visualization';
+import {constellationVariantCopy,type ConstellationVariant,streamVariantCopy,type StreamVariant,landscapeVariantCopy,type LandscapeVariant,visualizationCopy,type VisualizationMode} from '../lib/visualization';
 import {cloneScore,type NoteScore,type ScoreNote} from '../lib/note-score';
 import {createNoteEditor} from './note-editor';
 import {genreGroupCount,groupAnchorWeight,phraseContour,responsePhrase,phraseBreath,conversationLevel,phraseNoteAllowed,leadChord,instrumentGroup,windScoop,firstPhraseAttack,ornamentPitch} from '../lib/musicality';
@@ -86,6 +86,7 @@ let currentStyle:StyleId='electronic',pendingStyle:StyleId|null=null;
 let visualization:VisualizationMode='orbit';
 let landscapeVariant:LandscapeVariant='rivers';
 let streamVariant:StreamVariant='notes';
+let constellationVariant:ConstellationVariant='stars';
 const landscape=new LandscapeHistory();
 let streamRevision=0,streamCache:{key:string;scores:NoteScore[]}|null=null;
 let currentDance:DanceId|null=null,pendingDance:DanceId|null=null;
@@ -397,7 +398,7 @@ function snapshotSettings(includeDraft=false):SoundSettings{
  const backup=includeDraft?null:rhythmBackup;
  return {
    version:2,style:currentStyle,dance:currentDance,groove:grooveChoice,bpm,transpose,noteEffect,volume:Number($<HTMLInputElement>('#volume').value),
-   visualization,landscapeVariant,streamVariant,background:backgroundChoice,center:centerChoice,flowerCenter:flowerCenterChoice,orbit:orbitChoice,
+   visualization,landscapeVariant,streamVariant,constellationVariant,background:backgroundChoice,center:centerChoice,flowerCenter:flowerCenterChoice,orbit:orbitChoice,
    recording:{restart:$<HTMLInputElement>('#recording-restart').checked,random:$<HTMLInputElement>('#recording-random').checked,fullscreen:$<HTMLInputElement>('#recording-fullscreen').checked,minutes:Number($<HTMLInputElement>('#recording-duration').value),videoFormat:chosenVideoFormat(),videoInfo:chosenVideoInfo(),animations:chosenVideoAnimations()},
    pad:{mode:padMode,beats:(backup??tapPattern).beats,hits:(backup??tapPattern).hits.map(lane=>[...lane]),notes:(backup??tapPattern).notes.map(lane=>[...lane])},
    tracks:tracks.map((live,i)=>{const tr=backup&&rhythmTouched.has(i)&&rhythmTrackBackup?{...live,...rhythmTrackBackup[i]}:live;return ({
@@ -506,8 +507,8 @@ function pickVariant<T extends string>(modes:readonly T[],current:T):T{
  return choices[Math.floor(Math.random()*choices.length)];
 }
 function selectVisualization(mode:VisualizationMode){
- if(visualization!==mode){landscape.clear();streamCache=null;}visualization=mode;orbit.dataset.visualization=mode;orbit.dataset.landscapeVariant=landscapeVariant;orbit.dataset.streamVariant=streamVariant;orbit.dataset.flowerCenterVariant=flowerCenterMode;
- orbit.setAttribute('aria-label',mode==='flower'?visualizationCopy[language].flowerDescription:mode==='constellation'?visualizationCopy[language].constellationDescription:mode==='stream'?(streamVariant==='clouds'?streamVariantCopy[language].description:visualizationCopy[language].streamDescription):mode==='landscape'?(landscapeVariant==='delta'?landscapeVariantCopy[language].description:visualizationCopy[language].description):t.steps);
+ if(visualization!==mode){landscape.clear();streamCache=null;}visualization=mode;orbit.dataset.visualization=mode;orbit.dataset.landscapeVariant=landscapeVariant;orbit.dataset.streamVariant=streamVariant;orbit.dataset.constellationVariant=constellationVariant;orbit.dataset.flowerCenterVariant=flowerCenterMode;
+ orbit.setAttribute('aria-label',mode==='flower'?visualizationCopy[language].flowerDescription:mode==='constellation'?(constellationVariant==='nebula'?constellationVariantCopy[language].description:visualizationCopy[language].constellationDescription):mode==='stream'?(streamVariant==='clouds'?streamVariantCopy[language].description:visualizationCopy[language].streamDescription):mode==='landscape'?(landscapeVariant==='delta'?landscapeVariantCopy[language].description:visualizationCopy[language].description):t.steps);
  document.querySelectorAll<HTMLButtonElement>('button[data-visualization]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.visualization===mode)));
  syncAnimationSettings();
  document.querySelectorAll<HTMLButtonElement>('[data-orbit-mode],[data-center-mode]').forEach(button=>{
@@ -516,6 +517,13 @@ function selectVisualization(mode:VisualizationMode){
  persistSettings();
 }
 document.querySelectorAll<HTMLButtonElement>('button[data-visualization]').forEach(button=>button.addEventListener('click',()=>selectVisualization(button.dataset.visualization as VisualizationMode)));
+function selectConstellationVariant(choice:ConstellationVariant){
+ constellationVariant=choice;orbit.dataset.constellationVariant=choice;
+ document.querySelectorAll<HTMLButtonElement>('button[data-constellation-variant]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.constellationVariant===choice)));
+ if(visualization==='constellation')orbit.setAttribute('aria-label',choice==='nebula'?constellationVariantCopy[language].description:visualizationCopy[language].constellationDescription);
+ persistSettings();
+}
+document.querySelectorAll<HTMLButtonElement>('button[data-constellation-variant]').forEach(button=>button.addEventListener('click',()=>selectConstellationVariant(button.dataset.constellationVariant as ConstellationVariant)));
 function selectStreamVariant(choice:StreamVariant){
  streamVariant=choice;orbit.dataset.streamVariant=choice;
  document.querySelectorAll<HTMLButtonElement>('button[data-stream-variant]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.streamVariant===choice)));
@@ -1992,7 +2000,7 @@ function frame(now:number){
  const visualMaster=Math.min(1,Number($<HTMLInputElement>('#volume').value)/.3);
  const active=activeTracks();
  if(visualization==='flower')paintSoundFlower(oc,landscape,active.map(({tr,index})=>({index,label:String(padNumbers[index]),color:tr.color,volume:tr.volume,mute:tr.mute||tr.volume===0,pitched:isMelodic(tr.instrument)})),time,dark,playing,reduced.matches,visualMaster,noteEffect,flowerCenterMode==='ring');
- if(visualization==='constellation')paintConstellation(oc,landscape,active.map(({tr,index})=>({index,label:String(padNumbers[index]),color:tr.color,volume:tr.volume,mute:tr.mute||tr.volume===0,pitched:isMelodic(tr.instrument)})),time,dark,playing,reduced.matches,visualMaster,noteEffect);
+ if(visualization==='constellation')paintConstellation(oc,landscape,active.map(({tr,index})=>({index,label:String(padNumbers[index]),color:tr.color,volume:tr.volume,mute:tr.mute||tr.volume===0,pitched:isMelodic(tr.instrument)})),time,dark,playing,reduced.matches,visualMaster,noteEffect,constellationVariant);
  if(visualization==='landscape')(landscapeVariant==='delta'?paintRiverDelta:paintLandscape)(oc,landscape,active.map(({tr,index})=>({index,label:String(padNumbers[index]),color:tr.color,volume:tr.volume,mute:tr.mute||tr.volume===0,pitched:isMelodic(tr.instrument)})),time,bpm,groove.beats,dark,playing,reduced.matches,visualMaster,noteEffect);
  if(visualization==='stream'){
   const scene=streamFrame(time);
@@ -2121,7 +2129,7 @@ function applySettings(saved:SoundSettings){
    remeterRhythm(tapPattern,groove.beats,0);syncRhythmUi();
   }
   syncRhythmUi();
-  selectStreamVariant(saved.streamVariant??'notes');selectLandscapeVariant(saved.landscapeVariant??'rivers');selectCenterMode(saved.center);selectFlowerCenterMode(saved.flowerCenter??'ring');selectBackgroundMode(saved.background);selectOrbitMode(saved.orbit);selectVisualization(saved.visualization??'orbit');
+  selectConstellationVariant(saved.constellationVariant??'stars');selectStreamVariant(saved.streamVariant??'notes');selectLandscapeVariant(saved.landscapeVariant??'rivers');selectCenterMode(saved.center);selectFlowerCenterMode(saved.flowerCenter??'ring');selectBackgroundMode(saved.background);selectOrbitMode(saved.orbit);selectVisualization(saved.visualization??'orbit');
 
  syncGroove();syncDanceTiles();sync();
 }

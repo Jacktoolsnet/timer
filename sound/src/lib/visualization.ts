@@ -25,3 +25,12 @@ export const streamVariantCopy={
  es:{notes:'Notas',clouds:'Nubes de puntos',description:'Las notas se disuelven en partículas de colores al llegar a la línea, se dispersan y desaparecen hacia la izquierda.'},
  fr:{notes:'Notes',clouds:'Nuages de points',description:'Les notes jouées se dissolvent en particules colorées à la ligne, se dispersent et disparaissent vers la gauche.'}
 } as const;
+
+export const constellationVariants=['stars','nebula'] as const;
+export type ConstellationVariant=typeof constellationVariants[number];
+export const constellationVariantCopy={
+ de:{stars:'Sternenbild',nebula:'Sternennebel',description:'Sternennebel: Gespielte Töne entfalten weiche farbige Nebelwolken und Sternenfunken. Lange Töne ziehen Schleier; Tonhöhe und Lautstärke bestimmen Position und Leuchtkraft.'},
+ en:{stars:'Constellation',nebula:'Nebula',description:'Nebula: played notes unfold soft coloured clouds and star sparks. Long notes leave veils; pitch and level shape their position and glow.'},
+ es:{stars:'Constelación',nebula:'Nebulosa',description:'Las notas crean suaves nubes de colores y chispas estelares. Los tonos largos dejan velos; altura y volumen definen su posición y brillo.'},
+ fr:{stars:'Constellation',nebula:'Nébuleuse',description:'Les notes jouées créent de doux nuages colorés et des étincelles. Les sons longs laissent des voiles ; hauteur et volume déterminent position et éclat.'}
+} as const;

@@ -522,3 +522,8 @@ Video captions now use a separately selected language (English default, with Ger
 - The note-stream tile has an inline settings gear with Notes (unchanged default) and Particle clouds, localized in all four languages. Optional validated `streamVariant: 'notes'|'clouds'` round-trips through JSON and opt-in browser storage; legacy sessions keep Notes.
 - In cloud mode, actual heard events dissolve at the strike line into deterministic, bounded particles that spread, drift left and fade. Held/gliding notes release particles along their duration and pitch/velocity curve. Forecasts never emit particles, and music/random generation is unchanged.
 - Muted/zero-volume tracks and disabled glow emit nothing; reduced motion uses stationary fading points. The same canvas is used in focus mode and MP4 recordings.
+
+### Musical nebula
+- The constellation settings gear offers Constellation (existing default) and Nebula in all four languages. Optional validated `constellationVariant: 'stars'|'nebula'` is independent of music and other visualizations, included in JSON and opt-in browser storage, with old sessions defaulting to stars.
+- Nebula clouds sample only already-heard notes, retaining chord voices and performed pitch/velocity curves. Sustained notes form soft coloured veils; short notes add brief sparks. Clouds overlap naturally and fade after release, with no extra audio or musical randomness.
+- Rendering is bounded to the latest 64 events per track and a 4.2-second cloud lifetime. Mute, volume, master, playback and glow control emissions. Reduced motion retains stationary fading clouds without sparks. Focus mode and MP4 use the same live canvas.

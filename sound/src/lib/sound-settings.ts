@@ -1,4 +1,4 @@
-import {streamVariants,type StreamVariant,landscapeVariants,type LandscapeVariant,visualizationModes,type VisualizationMode} from './visualization';
+import {constellationVariants,type ConstellationVariant,streamVariants,type StreamVariant,landscapeVariants,type LandscapeVariant,visualizationModes,type VisualizationMode} from './visualization';
 import {validScore,type NoteScore} from './note-score';
 import {validNoteGroups,type NoteGroups} from './note-groups';
 import type {VideoAnimationSettings} from './video-animations';
@@ -26,6 +26,7 @@ export type SoundSettings={
  visualization?:VisualizationMode;
  landscapeVariant?:LandscapeVariant;
  streamVariant?:StreamVariant;
+ constellationVariant?:ConstellationVariant;
  flowerCenter?:typeof centerModes[number];
  recording?:{restart:boolean;random:boolean;fullscreen:boolean;minutes?:number;videoFormat?:'landscape'|'portrait';videoInfo?:VideoInfoSettings;animations?:VideoAnimationSettings};
  pad?:{mode:'draw'|'rhythm'|'notes';beats:2|3|4;hits:boolean[][];notes?:(number|null)[][]};
@@ -41,6 +42,7 @@ export function decodeSettings(raw:string|null):SoundSettings|null{
   if(!s||![1,2].includes(s.version)||!member(styleIds,s.style)||!number(s.bpm,40,220)||!number(s.volume,0,.7)
    ||!member(backgroundModes,s.background)||!member(centerModes,s.center)||!member(orbitModes,s.orbit)
    ||!Array.isArray(s.tracks)||!(s.version===1?[8,9]:[ORBIT_COUNT]).includes(s.tracks.length))return null;
+  if(s.constellationVariant!==undefined&&!member(constellationVariants,s.constellationVariant))return null;
   if(s.streamVariant!==undefined&&!member(streamVariants,s.streamVariant))return null;
   if(s.landscapeVariant!==undefined&&!member(landscapeVariants,s.landscapeVariant))return null;
   if(s.flowerCenter!==undefined&&!member(centerModes,s.flowerCenter))return null;
