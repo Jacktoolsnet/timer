@@ -1,0 +1,135 @@
+{
+  "format": "jacktools-historical-score-evidence",
+  "version": 1,
+  "asOf": "2026-11-03",
+  "purpose": "Offline source evidence for independent transcription, not playable songs or a legal clearance certificate.",
+  "records": [
+    {
+      "slot": "coffeehouse-1",
+      "fileId": "03060",
+      "workPage": "https://imslp.org/wiki/Kinderszenen,_Op.15_(Schumann,_Robert)",
+      "pdfUrl": "https://s9.imslp.org/files/imglnks/usimg/f/fe/IMSLP03060-Schumann-Op015Brt6016.pdf",
+      "retrievedAt": "2026-11-03",
+      "originalPdf": {
+        "sha256": "adb23fad9883cb4056907e58a0180f1cfdc7c184a68688d548eb8f79216a711a",
+        "bytes": 1728113,
+        "pages": 19
+      },
+      "evidencePdf": {
+        "path": "schumann-edition-extract.pdf",
+        "sha256": "0cc2d75a0373ef3689edb3de20f7f35c0f35f499ab8d040b52cdd5c3a793d07f",
+        "bytes": 3443852,
+        "originalPdfPages": [
+          1,
+          2
+        ]
+      },
+      "scoreLocation": {
+        "pdfPage": 2,
+        "printedPage": 3,
+        "region": "complete page"
+      },
+      "meter": "2/4",
+      "composerDeathYear": 1856,
+      "editionFirstPublicationYear": 1839,
+      "plate": "6016",
+      "inspection": {
+        "titlePageViewed": true,
+        "scorePageViewed": true,
+        "noteTranscriptionComplete": false,
+        "musicalVerificationComplete": false,
+        "audioAcceptanceComplete": false
+      },
+      "publicationGate": "not_ready",
+      "observations": {
+        "title": "Breitkopf & Härtel, Leipzig; plate 6016 visible. IMSLP identifies a later issue of the first edition.",
+        "scope": "No.1 only, not the complete Kinderszenen cycle."
+      }
+    },
+    {
+      "slot": "coffeehouse-2",
+      "fileId": "85374",
+      "workPage": "https://imslp.org/wiki/Preludes,_Op.28_(Chopin,_Fr%C3%A9d%C3%A9ric)",
+      "pdfUrl": "https://s9.imslp.org/files/imglnks/usimg/9/95/IMSLP85374-PMLP02344-Chopin_Op_28_Breitkopf_6088_first.pdf",
+      "retrievedAt": "2026-11-03",
+      "originalPdf": {
+        "sha256": "2edddaf66ee5b0401c425912bfd573b7050b77bd23e8d3f11c56205348d743a7",
+        "bytes": 4654994,
+        "pages": 39
+      },
+      "evidencePdf": {
+        "path": "chopin-edition-extract.pdf",
+        "sha256": "411a9a9657baa00db8784b4093da2ae631a8945524079c3c64bab73af80620cd",
+        "bytes": 200487,
+        "originalPdfPages": [
+          1,
+          10
+        ]
+      },
+      "scoreLocation": {
+        "pdfPage": 10,
+        "printedPage": 10,
+        "region": "upper two systems only; No.8 below is excluded"
+      },
+      "meter": "3/4",
+      "composerDeathYear": 1849,
+      "editionFirstPublicationYear": 1839,
+      "plate": "6088",
+      "inspection": {
+        "titlePageViewed": true,
+        "scorePageViewed": true,
+        "noteTranscriptionComplete": false,
+        "musicalVerificationComplete": false,
+        "audioAcceptanceComplete": false
+      },
+      "publicationGate": "not_ready",
+      "observations": {
+        "title": "Breitkopf & Härtel, Leipzig; plate 6088 visible; French title and dedication to J.C. Kessler.",
+        "scope": "No.7 ends at Fine in the second system; do not transcribe No.8 on the same page."
+      }
+    },
+    {
+      "slot": "coffeehouse-3",
+      "fileId": "138189",
+      "workPage": "https://imslp.org/wiki/16_Waltzes,_Op.39_(Brahms,_Johannes)",
+      "pdfUrl": "https://s9.imslp.org/files/imglnks/usimg/0/09/IMSLP138189-PMLP06507-JBrahms_16_Waltzes%2C_Op.39_pno_solo_fe_rsl.pdf",
+      "retrievedAt": "2026-11-03",
+      "originalPdf": {
+        "sha256": "9f0ff03f547575a50ed3c75d3066beaf19eaf8e41719ef7dffa78c3a39ca1fa5",
+        "bytes": 1843820,
+        "pages": 17
+      },
+      "evidencePdf": {
+        "path": "brahms-edition-extract.pdf",
+        "sha256": "bd18d5a6aa10fb76caf5943968425d9eba2c18e4269bd059a2ad6bb2d73eba4e",
+        "bytes": 362455,
+        "originalPdfPages": [
+          1,
+          16
+        ]
+      },
+      "scoreLocation": {
+        "pdfPage": 16,
+        "printedPage": 16,
+        "region": "complete page"
+      },
+      "meter": "3/4",
+      "composerDeathYear": 1897,
+      "editionFirstPublicationYear": 1866,
+      "plate": "524",
+      "inspection": {
+        "titlePageViewed": true,
+        "scorePageViewed": true,
+        "noteTranscriptionComplete": false,
+        "musicalVerificationComplete": false,
+        "audioAcceptanceComplete": false
+      },
+      "publicationGate": "not_ready",
+      "observations": {
+        "title": "J. Rieter-Biedermann, Winterthur/Leipzig. Cover lists plates 524 and 525; score uses 524.",
+        "datingCaveat": "IMSLP dates the first edition to 1866. Mark prices on this cover suggest a later issue; the exact date of this physical issue is not established.",
+        "scope": "Composer solo version, No.15 in A-flat, NOT the simplified version (plate 525) or a violin arrangement."
+      }
+    }
+  ]
+}

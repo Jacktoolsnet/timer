@@ -26,6 +26,7 @@ WORKS={
  'canon-original':dict(title='Canon in D · 3 Violinen und Basso',composer='Johann Pachelbel (1653–1706)',meter=(4,4),bpm=55,pickup=0),
  'canon':dict(title='Canon in D · Canonic Lights',composer='Johann Pachelbel (1653–1706)',meter=(4,4),bpm=76,pickup=0),
  'ode':dict(title='Ode an die Freude · Hymnenthema',composer='L. van Beethoven (1770–1827)',meter=(4,4),bpm=124,pickup=0),
+ 'chopin-a':dict(title='Prélude A-Dur · op.28/7',composer='Frédéric Chopin (1810–1849)',meter=(3,4),bpm=72,pickup=1),
 }
 ENTRIES=[
  ('classical-canon','canon-original','classical',55),
@@ -131,6 +132,18 @@ def build(entry):
    tr='voice'+str(i+1);track(tr,'cello' if i==3 else 'strings',[.38,.29,.25,.32][i]);transfer(tr,t['notes'])
   end=score['end']+offset
   scope='Complete first-movement score MIDI, including its encoded repeats; string ensemble.'
+ elif style=='coffeehouse':
+  # Quiet acoustic lead, warm inner harmony and a soft, correctly registered
+  # upright bass. No generic drum loop, extra chord cycle or duplicated theme.
+  track('piano','piano',.46)
+  track('warmth','epiano',.23)
+  track('upright','doublebass',.23)
+  transfer('piano',score['tracks'][0]['notes'])
+  for t in score['tracks'][1:]:
+   transfer('warmth',t['notes'],select=lambda n:n[2]>=48)
+   transfer('upright',t['notes'],select=lambda n:n[2]<48)
+  end=score['end']+offset
+  scope='Complete 16-bar Prelude with quarter-note pickup; PD helper edition, historical scan comparison pending. Coffeehouse preview, not an approved edition.'
  else:
   track('lead','pluck' if style=='house' else 'piano' if style in ('classical','jazz') else 'epiano',.43 if style!='house' else .36)
   track('inner','piano' if style in ('classical','jazz','house') else 'epiano',.28 if style!='house' else .22)
@@ -148,7 +161,7 @@ def build(entry):
  total=bars*qbar
  # Native-meter drum arrangements: 3/8 gets THREE eighth pulses, NOT a hidden 4/4.
  # Ragtime is straight, with very restrained percussion; no forced jazz swing.
- if style!='classical':
+ if style not in ('classical','coffeehouse'):
   track('kick','kick',.28 if style=='house' else .09 if style=='lofi' else .07)
   track('rim','clap' if style=='house' else 'rim',.12 if style=='house' else .055)
   track('hat','hat',.075 if style=='house' else .035)
@@ -223,6 +236,9 @@ def build(entry):
  elif key=='canon':
   rights['arrangement']='Free canon from full violin edition: Jim Paterson / Anonymous, Mutopia 1700 (2009); added voices, ground, coda and new production.'
   rights['license']='Violin source CC BY 3.0: https://creativecommons.org/licenses/by/3.0/ ; no separate license granted for project additions.'
+ elif key=='chopin-a':
+  rights['composition']='Prélude op.28/7 — Frédéric Chopin (1810–1849); original public domain.'
+  rights['arrangement']='Coffeehouse preview; complete PD notation by Magnus Lewis-Smith, Mutopia 470 (Peters). Historical scan comparison pending; see docs.'
  assert all(len(v)<=160 for v in rights.values()),rights
  assert len('\n'.join(rights.values()))<=550,(id,sum(map(len,rights.values())))
  song=dict(format='jacktools-song',version=3,title=f"{work['title']} — {style.title()}",rights=rights,

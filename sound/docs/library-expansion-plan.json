@@ -1,0 +1,1050 @@
+{
+  "format": "jacktools-library-roadmap",
+  "version": 1,
+  "asOf": "2026-11-03",
+  "requestedRegions": [
+    "DE",
+    "EU",
+    "US",
+    "CA"
+  ],
+  "targetStyles": 18,
+  "targetSlots": 54,
+  "existingSlots": 12,
+  "newSlots": 42,
+  "policy": {
+    "noExternalRecordings": true,
+    "workPageIsNotClearance": true,
+    "allRegionReviewsRequired": true,
+    "outputLicense": "Unresolved: existing arrangements/recordings do not have a separately granted usage licence. Do not claim restriction-free project outputs or change existing licences without owner decision.",
+    "preferHistoricalPublicDomainOriginalEditions": true,
+    "independentNoteTranscription": true,
+    "excludeProtectedModernContributions": true,
+    "noAutomaticBlockFromCcLabel": true,
+    "preserveExistingCreditsUntilSourceAudit": true
+  },
+  "statuses": {
+    "candidate_not_cleared": "Musikalische Vorauswahl, konkrete Ausgabe noch nicht geprüft.",
+    "edition_identified_not_cleared": "Konkrete als PD bezeichnete Ausgabe gefunden; noch keine regionale Produktionsfreigabe.",
+    "existing_requires_regional_recheck": "Vorhanden; neue Mehrregionen-Anforderung noch zu prüfen.",
+    "existing_requires_material_source_check": "Vorhanden: gemeinfreie Originalnoten und etwaige geschützte Ergänzungen konkret abgleichen; CC-Etikett allein ist keine Sperre. Bestehende Hinweise bis zum Audit erhalten.",
+    "historical_pages_inspected_not_produced": "Historische Titel- und Notenseiten lokal gesichert und betrachtet; Transkription, regionale Schlussprüfung und musikalische Abnahme noch offen.",
+    "musical_preview_not_approved": "Vollständige abspielbare Vorschau aus benannter PD-Hilfsnotation; historischer Einzelnotenabgleich und Abnahme offen, nicht im Katalog."
+  },
+  "phases": [
+    {
+      "phase": 0,
+      "styles": [
+        "classical",
+        "house",
+        "jazz",
+        "lofi"
+      ],
+      "action": "Bestand prüfen, beide Canon-Quellen getrennt behandeln; keine fertigen Fassungen voreilig überschreiben."
+    },
+    {
+      "phase": 1,
+      "styles": [
+        "coffeehouse",
+        "ambient",
+        "focus"
+      ],
+      "action": "Zuerst Coffeehouse als Dreierpaket, danach Ambient und Fokus."
+    },
+    {
+      "phase": 2,
+      "styles": [
+        "latin",
+        "slowwaltz",
+        "tango"
+      ],
+      "action": "Takt-/Stilkopplung vor Walzer/Tango entflechten; originale Taktarten erhalten."
+    },
+    {
+      "phase": 3,
+      "styles": [
+        "pop",
+        "rock"
+      ],
+      "action": "Instrumentale Genre-Bearbeitungen; bei wesentlichen Tempobögen zuerst Engine-Unterstützung oder geeigneten Ersatztitel."
+    },
+    {
+      "phase": 4,
+      "styles": [
+        "electronic",
+        "hiphop",
+        "funk",
+        "reggae"
+      ],
+      "action": "Eigene stiltypische Grooves und vollständige Themenentwicklung, keine modernen Samples."
+    },
+    {
+      "phase": 5,
+      "styles": [
+        "drumandbass",
+        "sport"
+      ],
+      "action": "Hohe Ereignisdichte erst nach Polyphonie-, Timing- und Headroom-Tests freigeben."
+    }
+  ],
+  "styles": [
+    {
+      "style": "electronic",
+      "label": "Electronic",
+      "phase": 4,
+      "tracks": [
+        {
+          "slot": "electronic-1",
+          "status": "candidate_not_cleared",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "Invention F-Dur · BWV 779",
+          "composer": "Johann Sebastian Bach",
+          "workPage": "https://imslp.org/wiki/15_Inventions,_BWV_772-786_(Bach,_Johann_Sebastian)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife."
+        },
+        {
+          "slot": "electronic-2",
+          "status": "candidate_not_cleared",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "Sonate d-Moll · K.141",
+          "composer": "Domenico Scarlatti",
+          "workPage": "https://imslp.org/wiki/Keyboard_Sonata_in_D_minor,_K.141_(Scarlatti,_Domenico)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife."
+        },
+        {
+          "slot": "electronic-3",
+          "status": "candidate_not_cleared",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "Les Barricades mystérieuses",
+          "composer": "François Couperin",
+          "workPage": "https://imslp.org/wiki/Pi%C3%A8ces_de_clavecin,_Livre_2_(Couperin,_Fran%C3%A7ois)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife."
+        }
+      ]
+    },
+    {
+      "style": "house",
+      "label": "House",
+      "phase": 0,
+      "tracks": [
+        {
+          "slot": "house-1",
+          "id": "house-canon",
+          "title": "Canon in D · Canonic Lights",
+          "composer": "Johann Pachelbel (1653–1706)",
+          "workPage": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=1700",
+          "scope": "Full 44-bar violin source; free three-voice canon, ground and coda. Not the complete original score.",
+          "status": "existing_requires_material_source_check",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "note": "Keine automatische Sperre wegen CC BY. Gegen eine geprüfte alte gemeinfreie Originalausgabe abgleichen: Originalnoten von etwaigen geschützten Ergänzungen trennen. Bestehende Quellen-/Lizenzhinweise nicht ungeprüft entfernen; keine automatische Freigabe oder Neufassung."
+        },
+        {
+          "slot": "house-2",
+          "id": "house-ode",
+          "title": "Ode an die Freude · Hymnenthema",
+          "composer": "L. van Beethoven (1770–1827)",
+          "workPage": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=528",
+          "scope": "Complete 16-bar SATB hymn setting, twice, with original intro/break/outro. Not the complete symphony.",
+          "status": "existing_requires_regional_recheck",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "note": "Vorhandene PD-Quellenkennzeichnung ist dokumentiert; zusätzliche regionale Prüfung und Projekt-Ausgabelizenz noch offen."
+        },
+        {
+          "slot": "house-3",
+          "id": "house-elise",
+          "title": "Für Elise",
+          "composer": "L. van Beethoven (1770–1827)",
+          "workPage": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=931",
+          "scope": "Complete score-event sequence and all source voices; repeats as encoded in the vendored performance.",
+          "status": "existing_requires_regional_recheck",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "note": "Vorhandene PD-Quellenkennzeichnung ist dokumentiert; zusätzliche regionale Prüfung und Projekt-Ausgabelizenz noch offen."
+        }
+      ]
+    },
+    {
+      "style": "pop",
+      "label": "Pop",
+      "phase": 3,
+      "tracks": [
+        {
+          "slot": "pop-1",
+          "status": "candidate_not_cleared",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "Beautiful Dreamer",
+          "composer": "Stephen Foster",
+          "workPage": "https://imslp.org/wiki/Beautiful_Dreamer_(Foster,_Stephen_Collins)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife."
+        },
+        {
+          "slot": "pop-2",
+          "status": "candidate_not_cleared",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "Wiegenlied · op.49 Nr.4",
+          "composer": "Johannes Brahms",
+          "workPage": "https://imslp.org/wiki/5_Lieder,_Op.49_(Brahms,_Johannes)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife."
+        },
+        {
+          "slot": "pop-3",
+          "status": "candidate_not_cleared",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "Heidenröslein · D 257",
+          "composer": "Franz Schubert",
+          "workPage": "https://imslp.org/wiki/Heidenr%C3%B6slein,_D.257_(Schubert,_Franz)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife."
+        }
+      ]
+    },
+    {
+      "style": "rock",
+      "label": "Rock",
+      "phase": 3,
+      "tracks": [
+        {
+          "slot": "rock-1",
+          "status": "candidate_not_cleared",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "In der Halle des Bergkönigs · op.46 Nr.4",
+          "composer": "Edvard Grieg",
+          "workPage": "https://imslp.org/wiki/Peer_Gynt_Suite_No.1,_Op.46_(Grieg,_Edvard)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife."
+        },
+        {
+          "slot": "rock-2",
+          "status": "candidate_not_cleared",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "Der Sommer · RV 315, III. Presto",
+          "composer": "Antonio Vivaldi",
+          "workPage": "https://imslp.org/wiki/Violin_Concerto_in_G_minor,_RV_315_(Vivaldi,_Antonio)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife."
+        },
+        {
+          "slot": "rock-3",
+          "status": "candidate_not_cleared",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "Erlkönig · D 328",
+          "composer": "Franz Schubert",
+          "workPage": "https://imslp.org/wiki/Erlk%C3%B6nig,_D.328_(Schubert,_Franz)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife."
+        }
+      ]
+    },
+    {
+      "style": "classical",
+      "label": "Klassik",
+      "phase": 0,
+      "tracks": [
+        {
+          "slot": "classical-1",
+          "id": "classical-canon",
+          "title": "Canon in D · 3 Violinen und Basso",
+          "composer": "Johann Pachelbel (1653–1706)",
+          "workPage": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=2047",
+          "scope": "Complete four-part Canon score: three violins and bass, with original entrances and ending; no invented voices or coda. Synthesized interpretation.",
+          "status": "existing_requires_material_source_check",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "note": "Keine automatische Sperre wegen CC BY. Gegen eine geprüfte alte gemeinfreie Originalausgabe abgleichen: Originalnoten von etwaigen geschützten Ergänzungen trennen. Bestehende Quellen-/Lizenzhinweise nicht ungeprüft entfernen; keine automatische Freigabe oder Neufassung."
+        },
+        {
+          "slot": "classical-2",
+          "id": "classical-nachtmusik",
+          "title": "Eine kleine Nachtmusik · I",
+          "composer": "W. A. Mozart (1756–1791)",
+          "workPage": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=900",
+          "scope": "Complete first-movement score MIDI, including its encoded repeats; string ensemble.",
+          "status": "existing_requires_regional_recheck",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "note": "Vorhandene PD-Quellenkennzeichnung ist dokumentiert; zusätzliche regionale Prüfung und Projekt-Ausgabelizenz noch offen."
+        },
+        {
+          "slot": "classical-3",
+          "id": "classical-turca",
+          "title": "Rondo alla turca",
+          "composer": "W. A. Mozart (1756–1791)",
+          "workPage": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=108",
+          "scope": "Complete score-event sequence and all source voices; repeats as encoded in the vendored performance.",
+          "status": "existing_requires_regional_recheck",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "note": "Vorhandene PD-Quellenkennzeichnung ist dokumentiert; zusätzliche regionale Prüfung und Projekt-Ausgabelizenz noch offen."
+        }
+      ]
+    },
+    {
+      "style": "slowwaltz",
+      "label": "Langsamer Walzer",
+      "phase": 2,
+      "tracks": [
+        {
+          "slot": "slowwaltz-1",
+          "status": "candidate_not_cleared",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "Walzer h-Moll · op.69 Nr.2",
+          "composer": "Frédéric Chopin",
+          "workPage": "https://imslp.org/wiki/Waltzes,_Op.69_(Chopin,_Fr%C3%A9d%C3%A9ric)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife."
+        },
+        {
+          "slot": "slowwaltz-2",
+          "status": "candidate_not_cleared",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "Valse noble Nr.1 · D 969 / op.77",
+          "composer": "Franz Schubert",
+          "workPage": "https://imslp.org/wiki/12_Valzes_nobles,_D.969_(Schubert,_Franz)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife."
+        },
+        {
+          "slot": "slowwaltz-3",
+          "status": "candidate_not_cleared",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "Valse sentimentale · op.51 Nr.6",
+          "composer": "Pjotr Iljitsch Tschaikowski",
+          "workPage": "https://imslp.org/wiki/6_Pieces,_Op.51_(Tchaikovsky,_Pyotr)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife."
+        }
+      ]
+    },
+    {
+      "style": "tango",
+      "label": "Tango",
+      "phase": 2,
+      "tracks": [
+        {
+          "slot": "tango-1",
+          "status": "candidate_not_cleared",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "El Choclo",
+          "composer": "Ángel Villoldo",
+          "workPage": "https://imslp.org/wiki/El_Choclo_(Villoldo,_%C3%81ngel_Gregorio)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife."
+        },
+        {
+          "slot": "tango-2",
+          "status": "candidate_not_cleared",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "El Porteñito",
+          "composer": "Ángel Villoldo",
+          "workPage": "https://imslp.org/wiki/El_Porte%C3%B1ito_(Villoldo,_%C3%81ngel_Gregorio)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife."
+        },
+        {
+          "slot": "tango-3",
+          "status": "candidate_not_cleared",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "El entrerriano",
+          "composer": "Rosendo Mendizábal",
+          "workPage": "https://imslp.org/wiki/El_entrerriano_(Mendiz%C3%A1bal,_Rosendo)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife."
+        }
+      ]
+    },
+    {
+      "style": "jazz",
+      "label": "Jazz & Blues",
+      "phase": 0,
+      "tracks": [
+        {
+          "slot": "jazz-1",
+          "id": "jazz-entertainer",
+          "title": "The Entertainer",
+          "composer": "Scott Joplin (1868–1917)",
+          "workPage": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=263",
+          "scope": "Complete score-event sequence and all source voices; repeats as encoded in the vendored performance.",
+          "status": "existing_requires_regional_recheck",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "note": "Vorhandene PD-Quellenkennzeichnung ist dokumentiert; zusätzliche regionale Prüfung und Projekt-Ausgabelizenz noch offen."
+        },
+        {
+          "slot": "jazz-2",
+          "id": "jazz-maple-leaf",
+          "title": "Maple Leaf Rag",
+          "composer": "Scott Joplin (1868–1917)",
+          "workPage": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=23",
+          "scope": "Complete score-event sequence and all source voices; repeats as encoded in the vendored performance.",
+          "status": "existing_requires_regional_recheck",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "note": "Vorhandene PD-Quellenkennzeichnung ist dokumentiert; zusätzliche regionale Prüfung und Projekt-Ausgabelizenz noch offen."
+        },
+        {
+          "slot": "jazz-3",
+          "id": "jazz-easy-winners",
+          "title": "The Easy Winners",
+          "composer": "Scott Joplin (1868–1917)",
+          "workPage": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=352",
+          "scope": "Complete score-event sequence and all source voices; repeats as encoded in the vendored performance.",
+          "status": "existing_requires_regional_recheck",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "note": "Vorhandene PD-Quellenkennzeichnung ist dokumentiert; zusätzliche regionale Prüfung und Projekt-Ausgabelizenz noch offen."
+        }
+      ]
+    },
+    {
+      "style": "coffeehouse",
+      "label": "Coffeehouse",
+      "phase": 1,
+      "tracks": [
+        {
+          "slot": "coffeehouse-1",
+          "status": "historical_pages_inspected_not_produced",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "Von fremden Ländern und Menschen · op.15 Nr.1",
+          "composer": "Robert Schumann",
+          "workPage": "https://imslp.org/wiki/Kinderszenen,_Op.15_(Schumann,_Robert)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife.",
+          "editionCandidate": {
+            "fileId": "03060",
+            "edition": "Breitkopf und Härtel, first edition, later issue, 1839, plate 6016",
+            "copyrightLabel": "Public Domain",
+            "basis": "Historical PDF downloaded; title and selected score page visually inspected. Offline evidence and exact page mapping recorded in sources/coffeehouse/manifest.json. Regional conclusion and production pending.",
+            "filePermalink": "https://imslp.org/wiki/Special:ReverseLookup/03060"
+          },
+          "evidenceManifest": "sources/coffeehouse/manifest.json",
+          "evidenceSlot": "coffeehouse-1",
+          "production": {
+            "transcription": "pending",
+            "scoreComparison": "pending",
+            "arrangement": "pending",
+            "audioAcceptance": "pending",
+            "catalogPublished": false
+          }
+        },
+        {
+          "slot": "coffeehouse-2",
+          "status": "musical_preview_not_approved",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "Prélude A-Dur · op.28 Nr.7",
+          "composer": "Frédéric Chopin",
+          "workPage": "https://imslp.org/wiki/Preludes,_Op.28_(Chopin,_Fr%C3%A9d%C3%A9ric)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife.",
+          "editionCandidate": {
+            "fileId": "85374",
+            "edition": "Breitkopf & Härtel, German first edition, ca.1839, plate 6088",
+            "copyrightLabel": "Public Domain",
+            "basis": "Historical PDF downloaded; title and selected score page visually inspected. Offline evidence and exact page mapping recorded in sources/coffeehouse/manifest.json. Regional conclusion and production pending.",
+            "filePermalink": "https://imslp.org/wiki/Special:ReverseLookup/85374"
+          },
+          "evidenceManifest": "sources/coffeehouse/manifest.json",
+          "evidenceSlot": "coffeehouse-2",
+          "production": {
+            "transcription": "complete_PD_helper_notation; historical_reconciliation_pending",
+            "scoreComparison": "form_and_landmarks_checked; full_reconciliation_pending",
+            "arrangement": "complete_listening_preview",
+            "audioAcceptance": "pending",
+            "catalogPublished": false,
+            "previewPath": "/examples/coffeehouse-chopin-prelude-a.preview.song.json",
+            "report": "coffeehouse-preview-report.json",
+            "overlaySelectable": true
+          }
+        },
+        {
+          "slot": "coffeehouse-3",
+          "status": "historical_pages_inspected_not_produced",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "Walzer As-Dur · op.39 Nr.15",
+          "composer": "Johannes Brahms",
+          "workPage": "https://imslp.org/wiki/16_Waltzes,_Op.39_(Brahms,_Johannes)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife.",
+          "editionCandidate": {
+            "fileId": "138189",
+            "alternativeFileId": "107868",
+            "edition": "J. Rieter-Biedermann, composer solo version, first edition 1866, plate 524",
+            "copyrightLabel": "Public Domain",
+            "basis": "Historical PDF downloaded; title and selected score page visually inspected. Offline evidence and exact page mapping recorded in sources/coffeehouse/manifest.json. Regional conclusion and production pending.",
+            "filePermalink": "https://imslp.org/wiki/Special:ReverseLookup/138189"
+          },
+          "evidenceManifest": "sources/coffeehouse/manifest.json",
+          "evidenceSlot": "coffeehouse-3",
+          "production": {
+            "transcription": "pending",
+            "scoreComparison": "pending",
+            "arrangement": "pending",
+            "audioAcceptance": "pending",
+            "catalogPublished": false
+          }
+        }
+      ]
+    },
+    {
+      "style": "hiphop",
+      "label": "Hip-Hop / Rap",
+      "phase": 4,
+      "tracks": [
+        {
+          "slot": "hiphop-1",
+          "status": "candidate_not_cleared",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "Pathétique · op.13, II. Adagio cantabile",
+          "composer": "Ludwig van Beethoven",
+          "workPage": "https://imslp.org/wiki/Piano_Sonata_No.8,_Op.13_(Beethoven,_Ludwig_van)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife."
+        },
+        {
+          "slot": "hiphop-2",
+          "status": "candidate_not_cleared",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "Prélude c-Moll · op.28 Nr.20",
+          "composer": "Frédéric Chopin",
+          "workPage": "https://imslp.org/wiki/Preludes,_Op.28_(Chopin,_Fr%C3%A9d%C3%A9ric)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife."
+        },
+        {
+          "slot": "hiphop-3",
+          "status": "candidate_not_cleared",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "Åses Tod · op.46 Nr.2",
+          "composer": "Edvard Grieg",
+          "workPage": "https://imslp.org/wiki/Peer_Gynt_Suite_No.1,_Op.46_(Grieg,_Edvard)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife."
+        }
+      ]
+    },
+    {
+      "style": "lofi",
+      "label": "Lo-Fi",
+      "phase": 0,
+      "tracks": [
+        {
+          "slot": "lofi-1",
+          "id": "lofi-gymnopedie",
+          "title": "Gymnopédie No. 1",
+          "composer": "Erik Satie (1866–1925)",
+          "workPage": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=37",
+          "scope": "Complete score-event sequence and all source voices; repeats as encoded in the vendored performance.",
+          "status": "existing_requires_regional_recheck",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "note": "Vorhandene PD-Quellenkennzeichnung ist dokumentiert; zusätzliche regionale Prüfung und Projekt-Ausgabelizenz noch offen."
+        },
+        {
+          "slot": "lofi-2",
+          "id": "lofi-traeumerei",
+          "title": "Träumerei",
+          "composer": "Robert Schumann (1810–1856)",
+          "workPage": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=504",
+          "scope": "Complete score-event sequence and all source voices; repeats as encoded in the vendored performance.",
+          "status": "existing_requires_regional_recheck",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "note": "Vorhandene PD-Quellenkennzeichnung ist dokumentiert; zusätzliche regionale Prüfung und Projekt-Ausgabelizenz noch offen."
+        },
+        {
+          "slot": "lofi-3",
+          "id": "lofi-prelude",
+          "title": "Prélude e-Moll · op. 28/4",
+          "composer": "Frédéric Chopin (1810–1849)",
+          "workPage": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=468",
+          "scope": "Complete score-event sequence and all source voices; repeats as encoded in the vendored performance.",
+          "status": "existing_requires_regional_recheck",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "note": "Vorhandene PD-Quellenkennzeichnung ist dokumentiert; zusätzliche regionale Prüfung und Projekt-Ausgabelizenz noch offen."
+        }
+      ]
+    },
+    {
+      "style": "funk",
+      "label": "Funk",
+      "phase": 4,
+      "tracks": [
+        {
+          "slot": "funk-1",
+          "status": "candidate_not_cleared",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "Frog Legs Rag",
+          "composer": "James Scott",
+          "workPage": "https://imslp.org/wiki/Frog_Legs_Rag_(Scott,_James)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife."
+        },
+        {
+          "slot": "funk-2",
+          "status": "candidate_not_cleared",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "Harlem Rag",
+          "composer": "Tom Turpin",
+          "workPage": "https://imslp.org/wiki/Harlem_Rag_(Turpin,_Tom)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife."
+        },
+        {
+          "slot": "funk-3",
+          "status": "candidate_not_cleared",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "Peacherine Rag",
+          "composer": "Scott Joplin",
+          "workPage": "https://imslp.org/wiki/Peacherine_Rag_(Joplin,_Scott)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife."
+        }
+      ]
+    },
+    {
+      "style": "reggae",
+      "label": "Reggae / Dub",
+      "phase": 4,
+      "tracks": [
+        {
+          "slot": "reggae-1",
+          "status": "candidate_not_cleared",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "Fröhlicher Landmann · op.68 Nr.10",
+          "composer": "Robert Schumann",
+          "workPage": "https://imslp.org/wiki/Album_f%C3%BCr_die_Jugend,_Op.68_(Schumann,_Robert)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife."
+        },
+        {
+          "slot": "reggae-2",
+          "status": "candidate_not_cleared",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "Camptown Races",
+          "composer": "Stephen Foster",
+          "workPage": "https://imslp.org/wiki/Camptown_Races_(Foster,_Stephen_Collins)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife."
+        },
+        {
+          "slot": "reggae-3",
+          "status": "candidate_not_cleared",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "Solace · A Mexican Serenade",
+          "composer": "Scott Joplin",
+          "workPage": "https://imslp.org/wiki/Solace_(Joplin,_Scott)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife."
+        }
+      ]
+    },
+    {
+      "style": "drumandbass",
+      "label": "Drum & Bass",
+      "phase": 5,
+      "tracks": [
+        {
+          "slot": "drumandbass-1",
+          "status": "candidate_not_cleared",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "Badinerie · BWV 1067, letzter Satz",
+          "composer": "Johann Sebastian Bach",
+          "workPage": "https://imslp.org/wiki/Orchestral_Suite_No.2_in_B_minor,_BWV_1067_(Bach,_Johann_Sebastian)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife."
+        },
+        {
+          "slot": "drumandbass-2",
+          "status": "candidate_not_cleared",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "Invention a-Moll · BWV 784",
+          "composer": "Johann Sebastian Bach",
+          "workPage": "https://imslp.org/wiki/15_Inventions,_BWV_772-786_(Bach,_Johann_Sebastian)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife."
+        },
+        {
+          "slot": "drumandbass-3",
+          "status": "candidate_not_cleared",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "Bourrée e-Moll · BWV 996, V. Satz",
+          "composer": "Johann Sebastian Bach",
+          "workPage": "https://imslp.org/wiki/Suite_in_E_minor,_BWV_996_(Bach,_Johann_Sebastian)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife."
+        }
+      ]
+    },
+    {
+      "style": "latin",
+      "label": "Latin / Bossa Nova",
+      "phase": 2,
+      "tracks": [
+        {
+          "slot": "latin-1",
+          "status": "candidate_not_cleared",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "Tango · España op.165 Nr.2",
+          "composer": "Isaac Albéniz",
+          "workPage": "https://imslp.org/wiki/Espa%C3%B1a,_Op.165_(Alb%C3%A9niz,_Isaac)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife."
+        },
+        {
+          "slot": "latin-2",
+          "status": "candidate_not_cleared",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "Capricho árabe",
+          "composer": "Francisco Tárrega",
+          "workPage": "https://imslp.org/wiki/Capricho_%C3%A1rabe_(T%C3%A1rrega,_Francisco)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife."
+        },
+        {
+          "slot": "latin-3",
+          "status": "candidate_not_cleared",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "La paloma",
+          "composer": "Sebastián Yradier",
+          "workPage": "https://imslp.org/wiki/La_paloma_(Yradier,_Sebasti%C3%A1n)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife."
+        }
+      ]
+    },
+    {
+      "style": "ambient",
+      "label": "Ambient",
+      "phase": 1,
+      "tracks": [
+        {
+          "slot": "ambient-1",
+          "status": "candidate_not_cleared",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "Clair de lune · Suite bergamasque Nr.3",
+          "composer": "Claude Debussy",
+          "workPage": "https://imslp.org/wiki/Suite_bergamasque_(Debussy,_Claude)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife."
+        },
+        {
+          "slot": "ambient-2",
+          "status": "candidate_not_cleared",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "Le Cygne · Carnaval des animaux Nr.13",
+          "composer": "Camille Saint-Saëns",
+          "workPage": "https://imslp.org/wiki/Le_carnaval_des_animaux_(Saint-Sa%C3%ABns,_Camille)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife."
+        },
+        {
+          "slot": "ambient-3",
+          "status": "candidate_not_cleared",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "Gymnopédie Nr.3",
+          "composer": "Erik Satie",
+          "workPage": "https://imslp.org/wiki/3_Gymnop%C3%A9dies_(Satie,_Erik)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife."
+        }
+      ]
+    },
+    {
+      "style": "focus",
+      "label": "Fokus",
+      "phase": 1,
+      "tracks": [
+        {
+          "slot": "focus-1",
+          "status": "candidate_not_cleared",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "Präludium C-Dur · BWV 846/1",
+          "composer": "Johann Sebastian Bach",
+          "workPage": "https://imslp.org/wiki/The_Well-Tempered_Clavier,_Book_1,_BWV_846-869_(Bach,_Johann_Sebastian)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife."
+        },
+        {
+          "slot": "focus-2",
+          "status": "candidate_not_cleared",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "Präludium c-Moll · BWV 999",
+          "composer": "Johann Sebastian Bach",
+          "workPage": "https://imslp.org/wiki/Prelude_in_C_minor,_BWV_999_(Bach,_Johann_Sebastian)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife."
+        },
+        {
+          "slot": "focus-3",
+          "status": "candidate_not_cleared",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "Melodie · Album für die Jugend op.68 Nr.1",
+          "composer": "Robert Schumann",
+          "workPage": "https://imslp.org/wiki/Album_f%C3%BCr_die_Jugend,_Op.68_(Schumann,_Robert)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife."
+        }
+      ]
+    },
+    {
+      "style": "sport",
+      "label": "Sport",
+      "phase": 5,
+      "tracks": [
+        {
+          "slot": "sport-1",
+          "status": "candidate_not_cleared",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "The Liberty Bell",
+          "composer": "John Philip Sousa",
+          "workPage": "https://imslp.org/wiki/The_Liberty_Bell_(Sousa,_John_Philip)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife."
+        },
+        {
+          "slot": "sport-2",
+          "status": "candidate_not_cleared",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "El Capitan · Marsch",
+          "composer": "John Philip Sousa",
+          "workPage": "https://imslp.org/wiki/El_Capitan_(Sousa,_John_Philip)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife."
+        },
+        {
+          "slot": "sport-3",
+          "status": "candidate_not_cleared",
+          "regionReview": {
+            "DE": "pending",
+            "EU": "pending",
+            "US": "pending",
+            "CA": "pending"
+          },
+          "title": "Radetzky-Marsch · op.228",
+          "composer": "Johann Strauss (Vater)",
+          "workPage": "https://imslp.org/wiki/Radetzky_March,_Op.228_(Strauss_Sr.,_Johann)",
+          "scope": "Vollständiges Einzelstück bzw. vollständig benannter Satz, keine bloße Motivschleife."
+        }
+      ]
+    }
+  ]
+}

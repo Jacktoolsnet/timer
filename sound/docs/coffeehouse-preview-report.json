@@ -1,0 +1,34 @@
+{
+  "status": "preview_not_approved",
+  "catalogPublished": false,
+  "entry": {
+    "id": "coffeehouse-chopin-prelude-a",
+    "style": "coffeehouse",
+    "title": "Prélude A-Dur · op.28/7",
+    "composer": "Frédéric Chopin (1810–1849)",
+    "path": "/examples/coffeehouse-chopin-prelude-a.preview.song.json",
+    "source": "https://imslp.org/wiki/Special:ReverseLookup/85374",
+    "originalMeter": "3/4",
+    "arrangementMeter": "3/4",
+    "bars": 18,
+    "durationSeconds": 45,
+    "scope": "Complete 16-bar Prelude with quarter-note pickup; PD helper edition, historical scan comparison pending. Coffeehouse preview, not an approved edition.",
+    "scopeLabel": {
+      "de": "Hörvorschau: vollständiges Prélude mit Auftakt, nach benannter gemeinfreier Hilfsnotation. Historischer Einzelnotenabgleich und Hörabnahme noch offen.",
+      "en": "Listening preview: complete Prelude and pickup, from the credited public-domain helper notation. Historical note-by-note comparison and listening review pending.",
+      "es": "Vista previa: preludio completo con anacrusa, según la notación auxiliar de dominio público acreditada. Cotejo histórico y revisión auditiva pendientes.",
+      "fr": "Préécoute : prélude complet avec anacrouse, selon la notation auxiliaire du domaine public créditée. Comparaison historique et écoute de validation à faire."
+    }
+  },
+  "production": {
+    "transferredSourceNotes": 168,
+    "source": "chopin-a.mid",
+    "sha256": "bd7af44401dcdf355771dc91e6908c876fc938f821828d462fc9ec6e429c3b44",
+    "sourceNotes": 168,
+    "outputNotes": 170,
+    "boundaryRearticulations": 2,
+    "bars": 18,
+    "durationSeconds": 45,
+    "scope": "Complete 16-bar Prelude with quarter-note pickup; PD helper edition, historical scan comparison pending. Coffeehouse preview, not an approved edition."
+  }
+}

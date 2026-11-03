@@ -1,6 +1,8 @@
 import {test,expect} from '@playwright/test';
 import {readFile} from 'node:fs/promises';
 import catalog from '../public/library/catalog.json' with {type:'json'};
+import {songLibrary,libraryStyles,libraryCopy} from '../src/lib/song-library';
+import preview from '../public/examples/coffeehouse-chopin-prelude-a.preview.song.json' with {type:'json'};
 import {decodeSongScript,scriptScore} from '../src/lib/song-script';
 import {videoCreditsForSong,songRightsText} from '../src/lib/video-credits';
 async function music(page:any,lang='de'){
@@ -23,7 +25,7 @@ test('catalog: exactly three v3 productions per initial style, valid determinist
  }
 });
 test('opening a sibling folder does not change style/music; keyboard dismiss restores focus',async({page})=>{
- await music(page);expect(await page.locator('[data-library-open]').count()).toBe(4);
+ await music(page);expect(await page.locator('[data-library-open]').count()).toBe(5);
  const selected=await page.locator('[data-style-preset][aria-pressed=true]').getAttribute('data-style-preset');
  const opener=page.locator('[data-library-open=house]');await opener.focus();await page.keyboard.press('Enter');
  await expect(page.locator('#song-library-dialog')).toBeVisible();
@@ -33,9 +35,9 @@ test('opening a sibling folder does not change style/music; keyboard dismiss res
  await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false');
  await page.keyboard.press('Escape');await expect(page.locator('#song-library-dialog')).not.toBeVisible();await expect(opener).toBeFocused();
 });
-test('all twelve starters load their source, start playback and expose rights; Random returns to generator',async({page})=>{
+test('all library songs and previews load their source, start playback and expose rights; Random returns to generator',async({page})=>{
  await music(page);
- for(const entry of catalog){
+ for(const entry of songLibrary){
   await page.locator(`[data-library-open=${entry.style}]`).click();
   await page.locator(`[data-library-song=${entry.id}]`).click();
   await expect(page.locator('#song-library-dialog')).not.toBeVisible();
@@ -48,6 +50,33 @@ test('all twelve starters load their source, start playback and expose rights; R
  await page.locator('[data-library-open=house]').click();await page.locator('[data-library-random=house]').click();
  await expect(page.locator('#evolve')).toHaveAttribute('aria-pressed','true');await expect(page.locator('#script-now')).toBeHidden();
  await expect(page.locator('[data-style-preset=house]')).toHaveAttribute('aria-pressed','true');await expect(page.locator('#video-song-rights')).toBeHidden();
+});
+for(const lang of ['de','en','es','fr'] as const)test('Coffeehouse folder exposes its preview with exact source rights: '+lang,async({page})=>{
+ expect(libraryStyles).toContain('coffeehouse');
+ expect(songLibrary.filter(s=>s.style==='coffeehouse')).toHaveLength(1);
+ await music(page,lang);
+ const opener=page.locator('[data-library-open=coffeehouse]');
+ await opener.focus();await page.keyboard.press('Enter');
+ const section=page.locator('[data-library-section=coffeehouse]');
+ await expect(section).toBeVisible();
+ await expect(section.locator('[data-library-song]')).toHaveCount(1);
+ await expect(section.locator('[data-library-preview]')).toContainText(libraryCopy[lang].preview);
+ const row=section.locator('li').first();await row.locator('summary').click();
+ await expect(row.locator('.library-rights')).toHaveText(Object.values(preview.rights).join('\n'));
+ await expect(row.locator('.library-rights')).not.toContainText('Pachelbel');
+ await expect(row.locator('a')).toHaveAttribute('href',preview.rights.source);
+ await expect(section).not.toContainText('Schumann');await expect(section).not.toContainText('Brahms');
+ await page.keyboard.press('Escape');await expect(opener).toBeFocused();
+ await opener.click();await section.locator('[data-library-song]').click();
+ await expect(page.locator('#song-library-dialog')).not.toBeVisible();
+ await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
+ expect(JSON.parse(await page.locator('#song-script-text').inputValue())).toEqual(preview);
+ await expect(page.locator('[data-style-preset=coffeehouse]')).toHaveAttribute('aria-pressed','true');
+ await expect(page.locator('#video-song-rights-text')).toContainText('Magnus Lewis-Smith');
+ await expect(page.locator('#video-song-rights-text')).not.toContainText('Pachelbel');
+ await opener.click();await section.locator('[data-library-random=coffeehouse]').click();
+ await expect(page.locator('#video-song-rights')).toBeHidden();
+ await expect(page.locator('#evolve')).toHaveAttribute('aria-pressed','true');
 });
 test('failed and cancelled fetches are atomic and retryable',async({page})=>{
  await music(page);

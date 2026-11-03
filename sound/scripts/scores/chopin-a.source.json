@@ -1,0 +1,17 @@
+{
+  "page": "https://imslp.org/wiki/Special:ReverseLookup/85374",
+  "historicalEvidence": "../../docs/sources/coffeehouse/manifest.json",
+  "symbolicHelper": {
+    "page": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=470",
+    "archive": "https://www.mutopiaproject.org/ftp/ChopinFF/O28/Chop-28-7/Chop-28-7-lys.zip",
+    "archiveSha256": "6e061dd3af2f17398c33d9d8eb657e65dca88ba0acae6592aa5cc2928b3f21ce",
+    "maintainer": "Magnus Lewis-Smith",
+    "edition": "Edition Peters",
+    "license": "Public Domain",
+    "localDirectory": "chopin-a-edition",
+    "purpose": "Explicitly used PD symbolic helper, NOT claimed as independent transcription from the historical scan."
+  },
+  "publicDomain": true,
+  "status": "preview_not_approved",
+  "historicalComparison": "Meter, pickup, 16-bar form, bass changes and ending visually compared. Full note-by-note first-edition reconciliation and listening acceptance remain pending."
+}

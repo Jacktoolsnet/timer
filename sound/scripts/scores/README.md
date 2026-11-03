@@ -1,5 +1,20 @@
 # Offline score inputs — retrieved 2026-11-03
 
+## Additional Coffeehouse preview input (not in the library catalog)
+
+`chopin-a-edition/` preserves Magnus Lewis-Smith's unmodified Public Domain
+Mutopia 470 notation (Edition Peters), including its attribution/license header.
+`chopin-a.mid` is locally score-compiled symbolic data, not a downloaded MIDI
+performance. Rebuild optionally with `python3 scripts/rebuild-coffeehouse-score.py`
+and LilyPond 2.24; the preview itself only needs Python to regenerate.
+`chopin-a.source.json` records the helper archive, its hash, and the separate
+historical IMSLP 85374 evidence. Do not call this an independent transcription
+solely from that scan or an approved first-edition reproduction: full historical
+reconciliation and listening acceptance remain pending. See
+`docs/COFFEEHOUSE_PREVIEW.de.md` for the exact production scope and limitations.
+
+## Existing library inputs
+
 Symbolic score events, **not audio recordings or commercial MIDI performances**.
 Original .ly files retain edition, maintainer and licence headers. Each
 .source.json records the exact Mutopia landing page and original MIDI URL.
