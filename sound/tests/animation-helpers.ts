@@ -9,7 +9,8 @@ export async function chooseAnimation(page:Page,selector:string){
   await page.locator('[data-animation-open=background]').click();
  }else{
   await page.locator('[data-animation-open=sound]').click();
-  if(selector.includes('data-flower-center-mode'))await page.locator('#flower-settings-open').click();
+  if(selector.includes('data-landscape-variant'))await page.locator('#landscape-settings-open').click();
+  else if(selector.includes('data-flower-center-mode'))await page.locator('#flower-settings-open').click();
   else if(!selector.includes('data-visualization')){
    await page.locator('#orbit-settings-open').click();
    await page.locator(selector.includes('data-center-mode')?'[data-animation-open=orbit-center]':'[data-animation-open=orbit-trail]').click();

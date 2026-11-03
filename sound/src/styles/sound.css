@@ -459,8 +459,8 @@ body.score-expanded{overflow:hidden}
 #animation-settings button:hover{border-color:var(--accent);color:var(--text)}
 #animation-settings button[aria-pressed=true]{color:var(--accent);border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
 .visualization-option{position:relative;min-width:0;min-height:0}
-#animation-settings :is(#orbit-settings-open,#flower-settings-open){position:absolute;right:5px;top:5px;width:26px;height:26px;padding:5px;border-radius:8px}
-#animation-settings :is(#orbit-settings-open,#flower-settings-open) svg{width:15px;height:15px}
+#animation-settings :is(#orbit-settings-open,#flower-settings-open,#landscape-settings-open){position:absolute;right:5px;top:5px;width:26px;height:26px;padding:5px;border-radius:8px}
+#animation-settings :is(#orbit-settings-open,#flower-settings-open,#landscape-settings-open) svg{width:15px;height:15px}
 @keyframes animation-settings-enter{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
 @media(max-width:600px){#animation-settings :is(.animation-home-tile,button[data-visualization],.center-tile){font-size:10px;gap:5px;padding:7px 3px}.animation-settings-heading h2{font-size:13px}#animation-settings :is(.animation-home-tile,button[data-visualization],.center-tile)>svg{width:24px;height:24px}.animation-home-tile small{font-size:9px}}
 @media(prefers-reduced-motion:reduce){#animation-settings [data-animation-panel]{animation:none}}

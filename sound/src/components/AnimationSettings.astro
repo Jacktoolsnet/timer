@@ -2,7 +2,7 @@
 import type {Language} from '../lib/i18n';
 import {animationSettingsCopy} from '../lib/animation-settings';
 import {animationCopy,orbitCopy,centerCopy,backgroundCopy} from '../lib/sound-i18n';
-import {visualizationCopy} from '../lib/visualization';
+import {landscapeVariantCopy,visualizationCopy} from '../lib/visualization';
 import VisualizationPicker from './VisualizationPicker.astro';
 import ActionIcon from './ActionIcon.astro';
 import OrbitIcon from './OrbitIcon.astro';
@@ -24,6 +24,12 @@ const {lang}=Astro.props,c=animationSettingsCopy[lang];
   </div>
  </div>
  <div data-animation-panel="sound" data-panel-title={c.sound} hidden><VisualizationPicker lang={lang}/></div>
+ <div data-animation-panel="landscape" data-panel-title={c.landscape} hidden>
+  <div class="center-tiles" role="group" aria-label={c.landscape}>
+   <button type="button" class="center-tile" data-landscape-variant="rivers" aria-pressed="true"><BackgroundIcon name="waves"/><span>{landscapeVariantCopy[lang].rivers}</span></button>
+   <button type="button" class="center-tile" data-landscape-variant="delta" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M12 2v5m0 0L5 15m7-8 7 8M12 7v8M3 19c3-3 5 3 8 0s5 3 10 0M2 23c3-3 6 3 9 0s6 3 11 0"/></svg><span>{landscapeVariantCopy[lang].delta}</span></button>
+  </div>
+ </div>
  <div data-animation-panel="orbit" data-panel-title={c.orbit} hidden>
   <div class="animation-settings-branches">
    <button type="button" class="animation-home-tile" data-animation-open="orbit-trail"><OrbitIcon name="comet"/><span>{animationCopy[lang].orbit}</span></button>
