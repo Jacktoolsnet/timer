@@ -27,10 +27,31 @@ function curve(ctx:CanvasRenderingContext2D,points:{x:number;y:number}[],move=tr
  }
  const last=points.at(-1)!;ctx.lineTo(last.x,last.y);
 }
-function ribbon(ctx:CanvasRenderingContext2D,points:Point[]){
+function ribbon(ctx:CanvasRenderingContext2D,points:Point[],outline=true){
  ctx.beginPath();curve(ctx,points.map(p=>({x:p.x,y:p.y-p.width})));
  curve(ctx,[...points].reverse().map(p=>({x:p.x,y:p.y+p.width})),false);ctx.closePath();ctx.fill();
- ctx.beginPath();curve(ctx,points);ctx.stroke();
+ if(outline){ctx.beginPath();curve(ctx,points);ctx.stroke();}
+}
+/** Energy-weighted common water colour; independent of instrument draw order. */
+export function deltaMixedColor(sources:{color:string;weight:number}[]){
+ let total=0,r=0,g=0,b=0;
+ for(const {color,weight} of sources){
+  if(!/^#[0-9a-f]{6}$/i.test(color)||!Number.isFinite(weight)||weight<=0)continue;
+  total+=weight;r+=parseInt(color.slice(1,3),16)*weight;g+=parseInt(color.slice(3,5),16)*weight;b+=parseInt(color.slice(5,7),16)*weight;
+ }
+ return total?'#'+[r,g,b].map(v=>Math.round(v/total).toString(16).padStart(2,'0')).join(''):'#4b798b';
+}
+export function deltaFanWidth(count:number,fraction:number,energy:number){
+ const opening=smooth((fraction-deltaSplit)/(1-deltaSplit)),river=.75+clamp(energy,0,1.5)*6;
+ return river+opening*(Math.max(32,Math.min(126,460/Math.max(1,count)*.85))+clamp(energy,0,1.5)*16-river);
+}
+/** Create and use the gradient within the same transform, retaining a soft elliptical edge. */
+function colourWash(ctx:CanvasRenderingContext2D,x:number,y:number,rx:number,ry:number,color:string,opacity:number){
+ if(opacity<=0)return;
+ ctx.save();ctx.translate(x,y);ctx.scale(rx,ry);ctx.shadowBlur=0;
+ const paint=ctx.createRadialGradient(0,0,0,0,0,1);
+ paint.addColorStop(0,color);paint.addColorStop(.38,color+'e0');paint.addColorStop(.72,color+'80');paint.addColorStop(1,color+'00');
+ ctx.fillStyle=paint;ctx.globalAlpha=clamp(opacity,0,1);ctx.beginPath();ctx.arc(0,0,1,0,Math.PI*2);ctx.fill();ctx.restore();
 }
 export function paintRiverDelta(ctx:CanvasRenderingContext2D,history:LandscapeHistory,tracks:LandscapeTrack[],time:number,bpm:number,beats:number,dark:boolean,playing:boolean,reduced:boolean,master:number,effect=1){
  ctx.save();ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;ctx.lineCap='round';ctx.lineJoin='round';
@@ -38,42 +59,29 @@ export function paintRiverDelta(ctx:CanvasRenderingContext2D,history:LandscapeHi
  const phase=flow*bpm/60*.65;
  const gains=tracks.map(tr=>playing&&!tr.mute?clamp(tr.volume*2,0,1.5)*clamp(master,0,1)*clamp(effect,0,1.5):0);
  const arrivals=tracks.map((tr,i)=>deltaSeaLevel(history,tr.index,time,reduced?0:travel)*gains[i]);
- // The sea has no hard shoreline: a soft, elliptical wash fades into the tool's background.
- ctx.save();ctx.translate(159,350);ctx.scale(143,263);
- const sea=ctx.createRadialGradient(0,0,0,0,0,1);
- sea.addColorStop(0,dark?'#387b9a44':'#188eac25');sea.addColorStop(.6,dark?'#245d7922':'#188eac14');sea.addColorStop(1,'transparent');
- ctx.fillStyle=sea;ctx.beginPath();ctx.arc(0,0,1,0,Math.PI*2);ctx.fill();ctx.restore();
- ctx.save();ctx.beginPath();ctx.ellipse(159,350,143,263,0,0,Math.PI*2);ctx.clip();
+ // A continuous common colour field, with incoming hues diffusing through it.
+ const sources=tracks.flatMap((tr,i)=>tr.mute||tr.volume<=0?[]:[{color:tr.color,weight:.12+arrivals[i]}]);
+ const mixed=deltaMixedColor(sources),powerSum=arrivals.reduce((sum,p)=>sum+p,0)/Math.max(1,tracks.length);
+ colourWash(ctx,159,350,147,267,mixed,(dark?.38:.3)+clamp(powerSum,0,1)*.22);
  for(const [rank,tr] of tracks.entries()){
   const power=clamp(arrivals[rank],0,1.5),mouth=deltaPoint(rank,tracks.length,1);
-  const seaInk=ctx.createLinearGradient(16,0,302,0);
-  seaInk.addColorStop(0,tr.color+'00');seaInk.addColorStop(.15,tr.color+'65');
-  seaInk.addColorStop(.48,tr.color);seaInk.addColorStop(.8,tr.color+'ad');seaInk.addColorStop(1,tr.color+'00');
-  ctx.strokeStyle=seaInk;ctx.shadowColor=tr.color;ctx.shadowBlur=reduced?0:power*(dark?14:5);
-  // Broad currents mingle; a sustained envelope supports wider, gentler waves.
-  for(let wave=0;wave<3;wave++){
-   const points=[];
-   for(let k=0;k<=36;k++){
-    const f=k/36,x=258-f*226;
-    const y=350+(mouth.y-350)*(1-f*.24)+(wave-1)*12+Math.sin(f*Math.PI)*Math.sin(f*8-phase+rank*.8+wave)* (8+f*21+power*10);
-    points.push({x,y});
-   }
-   ctx.globalAlpha=tr.mute?.015:(dark?.025:.035)+power*.06;ctx.lineWidth=10+power*15;
-   ctx.beginPath();curve(ctx,points);ctx.stroke();
-   ctx.globalAlpha=tr.mute?.035:(dark?.09:.15)+power*.35;ctx.lineWidth=.65+power*1.4;
-   ctx.beginPath();curve(ctx,points);ctx.stroke();
-  }
+  if(tr.mute||tr.volume<=0)continue;
+  const drift=reduced?0:Math.sin(phase*.6+rank*.8)*power;
+  // Large overlapping plumes mix the river colours instead of drawing separate wave lines.
+  colourWash(ctx,157+drift*8,350+(mouth.y-350)*.64+drift*7,139,126+power*24,tr.color,(dark?.13:.16)+power*.13);
+  colourWash(ctx,220+drift*4,mouth.y,104,70+power*20,tr.color,(dark?.14:.18)+power*.14);
   if(!reduced&&gains[rank]>0)for(const note of history.notes(tr.index).slice(-64)){
    if(note.pulseOnly)continue;
    const age=time-note.at-travel;if(age<0||age>2.2)continue;
    const strength=note.level*gains[rank]*Math.min(1,age/.12)*Math.exp(-age*1.65);
    if(strength<.005)continue;
    const p=deltaPoint(rank,tracks.length,1,tr.pitched?note.pitch:12,deltaBranch(tr.index,note.pitch,note.at),flow);
-   ctx.globalAlpha=clamp(strength*.7,0,.8);ctx.lineWidth=1+strength;
-   ctx.beginPath();ctx.ellipse(p.x-age*18,p.y,5+age*26,3+age*15,0,0,Math.PI*2);ctx.stroke();
+   // Short impacts spread as soft filled colour blooms, not hard outlined rings.
+   ctx.save();ctx.beginPath();ctx.ellipse(p.x-age*18,p.y,12+age*30,10+age*22,0,0,Math.PI*2);ctx.clip();
+   colourWash(ctx,p.x-age*18,p.y,12+age*30,10+age*22,tr.color,strength*.35);ctx.restore();
   }
  }
- ctx.restore();ctx.shadowBlur=0;
+ ctx.shadowBlur=0;
  for(const [rank,tr] of tracks.entries()){
   const gain=gains[rank],samples=Array.from({length:91},(_,k)=>{
    const f=k/90,value=history.sample(tr.index,reduced?time:time-travel*f);
@@ -85,6 +93,13 @@ export function paintRiverDelta(ctx:CanvasRenderingContext2D,history:LandscapeHi
   ctx.globalAlpha=tr.mute?.18:1;ctx.lineWidth=dark?.85:1.1;
   const points=(branch:number,start:number,end:number)=>samples.slice(start,end).map(v=>({...deltaPoint(rank,tracks.length,v.f,v.pitch,branch,flow),width:(.75+v.level*6)*(branch===0?1:.65)}));
   ribbon(ctx,points(0,0,37));
+  // Each river opens into a filled fan. Neighbouring fans overlap before joining the sea.
+  const fan=samples.slice(36).map(v=>({...deltaPoint(rank,tracks.length,v.f,v.pitch,0,flow),width:deltaFanWidth(tracks.length,v.f,v.level)}));
+  const fanPaint=ctx.createLinearGradient(230,0,482,0);
+  fanPaint.addColorStop(0,tr.color+'00');fanPaint.addColorStop(.12,tr.color+'dd');fanPaint.addColorStop(.5,tr.color+'b0');fanPaint.addColorStop(1,tr.color+'30');
+  ctx.fillStyle=fanPaint;ctx.shadowBlur=0;ctx.globalAlpha=tr.mute?.025:dark?.52:.62;ribbon(ctx,fan,false);
+  // Keep only faint channels inside the colour surface to suggest the direction of flow.
+  ctx.fillStyle=gradient;ctx.strokeStyle=gradient;ctx.globalAlpha=tr.mute?.05:dark?.14:.18;
   for(const branch of [-1,0,1])ribbon(ctx,points(branch,36,91));
   ctx.shadowBlur=0;
   if(!reduced&&gain>0)for(const note of history.notes(tr.index).slice(-64)){
@@ -97,7 +112,7 @@ export function paintRiverDelta(ctx:CanvasRenderingContext2D,history:LandscapeHi
      const f=from+(head-from)*k/24,value=landscapeValue(note,time-travel*f);
      points.push(deltaPoint(rank,tracks.length,f,tr.pitched?value.pitch:12,branch,flow));
     }
-    ctx.strokeStyle=tr.color;ctx.globalAlpha=clamp(note.level*gain*.45,0,.6);ctx.lineWidth=2+note.level*gain*3;
+    ctx.strokeStyle=tr.color;ctx.globalAlpha=clamp(note.level*gain*.3,0,.45);ctx.lineWidth=2+note.level*gain*3;
     ctx.beginPath();curve(ctx,points);ctx.stroke();
    }
    if(age>travel)continue;

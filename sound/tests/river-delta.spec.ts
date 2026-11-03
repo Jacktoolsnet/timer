@@ -1,6 +1,6 @@
 import {test,expect,type Page} from '@playwright/test';
 import {readFile} from 'node:fs/promises';
-import {deltaPoint,deltaSplit,deltaBranch,deltaSeaLevel,paintRiverDelta} from '../src/lib/river-delta';
+import {deltaMixedColor,deltaFanWidth,deltaPoint,deltaSplit,deltaBranch,deltaSeaLevel,paintRiverDelta} from '../src/lib/river-delta';
 import {LandscapeHistory,landscapeWindow} from '../src/lib/landscape';
 import {partsForStyle} from '../src/lib/presets';
 import {decodeSettings} from '../src/lib/sound-settings';
@@ -21,6 +21,16 @@ test('rivers split continuously and bounded branches travel downstream without r
  expect(deltaPoint(0,9,0).x).toBeGreaterThan(deltaPoint(0,9,1).x);
  expect(deltaBranch(0,7,1)).toBe(deltaBranch(0,7,1));
  for(let i=0;i<100;i++)expect([-1,0,1]).toContain(deltaBranch(i%9,i%24,i/10));
+});
+test('filled fans overlap into a surface and the common sea mixes colours by performed energy',()=>{
+ expect(deltaMixedColor([{color:'#ff0000',weight:1},{color:'#0000ff',weight:1}])).toBe('#800080');
+ const pair=[{color:'#ff0000',weight:3},{color:'#0000ff',weight:1}];
+ expect(deltaMixedColor(pair)).toBe('#bf0040');expect(deltaMixedColor([...pair].reverse())).toBe('#bf0040');
+ expect(deltaMixedColor([...pair,{color:'#00ff00',weight:0}])).toBe('#bf0040');
+ expect(deltaFanWidth(9,deltaSplit,.5)).toBeCloseTo(3.75);
+ expect(deltaFanWidth(9,1,0)*2).toBeGreaterThan(460/9*.82);
+ expect(deltaFanWidth(9,1,1)).toBeGreaterThan(deltaFanWidth(9,1,0));
+ for(let count=1;count<=9;count++)for(let k=0;k<=20;k++)expect(deltaFanWidth(count,k/20,1.5)).toBeLessThanOrEqual(150);
 });
 test('the sea receives only already-performed envelopes after the tempo-based journey',()=>{
  const h=new LandscapeHistory();h.record(0,{at:1,pitch:0,level:.2,length:2,glide:true,curve:[{offset:0,pitch:0,level:.2},{offset:1,pitch:12,level:1}]});
@@ -89,9 +99,12 @@ test('the shared sea retains visible coloured water beyond the river mouths in b
  const colouredWater=()=>page.locator('#orbit').evaluate((canvas:HTMLCanvasElement)=>{
   const pixels=canvas.getContext('2d')!.getImageData(45,140,145,420).data;let warm=0;
   for(let i=0;i<pixels.length;i+=4)if(pixels[i+3]>10&&pixels[i]>pixels[i+2]*1.2&&pixels[i]>80)warm++;
-  return warm;
+  let covered=0;for(let i=3;i<pixels.length;i+=4)if(pixels[i]>65)covered++;
+  return {warm,coverage:covered/(pixels.length/4)};
  });
- await expect.poll(colouredWater).toBeGreaterThan(30);
+ await expect.poll(async()=>(await colouredWater()).warm).toBeGreaterThan(30);
+ await expect.poll(async()=>(await colouredWater()).coverage).toBeGreaterThan(.35);
  await page.locator('#palette-dropdown summary').click();await page.locator('#theme-light').click();await page.locator('#preferences-close').click();
- await expect.poll(colouredWater).toBeGreaterThan(30);
+ await expect.poll(async()=>(await colouredWater()).warm).toBeGreaterThan(30);
+ await expect.poll(async()=>(await colouredWater()).coverage).toBeGreaterThan(.35);
 });
