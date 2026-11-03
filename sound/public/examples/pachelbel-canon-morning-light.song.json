@@ -1,7 +1,14 @@
 {
   "format": "jacktools-song",
-  "version": 1,
+  "version": 2,
   "title": "Canon in D — Morning Light (free arrangement)",
+  "rights": {
+    "composition": "Canon in D — Johann Pachelbel (1653–1706); Originalkomposition gemeinfrei in Deutschland.",
+    "arrangement": "KI-gestützte Bearbeitung „Morning Light“; keine fremde Bearbeitung als Vorlage angegeben.",
+    "recording": "Mit jacktools Sound synthetisiert; keine fremde Tonaufnahme verwendet.",
+    "license": "Bearbeitung und Aufnahme: keine gesonderte Nutzungslizenz erteilt; Rechte nicht abschließend geprüft.",
+    "source": "Grundlage: Pachelbels Canon in D; Quellenhinweis ist keine weltweite Rechtegarantie."
+  },
   "bpm": 72,
   "style": "classical",
   "loop": false,

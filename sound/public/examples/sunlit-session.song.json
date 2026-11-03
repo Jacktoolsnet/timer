@@ -1,7 +1,14 @@
 {
   "format": "jacktools-song",
-  "version": 1,
+  "version": 2,
   "title": "Sunlit Session",
+  "rights": {
+    "composition": "Sunlit Session — KI-gestützt erstellte instrumentale Beispielkomposition.",
+    "arrangement": "Für jacktools Sound erstellt; keine fremde Bearbeitung als Vorlage angegeben.",
+    "recording": "Mit jacktools Sound synthetisiert; keine fremde Tonaufnahme verwendet.",
+    "license": "Keine gesonderte Nutzungslizenz erteilt; Rechte nicht abschließend geprüft.",
+    "source": "Projekteigenes Song-Skript; kein Nachweis einer externen musikalischen Vorlage hinterlegt."
+  },
   "bpm": 125,
   "style": "house",
   "loop": true,

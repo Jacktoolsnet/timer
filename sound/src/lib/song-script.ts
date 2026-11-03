@@ -5,17 +5,24 @@ import type {NoteScore} from './note-score';
 export type ScriptNote={at:number;duration:number;pitch:number|number[];velocity:number;toPitch?:number;toVelocity?:number};
 export type ScriptPart={track:string;volume?:number;notes:ScriptNote[]};
 export type ScriptScene={name:string;bars:number;parts:ScriptPart[];variation?:number;visualization?:VisualizationMode};
-export type SongScript={format:'jacktools-song';version:1;title:string;bpm:number;style:StyleId;loop:boolean;seed:number;tracks:{id:string;instrument:InstrumentId;volume:number}[];scenes:ScriptScene[]};
+export type SongRights={composition:string;arrangement:string;recording:string;license:string;source:string};
+export type SongScript={format:'jacktools-song';title:string;bpm:number;style:StyleId;loop:boolean;seed:number;tracks:{id:string;instrument:InstrumentId;volume:number}[];scenes:ScriptScene[]}&({version:1;rights?:SongRights}|{version:2;rights:SongRights});
 const object=(v:unknown):v is Record<string,any>=>!!v&&typeof v==='object'&&!Array.isArray(v);
 const num=(v:unknown,a:number,b:number)=>typeof v==='number'&&Number.isFinite(v)&&v>=a&&v<=b;
 const pitch=(v:unknown)=>num(v,-24,60)&&Number.isInteger(v);
 const keys=(v:Record<string,any>,allowed:string[])=>Object.keys(v).every(k=>allowed.includes(k));
-/** Strict, bounded data only: no code, URLs, expressions or arbitrary engine parameters. */
+/** Strict, bounded data only: no code, expressions or arbitrary engine parameters. Rights sources are inert text, never fetched. */
 export function validSongScript(s:unknown):s is SongScript{
- if(!object(s)||!keys(s,['format','version','title','bpm','style','loop','seed','tracks','scenes'])||s.format!=='jacktools-song'||s.version!==1
+ if(!object(s)||!keys(s,['format','version','rights','title','bpm','style','loop','seed','tracks','scenes'])||s.format!=='jacktools-song'||![1,2].includes(s.version)
   ||typeof s.title!=='string'||!s.title.trim()||s.title.length>80||!num(s.bpm,40,220)||!(styleIds as readonly unknown[]).includes(s.style)
   ||['slowwaltz','tango'].includes(s.style)||typeof s.loop!=='boolean'||!num(s.seed,0,2147483647)||!Number.isInteger(s.seed)
   ||!Array.isArray(s.tracks)||s.tracks.length<1||s.tracks.length>9||!Array.isArray(s.scenes)||s.scenes.length<1||s.scenes.length>64)return false;
+ if(s.version===2&&s.rights===undefined)return false;
+ if(s.rights!==undefined){
+  const fields=['composition','arrangement','recording','license','source'];
+  if(!object(s.rights)||!keys(s.rights,fields)||fields.some(field=>typeof s.rights[field]!=='string'||!s.rights[field].trim()||s.rights[field].length>160)
+   ||fields.map(field=>s.rights[field]).join('\n').length>550)return false;
+ }
  const ids=new Set<string>();
  for(const tr of s.tracks){
   if(!object(tr)||!keys(tr,['id','instrument','volume'])||typeof tr.id!=='string'||!/^[a-z][a-z0-9_-]{0,31}$/.test(tr.id)||ids.has(tr.id)

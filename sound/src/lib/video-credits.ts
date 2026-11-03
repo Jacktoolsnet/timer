@@ -1,3 +1,4 @@
+import type {SongScript} from './song-script';
 import type {Language} from './i18n';
 export const CREDITS_SECONDS=3;
 export const SONG_TAIL_SECONDS=2;
@@ -15,9 +16,12 @@ export function paintVideoCredits(ctx:CanvasRenderingContext2D,text:string,langu
  ctx.globalAlpha=Math.min(1,Math.max(0,elapsed/.3));ctx.textAlign='center';ctx.textBaseline='middle';
  let size=Math.round(Math.min(width,height)*.038);
  const maxWidth=width*.84,lines:string[]=[];
+ const input=(text.trim()||copy.fallback).slice(0,600);
+ // Many explicit line breaks must not push text outside a landscape frame.
+ const paragraphs=input.split('\n').length>12?input.replace(/\s+/g,' ').split('\n'):input.split('\n');
  const wrap=()=>{
   lines.length=0;ctx.font=`500 ${size}px system-ui, sans-serif`;
-  for(const paragraph of (text.trim()||copy.fallback).slice(0,600).split('\n')){
+  for(const paragraph of paragraphs){
    let line='';for(const char of paragraph){if(ctx.measureText(line+char).width>maxWidth){lines.push(line);line='';}line+=char;}lines.push(line);
   }
  };
@@ -26,4 +30,22 @@ export function paintVideoCredits(ctx:CanvasRenderingContext2D,text:string,langu
  ctx.fillStyle='#b6d7ed';ctx.font=`600 ${Math.round(size*1.2)}px system-ui, sans-serif`;ctx.fillText(copy.title,width/2,Math.max(size*2,start-lineHeight*2));
  ctx.fillStyle='#fff';ctx.font=`500 ${size}px system-ui, sans-serif`;
  lines.forEach((line,index)=>ctx.fillText(line,width/2,start+index*lineHeight));ctx.restore();
+}
+
+export const songRightsCopy={
+ de:{required:'Song-Rechteangaben werden immer im Video-Abspann ausgegeben.',missing:'Rechteangaben fehlen (älteres Song-Skript). Keine Lizenz oder Gemeinfreiheit bestätigt.'},
+ en:{required:'Song rights information is always included in the video credits.',missing:'Rights information missing (legacy song script). No license or public-domain status confirmed.'},
+ es:{required:'Los derechos de la canción siempre se incluyen en los créditos del vídeo.',missing:'Faltan datos de derechos (guion antiguo). No se confirma licencia ni dominio público.'},
+ fr:{required:'Les droits du morceau figurent toujours dans le générique vidéo.',missing:'Droits non renseignés (ancien script). Aucune licence ni statut de domaine public confirmé.'}
+};
+export function songRightsText(song:SongScript,language:Language){
+ const rights=song.rights;
+ return rights?[rights.composition,rights.arrangement,rights.recording,rights.license,rights.source].join('\n'):songRightsCopy[language].missing;
+}
+/** Metadata is authoritative for display; optional user text cannot replace or truncate it. */
+export function videoCreditsForSong(song:SongScript|null,extra:{enabled:boolean;text:string},language:Language){
+ if(!song)return extra;
+ const required=songRightsText(song,language);
+ const additional=extra.enabled?extra.text.trim().slice(0,Math.max(0,600-required.length-2)):'';
+ return {enabled:true,text:required+(additional?'\n\n'+additional:'')};
 }

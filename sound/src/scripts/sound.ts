@@ -1,4 +1,4 @@
-import {CREDITS_SECONDS,SONG_TAIL_SECONDS,songVideoSeconds,paintVideoCredits} from '../lib/video-credits';
+import {CREDITS_SECONDS,SONG_TAIL_SECONDS,songVideoSeconds,paintVideoCredits,songRightsText,songRightsCopy,videoCreditsForSong} from '../lib/video-credits';
 import {decodeSongScript,scriptPosition,scriptScore,scriptCopy,type SongScript} from '../lib/song-script';
 import {RadarHistory,paintOrbitRadar,paintRadarHead,radarHeadPulse,radarStrength,radarPoint} from '../lib/orbit-radar';
 import {paintVideoPad,type VideoPadMode} from '../lib/video-pad';
@@ -75,6 +75,7 @@ const initialParts=partsForStyle('electronic');
 const tracks=colors.map((color,i)=>({color,rate:1 as TrackRate,rateChoice:'auto' as TrackRateChoice,pendingRate:null as TrackRate|null,score:null as NoteScore|null,groups:emptyNoteGroups(),grid:'auto' as GridChoice,slots:16 as GridSize,pendingGrid:null as GridChoice|null,pendingSlots:null as GridSize|null,motif:makeMotif(presets.electronic.melody),phase:0,direction:1,directionMode:'forward',pendingDirection:null as number|null,randomDynamics:false,lastVelocity:1,scheduledVelocity:1,morph:null as {to:InstrumentId;progress:number;from:number;at:number;duration:number}|null,hitVelocities:Array<number>(16).fill(1),enabled:true,instrument:initialParts[i].instrument,points:Array.from({length:16},(_,s)=>initialParts[i].steps.includes(s)),mute:false,volume:initialParts[i].volume??.55,pitch:initialParts[i].pitch??0,flash:Array(16).fill(-100),hits:Array<number>(16).fill(-Infinity)}));
 let audio:AudioContext|undefined, master:GainNode|undefined, playing=false,timer:ReturnType<typeof setInterval>|undefined,nextTime=0,step=0,bpm=100;
 let scriptSong:SongScript|null=null,scriptSceneKey='',scriptEndAt:number|null=null;
+let videoEndRequested:(()=>void)|null=null;
 let wholeSongCapture=false,videoMusicStart:number|null=null,videoCreditsCapture=false,videoNaturalEndAt:number|null=null;
 let recordingOutput:DynamicsCompressorNode|undefined;
 let recordingGeneration=0;
@@ -468,7 +469,7 @@ document.addEventListener('preferences-cleared',()=>{
  if(saveTimer)clearTimeout(saveTimer);saveTimer=undefined;
  try{localStorage.removeItem(STORAGE_KEY);}catch{}
 });
-window.addEventListener('pagehide',()=>{finishVideoRecording();finishWavRecording();if(saveTimer)clearTimeout(saveTimer);saveTimer=undefined;saveSettings();});
+window.addEventListener('pagehide',()=>{videoEndRequested=null;finishVideoRecording();finishWavRecording();if(saveTimer)clearTimeout(saveTimer);saveTimer=undefined;saveSettings();});
 type PlayedNote={note:number|null;pitch?:number;length:number;joinedFrom?:NoteJoin};
 const noteShapes=tracks.map(()=>new Map<number,{length:number;barSeconds:number;instrument:InstrumentId;slots:number;style:StyleId;time:number;angle:number;direction:number;phase:number;joinedFrom?:NoteJoin}>());
 type ChordVoicing={tones:number[];previous?:number[];result?:number[]};
@@ -1364,7 +1365,7 @@ $('#evolve').addEventListener('click',async()=>{
  }
 });
 $('#play').addEventListener('click',()=>playing?stop():void start());
-document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){videoEndRequested=null;stop();}});
 window.addEventListener('pagehide',()=>stop());
 $<HTMLInputElement>('#tempo').addEventListener('input',e=>{bpm=Number((e.target as HTMLInputElement).value);$('#tempo-value').textContent=bpm+' BPM';persistSettings();});
 function syncGroove(){
@@ -2360,7 +2361,7 @@ $('#song-script-leave').addEventListener('click',()=>{if(videoBusy||wavBusy||imp
 type RecordingStart={restart:boolean;random:boolean;generation:number;durationSeconds:number;videoFormat:VideoFormat;videoPad:VideoPadMode;videoInfo:VideoInfoSettings;animations:VideoAnimationSettings;wholeSong:boolean;credits:{enabled:boolean;text:string}};
 async function prepareRecording(forVideo=false):Promise<RecordingStart>{
  const wholeSong=forVideo&&!!scriptSong&&chosenVideoLength()==='song';
- const options={wholeSong,credits:chosenVideoCredits(),restart:wholeSong||$<HTMLInputElement>('#recording-restart').checked,random:!scriptSong&&$<HTMLInputElement>('#recording-random').checked,durationSeconds:wholeSong?songVideoSeconds(scriptSong!.scenes.reduce((sum,scene)=>sum+scene.bars,0),bpm):Number($<HTMLInputElement>('#recording-duration').value)*60,videoFormat:chosenVideoFormat(),videoPad:chosenVideoPad(),videoInfo:chosenVideoInfo(),animations:chosenVideoAnimations(),generation:recordingGeneration};
+ const options={wholeSong,credits:videoCreditsForSong(scriptSong,chosenVideoCredits(),captionLanguage()),restart:wholeSong||$<HTMLInputElement>('#recording-restart').checked,random:!scriptSong&&$<HTMLInputElement>('#recording-random').checked,durationSeconds:wholeSong?songVideoSeconds(scriptSong!.scenes.reduce((sum,scene)=>sum+scene.bars,0),bpm):Number($<HTMLInputElement>('#recording-duration').value)*60,videoFormat:chosenVideoFormat(),videoPad:chosenVideoPad(),videoInfo:chosenVideoInfo(),animations:chosenVideoAnimations(),generation:recordingGeneration};
  // Both requests must be initiated before awaiting anything, inside the button gesture.
  let fullscreen:Promise<void>|undefined;
  try{if($<HTMLInputElement>('#recording-fullscreen').checked)fullscreen=focus(true);}catch{/* Focus view remains available when fullscreen is denied. */}
@@ -2397,7 +2398,10 @@ function syncVideoSong(){
  $<HTMLInputElement>('#video-length-mode input[value="song"]').disabled=busy||!scriptSong;
  $<HTMLInputElement>('#video-length-mode input[value="fixed"]').disabled=busy;
  const whole=!!scriptSong&&chosenVideoLength()==='song';
- $('#video-song-duration').textContent=whole?new Date(songVideoSeconds(scriptSong!.scenes.reduce((sum,scene)=>sum+scene.bars,0),bpm)*1000).toISOString().slice(14,19)+' + '+(chosenVideoCredits().enabled?CREDITS_SECONDS:0)+' s':'';
+ $('#video-song-rights').hidden=!scriptSong;
+ $('#video-song-rights-hint').textContent=songRightsCopy[language].required;
+ $('#video-song-rights-text').textContent=scriptSong?songRightsText(scriptSong,language):'';
+ $('#video-song-duration').textContent=whole?new Date(songVideoSeconds(scriptSong!.scenes.reduce((sum,scene)=>sum+scene.bars,0),bpm)*1000).toISOString().slice(14,19)+' + '+(scriptSong||chosenVideoCredits().enabled?CREDITS_SECONDS:0)+' s':'';
  if(scriptSong)$<HTMLInputElement>('#recording-random').checked=false;
  $<HTMLInputElement>('#recording-random').disabled=busy||!!scriptSong||!$<HTMLInputElement>('#recording-restart').checked;
  $<HTMLInputElement>('#recording-restart').disabled=busy||whole;
@@ -2452,11 +2456,11 @@ function finishVideoRecording(){
  if(!videoRecording){if(videoBusy)recordingGeneration++;return;}
  $('#video-status').textContent=files.preparing;
  $<HTMLButtonElement>('#video-stop').disabled=true;
- videoRecording.stop();syncFileButtons();
+ if(videoEndRequested)videoEndRequested();else videoRecording.stop();syncFileButtons();
 }
 function finishVideoUi(){
  endVideoAnimations();
- videoRecording=null;videoBusy=false;wholeSongCapture=false;videoMusicStart=null;videoCreditsCapture=false;videoNaturalEndAt=null;
+ videoRecording=null;videoBusy=false;videoEndRequested=null;wholeSongCapture=false;videoMusicStart=null;videoCreditsCapture=false;videoNaturalEndAt=null;
  if(videoTimer)clearInterval(videoTimer);videoTimer=undefined;
  $('#video-stop').hidden=true;$('#video-dismiss').hidden=false;
  $('#video-record').setAttribute('aria-pressed','false');syncFileButtons();
@@ -2483,18 +2487,22 @@ $('#video-record').addEventListener('click',async()=>{
   const padContext=padCanvas?.getContext('2d');
   if(padCanvas&&!padContext)throw Error('Pad canvas unavailable');
   const recordingStart=audio.currentTime;
-  let creditsStarted=false;
+  const mandatoryCredits=!!scriptSong;
+  let creditsCompleted=false;
+  let creditsStarted=false,requestedCreditsAt:number|null=null;
+  // A manual recording stop still appends mandatory song credits. Repeated stops cannot skip them.
+  if(scriptSong)videoEndRequested=()=>{if(requestedCreditsAt===null&&!creditsStarted){requestedCreditsAt=audio!.currentTime;stop(false);}};
   videoRecording=createMp4Recording({
-   audio,output:recordingOutput,durationSeconds:options.durationSeconds+(options.credits.enabled?CREDITS_SECONDS:0)+(options.wholeSong?5:0),exactDuration:options.wholeSong||options.credits.enabled,format:options.videoFormat,
+   audio,output:recordingOutput,durationSeconds:options.durationSeconds+(options.credits.enabled?CREDITS_SECONDS:0)+(options.wholeSong||options.credits.enabled?5:0),exactDuration:options.wholeSong||options.credits.enabled,format:options.videoFormat,
    paint:ctx=>{
     const clock=audio?.currentTime??0;
-    const creditsAt=options.wholeSong?(videoMusicStart===null?Infinity:videoMusicStart+options.durationSeconds):Math.min(recordingStart+options.durationSeconds,videoNaturalEndAt??Infinity);
+    const creditsAt=requestedCreditsAt??(options.wholeSong?(videoMusicStart===null?Infinity:videoMusicStart+options.durationSeconds):Math.min(recordingStart+options.durationSeconds,videoNaturalEndAt??Infinity));
     if(clock>=creditsAt){
      if(options.credits.enabled){
       if(!creditsStarted){creditsStarted=true;stop(false);}
       paintVideoCredits(ctx,options.credits.text,options.videoInfo.language??'en',clock-creditsAt);
      }
-     if(clock>=creditsAt+(options.credits.enabled?CREDITS_SECONDS:0))videoRecording?.stop();
+     if(clock>=creditsAt+(options.credits.enabled?CREDITS_SECONDS:0)){creditsCompleted=true;videoRecording?.stop();}
      if(options.credits.enabled)return;
     }
     const lang=options.videoInfo.language??'en',style=styleCopy[lang].names[styleIds.indexOf(currentStyle)];
@@ -2512,6 +2520,8 @@ $('#video-record').addEventListener('click',async()=>{
    },
    ready:(blob,limited)=>{
     if(captureFailed)return;
+    // Never publish a partial song take whose mandatory rights card was cut off.
+    if(mandatoryCredits&&!creditsCompleted){finishVideoUi();$('#video-status').textContent=files.videoError;return;}
     finishVideoUi();videoUrl=URL.createObjectURL(blob);
     const link=$<HTMLAnchorElement>('#video-download');link.href=videoUrl;link.download=fileName('mp4');link.hidden=false;
     $('#video-status').textContent=limited?files.limit:files.ready;

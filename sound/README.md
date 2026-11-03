@@ -568,3 +568,8 @@ Video captions now use a separately selected language (English default, with Ger
 - Loaded scripts never enable recording Random Play. The recording random switch is cleared/disabled in script mode; visual random transitions remain independent.
 - Optional credits append 3 seconds after the music/decay, on the capture canvas only. Plain editable text (600 characters max) wraps in both aspect ratios; the heading follows the video-caption language. No public-domain or licensing status is inferred from a song title. Blank text uses a neutral synthesis credit.
 - `recording.videoLength` and `recording.credits` round-trip in settings JSON and consent-based browser storage. Legacy projects default to fixed duration and no credits. WAV retains its shared duration/restart behavior and has no video credits.
+
+### Song Script v2: required rights declarations
+- New v2 scripts require `rights.composition`, `rights.arrangement`, `rights.recording`, `rights.license`, and `rights.source`: nonempty plain text, each ≤160 characters, joined ≤550. Unknown rights must be stated explicitly; metadata is not legal verification. The AI guide and bundled examples use v2.
+- V1 imports remain compatible, with optional validated rights. Missing legacy rights produce an explicit missing/unverified notice, never an inferred license.
+- Every song video appends a mandatory rights card, including fixed-length takes and manual recording stops. The optional credits checkbox controls additional text only; it cannot remove or replace source metadata. Partial takes cut off before completing the rights card (e.g. tab interruption or safety limit) are not downloaded. This is a local exporter behavior, not DRM for externally edited videos.

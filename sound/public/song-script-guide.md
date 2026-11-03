@@ -1,4 +1,4 @@
-# JackTools Sound — Song Script v1 / AI authoring guide
+# JackTools Sound — Song Script v2 / AI authoring guide
 
 Give this document to an AI together with a musical description. Ask it to return
 ONLY valid JSON, without Markdown fences or commentary. No external service or API
@@ -9,13 +9,29 @@ is required by JackTools. The importer interprets data, never executes code.
 Create an ORIGINAL instrumental composition for JackTools Sound using the format
 below. Use musical motifs, harmonic development, contrasting scenes and deliberate
 instrument levels. Return only JSON. Do not claim to transcribe or reproduce an
-existing recording. My brief: [genre, atmosphere, approximate length, instrumentation].
+existing recording. Include the REQUIRED rights object: distinguish the original
+composition, this arrangement, and the synthesized recording; provide licensing
+conditions and provenance. Never invent permission, a license, an author or a
+source. If rights are unknown, say "Unverified; no usage permission confirmed"
+explicitly in the affected fields. Public-domain composition does not imply a
+public-domain arrangement or recording. My brief: [genre, atmosphere, approximate length, instrumentation].
 
 ## Root object (all these fields are required)
 
 - `format`: exactly `"jacktools-song"`
-- `version`: exactly `1`
+- `version`: exactly `2`
 - `title`: nonempty string, max 80 characters
+- `rights`: REQUIRED object with exactly five nonempty plain-text strings:
+  - `composition`: work title/composer and the original composition's rights status,
+    including jurisdiction when claiming public-domain status.
+  - `arrangement`: arranger/AI assistance and rights/provenance of this adaptation.
+  - `recording`: how this recording is produced and whether third-party audio is used.
+  - `license`: actual usage terms for the arrangement/recording, or explicitly unverified.
+    Do not infer a license from "free arrangement", free download or AI generation.
+  - `source`: verifiable source/provenance, or explicitly state no source is documented.
+  Each field is at most 160 characters; all five joined with newline separators
+  must fit within 550 characters. URLs are inert source text, not loaded resources.
+  These declarations are supplied information, NOT legal verification by the app.
 - `bpm`: number 40–220 (quarter-note beats per minute)
 - `style`: one of electronic, house, pop, rock, classical, jazz, coffeehouse, hiphop, lofi, funk, reggae, drumandbass, latin, ambient, focus, sport. This sets the synthesis character, not a generated melody.
 - `loop`: boolean. true repeats the whole song; false stops after the final scene.
@@ -76,8 +92,15 @@ A chord is simultaneous notes, not a note-by-note run. For runs, use separate on
 ```json
 {
   "format": "jacktools-song",
-  "version": 1,
+  "version": 2,
   "title": "First Light",
+  "rights": {
+    "composition": "First Light — AI-assisted instrumental example; rights unverified.",
+    "arrangement": "AI-assisted arrangement for jacktools Sound; no external arrangement documented.",
+    "recording": "Synthesized with jacktools Sound; no third-party recording supplied.",
+    "license": "Unverified; no usage permission or public-domain status confirmed.",
+    "source": "Newly authored example JSON; no external musical source documented."
+  },
   "bpm": 120,
   "style": "house",
   "loop": true,
@@ -153,4 +176,14 @@ Play is disabled for loaded scripts; visual animation changes remain optional.
 You can append a separate **3-second Music & rights** card with editable plain
 text. Enter verified composition/arrangement/recording information yourself;
 the app does not infer a license or public-domain status from the title.
-These video settings belong to the settings export, not the song-script schema.
+Song rights metadata is always appended to a video, regardless of the optional
+credits checkbox, even after a manual recording stop. Optional credits text is
+additional and cannot replace the mandatory song metadata. The metadata remains
+in the source JSON and project export; video preferences remain in settings.
+
+## Legacy compatibility
+Version 1 scripts remain importable for existing projects. If rights are present,
+they must satisfy the same validation. Without rights, EVERY song video receives
+an explicit "Rights information missing; no license or public-domain status
+confirmed" card. New AI output MUST use version 2 with all five rights fields.
+Do not use version 1 as a workaround to omit rights information.

@@ -40,18 +40,18 @@ for(const loop of [false,true])test('MP4 captures one whole song without random 
 test('credits wrap long text within both video formats',async({page})=>{
  await page.goto('/de/');
  const results=await page.evaluate(async()=>{
-  const path='/src/lib/video-credits.ts';const {paintVideoCredits}=await import(path);return [false,true].map(portrait=>{
+  const path='/src/lib/video-credits.ts';const {paintVideoCredits}=await import(path);return [false,true].flatMap(portrait=>['W'.repeat(600),'a\n'.repeat(300)].map(text=>{
    const canvas=document.createElement('canvas');canvas.width=portrait?720:1280;canvas.height=portrait?1280:720;const ctx=canvas.getContext('2d')!,texts:any[]=[];
-   ctx.fillText=(text,x,y)=>texts.push({x,y,width:ctx.measureText(text).width});paintVideoCredits(ctx,'W'.repeat(600),'de',1);return {texts,width:canvas.width,height:canvas.height};
-  });
+   ctx.fillText=(text,x,y)=>texts.push({x,y,width:ctx.measureText(text).width});paintVideoCredits(ctx,text,'de',1);return {texts,width:canvas.width,height:canvas.height};
+  }));
  });
  for(const result of results)for(const text of result.texts){expect(text.width).toBeLessThan(result.width*.9);expect(text.y).toBeGreaterThan(0);expect(text.y).toBeLessThan(result.height);}
 });
-test('whole song without credits stops automatically after one pass and decay',async({page})=>{
+test('whole song without optional credits still includes mandatory legacy rights notice',async({page})=>{
  await page.goto('/de/');await page.locator('#files-open').click();test.skip(await page.locator('#video-record').isDisabled(),'No native MP4');
  await page.locator('#song-script-upload').setInputFiles({name:'song.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(song))});
  await page.locator('#video-length-mode input[value=song]').check();const download=page.waitForEvent('download'),began=Date.now();await page.locator('#video-record').click();await download;
- expect(Date.now()-began).toBeGreaterThan(4500);expect(Date.now()-began).toBeLessThan(10000);await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false');
+ expect(Date.now()-began).toBeGreaterThan(7300);expect(Date.now()-began).toBeLessThan(14000);await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false');
 });
 test('a finite script still receives credits when fixed duration is longer than the song',async({page})=>{
  await page.addInitScript(()=>{
