@@ -1,3 +1,4 @@
+import {paintConstellation} from '../lib/constellation';
 import {paintNoteStream,type StreamPreview} from '../lib/note-stream';
 import {LandscapeHistory,paintLandscape} from '../lib/landscape';
 import {visualizationCopy,type VisualizationMode} from '../lib/visualization';
@@ -499,7 +500,7 @@ function pickVariant<T extends string>(modes:readonly T[],current:T):T{
 }
 function selectVisualization(mode:VisualizationMode){
  if(visualization!==mode){landscape.clear();streamCache=null;}visualization=mode;orbit.dataset.visualization=mode;
- orbit.setAttribute('aria-label',mode==='stream'?visualizationCopy[language].streamDescription:mode==='landscape'?visualizationCopy[language].description:t.steps);
+ orbit.setAttribute('aria-label',mode==='constellation'?visualizationCopy[language].constellationDescription:mode==='stream'?visualizationCopy[language].streamDescription:mode==='landscape'?visualizationCopy[language].description:t.steps);
  document.querySelectorAll<HTMLButtonElement>('button[data-visualization]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.visualization===mode)));
  document.querySelectorAll<HTMLButtonElement>('[data-orbit-mode],[data-center-mode]').forEach(button=>{
   button.disabled=mode!=='orbit';if(button.disabled)button.title=visualizationCopy[language].orbitOnly;else button.removeAttribute('title');
@@ -999,7 +1000,15 @@ function streamFrame(time:number){
  const clockSeconds=(position:number)=>{const b=Math.floor(position/native),s=position-b*native;return (b+swingPosition(s,native,groove.beats,groove.swing)/native)*barSeconds;};
  const now=playing?time:0,barStart=now-swingPosition(within,native,groove.beats,groove.swing)/native*barSeconds;
  const key=[bar,streamRevision,bpm,currentStyle,groove.swing,playing].join(':');
- if(streamCache?.key!==key)streamCache={key,scores:tracks.map((_,i)=>previewScore(i))};
+ if(streamCache?.key!==key)streamCache={key,scores:tracks.map((tr,i)=>{
+  const score=previewScore(i);
+  if(tr.score===null&&tappedTrack(i)){
+   const start=tapPattern.start??0,period=tapPattern.beats*8;
+   // Recorded pads inherit the swung transport, including a non-downbeat loop origin.
+   score.forEach(note=>note.start=(clockSeconds(start+note.start*period)-clockSeconds(start))/(barSeconds*2));
+  }
+  return score;
+ })};
  const previews:StreamPreview[]=tracks.map((tr,index)=>{
   let at=barStart;
   if(tr.score!==null)at-=bar%2*barSeconds;
@@ -1008,7 +1017,7 @@ function streamFrame(time:number){
    const cycleStart=start+Math.floor((clock-start)/period)*period;
    at=now+clockSeconds(cycleStart)-clockSeconds(clock);
   }
-  return {index,at,notes:streamCache!.scores[index]};
+  return {index,at,notes:streamCache!.scores[index],glide:!acousticInstruments.includes(tr.instrument)};
  });
  return {time:now,barStart,previews};
 }
@@ -1947,6 +1956,7 @@ function frame(now:number){
  oc.clearRect(0,0,700,700);
  const visualMaster=Math.min(1,Number($<HTMLInputElement>('#volume').value)/.3);
  const active=activeTracks();
+ if(visualization==='constellation')paintConstellation(oc,landscape,active.map(({tr,index})=>({index,label:String(padNumbers[index]),color:tr.color,volume:tr.volume,mute:tr.mute||tr.volume===0,pitched:isMelodic(tr.instrument)})),time,dark,playing,reduced.matches,visualMaster,noteEffect);
  if(visualization==='landscape')paintLandscape(oc,landscape,active.map(({tr,index})=>({index,label:String(padNumbers[index]),color:tr.color,volume:tr.volume,mute:tr.mute||tr.volume===0,pitched:isMelodic(tr.instrument)})),time,bpm,groove.beats,dark,playing,reduced.matches,visualMaster,noteEffect);
  if(visualization==='stream'){
   const scene=streamFrame(time);

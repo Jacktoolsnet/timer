@@ -1,6 +1,6 @@
 import type {NoteScore} from './note-score';
 import type {LandscapeHistory,LandscapeNote,LandscapeTrack} from './landscape';
-export type StreamPreview={index:number;at:number;notes:NoteScore};
+export type StreamPreview={index:number;at:number;notes:NoteScore;glide?:boolean};
 export type StreamTrack=LandscapeTrack&{name?:string};
 export const streamPlot={left:76,strike:174,right:658,top:88,bottom:614};
 const clamp=(n:number,min:number,max:number)=>Math.max(min,Math.min(max,n));
@@ -12,9 +12,9 @@ export function streamPreviewNotes(preview:StreamPreview,barSeconds:number,time:
  const cycle=barSeconds*2,notes:LandscapeNote[]=[];
  for(let repeat=0;repeat<=1;repeat++)for(const note of preview.notes){
   const at=preview.at+repeat*cycle+note.start*cycle;
-  if(at<=time+.012||at>time+barSeconds+.04)continue;
+  if(at<time-1e-7||at>time+barSeconds+.04)continue;
   notes.push({at,pitch:note.points[0].pitch,level:note.points[0].velocity,length:note.duration*cycle,
-   curve:note.points.length>1?note.points.map(p=>({offset:p.offset*cycle,pitch:p.pitch,level:p.velocity})):undefined,glide:true});
+   curve:note.points.length>1?note.points.map(p=>({offset:p.offset*cycle,pitch:p.pitch,level:p.velocity})):undefined,glide:preview.glide!==false});
  }
  return notes;
 }
@@ -25,8 +25,8 @@ export function paintNoteStream(ctx:CanvasRenderingContext2D,history:LandscapeHi
  for(const [rank,tr] of tracks.entries()){
   const y=top+rank*spacing;ctx.fillStyle=tr.color;ctx.globalAlpha=dark?.035:.055;ctx.fillRect(left,y+2,right-left,spacing-4);
   ctx.globalAlpha=dark?.14:.2;ctx.strokeStyle=tr.color;ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(left,y+spacing/2);ctx.lineTo(right,y+spacing/2);ctx.stroke();
-  ctx.globalAlpha=tr.mute?.3:.8;ctx.fillStyle=tr.color;ctx.font='11px system-ui';ctx.textAlign='left';ctx.fillText(tr.label??String(tr.index+1),24,y+spacing/2-3);
-  if(tr.name){ctx.globalAlpha=tr.mute?.25:.6;ctx.font='8px system-ui';ctx.fillText(tr.name,24,y+spacing/2+10,46);}
+  ctx.globalAlpha=tr.mute?.3:.8;ctx.fillStyle=tr.color;ctx.font='13px system-ui';ctx.textAlign='left';ctx.fillText(tr.label??String(tr.index+1),24,y+spacing/2-3);
+  if(tr.name){ctx.globalAlpha=tr.mute?.25:.6;ctx.font='10px system-ui';ctx.fillText(tr.name,24,y+spacing/2+10,46);}
  }
  for(let quarter=-beats;quarter<=beats*3;quarter++){
   const at=barStart+quarter*60/bpm,x=streamX(at,time,barSeconds);if(x<left||x>right)continue;
@@ -44,10 +44,15 @@ export function paintNoteStream(ctx:CanvasRenderingContext2D,history:LandscapeHi
    const raw=note.curve?.filter(p=>p.offset<=note.length)??[{offset:0,pitch:note.pitch,level:note.level}];
    if(!raw.length)return;
    const points=raw.map(p=>({x:streamX(note.at+p.offset,time,barSeconds),y:streamPitchY(p.pitch,base,spacing,tr.pitched),level:clamp(p.level*tr.volume*master,0,1),at:note.at+p.offset}));
-   const last=points.at(-1)!;const path=[...points,{...last,x:Math.max(start+5,end)}];
+   const last=points.at(-1)!,path=[points[0]];
+   for(let i=1;i<points.length;i++){
+    if(note.glide===false)path.push({...points[i],y:points[i-1].y});
+    path.push(points[i]);
+   }
+   path.push({...last,x:Math.max(start+5,end)});
    const audible=playing&&!tr.mute&&!forecast,muted=tr.mute||master<=0;
    const peak=Math.max(...points.map(p=>p.level)),age=time-note.at;
-   const attack=audible&&age>=0?Math.exp(-age/.22)*effect:0;
+   const attack=audible&&age>=0?Math.exp(-age/.22)*effect*clamp(note.level*tr.volume*master,0,1):0;
    ctx.fillStyle=tr.color;ctx.strokeStyle=tr.color;ctx.globalAlpha=muted?.12:forecast?.12:.32+peak*.4;
    ctx.shadowColor=tr.color;ctx.shadowBlur=reduced||forecast?0:attack*16;
    ctx.beginPath();path.forEach((p,i)=>{const w=2+p.level*4;i?ctx.lineTo(p.x,p.y-w):ctx.moveTo(p.x,p.y-w);});
