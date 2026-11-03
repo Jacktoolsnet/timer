@@ -1142,7 +1142,10 @@ function silenceScoreLane(index:number){
  cancelTappedVoices(index);sustained.forEach((entry,key)=>{if(entry.track===index){entry.voice.release(audio!.currentTime);sustained.delete(key);}});
 }
 function installNoteEditor(){
- noteEditor=createNoteEditor({language,steps:()=>stepsPerBar()*2,hit:i=>Math.max(...tracks[i].hits),
+ noteEditor=createNoteEditor({language,steps:()=>stepsPerBar()*2,
+  beatSteps:()=>scriptSong?.version===3?16/scriptSong.meter.denominator:4,
+  accentSteps:()=>{if(scriptSong?.version!==3)return [];const meter=scriptSong.meter;let at=0;return meter.groups.map(group=>{const start=at;at+=group*16/meter.denominator;return start;});},
+  hit:i=>Math.max(...tracks[i].hits),
   tracks:()=>tracks.map((tr,i)=>({name:instrumentNames[language][instrumentIds.indexOf(tr.instrument)],color:tr.color,muted:!tr.enabled||tr.mute,hit:Math.max(...tr.hits),score:previewScore(i)})),
   select(index){scoreSelection=index;scoreBackup=index===null?null:tracks[index].score===null?null:cloneScore(tracks[index].score!);syncRhythmUi();},
   change(index,score){silenceScoreLane(index);tracks[index].score=score;persistSettings();},

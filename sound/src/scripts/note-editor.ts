@@ -2,7 +2,7 @@ import {cloneScore,deleteScorePoint,noteEditorCopy,scoreClamp,type NoteScore} fr
 import type {Language} from '../lib/i18n';
 import {padForKey,padNumbers} from '../lib/orbit-layout';
 type EditorTrack={name:string;color:string;muted:boolean;score:NoteScore;hit:number};
-type Host={language:Language;tracks:()=>EditorTrack[];steps:()=>number;hit:(index:number)=>number;select:(index:number|null)=>void;change:(index:number,score:NoteScore)=>void;finish:(index:number,accept:boolean)=>void};
+type Host={language:Language;tracks:()=>EditorTrack[];steps:()=>number;beatSteps?:()=>number;accentSteps?:()=>number[];hit:(index:number)=>number;select:(index:number|null)=>void;change:(index:number,score:NoteScore)=>void;finish:(index:number,accept:boolean)=>void};
 /** DOM/SVG editor only; audio and accepted-vs-draft persistence belong to the transport. */
 export function createNoteEditor(host:Host){
  const root=document.querySelector<HTMLElement>('#note-editor')!,grid=root.querySelector<SVGSVGElement>('#score-grid')!;
@@ -91,9 +91,10 @@ export function createNoteEditor(host:Host){
    markup+=`<line class="score-pitch-line ${p%12===0?'score-octave':''}" x1="${inset}" x2="680" y1="${y(p)}" y2="${y(p)}"/><text class="score-pitch-name" x="0" y="0" transform="${textAt(inset-8,y(p)+3*sy)}">${name}</text>`;
   }
   for(let s=0;s<=host.steps();s++){
-   const px=x(s/host.steps()),bar=s===0||s===host.steps()/2||s===host.steps(),quarter=s%4===0;
-   markup+=`<line class="score-time-line ${bar?'score-bar':quarter?'score-beat':''}" x1="${px}" x2="${px}" y1="28" y2="480"/>`;
-   if(quarter&&s<host.steps())markup+=`<text class="score-beat-name" x="0" y="0" transform="${textAt(px+4,20)}">${s<host.steps()/2?'1':'2'}.${Math.floor((s%(host.steps()/2))/4)+1}</text>`;
+   const within=s%(host.steps()/2),beatSteps=host.beatSteps?.()??4;
+   const px=x(s/host.steps()),bar=s===0||s===host.steps()/2||s===host.steps(),beat=within%beatSteps===0,accent=host.accentSteps?.().includes(within)??false;
+   markup+=`<line class="score-time-line ${bar?'score-bar':accent?'score-accent':beat?'score-beat':''}" x1="${px}" x2="${px}" y1="28" y2="480"/>`;
+   if(beat&&s<host.steps())markup+=`<text class="score-beat-name" x="0" y="0" transform="${textAt(px+4,20)}">${s<host.steps()/2?'1':'2'}.${Math.floor(within/beatSteps)+1}</text>`;
   }
   markup+=`<line id="score-playhead" x1="${inset}" x2="${inset}" y1="28" y2="480"/>`;
   notes.forEach((n,i)=>{

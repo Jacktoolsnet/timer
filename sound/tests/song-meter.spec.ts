@@ -64,6 +64,10 @@ for(const [name,meter,tempoUnit] of cases)test('native playback clock and visual
  await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false',{timeout:8000});
  expect((Date.now()-begin)/1000).toBeGreaterThan(scriptSeconds(song)-.2);expect((Date.now()-begin)/1000).toBeLessThan(scriptSeconds(song)+1.1);
  await expect(page.locator('#script-now')).toContainText(name);
+ await page.locator('[data-pad-mode=notes]').click();await page.locator('#score-instruments [data-score-track="0"]').click();
+ await expect(page.locator('#score-grid .score-beat-name')).toHaveCount(meter.numerator*2);
+ await expect(page.locator('#score-grid .score-beat-name')).toHaveText(Array.from({length:2},(_,bar)=>Array.from({length:meter.numerator},(_,beat)=>`${bar+1}.${beat+1}`)).flat());
+ await expect(page.locator('#score-grid .score-accent')).toHaveCount((meter.groups.length-1)*2);
 });
 test('v3 settings/source roundtrip and correctly timed MP4 retain native meter and mandatory rights',async({page})=>{
  const source=fixture(cases[6][1],cases[6][2]);await page.goto('/de/');await page.locator('#files-open').click();
