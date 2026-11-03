@@ -41,8 +41,9 @@ Each scene has:
 - optional `variation`: number 0–0.15. Seeded relative velocity variation, applied
   on scene entry. It never changes pitch, timing or source data. Default 0.
 - optional `visualization`: `orbit`, `landscape`, `stream`, `constellation` or `flower`.
-  A change uses the existing soft crossfade. Without it, the current view stays.
-  Explicitly selected video visualization randomization takes priority during recording.
+  Accepted as a legacy hint only; it does NOT switch the visualization. Omit it in
+  new scripts. The user chooses the visualization independently. Automatic video
+  changes run only during recording when explicitly enabled in the video settings.
 
 V1 uses straight 4/4 and TWO-BAR note patterns. A scene repeats its pattern for
 its `bars` duration. To compose longer phrases rather than loops, concatenate
@@ -100,7 +101,6 @@ A chord is simultaneous notes, not a note-by-note run. For runs, use separate on
       "name": "Main",
       "bars": 8,
       "variation": 0.04,
-      "visualization": "orbit",
       "parts": [
         {"track": "beat", "notes": [
           {"at": 0, "duration": 0.2, "pitch": 0, "velocity": 0.9},

@@ -2,6 +2,7 @@ import {test,expect,type Page} from '@playwright/test';
 import {readFile} from 'node:fs/promises';
 import {decodeSongScript,scriptPosition,scriptScore,scriptCopy,type SongScript} from '../src/lib/song-script';
 import {validScore} from '../src/lib/note-score';
+import {chooseAnimation} from './animation-helpers';
 import {videoInfoCopy} from '../src/lib/video-info';
 import {decodeSettings} from '../src/lib/sound-settings';
 const fixture=(loop=true):SongScript=>({format:'jacktools-song',version:1,title:'Test composition',bpm:220,style:'house',loop,seed:42,
@@ -76,6 +77,15 @@ test('looping songs continue, Random Play and style changes deliberately leave s
  await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');await page.locator('#evolve').click();await expect(page.locator('#script-now')).toBeHidden();
  await page.locator('#play').click();await page.locator('#files-open').click();await load(page);await page.locator('#files-close').click();
  await page.locator('#animation-settings-open').click();await page.locator('[data-animation-open=music]').click();await page.locator('[data-style-preset=pop]').click();await expect(page.locator('#script-now')).toBeHidden();
+});
+test('legacy scene hints never override a fixed view, even with video randomization selected outside recording',async({page})=>{
+ await open(page);await page.locator('.video-animation-options summary').click();await page.locator('#video-animation-visualization').check();
+ const song=fixture();song.scenes[0].visualization='flower';song.scenes[1].visualization='stream';await load(page,song);
+ await expect(page.locator('#orbit')).toHaveAttribute('data-visualization','orbit');
+ await page.locator('#files-close').click();await page.locator('#play').click();
+ await expect(page.locator('#script-now')).toContainText('Chorus',{timeout:6000});await expect(page.locator('#orbit')).toHaveAttribute('data-visualization','orbit');
+ await chooseAnimation(page,'[data-visualization=constellation]');
+ await expect(page.locator('#script-now')).toContainText('Opening',{timeout:6000});await expect(page.locator('#orbit')).toHaveAttribute('data-visualization','constellation');
 });
 test('script source restores only with optional preference storage and never autoplays',async({page})=>{
  await open(page);await load(page);await page.locator('#files-close').click();

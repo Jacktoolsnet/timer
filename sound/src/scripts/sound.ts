@@ -2216,7 +2216,7 @@ function applyScriptScene(index:number,turn:number){
   tr.points=Array.from({length:16},(_,beat)=>tr.score!.some(n=>Math.floor(n.start*32)%16===beat));
  });
  cancelGroupNotes();groupDisplays.forEach(d=>d.clear());noteShapes.forEach(d=>d.clear());streamRevision++;
- if(scene.visualization&&!videoAnimationRun?.flags.visualization)selectVisualization(scene.visualization,true);
+ // Scripts control music only; manual visualization choices and video cadence remain independent.
  const label=script.title+' · '+scene.name+' · '+(index+1)+'/'+script.scenes.length;
  $('#song-script-status').textContent=label;$('#script-now').textContent=label;$('#script-now').hidden=false;
  syncRhythmUi();sync();

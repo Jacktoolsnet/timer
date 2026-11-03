@@ -259,8 +259,7 @@
             }
           ]
         }
-      ],
-      "visualization": "orbit"
+      ]
     },
     {
       "name": "First light",
@@ -1070,8 +1069,7 @@
             }
           ]
         }
-      ],
-      "visualization": "flower"
+      ]
     },
     {
       "name": "Floating",
@@ -1344,8 +1342,7 @@
             }
           ]
         }
-      ],
-      "visualization": "landscape"
+      ]
     },
     {
       "name": "Return to the light",
@@ -1810,8 +1807,7 @@
             }
           ]
         }
-      ],
-      "visualization": "orbit"
+      ]
     },
     {
       "name": "Afterglow",
