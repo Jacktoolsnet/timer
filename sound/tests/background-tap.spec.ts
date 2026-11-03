@@ -1,3 +1,4 @@
+import {chooseAnimation} from './animation-helpers';
 import {ORBIT_OUTER_RADIUS} from '../src/lib/orbit-layout';
 import {test,expect,type Page} from '@playwright/test';
 async function tapBackground(page:Page,touch=false){
@@ -18,7 +19,7 @@ test('outside taps cycle backgrounds without changing centre, notes or playback'
  await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false');
 });
 test('free app background cycles even with hidden orbit and background, including focus view',async({page})=>{
- await page.goto('/de/');await page.locator('[data-background-mode=off]').click();await page.locator('[data-orbit-mode=off]').click();
+ await page.goto('/de/');await chooseAnimation(page,'[data-background-mode=off]');await chooseAnimation(page,'[data-orbit-mode=off]');
  const app=page.locator('#sound-app'),bounds=(await app.boundingBox())!;await app.click({position:{x:bounds.width/2,y:8}});
  await expect(page.locator('[data-background-mode=clouds]')).toHaveAttribute('aria-pressed','true');
  await page.locator('#play').click();await page.locator('#focus').click();await tapBackground(page);
@@ -33,7 +34,7 @@ test('drawing, controls, centre, orbit notes and secondary clicks do not change 
  await orbit.click({position:{x:b.width/2,y:(350-ORBIT_OUTER_RADIUS)/700*b.height}}); // Outermost orbit note
  await orbit.click({button:'right',position:{x:8,y:8}});await page.keyboard.press('Escape');
  await expect(page.locator('[data-background-mode=clouds]')).toHaveAttribute('aria-pressed','true');
- await page.locator('[data-background-mode=random]').click();
+ await chooseAnimation(page,'[data-background-mode=random]');
  const current=await page.locator('#sound-atmosphere').getAttribute('data-mode'),modes=['clouds','aurora','stars','waves'];
  await tapBackground(page);
  await expect(page.locator('[data-background-mode='+modes[(modes.indexOf(current!)+1)%4]+']')).toHaveAttribute('aria-pressed','true');

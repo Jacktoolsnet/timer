@@ -1,3 +1,4 @@
+import {chooseAnimation} from './animation-helpers';
 import {test,expect,type Page} from '@playwright/test';
 import {LandscapeHistory,landscapeValue,landscapeWindow} from '../src/lib/landscape';
 import {partsForStyle} from '../src/lib/presets';
@@ -28,24 +29,24 @@ test('view setting validates without breaking older projects',()=>{
 });
 test('switching view preserves the music, draws nine streams only when chosen and keeps orbit effects separate',async({page})=>{
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await spy(page);await page.goto('/de/');const before=await exported(page);await page.locator('#play').click();
- await page.locator('button[data-visualization=landscape]').click();await expect(page.locator('#orbit')).toHaveAttribute('data-visualization','landscape');
+ await chooseAnimation(page,'button[data-visualization=landscape]');await expect(page.locator('#orbit')).toHaveAttribute('data-visualization','landscape');
  await expect.poll(()=>page.evaluate(()=>new Set((window as any).landscapeLines).size)).toBe(9);
  await expect(page.locator('[data-center-mode=ring]')).toBeDisabled();await expect(page.locator('[data-orbit-mode=comet]')).toBeDisabled();
  await page.locator('#orbit').click({position:{x:100,y:100}});const after=await exported(page);expect(after.tracks).toEqual(before.tracks);expect(after.bpm).toBe(before.bpm);expect(after.style).toBe(before.style);expect(after.visualization).toBe('landscape');
  await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
  const canvas=page.locator('#orbit');const first=await canvas.evaluate(el=>(el as HTMLCanvasElement).toDataURL());await page.waitForTimeout(350);expect(await canvas.evaluate(el=>(el as HTMLCanvasElement).toDataURL())).not.toBe(first);
- await page.locator('button[data-visualization=orbit]').click();await page.evaluate(()=>(window as any).landscapeLines=[]);await page.waitForTimeout(300);expect(await page.evaluate(()=>(window as any).landscapeLines.length)).toBe(0);
+ await chooseAnimation(page,'button[data-visualization=orbit]');await page.evaluate(()=>(window as any).landscapeLines=[]);await page.waitForTimeout(300);expect(await page.evaluate(()=>(window as any).landscapeLines.length)).toBe(0);
  await expect(page.locator('[data-center-mode=ring]')).toBeEnabled();expect(errors).toEqual([]);
 });
 test('landscape selection persists only with consent, round-trips through JSON and never autoplays',async({page})=>{
  await page.goto('/de/');await load(page,fixture());await expect(page.locator('button[data-visualization=landscape]')).toHaveAttribute('aria-pressed','true');await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false');
- const saved=await exported(page);await page.locator('button[data-visualization=orbit]').click();await load(page,saved);await expect(page.locator('#orbit')).toHaveAttribute('data-visualization','landscape');expect(await page.evaluate(()=>localStorage.getItem('jacktools.sound.settings.v1'))).toBeNull();
+ const saved=await exported(page);await chooseAnimation(page,'button[data-visualization=orbit]');await load(page,saved);await expect(page.locator('#orbit')).toHaveAttribute('data-visualization','landscape');expect(await page.evaluate(()=>localStorage.getItem('jacktools.sound.settings.v1'))).toBeNull();
  await page.locator('#palette-dropdown summary').click();await page.locator('#remember-preferences').check();await page.locator('#preferences-close').click();await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('jacktools.sound.settings.v1')!).visualization)).toBe('landscape');
  await page.reload();await expect(page.locator('#orbit')).toHaveAttribute('data-visualization','landscape');await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false');
 });
 test('view choices are localized and landscape remains available with hidden focus controls',async({page})=>{
  for(const language of ['de','en','es','fr'] as const){await page.goto('/'+language+'/');await expect(page.locator('button[data-visualization=landscape]')).toContainText(visualizationCopy[language].landscape);}
- await page.evaluate(()=>{document.documentElement.requestFullscreen=()=>Promise.reject(new Error('test fallback'));});await page.locator('button[data-visualization=landscape]').click();await page.locator('#focus').click();await page.locator('#hide-focus-controls').click();await expect(page.locator('body')).toHaveClass(/focus-idle/);
+ await page.evaluate(()=>{document.documentElement.requestFullscreen=()=>Promise.reject(new Error('test fallback'));});await chooseAnimation(page,'button[data-visualization=landscape]');await page.locator('#focus').click();await page.locator('#hide-focus-controls').click();await expect(page.locator('body')).toHaveClass(/focus-idle/);
  await expect(page.locator('#orbit')).toBeVisible();await expect(page.locator('.visualization-switch')).toBeHidden();await expect(page.locator('#orbit')).toHaveAttribute('data-visualization','landscape');
 });
 test('native MP4 records the landscape canvas with sound',async({page})=>{

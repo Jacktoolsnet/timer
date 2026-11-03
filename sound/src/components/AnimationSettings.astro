@@ -13,9 +13,9 @@ const {lang}=Astro.props,c=animationSettingsCopy[lang];
 ---
 <dialog id="animation-settings-dialog" aria-labelledby="animation-settings-title">
  <div class="animation-settings-heading">
-  <button type="button" id="animation-settings-back" class="settings-icon" aria-label={c.back} title={c.back} hidden><ActionIcon name="back"/></button>
+  <button type="button" id="animation-settings-back" class="animation-settings-icon" aria-label={c.back} title={c.back} hidden><ActionIcon name="back"/></button>
   <h2 id="animation-settings-title" tabindex="-1">{c.title}</h2>
-  <button type="button" id="animation-settings-close" class="settings-icon" aria-label={c.close} title={c.close}><ActionIcon name="cancel"/></button>
+  <button type="button" id="animation-settings-close" class="animation-settings-icon" aria-label={c.close} title={c.close}><ActionIcon name="cancel"/></button>
  </div>
  <div data-animation-panel="home" data-panel-title={c.title}>
   <div class="animation-settings-home">

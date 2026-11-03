@@ -1,3 +1,4 @@
+import {chooseAnimation} from './animation-helpers';
 import {test,expect,type Page} from '@playwright/test';
 import {readFile} from 'node:fs/promises';
 import {decodeSettings} from '../src/lib/sound-settings';
@@ -15,9 +16,9 @@ test('JSON round trip preserves nine tracks, melody, custom rhythm, levels and a
  await page.locator('#tempo').fill('92');await page.locator('#tempo').dispatchEvent('input');
  await page.locator('#volume').fill('0.56');await page.locator('#volume').dispatchEvent('input');
  await page.locator('#transpose').fill('5');await page.locator('#transpose').dispatchEvent('input');
- await page.locator('[data-background-mode=waves]').click();
- await page.locator('[data-center-mode=bars]').click();
- await page.locator('[data-orbit-mode=pulse]').click();
+ await chooseAnimation(page,'[data-background-mode=waves]');
+ await chooseAnimation(page,'[data-center-mode=bars]');
+ await chooseAnimation(page,'[data-orbit-mode=pulse]');
  await page.locator('[data-pad-mode=rhythm]').click();
  await page.keyboard.press('Numpad9');await page.keyboard.press('Numpad9');
  await expect(page.locator('#drawing')).toHaveAttribute('data-rhythm-hits','1');

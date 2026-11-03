@@ -1,3 +1,4 @@
+import {chooseAnimation} from './animation-helpers';
 import {test,expect,type Page} from '@playwright/test';
 async function tapCenter(page:Page,touch=false){
  const orbit=page.locator('#orbit'),b=(await orbit.boundingBox())!;
@@ -16,11 +17,11 @@ test('centre taps cycle the five concrete animations in tile order without chang
  await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false');
 });
 test('centre remains interactive with orbit hidden, centre off and no enabled tracks; random becomes a fixed next variant',async({page})=>{
- await page.goto('/de/');await page.locator('[data-orbit-mode=off]').click();
- await page.locator('[data-center-mode=off]').click();
+ await page.goto('/de/');await chooseAnimation(page,'[data-orbit-mode=off]');
+ await chooseAnimation(page,'[data-center-mode=off]');
  for(const toggle of await page.locator('.track-enabled').all())await toggle.evaluate((input:HTMLInputElement)=>{input.checked=false;input.dispatchEvent(new Event('change'));});
  await tapCenter(page);await expect(page.locator('#orbit')).toHaveAttribute('data-center-variant','ring');
- await page.locator('[data-center-mode=random]').click();
+ await chooseAnimation(page,'[data-center-mode=random]');
  const mode=await page.locator('#orbit').getAttribute('data-center-variant'),variants=['ring','filled','sun','sine','bars'];
  await tapCenter(page);await expect(page.locator('[data-center-mode='+variants[(variants.indexOf(mode!)+1)%5]+']')).toHaveAttribute('aria-pressed','true');
 });

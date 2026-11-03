@@ -1,3 +1,4 @@
+import {chooseAnimation} from './animation-helpers';
 import {test,expect,type Page} from '@playwright/test';
 import {noteHeadRadius,noteLengthSweep,noteIsSounding} from '../src/lib/note-shape';
 import {partsForStyle} from '../src/lib/presets';
@@ -54,7 +55,7 @@ test('orbit lengths follow real style-specific articulation and reverse with the
  const detached=await page.evaluate(()=>(window as any).lengthArcs[0]);
  expect(detached.sweep).toBeLessThan(legato*.75);expect(detached.reverse).toBe(true);
  // Turning the orbit off removes length shapes together with all other orbit elements.
- await page.locator('[data-orbit-mode=off]').click();await page.waitForTimeout(100);
+ await chooseAnimation(page,'[data-orbit-mode=off]');await page.waitForTimeout(100);
  await page.evaluate(()=>(window as any).lengthArcs=[]);await page.waitForTimeout(150);
  expect(await page.evaluate(()=>(window as any).lengthArcs.length)).toBe(0);
 });

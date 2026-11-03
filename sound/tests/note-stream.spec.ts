@@ -1,3 +1,4 @@
+import {chooseAnimation} from './animation-helpers';
 import {test,expect,type Page} from '@playwright/test';
 import {streamX,streamPitchY,streamPlot,streamPreviewNotes} from '../src/lib/note-stream';
 import {partsForStyle} from '../src/lib/presets';
@@ -32,8 +33,8 @@ test('nine stream lanes render upcoming notes and actual impacts; switching view
  await page.locator('#play').click();await expect.poll(()=>page.evaluate(()=>(window as any).streamStrikes.length)).toBeGreaterThan(0);
  const a=await page.locator('#orbit').evaluate(el=>(el as HTMLCanvasElement).toDataURL());await page.waitForTimeout(300);expect(await page.locator('#orbit').evaluate(el=>(el as HTMLCanvasElement).toDataURL())).not.toBe(a);
  await page.locator('#orbit').click({position:{x:120,y:120}});const saved=await exported(page);expect(saved.tracks).toEqual(before.tracks);expect(saved.visualization).toBe('stream');
- await page.locator('button[data-visualization=orbit]').click();await page.evaluate(()=>(window as any).streamLabels=[]);await page.waitForTimeout(180);expect(await page.evaluate(()=>(window as any).streamLabels.length)).toBe(0);
- await page.locator('button[data-visualization=landscape]').click();await page.locator('button[data-visualization=stream]').click();await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');expect(errors).toEqual([]);
+ await chooseAnimation(page,'button[data-visualization=orbit]');await page.evaluate(()=>(window as any).streamLabels=[]);await page.waitForTimeout(180);expect(await page.evaluate(()=>(window as any).streamLabels.length)).toBe(0);
+ await chooseAnimation(page,'button[data-visualization=landscape]');await chooseAnimation(page,'button[data-visualization=stream]');await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');expect(errors).toEqual([]);
 });
 test('notes reach the line only when they sound, while the future preview remains provisional',async({page})=>{
  await spy(page);await page.goto('/de/');const data=fixture();data.tracks.forEach((tr,i)=>tr.enabled=i===4);await load(page,data);
@@ -42,13 +43,13 @@ test('notes reach the line only when they sound, while the future preview remain
 });
 test('stream choice round-trips, persists with consent and does not autoplay after reload',async({page})=>{
  await page.goto('/de/');await load(page,fixture());await expect(page.locator('[data-orbit-mode=comet]')).toBeDisabled();await expect(page.locator('[data-center-mode=ring]')).toBeDisabled();
- const saved=await exported(page);await page.locator('button[data-visualization=orbit]').click();await load(page,saved);await expect(page.locator('button[data-visualization=stream]')).toHaveAttribute('aria-pressed','true');
+ const saved=await exported(page);await chooseAnimation(page,'button[data-visualization=orbit]');await load(page,saved);await expect(page.locator('button[data-visualization=stream]')).toHaveAttribute('aria-pressed','true');
  expect(await page.evaluate(()=>localStorage.getItem('jacktools.sound.settings.v1'))).toBeNull();await page.locator('#palette-dropdown summary').click();await page.locator('#remember-preferences').check();await page.locator('#preferences-close').click();
  await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('jacktools.sound.settings.v1')!).visualization)).toBe('stream');await page.reload();await expect(page.locator('#orbit')).toHaveAttribute('data-visualization','stream');await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false');
 });
 test('localized choices fit mobile, and stream is retained in focus view with reduced motion',async({page})=>{
  await page.emulateMedia({reducedMotion:'reduce'});for(const lang of ['de','en','es','fr'] as const){await page.goto('/'+lang+'/');await expect(page.locator('button[data-visualization=stream]')).toContainText(visualizationCopy[lang].stream);expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBe(0);}
- await page.evaluate(()=>{document.documentElement.requestFullscreen=()=>Promise.reject(new Error('fallback'));});await page.locator('button[data-visualization=stream]').click();await page.locator('#focus').click();await page.locator('#hide-focus-controls').click();await expect(page.locator('.visualization-switch')).toBeHidden();await expect(page.locator('#orbit')).toBeVisible();await expect(page.locator('#orbit')).toHaveAttribute('data-visualization','stream');
+ await page.evaluate(()=>{document.documentElement.requestFullscreen=()=>Promise.reject(new Error('fallback'));});await chooseAnimation(page,'button[data-visualization=stream]');await page.locator('#focus').click();await page.locator('#hide-focus-controls').click();await expect(page.locator('.visualization-switch')).toBeHidden();await expect(page.locator('#orbit')).toBeVisible();await expect(page.locator('#orbit')).toHaveAttribute('data-visualization','stream');
 });
 test('MP4 uses the note stream canvas and keeps its audio track',async({page})=>{
  test.setTimeout(45000);await spy(page);await page.goto('/de/');await load(page,fixture());await page.locator('#files-open').click();test.skip(await page.locator('#video-record').isDisabled(),'No native MP4 encoder');await page.locator('#video-record').click();await page.waitForTimeout(1300);

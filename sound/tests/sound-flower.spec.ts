@@ -1,3 +1,4 @@
+import {chooseAnimation} from './animation-helpers';
 import {test,expect,type Page} from '@playwright/test';
 import {flowerPoint,flowerPitch,flowerNotes,paintSoundFlower} from '../src/lib/sound-flower';
 import {LandscapeHistory} from '../src/lib/landscape';
@@ -68,14 +69,14 @@ test('flower rendering follows playback only, leaves music intact and stops when
  const after=await exported(page);expect(after.tracks).toEqual(before.tracks);expect(after.bpm).toBe(before.bpm);
  await expect(page.locator('[data-center-mode=ring]')).toBeDisabled();
  await page.locator('#play').click();await expect.poll(()=>page.evaluate(()=>(window as any).flowerHalos)).toBeGreaterThan(0);
- await page.locator('#play').click();await page.locator('button[data-visualization=stream]').click();
+ await page.locator('#play').click();await chooseAnimation(page,'button[data-visualization=stream]');
  await page.evaluate(()=>(window as any).flowerHalos=0);await page.waitForTimeout(250);expect(await page.evaluate(()=>(window as any).flowerHalos)).toBe(0);
- await page.locator('button[data-visualization=orbit]').click();await expect(page.locator('[data-center-mode=ring]')).toBeEnabled();expect(errors).toEqual([]);
+ await chooseAnimation(page,'button[data-visualization=orbit]');await expect(page.locator('[data-center-mode=ring]')).toBeEnabled();expect(errors).toEqual([]);
 });
 test('view persists only with consent, restores without autoplay and works in focus',async({page})=>{
  await page.goto('/de/');await load(page,fixture());expect(await page.evaluate(()=>localStorage.getItem('jacktools.sound.settings.v1'))).toBeNull();
  const saved=await exported(page);expect(saved.visualization).toBe('flower');
- await page.locator('button[data-visualization=orbit]').click();await load(page,saved);
+ await chooseAnimation(page,'button[data-visualization=orbit]');await load(page,saved);
  await page.locator('#palette-dropdown summary').click();await page.locator('#remember-preferences').check();await page.locator('#preferences-close').click();
  await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('jacktools.sound.settings.v1')!).visualization)).toBe('flower');
  await page.reload();await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false');await expect(page.locator('#orbit')).toHaveAttribute('data-visualization','flower');

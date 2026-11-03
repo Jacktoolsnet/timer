@@ -1,3 +1,4 @@
+import {chooseAnimation} from './animation-helpers';
 import {ORBIT_OUTER_RADIUS,orbitRadius,ORBIT_COUNT,orbitHitTolerance,ORBIT_HIT_RADIUS} from '../src/lib/orbit-layout';
 import {test,expect,type Page} from '@playwright/test';
 async function tapOrbit(page:Page,x:number,y:number){
@@ -32,9 +33,9 @@ test('actual dots toggle only their note; tapping between dots on the same ring 
  await expect(note).toHaveAttribute('aria-pressed',before!);
 });
 test('hidden orbit restarts on a free tap; random advances from its current style, also in focus mode',async({page})=>{
- await page.goto('/de/');await page.locator('[data-orbit-mode=off]').click();await tapFreeOrbit(page);
+ await page.goto('/de/');await chooseAnimation(page,'[data-orbit-mode=off]');await tapFreeOrbit(page);
  await expect(page.locator('[data-orbit-mode=comet]')).toHaveAttribute('aria-pressed','true');
- await page.locator('[data-orbit-mode=random]').click();const current=await page.locator('#orbit').getAttribute('data-mode');
+ await chooseAnimation(page,'[data-orbit-mode=random]');const current=await page.locator('#orbit').getAttribute('data-mode');
  await page.locator('#play').click(); // Random animation choices may update when starting.
  const started=await page.locator('#orbit').getAttribute('data-mode');expect(current).toBeTruthy();
  await page.locator('#focus').click();await tapFreeOrbit(page);

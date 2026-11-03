@@ -1,3 +1,4 @@
+import {chooseAnimation} from './animation-helpers';
 import {test,expect,type Page} from '@playwright/test';
 import {readFile} from 'node:fs/promises';
 import {videoAnimationPlan,videoAnimationKeys} from '../src/lib/video-animations';
@@ -46,7 +47,7 @@ test('video changes all selected layers temporarily, independently of normal Pla
 });
 test('explicitly disabled animation layers stay off throughout a randomized video',async({page})=>{
  await clock(page);await page.goto('/de/');
- for(const key of videoAnimationKeys)await page.locator('[data-'+key+'-mode=off]').click();
+ for(const key of videoAnimationKeys)await chooseAnimation(page,'[data-'+key+'-mode=off]');
  await options(page);await page.locator('#video-record').click();await expect(page.locator('#video-status')).toHaveText(fileCopy.de.recording);
  await page.evaluate(()=>(window as any).videoAdvance=50000);await page.waitForTimeout(200);
  await expect(page.locator('#orbit')).toHaveAttribute('data-center-variant','off');await expect(page.locator('#orbit')).toHaveAttribute('data-mode','off');await expect(page.locator('#sound-atmosphere')).toBeHidden();
