@@ -1,3 +1,4 @@
+import {setTempo} from './animation-helpers';
 import {test,expect} from '@playwright/test';
 import {emptyRhythm,recordRhythmHit,rhythmHitsAt,finishRhythm,remeterRhythm,rhythmLane,hasRhythm,replacingRhythmLane,resetRhythmSession} from '../src/lib/tap-rhythm';
 import {tapDrumRecipe} from '../src/lib/rhythm-player';
@@ -56,7 +57,7 @@ test('actual multi-touch recording loops audible drums, keeps melody intact and 
   OscillatorNode.prototype.start=function(when=0){(window as any).drumStarts.push({time:when,hz:frequencies.get(this.frequency)});return start.call(this,when);};
  });
  await page.goto('/de/');await page.locator('#clear').click();
- await page.locator('#tempo').fill('220');await page.locator('#tempo').dispatchEvent('input');
+ await setTempo(page,'220');
  const before=await page.locator('.instrument .count').allTextContents();
  await page.locator('[data-pad-mode=rhythm]').click();await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false');
  const pad=page.locator('#drawing');await pad.scrollIntoViewIfNeeded();const r=(await pad.boundingBox())!,cdp=await page.context().newCDPSession(page);
@@ -167,7 +168,7 @@ test('sequential selected input ducks companions and Finish restores their level
   };
  });
  await page.goto('/de/');await page.locator('#clear').click();
- await page.locator('#tempo').fill('220');await page.locator('#tempo').dispatchEvent('input');
+ await setTempo(page,'220');
  await page.locator('[data-pad-mode=rhythm]').click();
  const pad=page.locator('#drawing'),volume=await page.locator('#volume').inputValue();
  await pad.focus();await page.keyboard.press('7');await page.waitForTimeout(180);await page.keyboard.press('7');

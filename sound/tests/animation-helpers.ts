@@ -22,3 +22,19 @@ export async function chooseAnimation(page:Page,selector:string){
  await page.locator('#animation-settings-close').click();
  await expect(dialog).toBeHidden();
 }
+
+/** Tempo moved into the inline controls page; exercise its input handler there. */
+export async function setTempo(page:Page,value:string){
+ const settings=page.locator('#animation-settings');
+ if(await settings.isVisible())await page.locator('#animation-settings-close').click();
+ await page.locator('#animation-settings-open').click();await page.locator('[data-animation-open=controls]').click();
+ await expect(page.locator('#tempo')).toBeVisible();
+ await page.locator('#tempo').evaluate((input:HTMLInputElement,value)=>{input.value=value;input.dispatchEvent(new Event('input',{bubbles:true}));},value);
+ await page.locator('#animation-settings-close').click();
+}
+export async function chooseStyle(page:Page,style:string){
+ const settings=page.locator('#animation-settings');
+ if(await settings.isVisible())await page.locator('#animation-settings-close').click();
+ await page.locator('#animation-settings-open').click();await page.locator('[data-animation-open=music]').click();
+ await page.locator(`[data-style-preset=${style}]`).click();await page.locator('#animation-settings-close').click();
+}

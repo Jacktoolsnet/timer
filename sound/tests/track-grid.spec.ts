@@ -1,3 +1,4 @@
+import {setTempo,chooseStyle} from './animation-helpers';
 import {test,expect,type Page} from '@playwright/test';
 import {gridEvolutionPlan,enrichGrid,variedGrid,gridSizes,gridEvents,swingPosition,gridFractionAtTime,gridPhraseHold,remapPoints,canEvolveGrid,gridCopy} from '../src/lib/track-grid';
 import {holdSteps} from '../src/lib/pad-gestures';
@@ -53,12 +54,12 @@ test('manual grids queue at bar boundaries, stop applies pending edits, and styl
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/de/');
  await row(page,4).locator('summary').click();await grid(page,4,'12');
  await expect(row(page,4)).toHaveAttribute('data-slots','12');await expect(row(page,4).locator('[data-step]:visible')).toHaveCount(12);
- await page.locator('#tempo').fill('120');await page.locator('#tempo').dispatchEvent('input');await page.locator('#play').click();
+ await setTempo(page,'120');await page.locator('#play').click();
  await grid(page,4,'4');await expect(row(page,4)).toHaveAttribute('data-slots','12');await expect(row(page,4).locator('.grid-status')).toHaveText(gridCopy.de.pending);
  await expect(row(page,4)).toHaveAttribute('data-slots','4',{timeout:3500});await expect(row(page,4).locator('.grid-status')).toBeEmpty();
  await grid(page,4,'8');await page.locator('#play').click();await expect(row(page,4)).toHaveAttribute('data-slots','8');
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await row(page,4).screenshot({path:'test-results/grid-'+test.info().project.name+'.png'});
- await page.locator('[data-style-preset=slowwaltz]').click();await expect(row(page,4)).toHaveAttribute('data-slots','12');await expect(row(page,4)).toHaveAttribute('data-grid','auto');expect(errors).toEqual([]);
+ await chooseStyle(page,'slowwaltz');await expect(row(page,4)).toHaveAttribute('data-slots','12');await expect(row(page,4)).toHaveAttribute('data-grid','auto');expect(errors).toEqual([]);
 });
 test('drawing, tapping, holding and keyboard wrap use the selected grid',async({page})=>{
  await page.goto('/de/');await page.locator('#clear').click();await grid(page,0,'4');await grid(page,4,'12');
@@ -101,7 +102,7 @@ test('real production audio keeps four notes against twelve triplets synchronize
  for(let i=0;i<12;i++)await row(page,4).locator(`[data-step="${i}"]`).click();
  await row(page,5).locator('summary').click();await row(page,5).locator('.track-enabled').check();await row(page,5).locator('.instrument-select').selectOption('guitar',{force:true});await grid(page,5,'4');
  for(let i=0;i<4;i++)await row(page,5).locator(`[data-step="${i}"]`).click();
- await page.locator('#tempo').fill('120');await page.locator('#tempo').dispatchEvent('input');await page.locator('#play').click();
+ await setTempo(page,'120');await page.locator('#play').click();
  await expect.poll(()=>page.evaluate(()=>(window as any).__gridStarts.filter((s:{duration:number})=>Math.abs(s.duration-2.4)<.001).length)).toBeGreaterThanOrEqual(26);await page.locator('#play').click();
  const starts=await page.evaluate(()=>(window as any).__gridStarts as {at:number;duration:number}[]),harp=starts.filter(s=>Math.abs(s.duration-2.4)<.001),guitar=starts.filter(s=>Math.abs(s.duration-1.4)<.001);
  expect(harp.length).toBeGreaterThanOrEqual(26);expect(guitar.length).toBeGreaterThanOrEqual(9);expect(harp[0].at).toBe(guitar[0].at);
@@ -110,7 +111,7 @@ test('real production audio keeps four notes against twelve triplets synchronize
 test('Random Play changes an automatic melodic grid, not fixed grids or bass and drums',async({page})=>{
  test.setTimeout(30000);await page.addInitScript(()=>{Math.random=()=>0;});await page.goto('/de/');
  await page.locator('#palette-dropdown summary').click();await page.locator('#remember-preferences').check();await page.locator('#preferences-close').click();
- await grid(page,6,'8');await page.locator('#tempo').fill('180');await page.locator('#tempo').dispatchEvent('input');await page.locator('#evolve').click();
+ await grid(page,6,'8');await setTempo(page,'180');await page.locator('#evolve').click();
  await expect(row(page,4)).toHaveAttribute('data-slots','4');await expect(row(page,5)).toHaveAttribute('data-slots','12');await expect(row(page,7)).toHaveAttribute('data-slots','16');
  await expect(row(page,5)).toHaveAttribute('data-slots','4',{timeout:5000});await expect(row(page,5)).toHaveAttribute('data-grid','auto');
  await page.locator('#play').click();for(let i=0;i<4;i++)await expect(row(page,i)).toHaveAttribute('data-slots','16');await expect(row(page,6)).toHaveAttribute('data-slots','8');await expect(row(page,6)).toHaveAttribute('data-grid','8');
@@ -127,7 +128,7 @@ test('random pattern distributes grids immediately without starting audio',async
  expect(new Set(sizes.slice(4)).size).toBeGreaterThan(1);expect(sizes.slice(0,4)).toEqual([16,16,16,16]);await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false');
 });
 test('enabling random during normal playback waits for the next bar to diversify',async({page})=>{
- await page.goto('/de/');await page.locator('#tempo').fill('120');await page.locator('#tempo').dispatchEvent('input');await page.locator('#play').click();await page.waitForTimeout(200);await page.locator('#evolve').click();
+ await page.goto('/de/');await setTempo(page,'120');await page.locator('#play').click();await page.waitForTimeout(200);await page.locator('#evolve').click();
  await expect(row(page,4)).toHaveAttribute('data-slots','16');await expect(row(page,4)).not.toHaveAttribute('data-slots','16',{timeout:3000});await page.locator('#play').click();
 });
 test('initial random grids preserve fixed, muted, disabled and dance foundation tracks',async({page})=>{
@@ -165,7 +166,7 @@ test('finer grids add bounded audible subdivisions while preserving existing, si
  const dense=Array.from({length:16},(_,s)=>s<5);expect(enrichGrid(dense,4,8,[5,6,7]).filter(Boolean).length).toBe(5);
 });
 test('four melodic orbits start diverse and two vary by the first bar, independently of timbre evolution',async({page})=>{
- await page.addInitScript(()=>{Math.random=()=>0;});await page.goto('/de/');await page.locator('#tempo').fill('180');await page.locator('#tempo').dispatchEvent('input');await page.locator('#evolve').click();
+ await page.addInitScript(()=>{Math.random=()=>0;});await page.goto('/de/');await setTempo(page,'180');await page.locator('#evolve').click();
  const sizes=()=>page.locator('.instrument').evaluateAll(rows=>rows.slice(4).map(row=>Number((row as HTMLElement).dataset.slots)));
  await expect.poll(sizes).toEqual([4,8,12,16]);await expect.poll(sizes,{timeout:4000}).toEqual([8,4,12,16]);
  // First timbre journey starts only after two bars; grid development already ran after one.
