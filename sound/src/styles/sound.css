@@ -488,7 +488,7 @@ body.score-expanded{overflow:hidden}
 .script-label{display:block;font-size:12px;color:var(--muted);margin-bottom:8px}
 #song-script-text{display:block;width:100%;box-sizing:border-box;resize:vertical;min-height:120px;max-height:40dvh;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--text);padding:12px;font:12px/1.5 ui-monospace,monospace;tab-size:2}
 .script-project .file-actions{flex-wrap:wrap;margin-top:12px}.script-guide{display:inline-block;margin-top:14px;color:var(--accent);font-size:12px;text-decoration:underline}
-#script-now{font-size:12px;color:var(--accent);margin:8px 0}.focus-view #script-now{display:none}
+
 
 #video-length-mode{display:grid;gap:.65rem;margin-top:1rem}
 #video-length-mode label{display:flex;align-items:center;gap:.5rem}

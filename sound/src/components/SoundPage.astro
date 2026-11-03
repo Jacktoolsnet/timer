@@ -96,7 +96,7 @@ const instrumentsTitle={de:'Instrumente',en:'Instruments',es:'Instrumentos',fr:'
 
  <p id="evolution-status" role="status"></p>
  <p id="wake-status" role="status"></p>
- <p id="script-now" role="status" hidden></p><p id="audio-status" role="status"></p>
+ <p id="audio-status" role="status"></p>
 </section>
 
 <section class="dances-tile" hidden aria-labelledby="dances-title"><div class="dance-heading"><h2 id="dances-title">{danceCopy[lang].title}</h2><button type="button" class="dance-free" data-dance="" aria-pressed="true">{danceCopy[lang].off}</button></div><p class="dance-hint">{danceCopy[lang].hint}</p>{(['standard','latin','social'] as const).map(group=><div class="dance-group"><h3>{danceCopy[lang][group]}</h3><div class="dance-tiles" role="group" aria-label={danceCopy[lang][group]}>{danceIds.filter(id=>dances[id].group===group).map(id=><button type="button" class="dance-tile" data-dance={id} aria-pressed="false" aria-describedby="dance-status"><DanceIcon name={id}/><span>{danceCopy[lang].names[danceIds.indexOf(id)]}</span><small>{dances[id].beats}/4 · {dances[id].preset.bpm} BPM</small></button>)}</div></div>)}<p id="dance-status" role="status"></p><p class="dance-note">{danceCopy[lang].note}</p></section>

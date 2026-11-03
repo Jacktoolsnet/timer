@@ -1,0 +1,10 @@
+{
+  "page": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=2047",
+  "publicDomain": false,
+  "license": "CC BY 4.0",
+  "MIDI file": "https://www.mutopiaproject.org/ftp/PachelbelJ/Canon_per_3_Violini_e_Basso/Canon_per_3_Violini_e_Basso-mids.zip",
+  "LilyPond file": "https://www.mutopiaproject.org/ftp/PachelbelJ/Canon_per_3_Violini_e_Basso/Canon_per_3_Violini_e_Basso-lys.zip",
+  "maintainer": "Michael Fischer v. Mollard",
+  "edition": "Mutopia-2015/09/02-2047",
+  "midiMember": "canon_per_3_violini_e_basso.mid"
+}

@@ -2216,7 +2216,7 @@ function leaveSongScript(dropScores=false){
  if(persistenceReady)syncFileButtons();
  if(dropScores)tracks.forEach(tr=>tr.score=null);
  $<HTMLInputElement>('#video-info-title').placeholder=defaultVideoTitle(styleCopy[captionLanguage()].names[styleIds.indexOf(currentStyle)]);
- $('#script-now').hidden=true;$('#song-script-status').textContent=scriptCopy[language].inactive;
+ $('#song-script-status').textContent=scriptCopy[language].inactive;
  $<HTMLButtonElement>('#song-script-export').disabled=true;$<HTMLButtonElement>('#song-script-leave').disabled=true;
 }
 function applyScriptScene(index:number,turn:number){
@@ -2237,7 +2237,7 @@ function applyScriptScene(index:number,turn:number){
  cancelGroupNotes();groupDisplays.forEach(d=>d.clear());noteShapes.forEach(d=>d.clear());streamRevision++;
  // Scripts control music only; manual visualization choices and video cadence remain independent.
  const label=script.title+(script.version===3?' · '+tempoLabel(script,bpm):'')+' · '+scene.name+' · '+(index+1)+'/'+script.scenes.length;
- $('#song-script-status').textContent=label;$('#script-now').textContent=label;$('#script-now').hidden=false;
+ $('#song-script-status').textContent=label;
  syncRhythmUi();sync();
 }
 function loadSongScript(script:SongScript,restoring=false){

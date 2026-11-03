@@ -63,7 +63,7 @@ for(const [name,meter,tempoUnit] of cases)test('native playback clock and visual
  const begin=Date.now();await page.locator('#play').click();await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
  await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false',{timeout:8000});
  expect((Date.now()-begin)/1000).toBeGreaterThan(scriptSeconds(song)-.2);expect((Date.now()-begin)/1000).toBeLessThan(scriptSeconds(song)+1.1);
- await expect(page.locator('#script-now')).toContainText(name);
+ await expect(page.locator('#song-script-status')).toContainText(name);
  await page.locator('[data-pad-mode=notes]').click();await page.locator('#score-instruments [data-score-track="0"]').click();
  await expect(page.locator('#score-grid .score-beat-name')).toHaveCount(meter.numerator*2);
  await expect(page.locator('#score-grid .score-beat-name')).toHaveText(Array.from({length:2},(_,bar)=>Array.from({length:meter.numerator},(_,beat)=>`${bar+1}.${beat+1}`)).flat());
@@ -91,7 +91,7 @@ test('native denominator-note onsets, scene boundaries and looping use the same 
  const source=fixture(cases[6][1],cases[6][2]);source.scenes.push({...structuredClone(source.scenes[0]),name:'Second native phrase'});
  await page.goto('/de/');await page.locator('#files-open').click();await page.locator('#song-script-upload').setInputFiles({name:'six.song.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(source))});
  await page.locator('#files-close').click();await page.locator('#play').click();
- await expect(page.locator('#script-now')).toContainText('Second native phrase');await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false');
+ await expect(page.locator('#song-script-status')).toContainText('Second native phrase');await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false');
  const starts=await page.evaluate(()=>(window as any).meterStarts as number[]),times=[...new Set(starts.filter(t=>t>0).map(t=>Math.round(t*1000)/1000))].sort((a,b)=>a-b);
  // 6 eighth-note units = one bar = two dotted-quarter pulses, NOT six quarter beats.
  const barSeconds=scriptSeconds(source)/4;

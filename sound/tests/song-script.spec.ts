@@ -46,8 +46,8 @@ for(const lang of ['de','en','es','fr'] as const)test('example and AI guide work
 });
 test('the checkmark applies pasted JSON, closes the dialog and starts scene one; invalid JSON stays open without stopping music',async({page})=>{
  await open(page);await page.locator('#song-script-text').fill(JSON.stringify(fixture()));await page.locator('#song-script-load').click();
- await expect(page.locator('#files-dialog')).toBeHidden();await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
- await expect(page.locator('#script-now')).toContainText('Opening');
+ await expect(page.locator('#files-dialog')).toBeHidden();await expect(page.locator('#script-now')).toHaveCount(0);await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
+ await expect(page.locator('#song-script-status')).toContainText('Opening');
  await page.locator('#files-open').click();await page.locator('#song-script-text').fill('{bad');await page.locator('#song-script-load').click();
  await expect(page.locator('#files-dialog')).toBeVisible();await expect(page.locator('#song-script-status')).toHaveText(scriptCopy.de.invalid);
  await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');expect((await settings(page)).songScript).toEqual(fixture());
@@ -67,13 +67,13 @@ test('file import, source export and settings export retain the full song; inval
 });
 test('normal Play follows scenes on the audible clock, stops finite songs and restarts at scene one',async({page})=>{
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await open(page);await load(page,fixture(false));await page.locator('#files-close').click();
- await expect(page.locator('#script-now')).toContainText('Opening');await page.locator('#play').click();
- await expect(page.locator('#script-now')).toContainText('Chorus',{timeout:6000});await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false',{timeout:6000});
- await page.locator('#play').click();await expect(page.locator('#script-now')).toContainText('Opening');await page.locator('#play').click();expect(errors).toEqual([]);
+ await expect(page.locator('#song-script-status')).toContainText(scriptCopy.de.ready);await page.locator('#play').click();
+ await expect(page.locator('#song-script-status')).toContainText('Chorus',{timeout:6000});await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false',{timeout:6000});
+ await page.locator('#play').click();await expect(page.locator('#song-script-status')).toContainText('Opening');await page.locator('#play').click();expect(errors).toEqual([]);
 });
 test('looping songs continue, Random Play and style changes deliberately leave script mode',async({page})=>{
  await open(page);await load(page);await page.locator('#files-close').click();await page.locator('#play').click();
- await expect(page.locator('#script-now')).toContainText('Chorus',{timeout:6000});await expect(page.locator('#script-now')).toContainText('Opening',{timeout:6000});
+ await expect(page.locator('#song-script-status')).toContainText('Chorus',{timeout:6000});await expect(page.locator('#song-script-status')).toContainText('Opening',{timeout:6000});
  await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');await page.locator('#evolve').click();await expect(page.locator('#script-now')).toBeHidden();
  await page.locator('#play').click();await page.locator('#files-open').click();await load(page);await page.locator('#files-close').click();
  await page.locator('#animation-settings-open').click();await page.locator('[data-animation-open=music]').click();await page.locator('[data-style-preset=pop]').click();await expect(page.locator('#script-now')).toBeHidden();
@@ -83,9 +83,9 @@ test('legacy scene hints never override a fixed view, even with video randomizat
  const song=fixture();song.scenes[0].visualization='flower';song.scenes[1].visualization='stream';await load(page,song);
  await expect(page.locator('#orbit')).toHaveAttribute('data-visualization','orbit');
  await page.locator('#files-close').click();await page.locator('#play').click();
- await expect(page.locator('#script-now')).toContainText('Chorus',{timeout:6000});await expect(page.locator('#orbit')).toHaveAttribute('data-visualization','orbit');
+ await expect(page.locator('#song-script-status')).toContainText('Chorus',{timeout:6000});await expect(page.locator('#orbit')).toHaveAttribute('data-visualization','orbit');
  await chooseAnimation(page,'[data-visualization=constellation]');
- await expect(page.locator('#script-now')).toContainText('Opening',{timeout:6000});await expect(page.locator('#orbit')).toHaveAttribute('data-visualization','constellation');
+ await expect(page.locator('#song-script-status')).toContainText('Opening',{timeout:6000});await expect(page.locator('#orbit')).toHaveAttribute('data-visualization','constellation');
 });
 test('script source restores only with optional preference storage and never autoplays',async({page})=>{
  await open(page);await load(page);await page.locator('#files-close').click();
@@ -93,7 +93,7 @@ test('script source restores only with optional preference storage and never aut
  await page.locator('#tempo').fill('145');await page.locator('#tempo').dispatchEvent('input');
  await page.locator('#transpose').fill('3');await page.locator('#transpose').dispatchEvent('input');await page.locator('#animation-settings-close').click();
  await page.locator('#palette-dropdown summary').click();await page.locator('#remember-preferences').check();await page.locator('#preferences-close').click();await page.waitForTimeout(350);await page.reload();
- await expect(page.locator('#script-now')).toContainText('Opening');await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false');
+ await expect(page.locator('#song-script-status')).toContainText(scriptCopy.de.ready);await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false');
  await expect(page.locator('#tempo')).toHaveValue('145');await expect(page.locator('#transpose')).toHaveValue('3');
  await page.locator('#files-open').click();const restored=await settings(page);expect(restored.songScript).toEqual(fixture());expect(restored.bpm).toBe(145);expect(restored.transpose).toBe(3);
 });
@@ -106,7 +106,7 @@ test('script controls lock during native MP4 recording and the composed scene se
  await page.locator('#video-info-enabled').check();await page.locator('#video-info-section').check();
  await expect(page.locator('#video-info-title')).toHaveAttribute('placeholder','Test composition');
  await page.locator('#recording-restart').check();await page.locator('#recording-duration').fill('1');await page.locator('#video-record').click();
- await expect(page.locator('#script-now')).toContainText('Chorus',{timeout:6500});
+ await expect(page.locator('#song-script-status')).toContainText('Chorus',{timeout:6500});
  await expect.poll(()=>page.evaluate(()=>(window as any).scriptCaptions.includes('Chorus'))).toBe(true);
  const captions=await page.evaluate(()=>(window as any).scriptCaptions as string[]);
  expect(captions).toContain('Test composition');expect(captions.join('\n')).toContain(videoInfoCopy.en.scriptNotice);expect(captions.join('\n')).not.toContain(videoInfoCopy.en.randomNotice);

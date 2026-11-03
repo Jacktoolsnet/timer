@@ -23,11 +23,12 @@ WORKS={
  'gymno':dict(title='Gymnopédie No. 1',composer='Erik Satie (1866–1925)',meter=(3,4),bpm=60,pickup=0),
  'traum':dict(title='Träumerei',composer='Robert Schumann (1810–1856)',meter=(4,4),bpm=56,pickup=1),
  'prelude':dict(title='Prélude e-Moll · op. 28/4',composer='Frédéric Chopin (1810–1849)',meter=(2,2),bpm=56,pickup=1),
+ 'canon-original':dict(title='Canon in D · 3 Violinen und Basso',composer='Johann Pachelbel (1653–1706)',meter=(4,4),bpm=55,pickup=0),
  'canon':dict(title='Canon in D · Canonic Lights',composer='Johann Pachelbel (1653–1706)',meter=(4,4),bpm=76,pickup=0),
  'ode':dict(title='Ode an die Freude · Hymnenthema',composer='L. van Beethoven (1770–1827)',meter=(4,4),bpm=124,pickup=0),
 }
 ENTRIES=[
- ('classical-canon','canon','classical',76),
+ ('classical-canon','canon-original','classical',55),
  ('classical-nachtmusik','nacht','classical',132),
  ('classical-turca','turca','classical',108),
  ('house-canon','canon','house',122),
@@ -69,7 +70,18 @@ def build(entry):
   for a,d,p,v in notes:
    if select((a,d,p,v)):add(id,a+shift,d,p,v)
  original_count=sum(len(t['notes']) for t in score['tracks'])
- if key=='canon':
+ if key=='canon-original':
+  # Complete four-part score. Keep the score's entrances, bass and ending:
+  # no invented imitation, harmony, introduction, doubling, arpeggios or coda.
+  assert len(score['tracks'])==4
+  assert [t['name'] for t in score['tracks']]==['violinI:','violinII:','violinIII:','violoncello:']
+  for i,t in enumerate(score['tracks']):
+   tr='violin'+str(i+1) if i<3 else 'basso'
+   track(tr,'strings' if i<3 else 'cello',.32 if i<3 else .30)
+   transfer(tr,t['notes'],shift=0)
+  end=score['end']
+  scope='Complete four-part Canon score: three violins and bass, with original entrances and ending; no invented voices or coda. Synthesized interpretation.'
+ elif key=='canon':
   # Full licensed single-violin source, not a claimed Urtext/full original score.
   # 4-bar ground cycle makes the delayed imitations harmonically compatible.
   for n,level in enumerate([.36,.27,.22]):
@@ -205,7 +217,10 @@ def build(entry):
   recording='Synthesized in jacktools Sound; no external audio recording.',
   license='Source score: Public Domain. Project arrangement/recording: no separate usage license granted.',
   source=page)
- if key=='canon':
+ if key=='canon-original':
+  rights['arrangement']='Full 4-part score; Michael Fischer v. Mollard, Mutopia 2047 (2015). Synthesized strings/cello; balance and articulation adapted.'
+  rights['license']='Score CC BY 4.0: https://creativecommons.org/licenses/by/4.0/ ; no separate license granted for project additions.'
+ elif key=='canon':
   rights['arrangement']='Free canon from full violin edition: Jim Paterson / Anonymous, Mutopia 1700 (2009); added voices, ground, coda and new production.'
   rights['license']='Violin source CC BY 3.0: https://creativecommons.org/licenses/by/3.0/ ; no separate license granted for project additions.'
  assert all(len(v)<=160 for v in rights.values()),rights
@@ -220,7 +235,9 @@ def build(entry):
  assert len(raw.encode())<=1024*1024,(id,len(raw))
  (OUT/(id+'.song.json')).write_text(raw)
  seconds=total*60/(bpm*(.5 if key=='elise' else 1))
- if key=='canon':
+ if key=='canon-original':
+  scopes=dict(de='Vollständige Partitur für drei Violinen und Bass, mit originalen Einsätzen und Schluss; keine erfundenen Stimmen oder Coda. Synthetische Interpretation.',en=scope,es='Partitura completa para tres violines y bajo, con entradas y final originales; sin voces ni coda inventadas. Interpretación sintetizada.',fr='Partition complète pour trois violons et basse, entrées et fin originales ; aucune voix ni coda inventée. Interprétation synthétique.')
+ elif key=='canon':
   scopes=dict(de='Freie dreistimmige Kanonfassung aus der vollständigen Violinstimme, mit Bass und Coda; keine Original-Gesamtpartitur.',en=scope,es='Canon libre a tres voces de la fuente completa para violín; no es la partitura original completa.',fr='Canon libre à trois voix à partir de la partie complète de violon ; pas la partition originale intégrale.')
  elif key=='ode':
   scopes=dict(de='Vollständiger 16-taktiger Hymnensatz mit Einleitung, Breakdown und Outro; nicht die ganze Sinfonie.',en=scope,es='Arreglo completo del himno de 16 compases, con introducción y final; no la sinfonía completa.',fr='Hymne complet de 16 mesures avec introduction et conclusion ; pas la symphonie entière.')
