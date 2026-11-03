@@ -2386,7 +2386,7 @@ $('#video-record').addEventListener('click',async()=>{
    error:()=>{if(captureFailed)return;finishVideoUi();$('#video-status').textContent=files.videoError;}
   });
   if(videoRecording?.state!=='recording')throw Error('Recorder unavailable');
-  videoAnimationRun={start:performance.now(),flags:options.animations,plan:videoAnimationPlan(options.durationSeconds,Math.random,options.animations),next:{center:0,orbit:0,background:0,visualization:0},changed:new Set(),original:{visualization,landscapeVariant,streamVariant,constellationVariant}};
+  videoAnimationRun={start:performance.now(),flags:options.animations,plan:videoAnimationPlan(options.durationSeconds,options.animations),next:{center:0,orbit:0,background:0,visualization:0},changed:new Set(),original:{visualization,landscapeVariant,streamVariant,constellationVariant}};
   await startRecordedMusic(options);
   videoStarted=performance.now();$('#video-time').textContent='00:00';$('#video-time').hidden=false;
   videoTimer=setInterval(()=>{

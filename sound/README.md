@@ -548,9 +548,9 @@ Video captions now use a separately selected language (English default, with Ger
 - Pad video renders directly from the same accepted/draft score, actual audible-event history, track colours, mute/volume and local clocks. Tap view mirrors the 3×3/focused-pad layout; notes show score previews or the selected pitch/time grid with eight companions. It remains live while input/settings surfaces are hidden, without DOM screenshots, microphone capture or new dependencies. Editor buttons and settings are not included.
 - Portrait places the visual above the pad; landscape places them side by side. With a pad, all enabled captions—including provenance and signature—move into a reserved header above both surfaces. Without a pad, the prior layout is unchanged. Recording continues even when the expanded note editor hides the on-page visual.
 
-### Faster social-video visual development
-- Enabled video layers now share a staggered cadence, starting after 1.8–2.4 seconds. With all four options enabled, each layer changes about every 5–6 seconds; with only one enabled it changes every 3–5.5 seconds. Long recordings gain more changes rather than stretching the same few scenes across minutes.
-- A 1.25-second minimum between changes lets the existing 1.1-second crossfade finish. Disabled layers receive no scheduled changes; the intro/outro retain a brief hold. Playback/audio, manual choices and post-recording restoration are unchanged.
+### Calm duration-based video animation changes
+- One evenly spaced pass through the enabled video animation layers takes exactly one third of the selected recording duration. Three passes span the whole recording; the invisible change at the very end is omitted. At three minutes, each layer changes every 60 seconds; with all four layers enabled, individual changes are staggered 15 seconds apart.
+- Disabled layers receive no scheduled changes. Even the shortest one-minute recording leaves at least 5 seconds between changes, allowing the existing 1.1-second crossfade to finish. Playback/audio, manual choices and post-recording restoration are unchanged.
 
 ### Orbit radar
 - Orbit settings offer Radar alongside Comet, Dot and Pulse in all four languages. Radar also participates in manual tap cycling, random animation choice and randomized video changes, and round-trips as orbit: radar in JSON/opt-in preferences.
