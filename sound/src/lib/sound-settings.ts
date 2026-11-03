@@ -1,3 +1,4 @@
+import {quartersPerBar} from './song-meter';
 import {validSongScript,type SongScript} from './song-script';
 import {videoPadModes,type VideoPadMode} from './video-pad';
 import {trackRates,type TrackRate,type TrackRateChoice} from './track-rate';
@@ -10,7 +11,7 @@ import {ORBIT_COUNT} from './orbit-layout';
 import {makeMotif} from './harmony';
 import {resolveGroove} from './groove';
 import {partsForStyle} from './presets';
-import {gridSizes,type GridChoice,type GridSize} from './track-grid';
+import {gridSizes,type GridChoice} from './track-grid';
 import {danceIds,type DanceId} from './dances';
 import {grooveChoices,type GrooveChoice} from './groove';
 import {instrumentIds,type InstrumentId} from './instruments';
@@ -22,7 +23,7 @@ export type SavedTrack={
  rate?:TrackRate;rateChoice?:TrackRateChoice;
  score?:NoteScore|null;
  groups?:NoteGroups;
- grid?:GridChoice;slots?:GridSize;enabled:boolean;mute:boolean;instrument:InstrumentId;points:boolean[];motif?:number[];volume:number;pitch:number;phase:number;
+ grid?:GridChoice;slots?:number;enabled:boolean;mute:boolean;instrument:InstrumentId;points:boolean[];motif?:number[];volume:number;pitch:number;phase:number;
  direction:number;directionMode:string;randomDynamics:boolean;
  morph:{to:InstrumentId;progress:number}|null;
 };
@@ -34,7 +35,7 @@ export type SoundSettings={
  constellationVariant?:ConstellationVariant;
  flowerCenter?:typeof centerModes[number];
  recording?:{videoLength?:'fixed'|'song';credits?:{enabled:boolean;text:string};restart:boolean;random:boolean;fullscreen:boolean;minutes?:number;videoFormat?:'landscape'|'portrait';videoPad?:VideoPadMode;videoInfo?:VideoInfoSettings;animations?:VideoAnimationSettings};
- pad?:{mode:'draw'|'rhythm'|'notes';beats:2|3|4;hits:boolean[][];notes?:(number|null)[][]};
+ pad?:{mode:'draw'|'rhythm'|'notes';beats:number;hits:boolean[][];notes?:(number|null)[][]};
  version:2;style:StyleId;dance?:DanceId|null;groove?:GrooveChoice;bpm:number;volume:number;transpose?:number;noteEffect?:number;tracks:SavedTrack[];
  background:typeof backgroundModes[number];center:typeof centerModes[number];orbit:typeof orbitModes[number];
 };
@@ -72,7 +73,8 @@ export function decodeSettings(raw:string|null):SoundSettings|null{
   if(s.dance!==undefined&&s.dance!==null&&!member(danceIds,s.dance))return null;
   if(s.groove!==undefined&&!member(grooveChoices,s.groove))return null;
   if(s.pad!==undefined){
-   if(!s.pad||!member(['draw','rhythm','notes'],s.pad.mode)||![2,3,4].includes(s.pad.beats)
+   if(!s.pad||!member(['draw','rhythm','notes'],s.pad.mode)||!(number(s.pad.beats,.25,24)&&Number.isInteger(s.pad.beats*4))
+    ||(![2,3,4].includes(s.pad.beats)&&!(s.songScript?.version===3&&s.pad.beats===quartersPerBar(s.songScript)))
     ||!Array.isArray(s.pad.hits)||!(s.version===1?[3,ORBIT_COUNT]:[ORBIT_COUNT]).includes(s.pad.hits.length)
     ||s.pad.hits.some((lane:unknown)=>!Array.isArray(lane)||lane.length!==s.pad.beats*8||lane.some((on:unknown)=>typeof on!=='boolean')))return null;
    if(s.pad.notes!==undefined&&(!Array.isArray(s.pad.notes)||s.pad.notes.length!==s.pad.hits.length

@@ -16,7 +16,7 @@ test('v2 requires bounded, complete rights; v1 remains readable without inventin
  for(const name of ['sunlit-session','pachelbel-canon-morning-light']){
   const example=decodeSongScript(await readFile('public/examples/'+name+'.song.json','utf8'))!;expect(example?.version).toBe(2);expect(example.rights).toBeTruthy();
  }
- const guide=await readFile('public/song-script-guide.md','utf8');expect(decodeSongScript(guide.match(/```json\n([\s\S]*?)\n```/)![1])?.version).toBe(2);
+ const guide=await readFile('public/song-script-guide.md','utf8');expect(decodeSongScript(guide.match(/```json\n([\s\S]*?)\n```/)![1])?.version).toBe(3);
 });
 test('mandatory rights cannot be disabled, replaced or truncated by optional text',()=>{
  const parsed=decodeSongScript(JSON.stringify(song))!;

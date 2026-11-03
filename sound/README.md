@@ -584,3 +584,20 @@ of the short motif studies, 4/4 adaptations and rights limitations are documente
 in [`public/library/SOURCES.md`](public/library/SOURCES.md). Regenerate the eleven
 short studies and catalog with `python3 scripts/build-song-library.py`; the existing
 Morning Light example is not regenerated. Other meters are not part of this step.
+
+### Native meters (Song Script v3)
+
+V3 requires `meter: {numerator, denominator, groups}` and
+`tempoUnit: {denominator, dotted}` in addition to the existing required rights.
+Numerators 1–12 and denominators 2/4/8/16 cover 2/2, 2/4, 3/4, 4/4, 5/4,
+3/8, 6/8, 7/8, 9/8 and 12/8, among others. Groups must sum to the numerator.
+Note positions/durations use denominator-note units within a two-bar pattern,
+not always quarter notes. BPM refers to the explicit tempo unit: 6/8 at dotted
+quarter = 60 has a two-second bar, not a three- or six-second bar.
+The transport converts to quarter-note time once for audio scheduling, visuals
+and bar boundaries; the export length uses the same meter/tempo calculation.
+Gentle group accents apply only to v3; v1/v2 retain their original 4/4 semantics.
+Native-meter pad buffers are bounded and survive project JSON export/import.
+See the AI guide and `public/examples/meter-study-6-8.song.json` for examples.
+Meter changes inside a song and arbitrary swing are not part of this version.
+The curated v2 adaptations have not been musically rewritten in this step.

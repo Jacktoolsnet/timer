@@ -1,0 +1,266 @@
+{
+  "format": "jacktools-song",
+  "version": 3,
+  "title": "Two gentle pulses — 6/8 meter study",
+  "rights": {
+    "composition": "Original 6/8 meter study; AI-assisted example; rights unverified.",
+    "arrangement": "Newly authored jacktools demonstration; no external arrangement used.",
+    "recording": "Synthesized with jacktools Sound; no third-party recording supplied.",
+    "license": "Unverified; no usage permission or public-domain status confirmed.",
+    "source": "Project-authored educational JSON; no external musical source."
+  },
+  "meter": {
+    "numerator": 6,
+    "denominator": 8,
+    "groups": [
+      3,
+      3
+    ]
+  },
+  "tempoUnit": {
+    "denominator": 4,
+    "dotted": true
+  },
+  "bpm": 72,
+  "style": "classical",
+  "loop": false,
+  "seed": 42,
+  "tracks": [
+    {
+      "id": "lead",
+      "instrument": "piano",
+      "volume": 0.38
+    },
+    {
+      "id": "bass",
+      "instrument": "bass",
+      "volume": 0.22
+    }
+  ],
+  "scenes": [
+    {
+      "name": "6/8 · 3+3 · phrase 1",
+      "bars": 2,
+      "parts": [
+        {
+          "track": "lead",
+          "notes": [
+            {
+              "at": 0,
+              "duration": 0.9,
+              "pitch": 0,
+              "velocity": 0.68
+            },
+            {
+              "at": 1,
+              "duration": 0.9,
+              "pitch": 4,
+              "velocity": 0.68
+            },
+            {
+              "at": 2,
+              "duration": 0.9,
+              "pitch": 7,
+              "velocity": 0.68
+            },
+            {
+              "at": 3,
+              "duration": 0.9,
+              "pitch": 12,
+              "velocity": 0.68
+            },
+            {
+              "at": 4,
+              "duration": 0.9,
+              "pitch": 7,
+              "velocity": 0.68
+            },
+            {
+              "at": 5,
+              "duration": 0.9,
+              "pitch": 4,
+              "velocity": 0.68
+            },
+            {
+              "at": 6,
+              "duration": 0.9,
+              "pitch": 2,
+              "velocity": 0.68
+            },
+            {
+              "at": 7,
+              "duration": 0.9,
+              "pitch": 5,
+              "velocity": 0.68
+            },
+            {
+              "at": 8,
+              "duration": 0.9,
+              "pitch": 9,
+              "velocity": 0.68
+            },
+            {
+              "at": 9,
+              "duration": 0.9,
+              "pitch": 14,
+              "velocity": 0.68
+            },
+            {
+              "at": 10,
+              "duration": 0.9,
+              "pitch": 9,
+              "velocity": 0.68
+            },
+            {
+              "at": 11,
+              "duration": 0.9,
+              "pitch": 5,
+              "velocity": 0.68
+            }
+          ]
+        },
+        {
+          "track": "bass",
+          "notes": [
+            {
+              "at": 0,
+              "duration": 2.8,
+              "pitch": -12,
+              "velocity": 0.65
+            },
+            {
+              "at": 3,
+              "duration": 2.8,
+              "pitch": -12,
+              "velocity": 0.65
+            },
+            {
+              "at": 6,
+              "duration": 2.8,
+              "pitch": -5,
+              "velocity": 0.65
+            },
+            {
+              "at": 9,
+              "duration": 2.8,
+              "pitch": -5,
+              "velocity": 0.65
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "6/8 · 3+3 · phrase 2",
+      "bars": 2,
+      "parts": [
+        {
+          "track": "lead",
+          "notes": [
+            {
+              "at": 0,
+              "duration": 0.9,
+              "pitch": 4,
+              "velocity": 0.68
+            },
+            {
+              "at": 1,
+              "duration": 0.9,
+              "pitch": 7,
+              "velocity": 0.68
+            },
+            {
+              "at": 2,
+              "duration": 0.9,
+              "pitch": 12,
+              "velocity": 0.68
+            },
+            {
+              "at": 3,
+              "duration": 0.9,
+              "pitch": 16,
+              "velocity": 0.68
+            },
+            {
+              "at": 4,
+              "duration": 0.9,
+              "pitch": 12,
+              "velocity": 0.68
+            },
+            {
+              "at": 5,
+              "duration": 0.9,
+              "pitch": 7,
+              "velocity": 0.68
+            },
+            {
+              "at": 6,
+              "duration": 0.9,
+              "pitch": 7,
+              "velocity": 0.68
+            },
+            {
+              "at": 7,
+              "duration": 0.9,
+              "pitch": 4,
+              "velocity": 0.68
+            },
+            {
+              "at": 8,
+              "duration": 0.9,
+              "pitch": 2,
+              "velocity": 0.68
+            },
+            {
+              "at": 9,
+              "duration": 0.9,
+              "pitch": 0,
+              "velocity": 0.68
+            },
+            {
+              "at": 10,
+              "duration": 0.9,
+              "pitch": 0,
+              "velocity": 0.68
+            },
+            {
+              "at": 11,
+              "duration": 0.9,
+              "pitch": 0,
+              "velocity": 0.68
+            }
+          ]
+        },
+        {
+          "track": "bass",
+          "notes": [
+            {
+              "at": 0,
+              "duration": 2.8,
+              "pitch": -12,
+              "velocity": 0.65
+            },
+            {
+              "at": 3,
+              "duration": 2.8,
+              "pitch": -12,
+              "velocity": 0.65
+            },
+            {
+              "at": 6,
+              "duration": 2.8,
+              "pitch": -5,
+              "velocity": 0.65
+            },
+            {
+              "at": 9,
+              "duration": 2.8,
+              "pitch": -5,
+              "velocity": 0.65
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

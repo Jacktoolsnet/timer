@@ -4,8 +4,8 @@ export const RHYTHM_EDIT_MUSIC_LEVEL=.4;
 /** Legacy drum order only; matrix pads take their live instrument from the matching orbit. */
 export const rhythmInstruments=['hat','snare','kick'] as const;
 export type RhythmLane=OrbitPad;
-export type TapRhythm={beats:2|3|4;start:number|null;state:'armed'|'recording'|'loop';hits:boolean[][];notes:(number|null)[][];lastTap:(number|null)[];laneStart:(number|null)[];liveStep:(number|null)[]};
-export function emptyRhythm(beats:2|3|4):TapRhythm{
+export type TapRhythm={beats:number;start:number|null;state:'armed'|'recording'|'loop';hits:boolean[][];notes:(number|null)[][];lastTap:(number|null)[];laneStart:(number|null)[];liveStep:(number|null)[]};
+export function emptyRhythm(beats:number):TapRhythm{
  return {beats,start:null,state:'armed',hits:Array.from({length:ORBIT_COUNT},()=>Array<boolean>(beats*8).fill(false)),notes:Array.from({length:ORBIT_COUNT},()=>Array<number|null>(beats*8).fill(null)),lastTap:Array(ORBIT_COUNT).fill(null),laneStart:Array(ORBIT_COUNT).fill(null),liveStep:Array(ORBIT_COUNT).fill(null)};
 }
 /** Snapshot editing state without sharing mutable rows or transient activity arrays. */
@@ -53,7 +53,7 @@ export function resetRhythmSession(rhythm:TapRhythm){
 }
 export function finishRhythm(rhythm:TapRhythm){rhythm.state=hasRhythm(rhythm)?'loop':'armed';if(rhythm.state==='armed')rhythm.start=null;}
 /** Keep each bar's relative beat positions when the user changes between 3/4 and 4/4. */
-export function remeterRhythm(rhythm:TapRhythm,beats:2|3|4,start:number){
+export function remeterRhythm(rhythm:TapRhythm,beats:number,start:number){
  if(beats===rhythm.beats)return;
  const old=rhythm.beats*4,result=emptyRhythm(beats);
  rhythm.hits.forEach((lane,i)=>lane.forEach((on,s)=>{if(on){const at=Math.floor(s/old)*beats*4+Math.min(beats*4-1,Math.round(s%old/old*beats*4));result.hits[i][at]=true;result.notes[i][at]=rhythm.notes[i][s];}}));

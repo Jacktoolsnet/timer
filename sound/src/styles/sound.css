@@ -512,3 +512,5 @@ body.score-expanded{overflow:hidden}
 .style-library-open{width:40px;height:40px;right:8px;bottom:8px}
 
 .library-rights{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;margin-block:12px}
+/* Native-meter tempo labels include the beat unit; keep the slider usable on mobile. */
+.controls-tile #tempo-value{white-space:normal;overflow-wrap:anywhere;line-height:1.4;font-size:12px}

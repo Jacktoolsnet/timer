@@ -1,3 +1,4 @@
+import {validMeter,validTempoUnit,meterAccent,type SongMeter,type TempoUnit} from './song-meter';
 import {instrumentIds,type InstrumentId} from './instruments';
 import {styleIds,type StyleId} from './presets';
 import {visualizationModes,type VisualizationMode} from './visualization';
@@ -6,18 +7,20 @@ export type ScriptNote={at:number;duration:number;pitch:number|number[];velocity
 export type ScriptPart={track:string;volume?:number;notes:ScriptNote[]};
 export type ScriptScene={name:string;bars:number;parts:ScriptPart[];variation?:number;visualization?:VisualizationMode};
 export type SongRights={composition:string;arrangement:string;recording:string;license:string;source:string};
-export type SongScript={format:'jacktools-song';title:string;bpm:number;style:StyleId;loop:boolean;seed:number;tracks:{id:string;instrument:InstrumentId;volume:number}[];scenes:ScriptScene[]}&({version:1;rights?:SongRights}|{version:2;rights:SongRights});
+export type SongScript={format:'jacktools-song';title:string;bpm:number;style:StyleId;loop:boolean;seed:number;tracks:{id:string;instrument:InstrumentId;volume:number}[];scenes:ScriptScene[]}&({version:1;rights?:SongRights}|{version:2;rights:SongRights}|{version:3;rights:SongRights;meter:SongMeter;tempoUnit:TempoUnit});
 const object=(v:unknown):v is Record<string,any>=>!!v&&typeof v==='object'&&!Array.isArray(v);
 const num=(v:unknown,a:number,b:number)=>typeof v==='number'&&Number.isFinite(v)&&v>=a&&v<=b;
 const pitch=(v:unknown)=>num(v,-24,60)&&Number.isInteger(v);
 const keys=(v:Record<string,any>,allowed:string[])=>Object.keys(v).every(k=>allowed.includes(k));
 /** Strict, bounded data only: no code, expressions or arbitrary engine parameters. Rights sources are inert text, never fetched. */
 export function validSongScript(s:unknown):s is SongScript{
- if(!object(s)||!keys(s,['format','version','rights','title','bpm','style','loop','seed','tracks','scenes'])||s.format!=='jacktools-song'||![1,2].includes(s.version)
+ if(!object(s)||!keys(s,['format','version','rights','title','bpm','style','loop','seed','tracks','scenes',...(s.version===3?['meter','tempoUnit']:[])])||s.format!=='jacktools-song'||![1,2,3].includes(s.version)
   ||typeof s.title!=='string'||!s.title.trim()||s.title.length>80||!num(s.bpm,40,220)||!(styleIds as readonly unknown[]).includes(s.style)
   ||['slowwaltz','tango'].includes(s.style)||typeof s.loop!=='boolean'||!num(s.seed,0,2147483647)||!Number.isInteger(s.seed)
   ||!Array.isArray(s.tracks)||s.tracks.length<1||s.tracks.length>9||!Array.isArray(s.scenes)||s.scenes.length<1||s.scenes.length>64)return false;
- if(s.version===2&&s.rights===undefined)return false;
+ if(s.version>=2&&s.rights===undefined)return false;
+ if(s.version===3&&(!validMeter(s.meter)||!validTempoUnit(s.tempoUnit)))return false;
+ const window=s.version===3?s.meter.numerator*2:8,minDuration=s.version===3?Math.max(.016,window*.002):.016;
  if(s.rights!==undefined){
   const fields=['composition','arrangement','recording','license','source'];
   if(!object(s.rights)||!keys(s.rights,fields)||fields.some(field=>typeof s.rights[field]!=='string'||!s.rights[field].trim()||s.rights[field].length>160)
@@ -41,8 +44,8 @@ export function validSongScript(s:unknown):s is SongScript{
     ||!Array.isArray(part.notes)||part.notes.length>128)return false;
    used.add(part.track);let voices=0;
    for(const note of part.notes){
-    if(!object(note)||!keys(note,['at','duration','pitch','velocity','toPitch','toVelocity'])||!num(note.at,0,7.984)||!num(note.duration,.016,8)
-     ||note.at+note.duration>8.000001||!num(note.velocity,0,1)||note.toPitch!==undefined&&!pitch(note.toPitch)||note.toVelocity!==undefined&&!num(note.toVelocity,0,1))return false;
+    if(!object(note)||!keys(note,['at','duration','pitch','velocity','toPitch','toVelocity'])||!num(note.at,0,window-minDuration)||!num(note.duration,minDuration,window)
+     ||note.at+note.duration>window+.000001||!num(note.velocity,0,1)||note.toPitch!==undefined&&!pitch(note.toPitch)||note.toVelocity!==undefined&&!num(note.toVelocity,0,1))return false;
     const pitches=Array.isArray(note.pitch)?note.pitch:[note.pitch];
     if(!pitches.length||pitches.length>8||!pitches.every(pitch)||new Set(pitches).size!==pitches.length||pitches.length>1&&note.toPitch!==undefined)return false;
     voices+=pitches.length;
@@ -67,13 +70,14 @@ export function scriptPosition(s:SongScript,bar:number){
  return null;
 }
 /** Seeded velocity variation never changes pitch, rhythm or the source JSON. */
-export function scriptScore(part:ScriptPart|undefined,variation=0,seed=0):NoteScore{
+export function scriptScore(part:ScriptPart|undefined,variation=0,seed=0,meter?:SongMeter):NoteScore{
+ const window=meter?meter.numerator*2:8;
  let state=seed>>>0;
  const random=()=>{state=(Math.imul(state,1664525)+1013904223)>>>0;return state/4294967296;};
  return (part?.notes??[]).flatMap(note=>(Array.isArray(note.pitch)?note.pitch:[note.pitch]).map(p=>{
-  const factor=1+(random()*2-1)*variation,velocity=Math.max(0,Math.min(1,note.velocity*factor));
-  return {start:note.at/8,duration:note.duration/8,points:[{offset:0,pitch:p,velocity},
-   ...(note.toPitch!==undefined||note.toVelocity!==undefined?[{offset:note.duration/8*.95,pitch:note.toPitch??p,velocity:Math.max(0,Math.min(1,(note.toVelocity??note.velocity)*factor))}]:[])]};
+  const factor=1+(random()*2-1)*variation,velocity=Math.max(0,Math.min(1,note.velocity*factor*(meter?meterAccent(meter,note.at):1)));
+  return {start:note.at/window,duration:note.duration/window,points:[{offset:0,pitch:p,velocity},
+   ...(note.toPitch!==undefined||note.toVelocity!==undefined?[{offset:note.duration/window*.95,pitch:note.toPitch??p,velocity:Math.max(0,Math.min(1,(note.toVelocity??note.velocity)*factor*(meter?meterAccent(meter,note.at):1)))}]:[])]};
  })).sort((a,b)=>a.start-b.start);
 }
 export const scriptCopy={
