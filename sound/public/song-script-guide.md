@@ -1,5 +1,7 @@
 # JackTools Sound — Song Script v3 / AI authoring guide
 
+Reviewed against the current importer and playback clock: **2026-11-03**.
+
 Give this document to an AI together with a musical description. Ask it to return
 ONLY valid JSON, without Markdown fences or commentary. No external service or API
 is required by JackTools. The importer interprets data, never executes code.
@@ -12,8 +14,12 @@ instrument levels. Return only JSON. Do not claim to transcribe or reproduce an
 existing recording. Include the REQUIRED rights object: distinguish the original
 composition, this arrangement, and the synthesized recording; provide licensing
 conditions and provenance. Never invent permission, a license, an author or a
-source. If rights are unknown, say "Unverified; no usage permission confirmed"
-explicitly in the affected fields. Public-domain composition does not imply a
+source. Keep research checklists and review statuses in separate working notes,
+not in customer-facing rights fields. Use factual provenance; do not turn an
+unresolved source into a claim of clearance. Choose documented material instead.
+For your own project example with no granted usage licence, say "No separate
+usage license granted" rather than inventing permission. Preserve applicable
+third-party attribution and licence terms. Public-domain composition does not imply a
 public-domain arrangement or recording. My brief: [genre, atmosphere, approximate length, instrumentation].
 
 ## Root object (all these fields are required)
@@ -26,7 +32,8 @@ public-domain arrangement or recording. My brief: [genre, atmosphere, approximat
     including jurisdiction when claiming public-domain status.
   - `arrangement`: arranger/AI assistance and rights/provenance of this adaptation.
   - `recording`: how this recording is produced and whether third-party audio is used.
-  - `license`: actual usage terms for the arrangement/recording, or explicitly unverified.
+  - `license`: actual usage terms for the arrangement/recording; if none have
+    been granted for your own example, state that without inventing a licence.
     Do not infer a license from "free arrangement", free download or AI generation.
   - `source`: verifiable source/provenance, or explicitly state no source is documented.
   Each field is at most 160 characters; all five joined with newline separators
@@ -46,6 +53,9 @@ public-domain arrangement or recording. My brief: [genre, atmosphere, approximat
   3/8 and 7/8 eighth; 6/8, 9/8, 12/8 dotted quarter.
   The meter and tempo unit apply to the WHOLE song in v3.
 - `style`: one of electronic, house, pop, rock, classical, jazz, coffeehouse, hiphop, lofi, funk, reggae, drumandbass, latin, ambient, focus, sport. This sets the synthesis character, not a generated melody.
+  `slowwaltz` and `tango` exist as generator presets but are currently REJECTED
+  as Song Script style IDs. To author a waltz now, use e.g. `classical` or
+  `coffeehouse` with explicit 3/4 meter; the style name does not set the meter.
 - `loop`: boolean. true repeats the whole song; false stops after the final scene.
 - `seed`: integer 0–2147483647, for repeatable velocity variations
 - `tracks`: 1–9 track definitions, in orbit/pad order (7,8,9,4,5,6,1,2,3).
@@ -85,6 +95,54 @@ longer phrases, concatenate 2-bar scenes. No meter or tempo changes inside a son
 in v3; no swing field yet. Different instruments require different tracks.
 Scene changes happen on shared bar boundaries, always at a two-bar boundary.
 
+### Meter quick reference
+
+These are suggested musical groupings/pulses, not a whitelist. In the table,
+`tempo denominator` and `dotted` are the two `tempoUnit` fields. The two-bar
+window counts DENOMINATOR notes, independently of the tempo unit.
+
+| Meter | groups | tempo denominator | dotted | two-bar window |
+| --- | --- | --- | --- | --- |
+| 2/2 | [1,1] | 2 | false | 4 |
+| 2/4 | [1,1] | 4 | false | 4 |
+| 3/4 | [1,1,1] | 4 | false | 6 |
+| 4/4 | [1,1,1,1] | 4 | false | 8 |
+| 5/4 | [3,2] | 4 | false | 10 |
+| 3/8 | [1,1,1] | 8 | false | 6 |
+| 5/8 | [2,3] | 8 | false | 10 |
+| 6/8 | [3,3] | 4 | true | 12 |
+| 7/8 | [2,2,3] | 8 | false | 14 |
+| 9/8 | [3,3,3] | 4 | true | 18 |
+| 12/8 | [3,3,3,3] | 4 | true | 24 |
+| 3/2 | [1,1,1] | 2 | false | 6 |
+| 6/4 | [3,3] | 2 | true | 12 |
+| 7/4 | [2,2,3] | 4 | false | 14 |
+| 9/16 | [3,3,3] | 8 | true | 18 |
+
+### Pickups, tuplets and complete forms
+
+- Positions are local to EACH two-bar scene, not absolute song positions.
+  Bar two starts at `at = meter.numerator`, not always `at = 4`.
+- A pickup has no dedicated field. Precede it with silent denominator units:
+  in 3/4 a one-quarter pickup starts at `at: 2`, the first full bar at `at: 3`.
+  The silent time still counts toward scene length and exported duration.
+- Dotted notes and tuplets use numeric durations/onsets. In 3/4 a dotted quarter
+  is 1.5 units; three eighth-note triplets in one quarter use onsets 0,
+  0.333333 and 0.666667, with durations slightly below 0.333333 if desired.
+  Do NOT write `1/3` as a JSON value or add a `tuplet` property.
+- A note may span the internal bar line but cannot exceed the two-bar window.
+  There is no cross-scene tie field: a new scene note retriggers the sound.
+  Avoid splitting an important sustain across scenes where possible; otherwise
+  document the rearticulation instead of claiming a continuous tie.
+- There are no repeat signs or alternative-ending fields. Write every played
+  section in order. `bars: 8` repeats the SAME two-bar pattern four times;
+  it does not create eight bars of developed melody. Use separate 2-bar scenes
+  for a changing eight-bar phrase, and explicitly arrange AABB/volta endings.
+- An odd final bar needs a silent transport bar to fit the even scene length.
+  Do not insert an invented theme repetition merely to satisfy a length target.
+- Meter, grouping, tempo unit and BPM are song-wide. No tempo automation,
+  meter changes, rubato/fermata controls, pedal field or swing field is accepted.
+
 ## Notes (in DENOMINATOR-NOTE units, not seconds or normalized fractions)
 
 In v3, one unit is the meter's denominator note: a quarter in 3/4, an eighth in
@@ -115,11 +173,24 @@ Each note has:
 - optional `toVelocity`: number 0–1
 
 Pitch uses semitone offsets from C4: C4=0, D4=2, E4=4, F4=5, G4=7,
-A4=9, B4=11, C5=12, C3=-12. Some instruments retain their native register.
+A4=9, B4=11, C5=12, C3=-12. These are reference pitches, NOT a promise that
+every synthetic instrument sounds in the same register. In particular:
+
+| Instrument | Sounding register relative to reference | Encode sounding C4 as |
+| --- | --- | --- |
+| piano, epiano, strings, harp | unchanged | 0 |
+| bass, doublebass | two octaves lower | 24 |
+| guitar, organ, cello, horn | one octave lower | 12 |
+
+For those instruments, `encoded pitch = desired MIDI note - 60 + register
+compensation` (0, 24 or 12 from this table). For example, sounding C3 on
+doublebass needs `pitch: 12`, not `pitch: -12`. Never change the melody/key to
+compensate for an instrument register accidentally. Other synthetic/vocal voices
+have their own spectra/registers; use piano as the pitch reference when checking.
 Percussion uses pitch 0. `duration` uses the denominator-note units described above (v1/v2 always quarters).
 `toPitch`/`toVelocity` create a linked point at 95% of the duration. Sustained
 instruments can glide; plucked/acoustic instruments keep their characteristic
-articulation. Drum duration does not stretch the synthesized drum sample.
+articulation. Drum duration does not stretch the synthesized percussion sound.
 Avoid excessive polyphony and dense continuous chords on long sustained voices.
 A chord is simultaneous notes, not a note-by-note run. For runs, use separate onsets.
 
@@ -133,10 +204,10 @@ A chord is simultaneous notes, not a note-by-note run. For runs, use separate on
   "tempoUnit": {"denominator": 4, "dotted": false},
   "title": "First Light",
   "rights": {
-    "composition": "First Light — AI-assisted instrumental example; rights unverified.",
+    "composition": "First Light — AI-assisted original instrumental example.",
     "arrangement": "AI-assisted arrangement for jacktools Sound; no external arrangement documented.",
-    "recording": "Synthesized with jacktools Sound; no third-party recording supplied.",
-    "license": "Unverified; no usage permission or public-domain status confirmed.",
+    "recording": "Created with jacktools Sound and synthetic instruments; no external audio recording.",
+    "license": "Project composition and recording: no separate usage license granted.",
     "source": "Newly authored example JSON; no external musical source documented."
   },
   "bpm": 120,
@@ -182,6 +253,63 @@ A chord is simultaneous notes, not a note-by-note run. For runs, use separate on
       ]
     }
   ]
+}
+```
+
+## Complete native 6/8 example
+
+At 60 dotted quarters/minute, each bar lasts 2 seconds and this two-bar scene
+lasts 4 seconds. The melody uses all twelve eighth-note positions; the four
+lower notes mark the two compound pulses per bar. This is not twelve quarters.
+
+```json
+{
+  "format": "jacktools-song",
+  "version": 3,
+  "title": "Two gentle pulses",
+  "rights": {
+    "composition": "Two gentle pulses — AI-assisted original example.",
+    "arrangement": "Original 6/8 demonstration for jacktools Sound.",
+    "recording": "Created with jacktools Sound and synthetic instruments; no external audio recording.",
+    "license": "Project composition and recording: no separate usage license granted.",
+    "source": "Project-authored example; no external musical source."
+  },
+  "meter": {"numerator": 6, "denominator": 8, "groups": [3, 3]},
+  "tempoUnit": {"denominator": 4, "dotted": true},
+  "bpm": 60,
+  "style": "coffeehouse",
+  "loop": false,
+  "seed": 42,
+  "tracks": [
+    {"id": "melody", "instrument": "piano", "volume": 0.38},
+    {"id": "support", "instrument": "epiano", "volume": 0.2}
+  ],
+  "scenes": [{
+    "name": "Two compound bars",
+    "bars": 2,
+    "parts": [
+      {"track": "melody", "notes": [
+        {"at": 0, "duration": 0.9, "pitch": 0, "velocity": 0.7},
+        {"at": 1, "duration": 0.9, "pitch": 4, "velocity": 0.6},
+        {"at": 2, "duration": 0.9, "pitch": 7, "velocity": 0.6},
+        {"at": 3, "duration": 0.9, "pitch": 12, "velocity": 0.68},
+        {"at": 4, "duration": 0.9, "pitch": 7, "velocity": 0.6},
+        {"at": 5, "duration": 0.9, "pitch": 4, "velocity": 0.6},
+        {"at": 6, "duration": 0.9, "pitch": 5, "velocity": 0.7},
+        {"at": 7, "duration": 0.9, "pitch": 9, "velocity": 0.6},
+        {"at": 8, "duration": 0.9, "pitch": 12, "velocity": 0.6},
+        {"at": 9, "duration": 0.9, "pitch": 9, "velocity": 0.68},
+        {"at": 10, "duration": 0.9, "pitch": 5, "velocity": 0.6},
+        {"at": 11, "duration": 0.9, "pitch": 0, "velocity": 0.55}
+      ]},
+      {"track": "support", "notes": [
+        {"at": 0, "duration": 2.8, "pitch": -12, "velocity": 0.55},
+        {"at": 3, "duration": 2.8, "pitch": -5, "velocity": 0.5},
+        {"at": 6, "duration": 2.8, "pitch": -7, "velocity": 0.55},
+        {"at": 9, "duration": 2.8, "pitch": -12, "velocity": 0.48}
+      ]}
+    ]
+  }]
 }
 ```
 
@@ -236,6 +364,8 @@ and undotted-quarter tempo, but v3 introduces the documented gentle meter accent
 V1/v2 source files remain valid and are never rewritten automatically.
 
 The native-meter demo is `/examples/meter-study-6-8.song.json`.
-The current curated studies deliberately remain v2 until musically revised.
+The current library productions and Coffeehouse renditions use v3 with their
+native meters. The standalone Sunlit Session and Morning Light examples remain
+legacy v2; importing them does not automatically change their meter or notation.
 Whole-song MP4 capture is limited to approximately 51 minutes; longer takes are
 rejected rather than silently exporting a truncated song without rights.
