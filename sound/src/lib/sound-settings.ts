@@ -57,6 +57,7 @@ export function decodeSettings(raw:string|null):SoundSettings|null{
     ||['enabled','showTitle','style','tempo','section','signature'].some(key=>typeof info[key]!=='boolean'))return null;
   }
   if(s.recording?.animations!==undefined&&(!s.recording.animations||Array.isArray(s.recording.animations)||['center','orbit','background'].some(key=>typeof s.recording.animations[key]!=='boolean')))return null;
+  if(s.recording?.animations?.visualization!==undefined&&typeof s.recording.animations.visualization!=='boolean')return null;
   if(s.transpose!==undefined&&(!number(s.transpose,-12,12)||!Number.isInteger(s.transpose)))return null;
   if(s.noteEffect!==undefined&&!number(s.noteEffect,0,1.5))return null;
   if(s.dance!==undefined&&s.dance!==null&&!member(danceIds,s.dance))return null;

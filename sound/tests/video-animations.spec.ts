@@ -1,7 +1,7 @@
 import {chooseAnimation} from './animation-helpers';
 import {test,expect,type Page} from '@playwright/test';
 import {readFile} from 'node:fs/promises';
-import {videoAnimationPlan,videoAnimationKeys} from '../src/lib/video-animations';
+import {videoAnimationCopy,videoAnimationPlan,videoAnimationKeys} from '../src/lib/video-animations';
 import {decodeSettings} from '../src/lib/sound-settings';
 import {defaultVideoTitle} from '../src/lib/video-info';
 import {fileCopy} from '../src/lib/file-copy';
@@ -13,7 +13,7 @@ test('independent change plans scale with video length and keep changes away fro
   expect(short[key][0]).toBeGreaterThan(4000);expect(short[key].at(-1)!).toBeLessThan(57000);
   short[key].forEach((time,i)=>{expect(long[key][i]).toBeCloseTo(time*10);if(i)expect(time-short[key][i-1]).toBeGreaterThan(3000);});
  }
- expect(new Set(videoAnimationKeys.map(key=>short[key][0])).size).toBe(3);
+ expect(new Set(videoAnimationKeys.map(key=>short[key][0])).size).toBe(4);
 });
 async function options(page:Page){
  await page.locator('#files-open').click();test.skip(await page.locator('#video-record').isDisabled(),'No native MP4');
@@ -35,33 +35,41 @@ test('video changes all selected layers temporarily, independently of normal Pla
  await expect.poll(async()=>page.locator('#orbit').getAttribute('data-center-variant')).not.toBe('ring');
  // Other layer schedules have not reached their later first change yet (deterministic plan below is not required).
  await page.evaluate(()=>(window as any).videoAdvance=32000);
+ await expect.poll(async()=>page.locator('#orbit').getAttribute('data-visualization')).not.toBe('orbit');
  await expect.poll(async()=>page.locator('#orbit').getAttribute('data-mode')).not.toBe('comet');
  await expect.poll(async()=>page.locator('#sound-atmosphere').getAttribute('data-mode')).not.toBe('clouds');
  await expect(page.locator('[data-center-mode=ring]')).toHaveAttribute('aria-pressed','true');
  await expect(page.locator('[data-orbit-mode=comet]')).toHaveAttribute('aria-pressed','true');
  await expect(page.locator('[data-background-mode=clouds]')).toHaveAttribute('aria-pressed','true');
+ await page.locator('#files-open').click();const jsonDownload=page.waitForEvent('download');await page.locator('#json-export').click();
+ const during=JSON.parse(await readFile((await(await jsonDownload).path())!,'utf8'));
+ expect(during.visualization).toBe('orbit');expect(during.landscapeVariant).toBe('rivers');await page.locator('#files-close').click();
  const download=page.waitForEvent('download');await page.locator('#video-stop').click();await download;
+ await expect(page.locator('#orbit')).toHaveAttribute('data-visualization','orbit');
  await expect(page.locator('#orbit')).toHaveAttribute('data-center-variant','ring');
  await expect(page.locator('#orbit')).toHaveAttribute('data-mode','comet');
  await expect(page.locator('#sound-atmosphere')).toHaveAttribute('data-mode','clouds');
 });
 test('explicitly disabled animation layers stay off throughout a randomized video',async({page})=>{
  await clock(page);await page.goto('/de/');
- for(const key of videoAnimationKeys)await chooseAnimation(page,'[data-'+key+'-mode=off]');
+ for(const key of ['center','orbit','background'])await chooseAnimation(page,'[data-'+key+'-mode=off]');
  await options(page);await page.locator('#video-record').click();await expect(page.locator('#video-status')).toHaveText(fileCopy.de.recording);
  await page.evaluate(()=>(window as any).videoAdvance=50000);await page.waitForTimeout(200);
  await expect(page.locator('#orbit')).toHaveAttribute('data-center-variant','off');await expect(page.locator('#orbit')).toHaveAttribute('data-mode','off');await expect(page.locator('#sound-atmosphere')).toBeHidden();
  const download=page.waitForEvent('download');await page.locator('#video-stop').click();await download;
 });
-for(const lang of ['de','en','es','fr'])test(`video animation switches are optional, localized and project-safe: ${lang}`,async({page})=>{
+for(const lang of ['de','en','es','fr'] as const)test(`video animation switches are optional, localized and project-safe: ${lang}`,async({page})=>{
  await page.goto('/'+lang+'/');await page.locator('#files-open').click();await page.locator('.video-animation-options summary').click();
  for(const key of videoAnimationKeys)await expect(page.locator('#video-animation-'+key)).not.toBeChecked();
- await page.locator('#video-animation-center').check();await page.locator('#video-animation-background').check();
+ await expect(page.locator('#video-animation-visualization')).toHaveAccessibleName(videoAnimationCopy[lang].visualization);
+ await page.locator('#video-animation-center').check();await page.locator('#video-animation-background').check();await page.locator('#video-animation-visualization').check();
  const download=page.waitForEvent('download');await page.locator('#json-export').click();const raw=await readFile((await(await download).path())!,'utf8');
- expect(decodeSettings(raw)!.recording!.animations).toEqual({center:true,orbit:false,background:true});
+ expect(decodeSettings(raw)!.recording!.animations).toEqual({center:true,orbit:false,background:true,visualization:true});
+ const legacy=JSON.parse(raw);delete legacy.recording.animations.visualization;expect(decodeSettings(JSON.stringify(legacy))).not.toBeNull();
+ const invalid=JSON.parse(raw);invalid.recording.animations.visualization='yes';expect(decodeSettings(JSON.stringify(invalid))).toBeNull();
  const bad=JSON.parse(raw);bad.recording.animations.center='yes';expect(decodeSettings(JSON.stringify(bad))).toBeNull();
  await page.reload();await page.locator('#files-open').click();await page.locator('#json-file').setInputFiles({name:'animation.json',mimeType:'application/json',buffer:Buffer.from(raw)});
- await page.locator('.video-animation-options summary').click();await expect(page.locator('#video-animation-center')).toBeChecked();await expect(page.locator('#video-animation-orbit')).not.toBeChecked();
+ await page.locator('.video-animation-options summary').click();await expect(page.locator('#video-animation-center')).toBeChecked();await expect(page.locator('#video-animation-orbit')).not.toBeChecked();await expect(page.locator('#video-animation-visualization')).toBeChecked();
  await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false');
 });
 
