@@ -107,6 +107,10 @@ export function createSustainedVoice(ctx:AudioContext,destination:AudioNode,id:S
   filters.forEach(filter=>filter.disconnect());routes.forEach(route=>route.disconnect());onEnded();
  };});
  return {
+  /** Explicit score curves keep the same sounding source, with no new attack. */
+  bend(points:{at:number;ratio:number}[]){
+   for(const point of points)oscillators.forEach(({osc,detune})=>osc.frequency.exponentialRampToValueAtTime(frequency*detune*point.ratio,point.at));
+  },
   canContinue(at:number){return !articulation.detached&&alive&&at>=last&&at<=until+.035;},
   note(at:number,hz:number,target:number,duration:number,position:number){
    oscillators.forEach(({osc,detune})=>{

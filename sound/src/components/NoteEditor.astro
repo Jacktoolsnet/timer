@@ -1,0 +1,19 @@
+---
+import {noteEditorCopy} from '../lib/note-score';
+import type {Language} from '../lib/i18n';
+import ActionIcon from './ActionIcon.astro';
+interface Props {lang:Language}
+const {lang}=Astro.props,c=noteEditorCopy[lang];
+---
+<section id="note-editor" hidden aria-label={c.mode}>
+ <div id="score-instruments" aria-label={c.choose}></div>
+ <div id="score-workspace" hidden>
+  <div class="score-heading"><strong id="score-instrument-name"></strong><span>{c.bars}</span></div>
+  <div class="score-paper"><svg id="score-grid" viewBox="0 0 700 500" preserveAspectRatio="none" tabindex="0" role="group" aria-label={c.mode} aria-describedby="score-help"></svg>
+   <label id="score-volume-wrap" hidden><span>{c.volume}</span><output id="score-volume-value">80%</output><input id="score-volume" type="range" min="5" max="100" value="80" aria-label={c.volume}/></label>
+  </div>
+  <div class="rhythm-actions score-actions"><label class="score-snap"><input id="score-snap" type="checkbox" role="switch" checked/><span>{c.snap}</span></label><button id="score-delete" type="button" title={c.remove} aria-label={c.remove} disabled><ActionIcon name="clear"/></button><button id="score-done" type="button" title={c.done} aria-label={c.done}><ActionIcon name="done"/></button><button id="score-cancel" type="button" title={c.cancel} aria-label={c.cancel}><ActionIcon name="cancel"/></button></div>
+  <div id="score-companions" aria-label={c.choose}></div>
+ </div>
+ <p id="score-status" class="score-status" role="status"></p><span id="score-help" class="gesture-keyboard">{c.help}</span>
+</section>
