@@ -83,3 +83,15 @@ test('MP4 uses the delta canvas and its travelling notes with the original audio
  const bytes=await readFile((await(await download).path())!);expect(bytes.subarray(4,8).toString()).toBe('ftyp');expect(bytes.includes(Buffer.from('vide'))).toBe(true);expect(bytes.includes(Buffer.from('soun'))).toBe(true);
  expect(await page.evaluate(()=>new Set((window as any).deltaLabels).size)).toBe(9);
 });
+
+test('the shared sea retains visible coloured water beyond the river mouths in both themes',async({page})=>{
+ await page.goto('/de/');await load(page,fixture());await page.locator('#play').click();await page.waitForTimeout(3400);
+ const colouredWater=()=>page.locator('#orbit').evaluate((canvas:HTMLCanvasElement)=>{
+  const pixels=canvas.getContext('2d')!.getImageData(45,140,145,420).data;let warm=0;
+  for(let i=0;i<pixels.length;i+=4)if(pixels[i+3]>10&&pixels[i]>pixels[i+2]*1.2&&pixels[i]>80)warm++;
+  return warm;
+ });
+ await expect.poll(colouredWater).toBeGreaterThan(30);
+ await page.locator('#palette-dropdown summary').click();await page.locator('#theme-light').click();await page.locator('#preferences-close').click();
+ await expect.poll(colouredWater).toBeGreaterThan(30);
+});

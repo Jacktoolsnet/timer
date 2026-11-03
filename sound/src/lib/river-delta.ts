@@ -46,10 +46,9 @@ export function paintRiverDelta(ctx:CanvasRenderingContext2D,history:LandscapeHi
  ctx.save();ctx.beginPath();ctx.ellipse(159,350,143,263,0,0,Math.PI*2);ctx.clip();
  for(const [rank,tr] of tracks.entries()){
   const power=clamp(arrivals[rank],0,1.5),mouth=deltaPoint(rank,tracks.length,1);
-  ctx.save();ctx.translate(159,350);ctx.scale(143,263);
-  const seaInk=ctx.createRadialGradient(0,0,0,0,0,1);
-  seaInk.addColorStop(0,tr.color);seaInk.addColorStop(.5,tr.color);seaInk.addColorStop(.78,tr.color+'80');seaInk.addColorStop(1,tr.color+'00');
-  ctx.restore();
+  const seaInk=ctx.createLinearGradient(16,0,302,0);
+  seaInk.addColorStop(0,tr.color+'00');seaInk.addColorStop(.15,tr.color+'65');
+  seaInk.addColorStop(.48,tr.color);seaInk.addColorStop(.8,tr.color+'ad');seaInk.addColorStop(1,tr.color+'00');
   ctx.strokeStyle=seaInk;ctx.shadowColor=tr.color;ctx.shadowBlur=reduced?0:power*(dark?14:5);
   // Broad currents mingle; a sustained envelope supports wider, gentler waves.
   for(let wave=0;wave<3;wave++){
