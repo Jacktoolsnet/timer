@@ -3,10 +3,10 @@ import type {NoteScore} from './note-score';
 export const videoPadModes=['none','tap','notes'] as const;
 export type VideoPadMode=typeof videoPadModes[number];
 export const videoPadCopy={
- de:{label:'Zusätzliche Fläche im Video',none:'Nur Visualisierung',tap:'Tap-Pad',notes:'Noten-Pad',hint:'Mit Pad stehen alle aktivierten Infos oberhalb der Visualisierung. Die Fläche folgt den gespielten Noten, auch wenn Du gerade Einstellungen öffnest.'},
- en:{label:'Additional surface in video',none:'Visualization only',tap:'Tap pad',notes:'Note pad',hint:'With a pad, all enabled information appears above the visualization. The surface follows played notes even while settings are open.'},
- es:{label:'Superficie adicional en el vídeo',none:'Solo visualización',tap:'Pad rítmico',notes:'Pad de notas',hint:'Con un pad, toda la información activada aparece encima de la visualización. La superficie sigue las notas incluso con los ajustes abiertos.'},
- fr:{label:'Surface supplémentaire dans la vidéo',none:'Visualisation seule',tap:'Pad rythmique',notes:'Pad de notes',hint:'Avec un pad, toutes les infos activées apparaissent au-dessus de la visualisation. La surface suit les notes même lorsque les réglages sont ouverts.'}
+ de:{label:'Zusätzlich zur Visualisierung',none:'Ohne Pad',tap:'Mit Tap-Pad',notes:'Mit Noten-Pad',hint:'Die Visualisierung bleibt immer im Video sichtbar. Mit Pad stehen alle aktivierten Infos oberhalb der Visualisierung. Die Fläche folgt den gespielten Noten, auch wenn Du gerade Einstellungen öffnest.'},
+ en:{label:'Add to the visualization',none:'No pad',tap:'With tap pad',notes:'With note pad',hint:'The visualization always remains visible in the video. With a pad, all enabled information appears above the visualization. The surface follows played notes even while settings are open.'},
+ es:{label:'Añadir a la visualización',none:'Sin pad',tap:'Con pad rítmico',notes:'Con pad de notas',hint:'La visualización siempre permanece visible en el vídeo. Con un pad, toda la información activada aparece encima de la visualización. La superficie sigue las notas incluso con los ajustes abiertos.'},
+ fr:{label:'Ajouter à la visualisation',none:'Sans pad',tap:'Avec pad rythmique',notes:'Avec pad de notes',hint:'La visualisation reste toujours visible dans la vidéo. Avec un pad, toutes les infos activées apparaissent au-dessus de la visualisation. La surface suit les notes même lorsque les réglages sont ouverts.'}
 } as const;
 export type VideoPadHit={age:number;pitch:number;degree:number|null;level:number;position:number};
 export type VideoPadTrack={index:number;name:string;color:string;muted:boolean;pitched:boolean;score:NoteScore;position:number;hits:VideoPadHit[]};

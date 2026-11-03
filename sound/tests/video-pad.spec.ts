@@ -29,6 +29,9 @@ async function exported(page:Page){
 for(const lang of ['de','en','es','fr'] as const)test('video-pad options are localized, optional, persistent and validate legacy files: '+lang,async({page})=>{
  await page.setViewportSize({width:390,height:844});await page.goto('/'+lang+'/');await page.locator('#files-open').click();
  await expect(page.locator('#video-pad input[value=none]')).toBeChecked();await expect(page.locator('#video-pad legend')).toHaveText(videoPadCopy[lang].label);
+ for(const mode of ['none','tap','notes'] as const)await expect(page.locator('#video-pad label').filter({has:page.locator('input[value='+mode+']')})).toHaveText(videoPadCopy[lang][mode]);
+ await expect(page.locator('#video-pad > p')).toHaveText(videoPadCopy[lang].hint);
+ await page.locator('#video-pad label').filter({hasText:videoPadCopy[lang].tap}).click();await expect(page.locator('#video-pad input[value=tap]')).toBeChecked();
  await page.locator('#video-pad label').filter({hasText:videoPadCopy[lang].notes}).click();
  const data=await exported(page);expect(data.recording.videoPad).toBe('notes');expect(decodeSettings(JSON.stringify(data))!.recording!.videoPad).toBe('notes');
  const legacy=structuredClone(data);delete legacy.recording.videoPad;expect(decodeSettings(JSON.stringify(legacy))).not.toBeNull();

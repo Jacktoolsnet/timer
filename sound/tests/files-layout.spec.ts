@@ -12,8 +12,14 @@ for(const lang of ['de','en','es','fr'])test(`project, recording setup and forma
  expect(s.y).toBeGreaterThan(p.y+p.height);expect(f.y).toBeGreaterThan(s.y+s.height);
  for(const detail of await dialog.locator('.file-details').all())await expect(detail).not.toHaveAttribute('open');
  const wav=(await dialog.locator('.recording-format').nth(0).boundingBox())!,mp4=(await dialog.locator('.recording-format').nth(1).boundingBox())!;
- if(test.info().project.name==='desktop')expect(Math.abs(wav.y-mp4.y)).toBeLessThan(2);
- else expect(mp4.y).toBeGreaterThan(wav.y+wav.height);
+ const bounds=(await dialog.boundingBox())!,viewport=page.viewportSize()!;
+ expect(bounds.x).toBeGreaterThanOrEqual(16);expect(bounds.x+bounds.width).toBeLessThanOrEqual(viewport.width-16);
+ expect(await dialog.evaluate(d=>d.scrollWidth<=d.clientWidth)).toBe(true);
+ if(test.info().project.name==='desktop'){
+  expect(bounds.width).toBe(1040);expect(Math.abs(wav.y-mp4.y)).toBeLessThan(2);
+ }else{
+  expect(bounds.width).toBe(viewport.width-32);expect(mp4.y).toBeGreaterThan(wav.y+wav.height);
+ }
  await page.locator('#video-record').scrollIntoViewIfNeeded();await expect(page.locator('#files-close')).toBeInViewport();
  if(lang==='de'){
   await dialog.evaluate(d=>d.scrollTop=0);

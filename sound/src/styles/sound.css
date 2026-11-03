@@ -337,7 +337,7 @@ body:not(.focus-view) .sound-top{margin-bottom:20px}
 #recording-options p{margin-top:0}
 
 /* Files are project data; recording is a distinct two-step workflow. */
-#files-dialog{width:min(720px,calc(100vw - 32px));padding:0 24px 24px}
+#files-dialog{width:min(1040px,calc(100vw - 32px));max-width:calc(100vw - 32px);padding:0 24px 24px}
 #files-dialog>.files-heading{position:sticky;top:0;z-index:2;background:var(--surface);padding:20px 0 16px;border-bottom:1px solid var(--line);margin-bottom:20px}
 #files-dialog section{border:0;margin:0;padding:0}
 #files-dialog .file-project{padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--bg);margin-bottom:26px}
