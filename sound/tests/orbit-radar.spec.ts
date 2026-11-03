@@ -36,26 +36,36 @@ test('radar light moves on after the hit with a growing trailing echo in either 
  const history=new RadarHistory();history.record(0,note);note.motion!.turnSeconds=99;
  expect(history.notes(0)[0].motion!.turnSeconds).toBe(4);
 });
-test('radar draws no idle geometry, honours silence and directions, and reduces motion to fading points',()=>{
+test('radar mist reaches neighbouring lanes softly while keeping heads sharp and reduced motion static',()=>{
  const notes:RadarNote[]=[{at:1,beat:0,angle:0,level:.8,direction:1}];
- function draw(time:number,{gain=1,muted=false,reduced=false,effect=1,direction=1}={}){
-  let circles=0,halos=0;const counterclockwise:boolean[]=[],arcs:number[][]=[];
-  const ctx={save(){},restore(){},beginPath(){},fill(){},stroke(){},
-   createRadialGradient(){halos++;return {addColorStop(){}};},
-   arc(_x:number,_y:number,r:number,_a:number,_b:number,ccw=false){if(r>100){counterclockwise.push(ccw);arcs.push([_a,_b]);}else circles++;}} as unknown as CanvasRenderingContext2D;
-  paintOrbitRadar(ctx,notes.map(n=>({...n,direction})),200,'#55ccff',time,gain,muted,true,reduced,effect);
-  return {circles,halos,counterclockwise,arcs};
+ function draw(time:number,{gain=1,muted=false,reduced=false,effect=1,direction=1,spacing=27,dark=true}={}){
+  const circles:number[]=[],halos:{x:number;y:number;radius:number;stops:[number,string][]}[]=[];
+  let strokes=0;
+  const ctx={save(){},restore(){},beginPath(){},fill(){},stroke(){strokes++;},
+   createRadialGradient(x:number,y:number,_r:number,_x:number,_y:number,radius:number){
+    const stops:[number,string][]=[];halos.push({x,y,radius,stops});return {addColorStop(at:number,color:string){stops.push([at,color]);}};
+   },
+   arc(_x:number,_y:number,r:number){circles.push(r);}} as unknown as CanvasRenderingContext2D;
+  paintOrbitRadar(ctx,notes.map(n=>({...n,direction})),200,'#55ccff',time,gain,muted,dark,reduced,effect,spacing);
+  return {circles,halos,strokes};
  }
- expect(draw(.9).circles).toBe(0);expect(draw(1.1).halos).toBe(1);expect(draw(1+radarLifetime).circles).toBe(0);
- for(const direction of [1,-1]){
-  const result=draw(1.1,{direction});
-  expect(result.counterclockwise.every(v=>v===(direction<0))).toBe(true);
-  expect(result.arcs[0][0]).toBeCloseTo(0);
-  expect(result.arcs.at(-1)![1]*direction).toBeCloseTo(Math.PI*.1);
-  expect(result.arcs.every(([start,end])=>(end-start)*direction>0)).toBe(true);
+ expect(draw(.9).circles).toEqual([]);expect(draw(1+radarLifetime).circles).toEqual([]);
+ for(const direction of [1,-1])for(const dark of [true,false]){
+  const result=draw(1.1,{direction,dark}),mist=result.halos.slice(0,-1);
+  expect(mist).toHaveLength(12);expect(result.strokes).toBe(0);
+  for(const puff of mist){
+   expect(puff.radius).toBeGreaterThan(27);expect(puff.radius).toBeLessThan(54);
+   expect(puff.stops.at(-1)).toEqual([1,'#55ccff00']);
+   expect((puff.y-350)*direction).toBeGreaterThan(0);
+   expect(Math.hypot(puff.x-350,puff.y-350)).toBeCloseTo(200);
+  }
+  expect((mist.at(-1)!.y-mist[0].y)*direction).toBeGreaterThan(0);
+  expect(result.circles.slice(-3).every(r=>r<10)).toBe(true);
  }
- const reduced=draw(1.1,{reduced:true});expect(reduced.halos).toBe(0);expect(reduced.counterclockwise).toEqual([]);expect(reduced.circles).toBe(2);
- for(const options of [{gain:0},{muted:true},{effect:0}])expect(draw(1.1,options)).toEqual({circles:0,halos:0,counterclockwise:[],arcs:[]});
+ expect(draw(1.1,{spacing:40}).halos[0].radius).toBe(60);
+ expect(draw(1.1,{spacing:216}).halos[0].radius).toBe(72);
+ const reduced=draw(1.1,{reduced:true});expect(reduced.halos).toEqual([]);expect(reduced.circles).toHaveLength(2);
+ for(const options of [{gain:0},{muted:true},{effect:0}])expect(draw(1.1,options)).toEqual({circles:[],halos:[],strokes:0});
 });
 function fixture(){return {version:2,style:'electronic',bpm:40,volume:.3,center:'off',background:'off',orbit:'radar',tracks:partsForStyle('electronic').map((_p,i)=>({enabled:i===0,mute:false,instrument:'kick',groups:Array(16).fill(null),points:Array.from({length:16},(_,s)=>s===0),slots:16,grid:16,pitch:12,volume:.6,phase:0,direction:1,directionMode:'forward',randomDynamics:false,morph:null}))};}
 async function load(page:Page,data:unknown){await page.locator('#files-open').click();await page.locator('#json-file').setInputFiles({name:'radar.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(data))});await page.locator('#files-close').click();}

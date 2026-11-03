@@ -30,7 +30,7 @@ export function radarSweep(note:RadarNote,time:number){
  return {angle:note.angle+(note.direction<0?-1:1)*travel,length:Math.min(.72,travel)};
 }
 /** No idle rings, grid dots or continuously visible pointer: every mark fades to zero. */
-export function paintOrbitRadar(ctx:CanvasRenderingContext2D,notes:readonly RadarNote[],radius:number,color:string,time:number,gain:number,muted:boolean,dark:boolean,reduced:boolean,effect=1){
+export function paintOrbitRadar(ctx:CanvasRenderingContext2D,notes:readonly RadarNote[],radius:number,color:string,time:number,gain:number,muted:boolean,dark:boolean,reduced:boolean,effect=1,spacing=27){
  if(muted||gain<=0||effect<=0)return;
  ctx.save();ctx.lineCap='round';ctx.shadowColor=color;
  for(const note of notes){
@@ -40,10 +40,18 @@ export function paintOrbitRadar(ctx:CanvasRenderingContext2D,notes:readonly Rada
   if(!reduced){
    // The moving head leaves its trail behind; the original note remains a fixed echo.
    const sweep=radarSweep(note,time),headPoint=radarPoint(point.radius,{...note,angle:sweep.angle,kind:'run',member:0,count:1});
-   const segments=12;
+   // Overlapping feathered puffs form a fog ribbon without expensive canvas blur.
+   // Its soft edge reaches neighbouring lanes; sparse layouts stay bounded.
+   const fogRadius=Math.min(72,Math.max(24,spacing*1.5)),segments=12;
    for(let k=segments;k>0;k--){
-    ctx.globalAlpha=strength*Math.pow(1-k/(segments+1),1.5)*.75;ctx.strokeStyle=color;ctx.lineWidth=2+strength*4;ctx.shadowBlur=0;
-    ctx.beginPath();ctx.arc(350,350,point.radius,sweep.angle-direction*k*sweep.length/segments,sweep.angle-direction*(k-1)*sweep.length/segments,direction<0);ctx.stroke();
+    const angle=sweep.angle-direction*(k-.5)*sweep.length/segments,
+      x=350+Math.cos(angle)*point.radius,y=350+Math.sin(angle)*point.radius,
+      fog=ctx.createRadialGradient(x,y,0,x,y,fogRadius);
+    fog.addColorStop(0,color);fog.addColorStop(.25,color+'bb');fog.addColorStop(.65,color+'44');fog.addColorStop(1,color+'00');
+    // Grow the mist smoothly from zero length, rather than stacking twelve puffs at the onset.
+    ctx.globalAlpha=strength*Math.pow(1-k/(segments+1),1.25)*(dark?.22:.28)*Math.min(1,sweep.length/.18);
+    ctx.fillStyle=fog;ctx.shadowBlur=0;
+    ctx.beginPath();ctx.arc(x,y,fogRadius,0,Math.PI*2);ctx.fill();
    }
    const halo=ctx.createRadialGradient(headPoint.x,headPoint.y,0,headPoint.x,headPoint.y,18+strength*24);
    halo.addColorStop(0,color);halo.addColorStop(.35,color+'99');halo.addColorStop(1,color+'00');

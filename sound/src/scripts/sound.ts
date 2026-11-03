@@ -2080,7 +2080,7 @@ function frame(now:number){
  }
  if(visualization==='orbit'&&orbitAnimation)active.forEach(({tr,index},rank)=>{
   const r=radius(rank,active.length);
-  if(orbitMode==='radar'){paintOrbitRadar(oc,radar.notes(index),r,tr.color,time,playing?tr.volume*visualMaster:0,tr.mute||tr.volume===0,dark,reduced.matches,noteEffect);return;}
+  if(orbitMode==='radar'){paintOrbitRadar(oc,radar.notes(index),r,tr.color,time,playing?tr.volume*visualMaster:0,tr.mute||tr.volume===0,dark,reduced.matches,noteEffect,active.length>1?Math.abs(radius(0,active.length)-radius(1,active.length)):27);return;}
   oc.beginPath();oc.arc(350,350,r,0,Math.PI*2);oc.strokeStyle=tr.color+(dark?'55':'99');oc.lineWidth=dark?1:1.4;oc.stroke();
   // Each orbit carries a continuous comet; audible notes briefly boost its glow.
   if(playing&&orbitAnimation&&!reduced.matches){
