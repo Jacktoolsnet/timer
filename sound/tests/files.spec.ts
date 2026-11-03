@@ -12,10 +12,11 @@ async function exported(page:Page){
 test('JSON round trip preserves nine tracks, melody, custom rhythm, levels and animations without storage consent',async({page})=>{
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/de/');
- await page.locator('[data-style-preset=focus]').click();
+ await page.locator('#animation-settings-open').click();await page.locator('[data-animation-open=music]').click();await page.locator('[data-style-preset=focus]').click();await page.locator('#animation-settings-close').click();
+ await page.locator('#animation-settings-open').click();await page.locator('[data-animation-open=controls]').click();
  await page.locator('#tempo').fill('92');await page.locator('#tempo').dispatchEvent('input');
  await page.locator('#volume').fill('0.56');await page.locator('#volume').dispatchEvent('input');
- await page.locator('#transpose').fill('5');await page.locator('#transpose').dispatchEvent('input');
+ await page.locator('#transpose').fill('5');await page.locator('#transpose').dispatchEvent('input');await page.locator('#animation-settings-close').click();
  await chooseAnimation(page,'[data-background-mode=waves]');
  await chooseAnimation(page,'[data-center-mode=bars]');
  await chooseAnimation(page,'[data-orbit-mode=pulse]');
@@ -30,7 +31,7 @@ test('JSON round trip preserves nine tracks, melody, custom rhythm, levels and a
  expect(saved.transpose).toBe(5);expect(saved.background).toBe('waves');
  expect(saved.pad!.hits[2].filter(Boolean)).toHaveLength(1);
  await page.locator('#files-close').click();
- await page.locator('[data-style-preset=rock]').click();await page.locator('#play').click();
+ await page.locator('#animation-settings-open').click();await page.locator('[data-animation-open=music]').click();await page.locator('[data-style-preset=rock]').click();await page.locator('#animation-settings-close').click();await page.locator('#play').click();
  await page.locator('#files-open').click();
  await page.locator('#json-file').setInputFiles({name:'piece.json',mimeType:'application/json',buffer:Buffer.from(raw)});
  await expect(page.locator('#file-status')).toHaveText(fileCopy.de.imported);

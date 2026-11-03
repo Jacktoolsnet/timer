@@ -1,3 +1,4 @@
+import {validSongScript,type SongScript} from './song-script';
 import {videoPadModes,type VideoPadMode} from './video-pad';
 import {trackRates,type TrackRate,type TrackRateChoice} from './track-rate';
 import {constellationVariants,type ConstellationVariant,streamVariants,type StreamVariant,landscapeVariants,type LandscapeVariant,visualizationModes,type VisualizationMode} from './visualization';
@@ -26,6 +27,7 @@ export type SavedTrack={
  morph:{to:InstrumentId;progress:number}|null;
 };
 export type SoundSettings={
+ songScript?:SongScript;
  visualization?:VisualizationMode;
  landscapeVariant?:LandscapeVariant;
  streamVariant?:StreamVariant;
@@ -45,6 +47,7 @@ export function decodeSettings(raw:string|null):SoundSettings|null{
   if(!s||![1,2].includes(s.version)||!member(styleIds,s.style)||!number(s.bpm,40,220)||!number(s.volume,0,.7)
    ||!member(backgroundModes,s.background)||!member(centerModes,s.center)||!member(orbitModes,s.orbit)
    ||!Array.isArray(s.tracks)||!(s.version===1?[8,9]:[ORBIT_COUNT]).includes(s.tracks.length))return null;
+  if(s.songScript!==undefined&&!validSongScript(s.songScript))return null;
   if(s.constellationVariant!==undefined&&!member(constellationVariants,s.constellationVariant))return null;
   if(s.streamVariant!==undefined&&!member(streamVariants,s.streamVariant))return null;
   if(s.landscapeVariant!==undefined&&!member(landscapeVariants,s.landscapeVariant))return null;

@@ -1,4 +1,5 @@
 ---
+import {scriptCopy} from '../lib/song-script';
 import {videoPadCopy,videoPadModes} from '../lib/video-pad';
 import AnimationSettings from './AnimationSettings.astro';
 import {animationSettingsCopy} from '../lib/animation-settings';
@@ -49,6 +50,15 @@ const instrumentsTitle={de:'Instrumente',en:'Instruments',es:'Instrumentos',fr:'
   <details class="file-details"><summary>{recordingCopy[lang].details}</summary><p>{files.jsonHint}</p></details>
   <input id="json-file" type="file" accept=".json,application/json" hidden/><p id="file-status" role="status"></p>
  </section>
+ <section class="file-script script-project" aria-labelledby="script-title">
+  <div class="file-card-heading"><span class="file-type-badge">SONG</span><h3 id="script-title">{scriptCopy[lang].title}</h3></div>
+  <p>{scriptCopy[lang].hint}</p>
+  <label class="script-label" for="song-script-text">{scriptCopy[lang].text}</label><textarea id="song-script-text" rows="6" spellcheck="false" maxlength="1048576"></textarea>
+  <div class="file-actions">{(['load','file','example','export','leave'] as const).map(action=><button id={`song-script-${action}`} type="button" class="icon-action" aria-label={scriptCopy[lang][action]} title={scriptCopy[lang][action]} disabled={action==='export'||action==='leave'}><ActionIcon name={action==='load'?'done':action==='file'?'upload':action==='example'?'play':action==='export'?'download':'cancel'}/></button>)}</div>
+  <input id="song-script-upload" type="file" accept=".json,application/json" hidden/>
+  <a class="script-guide" href="/song-script-guide.md" download>{scriptCopy[lang].guide}</a>
+  <p>{scriptCopy[lang].editing}</p><p id="song-script-status" role="status">{scriptCopy[lang].inactive}</p>
+ </section>
  <section class="file-recording" aria-labelledby="recording-heading">
   <div class="file-card-heading"><span class="file-heading-icon"><ActionIcon name="record"/></span><h3 id="recording-heading">{recordingCopy[lang].recording}</h3></div>
   <p class="recording-shared-hint">{recordingCopy[lang].shared}</p>
@@ -83,7 +93,7 @@ const instrumentsTitle={de:'Instrumente',en:'Instruments',es:'Instrumentos',fr:'
 
  <p id="evolution-status" role="status"></p>
  <p id="wake-status" role="status"></p>
- <p id="audio-status" role="status"></p>
+ <p id="script-now" role="status" hidden></p><p id="audio-status" role="status"></p>
 </section>
 
 <section class="dances-tile" hidden aria-labelledby="dances-title"><div class="dance-heading"><h2 id="dances-title">{danceCopy[lang].title}</h2><button type="button" class="dance-free" data-dance="" aria-pressed="true">{danceCopy[lang].off}</button></div><p class="dance-hint">{danceCopy[lang].hint}</p>{(['standard','latin','social'] as const).map(group=><div class="dance-group"><h3>{danceCopy[lang][group]}</h3><div class="dance-tiles" role="group" aria-label={danceCopy[lang][group]}>{danceIds.filter(id=>dances[id].group===group).map(id=><button type="button" class="dance-tile" data-dance={id} aria-pressed="false" aria-describedby="dance-status"><DanceIcon name={id}/><span>{danceCopy[lang].names[danceIds.indexOf(id)]}</span><small>{dances[id].beats}/4 · {dances[id].preset.bpm} BPM</small></button>)}</div></div>)}<p id="dance-status" role="status"></p><p class="dance-note">{danceCopy[lang].note}</p></section>
