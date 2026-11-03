@@ -1,3 +1,4 @@
+import {paintNoteStream,type StreamPreview} from '../lib/note-stream';
 import {LandscapeHistory,paintLandscape} from '../lib/landscape';
 import {visualizationCopy,type VisualizationMode} from '../lib/visualization';
 import {cloneScore,type NoteScore,type ScoreNote} from '../lib/note-score';
@@ -80,6 +81,7 @@ const language=document.documentElement.lang as keyof typeof styleCopy;
 let currentStyle:StyleId='electronic',pendingStyle:StyleId|null=null;
 let visualization:VisualizationMode='orbit';
 const landscape=new LandscapeHistory();
+let streamRevision=0,streamCache:{key:string;scores:NoteScore[]}|null=null;
 let currentDance:DanceId|null=null,pendingDance:DanceId|null=null;
 function currentPreset(){return currentDance?dances[currentDance].preset:presets[currentStyle];}
 function rhythmTrack(i:number){return danceFoundation(currentDance,i);}
@@ -149,6 +151,7 @@ function rhythmPosition(time=audio?.currentTime||0){
  return clock?Math.max(0,clock.step+(time-clock.time)/clock.duration):0;
 }
 function syncRhythmUi(){
+ streamRevision++;
  const text=rhythmCopy[language],active=padMode==='rhythm';
  document.querySelectorAll<HTMLButtonElement>('[data-pad-mode]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.padMode===padMode)));
  $('#note-editor').hidden=padMode!=='notes';drawing.closest<HTMLElement>('.draw-wrap')!.hidden=padMode==='notes';
@@ -495,11 +498,11 @@ function pickVariant<T extends string>(modes:readonly T[],current:T):T{
  return choices[Math.floor(Math.random()*choices.length)];
 }
 function selectVisualization(mode:VisualizationMode){
- if(visualization!==mode)landscape.clear();visualization=mode;orbit.dataset.visualization=mode;
- orbit.setAttribute('aria-label',mode==='landscape'?visualizationCopy[language].description:t.steps);
+ if(visualization!==mode){landscape.clear();streamCache=null;}visualization=mode;orbit.dataset.visualization=mode;
+ orbit.setAttribute('aria-label',mode==='stream'?visualizationCopy[language].streamDescription:mode==='landscape'?visualizationCopy[language].description:t.steps);
  document.querySelectorAll<HTMLButtonElement>('button[data-visualization]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.visualization===mode)));
  document.querySelectorAll<HTMLButtonElement>('[data-orbit-mode],[data-center-mode]').forEach(button=>{
-  button.disabled=mode==='landscape';if(button.disabled)button.title=visualizationCopy[language].orbitOnly;else button.removeAttribute('title');
+  button.disabled=mode!=='orbit';if(button.disabled)button.title=visualizationCopy[language].orbitOnly;else button.removeAttribute('title');
  });
  persistSettings();
 }
@@ -990,8 +993,28 @@ function previewScore(index:number):NoteScore{
  }
  return result.slice(0,128);
 }
+function streamFrame(time:number){
+ const native=stepsPerBar(),barSeconds=60/bpm*groove.beats;
+ const clock=playing?rhythmPosition(time):0,bar=Math.floor(clock/native),within=clock-bar*native;
+ const clockSeconds=(position:number)=>{const b=Math.floor(position/native),s=position-b*native;return (b+swingPosition(s,native,groove.beats,groove.swing)/native)*barSeconds;};
+ const now=playing?time:0,barStart=now-swingPosition(within,native,groove.beats,groove.swing)/native*barSeconds;
+ const key=[bar,streamRevision,bpm,currentStyle,groove.swing,playing].join(':');
+ if(streamCache?.key!==key)streamCache={key,scores:tracks.map((_,i)=>previewScore(i))};
+ const previews:StreamPreview[]=tracks.map((tr,index)=>{
+  let at=barStart;
+  if(tr.score!==null)at-=bar%2*barSeconds;
+  else if(tappedTrack(index)){
+   const period=tapPattern.beats*8,start=tapPattern.start??0;
+   const cycleStart=start+Math.floor((clock-start)/period)*period;
+   at=now+clockSeconds(cycleStart)-clockSeconds(clock);
+  }
+  return {index,at,notes:streamCache!.scores[index]};
+ });
+ return {time:now,barStart,previews};
+}
 const scoreHits=new Map<string,number>();
 function silenceScoreLane(index:number){
+ streamRevision++;
  landscape.release(index,audio?.currentTime??0);
  cancelGroupNotes(index);groupDisplays[index].clear();noteShapes[index].clear();
  for(const key of scoreHits.keys())if(key.startsWith(index+':'))scoreHits.delete(key);
@@ -1172,7 +1195,7 @@ function schedule(){
  flushGroupNotes();events.sort((a,b)=>a.time-b.time);
 }
 function stop(finishRecordings=true){
- landscape.clear();
+ landscape.clear();streamCache=null;
  chordVoicings.clear();scoreHits.clear();
  cancelGroupNotes();groupDisplays.forEach(row=>row.forEach(g=>g.members.forEach(n=>n.played=false)));
  if(finishRecordings){recordingGeneration++;finishVideoRecording();finishWavRecording();}
@@ -1379,7 +1402,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.querySele
 function position(e:PointerEvent,c:HTMLCanvasElement){const r=c.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*c.width,y:(e.clientY-r.top)/r.height*c.height};}
 orbit.addEventListener('pointerdown',e=>{
  if(e.button!==0)return;
- if(visualization==='landscape'){e.preventDefault();return;}
+ if(visualization!=='orbit'){e.preventDefault();return;}
  const p=position(e,orbit),x=p.x-350,y=p.y-350,r=Math.hypot(x,y);
  // Independent of orbit visibility and active tracks; leave note hit-testing untouched.
  if(r<=80){
@@ -1419,7 +1442,7 @@ $('#sound-app').addEventListener('pointerdown',e=>{
  const target=e.target as HTMLElement;
  // Only the free canvas/background surfaces, never drawing, controls or status text.
  if(!target.matches('#sound-app,.sound-grid,.orbit-wrap,#orbit,#sound-atmosphere'))return;
- if(visualization==='landscape'&&target.matches('#orbit,.orbit-wrap'))return;
+ if(visualization!=='orbit'&&target.matches('#orbit,.orbit-wrap'))return;
  const point=position(e,orbit);
  if(Math.hypot(point.x-350,point.y-350)<=ORBIT_HIT_RADIUS)return;
  e.preventDefault();
@@ -1893,7 +1916,7 @@ function frame(now:number){
  advanceVideoAnimations(now);
  const time=audio?.currentTime||0;
  while(events.length&&events[0].time<=time){const ev=events.shift()!;if(ev.clock!==false){visualStep=ev.step;visualTime=ev.time;visualDuration=ev.duration;}ev.notes.forEach(({track,beat,velocity,note,pitch,length,angle,joinedFrom,group,member,scorePoint})=>{if(scorePoint)scoreHits.set(scorePoint,ev.time);const tr=tracks[track];if(tr.enabled&&!tr.mute&&tr.volume>0){tr.flash[beat]=now;tr.hits[beat]=ev.time;tr.hitVelocities[beat]=velocity;tr.lastVelocity=velocity;
-   if(visualization==='landscape'){
+   if(visualization!=='orbit'){
     const scoreKey=scorePoint?.split(':').map(Number),score=scoreKey&&tr.score?.[scoreKey[1]],first=scoreKey?.[2]===0;
     const seconds=60/bpm*groove.beats*2;
     landscape.record(track,{at:ev.time,pitch:pitch??12,level:velocity,length:first&&score?score.duration*seconds:length??.16,
@@ -1925,6 +1948,10 @@ function frame(now:number){
  const visualMaster=Math.min(1,Number($<HTMLInputElement>('#volume').value)/.3);
  const active=activeTracks();
  if(visualization==='landscape')paintLandscape(oc,landscape,active.map(({tr,index})=>({index,label:String(padNumbers[index]),color:tr.color,volume:tr.volume,mute:tr.mute||tr.volume===0,pitched:isMelodic(tr.instrument)})),time,bpm,groove.beats,dark,playing,reduced.matches,visualMaster,noteEffect);
+ if(visualization==='stream'){
+  const scene=streamFrame(time);
+  paintNoteStream(oc,landscape,active.map(({tr,index})=>({index,label:String(padNumbers[index]),name:instrumentNames[language][instrumentIds.indexOf(tr.instrument)],color:tr.color,volume:tr.volume,mute:tr.mute||tr.volume===0,pitched:isMelodic(tr.instrument)})),scene.previews,scene.time,scene.barStart,bpm,groove.beats,dark,playing,reduced.matches,visualMaster,noteEffect);
+ }
  if(visualization==='orbit'&&orbitAnimation)active.forEach(({tr,index},rank)=>{
   const r=radius(rank,active.length);oc.beginPath();oc.arc(350,350,r,0,Math.PI*2);oc.strokeStyle=tr.color+(dark?'55':'99');oc.lineWidth=dark?1:1.4;oc.stroke();
   // Each orbit carries a continuous comet; audible notes briefly boost its glow.

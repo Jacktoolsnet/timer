@@ -455,3 +455,8 @@ body.score-expanded{overflow:hidden}
 .focus-view.focus-idle .visualization-switch{display:none}
 .center-tile:disabled{opacity:.4;cursor:default}
 @media(max-width:450px){.visualization-switch button{font-size:11px;padding-inline:10px}}
+/* Three foreground views share the same responsive selector. */
+.visualization-switch{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%;max-width:520px}
+.visualization-switch button{min-width:0}.visualization-switch button span{text-align:center}
+#orbit[data-visualization=stream]{cursor:default}
+@media(max-width:600px){.visualization-switch button{flex-direction:column;gap:3px;font-size:10px;padding:6px 3px;min-height:48px}.visualization-switch svg{width:18px;height:18px}}
