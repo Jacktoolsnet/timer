@@ -22,11 +22,13 @@ nicht die Begründung der Gemeinfreiheit.
 - Noch keine neuen Bibliothekseinträge freigegeben. Für Chopin op.28/7 gibt es
   jetzt eine [vollständige abspielbare Coffeehouse-Vorschau](COFFEEHOUSE_PREVIEW.de.md),
   ausdrücklich mit benannter PD-Hilfsnotation und noch offenem historischem Einzelnotenabgleich.
-  Sie ist im Coffeehouse-Ordner direkt als Hörvorschau auswählbar; noch keine finale Abnahme.
+  Alle drei Coffeehouse-Stücke sind inzwischen direkt im Overlay auswählbar:
+  Chopin unverändert, Schumann mit AABB und Brahms mit vollständiger gespielter Form.
+  Details und noch offene historische Einzelnotenabgleiche: [Dreierpaket](COFFEEHOUSE_PRODUCTIONS.de.md).
 - Die vorhandenen Bibliothekslieder bleiben unverändert.
 - **Erster Arbeitsstand:** [Coffeehouse-Quellenpaket](sources/coffeehouse/README.de.md)
   mit drei PDF-Belegen, Seitenzuordnung, Original-/Beleg-Hashes und Offline-Prüfung.
-  Das ist noch kein fertiges musikalisches Dreierpaket; Chopin liegt als Hörvorschau vor.
+  Das Dreierpaket ist jetzt vollständig abspielbar; historischer Detailabgleich bleibt offen.
 
 ## Auswahl: genau drei Titel je Richtung
 
@@ -42,7 +44,7 @@ als vollständiges mehrsätziges Werk ausgegeben.
 | 0 | Klassik | Johann Pachelbel (1653–1706): [Canon in D · 3 Violinen und Basso](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=2047) | W. A. Mozart (1756–1791): [Eine kleine Nachtmusik · I](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=900) | W. A. Mozart (1756–1791): [Rondo alla turca](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=108) | Bestand: regionale Nachprüfung und konkreter Materialabgleich |
 | 0 | Jazz & Blues | Scott Joplin (1868–1917): [The Entertainer](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=263) | Scott Joplin (1868–1917): [Maple Leaf Rag](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=23) | Scott Joplin (1868–1917): [The Easy Winners](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=352) | Bestand: regionale Nachprüfung und konkreter Materialabgleich |
 | 0 | Lo-Fi | Erik Satie (1866–1925): [Gymnopédie No. 1](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=37) | Robert Schumann (1810–1856): [Träumerei](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=504) | Frédéric Chopin (1810–1849): [Prélude e-Moll · op. 28/4](https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=468) | Bestand: regionale Nachprüfung und konkreter Materialabgleich |
-| 1 | Coffeehouse | Robert Schumann: [Von fremden Ländern und Menschen · op.15 Nr.1](https://imslp.org/wiki/Kinderszenen,_Op.15_(Schumann,_Robert)) | Frédéric Chopin: [Prélude A-Dur · op.28 Nr.7](https://imslp.org/wiki/Preludes,_Op.28_(Chopin,_Fr%C3%A9d%C3%A9ric)) | Johannes Brahms: [Walzer As-Dur · op.39 Nr.15](https://imslp.org/wiki/16_Waltzes,_Op.39_(Brahms,_Johannes)) | Historische Seiten gesichert; Transkription offen |
+| 1 | Coffeehouse | Robert Schumann: [Von fremden Ländern und Menschen · op.15 Nr.1](https://imslp.org/wiki/Kinderszenen,_Op.15_(Schumann,_Robert)) | Frédéric Chopin: [Prélude A-Dur · op.28 Nr.7](https://imslp.org/wiki/Preludes,_Op.28_(Chopin,_Fr%C3%A9d%C3%A9ric)) | Johannes Brahms: [Walzer As-Dur · op.39 Nr.15](https://imslp.org/wiki/16_Waltzes,_Op.39_(Brahms,_Johannes)) | Drei vollständige Fassungen im Overlay; Detailabgleich offen |
 | 1 | Ambient | Claude Debussy: [Clair de lune · Suite bergamasque Nr.3](https://imslp.org/wiki/Suite_bergamasque_(Debussy,_Claude)) | Camille Saint-Saëns: [Le Cygne · Carnaval des animaux Nr.13](https://imslp.org/wiki/Le_carnaval_des_animaux_(Saint-Sa%C3%ABns,_Camille)) | Erik Satie: [Gymnopédie Nr.3](https://imslp.org/wiki/3_Gymnop%C3%A9dies_(Satie,_Erik)) | Vorauswahl, Ausgabe/Regionen offen |
 | 1 | Fokus | Johann Sebastian Bach: [Präludium C-Dur · BWV 846/1](https://imslp.org/wiki/The_Well-Tempered_Clavier,_Book_1,_BWV_846-869_(Bach,_Johann_Sebastian)) | Johann Sebastian Bach: [Präludium c-Moll · BWV 999](https://imslp.org/wiki/Prelude_in_C_minor,_BWV_999_(Bach,_Johann_Sebastian)) | Robert Schumann: [Melodie · Album für die Jugend op.68 Nr.1](https://imslp.org/wiki/Album_f%C3%BCr_die_Jugend,_Op.68_(Schumann,_Robert)) | Vorauswahl, Ausgabe/Regionen offen |
 | 2 | Langsamer Walzer | Frédéric Chopin: [Walzer h-Moll · op.69 Nr.2](https://imslp.org/wiki/Waltzes,_Op.69_(Chopin,_Fr%C3%A9d%C3%A9ric)) | Franz Schubert: [Valse noble Nr.1 · D 969 / op.77](https://imslp.org/wiki/12_Valzes_nobles,_D.969_(Schubert,_Franz)) | Pjotr Iljitsch Tschaikowski: [Valse sentimentale · op.51 Nr.6](https://imslp.org/wiki/6_Pieces,_Op.51_(Tchaikovsky,_Pyotr)) | Vorauswahl, Ausgabe/Regionen offen |

@@ -505,7 +505,7 @@
       "tracks": [
         {
           "slot": "coffeehouse-1",
-          "status": "historical_pages_inspected_not_produced",
+          "status": "musical_preview_not_approved",
           "regionReview": {
             "DE": "pending",
             "EU": "pending",
@@ -526,11 +526,14 @@
           "evidenceManifest": "sources/coffeehouse/manifest.json",
           "evidenceSlot": "coffeehouse-1",
           "production": {
-            "transcription": "pending",
-            "scoreComparison": "pending",
-            "arrangement": "pending",
-            "audioAcceptance": "pending",
-            "catalogPublished": false
+            "transcription": "complete_PD_helper_notation; historical_reconciliation_pending",
+            "arrangement": "complete_Coffeehouse_production",
+            "scoreComparison": "historical_meter_form_opening_and_ending_checked; detailed_reconciliation_pending",
+            "audioAcceptance": "technical_QA; human_listening_pending",
+            "catalogPublished": false,
+            "overlaySelectable": true,
+            "previewPath": "/examples/coffeehouse-schumann-foreign.preview.song.json",
+            "report": "coffeehouse-productions-report.json"
           }
         },
         {
@@ -563,12 +566,13 @@
             "catalogPublished": false,
             "previewPath": "/examples/coffeehouse-chopin-prelude-a.preview.song.json",
             "report": "coffeehouse-preview-report.json",
-            "overlaySelectable": true
+            "overlaySelectable": true,
+            "listeningFeedback": "User reports liking the complete rendition; historical reconciliation remains pending."
           }
         },
         {
           "slot": "coffeehouse-3",
-          "status": "historical_pages_inspected_not_produced",
+          "status": "musical_preview_not_approved",
           "regionReview": {
             "DE": "pending",
             "EU": "pending",
@@ -590,11 +594,14 @@
           "evidenceManifest": "sources/coffeehouse/manifest.json",
           "evidenceSlot": "coffeehouse-3",
           "production": {
-            "transcription": "pending",
-            "scoreComparison": "pending",
-            "arrangement": "pending",
-            "audioAcceptance": "pending",
-            "catalogPublished": false
+            "transcription": "complete_PD_helper_notation; historical_reconciliation_pending",
+            "arrangement": "complete_Coffeehouse_production",
+            "scoreComparison": "historical_meter_form_opening_and_ending_checked; detailed_reconciliation_pending",
+            "audioAcceptance": "technical_QA; human_listening_pending",
+            "catalogPublished": false,
+            "overlaySelectable": true,
+            "previewPath": "/examples/coffeehouse-brahms-waltz.preview.song.json",
+            "report": "coffeehouse-productions-report.json"
           }
         }
       ]

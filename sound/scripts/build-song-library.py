@@ -294,6 +294,7 @@ def build(entry):
  return entry
 
 def main():
+ REPORT.clear() # A prior preview build must not leak extra entries into the stable report.
  manifest=[build(e) for e in ENTRIES]
  (OUT/'catalog.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n')
  (OUT/'production-report.json').write_text(json.dumps(REPORT,ensure_ascii=False,indent=2)+'\n')
