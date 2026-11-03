@@ -9,7 +9,7 @@ export function validScore(value:unknown):value is NoteScore{
  return value.every(n=>n&&Number.isFinite(n.start)&&n.start>=0&&n.start<1&&Number.isFinite(n.duration)&&n.duration>=.002&&n.start+n.duration<=1.000001
   &&Array.isArray(n.points)&&n.points.length>0&&n.points.length<=32&&n.points.every((p:ScorePoint,i:number)=>p&&Number.isFinite(p.offset)&&p.offset>=0&&p.offset<n.duration
    &&(i===0?p.offset===0:p.offset>n.points[i-1].offset)&&Number.isInteger(p.pitch)&&p.pitch>=-24&&p.pitch<=60
-   &&Number.isFinite(p.velocity)&&p.velocity>=.05&&p.velocity<=1));
+   &&Number.isFinite(p.velocity)&&p.velocity>=0&&p.velocity<=1));
 }
 export function scoreValue(note:ScoreNote,offset:number):ScorePoint{
  const next=note.points.findIndex(p=>p.offset>offset);

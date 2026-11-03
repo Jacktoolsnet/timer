@@ -415,3 +415,34 @@ body:not(.focus-view) .sound-top{margin-bottom:20px}
 @media(max-width:500px){#note-editor{--score-sidebar:38px}}
 #score-grid text{font-size:9px}.score-point.is-selected .score-note{stroke:var(--text);stroke-width:3}.score-point.is-playing .score-note{filter:drop-shadow(0 0 8px var(--score-color));stroke:white;stroke-width:3}.score-connection{stroke-width:4;vector-effect:non-scaling-stroke}
 @media(max-width:800px){#note-editor:not([data-selected=""]){aspect-ratio:auto;min-height:620px}}
+/* A selected score expands into the top layer; audio continues behind the editor. */
+body.score-expanded{overflow:hidden}
+.orbit-wrap,.sound-transport,.pad-mode-controls{transition:opacity .24s ease,visibility .24s ease}
+.score-expanded :is(.orbit-wrap,.sound-transport,.pad-mode-controls){opacity:0;visibility:hidden;pointer-events:none}
+#score-expanded-dialog{position:fixed;inset:0;margin:0;width:100%;max-width:none;height:100dvh;max-height:none;padding:max(20px,env(safe-area-inset-top)) max(24px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(24px,env(safe-area-inset-left));border:0;border-radius:0;background:var(--surface);color:var(--text);overflow:hidden;box-sizing:border-box}
+#score-expanded-dialog::backdrop{background:transparent}
+#score-expanded-dialog>#note-editor{width:100%;height:100%;min-height:0;aspect-ratio:auto;transform-origin:top left;gap:12px}
+#score-expanded-dialog #score-workspace{min-height:0;gap:12px}
+#score-expanded-dialog .score-heading{font-size:16px;align-items:center;flex-shrink:0}
+#score-expanded-dialog .score-heading span{font-size:12px}
+#score-expanded-dialog .score-paper{flex:1;min-height:80px;border-radius:16px}
+#score-expanded-dialog #score-companions{grid-template-columns:repeat(8,minmax(0,1fr));flex-shrink:0}
+#score-expanded-dialog #score-companions button{min-height:62px}
+#score-expanded-dialog #score-companions span{font-size:11px}
+#score-expanded-dialog .score-actions{flex-shrink:0}
+#score-expanded-dialog #score-volume{height:min(60dvh,420px)}
+@media(max-width:650px){#score-expanded-dialog{padding:max(12px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left))}#score-expanded-dialog #score-companions{grid-template-columns:repeat(4,minmax(0,1fr))}#score-expanded-dialog #score-companions button{min-height:48px}#score-expanded-dialog #score-companions span{font-size:9px}#score-expanded-dialog #score-workspace{gap:8px}}
+@media(max-height:500px) and (min-width:651px){#score-expanded-dialog{padding:8px 16px}#score-expanded-dialog #score-workspace{gap:6px}#score-expanded-dialog #score-companions button{min-height:42px}#score-expanded-dialog #score-companions svg{max-height:16px}}
+@media(prefers-reduced-motion:reduce){.orbit-wrap,.sound-transport,.pad-mode-controls{transition:none}}
+
+.score-expanded.score-collapsing :is(.orbit-wrap,.sound-transport,.pad-mode-controls){opacity:1;visibility:visible}
+#score-expanded-dialog .score-actions button{flex:0 0 46px}
+#score-expanded-dialog #score-done{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 18%,var(--bg))}
+#score-expanded-dialog #score-grid text{font-size:11px}
+#score-grid:focus-visible{outline:2px solid color-mix(in srgb,var(--accent) 65%,transparent);outline-offset:-3px;border-radius:12px}
+/* Miniature note heads follow the shared audible onset events, only in note mode. */
+.score-preview-note.is-playing{fill:color-mix(in srgb,var(--lane),white calc(var(--preview-glow,0)*85%));filter:drop-shadow(0 0 calc(var(--preview-glow,0)*5px) var(--lane))}
+@media(prefers-reduced-motion:reduce){.score-preview-note.is-playing{filter:none}}
+/* High-contrast precision cursor: identical hotspot in drawing, orbit and note grid. */
+:is(#orbit,#drawing,#score-grid){cursor:url('/cursors/edit-crosshair.svg') 16 16,crosshair}
+#score-grid .score-point{cursor:pointer}

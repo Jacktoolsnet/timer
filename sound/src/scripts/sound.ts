@@ -469,7 +469,7 @@ function currentGroupDisplay(index:number,beat:number){
  return {stamp:-Infinity,anchor:beat,kind:definition.kind,definition,instrument:tr.instrument,slots:tr.slots,phase:tr.phase,direction:tr.direction,style:currentStyle,
   members:definition.notes.map(n=>({time:Infinity,angle:noteTimingAngle(beat,tr.slots,tr.phase,tr.direction,groupOffset(n.offset,definition.notes.length,groove.swing)*window,barSeconds,groove.beats,groove.swing),length:n.gate*window,velocity:n.velocity,note:null,played:false}))} satisfies GroupDisplay;
 }
-const events:{time:number;step:number;duration:number;clock?:boolean;notes:{track:number;beat:number;velocity:number;note?:number|null;length?:number;angle?:number;joinedFrom?:NoteJoin;group?:GroupDisplay;member?:number;scorePoint?:string}[]}[]=[];
+const events:{time:number;step:number;duration:number;clock?:boolean;notes:{track:number;beat:number;velocity:number;note?:number|null;pitch?:number;length?:number;angle?:number;joinedFrom?:NoteJoin;group?:GroupDisplay;member?:number;scorePoint?:string}[]}[]=[];
 function noteShape(index:number,beat:number){
  const tr=tracks[index],shape=noteShapes[index].get(beat);
  return shape&&shape.instrument===tr.instrument&&shape.slots===tr.slots&&shape.style===currentStyle&&shape.direction===tr.direction&&shape.phase===tr.phase?shape:undefined;
@@ -843,7 +843,7 @@ function playNoteGroup(index:number,beat:number,time:number,nominalTime:number,v
   const angle=noteTimingAngle(beat,slots,phase,direction,at-nominalTime,barSeconds,groove.beats,groove.swing);
   display.members[member]={time:at,angle,length:played.length,velocity:velocity*n.velocity*trim*currentMix[index],note:played.note,played:false};
   events.push({time:at,step:step%stepsPerBar(),duration:60/bpm/4,clock:false,
-   notes:[{track:index,beat,velocity:display.members[member].velocity,note:played.note,length:played.length,angle,group:display,member}]});
+   notes:[{track:index,beat,velocity:display.members[member].velocity,note:played.note,pitch:played.pitch,length:played.length,angle,group:display,member}]});
  };
  play(0);
  for(let member=1;member<group.notes.length;member++){
@@ -862,15 +862,15 @@ function playTapped(lane:RhythmLane,time:number,clockStep:number){
  const tr=tracks[lane];if(!audio||!tr.enabled||tr.mute||tr.volume<=0)return;
  const beat=Math.floor((clockStep%stepsPerBar())/stepsPerBar()*tr.slots)%tr.slots;
  const noteSlot=((clockStep-(tapPattern.start??0))%(tapPattern.beats*8)+tapPattern.beats*8)%(tapPattern.beats*8);
- let tapNote=isMelodic(tr.instrument)?tapPattern.notes[lane][noteSlot]:null,length=0,playedJoin:NoteJoin|undefined;
+ let tapNote=isMelodic(tr.instrument)?tapPattern.notes[lane][noteSlot]:null,length=0,playedJoin:NoteJoin|undefined,playedPitch:number|undefined;
  if(percussion.has(tr.instrument))length=rhythmPlayer?.hit(lane,time,tr.instrument,tr.volume)??0;
  else{
   const row=tapPattern.hits[lane],offset=((clockStep-(tapPattern.start??0))%row.length+row.length)%row.length;
   let gap=1;while(gap<row.length&&!row[(offset+gap)%row.length])gap++;
   const played=voiceInstrument(lane,time,beat,1,tr.instrument,undefined,true,Math.min(60/bpm*2,gap*60/bpm/4*.92),tapNote);
-  tapNote=played?.note??null;length=played?.length??0;playedJoin=played?.joinedFrom;
+  tapNote=played?.note??null;length=played?.length??0;playedJoin=played?.joinedFrom;playedPitch=played?.pitch;
  }
- events.push({time,step:clockStep%stepsPerBar(),duration:60/bpm/4,clock:false,notes:[{track:lane,beat,velocity:1,note:tapNote,length,joinedFrom:playedJoin}]});
+ events.push({time,step:clockStep%stepsPerBar(),duration:60/bpm/4,clock:false,notes:[{track:lane,beat,velocity:1,note:tapNote,pitch:playedPitch,length,joinedFrom:playedJoin}]});
  events.sort((a,b)=>a.time-b.time);
 }
 
@@ -1013,7 +1013,7 @@ function scheduleScores(s:number,duration:number){
      voiceInstrument(index,time,beat,1,tr.instrument,undefined,true,part.duration*seconds,null,undefined,{note:part,seconds});
     }
     const angle=((tr.direction*clock+tr.phase/tr.slots)%1)*Math.PI*2-Math.PI/2;
-    events.push({time,step:s,duration,clock:false,notes:[{track:index,beat,velocity:p.velocity,note:isMelodic(tr.instrument)?tapNoteDegree(currentStyle,harmonyBar(),p.pitch):null,length:segment*seconds,angle,scorePoint:index+':'+noteIndex+':'+pointIndex}]});
+    events.push({time,step:s,duration,clock:false,notes:[{track:index,beat,velocity:p.velocity,note:isMelodic(tr.instrument)?tapNoteDegree(currentStyle,harmonyBar(),p.pitch):null,pitch:p.pitch,length:segment*seconds,angle,scorePoint:index+':'+noteIndex+':'+pointIndex}]});
    });
   });
  });
@@ -1146,7 +1146,7 @@ function schedule(){
      const current=(tr.points[beat]||extra)&&mix>0?voice(i,time,beat,velocity*mix):null;
      played=current!==null&&(mix>=.5||previous===null)?current:previous;
     }
-    if(velocity*currentMix[i]>.0001)events.push({time,step:s,duration,clock:false,notes:[{track:i,beat,velocity:velocity*currentMix[i],note:played?.note,length:played?.length,angle,joinedFrom:played?.joinedFrom}]});
+    if(velocity*currentMix[i]>.0001)events.push({time,step:s,duration,clock:false,notes:[{track:i,beat,velocity:velocity*currentMix[i],note:played?.note,pitch:played?.pitch,length:played?.length,angle,joinedFrom:played?.joinedFrom}]});
    }
    };playNote();
   }});
@@ -1871,7 +1871,8 @@ function renderCenter(time:number,dark:boolean){
 function frame(now:number){
  advanceVideoAnimations(now);
  const time=audio?.currentTime||0;
- while(events.length&&events[0].time<=time){const ev=events.shift()!;if(ev.clock!==false){visualStep=ev.step;visualTime=ev.time;visualDuration=ev.duration;}ev.notes.forEach(({track,beat,velocity,note,length,angle,joinedFrom,group,member,scorePoint})=>{if(scorePoint)scoreHits.set(scorePoint,ev.time);const tr=tracks[track];if(tr.enabled&&!tr.mute&&tr.volume>0){tr.flash[beat]=now;tr.hits[beat]=ev.time;tr.hitVelocities[beat]=velocity;tr.lastVelocity=velocity;
+ while(events.length&&events[0].time<=time){const ev=events.shift()!;if(ev.clock!==false){visualStep=ev.step;visualTime=ev.time;visualDuration=ev.duration;}ev.notes.forEach(({track,beat,velocity,note,pitch,length,angle,joinedFrom,group,member,scorePoint})=>{if(scorePoint)scoreHits.set(scorePoint,ev.time);const tr=tracks[track];if(tr.enabled&&!tr.mute&&tr.volume>0){tr.flash[beat]=now;tr.hits[beat]=ev.time;tr.hitVelocities[beat]=velocity;tr.lastVelocity=velocity;
+   if(padMode==='notes'&&velocity>0&&Number($<HTMLInputElement>('#volume').value)>0)noteEditor?.pulse(track,ev.time,scorePosition(ev.time),pitch);
    if(group&&group.definition===usableGroup(track,beat)){
     const current=groupDisplays[track].get(beat);
     if(!current||group.stamp>=current.stamp){if(member!==undefined)group.members[member].played=true;groupDisplays[track].set(beat,group);}
@@ -1975,7 +1976,7 @@ function frame(now:number){
  }
  const progress=$<HTMLProgressElement>('#rhythm-progress');progress.max=tapPattern.beats*8;
  progress.value=tapPattern.state==='armed'?0:tapPattern.state==='loop'?progress.max:Math.max(0,rhythmPosition()-(tapPattern.start??0));
- renderPadGestures(now,dark);noteEditor?.animate(time,scorePosition(time),playing);
+ renderPadGestures(now,dark);if(padMode==='notes')noteEditor?.animate(time,scorePosition(time),playing);
  videoRecording?.frame(now);
  requestAnimationFrame(frame);
 }

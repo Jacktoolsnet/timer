@@ -4,11 +4,11 @@ import {decodeSettings} from '../src/lib/sound-settings';
 import {partsForStyle} from '../src/lib/presets';
 const chain:NoteScore=[{start:.1,duration:.3,points:[{offset:0,pitch:0,velocity:.2},{offset:.1,pitch:7,velocity:1},{offset:.2,pitch:4,velocity:.4}]}];
 test('score validation, interpolated pitch/level and point deletion preserve bounded independent notes',()=>{
- expect(validScore(chain)).toBe(true);const copy=cloneScore(chain);copy[0].points[0].pitch=9;expect(chain[0].points[0].pitch).toBe(0);
+ expect(validScore(chain)).toBe(true);expect(validScore([{start:0,duration:.1,points:[{offset:0,pitch:0,velocity:0}]}])).toBe(true);const copy=cloneScore(chain);copy[0].points[0].pitch=9;expect(chain[0].points[0].pitch).toBe(0);
  expect(scoreValue(chain[0],.05).pitch).toBeCloseTo(3.5);expect(scoreValue(chain[0],.05).velocity).toBeCloseTo(.6);
  const removed=deleteScorePoint(chain,0,0);expect(removed[0].start).toBeCloseTo(.2);expect(removed[0].points[0].offset).toBe(0);expect(validScore(removed)).toBe(true);
  expect(deleteScorePoint([{start:0,duration:.1,points:[{offset:0,pitch:0,velocity:1}]}],0,0)).toEqual([]);
- for(const invalid of [[{...chain[0],start:.9}], [{...chain[0],duration:0}], [{...chain[0],points:[{offset:0,pitch:Infinity,velocity:1}]}], [{...chain[0],points:[{offset:0,pitch:0,velocity:0}]}]])expect(validScore(invalid)).toBe(false);
+ for(const invalid of [[{...chain[0],start:.9}], [{...chain[0],duration:0}], [{...chain[0],points:[{offset:0,pitch:Infinity,velocity:1}]}], [{...chain[0],points:[{offset:0,pitch:0,velocity:-.1}]}]])expect(validScore(invalid)).toBe(false);
 });
 function fixture(score:NoteScore|null=null,instrument='strings'){
  return {version:2,style:'pop',bpm:220,volume:.3,center:'off',background:'off',orbit:'dot',tracks:partsForStyle('pop').map((p,i)=>({score:i===4?score:null,enabled:i===4,mute:false,instrument:i===4?instrument:p.instrument,points:Array.from({length:16},(_,s)=>s===0),grid:16,slots:16,pitch:0,volume:.5,phase:0,direction:1,directionMode:'forward',randomDynamics:false,morph:null}))};
@@ -17,8 +17,8 @@ async function load(page:Page,data:ReturnType<typeof fixture>){
  await page.locator('#files-open').click();await page.locator('#json-file').setInputFiles({name:'score.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(data))});await page.locator('#files-close').click();
 }
 async function read(page:Page){return page.locator('#note-editor').evaluate(el=>JSON.parse((el as HTMLElement).dataset.score!) as NoteScore);}
-async function choose(page:Page){await page.locator('[data-pad-mode=notes]').click();await page.locator('[data-score-track="4"]').click();}
-async function clickGrid(page:Page,x:number,y:number){const b=(await page.locator('#score-grid').boundingBox())!;await page.mouse.click(b.x+x/700*b.width,b.y+y/500*b.height);}
+async function choose(page:Page){await page.locator('[data-pad-mode=notes]').click();await page.locator('[data-score-track="4"]').click();await page.locator('#score-grid').scrollIntoViewIfNeeded();}
+async function clickGrid(page:Page,x:number,y:number){await page.locator('#score-grid').scrollIntoViewIfNeeded();const b=(await page.locator('#score-grid').boundingBox())!;await page.mouse.click(b.x+x/700*b.width,b.y+y/500*b.height);}
 async function exported(page:Page){
  await page.locator('#files-open').click();const download=page.waitForEvent('download');await page.locator('#json-export').click();const stream=await (await download).createReadStream();const chunks:Buffer[]=[];for await(const c of stream!)chunks.push(c);await page.locator('#files-close').click();return JSON.parse(Buffer.concat(chunks).toString());
 }
@@ -32,7 +32,7 @@ test('opening the editor preserves generated notes; changes can be discarded, ac
  await page.locator('[data-pad-mode=notes]').click();await expect(page.locator('#score-instruments [data-score-track]')).toHaveCount(9);
  expect((await page.locator('#drawing').getAttribute('data-lane-levels'))?.split(',').every(v=>v==='1')).toBe(true);
  await page.locator('[data-score-track="4"]').click();const original=await read(page);expect(original.length).toBeGreaterThan(0);await expect(page.locator('#score-companions [data-score-track]')).toHaveCount(8);
- await clickGrid(page,280,330);expect((await read(page)).length).toBe(original.length+1);await page.locator('#score-volume').fill('35');expect((await read(page)).at(-1)!.points[0].velocity).toBe(.35);
+ await clickGrid(page,280,330);expect((await read(page)).length).toBe(original.length+1);await page.locator('#score-companions [data-score-track="3"]').click();await expect(page.locator('#score-status')).toHaveText('Bitte zuerst übernehmen oder verwerfen.');await expect(page.locator('#note-editor')).toHaveAttribute('data-selected','4');await page.locator('#score-volume').fill('35');expect((await read(page)).at(-1)!.points[0].velocity).toBe(.35);
  await page.locator('#score-grid').focus();await page.keyboard.press('Escape');await expect(page.locator('#note-editor')).toHaveAttribute('data-selected','');
  await page.locator('[data-score-track="4"]').click();expect(await read(page)).toEqual(original);
  await clickGrid(page,280,330);await page.locator('#score-done').click();const saved=await exported(page);expect(saved.tracks[4].score.length).toBe(original.length+1);
@@ -49,7 +49,7 @@ test('drawing a connection creates independent pitches and volumes, supports fre
  await page.locator('#score-volume').fill('25');expect((await read(page))[0].points.at(-1)!.velocity).toBe(.25);expect((await read(page))[0].points[0].velocity).toBe(.8);
  await page.locator('#score-grid').focus();await page.keyboard.press('Delete');expect((await read(page))[0].points.length).toBe(notes[0].points.length-1);
  await page.locator('#score-snap').uncheck();await clickGrid(page,573,370);const free=(await read(page)).at(-1)!;expect(Math.abs(free.start*32-Math.round(free.start*32))).toBeGreaterThan(.01);
- await page.locator('[data-pad-mode=draw]').click();await choose(page);expect(await read(page)).toEqual([]);
+ await page.locator('#score-cancel').click();await expect(page.locator('#score-expanded-dialog')).not.toBeVisible();await page.locator('[data-pad-mode=draw]').click();await choose(page);expect(await read(page)).toEqual([]);
 });
 test('held score curves glide in real audio, ramp volume and survive Random Play without extra attacks',async({page})=>{
  await page.addInitScript(()=>{
@@ -69,7 +69,7 @@ test('only accepted score drafts enter opt-in browser storage, and reload never 
  await page.goto('/de/');await load(page,fixture([]));await page.locator('#palette-dropdown summary').click();await page.locator('#remember-preferences').check();await page.locator('#preferences-close').click();
  await choose(page);await clickGrid(page,280,330);
  const stored=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('jacktools.sound.settings.v1')!).tracks[4].score);
- await expect.poll(stored).toEqual([]);await page.locator('#score-done').click();await expect.poll(stored).not.toEqual([]);const accepted=await stored();
+ await expect.poll(stored).toEqual([]);await page.locator('#score-volume').focus();await page.keyboard.press('Enter');await expect.poll(stored).not.toEqual([]);const accepted=await stored();
  await page.locator('[data-score-track="4"]').click();await clickGrid(page,450,220);await expect.poll(stored).toEqual(accepted);
  await page.reload();await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false');await expect(page.locator('#note-editor')).toHaveAttribute('data-selected','');
  await page.locator('[data-score-track="4"]').click();expect(await read(page)).toEqual(accepted);
@@ -87,4 +87,43 @@ test('touch adds and selects notes; pitch grid occupies the visible paper in all
   if(info.project.name==='mobile')await page.touchscreen.tap(box.x+box.width*.4,box.y+box.height*.5);else await page.mouse.click(box.x+box.width*.4,box.y+box.height*.5);
   expect(await read(page)).toHaveLength(1);await expect(page.locator('#score-volume')).toBeVisible();
  }
+});
+
+test('selection expands into a viewport editor and accept/cancel restore the original view without stopping audio',async({page})=>{
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/de/');await load(page,fixture([]));await page.locator('#play').click();
+ await page.locator('[data-pad-mode=notes]').click();await page.locator('[data-score-track="4"]').scrollIntoViewIfNeeded();const scroll=await page.evaluate(()=>scrollY);
+ await page.locator('[data-score-track="4"]').click();await page.locator('#score-grid').scrollIntoViewIfNeeded();
+ await expect(page.locator('#score-expanded-dialog')).toBeVisible();await expect(page.locator('.orbit-wrap')).toBeHidden();await expect(page.locator('.sound-transport')).toBeHidden();
+ const bounds=(await page.locator('#score-grid').boundingBox())!;expect(bounds.width).toBeGreaterThan(page.viewportSize()!.width*.65);expect(bounds.height).toBeGreaterThan(page.viewportSize()!.height*.45);
+ await clickGrid(page,300,300);await page.locator('#score-done').click();await expect(page.locator('#score-expanded-dialog')).not.toBeVisible();await expect(page.locator('.orbit-wrap')).toBeVisible();await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
+ expect(Math.abs(await page.evaluate(()=>scrollY)-scroll)).toBeLessThan(3);await expect(page.locator('#note-editor')).toHaveAttribute('data-selected','');
+ await page.locator('[data-score-track="4"]').click();await page.locator('#score-grid').scrollIntoViewIfNeeded();const accepted=await read(page);await clickGrid(page,500,210);await page.locator('#score-grid').focus();await page.keyboard.press('Escape');await expect(page.locator('#score-expanded-dialog')).not.toBeVisible();
+ await page.locator('[data-score-track="4"]').click();expect(await read(page)).toEqual(accepted);await page.locator('#score-cancel').click();expect(errors).toEqual([]);
+});
+test('expanded editor also works in focus view with reduced motion and keeps the prior focus state',async({page})=>{
+ await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/de/');await page.evaluate(()=>{document.documentElement.requestFullscreen=()=>Promise.reject(new Error('test fallback'));});
+ await page.locator('#focus').click();await page.locator('[data-pad-mode=notes]').click();await page.locator('[data-score-track="4"]').click();await expect(page.locator('#score-expanded-dialog')).toBeVisible();
+ await page.locator('#score-companions [data-score-track="3"]').focus();await page.keyboard.press('Enter');await expect(page.locator('#note-editor')).toHaveAttribute('data-selected','3');await expect(page.locator('#score-expanded-dialog')).toBeVisible();
+ await page.locator('#score-grid').focus();await page.keyboard.press('Escape');await expect(page.locator('#score-expanded-dialog')).not.toBeVisible();await expect(page.locator('body')).toHaveClass(/focus-view/);await expect(page.locator('body')).not.toHaveClass(/score-expanded/);await expect(page.locator('#focus')).toHaveAttribute('aria-pressed','true');
+});
+
+test('miniature note points follow actual pitched onsets and stop animating outside note mode',async({page})=>{
+ const score:NoteScore=[0,7,12].map((pitch,i)=>({start:.05+i*.15,duration:.04,points:[{offset:0,pitch,velocity:.8}]}));
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/de/');await load(page,fixture(score,'pluck'));await page.locator('[data-pad-mode=notes]').click();
+ await expect(page.locator('#score-status')).toBeEmpty();
+ await page.evaluate(()=>{
+  (window as any).miniHits=[];
+  new MutationObserver(changes=>{for(const change of changes){const node=change.target as SVGCircleElement;if(node.tagName==='circle'&&node.dataset.previewHit)(window as any).miniHits.push({pitch:Number(node.dataset.previewPitch),start:Number(node.dataset.previewStart),time:Number(node.dataset.previewHit)});}}).observe(document.querySelector('#score-instruments')!,{subtree:true,attributes:true,attributeFilter:['data-preview-hit']});
+ });
+ await page.locator('#play').click();await expect.poll(()=>page.evaluate(()=>(window as any).miniHits.length)).toBeGreaterThanOrEqual(3);
+ const hits=await page.evaluate(()=>(window as any).miniHits.slice(0,3) as {pitch:number;time:number}[]);
+ expect(hits.map(h=>h.pitch)).toEqual([0,7,12]);expect(hits[1].time-hits[0].time).toBeCloseTo(.15*60/220*8,2);
+ await expect(page.locator('#score-instruments circle.is-playing')).not.toHaveCount(0);
+ await page.locator('[data-pad-mode=draw]').click();await expect(page.locator('#note-editor')).toBeHidden();
+ await page.evaluate(()=>{
+  (window as any).hiddenPreviewMutations=0;new MutationObserver(changes=>{(window as any).hiddenPreviewMutations+=changes.length;}).observe(document.querySelector('#score-instruments')!,{subtree:true,attributes:true,attributeFilter:['r','style','class','data-preview-hit']});
+ });
+ await page.waitForTimeout(850);expect(await page.evaluate(()=>(window as any).hiddenPreviewMutations)).toBe(0);
+ await page.locator('[data-pad-mode=notes]').click();await expect.poll(()=>page.locator('#score-instruments circle.is-playing').count()).toBeGreaterThan(0);
+ await page.locator('#play').click();await expect(page.locator('#score-instruments circle.is-playing')).toHaveCount(0);expect(errors).toEqual([]);
 });
