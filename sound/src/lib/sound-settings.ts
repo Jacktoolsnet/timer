@@ -1,3 +1,4 @@
+import {visualizationModes,type VisualizationMode} from './visualization';
 import {validScore,type NoteScore} from './note-score';
 import {validNoteGroups,type NoteGroups} from './note-groups';
 import type {VideoAnimationSettings} from './video-animations';
@@ -22,6 +23,7 @@ export type SavedTrack={
  morph:{to:InstrumentId;progress:number}|null;
 };
 export type SoundSettings={
+ visualization?:VisualizationMode;
  recording?:{restart:boolean;random:boolean;fullscreen:boolean;minutes?:number;videoFormat?:'landscape'|'portrait';videoInfo?:VideoInfoSettings;animations?:VideoAnimationSettings};
  pad?:{mode:'draw'|'rhythm'|'notes';beats:2|3|4;hits:boolean[][];notes?:(number|null)[][]};
  version:2;style:StyleId;dance?:DanceId|null;groove?:GrooveChoice;bpm:number;volume:number;transpose?:number;noteEffect?:number;tracks:SavedTrack[];
@@ -36,6 +38,7 @@ export function decodeSettings(raw:string|null):SoundSettings|null{
   if(!s||![1,2].includes(s.version)||!member(styleIds,s.style)||!number(s.bpm,40,220)||!number(s.volume,0,.7)
    ||!member(backgroundModes,s.background)||!member(centerModes,s.center)||!member(orbitModes,s.orbit)
    ||!Array.isArray(s.tracks)||!(s.version===1?[8,9]:[ORBIT_COUNT]).includes(s.tracks.length))return null;
+  if(s.visualization!==undefined&&!member(visualizationModes,s.visualization))return null;
   if(s.recording!==undefined&&(!s.recording||Array.isArray(s.recording)||['restart','random','fullscreen'].some(key=>typeof s.recording[key]!=='boolean')))return null;
   if(s.recording?.minutes!==undefined&&(!number(s.recording.minutes,1,10)||!Number.isInteger(s.recording.minutes)))return null;
   if(s.recording?.videoFormat!==undefined&&!member(['landscape','portrait'],s.recording.videoFormat))return null;

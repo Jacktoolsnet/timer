@@ -446,3 +446,12 @@ body.score-expanded{overflow:hidden}
 /* High-contrast precision cursor: identical hotspot in drawing, orbit and note grid. */
 :is(#orbit,#drawing,#score-grid){cursor:url('/cursors/edit-crosshair.svg') 16 16,crosshair}
 #score-grid .score-point{cursor:pointer}
+/* Independent view selection; the same canvas also supplies the MP4 export. */
+.visualization-switch{display:flex;justify-content:center;gap:5px;margin:0 auto 8px;width:max-content;max-width:100%;padding:4px;border:1px solid var(--line);border-radius:14px;background:color-mix(in srgb,var(--bg) 88%,transparent)}
+.visualization-switch button{display:flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:7px 12px;border-radius:10px;background:transparent;color:var(--muted);font:inherit;font-size:12px;cursor:pointer}
+.visualization-switch button[aria-pressed=true]{background:color-mix(in srgb,var(--accent) 16%,var(--surface));color:var(--text);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 35%,transparent)}
+.visualization-switch svg{width:20px;height:20px;flex-shrink:0}
+#orbit[data-visualization=landscape]{cursor:default}
+.focus-view.focus-idle .visualization-switch{display:none}
+.center-tile:disabled{opacity:.4;cursor:default}
+@media(max-width:450px){.visualization-switch button{font-size:11px;padding-inline:10px}}

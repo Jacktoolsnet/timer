@@ -1,3 +1,5 @@
+import {LandscapeHistory,paintLandscape} from '../lib/landscape';
+import {visualizationCopy,type VisualizationMode} from '../lib/visualization';
 import {cloneScore,type NoteScore,type ScoreNote} from '../lib/note-score';
 import {createNoteEditor} from './note-editor';
 import {genreGroupCount,groupAnchorWeight,phraseContour,responsePhrase,phraseBreath,conversationLevel,phraseNoteAllowed,leadChord,instrumentGroup,windScoop,firstPhraseAttack,ornamentPitch} from '../lib/musicality';
@@ -76,6 +78,8 @@ let lastPadDark:boolean|undefined;
 let visualStep=0,visualTime=0,visualDuration=.15;
 const language=document.documentElement.lang as keyof typeof styleCopy;
 let currentStyle:StyleId='electronic',pendingStyle:StyleId|null=null;
+let visualization:VisualizationMode='orbit';
+const landscape=new LandscapeHistory();
 let currentDance:DanceId|null=null,pendingDance:DanceId|null=null;
 function currentPreset(){return currentDance?dances[currentDance].preset:presets[currentStyle];}
 function rhythmTrack(i:number){return danceFoundation(currentDance,i);}
@@ -384,7 +388,7 @@ function snapshotSettings(includeDraft=false):SoundSettings{
  const backup=includeDraft?null:rhythmBackup;
  return {
    version:2,style:currentStyle,dance:currentDance,groove:grooveChoice,bpm,transpose,noteEffect,volume:Number($<HTMLInputElement>('#volume').value),
-   background:backgroundChoice,center:centerChoice,orbit:orbitChoice,
+   visualization,background:backgroundChoice,center:centerChoice,orbit:orbitChoice,
    recording:{restart:$<HTMLInputElement>('#recording-restart').checked,random:$<HTMLInputElement>('#recording-random').checked,fullscreen:$<HTMLInputElement>('#recording-fullscreen').checked,minutes:Number($<HTMLInputElement>('#recording-duration').value),videoFormat:chosenVideoFormat(),videoInfo:chosenVideoInfo(),animations:chosenVideoAnimations()},
    pad:{mode:padMode,beats:(backup??tapPattern).beats,hits:(backup??tapPattern).hits.map(lane=>[...lane]),notes:(backup??tapPattern).notes.map(lane=>[...lane])},
    tracks:tracks.map((live,i)=>{const tr=backup&&rhythmTouched.has(i)&&rhythmTrackBackup?{...live,...rhythmTrackBackup[i]}:live;return ({
@@ -490,6 +494,16 @@ function pickVariant<T extends string>(modes:readonly T[],current:T):T{
  const choices=modes.filter(mode=>mode!==current);
  return choices[Math.floor(Math.random()*choices.length)];
 }
+function selectVisualization(mode:VisualizationMode){
+ if(visualization!==mode)landscape.clear();visualization=mode;orbit.dataset.visualization=mode;
+ orbit.setAttribute('aria-label',mode==='landscape'?visualizationCopy[language].description:t.steps);
+ document.querySelectorAll<HTMLButtonElement>('button[data-visualization]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.visualization===mode)));
+ document.querySelectorAll<HTMLButtonElement>('[data-orbit-mode],[data-center-mode]').forEach(button=>{
+  button.disabled=mode==='landscape';if(button.disabled)button.title=visualizationCopy[language].orbitOnly;else button.removeAttribute('title');
+ });
+ persistSettings();
+}
+document.querySelectorAll<HTMLButtonElement>('button[data-visualization]').forEach(button=>button.addEventListener('click',()=>selectVisualization(button.dataset.visualization as VisualizationMode)));
 function selectCenterMode(choice:SoundSettings['center']){
  centerChoice=choice;
  centerMode=choice==='random'?pickVariant(currentStyle==='focus'?['ring','filled','sine']:currentStyle==='sport'?['ring','bars','sun']:['ring','filled','sine','bars','sun'],centerMode):choice;
@@ -577,9 +591,10 @@ function sync(){
 tracks.forEach((tr,i)=>{
  const row=$<HTMLElement>('[data-track="'+i+'"]');
  row.querySelector<HTMLInputElement>('.track-enabled')!.addEventListener('change',e=>{
-  tr.enabled=(e.target as HTMLInputElement).checked;if(!tr.enabled){cancelTappedVoices(i);rhythmPlayer?.cancelLane(i as RhythmLane,-Infinity);}tr.flash.fill(-100);tr.hits.fill(-Infinity);sync();
+  tr.enabled=(e.target as HTMLInputElement).checked;if(!tr.enabled){landscape.release(i,audio?.currentTime??0);cancelTappedVoices(i);rhythmPlayer?.cancelLane(i as RhythmLane,-Infinity);}tr.flash.fill(-100);tr.hits.fill(-Infinity);sync();
  });
  row.querySelector<HTMLSelectElement>('.instrument-select')!.addEventListener('change',e=>{
+  landscape.release(i,audio?.currentTime??0);
   if(selectedPad===i){beginRhythmEdit();rhythmTouched.add(i);}
   cancelTappedVoices(i);rhythmPlayer?.cancelLane(i as RhythmLane,-Infinity);
   noteShapes[i].clear();cancelGroupNotes(i);groupDisplays[i].clear();tr.groups=emptyNoteGroups();tr.hits.fill(-Infinity);
@@ -609,13 +624,14 @@ tracks.forEach((tr,i)=>{
   if(selectedPad===i){beginRhythmEdit();rhythmTouched.add(i);}
   tr.mute=(e.target as HTMLInputElement).checked;
   if(tr.mute){
+   landscape.release(i,audio?.currentTime??0);
    cancelTappedVoices(i);rhythmPlayer?.cancelLane(i as RhythmLane,-Infinity);
    sustained.forEach((entry,key)=>{if(entry.track===i&&audio){entry.voice.release(audio.currentTime);sustained.delete(key);}});
   }
   syncRhythmUi();persistSettings();
  });
  row.querySelector<HTMLInputElement>('.track-volume')!.addEventListener('input',e=>{
-  tr.volume=Number((e.target as HTMLInputElement).value);if(tr.volume===0)cancelTappedVoices(i);syncRhythmUi();
+  tr.volume=Number((e.target as HTMLInputElement).value);if(tr.volume===0){landscape.release(i,audio?.currentTime??0);cancelTappedVoices(i);}syncRhythmUi();
   row.querySelector('.track-volume-value')!.textContent=Math.round(tr.volume*100)+' %';persistSettings();
  });
  row.querySelector<HTMLInputElement>('.random-dynamics')!.addEventListener('change',e=>{
@@ -976,6 +992,7 @@ function previewScore(index:number):NoteScore{
 }
 const scoreHits=new Map<string,number>();
 function silenceScoreLane(index:number){
+ landscape.release(index,audio?.currentTime??0);
  cancelGroupNotes(index);groupDisplays[index].clear();noteShapes[index].clear();
  for(const key of scoreHits.keys())if(key.startsWith(index+':'))scoreHits.delete(key);
  events.forEach(e=>e.notes=e.notes.filter(n=>n.track!==index));
@@ -1155,6 +1172,7 @@ function schedule(){
  flushGroupNotes();events.sort((a,b)=>a.time-b.time);
 }
 function stop(finishRecordings=true){
+ landscape.clear();
  chordVoicings.clear();scoreHits.clear();
  cancelGroupNotes();groupDisplays.forEach(row=>row.forEach(g=>g.members.forEach(n=>n.played=false)));
  if(finishRecordings){recordingGeneration++;finishVideoRecording();finishWavRecording();}
@@ -1277,8 +1295,9 @@ function syncVolume(){
 }
 syncVolume();
 $<HTMLInputElement>('#volume').addEventListener('input',e=>{syncVolume();if(master&&audio&&playing)master.gain.setTargetAtTime(Number((e.target as HTMLInputElement).value),audio.currentTime,.02);persistSettings();});
-$('#clear').addEventListener('click',()=>{noteEditor?.cancel();tracks.forEach(tr=>tr.score=null);acceptRhythmEdit();resetTapRhythm();selectedPad=null;padSwitchBlocked=false;rhythmEditing=false;cancelPadGestures();tracks.forEach(tr=>{tr.points.fill(false);tr.groups=emptyNoteGroups();});cancelGroupNotes();groupDisplays.forEach(d=>d.clear());noteShapes.forEach(notes=>notes.clear());sync();});
+$('#clear').addEventListener('click',()=>{landscape.clear();noteEditor?.cancel();tracks.forEach(tr=>tr.score=null);acceptRhythmEdit();resetTapRhythm();selectedPad=null;padSwitchBlocked=false;rhythmEditing=false;cancelPadGestures();tracks.forEach(tr=>{tr.points.fill(false);tr.groups=emptyNoteGroups();});cancelGroupNotes();groupDisplays.forEach(d=>d.clear());noteShapes.forEach(notes=>notes.clear());sync();});
 function applyStyle(id:StyleId,dance:DanceId|null=null){
+ landscape.clear();
  noteEditor?.cancel();tracks.forEach(tr=>tr.score=null);
  chordVoicings.clear();
  cancelGroupNotes();groupDisplays.forEach(d=>d.clear());
@@ -1360,6 +1379,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.querySele
 function position(e:PointerEvent,c:HTMLCanvasElement){const r=c.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*c.width,y:(e.clientY-r.top)/r.height*c.height};}
 orbit.addEventListener('pointerdown',e=>{
  if(e.button!==0)return;
+ if(visualization==='landscape'){e.preventDefault();return;}
  const p=position(e,orbit),x=p.x-350,y=p.y-350,r=Math.hypot(x,y);
  // Independent of orbit visibility and active tracks; leave note hit-testing untouched.
  if(r<=80){
@@ -1399,6 +1419,7 @@ $('#sound-app').addEventListener('pointerdown',e=>{
  const target=e.target as HTMLElement;
  // Only the free canvas/background surfaces, never drawing, controls or status text.
  if(!target.matches('#sound-app,.sound-grid,.orbit-wrap,#orbit,#sound-atmosphere'))return;
+ if(visualization==='landscape'&&target.matches('#orbit,.orbit-wrap'))return;
  const point=position(e,orbit);
  if(Math.hypot(point.x-350,point.y-350)<=ORBIT_HIT_RADIUS)return;
  e.preventDefault();
@@ -1872,6 +1893,13 @@ function frame(now:number){
  advanceVideoAnimations(now);
  const time=audio?.currentTime||0;
  while(events.length&&events[0].time<=time){const ev=events.shift()!;if(ev.clock!==false){visualStep=ev.step;visualTime=ev.time;visualDuration=ev.duration;}ev.notes.forEach(({track,beat,velocity,note,pitch,length,angle,joinedFrom,group,member,scorePoint})=>{if(scorePoint)scoreHits.set(scorePoint,ev.time);const tr=tracks[track];if(tr.enabled&&!tr.mute&&tr.volume>0){tr.flash[beat]=now;tr.hits[beat]=ev.time;tr.hitVelocities[beat]=velocity;tr.lastVelocity=velocity;
+   if(visualization==='landscape'){
+    const scoreKey=scorePoint?.split(':').map(Number),score=scoreKey&&tr.score?.[scoreKey[1]],first=scoreKey?.[2]===0;
+    const seconds=60/bpm*groove.beats*2;
+    landscape.record(track,{at:ev.time,pitch:pitch??12,level:velocity,length:first&&score?score.duration*seconds:length??.16,
+     joined:!!joinedFrom,pulseOnly:!!score&&!first,glide:!acousticInstruments.includes(tr.instrument),
+     curve:first&&score?score.points.map(p=>({offset:p.offset*seconds,pitch:p.pitch,level:p.velocity})):undefined});
+   }
    if(padMode==='notes'&&velocity>0&&Number($<HTMLInputElement>('#volume').value)>0)noteEditor?.pulse(track,ev.time,scorePosition(ev.time),pitch);
    if(group&&group.definition===usableGroup(track,beat)){
     const current=groupDisplays[track].get(beat);
@@ -1896,7 +1924,8 @@ function frame(now:number){
  oc.clearRect(0,0,700,700);
  const visualMaster=Math.min(1,Number($<HTMLInputElement>('#volume').value)/.3);
  const active=activeTracks();
- if(orbitAnimation)active.forEach(({tr,index},rank)=>{
+ if(visualization==='landscape')paintLandscape(oc,landscape,active.map(({tr,index})=>({index,label:String(padNumbers[index]),color:tr.color,volume:tr.volume,mute:tr.mute||tr.volume===0,pitched:isMelodic(tr.instrument)})),time,bpm,groove.beats,dark,playing,reduced.matches,visualMaster,noteEffect);
+ if(visualization==='orbit'&&orbitAnimation)active.forEach(({tr,index},rank)=>{
   const r=radius(rank,active.length);oc.beginPath();oc.arc(350,350,r,0,Math.PI*2);oc.strokeStyle=tr.color+(dark?'55':'99');oc.lineWidth=dark?1:1.4;oc.stroke();
   // Each orbit carries a continuous comet; audible notes briefly boost its glow.
   if(playing&&orbitAnimation&&!reduced.matches){
@@ -1964,9 +1993,11 @@ function frame(now:number){
   }
  });
 
+ if(visualization==='orbit'){
  if(centerMode==='sun')renderCenter(time,dark);
  else if(centerMode==='ring')renderPulseRing(time,dark);
  else if(centerMode!=='off')renderCenterVariant(time,dark,centerMode);
+ }
  dc.clearRect(0,0,drawing.width,drawing.height);trail=trail.filter(p=>now-p.time<2200);
  const previousTrail=new Map<number,Trail>();
  for(const b of trail){const a=previousTrail.get(b.pointer);previousTrail.set(b.pointer,b);if(!a||b.start)continue;dc.globalAlpha=Math.max(0,1-(now-b.time)/2200);const color=dark?b.color:lightColors[colors.indexOf(b.color)];dc.strokeStyle=color;dc.shadowColor=color;dc.shadowBlur=reduced.matches?0:dark?16:7;dc.lineWidth=3;dc.lineCap='round';dc.beginPath();dc.moveTo(a.x,a.y);dc.lineTo(b.x,b.y);dc.stroke();}
@@ -2011,7 +2042,7 @@ function applySettings(saved:SoundSettings){
    remeterRhythm(tapPattern,groove.beats,0);syncRhythmUi();
   }
   syncRhythmUi();
-  selectCenterMode(saved.center);selectBackgroundMode(saved.background);selectOrbitMode(saved.orbit);
+  selectCenterMode(saved.center);selectBackgroundMode(saved.background);selectOrbitMode(saved.orbit);selectVisualization(saved.visualization??'orbit');
 
  syncGroove();syncDanceTiles();sync();
 }
@@ -2021,7 +2052,7 @@ function restoreSettings(){
   const saved=decodeSettings(localStorage.getItem(STORAGE_KEY));if(saved)applySettings(saved);
  }catch{}
 }
-installNoteEditor();seedNoteGroups();restoreSettings();syncGroove();syncDanceTiles();sync();persistenceReady=true;requestAnimationFrame(frame);
+installNoteEditor();orbit.dataset.visualization=visualization;seedNoteGroups();restoreSettings();syncGroove();syncDanceTiles();sync();persistenceReady=true;requestAnimationFrame(frame);
 
 
 // File operations do not require persistent-storage consent and never contact a server.

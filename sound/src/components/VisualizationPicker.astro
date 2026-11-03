@@ -1,0 +1,11 @@
+---
+import type {Language} from '../lib/i18n';
+import {visualizationCopy} from '../lib/visualization';
+import OrbitIcon from './OrbitIcon.astro';
+interface Props {lang:Language}
+const {lang}=Astro.props,c=visualizationCopy[lang];
+---
+<div class="visualization-switch" role="group" aria-label={c.title}>
+ <button type="button" data-visualization="orbit" aria-pressed="true"><OrbitIcon name="dot"/><span>{c.orbit}</span></button>
+ <button type="button" data-visualization="landscape" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M2 8c5-7 9 7 20 0M2 13c6-7 11 7 20 0M2 18c7-7 12 7 20 0"/></svg><span>{c.landscape}</span></button>
+</div>
