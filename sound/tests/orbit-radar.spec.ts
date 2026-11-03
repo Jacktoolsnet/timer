@@ -1,6 +1,6 @@
 import {test,expect,type Page} from '@playwright/test';
 import {readFile} from 'node:fs/promises';
-import {RadarHistory,radarStrength,radarLifetime,radarPoint,radarSweep,paintOrbitRadar,type RadarNote} from '../src/lib/orbit-radar';
+import {RadarHistory,radarStrength,radarLifetime,radarPoint,radarSweep,paintOrbitRadar,paintRadarHead,radarHeadPulse,type RadarNote} from '../src/lib/orbit-radar';
 import {gridFractionAtTime} from '../src/lib/track-grid';
 import {partsForStyle} from '../src/lib/presets';
 import {decodeSettings} from '../src/lib/sound-settings';
@@ -36,6 +36,27 @@ test('radar light moves on after the hit with a growing trailing echo in either 
  const history=new RadarHistory();history.record(0,note);note.motion!.turnSeconds=99;
  expect(history.notes(0)[0].motion!.turnSeconds).toBe(4);
 });
+test('persistent radar head stays small in silence and flashes only on audible recent hits',()=>{
+ const notes:RadarNote[]=[{at:1,beat:0,angle:0,level:.8,direction:1}];
+ expect(radarHeadPulse([],1,1)).toBe(0);
+ expect(radarHeadPulse(notes,.99,1)).toBe(0);
+ expect(radarHeadPulse(notes,1,1)).toBe(.8);
+ expect(radarHeadPulse(notes,1.1,1)).toBeLessThan(.8);
+ expect(radarHeadPulse(notes,1.23,1)).toBe(0);
+ expect(radarHeadPulse(notes,1,0)).toBe(0);expect(radarHeadPulse(notes,1,1,0)).toBe(0);
+ expect(radarHeadPulse(notes,1,.5)).toBeLessThan(radarHeadPulse(notes,1,1));
+ function head(angle:number,pulse:number,muted=false){
+  const circles:{x:number;y:number;radius:number}[]=[];
+  const ctx={save(){},restore(){},beginPath(){},fill(){},createRadialGradient(){return {addColorStop(){}};},
+   arc(x:number,y:number,radius:number){circles.push({x,y,radius});}} as unknown as CanvasRenderingContext2D;
+  paintRadarHead(ctx,200,'#55ccff',angle,pulse,true,muted);return circles;
+ }
+ const idle=head(0,0),flash=head(0,1),muted=head(0,1,true);
+ expect(idle).toHaveLength(3);expect(idle[1].radius).toBeGreaterThan(0);
+ expect(flash[0].radius).toBeGreaterThan(idle[0].radius);expect(flash[1].radius).toBeGreaterThan(idle[1].radius);
+ expect(muted).toEqual(idle);
+ expect(head(Math.PI/2,0)[1].x).toBeCloseTo(350);expect(head(Math.PI/2,0)[1].y).toBeCloseTo(550);
+});
 test('radar mist reaches neighbouring lanes softly while keeping heads sharp and reduced motion static',()=>{
  const notes:RadarNote[]=[{at:1,beat:0,angle:0,level:.8,direction:1}];
  function draw(time:number,{gain=1,muted=false,reduced=false,effect=1,direction=1,spacing=27,dark=true}={}){
@@ -70,11 +91,14 @@ test('radar mist reaches neighbouring lanes softly while keeping heads sharp and
 function fixture(){return {version:2,style:'electronic',bpm:40,volume:.3,center:'off',background:'off',orbit:'radar',tracks:partsForStyle('electronic').map((_p,i)=>({enabled:i===0,mute:false,instrument:'kick',groups:Array(16).fill(null),points:Array.from({length:16},(_,s)=>s===0),slots:16,grid:16,pitch:12,volume:.6,phase:0,direction:1,directionMode:'forward',randomDynamics:false,morph:null}))};}
 async function load(page:Page,data:unknown){await page.locator('#files-open').click();await page.locator('#json-file').setInputFiles({name:'radar.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(data))});await page.locator('#files-close').click();}
 const pixels=(page:Page)=>page.locator('#orbit').evaluate((c:HTMLCanvasElement)=>{const data=c.getContext('2d')!.getImageData(0,0,700,700).data;let count=0;for(let i=3;i<data.length;i+=4)if(data[i]>0)count++;return count;});
-test('only a sounded note appears, then the radar canvas becomes completely empty again',async({page})=>{
+test('radar head stays visible between notes while the sounded echoes and fog fade away',async({page})=>{
  await page.goto('/de/');await load(page,fixture());await page.waitForTimeout(1300);
- expect(await pixels(page)).toBe(0);await page.locator('#play').click();await page.waitForTimeout(250);
- expect(await pixels(page)).toBeGreaterThan(30);
- await expect.poll(()=>pixels(page),{timeout:4000}).toBe(0);await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
+ const idle=await pixels(page);expect(idle).toBeGreaterThan(0);expect(idle).toBeLessThan(500);
+ await page.locator('#play').click();await page.waitForTimeout(250);
+ expect(await pixels(page)).toBeGreaterThan(500);
+ await expect.poll(()=>pixels(page),{timeout:4000}).toBeLessThan(500);
+ expect(await pixels(page)).toBeGreaterThan(0);await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
+ await page.locator('#play').click();await page.waitForTimeout(250);expect(await pixels(page)).toBeGreaterThan(0);
 });
 test('Radar persists in JSON and browser preferences without changing the music or autoplay',async({page})=>{
  await page.goto('/de/');const f=fixture();expect(decodeSettings(JSON.stringify(f))?.orbit).toBe('radar');await load(page,f);

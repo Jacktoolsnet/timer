@@ -29,7 +29,31 @@ export function radarSweep(note:RadarNote,time:number){
   :age/2*Math.PI*2;
  return {angle:note.angle+(note.direction<0?-1:1)*travel,length:Math.min(.72,travel)};
 }
-/** No idle rings, grid dots or continuously visible pointer: every mark fades to zero. */
+/** Short, audible-onset-only flash; quiet grid crossings must not trigger it. */
+export function radarHeadPulse(notes:readonly RadarNote[],time:number,gain:number,effect=1){
+ if(gain<=0||effect<=0)return 0;
+ let pulse=0;
+ for(const note of notes){
+  const age=time-note.at;
+  if(age>=0&&age<.22)pulse=Math.max(pulse,Math.pow(1-age/.22,2)*Math.min(1,note.level*gain*effect));
+ }
+ return pulse;
+}
+/** One persistent transport head per lane, independent of the fading note echoes. */
+export function paintRadarHead(ctx:CanvasRenderingContext2D,radius:number,color:string,angle:number,pulse:number,dark:boolean,muted=false){
+ const flash=muted?0:Math.max(0,Math.min(1,pulse)),x=350+Math.cos(angle)*radius,y=350+Math.sin(angle)*radius,
+   haloRadius=8+flash*14;
+ ctx.save();ctx.shadowBlur=0;
+ const halo=ctx.createRadialGradient(x,y,0,x,y,haloRadius);
+ halo.addColorStop(0,color);halo.addColorStop(.3,color+'88');halo.addColorStop(1,color+'00');
+ ctx.globalAlpha=(muted?.12:dark?.3:.4)+flash*.55;ctx.fillStyle=halo;
+ ctx.beginPath();ctx.arc(x,y,haloRadius,0,Math.PI*2);ctx.fill();
+ ctx.globalAlpha=muted?.3:Math.min(1,.8+flash*.2);ctx.fillStyle=color;
+ ctx.beginPath();ctx.arc(x,y,3.2+flash*1.5,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle=dark?'#f5ffff':'#fff';ctx.beginPath();ctx.arc(x,y,1.4+flash*.8,0,Math.PI*2);ctx.fill();
+ ctx.restore();
+}
+/** Note echoes and their fog trails fade completely; the transport head is painted separately. */
 export function paintOrbitRadar(ctx:CanvasRenderingContext2D,notes:readonly RadarNote[],radius:number,color:string,time:number,gain:number,muted:boolean,dark:boolean,reduced:boolean,effect=1,spacing=27){
  if(muted||gain<=0||effect<=0)return;
  ctx.save();ctx.lineCap='round';ctx.shadowColor=color;

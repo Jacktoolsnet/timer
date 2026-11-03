@@ -1,4 +1,4 @@
-import {RadarHistory,paintOrbitRadar,radarStrength,radarPoint} from '../lib/orbit-radar';
+import {RadarHistory,paintOrbitRadar,paintRadarHead,radarHeadPulse,radarStrength,radarPoint} from '../lib/orbit-radar';
 import {paintVideoPad,type VideoPadMode} from '../lib/video-pad';
 import {rateWindow,rateGridEvents,randomTrackRate,trackRateCopy,type TrackRate,type TrackRateChoice} from '../lib/track-rate';
 import {CanvasTransition} from '../lib/canvas-transition';
@@ -2080,7 +2080,13 @@ function frame(now:number){
  }
  if(visualization==='orbit'&&orbitAnimation)active.forEach(({tr,index},rank)=>{
   const r=radius(rank,active.length);
-  if(orbitMode==='radar'){paintOrbitRadar(oc,radar.notes(index),r,tr.color,time,playing?tr.volume*visualMaster:0,tr.mute||tr.volume===0,dark,reduced.matches,noteEffect,active.length>1?Math.abs(radius(0,active.length)-radius(1,active.length)):27);return;}
+  if(orbitMode==='radar'){
+   const notes=radar.notes(index),muted=tr.mute||tr.volume===0,
+     head=tr.direction*(playing&&!reduced.matches?trackAngle(index,time):0)+tr.phase/tr.slots*Math.PI*2-Math.PI/2;
+   paintOrbitRadar(oc,notes,r,tr.color,time,playing?tr.volume*visualMaster:0,muted,dark,reduced.matches,noteEffect,active.length>1?Math.abs(radius(0,active.length)-radius(1,active.length)):27);
+   paintRadarHead(oc,r,tr.color,head,playing&&!reduced.matches&&!muted?radarHeadPulse(notes,time,tr.volume*visualMaster,noteEffect):0,dark,muted);
+   return;
+  }
   oc.beginPath();oc.arc(350,350,r,0,Math.PI*2);oc.strokeStyle=tr.color+(dark?'55':'99');oc.lineWidth=dark?1:1.4;oc.stroke();
   // Each orbit carries a continuous comet; audible notes briefly boost its glow.
   if(playing&&orbitAnimation&&!reduced.matches){
