@@ -1,3 +1,4 @@
+import {CREDITS_SECONDS,SONG_TAIL_SECONDS,songVideoSeconds,paintVideoCredits} from '../lib/video-credits';
 import {decodeSongScript,scriptPosition,scriptScore,scriptCopy,type SongScript} from '../lib/song-script';
 import {RadarHistory,paintOrbitRadar,paintRadarHead,radarHeadPulse,radarStrength,radarPoint} from '../lib/orbit-radar';
 import {paintVideoPad,type VideoPadMode} from '../lib/video-pad';
@@ -74,6 +75,7 @@ const initialParts=partsForStyle('electronic');
 const tracks=colors.map((color,i)=>({color,rate:1 as TrackRate,rateChoice:'auto' as TrackRateChoice,pendingRate:null as TrackRate|null,score:null as NoteScore|null,groups:emptyNoteGroups(),grid:'auto' as GridChoice,slots:16 as GridSize,pendingGrid:null as GridChoice|null,pendingSlots:null as GridSize|null,motif:makeMotif(presets.electronic.melody),phase:0,direction:1,directionMode:'forward',pendingDirection:null as number|null,randomDynamics:false,lastVelocity:1,scheduledVelocity:1,morph:null as {to:InstrumentId;progress:number;from:number;at:number;duration:number}|null,hitVelocities:Array<number>(16).fill(1),enabled:true,instrument:initialParts[i].instrument,points:Array.from({length:16},(_,s)=>initialParts[i].steps.includes(s)),mute:false,volume:initialParts[i].volume??.55,pitch:initialParts[i].pitch??0,flash:Array(16).fill(-100),hits:Array<number>(16).fill(-Infinity)}));
 let audio:AudioContext|undefined, master:GainNode|undefined, playing=false,timer:ReturnType<typeof setInterval>|undefined,nextTime=0,step=0,bpm=100;
 let scriptSong:SongScript|null=null,scriptSceneKey='',scriptEndAt:number|null=null;
+let wholeSongCapture=false,videoMusicStart:number|null=null,videoCreditsCapture=false,videoNaturalEndAt:number|null=null;
 let recordingOutput:DynamicsCompressorNode|undefined;
 let recordingGeneration=0;
 let videoAnimationRun:{start:number;flags:VideoAnimationSettings;plan:Record<VideoAnimationKey,number[]>;next:Record<VideoAnimationKey,number>;changed:Set<VideoAnimationKey>;original:{visualization:VisualizationMode;landscapeVariant:LandscapeVariant;streamVariant:StreamVariant;constellationVariant:ConstellationVariant}}|null=null;
@@ -438,7 +440,7 @@ function snapshotSettings(includeDraft=false):SoundSettings{
  return {
    version:2,songScript:scriptSong??undefined,style:currentStyle,dance:currentDance,groove:grooveChoice,bpm,transpose,noteEffect,volume:Number($<HTMLInputElement>('#volume').value),
    ...(videoAnimationRun?.changed.has('visualization')?videoAnimationRun.original:{visualization,landscapeVariant,streamVariant,constellationVariant}),background:backgroundChoice,center:centerChoice,flowerCenter:flowerCenterChoice,orbit:orbitChoice,
-   recording:{restart:$<HTMLInputElement>('#recording-restart').checked,random:$<HTMLInputElement>('#recording-random').checked,fullscreen:$<HTMLInputElement>('#recording-fullscreen').checked,minutes:Number($<HTMLInputElement>('#recording-duration').value),videoFormat:chosenVideoFormat(),videoPad:chosenVideoPad(),videoInfo:chosenVideoInfo(),animations:chosenVideoAnimations()},
+   recording:{videoLength:chosenVideoLength(),credits:chosenVideoCredits(),restart:$<HTMLInputElement>('#recording-restart').checked,random:$<HTMLInputElement>('#recording-random').checked,fullscreen:$<HTMLInputElement>('#recording-fullscreen').checked,minutes:Number($<HTMLInputElement>('#recording-duration').value),videoFormat:chosenVideoFormat(),videoPad:chosenVideoPad(),videoInfo:chosenVideoInfo(),animations:chosenVideoAnimations()},
    pad:{mode:padMode,beats:(backup??tapPattern).beats,hits:(backup??tapPattern).hits.map(lane=>[...lane]),notes:(backup??tapPattern).notes.map(lane=>[...lane])},
    tracks:tracks.map((live,i)=>{const tr=backup&&rhythmTouched.has(i)&&rhythmTrackBackup?{...live,...rhythmTrackBackup[i]}:live;return ({
     score:(()=>{const score=!includeDraft&&scoreSelection===i?scoreBackup:tr.score;return score===null?null:cloneScore(score);})(),rate:tr.pendingRate??tr.rate,rateChoice:tr.rateChoice,grid:tr.grid,slots:tr.slots,enabled:tr.enabled,mute:tr.mute,instrument:tr.instrument,groups:cloneNoteGroups(tr.groups),points:[...tr.points],motif:[...tr.motif],volume:tr.volume,pitch:tr.pitch,
@@ -1202,7 +1204,8 @@ function schedule(){
  }
  while(nextTime<audio.currentTime+.1){
   if(scriptSong&&step%stepsPerBar()===0){
-   const position=scriptPosition(scriptSong,Math.floor(step/stepsPerBar()));
+   const scriptBar=Math.floor(step/stepsPerBar());
+   const position=wholeSongCapture&&scriptBar>=scriptSong.scenes.reduce((sum,scene)=>sum+scene.bars,0)?null:scriptPosition(scriptSong,scriptBar);
    if(!position){scriptEndAt=nextTime;break;}
    applyScriptScene(position.index,position.turn);
   }
@@ -1344,13 +1347,14 @@ async function start(delay=.05,valid=()=>true){
   if(rhythmBackup&&hasRhythm(rhythmBackup)){finishRhythm(rhythmBackup);rhythmBackup.start=0;resetRhythmSession(rhythmBackup);}
   if(scriptSong){setEvolution(false);scriptSceneKey='';applyScriptScene(0,0);}
   playing=true;step=0;evolveAnimations();animationStep=nextEvolutionStep(0,Math.random,stepsPerBar());nextTime=audio.currentTime+delay;
+  if(wholeSongCapture)videoMusicStart=nextTime;
   labelAction('#play',t.pause);$('#play').setAttribute('aria-pressed','true');$('#audio-status').textContent='';
   syncRhythmUi();schedule();timer=setInterval(schedule,25);
  }catch{$('#audio-status').textContent=t.error;stop();}
  finally{starting=false;}
 }
 $('#evolve').addEventListener('click',async()=>{
- if(starting)return;
+ if(starting||(videoBusy&&scriptSong))return;
  if(evolving){setEvolution(false);return;}
  if(!playing){
   setEvolution(true);await start();if(!playing)setEvolution(false);
@@ -2045,7 +2049,11 @@ const soundTransition=new CanvasTransition(),backgroundTransition=new CanvasTran
 function frame(now:number){
  advanceVideoAnimations(now);
  const time=audio?.currentTime||0;
- if(scriptEndAt!==null&&time>=scriptEndAt)stop();
+ if(scriptEndAt!==null){
+  const keepVideo=wholeSongCapture||videoCreditsCapture;
+  if(keepVideo)videoNaturalEndAt=scriptEndAt+SONG_TAIL_SECONDS;
+  if(time>=scriptEndAt+(keepVideo?SONG_TAIL_SECONDS:0))stop(!keepVideo);
+ }
  while(events.length&&events[0].time<=time){const ev=events.shift()!;ev.notes.forEach(({track,beat,velocity,note,pitch,length,angle,joinedFrom,group,member,scorePoint})=>{if(scorePoint)scoreHits.set(scorePoint,ev.time);const tr=tracks[track];if(tr.enabled&&!tr.mute&&tr.volume>0){tr.flash[beat]=now;tr.hits[beat]=ev.time;tr.hitVelocities[beat]=velocity;tr.lastVelocity=velocity;
    radar.record(track,{at:ev.time,beat,angle:angle??orbitNoteAngle(track,beat),level:velocity,direction:tr.direction,kind:group?.kind,member,count:group?.members.length,motion:{turnSeconds:60/bpm*groove.beats/trackRate(track),clock:localTrackBars(track,ev.time),slots:tr.slots,beats:groove.beats,swing:groove.swing}});
    {
@@ -2195,6 +2203,7 @@ enhanceClockSelects($('.instruments-tile') as HTMLFormElement);
 enhanceClockSelects(instrumentDialog as unknown as HTMLFormElement);
 function leaveSongScript(dropScores=false){
  scriptSong=null;scriptSceneKey='';scriptEndAt=null;
+ if(persistenceReady)syncFileButtons();
  if(dropScores)tracks.forEach(tr=>tr.score=null);
  $<HTMLInputElement>('#video-info-title').placeholder=defaultVideoTitle(styleCopy[captionLanguage()].names[styleIds.indexOf(currentStyle)]);
  $('#script-now').hidden=true;$('#song-script-status').textContent=scriptCopy[language].inactive;
@@ -2231,10 +2240,15 @@ function loadSongScript(script:SongScript,restoring=false){
  $<HTMLButtonElement>('#song-script-export').disabled=false;$<HTMLButtonElement>('#song-script-leave').disabled=false;
  $<HTMLInputElement>('#video-info-title').placeholder=script.title;
  $('#song-script-status').textContent=script.title+' — '+scriptCopy[language].ready;
+ if(!restoring)syncFileButtons();
  if(!restoring)persistSettings();
 }
 function applySettings(saved:SoundSettings){
  for(const key of videoAnimationKeys)$<HTMLInputElement>('#video-animation-'+key).checked=saved.recording?.animations?.[key]??false;
+ $<HTMLInputElement>('#video-length-mode input[value="'+(saved.recording?.videoLength??'fixed')+'"]').checked=true;
+ $<HTMLInputElement>('#video-credits-enabled').checked=saved.recording?.credits?.enabled??false;
+ $<HTMLTextAreaElement>('#video-credits-text').value=saved.recording?.credits?.text??'';
+ syncVideoCredits();
  const videoInfo=saved.recording?.videoInfo??defaultVideoInfo;
  $<HTMLInputElement>('#video-caption-language input[value="'+(videoInfo.language??'en')+'"]').checked=true;
  $<HTMLInputElement>('#video-info-title').value=videoInfo.title;
@@ -2343,9 +2357,10 @@ $('#song-script-example').addEventListener('click',async()=>{
 });
 $('#song-script-export').addEventListener('click',()=>{if(scriptSong)downloadBlob(new Blob([JSON.stringify(scriptSong,null,2)],{type:'application/json'}),'jacktools-song.json');});
 $('#song-script-leave').addEventListener('click',()=>{if(videoBusy||wavBusy||importBusy)return;leaveSongScript(false);sync();persistSettings();});
-type RecordingStart={restart:boolean;random:boolean;generation:number;durationSeconds:number;videoFormat:VideoFormat;videoPad:VideoPadMode;videoInfo:VideoInfoSettings;animations:VideoAnimationSettings};
-async function prepareRecording():Promise<RecordingStart>{
- const options={restart:$<HTMLInputElement>('#recording-restart').checked,random:$<HTMLInputElement>('#recording-random').checked,durationSeconds:Number($<HTMLInputElement>('#recording-duration').value)*60,videoFormat:chosenVideoFormat(),videoPad:chosenVideoPad(),videoInfo:chosenVideoInfo(),animations:chosenVideoAnimations(),generation:recordingGeneration};
+type RecordingStart={restart:boolean;random:boolean;generation:number;durationSeconds:number;videoFormat:VideoFormat;videoPad:VideoPadMode;videoInfo:VideoInfoSettings;animations:VideoAnimationSettings;wholeSong:boolean;credits:{enabled:boolean;text:string}};
+async function prepareRecording(forVideo=false):Promise<RecordingStart>{
+ const wholeSong=forVideo&&!!scriptSong&&chosenVideoLength()==='song';
+ const options={wholeSong,credits:chosenVideoCredits(),restart:wholeSong||$<HTMLInputElement>('#recording-restart').checked,random:!scriptSong&&$<HTMLInputElement>('#recording-random').checked,durationSeconds:wholeSong?songVideoSeconds(scriptSong!.scenes.reduce((sum,scene)=>sum+scene.bars,0),bpm):Number($<HTMLInputElement>('#recording-duration').value)*60,videoFormat:chosenVideoFormat(),videoPad:chosenVideoPad(),videoInfo:chosenVideoInfo(),animations:chosenVideoAnimations(),generation:recordingGeneration};
  // Both requests must be initiated before awaiting anything, inside the button gesture.
  let fullscreen:Promise<void>|undefined;
  try{if($<HTMLInputElement>('#recording-fullscreen').checked)fullscreen=focus(true);}catch{/* Focus view remains available when fullscreen is denied. */}
@@ -2374,6 +2389,23 @@ async function startRecordedMusic(options:RecordingStart){
   if(!playing||options.generation!==recordingGeneration)throw Error('Music unavailable');
  }
 }
+function chosenVideoLength(){return $<HTMLInputElement>('#video-length-mode input:checked').value as 'fixed'|'song';}
+function chosenVideoCredits(){return {enabled:$<HTMLInputElement>('#video-credits-enabled').checked,text:$<HTMLTextAreaElement>('#video-credits-text').value.slice(0,600)};}
+function syncVideoCredits(){$('#video-credits-options').hidden=!chosenVideoCredits().enabled;}
+function syncVideoSong(){
+ const busy=videoBusy||wavBusy||importBusy;
+ $<HTMLInputElement>('#video-length-mode input[value="song"]').disabled=busy||!scriptSong;
+ $<HTMLInputElement>('#video-length-mode input[value="fixed"]').disabled=busy;
+ const whole=!!scriptSong&&chosenVideoLength()==='song';
+ $('#video-song-duration').textContent=whole?new Date(songVideoSeconds(scriptSong!.scenes.reduce((sum,scene)=>sum+scene.bars,0),bpm)*1000).toISOString().slice(14,19)+' + '+(chosenVideoCredits().enabled?CREDITS_SECONDS:0)+' s':'';
+ if(scriptSong)$<HTMLInputElement>('#recording-random').checked=false;
+ $<HTMLInputElement>('#recording-random').disabled=busy||!!scriptSong||!$<HTMLInputElement>('#recording-restart').checked;
+ $<HTMLInputElement>('#recording-restart').disabled=busy||whole;
+ $<HTMLTextAreaElement>('#video-credits-text').disabled=busy;
+ $<HTMLInputElement>('#video-credits-enabled').disabled=busy;
+}
+document.querySelectorAll<HTMLInputElement>('#video-length-mode input,#video-credits-enabled').forEach(input=>input.addEventListener('change',()=>{syncVideoCredits();syncFileButtons();persistSettings();}));
+$('#video-credits-text').addEventListener('input',persistSettings);
 function chosenVideoAnimations():VideoAnimationSettings{return Object.fromEntries(videoAnimationKeys.map(key=>[key,$<HTMLInputElement>('#video-animation-'+key).checked])) as VideoAnimationSettings;}
 for(const key of videoAnimationKeys)$('#video-animation-'+key).addEventListener('change',persistSettings);
 function captionLanguage():Language{return $<HTMLInputElement>('#video-caption-language input:checked').value as Language;}
@@ -2397,6 +2429,7 @@ function syncRecordingDuration(){
  $('#recording-duration-value').textContent=text;$('#recording-duration').setAttribute('aria-valuetext',text);
 }
 $('#recording-duration').addEventListener('input',()=>{syncRecordingDuration();persistSettings();});
+$('#tempo').addEventListener('input',()=>syncVideoSong());
 for(const option of ['restart','random','fullscreen'])$('#recording-'+option).addEventListener('change',()=>{syncFileButtons();persistSettings();});
 function syncFileButtons(){
  for(const action of ['load','file','example','export','leave'])$<HTMLButtonElement>('#song-script-'+action).disabled=videoBusy||wavBusy||importBusy||(['export','leave'].includes(action)&&!scriptSong);
@@ -2412,7 +2445,8 @@ function syncFileButtons(){
  $<HTMLInputElement>('#recording-duration').disabled=videoBusy||wavBusy||importBusy;
  for(const input of document.querySelectorAll<HTMLInputElement>('#video-format input,#video-pad input,.video-info input,.video-animation-options input'))input.disabled=videoBusy||wavBusy||importBusy;
  if(!videoBusy&&!wavBusy&&!importBusy)syncVideoInfo();
- for(const option of ['restart','random','fullscreen'])$<HTMLInputElement>('#recording-'+option).disabled=videoBusy||wavBusy||importBusy||(option==='random'&&!$<HTMLInputElement>('#recording-restart').checked);
+ for(const option of ['restart','random','fullscreen'])$<HTMLInputElement>('#recording-'+option).disabled=videoBusy||wavBusy||importBusy;
+ syncVideoSong();
 }
 function finishVideoRecording(){
  if(!videoRecording){if(videoBusy)recordingGeneration++;return;}
@@ -2422,7 +2456,7 @@ function finishVideoRecording(){
 }
 function finishVideoUi(){
  endVideoAnimations();
- videoRecording=null;videoBusy=false;
+ videoRecording=null;videoBusy=false;wholeSongCapture=false;videoMusicStart=null;videoCreditsCapture=false;videoNaturalEndAt=null;
  if(videoTimer)clearInterval(videoTimer);videoTimer=undefined;
  $('#video-stop').hidden=true;$('#video-dismiss').hidden=false;
  $('#video-record').setAttribute('aria-pressed','false');syncFileButtons();
@@ -2441,15 +2475,28 @@ $('#video-record').addEventListener('click',async()=>{
  $('#video-dismiss').hidden=true;$('#video-stop').hidden=false;$<HTMLButtonElement>('#video-stop').disabled=false;
  let captureFailed=false;
  try{
-  const options=await prepareRecording();
+  const options=await prepareRecording(true);
+  wholeSongCapture=options.wholeSong;videoMusicStart=null;videoCreditsCapture=options.credits.enabled;videoNaturalEndAt=null;
   if(!audio||!recordingOutput)throw Error('Audio unavailable');
   const padCanvas=options.videoPad==='none'?undefined:document.createElement('canvas');
   if(padCanvas){padCanvas.width=padCanvas.height=700;padCanvas.dataset.videoPad=options.videoPad;}
   const padContext=padCanvas?.getContext('2d');
   if(padCanvas&&!padContext)throw Error('Pad canvas unavailable');
+  const recordingStart=audio.currentTime;
+  let creditsStarted=false;
   videoRecording=createMp4Recording({
-   audio,output:recordingOutput,durationSeconds:options.durationSeconds,format:options.videoFormat,
+   audio,output:recordingOutput,durationSeconds:options.durationSeconds+(options.credits.enabled?CREDITS_SECONDS:0)+(options.wholeSong?5:0),exactDuration:options.wholeSong||options.credits.enabled,format:options.videoFormat,
    paint:ctx=>{
+    const clock=audio?.currentTime??0;
+    const creditsAt=options.wholeSong?(videoMusicStart===null?Infinity:videoMusicStart+options.durationSeconds):Math.min(recordingStart+options.durationSeconds,videoNaturalEndAt??Infinity);
+    if(clock>=creditsAt){
+     if(options.credits.enabled){
+      if(!creditsStarted){creditsStarted=true;stop(false);}
+      paintVideoCredits(ctx,options.credits.text,options.videoInfo.language??'en',clock-creditsAt);
+     }
+     if(clock>=creditsAt+(options.credits.enabled?CREDITS_SECONDS:0))videoRecording?.stop();
+     if(options.credits.enabled)return;
+    }
     const lang=options.videoInfo.language??'en',style=styleCopy[lang].names[styleIds.indexOf(currentStyle)];
     if(padContext){
      const time=audio?.currentTime??0,dark=document.documentElement.dataset.theme==='dark'||(!document.documentElement.dataset.theme&&matchMedia('(prefers-color-scheme: dark)').matches);

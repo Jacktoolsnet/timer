@@ -33,7 +33,7 @@ export type SoundSettings={
  streamVariant?:StreamVariant;
  constellationVariant?:ConstellationVariant;
  flowerCenter?:typeof centerModes[number];
- recording?:{restart:boolean;random:boolean;fullscreen:boolean;minutes?:number;videoFormat?:'landscape'|'portrait';videoPad?:VideoPadMode;videoInfo?:VideoInfoSettings;animations?:VideoAnimationSettings};
+ recording?:{videoLength?:'fixed'|'song';credits?:{enabled:boolean;text:string};restart:boolean;random:boolean;fullscreen:boolean;minutes?:number;videoFormat?:'landscape'|'portrait';videoPad?:VideoPadMode;videoInfo?:VideoInfoSettings;animations?:VideoAnimationSettings};
  pad?:{mode:'draw'|'rhythm'|'notes';beats:2|3|4;hits:boolean[][];notes?:(number|null)[][]};
  version:2;style:StyleId;dance?:DanceId|null;groove?:GrooveChoice;bpm:number;volume:number;transpose?:number;noteEffect?:number;tracks:SavedTrack[];
  background:typeof backgroundModes[number];center:typeof centerModes[number];orbit:typeof orbitModes[number];
@@ -54,6 +54,8 @@ export function decodeSettings(raw:string|null):SoundSettings|null{
   if(s.flowerCenter!==undefined&&!member(centerModes,s.flowerCenter))return null;
   if(s.visualization!==undefined&&!member(visualizationModes,s.visualization))return null;
   if(s.recording!==undefined&&(!s.recording||Array.isArray(s.recording)||['restart','random','fullscreen'].some(key=>typeof s.recording[key]!=='boolean')))return null;
+  if(s.recording?.videoLength!==undefined&&!member(['fixed','song'],s.recording.videoLength))return null;
+  if(s.recording?.credits!==undefined&&(!s.recording.credits||Array.isArray(s.recording.credits)||typeof s.recording.credits.enabled!=='boolean'||typeof s.recording.credits.text!=='string'||s.recording.credits.text.length>600))return null;
   if(s.recording?.minutes!==undefined&&(!number(s.recording.minutes,1,10)||!Number.isInteger(s.recording.minutes)))return null;
   if(s.recording?.videoFormat!==undefined&&!member(['landscape','portrait'],s.recording.videoFormat))return null;
   if(s.recording?.videoPad!==undefined&&!member(videoPadModes,s.recording.videoPad))return null;

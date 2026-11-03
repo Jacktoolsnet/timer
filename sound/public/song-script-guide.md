@@ -144,3 +144,13 @@ Do not select Random Play for the recording if you want the composed script.
 
 Limits: UTF-8 JSON file at most 1 MiB; no arbitrary executable data. Song Script
 is a versioned first implementation, not MIDI/MusicXML import or full DAW automation.
+
+## Whole-song video and credits
+In Files & Recording → MP4, choose **Whole song** to restart the loaded script and
+record one complete pass, including for looped songs, plus 2 seconds of decay.
+The fixed recording duration is ignored for this video mode. Recording Random
+Play is disabled for loaded scripts; visual animation changes remain optional.
+You can append a separate **3-second Music & rights** card with editable plain
+text. Enter verified composition/arrangement/recording information yourself;
+the app does not infer a license or public-domain status from the title.
+These video settings belong to the settings export, not the song-script schema.

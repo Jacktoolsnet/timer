@@ -14,7 +14,7 @@ export function mp4Type(){
 export type VideoFormat='landscape'|'portrait';
 export function videoDimensions(format:VideoFormat='landscape'){return format==='portrait'?{width:720,height:1280}:{width:1280,height:720};}
 export function createMp4Recording(options:{
- audio:AudioContext;output:AudioNode;durationSeconds?:number;format?:VideoFormat;paint:(ctx:CanvasRenderingContext2D)=>void;
+ audio:AudioContext;output:AudioNode;durationSeconds?:number;exactDuration?:boolean;format?:VideoFormat;paint:(ctx:CanvasRenderingContext2D)=>void;
  ready:(blob:Blob,limited:boolean)=>void;error:()=>void;
 }){
  const mimeType=mp4Type();if(!mimeType)throw Error('MP4 unsupported');
@@ -52,7 +52,7 @@ export function createMp4Recording(options:{
   options.ready(blob,limited);
  };
  try{options.output.connect(destination);connected=true;recorder.start(1000);}catch(error){cleanup();throw error;}
- timeout=setTimeout(()=>{limited=true;stop();},recordingSeconds(options.durationSeconds)*1000);
+ timeout=setTimeout(()=>{limited=true;stop();},(options.exactDuration?Math.max(.1,Math.min(3100,options.durationSeconds??600)):recordingSeconds(options.durationSeconds))*1000);
  let lastFrame=-Infinity;
  return {
   stop,

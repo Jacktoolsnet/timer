@@ -1,0 +1,7630 @@
+{
+  "format": "jacktools-song",
+  "version": 1,
+  "title": "Canon in D — Morning Light (free arrangement)",
+  "bpm": 72,
+  "style": "classical",
+  "loop": false,
+  "seed": 1706,
+  "tracks": [
+    {
+      "id": "cello",
+      "instrument": "cello",
+      "volume": 0.4
+    },
+    {
+      "id": "piano",
+      "instrument": "piano",
+      "volume": 0.42
+    },
+    {
+      "id": "strings",
+      "instrument": "strings",
+      "volume": 0.3
+    },
+    {
+      "id": "harp",
+      "instrument": "harp",
+      "volume": 0.25
+    },
+    {
+      "id": "counterline",
+      "instrument": "strings",
+      "volume": 0.18
+    },
+    {
+      "id": "flute",
+      "instrument": "flute",
+      "volume": 0.22
+    }
+  ],
+  "scenes": [
+    {
+      "name": "Morning light 1A",
+      "bars": 2,
+      "variation": 0.018,
+      "parts": [
+        {
+          "track": "cello",
+          "volume": 0.63,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.94,
+              "pitch": 2,
+              "velocity": 0.72
+            },
+            {
+              "at": 2,
+              "duration": 1.94,
+              "pitch": -3,
+              "velocity": 0.72
+            },
+            {
+              "at": 4,
+              "duration": 1.94,
+              "pitch": -1,
+              "velocity": 0.72
+            },
+            {
+              "at": 6,
+              "duration": 1.94,
+              "pitch": -6,
+              "velocity": 0.72
+            }
+          ]
+        },
+        {
+          "track": "piano",
+          "volume": 0.63,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.8,
+              "pitch": [
+                2,
+                6,
+                9
+              ],
+              "velocity": 0.48
+            },
+            {
+              "at": 2,
+              "duration": 1.8,
+              "pitch": [
+                -3,
+                1,
+                4
+              ],
+              "velocity": 0.48
+            },
+            {
+              "at": 4,
+              "duration": 1.8,
+              "pitch": [
+                -1,
+                2,
+                6
+              ],
+              "velocity": 0.48
+            },
+            {
+              "at": 6,
+              "duration": 1.8,
+              "pitch": [
+                -6,
+                -3,
+                1
+              ],
+              "velocity": 0.48
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Morning light 1B",
+      "bars": 2,
+      "variation": 0.018,
+      "parts": [
+        {
+          "track": "cello",
+          "volume": 0.63,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.94,
+              "pitch": -5,
+              "velocity": 0.72
+            },
+            {
+              "at": 2,
+              "duration": 1.94,
+              "pitch": 2,
+              "velocity": 0.72
+            },
+            {
+              "at": 4,
+              "duration": 1.94,
+              "pitch": -5,
+              "velocity": 0.72
+            },
+            {
+              "at": 6,
+              "duration": 1.94,
+              "pitch": -3,
+              "velocity": 0.72
+            }
+          ]
+        },
+        {
+          "track": "piano",
+          "volume": 0.63,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.8,
+              "pitch": [
+                -5,
+                -1,
+                2
+              ],
+              "velocity": 0.48
+            },
+            {
+              "at": 2,
+              "duration": 1.8,
+              "pitch": [
+                2,
+                6,
+                9
+              ],
+              "velocity": 0.48
+            },
+            {
+              "at": 4,
+              "duration": 1.8,
+              "pitch": [
+                -5,
+                -1,
+                2
+              ],
+              "velocity": 0.48
+            },
+            {
+              "at": 6,
+              "duration": 1.8,
+              "pitch": [
+                -3,
+                1,
+                4
+              ],
+              "velocity": 0.48
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Morning light 2A",
+      "bars": 2,
+      "variation": 0.018,
+      "parts": [
+        {
+          "track": "cello",
+          "volume": 0.7,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.94,
+              "pitch": 2,
+              "velocity": 0.72
+            },
+            {
+              "at": 2,
+              "duration": 1.94,
+              "pitch": -3,
+              "velocity": 0.72
+            },
+            {
+              "at": 4,
+              "duration": 1.94,
+              "pitch": -1,
+              "velocity": 0.72
+            },
+            {
+              "at": 6,
+              "duration": 1.94,
+              "pitch": -6,
+              "velocity": 0.72
+            }
+          ]
+        },
+        {
+          "track": "piano",
+          "volume": 0.7,
+          "notes": [
+            {
+              "at": 0.0,
+              "duration": 0.44,
+              "pitch": 2,
+              "velocity": 0.56
+            },
+            {
+              "at": 0.5,
+              "duration": 0.44,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.0,
+              "duration": 0.44,
+              "pitch": 9,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.5,
+              "duration": 0.44,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.0,
+              "duration": 0.44,
+              "pitch": -3,
+              "velocity": 0.56
+            },
+            {
+              "at": 2.5,
+              "duration": 0.44,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.0,
+              "duration": 0.44,
+              "pitch": 4,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.5,
+              "duration": 0.44,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.0,
+              "duration": 0.44,
+              "pitch": -1,
+              "velocity": 0.56
+            },
+            {
+              "at": 4.5,
+              "duration": 0.44,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.0,
+              "duration": 0.44,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.5,
+              "duration": 0.44,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.0,
+              "duration": 0.44,
+              "pitch": -6,
+              "velocity": 0.56
+            },
+            {
+              "at": 6.5,
+              "duration": 0.44,
+              "pitch": -3,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.0,
+              "duration": 0.44,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.5,
+              "duration": 0.44,
+              "pitch": -3,
+              "velocity": 0.43
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Morning light 2B",
+      "bars": 2,
+      "variation": 0.018,
+      "parts": [
+        {
+          "track": "cello",
+          "volume": 0.7,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.94,
+              "pitch": -5,
+              "velocity": 0.72
+            },
+            {
+              "at": 2,
+              "duration": 1.94,
+              "pitch": 2,
+              "velocity": 0.72
+            },
+            {
+              "at": 4,
+              "duration": 1.94,
+              "pitch": -5,
+              "velocity": 0.72
+            },
+            {
+              "at": 6,
+              "duration": 1.94,
+              "pitch": -3,
+              "velocity": 0.72
+            }
+          ]
+        },
+        {
+          "track": "piano",
+          "volume": 0.7,
+          "notes": [
+            {
+              "at": 0.0,
+              "duration": 0.44,
+              "pitch": -5,
+              "velocity": 0.56
+            },
+            {
+              "at": 0.5,
+              "duration": 0.44,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.0,
+              "duration": 0.44,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.5,
+              "duration": 0.44,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.0,
+              "duration": 0.44,
+              "pitch": 2,
+              "velocity": 0.56
+            },
+            {
+              "at": 2.5,
+              "duration": 0.44,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.0,
+              "duration": 0.44,
+              "pitch": 9,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.5,
+              "duration": 0.44,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.0,
+              "duration": 0.44,
+              "pitch": -5,
+              "velocity": 0.56
+            },
+            {
+              "at": 4.5,
+              "duration": 0.44,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.0,
+              "duration": 0.44,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.5,
+              "duration": 0.44,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.0,
+              "duration": 0.44,
+              "pitch": -3,
+              "velocity": 0.56
+            },
+            {
+              "at": 6.5,
+              "duration": 0.44,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.0,
+              "duration": 0.44,
+              "pitch": 4,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.5,
+              "duration": 0.44,
+              "pitch": 1,
+              "velocity": 0.43
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "The first voice 1A",
+      "bars": 2,
+      "variation": 0.018,
+      "parts": [
+        {
+          "track": "cello",
+          "volume": 0.738,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.94,
+              "pitch": 2,
+              "velocity": 0.72
+            },
+            {
+              "at": 2,
+              "duration": 1.94,
+              "pitch": -3,
+              "velocity": 0.72
+            },
+            {
+              "at": 4,
+              "duration": 1.94,
+              "pitch": -1,
+              "velocity": 0.72
+            },
+            {
+              "at": 6,
+              "duration": 1.94,
+              "pitch": -6,
+              "velocity": 0.72
+            }
+          ]
+        },
+        {
+          "track": "piano",
+          "volume": 0.738,
+          "notes": [
+            {
+              "at": 0.0,
+              "duration": 0.44,
+              "pitch": 2,
+              "velocity": 0.56
+            },
+            {
+              "at": 0.5,
+              "duration": 0.44,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.0,
+              "duration": 0.44,
+              "pitch": 9,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.5,
+              "duration": 0.44,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.0,
+              "duration": 0.44,
+              "pitch": -3,
+              "velocity": 0.56
+            },
+            {
+              "at": 2.5,
+              "duration": 0.44,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.0,
+              "duration": 0.44,
+              "pitch": 4,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.5,
+              "duration": 0.44,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.0,
+              "duration": 0.44,
+              "pitch": -1,
+              "velocity": 0.56
+            },
+            {
+              "at": 4.5,
+              "duration": 0.44,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.0,
+              "duration": 0.44,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.5,
+              "duration": 0.44,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.0,
+              "duration": 0.44,
+              "pitch": -6,
+              "velocity": 0.56
+            },
+            {
+              "at": 6.5,
+              "duration": 0.44,
+              "pitch": -3,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.0,
+              "duration": 0.44,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.5,
+              "duration": 0.44,
+              "pitch": -3,
+              "velocity": 0.43
+            }
+          ]
+        },
+        {
+          "track": "strings",
+          "volume": 0.738,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.96,
+              "pitch": 18,
+              "velocity": 0.68
+            },
+            {
+              "at": 2,
+              "duration": 1.96,
+              "pitch": 16,
+              "velocity": 0.68
+            },
+            {
+              "at": 4,
+              "duration": 1.96,
+              "pitch": 14,
+              "velocity": 0.68
+            },
+            {
+              "at": 6,
+              "duration": 1.96,
+              "pitch": 13,
+              "velocity": 0.68
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "The first voice 1B",
+      "bars": 2,
+      "variation": 0.018,
+      "parts": [
+        {
+          "track": "cello",
+          "volume": 0.738,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.94,
+              "pitch": -5,
+              "velocity": 0.72
+            },
+            {
+              "at": 2,
+              "duration": 1.94,
+              "pitch": 2,
+              "velocity": 0.72
+            },
+            {
+              "at": 4,
+              "duration": 1.94,
+              "pitch": -5,
+              "velocity": 0.72
+            },
+            {
+              "at": 6,
+              "duration": 1.94,
+              "pitch": -3,
+              "velocity": 0.72
+            }
+          ]
+        },
+        {
+          "track": "piano",
+          "volume": 0.738,
+          "notes": [
+            {
+              "at": 0.0,
+              "duration": 0.44,
+              "pitch": -5,
+              "velocity": 0.56
+            },
+            {
+              "at": 0.5,
+              "duration": 0.44,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.0,
+              "duration": 0.44,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.5,
+              "duration": 0.44,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.0,
+              "duration": 0.44,
+              "pitch": 2,
+              "velocity": 0.56
+            },
+            {
+              "at": 2.5,
+              "duration": 0.44,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.0,
+              "duration": 0.44,
+              "pitch": 9,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.5,
+              "duration": 0.44,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.0,
+              "duration": 0.44,
+              "pitch": -5,
+              "velocity": 0.56
+            },
+            {
+              "at": 4.5,
+              "duration": 0.44,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.0,
+              "duration": 0.44,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.5,
+              "duration": 0.44,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.0,
+              "duration": 0.44,
+              "pitch": -3,
+              "velocity": 0.56
+            },
+            {
+              "at": 6.5,
+              "duration": 0.44,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.0,
+              "duration": 0.44,
+              "pitch": 4,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.5,
+              "duration": 0.44,
+              "pitch": 1,
+              "velocity": 0.43
+            }
+          ]
+        },
+        {
+          "track": "strings",
+          "volume": 0.738,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.96,
+              "pitch": 11,
+              "velocity": 0.68
+            },
+            {
+              "at": 2,
+              "duration": 1.96,
+              "pitch": 9,
+              "velocity": 0.68
+            },
+            {
+              "at": 4,
+              "duration": 1.96,
+              "pitch": 11,
+              "velocity": 0.68
+            },
+            {
+              "at": 6,
+              "duration": 1.96,
+              "pitch": 13,
+              "velocity": 0.68
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "The first voice 2A",
+      "bars": 2,
+      "variation": 0.018,
+      "parts": [
+        {
+          "track": "cello",
+          "volume": 0.82,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.94,
+              "pitch": 2,
+              "velocity": 0.72
+            },
+            {
+              "at": 2,
+              "duration": 1.94,
+              "pitch": -3,
+              "velocity": 0.72
+            },
+            {
+              "at": 4,
+              "duration": 1.94,
+              "pitch": -1,
+              "velocity": 0.72
+            },
+            {
+              "at": 6,
+              "duration": 1.94,
+              "pitch": -6,
+              "velocity": 0.72
+            }
+          ]
+        },
+        {
+          "track": "piano",
+          "volume": 0.82,
+          "notes": [
+            {
+              "at": 0.0,
+              "duration": 0.44,
+              "pitch": 2,
+              "velocity": 0.56
+            },
+            {
+              "at": 0.5,
+              "duration": 0.44,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.0,
+              "duration": 0.44,
+              "pitch": 9,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.5,
+              "duration": 0.44,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.0,
+              "duration": 0.44,
+              "pitch": -3,
+              "velocity": 0.56
+            },
+            {
+              "at": 2.5,
+              "duration": 0.44,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.0,
+              "duration": 0.44,
+              "pitch": 4,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.5,
+              "duration": 0.44,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.0,
+              "duration": 0.44,
+              "pitch": -1,
+              "velocity": 0.56
+            },
+            {
+              "at": 4.5,
+              "duration": 0.44,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.0,
+              "duration": 0.44,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.5,
+              "duration": 0.44,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.0,
+              "duration": 0.44,
+              "pitch": -6,
+              "velocity": 0.56
+            },
+            {
+              "at": 6.5,
+              "duration": 0.44,
+              "pitch": -3,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.0,
+              "duration": 0.44,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.5,
+              "duration": 0.44,
+              "pitch": -3,
+              "velocity": 0.43
+            }
+          ]
+        },
+        {
+          "track": "strings",
+          "volume": 0.82,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.96,
+              "pitch": 18,
+              "velocity": 0.68
+            },
+            {
+              "at": 2,
+              "duration": 1.96,
+              "pitch": 16,
+              "velocity": 0.68
+            },
+            {
+              "at": 4,
+              "duration": 1.96,
+              "pitch": 14,
+              "velocity": 0.68
+            },
+            {
+              "at": 6,
+              "duration": 1.96,
+              "pitch": 13,
+              "velocity": 0.68
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "The first voice 2B",
+      "bars": 2,
+      "variation": 0.018,
+      "parts": [
+        {
+          "track": "cello",
+          "volume": 0.82,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.94,
+              "pitch": -5,
+              "velocity": 0.72
+            },
+            {
+              "at": 2,
+              "duration": 1.94,
+              "pitch": 2,
+              "velocity": 0.72
+            },
+            {
+              "at": 4,
+              "duration": 1.94,
+              "pitch": -5,
+              "velocity": 0.72
+            },
+            {
+              "at": 6,
+              "duration": 1.94,
+              "pitch": -3,
+              "velocity": 0.72
+            }
+          ]
+        },
+        {
+          "track": "piano",
+          "volume": 0.82,
+          "notes": [
+            {
+              "at": 0.0,
+              "duration": 0.44,
+              "pitch": -5,
+              "velocity": 0.56
+            },
+            {
+              "at": 0.5,
+              "duration": 0.44,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.0,
+              "duration": 0.44,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.5,
+              "duration": 0.44,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.0,
+              "duration": 0.44,
+              "pitch": 2,
+              "velocity": 0.56
+            },
+            {
+              "at": 2.5,
+              "duration": 0.44,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.0,
+              "duration": 0.44,
+              "pitch": 9,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.5,
+              "duration": 0.44,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.0,
+              "duration": 0.44,
+              "pitch": -5,
+              "velocity": 0.56
+            },
+            {
+              "at": 4.5,
+              "duration": 0.44,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.0,
+              "duration": 0.44,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.5,
+              "duration": 0.44,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.0,
+              "duration": 0.44,
+              "pitch": -3,
+              "velocity": 0.56
+            },
+            {
+              "at": 6.5,
+              "duration": 0.44,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.0,
+              "duration": 0.44,
+              "pitch": 4,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.5,
+              "duration": 0.44,
+              "pitch": 1,
+              "velocity": 0.43
+            }
+          ]
+        },
+        {
+          "track": "strings",
+          "volume": 0.82,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.96,
+              "pitch": 11,
+              "velocity": 0.68
+            },
+            {
+              "at": 2,
+              "duration": 1.96,
+              "pitch": 9,
+              "velocity": 0.68
+            },
+            {
+              "at": 4,
+              "duration": 1.96,
+              "pitch": 11,
+              "velocity": 0.68
+            },
+            {
+              "at": 6,
+              "duration": 1.96,
+              "pitch": 13,
+              "velocity": 0.68
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Threads of light 1A",
+      "bars": 2,
+      "variation": 0.018,
+      "parts": [
+        {
+          "track": "cello",
+          "volume": 0.792,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.94,
+              "pitch": 2,
+              "velocity": 0.72
+            },
+            {
+              "at": 2,
+              "duration": 1.94,
+              "pitch": -3,
+              "velocity": 0.72
+            },
+            {
+              "at": 4,
+              "duration": 1.94,
+              "pitch": -1,
+              "velocity": 0.72
+            },
+            {
+              "at": 6,
+              "duration": 1.94,
+              "pitch": -6,
+              "velocity": 0.72
+            }
+          ]
+        },
+        {
+          "track": "piano",
+          "volume": 0.792,
+          "notes": [
+            {
+              "at": 0.0,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.56
+            },
+            {
+              "at": 0.25,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 0.5,
+              "duration": 0.22,
+              "pitch": 9,
+              "velocity": 0.43
+            },
+            {
+              "at": 0.75,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.0,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.56
+            },
+            {
+              "at": 1.25,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.5,
+              "duration": 0.22,
+              "pitch": 9,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.75,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.0,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.56
+            },
+            {
+              "at": 2.25,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.5,
+              "duration": 0.22,
+              "pitch": 4,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.75,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.0,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.56
+            },
+            {
+              "at": 3.25,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.5,
+              "duration": 0.22,
+              "pitch": 4,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.75,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.0,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.56
+            },
+            {
+              "at": 4.25,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.5,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.75,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.0,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.56
+            },
+            {
+              "at": 5.25,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.5,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.75,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.0,
+              "duration": 0.22,
+              "pitch": -6,
+              "velocity": 0.56
+            },
+            {
+              "at": 6.25,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.5,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.75,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.0,
+              "duration": 0.22,
+              "pitch": -6,
+              "velocity": 0.56
+            },
+            {
+              "at": 7.25,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.5,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.75,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.43
+            }
+          ]
+        },
+        {
+          "track": "strings",
+          "volume": 0.792,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.96,
+              "pitch": 18,
+              "velocity": 0.68
+            },
+            {
+              "at": 2,
+              "duration": 1.96,
+              "pitch": 16,
+              "velocity": 0.68
+            },
+            {
+              "at": 4,
+              "duration": 1.96,
+              "pitch": 14,
+              "velocity": 0.68
+            },
+            {
+              "at": 6,
+              "duration": 1.96,
+              "pitch": 13,
+              "velocity": 0.68
+            }
+          ]
+        },
+        {
+          "track": "harp",
+          "volume": 0.792,
+          "notes": [
+            {
+              "at": 0.0,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.42
+            },
+            {
+              "at": 0.5,
+              "duration": 0.44,
+              "pitch": 18,
+              "velocity": 0.35
+            },
+            {
+              "at": 1.0,
+              "duration": 0.44,
+              "pitch": 21,
+              "velocity": 0.42
+            },
+            {
+              "at": 1.5,
+              "duration": 0.44,
+              "pitch": 18,
+              "velocity": 0.35
+            },
+            {
+              "at": 2.0,
+              "duration": 0.44,
+              "pitch": 9,
+              "velocity": 0.42
+            },
+            {
+              "at": 2.5,
+              "duration": 0.44,
+              "pitch": 13,
+              "velocity": 0.35
+            },
+            {
+              "at": 3.0,
+              "duration": 0.44,
+              "pitch": 16,
+              "velocity": 0.42
+            },
+            {
+              "at": 3.5,
+              "duration": 0.44,
+              "pitch": 13,
+              "velocity": 0.35
+            },
+            {
+              "at": 4.0,
+              "duration": 0.44,
+              "pitch": 11,
+              "velocity": 0.42
+            },
+            {
+              "at": 4.5,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.35
+            },
+            {
+              "at": 5.0,
+              "duration": 0.44,
+              "pitch": 18,
+              "velocity": 0.42
+            },
+            {
+              "at": 5.5,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.35
+            },
+            {
+              "at": 6.0,
+              "duration": 0.44,
+              "pitch": 6,
+              "velocity": 0.42
+            },
+            {
+              "at": 6.5,
+              "duration": 0.44,
+              "pitch": 9,
+              "velocity": 0.35
+            },
+            {
+              "at": 7.0,
+              "duration": 0.44,
+              "pitch": 13,
+              "velocity": 0.42
+            },
+            {
+              "at": 7.5,
+              "duration": 0.44,
+              "pitch": 9,
+              "velocity": 0.35
+            }
+          ]
+        },
+        {
+          "track": "counterline",
+          "volume": 0.792,
+          "notes": [
+            {
+              "at": 0.5,
+              "duration": 1.35,
+              "pitch": 14,
+              "velocity": 0.46
+            },
+            {
+              "at": 2.5,
+              "duration": 1.35,
+              "pitch": 13,
+              "velocity": 0.46
+            },
+            {
+              "at": 4.5,
+              "duration": 1.35,
+              "pitch": 18,
+              "velocity": 0.46
+            },
+            {
+              "at": 6.5,
+              "duration": 1.35,
+              "pitch": 6,
+              "velocity": 0.46
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Threads of light 1B",
+      "bars": 2,
+      "variation": 0.018,
+      "parts": [
+        {
+          "track": "cello",
+          "volume": 0.792,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.94,
+              "pitch": -5,
+              "velocity": 0.72
+            },
+            {
+              "at": 2,
+              "duration": 1.94,
+              "pitch": 2,
+              "velocity": 0.72
+            },
+            {
+              "at": 4,
+              "duration": 1.94,
+              "pitch": -5,
+              "velocity": 0.72
+            },
+            {
+              "at": 6,
+              "duration": 1.94,
+              "pitch": -3,
+              "velocity": 0.72
+            }
+          ]
+        },
+        {
+          "track": "piano",
+          "volume": 0.792,
+          "notes": [
+            {
+              "at": 0.0,
+              "duration": 0.22,
+              "pitch": -5,
+              "velocity": 0.56
+            },
+            {
+              "at": 0.25,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 0.5,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 0.75,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.0,
+              "duration": 0.22,
+              "pitch": -5,
+              "velocity": 0.56
+            },
+            {
+              "at": 1.25,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.5,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.75,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.0,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.56
+            },
+            {
+              "at": 2.25,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.5,
+              "duration": 0.22,
+              "pitch": 9,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.75,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.0,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.56
+            },
+            {
+              "at": 3.25,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.5,
+              "duration": 0.22,
+              "pitch": 9,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.75,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.0,
+              "duration": 0.22,
+              "pitch": -5,
+              "velocity": 0.56
+            },
+            {
+              "at": 4.25,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.5,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.75,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.0,
+              "duration": 0.22,
+              "pitch": -5,
+              "velocity": 0.56
+            },
+            {
+              "at": 5.25,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.5,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.75,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.0,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.56
+            },
+            {
+              "at": 6.25,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.5,
+              "duration": 0.22,
+              "pitch": 4,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.75,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.0,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.56
+            },
+            {
+              "at": 7.25,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.5,
+              "duration": 0.22,
+              "pitch": 4,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.75,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            }
+          ]
+        },
+        {
+          "track": "strings",
+          "volume": 0.792,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.96,
+              "pitch": 11,
+              "velocity": 0.68
+            },
+            {
+              "at": 2,
+              "duration": 1.96,
+              "pitch": 9,
+              "velocity": 0.68
+            },
+            {
+              "at": 4,
+              "duration": 1.96,
+              "pitch": 11,
+              "velocity": 0.68
+            },
+            {
+              "at": 6,
+              "duration": 1.96,
+              "pitch": 13,
+              "velocity": 0.68
+            }
+          ]
+        },
+        {
+          "track": "harp",
+          "volume": 0.792,
+          "notes": [
+            {
+              "at": 0.0,
+              "duration": 0.44,
+              "pitch": 7,
+              "velocity": 0.42
+            },
+            {
+              "at": 0.5,
+              "duration": 0.44,
+              "pitch": 11,
+              "velocity": 0.35
+            },
+            {
+              "at": 1.0,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.42
+            },
+            {
+              "at": 1.5,
+              "duration": 0.44,
+              "pitch": 11,
+              "velocity": 0.35
+            },
+            {
+              "at": 2.0,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.42
+            },
+            {
+              "at": 2.5,
+              "duration": 0.44,
+              "pitch": 18,
+              "velocity": 0.35
+            },
+            {
+              "at": 3.0,
+              "duration": 0.44,
+              "pitch": 21,
+              "velocity": 0.42
+            },
+            {
+              "at": 3.5,
+              "duration": 0.44,
+              "pitch": 18,
+              "velocity": 0.35
+            },
+            {
+              "at": 4.0,
+              "duration": 0.44,
+              "pitch": 7,
+              "velocity": 0.42
+            },
+            {
+              "at": 4.5,
+              "duration": 0.44,
+              "pitch": 11,
+              "velocity": 0.35
+            },
+            {
+              "at": 5.0,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.42
+            },
+            {
+              "at": 5.5,
+              "duration": 0.44,
+              "pitch": 11,
+              "velocity": 0.35
+            },
+            {
+              "at": 6.0,
+              "duration": 0.44,
+              "pitch": 9,
+              "velocity": 0.42
+            },
+            {
+              "at": 6.5,
+              "duration": 0.44,
+              "pitch": 13,
+              "velocity": 0.35
+            },
+            {
+              "at": 7.0,
+              "duration": 0.44,
+              "pitch": 16,
+              "velocity": 0.42
+            },
+            {
+              "at": 7.5,
+              "duration": 0.44,
+              "pitch": 13,
+              "velocity": 0.35
+            }
+          ]
+        },
+        {
+          "track": "counterline",
+          "volume": 0.792,
+          "notes": [
+            {
+              "at": 0.5,
+              "duration": 1.35,
+              "pitch": 7,
+              "velocity": 0.46
+            },
+            {
+              "at": 2.5,
+              "duration": 1.35,
+              "pitch": 18,
+              "velocity": 0.46
+            },
+            {
+              "at": 4.5,
+              "duration": 1.35,
+              "pitch": 14,
+              "velocity": 0.46
+            },
+            {
+              "at": 6.5,
+              "duration": 1.35,
+              "pitch": 9,
+              "velocity": 0.46
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Threads of light 2A",
+      "bars": 2,
+      "variation": 0.018,
+      "parts": [
+        {
+          "track": "cello",
+          "volume": 0.88,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.94,
+              "pitch": 2,
+              "velocity": 0.72
+            },
+            {
+              "at": 2,
+              "duration": 1.94,
+              "pitch": -3,
+              "velocity": 0.72
+            },
+            {
+              "at": 4,
+              "duration": 1.94,
+              "pitch": -1,
+              "velocity": 0.72
+            },
+            {
+              "at": 6,
+              "duration": 1.94,
+              "pitch": -6,
+              "velocity": 0.72
+            }
+          ]
+        },
+        {
+          "track": "piano",
+          "volume": 0.88,
+          "notes": [
+            {
+              "at": 0.0,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.56
+            },
+            {
+              "at": 0.25,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 0.5,
+              "duration": 0.22,
+              "pitch": 9,
+              "velocity": 0.43
+            },
+            {
+              "at": 0.75,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.0,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.56
+            },
+            {
+              "at": 1.25,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.5,
+              "duration": 0.22,
+              "pitch": 9,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.75,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.0,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.56
+            },
+            {
+              "at": 2.25,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.5,
+              "duration": 0.22,
+              "pitch": 4,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.75,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.0,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.56
+            },
+            {
+              "at": 3.25,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.5,
+              "duration": 0.22,
+              "pitch": 4,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.75,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.0,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.56
+            },
+            {
+              "at": 4.25,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.5,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.75,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.0,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.56
+            },
+            {
+              "at": 5.25,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.5,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.75,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.0,
+              "duration": 0.22,
+              "pitch": -6,
+              "velocity": 0.56
+            },
+            {
+              "at": 6.25,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.5,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.75,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.0,
+              "duration": 0.22,
+              "pitch": -6,
+              "velocity": 0.56
+            },
+            {
+              "at": 7.25,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.5,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.75,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.43
+            }
+          ]
+        },
+        {
+          "track": "strings",
+          "volume": 0.88,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.96,
+              "pitch": 18,
+              "velocity": 0.68
+            },
+            {
+              "at": 2,
+              "duration": 1.96,
+              "pitch": 16,
+              "velocity": 0.68
+            },
+            {
+              "at": 4,
+              "duration": 1.96,
+              "pitch": 14,
+              "velocity": 0.68
+            },
+            {
+              "at": 6,
+              "duration": 1.96,
+              "pitch": 13,
+              "velocity": 0.68
+            }
+          ]
+        },
+        {
+          "track": "harp",
+          "volume": 0.88,
+          "notes": [
+            {
+              "at": 0.0,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.42
+            },
+            {
+              "at": 0.5,
+              "duration": 0.44,
+              "pitch": 18,
+              "velocity": 0.35
+            },
+            {
+              "at": 1.0,
+              "duration": 0.44,
+              "pitch": 21,
+              "velocity": 0.42
+            },
+            {
+              "at": 1.5,
+              "duration": 0.44,
+              "pitch": 18,
+              "velocity": 0.35
+            },
+            {
+              "at": 2.0,
+              "duration": 0.44,
+              "pitch": 9,
+              "velocity": 0.42
+            },
+            {
+              "at": 2.5,
+              "duration": 0.44,
+              "pitch": 13,
+              "velocity": 0.35
+            },
+            {
+              "at": 3.0,
+              "duration": 0.44,
+              "pitch": 16,
+              "velocity": 0.42
+            },
+            {
+              "at": 3.5,
+              "duration": 0.44,
+              "pitch": 13,
+              "velocity": 0.35
+            },
+            {
+              "at": 4.0,
+              "duration": 0.44,
+              "pitch": 11,
+              "velocity": 0.42
+            },
+            {
+              "at": 4.5,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.35
+            },
+            {
+              "at": 5.0,
+              "duration": 0.44,
+              "pitch": 18,
+              "velocity": 0.42
+            },
+            {
+              "at": 5.5,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.35
+            },
+            {
+              "at": 6.0,
+              "duration": 0.44,
+              "pitch": 6,
+              "velocity": 0.42
+            },
+            {
+              "at": 6.5,
+              "duration": 0.44,
+              "pitch": 9,
+              "velocity": 0.35
+            },
+            {
+              "at": 7.0,
+              "duration": 0.44,
+              "pitch": 13,
+              "velocity": 0.42
+            },
+            {
+              "at": 7.5,
+              "duration": 0.44,
+              "pitch": 9,
+              "velocity": 0.35
+            }
+          ]
+        },
+        {
+          "track": "counterline",
+          "volume": 0.88,
+          "notes": [
+            {
+              "at": 0.5,
+              "duration": 1.35,
+              "pitch": 18,
+              "velocity": 0.46
+            },
+            {
+              "at": 2.5,
+              "duration": 1.35,
+              "pitch": 16,
+              "velocity": 0.46
+            },
+            {
+              "at": 4.5,
+              "duration": 1.35,
+              "pitch": 11,
+              "velocity": 0.46
+            },
+            {
+              "at": 6.5,
+              "duration": 1.35,
+              "pitch": 9,
+              "velocity": 0.46
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Threads of light 2B",
+      "bars": 2,
+      "variation": 0.018,
+      "parts": [
+        {
+          "track": "cello",
+          "volume": 0.88,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.94,
+              "pitch": -5,
+              "velocity": 0.72
+            },
+            {
+              "at": 2,
+              "duration": 1.94,
+              "pitch": 2,
+              "velocity": 0.72
+            },
+            {
+              "at": 4,
+              "duration": 1.94,
+              "pitch": -5,
+              "velocity": 0.72
+            },
+            {
+              "at": 6,
+              "duration": 1.94,
+              "pitch": -3,
+              "velocity": 0.72
+            }
+          ]
+        },
+        {
+          "track": "piano",
+          "volume": 0.88,
+          "notes": [
+            {
+              "at": 0.0,
+              "duration": 0.22,
+              "pitch": -5,
+              "velocity": 0.56
+            },
+            {
+              "at": 0.25,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 0.5,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 0.75,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.0,
+              "duration": 0.22,
+              "pitch": -5,
+              "velocity": 0.56
+            },
+            {
+              "at": 1.25,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.5,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.75,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.0,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.56
+            },
+            {
+              "at": 2.25,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.5,
+              "duration": 0.22,
+              "pitch": 9,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.75,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.0,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.56
+            },
+            {
+              "at": 3.25,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.5,
+              "duration": 0.22,
+              "pitch": 9,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.75,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.0,
+              "duration": 0.22,
+              "pitch": -5,
+              "velocity": 0.56
+            },
+            {
+              "at": 4.25,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.5,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.75,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.0,
+              "duration": 0.22,
+              "pitch": -5,
+              "velocity": 0.56
+            },
+            {
+              "at": 5.25,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.5,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.75,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.0,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.56
+            },
+            {
+              "at": 6.25,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.5,
+              "duration": 0.22,
+              "pitch": 4,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.75,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.0,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.56
+            },
+            {
+              "at": 7.25,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.5,
+              "duration": 0.22,
+              "pitch": 4,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.75,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            }
+          ]
+        },
+        {
+          "track": "strings",
+          "volume": 0.88,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.96,
+              "pitch": 11,
+              "velocity": 0.68
+            },
+            {
+              "at": 2,
+              "duration": 1.96,
+              "pitch": 9,
+              "velocity": 0.68
+            },
+            {
+              "at": 4,
+              "duration": 1.96,
+              "pitch": 11,
+              "velocity": 0.68
+            },
+            {
+              "at": 6,
+              "duration": 1.96,
+              "pitch": 13,
+              "velocity": 0.68
+            }
+          ]
+        },
+        {
+          "track": "harp",
+          "volume": 0.88,
+          "notes": [
+            {
+              "at": 0.0,
+              "duration": 0.44,
+              "pitch": 7,
+              "velocity": 0.42
+            },
+            {
+              "at": 0.5,
+              "duration": 0.44,
+              "pitch": 11,
+              "velocity": 0.35
+            },
+            {
+              "at": 1.0,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.42
+            },
+            {
+              "at": 1.5,
+              "duration": 0.44,
+              "pitch": 11,
+              "velocity": 0.35
+            },
+            {
+              "at": 2.0,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.42
+            },
+            {
+              "at": 2.5,
+              "duration": 0.44,
+              "pitch": 18,
+              "velocity": 0.35
+            },
+            {
+              "at": 3.0,
+              "duration": 0.44,
+              "pitch": 21,
+              "velocity": 0.42
+            },
+            {
+              "at": 3.5,
+              "duration": 0.44,
+              "pitch": 18,
+              "velocity": 0.35
+            },
+            {
+              "at": 4.0,
+              "duration": 0.44,
+              "pitch": 7,
+              "velocity": 0.42
+            },
+            {
+              "at": 4.5,
+              "duration": 0.44,
+              "pitch": 11,
+              "velocity": 0.35
+            },
+            {
+              "at": 5.0,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.42
+            },
+            {
+              "at": 5.5,
+              "duration": 0.44,
+              "pitch": 11,
+              "velocity": 0.35
+            },
+            {
+              "at": 6.0,
+              "duration": 0.44,
+              "pitch": 9,
+              "velocity": 0.42
+            },
+            {
+              "at": 6.5,
+              "duration": 0.44,
+              "pitch": 13,
+              "velocity": 0.35
+            },
+            {
+              "at": 7.0,
+              "duration": 0.44,
+              "pitch": 16,
+              "velocity": 0.42
+            },
+            {
+              "at": 7.5,
+              "duration": 0.44,
+              "pitch": 13,
+              "velocity": 0.35
+            }
+          ]
+        },
+        {
+          "track": "counterline",
+          "volume": 0.88,
+          "notes": [
+            {
+              "at": 0.5,
+              "duration": 1.35,
+              "pitch": 11,
+              "velocity": 0.46
+            },
+            {
+              "at": 2.5,
+              "duration": 1.35,
+              "pitch": 21,
+              "velocity": 0.46
+            },
+            {
+              "at": 4.5,
+              "duration": 1.35,
+              "pitch": 7,
+              "velocity": 0.46
+            },
+            {
+              "at": 6.5,
+              "duration": 1.35,
+              "pitch": 13,
+              "velocity": 0.46
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Open sky 1A",
+      "bars": 2,
+      "variation": 0.018,
+      "parts": [
+        {
+          "track": "cello",
+          "volume": 0.9,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.94,
+              "pitch": 2,
+              "velocity": 0.72
+            },
+            {
+              "at": 2,
+              "duration": 1.94,
+              "pitch": -3,
+              "velocity": 0.72
+            },
+            {
+              "at": 4,
+              "duration": 1.94,
+              "pitch": -1,
+              "velocity": 0.72
+            },
+            {
+              "at": 6,
+              "duration": 1.94,
+              "pitch": -6,
+              "velocity": 0.72
+            }
+          ]
+        },
+        {
+          "track": "piano",
+          "volume": 0.9,
+          "notes": [
+            {
+              "at": 0.0,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.56
+            },
+            {
+              "at": 0.25,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 0.5,
+              "duration": 0.22,
+              "pitch": 9,
+              "velocity": 0.43
+            },
+            {
+              "at": 0.75,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.0,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.56
+            },
+            {
+              "at": 1.25,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.5,
+              "duration": 0.22,
+              "pitch": 9,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.75,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.0,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.56
+            },
+            {
+              "at": 2.25,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.5,
+              "duration": 0.22,
+              "pitch": 4,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.75,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.0,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.56
+            },
+            {
+              "at": 3.25,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.5,
+              "duration": 0.22,
+              "pitch": 4,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.75,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.0,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.56
+            },
+            {
+              "at": 4.25,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.5,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.75,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.0,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.56
+            },
+            {
+              "at": 5.25,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.5,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.75,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.0,
+              "duration": 0.22,
+              "pitch": -6,
+              "velocity": 0.56
+            },
+            {
+              "at": 6.25,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.5,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.75,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.0,
+              "duration": 0.22,
+              "pitch": -6,
+              "velocity": 0.56
+            },
+            {
+              "at": 7.25,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.5,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.75,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.43
+            }
+          ]
+        },
+        {
+          "track": "strings",
+          "volume": 0.9,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.96,
+              "pitch": 18,
+              "velocity": 0.68
+            },
+            {
+              "at": 2,
+              "duration": 1.96,
+              "pitch": 16,
+              "velocity": 0.68
+            },
+            {
+              "at": 4,
+              "duration": 1.96,
+              "pitch": 14,
+              "velocity": 0.68
+            },
+            {
+              "at": 6,
+              "duration": 1.96,
+              "pitch": 13,
+              "velocity": 0.68
+            }
+          ]
+        },
+        {
+          "track": "harp",
+          "volume": 0.9,
+          "notes": [
+            {
+              "at": 0.0,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.42
+            },
+            {
+              "at": 0.5,
+              "duration": 0.44,
+              "pitch": 18,
+              "velocity": 0.35
+            },
+            {
+              "at": 1.0,
+              "duration": 0.44,
+              "pitch": 21,
+              "velocity": 0.42
+            },
+            {
+              "at": 1.5,
+              "duration": 0.44,
+              "pitch": 18,
+              "velocity": 0.35
+            },
+            {
+              "at": 2.0,
+              "duration": 0.44,
+              "pitch": 9,
+              "velocity": 0.42
+            },
+            {
+              "at": 2.5,
+              "duration": 0.44,
+              "pitch": 13,
+              "velocity": 0.35
+            },
+            {
+              "at": 3.0,
+              "duration": 0.44,
+              "pitch": 16,
+              "velocity": 0.42
+            },
+            {
+              "at": 3.5,
+              "duration": 0.44,
+              "pitch": 13,
+              "velocity": 0.35
+            },
+            {
+              "at": 4.0,
+              "duration": 0.44,
+              "pitch": 11,
+              "velocity": 0.42
+            },
+            {
+              "at": 4.5,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.35
+            },
+            {
+              "at": 5.0,
+              "duration": 0.44,
+              "pitch": 18,
+              "velocity": 0.42
+            },
+            {
+              "at": 5.5,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.35
+            },
+            {
+              "at": 6.0,
+              "duration": 0.44,
+              "pitch": 6,
+              "velocity": 0.42
+            },
+            {
+              "at": 6.5,
+              "duration": 0.44,
+              "pitch": 9,
+              "velocity": 0.35
+            },
+            {
+              "at": 7.0,
+              "duration": 0.44,
+              "pitch": 13,
+              "velocity": 0.42
+            },
+            {
+              "at": 7.5,
+              "duration": 0.44,
+              "pitch": 9,
+              "velocity": 0.35
+            }
+          ]
+        },
+        {
+          "track": "counterline",
+          "volume": 0.9,
+          "notes": [
+            {
+              "at": 0.5,
+              "duration": 1.35,
+              "pitch": 14,
+              "velocity": 0.46
+            },
+            {
+              "at": 2.5,
+              "duration": 1.35,
+              "pitch": 13,
+              "velocity": 0.46
+            },
+            {
+              "at": 4.5,
+              "duration": 1.35,
+              "pitch": 18,
+              "velocity": 0.46
+            },
+            {
+              "at": 6.5,
+              "duration": 1.35,
+              "pitch": 6,
+              "velocity": 0.46
+            }
+          ]
+        },
+        {
+          "track": "flute",
+          "volume": 0.9,
+          "notes": [
+            {
+              "at": 0.5,
+              "duration": 1.35,
+              "pitch": 18,
+              "velocity": 0.46
+            },
+            {
+              "at": 2.5,
+              "duration": 1.35,
+              "pitch": 16,
+              "velocity": 0.46
+            },
+            {
+              "at": 4.5,
+              "duration": 1.35,
+              "pitch": 11,
+              "velocity": 0.46
+            },
+            {
+              "at": 6.5,
+              "duration": 1.35,
+              "pitch": 9,
+              "velocity": 0.46
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Open sky 1B",
+      "bars": 2,
+      "variation": 0.018,
+      "parts": [
+        {
+          "track": "cello",
+          "volume": 0.9,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.94,
+              "pitch": -5,
+              "velocity": 0.72
+            },
+            {
+              "at": 2,
+              "duration": 1.94,
+              "pitch": 2,
+              "velocity": 0.72
+            },
+            {
+              "at": 4,
+              "duration": 1.94,
+              "pitch": -5,
+              "velocity": 0.72
+            },
+            {
+              "at": 6,
+              "duration": 1.94,
+              "pitch": -3,
+              "velocity": 0.72
+            }
+          ]
+        },
+        {
+          "track": "piano",
+          "volume": 0.9,
+          "notes": [
+            {
+              "at": 0.0,
+              "duration": 0.22,
+              "pitch": -5,
+              "velocity": 0.56
+            },
+            {
+              "at": 0.25,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 0.5,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 0.75,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.0,
+              "duration": 0.22,
+              "pitch": -5,
+              "velocity": 0.56
+            },
+            {
+              "at": 1.25,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.5,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.75,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.0,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.56
+            },
+            {
+              "at": 2.25,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.5,
+              "duration": 0.22,
+              "pitch": 9,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.75,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.0,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.56
+            },
+            {
+              "at": 3.25,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.5,
+              "duration": 0.22,
+              "pitch": 9,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.75,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.0,
+              "duration": 0.22,
+              "pitch": -5,
+              "velocity": 0.56
+            },
+            {
+              "at": 4.25,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.5,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.75,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.0,
+              "duration": 0.22,
+              "pitch": -5,
+              "velocity": 0.56
+            },
+            {
+              "at": 5.25,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.5,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.75,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.0,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.56
+            },
+            {
+              "at": 6.25,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.5,
+              "duration": 0.22,
+              "pitch": 4,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.75,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.0,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.56
+            },
+            {
+              "at": 7.25,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.5,
+              "duration": 0.22,
+              "pitch": 4,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.75,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            }
+          ]
+        },
+        {
+          "track": "strings",
+          "volume": 0.9,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.96,
+              "pitch": 11,
+              "velocity": 0.68
+            },
+            {
+              "at": 2,
+              "duration": 1.96,
+              "pitch": 9,
+              "velocity": 0.68
+            },
+            {
+              "at": 4,
+              "duration": 1.96,
+              "pitch": 11,
+              "velocity": 0.68
+            },
+            {
+              "at": 6,
+              "duration": 1.96,
+              "pitch": 13,
+              "velocity": 0.68
+            }
+          ]
+        },
+        {
+          "track": "harp",
+          "volume": 0.9,
+          "notes": [
+            {
+              "at": 0.0,
+              "duration": 0.44,
+              "pitch": 7,
+              "velocity": 0.42
+            },
+            {
+              "at": 0.5,
+              "duration": 0.44,
+              "pitch": 11,
+              "velocity": 0.35
+            },
+            {
+              "at": 1.0,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.42
+            },
+            {
+              "at": 1.5,
+              "duration": 0.44,
+              "pitch": 11,
+              "velocity": 0.35
+            },
+            {
+              "at": 2.0,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.42
+            },
+            {
+              "at": 2.5,
+              "duration": 0.44,
+              "pitch": 18,
+              "velocity": 0.35
+            },
+            {
+              "at": 3.0,
+              "duration": 0.44,
+              "pitch": 21,
+              "velocity": 0.42
+            },
+            {
+              "at": 3.5,
+              "duration": 0.44,
+              "pitch": 18,
+              "velocity": 0.35
+            },
+            {
+              "at": 4.0,
+              "duration": 0.44,
+              "pitch": 7,
+              "velocity": 0.42
+            },
+            {
+              "at": 4.5,
+              "duration": 0.44,
+              "pitch": 11,
+              "velocity": 0.35
+            },
+            {
+              "at": 5.0,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.42
+            },
+            {
+              "at": 5.5,
+              "duration": 0.44,
+              "pitch": 11,
+              "velocity": 0.35
+            },
+            {
+              "at": 6.0,
+              "duration": 0.44,
+              "pitch": 9,
+              "velocity": 0.42
+            },
+            {
+              "at": 6.5,
+              "duration": 0.44,
+              "pitch": 13,
+              "velocity": 0.35
+            },
+            {
+              "at": 7.0,
+              "duration": 0.44,
+              "pitch": 16,
+              "velocity": 0.42
+            },
+            {
+              "at": 7.5,
+              "duration": 0.44,
+              "pitch": 13,
+              "velocity": 0.35
+            }
+          ]
+        },
+        {
+          "track": "counterline",
+          "volume": 0.9,
+          "notes": [
+            {
+              "at": 0.5,
+              "duration": 1.35,
+              "pitch": 7,
+              "velocity": 0.46
+            },
+            {
+              "at": 2.5,
+              "duration": 1.35,
+              "pitch": 18,
+              "velocity": 0.46
+            },
+            {
+              "at": 4.5,
+              "duration": 1.35,
+              "pitch": 14,
+              "velocity": 0.46
+            },
+            {
+              "at": 6.5,
+              "duration": 1.35,
+              "pitch": 9,
+              "velocity": 0.46
+            }
+          ]
+        },
+        {
+          "track": "flute",
+          "volume": 0.9,
+          "notes": [
+            {
+              "at": 0.5,
+              "duration": 1.35,
+              "pitch": 11,
+              "velocity": 0.46
+            },
+            {
+              "at": 2.5,
+              "duration": 1.35,
+              "pitch": 21,
+              "velocity": 0.46
+            },
+            {
+              "at": 4.5,
+              "duration": 1.35,
+              "pitch": 7,
+              "velocity": 0.46
+            },
+            {
+              "at": 6.5,
+              "duration": 1.35,
+              "pitch": 13,
+              "velocity": 0.46
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Open sky 2A",
+      "bars": 2,
+      "variation": 0.018,
+      "parts": [
+        {
+          "track": "cello",
+          "volume": 1,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.94,
+              "pitch": 2,
+              "velocity": 0.72
+            },
+            {
+              "at": 2,
+              "duration": 1.94,
+              "pitch": -3,
+              "velocity": 0.72
+            },
+            {
+              "at": 4,
+              "duration": 1.94,
+              "pitch": -1,
+              "velocity": 0.72
+            },
+            {
+              "at": 6,
+              "duration": 1.94,
+              "pitch": -6,
+              "velocity": 0.72
+            }
+          ]
+        },
+        {
+          "track": "piano",
+          "volume": 1,
+          "notes": [
+            {
+              "at": 0.0,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.56
+            },
+            {
+              "at": 0.25,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 0.5,
+              "duration": 0.22,
+              "pitch": 9,
+              "velocity": 0.43
+            },
+            {
+              "at": 0.75,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.0,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.56
+            },
+            {
+              "at": 1.25,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.5,
+              "duration": 0.22,
+              "pitch": 9,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.75,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.0,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.56
+            },
+            {
+              "at": 2.25,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.5,
+              "duration": 0.22,
+              "pitch": 4,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.75,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.0,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.56
+            },
+            {
+              "at": 3.25,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.5,
+              "duration": 0.22,
+              "pitch": 4,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.75,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.0,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.56
+            },
+            {
+              "at": 4.25,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.5,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.75,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.0,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.56
+            },
+            {
+              "at": 5.25,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.5,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.75,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.0,
+              "duration": 0.22,
+              "pitch": -6,
+              "velocity": 0.56
+            },
+            {
+              "at": 6.25,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.5,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.75,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.0,
+              "duration": 0.22,
+              "pitch": -6,
+              "velocity": 0.56
+            },
+            {
+              "at": 7.25,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.5,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.75,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.43
+            }
+          ]
+        },
+        {
+          "track": "strings",
+          "volume": 1,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.96,
+              "pitch": 18,
+              "velocity": 0.68
+            },
+            {
+              "at": 2,
+              "duration": 1.96,
+              "pitch": 16,
+              "velocity": 0.68
+            },
+            {
+              "at": 4,
+              "duration": 1.96,
+              "pitch": 14,
+              "velocity": 0.68
+            },
+            {
+              "at": 6,
+              "duration": 1.96,
+              "pitch": 13,
+              "velocity": 0.68
+            }
+          ]
+        },
+        {
+          "track": "harp",
+          "volume": 1,
+          "notes": [
+            {
+              "at": 0.0,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.42
+            },
+            {
+              "at": 0.5,
+              "duration": 0.44,
+              "pitch": 18,
+              "velocity": 0.35
+            },
+            {
+              "at": 1.0,
+              "duration": 0.44,
+              "pitch": 21,
+              "velocity": 0.42
+            },
+            {
+              "at": 1.5,
+              "duration": 0.44,
+              "pitch": 18,
+              "velocity": 0.35
+            },
+            {
+              "at": 2.0,
+              "duration": 0.44,
+              "pitch": 9,
+              "velocity": 0.42
+            },
+            {
+              "at": 2.5,
+              "duration": 0.44,
+              "pitch": 13,
+              "velocity": 0.35
+            },
+            {
+              "at": 3.0,
+              "duration": 0.44,
+              "pitch": 16,
+              "velocity": 0.42
+            },
+            {
+              "at": 3.5,
+              "duration": 0.44,
+              "pitch": 13,
+              "velocity": 0.35
+            },
+            {
+              "at": 4.0,
+              "duration": 0.44,
+              "pitch": 11,
+              "velocity": 0.42
+            },
+            {
+              "at": 4.5,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.35
+            },
+            {
+              "at": 5.0,
+              "duration": 0.44,
+              "pitch": 18,
+              "velocity": 0.42
+            },
+            {
+              "at": 5.5,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.35
+            },
+            {
+              "at": 6.0,
+              "duration": 0.44,
+              "pitch": 6,
+              "velocity": 0.42
+            },
+            {
+              "at": 6.5,
+              "duration": 0.44,
+              "pitch": 9,
+              "velocity": 0.35
+            },
+            {
+              "at": 7.0,
+              "duration": 0.44,
+              "pitch": 13,
+              "velocity": 0.42
+            },
+            {
+              "at": 7.5,
+              "duration": 0.44,
+              "pitch": 9,
+              "velocity": 0.35
+            }
+          ]
+        },
+        {
+          "track": "counterline",
+          "volume": 1,
+          "notes": [
+            {
+              "at": 0.5,
+              "duration": 1.35,
+              "pitch": 18,
+              "velocity": 0.46
+            },
+            {
+              "at": 2.5,
+              "duration": 1.35,
+              "pitch": 16,
+              "velocity": 0.46
+            },
+            {
+              "at": 4.5,
+              "duration": 1.35,
+              "pitch": 11,
+              "velocity": 0.46
+            },
+            {
+              "at": 6.5,
+              "duration": 1.35,
+              "pitch": 9,
+              "velocity": 0.46
+            }
+          ]
+        },
+        {
+          "track": "flute",
+          "volume": 1,
+          "notes": [
+            {
+              "at": 0.5,
+              "duration": 1.35,
+              "pitch": 18,
+              "velocity": 0.46
+            },
+            {
+              "at": 2.5,
+              "duration": 1.35,
+              "pitch": 16,
+              "velocity": 0.46
+            },
+            {
+              "at": 4.5,
+              "duration": 1.35,
+              "pitch": 11,
+              "velocity": 0.46
+            },
+            {
+              "at": 6.5,
+              "duration": 1.35,
+              "pitch": 9,
+              "velocity": 0.46
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Open sky 2B",
+      "bars": 2,
+      "variation": 0.018,
+      "parts": [
+        {
+          "track": "cello",
+          "volume": 1,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.94,
+              "pitch": -5,
+              "velocity": 0.72
+            },
+            {
+              "at": 2,
+              "duration": 1.94,
+              "pitch": 2,
+              "velocity": 0.72
+            },
+            {
+              "at": 4,
+              "duration": 1.94,
+              "pitch": -5,
+              "velocity": 0.72
+            },
+            {
+              "at": 6,
+              "duration": 1.94,
+              "pitch": -3,
+              "velocity": 0.72
+            }
+          ]
+        },
+        {
+          "track": "piano",
+          "volume": 1,
+          "notes": [
+            {
+              "at": 0.0,
+              "duration": 0.22,
+              "pitch": -5,
+              "velocity": 0.56
+            },
+            {
+              "at": 0.25,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 0.5,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 0.75,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.0,
+              "duration": 0.22,
+              "pitch": -5,
+              "velocity": 0.56
+            },
+            {
+              "at": 1.25,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.5,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.75,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.0,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.56
+            },
+            {
+              "at": 2.25,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.5,
+              "duration": 0.22,
+              "pitch": 9,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.75,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.0,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.56
+            },
+            {
+              "at": 3.25,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.5,
+              "duration": 0.22,
+              "pitch": 9,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.75,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.0,
+              "duration": 0.22,
+              "pitch": -5,
+              "velocity": 0.56
+            },
+            {
+              "at": 4.25,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.5,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.75,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.0,
+              "duration": 0.22,
+              "pitch": -5,
+              "velocity": 0.56
+            },
+            {
+              "at": 5.25,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.5,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.75,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.0,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.56
+            },
+            {
+              "at": 6.25,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.5,
+              "duration": 0.22,
+              "pitch": 4,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.75,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.0,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.56
+            },
+            {
+              "at": 7.25,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.5,
+              "duration": 0.22,
+              "pitch": 4,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.75,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            }
+          ]
+        },
+        {
+          "track": "strings",
+          "volume": 1,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.96,
+              "pitch": 11,
+              "velocity": 0.68
+            },
+            {
+              "at": 2,
+              "duration": 1.96,
+              "pitch": 9,
+              "velocity": 0.68
+            },
+            {
+              "at": 4,
+              "duration": 1.96,
+              "pitch": 11,
+              "velocity": 0.68
+            },
+            {
+              "at": 6,
+              "duration": 1.96,
+              "pitch": 13,
+              "velocity": 0.68
+            }
+          ]
+        },
+        {
+          "track": "harp",
+          "volume": 1,
+          "notes": [
+            {
+              "at": 0.0,
+              "duration": 0.44,
+              "pitch": 7,
+              "velocity": 0.42
+            },
+            {
+              "at": 0.5,
+              "duration": 0.44,
+              "pitch": 11,
+              "velocity": 0.35
+            },
+            {
+              "at": 1.0,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.42
+            },
+            {
+              "at": 1.5,
+              "duration": 0.44,
+              "pitch": 11,
+              "velocity": 0.35
+            },
+            {
+              "at": 2.0,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.42
+            },
+            {
+              "at": 2.5,
+              "duration": 0.44,
+              "pitch": 18,
+              "velocity": 0.35
+            },
+            {
+              "at": 3.0,
+              "duration": 0.44,
+              "pitch": 21,
+              "velocity": 0.42
+            },
+            {
+              "at": 3.5,
+              "duration": 0.44,
+              "pitch": 18,
+              "velocity": 0.35
+            },
+            {
+              "at": 4.0,
+              "duration": 0.44,
+              "pitch": 7,
+              "velocity": 0.42
+            },
+            {
+              "at": 4.5,
+              "duration": 0.44,
+              "pitch": 11,
+              "velocity": 0.35
+            },
+            {
+              "at": 5.0,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.42
+            },
+            {
+              "at": 5.5,
+              "duration": 0.44,
+              "pitch": 11,
+              "velocity": 0.35
+            },
+            {
+              "at": 6.0,
+              "duration": 0.44,
+              "pitch": 9,
+              "velocity": 0.42
+            },
+            {
+              "at": 6.5,
+              "duration": 0.44,
+              "pitch": 13,
+              "velocity": 0.35
+            },
+            {
+              "at": 7.0,
+              "duration": 0.44,
+              "pitch": 16,
+              "velocity": 0.42
+            },
+            {
+              "at": 7.5,
+              "duration": 0.44,
+              "pitch": 13,
+              "velocity": 0.35
+            }
+          ]
+        },
+        {
+          "track": "counterline",
+          "volume": 1,
+          "notes": [
+            {
+              "at": 0.5,
+              "duration": 1.35,
+              "pitch": 11,
+              "velocity": 0.46
+            },
+            {
+              "at": 2.5,
+              "duration": 1.35,
+              "pitch": 21,
+              "velocity": 0.46
+            },
+            {
+              "at": 4.5,
+              "duration": 1.35,
+              "pitch": 7,
+              "velocity": 0.46
+            },
+            {
+              "at": 6.5,
+              "duration": 1.35,
+              "pitch": 13,
+              "velocity": 0.46
+            }
+          ]
+        },
+        {
+          "track": "flute",
+          "volume": 1,
+          "notes": [
+            {
+              "at": 0.5,
+              "duration": 1.35,
+              "pitch": 11,
+              "velocity": 0.46
+            },
+            {
+              "at": 2.5,
+              "duration": 1.35,
+              "pitch": 21,
+              "velocity": 0.46
+            },
+            {
+              "at": 4.5,
+              "duration": 1.35,
+              "pitch": 7,
+              "velocity": 0.46
+            },
+            {
+              "at": 6.5,
+              "duration": 1.35,
+              "pitch": 13,
+              "velocity": 0.46
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "A quiet reflection 1A",
+      "bars": 2,
+      "variation": 0.018,
+      "parts": [
+        {
+          "track": "cello",
+          "volume": 0.63,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.94,
+              "pitch": 2,
+              "velocity": 0.72
+            },
+            {
+              "at": 2,
+              "duration": 1.94,
+              "pitch": -3,
+              "velocity": 0.72
+            },
+            {
+              "at": 4,
+              "duration": 1.94,
+              "pitch": -1,
+              "velocity": 0.72
+            },
+            {
+              "at": 6,
+              "duration": 1.94,
+              "pitch": -6,
+              "velocity": 0.72
+            }
+          ]
+        },
+        {
+          "track": "piano",
+          "volume": 0.63,
+          "notes": [
+            {
+              "at": 0.0,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.56
+            },
+            {
+              "at": 0.25,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 0.5,
+              "duration": 0.22,
+              "pitch": 9,
+              "velocity": 0.43
+            },
+            {
+              "at": 0.75,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.0,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.56
+            },
+            {
+              "at": 1.25,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.5,
+              "duration": 0.22,
+              "pitch": 9,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.75,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.0,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.56
+            },
+            {
+              "at": 2.25,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.5,
+              "duration": 0.22,
+              "pitch": 4,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.75,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.0,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.56
+            },
+            {
+              "at": 3.25,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.5,
+              "duration": 0.22,
+              "pitch": 4,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.75,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.0,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.56
+            },
+            {
+              "at": 4.25,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.5,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.75,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.0,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.56
+            },
+            {
+              "at": 5.25,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.5,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.75,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.0,
+              "duration": 0.22,
+              "pitch": -6,
+              "velocity": 0.56
+            },
+            {
+              "at": 6.25,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.5,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.75,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.0,
+              "duration": 0.22,
+              "pitch": -6,
+              "velocity": 0.56
+            },
+            {
+              "at": 7.25,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.5,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.75,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.43
+            }
+          ]
+        },
+        {
+          "track": "harp",
+          "volume": 0.63,
+          "notes": [
+            {
+              "at": 0.0,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.42
+            },
+            {
+              "at": 0.5,
+              "duration": 0.44,
+              "pitch": 18,
+              "velocity": 0.35
+            },
+            {
+              "at": 1.0,
+              "duration": 0.44,
+              "pitch": 21,
+              "velocity": 0.42
+            },
+            {
+              "at": 1.5,
+              "duration": 0.44,
+              "pitch": 18,
+              "velocity": 0.35
+            },
+            {
+              "at": 2.0,
+              "duration": 0.44,
+              "pitch": 9,
+              "velocity": 0.42
+            },
+            {
+              "at": 2.5,
+              "duration": 0.44,
+              "pitch": 13,
+              "velocity": 0.35
+            },
+            {
+              "at": 3.0,
+              "duration": 0.44,
+              "pitch": 16,
+              "velocity": 0.42
+            },
+            {
+              "at": 3.5,
+              "duration": 0.44,
+              "pitch": 13,
+              "velocity": 0.35
+            },
+            {
+              "at": 4.0,
+              "duration": 0.44,
+              "pitch": 11,
+              "velocity": 0.42
+            },
+            {
+              "at": 4.5,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.35
+            },
+            {
+              "at": 5.0,
+              "duration": 0.44,
+              "pitch": 18,
+              "velocity": 0.42
+            },
+            {
+              "at": 5.5,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.35
+            },
+            {
+              "at": 6.0,
+              "duration": 0.44,
+              "pitch": 6,
+              "velocity": 0.42
+            },
+            {
+              "at": 6.5,
+              "duration": 0.44,
+              "pitch": 9,
+              "velocity": 0.35
+            },
+            {
+              "at": 7.0,
+              "duration": 0.44,
+              "pitch": 13,
+              "velocity": 0.42
+            },
+            {
+              "at": 7.5,
+              "duration": 0.44,
+              "pitch": 9,
+              "velocity": 0.35
+            }
+          ]
+        },
+        {
+          "track": "flute",
+          "volume": 0.63,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.9,
+              "pitch": 18,
+              "velocity": 0.62
+            },
+            {
+              "at": 2,
+              "duration": 1.9,
+              "pitch": 16,
+              "velocity": 0.62
+            },
+            {
+              "at": 4,
+              "duration": 1.9,
+              "pitch": 14,
+              "velocity": 0.62
+            },
+            {
+              "at": 6,
+              "duration": 1.9,
+              "pitch": 13,
+              "velocity": 0.62
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "A quiet reflection 1B",
+      "bars": 2,
+      "variation": 0.018,
+      "parts": [
+        {
+          "track": "cello",
+          "volume": 0.63,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.94,
+              "pitch": -5,
+              "velocity": 0.72
+            },
+            {
+              "at": 2,
+              "duration": 1.94,
+              "pitch": 2,
+              "velocity": 0.72
+            },
+            {
+              "at": 4,
+              "duration": 1.94,
+              "pitch": -5,
+              "velocity": 0.72
+            },
+            {
+              "at": 6,
+              "duration": 1.94,
+              "pitch": -3,
+              "velocity": 0.72
+            }
+          ]
+        },
+        {
+          "track": "piano",
+          "volume": 0.63,
+          "notes": [
+            {
+              "at": 0.0,
+              "duration": 0.22,
+              "pitch": -5,
+              "velocity": 0.56
+            },
+            {
+              "at": 0.25,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 0.5,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 0.75,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.0,
+              "duration": 0.22,
+              "pitch": -5,
+              "velocity": 0.56
+            },
+            {
+              "at": 1.25,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.5,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.75,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.0,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.56
+            },
+            {
+              "at": 2.25,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.5,
+              "duration": 0.22,
+              "pitch": 9,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.75,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.0,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.56
+            },
+            {
+              "at": 3.25,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.5,
+              "duration": 0.22,
+              "pitch": 9,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.75,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.0,
+              "duration": 0.22,
+              "pitch": -5,
+              "velocity": 0.56
+            },
+            {
+              "at": 4.25,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.5,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.75,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.0,
+              "duration": 0.22,
+              "pitch": -5,
+              "velocity": 0.56
+            },
+            {
+              "at": 5.25,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.5,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.75,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.0,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.56
+            },
+            {
+              "at": 6.25,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.5,
+              "duration": 0.22,
+              "pitch": 4,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.75,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.0,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.56
+            },
+            {
+              "at": 7.25,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.5,
+              "duration": 0.22,
+              "pitch": 4,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.75,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            }
+          ]
+        },
+        {
+          "track": "harp",
+          "volume": 0.63,
+          "notes": [
+            {
+              "at": 0.0,
+              "duration": 0.44,
+              "pitch": 7,
+              "velocity": 0.42
+            },
+            {
+              "at": 0.5,
+              "duration": 0.44,
+              "pitch": 11,
+              "velocity": 0.35
+            },
+            {
+              "at": 1.0,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.42
+            },
+            {
+              "at": 1.5,
+              "duration": 0.44,
+              "pitch": 11,
+              "velocity": 0.35
+            },
+            {
+              "at": 2.0,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.42
+            },
+            {
+              "at": 2.5,
+              "duration": 0.44,
+              "pitch": 18,
+              "velocity": 0.35
+            },
+            {
+              "at": 3.0,
+              "duration": 0.44,
+              "pitch": 21,
+              "velocity": 0.42
+            },
+            {
+              "at": 3.5,
+              "duration": 0.44,
+              "pitch": 18,
+              "velocity": 0.35
+            },
+            {
+              "at": 4.0,
+              "duration": 0.44,
+              "pitch": 7,
+              "velocity": 0.42
+            },
+            {
+              "at": 4.5,
+              "duration": 0.44,
+              "pitch": 11,
+              "velocity": 0.35
+            },
+            {
+              "at": 5.0,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.42
+            },
+            {
+              "at": 5.5,
+              "duration": 0.44,
+              "pitch": 11,
+              "velocity": 0.35
+            },
+            {
+              "at": 6.0,
+              "duration": 0.44,
+              "pitch": 9,
+              "velocity": 0.42
+            },
+            {
+              "at": 6.5,
+              "duration": 0.44,
+              "pitch": 13,
+              "velocity": 0.35
+            },
+            {
+              "at": 7.0,
+              "duration": 0.44,
+              "pitch": 16,
+              "velocity": 0.42
+            },
+            {
+              "at": 7.5,
+              "duration": 0.44,
+              "pitch": 13,
+              "velocity": 0.35
+            }
+          ]
+        },
+        {
+          "track": "flute",
+          "volume": 0.63,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.9,
+              "pitch": 11,
+              "velocity": 0.62
+            },
+            {
+              "at": 2,
+              "duration": 1.9,
+              "pitch": 9,
+              "velocity": 0.62
+            },
+            {
+              "at": 4,
+              "duration": 1.9,
+              "pitch": 11,
+              "velocity": 0.62
+            },
+            {
+              "at": 6,
+              "duration": 1.9,
+              "pitch": 13,
+              "velocity": 0.62
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "A quiet reflection 2A",
+      "bars": 2,
+      "variation": 0.018,
+      "parts": [
+        {
+          "track": "cello",
+          "volume": 0.7,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.94,
+              "pitch": 2,
+              "velocity": 0.72
+            },
+            {
+              "at": 2,
+              "duration": 1.94,
+              "pitch": -3,
+              "velocity": 0.72
+            },
+            {
+              "at": 4,
+              "duration": 1.94,
+              "pitch": -1,
+              "velocity": 0.72
+            },
+            {
+              "at": 6,
+              "duration": 1.94,
+              "pitch": -6,
+              "velocity": 0.72
+            }
+          ]
+        },
+        {
+          "track": "piano",
+          "volume": 0.7,
+          "notes": [
+            {
+              "at": 0.0,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.56
+            },
+            {
+              "at": 0.25,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 0.5,
+              "duration": 0.22,
+              "pitch": 9,
+              "velocity": 0.43
+            },
+            {
+              "at": 0.75,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.0,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.56
+            },
+            {
+              "at": 1.25,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.5,
+              "duration": 0.22,
+              "pitch": 9,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.75,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.0,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.56
+            },
+            {
+              "at": 2.25,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.5,
+              "duration": 0.22,
+              "pitch": 4,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.75,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.0,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.56
+            },
+            {
+              "at": 3.25,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.5,
+              "duration": 0.22,
+              "pitch": 4,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.75,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.0,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.56
+            },
+            {
+              "at": 4.25,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.5,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.75,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.0,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.56
+            },
+            {
+              "at": 5.25,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.5,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.75,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.0,
+              "duration": 0.22,
+              "pitch": -6,
+              "velocity": 0.56
+            },
+            {
+              "at": 6.25,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.5,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.75,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.0,
+              "duration": 0.22,
+              "pitch": -6,
+              "velocity": 0.56
+            },
+            {
+              "at": 7.25,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.5,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.75,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.43
+            }
+          ]
+        },
+        {
+          "track": "harp",
+          "volume": 0.7,
+          "notes": [
+            {
+              "at": 0.0,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.42
+            },
+            {
+              "at": 0.5,
+              "duration": 0.44,
+              "pitch": 18,
+              "velocity": 0.35
+            },
+            {
+              "at": 1.0,
+              "duration": 0.44,
+              "pitch": 21,
+              "velocity": 0.42
+            },
+            {
+              "at": 1.5,
+              "duration": 0.44,
+              "pitch": 18,
+              "velocity": 0.35
+            },
+            {
+              "at": 2.0,
+              "duration": 0.44,
+              "pitch": 9,
+              "velocity": 0.42
+            },
+            {
+              "at": 2.5,
+              "duration": 0.44,
+              "pitch": 13,
+              "velocity": 0.35
+            },
+            {
+              "at": 3.0,
+              "duration": 0.44,
+              "pitch": 16,
+              "velocity": 0.42
+            },
+            {
+              "at": 3.5,
+              "duration": 0.44,
+              "pitch": 13,
+              "velocity": 0.35
+            },
+            {
+              "at": 4.0,
+              "duration": 0.44,
+              "pitch": 11,
+              "velocity": 0.42
+            },
+            {
+              "at": 4.5,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.35
+            },
+            {
+              "at": 5.0,
+              "duration": 0.44,
+              "pitch": 18,
+              "velocity": 0.42
+            },
+            {
+              "at": 5.5,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.35
+            },
+            {
+              "at": 6.0,
+              "duration": 0.44,
+              "pitch": 6,
+              "velocity": 0.42
+            },
+            {
+              "at": 6.5,
+              "duration": 0.44,
+              "pitch": 9,
+              "velocity": 0.35
+            },
+            {
+              "at": 7.0,
+              "duration": 0.44,
+              "pitch": 13,
+              "velocity": 0.42
+            },
+            {
+              "at": 7.5,
+              "duration": 0.44,
+              "pitch": 9,
+              "velocity": 0.35
+            }
+          ]
+        },
+        {
+          "track": "flute",
+          "volume": 0.7,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.9,
+              "pitch": 18,
+              "velocity": 0.62
+            },
+            {
+              "at": 2,
+              "duration": 1.9,
+              "pitch": 16,
+              "velocity": 0.62
+            },
+            {
+              "at": 4,
+              "duration": 1.9,
+              "pitch": 14,
+              "velocity": 0.62
+            },
+            {
+              "at": 6,
+              "duration": 1.9,
+              "pitch": 13,
+              "velocity": 0.62
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "A quiet reflection 2B",
+      "bars": 2,
+      "variation": 0.018,
+      "parts": [
+        {
+          "track": "cello",
+          "volume": 0.7,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.94,
+              "pitch": -5,
+              "velocity": 0.72
+            },
+            {
+              "at": 2,
+              "duration": 1.94,
+              "pitch": 2,
+              "velocity": 0.72
+            },
+            {
+              "at": 4,
+              "duration": 1.94,
+              "pitch": -5,
+              "velocity": 0.72
+            },
+            {
+              "at": 6,
+              "duration": 1.94,
+              "pitch": -3,
+              "velocity": 0.72
+            }
+          ]
+        },
+        {
+          "track": "piano",
+          "volume": 0.7,
+          "notes": [
+            {
+              "at": 0.0,
+              "duration": 0.22,
+              "pitch": -5,
+              "velocity": 0.56
+            },
+            {
+              "at": 0.25,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 0.5,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 0.75,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.0,
+              "duration": 0.22,
+              "pitch": -5,
+              "velocity": 0.56
+            },
+            {
+              "at": 1.25,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.5,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.75,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.0,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.56
+            },
+            {
+              "at": 2.25,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.5,
+              "duration": 0.22,
+              "pitch": 9,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.75,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.0,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.56
+            },
+            {
+              "at": 3.25,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.5,
+              "duration": 0.22,
+              "pitch": 9,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.75,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.0,
+              "duration": 0.22,
+              "pitch": -5,
+              "velocity": 0.56
+            },
+            {
+              "at": 4.25,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.5,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.75,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.0,
+              "duration": 0.22,
+              "pitch": -5,
+              "velocity": 0.56
+            },
+            {
+              "at": 5.25,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.5,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.75,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.0,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.56
+            },
+            {
+              "at": 6.25,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.5,
+              "duration": 0.22,
+              "pitch": 4,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.75,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.0,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.56
+            },
+            {
+              "at": 7.25,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.5,
+              "duration": 0.22,
+              "pitch": 4,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.75,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            }
+          ]
+        },
+        {
+          "track": "harp",
+          "volume": 0.7,
+          "notes": [
+            {
+              "at": 0.0,
+              "duration": 0.44,
+              "pitch": 7,
+              "velocity": 0.42
+            },
+            {
+              "at": 0.5,
+              "duration": 0.44,
+              "pitch": 11,
+              "velocity": 0.35
+            },
+            {
+              "at": 1.0,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.42
+            },
+            {
+              "at": 1.5,
+              "duration": 0.44,
+              "pitch": 11,
+              "velocity": 0.35
+            },
+            {
+              "at": 2.0,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.42
+            },
+            {
+              "at": 2.5,
+              "duration": 0.44,
+              "pitch": 18,
+              "velocity": 0.35
+            },
+            {
+              "at": 3.0,
+              "duration": 0.44,
+              "pitch": 21,
+              "velocity": 0.42
+            },
+            {
+              "at": 3.5,
+              "duration": 0.44,
+              "pitch": 18,
+              "velocity": 0.35
+            },
+            {
+              "at": 4.0,
+              "duration": 0.44,
+              "pitch": 7,
+              "velocity": 0.42
+            },
+            {
+              "at": 4.5,
+              "duration": 0.44,
+              "pitch": 11,
+              "velocity": 0.35
+            },
+            {
+              "at": 5.0,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.42
+            },
+            {
+              "at": 5.5,
+              "duration": 0.44,
+              "pitch": 11,
+              "velocity": 0.35
+            },
+            {
+              "at": 6.0,
+              "duration": 0.44,
+              "pitch": 9,
+              "velocity": 0.42
+            },
+            {
+              "at": 6.5,
+              "duration": 0.44,
+              "pitch": 13,
+              "velocity": 0.35
+            },
+            {
+              "at": 7.0,
+              "duration": 0.44,
+              "pitch": 16,
+              "velocity": 0.42
+            },
+            {
+              "at": 7.5,
+              "duration": 0.44,
+              "pitch": 13,
+              "velocity": 0.35
+            }
+          ]
+        },
+        {
+          "track": "flute",
+          "volume": 0.7,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.9,
+              "pitch": 11,
+              "velocity": 0.62
+            },
+            {
+              "at": 2,
+              "duration": 1.9,
+              "pitch": 9,
+              "velocity": 0.62
+            },
+            {
+              "at": 4,
+              "duration": 1.9,
+              "pitch": 11,
+              "velocity": 0.62
+            },
+            {
+              "at": 6,
+              "duration": 1.9,
+              "pitch": 13,
+              "velocity": 0.62
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Homeward 1A",
+      "bars": 2,
+      "variation": 0.018,
+      "parts": [
+        {
+          "track": "cello",
+          "volume": 0.765,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.94,
+              "pitch": 2,
+              "velocity": 0.72
+            },
+            {
+              "at": 2,
+              "duration": 1.94,
+              "pitch": -3,
+              "velocity": 0.72
+            },
+            {
+              "at": 4,
+              "duration": 1.94,
+              "pitch": -1,
+              "velocity": 0.72
+            },
+            {
+              "at": 6,
+              "duration": 1.94,
+              "pitch": -6,
+              "velocity": 0.72
+            }
+          ]
+        },
+        {
+          "track": "piano",
+          "volume": 0.765,
+          "notes": [
+            {
+              "at": 0.0,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.56
+            },
+            {
+              "at": 0.25,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 0.5,
+              "duration": 0.22,
+              "pitch": 9,
+              "velocity": 0.43
+            },
+            {
+              "at": 0.75,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.0,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.56
+            },
+            {
+              "at": 1.25,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.5,
+              "duration": 0.22,
+              "pitch": 9,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.75,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.0,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.56
+            },
+            {
+              "at": 2.25,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.5,
+              "duration": 0.22,
+              "pitch": 4,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.75,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.0,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.56
+            },
+            {
+              "at": 3.25,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.5,
+              "duration": 0.22,
+              "pitch": 4,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.75,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.0,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.56
+            },
+            {
+              "at": 4.25,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.5,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.75,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.0,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.56
+            },
+            {
+              "at": 5.25,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.5,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.75,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.0,
+              "duration": 0.22,
+              "pitch": -6,
+              "velocity": 0.56
+            },
+            {
+              "at": 6.25,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.5,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.75,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.0,
+              "duration": 0.22,
+              "pitch": -6,
+              "velocity": 0.56
+            },
+            {
+              "at": 7.25,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.5,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.75,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.43
+            }
+          ]
+        },
+        {
+          "track": "strings",
+          "volume": 0.57375,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.96,
+              "pitch": 18,
+              "velocity": 0.68
+            },
+            {
+              "at": 2,
+              "duration": 1.96,
+              "pitch": 16,
+              "velocity": 0.68
+            },
+            {
+              "at": 4,
+              "duration": 1.96,
+              "pitch": 14,
+              "velocity": 0.68
+            },
+            {
+              "at": 6,
+              "duration": 1.96,
+              "pitch": 13,
+              "velocity": 0.68
+            }
+          ]
+        },
+        {
+          "track": "harp",
+          "volume": 0.765,
+          "notes": [
+            {
+              "at": 0.0,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.42
+            },
+            {
+              "at": 0.5,
+              "duration": 0.44,
+              "pitch": 18,
+              "velocity": 0.35
+            },
+            {
+              "at": 1.0,
+              "duration": 0.44,
+              "pitch": 21,
+              "velocity": 0.42
+            },
+            {
+              "at": 1.5,
+              "duration": 0.44,
+              "pitch": 18,
+              "velocity": 0.35
+            },
+            {
+              "at": 2.0,
+              "duration": 0.44,
+              "pitch": 9,
+              "velocity": 0.42
+            },
+            {
+              "at": 2.5,
+              "duration": 0.44,
+              "pitch": 13,
+              "velocity": 0.35
+            },
+            {
+              "at": 3.0,
+              "duration": 0.44,
+              "pitch": 16,
+              "velocity": 0.42
+            },
+            {
+              "at": 3.5,
+              "duration": 0.44,
+              "pitch": 13,
+              "velocity": 0.35
+            },
+            {
+              "at": 4.0,
+              "duration": 0.44,
+              "pitch": 11,
+              "velocity": 0.42
+            },
+            {
+              "at": 4.5,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.35
+            },
+            {
+              "at": 5.0,
+              "duration": 0.44,
+              "pitch": 18,
+              "velocity": 0.42
+            },
+            {
+              "at": 5.5,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.35
+            },
+            {
+              "at": 6.0,
+              "duration": 0.44,
+              "pitch": 6,
+              "velocity": 0.42
+            },
+            {
+              "at": 6.5,
+              "duration": 0.44,
+              "pitch": 9,
+              "velocity": 0.35
+            },
+            {
+              "at": 7.0,
+              "duration": 0.44,
+              "pitch": 13,
+              "velocity": 0.42
+            },
+            {
+              "at": 7.5,
+              "duration": 0.44,
+              "pitch": 9,
+              "velocity": 0.35
+            }
+          ]
+        },
+        {
+          "track": "counterline",
+          "volume": 0.765,
+          "notes": [
+            {
+              "at": 0.5,
+              "duration": 1.35,
+              "pitch": 14,
+              "velocity": 0.46
+            },
+            {
+              "at": 2.5,
+              "duration": 1.35,
+              "pitch": 13,
+              "velocity": 0.46
+            },
+            {
+              "at": 4.5,
+              "duration": 1.35,
+              "pitch": 18,
+              "velocity": 0.46
+            },
+            {
+              "at": 6.5,
+              "duration": 1.35,
+              "pitch": 6,
+              "velocity": 0.46
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Homeward 1B",
+      "bars": 2,
+      "variation": 0.018,
+      "parts": [
+        {
+          "track": "cello",
+          "volume": 0.765,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.94,
+              "pitch": -5,
+              "velocity": 0.72
+            },
+            {
+              "at": 2,
+              "duration": 1.94,
+              "pitch": 2,
+              "velocity": 0.72
+            },
+            {
+              "at": 4,
+              "duration": 1.94,
+              "pitch": -5,
+              "velocity": 0.72
+            },
+            {
+              "at": 6,
+              "duration": 1.94,
+              "pitch": -3,
+              "velocity": 0.72
+            }
+          ]
+        },
+        {
+          "track": "piano",
+          "volume": 0.765,
+          "notes": [
+            {
+              "at": 0.0,
+              "duration": 0.22,
+              "pitch": -5,
+              "velocity": 0.56
+            },
+            {
+              "at": 0.25,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 0.5,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 0.75,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.0,
+              "duration": 0.22,
+              "pitch": -5,
+              "velocity": 0.56
+            },
+            {
+              "at": 1.25,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.5,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.75,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.0,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.56
+            },
+            {
+              "at": 2.25,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.5,
+              "duration": 0.22,
+              "pitch": 9,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.75,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.0,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.56
+            },
+            {
+              "at": 3.25,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.5,
+              "duration": 0.22,
+              "pitch": 9,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.75,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.0,
+              "duration": 0.22,
+              "pitch": -5,
+              "velocity": 0.56
+            },
+            {
+              "at": 4.25,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.5,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.75,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.0,
+              "duration": 0.22,
+              "pitch": -5,
+              "velocity": 0.56
+            },
+            {
+              "at": 5.25,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.5,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.75,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.0,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.56
+            },
+            {
+              "at": 6.25,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.5,
+              "duration": 0.22,
+              "pitch": 4,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.75,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.0,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.56
+            },
+            {
+              "at": 7.25,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.5,
+              "duration": 0.22,
+              "pitch": 4,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.75,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            }
+          ]
+        },
+        {
+          "track": "strings",
+          "volume": 0.57375,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.96,
+              "pitch": 11,
+              "velocity": 0.68
+            },
+            {
+              "at": 2,
+              "duration": 1.96,
+              "pitch": 9,
+              "velocity": 0.68
+            },
+            {
+              "at": 4,
+              "duration": 1.96,
+              "pitch": 11,
+              "velocity": 0.68
+            },
+            {
+              "at": 6,
+              "duration": 1.96,
+              "pitch": 13,
+              "velocity": 0.68
+            }
+          ]
+        },
+        {
+          "track": "harp",
+          "volume": 0.765,
+          "notes": [
+            {
+              "at": 0.0,
+              "duration": 0.44,
+              "pitch": 7,
+              "velocity": 0.42
+            },
+            {
+              "at": 0.5,
+              "duration": 0.44,
+              "pitch": 11,
+              "velocity": 0.35
+            },
+            {
+              "at": 1.0,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.42
+            },
+            {
+              "at": 1.5,
+              "duration": 0.44,
+              "pitch": 11,
+              "velocity": 0.35
+            },
+            {
+              "at": 2.0,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.42
+            },
+            {
+              "at": 2.5,
+              "duration": 0.44,
+              "pitch": 18,
+              "velocity": 0.35
+            },
+            {
+              "at": 3.0,
+              "duration": 0.44,
+              "pitch": 21,
+              "velocity": 0.42
+            },
+            {
+              "at": 3.5,
+              "duration": 0.44,
+              "pitch": 18,
+              "velocity": 0.35
+            },
+            {
+              "at": 4.0,
+              "duration": 0.44,
+              "pitch": 7,
+              "velocity": 0.42
+            },
+            {
+              "at": 4.5,
+              "duration": 0.44,
+              "pitch": 11,
+              "velocity": 0.35
+            },
+            {
+              "at": 5.0,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.42
+            },
+            {
+              "at": 5.5,
+              "duration": 0.44,
+              "pitch": 11,
+              "velocity": 0.35
+            },
+            {
+              "at": 6.0,
+              "duration": 0.44,
+              "pitch": 9,
+              "velocity": 0.42
+            },
+            {
+              "at": 6.5,
+              "duration": 0.44,
+              "pitch": 13,
+              "velocity": 0.35
+            },
+            {
+              "at": 7.0,
+              "duration": 0.44,
+              "pitch": 16,
+              "velocity": 0.42
+            },
+            {
+              "at": 7.5,
+              "duration": 0.44,
+              "pitch": 13,
+              "velocity": 0.35
+            }
+          ]
+        },
+        {
+          "track": "counterline",
+          "volume": 0.765,
+          "notes": [
+            {
+              "at": 0.5,
+              "duration": 1.35,
+              "pitch": 7,
+              "velocity": 0.46
+            },
+            {
+              "at": 2.5,
+              "duration": 1.35,
+              "pitch": 18,
+              "velocity": 0.46
+            },
+            {
+              "at": 4.5,
+              "duration": 1.35,
+              "pitch": 14,
+              "velocity": 0.46
+            },
+            {
+              "at": 6.5,
+              "duration": 1.35,
+              "pitch": 9,
+              "velocity": 0.46
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Homeward 2A",
+      "bars": 2,
+      "variation": 0.018,
+      "parts": [
+        {
+          "track": "cello",
+          "volume": 0.85,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.94,
+              "pitch": 2,
+              "velocity": 0.72
+            },
+            {
+              "at": 2,
+              "duration": 1.94,
+              "pitch": -3,
+              "velocity": 0.72
+            },
+            {
+              "at": 4,
+              "duration": 1.94,
+              "pitch": -1,
+              "velocity": 0.72
+            },
+            {
+              "at": 6,
+              "duration": 1.94,
+              "pitch": -6,
+              "velocity": 0.72
+            }
+          ]
+        },
+        {
+          "track": "piano",
+          "volume": 0.85,
+          "notes": [
+            {
+              "at": 0.0,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.56
+            },
+            {
+              "at": 0.25,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 0.5,
+              "duration": 0.22,
+              "pitch": 9,
+              "velocity": 0.43
+            },
+            {
+              "at": 0.75,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.0,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.56
+            },
+            {
+              "at": 1.25,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.5,
+              "duration": 0.22,
+              "pitch": 9,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.75,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.0,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.56
+            },
+            {
+              "at": 2.25,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.5,
+              "duration": 0.22,
+              "pitch": 4,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.75,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.0,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.56
+            },
+            {
+              "at": 3.25,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.5,
+              "duration": 0.22,
+              "pitch": 4,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.75,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.0,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.56
+            },
+            {
+              "at": 4.25,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.5,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.75,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.0,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.56
+            },
+            {
+              "at": 5.25,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.5,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.75,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.0,
+              "duration": 0.22,
+              "pitch": -6,
+              "velocity": 0.56
+            },
+            {
+              "at": 6.25,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.5,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.75,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.0,
+              "duration": 0.22,
+              "pitch": -6,
+              "velocity": 0.56
+            },
+            {
+              "at": 7.25,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.5,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.75,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.43
+            }
+          ]
+        },
+        {
+          "track": "strings",
+          "volume": 0.6375,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.96,
+              "pitch": 18,
+              "velocity": 0.68
+            },
+            {
+              "at": 2,
+              "duration": 1.96,
+              "pitch": 16,
+              "velocity": 0.68
+            },
+            {
+              "at": 4,
+              "duration": 1.96,
+              "pitch": 14,
+              "velocity": 0.68
+            },
+            {
+              "at": 6,
+              "duration": 1.96,
+              "pitch": 13,
+              "velocity": 0.68
+            }
+          ]
+        },
+        {
+          "track": "harp",
+          "volume": 0.85,
+          "notes": [
+            {
+              "at": 0.0,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.42
+            },
+            {
+              "at": 0.5,
+              "duration": 0.44,
+              "pitch": 18,
+              "velocity": 0.35
+            },
+            {
+              "at": 1.0,
+              "duration": 0.44,
+              "pitch": 21,
+              "velocity": 0.42
+            },
+            {
+              "at": 1.5,
+              "duration": 0.44,
+              "pitch": 18,
+              "velocity": 0.35
+            },
+            {
+              "at": 2.0,
+              "duration": 0.44,
+              "pitch": 9,
+              "velocity": 0.42
+            },
+            {
+              "at": 2.5,
+              "duration": 0.44,
+              "pitch": 13,
+              "velocity": 0.35
+            },
+            {
+              "at": 3.0,
+              "duration": 0.44,
+              "pitch": 16,
+              "velocity": 0.42
+            },
+            {
+              "at": 3.5,
+              "duration": 0.44,
+              "pitch": 13,
+              "velocity": 0.35
+            },
+            {
+              "at": 4.0,
+              "duration": 0.44,
+              "pitch": 11,
+              "velocity": 0.42
+            },
+            {
+              "at": 4.5,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.35
+            },
+            {
+              "at": 5.0,
+              "duration": 0.44,
+              "pitch": 18,
+              "velocity": 0.42
+            },
+            {
+              "at": 5.5,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.35
+            },
+            {
+              "at": 6.0,
+              "duration": 0.44,
+              "pitch": 6,
+              "velocity": 0.42
+            },
+            {
+              "at": 6.5,
+              "duration": 0.44,
+              "pitch": 9,
+              "velocity": 0.35
+            },
+            {
+              "at": 7.0,
+              "duration": 0.44,
+              "pitch": 13,
+              "velocity": 0.42
+            },
+            {
+              "at": 7.5,
+              "duration": 0.44,
+              "pitch": 9,
+              "velocity": 0.35
+            }
+          ]
+        },
+        {
+          "track": "counterline",
+          "volume": 0.85,
+          "notes": [
+            {
+              "at": 0.5,
+              "duration": 1.35,
+              "pitch": 18,
+              "velocity": 0.46
+            },
+            {
+              "at": 2.5,
+              "duration": 1.35,
+              "pitch": 16,
+              "velocity": 0.46
+            },
+            {
+              "at": 4.5,
+              "duration": 1.35,
+              "pitch": 11,
+              "velocity": 0.46
+            },
+            {
+              "at": 6.5,
+              "duration": 1.35,
+              "pitch": 9,
+              "velocity": 0.46
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Homeward 2B",
+      "bars": 2,
+      "variation": 0.018,
+      "parts": [
+        {
+          "track": "cello",
+          "volume": 0.85,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.94,
+              "pitch": -5,
+              "velocity": 0.72
+            },
+            {
+              "at": 2,
+              "duration": 1.94,
+              "pitch": 2,
+              "velocity": 0.72
+            },
+            {
+              "at": 4,
+              "duration": 1.94,
+              "pitch": -5,
+              "velocity": 0.72
+            },
+            {
+              "at": 6,
+              "duration": 1.94,
+              "pitch": -3,
+              "velocity": 0.72
+            }
+          ]
+        },
+        {
+          "track": "piano",
+          "volume": 0.85,
+          "notes": [
+            {
+              "at": 0.0,
+              "duration": 0.22,
+              "pitch": -5,
+              "velocity": 0.56
+            },
+            {
+              "at": 0.25,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 0.5,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 0.75,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.0,
+              "duration": 0.22,
+              "pitch": -5,
+              "velocity": 0.56
+            },
+            {
+              "at": 1.25,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.5,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 1.75,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.0,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.56
+            },
+            {
+              "at": 2.25,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.5,
+              "duration": 0.22,
+              "pitch": 9,
+              "velocity": 0.43
+            },
+            {
+              "at": 2.75,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.0,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.56
+            },
+            {
+              "at": 3.25,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.5,
+              "duration": 0.22,
+              "pitch": 9,
+              "velocity": 0.43
+            },
+            {
+              "at": 3.75,
+              "duration": 0.22,
+              "pitch": 6,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.0,
+              "duration": 0.22,
+              "pitch": -5,
+              "velocity": 0.56
+            },
+            {
+              "at": 4.25,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.5,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 4.75,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.0,
+              "duration": 0.22,
+              "pitch": -5,
+              "velocity": 0.56
+            },
+            {
+              "at": 5.25,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.5,
+              "duration": 0.22,
+              "pitch": 2,
+              "velocity": 0.43
+            },
+            {
+              "at": 5.75,
+              "duration": 0.22,
+              "pitch": -1,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.0,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.56
+            },
+            {
+              "at": 6.25,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.5,
+              "duration": 0.22,
+              "pitch": 4,
+              "velocity": 0.43
+            },
+            {
+              "at": 6.75,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.0,
+              "duration": 0.22,
+              "pitch": -3,
+              "velocity": 0.56
+            },
+            {
+              "at": 7.25,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.5,
+              "duration": 0.22,
+              "pitch": 4,
+              "velocity": 0.43
+            },
+            {
+              "at": 7.75,
+              "duration": 0.22,
+              "pitch": 1,
+              "velocity": 0.43
+            }
+          ]
+        },
+        {
+          "track": "strings",
+          "volume": 0.6375,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 1.96,
+              "pitch": 11,
+              "velocity": 0.68
+            },
+            {
+              "at": 2,
+              "duration": 1.96,
+              "pitch": 9,
+              "velocity": 0.68
+            },
+            {
+              "at": 4,
+              "duration": 1.96,
+              "pitch": 11,
+              "velocity": 0.68
+            },
+            {
+              "at": 6,
+              "duration": 1.96,
+              "pitch": 13,
+              "velocity": 0.68
+            }
+          ]
+        },
+        {
+          "track": "harp",
+          "volume": 0.85,
+          "notes": [
+            {
+              "at": 0.0,
+              "duration": 0.44,
+              "pitch": 7,
+              "velocity": 0.42
+            },
+            {
+              "at": 0.5,
+              "duration": 0.44,
+              "pitch": 11,
+              "velocity": 0.35
+            },
+            {
+              "at": 1.0,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.42
+            },
+            {
+              "at": 1.5,
+              "duration": 0.44,
+              "pitch": 11,
+              "velocity": 0.35
+            },
+            {
+              "at": 2.0,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.42
+            },
+            {
+              "at": 2.5,
+              "duration": 0.44,
+              "pitch": 18,
+              "velocity": 0.35
+            },
+            {
+              "at": 3.0,
+              "duration": 0.44,
+              "pitch": 21,
+              "velocity": 0.42
+            },
+            {
+              "at": 3.5,
+              "duration": 0.44,
+              "pitch": 18,
+              "velocity": 0.35
+            },
+            {
+              "at": 4.0,
+              "duration": 0.44,
+              "pitch": 7,
+              "velocity": 0.42
+            },
+            {
+              "at": 4.5,
+              "duration": 0.44,
+              "pitch": 11,
+              "velocity": 0.35
+            },
+            {
+              "at": 5.0,
+              "duration": 0.44,
+              "pitch": 14,
+              "velocity": 0.42
+            },
+            {
+              "at": 5.5,
+              "duration": 0.44,
+              "pitch": 11,
+              "velocity": 0.35
+            },
+            {
+              "at": 6.0,
+              "duration": 0.44,
+              "pitch": 9,
+              "velocity": 0.42
+            },
+            {
+              "at": 6.5,
+              "duration": 0.44,
+              "pitch": 13,
+              "velocity": 0.35
+            },
+            {
+              "at": 7.0,
+              "duration": 0.44,
+              "pitch": 16,
+              "velocity": 0.42
+            },
+            {
+              "at": 7.5,
+              "duration": 0.44,
+              "pitch": 13,
+              "velocity": 0.35
+            }
+          ]
+        },
+        {
+          "track": "counterline",
+          "volume": 0.85,
+          "notes": [
+            {
+              "at": 0.5,
+              "duration": 1.35,
+              "pitch": 11,
+              "velocity": 0.46
+            },
+            {
+              "at": 2.5,
+              "duration": 1.35,
+              "pitch": 21,
+              "velocity": 0.46
+            },
+            {
+              "at": 4.5,
+              "duration": 1.35,
+              "pitch": 7,
+              "velocity": 0.46
+            },
+            {
+              "at": 6.5,
+              "duration": 1.35,
+              "pitch": 13,
+              "velocity": 0.46
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "D major — farewell",
+      "bars": 2,
+      "parts": [
+        {
+          "track": "cello",
+          "volume": 1,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 7.4,
+              "pitch": 2,
+              "velocity": 0.62,
+              "toVelocity": 0
+            }
+          ]
+        },
+        {
+          "track": "piano",
+          "volume": 1,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 3.5,
+              "pitch": [
+                2,
+                6,
+                9
+              ],
+              "velocity": 0.52
+            },
+            {
+              "at": 4,
+              "duration": 0.8,
+              "pitch": 14,
+              "velocity": 0.4
+            },
+            {
+              "at": 5,
+              "duration": 0.8,
+              "pitch": 9,
+              "velocity": 0.3
+            },
+            {
+              "at": 6,
+              "duration": 1.8,
+              "pitch": 6,
+              "velocity": 0.24,
+              "toVelocity": 0
+            }
+          ]
+        },
+        {
+          "track": "strings",
+          "volume": 1,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 7.5,
+              "pitch": 14,
+              "velocity": 0.5,
+              "toVelocity": 0
+            }
+          ]
+        },
+        {
+          "track": "harp",
+          "volume": 1,
+          "notes": [
+            {
+              "at": 0.0,
+              "duration": 0.48,
+              "pitch": 2,
+              "velocity": 0.38
+            },
+            {
+              "at": 0.5,
+              "duration": 0.48,
+              "pitch": 6,
+              "velocity": 0.355
+            },
+            {
+              "at": 1.0,
+              "duration": 0.48,
+              "pitch": 9,
+              "velocity": 0.33
+            },
+            {
+              "at": 1.5,
+              "duration": 0.48,
+              "pitch": 14,
+              "velocity": 0.305
+            },
+            {
+              "at": 2.0,
+              "duration": 0.48,
+              "pitch": 18,
+              "velocity": 0.28
+            },
+            {
+              "at": 2.5,
+              "duration": 0.48,
+              "pitch": 21,
+              "velocity": 0.255
+            },
+            {
+              "at": 3.0,
+              "duration": 0.48,
+              "pitch": 26,
+              "velocity": 0.22999999999999998
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
