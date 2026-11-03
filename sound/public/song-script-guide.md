@@ -43,8 +43,9 @@ public-domain arrangement or recording. My brief: [genre, atmosphere, approximat
 
 Instrument IDs: kick, snare, hat, bass, marimba, clap, tom, rim, shaker, bells, kalimba, pluck, synthbass, piano, strings, guitar, organ, pad, saxophone, harp, doublebass, epiano, voice, choir, vocalpad, flute, clarinet, trumpet, horn, analoglead, acidbass, shimmer, cello, vibraphone, conga.
 Choose low track volumes for pads, strings and secondary instruments. All sounds
-are synthetic. No samples, URLs, plugins, JavaScript, expressions or arbitrary
-synth parameters can be supplied. Unknown properties are rejected rather than ignored.
+are synthetic. Musical data cannot request samples, URLs, plugins, JavaScript,
+expressions or arbitrary synth parameters. URLs are allowed ONLY as inert text
+in rights declarations; they are never fetched. Unknown properties are rejected rather than ignored.
 
 ## Scenes and parts
 
@@ -61,7 +62,7 @@ Each scene has:
   new scripts. The user chooses the visualization independently. Automatic video
   changes run only during recording when explicitly enabled in the video settings.
 
-V1 uses straight 4/4 and TWO-BAR note patterns. A scene repeats its pattern for
+Both versions use straight 4/4 and TWO-BAR note patterns. A scene repeats its pattern for
 its `bars` duration. To compose longer phrases rather than loops, concatenate
 multiple 2-bar scenes with different notes. No tempo changes or instrument changes
 inside a scene in v1. Different instruments require different tracks.

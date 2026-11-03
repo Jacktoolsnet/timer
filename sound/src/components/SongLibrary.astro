@@ -1,0 +1,23 @@
+---
+import {songLibrary,libraryStyles,libraryCopy} from '../lib/song-library';
+import {styleIds,styleCopy} from '../lib/presets';
+import type {Language} from '../lib/i18n';
+import ActionIcon from './ActionIcon.astro';
+import canon from '../../public/examples/pachelbel-canon-morning-light.song.json';
+const studies=import.meta.glob<{rights:Record<string,string>}>('../../public/library/*.song.json',{eager:true,import:'default'});
+const rightsFor=(path:string)=>path.startsWith('/examples/')?canon.rights:studies['../../public'+path]?.rights;
+interface Props {lang:Language}
+const {lang}=Astro.props,t=libraryCopy[lang];
+---
+<dialog id="song-library-dialog" aria-labelledby="song-library-title" aria-describedby="song-library-hint">
+ <header class="song-library-heading"><h2 id="song-library-title">{t.title} · <span id="song-library-style"></span></h2><button type="button" id="song-library-close" aria-label={t.close}><ActionIcon name="cancel"/></button></header>
+ <p id="song-library-hint">{t.hint} {t.adaptation}</p>
+ {libraryStyles.map(style=><section data-library-section={style} hidden aria-label={styleCopy[lang].names[styleIds.indexOf(style)]}>
+  <ul class="song-library-list">{songLibrary.filter(song=>song.style===style).map(song=><li>
+   <button type="button" class="library-song-play" data-library-song={song.id} aria-label={t.play+': '+song.title+' · '+song.composer}><span aria-hidden="true">▶</span><span><strong>{song.title}</strong><small>{song.composer}</small></span></button>
+   <details><summary>{t.info}</summary><p>{t.meter}: {song.originalMeter} → 4/4. {t.rights}</p><pre class="library-rights">{Object.values(rightsFor(song.path)??{}).join('\n')}</pre><a href={song.source} target="_blank" rel="noopener noreferrer">{t.source} ↗</a></details>
+  </li>)}</ul>
+  <button type="button" class="library-random" data-library-random={style}>🎲 {t.random}</button>
+ </section>)}
+ <p id="song-library-status" role="status" aria-live="polite"></p>
+</dialog>

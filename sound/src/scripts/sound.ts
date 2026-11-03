@@ -1,3 +1,4 @@
+import {songLibrary,libraryCopy} from '../lib/song-library';
 import {CREDITS_SECONDS,SONG_TAIL_SECONDS,songVideoSeconds,paintVideoCredits,songRightsText,songRightsCopy,videoCreditsForSong} from '../lib/video-credits';
 import {decodeSongScript,scriptPosition,scriptScore,scriptCopy,type SongScript} from '../lib/song-script';
 import {RadarHistory,paintOrbitRadar,paintRadarHead,radarHeadPulse,radarStrength,radarPoint} from '../lib/orbit-radar';
@@ -2356,6 +2357,49 @@ $('#song-script-example').addEventListener('click',async()=>{
  try{const response=await fetch('/examples/sunlit-session.song.json');if(!response.ok)throw Error();importScriptText(await response.text());}
  catch{$('#song-script-status').textContent=scriptCopy[language].invalid;}finally{button.disabled=videoBusy||wavBusy||importBusy;}
 });
+// Library loading is atomic: validate before replacing music and never allow
+// overlapping imports/recordings or an abandoned asynchronous response to win.
+const libraryDialog=$<HTMLDialogElement>('#song-library-dialog');
+let libraryRequest:AbortController|null=null;
+function cancelLibraryRequest(){
+ if(!libraryRequest)return;
+ libraryRequest.abort();libraryRequest=null;importBusy=false;syncFileButtons();
+}
+libraryDialog.addEventListener('close',cancelLibraryRequest);
+window.addEventListener('pagehide',cancelLibraryRequest);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)cancelLibraryRequest();});
+$('#song-library-close').addEventListener('click',()=>{cancelLibraryRequest();libraryDialog.close();});
+document.querySelectorAll<HTMLButtonElement>('[data-library-open]').forEach(button=>button.addEventListener('click',()=>{
+ if(videoBusy||wavBusy||importBusy)return;
+ const style=button.dataset.libraryOpen as StyleId;
+ document.querySelectorAll<HTMLElement>('[data-library-section]').forEach(section=>section.hidden=section.dataset.librarySection!==style);
+ $('#song-library-style').textContent=styleCopy[language].names[styleIds.indexOf(style)];
+ $('#song-library-status').textContent='';libraryDialog.showModal();
+}));
+document.querySelectorAll<HTMLButtonElement>('[data-library-song]').forEach(button=>button.addEventListener('click',async()=>{
+ if(videoBusy||wavBusy||importBusy)return;
+ const entry=songLibrary.find(song=>song.id===button.dataset.librarySong);if(!entry)return;
+ const request=new AbortController();libraryRequest=request;importBusy=true;syncFileButtons();
+ $('#song-library-status').textContent=libraryCopy[language].loading;
+ try{
+  const response=await fetch(entry.path,{signal:request.signal});if(!response.ok)throw Error('Song unavailable');
+  const script=decodeSongScript(await response.text());
+  if(!script||script.version!==2||script.style!==entry.style)throw Error('Invalid library song');
+  if(libraryRequest!==request||request.signal.aborted||!libraryDialog.open)return;
+  libraryRequest=null;importBusy=false;loadSongScript(script);libraryDialog.close();
+  void start();
+ }catch{
+  if(libraryRequest===request&&!request.signal.aborted)$('#song-library-status').textContent=libraryCopy[language].error;
+ }finally{
+  if(libraryRequest===request){libraryRequest=null;importBusy=false;}
+  syncFileButtons();
+ }
+}));
+document.querySelectorAll<HTMLButtonElement>('[data-library-random]').forEach(button=>button.addEventListener('click',()=>{
+ if(videoBusy||wavBusy||importBusy)return;
+ const style=button.dataset.libraryRandom as StyleId;
+ stop();applyStyle(style);setEvolution(true);persistSettings();libraryDialog.close();void start();
+}));
 $('#song-script-export').addEventListener('click',()=>{if(scriptSong)downloadBlob(new Blob([JSON.stringify(scriptSong,null,2)],{type:'application/json'}),'jacktools-song.json');});
 $('#song-script-leave').addEventListener('click',()=>{if(videoBusy||wavBusy||importBusy)return;leaveSongScript(false);sync();persistSettings();});
 type RecordingStart={restart:boolean;random:boolean;generation:number;durationSeconds:number;videoFormat:VideoFormat;videoPad:VideoPadMode;videoInfo:VideoInfoSettings;animations:VideoAnimationSettings;wholeSong:boolean;credits:{enabled:boolean;text:string}};
@@ -2436,6 +2480,7 @@ $('#recording-duration').addEventListener('input',()=>{syncRecordingDuration();p
 $('#tempo').addEventListener('input',()=>syncVideoSong());
 for(const option of ['restart','random','fullscreen'])$('#recording-'+option).addEventListener('change',()=>{syncFileButtons();persistSettings();});
 function syncFileButtons(){
+ document.querySelectorAll<HTMLButtonElement>('[data-library-open],[data-library-song],[data-library-random]').forEach(button=>button.disabled=videoBusy||wavBusy||importBusy);
  for(const action of ['load','file','example','export','leave'])$<HTMLButtonElement>('#song-script-'+action).disabled=videoBusy||wavBusy||importBusy||(['export','leave'].includes(action)&&!scriptSong);
  $<HTMLTextAreaElement>('#song-script-text').disabled=videoBusy||wavBusy||importBusy;
  $<HTMLButtonElement>('#json-import').disabled=importBusy||videoBusy||wavBusy;

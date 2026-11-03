@@ -1,0 +1,1101 @@
+{
+  "format": "jacktools-song",
+  "version": 2,
+  "title": "Eine kleine Nachtmusik — Classical · motif study (4/4)",
+  "rights": {
+    "composition": "Eine kleine Nachtmusik — W. A. Mozart (1756–1791); original composition public domain in Germany.",
+    "arrangement": "jacktools AI-assisted motif study; simplified accompaniment; 4/4 source adapted to 4/4.",
+    "recording": "Synthesized by jacktools Sound; no external audio recording or samples used.",
+    "license": "Arrangement/recording: no separate usage license granted; rights not conclusively reviewed.",
+    "source": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=900"
+  },
+  "bpm": 108,
+  "style": "classical",
+  "loop": false,
+  "seed": 1726,
+  "tracks": [
+    {
+      "id": "lead",
+      "instrument": "piano",
+      "volume": 0.43
+    },
+    {
+      "id": "harmony",
+      "instrument": "piano",
+      "volume": 0.16
+    },
+    {
+      "id": "bass",
+      "instrument": "bass",
+      "volume": 0.23
+    }
+  ],
+  "scenes": [
+    {
+      "name": "Theme 1 · 4/4",
+      "bars": 2,
+      "variation": 0.012,
+      "parts": [
+        {
+          "track": "lead",
+          "volume": 0.82,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 0.94,
+              "pitch": 19,
+              "velocity": 0.62
+            },
+            {
+              "at": 1.5,
+              "duration": 0.47,
+              "pitch": 14,
+              "velocity": 0.62
+            },
+            {
+              "at": 2.0,
+              "duration": 0.94,
+              "pitch": 19,
+              "velocity": 0.62
+            },
+            {
+              "at": 3.5,
+              "duration": 0.47,
+              "pitch": 14,
+              "velocity": 0.62
+            },
+            {
+              "at": 4,
+              "duration": 0.47,
+              "pitch": 19,
+              "velocity": 0.62
+            },
+            {
+              "at": 4.5,
+              "duration": 0.47,
+              "pitch": 14,
+              "velocity": 0.62
+            },
+            {
+              "at": 5.0,
+              "duration": 0.47,
+              "pitch": 19,
+              "velocity": 0.62
+            },
+            {
+              "at": 5.5,
+              "duration": 0.47,
+              "pitch": 23,
+              "velocity": 0.62
+            },
+            {
+              "at": 6.0,
+              "duration": 0.94,
+              "pitch": 26,
+              "velocity": 0.62
+            }
+          ]
+        },
+        {
+          "track": "harmony",
+          "volume": 0.82,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 3.572,
+              "pitch": [
+                7,
+                11,
+                14
+              ],
+              "velocity": 0.46
+            },
+            {
+              "at": 4,
+              "duration": 3.572,
+              "pitch": [
+                2,
+                6,
+                9
+              ],
+              "velocity": 0.46
+            }
+          ]
+        },
+        {
+          "track": "bass",
+          "volume": 0.82,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 0.752,
+              "pitch": -5,
+              "velocity": 0.58
+            },
+            {
+              "at": 2,
+              "duration": 0.752,
+              "pitch": -5,
+              "velocity": 0.58
+            },
+            {
+              "at": 4,
+              "duration": 0.752,
+              "pitch": -10,
+              "velocity": 0.58
+            },
+            {
+              "at": 6,
+              "duration": 0.752,
+              "pitch": -10,
+              "velocity": 0.58
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Theme 2 · 4/4",
+      "bars": 2,
+      "variation": 0.012,
+      "parts": [
+        {
+          "track": "lead",
+          "volume": 0.82,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 0.94,
+              "pitch": 24,
+              "velocity": 0.62
+            },
+            {
+              "at": 1.5,
+              "duration": 0.47,
+              "pitch": 21,
+              "velocity": 0.62
+            },
+            {
+              "at": 2.0,
+              "duration": 0.94,
+              "pitch": 24,
+              "velocity": 0.62
+            },
+            {
+              "at": 3.5,
+              "duration": 0.47,
+              "pitch": 21,
+              "velocity": 0.62
+            },
+            {
+              "at": 4,
+              "duration": 0.47,
+              "pitch": 24,
+              "velocity": 0.62
+            },
+            {
+              "at": 4.5,
+              "duration": 0.47,
+              "pitch": 21,
+              "velocity": 0.62
+            },
+            {
+              "at": 5.0,
+              "duration": 0.47,
+              "pitch": 18,
+              "velocity": 0.62
+            },
+            {
+              "at": 5.5,
+              "duration": 0.47,
+              "pitch": 21,
+              "velocity": 0.62
+            },
+            {
+              "at": 6.0,
+              "duration": 0.94,
+              "pitch": 14,
+              "velocity": 0.62
+            }
+          ]
+        },
+        {
+          "track": "harmony",
+          "volume": 0.82,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 3.572,
+              "pitch": [
+                2,
+                6,
+                9
+              ],
+              "velocity": 0.46
+            },
+            {
+              "at": 4,
+              "duration": 3.572,
+              "pitch": [
+                2,
+                6,
+                9
+              ],
+              "velocity": 0.46
+            }
+          ]
+        },
+        {
+          "track": "bass",
+          "volume": 0.82,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 0.752,
+              "pitch": -10,
+              "velocity": 0.58
+            },
+            {
+              "at": 2,
+              "duration": 0.752,
+              "pitch": -10,
+              "velocity": 0.58
+            },
+            {
+              "at": 4,
+              "duration": 0.752,
+              "pitch": -10,
+              "velocity": 0.58
+            },
+            {
+              "at": 6,
+              "duration": 0.752,
+              "pitch": -10,
+              "velocity": 0.58
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Theme 3 · 4/4",
+      "bars": 2,
+      "variation": 0.012,
+      "parts": [
+        {
+          "track": "lead",
+          "volume": 0.82,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 0.47,
+              "pitch": 19,
+              "velocity": 0.62
+            },
+            {
+              "at": 1.0,
+              "duration": 1.41,
+              "pitch": 19,
+              "velocity": 0.62
+            },
+            {
+              "at": 2.5,
+              "duration": 0.47,
+              "pitch": 23,
+              "velocity": 0.62
+            },
+            {
+              "at": 3.0,
+              "duration": 0.47,
+              "pitch": 21,
+              "velocity": 0.62
+            },
+            {
+              "at": 3.5,
+              "duration": 0.47,
+              "pitch": 19,
+              "velocity": 0.62
+            },
+            {
+              "at": 4,
+              "duration": 0.47,
+              "pitch": 18,
+              "velocity": 0.62
+            },
+            {
+              "at": 5.0,
+              "duration": 1.41,
+              "pitch": 18,
+              "velocity": 0.62
+            },
+            {
+              "at": 6.5,
+              "duration": 0.47,
+              "pitch": 21,
+              "velocity": 0.62
+            },
+            {
+              "at": 7.0,
+              "duration": 0.47,
+              "pitch": 24,
+              "velocity": 0.62
+            },
+            {
+              "at": 7.5,
+              "duration": 0.47,
+              "pitch": 18,
+              "velocity": 0.62
+            }
+          ]
+        },
+        {
+          "track": "harmony",
+          "volume": 0.82,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 3.572,
+              "pitch": [
+                7,
+                11,
+                14
+              ],
+              "velocity": 0.46
+            },
+            {
+              "at": 4,
+              "duration": 3.572,
+              "pitch": [
+                2,
+                6,
+                9
+              ],
+              "velocity": 0.46
+            }
+          ]
+        },
+        {
+          "track": "bass",
+          "volume": 0.82,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 0.752,
+              "pitch": -5,
+              "velocity": 0.58
+            },
+            {
+              "at": 2,
+              "duration": 0.752,
+              "pitch": -5,
+              "velocity": 0.58
+            },
+            {
+              "at": 4,
+              "duration": 0.752,
+              "pitch": -10,
+              "velocity": 0.58
+            },
+            {
+              "at": 6,
+              "duration": 0.752,
+              "pitch": -10,
+              "velocity": 0.58
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Theme 4 · 4/4",
+      "bars": 2,
+      "variation": 0.012,
+      "parts": [
+        {
+          "track": "lead",
+          "volume": 0.82,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 0.47,
+              "pitch": 21,
+              "velocity": 0.62
+            },
+            {
+              "at": 0.5,
+              "duration": 0.47,
+              "pitch": 19,
+              "velocity": 0.62
+            },
+            {
+              "at": 1.0,
+              "duration": 1.41,
+              "pitch": 19,
+              "velocity": 0.62
+            },
+            {
+              "at": 2.5,
+              "duration": 0.47,
+              "pitch": 23,
+              "velocity": 0.62
+            },
+            {
+              "at": 3.0,
+              "duration": 0.47,
+              "pitch": 21,
+              "velocity": 0.62
+            },
+            {
+              "at": 3.5,
+              "duration": 0.47,
+              "pitch": 19,
+              "velocity": 0.62
+            },
+            {
+              "at": 4,
+              "duration": 0.47,
+              "pitch": 18,
+              "velocity": 0.62
+            },
+            {
+              "at": 5.0,
+              "duration": 0.94,
+              "pitch": 18,
+              "velocity": 0.62
+            },
+            {
+              "at": 6.0,
+              "duration": 0.47,
+              "pitch": 21,
+              "velocity": 0.62
+            },
+            {
+              "at": 6.5,
+              "duration": 0.47,
+              "pitch": 24,
+              "velocity": 0.62
+            },
+            {
+              "at": 7.0,
+              "duration": 0.94,
+              "pitch": 19,
+              "velocity": 0.62
+            }
+          ]
+        },
+        {
+          "track": "harmony",
+          "volume": 0.82,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 3.572,
+              "pitch": [
+                7,
+                11,
+                14
+              ],
+              "velocity": 0.46
+            },
+            {
+              "at": 4,
+              "duration": 3.572,
+              "pitch": [
+                7,
+                11,
+                14
+              ],
+              "velocity": 0.46
+            }
+          ]
+        },
+        {
+          "track": "bass",
+          "volume": 0.82,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 0.752,
+              "pitch": -5,
+              "velocity": 0.58
+            },
+            {
+              "at": 2,
+              "duration": 0.752,
+              "pitch": -5,
+              "velocity": 0.58
+            },
+            {
+              "at": 4,
+              "duration": 0.752,
+              "pitch": -5,
+              "velocity": 0.58
+            },
+            {
+              "at": 6,
+              "duration": 0.752,
+              "pitch": -5,
+              "velocity": 0.58
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Reprise 1 · 4/4",
+      "bars": 2,
+      "variation": 0.012,
+      "parts": [
+        {
+          "track": "lead",
+          "volume": 1,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 0.94,
+              "pitch": 19,
+              "velocity": 0.69
+            },
+            {
+              "at": 1.5,
+              "duration": 0.47,
+              "pitch": 14,
+              "velocity": 0.69
+            },
+            {
+              "at": 2.0,
+              "duration": 0.94,
+              "pitch": 19,
+              "velocity": 0.69
+            },
+            {
+              "at": 3.5,
+              "duration": 0.47,
+              "pitch": 14,
+              "velocity": 0.69
+            },
+            {
+              "at": 4,
+              "duration": 0.47,
+              "pitch": 19,
+              "velocity": 0.69
+            },
+            {
+              "at": 4.5,
+              "duration": 0.47,
+              "pitch": 14,
+              "velocity": 0.69
+            },
+            {
+              "at": 5.0,
+              "duration": 0.47,
+              "pitch": 19,
+              "velocity": 0.69
+            },
+            {
+              "at": 5.5,
+              "duration": 0.47,
+              "pitch": 23,
+              "velocity": 0.69
+            },
+            {
+              "at": 6.0,
+              "duration": 0.94,
+              "pitch": 26,
+              "velocity": 0.69
+            }
+          ]
+        },
+        {
+          "track": "harmony",
+          "volume": 1,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 3.572,
+              "pitch": [
+                7,
+                11,
+                14
+              ],
+              "velocity": 0.46
+            },
+            {
+              "at": 4,
+              "duration": 3.572,
+              "pitch": [
+                2,
+                6,
+                9
+              ],
+              "velocity": 0.46
+            }
+          ]
+        },
+        {
+          "track": "bass",
+          "volume": 1,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 0.752,
+              "pitch": -5,
+              "velocity": 0.58
+            },
+            {
+              "at": 2,
+              "duration": 0.752,
+              "pitch": -5,
+              "velocity": 0.58
+            },
+            {
+              "at": 4,
+              "duration": 0.752,
+              "pitch": -10,
+              "velocity": 0.58
+            },
+            {
+              "at": 6,
+              "duration": 0.752,
+              "pitch": -10,
+              "velocity": 0.58
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Reprise 2 · 4/4",
+      "bars": 2,
+      "variation": 0.012,
+      "parts": [
+        {
+          "track": "lead",
+          "volume": 1,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 0.94,
+              "pitch": 24,
+              "velocity": 0.69
+            },
+            {
+              "at": 1.5,
+              "duration": 0.47,
+              "pitch": 21,
+              "velocity": 0.69
+            },
+            {
+              "at": 2.0,
+              "duration": 0.94,
+              "pitch": 24,
+              "velocity": 0.69
+            },
+            {
+              "at": 3.5,
+              "duration": 0.47,
+              "pitch": 21,
+              "velocity": 0.69
+            },
+            {
+              "at": 4,
+              "duration": 0.47,
+              "pitch": 24,
+              "velocity": 0.69
+            },
+            {
+              "at": 4.5,
+              "duration": 0.47,
+              "pitch": 21,
+              "velocity": 0.69
+            },
+            {
+              "at": 5.0,
+              "duration": 0.47,
+              "pitch": 18,
+              "velocity": 0.69
+            },
+            {
+              "at": 5.5,
+              "duration": 0.47,
+              "pitch": 21,
+              "velocity": 0.69
+            },
+            {
+              "at": 6.0,
+              "duration": 0.94,
+              "pitch": 14,
+              "velocity": 0.69
+            }
+          ]
+        },
+        {
+          "track": "harmony",
+          "volume": 1,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 3.572,
+              "pitch": [
+                2,
+                6,
+                9
+              ],
+              "velocity": 0.46
+            },
+            {
+              "at": 4,
+              "duration": 3.572,
+              "pitch": [
+                2,
+                6,
+                9
+              ],
+              "velocity": 0.46
+            }
+          ]
+        },
+        {
+          "track": "bass",
+          "volume": 1,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 0.752,
+              "pitch": -10,
+              "velocity": 0.58
+            },
+            {
+              "at": 2,
+              "duration": 0.752,
+              "pitch": -10,
+              "velocity": 0.58
+            },
+            {
+              "at": 4,
+              "duration": 0.752,
+              "pitch": -10,
+              "velocity": 0.58
+            },
+            {
+              "at": 6,
+              "duration": 0.752,
+              "pitch": -10,
+              "velocity": 0.58
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Reprise 3 · 4/4",
+      "bars": 2,
+      "variation": 0.012,
+      "parts": [
+        {
+          "track": "lead",
+          "volume": 1,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 0.47,
+              "pitch": 19,
+              "velocity": 0.69
+            },
+            {
+              "at": 1.0,
+              "duration": 1.41,
+              "pitch": 19,
+              "velocity": 0.69
+            },
+            {
+              "at": 2.5,
+              "duration": 0.47,
+              "pitch": 23,
+              "velocity": 0.69
+            },
+            {
+              "at": 3.0,
+              "duration": 0.47,
+              "pitch": 21,
+              "velocity": 0.69
+            },
+            {
+              "at": 3.5,
+              "duration": 0.47,
+              "pitch": 19,
+              "velocity": 0.69
+            },
+            {
+              "at": 4,
+              "duration": 0.47,
+              "pitch": 18,
+              "velocity": 0.69
+            },
+            {
+              "at": 5.0,
+              "duration": 1.41,
+              "pitch": 18,
+              "velocity": 0.69
+            },
+            {
+              "at": 6.5,
+              "duration": 0.47,
+              "pitch": 21,
+              "velocity": 0.69
+            },
+            {
+              "at": 7.0,
+              "duration": 0.47,
+              "pitch": 24,
+              "velocity": 0.69
+            },
+            {
+              "at": 7.5,
+              "duration": 0.47,
+              "pitch": 18,
+              "velocity": 0.69
+            }
+          ]
+        },
+        {
+          "track": "harmony",
+          "volume": 1,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 3.572,
+              "pitch": [
+                7,
+                11,
+                14
+              ],
+              "velocity": 0.46
+            },
+            {
+              "at": 4,
+              "duration": 3.572,
+              "pitch": [
+                2,
+                6,
+                9
+              ],
+              "velocity": 0.46
+            }
+          ]
+        },
+        {
+          "track": "bass",
+          "volume": 1,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 0.752,
+              "pitch": -5,
+              "velocity": 0.58
+            },
+            {
+              "at": 2,
+              "duration": 0.752,
+              "pitch": -5,
+              "velocity": 0.58
+            },
+            {
+              "at": 4,
+              "duration": 0.752,
+              "pitch": -10,
+              "velocity": 0.58
+            },
+            {
+              "at": 6,
+              "duration": 0.752,
+              "pitch": -10,
+              "velocity": 0.58
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Reprise 4 · 4/4",
+      "bars": 2,
+      "variation": 0.012,
+      "parts": [
+        {
+          "track": "lead",
+          "volume": 1,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 0.47,
+              "pitch": 21,
+              "velocity": 0.69
+            },
+            {
+              "at": 0.5,
+              "duration": 0.47,
+              "pitch": 19,
+              "velocity": 0.69
+            },
+            {
+              "at": 1.0,
+              "duration": 1.41,
+              "pitch": 19,
+              "velocity": 0.69
+            },
+            {
+              "at": 2.5,
+              "duration": 0.47,
+              "pitch": 23,
+              "velocity": 0.69
+            },
+            {
+              "at": 3.0,
+              "duration": 0.47,
+              "pitch": 21,
+              "velocity": 0.69
+            },
+            {
+              "at": 3.5,
+              "duration": 0.47,
+              "pitch": 19,
+              "velocity": 0.69
+            },
+            {
+              "at": 4,
+              "duration": 0.47,
+              "pitch": 18,
+              "velocity": 0.69
+            },
+            {
+              "at": 5.0,
+              "duration": 0.94,
+              "pitch": 18,
+              "velocity": 0.69
+            },
+            {
+              "at": 6.0,
+              "duration": 0.47,
+              "pitch": 21,
+              "velocity": 0.69
+            },
+            {
+              "at": 6.5,
+              "duration": 0.47,
+              "pitch": 24,
+              "velocity": 0.69
+            },
+            {
+              "at": 7.0,
+              "duration": 0.94,
+              "pitch": 19,
+              "velocity": 0.69
+            }
+          ]
+        },
+        {
+          "track": "harmony",
+          "volume": 1,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 3.572,
+              "pitch": [
+                7,
+                11,
+                14
+              ],
+              "velocity": 0.46
+            },
+            {
+              "at": 4,
+              "duration": 3.572,
+              "pitch": [
+                7,
+                11,
+                14
+              ],
+              "velocity": 0.46
+            }
+          ]
+        },
+        {
+          "track": "bass",
+          "volume": 1,
+          "notes": [
+            {
+              "at": 0,
+              "duration": 0.752,
+              "pitch": -5,
+              "velocity": 0.58
+            },
+            {
+              "at": 2,
+              "duration": 0.752,
+              "pitch": -5,
+              "velocity": 0.58
+            },
+            {
+              "at": 4,
+              "duration": 0.752,
+              "pitch": -5,
+              "velocity": 0.58
+            },
+            {
+              "at": 6,
+              "duration": 0.752,
+              "pitch": -5,
+              "velocity": 0.58
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Coda",
+      "bars": 2,
+      "parts": [
+        {
+          "track": "lead",
+          "notes": [
+            {
+              "at": 0,
+              "duration": 6.58,
+              "pitch": 19,
+              "velocity": 0.45,
+              "toVelocity": 0
+            }
+          ]
+        },
+        {
+          "track": "harmony",
+          "notes": [
+            {
+              "at": 0,
+              "duration": 6.58,
+              "pitch": [
+                7,
+                11,
+                14
+              ],
+              "velocity": 0.4,
+              "toVelocity": 0
+            }
+          ]
+        },
+        {
+          "track": "bass",
+          "notes": [
+            {
+              "at": 0,
+              "duration": 6.58,
+              "pitch": -5,
+              "velocity": 0.45,
+              "toVelocity": 0
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
