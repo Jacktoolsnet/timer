@@ -1,4 +1,4 @@
-type Panel='home'|'sound'|'orbit'|'flower'|'background';
+type Panel='home'|'sound'|'orbit'|'orbit-trail'|'orbit-center'|'flower'|'background';
 
 export function syncAnimationSettings(){
  for(const [summary,selector] of [
@@ -10,33 +10,45 @@ export function syncAnimationSettings(){
  }
 }
 
-export function installAnimationSettings(activate:(view:'orbit'|'flower')=>void){
- const dialog=document.querySelector<HTMLDialogElement>('#animation-settings-dialog')!;
+export function animationSettingsActive(){return document.getElementById('animation-settings')?.hidden===false;}
+
+export function installAnimationSettings(activate:(view:'orbit'|'flower')=>void,onOpen:()=>void,onClose:()=>void){
+ const surface=document.querySelector<HTMLElement>('#animation-settings')!;
  const opener=document.querySelector<HTMLButtonElement>('#animation-settings-open')!;
  const back=document.querySelector<HTMLButtonElement>('#animation-settings-back')!;
  const title=document.querySelector<HTMLElement>('#animation-settings-title')!;
+ const side=surface.closest<HTMLElement>('.flow-side')!;
  let panel:Panel='home';
+ const parent=(value:Panel):Panel=>value==='orbit-trail'||value==='orbit-center'?'orbit':value==='orbit'||value==='flower'?'sound':'home';
  function show(next:Panel,focus=true){
   panel=next;
-  dialog.querySelectorAll<HTMLElement>('[data-animation-panel]').forEach(el=>{
+  surface.querySelectorAll<HTMLElement>('[data-animation-panel]').forEach(el=>{
    el.hidden=el.dataset.animationPanel!==next;
    if(!el.hidden)title.textContent=el.dataset.panelTitle!;
   });
-  back.hidden=next==='home';dialog.scrollTop=0;
+  back.hidden=next==='home';surface.scrollTop=0;
   if(focus)title.focus({preventScroll:true});
  }
+ function close(focus=true){
+  if(!animationSettingsActive())return;
+  surface.hidden=true;side.classList.remove('animation-settings-active');opener.setAttribute('aria-pressed','false');
+  onClose();
+  if(focus)opener.focus({preventScroll:true});
+ }
  opener.addEventListener('click',()=>{
-  show('home',false);syncAnimationSettings();dialog.showModal();opener.setAttribute('aria-expanded','true');
-  dialog.querySelector<HTMLButtonElement>('[data-animation-open=sound]')!.focus({preventScroll:true});
+  if(animationSettingsActive()){close();return;}
+  onOpen();show('home',false);syncAnimationSettings();surface.hidden=false;side.classList.add('animation-settings-active');opener.setAttribute('aria-pressed','true');
+  document.querySelectorAll<HTMLButtonElement>('[data-pad-mode]').forEach(button=>button.setAttribute('aria-pressed','false'));
  });
- dialog.querySelectorAll<HTMLButtonElement>('[data-animation-open]').forEach(button=>button.addEventListener('click',()=>show(button.dataset.animationOpen as Panel)));
+ surface.querySelectorAll<HTMLButtonElement>('[data-animation-open]').forEach(button=>button.addEventListener('click',()=>show(button.dataset.animationOpen as Panel)));
  for(const view of ['orbit','flower'] as const)document.querySelector('#'+view+'-settings-open')!.addEventListener('click',()=>{activate(view);show(view);});
- back.addEventListener('click',()=>show(panel==='orbit'||panel==='flower'?'sound':'home'));
- document.querySelector('#animation-settings-close')!.addEventListener('click',()=>dialog.close());
- dialog.addEventListener('close',()=>{opener.setAttribute('aria-expanded','false');opener.focus({preventScroll:true});});
- dialog.addEventListener('click',event=>{
-  if(event.target!==dialog)return;
-  const r=dialog.getBoundingClientRect();
-  if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)dialog.close();
- });
+ back.addEventListener('click',()=>show(parent(panel)));
+ document.querySelector('#animation-settings-close')!.addEventListener('click',()=>close());
+ // Switching to an input mode is ordinary inline navigation, not dismissal of a modal.
+ document.querySelectorAll<HTMLButtonElement>('[data-pad-mode]').forEach(button=>button.addEventListener('click',()=>close(false)));
+ document.addEventListener('keydown',event=>{
+  if(event.key!=='Escape'||!animationSettingsActive()||document.querySelector('dialog[open]'))return;
+  event.preventDefault();event.stopPropagation();
+  if(panel==='home')close();else show(parent(panel));
+ },{capture:true});
 }

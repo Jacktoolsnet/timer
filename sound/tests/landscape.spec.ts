@@ -47,7 +47,7 @@ test('landscape selection persists only with consent, round-trips through JSON a
 test('view choices are localized and landscape remains available with hidden focus controls',async({page})=>{
  for(const language of ['de','en','es','fr'] as const){await page.goto('/'+language+'/');await expect(page.locator('button[data-visualization=landscape]')).toContainText(visualizationCopy[language].landscape);}
  await page.evaluate(()=>{document.documentElement.requestFullscreen=()=>Promise.reject(new Error('test fallback'));});await chooseAnimation(page,'button[data-visualization=landscape]');await page.locator('#focus').click();await page.locator('#hide-focus-controls').click();await expect(page.locator('body')).toHaveClass(/focus-idle/);
- await expect(page.locator('#orbit')).toBeVisible();await expect(page.locator('.visualization-switch')).toBeHidden();await expect(page.locator('#orbit')).toHaveAttribute('data-visualization','landscape');
+ await expect(page.locator('#orbit')).toBeVisible();await expect(page.locator('#animation-settings .visualization-switch')).toBeHidden();await expect(page.locator('#orbit')).toHaveAttribute('data-visualization','landscape');
 });
 test('native MP4 records the landscape canvas with sound',async({page})=>{
  test.setTimeout(45000);await spy(page);await page.goto('/de/');await load(page,fixture());await page.locator('#files-open').click();test.skip(await page.locator('#video-record').isDisabled(),'No native MP4 encoder');

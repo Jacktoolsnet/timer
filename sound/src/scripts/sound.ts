@@ -1,4 +1,4 @@
-import {installAnimationSettings,syncAnimationSettings} from './animation-settings';
+import {installAnimationSettings,syncAnimationSettings,animationSettingsActive} from './animation-settings';
 import {paintSoundFlower} from '../lib/sound-flower';
 import {paintConstellation} from '../lib/constellation';
 import {paintNoteStream,type StreamPreview} from '../lib/note-stream';
@@ -156,7 +156,7 @@ function rhythmPosition(time=audio?.currentTime||0){
 function syncRhythmUi(){
  streamRevision++;
  const text=rhythmCopy[language],active=padMode==='rhythm';
- document.querySelectorAll<HTMLButtonElement>('[data-pad-mode]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.padMode===padMode)));
+ document.querySelectorAll<HTMLButtonElement>('[data-pad-mode]').forEach(button=>button.setAttribute('aria-pressed',String(!animationSettingsActive()&&button.dataset.padMode===padMode)));
  $('#note-editor').hidden=padMode!=='notes';drawing.closest<HTMLElement>('.draw-wrap')!.hidden=padMode==='notes';
  noteEditor?.refresh();
  $('#rhythm-zones').hidden=!active;$('#rhythm-controls').hidden=!active;
@@ -544,7 +544,7 @@ document.querySelectorAll<HTMLButtonElement>('[data-center-mode]').forEach(butto
 document.querySelectorAll<HTMLButtonElement>('[data-background-mode]').forEach(button=>button.addEventListener('click',()=>selectBackgroundMode(button.dataset.backgroundMode as typeof backgroundChoice)));
 document.querySelectorAll<HTMLButtonElement>('[data-orbit-mode]').forEach(button=>button.addEventListener('click',()=>selectOrbitMode(button.dataset.orbitMode as typeof orbitChoice)));
 document.querySelectorAll<HTMLButtonElement>('[data-flower-center-mode]').forEach(button=>button.addEventListener('click',()=>selectFlowerCenterMode(button.dataset.flowerCenterMode as typeof flowerCenterChoice)));
-installAnimationSettings(view=>selectVisualization(view));
+installAnimationSettings(view=>selectVisualization(view),cancelPadGestures,syncRhythmUi);
 function evolveAnimations(includeBackground=true){
  if(centerChoice==='random'&&!videoAnimationRun?.flags.center)selectCenterMode('random');
  if(flowerCenterChoice==='random'&&!videoAnimationRun?.flags.center)selectFlowerCenterMode('random');
@@ -1690,7 +1690,7 @@ drawing.addEventListener('keydown',e=>{
 drawing.addEventListener('keyup',e=>{if(e.key===' '){e.preventDefault();finishPadGesture(-1);}});
 drawing.addEventListener('blur',()=>{finishPadGesture(-1,true);for(const id of heldRhythmKeys.values())finishPadGesture(id,true);heldRhythmKeys.clear();});
 window.addEventListener('keydown',e=>{
- if(padMode!=='rhythm'||e.ctrlKey||e.metaKey||e.altKey)return;
+ if(animationSettingsActive()||padMode!=='rhythm'||e.ctrlKey||e.metaKey||e.altKey)return;
  const target=e.target as HTMLElement;
  if(target.closest('input,textarea,select,[contenteditable]:not([contenteditable=false]),[role=textbox],[role=combobox],[role=listbox],[role=option],[aria-haspopup=listbox]')||document.querySelector('dialog[open]'))return;
  if(selectedPad!==null&&(e.key==='Enter'||e.key==='Escape')){
@@ -1950,7 +1950,7 @@ function frame(now:number){
      joined:!!joinedFrom,pulseOnly:!!score&&!first,glide:!acousticInstruments.includes(tr.instrument),
      curve:first&&score?score.points.map(p=>({offset:p.offset*seconds,pitch:p.pitch,level:p.velocity})):undefined});
    }
-   if(padMode==='notes'&&velocity>0&&Number($<HTMLInputElement>('#volume').value)>0)noteEditor?.pulse(track,ev.time,scorePosition(ev.time),pitch);
+   if(!animationSettingsActive()&&padMode==='notes'&&velocity>0&&Number($<HTMLInputElement>('#volume').value)>0)noteEditor?.pulse(track,ev.time,scorePosition(ev.time),pitch);
    if(group&&group.definition===usableGroup(track,beat)){
     const current=groupDisplays[track].get(beat);
     if(!current||group.stamp>=current.stamp){if(member!==undefined)group.members[member].played=true;groupDisplays[track].set(beat,group);}
@@ -1961,7 +1961,7 @@ function frame(now:number){
     zone.dataset.playedNote=String(note);zone.style.setProperty('--note-row',String(7-note));
    }
    // Share the audible onset clock with the orbit, for automatic and recorded notes alike.
-   if(padMode==='rhythm'&&playing&&Number($<HTMLInputElement>('#volume').value)>0){
+   if(!animationSettingsActive()&&padMode==='rhythm'&&playing&&Number($<HTMLInputElement>('#volume').value)>0){
     padRings.push({...padPoint(track as RhythmLane),lane:track as RhythmLane,note,color:colors[track],started:now,released:now,duration:160,strength:Math.min(1,.35+tr.volume*velocity)});
     if(padRings.length>32)padRings.shift();
    }}});}
@@ -2069,7 +2069,7 @@ function frame(now:number){
  }
  const progress=$<HTMLProgressElement>('#rhythm-progress');progress.max=tapPattern.beats*8;
  progress.value=tapPattern.state==='armed'?0:tapPattern.state==='loop'?progress.max:Math.max(0,rhythmPosition()-(tapPattern.start??0));
- renderPadGestures(now,dark);if(padMode==='notes')noteEditor?.animate(time,scorePosition(time),playing);
+ if(!animationSettingsActive())renderPadGestures(now,dark);if(!animationSettingsActive()&&padMode==='notes')noteEditor?.animate(time,scorePosition(time),playing);
  videoRecording?.frame(now);
  requestAnimationFrame(frame);
 }

@@ -79,7 +79,7 @@ test('view persists only with consent, restores without autoplay and works in fo
  await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('jacktools.sound.settings.v1')!).visualization)).toBe('constellation');
  await page.reload();await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false');await expect(page.locator('#orbit')).toHaveAttribute('data-visualization','constellation');
  await page.evaluate(()=>{document.documentElement.requestFullscreen=()=>Promise.reject(new Error('fallback'));});
- await page.locator('#focus').click();await page.locator('#hide-focus-controls').click();await expect(page.locator('.visualization-switch')).toBeHidden();await expect(page.locator('#orbit')).toBeVisible();
+ await page.locator('#focus').click();await page.locator('#hide-focus-controls').click();await expect(page.locator('#animation-settings .visualization-switch')).toBeHidden();await expect(page.locator('#orbit')).toBeVisible();
 });
 test('localized selector fits mobile in both themes and reduced motion omits halos',async({page})=>{
  await spy(page);await page.setViewportSize({width:390,height:844});await page.emulateMedia({reducedMotion:'reduce'});

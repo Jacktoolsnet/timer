@@ -427,8 +427,8 @@ test('new background variants are selectable and render during playback',async({
 test('animation settings offer orbit variants and remain accessible in focus',async({page})=>{
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/de/');
- await expect(page.locator('.animations-tile')).toHaveCount(0);await expect(page.locator('[data-animation-panel=orbit] .animation-category')).toHaveCount(2);
- await expect(page.locator('.sound-app [data-center-mode]')).toHaveCount(0);
+ await expect(page.locator('.animations-tile')).toHaveCount(0);await expect(page.locator('[data-animation-panel=orbit] [data-animation-open]')).toHaveCount(2);
+ await expect(page.locator('.sound-app [data-center-mode]')).toHaveCount(7);
  await page.locator('#play').click();
  for(const mode of ['dot','pulse','comet','off']){
   await chooseAnimation(page,'[data-orbit-mode='+mode+']');

@@ -16,7 +16,9 @@ test('settings replace scattered controls, navigate live and leave music and inp
  const before=await exported(page);await page.locator('[data-pad-mode=rhythm]').click();await page.locator('#play').click();
  await page.locator('#animation-settings-open').click();
  await expect(page.locator('[data-animation-panel=home]')).toBeVisible();await expect(page.locator('[data-animation-panel=sound]')).toBeHidden();
- await expect(page.locator('[data-pad-mode=rhythm]')).toHaveAttribute('aria-pressed','true');
+ await expect(page.locator('[data-pad-mode=rhythm]')).toHaveAttribute('aria-pressed','false');
+ await expect(page.locator('.draw-wrap')).toBeHidden();await expect(page.locator('dialog[open]')).toHaveCount(0);
+ await expect(page.locator('#animation-settings')).toHaveCSS('aspect-ratio','1 / 1');
  await page.locator('[data-animation-open=sound]').click();await expect(page.locator('button[data-visualization]:visible')).toHaveCount(5);
  await expect(page.locator('#orbit-settings-open')).toHaveCount(1);
  await page.locator('button[data-visualization=flower]').click();await expect(page.locator('#orbit')).toHaveAttribute('data-visualization','flower');
@@ -24,7 +26,8 @@ test('settings replace scattered controls, navigate live and leave music and inp
  await page.locator('#orbit-settings-open').click();await expect(page.locator('[data-animation-panel=orbit]')).toBeVisible();
  await expect(page.locator('#orbit')).toHaveAttribute('data-visualization','orbit');
  await expect(page.locator('button[data-center-mode=ring]')).toBeEnabled();
- await page.locator('[data-orbit-mode=pulse]').click();await page.locator('[data-center-mode=bars]').click();
+ await page.locator('[data-animation-open=orbit-trail]').click();await page.locator('[data-orbit-mode=pulse]').click();await page.locator('#animation-settings-back').click();await page.locator('[data-animation-open=orbit-center]').click();await page.locator('[data-center-mode=bars]').click();
+ await page.locator('#animation-settings-back').click();
  await expect(page.locator('#orbit')).toHaveAttribute('data-mode','pulse');await expect(page.locator('#orbit')).toHaveAttribute('data-center-variant','bars');
  await page.locator('#animation-settings-back').click();await expect(page.locator('[data-animation-panel=sound]')).toBeVisible();
  await page.locator('#animation-settings-back').click();await expect(page.locator('#animation-current-sound')).toHaveText('Orbit');
@@ -37,20 +40,36 @@ test('settings replace scattered controls, navigate live and leave music and inp
  expect(after).toMatchObject({visualization:'orbit',orbit:'pulse',center:'bars',background:'waves'});expect(errors).toEqual([]);
 });
 
-test('Escape closes settings without leaving focus; keyboard and backdrop restore focus to the opener',async({page})=>{
+test('inline settings have back navigation, allow other controls, block hidden tapping keys and return to the previous input',async({page})=>{
  await page.goto('/de/');await page.evaluate(()=>{document.documentElement.requestFullscreen=()=>Promise.reject(new Error('fallback'));});
- await page.locator('#focus').click();await page.locator('#animation-settings-open').click();
- await expect(page.locator('[data-animation-open=sound]')).toBeFocused();
- await page.keyboard.press('Tab');await expect(page.locator('[data-animation-open=background]')).toBeFocused();
- await page.keyboard.press('Enter');await expect(page.locator('#animation-settings-title')).toBeFocused();
- await page.keyboard.press('Escape');await expect(page.locator('#animation-settings-dialog')).toBeHidden();
- await expect(page.locator('body')).toHaveClass(/focus-view/);await expect(page.locator('#animation-settings-open')).toBeFocused();
- await page.locator('#animation-settings-open').click();
- const r=(await page.locator('#animation-settings-dialog').boundingBox())!;await page.mouse.click(r.x-4,r.y+8);
- await expect(page.locator('#animation-settings-dialog')).toBeHidden();await expect(page.locator('#animation-settings-open')).toBeFocused();
- await page.locator('#hide-focus-controls').click();await expect(page.locator('#animation-settings-open')).toBeHidden();
- await page.locator('#orbit').click();await expect(page.locator('#animation-settings-open')).toBeVisible();
- await page.locator('#animation-settings-open').click();await expect(page.locator('#animation-settings-dialog')).toBeVisible();
+ await page.locator('[data-pad-mode=rhythm]').click();await page.locator('#focus').click();await page.locator('#animation-settings-open').click();
+ await expect(page.locator('#animation-settings-open')).toHaveAttribute('aria-pressed','true');
+ await page.locator('#play').click();await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
+ await page.keyboard.press('Numpad7');await page.keyboard.press('Digit1');
+ await expect(page.locator('#drawing')).toHaveAttribute('data-selected-pad','');
+ await page.locator('[data-animation-open=sound]').click();await expect(page.locator('#animation-settings-title')).toBeFocused();
+ await page.keyboard.press('Escape');await expect(page.locator('[data-animation-panel=home]')).toBeVisible();
+ await page.keyboard.press('Escape');await expect(page.locator('#animation-settings')).toBeHidden();
+ await expect(page.locator('body')).toHaveClass(/focus-view/);await expect(page.locator('[data-pad-mode=rhythm]')).toHaveAttribute('aria-pressed','true');
+ await page.locator('#animation-settings-open').click();await page.locator('[data-pad-mode=notes]').click();
+ await expect(page.locator('#animation-settings')).toBeHidden();await expect(page.locator('#note-editor')).toBeVisible();
+ await page.locator('#animation-settings-open').click();await page.locator('#animation-settings-close').click();
+ await expect(page.locator('#note-editor')).toBeVisible();
+ await page.locator('#animation-settings-open').click();await page.locator('#hide-focus-controls').click();await expect(page.locator('#animation-settings')).toBeHidden();
+ await page.locator('#orbit').click();await expect(page.locator('#animation-settings')).toBeVisible();
+});
+
+test('opening the settings grid preserves an unfinished pad take and ignores hidden rhythm shortcuts',async({page})=>{
+ await page.goto('/de/');await page.locator('[data-pad-mode=rhythm]').click();
+ await page.keyboard.press('Numpad7');await expect(page.locator('#drawing')).toHaveAttribute('data-selected-pad','0');
+ await page.keyboard.press('Digit1');await expect.poll(()=>page.locator('#drawing').getAttribute('data-rhythm-hits')).not.toBe('0');
+ const pattern=await page.locator('#drawing').getAttribute('data-rhythm-pattern');
+ await page.locator('#animation-settings-open').click();await page.keyboard.press('Digit8');await page.keyboard.press('Numpad3');
+ await expect(page.locator('#drawing')).toHaveAttribute('data-rhythm-pattern',pattern!);
+ await page.locator('#animation-settings-close').click();
+ await expect(page.locator('#drawing')).toHaveAttribute('data-selected-pad','0');await expect(page.locator('#drawing')).toHaveAttribute('data-rhythm-pattern',pattern!);
+ await expect(page.locator('#rhythm-cancel')).toBeEnabled();await page.locator('#rhythm-cancel').click();
+ await expect(page.locator('#drawing')).toHaveAttribute('data-rhythm-hits','0');
 });
 
 for(const language of ['de','en','es','fr'] as const)test('localized responsive settings work in both themes: '+language,async({page})=>{
@@ -61,9 +80,9 @@ for(const language of ['de','en','es','fr'] as const)test('localized responsive 
  await expect(page.locator('[data-animation-open=sound]')).toContainText(c.sound);
  await expect(page.locator('[data-animation-open=background]')).toContainText(c.background);
  await page.locator('[data-animation-open=sound]').click();await expect(page.locator('button[data-visualization=flower]')).toHaveText(visualizationCopy[language].flower);
- expect(await page.locator('#animation-settings-dialog').evaluate(el=>el.scrollWidth<=el.clientWidth)).toBe(true);
+ expect(await page.locator('#animation-settings').evaluate(el=>el.scrollWidth<=el.clientWidth)).toBe(true);
  await page.locator('#orbit-settings-open').click();await expect(page.locator('#animation-settings-title')).toHaveText(c.orbit);
- await expect(page.locator('[data-animation-panel=orbit] h3').nth(1)).toHaveText(animationCopy[language].center);
+ await expect(page.locator('[data-animation-open=orbit-center]')).toHaveText(animationCopy[language].center);
  await page.locator('#animation-settings-close').click();expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBe(0);
 });
 

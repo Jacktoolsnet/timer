@@ -495,11 +495,10 @@ Video captions now use a separately selected language (English default, with Ger
 - Five localized choices wrap responsively, with usage instructions in all four languages. JSON and opt-in local storage include the new view; older projects still default to Orbit. No new assets, dependencies or services.
 
 
-### Unified animation settings
-- A fourth icon button beside Draw / Rhythm / Notes opens a native modal, without changing the input mode or the music. The initial screen contains Sound animation and Background animation tiles with current-choice summaries. Sound animation contains the five visualization tiles; a separate gear on Orbit activates that view and opens its orbit and centre variant groups. Back navigates up one level; Close, Escape and backdrop clicks dismiss the dialog and return keyboard focus.
-- The former above-canvas selector and lower animation section are removed. All controls retain their existing selectors, shared state, opt-in persistence, JSON behaviour and random/off choices. Selection is live rather than a transactional draft. Only Orbit has orbit trail controls; Orbit and Sound flower each have independent centre controls.
-- The responsive, localized dialog is a browser top-layer element, available in focus/fullscreen and during recording. It neither pauses music nor changes recording. MP4 continues painting only the visualization/background canvases, never the settings UI. Reduced motion suppresses the dialog entrance animation.
-
+### Unified inline animation settings
+- The fourth icon button beside Draw / Rhythm / Notes replaces the input surface with a square settings area, not a modal or overlay. Every level uses the same three-column, three-row grid as the instrument pads: initially only Sound animation and Background animation are populated. Sound opens five visualization tiles; the Orbit gear opens two branch tiles (trail effects / centre), and the flower gear opens its own centre grid.
+- Settings preserve the previous input session. Back / Escape navigate one level up; Escape at the root, X, or toggling Settings returns to the previous input. Choosing Draw/Rhythm/Notes leaves settings normally. Hidden tapping shortcuts and preview animations are suspended; held gestures are released, without accepting/discarding the take or changing audio levels.
+- The visualization, transport, other page controls and focus/fullscreen remain usable alongside the grid, including during recordings. Only the two existing animation canvases are captured in MP4, never settings. Selection is live, retains JSON/consent-based persistence, and has four-language labels, visible keyboard focus and reduced-motion support.
 
 ### Independent flower centre
 - Orbit and Sound flower tiles each have a gear. Opening either settings page activates that visualization; the flower page contains only its centre variants. Back returns to Sound animation. All seven choices (ring, filled, sun, sine, bars, random, off) have four-language labels.

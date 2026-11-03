@@ -57,7 +57,7 @@ for(const lang of ['de','en','es','fr'] as const)test('localized flower settings
  await page.setViewportSize({width:390,height:844});await page.goto('/'+lang+'/');await page.locator('#animation-settings-open').click();await page.locator('[data-animation-open=sound]').click();
  await expect(page.locator('#flower-settings-open')).toHaveAccessibleName(animationSettingsCopy[lang].flower);await page.locator('#flower-settings-open').click();
  await expect(page.locator('#animation-settings-title')).toHaveText(animationSettingsCopy[lang].flower);await expect(page.locator('[data-flower-center-mode]:visible')).toHaveCount(7);
- await expect(page.locator('[data-orbit-mode]:visible')).toHaveCount(0);expect(await page.locator('#animation-settings-dialog').evaluate(el=>el.scrollWidth<=el.clientWidth)).toBe(true);
+ await expect(page.locator('[data-orbit-mode]:visible')).toHaveCount(0);expect(await page.locator('#animation-settings').evaluate(el=>el.scrollWidth<=el.clientWidth)).toBe(true);
  await page.locator('#animation-settings-back').click();await expect(page.locator('[data-animation-panel=sound]')).toBeVisible();
 });
 test('Random selection and temporary video centre changes target the flower independently of Orbit',async({page})=>{

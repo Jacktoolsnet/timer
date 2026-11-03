@@ -440,34 +440,27 @@ body.score-expanded{overflow:hidden}
 /* High-contrast precision cursor: identical hotspot in drawing, orbit and note grid. */
 :is(#orbit,#drawing,#score-grid){cursor:url('/cursors/edit-crosshair.svg') 16 16,crosshair}
 #score-grid .score-point{cursor:pointer}
-/* Animation choices now live in a top-layer dialog, available in focus and recordings. */
+/* Animation settings share the input surface, like the 3 × 3 instrument pads. */
 #orbit:is([data-visualization=landscape],[data-visualization=stream],[data-visualization=constellation],[data-visualization=flower]){cursor:default}
 .center-tile:disabled{opacity:.4;cursor:default}
-#animation-settings-dialog{width:min(680px,calc(100vw - 24px));max-height:calc(100dvh - 32px);box-sizing:border-box;overflow:auto;padding:0 22px 22px;border:1px solid var(--line);border-radius:24px;background:var(--surface);color:var(--text);box-shadow:0 24px 90px #0007}
-#animation-settings-dialog::backdrop{background:#0006;backdrop-filter:blur(5px)}
-#animation-settings-dialog[open]{animation:animation-settings-enter .18s ease-out}
-#animation-settings-dialog [hidden]{display:none!important}
-.animation-settings-heading{display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:2;background:var(--surface);padding:18px 0;margin-bottom:18px;border-bottom:1px solid var(--line)}
-.animation-settings-heading h2{flex:1;min-width:0;font-size:20px;font-weight:550;margin:0}
+#animation-settings{aspect-ratio:1;min-width:0;display:flex;flex-direction:column;gap:10px;overflow:hidden}
+#animation-settings[hidden],#animation-settings [hidden]{display:none!important}
+.animation-settings-active :is(.draw-wrap,#note-editor,#rhythm-controls,#gesture-keyboard){display:none!important}
+.animation-settings-heading{display:flex;align-items:center;gap:8px;flex-shrink:0;min-height:40px}
+.animation-settings-heading h2{flex:1;min-width:0;font-size:15px;font-weight:550;margin:0;overflow-wrap:anywhere}
 .animation-settings-heading h2:focus{outline:none}
-#animation-settings-dialog .animation-settings-icon{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;width:40px;height:40px;padding:9px;border:1px solid var(--line);border-radius:11px;background:var(--bg);color:var(--text);cursor:pointer}
-#animation-settings-dialog .animation-settings-icon svg{width:20px;height:20px}
-.animation-settings-home{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-.animation-home-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;min-width:0;min-height:170px;padding:20px 12px;border:1px solid var(--line);border-radius:18px;background:var(--bg);color:var(--text);font:inherit;font-size:14px;cursor:pointer;text-align:center}
-.animation-home-tile>svg{width:38px;height:38px;color:var(--accent)}
-.animation-home-tile small{font-size:12px;color:var(--muted)}
-.animation-home-tile:hover{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 7%,var(--bg))}
-.visualization-switch{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-.visualization-option{position:relative;min-width:0}
-.visualization-option>button[data-visualization]{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;width:100%;height:128px;padding:18px 8px;border:1px solid var(--line);border-radius:16px;background:var(--bg);color:var(--muted);font:inherit;font-size:13px;cursor:pointer}
-.visualization-option>button[data-visualization]>svg{width:34px;height:34px}
-.visualization-option>button[data-visualization]:hover{border-color:var(--accent);color:var(--text)}
-.visualization-option>button[aria-pressed=true]{color:var(--accent);border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
-#animation-settings-dialog :is(#orbit-settings-open,#flower-settings-open){position:absolute;right:6px;top:6px;width:30px;height:30px;padding:6px;border-radius:9px}
-#animation-settings-dialog :is(#orbit-settings-open,#flower-settings-open) svg{width:17px;height:17px}
-.animation-settings-orbit{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-#animation-settings-dialog .animation-category{padding:14px}
-#animation-settings-dialog .center-tile{min-height:86px}
-@keyframes animation-settings-enter{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:none}}
-@media(max-width:600px){#animation-settings-dialog{padding:0 16px 16px;border-radius:18px}.animation-settings-heading h2{font-size:18px}.animation-settings-home{gap:10px}.animation-home-tile{min-height:145px;font-size:12px}.visualization-switch{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.visualization-option>button[data-visualization]{height:112px;font-size:12px}.animation-settings-orbit{grid-template-columns:1fr}}
-@media(prefers-reduced-motion:reduce){#animation-settings-dialog[open]{animation:none}}
+#animation-settings .animation-settings-icon{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;width:36px;height:36px;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);cursor:pointer}
+#animation-settings .animation-settings-icon svg{width:18px;height:18px}
+#animation-settings [data-animation-panel]{flex:1;min-height:0;display:flex;flex-direction:column;animation:animation-settings-enter .18s ease-out}
+#animation-settings :is(.animation-settings-home,.animation-settings-branches,.visualization-switch,.center-tiles){display:grid;grid-template:repeat(3,minmax(0,1fr))/repeat(3,minmax(0,1fr));gap:8px;flex:1;min-height:0}
+#animation-settings :is(.animation-home-tile,button[data-visualization],.center-tile){display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;width:100%;height:100%;min-width:0;min-height:0;padding:10px 6px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(140deg,color-mix(in srgb,var(--accent) 9%,var(--bg)),var(--bg));color:var(--muted);font:inherit;font-size:12px;cursor:pointer;text-align:center;overflow-wrap:anywhere}
+#animation-settings :is(.animation-home-tile,button[data-visualization],.center-tile)>svg{width:30px;height:30px;flex-shrink:0}
+.animation-home-tile small{font-size:10px;color:var(--muted)}
+#animation-settings button:hover{border-color:var(--accent);color:var(--text)}
+#animation-settings button[aria-pressed=true]{color:var(--accent);border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.visualization-option{position:relative;min-width:0;min-height:0}
+#animation-settings :is(#orbit-settings-open,#flower-settings-open){position:absolute;right:5px;top:5px;width:26px;height:26px;padding:5px;border-radius:8px}
+#animation-settings :is(#orbit-settings-open,#flower-settings-open) svg{width:15px;height:15px}
+@keyframes animation-settings-enter{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+@media(max-width:600px){#animation-settings :is(.animation-home-tile,button[data-visualization],.center-tile){font-size:10px;gap:5px;padding:7px 3px}.animation-settings-heading h2{font-size:13px}#animation-settings :is(.animation-home-tile,button[data-visualization],.center-tile)>svg{width:24px;height:24px}.animation-home-tile small{font-size:9px}}
+@media(prefers-reduced-motion:reduce){#animation-settings [data-animation-panel]{animation:none}}
