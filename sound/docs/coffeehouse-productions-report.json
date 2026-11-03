@@ -1,0 +1,106 @@
+[
+  {
+    "status": "preview_not_approved",
+    "catalogPublished": false,
+    "entry": {
+      "id": "coffeehouse-chopin-prelude-a",
+      "style": "coffeehouse",
+      "title": "Prélude A-Dur · op.28/7",
+      "composer": "Frédéric Chopin (1810–1849)",
+      "path": "/examples/coffeehouse-chopin-prelude-a.preview.song.json",
+      "source": "https://imslp.org/wiki/Special:ReverseLookup/85374",
+      "originalMeter": "3/4",
+      "arrangementMeter": "3/4",
+      "bars": 18,
+      "durationSeconds": 45,
+      "scope": "Complete 16-bar Prelude with quarter-note pickup; PD helper edition, historical scan comparison pending. Coffeehouse preview, not an approved edition.",
+      "scopeLabel": {
+        "de": "Hörvorschau: vollständiges Prélude mit Auftakt, nach benannter gemeinfreier Hilfsnotation. Historischer Einzelnotenabgleich und Hörabnahme noch offen.",
+        "en": "Listening preview: complete Prelude and pickup, from the credited public-domain helper notation. Historical note-by-note comparison and listening review pending.",
+        "es": "Vista previa: preludio completo con anacrusa, según la notación auxiliar de dominio público acreditada. Cotejo histórico y revisión auditiva pendientes.",
+        "fr": "Préécoute : prélude complet avec anacrouse, selon la notation auxiliaire du domaine public créditée. Comparaison historique et écoute de validation à faire."
+      }
+    },
+    "production": {
+      "transferredSourceNotes": 168,
+      "source": "chopin-a.mid",
+      "sha256": "bd7af44401dcdf355771dc91e6908c876fc938f821828d462fc9ec6e429c3b44",
+      "sourceNotes": 168,
+      "outputNotes": 170,
+      "boundaryRearticulations": 2,
+      "bars": 18,
+      "durationSeconds": 45,
+      "scope": "Complete 16-bar Prelude with quarter-note pickup; PD helper edition, historical scan comparison pending. Coffeehouse preview, not an approved edition."
+    }
+  },
+  {
+    "status": "preview_not_approved",
+    "catalogPublished": false,
+    "overlaySelectable": true,
+    "entry": {
+      "id": "coffeehouse-schumann-foreign",
+      "style": "coffeehouse",
+      "title": "Von fremden Ländern und Menschen · op.15/1",
+      "composer": "Robert Schumann (1810–1856)",
+      "path": "/examples/coffeehouse-schumann-foreign.preview.song.json",
+      "source": "https://imslp.org/wiki/Special:ReverseLookup/03060",
+      "originalMeter": "2/4",
+      "arrangementMeter": "2/4",
+      "bars": 44,
+      "durationSeconds": 73,
+      "scope": "Complete 22-bar piece, both historical repeats played (AABB, 44 bars); four source voices. PD helper notation; scan reconciliation pending.",
+      "scopeLabel": {
+        "de": "Vollständiges Stück, beide Wiederholungen (AABB), vier Stimmen; warmer Coffeehouse-Mix. Historischer Detailabgleich offen.",
+        "en": "Complete 22-bar piece, both historical repeats played (AABB, 44 bars); four source voices. PD helper notation; scan reconciliation pending.",
+        "es": "Pieza completa con repeticiones y final, mezcla Coffeehouse según la notación auxiliar acreditada de dominio público. Cotejo histórico detallado pendiente.",
+        "fr": "Pièce complète avec reprises et fin, mix Coffeehouse selon la notation auxiliaire du domaine public créditée. Comparaison historique détaillée à faire."
+      }
+    },
+    "production": {
+      "transferredSourceNotes": 480,
+      "source": "schumann-foreign.performance.mid",
+      "sha256": "28bf4a0a582b7a29b17452e0b46e222949bf02ea0261e5f9b860277fec37b985",
+      "sourceNotes": 480,
+      "outputNotes": 480,
+      "boundaryRearticulations": 0,
+      "bars": 44,
+      "durationSeconds": 73.33,
+      "scope": "Complete 22-bar piece, both historical repeats played (AABB, 44 bars); four source voices. PD helper notation; scan reconciliation pending."
+    }
+  },
+  {
+    "status": "preview_not_approved",
+    "catalogPublished": false,
+    "overlaySelectable": true,
+    "entry": {
+      "id": "coffeehouse-brahms-waltz",
+      "style": "coffeehouse",
+      "title": "Walzer As-Dur · op.39/15",
+      "composer": "Johannes Brahms (1833–1897)",
+      "path": "/examples/coffeehouse-brahms-waltz.preview.song.json",
+      "source": "https://imslp.org/wiki/Special:ReverseLookup/138189",
+      "originalMeter": "3/4",
+      "arrangementMeter": "3/4",
+      "bars": 44,
+      "durationSeconds": 76,
+      "scope": "Complete 44-bar played solo Waltz, including written-out opening repeat and triplet coda. PD Joseffy/Rude helper notation; not a first-edition replica.",
+      "scopeLabel": {
+        "de": "Vollständige Walzer-Solofassung mit Eröffnungswiederholung und Triolen-Coda; Coffeehouse-Mix nach benannter PD-Hilfsnotation. Historischer Detailabgleich offen.",
+        "en": "Complete 44-bar played solo Waltz, including written-out opening repeat and triplet coda. PD Joseffy/Rude helper notation; not a first-edition replica.",
+        "es": "Pieza completa con repeticiones y final, mezcla Coffeehouse según la notación auxiliar acreditada de dominio público. Cotejo histórico detallado pendiente.",
+        "fr": "Pièce complète avec reprises et fin, mix Coffeehouse selon la notation auxiliaire du domaine public créditée. Comparaison historique détaillée à faire."
+      }
+    },
+    "production": {
+      "transferredSourceNotes": 720,
+      "source": "brahms-waltz.mid",
+      "sha256": "135633d92cf1948d3f1a630f11b4283e0c691239b44e02372c76e9c3f0723e00",
+      "sourceNotes": 720,
+      "outputNotes": 724,
+      "boundaryRearticulations": 4,
+      "bars": 44,
+      "durationSeconds": 76.15,
+      "scope": "Complete 44-bar played solo Waltz, including written-out opening repeat and triplet coda. PD Joseffy/Rude helper notation; not a first-edition replica."
+    }
+  }
+]

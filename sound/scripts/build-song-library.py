@@ -27,6 +27,8 @@ WORKS={
  'canon':dict(title='Canon in D · Canonic Lights',composer='Johann Pachelbel (1653–1706)',meter=(4,4),bpm=76,pickup=0),
  'ode':dict(title='Ode an die Freude · Hymnenthema',composer='L. van Beethoven (1770–1827)',meter=(4,4),bpm=124,pickup=0),
  'chopin-a':dict(title='Prélude A-Dur · op.28/7',composer='Frédéric Chopin (1810–1849)',meter=(3,4),bpm=72,pickup=1),
+ 'schumann-foreign':dict(title='Von fremden Ländern und Menschen · op.15/1',composer='Robert Schumann (1810–1856)',meter=(2,4),bpm=72,pickup=0),
+ 'brahms-waltz':dict(title='Walzer As-Dur · op.39/15',composer='Johannes Brahms (1833–1897)',meter=(3,4),bpm=104,pickup=0),
 }
 ENTRIES=[
  ('classical-canon','canon-original','classical',55),
@@ -138,12 +140,31 @@ def build(entry):
   track('piano','piano',.46)
   track('warmth','epiano',.23)
   track('upright','doublebass',.23)
-  transfer('piano',score['tracks'][0]['notes'])
-  for t in score['tracks'][1:]:
-   transfer('warmth',t['notes'],select=lambda n:n[2]>=48)
-   transfer('upright',t['notes'],select=lambda n:n[2]<48)
+  if key=='chopin-a':
+   transfer('piano',score['tracks'][0]['notes'])
+   for t in score['tracks'][1:]:
+    transfer('warmth',t['notes'],select=lambda n:n[2]>=48)
+    transfer('upright',t['notes'],select=lambda n:n[2]<48)
+  else:
+   # Source timing/pitches stay untouched. Shape eight-bar phrases and bring
+   # the top of Brahms's chords forward instead of equally loud block chords.
+   lead=score['tracks'][0]['notes']
+   highest={a:max(n[2] for n in lead if n[0]==a) for a,_,_,_ in lead}
+   for a,d,p,v in lead:
+    phrase=.88+.12*math.sin(math.pi*(a%(qbar*8))/(qbar*8))
+    tone=1 if key=='schumann-foreign' else 1.10 if p==highest[a] else .82
+    ending=1-.16*max(0,(a-(score['end']-qbar*4))/(qbar*4))
+    add('piano',a,d,p,min(120,round(v*phrase*tone*ending)))
+   for i,t in enumerate(score['tracks'][1:],1):
+    if key=='schumann-foreign':
+     transfer('upright' if i==2 else 'warmth',t['notes'])
+    else:
+     transfer('warmth',t['notes'],select=lambda n:n[2]>=48)
+     transfer('upright',t['notes'],select=lambda n:n[2]<48)
   end=score['end']+offset
   scope='Complete 16-bar Prelude with quarter-note pickup; PD helper edition, historical scan comparison pending. Coffeehouse preview, not an approved edition.'
+  if key=='schumann-foreign':scope='Complete 22-bar piece, both historical repeats played (AABB, 44 bars); four source voices. PD helper notation; scan reconciliation pending.'
+  elif key=='brahms-waltz':scope='Complete 44-bar played solo Waltz, including written-out opening repeat and triplet coda. PD Joseffy/Rude helper notation; not a first-edition replica.'
  else:
   track('lead','pluck' if style=='house' else 'piano' if style in ('classical','jazz') else 'epiano',.43 if style!='house' else .36)
   track('inner','piano' if style in ('classical','jazz','house') else 'epiano',.28 if style!='house' else .22)
@@ -239,6 +260,9 @@ def build(entry):
  elif key=='chopin-a':
   rights['composition']='Prélude op.28/7 — Frédéric Chopin (1810–1849); original public domain.'
   rights['arrangement']='Coffeehouse preview; complete PD notation by Magnus Lewis-Smith, Mutopia 470 (Peters). Historical scan comparison pending; see docs.'
+ elif key in ('schumann-foreign','brahms-waltz'):
+  rights['composition']=f"{work['title']} — {work['composer']}; original public domain."
+  rights['arrangement']=('Full AABB, 4 voices; PD helper Ying-Chun Liu, Mutopia 354 (1900 edition). Coffeehouse; historical detail review pending.' if key=='schumann-foreign' else 'Full solo Waltz; PD helper Brian D. Rude, Mutopia 794 (Joseffy). Coffeehouse balance; historical detail review pending.')
  assert all(len(v)<=160 for v in rights.values()),rights
  assert len('\n'.join(rights.values()))<=550,(id,sum(map(len,rights.values())))
  song=dict(format='jacktools-song',version=3,title=f"{work['title']} — {style.title()}",rights=rights,

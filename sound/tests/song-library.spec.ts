@@ -53,21 +53,21 @@ test('all library songs and previews load their source, start playback and expos
 });
 for(const lang of ['de','en','es','fr'] as const)test('Coffeehouse folder exposes its preview with exact source rights: '+lang,async({page})=>{
  expect(libraryStyles).toContain('coffeehouse');
- expect(songLibrary.filter(s=>s.style==='coffeehouse')).toHaveLength(1);
+ expect(songLibrary.filter(s=>s.style==='coffeehouse')).toHaveLength(3);
  await music(page,lang);
  const opener=page.locator('[data-library-open=coffeehouse]');
  await opener.focus();await page.keyboard.press('Enter');
  const section=page.locator('[data-library-section=coffeehouse]');
  await expect(section).toBeVisible();
- await expect(section.locator('[data-library-song]')).toHaveCount(1);
- await expect(section.locator('[data-library-preview]')).toContainText(libraryCopy[lang].preview);
+ await expect(section.locator('[data-library-song]')).toHaveCount(3);
+ await expect(section.locator('[data-library-preview]').first()).toContainText(libraryCopy[lang].preview);
  const row=section.locator('li').first();await row.locator('summary').click();
  await expect(row.locator('.library-rights')).toHaveText(Object.values(preview.rights).join('\n'));
  await expect(row.locator('.library-rights')).not.toContainText('Pachelbel');
  await expect(row.locator('a')).toHaveAttribute('href',preview.rights.source);
- await expect(section).not.toContainText('Schumann');await expect(section).not.toContainText('Brahms');
+ await expect(section).toContainText('Schumann');await expect(section).toContainText('Brahms');
  await page.keyboard.press('Escape');await expect(opener).toBeFocused();
- await opener.click();await section.locator('[data-library-song]').click();
+ await opener.click();await section.locator('[data-library-song]').first().click();
  await expect(page.locator('#song-library-dialog')).not.toBeVisible();
  await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
  expect(JSON.parse(await page.locator('#song-script-text').inputValue())).toEqual(preview);

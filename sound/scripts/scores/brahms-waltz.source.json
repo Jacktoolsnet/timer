@@ -1,0 +1,16 @@
+{
+  "page": "https://imslp.org/wiki/Special:ReverseLookup/138189",
+  "publicDomain": true,
+  "status": "preview_not_approved",
+  "symbolicHelper": {
+    "page": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=794",
+    "download": "https://www.mutopiaproject.org/ftp/BrahmsJ/O39/waltz-op39-15/waltz-op39-15.ly",
+    "sha256": "64cef49cf056947e8d4f900535dbc28a4a841653ff1e2a936534e928e2209a65",
+    "maintainer": "Brian D. Rude",
+    "edition": "Ed. R. Joseffy",
+    "license": "Public Domain",
+    "purpose": "Explicitly used PD notation helper; not claimed as independent transcription solely from historical scan."
+  },
+  "historicalComparison": "Title, meter, opening, repeat form and ending visually compared; full note-by-note reconciliation pending.",
+  "performance": "All 44 played bars of the helper, including opening repeat and triplet coda; Joseffy/Rude editorial ornament/rhythm variants retained, not presented as first-edition details."
+}

@@ -17,5 +17,43 @@
       "es": "Vista previa: preludio completo con anacrusa, según la notación auxiliar de dominio público acreditada. Cotejo histórico y revisión auditiva pendientes.",
       "fr": "Préécoute : prélude complet avec anacrouse, selon la notation auxiliaire du domaine public créditée. Comparaison historique et écoute de validation à faire."
     }
+  },
+  {
+    "id": "coffeehouse-schumann-foreign",
+    "style": "coffeehouse",
+    "title": "Von fremden Ländern und Menschen · op.15/1",
+    "composer": "Robert Schumann (1810–1856)",
+    "path": "/examples/coffeehouse-schumann-foreign.preview.song.json",
+    "source": "https://imslp.org/wiki/Special:ReverseLookup/03060",
+    "originalMeter": "2/4",
+    "arrangementMeter": "2/4",
+    "bars": 44,
+    "durationSeconds": 73,
+    "scope": "Complete 22-bar piece, both historical repeats played (AABB, 44 bars); four source voices. PD helper notation; scan reconciliation pending.",
+    "scopeLabel": {
+      "de": "Vollständiges Stück, beide Wiederholungen (AABB), vier Stimmen; warmer Coffeehouse-Mix. Historischer Detailabgleich offen.",
+      "en": "Complete 22-bar piece, both historical repeats played (AABB, 44 bars); four source voices. PD helper notation; scan reconciliation pending.",
+      "es": "Pieza completa con repeticiones y final, mezcla Coffeehouse según la notación auxiliar acreditada de dominio público. Cotejo histórico detallado pendiente.",
+      "fr": "Pièce complète avec reprises et fin, mix Coffeehouse selon la notation auxiliaire du domaine public créditée. Comparaison historique détaillée à faire."
+    }
+  },
+  {
+    "id": "coffeehouse-brahms-waltz",
+    "style": "coffeehouse",
+    "title": "Walzer As-Dur · op.39/15",
+    "composer": "Johannes Brahms (1833–1897)",
+    "path": "/examples/coffeehouse-brahms-waltz.preview.song.json",
+    "source": "https://imslp.org/wiki/Special:ReverseLookup/138189",
+    "originalMeter": "3/4",
+    "arrangementMeter": "3/4",
+    "bars": 44,
+    "durationSeconds": 76,
+    "scope": "Complete 44-bar played solo Waltz, including written-out opening repeat and triplet coda. PD Joseffy/Rude helper notation; not a first-edition replica.",
+    "scopeLabel": {
+      "de": "Vollständige Walzer-Solofassung mit Eröffnungswiederholung und Triolen-Coda; Coffeehouse-Mix nach benannter PD-Hilfsnotation. Historischer Detailabgleich offen.",
+      "en": "Complete 44-bar played solo Waltz, including written-out opening repeat and triplet coda. PD Joseffy/Rude helper notation; not a first-edition replica.",
+      "es": "Pieza completa con repeticiones y final, mezcla Coffeehouse según la notación auxiliar acreditada de dominio público. Cotejo histórico detallado pendiente.",
+      "fr": "Pièce complète avec reprises et fin, mix Coffeehouse selon la notation auxiliaire du domaine public créditée. Comparaison historique détaillée à faire."
+    }
   }
 ]

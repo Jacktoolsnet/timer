@@ -1,4 +1,4 @@
-"""Build one complete, explicitly unapproved Coffeehouse listening preview.
+"""Build three complete, explicitly labelled Coffeehouse listening productions.
 
 Does not publish a library slot or regenerate/overwrite the existing catalog.
 Normal offline regeneration needs only Python's standard library.
@@ -35,10 +35,34 @@ def build():
     return song, dict(status='preview_not_approved', catalogPublished=False, entry=entry, production=report)
 
 
+def build_addition(key, identifier, bpm):
+    with tempfile.TemporaryDirectory(prefix='jacktools-coffeehouse-') as directory:
+        production.OUT = Path(directory)
+        entry = production.build((identifier, key, 'coffeehouse', bpm))
+        song = json.loads((production.OUT / (identifier + '.song.json')).read_text())
+    filename = identifier + '.preview.song.json'
+    song['title'] = production.WORKS[key]['title'] + ' — Coffeehouse'
+    entry['path'] = '/examples/' + filename
+    entry['scopeLabel'] = dict(
+        de=('Vollständiges Stück, beide Wiederholungen (AABB), vier Stimmen; warmer Coffeehouse-Mix. Historischer Detailabgleich offen.' if key=='schumann-foreign' else 'Vollständige Walzer-Solofassung mit Eröffnungswiederholung und Triolen-Coda; Coffeehouse-Mix nach benannter PD-Hilfsnotation. Historischer Detailabgleich offen.'),
+        en=entry['scope'],
+        es='Pieza completa con repeticiones y final, mezcla Coffeehouse según la notación auxiliar acreditada de dominio público. Cotejo histórico detallado pendiente.',
+        fr='Pièce complète avec reprises et fin, mix Coffeehouse selon la notation auxiliaire du domaine public créditée. Comparaison historique détaillée à faire.')
+    return song, dict(status='preview_not_approved', catalogPublished=False, overlaySelectable=True, entry=entry, production=production.REPORT[identifier])
+
+
+def build_all():
+    return [build(),
+            build_addition('schumann-foreign','coffeehouse-schumann-foreign',72),
+            build_addition('brahms-waltz','coffeehouse-brahms-waltz',104)]
+
+
 if __name__ == '__main__':
-    song, report = build()
-    path = ROOT / 'public' / report['entry']['path'].lstrip('/')
-    path.write_text(json.dumps(song, ensure_ascii=False, indent=2) + '\n')
-    (ROOT / 'docs' / 'coffeehouse-preview-report.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
-    (ROOT / 'public/library/preview-catalog.json').write_text(json.dumps([report['entry']], ensure_ascii=False, indent=2) + '\n')
-    print(f'{path.name}: 16 full bars + pickup, 168 source notes, 45 seconds including transport tail; selectable as preview, not approved catalog.')
+    productions = build_all()
+    for song, report in productions:
+        path = ROOT / 'public' / report['entry']['path'].lstrip('/')
+        path.write_text(json.dumps(song, ensure_ascii=False, indent=2) + '\n')
+        print(f"{path.name}: {report['production']['sourceNotes']} source notes, {report['production']['durationSeconds']}s; selectable in overlay.")
+    (ROOT / 'docs/coffeehouse-preview-report.json').write_text(json.dumps(productions[0][1], ensure_ascii=False, indent=2) + '\n')
+    (ROOT / 'docs/coffeehouse-productions-report.json').write_text(json.dumps([r for _,r in productions], ensure_ascii=False, indent=2) + '\n')
+    (ROOT / 'public/library/preview-catalog.json').write_text(json.dumps([r['entry'] for _,r in productions], ensure_ascii=False, indent=2) + '\n')

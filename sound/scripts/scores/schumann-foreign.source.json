@@ -1,0 +1,16 @@
+{
+  "page": "https://imslp.org/wiki/Special:ReverseLookup/03060",
+  "publicDomain": true,
+  "status": "preview_not_approved",
+  "symbolicHelper": {
+    "page": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=354",
+    "download": "https://www.mutopiaproject.org/ftp/SchumannR/O15/SchumannOp15No01/SchumannOp15No01.ly",
+    "sha256": "b8f84c1b53f5aa150c54cd685f6f38fbbe3f76796f22add412620498adf2ac0a",
+    "maintainer": "Ying-Chun Liu",
+    "edition": "Leichte Stucke, 1900",
+    "license": "Public Domain",
+    "purpose": "Explicitly used PD notation helper; not claimed as independent transcription solely from historical scan."
+  },
+  "historicalComparison": "Title, meter, opening, repeat form and ending visually compared; full note-by-note reconciliation pending.",
+  "performance": "Four source voices isolated; complete A and B each played twice, as the historical repeat signs require. Constant quarter tempo; ritardando/fermata and pedal not modelled."
+}

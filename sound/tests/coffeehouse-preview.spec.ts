@@ -59,7 +59,7 @@ test('preview rebuild is byte-for-byte deterministic and source digest is pinned
   'm=importlib.util.module_from_spec(s);s.loader.exec_module(m)','song,report=m.build()',
   "assert json.dumps(song,ensure_ascii=False,indent=2)+'\\n'==pathlib.Path('public/examples/coffeehouse-chopin-prelude-a.preview.song.json').read_text()",
   "assert json.dumps(report,ensure_ascii=False,indent=2)+'\\n'==pathlib.Path('docs/coffeehouse-preview-report.json').read_text()"
-  ,"assert json.dumps([report['entry']],ensure_ascii=False,indent=2)+'\\n'==pathlib.Path('public/library/preview-catalog.json').read_text()"
+  ,"assert json.dumps([r['entry'] for _,r in m.build_all()],ensure_ascii=False,indent=2)+'\\n'==pathlib.Path('public/library/preview-catalog.json').read_text()"
  ].join('\n')],{cwd:new URL('..',import.meta.url)});
 });
 
