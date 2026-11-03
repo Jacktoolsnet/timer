@@ -2320,12 +2320,15 @@ fileInput.addEventListener('change',async()=>{
 });
 const scriptInput=$<HTMLInputElement>('#song-script-upload');
 function importScriptText(raw:string){
- if(videoBusy||wavBusy||importBusy)return;
+ if(videoBusy||wavBusy||importBusy)return false;
  const script=decodeSongScript(raw);
- if(!script){$('#song-script-status').textContent=scriptCopy[language].invalid;return;}
- loadSongScript(script);
+ if(!script){$('#song-script-status').textContent=scriptCopy[language].invalid;return false;}
+ loadSongScript(script);return true;
 }
-$('#song-script-load').addEventListener('click',()=>importScriptText($<HTMLTextAreaElement>('#song-script-text').value));
+$('#song-script-load').addEventListener('click',()=>{
+ if(!importScriptText($<HTMLTextAreaElement>('#song-script-text').value))return;
+ filesDialog.close();void start();
+});
 $('#song-script-file').addEventListener('click',()=>scriptInput.click());
 scriptInput.addEventListener('change',async()=>{
  const file=scriptInput.files?.[0];scriptInput.value='';if(!file)return;

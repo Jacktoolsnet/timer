@@ -32,7 +32,7 @@ test('scene timing, chords, glides and seeded dynamics preserve the source compo
  expect(scriptScore(undefined)).toEqual([]);expect(JSON.stringify(song)).toBe(raw);
 });
 async function open(page:Page){await page.goto('/de/');await page.locator('#files-open').click();}
-async function paste(page:Page,song=fixture()){await page.locator('#song-script-text').fill(JSON.stringify(song));await page.locator('#song-script-load').click();}
+async function load(page:Page,song=fixture()){await page.locator('#song-script-upload').setInputFiles({name:'song.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(song))});await expect(page.locator('#song-script-export')).toBeEnabled();}
 async function settings(page:Page){const wait=page.waitForEvent('download');await page.locator('#json-export').click();return JSON.parse(await readFile((await(await wait).path())!,'utf8'));}
 for(const lang of ['de','en','es','fr'] as const)test('example and AI guide work without autoplay, with localized mobile-friendly controls: '+lang,async({page})=>{
  await page.goto('/'+lang+'/');await page.locator('#files-open').click();
@@ -43,8 +43,16 @@ for(const lang of ['de','en','es','fr'] as const)test('example and AI guide work
  const guide=await page.request.get('/song-script-guide.md');expect(guide.ok()).toBe(true);expect(await guide.text()).toContain('jacktools-song');
  expect(await page.locator('#files-dialog').evaluate(d=>d.scrollWidth<=d.clientWidth)).toBe(true);
 });
-test('paste, file import, source export and settings export retain the full song; invalid input is atomic',async({page})=>{
- await open(page);await paste(page);const initial=await settings(page);expect(initial.songScript).toEqual(fixture());expect(decodeSettings(JSON.stringify(initial))?.songScript).toEqual(fixture());
+test('the checkmark applies pasted JSON, closes the dialog and starts scene one; invalid JSON stays open without stopping music',async({page})=>{
+ await open(page);await page.locator('#song-script-text').fill(JSON.stringify(fixture()));await page.locator('#song-script-load').click();
+ await expect(page.locator('#files-dialog')).toBeHidden();await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
+ await expect(page.locator('#script-now')).toContainText('Opening');
+ await page.locator('#files-open').click();await page.locator('#song-script-text').fill('{bad');await page.locator('#song-script-load').click();
+ await expect(page.locator('#files-dialog')).toBeVisible();await expect(page.locator('#song-script-status')).toHaveText(scriptCopy.de.invalid);
+ await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');expect((await settings(page)).songScript).toEqual(fixture());
+});
+test('file import, source export and settings export retain the full song; invalid input is atomic',async({page})=>{
+ await open(page);await load(page);const initial=await settings(page);expect(initial.songScript).toEqual(fixture());expect(decodeSettings(JSON.stringify(initial))?.songScript).toEqual(fixture());
  const wait=page.waitForEvent('download');await page.locator('#song-script-export').click();expect(JSON.parse(await readFile((await(await wait).path())!,'utf8'))).toEqual(fixture());
  await page.locator('#song-script-text').fill('{"bad":true}');await page.locator('#song-script-load').click();await expect(page.locator('#song-script-status')).toHaveText(scriptCopy.de.invalid);
  expect((await settings(page)).songScript).toEqual(fixture());
@@ -57,20 +65,20 @@ test('paste, file import, source export and settings export retain the full song
  expect((await settings(page)).songScript).toEqual(fixture());await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false');
 });
 test('normal Play follows scenes on the audible clock, stops finite songs and restarts at scene one',async({page})=>{
- const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await open(page);await paste(page,fixture(false));await page.locator('#files-close').click();
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await open(page);await load(page,fixture(false));await page.locator('#files-close').click();
  await expect(page.locator('#script-now')).toContainText('Opening');await page.locator('#play').click();
  await expect(page.locator('#script-now')).toContainText('Chorus',{timeout:6000});await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false',{timeout:6000});
  await page.locator('#play').click();await expect(page.locator('#script-now')).toContainText('Opening');await page.locator('#play').click();expect(errors).toEqual([]);
 });
 test('looping songs continue, Random Play and style changes deliberately leave script mode',async({page})=>{
- await open(page);await paste(page);await page.locator('#files-close').click();await page.locator('#play').click();
+ await open(page);await load(page);await page.locator('#files-close').click();await page.locator('#play').click();
  await expect(page.locator('#script-now')).toContainText('Chorus',{timeout:6000});await expect(page.locator('#script-now')).toContainText('Opening',{timeout:6000});
  await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');await page.locator('#evolve').click();await expect(page.locator('#script-now')).toBeHidden();
- await page.locator('#play').click();await page.locator('#files-open').click();await paste(page);await page.locator('#files-close').click();
+ await page.locator('#play').click();await page.locator('#files-open').click();await load(page);await page.locator('#files-close').click();
  await page.locator('#animation-settings-open').click();await page.locator('[data-animation-open=music]').click();await page.locator('[data-style-preset=pop]').click();await expect(page.locator('#script-now')).toBeHidden();
 });
 test('script source restores only with optional preference storage and never autoplays',async({page})=>{
- await open(page);await paste(page);await page.locator('#files-close').click();
+ await open(page);await load(page);await page.locator('#files-close').click();
  await page.locator('#animation-settings-open').click();await page.locator('[data-animation-open=controls]').click();
  await page.locator('#tempo').fill('145');await page.locator('#tempo').dispatchEvent('input');
  await page.locator('#transpose').fill('3');await page.locator('#transpose').dispatchEvent('input');await page.locator('#animation-settings-close').click();
@@ -84,7 +92,7 @@ test('script controls lock during native MP4 recording and the composed scene se
   (window as any).scriptCaptions=[];const fill=CanvasRenderingContext2D.prototype.fillText;
   CanvasRenderingContext2D.prototype.fillText=function(text,x,y,...args){if(this.canvas.width===1280&&this.canvas.height===720)(window as any).scriptCaptions.push(text);return fill.call(this,text,x,y,...args);};
  });
- await open(page);await paste(page);test.skip(await page.locator('#video-record').isDisabled(),'No native MP4');
+ await open(page);await load(page);test.skip(await page.locator('#video-record').isDisabled(),'No native MP4');
  await page.locator('#video-info-enabled').check();await page.locator('#video-info-section').check();
  await expect(page.locator('#video-info-title')).toHaveAttribute('placeholder','Test composition');
  await page.locator('#recording-restart').check();await page.locator('#recording-duration').fill('1');await page.locator('#video-record').click();
@@ -97,7 +105,7 @@ test('script controls lock during native MP4 recording and the composed scene se
 });
 
 test('WAV captures audible scripted notes rather than just an empty audio track',async({page})=>{
- await open(page);await paste(page);test.skip(await page.locator('#wav-record').isDisabled(),'No WAV support');
+ await open(page);await load(page);test.skip(await page.locator('#wav-record').isDisabled(),'No WAV support');
  await page.locator('#recording-restart').check();await page.locator('#recording-duration').fill('1');await page.locator('#wav-record').click();
  await page.waitForTimeout(1600);const download=page.waitForEvent('download');await page.locator('#wav-stop').click();
  const data=await readFile((await(await download).path())!);expect(data.subarray(0,4).toString()).toBe('RIFF');

@@ -127,7 +127,7 @@ A chord is simultaneous notes, not a note-by-note run. For runs, use separate on
 ## Use in the tool
 
 Open Files & Recording → Song Script. Paste the JSON and load it, or use file upload.
-Loading never starts audio. Close the dialog and press normal Play to start from scene 1.
+The checkmark applies valid pasted JSON, closes the dialog and starts playback at scene 1. Invalid JSON keeps the dialog open and does not interrupt the current song. File and example imports never start audio automatically; close the dialog and press normal Play.
 Stop/Play always restarts the script. The built-in example is Sunlit Session: an
 original 125 BPM, nine-track house sketch, 72 bars (about 2:18), with six scenes.
 It is not a transcription of Movin' To The Sun or another existing recording.
