@@ -8,15 +8,15 @@ async function music(page:any,lang='de'){
  await page.locator('#animation-settings-open').click();
  await page.locator('[data-animation-open=music]').click();
 }
-test('catalog: exactly three v2 songs per initial style, valid deterministic scores and mandatory credits',async()=>{
+test('catalog: exactly three v3 productions per initial style, valid deterministic scores and mandatory credits',async()=>{
  expect(catalog).toHaveLength(12);expect(new Set(catalog.map(s=>s.id)).size).toBe(12);
  for(const style of ['classical','house','jazz','lofi'])expect(catalog.filter(s=>s.style===style)).toHaveLength(3);
  for(const entry of catalog){
   const song=decodeSongScript(await readFile(new URL('../public'+entry.path,import.meta.url),'utf8'));
-  expect(song,entry.id).not.toBeNull();expect(song!.version).toBe(2);expect(song!.style).toBe(entry.style);expect(song!.loop).toBe(false);
+  expect(song,entry.id).not.toBeNull();expect(song!.version).toBe(3);expect(song!.style).toBe(entry.style);expect(song!.loop).toBe(false);
   for(const scene of song!.scenes)for(const part of scene.parts){
-   const score=scriptScore(part,scene.variation??0,song!.seed);
-   expect(score).toEqual(scriptScore(part,scene.variation??0,song!.seed));
+   const score=scriptScore(part,scene.variation??0,song!.seed,song!.version===3?song!.meter:undefined);
+   expect(score).toEqual(scriptScore(part,scene.variation??0,song!.seed,song!.version===3?song!.meter:undefined));
   }
   const credits=videoCreditsForSong(song!,{enabled:false,text:''},'en');
   expect(credits.enabled).toBe(true);expect(credits.text).toBe(songRightsText(song!,'en'));expect(credits.text).toContain(song!.rights!.source);
@@ -67,9 +67,9 @@ test('failed and cancelled fetches are atomic and retryable',async({page})=>{
 });
 for(const lang of ['de','en','es','fr'])test('localized library and visible provenance: '+lang,async({page})=>{
  await music(page,lang);await page.locator('[data-library-open=lofi]').click();
- await expect(page.locator('#song-library-hint')).toContainText('4/4');
+ await expect(page.locator('#song-library-hint')).not.toContainText('4/4');
  const row=page.locator('[data-library-section=lofi] li').first();await row.locator('summary').click();
- await expect(row.locator('details p')).toContainText('3/4 → 4/4');await expect(row.locator('a')).toHaveAttribute('rel','noopener noreferrer');
+ await expect(row.locator('details p').first()).toContainText('3/4');await expect(row.locator('details p').first()).not.toContainText('→ 4/4');await expect(row.locator('a')).toHaveAttribute('rel','noopener noreferrer');
  await expect(row.locator('a')).toHaveAttribute('href',/id=37$/);
  const overflow=await page.locator('#song-library-dialog').evaluate(el=>el.scrollWidth>el.clientWidth);expect(overflow).toBe(false);
 });

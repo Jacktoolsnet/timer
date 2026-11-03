@@ -17,7 +17,7 @@ export function validSongScript(s:unknown):s is SongScript{
  if(!object(s)||!keys(s,['format','version','rights','title','bpm','style','loop','seed','tracks','scenes',...(s.version===3?['meter','tempoUnit']:[])])||s.format!=='jacktools-song'||![1,2,3].includes(s.version)
   ||typeof s.title!=='string'||!s.title.trim()||s.title.length>80||!num(s.bpm,40,220)||!(styleIds as readonly unknown[]).includes(s.style)
   ||['slowwaltz','tango'].includes(s.style)||typeof s.loop!=='boolean'||!num(s.seed,0,2147483647)||!Number.isInteger(s.seed)
-  ||!Array.isArray(s.tracks)||s.tracks.length<1||s.tracks.length>9||!Array.isArray(s.scenes)||s.scenes.length<1||s.scenes.length>64)return false;
+  ||!Array.isArray(s.tracks)||s.tracks.length<1||s.tracks.length>9||!Array.isArray(s.scenes)||s.scenes.length<1||s.scenes.length>(s.version===3?256:64))return false;
  if(s.version>=2&&s.rights===undefined)return false;
  if(s.version===3&&(!validMeter(s.meter)||!validTempoUnit(s.tempoUnit)))return false;
  const window=s.version===3?s.meter.numerator*2:8,minDuration=s.version===3?Math.max(.016,window*.002):.016;

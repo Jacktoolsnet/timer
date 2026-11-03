@@ -1,0 +1,134 @@
+{
+  "classical-canon": {
+    "transferredSourceNotes": 414,
+    "source": "canon.mid",
+    "sha256": "1358ba0799aeb727be0ef155fc9090ea55762a3b41f85d3dbb02918f4ac66515",
+    "sourceNotes": 138,
+    "outputNotes": 987,
+    "boundaryRearticulations": 3,
+    "bars": 60,
+    "durationSeconds": 189.47,
+    "scope": "Full 44-bar violin source; free three-voice canon, ground and coda. Not the complete original score."
+  },
+  "classical-nachtmusik": {
+    "transferredSourceNotes": 5390,
+    "source": "nacht.mid",
+    "sha256": "f8b6dc991df6e90e2e2e11d561ab2cf8fec47beda747c69984c3fef4b539506b",
+    "sourceNotes": 5390,
+    "outputNotes": 5396,
+    "boundaryRearticulations": 6,
+    "bars": 192,
+    "durationSeconds": 349.09,
+    "scope": "Complete first-movement score MIDI, including its encoded repeats; string ensemble."
+  },
+  "classical-turca": {
+    "transferredSourceNotes": 2700,
+    "source": "turca.performance.mid",
+    "sha256": "d06ee940d42533f62bae2413d0a220c0fcd2f62cd592ab2967f604232b7f0b44",
+    "sourceNotes": 2700,
+    "outputNotes": 2711,
+    "boundaryRearticulations": 11,
+    "bars": 218,
+    "durationSeconds": 242.22,
+    "scope": "Complete score-event sequence and all source voices; repeats as encoded in the vendored performance."
+  },
+  "house-canon": {
+    "transferredSourceNotes": 414,
+    "source": "canon.mid",
+    "sha256": "1358ba0799aeb727be0ef155fc9090ea55762a3b41f85d3dbb02918f4ac66515",
+    "sourceNotes": 138,
+    "outputNotes": 1792,
+    "boundaryRearticulations": 3,
+    "bars": 60,
+    "durationSeconds": 118.03,
+    "scope": "Full 44-bar violin source; free three-voice canon, ground and coda. Not the complete original score."
+  },
+  "house-ode": {
+    "transferredSourceNotes": 476,
+    "source": "ode.mid",
+    "sha256": "fb1604c08c865b275b464d74e5a7c526ff1a8acccdf9853cb92f0778daaed14b",
+    "sourceNotes": 238,
+    "outputNotes": 1393,
+    "boundaryRearticulations": 0,
+    "bars": 56,
+    "durationSeconds": 108.39,
+    "scope": "Complete 16-bar SATB hymn setting, twice, with original intro/break/outro. Not the complete symphony."
+  },
+  "house-elise": {
+    "transferredSourceNotes": 1041,
+    "source": "elise.performance.mid",
+    "sha256": "8cbba80ba29abf6a8d0cb6fe9680fac538efc9225cb3e08f3b990ad6c84b214d",
+    "sourceNotes": 1041,
+    "outputNotes": 2266,
+    "boundaryRearticulations": 0,
+    "bars": 126,
+    "durationSeconds": 157.5,
+    "scope": "Complete score-event sequence and all source voices; repeats as encoded in the vendored performance."
+  },
+  "jazz-entertainer": {
+    "transferredSourceNotes": 2621,
+    "source": "entertainer.mid",
+    "sha256": "33e4e81ee64ffb2edf90d1c6a1ddee7276507296bfb915c2bb775231a467f066",
+    "sourceNotes": 2621,
+    "outputNotes": 3521,
+    "boundaryRearticulations": 0,
+    "bars": 152,
+    "durationSeconds": 207.27,
+    "scope": "Complete score-event sequence and all source voices; repeats as encoded in the vendored performance."
+  },
+  "jazz-maple-leaf": {
+    "transferredSourceNotes": 2566,
+    "source": "maple.mid",
+    "sha256": "3dd712a85fabd267f5a2cee5cb23af4683408c2f29b8814721844498f1ee4f66",
+    "sourceNotes": 2566,
+    "outputNotes": 3458,
+    "boundaryRearticulations": 28,
+    "bars": 146,
+    "durationSeconds": 182.5,
+    "scope": "Complete score-event sequence and all source voices; repeats as encoded in the vendored performance."
+  },
+  "jazz-easy-winners": {
+    "transferredSourceNotes": 2524,
+    "source": "winners.mid",
+    "sha256": "b4fcdafa0a6929a62e53f4fda0acf6f23f1b1955886d6f68b49c158a7b231c57",
+    "sourceNotes": 2524,
+    "outputNotes": 3424,
+    "boundaryRearticulations": 0,
+    "bars": 152,
+    "durationSeconds": 202.67,
+    "scope": "Complete score-event sequence and all source voices; repeats as encoded in the vendored performance."
+  },
+  "lofi-gymnopedie": {
+    "transferredSourceNotes": 455,
+    "source": "gymno.performance.mid",
+    "sha256": "6ca83eb55c53f6ff92151f791e71319c1aa10e6b53b58e314449e8f213f51d99",
+    "sourceNotes": 455,
+    "outputNotes": 842,
+    "boundaryRearticulations": 7,
+    "bars": 78,
+    "durationSeconds": 234.0,
+    "scope": "Complete score-event sequence and all source voices; repeats as encoded in the vendored performance."
+  },
+  "lofi-traeumerei": {
+    "transferredSourceNotes": 339,
+    "source": "traum.mid",
+    "sha256": "6e0045d5783ff28dedcf05813074fe407ca3846e5e2a7246f2793ac5614e4851",
+    "sourceNotes": 339,
+    "outputNotes": 522,
+    "boundaryRearticulations": 15,
+    "bars": 26,
+    "durationSeconds": 111.43,
+    "scope": "Complete score-event sequence and all source voices; repeats as encoded in the vendored performance."
+  },
+  "lofi-prelude": {
+    "transferredSourceNotes": 600,
+    "source": "prelude.mid",
+    "sha256": "c1d7e05aa4e6e2baeec2e9108402a969c16d5df302b82fd66d110634697f2e3b",
+    "sourceNotes": 600,
+    "outputNotes": 768,
+    "boundaryRearticulations": 0,
+    "bars": 26,
+    "durationSeconds": 111.43,
+    "scope": "Complete score-event sequence and all source voices; repeats as encoded in the vendored performance."
+  }
+}

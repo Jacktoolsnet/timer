@@ -1,112 +1,244 @@
-"""Rebuild the eleven short, hand-reduced motif arrangements (no network/dependencies).
-The existing full Morning Light arrangement is deliberately not regenerated.
-Pitch names use C4=0; durations below are already adapted to straight 4/4.
-See public/library/SOURCES.md for the exact source editions and limitations.
+"""Deterministic native-meter productions from vendored, attributed score events.
+Offline: python3 scripts/build-song-library.py. No runtime MIDI player or samples.
+See scores/README.md and public/library/SOURCES.md for provenance and limitations.
 """
+import hashlib
 import json
+import math
+from collections import defaultdict
 from pathlib import Path
-OUT=Path(__file__).resolve().parents[1]/'public/library'
-PC={'C':0,'D':2,'E':4,'F':5,'G':7,'A':9,'B':11}
-def pitch(s):
- return PC[s[0]]+(1 if '#' in s else -1 if 'b' in s else 0)+12*(int(s[-1])-4)
-def bar(s):
- events=[];at=0
- for tok in s.split():
-  p,d=tok.split(':');d=float(d)
-  if p!='r':events.append((at,d,pitch(p)))
-  at+=d
- assert at==4,(s,at)
- return events
-# Independent accompaniment/harmony is intentionally simpler than the source scores.
-works={
- 'nacht':('Eine kleine Nachtmusik','W. A. Mozart (1756–1791)',900,'4/4',[
- 'G5:1 r:0.5 D5:0.5 G5:1 r:0.5 D5:0.5','G5:0.5 D5:0.5 G5:0.5 B5:0.5 D6:1 r:1',
- 'C6:1 r:0.5 A5:0.5 C6:1 r:0.5 A5:0.5','C6:0.5 A5:0.5 F#5:0.5 A5:0.5 D5:1 r:1',
- 'G5:0.5 r:0.5 G5:1.5 B5:0.5 A5:0.5 G5:0.5','F#5:0.5 r:0.5 F#5:1.5 A5:0.5 C6:0.5 F#5:0.5',
- 'A5:0.5 G5:0.5 G5:1.5 B5:0.5 A5:0.5 G5:0.5','F#5:0.5 r:0.5 F#5:1 A5:0.5 C6:0.5 G5:1'],['G4','D4','D4','D4','G4','D4','G4','G4']),
- 'turca':('Rondo alla turca','W. A. Mozart (1756–1791)',108,'2/4',[
- 'B4:0.5 A4:0.5 G#4:0.5 A4:0.5 C5:1 r:1','D5:0.5 C5:0.5 B4:0.5 C5:0.5 E5:1 r:1',
- 'F5:0.5 E5:0.5 D#5:0.5 E5:0.5 B4:0.5 A4:0.5 G#4:0.5 A4:0.5','B4:0.5 A4:0.5 G#4:0.5 A4:0.5 C6:1 A5:0.5 C6:0.5',
- 'B5:1 A5:1 G5:1 A5:1','B5:1 A5:1 G5:1 A5:1','B5:1 A5:1 G5:1 F#5:1','E5:3 r:1'],['A4','A4','E4','A4','E4','E4','B4','E4']),
- 'ode':('Ode an die Freude','L. van Beethoven (1770–1827)',None,'4/4',[
- 'E5:1 E5:1 F5:1 G5:1','G5:1 F5:1 E5:1 D5:1','C5:1 C5:1 D5:1 E5:1','E5:1.5 D5:0.5 D5:2',
- 'E5:1 E5:1 F5:1 G5:1','G5:1 F5:1 E5:1 D5:1','C5:1 C5:1 D5:1 E5:1','D5:1.5 C5:0.5 C5:2'],['C4','G4','C4','G4','C4','G4','C4','C4']),
- 'elise':('Für Elise','L. van Beethoven (1770–1827)',931,'3/8',[
- 'E5:0.5 D#5:0.5 E5:0.5 D#5:0.5 E5:0.5 B4:0.5 D5:0.5 C5:0.5','A4:2 r:0.5 C4:0.5 E4:0.5 A4:0.5',
- 'B4:2 r:0.5 E4:0.5 G#4:0.5 B4:0.5','C5:2 r:0.5 E4:0.5 E5:0.5 D#5:0.5',
- 'E5:0.5 D#5:0.5 E5:0.5 B4:0.5 D5:0.5 C5:0.5 A4:1','C4:1 E4:1 A4:1 B4:1',
- 'E4:1 C5:1 B4:1 A4:1','A4:3 r:1'],['A4','A4','E4','A4','A4','A4','E4','A4']),
- 'entertainer':('The Entertainer','Scott Joplin (1868–1917)',263,'2/4',[
- 'E4:0.5 C5:1 E4:0.5 C5:1 E4:0.5 C5:0.5','C5:2.5 C6:0.5 D6:0.5 D#6:0.5',
- 'E6:0.5 C6:0.5 D6:0.5 E6:1 B5:0.5 D6:1','C6:3 D4:0.5 D#4:0.5',
- 'E4:0.5 C5:1 E4:0.5 C5:1 E4:0.5 C5:0.5','C5:3 A5:0.5 G5:0.5',
- 'F#5:0.5 A5:0.5 C6:0.5 E6:1 D6:0.5 C6:0.5 A5:0.5','D6:3 r:1'],['C4','C4','G4','C4','C4','F4','D4','G4']),
- 'maple':('Maple Leaf Rag','Scott Joplin (1868–1917)',23,'2/4',[
- 'r:0.5 Ab4:0.5 Eb5:0.5 Ab4:0.5 C5:0.5 Eb5:1 G4:0.5','Eb5:0.5 G4:0.5 Bb4:0.5 Eb5:2.5',
- 'r:0.5 Ab4:0.5 Eb5:0.5 Ab4:0.5 C5:0.5 Eb5:1 G4:0.5','Eb5:0.5 G4:0.5 Bb4:0.5 Eb5:1.5 r:0.5 Eb5:0.5',
- 'r:0.5 Ab4:0.5 B4:0.5 E5:0.5 r:0.5 Eb5:0.5 r:0.5 Eb5:0.5','r:0.5 Ab4:0.5 B4:0.5 E5:0.5 r:0.5 Eb5:0.5 r:1',
- 'r:0.5 Ab3:0.5 B3:0.5 Ab4:0.5 r:0.5 Ab4:0.5 B4:0.5 Ab5:0.5','r:0.5 Ab4:0.5 B4:0.5 Ab5:0.5 r:0.5 Ab4:0.5 B4:0.5 Ab5:0.5'],['Ab4','Eb4','Ab4','Eb4','Ab4','Ab4','Ab4','Ab4']),
- 'winners':('The Easy Winners','Scott Joplin (1868–1917)',352,'2/4',[
- 'C5:1 C5:2 Eb5:1','F5:0.5 Eb5:1 F5:0.5 Eb5:0.5 F5:0.5 Eb5:1',
- 'Bb5:0.5 Ab5:1 Bb5:0.5 Ab5:0.5 Bb5:0.5 Ab5:0.5 Eb5:0.5','Eb5:4',
- 'C5:1 C5:2 Eb5:1','F5:0.5 Eb5:1 F5:0.5 Eb5:0.5 Eb5:0.5 Eb5:1',
- 'r:0.5 G4:1.5 Ab4:1 Ab4:1','Eb5:2.5 Eb4:0.5 G4:0.5 Db5:0.5'],['Ab4','Ab4','Db4','Ab4','Ab4','Ab4','Eb4','Eb4']),
- 'gymno':('Gymnopédie No. 1','Erik Satie (1866–1925)',37,'3/4',[
- 'r:2 F#4:1 A4:1','G4:1 F#4:1 C#4:2','B3:1 C#4:1 D4:2','A3:4',
- 'F#3:4','F#3:4','F#3:4','F#3:4'],['G4','D4','G4','D4','G4','D4','G4','D4']),
- 'traum':('Träumerei','Robert Schumann (1810–1856)',504,'4/4',[
- 'F4:2.5 E4:0.5 F4:0.5 A4:0.5','C5:0.5 F5:0.5 F5:2 E5:0.5 D5:0.5',
- 'C5:0.5 F5:0.5 G4:0.5 A4:0.5 Bb4:0.5 D5:0.5 F4:0.5 G4:0.5','A4:0.5 C5:0.5 G4:2 C4:1',
- 'F4:2.5 E4:0.5 F4:0.5 A4:0.5','C5:0.5 A5:0.5 A5:1.5 G5:0.5 F5:0.5 E5:0.5',
- 'F5:0.5 A5:0.5 D5:0.5 F5:0.5 E5:1.5 Eb5:0.5','D5:1 E5:1 C5:1 r:1'],['F4','Bb4','G4','C4','F4','F4','Bb4','C4']),
- 'prelude':('Prélude e-Moll op. 28 Nr. 4','Frédéric Chopin (1810–1849)',468,'2/2',[
- 'B4:3 C5:1','B4:3 C5:1','B4:3 C5:1','B4:3 Bb4:1','A4:3 B4:1','A4:3 B4:1','A4:3 B4:0.75 A4:0.25','A4:3 G#4:1'],['E4','E4','E4','E4','A4','A4','A4','E4']),
- 'canon':('Canon in D','Johann Pachelbel (1653–1706)',None,'4/4',[
- 'F#5:2 E5:2','D5:2 C#5:2','B4:2 A4:2','B4:2 C#5:2',
- 'D5:2 C#5:2','B4:2 A4:2','G4:2 F#4:2','G4:2 E4:2'],['D4','B3','G3','G3','D4','B3','G3','G3'])}
-# IDs, style and BPM intentionally explicit: choosing a work never randomizes it.
-entries=[('classical-nachtmusik','nacht','classical',108),('classical-turca','turca','classical',100),('house-canon','canon','house',122),('house-ode','ode','house',124),('house-elise','elise','house',120),('jazz-entertainer','entertainer','jazz',94),('jazz-maple-leaf','maple','jazz',96),('jazz-easy-winners','winners','jazz',92),('lofi-gymnopedie','gymno','lofi',72),('lofi-traeumerei','traum','lofi',70),('lofi-prelude','prelude','lofi',68)]
-def note(at,d,p,v=.64):return dict(at=at,duration=round(d*.94,4),pitch=p,velocity=v)
-def generate(id,key,style,bpm):
- title,composer,ref,meter,bars,roots=works[key]
- source=f'https://www.mutopiaproject.org/cgibin/piece-info.cgi?id={ref}' if ref else ('https://imslp.org/wiki/Canon_and_Gigue_in_D_major_(Pachelbel,_Johann)' if key=='canon' else 'https://imslp.org/wiki/Symphony_No.9,_Op.125_(Beethoven,_Ludwig_van)')
- minor=key in ('elise','turca','prelude')
- tracks=[dict(id='lead',instrument={'house':'pluck','jazz':'piano','lofi':'epiano','classical':'piano'}[style],volume=.43),dict(id='harmony',instrument='pad' if style=='lofi' else 'piano',volume=.16),dict(id='bass',instrument='doublebass' if style=='jazz' else 'bass',volume=.23)]
- if style!='classical':tracks += [dict(id='kick',instrument='kick',volume=.24),dict(id='snare',instrument='rim' if style=='lofi' else 'snare',volume=.12),dict(id='hat',instrument='hat',volume=.08)]
- scenes=[]
- for section,volume in [('Theme',.82),('Reprise',1)]:
-  for pair in range(4):
-   lead=[];harmony=[];bass=[]
-   for b in range(2):
-    idx=pair*2+b;root=pitch(roots[idx]);chord=[root,root+(3 if minor else 4),root+7]
-    lead += [note(b*4+at,d,p+ (12 if style=='lofi' and key=='gymno' else 0),.62 if section=='Theme' else .69) for at,d,p in bar(bars[idx])]
-    if style=='house':
-     harmony += [note(b*4+at,.4,chord,.48) for at in [.5,1.5,2.5,3.5]]
-    elif style=='jazz':harmony += [note(b*4+at,.65,chord,.46) for at in [1,3]]
-    else:harmony += [note(b*4,3.8,chord,.46)]
-    bass += [note(b*4+at,.8,root-12,.58) for at in ([0,2] if style!='house' else [0,1,2,3])]
-    if key=='canon':
-     # Preserve the characteristic eight-chord ground, two beats per chord.
-     ground=['D4','A3','B3','F#3','G3','D4','G3','A3']
-     harmony=[n for n in harmony if n['at']<b*4]
-     bass=[n for n in bass if n['at']<b*4]
-     for half in range(2):
-      r=pitch(ground[(idx*2+half)%8]);c=[r,r+(3 if r%12 in (11,6) else 4),r+7]
-      harmony += [note(b*4+half*2+a,.4,c,.48) for a in [.5,1.5]]
-      bass += [note(b*4+half*2+a,.8,r-12,.58) for a in [0,1]]
-   parts=[dict(track=t,volume=volume,notes=n) for t,n in [('lead',lead),('harmony',harmony),('bass',bass)]]
-   if style!='classical':
-    for t,ats in [('kick',range(8) if style=='house' else [0,2.5,4,6.5]),('snare',[1,3,5,7]),('hat',[i*.5 for i in range(16)])]:parts.append(dict(track=t,volume=volume,notes=[note(at,.12,0,.48) for at in ats]))
-   scenes.append(dict(name=f'{section} {pair+1} · 4/4',bars=2,variation=.012,parts=parts))
- root=pitch(roots[0]);chord=[root,root+(3 if minor else 4),root+7]
- scenes.append(dict(name='Coda',bars=2,parts=[dict(track='lead',notes=[dict(note(0,7,root+12,.45),toVelocity=0)]),dict(track='harmony',notes=[dict(note(0,7,chord,.4),toVelocity=0)]),dict(track='bass',notes=[dict(note(0,7,root-12,.45),toVelocity=0)])]))
- rights=dict(composition=f'{title} — {composer}; original composition public domain in Germany.',arrangement=f'jacktools AI-assisted motif study; simplified accompaniment; {meter} source adapted to 4/4.',recording='Synthesized by jacktools Sound; no external audio recording or samples used.',license='Arrangement/recording: no separate usage license granted; rights not conclusively reviewed.',source=source)
- assert all(len(s)<=160 for s in rights.values())
- assert len('\n'.join(rights.values()))<=550
- song=dict(format='jacktools-song',version=2,title=f'{title} — {style.title()} · motif study (4/4)',rights=rights,bpm=bpm,style=style,loop=False,seed=1706+len(id),tracks=tracks,scenes=scenes)
- (OUT/(id+'.song.json')).write_text(json.dumps(song,ensure_ascii=False,indent=2)+'\n')
- return dict(id=id,style=style,title=title,composer=composer,path='/library/'+id+'.song.json',source=source,originalMeter=meter)
-manifest=[dict(id='classical-canon',style='classical',title='Canon in D — Morning Light',composer='Johann Pachelbel (1653–1706)',path='/examples/pachelbel-canon-morning-light.song.json',source='https://imslp.org/wiki/Canon_and_Gigue_in_D_major_(Pachelbel,_Johann)',originalMeter='4/4')]
-manifest += [generate(*e) for e in entries]
-(OUT/'catalog.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n')
-print(f'Generated {len(entries)} motif studies and catalog ({len(manifest)} entries).')
+from score_midi import read_score
+
+ROOT=Path(__file__).resolve().parents[1]
+SCORES=Path(__file__).with_name('scores')
+OUT=ROOT/'public/library'
+# BPM always refers to tempoUnit, NOT implicitly to the meter denominator.
+WORKS={
+ 'nacht':dict(title='Eine kleine Nachtmusik · I',composer='W. A. Mozart (1756–1791)',meter=(4,4),bpm=132,pickup=0),
+ 'turca':dict(title='Rondo alla turca',composer='W. A. Mozart (1756–1791)',meter=(2,4),bpm=108,pickup=1),
+ 'elise':dict(title='Für Elise',composer='L. van Beethoven (1770–1827)',meter=(3,8),bpm=144,pickup=.5),
+ 'entertainer':dict(title='The Entertainer',composer='Scott Joplin (1868–1917)',meter=(2,4),bpm=88,pickup=0),
+ 'maple':dict(title='Maple Leaf Rag',composer='Scott Joplin (1868–1917)',meter=(2,4),bpm=96,pickup=.5),
+ 'winners':dict(title='The Easy Winners',composer='Scott Joplin (1868–1917)',meter=(2,4),bpm=90,pickup=0),
+ 'gymno':dict(title='Gymnopédie No. 1',composer='Erik Satie (1866–1925)',meter=(3,4),bpm=60,pickup=0),
+ 'traum':dict(title='Träumerei',composer='Robert Schumann (1810–1856)',meter=(4,4),bpm=56,pickup=1),
+ 'prelude':dict(title='Prélude e-Moll · op. 28/4',composer='Frédéric Chopin (1810–1849)',meter=(2,2),bpm=56,pickup=1),
+ 'canon':dict(title='Canon in D · Canonic Lights',composer='Johann Pachelbel (1653–1706)',meter=(4,4),bpm=76,pickup=0),
+ 'ode':dict(title='Ode an die Freude · Hymnenthema',composer='L. van Beethoven (1770–1827)',meter=(4,4),bpm=124,pickup=0),
+}
+ENTRIES=[
+ ('classical-canon','canon','classical',76),
+ ('classical-nachtmusik','nacht','classical',132),
+ ('classical-turca','turca','classical',108),
+ ('house-canon','canon','house',122),
+ ('house-ode','ode','house',124),
+ ('house-elise','elise','house',144),
+ ('jazz-entertainer','entertainer','jazz',88),
+ ('jazz-maple-leaf','maple','jazz',96),
+ ('jazz-easy-winners','winners','jazz',90),
+ ('lofi-gymnopedie','gymno','lofi',60),
+ ('lofi-traeumerei','traum','lofi',56),
+ ('lofi-prelude','prelude','lofi',56),
+]
+# The engine's legacy instrument registers: score pitch C4=0 is sounding C4
+# for piano/strings, but bass sounds two octaves lower, cello one octave lower.
+REGISTER={'bass':24,'doublebass':24,'cello':12,'guitar':12,'horn':12,'organ':12}
+REPORT={}
+
+def load(key):
+ path=SCORES/(key+'.performance.mid')
+ if not path.exists():path=SCORES/(key+'.mid')
+ score=read_score(path)
+ assert score['meters']==[(0.,*WORKS[key]['meter'])],(key,score['meters'])
+ return score,path
+
+def build(entry):
+ id,key,style,bpm=entry;work=WORKS[key];num,den=work['meter'];qbar=num*4/den
+ score,path=load(key);source=json.loads((SCORES/(key+'.source.json')).read_text())
+ page=source['page']
+ offset=qbar-work['pickup'] if work['pickup'] else 0
+ # IDs are independent of instrument names; no instrument switching during notes.
+ instruments={};levels={};timeline=defaultdict(list)
+ def track(id,instrument,level):
+  instruments[id]=instrument;levels[id]=level
+ def add(id,at,duration,pitch,velocity=80,generated=False):
+  assert id in instruments
+  assert duration>0 and at>=0
+  timeline[id].append((at,duration,pitch,velocity,generated))
+ def transfer(id,notes,shift=offset,select=lambda n:True):
+  for a,d,p,v in notes:
+   if select((a,d,p,v)):add(id,a+shift,d,p,v)
+ original_count=sum(len(t['notes']) for t in score['tracks'])
+ if key=='canon':
+  # Full licensed single-violin source, not a claimed Urtext/full original score.
+  # 4-bar ground cycle makes the delayed imitations harmonically compatible.
+  for n,level in enumerate([.36,.27,.22]):
+   tr='voice'+str(n+1);track(tr,'strings' if style=='classical' else ['pluck','epiano','strings'][n],level)
+   transfer(tr,score['tracks'][0]['notes'],shift=16+n*16)
+  track('ground','cello' if style=='classical' else 'bass',.31)
+  track('continuo','harp' if style=='classical' else 'piano',.17)
+  music_end=16+score['end']+32
+  # D A Bm F#m G D G A, with voice-led upper inversions, not root-position blocks.
+  roots=[50,45,47,42,43,50,43,45]
+  voicings=[[66,69,74],[64,69,73],[66,71,74],[66,69,73],[67,71,74],[66,69,74],[67,71,74],[64,69,73]]
+  for i in range(math.ceil(music_end/2)):
+   a=i*2;r=roots[i%8];c=voicings[i%8]
+   add('ground',a,1.94,r,74,True)
+   for j in range(4):add('continuo',a+j*.5,.46,c[[0,1,2,1][j]],55,True)
+  # Four-bar composed resolution after all source voices have finished.
+  for n in range(3):add('voice'+str(n+1),music_end,8,[74,69,66][n],65,True)
+  add('ground',music_end,8,50,65,True)
+  for j,p in enumerate([62,66,69,74,78,81]):add('continuo',music_end+j*.5,2,p,62-j*4,True)
+  end=music_end+16
+  scope='Full 44-bar violin source; free three-voice canon, ground and coda. Not the complete original score.'
+ elif key=='ode':
+  # The complete 16-bar SATB hymn setting, NOT the Ninth Symphony finale.
+  track('theme','epiano',.42);track('harmony','piano',.25)
+  for start in [32,128]:
+   transfer('theme',score['tracks'][0]['notes'],shift=start)
+   transfer('harmony',score['tracks'][1]['notes'],shift=start)
+  # Instrumental introduction / breakdown / outro use actual source bass/chords.
+  track('bass','bass',.28);track('air','pad',.12)
+  low=score['tracks'][1]['notes']
+  for start,length in [(0,32),(96,32),(192,32)]:
+   for a in range(0,length,4):
+    local=a%64
+    active=[p for t,d,p,v in low if t<=local<t+d]
+    root=min(active or [43])
+    add('bass',start+a,1.7,root,70,True)
+    chord=sorted(set(p for t,d,p,v in score['tracks'][0]['notes'] if t<=local<t+d))
+    for p in chord:add('air',start+a,3.7,p,51,True)
+  # Bass during both full theme passes follows the actual score, not a fixed loop.
+  for start in [32,128]:
+   for a,d,p,v in low:
+    if p<55:add('bass',start+a,min(d,.85),p,v,True)
+  end=224
+  scope='Complete 16-bar SATB hymn setting, twice, with original intro/break/outro. Not the complete symphony.'
+ elif style=='classical' and key=='nacht':
+  for i,t in enumerate(score['tracks']):
+   tr='voice'+str(i+1);track(tr,'cello' if i==3 else 'strings',[.38,.29,.25,.32][i]);transfer(tr,t['notes'])
+  end=score['end']+offset
+  scope='Complete first-movement score MIDI, including its encoded repeats; string ensemble.'
+ else:
+  track('lead','pluck' if style=='house' else 'piano' if style in ('classical','jazz') else 'epiano',.43 if style!='house' else .36)
+  track('inner','piano' if style in ('classical','jazz','house') else 'epiano',.28 if style!='house' else .22)
+  track('bass','doublebass' if style=='jazz' else 'cello' if style=='lofi' else 'bass',.26)
+  # Full source hands and countervoices, including chromatic harmony.
+  transfer('lead',score['tracks'][0]['notes'])
+  for t in score['tracks'][1:]:
+   transfer('inner',t['notes'],select=lambda n:style=='classical' or n[2]>=48)
+   if style!='classical':transfer('bass',t['notes'],select=lambda n:n[2]<48)
+  end=score['end']+offset
+  scope='Complete score-event sequence and all source voices; repeats as encoded in the vendored performance.'
+ # Pad to an EVEN number of bars for the two-bar transport; no invented repeats.
+ bars=math.ceil((end-1e-8)/qbar)
+ bars+=bars%2
+ total=bars*qbar
+ # Native-meter drum arrangements: 3/8 gets THREE eighth pulses, NOT a hidden 4/4.
+ # Ragtime is straight, with very restrained percussion; no forced jazz swing.
+ if style!='classical':
+  track('kick','kick',.28 if style=='house' else .09 if style=='lofi' else .07)
+  track('rim','clap' if style=='house' else 'rim',.12 if style=='house' else .055)
+  track('hat','hat',.075 if style=='house' else .035)
+  for b in range(bars):
+   # Intro/break/outro filtering without dropping any source melody notes.
+   breakbar=style=='house' and (b%32 in range(24,28)) and b<bars-8
+   tail=b>=bars-2
+   if tail:continue
+   pulse=.5 if den==8 else 1
+   count=round(qbar/pulse)
+   strength=(.72 if b<4 or b>=bars-8 else 1)
+   for step in range(count):
+    a=b*qbar+step*pulse
+    if not breakbar and (style=='house' or step==0):
+     add('kick',a,min(.12,pulse*.3),60,84*strength,True)
+    if step%2==1:
+     add('rim',a+.008,min(.1,pulse*.25),60,(64 if style=='house' else 48)*strength,True)
+    for half in range(2):
+     if style=='lofi' and half==0:continue
+     add('hat',a+half*pulse/2,min(.065,pulse/4),60,(48 if half else 35)*strength,True)
+   # A short turnaround every 16 bars, not an identical fill every two bars.
+   if style=='house' and b%16==15 and not breakbar:
+    for j in range(3):
+     add('rim',(b+1)*qbar-pulse+j*pulse/3,pulse/8,60,42+j*7,True)
+ # Convert to bounded two-bar scenes. Whole-source events are never truncated;
+ # sustained notes crossing a scene boundary are split into rearticulations.
+ window=num*2;chunks=int(bars/2);scenes=[];split_count=0;emitted=0;minimum=max(.016,window*.002)
+ for i in range(chunks):
+  begin=i*2*qbar;finish=begin+2*qbar;parts=[]
+  for tr,events in timeline.items():
+   output=[]
+   for a,d,p,v,generated in events:
+    if a>=finish-1e-8 or a+d<=begin+1e-8:continue
+    onset=max(begin,a);stop=min(finish,a+d)
+    at=(onset-begin)*den/4;duration=(stop-onset)*den/4
+    if duration<minimum:
+     # Retain short grace notes, fitting them within the validated pattern.
+     duration=minimum;at=min(at,window-minimum)
+    continued=a<begin-1e-8
+    if continued:split_count+=1
+    # Exact onset groups remain together, tiny deterministic velocity variations only.
+    harmonic_density=sum(1 for other in events if abs(other[0]-a)<1e-6)
+    phrase=.95+.05*math.sin((a/total)*math.pi)
+    velocity=max(.16,min(.88,(.25+.48*v/127)*phrase))
+    if not generated and harmonic_density>1:velocity*=1/(harmonic_density**.16)
+    if continued:velocity*=.70
+    # Articulate without adding gaps to tied/padded continuations.
+    duration=max(minimum,duration*(.98 if style=='lofi' else .94 if style=='jazz' else .97))
+    pitch=p-60+REGISTER.get(instruments[tr],0)
+    assert -24<=pitch<=60,(id,tr,pitch)
+    n=dict(at=round(at,6),duration=round(min(duration,window-at),6),pitch=pitch,velocity=round(velocity,4))
+    if a+d>total-2*qbar and duration>num*.6:n['toVelocity']=round(velocity*.12,4)
+    output.append(n)
+   output.sort(key=lambda n:(n['at'],n['pitch']))
+   assert len(output)<=128,(id,i,tr,len(output))
+   if output:
+    emitted+=len(output);parts.append(dict(track=tr,notes=output))
+  # Explicit, slow arrangement envelope: no copy/pasted theme/reprise placeholders.
+  section='Opening' if i<2 else 'Resolution' if i>=chunks-2 else 'Development'
+  scenes.append(dict(name=f'{section} · bars {i*2+1}–{i*2+2}',bars=2,parts=parts))
+ assert emitted<=8192,(id,emitted)
+ assert len(scenes)<=256 and bars<=512
+ rights=dict(
+  composition=f"{work['title']} — {work['composer']}; original composition public domain in Germany.",
+  arrangement='AI-assisted full-source production; native meter; source voices retained. See library/SOURCES.md for exact scope.',
+  recording='Synthesized in jacktools Sound; no external audio recording.',
+  license='Source score: Public Domain. Project arrangement/recording: no separate usage license granted.',
+  source=page)
+ if key=='canon':
+  rights['arrangement']='Free canon from full violin edition: Jim Paterson / Anonymous, Mutopia 1700 (2009); added voices, ground, coda and new production.'
+  rights['license']='Violin source CC BY 3.0: https://creativecommons.org/licenses/by/3.0/ ; no separate license granted for project additions.'
+ assert all(len(v)<=160 for v in rights.values()),rights
+ assert len('\n'.join(rights.values()))<=550,(id,sum(map(len,rights.values())))
+ song=dict(format='jacktools-song',version=3,title=f"{work['title']} — {style.title()}",rights=rights,
+  meter=dict(numerator=num,denominator=den,groups=[1]*num),tempoUnit=dict(denominator=8 if key=='elise' else 4,dotted=False),
+  bpm=bpm,style=style,loop=False,seed=1000+int(hashlib.sha256(id.encode()).hexdigest()[:6],16),
+  tracks=[dict(id=tr,instrument=instrument,volume=levels[tr]) for tr,instrument in instruments.items() if timeline[tr]],
+  scenes=scenes)
+ # A part with no events never exists; make tracks agree after silent bass removal.
+ raw=json.dumps(song,ensure_ascii=False,indent=2)+'\n'
+ assert len(raw.encode())<=1024*1024,(id,len(raw))
+ (OUT/(id+'.song.json')).write_text(raw)
+ seconds=total*60/(bpm*(.5 if key=='elise' else 1))
+ if key=='canon':
+  scopes=dict(de='Freie dreistimmige Kanonfassung aus der vollständigen Violinstimme, mit Bass und Coda; keine Original-Gesamtpartitur.',en=scope,es='Canon libre a tres voces de la fuente completa para violín; no es la partitura original completa.',fr='Canon libre à trois voix à partir de la partie complète de violon ; pas la partition originale intégrale.')
+ elif key=='ode':
+  scopes=dict(de='Vollständiger 16-taktiger Hymnensatz mit Einleitung, Breakdown und Outro; nicht die ganze Sinfonie.',en=scope,es='Arreglo completo del himno de 16 compases, con introducción y final; no la sinfonía completa.',fr='Hymne complet de 16 mesures avec introduction et conclusion ; pas la symphonie entière.')
+ elif key=='nacht':
+  scopes=dict(de='Vollständiger erster Satz mit vier Streicherstimmen und den Wiederholungen der Quelle.',en=scope,es='Primer movimiento completo con cuatro voces de cuerda y las repeticiones de la fuente.',fr='Premier mouvement complet, quatre parties de cordes et reprises de la source.')
+ else:
+  scopes=dict(de='Vollständiger Notenverlauf mit allen Stimmen der angegebenen Quelle; gespielte Form und Grenzen in den Quellenhinweisen.',en=scope,es='Secuencia completa de notas y voces de la fuente citada; forma y límites en la documentación.',fr='Séquence complète des notes et parties de la source citée ; forme et limites documentées.')
+ entry=dict(id=id,style=style,title=work['title'],composer=work['composer'],path='/library/'+id+'.song.json',
+  source=page,originalMeter=f'{num}/{den}',arrangementMeter=f'{num}/{den}',bars=bars,durationSeconds=math.floor(seconds+.5),scope=scope,scopeLabel=scopes)
+ transferred=sum(1 for events in timeline.values() for n in events if not n[4])
+ assert transferred==original_count*(3 if key=='canon' else 2 if key=='ode' else 1),(id,transferred,original_count)
+ REPORT[id]=dict(transferredSourceNotes=transferred,source=path.name,sha256=hashlib.sha256(path.read_bytes()).hexdigest(),sourceNotes=original_count,
+  outputNotes=emitted,boundaryRearticulations=split_count,bars=bars,durationSeconds=round(seconds,2),scope=scope)
+ return entry
+
+def main():
+ manifest=[build(e) for e in ENTRIES]
+ (OUT/'catalog.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n')
+ (OUT/'production-report.json').write_text(json.dumps(REPORT,ensure_ascii=False,indent=2)+'\n')
+ print('\n'.join(f"{id}: {r['bars']} bars, {r['durationSeconds']}s, {r['outputNotes']} notes" for id,r in REPORT.items()))
+if __name__=='__main__':main()

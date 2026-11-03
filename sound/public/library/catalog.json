@@ -2,20 +2,40 @@
   {
     "id": "classical-canon",
     "style": "classical",
-    "title": "Canon in D — Morning Light",
+    "title": "Canon in D · Canonic Lights",
     "composer": "Johann Pachelbel (1653–1706)",
-    "path": "/examples/pachelbel-canon-morning-light.song.json",
-    "source": "https://imslp.org/wiki/Canon_and_Gigue_in_D_major_(Pachelbel,_Johann)",
-    "originalMeter": "4/4"
+    "path": "/library/classical-canon.song.json",
+    "source": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=1700",
+    "originalMeter": "4/4",
+    "arrangementMeter": "4/4",
+    "bars": 60,
+    "durationSeconds": 189,
+    "scope": "Full 44-bar violin source; free three-voice canon, ground and coda. Not the complete original score.",
+    "scopeLabel": {
+      "de": "Freie dreistimmige Kanonfassung aus der vollständigen Violinstimme, mit Bass und Coda; keine Original-Gesamtpartitur.",
+      "en": "Full 44-bar violin source; free three-voice canon, ground and coda. Not the complete original score.",
+      "es": "Canon libre a tres voces de la fuente completa para violín; no es la partitura original completa.",
+      "fr": "Canon libre à trois voix à partir de la partie complète de violon ; pas la partition originale intégrale."
+    }
   },
   {
     "id": "classical-nachtmusik",
     "style": "classical",
-    "title": "Eine kleine Nachtmusik",
+    "title": "Eine kleine Nachtmusik · I",
     "composer": "W. A. Mozart (1756–1791)",
     "path": "/library/classical-nachtmusik.song.json",
     "source": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=900",
-    "originalMeter": "4/4"
+    "originalMeter": "4/4",
+    "arrangementMeter": "4/4",
+    "bars": 192,
+    "durationSeconds": 349,
+    "scope": "Complete first-movement score MIDI, including its encoded repeats; string ensemble.",
+    "scopeLabel": {
+      "de": "Vollständiger erster Satz mit vier Streicherstimmen und den Wiederholungen der Quelle.",
+      "en": "Complete first-movement score MIDI, including its encoded repeats; string ensemble.",
+      "es": "Primer movimiento completo con cuatro voces de cuerda y las repeticiones de la fuente.",
+      "fr": "Premier mouvement complet, quatre parties de cordes et reprises de la source."
+    }
   },
   {
     "id": "classical-turca",
@@ -24,25 +44,55 @@
     "composer": "W. A. Mozart (1756–1791)",
     "path": "/library/classical-turca.song.json",
     "source": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=108",
-    "originalMeter": "2/4"
+    "originalMeter": "2/4",
+    "arrangementMeter": "2/4",
+    "bars": 218,
+    "durationSeconds": 242,
+    "scope": "Complete score-event sequence and all source voices; repeats as encoded in the vendored performance.",
+    "scopeLabel": {
+      "de": "Vollständiger Notenverlauf mit allen Stimmen der angegebenen Quelle; gespielte Form und Grenzen in den Quellenhinweisen.",
+      "en": "Complete score-event sequence and all source voices; repeats as encoded in the vendored performance.",
+      "es": "Secuencia completa de notas y voces de la fuente citada; forma y límites en la documentación.",
+      "fr": "Séquence complète des notes et parties de la source citée ; forme et limites documentées."
+    }
   },
   {
     "id": "house-canon",
     "style": "house",
-    "title": "Canon in D",
+    "title": "Canon in D · Canonic Lights",
     "composer": "Johann Pachelbel (1653–1706)",
     "path": "/library/house-canon.song.json",
-    "source": "https://imslp.org/wiki/Canon_and_Gigue_in_D_major_(Pachelbel,_Johann)",
-    "originalMeter": "4/4"
+    "source": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=1700",
+    "originalMeter": "4/4",
+    "arrangementMeter": "4/4",
+    "bars": 60,
+    "durationSeconds": 118,
+    "scope": "Full 44-bar violin source; free three-voice canon, ground and coda. Not the complete original score.",
+    "scopeLabel": {
+      "de": "Freie dreistimmige Kanonfassung aus der vollständigen Violinstimme, mit Bass und Coda; keine Original-Gesamtpartitur.",
+      "en": "Full 44-bar violin source; free three-voice canon, ground and coda. Not the complete original score.",
+      "es": "Canon libre a tres voces de la fuente completa para violín; no es la partitura original completa.",
+      "fr": "Canon libre à trois voix à partir de la partie complète de violon ; pas la partition originale intégrale."
+    }
   },
   {
     "id": "house-ode",
     "style": "house",
-    "title": "Ode an die Freude",
+    "title": "Ode an die Freude · Hymnenthema",
     "composer": "L. van Beethoven (1770–1827)",
     "path": "/library/house-ode.song.json",
-    "source": "https://imslp.org/wiki/Symphony_No.9,_Op.125_(Beethoven,_Ludwig_van)",
-    "originalMeter": "4/4"
+    "source": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=528",
+    "originalMeter": "4/4",
+    "arrangementMeter": "4/4",
+    "bars": 56,
+    "durationSeconds": 108,
+    "scope": "Complete 16-bar SATB hymn setting, twice, with original intro/break/outro. Not the complete symphony.",
+    "scopeLabel": {
+      "de": "Vollständiger 16-taktiger Hymnensatz mit Einleitung, Breakdown und Outro; nicht die ganze Sinfonie.",
+      "en": "Complete 16-bar SATB hymn setting, twice, with original intro/break/outro. Not the complete symphony.",
+      "es": "Arreglo completo del himno de 16 compases, con introducción y final; no la sinfonía completa.",
+      "fr": "Hymne complet de 16 mesures avec introduction et conclusion ; pas la symphonie entière."
+    }
   },
   {
     "id": "house-elise",
@@ -51,7 +101,17 @@
     "composer": "L. van Beethoven (1770–1827)",
     "path": "/library/house-elise.song.json",
     "source": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=931",
-    "originalMeter": "3/8"
+    "originalMeter": "3/8",
+    "arrangementMeter": "3/8",
+    "bars": 126,
+    "durationSeconds": 158,
+    "scope": "Complete score-event sequence and all source voices; repeats as encoded in the vendored performance.",
+    "scopeLabel": {
+      "de": "Vollständiger Notenverlauf mit allen Stimmen der angegebenen Quelle; gespielte Form und Grenzen in den Quellenhinweisen.",
+      "en": "Complete score-event sequence and all source voices; repeats as encoded in the vendored performance.",
+      "es": "Secuencia completa de notas y voces de la fuente citada; forma y límites en la documentación.",
+      "fr": "Séquence complète des notes et parties de la source citée ; forme et limites documentées."
+    }
   },
   {
     "id": "jazz-entertainer",
@@ -60,7 +120,17 @@
     "composer": "Scott Joplin (1868–1917)",
     "path": "/library/jazz-entertainer.song.json",
     "source": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=263",
-    "originalMeter": "2/4"
+    "originalMeter": "2/4",
+    "arrangementMeter": "2/4",
+    "bars": 152,
+    "durationSeconds": 207,
+    "scope": "Complete score-event sequence and all source voices; repeats as encoded in the vendored performance.",
+    "scopeLabel": {
+      "de": "Vollständiger Notenverlauf mit allen Stimmen der angegebenen Quelle; gespielte Form und Grenzen in den Quellenhinweisen.",
+      "en": "Complete score-event sequence and all source voices; repeats as encoded in the vendored performance.",
+      "es": "Secuencia completa de notas y voces de la fuente citada; forma y límites en la documentación.",
+      "fr": "Séquence complète des notes et parties de la source citée ; forme et limites documentées."
+    }
   },
   {
     "id": "jazz-maple-leaf",
@@ -69,7 +139,17 @@
     "composer": "Scott Joplin (1868–1917)",
     "path": "/library/jazz-maple-leaf.song.json",
     "source": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=23",
-    "originalMeter": "2/4"
+    "originalMeter": "2/4",
+    "arrangementMeter": "2/4",
+    "bars": 146,
+    "durationSeconds": 183,
+    "scope": "Complete score-event sequence and all source voices; repeats as encoded in the vendored performance.",
+    "scopeLabel": {
+      "de": "Vollständiger Notenverlauf mit allen Stimmen der angegebenen Quelle; gespielte Form und Grenzen in den Quellenhinweisen.",
+      "en": "Complete score-event sequence and all source voices; repeats as encoded in the vendored performance.",
+      "es": "Secuencia completa de notas y voces de la fuente citada; forma y límites en la documentación.",
+      "fr": "Séquence complète des notes et parties de la source citée ; forme et limites documentées."
+    }
   },
   {
     "id": "jazz-easy-winners",
@@ -78,7 +158,17 @@
     "composer": "Scott Joplin (1868–1917)",
     "path": "/library/jazz-easy-winners.song.json",
     "source": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=352",
-    "originalMeter": "2/4"
+    "originalMeter": "2/4",
+    "arrangementMeter": "2/4",
+    "bars": 152,
+    "durationSeconds": 203,
+    "scope": "Complete score-event sequence and all source voices; repeats as encoded in the vendored performance.",
+    "scopeLabel": {
+      "de": "Vollständiger Notenverlauf mit allen Stimmen der angegebenen Quelle; gespielte Form und Grenzen in den Quellenhinweisen.",
+      "en": "Complete score-event sequence and all source voices; repeats as encoded in the vendored performance.",
+      "es": "Secuencia completa de notas y voces de la fuente citada; forma y límites en la documentación.",
+      "fr": "Séquence complète des notes et parties de la source citée ; forme et limites documentées."
+    }
   },
   {
     "id": "lofi-gymnopedie",
@@ -87,7 +177,17 @@
     "composer": "Erik Satie (1866–1925)",
     "path": "/library/lofi-gymnopedie.song.json",
     "source": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=37",
-    "originalMeter": "3/4"
+    "originalMeter": "3/4",
+    "arrangementMeter": "3/4",
+    "bars": 78,
+    "durationSeconds": 234,
+    "scope": "Complete score-event sequence and all source voices; repeats as encoded in the vendored performance.",
+    "scopeLabel": {
+      "de": "Vollständiger Notenverlauf mit allen Stimmen der angegebenen Quelle; gespielte Form und Grenzen in den Quellenhinweisen.",
+      "en": "Complete score-event sequence and all source voices; repeats as encoded in the vendored performance.",
+      "es": "Secuencia completa de notas y voces de la fuente citada; forma y límites en la documentación.",
+      "fr": "Séquence complète des notes et parties de la source citée ; forme et limites documentées."
+    }
   },
   {
     "id": "lofi-traeumerei",
@@ -96,15 +196,35 @@
     "composer": "Robert Schumann (1810–1856)",
     "path": "/library/lofi-traeumerei.song.json",
     "source": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=504",
-    "originalMeter": "4/4"
+    "originalMeter": "4/4",
+    "arrangementMeter": "4/4",
+    "bars": 26,
+    "durationSeconds": 111,
+    "scope": "Complete score-event sequence and all source voices; repeats as encoded in the vendored performance.",
+    "scopeLabel": {
+      "de": "Vollständiger Notenverlauf mit allen Stimmen der angegebenen Quelle; gespielte Form und Grenzen in den Quellenhinweisen.",
+      "en": "Complete score-event sequence and all source voices; repeats as encoded in the vendored performance.",
+      "es": "Secuencia completa de notas y voces de la fuente citada; forma y límites en la documentación.",
+      "fr": "Séquence complète des notes et parties de la source citée ; forme et limites documentées."
+    }
   },
   {
     "id": "lofi-prelude",
     "style": "lofi",
-    "title": "Prélude e-Moll op. 28 Nr. 4",
+    "title": "Prélude e-Moll · op. 28/4",
     "composer": "Frédéric Chopin (1810–1849)",
     "path": "/library/lofi-prelude.song.json",
     "source": "https://www.mutopiaproject.org/cgibin/piece-info.cgi?id=468",
-    "originalMeter": "2/2"
+    "originalMeter": "2/2",
+    "arrangementMeter": "2/2",
+    "bars": 26,
+    "durationSeconds": 111,
+    "scope": "Complete score-event sequence and all source voices; repeats as encoded in the vendored performance.",
+    "scopeLabel": {
+      "de": "Vollständiger Notenverlauf mit allen Stimmen der angegebenen Quelle; gespielte Form und Grenzen in den Quellenhinweisen.",
+      "en": "Complete score-event sequence and all source voices; repeats as encoded in the vendored performance.",
+      "es": "Secuencia completa de notas y voces de la fuente citada; forma y límites en la documentación.",
+      "fr": "Séquence complète des notes et parties de la source citée ; forme et limites documentées."
+    }
   }
 ]

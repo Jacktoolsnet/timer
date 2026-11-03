@@ -51,7 +51,7 @@ public-domain arrangement or recording. My brief: [genre, atmosphere, approximat
 - `tracks`: 1–9 track definitions, in orbit/pad order (7,8,9,4,5,6,1,2,3).
   Each has exactly `id` (unique lowercase identifier, starting with a letter,
   then letters/digits/_/-, max 32 chars), `instrument`, and `volume` (0–1).
-- `scenes`: 1–64 scene definitions, at most 512 bars in total.
+- `scenes`: 1–256 scene definitions in v3 (v1/v2: 1–64), at most 512 bars in total.
 
 Instrument IDs: kick, snare, hat, bass, marimba, clap, tom, rim, shaker, bells, kalimba, pluck, synthbass, piano, strings, guitar, organ, pad, saxophone, harp, doublebass, epiano, voice, choir, vocalpad, flute, clarinet, trumpet, horn, analoglead, acidbass, shimmer, cello, vibraphone, conga.
 Choose low track volumes for pads, strings and secondary instruments. All sounds

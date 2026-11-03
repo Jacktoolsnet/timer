@@ -574,16 +574,16 @@ Video captions now use a separately selected language (English default, with Ger
 - V1 imports remain compatible, with optional validated rights. Missing legacy rights produce an explicit missing/unverified notice, never an inferred license.
 - Every song video appends a mandatory rights card, including fixed-length takes and manual recording stops. The optional credits checkbox controls additional text only; it cannot remove or replace source metadata. Partial takes cut off before completing the rights card (e.g. tab interruption or safety limit) are not downloaded. This is a local exporter behavior, not DRM for externally edited videos.
 
-### Curated song starters
+### Curated song productions
 
-The folder beside Classical, House, Jazz and Lo-Fi opens three deterministic song
-arrangements per style. Selection loads and plays a v2 Song Script; Random returns
-to newly generated music in that style. Opening the folder alone leaves music
-unchanged. The library is disabled during imports/recordings. Sources, the scope
-of the short motif studies, 4/4 adaptations and rights limitations are documented
-in [`public/library/SOURCES.md`](public/library/SOURCES.md). Regenerate the eleven
-short studies and catalog with `python3 scripts/build-song-library.py`; the existing
-Morning Light example is not regenerated. Other meters are not part of this step.
+The four style folders each offer three deterministic v3 productions in native
+meter, with complete cited score-event sequences where possible. Canon is a free
+canonic production from a full violin source; Ode a hymn-theme setting, not the
+complete symphony. Meter, duration and exact scope appear in the dialog.
+See [public/library/SOURCES.md](public/library/SOURCES.md) for licences, production
+details and limitations. Regenerate offline with python3 scripts/build-song-library.py.
+Optional LilyPond repeat unfolding is documented in scripts/scores/README.md.
+Standalone Morning Light is unchanged. Retain Canon's CC BY 3.0 attribution.
 
 ### Native meters (Song Script v3)
 
@@ -600,4 +600,4 @@ Gentle group accents apply only to v3; v1/v2 retain their original 4/4 semantics
 Native-meter pad buffers are bounded and survive project JSON export/import.
 See the AI guide and `public/examples/meter-study-6-8.song.json` for examples.
 Meter changes inside a song and arbitrary swing are not part of this version.
-The curated v2 adaptations have not been musically rewritten in this step.
+The curated library now uses native-meter v3 productions; v1/v2 imports remain supported.
