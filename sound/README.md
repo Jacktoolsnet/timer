@@ -497,5 +497,11 @@ Video captions now use a separately selected language (English default, with Ger
 
 ### Unified animation settings
 - A fourth icon button beside Draw / Rhythm / Notes opens a native modal, without changing the input mode or the music. The initial screen contains Sound animation and Background animation tiles with current-choice summaries. Sound animation contains the five visualization tiles; a separate gear on Orbit activates that view and opens its orbit and centre variant groups. Back navigates up one level; Close, Escape and backdrop clicks dismiss the dialog and return keyboard focus.
-- The former above-canvas selector and lower animation section are removed. All controls retain their existing selectors, shared state, opt-in persistence, JSON behaviour and random/off choices. Selection is live rather than a transactional draft. Only Orbit has orbit/centre controls.
+- The former above-canvas selector and lower animation section are removed. All controls retain their existing selectors, shared state, opt-in persistence, JSON behaviour and random/off choices. Selection is live rather than a transactional draft. Only Orbit has orbit trail controls; Orbit and Sound flower each have independent centre controls.
 - The responsive, localized dialog is a browser top-layer element, available in focus/fullscreen and during recording. It neither pauses music nor changes recording. MP4 continues painting only the visualization/background canvases, never the settings UI. Reduced motion suppresses the dialog entrance animation.
+
+
+### Independent flower centre
+- Orbit and Sound flower tiles each have a gear. Opening either settings page activates that visualization; the flower page contains only its centre variants. Back returns to Sound animation. All seven choices (ring, filled, sun, sine, bars, random, off) have four-language labels.
+- Existing `center` remains the Orbit choice. Optional validated `flowerCenter` is saved separately in JSON/local preferences and defaults to `ring` for old files, independently of Orbit. Switching views does not copy either setting. The flower keeps its original native heart for Ring, omits it for Off and other variants, and fits the alternate shared centre renderers to its compact centre.
+- Random choices develop independently. Optional video centre changes affect only the currently visible Orbit/flower centre, honour that view's Off choice and restore saved choices afterwards; manual changes remain the new saved choice. The canvas-based MP4 path and music are unchanged.

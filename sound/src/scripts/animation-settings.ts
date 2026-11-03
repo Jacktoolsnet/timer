@@ -1,4 +1,4 @@
-type Panel='home'|'sound'|'orbit'|'background';
+type Panel='home'|'sound'|'orbit'|'flower'|'background';
 
 export function syncAnimationSettings(){
  for(const [summary,selector] of [
@@ -10,7 +10,7 @@ export function syncAnimationSettings(){
  }
 }
 
-export function installAnimationSettings(activateOrbit:()=>void){
+export function installAnimationSettings(activate:(view:'orbit'|'flower')=>void){
  const dialog=document.querySelector<HTMLDialogElement>('#animation-settings-dialog')!;
  const opener=document.querySelector<HTMLButtonElement>('#animation-settings-open')!;
  const back=document.querySelector<HTMLButtonElement>('#animation-settings-back')!;
@@ -30,8 +30,8 @@ export function installAnimationSettings(activateOrbit:()=>void){
   dialog.querySelector<HTMLButtonElement>('[data-animation-open=sound]')!.focus({preventScroll:true});
  });
  dialog.querySelectorAll<HTMLButtonElement>('[data-animation-open]').forEach(button=>button.addEventListener('click',()=>show(button.dataset.animationOpen as Panel)));
- document.querySelector('#orbit-settings-open')!.addEventListener('click',()=>{activateOrbit();show('orbit');});
- back.addEventListener('click',()=>show(panel==='orbit'?'sound':'home'));
+ for(const view of ['orbit','flower'] as const)document.querySelector('#'+view+'-settings-open')!.addEventListener('click',()=>{activate(view);show(view);});
+ back.addEventListener('click',()=>show(panel==='orbit'||panel==='flower'?'sound':'home'));
  document.querySelector('#animation-settings-close')!.addEventListener('click',()=>dialog.close());
  dialog.addEventListener('close',()=>{opener.setAttribute('aria-expanded','false');opener.focus({preventScroll:true});});
  dialog.addEventListener('click',event=>{

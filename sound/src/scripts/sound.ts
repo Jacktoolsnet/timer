@@ -394,7 +394,7 @@ function snapshotSettings(includeDraft=false):SoundSettings{
  const backup=includeDraft?null:rhythmBackup;
  return {
    version:2,style:currentStyle,dance:currentDance,groove:grooveChoice,bpm,transpose,noteEffect,volume:Number($<HTMLInputElement>('#volume').value),
-   visualization,background:backgroundChoice,center:centerChoice,orbit:orbitChoice,
+   visualization,background:backgroundChoice,center:centerChoice,flowerCenter:flowerCenterChoice,orbit:orbitChoice,
    recording:{restart:$<HTMLInputElement>('#recording-restart').checked,random:$<HTMLInputElement>('#recording-random').checked,fullscreen:$<HTMLInputElement>('#recording-fullscreen').checked,minutes:Number($<HTMLInputElement>('#recording-duration').value),videoFormat:chosenVideoFormat(),videoInfo:chosenVideoInfo(),animations:chosenVideoAnimations()},
    pad:{mode:padMode,beats:(backup??tapPattern).beats,hits:(backup??tapPattern).hits.map(lane=>[...lane]),notes:(backup??tapPattern).notes.map(lane=>[...lane])},
    tracks:tracks.map((live,i)=>{const tr=backup&&rhythmTouched.has(i)&&rhythmTrackBackup?{...live,...rhythmTrackBackup[i]}:live;return ({
@@ -493,6 +493,8 @@ let orbitMode:'comet'|'dot'|'pulse'|'off'='comet';
 let orbitAnimation=true;
 let centerMode:'ring'|'filled'|'sine'|'bars'|'sun'|'off'='ring';
 let centerChoice:SoundSettings['center']=centerMode;
+let flowerCenterMode:Exclude<SoundSettings['center'],'random'>='ring';
+let flowerCenterChoice:SoundSettings['center']='ring';
 let backgroundChoice:SoundSettings['background']=backgroundMode;
 let orbitChoice:SoundSettings['orbit']=orbitMode;
 let animationStep=Infinity;
@@ -501,7 +503,7 @@ function pickVariant<T extends string>(modes:readonly T[],current:T):T{
  return choices[Math.floor(Math.random()*choices.length)];
 }
 function selectVisualization(mode:VisualizationMode){
- if(visualization!==mode){landscape.clear();streamCache=null;}visualization=mode;orbit.dataset.visualization=mode;
+ if(visualization!==mode){landscape.clear();streamCache=null;}visualization=mode;orbit.dataset.visualization=mode;orbit.dataset.flowerCenterVariant=flowerCenterMode;
  orbit.setAttribute('aria-label',mode==='flower'?visualizationCopy[language].flowerDescription:mode==='constellation'?visualizationCopy[language].constellationDescription:mode==='stream'?visualizationCopy[language].streamDescription:mode==='landscape'?visualizationCopy[language].description:t.steps);
  document.querySelectorAll<HTMLButtonElement>('button[data-visualization]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.visualization===mode)));
  syncAnimationSettings();
@@ -511,6 +513,13 @@ function selectVisualization(mode:VisualizationMode){
  persistSettings();
 }
 document.querySelectorAll<HTMLButtonElement>('button[data-visualization]').forEach(button=>button.addEventListener('click',()=>selectVisualization(button.dataset.visualization as VisualizationMode)));
+function selectFlowerCenterMode(choice:SoundSettings['center']){
+ flowerCenterChoice=choice;
+ flowerCenterMode=choice==='random'?pickVariant(currentStyle==='focus'?['ring','filled','sine']:currentStyle==='sport'?['ring','bars','sun']:['ring','filled','sine','bars','sun'],flowerCenterMode):choice;
+ orbit.dataset.flowerCenterVariant=flowerCenterMode;
+ document.querySelectorAll<HTMLButtonElement>('[data-flower-center-mode]').forEach(tile=>tile.setAttribute('aria-pressed',String(tile.dataset.flowerCenterMode===choice)));
+ persistSettings();
+}
 function selectCenterMode(choice:SoundSettings['center']){
  centerChoice=choice;
  centerMode=choice==='random'?pickVariant(currentStyle==='focus'?['ring','filled','sine']:currentStyle==='sport'?['ring','bars','sun']:['ring','filled','sine','bars','sun'],centerMode):choice;
@@ -534,9 +543,11 @@ function selectOrbitMode(choice:SoundSettings['orbit']){
 document.querySelectorAll<HTMLButtonElement>('[data-center-mode]').forEach(button=>button.addEventListener('click',()=>selectCenterMode(button.dataset.centerMode as typeof centerChoice)));
 document.querySelectorAll<HTMLButtonElement>('[data-background-mode]').forEach(button=>button.addEventListener('click',()=>selectBackgroundMode(button.dataset.backgroundMode as typeof backgroundChoice)));
 document.querySelectorAll<HTMLButtonElement>('[data-orbit-mode]').forEach(button=>button.addEventListener('click',()=>selectOrbitMode(button.dataset.orbitMode as typeof orbitChoice)));
-installAnimationSettings(()=>selectVisualization('orbit'));
+document.querySelectorAll<HTMLButtonElement>('[data-flower-center-mode]').forEach(button=>button.addEventListener('click',()=>selectFlowerCenterMode(button.dataset.flowerCenterMode as typeof flowerCenterChoice)));
+installAnimationSettings(view=>selectVisualization(view));
 function evolveAnimations(includeBackground=true){
  if(centerChoice==='random'&&!videoAnimationRun?.flags.center)selectCenterMode('random');
+ if(flowerCenterChoice==='random'&&!videoAnimationRun?.flags.center)selectFlowerCenterMode('random');
  if(includeBackground&&backgroundChoice==='random'&&!videoAnimationRun?.flags.background)selectBackgroundMode('random');
  if(orbitChoice==='random'&&!videoAnimationRun?.flags.orbit)selectOrbitMode('random');
 }
@@ -547,7 +558,9 @@ function advanceVideoAnimations(now:number){
   const times=run.plan[key];let due=false;
   while(run.next[key]<times.length&&now-run.start>=times[run.next[key]]){run.next[key]++;due=true;}
   if(!due)continue; // A stalled tab skips missed changes rather than flashing through them.
-  if(key==='center'&&centerMode!=='off'){
+  if(key==='center'&&visualization==='flower'&&flowerCenterMode!=='off'){
+   flowerCenterMode=pickVariant(['ring','filled','sun','sine','bars'],flowerCenterMode);orbit.dataset.flowerCenterVariant=flowerCenterMode;run.changed.add(key);
+  }else if(key==='center'&&visualization==='orbit'&&centerMode!=='off'){
    centerMode=pickVariant(['ring','filled','sun','sine','bars'],centerMode);orbit.dataset.centerVariant=centerMode;run.changed.add(key);
   }else if(key==='orbit'&&orbitMode!=='off'){
    orbitMode=pickVariant(['comet','dot','pulse'],orbitMode);orbit.dataset.mode=orbitMode;run.changed.add(key);
@@ -559,7 +572,7 @@ function advanceVideoAnimations(now:number){
 function endVideoAnimations(){
  const run=videoAnimationRun;videoAnimationRun=null;if(!run)return;
  // Temporary video variants never overwrite fixed/random/off choices or saved settings.
- if(run.changed.has('center'))selectCenterMode(centerChoice);
+ if(run.changed.has('center')){selectCenterMode(centerChoice);selectFlowerCenterMode(flowerCenterChoice);}
  if(run.changed.has('orbit'))selectOrbitMode(orbitChoice);
  if(run.changed.has('background'))selectBackgroundMode(backgroundChoice);
 }
@@ -1961,7 +1974,7 @@ function frame(now:number){
  oc.clearRect(0,0,700,700);
  const visualMaster=Math.min(1,Number($<HTMLInputElement>('#volume').value)/.3);
  const active=activeTracks();
- if(visualization==='flower')paintSoundFlower(oc,landscape,active.map(({tr,index})=>({index,label:String(padNumbers[index]),color:tr.color,volume:tr.volume,mute:tr.mute||tr.volume===0,pitched:isMelodic(tr.instrument)})),time,dark,playing,reduced.matches,visualMaster,noteEffect);
+ if(visualization==='flower')paintSoundFlower(oc,landscape,active.map(({tr,index})=>({index,label:String(padNumbers[index]),color:tr.color,volume:tr.volume,mute:tr.mute||tr.volume===0,pitched:isMelodic(tr.instrument)})),time,dark,playing,reduced.matches,visualMaster,noteEffect,flowerCenterMode==='ring');
  if(visualization==='constellation')paintConstellation(oc,landscape,active.map(({tr,index})=>({index,label:String(padNumbers[index]),color:tr.color,volume:tr.volume,mute:tr.mute||tr.volume===0,pitched:isMelodic(tr.instrument)})),time,dark,playing,reduced.matches,visualMaster,noteEffect);
  if(visualization==='landscape')paintLandscape(oc,landscape,active.map(({tr,index})=>({index,label:String(padNumbers[index]),color:tr.color,volume:tr.volume,mute:tr.mute||tr.volume===0,pitched:isMelodic(tr.instrument)})),time,bpm,groove.beats,dark,playing,reduced.matches,visualMaster,noteEffect);
  if(visualization==='stream'){
@@ -2040,6 +2053,12 @@ function frame(now:number){
  if(centerMode==='sun')renderCenter(time,dark);
  else if(centerMode==='ring')renderPulseRing(time,dark);
  else if(centerMode!=='off')renderCenterVariant(time,dark,centerMode);
+ }else if(visualization==='flower'&&flowerCenterMode!=='ring'&&flowerCenterMode!=='off'){
+ // Fit the shared centre variants to the flower's compact heart; never overlay its native ring.
+ oc.save();oc.translate(350,350);oc.scale(.55,.55);oc.translate(-350,-350);
+ if(flowerCenterMode==='sun')renderCenter(time,dark);
+ else renderCenterVariant(time,dark,flowerCenterMode);
+ oc.restore();
  }
  dc.clearRect(0,0,drawing.width,drawing.height);trail=trail.filter(p=>now-p.time<2200);
  const previousTrail=new Map<number,Trail>();
@@ -2085,7 +2104,7 @@ function applySettings(saved:SoundSettings){
    remeterRhythm(tapPattern,groove.beats,0);syncRhythmUi();
   }
   syncRhythmUi();
-  selectCenterMode(saved.center);selectBackgroundMode(saved.background);selectOrbitMode(saved.orbit);selectVisualization(saved.visualization??'orbit');
+  selectCenterMode(saved.center);selectFlowerCenterMode(saved.flowerCenter??'ring');selectBackgroundMode(saved.background);selectOrbitMode(saved.orbit);selectVisualization(saved.visualization??'orbit');
 
  syncGroove();syncDanceTiles();sync();
 }

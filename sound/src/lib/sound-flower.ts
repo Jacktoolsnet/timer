@@ -27,7 +27,7 @@ function petal(ctx:CanvasRenderingContext2D,index:number,reach:number,width:numb
 }
 
 /** Rendering only: no audio nodes, randomness or independent animation clock. */
-export function paintSoundFlower(ctx:CanvasRenderingContext2D,history:LandscapeHistory,tracks:LandscapeTrack[],time:number,dark:boolean,playing:boolean,reduced:boolean,master:number,effect=1){
+export function paintSoundFlower(ctx:CanvasRenderingContext2D,history:LandscapeHistory,tracks:LandscapeTrack[],time:number,dark:boolean,playing:boolean,reduced:boolean,master:number,effect=1,showCenter=true){
  ctx.save();ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';ctx.lineCap='round';ctx.lineJoin='round';
  let total=0;
  for(const tr of tracks){
@@ -81,7 +81,7 @@ export function paintSoundFlower(ctx:CanvasRenderingContext2D,history:LandscapeH
   }
  }
  // A small multicoloured heart gathers only the energy actually heard in the petals.
- for(const tr of tracks){
+ if(showCenter)for(const tr of tracks){
   const angle=tr.index*Math.PI*2/9-Math.PI/2,level=clamp(total/Math.max(1,tracks.length),0,1);
   ctx.strokeStyle=tr.color;ctx.globalAlpha=tr.mute?.08:.2+level*.6;ctx.lineWidth=2+level*2;
   ctx.beginPath();ctx.arc(350,350,reduced?24:22+level*5,angle+.08,angle+Math.PI*2/9-.08);ctx.stroke();

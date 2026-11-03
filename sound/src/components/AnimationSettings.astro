@@ -30,6 +30,9 @@ const {lang}=Astro.props,c=animationSettingsCopy[lang];
    <article class="animation-category"><h3>{animationCopy[lang].center}</h3><div class="center-tiles" role="group" aria-label={animationCopy[lang].center}>{(['ring','filled','sun','sine','bars','random','off'] as const).map(mode=><button type="button" class="center-tile" data-center-mode={mode} aria-pressed={mode==='ring'?"true":"false"}><CenterIcon name={mode}/><span>{centerCopy[lang][mode]}</span></button>)}</div></article>
   </div>
  </div>
+ <div data-animation-panel="flower" data-panel-title={c.flower} hidden>
+  <article class="animation-category"><h3>{animationCopy[lang].center}</h3><div class="center-tiles" role="group" aria-label={animationCopy[lang].center}>{(['ring','filled','sun','sine','bars','random','off'] as const).map(mode=><button type="button" class="center-tile" data-flower-center-mode={mode} aria-pressed={mode==='ring'?"true":"false"}><CenterIcon name={mode}/><span>{centerCopy[lang][mode]}</span></button>)}</div></article>
+ </div>
  <div data-animation-panel="background" data-panel-title={c.background} hidden>
   <div class="center-tiles" role="group" aria-label={c.background}>{(['clouds','aurora','stars','waves','random','off'] as const).map(mode=><button type="button" class="center-tile" data-background-mode={mode} aria-pressed={mode==='clouds'?"true":"false"}><BackgroundIcon name={mode}/><span>{backgroundCopy[lang][mode]}</span></button>)}</div>
  </div>
