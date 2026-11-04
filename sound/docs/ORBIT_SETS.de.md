@@ -51,7 +51,10 @@ Stimmen, Tonhöhenkurven und Instrument-Rezepte), nicht ein Audio-Preview oder e
 fremde Aufnahme. Zusätzliche Sets haben getrennte Effektbusse und Voice-Register.
 Orbit, Klangblume, Notenstrom und Klanglandschaft zeigen das bearbeitete Set.
 **Sternenhimmel und Nebelwolken zeigen bei mehreren belegten Sets alle Stimmen
-zusammen**, mit stabilen Sternengruppen pro Set/Instrument (bis zu 81). Die
+zusammen**, mit allen neun Orbitringen jedes belegten Sets als stabilen
+Sternengruppen (Kanon: 36 Gruppen, maximal 81). Unbespielte, deaktivierte und
+lautlose Ringe bleiben als dezente Sternbilder sichtbar, ohne Notenimpulse.
+Auch mit nur einem belegten Set werden alle neun Ringe dargestellt. Die
 Raster-Vorschauen zeigen weiterhin die Instrumentenringe des jeweiligen Sets.
 
 Die Summenlautstärke wird nach Anzahl klanglich belegter, nicht stummgeschalteter

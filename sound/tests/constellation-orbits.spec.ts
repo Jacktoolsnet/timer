@@ -39,7 +39,7 @@ test('Canon lights all four audible sets, keeps a shared sky on selection, and m
   CanvasRenderingContext2D.prototype.createRadialGradient=function(...args){if(this.canvas.id==='orbit'&&args[2]===0){const a=(window as any).skyGlows;a.push([args[0],args[1]]);if(a.length>5000)a.splice(0,500);}return radial.apply(this,args);};
  });
  await page.goto('/de/');await page.locator('#music-settings-open').click();await page.locator('[data-library-open=classical]').click();await page.locator('[data-library-song=classical-canon]').click();
- const orbit=page.locator('#orbit');await expect(orbit).toHaveAttribute('data-visualization','constellation');await expect(orbit).toHaveAttribute('data-constellation-sets','4');await expect(orbit).toHaveAttribute('data-constellation-lanes','4');
+ const orbit=page.locator('#orbit');await expect(orbit).toHaveAttribute('data-visualization','constellation');await expect(orbit).toHaveAttribute('data-constellation-sets','4');await expect(orbit).toHaveAttribute('data-constellation-lanes','36');
  await setTempo(page,'220');
  const lit=()=>page.evaluate(()=> (window as any).skyGlows as number[][]);
  await expect.poll(async()=>{
@@ -47,7 +47,7 @@ test('Canon lights all four audible sets, keeps a shared sky on selection, and m
  },{timeout:13000}).toBe(4);
  await orbit.screenshot({path:'/tmp/canon-sky-'+info.project.name+'.png'});
  await page.locator('#orbit-sets-open').click();await page.locator('[data-orbit-select="2"]').click();
- await expect(orbit).toHaveAttribute('data-visualization','constellation');await expect(orbit).toHaveAttribute('data-constellation-sets','4');
+ await expect(orbit).toHaveAttribute('data-visualization','constellation');await expect(orbit).toHaveAttribute('data-constellation-sets','4');await expect(orbit).toHaveAttribute('data-constellation-lanes','36');
  await page.locator('[data-orbit-mute="3"]').click();await page.evaluate(()=>(window as any).skyGlows=[]);await page.waitForTimeout(450);
  const [x,y]=constellationCentre(30,true);expect((await lit()).some(p=>Math.hypot(p[0]-x,p[1]-y)<40)).toBe(false);
  await page.locator('[data-orbit-mute="3"]').click();await expect.poll(async()=>(await lit()).some(p=>Math.hypot(p[0]-x,p[1]-y)<40)).toBe(true);
@@ -63,4 +63,12 @@ test('all 9 sets and 81 instruments are represented without changing imported no
  await page.goto('/de/');await page.locator('#files-open').click();await page.locator('#json-file').setInputFiles({name:'81.orbit.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(p))});await page.locator('#files-close').click();
  await expect(page.locator('#orbit')).toHaveAttribute('data-constellation-sets','9');await expect(page.locator('#orbit')).toHaveAttribute('data-constellation-lanes','81');
  await page.locator('#play').click();await page.waitForTimeout(500);await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
+});
+
+
+test('one occupied set still shows all nine rings, including disabled and silent instrument slots',async({page})=>{
+ const p=structuredClone(bank);for(let i=1;i<9;i++)p.sets[i]={name:'',muted:false,settings:null,barOffset:0} as any;
+ await page.goto('/de/');await page.locator('#files-open').click();await page.locator('#json-file').setInputFiles({name:'one.orbit.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(p))});await page.locator('#files-close').click();
+ await expect(page.locator('#orbit')).toHaveAttribute('data-constellation-sets','1');await expect(page.locator('#orbit')).toHaveAttribute('data-constellation-lanes','9');
+ await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false');
 });

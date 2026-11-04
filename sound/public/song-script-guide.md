@@ -438,7 +438,10 @@ bounded at 96 voices to protect the browser; avoid stacking excessive chords.
 ### Shared constellation view for orbit projects
 
 With multiple occupied orbit sets, `visualization: "constellation"` displays all
-sets together, for both `stars` and `nebula`. Other visualizations remain focused
+sets together, for both `stars` and `nebula`. All nine instrument slots of every
+occupied set remain visible (36 groups for the four-set Canon, up to 81 total).
+Disabled or silent slots are quiet constellations, never fabricated note pulses.
+A single set likewise displays all nine slots. Other visualizations remain focused
 on the selected editing set. Each set/instrument has a stable visual identity;
 only actual scheduled/heard notes drive its lights. Set mute, transport, master
 volume, note brightness and reduced motion are respected. No extra music is

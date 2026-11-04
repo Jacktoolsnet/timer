@@ -2202,7 +2202,7 @@ function frame(now:number){
  if(visualization==='flower')paintSoundFlower(oc,landscape,active.map(({tr,index})=>({index,label:String(padNumbers[index]),color:tr.color,volume:tr.volume,mute:tr.mute||tr.volume===0,pitched:isMelodic(tr.instrument)})),time,dark,playing,reduced.matches,visualMaster,noteEffect,flowerCenterMode==='ring');
  if(visualization==='constellation'){
   const shared=!!orbitClock&&orbitSets.filter((slot,i)=>i===activeOrbitSet?activeOrbitExists:!!slot.settings).length>1;
-  const stars=shared?sharedConstellationTracks(dark):active.map(({tr,index})=>({index,label:String(padNumbers[index]),color:tr.color,volume:tr.volume,mute:!scoreLaneAudible(index)||tr.volume===0,pitched:isMelodic(tr.instrument)}));
+  const stars=shared?sharedConstellationTracks(dark):tracks.map((tr,index)=>({index,label:String(padNumbers[index]),color:tr.color,volume:tr.volume,mute:!scoreLaneAudible(index)||tr.volume===0,pitched:isMelodic(tr.instrument)}));
   orbit.dataset.constellationSets=String(shared?new Set(stars.map(tr=>Math.floor(tr.index/9))).size:1);
   orbit.dataset.constellationLanes=String(stars.length);
   paintConstellation(oc,shared?skyHistory:landscape,stars,time,dark,playing,reduced.matches,visualMaster,noteEffect,constellationVariant,shared);
@@ -2509,9 +2509,8 @@ function sharedConstellationTracks(dark:boolean):LandscapeTrack[]{
    const part=source&&position?script!.scenes[position.index].parts.find(p=>p.track===source.id):null;
    const volume=current?tr.volume:source?(source.volume??1)*(part?.volume??1):tr.volume;
    const enabled=current?tr.enabled:script?!!source:tr.enabled;
-   if(!enabled||volume<=0)continue;
    result.push({index:set*9+lane,color:(dark?colors:lightColors)[(set*2+lane)%9],volume,
-    mute:slot.muted||(current?!scoreLaneAudible(lane):tr.mute),pitched:isMelodic(instrument)});
+    mute:slot.muted||!enabled||volume<=0||(current?!scoreLaneAudible(lane):tr.mute),pitched:isMelodic(instrument)});
   }
  });
  return result;
