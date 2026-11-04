@@ -297,7 +297,7 @@ def main():
  REPORT.clear() # A prior preview build must not leak extra entries into the stable report.
  manifest=[build(e) for e in ENTRIES]
  for entry in manifest:
-  if entry['id']=='classical-canon':entry['projectPath']='/library/classical-canon.orbit.json'
+  if entry['id'] in ('classical-canon','house-canon'):entry['projectPath']='/library/'+entry['id']+'.orbit.json'
  # Use the same source performance for the independently editable four-orbit edition.
  import runpy
  runpy.run_path(str(Path(__file__).with_name('build-canon-orbits.py')))['build']()

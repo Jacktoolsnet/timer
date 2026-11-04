@@ -114,3 +114,16 @@ compensate the four-set mix trim; source balance is retained. Source lane indice
 and seeds are kept, and all four parts share one clock at quarter = 55.
 Generated offline by `scripts/build-canon-orbits.py`, also called by the regular
 library builder. Library `projectPath` loads the full bank; five slots remain free.
+
+### Five-orbit House Canon edition
+
+`house-canon.orbit.json` splits the existing Canonic Lights production into three
+canon voices (pluck, electric piano, strings), bass/piano accompaniment, and drums.
+All 1,792 note events, 60 bars, source lane indices, seeds, articulation and dynamic
+curves remain intact. It remains a free House arrangement, not a newly claimed
+original score. Existing attribution and CC BY 3.0 source information are copied
+in full to each part; the single-set source file is unchanged. Track gains are
+multiplied by sqrt(5) to compensate the full-bank mix trim. No extra voices, new
+score sources or external audio are used. Four set slots remain free, and the
+shared constellation view shows all 45 ring groups. The offline Canon orbit
+builder now produces both the classical and House banks.

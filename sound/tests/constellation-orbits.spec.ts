@@ -10,8 +10,10 @@ test('81 independent, stable star groups remain on-canvas and cancel queued or r
   centres.add(constellationCentre(i,true).join(':'));
   for(const pitch of [-36,0,12,72]){
    const p=constellationStar(i,pitch,true);expect(p).toEqual(constellationStar(i,pitch,true));
-   expect(p.x).toBeGreaterThan(35);expect(p.x).toBeLessThan(665);expect(p.y).toBeGreaterThan(35);expect(p.y).toBeLessThan(665);
+   expect(p.x).toBeGreaterThan(0);expect(p.x).toBeLessThan(700);expect(p.y).toBeGreaterThan(0);expect(p.y).toBeLessThan(700);
   }
+  const [sx,sy]=constellationCentre(i,true),large=constellationStar(i,0,true);
+  expect(Math.hypot(large.x-sx,large.y-sy)).toBeCloseTo((20+36/108*43)*1.05,8);
   history.record(i,{at:1,pitch:12,level:.8,length:4});history.record(i,{at:3,pitch:24,level:.8,length:4});
   expect(constellationLights(history,i,.9,true)).toHaveLength(0);expect(constellationLights(history,i,2,true)).toHaveLength(1);
  }
@@ -43,14 +45,14 @@ test('Canon lights all four audible sets, keeps a shared sky on selection, and m
  await setTempo(page,'220');
  const lit=()=>page.evaluate(()=> (window as any).skyGlows as number[][]);
  await expect.poll(async()=>{
-  const glows=await lit();return [0,10,20,30].filter(i=>{const [x,y]=constellationCentre(i,true);return glows.some(p=>Math.hypot(p[0]-x,p[1]-y)<40);}).length;
+  const glows=await lit();return [0,10,20,30].filter(i=>{const [x,y]=constellationCentre(i,true);return glows.some(p=>Math.hypot(p[0]-x,p[1]-y)<70);}).length;
  },{timeout:13000}).toBe(4);
  await orbit.screenshot({path:'/tmp/canon-sky-'+info.project.name+'.png'});
  await page.locator('#orbit-sets-open').click();await page.locator('[data-orbit-select="2"]').click();
  await expect(orbit).toHaveAttribute('data-visualization','constellation');await expect(orbit).toHaveAttribute('data-constellation-sets','4');await expect(orbit).toHaveAttribute('data-constellation-lanes','36');
  await page.locator('[data-orbit-mute="3"]').click();await page.evaluate(()=>(window as any).skyGlows=[]);await page.waitForTimeout(450);
- const [x,y]=constellationCentre(30,true);expect((await lit()).some(p=>Math.hypot(p[0]-x,p[1]-y)<40)).toBe(false);
- await page.locator('[data-orbit-mute="3"]').click();await expect.poll(async()=>(await lit()).some(p=>Math.hypot(p[0]-x,p[1]-y)<40)).toBe(true);
+ const [x,y]=constellationCentre(30,true);expect((await lit()).some(p=>Math.hypot(p[0]-x,p[1]-y)<70)).toBe(false);
+ await page.locator('[data-orbit-mute="3"]').click();await expect.poll(async()=>(await lit()).some(p=>Math.hypot(p[0]-x,p[1]-y)<70)).toBe(true);
  await page.locator('#play').click();await page.evaluate(()=>(window as any).skyGlows=[]);await page.waitForTimeout(350);expect(await lit()).toHaveLength(0);
  await chooseAnimation(page,'button[data-visualization=orbit]');await expect(orbit).toHaveAttribute('data-visualization','orbit');
  expect(errors).toEqual([]);

@@ -137,7 +137,10 @@ Stimmenaufteilung vergleichen.
 Der Kanon öffnet jetzt in allen vier Sets mit Sternenhimmel und ausgeschalteter
 separater Hintergrundanimation. Ein sanfter Nachthimmel, feste verschieden helle
 Hintergrundsterne und die farbigen, notengesteuerten Gruppen bilden ein gemeinsames
-Bild. Die Basssterne beginnen allein; die Violinen treten entsprechend der Partitur
+Bild. Die Sternengruppen sind in der gemeinsamen Ansicht annähernd doppelt so
+groß wie in der ersten Mehr-Set-Fassung (1,05 statt 0,55 des Einzelset-Radius).
+Sie dürfen sich bewusst überschneiden; die stabilen Mittelpunkte bleiben erhalten.
+Die Basssterne beginnen allein; die Violinen treten entsprechend der Partitur
 hinzu. Keine zusätzliche oder erfundene Musik. Die Einstellungen bleiben individuell
 änderbar; auch Nebelwolken können die gemeinsame Notenhistorie darstellen.
 
@@ -155,3 +158,30 @@ Die geteilte Ansicht begrenzt gleichzeitig gezeichnete Noten-Halos und Nebelwolk
 statt bei neun vollen Sets unbeschränkt viele Verläufe zu malen. Reduced Motion
 unterdrückt bewegte Spuren, Strahlen und Noten-Halos; statische Tonpunkte bleiben.
 Helle und dunkle Darstellung, Fokusansicht und MP4 verwenden denselben Canvas.
+
+## House-Kanon · Canonic Lights
+
+Auch die zweite Kanonfassung lädt nun über `projectPath` eine vollständige Bank:
+`library/house-canon.orbit.json`, fünf belegte Sets und vier freie Plätze.
+
+1. Kanon I · Pluck (`voice1`)
+2. Kanon II · E-Piano (`voice2`)
+3. Kanon III · Streicher (`voice3`)
+4. Bass & Klavier (`ground`, `continuo`)
+5. Drums · Kick, Clap & Hi-Hat (`kick`, `rim`, `hat`)
+
+Die vollständige vorhandene House-Bearbeitung bleibt unverändert: 60 Takte,
+122 Viertel/Minute, 4/4, 1.792 Notenereignisse mit denselben Einsätzen, Kurven,
+Dynamikwerten, Breaks und Schluss. Es ist weiterhin die benannte freie Bearbeitung,
+nicht Pachelbels vollständige Originalpartitur. Die Einzelset-Quelldatei sowie ihre
+Quellen- und Lizenzangaben bleiben unverändert; jede Teilfassung trägt die vollen
+Angaben. Kein zusätzliches Instrument und keine neue Audiodatei wurden eingeführt.
+
+Die unabhängigen Gruppen behalten die ursprünglichen Spurindizes und Seeds.
+Jede Spur ist genau einem Set zugeordnet. Ihre Pegel werden mit `sqrt(5)` als
+Gegenstück zur allgemeinen Projekt-Mix-Absenkung multipliziert, sodass die bisherige
+Grundbalance bei voller Besetzung erhalten bleibt. Mutes wirken gruppenweise;
+beispielsweise lässt sich das Schlagzeug isoliert ausschalten.
+Der Standard-Sternenhimmel zeigt alle 45 Ringe. Die Notenlichtimpulse folgen nur
+den tatsächlich klingenden Spuren. Beide Kanon-Banken werden reproduzierbar von
+`build-canon-orbits.py` und im regulären Bibliotheks-Build erzeugt.

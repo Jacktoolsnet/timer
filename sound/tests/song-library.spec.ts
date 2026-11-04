@@ -80,17 +80,17 @@ for(const lang of ['de','en','es','fr'] as const)test('Coffeehouse folder expose
 });
 test('failed and cancelled fetches are atomic and retryable',async({page})=>{
  await music(page);
- await page.route('**/library/house-canon.song.json',route=>route.fulfill({status:503,body:'unavailable'}));
+ await page.route('**/library/house-canon.orbit.json',route=>route.fulfill({status:503,body:'unavailable'}));
  await page.locator('[data-library-open=house]').click();await page.locator('[data-library-song=house-canon]').click();
  await expect(page.locator('#song-library-status')).toContainText('nicht geladen');await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false');
  await expect(page.locator('[data-style-preset=electronic]')).toHaveAttribute('aria-pressed','true');
- await page.unroute('**/library/house-canon.song.json');
+ await page.unroute('**/library/house-canon.orbit.json');
  let release!:()=>void;const gate=new Promise<void>(r=>release=r);
- await page.route('**/library/house-canon.song.json',async route=>{await gate;await route.continue().catch(()=>{});});
+ await page.route('**/library/house-canon.orbit.json',async route=>{await gate;await route.continue().catch(()=>{});});
  await page.locator('[data-library-song=house-canon]').click();await expect(page.locator('[data-library-random=house]')).toBeDisabled();
  await page.locator('#song-library-close').click();release();
  await expect(page.locator('[data-library-open=house]')).toBeEnabled();await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false');
- await page.unroute('**/library/house-canon.song.json');
+ await page.unroute('**/library/house-canon.orbit.json');
  await page.locator('[data-library-open=house]').click();await page.locator('[data-library-song=house-canon]').click();
  await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
 });

@@ -12,7 +12,9 @@ export function constellationCentre(index:number,sky=false):readonly number[]{
 export function constellationStar(index:number,pitch:number,sky=false){
  const [cx,cy]=constellationCentre(index,sky);
  const p=clamp(pitch,-36,72),angle=p*2.399963229728653+index*.73;
- const radius=(20+(p+36)/108*43)*(sky?.55:1);
+ // Shared skies deliberately overlap: keep each ring at least as legible as
+ // in the single-set view rather than shrinking it to fit a non-overlap grid.
+ const radius=(20+(p+36)/108*43)*(sky?1.05:1);
  return {x:cx+Math.cos(angle)*radius,y:cy+Math.sin(angle)*radius};
 }
 export type ConstellationLight={x:number;y:number;level:number;age:number;length:number};

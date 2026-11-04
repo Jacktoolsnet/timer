@@ -74,7 +74,8 @@
       "en": "Full 44-bar violin source; free three-voice canon, ground and coda. Not the complete original score.",
       "es": "Canon libre a tres voces de la fuente completa para violín; no es la partitura original completa.",
       "fr": "Canon libre à trois voix à partir de la partie complète de violon ; pas la partition originale intégrale."
-    }
+    },
+    "projectPath": "/library/house-canon.orbit.json"
   },
   {
     "id": "house-ode",
