@@ -72,3 +72,37 @@ test('one occupied set still shows all nine rings, including disabled and silent
  await expect(page.locator('#orbit')).toHaveAttribute('data-constellation-sets','1');await expect(page.locator('#orbit')).toHaveAttribute('data-constellation-lanes','9');
  await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false');
 });
+
+test('silent orbit rings do not dilute the nebula; dense banks retain strong clouds within the rendering budget',()=>{
+ const history=new LandscapeHistory(81);
+ for(let i=0;i<81;i++)history.record(i,{at:1,pitch:12,level:.9,length:3});
+ const tracks=Array.from({length:81},(_,index)=>({index,color:'#77ccff',volume:.5,mute:false,pitched:true}));
+ const draw=(lanes:typeof tracks)=>{
+  let gradients=0;const alphas:number[]=[];
+  const ctx={globalAlpha:1,save(){},restore(){},fillRect(){},beginPath(){},moveTo(){},lineTo(){},stroke(){},fill(){alphas.push(this.globalAlpha);},fillText(){},arc(){},
+   createRadialGradient(){gradients++;return {addColorStop(){}};}};
+  paintConstellation(ctx as unknown as CanvasRenderingContext2D,history,lanes,2,true,true,false,1,1,'nebula',true);
+  return {gradients,alphas};
+ };
+ const four=tracks.slice(0,4),quiet=tracks.slice(4,36).map(t=>({...t,mute:true,volume:0}));
+ const reference=draw(four),expanded=draw([...four,...quiet]);
+ expect(reference.gradients).toBeGreaterThan(40);expect(expanded.gradients).toBe(reference.gradients);
+ expect(expanded.alphas.filter(a=>a>.05).length).toBeGreaterThan(20);
+ // 81 sounding lanes get at most three nebula layers and two note haloes each.
+ expect(draw(tracks).gradients).toBeLessThanOrEqual(1+81*5);
+});
+
+test('Canon nebula paints visibly strong clouds despite all 36 orbit rings being present',async({page},info)=>{
+ await page.addInitScript(()=>{
+  (window as any).visibleNebula=0;const clouds=new WeakSet<CanvasGradient>();
+  const radial=CanvasRenderingContext2D.prototype.createRadialGradient,fill=CanvasRenderingContext2D.prototype.fill;
+  CanvasRenderingContext2D.prototype.createRadialGradient=function(...args){const g=radial.apply(this,args);if(this.canvas.id==='orbit'&&args[2]===0&&args[5]>45)clouds.add(g);return g;};
+  CanvasRenderingContext2D.prototype.fill=function(...args:any[]){if(this.canvas.id==='orbit'&&typeof this.fillStyle==='object'&&clouds.has(this.fillStyle as CanvasGradient)&&this.globalAlpha>.02)(window as any).visibleNebula++;return (fill as any).apply(this,args);};
+ });
+ await page.goto('/de/');await page.locator('#music-settings-open').click();await page.locator('[data-library-open=classical]').click();await page.locator('[data-library-song=classical-canon]').click();
+ await setTempo(page,'220');await chooseAnimation(page,'button[data-constellation-variant=nebula]');
+ await expect(page.locator('#orbit')).toHaveAttribute('data-constellation-lanes','36');
+ await expect(page.locator('#orbit')).toHaveAttribute('data-constellation-variant','nebula');
+ await expect.poll(()=>page.evaluate(()=>(window as any).visibleNebula)).toBeGreaterThan(20);
+ await page.waitForTimeout(6500);await page.locator('#orbit').screenshot({path:'/tmp/canon-nebula-'+info.project.name+'.png'});
+});

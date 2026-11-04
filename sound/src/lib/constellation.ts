@@ -50,10 +50,17 @@ export function nebulaClouds(history:LandscapeHistory,index:number,time:number,g
  return clouds;
 }
 function paintNebula(ctx:CanvasRenderingContext2D,history:LandscapeHistory,tracks:LandscapeTrack[],time:number,dark:boolean,reduced:boolean,master:number,effect:number,sky=false){
+ // Quiet constellation rings must not consume the sounding voices' cloud budget.
+ const sounding=tracks.filter(tr=>!tr.mute&&tr.volume>0).length;
+ const limit=sky?Math.max(3,Math.floor(240/Math.max(1,sounding))):Infinity;
  for(const tr of tracks){
   if(tr.mute||tr.volume<=0)continue;
   const gain=clamp(tr.volume*2,0,1.5)*clamp(master,0,1)*clamp(effect,0,1.5);
-  for(const cloud of nebulaClouds(history,tr.index,time,gain,reduced,sky).slice(0,sky?Math.max(3,Math.floor(240/Math.max(1,tracks.length))):Infinity)){
+  const clouds=nebulaClouds(history,tr.index,time,gain,reduced,sky);
+  // Old, almost faded lobes are generated first. Keep the strongest cloud layers,
+  // not just that oldest prefix, when a dense shared sky reaches its budget.
+  const visible=sky?clouds.sort((a,b)=>b.alpha-a.alpha).slice(0,limit):clouds;
+  for(const cloud of visible){
    const paint=ctx.createRadialGradient(cloud.x,cloud.y,0,cloud.x,cloud.y,cloud.radius);
    paint.addColorStop(0,tr.color);paint.addColorStop(.4,tr.color+'b0');paint.addColorStop(1,tr.color+'00');
    ctx.fillStyle=paint;ctx.globalAlpha=cloud.alpha*(dark?1:.85);
