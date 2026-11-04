@@ -10,7 +10,7 @@ import {isMelodic,melodicSemitones} from '../src/lib/harmony';
 import {stereoPosition} from '../src/lib/space';
 const added=['flute','clarinet','trumpet','horn','analoglead','acidbass','shimmer','cello','vibraphone','conga'] as const;
 test('all ten additions have translations, a single group, deliberate articulation and compatible random palettes',()=>{
- expect(instrumentIds).toHaveLength(35);
+ expect(instrumentIds).toHaveLength(38);
  for(const id of added){
   expect(Object.values(instrumentGroups).flat().filter(v=>v===id)).toHaveLength(1);
   expect(instrumentFamily[id]).toBeTruthy();

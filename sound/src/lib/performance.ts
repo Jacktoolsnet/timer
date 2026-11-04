@@ -5,9 +5,9 @@ export type VoiceArticulation={scoop?:number;attack?:number;release?:number;glid
 /** Performance choices, not restrictions on the user's manual instrument selection. */
 export function performanceProfile(style:StyleId,id:SustainedInstrument,dance: DanceId|null=null){
  const rhythmic=dance?['quickstep','jive','samba','chacha','pasodoble','discofox','tango'].includes(dance):['electronic','house','sport','drumandbass','funk','reggae','hiphop','tango'].includes(style);
- const detached=rhythmic&&['saxophone','flute','clarinet','trumpet','horn','strings','cello','organ','analoglead'].includes(id);
+ const detached=rhythmic&&['saxophone','flute','clarinet','trumpet','horn','strings','cello','violin','viola','bowedbass','organ','analoglead'].includes(id);
  const voice:VoiceArticulation=detached
-  ?{detached:true,attack:id==='organ'?.008:(id==='strings'||id==='cello')?.018:.012,release:(id==='strings'||id==='cello')?.035:.025,glide:.004,vibrato:id==='organ'?0:.0003}
+  ?{detached:true,attack:id==='organ'?.008:(['strings','cello','violin','viola','bowedbass'].includes(id))?.018:.012,release:(['strings','cello','violin','viola','bowedbass'].includes(id))?.035:.025,glide:.004,vibrato:id==='organ'?0:.0003}
   :rhythmic&&id==='voice'?{attack:.045,release:.16,glide:.035}
   :rhythmic&&['pad','shimmer','vocalpad','choir'].includes(id)?{attack:(id==='pad'||id==='shimmer')?.16:.12,release:.35}:{};
  // Voices and atmospheric layers remain phrased, rather than returning to repeated "la la" attacks.

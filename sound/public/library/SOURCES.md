@@ -127,3 +127,26 @@ multiplied by sqrt(5) to compensate the full-bank mix trim. No extra voices, new
 score sources or external audio are used. Four set slots remain free, and the
 shared constellation view shows all 45 ring groups. The offline Canon orbit
 builder now produces both the classical and House banks.
+
+
+### Library-wide orbit editions (2026-11-04)
+
+`build-library-orbits.py` produces 14 selectable multi-set editions (including
+both Canons). House theme/accompaniment/bass/drums, Jazz piano/bass/rhythm,
+Lo-Fi electric piano/cello/beat and Coffeehouse piano/inner voices/bass are
+separated without adding notes. Original meters, tempo units, repeats, scene
+lengths, lane indices and seeds are retained. Each partial script carries the
+full title and attribution; gains compensate the shared square-root mix trim.
+The original single-set sources are not overwritten. The solo-piano Rondo alla
+Turca deliberately remains a single set. Coffeehouse entries retain their
+existing preview status and scope; splitting a production does not change its
+source or clearance status.
+
+The Nachtmusik bank uses five sets: two violins, viola, cello and arco double
+bass. The vendored `scripts/scores/nacht-eine-kleine-nachtmusik-mvt1.ly` labels
+the bass staff “Cello & Double Bass”; `nacht-mutopiaheaders.ly` also names both
+instruments. That same existing cello line is rendered additionally one sounding
+octave lower on a quieter bowed bass. No new melodic line is composed. The bank's
+arrangement notice documents this realization; other source/rights fields remain
+unchanged. Violin, viola and bowed double bass use new synthetic sustained voices
+with distinct envelopes and harmonic bodies, not external audio recordings.

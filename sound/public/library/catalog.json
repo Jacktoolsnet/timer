@@ -36,7 +36,8 @@
       "en": "Complete first-movement score MIDI, including its encoded repeats; string ensemble.",
       "es": "Primer movimiento completo con cuatro voces de cuerda y las repeticiones de la fuente.",
       "fr": "Premier mouvement complet, quatre parties de cordes et reprises de la source."
-    }
+    },
+    "projectPath": "/library/classical-nachtmusik.orbit.json"
   },
   {
     "id": "classical-turca",
@@ -94,7 +95,8 @@
       "en": "Complete 16-bar SATB hymn setting, twice, with original intro/break/outro. Not the complete symphony.",
       "es": "Arreglo completo del himno de 16 compases, con introducción y final; no la sinfonía completa.",
       "fr": "Hymne complet de 16 mesures avec introduction et conclusion ; pas la symphonie entière."
-    }
+    },
+    "projectPath": "/library/house-ode.orbit.json"
   },
   {
     "id": "house-elise",
@@ -113,7 +115,8 @@
       "en": "Complete score-event sequence and all source voices; repeats as encoded in the vendored performance.",
       "es": "Secuencia completa de notas y voces de la fuente citada; forma y límites en la documentación.",
       "fr": "Séquence complète des notes et parties de la source citée ; forme et limites documentées."
-    }
+    },
+    "projectPath": "/library/house-elise.orbit.json"
   },
   {
     "id": "jazz-entertainer",
@@ -132,7 +135,8 @@
       "en": "Complete score-event sequence and all source voices; repeats as encoded in the vendored performance.",
       "es": "Secuencia completa de notas y voces de la fuente citada; forma y límites en la documentación.",
       "fr": "Séquence complète des notes et parties de la source citée ; forme et limites documentées."
-    }
+    },
+    "projectPath": "/library/jazz-entertainer.orbit.json"
   },
   {
     "id": "jazz-maple-leaf",
@@ -151,7 +155,8 @@
       "en": "Complete score-event sequence and all source voices; repeats as encoded in the vendored performance.",
       "es": "Secuencia completa de notas y voces de la fuente citada; forma y límites en la documentación.",
       "fr": "Séquence complète des notes et parties de la source citée ; forme et limites documentées."
-    }
+    },
+    "projectPath": "/library/jazz-maple-leaf.orbit.json"
   },
   {
     "id": "jazz-easy-winners",
@@ -170,7 +175,8 @@
       "en": "Complete score-event sequence and all source voices; repeats as encoded in the vendored performance.",
       "es": "Secuencia completa de notas y voces de la fuente citada; forma y límites en la documentación.",
       "fr": "Séquence complète des notes et parties de la source citée ; forme et limites documentées."
-    }
+    },
+    "projectPath": "/library/jazz-easy-winners.orbit.json"
   },
   {
     "id": "lofi-gymnopedie",
@@ -189,7 +195,8 @@
       "en": "Complete score-event sequence and all source voices; repeats as encoded in the vendored performance.",
       "es": "Secuencia completa de notas y voces de la fuente citada; forma y límites en la documentación.",
       "fr": "Séquence complète des notes et parties de la source citée ; forme et limites documentées."
-    }
+    },
+    "projectPath": "/library/lofi-gymnopedie.orbit.json"
   },
   {
     "id": "lofi-traeumerei",
@@ -208,7 +215,8 @@
       "en": "Complete score-event sequence and all source voices; repeats as encoded in the vendored performance.",
       "es": "Secuencia completa de notas y voces de la fuente citada; forma y límites en la documentación.",
       "fr": "Séquence complète des notes et parties de la source citée ; forme et limites documentées."
-    }
+    },
+    "projectPath": "/library/lofi-traeumerei.orbit.json"
   },
   {
     "id": "lofi-prelude",
@@ -227,6 +235,7 @@
       "en": "Complete score-event sequence and all source voices; repeats as encoded in the vendored performance.",
       "es": "Secuencia completa de notas y voces de la fuente citada; forma y límites en la documentación.",
       "fr": "Séquence complète des notes et parties de la source citée ; forme et limites documentées."
-    }
+    },
+    "projectPath": "/library/lofi-prelude.orbit.json"
   }
 ]

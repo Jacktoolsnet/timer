@@ -69,7 +69,7 @@ const vocalPalette:Record<StyleId,InstrumentId[]>={
 const colourPalette:Partial<Record<StyleId,InstrumentId[]>>={
  electronic:['pluck','analoglead','acidbass','shimmer'],house:['epiano','organ','strings','analoglead','shimmer'],
  pop:['epiano','strings','saxophone','flute','trumpet','analoglead'],rock:['organ','epiano','cello','analoglead'],
- classical:['organ','flute','clarinet','horn','cello'],slowwaltz:['flute','clarinet','cello'],tango:['cello','clarinet'],
+ classical:['organ','flute','clarinet','horn','cello','violin','viola','bowedbass'],slowwaltz:['flute','clarinet','cello'],tango:['cello','clarinet'],
  jazz:['epiano','guitar','clarinet','trumpet','vibraphone'],coffeehouse:['piano','saxophone','flute','vibraphone'],
  funk:['saxophone','epiano','trumpet','conga','analoglead'],latin:['saxophone','epiano','flute','conga'],
  lofi:['piano','vibraphone','cello'],reggae:['epiano','trumpet','conga'],hiphop:['analoglead','acidbass'],

@@ -7,7 +7,7 @@ export function mixLevels(tracks:readonly DevelopmentTrack[],plan:DevelopmentPla
  const attention=Math.max(0,...focus);
  return tracks.map((track,i)=>{
   if(!available(track))return 0;
-  const id=track.instrument,foundation=['kick','bass','synthbass','doublebass','acidbass'].includes(id);
+  const id=track.instrument,foundation=['kick','bass','synthbass','doublebass','acidbass','bowedbass'].includes(id);
   const wave=(1+Math.sin(step/16*Math.PI/16+i*1.7))/2;
   let gain=(dialogueInstrument(id)||id==='strings')&&plan?developmentGain(plan,i,step,chorus)
    :id==='kick'?.8+.14*wave

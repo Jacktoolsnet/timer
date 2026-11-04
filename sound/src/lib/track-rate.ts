@@ -18,7 +18,7 @@ export function rateGridEvents(slots:number,native:number,step:number,beats:numb
 export function randomTrackRate(instrument:string,style:string,random=Math.random):TrackRate{
  if(['kick','snare','clap','bass','synthbass','doublebass','acidbass'].includes(instrument))return 1;
  const calm=['ambient','focus','classical','coffeehouse','slowwaltz'].includes(style);
- const sustained=['strings','cello','violin','pad','voice','saxophone','flute','horn','clarinet','trombone'].includes(instrument);
+ const sustained=['strings','cello','violin','viola','bowedbass','pad','voice','saxophone','flute','horn','clarinet','trombone'].includes(instrument);
  const percussion=['hat','shaker','rim','tom'].includes(instrument),r=random();
  if(sustained)return r<(calm?.7:.5)?.5:1;
  if(percussion)return r<(calm?.1:.4)?2:1;

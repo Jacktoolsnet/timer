@@ -5,6 +5,9 @@ export function sustainedProfile(id:SustainedInstrument){
  if(id==='clarinet')return {attack:.045,release:.19,glide:.045,vibrato:.0008,rate:4.7};
  if(id==='trumpet')return {attack:.035,release:.16,glide:.035,vibrato:.0013,rate:5.8};
  if(id==='horn')return {attack:.12,release:.32,glide:.075,vibrato:.0007,rate:4.5};
+ if(id==='violin')return {attack:.09,release:.26,glide:.055,vibrato:.0012,rate:5.3};
+ if(id==='viola')return {attack:.13,release:.32,glide:.07,vibrato:.0011,rate:4.9};
+ if(id==='bowedbass')return {attack:.2,release:.45,glide:.09,vibrato:.0007,rate:4.1};
  if(id==='cello')return {attack:.24,release:.58,glide:.11,vibrato:.0016,rate:4.6};
  if(id==='analoglead')return {attack:.018,release:.16,glide:.065,vibrato:.0008,rate:5};
  if(id==='shimmer')return {attack:.55,release:1.1,glide:.22,vibrato:.001,rate:.45};
@@ -22,6 +25,9 @@ export function sustainedHarmonic(id:SustainedInstrument,h:number){
  if(id==='clarinet')return (h%2?1:.07)/Math.pow(h,1.15);
  if(id==='trumpet')return Math.exp(-h/7)/Math.pow(h,.5);
  if(id==='horn')return Math.exp(-h/2.5)/Math.pow(h,.8);
+ if(id==='violin')return Math.exp(-h/7)/Math.pow(h,.8)*(h===3?1.12:1);
+ if(id==='viola')return Math.exp(-h/4.5)/Math.pow(h,.9)*(h===2?1.18:1);
+ if(id==='bowedbass')return Math.exp(-h/3.3)/Math.pow(h,1.05);
  if(id==='cello')return Math.pow(.68,h-1)/Math.sqrt(h);
  if(id==='analoglead')return 1/Math.pow(h,1.2);
  if(id==='shimmer')return ([1,.3,.12,.18,.035,.06,.02,.045][h-1]||0);
@@ -30,12 +36,12 @@ export function sustainedHarmonic(id:SustainedInstrument,h:number){
 const breathBuffers=new WeakMap<BaseAudioContext,AudioBuffer>();
 export function createSustainedVoice(ctx:AudioContext,destination:AudioNode,id:SustainedInstrument,frequency:number,time:number,level:number,hold:number,vowel:number,onEnded:()=>void,articulation:VoiceArticulation={}){
  const gain=ctx.createGain(),vibrato=ctx.createOscillator(),depth=ctx.createGain();
- const strings=id==='strings'||id==='cello',synth=id==='pad'||id==='shimmer'||id==='analoglead',pad=id==='vocalpad'||id==='pad'||id==='shimmer',choir=id==='choir',wind=['saxophone','flute','clarinet','trumpet','horn'].includes(id),organ=id==='organ';
+ const soloBow=['violin','viola','bowedbass'].includes(id),strings=id==='strings'||id==='cello'||soloBow,synth=id==='pad'||id==='shimmer'||id==='analoglead',pad=id==='vocalpad'||id==='pad'||id==='shimmer',choir=id==='choir',wind=['saxophone','flute','clarinet','trumpet','horn'].includes(id),organ=id==='organ';
  const profile={...sustainedProfile(id),...articulation},{attack,release}=profile;
  const real=new Float32Array(25),imag=new Float32Array(25);
  for(let h=1;h<imag.length;h++)imag[h]=sustainedHarmonic(id,h);
  const wave=ctx.createPeriodicWave(real,imag);
- const oscillators=(strings||choir||pad?[.9985,1.0015]:[1]).map(detune=>{
+ const oscillators=(soloBow?[1]:strings||choir||pad?[.9985,1.0015]:[1]).map(detune=>{
   const osc=ctx.createOscillator();osc.setPeriodicWave(wave);
   osc.frequency.setValueAtTime(frequency*detune*2**((profile.scoop??0)/12),time);
   if(profile.scoop)osc.frequency.exponentialRampToValueAtTime(frequency*detune,time+.085);
@@ -45,9 +51,12 @@ export function createSustainedVoice(ctx:AudioContext,destination:AudioNode,id:S
  const inlet=ctx.createGain();inlet.gain.value=1/oscillators.length;
  oscillators.forEach(({osc})=>osc.connect(inlet));
  if(strings||wind||organ||synth){
-  const filter=ctx.createBiquadFilter();filter.type='lowpass';filter.frequency.value=id==='flute'?5200:id==='horn'?1900:id==='trumpet'?5800:wind?3400:organ?5500:id==='analoglead'?4200:id==='shimmer'?3200:synth?1800:2600;filter.Q.value=.5;
+  const filter=ctx.createBiquadFilter();filter.type='lowpass';filter.frequency.value=id==='violin'?5800:id==='viola'?4000:id==='bowedbass'?2200:id==='flute'?5200:id==='horn'?1900:id==='trumpet'?5800:wind?3400:organ?5500:id==='analoglead'?4200:id==='shimmer'?3200:synth?1800:2600;filter.Q.value=.5;
   if(wind){
    const body=ctx.createBiquadFilter();body.type='peaking';body.frequency.value=id==='flute'?2100:id==='horn'?650:id==='clarinet'?1500:1100;body.Q.value=.8;body.gain.value=id==='flute'?1:3;
+   inlet.connect(body);body.connect(filter);filters.push(body);
+  }else if(soloBow){
+   const body=ctx.createBiquadFilter();body.type='peaking';body.frequency.value=id==='violin'?2700:id==='viola'?1700:420;body.Q.value=.8;body.gain.value=2.2;
    inlet.connect(body);body.connect(filter);filters.push(body);
   }else inlet.connect(filter);
   if(id==='analoglead'){filter.Q.value=1.1;filter.frequency.setValueAtTime(900,time);filter.frequency.exponentialRampToValueAtTime(4200,time+.08);filter.frequency.exponentialRampToValueAtTime(1700,time+.4);}

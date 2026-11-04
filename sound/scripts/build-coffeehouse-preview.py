@@ -65,4 +65,8 @@ if __name__ == '__main__':
         print(f"{path.name}: {report['production']['sourceNotes']} source notes, {report['production']['durationSeconds']}s; selectable in overlay.")
     (ROOT / 'docs/coffeehouse-preview-report.json').write_text(json.dumps(productions[0][1], ensure_ascii=False, indent=2) + '\n')
     (ROOT / 'docs/coffeehouse-productions-report.json').write_text(json.dumps([r for _,r in productions], ensure_ascii=False, indent=2) + '\n')
-    (ROOT / 'public/library/preview-catalog.json').write_text(json.dumps([r['entry'] for _,r in productions], ensure_ascii=False, indent=2) + '\n')
+    import runpy
+    orbits = runpy.run_path(str(Path(__file__).with_name('build-library-orbits.py')))
+    manifest = orbits['link_catalog']([r['entry'] for _, r in productions])
+    (ROOT / 'public/library/preview-catalog.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n')
+    orbits['build']([entry['id'] for entry in manifest])

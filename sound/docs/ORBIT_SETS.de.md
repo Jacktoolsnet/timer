@@ -128,9 +128,52 @@ und Notenreferenz unverändert. Jede Teilfassung trägt vollständigen Werktitel
 Quellen- und Rechteangaben sowie dieselbe Gesamtdauer; damit gelten Ganzsong-
 Video und Pflichtabspann auch nach Wechsel zu einer anderen Stimme.
 
-Weitere Bibliothekslieder sind noch nicht auf Mehr-Set-Produktion umgestellt.
-Mehr Spuren allein sind kein Qualitätsmerkmal; zuerst Original und sinnvolle
-Stimmenaufteilung vergleichen.
+## Weitere Bibliotheksproduktionen
+
+14 der 15 auswählbaren Einträge laden jetzt Mehr-Set-Banken; zwölf davon wurden
+nach den beiden Kanonfassungen umgestellt. Die vorhandenen Noten, Pausen,
+Wiederholungen, Szenengrenzen, Taktarten und Tempoeinheiten bleiben erhalten.
+
+| Werk / Musikrichtung | Aufteilung |
+| --- | --- |
+| Eine kleine Nachtmusik | 5 Sets: Violine I, Violine II, Bratsche, Cello, gestrichener Kontrabass |
+| Ode an die Freude · House | 4 Sets: Thema, Harmonie/Atmosphäre, Bass, Drums |
+| Für Elise · House | 4 Sets: Melodie, Klavierbegleitung, Bass, Drums; weiterhin 3/8 |
+| The Entertainer, Maple Leaf Rag, The Easy Winners · Jazz | jeweils 3 Sets: Klavier mit beiden Händen, Kontrabass, dezenter Rhythmus |
+| Gymnopédie, Träumerei, Prélude · Lo-Fi | jeweils 3 Sets: E-Piano mit beiden Händen, Cello, Beat |
+| Chopin, Schumann, Brahms · Coffeehouse | jeweils 3 Sets: Klavier, warme Innenstimmen, Kontrabass |
+
+Das Rondo alla Turca bleibt bewusst ein zusammenhängendes Soloklavier. Mehr
+Instrumente wären hier keine Annäherung an die Originalbesetzung. Die
+Coffeehouse-Einträge behalten ihren bisherigen Vorschau-Status und Umfang.
+Stilbearbeitungen bleiben Stilbearbeitungen, keine behaupteten Originalbesetzungen.
+
+Für die Nachtmusik gibt es drei neue synthetische Instrumente: `violin`, `viola`
+und `bowedbass`, mit eigenen Obertonspektren, Ansprache, Vibrato und Körperfiltern.
+Violine und Bratsche verwenden die notierte Tonhöhe; `bowedbass` klingt zwei
+Oktaven unter dem kodierten Pitch, eine Oktave unter dem vorhandenen Cello.
+Die lokale Partitur `scripts/scores/nacht-eine-kleine-nachtmusik-mvt1.ly` bezeichnet
+das Basssystem ausdrücklich als „Cello & Double Bass“. Diese gemeinsame Stimme
+wird deshalb zusätzlich auf gestrichenem Kontrabass in der tieferen Oktave
+realisiert; es wird keine neue Melodie oder Akkordbegleitung erfunden. Die neue
+Besetzung ist im Bearbeitungshinweis der Bank dokumentiert. Der Kontrabass ist
+gegenüber dem Cello zurückgenommen. Die zwei bisherigen Kanon-Klangfarben bleiben
+unverändert.
+
+Jede Quellspur gehört genau einem Set; nur die dokumentierte Nachtmusik-
+Bassverdopplung ergänzt Notenereignisse. Pegel werden mit `sqrt(Set-Anzahl)` gegen
+den gemeinsamen Mix-Trim ausgeglichen. Alle Teilskripte tragen Titel, vollständige
+Quellen-/Rechteangaben und dieselbe Gesamtdauer. Die ursprünglichen `.song.json`
+bleiben unverändert als Einzelset- und Notenreferenz erhalten.
+
+Alle Banken reproduzierbar erzeugen:
+`python3 sound/scripts/build-library-orbits.py`.
+`build-song-library.py` und `build-coffeehouse-preview.py` erzeugen beim regulären
+Build die jeweils zugehörigen Banken mit. `build-canon-orbits.py` bleibt als
+Kompatibilitätsaufruf für genau die zwei Kanon-Banken erhalten. Bibliothekseinträge
+verknüpfen die Bank über `projectPath`; `path` bleibt die Einzelset-Referenz.
+Bereits geladene Fassungen werden nicht heimlich ersetzt: das Werk erneut in der
+Bibliothek auswählen, um seine Mehr-Set-Produktion zu laden.
 
 ## Gemeinsamer Sternenhimmel
 

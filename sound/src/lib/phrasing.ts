@@ -1,4 +1,4 @@
-export const sustainedInstruments=['voice','choir','vocalpad','strings','saxophone','organ','pad','flute','clarinet','trumpet','horn','cello','analoglead','shimmer'] as const;
+export const sustainedInstruments=['voice','choir','vocalpad','strings','saxophone','organ','pad','flute','clarinet','trumpet','horn','cello','analoglead','shimmer','violin','viola','bowedbass'] as const;
 export type SustainedInstrument=typeof sustainedInstruments[number];
 /** Phrase rests affect automatic performance only, never freshly drawn notes. */
 export function phraseActive(id:string,step:number,track:number,chorus:boolean,random:boolean,drawn:boolean){
@@ -6,7 +6,7 @@ export function phraseActive(id:string,step:number,track:number,chorus:boolean,r
  const bar=Math.floor(step/16);
  if(id==='voice')return (bar+track)%4<(chorus?3:2);
  if(['saxophone','flute','clarinet','trumpet','horn'].includes(id))return (bar+track)%6<4;
- if(id==='strings'||id==='cello')return (bar+track)%8!==7;
+ if(['strings','cello','violin','viola','bowedbass'].includes(id))return (bar+track)%8!==7;
  return true;
 }
 /** Bridge neighbouring points, but keep real gaps and cleared patterns silent. */

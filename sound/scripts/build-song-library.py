@@ -296,12 +296,12 @@ def build(entry):
 def main():
  REPORT.clear() # A prior preview build must not leak extra entries into the stable report.
  manifest=[build(e) for e in ENTRIES]
- for entry in manifest:
-  if entry['id'] in ('classical-canon','house-canon'):entry['projectPath']='/library/'+entry['id']+'.orbit.json'
- # Use the same source performance for the independently editable four-orbit edition.
+ # Link source-preserving banks; keep piano-only Rondo alla turca together.
  import runpy
- runpy.run_path(str(Path(__file__).with_name('build-canon-orbits.py')))['build']()
+ orbits=runpy.run_path(str(Path(__file__).with_name('build-library-orbits.py')))
+ manifest=orbits['link_catalog'](manifest)
  (OUT/'catalog.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n')
+ orbits['build']([entry['id'] for entry in manifest if 'projectPath' in entry])
  (OUT/'production-report.json').write_text(json.dumps(REPORT,ensure_ascii=False,indent=2)+'\n')
  print('\n'.join(f"{id}: {r['bars']} bars, {r['durationSeconds']}s, {r['outputNotes']} notes" for id,r in REPORT.items()))
 if __name__=='__main__':main()

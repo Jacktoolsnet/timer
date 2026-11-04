@@ -306,7 +306,7 @@ function evolveTrackRates(initial=false){
  const chosen=initial?candidates:candidates.length?[candidates[Math.floor(Math.random()*candidates.length)]]:[];
  chosen.forEach(({tr})=>{const rate=randomTrackRate(tr.instrument,currentStyle);if(!playing)tr.rate=rate;else tr.pendingRate=rate;});
  if(initial&&!chosen.some(({tr})=>(tr.pendingRate??tr.rate)===.5)){
-  const melody=chosen.find(({tr})=>isMelodic(tr.instrument)&&!['bass','synthbass','doublebass','acidbass'].includes(tr.instrument));
+  const melody=chosen.find(({tr})=>isMelodic(tr.instrument)&&!['bass','synthbass','doublebass','acidbass','bowedbass'].includes(tr.instrument));
   if(melody){if(!playing)melody.tr.rate=.5;else melody.tr.pendingRate=.5;}
  }
 }
@@ -783,7 +783,7 @@ tracks.forEach((tr,i)=>{
  });
 });
 let expressionSeed=Math.random()*Math.PI*2;
-function musicalFoundation(index:number){return pulseTrack(index)||['kick','bass','synthbass','doublebass','acidbass'].includes(tracks[index].instrument);}
+function musicalFoundation(index:number){return pulseTrack(index)||['kick','bass','synthbass','doublebass','acidbass','bowedbass'].includes(tracks[index].instrument);}
 function dialogueRole(index:number){
  const melodic=tracks.map((tr,i)=>({tr,i})).filter(({tr,i})=>tr.enabled&&!tr.mute&&tr.volume>0&&tr.points.some(Boolean)&&dialogueInstrument(tr.instrument)&&!pulseTrack(i)&&!protectedRhythmTrack(i));
  // No extra notes or tracks: existing patterns and user silences remain intact.
@@ -822,7 +822,7 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
  const pulse=explicitNote?null:dancePulse||tango||(tr.slots===stepsPerBar()?waltzPulseRole(groove.beats,id,phrase?.points||tr.points):null);
  const harmonicStyle:StyleId=voiceDance?['tango','pasodoble'].includes(voiceDance)?'electronic':voiceStyle==='jazz'||voiceDance==='jive'?'pop':voiceStyle:voiceStyle;
  const vocal=(vocalInstruments as readonly string[]).includes(id);
- const cutoff=vocal?Math.max(3000,profile.cutoff):profile.cutoff;
+ const cutoff=vocal?Math.max(3000,profile.cutoff):id==='violin'?Math.max(5200,profile.cutoff):id==='viola'?Math.max(3800,profile.cutoff):profile.cutoff;
  const expressive=!tapped&&!pulseTrack(i)&&dialogueInstrument(id);
  const role=expressive?dialogueRole(i):-1;
  const bar=step/stepsPerBar();
@@ -859,7 +859,7 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
  const cleanVoice=()=>{layerAudio?.voices.delete(fader);editFaders[i].delete(edit);edit.disconnect();contour.disconnect();tappedVoices.delete(tapEntry);liveMix[i].delete(fader);bus.disconnect();fader.disconnect();pan.disconnect();hallSend.disconnect();echoSend.disconnect();};
  const roomSpace=layerAudio?.room??(tapped?tapSpace:space);
  if(roomSpace){
-  const room=spaceProfile(voiceStyle),foundation=['kick','bass','synthbass','doublebass','acidbass'].includes(id);
+  const room=spaceProfile(voiceStyle),foundation=['kick','bass','synthbass','doublebass','acidbass','bowedbass'].includes(id);
   hallSend.gain.value=foundation?.008:pulse?.025:room.hall;
   echoSend.gain.value=foundation||pulse?0:room.echo;
   pan.connect(hallSend);hallSend.connect(roomSpace.hall);
@@ -924,7 +924,7 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
  }
  if((sustainedInstruments as readonly string[]).includes(id)){
   const key=(tapped?'tap:':'')+i+':'+id+(score?':score:'+time+':'+scoreVoiceSerial++:group?':group:'+group.channel:''),previous=voiceHeld.get(key);
-  const frequency=vocal?(explicitNote?261.626*2**(voiced/12)/2:vocalFundamental(261.626*2**(voiced/12)))*2**(voiceTranspose/12):id==='organ'||id==='cello'||id==='horn'?note/2:note;
+  const frequency=vocal?(explicitNote?261.626*2**(voiced/12)/2:vocalFundamental(261.626*2**(voiced/12)))*2**(voiceTranspose/12):id==='bowedbass'?note/4:id==='organ'||id==='cello'||id==='horn'?note/2:note;
   const character=vocalCharacter(voiceStyle),vowel=evolving?vowelPosition(step/stepsPerBar(),expressionSeed):character.vowel;
   const clock=((beat-tr.phase)*tr.direction+tr.slots*2)%tr.slots;
   const bridge=tapped?tapHold:tr.slots===stepsPerBar()?phraseHold(phrase?.points||tr.points,beat,tr.direction,60/transportBpm()/4,groove.swing,clock,tr.slots):gridPhraseHold(phrase?.points||tr.points,beat,clock,tr.direction,tr.slots,groove.beats,transportBpm(),groove.swing);
@@ -933,7 +933,7 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
   if(group?.kind==='run'&&group.ornament!=='trill'){articulation.legato=false;articulation.voice={...articulation.voice,detached:true,attack:Math.min(.015,hold*.4),release:.025,glide:.004};}
   if(group?.ornament==='trill'){articulation.legato=true;articulation.voice={...articulation.voice,detached:false,attack:Math.min(.035,hold*.4),release:.06,glide:.008};}
   if(!group&&!tapped&&!protectedDrawing){const scoop=windScoop(voiceStyle,id,bar,firstPhraseAttack(phrase?.points||tr.points,beat,tr.slots,tr.direction,tr.phase)?0:1);if(scoop)articulation.voice={...articulation.voice,scoop};}
-  const level=tr.volume*velocity*(id==='voice'?.25:id==='strings'||id==='cello'?.15:id==='saxophone'?.23:id==='organ'?.16:id==='pad'?.13:.18);
+  const level=tr.volume*velocity*(id==='voice'?.25:['strings','cello','violin','viola','bowedbass'].includes(id)?.15:id==='saxophone'?.23:id==='organ'?.16:id==='pad'?.13:.18);
   if(articulation.legato&&previous?.voice.canContinue(time)){
    const joinedFrom={beat:previous.beat,time:previous.lastTime};
    previous.voice.note(time,frequency,level,hold,vowel);previous.beat=beat;previous.lastTime=time;
@@ -1382,7 +1382,7 @@ function schedule(){
     if(!tr.points[beat]&&!old?.points[beat]&&!extra)return;
     const dynamics=pulseTrack(i)?1:evolving?performanceVelocity(tr.scheduledVelocity):tr.randomDynamics?.45+Math.random()*.55:1;
     tr.scheduledVelocity=dynamics;
-    const foundation=pulseTrack(i)||['kick','bass','synthbass','doublebass','acidbass'].includes(tr.instrument)||!!tr.morph&&['kick','bass','synthbass','doublebass','acidbass'].includes(tr.morph.to);
+    const foundation=pulseTrack(i)||['kick','bass','synthbass','doublebass','acidbass','bowedbass'].includes(tr.instrument)||!!tr.morph&&['kick','bass','synthbass','doublebass','acidbass','bowedbass'].includes(tr.morph.to);
     const breath=evolving&&arrangement&&!protectedDrawing&&!foundation?breathGain(arrangement,i,musicalStep()):1;
     const arcVelocity=!musicalFoundation(i)&&!protectedDrawing?phraseContour(currentStyle,step/stepsPerBar()).velocity:1;
     const velocity=arcVelocity*grooveAccent(groove,tr.instrument,(pulseTrack(i)?due.index:beat)/tr.slots*stepsPerBar(),i)*dynamics*breath*songExpression().gain*(extra?.45:1),mix=evolving&&!pulseTrack(i)?songMix(time):1;

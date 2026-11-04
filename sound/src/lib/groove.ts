@@ -15,9 +15,9 @@ export function grooveRole(id:string){
  if(id==='kick')return 'kick';
  if(['snare','clap','rim','tom','conga'].includes(id))return 'backbeat';
  if(['hat','shaker'].includes(id))return 'hat';
- if(['bass','synthbass','doublebass','acidbass'].includes(id))return 'bass';
+ if(['bass','synthbass','doublebass','acidbass','bowedbass'].includes(id))return 'bass';
  if(['piano','epiano','guitar','organ'].includes(id))return 'chords';
- if(['strings','pad','choir','vocalpad','shimmer','cello'].includes(id))return 'sustain';
+ if(['strings','pad','choir','vocalpad','shimmer','cello','violin','viola','bowedbass'].includes(id))return 'sustain';
  return 'melody';
 }
 export function grooveAnchored(id:string){return !['melody','sustain'].includes(grooveRole(id));}

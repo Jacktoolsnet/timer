@@ -3,6 +3,7 @@ import {readFile} from 'node:fs/promises';
 import catalog from '../public/library/catalog.json' with {type:'json'};
 import {songLibrary,libraryStyles,libraryCopy} from '../src/lib/song-library';
 import preview from '../public/examples/coffeehouse-chopin-prelude-a.preview.song.json' with {type:'json'};
+import previewBank from '../public/library/coffeehouse-chopin-prelude-a.orbit.json' with {type:'json'};
 import {decodeSongScript,scriptScore} from '../src/lib/song-script';
 import {videoCreditsForSong,songRightsText} from '../src/lib/video-credits';
 async function music(page:any,lang='de'){
@@ -70,7 +71,10 @@ for(const lang of ['de','en','es','fr'] as const)test('Coffeehouse folder expose
  await opener.click();await section.locator('[data-library-song]').first().click();
  await expect(page.locator('#song-library-dialog')).not.toBeVisible();
  await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
- expect(JSON.parse(await page.locator('#song-script-text').inputValue())).toEqual(preview);
+ const selected=JSON.parse(await page.locator('#song-script-text').inputValue());
+ expect(selected).toEqual(previewBank.sets[0].settings!.songScript);
+ expect(selected.rights).toEqual(preview.rights);
+
  await expect(page.locator('[data-style-preset=coffeehouse]')).toHaveAttribute('aria-pressed','true');
  await expect(page.locator('#video-song-rights-text')).toContainText('Magnus Lewis-Smith');
  await expect(page.locator('#video-song-rights-text')).not.toContainText('Pachelbel');

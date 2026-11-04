@@ -63,7 +63,7 @@ public-domain arrangement or recording. My brief: [genre, atmosphere, approximat
   then letters/digits/_/-, max 32 chars), `instrument`, and `volume` (0–1).
 - `scenes`: 1–256 scene definitions in v3 (v1/v2: 1–64), at most 512 bars in total.
 
-Instrument IDs: kick, snare, hat, bass, marimba, clap, tom, rim, shaker, bells, kalimba, pluck, synthbass, piano, strings, guitar, organ, pad, saxophone, harp, doublebass, epiano, voice, choir, vocalpad, flute, clarinet, trumpet, horn, analoglead, acidbass, shimmer, cello, vibraphone, conga.
+Instrument IDs: kick, snare, hat, bass, marimba, clap, tom, rim, shaker, bells, kalimba, pluck, synthbass, piano, strings, guitar, organ, pad, saxophone, harp, doublebass, epiano, voice, choir, vocalpad, flute, clarinet, trumpet, horn, analoglead, acidbass, shimmer, cello, vibraphone, conga, violin, viola, bowedbass.
 Choose low track volumes for pads, strings and secondary instruments. All sounds
 are synthetic. Musical data cannot request samples, URLs, plugins, JavaScript,
 expressions or arbitrary synth parameters. URLs are allowed ONLY as inert text
@@ -178,8 +178,8 @@ every synthetic instrument sounds in the same register. In particular:
 
 | Instrument | Sounding register relative to reference | Encode sounding C4 as |
 | --- | --- | --- |
-| piano, epiano, strings, harp | unchanged | 0 |
-| bass, doublebass | two octaves lower | 24 |
+| piano, epiano, strings, violin, viola, harp | unchanged | 0 |
+| bass, doublebass, bowedbass | two octaves lower | 24 |
 | guitar, organ, cello, horn | one octave lower | 12 |
 
 For those instruments, `encoded pitch = desired MIDI note - 60 + register
@@ -398,8 +398,10 @@ in a small overlay. Enter/the checkmark saves; Escape/cancel discards the draft.
 The selected set is the editing target, not the only audible set. All unmuted sets
 share Start/Stop, BPM, meter and tempo unit. Style, instruments, notes and transpose
 are per set. Selecting another set does not restart the transport. Blank slots
-start silent. Existing library songs load unchanged into the selected set; an old
-settings file replaces the bank with one set. Different notated meters cannot be
+start silent. Library selection replaces the entire bank, loading a multi-set
+production when the catalog supplies `projectPath`, otherwise one set. The
+original single-set score remains at `path`. An old settings file replaces the
+bank with one set; a directly imported song script loads into the selected set. Different notated meters cannot be
 combined in one project; use New project rather than relabelling the source meter.
 The first additional set fixes the existing meter as the common project clock.
 Subsequent song imports follow that common tempo instead of changing every set.
@@ -447,3 +449,20 @@ only actual scheduled/heard notes drive its lights. Set mute, transport, master
 volume, note brightness and reduced motion are respected. No extra music is
 created. The complete Canon orbit production defaults to `constellation` / `stars`
 with `background: "off"`; all four parts keep their source notes unchanged.
+
+
+### Library production grouping
+
+Fourteen selectable library entries have multi-set editions. Keep genuine solo
+piano works together (the Rondo alla Turca remains one set); do not invent an
+orchestration merely to occupy slots. Separate existing melodic, accompaniment,
+bass and percussion roles without altering source timing, rests or repeats.
+The Nachtmusik edition uses two violins, viola, cello and bowed double bass; its
+shared source bass staff explicitly names both cello and double bass, so that
+line is realized in octaves with a quieter bass. `violin` and `viola` use the
+unshifted C4 reference; `bowedbass` sounds two octaves below encoded pitch.
+These are synthetic instruments, not sampled recordings. Style arrangements
+and Coffeehouse preview scope remain labelled as such. Every partial script
+must retain the complete title, attribution and transport duration. Build the
+published banks with `python3 sound/scripts/build-library-orbits.py`; original
+single-set scores are not overwritten.

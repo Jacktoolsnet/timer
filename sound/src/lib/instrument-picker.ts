@@ -3,7 +3,7 @@ export const instrumentGroups={
  drums:['kick','snare','hat','clap','tom','rim','shaker','conga'],
  bass:['bass','synthbass','doublebass','acidbass'],
  keys:['piano','epiano','organ','marimba','kalimba','bells','vibraphone'],
- strings:['strings','guitar','harp','cello'],
+ strings:['strings','violin','viola','cello','bowedbass','guitar','harp'],
  winds:['saxophone','flute','clarinet','trumpet','horn'],
  voices:['voice','choir','vocalpad'],
  synths:['pluck','pad','analoglead','shimmer']

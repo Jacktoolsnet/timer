@@ -16,7 +16,8 @@
       "en": "Listening preview: complete Prelude and pickup, from the credited public-domain helper notation.",
       "es": "Vista previa: preludio completo con anacrusa, según la notación auxiliar de dominio público acreditada.",
       "fr": "Préécoute : prélude complet avec anacrouse, selon la notation auxiliaire du domaine public créditée."
-    }
+    },
+    "projectPath": "/library/coffeehouse-chopin-prelude-a.orbit.json"
   },
   {
     "id": "coffeehouse-schumann-foreign",
@@ -35,7 +36,8 @@
       "en": "Complete 22-bar piece, both repeats played (AABB, 44 bars); four source voices, Coffeehouse interpretation.",
       "es": "Pieza completa con repeticiones y final, mezcla Coffeehouse según la notación auxiliar acreditada de dominio público.",
       "fr": "Pièce complète avec reprises et fin, mix Coffeehouse selon la notation auxiliaire du domaine public créditée."
-    }
+    },
+    "projectPath": "/library/coffeehouse-schumann-foreign.orbit.json"
   },
   {
     "id": "coffeehouse-brahms-waltz",
@@ -54,6 +56,7 @@
       "en": "Complete 44-bar played solo Waltz, including written-out opening repeat and triplet coda. From the credited Joseffy/Rude notation.",
       "es": "Pieza completa con repeticiones y final, mezcla Coffeehouse según la notación auxiliar acreditada de dominio público.",
       "fr": "Pièce complète avec reprises et fin, mix Coffeehouse selon la notation auxiliaire du domaine public créditée."
-    }
+    },
+    "projectPath": "/library/coffeehouse-brahms-waltz.orbit.json"
   }
 ]
