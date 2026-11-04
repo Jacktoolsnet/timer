@@ -100,7 +100,7 @@ function updateScoreAudition(){
  noteEditor?.refresh();
 }
 
-let noteEditLoop:{owner:'notes'|'rhythm';script:SongScript|null;sourceBar:number;resumeAt:number|null;originalScores:(NoteScore|null)[]|null;accepted:Set<number>;evolution:boolean}|null=null;
+let noteEditLoop:{owner:'notes'|'rhythm';script:SongScript|null;sourceBar:number;harmonyStart:number;resumeAt:number|null;originalScores:(NoteScore|null)[]|null;accepted:Set<number>;evolution:boolean}|null=null;
 let videoEndRequested:(()=>void)|null=null;
 let wholeSongCapture=false,videoMusicStart:number|null=null,videoCreditsCapture=false,videoNaturalEndAt:number|null=null;
 let recordingOutput:DynamicsCompressorNode|undefined;
@@ -793,7 +793,11 @@ function dialogueRole(index:number){
  if(lead>0)melodic.unshift(...melodic.splice(lead,1));
  return melodic.findIndex(({i})=>i===index);
 }
-function harmonyBar(){return evolving&&song?Math.max(0,Math.floor(step/stepsPerBar())-song.startBar):Math.floor(step/stepsPerBar());}
+function harmonyBar(){
+ const bar=Math.floor(step/stepsPerBar());
+ if(noteEditLoop)return noteEditLoop.harmonyStart+bar%2;
+ return evolving&&song?Math.max(0,bar-song.startBar):bar;
+}
 function currentMorph(tr:typeof tracks[number],time:number){
  const m=tr.morph;if(!m)return 0;
  const fraction=m.duration?Math.max(0,Math.min(1,(time-m.at)/m.duration)):1;
@@ -1199,7 +1203,8 @@ function beginNoteEditLoop(owner:'notes'|'rhythm'='notes'){
  }
  const originalScores=scriptSong?null:tracks.map(tr=>tr.score===null?null:cloneScore(tr.score));
  const previews=scriptSong?null:tracks.map((_,i)=>previewScore(i));
- noteEditLoop={owner,script:scriptSong,sourceBar:Math.floor(scriptLastBar/2)*2,resumeAt:null,originalScores,accepted:new Set(),evolution:evolving};
+ const harmonyStart=harmonyBar()-Math.floor(step/stepsPerBar())%2;
+ noteEditLoop={owner,script:scriptSong,sourceBar:Math.floor(scriptLastBar/2)*2,harmonyStart,resumeAt:null,originalScores,accepted:new Set(),evolution:evolving};
  if(previews){tracks.forEach((tr,i)=>tr.score=previews[i]);if(evolving)setEvolution(false);streamRevision++;}
  // The final song boundary can already be queued by the look-ahead scheduler.
  // Opening the editor must keep the displayed final section alive as well.

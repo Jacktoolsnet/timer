@@ -65,3 +65,20 @@ test('quickly transferring from the note grid to Tap does not leave a stuck edit
  await page.locator('#rhythm-cancel').click();await expect(page.locator('#drawing')).not.toHaveAttribute('data-section-loop','true',{timeout:3000});
  await expect(page.locator('#song-script-status')).toContainText('Middle',{timeout:3000});
 });
+
+test('melodic Tap notes keep the same harmony on every repeated two-bar pass',async({page})=>{
+ await page.addInitScript(()=>{
+  const values=new WeakMap<AudioParam,number>(),set=AudioParam.prototype.setValueAtTime;
+  AudioParam.prototype.setValueAtTime=function(v,t){values.set(this,v);return set.call(this,v,t);};
+  (window as any).tapPitches=[];const start=OscillatorNode.prototype.start;
+  OscillatorNode.prototype.start=function(at=0){const hz=values.get(this.frequency);if(hz)(window as any).tapPitches.push({at,hz:Math.round(hz*1000)});return start.call(this,at);};
+ });
+ const s=source(true);s.tracks=s.tracks.slice(0,1);s.tracks[0].instrument='organ';s.scenes.forEach(scene=>scene.parts=scene.parts.slice(0,1));
+ await load(page,s);await page.keyboard.press('Numpad7');await page.keyboard.press('Numpad7');
+ await expect(page.locator('#drawing')).toHaveAttribute('data-rhythm-hits','1');await page.waitForTimeout(250);
+ await page.evaluate(()=>(window as any).tapPitches=[]);await page.waitForTimeout(5500);
+ const events=await page.evaluate(()=>(window as any).tapPitches as {at:number;hz:number}[]);
+ const voices=new Map<number,number[]>();for(const event of events){const at=Math.round(event.at*1000);voices.set(at,[...(voices.get(at)??[]),event.hz]);}
+ const pitches=[...voices.values()].map(p=>p.sort((a,b)=>a-b));expect(pitches.length).toBeGreaterThanOrEqual(3);
+ for(const p of pitches)expect(p).toEqual(pitches[0]);
+});
