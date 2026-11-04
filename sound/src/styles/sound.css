@@ -536,3 +536,7 @@ body.score-expanded{overflow:hidden}
 .orbit-set-name{display:flex;align-items:center;gap:10px;font-size:12px;margin-top:16px}.orbit-set-name input{width:100%;min-width:0}.orbit-set-actions{display:flex;gap:8px;margin-top:12px}.orbit-set-actions button{flex:1;padding:8px;font-size:11px}#orbit-sets-status:empty{display:none}
 @media(max-height:650px){#orbit-sets-dialog{padding:12px}[data-orbit-select] svg{width:45px;height:45px}#orbit-sets-grid{gap:6px}}
 #orbit-project-new{margin-top:12px;padding:7px 10px;font-size:11px;color:var(--muted);background:transparent;border:1px solid var(--line);border-radius:8px}
+.orbit-sets-heading button,.orbit-set-actions button{color:var(--text);background:color-mix(in srgb,var(--text) 4%,var(--bg));border:1px solid var(--line);border-radius:9px;cursor:pointer;font-family:inherit}
+.orbit-set-name input{color:var(--text);background:color-mix(in srgb,var(--text) 4%,var(--bg));border:1px solid var(--line);border-radius:8px;padding:8px;font:inherit}
+#orbit-sets-dialog button:focus-visible,#orbit-set-name:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+#orbit-sets-dialog button:disabled{opacity:.35;cursor:default}

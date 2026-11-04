@@ -384,3 +384,44 @@ native meters. The standalone Sunlit Session and Morning Light examples remain
 legacy v2; importing them does not automatically change their meter or notation.
 Whole-song MP4 capture is limited to approximately 51 minutes; longer takes are
 rejected rather than silently exporting a truncated song without rights.
+
+## Orbit sets / multi-set projects
+
+The grid button before Draw manages up to **nine complete sets of nine tracks**.
+The selected set is the editing target, not the only audible set. All unmuted sets
+share Start/Stop, BPM, meter and tempo unit. Style, instruments, notes and transpose
+are per set. Selecting another set does not restart the transport. Blank slots
+start silent. Existing library songs load unchanged into the selected set; an old
+settings file replaces the bank with one set. Different notated meters cannot be
+combined in one project; use New project rather than relabelling the source meter.
+The first additional set fixes the existing meter as the common project clock.
+Subsequent song imports follow that common tempo instead of changing every set.
+
+**A `jacktools-song` still has at most nine tracks.** Do not put 81 tracks or new
+`orbits` keys into it. For now, author each complete song/set separately and load
+it into its chosen slot. The app's settings/project JSON export preserves the bank.
+The separate Song Script download still exports only the selected source song.
+
+Multi-set exports use `format: "jacktools-orbit-project"`, `version: 1`:
+- `active`: integer 0–8; `bpm`: 40–220; master `volume`: 0–0.7.
+- `clock`: `{meter, tempoUnit, quarters, steps, swing}`. Meter and tempo unit use
+  the definitions above; `quarters = numerator * 4 / denominator`,
+  `steps = quarters * 4`; swing is 0–0.6.
+- `sets`: exactly nine `{name, muted, settings, barOffset}` objects. Names are
+  max. 80 characters. An unused slot has `settings: null`; the active slot must
+  contain complete v2 settings, not a bare song script. Settings can contain the
+  unchanged source `songScript`. `barOffset` is 0 in exported restartable projects.
+
+Use an exported project as the settings template; do not invent settings fields
+or recursively nest project files. Project import is atomic and limited to 12 MiB;
+each source song retains its original bounds. Consent-based storage restores all
+sets and the selection, but never starts playback. The preview-only note-editor
+mute mix and unaccepted note drafts are not committed by background set playback.
+Random Play develops the selected set; other sets play their saved scores/patterns.
+An active note-editor loop holds that set's section; the other sets keep running.
+
+The current recording image and song-specific credits/whole-song option still
+refer to the selected set, while the audio output contains the full mix. Multi-work
+publication needs attribution for all source works; a dedicated project-wide
+credits/arrangement timeline is a separate extension. Background polyphony is
+bounded at 96 voices to protect the browser; avoid stacking excessive chords.

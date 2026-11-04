@@ -33,7 +33,7 @@ test('nine complete independent slots; duplicate, rename, mute and switch preser
  await page.locator('[data-track="0"] .track-volume').evaluate((el:HTMLInputElement)=>{el.value='.2';el.dispatchEvent(new Event('input',{bubbles:true}));});
  await grid(page);await page.locator('#orbit-set-name').fill('Second layer');await page.locator('[data-orbit-mute="0"]').click();await page.locator('#orbit-sets-close').click();
  let p=await exported(page);expect(p.format).toBe('jacktools-orbit-project');expect(p.active).toBe(1);expect(p.sets[0].settings.tracks[0].volume).toBe(.4);expect(p.sets[1].settings.tracks[0].volume).toBe(.2);expect(p.sets[0].muted).toBe(true);expect(p.sets[1].name).toBe('Second layer');
- await choose(page,8);p=await exported(page);expect(p.active).toBe(8);expect(p.sets[8].settings.tracks).toHaveLength(9);expect(p.sets[8].settings.tracks.every((t:any)=>!t.enabled)).toBe(true);expect(p.sets[1].name).toBe('Second layer');
+ await choose(page,8);p=await exported(page);expect(p.active).toBe(8);expect(p.sets[8].settings.tracks).toHaveLength(9);expect(p.sets[8].settings.tracks.every((t:any)=>!t.score?.length&&!t.points.some(Boolean))).toBe(true);expect(p.sets[1].name).toBe('Second layer');
  await upload(page,p);await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false');await choose(page,1);expect((await exported(page)).sets[1].settings.tracks[0].volume).toBe(.2);
  expect(errors).toEqual([]);
 });
@@ -84,4 +84,14 @@ test('orbit projects persist only after consent and restore every set without au
  await choose(page,1);await grid(page);await page.locator('#orbit-set-name').fill('Remembered layer');await page.locator('#orbit-sets-close').click();
  await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('jacktools.sound.settings.v1')!).sets[1].name)).toBe('Remembered layer');
  await page.reload();await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false');await grid(page);await expect(page.locator('[data-orbit-select="1"]')).toHaveAttribute('aria-pressed','true');await expect(page.locator('[data-orbit-slot="1"] [data-orbit-name]')).toHaveText('Remembered layer');
+});
+
+
+test('a new silent set accepts notes immediately and remains audible after leaving its editor',async({page})=>{
+ await page.addInitScript(()=>{(window as any).newLayerStarts=0;const start=AudioBufferSourceNode.prototype.start;AudioBufferSourceNode.prototype.start=function(...args){(window as any).newLayerStarts++;return start.apply(this,args);};});
+ await page.goto('/de/');await upload(page,fixture());await grid(page);await page.locator('[data-orbit-mute="0"]').click();await page.locator('[data-orbit-select="8"]').click();
+ await page.locator('[data-pad-mode=notes]').click();await page.locator('#score-instruments [data-score-track="0"]').click();
+ const box=(await page.locator('#score-grid').boundingBox())!;await page.mouse.click(box.x+box.width*.35,box.y+box.height*.5);await page.locator('#score-done').click();await expect(page.locator('#score-expanded-dialog')).not.toBeVisible();
+ const p=await exported(page);expect(p.sets[8].settings.tracks[0].enabled).toBe(true);expect(p.sets[8].settings.tracks[0].score).toHaveLength(1);expect(p.sets[0].muted).toBe(true);
+ await page.locator('#play').click();await expect.poll(()=>page.evaluate(()=>(window as any).newLayerStarts),{timeout:4000}).toBeGreaterThan(0);
 });

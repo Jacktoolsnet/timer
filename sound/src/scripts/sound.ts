@@ -140,7 +140,7 @@ let selectedPad:RhythmLane|null=null,padSwitchBlocked=false;
 const padNotes=Array<number>(9).fill(3);
 let nextRhythmKeyId=-20;
 const editFaders=tracks.map(()=>new Set<GainNode>());
-function editLevel(i:number){if(!scoreLaneAudible(i))return 0;return scoreSelection!==null&&scoreSelection!==i?RHYTHM_EDIT_MUSIC_LEVEL:rhythmEditing&&selectedPad!==null&&selectedPad!==i?RHYTHM_EDIT_MUSIC_LEVEL:1;}
+function editLevel(i:number){if(orbitSets[activeOrbitSet].muted||(scoreAuditionMuted?!scoreLaneAudible(i):tracks[i].mute))return 0;return scoreSelection!==null&&scoreSelection!==i?RHYTHM_EDIT_MUSIC_LEVEL:rhythmEditing&&selectedPad!==null&&selectedPad!==i?RHYTHM_EDIT_MUSIC_LEVEL:1;}
 function padPoint(lane:RhythmLane){return focusedPadCenter(lane,drawing.width,drawing.height,selectedPad);}
 let tapPattern=emptyRhythm(groove.beats);
 let rhythmBackup:ReturnType<typeof cloneRhythm>|null=null;
@@ -194,6 +194,7 @@ function rhythmPosition(time=audio?.currentTime||0){
  return clock?Math.max(0,clock.step+(time-clock.time)/clock.duration):0;
 }
 function syncRhythmUi(){
+ if(orbitClock&&master&&audio&&playing)master.gain.setTargetAtTime(Number($<HTMLInputElement>('#volume').value)*orbitMixTrim(),audio.currentTime,.04);
  streamRevision++;
  const text=rhythmCopy[language],active=padMode==='rhythm';
  document.querySelectorAll<HTMLButtonElement>('[data-pad-mode]').forEach(button=>button.setAttribute('aria-pressed',String(!animationSettingsActive()&&button.dataset.padMode===padMode)));
@@ -2402,14 +2403,14 @@ function snapshotOrbitProject(includeDraft=false):SoundSettings|OrbitProject{
 }
 function blankOrbitSettings():SoundSettings{
  const saved=snapshotSettings();delete saved.songScript;
- saved.tracks=saved.tracks.map(tr=>({...tr,score:null,groups:emptyNoteGroups(),enabled:false,mute:false,points:Array(16).fill(false),morph:null}));
+ saved.tracks=saved.tracks.map(tr=>({...tr,score:null,groups:emptyNoteGroups(),enabled:true,mute:false,volume:tr.volume>0?tr.volume:.45,points:Array(16).fill(false),morph:null}));
  saved.pad={mode:'draw',beats:groove.beats,hits:tracks.map(()=>Array(groove.beats*8).fill(false)),notes:tracks.map(()=>Array(groove.beats*8).fill(null))};
  return saved;
 }
 function orbitHasMusic(saved:SoundSettings|null){return !!saved&&(!!saved.songScript||saved.tracks.some((tr,i)=>tr.enabled&&tr.volume>0&&(tr.score?.length||tr.points.some(Boolean)||saved.pad?.hits[i]?.some(Boolean))));}
 function orbitMixTrim(){
  if(!orbitClock)return 1;
- const count=orbitSets.reduce((n,slot,i)=>n+Number(!slot.muted&&(i===activeOrbitSet?tracks.some(tr=>tr.enabled&&tr.volume>0):orbitHasMusic(slot.settings))),0);
+ const count=orbitSets.reduce((n,slot,i)=>n+Number(!slot.muted&&(i===activeOrbitSet?!!scriptSong||tracks.some((tr,j)=>tr.enabled&&tr.volume>0&&(tr.score?.length||tr.points.some(Boolean)||tappedTrack(j))):orbitHasMusic(slot.settings))),0);
  return 1/Math.sqrt(Math.max(1,count));
 }
 function orbitLayer(index:number){
@@ -2525,7 +2526,7 @@ function installOrbitSets(){
  $('#orbit-set-duplicate').addEventListener('click',()=>{
   rememberOrbitSet();const index=orbitSets.findIndex((slot,i)=>i!==activeOrbitSet&&(!slot.settings||!orbitHasMusic(slot.settings)));
   if(index<0){$('#orbit-sets-status').textContent=orbitSetCopy[language].full;return;}
-  orbitClock??=currentOrbitClock();orbitSets[index]=structuredClone(orbitSets[activeOrbitSet]);orbitSets[index].name=(orbitSets[index].name||'Orbit '+(activeOrbitSet+1))+' · '+(index+1);orbitPairCache.clear();syncVolume();renderOrbitSets();persistSettings();
+  orbitClock??=currentOrbitClock();orbitSets[index]=structuredClone(orbitSets[activeOrbitSet]);orbitSets[index].name=(orbitSets[index].name||'Orbit '+(activeOrbitSet+1)).slice(0,74)+' · '+(index+1);orbitPairCache.clear();syncVolume();renderOrbitSets();persistSettings();
  });
  $('#orbit-set-clear').addEventListener('click',()=>{
   if(!confirm(orbitSetCopy[language].confirm))return;
@@ -2730,6 +2731,7 @@ $('#tempo').addEventListener('input',()=>syncVideoSong());
 for(const option of ['restart','random','fullscreen'])$('#recording-'+option).addEventListener('change',()=>{syncFileButtons();persistSettings();});
 function syncFileButtons(){
  document.querySelectorAll<HTMLButtonElement>('#orbit-sets-open,#orbit-sets-dialog button:not(#orbit-sets-close)').forEach(button=>button.disabled=videoBusy||wavBusy||importBusy);
+ document.querySelectorAll<HTMLButtonElement>('[data-orbit-mute]').forEach(button=>{const i=Number(button.dataset.orbitMute);button.disabled=videoBusy||wavBusy||importBusy||(i!==activeOrbitSet&&!orbitSets[i].settings);});
  $<HTMLInputElement>('#orbit-set-name').disabled=videoBusy||wavBusy||importBusy;
  document.querySelectorAll<HTMLButtonElement>('[data-library-open],[data-library-song],[data-library-random]').forEach(button=>button.disabled=videoBusy||wavBusy||importBusy);
  for(const action of ['load','file','example','export','leave'])$<HTMLButtonElement>('#song-script-'+action).disabled=videoBusy||wavBusy||importBusy||(['export','leave'].includes(action)&&!scriptSong);

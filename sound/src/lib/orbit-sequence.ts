@@ -25,8 +25,8 @@ export function orbitPair(settings:SoundSettings,bar:number,clock:OrbitClock):Or
   });
  }
  const style=settings.dance?['tango','pasodoble'].includes(settings.dance)?'electronic':settings.style==='jazz'||settings.dance==='jive'?'pop':settings.style:settings.style;
- const groove={...resolveGroove(settings.style,settings.groove??'auto',settings.dance??null),beats:clock.quarters,steps:clock.steps};
- const seconds=60/(settings.bpm*4/clock.tempoUnit.denominator*(clock.tempoUnit.dotted?1.5:1))*clock.quarters*2;
+ const groove={...resolveGroove(settings.style,settings.groove??'auto',settings.dance??null),beats:clock.quarters,steps:clock.steps,swing:clock.swing};
+ const quarterBpm=settings.bpm*4/clock.tempoUnit.denominator*(clock.tempoUnit.dotted?1.5:1),seconds=60/quarterBpm*clock.quarters*2;
  return settings.tracks.map((track,index)=>{
   if(track.score)return {track,score:cloneScore(track.score)};
   const score:NoteScore=[];
@@ -42,7 +42,7 @@ export function orbitPair(settings:SoundSettings,bar:number,clock:OrbitClock):Or
    const base=style==='jazz'?jazzSemitones(bar+b,musicBeat,track.instrument,track.pitch,motif):melodicSemitones(style,bar+b,musicBeat,track.instrument,track.pitch,motif);
    const pitch=registerNote(base,dialogueInstrument(track.instrument)?phraseContour(style,bar+b).register:0,chord.root,style==='jazz'?[0,2,4,7,9]:[0,chord.third,7]);
    const group=track.groups?.[beat],start=(b+swingPosition(tick,slots,clock.quarters,groove.swing)/slots)/2;
-   const window=noteGroupWindow(track.points,beat,slots,track.direction,track.phase,clock.quarters,settings.bpm,groove.swing)/seconds;
+   const window=noteGroupWindow(track.points,beat,slots,track.direction,track.phase,clock.quarters,quarterBpm,groove.swing)/seconds;
    const members=group?.notes??[{offset:0,tone:0,velocity:1,gate:.9}];
    for(const member of members){
     const at=start+(group?groupOffset(member.offset,members.length,groove.swing)*window:0);if(at>=1)continue;

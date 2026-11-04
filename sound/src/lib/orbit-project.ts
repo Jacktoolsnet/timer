@@ -18,6 +18,7 @@ export function decodeOrbitProject(raw:string|null):OrbitProject|null{
    if(!slot||typeof slot.name!=='string'||slot.name.length>80||typeof slot.muted!=='boolean'||!Number.isSafeInteger(slot.barOffset)||Math.abs(slot.barOffset)>1e9)return null;
    if(slot.settings!==null){
     const settings=decodeSettings(JSON.stringify(slot.settings));if(!settings)return null;slot.settings=settings;
+    if(settings.meter&&(settings.meter.numerator!==c.meter.numerator||settings.meter.denominator!==c.meter.denominator))return null;
     const s=settings.songScript,m=s?.version===3?s.meter:{numerator:s?4:c.meter.numerator,denominator:s?4:c.meter.denominator};
     if(s&&(m.numerator!==c.meter.numerator||m.denominator!==c.meter.denominator))return null;
    }
