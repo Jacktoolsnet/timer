@@ -6,11 +6,21 @@ Stand: 2026-11-04
 
 - Der Raster-Button vor „Zeichnen“ zeigt neun Set-Plätze direkt in der Hauptansicht, wie Zeichnen und Tap-Pads.
   Es öffnet sich kein Overlay; Haupt-Orbit und Transport bleiben zugänglich.
+- Anordnung wie beim Zahlenblock: oben 7–8–9, mittig 4–5–6, unten 1–2–3.
+  Die internen Set-IDs bleiben unverändert; vorhandenes Set 1 liegt jetzt unten links.
+  Einfaches Antippen (auch der Ziffer) oder Ziffern-/Numblocktasten wählen das Set.
+  Haken, Akzentrahmen und die aktive Bearbeitungsanzeige markieren die Auswahl.
 - Jeder Platz enthält bis zu neun Instrumentenspuren, nicht nur ein Instrument.
 - Ein Set wird bearbeitet; alle belegten, nicht stummgeschalteten Sets spielen
   parallel. Auswählen ist kein Solo-Schalter und startet die Wiedergabe nicht neu.
 - Leere Plätze beginnen ohne automatisch erzeugte Begleitung. Über Musikrichtung,
   Instrumente, Zeichnen, Klopfen oder Noten lassen sie sich aufbauen.
+- Doppelklick/Doppeltipp auf eine Kachel öffnet das kleine Namens-Overlay;
+  alternativ F2 bei fokussierter Kachel. Enter bzw. der Haken übernimmt,
+  Escape oder Abbrechen verwirft den Entwurf. Leere Eingabe stellt den automatischen Namen wieder her.
+- Direkt in jeder Kachel liegen Duplizieren (links), Set-Mute (Mitte) und
+  Leeren (rechts), jeweils mit Icon und Tooltip. Sie wirken auf diese Kachel,
+  ohne das Bearbeitungs-Set zu wechseln. Leeren eines Hintergrund-Sets gibt seinen Platz frei.
 - Namen, Duplizieren, Set-Mute und Leeren sind in der Set-Ansicht verfügbar. Auswählen lässt das Raster geöffnet;
   die übrigen Ansichtsbuttons wechseln zu Zeichnen, Tap-Pads, Noten oder Einstellungen. Leeren und
   „Neues Projekt“ verlangen eine Bestätigung; Letzteres verwirft die gesamte Bank.

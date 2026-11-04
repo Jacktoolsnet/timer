@@ -390,6 +390,8 @@ rejected rather than silently exporting a truncated song without rights.
 The grid button before Draw manages up to **nine complete sets of nine tracks**
 as an inline main view, like the tap pads, not a modal overlay. Selecting a set
 keeps this grid visible; the main orbit and playback controls remain usable.
+Double-click/double-tap a tile, or press F2 on its focused button, to rename it
+in a small overlay. Enter/the checkmark saves; Escape/cancel discards the draft.
 The selected set is the editing target, not the only audible set. All unmuted sets
 share Start/Stop, BPM, meter and tempo unit. Style, instruments, notes and transpose
 are per set. Selecting another set does not restart the transport. Blank slots

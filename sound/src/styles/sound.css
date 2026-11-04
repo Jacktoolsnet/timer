@@ -546,3 +546,46 @@ body.score-expanded{overflow:hidden}
 #orbit-sets-panel .orbit-set-name{margin-top:10px}
 #orbit-sets-panel .orbit-set-actions{margin-top:8px}
 #orbit-sets-panel>p{margin:8px 0}
+
+:is(#orbit-confirm-dialog,#orbit-rename-dialog){box-sizing:border-box;width:min(440px,calc(100vw - 32px));max-height:calc(100dvh - 32px);overflow:auto;padding:26px;border:1px solid var(--line);border-radius:22px;color:var(--text);background:var(--surface);box-shadow:0 24px 90px #0007}
+:is(#orbit-confirm-dialog,#orbit-rename-dialog)::backdrop{background:#07111bb8;backdrop-filter:blur(7px)}
+:is(#orbit-confirm-dialog,#orbit-rename-dialog) form{margin:0}.orbit-confirm-heading{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.orbit-confirm-icon{display:grid;place-items:center;width:46px;height:46px;border-radius:14px;color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--surface));border:1px solid color-mix(in srgb,var(--accent) 30%,var(--line))}.orbit-confirm-icon svg{width:24px;height:24px}
+.orbit-confirm-close{display:grid;place-items:center;width:34px;height:34px;padding:7px;color:var(--muted);background:transparent;border:1px solid var(--line);border-radius:10px;cursor:pointer}.orbit-confirm-close svg{width:18px;height:18px}
+#orbit-confirm-title{font-size:20px;line-height:1.3;margin:20px 0 10px}#orbit-confirm-target{font-size:12px;color:var(--accent);overflow-wrap:anywhere;margin:0 0 12px}#orbit-confirm-message{font-size:13px;line-height:1.7;color:var(--muted);margin:0 0 24px}
+.orbit-confirm-actions{display:flex;gap:10px}.orbit-confirm-actions button{flex:1;min-width:0;min-height:44px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--text);font:inherit;font-size:12px;cursor:pointer;overflow-wrap:anywhere}
+#orbit-confirm-accept{color:#f397a7;border-color:#d5677d66;background:color-mix(in srgb,#d5677d 12%,var(--bg))}:is(#orbit-confirm-dialog,#orbit-rename-dialog) button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+@media(prefers-reduced-motion:no-preference){:is(#orbit-confirm-dialog,#orbit-rename-dialog)[open]{animation:orbit-confirm-in .18s ease-out}@keyframes orbit-confirm-in{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}}
+:root[data-theme=light] #orbit-confirm-accept{color:#a52f48}
+@media(prefers-color-scheme:light){:root:not([data-theme=dark]) #orbit-confirm-accept{color:#a52f48}}
+/* Compact icon actions, with localized titles and accessible names. */
+#orbit-sets-panel .orbit-set-actions{justify-content:flex-end;gap:8px}
+#orbit-sets-panel .orbit-set-actions button,:is(#orbit-confirm-dialog,#orbit-rename-dialog) .orbit-confirm-actions button{display:inline-flex;flex:0 0 44px;align-items:center;justify-content:center;width:44px;height:44px;min-height:44px;padding:11px;margin:0}
+.orbit-set-actions svg,.orbit-confirm-actions svg{width:20px;height:20px;flex:none}
+.orbit-confirm-actions{justify-content:flex-end}
+#orbit-confirm-accept[data-confirm-kind=clear] [data-icon=new],#orbit-confirm-accept[data-confirm-kind=project] [data-icon=clear]{display:none}
+
+[data-orbit-select]{touch-action:manipulation}
+#orbit-rename-title{font-size:20px;line-height:1.3;margin:20px 0 18px}
+#orbit-rename-dialog .orbit-set-name{display:block;margin:0 0 8px;color:var(--muted)}
+#orbit-set-name{box-sizing:border-box;width:100%;min-width:0;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font:inherit;font-size:16px}
+#orbit-rename-dialog .orbit-confirm-actions{margin-top:22px}
+#orbit-rename-save{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 40%,var(--line));background:color-mix(in srgb,var(--accent) 10%,var(--bg))}
+/* Per-tile actions operate on that set without changing the editing selection. */
+#orbit-sets-panel [data-orbit-select]{padding-bottom:42px}
+.orbit-tile-actions{position:absolute;bottom:4px;left:4px;right:4px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px}
+#orbit-sets-panel .orbit-tile-actions button{position:static;display:flex;align-items:center;justify-content:center;min-width:0;width:100%;height:36px;padding:5px;margin:0;border:0;border-radius:8px;color:var(--text);background:transparent;cursor:pointer}
+#orbit-sets-panel .orbit-tile-actions svg{width:17px;height:17px;flex:none}
+#orbit-sets-panel .orbit-tile-actions button:hover:not(:disabled){background:color-mix(in srgb,var(--accent) 12%,var(--bg))}
+#orbit-sets-panel .orbit-tile-actions [data-orbit-mute][aria-pressed=true]{color:var(--muted)}
+/* Match the numpad layout used by the tap pads; selection is editing, not solo. */
+.orbit-set-selected{position:absolute;top:6px;right:7px;display:none;color:var(--accent);pointer-events:none}
+.orbit-set-selected svg{width:18px!important;height:18px!important;opacity:1!important}
+.orbit-set-tile[data-active=true] .orbit-set-selected{display:block}
+#orbit-sets-panel .orbit-set-tile[data-active=true]>[data-orbit-select]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:color-mix(in srgb,var(--accent) 9%,var(--bg))}
+#orbit-sets-panel #orbit-active-label{color:var(--accent);font-size:11px;overflow-wrap:anywhere;margin:0 0 10px}
+.orbit-empty-plus{display:none;align-items:center;justify-content:center;height:clamp(42px,7vw,66px);color:var(--accent)}
+#orbit-sets-panel .orbit-empty-plus svg{width:28px!important;height:28px!important;opacity:1}
+.orbit-set-tile[data-empty=true] .orbit-empty-plus{display:flex}
+.orbit-set-tile[data-empty=true] [data-orbit-select]>svg,.orbit-set-tile[data-empty=true] .orbit-tile-actions{display:none}
+.orbit-set-tile[data-empty=true] [data-orbit-select]{padding-bottom:42px;border-style:dashed}

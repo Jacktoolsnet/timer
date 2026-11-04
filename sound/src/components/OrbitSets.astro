@@ -1,5 +1,6 @@
 ---
 import type {Language} from '../lib/i18n';
+import {padNumbers} from '../lib/orbit-layout';
 import {orbitSetCopy} from '../lib/orbit-project';
 import ActionIcon from './ActionIcon.astro';
 interface Props {lang:Language}
@@ -7,16 +8,36 @@ const {lang}=Astro.props,c=orbitSetCopy[lang];
 ---
 <section id="orbit-sets-panel" hidden aria-labelledby="orbit-sets-title">
  <div class="orbit-sets-heading"><h2 id="orbit-sets-title">{c.title}</h2><button id="orbit-sets-close" type="button" aria-label={c.close} title={c.close}><ActionIcon name="cancel"/></button></div>
- <p>{c.hint}</p>
- <div id="orbit-sets-grid">{Array.from({length:9},(_,i)=><div class="orbit-set-tile" data-orbit-slot={i}>
-  <button type="button" data-orbit-select={i} aria-label={c.choose+' '+(i+1)} aria-pressed={i===0?'true':'false'}>
+ <p>{c.hint}</p><p id="orbit-active-label" aria-live="polite"></p>
+ <div id="orbit-sets-grid">{padNumbers.map(number=>{const i=number-1;return <div class="orbit-set-tile" data-orbit-slot={i}>
+  <button type="button" data-orbit-select={i} aria-label={c.choose+' '+(i+1)} title={c.choose+' '+(i+1)+' · '+c.renameHint} aria-describedby="orbit-rename-hint" aria-pressed={i===0?'true':'false'}>
    <svg viewBox="0 0 100 100" aria-hidden="true">{Array.from({length:9},(_,n)=><circle cx="50" cy="50" r={7+n*4.5} fill="none" stroke={`hsl(${180+n*31} 60% 55%)`} stroke-width="1.5"/>)}</svg>
-   <b>{i+1}</b><span data-orbit-name>{c.empty}</span>
+   <span class="orbit-empty-plus" aria-hidden="true"><ActionIcon name="plus"/></span><b>{i+1}</b><span class="orbit-set-selected" aria-hidden="true"><ActionIcon name="done"/></span><span data-orbit-name>{c.empty}</span>
   </button>
+  <div class="orbit-tile-actions"><button type="button" data-orbit-duplicate={i} aria-label={c.duplicateSet+' '+(i+1)} title={c.duplicateSet}><ActionIcon name="duplicate"/></button>
   <button type="button" data-orbit-mute={i} aria-label={c.mute+' '+(i+1)} title={c.mute} aria-pressed="false"><ActionIcon name="mute"/><ActionIcon name="unmute"/></button>
- </div>)}</div>
- <label class="orbit-set-name">{c.name}<input id="orbit-set-name" maxlength="80" autocomplete="off"/></label>
- <div class="orbit-set-actions"><button type="button" id="orbit-set-duplicate">{c.duplicate}</button><button type="button" id="orbit-set-clear">{c.clear}</button></div>
- <button type="button" id="orbit-project-new">{c.newProject}</button>
+  <button type="button" data-orbit-clear={i} aria-label={c.clearSet+' '+(i+1)} title={c.clearSet}><ActionIcon name="clear"/></button></div>
+ </div>})}</div>
+ <span id="orbit-rename-hint" hidden>{c.renameHint}</span>
+ <div class="orbit-set-actions"><button type="button" id="orbit-project-new" aria-label={c.newProject} title={c.newProject}><ActionIcon name="new"/></button></div>
  <p id="orbit-sets-status" role="status"></p>
 </section>
+
+<dialog id="orbit-confirm-dialog" aria-labelledby="orbit-confirm-title" aria-describedby="orbit-confirm-message orbit-confirm-target">
+ <form method="dialog">
+  <div class="orbit-confirm-heading"><span class="orbit-confirm-icon"><ActionIcon name="clear"/></span><button type="submit" value="cancel" class="orbit-confirm-close" aria-label={c.cancel} title={c.cancel}><ActionIcon name="cancel"/></button></div>
+  <h2 id="orbit-confirm-title">{c.clearTitle}</h2>
+  <p id="orbit-confirm-target"></p>
+  <p id="orbit-confirm-message">{c.confirm}</p>
+  <div class="orbit-confirm-actions"><button id="orbit-confirm-cancel" type="submit" value="cancel" aria-label={c.cancel} title={c.cancel} autofocus><ActionIcon name="cancel"/></button><button id="orbit-confirm-accept" type="submit" value="confirm" aria-label={c.clear} title={c.clear} data-confirm-kind="clear"><ActionIcon name="clear"/><ActionIcon name="new"/></button></div>
+ </form>
+</dialog>
+
+<dialog id="orbit-rename-dialog" aria-labelledby="orbit-rename-title">
+ <form method="dialog">
+  <div class="orbit-confirm-heading"><span class="orbit-confirm-icon"><ActionIcon name="draw"/></span><button id="orbit-rename-close" type="button" class="orbit-confirm-close" aria-label={c.cancel} title={c.cancel}><ActionIcon name="cancel"/></button></div>
+  <h2 id="orbit-rename-title">{c.renameTitle}</h2>
+  <label class="orbit-set-name" for="orbit-set-name">{c.name}</label><input id="orbit-set-name" maxlength="80" autocomplete="off" autofocus/>
+  <div class="orbit-confirm-actions"><button id="orbit-rename-cancel" type="button" aria-label={c.cancel} title={c.cancel}><ActionIcon name="cancel"/></button><button id="orbit-rename-save" type="submit" value="save" aria-label={c.saveName} title={c.saveName}><ActionIcon name="done"/></button></div>
+ </form>
+</dialog>
