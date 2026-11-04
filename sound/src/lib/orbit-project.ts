@@ -23,6 +23,7 @@ export function decodeOrbitProject(raw:string|null):OrbitProject|null{
     if(s&&(m.numerator!==c.meter.numerator||m.denominator!==c.meter.denominator))return null;
    }
   }
+  if(!p.sets[p.active].settings&&p.sets.some((slot:OrbitSet)=>slot.settings!==null))return null;
   return p as OrbitProject;
  }catch{return null;}
 }

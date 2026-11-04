@@ -20,7 +20,10 @@ Stand: 2026-11-04
   Escape oder Abbrechen verwirft den Entwurf. Leere Eingabe stellt den automatischen Namen wieder her.
 - Direkt in jeder Kachel liegen Duplizieren (links), Set-Mute (Mitte) und
   Leeren (rechts), jeweils mit Icon und Tooltip. Sie wirken auf diese Kachel,
-  ohne das Bearbeitungs-Set zu wechseln. Leeren eines Hintergrund-Sets gibt seinen Platz frei.
+  ohne das Bearbeitungs-Set zu wechseln. Entfernen gibt den Platz vollständig frei. Die leere Kachel zeigt ein Plus
+  zum Hinzufügen eines frischen Orbits. Beim Entfernen des aktiven Orbits wird ein
+  anderes vorhandenes Set ausgewählt; ohne verbleibende Sets stoppt die Wiedergabe.
+  Auch ein vollständig leeres Projekt bleibt speicher- und wiederherstellbar.
 - Namen, Duplizieren, Set-Mute und Leeren sind in der Set-Ansicht verfügbar. Auswählen lässt das Raster geöffnet;
   die übrigen Ansichtsbuttons wechseln zu Zeichnen, Tap-Pads, Noten oder Einstellungen. Leeren und
   „Neues Projekt“ verlangen eine Bestätigung; Letzteres verwirft die gesamte Bank.
@@ -71,7 +74,7 @@ im bisherigen Einstellungsformat exportiert.
 Mehr-Set-Projekte verwenden `format: "jacktools-orbit-project"`, `version: 1`,
 `active` (0–8), gemeinsames `bpm`, `volume`, `clock` sowie genau neun `sets`.
 Jeder Eintrag enthält `name` (max. 80 Zeichen), `muted`, `settings` (vollständige
-v2-Einstellungen oder null) und `barOffset` (beim Export 0). Ein enthaltenes
+v2-Einstellungen oder null; bei ganz leerem Projekt auch für den aktiven Platz) und `barOffset` (beim Export 0). Ein enthaltenes
 `settings.songScript` bleibt ein vollständiger, unveränderter Song-Script-Quelltext.
 `clock` enthält `meter`, `tempoUnit`, `quarters`, `steps`, `swing`; `quarters` und
 `steps` sind strikt aus dem Takt abzuleiten. Verschachtelte Projekte sind ungültig.

@@ -2507,10 +2507,9 @@ function renderOrbitSets(){
   const name=slot.name||settings?.songScript?.title||'Orbit '+(i+1);
   const tile=panel.querySelector<HTMLElement>(`[data-orbit-slot="${i}"]`)!;
   tile.dataset.empty=String(!settings);tile.dataset.muted=String(slot.muted);tile.dataset.active=String(i===activeOrbitSet&&activeOrbitExists);
-  if(i===activeOrbitSet){const label=activeOrbitExists?orbitSetCopy[language].active+' · '+(i+1)+' · '+name:orbitSetCopy[language].addHint;if($('#orbit-active-label').textContent!==label)$('#orbit-active-label').textContent=label;}
   tile.querySelector('[data-orbit-select]')!.setAttribute('aria-pressed',String(i===activeOrbitSet&&activeOrbitExists));
   const selectButton=tile.querySelector<HTMLButtonElement>('[data-orbit-select]')!;selectButton.setAttribute('aria-label',orbitSetCopy[language].choose+' · '+(i+1)+' · '+name);selectButton.title=selectButton.getAttribute('aria-label')+' · '+orbitSetCopy[language].renameHint;if(!settings){selectButton.title=orbitSetCopy[language].add+' · '+(i+1);selectButton.setAttribute('aria-label',selectButton.title);}
-  tile.querySelector('[data-orbit-name]')!.textContent=settings?name:orbitSetCopy[language].empty;
+  tile.querySelector('[data-orbit-name]')!.textContent=settings?name:'';
   const mute=tile.querySelector<HTMLButtonElement>('[data-orbit-mute]')!;mute.disabled=!settings;mute.setAttribute('aria-pressed',String(slot.muted));mute.title=(slot.muted?orbitSetCopy[language].unmute:orbitSetCopy[language].mute)+' · '+name;mute.setAttribute('aria-label',mute.title);
   for(const [attribute,label] of [['data-orbit-duplicate',orbitSetCopy[language].duplicateSet],['data-orbit-clear',orbitSetCopy[language].clearSet]]){const button=tile.querySelector<HTMLButtonElement>(`[${attribute}]`)!;button.disabled=!settings;button.title=label+' · '+(i+1)+' · '+name;button.setAttribute('aria-label',button.title);}
   tile.querySelectorAll('circle').forEach((circle,n)=>circle.setAttribute('stroke-opacity',String(settings?.tracks[n]?.enabled?1:.15)));
@@ -2595,10 +2594,9 @@ function installOrbitSets(){
  }));
  const panel=$<HTMLElement>('#orbit-sets-panel');
  $('#orbit-sets-open').addEventListener('click',()=>{
-  if(animationSettingsActive())$('#animation-settings-close').click();
+  if(animationSettingsActive())$('#animation-settings').dispatchEvent(new Event('close-settings'));
   $('#orbit-sets-status').textContent='';setOrbitSetsVisible(!orbitSetsVisible);
  });
- $('#orbit-sets-close').addEventListener('click',()=>{setOrbitSetsVisible(false);$('#orbit-sets-open').focus({preventScroll:true});});
  document.addEventListener('keydown',event=>{
   if(event.key!=='Escape'||!orbitSetsVisible||document.querySelector('dialog[open]'))return;
   event.preventDefault();event.stopImmediatePropagation();setOrbitSetsVisible(false);$('#orbit-sets-open').focus({preventScroll:true});
@@ -2826,7 +2824,7 @@ $('#recording-duration').addEventListener('input',()=>{syncRecordingDuration();p
 $('#tempo').addEventListener('input',()=>syncVideoSong());
 for(const option of ['restart','random','fullscreen'])$('#recording-'+option).addEventListener('change',()=>{syncFileButtons();persistSettings();});
 function syncFileButtons(){
- document.querySelectorAll<HTMLButtonElement>('#orbit-sets-open,#orbit-sets-panel button:not(#orbit-sets-close)').forEach(button=>button.disabled=videoBusy||wavBusy||importBusy);
+ document.querySelectorAll<HTMLButtonElement>('#orbit-sets-open,#orbit-sets-panel button').forEach(button=>button.disabled=videoBusy||wavBusy||importBusy);
  document.querySelectorAll<HTMLButtonElement>('[data-orbit-mute],[data-orbit-clear],[data-orbit-duplicate]').forEach(button=>{const i=Number(button.dataset.orbitMute??button.dataset.orbitClear??button.dataset.orbitDuplicate);button.disabled=videoBusy||wavBusy||importBusy||(i===activeOrbitSet?!activeOrbitExists:!orbitSets[i].settings);});
  $<HTMLInputElement>('#orbit-set-name').disabled=videoBusy||wavBusy||importBusy;
  document.querySelectorAll<HTMLButtonElement>('[data-library-open],[data-library-song],[data-library-random]').forEach(button=>button.disabled=videoBusy||wavBusy||importBusy);

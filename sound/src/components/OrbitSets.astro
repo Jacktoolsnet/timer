@@ -6,13 +6,11 @@ import ActionIcon from './ActionIcon.astro';
 interface Props {lang:Language}
 const {lang}=Astro.props,c=orbitSetCopy[lang];
 ---
-<section id="orbit-sets-panel" hidden aria-labelledby="orbit-sets-title">
- <div class="orbit-sets-heading"><h2 id="orbit-sets-title">{c.title}</h2><button id="orbit-sets-close" type="button" aria-label={c.close} title={c.close}><ActionIcon name="cancel"/></button></div>
- <p>{c.hint}</p><p id="orbit-active-label" aria-live="polite"></p>
+<section id="orbit-sets-panel" hidden aria-label={c.title}>
  <div id="orbit-sets-grid">{padNumbers.map(number=>{const i=number-1;return <div class="orbit-set-tile" data-orbit-slot={i}>
   <button type="button" data-orbit-select={i} aria-label={c.choose+' '+(i+1)} title={c.choose+' '+(i+1)+' · '+c.renameHint} aria-describedby="orbit-rename-hint" aria-pressed={i===0?'true':'false'}>
    <svg viewBox="0 0 100 100" aria-hidden="true">{Array.from({length:9},(_,n)=><circle cx="50" cy="50" r={7+n*4.5} fill="none" stroke={`hsl(${180+n*31} 60% 55%)`} stroke-width="1.5"/>)}</svg>
-   <span class="orbit-empty-plus" aria-hidden="true"><ActionIcon name="plus"/></span><b>{i+1}</b><span class="orbit-set-selected" aria-hidden="true"><ActionIcon name="done"/></span><span data-orbit-name>{c.empty}</span>
+   <span class="orbit-empty-plus" aria-hidden="true"><ActionIcon name="plus"/></span><b>{i+1}</b><span class="orbit-set-selected" aria-hidden="true"><ActionIcon name="done"/></span><span data-orbit-name></span>
   </button>
   <div class="orbit-tile-actions"><button type="button" data-orbit-duplicate={i} aria-label={c.duplicateSet+' '+(i+1)} title={c.duplicateSet}><ActionIcon name="duplicate"/></button>
   <button type="button" data-orbit-mute={i} aria-label={c.mute+' '+(i+1)} title={c.mute} aria-pressed="false"><ActionIcon name="mute"/><ActionIcon name="unmute"/></button>

@@ -30,7 +30,10 @@ export function installAnimationSettings(activate:(view:'orbit'|'flower'|'landsc
    if(!el.hidden)title.textContent=el.dataset.panelTitle!;
   });
   back.hidden=next==='home'||next===rootPanel;surface.scrollTop=0;
-  if(focus)title.focus({preventScroll:true});
+  const heading=title.closest<HTMLElement>('.animation-settings-heading')!;
+  heading.hidden=next==='home'||next==='music'&&rootPanel==='music';
+  title.hidden=next==='home'||next==='music';
+  if(focus)(title.hidden?back:title).focus({preventScroll:true});
  }
  function close(focus=true){
   if(!animationSettingsActive())return;
@@ -51,7 +54,7 @@ export function installAnimationSettings(activate:(view:'orbit'|'flower'|'landsc
  surface.querySelectorAll<HTMLButtonElement>('[data-animation-open]').forEach(button=>button.addEventListener('click',()=>show(button.dataset.animationOpen as Panel)));
  for(const view of ['orbit','flower','landscape','stream','constellation'] as const)document.querySelector('#'+view+'-settings-open')!.addEventListener('click',()=>{activate(view);show(view);});
  back.addEventListener('click',()=>show(parent(panel)));
- document.querySelector('#animation-settings-close')!.addEventListener('click',()=>close());
+ surface.addEventListener('close-settings',()=>close(false));
  // Switching to an input mode is ordinary inline navigation, not dismissal of a modal.
  document.querySelectorAll<HTMLButtonElement>('[data-pad-mode]').forEach(button=>button.addEventListener('click',()=>close(false)));
  document.addEventListener('keydown',event=>{

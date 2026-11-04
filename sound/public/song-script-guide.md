@@ -413,7 +413,8 @@ Multi-set exports use `format: "jacktools-orbit-project"`, `version: 1`:
   `steps = quarters * 4`; swing is 0–0.6.
 - `sets`: exactly nine `{name, muted, settings, barOffset}` objects. Names are
   max. 80 characters. An unused slot has `settings: null`; the active slot must
-  contain complete v2 settings, not a bare song script. Settings can contain the
+  contain complete v2 settings, not a bare song script, unless all nine slots are
+  empty. Removing an orbit sets its settings to null; the central + recreates it. Settings can contain the
   unchanged source `songScript`. `barOffset` is 0 in exported restartable projects.
 
 Use an exported project as the settings template; do not invent settings fields

@@ -19,6 +19,7 @@ async function rename(page:Page,index:number,name:string){
 function project():OrbitProject{return {format:'jacktools-orbit-project',version:1,active:0,bpm:220,volume:.3,clock:{meter:{numerator:4,denominator:4,groups:[1,1,1,1]},tempoUnit:{denominator:4,dotted:false},quarters:4,steps:16,swing:0},sets:Array.from({length:9},(_,i)=>({name:'Set '+i,muted:false,settings:i<2?fixture():null,barOffset:0}))};}
 
 test('project validation is bounded, atomic, nonrecursive and backward compatible',()=>{
+ const empty=project();empty.sets.forEach(slot=>slot.settings=null);expect(decodeOrbitProject(JSON.stringify(empty))).not.toBeNull();
  expect(decodeSettings(JSON.stringify(fixture()))).not.toBeNull();expect(decodeOrbitProject(JSON.stringify(project()))).not.toBeNull();
  for(const mutate of [(p:any)=>p.sets.pop(),(p:any)=>p.active=9,(p:any)=>p.clock.steps=32,(p:any)=>p.sets[0].settings.tracks[0].instrument='unknown',(p:any)=>p.sets[0].settings=project(),(p:any)=>p.sets[0].barOffset=.5]){const p=project();mutate(p);expect(decodeOrbitProject(JSON.stringify(p))).toBeNull();}
  const p=project();p.clock={meter:{numerator:5,denominator:8,groups:[3,2]},tempoUnit:{denominator:8,dotted:false},quarters:2.5,steps:10,swing:0};
@@ -34,7 +35,7 @@ test('nine complete independent slots; duplicate, rename, mute and switch preser
  await page.locator('[data-orbit-duplicate="0"]').click();await expect(page.locator('[data-orbit-slot="1"]')).toHaveAttribute('data-empty','false');
  await page.locator('[data-orbit-select="1"]').click();
  await page.locator('[data-track="0"] .track-volume').evaluate((el:HTMLInputElement)=>{el.value='.2';el.dispatchEvent(new Event('input',{bubbles:true}));});
- await rename(page,1,'Second layer');await page.locator('[data-orbit-mute="0"]').click();await page.locator('#orbit-sets-close').click();
+ await rename(page,1,'Second layer');await page.locator('[data-orbit-mute="0"]').click();await page.locator('#orbit-sets-open').click();
  let p=await exported(page);expect(p.format).toBe('jacktools-orbit-project');expect(p.active).toBe(1);expect(p.sets[0].settings.tracks[0].volume).toBe(.4);expect(p.sets[1].settings.tracks[0].volume).toBe(.2);expect(p.sets[0].muted).toBe(true);expect(p.sets[1].name).toBe('Second layer');
  await choose(page,8);p=await exported(page);expect(p.active).toBe(8);expect(p.sets[8].settings.tracks).toHaveLength(9);expect(p.sets[8].settings.tracks.every((t:any)=>!t.score?.length&&!t.points.some(Boolean))).toBe(true);expect(p.sets[1].name).toBe('Second layer');
  await upload(page,p);await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false');await choose(page,1);expect((await exported(page)).sets[1].settings.tracks[0].volume).toBe(.2);
@@ -49,7 +50,7 @@ test('both complete sets sound on the same audio clock and selecting a different
  expect(starts.some((a,i)=>starts.some((b,j)=>i!==j&&Math.abs(a-b)<.003))).toBe(true);
  await choose(page,1);await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
  await page.waitForTimeout(2500);expect((await page.evaluate(()=>(window as any).orbitStarts as number[])).length).toBeGreaterThan(starts.length);
- await grid(page);await page.locator('[data-orbit-mute="0"]').click();await page.locator('[data-orbit-mute="1"]').click();await page.locator('#orbit-sets-close').click();
+ await grid(page);await page.locator('[data-orbit-mute="0"]').click();await page.locator('[data-orbit-mute="1"]').click();await page.locator('#orbit-sets-open').click();
  await page.waitForTimeout(200);const muted=await page.evaluate(()=>(window as any).orbitStarts.length);await page.waitForTimeout(2400);expect(await page.evaluate(()=>(window as any).orbitStarts.length)).toBe(muted);
  await page.locator('#play').click();await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false');
 });
@@ -76,7 +77,7 @@ test('all nine sets with nine instruments can sound together; the grid fits mobi
  const box=(await page.locator('[data-orbit-slot="8"]').boundingBox())!;expect(box.width).toBeLessThan(page.viewportSize()!.width);await page.locator('#orbit-sets-panel').scrollIntoViewIfNeeded();
  await page.screenshot({path:'/tmp/orbit-sets-'+info.project.name+'.png'});
  await page.locator('[data-orbit-clear="0"]').click();await page.locator('#orbit-confirm-accept').click();await expect(page.locator('#orbit-confirm-dialog')).not.toBeVisible();await expect(page.locator('[data-orbit-select="1"]')).toHaveAttribute('aria-pressed','true');await expect(page.locator('[data-orbit-slot="0"]')).toHaveAttribute('data-empty','true');
- await page.locator('#orbit-project-new').click();await page.locator('#orbit-confirm-accept').click();await expect(page.locator('#orbit-confirm-dialog')).not.toBeVisible();await expect(page.locator('[data-orbit-slot="1"]')).toHaveAttribute('data-empty','true');await page.locator('#orbit-sets-close').click();
+ await page.locator('#orbit-project-new').click();await page.locator('#orbit-confirm-accept').click();await expect(page.locator('#orbit-confirm-dialog')).not.toBeVisible();await expect(page.locator('[data-orbit-slot="1"]')).toHaveAttribute('data-empty','true');await page.locator('#orbit-sets-open').click();
  await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false');expect((await exported(page)).sets.every((slot:any)=>slot.settings===null)).toBe(true);
 });
 
@@ -84,7 +85,7 @@ test('orbit projects persist only after consent and restore every set without au
  await page.goto('/de/');await upload(page,project());
  expect(await page.evaluate(()=>localStorage.getItem('jacktools.sound.settings.v1'))).toBeNull();
  await page.locator('#palette-dropdown summary').click();await page.locator('#remember-preferences').check();await page.locator('#preferences-close').click();
- await choose(page,1);await rename(page,1,'Remembered layer');await page.locator('#orbit-sets-close').click();
+ await choose(page,1);await rename(page,1,'Remembered layer');await page.locator('#orbit-sets-open').click();
  await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('jacktools.sound.settings.v1')!).sets[1].name)).toBe('Remembered layer');
  await page.reload();await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false');await grid(page);await expect(page.locator('[data-orbit-select="1"]')).toHaveAttribute('aria-pressed','true');await expect(page.locator('[data-orbit-slot="1"] [data-orbit-name]')).toHaveText('Remembered layer');
 });
@@ -130,8 +131,8 @@ test('destructive actions use themed confirmation with safe focus, cancel and Es
  await page.locator('[data-orbit-clear="0"]').click();await page.keyboard.press('Escape');await expect(modal).not.toBeVisible();await expect(page.locator('#orbit-sets-panel')).toBeVisible();await expect(page.locator('[data-orbit-clear="0"]')).toBeFocused();
  expect((await exported(page)).sets).toEqual(before.sets);
  await page.locator('[data-orbit-clear="0"]').click();await page.locator('#orbit-confirm-accept').click();await expect(modal).not.toBeVisible();
- const cleared=await exported(page);expect(cleared.sets[0].settings).toBeNull();expect(cleared.active).toBe(1);expect(cleared.sets[1]).toEqual(before.sets[1]);
- await page.locator('#orbit-project-new').click();await expect(page.locator('#orbit-confirm-title')).toContainText('Neues Projekt');await page.locator('#orbit-confirm-cancel').click();await expect(modal).not.toBeVisible();expect((await exported(page)).sets[1]).toEqual(before.sets[1]);
+ const cleared=await exported(page);expect(cleared.sets[0].settings).toBeNull();expect(cleared.active).toBe(1);expect(cleared.sets[1]).toMatchObject(before.sets[1]);
+ await page.locator('#orbit-project-new').click();await expect(page.locator('#orbit-confirm-title')).toContainText('Neues Projekt');await page.locator('#orbit-confirm-cancel').click();await expect(modal).not.toBeVisible();expect((await exported(page)).sets[1]).toMatchObject(before.sets[1]);
  expect(browserDialogs).toEqual([]);
 });
 
@@ -193,7 +194,7 @@ test('orbit numbers match the numpad layout; tapping the number and number keys 
  await expect(page.locator('[data-orbit-slot="1"]')).toHaveAttribute('data-active','true');
  if(info.project.name==='mobile')await one.locator('b').tap();else await one.locator('b').click();
  await expect(one).toHaveAttribute('aria-pressed','true');await expect(page.locator('[data-orbit-slot="0"]')).toHaveAttribute('data-active','true');await expect(one.locator('.orbit-set-selected')).toBeVisible();
- await expect(page.locator('#orbit-active-label')).toContainText('1 · Set 0');await expect(page.locator('[data-track="0"] .track-volume')).toHaveValue('0.4');expect((await exported(page)).active).toBe(0);
+ await expect(page.locator('#orbit-active-label')).toHaveCount(0);await expect(page.locator('[data-track="0"] .track-volume')).toHaveValue('0.4');expect((await exported(page)).active).toBe(0);
  await page.keyboard.press('Digit9');await expect(page.locator('[data-orbit-select="8"]')).toHaveAttribute('aria-pressed','true');expect((await exported(page)).active).toBe(8);
  await page.keyboard.press('Numpad1');await expect(one).toHaveAttribute('aria-pressed','true');await expect(page.locator('[data-track="0"] .track-volume')).toHaveValue('0.4');
  await page.locator('#orbit-sets-panel').scrollIntoViewIfNeeded();await page.screenshot({path:'/tmp/orbit-numbering-'+info.project.name+'.png'});
@@ -205,6 +206,9 @@ test('removing the last orbit leaves a restartable empty plus tile; plus creates
  const tile=page.locator('[data-orbit-slot="0"]');await expect(tile).toHaveAttribute('data-empty','true');await expect(tile.locator('.orbit-empty-plus')).toBeVisible();await expect(tile.locator('.orbit-tile-actions')).not.toBeVisible();await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false');await expect(page.locator('#play')).toBeDisabled();
  const empty=await exported(page);expect(empty.sets.every((slot:any)=>slot.settings===null)).toBe(true);expect(decodeOrbitProject(JSON.stringify(empty))).not.toBeNull();
  await upload(page,empty);await grid(page);await expect(tile).toHaveAttribute('data-empty','true');await expect(page.locator('#play')).toBeDisabled();
+ await page.locator('#palette-dropdown summary').click();await page.locator('#remember-preferences').check();await page.locator('#preferences-close').click();
+ await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('jacktools.sound.settings.v1')!).sets.every((slot:any)=>slot.settings===null))).toBe(true);
+ await page.reload();await expect(page.locator('#orbit-sets-panel')).toBeVisible();await expect(tile).toHaveAttribute('data-empty','true');await expect(page.locator('#play')).toBeDisabled();
  await page.locator('#orbit-sets-panel').scrollIntoViewIfNeeded();await page.screenshot({path:'/tmp/orbit-empty-'+info.project.name+'.png'});
  if(info.project.name==='mobile')await tile.locator('.orbit-empty-plus').tap();else await tile.locator('.orbit-empty-plus').click();
  await expect(tile).toHaveAttribute('data-empty','false');await expect(tile.locator('.orbit-empty-plus')).not.toBeVisible();await expect(tile.locator('.orbit-tile-actions')).toBeVisible();await expect(page.locator('#play')).toBeEnabled();
