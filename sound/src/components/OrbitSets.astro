@@ -5,7 +5,7 @@ import ActionIcon from './ActionIcon.astro';
 interface Props {lang:Language}
 const {lang}=Astro.props,c=orbitSetCopy[lang];
 ---
-<dialog id="orbit-sets-dialog" aria-labelledby="orbit-sets-title">
+<section id="orbit-sets-panel" hidden aria-labelledby="orbit-sets-title">
  <div class="orbit-sets-heading"><h2 id="orbit-sets-title">{c.title}</h2><button id="orbit-sets-close" type="button" aria-label={c.close} title={c.close}><ActionIcon name="cancel"/></button></div>
  <p>{c.hint}</p>
  <div id="orbit-sets-grid">{Array.from({length:9},(_,i)=><div class="orbit-set-tile" data-orbit-slot={i}>
@@ -19,4 +19,4 @@ const {lang}=Astro.props,c=orbitSetCopy[lang];
  <div class="orbit-set-actions"><button type="button" id="orbit-set-duplicate">{c.duplicate}</button><button type="button" id="orbit-set-clear">{c.clear}</button></div>
  <button type="button" id="orbit-project-new">{c.newProject}</button>
  <p id="orbit-sets-status" role="status"></p>
-</dialog>
+</section>

@@ -78,7 +78,7 @@ const lightColors=['#00869b','#7845c7','#cf3659','#a66a08','#078565','#bd5715','
 const initialParts=partsForStyle('electronic');
 const tracks=colors.map((color,i)=>({color,rate:1 as TrackRate,rateChoice:'auto' as TrackRateChoice,pendingRate:null as TrackRate|null,score:null as NoteScore|null,groups:emptyNoteGroups(),grid:'auto' as GridChoice,slots:16 as number,pendingGrid:null as GridChoice|null,pendingSlots:null as number|null,motif:makeMotif(presets.electronic.melody),phase:0,direction:1,directionMode:'forward',pendingDirection:null as number|null,randomDynamics:false,lastVelocity:1,scheduledVelocity:1,morph:null as {to:InstrumentId;progress:number;from:number;at:number;duration:number}|null,hitVelocities:Array<number>(16).fill(1),enabled:true,instrument:initialParts[i].instrument,points:Array.from({length:16},(_,s)=>initialParts[i].steps.includes(s)),mute:false,volume:initialParts[i].volume??.55,pitch:initialParts[i].pitch??0,flash:Array(16).fill(-100),hits:Array<number>(16).fill(-Infinity)}));
 let audio:AudioContext|undefined, master:GainNode|undefined, playing=false,timer:ReturnType<typeof setInterval>|undefined,nextTime=0,step=0,bpm=100;
-let activeOrbitSet=0;
+let activeOrbitSet=0,orbitSetsVisible=false;
 const orbitSets:OrbitSet[]=Array.from({length:9},emptyOrbitSet);
 let orbitClock:OrbitClock|null=null,orbitSwitch=false,activeScriptFinished=false;
 const orbitLayerAudio=new Map<number,{output:GainNode;room:ReturnType<typeof createAudioSpace>;voices:Set<GainNode>;held:typeof sustained}>();
@@ -197,10 +197,11 @@ function syncRhythmUi(){
  if(orbitClock&&master&&audio&&playing)master.gain.setTargetAtTime(Number($<HTMLInputElement>('#volume').value)*orbitMixTrim(),audio.currentTime,.04);
  streamRevision++;
  const text=rhythmCopy[language],active=padMode==='rhythm';
- document.querySelectorAll<HTMLButtonElement>('[data-pad-mode]').forEach(button=>button.setAttribute('aria-pressed',String(!animationSettingsActive()&&button.dataset.padMode===padMode)));
- $('#note-editor').hidden=padMode!=='notes';drawing.closest<HTMLElement>('.draw-wrap')!.hidden=padMode==='notes';
+ document.querySelectorAll<HTMLButtonElement>('[data-pad-mode]').forEach(button=>button.setAttribute('aria-pressed',String(!orbitSetsVisible&&!animationSettingsActive()&&button.dataset.padMode===padMode)));
+ $('#note-editor').hidden=orbitSetsVisible||padMode!=='notes';drawing.closest<HTMLElement>('.draw-wrap')!.hidden=orbitSetsVisible||padMode==='notes';
+ $('#orbit-sets-open').setAttribute('aria-pressed',String(orbitSetsVisible));$('#gesture-keyboard').hidden=orbitSetsVisible;
  noteEditor?.refresh();
- $('#rhythm-zones').hidden=!active;$('#rhythm-controls').hidden=!active;
+ $('#rhythm-zones').hidden=!active;$('#rhythm-controls').hidden=orbitSetsVisible||!active;
  drawing.setAttribute('aria-describedby','gesture-keyboard');
  drawing.dataset.selectedPad=selectedPad===null?'':String(selectedPad);
  $('#rhythm-zones').dataset.focused=String(selectedPad!==null);
@@ -649,7 +650,7 @@ document.querySelectorAll<HTMLButtonElement>('[data-center-mode]').forEach(butto
 document.querySelectorAll<HTMLButtonElement>('[data-background-mode]').forEach(button=>button.addEventListener('click',()=>selectBackgroundMode(button.dataset.backgroundMode as typeof backgroundChoice)));
 document.querySelectorAll<HTMLButtonElement>('[data-orbit-mode]').forEach(button=>button.addEventListener('click',()=>selectOrbitMode(button.dataset.orbitMode as typeof orbitChoice)));
 document.querySelectorAll<HTMLButtonElement>('[data-flower-center-mode]').forEach(button=>button.addEventListener('click',()=>selectFlowerCenterMode(button.dataset.flowerCenterMode as typeof flowerCenterChoice)));
-installAnimationSettings(view=>selectVisualization(view),cancelPadGestures,syncRhythmUi);
+installAnimationSettings(view=>selectVisualization(view),()=>{setOrbitSetsVisible(false);cancelPadGestures();},syncRhythmUi);
 function evolveAnimations(includeBackground=true){
  if(centerChoice==='random'&&!videoAnimationRun?.flags.center)selectCenterMode('random');
  if(flowerCenterChoice==='random'&&!videoAnimationRun?.flags.center)selectFlowerCenterMode('random');
@@ -1779,7 +1780,7 @@ function syncPadState(){
  drawing.dataset.input=[...padGestures.values()].some(g=>g.mode==='drawing')?'drawing':[...padGestures.values()].some(g=>g.mode==='holding')?'holding':padGestures.size?'pending':'idle';
 }
 document.querySelectorAll<HTMLButtonElement>('[data-pad-mode]').forEach(button=>button.addEventListener('click',()=>{
- noteEditor?.cancel();rhythmGeneration++;cancelPadGestures();if(selectedPad!==null)cancelRhythmEdit();padMode=button.dataset.padMode as typeof padMode;selectedPad=null;padSwitchBlocked=false;rhythmEditing=false;syncRhythmUi();persistSettings();
+ setOrbitSetsVisible(false);noteEditor?.cancel();rhythmGeneration++;cancelPadGestures();if(selectedPad!==null)cancelRhythmEdit();padMode=button.dataset.padMode as typeof padMode;selectedPad=null;padSwitchBlocked=false;rhythmEditing=false;syncRhythmUi();persistSettings();
 }));
 $('#rhythm-done').addEventListener('click',()=>{
  cancelPadGestures();rhythmGeneration++;acceptRhythmEdit();rhythmEditing=false;selectedPad=null;padSwitchBlocked=false;finishRhythm(tapPattern);
@@ -1889,6 +1890,7 @@ drawing.addEventListener('keydown',e=>{
 drawing.addEventListener('keyup',e=>{if(e.key===' '){e.preventDefault();finishPadGesture(-1);}});
 drawing.addEventListener('blur',()=>{finishPadGesture(-1,true);for(const id of heldRhythmKeys.values())finishPadGesture(id,true);heldRhythmKeys.clear();});
 window.addEventListener('keydown',e=>{
+ if(orbitSetsVisible)return;
  if(animationSettingsActive()||padMode!=='rhythm'||e.ctrlKey||e.metaKey||e.altKey)return;
  const target=e.target as HTMLElement;
  if(target.closest('input,textarea,select,[contenteditable]:not([contenteditable=false]),[role=textbox],[role=combobox],[role=listbox],[role=option],[aria-haspopup=listbox]')||document.querySelector('dialog[open]'))return;
@@ -2491,7 +2493,7 @@ function selectOrbitSet(index:number){
  rememberOrbitSet();syncVolume();renderOrbitSets();persistSettings();return true;
 }
 function renderOrbitSets(){
- const panel=document.querySelector<HTMLElement>('#orbit-sets-dialog');if(!panel)return;
+ const panel=document.querySelector<HTMLElement>('#orbit-sets-panel');if(!panel)return;
  panel.dataset.active=String(activeOrbitSet);$('#orbit-sets-open').dataset.activeSet=String(activeOrbitSet);
  orbitSets.forEach((slot,i)=>{
   const settings=i===activeOrbitSet?snapshotSettings():slot.settings;
@@ -2505,6 +2507,13 @@ function renderOrbitSets(){
  });
  $<HTMLInputElement>('#orbit-set-name').value=orbitSets[activeOrbitSet].name;
 }
+function setOrbitSetsVisible(visible:boolean){
+ orbitSetsVisible=visible;
+ $('#orbit-sets-panel').hidden=!visible;
+ $('.flow-side').classList.toggle('orbit-sets-active',visible);
+ if(visible){cancelPadGestures();renderOrbitSets();}
+ syncRhythmUi();
+}
 function installOrbitSets(){
  $('#orbit-project-new').addEventListener('click',()=>{
   if(!confirm(orbitSetCopy[language].confirmProject))return;
@@ -2512,10 +2521,17 @@ function installOrbitSets(){
   orbitSets.forEach((_,i)=>orbitSets[i]=emptyOrbitSet());activeOrbitSet=0;orbitClock=null;orbitPairCache.clear();
   applySettings(saved);activeScriptFinished=false;scriptEndAt=null;renderOrbitSets();$('#orbit-sets-status').textContent='';persistSettings();
  });
- const panel=$<HTMLDialogElement>('#orbit-sets-dialog');
- $('#orbit-sets-open').addEventListener('click',()=>{renderOrbitSets();$('#orbit-sets-status').textContent='';panel.showModal();});
- $('#orbit-sets-close').addEventListener('click',()=>panel.close());
- panel.querySelectorAll<HTMLButtonElement>('[data-orbit-select]').forEach(button=>button.addEventListener('click',()=>{if(selectOrbitSet(Number(button.dataset.orbitSelect)))panel.close();}));
+ const panel=$<HTMLElement>('#orbit-sets-panel');
+ $('#orbit-sets-open').addEventListener('click',()=>{
+  if(animationSettingsActive())$('#animation-settings-close').click();
+  $('#orbit-sets-status').textContent='';setOrbitSetsVisible(!orbitSetsVisible);
+ });
+ $('#orbit-sets-close').addEventListener('click',()=>{setOrbitSetsVisible(false);$('#orbit-sets-open').focus({preventScroll:true});});
+ document.addEventListener('keydown',event=>{
+  if(event.key!=='Escape'||!orbitSetsVisible||document.querySelector('dialog[open]'))return;
+  event.preventDefault();event.stopImmediatePropagation();setOrbitSetsVisible(false);$('#orbit-sets-open').focus({preventScroll:true});
+ },{capture:true});
+ panel.querySelectorAll<HTMLButtonElement>('[data-orbit-select]').forEach(button=>button.addEventListener('click',()=>{selectOrbitSet(Number(button.dataset.orbitSelect));}));
  panel.querySelectorAll<HTMLButtonElement>('[data-orbit-mute]').forEach(button=>button.addEventListener('click',()=>{
   const i=Number(button.dataset.orbitMute);orbitClock??=currentOrbitClock();orbitSets[i].muted=!orbitSets[i].muted;
   const layer=orbitLayerAudio.get(i);if(layer&&audio)layer.output.gain.setTargetAtTime(orbitSets[i].muted?0:1,audio.currentTime,.008);
@@ -2730,7 +2746,7 @@ $('#recording-duration').addEventListener('input',()=>{syncRecordingDuration();p
 $('#tempo').addEventListener('input',()=>syncVideoSong());
 for(const option of ['restart','random','fullscreen'])$('#recording-'+option).addEventListener('change',()=>{syncFileButtons();persistSettings();});
 function syncFileButtons(){
- document.querySelectorAll<HTMLButtonElement>('#orbit-sets-open,#orbit-sets-dialog button:not(#orbit-sets-close)').forEach(button=>button.disabled=videoBusy||wavBusy||importBusy);
+ document.querySelectorAll<HTMLButtonElement>('#orbit-sets-open,#orbit-sets-panel button:not(#orbit-sets-close)').forEach(button=>button.disabled=videoBusy||wavBusy||importBusy);
  document.querySelectorAll<HTMLButtonElement>('[data-orbit-mute]').forEach(button=>{const i=Number(button.dataset.orbitMute);button.disabled=videoBusy||wavBusy||importBusy||(i!==activeOrbitSet&&!orbitSets[i].settings);});
  $<HTMLInputElement>('#orbit-set-name').disabled=videoBusy||wavBusy||importBusy;
  document.querySelectorAll<HTMLButtonElement>('[data-library-open],[data-library-song],[data-library-random]').forEach(button=>button.disabled=videoBusy||wavBusy||importBusy);

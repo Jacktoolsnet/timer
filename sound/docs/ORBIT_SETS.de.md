@@ -4,13 +4,15 @@ Stand: 2026-11-04
 
 ## Bedienung
 
-- Der Raster-Button vor „Zeichnen“ öffnet neun Set-Plätze.
+- Der Raster-Button vor „Zeichnen“ zeigt neun Set-Plätze direkt in der Hauptansicht, wie Zeichnen und Tap-Pads.
+  Es öffnet sich kein Overlay; Haupt-Orbit und Transport bleiben zugänglich.
 - Jeder Platz enthält bis zu neun Instrumentenspuren, nicht nur ein Instrument.
 - Ein Set wird bearbeitet; alle belegten, nicht stummgeschalteten Sets spielen
   parallel. Auswählen ist kein Solo-Schalter und startet die Wiedergabe nicht neu.
 - Leere Plätze beginnen ohne automatisch erzeugte Begleitung. Über Musikrichtung,
   Instrumente, Zeichnen, Klopfen oder Noten lassen sie sich aufbauen.
-- Namen, Duplizieren, Set-Mute und Leeren sind im Overlay verfügbar. Leeren und
+- Namen, Duplizieren, Set-Mute und Leeren sind in der Set-Ansicht verfügbar. Auswählen lässt das Raster geöffnet;
+  die übrigen Ansichtsbuttons wechseln zu Zeichnen, Tap-Pads, Noten oder Einstellungen. Leeren und
   „Neues Projekt“ verlangen eine Bestätigung; Letzteres verwirft die gesamte Bank.
 - Tempo, Takt einschließlich Tempoeinheit und Start/Stopp sind gemeinsam. Beim
   ersten zusätzlichen Set wird die bisherige Taktart als Projekt-Takt übernommen.

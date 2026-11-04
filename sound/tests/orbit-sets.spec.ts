@@ -11,8 +11,8 @@ async function upload(page:Page,data:unknown){
 async function exported(page:Page){
  await page.locator('#files-open').click();const wait=page.waitForEvent('download');await page.locator('#json-export').click();const stream=await(await wait).createReadStream(),chunks:Buffer[]=[];for await(const part of stream!)chunks.push(part);await page.locator('#files-close').click();return JSON.parse(Buffer.concat(chunks).toString());
 }
-async function grid(page:Page){await page.locator('#orbit-sets-open').click();await expect(page.locator('#orbit-sets-dialog')).toBeVisible();}
-async function choose(page:Page,i:number){await grid(page);await page.locator(`[data-orbit-select="${i}"]`).click();await expect(page.locator('#orbit-sets-dialog')).not.toBeVisible();}
+async function grid(page:Page){if(!await page.locator('#orbit-sets-panel').isVisible())await page.locator('#orbit-sets-open').click();await expect(page.locator('#orbit-sets-panel')).toBeVisible();}
+async function choose(page:Page,i:number){await grid(page);await page.locator(`[data-orbit-select="${i}"]`).click();await expect(page.locator('#orbit-sets-panel')).toBeVisible();}
 function project():OrbitProject{return {format:'jacktools-orbit-project',version:1,active:0,bpm:220,volume:.3,clock:{meter:{numerator:4,denominator:4,groups:[1,1,1,1]},tempoUnit:{denominator:4,dotted:false},quarters:4,steps:16,swing:0},sets:Array.from({length:9},(_,i)=>({name:'Set '+i,muted:false,settings:i<2?fixture():null,barOffset:0}))};}
 
 test('project validation is bounded, atomic, nonrecursive and backward compatible',()=>{
@@ -70,7 +70,7 @@ test('all nine sets with nine instruments can sound together; the grid fits mobi
  const p=project();for(const slot of p.sets){slot.settings=fixture();slot.settings.tracks.forEach((tr,i)=>{tr.enabled=true;tr.instrument='piano';tr.score=structuredClone(score);tr.score[0].points[0].pitch=i*2;});}
  await page.goto('/de/');await upload(page,p);await page.locator('#play').click();await expect.poll(()=>page.evaluate(()=>(window as any).starts),{timeout:7000}).toBeGreaterThanOrEqual(81);
  await grid(page);await page.locator('#orbit-set-duplicate').click();await expect(page.locator('#orbit-sets-status')).toContainText('belegt');
- const box=(await page.locator('[data-orbit-slot="8"]').boundingBox())!;expect(box.y+box.height).toBeLessThan(page.viewportSize()!.height);
+ const box=(await page.locator('[data-orbit-slot="8"]').boundingBox())!;expect(box.width).toBeLessThan(page.viewportSize()!.width);await page.locator('#orbit-sets-panel').scrollIntoViewIfNeeded();
  await page.screenshot({path:'/tmp/orbit-sets-'+info.project.name+'.png'});
  page.once('dialog',d=>d.accept());await page.locator('#orbit-set-clear').click();await expect(page.locator('[data-orbit-select="0"]')).toHaveAttribute('aria-pressed','true');
  page.once('dialog',d=>d.accept());await page.locator('#orbit-project-new').click();await expect(page.locator('[data-orbit-slot="1"]')).toHaveAttribute('data-empty','true');await page.locator('#orbit-sets-close').click();
@@ -94,4 +94,20 @@ test('a new silent set accepts notes immediately and remains audible after leavi
  const box=(await page.locator('#score-grid').boundingBox())!;await page.mouse.click(box.x+box.width*.35,box.y+box.height*.5);await page.locator('#score-done').click();await expect(page.locator('#score-expanded-dialog')).not.toBeVisible();
  const p=await exported(page);expect(p.sets[8].settings.tracks[0].enabled).toBe(true);expect(p.sets[8].settings.tracks[0].score).toHaveLength(1);expect(p.sets[0].muted).toBe(true);
  await page.locator('#play').click();await expect.poll(()=>page.evaluate(()=>(window as any).newLayerStarts),{timeout:4000}).toBeGreaterThan(0);
+});
+
+test('orbit sets are inline pad navigation, keep the main orbit and transport usable and never open a modal',async({page})=>{
+ await page.goto('/de/');await grid(page);
+ await expect(page.locator('dialog[open]')).toHaveCount(0);
+ await expect(page.locator('#orbit-sets-panel')).toHaveJSProperty('tagName','SECTION');
+ await expect(page.locator('.flow-side #orbit-sets-panel')).toBeVisible();
+ await expect(page.locator('#orbit-sets-open')).toHaveAttribute('aria-pressed','true');
+ await expect(page.locator('#drawing')).not.toBeVisible();await expect(page.locator('#orbit')).toBeVisible();await expect(page.locator('#play')).toBeVisible();
+ await page.locator('#play').click();await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
+ await page.locator('[data-orbit-select="8"]').click();await expect(page.locator('#orbit-sets-panel')).toBeVisible();await expect(page.locator('[data-orbit-select="8"]')).toHaveAttribute('aria-pressed','true');
+ await page.locator('[data-pad-mode=rhythm]').click();await expect(page.locator('#orbit-sets-panel')).not.toBeVisible();await expect(page.locator('#rhythm-zones')).toBeVisible();await expect(page.locator('[data-pad-mode=rhythm]')).toHaveAttribute('aria-pressed','true');
+ await grid(page);await page.locator('#music-settings-open').click();await expect(page.locator('#orbit-sets-panel')).not.toBeVisible();await expect(page.locator('#animation-settings')).toBeVisible();
+ await grid(page);await expect(page.locator('#animation-settings')).not.toBeVisible();await page.locator('[data-pad-mode=notes]').click();await expect(page.locator('#orbit-sets-panel')).not.toBeVisible();await expect(page.locator('#note-editor')).toBeVisible();
+ await grid(page);await page.keyboard.press('Escape');await expect(page.locator('#orbit-sets-panel')).not.toBeVisible();await expect(page.locator('#note-editor')).toBeVisible();await expect(page.locator('#orbit-sets-open')).toBeFocused();
+ await expect(page.locator('#play')).toHaveAttribute('aria-pressed','true');
 });
