@@ -1,3 +1,5 @@
+import {decodeOrbitProject,emptyOrbitSet,orbitSetCopy,type OrbitSet,type OrbitClock,type OrbitProject} from '../lib/orbit-project';
+import {orbitPair,type OrbitLane} from '../lib/orbit-sequence';
 import {quartersPerBar,tempoQuarters,meterLabel,tempoLabel,scriptSeconds} from '../lib/song-meter';
 import {songLibrary,libraryCopy} from '../lib/song-library';
 import {CREDITS_SECONDS,SONG_TAIL_SECONDS,paintVideoCredits,songRightsText,songRightsCopy,videoCreditsForSong} from '../lib/video-credits';
@@ -76,7 +78,28 @@ const lightColors=['#00869b','#7845c7','#cf3659','#a66a08','#078565','#bd5715','
 const initialParts=partsForStyle('electronic');
 const tracks=colors.map((color,i)=>({color,rate:1 as TrackRate,rateChoice:'auto' as TrackRateChoice,pendingRate:null as TrackRate|null,score:null as NoteScore|null,groups:emptyNoteGroups(),grid:'auto' as GridChoice,slots:16 as number,pendingGrid:null as GridChoice|null,pendingSlots:null as number|null,motif:makeMotif(presets.electronic.melody),phase:0,direction:1,directionMode:'forward',pendingDirection:null as number|null,randomDynamics:false,lastVelocity:1,scheduledVelocity:1,morph:null as {to:InstrumentId;progress:number;from:number;at:number;duration:number}|null,hitVelocities:Array<number>(16).fill(1),enabled:true,instrument:initialParts[i].instrument,points:Array.from({length:16},(_,s)=>initialParts[i].steps.includes(s)),mute:false,volume:initialParts[i].volume??.55,pitch:initialParts[i].pitch??0,flash:Array(16).fill(-100),hits:Array<number>(16).fill(-Infinity)}));
 let audio:AudioContext|undefined, master:GainNode|undefined, playing=false,timer:ReturnType<typeof setInterval>|undefined,nextTime=0,step=0,bpm=100;
+let activeOrbitSet=0;
+const orbitSets:OrbitSet[]=Array.from({length:9},emptyOrbitSet);
+let orbitClock:OrbitClock|null=null,orbitSwitch=false,activeScriptFinished=false;
+const orbitLayerAudio=new Map<number,{output:GainNode;room:ReturnType<typeof createAudioSpace>;voices:Set<GainNode>;held:typeof sustained}>();
+const orbitPairCache=new Map<string,OrbitLane[]>();
 let scriptSong:SongScript|null=null,scriptSceneKey='',scriptEndAt:number|null=null;
+// Transport time stays monotonic while the visible two-bar pattern is auditioned.
+// Only the script's logical song position is held; scheduler/audio clocks never rewind.
+let scriptBarOffset=0,scriptLastBar=0;
+// Audition mixing is temporary and never changes the saved arrangement.
+let scoreAuditionMuted:boolean[]|null=null;
+function scoreLaneAudible(index:number){
+ if(orbitSets[activeOrbitSet].muted)return false;
+ if(scoreAuditionMuted)return scoreSelection===index||!scoreAuditionMuted[index];
+ return tracks[index].enabled&&!tracks[index].mute;
+}
+function updateScoreAudition(){
+ tracks.forEach((_,i)=>{if(!scoreLaneAudible(i))silenceScoreLane(i);});
+ noteEditor?.refresh();
+}
+
+let noteEditLoop:{script:SongScript|null;sourceBar:number;resumeAt:number|null;originalScores:(NoteScore|null)[]|null;accepted:Set<number>;evolution:boolean}|null=null;
 let videoEndRequested:(()=>void)|null=null;
 let wholeSongCapture=false,videoMusicStart:number|null=null,videoCreditsCapture=false,videoNaturalEndAt:number|null=null;
 let recordingOutput:DynamicsCompressorNode|undefined;
@@ -106,7 +129,7 @@ function waltzPulse(i:number){return tracks[i].slots===stepsPerBar()?waltzPulseR
 function pulseTrack(i:number){return rhythmTrack(i)||waltzPulse(i)!==null||(currentStyle==='focus'&&groove.choice==='auto'&&!currentDance&&['kick','shaker','bass'].includes(tracks[i].instrument));}
 let grooveChoice:GrooveChoice='auto',pendingGroove:GrooveChoice|null=null;
 let groove=resolveGroove(currentStyle,grooveChoice);
-function transportBpm(){return bpm*(scriptSong?tempoQuarters(scriptSong):1);}
+function transportBpm(){return bpm*(orbitClock?4/orbitClock.tempoUnit.denominator*(orbitClock.tempoUnit.dotted?1.5:1):scriptSong?tempoQuarters(scriptSong):1);}
 function displayedTempo(){return scriptSong?tempoLabel(scriptSong,bpm):bpm+' BPM';}
 function scriptVideoDuration(){return scriptSong?scriptSeconds(scriptSong,bpm)+SONG_TAIL_SECONDS:0;}
 function stepsPerBar(){return groove.steps;}
@@ -117,7 +140,7 @@ let selectedPad:RhythmLane|null=null,padSwitchBlocked=false;
 const padNotes=Array<number>(9).fill(3);
 let nextRhythmKeyId=-20;
 const editFaders=tracks.map(()=>new Set<GainNode>());
-function editLevel(i:number){if(tracks[i].mute)return 0;return scoreSelection!==null&&scoreSelection!==i?RHYTHM_EDIT_MUSIC_LEVEL:rhythmEditing&&selectedPad!==null&&selectedPad!==i?RHYTHM_EDIT_MUSIC_LEVEL:1;}
+function editLevel(i:number){if(!scoreLaneAudible(i))return 0;return scoreSelection!==null&&scoreSelection!==i?RHYTHM_EDIT_MUSIC_LEVEL:rhythmEditing&&selectedPad!==null&&selectedPad!==i?RHYTHM_EDIT_MUSIC_LEVEL:1;}
 function padPoint(lane:RhythmLane){return focusedPadCenter(lane,drawing.width,drawing.height,selectedPad);}
 let tapPattern=emptyRhythm(groove.beats);
 let rhythmBackup:ReturnType<typeof cloneRhythm>|null=null;
@@ -449,7 +472,13 @@ function snapshotSettings(includeDraft=false):SoundSettings{
    recording:{videoLength:chosenVideoLength(),credits:chosenVideoCredits(),restart:$<HTMLInputElement>('#recording-restart').checked,random:$<HTMLInputElement>('#recording-random').checked,fullscreen:$<HTMLInputElement>('#recording-fullscreen').checked,minutes:Number($<HTMLInputElement>('#recording-duration').value),videoFormat:chosenVideoFormat(),videoPad:chosenVideoPad(),videoInfo:chosenVideoInfo(),animations:chosenVideoAnimations()},
    pad:{mode:padMode,beats:(backup??tapPattern).beats,hits:(backup??tapPattern).hits.map(lane=>[...lane]),notes:(backup??tapPattern).notes.map(lane=>[...lane])},
    tracks:tracks.map((live,i)=>{const tr=backup&&rhythmTouched.has(i)&&rhythmTrackBackup?{...live,...rhythmTrackBackup[i]}:live;return ({
-    score:(()=>{const score=!includeDraft&&scoreSelection===i?scoreBackup:tr.score;return score===null?null:cloneScore(score);})(),rate:tr.pendingRate??tr.rate,rateChoice:tr.rateChoice,grid:tr.grid,slots:tr.slots,enabled:tr.enabled,mute:tr.mute,instrument:tr.instrument,groups:cloneNoteGroups(tr.groups),points:[...tr.points],motif:[...tr.motif],volume:tr.volume,pitch:tr.pitch,
+    score:(()=>{
+     // Frozen companion previews are transport-only, never newly authored scores.
+     let score=tr.score;
+     if(noteEditLoop?.originalScores&&!noteEditLoop.accepted.has(i)&&(!includeDraft||scoreSelection!==i))score=noteEditLoop.originalScores[i];
+     else if(!includeDraft&&scoreSelection===i)score=scoreBackup;
+     return score===null?null:cloneScore(score);
+    })(),rate:tr.pendingRate??tr.rate,rateChoice:tr.rateChoice,grid:tr.grid,slots:tr.slots,enabled:tr.enabled,mute:tr.mute,instrument:tr.instrument,groups:cloneNoteGroups(tr.groups),points:[...tr.points],motif:[...tr.motif],volume:tr.volume,pitch:tr.pitch,
     phase:tr.phase,direction:evolving&&tr.directionMode!=='random'?(tr.directionMode==='reverse'?-1:1):(tr.pendingDirection??tr.direction),directionMode:tr.directionMode,randomDynamics:tr.randomDynamics,
     morph:tr.morph?{to:tr.morph.to,progress:currentMorph(tr,audio?.currentTime||0)}:null
    });})
@@ -458,7 +487,7 @@ function snapshotSettings(includeDraft=false):SoundSettings{
 function saveSettings(){
  if(!persistenceReady||!storageAllowed())return;
  try{
-  localStorage.setItem(STORAGE_KEY,JSON.stringify(snapshotSettings()));
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(snapshotOrbitProject()));
  }catch{
   const status=document.querySelector('#storage-status');
   if(status)status.textContent=document.querySelector<HTMLElement>('#clear-storage')?.dataset.error||'';
@@ -775,19 +804,22 @@ function voice(i:number,time:number,beat:number,velocity:number,phrase?:Phrase,g
  // During timbre morphs the louder voice supplies the displayed pitch.
  return weights[1]>weights[0]?second:first;
 }
-function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:InstrumentId,phrase?:Phrase,tapped=false,tapHold=0,tapNote:number|null=null,group?:GroupVoice,score?:{note:ScoreNote;seconds:number}):PlayedNote|null{
- const tr=tracks[i];const musicBeat=beat/tr.slots*stepsPerBar();if(!audio||!master||!tr.enabled||tr.mute||tr.volume===0)return null;
- const ctx=audio,profile=soundProfiles[currentStyle];
+function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:InstrumentId,phrase?:Phrase,tapped=false,tapHold=0,tapNote:number|null=null,group?:GroupVoice,score?:{note:ScoreNote;seconds:number},layer?:{set:number;track:typeof tracks[number];style:StyleId;dance:DanceId|null;transpose:number}):PlayedNote|null{
+ const layerAudio=layer?orbitLayer(layer.set):null;
+ const voiceStyle=layer?.style??currentStyle,voiceDance=layer?layer.dance:currentDance,voiceTranspose=layer?.transpose??transpose;
+ const voiceHeld=layerAudio?.held??sustained;
+ const tr=layer?.track??tracks[i];const musicBeat=beat/tr.slots*stepsPerBar();if(!audio||!master||(!layer&&!scoreLaneAudible(i))||tr.volume===0)return null;
+ const ctx=audio,profile=soundProfiles[voiceStyle];
  const explicitNote=!!score||tapped&&tapNote!==null;
- const tango=explicitNote?null:tangoPulseRole(currentDance,i,id),crisp=currentDance==='viennese',dancePulse=explicitNote?null:danceRhythmRole(currentDance,i,id);
+ const tango=explicitNote?null:tangoPulseRole(voiceDance,i,id),crisp=voiceDance==='viennese',dancePulse=explicitNote?null:danceRhythmRole(voiceDance,i,id);
  const pulse=explicitNote?null:dancePulse||tango||(tr.slots===stepsPerBar()?waltzPulseRole(groove.beats,id,phrase?.points||tr.points):null);
- const harmonicStyle:StyleId=currentDance?['tango','pasodoble'].includes(currentDance)?'electronic':currentStyle==='jazz'||currentDance==='jive'?'pop':currentStyle:currentStyle;
+ const harmonicStyle:StyleId=voiceDance?['tango','pasodoble'].includes(voiceDance)?'electronic':voiceStyle==='jazz'||voiceDance==='jive'?'pop':voiceStyle:voiceStyle;
  const vocal=(vocalInstruments as readonly string[]).includes(id);
  const cutoff=vocal?Math.max(3000,profile.cutoff):profile.cutoff;
  const expressive=!tapped&&!pulseTrack(i)&&dialogueInstrument(id);
  const role=expressive?dialogueRole(i):-1;
  const bar=step/stepsPerBar();
- const arc=phraseContour(currentStyle,bar);
+ const arc=phraseContour(voiceStyle,bar);
  const motion=tapped?{cutoff:1,attack:1}:timbreMotion(bar,expressionSeed,i);
  if(!tapped&&!musicalFoundation(i))motion.cutoff*=arc.cutoff;
  const expression=tapped?{gain:1,cutoff:1}:songExpression();
@@ -809,18 +841,18 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
  pan.pan.setValueAtTime(stereoPosition(id,i,bar,expressionSeed),time);
  pan.pan.linearRampToValueAtTime(stereoPosition(id,i,bar+1,expressionSeed),time+60/transportBpm()*4);
  const fader=ctx.createGain();fader.gain.setValueAtTime(tapped?1:currentMix[i],time);
- const tapEntry={track:i,time,fader};if(tapped)tappedVoices.add(tapEntry);else liveMix[i].add(fader);
- const edit=ctx.createGain();edit.gain.setValueAtTime(editLevel(i),time);editFaders[i].add(edit);
+ const tapEntry={track:i,time,fader};if(layerAudio)layerAudio.voices.add(fader);else if(tapped)tappedVoices.add(tapEntry);else liveMix[i].add(fader);
+ const edit=ctx.createGain();edit.gain.setValueAtTime(layerAudio?1:editLevel(i),time);if(!layerAudio)editFaders[i].add(edit);
  const contour=ctx.createGain();contour.gain.value=1;
  if(score){
   contour.gain.setValueAtTime(score.note.points[0].velocity,time);
   score.note.points.slice(1).forEach(p=>contour.gain.linearRampToValueAtTime(p.velocity,time+p.offset*score.seconds));
  }
- bus.connect(contour);contour.connect(fader);fader.connect(edit);edit.connect(pan);pan.connect(tapped?tapBus!:orbitBus!);
- const cleanVoice=()=>{editFaders[i].delete(edit);edit.disconnect();contour.disconnect();tappedVoices.delete(tapEntry);liveMix[i].delete(fader);bus.disconnect();fader.disconnect();pan.disconnect();hallSend.disconnect();echoSend.disconnect();};
- const roomSpace=tapped?tapSpace:space;
+ bus.connect(contour);contour.connect(fader);fader.connect(edit);edit.connect(pan);pan.connect(layerAudio?.output??(tapped?tapBus!:orbitBus!));
+ const cleanVoice=()=>{layerAudio?.voices.delete(fader);editFaders[i].delete(edit);edit.disconnect();contour.disconnect();tappedVoices.delete(tapEntry);liveMix[i].delete(fader);bus.disconnect();fader.disconnect();pan.disconnect();hallSend.disconnect();echoSend.disconnect();};
+ const roomSpace=layerAudio?.room??(tapped?tapSpace:space);
  if(roomSpace){
-  const room=spaceProfile(currentStyle),foundation=['kick','bass','synthbass','doublebass','acidbass'].includes(id);
+  const room=spaceProfile(voiceStyle),foundation=['kick','bass','synthbass','doublebass','acidbass'].includes(id);
   hallSend.gain.value=foundation?.008:pulse?.025:room.hall;
   echoSend.gain.value=foundation||pulse?0:room.echo;
   pan.connect(hallSend);hallSend.connect(roomSpace.hall);
@@ -847,7 +879,7 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
   voiced=ornamentPitch(group.ornamentAnchor.pitch,group.root,group.third,degree);
  }
  const visualNote=isMelodic(id)?explicitNote&&!score?tapNote:tapNoteDegree(harmonicStyle,(group?.bar??harmonyBar()),voiced):null;
- const note=261.626*2**((voiced+(isMelodic(id)?transpose:0))/12);
+ const note=261.626*2**((voiced+(isMelodic(id)?voiceTranspose:0))/12);
  function tone(freq:number,duration:number,level:number,type:OscillatorType='sine',end?:number,attack=.004,glide=.18,sustain?:number){
   if(score&&isMelodic(id))duration=score.note.duration*score.seconds;
   if(group&&isMelodic(id)){duration=Math.min(duration,group.gate+.04);attack=Math.min(attack,duration*.3);}
@@ -884,16 +916,16 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
   source.onended=()=>{source.disconnect();filter.disconnect();gain.disconnect();ended();};
  }
  if((sustainedInstruments as readonly string[]).includes(id)){
-  const key=(tapped?'tap:':'')+i+':'+id+(score?':score:'+time+':'+scoreVoiceSerial++:group?':group:'+group.channel:''),previous=sustained.get(key);
-  const frequency=vocal?(explicitNote?261.626*2**(voiced/12)/2:vocalFundamental(261.626*2**(voiced/12)))*2**(transpose/12):id==='organ'||id==='cello'||id==='horn'?note/2:note;
-  const character=vocalCharacter(currentStyle),vowel=evolving?vowelPosition(step/stepsPerBar(),expressionSeed):character.vowel;
+  const key=(tapped?'tap:':'')+i+':'+id+(score?':score:'+time+':'+scoreVoiceSerial++:group?':group:'+group.channel:''),previous=voiceHeld.get(key);
+  const frequency=vocal?(explicitNote?261.626*2**(voiced/12)/2:vocalFundamental(261.626*2**(voiced/12)))*2**(voiceTranspose/12):id==='organ'||id==='cello'||id==='horn'?note/2:note;
+  const character=vocalCharacter(voiceStyle),vowel=evolving?vowelPosition(step/stepsPerBar(),expressionSeed):character.vowel;
   const clock=((beat-tr.phase)*tr.direction+tr.slots*2)%tr.slots;
   const bridge=tapped?tapHold:tr.slots===stepsPerBar()?phraseHold(phrase?.points||tr.points,beat,tr.direction,60/transportBpm()/4,groove.swing,clock,tr.slots):gridPhraseHold(phrase?.points||tr.points,beat,clock,tr.direction,tr.slots,groove.beats,transportBpm(),groove.swing);
-  const articulation=performanceGate(currentStyle,id as SustainedInstrument,tapped?bridge:bridge/trackRate(i),60/transportBpm()/trackRate(i),currentDance),hold=score?score.note.duration*score.seconds:group?Math.max(.008,group.gate,group.kind==='chord'?(articulation.voice.attack??sustainedProfile(id as SustainedInstrument).attack)+.05:0):articulation.hold;
+  const articulation=performanceGate(voiceStyle,id as SustainedInstrument,tapped?bridge:bridge/trackRate(i),60/transportBpm()/trackRate(i),voiceDance),hold=score?score.note.duration*score.seconds:group?Math.max(.008,group.gate,group.kind==='chord'?(articulation.voice.attack??sustainedProfile(id as SustainedInstrument).attack)+.05:0):articulation.hold;
   if(score){articulation.legato=false;articulation.voice={...articulation.voice,detached:false,attack:Math.min(.035,hold*.3),release:.07,glide:.02};}
   if(group?.kind==='run'&&group.ornament!=='trill'){articulation.legato=false;articulation.voice={...articulation.voice,detached:true,attack:Math.min(.015,hold*.4),release:.025,glide:.004};}
   if(group?.ornament==='trill'){articulation.legato=true;articulation.voice={...articulation.voice,detached:false,attack:Math.min(.035,hold*.4),release:.06,glide:.008};}
-  if(!group&&!tapped&&!protectedDrawing){const scoop=windScoop(currentStyle,id,bar,firstPhraseAttack(phrase?.points||tr.points,beat,tr.slots,tr.direction,tr.phase)?0:1);if(scoop)articulation.voice={...articulation.voice,scoop};}
+  if(!group&&!tapped&&!protectedDrawing){const scoop=windScoop(voiceStyle,id,bar,firstPhraseAttack(phrase?.points||tr.points,beat,tr.slots,tr.direction,tr.phase)?0:1);if(scoop)articulation.voice={...articulation.voice,scoop};}
   const level=tr.volume*velocity*(id==='voice'?.25:id==='strings'||id==='cello'?.15:id==='saxophone'?.23:id==='organ'?.16:id==='pad'?.13:.18);
   if(articulation.legato&&previous?.voice.canContinue(time)){
    const joinedFrom={beat:previous.beat,time:previous.lastTime};
@@ -904,10 +936,10 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
   const entry={track:i,time,beat,lastTime:time,id:id as SustainedInstrument,voice:null as unknown as ReturnType<typeof createSustainedVoice>};
   entry.voice=createSustainedVoice(ctx,bus,entry.id,frequency,time,level,hold,vowel,()=>{
    cleanVoice();
-   if(sustained.get(key)===entry)sustained.delete(key);
+   if(voiceHeld.get(key)===entry)voiceHeld.delete(key);
   },articulation.voice);
   if(score)entry.voice.bend(score.note.points.slice(1).map(p=>({at:time+p.offset*score.seconds,ratio:2**((p.pitch-score.note.points[0].pitch)/12)})));
-  sustained.set(key,entry);return {note:visualNote,length:hold,pitch:voiced};
+  voiceHeld.set(key,entry);return {note:visualNote,length:hold,pitch:voiced};
  }
  if(dancePulse||acousticInstruments.includes(id)){
   const acoustic=id as AcousticInstrument,frequency=(id==='bass'||id==='doublebass')?note/4:id==='guitar'?note/2:note;
@@ -915,10 +947,10 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
   const layer=Math.max(0,Math.min(2,Math.round(velocity*tr.volume*2)));
   const brightness=(profile.warm?.2:.4)+layer*.2;
   const pulseStep=((beat-tr.phase)*tr.direction+tr.slots*2)%tr.slots;
-  const key=(pulse?[dancePulse?currentDance:tango?'tango':'waltz',id,pulse,chord.root,chord.third,transpose,bpm,ctx.sampleRate,brightness,crisp,tango||dancePulse?beat:!crisp?pulseStep:0]:[id,frequency.toFixed(4),ctx.sampleRate,brightness]).join(':');
+  const key=(pulse?[dancePulse?voiceDance:tango?'tango':'waltz',id,pulse,chord.root,chord.third,voiceTranspose,bpm,ctx.sampleRate,brightness,crisp,tango||dancePulse?beat:!crisp?pulseStep:0]:[id,frequency.toFixed(4),ctx.sampleRate,brightness]).join(':');
   let buffer=acousticCache.get(key);
   if(!buffer){
-   const samples=dancePulse&&isRhythmDance(currentDance)?danceRhythmWave(currentDance,id as PulseInstrument,dancePulse,chord.root,chord.third,transpose,bpm,beat,ctx.sampleRate,brightness):tango?tangoPulseWave(acoustic,tango,chord.root,chord.third,transpose,bpm,beat,ctx.sampleRate,brightness):pulse?waltzPulseWave(acoustic,pulse,chord.root,chord.third,transpose,bpm,ctx.sampleRate,brightness,crisp,pulseStep):acousticWave(acoustic,frequency,ctx.sampleRate,brightness);
+   const samples=dancePulse&&isRhythmDance(voiceDance)?danceRhythmWave(voiceDance,id as PulseInstrument,dancePulse,chord.root,chord.third,voiceTranspose,bpm,beat,ctx.sampleRate,brightness):tango?tangoPulseWave(acoustic,tango,chord.root,chord.third,voiceTranspose,bpm,beat,ctx.sampleRate,brightness):pulse?waltzPulseWave(acoustic,pulse,chord.root,chord.third,voiceTranspose,bpm,ctx.sampleRate,brightness,crisp,pulseStep):acousticWave(acoustic,frequency,ctx.sampleRate,brightness);
    buffer=ctx.createBuffer(1,samples.length,ctx.sampleRate);buffer.getChannelData(0).set(samples);
    if(acousticCache.size>=40)acousticCache.delete(acousticCache.keys().next().value!);
    acousticCache.set(key,buffer);
@@ -932,7 +964,7 @@ function voiceInstrument(i:number,time:number,beat:number,velocity:number,id:Ins
   source.onended=()=>{source.disconnect();gain.disconnect();ended();};
   return {note:visualNote,length:playedLength,pitch:voiced};
  }
- const recipe=rhythmDrums(currentDance,i,id,bpm,voiceRecipe(id,profile.warm,profile.decay));
+ const recipe=rhythmDrums(voiceDance,i,id,bpm,voiceRecipe(id,profile.warm,profile.decay));
  for(const spec of recipe.tones){
   const frequency=spec.hz??note*(spec.ratio??1);
   // Do not fold ultrasonic bell/metal partials back into the audible range.
@@ -1143,21 +1175,54 @@ function silenceScoreLane(index:number){
 }
 function installNoteEditor(){
  noteEditor=createNoteEditor({language,steps:()=>stepsPerBar()*2,
-  beatSteps:()=>scriptSong?.version===3?16/scriptSong.meter.denominator:4,
-  accentSteps:()=>{if(scriptSong?.version!==3)return [];const meter=scriptSong.meter;let at=0;return meter.groups.map(group=>{const start=at;at+=group*16/meter.denominator;return start;});},
+  opened:beginNoteEditLoop,closed:()=>{scoreAuditionMuted=null;updateScoreAudition();endNoteEditLoop();},
+  mute(index){if(!scoreAuditionMuted||scoreSelection===index)return;scoreAuditionMuted[index]=!scoreAuditionMuted[index];updateScoreAudition();},
+  muteOthers(){if(!scoreAuditionMuted)return;const muted=scoreAuditionMuted.every((value,i)=>i===scoreSelection||value);scoreAuditionMuted.fill(!muted);updateScoreAudition();},
+  beatSteps:()=>orbitClock?16/orbitClock.meter.denominator:scriptSong?.version===3?16/scriptSong.meter.denominator:4,
+  accentSteps:()=>{if(scriptSong?.version!==3)return [];const meter=orbitClock?.meter??scriptSong.meter;let at=0;return meter.groups.map(group=>{const start=at;at+=group*16/meter.denominator;return start;});},
   hit:i=>Math.max(...tracks[i].hits),
-  tracks:()=>tracks.map((tr,i)=>({name:instrumentNames[language][instrumentIds.indexOf(tr.instrument)],color:tr.color,muted:!tr.enabled||tr.mute,hit:Math.max(...tr.hits),score:previewScore(i)})),
-  select(index){scoreSelection=index;scoreBackup=index===null?null:tracks[index].score===null?null:cloneScore(tracks[index].score!);syncRhythmUi();},
+  tracks:()=>tracks.map((tr,i)=>({name:instrumentNames[language][instrumentIds.indexOf(tr.instrument)],color:tr.color,muted:!scoreLaneAudible(i),hit:Math.max(...tr.hits),score:previewScore(i)})),
+  select(index){scoreSelection=index;updateScoreAudition();scoreBackup=index===null?null:tracks[index].score===null?null:cloneScore(tracks[index].score!);syncRhythmUi();},
   change(index,score){silenceScoreLane(index);tracks[index].score=score;persistSettings();},
-  finish(index,accept){if(!accept){silenceScoreLane(index);tracks[index].score=scoreBackup===null?null:cloneScore(scoreBackup);}scoreSelection=null;scoreBackup=null;syncRhythmUi();persistSettings();}
+  finish(index,accept){if(!accept){silenceScoreLane(index);tracks[index].score=scoreBackup===null?null:cloneScore(scoreBackup);}else noteEditLoop?.accepted.add(index);scoreSelection=null;scoreBackup=null;syncRhythmUi();persistSettings();}
  });
+}
+function beginNoteEditLoop(){
+ scoreAuditionMuted??=tracks.map(tr=>!tr.enabled||tr.mute);
+ if(noteEditLoop){noteEditLoop.resumeAt=null;return;}
+ const originalScores=scriptSong?null:tracks.map(tr=>tr.score===null?null:cloneScore(tr.score));
+ const previews=scriptSong?null:tracks.map((_,i)=>previewScore(i));
+ noteEditLoop={script:scriptSong,sourceBar:Math.floor(scriptLastBar/2)*2,resumeAt:null,originalScores,accepted:new Set(),evolution:evolving};
+ if(previews){tracks.forEach((tr,i)=>tr.score=previews[i]);if(evolving)setEvolution(false);streamRevision++;}
+ // The final song boundary can already be queued by the look-ahead scheduler.
+ // Opening the editor must keep the displayed final section alive as well.
+ scriptEndAt=null;
+ $('#note-editor').dataset.sectionLoop='true';
+}
+function finishNoteEditLoop(transportBar:number,resume=true){
+ const loop=noteEditLoop;if(!loop)return;noteEditLoop=null;
+ delete $('#note-editor').dataset.sectionLoop;
+ if(loop.script&&loop.script===scriptSong)scriptBarOffset=transportBar-(loop.sourceBar+2);
+ if(loop.originalScores){
+  tracks.forEach((tr,i)=>{if(!loop.accepted.has(i))tr.score=loop.originalScores![i]===null?null:cloneScore(loop.originalScores![i]!);});
+  streamRevision++;
+  if(resume&&playing&&loop.evolution)setEvolution(true);
+ }
+ persistSettings();
+}
+function endNoteEditLoop(){
+ if(!noteEditLoop)return;
+ if(!playing){finishNoteEditLoop(0,false);return;}
+ // Complete the current audition cycle, then continue at the NEXT source pair,
+ // not at a later scene reached by counting the elapsed editing time.
+ noteEditLoop.resumeAt=Math.ceil(step/(stepsPerBar()*2))*2;
 }
 let scoreVoiceSerial=0;
 function scheduleScores(s:number,duration:number){
  if(!audio)return;
  const slots=stepsPerBar();
  tracks.forEach((tr,index)=>{
-  if(tr.score===null||!tr.enabled||tr.mute||tr.volume<=0)return;
+  if(tr.score===null||!scoreLaneAudible(index)||tr.volume<=0)return;
   const rate=trackRate(index),window=rateWindow(step,slots,groove.beats,groove.swing,rate),seconds=60/transportBpm()*groove.beats*2/rate;
   const cellStart=window.start/2,cellEnd=window.end/2;
   const continuous=isMelodic(tr.instrument)&&!acousticInstruments.includes(tr.instrument);
@@ -1200,7 +1265,7 @@ function schedule(){
  if(!audio||!playing||scriptEndAt!==null)return;
  sustained.forEach((entry,key)=>{
   const tr=tracks[entry.track];
-  if(!tr.enabled||tr.mute||tr.volume===0||(!key.startsWith('tap:')&&tr.score===null&&!tr.points.some(Boolean))||(tr.instrument!==entry.id&&tr.morph?.to!==entry.id)){
+  if(!scoreLaneAudible(entry.track)||tr.volume===0||(!key.startsWith('tap:')&&tr.score===null&&!tr.points.some(Boolean))||(tr.instrument!==entry.id&&tr.morph?.to!==entry.id)){
    entry.voice.release(audio!.currentTime);sustained.delete(key);
   }
  });
@@ -1212,25 +1277,34 @@ function schedule(){
   }
  }
  while(nextTime<audio.currentTime+.1){
+  scheduleOrbitSets();
+  if(orbitClock&&!noteEditLoop&&orbitProjectEnded()){scriptEndAt=nextTime;break;}
+  if(noteEditLoop&&step%(stepsPerBar()*2)===0&&noteEditLoop.resumeAt!==null&&Math.floor(step/stepsPerBar())>=noteEditLoop.resumeAt)finishNoteEditLoop(Math.floor(step/stepsPerBar()));
   if(scriptSong&&step%stepsPerBar()===0){
-   const scriptBar=Math.floor(step/stepsPerBar());
-   const position=wholeSongCapture&&scriptBar>=scriptSong.scenes.reduce((sum,scene)=>sum+scene.bars,0)?null:scriptPosition(scriptSong,scriptBar);
-   if(!position){scriptEndAt=nextTime;break;}
-   applyScriptScene(position.index,position.turn);
+   const transportBar=Math.floor(step/stepsPerBar());
+   const scriptBar=transportBar-scriptBarOffset;
+   if(noteEditLoop?.script===scriptSong){scriptLastBar=noteEditLoop.sourceBar+transportBar%2;}
+   else{
+    const position=wholeSongCapture&&scriptBar>=scriptSong.scenes.reduce((sum,scene)=>sum+scene.bars,0)?null:scriptPosition(scriptSong,scriptBar);
+    if(!position){
+     activeScriptFinished=true;
+     if(!orbitClock||orbitProjectEnded()){scriptEndAt=nextTime;break;}
+    }else{activeScriptFinished=false;scriptLastBar=scriptBar;applyScriptScene(position.index,position.turn);}
+   }
   }
-  if(pendingGroove&&step%stepsPerBar()===0)configureGroove(pendingGroove,true);
+  if(!noteEditLoop&&pendingGroove&&step%stepsPerBar()===0)configureGroove(pendingGroove,true);
   let finishedMorph=false;
-  tracks.forEach(tr=>{if(tr.morph&&tr.morph.progress===1&&currentMorph(tr,nextTime)>=1){
+  tracks.forEach(tr=>{if(!noteEditLoop&&tr.morph&&tr.morph.progress===1&&currentMorph(tr,nextTime)>=1){
    tr.instrument=tr.morph.to;tr.morph=null;tr.groups=emptyNoteGroups();finishedMorph=true;
   }});
   if(finishedMorph)sync();
-  if(step%(stepsPerBar()*2)===0){if(evolving&&step%(stepsPerBar()*8)===0&&step>0)evolveTrackRates();applyTrackRates();}
-  if(step%stepsPerBar()===0){applyPendingGrids();applyDirections();songBoundary(nextTime,Math.floor(step/stepsPerBar()));}
+  if(!noteEditLoop&&step%(stepsPerBar()*2)===0){if(evolving&&step%(stepsPerBar()*8)===0&&step>0)evolveTrackRates();applyTrackRates();}
+  if(!noteEditLoop&&step%stepsPerBar()===0){applyPendingGrids();applyDirections();songBoundary(nextTime,Math.floor(step/stepsPerBar()));}
   if(step%stepsPerBar()===0&&step>=animationStep){
    evolveAnimations();animationStep=nextEvolutionStep(step,Math.random,stepsPerBar());
   }
-  if(pendingStyle&&step%stepsPerBar()===0)applyStyle(pendingStyle,pendingDance);
-  if(pendingGridShuffle&&step%stepsPerBar()===0)shuffleGrids();
+  if(!noteEditLoop&&pendingStyle&&step%stepsPerBar()===0)applyStyle(pendingStyle,pendingDance);
+  if(!noteEditLoop&&pendingGridShuffle&&step%stepsPerBar()===0)shuffleGrids();
   if(evolving&&step%stepsPerBar()===0&&step/stepsPerBar()>=gridEvolutionBar)evolveGrids(step/stepsPerBar());
   if(evolving&&step%stepsPerBar()===0&&step>=evolutionStep){
    evolveJourney(nextTime);evolveNoteGroups();evolutionStep=nextMusicStep(step);
@@ -1263,7 +1337,7 @@ function schedule(){
   liveMix.forEach((nodes,index)=>nodes.forEach(node=>node.gain.setTargetAtTime(currentMix[index],nextTime,.09)));
   const duration=60/transportBpm()/4*(s%4<2?1+groove.swing:1-groove.swing);
   rhythmClock.push({step,time:nextTime,duration});if(rhythmClock.length>128)rhythmClock.shift();
-  scheduleScores(s,duration);
+  if(!activeScriptFinished)scheduleScores(s,duration);
   for(const lane of rhythmHitsAt(tapPattern,step)){
    if(tracks[lane].score!==null)continue;
    playTapped(lane,nextTime,step);
@@ -1275,7 +1349,8 @@ function schedule(){
    const time=Math.max(audio!.currentTime+.002,nominalTime+offset);
    const angle=noteTimingAngle(beat,tr.slots,tr.phase,tr.direction,time-nominalTime,60/transportBpm()*groove.beats/trackRate(i),groove.beats,groove.swing);
    const playNote=()=>{
-   if(tr.enabled&&!tr.mute&&tr.volume>0){
+   if(activeScriptFinished)return;
+   if(scoreLaneAudible(i)&&tr.volume>0){
     if(tappedTrack(i)||tr.score!==null)return;
     const old=evolving&&!pulseTrack(i)&&song?.from?song.from[i]:null;
     const protectedDrawing=musicalStep()<drawnUntil[i];
@@ -1322,6 +1397,7 @@ function schedule(){
  flushGroupNotes();events.sort((a,b)=>a.time-b.time);
 }
 function stop(finishRecordings=true){
+ stopOrbitLayers();
  scriptEndAt=null;scriptSceneKey='';
  landscape.clear();radar.clear();streamCache=null;
  chordVoicings.clear();scoreHits.clear();
@@ -1331,6 +1407,7 @@ function stop(finishRecordings=true){
  cancelPadGestures();
  sustained.forEach(entry=>entry.voice.release(audio?.currentTime||0));sustained.clear();
  setEvolution(false);playing=false;if(timer)clearInterval(timer);timer=undefined;events.length=0;tracks.forEach(tr=>tr.hits.fill(-Infinity));
+ if(noteEditLoop&&noteEditLoop.resumeAt!==null)finishNoteEditLoop(0,false);
  if(master&&audio){master.gain.cancelScheduledValues(audio.currentTime);master.gain.setTargetAtTime(0,audio.currentTime,.01);}
  applyTrackRates();applyPendingGrids();applyDirections();if(pendingStyle)applyStyle(pendingStyle,pendingDance);if(pendingGroove){configureGroove(pendingGroove,true);sync();}
  syncRhythmUi();
@@ -1350,12 +1427,16 @@ async function start(delay=.05,valid=()=>true){
   if(!audio||!master)return;
   master.gain.cancelScheduledValues(audio.currentTime);
   if(delay>.05)master.gain.setValueAtTime(0,audio.currentTime);
-  master.gain.setValueAtTime(Number($<HTMLInputElement>('#volume').value),audio.currentTime+(delay>.05?delay:0));
+  master.gain.setValueAtTime(Number($<HTMLInputElement>('#volume').value)*orbitMixTrim(),audio.currentTime+(delay>.05?delay:0));
   rhythmClock.length=0;
   if(hasRhythm(tapPattern)){finishRhythm(tapPattern);tapPattern.start=0;resetRhythmSession(tapPattern);}
   if(rhythmBackup&&hasRhythm(rhythmBackup)){finishRhythm(rhythmBackup);rhythmBackup.start=0;resetRhythmSession(rhythmBackup);}
-  if(scriptSong){setEvolution(false);scriptSceneKey='';applyScriptScene(0,0);}
-  playing=true;step=0;evolveAnimations();animationStep=nextEvolutionStep(0,Math.random,stepsPerBar());nextTime=audio.currentTime+delay;
+  if(scriptSong){
+   setEvolution(false);
+   if(noteEditLoop?.script===scriptSong){scriptLastBar=noteEditLoop.sourceBar;scriptEndAt=null;}
+   else{scriptBarOffset=0;scriptLastBar=0;scriptSceneKey='';applyScriptScene(0,0);}
+  }
+  playing=true;activeScriptFinished=false;step=0;orbitPairCache.clear();evolveAnimations();animationStep=nextEvolutionStep(0,Math.random,stepsPerBar());nextTime=audio.currentTime+delay;
   if(wholeSongCapture)videoMusicStart=nextTime;
   labelAction('#play',t.pause);$('#play').setAttribute('aria-pressed','true');$('#audio-status').textContent='';
   syncRhythmUi();schedule();timer=setInterval(schedule,25);
@@ -1391,6 +1472,7 @@ function configureGroove(choice:GrooveChoice,rebuild:boolean){
  cancelPadGestures();
  const old=stepsPerBar(),bar=step/old;
  grooveChoice=currentDance?'auto':choice;pendingGroove=null;groove=scriptSong?{choice:'discofox',style:currentStyle,beats:quartersPerBar(scriptSong),steps:quartersPerBar(scriptSong)*4,swing:0,grid:Array.from({length:quartersPerBar(scriptSong)*4},(_,i)=>i)}:resolveGroove(currentStyle,choice,currentDance);
+ if(orbitClock)groove={...groove,beats:orbitClock.quarters,steps:orbitClock.steps,swing:orbitClock.swing};
  step=Math.round(bar*stepsPerBar());
  if(old!==stepsPerBar()){
   remeterRhythm(tapPattern,groove.beats,Math.floor(step/stepsPerBar())*stepsPerBar());
@@ -2063,7 +2145,7 @@ function frame(now:number){
   if(keepVideo)videoNaturalEndAt=scriptEndAt+SONG_TAIL_SECONDS;
   if(time>=scriptEndAt+(keepVideo?SONG_TAIL_SECONDS:0))stop(!keepVideo);
  }
- while(events.length&&events[0].time<=time){const ev=events.shift()!;ev.notes.forEach(({track,beat,velocity,note,pitch,length,angle,joinedFrom,group,member,scorePoint})=>{if(scorePoint)scoreHits.set(scorePoint,ev.time);const tr=tracks[track];if(tr.enabled&&!tr.mute&&tr.volume>0){tr.flash[beat]=now;tr.hits[beat]=ev.time;tr.hitVelocities[beat]=velocity;tr.lastVelocity=velocity;
+ while(events.length&&events[0].time<=time){const ev=events.shift()!;ev.notes.forEach(({track,beat,velocity,note,pitch,length,angle,joinedFrom,group,member,scorePoint})=>{if(scorePoint)scoreHits.set(scorePoint,ev.time);const tr=tracks[track];if(scoreLaneAudible(track)&&tr.volume>0){tr.flash[beat]=now;tr.hits[beat]=ev.time;tr.hitVelocities[beat]=velocity;tr.lastVelocity=velocity;
    radar.record(track,{at:ev.time,beat,angle:angle??orbitNoteAngle(track,beat),level:velocity,direction:tr.direction,kind:group?.kind,member,count:group?.members.length,motion:{turnSeconds:60/transportBpm()*groove.beats/trackRate(track),clock:localTrackBars(track,ev.time),slots:tr.slots,beats:groove.beats,swing:groove.swing}});
    {
     const scoreKey=scorePoint?.split(':').map(Number),score=scoreKey&&tr.score?.[scoreKey[1]],first=scoreKey?.[2]===0;
@@ -2211,6 +2293,7 @@ function frame(now:number){
 enhanceClockSelects($('.instruments-tile') as HTMLFormElement);
 enhanceClockSelects(instrumentDialog as unknown as HTMLFormElement);
 function leaveSongScript(dropScores=false){
+ scoreAuditionMuted=null;finishNoteEditLoop(0,false);scriptBarOffset=0;scriptLastBar=0;
  const hadScript=!!scriptSong;scriptSong=null;scriptSceneKey='';scriptEndAt=null;
  if(hadScript){configureGroove(grooveChoice,false);$('#tempo-value').textContent=displayedTempo();}
  if(persistenceReady)syncFileButtons();
@@ -2241,6 +2324,8 @@ function applyScriptScene(index:number,turn:number){
  syncRhythmUi();sync();
 }
 function loadSongScript(script:SongScript,restoring=false){
+ if(orbitClock&&!orbitSwitch){const meter=script.version===3?script.meter:{numerator:4,denominator:4};if(meter.numerator!==orbitClock.meter.numerator||meter.denominator!==orbitClock.meter.denominator){$('#song-script-status').textContent=orbitSetCopy[language].incompatible;$('#orbit-sets-status').textContent=orbitSetCopy[language].incompatible;return false;}}
+ activeScriptFinished=false;
  if(!restoring)stop();
  setEvolution(false);applyStyle(script.style);configureGroove('discofox',false);
  scriptSong=script;scriptSceneKey='';scriptEndAt=null;configureGroove('discofox',false);
@@ -2251,7 +2336,8 @@ function loadSongScript(script:SongScript,restoring=false){
  $<HTMLInputElement>('#video-info-title').placeholder=script.title;
  $('#song-script-status').textContent=script.title+' — '+scriptCopy[language].ready;
  if(!restoring)syncFileButtons();
- if(!restoring)persistSettings();
+ if(!restoring){orbitPairCache.clear();persistSettings();}
+ return true;
 }
 function applySettings(saved:SoundSettings){
  for(const key of videoAnimationKeys)$<HTMLInputElement>('#video-animation-'+key).checked=saved.recording?.animations?.[key]??false;
@@ -2302,7 +2388,7 @@ function applySettings(saved:SoundSettings){
 function restoreSettings(){
  if(!storageAllowed())return;
  try{
-  const saved=decodeSettings(localStorage.getItem(STORAGE_KEY));if(saved)applySettings(saved);
+  const raw=localStorage.getItem(STORAGE_KEY),project=decodeOrbitProject(raw);if(project){applyOrbitProject(project);return;}const saved=decodeSettings(raw);if(saved)applySettings(saved);
  }catch{}
 }
 installNoteEditor();orbit.dataset.visualization=visualization;seedNoteGroups();restoreSettings();syncGroove();syncDanceTiles();sync();persistenceReady=true;requestAnimationFrame(frame);
@@ -2324,7 +2410,7 @@ $('#files-close').addEventListener('click',()=>filesDialog.close());
 filesDialog.addEventListener('click',event=>{if(event.target===filesDialog){const r=filesDialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)filesDialog.close();}});
 $('#json-export').addEventListener('click',()=>{
  try{
-  downloadBlob(new Blob([JSON.stringify(snapshotSettings(true),null,2)],{type:'application/json'}),fileName('json'));
+  downloadBlob(new Blob([JSON.stringify(snapshotOrbitProject(true),null,2)],{type:'application/json'}),fileName('json'));
   $('#file-status').textContent=files.exported;
  }catch{$('#file-status').textContent=files.error;}
 });
@@ -2333,12 +2419,14 @@ fileInput.addEventListener('change',async()=>{
  const file=fileInput.files?.[0];fileInput.value='';if(!file||importBusy||videoBusy||wavBusy)return;
  importBusy=true;syncFileButtons();
  try{
-  if(file.size>1024*1024){$('#file-status').textContent=files.invalid;return;}
-  const raw=await file.text(),script=decodeSongScript(raw);
+  if(file.size>12*1024*1024){$('#file-status').textContent=files.invalid;return;}
+  const raw=await file.text(),project=decodeOrbitProject(raw);
+  if(project){stop();applyOrbitProject(project);persistSettings();renderOrbitSets();$('#file-status').textContent=files.imported;return;}
+  const script=decodeSongScript(raw);
   if(script){loadSongScript(script);$('#file-status').textContent=files.imported;return;}
   const saved=decodeSettings(raw);
   if(!saved){$('#file-status').textContent=files.invalid;return;}
-  stop();applySettings(saved);persistSettings();$('#file-status').textContent=files.imported;
+  stop();orbitSets.forEach((_,i)=>orbitSets[i]=emptyOrbitSet());orbitClock=null;activeOrbitSet=0;applySettings(saved);renderOrbitSets();persistSettings();$('#file-status').textContent=files.imported;
  }catch{$('#file-status').textContent=files.error;}
  finally{importBusy=false;syncFileButtons();}
 });
@@ -2347,7 +2435,7 @@ function importScriptText(raw:string){
  if(videoBusy||wavBusy||importBusy)return false;
  const script=decodeSongScript(raw);
  if(!script){$('#song-script-status').textContent=scriptCopy[language].invalid;return false;}
- loadSongScript(script);return true;
+ return loadSongScript(script);
 }
 $('#song-script-load').addEventListener('click',()=>{
  if(!importScriptText($<HTMLTextAreaElement>('#song-script-text').value))return;

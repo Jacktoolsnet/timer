@@ -2,7 +2,7 @@ import {cloneScore,deleteScorePoint,noteEditorCopy,scoreClamp,type NoteScore} fr
 import type {Language} from '../lib/i18n';
 import {padForKey,padNumbers} from '../lib/orbit-layout';
 type EditorTrack={name:string;color:string;muted:boolean;score:NoteScore;hit:number};
-type Host={language:Language;tracks:()=>EditorTrack[];steps:()=>number;beatSteps?:()=>number;accentSteps?:()=>number[];hit:(index:number)=>number;select:(index:number|null)=>void;change:(index:number,score:NoteScore)=>void;finish:(index:number,accept:boolean)=>void};
+type Host={language:Language;tracks:()=>EditorTrack[];steps:()=>number;beatSteps?:()=>number;accentSteps?:()=>number[];hit:(index:number)=>number;mute:(index:number)=>void;muteOthers:()=>void;opened?:()=>void;closed?:()=>void;select:(index:number|null)=>void;change:(index:number,score:NoteScore)=>void;finish:(index:number,accept:boolean)=>void};
 /** DOM/SVG editor only; audio and accepted-vs-draft persistence belong to the transport. */
 export function createNoteEditor(host:Host){
  const root=document.querySelector<HTMLElement>('#note-editor')!,grid=root.querySelector<SVGSVGElement>('#score-grid')!;
@@ -17,7 +17,7 @@ export function createNoteEditor(host:Host){
  function openExpanded(){
   if(dialog.open)return false;
   returnScroll={x:window.scrollX,y:window.scrollY};
-  document.body.classList.add('score-expanded');dialog.append(root);dialog.showModal();return true;
+  document.body.classList.add('score-expanded');dialog.append(root);dialog.showModal();host.opened?.();return true;
  }
  function animateOpen(origin:DOMRect){
   cancelAnimations();const target=root.getBoundingClientRect(),duration=reduced.matches?0:420;
@@ -30,7 +30,7 @@ export function createNoteEditor(host:Host){
   closing=true;document.body.classList.add('score-collapsing');cancelAnimations();
   const animation=dialog.animate([{opacity:1,transform:'translateY(0)'},{opacity:0,transform:'translateY(10px)'}],{duration:reduced.matches?0:240,easing:'cubic-bezier(.4,0,.2,1)'});
   void animation.finished.catch(()=>{}).then(()=>{
-   dialog.close();home.after(root);closing=false;document.body.classList.remove('score-expanded','score-collapsing');render();
+   dialog.close();home.after(root);closing=false;document.body.classList.remove('score-expanded','score-collapsing');host.closed?.();render();
    window.scrollTo(returnScroll.x,returnScroll.y);
    const target=!root.hidden&&returnTrack!==null?root.querySelector<HTMLButtonElement>(`[data-score-track="${returnTrack}"]`):document.querySelector<HTMLButtonElement>('[data-pad-mode][aria-pressed=true]');
    target?.focus({preventScroll:true});
@@ -70,6 +70,15 @@ export function createNoteEditor(host:Host){
   for(const note of track.score)for(const p of note.points){const circle=document.createElementNS(preview.namespaceURI,'circle');circle.setAttribute('cx',String(3+(note.start+p.offset)*94));circle.setAttribute('cy',String(31-(p.pitch-min)/(max-min)*26));circle.setAttribute('r',String(1.3+p.velocity*1.4));circle.classList.add('score-preview-note');circle.setAttribute('data-preview-start',String(note.start+p.offset));circle.setAttribute('data-preview-pitch',String(p.pitch));circle.setAttribute('data-preview-radius',String(1.3+p.velocity*1.4));preview.append(circle);}
   button.append(number,name,preview);button.addEventListener('click',()=>select(index));return button;
  }
+ function companion(index:number,track:EditorTrack){
+  const wrap=document.createElement('div');wrap.className='score-companion';wrap.style.setProperty('--lane',track.color);
+  const toggle=document.createElement('button');toggle.type='button';toggle.dataset.scoreMute=String(index);toggle.className='score-mute';
+  toggle.setAttribute('aria-pressed',String(track.muted));toggle.title=(track.muted?c.unmute:c.mute)+' · '+padNumbers[index]+' · '+track.name;toggle.setAttribute('aria-label',toggle.title);
+  toggle.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9h4l5-4v14l-5-4H3Z'+(track.muted?'m13 0 6 6m0-6-6 6':'m13-2a7 7 0 0 1 0 10')+'"/></svg>';
+  toggle.addEventListener('click',()=>{host.mute(index);render();root.querySelector<HTMLButtonElement>(`[data-score-mute="${index}"]`)?.focus({preventScroll:true});});
+  wrap.append(card(index,track),toggle);return wrap;
+ }
+ root.querySelector('#score-mute-others')!.addEventListener('click',()=>{host.muteOthers();render();});
  function render(){
   if(closing){root.dataset.selected='';root.dataset.dirty='false';return;}
   root.dataset.selected=selected===null?'':String(selected);root.dataset.dirty=String(dirty);root.dataset.score=JSON.stringify(notes);
@@ -78,7 +87,10 @@ export function createNoteEditor(host:Host){
   cards.replaceChildren(...tracks.map((tr,i)=>card(i,tr)));
   if(selected===null)return;
   root.querySelector('#score-instrument-name')!.textContent=tracks[selected].name;
-  companions.replaceChildren(...tracks.flatMap((tr,i)=>i===selected?[]:[card(i,tr)]));
+  companions.replaceChildren(...tracks.flatMap((tr,i)=>i===selected?[]:[companion(i,tr)]));
+  const allMuted=tracks.every((tr,i)=>i===selected||tr.muted),toggle=root.querySelector<HTMLButtonElement>('#score-mute-others')!;
+  toggle.setAttribute('aria-pressed',String(allMuted));toggle.title=allMuted?c.unmuteOthers:c.muteOthers;toggle.setAttribute('aria-label',toggle.title);
+  toggle.querySelector('path')!.setAttribute('d','M3 9h4l5-4v14l-5-4H3Z'+(allMuted?'m13-2a7 7 0 0 1 0 10':'m13 0 6 6m0-6-6 6'));
   const sx=700/Math.max(200,grid.clientWidth),sy=500/Math.max(120,grid.clientHeight);
   inset=Math.max(48,30*sx);
   const textAt=(px:number,py:number)=>`translate(${px} ${py}) scale(${sx} ${sy})`;
@@ -154,7 +166,7 @@ export function createNoteEditor(host:Host){
  window.addEventListener('keydown',e=>{
   if(root.hidden||e.ctrlKey||e.metaKey||e.altKey||document.querySelector('dialog[open]:not(#score-expanded-dialog)'))return;
   if((e.target as Element).closest('input,textarea,select,[contenteditable=true]')&&!(selected!==null&&root.contains(e.target as Node)&&['Enter','Escape'].includes(e.key)))return;
-  if(e.key==='Enter'&&(e.target as Element).closest('[data-score-track]'))return;
+  if(e.key==='Enter'&&(e.target as Element).closest('[data-score-track],[data-score-mute],#score-mute-others'))return;
   if(selected!==null&&(e.key==='Enter'||e.key==='Escape')){e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)finish(e.key==='Enter');return;}
   if(selected!==null&&(e.key==='Delete'||e.key==='Backspace')){e.preventDefault();if(!e.repeat)deletePoint();return;}
   const lane=padForKey(e.code,e.key);if(lane!==null&&!e.repeat){e.preventDefault();select(lane);}

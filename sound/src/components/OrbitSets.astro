@@ -1,0 +1,21 @@
+---
+import type {Language} from '../lib/i18n';
+import {orbitSetCopy} from '../lib/orbit-project';
+import ActionIcon from './ActionIcon.astro';
+interface Props {lang:Language}
+const {lang}=Astro.props,c=orbitSetCopy[lang];
+---
+<dialog id="orbit-sets-dialog" aria-labelledby="orbit-sets-title">
+ <div class="orbit-sets-heading"><h2 id="orbit-sets-title">{c.title}</h2><button id="orbit-sets-close" type="button" aria-label={c.close} title={c.close}><ActionIcon name="cancel"/></button></div>
+ <p>{c.hint}</p>
+ <div id="orbit-sets-grid">{Array.from({length:9},(_,i)=><div class="orbit-set-tile" data-orbit-slot={i}>
+  <button type="button" data-orbit-select={i} aria-label={c.choose+' '+(i+1)} aria-pressed={i===0?'true':'false'}>
+   <svg viewBox="0 0 100 100" aria-hidden="true">{Array.from({length:9},(_,n)=><circle cx="50" cy="50" r={7+n*4.5} fill="none" stroke={`hsl(${180+n*31} 60% 55%)`} stroke-width="1.5"/>)}</svg>
+   <b>{i+1}</b><span data-orbit-name>{c.empty}</span>
+  </button>
+  <button type="button" data-orbit-mute={i} aria-label={c.mute+' '+(i+1)} title={c.mute} aria-pressed="false"><ActionIcon name="mute"/><ActionIcon name="unmute"/></button>
+ </div>)}</div>
+ <label class="orbit-set-name">{c.name}<input id="orbit-set-name" maxlength="80" autocomplete="off"/></label>
+ <div class="orbit-set-actions"><button type="button" id="orbit-set-duplicate">{c.duplicate}</button><button type="button" id="orbit-set-clear">{c.clear}</button></div>
+ <p id="orbit-sets-status" role="status"></p>
+</dialog>

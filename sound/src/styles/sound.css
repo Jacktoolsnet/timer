@@ -516,3 +516,22 @@ body.score-expanded{overflow:hidden}
 .controls-tile #tempo-value{white-space:normal;overflow-wrap:anywhere;line-height:1.4;font-size:12px}
 
 @media(max-width:360px){.pad-mode-controls{gap:4px}}
+
+/* Separate sibling controls: selecting an orbit never also toggles its sound. */
+.score-companion{position:relative;min-width:0;padding-bottom:32px}
+.score-companion>[data-score-track]{width:100%;height:100%}
+#score-expanded-dialog #score-companions .score-mute{position:absolute;bottom:0;left:0;width:100%;min-height:30px;height:30px;padding:4px;display:flex;align-items:center;justify-content:center;background:var(--bg)}
+#score-expanded-dialog #score-companions .score-mute svg{width:20px;height:20px;fill:none;stroke:currentColor}
+#score-companions .score-mute[aria-pressed=true],#score-mute-others[aria-pressed=true]{color:var(--muted);background:color-mix(in srgb,var(--line) 35%,var(--bg))}
+
+#orbit-sets-dialog{width:min(620px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto;padding:20px;border:1px solid var(--line);border-radius:20px;background:var(--bg);color:var(--text)}
+#orbit-sets-dialog::backdrop{background:#07111bcc;backdrop-filter:blur(8px)}
+.orbit-sets-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}.orbit-sets-heading h2{margin:0;font-size:20px}.orbit-sets-heading button{width:36px;height:36px;padding:7px}.orbit-sets-heading svg{width:20px;height:20px}
+#orbit-sets-dialog>p{font-size:12px;color:var(--muted);line-height:1.5}
+#orbit-sets-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.orbit-set-tile{position:relative;min-width:0}
+[data-orbit-select]{width:100%;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 8px 38px;border:1px solid var(--line);border-radius:12px;background:color-mix(in srgb,var(--text) 3%,var(--bg));color:var(--text);position:relative;cursor:pointer}
+[data-orbit-select][aria-pressed=true]{border-color:#21bed1;box-shadow:inset 0 0 0 1px #21bed1,0 0 20px #21bed11a}[data-orbit-select] svg{width:clamp(48px,12vw,88px);height:clamp(48px,12vw,88px)}[data-orbit-select] b{position:absolute;top:8px;left:10px;font-size:11px}[data-orbit-name]{font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.orbit-set-tile[data-empty=true] svg{opacity:.18}.orbit-set-tile[data-muted=true] svg{opacity:.3}
+[data-orbit-mute]{position:absolute;bottom:5px;left:calc(50% - 20px);width:40px;height:30px;padding:5px;display:flex;justify-content:center;align-items:center;border:0;border-radius:8px;color:var(--text);background:transparent;cursor:pointer}[data-orbit-mute] svg{width:20px;height:20px}[data-orbit-mute][aria-pressed=false] [data-icon=unmute],[data-orbit-mute][aria-pressed=true] [data-icon=mute]{display:none}
+.orbit-set-name{display:flex;align-items:center;gap:10px;font-size:12px;margin-top:16px}.orbit-set-name input{width:100%;min-width:0}.orbit-set-actions{display:flex;gap:8px;margin-top:12px}.orbit-set-actions button{flex:1;padding:8px;font-size:11px}#orbit-sets-status:empty{display:none}
+@media(max-height:650px){#orbit-sets-dialog{padding:12px}[data-orbit-select] svg{width:45px;height:45px}#orbit-sets-grid{gap:6px}}

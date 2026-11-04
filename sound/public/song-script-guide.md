@@ -1,6 +1,6 @@
 # JackTools Sound — Song Script v3 / AI authoring guide
 
-Reviewed against the current importer and playback clock: **2026-11-03**.
+Reviewed against the current importer and playback clock: **2026-11-04**.
 
 Give this document to an AI together with a musical description. Ask it to return
 ONLY valid JSON, without Markdown fences or commentary. No external service or API
@@ -317,12 +317,27 @@ lower notes mark the two compound pulses per bar. This is not twelve quarters.
 
 Open Files & Recording → Song Script. Paste the JSON and load it, or use file upload.
 The checkmark applies valid pasted JSON, closes the dialog and starts playback at scene 1. Invalid JSON keeps the dialog open and does not interrupt the current song. File and example imports never start audio automatically; close the dialog and press normal Play.
-Stop/Play always restarts the script. The built-in example is Sunlit Session: an
+Stop/Play normally restarts the script; while the expanded note editor is open,
+Play auditions the held visible section instead and preserves the draft. The built-in example is Sunlit Session: an
 original 125 BPM, nine-track house sketch, 72 bars (about 2:18), with six scenes.
 It is not a transcription of Movin' To The Sun or another existing recording.
 
 Draw, tap and use the note editor to temporarily change the current scene; the
-next scene entry restores the scripted notes. Script download preserves the source
+next scene entry restores the scripted notes. While the expanded note grid is
+open, its visible two-bar section loops without advancing scenes or ending the
+song. Instrument switching stays inside the same section. Accept or cancel closes
+the editor; playback then continues with the next source pair at a two-bar
+boundary, without skipping sections because of elapsed editing time. Opening the
+editor while stopped does not start audio. Generated arrangements are held too,
+and any previously active Random Play resumes after leaving the section loop.
+The editor also provides a mute/unmute-all-others button and individual companion
+orbit mute buttons. The selected instrument always bypasses these audition mutes,
+including its original track mute/disabled flag (master and track volume still
+apply). Switching instruments keeps the audition mix; closing the editor restores
+the saved mix. Audition mutes are never exported or persisted.
+Only the edited lane is accepted; frozen companion previews are not saved as new
+scores. This audition loop itself is temporary, not a new JSON repeat property.
+Script download preserves the source
 composition, not these temporary edits. Normal settings JSON includes the song
 script too. Optional browser persistence stores it only with the existing consent.
 Leaving script mode keeps the current patterns. Random Play clears scripted scores
