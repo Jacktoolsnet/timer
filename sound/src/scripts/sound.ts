@@ -130,7 +130,7 @@ function pulseTrack(i:number){return rhythmTrack(i)||waltzPulse(i)!==null||(curr
 let grooveChoice:GrooveChoice='auto',pendingGroove:GrooveChoice|null=null;
 let groove=resolveGroove(currentStyle,grooveChoice);
 function transportBpm(){return bpm*(orbitClock?4/orbitClock.tempoUnit.denominator*(orbitClock.tempoUnit.dotted?1.5:1):scriptSong?tempoQuarters(scriptSong):1);}
-function displayedTempo(){return scriptSong?tempoLabel(scriptSong,bpm):bpm+' BPM';}
+function displayedTempo(){return orbitClock?tempoLabel({version:3,meter:orbitClock.meter,tempoUnit:orbitClock.tempoUnit},bpm):scriptSong?tempoLabel(scriptSong,bpm):bpm+' BPM';}
 function scriptVideoDuration(){return scriptSong?scriptSeconds(scriptSong,bpm)+SONG_TAIL_SECONDS:0;}
 function stepsPerBar(){return groove.steps;}
 let padMode:'draw'|'rhythm'|'notes'='draw';
@@ -467,7 +467,7 @@ let persistenceReady=false,saveTimer:ReturnType<typeof setTimeout>|undefined;
 function snapshotSettings(includeDraft=false):SoundSettings{
  const backup=includeDraft?null:rhythmBackup;
  return {
-   version:2,songScript:scriptSong??undefined,style:currentStyle,dance:currentDance,groove:grooveChoice,bpm,transpose,noteEffect,volume:Number($<HTMLInputElement>('#volume').value),
+   version:2,...(orbitClock?{meter:orbitClock.meter,tempoUnit:orbitClock.tempoUnit}:{}),songScript:scriptSong??undefined,style:currentStyle,dance:currentDance,groove:grooveChoice,bpm,transpose,noteEffect,volume:Number($<HTMLInputElement>('#volume').value),
    ...(videoAnimationRun?.changed.has('visualization')?videoAnimationRun.original:{visualization,landscapeVariant,streamVariant,constellationVariant}),background:backgroundChoice,center:centerChoice,flowerCenter:flowerCenterChoice,orbit:orbitChoice,
    recording:{videoLength:chosenVideoLength(),credits:chosenVideoCredits(),restart:$<HTMLInputElement>('#recording-restart').checked,random:$<HTMLInputElement>('#recording-random').checked,fullscreen:$<HTMLInputElement>('#recording-fullscreen').checked,minutes:Number($<HTMLInputElement>('#recording-duration').value),videoFormat:chosenVideoFormat(),videoPad:chosenVideoPad(),videoInfo:chosenVideoInfo(),animations:chosenVideoAnimations()},
    pad:{mode:padMode,beats:(backup??tapPattern).beats,hits:(backup??tapPattern).hits.map(lane=>[...lane]),notes:(backup??tapPattern).notes.map(lane=>[...lane])},
@@ -1179,7 +1179,7 @@ function installNoteEditor(){
   mute(index){if(!scoreAuditionMuted||scoreSelection===index)return;scoreAuditionMuted[index]=!scoreAuditionMuted[index];updateScoreAudition();},
   muteOthers(){if(!scoreAuditionMuted)return;const muted=scoreAuditionMuted.every((value,i)=>i===scoreSelection||value);scoreAuditionMuted.fill(!muted);updateScoreAudition();},
   beatSteps:()=>orbitClock?16/orbitClock.meter.denominator:scriptSong?.version===3?16/scriptSong.meter.denominator:4,
-  accentSteps:()=>{if(scriptSong?.version!==3)return [];const meter=orbitClock?.meter??scriptSong.meter;let at=0;return meter.groups.map(group=>{const start=at;at+=group*16/meter.denominator;return start;});},
+  accentSteps:()=>{if(!orbitClock&&scriptSong?.version!==3)return [];const meter=orbitClock?.meter??(scriptSong?.version===3?scriptSong.meter:null);if(!meter)return [];let at=0;return meter.groups.map(group=>{const start=at;at+=group*16/meter.denominator;return start;});},
   hit:i=>Math.max(...tracks[i].hits),
   tracks:()=>tracks.map((tr,i)=>({name:instrumentNames[language][instrumentIds.indexOf(tr.instrument)],color:tr.color,muted:!scoreLaneAudible(i),hit:Math.max(...tr.hits),score:previewScore(i)})),
   select(index){scoreSelection=index;updateScoreAudition();scoreBackup=index===null?null:tracks[index].score===null?null:cloneScore(tracks[index].score!);syncRhythmUi();},
@@ -1436,7 +1436,7 @@ async function start(delay=.05,valid=()=>true){
    if(noteEditLoop?.script===scriptSong){scriptLastBar=noteEditLoop.sourceBar;scriptEndAt=null;}
    else{scriptBarOffset=0;scriptLastBar=0;scriptSceneKey='';applyScriptScene(0,0);}
   }
-  playing=true;activeScriptFinished=false;step=0;orbitPairCache.clear();evolveAnimations();animationStep=nextEvolutionStep(0,Math.random,stepsPerBar());nextTime=audio.currentTime+delay;
+  playing=true;orbitSets.forEach(slot=>slot.barOffset=0);activeScriptFinished=false;step=0;orbitPairCache.clear();evolveAnimations();animationStep=nextEvolutionStep(0,Math.random,stepsPerBar());nextTime=audio.currentTime+delay;
   if(wholeSongCapture)videoMusicStart=nextTime;
   labelAction('#play',t.pause);$('#play').setAttribute('aria-pressed','true');$('#audio-status').textContent='';
   syncRhythmUi();schedule();timer=setInterval(schedule,25);
@@ -1456,14 +1456,14 @@ $('#evolve').addEventListener('click',async()=>{
 $('#play').addEventListener('click',()=>playing?stop():void start());
 document.addEventListener('visibilitychange',()=>{if(document.hidden){videoEndRequested=null;stop();}});
 window.addEventListener('pagehide',()=>stop());
-$<HTMLInputElement>('#tempo').addEventListener('input',e=>{bpm=Number((e.target as HTMLInputElement).value);$('#tempo-value').textContent=displayedTempo();persistSettings();});
+$<HTMLInputElement>('#tempo').addEventListener('input',e=>{bpm=Number((e.target as HTMLInputElement).value);orbitPairCache.clear();$('#tempo-value').textContent=displayedTempo();persistSettings();});
 function syncGroove(){
  document.querySelectorAll<HTMLButtonElement>('[data-groove]').forEach(button=>{
   button.disabled=!!currentDance||!!scriptSong;
   button.setAttribute('aria-pressed',String(button.dataset.groove===grooveChoice));
   button.classList.toggle('is-pending',button.dataset.groove===pendingGroove);
  });
- $('#meter-value').textContent=scriptSong?meterLabel(scriptSong):groove.beats+'/4';
+ $('#meter-value').textContent=orbitClock?orbitClock.meter.numerator+'/'+orbitClock.meter.denominator:scriptSong?meterLabel(scriptSong):groove.beats+'/4';
  $('#groove-pending').textContent=pendingGroove?grooveCopy[language].pending:'';
  $('#sound-app').dataset.steps=String(stepsPerBar());
  $('#orbit').dataset.steps=String(stepsPerBar());
@@ -1527,9 +1527,10 @@ function syncVolume(){
  const slider=$<HTMLInputElement>('#volume');
  const value=Math.round(Number(slider.value)/Number(slider.max)*100)+' %';
  $('#volume-value').textContent=value;slider.setAttribute('aria-valuetext',value);
+ if(master&&audio&&playing)master.gain.setTargetAtTime(Number(slider.value)*orbitMixTrim(),audio.currentTime,.02);
 }
 syncVolume();
-$<HTMLInputElement>('#volume').addEventListener('input',e=>{syncVolume();if(master&&audio&&playing)master.gain.setTargetAtTime(Number((e.target as HTMLInputElement).value),audio.currentTime,.02);persistSettings();});
+$<HTMLInputElement>('#volume').addEventListener('input',()=>{syncVolume();persistSettings();});
 $('#clear').addEventListener('click',()=>{leaveSongScript(false);landscape.clear();radar.clear();noteEditor?.cancel();tracks.forEach(tr=>tr.score=null);acceptRhythmEdit();resetTapRhythm();selectedPad=null;padSwitchBlocked=false;rhythmEditing=false;cancelPadGestures();tracks.forEach(tr=>{tr.points.fill(false);tr.groups=emptyNoteGroups();});cancelGroupNotes();groupDisplays.forEach(d=>d.clear());noteShapes.forEach(notes=>notes.clear());sync();});
 function applyStyle(id:StyleId,dance:DanceId|null=null){
  leaveSongScript(false);
@@ -2325,11 +2326,11 @@ function applyScriptScene(index:number,turn:number){
 }
 function loadSongScript(script:SongScript,restoring=false){
  if(orbitClock&&!orbitSwitch){const meter=script.version===3?script.meter:{numerator:4,denominator:4};if(meter.numerator!==orbitClock.meter.numerator||meter.denominator!==orbitClock.meter.denominator){$('#song-script-status').textContent=orbitSetCopy[language].incompatible;$('#orbit-sets-status').textContent=orbitSetCopy[language].incompatible;return false;}}
- activeScriptFinished=false;
+ const sharedBpm=bpm;activeScriptFinished=false;
  if(!restoring)stop();
  setEvolution(false);applyStyle(script.style);configureGroove('discofox',false);
  scriptSong=script;scriptSceneKey='';scriptEndAt=null;configureGroove('discofox',false);
- bpm=script.bpm;transpose=0;syncTranspose();$<HTMLInputElement>('#tempo').value=String(bpm);$('#tempo-value').textContent=displayedTempo();
+ bpm=orbitClock?sharedBpm:script.bpm;transpose=0;syncTranspose();$<HTMLInputElement>('#tempo').value=String(bpm);$('#tempo-value').textContent=displayedTempo();
  applyScriptScene(0,0);syncGroove();
  $<HTMLTextAreaElement>('#song-script-text').value=JSON.stringify(script,null,2);
  $<HTMLButtonElement>('#song-script-export').disabled=false;$<HTMLButtonElement>('#song-script-leave').disabled=false;
@@ -2385,6 +2386,157 @@ function applySettings(saved:SoundSettings){
  }
  syncGroove();syncDanceTiles();sync();
 }
+/** Orbit bank: one editing surface, independent musical state and shared audio clock. */
+function currentOrbitClock():OrbitClock{
+ const meter=scriptSong?.version===3?structuredClone(scriptSong.meter):{numerator:groove.beats,denominator:4 as const,groups:Array.from({length:groove.beats},()=>1)};
+ return {meter,tempoUnit:scriptSong?.version===3?{...scriptSong.tempoUnit}:{denominator:4,dotted:false},quarters:groove.beats,steps:stepsPerBar(),swing:groove.swing};
+}
+function rememberOrbitSet(includeDraft=false){
+ orbitSets[activeOrbitSet].settings=snapshotSettings(includeDraft);
+ orbitSets[activeOrbitSet].barOffset=scriptBarOffset;
+}
+function snapshotOrbitProject(includeDraft=false):SoundSettings|OrbitProject{
+ if(!orbitClock)return snapshotSettings(includeDraft);
+ rememberOrbitSet(includeDraft);
+ return {format:'jacktools-orbit-project',version:1,active:activeOrbitSet,bpm,volume:Number($<HTMLInputElement>('#volume').value),clock:structuredClone(orbitClock),sets:orbitSets.map(slot=>({...slot,barOffset:0}))};
+}
+function blankOrbitSettings():SoundSettings{
+ const saved=snapshotSettings();delete saved.songScript;
+ saved.tracks=saved.tracks.map(tr=>({...tr,score:null,groups:emptyNoteGroups(),enabled:false,mute:false,points:Array(16).fill(false),morph:null}));
+ saved.pad={mode:'draw',beats:groove.beats,hits:tracks.map(()=>Array(groove.beats*8).fill(false)),notes:tracks.map(()=>Array(groove.beats*8).fill(null))};
+ return saved;
+}
+function orbitHasMusic(saved:SoundSettings|null){return !!saved&&(!!saved.songScript||saved.tracks.some((tr,i)=>tr.enabled&&tr.volume>0&&(tr.score?.length||tr.points.some(Boolean)||saved.pad?.hits[i]?.some(Boolean))));}
+function orbitMixTrim(){
+ if(!orbitClock)return 1;
+ const count=orbitSets.reduce((n,slot,i)=>n+Number(!slot.muted&&(i===activeOrbitSet?tracks.some(tr=>tr.enabled&&tr.volume>0):orbitHasMusic(slot.settings))),0);
+ return 1/Math.sqrt(Math.max(1,count));
+}
+function orbitLayer(index:number){
+ let layer=orbitLayerAudio.get(index);if(layer)return layer;
+ const output=audio!.createGain();output.connect(master!);output.gain.value=orbitSets[index].muted?0:1;
+ layer={output,room:createAudioSpace(audio!,output),voices:new Set(),held:new Map()};orbitLayerAudio.set(index,layer);return layer;
+}
+function stopOrbitLayers(index?:number){
+ for(const [i,layer] of orbitLayerAudio){
+  if(index!==undefined&&index!==i)continue;
+  const now=audio?.currentTime??0;
+  layer.voices.forEach(g=>{g.gain.cancelScheduledValues(now);g.gain.setTargetAtTime(0,now,.008);});
+  layer.held.forEach(entry=>entry.voice.release(now));layer.held.clear();
+  layer.output.disconnect();layer.room.dispose();orbitLayerAudio.delete(i);
+ }
+}
+function orbitProjectEnded(){
+ if(!orbitClock)return false;
+ let any=false;const bar=Math.floor(step/stepsPerBar());
+ return orbitSets.every((slot,i)=>{
+  const settings=i===activeOrbitSet?null:slot.settings;
+  const script=i===activeOrbitSet?scriptSong:settings?.songScript;
+  const has=i===activeOrbitSet?!!scriptSong||tracks.some(tr=>tr.enabled&&tr.volume>0&&(tr.score?.length||tr.points.some(Boolean))):orbitHasMusic(settings);
+  if(!has)return true;any=true;
+  return !!script&&!script.loop&&bar-(i===activeOrbitSet?scriptBarOffset:slot.barOffset)>=script.scenes.reduce((sum,s)=>sum+s.bars,0);
+ })&&any;
+}
+function scheduleOrbitSets(){
+ if(!orbitClock||!audio)return;
+ const slots=stepsPerBar(),quarterBpm=transportBpm();
+ let budget=96-[...orbitLayerAudio.values()].reduce((n,a)=>n+a.voices.size,0);
+ for(let set=0;set<9;set++){
+  const slot=orbitSets[set],saved=slot.settings;if(set===activeOrbitSet||slot.muted||!saved)continue;
+  for(let index=0;index<9;index++){
+   const rate=saved.songScript?1:saved.tracks[index].rate??1;
+   const localStep=step-slot.barOffset*slots,sourceBar=Math.floor(localStep/slots*rate/2)*2;if(sourceBar<0)continue;
+   const key=set+':'+sourceBar;
+   let lanes=orbitPairCache.get(key);
+   if(!lanes){lanes=orbitPair({...saved,bpm},sourceBar,orbitClock);orbitPairCache.set(key,lanes);if(orbitPairCache.size>81)orbitPairCache.delete(orbitPairCache.keys().next().value!);}
+   const lane=lanes[index];if(!lane||!lane.track.enabled||lane.track.mute||lane.track.volume<=0)continue;
+   const window=rateWindow(localStep,slots,orbitClock.quarters,orbitClock.swing,rate),seconds=60/quarterBpm*orbitClock.quarters*2/rate;
+   const start=window.start/2,end=window.end/2;
+   for(let cycle=Math.floor(start);cycle<=Math.floor(end);cycle++)for(const note of lane.score){
+    const continuous=isMelodic(lane.track.instrument)&&!acousticInstruments.includes(lane.track.instrument);
+    note.points.forEach((p,j)=>{
+     const fraction=cycle+note.start+p.offset;if(fraction<start-1e-9||fraction>=end-1e-9||continuous&&j>0||budget<=0)return;
+     const next=note.points[j+1],segment=Math.max(.002,(next?.offset??note.duration)-p.offset);
+     const part=continuous?note:{start:0,duration:segment,points:[{...p,offset:0},...(next?[{offset:Math.max(.0001,segment-.0001),pitch:p.pitch,velocity:next.velocity}]:[])]};
+     const at=Math.max(audio!.currentTime+.002,nextTime+(fraction-start)*seconds);
+     const track={...tracks[index],...lane.track,score:lane.score,rate,rateChoice:rate,morph:null} as typeof tracks[number];
+     voiceInstrument(index,at,0,1,track.instrument,undefined,true,part.duration*seconds,null,undefined,{note:part,seconds},{set,track,style:saved.style,dance:saved.dance??null,transpose:saved.transpose??0});budget--;
+    });
+   }
+  }
+ }
+}
+function applyOrbitProject(project:OrbitProject){
+ stopOrbitLayers();orbitClock=structuredClone(project.clock);activeOrbitSet=project.active;
+ project.sets.forEach((slot,i)=>orbitSets[i]=structuredClone(slot));
+ const saved=structuredClone(orbitSets[activeOrbitSet].settings!);saved.bpm=project.bpm;saved.volume=project.volume;
+ orbitSwitch=true;try{applySettings(saved);}finally{orbitSwitch=false;}
+ scriptBarOffset=0;activeScriptFinished=false;orbitPairCache.clear();renderOrbitSets();
+}
+function selectOrbitSet(index:number){
+ if(index===activeOrbitSet)return true;
+ if(noteEditor?.dirty||rhythmBackup){$('#orbit-sets-status').textContent=orbitSetCopy[language].pending;return false;}
+ noteEditor?.cancel();cancelPadGestures();if(noteEditLoop)finishNoteEditLoop(Math.floor(step/(stepsPerBar()*2))*2);rememberOrbitSet();orbitClock??=currentOrbitClock();
+ const saved=structuredClone(orbitSets[index].settings??blankOrbitSettings()),clockStep=step,clockTime=nextTime,sharedBpm=bpm,volume=Number($<HTMLInputElement>('#volume').value),recording=snapshotSettings().recording;
+ saved.bpm=sharedBpm;saved.volume=volume;saved.recording=recording;
+ tracks.forEach((_,i)=>silenceScoreLane(i));stopOrbitLayers(index);events.length=0;
+ setEvolution(false);activeOrbitSet=index;orbitPairCache.clear();
+ orbitSwitch=true;try{applySettings(saved);}finally{orbitSwitch=false;}
+ step=clockStep;nextTime=clockTime;scriptBarOffset=orbitSets[index].barOffset;scriptEndAt=null;activeScriptFinished=false;
+ if(scriptSong){
+  const pos=scriptPosition(scriptSong,Math.max(0,Math.floor(step/stepsPerBar())-scriptBarOffset));
+  if(pos){scriptSceneKey='';applyScriptScene(pos.index,pos.turn);}else activeScriptFinished=true;
+ }
+ rememberOrbitSet();syncVolume();renderOrbitSets();persistSettings();return true;
+}
+function renderOrbitSets(){
+ const panel=document.querySelector<HTMLElement>('#orbit-sets-dialog');if(!panel)return;
+ panel.dataset.active=String(activeOrbitSet);$('#orbit-sets-open').dataset.activeSet=String(activeOrbitSet);
+ orbitSets.forEach((slot,i)=>{
+  const settings=i===activeOrbitSet?snapshotSettings():slot.settings;
+  const name=slot.name||settings?.songScript?.title||'Orbit '+(i+1);
+  const tile=panel.querySelector<HTMLElement>(`[data-orbit-slot="${i}"]`)!;
+  tile.dataset.empty=String(!settings);tile.dataset.muted=String(slot.muted);
+  tile.querySelector('[data-orbit-select]')!.setAttribute('aria-pressed',String(i===activeOrbitSet));
+  tile.querySelector('[data-orbit-name]')!.textContent=settings?name:orbitSetCopy[language].empty;
+  const mute=tile.querySelector<HTMLButtonElement>('[data-orbit-mute]')!;mute.disabled=!settings;mute.setAttribute('aria-pressed',String(slot.muted));mute.title=(slot.muted?orbitSetCopy[language].unmute:orbitSetCopy[language].mute)+' · '+name;mute.setAttribute('aria-label',mute.title);
+  tile.querySelectorAll('circle').forEach((circle,n)=>circle.setAttribute('stroke-opacity',String(settings?.tracks[n]?.enabled?1:.15)));
+ });
+ $<HTMLInputElement>('#orbit-set-name').value=orbitSets[activeOrbitSet].name;
+}
+function installOrbitSets(){
+ $('#orbit-project-new').addEventListener('click',()=>{
+  if(!confirm(orbitSetCopy[language].confirmProject))return;
+  stop();const saved=blankOrbitSettings();delete saved.meter;delete saved.tempoUnit;
+  orbitSets.forEach((_,i)=>orbitSets[i]=emptyOrbitSet());activeOrbitSet=0;orbitClock=null;orbitPairCache.clear();
+  applySettings(saved);activeScriptFinished=false;scriptEndAt=null;renderOrbitSets();$('#orbit-sets-status').textContent='';persistSettings();
+ });
+ const panel=$<HTMLDialogElement>('#orbit-sets-dialog');
+ $('#orbit-sets-open').addEventListener('click',()=>{renderOrbitSets();$('#orbit-sets-status').textContent='';panel.showModal();});
+ $('#orbit-sets-close').addEventListener('click',()=>panel.close());
+ panel.querySelectorAll<HTMLButtonElement>('[data-orbit-select]').forEach(button=>button.addEventListener('click',()=>{if(selectOrbitSet(Number(button.dataset.orbitSelect)))panel.close();}));
+ panel.querySelectorAll<HTMLButtonElement>('[data-orbit-mute]').forEach(button=>button.addEventListener('click',()=>{
+  const i=Number(button.dataset.orbitMute);orbitClock??=currentOrbitClock();orbitSets[i].muted=!orbitSets[i].muted;
+  const layer=orbitLayerAudio.get(i);if(layer&&audio)layer.output.gain.setTargetAtTime(orbitSets[i].muted?0:1,audio.currentTime,.008);
+  if(i===activeOrbitSet){if(orbitSets[i].muted)tracks.forEach((_,j)=>silenceScoreLane(j));syncRhythmUi();}
+  syncVolume();renderOrbitSets();persistSettings();
+ }));
+ $('#orbit-set-name').addEventListener('input',()=>{orbitClock??=currentOrbitClock();orbitSets[activeOrbitSet].name=$<HTMLInputElement>('#orbit-set-name').value;renderOrbitSets();persistSettings();});
+ $('#orbit-set-duplicate').addEventListener('click',()=>{
+  rememberOrbitSet();const index=orbitSets.findIndex((slot,i)=>i!==activeOrbitSet&&(!slot.settings||!orbitHasMusic(slot.settings)));
+  if(index<0){$('#orbit-sets-status').textContent=orbitSetCopy[language].full;return;}
+  orbitClock??=currentOrbitClock();orbitSets[index]=structuredClone(orbitSets[activeOrbitSet]);orbitSets[index].name=(orbitSets[index].name||'Orbit '+(activeOrbitSet+1))+' · '+(index+1);orbitPairCache.clear();syncVolume();renderOrbitSets();persistSettings();
+ });
+ $('#orbit-set-clear').addEventListener('click',()=>{
+  if(!confirm(orbitSetCopy[language].confirm))return;
+  const saved=blankOrbitSettings(),wasPlaying=playing,clockStep=step,clockTime=nextTime;
+  tracks.forEach((_,i)=>silenceScoreLane(i));orbitSets[activeOrbitSet]=emptyOrbitSet();
+  orbitSwitch=true;try{applySettings(saved);}finally{orbitSwitch=false;}
+  playing=wasPlaying;step=clockStep;nextTime=clockTime;activeScriptFinished=false;scriptEndAt=null;orbitPairCache.clear();rememberOrbitSet();syncVolume();renderOrbitSets();persistSettings();
+ });
+ renderOrbitSets();
+}
+
 function restoreSettings(){
  if(!storageAllowed())return;
  try{
@@ -2423,7 +2575,7 @@ fileInput.addEventListener('change',async()=>{
   const raw=await file.text(),project=decodeOrbitProject(raw);
   if(project){stop();applyOrbitProject(project);persistSettings();renderOrbitSets();$('#file-status').textContent=files.imported;return;}
   const script=decodeSongScript(raw);
-  if(script){loadSongScript(script);$('#file-status').textContent=files.imported;return;}
+  if(script){$('#file-status').textContent=loadSongScript(script)?files.imported:orbitSetCopy[language].incompatible;renderOrbitSets();return;}
   const saved=decodeSettings(raw);
   if(!saved){$('#file-status').textContent=files.invalid;return;}
   stop();orbitSets.forEach((_,i)=>orbitSets[i]=emptyOrbitSet());orbitClock=null;activeOrbitSet=0;applySettings(saved);renderOrbitSets();persistSettings();$('#file-status').textContent=files.imported;
@@ -2482,7 +2634,7 @@ document.querySelectorAll<HTMLButtonElement>('[data-library-song]').forEach(butt
   const script=decodeSongScript(await response.text());
   if(!script||script.version<2||script.style!==entry.style)throw Error('Invalid library song');
   if(libraryRequest!==request||request.signal.aborted||!libraryDialog.open)return;
-  libraryRequest=null;importBusy=false;loadSongScript(script);libraryDialog.close();
+  libraryRequest=null;importBusy=false;if(!loadSongScript(script)){$('#song-library-status').textContent=orbitSetCopy[language].incompatible;return;}renderOrbitSets();libraryDialog.close();
   void start();
  }catch{
   if(libraryRequest===request&&!request.signal.aborted)$('#song-library-status').textContent=libraryCopy[language].error;
@@ -2577,6 +2729,8 @@ $('#recording-duration').addEventListener('input',()=>{syncRecordingDuration();p
 $('#tempo').addEventListener('input',()=>syncVideoSong());
 for(const option of ['restart','random','fullscreen'])$('#recording-'+option).addEventListener('change',()=>{syncFileButtons();persistSettings();});
 function syncFileButtons(){
+ document.querySelectorAll<HTMLButtonElement>('#orbit-sets-open,#orbit-sets-dialog button:not(#orbit-sets-close)').forEach(button=>button.disabled=videoBusy||wavBusy||importBusy);
+ $<HTMLInputElement>('#orbit-set-name').disabled=videoBusy||wavBusy||importBusy;
  document.querySelectorAll<HTMLButtonElement>('[data-library-open],[data-library-song],[data-library-random]').forEach(button=>button.disabled=videoBusy||wavBusy||importBusy);
  for(const action of ['load','file','example','export','leave'])$<HTMLButtonElement>('#song-script-'+action).disabled=videoBusy||wavBusy||importBusy||(['export','leave'].includes(action)&&!scriptSong);
  $<HTMLTextAreaElement>('#song-script-text').disabled=videoBusy||wavBusy||importBusy;
@@ -2742,3 +2896,5 @@ $('#wav-record').addEventListener('click',async()=>{
   $('#wav-record').setAttribute('aria-pressed','true');syncFileButtons();filesDialog.close();
  }catch{captureFailed=true;wavRecording?.stop();finishWavUi();$('#wav-time').hidden=true;const message=controller.signal.aborted?files.wavCancelled:files.wavError;$('#wav-status').textContent=message;$('#wav-support').textContent=message;}
 });
+
+installOrbitSets();

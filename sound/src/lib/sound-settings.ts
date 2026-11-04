@@ -1,4 +1,4 @@
-import {quartersPerBar} from './song-meter';
+import {validMeter,validTempoUnit,type SongMeter,type TempoUnit,quartersPerBar} from './song-meter';
 import {validSongScript,type SongScript} from './song-script';
 import {videoPadModes,type VideoPadMode} from './video-pad';
 import {trackRates,type TrackRate,type TrackRateChoice} from './track-rate';
@@ -28,6 +28,7 @@ export type SavedTrack={
  morph:{to:InstrumentId;progress:number}|null;
 };
 export type SoundSettings={
+ meter?:SongMeter;tempoUnit?:TempoUnit;
  songScript?:SongScript;
  visualization?:VisualizationMode;
  landscapeVariant?:LandscapeVariant;
@@ -49,6 +50,7 @@ export function decodeSettings(raw:string|null):SoundSettings|null{
    ||!member(backgroundModes,s.background)||!member(centerModes,s.center)||!member(orbitModes,s.orbit)
    ||!Array.isArray(s.tracks)||!(s.version===1?[8,9]:[ORBIT_COUNT]).includes(s.tracks.length))return null;
   if(s.songScript!==undefined&&!validSongScript(s.songScript))return null;
+  if(s.meter!==undefined&&!validMeter(s.meter)||s.tempoUnit!==undefined&&!validTempoUnit(s.tempoUnit))return null;
   if(s.constellationVariant!==undefined&&!member(constellationVariants,s.constellationVariant))return null;
   if(s.streamVariant!==undefined&&!member(streamVariants,s.streamVariant))return null;
   if(s.landscapeVariant!==undefined&&!member(landscapeVariants,s.landscapeVariant))return null;
@@ -74,7 +76,7 @@ export function decodeSettings(raw:string|null):SoundSettings|null{
   if(s.groove!==undefined&&!member(grooveChoices,s.groove))return null;
   if(s.pad!==undefined){
    if(!s.pad||!member(['draw','rhythm','notes'],s.pad.mode)||!(number(s.pad.beats,.25,24)&&Number.isInteger(s.pad.beats*4))
-    ||(![2,3,4].includes(s.pad.beats)&&!(s.songScript?.version===3&&s.pad.beats===quartersPerBar(s.songScript)))
+    ||(![2,3,4].includes(s.pad.beats)&&!(s.songScript?.version===3&&s.pad.beats===quartersPerBar(s.songScript))&&!(s.meter&&s.pad.beats===s.meter.numerator*4/s.meter.denominator))
     ||!Array.isArray(s.pad.hits)||!(s.version===1?[3,ORBIT_COUNT]:[ORBIT_COUNT]).includes(s.pad.hits.length)
     ||s.pad.hits.some((lane:unknown)=>!Array.isArray(lane)||lane.length!==s.pad.beats*8||lane.some((on:unknown)=>typeof on!=='boolean')))return null;
    if(s.pad.notes!==undefined&&(!Array.isArray(s.pad.notes)||s.pad.notes.length!==s.pad.hits.length
