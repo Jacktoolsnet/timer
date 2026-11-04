@@ -19,7 +19,8 @@ export function landscapeValue(note:LandscapeNote,at:number){
 }
 export function landscapeWindow(bpm:number,beats:number){return clamp(60/bpm*beats*2,3,14);}
 export class LandscapeHistory{
- private lanes:LandscapeNote[][]=Array.from({length:9},()=>[]);
+ private lanes:LandscapeNote[][];
+ constructor(count=9){this.lanes=Array.from({length:Math.max(1,Math.min(81,count))},()=>[]);}
  record(index:number,note:LandscapeNote){
   if(!this.lanes[index]||![note.at,note.pitch,note.level,note.length].every(Number.isFinite))return;
   const lane=this.lanes[index];lane.push({...note,curve:note.curve?.map(p=>({...p}))});
@@ -29,7 +30,8 @@ export class LandscapeHistory{
  release(index:number,at:number){
   for(const note of this.notes(index))if(note.at<=at&&note.at+note.length>at)note.length=Math.max(0,at-note.at);
  }
- clear(){this.lanes.forEach(lane=>lane.length=0);}
+ cancel(index:number,at:number){if(this.lanes[index])this.lanes[index]=this.lanes[index].filter(n=>n.at<=at);this.release(index,at);}
+ clear(index?:number){if(index===undefined)this.lanes.forEach(lane=>lane.length=0);else if(this.lanes[index])this.lanes[index].length=0;}
  notes(index:number){return this.lanes[index]??[];}
  sample(index:number,at:number){
   const lane=this.notes(index);let current=-1;

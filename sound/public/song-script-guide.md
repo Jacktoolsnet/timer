@@ -433,3 +433,14 @@ refer to the selected set, while the audio output contains the full mix. Multi-w
 publication needs attribution for all source works; a dedicated project-wide
 credits/arrangement timeline is a separate extension. Background polyphony is
 bounded at 96 voices to protect the browser; avoid stacking excessive chords.
+
+
+### Shared constellation view for orbit projects
+
+With multiple occupied orbit sets, `visualization: "constellation"` displays all
+sets together, for both `stars` and `nebula`. Other visualizations remain focused
+on the selected editing set. Each set/instrument has a stable visual identity;
+only actual scheduled/heard notes drive its lights. Set mute, transport, master
+volume, note brightness and reduced motion are respected. No extra music is
+created. The complete Canon orbit production defaults to `constellation` / `stars`
+with `background: "off"`; all four parts keep their source notes unchanged.

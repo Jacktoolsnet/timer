@@ -46,10 +46,11 @@
           "denominator": 4,
           "dotted": false
         },
-        "background": "aurora",
+        "background": "off",
         "center": "ring",
         "orbit": "comet",
-        "visualization": "orbit",
+        "visualization": "constellation",
+        "constellationVariant": "stars",
         "tracks": [
           {
             "enabled": true,
@@ -4281,10 +4282,11 @@
           "denominator": 4,
           "dotted": false
         },
-        "background": "aurora",
+        "background": "off",
         "center": "ring",
         "orbit": "comet",
-        "visualization": "orbit",
+        "visualization": "constellation",
+        "constellationVariant": "stars",
         "tracks": [
           {
             "enabled": false,
@@ -8414,10 +8416,11 @@
           "denominator": 4,
           "dotted": false
         },
-        "background": "aurora",
+        "background": "off",
         "center": "ring",
         "orbit": "comet",
-        "visualization": "orbit",
+        "visualization": "constellation",
+        "constellationVariant": "stars",
         "tracks": [
           {
             "enabled": false,
@@ -12445,10 +12448,11 @@
           "denominator": 4,
           "dotted": false
         },
-        "background": "aurora",
+        "background": "off",
         "center": "ring",
         "orbit": "comet",
-        "visualization": "orbit",
+        "visualization": "constellation",
+        "constellationVariant": "stars",
         "tracks": [
           {
             "enabled": false,

@@ -32,7 +32,7 @@ def build():
                 randomDynamics=False, morph=None))
         settings = dict(version=2, style=source['style'], bpm=source['bpm'], volume=.4,
             meter=source['meter'], tempoUnit=source['tempoUnit'],
-            background='aurora', center='ring', orbit='comet', visualization='orbit',
+            background='off', center='ring', orbit='comet', visualization='constellation', constellationVariant='stars',
             tracks=tracks, songScript=script)
         sets.append(dict(name=name, muted=False, settings=settings, barOffset=0))
     sets += [dict(name='', muted=False, settings=None, barOffset=0) for _ in range(5)]

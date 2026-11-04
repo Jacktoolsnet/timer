@@ -49,8 +49,10 @@ Ein AudioContext, ein Master und eine gemeinsame Viertel-/Takt-Uhr. Für zusätz
 Sets wird derselbe Instrumenten-Renderer verwendet (akustische Synthese, gehaltene
 Stimmen, Tonhöhenkurven und Instrument-Rezepte), nicht ein Audio-Preview oder eine
 fremde Aufnahme. Zusätzliche Sets haben getrennte Effektbusse und Voice-Register.
-Die Hauptansicht zeigt nur das bearbeitete Set; die Raster-Vorschauen zeigen seine
-neun Instrumentenringe, keine vollständige Mehr-Set-Szenenanimation.
+Orbit, Klangblume, Notenstrom und Klanglandschaft zeigen das bearbeitete Set.
+**Sternenhimmel und Nebelwolken zeigen bei mehreren belegten Sets alle Stimmen
+zusammen**, mit stabilen Sternengruppen pro Set/Instrument (bis zu 81). Die
+Raster-Vorschauen zeigen weiterhin die Instrumentenringe des jeweiligen Sets.
 
 Die Summenlautstärke wird nach Anzahl klanglich belegter, nicht stummgeschalteter
 Sets abgesenkt; der vorhandene Ausgangskompressor bleibt aktiv. Die Hintergrund-
@@ -126,3 +128,27 @@ Video und Pflichtabspann auch nach Wechsel zu einer anderen Stimme.
 Weitere Bibliothekslieder sind noch nicht auf Mehr-Set-Produktion umgestellt.
 Mehr Spuren allein sind kein Qualitätsmerkmal; zuerst Original und sinnvolle
 Stimmenaufteilung vergleichen.
+
+## Gemeinsamer Sternenhimmel
+
+Der Kanon öffnet jetzt in allen vier Sets mit Sternenhimmel und ausgeschalteter
+separater Hintergrundanimation. Ein sanfter Nachthimmel, feste verschieden helle
+Hintergrundsterne und die farbigen, notengesteuerten Gruppen bilden ein gemeinsames
+Bild. Die Basssterne beginnen allein; die Violinen treten entsprechend der Partitur
+hinzu. Keine zusätzliche oder erfundene Musik. Die Einstellungen bleiben individuell
+änderbar; auch Nebelwolken können die gemeinsame Notenhistorie darstellen.
+
+Die zusätzliche Historie ist rein visuell und an die tatsächliche Audiozeit gebunden:
+Hintergrund-Sets melden nur erfolgreich geplante Audio-Stimmen; zukünftige Noten
+leuchten nicht vor ihrem Anschlag. Das ausgewählte Set speist seine vorhandenen
+Audio-Ereignisse ein. Stummgeschaltete Sets sind abgedunkelt, haben keine aktiven
+Lichter und verlieren ihre alte Notenhistorie; beim Wiedereinschalten leuchten nur
+neue Anschläge. Setwechsel ändern weder Sternpositionen noch die Identität der
+anderen Stimmen. Stopp leert die Historie. Keine zusätzlichen Audio-Nodes,
+Zufallszahlen des Musikgenerators oder Speicherung visueller Notenverläufe.
+
+Begrenzt auf 81 Spuren mit je höchstens 192 Ereignissen und 30 Sekunden Historie.
+Die geteilte Ansicht begrenzt gleichzeitig gezeichnete Noten-Halos und Nebelwolken,
+statt bei neun vollen Sets unbeschränkt viele Verläufe zu malen. Reduced Motion
+unterdrückt bewegte Spuren, Strahlen und Noten-Halos; statische Tonpunkte bleiben.
+Helle und dunkle Darstellung, Fokusansicht und MP4 verwenden denselben Canvas.

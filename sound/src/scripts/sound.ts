@@ -13,7 +13,7 @@ import {installAnimationSettings,syncAnimationSettings,animationSettingsActive} 
 import {paintSoundFlower} from '../lib/sound-flower';
 import {paintConstellation} from '../lib/constellation';
 import {paintNoteStream,type StreamPreview} from '../lib/note-stream';
-import {LandscapeHistory,paintLandscape} from '../lib/landscape';
+import {LandscapeHistory,paintLandscape,type LandscapeTrack} from '../lib/landscape';
 import {constellationVariantCopy,type ConstellationVariant,streamVariantCopy,type StreamVariant,landscapeVariantCopy,type LandscapeVariant,visualizationCopy,type VisualizationMode} from '../lib/visualization';
 import {cloneScore,type NoteScore,type ScoreNote} from '../lib/note-score';
 import {createNoteEditor} from './note-editor';
@@ -121,7 +121,7 @@ let visualization:VisualizationMode='orbit';
 let landscapeVariant:LandscapeVariant='rivers';
 let streamVariant:StreamVariant='notes';
 let constellationVariant:ConstellationVariant='stars';
-const landscape=new LandscapeHistory(),radar=new RadarHistory();
+const landscape=new LandscapeHistory(),skyHistory=new LandscapeHistory(81),radar=new RadarHistory();
 let streamRevision=0,streamCache:{key:string;scores:NoteScore[]}|null=null;
 let currentDance:DanceId|null=null,pendingDance:DanceId|null=null;
 function currentPreset(){return currentDance?dances[currentDance].preset:presets[currentStyle];}
@@ -1172,7 +1172,7 @@ function streamFrame(time:number){
 const scoreHits=new Map<string,number>();
 function silenceScoreLane(index:number){
  streamRevision++;
- landscape.release(index,audio?.currentTime??0);radar.clear(index);
+ landscape.release(index,audio?.currentTime??0);skyHistory.cancel(activeOrbitSet*9+index,audio?.currentTime??0);radar.clear(index);
  cancelGroupNotes(index);groupDisplays[index].clear();noteShapes[index].clear();
  for(const key of scoreHits.keys())if(key.startsWith(index+':'))scoreHits.delete(key);
  events.forEach(e=>e.notes=e.notes.filter(n=>n.track!==index));
@@ -1411,7 +1411,7 @@ function schedule(){
 function stop(finishRecordings=true){
  stopOrbitLayers();
  scriptEndAt=null;scriptSceneKey='';
- landscape.clear();radar.clear();streamCache=null;
+ landscape.clear();skyHistory.clear();radar.clear();streamCache=null;
  chordVoicings.clear();scoreHits.clear();
  cancelGroupNotes();groupDisplays.forEach(row=>row.forEach(g=>g.members.forEach(n=>n.played=false)));
  if(finishRecordings){recordingGeneration++;finishVideoRecording();finishWavRecording();}
@@ -2166,9 +2166,10 @@ function frame(now:number){
    {
     const scoreKey=scorePoint?.split(':').map(Number),score=scoreKey&&tr.score?.[scoreKey[1]],first=scoreKey?.[2]===0;
     const seconds=60/transportBpm()*groove.beats*2/trackRate(track);
-    landscape.record(track,{at:ev.time,pitch:pitch??12,level:velocity,length:first&&score?score.duration*seconds:length??.16,
+    const visualNote={at:ev.time,pitch:pitch??12,level:velocity,length:first&&score?score.duration*seconds:length??.16,
      joined:!!joinedFrom,pulseOnly:!!score&&!first,glide:!acousticInstruments.includes(tr.instrument),
-     curve:first&&score?score.points.map(p=>({offset:p.offset*seconds,pitch:p.pitch,level:p.velocity})):undefined});
+     curve:first&&score?score.points.map(p=>({offset:p.offset*seconds,pitch:p.pitch,level:p.velocity})):undefined};
+    landscape.record(track,visualNote);skyHistory.record(activeOrbitSet*9+track,visualNote);
    }
    if(!animationSettingsActive()&&padMode==='notes'&&velocity>0&&Number($<HTMLInputElement>('#volume').value)>0)noteEditor?.pulse(track,ev.time,scorePosition(ev.time,track),pitch);
    if(group&&group.definition===usableGroup(track,beat)){
@@ -2199,7 +2200,13 @@ function frame(now:number){
  const visualMaster=Math.min(1,Number($<HTMLInputElement>('#volume').value)/.3);
  const active=activeTracks();
  if(visualization==='flower')paintSoundFlower(oc,landscape,active.map(({tr,index})=>({index,label:String(padNumbers[index]),color:tr.color,volume:tr.volume,mute:tr.mute||tr.volume===0,pitched:isMelodic(tr.instrument)})),time,dark,playing,reduced.matches,visualMaster,noteEffect,flowerCenterMode==='ring');
- if(visualization==='constellation')paintConstellation(oc,landscape,active.map(({tr,index})=>({index,label:String(padNumbers[index]),color:tr.color,volume:tr.volume,mute:tr.mute||tr.volume===0,pitched:isMelodic(tr.instrument)})),time,dark,playing,reduced.matches,visualMaster,noteEffect,constellationVariant);
+ if(visualization==='constellation'){
+  const shared=!!orbitClock&&orbitSets.filter((slot,i)=>i===activeOrbitSet?activeOrbitExists:!!slot.settings).length>1;
+  const stars=shared?sharedConstellationTracks(dark):active.map(({tr,index})=>({index,label:String(padNumbers[index]),color:tr.color,volume:tr.volume,mute:!scoreLaneAudible(index)||tr.volume===0,pitched:isMelodic(tr.instrument)}));
+  orbit.dataset.constellationSets=String(shared?new Set(stars.map(tr=>Math.floor(tr.index/9))).size:1);
+  orbit.dataset.constellationLanes=String(stars.length);
+  paintConstellation(oc,shared?skyHistory:landscape,stars,time,dark,playing,reduced.matches,visualMaster,noteEffect,constellationVariant,shared);
+ }
  if(visualization==='landscape')(landscapeVariant==='delta'?paintRiverDelta:paintLandscape)(oc,landscape,active.map(({tr,index})=>({index,label:String(padNumbers[index]),color:tr.color,volume:tr.volume,mute:tr.mute||tr.volume===0,pitched:isMelodic(tr.instrument)})),time,transportBpm(),groove.beats,dark,playing,reduced.matches,visualMaster,noteEffect);
  if(visualization==='stream'){
   const scene=streamFrame(time);
@@ -2440,6 +2447,7 @@ function stopOrbitLayers(index?:number){
  for(const [i,layer] of orbitLayerAudio){
   if(index!==undefined&&index!==i)continue;
   const now=audio?.currentTime??0;
+  for(let lane=0;lane<9;lane++)skyHistory.cancel(i*9+lane,now);
   layer.voices.forEach(g=>{g.gain.cancelScheduledValues(now);g.gain.setTargetAtTime(0,now,.008);});
   layer.held.forEach(entry=>entry.voice.release(now));layer.held.clear();
   layer.output.disconnect();layer.room.dispose();orbitLayerAudio.delete(i);
@@ -2479,11 +2487,34 @@ function scheduleOrbitSets(){
      const part=continuous?note:{start:0,duration:segment,points:[{...p,offset:0},...(next?[{offset:Math.max(.0001,segment-.0001),pitch:p.pitch,velocity:next.velocity}]:[])]};
      const at=Math.max(audio!.currentTime+.002,nextTime+(fraction-start)*seconds);
      const track={...tracks[index],...lane.track,score:lane.score,rate,rateChoice:rate,morph:null} as typeof tracks[number];
-     voiceInstrument(index,at,0,1,track.instrument,undefined,true,part.duration*seconds,null,undefined,{note:part,seconds},{set,track,style:saved.style,dance:saved.dance??null,transpose:saved.transpose??0});budget--;
+     const played=voiceInstrument(index,at,0,1,track.instrument,undefined,true,part.duration*seconds,null,undefined,{note:part,seconds},{set,track,style:saved.style,dance:saved.dance??null,transpose:saved.transpose??0});budget--;
+     if(played)skyHistory.record(set*9+index,{at,pitch:p.pitch,level:p.velocity,length:played.length,
+      glide:continuous,curve:part.points.map(point=>({offset:point.offset*seconds,pitch:point.pitch,level:point.velocity}))});
     });
    }
   }
  }
+}
+function sharedConstellationTracks(dark:boolean):LandscapeTrack[]{
+ const result:LandscapeTrack[]=[];
+ orbitSets.forEach((slot,set)=>{
+  const current=set===activeOrbitSet,saved=slot.settings;
+  if(current?!activeOrbitExists:!saved)return;
+  const script=current?scriptSong:saved?.songScript;
+  const bar=Math.max(0,Math.floor(step/stepsPerBar())-slot.barOffset);
+  const position=script?scriptPosition(script,bar):null;
+  for(let lane=0;lane<9;lane++){
+   const tr=current?tracks[lane]:saved!.tracks[lane],source=script?.tracks[lane];
+   const instrument=source?.instrument??tr.instrument;
+   const part=source&&position?script!.scenes[position.index].parts.find(p=>p.track===source.id):null;
+   const volume=current?tr.volume:source?(source.volume??1)*(part?.volume??1):tr.volume;
+   const enabled=current?tr.enabled:script?!!source:tr.enabled;
+   if(!enabled||volume<=0)continue;
+   result.push({index:set*9+lane,color:(dark?colors:lightColors)[(set*2+lane)%9],volume,
+    mute:slot.muted||(current?!scoreLaneAudible(lane):tr.mute),pitched:isMelodic(instrument)});
+  }
+ });
+ return result;
 }
 function applyOrbitProject(project:OrbitProject){
  stopOrbitLayers();orbitClock=structuredClone(project.clock);activeOrbitSet=project.active;
@@ -2614,6 +2645,7 @@ function installOrbitSets(){
  panel.querySelectorAll<HTMLButtonElement>('[data-orbit-select]').forEach(button=>button.addEventListener('click',()=>{selectOrbitSet(Number(button.dataset.orbitSelect));}));
  panel.querySelectorAll<HTMLButtonElement>('[data-orbit-mute]').forEach(button=>button.addEventListener('click',()=>{
   const i=Number(button.dataset.orbitMute);orbitClock??=currentOrbitClock();orbitSets[i].muted=!orbitSets[i].muted;
+  if(orbitSets[i].muted)for(let lane=0;lane<9;lane++)skyHistory.clear(i*9+lane);
   const layer=orbitLayerAudio.get(i);if(layer&&audio)layer.output.gain.setTargetAtTime(orbitSets[i].muted?0:1,audio.currentTime,.008);
   if(i===activeOrbitSet){if(orbitSets[i].muted)tracks.forEach((_,j)=>silenceScoreLane(j));syncRhythmUi();}
   syncVolume();renderOrbitSets();persistSettings();
