@@ -61,7 +61,7 @@ test('returning to Draw discards unaccepted edits and changing style clears stal
  await page.keyboard.press('Numpad7');await page.keyboard.press('Numpad7');
  await page.locator('[data-pad-mode=draw]').click();await expect(page.locator('#drawing')).toHaveAttribute('data-rhythm-hits','0');
  await page.locator('[data-pad-mode=rhythm]').click();await expect(page.locator('#rhythm-cancel')).toBeDisabled();
- await take(page,'Numpad7');await page.locator('#play').click();await page.locator('[data-style-preset=jazz]').click();
+ await take(page,'Numpad7');await page.locator('#play').click();await page.locator('#music-settings-open').click();await page.locator('[data-style-preset=jazz]').click();
  await expect(page.locator('#rhythm-cancel')).toBeDisabled();await expect(page.locator('#drawing')).toHaveAttribute('data-rhythm-hits','0');
 });
 test('Record again discards only the draft; Cancel still returns to the last explicit acceptance',async({page})=>{

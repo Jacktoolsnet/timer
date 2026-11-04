@@ -9,7 +9,7 @@ Stand: 2026-11-04
 - Anordnung wie beim Zahlenblock: oben 7–8–9, mittig 4–5–6, unten 1–2–3.
   Die internen Set-IDs bleiben unverändert; vorhandenes Set 1 liegt jetzt unten links.
   Einfaches Antippen (auch der Ziffer) oder Ziffern-/Numblocktasten wählen das Set.
-  Haken, Akzentrahmen und die aktive Bearbeitungsanzeige markieren die Auswahl.
+  Haken und Akzentrahmen markieren die Auswahl.
 - Jeder Platz enthält bis zu neun Instrumentenspuren, nicht nur ein Instrument.
 - Ein Set wird bearbeitet; alle belegten, nicht stummgeschalteten Sets spielen
   parallel. Auswählen ist kein Solo-Schalter und startet die Wiedergabe nicht neu.
@@ -35,7 +35,11 @@ Stand: 2026-11-04
   Visualisierung gehören zum ausgewählten Set. Zufalls-Play entwickelt das aktive
   Set; Hintergrund-Sets werden aus ihren gespeicherten Noten/Pattern-Einstellungen
   abgespielt. Sie erhalten keine zusätzliche unabhängige Zufalls-Play-Steuerung.
-- Das Notenraster hält weiterhin den bearbeiteten Zweitakt-Abschnitt. Andere Sets
+- Notenraster und ausgewählte Tap-Fläche halten den bearbeiteten Zweitakt-Abschnitt.
+  Bei Tap beginnt das Halten mit der Instrumentauswahl, nicht mit der Übersicht.
+  Fertig, Abbrechen oder Verlassen des Tap-Modus lösen die Schleife; beim Spielen
+  geht es an der nächsten Zweitaktgrenze mit dem folgenden Quellabschnitt weiter.
+  Ohne laufende Wiedergabe startet die Auswahl keinen Ton. Andere Sets
   laufen weiter. Die bisherigen Regeln für vorübergehende Song-Skript-Änderungen
   bleiben bestehen; der Quell-Song wird nicht automatisch neu arrangiert.
 
@@ -86,9 +90,39 @@ Bearbeitungsauswahl werden gespeichert, niemals ein automatischer Wiedergabestar
 oder verworfene Notenentwürfe. Das Laden einer alten Einstellungsdatei ersetzt die
 Bank; ein einzelnes Song-Skript wird dagegen in das aktuell ausgewählte Set geladen.
 
-## Nächster Produktionsschritt
+## Erste Bibliotheksproduktion: Canon in D
 
-Vorhandene Bibliothekslieder sind noch nicht in neue Mehr-Set-Fassungen umgeschrieben.
-Zuerst Original und Stimmenaufteilung vergleichen; dann getrennte Orchestergruppen,
-Gegenstimmen und Begleitungen gezielt komponieren. Mehr Spuren allein sind kein
-Qualitätsmerkmal und ersetzen keine Prüfung der musikalischen Vorlage.
+Der klassische Kanon lädt über `catalog.json → projectPath` die vollständige Bank
+`library/classical-canon.orbit.json`: Violine I, II, III und Basso in vier getrennt
+bearbeitbaren Orbits, fünf freie Plätze. Eine Bibliotheksauswahl ersetzt
+das gesamte Werk einschließlich seiner Bank, auch beim Wechsel zu einem Einzelset-
+Lied oder zu „Zufall“. So bleiben keine Stimmen des vorherigen Werks übrig und
+unterschiedliche Taktarten blockieren den Wechsel nicht. Einzelne Song-Skripte
+über den JSON-Import werden weiterhin in das ausgewählte Set geladen.
+Gesamtlautstärke und Aufnahmeoptionen des Hörers bleiben beim Bibliotheksaufruf erhalten.
+
+Die vorhandene vollständige 58-Takt-Fassung (55 Viertel/Minute) ist die einzige
+Notenquelle. Alle 1.956 Noten, Pausen, versetzten Einsätze (Viertel 8/16/24),
+Dynamikwerte, Artikulation, Szenengrenzen und Quellenangaben bleiben erhalten.
+Keine zusätzlichen Stimmen, Doublings oder Coda. Die vorhandenen synthetischen
+Streicher und das Cello genügen dieser vierstimmigen Besetzung; kein neues
+Instrument oder fremdes Audiomaterial wurde hinzugefügt.
+
+Die vier Skripte behalten die ursprünglichen Spurindizes und Seeds; fremde Parts
+werden entfernt und ihre Spurlautstärken auf null gesetzt. Das erhält die
+stimmbezogene Dynamik und Stereoanordnung auch beim Setwechsel. Jede einzige
+klingende Stimme erhält den doppelten Spurpegel als Ausgleich des gemeinsamen
+`1/sqrt(4)`-Mix-Trims. So wird die bisherige Grundbalance nicht versehentlich halbiert.
+Separate Raumbusse und individuelle Mutes ermöglichen nun das gezielte Anhören
+und Bearbeiten der Stimmen. Set-Mutes verwenden weiterhin die allgemeine automatische
+Summenpegelanpassung; Solo ist daher nicht pegelidentisch zur Vollbesetzung.
+
+Reproduzierbar: `python3 sound/scripts/build-canon-orbits.py` oder im regulären
+Bibliotheks-Build. Die ursprüngliche `.song.json` bleibt als kompatible Einzelset-
+und Notenreferenz unverändert. Jede Teilfassung trägt vollständigen Werktitel,
+Quellen- und Rechteangaben sowie dieselbe Gesamtdauer; damit gelten Ganzsong-
+Video und Pflichtabspann auch nach Wechsel zu einer anderen Stimme.
+
+Weitere Bibliothekslieder sind noch nicht auf Mehr-Set-Produktion umgestellt.
+Mehr Spuren allein sind kein Qualitätsmerkmal; zuerst Original und sinnvolle
+Stimmenaufteilung vergleichen.

@@ -325,7 +325,10 @@ It is not a transcription of Movin' To The Sun or another existing recording.
 Draw, tap and use the note editor to temporarily change the current scene; the
 next scene entry restores the scripted notes. While the expanded note grid is
 open, its visible two-bar section loops without advancing scenes or ending the
-song. Instrument switching stays inside the same section. Accept or cancel closes
+song. Selecting a Tap instrument uses the same two-bar section loop. Finish or
+cancel the Tap take (or leave Tap mode) to release it; merely opening the Tap
+overview does not loop, and selecting a pad does not start playback. Instrument
+switching without unsaved edits stays inside the same section. Accept or cancel closes
 the editor; playback then continues with the next source pair at a two-bar
 boundary, without skipping sections because of elapsed editing time. Opening the
 editor while stopped does not start audio. Generated arrangements are held too,

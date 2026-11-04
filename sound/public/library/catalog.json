@@ -16,7 +16,8 @@
       "en": "Complete four-part Canon score: three violins and bass, with original entrances and ending; no invented voices or coda. Synthesized interpretation.",
       "es": "Partitura completa para tres violines y bajo, con entradas y final originales; sin voces ni coda inventadas. Interpretación sintetizada.",
       "fr": "Partition complète pour trois violons et basse, entrées et fin originales ; aucune voix ni coda inventée. Interprétation synthétique."
-    }
+    },
+    "projectPath": "/library/classical-canon.orbit.json"
   },
   {
     "id": "classical-nachtmusik",

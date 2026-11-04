@@ -102,3 +102,15 @@ tempo prescription. This is score-based, not a historically authenticated
 performance or proof of the composer's exact sound intentions.
 The full licence, author, source and change notices remain in mandatory rights.
 The House version and all eleven other song files remain unchanged.
+
+### Four-orbit Canon edition (2026-11-04)
+
+`classical-canon.orbit.json` separates the existing full performance into Violin I,
+II, III and Basso. It does not introduce a new score source or new notes. The
+original single-set JSON remains unchanged. All 1,956 note events, entrances,
+rests and the 58-bar transport length are preserved, as are the complete source,
+author and licence notices in each embedded part. Per-part gain is doubled to
+compensate the four-set mix trim; source balance is retained. Source lane indices
+and seeds are kept, and all four parts share one clock at quarter = 55.
+Generated offline by `scripts/build-canon-orbits.py`, also called by the regular
+library builder. Library `projectPath` loads the full bank; five slots remain free.

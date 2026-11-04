@@ -100,7 +100,7 @@ function updateScoreAudition(){
  noteEditor?.refresh();
 }
 
-let noteEditLoop:{script:SongScript|null;sourceBar:number;resumeAt:number|null;originalScores:(NoteScore|null)[]|null;accepted:Set<number>;evolution:boolean}|null=null;
+let noteEditLoop:{owner:'notes'|'rhythm';script:SongScript|null;sourceBar:number;resumeAt:number|null;originalScores:(NoteScore|null)[]|null;accepted:Set<number>;evolution:boolean}|null=null;
 let videoEndRequested:(()=>void)|null=null;
 let wholeSongCapture=false,videoMusicStart:number|null=null,videoCreditsCapture=false,videoNaturalEndAt:number|null=null;
 let recordingOutput:DynamicsCompressorNode|undefined;
@@ -169,7 +169,7 @@ function cancelRhythmEdit(){
   if(changed[i]){tr.hits.fill(-Infinity);tr.flash.fill(-100);}
   if(tappedTrack(i)&&audio)liveMix[i].forEach(node=>{node.gain.cancelScheduledValues(audio!.currentTime);node.gain.setTargetAtTime(0,audio!.currentTime,.006);});
  });
- sync();persistSettings();
+ endNoteEditLoop('rhythm');sync();persistSettings();
 }
 let rhythmEditing=false,orbitBus:GainNode|undefined,tapBus:GainNode|undefined;
 let rhythmPlayer:ReturnType<typeof createRhythmPlayer>|undefined;
@@ -267,8 +267,7 @@ async function tapRhythm(lane:RhythmLane,pressed:number,note:number|null=null){
  rhythmPlayer?.cancelLane(lane,replacing?-Infinity:audio.currentTime);
  cancelTappedVoices(lane,replacing?-Infinity:audio.currentTime);
  events.forEach(event=>{if(event.time>=audio!.currentTime)event.notes=event.notes.filter(note=>note.track!==lane);});
- // A tapped part keeps its selected timbre; the untouched orbits can still evolve.
- const changedTimbre=!!tr.morph;
+ // Keep the chosen timbre; the shared section loop holds accompaniment while editing.
  if(tr.morph){if(currentMorph(tr,audio.currentTime)>=.5)tr.instrument=tr.morph.to;tr.morph=null;}
  if(journey?.track===lane)journey=null;
  tr.direction=1;tr.phase=0;tr.pendingDirection=null;
@@ -277,7 +276,7 @@ async function tapRhythm(lane:RhythmLane,pressed:number,note:number|null=null){
  rhythmEditing=true;
  recordRhythmHit(tapPattern,position,lane,note);
  playTapped(lane,audio.currentTime+.004,Math.max(0,Math.round(position)));
- if(changedTimbre)sync();else syncRhythmUi();persistSettings();
+ sync();persistSettings();
 }
 
 function musicalStep(){return step/stepsPerBar()*16;}
@@ -1179,7 +1178,7 @@ function silenceScoreLane(index:number){
 }
 function installNoteEditor(){
  noteEditor=createNoteEditor({language,steps:()=>stepsPerBar()*2,
-  opened:beginNoteEditLoop,closed:()=>{scoreAuditionMuted=null;updateScoreAudition();endNoteEditLoop();},
+  opened:()=>beginNoteEditLoop('notes'),closed:()=>{scoreAuditionMuted=null;updateScoreAudition();endNoteEditLoop();},
   mute(index){if(!scoreAuditionMuted||scoreSelection===index)return;scoreAuditionMuted[index]=!scoreAuditionMuted[index];updateScoreAudition();},
   muteOthers(){if(!scoreAuditionMuted)return;const muted=scoreAuditionMuted.every((value,i)=>i===scoreSelection||value);scoreAuditionMuted.fill(!muted);updateScoreAudition();},
   beatSteps:()=>orbitClock?16/orbitClock.meter.denominator:scriptSong?.version===3?16/scriptSong.meter.denominator:4,
@@ -1191,21 +1190,25 @@ function installNoteEditor(){
   finish(index,accept){if(!accept){silenceScoreLane(index);tracks[index].score=scoreBackup===null?null:cloneScore(scoreBackup);}else noteEditLoop?.accepted.add(index);scoreSelection=null;scoreBackup=null;syncRhythmUi();persistSettings();}
  });
 }
-function beginNoteEditLoop(){
- scoreAuditionMuted??=tracks.map(tr=>!tr.enabled||tr.mute);
- if(noteEditLoop){noteEditLoop.resumeAt=null;return;}
+function beginNoteEditLoop(owner:'notes'|'rhythm'='notes'){
+ if(owner==='notes')scoreAuditionMuted??=tracks.map(tr=>!tr.enabled||tr.mute);
+ if(noteEditLoop){
+  noteEditLoop.owner=owner;noteEditLoop.resumeAt=null;
+  delete $('#note-editor').dataset.sectionLoop;delete drawing.dataset.sectionLoop;
+  $(owner==='rhythm'?'#drawing':'#note-editor').dataset.sectionLoop='true';return;
+ }
  const originalScores=scriptSong?null:tracks.map(tr=>tr.score===null?null:cloneScore(tr.score));
  const previews=scriptSong?null:tracks.map((_,i)=>previewScore(i));
- noteEditLoop={script:scriptSong,sourceBar:Math.floor(scriptLastBar/2)*2,resumeAt:null,originalScores,accepted:new Set(),evolution:evolving};
+ noteEditLoop={owner,script:scriptSong,sourceBar:Math.floor(scriptLastBar/2)*2,resumeAt:null,originalScores,accepted:new Set(),evolution:evolving};
  if(previews){tracks.forEach((tr,i)=>tr.score=previews[i]);if(evolving)setEvolution(false);streamRevision++;}
  // The final song boundary can already be queued by the look-ahead scheduler.
  // Opening the editor must keep the displayed final section alive as well.
  scriptEndAt=null;
- $('#note-editor').dataset.sectionLoop='true';
+ $(owner==='rhythm'?'#drawing':'#note-editor').dataset.sectionLoop='true';
 }
 function finishNoteEditLoop(transportBar:number,resume=true){
  const loop=noteEditLoop;if(!loop)return;noteEditLoop=null;
- delete $('#note-editor').dataset.sectionLoop;
+ delete $('#note-editor').dataset.sectionLoop;delete drawing.dataset.sectionLoop;
  if(loop.script&&loop.script===scriptSong)scriptBarOffset=transportBar-(loop.sourceBar+2);
  if(loop.originalScores){
   tracks.forEach((tr,i)=>{if(!loop.accepted.has(i))tr.score=loop.originalScores![i]===null?null:cloneScore(loop.originalScores![i]!);});
@@ -1214,8 +1217,8 @@ function finishNoteEditLoop(transportBar:number,resume=true){
  }
  persistSettings();
 }
-function endNoteEditLoop(){
- if(!noteEditLoop)return;
+function endNoteEditLoop(owner:'notes'|'rhythm'='notes'){
+ if(!noteEditLoop||noteEditLoop.owner!==owner)return;
  if(!playing){finishNoteEditLoop(0,false);return;}
  // Complete the current audition cycle, then continue at the NEXT source pair,
  // not at a later scene reached by counting the elapsed editing time.
@@ -1785,9 +1788,11 @@ document.querySelectorAll<HTMLButtonElement>('[data-pad-mode]').forEach(button=>
  setOrbitSetsVisible(false);noteEditor?.cancel();rhythmGeneration++;cancelPadGestures();if(selectedPad!==null)cancelRhythmEdit();padMode=button.dataset.padMode as typeof padMode;selectedPad=null;padSwitchBlocked=false;rhythmEditing=false;syncRhythmUi();persistSettings();
 }));
 $('#rhythm-done').addEventListener('click',()=>{
- cancelPadGestures();rhythmGeneration++;acceptRhythmEdit();rhythmEditing=false;selectedPad=null;padSwitchBlocked=false;finishRhythm(tapPattern);
+ cancelPadGestures();rhythmGeneration++;
+ for(const index of rhythmTouched)noteEditLoop?.accepted.add(index);
+ acceptRhythmEdit();rhythmEditing=false;selectedPad=null;padSwitchBlocked=false;finishRhythm(tapPattern);
  // Accept even a short take now, without waiting for a further two-bar recording pass.
- tapPattern.laneStart.fill(null);syncRhythmUi();persistSettings();
+ tapPattern.laneStart.fill(null);endNoteEditLoop('rhythm');syncRhythmUi();persistSettings();
 });
 $('#rhythm-cancel').addEventListener('click',cancelRhythmEdit);
 $('#pad-mute').addEventListener('click',()=>{
@@ -1852,7 +1857,7 @@ function selectRhythmPad(lane:RhythmLane){
  if(selectedPad===lane)return true;
  if(selectedPad!==null&&rhythmTouched.size){padSwitchBlocked=true;syncRhythmUi();return false;}
  if(selectedPad!==null)cancelRhythmEdit();
- cancelPadGestures();rhythmGeneration++;selectedPad=lane;padSwitchBlocked=false;rhythmEditing=true;beginRhythmEdit();
+ cancelPadGestures();rhythmGeneration++;selectedPad=lane;padSwitchBlocked=false;rhythmEditing=true;beginNoteEditLoop('rhythm');beginRhythmEdit();
  keyboardPoint=padPoint(lane);syncRhythmUi();return true;
 }
 $('#rhythm-record').addEventListener('click',beginReplacementTake);
@@ -2719,17 +2724,35 @@ document.querySelectorAll<HTMLButtonElement>('[data-library-open]').forEach(butt
  $('#song-library-style').textContent=styleCopy[language].names[styleIds.indexOf(style)];
  $('#song-library-status').textContent='';libraryDialog.showModal();
 }));
+function beginLibraryProduction(){
+ // Library selection replaces the work; JSON song imports still target one set.
+ noteEditor?.cancel();cancelPadGestures();stop();stopOrbitLayers();
+ orbitSets.forEach((_,i)=>orbitSets[i]=emptyOrbitSet());
+ activeOrbitSet=0;activeOrbitExists=true;orbitClock=null;orbitPairCache.clear();
+}
 document.querySelectorAll<HTMLButtonElement>('[data-library-song]').forEach(button=>button.addEventListener('click',async()=>{
  if(videoBusy||wavBusy||importBusy)return;
  const entry=songLibrary.find(song=>song.id===button.dataset.librarySong);if(!entry)return;
  const request=new AbortController();libraryRequest=request;importBusy=true;syncFileButtons();
  $('#song-library-status').textContent=libraryCopy[language].loading;
  try{
-  const response=await fetch(entry.path,{signal:request.signal});if(!response.ok)throw Error('Song unavailable');
-  const script=decodeSongScript(await response.text());
-  if(!script||script.version<2||script.style!==entry.style)throw Error('Invalid library song');
+  const projectPath='projectPath' in entry&&typeof entry.projectPath==='string'?entry.projectPath:null;
+  const response=await fetch(projectPath??entry.path,{signal:request.signal});if(!response.ok)throw Error('Song unavailable');
+  const raw=await response.text(),project=projectPath?decodeOrbitProject(raw):null;
+  const script=projectPath?project?.sets[project.active].settings?.songScript:decodeSongScript(raw);
+  if(!script||script.version<2||script.style!==entry.style||projectPath&&!project)throw Error('Invalid library song');
+  if(project&&project.sets.some(slot=>slot.settings&&slot.settings.style!==entry.style))throw Error('Invalid library project');
   if(libraryRequest!==request||request.signal.aborted||!libraryDialog.open)return;
-  libraryRequest=null;importBusy=false;if(!loadSongScript(script)){$('#song-library-status').textContent=orbitSetCopy[language].incompatible;return;}renderOrbitSets();libraryDialog.close();
+  libraryRequest=null;importBusy=false;
+  if(project){
+   // A library production is a complete bank, not extra layers on the previous song.
+   // Preserve the listener's master volume and recording preferences.
+   const recording=snapshotSettings().recording;
+   project.volume=Number($<HTMLInputElement>('#volume').value);
+   project.sets.forEach(slot=>{if(slot.settings)slot.settings.recording=recording;});
+   beginLibraryProduction();applyOrbitProject(project);persistSettings();
+  }else{beginLibraryProduction();loadSongScript(script);}
+  renderOrbitSets();libraryDialog.close();
   void start();
  }catch{
   if(libraryRequest===request&&!request.signal.aborted)$('#song-library-status').textContent=libraryCopy[language].error;
@@ -2741,7 +2764,7 @@ document.querySelectorAll<HTMLButtonElement>('[data-library-song]').forEach(butt
 document.querySelectorAll<HTMLButtonElement>('[data-library-random]').forEach(button=>button.addEventListener('click',()=>{
  if(videoBusy||wavBusy||importBusy)return;
  const style=button.dataset.libraryRandom as StyleId;
- stop();applyStyle(style);setEvolution(true);persistSettings();libraryDialog.close();void start();
+ beginLibraryProduction();applyStyle(style);setEvolution(true);persistSettings();renderOrbitSets();libraryDialog.close();void start();
 }));
 $('#song-script-export').addEventListener('click',()=>{if(scriptSong)downloadBlob(new Blob([JSON.stringify(scriptSong,null,2)],{type:'application/json'}),'jacktools-song.json');});
 $('#song-script-leave').addEventListener('click',()=>{if(videoBusy||wavBusy||importBusy)return;leaveSongScript(false);sync();persistSettings();});
