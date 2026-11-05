@@ -904,3 +904,28 @@ body > header nav { gap: 8px; }
   .agent-profile-boundaries { grid-template-columns: 1fr; gap: 20px; }
   .agent-profile-state { margin-left: auto; }
 }
+
+.agents-layout { padding-top: 24px; }
+.agents-intro { padding: 32px 0 35px; margin: 0; max-width: none; }
+
+.agents-empty-state { padding: 20px 28px 36px; text-align: center; border: 1px solid var(--line); border-radius: 22px; background: var(--surface); }
+.agents-empty-art { width: min(240px, 100%); margin: 0 auto; color: var(--accent); }
+.agents-empty-art svg { display: block; width: 100%; height: auto; }
+.empty-agent-halo { fill: var(--accent-soft); }
+.empty-agent-shadow { fill: var(--accent); opacity: .09; }
+.empty-agent-face { fill: var(--surface); stroke: var(--accent); stroke-width: 2.5; }
+.empty-agent-outline { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.empty-agent-ink { fill: var(--accent); }
+.empty-agent-wisp { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linecap: round; opacity: .4; }
+.agents-empty-state h2 { margin: 4px 0 12px; font-size: 1.5rem; }
+.agents-empty-state p { max-width: 350px; margin: 0 auto 22px; color: var(--muted); font-size: .875rem; line-height: 1.8; }
+.agents-empty-state button { color: var(--accent); background: var(--accent-soft); border-color: var(--line); }
+.agents-empty-state button:hover { border-color: var(--accent); }
+[data-style=technical] .agents-empty-state { border-radius: 3px; }
+[data-style=minimal] .agents-empty-state { border-radius: 8px; }
+[data-style=soft] .agents-empty-state { border-radius: 30px; }
+
+.agent-search-button { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 46px; min-height: 46px; padding: 0; }
+.agent-search-button svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+.agent-search-button::after { content: attr(data-tooltip); position: absolute; bottom: calc(100% + 8px); right: 0; width: max-content; padding: 7px 10px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); color: var(--text); box-shadow: 0 4px 16px #0002; font-size: .75rem; visibility: hidden; opacity: 0; z-index: 2; }
+.agent-search-button:is(:hover, :focus-visible)::after { visibility: visible; opacity: 1; }

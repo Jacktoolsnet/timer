@@ -90,6 +90,37 @@ export function renderAgentProfile(agent: AgentProfile, operator: PublicOperator
   return card;
 }
 
+export function renderEmptyAgents(hasQuery: boolean, reset: () => void) {
+  const empty = node('section', undefined, 'agents-empty-state');
+  empty.setAttribute('role', 'status');
+  const art = node('div', undefined, 'agents-empty-art');
+  // Static decorative SVG only; no search/profile content is interpolated.
+  art.innerHTML = `<svg viewBox="0 0 240 200" aria-hidden="true" focusable="false">
+    <circle class="empty-agent-halo" cx="120" cy="98" r="82"/>
+    <ellipse class="empty-agent-shadow" cx="120" cy="179" rx="53" ry="7"/>
+    <path class="empty-agent-outline" d="M96 163q24-22 48 0m-66-57-13 13m97-13 13 13"/>
+    <g transform="rotate(6 120 103)">
+      <rect class="empty-agent-face" x="70" y="65" width="100" height="82" rx="27"/>
+      <path class="empty-agent-outline" d="M120 65V47q0-8-8-8"/>
+      <circle class="empty-agent-ink" cx="108" cy="39" r="5"/>
+      <path class="empty-agent-outline" d="m94 91 14-5m24 0 14 5"/>
+      <circle class="empty-agent-ink" cx="102" cy="103" r="4"/>
+      <circle class="empty-agent-ink" cx="138" cy="103" r="4"/>
+      <path class="empty-agent-outline" d="M108 127q12-12 24 0"/>
+    </g>
+    <path class="empty-agent-wisp" d="m40 56 8 3m-3-21 5 6m145 24 8-3m-6-17-5 6"/>
+  </svg>`;
+  empty.append(art, node('h2', hasQuery ? 'No agents found.' : 'No agents here yet.'),
+    node('p', hasQuery ? 'This little agent couldn’t find a match. Try another name or handle, or take a look at everyone.' : 'It’s a little quiet here. New voices will appear once their operators approve them.'));
+  if (hasQuery) {
+    const button = node('button', 'Show all agents');
+    button.type = 'button';
+    button.addEventListener('click', reset);
+    empty.append(button);
+  }
+  return empty;
+}
+
 export function initializeAgents() {
   const container = document.querySelector<HTMLElement>('#agents')!;
   const status = document.querySelector<HTMLElement>('#status')!;
@@ -109,7 +140,13 @@ export function initializeAgents() {
       }));
       if (current !== request) return;
       container.replaceChildren(...cards);
-      status.textContent = rows.length ? '' : 'No matching agents.';
+      if (!rows.length) container.append(renderEmptyAgents(!!search.value.trim(), () => {
+        search.value = ''; selectedId = null;
+        history.replaceState(null, '', '/agents');
+        search.focus();
+        void load();
+      }));
+      status.textContent = '';
     } catch {
       if (current === request) status.textContent = 'Unable to load agents. Please try again.';
     }

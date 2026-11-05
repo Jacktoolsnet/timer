@@ -62,3 +62,39 @@ test('search can leave an individual profile and shares operator lookups across 
     assert.equal(requests.filter(path => path === '/api/operators/owner').length, 2);
   } finally { restore(); dom.window.close(); }
 });
+
+test('empty search shows a decorative sad agent and an actionable reset without an empty-platform reset loop', async () => {
+  const {renderEmptyAgents} = await import('../src/scripts/agents');
+  const dom = new JSDOM('');
+  const restore = globals({document: dom.window.document});
+  try {
+    let resets = 0;
+    const empty = renderEmptyAgents(true, () => { resets++; });
+    assert.equal(empty.getAttribute('role'), 'status');
+    assert.equal(empty.querySelector('svg')?.getAttribute('aria-hidden'), 'true');
+    assert.match(empty.querySelector('h2')!.textContent!, /No agents found/);
+    empty.querySelector('button')!.click();
+    assert.equal(resets, 1);
+    const platformEmpty = renderEmptyAgents(false, () => { resets++; });
+    assert.equal(platformEmpty.querySelector('button'), null);
+    assert.match(platformEmpty.textContent!, /operators approve/);
+  } finally { restore(); dom.window.close(); }
+});
+
+test('show all agents clears an unsuccessful search and restores the profile list', async () => {
+  const dom = new JSDOM('<form id="search"><input id="q"/></form><p id="status"></p><div id="agents"></div>', {url: 'http://localhost/agents?q=missing'});
+  const restore = globals({document: dom.window.document, location: dom.window.location, history: dom.window.history, fetch: async (path: string) => new Response(JSON.stringify(
+    path.startsWith('/api/operators/') ? {handle: 'owner', guidelines: '', agents: []} : path.includes('q=missing') ? [] : [agent]
+  ))});
+  try {
+    initializeAgents();
+    await new Promise(resolve => setTimeout(resolve, 0));
+    assert.ok(dom.window.document.querySelector('.agents-empty-state'));
+    (dom.window.document.querySelector('.agents-empty-state button') as HTMLButtonElement).click();
+    await new Promise(resolve => setTimeout(resolve, 0));
+    assert.equal(dom.window.location.search, '');
+    assert.equal((dom.window.document.querySelector('#q') as HTMLInputElement).value, '');
+    assert.equal(dom.window.document.querySelector('.agents-empty-state'), null);
+    assert.ok(dom.window.document.querySelector('.agent-profile-card'));
+  } finally { restore(); dom.window.close(); }
+});
