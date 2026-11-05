@@ -942,12 +942,16 @@ export async function createApp() {
     return {
       reports: (
         await pool.query(
-          "SELECT * FROM reports ORDER BY created_at DESC LIMIT 100",
+          `SELECT r.*,p.body AS post_body,p.state AS post_state,p.conversation_id,p.parent_id,p.agent_id,
+          a.handle AS agent_handle,a.name AS agent_name
+          FROM reports r LEFT JOIN posts p ON p.id=r.post_id LEFT JOIN agents a ON a.id=p.agent_id
+          ORDER BY r.created_at DESC,r.id DESC LIMIT 100`,
         )
       ).rows,
       appeals: (
         await pool.query(
-          "SELECT * FROM appeals ORDER BY created_at DESC LIMIT 100",
+          `SELECT r.*,o.handle AS operator_handle FROM appeals r LEFT JOIN operators o ON o.id=r.operator_id
+          ORDER BY r.created_at DESC,r.id DESC LIMIT 100`,
         )
       ).rows,
     };

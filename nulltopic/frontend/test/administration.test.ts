@@ -6,9 +6,10 @@ import {initializeAdministration} from '../src/scripts/administration';
 
 const html = readFileSync(new URL('../dist/administration/index.html', import.meta.url), 'utf8');
 const tick = () => new Promise(resolve => setTimeout(resolve, 0));
-async function fixture(run: (dom: JSDOM, requests: {path: string; body?: any; headers?: HeadersInit}[]) => Promise<void>, fail = false, root = false) {
+async function fixture(run: (dom: JSDOM, requests: {path: string; body?: any; headers?: HeadersInit}[]) => Promise<void>, fail = false, root = false, withReports = false) {
   const dom = new JSDOM(html, {url: 'http://localhost/administration'});
   dom.window.scrollTo = () => {};
+  dom.window.HTMLElement.prototype.scrollIntoView = () => {};
   const requests: {path: string; body?: any; headers?: HeadersInit}[] = [];
   let authenticated = false;
   const users = [{id: 'root', handle: 'server_root', is_root: true, enabled: true}, {id: 'normal', handle: 'existing_admin', is_root: false, enabled: true}];
@@ -21,7 +22,7 @@ async function fixture(run: (dom: JSDOM, requests: {path: string; body?: any; he
       return new Response(JSON.stringify({csrf: 'test-csrf'}));
     }
     if (path === '/api/logout') { authenticated = false; return new Response(JSON.stringify({ok: true})); }
-    if (path === '/api/admin') return new Response(JSON.stringify({reports: [], appeals: []}));
+    if (path === '/api/admin') return new Response(JSON.stringify({reports: withReports ? [{id:'report', post_id:'message', agent_id:'agent', agent_handle:'example_agent', agent_name:'Example', conversation_id:'thread', post_body:'Reported example', reason:'Reported reason', created_at:'2026-11-05T10:00:00Z', resolved:false}] : [], appeals: []}));
     if (path === '/api/admin/users') {
       if (options?.method === 'POST') {
         const body = JSON.parse(String(options.body));
@@ -181,3 +182,27 @@ test('ordinary administrators cannot open user management even through a view ha
   assert.equal((doc.querySelector('#admin-overview') as HTMLElement).hidden, false);
   assert.equal(requests.some(r => r.path === '/api/admin/users'), false);
 }));
+
+test('human-readable moderation review selects the right target without executing an action', async () => fixture(async (dom, requests) => {
+  await initializeAdministration();
+  const doc = dom.window.document;
+  (doc.querySelector('#admin-handle') as HTMLInputElement).value = 'test_admin';
+  (doc.querySelector('#admin-password') as HTMLInputElement).value = 'test-only-password';
+  doc.querySelector('#login')!.dispatchEvent(new dom.window.Event('submit', {cancelable: true}));
+  await tick();
+  (doc.querySelector('#admin-moderation-tile') as HTMLButtonElement).click();
+  await tick();
+  assert.match(doc.querySelector('#reports')!.textContent!, /Reported example/);
+  assert.equal(doc.querySelector('#reports pre'), null);
+  (doc.querySelector('.moderation-report-actions button') as HTMLButtonElement).click();
+  assert.equal((doc.querySelector('#action-id') as HTMLInputElement).value, 'message');
+  assert.equal((doc.querySelector('#action-type') as HTMLSelectElement).value, 'hide');
+  assert.equal((doc.querySelector('#action-reason') as HTMLTextAreaElement).value, '');
+  assert.equal(doc.activeElement?.id, 'action-reason');
+  const action = doc.querySelector<HTMLSelectElement>('#action-type')!;
+  action.value = 'block'; action.dispatchEvent(new dom.window.Event('change'));
+  assert.equal((doc.querySelector('#action-id') as HTMLInputElement).value, 'agent');
+  assert.equal(requests.some(r => r.path === '/api/admin/actions'), false);
+  (doc.querySelector('#admin-moderation .admin-back') as HTMLButtonElement).click();
+  assert.equal((doc.querySelector('#action-id') as HTMLInputElement).value, '');
+}, false, false, true));

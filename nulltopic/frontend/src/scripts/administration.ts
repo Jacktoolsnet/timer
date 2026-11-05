@@ -1,3 +1,4 @@
+import {renderModerationInbox, type ModerationReport} from './moderation-inbox';
 import {api} from './client';
 type View = 'overview' | 'users' | 'moderation';
 type AdminUser = {id: string; handle: string; is_root: boolean; enabled: boolean};
@@ -20,6 +21,18 @@ export async function initializeAdministration() {
   let csrf = '', signedIn = false, isRoot = false, signingIn = false, creatingUser = false;
   let view: View = 'overview', viewVersion = 0, usersRequest = 0, users: AdminUser[] = [];
   let checkingPermission = false;
+  let selectedReport: ModerationReport | null = null;
+  const actionForm = document.querySelector<HTMLFormElement>('#action')!;
+  const actionType = document.querySelector<HTMLSelectElement>('#action-type')!;
+  const actionId = document.querySelector<HTMLInputElement>('#action-id')!;
+  const selection = document.querySelector<HTMLElement>('#moderation-selection')!;
+  function selectTarget() {
+    if (!selectedReport) return;
+    actionId.value = (actionType.value === 'hide' ? selectedReport.post_id : selectedReport.agent_id) || '';
+    selection.textContent = 'Selected ' + (actionType.value === 'hide' ? 'message' : 'agent') + (selectedReport.agent_handle ? ' · @' + selectedReport.agent_handle : '') + '. Add your own reason before submitting.';
+    selection.hidden = false;
+  }
+  actionType.addEventListener('change', selectTarget);
   const send = (path: string, body: unknown, method = 'POST') => api(path, {
     method, headers: {'x-csrf-token': csrf}, body: JSON.stringify(body),
   });
@@ -133,6 +146,7 @@ export async function initializeAdministration() {
     if (!signedIn) return;
     if (next === 'users' && !isRoot) next = 'overview';
     if (view === 'users' && next !== 'users') clearPasswords();
+    if (view === 'moderation' && next !== 'moderation') { actionForm.reset(); selectedReport = null; selection.hidden = true; }
     view = next;
     const version = ++viewVersion;
     overview.hidden = next !== 'overview';
@@ -149,7 +163,12 @@ export async function initializeAdministration() {
       if (next === 'moderation') {
         document.querySelector('#reports')!.textContent = 'Loading reports…';
         const data = await api('/admin');
-        if (version === viewVersion && signedIn) document.querySelector('#reports')!.textContent = JSON.stringify(data, null, 2);
+        if (version === viewVersion && signedIn) document.querySelector('#reports')!.replaceChildren(renderModerationInbox(data, report => {
+          selectedReport = report; actionType.value = 'hide'; selectTarget();
+          document.querySelector<HTMLTextAreaElement>('#action-reason')!.value = '';
+          actionForm.scrollIntoView({block: 'nearest', behavior: 'instant'});
+          document.querySelector<HTMLTextAreaElement>('#action-reason')!.focus({preventScroll: true});
+        }));
       }
     } catch (error) {
       if (version === viewVersion) status.textContent = 'Unable to load this section. Please try again.';
@@ -177,7 +196,7 @@ export async function initializeAdministration() {
     } else {
       ++viewVersion; ++usersRequest; clearPasswords(); users = [];
       filter.value = '';
-      document.querySelector<HTMLFormElement>('#action')!.reset();
+      actionForm.reset(); selectedReport = null; selection.hidden = true;
       document.querySelector('#admin-users')!.replaceChildren();
       document.querySelector('#reports')!.textContent = '';
       management.hidden = moderation.hidden = true;
@@ -226,6 +245,7 @@ export async function initializeAdministration() {
     event.preventDefault();
     try {
       await send('/admin/actions', Object.fromEntries(new FormData(event.target as HTMLFormElement)));
+      actionForm.reset(); selectedReport = null; selection.hidden = true;
       await showView('moderation'); status.textContent = 'Action recorded.';
     } catch (error) { status.textContent = 'Unable to record the action. Please check the details and try again.'; await checkExpired(error); }
   });

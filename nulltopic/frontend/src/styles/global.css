@@ -992,3 +992,34 @@ body > header nav { gap: 8px; }
 #admin-header-logout:disabled { opacity: .6; cursor: wait; }
 .admin-session-handle { max-width: min(220px, 40vw); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .8125rem; font-weight: 650; }
 .admin-session-handle:empty { display: none; }
+
+.moderation-queue + .moderation-queue { border-top: 1px solid var(--line); padding-top: 22px; margin-top: 28px; }
+.moderation-queue-heading { color: var(--muted); font-size: .75rem; text-transform: uppercase; letter-spacing: .07em; margin: 24px 0 14px; }
+.moderation-report-card, .moderation-review-card { padding: 20px; border-radius: 14px; margin-bottom: 14px; box-shadow: none; }
+.moderation-item-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.moderation-item-badge { font-size: .625rem; font-weight: 650; padding: 4px 8px; border-radius: 999px; color: var(--accent); background: var(--accent-soft); }
+.moderation-item-badge[data-resolved=true] { color: var(--green); background: color-mix(in srgb, var(--green) 10%, var(--surface)); }
+.moderation-date { font-size: .625rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.moderation-inbox h4 { font-size: .8125rem; margin: 18px 0 8px; }
+.moderation-reason, .moderation-message-text { font-size: .8125rem; line-height: 1.8; overflow-wrap: anywhere; white-space: pre-wrap; margin: 0; }
+.moderation-message-preview { padding: 16px; margin-top: 18px; background: var(--accent-soft); border-radius: 10px; }
+.moderation-preview-author { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.moderation-preview-author strong { display: block; font-size: .75rem; }
+.moderation-preview-author .meta { display: block; font-size: .625rem; margin-top: 3px; }
+.moderation-author-avatar { display: grid; place-items: center; width: 32px; height: 32px; flex-shrink: 0; border-radius: 10px; background: var(--surface); color: var(--accent); font-weight: 650; }
+.moderation-report-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 14px; margin-top: 16px; }
+.moderation-report-actions a, .moderation-report-actions button { font-size: .75rem; }
+.moderation-report-actions button { color: var(--accent); background: var(--accent-soft); }
+.moderation-references { margin-top: 12px; font-size: .6875rem; color: var(--muted); }
+.moderation-references summary { cursor: pointer; padding: 6px 0; }
+.moderation-references dl { display: grid; grid-template-columns: auto minmax(0,1fr); gap: 8px 12px; }
+.moderation-references dt, .moderation-references dd { margin: 0; overflow-wrap: anywhere; }
+.moderation-references dd { font-family: ui-monospace, monospace; font-size: .625rem; }
+.moderation-all-clear { text-align: center; padding: 24px 10px; }
+.moderation-all-clear svg { width: 100px; height: 100px; }
+.moderation-all-clear h3 { font-size: 1.25rem; margin: 16px 0 10px; }
+.moderation-all-clear p { max-width: 300px; margin: 0 auto; color: var(--muted); font-size: .8125rem; line-height: 1.8; }
+.admin-selected-message { color: var(--accent); border-left: 3px solid var(--accent); padding: 10px 12px; background: var(--accent-soft); font-size: .75rem; line-height: 1.7; }
+#action { scroll-margin-top: 20px; }
+#action .admin-field-hint { margin: -8px 0 20px; }
+[data-style=technical] :is(.moderation-report-card,.moderation-review-card,.moderation-message-preview) { border-radius: 3px; }

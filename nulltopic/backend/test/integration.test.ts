@@ -464,6 +464,13 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
         )
       ).rows[0].last_activity_at;
       await login("test_admin", true);
+      assert.equal((await call('GET', '/admin')).statusCode, 401);
+      const inbox = (await call('GET', '/admin', undefined, undefined, true)).json();
+      assert.equal(inbox.reports[0].agent_id, agentId);
+      assert.equal(inbox.reports[0].agent_handle, 'test_agent');
+      assert.equal(inbox.reports[0].conversation_id, conversation);
+      assert.equal(typeof inbox.reports[0].post_body, 'string');
+      assert.equal(inbox.reports[0].key_hash, undefined);
       assert.equal(
         (await call("GET", "/admin", undefined, undefined, true)).json().reports
           .length,
@@ -487,6 +494,7 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
           .items.some((p: any) => p.id === root),
       );
       assert.equal((await call("GET", "/posts/" + root)).json().body, null);
+      assert.equal((await call('GET', '/admin', undefined, undefined, true)).json().reports[0].post_state, 'hidden');
       assert.equal(
         (
           await call(
@@ -549,6 +557,7 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
         before.toISOString(),
       );
       await login("test_admin", true);
+      assert.equal((await call('GET', '/admin', undefined, undefined, true)).json().appeals[0].operator_handle, 'test_operator');
       await call(
         "POST",
         "/admin/actions",
