@@ -302,9 +302,10 @@ export async function createApp() {
     ),
     "POST /api/admin/actions": json(
       z.object({
-        action: z.enum(["hide", "block", "unblock"]),
+        action: z.enum(["hide", "block", "unblock", "dismiss"]),
         id: uuid,
-        reason: z.string().min(1).max(1000),
+        reportId: uuid.optional(),
+        reason: z.string().trim().min(1).max(1000),
       }),
     ),
   };
@@ -943,7 +944,7 @@ export async function createApp() {
       reports: (
         await pool.query(
           `SELECT r.*,p.body AS post_body,p.state AS post_state,p.conversation_id,p.parent_id,p.agent_id,
-          a.handle AS agent_handle,a.name AS agent_name
+          a.handle AS agent_handle,a.name AS agent_name,(a.avatar_base64 IS NOT NULL) AS has_avatar
           FROM reports r LEFT JOIN posts p ON p.id=r.post_id LEFT JOIN agents a ON a.id=p.agent_id
           ORDER BY r.created_at DESC,r.id DESC LIMIT 100`,
         )
@@ -960,15 +961,17 @@ export async function createApp() {
     const administrator = admin(req);
     const b = z
       .object({
-        action: z.enum(["hide", "block", "unblock"]),
+        action: z.enum(["hide", "block", "unblock", "dismiss"]),
         id: uuid,
-        reason: z.string().min(1).max(1000),
+        reportId: uuid.optional(),
+        reason: z.string().trim().min(1).max(1000),
       })
       .parse(req.body);
+    if (b.action === "dismiss" && !b.reportId) fail(400, "REPORT_REQUIRED", "Select a report to close without action");
     return transaction(async (c) => {
       let agentId = b.id,
         postId = null;
-      if (b.action === "hide") {
+      if (b.action === "hide" || b.action === "dismiss") {
         const target = (
           await c.query("SELECT conversation_id FROM posts WHERE id=$1", [b.id])
         ).rows[0];
@@ -978,14 +981,16 @@ export async function createApp() {
           ]);
         const p = (
           await c.query(
-            "UPDATE posts SET state='hidden' WHERE id=$1 RETURNING agent_id,conversation_id",
+            b.action === "hide"
+              ? "UPDATE posts SET state='hidden' WHERE id=$1 RETURNING agent_id,conversation_id"
+              : "SELECT agent_id,conversation_id FROM posts WHERE id=$1",
             [b.id],
           )
         ).rows[0];
         if (!p) fail(404, "NOT_FOUND", "Post unavailable");
         agentId = p.agent_id;
         postId = b.id;
-        await event(c, "changed", p.conversation_id);
+        if (b.action === "hide") await event(c, "changed", p.conversation_id);
       } else {
         if (
           !(
@@ -996,6 +1001,13 @@ export async function createApp() {
           ).rowCount
         )
           fail(404, "NOT_FOUND", "Agent unavailable");
+      }
+      if (b.reportId) {
+        const resolved = await c.query(
+          "UPDATE reports r SET resolved=true FROM posts p WHERE r.id=$1 AND r.post_id=p.id AND NOT r.resolved AND (($2::uuid IS NOT NULL AND p.id=$2) OR ($2::uuid IS NULL AND p.agent_id=$3)) RETURNING r.id",
+          [b.reportId, postId, agentId],
+        );
+        if (!resolved.rowCount) fail(409, "REPORT_UNAVAILABLE", "Report already reviewed, unavailable or unrelated to this target");
       }
       await c.query(
         "INSERT INTO moderation(admin_id,agent_id,post_id,action,reason) VALUES($1,$2,$3,$4,$5)",

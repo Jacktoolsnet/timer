@@ -21,6 +21,7 @@ async function fixture(run: (dom: JSDOM, requests: {path: string; body?: any; he
       authenticated = true;
       return new Response(JSON.stringify({csrf: 'test-csrf'}));
     }
+    if (path === '/api/admin/actions') return new Response(JSON.stringify({ok:true}));
     if (path === '/api/logout') { authenticated = false; return new Response(JSON.stringify({ok: true})); }
     if (path === '/api/admin') return new Response(JSON.stringify({reports: withReports ? [{id:'report', post_id:'message', agent_id:'agent', agent_handle:'example_agent', agent_name:'Example', conversation_id:'thread', post_body:'Reported example', reason:'Reported reason', created_at:'2026-11-05T10:00:00Z', resolved:false}] : [], appeals: []}));
     if (path === '/api/admin/users') {
@@ -206,3 +207,39 @@ test('human-readable moderation review selects the right target without executin
   (doc.querySelector('#admin-moderation .admin-back') as HTMLButtonElement).click();
   assert.equal((doc.querySelector('#action-id') as HTMLInputElement).value, '');
 }, false, false, true));
+
+
+test('no-action decision sends selected report and editable preset only on explicit submission', async () => fixture(async (dom, requests) => {
+  await initializeAdministration();
+  const doc = dom.window.document;
+  (doc.querySelector('#admin-handle') as HTMLInputElement).value = 'test_admin';
+  (doc.querySelector('#admin-password') as HTMLInputElement).value = 'test-only-password';
+  doc.querySelector('#login')!.dispatchEvent(new dom.window.Event('submit', {cancelable:true}));
+  await tick();
+  (doc.querySelector('#admin-moderation-tile') as HTMLButtonElement).click(); await tick();
+  (doc.querySelector('.moderation-report-actions button') as HTMLButtonElement).click();
+  (doc.querySelector('#moderation-action-trigger') as HTMLButtonElement).click();
+  (doc.querySelector('[data-value=dismiss]') as HTMLButtonElement).click();
+  (doc.querySelector('#moderation-reason-presets button') as HTMLButtonElement).click();
+  const reason = doc.querySelector<HTMLTextAreaElement>('#action-reason')!;
+  reason.value += ' Reviewed the whole thread.';
+  assert.equal(requests.some(r => r.path === '/api/admin/actions'),false);
+  doc.querySelector('#action')!.dispatchEvent(new dom.window.Event('submit',{cancelable:true}));
+  await tick();
+  const decision = requests.find(r => r.path === '/api/admin/actions')!;
+  assert.equal(decision.body.action,'dismiss');
+  assert.equal(decision.body.id,'message');
+  assert.equal(decision.body.reportId,'report');
+  assert.match(decision.body.reason,/Reviewed the whole thread/);
+}, false, false, true));
+
+
+test('moderation submit is a labelled icon button with the action text as tooltip', () => {
+  const dom = new JSDOM(html);
+  const button = dom.window.document.querySelector('#action button[type=submit]')!;
+  assert.equal(button.getAttribute('aria-label'), 'Record moderation action');
+  assert.equal(button.getAttribute('data-tooltip'), 'Record moderation action');
+  assert.equal(button.textContent, '');
+  assert.ok(button.querySelector('svg[aria-hidden=true]'));
+  dom.window.close();
+});

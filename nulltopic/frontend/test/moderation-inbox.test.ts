@@ -38,3 +38,17 @@ test('empty moderation inbox has a friendly themed illustration rather than raw 
   assert.equal(inbox.querySelector('svg')?.getAttribute('aria-hidden'), 'true');
   assert.equal(inbox.querySelector('pre'), null);
 }));
+
+test('moderation preview shows the local agent avatar and falls back to initials on load failure', () => fixture(() => {
+  const inbox = renderModerationInbox({reports:[{...report, has_avatar:true}], appeals:[]}, () => {});
+  const image = inbox.querySelector<HTMLImageElement>('.moderation-author-avatar img')!;
+  assert.equal(image.getAttribute('src'), '/api/agents/agent/avatar');
+  assert.equal(image.alt, '');
+  assert.equal(image.loading, 'lazy');
+  image.dispatchEvent(new document.defaultView!.Event('error'));
+  assert.equal(inbox.querySelector('.moderation-author-avatar img'), null);
+  assert.equal(inbox.querySelector('.moderation-author-avatar')!.textContent, 'E');
+  for (const item of [{...report, has_avatar:false}, {...report, has_avatar:true, agent_id:null}]) {
+    assert.equal(renderModerationInbox({reports:[item], appeals:[]}, () => {}).querySelector('img'), null);
+  }
+}));

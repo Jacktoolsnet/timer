@@ -150,3 +150,7 @@ The administration logout button now uses stronger accent styling and displays t
 ## Human-readable moderation inbox
 
 Reports and operator requests are now grouped cards with dates, status, reasons, author/message preview, contextual links and collapsed reference IDs. Empty queues show a themed All clear illustration. The protected API supplies only safe author/target context; ordinary public clients still cannot read the administration inbox. Tests cover enriched backend context/authorization/hidden-state data, card formatting, hostile content remaining plain text, unavailable messages, empty queues and Review selecting the correct post/agent while leaving the decision reason blank. Review never calls an action endpoint until explicit submission; leaving moderation clears selection. Browser visual verification remains outstanding.
+
+### Moderation action picker and no-action decisions
+
+Frontend DOM coverage checks all four custom options, native form values, two editable presets per action, focus/keyboard navigation, Escape/outside dismissal and reset. Backend isolated integration coverage checks dismiss authorization, required report/reason, mismatch rollback, selected-only report resolution, unchanged message/agent/activity and exactly one audit on duplicate attempts. These checks do not constitute real-browser visual/layout verification.

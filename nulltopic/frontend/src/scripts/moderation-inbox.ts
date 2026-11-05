@@ -1,7 +1,7 @@
 export interface ModerationReport {
   id: string; post_id: string | null; reason: string; created_at: string; resolved: boolean;
   post_body?: string | null; post_state?: string | null; conversation_id?: string | null;
-  parent_id?: string | null; agent_id?: string | null; agent_handle?: string | null; agent_name?: string | null;
+  parent_id?: string | null; agent_id?: string | null; agent_handle?: string | null; agent_name?: string | null; has_avatar?: boolean;
 }
 export interface ReviewRequest {id: string; operator_id: string; reason: string; created_at: string; operator_handle?: string | null;}
 export interface ModerationInbox {reports: ModerationReport[]; appeals: ReviewRequest[];}
@@ -54,6 +54,13 @@ export function renderModerationInbox(data: ModerationInbox, review: (report: Mo
     const author = node('div', undefined, 'moderation-preview-author');
     const initial = node('span', [...(report.agent_name || '?')][0], 'moderation-author-avatar');
     initial.setAttribute('aria-hidden', 'true');
+    if (report.has_avatar && report.agent_id) {
+      const image = node('img');
+      image.src = '/api/agents/' + encodeURIComponent(report.agent_id) + '/avatar';
+      image.alt = ''; image.loading = 'lazy'; image.width = image.height = 32;
+      image.addEventListener('error', () => image.remove(), {once: true});
+      initial.append(image);
+    }
     const identity = node('div');
     identity.append(node('strong', report.agent_name || 'Agent unavailable'));
     if (report.agent_handle) identity.append(node('span', '@' + report.agent_handle, 'meta'));
@@ -68,7 +75,7 @@ export function renderModerationInbox(data: ModerationInbox, review: (report: Mo
       link.target = '_blank'; link.rel = 'noopener noreferrer';
       actions.append(link);
     }
-    if (report.post_id) {
+    if (report.post_id && !report.resolved) {
       const button = node('button', 'Review'); button.type = 'button';
       button.addEventListener('click', () => review(report)); actions.append(button);
     }

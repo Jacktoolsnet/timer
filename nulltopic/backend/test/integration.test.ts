@@ -447,6 +447,32 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
         ).json().key;
       },
     );
+    await t.test("dismiss closes only the selected report atomically without altering public content", async () => {
+      const reportId = randomUUID(), secondReport = randomUUID();
+      await pool.query("INSERT INTO reports(id,post_id,reason) VALUES($1,$3,'Fixture'),($2,$3,'Second fixture')", [reportId, secondReport, root]);
+      const snapshot = async () => (await pool.query("SELECT p.body,p.state,a.status,c.last_activity_at FROM posts p JOIN agents a ON a.id=p.agent_id JOIN conversations c ON c.id=p.conversation_id WHERE p.id=$1", [root])).rows[0];
+      const before = await snapshot();
+      const decision = {action: "dismiss", id: root, reportId, reason: "Reviewed in context; no violation."};
+      assert.equal((await call("POST", "/admin/actions", decision)).statusCode, 401);
+      await login();
+      assert.equal((await call("POST", "/admin/actions", decision, undefined, true)).statusCode, 401);
+      await login("test_admin", true);
+      assert.equal((await call("POST", "/admin/actions", {...decision, reportId: undefined}, undefined, true)).statusCode, 400);
+      assert.equal((await call("POST", "/admin/actions", {...decision, reason: "   "}, undefined, true)).statusCode, 400);
+      assert.equal((await call("POST", "/admin/actions", {...decision, action: "hide", reportId: randomUUID()}, undefined, true)).statusCode, 409);
+      assert.deepEqual(await snapshot(), before, 'mismatched report rolls back hiding');
+      assert.equal((await call("POST", "/admin/actions", decision, undefined, true)).statusCode, 200);
+      assert.deepEqual(await snapshot(), before);
+      const reports = (await pool.query("SELECT id,resolved FROM reports WHERE id=ANY($1::uuid[])", [[reportId,secondReport]])).rows;
+      assert.equal(reports.find(r => r.id === reportId).resolved, true);
+      assert.equal(reports.find(r => r.id === secondReport).resolved, false);
+      const audit = (await pool.query("SELECT reason,admin_id FROM moderation WHERE post_id=$1 AND action='dismiss'", [root])).rows;
+      assert.deepEqual(audit, [{reason: decision.reason, admin_id: admin}]);
+      assert.equal((await call("POST", "/admin/actions", decision, undefined, true)).statusCode, 409);
+      assert.equal((await pool.query("SELECT count(*)::int AS count FROM moderation WHERE post_id=$1 AND action='dismiss'", [root])).rows[0].count, 1);
+      await pool.query("DELETE FROM reports WHERE id=ANY($1::uuid[])", [[reportId, secondReport]]);
+      await pool.query("DELETE FROM moderation WHERE post_id=$1 AND action='dismiss'", [root]);
+    });
     await t.test("report, hide, block, operator notices, appeal", async () => {
       assert.equal(
         (
@@ -471,6 +497,8 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
       assert.equal(inbox.reports[0].conversation_id, conversation);
       assert.equal(typeof inbox.reports[0].post_body, 'string');
       assert.equal(inbox.reports[0].key_hash, undefined);
+      assert.equal(inbox.reports[0].has_avatar, false);
+      assert.equal(inbox.reports[0].avatar_base64, undefined);
       assert.equal(
         (await call("GET", "/admin", undefined, undefined, true)).json().reports
           .length,
@@ -481,7 +509,7 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
           await call(
             "POST",
             "/admin/actions",
-            { action: "hide", id: root, reason: "Integration test" },
+            { action: "hide", id: root, reportId: inbox.reports[0].id, reason: "Integration test" },
             undefined,
             true,
           )

@@ -1,3 +1,4 @@
+import {initializeModerationActionPicker} from './moderation-action-picker';
 import {renderModerationInbox, type ModerationReport} from './moderation-inbox';
 import {api} from './client';
 type View = 'overview' | 'users' | 'moderation';
@@ -25,11 +26,12 @@ export async function initializeAdministration() {
   const actionForm = document.querySelector<HTMLFormElement>('#action')!;
   const actionType = document.querySelector<HTMLSelectElement>('#action-type')!;
   const actionId = document.querySelector<HTMLInputElement>('#action-id')!;
+  const syncActionPicker = initializeModerationActionPicker(actionType, document.querySelector<HTMLTextAreaElement>('#action-reason')!);
   const selection = document.querySelector<HTMLElement>('#moderation-selection')!;
   function selectTarget() {
     if (!selectedReport) return;
-    actionId.value = (actionType.value === 'hide' ? selectedReport.post_id : selectedReport.agent_id) || '';
-    selection.textContent = 'Selected ' + (actionType.value === 'hide' ? 'message' : 'agent') + (selectedReport.agent_handle ? ' · @' + selectedReport.agent_handle : '') + '. Add your own reason before submitting.';
+    actionId.value = (['hide','dismiss'].includes(actionType.value) ? selectedReport.post_id : selectedReport.agent_id) || '';
+    selection.textContent = 'Selected ' + (['hide','dismiss'].includes(actionType.value) ? 'message' : 'agent') + (selectedReport.agent_handle ? ' · @' + selectedReport.agent_handle : '') + '. Review or edit the reason before submitting.';
     selection.hidden = false;
   }
   actionType.addEventListener('change', selectTarget);
@@ -164,7 +166,7 @@ export async function initializeAdministration() {
         document.querySelector('#reports')!.textContent = 'Loading reports…';
         const data = await api('/admin');
         if (version === viewVersion && signedIn) document.querySelector('#reports')!.replaceChildren(renderModerationInbox(data, report => {
-          selectedReport = report; actionType.value = 'hide'; selectTarget();
+          selectedReport = report; actionType.value = 'hide'; selectTarget(); syncActionPicker();
           document.querySelector<HTMLTextAreaElement>('#action-reason')!.value = '';
           actionForm.scrollIntoView({block: 'nearest', behavior: 'instant'});
           document.querySelector<HTMLTextAreaElement>('#action-reason')!.focus({preventScroll: true});
@@ -241,13 +243,20 @@ export async function initializeAdministration() {
       await checkExpired(error);
     } finally { creatingUser = false; button.disabled = false; }
   });
+  let recordingAction = false;
   document.querySelector('#action')!.addEventListener('submit', async event => {
     event.preventDefault();
+    if (recordingAction || !actionForm.reportValidity()) return;
+    if (actionType.value === 'dismiss' && !selectedReport) { status.textContent = 'Choose Review on a report before closing it without action.'; return; }
+    recordingAction = true;
+    const button = actionForm.querySelector<HTMLButtonElement>('button:not([type=button])')!;
+    button.disabled = true;
     try {
-      await send('/admin/actions', Object.fromEntries(new FormData(event.target as HTMLFormElement)));
+      await send('/admin/actions', {...Object.fromEntries(new FormData(actionForm)), ...(selectedReport ? {reportId: selectedReport.id} : {})});
       actionForm.reset(); selectedReport = null; selection.hidden = true;
       await showView('moderation'); status.textContent = 'Action recorded.';
-    } catch (error) { status.textContent = 'Unable to record the action. Please check the details and try again.'; await checkExpired(error); }
+    } catch (error) { status.textContent = 'Unable to record the action. The report may already have been reviewed; check the details and try again.'; await checkExpired(error); }
+    finally { recordingAction = false; button.disabled = false; }
   });
   logout.addEventListener('click', async () => {
     logout.disabled = true;
