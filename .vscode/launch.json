@@ -93,6 +93,149 @@
       "skipFiles": [
         "<node_internals>/**"
       ]
+    },
+    {
+      "name": "Start: NullTopic komplett (DB + Migrationen + Server)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "docker compose up -d --wait && npm exec --yes --package=node@24 --package=npm@11 -- npm run migrate && npm exec --yes --package=node@24 --package=npm@11 -- npm run dev",
+      "cwd": "${workspaceFolder}/nulltopic"
+    },
+    {
+      "name": "Start: NullTopic Backend",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm exec --yes --package=node@24 --package=npm@11 -- npm run dev -w backend",
+      "cwd": "${workspaceFolder}/nulltopic"
+    },
+    {
+      "name": "Start: NullTopic Frontend",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm exec --yes --package=node@24 --package=npm@11 -- npm run dev -w frontend",
+      "cwd": "${workspaceFolder}/nulltopic"
+    },
+    {
+      "name": "Database: NullTopic starten",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "docker compose up -d --wait",
+      "cwd": "${workspaceFolder}/nulltopic"
+    },
+    {
+      "name": "Database: NullTopic stoppen (Daten bleiben erhalten)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "docker compose stop",
+      "cwd": "${workspaceFolder}/nulltopic"
+    },
+    {
+      "name": "Database: NullTopic Status",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "docker compose ps",
+      "cwd": "${workspaceFolder}/nulltopic"
+    },
+    {
+      "name": "Database: NullTopic Logs",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "docker compose logs --follow postgres",
+      "cwd": "${workspaceFolder}/nulltopic"
+    },
+    {
+      "name": "Setup: NullTopic Abhängigkeiten installieren",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm exec --yes --package=node@24 --package=npm@11 -- npm ci",
+      "cwd": "${workspaceFolder}/nulltopic"
+    },
+    {
+      "name": "Setup: NullTopic Datenbank migrieren",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm exec --yes --package=node@24 --package=npm@11 -- npm run migrate",
+      "cwd": "${workspaceFolder}/nulltopic"
+    },
+    {
+      "name": "Setup: NullTopic Testdatenbank anlegen (einmalig)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "docker compose exec -T postgres createdb -U nulltopic nulltopic_test",
+      "cwd": "${workspaceFolder}/nulltopic"
+    },
+    {
+      "name": "Check: NullTopic Typechecks",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm exec --yes --package=node@24 --package=npm@11 -- npm run check",
+      "cwd": "${workspaceFolder}/nulltopic"
+    },
+    {
+      "name": "Build: NullTopic",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm exec --yes --package=node@24 --package=npm@11 -- npm run build",
+      "cwd": "${workspaceFolder}/nulltopic"
+    },
+    {
+      "name": "Test: NullTopic Integration (leert konfigurierte _test-Datenbank)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm exec --yes --package=node@24 --package=npm@11 -- npm test",
+      "cwd": "${workspaceFolder}/nulltopic"
+    },
+    {
+      "name": "Test: NullTopic Smoke (Server nötig; schreibt Testbeiträge)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm exec --yes --package=node@24 --package=npm@11 -- npm run test:smoke",
+      "cwd": "${workspaceFolder}/nulltopic"
+    },
+    {
+      "name": "Check: NullTopic Dependency Audit",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm exec --yes --package=node@24 --package=npm@11 -- npm audit",
+      "cwd": "${workspaceFolder}/nulltopic"
+    },
+    {
+      "name": "Setup: NullTopic lokalen Testagenten ausdrücklich freigeben (Backend nötig)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm exec --yes --package=node@24 --package=npm@11 -- npm run test-agent",
+      "cwd": "${workspaceFolder}/nulltopic",
+      "env": {
+        "LOCAL_TEST_AGENT": "1"
+      }
+    },
+    {
+      "name": "Cleanup: NullTopic Dry-Run (keine Datenänderungen)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm exec --yes --package=node@24 --package=npm@11 -- npm run cleanup:conversations -- --dry-run",
+      "cwd": "${workspaceFolder}/nulltopic"
+    },
+    {
+      "name": "Cleanup: NullTopic ausführen (löscht abgelaufene Gespräche)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm exec --yes --package=node@24 --package=npm@11 -- npm run cleanup:conversations",
+      "cwd": "${workspaceFolder}/nulltopic"
+    },
+    {
+      "name": "Setup: NullTopic Betreiber anlegen (interaktive Eingabe)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "read -r -p 'Pseudonymous handle: ' BOOTSTRAP_HANDLE && read -r -s -p 'Password (at least 12 characters): ' BOOTSTRAP_PASSWORD && printf '\\n' && export BOOTSTRAP_HANDLE BOOTSTRAP_PASSWORD && npm exec --yes --package=node@24 --package=npm@11 -- npm run bootstrap; unset BOOTSTRAP_HANDLE BOOTSTRAP_PASSWORD",
+      "cwd": "${workspaceFolder}/nulltopic"
+    },
+    {
+      "name": "Setup: NullTopic Administrator anlegen (interaktive Eingabe)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "read -r -p 'Pseudonymous handle: ' BOOTSTRAP_HANDLE && read -r -s -p 'Password (at least 12 characters): ' BOOTSTRAP_PASSWORD && printf '\\n' && export BOOTSTRAP_HANDLE BOOTSTRAP_PASSWORD && npm exec --yes --package=node@24 --package=npm@11 -- npm run bootstrap -- --admin; unset BOOTSTRAP_HANDLE BOOTSTRAP_PASSWORD",
+      "cwd": "${workspaceFolder}/nulltopic"
     }
   ]
 }

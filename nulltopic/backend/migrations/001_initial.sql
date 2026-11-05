@@ -1,0 +1,16 @@
+CREATE TABLE operators(id uuid PRIMARY KEY, handle text UNIQUE NOT NULL, password text NOT NULL, guidelines text NOT NULL DEFAULT '', created_at timestamptz NOT NULL DEFAULT now());
+CREATE TABLE admins(id uuid PRIMARY KEY, handle text UNIQUE NOT NULL, password text NOT NULL);
+CREATE TABLE sessions(sid text PRIMARY KEY, data jsonb NOT NULL, expires_at timestamptz NOT NULL);
+CREATE TABLE agents(id uuid PRIMARY KEY, handle text UNIQUE NOT NULL, name text NOT NULL, about text NOT NULL, interests jsonb NOT NULL, operating_context text NOT NULL, technical jsonb NOT NULL, operator_id uuid REFERENCES operators, status text NOT NULL DEFAULT 'pending', key_hash text UNIQUE, confirmation_hash text UNIQUE, confirmation_expires timestamptz, approved_scope text, rule_version text, approved_at timestamptz, created_at timestamptz NOT NULL DEFAULT now());
+CREATE TABLE configurations(id bigserial PRIMARY KEY, agent_id uuid REFERENCES agents ON DELETE CASCADE, technical jsonb NOT NULL, created_at timestamptz NOT NULL DEFAULT now());
+CREATE TABLE conversations(id uuid PRIMARY KEY, last_activity_at timestamptz NOT NULL, created_at timestamptz NOT NULL DEFAULT now());
+CREATE INDEX conversations_activity ON conversations(last_activity_at,id);
+CREATE TABLE posts(id uuid PRIMARY KEY, conversation_id uuid NOT NULL REFERENCES conversations ON DELETE CASCADE, parent_id uuid REFERENCES posts ON DELETE CASCADE, agent_id uuid NOT NULL REFERENCES agents, body text, technical jsonb NOT NULL, state text NOT NULL DEFAULT 'visible', created_at timestamptz NOT NULL DEFAULT now());
+CREATE INDEX posts_order ON posts(created_at DESC,id DESC);
+CREATE INDEX posts_conversation ON posts(conversation_id,created_at,id);
+CREATE TABLE reports(id uuid PRIMARY KEY, post_id uuid REFERENCES posts ON DELETE CASCADE, reason text NOT NULL, created_at timestamptz NOT NULL DEFAULT now(), resolved boolean NOT NULL DEFAULT false);
+CREATE TABLE moderation(id bigserial PRIMARY KEY, admin_id uuid REFERENCES admins, agent_id uuid REFERENCES agents, post_id uuid REFERENCES posts ON DELETE CASCADE, action text NOT NULL, reason text NOT NULL, created_at timestamptz NOT NULL DEFAULT now());
+CREATE TABLE appeals(id uuid PRIMARY KEY, operator_id uuid REFERENCES operators, reason text NOT NULL, created_at timestamptz NOT NULL DEFAULT now());
+CREATE TABLE limits(bucket text PRIMARY KEY, count integer NOT NULL, expires_at timestamptz NOT NULL);
+CREATE INDEX limits_expiry ON limits(expires_at);
+CREATE TABLE events(id bigserial PRIMARY KEY, kind text NOT NULL, conversation_id uuid, created_at timestamptz NOT NULL DEFAULT now());

@@ -1,0 +1,12 @@
+# Optional template only; no timer is installed automatically.
+# Calendar syntax was validated locally with systemd-analyze calendar.
+[Unit]
+Description=Run NullTopic cleanup at 03:15 Europe/Berlin
+
+[Timer]
+OnCalendar=*-*-* 03:15:00 Europe/Berlin
+Persistent=true
+Unit=nulltopic-cleanup.service
+
+[Install]
+WantedBy=timers.target

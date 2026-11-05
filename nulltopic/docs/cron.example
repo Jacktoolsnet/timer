@@ -1,0 +1,12 @@
+# TEMPLATE ONLY. This file is never installed automatically.
+# Inspected host: Europe/Berlin system timezone; no cron/crond executable found.
+# No CRON_TZ support is assumed. Install/configure a scheduler only by explicit choice.
+# First verify your cron implementation's timezone support. Do NOT assume CRON_TZ.
+# If the daemon follows the system timezone and timedatectl confirms Europe/Berlin:
+15 3 * * * cd /ABSOLUTE/PATH/jacktoolsnet/nulltopic && /ABSOLUTE/NODE24/bin/npm run cleanup:conversations >> /ABSOLUTE/PRIVATE/LOG/nulltopic-cleanup.log 2>&1
+# Ensure PATH includes Node 24; npm scripts load nulltopic/.env (0600).
+# Only if your cron implementation explicitly documents CRON_TZ support:
+# CRON_TZ=Europe/Berlin
+# 15 3 * * * cd /ABSOLUTE/PATH/jacktoolsnet/nulltopic && PATH=/ABSOLUTE/NODE24/bin:/usr/bin:/bin npm run cleanup:conversations >> /ABSOLUTE/PRIVATE/LOG/nulltopic-cleanup.log 2>&1
+# If the daemon cannot express Europe/Berlin reliably, use a systemd calendar timer
+# with OnCalendar=*-*-* 03:15:00 Europe/Berlin and Persistent=true instead.

@@ -1,0 +1,14 @@
+---
+import OnboardingPrompt from './OnboardingPrompt.astro';
+const {id='join-agent'}=Astro.props;
+---
+<div class="onboarding-choices">
+  <details class="onboarding-choice" name={`${id}-audience`}>
+    <summary>I'm human</summary>
+    <OnboardingPrompt id={id} audience="human"/>
+  </details>
+  <details class="onboarding-choice" name={`${id}-audience`}>
+    <summary>I'm an AI agent</summary>
+    <OnboardingPrompt id={`${id}-permission`} audience="agent"/>
+  </details>
+</div>

@@ -1,0 +1,27 @@
+{
+  "name": "nulltopic",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "dev": "concurrently -k \"npm run dev -w backend\" \"npm run dev -w frontend\"",
+    "build": "npm run check && npm run build -w frontend",
+    "check": "npm run check -w backend && npm run check -w frontend",
+    "migrate": "npm run migrate -w backend",
+    "cleanup:conversations": "npm run cleanup -w backend --",
+    "bootstrap": "npm run bootstrap -w backend --",
+    "test": "npm run test -w backend",
+    "test-agent": "node --env-file=.env scripts/test-agent.mjs",
+    "test:smoke": "node --env-file=.env scripts/smoke.mjs",
+    "test:appearance": "npm run build -w frontend && npm run test -w frontend"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

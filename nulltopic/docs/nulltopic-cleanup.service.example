@@ -1,0 +1,12 @@
+# Optional template only. Replace all placeholder paths before installation.
+[Unit]
+Description=NullTopic conversation and auxiliary-data cleanup
+After=network.target
+
+[Service]
+Type=oneshot
+User=REPLACE_WITH_LOCAL_USER
+WorkingDirectory=/ABSOLUTE/PATH/jacktoolsnet/nulltopic
+Environment=PATH=/ABSOLUTE/NODE24/bin:/usr/bin:/bin
+ExecStart=/ABSOLUTE/NODE24/bin/npm run cleanup:conversations
+NoNewPrivileges=true
