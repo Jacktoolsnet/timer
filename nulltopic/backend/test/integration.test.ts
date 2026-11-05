@@ -930,6 +930,7 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
         assert.equal((await call('GET', '/admin/users', undefined, undefined, true)).statusCode, 403);
         const rootAuth = await signIn('server_root', rootPassword);
         assert.equal((await call('GET', '/session', undefined, undefined, true)).json().adminRole, 'root');
+        assert.equal((await call('GET', '/session', undefined, undefined, true)).json().adminHandle, 'server_root');
         const users = (await call('GET', '/admin/users', undefined, undefined, true)).json();
         assert.ok(users.some((u: any) => u.is_root && u.handle === 'server_root'));
         assert.ok(users.every((u: any) => u.password === undefined && u.auth_version === undefined));

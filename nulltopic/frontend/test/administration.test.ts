@@ -8,17 +8,19 @@ const html = readFileSync(new URL('../dist/administration/index.html', import.me
 const tick = () => new Promise(resolve => setTimeout(resolve, 0));
 async function fixture(run: (dom: JSDOM, requests: {path: string; body?: any; headers?: HeadersInit}[]) => Promise<void>, fail = false, root = false) {
   const dom = new JSDOM(html, {url: 'http://localhost/administration'});
+  dom.window.scrollTo = () => {};
   const requests: {path: string; body?: any; headers?: HeadersInit}[] = [];
   let authenticated = false;
   const users = [{id: 'root', handle: 'server_root', is_root: true, enabled: true}, {id: 'normal', handle: 'existing_admin', is_root: false, enabled: true}];
   const values = {document: dom.window.document, FormData: dom.window.FormData, fetch: async (path: string, options?: RequestInit) => {
     requests.push({path, body: options?.body ? JSON.parse(String(options.body)) : undefined, headers: options?.headers});
-    if (path === '/api/session') return new Response(JSON.stringify({csrf: 'test-csrf', operatorId: 'operator-only', ...(authenticated ? {adminId: 'admin', adminRole: root ? 'root' : 'administrator'} : {})}));
+    if (path === '/api/session') return new Response(JSON.stringify({csrf: 'test-csrf', operatorId: 'operator-only', ...(authenticated ? {adminId: 'admin', adminHandle: root ? 'server_root' : 'test_admin', adminRole: root ? 'root' : 'administrator'} : {})}));
     if (path === '/api/login') {
       if (fail) return new Response(JSON.stringify({error: {message: 'Internal authentication detail'}}), {status: 401});
       authenticated = true;
       return new Response(JSON.stringify({csrf: 'test-csrf'}));
     }
+    if (path === '/api/logout') { authenticated = false; return new Response(JSON.stringify({ok: true})); }
     if (path === '/api/admin') return new Response(JSON.stringify({reports: [], appeals: []}));
     if (path === '/api/admin/users') {
       if (options?.method === 'POST') {
@@ -89,6 +91,11 @@ test('root can manage accounts while its own credentials remain environment-only
   (doc.querySelector('#admin-password') as HTMLInputElement).value = 'test-only-password';
   doc.querySelector('#login')!.dispatchEvent(new dom.window.Event('submit', {cancelable: true}));
   await tick();
+  assert.equal((doc.querySelector('#admin-overview') as HTMLElement).hidden, false);
+  assert.equal((doc.querySelector('#admin-user-management') as HTMLElement).hidden, true);
+  assert.equal(requests.some(r => r.path === '/api/admin/users'), false);
+  (doc.querySelector('#admin-users-tile') as HTMLButtonElement).click();
+  await tick();
   assert.equal((doc.querySelector('#admin-user-management') as HTMLElement).hidden, false);
   const cards = doc.querySelectorAll('.admin-user-card');
   assert.equal(cards.length, 2);
@@ -106,7 +113,71 @@ test('root can manage accounts while its own credentials remain environment-only
   normalForm.dispatchEvent(new dom.window.Event('submit', {cancelable: true}));
   await tick();
   assert.ok(requests.some(r => r.path === '/api/admin/users/normal' && r.body?.password));
-  (doc.querySelector('.admin-user-password button[type=button]') as HTMLButtonElement).click();
+  (doc.querySelector('.admin-user-toggle') as HTMLButtonElement).click();
   await tick();
   assert.ok(requests.some(r => r.path === '/api/admin/users/normal' && r.body?.enabled === false));
 }, false, true));
+
+test('administration tiles, back navigation and toolbar lock follow the authenticated workspace', async () => fixture(async (dom, requests) => {
+  await initializeAdministration();
+  const doc = dom.window.document;
+  (doc.querySelector('#admin-handle') as HTMLInputElement).value = 'server_root';
+  (doc.querySelector('#admin-password') as HTMLInputElement).value = 'test-only-password';
+  doc.querySelector('#login')!.dispatchEvent(new dom.window.Event('submit', {cancelable: true}));
+  await tick();
+  assert.equal((doc.querySelector('#admin-overview') as HTMLElement).hidden, false);
+  assert.equal(doc.querySelectorAll('.admin-tile svg[aria-hidden=true]').length, 2);
+  for (const link of doc.querySelectorAll('header nav a.header-action')) {
+    assert.equal(link.getAttribute('aria-disabled'), 'true');
+    assert.equal(link.hasAttribute('href'), false);
+    assert.equal(link.getAttribute('tabindex'), '-1');
+    const click = new dom.window.MouseEvent('click', {bubbles: true, cancelable: true});
+    link.dispatchEvent(click); assert.equal(click.defaultPrevented, true);
+  }
+  assert.equal((doc.querySelector('#admin-header-logout') as HTMLElement).hidden, false);
+  assert.equal(doc.querySelector('.admin-session-handle')?.textContent, '@server_root');
+  assert.equal(doc.querySelector('#admin-header-logout')?.getAttribute('aria-label'), 'Sign out · @server_root');
+  assert.equal(doc.querySelector('[aria-label="Settings"]')?.getAttribute('aria-disabled'), null);
+  assert.equal(requests.some(r => r.path === '/api/admin'), false);
+  (doc.querySelector('#admin-moderation-tile') as HTMLButtonElement).click();
+  await tick();
+  assert.equal(dom.window.location.hash, '#moderation');
+  assert.equal((doc.querySelector('#admin-moderation') as HTMLElement).hidden, false);
+  assert.equal(requests.filter(r => r.path === '/api/admin').length, 1);
+  (doc.querySelector('#admin-moderation .admin-back') as HTMLButtonElement).click();
+  await tick();
+  assert.equal((doc.querySelector('#admin-overview') as HTMLElement).hidden, false);
+  (doc.querySelector('#admin-users-tile') as HTMLButtonElement).click();
+  await tick();
+  const filter = doc.querySelector<HTMLInputElement>('#admin-user-filter')!;
+  filter.value = 'existing'; filter.dispatchEvent(new dom.window.Event('input'));
+  assert.equal(doc.querySelectorAll('.admin-user-card').length, 1);
+  assert.match(doc.querySelector('.admin-user-card')!.textContent!, /existing_admin/);
+  (doc.querySelector('#new-admin-password') as HTMLInputElement).value = 'discard-on-leave';
+  (doc.querySelector('#admin-user-management .admin-back') as HTMLButtonElement).click();
+  assert.equal((doc.querySelector('#new-admin-password') as HTMLInputElement).value, '');
+  (doc.querySelector('#admin-header-logout') as HTMLButtonElement).click();
+  await tick();
+  assert.equal((doc.querySelector('#dashboard') as HTMLElement).hidden, true);
+  assert.equal((doc.querySelector('#admin-login-shell') as HTMLElement).hidden, false);
+  assert.equal((doc.querySelector('#admin-header-logout') as HTMLElement).hidden, true);
+  assert.equal(doc.querySelector('.admin-session-handle')?.textContent, '');
+  assert.equal(doc.querySelector('header nav a')?.getAttribute('href'), '/');
+  assert.equal(doc.querySelector('header nav a')?.getAttribute('aria-disabled'), null);
+}, false, true));
+
+test('ordinary administrators cannot open user management even through a view hash', async () => fixture(async (dom, requests) => {
+  await initializeAdministration();
+  const doc = dom.window.document;
+  (doc.querySelector('#admin-handle') as HTMLInputElement).value = 'normal_admin';
+  (doc.querySelector('#admin-password') as HTMLInputElement).value = 'test-only-password';
+  doc.querySelector('#login')!.dispatchEvent(new dom.window.Event('submit', {cancelable: true}));
+  await tick();
+  assert.equal((doc.querySelector('#admin-users-tile') as HTMLButtonElement).disabled, true);
+  dom.window.history.replaceState(null, '', '#users');
+  dom.window.dispatchEvent(new dom.window.HashChangeEvent('hashchange'));
+  await tick();
+  assert.equal((doc.querySelector('#admin-user-management') as HTMLElement).hidden, true);
+  assert.equal((doc.querySelector('#admin-overview') as HTMLElement).hidden, false);
+  assert.equal(requests.some(r => r.path === '/api/admin/users'), false);
+}));

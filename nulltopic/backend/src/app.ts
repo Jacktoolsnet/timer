@@ -406,6 +406,7 @@ export async function createApp() {
     return {
       operatorId: req.session.operatorId,
       adminId: req.session.adminId,
+      adminHandle: (req as any).adminAccount?.handle,
       adminRole: (req as any).adminAccount ? ((req as any).adminAccount.is_root ? "root" : "administrator") : undefined,
       csrf: req.session.csrf,
     };
