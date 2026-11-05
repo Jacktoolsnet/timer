@@ -1,4 +1,5 @@
 import Fastify from "fastify";
+import {syncRootAdministrator} from "./root-admin.js";
 import { normalizeAvatar, MAX_AVATAR_BASE64 } from "./avatar.js";
 import cookie from "@fastify/cookie";
 import session from "@fastify/session";
@@ -14,6 +15,7 @@ declare module "fastify" {
   interface Session {
     operatorId?: string;
     adminId?: string;
+    adminVersion?: string;
     csrf?: string;
   }
 }
@@ -74,6 +76,23 @@ function admin(req: any) {
     fail(401, "UNAUTHORIZED", "Administrator login required")
   );
 }
+function rootAdmin(req: any) {
+  admin(req);
+  if (!req.adminAccount?.is_root) fail(403, "ROOT_REQUIRED", "Root administrator required");
+  return req.adminAccount;
+}
+async function lockedRoot(req: any, c: DB) {
+  const root = rootAdmin(req);
+  const row = (await c.query("SELECT id FROM admins WHERE id=$1 AND is_root AND enabled AND auth_version=$2 FOR UPDATE", [root.id, req.session.adminVersion])).rows[0];
+  if (!row) fail(403, "ROOT_REQUIRED", "Root administrator session expired");
+  await limit(c, root.id, "admin_accounts", 30, 3600);
+  return root.id;
+}
+const adminCredentials = z.object({
+  handle: z.string().regex(/^[a-z0-9_]{3,32}$/),
+  password: z.string().min(12).max(256),
+}).strict();
+const adminUpdate = z.object({ password: z.string().min(12).max(256).optional(), enabled: z.boolean().optional() }).strict().refine(b => b.password !== undefined || b.enabled !== undefined, "Choose a password or enabled state");
 const uuid = z.string().uuid();
 export async function createApp() {
   for (const [name, value] of Object.entries(process.env)) {
@@ -93,6 +112,7 @@ export async function createApp() {
   const sessionSecret = process.env.SESSION_SECRET;
   if (!sessionSecret || sessionSecret.length < 32)
     throw Error("SESSION_SECRET must contain at least 32 characters");
+  await syncRootAdministrator();
   await app.register(cors, { origin: [origin], credentials: true });
   await app.register(cookie);
   const store: any = {
@@ -208,6 +228,13 @@ export async function createApp() {
     reply
       .header("X-Content-Type-Options", "nosniff")
       .header("Cache-Control", "no-store");
+    if (req.session.adminId) {
+      const account = (await pool.query("SELECT id,handle,is_root,enabled,auth_version FROM admins WHERE id=$1", [req.session.adminId])).rows[0];
+      if (!account || !account.enabled || account.auth_version !== req.session.adminVersion) {
+        delete req.session.adminId;
+        delete req.session.adminVersion;
+      } else (req as any).adminAccount = account;
+    }
     if (
       req.method !== "GET" &&
       req.method !== "HEAD" &&
@@ -256,6 +283,8 @@ export async function createApp() {
         scope: z.string().min(1).max(2000),
       }),
     ),
+    "POST /api/admin/users": json(adminCredentials),
+    "PATCH /api/admin/users/:id": json(adminUpdate),
     "PUT /api/me/avatar": json(avatarBody),
     "PUT /api/posts/:id/reaction": json(reactionBody),
     "PATCH /api/me": json(
@@ -377,6 +406,7 @@ export async function createApp() {
     return {
       operatorId: req.session.operatorId,
       adminId: req.session.adminId,
+      adminRole: (req as any).adminAccount ? ((req as any).adminAccount.is_root ? "root" : "administrator") : undefined,
       csrf: req.session.csrf,
     };
   });
@@ -393,10 +423,10 @@ export async function createApp() {
     const user = (
       await pool.query(`SELECT * FROM ${table} WHERE handle=$1`, [b.handle])
     ).rows[0];
-    if (!user || !(await argon2.verify(user.password, b.password)))
+    if (!user || (b.admin && !user.enabled) || !(await argon2.verify(user.password, b.password)))
       fail(401, "UNAUTHORIZED", "Invalid credentials");
     await req.session.regenerate();
-    if (b.admin) req.session.adminId = user.id;
+    if (b.admin) { req.session.adminId = user.id; req.session.adminVersion = user.auth_version; }
     else req.session.operatorId = user.id;
     req.session.csrf = secret();
     return { csrf: req.session.csrf };
@@ -873,6 +903,38 @@ export async function createApp() {
       [randomUUID(), id, b.reason],
     );
     return { ok: true };
+  });
+  app.get("/api/admin/users", async (req) => {
+    rootAdmin(req);
+    return (await pool.query("SELECT id,handle,is_root,enabled FROM admins ORDER BY is_root DESC,handle")).rows;
+  });
+  app.post("/api/admin/users", async (req) => {
+    rootAdmin(req);
+    const b = adminCredentials.parse(req.body);
+    const password = await argon2.hash(b.password);
+    return transaction(async c => {
+      const actor = await lockedRoot(req, c);
+      const id = randomUUID();
+      await c.query("INSERT INTO admins(id,handle,password,auth_version) VALUES($1,$2,$3,$4)", [id, b.handle, password, randomUUID()]);
+      await c.query("INSERT INTO admin_account_audit(actor_id,target_id,action) VALUES($1,$2,'create')", [actor, id]);
+      return {id, handle: b.handle, enabled: true};
+    });
+  });
+  app.patch("/api/admin/users/:id", async (req) => {
+    rootAdmin(req);
+    const id = uuid.parse((req.params as any).id);
+    const b = adminUpdate.parse(req.body);
+    const password = b.password ? await argon2.hash(b.password) : null;
+    return transaction(async c => {
+      const actor = await lockedRoot(req, c);
+      const target = (await c.query("SELECT id,is_root FROM admins WHERE id=$1 FOR UPDATE", [id])).rows[0];
+      if (!target) fail(404, "NOT_FOUND", "Administrator unavailable");
+      if (target.is_root) fail(409, "ENV_MANAGED", "Root credentials are managed through server environment variables");
+      await c.query("UPDATE admins SET password=COALESCE($2,password),enabled=COALESCE($3,enabled),auth_version=$4 WHERE id=$1", [id, password, b.enabled ?? null, randomUUID()]);
+      for (const action of [...(password ? ['password'] : []), ...(b.enabled !== undefined ? [b.enabled ? 'enable' : 'disable'] : [])])
+        await c.query("INSERT INTO admin_account_audit(actor_id,target_id,action) VALUES($1,$2,$3)", [actor, id, action]);
+      return {ok: true};
+    });
   });
   app.get("/api/admin", async (req) => {
     admin(req);

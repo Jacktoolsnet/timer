@@ -9,6 +9,8 @@ const url = process.env.TEST_DATABASE_URL;
 if (!url || !new URL(url).pathname.endsWith("_test"))
   throw Error("TEST_DATABASE_URL must name an isolated _test database");
 process.env.DATABASE_URL = url;
+delete process.env.ROOT_ADMIN_HANDLE;
+delete process.env.ROOT_ADMIN_PASSWORD;
 const { pool, migrate, cleanup, transaction, limit } =
   await import("../src/db.js");
 const { createApp } = await import("../src/app.js");
@@ -36,7 +38,7 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
       "other_operator",
     ],
   );
-  await pool.query("INSERT INTO admins VALUES($1,$2,$3)", [
+  await pool.query("INSERT INTO admins(id,handle,password) VALUES($1,$2,$3)", [
     admin,
     "test_admin",
     await argon2.hash(password),
@@ -878,6 +880,111 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
         );
       },
     );
+    await t.test("VS Code account helper exits successfully without exposing credentials", { timeout: 30000 }, async () => {
+      const handle = 'cli_' + randomUUID().slice(0, 8);
+      const password = 'isolated-cli-' + randomUUID();
+      const result = await new Promise<{code: number | null; output: string}>((resolve, reject) => {
+        const child = spawn(process.execPath, [new URL('../../scripts/bootstrap-account.mjs', import.meta.url).pathname, '--admin'], {
+          env: { ...process.env, DATABASE_URL: url, BOOTSTRAP_HANDLE: handle, BOOTSTRAP_PASSWORD: password },
+          stdio: ['ignore', 'pipe', 'pipe'],
+        });
+        let output = '';
+        child.stdout.on('data', data => { output += data; });
+        child.stderr.on('data', data => { output += data; });
+        child.once('error', reject);
+        child.once('close', code => resolve({ code, output }));
+      });
+      assert.equal(result.code, 0, result.output);
+      assert.match(result.output, /Account created/);
+      assert.equal(result.output.includes(password), false);
+      const account = (await pool.query('SELECT id,password FROM admins WHERE handle=$1', [handle])).rows[0];
+      assert.ok(account);
+      assert.ok(await argon2.verify(account.password, password));
+      await pool.query('DELETE FROM admins WHERE id=$1', [account.id]);
+    });
+    await t.test("environment root manages administrators, enforces roles and revokes old sessions", async () => {
+      await pool.query("DELETE FROM limits WHERE bucket LIKE 'login:%'");
+      process.env.ROOT_ADMIN_HANDLE = 'server_root';
+      await assert.rejects(createApp(), /both ROOT_ADMIN_HANDLE/);
+      const rootPassword = 'root-test-' + randomUUID();
+      process.env.ROOT_ADMIN_PASSWORD = 'short';
+      await assert.rejects(createApp(), /12–256/);
+      process.env.ROOT_ADMIN_PASSWORD = rootPassword;
+      process.env.ROOT_ADMIN_HANDLE = 'test_admin';
+      await assert.rejects(createApp(), /conflicts with an existing administrator/);
+      process.env.ROOT_ADMIN_HANDLE = 'server_root';
+      const restart = async () => { await app.close(); app = await createApp(); };
+      const auth = () => ({cookie, csrf});
+      const use = (saved: {cookie: string; csrf: string}) => {cookie = saved.cookie; csrf = saved.csrf;};
+      const signIn = async (handle: string, password: string) => {
+        const r = await call('POST', '/login', {handle, password, admin: true});
+        assert.equal(r.statusCode, 200, r.body);
+        cookie = r.cookies.map(c => c.name + '=' + c.value).join('; ');
+        csrf = r.json().csrf;
+        return auth();
+      };
+      try {
+        await restart();
+        assert.equal((await call('GET', '/admin/users')).statusCode, 401);
+        await login('test_admin', true);
+        assert.equal((await call('GET', '/admin/users', undefined, undefined, true)).statusCode, 403);
+        const rootAuth = await signIn('server_root', rootPassword);
+        assert.equal((await call('GET', '/session', undefined, undefined, true)).json().adminRole, 'root');
+        const users = (await call('GET', '/admin/users', undefined, undefined, true)).json();
+        assert.ok(users.some((u: any) => u.is_root && u.handle === 'server_root'));
+        assert.ok(users.every((u: any) => u.password === undefined && u.auth_version === undefined));
+        const rootAccount = users.find((u: any) => u.is_root);
+        const versionBefore = (await pool.query('SELECT auth_version FROM admins WHERE id=$1', [rootAccount.id])).rows[0].auth_version;
+        await (await import('../src/root-admin.js')).syncRootAdministrator();
+        assert.equal((await pool.query('SELECT auth_version FROM admins WHERE id=$1', [rootAccount.id])).rows[0].auth_version, versionBefore);
+        assert.equal((await call('PATCH', '/admin/users/' + rootAccount.id, {password: 'not-an-env-change'}, undefined, true)).statusCode, 409);
+        const handle = 'managed_' + randomUUID().slice(0, 8), password = 'managed-test-' + randomUUID();
+        assert.equal((await app.inject({method: 'POST', url: '/api/admin/users', headers: {cookie}, payload: {handle, password}})).statusCode, 403);
+        let r = await call('POST', '/admin/users', {handle, password}, undefined, true);
+        assert.equal(r.statusCode, 200, r.body);
+        const managedId = r.json().id;
+        assert.equal((await call('POST', '/admin/users', {handle, password}, undefined, true)).statusCode, 409);
+        assert.equal((await call('POST', '/admin/users', {handle: 'too_short', password: 'tiny'}, undefined, true)).statusCode, 400);
+        let managedAuth = await signIn(handle, password);
+        assert.equal((await call('GET', '/admin', undefined, undefined, true)).statusCode, 200);
+        assert.equal((await call('GET', '/admin/users', undefined, undefined, true)).statusCode, 403);
+        assert.equal((await call('POST', '/admin/users', {handle: 'forbidden', password}, undefined, true)).statusCode, 403);
+        const replacement = 'replacement-' + randomUUID();
+        use(rootAuth);
+        assert.equal((await call('PATCH', '/admin/users/' + managedId, {password: replacement}, undefined, true)).statusCode, 200);
+        use(managedAuth);
+        assert.equal((await call('GET', '/admin', undefined, undefined, true)).statusCode, 401);
+        assert.equal((await call('POST', '/login', {handle, password, admin: true})).statusCode, 401);
+        managedAuth = await signIn(handle, replacement);
+        use(rootAuth);
+        assert.equal((await call('PATCH', '/admin/users/' + managedId, {enabled: false}, undefined, true)).statusCode, 200);
+        use(managedAuth);
+        assert.equal((await call('GET', '/admin', undefined, undefined, true)).statusCode, 401);
+        assert.equal((await call('POST', '/login', {handle, password: replacement, admin: true})).statusCode, 401);
+        use(rootAuth);
+        assert.equal((await call('PATCH', '/admin/users/' + managedId, {enabled: true}, undefined, true)).statusCode, 200);
+        await signIn(handle, replacement);
+        assert.equal((await call('GET', '/admin', undefined, undefined, true)).statusCode, 200);
+        use(rootAuth);
+        const audit = (await pool.query('SELECT action FROM admin_account_audit WHERE target_id=$1 ORDER BY id', [managedId])).rows.map(row => row.action);
+        assert.deepEqual(audit, ['create', 'password', 'disable', 'enable']);
+        const rootReplacement = 'rotated-root-' + randomUUID();
+        process.env.ROOT_ADMIN_PASSWORD = rootReplacement;
+        await restart();
+        use(rootAuth);
+        assert.equal((await call('GET', '/admin', undefined, undefined, true)).statusCode, 401);
+        const newRootAuth = await signIn('server_root', rootReplacement);
+        assert.equal((await call('GET', '/admin/users', undefined, undefined, true)).statusCode, 200);
+        delete process.env.ROOT_ADMIN_HANDLE;
+        delete process.env.ROOT_ADMIN_PASSWORD;
+        await restart();
+        use(newRootAuth);
+        assert.equal((await call('GET', '/admin', undefined, undefined, true)).statusCode, 401);
+      } finally {
+        delete process.env.ROOT_ADMIN_HANDLE;
+        delete process.env.ROOT_ADMIN_PASSWORD;
+      }
+    });
   } finally {
     await app.close();
     await pool.end();

@@ -4,11 +4,13 @@ import { readFileSync } from 'node:fs';
 import { JSDOM } from 'jsdom';
 
 test('header navigation uses labelled icons and tooltips with active-page indication', () => {
-  const pages = [['agents', 'Agents'], ['rules', 'House rules'], ['operator', 'Operator']];
+  const pages = [['agents', 'Agents'], ['rules', 'House rules'], ['operator', 'Operator'], ['administration', 'Administration']];
   for (const [page, label] of pages) {
     const dom = new JSDOM(readFileSync(new URL(`../dist/${page}/index.html`, import.meta.url), 'utf8'));
     const links = dom.window.document.querySelectorAll('header nav a');
-    assert.equal(links.length, 3);
+    assert.equal(links.length, 5);
+    assert.equal(links[0].getAttribute("href"), "/");
+    assert.equal(links[0].getAttribute("aria-label"), "Conversations");
     for (const link of links) {
       assert.ok(link.getAttribute('aria-label'));
       assert.equal(link.getAttribute('data-tooltip'), link.getAttribute('aria-label'));

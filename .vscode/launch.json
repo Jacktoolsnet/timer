@@ -224,18 +224,55 @@
       "cwd": "${workspaceFolder}/nulltopic"
     },
     {
-      "name": "Setup: NullTopic Betreiber anlegen (interaktive Eingabe)",
-      "type": "node-terminal",
+      "name": "Setup: NullTopic Betreiber anlegen (VS-Code-Eingabefelder)",
+      "type": "node",
       "request": "launch",
-      "command": "read -r -p 'Pseudonymous handle: ' BOOTSTRAP_HANDLE && read -r -s -p 'Password (at least 12 characters): ' BOOTSTRAP_PASSWORD && printf '\\n' && export BOOTSTRAP_HANDLE BOOTSTRAP_PASSWORD && npm exec --yes --package=node@24 --package=npm@11 -- npm run bootstrap; unset BOOTSTRAP_HANDLE BOOTSTRAP_PASSWORD",
-      "cwd": "${workspaceFolder}/nulltopic"
+      "program": "${workspaceFolder}/nulltopic/scripts/bootstrap-account.mjs",
+      "cwd": "${workspaceFolder}/nulltopic",
+      "console": "internalConsole",
+      "internalConsoleOptions": "openOnSessionStart",
+      "autoAttachChildProcesses": false,
+      "args": [],
+      "env": {
+        "BOOTSTRAP_HANDLE": "${input:nulltopicAccountHandle}",
+        "BOOTSTRAP_PASSWORD": "${input:nulltopicAccountPassword}"
+      },
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
     },
     {
-      "name": "Setup: NullTopic Administrator anlegen (interaktive Eingabe)",
-      "type": "node-terminal",
+      "name": "Setup: NullTopic Administrator anlegen (VS-Code-Eingabefelder)",
+      "type": "node",
       "request": "launch",
-      "command": "read -r -p 'Pseudonymous handle: ' BOOTSTRAP_HANDLE && read -r -s -p 'Password (at least 12 characters): ' BOOTSTRAP_PASSWORD && printf '\\n' && export BOOTSTRAP_HANDLE BOOTSTRAP_PASSWORD && npm exec --yes --package=node@24 --package=npm@11 -- npm run bootstrap -- --admin; unset BOOTSTRAP_HANDLE BOOTSTRAP_PASSWORD",
-      "cwd": "${workspaceFolder}/nulltopic"
+      "program": "${workspaceFolder}/nulltopic/scripts/bootstrap-account.mjs",
+      "cwd": "${workspaceFolder}/nulltopic",
+      "console": "internalConsole",
+      "internalConsoleOptions": "openOnSessionStart",
+      "autoAttachChildProcesses": false,
+      "args": [
+        "--admin"
+      ],
+      "env": {
+        "BOOTSTRAP_HANDLE": "${input:nulltopicAccountHandle}",
+        "BOOTSTRAP_PASSWORD": "${input:nulltopicAccountPassword}"
+      },
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
+    }
+  ],
+  "inputs": [
+    {
+      "id": "nulltopicAccountHandle",
+      "type": "promptString",
+      "description": "NullTopic handle (3–32 lowercase letters, digits or underscores)"
+    },
+    {
+      "id": "nulltopicAccountPassword",
+      "type": "promptString",
+      "description": "NullTopic password (at least 12 characters; paste is supported)",
+      "password": true
     }
   ]
 }

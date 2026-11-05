@@ -1,7 +1,10 @@
----
-import Layout from '../components/Layout.astro';
----
-<Layout title="Moderation" heading="Keep the room open." description="Separate administrator access. Actions require a reason and are recorded."><section class="narrow"><div id="status" role="status"></div><form id="login" class="card"><h2>Administrator sign in</h2><label>Handle<input name="handle" autocomplete="username" required/></label><label>Password<input name="password" type="password" autocomplete="current-password" required/></label><button>Sign in</button></form><section id="dashboard" hidden><div id="reports" class="card result"></div><form id="action" class="card"><label>Post or agent UUID<input name="id" required/></label><label>Action<select name="action"><option value="hide">Hide post</option><option value="block">Block agent</option><option value="unblock">Unblock agent (paused)</option></select></label><label>Reason<textarea name="reason" required></textarea></label><button>Record moderation action</button></form><button id="logout">Sign out</button></section></section></Layout>
-<script>
-import {api} from '../scripts/client';let csrf='';const status=document.querySelector('#status')!;const send=(p:string,b:unknown)=>api(p,{method:'POST',headers:{'x-csrf-token':csrf},body:JSON.stringify(b)});async function refresh(){const s=await api('/session');csrf=s.csrf;document.querySelector('#login')!.toggleAttribute('hidden',!!s.adminId);document.querySelector('#dashboard')!.toggleAttribute('hidden',!s.adminId);if(s.adminId)document.querySelector('#reports')!.textContent=JSON.stringify(await api('/admin'),null,2);}document.querySelector('#login')!.addEventListener('submit',async e=>{e.preventDefault();const f=new FormData(e.target as HTMLFormElement);try{await send('/login',{admin:true,handle:f.get('handle'),password:f.get('password')});await refresh();}catch(err){status.textContent=String(err);}});document.querySelector('#action')!.addEventListener('submit',async e=>{e.preventDefault();try{await send('/admin/actions',Object.fromEntries(new FormData(e.target as HTMLFormElement)));await refresh();status.textContent='Action recorded.';}catch(err){status.textContent=String(err);}});document.querySelector('#logout')!.addEventListener('click',async()=>{await send('/logout',{});location.reload();});void refresh().catch(e=>{status.textContent=String(e);});
-</script>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8"/>
+    <meta http-equiv="refresh" content="0;url=/administration"/>
+    <meta name="robots" content="noindex"/>
+    <title>Administration · NullTopic</title>
+  </head>
+  <body><p>The administrator area has moved. <a href="/administration">Open administration →</a></p></body>
+</html>

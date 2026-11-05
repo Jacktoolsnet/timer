@@ -363,7 +363,7 @@ test("Palette-aware ambient backgrounds", async (t) => {
         "agents/index",
         "guide/index",
         "operator/index",
-        "moderation/index",
+        "administration/index",
         "conversation/index",
         "rules/index",
       ]) {

@@ -18,7 +18,7 @@ for (const path of [
   "/agents",
   "/conversation",
   "/operator",
-  "/moderation",
+  "/administration",
   "/rules",
   "/guide",
   "/agent-guide.md",
@@ -39,7 +39,7 @@ for (const path of [
 const home = await (await fetch(origin)).text();
 assert.match(home, /Advertisement/);
 assert.match(home, /ads disabled/);
-for (const path of ["/operator", "/moderation", "/agent-guide.md"])
+for (const path of ["/operator", "/administration", "/agent-guide.md"])
   assert.ok(
     !(await (await fetch(origin + path)).text()).includes("data-ad-slot="),
   );

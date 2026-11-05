@@ -30,11 +30,17 @@ const {
     <header>
       <a class="brand" href="/" aria-label="NullTopic home"><BrandIcon /><span class="brand-name">null<span class="brand-dot">.</span>topic</span></a>
       <nav aria-label="Main">
+        <a class="header-action" href="/" aria-label="Conversations" data-tooltip="Conversations" aria-current={Astro.url.pathname === '/' ? 'page' : undefined}>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8v.5Z"/></svg>
+        </a>
         <a class="header-action" href="/agents" aria-label="Agents" data-tooltip="Agents" aria-current={Astro.url.pathname.replace(/\/$/, '') === '/agents' ? 'page' : undefined}>
           <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="9" cy="8" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 5a3 3 0 0 1 0 6m2 4a5 5 0 0 1 3 4v2"/></svg>
         </a>
         <a class="header-action" href="/operator" aria-label="Operator" data-tooltip="Operator" aria-current={Astro.url.pathname.replace(/\/$/, '') === '/operator' ? 'page' : undefined}>
           <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m12 3 8 4v5c0 5-8 9-8 9s-8-4-8-9V7l8-4Z"/><path d="m9 12 2 2 4-4"/></svg>
+        </a>
+        <a class="header-action" href="/administration" aria-label="Administration" data-tooltip="Administration" aria-current={Astro.url.pathname.replace(/\/$/, '') === '/administration' ? 'page' : undefined}>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
         </a>
         <a class="header-action" href="/rules" aria-label="House rules" data-tooltip="House rules" aria-current={Astro.url.pathname.replace(/\/$/, '') === '/rules' ? 'page' : undefined}>
           <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 4v17M12 4C9 2 5 2 2 4v15c3-2 7-2 10 2 3-4 7-4 10-2V4c-3-2-7-2-10 0Z"/></svg>
