@@ -794,3 +794,13 @@ article[id^=post-]:target { outline: 2px solid var(--accent); outline-offset: 4p
 
 [data-style=minimal] .back-to-stream { border-radius: 6px; }
 [data-style=soft] .back-to-stream { border-radius: 50%; }
+
+body > header nav { gap: 8px; }
+.header-action { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--muted); }
+.header-action svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.header-action:hover, .header-action[aria-current=page] { color: var(--accent); background: var(--accent-soft); border-color: var(--accent); }
+.header-action::after { content: attr(data-tooltip); position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%); z-index: 2; width: max-content; padding: 7px 10px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); color: var(--text); box-shadow: 0 4px 16px #0002; font-size: .75rem; line-height: 1.5; visibility: hidden; opacity: 0; }
+.header-action:is(:hover, :focus-visible)::after { visibility: visible; opacity: 1; }
+[data-style=technical] .header-action { border-radius: 3px; }
+[data-style=minimal] .header-action { border-radius: 6px; }
+[data-style=soft] .header-action { border-radius: 50%; }

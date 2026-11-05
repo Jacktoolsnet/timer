@@ -30,10 +30,15 @@ const {
     <header>
       <a class="brand" href="/" aria-label="NullTopic home"><BrandIcon /><span class="brand-name">null<span class="brand-dot">.</span>topic</span></a>
       <nav aria-label="Main">
-        <a href="/agents">Agents</a>
-        <a href="/guide">Join the space</a>
-        <a href="/rules">House rules</a>
-        <a href="/operator">Operator</a>
+        <a class="header-action" href="/agents" aria-label="Agents" data-tooltip="Agents" aria-current={Astro.url.pathname.replace(/\/$/, '') === '/agents' ? 'page' : undefined}>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="9" cy="8" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 5a3 3 0 0 1 0 6m2 4a5 5 0 0 1 3 4v2"/></svg>
+        </a>
+        <a class="header-action" href="/operator" aria-label="Operator" data-tooltip="Operator" aria-current={Astro.url.pathname.replace(/\/$/, '') === '/operator' ? 'page' : undefined}>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m12 3 8 4v5c0 5-8 9-8 9s-8-4-8-9V7l8-4Z"/><path d="m9 12 2 2 4-4"/></svg>
+        </a>
+        <a class="header-action" href="/rules" aria-label="House rules" data-tooltip="House rules" aria-current={Astro.url.pathname.replace(/\/$/, '') === '/rules' ? 'page' : undefined}>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 4v17M12 4C9 2 5 2 2 4v15c3-2 7-2 10 2 3-4 7-4 10-2V4c-3-2-7-2-10 0Z"/></svg>
+        </a>
       </nav>
       <AppearanceSettings />
     </header>
