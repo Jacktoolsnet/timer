@@ -1,11 +1,13 @@
+import {renderOperatorNotices,type OperatorNotice,decisions} from './operator-notices';
 import {renderReviewParticipation,type ReviewParticipation} from './review-participation';
 export interface ModerationReport {
   target_kind?:'message'|'agent'; id: string; post_id: string | null; reason: string; created_at: string; resolved: boolean;
   post_body?: string | null; post_state?: string | null; conversation_id?: string | null;
   parent_id?: string | null; agent_id?: string | null; agent_handle?: string | null; agent_name?: string | null; has_avatar?: boolean;
 }
-export interface ReviewRequest extends ReviewParticipation {revision?:number;id: string; operator_id: string; reason: string; created_at: string; operator_handle?: string | null; original_action?:string|null;correction?:string|null;status?:string; response?:string|null; decided_at?:string|null;}
-export interface ModerationInbox {reports: ModerationReport[]; appeals: ReviewRequest[];counts?:{pending:number;processed:number};}
+export interface ReviewRequest extends ReviewParticipation {moderation_id?:string|number|null;revision?:number;id: string; operator_id: string; reason: string; created_at: string; operator_handle?: string | null; original_action?:string|null;correction?:string|null;status?:string; response?:string|null; decided_at?:string|null;}
+export interface ModerationInbox {case_context?:{reports:ModerationReport[];notices:AdminDecision[];appeals:ReviewRequest[]};reports: ModerationReport[]; appeals: ReviewRequest[];counts?:{pending:number;processed:number};}
+interface AdminDecision extends OperatorNotice {report_id?:string|null;}
 function node<K extends keyof HTMLElementTagNameMap>(tag: K, text?: string, className?: string) {
   const n = document.createElement(tag);
   if (text !== undefined) n.textContent = text;
@@ -35,7 +37,9 @@ function references(entries: [string, string | null | undefined][]) {
   details.append(list);
   return details;
 }
-export function renderModerationInbox(data: ModerationInbox, review: (report: ModerationReport, trigger:HTMLButtonElement) => void, decide?: (request: ReviewRequest, trigger:HTMLButtonElement) => void, status?:'pending'|'processed') {
+export function renderModerationInbox(data: ModerationInbox, review: (report: ModerationReport, trigger:HTMLButtonElement) => void, decide?: (request: ReviewRequest, trigger:HTMLButtonElement) => void, status?:'pending'|'processed',openCases:Set<string>=new Set()) {
+  const context=data.case_context;
+  if(context)data={...data,reports:context.reports,appeals:context.appeals};
   const inbox = node('div', undefined, 'moderation-inbox');
   if (!data.reports.length && !data.appeals.length) {
     const empty = node('div', undefined, 'moderation-all-clear');
@@ -97,7 +101,7 @@ export function renderModerationInbox(data: ModerationInbox, review: (report: Mo
   for (const request of data.appeals) {
     const card = node('article', undefined, 'moderation-review-card');
     const top = node('div', undefined, 'moderation-item-top');
-    top.append(node('span', 'Operator review request', 'moderation-item-badge'), timestamp(request.created_at));
+    top.append(node('span', request.submitted_by==='agent'?'Agent review request':'Operator review request', 'moderation-item-badge'), timestamp(request.created_at));
     card.append(top, node('h4', request.operator_handle ? 'From @' + request.operator_handle : 'From an operator'), node('p', request.reason, 'moderation-reason'), references([['Request', request.id], ['Operator', request.operator_id]]));
     card.append(renderReviewParticipation(request));
     const state=request.status || 'pending';
@@ -108,6 +112,52 @@ export function renderModerationInbox(data: ModerationInbox, review: (report: Mo
     if(state==='pending' && decide){const button=node('button');button.type='button';button.className='admin-icon-button';button.setAttribute('aria-label','Decide review');button.dataset.tooltip='Decide review';button.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 4H6a2 2 0 0 0-2 2v14h16V6a2 2 0 0 0-2-2h-3"/><rect x="9" y="2" width="6" height="4" rx="1"/><path d="m8 13 3 3 5-6"/></svg>';button.addEventListener('click',()=>decide(request,button));card.append(button);}
     appeals.append(card);
   }
-  inbox.append(reports, appeals);
+  inbox.append(renderAdminCases(data.reports,data.appeals,context?.notices || [],reports,appeals,openCases));
   return inbox;
+}
+
+
+function renderAdminCases(reports:ModerationReport[],appeals:ReviewRequest[],notices:AdminDecision[],reportList:HTMLElement,reviewList:HTMLElement,openCases:Set<string>){
+  const list=node('div',undefined,'operator-cases admin-cases');
+  type Case={reports:ModerationReport[];notices:AdminDecision[];appeals:ReviewRequest[]};
+  const cases=new Map<string,Case>();
+  function group(key:string){if(!cases.has(key))cases.set(key,{reports:[],notices:[],appeals:[]});return cases.get(key)!;}
+  const decisionKeys=new Map(notices.map(n=>[String(n.id),n.report_id?'report:'+n.report_id:'decision:'+n.id]));
+  for(const report of reports)group('report:'+report.id).reports.push(report);
+  for(const notice of notices)group(decisionKeys.get(String(notice.id))!).notices.push(notice);
+  function reviewKey(review:ReviewRequest){
+    let current=review;const seen=new Set<string>();
+    while(current.moderation_id==null&&current.parent_appeal_id&&!seen.has(current.id)){
+      seen.add(current.id);const parent=appeals.find(r=>r.id===current.parent_appeal_id);if(!parent)break;current=parent;
+    }
+    return current.moderation_id!=null?(decisionKeys.get(String(current.moderation_id)) || 'decision:'+current.moderation_id):'review:'+current.id;
+  }
+  for(const review of appeals)group(reviewKey(review)).appeals.push(review);
+  const reportCards=Array.from(reportList.querySelectorAll<HTMLElement>('.moderation-report-card'));
+  const reviewCards=Array.from(reviewList.querySelectorAll<HTMLElement>('.moderation-review-card'));
+  for(const [key,entry] of cases){
+    const section=node('details',undefined,'operator-case admin-case');section.dataset.caseId=key;section.open=openCases.has(key);
+    section.addEventListener('toggle',()=>{if(section.open)openCases.add(key);else openCases.delete(key);});
+    const report=entry.reports[0],notice=entry.notices[0],review=entry.appeals[0];
+    const name=report?.agent_name || notice?.agent_name || review?.agent_handle || 'Account review';
+    const title=report?(report.target_kind==='agent'?'Agent report':'Message report'):notice?(decisions[notice.action]?.[0] || 'Moderation decision'):'Review request';
+    const summary=node('summary'),badge=node('span',entry.reports.some(r=>!r.resolved)?'Report needs review':entry.appeals.some(r=>(r.status || 'pending')==='pending')?'Review needs a decision':'Processed','moderation-item-badge');
+    summary.append(node('strong',title+' · '+name),badge,timestamp(report?.created_at || notice?.created_at || review.created_at));section.append(summary);
+    const content=node('div',undefined,'operator-case-content');content.append(node('p','Case reference · '+key,'meta'));
+    if(!entry.reports.length)content.append(node('p',entry.notices.length?'No source report linked to this decision. Historical reports cannot be reliably assigned.':'The original decision is unavailable, or this request has no linked decision.','meta'));
+    for(const r of entry.reports){content.append(node('h3','Original report'),reportCards[reports.indexOf(r)]);}
+    if(entry.notices.length){
+      content.append(node('h3','Moderation decisions'));
+      const cards=renderOperatorNotices(entry.notices.map(n=>({...n,has_review:true})),()=>{});
+      // These are read-only audit records: actions belong to the current report/review.
+      for(const card of Array.from(cards.querySelectorAll<HTMLElement>('.operator-notice-card')))content.append(card);
+    }
+    if(entry.appeals.length){
+      content.append(node('h3','Review history'));const seen=new Set<string>();
+      function appendReview(r:ReviewRequest){if(seen.has(r.id))return;seen.add(r.id);const parent=entry.appeals.find(p=>p.id===r.parent_appeal_id);if(parent)appendReview(parent);content.append(reviewCards[appeals.indexOf(r)]);}
+      for(const r of [...entry.appeals].sort((a,b)=>a.created_at.localeCompare(b.created_at)))appendReview(r);
+    }
+    section.append(content);list.append(section);
+  }
+  return list;
 }

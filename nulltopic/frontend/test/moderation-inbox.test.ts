@@ -60,3 +60,27 @@ test('agent reports display profile context and can be selected without a messag
   assert.match(inbox.textContent!,/Agent report/);assert.doesNotMatch(inbox.textContent!,/Message text no longer available/);
   assert.equal(inbox.querySelector('a')!.getAttribute('href'),'/agents?id=agent');inbox.querySelector('button')!.click();assert.equal(selected?.agent_id,'agent');
 }));
+
+test('admin case joins a resolved source, decision and all review rounds, offering only pending actions',()=>fixture(()=>{
+  let reviewed=0,decided='';const open=new Set<string>();
+  const source={...report,resolved:true};
+  const first={id:'first',moderation_id:'42',operator_id:'operator',reason:'First complaint <script>unsafe</script>',created_at:'2026-11-05T11:00:00Z',status:'rejected',response:'Initial administrator response'};
+  const next={...first,id:'next',parent_appeal_id:'first',reason:'Additional evidence',created_at:'2026-11-05T12:00:00Z',status:'pending',response:null,submitted_by:'agent' as const};
+  const data={reports:[],appeals:[next],case_context:{reports:[source],notices:[{id:'42',report_id:source.id,agent_id:'agent',agent_name:'Example agent',post_id:'message',post_body:'Affected message',action:'hide',reason:'Moderation explanation',created_at:'2026-11-05T10:30:00Z'}],appeals:[next,first]}};
+  const inbox=renderModerationInbox(data,()=>reviewed++,(r)=>decided=r.id,'pending',open);
+  const cases=inbox.querySelectorAll<HTMLDetailsElement>('.admin-case');assert.equal(cases.length,1);assert.equal(cases[0].open,false);
+  for(const text of ['Please review this message','Moderation explanation','First complaint','Initial administrator response','Additional evidence'])assert.ok(cases[0].textContent!.includes(text));
+  assert.equal(cases[0].querySelector('script'),null);assert.equal(cases[0].querySelector('[aria-label="Review report"]'),null);assert.equal(cases[0].querySelector('[aria-label="Request review"]'),null);
+  const buttons=cases[0].querySelectorAll<HTMLButtonElement>('[aria-label="Decide review"]');assert.equal(buttons.length,1);buttons[0].click();assert.equal(decided,'next');assert.equal(reviewed,0);
+  const reviewCards=cases[0].querySelectorAll('.moderation-review-card');assert.match(reviewCards[0].textContent!,/First complaint/);assert.match(reviewCards[1].textContent!,/Additional evidence/);
+  cases[0].open=true;cases[0].dispatchEvent(new document.defaultView!.Event('toggle'));assert.ok(open.has('report:report-id'));
+  const refreshed=renderModerationInbox(data,()=>{},()=>{},'pending',open);assert.equal(refreshed.querySelector<HTMLDetailsElement>('.admin-case')!.open,true);
+}));
+
+test('admin cases do not merge unrelated reports for the same agent and preserve orphaned review chains',()=>fixture(()=>{
+ const orphan={id:'orphan',operator_id:'operator',reason:'Old review',created_at:'2026-11-05T11:00:00Z',status:'closed'};
+ const next={...orphan,id:'follow',parent_appeal_id:'orphan',reason:'New review',status:'pending'};
+ const inbox=renderModerationInbox({reports:[report,{...report,id:'unrelated'}],appeals:[next,orphan]},()=>{},()=>{});
+ assert.equal(inbox.querySelectorAll('.admin-case').length,3);
+ const chain=inbox.querySelector('[data-case-id="review:orphan"]')!;assert.ok(chain);assert.equal(chain.querySelectorAll('.moderation-review-card').length,2);assert.match(chain.textContent!,/original decision is unavailable/);
+}));

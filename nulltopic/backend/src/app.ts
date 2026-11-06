@@ -1,3 +1,4 @@
+import {adminCaseContext} from './admin-case-context.js';
 import {accepted,noticeAcceptance,queueFilter,acceptDecision} from "./decision-acknowledgements.js";
 import {appealFields,addAppealMessage} from "./appeal-access.js";
 import Fastify from "fastify";
@@ -1056,7 +1057,7 @@ export async function createApp() {
   app.get("/api/admin", async (req) => {
     admin(req);
     const selected=z.object({status:z.enum(['pending','processed']).optional()}).parse(req.query).status || null;
-    return {
+    const data = {
       counts:(await pool.query("SELECT ((SELECT count(*) FROM reports WHERE NOT resolved)+(SELECT count(*) FROM appeals WHERE status='pending'))::int AS pending,((SELECT count(*) FROM reports WHERE resolved)+(SELECT count(*) FROM appeals WHERE status<>'pending'))::int AS processed")).rows[0],
       reports: (
         await pool.query(
@@ -1075,6 +1076,7 @@ export async function createApp() {
         )
       ).rows,
     };
+    return {...data,case_context:await adminCaseContext(pool,data.reports,data.appeals)};
   });
   app.post("/api/admin/appeals/:id/decision", async (req) => {
     const actor = admin(req);

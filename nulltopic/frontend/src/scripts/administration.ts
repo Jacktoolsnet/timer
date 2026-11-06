@@ -25,6 +25,7 @@ export async function initializeAdministration() {
   let csrf = '', signedIn = false, isRoot = false, signingIn = false, creatingUser = false;
   let view: View = 'overview', viewVersion = 0, usersRequest = 0, users: AdminUser[] = [];
   let checkingPermission = false;
+  const openCases=new Set<string>();
   let moderationStatus:'pending'|'processed'='pending';
   const tabs=Array.from(document.querySelectorAll<HTMLButtonElement>('[data-moderation-status]'));
   const reportsPanel=document.querySelector<HTMLElement>('#reports')!;
@@ -105,7 +106,7 @@ export async function initializeAdministration() {
         signedIn = isRoot = false; ++usersRequest; clearPasswords(); toolbar(false);
         modal.close(true);dashboard.hidden = true; shell.hidden = false;
         document.querySelector('#admin-users')!.replaceChildren();
-        document.querySelector('#reports')!.textContent = '';
+        document.querySelector('#reports')!.textContent = '';openCases.clear();
         status.textContent = 'Your session could not be verified. Please sign in again.';
       } finally { checkingPermission = false; }
     }
@@ -207,7 +208,7 @@ export async function initializeAdministration() {
           const who=document.createElement('p');who.textContent=request.operator_handle?'From @'+request.operator_handle:'Operator review request';
           const text=document.createElement('p');text.className='moderation-reason';text.textContent=request.reason;
           context.replaceChildren(who,text,renderReviewParticipation(request));modal.open('review-decision-title',trigger);document.querySelector<HTMLTextAreaElement>('#review-response')!.focus();
-        },moderationStatus));
+        },moderationStatus,openCases));
         if(version===viewVersion)reportsPanel.removeAttribute('aria-busy');
       }
     } catch (error) {
@@ -238,7 +239,7 @@ export async function initializeAdministration() {
       filter.value = '';
       modal.close(true);clearReview(); actionForm.reset(); selectedReport = null; selection.hidden = true;
       document.querySelector('#admin-users')!.replaceChildren();
-      document.querySelector('#reports')!.textContent = '';
+      document.querySelector('#reports')!.textContent = '';openCases.clear();
       management.hidden = moderation.hidden = true;
     }
   }

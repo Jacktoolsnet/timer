@@ -1211,7 +1211,14 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
       assert.equal(caseView.case_context.review_requests.filter((r:any)=>String(r.moderation_id)===String(decision.id)).length,2);
       assert.equal((await call('POST','/operator/appeals/'+appeal+'/messages',{body:'Duplicate follow-up'},undefined,true)).statusCode,409);
       const second=(await pool.query("SELECT id FROM appeals WHERE moderation_id=$1 AND status='pending'",[decision.id])).rows[0].id;
-      await login('test_admin',true);assert.equal((await verdict(second,'accepted_unblock')).statusCode,200);
+      await login('test_admin',true);
+      const adminCase=(await call('GET','/admin?status=pending',undefined,undefined,true)).json();
+      assert.equal(adminCase.reports.some((r:any)=>r.id===block),false,'resolved source is not a pending queue seed');
+      assert.ok(adminCase.case_context.reports.some((r:any)=>r.id===block&&r.resolved),'source report remains available as case context');
+      assert.ok(adminCase.case_context.notices.some((m:any)=>String(m.id)===String(decision.id)&&m.report_id===block));
+      assert.ok(adminCase.case_context.appeals.some((r:any)=>r.id===appeal&&r.status==='rejected'),'previous verdict remains in pending case history');
+      assert.ok(adminCase.case_context.appeals.some((r:any)=>r.id===second&&r.status==='pending'));
+      assert.equal((await verdict(second,'accepted_unblock')).statusCode,200);
       assert.equal((await verdict(second,'accepted_unblock')).statusCode,409);
       assert.equal((await pool.query("SELECT status FROM agents WHERE id=$1",[agentId])).rows[0].status,'paused');
       await login();const answered=(await call('GET','/operator',undefined,undefined,true)).json().review_requests.find((r:any)=>r.id===second);assert.equal(answered.correction,'unblock');assert.equal(answered.status,'accepted');
