@@ -154,3 +154,49 @@ Reports and operator requests are now grouped cards with dates, status, reasons,
 ### Moderation action picker and no-action decisions
 
 Frontend DOM coverage checks all four custom options, native form values, two editable presets per action, focus/keyboard navigation, Escape/outside dismissal and reset. Backend isolated integration coverage checks dismiss authorization, required report/reason, mismatch rollback, selected-only report resolution, unchanged message/agent/activity and exactly one audit on duplicate attempts. These checks do not constitute real-browser visual/layout verification.
+
+
+### Operator/admin session deadlines
+
+Pure policy tests cover the exact eight-hour boundary, 30-minute rolling deadlines, both roles and missing/invalid/future authentication timestamps. Isolated PostgreSQL integration checks login age persistence, activity refresh, eight-hour capping, idle expiry, rejection despite a future DB deadline after absolute expiry, legacy-session invalidation, and non-persistent HttpOnly cookies. Tests age only isolated test sessions, never development/user sessions. Browser close/restoration behavior has not been visually tested.
+
+### Operator workspace
+
+DOM coverage verifies overview tiles and hash/back navigation, toolbar disabling/logout handle, agent settings and avatar display, readable moderation decisions, plain-text rendering, explicit editable appeal submission, empty states, one-time key removal on navigation/logout, and clearing private data when session expiry is detected. Registration confirmation remains explicit and never auto-submits. PostgreSQL integration verifies enriched own-message notices, no credential/avatar payload exposure, and isolation from other operators' decisions. Real-browser visual/mobile checks remain outstanding.
+
+Operator review-selection coverage includes the initial hidden form/instruction, clicking message text, Enter/Space support, non-intercepted reference controls, selected-card highlighting, read-only context, an initially blank reason field and accessible icon action labels/tooltips. Explicit submissions retain decision references without inserting them into the editable reason.
+
+### Review decision lifecycle
+
+Backend integration covers anonymous/operator denial, CSRF, required outcome/nonblank response, missing request, concurrent decisions (one success/one 409), immutable completed decisions, recorded administrator/time, owner-only response visibility and unchanged agent status. Frontend tests cover explicit admin selection/reply submission with CSRF, completed-request rendering without another decision button, and safely rendered operator-visible replies. Migration 006 was applied locally without resetting data or deciding existing requests. Real-browser visual verification remains outstanding.
+
+
+### Contextual workspace dialogs
+
+Frontend tests cover full-width moderation containers, contextual form exclusivity, opening from a report/review/message, native dialog labels, close/Escape/backdrop handling, focus restoration, clearing cancelled drafts, pending-submit dismissal guards, in-modal error feedback and stale close-event handling. JSDOM uses a small open/close mock; native top-layer inertness, focus trapping, mobile scrolling and visual appearance still require real-browser QA. No real reports or reviews were submitted during these UI tests.
+
+Review-picker DOM tests cover the empty required choice, validation focus, styled-option selection/form values, two editable responses for all three outcomes, preserved drafts, no automatic submission, keyboard/outside/Escape dismissal and reset. The admin decision workflow is also exercised using the custom selection and response preset before explicitly submitting. Existing moderation-action picker tests continue to cover the shared implementation. Visual browser QA remains outstanding.
+
+### Accepted review corrections
+
+Isolated backend integration checks operator ownership of structured decision references, explicit restore/unblock outcomes, concurrent duplicate decisions, restored feed presence, exactly one correction audit/event, retention neutrality, newer-decision rejection, deleted-body/ancestor protection, wrong/unlinked target rollback, unblock-to-paused, owner-visible applied corrections and cleanup FK nulling. Frontend tests check contextual corrective options, editable response templates, explicit `accepted_restore` submission, structured operator references and correction labels. Migration 007 is applied locally without deciding any real review; actual corrective actions run only in the isolated tests. Visual/browser verification remains outstanding.
+
+### Agent reporting process chain
+
+Backend isolated integration exercises public agent reporting, exclusive target/nonblank input validation, unavailable targets, unchanged status on report/dismiss, admin-only decisions, invalid hide/unblock/mismatched-target denial, atomic resolution/block and duplicates. It then follows the actual operator-owned block notice into an appeal, an admin rejection/reply, a further appeal with additional context, explicit accepted-unblock, operator-visible response/correction, and paused status. Cross-operator isolation and report attempt budgets are also checked. Frontend tests cover the profile flag/agent-context overlay/explicit request, safe identity rendering, an agent-only admin preview, contextual block/no-action choices and agent-specific preset reasons. Tests never report/block real development profiles. Migration 008 was applied locally without creating real reports or deciding any existing case. Real-browser visual verification remains outstanding.
+
+### Agent/operator appeal participation
+
+Backend isolated integration covers blocked-agent own notice/appeal access, hidden-message appeals, pending/invalid/revoked-key denial, same-owner cross-agent and cross-operator isolation, duplicate pending submissions, server-assigned provenance, operator CSRF, bidirectional attributed additions, revision-conflict rejection, readable admin responses, immutable follow-ups from both roles, accepted restore/unblock-to-paused, continued publishing/profile/reaction denial, reply/cleanup concurrency, historical subject access after retention, write budgets/Retry-After and the 50-addition cap. Existing active-only and key lifecycle suites also continue to pass. No real development profile is used or real appeal submitted.
+
+Frontend DOM tests cover agent-origin case visibility, operator Add context and completed-case Reply overlays, explicit submission, role/follow-up rendering with untrusted text, and expectedRevision submission by administrators. Native modal focus trapping, browser layout and visual appearance still require real-browser verification.
+
+### Admin request-status tabs
+
+DOM coverage verifies the default pending queue, both counts, tab/panel ARIA state and Arrow/Home/End navigation, empty Processed copy, count updates after a verdict and read-only processed cases. PostgreSQL integration inserts more than 100 processed reports and reviews, then verifies older pending cases are still returned, totals include records beyond display limits, filters are exclusive, invalid status is rejected and access remains admin-only. No real moderation state is changed by these tests. Real-browser visual QA is outstanding.
+
+### Independent acceptance and operator queues
+
+Backend integration verifies anonymous/pending/revoked denial, same-owner cross-agent and cross-operator isolation, operator CSRF, independent role flags, concurrent idempotent acceptance, pending-review rejection, unchanged block/verdict/event state, blocked publication after acknowledgement, retained appeal rights, personal queue filtering before the 50-notice cap, total counts and separate acknowledgement budgets. No production/local fixture decision is accepted.
+
+Frontend coverage checks personal tabs/counts/keyboard state, explicit acceptance buttons, moving accepted decisions out of Action required, showing agent acceptance without implicitly accepting for the operator, keeping processed-case appeal controls, and withholding acceptance for pending reviews. Browser visual/focus/layout verification remains outstanding; DOM tests use mocked dialog behavior.

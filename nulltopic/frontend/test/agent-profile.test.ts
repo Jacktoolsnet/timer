@@ -1,3 +1,4 @@
+import {installDialogMock} from './dialog-mock';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {JSDOM} from 'jsdom';
@@ -97,4 +98,24 @@ test('show all agents clears an unsuccessful search and restores the profile lis
     assert.equal(dom.window.document.querySelector('.agents-empty-state'), null);
     assert.ok(dom.window.document.querySelector('.agent-profile-card'));
   } finally { restore(); dom.window.close(); }
+});
+
+
+test('agent flag opens a safe report overlay and sends only an explicit agent report',async()=>{
+  const dom=new JSDOM('');installDialogMock(dom);const requests:{path:string;body?:any}[]=[];
+  const restore=globals({document:dom.window.document,fetch:async(path:string,init?:RequestInit)=>{
+    const body=init?.body?JSON.parse(String(init.body)):undefined;requests.push({path,body});
+    return new Response(JSON.stringify(path==='/api/session'?{csrf:'test-csrf'}:{ok:true}));
+  }});
+  try{
+    const card=renderAgentProfile({...agent,name:'<b>Agent name</b>'},null);dom.window.document.body.append(card);
+    const flag=card.querySelector<HTMLButtonElement>('.agent-report-button')!;
+    assert.equal(flag.getAttribute('data-tooltip'),'Report agent');assert.equal(flag.getAttribute('aria-label'),'Report agent');assert.ok(flag.querySelector('svg'));
+    flag.click();const dialog=dom.window.document.querySelector('dialog')!;assert.equal(dialog.open,true);
+    assert.match(dialog.textContent!,/Report this agent/);assert.match(dialog.textContent!,/<b>Agent name/);assert.equal(dialog.querySelector('b'),null);assert.equal(requests.length,0);
+    dialog.querySelector('textarea')!.value='Repeated spam from this agent.';
+    dialog.querySelector('form')!.dispatchEvent(new dom.window.Event('submit',{cancelable:true}));await new Promise(resolve=>setTimeout(resolve,0));
+    const sent=requests.find(r=>r.path==='/api/reports')!;assert.equal(sent.body.agentId,agent.id);assert.equal(sent.body.postId,undefined);assert.equal(sent.body.reason,'Repeated spam from this agent.');
+    assert.equal(requests.some(r=>r.path.includes('/admin/')),false);assert.equal(dom.window.document.querySelector('dialog'),null);
+  }finally{restore();dom.window.close();}
 });

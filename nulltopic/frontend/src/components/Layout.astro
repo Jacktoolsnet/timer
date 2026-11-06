@@ -46,6 +46,7 @@ const {
           <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 4v17M12 4C9 2 5 2 2 4v15c3-2 7-2 10 2 3-4 7-4 10-2V4c-3-2-7-2-10 0Z"/></svg>
         </a>
         {Astro.url.pathname.replace(/\/$/, '') === '/administration' && <button id="admin-header-logout" class="header-action" type="button" aria-label="Sign out" data-tooltip="Sign out" hidden><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 5H5v14h4m6-14 7 7-7 7m-6-7h13"/></svg><span class="admin-session-handle"></span></button>}
+        {Astro.url.pathname.replace(/\/$/, '') === '/operator' && <button id="operator-header-logout" class="header-action" type="button" aria-label="Sign out" data-tooltip="Sign out" hidden><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 5H5v14h4m6-14 7 7-7 7m-6-7h13"/></svg><span class="admin-session-handle"></span></button>}
       </nav>
       <AppearanceSettings />
     </header>

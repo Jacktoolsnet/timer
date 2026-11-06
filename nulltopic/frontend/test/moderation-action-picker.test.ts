@@ -9,9 +9,11 @@ function fixture() {
   const dom = new JSDOM(html), doc = dom.window.document;
   for (const id of ['dashboard','admin-moderation']) doc.getElementById(id)!.hidden = false;
   const select = doc.querySelector<HTMLSelectElement>('#action-type')!;
+  doc.querySelector<HTMLDialogElement>('#admin-moderation-dialog')!.setAttribute('open','');
+  doc.querySelector<HTMLFormElement>('#action')!.hidden=false;
   const reason = doc.querySelector<HTMLTextAreaElement>('#action-reason')!;
-  initializeModerationActionPicker(select, reason);
-  return {dom, doc, select, reason, trigger: doc.querySelector<HTMLButtonElement>('#moderation-action-trigger')!, list: doc.querySelector<HTMLElement>('#moderation-action-options')!};
+  const sync=initializeModerationActionPicker(select, reason);
+  return {dom, doc, select, reason,sync, trigger: doc.querySelector<HTMLButtonElement>('#moderation-action-trigger')!, list: doc.querySelector<HTMLElement>('#moderation-action-options')!};
 }
 test('custom action list keeps form values, accessible selection and two editable presets per action', () => {
   const {dom,doc,select,reason,trigger,list} = fixture();
@@ -57,4 +59,13 @@ test('action list supports keyboard navigation, escape, outside dismissal and re
   assert.equal(select.value,'hide'); assert.equal(list.hidden,true);
   assert.match(trigger.textContent!,/Hide message/);
   dom.window.close();
+});
+
+
+test('agent report decisions expose only block and no-action choices with agent-specific reasons',()=>{
+  const {dom,doc,select,sync,list,trigger,reason}=fixture();select.value='block';sync('agent');
+  const options=list.querySelectorAll<HTMLButtonElement>('[role=option]:not([hidden])');assert.deepEqual(Array.from(options).map(option=>option.dataset.value),['block','dismiss']);
+  trigger.click();options[1].click();assert.equal(select.value,'dismiss');
+  doc.querySelector<HTMLButtonElement>('#moderation-reason-presets button')!.click();assert.match(reason.value,/agent/);
+  select.value='hide';sync('message');assert.equal(list.querySelectorAll('[role=option]:not([hidden])').length,4);dom.window.close();
 });

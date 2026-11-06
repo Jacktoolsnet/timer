@@ -1,3 +1,4 @@
+import {installDialogMock} from './dialog-mock';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -5,9 +6,12 @@ import {JSDOM} from 'jsdom';
 import {initializeOperator} from '../src/scripts/operator';
 const html = readFileSync(new URL('../dist/operator/index.html', import.meta.url), 'utf8');
 const tick = () => new Promise(resolve => setTimeout(resolve, 0));
-async function fixture(run: (dom: JSDOM, requests: {path: string; body?: any}[]) => Promise<void>, options: {signedIn?: boolean; fail?: boolean; confirmation?: boolean} = {}) {
+async function fixture(run: (dom: JSDOM, requests: {path: string; body?: any}[]) => Promise<void>, options: {signedIn?: boolean; fail?: boolean; confirmation?: boolean; withData?:boolean; expire?:boolean;reviews?:boolean;decided?:boolean;agentAccepted?:boolean} = {}) {
   const dom = new JSDOM(html, {url: 'http://localhost/operator' + (options.confirmation ? '?confirmation=test-token' : '')});
+  installDialogMock(dom);
+  dom.window.scrollTo=()=>{}; dom.window.HTMLElement.prototype.scrollIntoView=()=>{}; dom.window.confirm=()=>true;
   let signedIn = !!options.signedIn;
+  const operatorReplies:string[]=[];let acceptedNotice=false,acceptedReview=false;
   const requests: {path: string; body?: any}[] = [];
   const values = {document: dom.window.document, location: dom.window.location, FormData: dom.window.FormData, fetch: async (path: string, init?: RequestInit) => {
     const body = init?.body ? JSON.parse(String(init.body)) : undefined;
@@ -17,20 +21,34 @@ async function fixture(run: (dom: JSDOM, requests: {path: string; body?: any}[])
       if (options.fail) return new Response(JSON.stringify({error: {message: 'Internal detail'}}), {status: 401});
       signedIn = true; return new Response(JSON.stringify({csrf: 'test-csrf'}));
     }
-    if (path === '/api/operator') return new Response(JSON.stringify({operator: {guidelines: 'Test boundaries'}, agents: [], notices: []}));
+    if(path==='/api/operator/moderation/42/accept'){acceptedNotice=true;return new Response(JSON.stringify({ok:true}));}
+    if(path==='/api/operator/appeals/review-fixture/accept'){acceptedReview=true;return new Response(JSON.stringify({ok:true}));}
+    if (path === '/api/logout') {signedIn=false;return new Response(JSON.stringify({ok:true}));}
+    if(path==='/api/operator/appeals/review-fixture/messages'){operatorReplies.push(body.body);return new Response(JSON.stringify({reviewId:options.decided?'follow-up':'review-fixture',followUp:!!options.decided}));}
+    if (path === '/api/operator/appeals') {
+      if(options.expire){signedIn=false;return new Response(JSON.stringify({error:{message:'Expired'}}),{status:401});}
+      return new Response(JSON.stringify({ok:true}));
+    }
+    if (path === '/api/operator/agents/agent') return new Response(JSON.stringify({key:'one-time-test-key'}));
+    if(path==='/api/operator'||path.startsWith('/api/operator?')){
+      const data={review_requests:options.reviews?[{id:'review-fixture',operator_accepted:acceptedReview,agent_accepted:!!options.agentAccepted,reason:'Agent request to review a block.',created_at:'2026-11-06T08:00:00Z',status:options.decided?'rejected':'pending',response:options.decided?'The original decision remains in place.':null,submitted_by:'agent',agent_handle:'example',messages:[{author_role:'agent',handle:'example',body:'Agent clarification.',created_at:'2026-11-06T08:01:00Z'},...operatorReplies.map(text=>({author_role:'operator',handle:'test_operator',body:text,created_at:'2026-11-06T08:02:00Z'}))]}]:[],operator: {handle:'test_operator',guidelines: 'Test boundaries'}, agents: options.withData?[{id:'agent',name:'Example agent',handle:'example',status:'paused',has_avatar:true,approved_scope:'Public test scope'}]:[], notices: options.withData?[{id:42,operator_accepted:acceptedNotice,agent_accepted:!!options.agentAccepted,action:'hide',reason:'Please follow the house rules.',created_at:'2026-11-06T08:00:00Z',agent_id:'agent',agent_name:'Example agent',agent_handle:'example',post_id:'message',post_body:'Reported example message.',conversation_id:'thread',has_avatar:true}]:[] };
+      const counts={pending:data.notices.filter(n=>!n.operator_accepted).length+data.review_requests.filter(r=>r.status==='pending'||!r.operator_accepted).length,processed:data.notices.filter(n=>n.operator_accepted).length+data.review_requests.filter(r=>r.status!=='pending'&&r.operator_accepted).length};
+      const status=new URL(path,'http://localhost').searchParams.get('moderationStatus');
+      return new Response(JSON.stringify({...data,moderation_counts:counts,notices:status?data.notices.filter(n=>status==='processed'?n.operator_accepted:!n.operator_accepted):data.notices,review_requests:status?data.review_requests.filter(r=>status==='processed'?r.status!=='pending'&&r.operator_accepted:r.status==='pending'||!r.operator_accepted):data.review_requests}));
+    }
     if (path === '/api/confirmation?token=test-token') return new Response(JSON.stringify({name: 'Pending example'}));
     throw Error('Unexpected request');
   }};
   const descriptors = Object.keys(values).map(key => [key, Object.getOwnPropertyDescriptor(globalThis, key)] as const);
   for (const [key, value] of Object.entries(values)) Object.defineProperty(globalThis, key, {configurable: true, value});
   try { await run(dom, requests); }
-  finally { for (const [key, descriptor] of descriptors) { if (descriptor) Object.defineProperty(globalThis, key, descriptor); else Reflect.deleteProperty(globalThis, key); } dom.window.close(); }
+  finally { await tick(); for (const [key, descriptor] of descriptors) { if (descriptor) Object.defineProperty(globalThis, key, descriptor); else Reflect.deleteProperty(globalThis, key); } dom.window.close(); }
 }
 test('operator login uses its own palette-aware agent illustration without a generic hero', () => {
   const dom = new JSDOM(html), doc = dom.window.document;
   assert.equal(doc.querySelector('.hero'), null);
   assert.ok(doc.querySelector('#operator-login-shell .operator-art-solid'));
-  assert.equal(doc.querySelector('.admin-art-shield'), null);
+  assert.equal(doc.querySelector('#operator-login-shell .admin-art-shield'), null);
   assert.ok(doc.querySelector('#operator-password[autocomplete="current-password"]'));
   assert.equal((doc.querySelector('#dashboard') as HTMLElement).hidden, true);
   dom.window.close();
@@ -66,3 +84,154 @@ test('operator login failures stay inline without exposing backend details', asy
   assert.match(doc.querySelector('#login-status')!.textContent!, /operator credentials/);
   assert.doesNotMatch(doc.body.textContent!, /Internal detail/);
 }, {fail: true}));
+
+
+test('operator overview uses themed tiles, subviews, back navigation and a locked session toolbar', async () => fixture(async dom => {
+  await initializeOperator();const doc=dom.window.document;
+  assert.equal((doc.querySelector('#operator-overview') as HTMLElement).hidden,false);
+  assert.equal((doc.querySelector('#operator-settings') as HTMLElement).hidden,true);
+  assert.equal((doc.querySelector('#operator-moderation') as HTMLElement).hidden,true);
+  assert.ok(doc.querySelector('#operator-settings-tile svg'));
+  assert.equal(doc.querySelector('.admin-session-handle')!.textContent,'@test_operator');
+  assert.equal(doc.querySelector('header nav a')!.getAttribute('aria-disabled'),'true');
+  (doc.querySelector('#operator-settings-tile') as HTMLButtonElement).click();
+  assert.equal(dom.window.location.hash,'#settings');
+  assert.equal((doc.querySelector('#operator-settings') as HTMLElement).hidden,false);
+  assert.equal(doc.activeElement!.id,'operator-settings-heading');
+  assert.match(doc.querySelector('#owned')!.textContent!,/Public test scope/);
+  assert.ok(doc.querySelector('#owned img'));
+  (doc.querySelector('#operator-settings .admin-back') as HTMLButtonElement).click();
+  assert.equal((doc.querySelector('#operator-overview') as HTMLElement).hidden,false);
+  dom.window.history.replaceState({},'','#moderation');dom.window.dispatchEvent(new dom.window.HashChangeEvent('hashchange'));
+  assert.equal((doc.querySelector('#operator-moderation') as HTMLElement).hidden,false);
+}, {signedIn:true,withData:true}));
+test('operator moderation explains decisions and submits an editable review request explicitly', async () => fixture(async (dom,requests) => {
+  await initializeOperator();const doc=dom.window.document;
+  (doc.querySelector('#operator-moderation-tile') as HTMLButtonElement).click();
+  assert.match(doc.querySelector('#notices')!.textContent!,/Message hidden/);
+  assert.match(doc.querySelector('#notices')!.textContent!,/Please follow the house rules/);
+  assert.match(doc.querySelector('#notices')!.textContent!,/Reported example message/);
+  assert.equal(doc.querySelector('#notices pre'),null);
+  assert.equal(doc.querySelector('#notices a')!.getAttribute('href'),'/conversation?id=thread');
+  (doc.querySelector('#notices button') as HTMLButtonElement).click();
+  const reason=doc.querySelector<HTMLTextAreaElement>('#appeal-reason')!;
+  assert.equal(reason.value,'');
+  assert.match(doc.querySelector('#appeal-context')!.textContent!,/@example/);assert.match(doc.querySelector('#appeal-context')!.textContent!,/42/);
+  assert.equal((doc.querySelector('#appeal-empty') as HTMLElement).hidden,true);
+  assert.equal((doc.querySelector('#appeal') as HTMLElement).hidden,false);
+  assert.equal(requests.some(r=>r.path==='/api/operator/appeals'),false);
+  reason.value='Please review decision 42. Here is my context.';
+  doc.querySelector('#appeal')!.dispatchEvent(new dom.window.Event('submit',{cancelable:true}));await tick();
+  assert.match(requests.find(r=>r.path==='/api/operator/appeals')!.body.reason,/Decision: 42/);
+  assert.equal(requests.find(r=>r.path==='/api/operator/appeals')!.body.moderationId,'42');
+  assert.match(requests.find(r=>r.path==='/api/operator/appeals')!.body.reason,/Reason:\nPlease review decision 42. Here is my context/);
+  assert.equal(reason.value,'');assert.match(doc.querySelector('#appeal-status')!.textContent!,/Review requested/);
+}, {signedIn:true,withData:true}));
+test('operator logout clears cached private data, restores navigation and hides one-time credentials', async () => fixture(async dom => {
+  await initializeOperator();const doc=dom.window.document;
+  (doc.querySelector('#operator-settings-tile') as HTMLButtonElement).click();
+  const rotate=Array.from(doc.querySelectorAll<HTMLButtonElement>('#owned button')).find(b=>b.textContent==='Replace key')!;
+  rotate.click();await tick();assert.match(doc.querySelector('.operator-new-key')!.textContent!,/one-time-test-key/);
+  (doc.querySelector('#operator-settings .admin-back') as HTMLButtonElement).click();
+  assert.equal(doc.querySelector('.operator-new-key'),null);
+  (doc.querySelector('#operator-header-logout') as HTMLButtonElement).click();await tick();
+  assert.equal((doc.querySelector('#dashboard') as HTMLElement).hidden,true);
+  assert.equal(doc.querySelector('#owned')!.textContent,'');assert.equal(doc.querySelector('#notices')!.textContent,'');
+  assert.equal((doc.querySelector('#operator-guidelines') as HTMLTextAreaElement).value,'');
+  assert.equal(doc.querySelector('header nav a')!.getAttribute('href'),'/');
+}, {signedIn:true,withData:true}));
+test('expired operator session returns to login and clears moderation data', async () => fixture(async dom => {
+  await initializeOperator();const doc=dom.window.document;
+  (doc.querySelector('#operator-moderation-tile') as HTMLButtonElement).click();
+  (doc.querySelector('#notices .moderation-message-text') as HTMLElement).click();
+  (doc.querySelector('#appeal-reason') as HTMLTextAreaElement).value='Please review this decision.';
+  doc.querySelector('#appeal')!.dispatchEvent(new dom.window.Event('submit',{cancelable:true}));await tick();await tick();
+  assert.equal((doc.querySelector('#operator-login-shell') as HTMLElement).hidden,false);
+  assert.equal((doc.querySelector('#dashboard') as HTMLElement).hidden,true);
+  assert.equal(doc.querySelector('#notices')!.textContent,'');
+  assert.match(doc.querySelector('#status')!.textContent!,/session has expired/);
+}, {signedIn:true,withData:true,expire:true}));
+
+
+test('operator review starts with a hint and tapping a message selects readonly context without prefilling the reason', async () => fixture(async (dom,requests) => {
+  await initializeOperator();const doc=dom.window.document;
+  (doc.querySelector('#operator-moderation-tile') as HTMLButtonElement).click();
+  assert.equal((doc.querySelector('#appeal') as HTMLElement).hidden,true);
+  assert.equal((doc.querySelector('#appeal-empty') as HTMLElement).hidden,false);
+  (doc.querySelector('#notices .moderation-message-text') as HTMLElement).click();
+  assert.equal((doc.querySelector('#appeal') as HTMLElement).hidden,false);
+  assert.match(doc.querySelector('#appeal-context')!.textContent!,/Example agent/);
+  assert.match(doc.querySelector('#appeal-context')!.textContent!,/Message hidden/);
+  assert.match(doc.querySelector('#appeal-context')!.textContent!,/Reported example message/);
+  assert.equal(doc.querySelector('#appeal-context input, #appeal-context textarea'),null);
+  assert.equal((doc.querySelector('#appeal-reason') as HTMLTextAreaElement).value,'');
+  assert.equal(requests.some(r=>r.path==='/api/operator/appeals'),false);
+  const button=doc.querySelector('#notices button')!;
+  assert.equal(button.getAttribute('data-tooltip'),'Request review');
+  assert.equal(button.getAttribute('aria-label'),'Request review');
+  assert.equal(button.textContent,'');assert.ok(button.querySelector('svg'));
+  const link=doc.querySelector('#notices a')!;
+  assert.equal(link.getAttribute('data-tooltip'),'Open message');assert.equal(link.textContent,'');
+}, {signedIn:true,withData:true}));
+
+test('operator review opens a modal from the full-width message and clears its draft on dismissal',async()=>fixture(async(dom,requests)=>{
+  await initializeOperator();const doc=dom.window.document;
+  (doc.querySelector('#operator-moderation-tile') as HTMLButtonElement).click();
+  const dialog=doc.querySelector<HTMLDialogElement>('#operator-review-dialog')!;
+  assert.equal(dialog.open,false);assert.equal(doc.querySelector('#operator-moderation .admin-moderation-grid'),null);
+  (doc.querySelector('.operator-notice-card .moderation-message-text') as HTMLElement).click();
+  assert.equal(dialog.open,true);assert.equal(doc.activeElement!.id,'appeal-reason');
+  (doc.querySelector('#appeal-reason') as HTMLTextAreaElement).value='Unsent reason';
+  dialog.dispatchEvent(new dom.window.Event('cancel',{cancelable:true}));assert.equal(dialog.open,false);
+  assert.equal((doc.querySelector('#appeal-reason') as HTMLTextAreaElement).value,'');
+  assert.equal(doc.querySelector('.operator-notice-card[data-selected=true]'),null);
+  assert.equal(doc.activeElement,doc.querySelector('.operator-notice-card'));
+  assert.equal(requests.some(r=>r.path==='/api/operator/appeals'),false);
+},{signedIn:true,withData:true}));
+
+
+test('operator sees agent-originated appeals and can append attributed context through the overlay',async()=>fixture(async(dom,requests)=>{
+  await initializeOperator();const doc=dom.window.document;
+  doc.querySelector<HTMLButtonElement>('#operator-moderation-tile')!.click();
+  assert.match(doc.querySelector('#operator-reviews')!.textContent!,/Submitted by agent @example/);
+  assert.match(doc.querySelector('#operator-reviews')!.textContent!,/Agent clarification/);
+  const reply=doc.querySelector<HTMLButtonElement>('#operator-reviews button')!;assert.equal(reply.dataset.tooltip,'Add context');reply.click();
+  assert.equal(doc.querySelector<HTMLDialogElement>('#operator-review-dialog')!.open,true);
+  assert.match(doc.querySelector('#operator-review-title')!.textContent!,/Add context/);
+  assert.equal(requests.some(r=>r.path.endsWith('/messages')),false);
+  doc.querySelector<HTMLTextAreaElement>('#appeal-reason')!.value='Operator additional context.';
+  doc.querySelector('#appeal')!.dispatchEvent(new dom.window.Event('submit',{cancelable:true}));await tick();await tick();
+  assert.equal(requests.find(r=>r.path.endsWith('/messages'))!.body.body,'Operator additional context.');
+  assert.match(doc.querySelector('#operator-reviews')!.textContent!,/Operator additional context/);
+  assert.equal(doc.querySelector<HTMLDialogElement>('#operator-review-dialog')!.open,false);
+},{signedIn:true,reviews:true}));
+test('operator reply to a completed appeal starts an explicit follow-up without overwriting the response',async()=>fixture(async(dom,requests)=>{
+  await initializeOperator();const doc=dom.window.document;
+  doc.querySelector<HTMLButtonElement>('#operator-moderation-tile')!.click();
+  const reply=doc.querySelector<HTMLButtonElement>('#operator-reviews button')!;assert.equal(reply.dataset.tooltip,'Reply with a follow-up review');reply.click();
+  assert.match(doc.querySelector('#appeal-context')!.textContent!,/previous decision remains unchanged/);
+  assert.match(doc.querySelector('#appeal-context')!.textContent!,/original decision remains in place/);
+  doc.querySelector<HTMLTextAreaElement>('#appeal-reason')!.value='New operator evidence.';
+  doc.querySelector('#appeal')!.dispatchEvent(new dom.window.Event('submit',{cancelable:true}));await tick();await tick();
+  assert.equal(requests.find(r=>r.path.endsWith('/messages'))!.body.body,'New operator evidence.');
+  assert.match(doc.querySelector('#appeal-status')!.textContent!,/Follow-up review sent/);
+},{signedIn:true,reviews:true,decided:true}));
+
+
+test('operator accepts decisions independently, with personal queue tabs and preserved appeal controls',async()=>fixture(async(dom,requests)=>{
+  await initializeOperator();const doc=dom.window.document;
+  doc.querySelector<HTMLButtonElement>('#operator-moderation-tile')!.click();await tick();
+  const pending=doc.querySelector<HTMLButtonElement>('#operator-pending-tab')!,processed=doc.querySelector<HTMLButtonElement>('#operator-processed-tab')!;
+  assert.equal(pending.getAttribute('aria-selected'),'true');assert.equal(doc.querySelector('#operator-pending-count')!.textContent,'2');assert.match(doc.querySelector('#notices')!.textContent!,/Accepted by agent/);
+  doc.querySelector<HTMLButtonElement>('#notices .operator-accept-decision')!.click();await tick();await tick();
+  assert.ok(requests.some(r=>r.path==='/api/operator/moderation/42/accept'));assert.equal(doc.querySelector('.operator-notice-card'),null);assert.equal(doc.querySelector('#operator-pending-count')!.textContent,'1');assert.equal(doc.querySelector('#operator-processed-count')!.textContent,'1');
+  doc.querySelector<HTMLButtonElement>('#operator-reviews .operator-accept-decision')!.click();await tick();await tick();
+  assert.equal(doc.querySelector('#operator-pending-count')!.textContent,'0');processed.click();await tick();
+  assert.equal(doc.querySelector('#operator-moderation-queue')!.getAttribute('aria-labelledby'),processed.id);assert.match(doc.querySelector('#notices')!.textContent!,/Accepted by you/);
+  assert.equal(doc.querySelector('#notices .operator-accept-decision'),null);assert.ok(doc.querySelector('#notices button[aria-label="Request review"]'));
+  processed.dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:'Home',bubbles:true,cancelable:true}));await tick();assert.equal(doc.activeElement,pending);
+},{signedIn:true,withData:true,reviews:true,decided:true,agentAccepted:true}));
+test('pending operator reviews cannot be accepted before the administrator decides',async()=>fixture(async(dom)=>{
+  await initializeOperator();const doc=dom.window.document;doc.querySelector<HTMLButtonElement>('#operator-moderation-tile')!.click();await tick();
+  assert.equal(doc.querySelector('#operator-reviews .operator-accept-decision'),null);assert.ok(doc.querySelector('#operator-reviews button[aria-label="Add context"]'));
+},{signedIn:true,reviews:true}));

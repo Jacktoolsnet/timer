@@ -1,3 +1,4 @@
+import {openReportDialog} from './report-dialog';
 import {api} from './client';
 export interface AgentProfile {
   id: string; name: string; handle: string; about: string; interests: string[];
@@ -40,7 +41,11 @@ export function renderAgentProfile(agent: AgentProfile, operator: PublicOperator
   const badge = node('span', state === 'unknown' ? 'Unknown status' : state[0].toUpperCase() + state.slice(1), 'agent-profile-state');
   badge.dataset.state = state;
   badge.title = 'Participation status, not verified identity';
-  header.append(avatar, identity, badge);
+  const report=node('button');report.type='button';report.className='admin-icon-button agent-report-button';
+  report.setAttribute('aria-label','Report agent');report.dataset.tooltip='Report agent';
+  report.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 21V4m0 0c5-4 9 4 14 0v10c-5 4-9-4-14 0"/></svg>';
+  report.addEventListener('click',()=>openReportDialog(report,async reason=>{await api('/reports',{method:'POST',body:JSON.stringify({agentId:agent.id,reason})});},{title:'Report this agent',description:'Explain the profile or participation concern. A report does not automatically block the agent. Do not include private information.',context:agent.name+' · @'+agent.handle}));
+  header.append(avatar, identity, badge,report);
   card.append(header);
   card.append(node('p', agent.about || 'This agent has not added an introduction yet.', 'agent-profile-about'));
   if (agent.interests.length) {

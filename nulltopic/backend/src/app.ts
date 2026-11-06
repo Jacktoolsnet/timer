@@ -1,4 +1,7 @@
+import {accepted,noticeAcceptance,queueFilter,acceptDecision} from "./decision-acknowledgements.js";
+import {appealFields,addAppealMessage} from "./appeal-access.js";
 import Fastify from "fastify";
+import {sessionDeadline} from "./session-policy.js";
 import {syncRootAdministrator} from "./root-admin.js";
 import { normalizeAvatar, MAX_AVATAR_BASE64 } from "./avatar.js";
 import cookie from "@fastify/cookie";
@@ -17,6 +20,7 @@ declare module "fastify" {
     adminId?: string;
     adminVersion?: string;
     csrf?: string;
+    authenticatedAt?: number;
   }
 }
 const hash = (s: string) => createHash("sha256").update(s).digest("hex");
@@ -50,11 +54,11 @@ const reactionCounts = `(SELECT count(*)::int FROM post_reactions r WHERE r.post
 const postQuery = `SELECT p.*,${reactionCounts},
   (SELECT count(*)::int FROM posts comments WHERE comments.conversation_id=p.conversation_id AND comments.parent_id IS NOT NULL AND (p.parent_id IS NULL OR comments.parent_id=p.id)) AS comment_count,
   a.handle,a.name,(a.avatar_base64 IS NOT NULL) AS has_avatar FROM posts p JOIN agents a ON a.id=p.agent_id`;
-async function agent(req: any, db: DB, write = false) {
+async function agent(req: any, db: DB, write = false, keyShare = false) {
   const token = req.headers.authorization?.match(/^Bearer (\S+)$/)?.[1];
   if (!token) fail(401, "UNAUTHORIZED", "Agent key required");
   const a = (
-    await db.query("SELECT * FROM agents WHERE key_hash=$1 FOR UPDATE", [
+    await db.query(`SELECT * FROM agents WHERE key_hash=$1 FOR ${keyShare ? "KEY SHARE" : "UPDATE"}`, [
       hash(token),
     ])
   ).rows[0];
@@ -63,6 +67,14 @@ async function agent(req: any, db: DB, write = false) {
     fail(403, "AGENT_INACTIVE", "Agent is not active");
   if (req.method === "GET") await limit(db, a.id, "agent_read", 120, 60);
   return a;
+}
+async function moderationAgent(req:any,db:DB){
+ const a=await agent(req,db,false,true);
+ if(!['active','paused','blocked'].includes(a.status))fail(403,'AGENT_INACTIVE','Operator approval is required before accessing moderation');
+ return a;
+}
+async function chargeAgentAppeal(req:any){
+ await transaction(async c=>{const a=await moderationAgent(req,c);await limit(c,a.id,'agent_appeal',6,3600);await limit(c,a.operator_id,'appeal_owner',30,3600);});
 }
 function owner(req: any) {
   return (
@@ -117,14 +129,16 @@ export async function createApp() {
   await app.register(cookie);
   const store: any = {
     compareAndSet(sid: string, generation: string, data: any, cb: any) {
+      const deadline = sessionDeadline(data);
+      if (deadline === null) return cb(Object.assign(new Error("Session expired"), {code: "ENOENT"}));
       pool
         .query(
-          "UPDATE sessions SET data=$3,expires_at=$4 WHERE sid=$1 AND COALESCE(data->'__fastifySessionMetadata'->>'generation',sid)=$2",
+          "UPDATE sessions SET data=$3,expires_at=$4 WHERE sid=$1 AND expires_at>now() AND COALESCE(data->'__fastifySessionMetadata'->>'generation',sid)=$2",
           [
             sid,
             generation,
             JSON.stringify(data),
-            new Date(Date.now() + 86400000),
+            new Date(deadline),
           ],
         )
         .then((r) => {
@@ -137,10 +151,12 @@ export async function createApp() {
         .catch(cb);
     },
     set(sid: string, data: any, cb: any) {
+      const deadline = sessionDeadline(data);
+      if (deadline === null) return cb(Object.assign(new Error("Session expired"), {code: "ENOENT"}));
       pool
         .query(
           "INSERT INTO sessions VALUES($1,$2,$3) ON CONFLICT(sid) DO UPDATE SET data=$2,expires_at=$3",
-          [sid, JSON.stringify(data), new Date(Date.now() + 86400000)],
+          [sid, JSON.stringify(data), new Date(deadline)],
         )
         .then(() => cb())
         .catch(cb);
@@ -150,7 +166,18 @@ export async function createApp() {
         .query("SELECT data FROM sessions WHERE sid=$1 AND expires_at>now()", [
           sid,
         ])
-        .then((r) => cb(null, r.rows[0]?.data))
+        .then((r) => {
+          const data = r.rows[0]?.data;
+          if (!data || sessionDeadline(data) === null) return cb(null, undefined);
+          // Never restore a persistent cookie from a pre-policy anonymous session.
+          if (data.cookie) {
+            delete data.cookie.expires;
+            delete data.cookie.originalExpires;
+            delete data.cookie.originalMaxAge;
+            delete data.cookie.maxAge;
+          }
+          cb(null, data);
+        })
         .catch(cb);
     },
     destroy(sid: string, cb: any) {
@@ -167,9 +194,9 @@ export async function createApp() {
       secure: process.env.NODE_ENV === "production",
       httpOnly: true,
       sameSite: "lax",
-      maxAge: 86400000,
       path: "/",
     },
+    rolling: true,
     saveUninitialized: false,
     store,
   });
@@ -250,7 +277,7 @@ export async function createApp() {
     if (
       req.method === "GET" &&
       req.headers.authorization &&
-      !["/api/me", "/api/registration-status"].includes(req.url.split("?")[0])
+      !["/api/me", "/api/me/moderation", "/api/me/appeals", "/api/registration-status"].includes(req.url.split("?")[0])
     )
       await transaction(async (c) => {
         await agent(req, c);
@@ -291,15 +318,22 @@ export async function createApp() {
       profile.omit({ handle: true, operating_context: true }).partial(),
     ),
     "POST /api/reports": json(
-      z.object({ postId: uuid, reason: z.string().min(1).max(1000) }),
+      z.object({postId:uuid.optional(),agentId:uuid.optional(),reason:z.string().trim().min(1).max(1000)}).refine(b=>!!b.postId!==!!b.agentId,"Choose exactly one report target"),
     ),
     "PATCH /api/operator": json(z.object({ guidelines: z.string().max(2000) })),
     "POST /api/operator/agents/:id": json(
       z.object({ action: z.enum(["pause", "activate", "rotate", "revoke"]) }),
     ),
+    "POST /api/me/appeals": json(z.object({moderationId:z.string().regex(/^[0-9]{1,19}$/),reason:z.string().trim().min(1).max(2000)})),
+    "POST /api/me/appeals/:id/messages": json(z.object({body:z.string().trim().min(1).max(2000)})),
+    "POST /api/operator/appeals/:id/messages": json(z.object({body:z.string().trim().min(1).max(2000)})),
     "POST /api/operator/appeals": json(
-      z.object({ reason: z.string().min(1).max(2000) }),
+      z.object({ reason: z.string().min(1).max(2000), moderationId:z.string().regex(/^[0-9]{1,19}$/).optional() }),
     ),
+    "POST /api/admin/appeals/:id/decision": json(z.object({
+      outcome: z.enum(["accepted", "accepted_restore", "accepted_unblock", "rejected", "closed"]),
+      response: z.string().trim().min(1).max(2000),expectedRevision:z.number().int().min(0).default(0),
+    })),
     "POST /api/admin/actions": json(
       z.object({
         action: z.enum(["hide", "block", "unblock", "dismiss"]),
@@ -322,7 +356,12 @@ export async function createApp() {
         required: ["id"],
         properties: { id: { type: "string", format: "uuid" } },
       };
+    if(route.url.includes(':decisionId'))schema.params={type:'object',required:['decisionId'],properties:{decisionId:{type:'string',pattern:'^[0-9]{1,19}$'}}};
     const queryProperties: Record<string, unknown> = {
+      "/api/me/moderation": {status:{type:"string",enum:["pending","processed"]}},
+      "/api/me/appeals": {status:{type:"string",enum:["pending","processed"]}},
+      "/api/operator": {moderationStatus:{type:"string",enum:["pending","processed"]}},
+      "/api/admin": {status:{type:"string",enum:["pending","processed"]}},
       "/api/feed": {
         cursor: {
           type: "string",
@@ -386,7 +425,7 @@ export async function createApp() {
     if (bodies[method + " " + route.url])
       schema.body = bodies[method + " " + route.url];
     if (
-      route.url === "/api/me" || route.url === "/api/me/avatar" || route.url === "/api/posts/:id/reaction" ||
+      route.url === "/api/me" || route.url.startsWith("/api/me/") || route.url === "/api/posts/:id/reaction" ||
       route.url === "/api/registration-status" ||
       (route.url.startsWith("/api/posts") &&
         method !== "GET" &&
@@ -428,6 +467,7 @@ export async function createApp() {
     if (!user || (b.admin && !user.enabled) || !(await argon2.verify(user.password, b.password)))
       fail(401, "UNAUTHORIZED", "Invalid credentials");
     await req.session.regenerate();
+    req.session.authenticatedAt = Date.now();
     if (b.admin) { req.session.adminId = user.id; req.session.adminVersion = user.auth_version; }
     else req.session.operatorId = user.id;
     req.session.csrf = secret();
@@ -811,28 +851,28 @@ export async function createApp() {
   );
   app.post("/api/reports", async (req) => {
     const b = z
-      .object({ postId: uuid, reason: z.string().min(1).max(1000) })
+      .object({postId:uuid.optional(),agentId:uuid.optional(),reason:z.string().trim().min(1).max(1000)}).refine(b=>!!b.postId!==!!b.agentId,"Choose exactly one report target")
       .parse(req.body);
     return transaction(async (c) => {
       if (req.headers.authorization) {
         const a = await agent(req, c, true);
         await limit(c, a.id, "agent_report", 10, 3600);
       } else await limit(c, req.ip, "public_report", 5, 3600);
-      if (
-        !(await c.query("SELECT 1 FROM posts WHERE id=$1", [b.postId])).rowCount
-      )
-        fail(404, "NOT_FOUND", "Post unavailable");
-      await c.query("INSERT INTO reports(id,post_id,reason) VALUES($1,$2,$3)", [
-        randomUUID(),
-        b.postId,
-        b.reason,
-      ]);
+      if(b.agentId){
+        const saved=await c.query("INSERT INTO reports(id,agent_id,target_kind,reason) SELECT $1,id,'agent',$3 FROM agents WHERE id=$2 AND status IN ('active','paused','blocked') RETURNING id",[randomUUID(),b.agentId,b.reason]);
+        if(!saved.rowCount)fail(404,"NOT_FOUND","Public agent unavailable");
+      }else{
+        const saved=await c.query("INSERT INTO reports(id,post_id,reason) SELECT $1,id,$3 FROM posts WHERE id=$2 RETURNING id",[randomUUID(),b.postId,b.reason]);
+        if(!saved.rowCount)fail(404,"NOT_FOUND","Post unavailable");
+      }
       return { ok: true };
     });
   });
   app.get("/api/operator", async (req) => {
     const id = owner(req);
+    const selected=z.object({moderationStatus:z.enum(['pending','processed']).optional()}).parse(req.query).moderationStatus || null;
     return {
+      moderation_counts:(await pool.query(`SELECT ((SELECT count(*) FROM moderation m JOIN agents a ON a.id=m.agent_id WHERE a.operator_id=$1 AND ${queueFilter('moderation','m','operator','$1',"'pending'")})+(SELECT count(*) FROM appeals r WHERE r.operator_id=$1 AND ${queueFilter('appeal','r','operator','$1',"'pending'")}))::int AS pending,((SELECT count(*) FROM moderation m JOIN agents a ON a.id=m.agent_id WHERE a.operator_id=$1 AND ${queueFilter('moderation','m','operator','$1',"'processed'")})+(SELECT count(*) FROM appeals r WHERE r.operator_id=$1 AND ${queueFilter('appeal','r','operator','$1',"'processed'")}))::int AS processed`,[id])).rows[0],
       operator: (
         await pool.query(
           "SELECT id,handle,guidelines FROM operators WHERE id=$1",
@@ -845,10 +885,17 @@ export async function createApp() {
           [id],
         )
       ).rows,
+      review_requests: (
+        await pool.query(`SELECT ${appealFields} FROM appeals r WHERE r.operator_id=$1 AND ${queueFilter('appeal','r','operator','$1','$2')} ORDER BY r.created_at DESC,r.id DESC LIMIT 100`, [id,selected])
+      ).rows,
       notices: (
         await pool.query(
-          "SELECT m.action,m.reason,m.created_at,m.agent_id FROM moderation m JOIN agents a ON a.id=m.agent_id WHERE a.operator_id=$1 ORDER BY m.id DESC LIMIT 50",
-          [id],
+          `SELECT m.id,m.action,m.reason,m.created_at,m.agent_id,m.post_id,
+          a.name AS agent_name,a.handle AS agent_handle,(a.avatar_base64 IS NOT NULL) AS has_avatar,
+          p.body AS post_body,p.state AS post_state,p.conversation_id,p.parent_id,${noticeAcceptance()}
+          FROM moderation m JOIN agents a ON a.id=m.agent_id LEFT JOIN posts p ON p.id=m.post_id
+          WHERE a.operator_id=$1 AND ${queueFilter('moderation','m','operator','$1','$2')} ORDER BY m.id DESC LIMIT 50`,
+          [id,selected],
         )
       ).rows,
     };
@@ -897,13 +944,59 @@ export async function createApp() {
       return { ok: true };
     });
   });
+  app.get('/api/me/moderation',async req=>transaction(async c=>{
+    const a=await moderationAgent(req,c);
+    const selected=z.object({status:z.enum(['pending','processed']).optional()}).parse(req.query).status || null;
+    return (await c.query(`SELECT m.id,m.action,m.reason,m.created_at,m.agent_id,m.post_id,p.body AS post_body,p.state AS post_state,p.conversation_id,${noticeAcceptance()} FROM moderation m JOIN agents a ON a.id=m.agent_id LEFT JOIN posts p ON p.id=m.post_id WHERE m.agent_id=$1 AND ${queueFilter('moderation','m','agent','$1','$2')} ORDER BY m.id DESC LIMIT 50`,[a.id,selected])).rows;
+  }));
+  app.get('/api/me/appeals',async req=>transaction(async c=>{
+    const a=await moderationAgent(req,c);
+    const selected=z.object({status:z.enum(['pending','processed']).optional()}).parse(req.query).status || null;
+    return (await c.query(`SELECT ${appealFields} FROM appeals r WHERE r.subject_agent_id=$1 AND r.operator_id=$2 AND ${queueFilter('appeal','r','agent','$1','$3')} ORDER BY r.created_at DESC,r.id DESC LIMIT 100`,[a.id,a.operator_id,selected])).rows;
+  }));
+  for(const asAgent of [false,true]) for(const target of ['moderation','appeal'] as const){
+    const prefix=asAgent?'/api/me':'/api/operator';
+    const path=target==='moderation'?prefix+'/moderation/:decisionId/accept':prefix+'/appeals/:id/accept';
+    app.post(path,async req=>{
+      const id=target==='moderation'?z.string().regex(/^[0-9]{1,19}$/).parse((req.params as any).decisionId):uuid.parse((req.params as any).id);
+      if(asAgent){
+        await transaction(async c=>{const a=await moderationAgent(req,c);await limit(c,a.id,'agent_ack',30,3600);await limit(c,a.operator_id,'ack_owner',120,3600);});
+        return transaction(async c=>{const a=await moderationAgent(req,c);return acceptDecision(c,target,id,{operatorId:a.operator_id,agentId:a.id});});
+      }
+      const operatorId=owner(req);await transaction(c=>limit(c,operatorId,'ack_owner',120,3600));
+      return transaction(c=>acceptDecision(c,target,id,{operatorId}));
+    });
+  }
+  app.post('/api/me/appeals',async req=>{
+    const b=z.object({moderationId:z.string().regex(/^[0-9]{1,19}$/),reason:z.string().trim().min(1).max(2000)}).parse(req.body);
+    await chargeAgentAppeal(req);
+    return transaction(async c=>{
+      const a=await moderationAgent(req,c);
+      await c.query("SELECT pg_advisory_xact_lock(hashtextextended($1,0))",['appeal:'+a.id+':'+b.moderationId]);
+      const original=(await c.query('SELECT id FROM moderation WHERE id::text=$1 AND agent_id=$2',[b.moderationId,a.id])).rows[0];
+      if(!original)fail(404,'NOT_FOUND','Own moderation decision unavailable');
+      if((await c.query("SELECT id FROM appeals WHERE moderation_id=$1 AND subject_agent_id=$2 AND status='pending' LIMIT 1",[original.id,a.id])).rowCount)fail(409,'REVIEW_PENDING','A pending review already exists. Add context to that request instead');
+      const created=(await c.query("INSERT INTO appeals(id,operator_id,subject_agent_id,moderation_id,reason,submitted_by,submitted_agent_id) VALUES($1,$2,$3,$4,$5,'agent',$3) RETURNING id",[randomUUID(),a.operator_id,a.id,original.id,b.reason])).rows[0];return {id:created.id};
+    });
+  });
+  app.post('/api/me/appeals/:id/messages',async req=>{
+    const id=uuid.parse((req.params as any).id),b=z.object({body:z.string().trim().min(1).max(2000)}).parse(req.body);
+    await chargeAgentAppeal(req);
+    return transaction(async c=>{const a=await moderationAgent(req,c);return addAppealMessage(c,id,b.body,{operatorId:a.operator_id,agentId:a.id});});
+  });
+  app.post('/api/operator/appeals/:id/messages',async req=>{
+    const operatorId=owner(req),id=uuid.parse((req.params as any).id),b=z.object({body:z.string().trim().min(1).max(2000)}).parse(req.body);
+    await transaction(c=>limit(c,operatorId,'appeal_owner',30,3600));
+    return transaction(c=>addAppealMessage(c,id,b.body,{operatorId}));
+  });
   app.post("/api/operator/appeals", async (req) => {
     const id = owner(req);
-    const b = z.object({ reason: z.string().min(1).max(2000) }).parse(req.body);
-    await pool.query(
-      "INSERT INTO appeals(id,operator_id,reason) VALUES($1,$2,$3)",
-      [randomUUID(), id, b.reason],
-    );
+    const b = z.object({ reason:z.string().trim().min(1).max(2000),moderationId:z.string().regex(/^[0-9]{1,19}$/).optional() }).parse(req.body);
+    await transaction(c=>limit(c,id,'appeal_owner',30,3600));
+    if(b.moderationId){
+      const saved=await pool.query("INSERT INTO appeals(id,operator_id,reason,moderation_id,subject_agent_id) SELECT $1,$2,$3,m.id,m.agent_id FROM moderation m JOIN agents a ON a.id=m.agent_id WHERE m.id::text=$4 AND a.operator_id=$2 RETURNING id",[randomUUID(),id,b.reason,b.moderationId]);
+      if(!saved.rowCount)fail(404,"NOT_FOUND","Owned moderation decision unavailable");
+    }else await pool.query("INSERT INTO appeals(id,operator_id,reason) VALUES($1,$2,$3)",[randomUUID(),id,b.reason]);
     return { ok: true };
   });
   app.get("/api/admin/users", async (req) => {
@@ -940,23 +1033,64 @@ export async function createApp() {
   });
   app.get("/api/admin", async (req) => {
     admin(req);
+    const selected=z.object({status:z.enum(['pending','processed']).optional()}).parse(req.query).status || null;
     return {
+      counts:(await pool.query("SELECT ((SELECT count(*) FROM reports WHERE NOT resolved)+(SELECT count(*) FROM appeals WHERE status='pending'))::int AS pending,((SELECT count(*) FROM reports WHERE resolved)+(SELECT count(*) FROM appeals WHERE status<>'pending'))::int AS processed")).rows[0],
       reports: (
         await pool.query(
-          `SELECT r.*,p.body AS post_body,p.state AS post_state,p.conversation_id,p.parent_id,p.agent_id,
+          `SELECT r.*,p.body AS post_body,p.state AS post_state,p.conversation_id,p.parent_id,COALESCE(p.agent_id,r.agent_id) AS agent_id,
           a.handle AS agent_handle,a.name AS agent_name,(a.avatar_base64 IS NOT NULL) AS has_avatar
-          FROM reports r LEFT JOIN posts p ON p.id=r.post_id LEFT JOIN agents a ON a.id=p.agent_id
-          ORDER BY r.created_at DESC,r.id DESC LIMIT 100`,
+          FROM reports r LEFT JOIN posts p ON p.id=r.post_id LEFT JOIN agents a ON a.id=COALESCE(p.agent_id,r.agent_id)
+          WHERE ($1::text IS NULL OR ($1='pending' AND NOT r.resolved) OR ($1='processed' AND r.resolved))
+          ORDER BY r.created_at DESC,r.id DESC LIMIT 100`,[selected],
         )
       ).rows,
       appeals: (
         await pool.query(
-          `SELECT r.*,o.handle AS operator_handle FROM appeals r LEFT JOIN operators o ON o.id=r.operator_id
-          ORDER BY r.created_at DESC,r.id DESC LIMIT 100`,
+          `SELECT ${appealFields},o.handle AS operator_handle,m.action AS original_action FROM appeals r LEFT JOIN operators o ON o.id=r.operator_id LEFT JOIN moderation m ON m.id=r.moderation_id
+          WHERE ($1::text IS NULL OR ($1='pending' AND r.status='pending') OR ($1='processed' AND r.status<>'pending'))
+          ORDER BY r.created_at DESC,r.id DESC LIMIT 100`,[selected],
         )
       ).rows,
     };
   });
+  app.post("/api/admin/appeals/:id/decision", async (req) => {
+    const actor = admin(req);
+    const id = uuid.parse((req.params as any).id);
+    const body = z.object({outcome:z.enum(["accepted","accepted_restore","accepted_unblock","rejected","closed"]),response:z.string().trim().min(1).max(2000),expectedRevision:z.number().int().min(0).default(0)}).parse(req.body);
+    const correction=body.outcome==='accepted_restore'?'restore':body.outcome==='accepted_unblock'?'unblock':null;
+    return transaction(async c => {
+      // Acquire target locks before the appeal: cleanup locks conversation -> deletes
+      // moderation -> nulls its appeal FK. The opposite order could deadlock.
+      const target=correction?(await c.query("SELECT m.*,p.conversation_id FROM appeals ap JOIN moderation m ON m.id=ap.moderation_id JOIN agents a ON a.id=m.agent_id LEFT JOIN posts p ON p.id=m.post_id WHERE ap.id=$1 AND a.operator_id=ap.operator_id",[id])).rows[0]:null;
+      if(target && correction==='restore' && target.conversation_id)await c.query("SELECT id FROM conversations WHERE id=$1 FOR UPDATE",[target.conversation_id]);
+      if(target && correction==='unblock')await c.query("SELECT id FROM agents WHERE id=$1 FOR UPDATE",[target.agent_id]);
+      const appeal=(await c.query("SELECT * FROM appeals WHERE id=$1 FOR UPDATE",[id])).rows[0];
+      if(!appeal)fail(404,"NOT_FOUND","Review request unavailable");
+      if(appeal.status!=='pending')fail(409,"ALREADY_DECIDED","This review request has already been decided");
+      if(appeal.revision!==body.expectedRevision)fail(409,'REVIEW_CHANGED','New context was added. Reload the request before deciding');
+      if(correction){
+        if(!target || appeal.moderation_id!==target.id || (correction==='restore'?target.action!=='hide':target.action!=='block'))fail(409,"CORRECTION_UNAVAILABLE","This request has no matching moderation decision to reverse");
+        const newer=(await c.query(correction==='restore'?"SELECT 1 FROM moderation WHERE post_id=$1 AND id>$2 AND action IN ('hide','restore') LIMIT 1":"SELECT 1 FROM moderation WHERE agent_id=$1 AND id>$2 AND action IN ('block','unblock') LIMIT 1",[correction==='restore'?target.post_id:target.agent_id,target.id])).rowCount;
+        if(newer)fail(409,"NEWER_DECISION","A newer moderation decision exists. Review it instead");
+        if(correction==='restore'){
+          // A hidden ancestor would keep a restored reply inaccessible.
+          const unavailable=(await c.query("WITH RECURSIVE ancestors AS (SELECT p.* FROM posts p WHERE p.id=(SELECT parent_id FROM posts WHERE id=$1) UNION ALL SELECT p.* FROM posts p JOIN ancestors a ON p.id=a.parent_id) SELECT 1 FROM ancestors WHERE state<>'visible' LIMIT 1",[target.post_id])).rowCount;
+          if(unavailable)fail(409,"PARENT_UNAVAILABLE","Restore the affected parent message separately first");
+          const restored=await c.query("UPDATE posts SET state='visible' WHERE id=$1 AND state='hidden' AND body IS NOT NULL RETURNING id",[target.post_id]);
+          if(!restored.rowCount)fail(409,"MESSAGE_UNAVAILABLE","Message is not hidden or is no longer available");
+        }else{
+          const unblocked=await c.query("UPDATE agents SET status='paused' WHERE id=$1 AND status='blocked' RETURNING id",[target.agent_id]);
+          if(!unblocked.rowCount)fail(409,"AGENT_UNAVAILABLE","Agent is no longer blocked");
+        }
+        await c.query("INSERT INTO moderation(admin_id,agent_id,post_id,action,reason) VALUES($1,$2,$3,$4,$5)",[actor,target.agent_id,correction==='restore'?target.post_id:null,correction,body.response]);
+        if(correction==='restore')await event(c,"changed",target.conversation_id);
+      }
+      await c.query("UPDATE appeals SET status=$2,response=$3,decided_at=now(),decided_by=$4,correction=$5 WHERE id=$1",[id,correction?'accepted':body.outcome,body.response,actor,correction]);
+      return {ok:true,correction};
+    });
+  });
+
   app.post("/api/admin/actions", async (req) => {
     const administrator = admin(req);
     const b = z
@@ -969,9 +1103,13 @@ export async function createApp() {
       .parse(req.body);
     if (b.action === "dismiss" && !b.reportId) fail(400, "REPORT_REQUIRED", "Select a report to close without action");
     return transaction(async (c) => {
+      const report=b.reportId?(await c.query("SELECT target_kind,agent_id FROM reports WHERE id=$1 AND NOT resolved",[b.reportId])).rows[0]:null;
+      if(b.reportId&&!report)fail(409,"REPORT_UNAVAILABLE","Report already reviewed or unavailable");
+      const agentReport=report?.target_kind==='agent';
+      if(agentReport && (report.agent_id!==b.id || !['block','dismiss'].includes(b.action)))fail(409,"REPORT_TARGET","Agent reports allow block or no action for the selected agent only");
       let agentId = b.id,
         postId = null;
-      if (b.action === "hide" || b.action === "dismiss") {
+      if (b.action === "hide" || (b.action === "dismiss" && !agentReport)) {
         const target = (
           await c.query("SELECT conversation_id FROM posts WHERE id=$1", [b.id])
         ).rows[0];
@@ -991,6 +1129,8 @@ export async function createApp() {
         agentId = p.agent_id;
         postId = b.id;
         if (b.action === "hide") await event(c, "changed", p.conversation_id);
+      } else if(b.action==='dismiss'){
+        if(!(await c.query("SELECT id FROM agents WHERE id=$1",[b.id])).rowCount)fail(404,"NOT_FOUND","Agent unavailable");
       } else {
         if (
           !(
@@ -1004,7 +1144,7 @@ export async function createApp() {
       }
       if (b.reportId) {
         const resolved = await c.query(
-          "UPDATE reports r SET resolved=true FROM posts p WHERE r.id=$1 AND r.post_id=p.id AND NOT r.resolved AND (($2::uuid IS NOT NULL AND p.id=$2) OR ($2::uuid IS NULL AND p.agent_id=$3)) RETURNING r.id",
+          "UPDATE reports r SET resolved=true WHERE r.id=$1 AND NOT r.resolved AND ((r.target_kind='agent' AND r.agent_id=$3 AND $2::uuid IS NULL) OR (r.target_kind='message' AND EXISTS(SELECT 1 FROM posts p WHERE p.id=r.post_id AND (($2::uuid IS NOT NULL AND p.id=$2) OR ($2::uuid IS NULL AND p.agent_id=$3))))) RETURNING r.id",
           [b.reportId, postId, agentId],
         );
         if (!resolved.rowCount) fail(409, "REPORT_UNAVAILABLE", "Report already reviewed, unavailable or unrelated to this target");

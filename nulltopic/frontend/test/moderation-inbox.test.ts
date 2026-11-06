@@ -52,3 +52,11 @@ test('moderation preview shows the local agent avatar and falls back to initials
     assert.equal(renderModerationInbox({reports:[item], appeals:[]}, () => {}).querySelector('img'), null);
   }
 }));
+
+
+test('agent reports display profile context and can be selected without a message',()=>fixture(()=>{
+  let selected:ModerationReport|undefined;
+  const inbox=renderModerationInbox({reports:[{...report,target_kind:'agent',post_id:null,post_body:null,conversation_id:null}],appeals:[]},item=>selected=item);
+  assert.match(inbox.textContent!,/Agent report/);assert.doesNotMatch(inbox.textContent!,/Message text no longer available/);
+  assert.equal(inbox.querySelector('a')!.getAttribute('href'),'/agents?id=agent');inbox.querySelector('button')!.click();assert.equal(selected?.agent_id,'agent');
+}));

@@ -1,5 +1,8 @@
+import {renderReviewParticipation} from './review-participation';
+import {initializeReviewDecisionPicker} from './review-decision-picker';
+import {initializeWorkspaceDialog} from './workspace-dialog';
 import {initializeModerationActionPicker} from './moderation-action-picker';
-import {renderModerationInbox, type ModerationReport} from './moderation-inbox';
+import {renderModerationInbox, type ModerationReport, type ReviewRequest, type ModerationInbox} from './moderation-inbox';
 import {api} from './client';
 type View = 'overview' | 'users' | 'moderation';
 type AdminUser = {id: string; handle: string; is_root: boolean; enabled: boolean};
@@ -22,7 +25,30 @@ export async function initializeAdministration() {
   let csrf = '', signedIn = false, isRoot = false, signingIn = false, creatingUser = false;
   let view: View = 'overview', viewVersion = 0, usersRequest = 0, users: AdminUser[] = [];
   let checkingPermission = false;
+  let moderationStatus:'pending'|'processed'='pending';
+  const tabs=Array.from(document.querySelectorAll<HTMLButtonElement>('[data-moderation-status]'));
+  const reportsPanel=document.querySelector<HTMLElement>('#reports')!;
+  function updateTabs(counts?:{pending:number;processed:number}){
+    for(const tab of tabs){const selected=tab.dataset.moderationStatus===moderationStatus;tab.setAttribute('aria-selected',String(selected));tab.tabIndex=selected?0:-1;}
+    reportsPanel.setAttribute('aria-labelledby','moderation-'+moderationStatus+'-tab');
+    if(counts)for(const name of ['pending','processed'] as const)document.getElementById('moderation-'+name+'-count')!.textContent=String(counts[name]);
+  }
+  for(const tab of tabs){
+    tab.addEventListener('click',()=>{if(!signedIn)return;moderationStatus=tab.dataset.moderationStatus as 'pending'|'processed';updateTabs();void showView('moderation');});
+    tab.addEventListener('keydown',event=>{
+      if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();
+      const index=tabs.indexOf(tab),next=event.key==='Home'?0:event.key==='End'?tabs.length-1:(index+(event.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length;
+      tabs[next].focus();tabs[next].click();
+    });
+  }
+
   let selectedReport: ModerationReport | null = null;
+  let selectedReview: ReviewRequest | null = null;
+  const reviewForm=document.querySelector<HTMLFormElement>('#review-decision')!;
+  const syncReviewPicker=initializeReviewDecisionPicker(document.querySelector<HTMLSelectElement>('#review-outcome')!,document.querySelector<HTMLTextAreaElement>('#review-response')!);
+  const modal=initializeWorkspaceDialog(document.querySelector<HTMLDialogElement>('#admin-moderation-dialog')!,()=>{clearReview();actionForm.reset();actionForm.hidden=true;selectedReport=null;selection.hidden=true;});
+  function clearReview(){selectedReview=null;reviewForm.reset();reviewForm.hidden=true;document.querySelector('#review-decision-context')!.replaceChildren();}
+
   const actionForm = document.querySelector<HTMLFormElement>('#action')!;
   const actionType = document.querySelector<HTMLSelectElement>('#action-type')!;
   const actionId = document.querySelector<HTMLInputElement>('#action-id')!;
@@ -30,11 +56,13 @@ export async function initializeAdministration() {
   const selection = document.querySelector<HTMLElement>('#moderation-selection')!;
   function selectTarget() {
     if (!selectedReport) return;
-    actionId.value = (['hide','dismiss'].includes(actionType.value) ? selectedReport.post_id : selectedReport.agent_id) || '';
-    selection.textContent = 'Selected ' + (['hide','dismiss'].includes(actionType.value) ? 'message' : 'agent') + (selectedReport.agent_handle ? ' · @' + selectedReport.agent_handle : '') + '. Review or edit the reason before submitting.';
+    actionId.value = (selectedReport.target_kind!=='agent' && ['hide','dismiss'].includes(actionType.value) ? selectedReport.post_id : selectedReport.agent_id) || '';
+    selection.textContent = 'Selected ' + (selectedReport.target_kind!=='agent' && ['hide','dismiss'].includes(actionType.value) ? 'message' : 'agent') + (selectedReport.agent_handle ? ' · @' + selectedReport.agent_handle : '') + '. Review or edit the reason before submitting.';
     selection.hidden = false;
   }
   actionType.addEventListener('change', selectTarget);
+
+
   const send = (path: string, body: unknown, method = 'POST') => api(path, {
     method, headers: {'x-csrf-token': csrf}, body: JSON.stringify(body),
   });
@@ -75,7 +103,7 @@ export async function initializeAdministration() {
       try { await refresh(); }
       catch {
         signedIn = isRoot = false; ++usersRequest; clearPasswords(); toolbar(false);
-        dashboard.hidden = true; shell.hidden = false;
+        modal.close(true);dashboard.hidden = true; shell.hidden = false;
         document.querySelector('#admin-users')!.replaceChildren();
         document.querySelector('#reports')!.textContent = '';
         status.textContent = 'Your session could not be verified. Please sign in again.';
@@ -148,7 +176,7 @@ export async function initializeAdministration() {
     if (!signedIn) return;
     if (next === 'users' && !isRoot) next = 'overview';
     if (view === 'users' && next !== 'users') clearPasswords();
-    if (view === 'moderation' && next !== 'moderation') { actionForm.reset(); selectedReport = null; selection.hidden = true; }
+    if (view === 'moderation' && next !== 'moderation') { modal.close(true); clearReview(); actionForm.reset(); selectedReport = null; selection.hidden = true; }
     view = next;
     const version = ++viewVersion;
     overview.hidden = next !== 'overview';
@@ -163,17 +191,27 @@ export async function initializeAdministration() {
     try {
       if (next === 'users') { usersStatus.textContent = 'Loading accounts…'; await loadUsers(); if (version === viewVersion) usersStatus.textContent = ''; }
       if (next === 'moderation') {
-        document.querySelector('#reports')!.textContent = 'Loading reports…';
-        const data = await api('/admin');
-        if (version === viewVersion && signedIn) document.querySelector('#reports')!.replaceChildren(renderModerationInbox(data, report => {
-          selectedReport = report; actionType.value = 'hide'; selectTarget(); syncActionPicker();
+        reportsPanel.textContent = 'Loading requests…';reportsPanel.setAttribute('aria-busy','true');updateTabs();
+        const data:ModerationInbox = await api('/admin?status='+moderationStatus);
+        if(version===viewVersion && signedIn){updateTabs(data.counts);document.getElementById('moderation-list-limit')!.hidden=!data.counts || data.counts[moderationStatus]<=data.reports.length+data.appeals.length;}
+        if (version === viewVersion && signedIn) document.querySelector('#reports')!.replaceChildren(renderModerationInbox(data, (report,trigger) => {
+          clearReview();actionForm.hidden=false;
+          selectedReport = report; actionType.value = report.target_kind==='agent'?'block':'hide';selectTarget();syncActionPicker(report.target_kind);
           document.querySelector<HTMLTextAreaElement>('#action-reason')!.value = '';
-          actionForm.scrollIntoView({block: 'nearest', behavior: 'instant'});
+          modal.open('moderation-action-title',trigger);
           document.querySelector<HTMLTextAreaElement>('#action-reason')!.focus({preventScroll: true});
-        }));
+        }, (request,trigger)=>{
+          actionForm.hidden=true;
+          clearReview();selectedReview=request;syncReviewPicker(request.original_action);reviewForm.hidden=false;
+          const context=document.querySelector('#review-decision-context')!;
+          const who=document.createElement('p');who.textContent=request.operator_handle?'From @'+request.operator_handle:'Operator review request';
+          const text=document.createElement('p');text.className='moderation-reason';text.textContent=request.reason;
+          context.replaceChildren(who,text,renderReviewParticipation(request));modal.open('review-decision-title',trigger);document.querySelector<HTMLTextAreaElement>('#review-response')!.focus();
+        },moderationStatus));
+        if(version===viewVersion)reportsPanel.removeAttribute('aria-busy');
       }
     } catch (error) {
-      if (version === viewVersion) status.textContent = 'Unable to load this section. Please try again.';
+      if (version === viewVersion){reportsPanel.removeAttribute('aria-busy');status.textContent = 'Unable to load this section. Please try again.';}
       await checkExpired(error);
     }
   }
@@ -196,9 +234,9 @@ export async function initializeAdministration() {
       (login.elements.namedItem('password') as HTMLInputElement).value = '';
       await showView(requestedView());
     } else {
-      ++viewVersion; ++usersRequest; clearPasswords(); users = [];
+      ++viewVersion; ++usersRequest; clearPasswords(); users = [];moderationStatus='pending';updateTabs({pending:0,processed:0});document.getElementById('moderation-list-limit')!.hidden=true;
       filter.value = '';
-      actionForm.reset(); selectedReport = null; selection.hidden = true;
+      modal.close(true);clearReview(); actionForm.reset(); selectedReport = null; selection.hidden = true;
       document.querySelector('#admin-users')!.replaceChildren();
       document.querySelector('#reports')!.textContent = '';
       management.hidden = moderation.hidden = true;
@@ -243,20 +281,31 @@ export async function initializeAdministration() {
       await checkExpired(error);
     } finally { creatingUser = false; button.disabled = false; }
   });
+  let decidingReview=false;
+  reviewForm.addEventListener('submit',async event=>{
+    event.preventDefault();if(decidingReview||!selectedReview||!reviewForm.reportValidity())return;
+    const id=selectedReview.id,revision=selectedReview.revision || 0;const button=reviewForm.querySelector<HTMLButtonElement>('button[type=submit]')!;
+    decidingReview=true;button.disabled=true;modal.setBusy(true);
+    try {
+      await send('/admin/appeals/'+encodeURIComponent(id)+'/decision',{...Object.fromEntries(new FormData(reviewForm)),expectedRevision:revision});
+      modal.close(true);clearReview();await showView('moderation');const heading=document.querySelector<HTMLElement>('#reports-heading')!;heading.tabIndex=-1;heading.focus();status.textContent='Review decided. Your response is now visible to the operator.';
+    }catch(error){status.textContent=(error as {status?:number}).status===409?'Unable to apply this decision. It may have new agent/operator context, already be decided, have a newer moderation action, or refer to an unavailable message or parent. No changes were saved. Reload Moderation and check the current state.':'Unable to send your decision. Please try again.';modal.error(status.textContent || 'Unable to decide this review.');await checkExpired(error);}
+    finally{decidingReview=false;button.disabled=false;modal.setBusy(false);}
+  });
   let recordingAction = false;
   document.querySelector('#action')!.addEventListener('submit', async event => {
     event.preventDefault();
     if (recordingAction || !actionForm.reportValidity()) return;
-    if (actionType.value === 'dismiss' && !selectedReport) { status.textContent = 'Choose Review on a report before closing it without action.'; return; }
-    recordingAction = true;
+    if (actionType.value === 'dismiss' && !selectedReport) { modal.error('Choose Review on a report before closing it without action.'); return; }
+    recordingAction = true;modal.setBusy(true);
     const button = actionForm.querySelector<HTMLButtonElement>('button:not([type=button])')!;
     button.disabled = true;
     try {
       await send('/admin/actions', {...Object.fromEntries(new FormData(actionForm)), ...(selectedReport ? {reportId: selectedReport.id} : {})});
-      actionForm.reset(); selectedReport = null; selection.hidden = true;
-      await showView('moderation'); status.textContent = 'Action recorded.';
-    } catch (error) { status.textContent = 'Unable to record the action. The report may already have been reviewed; check the details and try again.'; await checkExpired(error); }
-    finally { recordingAction = false; button.disabled = false; }
+      modal.close(true);clearReview(); actionForm.reset(); selectedReport = null; selection.hidden = true;
+      await showView('moderation');const heading=document.querySelector<HTMLElement>('#reports-heading')!;heading.tabIndex=-1;heading.focus(); status.textContent = 'Action recorded.';
+    } catch (error) { status.textContent = 'Unable to record the action. The report may already have been reviewed; check the details and try again.';modal.error(status.textContent || 'Unable to record the action.'); await checkExpired(error); }
+    finally { recordingAction = false; button.disabled = false;modal.setBusy(false); }
   });
   logout.addEventListener('click', async () => {
     logout.disabled = true;

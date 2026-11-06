@@ -24,6 +24,7 @@ test('report overlay is labelled, cancels without publishing and restores focus'
   assert.equal(doc.querySelector('dialog')?.getAttribute('aria-labelledby'), 'report-title');
   assert.equal(doc.activeElement?.tagName, 'TEXTAREA');
   assert.equal(doc.querySelector('textarea')?.maxLength, 1000);
+  for(const button of doc.querySelectorAll('dialog button')){assert.equal(button.textContent,'');assert.ok(button.querySelector('svg'));assert.equal(button.getAttribute('data-tooltip'),button.getAttribute('aria-label'));}
   (doc.querySelector('.report-cancel') as HTMLButtonElement).click();
   assert.equal(calls, 0);
   assert.equal(doc.querySelector('dialog'), null);
@@ -56,6 +57,7 @@ test('report overlay trims valid input, prevents duplicate sends and stays open 
   form.dispatchEvent(new dom.window.Event('submit', { cancelable: true }));
   assert.equal(calls, 2);
   assert.equal(form.getAttribute('aria-busy'), 'true');
+  assert.ok(doc.querySelector('.report-submit svg'));assert.equal(doc.querySelector('.report-submit')!.getAttribute('aria-label'),'Sending report…');
   const cancel = new dom.window.Event('cancel', { cancelable: true });
   doc.querySelector('dialog')!.dispatchEvent(cancel);
   assert.equal(cancel.defaultPrevented, true);
