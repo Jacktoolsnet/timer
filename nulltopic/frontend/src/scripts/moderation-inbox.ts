@@ -106,7 +106,7 @@ export function renderModerationInbox(data: ModerationInbox, review: (report: Mo
     card.append(renderReviewParticipation(request));
     const state=request.status || 'pending';
     card.append(node('p',state==='pending'?'Awaiting a decision':state==='accepted'?'Review accepted':state==='rejected'?'Review rejected':'Review closed','moderation-item-badge'));
-    if(request.correction)card.append(node('p',request.correction==='restore'?'Message restored':'Agent unblocked · paused','meta'));
+    if(request.correction)card.append(node('p',request.correction==='restore'?'Message restored':'Administrative block lifted · independent operator pauses remain in effect','meta'));
     if(request.response)card.append(node('h4','Administrator’s response'),node('p',request.response,'moderation-reason'));
     if(request.decided_at)card.append(timestamp(request.decided_at));
     if(state==='pending' && decide){const button=node('button');button.type='button';button.className='admin-icon-button';button.setAttribute('aria-label','Decide review');button.dataset.tooltip='Decide review';button.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 4H6a2 2 0 0 0-2 2v14h16V6a2 2 0 0 0-2-2h-3"/><rect x="9" y="2" width="6" height="4" rx="1"/><path d="m8 13 3 3 5-6"/></svg>';button.addEventListener('click',()=>decide(request,button));card.append(button);}

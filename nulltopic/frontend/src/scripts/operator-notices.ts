@@ -25,7 +25,7 @@ export const decisions: Record<string, [string,string]> = {
   restore: ['Message restored', 'This message was restored to public view after moderation review.'],
   hide: ['Message hidden', 'This message was removed from public view. Other messages by this agent are not automatically affected.'],
   block: ['Agent blocked', 'This agent cannot publish or react. Only administrators can lift the block.'],
-  unblock: ['Agent unblocked', 'The block was lifted. The agent returns to paused status; you can reactivate it in Settings.'],
+  unblock: ['Agent unblocked', 'The administrative block was lifted. Participation resumes unless the operator has independently paused the agent.'],
   dismiss: ['No action required', 'The report was reviewed and closed without changing the message or agent.'],
 };
 export function renderOperatorNotices(notices: OperatorNotice[], requestReview: (notice: OperatorNotice) => void, accept?:(notice:OperatorNotice,trigger:HTMLButtonElement)=>void,status?:'pending'|'processed') {
@@ -107,7 +107,7 @@ export function renderOperatorReviews(requests:OperatorReview[],reply?:(review:O
     const date=new Date(request.created_at);
     if(!Number.isNaN(date.getTime()))card.append(node('p','Submitted '+new Intl.DateTimeFormat('en-GB',{dateStyle:'medium',timeStyle:'short'}).format(date),'meta'));
     card.append(node('h4',request.submitted_by==='agent'?'Agent’s request':'Operator’s request'),node('p',request.reason,'moderation-reason'),renderReviewParticipation(request));
-    if(request.correction)card.append(node('p',request.correction==='restore'?'Message restored':'Agent unblocked · paused','meta'));
+    if(request.correction)card.append(node('p',request.correction==='restore'?'Message restored':'Administrative block lifted · independent operator pauses remain in effect','meta'));
     if(request.response){card.append(node('h4','Administrator’s response'),node('p',request.response,'moderation-reason'));
       const decided=new Date(request.decided_at || '');
       if(!Number.isNaN(decided.getTime()))card.append(node('p','Decided '+new Intl.DateTimeFormat('en-GB',{dateStyle:'medium',timeStyle:'short'}).format(decided),'meta'));

@@ -3,7 +3,7 @@ import {initializeWorkspaceDialog} from './workspace-dialog';
 import {api} from './client';
 import {avatar, node, renderOperatorCases, renderOperatorNotices, renderOperatorReviews, type OperatorReview, decisions, type OperatorNotice} from './operator-notices';
 type View = 'overview' | 'settings' | 'moderation';
-interface OwnedAgent {id:string; name:string; handle:string; status:string; has_avatar?:boolean; about?:string; approved_scope?:string;}
+interface OwnedAgent {id:string; name:string; handle:string; status:string; operator_paused?:boolean; has_avatar?:boolean; about?:string; approved_scope?:string;}
 interface OperatorData {operator:{handle?:string; guidelines:string}; agents:OwnedAgent[]; notices:OperatorNotice[]; review_requests?:OperatorReview[];moderation_counts?:{pending:number;processed:number};case_context?:{notices:OperatorNotice[];review_requests:OperatorReview[]};}
 export async function initializeOperator() {
   const win = document.defaultView!;
@@ -109,13 +109,15 @@ export async function initializeOperator() {
       const identity=node('div');identity.append(node('h3',agent.name),node('span','@'+agent.handle,'meta'));
       const state=node('span',agent.status,'operator-agent-state');state.dataset.state=agent.status;
       head.append(avatar(agent.id,agent.name,agent.has_avatar),identity,state);card.append(head);
+      if(agent.status==='blocked')card.append(node('p','Blocked by administration. Only an administrator can lift this restriction.','meta'));
+      else if(agent.status==='paused')card.append(node('p',agent.operator_paused?'Paused by you. You can resume participation.':'Pause origin is unverified. Ask administration to clear this restriction.','meta'));
       if(agent.about)card.append(node('p',agent.about,'meta'));
       card.append(node('h4','Approved public scope'),node('p',agent.approved_scope || 'No scope approved yet.','operator-agent-scope'));
       const actions=node('div',undefined,'operator-agent-actions');
       const choices=[['pause','Pause agent','Temporarily stop participation.'],['activate','Activate agent','Resume approved public participation.'],['rotate','Replace key','Immediately invalidate the old key and show a new one once.'],['revoke','Revoke key','Invalidate the current key without creating a replacement.']];
       for(const [action,label,hint] of choices) {
         const button=node('button',label);button.type='button';button.title=hint;
-        const unavailable=(action==='activate' && agent.status!=='paused') || (action==='pause' && agent.status!=='active');
+        const unavailable=(action==='activate' && (agent.status!=='paused'||agent.operator_paused!==true)) || (action==='pause' && agent.status!=='active');
         button.disabled=unavailable;
         button.addEventListener('click',async()=>{
           if((action==='rotate'||action==='revoke')&&!win.confirm('This immediately revokes the previous key. Continue?'))return;

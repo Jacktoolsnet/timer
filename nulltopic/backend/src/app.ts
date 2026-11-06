@@ -660,7 +660,7 @@ export async function createApp() {
       ...o,
       agents: (
         await pool.query(
-          `SELECT ${publicAgent} FROM agents WHERE operator_id=$1 ORDER BY handle`,
+          `SELECT ${publicAgent},operator_paused FROM agents WHERE operator_id=$1 ORDER BY handle`,
           [id],
         )
       ).rows,
@@ -890,7 +890,7 @@ export async function createApp() {
       ).rows[0],
       agents: (
         await pool.query(
-          `SELECT ${publicAgent} FROM agents WHERE operator_id=$1 ORDER BY handle`,
+          `SELECT ${publicAgent},operator_paused FROM agents WHERE operator_id=$1 ORDER BY handle`,
           [id],
         )
       ).rows,
@@ -960,9 +960,11 @@ export async function createApp() {
       else {
         if (a.status === "blocked")
           fail(403, "BLOCKED", "Only platform administration can unblock");
-        await c.query("UPDATE agents SET status=$2 WHERE id=$1", [
-          id,
-          b.action === "pause" ? "paused" : "active",
+        if(!a.approved_at || !a.approved_scope || a.status==='pending')fail(403,'APPROVAL_REQUIRED','Public participation must be approved first');
+        if(b.action==='activate' && (a.status!=='paused' || !a.operator_paused))fail(403,'OPERATOR_PAUSE_REQUIRED','Only an explicit operator pause may be resumed by the operator');
+        if(b.action==='pause' && a.status!=='active')fail(409,'AGENT_STATE','Only an active agent may be paused');
+        await c.query("UPDATE agents SET status=$2,operator_paused=$3 WHERE id=$1", [
+          id,b.action === "pause" ? "paused" : "active",b.action==='pause',
         ]);
       }
       return { ok: true };
@@ -1112,7 +1114,7 @@ export async function createApp() {
           const restored=await c.query("UPDATE posts SET state='visible' WHERE id=$1 AND state='hidden' AND body IS NOT NULL RETURNING id",[target.post_id]);
           if(!restored.rowCount)fail(409,"MESSAGE_UNAVAILABLE","Message is not hidden or is no longer available");
         }else{
-          const unblocked=await c.query("UPDATE agents SET status='paused' WHERE id=$1 AND status='blocked' RETURNING id",[target.agent_id]);
+          const unblocked=await c.query("UPDATE agents SET status=CASE WHEN operator_paused THEN 'paused' ELSE 'active' END WHERE id=$1 AND status='blocked' AND approved_at IS NOT NULL AND approved_scope IS NOT NULL RETURNING id",[target.agent_id]);
           if(!unblocked.rowCount)fail(409,"AGENT_UNAVAILABLE","Agent is no longer blocked");
         }
         await c.query("INSERT INTO moderation(admin_id,agent_id,post_id,action,reason) VALUES($1,$2,$3,$4,$5)",[actor,target.agent_id,correction==='restore'?target.post_id:null,correction,body.response]);
@@ -1167,8 +1169,8 @@ export async function createApp() {
         if (
           !(
             await c.query(
-              "UPDATE agents SET status=$2 WHERE id=$1 RETURNING id",
-              [b.id, b.action === "block" ? "blocked" : "paused"],
+              "UPDATE agents SET status=CASE WHEN $2='block' THEN 'blocked' WHEN operator_paused THEN 'paused' ELSE 'active' END WHERE id=$1 AND status<>'pending' AND ($2='block' OR (approved_at IS NOT NULL AND approved_scope IS NOT NULL)) RETURNING id",
+              [b.id, b.action],
             )
           ).rowCount
         )

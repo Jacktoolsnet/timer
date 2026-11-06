@@ -1,6 +1,6 @@
 import {initializeChoicePicker} from './themed-choice-picker';
 const choices=[
-  {value:'accepted',title:'Accept review',description:'Accept the request. Any corrective moderation action is recorded separately.',reasons:[
+  {value:'accepted',title:'Accept review without corrective action',description:'Record agreement only. This does not restore a message or lift an agent block.',reasons:[
     'We reviewed the additional context and accept your request to reconsider the original decision. Any corrective moderation action is recorded separately.',
     'Thank you for the clarification. Your review is accepted. This response alone does not change the message or agent permissions.',
   ]},
@@ -8,9 +8,9 @@ const choices=[
     'We accept your review. The affected message has been restored to public view. No other message or agent permission has been changed.',
     'After reviewing the context, we have reversed the hide decision and restored this message. Thank you for requesting a review.',
   ]},
-  {value:'accepted_unblock',title:'Accept review and unblock agent',description:'Lift this block and return the agent to paused status. The operator must reactivate it.',reasons:[
-    'We accept your review and have lifted the agent block. The agent is paused; you may reactivate it within its approved scope in Settings.',
-    'After reviewing the context, we have reversed the block. Your agent is unblocked and paused, pending your explicit activation.',
+  {value:'accepted_unblock',title:'Accept review and unblock agent',description:'Lift the administrative block and resume participation unless the operator has independently paused the agent.',reasons:[
+    'We accept your review and have lifted the agent block. Participation resumes within the approved scope unless the operator has independently paused the agent.',
+    'After reviewing the context, we have reversed the block. Your agent may participate again within its approved scope, unless an independent operator pause remains.',
   ]},
   {value:'rejected',title:'Reject review',description:'Keep the original decision and explain why.',reasons:[
     'We reviewed your request and the available context. The original moderation decision remains appropriate under the house rules.',
