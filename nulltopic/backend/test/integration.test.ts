@@ -1127,7 +1127,7 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
       assert.equal(reviews.find((r:any)=>r.id===ids[0]).decided_by,undefined);
       await login('other_operator');assert.equal((await call('GET','/operator',undefined,undefined,true)).json().review_requests.some((r:any)=>ids.includes(r.id)),false);
     });
-    await t.test("accepted review can atomically restore a hidden message or unblock to paused without overriding later moderation", async () => {
+    await t.test("accepted review can atomically restore a hidden message or lift a block without overriding later moderation", async () => {
       await pool.query("DELETE FROM limits WHERE bucket LIKE 'login:%'");
       const thread=randomUUID(),message=randomUUID();
       await pool.query("INSERT INTO conversations(id,last_activity_at) VALUES($1,now())",[thread]);
@@ -1165,7 +1165,7 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
       const blocked=randomUUID();await pool.query("INSERT INTO appeals(id,operator_id,reason,moderation_id) VALUES($1,$2,'Unblock request',$3)",[blocked,operator,block]);
       assert.equal((await decide(blocked,'accepted_restore')).statusCode,409,'wrong corrective action rolls back');
       assert.equal((await decide(blocked,'accepted_unblock')).statusCode,200);
-      assert.equal((await pool.query("SELECT status FROM agents WHERE id=$1",[agentId])).rows[0].status,'paused');
+      assert.equal((await pool.query("SELECT status FROM agents WHERE id=$1",[agentId])).rows[0].status,'active');
       assert.equal((await pool.query("SELECT correction FROM appeals WHERE id=$1",[blocked])).rows[0].correction,'unblock');
       const unlinked=randomUUID();await pool.query("INSERT INTO appeals(id,operator_id,reason) VALUES($1,$2,'Legacy unlinked request')",[unlinked,operator]);
       assert.equal((await decide(unlinked,'accepted_restore')).statusCode,409);
@@ -1239,7 +1239,7 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
       assert.ok(adminCase.case_context.appeals.some((r:any)=>r.id===second&&r.status==='pending'));
       assert.equal((await verdict(second,'accepted_unblock')).statusCode,200);
       assert.equal((await verdict(second,'accepted_unblock')).statusCode,409);
-      assert.equal((await pool.query("SELECT status FROM agents WHERE id=$1",[agentId])).rows[0].status,'paused');
+      assert.equal((await pool.query("SELECT status FROM agents WHERE id=$1",[agentId])).rows[0].status,'active');
       await login();const answered=(await call('GET','/operator',undefined,undefined,true)).json().review_requests.find((r:any)=>r.id===second);assert.equal(answered.correction,'unblock');assert.equal(answered.status,'accepted');
       await pool.query("DELETE FROM limits WHERE bucket LIKE 'public_report:%'");process.env.LIMIT_PUBLIC_REPORT='1';
       try{assert.equal((await call('POST','/reports',{agentId,reason:'Budget fixture'})).statusCode,200);assert.equal((await call('POST','/reports',{agentId,reason:'Over budget'})).statusCode,429);}finally{delete process.env.LIMIT_PUBLIC_REPORT;}
@@ -1252,6 +1252,7 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
       const digest=(value:string)=>createHash('sha256').update(value).digest('hex');
       try {
         for(const [id,handle,status,credential] of [[peer,'appeal_peer','paused',peerKey],[pending,'appeal_pending','pending',pendingKey]])await pool.query("INSERT INTO agents(id,handle,name,about,interests,operating_context,technical,operator_id,status,key_hash) VALUES($1,$2,'Fixture','Test','[]','Isolated','{}',$3,$4,$5)",[id,handle,operator,status,digest(credential)]);
+        await login();assert.equal((await call('POST','/operator/agents/'+agentId,{action:'pause'},undefined,true)).statusCode,200);
         await pool.query("UPDATE agents SET status='blocked' WHERE id=$1",[agentId]);
         await pool.query("INSERT INTO conversations(id,last_activity_at) VALUES($1,now())",[thread]);
         await pool.query("INSERT INTO posts(id,conversation_id,agent_id,body,technical,state) VALUES($1,$2,$3,'Own hidden appeal fixture','{}','hidden')",[post,thread,agentId]);
@@ -1334,6 +1335,44 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
       const processed=(await call('GET','/admin?status=processed',undefined,undefined,true)).json();assert.equal(processed.reports.length,100);assert.equal(processed.appeals.length,100);assert.ok(processed.reports.every((r:any)=>r.resolved));assert.ok(processed.appeals.every((r:any)=>r.status!=='pending'));
       assert.deepEqual(processed.counts,{pending:before.pending+2,processed:before.processed+210});assert.deepEqual(pending.counts,processed.counts);
     });
+    await t.test('operator may resume only its own pauses; admin unblocking restores participation but preserves independent pauses',async()=>{
+      await pool.query("DELETE FROM limits WHERE bucket LIKE 'login:%'");
+      const before=(await pool.query('SELECT status,operator_paused FROM agents WHERE id=$1',[agentId])).rows[0];
+      const path='/operator/agents/'+agentId;let published:string|undefined;const unapproved=randomUUID();
+      try{
+        await pool.query("UPDATE agents SET status='active',operator_paused=false WHERE id=$1",[agentId]);
+        await pool.query("INSERT INTO agents(id,handle,name,about,interests,operating_context,technical,operator_id,status,operator_paused) VALUES($1,$2,'Unapproved','Test','[]','Isolated','{}',$3,'paused',true)",[unapproved,'pause_pending_'+unapproved.slice(0,8),operator]);
+        await login();assert.equal((await call('POST','/operator/agents/'+unapproved,{action:'activate'},undefined,true)).statusCode,403,'pause provenance cannot bypass participation approval');
+        await login();assert.equal((await call('POST',path,{action:'pause'},undefined,true)).statusCode,200);
+        assert.equal((await call('GET','/operator',undefined,undefined,true)).json().agents.find((a:any)=>a.id===agentId).operator_paused,true);
+        assert.equal((await call('GET','/operators/'+operator)).json().agents.find((a:any)=>a.id===agentId).operator_paused,undefined,'pause provenance remains owner-only');
+        await login('test_admin',true);assert.equal((await call('POST','/admin/actions',{id:agentId,action:'block',reason:'Administrative restriction'},undefined,true)).statusCode,200);
+        await login();assert.equal((await call('POST',path,{action:'activate'},undefined,true)).statusCode,403);assert.equal((await call('POST',path,{action:'pause'},undefined,true)).statusCode,403);
+        await login('test_admin',true);assert.equal((await call('POST','/admin/actions',{id:agentId,action:'unblock',reason:'Lift administrative restriction'},undefined,true)).statusCode,200);
+        assert.deepEqual((await pool.query('SELECT status,operator_paused FROM agents WHERE id=$1',[agentId])).rows[0],{status:'paused',operator_paused:true});
+        await login();assert.equal((await call('POST',path,{action:'activate'},undefined,true)).statusCode,200);
+        // A legacy/administratively paused state is not evidence of an operator pause.
+        await pool.query("UPDATE agents SET status='paused',operator_paused=false WHERE id=$1",[agentId]);
+        assert.equal((await call('POST',path,{action:'activate'},undefined,true)).statusCode,403);
+        await login('test_admin',true);assert.equal((await call('POST','/admin/actions',{id:agentId,action:'block',reason:'Review correction fixture'},undefined,true)).statusCode,200);
+        const original=(await pool.query("SELECT id FROM moderation WHERE agent_id=$1 AND action='block' ORDER BY id DESC LIMIT 1",[agentId])).rows[0].id;
+        const review=randomUUID();await pool.query("INSERT INTO appeals(id,operator_id,subject_agent_id,moderation_id,reason) VALUES($1,$2,$3,$4,'Restore participation')",[review,operator,agentId,original]);
+        assert.equal((await call('POST','/admin/appeals/'+review+'/decision',{outcome:'accepted_unblock',response:'The restriction is lifted.'},undefined,true)).statusCode,200);
+        assert.deepEqual((await pool.query('SELECT status,operator_paused FROM agents WHERE id=$1',[agentId])).rows[0],{status:'active',operator_paused:false});
+        await pool.query("DELETE FROM limits WHERE bucket LIKE 'publish:'||$1||':%' OR bucket LIKE 'operator_day:'||$2||':%'",[agentId,operator]);
+        const post=await call('POST','/posts',{body:'[Local test] Accepted unblock restores participation.'},key);assert.equal(post.statusCode,200,post.body);published=post.json().conversationId;
+        await login();assert.equal((await call('POST',path,{action:'pause'},undefined,true)).statusCode,200);
+        const operatorCookie=cookie,operatorCsrf=csrf;
+        await login('test_admin',true);
+        const race=await Promise.all([call('POST','/admin/actions',{id:agentId,action:'block',reason:'Concurrent restriction'},undefined,true),app.inject({method:'POST',url:'/api'+path,headers:{cookie:operatorCookie,origin:process.env.PUBLIC_ORIGIN || 'http://localhost:4321','x-csrf-token':operatorCsrf},payload:{action:'activate'}})]);
+        assert.equal(race[0].statusCode,200);assert.ok([200,403].includes(race[1].statusCode));assert.equal((await pool.query('SELECT status FROM agents WHERE id=$1',[agentId])).rows[0].status,'blocked');
+      }finally{
+        await pool.query('DELETE FROM agents WHERE id=$1',[unapproved]);
+        if(published)await pool.query('DELETE FROM conversations WHERE id=$1',[published]);
+        await pool.query('UPDATE agents SET status=$2,operator_paused=$3 WHERE id=$1',[agentId,before.status,before.operator_paused]);
+      }
+    });
+
     await t.test("operator/agent acceptance is scoped, independent, idempotent and never changes moderation", {timeout:30000},async()=>{
       await pool.query("DELETE FROM limits WHERE bucket LIKE 'login:%' OR bucket LIKE 'agent_ack:%' OR bucket LIKE 'ack_owner:%'");
       const peer=randomUUID(),pendingAgent=randomUUID(),peerKey='ack-peer-'+randomUUID(),pendingKey='ack-pending-'+randomUUID();

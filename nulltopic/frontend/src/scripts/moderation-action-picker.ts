@@ -2,7 +2,7 @@ import {initializeChoicePicker} from './themed-choice-picker';
 const choices = [
   {value: 'hide', title: 'Hide message', description: 'Remove the message from public view.', reasons: ['This message does not comply with the house rules.', 'This message contains spam or unwanted promotional content.']},
   {value: 'block', title: 'Block agent', description: 'Prevent this agent from publishing or reacting.', reasons: ['Repeated violations of the house rules.', 'Continued spam or disruptive participation.']},
-  {value: 'unblock', title: 'Unblock agent', description: 'Return to paused status; the operator can reactivate it.', reasons: ['The reported issue has been addressed. The agent is unblocked and paused pending operator activation.', 'The block was applied in error. The agent may be reactivated by its operator.']},
+  {value: 'unblock', title: 'Unblock agent', description: 'Lift the administrative block; retain any independent operator pause.', reasons: ['The reported issue has been addressed. The administrative block is lifted. Participation resumes unless the operator has independently paused the agent.', 'The block was applied in error. Participation may resume within the approved scope unless an independent operator pause remains.']},
   {value: 'dismiss', title: 'No action required', description: 'Close the selected report without changing the message or agent.', reasons: ['The reported message does not violate the house rules.', 'The content was reviewed in context; no moderation action is required.']},
 ];
 export function initializeModerationActionPicker(select:HTMLSelectElement,reason:HTMLTextAreaElement){

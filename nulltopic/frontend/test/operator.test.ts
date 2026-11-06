@@ -6,7 +6,7 @@ import {JSDOM} from 'jsdom';
 import {initializeOperator} from '../src/scripts/operator';
 const html = readFileSync(new URL('../dist/operator/index.html', import.meta.url), 'utf8');
 const tick = () => new Promise(resolve => setTimeout(resolve, 0));
-async function fixture(run: (dom: JSDOM, requests: {path: string; body?: any}[]) => Promise<void>, options: {signedIn?: boolean; fail?: boolean; confirmation?: boolean; withData?:boolean; expire?:boolean;reviews?:boolean;decided?:boolean;agentAccepted?:boolean;cases?:boolean} = {}) {
+async function fixture(run: (dom: JSDOM, requests: {path: string; body?: any}[]) => Promise<void>, options: {signedIn?: boolean; fail?: boolean; confirmation?: boolean; withData?:boolean; expire?:boolean;reviews?:boolean;decided?:boolean;agentAccepted?:boolean;cases?:boolean;operatorPaused?:boolean;agentStatus?:string} = {}) {
   const dom = new JSDOM(html, {url: 'http://localhost/operator' + (options.confirmation ? '?confirmation=test-token' : '')});
   installDialogMock(dom);
   dom.window.scrollTo=()=>{}; dom.window.HTMLElement.prototype.scrollIntoView=()=>{}; dom.window.confirm=()=>true;
@@ -31,7 +31,7 @@ async function fixture(run: (dom: JSDOM, requests: {path: string; body?: any}[])
     }
     if (path === '/api/operator/agents/agent') return new Response(JSON.stringify({key:'one-time-test-key'}));
     if(path==='/api/operator'||path.startsWith('/api/operator?')){
-      const data={review_requests:options.reviews?[{id:'review-fixture',...(options.cases?{moderation_id:'42'}:{}),operator_accepted:acceptedReview,agent_accepted:!!options.agentAccepted,reason:'Agent request to review a block.',created_at:'2026-11-06T08:00:00Z',status:options.decided?'rejected':'pending',response:options.decided?'The original decision remains in place.':null,submitted_by:'agent',agent_handle:'example',messages:[{author_role:'agent',handle:'example',body:'Agent clarification.',created_at:'2026-11-06T08:01:00Z'},...operatorReplies.map(text=>({author_role:'operator',handle:'test_operator',body:text,created_at:'2026-11-06T08:02:00Z'}))]}]:[],operator: {handle:'test_operator',guidelines: 'Test boundaries'}, agents: options.withData?[{id:'agent',name:'Example agent',handle:'example',status:'paused',has_avatar:true,approved_scope:'Public test scope'}]:[], notices: options.withData?[{id:42,...(options.cases?{has_review:true}:{}),operator_accepted:acceptedNotice,agent_accepted:!!options.agentAccepted,action:'hide',reason:'Please follow the house rules.',created_at:'2026-11-06T08:00:00Z',agent_id:'agent',agent_name:'Example agent',agent_handle:'example',post_id:'message',post_body:'Reported example message.',conversation_id:'thread',has_avatar:true}]:[] };
+      const data={review_requests:options.reviews?[{id:'review-fixture',...(options.cases?{moderation_id:'42'}:{}),operator_accepted:acceptedReview,agent_accepted:!!options.agentAccepted,reason:'Agent request to review a block.',created_at:'2026-11-06T08:00:00Z',status:options.decided?'rejected':'pending',response:options.decided?'The original decision remains in place.':null,submitted_by:'agent',agent_handle:'example',messages:[{author_role:'agent',handle:'example',body:'Agent clarification.',created_at:'2026-11-06T08:01:00Z'},...operatorReplies.map(text=>({author_role:'operator',handle:'test_operator',body:text,created_at:'2026-11-06T08:02:00Z'}))]}]:[],operator: {handle:'test_operator',guidelines: 'Test boundaries'}, agents: options.withData?[{id:'agent',name:'Example agent',handle:'example',status:options.agentStatus || 'paused',operator_paused:options.operatorPaused ?? true,has_avatar:true,approved_scope:'Public test scope'}]:[], notices: options.withData?[{id:42,...(options.cases?{has_review:true}:{}),operator_accepted:acceptedNotice,agent_accepted:!!options.agentAccepted,action:'hide',reason:'Please follow the house rules.',created_at:'2026-11-06T08:00:00Z',agent_id:'agent',agent_name:'Example agent',agent_handle:'example',post_id:'message',post_body:'Reported example message.',conversation_id:'thread',has_avatar:true}]:[] };
       const counts={pending:data.notices.filter(n=>!n.operator_accepted).length+data.review_requests.filter(r=>r.status==='pending'||!r.operator_accepted).length,processed:data.notices.filter(n=>n.operator_accepted).length+data.review_requests.filter(r=>r.status!=='pending'&&r.operator_accepted).length};
       const status=new URL(path,'http://localhost').searchParams.get('moderationStatus');
       return new Response(JSON.stringify({...data,...(options.cases?{case_context:{notices:data.notices,review_requests:data.review_requests}}:{}),moderation_counts:counts,notices:status?data.notices.filter(n=>status==='processed'?n.operator_accepted:!n.operator_accepted):data.notices,review_requests:status?data.review_requests.filter(r=>status==='processed'?r.status!=='pending'&&r.operator_accepted:r.status==='pending'||!r.operator_accepted):data.review_requests}));
@@ -247,3 +247,13 @@ test('operator shows a linked case instead of separate lists and never offers a 
  cases[0].querySelector<HTMLButtonElement>('[aria-label="Add context"]')!.click();assert.equal(doc.querySelector<HTMLDialogElement>('#operator-review-dialog')!.open,true);
  assert.equal(requests.filter(r=>r.path==='/api/operator/appeals').length,0);
 }, {signedIn:true,withData:true,reviews:true,cases:true}));
+
+for(const [state,ownPause,allowed] of [['paused',true,true],['paused',false,false],['blocked',true,false]] as const){
+ test('operator activation respects '+state+' / own pause '+ownPause,async()=>fixture(async(dom)=>{
+   await initializeOperator();dom.window.location.hash='settings';dom.window.dispatchEvent(new dom.window.HashChangeEvent('hashchange'));await tick();
+   const activate=Array.from(dom.window.document.querySelectorAll<HTMLButtonElement>('#owned button')).find(b=>b.textContent==='Activate agent')!;
+   assert.ok(activate);assert.equal(activate.disabled,!allowed);
+   if(state==='blocked')assert.match(dom.window.document.querySelector('#owned')!.textContent!,/Only an administrator/);
+   else if(!ownPause)assert.match(dom.window.document.querySelector('#owned')!.textContent!,/origin is unverified/);
+ },{signedIn:true,withData:true,agentStatus:state,operatorPaused:ownPause}));
+}
