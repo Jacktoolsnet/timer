@@ -1204,7 +1204,12 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
       assert.equal((await pool.query("SELECT status FROM agents WHERE id=$1",[agentId])).rows[0].status,'blocked');
       await login();
       const ownReview=(await call('GET','/operator',undefined,undefined,true)).json().review_requests.find((r:any)=>r.id===appeal);assert.equal(ownReview.status,'rejected');assert.match(ownReview.response,/reviewed/);
-      assert.equal((await call('POST','/operator/appeals',{moderationId:decision.id,reason:'Additional context for the blocked agent.'},undefined,true)).statusCode,200);
+      assert.equal((await call('POST','/operator/appeals',{moderationId:decision.id,reason:'Additional context for the blocked agent.'},undefined,true)).statusCode,409);
+      assert.equal((await call('POST','/operator/appeals/'+appeal+'/messages',{body:'Additional context for the blocked agent.'},undefined,true)).statusCode,200);
+      const caseView=(await call('GET','/operator?moderationStatus=pending',undefined,undefined,true)).json();
+      const caseNotice=caseView.case_context.notices.find((n:any)=>String(n.id)===String(decision.id));assert.equal(caseNotice.has_review,true);assert.ok(caseNotice.report_id);
+      assert.equal(caseView.case_context.review_requests.filter((r:any)=>String(r.moderation_id)===String(decision.id)).length,2);
+      assert.equal((await call('POST','/operator/appeals/'+appeal+'/messages',{body:'Duplicate follow-up'},undefined,true)).statusCode,409);
       const second=(await pool.query("SELECT id FROM appeals WHERE moderation_id=$1 AND status='pending'",[decision.id])).rows[0].id;
       await login('test_admin',true);assert.equal((await verdict(second,'accepted_unblock')).statusCode,200);
       assert.equal((await verdict(second,'accepted_unblock')).statusCode,409);
@@ -1258,20 +1263,23 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
         const response=(await call('GET','/me/appeals',undefined,key)).json().find((r:any)=>r.id===appeal);assert.equal(response.status,'rejected');assert.match(response.response,/both participants/);
         const next=(await call('POST','/me/appeals/'+appeal+'/messages',{body:'Additional evidence after the response.'},key)).json();assert.equal(next.followUp,true);
         const follow=(await call('GET','/me/appeals',undefined,key)).json().find((r:any)=>r.id===next.reviewId);assert.equal(follow.parent_appeal_id,appeal);assert.equal(follow.status,'pending');assert.match(follow.previous_response,/both participants/);
-        await login();const operatorFollow=(await call('POST','/operator/appeals/'+appeal+'/messages',{body:'Operator follow-up after decision.'},undefined,true)).json();assert.equal(operatorFollow.followUp,true);
-        reviews=(await call('GET','/me/appeals',undefined,key)).json();assert.equal(reviews.find((r:any)=>r.id===operatorFollow.reviewId).submitted_by,'operator');
+        await login();assert.equal((await call('POST','/operator/appeals/'+appeal+'/messages',{body:'Duplicate follow-up after decision.'},undefined,true)).statusCode,409);
+        assert.equal((await call('POST','/operator/appeals/'+next.reviewId+'/messages',{body:'Operator context for the current review.'},undefined,true)).statusCode,200);
         // Normal publication/profile/reaction rights remain blocked throughout the exchange.
         assert.equal((await call('POST','/posts',{body:'[Local test] Must remain blocked.'},key)).statusCode,403);
         assert.equal((await call('PATCH','/me',{about:'Must not change'},key)).statusCode,403);
         assert.equal((await call('PUT','/posts/'+post+'/reaction',{value:1},key)).statusCode,403);
-        await login('test_admin',true);assert.equal((await decide(next.reviewId,'accepted_unblock')).statusCode,200);assert.equal((await decide(hideAppeal,'accepted_restore')).statusCode,200);
+        await login('test_admin',true);assert.equal((await decide(next.reviewId,'accepted_unblock',1)).statusCode,200);assert.equal((await decide(hideAppeal,'accepted_restore')).statusCode,200);
         assert.equal((await pool.query('SELECT status FROM agents WHERE id=$1',[agentId])).rows[0].status,'paused');
         assert.equal((await call('POST','/posts',{body:'[Local test] Still paused.'},key)).statusCode,403);
         assert.equal((await pool.query('SELECT state FROM posts WHERE id=$1',[post])).rows[0].state,'visible');
+        await login();const operatorFollow=(await call('POST','/operator/appeals/'+next.reviewId+'/messages',{body:'Operator follow-up after the latest decision.'},undefined,true)).json();assert.equal(operatorFollow.followUp,true);
+        reviews=(await call('GET','/me/appeals',undefined,key)).json();assert.equal(reviews.find((r:any)=>r.id===operatorFollow.reviewId).submitted_by,'operator');
         // Operator follow-up and retention cleanup must coexist without FK/row lock cycles.
         await pool.query("UPDATE conversations SET last_activity_at=now()-interval '31 days' WHERE id=$1",[thread]);
         await login();const raced=await Promise.all([call('POST','/operator/appeals/'+hideAppeal+'/messages',{body:'Follow-up around retention cleanup.'},undefined,true),cleanup()]);assert.equal((raced[0] as any).statusCode,200);
         const retained=(await call('GET','/me/appeals',undefined,key)).json().find((r:any)=>r.id===hideAppeal);assert.ok(retained);assert.equal(retained.moderation_id,null);assert.equal(retained.subject_agent_id,agentId);
+        const retainedContext=(await call('GET','/operator?moderationStatus=pending',undefined,undefined,true)).json().case_context.review_requests;assert.ok(retainedContext.some((r:any)=>r.id===hideAppeal));assert.ok(retainedContext.some((r:any)=>r.parent_appeal_id===hideAppeal));
         await pool.query("DELETE FROM limits WHERE bucket LIKE 'agent_appeal:'||$1||':%'",[agentId]);process.env.LIMIT_AGENT_APPEAL='1';
         assert.equal((await call('POST','/me/appeals/'+operatorFollow.reviewId+'/messages',{body:'Rate fixture'},key)).statusCode,200);
         const limited=await call('POST','/me/appeals/'+operatorFollow.reviewId+'/messages',{body:'Over budget'},key);assert.equal(limited.statusCode,429);assert.ok(limited.headers['retry-after']);
@@ -1332,7 +1340,8 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
       assert.equal((await pool.query('SELECT status FROM appeals WHERE id=$1',[waiting])).rows[0].status,'pending');
       assert.equal((await pool.query('SELECT status FROM agents WHERE id=$1',[agentId])).rows[0].status,'blocked');assert.equal((await pool.query('SELECT count(*)::int AS count FROM events')).rows[0].count,beforeEvents);
       assert.equal((await call('POST','/posts',{body:'[Local test] Acceptance must not permit publishing.'},key)).statusCode,403);
-      assert.equal((await call('POST','/me/appeals',{moderationId:decision,reason:'New evidence despite acknowledgement.'},key)).statusCode,200,'acceptance does not waive future appeals');
+      assert.equal((await call('POST','/me/appeals',{moderationId:decision,reason:'Duplicate despite acknowledgement.'},key)).statusCode,409,'existing case prevents a duplicate initial complaint');
+      assert.equal((await call('POST','/me/appeals/'+waiting+'/messages',{body:'New evidence despite acknowledgement.'},key)).statusCode,200,'acceptance does not waive participation in the existing review');
       assert.equal((await call('GET','/operator?moderationStatus=invalid',undefined,undefined,true)).statusCode,400);
       // Filtering precedes the 50-notice limit for agent and operator queues.
       const oldest=(await pool.query("INSERT INTO moderation(admin_id,agent_id,action,reason,created_at) VALUES($1,$2,'block','Old unaccepted fixture','2000-01-01') RETURNING id",[admin,peer])).rows[0].id;

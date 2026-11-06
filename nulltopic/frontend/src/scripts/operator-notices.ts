@@ -1,6 +1,6 @@
 import {renderReviewParticipation,type ReviewParticipation} from './review-participation';
 export interface OperatorNotice {
-  operator_accepted?:boolean;agent_accepted?:boolean;id?: string | number; action: string; reason: string; created_at: string; agent_id: string;
+  has_review?:boolean;report_id?:string|null;report_reason?:string|null;report_created_at?:string|null;operator_accepted?:boolean;agent_accepted?:boolean;id?: string | number; action: string; reason: string; created_at: string; agent_id: string;
   agent_name?: string; agent_handle?: string; has_avatar?: boolean;
   post_id?: string | null; post_body?: string | null; post_state?: string | null;
   conversation_id?: string | null; parent_id?: string | null;
@@ -42,14 +42,16 @@ export function renderOperatorNotices(notices: OperatorNotice[], requestReview: 
     const [title,description] = decisions[notice.action] || ['Moderation update','An administrator recorded an update for this agent.'];
     const card = node('article',undefined,'moderation-report-card');
     card.dataset.action = notice.action;
-    card.classList.add('operator-notice-card'); card.tabIndex = 0;
+    card.classList.add('operator-notice-card'); if(!notice.has_review)card.tabIndex = 0;
     card.setAttribute('role','group'); card.setAttribute('aria-label',title+' · '+(notice.agent_name || 'Your agent'));
     function select() {
-      for (const other of list.querySelectorAll<HTMLElement>('.operator-notice-card')) other.dataset.selected='false';
+      if(notice.has_review)return;
+      for (const other of (card.closest('.operator-cases') || list).querySelectorAll<HTMLElement>('.operator-notice-card')) other.dataset.selected='false';
       card.dataset.selected='true'; requestReview(notice);
     }
     card.addEventListener('click',event=>{
-      if ((event.target as Element).closest('button,a,details,input,textarea,select')) return;
+      const target=event.target as Element;
+      if(target.closest('button,a,input,textarea,select') || (target.closest('details') && card.contains(target.closest('details'))))return;
       if (document.defaultView?.getSelection()?.toString()) return;
       select();
     });
@@ -79,7 +81,7 @@ export function renderOperatorNotices(notices: OperatorNotice[], requestReview: 
       const link = node('a'); link.className='admin-icon-button'; link.setAttribute('aria-label','Open message'); link.dataset.tooltip='Open message'; link.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6m0-6L10 14M10 4H4v16h16v-6"/></svg>'; link.href = '/conversation?id='+encodeURIComponent(notice.conversation_id)+(notice.parent_id?'&post='+encodeURIComponent(notice.post_id):'');
       link.target = '_blank'; link.rel = 'noopener noreferrer'; actions.append(link);
     }
-    const review = node('button'); review.type = 'button'; review.className='admin-icon-button'; review.setAttribute('aria-label','Request review'); review.dataset.tooltip='Request review'; review.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9a8 8 0 1 1-1 7M4 3v6h6"/><path d="M12 8v5l3 2"/></svg>'; review.addEventListener('click',select); actions.append(review);if(accept&&!notice.operator_accepted&&notice.id!=null)actions.append(acceptButton(button=>accept(notice,button), 'Accept decision'));
+    const review = node('button'); review.type = 'button'; review.className='admin-icon-button'; review.setAttribute('aria-label','Request review'); review.dataset.tooltip='Request review'; review.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9a8 8 0 1 1-1 7M4 3v6h6"/><path d="M12 8v5l3 2"/></svg>'; review.addEventListener('click',select); if(!notice.has_review)actions.append(review);if(accept&&!notice.operator_accepted&&notice.id!=null)actions.append(acceptButton(button=>accept(notice,button), 'Accept decision'));
     card.append(actions);
     const details = node('details',undefined,'moderation-references'); details.append(node('summary','Reference IDs'));
     const ids = node('dl');
@@ -93,7 +95,7 @@ export function renderOperatorNotices(notices: OperatorNotice[], requestReview: 
 function acceptButton(send:(button:HTMLButtonElement)=>void,label:string){
  const button=node('button');button.type='button';button.className='admin-icon-button operator-accept-decision';button.setAttribute('aria-label',label);button.dataset.tooltip=label;button.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>';button.addEventListener('click',()=>send(button));return button;
 }
-export interface OperatorReview extends ReviewParticipation {operator_accepted?:boolean;agent_accepted?:boolean;id:string;reason:string;created_at:string;status:string;correction?:string|null;response?:string|null;decided_at?:string|null;}
+export interface OperatorReview extends ReviewParticipation {can_reply?:boolean;moderation_id?:string|number|null;subject_agent_id?:string|null;operator_accepted?:boolean;agent_accepted?:boolean;id:string;reason:string;created_at:string;status:string;correction?:string|null;response?:string|null;decided_at?:string|null;}
 export function renderOperatorReviews(requests:OperatorReview[],reply?:(review:OperatorReview,trigger:HTMLButtonElement)=>void,accept?:(review:OperatorReview,trigger:HTMLButtonElement)=>void,status?:'pending'|'processed') {
   const list=node('div');
   if(!requests.length){list.append(node('p',status==='processed'?'No review decisions accepted yet.':status==='pending'?'No open or unaccepted review decisions.':'No review requests submitted yet.','meta'));return list;}
@@ -110,9 +112,56 @@ export function renderOperatorReviews(requests:OperatorReview[],reply?:(review:O
       const decided=new Date(request.decided_at || '');
       if(!Number.isNaN(decided.getTime()))card.append(node('p','Decided '+new Intl.DateTimeFormat('en-GB',{dateStyle:'medium',timeStyle:'short'}).format(decided),'meta'));
     }
-    if(reply){const button=node('button');button.type='button';button.className='admin-icon-button';const label=request.status==='pending'?'Add context':'Reply with a follow-up review';button.setAttribute('aria-label',label);button.dataset.tooltip=label;button.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12v7H4V5h9m3-2 5 5-9 9H7v-5L16 3Z"/></svg>';button.addEventListener('click',()=>reply(request,button));card.append(button);}
+    const related=requests.filter(other=>request.moderation_id!=null && String(other.moderation_id)===String(request.moderation_id));
+    const canReply=request.status==='pending'||(!related.some(other=>other.status==='pending')&&!requests.some(other=>other.parent_appeal_id===request.id)&&!related.some(other=>other.created_at>request.created_at||(other.created_at===request.created_at&&other.id>request.id)));
+    if(reply&&(request.can_reply ?? canReply)){const button=node('button');button.type='button';button.className='admin-icon-button';const label=request.status==='pending'?'Add context':'Reply with a follow-up review';button.setAttribute('aria-label',label);button.dataset.tooltip=label;button.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12v7H4V5h9m3-2 5 5-9 9H7v-5L16 3Z"/></svg>';button.addEventListener('click',()=>reply(request,button));card.append(button);}
     if(accept&&request.status!=='pending'&&!request.operator_accepted)card.append(acceptButton(button=>accept(request,button),'Accept decision'));
     list.append(card);
   }
+  return list;
+}
+
+
+/** Group only explicit decision/review references; never guess based on agent or message. */
+export function renderOperatorCases(notices:OperatorNotice[],reviews:OperatorReview[],noticeList:HTMLElement,reviewList:HTMLElement,openCases:Set<string>=new Set()){
+  const list=node('div',undefined,'operator-cases');
+  const groups=new Map<string,{notice?:OperatorNotice;reviews:OperatorReview[]}>();
+  for(const notice of notices)groups.set('decision:'+notice.id,{notice,reviews:[]});
+  function root(review:OperatorReview):string{
+    if(review.moderation_id!=null)return 'decision:'+review.moderation_id;
+    let current=review;const seen=new Set<string>();
+    while(current.parent_appeal_id&&!seen.has(current.id)){seen.add(current.id);const parent=reviews.find(r=>r.id===current.parent_appeal_id);if(!parent)break;current=parent;}
+    return 'review:'+current.id;
+  }
+  for(const review of reviews){const key=root(review);if(!groups.has(key))groups.set(key,{reviews:[]});groups.get(key)!.reviews.push(review);}
+  const noticeCards=Array.from(noticeList.querySelectorAll<HTMLElement>('.operator-notice-card'));
+  const reviewCards=Array.from(reviewList.querySelectorAll<HTMLElement>('.moderation-review-card'));
+  for(const [key,group] of groups){
+    const section=node('details',undefined,'operator-case');section.dataset.caseId=key;section.open=openCases.has(key);
+    section.addEventListener('toggle',()=>{if(section.open)openCases.add(key);else openCases.delete(key);});
+    const summary=node('summary');const title=group.notice?(decisions[group.notice.action]?.[0] || 'Moderation decision')+' · '+(group.notice.agent_name || 'Your agent'):'Review request · '+(group.reviews[0]?.agent_handle?'@'+group.reviews[0].agent_handle:'Your account');
+    summary.append(node('strong',title),node('span',group.reviews.some(r=>r.status==='pending')?'Review pending':group.reviews.length?'Review decided':'Decision recorded','moderation-item-badge'),node('span',group.reviews.length+' review'+(group.reviews.length===1?'':'s'),'meta'));section.append(summary);
+    const content=node('div',undefined,'operator-case-content');
+    content.append(node('p','Case reference · '+key,'meta'));
+    if(group.notice){
+      const report=node('section',undefined,'moderation-message-preview');report.append(node('h3','Original report'));
+      if(group.notice.report_id){report.append(node('p',group.notice.report_reason || 'Report text no longer available.','moderation-reason'));if(group.notice.report_created_at)report.append(node('p',new Intl.DateTimeFormat('en-GB',{dateStyle:'medium',timeStyle:'short'}).format(new Date(group.notice.report_created_at)),'meta'));}
+      else report.append(node('p','No source report linked to this decision. Historical reports cannot be reliably assigned.','meta'));
+      content.append(report,node('h3','Moderation decision'));
+      const card=noticeCards[notices.indexOf(group.notice)];if(card)content.append(card);
+    }else content.append(node('p','The original moderation decision is no longer available, or this request was submitted without a linked decision.','meta'));
+    if(group.reviews.length){
+      content.append(node('h3','Review history'));
+      const seen=new Set<string>();
+      function appendReview(review:OperatorReview){
+        if(seen.has(review.id))return;seen.add(review.id);
+        const parent=group.reviews.find(r=>r.id===review.parent_appeal_id);if(parent)appendReview(parent);
+        const card=reviewCards[reviews.indexOf(review)];if(card)content.append(card);
+      }
+      for(const review of [...group.reviews].sort((a,b)=>a.created_at.localeCompare(b.created_at)))appendReview(review);
+    }
+    section.append(content);list.append(section);
+  }
+  if(!groups.size)list.append(node('div','No cases in this view.','moderation-all-clear'));
   return list;
 }

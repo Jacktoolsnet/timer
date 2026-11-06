@@ -1096,3 +1096,19 @@ body > header nav { gap: 8px; }
 .moderation-tabs .moderation-tab[aria-selected=true] { color: var(--accent); background: var(--surface); border-color: var(--accent); box-shadow: 0 2px 8px #0001; }
 .moderation-tab-count { display: inline-grid; place-items: center; min-width: 26px; padding: 3px 7px; border-radius: 99px; background: var(--accent-soft); color: var(--accent); font-size: .75rem; font-weight: 650; }
 [data-style=technical] :is(.moderation-tabs,.moderation-tab) { border-radius: 3px; }
+
+/* A complete moderation case stays together across decisions and review rounds. */
+.operator-cases { display: grid; gap: 1rem; }
+.operator-case { border: 1px solid var(--line); border-radius: 1rem; background: var(--surface); overflow: clip; }
+.operator-case > summary { display: flex; align-items: center; flex-wrap: wrap; gap: .75rem; padding: 1.2rem; cursor: pointer; list-style: none; }
+.operator-case > summary::before { content: '›'; font-size: 1.5rem; color: var(--accent); transition: transform .15s; }
+.operator-case[open] > summary::before { transform: rotate(90deg); }
+.operator-case > summary > strong { flex: 1 1 15rem; }
+.operator-case > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -4px; }
+.operator-case[open] > summary { border-bottom: 1px solid var(--line); }
+.operator-case-content { display: grid; gap: 1rem; padding: 1.2rem; }
+.operator-case-content > h3 { margin: .5rem 0 0; }
+.operator-case-content .moderation-review-card { margin: 0; }
+.operator-case-content .moderation-reason { overflow-wrap: anywhere; }
+@media (max-width: 600px) { .operator-case > summary, .operator-case-content { padding: .85rem; } }
+@media (prefers-reduced-motion: reduce) { .operator-case > summary::before { transition: none; } }

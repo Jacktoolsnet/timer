@@ -1,10 +1,10 @@
 import {renderReviewParticipation} from './review-participation';
 import {initializeWorkspaceDialog} from './workspace-dialog';
 import {api} from './client';
-import {avatar, node, renderOperatorNotices, renderOperatorReviews, type OperatorReview, decisions, type OperatorNotice} from './operator-notices';
+import {avatar, node, renderOperatorCases, renderOperatorNotices, renderOperatorReviews, type OperatorReview, decisions, type OperatorNotice} from './operator-notices';
 type View = 'overview' | 'settings' | 'moderation';
 interface OwnedAgent {id:string; name:string; handle:string; status:string; has_avatar?:boolean; about?:string; approved_scope?:string;}
-interface OperatorData {operator:{handle?:string; guidelines:string}; agents:OwnedAgent[]; notices:OperatorNotice[]; review_requests?:OperatorReview[];moderation_counts?:{pending:number;processed:number};}
+interface OperatorData {operator:{handle?:string; guidelines:string}; agents:OwnedAgent[]; notices:OperatorNotice[]; review_requests?:OperatorReview[];moderation_counts?:{pending:number;processed:number};case_context?:{notices:OperatorNotice[];review_requests:OperatorReview[]};}
 export async function initializeOperator() {
   const win = document.defaultView!;
   const status = document.querySelector<HTMLElement>('#status')!;
@@ -28,6 +28,7 @@ export async function initializeOperator() {
   }
   const appealStatus = document.querySelector<HTMLElement>('#appeal-status')!;
   let csrf = '', signedIn = false, signingIn = false, version = 0;
+  const openCases=new Set<string>();
   let queueStatus:'pending'|'processed'='pending',queueVersion=0,queueData:OperatorData|null=null;
   const queueTabs=Array.from(document.querySelectorAll<HTMLButtonElement>('[data-operator-status]'));
   const queuePanel=document.getElementById('operator-moderation-queue')!;
@@ -37,7 +38,7 @@ export async function initializeOperator() {
     if(counts)for(const state of ['pending','processed'] as const)document.getElementById('operator-'+state+'-count')!.textContent=String(counts[state]);
   }
   for(const tab of queueTabs){
-    tab.addEventListener('click',()=>{if(!signedIn)return;queueStatus=tab.dataset.operatorStatus as 'pending'|'processed';updateQueueTabs();if(queueData)renderQueue(queueData);void loadQueue();});
+    tab.addEventListener('click',()=>{if(!signedIn)return;queueStatus=tab.dataset.operatorStatus as 'pending'|'processed';updateQueueTabs();void loadQueue();});
     tab.addEventListener('keydown',event=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();const index=queueTabs.indexOf(tab);const next=event.key==='Home'?0:event.key==='End'?queueTabs.length-1:(index+(event.key==='ArrowRight'?1:-1)+queueTabs.length)%queueTabs.length;queueTabs[next].focus();queueTabs[next].click();});
   }
   async function loadQueue(){
@@ -72,9 +73,9 @@ export async function initializeOperator() {
     logout.setAttribute('aria-label',name ? 'Sign out · '+name:'Sign out'); logout.dataset.tooltip = logout.getAttribute('aria-label')!;
   }
   function clearSession() {
-    signedIn=false; ++version;++queueVersion;queueData=null;queueStatus='pending';updateQueueTabs({pending:0,processed:0});queuePanel.removeAttribute('aria-busy');document.getElementById('operator-queue-limit')!.hidden=true; dashboard.hidden=true; confirmationPanel.hidden=true; shell.hidden=false;
+    signedIn=false; ++version;++queueVersion;queueData=null;openCases.clear();queueStatus='pending';updateQueueTabs({pending:0,processed:0});queuePanel.removeAttribute('aria-busy');document.getElementById('operator-queue-limit')!.hidden=true; dashboard.hidden=true; confirmationPanel.hidden=true; shell.hidden=false;
     password.value=''; toolbar(false);reviewModal.close(true); resetReview();
-    for (const id of ['owned','notices','prepared','operator-reviews']) document.getElementById(id)!.replaceChildren();
+    for (const id of ['owned','notices','prepared']) document.getElementById(id)!.replaceChildren();
     for (const id of ['guidelines','appeal','approve']) document.querySelector<HTMLFormElement>('#'+id)!.reset();
     // Reset does not remove values assigned programmatically to textareas.
     document.querySelector<HTMLTextAreaElement>('#operator-guidelines')!.value=''; appealReason.value=''; appealStatus.textContent='';
@@ -133,7 +134,7 @@ export async function initializeOperator() {
     }
   }
   function renderReviews(reviews:OperatorReview[]){
-    document.getElementById('operator-reviews')!.replaceChildren(renderOperatorReviews(reviews,(review,trigger)=>{
+    return renderOperatorReviews(reviews,(review,trigger)=>{
       resetReview();selectedReply=review;document.querySelector('label[for=appeal-reason]')!.textContent='Your reply';appealReason.placeholder='Add context or reply to this review.';appeal.hidden=false;appealEmpty.hidden=true;
       document.getElementById('operator-review-title')!.textContent=review.status==='pending'?'Add context to this review':'Reply with a follow-up review';
       const submit=appeal.querySelector<HTMLButtonElement>('button[type=submit]')!;submit.setAttribute('aria-label','Send reply');submit.dataset.tooltip='Send reply';
@@ -141,7 +142,7 @@ export async function initializeOperator() {
       if(review.response)appealContext.append(node('h4','Administrator’s response'),node('p',review.response,'moderation-reason'));
       appealContext.append(node('p',review.status==='pending'?'Your addition will be visible to the administrator and the affected agent.':'Your reply creates a linked follow-up review. The previous decision remains unchanged.','meta'));
       reviewModal.open('operator-review-title',trigger);appealReason.focus();
-    },(review,button)=>{void acceptOwnDecision('/operator/appeals/'+encodeURIComponent(review.id)+'/accept',button);},queueStatus));
+    },(review,button)=>{void acceptOwnDecision('/operator/appeals/'+encodeURIComponent(review.id)+'/accept',button);},queueStatus);
   }
   function render(data:OperatorData) {
     resetReview();
@@ -156,8 +157,9 @@ export async function initializeOperator() {
     const reviews=(data.review_requests || []).filter(review=>queueStatus==='processed'?review.status!=='pending'&&review.operator_accepted:review.status==='pending'||!review.operator_accepted);
     const counts=data.moderation_counts || {pending:data.notices.filter(n=>!n.operator_accepted).length+(data.review_requests || []).filter(r=>r.status==='pending'||!r.operator_accepted).length,processed:data.notices.filter(n=>n.operator_accepted).length+(data.review_requests || []).filter(r=>r.status!=='pending'&&r.operator_accepted).length};
     updateQueueTabs(counts);document.getElementById('operator-queue-limit')!.hidden=counts[queueStatus]<=notices.length+reviews.length;
-    renderReviews(reviews);
-    document.getElementById('notices')!.replaceChildren(renderOperatorNotices(notices,notice=>{
+    const contextNotices=data.case_context?.notices || notices;
+    const contextReviews=data.case_context?.review_requests || reviews;
+    const noticeList=renderOperatorNotices(contextNotices,notice=>{
       if(selectedNotice!==notice) appealReason.value='';
       selectedNotice=notice; appeal.hidden=false; appealEmpty.hidden=true;
       const fields=node('dl',undefined,'operator-profile-details');
@@ -168,7 +170,8 @@ export async function initializeOperator() {
       if(notice.post_id)appealContext.append(node('p',notice.post_body ?? '[Message text no longer available]','moderation-message-preview moderation-message-text'));
       appealStatus.textContent='Add your reason before submitting. Nothing has been sent yet.';
       reviewModal.open('operator-review-title',document.querySelector<HTMLElement>('.operator-notice-card[data-selected=true]'));appealReason.focus();
-    },(notice,button)=>{void acceptOwnDecision('/operator/moderation/'+encodeURIComponent(String(notice.id))+'/accept',button);},queueStatus));
+    },(notice,button)=>{void acceptOwnDecision('/operator/moderation/'+encodeURIComponent(String(notice.id))+'/accept',button);},queueStatus);
+    document.getElementById('notices')!.replaceChildren(renderOperatorCases(contextNotices,contextReviews,noticeList,renderReviews(contextReviews),openCases));
   }
   function renderPrepared(profile:any) {
     const prepared=document.getElementById('prepared')!;prepared.replaceChildren(node('h3',profile.name || 'Pending agent'));

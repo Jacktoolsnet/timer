@@ -871,7 +871,7 @@ export async function createApp() {
   app.get("/api/operator", async (req) => {
     const id = owner(req);
     const selected=z.object({moderationStatus:z.enum(['pending','processed']).optional()}).parse(req.query).moderationStatus || null;
-    return {
+    const data = {
       moderation_counts:(await pool.query(`SELECT ((SELECT count(*) FROM moderation m JOIN agents a ON a.id=m.agent_id WHERE a.operator_id=$1 AND ${queueFilter('moderation','m','operator','$1',"'pending'")})+(SELECT count(*) FROM appeals r WHERE r.operator_id=$1 AND ${queueFilter('appeal','r','operator','$1',"'pending'")}))::int AS pending,((SELECT count(*) FROM moderation m JOIN agents a ON a.id=m.agent_id WHERE a.operator_id=$1 AND ${queueFilter('moderation','m','operator','$1',"'processed'")})+(SELECT count(*) FROM appeals r WHERE r.operator_id=$1 AND ${queueFilter('appeal','r','operator','$1',"'processed'")}))::int AS processed`,[id])).rows[0],
       operator: (
         await pool.query(
@@ -891,6 +891,7 @@ export async function createApp() {
       notices: (
         await pool.query(
           `SELECT m.id,m.action,m.reason,m.created_at,m.agent_id,m.post_id,
+          EXISTS(SELECT 1 FROM appeals ar WHERE ar.moderation_id=m.id AND ar.operator_id=$1) AS has_review,
           a.name AS agent_name,a.handle AS agent_handle,(a.avatar_base64 IS NOT NULL) AS has_avatar,
           p.body AS post_body,p.state AS post_state,p.conversation_id,p.parent_id,${noticeAcceptance()}
           FROM moderation m JOIN agents a ON a.id=m.agent_id LEFT JOIN posts p ON p.id=m.post_id
@@ -899,6 +900,20 @@ export async function createApp() {
         )
       ).rows,
     };
+    // Fetch complete context for the selected queue entries, including history in the other tab.
+    // Never infer relationships from message/agent identity or timestamps.
+    const decisionIds=[...new Set([...data.notices.map(n=>String(n.id)),...data.review_requests.filter(r=>r.moderation_id!=null).map(r=>String(r.moderation_id))])];
+    const contextReviews=(await pool.query(`WITH RECURSIVE links AS (SELECT id,parent_appeal_id FROM appeals WHERE operator_id=$1), family(id) AS (
+      SELECT unnest($3::uuid[]) UNION SELECT CASE WHEN l.id=f.id THEN l.parent_appeal_id ELSE l.id END FROM family f JOIN links l ON l.id=f.id OR l.parent_appeal_id=f.id WHERE l.parent_appeal_id IS NOT NULL
+    ) SELECT ${appealFields} FROM appeals r WHERE r.operator_id=$1 AND (r.moderation_id=ANY($2::bigint[]) OR (r.moderation_id IS NULL AND r.id IN(SELECT id FROM family))) ORDER BY r.created_at,r.id`,[id,decisionIds,data.review_requests.map(r=>r.id)])).rows;
+    const contextNotices=(await pool.query(`SELECT m.id,m.action,m.reason,m.created_at,m.agent_id,m.post_id,m.report_id,
+      a.name AS agent_name,a.handle AS agent_handle,(a.avatar_base64 IS NOT NULL) AS has_avatar,
+      p.body AS post_body,p.state AS post_state,p.conversation_id,p.parent_id,${noticeAcceptance()},
+      EXISTS(SELECT 1 FROM appeals ar WHERE ar.moderation_id=m.id AND ar.operator_id=$1) AS has_review,
+      rp.reason AS report_reason,rp.created_at AS report_created_at,rp.target_kind AS report_target
+      FROM moderation m JOIN agents a ON a.id=m.agent_id LEFT JOIN posts p ON p.id=m.post_id LEFT JOIN reports rp ON rp.id=m.report_id
+      WHERE a.operator_id=$1 AND m.id=ANY($2::bigint[]) ORDER BY m.id DESC`,[id,decisionIds])).rows;
+    return {...data,case_context:{notices:contextNotices,review_requests:contextReviews}};
   });
   app.patch("/api/operator", async (req) => {
     const id = owner(req);
@@ -972,10 +987,11 @@ export async function createApp() {
     await chargeAgentAppeal(req);
     return transaction(async c=>{
       const a=await moderationAgent(req,c);
-      await c.query("SELECT pg_advisory_xact_lock(hashtextextended($1,0))",['appeal:'+a.id+':'+b.moderationId]);
       const original=(await c.query('SELECT id FROM moderation WHERE id::text=$1 AND agent_id=$2',[b.moderationId,a.id])).rows[0];
       if(!original)fail(404,'NOT_FOUND','Own moderation decision unavailable');
+      await c.query("SELECT pg_advisory_xact_lock(hashtextextended($1,0))",['appeal:'+a.id+':'+original.id]);
       if((await c.query("SELECT id FROM appeals WHERE moderation_id=$1 AND subject_agent_id=$2 AND status='pending' LIMIT 1",[original.id,a.id])).rowCount)fail(409,'REVIEW_PENDING','A pending review already exists. Add context to that request instead');
+      if((await c.query('SELECT id FROM appeals WHERE moderation_id=$1 AND subject_agent_id=$2 LIMIT 1',[original.id,a.id])).rowCount)fail(409,'REVIEW_EXISTS','Reply to the existing review instead');
       const created=(await c.query("INSERT INTO appeals(id,operator_id,subject_agent_id,moderation_id,reason,submitted_by,submitted_agent_id) VALUES($1,$2,$3,$4,$5,'agent',$3) RETURNING id",[randomUUID(),a.operator_id,a.id,original.id,b.reason])).rows[0];return {id:created.id};
     });
   });
@@ -994,8 +1010,14 @@ export async function createApp() {
     const b = z.object({ reason:z.string().trim().min(1).max(2000),moderationId:z.string().regex(/^[0-9]{1,19}$/).optional() }).parse(req.body);
     await transaction(c=>limit(c,id,'appeal_owner',30,3600));
     if(b.moderationId){
-      const saved=await pool.query("INSERT INTO appeals(id,operator_id,reason,moderation_id,subject_agent_id) SELECT $1,$2,$3,m.id,m.agent_id FROM moderation m JOIN agents a ON a.id=m.agent_id WHERE m.id::text=$4 AND a.operator_id=$2 RETURNING id",[randomUUID(),id,b.reason,b.moderationId]);
-      if(!saved.rowCount)fail(404,"NOT_FOUND","Owned moderation decision unavailable");
+      await transaction(async c=>{
+        const original=(await c.query('SELECT m.id,m.agent_id FROM moderation m JOIN agents a ON a.id=m.agent_id WHERE m.id::text=$1 AND a.operator_id=$2',[b.moderationId,id])).rows[0];
+        if(!original)fail(404,'NOT_FOUND','Owned moderation decision unavailable');
+        await c.query('SELECT id FROM agents WHERE id=$1 FOR KEY SHARE',[original.agent_id]);
+        await c.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))',['appeal:'+original.agent_id+':'+original.id]);
+        if((await c.query('SELECT id FROM appeals WHERE moderation_id=$1 AND operator_id=$2 LIMIT 1',[original.id,id])).rowCount)fail(409,'REVIEW_EXISTS','Reply to the existing review instead');
+        await c.query('INSERT INTO appeals(id,operator_id,reason,moderation_id,subject_agent_id) VALUES($1,$2,$3,$4,$5)',[randomUUID(),id,b.reason,original.id,original.agent_id]);
+      });
     }else await pool.query("INSERT INTO appeals(id,operator_id,reason) VALUES($1,$2,$3)",[randomUUID(),id,b.reason]);
     return { ok: true };
   });
@@ -1150,8 +1172,8 @@ export async function createApp() {
         if (!resolved.rowCount) fail(409, "REPORT_UNAVAILABLE", "Report already reviewed, unavailable or unrelated to this target");
       }
       await c.query(
-        "INSERT INTO moderation(admin_id,agent_id,post_id,action,reason) VALUES($1,$2,$3,$4,$5)",
-        [administrator, agentId, postId, b.action, b.reason],
+        "INSERT INTO moderation(admin_id,agent_id,post_id,action,reason,report_id) VALUES($1,$2,$3,$4,$5,$6)",
+        [administrator, agentId, postId, b.action, b.reason, b.reportId || null],
       );
       return { ok: true };
     });
