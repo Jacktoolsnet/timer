@@ -1,3 +1,5 @@
+import {hashtagTokens,normalizeHashtag} from '../../../shared/hashtags';
+import {appendHashtagText} from './hashtags';
 import { setFeedStatus } from "./feed-status";
 import { openModelDialog } from "./model-dialog";
 import { openReportDialog } from "./report-dialog";
@@ -54,13 +56,14 @@ function labelAction(control: HTMLElement, label: string) {
   control.setAttribute("aria-label", label);
   control.dataset.tooltip = label;
 }
-export function renderPost(p: Post, options: { streamPages?: number } = {}) {
+export function renderPost(p: Post, options: { streamPages?: number;streamTag?:string } = {}) {
   const article = element("article");
   article.dataset.id = p.id;
   article.id = "post-" + p.id;
   const conversationUrl = "/conversation?id=" + encodeURIComponent(p.conversation_id)
     + (p.parent_id ? "&post=" + encodeURIComponent(p.id) : "")
-    + (options.streamPages ? "&streamPages=" + options.streamPages : "");
+    + (options.streamPages ? "&streamPages=" + options.streamPages : "")
+    + (options.streamTag ? "&streamTag=" + encodeURIComponent(options.streamTag) : "");
   const head = element("div");
   head.className = "post-head";
   const avatar = element("div", [...p.name][0] || "?");
@@ -83,12 +86,11 @@ export function renderPost(p: Post, options: { streamPages?: number } = {}) {
   identity.lastElementChild!.className = "meta";
   head.append(identity);
   article.append(head);
-  const body = element(
-    "a",
-    p.state === "visible" ? p.body || "" : "[Message unavailable]",
-  );
-  body.className = "body message-link";
-  (body as HTMLAnchorElement).href = conversationUrl;
+  const messageText=p.state === 'visible' ? p.body || '' : '[Message unavailable]';
+  const tagged=p.state==='visible'&&hashtagTokens(messageText).length>0;
+  const body=element(tagged?'div':'a');body.className='body message-link';
+  if(tagged)appendHashtagText(body,messageText,conversationUrl);
+  else {body.textContent=messageText;(body as HTMLAnchorElement).href=conversationUrl;}
 
   article.append(body);
   const footer = element("div");
@@ -165,6 +167,12 @@ export async function startFeed() {
     status = document.querySelector("#status")!,
     more = document.querySelector<HTMLButtonElement>("#more")!,
     live = document.querySelector<HTMLElement>("#live")!;
+  const rawTag=new URLSearchParams(location.search).get('tag');
+  const tag=rawTag===null?null:normalizeHashtag(rawTag);
+  const filter=document.querySelector<HTMLElement>('#hashtag-filter');
+  if(rawTag!==null&&!tag){status.textContent='Invalid hashtag. Use letters, numbers or underscores (up to 64 characters).';return;}
+  if(filter&&tag){filter.hidden=false;filter.querySelector('[data-hashtag-label]')!.textContent='#'+tag;}
+  function feedPath(cursor?:string|null){const params=new URLSearchParams();if(tag)params.set('tag',tag);if(cursor)params.set('cursor',cursor);return '/feed'+(params.size?'?'+params:'');}
   let next: string | null = null,
     source: EventSource | undefined,
     busy = false,
@@ -187,13 +195,13 @@ export async function startFeed() {
       top = anchor?.getBoundingClientRect().top;
     try {
       if (append) {
-        const data = await api("/feed?cursor=" + encodeURIComponent(next!));
+        const data = await api(feedPath(next));
         if (suspended) return;
         const ids = new Set(
           Array.from(feed.children).map((n) => (n as HTMLElement).dataset.id),
         );
         for (const p of data.items)
-          if (!ids.has(p.id)) feed.append(renderPost(p, { streamPages: pages + 1 }));
+          if (!ids.has(p.id)) feed.append(renderPost(p, { streamPages: pages + 1,streamTag:tag || undefined }));
         next = data.nextCursor;
         pages++;
       } else {
@@ -202,7 +210,7 @@ export async function startFeed() {
         let watermark = "0";
         for (let i = 0; i < pages; i++) {
           const data = await api(
-            "/feed" + (cursor ? "?cursor=" + encodeURIComponent(cursor) : ""),
+            feedPath(cursor),
           );
           if (suspended) return;
           if (i === 0) watermark = data.eventCursor;
@@ -215,7 +223,7 @@ export async function startFeed() {
         }
         next = cursor;
         const unique = [...new Map(posts.map((p) => [p.id, p])).values()];
-        feed.replaceChildren(...unique.map(p => renderPost(p, { streamPages: pages })));
+        feed.replaceChildren(...unique.map(p => renderPost(p, { streamPages: pages,streamTag:tag || undefined })));
         if (!source) {
           source = new EventSource("/api/events?after=" + watermark);
           const refresh = () => {
@@ -235,7 +243,7 @@ export async function startFeed() {
       setFeedStatus(live, !navigator.onLine ? "offline" : source?.readyState === 1 ? "live" : live.dataset.state === "reconnecting" ? "reconnecting" : "connecting");
       status.textContent = feed.children.length
         ? ""
-        : "No messages yet. A little quiet is welcome here.";
+        : tag ? "No conversations match #"+tag+" yet." : "No messages yet. A little quiet is welcome here.";
       status.className = feed.children.length ? "" : "empty";
       more.hidden = !next;
       if (window.scrollY > 80 && anchorId && top !== undefined) {

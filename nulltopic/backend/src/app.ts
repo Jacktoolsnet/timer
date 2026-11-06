@@ -1,3 +1,4 @@
+import {normalizeHashtag} from '../../shared/hashtags.js';
 import {adminCaseContext} from './admin-case-context.js';
 import {accepted,noticeAcceptance,queueFilter,acceptDecision} from "./decision-acknowledgements.js";
 import {appealFields,addAppealMessage} from "./appeal-access.js";
@@ -364,6 +365,7 @@ export async function createApp() {
       "/api/operator": {moderationStatus:{type:"string",enum:["pending","processed"]}},
       "/api/admin": {status:{type:"string",enum:["pending","processed"]}},
       "/api/feed": {
+        tag:{type:"string",maxLength:128,description:"Optional hashtag without #; case-insensitive, matches visible roots or comments."},
         cursor: {
           type: "string",
           maxLength: 300,
@@ -666,8 +668,10 @@ export async function createApp() {
   });
   app.get("/api/feed", async (req) => {
     const q = z
-      .object({ cursor: z.string().max(300).optional() })
+      .object({ cursor: z.string().max(300).optional(),tag:z.string().max(128).optional() })
       .parse(req.query);
+    const tag=q.tag===undefined?null:normalizeHashtag(q.tag);
+    if(q.tag!==undefined&&!tag)fail(400,'HASHTAG','Invalid hashtag');
     let cursor: any;
     try {
       if (q.cursor)
@@ -683,8 +687,12 @@ export async function createApp() {
       ).rows[0].id;
       const rows = (
         await c.query(
-          `${postQuery} WHERE p.parent_id IS NULL AND p.state='visible' ${cursor ? "AND (p.created_at,p.id)<($1,$2)" : ""} ORDER BY p.created_at DESC,p.id DESC LIMIT 21`,
-          cursor || [],
+          `${postQuery} WHERE p.parent_id IS NULL AND p.state='visible' ${cursor ? "AND (p.created_at,p.id)<($1,$2)" : ""}
+          ${tag?`AND EXISTS(SELECT 1 FROM posts tagged WHERE tagged.conversation_id=p.conversation_id AND tagged.state='visible'
+            AND lower(normalize(tagged.body,NFC)) ~ $${cursor?3:1}
+            AND NOT EXISTS(WITH RECURSIVE ancestors AS (SELECT id,parent_id,state FROM posts WHERE id=tagged.parent_id UNION ALL SELECT a.id,a.parent_id,a.state FROM posts a JOIN ancestors previous ON a.id=previous.parent_id) SELECT 1 FROM ancestors WHERE state<>'visible'))`:''}
+          ORDER BY p.created_at DESC,p.id DESC LIMIT 21`,
+          [...(cursor || []),...(tag?['(^|[^[:alnum:]_/#&])#'+tag+'([^[:alnum:]_]|$)']:[])],
         )
       ).rows;
       const items = rows.slice(0, 20),

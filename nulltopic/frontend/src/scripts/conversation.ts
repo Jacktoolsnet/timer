@@ -1,22 +1,25 @@
+import {appendHashtagText} from './hashtags';
+import {normalizeHashtag} from '../../../shared/hashtags';
 import {api, renderPost, parseStreamPages, type Post} from './client';
 
-export function conversationBackUrl(threadId: string, selected: Post, pages: number) {
-  if (!selected.parent_id) return '/?pages=' + pages + '#post-' + selected.id;
+export function conversationBackUrl(threadId: string, selected: Post, pages: number,streamTag?:string) {
+  if (!selected.parent_id) return '/?pages=' + pages + (streamTag?'&tag='+encodeURIComponent(streamTag):'') + '#post-' + selected.id;
   const params = new URLSearchParams({ id: threadId, streamPages: String(pages) });
+  if(streamTag)params.set('streamTag',streamTag);
   if (selected.parent_id !== threadId) params.set('post', selected.parent_id);
   return '/conversation?' + params + '#post-' + selected.id;
 }
 
-export function renderConversation(rows: Post[], root: HTMLElement, comments: HTMLElement, streamPages = 1, selectedId?: string) {
+export function renderConversation(rows: Post[], root: HTMLElement, comments: HTMLElement, streamPages = 1, selectedId?: string,streamTag?:string) {
   const original = rows.find(post => selectedId ? post.id === selectedId : post.parent_id === null);
   if (!original) throw Object.assign(Error('Message unavailable'), { status: 404 });
-  const card = renderPost(original, { streamPages });
+  const card = renderPost(original, { streamPages,streamTag });
   card.classList.add('original-post');
   // The message is already open; its text need not link back to this same page.
   const message = card.querySelector<HTMLAnchorElement>('.message-link')!;
   const text = document.createElement('div');
   text.className = 'body';
-  text.textContent = message.textContent;
+  appendHashtagText(text,message.textContent || '');
   message.replaceWith(text);
   const children = new Map<string, string[]>();
   for (const post of rows) {
@@ -37,7 +40,7 @@ export function renderConversation(rows: Post[], root: HTMLElement, comments: HT
     : post.parent_id === original.id);
   root.replaceChildren(card);
   comments.replaceChildren(...replies.map(post => {
-    const reply = renderPost(post, { streamPages });
+    const reply = renderPost(post, { streamPages,streamTag });
     if (post.parent_id && post.parent_id !== original.id) {
       const context = document.createElement('a');
       context.className = 'reply-context';
@@ -54,6 +57,7 @@ export async function startConversation() {
   const params = new URLSearchParams(location.search);
   const id = params.get('id');
   const selectedId = params.get('post') || undefined;
+  const streamTag=normalizeHashtag(params.get('streamTag') || '') || undefined;
   let initialScrollDone = false;
   const pages = parseStreamPages(params.get('streamPages'));
   const status = document.querySelector<HTMLElement>('#status')!;
@@ -76,9 +80,9 @@ export async function startConversation() {
       // Keep the visible message stable when only counts/comments change.
       const anchor = [...comments.children].find(n => n.getBoundingClientRect().bottom > 0) as HTMLElement | undefined;
       const anchorId = anchor?.id, top = anchor?.getBoundingClientRect().top;
-      const result = renderConversation(rows, root, comments, pages, selectedId);
+      const result = renderConversation(rows, root, comments, pages, selectedId,streamTag);
       const selected = rows.find(post => post.id === result.id)!;
-      back.href = conversationBackUrl(id, selected, pages);
+      back.href = conversationBackUrl(id, selected, pages,streamTag);
       const backLabel = selected.parent_id ? 'Back to parent message' : 'Back to stream';
       back.setAttribute('aria-label', backLabel);
       back.dataset.tooltip = backLabel;

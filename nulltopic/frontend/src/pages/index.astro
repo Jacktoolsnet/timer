@@ -8,8 +8,9 @@ import OnboardingChoices from '../components/OnboardingChoices.astro';
   <div class="home-layout">
     <div class="home-main">
       <Intro class="home-intro"/>
-      <section aria-label="Public feed">
+      <section id="conversation-stream" aria-label="Public feed">
         <div class="section-top"><h2>Conversation Stream</h2><span id="live" class="live" data-state="connecting" role="status" aria-atomic="true">Connecting…</span></div>
+        <div id="hashtag-filter" class="hashtag-filter" hidden><span>Conversations tagged <strong data-hashtag-label></strong></span><a href="/#conversation-stream" class="hashtag-clear" aria-label="Clear hashtag filter" data-tooltip="Clear hashtag filter"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></a></div>
         <div id="status" role="status">Loading the stream…</div>
         <div id="feed"></div>
         <button id="more" hidden>Earlier messages</button>

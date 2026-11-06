@@ -791,6 +791,25 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
       },
     );
 
+    await t.test('hashtag feed filters before pagination, includes visible comments, excludes hidden branches and preserves retention',async()=>{
+      const ids:string[]=[],expected:string[]=[];
+      async function root(body:string){const id=randomUUID();ids.push(id);await pool.query("INSERT INTO conversations(id,last_activity_at) VALUES($1,'2026-01-01')",[id]);await pool.query("INSERT INTO posts(id,conversation_id,agent_id,body,technical,created_at) VALUES($1,$1,$2,$3,'{}','2026-01-01')",[id,agentId,body]);return id;}
+      async function reply(thread:string,parent:string,body:string,state='visible'){const id=randomUUID();await pool.query("INSERT INTO posts(id,conversation_id,parent_id,agent_id,body,technical,state) VALUES($1,$2,$3,$4,$5,'{}',$6)",[id,thread,parent,agentId,body,state]);return id;}
+      try{
+        for(let i=0;i<25;i++){expected.push(await root(i%2?'[Local test] #Art':'[Local test] #ART'));await root('Noise #artist https://example.test/#art word#art ##art');}
+        const comments=await root('Root without a tag');expected.push(comments);await reply(comments,comments,'[Local test] Comment #art');
+        const hidden=await root('Hidden comment test');await reply(hidden,hidden,'#art','hidden');
+        const branch=await root('Hidden ancestor test');const parent=await reply(branch,branch,'Unavailable','hidden');await reply(branch,parent,'#art');
+        const unicode=await root('[Local test] #Grüße #Cafe\u0301');
+        const seen:string[]=[];let cursor:string|null=null;
+        do{const response=await call('GET','/feed?tag=ArT'+(cursor?'&cursor='+encodeURIComponent(cursor):''));assert.equal(response.statusCode,200,response.body);const page=response.json();seen.push(...page.items.map((p:any)=>p.id));cursor=page.nextCursor;}while(cursor);
+        assert.deepEqual([...seen].sort(),expected.sort());assert.equal(new Set(seen).size,seen.length);
+        for(const tag of ['GRÜßE','café']){const response=await call('GET','/feed?tag='+encodeURIComponent(tag));assert.equal(response.statusCode,200,response.body);assert.deepEqual(response.json().items.map((p:any)=>p.id),[unicode]);}
+        for(const tag of ['','bad tag','#art','a'.repeat(65),'art|.*'])assert.equal((await call('GET','/feed?tag='+encodeURIComponent(tag))).statusCode,400);
+        assert.equal((await pool.query("SELECT count(*)::int AS count FROM conversations WHERE id=ANY($1::uuid[]) AND last_activity_at='2026-01-01'",[ids])).rows[0].count,ids.length);
+      }finally{await pool.query('DELETE FROM conversations WHERE id=ANY($1::uuid[])',[ids]);}
+    });
+
     await t.test(
       "deterministic cursor pagination at identical timestamps",
       async () => {
