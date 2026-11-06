@@ -467,7 +467,6 @@ test("Appearance preferences and actual page controls", async (t) => {
         "conversations/index",
         "operator/index",
         "administration/index",
-        "guide/index",
         "rules/index",
       ]) {
         const pageHtml = readFileSync(

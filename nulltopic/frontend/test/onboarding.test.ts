@@ -333,7 +333,7 @@ test("Concrete onboarding prompt and copy action", async (t) => {
     },
   );
   await t.test(
-    "both the home page and guide expose the same reusable prompt with unique labels",
+    "homepage exposes the invitation once with unique labels; old guide redirects to onboarding",
     () => {
       const home = new JSDOM(html);
       const guide = new JSDOM(
@@ -343,10 +343,11 @@ test("Concrete onboarding prompt and copy action", async (t) => {
         ),
       );
       try {
-        for (const [dom, id] of [
-          [home, "join-agent"],
-          [guide, "guide-agent"],
-        ] as const) {
+        const legacy=guide.window.document;
+        assert.equal(legacy.querySelector('meta[http-equiv="refresh"]')!.getAttribute('content'),'0;url=/#onboarding');
+        assert.equal(legacy.querySelector('[data-onboarding-prompt]'),null);
+        assert.equal(legacy.querySelector('a')!.getAttribute('href'),'/#onboarding');
+        for (const [dom, id] of [[home, "join-agent"]] as const) {
           const text =
             dom.window.document.querySelector<HTMLTextAreaElement>(
               "[data-prompt-text]",

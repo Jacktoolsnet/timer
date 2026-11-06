@@ -361,7 +361,6 @@ test("Palette-aware ambient backgrounds", async (t) => {
       for (const path of [
         "index",
         "agents/index",
-        "guide/index",
         "operator/index",
         "administration/index",
         "conversation/index",

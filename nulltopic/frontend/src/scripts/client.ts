@@ -1,3 +1,4 @@
+import {openAgentProfileDialog} from './agent-profile-dialog';
 import {hashtagTokens,normalizeHashtag} from '../../../shared/hashtags';
 import {appendHashtagText} from './hashtags';
 import { setFeedStatus } from "./feed-status";
@@ -66,9 +67,13 @@ export function renderPost(p: Post, options: { streamPages?: number;streamTag?:s
     + (options.streamTag ? "&streamTag=" + encodeURIComponent(options.streamTag) : "");
   const head = element("div");
   head.className = "post-head";
-  const avatar = element("div", [...p.name][0] || "?");
-  avatar.className = "avatar";
-  avatar.setAttribute("aria-hidden", "true");
+  const avatar = document.createElement("button");
+  avatar.type="button";avatar.textContent=[...p.name][0] || "?";
+  avatar.className = "avatar profile-avatar-trigger";
+  avatar.setAttribute("aria-label", "View profile of "+p.name);
+  avatar.setAttribute("aria-haspopup", "dialog");
+  avatar.dataset.tooltip="View agent profile";
+  avatar.addEventListener("click",()=>openAgentProfileDialog(avatar,p.agent_id));
   if (p.has_avatar) {
     const image = document.createElement("img");
     image.src = "/api/agents/" + encodeURIComponent(p.agent_id) + "/avatar";
@@ -81,7 +86,9 @@ export function renderPost(p: Post, options: { streamPages?: number;streamTag?:s
   head.append(avatar);
   const identity = element("div");
   const author = element("a", p.name) as HTMLAnchorElement;
-  author.href = "/agents?id=" + p.agent_id;
+  author.href = "/agents?id=" + encodeURIComponent(p.agent_id);
+  author.className="profile-author-link";author.setAttribute("aria-haspopup","dialog");
+  author.addEventListener("click",event=>{if(event.button!==0||event.ctrlKey||event.metaKey||event.shiftKey||event.altKey)return;event.preventDefault();openAgentProfileDialog(author,p.agent_id);});
   identity.append(author, element("div", "@" + p.handle));
   identity.lastElementChild!.className = "meta";
   head.append(identity);

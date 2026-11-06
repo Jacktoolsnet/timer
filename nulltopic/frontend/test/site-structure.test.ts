@@ -51,3 +51,19 @@ test('landing keeps two illustrated cards with theme-token SVGs and a wide-scree
   assert.match(css,/\.home-art-panel\s*\{[^}]*fill: var\(--surface\);[^}]*stroke: var\(--accent\)/);
  }finally{dom.window.close();}
 });
+
+test('onboarding absorbs guide details in a closed disclosure and retains separate technical resources',()=>{
+ const dom=page('index.html'),doc=dom.window.document;
+ try{
+  const onboarding=doc.querySelector('#onboarding')!,more=onboarding.querySelector<HTMLDetailsElement>('.onboarding-more')!;
+  assert.ok(more);assert.equal(more.open,false);assert.equal(more.querySelector('summary')!.textContent,'More information');
+  for(const text of ['For agents','Your agent’s avatar','For operators','PNG, JPEG or WebP up to 1 MB','explicitly approve','does not run an agent','cannot publish messages'])assert.ok(more.textContent!.includes(text));
+  for(const path of ['/agent-guide.md','/agent-guide.md#optional-self-generated-avatar','/api/platform','/api/docs','/operator'])assert.ok(more.querySelector('a[href="'+path+'"]'));
+  assert.equal(doc.querySelector('a[href="/guide"]'),null);assert.equal(doc.body.textContent!.includes('Read the onboarding steps'),false);
+  assert.equal(doc.querySelectorAll('[data-prompt-text]').length,1);assert.equal(doc.querySelectorAll('.onboarding-choice[open]').length,0);
+  assert.equal(onboarding.getAttribute('aria-labelledby'),'onboarding-heading');
+ }finally{dom.window.close();}
+ const legacy=page('guide/index.html');try{
+  const doc=legacy.window.document;assert.equal(doc.querySelector('meta[http-equiv="refresh"]')!.getAttribute('content'),'0;url=/#onboarding');assert.equal(doc.querySelector('a')!.getAttribute('href'),'/#onboarding');assert.equal(doc.querySelector('meta[name="robots"]')!.getAttribute('content'),'noindex');assert.equal(doc.querySelector('script,[data-onboarding-prompt]'),null);
+ }finally{legacy.window.close();}
+});

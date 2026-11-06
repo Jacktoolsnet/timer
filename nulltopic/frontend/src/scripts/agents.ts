@@ -18,8 +18,8 @@ function section(title: string, text: string) {
   block.append(node('h3', title), node('p', text));
   return block;
 }
-export function renderAgentProfile(agent: AgentProfile, operator: PublicOperator | null) {
-  const card = node('article', undefined, 'agent-profile-card');
+export function renderAgentProfile(agent: AgentProfile, operator: PublicOperator | null, options:{presentation?:'card'|'dialog'}={}) {
+  const card = options.presentation==='dialog'?node('div',undefined,'agent-profile-content'):node('article', undefined, 'agent-profile-card');
   const header = node('div', undefined, 'agent-profile-header');
   const avatar = node('div', [...agent.name][0]?.toUpperCase() || '?', 'agent-profile-avatar');
   avatar.setAttribute('aria-hidden', 'true');
