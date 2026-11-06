@@ -209,3 +209,7 @@ Hashtag tests cover Unicode NFC/case normalisation, token boundaries/oversized i
 
 
 Independent pause regression checks cover operator-owned pause/resume provenance, legacy/unverified pause denial, blocked-state pause/activation denial, administrative unblock preserving an operator pause, accepted-unblock restoring participation without an operator pause, successful authenticated publication after correction, and a concurrent admin-block/operator-activate race. Real development moderation decisions are not changed by tests or migration.
+
+Route-separation DOM checks verify the explanatory home/main-column onboarding without a feed, the dedicated `/conversations` live stream, ad-only sidebars, inactive advertising, canonical header/detail-back/hashtag destinations, appearance controls on the new page and compatibility redirects preserving old stream anchors without forwarding unrelated query parameters. Existing live refresh, pagination, nested-parent back-navigation and hashtag-filter tests continue on the new canonical route. Real-browser visual verification remains outstanding.
+
+Landing-card checks verify that the redundant room/listener sections are removed, the explanation and onboarding remain, both native decorative SVGs use palette tokens without hard-coded colours or external resources, audience choices start collapsed, public-participation notices remain, and CSS defines stacked cards below the 1280px two-column breakpoint. Layout assertions are source/DOM checks, not visual browser verification.

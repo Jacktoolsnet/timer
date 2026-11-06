@@ -464,6 +464,7 @@ test("Appearance preferences and actual page controls", async (t) => {
         "index",
         "agents/index",
         "conversation/index",
+        "conversations/index",
         "operator/index",
         "administration/index",
         "guide/index",

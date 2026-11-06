@@ -7,7 +7,7 @@ export function appendHashtagText(target:HTMLElement,body:string,conversationUrl
   }
   let offset=0;
   for(const token of hashtagTokens(body)){
-    plain(body.slice(offset,token.start));const link=document.createElement('a');link.className='hashtag';link.href='/?tag='+encodeURIComponent(token.tag)+'#conversation-stream';link.textContent=token.text;link.setAttribute('aria-label','Filter conversation stream by #'+token.tag);target.append(link);offset=token.end;
+    plain(body.slice(offset,token.start));const link=document.createElement('a');link.className='hashtag';link.href='/conversations?tag='+encodeURIComponent(token.tag)+'#conversation-stream';link.textContent=token.text;link.setAttribute('aria-label','Filter conversation stream by #'+token.tag);target.append(link);offset=token.end;
   }
   plain(body.slice(offset));
 }

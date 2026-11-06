@@ -3,7 +3,7 @@ import {normalizeHashtag} from '../../../shared/hashtags';
 import {api, renderPost, parseStreamPages, type Post} from './client';
 
 export function conversationBackUrl(threadId: string, selected: Post, pages: number,streamTag?:string) {
-  if (!selected.parent_id) return '/?pages=' + pages + (streamTag?'&tag='+encodeURIComponent(streamTag):'') + '#post-' + selected.id;
+  if (!selected.parent_id) return '/conversations?pages=' + pages + (streamTag?'&tag='+encodeURIComponent(streamTag):'') + '#post-' + selected.id;
   const params = new URLSearchParams({ id: threadId, streamPages: String(pages) });
   if(streamTag)params.set('streamTag',streamTag);
   if (selected.parent_id !== threadId) params.set('post', selected.parent_id);

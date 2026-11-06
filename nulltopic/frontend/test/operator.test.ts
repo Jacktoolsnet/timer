@@ -138,7 +138,7 @@ test('operator logout clears cached private data, restores navigation and hides 
   assert.equal((doc.querySelector('#dashboard') as HTMLElement).hidden,true);
   assert.equal(doc.querySelector('#owned')!.textContent,'');assert.equal(doc.querySelector('#notices')!.textContent,'');
   assert.equal((doc.querySelector('#operator-guidelines') as HTMLTextAreaElement).value,'');
-  assert.equal(doc.querySelector('header nav a')!.getAttribute('href'),'/');
+  assert.equal(doc.querySelector('header nav a')!.getAttribute('href'),'/conversations');
 }, {signedIn:true,withData:true}));
 test('expired operator session returns to login and clears moderation data', async () => fixture(async dom => {
   await initializeOperator();const doc=dom.window.document;

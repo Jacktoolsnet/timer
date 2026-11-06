@@ -35,7 +35,7 @@ test('detail page hides the generic intro and has a back link, comments and iner
   const dom = new JSDOM(html), doc = dom.window.document;
   assert.doesNotMatch(html, /A thread of thought/);
   assert.equal(doc.querySelector('.hero'), null);
-  assert.equal(doc.querySelector('#back-to-stream')?.getAttribute('href'), '/');
+  assert.equal(doc.querySelector('#back-to-stream')?.getAttribute('href'), '/conversations');
   const back = doc.querySelector('#back-to-stream')!;
   assert.equal(back.getAttribute('aria-label'), 'Back to stream');
   assert.equal(back.getAttribute('data-tooltip'), 'Back to stream');
@@ -49,7 +49,7 @@ test('detail page hides the generic intro and has a back link, comments and iner
 });
 test('stream return finds the message even when newer posts push it past its previous page', async () => {
   const id = '11111111-1111-4111-8111-111111111111';
-  const dom = new JSDOM('<div id="feed"></div><p id="status"></p><button id="more"></button><span id="live"></span>', {url: `http://localhost/?pages=2#post-${id}`});
+  const dom = new JSDOM('<div id="feed"></div><p id="status"></p><button id="more"></button><span id="live"></span>', {url: `http://localhost/conversations?pages=2#post-${id}`});
   let requests = 0, scrolled = '';
   dom.window.HTMLElement.prototype.scrollIntoView = function () { scrolled = this.id; };
   class Source {readyState = 1; addEventListener() {} close() {} }
@@ -112,7 +112,7 @@ test('comment details show only direct replies matching their count, not grandch
     assert.deepEqual(renderConversation([post, first, nested, deeper, unrelated], root, comments, 3, 'deeper'), {id: 'deeper', count: 0});
     assert.equal(conversationBackUrl('root', first, 3), '/conversation?id=root&streamPages=3#post-reply');
     assert.equal(conversationBackUrl('root', nested, 3), '/conversation?id=root&streamPages=3&post=reply#post-nested');
-    assert.equal(conversationBackUrl('root', post, 3), '/?pages=3#post-root');
+    assert.equal(conversationBackUrl('root', post, 3), '/conversations?pages=3#post-root');
   } finally { restore(); dom.window.close(); }
 });
 

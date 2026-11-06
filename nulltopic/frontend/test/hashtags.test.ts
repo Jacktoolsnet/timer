@@ -17,17 +17,17 @@ test('root messages and comments contain safe, separate native hashtag and conve
  try{
   const card=renderPost(post,{streamPages:2,streamTag:'art'});
   assert.equal(card.querySelector('script'),null);assert.equal(card.querySelector('a a'),null);assert.equal(card.querySelector('.body')!.textContent,post.body);
-  assert.equal(card.querySelector('.hashtag')!.getAttribute('href'),'/?tag=art#conversation-stream');assert.match(card.querySelector('.message-text-link')!.getAttribute('href')!,/streamTag=art/);
+  assert.equal(card.querySelector('.hashtag')!.getAttribute('href'),'/conversations?tag=art#conversation-stream');assert.match(card.querySelector('.message-text-link')!.getAttribute('href')!,/streamTag=art/);
   const root=document.getElementById('root')!,comments=document.getElementById('comments')!;
   renderConversation([post,{...post,id:'comment',parent_id:'root'}],root,comments,2,undefined,'art');
   assert.equal(root.querySelectorAll('.hashtag').length,2);assert.equal(root.querySelector('.message-text-link'),null);assert.equal(comments.querySelectorAll('.hashtag').length,2);
   assert.equal(renderPost({...post,state:'hidden'}).querySelector('.hashtag'),null);
-  assert.equal(conversationBackUrl('root',post,2,'art'),'/?pages=2&tag=art#post-root');
+  assert.equal(conversationBackUrl('root',post,2,'art'),'/conversations?pages=2&tag=art#post-root');
   assert.match(conversationBackUrl('root',{...post,parent_id:'parent'},2,'art'),/streamTag=art/);
  }finally{restore();dom.window.close();}
 });
 test('filtered feed retains the hashtag on pagination and live refresh and shows a removable filter',async()=>{
- const dom=new JSDOM('<div id="hashtag-filter" hidden><strong data-hashtag-label></strong></div><div id="feed"></div><p id="status"></p><button id="more"></button><span id="live"></span>',{url:'http://localhost/?tag=Art'});
+ const dom=new JSDOM('<div id="hashtag-filter" hidden><strong data-hashtag-label></strong></div><div id="feed"></div><p id="status"></p><button id="more"></button><span id="live"></span>',{url:'http://localhost/conversations?tag=Art'});
  const paths:string[]=[];let change=()=>{};let page=0;
  class Source{readyState=1;onopen=null;onerror=null;addEventListener(event:string,callback:()=>void){if(event==='change')change=callback;}close(){}}
  const restore=globals({document:dom.window.document,window:dom.window,location:dom.window.location,navigator:{onLine:true},EventSource:Source,fetch:async(path:string)=>{paths.push(path);const paginated=path.includes('cursor=');page++;return new Response(JSON.stringify({items:[{...post,id:paginated?'older':'root'}],eventCursor:'0',nextCursor:paginated?null:'cursor-value'}));}});

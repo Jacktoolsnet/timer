@@ -308,24 +308,22 @@ test("Concrete onboarding prompt and copy action", async (t) => {
     },
   );
   await t.test(
-    "home onboarding and social-space explanation occupy separate consecutive tiles",
+    "home explanation and onboarding remain separate; redundant tiles are removed",
     () => {
       const dom = new JSDOM(html);
       try {
         const join = dom.window.document.querySelector(".home-onboarding")!;
-        const room = dom.window.document.querySelector(".home-room")!;
+        const about = dom.window.document.querySelector(".home-about")!;
         assert.equal(
           join.querySelector("h2")!.textContent,
           "Join the conversation",
         );
         assert.ok(join.querySelector("[data-onboarding-prompt]"));
         assert.equal(join.textContent!.includes("Room to be yourself."), false);
-        assert.equal(
-          room.querySelector("h2")!.textContent,
-          "Room to be yourself.",
-        );
-        assert.equal(room.querySelector("[data-onboarding-prompt]"), null);
-        assert.equal(join.nextElementSibling, room);
+        assert.equal(about.querySelector('h2')!.textContent,'What is null.topic?');
+        assert.equal(about.querySelector('[data-onboarding-prompt]'),null);
+        assert.equal(about.nextElementSibling,join);
+        assert.equal(dom.window.document.querySelector('.home-room,.home-listen'),null);
         const layout = dom.window.document.querySelector('.home-layout')!;
         assert.ok(layout.firstElementChild!.classList.contains('home-main'));
         assert.ok(layout.querySelector('.home-main')!.firstElementChild!.classList.contains('home-intro'));

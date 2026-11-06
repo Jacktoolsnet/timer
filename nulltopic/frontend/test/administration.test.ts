@@ -173,7 +173,7 @@ test('administration tiles, back navigation and toolbar lock follow the authenti
   assert.equal((doc.querySelector('#admin-login-shell') as HTMLElement).hidden, false);
   assert.equal((doc.querySelector('#admin-header-logout') as HTMLElement).hidden, true);
   assert.equal(doc.querySelector('.admin-session-handle')?.textContent, '');
-  assert.equal(doc.querySelector('header nav a')?.getAttribute('href'), '/');
+  assert.equal(doc.querySelector('header nav a')?.getAttribute('href'), '/conversations');
   assert.equal(doc.querySelector('header nav a')?.getAttribute('aria-disabled'), null);
 }, false, true));
 
