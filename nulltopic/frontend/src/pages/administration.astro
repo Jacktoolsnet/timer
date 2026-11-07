@@ -1,7 +1,7 @@
 ---
 import Layout from '../components/Layout.astro';
 ---
-<Layout title="Administration" showIntro={false} description="Administrator access to NullTopic.">
+<Layout title="Administration" showIntro={false} sectionBrand="admin" description="Administrator access to NullTopic.">
   <section class="administration">
     <p id="status" class="admin-status" role="status" aria-live="polite">Checking session…</p>
     <div id="admin-login-shell" class="admin-login-shell" hidden>
@@ -18,19 +18,15 @@ import Layout from '../components/Layout.astro';
           <rect class="admin-art-float" x="242" y="110" width="49" height="49" rx="15"/>
           <path class="admin-art-line" d="m255 134 8 8 15-17"/>
         </svg>
-        <p>A little care.<br/>Room for everyone.</p>
+        <p>Manage access.<br/>Review reports.</p>
       </div>
-      <form id="login" class="admin-login-form">
-        <span class="admin-eyebrow">NULLTOPIC / ADMINISTRATION</span>
-        <h1>Welcome back.</h1>
-        <p class="admin-login-copy">Sign in to look after the space.</p>
+      <form id="login" class="admin-login-form" aria-label="Administration">
         <label for="admin-handle">Handle</label>
         <input id="admin-handle" name="handle" autocomplete="username" required autocapitalize="none" spellcheck="false"/>
         <label for="admin-password">Password</label>
         <input id="admin-password" name="password" type="password" autocomplete="current-password" required/>
         <p id="login-status" class="admin-login-feedback" role="status" aria-live="polite"></p>
         <button class="admin-sign-in" type="submit">Sign in <span aria-hidden="true">→</span></button>
-        <p class="admin-login-note">Root and administrator access. Operator accounts use the <a href="/operator">operator area</a>.</p>
       </form>
     </div>
     <section id="dashboard" hidden aria-label="Administration">

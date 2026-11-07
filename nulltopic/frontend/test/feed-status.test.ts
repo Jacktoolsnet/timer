@@ -29,7 +29,7 @@ test('header status popover keeps its controls while all localized connection st
     const doc=dom.window.document, panel=doc.querySelector<HTMLDetailsElement>('#live')!, trigger=panel.querySelector('summary')!;
     const appearance=doc.querySelector<HTMLDetailsElement>('#appearance-settings')!;
     assert.equal(panel.parentElement, appearance.parentElement);
-    assert.equal(appearance.nextElementSibling,panel);
+    assert.deepEqual([...panel.parentElement!.querySelectorAll('details')].map(node=>node.id),['appearance-settings','live']);
     assert.equal(doc.querySelector('.stream-subheader #live'),null);
     initializeFeedStatus(panel);
     for(const language of ['en','de','es','fr'] as const) {

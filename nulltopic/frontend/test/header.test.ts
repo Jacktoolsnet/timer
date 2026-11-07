@@ -65,3 +65,12 @@ test('stream identity is in the header with a compact mobile prefix while other 
   assert.match(css, /@media \(max-width: 760px\)\s*\{\s*\.section-brand-prefix\s*\{\s*display: none;/);
   stream.window.close(); home.window.close();
 });
+
+test('operator and administration share responsive section identities', () => {
+  for (const [page,brand] of [['operator','operators'],['administration','admin']]) {
+    const dom=new JSDOM(readFileSync(new URL(`../dist/${page}/index.html`,import.meta.url),'utf8'));
+    assert.equal(dom.window.document.querySelector('header h1 .brand-name')!.textContent,'null.topic.'+brand);
+    assert.equal(dom.window.document.querySelector('header .section-brand-prefix')!.textContent,'null.topic.');
+    dom.window.close();
+  }
+});

@@ -267,3 +267,13 @@ test('operator overview conversations tile leads to owned-agent tiles and a sear
  doc.querySelector<HTMLButtonElement>('.operator-conversation-agent')!.click();await tick();assert.ok(requests.some(r=>r.path.startsWith('/api/operator/agents/agent/posts?')));assert.match(doc.querySelector('#operator-messages-heading')!.textContent!,/Example agent/);
  doc.querySelector<HTMLButtonElement>('#operator-messages-back')!.click();doc.querySelector<HTMLButtonElement>('#operator-conversations [data-operator-view=overview]')!.click();assert.equal(doc.querySelector<HTMLElement>('#operator-overview')!.hidden,false);
 },{signedIn:true,withData:true}));
+
+test('operator login keeps only the illustration and login controls below its section brand', () => {
+  const dom=new JSDOM(html),doc=dom.window.document;
+  assert.equal(doc.querySelector('header h1 .brand-name')!.textContent,'null.topic.operators');
+  const login=doc.querySelector('#operator-login-shell')!;
+  assert.equal(login.querySelector('.admin-eyebrow,h1,.admin-login-copy,.admin-login-note'),null);
+  assert.equal(login.querySelector('form')!.getAttribute('aria-label'),'Operator');
+  assert.ok(login.querySelector('svg'));assert.ok(login.querySelector('[autocomplete=username]'));assert.ok(login.querySelector('[autocomplete=current-password]'));assert.ok(login.querySelector('button[type=submit]'));
+  dom.window.close();
+});

@@ -75,10 +75,18 @@ const {
       import {initializeBackgroundAnimation} from '../scripts/background';
       initializeBackgroundAnimation();
       const header = document.querySelector<HTMLElement>('body > header');
+      const searchToolbar = document.querySelector<HTMLElement>('.stream-subheader');
       if (header) {
-        const measure = () => document.documentElement.style.setProperty('--header-height', `${header.getBoundingClientRect().height}px`);
+        const measure = () => {
+          document.documentElement.style.setProperty('--header-height', `${header.getBoundingClientRect().height}px`);
+          if (searchToolbar) document.documentElement.style.setProperty('--search-toolbar-height', `${searchToolbar.getBoundingClientRect().height}px`);
+        };
         measure();
-        if ('ResizeObserver' in window) new ResizeObserver(measure).observe(header);
+        if ('ResizeObserver' in window) {
+          const observer = new ResizeObserver(measure);
+          observer.observe(header);
+          if (searchToolbar) observer.observe(searchToolbar);
+        }
       }
     </script>
   </body>

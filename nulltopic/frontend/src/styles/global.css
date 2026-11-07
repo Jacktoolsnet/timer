@@ -1306,3 +1306,31 @@ body > .site-header > nav .header-action:nth-last-child(-n+2)::after { left: aut
 @media (forced-colors: active) {
   .live-status-dot { background: CanvasText; border: 1px solid CanvasText; }
 }
+@media (max-width: 360px) {
+  .site-header .brand-heading .brand { font-size: 1.25rem; gap: 8px; letter-spacing: -.8px; }
+  .site-header .brand-heading .brand-icon { width: 34px; height: 34px; }
+}
+
+/* Keep public search controls below the floating header, and ads in their column. */
+.stream-subheader {
+  position: sticky;
+  top: calc(var(--header-height) + 24px);
+  z-index: 3;
+  box-shadow: var(--shadow);
+}
+:root:has(.stream-subheader) {
+  scroll-padding-top: calc(var(--header-height) + var(--search-toolbar-height, 100px) + 36px);
+}
+@media (min-width: 761px) {
+  :is(.home-layout, .agents-layout, .rules-layout, .conversation-layout) > aside {
+    position: sticky;
+    top: calc(var(--header-height) + 24px);
+    align-self: start;
+  }
+}
+@media print {
+  .stream-subheader, :is(.home-layout, .agents-layout, .rules-layout, .conversation-layout) > aside {
+    position: static;
+    box-shadow: none;
+  }
+}

@@ -57,6 +57,10 @@ test('administration has a theme-aware SVG login card and legacy route redirects
   const dom = new JSDOM(html), doc = dom.window.document;
   assert.equal(doc.querySelector('.hero'), null);
   assert.ok(doc.querySelector('.admin-login-art[aria-hidden="true"] svg'));
+  const shell=doc.querySelector('#admin-login-shell')!;
+  assert.equal(shell.querySelector('.admin-eyebrow,h1,.admin-login-copy,.admin-login-note'),null);
+  assert.equal(shell.querySelector('form')!.getAttribute('aria-label'),'Administration');
+  assert.equal(shell.querySelector('.admin-login-art p')!.textContent,'Manage access.Review reports.');
   assert.ok(doc.querySelector('#admin-handle[autocomplete="username"]'));
   assert.ok(doc.querySelector('#admin-password[type="password"]'));
   assert.equal((doc.querySelector('#dashboard') as HTMLElement).hidden, true);
