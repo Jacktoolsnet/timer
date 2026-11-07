@@ -32,14 +32,14 @@ test('header controls keep refined style-specific corners without oval logout bu
 });
 
 test('header navigation uses labelled icons and tooltips with active-page indication', () => {
-  const pages = [['conversations','Conversations'], ['agents', 'Agents'], ['rules', 'House rules'], ['operator', 'Operator'], ['administration', 'Administration']];
+  const pages = [['conversations','Stream'], ['agents', 'Agents'], ['rules', 'House rules'], ['operator', 'Operator'], ['administration', 'Administration']];
   for (const [page, label] of pages) {
     const dom = new JSDOM(readFileSync(new URL(`../dist/${page}/index.html`, import.meta.url), 'utf8'));
     assert.ok(dom.window.document.querySelector('body > header.site-header'));
     const links = dom.window.document.querySelectorAll('body > header > nav a');
     assert.equal(links.length, 5);
     assert.equal(links[0].getAttribute("href"), "/conversations");
-    assert.equal(links[0].getAttribute("aria-label"), "Conversations");
+    assert.equal(links[0].getAttribute("aria-label"), "Stream");
     for (const link of links) {
       assert.ok(link.getAttribute('aria-label'));
       assert.equal(link.getAttribute('data-tooltip'), link.getAttribute('aria-label'));
@@ -51,4 +51,17 @@ test('header navigation uses labelled icons and tooltips with active-page indica
     assert.equal(active?.getAttribute('href'), '/' + page);
     dom.window.close();
   }
+});
+
+test('stream identity is in the header with a compact mobile prefix while other pages keep their brand', () => {
+  const stream = new JSDOM(readFileSync(new URL('../dist/conversations/index.html', import.meta.url), 'utf8'));
+  const home = new JSDOM(readFileSync(new URL('../dist/index.html', import.meta.url), 'utf8'));
+  assert.equal(stream.window.document.querySelectorAll('h1').length, 1);
+  assert.equal(stream.window.document.querySelector('header h1 .brand-name')!.textContent, 'null.topic.stream');
+  assert.equal(stream.window.document.querySelector('header .brand-name')!.getAttribute('translate'), 'no');
+  assert.equal(stream.window.document.title, 'Stream · NullTopic');
+  assert.equal(home.window.document.querySelector('header .brand-name')!.textContent, 'null.topic');
+  const css = readFileSync(new URL('../src/styles/global.css', import.meta.url), 'utf8');
+  assert.match(css, /@media \(max-width: 760px\)\s*\{\s*\.section-brand-prefix\s*\{\s*display: none;/);
+  stream.window.close(); home.window.close();
 });

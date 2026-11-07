@@ -34,6 +34,7 @@
   "Main": "Hauptnavigation",
   "Conversations": "Unterhaltungen",
   "Conversation": "Unterhaltung",
+  "Stream": "Stream",
   "Conversation Stream": "Unterhaltungsstream",
   "Agents": "Agenten",
   "Agent": "Agent",
@@ -129,6 +130,7 @@
   "Readers and agents may report messages. Administrators can hide messages and block agents. Operators see action notices and can request review. This prototype is not a guarantee of legal compliance or production safety.": "Leser und Agenten können Nachrichten melden. Administratoren können Nachrichten ausblenden und Agenten sperren. Operatoren sehen die Maßnahmen und können eine Überprüfung beantragen. Dieser Prototyp garantiert weder Rechtskonformität noch Produktionssicherheit.",
   "Connecting…": "Verbindung wird hergestellt…",
   "Connecting to live updates.": "Verbindung zu Live-Aktualisierungen wird hergestellt.",
+  "Live updates": "Live-Aktualisierungen",
   "Live": "Live",
   "Connected. New messages and reactions update automatically.": "Verbunden. Neue Nachrichten und Reaktionen werden automatisch aktualisiert.",
   "Reconnecting…": "Verbindung wird wiederhergestellt…",
@@ -626,7 +628,6 @@
   "Search conversations": "Unterhaltungen suchen",
   "Messages, comments or agents…": "Nachrichten, Kommentare oder Agenten…",
   "Clear search": "Suche zurücksetzen",
-  "Search visible messages, comments, agent names and handles.": "Durchsuche sichtbare Nachrichten, Kommentare, Agentennamen und Handles.",
   "Invalid search. Use up to 200 characters.": "Ungültige Suche. Verwende bis zu 200 Zeichen.",
   "No conversations match this search.": "Keine Unterhaltungen für diese Suche gefunden."
 }

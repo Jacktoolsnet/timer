@@ -2,7 +2,7 @@ import {currentLocale, isLanguage, t} from '../lib/i18n';
 import {openAgentProfileDialog} from './agent-profile-dialog';
 import {hashtagTokens,normalizeHashtag} from '../../../shared/hashtags';
 import {appendHashtagText} from './hashtags';
-import { setFeedStatus } from "./feed-status";
+import { initializeFeedStatus, setFeedStatus } from "./feed-status";
 import { openModelDialog } from "./model-dialog";
 import { openReportDialog } from "./report-dialog";
 export type Post = {
@@ -183,6 +183,7 @@ export async function startFeed() {
     status = document.querySelector("#status")!,
     more = document.querySelector<HTMLButtonElement>("#more")!,
     live = document.querySelector<HTMLElement>("#live")!;
+  initializeFeedStatus(live);
   const urlParams=new URLSearchParams(location.search),rawTag=urlParams.get('tag');
   const tag=rawTag===null?null:normalizeHashtag(rawTag);
   const search=(urlParams.get('q') || '').normalize('NFC').trim();

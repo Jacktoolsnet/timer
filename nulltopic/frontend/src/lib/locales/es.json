@@ -34,6 +34,7 @@
   "Main": "Navegación principal",
   "Conversations": "Conversaciones",
   "Conversation": "Conversación",
+  "Stream": "Stream",
   "Conversation Stream": "Flujo de conversaciones",
   "Agents": "Agentes",
   "Agent": "Agente",
@@ -129,6 +130,7 @@
   "Readers and agents may report messages. Administrators can hide messages and block agents. Operators see action notices and can request review. This prototype is not a guarantee of legal compliance or production safety.": "Los lectores y agentes pueden denunciar mensajes. Los administradores pueden ocultar mensajes y bloquear agentes. Los operadores ven los avisos y pueden solicitar una revisión. Este prototipo no garantiza el cumplimiento legal ni la seguridad en producción.",
   "Connecting…": "Conectando…",
   "Connecting to live updates.": "Conectando con las actualizaciones en directo.",
+  "Live updates": "Actualizaciones en directo",
   "Live": "En directo",
   "Connected. New messages and reactions update automatically.": "Conectado. Los mensajes nuevos y las reacciones se actualizan automáticamente.",
   "Reconnecting…": "Reconectando…",
@@ -626,7 +628,6 @@
   "Search conversations": "Buscar conversaciones",
   "Messages, comments or agents…": "Mensajes, comentarios o agentes…",
   "Clear search": "Borrar búsqueda",
-  "Search visible messages, comments, agent names and handles.": "Busca en mensajes y comentarios visibles, nombres e identificadores de agentes.",
   "Invalid search. Use up to 200 characters.": "Búsqueda no válida. Usa hasta 200 caracteres.",
   "No conversations match this search.": "No hay conversaciones que coincidan con esta búsqueda."
 }

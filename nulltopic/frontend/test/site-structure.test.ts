@@ -13,19 +13,19 @@ test('home explains NullTopic and gives onboarding the main column; sidebar cont
   assert.equal(doc.querySelector('#feed'),null);assert.equal(doc.querySelector('#live'),null);
   assert.equal(sidebar.children.length,1);assert.equal(sidebar.firstElementChild!.getAttribute('data-ad-active'),'false');assert.equal(sidebar.querySelector('[data-onboarding-prompt]'),null);
   assert.equal(doc.querySelector('.brand')!.getAttribute('href'),'/');
-  assert.equal(doc.querySelector('header a[aria-label="Conversations"]')!.getAttribute('aria-current'),null);
+  assert.equal(doc.querySelector('header a[aria-label="Stream"]')!.getAttribute('aria-current'),null);
  }finally{dom.window.close();}
 });
 test('dedicated conversations route contains the live stream and only an ad in its sidebar',()=>{
  const dom=page('conversations/index.html'),doc=dom.window.document;
  try{
-  const layout=doc.querySelector('.stream-layout')!;assert.ok(layout.querySelector('.conversation-main #feed'));assert.ok(layout.querySelector('#live'));assert.ok(layout.querySelector('#more'));assert.ok(layout.querySelector('#hashtag-filter'));
-  assert.equal(doc.querySelector('h1')!.textContent,'Conversation Stream');assert.equal(doc.querySelector('.home-onboarding,.hero'),null);
+  const layout=doc.querySelector('.stream-layout')!;assert.ok(layout.querySelector('.conversation-main #feed'));assert.ok(doc.querySelector('header #live'));assert.ok(layout.querySelector('#more'));assert.ok(layout.querySelector('#hashtag-filter'));
+  assert.equal(doc.querySelector('header h1')!.textContent,'null.topic.stream');assert.equal(doc.querySelector('.home-onboarding,.hero'),null);
   const sidebar=layout.querySelector('aside')!;assert.equal(sidebar.children.length,1);assert.equal(sidebar.firstElementChild!.getAttribute('data-ad-slot'),'stream-sidebar');assert.equal(sidebar.firstElementChild!.getAttribute('data-ad-active'),'false');
   assert.equal(doc.querySelector('.hashtag-clear')!.getAttribute('href'),'/conversations#conversation-stream');
   assert.equal(doc.querySelector('header [aria-current="page"]')!.getAttribute('href'),'/conversations');
  }finally{dom.window.close();}
- const detail=page('conversation/index.html');try{assert.equal(detail.window.document.querySelector('#back-to-stream')!.getAttribute('href'),'/conversations');assert.equal(detail.window.document.querySelector('header [aria-current="page"]')!.getAttribute('aria-label'),'Conversations');}finally{detail.window.close();}
+ const detail=page('conversation/index.html');try{assert.equal(detail.window.document.querySelector('#back-to-stream')!.getAttribute('href'),'/conversations');assert.equal(detail.window.document.querySelector('header [aria-current="page"]')!.getAttribute('aria-label'),'Stream');}finally{detail.window.close();}
 });
 test('legacy homepage stream links move to the new route without forwarding unrelated parameters',()=>{
  const id='11111111-1111-4111-8111-111111111111';

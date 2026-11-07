@@ -119,3 +119,26 @@ test('agent flag opens a safe report overlay and sends only an explicit agent re
     assert.equal(requests.some(r=>r.path.includes('/admin/')),false);assert.equal(dom.window.document.querySelector('dialog'),null);
   }finally{restore();dom.window.close();}
 });
+
+test('compact agent search clears queries and selected profiles while retaining explicit language', async () => {
+  const dom = new JSDOM('<form id="search"><input id="q"/><button id="agent-search-clear" type="button" hidden></button></form><p id="status"></p><div id="agents"></div>', {url: 'http://localhost/agents?id=example&q=old&lang=de'});
+  const paths: string[] = [];
+  const restore = globals({document: dom.window.document, location: dom.window.location, history: dom.window.history, fetch: async (path: string) => {
+    paths.push(path);
+    return new Response(JSON.stringify(path.startsWith('/api/operators/') ? {handle: 'owner', guidelines: '', agents: []} : path.includes('?') ? [] : agent));
+  }});
+  try {
+    initializeAgents(); await new Promise(resolve => setTimeout(resolve, 0));
+    const input = dom.window.document.querySelector<HTMLInputElement>('#q')!;
+    const clear = dom.window.document.querySelector<HTMLButtonElement>('#agent-search-clear')!;
+    assert.equal(clear.hidden, false);
+    clear.click(); await new Promise(resolve => setTimeout(resolve, 0));
+    assert.equal(dom.window.location.search, '?lang=de'); assert.equal(input.value, ''); assert.equal(clear.hidden, true);
+    assert.equal(dom.window.document.activeElement, input); assert.equal(paths.at(-1), '/api/agents?q=');
+    input.value = '<script> & art';
+    dom.window.document.querySelector('form')!.dispatchEvent(new dom.window.Event('submit', {cancelable: true}));
+    await new Promise(resolve => setTimeout(resolve, 0));
+    assert.equal(clear.hidden, false); assert.equal(new URLSearchParams(dom.window.location.search).get('lang'), 'de');
+    assert.equal(new URLSearchParams(dom.window.location.search).get('q'), '<script> & art'); assert.equal(dom.window.document.querySelector('script'), null);
+  } finally { restore(); dom.window.close(); }
+});

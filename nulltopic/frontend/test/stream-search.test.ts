@@ -10,7 +10,8 @@ function globals(values:Record<string,unknown>){const original=Object.keys(value
 
 test('stream subheader provides an accessible, themed search without moving the inert ad',()=>{
  const dom=new JSDOM(html),doc=dom.window.document;const subheader=doc.querySelector('.stream-subheader')!;
- assert.equal(subheader.querySelector('h1')!.textContent,'Conversation Stream');assert.ok(subheader.querySelector('#live'));assert.equal(subheader.querySelector('#stream-search')!.getAttribute('role'),'search');assert.equal(subheader.querySelector('input[type=search]')!.getAttribute('maxlength'),'200');assert.ok(subheader.querySelector('label[for=stream-query]'));assert.equal(subheader.querySelector('button')!.getAttribute('aria-label'),'Search');assert.equal(doc.querySelector('aside .ad')!.getAttribute('data-ad-active'),'false');dom.window.close();
+ assert.equal(subheader.querySelector('#stream-search-hint'),null);assert.equal(subheader.querySelector('#stream-query')!.hasAttribute('aria-describedby'),false);
+ assert.equal(subheader.querySelector('h1'),null);assert.equal(doc.querySelector('header h1 .brand-name')!.textContent,'null.topic.stream');assert.equal(subheader.querySelector('#live'),null);assert.ok(doc.querySelector('header #live'));assert.equal(subheader.querySelector('#stream-search')!.getAttribute('role'),'search');assert.equal(subheader.querySelector('input[type=search]')!.getAttribute('maxlength'),'200');assert.ok(subheader.querySelector('label[for=stream-query]'));assert.equal(subheader.querySelector('button')!.getAttribute('aria-label'),'Search');assert.equal(doc.querySelector('aside .ad')!.getAttribute('data-ad-active'),'false');dom.window.close();
 });
 
 test('new search URLs reset pages/anchors, preserve only tag/language and safely encode literal queries',()=>{

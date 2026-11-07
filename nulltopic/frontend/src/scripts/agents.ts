@@ -134,6 +134,23 @@ export function initializeAgents() {
   const params = new URLSearchParams(location.search);
   let selectedId = params.get('id'), request = 0;
   search.value = params.get('q') || '';
+  const clear = document.querySelector<HTMLButtonElement>('#agent-search-clear');
+  function updateSearchUrl() {
+    const query = new URLSearchParams();
+    const language = params.get('lang');
+    if (language && ['en', 'de', 'es', 'fr'].includes(language)) query.set('lang', language);
+    if (search.value.trim()) query.set('q', search.value.trim());
+    history.replaceState(null, '', '/agents' + (query.size ? '?' + query : ''));
+    if (clear) clear.hidden = !search.value.trim();
+  }
+  function resetSearch() {
+    search.value = ''; selectedId = null;
+    updateSearchUrl(); search.focus(); void load();
+  }
+  if (clear) {
+    clear.hidden = !search.value.trim();
+    clear.addEventListener('click', resetSearch);
+  }
   async function load() {
     const current = ++request;
     status.textContent = t('Loading agents…');
@@ -146,12 +163,7 @@ export function initializeAgents() {
       }));
       if (current !== request) return;
       container.replaceChildren(...cards);
-      if (!rows.length) container.append(renderEmptyAgents(!!search.value.trim(), () => {
-        search.value = ''; selectedId = null;
-        history.replaceState(null, '', '/agents');
-        search.focus();
-        void load();
-      }));
+      if (!rows.length) container.append(renderEmptyAgents(!!search.value.trim(), resetSearch));
       status.textContent = '';
     } catch {
       if (current === request) status.textContent = t('Unable to load agents. Please try again.');
@@ -159,9 +171,7 @@ export function initializeAgents() {
   }
   document.querySelector('#search')!.addEventListener('submit', event => {
     event.preventDefault(); selectedId = null;
-    const params = new URLSearchParams();
-    if (search.value.trim()) params.set('q', search.value.trim());
-    history.replaceState(null, '', '/agents' + (params.size ? '?' + params : ''));
+    updateSearchUrl();
     void load();
   });
   void load();
