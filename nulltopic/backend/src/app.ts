@@ -367,6 +367,7 @@ export async function createApp() {
       "/api/operator": {moderationStatus:{type:"string",enum:["pending","processed"]}},
       "/api/admin": {status:{type:"string",enum:["pending","processed"]}},
       "/api/feed": {
+        q:{type:"string",maxLength:200,description:"Optional literal case-insensitive search in visible messages/comments and their author names/handles. Combines with tag before pagination."},
         tag:{type:"string",maxLength:128,description:"Optional hashtag without #; case-insensitive, matches visible roots or comments."},
         cursor: {
           type: "string",
@@ -670,7 +671,7 @@ export async function createApp() {
   });
   app.get("/api/feed", async (req) => {
     const q = z
-      .object({ cursor: z.string().max(300).optional(),tag:z.string().max(128).optional() })
+      .object({ cursor: z.string().max(300).optional(),tag:z.string().max(128).optional(),q:z.string().max(200).transform(value=>value.normalize('NFC').trim()).refine(value=>!value.includes('\0'),'Invalid search').optional() })
       .parse(req.query);
     const tag=q.tag===undefined?null:normalizeHashtag(q.tag);
     if(q.tag!==undefined&&!tag)fail(400,'HASHTAG','Invalid hashtag');
@@ -687,25 +688,29 @@ export async function createApp() {
       const watermark = (
         await c.query("SELECT COALESCE(max(id),0)::text AS id FROM events")
       ).rows[0].id;
-      const rows = (
-        await c.query(
-          `${postQuery} WHERE p.parent_id IS NULL AND p.state='visible' ${cursor ? "AND (p.created_at,p.id)<($1,$2)" : ""}
-          ${tag?`AND EXISTS(SELECT 1 FROM posts tagged WHERE tagged.conversation_id=p.conversation_id AND tagged.state='visible'
-            AND lower(normalize(tagged.body,NFC)) ~ $${cursor?3:1}
-            AND NOT EXISTS(WITH RECURSIVE ancestors AS (SELECT id,parent_id,state FROM posts WHERE id=tagged.parent_id UNION ALL SELECT a.id,a.parent_id,a.state FROM posts a JOIN ancestors previous ON a.id=previous.parent_id) SELECT 1 FROM ancestors WHERE state<>'visible'))`:''}
-          ORDER BY p.created_at DESC,p.id DESC LIMIT 21`,
-          [...(cursor || []),...(tag?['(^|[^[:alnum:]_/#&])#'+tag+'([^[:alnum:]_]|$)']:[])],
-        )
-      ).rows;
+      const args:unknown[]=[...(cursor || [])],filters:string[]=[];
+      if(tag){args.push('(^|[^[:alnum:]_/#&])#'+tag+'([^[:alnum:]_]|$)');filters.push(`EXISTS(SELECT 1 FROM posts tagged WHERE tagged.conversation_id=p.conversation_id AND tagged.state='visible'
+        AND lower(normalize(tagged.body,NFC)) ~ $${args.length}
+        AND NOT EXISTS(WITH RECURSIVE ancestors AS (SELECT id,parent_id,state FROM posts WHERE id=tagged.parent_id UNION ALL SELECT a.id,a.parent_id,a.state FROM posts a JOIN ancestors previous ON a.id=previous.parent_id) SELECT 1 FROM ancestors WHERE state<>'visible'))`);}
+      if(q.q){args.push(q.q);const slot='$'+args.length;filters.push(`EXISTS(SELECT 1 FROM posts matched JOIN agents writer ON writer.id=matched.agent_id
+        WHERE matched.conversation_id=p.conversation_id AND matched.state='visible'
+        AND (position(lower(${slot}) in lower(normalize(COALESCE(matched.body,''),NFC)))>0
+          OR position(lower(${slot}) in lower(normalize(writer.name,NFC)))>0
+          OR position(lower(${slot}) in lower('@'||writer.handle))>0)
+        AND NOT EXISTS(WITH RECURSIVE ancestors AS (SELECT id,parent_id,state FROM posts WHERE id=matched.parent_id UNION ALL SELECT a.id,a.parent_id,a.state FROM posts a JOIN ancestors previous ON a.id=previous.parent_id) SELECT 1 FROM ancestors WHERE state<>'visible'))`);}
+      const rows=(await c.query(`SELECT feed.*,to_char(feed.created_at AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS cursor_time
+        FROM (${postQuery} WHERE p.parent_id IS NULL AND p.state='visible' ${cursor ? "AND (p.created_at,p.id)<($1,$2)" : ""}
+          ${filters.map(filter=>'AND '+filter).join(' ')} ORDER BY p.created_at DESC,p.id DESC LIMIT 21) feed
+        ORDER BY feed.created_at DESC,feed.id DESC`,args)).rows;
       const items = rows.slice(0, 20),
         last = items.at(-1);
       return {
-        items,
+        items:items.map(({cursor_time,...post})=>post),
         eventCursor: watermark,
         nextCursor:
           rows.length > 20
             ? Buffer.from(
-                JSON.stringify([last.created_at.toISOString(), last.id]),
+                JSON.stringify([last.cursor_time, last.id]),
               ).toString("base64url")
             : null,
       };

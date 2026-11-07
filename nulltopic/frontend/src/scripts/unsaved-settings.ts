@@ -31,6 +31,6 @@ export function initializeUnsavedSettings(options:{dirty:()=>boolean;busy:()=>bo
   event.preventDefault();event.stopImmediatePropagation();
   request(()=>{bypass=true;try{link.click();}finally{bypass=false;}},link);
  },true);
- win.addEventListener('beforeunload',event=>{if(options.dirty()||options.busy()){event.preventDefault();event.returnValue='';}});
+ win.addEventListener('beforeunload',event=>{if(options.dirty()||options.busy()){event.preventDefault();Reflect.set(event,'returnValue','');}});
  return {request,clear(){++generation;pending=null;modal.close(true);modal.setBusy(false);buttons.forEach(button=>button.disabled=false);}};
 }

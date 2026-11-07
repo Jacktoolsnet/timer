@@ -1,4 +1,4 @@
-import {currentLocale, t} from '../lib/i18n';
+import {currentLocale, isLanguage, t} from '../lib/i18n';
 import {openAgentProfileDialog} from './agent-profile-dialog';
 import {hashtagTokens,normalizeHashtag} from '../../../shared/hashtags';
 import {appendHashtagText} from './hashtags';
@@ -58,14 +58,15 @@ function labelAction(control: HTMLElement, label: string) {
   control.setAttribute("aria-label", label);
   control.dataset.tooltip = label;
 }
-export function renderPost(p: Post, options: { streamPages?: number;streamTag?:string } = {}) {
+export function renderPost(p: Post, options: { streamPages?: number;streamTag?:string;streamQuery?:string } = {}) {
   const article = element("article");
   article.dataset.id = p.id;
   article.id = "post-" + p.id;
   const conversationUrl = "/conversation?id=" + encodeURIComponent(p.conversation_id)
     + (p.parent_id ? "&post=" + encodeURIComponent(p.id) : "")
     + (options.streamPages ? "&streamPages=" + options.streamPages : "")
-    + (options.streamTag ? "&streamTag=" + encodeURIComponent(options.streamTag) : "");
+    + (options.streamTag ? "&streamTag=" + encodeURIComponent(options.streamTag) : "")
+    + (options.streamQuery ? "&streamQuery=" + encodeURIComponent(options.streamQuery) : "");
   const head = element("div");
   head.className = "post-head";
   const avatar = document.createElement("button");
@@ -170,17 +171,35 @@ export function parseStreamPages(value: string | null) {
   const pages = Number(value);
   return Number.isInteger(pages) && pages >= 1 && pages <= 100 ? pages : 1;
 }
+/** A new search/filter starts at page one; never carry a stale post anchor or unrelated parameters. */
+export function streamSearchUrl(href:string,values:{q?:string;tag?:string|null}){
+  const current=new URL(href),params=new URLSearchParams();
+  if(values.q)params.set('q',values.q);if(values.tag)params.set('tag',values.tag);
+  const lang=current.searchParams.get('lang');if(isLanguage(lang))params.set('lang',lang);
+  return '/conversations'+(params.size?'?'+params:'')+'#conversation-stream';
+}
 export async function startFeed() {
   const feed = document.querySelector("#feed")!,
     status = document.querySelector("#status")!,
     more = document.querySelector<HTMLButtonElement>("#more")!,
     live = document.querySelector<HTMLElement>("#live")!;
-  const rawTag=new URLSearchParams(location.search).get('tag');
+  const urlParams=new URLSearchParams(location.search),rawTag=urlParams.get('tag');
   const tag=rawTag===null?null:normalizeHashtag(rawTag);
+  const search=(urlParams.get('q') || '').normalize('NFC').trim();
   const filter=document.querySelector<HTMLElement>('#hashtag-filter');
+  const form=document.querySelector<HTMLFormElement>('#stream-search'),input=document.querySelector<HTMLInputElement>('#stream-query');
+  const streamUrl=(values:{q?:string;tag?:string|null})=>streamSearchUrl(location.href,values);
+  if(input)input.value=search;
+  if(form){
+    const tagInput=form.querySelector<HTMLInputElement>('#stream-search-tag')!,language=form.querySelector<HTMLInputElement>('#stream-search-language')!;
+    tagInput.disabled=!tag;tagInput.value=tag || '';const lang=urlParams.get('lang');language.disabled=!isLanguage(lang);language.value=isLanguage(lang)?lang:'';
+    form.addEventListener('submit',event=>{event.preventDefault();if(!form.reportValidity())return;const value=input!.value.normalize('NFC').trim();if(value.length>200||value.includes('\0')){status.textContent=t('Invalid search. Use up to 200 characters.');return;}window.location.assign(streamUrl({q:value,tag}));});
+  }
+  const clear=document.querySelector<HTMLAnchorElement>('#stream-search-clear');if(clear){clear.hidden=!search;clear.href=streamUrl({tag});}
   if(rawTag!==null&&!tag){status.textContent=t('Invalid hashtag. Use letters, numbers or underscores (up to 64 characters).');return;}
-  if(filter&&tag){filter.hidden=false;filter.querySelector('[data-hashtag-label]')!.textContent='#'+tag;}
-  function feedPath(cursor?:string|null){const params=new URLSearchParams();if(tag)params.set('tag',tag);if(cursor)params.set('cursor',cursor);return '/feed'+(params.size?'?'+params:'');}
+  if(search.length>200||search.includes('\0')){status.textContent=t('Invalid search. Use up to 200 characters.');return;}
+  if(filter&&tag){filter.hidden=false;filter.querySelector('[data-hashtag-label]')!.textContent='#'+tag;const clearTag=filter.querySelector<HTMLAnchorElement>('a');if(clearTag)clearTag.href=streamUrl({q:search});}
+  function feedPath(cursor?:string|null){const params=new URLSearchParams();if(tag)params.set('tag',tag);if(search)params.set('q',search);if(cursor)params.set('cursor',cursor);return '/feed'+(params.size?'?'+params:'');}
   let next: string | null = null,
     source: EventSource | undefined,
     busy = false,
@@ -209,7 +228,7 @@ export async function startFeed() {
           Array.from(feed.children).map((n) => (n as HTMLElement).dataset.id),
         );
         for (const p of data.items)
-          if (!ids.has(p.id)) feed.append(renderPost(p, { streamPages: pages + 1,streamTag:tag || undefined }));
+          if (!ids.has(p.id)) feed.append(renderPost(p, { streamPages: pages + 1,streamTag:tag || undefined,streamQuery:search || undefined }));
         next = data.nextCursor;
         pages++;
       } else {
@@ -231,7 +250,7 @@ export async function startFeed() {
         }
         next = cursor;
         const unique = [...new Map(posts.map((p) => [p.id, p])).values()];
-        feed.replaceChildren(...unique.map(p => renderPost(p, { streamPages: pages,streamTag:tag || undefined })));
+        feed.replaceChildren(...unique.map(p => renderPost(p, { streamPages: pages,streamTag:tag || undefined,streamQuery:search || undefined })));
         if (!source) {
           source = new EventSource("/api/events?after=" + watermark);
           const refresh = () => {
@@ -251,7 +270,7 @@ export async function startFeed() {
       setFeedStatus(live, !navigator.onLine ? "offline" : source?.readyState === 1 ? "live" : live.dataset.state === "reconnecting" ? "reconnecting" : "connecting");
       status.textContent = feed.children.length
         ? ""
-        : tag ? t("No conversations match #{tag} yet.", {tag:tag!}) : t("No messages yet. A little quiet is welcome here.");
+        : search ? t("No conversations match this search.") : tag ? t("No conversations match #{tag} yet.", {tag:tag!}) : t("No messages yet. A little quiet is welcome here.");
       status.className = feed.children.length ? "" : "empty";
       more.hidden = !next;
       if (window.scrollY > 80 && anchorId && top !== undefined) {

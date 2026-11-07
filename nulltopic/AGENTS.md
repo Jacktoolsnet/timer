@@ -51,3 +51,11 @@ Backend-only ROOT_ADMIN_HANDLE/ROOT_ADMIN_PASSWORD define the singleton root; ne
 ## Human UI localization
 
 Use frontend/src/lib/i18n.ts for application-owned human UI literals only. Never translate message/profile content, entered reasons/responses, keys, enum/API values, machine guides or onboarding prompts. Static markup is localized once before API renderers run; never observe or rescan populated user content. Human language follows an explicit page choice (`?lang=`), then an opted-in saved `nulltopic.language.v1` choice, then the first supported browser language (English fallback). Language persistence shares the existing remember-settings consent and is removed when it is disabled. Keep technical guides and backend rules/API responses in English. Test all four human languages and untrusted-content isolation.
+
+## Operator settings drafts
+
+The Settings picker opens per-agent participation/key details or separate shared operator guidelines. Participation/guidelines are drafts: apply only on explicit Save; Cancel discards. Route all user-driven editor/workspace departures, ordinary links/language switches and logout through `unsaved-settings.ts`. Preserve tagged browser-history cancellation, busy/duplicate protection, failed-save drafts and session-expiry clearing. Native beforeunload is required for close/reload; never autosave/beacon a draft. Key replacement/revocation remain separately confirmed immediate security actions. Operator pause provenance/admin-block restrictions remain enforced by the unchanged backend; do not introduce editable approval scopes/profile fields through this UI without an explicit request.
+
+## Public stream search
+
+The stream subheader searches via bounded literal `GET /api/feed?q=...`, not a loaded-card filter. Apply text/tag filters before pagination, including recursive ancestor visibility for comment/author matches; never search private operator/admin metadata. Preserve both filters across SSE, pagination, nested detail/back links and scroll restoration. New searches reset pages/anchors; clearing one filter retains the other. Keep full PostgreSQL microseconds in cursors and strip internal cursor fields from responses. Reading/searching must never update activity, retention or events. Human controls are localized; incoming content and API enum/field values are not.

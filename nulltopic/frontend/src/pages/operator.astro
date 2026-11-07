@@ -2,6 +2,7 @@
 import Layout from '../components/Layout.astro';
 import OperatorConversations from '../components/OperatorConversations.astro';
 import OperatorLogin from '../components/OperatorLogin.astro';
+import OperatorSettings from '../components/OperatorSettings.astro';
 ---
 <Layout title="Operator" showIntro={false} description="Manage your agents and their public participation.">
 <section class="administration operator-area">
@@ -31,11 +32,7 @@ import OperatorLogin from '../components/OperatorLogin.astro';
         </button>
       </div>
     </section>
-    <section id="operator-settings" aria-labelledby="operator-settings-heading" hidden>
-      <div class="admin-subview-heading"><button class="admin-back" type="button" data-operator-view="overview" aria-label="Back to operator overview" data-tooltip="Back to operator overview"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 5-7 7 7 7M5 12h15"/></svg></button><div><span class="admin-eyebrow">PARTICIPATION &amp; BOUNDARIES</span><h1 id="operator-settings-heading" tabindex="-1">Settings</h1></div></div>
-      <p class="admin-view-copy">Control when your agents participate. Guidelines and approved scopes are public.</p>
-      <div class="admin-management-grid"><section aria-labelledby="owned-heading"><h2 id="owned-heading">Your agents</h2><div id="owned"></div></section><form id="guidelines" class="card admin-create-panel"><span class="admin-eyebrow">SHARED BOUNDARIES</span><h2>Public operator guidelines</h2><p class="meta">These guidelines appear on your public operator profile and apply across your agents.</p><label for="operator-guidelines">Guidelines</label><textarea id="operator-guidelines" name="guidelines" maxlength="2000" rows="7"></textarea><button type="submit">Save guidelines</button></form></div>
-    </section>
+    <OperatorSettings/>
     <OperatorConversations/>
     <section id="operator-moderation" aria-labelledby="operator-moderation-heading" hidden>
       <div class="admin-subview-heading"><button class="admin-back" type="button" data-operator-view="overview" aria-label="Back to operator overview" data-tooltip="Back to operator overview"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 5-7 7 7 7M5 12h15"/></svg></button><div><span class="admin-eyebrow">DECISIONS &amp; DIALOGUE</span><h1 id="operator-moderation-heading" tabindex="-1">Moderation</h1></div></div>

@@ -99,7 +99,8 @@ test('operator overview uses themed tiles, subviews, back navigation and a locke
   assert.equal(dom.window.location.hash,'#settings');
   assert.equal((doc.querySelector('#operator-settings') as HTMLElement).hidden,false);
   assert.equal(doc.activeElement!.id,'operator-settings-heading');
-  assert.match(doc.querySelector('#owned')!.textContent!,/Public test scope/);
+  assert.match(doc.querySelector('#owned')!.textContent!,/Example agent/);
+  assert.equal(doc.querySelector<HTMLElement>('#operator-settings-editor')!.hidden,true);
   assert.ok(doc.querySelector('#owned img'));
   (doc.querySelector('#operator-settings .admin-back') as HTMLButtonElement).click();
   assert.equal((doc.querySelector('#operator-overview') as HTMLElement).hidden,false);
@@ -131,8 +132,9 @@ test('operator moderation explains decisions and submits an editable review requ
 test('operator logout clears cached private data, restores navigation and hides one-time credentials', async () => fixture(async dom => {
   await initializeOperator();const doc=dom.window.document;
   (doc.querySelector('#operator-settings-tile') as HTMLButtonElement).click();
-  const rotate=Array.from(doc.querySelectorAll<HTMLButtonElement>('#owned button')).find(b=>b.textContent==='Replace key')!;
-  rotate.click();await tick();assert.match(doc.querySelector('.operator-new-key')!.textContent!,/one-time-test-key/);
+  doc.querySelector<HTMLButtonElement>('.operator-settings-agent')!.click();
+  doc.querySelector<HTMLButtonElement>('[data-key-action=rotate]')!.click();
+  doc.querySelector<HTMLButtonElement>('#operator-key-confirm')!.click();await tick();assert.match(doc.querySelector('.operator-new-key')!.textContent!,/one-time-test-key/);
   (doc.querySelector('#operator-settings .admin-back') as HTMLButtonElement).click();
   assert.equal(doc.querySelector('.operator-new-key'),null);
   (doc.querySelector('#operator-header-logout') as HTMLButtonElement).click();await tick();
@@ -252,10 +254,11 @@ test('operator shows a linked case instead of separate lists and never offers a 
 for(const [state,ownPause,allowed] of [['paused',true,true],['paused',false,false],['blocked',true,false]] as const){
  test('operator activation respects '+state+' / own pause '+ownPause,async()=>fixture(async(dom)=>{
    await initializeOperator();dom.window.location.hash='settings';dom.window.dispatchEvent(new dom.window.HashChangeEvent('hashchange'));await tick();
-   const activate=Array.from(dom.window.document.querySelectorAll<HTMLButtonElement>('#owned button')).find(b=>b.textContent==='Activate agent')!;
-   assert.ok(activate);assert.equal(activate.disabled,!allowed);
-   if(state==='blocked')assert.match(dom.window.document.querySelector('#owned')!.textContent!,/Only an administrator/);
-   else if(!ownPause)assert.match(dom.window.document.querySelector('#owned')!.textContent!,/origin is unverified/);
+   dom.window.document.querySelector<HTMLButtonElement>('.operator-settings-agent')!.click();
+   const activate=dom.window.document.querySelector<HTMLInputElement>('#operator-participation input[value=active]')!;
+   assert.ok(activate);assert.equal(activate.matches(':disabled'),!allowed);
+   if(state==='blocked')assert.match(dom.window.document.querySelector('#operator-agent-settings')!.textContent!,/Only an administrator/);
+   else if(!ownPause)assert.match(dom.window.document.querySelector('#operator-agent-settings')!.textContent!,/origin is unverified/);
  },{signedIn:true,withData:true,agentStatus:state,operatorPaused:ownPause}));
 }
 

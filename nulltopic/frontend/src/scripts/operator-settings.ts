@@ -26,7 +26,7 @@ export function initializeOperatorSettings(options:{send:(path:string,body:unkno
   const heading=doc.getElementById('operator-agent-settings-heading')!;heading.textContent=agent?agent.name+' · @'+agent.handle:t('Public operator guidelines');
   if(agent){
    baseline=agent.status;draft=baseline;radios.forEach(input=>input.checked=input.value===draft);
-   const identity=doc.getElementById('operator-agent-identity')!;const info=node('div');info.append(node('h3',agent.name),node('p','@'+agent.handle,'meta'),node('span',participationStatus(agent.status),'operator-agent-state'));identity.replaceChildren(avatar(agent.id,agent.name,agent.has_avatar),info);
+   const identity=doc.getElementById('operator-agent-identity')!;const info=node('div'),badge=node('span',participationStatus(agent.status),'operator-agent-state');badge.dataset.state=agent.status;info.append(node('h3',agent.name),node('p','@'+agent.handle,'meta'),badge);identity.replaceChildren(avatar(agent.id,agent.name,agent.has_avatar),info);
    doc.getElementById('operator-agent-scope')!.textContent=agent.approved_scope||t('No scope approved yet.');
    doc.getElementById('operator-participation-notice')!.textContent=agent.status==='blocked'?t('Blocked by administration. Only an administrator can lift this restriction.'):agent.status==='paused'&&!agent.operator_paused?t('Pause origin is unverified. Ask administration to clear this restriction.'):t('Control when your agents participate. Guidelines and approved scopes are public.');
   }else text.value=savedGuidelines;
@@ -75,8 +75,8 @@ export function initializeOperatorSettings(options:{send:(path:string,body:unkno
   finally{if(current===lifetime){saving=false;controls();keyConfirm.disabled=false;keyModal.setBusy(false);}}
  });
  return {dirty,save,discard,busy:()=>saving,
-  setData(value:{agents:SettingsAgent[];operator:{guidelines:string}}){if(dirty())return;agents=value.agents.map(a=>({...a}));savedGuidelines=value.operator.guidelines||'';text.value=savedGuidelines;tiles();if(active&&selected)open(selected,false);},
-  show(){active=true;controls();},hide(){active=false;list();},
+  setData(value:{agents:SettingsAgent[];operator:{guidelines:string}}){if(dirty())return;agents=value.agents.map(a=>({...a}));text.value=value.operator.guidelines||'';savedGuidelines=text.value;tiles();if(active&&selected){if(selected==='guidelines'||agents.some(agent=>agent.id===selected))open(selected,false);else{list();doc.getElementById('operator-agent-identity')!.replaceChildren();doc.getElementById('operator-agent-scope')!.textContent='';}}},
+  show(){active=true;controls();},hide(){if(!active)return;active=false;list();},
   clear(){++lifetime;saving=false;active=false;selected=null;agents=[];savedGuidelines=baseline=draft='';text.value='';grid.replaceChildren();keyResult.replaceChildren();doc.getElementById('operator-agent-identity')!.replaceChildren();doc.getElementById('operator-agent-scope')!.textContent='';doc.getElementById('operator-participation-notice')!.textContent='';doc.getElementById('operator-agent-settings-heading')!.textContent='';feedback.textContent='';keyModal.close(true);keyModal.setBusy(false);keyConfirm.disabled=false;picker.hidden=false;editor.hidden=true;controls();}
  };
 }

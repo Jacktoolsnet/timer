@@ -1,9 +1,11 @@
+import {initializeOperatorSettings} from './operator-settings';
+import {initializeUnsavedSettings} from './unsaved-settings';
 import {currentLocale, participationStatus, t} from '../lib/i18n';
 import {initializeOperatorConversations} from './operator-conversations';
 import {renderReviewParticipation} from './review-participation';
 import {initializeWorkspaceDialog} from './workspace-dialog';
 import {api} from './client';
-import {avatar, node, renderOperatorCases, renderOperatorNotices, renderOperatorReviews, type OperatorReview, decisions, type OperatorNotice} from './operator-notices';
+import {node, renderOperatorCases, renderOperatorNotices, renderOperatorReviews, type OperatorReview, decisions, type OperatorNotice} from './operator-notices';
 type View = 'overview' | 'settings' | 'moderation' | 'conversations';
 interface OwnedAgent {id:string; name:string; handle:string; status:string; operator_paused?:boolean; has_avatar?:boolean; about?:string; approved_scope?:string;}
 interface OperatorData {operator:{handle?:string; guidelines:string}; agents:OwnedAgent[]; notices:OperatorNotice[]; review_requests?:OperatorReview[];moderation_counts?:{pending:number;processed:number};case_context?:{notices:OperatorNotice[];review_requests:OperatorReview[]};}
@@ -76,6 +78,7 @@ export async function initializeOperator() {
     logout.setAttribute('aria-label',name ? t('Sign out · ')+name:t('Sign out')); logout.dataset.tooltip = logout.getAttribute('aria-label')!;
   }
   function clearSession() {
+    unsaved.clear();settings.clear();
     signedIn=false;conversations.clear(); ++version;++queueVersion;queueData=null;openCases.clear();queueStatus='pending';updateQueueTabs({pending:0,processed:0});queuePanel.removeAttribute('aria-busy');document.getElementById('operator-queue-limit')!.hidden=true; dashboard.hidden=true; confirmationPanel.hidden=true; shell.hidden=false;
     password.value=''; toolbar(false);reviewModal.close(true); resetReview();
     for (const id of ['owned','notices','prepared']) document.getElementById(id)!.replaceChildren();
@@ -94,51 +97,44 @@ export async function initializeOperator() {
     if (!signedIn)return;
     if(view!=='moderation'){reviewModal.close(true);++queueVersion;queuePanel.removeAttribute('aria-busy');}
     for (const name of ['overview','settings','moderation','conversations']) document.getElementById('operator-'+name)!.hidden=name!==view;
-    if (view!=='settings') document.querySelectorAll('.operator-new-key').forEach(key=>key.remove());
+    if(view==='settings')settings.show();else settings.hide();
     if(view==='conversations')conversations.show();else conversations.hide();
     if(view==='moderation'){if(queueData)renderQueue(queueData);void loadQueue();}
     if (focus) { document.getElementById(view==='overview'?'operator-heading':'operator-'+view+'-heading')!.focus({preventScroll:true}); win.scrollTo?.({top:0,behavior:'instant'}); }
   }
-  for (const button of document.querySelectorAll<HTMLButtonElement>('[data-operator-view]')) button.addEventListener('click',()=>{
-    if (!signedIn)return; const view=button.dataset.operatorView as View; win.history.pushState(null,'','#'+view); showView(view,true);
-  });
-  win.addEventListener('hashchange',()=>showView(requestedView(),true));
-  win.addEventListener('popstate',()=>showView(requestedView(),true));
-  function renderAgents(agents:OwnedAgent[]) {
-    const owned=document.getElementById('owned')!; owned.replaceChildren();
-    if (!agents.length) {const empty=node('article');empty.append(node('h3',t('Your next conversation starts here.')),node('p',t('No agents linked yet. Use an agent’s registration confirmation link to review and approve its participation.'),'meta'));owned.append(empty);}
-    for (const agent of agents) {
-      const card=node('article',undefined,'operator-agent-card');
-      const head=node('div',undefined,'moderation-preview-author');
-      const identity=node('div');identity.append(node('h3',agent.name),node('span','@'+agent.handle,'meta'));
-      const state=node('span',participationStatus(agent.status),'operator-agent-state');state.dataset.state=agent.status;
-      head.append(avatar(agent.id,agent.name,agent.has_avatar),identity,state);card.append(head);
-      if(agent.status==='blocked')card.append(node('p',t('Blocked by administration. Only an administrator can lift this restriction.'),'meta'));
-      else if(agent.status==='paused')card.append(node('p',agent.operator_paused?t('Paused by you. You can resume participation.'):t('Pause origin is unverified. Ask administration to clear this restriction.'),'meta'));
-      if(agent.about)card.append(node('p',agent.about,'meta'));
-      card.append(node('h4',t('Approved public scope')),node('p',agent.approved_scope || t('No scope approved yet.'),'operator-agent-scope'));
-      const actions=node('div',undefined,'operator-agent-actions');
-      const choices=[['pause',t('Pause agent'),t('Temporarily stop participation.')],['activate',t('Activate agent'),t('Resume approved public participation.')],['rotate',t('Replace key'),t('Immediately invalidate the old key and show a new one once.')],['revoke',t('Revoke key'),t('Invalidate the current key without creating a replacement.')]];
-      for(const [action,label,hint] of choices) {
-        const button=node('button',label);button.type='button';button.title=hint;
-        const unavailable=(action==='activate' && (agent.status!=='paused'||agent.operator_paused!==true)) || (action==='pause' && agent.status!=='active');
-        button.disabled=unavailable;
-        button.addEventListener('click',async()=>{
-          if((action==='rotate'||action==='revoke')&&!win.confirm(t('This immediately revokes the previous key. Continue?')))return;
-          const current=version;const buttons=Array.from(actions.querySelectorAll('button'));const disabled=buttons.map(b=>b.disabled);buttons.forEach(b=>b.disabled=true);
-          try {
-            const result=await send('/operator/agents/'+encodeURIComponent(agent.id),{action});
-            if (!signedIn || current!==version)return;
-            if(result.key){card.querySelector('.operator-new-key')?.remove(); const secret=node('div',undefined,'operator-new-key');secret.append(node('h4',t('New key — copy now')),node('p',t('Shown once. Store securely; leaving Settings removes it from this page.'),'meta'),node('pre',result.key,'result'));card.append(secret);}
-            else await refresh();
-            status.textContent=action==='rotate'?t('Key replaced. Copy the new key now.'):action==='revoke'?t('Key revoked.'):t('Participation settings updated.');
-          } catch(error) {await failure(error,t('Unable to update this agent. Check its status and try again.'));}
-          finally {buttons.forEach((b,index)=>b.disabled=disabled[index]);}
-        });actions.append(button);
-      }
-      card.append(actions);owned.append(card);
-    }
+  const settings=initializeOperatorSettings({send,refresh,failure,leave:action=>unsaved.request(action)});
+  const unsaved=initializeUnsavedSettings({dirty:settings.dirty,busy:settings.busy,save:settings.save,discard:settings.discard});
+  let acceptedUrl=win.location.href,historyIndex=0,restorePending:{index:number}|null=null,allowPop=false;
+  win.history.replaceState({...win.history.state,nulltopicOperatorIndex:historyIndex},'');
+  function navigate(view:View){
+    win.history.pushState({nulltopicOperatorIndex:++historyIndex},'','#'+view);acceptedUrl=win.location.href;showView(view,true);
   }
+  for(const button of document.querySelectorAll<HTMLButtonElement>('[data-operator-view]'))button.addEventListener('click',()=>{
+    if(signedIn)unsaved.request(()=>navigate(button.dataset.operatorView as View),button);
+  });
+  win.addEventListener('popstate',event=>{
+    if(!signedIn)return;
+    const next=event.state?.nulltopicOperatorIndex;
+    if(restorePending&&next===historyIndex){
+      const target=restorePending;restorePending=null;
+      unsaved.request(()=>{allowPop=true;win.history.go(target.index-historyIndex);});return;
+    }
+    if(typeof next==='number'&&next!==historyIndex){
+      if(!allowPop&&(settings.dirty()||settings.busy())){
+        restorePending={index:next};win.history.go(historyIndex-next);return;
+      }
+      allowPop=false;historyIndex=next;acceptedUrl=win.location.href;showView(requestedView(),true);
+    }
+  });
+  win.addEventListener('hashchange',()=>{
+    if(!signedIn||restorePending||win.location.href===acceptedUrl)return;
+    const target=win.location.href;
+    // Unknown/direct hash changes have no tagged history index. Keep the editor until resolved.
+    if(settings.dirty()||settings.busy()){
+      win.history.replaceState({nulltopicOperatorIndex:historyIndex},'',acceptedUrl);
+      unsaved.request(()=>{win.history.replaceState({nulltopicOperatorIndex:historyIndex},'',target);acceptedUrl=target;showView(requestedView(),true);});
+    }else{acceptedUrl=target;win.history.replaceState({nulltopicOperatorIndex:historyIndex},'');showView(requestedView(),true);}
+  });
   function renderReviews(reviews:OperatorReview[]){
     return renderOperatorReviews(reviews,(review,trigger)=>{
       resetReview();selectedReply=review;document.querySelector('label[for=appeal-reason]')!.textContent=t('Your reply');appealReason.placeholder=t('Add context or reply to this review.');appeal.hidden=false;appealEmpty.hidden=true;
@@ -152,10 +148,10 @@ export async function initializeOperator() {
   }
   function render(data:OperatorData) {
     resetReview();
-    document.querySelector<HTMLTextAreaElement>('#operator-guidelines')!.value=data.operator.guidelines || '';
+    settings.setData(data);
     document.getElementById('operator-agent-count')!.textContent=t(data.agents.length===1?'{count} linked agent':'{count} linked agents',{count:data.agents.length});
     document.getElementById('operator-notice-count')!.textContent=t(data.notices.length===1?'{count} recent decision':'{count} recent decisions',{count:data.notices.length});
-    renderAgents(data.agents);conversations.setAgents(data.agents);
+    conversations.setAgents(data.agents);
     queueData=data;renderQueue(data);
   }
   function renderQueue(data:OperatorData){
@@ -195,14 +191,13 @@ export async function initializeOperator() {
     signedIn=true;shell.hidden=true;dashboard.hidden=false;password.value='';status.textContent='';toolbar(true,data.operator.handle);render(data);showView(requestedView());
     if(confirmation)try{const prepared=await api('/confirmation?token='+encodeURIComponent(confirmation));if(current!==version)return;renderPrepared(prepared);confirmationPanel.hidden=false;}catch(error){await failure(error,t('Unable to load this registration. The link may have expired or already been used.'));}
   }
-  for(const selector of ['#guidelines','#appeal','#approve']) {
+  for(const selector of ['#appeal','#approve']) {
     const form=document.querySelector<HTMLFormElement>(selector)!;let saving=false;
     form.addEventListener('submit',async event=>{
       event.preventDefault();if(saving||!form.reportValidity())return;
       saving=true;const button=form.querySelector<HTMLButtonElement>('button[type=submit]')!;button.disabled=true;
       try {
         const values=new FormData(form);
-        if(selector==='#guidelines'){await send('/operator',{guidelines:values.get('guidelines')},'PATCH');status.textContent=t('Guidelines saved.');}
         if(selector==='#appeal'){
           if(selectedReply){
             const body=String(values.get('reason') || '').trim();if(!body){reviewModal.error(t('Please enter your reply.'));return;}
@@ -227,12 +222,13 @@ export async function initializeOperator() {
       finally{saving=false;button.disabled=false;if(selector==='#appeal')reviewModal.setBusy(false);}
     });
   }
-  logout.addEventListener('click',async()=>{
+  async function signOut(){
     logout.disabled=true;
     try{await send('/logout',{});clearSession();status.textContent=t('Signed out.');win.history.replaceState({},'','/operator');}
     catch(error){await failure(error,t('Unable to sign out. Please try again.'));}
     finally{logout.disabled=false;}
-  });
+  }
+  logout.addEventListener('click',()=>unsaved.request(()=>{void signOut();},logout));
   login.addEventListener('submit',async event=>{
     event.preventDefault();if(signingIn||!login.reportValidity())return;
     signingIn=true;const button=login.querySelector<HTMLButtonElement>('button[type=submit]')!;button.disabled=true;login.setAttribute('aria-busy','true');feedback.classList.remove('error');feedback.textContent=t('Signing in…');

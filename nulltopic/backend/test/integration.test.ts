@@ -1469,6 +1469,40 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
         await pool.query('DELETE FROM conversations WHERE id=ANY($1::uuid[])',[conversations]);await pool.query('DELETE FROM agents WHERE id=$1',[foreign]);await pool.query('UPDATE agents SET status=$2 WHERE id=$1',[agentId,saved]);
       }
     });
+    await t.test('public stream search filters visible conversations before pagination, preserves precision and never matches hidden branches',async()=>{
+      const ids:string[]=[],writer=randomUUID(),suffix=writer.slice(0,8),needle='stream-search-'+suffix,handle='searchwriter_'+suffix;
+      await pool.query("INSERT INTO agents(id,handle,name,about,interests,operating_context,technical,operator_id,status) VALUES($1,$2,$3,'Fixture','[]','Isolated','{}',$4,'active')",[writer,handle,'Café SearchWriter '+suffix,operator]);
+      async function root(body:string,state='visible',fraction='123456',author=agentId){const id=randomUUID();ids.push(id);await pool.query('INSERT INTO conversations(id,last_activity_at) VALUES($1,now())',[id]);await pool.query("INSERT INTO posts(id,conversation_id,agent_id,body,technical,state,created_at) VALUES($1,$1,$2,$3,'{}',$4,$5)",[id,author,state==='deleted'?null:body,state,'2026-01-01T00:00:00.'+fraction+'Z']);return id;}
+      async function reply(rootId:string,parent:string,body:string,state='visible',author=agentId){const id=randomUUID();await pool.query("INSERT INTO posts(id,conversation_id,parent_id,agent_id,body,technical,state) VALUES($1,$2,$3,$4,$5,'{}',$6)",[id,rootId,parent,author,body,state]);return id;}
+      const read=async(query:string,tag?:string,cursor?:string)=>call('GET','/feed?'+new URLSearchParams({q:query,...(tag?{tag}:{}),...(cursor?{cursor}:{})}));
+      try{
+        const visible:string[]=[];for(let i=0;i<25;i++)visible.push(await root(needle+' '+i+' #searchpaging'+(i===0?' #streamsearch':''),'visible','123'+String(i).padStart(3,'0')));
+        const commentRoot=await root('An unrelated public opening');visible.push(commentRoot);
+        const comment=await reply(commentRoot,commentRoot,needle+' %_ public comment','visible',writer);await reply(commentRoot,commentRoot,'A separate #streamsearch comment');
+        const unicode=await root(needle+' café');visible.push(unicode);
+        const privateRoot=await root('A neutral opening');const hidden=await reply(privateRoot,privateRoot,needle+' hidden','hidden');await reply(privateRoot,hidden,needle+' deepsecret #streamsearch','visible',writer);
+        const hiddenRoot=await root(needle+' #streamsearch','hidden','123456',writer);await reply(hiddenRoot,hiddenRoot,needle+' deepsecret','visible',writer);await root(needle,'deleted');
+        const authorRoot=await root('A visible author fixture','visible','123456',writer);
+        const activity=(await pool.query('SELECT id,last_activity_at FROM conversations WHERE id=ANY($1::uuid[]) ORDER BY id',[ids])).rows;
+        const events=(await pool.query('SELECT count(*)::int AS count FROM events')).rows[0].count;
+        const found:string[]=[];let cursor:string|undefined;
+        do{const r=await read(needle.toUpperCase(),undefined,cursor);assert.equal(r.statusCode,200,r.body);const data=r.json();found.push(...data.items.map((post:any)=>post.id));assert.ok(data.items.every((post:any)=>post.cursor_time===undefined));cursor=data.nextCursor || undefined;}while(cursor);
+        assert.equal(found.length,visible.length);assert.equal(new Set(found).size,visible.length);assert.deepEqual([...found].sort(),[...visible].sort(),'microsecond cursor does not skip matching roots');
+        const taggedPages:string[]=[];cursor=undefined;
+        do{const r=await read(needle,'searchpaging',cursor);assert.equal(r.statusCode,200,r.body);const data=r.json();taggedPages.push(...data.items.map((post:any)=>post.id));cursor=data.nextCursor || undefined;}while(cursor);
+        assert.deepEqual(taggedPages.sort(),visible.slice(0,25).sort(),'combined query/tag cursor parameters stay aligned');
+        const combined=await read(needle,'streamsearch');assert.equal(combined.statusCode,200,combined.body);assert.deepEqual(combined.json().items.map((p:any)=>p.id).sort(),[visible[0],commentRoot].sort(),'tag and query combine at conversation level');
+        assert.deepEqual((await read(needle+' %_')).json().items.map((p:any)=>p.id),[commentRoot],'wildcards are literal');
+        assert.deepEqual((await read(needle+' CAFE\u0301')).json().items.map((p:any)=>p.id),[unicode]);
+        for(const query of ['CAFÉ SEARCHWRITER '+suffix,'@'+handle,handle])assert.deepEqual((await read(query)).json().items.map((p:any)=>p.id).sort(),[authorRoot,commentRoot].sort());
+        assert.equal((await read(needle+' deepsecret')).json().items.length,0);
+        assert.equal((await read("' OR 1=1 --")).json().items.length,0);
+        assert.equal((await read('x'.repeat(201))).statusCode,400);assert.equal((await read('bad\0search')).statusCode,400);
+        await pool.query("UPDATE posts SET state='hidden' WHERE id=$1",[comment]);assert.equal((await read(needle+' %_')).json().items.length,0,'a newly hidden match disappears');
+        assert.deepEqual((await pool.query('SELECT id,last_activity_at FROM conversations WHERE id=ANY($1::uuid[]) ORDER BY id',[ids])).rows,activity);
+        assert.equal((await pool.query('SELECT count(*)::int AS count FROM events')).rows[0].count,events,'searching emits no events');
+      }finally{await pool.query('DELETE FROM conversations WHERE id=ANY($1::uuid[])',[ids]);await pool.query('DELETE FROM agents WHERE id=$1',[writer]);}
+    });
   } finally {
     await app.close();
     await pool.end();

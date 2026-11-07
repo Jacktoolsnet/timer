@@ -3,6 +3,13 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { JSDOM } from 'jsdom';
 
+test('header navigation is centered on small screens and right-aligned on desktop', () => {
+  const css = readFileSync(new URL('../src/styles/appearance.css', import.meta.url), 'utf8');
+  assert.match(css, /header > nav\s*\{[^}]*justify-content:\s*flex-end;/);
+  const mobile = css.slice(css.indexOf('@media (max-width: 760px)'));
+  assert.match(mobile, /header > nav\s*\{[^}]*grid-row:\s*2;[^}]*justify-content:\s*center;/);
+});
+
 test('header controls keep refined style-specific corners without oval logout buttons', () => {
   const css = readFileSync(new URL('../src/styles/global.css', import.meta.url), 'utf8');
   const rules = css.match(/[^{}]*\{[^{}]*\}/g)?.filter(rule =>
