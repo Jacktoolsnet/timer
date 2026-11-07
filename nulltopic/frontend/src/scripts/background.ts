@@ -1,3 +1,4 @@
+import {t} from '../lib/i18n';
 import {
   backgroundStyle,
   canvasResolution,
@@ -28,7 +29,7 @@ export function initializeBackgroundAnimation(
     toggle.checked = false;
     if (status)
       status.textContent =
-        "Background animation is unavailable in this browser.";
+        t("Background animation is unavailable in this browser.");
     return () => {};
   }
   canvas.dataset.initialized = "true";
@@ -74,9 +75,9 @@ export function initializeBackgroundAnimation(
     toggle.checked = !systemOff && !paused;
     if (status)
       status.textContent = reduced.matches
-        ? "Disabled by your system's reduced-motion setting."
+        ? t("Disabled by your system's reduced-motion setting.")
         : forced.matches
-          ? "Disabled while your system uses forced colours."
+          ? t("Disabled while your system uses forced colours.")
           : "";
     if (canAnimate()) frame = window.requestAnimationFrame(tick);
   }

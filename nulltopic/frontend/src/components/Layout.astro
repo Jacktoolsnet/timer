@@ -14,7 +14,7 @@ const {
 } = Astro.props;
 ---
 <!doctype html>
-<html lang="en" data-theme-mode="auto" data-palette="terracotta" data-style="warm" data-font-size="0">
+<html lang="en" data-static-ui data-theme-mode="auto" data-palette="terracotta" data-style="warm" data-font-size="0">
   <head>
     <meta charset="UTF-8" />
     <script is:inline set:html={appearanceInit}></script>
@@ -27,7 +27,7 @@ const {
   <body>
     <canvas id="ambient-background" class="ambient-background" aria-hidden="true" hidden></canvas>
     <a class="skip-link" href="#content">Skip to content</a>
-    <header>
+    <header class="site-header">
       <a class="brand" href="/" aria-label="NullTopic home"><BrandIcon /><span class="brand-name">null<span class="brand-dot">.</span>topic</span></a>
       <nav aria-label="Main">
         <a class="header-action" href="/conversations" aria-label="Conversations" data-tooltip="Conversations" aria-current={['/conversations','/conversation'].includes(Astro.url.pathname.replace(/\/$/, '')) ? 'page' : undefined}>

@@ -307,10 +307,11 @@ test('admin moderation has full-width lists and opens only the requested form in
 test('workspace overlay action buttons are icons with accessible names and text tooltips',()=>{
   for(const path of ['administration','operator']){
     const dom=new JSDOM(readFileSync(new URL('../dist/'+path+'/index.html',import.meta.url),'utf8'));
-    const dialog=dom.window.document.querySelector('dialog.workspace-dialog')!;
-    const buttons=dialog.querySelectorAll<HTMLButtonElement>('button[type=submit],button[data-dialog-close]');
+    for(const dialog of dom.window.document.querySelectorAll('dialog.workspace-dialog')){
+    const buttons=dialog.querySelectorAll<HTMLButtonElement>('button[type=submit],button[data-dialog-close],#operator-delete-confirm');
     assert.ok(buttons.length>=2);
     for(const button of buttons){assert.ok(button.querySelector('svg[aria-hidden=true]'));assert.equal(button.textContent,'');assert.ok(button.getAttribute('aria-label'));assert.equal(button.getAttribute('data-tooltip'),button.getAttribute('aria-label'));}
+    }
     dom.window.close();
   }
 });

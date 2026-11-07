@@ -1,3 +1,4 @@
+import {t} from '../lib/i18n';
 export interface Choice {value:string; title:string; description:string; reasons:string[];}
 interface PickerOptions {choices:Choice[];hostId:string;triggerId:string;listId:string;presetsId:string;labelId:string;valueId:string;placeholder?:string;suggestionsLabel:string;isAvailable?:(value:string)=>boolean;}
 export function initializeChoicePicker(select: HTMLSelectElement, reason: HTMLTextAreaElement, config:PickerOptions) {
@@ -22,8 +23,8 @@ export function initializeChoicePicker(select: HTMLSelectElement, reason: HTMLTe
   for (const choice of choices) {
     const option = doc.createElement('button'); option.type = 'button';
     option.setAttribute('role', 'option'); option.tabIndex = -1; option.dataset.value = choice.value;
-    const title = doc.createElement('span'); title.className = 'moderation-option-title'; title.textContent = choice.title;
-    const description = doc.createElement('span'); description.className = 'moderation-option-description'; description.textContent = choice.description;
+    const title = doc.createElement('span'); title.className = 'moderation-option-title'; title.textContent = t(choice.title);
+    const description = doc.createElement('span'); description.className = 'moderation-option-description'; description.textContent = t(choice.description);
     option.append(title, description); option.addEventListener('click', () => choose(choice.value));
     option.addEventListener('keydown', event => {
       const available=options.filter(option=>!option.hidden);
@@ -43,14 +44,14 @@ export function initializeChoicePicker(select: HTMLSelectElement, reason: HTMLTe
     if(select.value && config.isAvailable && !config.isAvailable(select.value))select.value='';
     const choice = choices.find(choice => choice.value === select.value);
     trigger.removeAttribute('aria-invalid');
-    doc.querySelector('#'+config.valueId)!.textContent = choice?.title || config.placeholder || choices[0].title;
+    doc.querySelector('#'+config.valueId)!.textContent = t(choice?.title || config.placeholder || choices[0].title);
     options.forEach(option => option.setAttribute('aria-selected', String(option.dataset.value === choice?.value)));
     presets.replaceChildren();
-    const label = doc.createElement('p'); label.textContent = choice ? config.suggestionsLabel : 'Choose a decision to see suggested responses.';
+    const label = doc.createElement('p'); label.textContent = choice ? t(config.suggestionsLabel) : t('Choose a decision to see suggested responses.');
     presets.append(label);
     for (const text of choice?.reasons || []) {
-      const button = doc.createElement('button'); button.type = 'button'; button.textContent = text;
-      button.addEventListener('click', () => { reason.value = text; reason.dispatchEvent(new win.Event('input', {bubbles:true})); reason.focus(); });
+      const button = doc.createElement('button'); button.type = 'button'; button.textContent = t(text);
+      button.addEventListener('click', () => { reason.value = t(text); reason.dispatchEvent(new win.Event('input', {bubbles:true})); reason.focus(); });
       presets.append(button);
     }
   }

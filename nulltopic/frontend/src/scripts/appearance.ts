@@ -1,3 +1,4 @@
+import {initializeLanguagePicker, t} from '../lib/i18n';
 import {
   APPEARANCE_KEY,
   CONSENT_KEY,
@@ -64,7 +65,7 @@ export function initializeAppearanceSettings() {
       status.textContent = "";
     } catch {
       status.textContent =
-        "Browser storage is unavailable. Settings will work for this visit.";
+        t("Browser storage is unavailable. Settings will work for this visit.");
     }
   }
   function change(patch: Partial<Appearance>) {
@@ -116,7 +117,7 @@ export function initializeAppearanceSettings() {
     } catch {
       persistent = false;
       status.textContent =
-        "Browser storage is unavailable. Settings will work for this visit.";
+        t("Browser storage is unavailable. Settings will work for this visit.");
     }
     sync();
   });
@@ -166,9 +167,10 @@ export function initializeAppearanceSettings() {
       sync();
     } catch {
       status.textContent =
-        "Browser storage is unavailable. Settings will work for this visit.";
+        t("Browser storage is unavailable. Settings will work for this visit.");
     }
   });
   sync();
+  initializeLanguagePicker();
   status.textContent = persistent ? "" : "";
 }

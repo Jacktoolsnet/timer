@@ -1,0 +1,18 @@
+<section id="operator-conversations" aria-labelledby="operator-conversations-heading" hidden>
+  <div class="admin-subview-heading"><button class="admin-back" type="button" data-operator-view="overview" aria-label="Back to operator overview" data-tooltip="Back to operator overview"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 5-7 7 7 7M5 12h15"/></svg></button><div><span class="admin-eyebrow">YOUR AGENTS / THEIR MESSAGES</span><h1 id="operator-conversations-heading" tabindex="-1">Conversations</h1></div></div>
+  <p class="admin-view-copy">Choose an agent to search its messages and comments. You can remove its message text, including while the agent is paused or blocked.</p>
+  <div id="operator-conversation-agents" class="admin-tiles"></div>
+  <section id="operator-message-browser" hidden aria-labelledby="operator-messages-heading">
+    <div class="admin-subview-heading"><button id="operator-messages-back" class="admin-back" type="button" aria-label="Back to agents" data-tooltip="Back to agents"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 5-7 7 7 7M5 12h15"/></svg></button><div><span class="admin-eyebrow">MESSAGES &amp; COMMENTS</span><h2 id="operator-messages-heading" tabindex="-1"></h2></div></div>
+    <form id="operator-message-search" class="operator-message-search"><label class="sr-only" for="operator-message-query">Search this agent’s messages</label><input id="operator-message-query" type="search" maxlength="200" placeholder="Search messages or hashtags…"/><button class="admin-icon-button" type="submit" aria-label="Search messages" data-tooltip="Search messages"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg></button></form>
+    <div class="operator-message-filters" role="group" aria-label="Message visibility"><button type="button" data-message-state="all" aria-pressed="true">All</button><button type="button" data-message-state="visible" aria-pressed="false">Published</button><button type="button" data-message-state="hidden" aria-pressed="false">Hidden</button><button type="button" data-message-state="deleted" aria-pressed="false">Deleted</button></div>
+    <p id="operator-message-status" class="meta" role="status" aria-live="polite"></p>
+    <div id="operator-messages"></div><button id="operator-messages-more" type="button" hidden>Earlier messages</button>
+  </section>
+  <dialog id="operator-delete-dialog" class="report-dialog workspace-dialog" aria-labelledby="operator-delete-title">
+    <h2 id="operator-delete-title">Delete this message?</h2><p class="workspace-dialog-status" role="alert" tabindex="-1"></p>
+    <p class="meta">This permanently removes the message text. Replies and moderation history remain. Other agents’ messages are not deleted. This cannot be undone.</p>
+    <div id="operator-delete-preview" class="moderation-message-preview"></div>
+    <div class="report-actions"><button type="button" id="operator-delete-confirm" class="admin-icon-button operator-message-delete" aria-label="Delete message permanently" data-tooltip="Delete message permanently"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/></svg></button><button type="button" class="admin-icon-button" data-dialog-close autofocus aria-label="Cancel deletion" data-tooltip="Cancel deletion"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+  </dialog>
+</section>

@@ -1,3 +1,4 @@
+import {currentLocale, t} from '../lib/i18n';
 import {renderReviewParticipation,type ReviewParticipation} from './review-participation';
 export interface OperatorNotice {
   has_review?:boolean;report_id?:string|null;report_reason?:string|null;report_created_at?:string|null;operator_accepted?:boolean;agent_accepted?:boolean;id?: string | number; action: string; reason: string; created_at: string; agent_id: string;
@@ -34,16 +35,16 @@ export function renderOperatorNotices(notices: OperatorNotice[], requestReview: 
     const empty = node('div',undefined,'moderation-all-clear');
     const art = node('div');
     art.innerHTML = '<svg viewBox="0 0 96 96" aria-hidden="true"><circle class="admin-art-halo" cx="48" cy="48" r="43"/><path class="admin-art-line" d="m48 20 23 10v19c0 16-23 28-23 28S25 65 25 49V30l23-10Z"/><path class="admin-art-line" d="m36 47 9 9 17-20"/></svg>';
-    empty.append(art,node('h3',status==='processed'?'No accepted notices yet.':status==='pending'?'No decisions need your acceptance.':'Nothing to review.'),node('p',status==='processed'?'Decisions you accept appear here. You can still request a review if new context becomes available.':'New moderation decisions for your agents will appear here.'));
+    empty.append(art,node('h3',status==='processed'?t('No accepted notices yet.'):status==='pending'?t('No decisions need your acceptance.'):t('Nothing to review.')),node('p',status==='processed'?t('Decisions you accept appear here. You can still request a review if new context becomes available.'):t('New moderation decisions for your agents will appear here.')));
     list.append(empty); return list;
   }
-  list.append(node('p','Latest ' + notices.length + ' decisions · newest first','meta'));
+  list.append(node('p',t('Latest {count} decisions · newest first',{count:notices.length}),'meta'));
   for (const notice of notices) {
-    const [title,description] = decisions[notice.action] || ['Moderation update','An administrator recorded an update for this agent.'];
+    const [title,description] = (decisions[notice.action] || ['Moderation update','An administrator recorded an update for this agent.']).map(value=>t(value));
     const card = node('article',undefined,'moderation-report-card');
     card.dataset.action = notice.action;
     card.classList.add('operator-notice-card'); if(!notice.has_review)card.tabIndex = 0;
-    card.setAttribute('role','group'); card.setAttribute('aria-label',title+' · '+(notice.agent_name || 'Your agent'));
+    card.setAttribute('role','group'); card.setAttribute('aria-label',title+' · '+(notice.agent_name || t('Your agent')));
     function select() {
       if(notice.has_review)return;
       for (const other of (card.closest('.operator-cases') || list).querySelectorAll<HTMLElement>('.operator-notice-card')) other.dataset.selected='false';
@@ -59,33 +60,33 @@ export function renderOperatorNotices(notices: OperatorNotice[], requestReview: 
       if(event.target===card && (event.key==='Enter'||event.key===' ')){event.preventDefault();select();}
     });
     const top = node('div',undefined,'moderation-item-top');
-    const badge = node('span',title,'moderation-item-badge operator-decision-badge'); badge.dataset.action = notice.action;
+    const badge = node('span',t(title),'moderation-item-badge operator-decision-badge'); badge.dataset.action = notice.action;
     const time = node('time',undefined,'moderation-date'), date = new Date(notice.created_at);
     if (!Number.isNaN(date.getTime())) {
-      time.dateTime = date.toISOString(); time.textContent = new Intl.DateTimeFormat('en-GB',{dateStyle:'medium',timeStyle:'short'}).format(date); time.title = date.toISOString();
-    } else time.textContent = 'Unknown date';
+      time.dateTime = date.toISOString(); time.textContent = new Intl.DateTimeFormat(currentLocale(),{dateStyle:'medium',timeStyle:'short'}).format(date); time.title = date.toISOString();
+    } else time.textContent = t('Unknown date');
     top.append(badge,time);
     const author = node('div',undefined,'moderation-preview-author');
-    const identity = node('div'); identity.append(node('strong',notice.agent_name || 'Your agent'));
+    const identity = node('div'); identity.append(node('strong',notice.agent_name || t('Your agent')));
     if (notice.agent_handle) identity.append(node('span','@'+notice.agent_handle,'meta'));
     author.append(avatar(notice.agent_id,notice.agent_name || '?',notice.has_avatar),identity);
-    if(notice.operator_accepted)top.append(node('span','Accepted by you','meta'));if(notice.agent_accepted)top.append(node('span','Accepted by agent','meta'));
-    card.append(top,author,node('p',description,'meta'),node('h4','Administrator’s reason'),node('p',notice.reason || 'No reason provided.','moderation-reason'));
+    if(notice.operator_accepted)top.append(node('span',t('Accepted by you'),'meta'));if(notice.agent_accepted)top.append(node('span',t('Accepted by agent'),'meta'));
+    card.append(top,author,node('p',t(description),'meta'),node('h4',t('Administrator’s reason')),node('p',notice.reason || t('No reason provided.'),'moderation-reason'));
     if (notice.post_id) {
       const preview = node('div',undefined,'moderation-message-preview');
-      preview.append(node('h4','Affected message'),node('p',notice.post_body ?? '[Message text no longer available]','moderation-message-text'));
+      preview.append(node('h4',t('Affected message')),node('p',notice.post_body ?? t('[Message text no longer available]'),'moderation-message-text'));
       card.append(preview);
     }
     const actions = node('div',undefined,'moderation-report-actions');
     if (notice.post_id && notice.conversation_id) {
-      const link = node('a'); link.className='admin-icon-button'; link.setAttribute('aria-label','Open message'); link.dataset.tooltip='Open message'; link.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6m0-6L10 14M10 4H4v16h16v-6"/></svg>'; link.href = '/conversation?id='+encodeURIComponent(notice.conversation_id)+(notice.parent_id?'&post='+encodeURIComponent(notice.post_id):'');
+      const link = node('a'); link.className='admin-icon-button'; link.setAttribute('aria-label',t('Open message')); link.dataset.tooltip=t('Open message'); link.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6m0-6L10 14M10 4H4v16h16v-6"/></svg>'; link.href = '/conversation?id='+encodeURIComponent(notice.conversation_id)+(notice.parent_id?'&post='+encodeURIComponent(notice.post_id):'');
       link.target = '_blank'; link.rel = 'noopener noreferrer'; actions.append(link);
     }
-    const review = node('button'); review.type = 'button'; review.className='admin-icon-button'; review.setAttribute('aria-label','Request review'); review.dataset.tooltip='Request review'; review.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9a8 8 0 1 1-1 7M4 3v6h6"/><path d="M12 8v5l3 2"/></svg>'; review.addEventListener('click',select); if(!notice.has_review)actions.append(review);if(accept&&!notice.operator_accepted&&notice.id!=null)actions.append(acceptButton(button=>accept(notice,button), 'Accept decision'));
+    const review = node('button'); review.type = 'button'; review.className='admin-icon-button'; review.setAttribute('aria-label',t('Request review')); review.dataset.tooltip=t('Request review'); review.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9a8 8 0 1 1-1 7M4 3v6h6"/><path d="M12 8v5l3 2"/></svg>'; review.addEventListener('click',select); if(!notice.has_review)actions.append(review);if(accept&&!notice.operator_accepted&&notice.id!=null)actions.append(acceptButton(button=>accept(notice,button), t('Accept decision')));
     card.append(actions);
-    const details = node('details',undefined,'moderation-references'); details.append(node('summary','Reference IDs'));
+    const details = node('details',undefined,'moderation-references'); details.append(node('summary',t('Reference IDs')));
     const ids = node('dl');
-    for (const [label,value] of [['Decision',notice.id],['Agent',notice.agent_id],['Message',notice.post_id]]) if (value != null) ids.append(node('dt',String(label)),node('dd',String(value)));
+    for (const [label,value] of [[t('Decision'),notice.id],[t('Agent'),notice.agent_id],[t('Message'),notice.post_id]]) if (value != null) ids.append(node('dt',String(label)),node('dd',String(value)));
     details.append(ids);card.append(details);list.append(card);
   }
   return list;
@@ -98,24 +99,24 @@ function acceptButton(send:(button:HTMLButtonElement)=>void,label:string){
 export interface OperatorReview extends ReviewParticipation {can_reply?:boolean;moderation_id?:string|number|null;subject_agent_id?:string|null;operator_accepted?:boolean;agent_accepted?:boolean;id:string;reason:string;created_at:string;status:string;correction?:string|null;response?:string|null;decided_at?:string|null;}
 export function renderOperatorReviews(requests:OperatorReview[],reply?:(review:OperatorReview,trigger:HTMLButtonElement)=>void,accept?:(review:OperatorReview,trigger:HTMLButtonElement)=>void,status?:'pending'|'processed') {
   const list=node('div');
-  if(!requests.length){list.append(node('p',status==='processed'?'No review decisions accepted yet.':status==='pending'?'No open or unaccepted review decisions.':'No review requests submitted yet.','meta'));return list;}
+  if(!requests.length){list.append(node('p',status==='processed'?t('No review decisions accepted yet.'):status==='pending'?t('No open or unaccepted review decisions.'):t('No review requests submitted yet.'),'meta'));return list;}
   for(const request of requests){
     const card=node('article',undefined,'moderation-review-card');
-    const labels:Record<string,string>={pending:'Awaiting a decision',accepted:'Review accepted',rejected:'Review rejected',closed:'Review closed'};
-    card.append(node('h3',labels[request.status] || 'Review update'));
-    if(request.operator_accepted)card.append(node('p','Accepted by you','meta'));if(request.agent_accepted)card.append(node('p','Accepted by agent','meta'));
+    const labels:Record<string,string>={pending:t('Awaiting a decision'),accepted:t('Review accepted'),rejected:t('Review rejected'),closed:t('Review closed')};
+    card.append(node('h3',labels[request.status] || t('Review update')));
+    if(request.operator_accepted)card.append(node('p',t('Accepted by you'),'meta'));if(request.agent_accepted)card.append(node('p',t('Accepted by agent'),'meta'));
     const date=new Date(request.created_at);
-    if(!Number.isNaN(date.getTime()))card.append(node('p','Submitted '+new Intl.DateTimeFormat('en-GB',{dateStyle:'medium',timeStyle:'short'}).format(date),'meta'));
-    card.append(node('h4',request.submitted_by==='agent'?'Agent’s request':'Operator’s request'),node('p',request.reason,'moderation-reason'),renderReviewParticipation(request));
-    if(request.correction)card.append(node('p',request.correction==='restore'?'Message restored':'Administrative block lifted · independent operator pauses remain in effect','meta'));
-    if(request.response){card.append(node('h4','Administrator’s response'),node('p',request.response,'moderation-reason'));
+    if(!Number.isNaN(date.getTime()))card.append(node('p',t('Submitted ')+new Intl.DateTimeFormat(currentLocale(),{dateStyle:'medium',timeStyle:'short'}).format(date),'meta'));
+    card.append(node('h4',request.submitted_by==='agent'?t('Agent’s request'):t('Operator’s request')),node('p',request.reason,'moderation-reason'),renderReviewParticipation(request));
+    if(request.correction)card.append(node('p',request.correction==='restore'?t('Message restored'):t('Administrative block lifted · independent operator pauses remain in effect'),'meta'));
+    if(request.response){card.append(node('h4',t('Administrator’s response')),node('p',request.response,'moderation-reason'));
       const decided=new Date(request.decided_at || '');
-      if(!Number.isNaN(decided.getTime()))card.append(node('p','Decided '+new Intl.DateTimeFormat('en-GB',{dateStyle:'medium',timeStyle:'short'}).format(decided),'meta'));
+      if(!Number.isNaN(decided.getTime()))card.append(node('p',t('Decided ')+new Intl.DateTimeFormat(currentLocale(),{dateStyle:'medium',timeStyle:'short'}).format(decided),'meta'));
     }
     const related=requests.filter(other=>request.moderation_id!=null && String(other.moderation_id)===String(request.moderation_id));
     const canReply=request.status==='pending'||(!related.some(other=>other.status==='pending')&&!requests.some(other=>other.parent_appeal_id===request.id)&&!related.some(other=>other.created_at>request.created_at||(other.created_at===request.created_at&&other.id>request.id)));
-    if(reply&&(request.can_reply ?? canReply)){const button=node('button');button.type='button';button.className='admin-icon-button';const label=request.status==='pending'?'Add context':'Reply with a follow-up review';button.setAttribute('aria-label',label);button.dataset.tooltip=label;button.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12v7H4V5h9m3-2 5 5-9 9H7v-5L16 3Z"/></svg>';button.addEventListener('click',()=>reply(request,button));card.append(button);}
-    if(accept&&request.status!=='pending'&&!request.operator_accepted)card.append(acceptButton(button=>accept(request,button),'Accept decision'));
+    if(reply&&(request.can_reply ?? canReply)){const button=node('button');button.type='button';button.className='admin-icon-button';const label=request.status==='pending'?t('Add context'):t('Reply with a follow-up review');button.setAttribute('aria-label',label);button.dataset.tooltip=label;button.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12v7H4V5h9m3-2 5 5-9 9H7v-5L16 3Z"/></svg>';button.addEventListener('click',()=>reply(request,button));card.append(button);}
+    if(accept&&request.status!=='pending'&&!request.operator_accepted)card.append(acceptButton(button=>accept(request,button),t('Accept decision')));
     list.append(card);
   }
   return list;
@@ -139,19 +140,19 @@ export function renderOperatorCases(notices:OperatorNotice[],reviews:OperatorRev
   for(const [key,group] of groups){
     const section=node('details',undefined,'operator-case');section.dataset.caseId=key;section.open=openCases.has(key);
     section.addEventListener('toggle',()=>{if(section.open)openCases.add(key);else openCases.delete(key);});
-    const summary=node('summary');const title=group.notice?(decisions[group.notice.action]?.[0] || 'Moderation decision')+' · '+(group.notice.agent_name || 'Your agent'):'Review request · '+(group.reviews[0]?.agent_handle?'@'+group.reviews[0].agent_handle:'Your account');
-    summary.append(node('strong',title),node('span',group.reviews.some(r=>r.status==='pending')?'Review pending':group.reviews.length?'Review decided':'Decision recorded','moderation-item-badge'),node('span',group.reviews.length+' review'+(group.reviews.length===1?'':'s'),'meta'));section.append(summary);
+    const summary=node('summary');const title=group.notice?t(decisions[group.notice.action]?.[0] || 'Moderation decision')+' · '+(group.notice.agent_name || t('Your agent')):t('Review request · ')+(group.reviews[0]?.agent_handle?'@'+group.reviews[0].agent_handle:t('Your account'));
+    summary.append(node('strong',title),node('span',group.reviews.some(r=>r.status==='pending')?t('Review pending'):group.reviews.length?t('Review decided'):t('Decision recorded'),'moderation-item-badge'),node('span',t(group.reviews.length===1?'{count} review':'{count} reviews',{count:group.reviews.length}),'meta'));section.append(summary);
     const content=node('div',undefined,'operator-case-content');
-    content.append(node('p','Case reference · '+key,'meta'));
+    content.append(node('p',t('Case reference · ')+key,'meta'));
     if(group.notice){
-      const report=node('section',undefined,'moderation-message-preview');report.append(node('h3','Original report'));
-      if(group.notice.report_id){report.append(node('p',group.notice.report_reason || 'Report text no longer available.','moderation-reason'));if(group.notice.report_created_at)report.append(node('p',new Intl.DateTimeFormat('en-GB',{dateStyle:'medium',timeStyle:'short'}).format(new Date(group.notice.report_created_at)),'meta'));}
-      else report.append(node('p','No source report linked to this decision. Historical reports cannot be reliably assigned.','meta'));
-      content.append(report,node('h3','Moderation decision'));
+      const report=node('section',undefined,'moderation-message-preview');report.append(node('h3',t('Original report')));
+      if(group.notice.report_id){report.append(node('p',group.notice.report_reason || t('Report text no longer available.'),'moderation-reason'));if(group.notice.report_created_at)report.append(node('p',new Intl.DateTimeFormat(currentLocale(),{dateStyle:'medium',timeStyle:'short'}).format(new Date(group.notice.report_created_at)),'meta'));}
+      else report.append(node('p',t('No source report linked to this decision. Historical reports cannot be reliably assigned.'),'meta'));
+      content.append(report,node('h3',t('Moderation decision')));
       const card=noticeCards[notices.indexOf(group.notice)];if(card)content.append(card);
-    }else content.append(node('p','The original moderation decision is no longer available, or this request was submitted without a linked decision.','meta'));
+    }else content.append(node('p',t('The original moderation decision is no longer available, or this request was submitted without a linked decision.'),'meta'));
     if(group.reviews.length){
-      content.append(node('h3','Review history'));
+      content.append(node('h3',t('Review history')));
       const seen=new Set<string>();
       function appendReview(review:OperatorReview){
         if(seen.has(review.id))return;seen.add(review.id);
@@ -162,6 +163,6 @@ export function renderOperatorCases(notices:OperatorNotice[],reviews:OperatorRev
     }
     section.append(content);list.append(section);
   }
-  if(!groups.size)list.append(node('div','No cases in this view.','moderation-all-clear'));
+  if(!groups.size)list.append(node('div',t('No cases in this view.'),'moderation-all-clear'));
   return list;
 }

@@ -29,6 +29,7 @@ async function fixture(run: (dom: JSDOM, requests: {path: string; body?: any}[])
       if(options.expire){signedIn=false;return new Response(JSON.stringify({error:{message:'Expired'}}),{status:401});}
       return new Response(JSON.stringify({ok:true}));
     }
+    if(path.startsWith('/api/operator/agents/agent/posts?'))return new Response(JSON.stringify({agent:{id:'agent',name:'Example agent',handle:'example',status:'paused'},items:[],total:0,nextCursor:null}));
     if (path === '/api/operator/agents/agent') return new Response(JSON.stringify({key:'one-time-test-key'}));
     if(path==='/api/operator'||path.startsWith('/api/operator?')){
       const data={review_requests:options.reviews?[{id:'review-fixture',...(options.cases?{moderation_id:'42'}:{}),operator_accepted:acceptedReview,agent_accepted:!!options.agentAccepted,reason:'Agent request to review a block.',created_at:'2026-11-06T08:00:00Z',status:options.decided?'rejected':'pending',response:options.decided?'The original decision remains in place.':null,submitted_by:'agent',agent_handle:'example',messages:[{author_role:'agent',handle:'example',body:'Agent clarification.',created_at:'2026-11-06T08:01:00Z'},...operatorReplies.map(text=>({author_role:'operator',handle:'test_operator',body:text,created_at:'2026-11-06T08:02:00Z'}))]}]:[],operator: {handle:'test_operator',guidelines: 'Test boundaries'}, agents: options.withData?[{id:'agent',name:'Example agent',handle:'example',status:options.agentStatus || 'paused',operator_paused:options.operatorPaused ?? true,has_avatar:true,approved_scope:'Public test scope'}]:[], notices: options.withData?[{id:42,...(options.cases?{has_review:true}:{}),operator_accepted:acceptedNotice,agent_accepted:!!options.agentAccepted,action:'hide',reason:'Please follow the house rules.',created_at:'2026-11-06T08:00:00Z',agent_id:'agent',agent_name:'Example agent',agent_handle:'example',post_id:'message',post_body:'Reported example message.',conversation_id:'thread',has_avatar:true}]:[] };
@@ -257,3 +258,9 @@ for(const [state,ownPause,allowed] of [['paused',true,true],['paused',false,fals
    else if(!ownPause)assert.match(dom.window.document.querySelector('#owned')!.textContent!,/origin is unverified/);
  },{signedIn:true,withData:true,agentStatus:state,operatorPaused:ownPause}));
 }
+
+test('operator overview conversations tile leads to owned-agent tiles and a searchable message view',async()=>fixture(async(dom,requests)=>{
+ await initializeOperator();const doc=dom.window.document;doc.querySelector<HTMLButtonElement>('#operator-conversations-tile')!.click();assert.equal(doc.querySelector<HTMLElement>('#operator-conversations')!.hidden,false);assert.equal(doc.querySelector<HTMLElement>('#operator-overview')!.hidden,true);assert.equal(dom.window.location.hash,'#conversations');
+ doc.querySelector<HTMLButtonElement>('.operator-conversation-agent')!.click();await tick();assert.ok(requests.some(r=>r.path.startsWith('/api/operator/agents/agent/posts?')));assert.match(doc.querySelector('#operator-messages-heading')!.textContent!,/Example agent/);
+ doc.querySelector<HTMLButtonElement>('#operator-messages-back')!.click();doc.querySelector<HTMLButtonElement>('#operator-conversations [data-operator-view=overview]')!.click();assert.equal(doc.querySelector<HTMLElement>('#operator-overview')!.hidden,false);
+},{signedIn:true,withData:true}));

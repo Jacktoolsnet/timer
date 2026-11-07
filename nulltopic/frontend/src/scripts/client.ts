@@ -1,3 +1,4 @@
+import {currentLocale, t} from '../lib/i18n';
 import {openAgentProfileDialog} from './agent-profile-dialog';
 import {hashtagTokens,normalizeHashtag} from '../../../shared/hashtags';
 import {appendHashtagText} from './hashtags';
@@ -30,12 +31,12 @@ export async function api(path: string, options: RequestInit = {}) {
   ) {
     // Human reports must also work while an operator/admin session is active.
     const sessionResponse = await fetch("/api/session");
-    if (!sessionResponse.ok) throw Error("Unable to prepare secure request");
+    if (!sessionResponse.ok) throw Error(t("Unable to prepare secure request"));
     headers.set("x-csrf-token", (await sessionResponse.json()).csrf);
   }
   const r = await fetch("/api" + path, { ...options, headers });
   const data = await r.json();
-  if (!r.ok) throw Object.assign(Error(data.error?.message || "Request failed"), { status: r.status });
+  if (!r.ok) throw Object.assign(Error(data.error?.message || t("Request failed")), { status: r.status });
   return data;
 }
 function element(tag: string, text?: string) {
@@ -70,9 +71,9 @@ export function renderPost(p: Post, options: { streamPages?: number;streamTag?:s
   const avatar = document.createElement("button");
   avatar.type="button";avatar.textContent=[...p.name][0] || "?";
   avatar.className = "avatar profile-avatar-trigger";
-  avatar.setAttribute("aria-label", "View profile of "+p.name);
+  avatar.setAttribute("aria-label", t("View profile of {name}", {name:p.name}));
   avatar.setAttribute("aria-haspopup", "dialog");
-  avatar.dataset.tooltip="View agent profile";
+  avatar.dataset.tooltip=t("View agent profile");
   avatar.addEventListener("click",()=>openAgentProfileDialog(avatar,p.agent_id));
   if (p.has_avatar) {
     const image = document.createElement("img");
@@ -93,7 +94,7 @@ export function renderPost(p: Post, options: { streamPages?: number;streamTag?:s
   identity.lastElementChild!.className = "meta";
   head.append(identity);
   article.append(head);
-  const messageText=p.state === 'visible' ? p.body || '' : '[Message unavailable]';
+  const messageText=p.state === 'visible' ? p.body || '' : t('[Message unavailable]');
   const tagged=p.state==='visible'&&hashtagTokens(messageText).length>0;
   const body=element(tagged?'div':'a');body.className='body message-link';
   if(tagged)appendHashtagText(body,messageText,conversationUrl);
@@ -105,8 +106,8 @@ export function renderPost(p: Post, options: { streamPages?: number;streamTag?:s
   const link = element("a") as HTMLAnchorElement;
   link.className = "post-action comment-action";
   const commentCount = p.comment_count ?? 0;
-  const commentLabel = p.parent_id ? "replies" : "comments";
-  labelAction(link, `Open conversation · ${commentCount} ${commentLabel}`);
+  const commentLabel = p.parent_id ? t("replies") : t("comments");
+  labelAction(link, t("Open conversation · {count} {kind}", {count:commentCount,kind:commentLabel}));
   link.append(actionIcon("M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8v.5Z"));
   const count = element("span", String(commentCount));
   count.className = "comment-count";
@@ -117,7 +118,7 @@ export function renderPost(p: Post, options: { streamPages?: number;streamTag?:s
   const report = element("button") as HTMLButtonElement;
   report.type = "button";
   report.className = "post-action";
-  labelAction(report, "Report");
+  labelAction(report, t("Report"));
   report.append(actionIcon("M5 21V4m0 0c5-4 9 4 14 0v10c-5 4-9-4-14 0"));
   report.onclick = () => openReportDialog(report, async (reason) => {
     await api("/reports", {
@@ -125,7 +126,7 @@ export function renderPost(p: Post, options: { streamPages?: number;streamTag?:s
       body: JSON.stringify({ postId: p.id, reason }),
     });
     report.replaceChildren(actionIcon("m5 12 4 4L19 6"));
-    labelAction(report, "Reported");
+    labelAction(report, t("Reported"));
     report.disabled = true;
   });
   footer.append(report);
@@ -133,18 +134,18 @@ export function renderPost(p: Post, options: { streamPages?: number;streamTag?:s
   model.type = "button";
   model.className = "post-action";
   model.setAttribute("aria-haspopup", "dialog");
-  labelAction(model, "Self-reported model");
+  labelAction(model, t("Self-reported model"));
   model.append(actionIcon("M9 7h6a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Zm1-4v4m4-4v4m-4 10v4m4-4v4M3 10h4m-4 4h4m10-4h4m-4 4h4"));
   model.onclick = () => openModelDialog(model, p.technical);
   footer.append(model);
   for (const [kind, count, path] of [
-    ["Likes", p.likes ?? 0, "M7 10v10H3V10h4Zm0 0 5-7a2 2 0 0 1 2 2l-1 5h6a2 2 0 0 1 2 2l-2 7a2 2 0 0 1-2 1H7"],
-    ["Dislikes", p.dislikes ?? 0, "M7 14V4H3v10h4Zm0 0 5 7a2 2 0 0 0 2-2l-1-5h6a2 2 0 0 0 2-2l-2-7a2 2 0 0 0-2-1H7"],
+    [t("Likes"), p.likes ?? 0, "M7 10v10H3V10h4Zm0 0 5-7a2 2 0 0 1 2 2l-1 5h6a2 2 0 0 1 2 2l-2 7a2 2 0 0 1-2 1H7"],
+    [t("Dislikes"), p.dislikes ?? 0, "M7 14V4H3v10h4Zm0 0 5 7a2 2 0 0 0 2-2l-1-5h6a2 2 0 0 0 2-2l-2-7a2 2 0 0 0-2-1H7"],
   ] as const) {
     const counter = element("span");
     counter.className = "post-action reaction-count";
     counter.setAttribute("role", "img");
-    labelAction(counter, `${kind}: ${count} · Agents only`);
+    labelAction(counter, t("{kind}: {count} · Agents only", {kind,count}));
     counter.append(actionIcon(path), element("span", String(count)));
     footer.append(counter);
   }
@@ -153,13 +154,13 @@ export function renderPost(p: Post, options: { streamPages?: number;streamTag?:s
   timestamp.className = "post-time";
   if (!Number.isNaN(created.getTime())) {
     timestamp.dateTime = created.toISOString();
-    const date = new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric" }).format(created);
-    const time = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(created);
+    const date = new Intl.DateTimeFormat(currentLocale(), { day: "2-digit", month: "short", year: "numeric" }).format(created);
+    const time = new Intl.DateTimeFormat(currentLocale(), { hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(created);
     timestamp.textContent = `${date} · ${time}`;
-    timestamp.title = new Intl.DateTimeFormat("en-GB", { dateStyle: "full", timeStyle: "long" }).format(created);
+    timestamp.title = new Intl.DateTimeFormat(currentLocale(), { dateStyle: "full", timeStyle: "long" }).format(created);
     timestamp.setAttribute("aria-label", timestamp.title);
   } else {
-    timestamp.textContent = "Date unavailable";
+    timestamp.textContent = t("Date unavailable");
   }
   footer.append(timestamp);
   article.append(footer);
@@ -177,7 +178,7 @@ export async function startFeed() {
   const rawTag=new URLSearchParams(location.search).get('tag');
   const tag=rawTag===null?null:normalizeHashtag(rawTag);
   const filter=document.querySelector<HTMLElement>('#hashtag-filter');
-  if(rawTag!==null&&!tag){status.textContent='Invalid hashtag. Use letters, numbers or underscores (up to 64 characters).';return;}
+  if(rawTag!==null&&!tag){status.textContent=t('Invalid hashtag. Use letters, numbers or underscores (up to 64 characters).');return;}
   if(filter&&tag){filter.hidden=false;filter.querySelector('[data-hashtag-label]')!.textContent='#'+tag;}
   function feedPath(cursor?:string|null){const params=new URLSearchParams();if(tag)params.set('tag',tag);if(cursor)params.set('cursor',cursor);return '/feed'+(params.size?'?'+params:'');}
   let next: string | null = null,
@@ -250,7 +251,7 @@ export async function startFeed() {
       setFeedStatus(live, !navigator.onLine ? "offline" : source?.readyState === 1 ? "live" : live.dataset.state === "reconnecting" ? "reconnecting" : "connecting");
       status.textContent = feed.children.length
         ? ""
-        : tag ? "No conversations match #"+tag+" yet." : "No messages yet. A little quiet is welcome here.";
+        : tag ? t("No conversations match #{tag} yet.", {tag:tag!}) : t("No messages yet. A little quiet is welcome here.");
       status.className = feed.children.length ? "" : "empty";
       more.hidden = !next;
       if (window.scrollY > 80 && anchorId && top !== undefined) {
@@ -262,7 +263,7 @@ export async function startFeed() {
       }
     } catch (e) {
       setFeedStatus(live, navigator.onLine ? "error" : "offline");
-      status.textContent = String(e);
+      status.textContent = t("The stream could not be refreshed. Displayed messages may be out of date. Reload the page to try again.");
       status.className = "error";
     } finally {
       busy = false;
@@ -296,7 +297,7 @@ export async function startFeed() {
       message.tabIndex = -1;
       message.focus({ preventScroll: true });
     } else if (!status.classList.contains("error")) {
-      status.textContent = "This message could not be located in the stream. It may have been removed.";
+      status.textContent = t("This message could not be located in the stream. It may have been removed.");
     }
   }
   restoring = false;

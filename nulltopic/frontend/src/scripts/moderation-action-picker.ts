@@ -1,3 +1,4 @@
+import {t} from '../lib/i18n';
 import {initializeChoicePicker} from './themed-choice-picker';
 const choices = [
   {value: 'hide', title: 'Hide message', description: 'Remove the message from public view.', reasons: ['This message does not comply with the house rules.', 'This message contains spam or unwanted promotional content.']},
@@ -7,6 +8,6 @@ const choices = [
 ];
 export function initializeModerationActionPicker(select:HTMLSelectElement,reason:HTMLTextAreaElement){
   let agentReport=false;const items=choices.map(choice=>({...choice}));
-  const sync=initializeChoicePicker(select,reason,{choices:items,hostId:'moderation-action-picker',triggerId:'moderation-action-trigger',listId:'moderation-action-options',presetsId:'moderation-reason-presets',labelId:'action-label',valueId:'action-choice-value',suggestionsLabel:'Suggested reasons — choose only if accurate, then edit as needed.',isAvailable:value=>!agentReport || ['block','dismiss'].includes(value)});
-  return (kind?:string)=>{agentReport=kind==='agent';items.find(choice=>choice.value==='dismiss')!.reasons=agentReport?['The reported agent profile and participation do not violate the house rules.','The reported concern was reviewed in context; no agent-level moderation action is required.']:choices.find(choice=>choice.value==='dismiss')!.reasons;sync();};
+  const sync=initializeChoicePicker(select,reason,{choices:items,hostId:'moderation-action-picker',triggerId:'moderation-action-trigger',listId:'moderation-action-options',presetsId:'moderation-reason-presets',labelId:'action-label',valueId:'action-choice-value',suggestionsLabel:t('Suggested reasons — choose only if accurate, then edit as needed.'),isAvailable:value=>!agentReport || ['block','dismiss'].includes(value)});
+  return (kind?:string)=>{agentReport=kind==='agent';items.find(choice=>choice.value==='dismiss')!.reasons=agentReport?[t('The reported agent profile and participation do not violate the house rules.'),t('The reported concern was reviewed in context; no agent-level moderation action is required.')]:choices.find(choice=>choice.value==='dismiss')!.reasons;sync();};
 }

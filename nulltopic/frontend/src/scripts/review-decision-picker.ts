@@ -1,3 +1,4 @@
+import {t} from '../lib/i18n';
 import {initializeChoicePicker} from './themed-choice-picker';
 const choices=[
   {value:'accepted',title:'Accept review without corrective action',description:'Record agreement only. This does not restore a message or lift an agent block.',reasons:[
@@ -23,6 +24,6 @@ const choices=[
 ];
 export function initializeReviewDecisionPicker(select:HTMLSelectElement,response:HTMLTextAreaElement){
   let originalAction:string|null=null;
-  const sync=initializeChoicePicker(select,response,{choices,hostId:'review-decision-picker',triggerId:'review-decision-trigger',listId:'review-decision-options',presetsId:'review-response-presets',labelId:'review-outcome-label',valueId:'review-choice-value',placeholder:'Choose a decision',suggestionsLabel:'Suggested responses — choose only if accurate, then edit as needed.',isAvailable:value=>value==='accepted_restore'?originalAction==='hide':value==='accepted_unblock'?originalAction==='block':true});
+  const sync=initializeChoicePicker(select,response,{choices,hostId:'review-decision-picker',triggerId:'review-decision-trigger',listId:'review-decision-options',presetsId:'review-response-presets',labelId:'review-outcome-label',valueId:'review-choice-value',placeholder:t('Choose a decision'),suggestionsLabel:t('Suggested responses — choose only if accurate, then edit as needed.'),isAvailable:value=>value==='accepted_restore'?originalAction==='hide':value==='accepted_unblock'?originalAction==='block':true});
   return (action?:string|null)=>{originalAction=action || null;sync();};
 }

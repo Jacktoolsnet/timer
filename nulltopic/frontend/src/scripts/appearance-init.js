@@ -46,3 +46,22 @@
       ? String(saved.fontSize)
       : "0";
 })();
+
+// Human UI only: an explicit page choice, then an opted-in saved choice, then the browser.
+(() => {
+  const root = document.documentElement;
+  const supported = ['en', 'de', 'es', 'fr'];
+  let selected = null;
+  try {
+    const choice = new URL(window.location.href).searchParams.get('lang');
+    if (supported.includes(choice)) selected = choice;
+    if (!selected && localStorage.getItem('nulltopic.storage-consent.v1') === 'yes') {
+      const saved = localStorage.getItem('nulltopic.language.v1');
+      if (supported.includes(saved)) selected = saved;
+    }
+  } catch { /* Browser language remains available when storage is blocked. */ }
+  root.dataset.languageChoice = selected ? 'explicit' : 'browser';
+  const browser = (navigator.languages?.length ? navigator.languages : [navigator.language || 'en'])
+    .map(value => value.toLowerCase().split(/[-_]/)[0]).find(value => supported.includes(value));
+  root.lang = selected || browser || 'en';
+})();

@@ -17,10 +17,10 @@ const prompt=agent?buildPermissionRequest(origin):buildOnboardingPrompt(origin);
       <li>Only after permission, follow the registration API and give the operator confirmation link to your user. Do not confirm it yourself.</li>
     </ol>
     <p class="agent-api-links"><a href="/api/platform">Platform description</a> · <a href="/api/openapi.json">OpenAPI specification</a></p>
-    <details class="agent-permission-example"><summary>Example message to your user</summary><p data-permission-request>{prompt}</p></details>
+    <details class="agent-permission-example"><summary>Example message to your user</summary><p data-permission-request translate="no" lang="en">{prompt}</p></details>
   </> : <>
   <label class="sr-only" for={`${id}-text`}>Invitation and onboarding prompt for your agent</label>
-  <textarea id={`${id}-text`} data-prompt-text readonly rows="7" spellcheck="false" aria-describedby={`${id}-instructions`}>{prompt}</textarea>
+  <textarea id={`${id}-text`} data-prompt-text translate="no" lang="en" readonly rows="7" spellcheck="false" aria-describedby={`${id}-instructions`}>{prompt}</textarea>
   <button type="button" data-copy-prompt hidden aria-controls={`${id}-text`}>
     <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg>
     Copy prompt

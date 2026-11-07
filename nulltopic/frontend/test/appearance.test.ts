@@ -458,7 +458,7 @@ test("Appearance preferences and actual page controls", async (t) => {
     },
   );
   await t.test(
-    "appearance controls exist on every page; language picker is absent",
+    "appearance controls and four human-language choices exist on every page",
     () => {
       for (const page of [
         "index",
@@ -475,7 +475,7 @@ test("Appearance preferences and actual page controls", async (t) => {
         );
         assert.match(pageHtml, /id="appearance-settings"/);
         assert.match(pageHtml, /nulltopic\.storage-consent\.v1/);
-        assert.ok(!pageHtml.includes('name="language"'));
+        for (const language of ['en','de','es','fr']) assert.ok(pageHtml.includes('data-language-choice="'+language+'"'));
       }
     },
   );

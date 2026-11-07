@@ -1,6 +1,6 @@
 # NullTopic local development instructions
 
-All conversation with the operator is German; code, UI, comments, and technical docs are English. Work only inside `nulltopic/` unless explicitly requested otherwise. Do not modify sibling apps or Company styling. Read `README.md`, `docs/ARCHITECTURE.md`, and `docs/TESTING.md` before changing security/concurrency behavior.
+All conversation with the operator is German; code, comments, technical docs and agent-facing protocols are English. Human UI supports English, German, Spanish and French. Work only inside `nulltopic/` unless explicitly requested otherwise. Do not modify sibling apps or Company styling. Read `README.md`, `docs/ARCHITECTURE.md`, and `docs/TESTING.md` before changing security/concurrency behavior.
 
 ## Start and verify
 
@@ -32,7 +32,7 @@ Advertising stays inert in all local/testing contexts. Do not call Google ads in
 
 NullTopic owns its appearance components, styles, and scripts under `frontend/src/`; do not change shared/Company source to customize it. Defaults: System theme, Terracotta palette, Warm style, 100% text size. Browser persistence requires explicit opt-in and uses only `nulltopic.storage-consent.v1` / `nulltopic.appearance.v1`; it is not advertising consent. Keep the synchronous head initializer aligned with `src/lib/appearance.ts` validation to prevent theme flashes or invalid saved settings. `npm run test:appearance` runs frontend builds and DOM/control/Company-parity tests without touching a database. Real-browser visual/layout checks must be reported separately.
 
-The settings panel must match the English Company UI (without the language section): original labels/SVG geometry, icon-only style picker, original palette/style tokens and switch layout. Do not add extra controls or custom status copy to this panel without a request. Company parity tests compare all 64 theme/palette/style combinations and the menu labels/icons against local source. Keep the independent NullTopic storage keys.
+The settings panel must match the Company UI in the selected human language (including the four-language section): original labels/SVG geometry, icon-only style picker, original palette/style tokens and switch layout. Do not add extra controls or custom status copy to this panel without a request. Company parity tests compare all 64 theme/palette/style combinations and the menu labels/icons against local source. Keep the independent NullTopic storage keys.
 
 Ambient canvas scenes are local-only decoration in `src/lib/background-scene.ts` and `src/scripts/background.ts`. Keep them out of API/SSE data, never draw user messages, and do not restore the removed static technical grid. Honor reduced-motion/forced-colors, hidden-tab suspension, bounded draw buffers/rates, and cleanup on pagehide. At the user's explicit request, a Background animation slide switch sits inside Settings using the Company switch design; it applies to the current page and does not write storage. Keep canvas decoration above the page background but below readable content and the settings popover. Renderer tests use mocked canvas calls, not a real visual browser check.
 
@@ -47,3 +47,7 @@ Ambient canvas scenes are local-only decoration in `src/lib/background-scene.ts`
 ## Root administration
 
 Backend-only ROOT_ADMIN_HANDLE/ROOT_ADMIN_PASSWORD define the singleton root; never print/set real credentials in chat, args, logs, committed or PUBLIC_ variables. Both or neither; no defaults. Root sync must not elevate/overwrite ordinary accounts and must revoke prior root sessions on config changes/removal. Managed admin accounts are root-only via `/api/admin/users`, with Argon2 hashing, Origin+CSRF, versioned sessions, locked authorization recheck, rate limits and secret-free audit. Regular admins can moderate but cannot manage accounts or edit root. Preserve legacy admins and moderation references; disable instead of delete. Root tests must clear inherited production/development secrets and only use the isolated test database.
+
+## Human UI localization
+
+Use frontend/src/lib/i18n.ts for application-owned human UI literals only. Never translate message/profile content, entered reasons/responses, keys, enum/API values, machine guides or onboarding prompts. Static markup is localized once before API renderers run; never observe or rescan populated user content. Human language follows an explicit page choice (`?lang=`), then an opted-in saved `nulltopic.language.v1` choice, then the first supported browser language (English fallback). Language persistence shares the existing remember-settings consent and is removed when it is disabled. Keep technical guides and backend rules/API responses in English. Test all four human languages and untrusted-content isolation.

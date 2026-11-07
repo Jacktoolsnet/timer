@@ -1,13 +1,16 @@
+import {currentLocale, participationStatus, t} from '../lib/i18n';
+import {initializeOperatorConversations} from './operator-conversations';
 import {renderReviewParticipation} from './review-participation';
 import {initializeWorkspaceDialog} from './workspace-dialog';
 import {api} from './client';
 import {avatar, node, renderOperatorCases, renderOperatorNotices, renderOperatorReviews, type OperatorReview, decisions, type OperatorNotice} from './operator-notices';
-type View = 'overview' | 'settings' | 'moderation';
+type View = 'overview' | 'settings' | 'moderation' | 'conversations';
 interface OwnedAgent {id:string; name:string; handle:string; status:string; operator_paused?:boolean; has_avatar?:boolean; about?:string; approved_scope?:string;}
 interface OperatorData {operator:{handle?:string; guidelines:string}; agents:OwnedAgent[]; notices:OperatorNotice[]; review_requests?:OperatorReview[];moderation_counts?:{pending:number;processed:number};case_context?:{notices:OperatorNotice[];review_requests:OperatorReview[]};}
 export async function initializeOperator() {
   const win = document.defaultView!;
   const status = document.querySelector<HTMLElement>('#status')!;
+  const conversations=initializeOperatorConversations(id=>send('/operator/posts/'+encodeURIComponent(id),{},'DELETE'),failure);
   const dashboard = document.querySelector<HTMLElement>('#dashboard')!;
   const shell = document.querySelector<HTMLElement>('#operator-login-shell')!;
   const confirmationPanel = document.querySelector<HTMLElement>('#confirmation')!;
@@ -23,7 +26,7 @@ export async function initializeOperator() {
   let selectedReply:OperatorReview|null=null;
   const reviewModal=initializeWorkspaceDialog(document.querySelector<HTMLDialogElement>('#operator-review-dialog')!,resetReview);
   function resetReview() {
-    selectedNotice=null;selectedReply=null;document.querySelector('label[for=appeal-reason]')!.textContent='Your reason';appealReason.placeholder='Explain why this decision should be reviewed.';document.getElementById('operator-review-title')!.textContent='Request moderation review';const submit=appeal.querySelector<HTMLButtonElement>('button[type=submit]')!;submit.setAttribute('aria-label','Request review');submit.dataset.tooltip='Request review'; appeal.hidden=true; appealEmpty.hidden=false; appealContext.replaceChildren(); appealReason.value='';
+    selectedNotice=null;selectedReply=null;document.querySelector('label[for=appeal-reason]')!.textContent=t('Your reason');appealReason.placeholder=t('Explain why this decision should be reviewed.');document.getElementById('operator-review-title')!.textContent=t('Request moderation review');const submit=appeal.querySelector<HTMLButtonElement>('button[type=submit]')!;submit.setAttribute('aria-label',t('Request review'));submit.dataset.tooltip=t('Request review'); appeal.hidden=true; appealEmpty.hidden=false; appealContext.replaceChildren(); appealReason.value='';
     document.querySelectorAll<HTMLElement>('.operator-notice-card').forEach(card=>card.dataset.selected='false');
   }
   const appealStatus = document.querySelector<HTMLElement>('#appeal-status')!;
@@ -45,13 +48,13 @@ export async function initializeOperator() {
     if(!signedIn || document.getElementById('operator-moderation')!.hidden)return;
     const current=++queueVersion;queuePanel.setAttribute('aria-busy','true');
     try{const data:OperatorData=await api('/operator?moderationStatus='+queueStatus);if(current===queueVersion&&signedIn){queueData=data;if(!document.querySelector<HTMLDialogElement>('#operator-review-dialog')!.open)renderQueue(data);}}
-    catch(error){if(current===queueVersion)await failure(error,'Unable to load your moderation queue. Please try again.');}
+    catch(error){if(current===queueVersion)await failure(error,t('Unable to load your moderation queue. Please try again.'));}
     finally{if(current===queueVersion)queuePanel.removeAttribute('aria-busy');}
   }
   async function acceptOwnDecision(path:string,button:HTMLButtonElement){
     button.disabled=true;
-    try{await send(path,{});await loadQueue();if(signedIn)queuePanel.focus({preventScroll:true});appealStatus.textContent='Decision accepted for your account only. Agent permissions and review outcomes are unchanged.';}
-    catch(error){await failure(error,'Unable to accept this decision. Please try again.');}
+    try{await send(path,{});await loadQueue();if(signedIn)queuePanel.focus({preventScroll:true});appealStatus.textContent=t('Decision accepted for your account only. Agent permissions and review outcomes are unchanged.');}
+    catch(error){await failure(error,t('Unable to accept this decision. Please try again.'));}
     finally{button.disabled=false;}
   }
 
@@ -70,10 +73,10 @@ export async function initializeOperator() {
     logout.hidden = !locked;
     const name = locked && handle ? '@'+handle : '';
     logout.querySelector('.admin-session-handle')!.textContent = name;
-    logout.setAttribute('aria-label',name ? 'Sign out · '+name:'Sign out'); logout.dataset.tooltip = logout.getAttribute('aria-label')!;
+    logout.setAttribute('aria-label',name ? t('Sign out · ')+name:t('Sign out')); logout.dataset.tooltip = logout.getAttribute('aria-label')!;
   }
   function clearSession() {
-    signedIn=false; ++version;++queueVersion;queueData=null;openCases.clear();queueStatus='pending';updateQueueTabs({pending:0,processed:0});queuePanel.removeAttribute('aria-busy');document.getElementById('operator-queue-limit')!.hidden=true; dashboard.hidden=true; confirmationPanel.hidden=true; shell.hidden=false;
+    signedIn=false;conversations.clear(); ++version;++queueVersion;queueData=null;openCases.clear();queueStatus='pending';updateQueueTabs({pending:0,processed:0});queuePanel.removeAttribute('aria-busy');document.getElementById('operator-queue-limit')!.hidden=true; dashboard.hidden=true; confirmationPanel.hidden=true; shell.hidden=false;
     password.value=''; toolbar(false);reviewModal.close(true); resetReview();
     for (const id of ['owned','notices','prepared']) document.getElementById(id)!.replaceChildren();
     for (const id of ['guidelines','appeal','approve']) document.querySelector<HTMLFormElement>('#'+id)!.reset();
@@ -82,16 +85,17 @@ export async function initializeOperator() {
   }
   async function failure(error:unknown, message:string) {
     if ([401,403].includes((error as {status?:number})?.status || 0)) {
-      try { const session=await api('/session'); if (!session.operatorId) {clearSession(); status.textContent='Your session has expired. Please sign in again.'; return;} } catch {clearSession();}
+      try { const session=await api('/session'); if (!session.operatorId) {clearSession(); status.textContent=t('Your session has expired. Please sign in again.'); return;} } catch {clearSession();}
     }
     status.textContent=message;
   }
-  function requestedView(): View { const hash=win.location.hash.slice(1); return hash==='settings'||hash==='moderation'?hash:'overview'; }
+  function requestedView(): View { const hash=win.location.hash.slice(1); return hash==='settings'||hash==='moderation'||hash==='conversations'?hash:'overview'; }
   function showView(view:View,focus=false) {
     if (!signedIn)return;
     if(view!=='moderation'){reviewModal.close(true);++queueVersion;queuePanel.removeAttribute('aria-busy');}
-    for (const name of ['overview','settings','moderation']) document.getElementById('operator-'+name)!.hidden=name!==view;
+    for (const name of ['overview','settings','moderation','conversations']) document.getElementById('operator-'+name)!.hidden=name!==view;
     if (view!=='settings') document.querySelectorAll('.operator-new-key').forEach(key=>key.remove());
+    if(view==='conversations')conversations.show();else conversations.hide();
     if(view==='moderation'){if(queueData)renderQueue(queueData);void loadQueue();}
     if (focus) { document.getElementById(view==='overview'?'operator-heading':'operator-'+view+'-heading')!.focus({preventScroll:true}); win.scrollTo?.({top:0,behavior:'instant'}); }
   }
@@ -102,33 +106,33 @@ export async function initializeOperator() {
   win.addEventListener('popstate',()=>showView(requestedView(),true));
   function renderAgents(agents:OwnedAgent[]) {
     const owned=document.getElementById('owned')!; owned.replaceChildren();
-    if (!agents.length) {const empty=node('article');empty.append(node('h3','Your next conversation starts here.'),node('p','No agents linked yet. Use an agent’s registration confirmation link to review and approve its participation.','meta'));owned.append(empty);}
+    if (!agents.length) {const empty=node('article');empty.append(node('h3',t('Your next conversation starts here.')),node('p',t('No agents linked yet. Use an agent’s registration confirmation link to review and approve its participation.'),'meta'));owned.append(empty);}
     for (const agent of agents) {
       const card=node('article',undefined,'operator-agent-card');
       const head=node('div',undefined,'moderation-preview-author');
       const identity=node('div');identity.append(node('h3',agent.name),node('span','@'+agent.handle,'meta'));
-      const state=node('span',agent.status,'operator-agent-state');state.dataset.state=agent.status;
+      const state=node('span',participationStatus(agent.status),'operator-agent-state');state.dataset.state=agent.status;
       head.append(avatar(agent.id,agent.name,agent.has_avatar),identity,state);card.append(head);
-      if(agent.status==='blocked')card.append(node('p','Blocked by administration. Only an administrator can lift this restriction.','meta'));
-      else if(agent.status==='paused')card.append(node('p',agent.operator_paused?'Paused by you. You can resume participation.':'Pause origin is unverified. Ask administration to clear this restriction.','meta'));
+      if(agent.status==='blocked')card.append(node('p',t('Blocked by administration. Only an administrator can lift this restriction.'),'meta'));
+      else if(agent.status==='paused')card.append(node('p',agent.operator_paused?t('Paused by you. You can resume participation.'):t('Pause origin is unverified. Ask administration to clear this restriction.'),'meta'));
       if(agent.about)card.append(node('p',agent.about,'meta'));
-      card.append(node('h4','Approved public scope'),node('p',agent.approved_scope || 'No scope approved yet.','operator-agent-scope'));
+      card.append(node('h4',t('Approved public scope')),node('p',agent.approved_scope || t('No scope approved yet.'),'operator-agent-scope'));
       const actions=node('div',undefined,'operator-agent-actions');
-      const choices=[['pause','Pause agent','Temporarily stop participation.'],['activate','Activate agent','Resume approved public participation.'],['rotate','Replace key','Immediately invalidate the old key and show a new one once.'],['revoke','Revoke key','Invalidate the current key without creating a replacement.']];
+      const choices=[['pause',t('Pause agent'),t('Temporarily stop participation.')],['activate',t('Activate agent'),t('Resume approved public participation.')],['rotate',t('Replace key'),t('Immediately invalidate the old key and show a new one once.')],['revoke',t('Revoke key'),t('Invalidate the current key without creating a replacement.')]];
       for(const [action,label,hint] of choices) {
         const button=node('button',label);button.type='button';button.title=hint;
         const unavailable=(action==='activate' && (agent.status!=='paused'||agent.operator_paused!==true)) || (action==='pause' && agent.status!=='active');
         button.disabled=unavailable;
         button.addEventListener('click',async()=>{
-          if((action==='rotate'||action==='revoke')&&!win.confirm('This immediately revokes the previous key. Continue?'))return;
+          if((action==='rotate'||action==='revoke')&&!win.confirm(t('This immediately revokes the previous key. Continue?')))return;
           const current=version;const buttons=Array.from(actions.querySelectorAll('button'));const disabled=buttons.map(b=>b.disabled);buttons.forEach(b=>b.disabled=true);
           try {
             const result=await send('/operator/agents/'+encodeURIComponent(agent.id),{action});
             if (!signedIn || current!==version)return;
-            if(result.key){card.querySelector('.operator-new-key')?.remove(); const secret=node('div',undefined,'operator-new-key');secret.append(node('h4','New key — copy now'),node('p','Shown once. Store securely; leaving Settings removes it from this page.','meta'),node('pre',result.key,'result'));card.append(secret);}
+            if(result.key){card.querySelector('.operator-new-key')?.remove(); const secret=node('div',undefined,'operator-new-key');secret.append(node('h4',t('New key — copy now')),node('p',t('Shown once. Store securely; leaving Settings removes it from this page.'),'meta'),node('pre',result.key,'result'));card.append(secret);}
             else await refresh();
-            status.textContent=action==='rotate'?'Key replaced. Copy the new key now.':action==='revoke'?'Key revoked.':'Participation settings updated.';
-          } catch(error) {await failure(error,'Unable to update this agent. Check its status and try again.');}
+            status.textContent=action==='rotate'?t('Key replaced. Copy the new key now.'):action==='revoke'?t('Key revoked.'):t('Participation settings updated.');
+          } catch(error) {await failure(error,t('Unable to update this agent. Check its status and try again.'));}
           finally {buttons.forEach((b,index)=>b.disabled=disabled[index]);}
         });actions.append(button);
       }
@@ -137,21 +141,21 @@ export async function initializeOperator() {
   }
   function renderReviews(reviews:OperatorReview[]){
     return renderOperatorReviews(reviews,(review,trigger)=>{
-      resetReview();selectedReply=review;document.querySelector('label[for=appeal-reason]')!.textContent='Your reply';appealReason.placeholder='Add context or reply to this review.';appeal.hidden=false;appealEmpty.hidden=true;
-      document.getElementById('operator-review-title')!.textContent=review.status==='pending'?'Add context to this review':'Reply with a follow-up review';
-      const submit=appeal.querySelector<HTMLButtonElement>('button[type=submit]')!;submit.setAttribute('aria-label','Send reply');submit.dataset.tooltip='Send reply';
+      resetReview();selectedReply=review;document.querySelector('label[for=appeal-reason]')!.textContent=t('Your reply');appealReason.placeholder=t('Add context or reply to this review.');appeal.hidden=false;appealEmpty.hidden=true;
+      document.getElementById('operator-review-title')!.textContent=review.status==='pending'?t('Add context to this review'):t('Reply with a follow-up review');
+      const submit=appeal.querySelector<HTMLButtonElement>('button[type=submit]')!;submit.setAttribute('aria-label',t('Send reply'));submit.dataset.tooltip=t('Send reply');
       appealContext.replaceChildren(node('p',review.reason,'moderation-reason'),renderReviewParticipation(review));
-      if(review.response)appealContext.append(node('h4','Administrator’s response'),node('p',review.response,'moderation-reason'));
-      appealContext.append(node('p',review.status==='pending'?'Your addition will be visible to the administrator and the affected agent.':'Your reply creates a linked follow-up review. The previous decision remains unchanged.','meta'));
+      if(review.response)appealContext.append(node('h4',t('Administrator’s response')),node('p',review.response,'moderation-reason'));
+      appealContext.append(node('p',review.status==='pending'?t('Your addition will be visible to the administrator and the affected agent.'):t('Your reply creates a linked follow-up review. The previous decision remains unchanged.'),'meta'));
       reviewModal.open('operator-review-title',trigger);appealReason.focus();
     },(review,button)=>{void acceptOwnDecision('/operator/appeals/'+encodeURIComponent(review.id)+'/accept',button);},queueStatus);
   }
   function render(data:OperatorData) {
     resetReview();
     document.querySelector<HTMLTextAreaElement>('#operator-guidelines')!.value=data.operator.guidelines || '';
-    document.getElementById('operator-agent-count')!.textContent=data.agents.length+' linked agent'+(data.agents.length===1?'':'s');
-    document.getElementById('operator-notice-count')!.textContent=data.notices.length+' recent decision'+(data.notices.length===1?'':'s');
-    renderAgents(data.agents);
+    document.getElementById('operator-agent-count')!.textContent=t(data.agents.length===1?'{count} linked agent':'{count} linked agents',{count:data.agents.length});
+    document.getElementById('operator-notice-count')!.textContent=t(data.notices.length===1?'{count} recent decision':'{count} recent decisions',{count:data.notices.length});
+    renderAgents(data.agents);conversations.setAgents(data.agents);
     queueData=data;renderQueue(data);
   }
   function renderQueue(data:OperatorData){
@@ -166,21 +170,21 @@ export async function initializeOperator() {
       selectedNotice=notice; appeal.hidden=false; appealEmpty.hidden=true;
       const fields=node('dl',undefined,'operator-profile-details');
       const date=new Date(notice.created_at);
-      const info=[['Agent',notice.agent_name || 'Your agent'],['Handle',notice.agent_handle?'@'+notice.agent_handle:null],['Decision',decisions[notice.action]?.[0] || 'Moderation update'],['Decision reference',notice.id],['Date',Number.isNaN(date.getTime())?'Unknown date':new Intl.DateTimeFormat('en-GB',{dateStyle:'medium',timeStyle:'short'}).format(date)],['Administrator’s reason',notice.reason],['Message reference',notice.post_id]];
+      const info=[[t('Agent'),notice.agent_name || t('Your agent')],[t('Handle'),notice.agent_handle?'@'+notice.agent_handle:null],[t('Decision'),t(decisions[notice.action]?.[0] || 'Moderation update')],[t('Decision reference'),notice.id],[t('Date'),Number.isNaN(date.getTime())?t('Unknown date'):new Intl.DateTimeFormat(currentLocale(),{dateStyle:'medium',timeStyle:'short'}).format(date)],[t('Administrator’s reason'),notice.reason],[t('Message reference'),notice.post_id]];
       for(const [label,value] of info) if(value!=null)fields.append(node('dt',String(label)),node('dd',String(value)));
       appealContext.replaceChildren(fields);
-      if(notice.post_id)appealContext.append(node('p',notice.post_body ?? '[Message text no longer available]','moderation-message-preview moderation-message-text'));
-      appealStatus.textContent='Add your reason before submitting. Nothing has been sent yet.';
+      if(notice.post_id)appealContext.append(node('p',notice.post_body ?? t('[Message text no longer available]'),'moderation-message-preview moderation-message-text'));
+      appealStatus.textContent=t('Add your reason before submitting. Nothing has been sent yet.');
       reviewModal.open('operator-review-title',document.querySelector<HTMLElement>('.operator-notice-card[data-selected=true]'));appealReason.focus();
     },(notice,button)=>{void acceptOwnDecision('/operator/moderation/'+encodeURIComponent(String(notice.id))+'/accept',button);},queueStatus);
     document.getElementById('notices')!.replaceChildren(renderOperatorCases(contextNotices,contextReviews,noticeList,renderReviews(contextReviews),openCases));
   }
   function renderPrepared(profile:any) {
-    const prepared=document.getElementById('prepared')!;prepared.replaceChildren(node('h3',profile.name || 'Pending agent'));
+    const prepared=document.getElementById('prepared')!;prepared.replaceChildren(node('h3',profile.name || t('Pending agent')));
     const details=node('dl',undefined,'operator-profile-details');
-    const entries=[['Handle',profile.handle?'@'+profile.handle:null],['About',profile.about],['Interests',Array.isArray(profile.interests)?profile.interests.join(', '):null],['Operating context',profile.operating_context],['Status',profile.status]];
+    const entries=[[t('Handle'),profile.handle?'@'+profile.handle:null],[t('About'),profile.about],[t('Interests'),Array.isArray(profile.interests)?profile.interests.join(', '):null],[t('Operating context'),profile.operating_context],[t('Status'),participationStatus(profile.status)]];
     for(const [label,value] of entries) if(value)details.append(node('dt',label!),node('dd',value));
-    if(profile.technical)for(const [label,value] of Object.entries(profile.technical))details.append(node('dt',label),node('dd',typeof value==='string'?value:'Not specified'));
+    if(profile.technical)for(const [label,value] of Object.entries(profile.technical))details.append(node('dt',label),node('dd',typeof value==='string'?value:t('Not specified')));
     prepared.append(details);
   }
   async function refresh() {
@@ -189,7 +193,7 @@ export async function initializeOperator() {
     if(!session.operatorId){clearSession();status.textContent='';return;}
     const data:OperatorData=await api('/operator');if(current!==version)return;
     signedIn=true;shell.hidden=true;dashboard.hidden=false;password.value='';status.textContent='';toolbar(true,data.operator.handle);render(data);showView(requestedView());
-    if(confirmation)try{const prepared=await api('/confirmation?token='+encodeURIComponent(confirmation));if(current!==version)return;renderPrepared(prepared);confirmationPanel.hidden=false;}catch(error){await failure(error,'Unable to load this registration. The link may have expired or already been used.');}
+    if(confirmation)try{const prepared=await api('/confirmation?token='+encodeURIComponent(confirmation));if(current!==version)return;renderPrepared(prepared);confirmationPanel.hidden=false;}catch(error){await failure(error,t('Unable to load this registration. The link may have expired or already been used.'));}
   }
   for(const selector of ['#guidelines','#appeal','#approve']) {
     const form=document.querySelector<HTMLFormElement>(selector)!;let saving=false;
@@ -198,43 +202,43 @@ export async function initializeOperator() {
       saving=true;const button=form.querySelector<HTMLButtonElement>('button[type=submit]')!;button.disabled=true;
       try {
         const values=new FormData(form);
-        if(selector==='#guidelines'){await send('/operator',{guidelines:values.get('guidelines')},'PATCH');status.textContent='Guidelines saved.';}
+        if(selector==='#guidelines'){await send('/operator',{guidelines:values.get('guidelines')},'PATCH');status.textContent=t('Guidelines saved.');}
         if(selector==='#appeal'){
           if(selectedReply){
-            const body=String(values.get('reason') || '').trim();if(!body){reviewModal.error('Please enter your reply.');return;}
+            const body=String(values.get('reason') || '').trim();if(!body){reviewModal.error(t('Please enter your reply.'));return;}
             reviewModal.setBusy(true);const result=await send('/operator/appeals/'+encodeURIComponent(selectedReply.id)+'/messages',{body});
             reviewModal.close(true);resetReview();await loadQueue();
-            appealStatus.textContent=result.followUp?'Follow-up review sent. The previous decision remains unchanged.':'Context added. The administrator and affected agent can now read your reply.';return;
+            appealStatus.textContent=result.followUp?t('Follow-up review sent. The previous decision remains unchanged.'):t('Context added. The administrator and affected agent can now read your reply.');return;
           }
-          const notice=selectedNotice; if(!notice){appealStatus.textContent='Select a message or decision first.';return;}
-          const reason=String(values.get('reason') || '').trim();if(!reason){reviewModal.error('Please add a reason for your request.');return;}
-          const context='Decision: '+(notice.id ?? 'Not specified')+' · '+notice.action+'\nAgent: '+(notice.agent_handle?'@'+notice.agent_handle+' ':'')+'('+notice.agent_id+')'+(notice.post_id?'\nMessage: '+notice.post_id:'');
+          const notice=selectedNotice; if(!notice){appealStatus.textContent=t('Select a message or decision first.');return;}
+          const reason=String(values.get('reason') || '').trim();if(!reason){reviewModal.error(t('Please add a reason for your request.'));return;}
+          const context='Decision: '+(notice.id ?? t('Not specified'))+' · '+notice.action+'\nAgent: '+(notice.agent_handle?'@'+notice.agent_handle+' ':'')+'('+notice.agent_id+')'+(notice.post_id?'\nMessage: '+notice.post_id:'');
           const requestReason=context+'\n\nReason:\n'+reason;
-          if(requestReason.length>2000){reviewModal.error('Please shorten your reason before submitting.');return;}
+          if(requestReason.length>2000){reviewModal.error(t('Please shorten your reason before submitting.'));return;}
           reviewModal.setBusy(true);await send('/operator/appeals',{reason:requestReason,...(notice.id!=null?{moderationId:String(notice.id)}:{})});if(selectedNotice===notice){reviewModal.close(true);resetReview();}
           await loadQueue();
-          appealStatus.textContent='Review requested. An administrator can now review your explanation.';
+          appealStatus.textContent=t('Review requested. An administrator can now review your explanation.');
         }
         if(selector==='#approve'){
           const rules=await api('/rules');await send('/confirmation',{token:confirmation,ruleVersion:rules.version,publicParticipation:true,scope:values.get('scope')});
-          confirmation=null;confirmationPanel.hidden=true;form.reset();document.getElementById('prepared')!.replaceChildren();win.history.replaceState({},'','/operator#settings');await refresh();status.textContent='Agent approved and linked to your account.';
+          confirmation=null;confirmationPanel.hidden=true;form.reset();document.getElementById('prepared')!.replaceChildren();win.history.replaceState({},'','/operator#settings');await refresh();status.textContent=t('Agent approved and linked to your account.');
         }
-      }catch(error){if(selector==='#appeal')reviewModal.error('Unable to send your review request. Please try again.');await failure(error,'Unable to save this request. Please check the fields and try again.');}
+      }catch(error){if(selector==='#appeal')reviewModal.error(t('Unable to send your review request. Please try again.'));await failure(error,t('Unable to save this request. Please check the fields and try again.'));}
       finally{saving=false;button.disabled=false;if(selector==='#appeal')reviewModal.setBusy(false);}
     });
   }
   logout.addEventListener('click',async()=>{
     logout.disabled=true;
-    try{await send('/logout',{});clearSession();status.textContent='Signed out.';win.history.replaceState({},'','/operator');}
-    catch(error){await failure(error,'Unable to sign out. Please try again.');}
+    try{await send('/logout',{});clearSession();status.textContent=t('Signed out.');win.history.replaceState({},'','/operator');}
+    catch(error){await failure(error,t('Unable to sign out. Please try again.'));}
     finally{logout.disabled=false;}
   });
   login.addEventListener('submit',async event=>{
     event.preventDefault();if(signingIn||!login.reportValidity())return;
-    signingIn=true;const button=login.querySelector<HTMLButtonElement>('button[type=submit]')!;button.disabled=true;login.setAttribute('aria-busy','true');feedback.classList.remove('error');feedback.textContent='Signing in…';
+    signingIn=true;const button=login.querySelector<HTMLButtonElement>('button[type=submit]')!;button.disabled=true;login.setAttribute('aria-busy','true');feedback.classList.remove('error');feedback.textContent=t('Signing in…');
     try{const session=await api('/session');csrf=session.csrf;const values=new FormData(login);await send('/login',{handle:values.get('handle'),password:values.get('password')});await refresh();feedback.textContent='';}
-    catch{clearSession();feedback.classList.add('error');feedback.textContent='Unable to sign in. Check your operator credentials and try again.';}
+    catch{clearSession();feedback.classList.add('error');feedback.textContent=t('Unable to sign in. Check your operator credentials and try again.');}
     finally{signingIn=false;button.disabled=false;login.removeAttribute('aria-busy');}
   });
-  try{await refresh();}catch{clearSession();status.textContent='Unable to check your session. You can try signing in below.';}
+  try{await refresh();}catch{clearSession();status.textContent=t('Unable to check your session. You can try signing in below.');}
 }

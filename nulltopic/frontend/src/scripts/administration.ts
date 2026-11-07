@@ -1,3 +1,4 @@
+import {t} from '../lib/i18n';
 import {renderReviewParticipation} from './review-participation';
 import {initializeReviewDecisionPicker} from './review-decision-picker';
 import {initializeWorkspaceDialog} from './workspace-dialog';
@@ -58,7 +59,7 @@ export async function initializeAdministration() {
   function selectTarget() {
     if (!selectedReport) return;
     actionId.value = (selectedReport.target_kind!=='agent' && ['hide','dismiss'].includes(actionType.value) ? selectedReport.post_id : selectedReport.agent_id) || '';
-    selection.textContent = 'Selected ' + (selectedReport.target_kind!=='agent' && ['hide','dismiss'].includes(actionType.value) ? 'message' : 'agent') + (selectedReport.agent_handle ? ' · @' + selectedReport.agent_handle : '') + '. Review or edit the reason before submitting.';
+    selection.textContent = t('Selected {kind}{agent}. Review or edit the reason before submitting.', {kind:selectedReport.target_kind!=='agent' && ['hide','dismiss'].includes(actionType.value) ? t('Message') : t('Agent'), agent:selectedReport.agent_handle ? ' · @'+selectedReport.agent_handle : ''});
     selection.hidden = false;
   }
   actionType.addEventListener('change', selectTarget);
@@ -81,7 +82,7 @@ export async function initializeAdministration() {
     }
     const username = locked && handle ? '@' + handle : '';
     logout.querySelector('.admin-session-handle')!.textContent = username;
-    const label = username ? 'Sign out · ' + username : 'Sign out';
+    const label = username ? t('Sign out · ') + username : t('Sign out');
     logout.setAttribute('aria-label', label);
     logout.dataset.tooltip = label;
     logout.hidden = !locked;
@@ -107,7 +108,7 @@ export async function initializeAdministration() {
         modal.close(true);dashboard.hidden = true; shell.hidden = false;
         document.querySelector('#admin-users')!.replaceChildren();
         document.querySelector('#reports')!.textContent = '';openCases.clear();
-        status.textContent = 'Your session could not be verified. Please sign in again.';
+        status.textContent = t('Your session could not be verified. Please sign in again.');
       } finally { checkingPermission = false; }
     }
   }
@@ -116,30 +117,30 @@ export async function initializeAdministration() {
     const visible = users.filter(user => user.handle.toLowerCase().includes(query));
     const container = document.querySelector('#admin-users')!;
     container.replaceChildren();
-    document.querySelector('#admin-user-count')!.textContent = `${visible.length} of ${users.length} accounts`;
-    if (!visible.length) container.append(node('p', 'No matching administrator accounts.', 'admin-list-empty'));
+    document.querySelector('#admin-user-count')!.textContent = t('{shown} of {total} accounts',{shown:visible.length,total:users.length});
+    if (!visible.length) container.append(node('p', t('No matching administrator accounts.'), 'admin-list-empty'));
     for (const user of visible) {
       const card = node('div', undefined, 'admin-user-card');
       const heading = node('div', undefined, 'admin-user-heading');
       const avatar = node('span', user.handle[0]?.toUpperCase() || '?', 'admin-user-avatar');
       avatar.setAttribute('aria-hidden', 'true');
       const identity = node('div', undefined, 'admin-user-identity');
-      identity.append(node('h3', '@' + user.handle), node('p', user.is_root ? 'Managed through server environment' : 'Administrator', 'meta'));
-      const badge = node('span', user.is_root ? 'Root' : user.enabled ? 'Active' : 'Disabled', 'admin-account-state');
+      identity.append(node('h3', '@' + user.handle), node('p', user.is_root ? t('Managed through server environment') : t('Administrator'), 'meta'));
+      const badge = node('span', user.is_root ? t('Root') : user.enabled ? t('Active') : t('Disabled'), 'admin-account-state');
       badge.dataset.enabled = String(user.enabled);
       heading.append(avatar, identity, badge); card.append(heading);
       if (!user.is_root) {
         const actions = node('div', undefined, 'admin-user-actions');
         const details = node('details', undefined, 'admin-user-security');
-        details.append(node('summary', 'Change password'));
+        details.append(node('summary', t('Change password')));
         const form = node('form', undefined, 'admin-user-password');
-        const label = node('label', 'New password');
+        const label = node('label', t('New password'));
         const input = node('input');
         input.type = 'password'; input.minLength = 12; input.maxLength = 256;
         input.required = true; input.autocomplete = 'new-password';
         label.append(input);
-        const save = node('button', 'Set password'); save.type = 'submit';
-        const toggle = node('button', user.enabled ? 'Disable access' : 'Enable access', 'admin-user-toggle');
+        const save = node('button', t('Set password')); save.type = 'submit';
+        const toggle = node('button', user.enabled ? t('Disable access') : t('Enable access'), 'admin-user-toggle');
         toggle.type = 'button';
         let busy = false;
         const update = async (body: unknown) => {
@@ -148,10 +149,10 @@ export async function initializeAdministration() {
           try {
             await send('/admin/users/' + encodeURIComponent(user.id), body, 'PATCH');
             input.value = '';
-            usersStatus.textContent = 'Administrator updated. Previous sessions are no longer valid.';
+            usersStatus.textContent = t('Administrator updated. Previous sessions are no longer valid.');
             await loadUsers();
           } catch (error) {
-            usersStatus.textContent = 'Unable to update administrator. Please try again.';
+            usersStatus.textContent = t('Unable to update administrator. Please try again.');
             await checkExpired(error);
           } finally { busy = false; save.disabled = toggle.disabled = false; }
         };
@@ -190,9 +191,9 @@ export async function initializeAdministration() {
       win.scrollTo({top: 0, behavior: 'instant'});
     }
     try {
-      if (next === 'users') { usersStatus.textContent = 'Loading accounts…'; await loadUsers(); if (version === viewVersion) usersStatus.textContent = ''; }
+      if (next === 'users') { usersStatus.textContent = t('Loading accounts…'); await loadUsers(); if (version === viewVersion) usersStatus.textContent = ''; }
       if (next === 'moderation') {
-        reportsPanel.textContent = 'Loading requests…';reportsPanel.setAttribute('aria-busy','true');updateTabs();
+        reportsPanel.textContent = t('Loading requests…');reportsPanel.setAttribute('aria-busy','true');updateTabs();
         const data:ModerationInbox = await api('/admin?status='+moderationStatus);
         if(version===viewVersion && signedIn){updateTabs(data.counts);document.getElementById('moderation-list-limit')!.hidden=!data.counts || data.counts[moderationStatus]<=data.reports.length+data.appeals.length;}
         if (version === viewVersion && signedIn) document.querySelector('#reports')!.replaceChildren(renderModerationInbox(data, (report,trigger) => {
@@ -205,14 +206,14 @@ export async function initializeAdministration() {
           actionForm.hidden=true;
           clearReview();selectedReview=request;syncReviewPicker(request.original_action);reviewForm.hidden=false;
           const context=document.querySelector('#review-decision-context')!;
-          const who=document.createElement('p');who.textContent=request.operator_handle?'From @'+request.operator_handle:'Operator review request';
+          const who=document.createElement('p');who.textContent=request.operator_handle?t('From @{handle}',{handle:request.operator_handle}):t('Operator review request');
           const text=document.createElement('p');text.className='moderation-reason';text.textContent=request.reason;
           context.replaceChildren(who,text,renderReviewParticipation(request));modal.open('review-decision-title',trigger);document.querySelector<HTMLTextAreaElement>('#review-response')!.focus();
         },moderationStatus,openCases));
         if(version===viewVersion)reportsPanel.removeAttribute('aria-busy');
       }
     } catch (error) {
-      if (version === viewVersion){reportsPanel.removeAttribute('aria-busy');status.textContent = 'Unable to load this section. Please try again.';}
+      if (version === viewVersion){reportsPanel.removeAttribute('aria-busy');status.textContent = t('Unable to load this section. Please try again.');}
       await checkExpired(error);
     }
   }
@@ -229,7 +230,7 @@ export async function initializeAdministration() {
     csrf = session.csrf; signedIn = !!session.adminId; isRoot = signedIn && session.adminRole === 'root';
     shell.hidden = signedIn; dashboard.hidden = !signedIn;
     toolbar(signedIn, session.adminHandle); usersTile.disabled = !isRoot;
-    document.querySelector('#users-tile-access')!.textContent = isRoot ? 'Manage accounts' : 'Root access required';
+    document.querySelector('#users-tile-access')!.textContent = isRoot ? t('Manage accounts') : t('Root access required');
     status.textContent = '';
     if (signedIn) {
       (login.elements.namedItem('password') as HTMLInputElement).value = '';
@@ -247,7 +248,7 @@ export async function initializeAdministration() {
     event.preventDefault();
     if (signingIn || !login.reportValidity()) return;
     signingIn = true; submit.disabled = true; login.setAttribute('aria-busy', 'true');
-    feedback.classList.remove('error'); feedback.textContent = 'Signing in…';
+    feedback.classList.remove('error'); feedback.textContent = t('Signing in…');
     const form = new FormData(login);
     try {
       const session = await api('/session'); csrf = session.csrf;
@@ -260,8 +261,8 @@ export async function initializeAdministration() {
     } catch (error) {
       feedback.classList.add('error');
       feedback.textContent = (error as {status?: number})?.status === 429
-        ? 'Too many sign-in attempts. Please wait before trying again.'
-        : 'Unable to sign in. Check your root or administrator credentials and try again.';
+        ? t('Too many sign-in attempts. Please wait before trying again.')
+        : t('Unable to sign in. Check your root or administrator credentials and try again.');
     } finally { signingIn = false; submit.disabled = false; login.removeAttribute('aria-busy'); }
   });
   const create = document.querySelector<HTMLFormElement>('#admin-create-user')!;
@@ -274,11 +275,11 @@ export async function initializeAdministration() {
       const data = new FormData(create);
       await send('/admin/users', {handle: data.get('handle'), password: data.get('password')});
       create.reset(); filter.value = '';
-      usersStatus.textContent = 'Administrator created.';
+      usersStatus.textContent = t('Administrator created.');
       await loadUsers();
     } catch (error) {
       usersStatus.textContent = (error as {status?: number})?.status === 409
-        ? 'That handle is already in use. Choose another one.' : 'Unable to create administrator. Check the fields and try again.';
+        ? t('That handle is already in use. Choose another one.') : t('Unable to create administrator. Check the fields and try again.');
       await checkExpired(error);
     } finally { creatingUser = false; button.disabled = false; }
   });
@@ -289,23 +290,23 @@ export async function initializeAdministration() {
     decidingReview=true;button.disabled=true;modal.setBusy(true);
     try {
       await send('/admin/appeals/'+encodeURIComponent(id)+'/decision',{...Object.fromEntries(new FormData(reviewForm)),expectedRevision:revision});
-      modal.close(true);clearReview();await showView('moderation');const heading=document.querySelector<HTMLElement>('#reports-heading')!;heading.tabIndex=-1;heading.focus();status.textContent='Review decided. Your response is now visible to the operator.';
-    }catch(error){status.textContent=(error as {status?:number}).status===409?'Unable to apply this decision. It may have new agent/operator context, already be decided, have a newer moderation action, or refer to an unavailable message or parent. No changes were saved. Reload Moderation and check the current state.':'Unable to send your decision. Please try again.';modal.error(status.textContent || 'Unable to decide this review.');await checkExpired(error);}
+      modal.close(true);clearReview();await showView('moderation');const heading=document.querySelector<HTMLElement>('#reports-heading')!;heading.tabIndex=-1;heading.focus();status.textContent=t('Review decided. Your response is now visible to the operator.');
+    }catch(error){status.textContent=(error as {status?:number}).status===409?t('Unable to apply this decision. It may have new agent/operator context, already be decided, have a newer moderation action, or refer to an unavailable message or parent. No changes were saved. Reload Moderation and check the current state.'):t('Unable to send your decision. Please try again.');modal.error(status.textContent || t('Unable to decide this review.'));await checkExpired(error);}
     finally{decidingReview=false;button.disabled=false;modal.setBusy(false);}
   });
   let recordingAction = false;
   document.querySelector('#action')!.addEventListener('submit', async event => {
     event.preventDefault();
     if (recordingAction || !actionForm.reportValidity()) return;
-    if (actionType.value === 'dismiss' && !selectedReport) { modal.error('Choose Review on a report before closing it without action.'); return; }
+    if (actionType.value === 'dismiss' && !selectedReport) { modal.error(t('Choose Review on a report before closing it without action.')); return; }
     recordingAction = true;modal.setBusy(true);
     const button = actionForm.querySelector<HTMLButtonElement>('button:not([type=button])')!;
     button.disabled = true;
     try {
       await send('/admin/actions', {...Object.fromEntries(new FormData(actionForm)), ...(selectedReport ? {reportId: selectedReport.id} : {})});
       modal.close(true);clearReview(); actionForm.reset(); selectedReport = null; selection.hidden = true;
-      await showView('moderation');const heading=document.querySelector<HTMLElement>('#reports-heading')!;heading.tabIndex=-1;heading.focus(); status.textContent = 'Action recorded.';
-    } catch (error) { status.textContent = 'Unable to record the action. The report may already have been reviewed; check the details and try again.';modal.error(status.textContent || 'Unable to record the action.'); await checkExpired(error); }
+      await showView('moderation');const heading=document.querySelector<HTMLElement>('#reports-heading')!;heading.tabIndex=-1;heading.focus(); status.textContent = t('Action recorded.');
+    } catch (error) { status.textContent = t('Unable to record the action. The report may already have been reviewed; check the details and try again.');modal.error(status.textContent || t('Unable to record the action.')); await checkExpired(error); }
     finally { recordingAction = false; button.disabled = false;modal.setBusy(false); }
   });
   logout.addEventListener('click', async () => {
@@ -315,13 +316,13 @@ export async function initializeAdministration() {
       win.history.replaceState(null, '', win.location.pathname);
       await refresh();
       document.querySelector<HTMLInputElement>('#admin-handle')!.focus();
-    } catch { status.textContent = 'Unable to sign out. Please try again.'; }
+    } catch { status.textContent = t('Unable to sign out. Please try again.'); }
     finally { logout.disabled = false; }
   });
   try { await refresh(); }
   catch {
     signedIn = isRoot = false; toolbar(false);
     shell.hidden = false; dashboard.hidden = true;
-    status.textContent = 'Unable to check your session. You can try signing in below.';
+    status.textContent = t('Unable to check your session. You can try signing in below.');
   }
 }

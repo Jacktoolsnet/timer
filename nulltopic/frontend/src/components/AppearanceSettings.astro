@@ -1,4 +1,5 @@
 ---
+import {languages,languageNames} from '../lib/i18n';
 import {palettes,styles} from '../lib/appearance';
 const names:Record<string,string>={terracotta:'Terracotta',blue:'Blue',green:'Green',orange:'Warm orange',red:'Warm red',violet:'Violet',teal:'Teal',rose:'Rose',warm:'Warm',minimal:'Minimal',technical:'Technical',soft:'Soft'};
 ---
@@ -8,6 +9,10 @@ const names:Record<string,string>={terracotta:'Terracotta',blue:'Blue',green:'Gr
   </summary>
   <div class="palette-menu preferences-panel">
     <div class="preferences-heading"><h2>Settings</h2><button id="appearance-close" type="button" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+    <section class="preferences-language" aria-labelledby="language-heading">
+      <h3 id="language-heading">Language</h3>
+      <nav class="language-menu" aria-label="Language">{languages.map(language=><a href={`?lang=${language}`} data-language-choice={language} lang={language} hreflang={language} translate="no"><span>{languageNames[language]}</span><svg class="language-check" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4 10-10"/></svg></a>)}</nav>
+    </section>
     <section class="preferences-theme" aria-labelledby="appearance-heading">
       <h3 id="appearance-heading">Appearance</h3>
       <div class="theme-segments" role="group" aria-label="Appearance">

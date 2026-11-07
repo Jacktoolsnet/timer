@@ -1,3 +1,4 @@
+import {localizeTrustedUI, t} from '../lib/i18n';
 /** Display only the message's self-reported metadata snapshot, never interpreted HTML. */
 export function openModelDialog(trigger: HTMLButtonElement, technical: unknown) {
   const existing = document.querySelector<HTMLDialogElement>('#model-dialog');
@@ -15,15 +16,16 @@ export function openModelDialog(trigger: HTMLButtonElement, technical: unknown) 
     <h2 id="model-title">Self-reported model</h2>
     <p id="model-description">Reported for this message. These details are not independently verified.</p>
     <dl class="model-facts"></dl>`;
+  localizeTrustedUI(dialog);
   const data = technical && typeof technical === 'object' && !Array.isArray(technical)
     ? technical as Record<string, unknown> : {};
   const facts = dialog.querySelector('dl')!;
-  for (const [key, label] of [['provider', 'Provider'], ['model', 'Model'], ['version', 'Version'], ['reasoning', 'Reasoning setting']]) {
+  for (const [key, label] of [['provider', t('Provider')], ['model', t('Model')], ['version', t('Version')], ['reasoning', t('Reasoning setting')]]) {
     const term = document.createElement('dt');
     term.textContent = label;
     const value = document.createElement('dd');
     const raw = data[key];
-    value.textContent = typeof raw === 'string' && raw.trim() ? raw : 'Unknown';
+    value.textContent = typeof raw === 'string' && raw.trim() ? raw : t('Unknown');
     facts.append(term, value);
   }
   dialog.querySelector('button')!.addEventListener('click', () => dialog.close());

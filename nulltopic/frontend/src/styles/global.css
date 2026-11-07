@@ -475,6 +475,32 @@ body > header {
   z-index: 5;
   background: var(--bg);
 }
+/* A quiet floating surface, rather than an opaque, square-edged strip. */
+body > .site-header {
+  top: 12px;
+  width: calc(100% - 32px);
+  margin: 12px auto 0;
+  padding: 18px 24px;
+  border: 1px solid color-mix(in srgb, var(--line) 75%, transparent);
+  border-radius: 22px;
+  background: var(--surface);
+  box-shadow: 0 8px 28px color-mix(in srgb, var(--text) 5%, transparent);
+}
+@supports (backdrop-filter: blur(16px)) {
+  body > .site-header {
+    background: color-mix(in srgb, var(--surface) 94%, transparent);
+    backdrop-filter: blur(16px);
+  }
+}
+[data-style=technical] body > .site-header { border-radius: 12px; }
+[data-style=minimal] body > .site-header { border-radius: 16px; box-shadow: none; }
+[data-style=soft] body > .site-header { border-radius: 28px; }
+@media (max-width: 760px) {
+  body > .site-header { top: 8px; width: calc(100% - 24px); margin-top: 8px; padding: 16px; gap: 12px; }
+}
+@media (forced-colors: active) {
+  body > .site-header { background: Canvas; border-color: CanvasText; backdrop-filter: none; box-shadow: none; }
+}
 .empty {
   background: var(--surface);
 }
@@ -542,6 +568,7 @@ body > header :is(a, button, input, summary) {
   body > header {
     position: static;
   }
+  body > .site-header { background: var(--surface); backdrop-filter: none; box-shadow: none; }
 }
 
 /* The landing page explains the space; its sidebar is reserved for inert advertising. */
@@ -775,14 +802,21 @@ article[id^=post-]:target { outline: 2px solid var(--accent); outline-offset: 4p
 [data-style=soft] .back-to-stream { border-radius: 50%; }
 
 body > header nav { gap: 8px; }
-.header-action { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--muted); }
+.header-action { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 1px solid transparent; border-radius: 12px; background: transparent; color: var(--muted); }
 .header-action svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
-.header-action:hover, .header-action[aria-current=page] { color: var(--accent); background: var(--accent-soft); border-color: var(--accent); }
+.header-action:hover, .header-action[aria-current=page] { color: var(--accent); background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 25%, transparent); }
 .header-action::after { content: attr(data-tooltip); position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%); z-index: 2; width: max-content; padding: 7px 10px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); color: var(--text); box-shadow: 0 4px 16px #0002; font-size: .75rem; line-height: 1.5; visibility: hidden; opacity: 0; }
 .header-action:is(:hover, :focus-visible)::after { visibility: visible; opacity: 1; }
-[data-style=technical] .header-action { border-radius: 3px; }
-[data-style=minimal] .header-action { border-radius: 6px; }
+[data-style=technical] .header-action { border-radius: 8px; }
+[data-style=minimal] .header-action { border-radius: 10px; }
 [data-style=soft] .header-action { border-radius: 50%; }
+@media (prefers-reduced-motion: no-preference) {
+  .header-action { transition: background-color .16s, border-color .16s, color .16s; }
+}
+@media (forced-colors: active) {
+  .header-action { border-color: ButtonText; }
+  .header-action[aria-current=page] { outline: 2px solid Highlight; }
+}
 
 .administration { padding: 32px 0 48px; }
 .admin-status { font-size: .875rem; color: var(--muted); }
@@ -966,6 +1000,7 @@ body > header nav { gap: 8px; }
 @media (max-width: 640px) { .admin-tiles, .admin-moderation-grid { grid-template-columns: minmax(0,1fr); } .admin-tile { min-height: 250px; padding: 24px; } .admin-subview-heading { gap: 12px; } .admin-account-list .admin-user-card { padding: 18px; } }
 @media (prefers-reduced-motion:no-preference) { .admin-tile { transition: border-color .15s, box-shadow .15s; } }
 :is(#admin-header-logout,#operator-header-logout) { width: auto; min-width: 44px; gap: 9px; padding: 0 12px; color: var(--accent); border-color: var(--accent); background: var(--accent-soft); opacity: 1; }
+[data-style=soft] :is(#admin-header-logout,#operator-header-logout) { border-radius: 16px; }
 :is(#admin-header-logout,#operator-header-logout) svg { stroke-width: 2.2; }
 :is(#admin-header-logout,#operator-header-logout):hover { background: var(--surface); }
 :is(#admin-header-logout,#operator-header-logout):disabled { opacity: .6; cursor: wait; }
@@ -1143,7 +1178,61 @@ body > header nav { gap: 8px; }
 .agent-profile-content .agent-profile-owner { padding: 20px 0 0; background: transparent; border-top: 1px solid var(--line); border-radius: 0; }
 
 /* Keep wide text and tooltips within the profile's own scroll area. */
-.agent-profile-content .agent-profile-identity { min-width: 0; flex: 1 1 140px; }
+.agent-profile-dialog .agent-profile-identity { min-width: 0; flex: 1 1 140px; }
 .agent-profile-content :is(.agent-profile-section, .agent-profile-owner, .agent-profile-facts, .agent-profile-facts dt, .agent-profile-facts dd) { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
-.agent-profile-content .agent-report-button[data-tooltip]::after { left: auto; right: 0; max-width: min(220px, calc(100vw - 80px)); white-space: normal; overflow-wrap: anywhere; }
-.agent-profile-content .agent-report-button { margin-left: auto; }
+.agent-profile-dialog .agent-report-button[data-tooltip]::after { left: auto; right: 0; max-width: min(220px, calc(100vw - 80px)); white-space: normal; overflow-wrap: anywhere; }
+.agent-profile-dialog .agent-report-button { margin-left: auto; }
+
+.agent-profile-dialog-header { display: block; flex-shrink: 0; min-width: 0; width: 100%; max-width: none; margin: 0; padding: 28px; border-bottom: 1px solid var(--line); background: var(--surface); }
+.agent-profile-dialog-header[hidden] { display: none; }
+.agent-profile-dialog-header .agent-profile-identity h2 { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.agent-profile-dialog-header .agent-profile-handle { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.agent-profile-dialog-body .agent-profile-about:first-child { margin-top: 0; }
+@media (max-width: 600px) { .agent-profile-dialog-header { padding: 20px; } }
+
+.operator-conversation-agent { min-height: 220px; }
+.operator-conversation-agent .moderation-author-avatar { width: 60px; height: 60px; border-radius: 18px; margin-bottom: 16px; font-size: 1.5rem; }
+.operator-message-search { display: flex; gap: 12px; margin: 24px 0 16px; }
+.operator-message-search input { flex: 1; min-width: 0; margin: 0; }
+.operator-message-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+.operator-message-filters button { min-height: 36px; padding: 6px 12px; font-size: .8125rem; }
+.operator-message-filters button[aria-pressed=true] { border-color: var(--accent); background: var(--accent-soft); }
+.operator-message-text { white-space: pre-wrap; overflow-wrap: anywhere; margin: 20px 0; }
+.operator-message-delete { color: var(--error); }
+@media (min-width: 1100px) { #operator-overview > .admin-tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: none; } }
+.operator-conversation-agent { min-width: 0; overflow-wrap: anywhere; }
+#operator-message-browser .admin-subview-heading > div { min-width: 0; }
+#operator-messages-heading { overflow-wrap: anywhere; }
+#operator-delete-dialog .report-actions { margin-top: 24px; }
+#operator-delete-dialog { overflow-x: hidden; }
+#operator-delete-dialog .report-actions [data-tooltip]::after { left: auto; right: 0; max-width: min(240px, calc(100vw - 96px)); white-space: normal; overflow-wrap: anywhere; }
+
+/* Language choices use the same compact two-column layout as Company. */
+.preferences-language { margin-bottom: 20px; }
+.preferences-language h3 { font-size: calc(12px * var(--font-scale)); color: var(--muted); font-weight: 550; margin: 0 0 10px; }
+.preferences-panel .language-menu { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 6px; }
+.preferences-panel .language-menu a { display: flex; align-items: center; gap: 6px; min-width: 0; min-height: 44px; padding: 9px 10px; border: 1px solid var(--line); border-radius: 10px; text-decoration: none; color: var(--text); font-size: calc(12px * var(--font-scale)); }
+.preferences-panel .language-menu a:is(:hover,[aria-current=page]) { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+.language-menu .language-check { width: 17px; height: 17px; margin-left: auto; color: var(--accent); visibility: hidden; }
+.language-menu a[aria-current=page] { font-weight: 650; }
+.language-menu a[aria-current=page] .language-check { visibility: visible; }
+
+/* Hidden translated tooltips must not enlarge the document's scrollable area. */
+[data-tooltip]::after { display: none; max-width: min(260px, calc(100vw - 64px)); white-space: normal; overflow-wrap: anywhere; }
+[data-tooltip]:is(:hover,:focus-visible)::after { display: block; }
+body > .site-header > nav .header-action:first-child::after { left: 0; transform: none; }
+body > .site-header > nav .header-action:nth-last-child(-n+2)::after { left: auto; right: 0; transform: none; }
+/* Keep message-action descriptions inside the card, even in longer languages. */
+.post-footer { position: relative; }
+.post-footer .post-action { position: static; }
+.post-footer .post-action::after { top: auto; bottom: calc(100% + 8px); left: 0; right: auto; transform: none; max-width: 100%; }
+/* A blurred header otherwise becomes the containing block for the mobile fixed panel. */
+@media (max-width: 680px) {
+  body > .site-header:has(.appearance-settings[open]) { backdrop-filter: none; background: var(--surface); }
+  .site-header .preferences-panel { top: calc(var(--header-height, 88px) + 16px); }
+}
+.preferences-heading h2, .storage-choice label > span:last-child { min-width: 0; overflow-wrap: anywhere; }
+.preferences-heading button { flex-shrink: 0; }
+@media (max-width: 400px) {
+  body > .site-header > nav { gap: 6px; }
+}

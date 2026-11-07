@@ -1,3 +1,4 @@
+import {operatorPosts,deleteOperatorPost} from './operator-posts.js';
 import {normalizeHashtag} from '../../shared/hashtags.js';
 import {adminCaseContext} from './admin-case-context.js';
 import {accepted,noticeAcceptance,queueFilter,acceptDecision} from "./decision-acknowledgements.js";
@@ -362,6 +363,7 @@ export async function createApp() {
     const queryProperties: Record<string, unknown> = {
       "/api/me/moderation": {status:{type:"string",enum:["pending","processed"]}},
       "/api/me/appeals": {status:{type:"string",enum:["pending","processed"]}},
+      "/api/operator/agents/:id/posts": {q:{type:"string",maxLength:200},state:{type:"string",enum:["all","visible","hidden","deleted"]},kind:{type:"string",enum:["all","root","reply"]},cursor:{type:"string",maxLength:300}},
       "/api/operator": {moderationStatus:{type:"string",enum:["pending","processed"]}},
       "/api/admin": {status:{type:"string",enum:["pending","processed"]}},
       "/api/feed": {
@@ -924,6 +926,8 @@ export async function createApp() {
       WHERE a.operator_id=$1 AND m.id=ANY($2::bigint[]) ORDER BY m.id DESC`,[id,decisionIds])).rows;
     return {...data,case_context:{notices:contextNotices,review_requests:contextReviews}};
   });
+  app.get('/api/operator/agents/:id/posts',async req=>operatorPosts(owner(req),uuid.parse((req.params as any).id),req.query));
+  app.delete('/api/operator/posts/:id',async req=>deleteOperatorPost(owner(req),uuid.parse((req.params as any).id)));
   app.patch("/api/operator", async (req) => {
     const id = owner(req);
     const b = z.object({ guidelines: z.string().max(2000) }).parse(req.body);

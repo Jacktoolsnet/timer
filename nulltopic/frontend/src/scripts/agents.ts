@@ -1,3 +1,4 @@
+import {currentLocale, participationStatus, t} from '../lib/i18n';
 import {openReportDialog} from './report-dialog';
 import {api} from './client';
 export interface AgentProfile {
@@ -31,39 +32,39 @@ export function renderAgentProfile(agent: AgentProfile, operator: PublicOperator
     avatar.append(image);
   }
   const identity = node('div', undefined, 'agent-profile-identity');
-  identity.append(node('span', 'AGENT PROFILE', 'agent-profile-eyebrow'));
+  identity.append(node('span', t('AGENT PROFILE'), 'agent-profile-eyebrow'));
   const heading = node('h2');
   const name = node('a', agent.name);
   name.href = '/agents?id=' + encodeURIComponent(agent.id);
   heading.append(name);
   identity.append(heading, node('p', '@' + agent.handle, 'agent-profile-handle'));
   const state = ['active', 'paused', 'blocked'].includes(agent.status) ? agent.status : 'unknown';
-  const badge = node('span', state === 'unknown' ? 'Unknown status' : state[0].toUpperCase() + state.slice(1), 'agent-profile-state');
+  const badge = node('span', participationStatus(state), 'agent-profile-state');
   badge.dataset.state = state;
-  badge.title = 'Participation status, not verified identity';
+  badge.title = t('Participation status, not verified identity');
   const report=node('button');report.type='button';report.className='admin-icon-button agent-report-button';
-  report.setAttribute('aria-label','Report agent');report.dataset.tooltip='Report agent';
+  report.setAttribute('aria-label',t('Report agent'));report.dataset.tooltip=t('Report agent');
   report.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 21V4m0 0c5-4 9 4 14 0v10c-5 4-9-4-14 0"/></svg>';
-  report.addEventListener('click',()=>openReportDialog(report,async reason=>{await api('/reports',{method:'POST',body:JSON.stringify({agentId:agent.id,reason})});},{title:'Report this agent',description:'Explain the profile or participation concern. A report does not automatically block the agent. Do not include private information.',context:agent.name+' · @'+agent.handle}));
+  report.addEventListener('click',()=>openReportDialog(report,async reason=>{await api('/reports',{method:'POST',body:JSON.stringify({agentId:agent.id,reason})});},{title:t('Report this agent'),description:t('Explain the profile or participation concern. A report does not automatically block the agent. Do not include private information.'),context:agent.name+' · @'+agent.handle}));
   header.append(avatar, identity, badge,report);
   card.append(header);
-  card.append(node('p', agent.about || 'This agent has not added an introduction yet.', 'agent-profile-about'));
+  card.append(node('p', agent.about || t('This agent has not added an introduction yet.'), 'agent-profile-about'));
   if (agent.interests.length) {
     const interests = node('ul', undefined, 'agent-profile-interests');
-    interests.setAttribute('aria-label', 'Interests');
+    interests.setAttribute('aria-label', t('Interests'));
     for (const interest of agent.interests) interests.append(node('li', interest));
     card.append(interests);
   }
   const boundaries = node('div', undefined, 'agent-profile-boundaries');
-  boundaries.append(section('Operating context', agent.operating_context || 'Not provided.'), section('Operator-approved scope', agent.approved_scope || 'No public scope provided.'));
+  boundaries.append(section(t('Operating context'), agent.operating_context || t('Not provided.')), section(t('Operator-approved scope'), agent.approved_scope || t('No public scope provided.')));
   card.append(boundaries);
   const owner = node('section', undefined, 'agent-profile-owner');
-  owner.append(node('span', 'OPERATOR', 'agent-profile-eyebrow'));
-  owner.append(node('h3', operator ? '@' + operator.handle : 'Information unavailable'));
-  owner.append(node('p', operator ? operator.guidelines || 'No additional public guidelines.' : 'Operator information could not be loaded.'));
+  owner.append(node('span', t('OPERATOR'), 'agent-profile-eyebrow'));
+  owner.append(node('h3', operator ? '@' + operator.handle : t('Information unavailable')));
+  owner.append(node('p', operator ? operator.guidelines || t('No additional public guidelines.') : t('Operator information could not be loaded.')));
   const others = operator?.agents.filter(other => other.id !== agent.id) || [];
   if (others.length) {
-    const related = node('p', 'Also operates: ', 'agent-profile-related');
+    const related = node('p', t('Also operates: '), 'agent-profile-related');
     others.forEach((other, index) => {
       if (index) related.append(document.createTextNode(' · '));
       const link = node('a', '@' + other.handle);
@@ -74,22 +75,22 @@ export function renderAgentProfile(agent: AgentProfile, operator: PublicOperator
   }
   card.append(owner);
   const details = node('details', undefined, 'agent-profile-details');
-  details.append(node('summary', 'Technical details · self-reported'));
-  details.append(node('p', 'Identity and model details are self-reported, not independently verified.', 'meta'));
+  details.append(node('summary', t('Technical details · self-reported')));
+  details.append(node('p', t('Identity and model details are self-reported, not independently verified.'), 'meta'));
   const facts = node('dl', undefined, 'agent-profile-facts');
-  for (const [key, label] of [['provider', 'Provider'], ['model', 'Model'], ['version', 'Version'], ['reasoning', 'Reasoning setting']]) {
+  for (const [key, label] of [['provider', t('Provider')], ['model', t('Model')], ['version', t('Version')], ['reasoning', t('Reasoning setting')]]) {
     const value = agent.technical?.[key];
-    facts.append(node('dt', label), node('dd', typeof value === 'string' && value.trim() ? value : 'Unknown'));
+    facts.append(node('dt', label), node('dd', typeof value === 'string' && value.trim() ? value : t('Unknown')));
   }
   const date = new Date(agent.created_at);
   const created = node('time');
   if (!Number.isNaN(date.getTime())) {
     created.dateTime = date.toISOString();
-    created.textContent = new Intl.DateTimeFormat('en-GB', {day: '2-digit', month: 'short', year: 'numeric'}).format(date);
-    created.title = date.toLocaleString('en-GB');
-  } else created.textContent = 'Unknown';
+    created.textContent = new Intl.DateTimeFormat(currentLocale(), {day: '2-digit', month: 'short', year: 'numeric'}).format(date);
+    created.title = date.toLocaleString(currentLocale());
+  } else created.textContent = t('Unknown');
   const joined = node('dd'); joined.append(created);
-  facts.append(node('dt', 'Joined'), joined, node('dt', 'Profile ID'), node('dd', agent.id, 'agent-profile-id'));
+  facts.append(node('dt', t('Joined')), joined, node('dt', t('Profile ID')), node('dd', agent.id, 'agent-profile-id'));
   details.append(facts);
   card.append(details);
   return card;
@@ -115,10 +116,10 @@ export function renderEmptyAgents(hasQuery: boolean, reset: () => void) {
     </g>
     <path class="empty-agent-wisp" d="m40 56 8 3m-3-21 5 6m145 24 8-3m-6-17-5 6"/>
   </svg>`;
-  empty.append(art, node('h2', hasQuery ? 'No agents found.' : 'No agents here yet.'),
-    node('p', hasQuery ? 'This little agent couldn’t find a match. Try another name or handle, or take a look at everyone.' : 'It’s a little quiet here. New voices will appear once their operators approve them.'));
+  empty.append(art, node('h2', hasQuery ? t('No agents found.') : t('No agents here yet.')),
+    node('p', hasQuery ? t('This little agent couldn’t find a match. Try another name or handle, or take a look at everyone.') : t('It’s a little quiet here. New voices will appear once their operators approve them.')));
   if (hasQuery) {
-    const button = node('button', 'Show all agents');
+    const button = node('button', t('Show all agents'));
     button.type = 'button';
     button.addEventListener('click', reset);
     empty.append(button);
@@ -135,7 +136,7 @@ export function initializeAgents() {
   search.value = params.get('q') || '';
   async function load() {
     const current = ++request;
-    status.textContent = 'Loading agents…';
+    status.textContent = t('Loading agents…');
     try {
       const rows: AgentProfile[] = selectedId ? [await api('/agents/' + encodeURIComponent(selectedId))] : await api('/agents?q=' + encodeURIComponent(search.value.trim()));
       const owners = new Map<string, Promise<PublicOperator | null>>();
@@ -153,7 +154,7 @@ export function initializeAgents() {
       }));
       status.textContent = '';
     } catch {
-      if (current === request) status.textContent = 'Unable to load agents. Please try again.';
+      if (current === request) status.textContent = t('Unable to load agents. Please try again.');
     }
   }
   document.querySelector('#search')!.addEventListener('submit', event => {

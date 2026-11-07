@@ -1,3 +1,4 @@
+import {t} from '../lib/i18n';
 import {appendHashtagText} from './hashtags';
 import {normalizeHashtag} from '../../../shared/hashtags';
 import {api, renderPost, parseStreamPages, type Post} from './client';
@@ -12,7 +13,7 @@ export function conversationBackUrl(threadId: string, selected: Post, pages: num
 
 export function renderConversation(rows: Post[], root: HTMLElement, comments: HTMLElement, streamPages = 1, selectedId?: string,streamTag?:string) {
   const original = rows.find(post => selectedId ? post.id === selectedId : post.parent_id === null);
-  if (!original) throw Object.assign(Error('Message unavailable'), { status: 404 });
+  if (!original) throw Object.assign(Error(t('Message unavailable')), { status: 404 });
   const card = renderPost(original, { streamPages,streamTag });
   card.classList.add('original-post');
   // The message is already open; its text need not link back to this same page.
@@ -45,7 +46,7 @@ export function renderConversation(rows: Post[], root: HTMLElement, comments: HT
       const context = document.createElement('a');
       context.className = 'reply-context';
       context.href = '#post-' + post.parent_id;
-      context.textContent = 'Reply to a comment ↑';
+      context.textContent = t('Reply to a comment ↑');
       reply.prepend(context);
     }
     return reply;
@@ -67,7 +68,7 @@ export async function startConversation() {
   const back = document.querySelector<HTMLAnchorElement>('#back-to-stream')!;
   let source: EventSource | undefined, busy = false, pending = false, disposed = false;
   if (!id || !/^[0-9a-f-]{36}$/i.test(id) || (selectedId && !/^[0-9a-f-]{36}$/i.test(selectedId))) {
-    status.textContent = 'This conversation link is invalid. Return to the stream to find a message.';
+    status.textContent = t('This conversation link is invalid. Return to the stream to find a message.');
     return;
   }
   const load = async () => {
@@ -83,7 +84,7 @@ export async function startConversation() {
       const result = renderConversation(rows, root, comments, pages, selectedId,streamTag);
       const selected = rows.find(post => post.id === result.id)!;
       back.href = conversationBackUrl(id, selected, pages,streamTag);
-      const backLabel = selected.parent_id ? 'Back to parent message' : 'Back to stream';
+      const backLabel = selected.parent_id ? t('Back to parent message') : t('Back to stream');
       back.setAttribute('aria-label', backLabel);
       back.dataset.tooltip = backLabel;
       document.querySelector('#comment-count')!.textContent = `(${result.count})`;
@@ -110,13 +111,13 @@ export async function startConversation() {
         comments.replaceChildren();
         section.hidden = true;
         status.className = 'error';
-        status.textContent = 'This conversation is no longer available. Return to the stream to find another message.';
+        status.textContent = t('This conversation is no longer available. Return to the stream to find another message.');
         return;
       }
       status.className = 'error';
       status.textContent = root.children.length
-        ? 'Unable to refresh this conversation. Displayed messages may be out of date.'
-        : 'Unable to load this conversation. It may have been removed. Please try again or return to the stream.';
+        ? t('Unable to refresh this conversation. Displayed messages may be out of date.')
+        : t('Unable to load this conversation. It may have been removed. Please try again or return to the stream.');
     } finally {
       busy = false;
       if (pending) { pending = false; void load(); }

@@ -1,3 +1,4 @@
+import {t} from '../lib/i18n';
 export type FeedState = 'connecting' | 'live' | 'reconnecting' | 'offline' | 'error';
 const states: Record<FeedState, [string, string]> = {
   connecting: ['Connecting…', 'Connecting to live updates.'],
@@ -8,5 +9,5 @@ const states: Record<FeedState, [string, string]> = {
 };
 export function setFeedStatus(target: HTMLElement, state: FeedState) {
   target.dataset.state = state;
-  [target.textContent, target.title] = states[state];
+  [target.textContent, target.title] = states[state].map(value=>t(value)) as [string,string];
 }

@@ -1,3 +1,4 @@
+import {localizeTrustedUI, t} from '../lib/i18n';
 /** Native modal dialog supplies focus containment and an inert page underneath. */
 export function openReportDialog(trigger: HTMLButtonElement, send: (reason: string) => Promise<void>, options?:{title:string;description:string;context?:string}) {
   const existing = document.querySelector<HTMLDialogElement>('#report-dialog');
@@ -21,6 +22,7 @@ export function openReportDialog(trigger: HTMLButtonElement, send: (reason: stri
       <p class="report-status" role="status" aria-live="polite"></p>
       <div class="report-actions"><button class="report-cancel admin-icon-button" type="button" aria-label="Cancel" data-tooltip="Cancel"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m6 6 12 12M18 6 6 18"/></svg></button><button class="report-submit admin-icon-button" type="submit" aria-label="Send report" data-tooltip="Send report"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m22 2-7 20-4-9-9-4 20-7ZM22 2 11 13"/></svg></button></div>
     </form>`;
+  localizeTrustedUI(dialog);
   if(options){
     dialog.querySelector('#report-title')!.textContent=options.title;
     dialog.querySelector('#report-description')!.textContent=options.description;
@@ -51,15 +53,15 @@ export function openReportDialog(trigger: HTMLButtonElement, send: (reason: stri
     e.preventDefault();
     if (busy) return;
     const reason = textarea.value.trim();
-    textarea.setCustomValidity(reason ? '' : 'Please enter a reason.');
+    textarea.setCustomValidity(reason ? '' : t('Please enter a reason.'));
     if (!form.reportValidity()) return;
     busy = true;
     form.setAttribute('aria-busy', 'true');
     textarea.readOnly = true;
     dialog.querySelectorAll('button').forEach(button => button.disabled = true);
     status.classList.remove('error');
-    status.textContent = 'Sending report…';
-    submit.setAttribute('aria-label', 'Sending report…');submit.dataset.tooltip = 'Sending report…';
+    status.textContent = t('Sending report…');
+    submit.setAttribute('aria-label', t('Sending report…'));submit.dataset.tooltip = t('Sending report…');
     try {
       await send(reason);
       busy = false;
@@ -70,8 +72,8 @@ export function openReportDialog(trigger: HTMLButtonElement, send: (reason: stri
       textarea.readOnly = false;
       dialog.querySelectorAll('button').forEach(button => button.disabled = false);
       status.classList.add('error');
-      status.textContent = 'Your report could not be sent. Please try again in a moment.';
-      submit.setAttribute('aria-label', 'Send report');submit.dataset.tooltip = 'Send report';
+      status.textContent = t('Your report could not be sent. Please try again in a moment.');
+      submit.setAttribute('aria-label', t('Send report'));submit.dataset.tooltip = t('Send report');
       textarea.focus();
     }
   });

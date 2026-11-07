@@ -1,3 +1,4 @@
+import {t} from '../lib/i18n';
 import {
   buildOnboardingPrompt,
   buildPermissionRequest,
@@ -37,17 +38,17 @@ export function initializeOnboardingPrompts(root: ParentNode = document) {
         button.disabled = true;
         try {
           if (!window.navigator.clipboard?.writeText)
-            throw new Error("Clipboard unavailable");
+            throw new Error(t("Clipboard unavailable"));
           await window.navigator.clipboard.writeText(text.value);
           status.textContent =
-            "Prompt copied. Paste it into your agent's chat.";
+            t("Prompt copied. Paste it into your agent's chat.");
         } catch {
           // Clipboard permission can be denied. Keep manual copying fully usable.
           text.focus();
           text.select();
           text.setSelectionRange(0, text.value.length);
           status.textContent =
-            "Automatic copying is unavailable. The prompt is selected; copy it manually.";
+            t("Automatic copying is unavailable. The prompt is selected; copy it manually.");
         } finally {
           button.disabled = false;
         }

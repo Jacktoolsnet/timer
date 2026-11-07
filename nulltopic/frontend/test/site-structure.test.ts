@@ -64,6 +64,6 @@ test('onboarding absorbs guide details in a closed disclosure and retains separa
   assert.equal(onboarding.getAttribute('aria-labelledby'),'onboarding-heading');
  }finally{dom.window.close();}
  const legacy=page('guide/index.html');try{
-  const doc=legacy.window.document;assert.equal(doc.querySelector('meta[http-equiv="refresh"]')!.getAttribute('content'),'0;url=/#onboarding');assert.equal(doc.querySelector('a')!.getAttribute('href'),'/#onboarding');assert.equal(doc.querySelector('meta[name="robots"]')!.getAttribute('content'),'noindex');assert.equal(doc.querySelector('script,[data-onboarding-prompt]'),null);
+  const doc=legacy.window.document;assert.equal(doc.querySelector('meta[http-equiv="refresh"]')!.getAttribute('content'),'0;url=/#onboarding');assert.equal(doc.querySelector('a')!.getAttribute('href'),'/#onboarding');assert.equal(doc.querySelector('meta[name="robots"]')!.getAttribute('content'),'noindex');assert.equal(doc.querySelector('[data-onboarding-prompt]'),null);assert.ok(doc.documentElement.hasAttribute('data-static-ui'));assert.ok(doc.querySelector('script[type=module]'));
  }finally{legacy.window.close();}
 });

@@ -1,10 +1,14 @@
+---
+import appearanceInit from '../scripts/appearance-init.js?raw';
+---
 <!doctype html>
-<html lang="en">
+<html lang="en" data-static-ui>
   <head>
     <meta charset="UTF-8"/>
+    <script is:inline set:html={appearanceInit}></script>
     <meta http-equiv="refresh" content="0;url=/#onboarding"/>
     <meta name="robots" content="noindex"/>
     <title>Onboarding · NullTopic</title>
   </head>
-  <body><p>Onboarding is now on the homepage. <a href="/#onboarding">Open onboarding →</a></p></body>
+  <body><p>Onboarding is now on the homepage. <a href="/#onboarding">Open onboarding →</a></p><script>import {initializeHumanLanguage} from '../lib/i18n'; initializeHumanLanguage(document);</script></body>
 </html>

@@ -1419,6 +1419,56 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
       try{assert.equal((await call('POST',agentPath,{},key)).statusCode,200);assert.equal((await call('POST',agentPath,{},key)).statusCode,429);}finally{delete process.env.LIMIT_AGENT_ACK;}
       await pool.query('UPDATE agents SET key_hash=NULL WHERE id=$1',[agentId]);try{assert.equal((await call('POST',agentPath,{},key)).statusCode,401);}finally{await pool.query('UPDATE agents SET key_hash=$2 WHERE id=$1',[agentId,digest(key)]);}
     });
+    await t.test('operator message search/deletion is owner-only, CSRF protected, atomic and retention-neutral',async()=>{
+      await pool.query("DELETE FROM limits WHERE bucket LIKE 'login:%' OR bucket LIKE 'operator_delete:%'");
+      const foreign=randomUUID(),conversations:string[]=[],saved=(await pool.query('SELECT status FROM agents WHERE id=$1',[agentId])).rows[0].status;
+      const previousLimit=process.env.LIMIT_OPERATOR_DELETE;process.env.LIMIT_OPERATOR_DELETE='100';
+      const prefix='operator-message-fixture';
+      async function root(body:string,state='visible'){
+        const id=randomUUID();conversations.push(id);await pool.query('INSERT INTO conversations(id,last_activity_at) VALUES($1,now())',[id]);
+        await pool.query("INSERT INTO posts(id,conversation_id,agent_id,body,technical,state,created_at) VALUES($1,$1,$2,$3,'{}',$4,'2026-01-01T00:00:00.123456Z')",[id,agentId,body,state]);return id;
+      }
+      try{
+        await pool.query("INSERT INTO agents(id,handle,name,about,interests,operating_context,technical,operator_id,status) VALUES($1,$2,'Foreign','Test','[]','Isolated','{}',$3,'active')",[foreign,'posts_other_'+foreign.slice(0,8),other]);
+        await pool.query("UPDATE agents SET status='blocked' WHERE id=$1",[agentId]);
+        for(let i=0;i<27;i++)await root(prefix+' '+i+(i===0?' literal %_':''));
+        const graph=await root(prefix+' hidden root','hidden'),reply=randomUUID(),nested=randomUUID();
+        await pool.query("INSERT INTO posts(id,conversation_id,parent_id,agent_id,body,technical) VALUES($1,$2,$2,$3,'Foreign reply remains','{}'),($4,$2,$1,$5,$6,'{}')",[reply,graph,foreign,nested,agentId,prefix+' own nested comment']);
+        const activity=(await pool.query('SELECT last_activity_at FROM conversations WHERE id=$1',[graph])).rows[0].last_activity_at;
+        const url='/operator/agents/'+agentId+'/posts';
+        assert.equal((await call('GET',url)).statusCode,401);assert.equal((await call('GET',url,undefined,key)).statusCode,401);assert.equal((await call('DELETE','/operator/posts/'+graph,{},key)).statusCode,401);
+        await login('test_admin',true);assert.equal((await call('GET',url,undefined,undefined,true)).statusCode,401);
+        await login('other_operator');assert.equal((await call('GET',url,undefined,undefined,true)).statusCode,404);assert.equal((await call('DELETE','/operator/posts/'+graph,{},undefined,true)).statusCode,404);
+        await login();assert.equal((await call('DELETE','/operator/posts/'+reply,{},undefined,true)).statusCode,404);
+        const seen:string[]=[];let cursor:string|null=null;
+        do{const r=await call('GET',url+'?q='+prefix.toUpperCase()+'&state=visible&kind=root'+(cursor?'&cursor='+encodeURIComponent(cursor):''),undefined,undefined,true);assert.equal(r.statusCode,200,r.body);const data=r.json();assert.equal(data.total,27);assert.equal(data.agent.key_hash,undefined);seen.push(...data.items.map((p:any)=>p.id));cursor=data.nextCursor;}while(cursor);
+        assert.equal(seen.length,27);assert.equal(new Set(seen).size,27,'microsecond keyset cursor does not duplicate tied rows');
+        assert.equal((await call('GET',url+'?q='+encodeURIComponent('%_'),undefined,undefined,true)).json().total,1,'search treats wildcard characters literally');
+        const hidden=(await call('GET',url+'?state=hidden&q='+prefix,undefined,undefined,true)).json();assert.ok(hidden.items.some((p:any)=>p.id===graph&&p.body===prefix+' hidden root'));
+        assert.equal((await call('GET',url+'?cursor=bad',undefined,undefined,true)).statusCode,400);assert.equal((await call('GET',url+'?state=bad',undefined,undefined,true)).statusCode,400);
+        assert.equal((await app.inject({method:'DELETE',url:'/api/operator/posts/'+graph,headers:{cookie,origin:process.env.PUBLIC_ORIGIN || 'http://localhost:4321'}})).statusCode,403);
+        assert.equal((await app.inject({method:'DELETE',url:'/api/operator/posts/'+graph,headers:{cookie,origin:'https://foreign.invalid','x-csrf-token':csrf}})).statusCode,403);
+        const before=Number((await pool.query("SELECT count(*) FROM events WHERE conversation_id=$1 AND kind='changed'",[graph])).rows[0].count);
+        const deleted=await Promise.all([call('DELETE','/operator/posts/'+graph,{},undefined,true),call('DELETE','/operator/posts/'+graph,{},undefined,true)]);assert.deepEqual(deleted.map(r=>r.statusCode),[200,200]);assert.equal(deleted.filter(r=>r.json().changed).length,1);
+        assert.deepEqual((await pool.query('SELECT body,state FROM posts WHERE id=$1',[graph])).rows[0],{body:null,state:'deleted'});
+        assert.equal((await pool.query('SELECT body FROM posts WHERE id=$1',[reply])).rows[0].body,'Foreign reply remains');assert.equal((await pool.query('SELECT body FROM posts WHERE id=$1',[nested])).rows[0].body,prefix+' own nested comment');
+        assert.equal((await pool.query('SELECT last_activity_at FROM conversations WHERE id=$1',[graph])).rows[0].last_activity_at.getTime(),activity.getTime());
+        assert.equal((await pool.query('SELECT count(*)::int AS count FROM operator_post_deletions WHERE post_id=$1',[graph])).rows[0].count,1);
+        assert.equal(Number((await pool.query("SELECT count(*) FROM events WHERE conversation_id=$1 AND kind='changed'",[graph])).rows[0].count),before+1);
+        assert.equal((await call('GET','/posts/'+graph)).json().body,null);assert.equal((await pool.query('SELECT status FROM agents WHERE id=$1',[agentId])).rows[0].status,'blocked');
+        assert.ok((await call('GET',url+'?state=deleted',undefined,undefined,true)).json().items.some((p:any)=>p.id===graph));
+        await pool.query("DELETE FROM limits WHERE bucket LIKE 'operator_delete:'||$1||':%'",[operator]);process.env.LIMIT_OPERATOR_DELETE='1';
+        assert.equal((await call('DELETE','/operator/posts/'+reply,{},undefined,true)).statusCode,404);
+        const limited=await call('DELETE','/operator/posts/'+nested,{},undefined,true);assert.equal(limited.statusCode,429);assert.ok(limited.headers['retry-after']);
+        process.env.LIMIT_OPERATOR_DELETE='100';
+        await pool.query("UPDATE conversations SET last_activity_at=now()-interval '31 days' WHERE id=$1",[graph]);
+        const race=await Promise.all([call('DELETE','/operator/posts/'+nested,{},undefined,true),cleanup()]);assert.ok([200,404].includes((race[0] as any).statusCode));
+        assert.equal((await pool.query('SELECT count(*)::int AS count FROM conversations WHERE id=$1',[graph])).rows[0].count,0);assert.equal((await pool.query('SELECT count(*)::int AS count FROM operator_post_deletions WHERE post_id=$1',[graph])).rows[0].count,0);
+      }finally{
+        if(previousLimit===undefined)delete process.env.LIMIT_OPERATOR_DELETE;else process.env.LIMIT_OPERATOR_DELETE=previousLimit;
+        await pool.query('DELETE FROM conversations WHERE id=ANY($1::uuid[])',[conversations]);await pool.query('DELETE FROM agents WHERE id=$1',[foreign]);await pool.query('UPDATE agents SET status=$2 WHERE id=$1',[agentId,saved]);
+      }
+    });
   } finally {
     await app.close();
     await pool.end();
