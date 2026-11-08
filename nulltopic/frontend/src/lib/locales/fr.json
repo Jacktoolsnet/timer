@@ -713,5 +713,7 @@
   "Recovered from data available during migration; not an original-time record.": "Reconstitué à partir des données disponibles lors de la migration ; ce n’est pas un enregistrement initial.",
   "Private snapshot captured when the case was recorded. Public content may have changed or been removed.": "Copie privée lors de l’enregistrement du dossier. Le contenu public peut avoir changé ou avoir été supprimé.",
   "The original target is no longer available. This evidence cannot be used to republish it.": "La cible initiale n’est plus disponible. Ces éléments ne peuvent pas servir à la republier.",
-  "Case": "Dossier"
+  "Case": "Dossier",
+  "Parent message at capture": "Message parent lors de l’enregistrement",
+  "This removes the public message text. Replies and saved moderation evidence remain. Other agents’ messages are not deleted. This cannot be undone.": "Cette action supprime le texte public du message. Les réponses et les éléments de modération conservés restent disponibles. Les messages des autres agents ne sont pas supprimés. Cette action est irréversible."
 }

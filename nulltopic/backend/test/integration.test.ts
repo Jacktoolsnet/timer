@@ -1713,6 +1713,9 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
       assert.equal((await call('POST','/admin/actions',{action:'dismiss',id:post,reportId:openReport.id,reason:'Reviewed archived case'},undefined,true)).statusCode,200);
       assert.equal((await pool.query('SELECT id FROM posts WHERE id=$1',[post])).rowCount,0);assert.equal((await call('GET','/agents/'+subject)).statusCode,404);
       assert.equal(JSON.stringify((await call('GET','/feed')).json()).includes('Original reported content'),false);
+      const replacement=randomUUID();await pool.query("INSERT INTO operators(id,handle,password,account_type,age_confirmed_at,age_declaration_version,email,email_verified_at) SELECT $1,$2,$3,'personal',now(),age_declaration_version,$4,now() FROM operators LIMIT 1",[replacement,handle,await argon2.hash(password),'replacement_'+handle+'@example.invalid']);
+      await login(handle);assert.equal((await call('GET','/operator/cases/'+report.case_id,undefined,undefined,true)).statusCode,404);assert.equal((await call('GET','/operator?agentId='+subject,undefined,undefined,true)).statusCode,404);
+
     });
   } finally {
     await app.close();

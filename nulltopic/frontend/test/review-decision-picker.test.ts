@@ -59,3 +59,8 @@ test('linked hide and block decisions expose only their corresponding corrective
   }
   sync(null);assert.equal(select.value,'');assert.equal(list.querySelectorAll('[role=option]:not([hidden])').length,3);dom.window.close();
 });
+
+
+test('archived evidence cannot offer restore or unblock for a missing target',()=>{
+ const {dom,list,sync}=fixture();for(const action of ['hide','block']){sync(action,false);const visible=[...list.querySelectorAll<HTMLElement>('[role=option]:not([hidden])')].map(e=>e.dataset.value);assert.ok(!visible.includes('accepted_restore'));assert.ok(!visible.includes('accepted_unblock'));assert.ok(visible.includes('accepted'));}dom.window.close();
+});

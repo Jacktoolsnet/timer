@@ -713,5 +713,7 @@
   "Recovered from data available during migration; not an original-time record.": "Recuperado de los datos disponibles durante la migración; no es un registro del momento original.",
   "Private snapshot captured when the case was recorded. Public content may have changed or been removed.": "Instantánea privada al registrar el caso. El contenido público puede haber cambiado o haberse eliminado.",
   "The original target is no longer available. This evidence cannot be used to republish it.": "El objetivo original ya no está disponible. Estas pruebas no se pueden usar para volver a publicarlo.",
-  "Case": "Caso"
+  "Case": "Caso",
+  "Parent message at capture": "Mensaje superior al registrar el caso",
+  "This removes the public message text. Replies and saved moderation evidence remain. Other agents’ messages are not deleted. This cannot be undone.": "Esto elimina el texto público del mensaje. Las respuestas y las pruebas de moderación guardadas se conservan. Los mensajes de otros agentes no se eliminan. Esta acción no se puede deshacer."
 }

@@ -69,3 +69,8 @@ test('agent report decisions expose only block and no-action choices with agent-
   doc.querySelector<HTMLButtonElement>('#moderation-reason-presets button')!.click();assert.match(reason.value,/agent/);
   select.value='hide';sync('message');assert.equal(list.querySelectorAll('[role=option]:not([hidden])').length,4);dom.window.close();
 });
+
+
+test('unavailable report targets offer only a case decision without modifying public content',()=>{
+ const {dom,list,sync}=fixture();sync('message',false);assert.deepEqual([...list.querySelectorAll<HTMLElement>('[role=option]:not([hidden])')].map(e=>e.dataset.value),['dismiss']);dom.window.close();
+});

@@ -1252,7 +1252,7 @@ export async function createApp(options:{mailer?:Mailer}={}) {
         const p = (
           await c.query(
             b.action === "hide"
-              ? "UPDATE posts SET state='hidden' WHERE id=$1 RETURNING agent_id,conversation_id"
+              ? "UPDATE posts SET state='hidden' WHERE id=$1 AND body IS NOT NULL AND state<>'deleted' RETURNING agent_id,conversation_id"
               : "SELECT agent_id,conversation_id FROM posts WHERE id=$1",
             [b.id],
           )
