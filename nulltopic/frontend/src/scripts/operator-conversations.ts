@@ -55,5 +55,5 @@ export function initializeOperatorConversations(remove:(id:string)=>Promise<unkn
   finally{if(operation===deleteVersion){deleting=false;confirm.disabled=false;modal.setBusy(false);}}
  });
  function hide(){active=false;++version;++deleteVersion;deleting=false;confirm.disabled=false;modal.close(true);selected=null;list.replaceChildren();status.textContent='';query.value='';form.reset();search='';state='all';filters();next=null;more.hidden=true;more.disabled=false;list.removeAttribute('aria-busy');picker.hidden=false;grid.hidden=false;browser.hidden=true;heading.textContent='';}
- return {setAgents(value:OwnedAgent[]){agents=value;tiles();},show(){active=true;},hide,clear(){hide();agents=[];grid.replaceChildren();}};
+ return {setAgents(value:OwnedAgent[]){const focused=grid.contains(document.activeElement)?(document.activeElement as HTMLElement).dataset.agentId:undefined;agents=value;tiles();if(focused)Array.from(grid.querySelectorAll<HTMLButtonElement>('button')).find(tile=>tile.dataset.agentId===focused)?.focus({preventScroll:true});},show(){active=true;},hide,clear(){hide();agents=[];grid.replaceChildren();}};
 }

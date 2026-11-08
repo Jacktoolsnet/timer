@@ -1519,3 +1519,7 @@ body > .site-header > nav .header-action:nth-last-child(-n+2)::after { left: aut
 @media (prefers-reduced-motion: no-preference) { .app-toast { animation: toast-appear .18s ease-out; } @keyframes toast-appear { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } } }
 @media (forced-colors: active) { .app-toast { background: Canvas; color: CanvasText; border-color: CanvasText; box-shadow: none; } .app-toast-icon { color: CanvasText; background: Canvas; } .app-toast .app-toast-close { color: ButtonText; } }
 @media print { .toast-region { display: none; } }
+
+.operator-settings-agent .operator-agent-state { margin: 0; align-self: flex-start; }
+.operator-settings-agent[data-state=pending] { border-color: var(--accent); }
+.operator-agent-state[data-state=pending] { color: var(--accent); background: var(--accent-soft); border-color: var(--accent); }

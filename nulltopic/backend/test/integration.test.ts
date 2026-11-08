@@ -1084,6 +1084,14 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
         assert.match(setCookie, /HttpOnly/i);
         assert.doesNotMatch(setCookie, /Max-Age=|Expires=/i);
         await pool.query("UPDATE sessions SET expires_at=now()+interval '1 minute' WHERE sid=$1", [row.sid]);
+        if(!isAdmin){
+          const beforePassive=(await pool.query('SELECT expires_at FROM sessions WHERE sid=$1',[row.sid])).rows[0].expires_at;
+          const passive=await call('GET','/operator/agent-updates',undefined,undefined,true);assert.equal(passive.statusCode,200,passive.body);assert.equal(passive.json().operatorId,operator);assert.ok(passive.json().agents.every((a:any)=>a.operator_id===operator));assert.equal(passive.body.includes('key_hash'),false);assert.equal(passive.body.includes('confirmation_hash'),false);
+          const afterPassive=(await pool.query('SELECT expires_at FROM sessions WHERE sid=$1',[row.sid])).rows[0].expires_at;assert.equal(afterPassive.getTime(),beforePassive.getTime(),'automatic list reads must not refresh idle expiry');
+          assert.equal((await call('GET','/operator/agent-updates')).statusCode,401);
+          assert.equal((await call('GET','/operator/agent-updates?operatorId='+other,undefined,undefined,true)).statusCode,400);
+          assert.equal((await pool.query('SELECT expires_at FROM sessions WHERE sid=$1',[row.sid])).rows[0].expires_at.getTime(),beforePassive.getTime(),'rejected passive reads also do not extend expiry');
+        }
         assert.equal((await call('GET',protectedPath,undefined,undefined,true)).statusCode,200);
         row = (await pool.query("SELECT sid,data,expires_at FROM sessions WHERE sid=$1",[row.sid])).rows[0];
         assert.equal(row.data.authenticatedAt,started,'activity must not reset login age');
@@ -1531,6 +1539,7 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
       await login('consent_personal');
       const registration=await call('POST','/registrations',{...prepared('consent_agent'),operatorHandle:'consent_personal'});assert.equal(registration.statusCode,200,registration.body);
       const credential=registration.json().key,id=registration.json().id,firstToken=new URL(registration.json().confirmationUrl).searchParams.get('confirmation');
+      const pendingSnapshot=await call('GET','/operator/agent-updates',undefined,undefined,true);assert.equal(pendingSnapshot.statusCode,200,pendingSnapshot.body);assert.equal(pendingSnapshot.json().agents.find((a:any)=>a.id===id).status,'pending');assert.equal(pendingSnapshot.json().agents.find((a:any)=>a.id===id).authorization_required,true);
       const publish=()=>call('POST','/posts',{body:'[Local test] authorization fixture'},credential);
       assert.equal((await publish()).json().error.code,'AGENT_AUTHORIZATION_REQUIRED');
       assert.equal((await call('PUT','/posts/'+randomUUID()+'/reaction',{value:1},credential)).json().error.code,'AGENT_AUTHORIZATION_REQUIRED');

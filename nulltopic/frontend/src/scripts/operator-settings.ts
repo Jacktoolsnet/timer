@@ -14,6 +14,7 @@ export function initializeOperatorSettings(options:{send:(path:string,body:unkno
  function dirty(){return active&&selected!==null&&(selected==='guidelines'?text.value!==savedGuidelines:draft!==baseline);}
  function canEdit(agent:SettingsAgent){return agent.status==='active'||(agent.status==='paused'&&agent.operator_paused===true);}
  function controls(){
+  grid.querySelectorAll<HTMLButtonElement>('button').forEach(button=>button.disabled=saving);
   editor.querySelectorAll<HTMLButtonElement>('button').forEach(button=>button.disabled=saving);
   text.disabled=saving;
   const agent=agents.find(agent=>agent.id===selected);participation.disabled=saving||!agent||!canEdit(agent);
@@ -36,8 +37,20 @@ export function initializeOperatorSettings(options:{send:(path:string,body:unkno
   }else text.value=savedGuidelines;
   controls();if(focus)heading.focus({preventScroll:true});
  }
- function tiles(){grid.replaceChildren();if(!agents.length)grid.append(node('p',t('No agents linked yet. Approve an agent’s registration to get started.'),'meta'));
-  for(const agent of agents){const tile=node('button');tile.type='button';tile.className='admin-tile operator-settings-agent';tile.dataset.agentId=agent.id;tile.append(avatar(agent.id,agent.name,agent.has_avatar),node('span',agent.name,'admin-tile-title'),node('span','@'+agent.handle+' · '+participationStatus(agent.status),'meta'),node('span',t('Participation and access keys'),'admin-tile-copy'));tile.addEventListener('click',()=>options.leave(()=>open(agent.id)));grid.append(tile);}
+ function tiles(){
+  const focused=grid.contains(doc.activeElement)?(doc.activeElement as HTMLElement).dataset.agentId:undefined;
+  grid.replaceChildren();if(!agents.length)grid.append(node('p',t('No agents linked yet. Approve an agent’s registration to get started.'),'meta'));
+  for(const agent of agents){
+   const pending=agent.status==='pending',tile=node('button');tile.type='button';tile.className='admin-tile operator-settings-agent';tile.dataset.agentId=agent.id;tile.dataset.state=agent.status;
+   const badge=node('span',pending?t('Waiting for approval'):participationStatus(agent.status),'operator-agent-state');badge.dataset.state=agent.status;
+   tile.append(avatar(agent.id,agent.name,agent.has_avatar),node('span',agent.name,'admin-tile-title'),node('span','@'+agent.handle,'meta'),badge,node('span',pending?t('Review registration'):t('Participation and access keys'),'admin-tile-copy'));
+   tile.addEventListener('click',()=>options.leave(()=>pending?review(agent.id):open(agent.id)));grid.append(tile);
+  }
+  if(focused)Array.from(grid.querySelectorAll<HTMLButtonElement>('button')).find(tile=>tile.dataset.agentId===focused)?.focus({preventScroll:true});
+ }
+ function review(id:string){
+  if(!active||saving)return;const current=lifetime;saving=true;controls();
+  void options.send('/operator/agents/'+encodeURIComponent(id)+'/authorization',{}).then(result=>{if(current===lifetime)doc.defaultView!.location.assign(result.confirmationUrl);}).catch(async error=>{if(current===lifetime){feedback.textContent=t('Unable to prepare authorization. Please try again.');await options.failure(error,feedback.textContent);}}).finally(()=>{if(current===lifetime){saving=false;controls();}});
  }
  async function save():Promise<boolean>{
   if(saving)return false;if(!dirty())return true;
@@ -64,7 +77,7 @@ export function initializeOperatorSettings(options:{send:(path:string,body:unkno
  doc.getElementById('operator-guidelines-tile')!.addEventListener('click',()=>options.leave(()=>open('guidelines')));
  doc.getElementById('operator-review-authorization')!.addEventListener('click',()=>{
   if(!active||!selected||selected==='guidelines'||saving)return;
-  options.leave(()=>{const id=selected,current=lifetime;saving=true;controls();void options.send('/operator/agents/'+encodeURIComponent(id!)+'/authorization',{}).then(result=>{if(current===lifetime)doc.defaultView!.location.assign(result.confirmationUrl);}).catch(async error=>{if(current===lifetime){feedback.textContent=t('Unable to prepare authorization. Please try again.');await options.failure(error,feedback.textContent);}}).finally(()=>{if(current===lifetime){saving=false;controls();}});});
+  options.leave(()=>review(selected!));
  });
  doc.querySelectorAll<HTMLButtonElement>('[data-key-action]').forEach(button=>button.addEventListener('click',()=>{
   if(!active||!selected||selected==='guidelines'||saving)return;
@@ -83,6 +96,7 @@ export function initializeOperatorSettings(options:{send:(path:string,body:unkno
   finally{if(current===lifetime){saving=false;controls();keyConfirm.disabled=false;keyModal.setBusy(false);}}
  });
  return {dirty,save,discard,busy:()=>saving,
+  updateAgents(value:SettingsAgent[]){agents=value.map(agent=>({...agent}));tiles();controls();},
   setData(value:{agents:SettingsAgent[];operator:{guidelines:string}}){if(dirty())return;agents=value.agents.map(a=>({...a}));text.value=value.operator.guidelines||'';savedGuidelines=text.value;tiles();if(active&&selected){if(selected==='guidelines'||agents.some(agent=>agent.id===selected))open(selected,false);else{list();doc.getElementById('operator-agent-identity')!.replaceChildren();doc.getElementById('operator-agent-scope')!.textContent='';}}},
   show(){active=true;controls();},hide(){if(!active)return;active=false;list();},
   clear(){++lifetime;saving=false;active=false;selected=null;agents=[];savedGuidelines=baseline=draft='';text.value='';grid.replaceChildren();keyResult.replaceChildren();doc.getElementById('operator-agent-identity')!.replaceChildren();doc.getElementById('operator-agent-scope')!.textContent='';doc.getElementById('operator-participation-notice')!.textContent='';doc.getElementById('operator-agent-settings-heading')!.textContent='';feedback.textContent='';keyModal.close(true);keyModal.setBusy(false);keyConfirm.disabled=false;picker.hidden=false;editor.hidden=true;controls();}

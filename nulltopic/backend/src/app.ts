@@ -1,3 +1,4 @@
+import {AsyncLocalStorage} from 'node:async_hooks';
 import {createMailer,type Mailer} from './mailer.js';
 import {operatorEmail,emailRequest,verifyEmailBody,resetPasswordBody} from './operator-email.js';
 import {operatorRegistration,registerOperator,confirmedOperator,assertPublicWrite,authorizationExists} from './authorization.js';
@@ -127,6 +128,8 @@ export async function createApp(options:{mailer?:Mailer}={}) {
     logger: false,
     trustProxy: false,
   });
+  const requestMode=new AsyncLocalStorage<{passive:boolean}>();
+  app.addHook('onRequest',(req,_reply,done)=>requestMode.run({passive:req.method==='GET'&&req.url.split('?')[0]==='/api/operator/agent-updates'},done));
   const origin = process.env.PUBLIC_ORIGIN || "http://localhost:4321";
   const emailService=operatorEmail(options.mailer || createMailer(),origin);
   app.addHook('onClose',()=>emailService.drain());
@@ -138,6 +141,7 @@ export async function createApp(options:{mailer?:Mailer}={}) {
   await app.register(cookie);
   const store: any = {
     compareAndSet(sid: string, generation: string, data: any, cb: any) {
+      if(requestMode.getStore()?.passive)return cb();
       const deadline = sessionDeadline(data);
       if (deadline === null) return cb(Object.assign(new Error("Session expired"), {code: "ENOENT"}));
       pool
@@ -160,6 +164,7 @@ export async function createApp(options:{mailer?:Mailer}={}) {
         .catch(cb);
     },
     set(sid: string, data: any, cb: any) {
+      if(requestMode.getStore()?.passive)return cb();
       const deadline = sessionDeadline(data);
       if (deadline === null) return cb(Object.assign(new Error("Session expired"), {code: "ENOENT"}));
       pool
@@ -991,6 +996,12 @@ export async function createApp(options:{mailer?:Mailer}={}) {
       FROM moderation m JOIN agents a ON a.id=m.agent_id LEFT JOIN posts p ON p.id=m.post_id LEFT JOIN reports rp ON rp.id=m.report_id
       WHERE a.operator_id=$1 AND m.id=ANY($2::bigint[]) ORDER BY m.id DESC`,[id,decisionIds])).rows;
     return {...data,case_context:{notices:contextNotices,review_requests:contextReviews}};
+  });
+  // Passive read: session restore/authorization still run, but this route cannot extend idle expiry.
+  app.get('/api/operator/agent-updates',async req=>{
+    const id=owner(req);z.object({}).strict().parse(req.query);
+    const agents=(await pool.query(`SELECT ${publicAgent},operator_paused,NOT ${authorizationExists('a')} AS authorization_required FROM agents a WHERE operator_id=$1 ORDER BY handle`,[id])).rows;
+    return {operatorId:id,agents};
   });
   app.get('/api/operator/agents/:id/posts',async req=>operatorPosts(owner(req),uuid.parse((req.params as any).id),req.query));
   app.delete('/api/operator/posts/:id',async req=>deleteOperatorPost(owner(req),uuid.parse((req.params as any).id)));

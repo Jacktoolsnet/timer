@@ -1,3 +1,4 @@
+import {initializeAgentUpdates} from './operator-agent-updates';
 import {setOnboardingOperator} from './onboarding';
 import {declarations} from '../../../shared/declarations';
 import {initializeOperatorSettings} from './operator-settings';
@@ -35,6 +36,7 @@ export async function initializeOperator() {
     document.querySelectorAll<HTMLElement>('.operator-notice-card').forEach(card=>card.dataset.selected='false');
   }
   const appealStatus = document.querySelector<HTMLElement>('#appeal-status')!;
+  let operatorId:string|undefined,agentSnapshot='';
   let csrf = '', signedIn = false, signingIn = false, version = 0;
   const openCases=new Set<string>();
   let queueStatus:'pending'|'processed'='pending',queueVersion=0,queueData:OperatorData|null=null;
@@ -85,7 +87,7 @@ export async function initializeOperator() {
   function clearSession() {
     setOnboardingOperator(undefined);
     unsaved.clear();settings.clear();
-    signedIn=false;conversations.clear(); ++version;++queueVersion;queueData=null;openCases.clear();queueStatus='pending';updateQueueTabs({pending:0,processed:0});queuePanel.removeAttribute('aria-busy');document.getElementById('operator-queue-limit')!.hidden=true; dashboard.hidden=true; confirmationPanel.hidden=true; shell.hidden=false;
+    signedIn=false;operatorId=undefined;agentSnapshot='';conversations.clear(); ++version;++queueVersion;queueData=null;openCases.clear();queueStatus='pending';updateQueueTabs({pending:0,processed:0});queuePanel.removeAttribute('aria-busy');document.getElementById('operator-queue-limit')!.hidden=true; dashboard.hidden=true; confirmationPanel.hidden=true; shell.hidden=false;
     password.value=''; toolbar(false);reviewModal.close(true); resetReview();
     for (const id of ['owned','notices','prepared']) document.getElementById(id)!.replaceChildren();
     for (const id of ['guidelines','appeal','approve']) document.querySelector<HTMLFormElement>('#'+id)!.reset();
@@ -110,6 +112,18 @@ export async function initializeOperator() {
   }
   const settings=initializeOperatorSettings({send,refresh,failure,leave:action=>unsaved.request(action)});
   const unsaved=initializeUnsavedSettings({dirty:settings.dirty,busy:settings.busy,save:settings.save,discard:settings.discard});
+  initializeAgentUpdates<{operatorId:string;agents:OwnedAgent[]}>({document,
+    enabled:()=>signedIn&&!dashboard.hidden,
+    generation:()=>version,
+    read:signal=>api('/operator/agent-updates',{signal}),
+    apply:data=>{
+      if(data.operatorId!==operatorId){clearSession();status.textContent=t('Your session has expired. Please sign in again.');return;}
+      const snapshot=JSON.stringify(data.agents);if(snapshot===agentSnapshot)return;agentSnapshot=snapshot;
+      settings.updateAgents(data.agents);conversations.setAgents(data.agents);
+      document.getElementById('operator-agent-count')!.textContent=t(data.agents.length===1?'{count} linked agent':'{count} linked agents',{count:data.agents.length});
+    },
+    expired:()=>{clearSession();status.textContent=t('Your session has expired. Please sign in again.');}
+  });
   let acceptedUrl=win.location.href,historyIndex=0,restorePending:{index:number}|null=null,allowPop=false;
   win.history.replaceState({...win.history.state,nulltopicOperatorIndex:historyIndex},'');
   function navigate(view:View){
@@ -154,6 +168,7 @@ export async function initializeOperator() {
   }
   function render(data:OperatorData) {
     resetReview();
+    agentSnapshot=JSON.stringify(data.agents);
     settings.setData(data);
     document.getElementById('operator-agent-count')!.textContent=t(data.agents.length===1?'{count} linked agent':'{count} linked agents',{count:data.agents.length});
     document.getElementById('operator-notice-count')!.textContent=t(data.notices.length===1?'{count} recent decision':'{count} recent decisions',{count:data.notices.length});
@@ -201,7 +216,7 @@ export async function initializeOperator() {
     const session=await api('/session');if(current!==version)return;csrf=session.csrf;
     if(!session.operatorId){clearSession();status.textContent='';return;}
     const data:OperatorData=await api('/operator');if(current!==version)return;
-    signedIn=true;shell.hidden=true;dashboard.hidden=false;password.value='';status.textContent='';toolbar(true,data.operator.handle);setOnboardingOperator(data.operator.handle);render(data);showView(requestedView());
+    signedIn=true;operatorId=session.operatorId;shell.hidden=true;dashboard.hidden=false;password.value='';status.textContent='';toolbar(true,data.operator.handle);setOnboardingOperator(data.operator.handle);render(data);showView(requestedView());
     if(confirmation)try{const prepared=await api('/confirmation?token='+encodeURIComponent(confirmation));if(current!==version)return;renderPrepared(prepared);dashboard.hidden=true;confirmationPanel.hidden=false;}catch(error){await failure(error,t('Unable to load this registration. The link may have expired or already been used.'));}
   }
   document.getElementById('cancel-authorization')!.addEventListener('click',()=>{
