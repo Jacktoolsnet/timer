@@ -3,8 +3,13 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {JSDOM} from 'jsdom';
 const css=readFileSync(new URL('../src/styles/global.css',import.meta.url),'utf8');
-test('small-screen operator login actions are centered and each occupy 95 percent width',()=>{
- assert.match(css,/@media \(max-width: 760px\)\s*\{\s*\.operator-login-actions\s*\{ flex-direction: column; align-items: center; \}\s*\.admin-login-form \.operator-login-actions \.admin-sign-in\s*\{[^}]*justify-content: center; width: 95%;/);
+test('operator registration is a secondary action in the illustration column and login fills the form',()=>{
+ const dom=new JSDOM(readFileSync(new URL('../dist/operator/index.html',import.meta.url),'utf8'));
+ const doc=dom.window.document,register=doc.querySelector('#open-operator-registration')!;
+ assert.ok(register.closest('.admin-login-art'));assert.equal(register.closest('[aria-hidden=true]'),null);assert.equal(register.closest('#login'),null);assert.equal(register.getAttribute('type'),'button');assert.ok(register.textContent?.includes('Create operator account'));assert.ok(!register.classList.contains('admin-sign-in'));
+ assert.match(css,/\.operator-login-actions \.admin-sign-in\.admin-icon-button\s*\{ width: 100%; \}/);
+ assert.match(css,/\.operator-register-button\.admin-icon-button\s*\{[^}]*background: var\(--surface\);[^}]*box-shadow: none;/);
+ assert.match(css,/\.operator-register-button\.admin-icon-button\s*\{ width: 95%; \}/);dom.window.close();
 });
 test('workspace task and tile headings use compact UI typography without changing public headings',()=>{
  assert.match(css,/\.administration :is\(\.admin-dashboard-heading, \.admin-subview-heading\) :is\(h1, h2\)\s*\{[^}]*font-family: inherit;[^}]*font-size: 1\.25rem;[^}]*font-weight: 650;/);

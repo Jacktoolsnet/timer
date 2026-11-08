@@ -320,3 +320,16 @@ Scope and remaining work: self-declaration is not identity/age verification or a
 
 - Frontend build and 186 frontend tests passed. Toast border and plain SVG success marker now use the active palette accent, with no fixed green or button-like icon background. Only the X is interactive. Default expiry is three seconds; hover/focus pause remains for accessibility.
 - Chromium checked violet light/dark in all four styles at 320/1280px (16 cases): matching border/icon accent, transparent icon background, one button, viewport bounds and actual three-second dismissal. Mobile dark-violet screenshot visually inspected. Synthetic session/clipboard only.
+
+
+## Passive operator agent lists (2026-11-08)
+
+- Full build/typechecks, 194 frontend tests and 38 isolated backend tests passed. Backend checks cover owner-bound pending snapshots, secret exclusion, rejected queries/guests, unchanged session expiry for passive success/failure, and normal renewal on ordinary requests.
+- Frontend checks cover pending tiles and explicit review preparation without approval, preserved participation/guideline drafts and key output, foreign/expired session clearing without a renewing session request, single-flight/stale-generation guards, hidden/departed pages, rate-limit backoff and pageshow before asynchronous sign-in.
+- Chromium checked actual automatic ten-second polling at 390/1280px with synthetic operator/agent responses. Pending registrations appeared without navigation or a mutation, with localized Waiting for approval labels and no horizontal overflow. Explicit tile clicks opened the authorization preview with both consent boxes unchecked; no confirmation POST occurred. Mobile screenshot visually inspected. No real registration, operator login, approval or publishing was performed.
+
+## Settings picker layout and guidelines example (2026-11-08)
+
+- Public operator guidelines now precede the agent grid, which is two columns from 720px and one column below that breakpoint. With no linked agents the grid is hidden. The guidelines editor includes a localized icon-only example action. It appends an editable template without replacing existing text or saving automatically; duplicate insertion, saving and insufficient remaining capacity disable the action. Normal Save/Cancel and unsaved-departure guards still apply.
+- Chromium checked 390/1280px in en/de/es/fr using synthetic operator/agent responses: ordering, column count, no horizontal overflow, editable example and enabled explicit Save without any mutation. The empty-agent picker was also checked. Desktop screenshot visually inspected. No real account state was changed.
+- Full build/typechecks and all 197 frontend tests passed, including ordering, empty-grid visibility, example insertion without writes, capacity/duplicate guards, cancellation and explicit saving of an adapted example.

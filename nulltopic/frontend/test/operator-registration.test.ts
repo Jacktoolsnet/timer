@@ -31,9 +31,9 @@ test('switching account types clears organization consent; failed registration i
  form.dispatchEvent(new dom.window.Event('submit',{cancelable:true}));await tick();await tick();assert.equal(requests.find(r=>r.path==='/api/operator-registrations').body.organizationAuthorized,undefined);assert.match(d.querySelector('#register-feedback')!.textContent!,/Unable to create/);assert.equal(d.activeElement,d.querySelector('#register-feedback'));assert.equal(d.querySelector<HTMLInputElement>('#register-password')!.value,'');assert.equal(d.querySelector<HTMLInputElement>('#register-password-repeat')!.value,'');
 },true));
 
-test('registration opens as a modal beside login; cancel clears declarations and returns focus',async()=>fixture(async(dom)=>{
+test('registration opens from the illustration column; cancel clears declarations and returns focus',async()=>fixture(async(dom)=>{
  const d=dom.window.document,dialog=d.querySelector<HTMLDialogElement>('#operator-registration')!,trigger=d.querySelector<HTMLButtonElement>('#open-operator-registration')!;
- assert.equal(dialog.open,true);assert.equal(trigger.closest('form')?.id,'login');assert.equal(trigger.type,'button');
+ assert.equal(dialog.open,true);assert.ok(trigger.closest('.admin-login-art'));assert.equal(trigger.closest('form'),null);assert.equal(trigger.type,'button');
  const age=d.querySelector<HTMLInputElement>('[name=ageConfirmed]')!;assert.equal(age.getAttribute('role'),'switch');age.checked=true;
  d.querySelector<HTMLInputElement>('#register-password')!.value='synthetic-password';d.querySelector<HTMLInputElement>('#register-password-repeat')!.value='synthetic-password';d.querySelector<HTMLButtonElement>('#register-cancel')!.click();
  assert.equal(dialog.open,false);assert.equal(age.checked,false);assert.equal(d.querySelector<HTMLInputElement>('#register-password')!.value,'');assert.equal(d.querySelector<HTMLInputElement>('#register-password-repeat')!.value,'');assert.equal(d.activeElement,trigger);

@@ -23,7 +23,7 @@ export function initializeAgentUpdates<T>(options:{document:Document;enabled:()=
   }finally{inFlight=false;controller=undefined;nextAt=Date.now()+delay;schedule(Math.min(delay,2147483647));}
  }
  function pause(){epoch++;clear();controller?.abort();}
- function wake(){if(available())void check();else pause();}
+ function wake(){if(available())void check();else{pause();schedule();}}
  const hide=()=>{suspended=true;pause();};
  const show=()=>{suspended=false;wake();};
  doc.addEventListener('visibilitychange',wake);win.addEventListener('focus',wake);win.addEventListener('online',wake);win.addEventListener('offline',pause);win.addEventListener('pagehide',hide);win.addEventListener('pageshow',show);schedule();

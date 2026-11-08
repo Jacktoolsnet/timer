@@ -249,3 +249,7 @@ New registrations use unique, trimmed, lowercased email addresses. Request respo
 Mail tasks are process-local, not a durable delivery queue. A crash or delivery failure may require a new request through the recovery form; failures log a generic, secret-free message. SMTP acceptance does not guarantee inbox delivery. Existing pre-release rows are preserved without inventing email ownership; email-less/unverified fixtures cannot sign in or publish. There is no self-service address-change/backfill UI in this first release (there are no real accounts yet). No database rebuild is needed. The synthetic `test-agent` helper now requires local mail for new fixtures and verifies only its own synthetic address through the regular endpoint; it never uses a public verification bypass.
 
 Security design references: [OWASP password recovery guidance](https://cheatsheetseries.owasp.org/cheatsheets/Forgot_Password_Cheat_Sheet.html) and [Nodemailer SMTP transport](https://nodemailer.com/smtp/).
+
+## Live operator agent lists
+
+Signed-in, visible operator workspaces refresh linked agents about every ten seconds. Pending registrations appear as **Waiting for approval**; selecting their tile explicitly prepares a fresh owner-bound authorization preview. Registration alone never confirms participation. Existing editor drafts and displayed keys are preserved. These passive reads do not renew the 30-minute idle deadline (eight-hour absolute cap).

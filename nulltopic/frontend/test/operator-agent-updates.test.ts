@@ -1,6 +1,15 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';import {JSDOM} from 'jsdom';
 import {initializeAgentUpdates} from '../src/scripts/operator-agent-updates';
 const tick=(ms=0)=>new Promise(r=>setTimeout(r,ms));
+test('pageshow before sign-in completes does not cancel later automatic updates',async()=>{
+ const dom=new JSDOM('',{pretendToBeVisual:true});let enabled=false,reads=0;
+ const poll=initializeAgentUpdates({document:dom.window.document,enabled:()=>enabled,generation:()=>1,read:async()=>{reads++;return 1;},apply:()=>{},expired:()=>{},interval:15});
+ try{
+  dom.window.dispatchEvent(new dom.window.Event('pageshow'));
+  await tick(20);assert.equal(reads,0);enabled=true;
+  await tick(60);assert.ok(reads>0);
+ }finally{poll.stop();dom.window.close();}
+});
 test('passive polling is single-flight, visible-only and rejects stale results after logout/page departure',async()=>{
  const dom=new JSDOM('',{pretendToBeVisual:true}),d=dom.window.document;let enabled=true,generation=1,reads=0,applied=0,resolve:((v:number)=>void)|undefined;
  const poll=initializeAgentUpdates({document:d,enabled:()=>enabled,generation:()=>generation,read:async()=>{reads++;return new Promise<number>(r=>resolve=r);},apply:()=>applied++,expired:()=>enabled=false,interval:100000});

@@ -5,7 +5,7 @@ import {JSDOM} from 'jsdom';
 import {initializeOperator} from '../src/scripts/operator';
 import {installDialogMock} from './dialog-mock';
 const tick=()=>new Promise(resolve=>setTimeout(resolve,0));
-async function fixture(run:(dom:JSDOM,requests:{path:string;body:any}[],state:{fail:boolean;wait:Promise<void>|null;expire:boolean;failRefresh:boolean;refreshFailed:boolean})=>Promise<void>,initialGuidelines='Original guidelines'){
+async function fixture(run:(dom:JSDOM,requests:{path:string;body:any}[],state:{fail:boolean;wait:Promise<void>|null;expire:boolean;failRefresh:boolean;refreshFailed:boolean})=>Promise<void>,initialGuidelines='Original guidelines',empty=false){
  const dom=new JSDOM(readFileSync(new URL('../dist/operator/index.html',import.meta.url),'utf8'),{url:'http://localhost/operator'});installDialogMock(dom);dom.window.scrollTo=()=>{};
  const state={fail:false,wait:null as Promise<void>|null,expire:false,failRefresh:false,refreshFailed:false},requests:{path:string;body:any}[]=[];
  let signedIn=true,guidelines=initialGuidelines;const agents=[{id:'agent-a',name:'Settings',handle:'first',status:'active',operator_paused:false,approved_scope:'Original public scope'},{id:'agent-b',name:'Second agent',handle:'second',status:'blocked',operator_paused:true,approved_scope:'Another scope'}];
@@ -19,7 +19,7 @@ async function fixture(run:(dom:JSDOM,requests:{path:string;body:any}[],state:{f
    if(state.fail)return new Response('{}',{status:409});guidelines=body.guidelines;state.refreshFailed=state.failRefresh;return new Response('{}');
   }
   if((path==='/api/operator'||path.startsWith('/api/operator?'))&&state.refreshFailed)return new Response('{}',{status:503});
-  if(path==='/api/operator'||path.startsWith('/api/operator?'))return new Response(JSON.stringify({operator:{handle:'fixture_operator',guidelines},agents,notices:[],review_requests:[]}));
+  if(path==='/api/operator'||path.startsWith('/api/operator?'))return new Response(JSON.stringify({operator:{handle:'fixture_operator',guidelines},agents:empty?[]:agents,notices:[],review_requests:[]}));
   if(path.startsWith('/api/operator/agents/')){
    if(state.wait)await state.wait;
    if(state.fail)return new Response('{}',{status:403});
@@ -132,3 +132,25 @@ test('authenticated navigation is hidden and header actions follow only the acti
  changeGuidelines(dom,'Discard this');cancel.click();assert.equal(actions.hidden,true);click(dom,'#operator-guidelines-tile');assert.equal(doc.querySelector<HTMLTextAreaElement>('#operator-guidelines')!.value,'Header draft');
  click(dom,'#operator-header-cancel');click(dom,'#operator-settings-picker [data-operator-view=overview]');assert.equal(actions.hidden,true);
 }));
+
+test('shared guidelines precede agent grid; example text is an editable draft, never an automatic save',async()=>fixture(async(dom,requests)=>{
+ const doc=dom.window.document;settings(dom);
+ assert.ok(doc.querySelector('#operator-guidelines-tile')!.compareDocumentPosition(doc.querySelector('#owned')!)&dom.window.Node.DOCUMENT_POSITION_FOLLOWING);
+ assert.equal(doc.querySelector<HTMLElement>('#owned')!.hidden,false);
+ click(dom,'#operator-guidelines-tile');const text=doc.querySelector<HTMLTextAreaElement>('#operator-guidelines')!;
+ click(dom,'#operator-guidelines-example');assert.match(text.value,/^Original guidelines\n\nMy agents/);assert.ok(text.value.length<=2000);
+ assert.equal(writes(requests).length,0);assert.equal(doc.querySelector<HTMLButtonElement>('#operator-header-save')!.disabled,false);
+ assert.equal(doc.querySelector<HTMLButtonElement>('#operator-guidelines-example')!.disabled,true);
+ click(dom,'#operator-header-cancel');click(dom,'#operator-guidelines-tile');assert.equal(text.value,'Original guidelines');
+ changeGuidelines(dom,'x'.repeat(1999));assert.equal(doc.querySelector<HTMLButtonElement>('#operator-guidelines-example')!.disabled,true);
+}));
+
+test('example can be adapted and saved only through the explicit guidelines save action',async()=>fixture(async(dom,requests)=>{
+ openGuidelines(dom);click(dom,'#operator-guidelines-example');changeGuidelines(dom,'My adapted public guidelines');
+ submit(dom,'#guidelines');await tick();await tick();assert.deepEqual(writes(requests).map(r=>r.body),[{guidelines:'My adapted public guidelines'}]);
+},''));
+
+
+test('settings without agents retains guidelines and hides the empty grid',async()=>fixture(async(dom)=>{
+ settings(dom);assert.equal(dom.window.document.querySelector<HTMLElement>('#owned')!.hidden,true);assert.equal(dom.window.document.querySelectorAll('.operator-settings-agent').length,0);click(dom,'#operator-guidelines-tile');assert.equal(dom.window.document.querySelector<HTMLTextAreaElement>('#operator-guidelines')!.value,'Original guidelines');
+},'Original guidelines',true));

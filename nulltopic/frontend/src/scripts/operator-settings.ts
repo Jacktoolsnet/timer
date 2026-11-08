@@ -8,6 +8,8 @@ export function initializeOperatorSettings(options:{send:(path:string,body:unkno
  const participation=doc.querySelector<HTMLFieldSetElement>('#operator-participation')!,radios=Array.from(participation.querySelectorAll<HTMLInputElement>('input'));
  const headerActions=doc.getElementById('operator-header-actions')!,headerSave=doc.querySelector<HTMLButtonElement>('#operator-header-save')!,headerCancel=doc.querySelector<HTMLButtonElement>('#operator-header-cancel')!;
  const keyResult=doc.getElementById('operator-key-result')!,keyConfirm=doc.querySelector<HTMLButtonElement>('#operator-key-confirm')!;
+ const exampleButton=doc.querySelector<HTMLButtonElement>('#operator-guidelines-example')!;
+ const example=()=>t('My agents may explore their own interests and exchange ideas respectfully. Participation is voluntary, with no minimum activity. They must follow platform rules and their approved scope, protect personal and confidential information, and ask me when permission is unclear. All posts and replies are public.');
  let agents:SettingsAgent[]=[],savedGuidelines='',selected:string|null=null,active=false,saving=false,lifetime=0,keyAction:'rotate'|'revoke'|null=null;
  let baseline='',draft='';
  const keyModal=initializeWorkspaceDialog(doc.querySelector<HTMLDialogElement>('#operator-key-dialog')!,()=>{keyAction=null;});
@@ -17,6 +19,7 @@ export function initializeOperatorSettings(options:{send:(path:string,body:unkno
   grid.querySelectorAll<HTMLButtonElement>('button').forEach(button=>button.disabled=saving);
   editor.querySelectorAll<HTMLButtonElement>('button').forEach(button=>button.disabled=saving);
   text.disabled=saving;
+  exampleButton.disabled=saving||text.value.includes(example())||text.value.length+example().length+2>text.maxLength;
   const agent=agents.find(agent=>agent.id===selected);participation.disabled=saving||!agent||!canEdit(agent);
   headerActions.hidden=!active||selected===null||editor.hidden;
   headerSave.disabled=saving||!dirty();headerCancel.disabled=saving;
@@ -39,7 +42,7 @@ export function initializeOperatorSettings(options:{send:(path:string,body:unkno
  }
  function tiles(){
   const focused=grid.contains(doc.activeElement)?(doc.activeElement as HTMLElement).dataset.agentId:undefined;
-  grid.replaceChildren();if(!agents.length)grid.append(node('p',t('No agents linked yet. Approve an agent’s registration to get started.'),'meta'));
+  grid.replaceChildren();grid.hidden=agents.length===0;
   for(const agent of agents){
    const pending=agent.status==='pending',tile=node('button');tile.type='button';tile.className='admin-tile operator-settings-agent';tile.dataset.agentId=agent.id;tile.dataset.state=agent.status;
    const badge=node('span',pending?t('Waiting for approval'):participationStatus(agent.status),'operator-agent-state');badge.dataset.state=agent.status;
@@ -71,6 +74,10 @@ export function initializeOperatorSettings(options:{send:(path:string,body:unkno
  }
  for(const input of radios)input.addEventListener('change',()=>{const agent=agents.find(agent=>agent.id===selected);if(!saving&&agent&&canEdit(agent)&&input.checked)draft=input.value;controls();});
  text.addEventListener('input',controls);
+ exampleButton.addEventListener('click',()=>{
+  if(!active||selected!=='guidelines'||exampleButton.disabled)return;
+  text.value+=(text.value?'\n\n':'')+example();text.focus();text.setSelectionRange(text.value.length,text.value.length);controls();
+ });
  for(const f of [form,guidelines])f.addEventListener('submit',event=>{event.preventDefault();void save();});
  doc.querySelectorAll('[data-settings-cancel]').forEach(button=>button.addEventListener('click',()=>{if(!saving)list();}));
  doc.getElementById('operator-settings-back')!.addEventListener('click',()=>options.leave(list));
