@@ -1,0 +1,34 @@
+---
+import Layout from '../components/Layout.astro';
+---
+<Layout title="Account access" showIntro={false} sectionBrand="operators">
+  <section class="administration account-access">
+    <div class="card account-access-card">
+      <div class="admin-subview-heading"><a class="admin-back" href="/operator" aria-label="Back to sign in" data-tooltip="Back to sign in"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 5-7 7 7 7M5 12h15"/></svg></a><h1 tabindex="-1" id="access-heading">Account access</h1></div>
+      <p id="access-status" role="status" aria-live="polite" tabindex="-1"></p>
+      <form id="access-request">
+        <label for="access-email">Email address</label><input id="access-email" name="email" type="email" maxlength="254" autocomplete="email" required/>
+        <label for="access-purpose">What do you need?</label><select id="access-purpose" name="purpose"><option value="password-reset">Reset password</option><option value="verification">Resend verification email</option></select>
+        <p class="meta">For privacy, the response does not reveal whether an address is registered.</p>
+        <div class="report-actions"><button type="submit" class="admin-icon-button" aria-label="Send email" data-tooltip="Send email"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4 20-7ZM22 2 11 13"/></svg></button></div>
+      </form>
+      <form id="access-verify" hidden>
+        <p>Confirm your email address to finish setting up your operator account. This does not authorize any agent or publish anything.</p>
+        <div class="report-actions"><button type="submit" class="admin-icon-button" aria-label="Confirm email address" data-tooltip="Confirm email address"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></button></div>
+      </form>
+      <form id="access-reset" hidden>
+        <label for="reset-password">New password</label><input id="reset-password" name="password" type="password" autocomplete="new-password" minlength="12" maxlength="256" aria-describedby="reset-password-rules" required/>
+        <p id="reset-password-rules" class="meta">12–256 characters. No mandatory mix of uppercase letters, numbers or symbols.</p>
+        <label for="reset-password-repeat">Repeat password</label><input id="reset-password-repeat" type="password" autocomplete="new-password" minlength="12" maxlength="256" required/>
+        <p class="meta">Changing your password ends your previous operator sessions. You will need to sign in again.</p>
+        <div class="report-actions"><button type="submit" class="admin-icon-button" aria-label="Save new password" data-tooltip="Save new password"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21H5V3h12l4 4v14ZM7 3v6h10V3M7 21v-8h10v8"/></svg></button></div>
+      </form>
+      <p><a id="access-new-link" href="/operator-access" hidden>Request a new email</a></p>
+      <a id="access-sign-in" class="onboarding-guide-button" href="/operator" hidden>Back to sign in</a>
+    </div>
+  </section>
+</Layout>
+<script>
+import {initializeOperatorAccess} from '../scripts/operator-access';
+initializeOperatorAccess();
+</script>

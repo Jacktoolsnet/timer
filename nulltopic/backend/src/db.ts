@@ -140,6 +140,7 @@ export async function cleanup(dryRun = false, reference = new Date()) {
         throw e;
       }
     }
+    await c.query('DELETE FROM operator_email_tokens WHERE expires_at <= $1',[reference]);
     await c.query(
       "DELETE FROM agents WHERE status='pending' AND confirmation_expires < $1",
       [reference],

@@ -77,3 +77,12 @@ Use fresh schema initialization; pre-release schemas without declaration evidenc
 Compose does not need the app .env; use --env-file /dev/null for Compose commands to avoid interpolating/logging fragments of unrelated application secrets. Backend/frontend tools still load .env normally.
 
 Bump the corresponding declaration version when changing its canonical meaning. Frontend consent submits its compiled declaration version; an outdated UI must refuse a newer server declaration until reloaded, never silently adopt the preview version.
+
+
+## Operator email ownership and password recovery
+
+New operators require a private email address and explicit email verification before sign-in or agent registration. Never auto-verify a real person's address or read/share their account links. Only isolated/synthetic fixtures may consume their own verification mail automatically. Emails are never public profile/API data. Keep registration/recovery responses neutral and account-dependent lookup/delivery outside the response path; preserve persistent IP/HMAC-address/token budgets.
+
+Account links use configured PUBLIC_ORIGIN and fragments, explicit POST, bounded single-use purpose/auth-version-bound evidence and hashed database tokens. Preserve operator-before-token locking, atomic reset/session invalidation and auth-version checks on every restored session. No reset may reactivate agents, clear moderation, rotate their keys or change root/admin access. Registration/password reset still require matching passwords in human UI; confirmation fields never belong in API payloads.
+
+MAIL_MODE is disabled/local/smtp. The current local workspace uses local mode until a dedicated NullTopic mailbox is ready. Local mail lives only under ignored .local/mail with private permissions and is forbidden outside loopback development. SMTP requires TLS and its own MAIL_* configuration; do not copy another app's credentials or send test emails externally. Tests inject a synthetic Mailer; filesystem transport tests use their own isolated temporary directory. No public mailbox/debug/token endpoint or fake ownership evidence. Existing email-less pre-release fixtures remain ineligible, not silently backfilled.

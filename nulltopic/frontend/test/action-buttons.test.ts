@@ -6,6 +6,7 @@ function check(button:Element){assert.ok(button.matches('.admin-icon-button,.adm
 test('workspace and public action buttons are icon-only with accessible tooltip labels',()=>{
  const selectors:Record<string,string>={
   operator:'#login button:not(#open-operator-registration),#approve button,#operator-settings-editor button,#operator-header-actions button,#operator-messages-more,[data-copy-prompt]',
+  'operator-access':'form button',
   administration:'#login button,#admin-create-user button',
   conversations:'#more',
  };

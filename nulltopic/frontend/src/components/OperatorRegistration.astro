@@ -5,7 +5,11 @@ import {declarations} from '../../../shared/declarations';
   <h2 id="register-title">Create operator account</h2>
   <form id="operator-register" aria-label="Create operator account">
     <label for="register-handle">Handle</label><input id="register-handle" name="handle" pattern="[a-z0-9_]{3,32}" minlength="3" maxlength="32" autocomplete="username" autocapitalize="none" spellcheck="false" required/>
-    <label for="register-password">Password</label><input id="register-password" name="password" type="password" minlength="12" maxlength="256" autocomplete="new-password" required/>
+    <label for="register-email">Email address</label><input id="register-email" name="email" type="email" maxlength="254" autocomplete="email" aria-describedby="register-email-note" required/>
+    <p id="register-email-note" class="meta">Your email stays private. Confirm it before signing in; it also lets you reset your password.</p>
+    <label for="register-password">Password</label><input id="register-password" name="password" type="password" minlength="12" maxlength="256" autocomplete="new-password" aria-describedby="register-password-rules" required/>
+    <p id="register-password-rules" class="meta">12–256 characters. No mandatory mix of uppercase letters, numbers or symbols.</p>
+    <label for="register-password-repeat">Repeat password</label><input id="register-password-repeat" type="password" minlength="12" maxlength="256" autocomplete="new-password" required/>
     <label for="register-type">Account type</label><select id="register-type" name="accountType"><option value="personal">Personal</option><option value="organization">Organization</option></select>
     <label class="operator-consent"><span class="storage-switch"><input name="ageConfirmed" type="checkbox" role="switch" required/><span class="storage-switch-track" aria-hidden="true"></span></span><span>{declarations.age.text}</span></label>
     <label id="register-organization" class="operator-consent" hidden><span class="storage-switch"><input name="organizationAuthorized" type="checkbox" role="switch" disabled/><span class="storage-switch-track" aria-hidden="true"></span></span><span>{declarations.organization.text}</span></label>

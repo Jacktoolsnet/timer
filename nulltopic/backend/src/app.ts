@@ -1,3 +1,5 @@
+import {createMailer,type Mailer} from './mailer.js';
+import {operatorEmail,emailRequest,verifyEmailBody,resetPasswordBody} from './operator-email.js';
 import {operatorRegistration,registerOperator,confirmedOperator,assertPublicWrite,authorizationExists} from './authorization.js';
 import {declarations} from '../../shared/declarations.js';
 import {operatorPosts,deleteOperatorPost} from './operator-posts.js';
@@ -22,6 +24,7 @@ import { rules, platform } from "./rules.js";
 declare module "fastify" {
   interface Session {
     operatorId?: string;
+    operatorVersion?: string;
     adminId?: string;
     adminVersion?: string;
     csrf?: string;
@@ -110,7 +113,7 @@ const adminCredentials = z.object({
 }).strict();
 const adminUpdate = z.object({ password: z.string().min(12).max(256).optional(), enabled: z.boolean().optional() }).strict().refine(b => b.password !== undefined || b.enabled !== undefined, "Choose a password or enabled state");
 const uuid = z.string().uuid();
-export async function createApp() {
+export async function createApp(options:{mailer?:Mailer}={}) {
   for (const [name, value] of Object.entries(process.env)) {
     if (
       (name.startsWith("LIMIT_") || name === "SSE_PER_IP") &&
@@ -125,6 +128,8 @@ export async function createApp() {
     trustProxy: false,
   });
   const origin = process.env.PUBLIC_ORIGIN || "http://localhost:4321";
+  const emailService=operatorEmail(options.mailer || createMailer(),origin);
+  app.addHook('onClose',()=>emailService.drain());
   const sessionSecret = process.env.SESSION_SECRET;
   if (!sessionSecret || sessionSecret.length < 32)
     throw Error("SESSION_SECRET must contain at least 32 characters");
@@ -259,6 +264,10 @@ export async function createApp() {
     reply
       .header("X-Content-Type-Options", "nosniff")
       .header("Cache-Control", "no-store");
+    if(req.session.operatorId){
+      const account=(await pool.query('SELECT auth_version,email_verified_at,suspended FROM operators WHERE id=$1',[req.session.operatorId])).rows[0];
+      if(!account||!account.email_verified_at||account.suspended||account.auth_version!==req.session.operatorVersion){delete req.session.operatorId;delete req.session.operatorVersion;}
+    }
     if (req.session.adminId) {
       const account = (await pool.query("SELECT id,handle,is_root,enabled,auth_version FROM admins WHERE id=$1", [req.session.adminId])).rows[0];
       if (!account || !account.enabled || account.auth_version !== req.session.adminVersion) {
@@ -300,6 +309,10 @@ export async function createApp() {
   const bodies: Record<string, unknown> = {
     "POST /api/registrations": json(profile.extend({operatorHandle:z.string().regex(/^[a-z0-9_]{3,32}$/)}).strict()),
     "POST /api/operator-registrations": json(operatorRegistration),
+    "POST /api/operator-email/verification":json(emailRequest),
+    "POST /api/operator-email/password-reset":json(emailRequest),
+    "POST /api/operator-email/verify":json(verifyEmailBody),
+    "POST /api/operator-email/reset":json(resetPasswordBody),
     "POST /api/login": json(
       z.object({
         handle: z.string(),
@@ -463,7 +476,21 @@ export async function createApp() {
   app.post("/api/operator-registrations", async req => {
     const body=operatorRegistration.parse(req.body);
     await transaction(c=>limit(c,req.ip,"operator_registration",5,3600));
-    return transaction(c=>registerOperator(c,body));
+    emailService.available();
+    await transaction(c=>registerOperator(c,body));
+    await emailService.request(body.email,'verify',body.language,req.ip);
+    return {ok:true};
+  });
+  for(const [path,purpose] of [['verification','verify'],['password-reset','reset']] as const)app.post('/api/operator-email/'+path,async req=>{
+    const b=emailRequest.parse(req.body);return emailService.request(b.email,purpose,b.language,req.ip);
+  });
+  app.post('/api/operator-email/verify',async req=>{
+    const b=verifyEmailBody.parse(req.body);await transaction(c=>limit(c,req.ip,'email_token',20,900));return emailService.verify(b.token);
+  });
+  app.post('/api/operator-email/reset',async req=>{
+    const b=resetPasswordBody.parse(req.body);await transaction(c=>limit(c,req.ip,'email_token',20,900));const result=await emailService.reset(b.token,b.password,b.language);
+    if(req.session.operatorId)await req.session.destroy();
+    return result;
   });
   app.get("/api/openapi.json", async () => app.swagger());
   app.get("/api/session", async (req) => {
@@ -491,10 +518,14 @@ export async function createApp() {
     ).rows[0];
     if (!user || (b.admin && !user.enabled) || !(await argon2.verify(user.password, b.password)))
       fail(401, "UNAUTHORIZED", "Invalid credentials");
+    if(!b.admin && !user.email_verified_at)fail(403,'EMAIL_VERIFICATION_REQUIRED','Verify your email address before signing in');
+    if(!b.admin && user.suspended)fail(403,'OPERATOR_SUSPENDED','Operator account is suspended');
+    // A reset may have won while Argon2 was checking the previous hash.
+    if(!b.admin && !(await pool.query('SELECT id FROM operators WHERE id=$1 AND password=$2 AND auth_version=$3',[user.id,user.password,user.auth_version])).rowCount)fail(401,'UNAUTHORIZED','Invalid credentials');
     await req.session.regenerate();
     req.session.authenticatedAt = Date.now();
     if (b.admin) { req.session.adminId = user.id; req.session.adminVersion = user.auth_version; }
-    else req.session.operatorId = user.id;
+    else {req.session.operatorId = user.id;req.session.operatorVersion=user.auth_version;}
     req.session.csrf = secret();
     return { csrf: req.session.csrf };
   });
@@ -921,7 +952,7 @@ export async function createApp() {
       moderation_counts:(await pool.query(`SELECT ((SELECT count(*) FROM moderation m JOIN agents a ON a.id=m.agent_id WHERE a.operator_id=$1 AND ${queueFilter('moderation','m','operator','$1',"'pending'")})+(SELECT count(*) FROM appeals r WHERE r.operator_id=$1 AND ${queueFilter('appeal','r','operator','$1',"'pending'")}))::int AS pending,((SELECT count(*) FROM moderation m JOIN agents a ON a.id=m.agent_id WHERE a.operator_id=$1 AND ${queueFilter('moderation','m','operator','$1',"'processed'")})+(SELECT count(*) FROM appeals r WHERE r.operator_id=$1 AND ${queueFilter('appeal','r','operator','$1',"'processed'")}))::int AS processed`,[id])).rows[0],
       operator: (
         await pool.query(
-          "SELECT id,handle,guidelines FROM operators WHERE id=$1",
+          "SELECT id,handle,guidelines,email,email_verified_at FROM operators WHERE id=$1",
           [id],
         )
       ).rows[0],

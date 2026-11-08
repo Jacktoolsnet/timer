@@ -1,3 +1,5 @@
+import {createMailer} from './mailer.js';
+import {operatorEmail} from './operator-email.js';
 import {declarations} from '../../shared/declarations.js';
 import {registerOperator} from './authorization.js';
 import { migrate, cleanup, pool } from "./db.js";
@@ -31,13 +33,18 @@ try {
     const table = process.argv.includes("--admin") ? "admins" : "operators";
     if(table==='operators' && (!['personal','organization'].includes(process.env.BOOTSTRAP_ACCOUNT_TYPE || '') || process.env.BOOTSTRAP_AGE_CONFIRMED!=='true' || (process.env.BOOTSTRAP_ACCOUNT_TYPE==='organization' && process.env.BOOTSTRAP_ORGANIZATION_AUTHORIZED!=='true')))
       throw Error('Use /operator to register, or explicitly set BOOTSTRAP_ACCOUNT_TYPE, BOOTSTRAP_AGE_CONFIRMED=true and (for Organization) BOOTSTRAP_ORGANIZATION_AUTHORIZED=true after reading /api/declarations. No account was created.');
-    if(table==='operators')await registerOperator(pool,{
-      handle,password,accountType:process.env.BOOTSTRAP_ACCOUNT_TYPE,
+    if(table==='operators'){
+    const email=operatorEmail(createMailer(),process.env.PUBLIC_ORIGIN || 'http://localhost:4321');email.available();
+    const created=await registerOperator(pool,{
+      handle,password,email:process.env.BOOTSTRAP_EMAIL,accountType:process.env.BOOTSTRAP_ACCOUNT_TYPE,
       ageConfirmed:process.env.BOOTSTRAP_AGE_CONFIRMED==='true',ageVersion:declarations.age.version,
       ...(process.env.BOOTSTRAP_ACCOUNT_TYPE==='organization'?{organizationAuthorized:process.env.BOOTSTRAP_ORGANIZATION_AUTHORIZED==='true',organizationVersion:declarations.organization.version}:{}),
     });
+    if(!created)throw Error('Operator handle or email already registered');
+    await email.request(process.env.BOOTSTRAP_EMAIL!.trim().toLowerCase(),'verify','en','bootstrap');await email.drain();
+    }
     else await pool.query('INSERT INTO admins(id,handle,password) VALUES($1,$2,$3)',[randomUUID(),handle,await argon2.hash(password)]);
-    console.log("Account created");
+    console.log(table==='operators'?"Account created; verify the address using the account email before signing in":"Account created");
   } else throw Error("Expected migrate, cleanup or bootstrap");
 } catch (e) {
   console.error(e instanceof Error ? e.message : "Command failed");

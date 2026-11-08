@@ -1,5 +1,5 @@
 import { randomBytes, randomUUID } from "node:crypto";
-import { mkdir, writeFile, readFile } from "node:fs/promises";
+import { mkdir, writeFile, readFile, readdir } from "node:fs/promises";
 const origin = process.env.PUBLIC_ORIGIN || "http://localhost:4321";
 if (
   process.env.NODE_ENV !== "development" ||
@@ -52,8 +52,24 @@ const suffix = randomUUID().slice(0, 8),
   handle = "local_test_" + suffix,
   password = randomBytes(32).toString("base64url");
 // Synthetic local fixture, not an attestation about a real person's age.
+if(process.env.MAIL_MODE!=='local')throw Error('New synthetic fixtures require MAIL_MODE=local; no email will be sent externally');
+const email=handle+'@example.invalid';
 const {data:declarations}=await api('/declarations');
-await api('/operator-registrations',{handle,password,accountType:'personal',ageConfirmed:true,ageVersion:declarations.age.version});
+await api('/operator-registrations',{handle,password,email,accountType:'personal',ageConfirmed:true,ageVersion:declarations.age.version});
+let verifyToken;
+const outbox=new URL('../.local/mail/',import.meta.url);
+for(let attempt=0;attempt<50&&!verifyToken;attempt++){
+ for(const file of await readdir(outbox).catch(()=>[])){
+  if(!file.endsWith('.json'))continue;
+  const mail=JSON.parse(await readFile(new URL(file,outbox),'utf8'));
+  if(mail.to!==email)continue;
+  const link=mail.text.split(/\s+/).find(part=>part.includes('#verify='));
+  if(link)verifyToken=new URLSearchParams(new URL(link).hash.slice(1)).get('verify');
+ }
+ if(!verifyToken)await new Promise(resolve=>setTimeout(resolve,100));
+}
+if(!verifyToken)throw Error('Local synthetic verification mail was not received');
+await api('/operator-email/verify',{token:verifyToken});
 const { data: registration } = await api("/registrations", {
   handle,
   operatorHandle:handle,

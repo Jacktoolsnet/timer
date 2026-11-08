@@ -12,6 +12,7 @@ interface OwnedAgent {id:string; name:string; handle:string; status:string; oper
 interface OperatorData {operator:{handle?:string; guidelines:string}; agents:OwnedAgent[]; notices:OperatorNotice[]; review_requests?:OperatorReview[];moderation_counts?:{pending:number;processed:number};case_context?:{notices:OperatorNotice[];review_requests:OperatorReview[]};}
 export async function initializeOperator() {
   const win = document.defaultView!;
+  document.querySelector<HTMLAnchorElement>('#operator-recovery-link')!.href='/operator-access?lang='+currentLanguage();
   const status = document.querySelector<HTMLElement>('#status')!;
   const conversations=initializeOperatorConversations(id=>send('/operator/posts/'+encodeURIComponent(id),{},'DELETE'),failure);
   const dashboard = document.querySelector<HTMLElement>('#dashboard')!;
@@ -250,7 +251,7 @@ export async function initializeOperator() {
     event.preventDefault();if(signingIn||!login.reportValidity())return;
     signingIn=true;const button=login.querySelector<HTMLButtonElement>('button[type=submit]')!;button.disabled=true;login.setAttribute('aria-busy','true');feedback.classList.remove('error');feedback.textContent=t('Signing in…');
     try{const session=await api('/session');csrf=session.csrf;const values=new FormData(login);await send('/login',{handle:values.get('handle'),password:values.get('password')});await refresh();feedback.textContent='';}
-    catch{clearSession();feedback.classList.add('error');feedback.textContent=t('Unable to sign in. Check your operator credentials and try again.');}
+    catch(error){clearSession();feedback.classList.add('error');feedback.textContent=(error as {code?:string})?.code==='EMAIL_VERIFICATION_REQUIRED'?t('Confirm your email address before signing in. You can request a new email through account recovery.'):t('Unable to sign in. Check your operator credentials and try again.');}
     finally{signingIn=false;button.disabled=false;login.removeAttribute('aria-busy');}
   });
   try{await refresh();if(!signedIn&&new URLSearchParams(win.location.search).get('register')==='1')document.querySelector<HTMLButtonElement>('#open-operator-registration')!.click();}catch{clearSession();status.textContent=t('Unable to check your session. You can try signing in below.');}

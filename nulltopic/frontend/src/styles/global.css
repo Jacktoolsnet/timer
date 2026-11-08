@@ -1468,3 +1468,9 @@ body > .site-header > nav .header-action:nth-last-child(-n+2)::after { left: aut
 [data-style=technical] .onboarding-start-steps li::before, [data-style=technical] .onboarding-safety-note { border-radius: 3px; }
 @media (forced-colors: active) { .onboarding-start-steps li::before { border-color: CanvasText; } }
 
+
+.operator-recovery-link { margin: 22px 0 0; font-size: .8125rem; }
+.account-access-card { width: 100%; max-width: 560px; margin: 24px auto; }
+.account-access-card .admin-subview-heading h1 { font-family: inherit; font-size: 1.25rem; }
+.account-access-card .admin-subview-heading { align-items: center; }
+.account-access-card form > p { line-height: 1.7; }

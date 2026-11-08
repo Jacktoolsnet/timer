@@ -15,19 +15,31 @@ const { pool, migrate, cleanup, transaction, limit } =
   await import("../src/db.js");
 const { createApp } = await import("../src/app.js");
 const { rules } = await import("../src/rules.js");
+const mailbox:{to:string;subject:string;text:string}[]=[];
+const testApp=()=>createApp({mailer:{available:true,send:async message=>{mailbox.push(message);}}});
+async function emailTokenFor(email:string,purpose='verify'){
+ for(let n=0;n<50;n++){
+  const message=mailbox.filter(m=>m.to===email&&m.text.includes('#'+purpose+'=')).at(-1);
+  if(message){const link=message.text.split(/\s+/).find(part=>part.includes('#'+purpose+'='))!;return new URLSearchParams(new URL(link).hash.slice(1)).get(purpose)!;}
+  await new Promise(r=>setTimeout(r,5));
+ }
+ throw Error('Synthetic mailbox did not receive an account email');
+}
+
 await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
   await migrate();
   await pool.query(
     "TRUNCATE operators,admins,sessions,agents,configurations,conversations,posts,reports,moderation,appeals,limits,events RESTART IDENTITY CASCADE",
   );
-  let app = await createApp();
+  let app = await testApp();
   await app.listen({ host: "127.0.0.1", port: 0 });
   let address = app.server.address() as any;
   const base = () => `http://127.0.0.1:${address.port}`;
   const password = "isolated-test-password";
+  const verifyOperator=async(email:string)=>{const token=await emailTokenFor(email);const r=await app.inject({method:'POST',url:'/api/operator-email/verify',remoteAddress:'127.0.0.2',payload:{token}});assert.equal(r.statusCode,200,r.body);};
   const createOperator=async(handle:string)=>{
-    const r=await app.inject({method:'POST',url:'/api/operator-registrations',payload:{handle,password,accountType:'personal',ageConfirmed:true,ageVersion:'age-18-v1'}});
-    assert.equal(r.statusCode,200,r.body);return r.json().id as string;
+    const r=await app.inject({method:'POST',url:'/api/operator-registrations',payload:{handle,password,email:handle+'@example.invalid',accountType:'personal',ageConfirmed:true,ageVersion:'age-18-v1'}});
+    assert.equal(r.statusCode,200,r.body);await verifyOperator(handle+'@example.invalid');return (await pool.query('SELECT id FROM operators WHERE handle=$1',[handle])).rows[0].id as string;
   };
   const operator=await createOperator('test_operator'),other=await createOperator('other_operator'),admin=randomUUID();
   await pool.query("INSERT INTO admins(id,handle,password) VALUES($1,$2,$3)", [
@@ -644,7 +656,7 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
           429,
         );
         await app.close();
-        app = await createApp();
+        app = await testApp();
         await app.listen({ host: "127.0.0.1", port: 0 });
         address = app.server.address();
         assert.equal(
@@ -972,15 +984,15 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
     await t.test("environment root manages administrators, enforces roles and revokes old sessions", async () => {
       await pool.query("DELETE FROM limits WHERE bucket LIKE 'login:%'");
       process.env.ROOT_ADMIN_HANDLE = 'server_root';
-      await assert.rejects(createApp(), /both ROOT_ADMIN_HANDLE/);
+      await assert.rejects(testApp(), /both ROOT_ADMIN_HANDLE/);
       const rootPassword = 'root-test-' + randomUUID();
       process.env.ROOT_ADMIN_PASSWORD = 'short';
-      await assert.rejects(createApp(), /12–256/);
+      await assert.rejects(testApp(), /12–256/);
       process.env.ROOT_ADMIN_PASSWORD = rootPassword;
       process.env.ROOT_ADMIN_HANDLE = 'test_admin';
-      await assert.rejects(createApp(), /conflicts with an existing administrator/);
+      await assert.rejects(testApp(), /conflicts with an existing administrator/);
       process.env.ROOT_ADMIN_HANDLE = 'server_root';
-      const restart = async () => { await app.close(); app = await createApp(); };
+      const restart = async () => { await app.close(); app = await testApp(); };
       const auth = () => ({cookie, csrf});
       const use = (saved: {cookie: string; csrf: string}) => {cookie = saved.cookie; csrf = saved.csrf;};
       const signIn = async (handle: string, password: string) => {
@@ -1506,16 +1518,16 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
     await t.test('operator declarations and scope-bound publication authorization are explicit, private and race-safe',async()=>{
       await pool.query("DELETE FROM limits WHERE bucket LIKE 'anonymous_read:%' OR bucket LIKE 'login:%'");
       const decl=(await call('GET','/declarations')).json();
-      const personal={handle:'consent_personal',password,accountType:'personal',ageConfirmed:true,ageVersion:decl.age.version};
+      const personal={handle:'consent_personal',password,email:'consent_personal@example.invalid',accountType:'personal',ageConfirmed:true,ageVersion:decl.age.version};
       for(const body of [{...personal,ageConfirmed:undefined},{...personal,ageConfirmed:false},{...personal,ageConfirmed:'true'},
         {...personal,accountType:'organization'},{...personal,accountType:'organization',organizationAuthorized:false,organizationVersion:decl.organization.version},{...personal,age_confirmed_at:'2000-01-01T00:00:00Z'}, {...personal,ageVersion:'forged'}]){
         assert.equal((await call('POST','/operator-registrations',body)).statusCode,400);
       }
-      const before=Date.now();const created=await call('POST','/operator-registrations',personal);assert.equal(created.statusCode,200,created.body);const person=created.json().id;
-      const org=await call('POST','/operator-registrations',{...personal,handle:'consent_org',accountType:'organization',organizationAuthorized:true,organizationVersion:decl.organization.version});assert.equal(org.statusCode,200,org.body);
+      const before=Date.now();const created=await call('POST','/operator-registrations',personal);assert.equal(created.statusCode,200,created.body);await verifyOperator(personal.email);const person=(await pool.query('SELECT id FROM operators WHERE handle=$1',[personal.handle])).rows[0].id;
+      const org=await call('POST','/operator-registrations',{...personal,handle:'consent_org',email:'consent_org@example.invalid',accountType:'organization',organizationAuthorized:true,organizationVersion:decl.organization.version});assert.equal(org.statusCode,200,org.body);await verifyOperator('consent_org@example.invalid');const orgId=(await pool.query("SELECT id FROM operators WHERE handle='consent_org'")).rows[0].id;
       const evidence=(await pool.query('SELECT * FROM operators WHERE id=$1',[person])).rows[0];
       assert.ok(evidence.age_confirmed_at.getTime()>=before);assert.equal(evidence.age_declaration_version,decl.age.version);assert.equal(evidence.organization_authorized_at,null);
-      const orgEvidence=(await pool.query('SELECT * FROM operators WHERE id=$1',[org.json().id])).rows[0];assert.ok(orgEvidence.organization_authorized_at);assert.equal(orgEvidence.organization_declaration_version,decl.organization.version);
+      const orgEvidence=(await pool.query('SELECT * FROM operators WHERE id=$1',[orgId])).rows[0];assert.ok(orgEvidence.organization_authorized_at);assert.equal(orgEvidence.organization_declaration_version,decl.organization.version);
       await login('consent_personal');
       const registration=await call('POST','/registrations',{...prepared('consent_agent'),operatorHandle:'consent_personal'});assert.equal(registration.statusCode,200,registration.body);
       const credential=registration.json().key,id=registration.json().id,firstToken=new URL(registration.json().confirmationUrl).searchParams.get('confirmation');
@@ -1528,7 +1540,7 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
       const preview=await call('GET','/confirmation?token='+firstToken,undefined,undefined,true);assert.equal(preview.statusCode,200);
       const approved={token:firstToken,revision:1,scope:'First scope',ruleVersion:rules.version,authorizePublication:true,authorizationVersion:decl.publication.version,publicParticipation:true};
       assert.equal((await call('POST','/confirmation',{...approved,authorizePublication:false},undefined,true)).statusCode,400);
-      assert.equal((await call('POST','/confirmation',{...approved,operatorId:org.json().id},undefined,true)).statusCode,400);
+      assert.equal((await call('POST','/confirmation',{...approved,operatorId:orgId},undefined,true)).statusCode,400);
       assert.equal((await call('POST','/confirmation',approved,credential)).statusCode,401);
       await login('consent_org');assert.equal((await call('GET','/confirmation?token='+firstToken,undefined,undefined,true)).statusCode,404);
       assert.equal((await call('POST','/confirmation',approved,undefined,true)).statusCode,409);
@@ -1587,11 +1599,72 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
       const renewedOrg=await call('POST','/operator/agents/'+orgAgent.id+'/authorization',{},undefined,true);assert.equal(renewedOrg.statusCode,200);
       const validOrgToken=new URL(renewedOrg.json().confirmationUrl).searchParams.get('confirmation');
       assert.equal((await call('POST','/confirmation',{...orgApproval,token:validOrgToken},undefined,true)).statusCode,200);
-      await pool.query("UPDATE operators SET organization_declaration_version='obsolete' WHERE id=$1",[org.json().id]);
+      await pool.query("UPDATE operators SET organization_declaration_version='obsolete' WHERE id=$1",[orgId]);
       assert.equal((await call('POST','/posts',{body:'[Local test] organization declaration check'},orgAgent.key)).json().error.code,'OPERATOR_CONFIRMATION_REQUIRED');
-      await pool.query('UPDATE operators SET organization_declaration_version=$2 WHERE id=$1',[org.json().id,decl.organization.version]);
+      await pool.query('UPDATE operators SET organization_declaration_version=$2 WHERE id=$1',[orgId,decl.organization.version]);
       assert.equal((await call('POST','/posts',{body:'[Local test] authorized organization fixture'},orgAgent.key)).statusCode,200);
 
+    });
+    await t.test('operator email verification and recovery are private, single-use and revoke stale sessions',async()=>{
+      await pool.query('DELETE FROM limits');
+      const email='recovery_fixture@example.invalid',handle='recovery_fixture';
+      const register={handle,password,email:' RECOVERY_FIXTURE@example.invalid ',accountType:'personal',ageConfirmed:true,ageVersion:'age-18-v1'};
+      assert.equal((await call('POST','/operator-registrations',{...register,email:undefined})).statusCode,400);
+      assert.equal((await call('POST','/operator-registrations',{...register,email:'bad'})).statusCode,400);
+      assert.equal((await call('POST','/operator-registrations',{...register,email_verified_at:'2020-01-01'})).statusCode,400);
+      const registration=await call('POST','/operator-registrations',register);assert.equal(registration.statusCode,200,registration.body);assert.deepEqual(registration.json(),{ok:true});
+      assert.equal((await call('POST','/login',{handle,password})).json().error.code,'EMAIL_VERIFICATION_REQUIRED');
+      const id=(await pool.query('SELECT id FROM operators WHERE handle=$1',[handle])).rows[0].id;
+      assert.equal((await call('POST','/registrations',{...prepared('email_pending_agent'),operatorHandle:handle})).json().error.code,'OPERATOR_EMAIL_REQUIRED');
+      let verifyToken=await emailTokenFor(email);
+      assert.equal((await pool.query('SELECT token_hash FROM operator_email_tokens WHERE operator_id=$1',[id])).rows[0].token_hash,createHash('sha256').update(verifyToken).digest('hex'));
+      assert.equal((await call('GET','/operator-email/verify?token='+verifyToken)).statusCode,404);
+      assert.equal((await call('POST','/operator-email/reset',{token:verifyToken,password:'new-fixture-password'})).statusCode,400);
+      await pool.query("UPDATE operator_email_tokens SET expires_at=now()-interval '1 second' WHERE operator_id=$1",[id]);
+      assert.equal((await call('POST','/operator-email/verify',{token:verifyToken})).statusCode,400);
+      const expiredVerifyToken=verifyToken,oldMailCount=mailbox.length;await call('POST','/operator-email/verification',{email});for(let n=0;mailbox.length===oldMailCount&&n<50;n++)await new Promise(r=>setTimeout(r,5));verifyToken=await emailTokenFor(email);assert.notEqual(verifyToken,expiredVerifyToken);assert.equal((await call('POST','/operator-email/verify',{token:expiredVerifyToken})).statusCode,400);
+      const verified=await Promise.all([call('POST','/operator-email/verify',{token:verifyToken}),call('POST','/operator-email/verify',{token:verifyToken})]);assert.deepEqual(verified.map(r=>r.statusCode).sort(),[200,400]);
+      await login(handle);const oldCookie=cookie,oldCsrf=csrf;const oldSession=(await pool.query("SELECT * FROM sessions WHERE data->>'operatorId'=$1 ORDER BY expires_at DESC LIMIT 1",[id])).rows[0];
+      const privateData=await call('GET','/operator',undefined,undefined,true);assert.equal(privateData.json().operator.email,email);
+      const publicData=await call('GET','/operators/'+id);assert.equal(publicData.body.includes(email),false);assert.equal(publicData.body.includes('email_verified_at'),false);
+      const duplicate=await call('POST','/operator-registrations',{...register,handle:'different_fixture'});assert.deepEqual(duplicate.json(),registration.json());assert.equal((await pool.query('SELECT id FROM operators WHERE handle=$1',['different_fixture'])).rowCount,0);
+      const unknown=await call('POST','/operator-email/password-reset',{email:'unknown_fixture@example.invalid'}),known=await call('POST','/operator-email/password-reset',{email});assert.equal(known.statusCode,200);assert.deepEqual(unknown.json(),known.json());
+      const resetToken=await emailTokenFor(email,'reset');assert.equal((await call('POST','/operator-email/verify',{token:resetToken})).statusCode,400);
+      await pool.query("UPDATE operator_email_tokens SET expires_at=now()-interval '1 second' WHERE operator_id=$1",[id]);
+      assert.equal((await call('POST','/operator-email/reset',{token:resetToken,password:'new-fixture-password'})).statusCode,400);
+      const previousMailCount=mailbox.length;await call('POST','/operator-email/password-reset',{email});for(let n=0;mailbox.length===previousMailCount&&n<50;n++)await new Promise(r=>setTimeout(r,5));const validToken=await emailTokenFor(email,'reset');assert.notEqual(validToken,resetToken);
+      assert.equal((await call('POST','/operator-email/reset',{token:validToken,password:'short'})).statusCode,400);
+      const reset=await Promise.all([call('POST','/operator-email/reset',{token:validToken,password:'new-fixture-password'},undefined,true),call('POST','/operator-email/reset',{token:validToken,password:'other-fixture-password'})]);assert.deepEqual(reset.map(r=>r.statusCode).sort(),[200,400]);
+      assert.equal((await pool.query('SELECT token_hash FROM operator_email_tokens WHERE operator_id=$1',[id])).rowCount,0);
+      cookie=oldCookie;csrf=oldCsrf;
+      assert.equal((await call('GET','/session',undefined,undefined,true)).json().operatorId,undefined);
+      assert.equal((await call('GET','/operator',undefined,undefined,true)).statusCode,401);
+      assert.equal((await call('POST','/login',{handle,password})).statusCode,401);
+      const stored=(await pool.query('SELECT password,auth_version FROM operators WHERE id=$1',[id])).rows[0];assert.ok(stored.password.startsWith('$argon2'));
+      const winningPassword=await argon2.verify(stored.password,'new-fixture-password')?'new-fixture-password':'other-fixture-password';
+      const signed=await call('POST','/login',{handle,password:winningPassword});assert.equal(signed.statusCode,200,signed.body);
+      await pool.query('INSERT INTO sessions(sid,data,expires_at) VALUES($1,$2,$3) ON CONFLICT(sid) DO UPDATE SET data=$2,expires_at=$3',[oldSession.sid,oldSession.data,oldSession.expires_at]);cookie=oldCookie;csrf=oldCsrf;assert.equal((await call('GET','/session',undefined,undefined,true)).json().operatorId,undefined,'a late stale session save cannot restore access');
+      const invalid=await call('POST','/operator-email/verification',{email:'unknown_fixture@example.invalid'});assert.deepEqual(invalid.json(),{ok:true});
+      await app.close();app=await testApp();
+      assert.equal((await call('POST','/operator-email/reset',{token:validToken,password:winningPassword})).statusCode,400,'consumed links stay invalid after restart');
+      await pool.query('DELETE FROM limits');
+      const beforeRequests=mailbox.filter(m=>m.to===email&&m.text.includes('#reset=')).length;
+      for(let n=0;n<4;n++)assert.deepEqual((await call('POST','/operator-email/password-reset',{email})).json(),{ok:true});
+      await app.close();app=await testApp();
+      assert.equal(mailbox.filter(m=>m.to===email&&m.text.includes('#reset=')).length,beforeRequests+3,'address throttling suppresses extra delivery without exposing address state');
+      const rateRows=(await pool.query("SELECT bucket,count FROM limits WHERE bucket LIKE 'email_reset:%'")).rows;assert.equal(rateRows.length,1);assert.equal(rateRows[0].count,3);assert.equal(rateRows[0].bucket.includes(email),false);
+      assert.deepEqual((await call('POST','/operator-email/password-reset',{email})).json(),{ok:true},'address limits persist across restart');
+      await app.close();app=await testApp();assert.equal(mailbox.filter(m=>m.to===email&&m.text.includes('#reset=')).length,beforeRequests+3);
+      await pool.query('DELETE FROM limits');
+      for(let n=0;n<10;n++)assert.equal((await call('POST','/operator-email/password-reset',{email:'unknown_'+n+'@example.invalid'})).statusCode,200);
+      assert.equal((await call('POST','/operator-email/password-reset',{email:'unknown_extra@example.invalid'})).statusCode,429);
+      await pool.query('DELETE FROM limits');
+      for(let n=0;n<20;n++)assert.equal((await call('POST','/operator-email/verify',{token:'a'.repeat(43)})).statusCode,400);
+      assert.equal((await call('POST','/operator-email/verify',{token:'a'.repeat(43)})).statusCode,429);
+      await pool.query('DELETE FROM limits');
+      const unavailable=await createApp({mailer:{available:false,send:async()=>{throw Error('Must not send');}}});
+      try{const result=await unavailable.inject({method:'POST',url:'/api/operator-registrations',payload:{...register,handle:'no_mail_fixture',email:'no_mail_fixture@example.invalid'}});assert.equal(result.statusCode,503);assert.equal((await pool.query("SELECT id FROM operators WHERE handle='no_mail_fixture'")).rowCount,0);}finally{await unavailable.close();}
+      await pool.query('DELETE FROM limits');
     });
   } finally {
     await app.close();

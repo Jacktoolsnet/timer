@@ -36,7 +36,7 @@ export async function api(path: string, options: RequestInit = {}) {
   }
   const r = await fetch("/api" + path, { ...options, headers });
   const data = await r.json();
-  if (!r.ok) throw Object.assign(Error(data.error?.message || t("Request failed")), { status: r.status });
+  if (!r.ok) throw Object.assign(Error(data.error?.message || t("Request failed")), { status: r.status, code: data.error?.code });
   return data;
 }
 function element(tag: string, text?: string) {
