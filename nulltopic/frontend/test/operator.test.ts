@@ -6,7 +6,7 @@ import {JSDOM} from 'jsdom';
 import {initializeOperator} from '../src/scripts/operator';
 const html = readFileSync(new URL('../dist/operator/index.html', import.meta.url), 'utf8');
 const tick = () => new Promise(resolve => setTimeout(resolve, 0));
-async function fixture(run: (dom: JSDOM, requests: {path: string; body?: any}[]) => Promise<void>, options: {signedIn?: boolean; fail?: boolean; confirmation?: boolean; withData?:boolean; expire?:boolean;reviews?:boolean;decided?:boolean;agentAccepted?:boolean;cases?:boolean;operatorPaused?:boolean;agentStatus?:string;declarationVersion?:string;approvedScope?:string} = {}) {
+async function fixture(run: (dom: JSDOM, requests: {path: string; body?: any}[]) => Promise<void>, options: {signedIn?: boolean; fail?: boolean; confirmation?: boolean; withData?:boolean; expire?:boolean;reviews?:boolean;decided?:boolean;agentAccepted?:boolean;cases?:boolean;operatorPaused?:boolean;agentStatus?:string;declarationVersion?:string;approvedScope?:string;confirmationFail?:boolean} = {}) {
   const dom = new JSDOM(html, {url: 'http://localhost/operator' + (options.confirmation ? '?confirmation=test-token' : '')});
   installDialogMock(dom);
   dom.window.scrollTo=()=>{}; dom.window.HTMLElement.prototype.scrollIntoView=()=>{}; dom.window.confirm=()=>true;
@@ -38,7 +38,7 @@ async function fixture(run: (dom: JSDOM, requests: {path: string; body?: any}[])
       return new Response(JSON.stringify({...data,...(options.cases?{case_context:{notices:data.notices,review_requests:data.review_requests}}:{}),moderation_counts:counts,notices:status?data.notices.filter(n=>status==='processed'?n.operator_accepted:!n.operator_accepted):data.notices,review_requests:status?data.review_requests.filter(r=>status==='processed'?r.status!=='pending'&&r.operator_accepted:r.status==='pending'||!r.operator_accepted):data.review_requests}));
     }
     if (path === '/api/confirmation?token=test-token') return new Response(JSON.stringify({name: 'Pending example',handle:'pending',approved_scope:options.approvedScope,operating_context:'Visible scope',scope_revision:7,ruleVersion:'fixture-rules',authorizationVersion:options.declarationVersion||'agent-publication-v1'}));
-    if(path==='/api/confirmation')return new Response(JSON.stringify({id:'approved'}));
+    if(path==='/api/confirmation')return options.confirmationFail?new Response('{}',{status:409}):new Response(JSON.stringify({id:'approved'}));
     throw Error('Unexpected request');
   }};
   const descriptors = Object.keys(values).map(key => [key, Object.getOwnPropertyDescriptor(globalThis, key)] as const);
@@ -288,7 +288,7 @@ test('operator authorization requires both explicit checkboxes and submits the p
  doc.querySelector<HTMLInputElement>('[name=consent]')!.checked=true;form.dispatchEvent(new dom.window.Event('submit',{cancelable:true}));await tick();assert.equal(requests.some(r=>r.path==='/api/confirmation'),false);
  doc.querySelector<HTMLInputElement>('[name=authorizePublication]')!.checked=true;form.dispatchEvent(new dom.window.Event('submit',{cancelable:true}));await tick();await tick();
  const sent=requests.find(r=>r.path==='/api/confirmation')!.body;assert.equal(sent.revision,7);assert.equal(sent.authorizePublication,true);assert.equal(sent.authorizationVersion,'agent-publication-v1');assert.equal(sent.ruleVersion,'fixture-rules');
- assert.equal(doc.querySelector<HTMLElement>('#confirmation')!.hidden,true);
+ assert.equal(doc.querySelector<HTMLElement>('#confirmation')!.hidden,true);assert.equal(doc.querySelector('#status')!.textContent,'');
 },{signedIn:true,confirmation:true}));
 
 test('an older UI never accepts a newer authorization declaration silently',async()=>fixture(async(dom,requests)=>{
@@ -346,10 +346,25 @@ test('approval header actions are shown only for review and submit their associa
  await initializeOperator();const doc=dom.window.document,actions=doc.querySelector<HTMLElement>('#operator-approval-header-actions')!,button=doc.querySelector<HTMLButtonElement>('#operator-approve')!,form=doc.querySelector<HTMLFormElement>('#approve')!;
  assert.equal(actions.hidden,false);assert.ok(button.closest('header'));assert.equal(button.form,form);assert.equal(form.querySelector('button[type=submit]'),null);assert.ok(doc.querySelector('#cancel-authorization')!.closest('header'));
  button.click();await tick();assert.equal(requests.some(r=>r.path==='/api/confirmation'),false);
- doc.querySelector<HTMLTextAreaElement>('#approval-scope')!.value='Explicit manual participation';form.querySelectorAll<HTMLInputElement>('input[type=checkbox]').forEach(input=>input.checked=true);
+ doc.querySelector<HTMLTextAreaElement>('#approval-scope')!.value='Explicit manual participation';form.querySelectorAll<HTMLInputElement>('input[type=checkbox]').forEach(input=>{input.checked=true;input.dispatchEvent(new dom.window.Event('change'));});
  button.click();await tick();await tick();assert.equal(requests.filter(r=>r.path==='/api/confirmation').length,1);assert.equal(actions.hidden,true);
 },{signedIn:true,confirmation:true}));
 
 test('approval header actions stay hidden outside registration review',async()=>fixture(async(dom)=>{
  await initializeOperator();assert.equal(dom.window.document.querySelector<HTMLElement>('#operator-approval-header-actions')!.hidden,true);
 },{signedIn:true,withData:true}));
+
+
+test('acceptance enables only when both consent switches are on and disables again when either is off',async()=>fixture(async(dom,requests)=>{
+ await initializeOperator();const doc=dom.window.document,button=doc.querySelector<HTMLButtonElement>('#operator-approve')!,inputs=Array.from(doc.querySelectorAll<HTMLInputElement>('#approve input[type=checkbox]'));
+ assert.equal(button.disabled,true);inputs[0].click();assert.equal(button.disabled,true);inputs[1].click();assert.equal(button.disabled,false);inputs[0].click();assert.equal(button.disabled,true);inputs[0].click();assert.equal(button.disabled,false);inputs[1].click();assert.equal(button.disabled,true);assert.equal(requests.some(r=>r.path==='/api/confirmation'),false);
+},{signedIn:true,confirmation:true}));
+
+test('consent switches cannot enable acceptance of an outdated authorization declaration',async()=>fixture(async(dom)=>{
+ await initializeOperator();dom.window.document.querySelectorAll<HTMLInputElement>('#approve input[type=checkbox]').forEach(input=>input.click());assert.equal(dom.window.document.querySelector<HTMLButtonElement>('#operator-approve')!.disabled,true);
+},{signedIn:true,confirmation:true,declarationVersion:'future-version'}));
+
+
+test('failed approval clears consent and leaves acceptance disabled until both switches are confirmed again',async()=>fixture(async(dom)=>{
+ await initializeOperator();const doc=dom.window.document,button=doc.querySelector<HTMLButtonElement>('#operator-approve')!;doc.querySelector<HTMLTextAreaElement>('#approval-scope')!.value='Explicit scope';doc.querySelectorAll<HTMLInputElement>('#approve input[type=checkbox]').forEach(input=>input.click());button.click();assert.equal(button.disabled,true);await tick();await tick();assert.equal(doc.querySelectorAll('#approve input:checked').length,0);assert.equal(button.disabled,true);
+},{signedIn:true,confirmation:true,confirmationFail:true}));

@@ -1559,8 +1559,8 @@ body > .site-header > nav .header-action:nth-last-child(-n+2)::after { left: aut
 @media (max-width: 400px) { .admin-tile.operator-agent-tile { padding: 20px; } .operator-agent-tile-top { gap: 12px; } .operator-agent-tile .moderation-author-avatar { width: 64px; height: 64px; border-radius: 18px; } }
 @media (forced-colors: active) { .operator-agent-tile::before { background: Canvas; } .operator-agent-tile .moderation-author-avatar { border-color: CanvasText; } }
 
-/* Explicit labelled-button exception: the final registration acceptance. */
-#operator-approval-header-actions .operator-approve-button { display: inline-flex; align-items: center; justify-content: center; gap: 12px; width: auto; max-width: 100%; height: auto; min-height: 60px; padding: 16px 24px; border: 2px solid var(--accent); background: var(--accent); color: var(--surface); font-size: 1rem; font-weight: 650; line-height: 1.4; box-shadow: 0 5px 16px color-mix(in srgb, var(--accent) 22%, transparent); }
+/* Highlighted compact registration acceptance in the header. */
+#operator-approval-header-actions .operator-approve-button { display: inline-flex; align-items: center; justify-content: center; width: 44px; min-width: 44px; height: 44px; min-height: 44px; padding: 8px; border: 2px solid var(--accent); border-radius: 14px; background: var(--accent); color: var(--surface); box-shadow: 0 5px 16px color-mix(in srgb, var(--accent) 22%, transparent); }
 #operator-approval-header-actions .operator-approve-button svg { width: 24px; height: 24px; flex-shrink: 0; }
 [data-theme=dark] #operator-approval-header-actions .operator-approve-button { color: var(--bg); }
 #operator-approval-header-actions .operator-approve-button:hover:not(:disabled) { background: var(--accent); filter: brightness(.94); }
@@ -1569,3 +1569,7 @@ body > .site-header > nav .header-action:nth-last-child(-n+2)::after { left: aut
 @media (forced-colors: active) { #operator-approval-header-actions .operator-approve-button { background: ButtonFace; color: ButtonText; border-color: ButtonText; box-shadow: none; } }
 
 #operator-approval-header-actions { flex-wrap: wrap; justify-content: center; }
+
+[data-style=technical] #operator-approval-header-actions .operator-approve-button { border-radius: 8px; }
+[data-style=minimal] #operator-approval-header-actions .operator-approve-button { border-radius: 10px; }
+[data-style=soft] #operator-approval-header-actions .operator-approve-button { border-radius: 16px; }

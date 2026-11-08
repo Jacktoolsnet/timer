@@ -66,6 +66,7 @@ export async function initializeOperator() {
     finally{button.disabled=false;}
   }
 
+  let approvalBusy=false;
   let confirmationRevision:number|undefined,confirmationRuleVersion:string|undefined,confirmationAuthorizationVersion:string|undefined;
   let confirmation = new URLSearchParams(win.location.search).get('confirmation');
   const send = (path:string,body:unknown,method='POST') => api(path,{method,headers:{'x-csrf-token':csrf},body:JSON.stringify(body)});
@@ -86,7 +87,7 @@ export async function initializeOperator() {
     logout.setAttribute('aria-label',name ? t('Sign out · ')+name:t('Sign out')); logout.dataset.tooltip = logout.getAttribute('aria-label')!;
   }
   function clearSession() {
-    approvalHeader.hidden=true;approveButton.disabled=true;
+    approvalBusy=false;approvalHeader.hidden=true;approveButton.disabled=true;
     setOnboardingOperator(undefined);
     unsaved.clear();settings.clear();
     signedIn=false;operatorId=undefined;agentSnapshot='';conversations.clear(); ++version;++queueVersion;queueData=null;openCases.clear();queueStatus='pending';updateQueueTabs({pending:0,processed:0});queuePanel.removeAttribute('aria-busy');document.getElementById('operator-queue-limit')!.hidden=true; dashboard.hidden=true; confirmationPanel.hidden=true; shell.hidden=false;
@@ -199,21 +200,23 @@ export async function initializeOperator() {
     document.getElementById('notices')!.replaceChildren(renderOperatorCases(contextNotices,contextReviews,noticeList,renderReviews(contextReviews),openCases));
   }
   const scopeInput=document.querySelector<HTMLTextAreaElement>('#approval-scope')!,scopeExample=document.querySelector<HTMLButtonElement>('#approval-scope-example')!;
+  const approvalConsents=Array.from(document.querySelectorAll<HTMLInputElement>('#approve input[type=checkbox]'));
+  function approvalState(){approveButton.disabled=approvalBusy||!signedIn||!confirmation||confirmationAuthorizationVersion!==declarations.publication.version||!approvalConsents.every(input=>input.checked);}
+  for(const input of approvalConsents)input.addEventListener('change',approvalState);
   const scopeTemplate=()=>t('The agent may publish posts and replies about its interests only when I explicitly ask it to do so. It must follow platform rules and my public guidelines. It must not share personal, confidential or work-related information. If permission is unclear, it must ask me first. This scope does not authorize autonomous or scheduled activity.');
   function scopeExampleState(){scopeExample.hidden=scopeInput.readOnly;scopeExample.disabled=scopeInput.readOnly||scopeInput.value.includes(scopeTemplate())||scopeInput.value.length+scopeTemplate().length+(scopeInput.value?2:0)>scopeInput.maxLength;}
   scopeInput.addEventListener('input',scopeExampleState);
   scopeExample.addEventListener('click',()=>{
-    if(scopeExample.disabled||scopeInput.readOnly||confirmationPanel.hidden||approveButton.disabled)return;
+    if(scopeExample.disabled||scopeInput.readOnly||confirmationPanel.hidden||approvalBusy||confirmationAuthorizationVersion!==declarations.publication.version)return;
     scopeInput.value+=(scopeInput.value?'\n\n':'')+scopeTemplate();scopeInput.focus();scopeInput.setSelectionRange(scopeInput.value.length,scopeInput.value.length);scopeExampleState();
   });
   function renderPrepared(profile:any) {
     document.getElementById('approval-status')!.textContent='';
     confirmationRevision=profile.scope_revision;confirmationRuleVersion=profile.ruleVersion;confirmationAuthorizationVersion=profile.authorizationVersion;
     const declarationMatches=confirmationAuthorizationVersion===declarations.publication.version;
-    approveButton.disabled=!declarationMatches;
     if(!declarationMatches)document.getElementById('approval-status')!.textContent=t('Reload this page to review the current authorization declaration.');
     const scope=document.querySelector<HTMLTextAreaElement>('#approval-scope')!;scope.value=profile.approved_scope||'';scope.readOnly=!!profile.approved_scope;scopeExampleState();
-    document.querySelector<HTMLFormElement>('#approve')!.querySelectorAll<HTMLInputElement>('input[type=checkbox]').forEach(input=>input.checked=false);
+    approvalConsents.forEach(input=>input.checked=false);approvalState();
     const prepared=document.getElementById('prepared')!;prepared.replaceChildren(node('h3',profile.name || t('Pending agent')));
     const details=node('dl',undefined,'operator-profile-details');
     const entries=[[t('Handle'),profile.handle?'@'+profile.handle:null],[t('About'),profile.about],[t('Interests'),Array.isArray(profile.interests)?profile.interests.join(', '):null],[t('Operating context'),profile.operating_context],[t('Status'),participationStatus(profile.status)]];
@@ -237,7 +240,7 @@ export async function initializeOperator() {
     form.addEventListener('submit',async event=>{
       event.preventDefault();if(saving||!form.reportValidity())return;
       if(selector==='#approve' && confirmationAuthorizationVersion!==declarations.publication.version){document.getElementById('approval-status')!.focus();return;}
-      saving=true;const button=selector==='#approve'?approveButton:form.querySelector<HTMLButtonElement>('button[type=submit]')!;button.disabled=true;if(selector==='#approve')cancelApproval.disabled=true;
+      saving=true;const button=selector==='#approve'?approveButton:form.querySelector<HTMLButtonElement>('button[type=submit]')!;button.disabled=true;if(selector==='#approve'){approvalBusy=true;approvalState();cancelApproval.disabled=true;}
       try {
         const values=new FormData(form);
         if(selector==='#appeal'){
@@ -258,13 +261,13 @@ export async function initializeOperator() {
         }
         if(selector==='#approve'){
           await send('/confirmation',{token:confirmation,ruleVersion:confirmationRuleVersion,authorizationVersion:declarations.publication.version,publicParticipation:values.get('consent')==='on',authorizePublication:values.get('authorizePublication')==='on',revision:confirmationRevision,scope:values.get('scope')});
-          confirmation=null;confirmationPanel.hidden=true;approvalHeader.hidden=true;form.reset();document.getElementById('prepared')!.replaceChildren();win.history.replaceState({},'','/operator#settings');await refresh();status.textContent=t('Agent approved and linked to your account.');
+          confirmation=null;confirmationPanel.hidden=true;approvalHeader.hidden=true;form.reset();document.getElementById('prepared')!.replaceChildren();win.history.replaceState({},'','/operator#settings');await refresh();status.textContent='';
         }
       }catch(error){if(selector==='#approve'){
         form.querySelectorAll<HTMLInputElement>('input[type=checkbox]').forEach(input=>input.checked=false);
         const message=document.getElementById('approval-status')!;message.textContent=(error as {status?:number}).status===409?t('The authorization is outdated or already used. Open a fresh review from Settings.'):t('Unable to authorize publication. Check the required confirmations and review the current scope.');message.focus();
       }if(selector==='#appeal')reviewModal.error(t('Unable to send your review request. Please try again.'));await failure(error,t('Unable to save this request. Please check the fields and try again.'));}
-      finally{saving=false;button.disabled=false;if(selector==='#approve')cancelApproval.disabled=false;if(selector==='#appeal')reviewModal.setBusy(false);}
+      finally{saving=false;if(selector==='#approve'){approvalBusy=false;cancelApproval.disabled=false;approvalState();}else{button.disabled=false;reviewModal.setBusy(false);}}
     });
   }
   async function signOut(){

@@ -23,6 +23,7 @@ export function initializeOperatorSettings(options:{send:(path:string,body:unkno
   exampleButton.disabled=saving||text.value.includes(example())||text.value.length+example().length+2>text.maxLength;
   const agent=agents.find(agent=>agent.id===selected);participation.disabled=saving||!agent||!canEdit(agent);
   headerActions.hidden=!active||selected===null||editor.hidden;
+  headerSave.hidden=!dirty();
   headerSave.disabled=saving||!dirty();headerCancel.disabled=saving;
   headerSave.setAttribute('form',selected==='guidelines'?'guidelines':'operator-agent-form');
  }
@@ -31,6 +32,7 @@ export function initializeOperatorSettings(options:{send:(path:string,body:unkno
  function open(id:string,focus=true){
   if(!active)return;const agent=agents.find(agent=>agent.id===id);if(id!=='guidelines'&&!agent)return;
   selected=id;picker.hidden=true;editor.hidden=false;guidelines.hidden=id!=='guidelines';agentPanel.hidden=id==='guidelines';feedback.textContent='';keyResult.replaceChildren();
+  doc.getElementById('operator-settings-back')!.hidden=true;
   const heading=doc.getElementById('operator-agent-settings-heading')!;heading.textContent=agent?agent.name+' · @'+agent.handle:t('Public operator guidelines');
   doc.querySelector<HTMLButtonElement>('#operator-review-authorization')!.hidden=!agent;
   if(agent){
@@ -81,7 +83,7 @@ export function initializeOperatorSettings(options:{send:(path:string,body:unkno
   if(!active||selected!=='guidelines'||exampleButton.disabled)return;
   text.value+=(text.value?'\n\n':'')+example();text.focus();text.setSelectionRange(text.value.length,text.value.length);controls();
  });
- for(const f of [form,guidelines])f.addEventListener('submit',event=>{event.preventDefault();void save();});
+ for(const f of [form,guidelines])f.addEventListener('submit',async event=>{event.preventDefault();if(await save()&&active&&selected!==null)list();});
  doc.querySelectorAll('[data-settings-cancel]').forEach(button=>button.addEventListener('click',()=>{if(!saving)list();}));
  doc.getElementById('operator-settings-back')!.addEventListener('click',()=>options.leave(list));
  doc.getElementById('operator-guidelines-tile')!.addEventListener('click',()=>options.leave(()=>open('guidelines')));

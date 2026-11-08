@@ -372,3 +372,38 @@ Scope and remaining work: self-declaration is not identity/age verification or a
 - Self-generated avatars are encouraged but optional and deferred until approval plus image-tool/publication permission. Registration-only invitations still authorize neither image generation/upload nor approval, publishing or autonomous activity. No existing profile was modified and no image/model calls were made. Changes concern machine-facing guide/prompt text; no human UI layout changed.
 
 - Full build/typechecks and 204 frontend tests passed. Added regression coverage for requested metadata fields, unknown/non-disclosable values, optional deferred avatars and retained onboarding-only boundaries.
+
+## Registration review actions in sticky header (2026-11-08)
+
+- Moved acceptance and cancellation to a dedicated operator header group, shown only while an authenticated authorization preview is visible. The labelled primary acceptance button uses native form=approve association; mandatory scope/consent validation and explicit submission remain intact. Cancellation still leaves review without granting or permanently rejecting registration. It is disabled during submission.
+- Full build/typechecks and 206 frontend tests passed, including external-button form ownership/native validation, successful one-shot submission, outdated declaration protection and header visibility outside review. Chromium checked synthetic previews at 320/390/1280px in all four languages: sticky header visibility after scrolling, settings-action exclusion, no horizontal overflow and no submission with missing consent. German mobile screenshot visually inspected. No real approval was submitted.
+
+## Approval button gated by both consent switches (2026-11-08)
+
+- Acceptance is disabled until both review switches are on, and disables immediately if either is switched off. It also stays disabled during submission, without a session/confirmation or with an outdated declaration. Failed approval resets both switches and recomputes the disabled state. Scope example insertion remains available before consent; normal scope validation and backend consent checks are unchanged.
+- Full build/typechecks passed. Frontend tests cover toggle combinations, outdated declarations, explicit submission, editable examples before consent and failure reset. Chromium checked the enable/disable sequence and example insertion at 390/1280px using synthetic previews, without any approval writes.
+
+- All 209 frontend tests passed.
+
+## Return from saved public guidelines (2026-11-08)
+
+- Explicit guidelines-form/header Save now returns to the settings picker only after an acknowledged successful save, hides editor/header actions and focuses the picker heading. Failed saves preserve the visible draft. The shared save callback used by the unsaved-changes dialog is unchanged, so it still continues to the originally requested destination; per-agent save behavior is unchanged.
+- Full build/typechecks and 211 frontend tests passed. Chromium checked synthetic successful/rejected guideline saves at 390/1280px: exactly one mocked PATCH, correct picker/editor/header visibility and retained text. No actual operator guidelines were modified.
+
+## Guidelines omit duplicate back navigation (2026-11-08)
+
+- The editor back button is hidden for public operator guidelines only; Save/Cancel remain in the header. Per-agent editors restore their back button. DOM regression coverage checks both transitions. This small visibility-only change has no new real-browser visual check.
+
+- Full build/typechecks and 212 frontend tests passed.
+
+## Compact icon-only header acceptance (2026-11-08)
+
+- Removed the visible acceptance label at the user's request; the localized Accept registration tooltip/accessible name remains. The accent-highlighted control is now 44×44px with explicit style-specific corners instead of an oval, retaining native form association and the two-consent gate.
+- Full build/typechecks and 212 frontend tests passed. Chromium checked 320/1280px across all four styles (eight cases): equal 44px dimensions, non-oval corners, German accessible label/tooltip, no visible text and no horizontal overflow. Synthetic guest preview shell only, no approval writes.
+
+## Guidelines Save visibility follows draft changes (2026-11-08)
+
+- Public-guidelines Save is hidden while the text matches the saved baseline, appears when it differs (including example insertion), and hides again when restored. Cancel remains available; per-agent settings keep their existing visible-but-disabled clean Save. Saving still disables duplicate submission, and failures preserve the changed draft.
+- DOM regression checks cover initial/reverted/example/cancelled drafts and switching to per-agent settings. No new real-browser visual check for this visibility-only change.
+
+- Full build/typechecks and 213 frontend tests passed.

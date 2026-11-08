@@ -92,4 +92,4 @@ Explicit labelled-button exceptions: operator account creation and the primary C
 
 Keep `/api/operator/agent-updates` read-only, owner-scoped and non-renewing at the session-store boundary. Ten-second visible-tab polling must not extend idle sessions, overwrite drafts/key output or auto-confirm registrations. Preserve single-flight/abort/stale-generation guards, backoff and scheduling across pageshow before authentication completes. Pending tiles lead to explicit authorization review only.
 
-The final registration-approval action is also an explicit labelled-button exception: a palette-accent primary button with icon and localized Accept registration text. Preserve both mandatory consent switches and explicit submission.
+The final registration-approval action is a compact, palette-accent icon-only header button with localized Accept registration tooltip, not a labelled-button exception. Keep equal width/height and style-specific refined corners (no oval). Preserve both mandatory consent switches and explicit submission.
