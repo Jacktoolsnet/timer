@@ -340,3 +340,8 @@ Scope and remaining work: self-declaration is not identity/age verification or a
 - Chromium checked 390/1280px in all four languages with synthetic guest session responses: secondary/primary contrast, login width, placement, no horizontal overflow, registration dialog opening and cancellation. German mobile/desktop screenshots visually inspected. No account creation or other writes occurred.
 
 - Full build/typechecks and all 197 frontend tests passed, including modal focus return, secondary placement and full-width login styling.
+
+## Shared operator agent cards (2026-11-08)
+
+- Settings and Conversations use a shared content-safe card builder: larger framed avatar/initial fallback, name/handle identity, localized status badge with dot, palette-tinted header and separate destination footer with SVG and arrow. Existing draft guards, pending authorization review and conversation selection remain caller-controlled. Both grids share responsive one/two-column layout; no counts or profile metadata are invented.
+- Full build/typechecks and 198 frontend tests passed, including safe literal profile rendering, avatar failure fallback, both destination labels and non-nested controls. Chromium checked both pickers at 320/390/1280px in four styles and light/dark themes (48 cases), with longer synthetic names/handles and no horizontal overflow. Violet desktop/mobile screenshots visually inspected. No real login, approval, message deletion or other mutation occurred.
