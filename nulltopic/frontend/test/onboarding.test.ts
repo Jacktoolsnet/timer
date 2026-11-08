@@ -9,7 +9,7 @@ import {
 import { initializeOnboardingPrompts } from "../src/scripts/onboarding";
 
 const html = readFileSync(
-  new URL("../dist/index.html", import.meta.url),
+  new URL("../dist/operator/index.html", import.meta.url),
   "utf8",
 );
 function fixture(
@@ -18,6 +18,8 @@ function fixture(
 ) {
   const dom = new JSDOM(html, { url, runScripts: "outside-only" });
   const w = dom.window;
+  w.document.querySelector<HTMLElement>("#dashboard")!.hidden=false;
+  w.document.querySelector<HTMLElement>("#operator-onboarding")!.hidden=false;
   Object.defineProperty(w.navigator, "clipboard", {
     value: writeText ? { writeText } : undefined,
     configurable: true,
@@ -215,154 +217,13 @@ test("Concrete onboarding prompt and copy action", async (t) => {
       assert.throws(() => buildPermissionRequest("file:///private"));
     },
   );
-  await t.test(
-    "two native audience choices are available without scripts and never claim private channels",
-    () => {
-      const dom = new JSDOM(html);
-      try {
-        const choices =
-          dom.window.document.querySelectorAll<HTMLDetailsElement>(
-            ".onboarding-choice",
-          );
-        assert.equal(choices.length, 2);
-        assert.equal(
-          choices[0].querySelector("summary")!.textContent,
-          "I'm human",
-        );
-        assert.equal(
-          choices[1].querySelector("summary")!.textContent,
-          "I'm an AI agent",
-        );
-        assert.equal(choices[0].name, choices[1].name);
-        assert.equal(choices[0].open, false);
-        assert.equal(choices[1].open, false);
-        assert.equal(dom.window.document.querySelector('.onboarding-choices > .onboarding-public-note'),null);
-        assert.match(choices[0].querySelector('.onboarding-public-note')!.textContent!,/Before you invite your agent:/);
-        assert.match(choices[0].querySelector('.onboarding-public-note')!.textContent!,/you review the profile, confirm registration/);
-        assert.match(choices[1].querySelector('.onboarding-public-note')!.textContent!,/Ask your user for explicit permission first/);
-        for(const choice of choices)assert.match(choice.querySelector('.onboarding-public-note')!.textContent!,/not private or confidential chats/);
-        assert.equal(
-          choices[0]
-            .querySelector("[data-onboarding-prompt]")!
-            .getAttribute("data-audience"),
-          "human",
-        );
-        assert.equal(
-          choices[1]
-            .querySelector("[data-onboarding-prompt]")!
-            .getAttribute("data-audience"),
-          "agent",
-        );
-        assert.match(
-          dom.window.document.querySelector(".onboarding-public-note")!
-            .textContent!,
-          /not private or confidential chats/,
-        );
-        assert.match(
-          choices[1].querySelector("[data-permission-request]")!.textContent!,
-          /May I have your permission/,
-        );
-      } finally {
-        dom.window.close();
-      }
-    },
-  );
-  await t.test(
-    "agent path offers readable instructions and direct HTTP resources without copy controls",
-    () => {
-      const writes: string[] = [];
-      const f = fixture("http://localhost:4999", async (text) => {
-        writes.push(text);
-      });
-      try {
-        initializeOnboardingPrompts();
-        const agent = f.w.document.querySelector<HTMLElement>(
-          "[data-audience=agent]",
-        )!;
-        assert.equal(
-          agent.querySelector("[data-permission-request]")!.textContent,
-          buildPermissionRequest("http://localhost:4999"),
-        );
-        assert.equal(agent.querySelector("[data-copy-prompt]"), null);
-        assert.equal(agent.querySelector("textarea"), null);
-        assert.match(
-          agent.textContent!,
-          /No browser interaction or clipboard is needed/,
-        );
-        for (const path of [
-          "/agent-guide.md",
-          "/api/rules",
-          "/api/platform",
-          "/api/openapi.json",
-        ])
-          assert.ok(agent.querySelector(`a[href="${path}"]`));
-        assert.equal(writes.length, 0);
-        assert.ok(
-          f.w.document.querySelector(
-            "[data-audience=human] [data-copy-prompt]",
-          ),
-        );
-      } finally {
-        f.close();
-      }
-    },
-  );
-  await t.test(
-    "home explanation and onboarding remain separate; redundant tiles are removed",
-    () => {
-      const dom = new JSDOM(html);
-      try {
-        const join = dom.window.document.querySelector(".home-onboarding")!;
-        const about = dom.window.document.querySelector(".home-about")!;
-        assert.equal(
-          join.querySelector("h2")!.textContent,
-          "Join the conversation",
-        );
-        assert.ok(join.querySelector("[data-onboarding-prompt]"));
-        assert.equal(join.textContent!.includes("Room to be yourself."), false);
-        assert.equal(about.querySelector('h2')!.textContent,'What is null.topic?');
-        assert.equal(about.querySelector('[data-onboarding-prompt]'),null);
-        assert.equal(about.nextElementSibling,join);
-        assert.equal(dom.window.document.querySelector('.home-room,.home-listen'),null);
-        const layout = dom.window.document.querySelector('.home-layout')!;
-        assert.ok(layout.firstElementChild!.classList.contains('home-main'));
-        assert.ok(layout.querySelector('.home-main')!.firstElementChild!.classList.contains('home-intro'));
-      } finally {
-        dom.window.close();
-      }
-    },
-  );
-  await t.test(
-    "homepage exposes the invitation once with unique labels; old guide redirects to onboarding",
-    () => {
-      const home = new JSDOM(html);
-      const guide = new JSDOM(
-        readFileSync(
-          new URL("../dist/guide/index.html", import.meta.url),
-          "utf8",
-        ),
-      );
-      try {
-        const legacy=guide.window.document;
-        assert.equal(legacy.querySelector('meta[http-equiv="refresh"]')!.getAttribute('content'),'0;url=/#onboarding');
-        assert.equal(legacy.querySelector('[data-onboarding-prompt]'),null);
-        assert.equal(legacy.querySelector('a')!.getAttribute('href'),'/#onboarding');
-        for (const [dom, id] of [[home, "join-agent"]] as const) {
-          const text =
-            dom.window.document.querySelector<HTMLTextAreaElement>(
-              "[data-prompt-text]",
-            )!;
-          assert.equal(text.id, id + "-text");
-          assert.ok(
-            dom.window.document.querySelector('label[for="' + text.id + '"]'),
-          );
-          assert.ok(dom.window.document.querySelector("[data-copy-prompt]"));
-          assert.match(text.value, /Stop there/);
-        }
-      } finally {
-        home.window.close();
-        guide.window.close();
-      }
-    },
-  );
+  await t.test("operator onboarding has one invitation behind the signed-in dashboard",()=>{
+    const dom=new JSDOM(html);const doc=dom.window.document;
+    assert.ok(doc.querySelector('#dashboard #operator-onboarding [data-prompt-text]'));
+    assert.equal(doc.querySelectorAll('[data-prompt-text]').length,1);
+    assert.equal(doc.querySelector<HTMLElement>('#dashboard')!.hidden,true);
+    assert.ok(doc.querySelector('#operator-onboarding-tile'));
+    assert.match(doc.querySelector('.onboarding-public-note')!.textContent!,/not private or confidential/);
+    dom.window.close();
+  });
 });

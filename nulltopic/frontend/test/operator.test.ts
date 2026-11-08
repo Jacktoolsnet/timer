@@ -295,3 +295,17 @@ test('an older UI never accepts a newer authorization declaration silently',asyn
  await initializeOperator();const doc=dom.window.document;assert.equal(doc.querySelector<HTMLButtonElement>('#approve button[type=submit]')!.disabled,true);assert.match(doc.querySelector('#approval-status')!.textContent!,/Reload/);
  doc.querySelector<HTMLTextAreaElement>('#approval-scope')!.value='Scope';doc.querySelectorAll<HTMLInputElement>('#approve input[type=checkbox]').forEach(input=>input.checked=true);doc.querySelector('#approve')!.dispatchEvent(new dom.window.Event('submit',{cancelable:true}));await tick();assert.equal(requests.some(r=>r.path==='/api/confirmation'),false);
 },{signedIn:true,confirmation:true,declarationVersion:'future-version'}));
+
+test('signed-in operators can open agent onboarding and return to the overview without creating an agent',async()=>fixture(async(dom,requests)=>{
+ await initializeOperator();const d=dom.window.document;
+ d.querySelector<HTMLButtonElement>('#operator-onboarding-tile')!.click();
+ assert.equal(dom.window.location.hash,'#onboarding');assert.equal(d.querySelector<HTMLElement>('#operator-onboarding')!.hidden,false);assert.equal(d.querySelector<HTMLElement>('#operator-overview')!.hidden,true);assert.equal(d.activeElement?.id,'operator-onboarding-heading');
+ assert.ok(d.querySelector('#operator-onboarding [data-prompt-text]'));
+ d.querySelector<HTMLButtonElement>('#operator-onboarding [data-operator-view=overview]')!.click();assert.equal(d.querySelector<HTMLElement>('#operator-overview')!.hidden,false);
+ assert.equal(requests.some(r=>r.body),false);
+},{signedIn:true}));
+for(const signedIn of [false,true])test(`homepage registration shortcut opens only when signed out (signedIn=${signedIn})`,async()=>fixture(async(dom)=>{
+ dom.window.history.replaceState({},'','/operator?register=1');let opened=0;
+ dom.window.document.querySelector('#open-operator-registration')!.addEventListener('click',()=>opened++);
+ await initializeOperator();assert.equal(opened,signedIn?0:1);
+},{signedIn}));

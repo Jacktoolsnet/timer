@@ -256,3 +256,14 @@ Executed for this feature:
 - Dependency audit: zero vulnerabilities.
 
 Scope and remaining work: self-declaration is not identity/age verification or a legal-compliance certification. Final terms/privacy texts, their future separate versioned acceptance, deletion and exports are not implemented. Scope editing currently uses the protected CAS API; Settings displays the scope read-only and supplies the review-authorization action. Operator suspension has a private server-side flag but no new administration UI. The mutating `test:smoke` script was intentionally not run for this feature; it would publish development messages.
+
+## Operator-first onboarding entry (2026-11-08)
+
+- Full build/typechecks passed with no Astro errors, warnings or hints; 172 frontend tests passed.
+- Homepage has a four-step operator-first explanation and a direct account-creation shortcut, with no copyable invitation. Signed-in operators get an Add agent tile, a dedicated invitation view and guarded back navigation. Existing invitation clipboard, manual-copy fallback and authorization boundaries remain covered.
+- Headless Chromium checked English, German, Spanish and French at 360px and 1280px: homepage has no prompt or horizontal overflow; its shortcut opens the registration modal when signed out; a synthetic signed-in session can open Add agent, explicitly copy the invitation and return to the overview without creating or publishing anything. The mobile German invitation was visually inspected. All browser APIs used synthetic responses; no real account or agent was created.
+
+## Palette-aware fields and browser autofill (2026-11-08)
+
+- Frontend build and 173 frontend tests passed. Field text, placeholders and autofill use the active palette tokens; forced-colors mode leaves system field colors in control.
+- Headless Chromium forced the native `:autofill` pseudo-class and checked ordinary field backgrounds/text and autofill inset/text/caret colors across all 64 theme/palette/style combinations. Dark-blue login screenshot visually inspected. No saved credentials or real login were used.

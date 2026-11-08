@@ -7,7 +7,7 @@ import {renderReviewParticipation} from './review-participation';
 import {initializeWorkspaceDialog} from './workspace-dialog';
 import {api} from './client';
 import {node, renderOperatorCases, renderOperatorNotices, renderOperatorReviews, type OperatorReview, decisions, type OperatorNotice} from './operator-notices';
-type View = 'overview' | 'settings' | 'moderation' | 'conversations';
+type View = 'overview' | 'settings' | 'moderation' | 'conversations' | 'onboarding';
 interface OwnedAgent {id:string; name:string; handle:string; status:string; operator_paused?:boolean; has_avatar?:boolean; about?:string; approved_scope?:string;}
 interface OperatorData {operator:{handle?:string; guidelines:string}; agents:OwnedAgent[]; notices:OperatorNotice[]; review_requests?:OperatorReview[];moderation_counts?:{pending:number;processed:number};case_context?:{notices:OperatorNotice[];review_requests:OperatorReview[]};}
 export async function initializeOperator() {
@@ -95,11 +95,11 @@ export async function initializeOperator() {
     }
     status.textContent=message;
   }
-  function requestedView(): View { const hash=win.location.hash.slice(1); return hash==='settings'||hash==='moderation'||hash==='conversations'?hash:'overview'; }
+  function requestedView(): View { const hash=win.location.hash.slice(1); return hash==='settings'||hash==='moderation'||hash==='conversations'||hash==='onboarding'?hash:'overview'; }
   function showView(view:View,focus=false) {
     if (!signedIn)return;
     if(view!=='moderation'){reviewModal.close(true);++queueVersion;queuePanel.removeAttribute('aria-busy');}
-    for (const name of ['overview','settings','moderation','conversations']) document.getElementById('operator-'+name)!.hidden=name!==view;
+    for (const name of ['overview','settings','moderation','conversations','onboarding']) document.getElementById('operator-'+name)!.hidden=name!==view;
     if(view==='settings')settings.show();else settings.hide();
     if(view==='conversations')conversations.show();else conversations.hide();
     if(view==='moderation'){if(queueData)renderQueue(queueData);void loadQueue();}
@@ -253,5 +253,5 @@ export async function initializeOperator() {
     catch{clearSession();feedback.classList.add('error');feedback.textContent=t('Unable to sign in. Check your operator credentials and try again.');}
     finally{signingIn=false;button.disabled=false;login.removeAttribute('aria-busy');}
   });
-  try{await refresh();}catch{clearSession();status.textContent=t('Unable to check your session. You can try signing in below.');}
+  try{await refresh();if(!signedIn&&new URLSearchParams(win.location.search).get('register')==='1')document.querySelector<HTMLButtonElement>('#open-operator-registration')!.click();}catch{clearSession();status.textContent=t('Unable to check your session. You can try signing in below.');}
 }

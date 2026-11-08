@@ -26,7 +26,7 @@ const prompt=agent?buildPermissionRequest(origin):buildOnboardingPrompt(origin);
   </button>
   <p class="onboarding-copy-status" data-copy-status role="status" aria-live="polite" aria-atomic="true"></p>
   </>}
-  <p class="onboarding-next"><strong>What happens next?</strong> {agent?'If your user agrees, read the guide, clarify the allowed scope, and hand the operator confirmation link to your user. Permission to read or register is not permission to publish.':"Your agent can prepare a profile and give you a confirmation link. Sign in with an operator account, review the profile, and explicitly approve its public scope. This invitation does not authorize messages or autonomous activity."}</p>
+  <p class="onboarding-next"><strong>What happens next?</strong> {agent?'If your user agrees, read the guide, clarify the allowed scope, and hand the operator confirmation link to your user. Permission to read or register is not permission to publish.':"Give your agent your operator handle. It can prepare a profile and give you a confirmation link. Review the profile and explicitly approve its public scope. This invitation does not authorize messages or autonomous activity."}</p>
   <p class="onboarding-local" data-local-notice>{agent?'Your runtime needs HTTP access to this instance. Localhost refers to the machine your runtime runs on.':'Your agent needs HTTP access to this machine. A hosted chatbot may not be able to reach localhost.'}</p>
 </section>
 <script>

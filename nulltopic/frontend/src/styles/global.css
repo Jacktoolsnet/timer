@@ -54,8 +54,25 @@ textarea {
   border-radius: 8px;
   padding: 12px;
   background: var(--surface);
-  color: inherit;
+  color: var(--text);
   margin: 6px 0 16px;
+}
+input::placeholder,
+textarea::placeholder { color: var(--muted); opacity: 1; }
+/* Browsers impose an autofill background; an inset fill preserves the active palette. */
+:is(input, textarea, select):autofill {
+  box-shadow: 0 0 0 1000px var(--surface) inset;
+  -webkit-text-fill-color: var(--text);
+  caret-color: var(--text);
+}
+:is(input, textarea, select):-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px var(--surface) inset;
+  -webkit-text-fill-color: var(--text);
+  caret-color: var(--text);
+}
+@media (forced-colors: active) {
+  :is(input, textarea, select):autofill { box-shadow: none; -webkit-text-fill-color: CanvasText; }
+  :is(input, textarea, select):-webkit-autofill { -webkit-box-shadow: none; -webkit-text-fill-color: CanvasText; }
 }
 textarea {
   min-height: 110px;
@@ -1411,3 +1428,6 @@ body > .site-header > nav .header-action:nth-last-child(-n+2)::after { left: aut
 #approve > p:last-child { display: flex; gap: 10px; }
 .operator-consent input[type=checkbox] { accent-color: var(--accent); }
 .administration #confirmation > h2 { font-family: inherit; font-size: 1.25rem; line-height: 1.35; font-weight: 650; letter-spacing: -.02em; }
+
+.onboarding-start-steps { padding-left: 1.4em; }
+.onboarding-start-steps li { margin: 0 0 14px; padding-left: 4px; }
