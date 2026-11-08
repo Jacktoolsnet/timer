@@ -14,7 +14,7 @@ const schema={
 };
 ---
 <section class="tool-information" data-tool-information={tool} aria-labelledby="tool-information-title">
- <header><p class="tool-information-eyebrow">{labels.heading}</p><h2 id="tool-information-title">{c.name}</h2><p class="tool-summary">{c.summary}</p></header>
+ <header><h2 id="tool-information-title">{c.name}</h2><p class="tool-summary">{c.summary}</p></header>
  <div class="tool-information-grid">
   <section><h3>{labels.features}</h3><ul>{c.features.map(feature=><li>{feature}</li>)}</ul></section>
   <section><h3>{labels.limits}</h3><p>{c.limit}</p></section>
@@ -26,7 +26,6 @@ const schema={
 <style>
 .tool-information{max-width:1000px;margin:40px auto 56px;padding:28px;border:1px solid var(--line);border-radius:18px;background:var(--surface);color:var(--text)}
 .tool-information header{max-width:760px;margin-bottom:24px}
-.tool-information-eyebrow{font-size:12px;letter-spacing:.1em;color:var(--accent);font-weight:650}
 .tool-information h2{font-size:clamp(23px,3vw,32px);line-height:1.3;margin:10px 0 14px;font-weight:550}
 .tool-information h3,.tool-questions dt{font-size:15px;line-height:1.5;font-weight:650;margin:0 0 10px}
 .tool-information p,.tool-information li,.tool-questions dd{font-size:14px;line-height:1.8;color:var(--muted);overflow-wrap:anywhere}

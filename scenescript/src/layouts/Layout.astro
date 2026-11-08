@@ -131,12 +131,6 @@ const alternateLanguages = legal && route !== 'usage' ? (['en', 'de'] as const) 
       </header>
       <main id="main"><slot /></main>
       <footer class="site-footer">
-        <section class="support-section" aria-labelledby="support-title">
-          <div><h2 id="support-title">{t.supportTitle}</h2><p>{t.supportBody}</p></div>
-          <div class="support-actions">
-            <a class="support-coffee" href="https://buymeacoffee.com/jacktoolsnet" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer"><span aria-hidden="true">☕</span>{t.supportCoffee}<span aria-hidden="true">↗</span></a>
-          </div>
-        </section>
         <div><a class="footer-brand" href={'/' + lang + '/'}>jacktools.net</a><p>{t.footer}</p></div>
         <nav aria-label={t.legal}><a href={'/' + (lang === 'de' ? 'de' : 'en') + '/legal/'}>{t.legal}{!['de','en'].includes(lang) && ' (EN)'}</a><a href={'/' + (lang === 'de' ? 'de' : 'en') + '/privacy/'}>{t.privacy}{!['de','en'].includes(lang) && ' (EN)'}</a><a href={'/' + lang + '/usage/'}>{t.usage}</a><button id="privacy-open">{t.preferences}</button></nav>
         <p class="footer-credit">{t.creditBefore} ❤️ ☕ {t.creditAnd} 🍫 {t.creditAfter} <a href="https://jacktools.net" rel="noreferrer" referrerpolicy="no-referrer"><strong>jacktools.net</strong></a></p>

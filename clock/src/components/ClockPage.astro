@@ -74,7 +74,7 @@ const seo=toolSeo.clock[lang];
 </fieldset>
 <ClockAlarm lang={lang} />
 <p id="clock-settings-status" role="status"></p>
-</form></aside></div><p class="local-note">{c.note}</p><p class="privacy-promise">{t.privacyPromise}</p></div>
+</form></aside></div></div>
 <ToolInformation lang={lang} tool="clock" />
 <section class="guide"><div class="guide-heading"><p class="eyebrow">THE JACKTOOLS.NET WAY</p><h2>{guide.heading}</h2><p>{guide.body}</p></div><div class="guide-grid">{guide.steps.map(([title,body],i)=><article><span class="step-number">0{i+1}</span><h3>{title}</h3><p>{body}</p></article>)}</div></section>
 <section class="faq"><h2>{t.faq}</h2>{guide.faq.map(([question,answer])=><details><summary>{question}<span aria-hidden="true">+</span></summary><p>{answer}</p></details>)}</section>
