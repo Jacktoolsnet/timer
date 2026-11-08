@@ -20,6 +20,7 @@ async function fixture(run:(dom:JSDOM,requests:{path:string;body:any}[],state:{f
   }
   if((path==='/api/operator'||path.startsWith('/api/operator?'))&&state.refreshFailed)return new Response('{}',{status:503});
   if(path==='/api/operator'||path.startsWith('/api/operator?'))return new Response(JSON.stringify({operator:{handle:'fixture_operator',guidelines},agents:empty?[]:agents,notices:[],review_requests:[]}));
+  if(path.endsWith('/authorization'))return new Response(JSON.stringify({confirmationUrl:'http://localhost/operator?confirmation=synthetic'}));
   if(path.startsWith('/api/operator/agents/')){
    if(state.wait)await state.wait;
    if(state.fail)return new Response('{}',{status:403});
@@ -154,3 +155,16 @@ test('example can be adapted and saved only through the explicit guidelines save
 test('settings without agents retains guidelines and hides the empty grid',async()=>fixture(async(dom)=>{
  settings(dom);assert.equal(dom.window.document.querySelector<HTMLElement>('#owned')!.hidden,true);assert.equal(dom.window.document.querySelectorAll('.operator-settings-agent').length,0);click(dom,'#operator-guidelines-tile');assert.equal(dom.window.document.querySelector<HTMLTextAreaElement>('#operator-guidelines')!.value,'Original guidelines');
 },'Original guidelines',true));
+
+
+test('intentional authorization navigation is not treated as an unfinished settings write',async()=>fixture(async(dom,requests)=>{
+ let navigation=false,warned:boolean|undefined;
+ dom.virtualConsole.removeAllListeners('jsdomError');
+ dom.virtualConsole.on('jsdomError',error=>{
+  if(!error.message.includes('navigation'))return;navigation=true;
+  const event=new dom.window.Event('beforeunload',{cancelable:true});dom.window.dispatchEvent(event);warned=event.defaultPrevented;
+ });
+ openAgent(dom);click(dom,'#operator-review-authorization');await tick();await tick();
+ assert.equal(navigation,true);assert.equal(warned,false);assert.equal(dom.window.document.querySelector<HTMLDialogElement>('#operator-unsaved-dialog')!.open,false);
+ assert.equal(writes(requests).filter(r=>r.path.endsWith('/authorization')).length,1);assert.equal(requests.some(r=>r.path==='/api/confirmation'),false);
+}));

@@ -21,6 +21,7 @@ export async function initializeOperator() {
   const shell = document.querySelector<HTMLElement>('#operator-login-shell')!;
   const confirmationPanel = document.querySelector<HTMLElement>('#confirmation')!;
   const logout = document.querySelector<HTMLButtonElement>('#operator-header-logout')!;
+  const approvalHeader=document.getElementById('operator-approval-header-actions')!,approveButton=document.querySelector<HTMLButtonElement>('#operator-approve')!,cancelApproval=document.querySelector<HTMLButtonElement>('#cancel-authorization')!;
   const login = document.querySelector<HTMLFormElement>('#login')!;
   const feedback = document.querySelector<HTMLElement>('#login-status')!;
   const password = document.querySelector<HTMLInputElement>('#operator-password')!;
@@ -85,6 +86,7 @@ export async function initializeOperator() {
     logout.setAttribute('aria-label',name ? t('Sign out · ')+name:t('Sign out')); logout.dataset.tooltip = logout.getAttribute('aria-label')!;
   }
   function clearSession() {
+    approvalHeader.hidden=true;approveButton.disabled=true;
     setOnboardingOperator(undefined);
     unsaved.clear();settings.clear();
     signedIn=false;operatorId=undefined;agentSnapshot='';conversations.clear(); ++version;++queueVersion;queueData=null;openCases.clear();queueStatus='pending';updateQueueTabs({pending:0,processed:0});queuePanel.removeAttribute('aria-busy');document.getElementById('operator-queue-limit')!.hidden=true; dashboard.hidden=true; confirmationPanel.hidden=true; shell.hidden=false;
@@ -196,13 +198,21 @@ export async function initializeOperator() {
     },(notice,button)=>{void acceptOwnDecision('/operator/moderation/'+encodeURIComponent(String(notice.id))+'/accept',button);},queueStatus);
     document.getElementById('notices')!.replaceChildren(renderOperatorCases(contextNotices,contextReviews,noticeList,renderReviews(contextReviews),openCases));
   }
+  const scopeInput=document.querySelector<HTMLTextAreaElement>('#approval-scope')!,scopeExample=document.querySelector<HTMLButtonElement>('#approval-scope-example')!;
+  const scopeTemplate=()=>t('The agent may publish posts and replies about its interests only when I explicitly ask it to do so. It must follow platform rules and my public guidelines. It must not share personal, confidential or work-related information. If permission is unclear, it must ask me first. This scope does not authorize autonomous or scheduled activity.');
+  function scopeExampleState(){scopeExample.hidden=scopeInput.readOnly;scopeExample.disabled=scopeInput.readOnly||scopeInput.value.includes(scopeTemplate())||scopeInput.value.length+scopeTemplate().length+(scopeInput.value?2:0)>scopeInput.maxLength;}
+  scopeInput.addEventListener('input',scopeExampleState);
+  scopeExample.addEventListener('click',()=>{
+    if(scopeExample.disabled||scopeInput.readOnly||confirmationPanel.hidden||approveButton.disabled)return;
+    scopeInput.value+=(scopeInput.value?'\n\n':'')+scopeTemplate();scopeInput.focus();scopeInput.setSelectionRange(scopeInput.value.length,scopeInput.value.length);scopeExampleState();
+  });
   function renderPrepared(profile:any) {
     document.getElementById('approval-status')!.textContent='';
     confirmationRevision=profile.scope_revision;confirmationRuleVersion=profile.ruleVersion;confirmationAuthorizationVersion=profile.authorizationVersion;
     const declarationMatches=confirmationAuthorizationVersion===declarations.publication.version;
-    document.querySelector<HTMLButtonElement>('#approve button[type=submit]')!.disabled=!declarationMatches;
+    approveButton.disabled=!declarationMatches;
     if(!declarationMatches)document.getElementById('approval-status')!.textContent=t('Reload this page to review the current authorization declaration.');
-    const scope=document.querySelector<HTMLTextAreaElement>('#approval-scope')!;scope.value=profile.approved_scope||'';scope.readOnly=!!profile.approved_scope;
+    const scope=document.querySelector<HTMLTextAreaElement>('#approval-scope')!;scope.value=profile.approved_scope||'';scope.readOnly=!!profile.approved_scope;scopeExampleState();
     document.querySelector<HTMLFormElement>('#approve')!.querySelectorAll<HTMLInputElement>('input[type=checkbox]').forEach(input=>input.checked=false);
     const prepared=document.getElementById('prepared')!;prepared.replaceChildren(node('h3',profile.name || t('Pending agent')));
     const details=node('dl',undefined,'operator-profile-details');
@@ -216,8 +226,8 @@ export async function initializeOperator() {
     const session=await api('/session');if(current!==version)return;csrf=session.csrf;
     if(!session.operatorId){clearSession();status.textContent='';return;}
     const data:OperatorData=await api('/operator');if(current!==version)return;
-    signedIn=true;operatorId=session.operatorId;shell.hidden=true;dashboard.hidden=false;password.value='';status.textContent='';toolbar(true,data.operator.handle);setOnboardingOperator(data.operator.handle);render(data);showView(requestedView());
-    if(confirmation)try{const prepared=await api('/confirmation?token='+encodeURIComponent(confirmation));if(current!==version)return;renderPrepared(prepared);dashboard.hidden=true;confirmationPanel.hidden=false;}catch(error){await failure(error,t('Unable to load this registration. The link may have expired or already been used.'));}
+    approvalHeader.hidden=true;signedIn=true;operatorId=session.operatorId;shell.hidden=true;dashboard.hidden=false;password.value='';status.textContent='';toolbar(true,data.operator.handle);setOnboardingOperator(data.operator.handle);render(data);showView(requestedView());
+    if(confirmation)try{const prepared=await api('/confirmation?token='+encodeURIComponent(confirmation));if(current!==version)return;renderPrepared(prepared);dashboard.hidden=true;confirmationPanel.hidden=false;approvalHeader.hidden=false;document.getElementById('operator-header-actions')!.hidden=true;}catch(error){await failure(error,t('Unable to load this registration. The link may have expired or already been used.'));}
   }
   document.getElementById('cancel-authorization')!.addEventListener('click',()=>{
     win.location.assign('/operator?lang='+currentLanguage()+'#settings');
@@ -227,7 +237,7 @@ export async function initializeOperator() {
     form.addEventListener('submit',async event=>{
       event.preventDefault();if(saving||!form.reportValidity())return;
       if(selector==='#approve' && confirmationAuthorizationVersion!==declarations.publication.version){document.getElementById('approval-status')!.focus();return;}
-      saving=true;const button=form.querySelector<HTMLButtonElement>('button[type=submit]')!;button.disabled=true;
+      saving=true;const button=selector==='#approve'?approveButton:form.querySelector<HTMLButtonElement>('button[type=submit]')!;button.disabled=true;if(selector==='#approve')cancelApproval.disabled=true;
       try {
         const values=new FormData(form);
         if(selector==='#appeal'){
@@ -248,13 +258,13 @@ export async function initializeOperator() {
         }
         if(selector==='#approve'){
           await send('/confirmation',{token:confirmation,ruleVersion:confirmationRuleVersion,authorizationVersion:declarations.publication.version,publicParticipation:values.get('consent')==='on',authorizePublication:values.get('authorizePublication')==='on',revision:confirmationRevision,scope:values.get('scope')});
-          confirmation=null;confirmationPanel.hidden=true;form.reset();document.getElementById('prepared')!.replaceChildren();win.history.replaceState({},'','/operator#settings');await refresh();status.textContent=t('Agent approved and linked to your account.');
+          confirmation=null;confirmationPanel.hidden=true;approvalHeader.hidden=true;form.reset();document.getElementById('prepared')!.replaceChildren();win.history.replaceState({},'','/operator#settings');await refresh();status.textContent=t('Agent approved and linked to your account.');
         }
       }catch(error){if(selector==='#approve'){
         form.querySelectorAll<HTMLInputElement>('input[type=checkbox]').forEach(input=>input.checked=false);
         const message=document.getElementById('approval-status')!;message.textContent=(error as {status?:number}).status===409?t('The authorization is outdated or already used. Open a fresh review from Settings.'):t('Unable to authorize publication. Check the required confirmations and review the current scope.');message.focus();
       }if(selector==='#appeal')reviewModal.error(t('Unable to send your review request. Please try again.'));await failure(error,t('Unable to save this request. Please check the fields and try again.'));}
-      finally{saving=false;button.disabled=false;if(selector==='#appeal')reviewModal.setBusy(false);}
+      finally{saving=false;button.disabled=false;if(selector==='#approve')cancelApproval.disabled=false;if(selector==='#appeal')reviewModal.setBusy(false);}
     });
   }
   async function signOut(){

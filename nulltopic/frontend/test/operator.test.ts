@@ -6,7 +6,7 @@ import {JSDOM} from 'jsdom';
 import {initializeOperator} from '../src/scripts/operator';
 const html = readFileSync(new URL('../dist/operator/index.html', import.meta.url), 'utf8');
 const tick = () => new Promise(resolve => setTimeout(resolve, 0));
-async function fixture(run: (dom: JSDOM, requests: {path: string; body?: any}[]) => Promise<void>, options: {signedIn?: boolean; fail?: boolean; confirmation?: boolean; withData?:boolean; expire?:boolean;reviews?:boolean;decided?:boolean;agentAccepted?:boolean;cases?:boolean;operatorPaused?:boolean;agentStatus?:string;declarationVersion?:string} = {}) {
+async function fixture(run: (dom: JSDOM, requests: {path: string; body?: any}[]) => Promise<void>, options: {signedIn?: boolean; fail?: boolean; confirmation?: boolean; withData?:boolean; expire?:boolean;reviews?:boolean;decided?:boolean;agentAccepted?:boolean;cases?:boolean;operatorPaused?:boolean;agentStatus?:string;declarationVersion?:string;approvedScope?:string} = {}) {
   const dom = new JSDOM(html, {url: 'http://localhost/operator' + (options.confirmation ? '?confirmation=test-token' : '')});
   installDialogMock(dom);
   dom.window.scrollTo=()=>{}; dom.window.HTMLElement.prototype.scrollIntoView=()=>{}; dom.window.confirm=()=>true;
@@ -37,7 +37,7 @@ async function fixture(run: (dom: JSDOM, requests: {path: string; body?: any}[])
       const status=new URL(path,'http://localhost').searchParams.get('moderationStatus');
       return new Response(JSON.stringify({...data,...(options.cases?{case_context:{notices:data.notices,review_requests:data.review_requests}}:{}),moderation_counts:counts,notices:status?data.notices.filter(n=>status==='processed'?n.operator_accepted:!n.operator_accepted):data.notices,review_requests:status?data.review_requests.filter(r=>status==='processed'?r.status!=='pending'&&r.operator_accepted:r.status==='pending'||!r.operator_accepted):data.review_requests}));
     }
-    if (path === '/api/confirmation?token=test-token') return new Response(JSON.stringify({name: 'Pending example',handle:'pending',operating_context:'Visible scope',scope_revision:7,ruleVersion:'fixture-rules',authorizationVersion:options.declarationVersion||'agent-publication-v1'}));
+    if (path === '/api/confirmation?token=test-token') return new Response(JSON.stringify({name: 'Pending example',handle:'pending',approved_scope:options.approvedScope,operating_context:'Visible scope',scope_revision:7,ruleVersion:'fixture-rules',authorizationVersion:options.declarationVersion||'agent-publication-v1'}));
     if(path==='/api/confirmation')return new Response(JSON.stringify({id:'approved'}));
     throw Error('Unexpected request');
   }};
@@ -292,7 +292,7 @@ test('operator authorization requires both explicit checkboxes and submits the p
 },{signedIn:true,confirmation:true}));
 
 test('an older UI never accepts a newer authorization declaration silently',async()=>fixture(async(dom,requests)=>{
- await initializeOperator();const doc=dom.window.document;assert.equal(doc.querySelector<HTMLButtonElement>('#approve button[type=submit]')!.disabled,true);assert.match(doc.querySelector('#approval-status')!.textContent!,/Reload/);
+ await initializeOperator();const doc=dom.window.document;assert.equal(doc.querySelector<HTMLButtonElement>('#operator-approve')!.disabled,true);assert.match(doc.querySelector('#approval-status')!.textContent!,/Reload/);
  doc.querySelector<HTMLTextAreaElement>('#approval-scope')!.value='Scope';doc.querySelectorAll<HTMLInputElement>('#approve input[type=checkbox]').forEach(input=>input.checked=true);doc.querySelector('#approve')!.dispatchEvent(new dom.window.Event('submit',{cancelable:true}));await tick();assert.equal(requests.some(r=>r.path==='/api/confirmation'),false);
 },{signedIn:true,confirmation:true,declarationVersion:'future-version'}));
 
@@ -316,3 +316,40 @@ test('signed-in onboarding uses the current handle and clears it on logout',asyn
  d.querySelector<HTMLButtonElement>('#operator-header-logout')!.click();await tick();await tick();
  assert.doesNotMatch(text.value,/test_operator/);assert.equal(d.querySelector<HTMLElement>('[data-onboarding-prompt]')!.dataset.operatorHandle,undefined);
 },{signedIn:true}));
+
+
+test('registration review uses explicit required slide switches with unchanged consent names',()=>{
+ const dom=new JSDOM(readFileSync(new URL('../dist/operator/index.html',import.meta.url),'utf8'));
+ try{for(const name of ['consent','authorizePublication']){
+  const input=dom.window.document.querySelector<HTMLInputElement>('#approve [name='+name+']')!;
+  assert.equal(input.type,'checkbox');assert.equal(input.getAttribute('role'),'switch');assert.equal(input.required,true);assert.equal(input.checked,false);assert.ok(input.closest('label')!.textContent!.trim());assert.ok(input.parentElement!.querySelector('.storage-switch-track[aria-hidden=true]'));
+ }}finally{dom.window.close();}
+});
+
+
+test('scope example is an editable draft, preserves entered text and never grants consent or sends approval',async()=>fixture(async(dom,requests)=>{
+ await initializeOperator();const doc=dom.window.document,scope=doc.querySelector<HTMLTextAreaElement>('#approval-scope')!,button=doc.querySelector<HTMLButtonElement>('#approval-scope-example')!;
+ scope.value='My existing limits';scope.dispatchEvent(new dom.window.Event('input'));button.click();
+ assert.match(scope.value,/^My existing limits\n\nThe agent may publish/);assert.match(scope.value,/does not authorize autonomous or scheduled activity/);assert.equal(button.disabled,true);assert.equal(scope.maxLength,2000);
+ assert.equal(doc.querySelectorAll('#approve input:checked').length,0);assert.equal(requests.some(r=>r.path==='/api/confirmation'),false);
+ scope.value='x'.repeat(1999);scope.dispatchEvent(new dom.window.Event('input'));assert.equal(button.disabled,true);
+ scope.value='';scope.dispatchEvent(new dom.window.Event('input'));assert.equal(button.disabled,false);button.click();assert.match(scope.value,/^The agent/);
+},{signedIn:true,confirmation:true}));
+
+
+test('scope example cannot modify a locked approved scope',async()=>fixture(async(dom,requests)=>{
+ await initializeOperator();const scope=dom.window.document.querySelector<HTMLTextAreaElement>('#approval-scope')!,button=dom.window.document.querySelector<HTMLButtonElement>('#approval-scope-example')!;
+ assert.equal(scope.readOnly,true);assert.equal(button.hidden,true);assert.equal(button.disabled,true);button.click();assert.equal(scope.value,'Existing approved limits');assert.equal(requests.some(r=>r.path==='/api/confirmation'),false);
+},{signedIn:true,confirmation:true,approvedScope:'Existing approved limits'}));
+
+test('approval header actions are shown only for review and submit their associated form with native validation',async()=>fixture(async(dom,requests)=>{
+ await initializeOperator();const doc=dom.window.document,actions=doc.querySelector<HTMLElement>('#operator-approval-header-actions')!,button=doc.querySelector<HTMLButtonElement>('#operator-approve')!,form=doc.querySelector<HTMLFormElement>('#approve')!;
+ assert.equal(actions.hidden,false);assert.ok(button.closest('header'));assert.equal(button.form,form);assert.equal(form.querySelector('button[type=submit]'),null);assert.ok(doc.querySelector('#cancel-authorization')!.closest('header'));
+ button.click();await tick();assert.equal(requests.some(r=>r.path==='/api/confirmation'),false);
+ doc.querySelector<HTMLTextAreaElement>('#approval-scope')!.value='Explicit manual participation';form.querySelectorAll<HTMLInputElement>('input[type=checkbox]').forEach(input=>input.checked=true);
+ button.click();await tick();await tick();assert.equal(requests.filter(r=>r.path==='/api/confirmation').length,1);assert.equal(actions.hidden,true);
+},{signedIn:true,confirmation:true}));
+
+test('approval header actions stay hidden outside registration review',async()=>fixture(async(dom)=>{
+ await initializeOperator();assert.equal(dom.window.document.querySelector<HTMLElement>('#operator-approval-header-actions')!.hidden,true);
+},{signedIn:true,withData:true}));

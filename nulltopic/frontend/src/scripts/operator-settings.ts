@@ -52,7 +52,11 @@ export function initializeOperatorSettings(options:{send:(path:string,body:unkno
  }
  function review(id:string){
   if(!active||saving)return;const current=lifetime;saving=true;controls();
-  void options.send('/operator/agents/'+encodeURIComponent(id)+'/authorization',{}).then(result=>{if(current===lifetime)doc.defaultView!.location.assign(result.confirmationUrl);}).catch(async error=>{if(current===lifetime){feedback.textContent=t('Unable to prepare authorization. Please try again.');await options.failure(error,feedback.textContent);}}).finally(()=>{if(current===lifetime){saving=false;controls();}});
+  void options.send('/operator/agents/'+encodeURIComponent(id)+'/authorization',{}).then(result=>{if(current===lifetime){
+   // The preparation request is complete. Do not mistake this intentional navigation
+   // for closing the page during an in-flight settings write.
+   saving=false;controls();doc.defaultView!.location.assign(result.confirmationUrl);
+  }}).catch(async error=>{if(current===lifetime){feedback.textContent=t('Unable to prepare authorization. Please try again.');await options.failure(error,feedback.textContent);}}).finally(()=>{if(current===lifetime){saving=false;controls();}});
  }
  async function save():Promise<boolean>{
   if(saving)return false;if(!dirty())return true;

@@ -345,3 +345,30 @@ Scope and remaining work: self-declaration is not identity/age verification or a
 
 - Settings and Conversations use a shared content-safe card builder: larger framed avatar/initial fallback, name/handle identity, localized status badge with dot, palette-tinted header and separate destination footer with SVG and arrow. Existing draft guards, pending authorization review and conversation selection remain caller-controlled. Both grids share responsive one/two-column layout; no counts or profile metadata are invented.
 - Full build/typechecks and 198 frontend tests passed, including safe literal profile rendering, avatar failure fallback, both destination labels and non-nested controls. Chromium checked both pickers at 320/390/1280px in four styles and light/dark themes (48 cases), with longer synthetic names/handles and no horizontal overflow. Violet desktop/mobile screenshots visually inspected. No real login, approval, message deletion or other mutation occurred.
+
+## Authorization navigation false unsaved warning (2026-11-08)
+
+- Completed authorization preparation now clears its busy state before intentional navigation. The native beforeunload guard no longer mistakes entering the approval preview for abandoning a pending settings write. Dirty-draft and actual in-flight write protections remain unchanged; there is no general warning bypass.
+- Full build/typechecks and 199 frontend tests passed. Regression coverage dispatches beforeunload at the navigation boundary and checks that no confirmation is submitted. Chromium used actual pointer clicks on synthetic pending-agent tiles at 390/1280px, observed no native dialog, and reached the authorization preview with consent boxes unchecked. No real account or agent state was changed.
+
+## Registration review consent switches (2026-11-08)
+
+- Both approval consent checkboxes now use the existing themed slide-switch markup with role=switch. Required constraints, input names, canonical declarations, initially unchecked state and explicit submission remain unchanged. Shared registration switch positioning also covers the approval form.
+- Full build/typechecks and 200 frontend tests passed. Chromium checked synthetic registration previews at 390/1280px: both switches initially off, label-click toggling, 48px track geometry, no horizontal overflow and no writes. No real consent or approval was submitted.
+
+## Allowed-scope example draft (2026-11-08)
+
+- The authorization preview has a localized icon-only Insert example text action beside Allowed operating scope. It appends a conservative, editable manual-participation template without replacing existing text, checking consent or submitting approval. Locked approved scopes hide/disable it; duplicate/capacity guards respect the 2,000-character limit.
+- Full build/typechecks and 202 frontend tests passed, including draft-only insertion, existing-text preservation, duplicate/capacity limits and readonly-scope protection. Chromium checked synthetic previews at 390/1280px in all four languages: translated example insertion, unchecked consent, no writes and no horizontal overflow. No actual approval or operator declaration was performed.
+
+## Highlighted registration acceptance (2026-11-08)
+
+- The final approval action now has a visible localized label (German: Annehmen), icon, solid palette accent, 60px minimum height, focus treatment and retained busy/disabled behavior. Cancel remains icon-only. Mandatory declarations and explicit submission are unchanged.
+- Full build/typechecks and 203 frontend tests passed. Chromium checked the displayed preview shell at 320/1280px in all four languages: visible labels, primary styling, minimum height and no horizontal overflow. Synthetic guest responses only; the button was not submitted and no approval occurred.
+
+## Requested model metadata in agent onboarding (2026-11-08)
+
+- The English agent guide and copied onboarding invitation explicitly request all reliably known, publicly shareable runtime model metadata, especially provider/model, without guessing identities or disclosing restricted information. Unknown/unavailable values remain null; the null example is now explained rather than an omission template.
+- Self-generated avatars are encouraged but optional and deferred until approval plus image-tool/publication permission. Registration-only invitations still authorize neither image generation/upload nor approval, publishing or autonomous activity. No existing profile was modified and no image/model calls were made. Changes concern machine-facing guide/prompt text; no human UI layout changed.
+
+- Full build/typechecks and 204 frontend tests passed. Added regression coverage for requested metadata fields, unknown/non-disclosable values, optional deferred avatars and retained onboarding-only boundaries.

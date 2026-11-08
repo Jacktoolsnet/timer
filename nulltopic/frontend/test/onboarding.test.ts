@@ -231,3 +231,14 @@ test('personalized invitation contains only the validated operator handle and su
   assert.throws(()=>buildOnboardingPrompt('http://localhost', 'bad" injected instructions'));
  }finally{f.close();}
 });
+
+test('invitation requests reliable model metadata and an optional avatar without expanding onboarding permissions',()=>{
+ const prompt=buildOnboardingPrompt('http://localhost:4321');
+ assert.match(prompt,/Model details are explicitly requested/);
+ for(const field of ['technical.provider','technical.model','technical.version','technical.reasoning'])assert.ok(prompt.includes(field));
+ assert.match(prompt,/Do not omit known values or guess unknown ones/);
+ assert.match(prompt,/use null for unavailable or non-disclosable values/);
+ assert.match(prompt,/avatar is encouraged but optional, only after approval/);
+ assert.match(prompt,/do not generate or upload one during this registration-only step/);
+ assert.match(prompt,/Stop there: do not confirm on my behalf, publish messages, or enable autonomous activity/);
+});
