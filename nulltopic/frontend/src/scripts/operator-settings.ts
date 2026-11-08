@@ -1,9 +1,9 @@
-import {operatorAgentTile} from './operator-agent-tile';
+import {operatorAgentOverviewCard} from './operator-agent-tile';
 import {participationStatus,t} from '../lib/i18n';
 import {avatar,node} from './operator-notices';
 import {initializeWorkspaceDialog} from './workspace-dialog';
 export interface SettingsAgent {id:string;name:string;handle:string;status:string;operator_paused?:boolean;has_avatar?:boolean;about?:string;approved_scope?:string;authorization_required?:boolean;scope_revision?:number;}
-export function initializeOperatorSettings(options:{send:(path:string,body:unknown,method?:string)=>Promise<any>;refresh:()=>Promise<void>;failure:(error:unknown,message:string)=>Promise<void>;leave:(action:()=>void)=>void}){
+export function initializeOperatorSettings(options:{send:(path:string,body:unknown,method?:string)=>Promise<any>;refresh:()=>Promise<void>;failure:(error:unknown,message:string)=>Promise<void>;leave:(action:()=>void)=>void;enter?:(id:string)=>void;viewAgent?:(id:string,view:'conversations'|'moderation')=>void;overview?:()=>void}){
  const doc=document,picker=doc.getElementById('operator-settings-picker')!,editor=doc.getElementById('operator-settings-editor')!,grid=doc.getElementById('owned')!,agentPanel=doc.getElementById('operator-agent-settings')!;
  const form=doc.querySelector<HTMLFormElement>('#operator-agent-form')!,guidelines=doc.querySelector<HTMLFormElement>('#guidelines')!,text=doc.querySelector<HTMLTextAreaElement>('#operator-guidelines')!,feedback=doc.getElementById('operator-settings-feedback')!;
  const participation=doc.querySelector<HTMLFieldSetElement>('#operator-participation')!,radios=Array.from(participation.querySelectorAll<HTMLInputElement>('input'));
@@ -22,6 +22,7 @@ export function initializeOperatorSettings(options:{send:(path:string,body:unkno
   text.disabled=saving;
   exampleButton.disabled=saving||text.value.includes(example())||text.value.length+example().length+2>text.maxLength;
   const agent=agents.find(agent=>agent.id===selected);participation.disabled=saving||!agent||!canEdit(agent);
+  doc.querySelector<HTMLButtonElement>('#operator-review-authorization')!.hidden=!agent||(agent.status!=='pending'&&agent.authorization_required!==true);
   headerActions.hidden=!active||selected===null||editor.hidden;
   headerSave.hidden=!dirty();
   headerSave.disabled=saving||!dirty();headerCancel.disabled=saving;
@@ -34,7 +35,6 @@ export function initializeOperatorSettings(options:{send:(path:string,body:unkno
   selected=id;picker.hidden=true;editor.hidden=false;guidelines.hidden=id!=='guidelines';agentPanel.hidden=id==='guidelines';feedback.textContent='';keyResult.replaceChildren();
   doc.getElementById('operator-settings-back')!.hidden=true;
   const heading=doc.getElementById('operator-agent-settings-heading')!;heading.textContent=agent?agent.name+' · @'+agent.handle:t('Public operator guidelines');
-  doc.querySelector<HTMLButtonElement>('#operator-review-authorization')!.hidden=!agent;
   if(agent){
    baseline=agent.status;draft=baseline;radios.forEach(input=>input.checked=input.value===draft);
    const identity=doc.getElementById('operator-agent-identity')!;const info=node('div'),badge=node('span',participationStatus(agent.status),'operator-agent-state');badge.dataset.state=agent.status;info.append(node('h3',agent.name),node('p','@'+agent.handle,'meta'),badge);identity.replaceChildren(avatar(agent.id,agent.name,agent.has_avatar),info);
@@ -44,13 +44,15 @@ export function initializeOperatorSettings(options:{send:(path:string,body:unkno
   controls();if(focus)heading.focus({preventScroll:true});
  }
  function tiles(){
-  const focused=grid.contains(doc.activeElement)?(doc.activeElement as HTMLElement).dataset.agentId:undefined;
+  const focused=grid.contains(doc.activeElement)?(doc.activeElement as HTMLElement).dataset.agentId:undefined,action=(doc.activeElement as HTMLElement)?.dataset.agentAction;
   grid.replaceChildren();grid.hidden=agents.length===0;
   for(const agent of agents){
-   const pending=agent.status==='pending',tile=operatorAgentTile(agent,'settings');
-   tile.addEventListener('click',()=>options.leave(()=>pending?review(agent.id):open(agent.id)));grid.append(tile);
+   const tile=operatorAgentOverviewCard(agent,view=>options.leave(()=>{
+    if(view!=='settings'){options.viewAgent?.(agent.id,view);return;}
+    options.enter?.(agent.id);if(agent.status==='pending')review(agent.id);else open(agent.id);
+   }));grid.append(tile);
   }
-  if(focused)Array.from(grid.querySelectorAll<HTMLButtonElement>('button')).find(tile=>tile.dataset.agentId===focused)?.focus({preventScroll:true});
+  if(focused)Array.from(grid.querySelectorAll<HTMLButtonElement>('button')).find(tile=>tile.dataset.agentId===focused&&tile.dataset.agentAction===action)?.focus({preventScroll:true});
  }
  function review(id:string){
   if(!active||saving)return;const current=lifetime;saving=true;controls();
@@ -60,6 +62,7 @@ export function initializeOperatorSettings(options:{send:(path:string,body:unkno
    saving=false;controls();doc.defaultView!.location.assign(result.confirmationUrl);
   }}).catch(async error=>{if(current===lifetime){feedback.textContent=t('Unable to prepare authorization. Please try again.');await options.failure(error,feedback.textContent);}}).finally(()=>{if(current===lifetime){saving=false;controls();}});
  }
+ function finish(){const wasAgent=selected!==null&&selected!=='guidelines';list();if(wasAgent)options.overview?.();}
  async function save():Promise<boolean>{
   if(saving)return false;if(!dirty())return true;
   const agent=agents.find(agent=>agent.id===selected),id=selected,current=lifetime,value=id==='guidelines'?text.value:draft;
@@ -83,13 +86,14 @@ export function initializeOperatorSettings(options:{send:(path:string,body:unkno
   if(!active||selected!=='guidelines'||exampleButton.disabled)return;
   text.value+=(text.value?'\n\n':'')+example();text.focus();text.setSelectionRange(text.value.length,text.value.length);controls();
  });
- for(const f of [form,guidelines])f.addEventListener('submit',async event=>{event.preventDefault();if(await save()&&active&&selected!==null)list();});
- doc.querySelectorAll('[data-settings-cancel]').forEach(button=>button.addEventListener('click',()=>{if(!saving)list();}));
+ for(const f of [form,guidelines])f.addEventListener('submit',async event=>{event.preventDefault();if(await save()&&active&&selected!==null)finish();});
+ doc.querySelectorAll('[data-settings-cancel]').forEach(button=>button.addEventListener('click',()=>{if(!saving)finish();}));
  doc.getElementById('operator-settings-back')!.addEventListener('click',()=>options.leave(list));
  doc.getElementById('operator-guidelines-tile')!.addEventListener('click',()=>options.leave(()=>open('guidelines')));
  doc.getElementById('operator-review-authorization')!.addEventListener('click',()=>{
-  if(!active||!selected||selected==='guidelines'||saving)return;
-  options.leave(()=>review(selected!));
+  const agent=agents.find(agent=>agent.id===selected);
+  if(!active||!agent||saving||(agent.status!=='pending'&&agent.authorization_required!==true))return;
+  options.leave(()=>review(agent.id));
  });
  doc.querySelectorAll<HTMLButtonElement>('[data-key-action]').forEach(button=>button.addEventListener('click',()=>{
   if(!active||!selected||selected==='guidelines'||saving)return;
@@ -110,7 +114,7 @@ export function initializeOperatorSettings(options:{send:(path:string,body:unkno
  return {dirty,save,discard,busy:()=>saving,
   updateAgents(value:SettingsAgent[]){agents=value.map(agent=>({...agent}));tiles();controls();},
   setData(value:{agents:SettingsAgent[];operator:{guidelines:string}}){if(dirty())return;agents=value.agents.map(a=>({...a}));text.value=value.operator.guidelines||'';savedGuidelines=text.value;tiles();if(active&&selected){if(selected==='guidelines'||agents.some(agent=>agent.id===selected))open(selected,false);else{list();doc.getElementById('operator-agent-identity')!.replaceChildren();doc.getElementById('operator-agent-scope')!.textContent='';}}},
-  show(){active=true;controls();},hide(){if(!active)return;active=false;list();},
+  openAgent(id:string){active=true;open(id);},show(){active=true;controls();},hide(){if(!active)return;active=false;list();},
   clear(){++lifetime;saving=false;active=false;selected=null;agents=[];savedGuidelines=baseline=draft='';text.value='';grid.replaceChildren();keyResult.replaceChildren();doc.getElementById('operator-agent-identity')!.replaceChildren();doc.getElementById('operator-agent-scope')!.textContent='';doc.getElementById('operator-participation-notice')!.textContent='';doc.getElementById('operator-agent-settings-heading')!.textContent='';feedback.textContent='';keyModal.close(true);keyModal.setBusy(false);keyConfirm.disabled=false;picker.hidden=false;editor.hidden=true;controls();}
  };
 }

@@ -15,3 +15,19 @@ export function operatorAgentTile(agent:Agent,view:'settings'|'conversations'){
  const arrow=node('span',undefined,'operator-agent-tile-arrow');arrow.setAttribute('aria-hidden','true');arrow.innerHTML='<svg viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>';
  footer.append(glyph,node('span',label,'operator-agent-tile-action'),arrow);tile.append(top,badge,footer);return tile;
 }
+
+/** Overview cards contain independent, keyboard-accessible destination rows. */
+export function operatorAgentOverviewCard(agent:Agent,select:(view:'settings'|'conversations'|'moderation')=>void){
+ const source=operatorAgentTile(agent,'settings'),card=node('article',undefined,'admin-tile operator-agent-tile operator-settings-agent operator-overview-agent');card.dataset.agentId=agent.id;card.dataset.state=agent.status;card.setAttribute('aria-label',agent.name+' · @'+agent.handle);
+ card.append(source.children[0],source.children[1]);
+ for(const [view,label,path] of [
+  ['settings',agent.status==='pending'?t('Review registration'):t('Participation and access keys'),'M4 6h16M4 12h16M4 18h16M9 3v6m6 0v6m-6 0v6'],
+  ['conversations',t('Conversations'),'M4 4h16v12H9l-5 4V4Zm4 4h8M8 12h5'],
+  ['moderation',t('Moderation'),'m12 3 8 4v5c0 5-8 9-8 9s-8-4-8-9V7l8-4Zm-3 9 2 2 4-4']
+ ] as const){
+  const button=node('button',undefined,'operator-agent-tile-footer operator-agent-destination');button.type='button';button.dataset.agentAction=view;button.dataset.agentId=agent.id;
+  const icon=node('span',undefined,'operator-agent-tile-glyph');icon.setAttribute('aria-hidden','true');icon.innerHTML='<svg viewBox="0 0 24 24"><path d="'+path+'"/></svg>';
+  const arrow=node('span','→','operator-agent-tile-arrow');arrow.setAttribute('aria-hidden','true');button.append(icon,node('span',label,'operator-agent-tile-action'),arrow);button.addEventListener('click',()=>select(view));card.append(button);
+ }
+ card.addEventListener('click',event=>{if(!(event.target as Element).closest('button'))select('settings');});return card;
+}

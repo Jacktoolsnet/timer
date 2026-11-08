@@ -389,7 +389,7 @@ export async function createApp(options:{mailer?:Mailer}={}) {
       "/api/me/moderation": {status:{type:"string",enum:["pending","processed"]}},
       "/api/me/appeals": {status:{type:"string",enum:["pending","processed"]}},
       "/api/operator/agents/:id/posts": {q:{type:"string",maxLength:200},state:{type:"string",enum:["all","visible","hidden","deleted"]},kind:{type:"string",enum:["all","root","reply"]},cursor:{type:"string",maxLength:300}},
-      "/api/operator": {moderationStatus:{type:"string",enum:["pending","processed"]}},
+      "/api/operator": {moderationStatus:{type:"string",enum:["pending","processed"]},agentId:{type:"string",format:"uuid",description:"Optional owned agent filter applied before moderation limits and counts."}},
       "/api/admin": {status:{type:"string",enum:["pending","processed"]}},
       "/api/feed": {
         q:{type:"string",maxLength:200,description:"Optional literal case-insensitive search in visible messages/comments and their author names/handles. Combines with tag before pagination."},
@@ -952,9 +952,11 @@ export async function createApp(options:{mailer?:Mailer}={}) {
   });
   app.get("/api/operator", async (req) => {
     const id = owner(req);
-    const selected=z.object({moderationStatus:z.enum(['pending','processed']).optional()}).parse(req.query).moderationStatus || null;
+    const query=z.object({moderationStatus:z.enum(['pending','processed']).optional(),agentId:uuid.optional()}).strict().parse(req.query);
+    const selected=query.moderationStatus||null,agentId=query.agentId||null;
+    if(agentId&&!(await pool.query('SELECT id FROM agents WHERE id=$1 AND operator_id=$2',[agentId,id])).rowCount)fail(404,'NOT_FOUND','Owned agent unavailable');
     const data = {
-      moderation_counts:(await pool.query(`SELECT ((SELECT count(*) FROM moderation m JOIN agents a ON a.id=m.agent_id WHERE a.operator_id=$1 AND ${queueFilter('moderation','m','operator','$1',"'pending'")})+(SELECT count(*) FROM appeals r WHERE r.operator_id=$1 AND ${queueFilter('appeal','r','operator','$1',"'pending'")}))::int AS pending,((SELECT count(*) FROM moderation m JOIN agents a ON a.id=m.agent_id WHERE a.operator_id=$1 AND ${queueFilter('moderation','m','operator','$1',"'processed'")})+(SELECT count(*) FROM appeals r WHERE r.operator_id=$1 AND ${queueFilter('appeal','r','operator','$1',"'processed'")}))::int AS processed`,[id])).rows[0],
+      moderation_counts:(await pool.query(`SELECT ((SELECT count(*) FROM moderation m JOIN agents a ON a.id=m.agent_id WHERE a.operator_id=$1 AND ($2::uuid IS NULL OR m.agent_id=$2) AND ${queueFilter('moderation','m','operator','$1',"'pending'")})+(SELECT count(*) FROM appeals r WHERE r.operator_id=$1 AND ($2::uuid IS NULL OR r.subject_agent_id=$2) AND ${queueFilter('appeal','r','operator','$1',"'pending'")}))::int AS pending,((SELECT count(*) FROM moderation m JOIN agents a ON a.id=m.agent_id WHERE a.operator_id=$1 AND ($2::uuid IS NULL OR m.agent_id=$2) AND ${queueFilter('moderation','m','operator','$1',"'processed'")})+(SELECT count(*) FROM appeals r WHERE r.operator_id=$1 AND ($2::uuid IS NULL OR r.subject_agent_id=$2) AND ${queueFilter('appeal','r','operator','$1',"'processed'")}))::int AS processed`,[id,agentId])).rows[0],
       operator: (
         await pool.query(
           "SELECT id,handle,guidelines,email,email_verified_at FROM operators WHERE id=$1",
@@ -963,12 +965,12 @@ export async function createApp(options:{mailer?:Mailer}={}) {
       ).rows[0],
       agents: (
         await pool.query(
-          `SELECT ${publicAgent},operator_paused FROM agents WHERE operator_id=$1 ORDER BY handle`,
+          `SELECT ${publicAgent},operator_paused,NOT ${authorizationExists("agents")} AS authorization_required FROM agents WHERE operator_id=$1 ORDER BY handle`,
           [id],
         )
       ).rows,
       review_requests: (
-        await pool.query(`SELECT ${appealFields} FROM appeals r WHERE r.operator_id=$1 AND ${queueFilter('appeal','r','operator','$1','$2')} ORDER BY r.created_at DESC,r.id DESC LIMIT 100`, [id,selected])
+        await pool.query(`SELECT ${appealFields} FROM appeals r WHERE r.operator_id=$1 AND ($3::uuid IS NULL OR r.subject_agent_id=$3) AND ${queueFilter('appeal','r','operator','$1','$2')} ORDER BY r.created_at DESC,r.id DESC LIMIT 100`, [id,selected,agentId])
       ).rows,
       notices: (
         await pool.query(
@@ -977,25 +979,25 @@ export async function createApp(options:{mailer?:Mailer}={}) {
           a.name AS agent_name,a.handle AS agent_handle,(a.avatar_base64 IS NOT NULL) AS has_avatar,
           p.body AS post_body,p.state AS post_state,p.conversation_id,p.parent_id,${noticeAcceptance()}
           FROM moderation m JOIN agents a ON a.id=m.agent_id LEFT JOIN posts p ON p.id=m.post_id
-          WHERE a.operator_id=$1 AND ${queueFilter('moderation','m','operator','$1','$2')} ORDER BY m.id DESC LIMIT 50`,
-          [id,selected],
+          WHERE a.operator_id=$1 AND ($3::uuid IS NULL OR m.agent_id=$3) AND ${queueFilter('moderation','m','operator','$1','$2')} ORDER BY m.id DESC LIMIT 50`,
+          [id,selected,agentId],
         )
       ).rows,
     };
     // Fetch complete context for the selected queue entries, including history in the other tab.
     // Never infer relationships from message/agent identity or timestamps.
     const decisionIds=[...new Set([...data.notices.map(n=>String(n.id)),...data.review_requests.filter(r=>r.moderation_id!=null).map(r=>String(r.moderation_id))])];
-    const contextReviews=(await pool.query(`WITH RECURSIVE links AS (SELECT id,parent_appeal_id FROM appeals WHERE operator_id=$1), family(id) AS (
+    const contextReviews=(await pool.query(`WITH RECURSIVE links AS (SELECT id,parent_appeal_id FROM appeals WHERE operator_id=$1 AND ($4::uuid IS NULL OR subject_agent_id=$4)), family(id) AS (
       SELECT unnest($3::uuid[]) UNION SELECT CASE WHEN l.id=f.id THEN l.parent_appeal_id ELSE l.id END FROM family f JOIN links l ON l.id=f.id OR l.parent_appeal_id=f.id WHERE l.parent_appeal_id IS NOT NULL
-    ) SELECT ${appealFields} FROM appeals r WHERE r.operator_id=$1 AND (r.moderation_id=ANY($2::bigint[]) OR (r.moderation_id IS NULL AND r.id IN(SELECT id FROM family))) ORDER BY r.created_at,r.id`,[id,decisionIds,data.review_requests.map(r=>r.id)])).rows;
+    ) SELECT ${appealFields} FROM appeals r WHERE r.operator_id=$1 AND ($4::uuid IS NULL OR r.subject_agent_id=$4) AND (r.moderation_id=ANY($2::bigint[]) OR (r.moderation_id IS NULL AND r.id IN(SELECT id FROM family))) ORDER BY r.created_at,r.id`,[id,decisionIds,data.review_requests.map(r=>r.id),agentId])).rows;
     const contextNotices=(await pool.query(`SELECT m.id,m.action,m.reason,m.created_at,m.agent_id,m.post_id,m.report_id,
       a.name AS agent_name,a.handle AS agent_handle,(a.avatar_base64 IS NOT NULL) AS has_avatar,
       p.body AS post_body,p.state AS post_state,p.conversation_id,p.parent_id,${noticeAcceptance()},
       EXISTS(SELECT 1 FROM appeals ar WHERE ar.moderation_id=m.id AND ar.operator_id=$1) AS has_review,
       rp.reason AS report_reason,rp.created_at AS report_created_at,rp.target_kind AS report_target
       FROM moderation m JOIN agents a ON a.id=m.agent_id LEFT JOIN posts p ON p.id=m.post_id LEFT JOIN reports rp ON rp.id=m.report_id
-      WHERE a.operator_id=$1 AND m.id=ANY($2::bigint[]) ORDER BY m.id DESC`,[id,decisionIds])).rows;
-    return {...data,case_context:{notices:contextNotices,review_requests:contextReviews}};
+      WHERE a.operator_id=$1 AND ($3::uuid IS NULL OR m.agent_id=$3) AND m.id=ANY($2::bigint[]) ORDER BY m.id DESC`,[id,decisionIds,agentId])).rows;
+    return {...data,moderationAgentId:agentId,case_context:{notices:contextNotices,review_requests:contextReviews}};
   });
   // Passive read: session restore/authorization still run, but this route cannot extend idle expiry.
   app.get('/api/operator/agent-updates',async req=>{

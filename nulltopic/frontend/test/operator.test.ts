@@ -32,7 +32,7 @@ async function fixture(run: (dom: JSDOM, requests: {path: string; body?: any}[])
     if(path.startsWith('/api/operator/agents/agent/posts?'))return new Response(JSON.stringify({agent:{id:'agent',name:'Example agent',handle:'example',status:'paused'},items:[],total:0,nextCursor:null}));
     if (path === '/api/operator/agents/agent') return new Response(JSON.stringify({key:'one-time-test-key'}));
     if(path==='/api/operator'||path.startsWith('/api/operator?')){
-      const data={review_requests:options.reviews?[{id:'review-fixture',...(options.cases?{moderation_id:'42'}:{}),operator_accepted:acceptedReview,agent_accepted:!!options.agentAccepted,reason:'Agent request to review a block.',created_at:'2026-11-06T08:00:00Z',status:options.decided?'rejected':'pending',response:options.decided?'The original decision remains in place.':null,submitted_by:'agent',agent_handle:'example',messages:[{author_role:'agent',handle:'example',body:'Agent clarification.',created_at:'2026-11-06T08:01:00Z'},...operatorReplies.map(text=>({author_role:'operator',handle:'test_operator',body:text,created_at:'2026-11-06T08:02:00Z'}))]}]:[],operator: {handle:'test_operator',guidelines: 'Test boundaries'}, agents: options.withData?[{id:'agent',name:'Example agent',handle:'example',status:options.agentStatus || 'paused',operator_paused:options.operatorPaused ?? true,has_avatar:true,approved_scope:'Public test scope'}]:[], notices: options.withData?[{id:42,...(options.cases?{has_review:true}:{}),operator_accepted:acceptedNotice,agent_accepted:!!options.agentAccepted,action:'hide',reason:'Please follow the house rules.',created_at:'2026-11-06T08:00:00Z',agent_id:'agent',agent_name:'Example agent',agent_handle:'example',post_id:'message',post_body:'Reported example message.',conversation_id:'thread',has_avatar:true}]:[] };
+      const data={review_requests:options.reviews?[{id:'review-fixture',...(options.cases?{moderation_id:'42'}:{}),operator_accepted:acceptedReview,agent_accepted:!!options.agentAccepted,reason:'Agent request to review a block.',created_at:'2026-11-06T08:00:00Z',status:options.decided?'rejected':'pending',response:options.decided?'The original decision remains in place.':null,submitted_by:'agent',agent_handle:'example',messages:[{author_role:'agent',handle:'example',body:'Agent clarification.',created_at:'2026-11-06T08:01:00Z'},...operatorReplies.map(text=>({author_role:'operator',handle:'test_operator',body:text,created_at:'2026-11-06T08:02:00Z'}))]}]:[],operator: {handle:'test_operator',guidelines: 'Test boundaries'}, agents: (options.withData||options.reviews)?[{id:'agent',name:'Example agent',handle:'example',status:options.agentStatus || 'paused',operator_paused:options.operatorPaused ?? true,has_avatar:true,approved_scope:'Public test scope'}]:[], notices: options.withData?[{id:42,...(options.cases?{has_review:true}:{}),operator_accepted:acceptedNotice,agent_accepted:!!options.agentAccepted,action:'hide',reason:'Please follow the house rules.',created_at:'2026-11-06T08:00:00Z',agent_id:'agent',agent_name:'Example agent',agent_handle:'example',post_id:'message',post_body:'Reported example message.',conversation_id:'thread',has_avatar:true}]:[] };
       const counts={pending:data.notices.filter(n=>!n.operator_accepted).length+data.review_requests.filter(r=>r.status==='pending'||!r.operator_accepted).length,processed:data.notices.filter(n=>n.operator_accepted).length+data.review_requests.filter(r=>r.status!=='pending'&&r.operator_accepted).length};
       const status=new URL(path,'http://localhost').searchParams.get('moderationStatus');
       return new Response(JSON.stringify({...data,...(options.cases?{case_context:{notices:data.notices,review_requests:data.review_requests}}:{}),moderation_counts:counts,notices:status?data.notices.filter(n=>status==='processed'?n.operator_accepted:!n.operator_accepted):data.notices,review_requests:status?data.review_requests.filter(r=>status==='processed'?r.status!=='pending'&&r.operator_accepted:r.status==='pending'||!r.operator_accepted):data.review_requests}));
@@ -111,7 +111,7 @@ test('operator overview uses themed tiles, subviews, back navigation and a locke
 }, {signedIn:true,withData:true}));
 test('operator moderation explains decisions and submits an editable review request explicitly', async () => fixture(async (dom,requests) => {
   await initializeOperator();const doc=dom.window.document;
-  (doc.querySelector('#operator-moderation-tile') as HTMLButtonElement).click();
+  (doc.querySelector('[data-agent-action=moderation]') as HTMLButtonElement).click();await tick();await tick();
   assert.match(doc.querySelector('#notices')!.textContent!,/Message hidden/);
   assert.match(doc.querySelector('#notices')!.textContent!,/Please follow the house rules/);
   assert.match(doc.querySelector('#notices')!.textContent!,/Reported example message/);
@@ -147,7 +147,7 @@ test('operator logout clears cached private data, restores navigation and hides 
 }, {signedIn:true,withData:true}));
 test('expired operator session returns to login and clears moderation data', async () => fixture(async dom => {
   await initializeOperator();const doc=dom.window.document;
-  (doc.querySelector('#operator-moderation-tile') as HTMLButtonElement).click();
+  (doc.querySelector('[data-agent-action=moderation]') as HTMLButtonElement).click();await tick();await tick();
   (doc.querySelector('#notices .moderation-message-text') as HTMLElement).click();
   (doc.querySelector('#appeal-reason') as HTMLTextAreaElement).value='Please review this decision.';
   doc.querySelector('#appeal')!.dispatchEvent(new dom.window.Event('submit',{cancelable:true}));await tick();await tick();
@@ -160,7 +160,7 @@ test('expired operator session returns to login and clears moderation data', asy
 
 test('operator review starts with a hint and tapping a message selects readonly context without prefilling the reason', async () => fixture(async (dom,requests) => {
   await initializeOperator();const doc=dom.window.document;
-  (doc.querySelector('#operator-moderation-tile') as HTMLButtonElement).click();
+  (doc.querySelector('[data-agent-action=moderation]') as HTMLButtonElement).click();await tick();await tick();
   assert.equal((doc.querySelector('#appeal') as HTMLElement).hidden,true);
   assert.equal((doc.querySelector('#appeal-empty') as HTMLElement).hidden,false);
   (doc.querySelector('#notices .moderation-message-text') as HTMLElement).click();
@@ -181,7 +181,7 @@ test('operator review starts with a hint and tapping a message selects readonly 
 
 test('operator review opens a modal from the full-width message and clears its draft on dismissal',async()=>fixture(async(dom,requests)=>{
   await initializeOperator();const doc=dom.window.document;
-  (doc.querySelector('#operator-moderation-tile') as HTMLButtonElement).click();
+  (doc.querySelector('[data-agent-action=moderation]') as HTMLButtonElement).click();await tick();await tick();
   const dialog=doc.querySelector<HTMLDialogElement>('#operator-review-dialog')!;
   assert.equal(dialog.open,false);assert.equal(doc.querySelector('#operator-moderation .admin-moderation-grid'),null);
   (doc.querySelector('.operator-notice-card .moderation-message-text') as HTMLElement).click();
@@ -197,7 +197,7 @@ test('operator review opens a modal from the full-width message and clears its d
 
 test('operator sees agent-originated appeals and can append attributed context through the overlay',async()=>fixture(async(dom,requests)=>{
   await initializeOperator();const doc=dom.window.document;
-  doc.querySelector<HTMLButtonElement>('#operator-moderation-tile')!.click();
+  doc.querySelector<HTMLButtonElement>('[data-agent-action=moderation]')!.click();await tick();await tick();
   assert.match(doc.querySelector('#notices .moderation-review-card')!.textContent!,/Submitted by agent @example/);
   assert.match(doc.querySelector('#notices .moderation-review-card')!.textContent!,/Agent clarification/);
   const reply=doc.querySelector<HTMLButtonElement>('#notices .moderation-review-card button')!;assert.equal(reply.dataset.tooltip,'Add context');reply.click();
@@ -212,7 +212,7 @@ test('operator sees agent-originated appeals and can append attributed context t
 },{signedIn:true,reviews:true}));
 test('operator reply to a completed appeal starts an explicit follow-up without overwriting the response',async()=>fixture(async(dom,requests)=>{
   await initializeOperator();const doc=dom.window.document;
-  doc.querySelector<HTMLButtonElement>('#operator-moderation-tile')!.click();
+  doc.querySelector<HTMLButtonElement>('[data-agent-action=moderation]')!.click();await tick();await tick();
   const reply=doc.querySelector<HTMLButtonElement>('#notices .moderation-review-card button')!;assert.equal(reply.dataset.tooltip,'Reply with a follow-up review');reply.click();
   assert.match(doc.querySelector('#appeal-context')!.textContent!,/previous decision remains unchanged/);
   assert.match(doc.querySelector('#appeal-context')!.textContent!,/original decision remains in place/);
@@ -225,7 +225,7 @@ test('operator reply to a completed appeal starts an explicit follow-up without 
 
 test('operator accepts decisions independently, with personal queue tabs and preserved appeal controls',async()=>fixture(async(dom,requests)=>{
   await initializeOperator();const doc=dom.window.document;
-  doc.querySelector<HTMLButtonElement>('#operator-moderation-tile')!.click();await tick();
+  doc.querySelector<HTMLButtonElement>('[data-agent-action=moderation]')!.click();await tick();
   const pending=doc.querySelector<HTMLButtonElement>('#operator-pending-tab')!,processed=doc.querySelector<HTMLButtonElement>('#operator-processed-tab')!;
   assert.equal(pending.getAttribute('aria-selected'),'true');assert.equal(doc.querySelector('#operator-pending-count')!.textContent,'2');assert.match(doc.querySelector('#notices')!.textContent!,/Accepted by agent/);
   doc.querySelector<HTMLButtonElement>('#notices .operator-accept-decision')!.click();await tick();await tick();
@@ -237,7 +237,7 @@ test('operator accepts decisions independently, with personal queue tabs and pre
   processed.dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:'Home',bubbles:true,cancelable:true}));await tick();assert.equal(doc.activeElement,pending);
 },{signedIn:true,withData:true,reviews:true,decided:true,agentAccepted:true}));
 test('pending operator reviews cannot be accepted before the administrator decides',async()=>fixture(async(dom)=>{
-  await initializeOperator();const doc=dom.window.document;doc.querySelector<HTMLButtonElement>('#operator-moderation-tile')!.click();await tick();
+  await initializeOperator();const doc=dom.window.document;doc.querySelector<HTMLButtonElement>('[data-agent-action=moderation]')!.click();await tick();
   assert.equal(doc.querySelector('#notices .moderation-review-card .operator-accept-decision'),null);assert.ok(doc.querySelector('#notices .moderation-review-card button[aria-label="Add context"]'));
 },{signedIn:true,reviews:true}));
 
@@ -265,9 +265,9 @@ for(const [state,ownPause,allowed] of [['paused',true,true],['paused',false,fals
 }
 
 test('operator overview conversations tile leads to owned-agent tiles and a searchable message view',async()=>fixture(async(dom,requests)=>{
- await initializeOperator();const doc=dom.window.document;doc.querySelector<HTMLButtonElement>('#operator-conversations-tile')!.click();assert.equal(doc.querySelector<HTMLElement>('#operator-conversations')!.hidden,false);assert.equal(doc.querySelector<HTMLElement>('#operator-overview')!.hidden,true);assert.equal(dom.window.location.hash,'#conversations');
+ await initializeOperator();const doc=dom.window.document;doc.querySelector<HTMLButtonElement>('[data-agent-action=conversations]')!.click();assert.equal(doc.querySelector<HTMLElement>('#operator-conversations')!.hidden,false);assert.equal(doc.querySelector<HTMLElement>('#operator-overview')!.hidden,true);assert.equal(dom.window.location.hash,'#conversations/agent/agent');
  doc.querySelector<HTMLButtonElement>('.operator-conversation-agent')!.click();await tick();assert.ok(requests.some(r=>r.path.startsWith('/api/operator/agents/agent/posts?')));assert.match(doc.querySelector('#operator-messages-heading')!.textContent!,/Example agent/);
- doc.querySelector<HTMLButtonElement>('#operator-messages-back')!.click();doc.querySelector<HTMLButtonElement>('#operator-conversations [data-operator-view=overview]')!.click();assert.equal(doc.querySelector<HTMLElement>('#operator-overview')!.hidden,false);
+ doc.querySelector<HTMLButtonElement>('#operator-messages-back')!.click();assert.equal(doc.querySelector<HTMLElement>('#operator-overview')!.hidden,false);
 },{signedIn:true,withData:true}));
 
 test('operator login keeps only the illustration and login controls below its section brand', () => {
@@ -368,3 +368,13 @@ test('consent switches cannot enable acceptance of an outdated authorization dec
 test('failed approval clears consent and leaves acceptance disabled until both switches are confirmed again',async()=>fixture(async(dom)=>{
  await initializeOperator();const doc=dom.window.document,button=doc.querySelector<HTMLButtonElement>('#operator-approve')!;doc.querySelector<HTMLTextAreaElement>('#approval-scope')!.value='Explicit scope';doc.querySelectorAll<HTMLInputElement>('#approve input[type=checkbox]').forEach(input=>input.click());button.click();assert.equal(button.disabled,true);await tick();await tick();assert.equal(doc.querySelectorAll('#approve input:checked').length,0);assert.equal(button.disabled,true);
 },{signedIn:true,confirmation:true,confirmationFail:true}));
+
+test('overview places full-width shared actions before agent-specific destinations and scopes moderation tabs',async()=>fixture(async(dom,requests)=>{
+ await initializeOperator();const doc=dom.window.document;assert.deepEqual([...doc.querySelectorAll('.operator-overview-actions > button')].map(e=>e.id),['operator-settings-tile','operator-onboarding-tile']);assert.equal(doc.querySelector('#operator-settings #owned'),null);assert.ok(doc.querySelector('#operator-overview #owned'));assert.equal(doc.querySelectorAll('#owned [data-agent-action]').length,3);
+ doc.querySelector<HTMLButtonElement>('#owned [data-agent-action=moderation]')!.click();await tick();await tick();assert.equal(dom.window.location.hash,'#moderation/agent/agent');assert.ok(requests.some(r=>r.path.includes('moderationStatus=pending&agentId=agent')));assert.match(doc.querySelector('#operator-moderation-heading')!.textContent!,/Example agent.*@example/);
+ doc.querySelector<HTMLButtonElement>('#operator-processed-tab')!.click();await tick();assert.ok(requests.some(r=>r.path.includes('moderationStatus=processed&agentId=agent')));
+},{signedIn:true,withData:true}));
+
+test('direct agent conversation routes restore the selected message view on refresh',async()=>fixture(async(dom,requests)=>{
+ dom.window.history.replaceState({},'','#conversations/agent/agent');await initializeOperator();await tick();assert.equal(dom.window.document.querySelector<HTMLElement>('#operator-message-browser')!.hidden,false);assert.equal(dom.window.document.querySelector<HTMLElement>('#operator-conversations-picker')!.hidden,true);assert.ok(requests.some(r=>r.path.startsWith('/api/operator/agents/agent/posts?')));
+},{signedIn:true,withData:true}));

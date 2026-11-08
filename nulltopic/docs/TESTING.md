@@ -407,3 +407,21 @@ Scope and remaining work: self-declaration is not identity/age verification or a
 - DOM regression checks cover initial/reverted/example/cancelled drafts and switching to per-agent settings. No new real-browser visual check for this visibility-only change.
 
 - Full build/typechecks and 213 frontend tests passed.
+
+## Consistent per-agent settings completion (2026-11-08)
+
+- Removed the lingering approved-and-linked status message after authorization. Agent editors now share guidelines behavior: Save is visible only for a changed draft, explicit successful form Save returns to the picker, and the redundant in-editor back button is hidden. Header Cancel remains. Shared save callbacks still preserve requested unsaved-dialog destinations; failures keep drafts open.
+- Full build/typechecks and 214 frontend tests passed. Chromium checked synthetic agent participation changes at 390/1280px, successful and rejected saves: clean/changed/reverted Save visibility, hidden back button, exactly one mocked request, return on success and retained editor on failure. No actual agent state was changed.
+
+## Publication review only when authorization is required (2026-11-08)
+
+- The per-agent publication-review action now follows the server's authorization_required flag (or pending registration state), instead of appearing for every selected agent. Already authorized agents hide it, and a programmatic click cannot prepare a redundant link. Passive agent updates recompute availability without resetting active drafts. Genuine scope reauthorization remains available.
+- DOM regressions cover authorized/reauthorization-needed states, guarded clicks, intentional review navigation and passive flag changes with a dirty participation draft. No new real-browser layout check for this visibility-only change.
+
+- Full build/typechecks and 217 frontend tests passed.
+
+## Agent-centered operator home (2026-11-08)
+
+- Home now has stacked full-width Settings/Add agent actions, followed by a three/two/one-column agent grid. Cards are articles with three separate, accessible destination rows. Shared Settings contains only public guidelines; direct agent settings, message and moderation routes retain the selected agent through refresh/history. Save/Cancel for an agent and message Back return to the overview. Pending review still requires an explicit click.
+- Full build/typechecks, 221 frontend tests and 38 isolated backend tests passed. Coverage includes safe card content/independent destination buttons, scoped moderation tab requests, restoring message routes, existing draft/save/expiry guards, passive discovery and retained row focus. Backend integration checks verify invalid/foreign agent filters, correct per-agent counts before limits and complete owner/agent-scoped case context.
+- Chromium checked 320/768/1440px in en/de/es/fr (12 layout/navigation cases): stacked shared actions, 1/2/3 agent columns, no horizontal overflow, direct agent settings/messages/moderation, correct selected-agent requests and guidelines-only shared Settings. German desktop/mobile screenshots visually inspected; mobile action-card layout refined after inspection. Synthetic session/agents/read responses only; no actual account, agent, moderation or conversation state changed.

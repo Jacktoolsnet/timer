@@ -5,10 +5,10 @@ import {JSDOM} from 'jsdom';
 import {initializeOperator} from '../src/scripts/operator';
 import {installDialogMock} from './dialog-mock';
 const tick=()=>new Promise(resolve=>setTimeout(resolve,0));
-async function fixture(run:(dom:JSDOM,requests:{path:string;body:any}[],state:{fail:boolean;wait:Promise<void>|null;expire:boolean;failRefresh:boolean;refreshFailed:boolean})=>Promise<void>,initialGuidelines='Original guidelines',empty=false){
+async function fixture(run:(dom:JSDOM,requests:{path:string;body:any}[],state:{fail:boolean;wait:Promise<void>|null;expire:boolean;failRefresh:boolean;refreshFailed:boolean})=>Promise<void>,initialGuidelines='Original guidelines',empty=false,authorizationRequired=false){
  const dom=new JSDOM(readFileSync(new URL('../dist/operator/index.html',import.meta.url),'utf8'),{url:'http://localhost/operator'});installDialogMock(dom);dom.window.scrollTo=()=>{};
  const state={fail:false,wait:null as Promise<void>|null,expire:false,failRefresh:false,refreshFailed:false},requests:{path:string;body:any}[]=[];
- let signedIn=true,guidelines=initialGuidelines;const agents=[{id:'agent-a',name:'Settings',handle:'first',status:'active',operator_paused:false,approved_scope:'Original public scope'},{id:'agent-b',name:'Second agent',handle:'second',status:'blocked',operator_paused:true,approved_scope:'Another scope'}];
+ let signedIn=true,guidelines=initialGuidelines;const agents=[{id:'agent-a',authorization_required:authorizationRequired,name:'Settings',handle:'first',status:'active',operator_paused:false,approved_scope:'Original public scope'},{id:'agent-b',name:'Second agent',handle:'second',status:'blocked',operator_paused:true,approved_scope:'Another scope'}];
  const values={document:dom.window.document,location:dom.window.location,FormData:dom.window.FormData,fetch:async(path:string,init?:RequestInit)=>{
   const body=init?.body?JSON.parse(String(init.body)):undefined;requests.push({path,body});
   if(path==='/api/session')return new Response(JSON.stringify({csrf:'fixture',...(signedIn?{operatorId:'owner'}:{})}));
@@ -35,7 +35,7 @@ async function fixture(run:(dom:JSDOM,requests:{path:string;body:any}[],state:{f
 }
 function click(dom:JSDOM,selector:string){const element=dom.window.document.querySelector<HTMLButtonElement>(selector);assert.ok(element,selector);element.click();}
 function settings(dom:JSDOM){click(dom,'#operator-settings-tile');}
-function openAgent(dom:JSDOM){settings(dom);click(dom,'[data-agent-id="agent-a"].operator-settings-agent');}
+function openAgent(dom:JSDOM){click(dom,'[data-agent-id="agent-a"].operator-settings-agent');}
 function openGuidelines(dom:JSDOM){settings(dom);click(dom,'#operator-guidelines-tile');}
 function changeGuidelines(dom:JSDOM,value='Changed guidelines'){const input=dom.window.document.querySelector<HTMLTextAreaElement>('#operator-guidelines')!;input.value=value;input.dispatchEvent(new dom.window.Event('input'));}
 function submit(dom:JSDOM,id:string){dom.window.document.querySelector(id)!.dispatchEvent(new dom.window.Event('submit',{cancelable:true}));}
@@ -129,14 +129,14 @@ test('authenticated navigation is hidden and header actions follow only the acti
  assert.equal(actions.hidden,true);openAgent(dom);assert.equal(actions.hidden,false);assert.equal(save.form,doc.querySelector('#operator-agent-form'));assert.equal(save.disabled,true);
  assert.equal(doc.querySelector('#operator-settings-editor [data-settings-cancel]'),null);
  click(dom,'input[value=paused]');assert.equal(save.disabled,false);save.click();await tick();await tick();assert.deepEqual(writes(requests).map(request=>request.body),[{action:'pause'}]);assert.equal(save.disabled,true);
- cancel.click();assert.equal(actions.hidden,true);click(dom,'#operator-guidelines-tile');assert.equal(save.form,doc.querySelector('#guidelines'));changeGuidelines(dom,'Header draft');save.click();await tick();await tick();assert.equal(writes(requests).at(-1)!.body.guidelines,'Header draft');
- changeGuidelines(dom,'Discard this');cancel.click();assert.equal(actions.hidden,true);click(dom,'#operator-guidelines-tile');assert.equal(doc.querySelector<HTMLTextAreaElement>('#operator-guidelines')!.value,'Header draft');
+ cancel.click();assert.equal(actions.hidden,true);settings(dom);click(dom,'#operator-guidelines-tile');assert.equal(save.form,doc.querySelector('#guidelines'));changeGuidelines(dom,'Header draft');save.click();await tick();await tick();assert.equal(writes(requests).at(-1)!.body.guidelines,'Header draft');
+ changeGuidelines(dom,'Discard this');cancel.click();assert.equal(actions.hidden,true);settings(dom);click(dom,'#operator-guidelines-tile');assert.equal(doc.querySelector<HTMLTextAreaElement>('#operator-guidelines')!.value,'Header draft');
  click(dom,'#operator-header-cancel');click(dom,'#operator-settings-picker [data-operator-view=overview]');assert.equal(actions.hidden,true);
 }));
 
 test('shared guidelines precede agent grid; example text is an editable draft, never an automatic save',async()=>fixture(async(dom,requests)=>{
  const doc=dom.window.document;settings(dom);
- assert.ok(doc.querySelector('#operator-guidelines-tile')!.compareDocumentPosition(doc.querySelector('#owned')!)&dom.window.Node.DOCUMENT_POSITION_FOLLOWING);
+ assert.ok(doc.querySelector('#operator-overview #owned'));assert.equal(doc.querySelector('#operator-settings #owned'),null);
  assert.equal(doc.querySelector<HTMLElement>('#owned')!.hidden,false);
  click(dom,'#operator-guidelines-tile');const text=doc.querySelector<HTMLTextAreaElement>('#operator-guidelines')!;
  click(dom,'#operator-guidelines-example');assert.match(text.value,/^Original guidelines\n\nMy agents/);assert.ok(text.value.length<=2000);
@@ -167,7 +167,7 @@ test('intentional authorization navigation is not treated as an unfinished setti
  openAgent(dom);click(dom,'#operator-review-authorization');await tick();await tick();
  assert.equal(navigation,true);assert.equal(warned,false);assert.equal(dom.window.document.querySelector<HTMLDialogElement>('#operator-unsaved-dialog')!.open,false);
  assert.equal(writes(requests).filter(r=>r.path.endsWith('/authorization')).length,1);assert.equal(requests.some(r=>r.path==='/api/confirmation'),false);
-}));
+},'Original guidelines',false,true));
 
 
 test('saving guidelines returns to the settings picker with committed text and no stale header actions',async()=>fixture(async(dom,requests)=>{
@@ -202,3 +202,12 @@ test('agent Save appears only for changes, hides on reversion and returns to pic
  assert.deepEqual(writes(requests).map(r=>r.body),[{action:'pause'}]);assert.equal(doc.querySelector<HTMLElement>('#operator-settings-picker')!.hidden,false);assert.equal(doc.querySelector<HTMLElement>('#operator-settings-editor')!.hidden,true);assert.equal(doc.querySelector<HTMLElement>('#operator-header-actions')!.hidden,true);
  click(dom,'[data-agent-id="agent-a"].operator-settings-agent');assert.equal(doc.querySelector<HTMLInputElement>('input[value=paused]')!.checked,true);assert.equal(save.hidden,true);
 }));
+
+
+test('authorized agents do not offer redundant publication review or prepare fresh links',async()=>fixture(async(dom,requests)=>{
+ const doc=dom.window.document;openAgent(dom);const button=doc.querySelector<HTMLButtonElement>('#operator-review-authorization')!;assert.equal(button.hidden,true);button.click();await tick();assert.equal(writes(requests).length,0);
+}));
+
+test('agents requiring renewed scope authorization offer publication review',async()=>fixture(async(dom)=>{
+ openAgent(dom);assert.equal(dom.window.document.querySelector<HTMLButtonElement>('#operator-review-authorization')!.hidden,false);
+},'Original guidelines',false,true));

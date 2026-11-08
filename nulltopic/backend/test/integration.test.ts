@@ -1237,6 +1237,8 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
       await login('other_operator');
       assert.equal((await call('POST','/operator/appeals',{moderationId:decision.id,reason:'Not owned'},undefined,true)).statusCode,404);
       assert.equal((await call('GET','/operator',undefined,undefined,true)).json().review_requests.some((r:any)=>r.id===appeal),false);
+      assert.equal((await call('GET','/operator?agentId='+agentId,undefined,undefined,true)).statusCode,404);
+      assert.equal((await call('GET','/operator?agentId=invalid',undefined,undefined,true)).statusCode,400);
       await login('test_admin',true);
       const verdict=(id:string,outcome:string)=>call('POST','/admin/appeals/'+id+'/decision',{outcome,response:'We reviewed the agent-level concern and its context.'},undefined,true);
       assert.equal((await verdict(appeal,'rejected')).statusCode,200);
@@ -1246,6 +1248,8 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
       assert.equal((await call('POST','/operator/appeals',{moderationId:decision.id,reason:'Additional context for the blocked agent.'},undefined,true)).statusCode,409);
       assert.equal((await call('POST','/operator/appeals/'+appeal+'/messages',{body:'Additional context for the blocked agent.'},undefined,true)).statusCode,200);
       const caseView=(await call('GET','/operator?moderationStatus=pending',undefined,undefined,true)).json();
+      const scoped=(await call('GET','/operator?moderationStatus=pending&agentId='+agentId,undefined,undefined,true)).json();
+      assert.equal(scoped.moderationAgentId,agentId);assert.ok(scoped.notices.length);assert.ok(scoped.notices.every((n:any)=>n.agent_id===agentId));assert.ok(scoped.review_requests.every((r:any)=>r.subject_agent_id===agentId));assert.ok(scoped.case_context.notices.every((n:any)=>n.agent_id===agentId));assert.ok(scoped.case_context.review_requests.every((r:any)=>r.subject_agent_id===agentId));
       const caseNotice=caseView.case_context.notices.find((n:any)=>String(n.id)===String(decision.id));assert.equal(caseNotice.has_review,true);assert.ok(caseNotice.report_id);
       assert.equal(caseView.case_context.review_requests.filter((r:any)=>String(r.moderation_id)===String(decision.id)).length,2);
       assert.equal((await call('POST','/operator/appeals/'+appeal+'/messages',{body:'Duplicate follow-up'},undefined,true)).statusCode,409);
@@ -1435,6 +1439,8 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
       await pool.query("INSERT INTO decision_acknowledgements(moderation_id,actor_role,operator_id) SELECT id,'operator',$2 FROM moderation WHERE agent_id=$1 AND reason='Accepted paging fixture'",[peer,operator]);
       assert.deepEqual((await call('GET','/me/moderation?status=pending',undefined,peerKey)).json().map((n:any)=>n.id),[oldest]);assert.equal((await call('GET','/me/moderation?status=processed',undefined,peerKey)).json().length,50);
       const queue=(await call('GET','/operator?moderationStatus=pending',undefined,undefined,true)).json();assert.ok(queue.notices.some((n:any)=>n.id===oldest));assert.ok(queue.moderation_counts.processed>=107);
+      const scopedPeer=(await call('GET','/operator?moderationStatus=processed&agentId='+peer,undefined,undefined,true)).json();assert.ok(scopedPeer.notices.every((n:any)=>n.agent_id===peer));assert.ok(scopedPeer.moderation_counts.processed>=105);
+      const scopedOwn=(await call('GET','/operator?moderationStatus=processed&agentId='+agentId,undefined,undefined,true)).json();assert.ok(scopedOwn.moderation_counts.processed<scopedPeer.moderation_counts.processed);assert.ok(scopedOwn.notices.every((n:any)=>n.agent_id===agentId));
       process.env.LIMIT_AGENT_ACK='1';await pool.query("DELETE FROM limits WHERE bucket LIKE 'agent_ack:'||$1||':%'",[agentId]);
       try{assert.equal((await call('POST',agentPath,{},key)).statusCode,200);assert.equal((await call('POST',agentPath,{},key)).statusCode,429);}finally{delete process.env.LIMIT_AGENT_ACK;}
       await pool.query('UPDATE agents SET key_hash=NULL WHERE id=$1',[agentId]);try{assert.equal((await call('POST',agentPath,{},key)).statusCode,401);}finally{await pool.query('UPDATE agents SET key_hash=$2 WHERE id=$1',[agentId,digest(key)]);}

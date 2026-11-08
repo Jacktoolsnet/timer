@@ -16,7 +16,7 @@ export async function initializeOperator() {
   const win = document.defaultView!;
   document.querySelector<HTMLAnchorElement>('#operator-recovery-link')!.href='/operator-access?lang='+currentLanguage();
   const status = document.querySelector<HTMLElement>('#status')!;
-  const conversations=initializeOperatorConversations(id=>send('/operator/posts/'+encodeURIComponent(id),{},'DELETE'),failure);
+  const conversations=initializeOperatorConversations(id=>send('/operator/posts/'+encodeURIComponent(id),{},'DELETE'),failure,()=>navigate('overview'));
   const dashboard = document.querySelector<HTMLElement>('#dashboard')!;
   const shell = document.querySelector<HTMLElement>('#operator-login-shell')!;
   const confirmationPanel = document.querySelector<HTMLElement>('#confirmation')!;
@@ -37,7 +37,7 @@ export async function initializeOperator() {
     document.querySelectorAll<HTMLElement>('.operator-notice-card').forEach(card=>card.dataset.selected='false');
   }
   const appealStatus = document.querySelector<HTMLElement>('#appeal-status')!;
-  let operatorId:string|undefined,agentSnapshot='';
+  let operatorId:string|undefined,agentSnapshot='',moderationAgent:string|null=null,lastRoute='';let knownAgents:OwnedAgent[]=[];
   let csrf = '', signedIn = false, signingIn = false, version = 0;
   const openCases=new Set<string>();
   let queueStatus:'pending'|'processed'='pending',queueVersion=0,queueData:OperatorData|null=null;
@@ -55,7 +55,7 @@ export async function initializeOperator() {
   async function loadQueue(){
     if(!signedIn || document.getElementById('operator-moderation')!.hidden)return;
     const current=++queueVersion;queuePanel.setAttribute('aria-busy','true');
-    try{const data:OperatorData=await api('/operator?moderationStatus='+queueStatus);if(current===queueVersion&&signedIn){queueData=data;if(!document.querySelector<HTMLDialogElement>('#operator-review-dialog')!.open)renderQueue(data);}}
+    try{const data:OperatorData=await api('/operator?'+new URLSearchParams({moderationStatus:queueStatus,...(moderationAgent?{agentId:moderationAgent}:{})}));if(current===queueVersion&&signedIn){queueData=data;if(!document.querySelector<HTMLDialogElement>('#operator-review-dialog')!.open)renderQueue(data);}}
     catch(error){if(current===queueVersion)await failure(error,t('Unable to load your moderation queue. Please try again.'));}
     finally{if(current===queueVersion)queuePanel.removeAttribute('aria-busy');}
   }
@@ -90,7 +90,7 @@ export async function initializeOperator() {
     approvalBusy=false;approvalHeader.hidden=true;approveButton.disabled=true;
     setOnboardingOperator(undefined);
     unsaved.clear();settings.clear();
-    signedIn=false;operatorId=undefined;agentSnapshot='';conversations.clear(); ++version;++queueVersion;queueData=null;openCases.clear();queueStatus='pending';updateQueueTabs({pending:0,processed:0});queuePanel.removeAttribute('aria-busy');document.getElementById('operator-queue-limit')!.hidden=true; dashboard.hidden=true; confirmationPanel.hidden=true; shell.hidden=false;
+    signedIn=false;operatorId=undefined;agentSnapshot='';moderationAgent=null;knownAgents=[];conversations.clear(); ++version;++queueVersion;queueData=null;openCases.clear();queueStatus='pending';updateQueueTabs({pending:0,processed:0});queuePanel.removeAttribute('aria-busy');document.getElementById('operator-queue-limit')!.hidden=true; dashboard.hidden=true; confirmationPanel.hidden=true; shell.hidden=false;
     password.value=''; toolbar(false);reviewModal.close(true); resetReview();
     for (const id of ['owned','notices','prepared']) document.getElementById(id)!.replaceChildren();
     for (const id of ['guidelines','appeal','approve']) document.querySelector<HTMLFormElement>('#'+id)!.reset();
@@ -103,17 +103,25 @@ export async function initializeOperator() {
     }
     status.textContent=message;
   }
-  function requestedView(): View { const hash=win.location.hash.slice(1); return hash==='settings'||hash==='moderation'||hash==='conversations'||hash==='onboarding'?hash:'overview'; }
+  function requestedView(): View { const hash=win.location.hash.slice(1).split('/')[0]; return hash==='settings'||hash==='moderation'||hash==='conversations'||hash==='onboarding'?hash:'overview'; }
+  function requestedAgent(){const parts=win.location.hash.slice(1).split('/');try{return parts[1]==='agent'&&parts[2]?decodeURIComponent(parts[2]):null;}catch{return null;}}
   function showView(view:View,focus=false) {
     if (!signedIn)return;
     if(view!=='moderation'){reviewModal.close(true);++queueVersion;queuePanel.removeAttribute('aria-busy');}
     for (const name of ['overview','settings','moderation','conversations','onboarding']) document.getElementById('operator-'+name)!.hidden=name!==view;
-    if(view==='settings')settings.show();else settings.hide();
-    if(view==='conversations')conversations.show();else conversations.hide();
-    if(view==='moderation'){if(queueData)renderQueue(queueData);void loadQueue();}
-    if (focus) { document.getElementById(view==='overview'?'operator-heading':'operator-'+view+'-heading')!.focus({preventScroll:true}); win.scrollTo?.({top:0,behavior:'instant'}); }
+    const agentId=requestedAgent();
+    if(view==='settings'&&!agentId&&lastRoute.startsWith('#settings/agent/'))settings.hide();
+    lastRoute=win.location.hash;
+    if(view==='settings'){settings.show();if(agentId)settings.openAgent(agentId);}else settings.hide();
+    if(view==='conversations'){conversations.show();if(agentId)conversations.open(agentId);}else conversations.hide();
+    if(view==='moderation'){
+      if(moderationAgent!==agentId){moderationAgent=agentId;queueData=null;openCases.clear();queueStatus='pending';updateQueueTabs({pending:0,processed:0});document.getElementById('notices')!.replaceChildren();}
+      const agent=knownAgents.find(agent=>agent.id===agentId);document.getElementById('operator-moderation-heading')!.textContent=agent?t('Moderation')+' · '+agent.name+' · @'+agent.handle:t('Moderation');
+      if(queueData)renderQueue(queueData);void loadQueue();
+    }
+    if (focus&&!((view==='settings'||view==='conversations')&&agentId)) { document.getElementById(view==='overview'?'operator-heading':'operator-'+view+'-heading')!.focus({preventScroll:true}); win.scrollTo?.({top:0,behavior:'instant'}); }
   }
-  const settings=initializeOperatorSettings({send,refresh,failure,leave:action=>unsaved.request(action)});
+  const settings=initializeOperatorSettings({send,refresh,failure,leave:action=>unsaved.request(action),enter:id=>navigate('settings',id),viewAgent:(id,view)=>navigate(view,id),overview:()=>navigate('overview')});
   const unsaved=initializeUnsavedSettings({dirty:settings.dirty,busy:settings.busy,save:settings.save,discard:settings.discard});
   initializeAgentUpdates<{operatorId:string;agents:OwnedAgent[]}>({document,
     enabled:()=>signedIn&&!dashboard.hidden,
@@ -122,15 +130,15 @@ export async function initializeOperator() {
     apply:data=>{
       if(data.operatorId!==operatorId){clearSession();status.textContent=t('Your session has expired. Please sign in again.');return;}
       const snapshot=JSON.stringify(data.agents);if(snapshot===agentSnapshot)return;agentSnapshot=snapshot;
-      settings.updateAgents(data.agents);conversations.setAgents(data.agents);
+      knownAgents=data.agents;settings.updateAgents(data.agents);conversations.setAgents(data.agents);
       document.getElementById('operator-agent-count')!.textContent=t(data.agents.length===1?'{count} linked agent':'{count} linked agents',{count:data.agents.length});
     },
     expired:()=>{clearSession();status.textContent=t('Your session has expired. Please sign in again.');}
   });
   let acceptedUrl=win.location.href,historyIndex=0,restorePending:{index:number}|null=null,allowPop=false;
   win.history.replaceState({...win.history.state,nulltopicOperatorIndex:historyIndex},'');
-  function navigate(view:View){
-    win.history.pushState({nulltopicOperatorIndex:++historyIndex},'','#'+view);acceptedUrl=win.location.href;showView(view,true);
+  function navigate(view:View,agentId?:string){
+    win.history.pushState({nulltopicOperatorIndex:++historyIndex},'','#'+view+(agentId?'/agent/'+encodeURIComponent(agentId):''));acceptedUrl=win.location.href;showView(view,true);
   }
   for(const button of document.querySelectorAll<HTMLButtonElement>('[data-operator-view]'))button.addEventListener('click',()=>{
     if(signedIn)unsaved.request(()=>navigate(button.dataset.operatorView as View),button);
@@ -172,11 +180,10 @@ export async function initializeOperator() {
   function render(data:OperatorData) {
     resetReview();
     agentSnapshot=JSON.stringify(data.agents);
-    settings.setData(data);
+    knownAgents=data.agents;settings.setData(data);
     document.getElementById('operator-agent-count')!.textContent=t(data.agents.length===1?'{count} linked agent':'{count} linked agents',{count:data.agents.length});
-    document.getElementById('operator-notice-count')!.textContent=t(data.notices.length===1?'{count} recent decision':'{count} recent decisions',{count:data.notices.length});
     conversations.setAgents(data.agents);
-    queueData=data;renderQueue(data);
+    if(!moderationAgent){queueData=data;renderQueue(data);}
   }
   function renderQueue(data:OperatorData){
     const notices=data.notices.filter(notice=>queueStatus==='processed'?notice.operator_accepted:!notice.operator_accepted);

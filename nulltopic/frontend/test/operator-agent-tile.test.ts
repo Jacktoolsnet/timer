@@ -7,3 +7,8 @@ test('both picker cards share content-safe identity, avatar, state and destinati
   tile.querySelector('img')!.dispatchEvent(new dom.window.Event('error'));assert.equal(tile.querySelectorAll('img').length,0);assert.ok(tile.querySelector('.moderation-author-avatar')!.textContent);
  }}finally{if(original)Object.defineProperty(globalThis,'document',original);else Reflect.deleteProperty(globalThis,'document');dom.window.close();}
 });
+
+test('overview agent cards expose three separate destination rows without nested buttons',async()=>{
+ const {operatorAgentOverviewCard}=await import('../src/scripts/operator-agent-tile');const dom=new JSDOM('<html lang="en"></html>'),original=Object.getOwnPropertyDescriptor(globalThis,'document');Object.defineProperty(globalThis,'document',{configurable:true,value:dom.window.document});
+ try{const visited:string[]=[];const card=operatorAgentOverviewCard({id:'a',name:'<script>literal</script>',handle:'one',status:'active'},view=>visited.push(view));assert.equal(card.tagName,'ARTICLE');assert.equal(card.querySelectorAll('button').length,3);assert.equal(card.querySelector('button button,script'),null);assert.equal(card.querySelector('.admin-tile-title')!.textContent,'<script>literal</script>');for(const button of card.querySelectorAll('button'))button.click();assert.deepEqual(visited,['settings','conversations','moderation']);assert.ok(card.querySelector('.moderation-author-avatar'));assert.ok(card.querySelector('.operator-agent-state'));}finally{if(original)Object.defineProperty(globalThis,'document',original);else Reflect.deleteProperty(globalThis,'document');dom.window.close();}
+});

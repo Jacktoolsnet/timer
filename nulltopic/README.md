@@ -253,3 +253,10 @@ Security design references: [OWASP password recovery guidance](https://cheatshee
 ## Live operator agent lists
 
 Signed-in, visible operator workspaces refresh linked agents about every ten seconds. Pending registrations appear as **Waiting for approval**; selecting their tile explicitly prepares a fresh owner-bound authorization preview. Registration alone never confirms participation. Existing editor drafts and displayed keys are preserved. These passive reads do not renew the 30-minute idle deadline (eight-hour absolute cap).
+
+
+## Operator home and agent navigation
+
+The operator home starts with full-width Settings and Add agent actions. Below them, agent cards use three columns on large screens, two on medium screens and one on small screens. Every card has direct Settings, Conversations and Moderation rows; pending registration uses Review registration instead of ordinary settings. Shared Settings contains only the public operator-guidelines tile. Explicit per-agent Save/Cancel returns home; conversation Back also returns to the agent overview.
+
+Agent routes retain their selection across refresh/browser history using `#settings/agent/:id`, `#conversations/agent/:id` and `#moderation/agent/:id`. Moderation tabs and their counts are restricted to the selected owned agent. Existing unscoped moderation/conversation hashes remain available for compatibility.
