@@ -315,3 +315,8 @@ Scope and remaining work: self-declaration is not identity/age verification or a
 
 - Full build/typechecks and 185 frontend tests passed. Successful prompt copying now uses a polite live-region success toast with checkmark, palette-aware surface, semantic green marker, localized icon-only close control and no focus stealing. It expires after eight seconds, pauses during pointer/keyboard interaction, replaces duplicate feedback and clears on page departure/logout. Clipboard failures still reveal the manual-copy field with inline guidance instead of a success toast.
 - Unit checks cover plain-text injection safety, replacement, close/focus restoration, expiry/interaction pause and page cleanup. Chromium checked all 64 theme/palette/style combinations at 320/1280px (128 cases), bounds/no overflow, translated German feedback, manual closing and denied-clipboard fallback. Mobile dark-blue screenshot visually inspected. Synthetic operator and clipboard only; no real account actions.
+
+## Palette-only toast accents and three-second expiry (2026-11-08)
+
+- Frontend build and 186 frontend tests passed. Toast border and plain SVG success marker now use the active palette accent, with no fixed green or button-like icon background. Only the X is interactive. Default expiry is three seconds; hover/focus pause remains for accessibility.
+- Chromium checked violet light/dark in all four styles at 320/1280px (16 cases): matching border/icon accent, transparent icon background, one button, viewport bounds and actual three-second dismissal. Mobile dark-violet screenshot visually inspected. Synthetic session/clipboard only.
