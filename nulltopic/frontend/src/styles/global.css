@@ -58,7 +58,16 @@ textarea {
   margin: 6px 0 16px;
 }
 input::placeholder,
-textarea::placeholder { color: var(--muted); opacity: 1; }
+textarea::placeholder { color: var(--muted); -webkit-text-fill-color: var(--muted); opacity: 1; }
+/* Keep the painted field surface stable while typing, focusing or previewing autofill.
+   Some browser/password-manager highlights do not expose the :autofill state. */
+:root :is(input:not([type]), input[type=text], input[type=password], input[type=email], input[type=search], input[type=url], input[type=tel], input[type=number], textarea) {
+  background-color: var(--surface) !important;
+  box-shadow: inset 0 0 0 1000px var(--surface) !important;
+  color: var(--text) !important;
+  -webkit-text-fill-color: var(--text) !important;
+  caret-color: var(--text);
+}
 /* Browsers impose an autofill background; an inset fill preserves the active palette. */
 :is(input, textarea, select):autofill {
   box-shadow: 0 0 0 1000px var(--surface) inset;
@@ -71,6 +80,12 @@ textarea::placeholder { color: var(--muted); opacity: 1; }
   caret-color: var(--text);
 }
 @media (forced-colors: active) {
+  :root :is(input:not([type]), input[type=text], input[type=password], input[type=email], input[type=search], input[type=url], input[type=tel], input[type=number], textarea) {
+    background-color: Field !important;
+    box-shadow: none !important;
+    color: FieldText !important;
+    -webkit-text-fill-color: FieldText !important;
+  }
   :is(input, textarea, select):autofill { box-shadow: none; -webkit-text-fill-color: CanvasText; }
   :is(input, textarea, select):-webkit-autofill { -webkit-box-shadow: none; -webkit-text-fill-color: CanvasText; }
 }
@@ -1147,17 +1162,26 @@ body > header nav { gap: 8px; }
 
 .home-panels { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.5rem; align-items: start; margin-bottom: 1.5rem; }
 .home-panels > .card { min-width: 0; margin: 0; padding: clamp(1.2rem, 3vw, 2rem); }
-.home-onboarding { padding: clamp(1.2rem, 3vw, 2rem); }
+.home-panel-content { min-width: 0; }
+.home-panel-content > h2 { margin-top: 0; }
+.home-panel-visual { min-width: 0; align-self: start; }
 .home-about p { line-height: 1.75; }
 .stream-layout .section-top h1 { font-size: clamp(1.6rem, 3vw, 2.4rem); margin: 0; }
 
 .home-illustration { display: block; width: min(100%, 320px); height: auto; margin: 0 auto 1.25rem; }
+.home-illustration-portrait { display: none; }
 .home-art-wash { fill: var(--accent); opacity: .09; }
 .home-art-panel { fill: var(--surface); stroke: var(--accent); stroke-width: 1.8; stroke-linejoin: round; }
 .home-art-line { stroke: var(--accent); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .home-art-orbit { stroke: var(--accent); stroke-width: 1.5; opacity: .5; stroke-linecap: round; }
 .home-art-solid { fill: var(--accent); }
-@media (min-width: 1280px) { .home-panels { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1000px) {
+  .home-panels > .card { display: grid; grid-template-columns: minmax(140px, .32fr) minmax(0, 1fr); gap: clamp(20px, 3vw, 36px); }
+  .home-panel-visual { align-self: center; padding: 0; }
+  .home-panel-visual .home-illustration-landscape { display: none; }
+  .home-panel-visual .home-illustration-portrait { display: block; width: 100%; max-width: 240px; height: auto; margin: 0 auto; }
+}
+@media (max-width: 999px) { .home-panel-visual .home-illustration { max-width: 220px; margin-bottom: 20px; } }
 @media (forced-colors: active) {
   .home-art-panel { fill: Canvas; stroke: CanvasText; }
   .home-art-line, .home-art-orbit { stroke: CanvasText; }
@@ -1429,5 +1453,18 @@ body > .site-header > nav .header-action:nth-last-child(-n+2)::after { left: aut
 .operator-consent input[type=checkbox] { accent-color: var(--accent); }
 .administration #confirmation > h2 { font-family: inherit; font-size: 1.25rem; line-height: 1.35; font-weight: 650; letter-spacing: -.02em; }
 
-.onboarding-start-steps { padding-left: 1.4em; }
-.onboarding-start-steps li { margin: 0 0 14px; padding-left: 4px; }
+/* The ordered list keeps the sequence accessible; palette-colored markers provide a visual path. */
+.onboarding-start-steps { list-style: none; padding: 0; margin: 24px 0; counter-reset: onboarding-step; }
+.onboarding-start-steps li { position: relative; counter-increment: onboarding-step; padding: 0 0 22px 48px; }
+.onboarding-start-steps li:last-child { padding-bottom: 0; }
+.onboarding-start-steps li::before { content: counter(onboarding-step, decimal-leading-zero); position: absolute; top: 0; left: 0; display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 12px; color: var(--accent); background: var(--accent-soft); font-size: .75rem; font-weight: 700; }
+.onboarding-start-steps li:not(:last-child)::after { content: ""; position: absolute; left: 16px; top: 40px; bottom: 6px; border-left: 1px solid var(--line); }
+.onboarding-start-steps h3 { margin: 0 0 5px; font-family: inherit; font-size: .9375rem; line-height: 1.5; font-weight: 650; }
+.onboarding-start-steps p { margin: 0; color: var(--muted); font-size: .8125rem; line-height: 1.7; }
+.onboarding-safety-note { padding: 14px 16px; border-left: 3px solid var(--accent); background: var(--accent-soft); border-radius: 0 10px 10px 0; font-size: .8125rem; line-height: 1.7; }
+.onboarding-start-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; }
+.onboarding-start-actions .onboarding-guide-button { flex: 1 1 200px; }
+.home-onboarding .onboarding-secondary-button { background: transparent; color: var(--accent); border-color: var(--input-line); }
+[data-style=technical] .onboarding-start-steps li::before, [data-style=technical] .onboarding-safety-note { border-radius: 3px; }
+@media (forced-colors: active) { .onboarding-start-steps li::before { border-color: CanvasText; } }
+

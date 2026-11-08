@@ -267,3 +267,18 @@ Scope and remaining work: self-declaration is not identity/age verification or a
 
 - Frontend build and 173 frontend tests passed. Field text, placeholders and autofill use the active palette tokens; forced-colors mode leaves system field colors in control.
 - Headless Chromium forced the native `:autofill` pseudo-class and checked ordinary field backgrounds/text and autofill inset/text/caret colors across all 64 theme/palette/style combinations. Dark-blue login screenshot visually inspected. No saved credentials or real login were used.
+
+## Stacked landing sections (2026-11-08)
+
+- Frontend build and 173 frontend tests passed. Homepage sections remain in one vertical sequence; at 1000px and above each card has illustration/content columns. The homepage's More information disclosure is removed; operator onboarding keeps its technical guidance.
+- Headless Chromium checked 80 layout cases: 320/390/768/1280/1600px, all four languages and all four styles. Verified section order, internal desktop columns, four titled steps, absence of the removed disclosure and no horizontal page overflow. German desktop/mobile screenshots visually inspected. No accounts, agent actions or advertising calls were made.
+
+## Stable field surface during typing (2026-11-08)
+
+- Extended the themed inset surface to text-like inputs and textareas regardless of autofill state, without affecting checkbox/radio/range controls or the focus outline. Placeholder colors remain separate; forced-colors mode uses Field/FieldText and no inset fill.
+- Headless Chromium exercised native mouse focus and typing into both operator and administrator handle/password fields across 64 theme/palette/style combinations (256 field cases). An explicitly injected yellow background still left the palette-colored inset surface and matching text in place. This simulates a browser/password-manager highlight; no real password-manager extension or saved credentials were used.
+
+## Desktop portrait landing artwork (2026-11-08)
+
+- Frontend build and 174 frontend tests passed. The original landscape illustrations remain below 1000px; desktop cards display dedicated, undistorted 240×480 SVG compositions, vertically centered beside the content. Both variants use existing palette tokens and remain decorative/accessibility-hidden.
+- Chromium checked 80 layout cases (390/999/1000/1280/1600px, four languages, four styles), including breakpoint visibility, a 2:1 portrait height/width ratio, at least 260px desktop artwork height and no page overflow. Desktop German screenshot visually inspected.

@@ -35,19 +35,22 @@ test('legacy homepage stream links move to the new route without forwarding unre
  for(const url of ['http://localhost/','http://localhost/?utm_source=example','http://localhost/#about-heading','http://localhost/operator?confirmation=token','http://localhost/conversations?tag=art'])assert.equal(legacyStreamUrl(url),null);
 });
 
-test('landing keeps two illustrated cards with theme-token SVGs and a wide-screen two-column layout',()=>{
+test('landing keeps two illustrated cards with theme-token SVGs and stacked cards and internal wide-screen columns',()=>{
  const dom=page('index.html'),doc=dom.window.document;
  try{
   const panels=doc.querySelector('.home-panels')!;
-  assert.equal(panels.children.length,2);assert.ok(panels.children[0].classList.contains('home-about'));assert.ok(panels.children[1].classList.contains('home-onboarding'));
+  assert.equal(panels.querySelector('.onboarding-more'),null);assert.equal(panels.querySelectorAll('.home-panel-content').length,2);assert.equal(panels.querySelectorAll('.onboarding-start-steps li h3').length,4);assert.equal(panels.children.length,2);assert.ok(panels.children[0].classList.contains('home-about'));assert.ok(panels.children[1].classList.contains('home-onboarding'));
   assert.equal(doc.querySelector('.home-room,.home-listen'),null);assert.equal(doc.body.textContent!.includes('Room to be yourself.'),false);assert.equal(doc.body.textContent!.includes('Here to listen?'),false);
-  const art=panels.querySelectorAll<SVGElement>('svg.home-illustration');assert.equal(art.length,2);
+  const art=panels.querySelectorAll<SVGElement>('svg.home-illustration-landscape');assert.equal(art.length,2);
+  const portraits=panels.querySelectorAll('svg.home-illustration-portrait');assert.equal(portraits.length,2);for(const svg of portraits){assert.equal(svg.getAttribute('viewBox'),'0 0 240 480');assert.equal(svg.getAttribute('aria-hidden'),'true');assert.equal(svg.querySelector('image,foreignObject,script'),null);}
   assert.deepEqual(Array.from(art).map(svg=>svg.getAttribute('data-home-art')),['space','join']);
   for(const svg of art){assert.equal(svg.getAttribute('aria-hidden'),'true');assert.equal(svg.getAttribute('focusable'),'false');assert.equal(svg.getAttribute('viewBox'),'0 0 320 180');assert.ok(svg.querySelector('.home-art-panel'));assert.ok(svg.querySelector('.home-art-line'));assert.equal(svg.querySelector('image,foreignObject,script'),null);assert.equal(svg.querySelector('[fill^="#"],[stroke^="#"]'),null);}
   assert.equal(panels.querySelectorAll('.onboarding-choice[open]').length,0);assert.match(panels.querySelector('.home-onboarding')!.textContent!,/public/);
   const css=readFileSync(new URL('../src/styles/global.css',import.meta.url),'utf8');
   assert.match(css,/\.home-panels\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/);
-  assert.match(css,/@media\s*\(min-width: 1280px\)\s*\{\s*\.home-panels\s*\{\s*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);
+  assert.match(css,/@media\s*\(min-width: 1000px\)\s*\{\s*\.home-panels > \.card\s*\{[^}]*grid-template-columns: minmax\(140px, \.32fr\) minmax\(0, 1fr\)/);
+  assert.match(css,/\.home-illustration-portrait\s*\{ display: none;/);
+  assert.match(css,/\.home-panel-visual \.home-illustration-landscape\s*\{ display: none;/);
   assert.match(css,/\.home-art-panel\s*\{[^}]*fill: var\(--surface\);[^}]*stroke: var\(--accent\)/);
  }finally{dom.window.close();}
 });

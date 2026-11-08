@@ -2,7 +2,7 @@
 interface Props {variant:'space'|'join';}
 const {variant}=Astro.props;
 ---
-<svg class="home-illustration" data-home-art={variant} viewBox="0 0 320 180" aria-hidden="true" focusable="false" fill="none">
+<svg class="home-illustration home-illustration-landscape" data-home-art={variant} viewBox="0 0 320 180" aria-hidden="true" focusable="false" fill="none">
   <ellipse class="home-art-wash" cx="160" cy="94" rx="120" ry="75"/>
   {variant==='space' ? <>
     <path class="home-art-orbit" d="M54 119C12 69 103 8 194 33s139 100 62 120" stroke-dasharray="3 9"/>
@@ -28,5 +28,34 @@ const {variant}=Astro.props;
     <circle class="home-art-solid" cx="190" cy="106" r="3.5"/><circle class="home-art-solid" cx="214" cy="106" r="3.5"/>
     <circle class="home-art-panel" cx="257" cy="51" r="20"/>
     <path class="home-art-line" d="m248 51 6 6 12-13"/>
+  </>}
+</svg>
+
+<!-- A portrait composition fills the desktop illustration column without stretching the artwork. -->
+<svg class="home-illustration home-illustration-portrait" data-home-art={variant} viewBox="0 0 240 480" aria-hidden="true" focusable="false" fill="none">
+  <ellipse class="home-art-wash" cx="120" cy="240" rx="110" ry="208"/>
+  {variant==='space' ? <>
+    <path class="home-art-orbit" d="M49 98C-8 162 16 302 72 361m112-249c57 64 41 219-14 282" stroke-dasharray="3 9"/>
+    <path class="home-art-panel" d="M33 54h142a15 15 0 0 1 15 15v66a15 15 0 0 1-15 15h-65l-28 24v-24H33a15 15 0 0 1-15-15V69a15 15 0 0 1 15-15Z"/>
+    <path class="home-art-line" d="M40 80h95M40 101h125m-125 21h68"/>
+    <rect class="home-art-panel" x="63" y="204" width="114" height="90" rx="28"/>
+    <path class="home-art-line" d="M120 204v-20m-24 80q24 18 48 0m-58 30-9 16m77-16 9 16"/>
+    <circle class="home-art-solid" cx="97" cy="239" r="6"/><circle class="home-art-solid" cx="143" cy="239" r="6"/>
+    <path class="home-art-panel" d="M69 344h142a15 15 0 0 1 15 15v66a15 15 0 0 1-15 15h-20v24l-30-24H69a15 15 0 0 1-15-15v-66a15 15 0 0 1 15-15Z"/>
+    <path class="home-art-line" d="M76 370h122m-122 22h85"/>
+    <circle class="home-art-solid" cx="82" cy="418" r="4"/><circle class="home-art-solid" cx="100" cy="418" r="4"/><circle class="home-art-solid" cx="118" cy="418" r="4"/>
+    <path class="home-art-line" d="m198 28 4 11 11 4-11 4-4 11-4-11-11-4 11-4Z"/>
+  </> : <>
+    <path class="home-art-orbit" d="M61 118C12 153 18 221 58 247m116 40c49 35 48 104-7 133" stroke-dasharray="3 9"/>
+    <circle class="home-art-panel" cx="90" cy="57" r="25"/>
+    <path class="home-art-panel" d="M48 136v-19a42 34 0 0 1 84 0v19Z"/>
+    <path class="home-art-panel" d="M62 302V180a16 16 0 0 1 16-16h100a16 16 0 0 1 16 16v122"/>
+    <path class="home-art-wash" d="M81 302V184h94v118Z"/>
+    <path class="home-art-line" d="M81 302V184h94v118m-16-68v17M36 302h179m-102-69h34m-12-12 12 12-12 12"/>
+    <rect class="home-art-panel" x="76" y="352" width="108" height="86" rx="27"/>
+    <path class="home-art-line" d="M130 352v-20m-23 78q23 17 46 0m-59 28-9 17m80-17 9 17"/>
+    <circle class="home-art-solid" cx="108" cy="385" r="6"/><circle class="home-art-solid" cx="152" cy="385" r="6"/>
+    <circle class="home-art-panel" cx="196" cy="112" r="26"/>
+    <path class="home-art-line" d="m184 112 8 8 17-19"/>
   </>}
 </svg>
