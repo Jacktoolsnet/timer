@@ -12,13 +12,13 @@ async function fixture(run:(dom:JSDOM,manager:ReturnType<typeof initializeOperat
 }
 test('operator conversations selects an agent, searches/filters and paginates only its messages',async()=>fixture(async(dom,manager,paths)=>{
  const doc=dom.window.document;assert.equal(doc.querySelectorAll('.operator-conversation-agent').length,2);assert.equal(paths.length,0);
- doc.querySelector<HTMLButtonElement>('.operator-conversation-agent')!.click();await tick();assert.match(paths[0],/^\/api\/operator\/agents\/agent\/posts\?/);assert.equal(doc.querySelector<HTMLElement>('#operator-message-browser')!.hidden,false);
+ doc.querySelector<HTMLButtonElement>('.operator-conversation-agent')!.click();await tick();assert.match(paths[0],/^\/api\/operator\/agents\/agent\/posts\?/);assert.equal(doc.querySelector<HTMLElement>('#operator-message-browser')!.hidden,false);assert.ok(doc.querySelector('#operator-conversations-heading')!.closest('[hidden]'));assert.equal(doc.querySelector('#operator-messages-heading')!.closest('[hidden]'),null);
  assert.match(doc.querySelector('#operator-messages')!.textContent!,/Literal message/);assert.equal(doc.querySelector('#operator-messages script'),null);
  doc.querySelector<HTMLInputElement>('#operator-message-query')!.value='#Art %_';doc.querySelector('form#operator-message-search')!.dispatchEvent(new dom.window.Event('submit',{cancelable:true}));await tick();assert.equal(new URL(paths.at(-1)!,'http://localhost').searchParams.get('q'),'#Art %_');
  doc.querySelector<HTMLButtonElement>('[data-message-state=hidden]')!.click();await tick();assert.equal(new URL(paths.at(-1)!,'http://localhost').searchParams.get('state'),'hidden');assert.equal(doc.querySelector('[data-message-state=hidden]')!.getAttribute('aria-pressed'),'true');
  doc.querySelector<HTMLButtonElement>('#operator-messages-more')!.click();await tick();assert.equal(doc.querySelectorAll('.operator-message-card').length,2);assert.ok(paths.at(-1)!.includes('cursor=older-cursor'));
  assert.equal(doc.querySelector('a[aria-label="Open conversation"]')!.getAttribute('href'),'/conversation?id=thread');
- doc.querySelector<HTMLButtonElement>('#operator-messages-back')!.click();assert.equal(doc.querySelector<HTMLElement>('#operator-message-browser')!.hidden,true);assert.equal(doc.querySelector<HTMLElement>('#operator-conversation-agents')!.hidden,false);
+ doc.querySelector<HTMLButtonElement>('#operator-messages-back')!.click();assert.equal(doc.querySelector<HTMLElement>('#operator-message-browser')!.hidden,true);assert.equal(doc.querySelector<HTMLElement>('#operator-conversation-agents')!.hidden,false);assert.equal(doc.querySelector('#operator-conversations-heading')!.closest('[hidden]'),null);
  manager.clear();assert.equal(doc.querySelector('#operator-conversation-agents')!.textContent,'');assert.equal(doc.querySelector('#operator-messages')!.textContent,'');
 }));
 test('operator deletion is explicit, cancellable, icon-only and refreshes the selected agent without publishing',async()=>fixture(async(dom,_manager,_paths,deleted)=>{

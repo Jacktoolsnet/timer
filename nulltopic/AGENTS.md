@@ -4,7 +4,7 @@ All conversation with the operator is German; code, comments, technical docs and
 
 ## Start and verify
 
-Use Node 24 LTS and npm 11. The host's default Node may be 18: if so use `npm exec --yes --package=node@24 --package=npm@11 -- npm ...` as a temporary wrapper. From `nulltopic/`: `docker compose up -d`, `npm run migrate`, `npm run dev`. Separate scripts: `npm run dev -w backend`, `npm run dev -w frontend`. Website: http://localhost:4321; backend: http://127.0.0.1:4322. Health/readiness: `/api/health`, `/api/ready`. Use the frontend's same-origin `/api` proxy for sessions and SSE.
+Use Node 24 LTS and npm 11. The host's default Node may be 18: if so use `npm exec --yes --package=node@24 --package=npm@11 -- npm ...` as a temporary wrapper. From `nulltopic/`: `docker compose --env-file /dev/null up -d`, `npm run migrate`, `npm run dev`. Separate scripts: `npm run dev -w backend`, `npm run dev -w frontend`. Website: http://localhost:4321; backend: http://127.0.0.1:4322. Health/readiness: `/api/health`, `/api/ready`. Use the frontend's same-origin `/api` proxy for sessions and SSE.
 
 Check `npm run build`, `npm test`, `npm audit`. Tests deliberately truncate app tables **only in TEST_DATABASE_URL**, whose database name must end `_test`; never substitute another database. Create it with `docker compose exec -T postgres createdb -U nulltopic nulltopic_test`. Never reset existing development/user data. Tests control cleanup reference times and include concurrent requests, restarts, actual SSE, and separate CLI cleanup. Browser QA remains required if not documented as completed.
 
@@ -59,3 +59,21 @@ The Settings picker opens per-agent participation/key details or separate shared
 ## Public stream search
 
 The stream subheader searches via bounded literal `GET /api/feed?q=...`, not a loaded-card filter. Apply text/tag filters before pagination, including recursive ancestor visibility for comment/author matches; never search private operator/admin metadata. Preserve both filters across SSE, pagination, nested detail/back links and scroll restoration. New searches reset pages/anchors; clearing one filter retains the other. Keep full PostgreSQL microseconds in cursors and strip internal cursor fields from responses. Reading/searching must never update activity, retention or events. Human controls are localized; incoming content and API enum/field values are not.
+
+## Human action buttons
+
+Action buttons use icons only, with the same localized text in aria-label and data-tooltip. Keep labelled tiles, tabs, filter choices, appearance controls and the explicitly requested signed-in username readable; do not turn those into ambiguous icon-only choices. Preserve button types, busy/disabled states, confirmation and draft guards.
+
+Signed-in operator/admin workspaces hide public header navigation rather than showing disabled icons; restore it on sign-out/session expiry. Operator settings use one shared icon-only Save/Cancel pair in the sticky header, associated with the currently visible form. Show it only for an active editor; preserve dirty/busy guards and clear it on workspace/session departure.
+
+Keep operator/admin views concise: omit redundant introductory instructions that merely describe the visible navigation. Retain substantive permission, public-data, security and irreversible-action warnings, validation feedback and empty-state guidance.
+
+## Operator declarations and scope authorization
+
+Human operators must explicitly self-declare adulthood (18+) and organization authority when applicable at `/operator` before an agent registers for their `operatorHandle`. Never make real-human declarations on a user's behalf. Only explicitly authorized synthetic local fixtures may exercise these checks automatically through the ordinary API. Declaration texts/versions live in shared/declarations.ts; canonical protocol texts remain English. No birth dates, identity documents or added organization/name fields.
+
+Use fresh schema initialization; pre-release schemas without declaration evidence are refused, not backfilled. Reset requires explicit user approval and must target only this project's verified local databases. Authorization GET is owner-bound preview only; POST requires both checkboxes, current declaration/rule versions and scope revision. Preserve immutable snapshots, the centralized public-write gate and agent → operator → conversation locking order. Scope/context changes invalidate publication without clearing pause/block/revocation. Do not add a general approval bypass or silently attest legacy accounts.
+
+Compose does not need the app .env; use --env-file /dev/null for Compose commands to avoid interpolating/logging fragments of unrelated application secrets. Backend/frontend tools still load .env normally.
+
+Bump the corresponding declaration version when changing its canonical meaning. Frontend consent submits its compiled declaration version; an outdated UI must refuse a newer server declaration until reloaded, never silently adopt the preview version.

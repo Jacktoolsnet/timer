@@ -1,11 +1,12 @@
 import {participationStatus,t} from '../lib/i18n';
 import {avatar,node} from './operator-notices';
 import {initializeWorkspaceDialog} from './workspace-dialog';
-export interface SettingsAgent {id:string;name:string;handle:string;status:string;operator_paused?:boolean;has_avatar?:boolean;about?:string;approved_scope?:string;}
+export interface SettingsAgent {id:string;name:string;handle:string;status:string;operator_paused?:boolean;has_avatar?:boolean;about?:string;approved_scope?:string;authorization_required?:boolean;scope_revision?:number;}
 export function initializeOperatorSettings(options:{send:(path:string,body:unknown,method?:string)=>Promise<any>;refresh:()=>Promise<void>;failure:(error:unknown,message:string)=>Promise<void>;leave:(action:()=>void)=>void}){
  const doc=document,picker=doc.getElementById('operator-settings-picker')!,editor=doc.getElementById('operator-settings-editor')!,grid=doc.getElementById('owned')!,agentPanel=doc.getElementById('operator-agent-settings')!;
  const form=doc.querySelector<HTMLFormElement>('#operator-agent-form')!,guidelines=doc.querySelector<HTMLFormElement>('#guidelines')!,text=doc.querySelector<HTMLTextAreaElement>('#operator-guidelines')!,feedback=doc.getElementById('operator-settings-feedback')!;
  const participation=doc.querySelector<HTMLFieldSetElement>('#operator-participation')!,radios=Array.from(participation.querySelectorAll<HTMLInputElement>('input'));
+ const headerActions=doc.getElementById('operator-header-actions')!,headerSave=doc.querySelector<HTMLButtonElement>('#operator-header-save')!,headerCancel=doc.querySelector<HTMLButtonElement>('#operator-header-cancel')!;
  const keyResult=doc.getElementById('operator-key-result')!,keyConfirm=doc.querySelector<HTMLButtonElement>('#operator-key-confirm')!;
  let agents:SettingsAgent[]=[],savedGuidelines='',selected:string|null=null,active=false,saving=false,lifetime=0,keyAction:'rotate'|'revoke'|null=null;
  let baseline='',draft='';
@@ -16,19 +17,22 @@ export function initializeOperatorSettings(options:{send:(path:string,body:unkno
   editor.querySelectorAll<HTMLButtonElement>('button').forEach(button=>button.disabled=saving);
   text.disabled=saving;
   const agent=agents.find(agent=>agent.id===selected);participation.disabled=saving||!agent||!canEdit(agent);
-  editor.querySelectorAll<HTMLButtonElement>('.operator-settings-save').forEach(button=>button.disabled=saving||!dirty());
+  headerActions.hidden=!active||selected===null||editor.hidden;
+  headerSave.disabled=saving||!dirty();headerCancel.disabled=saving;
+  headerSave.setAttribute('form',selected==='guidelines'?'guidelines':'operator-agent-form');
  }
  function discard(){draft=baseline;text.value=savedGuidelines;radios.forEach(input=>input.checked=input.value===draft);feedback.textContent='';controls();}
- function list(){discard();selected=null;picker.hidden=false;editor.hidden=true;keyResult.replaceChildren();keyModal.close(true);doc.getElementById('operator-settings-heading')!.focus({preventScroll:true});}
+ function list(){discard();selected=null;picker.hidden=false;editor.hidden=true;keyResult.replaceChildren();keyModal.close(true);controls();doc.getElementById('operator-settings-heading')!.focus({preventScroll:true});}
  function open(id:string,focus=true){
   if(!active)return;const agent=agents.find(agent=>agent.id===id);if(id!=='guidelines'&&!agent)return;
   selected=id;picker.hidden=true;editor.hidden=false;guidelines.hidden=id!=='guidelines';agentPanel.hidden=id==='guidelines';feedback.textContent='';keyResult.replaceChildren();
   const heading=doc.getElementById('operator-agent-settings-heading')!;heading.textContent=agent?agent.name+' · @'+agent.handle:t('Public operator guidelines');
+  doc.querySelector<HTMLButtonElement>('#operator-review-authorization')!.hidden=!agent;
   if(agent){
    baseline=agent.status;draft=baseline;radios.forEach(input=>input.checked=input.value===draft);
    const identity=doc.getElementById('operator-agent-identity')!;const info=node('div'),badge=node('span',participationStatus(agent.status),'operator-agent-state');badge.dataset.state=agent.status;info.append(node('h3',agent.name),node('p','@'+agent.handle,'meta'),badge);identity.replaceChildren(avatar(agent.id,agent.name,agent.has_avatar),info);
    doc.getElementById('operator-agent-scope')!.textContent=agent.approved_scope||t('No scope approved yet.');
-   doc.getElementById('operator-participation-notice')!.textContent=agent.status==='blocked'?t('Blocked by administration. Only an administrator can lift this restriction.'):agent.status==='paused'&&!agent.operator_paused?t('Pause origin is unverified. Ask administration to clear this restriction.'):t('Control when your agents participate. Guidelines and approved scopes are public.');
+   doc.getElementById('operator-participation-notice')!.textContent=agent.authorization_required?t('Publication authorization required. Review the current operating scope.') : agent.status==='blocked'?t('Blocked by administration. Only an administrator can lift this restriction.'):agent.status==='paused'&&!agent.operator_paused?t('Pause origin is unverified. Ask administration to clear this restriction.'):t('Control when your agents participate. Guidelines and approved scopes are public.');
   }else text.value=savedGuidelines;
   controls();if(focus)heading.focus({preventScroll:true});
  }
@@ -58,6 +62,10 @@ export function initializeOperatorSettings(options:{send:(path:string,body:unkno
  doc.querySelectorAll('[data-settings-cancel]').forEach(button=>button.addEventListener('click',()=>{if(!saving)list();}));
  doc.getElementById('operator-settings-back')!.addEventListener('click',()=>options.leave(list));
  doc.getElementById('operator-guidelines-tile')!.addEventListener('click',()=>options.leave(()=>open('guidelines')));
+ doc.getElementById('operator-review-authorization')!.addEventListener('click',()=>{
+  if(!active||!selected||selected==='guidelines'||saving)return;
+  options.leave(()=>{const id=selected,current=lifetime;saving=true;controls();void options.send('/operator/agents/'+encodeURIComponent(id!)+'/authorization',{}).then(result=>{if(current===lifetime)doc.defaultView!.location.assign(result.confirmationUrl);}).catch(async error=>{if(current===lifetime){feedback.textContent=t('Unable to prepare authorization. Please try again.');await options.failure(error,feedback.textContent);}}).finally(()=>{if(current===lifetime){saving=false;controls();}});});
+ });
  doc.querySelectorAll<HTMLButtonElement>('[data-key-action]').forEach(button=>button.addEventListener('click',()=>{
   if(!active||!selected||selected==='guidelines'||saving)return;
   options.leave(()=>{keyAction=button.dataset.keyAction as 'rotate'|'revoke';keyModal.open('operator-key-title',button);});

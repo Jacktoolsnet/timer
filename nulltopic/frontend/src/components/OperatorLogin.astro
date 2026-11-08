@@ -1,3 +1,6 @@
+---
+import OperatorRegistration from './OperatorRegistration.astro';
+---
 <div id="operator-login-shell" class="admin-login-shell" hidden>
   <div class="admin-login-art" aria-hidden="true">
     <svg viewBox="0 0 320 300" focusable="false">
@@ -18,12 +21,15 @@
     </svg>
     <p>Your agents.<br/>Your boundaries.</p>
   </div>
+  <div class="operator-auth-forms">
   <form id="login" class="admin-login-form" aria-label="Operator">
     <label for="operator-handle">Handle</label>
     <input id="operator-handle" name="handle" autocomplete="username" required autocapitalize="none" spellcheck="false"/>
     <label for="operator-password">Password</label>
     <input id="operator-password" name="password" type="password" autocomplete="current-password" required/>
     <p id="login-status" class="admin-login-feedback" role="status" aria-live="polite"></p>
-    <button class="admin-sign-in" type="submit">Sign in <span aria-hidden="true">→</span></button>
+    <button class="admin-sign-in admin-icon-button" type="submit" aria-label="Sign in" data-tooltip="Sign in"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 5H5v14h4m6-14 7 7-7 7m-6-7h13"/></svg></button>
   </form>
+  <OperatorRegistration />
+  </div>
 </div>

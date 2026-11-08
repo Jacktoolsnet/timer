@@ -6,7 +6,7 @@ import {JSDOM} from 'jsdom';
 import {initializeOperator} from '../src/scripts/operator';
 const html = readFileSync(new URL('../dist/operator/index.html', import.meta.url), 'utf8');
 const tick = () => new Promise(resolve => setTimeout(resolve, 0));
-async function fixture(run: (dom: JSDOM, requests: {path: string; body?: any}[]) => Promise<void>, options: {signedIn?: boolean; fail?: boolean; confirmation?: boolean; withData?:boolean; expire?:boolean;reviews?:boolean;decided?:boolean;agentAccepted?:boolean;cases?:boolean;operatorPaused?:boolean;agentStatus?:string} = {}) {
+async function fixture(run: (dom: JSDOM, requests: {path: string; body?: any}[]) => Promise<void>, options: {signedIn?: boolean; fail?: boolean; confirmation?: boolean; withData?:boolean; expire?:boolean;reviews?:boolean;decided?:boolean;agentAccepted?:boolean;cases?:boolean;operatorPaused?:boolean;agentStatus?:string;declarationVersion?:string} = {}) {
   const dom = new JSDOM(html, {url: 'http://localhost/operator' + (options.confirmation ? '?confirmation=test-token' : '')});
   installDialogMock(dom);
   dom.window.scrollTo=()=>{}; dom.window.HTMLElement.prototype.scrollIntoView=()=>{}; dom.window.confirm=()=>true;
@@ -37,7 +37,8 @@ async function fixture(run: (dom: JSDOM, requests: {path: string; body?: any}[])
       const status=new URL(path,'http://localhost').searchParams.get('moderationStatus');
       return new Response(JSON.stringify({...data,...(options.cases?{case_context:{notices:data.notices,review_requests:data.review_requests}}:{}),moderation_counts:counts,notices:status?data.notices.filter(n=>status==='processed'?n.operator_accepted:!n.operator_accepted):data.notices,review_requests:status?data.review_requests.filter(r=>status==='processed'?r.status!=='pending'&&r.operator_accepted:r.status==='pending'||!r.operator_accepted):data.review_requests}));
     }
-    if (path === '/api/confirmation?token=test-token') return new Response(JSON.stringify({name: 'Pending example'}));
+    if (path === '/api/confirmation?token=test-token') return new Response(JSON.stringify({name: 'Pending example',handle:'pending',operating_context:'Visible scope',scope_revision:7,ruleVersion:'fixture-rules',authorizationVersion:options.declarationVersion||'agent-publication-v1'}));
+    if(path==='/api/confirmation')return new Response(JSON.stringify({id:'approved'}));
     throw Error('Unexpected request');
   }};
   const descriptors = Object.keys(values).map(key => [key, Object.getOwnPropertyDescriptor(globalThis, key)] as const);
@@ -95,6 +96,7 @@ test('operator overview uses themed tiles, subviews, back navigation and a locke
   assert.ok(doc.querySelector('#operator-settings-tile svg'));
   assert.equal(doc.querySelector('.admin-session-handle')!.textContent,'@test_operator');
   assert.equal(doc.querySelector('header nav a')!.getAttribute('aria-disabled'),'true');
+  assert.equal(doc.querySelector<HTMLElement>('header nav a')!.hidden,true);
   (doc.querySelector('#operator-settings-tile') as HTMLButtonElement).click();
   assert.equal(dom.window.location.hash,'#settings');
   assert.equal((doc.querySelector('#operator-settings') as HTMLElement).hidden,false);
@@ -277,3 +279,19 @@ test('operator login keeps only the illustration and login controls below its se
   assert.ok(login.querySelector('svg'));assert.ok(login.querySelector('[autocomplete=username]'));assert.ok(login.querySelector('[autocomplete=current-password]'));assert.ok(login.querySelector('button[type=submit]'));
   dom.window.close();
 });
+
+test('operator authorization requires both explicit checkboxes and submits the preview revision',async()=>fixture(async(dom,requests)=>{
+ const doc=dom.window.document,form=doc.querySelector<HTMLFormElement>('#approve')!;
+ await initializeOperator();assert.equal(doc.querySelector<HTMLInputElement>('[name=authorizePublication]')!.checked,false);
+ doc.querySelector<HTMLTextAreaElement>('#approval-scope')!.value='Explicit scope';
+ form.dispatchEvent(new dom.window.Event('submit',{cancelable:true}));await tick();assert.equal(requests.some(r=>r.path==='/api/confirmation'),false);
+ doc.querySelector<HTMLInputElement>('[name=consent]')!.checked=true;form.dispatchEvent(new dom.window.Event('submit',{cancelable:true}));await tick();assert.equal(requests.some(r=>r.path==='/api/confirmation'),false);
+ doc.querySelector<HTMLInputElement>('[name=authorizePublication]')!.checked=true;form.dispatchEvent(new dom.window.Event('submit',{cancelable:true}));await tick();await tick();
+ const sent=requests.find(r=>r.path==='/api/confirmation')!.body;assert.equal(sent.revision,7);assert.equal(sent.authorizePublication,true);assert.equal(sent.authorizationVersion,'agent-publication-v1');assert.equal(sent.ruleVersion,'fixture-rules');
+ assert.equal(doc.querySelector<HTMLElement>('#confirmation')!.hidden,true);
+},{signedIn:true,confirmation:true}));
+
+test('an older UI never accepts a newer authorization declaration silently',async()=>fixture(async(dom,requests)=>{
+ await initializeOperator();const doc=dom.window.document;assert.equal(doc.querySelector<HTMLButtonElement>('#approve button[type=submit]')!.disabled,true);assert.match(doc.querySelector('#approval-status')!.textContent!,/Reload/);
+ doc.querySelector<HTMLTextAreaElement>('#approval-scope')!.value='Scope';doc.querySelectorAll<HTMLInputElement>('#approve input[type=checkbox]').forEach(input=>input.checked=true);doc.querySelector('#approve')!.dispatchEvent(new dom.window.Event('submit',{cancelable:true}));await tick();assert.equal(requests.some(r=>r.path==='/api/confirmation'),false);
+},{signedIn:true,confirmation:true,declarationVersion:'future-version'}));

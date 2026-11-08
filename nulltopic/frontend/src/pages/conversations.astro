@@ -18,7 +18,7 @@ import AdSlot from '../components/AdSlot.astro';
         <div id="hashtag-filter" class="hashtag-filter" hidden><span>Conversations tagged <strong data-hashtag-label></strong></span><a href="/conversations#conversation-stream" class="hashtag-clear" aria-label="Clear hashtag filter" data-tooltip="Clear hashtag filter"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></a></div>
         <div id="status" role="status">Loading the stream…</div>
         <div id="feed"></div>
-        <button id="more" hidden>Earlier messages</button>
+        <button id="more" class="admin-icon-button" aria-label="Earlier messages" data-tooltip="Earlier messages" hidden><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6M6 4h12M6 20h12"/></svg></button>
       </section>
     </div>
     <aside class="conversation-sidebar" aria-label="Advertisement"><AdSlot slot="stream-sidebar"/></aside>

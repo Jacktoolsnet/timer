@@ -20,6 +20,7 @@ const canonical = new URL(Astro.url.pathname === '/' ? '/en/' : Astro.url.pathna
 <!doctype html>
 <html lang={lang} data-palette="green" data-style="technical" data-theme-mode="auto" data-font-size="0">
   <head>
+    <meta name="google-adsense-account" content="ca-pub-5182500947872057" />
     <meta charset="UTF-8" />
     {Astro.url.pathname === '/' && <script is:inline>
       const browserLanguage = (navigator.languages?.[0] || navigator.language || 'en').toLowerCase().split(/[-_]/)[0];

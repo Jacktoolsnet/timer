@@ -43,14 +43,14 @@ const writes=(requests:{path:string;body:any}[])=>requests.filter(r=>r.body!==un
 test('settings starts with agent tiles and a separate shared-guidelines tile; agent state is saved explicitly',async()=>fixture(async(dom,requests)=>{
  const doc=dom.window.document;settings(dom);assert.equal(doc.querySelectorAll('.operator-settings-agent').length,2);assert.equal(doc.querySelector<HTMLElement>('#operator-settings-editor')!.hidden,true);
  click(dom,'[data-agent-id="agent-a"].operator-settings-agent');assert.match(doc.querySelector('#operator-agent-settings-heading')!.textContent!,/Settings.*first/);assert.equal(doc.querySelector('#operator-agent-scope')!.textContent,'Original public scope');
- click(dom,'input[name=participation][value=paused]');assert.equal(writes(requests).length,0);assert.equal(doc.querySelector<HTMLButtonElement>('#operator-agent-form [type=submit]')!.disabled,false);
- submit(dom,'#operator-agent-form');await tick();await tick();assert.deepEqual(writes(requests).map(r=>r.body),[{action:'pause'}]);assert.equal(doc.querySelector<HTMLInputElement>('input[value=paused]')!.checked,true);assert.equal(doc.querySelector<HTMLButtonElement>('#operator-agent-form [type=submit]')!.disabled,true);assert.equal(doc.querySelector<HTMLElement>('#operator-settings-editor')!.hidden,false);
+ click(dom,'input[name=participation][value=paused]');assert.equal(writes(requests).length,0);assert.equal(doc.querySelector<HTMLButtonElement>('#operator-header-save')!.disabled,false);
+ submit(dom,'#operator-agent-form');await tick();await tick();assert.deepEqual(writes(requests).map(r=>r.body),[{action:'pause'}]);assert.equal(doc.querySelector<HTMLInputElement>('input[value=paused]')!.checked,true);assert.equal(doc.querySelector<HTMLButtonElement>('#operator-header-save')!.disabled,true);assert.equal(doc.querySelector<HTMLElement>('#operator-settings-editor')!.hidden,false);
 }));
 
 test('Cancel discards agent and shared drafts without requests; blocked agents cannot be resumed',async()=>fixture(async(dom,requests)=>{
- const doc=dom.window.document;openAgent(dom);click(dom,'input[value=paused]');click(dom,'#operator-agent-form [data-settings-cancel]');assert.equal(doc.querySelector<HTMLElement>('#operator-settings-picker')!.hidden,false);click(dom,'[data-agent-id="agent-a"].operator-settings-agent');assert.equal(doc.querySelector<HTMLInputElement>('input[value=active]')!.checked,true);
+ const doc=dom.window.document;openAgent(dom);click(dom,'input[value=paused]');click(dom,'#operator-header-cancel');assert.equal(doc.querySelector<HTMLElement>('#operator-settings-picker')!.hidden,false);click(dom,'[data-agent-id="agent-a"].operator-settings-agent');assert.equal(doc.querySelector<HTMLInputElement>('input[value=active]')!.checked,true);
  click(dom,'#operator-settings-back');click(dom,'[data-agent-id="agent-b"].operator-settings-agent');assert.equal(doc.querySelector('input[value=active]')!.matches(':disabled'),true);submit(dom,'#operator-agent-form');assert.equal(writes(requests).length,0);
- click(dom,'#operator-settings-back');click(dom,'#operator-guidelines-tile');changeGuidelines(dom);click(dom,'#guidelines [data-settings-cancel]');click(dom,'#operator-guidelines-tile');assert.equal(doc.querySelector<HTMLTextAreaElement>('#operator-guidelines')!.value,'Original guidelines');assert.equal(writes(requests).length,0);
+ click(dom,'#operator-settings-back');click(dom,'#operator-guidelines-tile');changeGuidelines(dom);click(dom,'#operator-header-cancel');click(dom,'#operator-guidelines-tile');assert.equal(doc.querySelector<HTMLTextAreaElement>('#operator-guidelines')!.value,'Original guidelines');assert.equal(writes(requests).length,0);
 }));
 
 test('leaving prompts Save / Discard / Keep editing; drafts are untouched by Escape and failed saves',async()=>fixture(async(dom,requests,state)=>{
@@ -94,17 +94,41 @@ test('pending saves prevent duplicate writes and navigation; expired sessions cl
 
 test('a rejected participation save preserves the draft and never converts a denial into activation',async()=>fixture(async(dom,requests,state)=>{
  const doc=dom.window.document;openAgent(dom);click(dom,'input[value=paused]');state.fail=true;submit(dom,'#operator-agent-form');await tick();await tick();
- assert.match(doc.querySelector('#operator-settings-feedback')!.textContent!,/Unable to save/);assert.equal(doc.querySelector<HTMLInputElement>('input[value=paused]')!.checked,true);assert.equal(doc.querySelector<HTMLButtonElement>('#operator-agent-form [type=submit]')!.disabled,false);assert.deepEqual(writes(requests).map(r=>r.body),[{action:'pause'}]);
+ assert.match(doc.querySelector('#operator-settings-feedback')!.textContent!,/Unable to save/);assert.equal(doc.querySelector<HTMLInputElement>('input[value=paused]')!.checked,true);assert.equal(doc.querySelector<HTMLButtonElement>('#operator-header-save')!.disabled,false);assert.deepEqual(writes(requests).map(r=>r.body),[{action:'pause'}]);
  click(dom,'#operator-settings-back');assert.equal(doc.querySelector<HTMLDialogElement>('#operator-unsaved-dialog')!.open,true);click(dom,'[data-unsaved-discard]');click(dom,'[data-agent-id="agent-a"].operator-settings-agent');assert.equal(doc.querySelector<HTMLInputElement>('input[value=active]')!.checked,true);
 }));
 
 test('an acknowledged save followed by refresh failure is not repeated when leaving',async()=>fixture(async(dom,requests,state)=>{
  const doc=dom.window.document;openGuidelines(dom);changeGuidelines(dom);state.failRefresh=true;submit(dom,'#guidelines');await tick();await tick();
- assert.match(doc.querySelector('#status')!.textContent!,/saved.*could not be reloaded/);assert.equal(doc.querySelector<HTMLButtonElement>('#guidelines [type=submit]')!.disabled,true);click(dom,'#operator-settings-back');assert.equal(doc.querySelector<HTMLDialogElement>('#operator-unsaved-dialog')!.open,false);assert.equal(writes(requests).length,1);
+ assert.match(doc.querySelector('#status')!.textContent!,/saved.*could not be reloaded/);assert.equal(doc.querySelector<HTMLButtonElement>('#operator-header-save')!.disabled,true);click(dom,'#operator-settings-back');assert.equal(doc.querySelector<HTMLDialogElement>('#operator-unsaved-dialog')!.open,false);assert.equal(writes(requests).length,1);
 }));
 
 
 test('textarea newline normalization does not invent unsaved operator changes',async()=>fixture(async(dom,requests)=>{
- const doc=dom.window.document;openGuidelines(dom);assert.equal(doc.querySelector<HTMLTextAreaElement>('#operator-guidelines')!.value,'Original guidelines\nSecond line');assert.equal(doc.querySelector<HTMLButtonElement>('#guidelines [type=submit]')!.disabled,true);
+ const doc=dom.window.document;openGuidelines(dom);assert.equal(doc.querySelector<HTMLTextAreaElement>('#operator-guidelines')!.value,'Original guidelines\nSecond line');assert.equal(doc.querySelector<HTMLButtonElement>('#operator-header-save')!.disabled,true);
  const event=new dom.window.Event('beforeunload',{cancelable:true});dom.window.dispatchEvent(event);assert.equal(event.defaultPrevented,false);click(dom,'#operator-settings-back');assert.equal(doc.querySelector<HTMLDialogElement>('#operator-unsaved-dialog')!.open,false);assert.equal(writes(requests).length,0);
 },'Original guidelines\r\nSecond line'));
+
+test('only the current settings level has a visible title, including guidelines and return navigation',async()=>fixture(async(dom)=>{
+ const doc=dom.window.document;
+ const titles=()=>[...doc.querySelectorAll('#dashboard h1')].filter(node=>!node.closest('[hidden]')).map(node=>node.id);
+ settings(dom);assert.deepEqual(titles(),['operator-settings-heading']);
+ click(dom,'[data-agent-id="agent-a"].operator-settings-agent');assert.deepEqual(titles(),['operator-agent-settings-heading']);
+ assert.ok(doc.querySelector('#operator-settings-heading')!.closest('[hidden]'));
+ assert.equal(doc.activeElement,doc.querySelector('#operator-agent-settings-heading'));
+ click(dom,'#operator-settings-back');assert.deepEqual(titles(),['operator-settings-heading']);
+ click(dom,'#operator-guidelines-tile');assert.deepEqual(titles(),['operator-agent-settings-heading']);assert.equal(doc.querySelector('#guidelines h3'),null);
+ click(dom,'#operator-header-cancel');assert.deepEqual(titles(),['operator-settings-heading']);
+ click(dom,'#operator-settings-picker [data-operator-view=overview]');assert.deepEqual(titles(),['operator-heading']);
+}));
+
+test('authenticated navigation is hidden and header actions follow only the active draft form',async()=>fixture(async(dom,requests)=>{
+ const doc=dom.window.document,actions=doc.querySelector<HTMLElement>('#operator-header-actions')!,save=doc.querySelector<HTMLButtonElement>('#operator-header-save')!,cancel=doc.querySelector<HTMLButtonElement>('#operator-header-cancel')!;
+ assert.ok([...doc.querySelectorAll<HTMLAnchorElement>('header nav a.header-action')].every(link=>link.hidden));
+ assert.equal(actions.hidden,true);openAgent(dom);assert.equal(actions.hidden,false);assert.equal(save.form,doc.querySelector('#operator-agent-form'));assert.equal(save.disabled,true);
+ assert.equal(doc.querySelector('#operator-settings-editor [data-settings-cancel]'),null);
+ click(dom,'input[value=paused]');assert.equal(save.disabled,false);save.click();await tick();await tick();assert.deepEqual(writes(requests).map(request=>request.body),[{action:'pause'}]);assert.equal(save.disabled,true);
+ cancel.click();assert.equal(actions.hidden,true);click(dom,'#operator-guidelines-tile');assert.equal(save.form,doc.querySelector('#guidelines'));changeGuidelines(dom,'Header draft');save.click();await tick();await tick();assert.equal(writes(requests).at(-1)!.body.guidelines,'Header draft');
+ changeGuidelines(dom,'Discard this');cancel.click();assert.equal(actions.hidden,true);click(dom,'#operator-guidelines-tile');assert.equal(doc.querySelector<HTMLTextAreaElement>('#operator-guidelines')!.value,'Header draft');
+ click(dom,'#operator-header-cancel');click(dom,'#operator-settings-picker [data-operator-view=overview]');assert.equal(actions.hidden,true);
+}));

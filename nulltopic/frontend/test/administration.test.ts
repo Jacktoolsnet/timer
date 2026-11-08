@@ -107,6 +107,7 @@ test('root can manage accounts while its own credentials remain environment-only
   doc.querySelector('#login')!.dispatchEvent(new dom.window.Event('submit', {cancelable: true}));
   await tick();
   assert.equal((doc.querySelector('#admin-overview') as HTMLElement).hidden, false);
+  assert.deepEqual([...doc.querySelectorAll('#dashboard h1')].filter(node=>!node.closest('[hidden]')).map(node=>node.id),['admin-heading']);
   assert.equal((doc.querySelector('#admin-user-management') as HTMLElement).hidden, true);
   assert.equal(requests.some(r => r.path === '/api/admin/users'), false);
   (doc.querySelector('#admin-users-tile') as HTMLButtonElement).click();
@@ -116,6 +117,10 @@ test('root can manage accounts while its own credentials remain environment-only
   assert.equal(cards.length, 2);
   assert.equal(cards[0].querySelector('input'), null);
   assert.ok(cards[1].querySelector('input[type=password]'));
+  for(const button of cards[1].querySelectorAll('button')){
+    assert.equal(button.textContent?.trim(),'');assert.ok(button.querySelector('svg'));assert.ok(button.getAttribute('aria-label'));
+    assert.equal(button.getAttribute('aria-label'),button.getAttribute('data-tooltip'));
+  }
   (doc.querySelector('#new-admin-handle') as HTMLInputElement).value = 'new_admin';
   (doc.querySelector('#new-admin-password') as HTMLInputElement).value = 'test-new-password';
   doc.querySelector('#admin-create-user')!.dispatchEvent(new dom.window.Event('submit', {cancelable: true}));
@@ -144,6 +149,7 @@ test('administration tiles, back navigation and toolbar lock follow the authenti
   assert.equal(doc.querySelectorAll('.admin-tile svg[aria-hidden=true]').length, 2);
   for (const link of doc.querySelectorAll('header nav a.header-action')) {
     assert.equal(link.getAttribute('aria-disabled'), 'true');
+    assert.equal((link as HTMLElement).hidden, true);
     assert.equal(link.hasAttribute('href'), false);
     assert.equal(link.getAttribute('tabindex'), '-1');
     const click = new dom.window.MouseEvent('click', {bubbles: true, cancelable: true});
@@ -158,6 +164,7 @@ test('administration tiles, back navigation and toolbar lock follow the authenti
   await tick();
   assert.equal(dom.window.location.hash, '#moderation');
   assert.equal((doc.querySelector('#admin-moderation') as HTMLElement).hidden, false);
+  assert.deepEqual([...doc.querySelectorAll('#dashboard h1')].filter(node=>!node.closest('[hidden]')).map(node=>node.id),['moderation-heading']);
   assert.equal(requests.filter(r => r.path.startsWith('/api/admin?')).length, 1);
   (doc.querySelector('#admin-moderation .admin-back') as HTMLButtonElement).click();
   await tick();
@@ -179,6 +186,7 @@ test('administration tiles, back navigation and toolbar lock follow the authenti
   assert.equal(doc.querySelector('.admin-session-handle')?.textContent, '');
   assert.equal(doc.querySelector('header nav a')?.getAttribute('href'), '/conversations');
   assert.equal(doc.querySelector('header nav a')?.getAttribute('aria-disabled'), null);
+  assert.equal(doc.querySelector<HTMLElement>('header nav a')!.hidden,false);
 }, false, true));
 
 test('ordinary administrators cannot open user management even through a view hash', async () => fixture(async (dom, requests) => {

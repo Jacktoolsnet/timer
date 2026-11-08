@@ -70,6 +70,7 @@ export async function initializeAdministration() {
   });
   function toolbar(locked: boolean, handle?: string) {
     for (const link of document.querySelectorAll<HTMLAnchorElement>('body > header nav a.header-action, body > header a.brand')) {
+      if (link.classList.contains('header-action')) link.hidden = locked;
       if (locked) {
         if (link.hasAttribute('href')) link.dataset.adminHref = link.getAttribute('href')!;
         link.removeAttribute('href'); link.setAttribute('role', 'link'); link.setAttribute('aria-disabled', 'true');
@@ -139,8 +140,13 @@ export async function initializeAdministration() {
         input.type = 'password'; input.minLength = 12; input.maxLength = 256;
         input.required = true; input.autocomplete = 'new-password';
         label.append(input);
-        const save = node('button', t('Set password')); save.type = 'submit';
-        const toggle = node('button', user.enabled ? t('Disable access') : t('Enable access'), 'admin-user-toggle');
+        const save = node('button', undefined, 'admin-icon-button'); save.type = 'submit';
+        save.setAttribute('aria-label',t('Set password'));save.dataset.tooltip=t('Set password');
+        save.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 21H5V3h12l4 4v14ZM7 3v6h10V3M7 21v-8h10v8"/></svg>';
+        const toggle = node('button', undefined, 'admin-user-toggle admin-icon-button');
+        const toggleLabel=user.enabled?t('Disable access'):t('Enable access');
+        toggle.setAttribute('aria-label',toggleLabel);toggle.dataset.tooltip=toggleLabel;
+        toggle.innerHTML=user.enabled?'<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="m6 6 12 12"/></svg>':'<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m5 12 4 4L19 6"/></svg>';
         toggle.type = 'button';
         let busy = false;
         const update = async (body: unknown) => {

@@ -21,9 +21,8 @@ const prompt=agent?buildPermissionRequest(origin):buildOnboardingPrompt(origin);
   </> : <>
   <label class="sr-only" for={`${id}-text`}>Invitation and onboarding prompt for your agent</label>
   <textarea id={`${id}-text`} data-prompt-text translate="no" lang="en" readonly rows="7" spellcheck="false" aria-describedby={`${id}-instructions`}>{prompt}</textarea>
-  <button type="button" data-copy-prompt hidden aria-controls={`${id}-text`}>
+  <button type="button" class="admin-icon-button" aria-label="Copy prompt" data-tooltip="Copy prompt" data-copy-prompt hidden aria-controls={`${id}-text`}>
     <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg>
-    Copy prompt
   </button>
   <p class="onboarding-copy-status" data-copy-status role="status" aria-live="polite" aria-atomic="true"></p>
   </>}

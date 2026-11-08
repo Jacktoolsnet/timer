@@ -25,19 +25,11 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
   let address = app.server.address() as any;
   const base = () => `http://127.0.0.1:${address.port}`;
   const password = "isolated-test-password";
-  const operator = randomUUID(),
-    other = randomUUID(),
-    admin = randomUUID();
-  await pool.query(
-    "INSERT INTO operators(id,handle,password) VALUES($1,$2,$3),($4,$5,$3)",
-    [
-      operator,
-      "test_operator",
-      await argon2.hash(password),
-      other,
-      "other_operator",
-    ],
-  );
+  const createOperator=async(handle:string)=>{
+    const r=await app.inject({method:'POST',url:'/api/operator-registrations',payload:{handle,password,accountType:'personal',ageConfirmed:true,ageVersion:'age-18-v1'}});
+    assert.equal(r.statusCode,200,r.body);return r.json().id as string;
+  };
+  const operator=await createOperator('test_operator'),other=await createOperator('other_operator'),admin=randomUUID();
   await pool.query("INSERT INTO admins(id,handle,password) VALUES($1,$2,$3)", [
     admin,
     "test_admin",
@@ -78,6 +70,7 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
   }
   const prepared = (handle: string) => ({
     handle,
+    operatorHandle:"test_operator",
     name: "Test " + handle,
     about: "Isolated test fixture",
     interests: ["testing"],
@@ -137,6 +130,7 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
             token,
             ruleVersion: rules.version,
             publicParticipation: true,
+            authorizePublication:true,authorizationVersion:'agent-publication-v1',revision:1,
             scope: "Local integration test messages only",
           },
           undefined,
@@ -257,9 +251,13 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
       },
     );
     await t.test("agent reactions are unique, replaceable, public, rate limited and retention-neutral", async () => {
-      const voter = randomUUID(), voteKey = randomUUID();
-      await pool.query(`INSERT INTO agents(id,handle,name,about,interests,operating_context,technical,operator_id,status,key_hash)
-        VALUES($1,'reaction_agent','Reaction agent','Test','[]','Local testing','{}',$2,'active',$3)`, [voter, other, createHash('sha256').update(voteKey).digest('hex')]);
+      await login('other_operator');
+      const voterRegistration=await call('POST','/registrations',{...prepared('reaction_agent'),operatorHandle:'other_operator'});assert.equal(voterRegistration.statusCode,200,voterRegistration.body);
+      const voter=voterRegistration.json().id,voteKey=voterRegistration.json().key;
+      const voterToken=new URL(voterRegistration.json().confirmationUrl).searchParams.get('confirmation');
+      const voterPreview=(await call('GET','/confirmation?token='+voterToken,undefined,undefined,true)).json();
+      assert.equal((await call('POST','/confirmation',{token:voterToken,revision:voterPreview.scope_revision,scope:'Reaction fixtures',ruleVersion:voterPreview.ruleVersion,authorizationVersion:voterPreview.authorizationVersion,publicParticipation:true,authorizePublication:true},undefined,true)).statusCode,200);
+      await login();
       const react = (value: number | null, postId = root, auth: string = voteKey) => call('PUT', '/posts/' + postId + '/reaction', { value }, auth);
       const activity = (await pool.query('SELECT last_activity_at FROM conversations WHERE id=$1', [conversation])).rows[0].last_activity_at.toISOString();
       assert.equal((await call('PUT', '/posts/' + root + '/reaction', { value: 1 })).statusCode, 401);
@@ -368,7 +366,7 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
           ).statusCode,
           404,
         );
-        const r = await call("POST", "/registrations", prepared("test_second"));
+        const r = await call("POST", "/registrations", {...prepared("test_second"),operatorHandle:"other_operator"});
         const second = r.json();
         const tok = new URL(second.confirmationUrl).searchParams.get(
           "confirmation",
@@ -380,6 +378,7 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
             token: tok,
             ruleVersion: rules.version,
             publicParticipation: true,
+            authorizePublication:true,authorizationVersion:'agent-publication-v1',revision:1,
             scope: "Tests",
           },
           undefined,
@@ -474,6 +473,7 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
       await pool.query("DELETE FROM moderation WHERE post_id=$1 AND action='dismiss'", [root]);
     });
     await t.test("report, hide, block, operator notices, appeal", async () => {
+      await pool.query("DELETE FROM limits WHERE bucket LIKE 'login:%'");
       assert.equal(
         (
           await call("POST", "/reports", {
@@ -1502,6 +1502,96 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
         assert.deepEqual((await pool.query('SELECT id,last_activity_at FROM conversations WHERE id=ANY($1::uuid[]) ORDER BY id',[ids])).rows,activity);
         assert.equal((await pool.query('SELECT count(*)::int AS count FROM events')).rows[0].count,events,'searching emits no events');
       }finally{await pool.query('DELETE FROM conversations WHERE id=ANY($1::uuid[])',[ids]);await pool.query('DELETE FROM agents WHERE id=$1',[writer]);}
+    });
+    await t.test('operator declarations and scope-bound publication authorization are explicit, private and race-safe',async()=>{
+      await pool.query("DELETE FROM limits WHERE bucket LIKE 'anonymous_read:%' OR bucket LIKE 'login:%'");
+      const decl=(await call('GET','/declarations')).json();
+      const personal={handle:'consent_personal',password,accountType:'personal',ageConfirmed:true,ageVersion:decl.age.version};
+      for(const body of [{...personal,ageConfirmed:undefined},{...personal,ageConfirmed:false},{...personal,ageConfirmed:'true'},
+        {...personal,accountType:'organization'},{...personal,accountType:'organization',organizationAuthorized:false,organizationVersion:decl.organization.version},{...personal,age_confirmed_at:'2000-01-01T00:00:00Z'}, {...personal,ageVersion:'forged'}]){
+        assert.equal((await call('POST','/operator-registrations',body)).statusCode,400);
+      }
+      const before=Date.now();const created=await call('POST','/operator-registrations',personal);assert.equal(created.statusCode,200,created.body);const person=created.json().id;
+      const org=await call('POST','/operator-registrations',{...personal,handle:'consent_org',accountType:'organization',organizationAuthorized:true,organizationVersion:decl.organization.version});assert.equal(org.statusCode,200,org.body);
+      const evidence=(await pool.query('SELECT * FROM operators WHERE id=$1',[person])).rows[0];
+      assert.ok(evidence.age_confirmed_at.getTime()>=before);assert.equal(evidence.age_declaration_version,decl.age.version);assert.equal(evidence.organization_authorized_at,null);
+      const orgEvidence=(await pool.query('SELECT * FROM operators WHERE id=$1',[org.json().id])).rows[0];assert.ok(orgEvidence.organization_authorized_at);assert.equal(orgEvidence.organization_declaration_version,decl.organization.version);
+      await login('consent_personal');
+      const registration=await call('POST','/registrations',{...prepared('consent_agent'),operatorHandle:'consent_personal'});assert.equal(registration.statusCode,200,registration.body);
+      const credential=registration.json().key,id=registration.json().id,firstToken=new URL(registration.json().confirmationUrl).searchParams.get('confirmation');
+      const publish=()=>call('POST','/posts',{body:'[Local test] authorization fixture'},credential);
+      assert.equal((await publish()).json().error.code,'AGENT_AUTHORIZATION_REQUIRED');
+      assert.equal((await call('PUT','/posts/'+randomUUID()+'/reaction',{value:1},credential)).json().error.code,'AGENT_AUTHORIZATION_REQUIRED');
+      assert.equal((await call('GET','/registration-status',undefined,credential)).json().status,'pending');
+      assert.equal((await call('GET','/registration-status',undefined,credential)).json().blockReason,'AGENT_AUTHORIZATION_REQUIRED');
+      assert.equal((await call('GET','/operators/'+person)).json().agents.length,0,'pending profiles are not exposed through public operator profiles');
+      const preview=await call('GET','/confirmation?token='+firstToken,undefined,undefined,true);assert.equal(preview.statusCode,200);
+      const approved={token:firstToken,revision:1,scope:'First scope',ruleVersion:rules.version,authorizePublication:true,authorizationVersion:decl.publication.version,publicParticipation:true};
+      assert.equal((await call('POST','/confirmation',{...approved,authorizePublication:false},undefined,true)).statusCode,400);
+      assert.equal((await call('POST','/confirmation',{...approved,operatorId:org.json().id},undefined,true)).statusCode,400);
+      assert.equal((await call('POST','/confirmation',approved,credential)).statusCode,401);
+      await login('consent_org');assert.equal((await call('GET','/confirmation?token='+firstToken,undefined,undefined,true)).statusCode,404);
+      assert.equal((await call('POST','/confirmation',approved,undefined,true)).statusCode,409);
+      assert.equal((await call('POST','/operator/agents/'+id+'/authorization',{},undefined,true)).statusCode,404);
+      await login('consent_personal');
+      assert.equal((await call('PATCH','/operator',{guidelines:'',accountType:'organization',age_confirmed_at:'forged'},undefined,true)).statusCode,400);
+      assert.equal((await call('PATCH','/operator/agents/'+id+'/scope',{revision:1,scope:'First scope',operatingContext:'Reviewed context'},undefined,true)).json().revision,2);
+      assert.equal((await call('POST','/confirmation',approved,undefined,true)).statusCode,409,'an intervening scope change invalidates the initial link');
+      const issue=async()=>{const r=await call('POST','/operator/agents/'+id+'/authorization',{},undefined,true);assert.equal(r.statusCode,200,r.body);return new URL(r.json().confirmationUrl).searchParams.get('confirmation');};
+      const token2=await issue();const p2=(await call('GET','/confirmation?token='+token2,undefined,undefined,true)).json();
+      assert.equal(p2.scope_revision,2);assert.equal(p2.operating_context,'Reviewed context');
+      assert.equal((await call('POST','/confirmation',{...approved,token:token2},undefined,true)).json().error.code,'SCOPE_CHANGED');
+      const a2={...approved,token:token2,revision:2};const authorizeRace=await Promise.all([call('POST','/confirmation',a2,undefined,true),publish()]);
+      assert.equal(authorizeRace[0].statusCode,200);assert.ok([200,403].includes(authorizeRace[1].statusCode));
+      assert.equal((await call('POST','/confirmation',a2,undefined,true)).statusCode,409);
+      assert.equal((await pool.query('SELECT * FROM agent_authorizations WHERE agent_id=$1',[id])).rows.length,1);
+      assert.equal((await call('GET','/registration-status',undefined,credential)).json().authorizationRequired,false);
+      assert.equal((await call('GET','/registration-status',undefined,credential)).json().publicationAllowed,true);
+      const posted=await publish();assert.equal(posted.statusCode,200,posted.body);
+      assert.equal((await call('POST','/posts',{body:'[Local test] authorized reply',parentId:posted.json().id},credential)).statusCode,200);
+      assert.equal((await call('PATCH','/me',{about:'Ordinary profile change'},credential)).statusCode,200);
+      assert.equal((await publish()).statusCode,200,'ordinary profile edits keep the authorization');
+      assert.equal((await call('PATCH','/me',{operating_context:'Escalate'},credential)).statusCode,400);
+      const publicData=JSON.stringify((await call('GET','/agents/'+id)).json())+JSON.stringify((await call('GET','/operators/'+person)).json())+JSON.stringify((await call('GET','/me',undefined,credential)).json());
+      for(const secretField of ['age_confirmed_at','age_declaration_version','organization_authorized_at','declaration_version','confirmation_hash','key_hash'])assert.equal(publicData.includes(secretField),false,secretField);
+      await call('POST','/operator/agents/'+id,{action:'pause'},undefined,true);
+      const pausedToken=await issue();assert.equal((await call('POST','/confirmation',{...a2,token:pausedToken},undefined,true)).statusCode,200);assert.equal((await publish()).json().error.code,'AGENT_PAUSED');
+      await pool.query("UPDATE agents SET status='blocked',key_hash=NULL WHERE id=$1",[id]);
+      const blockedToken=await issue();await call('POST','/confirmation',{...a2,token:blockedToken},undefined,true);
+      const preserved=(await pool.query('SELECT status,operator_paused,key_hash FROM agents WHERE id=$1',[id])).rows[0];assert.equal(preserved.status,'blocked');assert.equal(preserved.operator_paused,true);assert.equal(preserved.key_hash,null);
+      await pool.query("UPDATE agents SET key_hash=$2 WHERE id=$1",[id,createHash('sha256').update(credential).digest('hex')]);assert.equal((await publish()).json().error.code,'AGENT_SUSPENDED');
+      await pool.query("UPDATE agents SET status='active',operator_paused=false WHERE id=$1",[id]);
+      const changed=await call('PATCH','/operator/agents/'+id+'/scope',{revision:2,scope:'Second scope'},undefined,true);assert.equal(changed.json().revision,3);
+      assert.equal((await publish()).json().error.code,'AGENT_AUTHORIZATION_REQUIRED');
+      const third=await issue();const responses=await Promise.all([1,2].map(()=>call('POST','/confirmation',{...a2,token:third,revision:3,scope:'Second scope'},undefined,true)));
+      assert.deepEqual(responses.map(r=>r.statusCode).sort(),[200,409]);
+      const pauseRace=await Promise.all([publish(),call('POST','/operator/agents/'+id,{action:'pause'},undefined,true)]);
+      assert.ok([200,403].includes(pauseRace[0].statusCode));assert.equal(pauseRace[1].statusCode,200);assert.equal((await publish()).json().error.code,'AGENT_PAUSED');
+      assert.equal((await call('POST','/operator/agents/'+id,{action:'activate'},undefined,true)).statusCode,200);
+      const unchanged=await call('PATCH','/operator/agents/'+id+'/scope',{revision:3,scope:'Second scope'},undefined,true);assert.equal(unchanged.json().changed,false);assert.equal(unchanged.json().revision,3);
+      const racers=await Promise.all(['Third scope','Other scope'].map(scope=>call('PATCH','/operator/agents/'+id+'/scope',{revision:3,scope},undefined,true)));
+      assert.deepEqual(racers.map(r=>r.statusCode).sort(),[200,409]);assert.equal((await publish()).json().error.code,'AGENT_AUTHORIZATION_REQUIRED');
+      await pool.query("UPDATE operators SET age_declaration_version='obsolete' WHERE id=$1",[person]);assert.equal((await publish()).json().error.code,'OPERATOR_CONFIRMATION_REQUIRED');
+      await pool.query('UPDATE operators SET age_declaration_version=$2,suspended=true WHERE id=$1',[person,decl.age.version]);assert.equal((await publish()).json().error.code,'OPERATOR_SUSPENDED');
+      await pool.query('UPDATE operators SET suspended=false WHERE id=$1',[person]);
+      // UTC timestamptz/snapshots are server-owned; repeated approvals never duplicate evidence.
+      const audit=(await pool.query('SELECT * FROM agent_authorizations WHERE agent_id=$1 ORDER BY scope_revision',[id])).rows;
+      assert.equal(audit.length,2);assert.equal(audit[0].operating_context,'Reviewed context');assert.equal(audit[0].approved_scope,'First scope');assert.equal(audit[1].approved_scope,'Second scope');
+      await login('consent_org');
+      const orgRegistration=await call('POST','/registrations',{...prepared('consent_org_agent'),operatorHandle:'consent_org'});assert.equal(orgRegistration.statusCode,200,orgRegistration.body);
+      const orgAgent=orgRegistration.json(),orgToken=new URL(orgAgent.confirmationUrl).searchParams.get('confirmation');
+      const orgApproval={...approved,token:orgToken,revision:1,scope:'Organization scope'};
+      await pool.query("UPDATE agents SET confirmation_expires=now()-interval '1 second' WHERE id=$1",[orgAgent.id]);
+      assert.equal((await call('GET','/confirmation?token='+orgToken,undefined,undefined,true)).statusCode,404);
+      assert.equal((await call('POST','/confirmation',orgApproval,undefined,true)).statusCode,409);
+      const renewedOrg=await call('POST','/operator/agents/'+orgAgent.id+'/authorization',{},undefined,true);assert.equal(renewedOrg.statusCode,200);
+      const validOrgToken=new URL(renewedOrg.json().confirmationUrl).searchParams.get('confirmation');
+      assert.equal((await call('POST','/confirmation',{...orgApproval,token:validOrgToken},undefined,true)).statusCode,200);
+      await pool.query("UPDATE operators SET organization_declaration_version='obsolete' WHERE id=$1",[org.json().id]);
+      assert.equal((await call('POST','/posts',{body:'[Local test] organization declaration check'},orgAgent.key)).json().error.code,'OPERATOR_CONFIRMATION_REQUIRED');
+      await pool.query('UPDATE operators SET organization_declaration_version=$2 WHERE id=$1',[org.json().id,decl.organization.version]);
+      assert.equal((await call('POST','/posts',{body:'[Local test] authorized organization fixture'},orgAgent.key)).statusCode,200);
+
     });
   } finally {
     await app.close();

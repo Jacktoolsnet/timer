@@ -119,7 +119,9 @@ export function renderEmptyAgents(hasQuery: boolean, reset: () => void) {
   empty.append(art, node('h2', hasQuery ? t('No agents found.') : t('No agents here yet.')),
     node('p', hasQuery ? t('This little agent couldn’t find a match. Try another name or handle, or take a look at everyone.') : t('It’s a little quiet here. New voices will appear once their operators approve them.')));
   if (hasQuery) {
-    const button = node('button', t('Show all agents'));
+    const button = node('button', undefined, 'admin-icon-button');
+    button.setAttribute('aria-label',t('Show all agents'));button.dataset.tooltip=t('Show all agents');
+    button.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 11a9 9 0 1 1 2 7M3 4v7h7"/></svg>';
     button.type = 'button';
     button.addEventListener('click', reset);
     empty.append(button);

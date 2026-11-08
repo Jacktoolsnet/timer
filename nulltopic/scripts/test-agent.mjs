@@ -1,6 +1,5 @@
 import { randomBytes, randomUUID } from "node:crypto";
 import { mkdir, writeFile, readFile } from "node:fs/promises";
-import { spawnSync } from "node:child_process";
 const origin = process.env.PUBLIC_ORIGIN || "http://localhost:4321";
 if (
   process.env.NODE_ENV !== "development" ||
@@ -21,7 +20,7 @@ async function api(route, body, headers = {}, method = body ? "POST" : "GET") {
     body: body ? JSON.stringify(body) : undefined,
   });
   const data = await r.json();
-  if (!r.ok) throw Error(route + ": " + data.error?.message);
+  if (!r.ok) throw Error("Local fixture request failed: " + route.split("?")[0] + " (HTTP " + r.status + ")");
   return {
     data,
     cookies: r.headers
@@ -34,11 +33,13 @@ let exists = false;
 try {
   const saved = JSON.parse(await readFile(path, "utf8"));
   await api("/me", undefined, { authorization: "Bearer " + saved.key });
+  const {data:state}=await api('/registration-status',undefined,{authorization:'Bearer '+saved.key});
+  if(!state.publicationAllowed)throw Error('Fixture requires operator attention');
   exists = true;
 } catch (e) {
   if (e.code !== "ENOENT")
     throw Error(
-      "Existing local credentials are not usable. Recover through operator key rotation; no automatic reset.",
+      "Existing local fixture is not ready. Check authorization, pause/block state and key validity in Operator Settings; no automatic reset or approval.",
     );
 }
 if (exists) {
@@ -50,21 +51,12 @@ if (exists) {
 const suffix = randomUUID().slice(0, 8),
   handle = "local_test_" + suffix,
   password = randomBytes(32).toString("base64url");
-const child = spawnSync(
-  process.execPath,
-  ["--import", "tsx", "backend/src/cli.ts", "bootstrap"],
-  {
-    env: {
-      ...process.env,
-      BOOTSTRAP_HANDLE: handle,
-      BOOTSTRAP_PASSWORD: password,
-    },
-    stdio: ["ignore", "pipe", "pipe"],
-  },
-);
-if (child.status !== 0) throw Error("Local operator bootstrap failed");
+// Synthetic local fixture, not an attestation about a real person's age.
+const {data:declarations}=await api('/declarations');
+await api('/operator-registrations',{handle,password,accountType:'personal',ageConfirmed:true,ageVersion:declarations.age.version});
 const { data: registration } = await api("/registrations", {
   handle,
+  operatorHandle:handle,
   name: "Local test agent",
   about:
     "Explicitly authorized local prototype test fixture. Not a real user or a verified model.",
@@ -78,7 +70,7 @@ const headers = { cookie: cookies, origin, "x-csrf-token": session.csrf };
 const token = new URL(registration.confirmationUrl).searchParams.get(
   "confirmation",
 );
-await api("/confirmation?token=" + token, undefined, headers);
+const {data:preview}=await api("/confirmation?token=" + token, undefined, headers);
 const { data: rules } = await api("/rules");
 await api(
   "/confirmation",
@@ -86,6 +78,7 @@ await api(
     token,
     ruleVersion: rules.version,
     publicParticipation: true,
+    authorizePublication:true,authorizationVersion:declarations.publication.version,revision:preview.scope_revision,
     scope:
       "Explicitly authorized local test messages only. Do not run autonomously or access external services.",
   },

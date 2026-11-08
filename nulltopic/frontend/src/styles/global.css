@@ -938,7 +938,6 @@ body > header nav { gap: 8px; }
 /* Administration workspace: overview first, focused task views afterwards. */
 .header-action[aria-disabled=true], .brand[aria-disabled=true] { opacity: .35; cursor: not-allowed; filter: none; }
 .header-action[aria-disabled=true]:hover, .header-action[aria-disabled=true][aria-current] { background: var(--surface); border-color: var(--line); color: var(--muted); }
-.admin-view-copy { color: var(--muted); font-size: .875rem; line-height: 1.8; margin: 10px 0 28px; }
 .admin-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; max-width: 900px; }
 .admin-tile { display: flex; flex-direction: column; align-items: flex-start; text-align: left; padding: 28px; min-height: 290px; border-radius: 22px; background: var(--surface); color: var(--text); }
 .admin-tile:hover:not(:disabled) { background: var(--surface); border-color: var(--accent); box-shadow: 0 10px 35px color-mix(in srgb, var(--accent) 9%, transparent); }
@@ -1334,3 +1333,77 @@ body > .site-header > nav .header-action:nth-last-child(-n+2)::after { left: aut
     box-shadow: none;
   }
 }
+
+/* Action labels live in tooltips; identity, tabs and choices stay readable. */
+.admin-sign-in.admin-icon-button { width: 44px; justify-content: center; }
+.admin-sign-in.admin-icon-button::after { color: var(--text); font-weight: 400; }
+.operator-settings-actions .admin-icon-button { gap: 0; }
+.operator-agent-actions .admin-icon-button { font-size: inherit; }
+.admin-user-actions .admin-icon-button::after { left: auto; right: 0; }
+.admin-create-user .admin-icon-button { justify-content: center; }
+.agents-empty-state > .admin-icon-button { margin: 16px auto 0; }
+/* Anchor editor tooltips to the available action row, not a narrow icon target. */
+#operator-settings-editor :is(.operator-settings-actions, .operator-agent-actions), .admin-user-actions { position: relative; }
+#operator-settings-editor :is(.operator-settings-actions, .operator-agent-actions) .admin-icon-button, .admin-user-actions .admin-icon-button { position: static; }
+#operator-settings-editor :is(.operator-settings-actions, .operator-agent-actions) .admin-icon-button::after, .admin-user-actions .admin-icon-button::after { left: 0; right: auto; max-width: 100%; }
+.admin-login-shell .admin-icon-button::after { max-width: min(240px, calc(100vw - 104px)); }
+.admin-subview-heading:has(.admin-root-badge) { flex-wrap: wrap; }
+.admin-subview-heading:has(.admin-root-badge) > div { flex: 1 1 180px; min-width: 0; overflow-wrap: anywhere; }
+
+.operator-header-actions { display: flex; align-items: center; gap: 10px; }
+.operator-header-actions .header-action::after { top: calc(100% + 8px); bottom: auto; left: auto; right: 0; }
+.operator-header-actions { position: relative; }
+.operator-header-actions .header-action { position: static; }
+.operator-header-actions .header-action::after { left: 50%; right: auto; transform: translateX(-50%); max-width: min(180px, calc(100vw - 64px)); }
+
+/* Quiet workspace typography: task titles, not oversized landing-page headlines. */
+.administration :is(.admin-dashboard-heading, .admin-subview-heading) :is(h1, h2) {
+  font-family: inherit;
+  font-size: 1.25rem;
+  font-weight: 650;
+  line-height: 1.35;
+  letter-spacing: -.02em;
+  margin: 4px 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.administration .admin-dashboard-heading { margin-bottom: 20px; }
+.administration .admin-subview-heading { gap: 12px; margin: 4px 0 20px; }
+.administration :is(.admin-dashboard-heading, .admin-subview-heading) .admin-eyebrow { font-weight: 550; letter-spacing: .08em; }
+.administration .admin-tile-title { font-family: inherit; font-size: 1.125rem; font-weight: 600; line-height: 1.35; letter-spacing: -.015em; }
+
+/* Solid primary action, deliberately stronger than the secondary icon buttons. */
+.admin-login-form .admin-sign-in.admin-icon-button {
+  width: 60px;
+  height: 60px;
+  min-height: 60px;
+  justify-content: center;
+  border: 2px solid var(--accent);
+  border-radius: 16px;
+  background: var(--accent);
+  color: var(--surface);
+  box-shadow: 0 5px 14px color-mix(in srgb, var(--accent) 24%, transparent);
+}
+[data-theme=dark] .admin-login-form .admin-sign-in.admin-icon-button { color: var(--bg); }
+.admin-login-form .admin-sign-in.admin-icon-button svg { width: 28px; height: 28px; stroke-width: 2.2; }
+.admin-login-form .admin-sign-in.admin-icon-button:hover { background: var(--accent); filter: none; box-shadow: 0 7px 18px color-mix(in srgb, var(--accent) 34%, transparent); }
+.admin-login-form .admin-sign-in.admin-icon-button:focus-visible { outline: 3px solid var(--text); outline-offset: 4px; }
+[data-style=technical] .admin-login-form .admin-sign-in.admin-icon-button { border-radius: 8px; }
+[data-style=soft] .admin-login-form .admin-sign-in.admin-icon-button { border-radius: 20px; }
+@media (forced-colors: active) {
+  .admin-login-form .admin-sign-in.admin-icon-button { background: ButtonFace; color: ButtonText; border-color: ButtonText; box-shadow: none; forced-color-adjust: auto; }
+}
+.operator-auth-forms { min-width: 0; }
+.operator-registration { padding: 0 38px 34px; }
+.operator-registration > summary { color: var(--accent); cursor: pointer; padding: 12px 0; }
+.operator-registration form { margin: 12px 0 0; }
+.operator-registration label { display: block; }
+.operator-registration .operator-consent, #approve .operator-consent { display: flex; align-items: flex-start; gap: 10px; margin: 16px 0; line-height: 1.6; }
+.operator-registration .operator-consent input { flex: 0 0 18px; width: 18px; margin: 4px 0 0; }
+.operator-registration input, .operator-registration select { min-width: 0; }
+@media(max-width:640px){.operator-registration{padding:0 24px 26px;}}
+.operator-registration .admin-sign-in.admin-icon-button { width: 60px; height: 60px; min-height: 60px; background: var(--accent); color: var(--surface); border: 2px solid var(--accent); }
+[data-theme=dark] .operator-registration .admin-sign-in.admin-icon-button { color: var(--bg); }
+#approve > p:last-child { display: flex; gap: 10px; }
+.operator-consent input[type=checkbox] { accent-color: var(--accent); }
+.administration #confirmation > h2 { font-family: inherit; font-size: 1.25rem; line-height: 1.35; font-weight: 650; letter-spacing: -.02em; }

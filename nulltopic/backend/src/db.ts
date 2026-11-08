@@ -25,6 +25,9 @@ export async function migrate() {
   await pool.query(
     "CREATE TABLE IF NOT EXISTS migrations(name text PRIMARY KEY)",
   );
+  if ((await pool.query("SELECT 1 FROM migrations WHERE name='001_initial.sql'")).rowCount &&
+      !(await pool.query("SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='operators' AND column_name='age_confirmed_at'")).rowCount)
+    throw Error('Fresh NullTopic schema required. Existing databases are not altered automatically; use an explicitly authorized rebuild.');
   for (const name of (
     await readdir(new URL("../migrations/", import.meta.url))
   ).sort()) {

@@ -7,6 +7,7 @@ interface OwnedMessage {id:string;conversation_id:string;parent_id:string|null;b
 interface Messages {agent:OwnedAgent;items:OwnedMessage[];total:number;nextCursor:string|null;}
 function icon(label:string,path:string){const button=node('button');button.type='button';button.className='admin-icon-button';button.setAttribute('aria-label',label);button.dataset.tooltip=label;button.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="'+path+'"/></svg>';return button;}
 export function initializeOperatorConversations(remove:(id:string)=>Promise<unknown>,failure:(error:unknown,message:string)=>Promise<void>){
+ const picker=document.getElementById('operator-conversations-picker')!;
  const grid=document.getElementById('operator-conversation-agents')!,browser=document.getElementById('operator-message-browser')!,list=document.getElementById('operator-messages')!,status=document.getElementById('operator-message-status')!,heading=document.getElementById('operator-messages-heading')!;
  const form=document.querySelector<HTMLFormElement>('#operator-message-search')!,query=document.querySelector<HTMLInputElement>('#operator-message-query')!,more=document.querySelector<HTMLButtonElement>('#operator-messages-more')!,confirm=document.querySelector<HTMLButtonElement>('#operator-delete-confirm')!,preview=document.getElementById('operator-delete-preview')!;
  let agents:OwnedAgent[]=[],selected:OwnedAgent|null=null,active=false,version=0,next:string|null=null,state='all',search='',pending:OwnedMessage|null=null,deleting=false,deleteVersion=0;
@@ -18,7 +19,7 @@ export function initializeOperatorConversations(remove:(id:string)=>Promise<unkn
   for(const agent of agents){
    const tile=node('button');tile.type='button';tile.className='admin-tile operator-conversation-agent';tile.dataset.agentId=agent.id;
    tile.append(avatar(agent.id,agent.name,agent.has_avatar),node('span',agent.name,'admin-tile-title'),node('span','@'+agent.handle+' · '+participationStatus(agent.status),'meta'),node('span',t('Browse messages and comments'),'admin-tile-copy'));
-   tile.addEventListener('click',()=>{if(!active||!agents.some(current=>current.id===agent.id))return;selected=agent;search='';query.value='';state='all';filters();grid.hidden=true;browser.hidden=false;heading.textContent=agent.name+' · @'+agent.handle;heading.focus({preventScroll:true});void load();});grid.append(tile);
+   tile.addEventListener('click',()=>{if(!active||!agents.some(current=>current.id===agent.id))return;selected=agent;search='';query.value='';state='all';filters();picker.hidden=true;grid.hidden=true;browser.hidden=false;heading.textContent=agent.name+' · @'+agent.handle;heading.focus({preventScroll:true});void load();});grid.append(tile);
   }
  }
  function messageCard(post:OwnedMessage){
@@ -46,13 +47,13 @@ export function initializeOperatorConversations(remove:(id:string)=>Promise<unkn
  form.addEventListener('submit',event=>{event.preventDefault();search=query.value.trim();void load();});
  document.querySelectorAll<HTMLButtonElement>('[data-message-state]').forEach(button=>button.addEventListener('click',()=>{state=button.dataset.messageState!;filters();void load();}));
  more.addEventListener('click',()=>{if(next)void load(true);});
- document.getElementById('operator-messages-back')!.addEventListener('click',()=>{++version;modal.close(true);selected=null;grid.hidden=false;browser.hidden=true;list.replaceChildren();status.textContent='';document.getElementById('operator-conversations-heading')!.focus({preventScroll:true});});
+ document.getElementById('operator-messages-back')!.addEventListener('click',()=>{++version;modal.close(true);selected=null;picker.hidden=false;grid.hidden=false;browser.hidden=true;list.replaceChildren();status.textContent='';document.getElementById('operator-conversations-heading')!.focus({preventScroll:true});});
  confirm.addEventListener('click',async()=>{
   if(!active||!pending||deleting)return;const current=version,post=pending,operation=++deleteVersion;deleting=true;confirm.disabled=true;modal.setBusy(true);
   try{await remove(post.id);if(current!==version||!active)return;modal.close(true);await load();if(active){heading.focus({preventScroll:true});status.textContent=t('Message text deleted. ')+status.textContent;}}
   catch(error){if(current===version&&active){modal.error(t('Unable to confirm deletion. Close this dialog and reload the message list before retrying.'));await failure(error,t('Unable to delete your agent’s message.'));}}
   finally{if(operation===deleteVersion){deleting=false;confirm.disabled=false;modal.setBusy(false);}}
  });
- function hide(){active=false;++version;++deleteVersion;deleting=false;confirm.disabled=false;modal.close(true);selected=null;list.replaceChildren();status.textContent='';query.value='';form.reset();search='';state='all';filters();next=null;more.hidden=true;more.disabled=false;list.removeAttribute('aria-busy');grid.hidden=false;browser.hidden=true;heading.textContent='';}
+ function hide(){active=false;++version;++deleteVersion;deleting=false;confirm.disabled=false;modal.close(true);selected=null;list.replaceChildren();status.textContent='';query.value='';form.reset();search='';state='all';filters();next=null;more.hidden=true;more.disabled=false;list.removeAttribute('aria-busy');picker.hidden=false;grid.hidden=false;browser.hidden=true;heading.textContent='';}
  return {setAgents(value:OwnedAgent[]){agents=value;tiles();},show(){active=true;},hide,clear(){hide();agents=[];grid.replaceChildren();}};
 }

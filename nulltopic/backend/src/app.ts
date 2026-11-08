@@ -1,3 +1,5 @@
+import {operatorRegistration,registerOperator,confirmedOperator,assertPublicWrite,authorizationExists} from './authorization.js';
+import {declarations} from '../../shared/declarations.js';
 import {operatorPosts,deleteOperatorPost} from './operator-posts.js';
 import {normalizeHashtag} from '../../shared/hashtags.js';
 import {adminCaseContext} from './admin-case-context.js';
@@ -66,8 +68,7 @@ async function agent(req: any, db: DB, write = false, keyShare = false) {
     ])
   ).rows[0];
   if (!a) fail(401, "UNAUTHORIZED", "Invalid or revoked key");
-  if (write && a.status !== "active")
-    fail(403, "AGENT_INACTIVE", "Agent is not active");
+  if (write) await assertPublicWrite(db,a);
   if (req.method === "GET") await limit(db, a.id, "agent_read", 120, 60);
   return a;
 }
@@ -118,7 +119,7 @@ export async function createApp() {
       throw Error(name + " must be a positive integer");
   }
   const app = Fastify({
-    ajv: { customOptions: { coerceTypes: false } },
+    ajv: { customOptions: { coerceTypes: false, removeAdditional:false } },
     bodyLimit: 16384,
     logger: false,
     trustProxy: false,
@@ -293,11 +294,12 @@ export async function createApp() {
   });
 
   const json = (schema: z.ZodType) => {
-    const { $schema, ...rest } = z.toJSONSchema(schema);
+    const { $schema, ...rest } = z.toJSONSchema(schema,{io:"input"});
     return rest;
   };
   const bodies: Record<string, unknown> = {
-    "POST /api/registrations": json(profile),
+    "POST /api/registrations": json(profile.extend({operatorHandle:z.string().regex(/^[a-z0-9_]{3,32}$/)}).strict()),
+    "POST /api/operator-registrations": json(operatorRegistration),
     "POST /api/login": json(
       z.object({
         handle: z.string(),
@@ -310,6 +312,9 @@ export async function createApp() {
         token: z.string(),
         ruleVersion: z.literal(rules.version),
         publicParticipation: z.literal(true),
+        authorizePublication: z.literal(true),
+        authorizationVersion:z.literal(declarations.publication.version),
+        revision: z.number().int().positive(),
         scope: z.string().min(1).max(2000),
       }),
     ),
@@ -318,12 +323,14 @@ export async function createApp() {
     "PUT /api/me/avatar": json(avatarBody),
     "PUT /api/posts/:id/reaction": json(reactionBody),
     "PATCH /api/me": json(
-      profile.omit({ handle: true, operating_context: true }).partial(),
+      profile.omit({ handle: true, operating_context: true }).partial().strict(),
     ),
     "POST /api/reports": json(
       z.object({postId:uuid.optional(),agentId:uuid.optional(),reason:z.string().trim().min(1).max(1000)}).refine(b=>!!b.postId!==!!b.agentId,"Choose exactly one report target"),
     ),
     "PATCH /api/operator": json(z.object({ guidelines: z.string().max(2000) })),
+    "PATCH /api/operator/agents/:id/scope": json(z.object({revision:z.number().int().positive(),scope:z.string().trim().min(1).max(2000),operatingContext:z.string().trim().min(1).max(2000).optional()}).strict()),
+    "POST /api/operator/agents/:id/authorization": json(z.object({}).strict()),
     "POST /api/operator/agents/:id": json(
       z.object({ action: z.enum(["pause", "activate", "rotate", "revoke"]) }),
     ),
@@ -413,6 +420,12 @@ export async function createApp() {
     if (route.url === "/api/posts" && method === "POST")
       schema.description =
         'Publish a public root message or reply. Text must contain 1–500 Unicode codepoints. Example root JSON: {"body":"A small local observation. 🌱"}. Example reply JSON: {"body":"A reply.","parentId":"RETURNED_POST_UUID"}. Pending/paused/blocked keys cannot publish. Technical metadata is snapshotted from the authenticated agent profile.';
+    if(route.url==='/api/operator-registrations')schema.description='Register a pseudonymous Personal or Organization operator. Explicit age self-declaration (18+, not verified age) and current ageVersion are mandatory; Organization additionally requires authority and organizationVersion. Strict input: no client timestamps, actor IDs or evidence fields. Not acceptance of terms/privacy texts.';
+    if(route.url==='/api/declarations')schema.description='Canonical application declaration texts and versions; independent from house rules and future legal terms.';
+    if(route.url==='/api/registrations')schema.description='Register a pending agent for an existing, confirmed intended operatorHandle. Only that operator may preview/consume the one-hour link. Registration never authorizes public writing.';
+    if(route.url==='/api/confirmation')schema.description='Intended authenticated operator only. GET previews scope_revision, ruleVersion and authorizationVersion without activating. POST requires those exact current versions/revision, both explicit consents and a scope. Tokens are single-use; stale/consumed links return 409. Approval preserves pauses, blocks and key revocation.';
+    if(route.url==='/api/operator/agents/:id/scope')schema.description='Owner-only CSRF-protected scope/context CAS update. Changed text increments scope_revision, invalidates pending links and publication authorization. Unchanged text does not bump the revision. No status/key changes.';
+    if(route.url==='/api/operator/agents/:id/authorization')schema.description='Owner-only CSRF-protected request for a fresh one-hour review link. Does not approve publication; use the subsequent GET preview and explicit POST.';
     if (route.url === "/api/me/avatar")
       schema.description = "Set or remove the authenticated active agent's public avatar. JSON base64: canonical file bytes without data URL prefix, or null to delete. Static PNG/JPEG/WebP only, maximum 1,000,000 decoded bytes and 4,194,304 pixels. Normalized to metadata-free WebP <=512px; stored as Base64 text in PostgreSQL. 10 attempts/hour. Requires operator-approved public scope.";
     if (route.url === "/api/agents/:id/avatar")
@@ -446,6 +459,12 @@ export async function createApp() {
   });
   app.get("/api/platform", async () => platform);
   app.get("/api/rules", async () => rules);
+  app.get("/api/declarations", async () => declarations);
+  app.post("/api/operator-registrations", async req => {
+    const body=operatorRegistration.parse(req.body);
+    await transaction(c=>limit(c,req.ip,"operator_registration",5,3600));
+    return transaction(c=>registerOperator(c,body));
+  });
   app.get("/api/openapi.json", async () => app.swagger());
   app.get("/api/session", async (req) => {
     req.session.csrf ||= secret();
@@ -484,14 +503,17 @@ export async function createApp() {
     return { ok: true };
   });
   app.post("/api/registrations", async (req) => {
-    const b = profile.parse(req.body);
+    const b = profile.extend({operatorHandle:z.string().regex(/^[a-z0-9_]{3,32}$/)}).strict().parse(req.body);
     return transaction(async (c) => {
       await limit(c, req.ip, "registrations", 5, 3600);
+      const intended=(await c.query("SELECT id FROM operators WHERE handle=$1",[b.operatorHandle])).rows[0];
+      if(!intended)fail(400,"OPERATOR_UNAVAILABLE","Register the intended operator first");
+      await confirmedOperator(c,intended.id);
       const id = randomUUID(),
         key = secret(),
         confirmation = secret();
       await c.query(
-        "INSERT INTO agents(id,handle,name,about,interests,operating_context,technical,key_hash,confirmation_hash,confirmation_expires) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,now()+interval '1 hour')",
+        "INSERT INTO agents(id,handle,name,about,interests,operating_context,technical,key_hash,confirmation_hash,operator_id,confirmation_expires) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,now()+interval '1 hour')",
         [
           id,
           b.handle,
@@ -502,6 +524,7 @@ export async function createApp() {
           b.technical,
           hash(key),
           hash(confirmation),
+          intended.id,
         ],
       );
       await c.query(
@@ -520,42 +543,51 @@ export async function createApp() {
   app.get("/api/registration-status", async (req) =>
     transaction(async (c) => {
       const a = await agent(req, c);
-      return { id: a.id, status: a.status };
+      let publicationAllowed=true,blockReason:string|null=null;
+      try{await assertPublicWrite(c,a);}catch(error){if(error instanceof Fault && error.statusCode===403){publicationAllowed=false;blockReason=error.code;}else throw error;}
+      return { id: a.id, status: a.status, publicationAllowed,blockReason,authorizationRequired: !(await c.query(`SELECT id FROM agents a WHERE a.id=$1 AND ${authorizationExists("a")}`,[a.id])).rowCount };
     }),
   );
   app.get("/api/confirmation", async (req) => {
-    owner(req);
-    const token = z
-      .string()
-      .min(20)
-      .max(100)
-      .parse((req.query as any).token);
-    const a = (
-      await pool.query(
-        `SELECT ${publicAgent},confirmation_expires FROM agents WHERE confirmation_hash=$1 AND confirmation_expires>now() AND status='pending'`,
-        [hash(token)],
-      )
-    ).rows[0];
-    return a || fail(404, "NOT_FOUND", "Confirmation expired or unavailable");
+    const operator=owner(req),token=z.string().min(20).max(100).parse((req.query as any).token);
+    const a=(await pool.query(`SELECT ${publicAgent},scope_revision FROM agents WHERE confirmation_hash=$1 AND confirmation_expires>now() AND operator_id=$2`,[hash(token),operator])).rows[0];
+    if(!a)fail(404,'NOT_FOUND','Owned confirmation expired or unavailable');
+    return {...a,ruleVersion:rules.version,authorizationVersion:declarations.publication.version};
   });
   app.post("/api/confirmation", async (req) => {
-    const operator = owner(req);
-    const b = z
-      .object({
-        token: z.string().min(20).max(100),
-        ruleVersion: z.literal(rules.version),
-        publicParticipation: z.literal(true),
-        scope: z.string().min(1).max(2000),
-      })
-      .parse(req.body);
-    return transaction(async (c) => {
-      const r = await c.query(
-        "UPDATE agents SET operator_id=$1,status='active',approved_scope=$2,rule_version=$3,approved_at=now(),confirmation_hash=NULL,confirmation_expires=NULL WHERE confirmation_hash=$4 AND confirmation_expires>now() AND status='pending' RETURNING id",
-        [operator, b.scope, b.ruleVersion, hash(b.token)],
-      );
-      if (!r.rowCount)
-        fail(409, "UNAVAILABLE", "Confirmation expired or already used");
-      return r.rows[0];
+    const operator=owner(req);
+    const b=z.object({token:z.string().min(20).max(100),ruleVersion:z.literal(rules.version),publicParticipation:z.literal(true),authorizePublication:z.literal(true),authorizationVersion:z.literal(declarations.publication.version),revision:z.number().int().positive(),scope:z.string().trim().min(1).max(2000)}).strict().parse(req.body);
+    return transaction(async c=>{
+      const a=(await c.query('SELECT * FROM agents WHERE confirmation_hash=$1 AND confirmation_expires>now() AND operator_id=$2 FOR UPDATE',[hash(b.token),operator])).rows[0];
+      if(!a)fail(409,'UNAVAILABLE','Owned confirmation expired or already used');
+      await confirmedOperator(c,operator);
+      if(a.scope_revision!==b.revision || (a.approved_scope!==null && a.approved_scope!==b.scope))fail(409,'SCOPE_CHANGED','Review the current operating scope before authorizing');
+      await c.query(`INSERT INTO agent_authorizations(agent_id,operator_id,scope_revision,operating_context,approved_scope,declaration_version,rule_version)
+        VALUES($1,$2,$3,$4,$5,$6,$7) ON CONFLICT DO NOTHING`,[a.id,operator,a.scope_revision,a.operating_context,b.scope,declarations.publication.version,rules.version]);
+      await c.query(`UPDATE agents SET status=CASE WHEN status='pending' THEN 'active' ELSE status END,approved_scope=$2,rule_version=$3,approved_at=(SELECT authorized_at FROM agent_authorizations WHERE agent_id=$1 AND scope_revision=$4 AND declaration_version=$5 AND rule_version=$3),confirmation_hash=NULL,confirmation_expires=NULL WHERE id=$1`,[a.id,b.scope,rules.version,a.scope_revision,declarations.publication.version]);
+      return {id:a.id};
+    });
+  });
+  app.patch('/api/operator/agents/:id/scope',async req=>{
+    const operator=owner(req),id=uuid.parse((req.params as any).id);
+    const b=z.object({revision:z.number().int().positive(),scope:z.string().trim().min(1).max(2000),operatingContext:z.string().trim().min(1).max(2000).optional()}).strict().parse(req.body);
+    return transaction(async c=>{
+      const a=(await c.query('SELECT * FROM agents WHERE id=$1 AND operator_id=$2 FOR UPDATE',[id,operator])).rows[0];
+      if(!a)fail(404,'NOT_FOUND','Owned agent unavailable');
+      await confirmedOperator(c,operator);
+      if(a.scope_revision!==b.revision)fail(409,'SCOPE_CHANGED','Reload the current operating scope');
+      if(a.approved_scope===b.scope && a.operating_context===(b.operatingContext??a.operating_context))return {revision:a.scope_revision,changed:false};
+      const row=(await c.query('UPDATE agents SET approved_scope=$2,operating_context=$3,scope_revision=scope_revision+1,confirmation_hash=NULL,confirmation_expires=NULL WHERE id=$1 RETURNING scope_revision',[id,b.scope,b.operatingContext??a.operating_context])).rows[0];
+      return {revision:row.scope_revision,changed:true};
+    });
+  });
+  app.post('/api/operator/agents/:id/authorization',async req=>{
+    const operator=owner(req),id=uuid.parse((req.params as any).id);z.object({}).strict().parse(req.body);
+    return transaction(async c=>{
+      const a=(await c.query('SELECT id FROM agents WHERE id=$1 AND operator_id=$2 FOR UPDATE',[id,operator])).rows[0];
+      if(!a)fail(404,'NOT_FOUND','Owned agent unavailable');await confirmedOperator(c,operator);
+      const token=secret();await c.query("UPDATE agents SET confirmation_hash=$2,confirmation_expires=now()+interval '1 hour' WHERE id=$1",[id,hash(token)]);
+      return {confirmationUrl:origin+'/operator?confirmation='+token,expiresIn:3600};
     });
   });
   app.get("/api/me", async (req) =>
@@ -563,15 +595,13 @@ export async function createApp() {
       const a = await agent(req, c);
       if (a.status === "pending")
         fail(403, "AGENT_INACTIVE", "Operator approval required");
-      const { key_hash, confirmation_hash, avatar_base64, ...safe } = a;
-      safe.has_avatar = avatar_base64 !== null;
-      return safe;
+      return (await c.query(`SELECT ${publicAgent} FROM agents WHERE id=$1`,[a.id])).rows[0];
     }),
   );
   app.patch("/api/me", async (req) => {
     const b = profile
       .omit({ handle: true, operating_context: true })
-      .partial()
+      .partial().strict()
       .parse(req.body);
     return transaction(async (c) => {
       const a = await agent(req, c, true);
@@ -663,7 +693,7 @@ export async function createApp() {
       ...o,
       agents: (
         await pool.query(
-          `SELECT ${publicAgent} FROM agents WHERE operator_id=$1 ORDER BY handle`,
+          `SELECT ${publicAgent},scope_revision,NOT ${authorizationExists("agents")} AS authorization_required FROM agents WHERE operator_id=$1 AND status<>'pending' ORDER BY handle`,
           [id],
         )
       ).rows,
@@ -935,7 +965,7 @@ export async function createApp() {
   app.delete('/api/operator/posts/:id',async req=>deleteOperatorPost(owner(req),uuid.parse((req.params as any).id)));
   app.patch("/api/operator", async (req) => {
     const id = owner(req);
-    const b = z.object({ guidelines: z.string().max(2000) }).parse(req.body);
+    const b = z.object({ guidelines: z.string().max(2000) }).strict().parse(req.body);
     await pool.query("UPDATE operators SET guidelines=$2 WHERE id=$1", [
       id,
       b.guidelines,
