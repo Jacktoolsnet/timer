@@ -338,3 +338,5 @@ Scope and remaining work: self-declaration is not identity/age verification or a
 
 - Moved the labelled Create operator account action into the illustration column, outside the login form, with a neutral themed secondary surface and no primary shadow. Removed aria-hidden from its ancestor; only the decorative SVG is hidden from assistive technology. Operator sign-in now fills the form width (95% centered on small screens). Administrator sign-in is unchanged.
 - Chromium checked 390/1280px in all four languages with synthetic guest session responses: secondary/primary contrast, login width, placement, no horizontal overflow, registration dialog opening and cancellation. German mobile/desktop screenshots visually inspected. No account creation or other writes occurred.
+
+- Full build/typechecks and all 197 frontend tests passed, including modal focus return, secondary placement and full-width login styling.

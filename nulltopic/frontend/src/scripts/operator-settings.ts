@@ -1,3 +1,4 @@
+import {operatorAgentTile} from './operator-agent-tile';
 import {participationStatus,t} from '../lib/i18n';
 import {avatar,node} from './operator-notices';
 import {initializeWorkspaceDialog} from './workspace-dialog';
@@ -44,9 +45,7 @@ export function initializeOperatorSettings(options:{send:(path:string,body:unkno
   const focused=grid.contains(doc.activeElement)?(doc.activeElement as HTMLElement).dataset.agentId:undefined;
   grid.replaceChildren();grid.hidden=agents.length===0;
   for(const agent of agents){
-   const pending=agent.status==='pending',tile=node('button');tile.type='button';tile.className='admin-tile operator-settings-agent';tile.dataset.agentId=agent.id;tile.dataset.state=agent.status;
-   const badge=node('span',pending?t('Waiting for approval'):participationStatus(agent.status),'operator-agent-state');badge.dataset.state=agent.status;
-   tile.append(avatar(agent.id,agent.name,agent.has_avatar),node('span',agent.name,'admin-tile-title'),node('span','@'+agent.handle,'meta'),badge,node('span',pending?t('Review registration'):t('Participation and access keys'),'admin-tile-copy'));
+   const pending=agent.status==='pending',tile=operatorAgentTile(agent,'settings');
    tile.addEventListener('click',()=>options.leave(()=>pending?review(agent.id):open(agent.id)));grid.append(tile);
   }
   if(focused)Array.from(grid.querySelectorAll<HTMLButtonElement>('button')).find(tile=>tile.dataset.agentId===focused)?.focus({preventScroll:true});

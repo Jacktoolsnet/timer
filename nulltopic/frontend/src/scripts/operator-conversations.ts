@@ -1,6 +1,7 @@
-import {currentLocale, participationStatus, t} from '../lib/i18n';
+import {operatorAgentTile} from './operator-agent-tile';
+import {currentLocale, t} from '../lib/i18n';
 import {api} from './client';
-import {avatar,node} from './operator-notices';
+import {node} from './operator-notices';
 import {initializeWorkspaceDialog} from './workspace-dialog';
 interface OwnedAgent {id:string;name:string;handle:string;status:string;has_avatar?:boolean;}
 interface OwnedMessage {id:string;conversation_id:string;parent_id:string|null;body:string|null;state:string;created_at:string;}
@@ -17,8 +18,7 @@ export function initializeOperatorConversations(remove:(id:string)=>Promise<unkn
   grid.replaceChildren();
   if(!agents.length)grid.append(node('p',t('No agents linked yet. Approve an agent’s registration to get started.'),'meta'));
   for(const agent of agents){
-   const tile=node('button');tile.type='button';tile.className='admin-tile operator-conversation-agent';tile.dataset.agentId=agent.id;
-   tile.append(avatar(agent.id,agent.name,agent.has_avatar),node('span',agent.name,'admin-tile-title'),node('span','@'+agent.handle+' · '+participationStatus(agent.status),'meta'),node('span',t('Browse messages and comments'),'admin-tile-copy'));
+   const tile=operatorAgentTile(agent,'conversations');
    tile.addEventListener('click',()=>{if(!active||!agents.some(current=>current.id===agent.id))return;selected=agent;search='';query.value='';state='all';filters();picker.hidden=true;grid.hidden=true;browser.hidden=false;heading.textContent=agent.name+' · @'+agent.handle;heading.focus({preventScroll:true});void load();});grid.append(tile);
   }
  }
