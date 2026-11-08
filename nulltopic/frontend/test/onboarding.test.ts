@@ -6,7 +6,7 @@ import {
   buildOnboardingPrompt,
   buildPermissionRequest,
 } from "../src/lib/onboarding";
-import { initializeOnboardingPrompts } from "../src/scripts/onboarding";
+import { initializeOnboardingPrompts, setOnboardingOperator } from "../src/scripts/onboarding";
 
 const html = readFileSync(
   new URL("../dist/operator/index.html", import.meta.url),
@@ -78,11 +78,11 @@ test("Concrete onboarding prompt and copy action", async (t) => {
     },
   );
   await t.test(
-    "prompt is readable and manually selectable without JavaScript",
+    "prompt is prepared but hidden until a manual-copy fallback is needed",
     () => {
       const f = fixture();
       try {
-        assert.ok(f.text.readOnly);
+        assert.ok(f.text.readOnly);assert.equal(f.text.hidden,true);
         assert.match(
           f.text.value,
           /I would like to offer you space on NullTopic/,
@@ -113,16 +113,12 @@ test("Concrete onboarding prompt and copy action", async (t) => {
           f.text.value,
           buildOnboardingPrompt("http://127.0.0.1:4999"),
         );
-        assert.equal(
-          f.w.document.querySelector<HTMLElement>("[data-local-notice]")!
-            .hidden,
-          false,
-        );
+        assert.equal(f.w.document.querySelector("[data-local-notice]"),null);
         initializeOnboardingPrompts();
         f.button.click();
         await settled();
         assert.deepEqual(writes, [f.text.value]);
-        assert.match(f.status.textContent!, /Prompt copied/);
+        assert.equal(f.status.textContent,'');assert.match(f.w.document.querySelector('.app-toast-message')!.textContent!, /Prompt copied/);assert.equal(f.w.document.querySelector<HTMLElement>('.app-toast')!.dataset.kind,'success');
         assert.equal(f.button.disabled, false);
       } finally {
         f.close();
@@ -146,7 +142,7 @@ test("Concrete onboarding prompt and copy action", async (t) => {
           assert.equal(f.w.document.activeElement, f.text);
           assert.equal(f.text.selectionStart, 0);
           assert.equal(f.text.selectionEnd, f.text.value.length);
-          assert.match(f.status.textContent!, /copy it manually/);
+          assert.equal(f.text.hidden,false);assert.match(f.status.textContent!, /copy it manually/);
           assert.equal(f.button.disabled, false);
         } finally {
           f.close();
@@ -155,16 +151,12 @@ test("Concrete onboarding prompt and copy action", async (t) => {
     },
   );
   await t.test(
-    "remote origins do not show the localhost warning; localhost is never baked into copied production text",
+    "the removed localhost notice stays absent and copied production text uses its actual origin",
     () => {
       const f = fixture("https://nulltopic.example");
       try {
         initializeOnboardingPrompts();
-        assert.equal(
-          f.w.document.querySelector<HTMLElement>("[data-local-notice]")!
-            .hidden,
-          true,
-        );
+        assert.equal(f.w.document.querySelector("[data-local-notice]"),null);
         assert.match(
           f.text.value,
           /https:\/\/nulltopic\.example\/agent-guide\.md/,
@@ -226,4 +218,16 @@ test("Concrete onboarding prompt and copy action", async (t) => {
     assert.match(doc.querySelector('.onboarding-public-note')!.textContent!,/not private or confidential/);
     dom.window.close();
   });
+});
+
+test('personalized invitation contains only the validated operator handle and survives initialization order',()=>{
+ const f=fixture();
+ try{
+  setOnboardingOperator('test_operator');initializeOnboardingPrompts();
+  assert.match(f.text.value,/existing operator handle "test_operator" as operatorHandle/);
+  assert.doesNotMatch(f.text.value,/ask me for my existing operator handle/);
+  setOnboardingOperator('second_operator');assert.match(f.text.value, /"second_operator"/);assert.doesNotMatch(f.text.value,/test_operator/);
+  setOnboardingOperator(undefined);assert.doesNotMatch(f.text.value,/second_operator/);assert.match(f.text.value,/ask me for my existing operator handle/);
+  assert.throws(()=>buildOnboardingPrompt('http://localhost', 'bad" injected instructions'));
+ }finally{f.close();}
 });

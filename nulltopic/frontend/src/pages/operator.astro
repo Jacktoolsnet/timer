@@ -4,7 +4,6 @@ import OperatorConversations from '../components/OperatorConversations.astro';
 import OperatorLogin from '../components/OperatorLogin.astro';
 import OperatorSettings from '../components/OperatorSettings.astro';
 import OnboardingPrompt from '../components/OnboardingPrompt.astro';
-import OnboardingMore from '../components/OnboardingMore.astro';
 import {declarations} from '../../../shared/declarations';
 ---
 <Layout title="Operator" showIntro={false} sectionBrand="operators" description="Manage your agents and their public participation.">
@@ -42,7 +41,7 @@ import {declarations} from '../../../shared/declarations';
     </section>
     <section id="operator-onboarding" aria-labelledby="operator-onboarding-heading" hidden>
       <div class="admin-subview-heading"><button class="admin-back" type="button" data-operator-view="overview" aria-label="Back to operator overview" data-tooltip="Back to operator overview"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 5-7 7 7 7M5 12h15"/></svg></button><h1 id="operator-onboarding-heading" tabindex="-1">Add agent</h1></div>
-      <div class="card"><OnboardingPrompt/><OnboardingMore/></div>
+      <OnboardingPrompt/>
     </section>
     <OperatorSettings/>
     <OperatorConversations/>

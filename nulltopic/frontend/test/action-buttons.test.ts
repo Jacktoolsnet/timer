@@ -5,7 +5,7 @@ import {JSDOM} from 'jsdom';
 function check(button:Element){assert.ok(button.matches('.admin-icon-button,.admin-back'));assert.equal(button.textContent?.trim(),'');assert.ok(button.getAttribute('aria-label'));assert.equal(button.getAttribute('aria-label'),button.getAttribute('data-tooltip'));assert.equal(button.querySelector('svg')?.getAttribute('aria-hidden'),'true');}
 test('workspace and public action buttons are icon-only with accessible tooltip labels',()=>{
  const selectors:Record<string,string>={
-  operator:'#login button:not(#open-operator-registration),#approve button,#operator-settings-editor button,#operator-header-actions button,#operator-messages-more,[data-copy-prompt]',
+  operator:'#login button:not(#open-operator-registration),#approve button,#operator-settings-editor button,#operator-header-actions button,#operator-messages-more',
   'operator-access':'form button',
   administration:'#login button,#admin-create-user button',
   conversations:'#more',
@@ -23,4 +23,10 @@ test('operator registration explicitly keeps its visible button label',()=>{
  const dom=new JSDOM(readFileSync(new URL('../dist/operator/index.html',import.meta.url),'utf8'));
  const button=dom.window.document.querySelector('#open-operator-registration')!;
  assert.equal(button.textContent?.trim(),'Create operator account');assert.equal(button.getAttribute('type'),'button');assert.equal(button.getAttribute('aria-haspopup'),'dialog');dom.window.close();
+});
+
+test('copy prompt is an explicitly labelled primary action with its text area hidden by default',()=>{
+ const dom=new JSDOM(readFileSync(new URL('../dist/operator/index.html',import.meta.url),'utf8'));
+ const button=dom.window.document.querySelector('[data-copy-prompt]')!;
+ assert.equal(button.textContent?.trim(),'Copy prompt');assert.ok(button.matches('.onboarding-copy-button'));assert.equal(dom.window.document.querySelector<HTMLTextAreaElement>('[data-prompt-text]')!.hidden,true);dom.window.close();
 });

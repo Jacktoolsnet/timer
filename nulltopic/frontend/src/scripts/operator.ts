@@ -1,3 +1,4 @@
+import {setOnboardingOperator} from './onboarding';
 import {declarations} from '../../../shared/declarations';
 import {initializeOperatorSettings} from './operator-settings';
 import {initializeUnsavedSettings} from './unsaved-settings';
@@ -82,6 +83,7 @@ export async function initializeOperator() {
     logout.setAttribute('aria-label',name ? t('Sign out · ')+name:t('Sign out')); logout.dataset.tooltip = logout.getAttribute('aria-label')!;
   }
   function clearSession() {
+    setOnboardingOperator(undefined);
     unsaved.clear();settings.clear();
     signedIn=false;conversations.clear(); ++version;++queueVersion;queueData=null;openCases.clear();queueStatus='pending';updateQueueTabs({pending:0,processed:0});queuePanel.removeAttribute('aria-busy');document.getElementById('operator-queue-limit')!.hidden=true; dashboard.hidden=true; confirmationPanel.hidden=true; shell.hidden=false;
     password.value=''; toolbar(false);reviewModal.close(true); resetReview();
@@ -199,7 +201,7 @@ export async function initializeOperator() {
     const session=await api('/session');if(current!==version)return;csrf=session.csrf;
     if(!session.operatorId){clearSession();status.textContent='';return;}
     const data:OperatorData=await api('/operator');if(current!==version)return;
-    signedIn=true;shell.hidden=true;dashboard.hidden=false;password.value='';status.textContent='';toolbar(true,data.operator.handle);render(data);showView(requestedView());
+    signedIn=true;shell.hidden=true;dashboard.hidden=false;password.value='';status.textContent='';toolbar(true,data.operator.handle);setOnboardingOperator(data.operator.handle);render(data);showView(requestedView());
     if(confirmation)try{const prepared=await api('/confirmation?token='+encodeURIComponent(confirmation));if(current!==version)return;renderPrepared(prepared);dashboard.hidden=true;confirmationPanel.hidden=false;}catch(error){await failure(error,t('Unable to load this registration. The link may have expired or already been used.'));}
   }
   document.getElementById('cancel-authorization')!.addEventListener('click',()=>{

@@ -1448,6 +1448,9 @@ body > .site-header > nav .header-action:nth-last-child(-n+2)::after { left: aut
 .operator-registration .storage-switch input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; z-index: 1; }
 .operator-registration input, .operator-registration select { min-width: 0; }
 .operator-registration .admin-sign-in.admin-icon-button { width: 60px; height: 60px; min-height: 60px; background: var(--accent); color: var(--surface); border: 2px solid var(--accent); }
+.operator-registration .report-actions { justify-content: space-between; align-items: center; }
+#register-cancel { width: 60px; min-width: 60px; height: 60px; min-height: 60px; }
+#register-cancel svg { width: 28px; height: 28px; }
 [data-theme=dark] .operator-registration .admin-sign-in.admin-icon-button { color: var(--bg); }
 #approve > p:last-child { display: flex; gap: 10px; }
 .operator-consent input[type=checkbox] { accent-color: var(--accent); }
@@ -1474,3 +1477,45 @@ body > .site-header > nav .header-action:nth-last-child(-n+2)::after { left: aut
 .account-access-card .admin-subview-heading h1 { font-family: inherit; font-size: 1.25rem; }
 .account-access-card .admin-subview-heading { align-items: center; }
 .account-access-card form > p { line-height: 1.7; }
+
+/* Explicitly labelled primary action for inviting an agent. */
+.onboarding-prompt .onboarding-copy-button { min-height: 60px; padding: 16px 24px; margin: 20px 0 0; gap: 12px; border: 2px solid var(--accent); border-radius: 14px; background: var(--accent); color: var(--surface); font-size: 1rem; font-weight: 650; line-height: 1.4; box-shadow: 0 5px 16px color-mix(in srgb, var(--accent) 22%, transparent); }
+[data-theme=dark] .onboarding-prompt .onboarding-copy-button { color: var(--bg); }
+.onboarding-prompt .onboarding-copy-button svg { width: 24px; height: 24px; flex-shrink: 0; }
+.onboarding-prompt .onboarding-copy-button:hover { background: var(--accent); filter: brightness(.94); }
+.onboarding-prompt .onboarding-copy-button:focus-visible { outline: 3px solid var(--text); outline-offset: 4px; }
+[data-style=technical] .onboarding-prompt .onboarding-copy-button { border-radius: 3px; }
+[data-style=minimal] .onboarding-prompt .onboarding-copy-button { border-radius: 8px; }
+[data-style=soft] .onboarding-prompt .onboarding-copy-button { border-radius: 999px; }
+@media (forced-colors: active) { .onboarding-prompt .onboarding-copy-button { background: ButtonFace; color: ButtonText; border-color: ButtonText; box-shadow: none; } }
+
+.onboarding-tile-layout { border: 0; padding: 0; margin: 0; display: grid; gap: 20px; }
+.onboarding-tile-layout .card { min-width: 0; margin: 0; padding: clamp(20px, 3vw, 30px); }
+.onboarding-invite-tile { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+.onboarding-tile-layout .onboarding-invite-tile h3 { font: inherit; font-size: 1.25rem; font-weight: 650; line-height: 1.4; margin: 16px 0 12px; }
+.onboarding-tile-layout .onboarding-invite-tile > p { max-width: 72ch; }
+.onboarding-hint-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.onboarding-tile-icon { display: grid; place-items: center; width: 44px; height: 44px; background: var(--accent-soft); color: var(--accent); border-radius: 14px; margin-bottom: 16px; }
+.onboarding-tile-icon svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.onboarding-hint-tile h3 { font-family: inherit; font-size: 1rem; line-height: 1.4; }
+.onboarding-hint-tile > a, .onboarding-resource-links { font-size: .8125rem; }
+.onboarding-resource-links { display: flex; flex-wrap: wrap; gap: 10px 18px; margin-top: 18px; }
+.onboarding-hint-tile .onboarding-local { margin-bottom: 0; }
+[data-style=technical] .onboarding-tile-icon { border-radius: 3px; }
+@media (max-width: 760px) { .onboarding-hint-tiles { grid-template-columns: minmax(0, 1fr); } }
+@media (forced-colors: active) { .onboarding-invite-tile { border-color: CanvasText; } }
+
+.toast-region { position: fixed; z-index: 100; right: max(20px, env(safe-area-inset-right)); bottom: max(24px, env(safe-area-inset-bottom)); width: min(520px, calc(100vw - 40px)); pointer-events: none; }
+.app-toast { --toast-tone: var(--accent); display: flex; align-items: center; gap: 12px; padding: 14px 12px 14px 16px; border: 1px solid color-mix(in srgb, var(--toast-tone) 45%, var(--line)); border-left: 4px solid var(--toast-tone); border-radius: 16px; color: var(--text); background: color-mix(in srgb, var(--surface) 95%, var(--accent)); box-shadow: 0 10px 36px #0003; pointer-events: auto; }
+.app-toast-icon { display: grid; place-items: center; flex: 0 0 28px; height: 28px; color: var(--accent); }
+.app-toast svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.app-toast-message { flex: 1; min-width: 0; overflow-wrap: anywhere; font-size: .875rem; line-height: 1.6; }
+.app-toast .app-toast-close { color: var(--text); background: transparent; border-color: transparent; }
+.app-toast-close[data-tooltip]::after { left: auto; right: 0; }
+[data-style=technical] .app-toast { border-radius: 3px; }
+[data-style=minimal] .app-toast { border-radius: 8px; }
+[data-style=soft] .app-toast { border-radius: 24px; }
+@media (max-width: 760px) { .toast-region { right: max(16px, env(safe-area-inset-right)); width: calc(100vw - 32px); bottom: max(16px, env(safe-area-inset-bottom)); } }
+@media (prefers-reduced-motion: no-preference) { .app-toast { animation: toast-appear .18s ease-out; } @keyframes toast-appear { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } } }
+@media (forced-colors: active) { .app-toast { background: Canvas; color: CanvasText; border-color: CanvasText; box-shadow: none; } .app-toast-icon { color: CanvasText; background: Canvas; } .app-toast .app-toast-close { color: ButtonText; } }
+@media print { .toast-region { display: none; } }

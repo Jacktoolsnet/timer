@@ -309,3 +309,10 @@ for(const signedIn of [false,true])test(`homepage registration shortcut opens on
  dom.window.document.querySelector('#open-operator-registration')!.addEventListener('click',()=>opened++);
  await initializeOperator();assert.equal(opened,signedIn?0:1);
 },{signedIn}));
+
+test('signed-in onboarding uses the current handle and clears it on logout',async()=>fixture(async(dom)=>{
+ await initializeOperator();const d=dom.window.document,text=d.querySelector<HTMLTextAreaElement>('[data-prompt-text]')!;
+ assert.match(text.value,/existing operator handle "test_operator" as operatorHandle/);
+ d.querySelector<HTMLButtonElement>('#operator-header-logout')!.click();await tick();await tick();
+ assert.doesNotMatch(text.value,/test_operator/);assert.equal(d.querySelector<HTMLElement>('[data-onboarding-prompt]')!.dataset.operatorHandle,undefined);
+},{signedIn:true}));

@@ -1,6 +1,11 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';import {JSDOM} from 'jsdom';
 import {initializeOperatorRegistration} from '../src/scripts/operator-registration';import {declarations} from '../../shared/declarations';
 const html=readFileSync(new URL('../dist/operator/index.html',import.meta.url),'utf8');const tick=()=>new Promise(r=>setTimeout(r,0));
+test('registration cancel action matches the submit size and sits on the left',()=>{
+ const css=readFileSync(new URL('../src/styles/global.css',import.meta.url),'utf8');
+ assert.match(css,/\.operator-registration \.report-actions\s*\{ justify-content: space-between; align-items: center;/);
+ assert.match(css,/#register-cancel\s*\{ width: 60px; min-width: 60px; height: 60px; min-height: 60px;/);
+});
 async function fixture(run:(dom:JSDOM,requests:any[])=>Promise<void>,fail=false){
  const dom=new JSDOM(html,{url:'http://localhost/operator'}),requests:any[]=[];
  dom.window.document.querySelector<HTMLElement>('#operator-login-shell')!.hidden=false;const dialog=dom.window.document.querySelector<HTMLDialogElement>('#operator-registration')!;

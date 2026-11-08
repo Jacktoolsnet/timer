@@ -295,3 +295,23 @@ Scope and remaining work: self-declaration is not identity/age verification or a
 - Backend scenarios cover email validation/canonicalization, declaration/metadata tampering, unverified sign-in and agent-registration denial, private/public field separation, hashed tokens, purpose separation, expiry/resend, concurrent single-use verification/reset, password hashing, invalidating existing and late-restored sessions, consumed-token persistence after restart, neutral unknown/duplicate address responses, persistent address throttling, IP/token attempt limits and disabled-mail fail-closed behavior. Existing moderation/retention/authorization suites remain green. SMTP/local transport configuration and 0600 file delivery tested in an isolated temporary directory, with no real SMTP connection.
 - Chromium checked registration in eight cases (390/1280px × en/de/es/fr) and 24 recovery/verification/reset flows. Verified required email before submission, removal of token fragments, no automatic token consumption, neutral recovery feedback, matching passwords, explicit single submissions, localized sign-in links and no horizontal page overflow. Pasting a mail fragment into an already-open recovery page is covered by real same-document navigation/reload. Mobile German reset screenshot visually inspected.
 - All browser mutations and mailbox messages were fully synthetic. No real person was registered/verified, no external email was sent and no agent published. The real provider's SMTP credentials, inbox delivery, SPF/DKIM/DMARC and production HTTPS remain to be configured/tested when the dedicated mailbox exists. Email second factor, address changing/backfill, root/admin recovery and durable mail queues are not part of this phase.
+
+## Operator-bound invitation prompt (2026-11-08)
+
+- Full build/typechecks and 182 frontend tests passed. The invitation includes the signed-in operator's validated handle as `operatorHandle`, without asking for it again. The standalone fallback still asks for a missing handle. Initialization order is covered; logout/session clearing removes the previous account's handle and copy feedback.
+- Chromium checked synthetic signed-in sessions at 390/1280px: the actual clipboard text contains the handle, excludes private email/guidelines, and resets after mocked logout. No real session, account data, agent registration or publishing was used.
+
+## Labelled copy-prompt action (2026-11-08)
+
+- Frontend build and 183 frontend tests passed. The prompt textarea is hidden by default; the primary full-width 60px action shows its localized Copy prompt label and icon. Denied/unavailable clipboard access reveals and selects the readonly textarea for manual copying; a later successful copy hides it again.
+- Chromium checked 390/1280px with a synthetic operator/clipboard: German visible label, hidden initial text, current handle in copied content, primary-action height, no overflow and visible/focused manual fallback. No real account or clipboard data was accessed.
+
+## Agent invitation and guidance tiles (2026-11-08)
+
+- Full build/typechecks and 183 frontend tests passed. Add agent now has one primary instruction/copy tile plus four visible guidance tiles: operator approval, public-data safety, HTTP/runtime requirements and optional avatar. No nested outer card or More information disclosure. Current-handle personalization, hidden prompt, clipboard fallback and public/authorization boundaries remain intact.
+- Chromium checked 48 layout cases (320/390/1280px × en/de/es/fr × four styles): five cards, one/two-column guidance layout, hidden initial text and no horizontal overflow. Explicit copy used the synthetic operator handle. German desktop/mobile screenshots visually inspected. No real account, registration, mail or agent activity was used.
+
+## Themed copy-success toast (2026-11-08)
+
+- Full build/typechecks and 185 frontend tests passed. Successful prompt copying now uses a polite live-region success toast with checkmark, palette-aware surface, semantic green marker, localized icon-only close control and no focus stealing. It expires after eight seconds, pauses during pointer/keyboard interaction, replaces duplicate feedback and clears on page departure/logout. Clipboard failures still reveal the manual-copy field with inline guidance instead of a success toast.
+- Unit checks cover plain-text injection safety, replacement, close/focus restoration, expiry/interaction pause and page cleanup. Chromium checked all 64 theme/palette/style combinations at 320/1280px (128 cases), bounds/no overflow, translated German feedback, manual closing and denied-clipboard fallback. Mobile dark-blue screenshot visually inspected. Synthetic operator and clipboard only; no real account actions.
