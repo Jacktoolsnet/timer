@@ -5,7 +5,7 @@ import {JSDOM} from 'jsdom';
 function check(button:Element){assert.ok(button.matches('.admin-icon-button,.admin-back'));assert.equal(button.textContent?.trim(),'');assert.ok(button.getAttribute('aria-label'));assert.equal(button.getAttribute('aria-label'),button.getAttribute('data-tooltip'));assert.equal(button.querySelector('svg')?.getAttribute('aria-hidden'),'true');}
 test('workspace and public action buttons are icon-only with accessible tooltip labels',()=>{
  const selectors:Record<string,string>={
-  operator:'#login button:not(#open-operator-registration),#approve button:not(.operator-approve-button),#operator-settings-editor button,#operator-header-actions button,#cancel-authorization,#operator-approve,#operator-messages-more',
+  operator:'#login button:not(#open-operator-registration),#approve button:not(.operator-approve-button),#operator-settings-editor button:not([data-key-action]),#operator-header-actions button,#cancel-authorization,#operator-approve,#operator-messages-more',
   'operator-access':'form button',
   administration:'#login button,#admin-create-user button',
   conversations:'#more',
@@ -36,4 +36,10 @@ test('registration acceptance is a compact header icon with native form associat
  const dom=new JSDOM(readFileSync(new URL('../dist/operator/index.html',import.meta.url),'utf8'));
  const button=dom.window.document.querySelector('#operator-approve')!;
  assert.equal(button.textContent?.trim(),'');assert.equal(button.getAttribute('type'),'submit');assert.equal(button.getAttribute('form'),'approve');assert.ok(button.closest('header'));assert.equal(button.getAttribute('aria-label'),'Accept registration');assert.equal(button.getAttribute('data-tooltip'),'Accept registration');assert.equal(button.querySelector('svg')?.getAttribute('aria-hidden'),'true');dom.window.close();
+});
+
+
+test('agent key actions explicitly keep visible labels, icons and separate action semantics',()=>{
+ const dom=new JSDOM(readFileSync(new URL('../dist/operator/index.html',import.meta.url),'utf8'));
+ for(const [action,label] of [['rotate','Replace key'],['revoke','Revoke key']]){const button=dom.window.document.querySelector('[data-key-action='+action+']')!;assert.equal(button.textContent?.trim(),label);assert.equal(button.getAttribute('type'),'button');assert.equal(button.getAttribute('aria-label'),label);assert.ok(button.querySelector('svg[aria-hidden=true]'));}dom.window.close();
 });

@@ -378,3 +378,13 @@ test('overview places full-width shared actions before agent-specific destinatio
 test('direct agent conversation routes restore the selected message view on refresh',async()=>fixture(async(dom,requests)=>{
  dom.window.history.replaceState({},'','#conversations/agent/agent');await initializeOperator();await tick();assert.equal(dom.window.document.querySelector<HTMLElement>('#operator-message-browser')!.hidden,false);assert.equal(dom.window.document.querySelector<HTMLElement>('#operator-conversations-picker')!.hidden,true);assert.ok(requests.some(r=>r.path.startsWith('/api/operator/agents/agent/posts?')));
 },{signedIn:true,withData:true}));
+
+
+test('home settings tile omits its redundant guidelines footer and arrow',()=>{
+ const dom=new JSDOM(html);const tile=dom.window.document.querySelector('#operator-settings-tile')!;assert.equal(tile.querySelector('.admin-tile-foot'),null);assert.equal(tile.querySelector('.admin-tile-title')!.textContent,'Settings');assert.ok(tile.querySelector('svg'));assert.equal(tile.getAttribute('data-operator-view'),'settings');dom.window.close();
+});
+
+
+test('home Add agent tile omits its redundant onboarding footer and arrow',()=>{
+ const dom=new JSDOM(html);const tile=dom.window.document.querySelector('#operator-onboarding-tile')!;assert.equal(tile.querySelector('.admin-tile-foot'),null);assert.equal(tile.querySelector('.admin-tile-title')!.textContent,'Add agent');assert.ok(tile.querySelector('svg'));assert.equal(tile.getAttribute('data-operator-view'),'onboarding');dom.window.close();
+});

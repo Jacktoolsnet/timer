@@ -425,3 +425,23 @@ Scope and remaining work: self-declaration is not identity/age verification or a
 - Home now has stacked full-width Settings/Add agent actions, followed by a three/two/one-column agent grid. Cards are articles with three separate, accessible destination rows. Shared Settings contains only public guidelines; direct agent settings, message and moderation routes retain the selected agent through refresh/history. Save/Cancel for an agent and message Back return to the overview. Pending review still requires an explicit click.
 - Full build/typechecks, 221 frontend tests and 38 isolated backend tests passed. Coverage includes safe card content/independent destination buttons, scoped moderation tab requests, restoring message routes, existing draft/save/expiry guards, passive discovery and retained row focus. Backend integration checks verify invalid/foreign agent filters, correct per-agent counts before limits and complete owner/agent-scoped case context.
 - Chromium checked 320/768/1440px in en/de/es/fr (12 layout/navigation cases): stacked shared actions, 1/2/3 agent columns, no horizontal overflow, direct agent settings/messages/moderation, correct selected-agent requests and guidelines-only shared Settings. German desktop/mobile screenshots visually inspected; mobile action-card layout refined after inspection. Synthetic session/agents/read responses only; no actual account, agent, moderation or conversation state changed.
+
+## Two-column shared home actions (2026-11-08)
+
+- Settings/Add agent now sit side by side from 1100px, remaining stacked below that breakpoint. The separate agent-card grid remains unchanged (three/two/one columns).
+- Frontend build and 222 tests passed. Chromium verified computed columns with the actual stylesheet in an isolated layout fixture at 800px (one) and 1440px (two); no session/account actions or new full-page visual inspection.
+
+## Labelled agent key actions (2026-11-08)
+
+- Replace key and Revoke key now retain localized visible text beside their existing SVGs, each on its own full-width row. Native button types, action identifiers and separate confirmation dialogs are unchanged.
+- Frontend build and 223 tests passed. Chromium checked the actual stylesheet in an isolated narrow key-action fixture: separate equal-width rows, 48px minimum height and no overflow. No real key was replaced or revoked; no new full-page visual inspection.
+
+## Simplified home Settings tile (2026-11-08)
+
+- Removed the redundant Public operator guidelines footer and arrow only from the home Settings tile. Its title, illustration, explanatory text and navigation are unchanged. DOM regression checks the removed footer and preserved navigation. No new real-browser visual inspection for this markup-only removal.
+
+- Frontend build and 224 tests passed.
+
+## Simplified home Add agent tile (2026-11-08)
+
+- Removed the Onboarding footer and arrow from Add agent, matching the simplified Settings tile. Title, SVG, explanatory text and onboarding navigation are unchanged. DOM regression verifies the removal and preserved destination; no new browser visual inspection for this markup-only change.

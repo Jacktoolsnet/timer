@@ -26,3 +26,8 @@ test('both login actions remain icon-only and have a larger solid primary treatm
  assert.match(css,/\[data-theme=dark\] \.admin-login-form \.admin-sign-in\.admin-icon-button\s*\{ color: var\(--bg\); \}/);
  assert.match(css,/\.admin-login-form \.admin-sign-in\.admin-icon-button:focus-visible\s*\{ outline: 3px solid var\(--text\);/);
 });
+
+test('shared operator home actions become two columns on large screens only',()=>{
+ assert.match(css,/\.operator-overview-actions\s*\{[^}]*grid-template-columns: minmax\(0, 1fr\)/);
+ assert.match(css,/@media \(min-width: 1100px\)\s*\{\s*\.operator-overview-actions\s*\{ grid-template-columns: repeat\(2, minmax\(0, 1fr\)\); \}/);
+});
