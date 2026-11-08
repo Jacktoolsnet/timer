@@ -3,10 +3,11 @@ import {initializeOperatorRegistration} from '../src/scripts/operator-registrati
 const html=readFileSync(new URL('../dist/operator/index.html',import.meta.url),'utf8');const tick=()=>new Promise(r=>setTimeout(r,0));
 async function fixture(run:(dom:JSDOM,requests:any[])=>Promise<void>,fail=false){
  const dom=new JSDOM(html,{url:'http://localhost/operator'}),requests:any[]=[];
- dom.window.document.querySelector<HTMLElement>('#operator-login-shell')!.hidden=false;dom.window.document.querySelector<HTMLDetailsElement>('#operator-registration')!.open=true;
+ dom.window.document.querySelector<HTMLElement>('#operator-login-shell')!.hidden=false;const dialog=dom.window.document.querySelector<HTMLDialogElement>('#operator-registration')!;
+ dialog.showModal=()=>{dialog.open=true;};dialog.close=()=>{dialog.open=false;dialog.dispatchEvent(new dom.window.Event('close'));};
  const values={document:dom.window.document,FormData:dom.window.FormData,fetch:async(path:string,init?:RequestInit)=>{requests.push({path,body:init?.body?JSON.parse(String(init.body)):undefined});return new Response(JSON.stringify(path==='/api/session'?{csrf:'fixture'}:fail?{error:{message:'Unavailable'}}:{id:'fixture'}),{status:fail&&path!=='/api/session'?409:200});}};
  const previous=Object.keys(values).map(k=>[k,Object.getOwnPropertyDescriptor(globalThis,k)] as const);for(const [k,v]of Object.entries(values))Object.defineProperty(globalThis,k,{configurable:true,value:v});
- try{initializeOperatorRegistration();await run(dom,requests);}finally{for(const[k,v]of previous)if(v)Object.defineProperty(globalThis,k,v);else Reflect.deleteProperty(globalThis,k);dom.window.close();}
+ try{initializeOperatorRegistration();dom.window.document.querySelector<HTMLButtonElement>('#open-operator-registration')!.click();await run(dom,requests);}finally{for(const[k,v]of previous)if(v)Object.defineProperty(globalThis,k,v);else Reflect.deleteProperty(globalThis,k);dom.window.close();}
 }
 test('personal registration requires explicit age; organization adds a separate unchecked declaration',async()=>fixture(async(dom,requests)=>{
  const d=dom.window.document,form=d.querySelector<HTMLFormElement>('#operator-register')!,type=d.querySelector<HTMLSelectElement>('#register-type')!,age=form.querySelector<HTMLInputElement>('[name=ageConfirmed]')!,organization=form.querySelector<HTMLInputElement>('[name=organizationAuthorized]')!;
@@ -24,3 +25,12 @@ test('switching account types clears organization consent; failed registration i
  d.querySelector<HTMLInputElement>('#register-handle')!.value='fixture_operator';d.querySelector<HTMLInputElement>('#register-password')!.value='synthetic-password';form.querySelector<HTMLInputElement>('[name=ageConfirmed]')!.checked=true;
  form.dispatchEvent(new dom.window.Event('submit',{cancelable:true}));await tick();await tick();assert.equal(requests.find(r=>r.path==='/api/operator-registrations').body.organizationAuthorized,undefined);assert.match(d.querySelector('#register-feedback')!.textContent!,/Unable to create/);assert.equal(d.activeElement,d.querySelector('#register-feedback'));assert.equal(d.querySelector<HTMLInputElement>('#register-password')!.value,'');
 },true));
+
+test('registration opens as a modal beside login; cancel clears declarations and returns focus',async()=>fixture(async(dom)=>{
+ const d=dom.window.document,dialog=d.querySelector<HTMLDialogElement>('#operator-registration')!,trigger=d.querySelector<HTMLButtonElement>('#open-operator-registration')!;
+ assert.equal(dialog.open,true);assert.equal(trigger.closest('form')?.id,'login');assert.equal(trigger.type,'button');
+ const age=d.querySelector<HTMLInputElement>('[name=ageConfirmed]')!;assert.equal(age.getAttribute('role'),'switch');age.checked=true;
+ d.querySelector<HTMLInputElement>('#register-password')!.value='synthetic-password';d.querySelector<HTMLButtonElement>('#register-cancel')!.click();
+ assert.equal(dialog.open,false);assert.equal(age.checked,false);assert.equal(d.querySelector<HTMLInputElement>('#register-password')!.value,'');assert.equal(d.activeElement,trigger);
+ trigger.click();assert.equal(dialog.open,true);assert.equal(age.checked,false);
+}));

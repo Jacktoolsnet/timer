@@ -28,7 +28,8 @@ import OperatorRegistration from './OperatorRegistration.astro';
     <label for="operator-password">Password</label>
     <input id="operator-password" name="password" type="password" autocomplete="current-password" required/>
     <p id="login-status" class="admin-login-feedback" role="status" aria-live="polite"></p>
-    <button class="admin-sign-in admin-icon-button" type="submit" aria-label="Sign in" data-tooltip="Sign in"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 5H5v14h4m6-14 7 7-7 7m-6-7h13"/></svg></button>
+    <div class="operator-login-actions"><button class="admin-sign-in admin-icon-button" type="submit" aria-label="Sign in" data-tooltip="Sign in"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 5H5v14h4m6-14 7 7-7 7m-6-7h13"/></svg></button>
+    <button id="open-operator-registration" class="admin-sign-in admin-icon-button operator-register-button" type="button" aria-label="Create operator account" data-tooltip="Create operator account" aria-haspopup="dialog" aria-controls="operator-registration"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 21v-2a6 6 0 0 0-12 0v2M9 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm10 5v8m-4-4h8"/></svg><span>Create operator account</span></button></div>
   </form>
   <OperatorRegistration />
   </div>

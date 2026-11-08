@@ -1394,14 +1394,18 @@ body > .site-header > nav .header-action:nth-last-child(-n+2)::after { left: aut
   .admin-login-form .admin-sign-in.admin-icon-button { background: ButtonFace; color: ButtonText; border-color: ButtonText; box-shadow: none; forced-color-adjust: auto; }
 }
 .operator-auth-forms { min-width: 0; }
-.operator-registration { padding: 0 38px 34px; }
-.operator-registration > summary { color: var(--accent); cursor: pointer; padding: 12px 0; }
+.operator-login-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+.admin-login-form .admin-sign-in.operator-register-button { display: flex; gap: 10px; width: auto; max-width: 100%; height: auto; padding: 14px 18px; font-size: .875rem; line-height: 1.4; text-align: left; }
+.operator-register-button svg { flex-shrink: 0; }
+@media (max-width: 760px) {
+  .operator-login-actions { flex-direction: column; align-items: center; }
+  .admin-login-form .operator-login-actions .admin-sign-in { display: flex; justify-content: center; width: 95%; height: auto; min-height: 60px; text-align: center; }
+}
 .operator-registration form { margin: 12px 0 0; }
 .operator-registration label { display: block; }
 .operator-registration .operator-consent, #approve .operator-consent { display: flex; align-items: flex-start; gap: 10px; margin: 16px 0; line-height: 1.6; }
-.operator-registration .operator-consent input { flex: 0 0 18px; width: 18px; margin: 4px 0 0; }
+.operator-registration .storage-switch input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; z-index: 1; }
 .operator-registration input, .operator-registration select { min-width: 0; }
-@media(max-width:640px){.operator-registration{padding:0 24px 26px;}}
 .operator-registration .admin-sign-in.admin-icon-button { width: 60px; height: 60px; min-height: 60px; background: var(--accent); color: var(--surface); border: 2px solid var(--accent); }
 [data-theme=dark] .operator-registration .admin-sign-in.admin-icon-button { color: var(--bg); }
 #approve > p:last-child { display: flex; gap: 10px; }
