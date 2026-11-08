@@ -1,8 +1,9 @@
 ---
+import AdvertisingPrivacy from '../../../shared/AdvertisingPrivacy.astro';
 interface Props { de: boolean }
 const { de } = Astro.props;
 ---
-<p>{de ? 'Stand: 5. Oktober 2026. Die deutsche Fassung ist die redaktionelle Originalfassung; die englische Fassung ist eine Übersetzung.' : 'Last updated: 5 October 2026. German is the editorial original; the English version is a translation.'}</p>
+<p>{de ? 'Stand: 8. November 2026. Die deutsche Fassung ist die redaktionelle Originalfassung; die englische Fassung ist eine Übersetzung.' : 'Last updated: 8 November 2026. German is the editorial original; the English version is a translation.'}</p>
 
 <p>{de ? 'Wir, die JackTools.Net UG (haftungsbeschränkt), informieren dich hier darüber, wie wir personenbezogene Daten beim Betrieb unseres Timers verarbeiten.' : 'We, JackTools.Net UG (haftungsbeschränkt), explain below how we process personal data when operating our timer.'}</p>
 <h2>{de ? '1. Verantwortlicher' : '1. Controller'}</h2>
@@ -14,7 +15,7 @@ const { de } = Astro.props;
 
 <h2>{de ? '2. Was der Timer verarbeitet' : '2. What the timer processes'}</h2>
 <p>{de ? 'Countdown, Pomodoro und Intervalltimer laufen in deinem Browser. Es gibt kein Benutzerkonto und kein eigenes Anwendungs-Backend. Deine Timerzeiten und Anzeigeeinstellungen werden von der Timer-Anwendung nicht an uns übertragen. Der laufende Timer wird nach einem Neuladen nicht fortgesetzt.' : 'Countdown, Pomodoro and the interval timer run in your browser. There are no user accounts or custom application backend. The timer application does not transmit your timer durations or display preferences to us. A running timer does not resume after a page reload.'}</p>
-<p>{de ? 'Wir binden keine Werbeskripte, browserseitigen Analyseprogramme, Tracking-Pixel oder extern geladenen Schriftarten ein. Davon zu unterscheiden sind die technischen Zugriffsdaten beim Abruf der Website. „Ohne Tracking“ bedeutet daher nicht, dass beim Websiteaufruf keinerlei personenbezogene Daten verarbeitet werden.' : 'We do not embed advertising scripts, browser-side analytics, tracking pixels or externally loaded fonts. This is separate from technical access data required when loading the website. “No tracking” therefore does not mean that visiting the website involves no processing of personal data.'}</p>
+<p>{de ? 'Diese Website bindet Google AdSense für Werbung ein. Die Verarbeitung durch Google ist von den lokalen Tool-Einstellungen getrennt; Details stehen im Abschnitt zu Werbung. Beim Websiteaufruf entstehen außerdem technisch erforderliche Verbindungsdaten.' : 'This website includes Google AdSense advertising. Processing by Google is separate from local tool preferences; see the advertising section for details. Visiting the website also involves technically necessary connection data.'}</p>
 
 <h2>{de ? '3. Hosting und technische Serverprotokolle' : '3. Hosting and technical server logs'}</h2>
 <p>{de ? 'Unser Hostinganbieter ist die 1blu GmbH, Riedemannweg 60, 13627 Berlin, Deutschland. Nach den veröffentlichten Angaben von 1blu befinden sich sämtliche 1blu-Serversysteme im Rechenzentrum in Frankfurt am Main, Deutschland.' : 'Our hosting provider is 1blu GmbH, Riedemannweg 60, 13627 Berlin, Germany. According to 1blu’s published information, all 1blu server systems are located in its data centre in Frankfurt am Main, Germany.'}</p>
@@ -51,4 +52,6 @@ const { de } = Astro.props;
 <p><strong>{de ? 'Widerspruchsrecht: Bei einer Verarbeitung auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO kannst du aus Gründen deiner besonderen Situation gemäß Art. 21 DSGVO widersprechen. Wir verarbeiten die Daten dann nicht weiter, sofern keine nachgewiesenen zwingenden schutzwürdigen Gründe überwiegen oder die Verarbeitung der Geltendmachung, Ausübung oder Verteidigung von Rechtsansprüchen dient.' : 'Right to object: for processing based on Article 6(1)(f) GDPR, you may object under Article 21 on grounds relating to your particular situation. We then stop processing unless demonstrated compelling legitimate grounds override your interests or processing is required to establish, exercise or defend legal claims.'}</strong></p>
 <p>{de ? 'Außerdem kannst du dich bei einer Datenschutzaufsichtsbehörde beschweren, insbesondere am Ort deines gewöhnlichen Aufenthalts, deines Arbeitsplatzes oder des vermuteten Verstoßes (Art. 77 DSGVO). Eine Anlaufstelle ist der ' : 'You may also complain to a data protection authority, particularly where you normally live, work or where an alleged infringement occurred (Article 77 GDPR). One contact point is the '}
 <a href="https://www.lfd.niedersachsen.de/beschwerde" rel="noreferrer">{de ? 'Landesbeauftragte für den Datenschutz Niedersachsen' : 'Data Protection Commissioner for Lower Saxony'}</a>.</p>
-<p>{de ? 'Die Timer-Anwendung trifft keine automatisierten Entscheidungen mit rechtlicher oder vergleichbar erheblicher Wirkung und erstellt keine Werbeprofile.' : 'The timer application makes no automated decisions with legal or similarly significant effects and creates no advertising profiles.'}</p>
+<p>{de ? 'Die Timer-Anwendung trifft keine automatisierten Entscheidungen mit rechtlicher oder vergleichbar erheblicher Wirkung. Die Verarbeitung für Werbung durch Google wird im folgenden Abschnitt beschrieben.' : 'The timer application makes no automated decisions with legal or similarly significant effects. Advertising processing by Google is described in the following section.'}</p>
+
+<AdvertisingPrivacy de={de} />

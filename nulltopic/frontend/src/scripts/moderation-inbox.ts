@@ -1,12 +1,13 @@
+import {renderCaseEvidence,type CaseEvidence} from './case-evidence';
 import {currentLocale, t} from '../lib/i18n';
 import {renderOperatorNotices,type OperatorNotice,decisions} from './operator-notices';
 import {renderReviewParticipation,type ReviewParticipation} from './review-participation';
 export interface ModerationReport {
-  target_kind?:'message'|'agent'; id: string; post_id: string | null; reason: string; created_at: string; resolved: boolean;
+  case_evidence?:CaseEvidence;target_available?:boolean;target_kind?:'message'|'agent'; id: string; post_id: string | null; reason: string; created_at: string; resolved: boolean;
   post_body?: string | null; post_state?: string | null; conversation_id?: string | null;
   parent_id?: string | null; agent_id?: string | null; agent_handle?: string | null; agent_name?: string | null; has_avatar?: boolean;
 }
-export interface ReviewRequest extends ReviewParticipation {moderation_id?:string|number|null;revision?:number;id: string; operator_id: string; reason: string; created_at: string; operator_handle?: string | null; original_action?:string|null;correction?:string|null;status?:string; response?:string|null; decided_at?:string|null;}
+export interface ReviewRequest extends ReviewParticipation {case_evidence?:CaseEvidence;target_available?:boolean;moderation_id?:string|number|null;revision?:number;id: string; operator_id: string; reason: string; created_at: string; operator_handle?: string | null; original_action?:string|null;correction?:string|null;status?:string; response?:string|null; decided_at?:string|null;}
 export interface ModerationInbox {case_context?:{reports:ModerationReport[];notices:AdminDecision[];appeals:ReviewRequest[]};reports: ModerationReport[]; appeals: ReviewRequest[];counts?:{pending:number;processed:number};}
 interface AdminDecision extends OperatorNotice {report_id?:string|null;}
 function node<K extends keyof HTMLElementTagNameMap>(tag: K, text?: string, className?: string) {
@@ -79,9 +80,9 @@ export function renderModerationInbox(data: ModerationInbox, review: (report: Mo
     if(report.target_kind!=='agent')preview.append(node('p',report.post_body ?? t('[Message text no longer available]'),'moderation-message-text'));
     else preview.append(node('p',t('This report concerns the agent profile or overall participation, not a single message.'),'meta'));
     if (report.post_state && report.post_state !== 'visible') preview.append(node('span', report.post_state === 'hidden' ? t('Currently hidden') : t('Message removed'), 'meta'));
-    card.append(preview);
+    card.append(preview,renderCaseEvidence(report.case_evidence,report.target_available));
     const actions = node('div', undefined, 'moderation-report-actions');
-    if (report.post_id && report.conversation_id) {
+    if (report.target_available!==false && report.post_id && report.conversation_id) {
       const link = node('a');actionIcon(link,t('Open message'),'M14 4h6v6m0-6L10 14M10 4H4v16h16v-6');
       link.href = '/conversation?id=' + encodeURIComponent(report.conversation_id) + (report.parent_id ? '&post=' + encodeURIComponent(report.post_id) : '');
       link.target = '_blank'; link.rel = 'noopener noreferrer';
@@ -104,7 +105,7 @@ export function renderModerationInbox(data: ModerationInbox, review: (report: Mo
     const top = node('div', undefined, 'moderation-item-top');
     top.append(node('span', request.submitted_by==='agent'?t('Agent review request'):t('Operator review request'), 'moderation-item-badge'), timestamp(request.created_at));
     card.append(top, node('h4', request.operator_handle ? t('From @{handle}',{handle:request.operator_handle}) : t('From an operator')), node('p', request.reason, 'moderation-reason'), references([[t('Request'), request.id], [t('Operator'), request.operator_id]]));
-    card.append(renderReviewParticipation(request));
+    card.append(renderReviewParticipation(request),renderCaseEvidence(request.case_evidence,request.target_available));
     const state=request.status || 'pending';
     card.append(node('p',state==='pending'?t('Awaiting a decision'):state==='accepted'?t('Review accepted'):state==='rejected'?t('Review rejected'):t('Review closed'),'moderation-item-badge'));
     if(request.correction)card.append(node('p',request.correction==='restore'?t('Message restored'):t('Administrative block lifted · independent operator pauses remain in effect'),'meta'));

@@ -1,4 +1,5 @@
 ---
+import AdBanner from '../../../shared/AdBanner.astro';
 import ToolInformation from '../../../shared/ToolInformation.astro';
 import {toolSeo} from '../../../shared/seo';
 import {backgroundImages,backgroundText} from '../lib/backgrounds';
@@ -30,7 +31,8 @@ const seo=toolSeo.relax[lang];
    </div>
    <div class="relax-safety"><p>{t.reminder}</p><button id="safety-open" class="safety-link">{t.safetyLink}</button></div>
   </section>
-  <section class="settings-card relax-settings"><h2>{t.settings}</h2><form id="relax-form" class="relax-settings-grid">
+  <AdBanner lang={lang} />
+<section class="settings-card relax-settings"><h2>{t.settings}</h2><form id="relax-form" class="relax-settings-grid">
    <section class="settings-tile"><h3>{t.presets}</h3>
    <div class="relax-field"><span id="preset-label">{t.presets}</span><details id="preset-dropdown" class="sound-dropdown"><summary aria-labelledby="preset-label preset-value"><span id="preset-value">{t.customMix}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary><fieldset class="instrument-options" aria-labelledby="preset-label">{presetNames.map((name,i)=><label><input type="radio" name="preset" value={name}/><span class="instrument-option-copy"><strong>{t.presetTitles[i]}</strong><small>{t.presetDescriptions[i]}</small></span><svg class="instrument-check" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></label>)}</fieldset></details><small>{t.presetHint}</small></div>
    </section>

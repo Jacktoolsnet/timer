@@ -1,4 +1,5 @@
 ---
+import AdBanner from '../../../shared/AdBanner.astro';
 import ToolInformation from '../../../shared/ToolInformation.astro';
 import {toolSeo} from '../../../shared/seo';
 import TimerHandMotion from './TimerHandMotion.astro';
@@ -48,7 +49,8 @@ const seo=toolSeo[isPomo?'pomodoro':'countdown'][lang];
         <noscript><p class="notice">{t.js}</p></noscript>
         </div>
       </section>
-      <aside class="settings-card timer-options">
+      <AdBanner lang={lang} />
+<aside class="settings-card timer-options">
         <div class="settings-heading"><span class="settings-icon">✳</span><h2>{t.settings}</h2><p>{t.settingsIntro}</p></div>
         <TimerAppearance lang={lang} pomodoro={isPomo} />
         <form id="settings-form" class="timer-options-form">

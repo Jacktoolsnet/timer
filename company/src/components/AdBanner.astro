@@ -1,0 +1,25 @@
+---
+import type { Language } from '../lib/i18n';
+interface Props { lang: Language }
+const { lang } = Astro.props;
+const label = { de: 'Werbung', en: 'Advertisement', es: 'Publicidad', fr: 'Publicité' }[lang];
+---
+<aside class="company-ad" aria-label={label}>
+  <p class="company-ad-label">{label}</p>
+  <script is:inline async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5182500947872057" crossorigin="anonymous"></script>
+  <!-- Horizontal JackTools.Net: responsive slot supplied by the publisher. -->
+  <ins class="adsbygoogle"
+    style="display:block"
+    data-ad-client="ca-pub-5182500947872057"
+    data-ad-slot="4560273012"
+    data-ad-format="auto"
+    data-full-width-responsive="true"></ins>
+  <script is:inline>
+    (window.adsbygoogle = window.adsbygoogle || []).push({});
+  </script>
+</aside>
+<style>
+  .company-ad { width:100%; min-width:0; margin:0 0 48px; }
+  .company-ad-label { margin:0 0 12px; text-align:center; color:var(--muted); font-size:12px; }
+  .adsbygoogle { width:100%; min-height:250px; }
+</style>

@@ -1,4 +1,5 @@
 ---
+import AdBanner from '../../../shared/AdBanner.astro';
 import ToolInformation from '../../../shared/ToolInformation.astro';
 import {toolSeo} from '../../../shared/seo';
 import {seoCopy} from '../lib/seo';
@@ -35,7 +36,8 @@ const seo=toolSeo.metronome[lang],content=seoCopy[lang];
   <p id="audio-error" role="status"></p><p id="wake-status" role="status"></p>
   </div>
  </section>
- <aside class="settings-card metronome-settings-card" aria-labelledby="metronome-settings-title">
+ <AdBanner lang={lang} />
+<aside class="settings-card metronome-settings-card" aria-labelledby="metronome-settings-title">
   <h2 id="metronome-settings-title">{groups.settings}</h2>
   <form id="metronome-settings">
    <fieldset class="metronome-settings-group"><legend>{groups.rhythm}</legend>

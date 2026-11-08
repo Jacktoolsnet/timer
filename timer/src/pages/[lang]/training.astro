@@ -1,4 +1,5 @@
 ---
+import AdBanner from '../../../../shared/AdBanner.astro';
 import ToolInformation from '../../../../shared/ToolInformation.astro';
 import {toolSeo} from '../../../../shared/seo';
 import TimerHandMotion from '../../components/TimerHandMotion.astro';
@@ -34,6 +35,7 @@ const seo=toolSeo.interval[lang];
 <p id="wake-status" class="timer-status" role="status"></p><noscript>{t.js}</noscript>
 </div>
 </section>
+<AdBanner lang={lang} />
 <aside class="settings-card timer-options"><div class="settings-heading"><h2>{t.settings}</h2></div><TimerAppearance lang={lang} /><form id="training-form" class="timer-options-form"><fieldset class="timer-options-group timing-options"><legend>{groups.timing}</legend><div class="pomo-inputs">
 {(['preparation','work','rest','rounds','countdown'] as const).map(key => <div class="number-field"><label class="training-field-label" for={key}>{x[key]}</label><NumberStepper id={key} name={key} label={x[key]} min={key === 'work' || key === 'rounds' ? 1 : 0} max={key === 'rounds' ? 100 : key === 'countdown' ? 10 : 3600} step={1} value={trainingDefaults[key]} lang={lang}/></div>)}
 </div></fieldset>

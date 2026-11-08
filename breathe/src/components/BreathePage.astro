@@ -1,4 +1,5 @@
 ---
+import AdBanner from '../../../shared/AdBanner.astro';
 import ToolInformation from '../../../shared/ToolInformation.astro';
 import {toolSeo} from '../../../shared/seo';
 import {backgrounds} from '../lib/backgrounds';
@@ -32,7 +33,8 @@ const seo=toolSeo.breathe[lang];
    </div>
    <div class="breath-safety"><p>{t.reminder}</p><button id="safety-open" type="button" class="safety-link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Z"/><path d="M12 8v5m0 3h.01"/></svg><span>{t.safetyLink}</span></button></div>
   </section>
-  <section class="settings-card breathe-settings">
+  <AdBanner lang={lang} />
+<section class="settings-card breathe-settings">
    <h2>{t.settings}</h2>
    <form id="breath-form" class="breathe-settings-grid">
     <section class="breathe-settings-tile"><h3>{t.patternGroup}</h3>

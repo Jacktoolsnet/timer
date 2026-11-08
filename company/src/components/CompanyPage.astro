@@ -1,4 +1,5 @@
 ---
+import AdBanner from './AdBanner.astro';
 import MetronomePreview from './MetronomePreview.astro';
 import RelaxPreview from './RelaxPreview.astro';
 import Layout from '../layouts/Layout.astro';
@@ -59,6 +60,7 @@ const spotlights = rawSpotlights.map(tool => ({...tool,name:t(tool.name),title:t
       window.addEventListener('pageshow', event => { if (event.persisted) selectSpotlight(); });
     })();
   </script>
+  <AdBanner lang={lang} />
   <section class="tools-section" id="tools" aria-labelledby="tools-heading"><div class="section-heading"><div><p class="eyebrow">{t("DIE JACKTOOLS.NET-FAMILIE")}</p><h2 id="tools-heading">{t("Online-Tools für Zeit, Fokus und Entspannung")}</h2></div><p>{t("Wähle den passenden Helfer – direkt im Browser, ohne Anmeldung.")}</p></div>
     <nav class="tool-shortcuts" aria-label={t("Toolübersicht")}><a href="#online-timer">{t("Timer")}</a><a href="#online-uhr">{t("Uhr")}</a><a href="#online-stoppuhr">{t("Stoppuhr")}</a><a href="#taschenrechner">{t("Taschenrechner")}</a><a href="#atemuebungen">{t("Atemübungen")}</a><a href="#naturgeraeusche">{t("Naturgeräusche")}</a><a href="#online-metronom">{t("Metronom")}</a><a href="#messagedrop">{t("MessageDrop")}</a></nav>
     <div class="product-grid time-tools-grid">
@@ -88,7 +90,7 @@ const spotlights = rawSpotlights.map(tool => ({...tool,name:t(tool.name),title:t
       </div>
     </article>
     <article id="naturgeraeusche" class="product-card timer-feature breathe-feature relax-feature" aria-labelledby="relax-card-title">
-     <div class="product-copy"><span class="product-tag">{t("KLANG & ENTSPANNUNG")}</span><h3 id="relax-card-title">{t("Relax – Naturgeräusche und Klänge")}</h3><p>{t("Stelle dir deine eigene Klanglandschaft zusammen. Sanfte Instrumente und Naturgeräusche treffen auf ruhige, farbige Animationen – zum Zuhören, Zuschauen und Abschalten.")}</p><ul class="feature-list"><li>{t("Sieben Instrumente: vom Windspiel bis zu Klangschalen, Harfe und Gong")}</li><li>{t("Regen, Wind, Rauschen, Lagerfeuer und Meeresrauschen frei kombinieren")}</li><li>{t("Klang-Presets, eigene Lautstärken und einzeln schaltbare Animationen")}</li><li>{t("Fokusansicht und Schlafmodus mit sanftem Ausblenden bei begrenzter Dauer")}</li></ul><a class="primary tool-open" href={localizedToolUrl("https://relax.jacktools.net/de/",lang)} rel="noreferrer">{t("Naturgeräusche öffnen")} <span aria-hidden="true">↗</span></a><p class="product-note">{t("Kostenlos · ohne Werbung · ohne Tracking · direkt im Browser")}</p><p class="breathe-product-hint">{t("Höre leise und so, wie es angenehm ist. Ein Entspannungstool, kein medizinisches Angebot.")}</p></div>
+     <div class="product-copy"><span class="product-tag">{t("KLANG & ENTSPANNUNG")}</span><h3 id="relax-card-title">{t("Relax – Naturgeräusche und Klänge")}</h3><p>{t("Stelle dir deine eigene Klanglandschaft zusammen. Sanfte Instrumente und Naturgeräusche treffen auf ruhige, farbige Animationen – zum Zuhören, Zuschauen und Abschalten.")}</p><ul class="feature-list"><li>{t("Sieben Instrumente: vom Windspiel bis zu Klangschalen, Harfe und Gong")}</li><li>{t("Regen, Wind, Rauschen, Lagerfeuer und Meeresrauschen frei kombinieren")}</li><li>{t("Klang-Presets, eigene Lautstärken und einzeln schaltbare Animationen")}</li><li>{t("Fokusansicht und Schlafmodus mit sanftem Ausblenden bei begrenzter Dauer")}</li></ul><a class="primary tool-open" href={localizedToolUrl("https://relax.jacktools.net/de/",lang)} rel="noreferrer">{t("Naturgeräusche öffnen")} <span aria-hidden="true">↗</span></a><p class="product-note">{t("Kostenlos · ohne Benutzerkonto · direkt im Browser")}</p><p class="breathe-product-hint">{t("Höre leise und so, wie es angenehm ist. Ein Entspannungstool, kein medizinisches Angebot.")}</p></div>
      <div class="timer-preview relax-preview" role="img" aria-label={t("Statische Vorschau von Relax: farbige Formen und sanfte Meereswellen")}><div class="preview-tabs" aria-hidden="true"><span>{t("Instrumente")}</span><span class="active">{t("Naturklänge")}</span><span>{t("Deine Mischung")}</span></div><RelaxPreview/><p>{t("Zuhören. Zuschauen. Zur Ruhe kommen.")}</p></div>
     </article>
     <article id="online-metronom" class="product-card timer-feature metronome-feature" aria-labelledby="metronome-card-title">

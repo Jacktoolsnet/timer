@@ -204,13 +204,13 @@ export async function initializeAdministration() {
         if(version===viewVersion && signedIn){updateTabs(data.counts);document.getElementById('moderation-list-limit')!.hidden=!data.counts || data.counts[moderationStatus]<=data.reports.length+data.appeals.length;}
         if (version === viewVersion && signedIn) document.querySelector('#reports')!.replaceChildren(renderModerationInbox(data, (report,trigger) => {
           clearReview();actionForm.hidden=false;
-          selectedReport = report; actionType.value = report.target_kind==='agent'?'block':'hide';selectTarget();syncActionPicker(report.target_kind);
+          selectedReport = report; actionType.value = report.target_available===false?'dismiss':report.target_kind==='agent'?'block':'hide';selectTarget();syncActionPicker(report.target_kind,report.target_available!==false);
           document.querySelector<HTMLTextAreaElement>('#action-reason')!.value = '';
           modal.open('moderation-action-title',trigger);
           document.querySelector<HTMLTextAreaElement>('#action-reason')!.focus({preventScroll: true});
         }, (request,trigger)=>{
           actionForm.hidden=true;
-          clearReview();selectedReview=request;syncReviewPicker(request.original_action);reviewForm.hidden=false;
+          clearReview();selectedReview=request;syncReviewPicker(request.original_action,request.target_available!==false);reviewForm.hidden=false;
           const context=document.querySelector('#review-decision-context')!;
           const who=document.createElement('p');who.textContent=request.operator_handle?t('From @{handle}',{handle:request.operator_handle}):t('Operator review request');
           const text=document.createElement('p');text.className='moderation-reason';text.textContent=request.reason;

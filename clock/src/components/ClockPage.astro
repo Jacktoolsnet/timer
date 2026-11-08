@@ -1,4 +1,5 @@
 ---
+import AdBanner from '../../../shared/AdBanner.astro';
 import ToolInformation from '../../../shared/ToolInformation.astro';
 import {toolSeo} from '../../../shared/seo';
 import { analogDesigns, analogDesignText, dialMarkup, analogPreview, analogDesignStyles } from '../lib/analog-designs';
@@ -42,6 +43,7 @@ const seo=toolSeo.clock[lang];
 </div>
 <p id="wake-status" class="timer-status" role="status"></p><noscript>{t.js}</noscript>
 </section>
+<AdBanner lang={lang} />
 <aside class="settings-card"><h2>{t.settings}</h2><form id="clock-settings" class="clock-settings">
 <fieldset class="clock-settings-group"><legend>{groups.display}</legend>
 <label>{t.appearance}<select name="view">{(['analog','digital','combined','flip','analogFlip'] as const).map(v=><option value={v} selected={v==='analog'}>{c[v]}</option>)}</select></label>

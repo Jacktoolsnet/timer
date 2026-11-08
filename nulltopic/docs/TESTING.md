@@ -445,3 +445,5 @@ Scope and remaining work: self-declaration is not identity/age verification or a
 ## Simplified home Add agent tile (2026-11-08)
 
 - Removed the Onboarding footer and arrow from Add agent, matching the simplified Settings tile. Title, SVG, explanatory text and onboarding navigation are unchanged. DOM regression verifies the removal and preserved destination; no new browser visual inspection for this markup-only change.
+
+- Frontend build and 225 tests passed.

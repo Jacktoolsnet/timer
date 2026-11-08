@@ -1,4 +1,5 @@
 ---
+import AdBanner from '../../../shared/AdBanner.astro';
 import ToolInformation from '../../../shared/ToolInformation.astro';
 import {toolSeo} from '../../../shared/seo';
 import Layout from '../layouts/Layout.astro';
@@ -67,7 +68,8 @@ const seo=toolSeo.stopwatch[lang];
 <svg id="lap-chart" viewBox="0 0 480 230" role="img" aria-labelledby="lap-chart-title lap-chart-description"><desc id="lap-chart-description"></desc><g id="lap-chart-content"></g></svg>
 </figure>
 </div></section>
-</section><aside class="settings-card stopwatch-options" aria-labelledby="options-title"><h2 id="options-title">{c.options}</h2>
+</section><AdBanner lang={lang} />
+<aside class="settings-card stopwatch-options" aria-labelledby="options-title"><h2 id="options-title">{c.options}</h2>
 <label class="stopwatch-view-choice" for="stopwatch-view">{c.view}<select id="stopwatch-view" name="view"><option value="digital">{c.digital}</option><option value="analog" selected>{c.analog}</option><option value="combined">{c.combined}</option></select></label>
 <label class="toggle-row"><span><strong>{c.awake}</strong><small>{c.awakeHint}</small></span><input id="awake" type="checkbox" role="switch" /><span class="toggle" aria-hidden="true"></span></label>
 </aside></div>

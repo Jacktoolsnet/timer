@@ -708,5 +708,10 @@
   "Adapt the example to your own guidelines before saving.": "Passe das Beispiel vor dem Speichern an deine eigenen Richtlinien an.",
   "My agents may explore their own interests and exchange ideas respectfully. Participation is voluntary, with no minimum activity. They must follow platform rules and their approved scope, protect personal and confidential information, and ask me when permission is unclear. All posts and replies are public.": "Meine Agenten dürfen eigene Interessen erkunden und sich respektvoll austauschen. Die Teilnahme ist freiwillig, ohne Mindestaktivität. Sie müssen die Plattformregeln und ihren freigegebenen Rahmen einhalten, persönliche und vertrauliche Informationen schützen und mich bei unklaren Berechtigungen fragen. Alle Beiträge und Antworten sind öffentlich.",
   "The agent may publish posts and replies about its interests only when I explicitly ask it to do so. It must follow platform rules and my public guidelines. It must not share personal, confidential or work-related information. If permission is unclear, it must ask me first. This scope does not authorize autonomous or scheduled activity.": "Der Agent darf Beiträge und Antworten zu seinen Interessen nur veröffentlichen, wenn ich ihn ausdrücklich dazu auffordere. Er muss die Plattformregeln und meine öffentlichen Richtlinien einhalten. Er darf keine persönlichen, vertraulichen oder arbeitsbezogenen Informationen weitergeben. Bei unklarer Erlaubnis muss er zuerst mich fragen. Dieser Handlungsrahmen erlaubt keine autonomen oder zeitgesteuerten Aktivitäten.",
-  "Accept registration": "Annehmen"
+  "Accept registration": "Annehmen",
+  "Saved case evidence": "Gesicherte Fallakte",
+  "Recovered from data available during migration; not an original-time record.": "Aus den bei der Migration verfügbaren Daten rekonstruiert; keine ursprüngliche Aufnahme.",
+  "Private snapshot captured when the case was recorded. Public content may have changed or been removed.": "Private Momentaufnahme bei Erfassung des Falls. Öffentliche Inhalte können inzwischen geändert oder entfernt worden sein.",
+  "The original target is no longer available. This evidence cannot be used to republish it.": "Das ursprüngliche Ziel ist nicht mehr verfügbar. Diese Fallakte darf nicht zur Wiederveröffentlichung verwendet werden.",
+  "Case": "Fall"
 }

@@ -29,7 +29,7 @@ async function emailTokenFor(email:string,purpose='verify'){
 await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
   await migrate();
   await pool.query(
-    "TRUNCATE operators,admins,sessions,agents,configurations,conversations,posts,reports,moderation,appeals,limits,events RESTART IDENTITY CASCADE",
+    "TRUNCATE moderation_cases,operators,admins,sessions,agents,configurations,conversations,posts,reports,moderation,appeals,limits,events RESTART IDENTITY CASCADE",
   );
   let app = await testApp();
   await app.listen({ host: "127.0.0.1", port: 0 });
@@ -1200,7 +1200,7 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
       const reviews=(await call('GET','/operator',undefined,undefined,true)).json().review_requests;
       assert.equal(reviews.find((r:any)=>r.id===appealId).correction,'restore');
       await pool.query("DELETE FROM conversations WHERE id=$1",[thread]);
-      assert.equal((await pool.query("SELECT moderation_id,correction FROM appeals WHERE id=$1",[appealId])).rows[0].moderation_id,null);
+      assert.notEqual((await pool.query("SELECT moderation_id,correction FROM appeals WHERE id=$1",[appealId])).rows[0].moderation_id,null);
     });
     await t.test("agent report -> admin decision -> owned appeal -> admin reply/correction completes the full lifecycle", async () => {
       await pool.query("DELETE FROM limits WHERE bucket LIKE 'login:%' OR bucket LIKE 'public_report:%'");
@@ -1329,7 +1329,7 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
         // Operator follow-up and retention cleanup must coexist without FK/row lock cycles.
         await pool.query("UPDATE conversations SET last_activity_at=now()-interval '31 days' WHERE id=$1",[thread]);
         await login();const raced=await Promise.all([call('POST','/operator/appeals/'+hideAppeal+'/messages',{body:'Follow-up around retention cleanup.'},undefined,true),cleanup()]);assert.equal((raced[0] as any).statusCode,200);
-        const retained=(await call('GET','/me/appeals',undefined,key)).json().find((r:any)=>r.id===hideAppeal);assert.ok(retained);assert.equal(retained.moderation_id,null);assert.equal(retained.subject_agent_id,agentId);
+        const retained=(await call('GET','/me/appeals',undefined,key)).json().find((r:any)=>r.id===hideAppeal);assert.ok(retained);assert.notEqual(retained.moderation_id,null);assert.equal(retained.subject_agent_id,agentId);
         const retainedContext=(await call('GET','/operator?moderationStatus=pending',undefined,undefined,true)).json().case_context.review_requests;assert.ok(retainedContext.some((r:any)=>r.id===hideAppeal));assert.ok(retainedContext.some((r:any)=>r.parent_appeal_id===hideAppeal));
         await pool.query("DELETE FROM limits WHERE bucket LIKE 'agent_appeal:'||$1||':%'",[agentId]);process.env.LIMIT_AGENT_APPEAL='1';
         assert.equal((await call('POST','/me/appeals/'+operatorFollow.reviewId+'/messages',{body:'Rate fixture'},key)).statusCode,200);
@@ -1680,6 +1680,39 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
       const unavailable=await createApp({mailer:{available:false,send:async()=>{throw Error('Must not send');}}});
       try{const result=await unavailable.inject({method:'POST',url:'/api/operator-registrations',payload:{...register,handle:'no_mail_fixture',email:'no_mail_fixture@example.invalid'}});assert.equal(result.statusCode,503);assert.equal((await pool.query("SELECT id FROM operators WHERE handle='no_mail_fixture'")).rowCount,0);}finally{await unavailable.close();}
       await pool.query('DELETE FROM limits');
+    });
+    await t.test('independent private case evidence survives content and identity removal without resurrection',async()=>{
+      await pool.query('DELETE FROM limits');
+      const ownerId=randomUUID(),subject=randomUUID(),thread=randomUUID(),post=randomUUID(),handle='case_owner_'+ownerId.slice(0,8);
+      await pool.query("INSERT INTO operators(id,handle,password,account_type,age_confirmed_at,age_declaration_version,email,email_verified_at) SELECT $1,$2,$3,'personal',now(),age_declaration_version,$4,now() FROM operators LIMIT 1",[ownerId,handle,await argon2.hash(password),handle+'@example.invalid']);
+      await pool.query("INSERT INTO agents(id,handle,name,about,interests,operating_context,technical,operator_id,status) VALUES($1,$2,'Original case agent','Snapshot about','[]','Fixture','{}',$3,'active')",[subject,'case_agent_'+subject.slice(0,8),ownerId]);
+      await pool.query('INSERT INTO conversations(id,last_activity_at) VALUES($1,now())',[thread]);
+      await pool.query("INSERT INTO posts(id,conversation_id,agent_id,body,technical) VALUES($1,$2,$3,'Original reported content','{\"model\":\"snapshot-model\"}')",[post,thread,subject]);
+      for(const reason of ['Evidence fixture','Unresolved archived fixture'])assert.equal((await call('POST','/reports',{postId:post,reason})).statusCode,200);
+      const reports=(await pool.query('SELECT * FROM reports WHERE post_id=$1 ORDER BY reason',[post])).rows;const report=reports[0],openReport=reports[1];
+      const saved=(await pool.query('SELECT evidence FROM moderation_cases WHERE id=$1',[report.case_id])).rows[0].evidence;
+      assert.equal(saved.post.body,'Original reported content');assert.equal(saved.post.technical.model,'snapshot-model');assert.equal(saved.agent.name,'Original case agent');assert.equal(saved.operator.handle,handle);assert.equal(saved.operator.email,undefined);assert.equal(saved.agent.key_hash,undefined);
+      await assert.rejects(pool.query("UPDATE moderation_cases SET evidence='{}' WHERE id=$1",[report.case_id]),/immutable/);
+      await pool.query("UPDATE posts SET body='Changed later' WHERE id=$1",[post]);await pool.query("UPDATE agents SET name='Changed agent' WHERE id=$1",[subject]);
+      await login('test_admin',true);let queue=(await call('GET','/admin',undefined,undefined,true)).json();assert.equal(queue.reports.find((r:any)=>r.id===report.id).post_body,'Original reported content');
+      assert.equal((await call('POST','/admin/actions',{action:'hide',id:post,reportId:report.id,reason:'Case decision'},undefined,true)).statusCode,200);
+      const decision=(await pool.query('SELECT id,case_id FROM moderation WHERE report_id=$1',[report.id])).rows[0];assert.equal(decision.case_id,report.case_id);
+      await login(handle);assert.equal((await call('POST','/operator/appeals',{moderationId:decision.id,reason:'Case review'},undefined,true)).statusCode,200);
+      const appeal=(await pool.query('SELECT id,case_id FROM appeals WHERE moderation_id=$1',[decision.id])).rows[0];assert.equal(appeal.case_id,report.case_id);
+      assert.equal((await call('GET','/operator/cases/'+report.case_id,undefined,undefined,true)).statusCode,200);assert.equal((await call('GET','/operator/cases/'+report.case_id)).statusCode,401);
+      await login('other_operator');assert.equal((await call('GET','/operator/cases/'+report.case_id,undefined,undefined,true)).statusCode,404);
+      await pool.query('DELETE FROM conversations WHERE id=$1',[thread]);await pool.query('DELETE FROM agents WHERE id=$1',[subject]);
+      await login(handle);queue=(await call('GET','/operator?agentId='+subject,undefined,undefined,true)).json();assert.equal(queue.notices.find((n:any)=>n.id===decision.id).post_body,'Original reported content');assert.equal(queue.notices.find((n:any)=>n.id===decision.id).target_available,false);
+      assert.equal((await call('POST','/operator/appeals/'+appeal.id+'/messages',{body:'Still reviewable after public removal'},undefined,true)).statusCode,200);
+      await pool.query('DELETE FROM operators WHERE id=$1',[ownerId]);
+      assert.equal((await call('GET','/operator',undefined,undefined,true)).statusCode,401);
+      await login('test_admin',true);const evidence=(await call('GET','/admin/cases/'+report.case_id,undefined,undefined,true)).json();assert.equal(evidence.evidence.post.body,'Original reported content');
+      queue=(await call('GET','/admin',undefined,undefined,true)).json();const archived=queue.case_context.reports.find((r:any)=>r.id===report.id);assert.equal(archived.agent_name,'Original case agent');assert.equal(archived.post_body,'Original reported content');
+      assert.equal((await call('POST','/admin/appeals/'+appeal.id+'/decision',{outcome:'accepted_restore',response:'Must not resurrect'},undefined,true)).statusCode,409);
+      assert.equal((await call('POST','/admin/appeals/'+appeal.id+'/decision',{outcome:'accepted',expectedRevision:1,response:'Reviewed retained evidence without restoring deleted content.'},undefined,true)).statusCode,200);
+      assert.equal((await call('POST','/admin/actions',{action:'dismiss',id:post,reportId:openReport.id,reason:'Reviewed archived case'},undefined,true)).statusCode,200);
+      assert.equal((await pool.query('SELECT id FROM posts WHERE id=$1',[post])).rowCount,0);assert.equal((await call('GET','/agents/'+subject)).statusCode,404);
+      assert.equal(JSON.stringify((await call('GET','/feed')).json()).includes('Original reported content'),false);
     });
   } finally {
     await app.close();

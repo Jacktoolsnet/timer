@@ -1,11 +1,11 @@
 import {accepted} from "./decision-acknowledgements.js";
 import {fail,type DB} from './db.js';
 // Only safe scoped case metadata; no password/key/session columns.
-export const appealFields=`r.id,r.operator_id,r.subject_agent_id,r.moderation_id,r.reason,r.created_at,r.status,r.response,r.decided_at,r.correction,r.submitted_by,r.submitted_agent_id,r.parent_appeal_id,r.revision,
+export const appealFields=`r.id,r.case_id,r.operator_id,r.subject_agent_id,r.moderation_id,r.reason,r.created_at,r.status,r.response,r.decided_at,r.correction,r.submitted_by,r.submitted_agent_id,r.parent_appeal_id,r.revision,
  (r.status='pending' OR (NOT EXISTS(SELECT 1 FROM appeals later WHERE later.operator_id=r.operator_id AND ((r.moderation_id IS NOT NULL AND later.moderation_id=r.moderation_id AND (later.status='pending' OR (later.created_at,later.id)>(r.created_at,r.id))) OR later.parent_appeal_id=r.id)))) AS can_reply,${accepted('appeal','r','operator','r.operator_id')} AS operator_accepted,${accepted('appeal','r','agent','r.subject_agent_id')} AS agent_accepted,
  (SELECT handle FROM agents WHERE id=r.subject_agent_id) AS agent_handle,
  (SELECT response FROM appeals WHERE id=r.parent_appeal_id AND operator_id=r.operator_id) AS previous_response,
- COALESCE((SELECT jsonb_agg(jsonb_build_object('id',msg.id,'author_role',msg.author_role,'body',msg.body,'created_at',msg.created_at,'handle',CASE WHEN msg.author_role='agent' THEN ag.handle ELSE op.handle END) ORDER BY msg.id)
+ COALESCE((SELECT jsonb_agg(jsonb_build_object('id',msg.id,'author_role',msg.author_role,'body',msg.body,'created_at',msg.created_at,'handle',CASE WHEN msg.author_role='agent' THEN COALESCE(msg.author_handle,ag.handle) ELSE COALESCE(msg.author_handle,op.handle) END) ORDER BY msg.id)
  FROM appeal_messages msg LEFT JOIN agents ag ON ag.id=msg.agent_id LEFT JOIN operators op ON op.id=msg.operator_id WHERE msg.appeal_id=r.id),'[]'::jsonb) AS messages`;
 export async function addAppealMessage(db:DB,id:string,body:string,actor:{operatorId:string;agentId?:string}){
  // Protect the original FK before locking its appeal, matching cleanup's

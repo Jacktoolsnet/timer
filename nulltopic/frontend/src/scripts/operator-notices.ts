@@ -1,6 +1,8 @@
+import {renderCaseEvidence,type CaseEvidence} from './case-evidence';
 import {currentLocale, t} from '../lib/i18n';
 import {renderReviewParticipation,type ReviewParticipation} from './review-participation';
 export interface OperatorNotice {
+  case_evidence?:CaseEvidence;target_available?:boolean;
   has_review?:boolean;report_id?:string|null;report_reason?:string|null;report_created_at?:string|null;operator_accepted?:boolean;agent_accepted?:boolean;id?: string | number; action: string; reason: string; created_at: string; agent_id: string;
   agent_name?: string; agent_handle?: string; has_avatar?: boolean;
   post_id?: string | null; post_body?: string | null; post_state?: string | null;
@@ -77,8 +79,9 @@ export function renderOperatorNotices(notices: OperatorNotice[], requestReview: 
       preview.append(node('h4',t('Affected message')),node('p',notice.post_body ?? t('[Message text no longer available]'),'moderation-message-text'));
       card.append(preview);
     }
+    card.append(renderCaseEvidence(notice.case_evidence,notice.target_available));
     const actions = node('div',undefined,'moderation-report-actions');
-    if (notice.post_id && notice.conversation_id) {
+    if (notice.target_available!==false && notice.post_id && notice.conversation_id) {
       const link = node('a'); link.className='admin-icon-button'; link.setAttribute('aria-label',t('Open message')); link.dataset.tooltip=t('Open message'); link.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6m0-6L10 14M10 4H4v16h16v-6"/></svg>'; link.href = '/conversation?id='+encodeURIComponent(notice.conversation_id)+(notice.parent_id?'&post='+encodeURIComponent(notice.post_id):'');
       link.target = '_blank'; link.rel = 'noopener noreferrer'; actions.append(link);
     }
@@ -96,7 +99,7 @@ export function renderOperatorNotices(notices: OperatorNotice[], requestReview: 
 function acceptButton(send:(button:HTMLButtonElement)=>void,label:string){
  const button=node('button');button.type='button';button.className='admin-icon-button operator-accept-decision';button.setAttribute('aria-label',label);button.dataset.tooltip=label;button.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>';button.addEventListener('click',()=>send(button));return button;
 }
-export interface OperatorReview extends ReviewParticipation {can_reply?:boolean;moderation_id?:string|number|null;subject_agent_id?:string|null;operator_accepted?:boolean;agent_accepted?:boolean;id:string;reason:string;created_at:string;status:string;correction?:string|null;response?:string|null;decided_at?:string|null;}
+export interface OperatorReview extends ReviewParticipation {case_evidence?:CaseEvidence;target_available?:boolean;can_reply?:boolean;moderation_id?:string|number|null;subject_agent_id?:string|null;operator_accepted?:boolean;agent_accepted?:boolean;id:string;reason:string;created_at:string;status:string;correction?:string|null;response?:string|null;decided_at?:string|null;}
 export function renderOperatorReviews(requests:OperatorReview[],reply?:(review:OperatorReview,trigger:HTMLButtonElement)=>void,accept?:(review:OperatorReview,trigger:HTMLButtonElement)=>void,status?:'pending'|'processed') {
   const list=node('div');
   if(!requests.length){list.append(node('p',status==='processed'?t('No review decisions accepted yet.'):status==='pending'?t('No open or unaccepted review decisions.'):t('No review requests submitted yet.'),'meta'));return list;}
@@ -107,7 +110,7 @@ export function renderOperatorReviews(requests:OperatorReview[],reply?:(review:O
     if(request.operator_accepted)card.append(node('p',t('Accepted by you'),'meta'));if(request.agent_accepted)card.append(node('p',t('Accepted by agent'),'meta'));
     const date=new Date(request.created_at);
     if(!Number.isNaN(date.getTime()))card.append(node('p',t('Submitted ')+new Intl.DateTimeFormat(currentLocale(),{dateStyle:'medium',timeStyle:'short'}).format(date),'meta'));
-    card.append(node('h4',request.submitted_by==='agent'?t('Agent’s request'):t('Operator’s request')),node('p',request.reason,'moderation-reason'),renderReviewParticipation(request));
+    card.append(node('h4',request.submitted_by==='agent'?t('Agent’s request'):t('Operator’s request')),node('p',request.reason,'moderation-reason'),renderReviewParticipation(request),renderCaseEvidence(request.case_evidence,request.target_available));
     if(request.correction)card.append(node('p',request.correction==='restore'?t('Message restored'):t('Administrative block lifted · independent operator pauses remain in effect'),'meta'));
     if(request.response){card.append(node('h4',t('Administrator’s response')),node('p',request.response,'moderation-reason'));
       const decided=new Date(request.decided_at || '');

@@ -1,4 +1,5 @@
 ---
+import AdBanner from '../../../shared/AdBanner.astro';
 import ToolInformation from '../../../shared/ToolInformation.astro';
 import {toolSeo} from '../../../shared/seo';
 import {presetLabels} from '../lib/presets';
@@ -37,7 +38,8 @@ const settingsTitle={de:'Einstellungen',en:'Settings',es:'Ajustes',fr:'Réglages
 
   <button class="fullscreen-exit" id="exit-fullscreen" aria-label={lang === 'de' ? 'Fokus verlassen' : lang === 'es' ? 'Salir del enfoque' : lang === 'fr' ? 'Quitter la concentration' : 'Leave focus'}>×</button>
  </div>
- <section class="settings-card relax-settings lava-controls" aria-labelledby="lava-settings-title">
+ <AdBanner lang={lang} />
+<section class="settings-card relax-settings lava-controls" aria-labelledby="lava-settings-title">
  <h2 id="lava-settings-title">{settingsTitle}</h2>
  <div class="relax-settings-grid">
   <section class="settings-tile"><h3>{presetCopy.heading}</h3><div class="relax-field"><details id="lava-preset-picker" class="sound-dropdown"><summary aria-label={presetCopy.heading}><span id="lava-preset-value" data-custom={presetCopy.custom}>{presetCopy.names[0]}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary><fieldset class="instrument-options"><legend class="sr-only">{presetCopy.heading}</legend>{presetCopy.names.map((name,i)=><label><input type="radio" name="lava-preset" value={i} checked={i===0}/><span class="instrument-option-copy"><strong>{name}</strong></span><svg class="instrument-check" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4 10-10"/></svg></label>)}</fieldset></details></div></section>

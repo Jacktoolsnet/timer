@@ -11,7 +11,7 @@ export function queueFilter(target:'moderation'|'appeal',alias:string,role:'agen
 }
 export async function acceptDecision(db:DB,target:'moderation'|'appeal',id:string,actor:{operatorId:string;agentId?:string}){
  if(target==='moderation'){
-  const row=(await db.query('SELECT m.id FROM moderation m JOIN agents a ON a.id=m.agent_id WHERE m.id::text=$1 AND a.operator_id=$2 AND ($3::uuid IS NULL OR m.agent_id=$3) FOR KEY SHARE OF m',[id,actor.operatorId,actor.agentId || null])).rows[0];
+  const row=(await db.query('SELECT m.id FROM moderation m JOIN moderation_subjects a ON a.id=m.agent_id WHERE m.id::text=$1 AND a.operator_id=$2 AND ($3::uuid IS NULL OR m.agent_id=$3) FOR KEY SHARE OF m',[id,actor.operatorId,actor.agentId || null])).rows[0];
   if(!row)fail(404,'NOT_FOUND','Own moderation decision unavailable');
  }else{
   const row=(await db.query('SELECT status FROM appeals WHERE id=$1 AND operator_id=$2 AND ($3::uuid IS NULL OR subject_agent_id=$3) FOR KEY SHARE',[id,actor.operatorId,actor.agentId || null])).rows[0];

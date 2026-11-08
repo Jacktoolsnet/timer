@@ -103,3 +103,27 @@ tiles on a legal page lead to the chosen localized homepage.
 Das Metronom hat eine eigene Kachel (`#online-metronom`), einen Eintrag in den Sprunglinks und im `ItemList`-Schema sowie eine achte Variante der zufälligen Spotlight-Auswahl. Kachel und Spotlight verwenden dieselbe statische Orbit-Vorschau; es werden keine Metronom-Skripte geladen und keine Töne abgespielt. Texte und Ziel-URLs sind für DE/EN/ES/FR lokalisiert. `/metronome` ist als fester Tool-Kurzlink vorbereitet, inklusive generierter Hosting-Regeln.
 
 Company- und Metronom-Build gemeinsam veröffentlichen, damit die neuen Links ein erreichbares Ziel haben. Es wurde nichts deployed. Für einen isolierten Testserver kann `COMPANY_TEST_PORT=4349 CI=1 npm run test:e2e` verwendet werden.
+
+## AdSense-Werbeplatz
+
+Die lokalisierten Startseiten enthalten zwischen Spotlight und Toolübersicht
+genau einen responsiven AdSense-Slot (Client ca-pub-5182500947872057,
+Slot 4560273012). Der gelieferte Code heißt „Horizontal JackTools.Net“ und
+verwendet Format auto; es ist kein festes vertikales Hochformat.
+Impressum, Datenschutz und Weiterleitungsseiten enthalten diesen Slot nicht.
+Die Beschriftung „Werbung“ ist lokalisiert; Mindesthöhe reduziert Layoutsprünge.
+Adblocker oder fehlendes Inventar können den Werbeplatz leer lassen.
+
+**Vor Veröffentlichung:** Im AdSense-Konto unter „Datenschutz und Mitteilungen“
+die passende Google-zertifizierte CMP/Einwilligungsnachricht für jacktools.net
+einrichten und veröffentlichen, inklusive Möglichkeit zur erneuten Auswahl.
+Die vorhandene Option zum Merken der Darstellung ist KEINE Werbeeinwilligung.
+Die Einbindung des AdSense-Skripts allein richtet keine CMP ein.
+Einwilligung, Ablehnung und Widerruf auf der veröffentlichten Domain prüfen;
+Datenschutzerklärung mit tatsächlichen Konto-/Partner-Einstellungen abgleichen.
+Diese Änderungen sind keine rechtliche Freigabe.
+Siehe https://support.google.com/adsense/answer/13554116?hl=de
+und https://support.google.com/adsense/answer/1348695?hl=de.
+
+Automatisierte Tests müssen Google-Anfragen abfangen; keine echten Anzeigen
+anklicken oder durch wiederholte Testaufrufe künstliche Impressionen erzeugen.
