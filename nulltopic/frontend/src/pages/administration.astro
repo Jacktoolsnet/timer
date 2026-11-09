@@ -26,7 +26,7 @@ import Layout from '../components/Layout.astro';
         <label for="admin-password">Password</label>
         <input id="admin-password" name="password" type="password" autocomplete="current-password" required/>
         <p id="login-status" class="admin-login-feedback" role="status" aria-live="polite"></p>
-        <button class="admin-sign-in admin-icon-button" type="submit" aria-label="Sign in" data-tooltip="Sign in"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 5H5v14h4m6-14 7 7-7 7m-6-7h13"/></svg></button>
+        <div class="admin-login-actions"><button class="admin-sign-in admin-icon-button" type="submit" aria-label="Sign in" data-tooltip="Sign in"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 5H5v14h4m6-14 7 7-7 7m-6-7h13"/></svg></button></div>
       </form>
     </div>
     <section id="dashboard" hidden aria-label="Administration">

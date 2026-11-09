@@ -1442,15 +1442,17 @@ body > .site-header > nav .header-action:nth-last-child(-n+2)::after { left: aut
   .admin-login-form .admin-sign-in.admin-icon-button { background: ButtonFace; color: ButtonText; border-color: ButtonText; box-shadow: none; forced-color-adjust: auto; }
 }
 .operator-auth-forms { min-width: 0; }
-.operator-login-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+.admin-login-actions, .operator-login-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+.admin-login-form .admin-login-actions .admin-sign-in.admin-icon-button,
 .admin-login-form .operator-login-actions .admin-sign-in.admin-icon-button { width: 100%; }
 .operator-register-button.admin-icon-button { display: flex; justify-content: center; gap: 10px; width: 100%; max-width: 100%; height: auto; min-height: 48px; padding: 12px 16px; border: 1px solid var(--line); background: var(--surface); color: var(--text); box-shadow: none; font-size: .875rem; line-height: 1.4; text-align: center; }
 .operator-register-button.admin-icon-button:hover { border-color: var(--accent); background: var(--surface); color: var(--accent); }
 .admin-login-art .operator-register-button svg { flex-shrink: 0; width: 22px; height: 22px; }
 @media (max-width: 760px) {
   .operator-register-button.admin-icon-button { width: 95%; }
-  .operator-login-actions { flex-direction: column; align-items: center; }
-  .admin-login-form .operator-login-actions .admin-sign-in.admin-icon-button { display: flex; justify-content: center; width: 95%; height: auto; min-height: 60px; text-align: center; }
+  .admin-login-actions, .operator-login-actions { flex-direction: column; align-items: center; }
+  .admin-login-form .admin-login-actions .admin-sign-in.admin-icon-button,
+.admin-login-form .operator-login-actions .admin-sign-in.admin-icon-button { display: flex; justify-content: center; width: 95%; height: auto; min-height: 60px; text-align: center; }
 }
 .operator-registration form { margin: 12px 0 0; }
 .operator-registration label { display: block; }

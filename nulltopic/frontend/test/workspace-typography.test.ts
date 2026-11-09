@@ -31,3 +31,13 @@ test('shared operator home actions become two columns on large screens only',()=
  assert.match(css,/\.operator-overview-actions\s*\{[^}]*grid-template-columns: minmax\(0, 1fr\)/);
  assert.match(css,/@media \(min-width: 1100px\)\s*\{\s*\.operator-overview-actions\s*\{ grid-template-columns: repeat\(2, minmax\(0, 1fr\)\); \}/);
 });
+
+test('admin login uses the same wide responsive action layout as operator login',()=>{
+ const dom=new JSDOM(readFileSync(new URL('../dist/administration/index.html',import.meta.url),'utf8'));
+ assert.ok(dom.window.document.querySelector('#login .admin-login-actions > button.admin-sign-in'));
+ assert.ok(css.includes('.admin-login-actions, .operator-login-actions { display: flex;'));
+ assert.ok(css.includes('.admin-login-form .admin-login-actions .admin-sign-in.admin-icon-button,\n.admin-login-form .operator-login-actions .admin-sign-in.admin-icon-button { width: 100%; }'));
+ assert.ok(css.includes('.admin-login-actions, .operator-login-actions { flex-direction: column; align-items: center; }'));
+ assert.match(css,/\.admin-login-form \.admin-login-actions \.admin-sign-in\.admin-icon-button,\s*\.admin-login-form \.operator-login-actions \.admin-sign-in\.admin-icon-button\s*\{[^}]*width: 95%;/);
+ dom.window.close();
+});
