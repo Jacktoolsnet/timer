@@ -164,7 +164,7 @@ test('intentional authorization navigation is not treated as an unfinished setti
   if(!error.message.includes('navigation'))return;navigation=true;
   const event=new dom.window.Event('beforeunload',{cancelable:true});dom.window.dispatchEvent(event);warned=event.defaultPrevented;
  });
- openAgent(dom);click(dom,'#operator-review-authorization');await tick();await tick();
+ click(dom,'[data-agent-action=authorization]');await tick();await tick();
  assert.equal(navigation,true);assert.equal(warned,false);assert.equal(dom.window.document.querySelector<HTMLDialogElement>('#operator-unsaved-dialog')!.open,false);
  assert.equal(writes(requests).filter(r=>r.path.endsWith('/authorization')).length,1);assert.equal(requests.some(r=>r.path==='/api/confirmation'),false);
 },'Original guidelines',false,true));
@@ -205,9 +205,9 @@ test('agent Save appears only for changes, hides on reversion and returns to pic
 
 
 test('authorized agents do not offer redundant publication review or prepare fresh links',async()=>fixture(async(dom,requests)=>{
- const doc=dom.window.document;openAgent(dom);const button=doc.querySelector<HTMLButtonElement>('#operator-review-authorization')!;assert.equal(button.hidden,true);button.click();await tick();assert.equal(writes(requests).length,0);
+ const doc=dom.window.document;openAgent(dom);assert.equal(doc.querySelector('#operator-review-authorization'),null);assert.equal(doc.querySelector('[data-agent-action=authorization]'),null);await tick();assert.equal(writes(requests).length,0);
 }));
 
 test('agents requiring renewed scope authorization offer publication review',async()=>fixture(async(dom)=>{
- openAgent(dom);assert.equal(dom.window.document.querySelector<HTMLButtonElement>('#operator-review-authorization')!.hidden,false);
+ const doc=dom.window.document;assert.ok(doc.querySelector('[data-agent-action=authorization]'));assert.match(doc.querySelector('.operator-agent-authorization-hint')!.textContent!,/New publication approval required/);openAgent(dom);assert.equal(doc.querySelector('#operator-review-authorization'),null);
 },'Original guidelines',false,true));

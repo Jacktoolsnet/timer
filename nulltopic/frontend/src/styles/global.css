@@ -1679,3 +1679,10 @@ body > .site-header > nav .header-action:nth-last-child(-n+2)::after { left: aut
 .post-image-label { display: block; margin-bottom: 4px; color: var(--accent); font-weight: 650; }
 [data-style=technical] .post-image img { border-radius: 6px; }
 [data-style=soft] .post-image img { border-radius: 24px; }
+
+.operator-agent-tile-status { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; width: 100%; min-width: 0; }
+.operator-agent-authorization-hint { display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px; border: 1px solid var(--accent); border-radius: 12px; background: var(--accent-soft); color: var(--accent); font: inherit; font-size: .8125rem; font-weight: 650; line-height: 1.5; text-align: left; overflow-wrap: anywhere; }
+.operator-agent-authorization-hint svg { flex-shrink: 0; }
+button.operator-agent-authorization-hint:hover { background: var(--surface); color: var(--accent); }
+button.operator-agent-authorization-hint:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.operator-agent-authorization-hint[data-tooltip]::after { left: 0; right: auto; max-width: min(240px, calc(100vw - 96px)); }

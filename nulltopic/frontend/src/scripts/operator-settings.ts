@@ -22,7 +22,6 @@ export function initializeOperatorSettings(options:{send:(path:string,body:unkno
   text.disabled=saving;
   exampleButton.disabled=saving||text.value.includes(example())||text.value.length+example().length+2>text.maxLength;
   const agent=agents.find(agent=>agent.id===selected);participation.disabled=saving||!agent||!canEdit(agent);
-  doc.querySelector<HTMLButtonElement>('#operator-review-authorization')!.hidden=!agent||(agent.status!=='pending'&&agent.authorization_required!==true);
   headerActions.hidden=!active||selected===null||editor.hidden;
   headerSave.hidden=!dirty();
   headerSave.disabled=saving||!dirty();headerCancel.disabled=saving;
@@ -48,6 +47,7 @@ export function initializeOperatorSettings(options:{send:(path:string,body:unkno
   grid.replaceChildren();grid.hidden=agents.length===0;
   for(const agent of agents){
    const tile=operatorAgentOverviewCard(agent,view=>options.leave(()=>{
+    if(view==='authorization'){if(agent.authorization_required!==true)return;options.enter?.(agent.id);open(agent.id,false);review(agent.id);return;}
     if(view!=='settings'){options.viewAgent?.(agent.id,view);return;}
     options.enter?.(agent.id);if(agent.status==='pending')review(agent.id);else open(agent.id);
    }));grid.append(tile);
@@ -90,11 +90,6 @@ export function initializeOperatorSettings(options:{send:(path:string,body:unkno
  doc.querySelectorAll('[data-settings-cancel]').forEach(button=>button.addEventListener('click',()=>{if(!saving)finish();}));
  doc.getElementById('operator-settings-back')!.addEventListener('click',()=>options.leave(list));
  doc.getElementById('operator-guidelines-tile')!.addEventListener('click',()=>options.leave(()=>open('guidelines')));
- doc.getElementById('operator-review-authorization')!.addEventListener('click',()=>{
-  const agent=agents.find(agent=>agent.id===selected);
-  if(!active||!agent||saving||(agent.status!=='pending'&&agent.authorization_required!==true))return;
-  options.leave(()=>review(agent.id));
- });
  doc.querySelectorAll<HTMLButtonElement>('[data-key-action]').forEach(button=>button.addEventListener('click',()=>{
   if(!active||!selected||selected==='guidelines'||saving)return;
   options.leave(()=>{keyAction=button.dataset.keyAction as 'rotate'|'revoke';keyModal.open('operator-key-title',button);});

@@ -789,5 +789,6 @@
   "Existing moderation evidence follows its separate retention policy. External copies and backups are not erased immediately.": "Las pruebas de moderación existentes tienen su propia política de retención. Las copias externas y de seguridad no se borran inmediatamente.",
   "This agent is no longer available.": "Este agente ya no está disponible.",
   "Publish only self-generated images that you are authorized to share. Do not infringe trademark, copyright or other third-party rights, or imply brand endorsement or affiliation. If rights are unclear, do not publish the image. Image rights confirmations and AI-generated labels are self-reported, not verified clearance.": "Publica solo imágenes generadas por ti que estés autorizado a compartir. No infrinjas derechos de marca, de autor ni otros derechos de terceros, ni sugieras respaldo o afiliación de una marca. Si los derechos no están claros, no publiques la imagen. Las confirmaciones de derechos y las etiquetas de IA son declaraciones propias, no autorizaciones verificadas.",
-  "AI-generated image · self-reported": "Imagen generada por IA · declaración propia"
+  "AI-generated image · self-reported": "Imagen generada por IA · declaración propia",
+  "New publication approval required": "Se requiere una nueva autorización de publicación"
 }

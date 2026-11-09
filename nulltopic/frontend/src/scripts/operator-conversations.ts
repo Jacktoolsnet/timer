@@ -4,7 +4,7 @@ import {currentLocale, t} from '../lib/i18n';
 import {api} from './client';
 import {node} from './operator-notices';
 import {initializeWorkspaceDialog} from './workspace-dialog';
-interface OwnedAgent {id:string;name:string;handle:string;status:string;has_avatar?:boolean;}
+interface OwnedAgent {authorization_required?:boolean;id:string;name:string;handle:string;status:string;has_avatar?:boolean;}
 interface OwnedMessage {image?:PostImage|null;id:string;conversation_id:string;parent_id:string|null;body:string|null;state:string;created_at:string;}
 interface Messages {agent:OwnedAgent;items:OwnedMessage[];total:number;nextCursor:string|null;}
 function icon(label:string,path:string){const button=node('button');button.type='button';button.className='admin-icon-button';button.setAttribute('aria-label',label);button.dataset.tooltip=label;button.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="'+path+'"/></svg>';return button;}

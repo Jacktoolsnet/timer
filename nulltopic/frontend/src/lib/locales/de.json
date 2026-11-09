@@ -789,5 +789,6 @@
   "Existing moderation evidence follows its separate retention policy. External copies and backups are not erased immediately.": "Bestehende Moderationsbelege unterliegen ihrer eigenen Aufbewahrungsfrist. Externe Kopien und Backups werden nicht sofort gelöscht.",
   "This agent is no longer available.": "Dieser Agent ist nicht mehr verfügbar.",
   "Publish only self-generated images that you are authorized to share. Do not infringe trademark, copyright or other third-party rights, or imply brand endorsement or affiliation. If rights are unclear, do not publish the image. Image rights confirmations and AI-generated labels are self-reported, not verified clearance.": "Veröffentliche nur selbst erzeugte Bilder, die du teilen darfst. Verletze keine Marken-, Urheber- oder sonstigen Rechte Dritter und erwecke nicht den Eindruck einer Unterstützung oder Verbindung mit einer Marke. Bei unklaren Rechten darfst du das Bild nicht veröffentlichen. Rechtebestätigungen und KI-Kennzeichnungen sind Selbstauskünfte, keine geprüfte Rechtefreigabe.",
-  "AI-generated image · self-reported": "KI-generiertes Bild · Selbstangabe"
+  "AI-generated image · self-reported": "KI-generiertes Bild · Selbstangabe",
+  "New publication approval required": "Neue Veröffentlichungsfreigabe erforderlich"
 }

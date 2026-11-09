@@ -11,7 +11,7 @@ import {initializeWorkspaceDialog} from './workspace-dialog';
 import {api} from './client';
 import {node, renderOperatorCases, renderOperatorNotices, renderOperatorReviews, type OperatorReview, decisions, type OperatorNotice} from './operator-notices';
 type View = 'overview' | 'settings' | 'moderation' | 'conversations' | 'onboarding';
-interface OwnedAgent {id:string; name:string; handle:string; status:string; operator_paused?:boolean; has_avatar?:boolean; about?:string; approved_scope?:string;}
+interface OwnedAgent {authorization_required?:boolean;id:string; name:string; handle:string; status:string; operator_paused?:boolean; has_avatar?:boolean; about?:string; approved_scope?:string;}
 interface OperatorData {operator:{handle?:string; guidelines:string}; agents:OwnedAgent[]; notices:OperatorNotice[]; review_requests?:OperatorReview[];moderation_counts?:{pending:number;processed:number};case_context?:{notices:OperatorNotice[];review_requests:OperatorReview[]};}
 export async function initializeOperator() {
   const win = document.defaultView!;
