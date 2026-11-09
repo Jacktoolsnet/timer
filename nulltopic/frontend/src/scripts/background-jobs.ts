@@ -16,15 +16,15 @@ export async function renderBackgroundJobs(section:HTMLElement,send:Send,active:
    const data:{items:Job[];enabled:boolean}=await api('/admin/jobs');if(!active())return;list.replaceChildren();delay=30000;
    if(!data.enabled)list.append(text('p',t('Automatic background tasks are disabled on this server.')));
    for(const job of data.items){
-    const card=document.createElement('article');card.className='card background-job';card.dataset.job=job.id;
-    const heading=document.createElement('div');heading.className='admin-user-heading';const badge=text('span',t(labels[job.state]));badge.className='job-state';badge.dataset.state=job.state;heading.append(text('h2',t(names[job.id])),badge);card.append(heading);
-    const info=document.createElement('dl');for(const [label,value]of [['Last run',date(job.started_at)],['Last successful run',date(job.last_success_at)],['Next scheduled run',date(job.next_run_at)+' · Europe/Berlin'],...(job.retry_at?[['Retry after',date(job.retry_at)]]:[])])info.append(text('dt',t(label)),text('dd',value));card.append(info);
-    if(job.affected_count!==null)card.append(text('p',t('Deleted: {count}',{count:job.affected_count})));
-    if(job.error_code)card.append(text('p',t(job.error_code==='INTERRUPTED'?'The previous run was interrupted.':'The previous run failed. A retry is scheduled.')));
-    const actions=document.createElement('div');actions.className='admin-user-actions';card.append(actions);
+    const card=document.createElement('article');card.className='card background-job';card.dataset.job=job.id;const content=document.createElement('div');content.className='background-job-content';card.append(content);
+    const heading=document.createElement('div');heading.className='admin-user-heading';const badge=text('span',t(labels[job.state]));badge.className='job-state';badge.dataset.state=job.state;heading.append(text('h2',t(names[job.id])),badge);const header=document.createElement('div');header.className='background-job-header';header.append(heading);content.append(header);
+    const info=document.createElement('dl');for(const [label,value]of [['Last run',date(job.started_at)],['Last successful run',date(job.last_success_at)],['Next scheduled run',date(job.next_run_at)+' · Europe/Berlin'],...(job.retry_at?[['Retry after',date(job.retry_at)]]:[])])info.append(text('dt',t(label)),text('dd',value));content.append(info);
+    if(job.affected_count!==null)content.append(text('p',t('Deleted: {count}',{count:job.affected_count})));
+    if(job.error_code)content.append(text('p',t(job.error_code==='INTERRUPTED'?'The previous run was interrupted.':'The previous run failed. A retry is scheduled.')));
+    const actions=document.createElement('div');actions.className='background-job-toolbar';actions.setAttribute('role','group');actions.setAttribute('aria-label',t('Background tasks'));card.append(actions);
     const reload=icon('Refresh tasks','M20 7v5h-5M4 17v-5h5M6 7a7 7 0 0 1 12-1l2 3M4 15l2 3a7 7 0 0 0 12-1');reload.onclick=()=>void refresh();actions.append(reload);
-    if(job.manual_required){const start=icon('Preview manual run','m8 5 11 7-11 7Z');actions.append(start);start.onclick=async()=>{
-     if(!active())return;start.disabled=true;
+    const start=icon('Preview manual run','m8 5 11 7-11 7Z');actions.append(start);start.disabled=!job.manual_required||job.state==='running';start.onclick=async()=>{
+     if(start.disabled||!active())return;start.disabled=true;
      try{
       const preview:{id:string;count:number}=await send('/admin/jobs/'+job.id+'/preview',{});if(!active())return;
       const dialog=document.createElement('dialog');dialog.dataset.jobDialog='';dialog.className='report-dialog workspace-dialog';const title=text('h2',t('Confirm cleanup'));title.id='job-confirm-title';dialog.setAttribute('aria-labelledby',title.id);
@@ -35,10 +35,10 @@ export async function renderBackgroundJobs(section:HTMLElement,send:Send,active:
        try{await send('/admin/jobs/'+job.id+'/run',{previewId:preview.id});dialog.close();await refresh();}
        catch(error){await onError(error);if(active()){feedback.textContent=t('Unable to run the task. Close this dialog and prepare a fresh preview.');busy=false;cancel.disabled=false;dialog.removeAttribute('aria-busy');}}
       };
-     }catch(error){await onError(error);if(active()){const message=text('p',t('Unable to prepare the task. Refresh and try again.'));message.role='alert';card.append(message);}}
-     finally{start.disabled=false;}
-    };}
-    const history=document.createElement('details');history.append(text('summary',t('Recent runs')));card.append(history);let loaded=false;
+     }catch(error){await onError(error);if(active()){const message=text('p',t('Unable to prepare the task. Refresh and try again.'));message.role='alert';content.append(message);}}
+     finally{start.disabled=!job.manual_required||job.state==='running';}
+    };
+    const history=document.createElement('details');history.append(text('summary',t('Recent runs')));content.append(history);let loaded=false;
     history.ontoggle=async()=>{if(!history.open||loaded||!active())return;loaded=true;try{
      const rows:{source:string;started_at:string;status:string;affected_count:number|null;error_code:string|null}[]=await api('/admin/jobs/'+job.id+'/history');if(!active())return;
      if(!rows.length)history.append(text('p',t('No runs yet.')));
