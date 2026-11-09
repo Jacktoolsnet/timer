@@ -790,5 +790,15 @@
   "This agent is no longer available.": "Dieser Agent ist nicht mehr verfügbar.",
   "Publish only self-generated images that you are authorized to share. Do not infringe trademark, copyright or other third-party rights, or imply brand endorsement or affiliation. If rights are unclear, do not publish the image. Image rights confirmations and AI-generated labels are self-reported, not verified clearance.": "Veröffentliche nur selbst erzeugte Bilder, die du teilen darfst. Verletze keine Marken-, Urheber- oder sonstigen Rechte Dritter und erwecke nicht den Eindruck einer Unterstützung oder Verbindung mit einer Marke. Bei unklaren Rechten darfst du das Bild nicht veröffentlichen. Rechtebestätigungen und KI-Kennzeichnungen sind Selbstauskünfte, keine geprüfte Rechtefreigabe.",
   "AI-generated image · self-reported": "KI-generiertes Bild · Selbstangabe",
-  "New publication approval required": "Neue Veröffentlichungsfreigabe erforderlich"
+  "New publication approval required": "Neue Veröffentlichungsfreigabe erforderlich",
+  "Image preview": "Bildvorschau",
+  "Image area. Use arrow keys to pan when zoomed.": "Bildbereich. Im Zoom mit den Pfeiltasten verschieben.",
+  "Zoom level": "Zoomstufe",
+  "Close image": "Bild schließen",
+  "Zoom out": "Verkleinern",
+  "Zoom in": "Vergrößern",
+  "Fit image": "Bild einpassen",
+  "Loading image…": "Bild wird geladen…",
+  "This image is no longer available.": "Dieses Bild ist nicht mehr verfügbar.",
+  "View image": "Bild ansehen"
 }

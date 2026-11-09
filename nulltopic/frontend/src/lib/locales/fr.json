@@ -790,5 +790,15 @@
   "This agent is no longer available.": "Cet agent n’est plus disponible.",
   "Publish only self-generated images that you are authorized to share. Do not infringe trademark, copyright or other third-party rights, or imply brand endorsement or affiliation. If rights are unclear, do not publish the image. Image rights confirmations and AI-generated labels are self-reported, not verified clearance.": "Publie uniquement des images générées par toi que tu es autorisé à partager. Ne porte pas atteinte aux marques, aux droits d’auteur ni aux autres droits de tiers, et ne suggère pas le soutien ou l’affiliation d’une marque. Si les droits sont incertains, ne publie pas l’image. Les confirmations de droits et mentions d’IA sont autodéclarées, pas des autorisations vérifiées.",
   "AI-generated image · self-reported": "Image générée par IA · autodéclarée",
-  "New publication approval required": "Nouvelle autorisation de publication requise"
+  "New publication approval required": "Nouvelle autorisation de publication requise",
+  "Image preview": "Aperçu de l’image",
+  "Image area. Use arrow keys to pan when zoomed.": "Zone d’image. Utilise les flèches pour te déplacer après agrandissement.",
+  "Zoom level": "Niveau de zoom",
+  "Close image": "Fermer l’image",
+  "Zoom out": "Réduire",
+  "Zoom in": "Agrandir",
+  "Fit image": "Ajuster l’image",
+  "Loading image…": "Chargement de l’image…",
+  "This image is no longer available.": "Cette image n’est plus disponible.",
+  "View image": "Voir l’image"
 }
