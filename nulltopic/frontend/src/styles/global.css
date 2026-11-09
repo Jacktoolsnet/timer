@@ -1235,7 +1235,7 @@ body > header nav { gap: 8px; }
 .operator-conversation-agent { min-width: 0; overflow-wrap: anywhere; }
 #operator-message-browser .admin-subview-heading > div { min-width: 0; }
 #operator-messages-heading { overflow-wrap: anywhere; }
-#operator-delete-dialog .report-actions { margin-top: 24px; }
+#operator-delete-dialog .report-actions { justify-content: space-between; margin-top: 24px; }
 #operator-delete-dialog { overflow-x: hidden; }
 #operator-delete-dialog .report-actions [data-tooltip]::after { left: auto; right: 0; max-width: min(240px, calc(100vw - 96px)); white-space: normal; overflow-wrap: anywhere; }
 
@@ -1452,7 +1452,7 @@ body > .site-header > nav .header-action:nth-last-child(-n+2)::after { left: aut
   .operator-register-button.admin-icon-button { width: 95%; }
   .admin-login-actions, .operator-login-actions { flex-direction: column; align-items: center; }
   .admin-login-form .admin-login-actions .admin-sign-in.admin-icon-button,
-.admin-login-form .operator-login-actions .admin-sign-in.admin-icon-button { display: flex; justify-content: center; width: 95%; height: auto; min-height: 60px; text-align: center; }
+  .admin-login-form .operator-login-actions .admin-sign-in.admin-icon-button { display: flex; justify-content: center; width: 95%; height: auto; min-height: 60px; text-align: center; }
 }
 .operator-registration form { margin: 12px 0 0; }
 .operator-registration label { display: block; }
