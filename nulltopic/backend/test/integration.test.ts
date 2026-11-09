@@ -12,6 +12,8 @@ const url = process.env.TEST_DATABASE_URL;
 if (!url || !new URL(url).pathname.endsWith("_test"))
   throw Error("TEST_DATABASE_URL must name an isolated _test database");
 process.env.DATABASE_URL = url;
+const deletionTestDirectory=await mkdtemp(join(tmpdir(),'nulltopic-deletion-suite-'));
+process.env.CASE_PURGE_JOURNAL_PATH=join(deletionTestDirectory,'journal.json');
 delete process.env.ROOT_ADMIN_HANDLE;
 delete process.env.ROOT_ADMIN_PASSWORD;
 const { pool, migrate, cleanup, transaction, limit } =
@@ -32,7 +34,7 @@ async function emailTokenFor(email:string,purpose='verify'){
 await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
   await migrate();
   await pool.query(
-    "TRUNCATE background_job_runs,background_job_previews,moderation_cases,operators,admins,sessions,agents,configurations,conversations,posts,reports,moderation,appeals,limits,events RESTART IDENTITY CASCADE",
+    "TRUNCATE post_deletion_journal,background_job_runs,background_job_previews,moderation_cases,operators,admins,sessions,agents,configurations,conversations,posts,reports,moderation,appeals,limits,events RESTART IDENTITY CASCADE",
   );
   let app = await testApp();
   await app.listen({ host: "127.0.0.1", port: 0 });
@@ -329,7 +331,7 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
         const reader = res.body!.getReader();
         let received = "";
         const timer = setTimeout(() => controller.abort(), 5000);
-        await call("DELETE", "/posts/" + replyId, undefined, key);
+        await call("DELETE", "/posts/" + replyId, {confirmSubtree:true}, key);
         try {
           while (!received.includes("event: change")) {
             const chunk = await reader.read();
@@ -400,7 +402,7 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
           true,
         );
         assert.equal(
-          (await call("DELETE", "/posts/" + root, undefined, second.key))
+          (await call("DELETE", "/posts/" + root, {confirmSubtree:true}, second.key))
             .statusCode,
           404,
         );
@@ -931,7 +933,7 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
       },
     );
     await t.test(
-      "manual deletion removes text, retains neutral structure and rejects replies",
+      "manual deletion removes the entire conversation and rejects replies",
       async () => {
         await pool.query("DELETE FROM limits");
         const p = await call("POST", "/posts", { body: "Delete my text" }, key);
@@ -943,12 +945,12 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
           key,
         );
         assert.equal(
-          (await call("DELETE", "/posts/" + id, undefined, key)).statusCode,
+          (await call("DELETE", "/posts/" + id, {confirmSubtree:true}, key)).statusCode,
           200,
         );
         const rows = (await call("GET", "/conversations/" + id)).json();
-        assert.equal(rows.length, 2);
-        assert.equal(rows[0].body, null);
+        assert.equal((await call("GET", "/conversations/" + id)).statusCode,404);
+        assert.equal((await pool.query("SELECT id FROM posts WHERE conversation_id=$1",[id])).rowCount,0);
         assert.equal(
           (
             await call(
@@ -1471,10 +1473,10 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
         await pool.query("INSERT INTO posts(id,conversation_id,parent_id,agent_id,body,technical) VALUES($1,$2,$2,$3,'Foreign reply remains','{}'),($4,$2,$1,$5,$6,'{}')",[reply,graph,foreign,nested,agentId,prefix+' own nested comment']);
         const activity=(await pool.query('SELECT last_activity_at FROM conversations WHERE id=$1',[graph])).rows[0].last_activity_at;
         const url='/operator/agents/'+agentId+'/posts';
-        assert.equal((await call('GET',url)).statusCode,401);assert.equal((await call('GET',url,undefined,key)).statusCode,401);assert.equal((await call('DELETE','/operator/posts/'+graph,{},key)).statusCode,401);
+        assert.equal((await call('GET',url)).statusCode,401);assert.equal((await call('GET',url,undefined,key)).statusCode,401);assert.equal((await call('DELETE','/operator/posts/'+graph,{confirmSubtree:true},key)).statusCode,401);
         await login('test_admin',true);assert.equal((await call('GET',url,undefined,undefined,true)).statusCode,401);
-        await login('other_operator');assert.equal((await call('GET',url,undefined,undefined,true)).statusCode,404);assert.equal((await call('DELETE','/operator/posts/'+graph,{},undefined,true)).statusCode,404);
-        await login();assert.equal((await call('DELETE','/operator/posts/'+reply,{},undefined,true)).statusCode,404);
+        await login('other_operator');assert.equal((await call('GET',url,undefined,undefined,true)).statusCode,404);assert.equal((await call('DELETE','/operator/posts/'+graph,{confirmSubtree:true},undefined,true)).statusCode,404);
+        await login();assert.equal((await call('DELETE','/operator/posts/'+reply,{confirmSubtree:true},undefined,true)).statusCode,404);
         const seen:string[]=[];let cursor:string|null=null;
         do{const r=await call('GET',url+'?q='+prefix.toUpperCase()+'&state=visible&kind=root'+(cursor?'&cursor='+encodeURIComponent(cursor):''),undefined,undefined,true);assert.equal(r.statusCode,200,r.body);const data=r.json();assert.equal(data.total,27);assert.equal(data.agent.key_hash,undefined);seen.push(...data.items.map((p:any)=>p.id));cursor=data.nextCursor;}while(cursor);
         assert.equal(seen.length,27);assert.equal(new Set(seen).size,27,'microsecond keyset cursor does not duplicate tied rows');
@@ -1484,20 +1486,19 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
         assert.equal((await app.inject({method:'DELETE',url:'/api/operator/posts/'+graph,headers:{cookie,origin:process.env.PUBLIC_ORIGIN || 'http://localhost:4321'}})).statusCode,403);
         assert.equal((await app.inject({method:'DELETE',url:'/api/operator/posts/'+graph,headers:{cookie,origin:'https://foreign.invalid','x-csrf-token':csrf}})).statusCode,403);
         const before=Number((await pool.query("SELECT count(*) FROM events WHERE conversation_id=$1 AND kind='changed'",[graph])).rows[0].count);
-        const deleted=await Promise.all([call('DELETE','/operator/posts/'+graph,{},undefined,true),call('DELETE','/operator/posts/'+graph,{},undefined,true)]);assert.deepEqual(deleted.map(r=>r.statusCode),[200,200]);assert.equal(deleted.filter(r=>r.json().changed).length,1);
-        assert.deepEqual((await pool.query('SELECT body,state FROM posts WHERE id=$1',[graph])).rows[0],{body:null,state:'deleted'});
-        assert.equal((await pool.query('SELECT body FROM posts WHERE id=$1',[reply])).rows[0].body,'Foreign reply remains');assert.equal((await pool.query('SELECT body FROM posts WHERE id=$1',[nested])).rows[0].body,prefix+' own nested comment');
-        assert.equal((await pool.query('SELECT last_activity_at FROM conversations WHERE id=$1',[graph])).rows[0].last_activity_at.getTime(),activity.getTime());
-        assert.equal((await pool.query('SELECT count(*)::int AS count FROM operator_post_deletions WHERE post_id=$1',[graph])).rows[0].count,1);
-        assert.equal(Number((await pool.query("SELECT count(*) FROM events WHERE conversation_id=$1 AND kind='changed'",[graph])).rows[0].count),before+1);
-        assert.equal((await call('GET','/posts/'+graph)).json().body,null);assert.equal((await pool.query('SELECT status FROM agents WHERE id=$1',[agentId])).rows[0].status,'blocked');
-        assert.ok((await call('GET',url+'?state=deleted',undefined,undefined,true)).json().items.some((p:any)=>p.id===graph));
+        const deleted=await Promise.all([call('DELETE','/operator/posts/'+graph,{confirmSubtree:true},undefined,true),call('DELETE','/operator/posts/'+graph,{confirmSubtree:true},undefined,true)]);assert.deepEqual(deleted.map(r=>r.statusCode),[200,200]);assert.equal(deleted.filter(r=>r.json().changed).length,1);
+        assert.equal((await pool.query('SELECT id FROM posts WHERE conversation_id=$1',[graph])).rowCount,0);
+        assert.equal((await pool.query('SELECT id FROM conversations WHERE id=$1',[graph])).rowCount,0);
+        assert.equal((await pool.query('SELECT post_id FROM post_deletion_journal WHERE conversation_id=$1',[graph])).rowCount,3);
+        assert.equal((await pool.query("SELECT count(*)::int AS n FROM events WHERE conversation_id=$1 AND kind='removed'",[graph])).rows[0].n,1);
+        assert.equal((await call('GET','/posts/'+graph)).statusCode,404);assert.equal((await pool.query('SELECT status FROM agents WHERE id=$1',[agentId])).rows[0].status,'blocked');
+        assert.equal((await call('GET',url+'?state=deleted',undefined,undefined,true)).json().items.some((p:any)=>p.id===graph),false);
         await pool.query("DELETE FROM limits WHERE bucket LIKE 'operator_delete:'||$1||':%'",[operator]);process.env.LIMIT_OPERATOR_DELETE='1';
-        assert.equal((await call('DELETE','/operator/posts/'+reply,{},undefined,true)).statusCode,404);
-        const limited=await call('DELETE','/operator/posts/'+nested,{},undefined,true);assert.equal(limited.statusCode,429);assert.ok(limited.headers['retry-after']);
+        assert.equal((await call('DELETE','/operator/posts/'+reply,{confirmSubtree:true},undefined,true)).statusCode,404);
+        const limited=await call('DELETE','/operator/posts/'+nested,{confirmSubtree:true},undefined,true);assert.equal(limited.statusCode,429);assert.ok(limited.headers['retry-after']);
         process.env.LIMIT_OPERATOR_DELETE='100';
         await pool.query("UPDATE conversations SET last_activity_at=now()-interval '31 days' WHERE id=$1",[graph]);
-        const race=await Promise.all([call('DELETE','/operator/posts/'+nested,{},undefined,true),cleanup()]);assert.ok([200,404].includes((race[0] as any).statusCode));
+        const race=await Promise.all([call('DELETE','/operator/posts/'+nested,{confirmSubtree:true},undefined,true),cleanup()]);assert.ok([200,404].includes((race[0] as any).statusCode));
         assert.equal((await pool.query('SELECT count(*)::int AS count FROM conversations WHERE id=$1',[graph])).rows[0].count,0);assert.equal((await pool.query('SELECT count(*)::int AS count FROM operator_post_deletions WHERE post_id=$1',[graph])).rows[0].count,0);
       }finally{
         if(previousLimit===undefined)delete process.env.LIMIT_OPERATOR_DELETE;else process.env.LIMIT_OPERATOR_DELETE=previousLimit;
@@ -1727,6 +1728,81 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
       await login(handle);assert.equal((await call('GET','/operator/cases/'+report.case_id,undefined,undefined,true)).statusCode,404);assert.equal((await call('GET','/operator?agentId='+subject,undefined,undefined,true)).statusCode,404);
 
     });
+    await t.test('subtree removal preserves siblings, foreign case evidence and restore tombstones, including paused and blocked actors',async()=>{
+      await pool.query('DELETE FROM limits');
+      const approve=async(handle:string,ownerHandle:string)=>{
+        const registration=await call('POST','/registrations',{...prepared(handle),operatorHandle:ownerHandle});assert.equal(registration.statusCode,200);
+        const data=registration.json(),tok=new URL(data.confirmationUrl).searchParams.get('confirmation');await login(ownerHandle);
+        const preview=(await call('GET','/confirmation?token='+tok,undefined,undefined,true)).json();
+        assert.equal((await call('POST','/confirmation',{token:tok,revision:preview.scope_revision,scope:'Isolated subtree deletion fixtures',ruleVersion:preview.ruleVersion,authorizationVersion:preview.authorizationVersion,publicParticipation:true,authorizePublication:true},undefined,true)).statusCode,200);
+        return {id:data.id,key:data.key};
+      };
+      const author=await approve('subtree_author','test_operator'),peer=await approve('subtree_peer','other_operator');
+      const graph=randomUUID();await pool.query('INSERT INTO conversations(id,last_activity_at) VALUES($1,now())',[graph]);
+      async function add(parent:string|null,who=author.id,body='Subtree fixture',state='visible',id=randomUUID()){
+        await pool.query('INSERT INTO posts(id,conversation_id,parent_id,agent_id,body,technical,state) VALUES($1,$2,$3,$4,$5,$6,$7)',[id,graph,parent,who,state==='deleted'?null:body,{model:'synthetic-fixture'},state]);return id;
+      }
+      await add(null,author.id,'Surviving parent','visible',graph);const branch=await add(graph),foreign=await add(branch,peer.id,'Original foreign reported evidence'),sibling=await add(graph,peer.id,'Untouched sibling');
+      let parent=foreign;for(let i=0;i<80;i++)parent=await add(parent,i%2?author.id:peer.id,'Deep fixture '+i,i===20?'deleted':'visible');
+      await pool.query('INSERT INTO post_reactions(post_id,agent_id,value) VALUES($1,$2,1)',[foreign,author.id]);
+      const report=randomUUID();await pool.query("INSERT INTO reports(id,post_id,reason) VALUES($1,$2,'Subtree report fixture')",[report,foreign]);
+      await login('test_admin',true);assert.equal((await call('POST','/admin/actions',{action:'hide',id:foreign,reportId:report,reason:'Subtree evidence fixture'},undefined,true)).statusCode,200);
+      const decision=(await pool.query('SELECT id,case_id FROM moderation WHERE report_id=$1',[report])).rows[0];
+      await login('other_operator');assert.equal((await call('POST','/operator/appeals',{moderationId:decision.id,reason:'Preserve this complaint'},undefined,true)).statusCode,200);
+      const appeal=(await pool.query('SELECT id FROM appeals WHERE moderation_id=$1',[decision.id])).rows[0].id;
+      const activity=(await pool.query('SELECT last_activity_at FROM conversations WHERE id=$1',[graph])).rows[0].last_activity_at;
+      assert.equal((await call('DELETE','/posts/'+branch,{},author.key)).statusCode,400);assert.equal((await call('DELETE','/posts/'+branch,{confirmSubtree:false},author.key)).statusCode,400);
+      assert.equal((await call('DELETE','/posts/'+branch,{confirmSubtree:true},peer.key)).statusCode,404);
+      await login('other_operator');assert.equal((await call('DELETE','/operator/posts/'+branch,{confirmSubtree:true},undefined,true)).statusCode,404);
+      await pool.query("UPDATE agents SET status='paused',operator_paused=true WHERE id=$1",[author.id]);
+      const removed=await call('DELETE','/posts/'+branch,{confirmSubtree:true},author.key);assert.equal(removed.statusCode,200,removed.body);assert.equal(removed.json().deletedCount,82);
+      const remaining=(await pool.query('SELECT id FROM posts WHERE conversation_id=$1 ORDER BY id',[graph])).rows.map(r=>r.id).sort();assert.deepEqual(remaining,[graph,sibling].sort());
+      assert.equal((await pool.query('SELECT * FROM post_reactions WHERE post_id=$1',[foreign])).rowCount,0);
+      assert.equal((await pool.query('SELECT last_activity_at FROM conversations WHERE id=$1',[graph])).rows[0].last_activity_at.getTime(),activity.getTime());
+      assert.equal((await call('GET','/posts/'+graph)).json().comment_count,1);
+      assert.equal((await call('DELETE','/posts/'+branch,{confirmSubtree:true},author.key)).json().changed,false);
+      assert.equal((await call('DELETE','/posts/'+sibling,{confirmSubtree:true},author.key)).statusCode,404);
+      await login('other_operator');const saved=(await call('GET','/operator/cases/'+decision.case_id,undefined,undefined,true)).json();assert.equal(saved.evidence.post.body,'Original foreign reported evidence');assert.equal(saved.evidence.post.technical.model,'synthetic-fixture');
+      assert.equal((await pool.query('SELECT post_id FROM reports WHERE id=$1',[report])).rows[0].post_id,null);assert.equal((await pool.query('SELECT id FROM appeals WHERE id=$1',[appeal])).rowCount,1);
+      await login('test_admin',true);assert.equal((await call('POST','/admin/appeals/'+appeal+'/decision',{outcome:'accepted_restore',response:'Never resurrect deleted text'},undefined,true)).statusCode,409);
+      assert.equal((await call('POST','/admin/appeals/'+appeal+'/decision',{outcome:'accepted',response:'Retained case reviewed'},undefined,true)).statusCode,200);
+      await pool.query("UPDATE agents SET status='blocked' WHERE id=$1",[author.id]);
+      assert.equal((await call('DELETE','/posts/'+graph,{confirmSubtree:true},author.key)).json().deletedCount,2);assert.equal((await call('GET','/conversations/'+graph)).statusCode,404);
+      const exported=JSON.parse(await readFile(process.env.CASE_PURGE_JOURNAL_PATH!,'utf8'));assert.equal(exported.version,2);assert.ok(exported.postEntries.some((p:any)=>p.post_id===graph&&p.was_root));assert.ok(exported.postEntries.every((p:any)=>Object.keys(p).sort().join(',')==='conversation_id,deleted_at,post_id,was_root'));
+      // Simulate an old backup, not a new publication or restoration from case text.
+      await pool.query('INSERT INTO conversations(id,last_activity_at) VALUES($1,now())',[graph]);await add(null,author.id,'Restored backup text','visible',graph);await add(graph,peer.id,'Restored backup reply');
+      const {reconcilePostDeletions}=await import('../src/post-deletion.js');assert.ok((await reconcilePostDeletions(exported.postEntries)).count>=2);assert.equal((await reconcilePostDeletions(exported.postEntries)).count,0);
+      assert.equal((await pool.query('SELECT id FROM conversations WHERE id=$1',[graph])).rowCount,0);assert.equal((await pool.query('SELECT evidence FROM moderation_cases WHERE id=$1',[decision.case_id])).rows[0].evidence.post.body,'Original foreign reported evidence');
+      await pool.query("UPDATE agents SET status='active',operator_paused=false WHERE id=$1",[author.id]);
+      // Publication and deletion serialize on the same conversation row.
+      for(let n=0;n<3;n++){
+        const thread=randomUUID();await pool.query('INSERT INTO conversations(id,last_activity_at) VALUES($1,now())',[thread]);await pool.query("INSERT INTO posts(id,conversation_id,agent_id,body,technical) VALUES($1,$1,$2,'Race root','{}')",[thread,author.id]);
+        const [deletion,reply,reporting]=await Promise.all([call('DELETE','/posts/'+thread,{confirmSubtree:true},author.key),call('POST','/posts',{body:'Concurrent reply',parentId:thread},peer.key),call('POST','/reports',{postId:thread,reason:'Concurrent subtree report '+n})]);
+        assert.equal(deletion.statusCode,200,deletion.body);assert.ok([200,409].includes(reply.statusCode),reply.body);assert.ok([200,404].includes(reporting.statusCode),reporting.body);assert.equal((await pool.query('SELECT id FROM posts WHERE conversation_id=$1',[thread])).rowCount,0);
+        if(reporting.statusCode===200){const retained=(await pool.query('SELECT r.post_id,c.evidence FROM reports r JOIN moderation_cases c ON c.id=r.case_id WHERE c.post_id=$1',[thread])).rows[0];assert.equal(retained.post_id,null);assert.equal(retained.evidence.post.body,'Race root');}
+      }
+      // A comment in someone else's conversation removes only that comment's descendants.
+      const foreignRoot=randomUUID(),ownComment=randomUUID(),foreignChild=randomUUID(),otherBranch=randomUUID();
+      await pool.query('INSERT INTO conversations(id,last_activity_at) VALUES($1,now())',[foreignRoot]);
+      await pool.query("INSERT INTO posts(id,conversation_id,parent_id,agent_id,body,technical) VALUES($1,$1,NULL,$5,'Foreign root','{}'),($2,$1,$1,$6,'Owned comment','{}'),($3,$1,$2,$5,'Foreign child','{}'),($4,$1,$1,$5,'Other branch','{}')",[foreignRoot,ownComment,foreignChild,otherBranch,peer.id,author.id]);
+      const rollbackReport=randomUUID();await pool.query("INSERT INTO reports(id,post_id,reason) VALUES($1,$2,'Rollback evidence')",[rollbackReport,foreignChild]);
+      const {deletePostSubtree}=await import('../src/post-deletion.js');const eventsBefore=(await pool.query('SELECT count(*)::int AS n FROM events')).rows[0].n;
+      await assert.rejects(transaction(async c=>{await c.query('SELECT id FROM agents WHERE id=$1 FOR KEY SHARE',[author.id]);await c.query('SELECT id FROM operators WHERE id=$1 FOR SHARE',[operator]);await deletePostSubtree(c,ownComment,{agentId:author.id});throw Error('Intentional rollback');}),/Intentional rollback/);
+      assert.equal((await pool.query('SELECT id FROM posts WHERE conversation_id=$1',[foreignRoot])).rowCount,4);assert.equal((await pool.query('SELECT post_id FROM reports WHERE id=$1',[rollbackReport])).rows[0].post_id,foreignChild);assert.equal((await pool.query('SELECT post_id FROM post_deletion_journal WHERE conversation_id=$1',[foreignRoot])).rowCount,0);assert.equal((await pool.query('SELECT count(*)::int AS n FROM events')).rows[0].n,eventsBefore);
+      await login('test_operator');assert.equal((await call('DELETE','/operator/posts/'+foreignRoot,{confirmSubtree:true},undefined,true)).statusCode,404);
+      assert.equal((await call('DELETE','/operator/posts/'+ownComment,{confirmSubtree:true},undefined,true)).json().deletedCount,2);
+      assert.deepEqual((await pool.query('SELECT id FROM posts WHERE conversation_id=$1 ORDER BY id',[foreignRoot])).rows.map(r=>r.id).sort(),[foreignRoot,otherBranch].sort());
+      const pending=(await call('POST','/registrations',prepared('subtree_pending'))).json();assert.equal((await call('DELETE','/posts/'+foreignRoot,{confirmSubtree:true},pending.key)).statusCode,403);
+      const previousBudget=process.env.LIMIT_AGENT_DELETE;process.env.LIMIT_AGENT_DELETE='1';await pool.query("DELETE FROM limits WHERE bucket LIKE 'agent_delete:'||$1||':%'",[author.id]);
+      try{assert.equal((await call('DELETE','/posts/'+foreignRoot,{confirmSubtree:true},author.key)).statusCode,404);const limited=await call('DELETE','/posts/'+ownComment,{confirmSubtree:true},author.key);assert.equal(limited.statusCode,429);assert.ok(limited.headers['retry-after']);}finally{if(previousBudget===undefined)delete process.env.LIMIT_AGENT_DELETE;else process.env.LIMIT_AGENT_DELETE=previousBudget;}
+      // An export failure must not pretend the committed deletion failed to happen.
+      const failed=randomUUID();await pool.query('INSERT INTO conversations(id,last_activity_at) VALUES($1,now())',[failed]);await pool.query("INSERT INTO posts(id,conversation_id,agent_id,body,technical) VALUES($1,$1,$2,'Export fixture','{}')",[failed,author.id]);
+      const destination=process.env.CASE_PURGE_JOURNAL_PATH!;const blocker=join(deletionTestDirectory,'not-a-directory');await writeFile(blocker,'fixture');process.env.CASE_PURGE_JOURNAL_PATH=join(blocker,'journal.json');
+      try{assert.equal((await call('DELETE','/posts/'+failed,{confirmSubtree:true},author.key)).statusCode,500);assert.equal((await pool.query('SELECT id FROM posts WHERE id=$1',[failed])).rowCount,0);}finally{process.env.CASE_PURGE_JOURNAL_PATH=destination;}
+      const retry=await call('DELETE','/posts/'+failed,{confirmSubtree:true},author.key);assert.equal(retry.statusCode,200);assert.equal(retry.json().changed,false);
+      await pool.query("UPDATE post_deletion_journal SET deleted_at=now()-interval '36 days' WHERE post_id=$1",[failed]);assert.equal((await call('DELETE','/posts/'+failed,{confirmSubtree:true},author.key)).statusCode,404,'expired receipts do not grant indefinite retries');
+      await pool.query('UPDATE agents SET key_hash=NULL WHERE id=$1',[author.id]);assert.equal((await call('DELETE','/posts/'+failed,{confirmSubtree:true},author.key)).statusCode,401);
+    });
     await t.test('case retention protects open reviews and holds, purges complete families, and reconciles restores',async()=>{
       const {cleanupCases,reconcileCases}=await import('../src/case-retention.js');
       await pool.query('DELETE FROM limits');
@@ -1845,5 +1921,6 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
   } finally {
     await app.close();
     await pool.end();
+    await rm(deletionTestDirectory,{recursive:true,force:true});
   }
 });

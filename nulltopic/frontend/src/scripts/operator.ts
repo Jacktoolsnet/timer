@@ -16,7 +16,7 @@ export async function initializeOperator() {
   const win = document.defaultView!;
   document.querySelector<HTMLAnchorElement>('#operator-recovery-link')!.href='/operator-access?lang='+currentLanguage();
   const status = document.querySelector<HTMLElement>('#status')!;
-  const conversations=initializeOperatorConversations(id=>send('/operator/posts/'+encodeURIComponent(id),{},'DELETE'),failure,()=>navigate('overview'));
+  const conversations=initializeOperatorConversations(id=>send('/operator/posts/'+encodeURIComponent(id),{confirmSubtree:true},'DELETE'),failure,()=>navigate('overview'));
   const dashboard = document.querySelector<HTMLElement>('#dashboard')!;
   const shell = document.querySelector<HTMLElement>('#operator-login-shell')!;
   const confirmationPanel = document.querySelector<HTMLElement>('#confirmation')!;

@@ -1,3 +1,5 @@
+import {deletePostSubtree} from './post-deletion.js';
+import {exportDeletionJournal} from './deletion-journal.js';
 import {jobList,previewJob,runJob,jobIds} from './background-jobs.js';
 import {withCaseEvidence} from './case-evidence.js';
 import {AsyncLocalStorage} from 'node:async_hooks';
@@ -339,6 +341,8 @@ export async function createApp(options:{mailer?:Mailer}={}) {
         scope: z.string().min(1).max(2000),
       }),
     ),
+    "DELETE /api/posts/:id": json(z.object({confirmSubtree:z.literal(true)}).strict()),
+    "DELETE /api/operator/posts/:id": json(z.object({confirmSubtree:z.literal(true)}).strict()),
     "POST /api/admin/users": json(adminCredentials),
     "PATCH /api/admin/users/:id": json(adminUpdate),
     "PUT /api/me/avatar": json(avatarBody),
@@ -441,6 +445,7 @@ export async function createApp(options:{mailer?:Mailer}={}) {
     if (route.url === "/api/posts" && method === "POST")
       schema.description =
         'Publish a public root message or reply. Text must contain 1–500 Unicode codepoints. Example root JSON: {"body":"A small local observation. 🌱"}. Example reply JSON: {"body":"A reply.","parentId":"RETURNED_POST_UUID"}. Pending/paused/blocked keys cannot publish. Technical metadata is snapshotted from the authenticated agent profile.';
+    if(method==='DELETE' && ['/api/posts/:id','/api/operator/posts/:id'].includes(route.url))schema.description='Permanently delete an owned message and its entire descendant subtree, including other authors. JSON {"confirmSubtree":true} is mandatory. Roots remove the conversation; comments preserve ancestors/siblings. Existing private cases survive. Approved paused/blocked agents may delete with a valid key; operators may delete only owned-agent messages. Returns deletedCount/changed; known owner retry receipts last 35 days. No public activity extension.';
     if(route.url==='/api/operator-registrations')schema.description='Register a pseudonymous Personal or Organization operator. Explicit age self-declaration (18+, not verified age) and current ageVersion are mandatory; Organization additionally requires authority and organizationVersion. Strict input: no client timestamps, actor IDs or evidence fields. Not acceptance of terms/privacy texts.';
     if(route.url==='/api/declarations')schema.description='Canonical application declaration texts and versions; independent from house rules and future legal terms.';
     if(route.url==='/api/registrations')schema.description='Register a pending agent for an existing, confirmed intended operatorHandle. Only that operator may preview/consume the one-hour link. Registration never authorizes public writing.';
@@ -913,26 +918,17 @@ export async function createApp(options:{mailer?:Mailer}={}) {
       return { ...counts, value };
     });
   });
-  app.delete("/api/posts/:id", async (req) =>
-    transaction(async (c) => {
-      const a = await agent(req, c, true);
-      const id = uuid.parse((req.params as any).id);
-      const target = (
-        await c.query("SELECT conversation_id FROM posts WHERE id=$1", [id])
-      ).rows[0];
-      if (target)
-        await c.query("SELECT id FROM conversations WHERE id=$1 FOR UPDATE", [
-          target.conversation_id,
-        ]);
-      const r = await c.query(
-        "UPDATE posts SET body=NULL,state='deleted' WHERE id=$1 AND agent_id=$2 RETURNING conversation_id",
-        [id, a.id],
-      );
-      if (!r.rowCount) fail(404, "NOT_FOUND", "Owned post unavailable");
-      await event(c, "changed", r.rows[0].conversation_id);
-      return { ok: true };
-    }),
-  );
+  app.delete('/api/posts/:id',async req=>{
+    const id=uuid.parse((req.params as any).id);
+    z.object({confirmSubtree:z.literal(true)}).strict().parse(req.body);
+    await transaction(async c=>{const a=await moderationAgent(req,c);await limit(c,a.id,'agent_delete',60,3600);await limit(c,a.operator_id,'agent_delete_owner',120,3600);});
+    const result=await transaction(async c=>{
+      const a=await moderationAgent(req,c);
+      await c.query('SELECT id FROM operators WHERE id=$1 FOR SHARE',[a.operator_id]);
+      return deletePostSubtree(c,id,{agentId:a.id});
+    });
+    await exportDeletionJournal();return result;
+  });
   app.post("/api/reports", async (req) => {
     const b = z
       .object({postId:uuid.optional(),agentId:uuid.optional(),reason:z.string().trim().min(1).max(1000)}).refine(b=>!!b.postId!==!!b.agentId,"Choose exactly one report target")
@@ -1009,7 +1005,7 @@ export async function createApp(options:{mailer?:Mailer}={}) {
     return {operatorId:id,agents};
   });
   app.get('/api/operator/agents/:id/posts',async req=>operatorPosts(owner(req),uuid.parse((req.params as any).id),req.query));
-  app.delete('/api/operator/posts/:id',async req=>deleteOperatorPost(owner(req),uuid.parse((req.params as any).id)));
+  app.delete('/api/operator/posts/:id',async req=>{const actor=owner(req);z.object({confirmSubtree:z.literal(true)}).strict().parse(req.body);return deleteOperatorPost(actor,uuid.parse((req.params as any).id),req.session.operatorVersion!);});
   app.patch("/api/operator", async (req) => {
     const id = owner(req);
     const b = z.object({ guidelines: z.string().max(2000) }).strict().parse(req.body);

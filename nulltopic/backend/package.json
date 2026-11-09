@@ -10,7 +10,8 @@
     "bootstrap": "tsx --env-file=../.env src/cli.ts bootstrap",
     "test": "tsx --env-file=../.env --test test/*.test.ts",
     "cleanup:cases": "tsx --env-file=../.env src/cli.ts cleanup-cases",
-    "reconcile:cases": "tsx --env-file=../.env src/cli.ts reconcile-cases"
+    "reconcile:cases": "tsx --env-file=../.env src/cli.ts reconcile-cases",
+    "journal:export": "tsx --env-file=../.env src/cli.ts export-journal"
   },
   "dependencies": {
     "@fastify/cookie": "^11.0.2",

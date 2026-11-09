@@ -1,3 +1,5 @@
+import {exportDeletionJournal} from './deletion-journal.js';
+import {reconcilePostDeletions} from './post-deletion.js';
 import {reconcileCases} from './case-retention.js';
 import {readFile} from 'node:fs/promises';
 import {runJob} from './background-jobs.js';
@@ -27,12 +29,14 @@ try {
     const dryRun=process.argv.includes('--dry-run');
     const result=dryRun?await maintainCases(true):await runJob('cases','cli');
     console.log(JSON.stringify({event:'case_cleanup',...result,dryRun}));
+  } else if(command==='export-journal'){
+    await exportDeletionJournal();console.log('Private deletion journal exported');
   } else if(command==='reconcile-cases'){
     const source=process.env.CASE_PURGE_JOURNAL_PATH;
     if(!source)throw Error('Provide a current, trusted out-of-band CASE_PURGE_JOURNAL_PATH; keep the restored service offline');
-    const journal=z.object({version:z.literal(1),exportedAt:z.iso.datetime(),entries:z.array(z.object({case_id:z.string().uuid(),purged_at:z.iso.datetime()})).max(1000000)}).strict().parse(JSON.parse(await readFile(source,'utf8')));
+    const journal=z.object({version:z.literal(2),postEntries:z.array(z.object({post_id:z.string().uuid(),conversation_id:z.string().uuid(),was_root:z.boolean(),deleted_at:z.iso.datetime()})).max(1000000),exportedAt:z.iso.datetime(),entries:z.array(z.object({case_id:z.string().uuid(),purged_at:z.iso.datetime()})).max(1000000)}).strict().parse(JSON.parse(await readFile(source,'utf8')));
     if(Date.now()-Date.parse(journal.exportedAt)>86400000||Date.parse(journal.exportedAt)>Date.now()+60000)throw Error('Restore journal must be refreshed within 24 hours before reconciliation');
-    console.log(JSON.stringify({event:'case_restore_reconciliation',...await reconcileCases(journal.entries)}));
+    console.log(JSON.stringify({event:'case_restore_reconciliation',...await reconcileCases(journal.entries),posts:await reconcilePostDeletions(journal.postEntries)}));
   } else if (command === "bootstrap") {
     const handle = process.env.BOOTSTRAP_HANDLE,
       password = process.env.BOOTSTRAP_PASSWORD;

@@ -1,5 +1,7 @@
+import {deletePostSubtree} from './post-deletion.js';
+import {exportDeletionJournal} from './deletion-journal.js';
 import {z} from 'zod';
-import {transaction,limit,fail,event} from './db.js';
+import {transaction,limit,fail} from './db.js';
 const uuid=z.string().uuid();
 export async function operatorPosts(operatorId:string,agentId:string,query:unknown){
   uuid.parse(agentId);
@@ -17,21 +19,13 @@ export async function operatorPosts(operatorId:string,agentId:string,query:unkno
     return {agent,total,items:selected.map(({cursor_time,...post})=>post),nextCursor:rows.length>25?Buffer.from(JSON.stringify([last.cursor_time,last.id])).toString('base64url'):null};
   }, "REPEATABLE READ");
 }
-export async function deleteOperatorPost(operatorId:string,id:string){
+export async function deleteOperatorPost(operatorId:string,id:string,version:string){
   uuid.parse(id);
-  // Committed attempt budget also applies to unavailable/foreign targets.
   await transaction(c=>limit(c,operatorId,'operator_delete',60,3600));
-  return transaction(async c=>{
-    const target=(await c.query('SELECT p.conversation_id,p.agent_id FROM posts p JOIN agents a ON a.id=p.agent_id WHERE p.id=$1 AND a.operator_id=$2 FOR KEY SHARE OF a',[id,operatorId])).rows[0];
-    if(!target)fail(404,'NOT_FOUND','Owned message unavailable');
-    // Match publication's agent -> conversation order and serialize with retention cleanup.
-    await c.query('SELECT id FROM conversations WHERE id=$1 FOR UPDATE',[target.conversation_id]);
-    const owned=(await c.query('SELECT p.state FROM posts p JOIN agents a ON a.id=p.agent_id WHERE p.id=$1 AND a.operator_id=$2',[id,operatorId])).rows[0];
-    if(!owned)fail(404,'NOT_FOUND','Owned message unavailable');
-    if(owned.state==='deleted')return {ok:true,changed:false};
-    await c.query("UPDATE posts SET body=NULL,state='deleted' WHERE id=$1",[id]);
-    await c.query('INSERT INTO operator_post_deletions(post_id,operator_id,agent_id) VALUES($1,$2,$3)',[id,operatorId,target.agent_id]);
-    await event(c,'changed',target.conversation_id);
-    return {ok:true,changed:true};
+  const result=await transaction(async c=>{
+    await c.query('SELECT a.id FROM agents a JOIN posts p ON p.agent_id=a.id WHERE p.id=$1 AND a.operator_id=$2 FOR KEY SHARE OF a',[id,operatorId]);
+    if(!(await c.query('SELECT id FROM operators WHERE id=$1 AND auth_version=$2 AND NOT suspended AND email_verified_at IS NOT NULL FOR SHARE',[operatorId,version])).rowCount)fail(401,'UNAUTHORIZED','Operator session expired');
+    return deletePostSubtree(c,id,{operatorId});
   });
+  await exportDeletionJournal();return result;
 }

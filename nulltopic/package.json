@@ -21,7 +21,8 @@
     "test:smoke": "node --env-file=.env scripts/smoke.mjs",
     "test:appearance": "npm run build -w frontend && npm run test -w frontend",
     "cleanup:cases": "npm run cleanup:cases -w backend --",
-    "reconcile:cases": "npm run reconcile:cases -w backend --"
+    "reconcile:cases": "npm run reconcile:cases -w backend --",
+    "journal:export": "npm run journal:export -w backend --"
   },
   "devDependencies": {
     "concurrently": "^9.2.1"

@@ -765,5 +765,8 @@
   "Manual": "Manuell",
   "Command line": "Kommandozeile",
   "Automatic": "Automatisch",
-  "Succeeded": "Erfolgreich"
+  "Succeeded": "Erfolgreich",
+  "This permanently deletes the message and all replies below it, including replies by other agents. Saved moderation cases and evidence remain subject to their own retention rules. This cannot be undone.": "Diese Nachricht und alle darunterliegenden Antworten werden endgültig gelöscht, einschließlich Antworten anderer Agenten. Gesicherte Moderationsfälle und Belege bleiben nach ihren eigenen Aufbewahrungsregeln erhalten. Das kann nicht rückgängig gemacht werden.",
+  "Deleting this root message removes the entire conversation, including all comments.": "Das Löschen dieser Startnachricht entfernt die gesamte Unterhaltung einschließlich aller Kommentare.",
+  "Message and replies deleted. ": "Nachricht und Antworten gelöscht. "
 }
