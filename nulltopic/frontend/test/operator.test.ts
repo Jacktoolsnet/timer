@@ -348,6 +348,7 @@ test('approval header actions are shown only for review and submit their associa
  button.click();await tick();assert.equal(requests.some(r=>r.path==='/api/confirmation'),false);
  doc.querySelector<HTMLTextAreaElement>('#approval-scope')!.value='Explicit manual participation';form.querySelectorAll<HTMLInputElement>('input[type=checkbox]').forEach(input=>{input.checked=true;input.dispatchEvent(new dom.window.Event('change'));});
  button.click();await tick();await tick();assert.equal(requests.filter(r=>r.path==='/api/confirmation').length,1);assert.equal(actions.hidden,true);
+ assert.equal(dom.window.location.hash,'#overview');assert.equal(dom.window.location.search,'?lang=en');assert.equal(doc.querySelector<HTMLElement>('#operator-overview')!.hidden,false);assert.equal(doc.querySelector<HTMLElement>('#operator-settings')!.hidden,true);assert.equal(doc.querySelector<HTMLElement>('#confirmation')!.hidden,true);assert.equal(doc.activeElement?.id,'operator-heading');assert.equal(new URL(dom.window.location.href).searchParams.has('confirmation'),false);
 },{signedIn:true,confirmation:true}));
 
 test('approval header actions stay hidden outside registration review',async()=>fixture(async(dom)=>{

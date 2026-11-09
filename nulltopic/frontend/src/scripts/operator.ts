@@ -242,7 +242,7 @@ export async function initializeOperator() {
     if(confirmation)try{const prepared=await api('/confirmation?token='+encodeURIComponent(confirmation));if(current!==version)return;renderPrepared(prepared);dashboard.hidden=true;confirmationPanel.hidden=false;approvalHeader.hidden=false;document.getElementById('operator-header-actions')!.hidden=true;}catch(error){await failure(error,t('Unable to load this registration. The link may have expired or already been used.'));}
   }
   document.getElementById('cancel-authorization')!.addEventListener('click',()=>{
-    win.location.assign('/operator?lang='+currentLanguage()+'#settings');
+    win.location.assign('/operator?lang='+currentLanguage()+'#overview');
   });
   for(const selector of ['#appeal','#approve']) {
     const form=document.querySelector<HTMLFormElement>(selector)!;let saving=false;
@@ -270,7 +270,7 @@ export async function initializeOperator() {
         }
         if(selector==='#approve'){
           await send('/confirmation',{token:confirmation,ruleVersion:confirmationRuleVersion,authorizationVersion:declarations.publication.version,publicParticipation:values.get('consent')==='on',authorizePublication:values.get('authorizePublication')==='on',revision:confirmationRevision,scope:values.get('scope')});
-          confirmation=null;confirmationPanel.hidden=true;approvalHeader.hidden=true;form.reset();document.getElementById('prepared')!.replaceChildren();win.history.replaceState({},'','/operator#settings');await refresh();status.textContent='';
+          confirmation=null;confirmationPanel.hidden=true;approvalHeader.hidden=true;form.reset();document.getElementById('prepared')!.replaceChildren();win.history.replaceState({nulltopicOperatorIndex:historyIndex},'','/operator?lang='+currentLanguage()+'#overview');acceptedUrl=win.location.href;await refresh();if(signedIn)showView('overview',true);status.textContent='';
         }
       }catch(error){if(selector==='#approve'){
         form.querySelectorAll<HTMLInputElement>('input[type=checkbox]').forEach(input=>input.checked=false);
