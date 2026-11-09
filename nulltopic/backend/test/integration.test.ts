@@ -34,7 +34,7 @@ async function emailTokenFor(email:string,purpose='verify'){
 await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
   await migrate();
   await pool.query(
-    "TRUNCATE post_deletion_journal,background_job_runs,background_job_previews,moderation_cases,operators,admins,sessions,agents,configurations,conversations,posts,reports,moderation,appeals,limits,events RESTART IDENTITY CASCADE",
+    "TRUNCATE identity_deletion_journal,post_deletion_journal,background_job_runs,background_job_previews,moderation_cases,operators,admins,sessions,agents,configurations,conversations,posts,reports,moderation,appeals,limits,events RESTART IDENTITY CASCADE",
   );
   let app = await testApp();
   await app.listen({ host: "127.0.0.1", port: 0 });
@@ -1768,7 +1768,7 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
       assert.equal((await call('POST','/admin/appeals/'+appeal+'/decision',{outcome:'accepted',response:'Retained case reviewed'},undefined,true)).statusCode,200);
       await pool.query("UPDATE agents SET status='blocked' WHERE id=$1",[author.id]);
       assert.equal((await call('DELETE','/posts/'+graph,{confirmSubtree:true},author.key)).json().deletedCount,2);assert.equal((await call('GET','/conversations/'+graph)).statusCode,404);
-      const exported=JSON.parse(await readFile(process.env.CASE_PURGE_JOURNAL_PATH!,'utf8'));assert.equal(exported.version,2);assert.ok(exported.postEntries.some((p:any)=>p.post_id===graph&&p.was_root));assert.ok(exported.postEntries.every((p:any)=>Object.keys(p).sort().join(',')==='conversation_id,deleted_at,post_id,was_root'));
+      const exported=JSON.parse(await readFile(process.env.CASE_PURGE_JOURNAL_PATH!,'utf8'));assert.equal(exported.version,3);assert.ok(exported.postEntries.some((p:any)=>p.post_id===graph&&p.was_root));assert.ok(exported.postEntries.every((p:any)=>Object.keys(p).sort().join(',')==='conversation_id,deleted_at,post_id,was_root'));
       // Simulate an old backup, not a new publication or restoration from case text.
       await pool.query('INSERT INTO conversations(id,last_activity_at) VALUES($1,now())',[graph]);await add(null,author.id,'Restored backup text','visible',graph);await add(graph,peer.id,'Restored backup reply');
       const {reconcilePostDeletions}=await import('../src/post-deletion.js');assert.ok((await reconcilePostDeletions(exported.postEntries)).count>=2);assert.equal((await reconcilePostDeletions(exported.postEntries)).count,0);
@@ -1905,6 +1905,88 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
       await pool.query("INSERT INTO background_job_runs(job_id,source,due_at,status) VALUES('conversations','scheduled',now(),'running')");
       await runJob('conversations','scheduled',undefined,async()=>({count:0}));assert.equal((await pool.query("SELECT count(*)::int AS n FROM background_job_runs WHERE error_code='INTERRUPTED'")).rows[0].n,1);
       const history=await call('GET','/admin/jobs/cases/history',undefined,undefined,true);assert.equal(history.statusCode,200);assert.ok(history.json().length>0);assert.equal(history.body.includes('admin_id'),false);
+    });
+    await t.test('operator identity deletion reauthenticates, removes subtrees and sessions, preserves independent cases and restores safely',async()=>{
+      await pool.query('DELETE FROM limits');
+      const ownerId=await createOperator('erase_owner');
+      const lock=await pool.connect();let sessionWrite:Promise<unknown>|undefined;
+      try{
+        await lock.query('BEGIN');await lock.query('SELECT pg_advisory_xact_lock_shared(481920)');await lock.query('SELECT id FROM operators WHERE id=$1 FOR UPDATE',[ownerId]);
+        sessionWrite=pool.query("INSERT INTO sessions VALUES('identity-session-order-fixture',$1,now()+interval '10 minutes')",[{operatorId:ownerId}]);
+        let timer:ReturnType<typeof setTimeout>|undefined;try{await Promise.race([sessionWrite,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Session storage must not take an owner lock after a session tuple')),1500);})]);}finally{clearTimeout(timer);}
+      }finally{await lock.query('ROLLBACK');lock.release();await sessionWrite;await pool.query("DELETE FROM sessions WHERE sid='identity-session-order-fixture'");}
+
+      const approve=async(handle:string,ownerHandle='erase_owner')=>{
+        const r=await call('POST','/registrations',{...prepared(handle),operatorHandle:ownerHandle});assert.equal(r.statusCode,200,r.body);
+        const a=r.json(),tok=new URL(a.confirmationUrl).searchParams.get('confirmation');await login(ownerHandle);
+        const p=(await call('GET','/confirmation?token='+tok,undefined,undefined,true)).json();
+        assert.equal((await call('POST','/confirmation',{token:tok,revision:p.scope_revision,scope:'Synthetic identity deletion fixtures only',ruleVersion:p.ruleVersion,authorizationVersion:p.authorizationVersion,publicParticipation:true,authorizePublication:true},undefined,true)).statusCode,200);
+        return a;
+      };
+      const a=await approve('erase_first'),b=await approve('erase_second'),peer=await approve('erase_peer','other_operator');
+      const pendingResponse=await call('POST','/registrations',{...prepared('erase_pending'),operatorHandle:'erase_owner'});assert.equal(pendingResponse.statusCode,200);const pending=pendingResponse.json();
+      const publish=async(key:string,body:string,parentId?:string)=>{const r=await call('POST','/posts',{body,...(parentId?{parentId}:{})},key);assert.equal(r.statusCode,200,r.body);return r.json().id as string;};
+      const root=await publish(a.key,'Identity root evidence'),child=await publish(peer.key,'Foreign child removed with parent',root),foreignRoot=await publish(peer.key,'Unaffected foreign root'),branch=await publish(a.key,'Owned branch',foreignRoot),descendant=await publish(peer.key,'Foreign descendant removed',branch),sibling=await publish(peer.key,'Foreign sibling remains',foreignRoot);
+      const ownSecond=await publish(b.key,'Second agent survives first deletion');
+      await pool.query('INSERT INTO post_reactions(post_id,agent_id,value) VALUES($1,$2,1)',[sibling,a.id]);
+      const report=randomUUID();await pool.query("INSERT INTO reports(id,post_id,reason) VALUES($1,$2,'Identity deletion report')",[report,root]);
+      const decision=(await pool.query("INSERT INTO moderation(admin_id,agent_id,post_id,action,reason,report_id) VALUES($1,$2,$3,'hide','Evidence must survive',$4) RETURNING id,case_id",[admin,a.id,root,report])).rows[0];
+      const appeal=randomUUID();await pool.query("INSERT INTO appeals(id,operator_id,subject_agent_id,moderation_id,reason) VALUES($1,$2,$3,$4,'Synthetic appeal')",[appeal,ownerId,a.id,decision.id]);
+      const evidence=(await pool.query('SELECT evidence FROM moderation_cases WHERE id=$1',[decision.case_id])).rows[0].evidence;
+      const savedAgent=(await pool.query('SELECT * FROM agents WHERE id=$1',[a.id])).rows[0];
+      await login('erase_owner');
+      const body={confirmDeletion:true,password};
+      assert.equal((await call('DELETE','/operator/agents/'+a.id,{password},undefined,true)).statusCode,400);
+      assert.equal((await call('DELETE','/operator/agents/'+a.id,{confirmDeletion:true,password:'wrong-password'},undefined,true)).json().error.code,'REAUTHENTICATION_FAILED');
+      assert.equal((await call('DELETE','/operator/agents/'+peer.id,body,undefined,true)).statusCode,404);
+      const csrfDenied=await app.inject({method:'DELETE',url:'/api/operator/agents/'+a.id,headers:{cookie,origin:process.env.PUBLIC_ORIGIN||'http://localhost:4321'},payload:body});assert.equal(csrfDenied.statusCode,403);
+      assert.equal((await call('DELETE','/operator/agents/'+a.id,body,a.key)).statusCode,401);
+      assert.equal((await call('GET','/agents/'+a.id)).statusCode,200);
+      await pool.query("CREATE FUNCTION reject_test_agent_delete() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'Synthetic deletion rollback'; END $$; CREATE TRIGGER reject_test_agent_delete BEFORE DELETE ON agents FOR EACH ROW EXECUTE FUNCTION reject_test_agent_delete()");
+      try{assert.equal((await call('DELETE','/operator/agents/'+a.id,body,undefined,true)).statusCode,500);assert.equal((await pool.query('SELECT id FROM posts WHERE id=$1',[root])).rowCount,1);assert.equal((await pool.query('SELECT identity_id FROM identity_deletion_journal WHERE identity_id=$1',[a.id])).rowCount,0);assert.deepEqual((await pool.query('SELECT evidence FROM moderation_cases WHERE id=$1',[decision.case_id])).rows[0].evidence,evidence);}
+      finally{await pool.query('DROP TRIGGER reject_test_agent_delete ON agents; DROP FUNCTION reject_test_agent_delete()');}
+      const journalDestination=process.env.CASE_PURGE_JOURNAL_PATH!;
+      try{process.env.CASE_PURGE_JOURNAL_PATH=deletionTestDirectory;const gone=await call('DELETE','/operator/agents/'+a.id,body,undefined,true);assert.equal(gone.statusCode,500,gone.body);}
+      finally{process.env.CASE_PURGE_JOURNAL_PATH=journalDestination;}
+      const retry=await call('DELETE','/operator/agents/'+a.id,body,undefined,true);assert.equal(retry.statusCode,200);assert.equal(retry.json().changed,false);
+      for(const id of [root,child,branch,descendant])assert.equal((await pool.query('SELECT id FROM posts WHERE id=$1',[id])).rowCount,0);
+      for(const id of [foreignRoot,sibling,ownSecond])assert.equal((await pool.query('SELECT id FROM posts WHERE id=$1',[id])).rowCount,1);
+      for(const suffix of ['', '/avatar','/configurations'])assert.equal((await call('GET','/agents/'+a.id+suffix)).statusCode,404);
+      assert.equal((await call('GET','/me',undefined,a.key)).statusCode,401);
+      assert.equal((await pool.query('SELECT id FROM configurations WHERE agent_id=$1',[a.id])).rowCount,0);
+      assert.equal((await pool.query('SELECT id FROM agent_authorizations WHERE agent_id=$1',[a.id])).rowCount,0);
+      assert.equal((await pool.query('SELECT * FROM post_reactions WHERE agent_id=$1',[a.id])).rowCount,0);
+      assert.deepEqual((await pool.query('SELECT evidence FROM moderation_cases WHERE id=$1',[decision.case_id])).rows[0].evidence,evidence);
+      assert.equal((await pool.query('SELECT id FROM appeals WHERE id=$1',[appeal])).rowCount,1);
+      assert.equal((await pool.query('SELECT id FROM operators WHERE id=$1',[ownerId])).rowCount,1);
+      // Replay a genuinely restored public identity; only UUID markers authorize erasure.
+      const ledger=JSON.parse(await readFile(process.env.CASE_PURGE_JOURNAL_PATH!,'utf8'));assert.equal(ledger.version,3);assert.ok(ledger.identityEntries.some((r:any)=>r.identity_id===a.id));assert.ok(ledger.identityEntries.every((r:any)=>Object.keys(r).sort().join(',')==='deleted_at,identity_id,kind'));
+      await pool.query('INSERT INTO agents SELECT * FROM json_populate_record(NULL::agents,$1::json)',[JSON.stringify(savedAgent)]);
+      const {reconcileIdentityDeletions}=await import('../src/identity-deletion.js');assert.equal((await reconcileIdentityDeletions(ledger.identityEntries)).count,1);assert.equal((await reconcileIdentityDeletions(ledger.identityEntries)).count,0);
+      // A committed publication racing deletion is included; a later write cannot resurrect it.
+      await pool.query('DELETE FROM limits');await login('erase_owner');const oldCookie=cookie;await login('erase_owner');const secondCookie=cookie;
+      const savedOwner=(await pool.query('SELECT * FROM operators WHERE id=$1',[ownerId])).rows[0];const savedSecond=(await pool.query('SELECT * FROM agents WHERE id=$1',[b.id])).rows[0];
+      assert.equal((await call('DELETE','/operator',{...body,expectedAgentIds:[]},undefined,true)).json().error.code,'AGENTS_CHANGED');
+      const accountBody={...body,expectedAgentIds:[b.id,pending.id]};
+      const [removed,racing]=await Promise.all([call('DELETE','/operator',accountBody,undefined,true),call('POST','/posts',{body:'Racing identity publication'},b.key)]);
+      assert.equal(removed.statusCode,200,removed.body);assert.ok([200,401,403].includes(racing.statusCode),racing.body);
+      assert.equal((await pool.query('SELECT id FROM operators WHERE id=$1',[ownerId])).rowCount,0);assert.equal((await pool.query('SELECT id FROM agents WHERE operator_id=$1',[ownerId])).rowCount,0);assert.equal((await pool.query('SELECT id FROM posts WHERE agent_id=$1',[b.id])).rowCount,0);
+      assert.equal((await pool.query("SELECT sid FROM sessions WHERE data->>'operatorId'=$1",[ownerId])).rowCount,0);
+      for(const sessionCookie of [oldCookie,secondCookie]){const r=await app.inject({method:'GET',url:'/api/operator',headers:{cookie:sessionCookie}});assert.equal(r.statusCode,401);}
+      for(const key of [b.key,pending.key])assert.equal((await call('GET','/registration-status',undefined,key)).statusCode,401);
+      assert.equal((await call('GET','/operators/'+ownerId)).statusCode,404);
+      assert.equal((await pool.query('SELECT id FROM reports WHERE id=$1',[report])).rowCount,1);assert.deepEqual((await pool.query('SELECT evidence FROM moderation_cases WHERE id=$1',[decision.case_id])).rows[0].evidence,evidence);
+      assert.equal((await call('GET','/agents/'+peer.id)).statusCode,200);
+      // Session store cannot reinsert a stale authenticated response after removal.
+      await pool.query("INSERT INTO sessions VALUES($1,$2,now()+interval '10 minutes')",['deleted-owner-session',{operatorId:ownerId}]);assert.equal((await pool.query("SELECT sid FROM sessions WHERE sid='deleted-owner-session'")).rowCount,0);
+      const finalLedger=JSON.parse(await readFile(process.env.CASE_PURGE_JOURNAL_PATH!,'utf8'));
+      await pool.query('INSERT INTO operators SELECT * FROM json_populate_record(NULL::operators,$1::json)',[JSON.stringify(savedOwner)]);await pool.query('INSERT INTO agents SELECT * FROM json_populate_record(NULL::agents,$1::json)',[JSON.stringify(savedSecond)]);
+      assert.equal((await reconcileIdentityDeletions(finalLedger.identityEntries)).count,1);assert.equal((await pool.query('SELECT id FROM operators WHERE id=$1',[ownerId])).rowCount,0);
+      // Reusing a handle never reuses IDs or gives access to retained cases.
+      await pool.query('DELETE FROM limits');for(let n=mailbox.length-1;n>=0;n--)if(mailbox[n].to==='erase_owner@example.invalid')mailbox.splice(n,1);const replacement=await createOperator('erase_owner');assert.notEqual(replacement,ownerId);await login('erase_owner');assert.equal((await call('GET','/operator/cases/'+decision.case_id,undefined,undefined,true)).statusCode,404);
+      for(let n=0;n<5;n++)assert.equal((await call('DELETE','/operator',{confirmDeletion:true,password:'incorrect',expectedAgentIds:[]},undefined,true)).statusCode,403);
+      assert.equal((await call('DELETE','/operator',{...body,expectedAgentIds:[]},undefined,true)).statusCode,429);assert.equal((await pool.query('SELECT id FROM operators WHERE id=$1',[replacement])).rowCount,1);
+      await pool.query("UPDATE identity_deletion_journal SET deleted_at=now()-interval '36 days' WHERE owner_id=$1",[ownerId]);
     });
     await t.test('real server starts both daily workers, exports privately and shuts down cleanly',async()=>{
       await pool.query('TRUNCATE background_job_runs,background_job_previews');await pool.query('UPDATE background_jobs SET last_success_due=NULL,last_success_at=NULL,retry_at=NULL');

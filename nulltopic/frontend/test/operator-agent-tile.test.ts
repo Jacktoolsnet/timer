@@ -10,5 +10,13 @@ test('both picker cards share content-safe identity, avatar, state and destinati
 
 test('overview agent cards expose three separate destination rows without nested buttons',async()=>{
  const {operatorAgentOverviewCard}=await import('../src/scripts/operator-agent-tile');const dom=new JSDOM('<html lang="en"></html>'),original=Object.getOwnPropertyDescriptor(globalThis,'document');Object.defineProperty(globalThis,'document',{configurable:true,value:dom.window.document});
- try{const visited:string[]=[];const card=operatorAgentOverviewCard({id:'a',name:'<script>literal</script>',handle:'one',status:'active'},view=>visited.push(view));assert.equal(card.tagName,'ARTICLE');assert.equal(card.querySelectorAll('button').length,3);assert.equal(card.querySelector('button button,script'),null);assert.equal(card.querySelector('.admin-tile-title')!.textContent,'<script>literal</script>');for(const button of card.querySelectorAll('button'))button.click();assert.deepEqual(visited,['settings','conversations','moderation']);assert.ok(card.querySelector('.moderation-author-avatar'));assert.ok(card.querySelector('.operator-agent-state'));}finally{if(original)Object.defineProperty(globalThis,'document',original);else Reflect.deleteProperty(globalThis,'document');dom.window.close();}
+ try{const visited:string[]=[];const card=operatorAgentOverviewCard({id:'a',name:'<script>literal</script>',handle:'one',status:'active'},view=>visited.push(view));assert.equal(card.tagName,'ARTICLE');assert.equal(card.querySelectorAll('button[data-agent-action]').length,3);assert.equal(card.querySelector('button button,script'),null);assert.equal(card.querySelector('.admin-tile-title')!.textContent,'<script>literal</script>');assert.ok(card.querySelector('[data-delete-identity=agent][aria-label="Delete agent"]'));for(const button of card.querySelectorAll<HTMLButtonElement>('button[data-agent-action]'))button.click();assert.deepEqual(visited,['settings','conversations','moderation']);assert.ok(card.querySelector('.moderation-author-avatar'));assert.ok(card.querySelector('.operator-agent-state'));}finally{if(original)Object.defineProperty(globalThis,'document',original);else Reflect.deleteProperty(globalThis,'document');dom.window.close();}
+});
+
+test('overview deletion tooltips escape the tile and align inward without losing rounded decoration',async()=>{
+ const {readFileSync}=await import('node:fs');const css=readFileSync(new URL('../src/styles/global.css',import.meta.url),'utf8');
+ assert.match(css,/\.admin-tile\.operator-overview-agent\s*\{ overflow: visible; \}/);
+ assert.match(css,/\.operator-overview-agent::before\s*\{ border-radius: inherit; \}/);
+ assert.match(css,/\.operator-overview-agent:is\(:hover,:focus-within\)\s*\{ z-index: 3; \}/);
+ assert.match(css,/\.operator-overview-agent \.operator-agent-remove\[data-tooltip\]::after\s*\{ left: auto; right: 0;/);
 });

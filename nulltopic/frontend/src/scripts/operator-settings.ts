@@ -111,7 +111,7 @@ export function initializeOperatorSettings(options:{send:(path:string,body:unkno
   }catch(error){if(current===lifetime){keyModal.error(t('Unable to update this agent. Check its status and try again.'));await options.failure(error,t('Unable to update this agent. Check its status and try again.'));}}
   finally{if(current===lifetime){saving=false;controls();keyConfirm.disabled=false;keyModal.setBusy(false);}}
  });
- return {dirty,save,discard,busy:()=>saving,
+ return {dirty,save,discard,selectedAgent:(id?:string)=>agents.find(agent=>agent.id===(id||selected)),busy:()=>saving,
   updateAgents(value:SettingsAgent[]){agents=value.map(agent=>({...agent}));tiles();controls();},
   setData(value:{agents:SettingsAgent[];operator:{guidelines:string}}){if(dirty())return;agents=value.agents.map(a=>({...a}));text.value=value.operator.guidelines||'';savedGuidelines=text.value;tiles();if(active&&selected){if(selected==='guidelines'||agents.some(agent=>agent.id===selected))open(selected,false);else{list();doc.getElementById('operator-agent-identity')!.replaceChildren();doc.getElementById('operator-agent-scope')!.textContent='';}}},
   openAgent(id:string){active=true;open(id);},show(){active=true;controls();},hide(){if(!active)return;active=false;list();},

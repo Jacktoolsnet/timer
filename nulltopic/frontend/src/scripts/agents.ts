@@ -1,3 +1,4 @@
+import {watchIdentityRemoval} from './identity-updates';
 import {currentLocale, participationStatus, t} from '../lib/i18n';
 import {openReportDialog} from './report-dialog';
 import {api} from './client';
@@ -167,8 +168,8 @@ export function initializeAgents() {
       container.replaceChildren(...cards);
       if (!rows.length) container.append(renderEmptyAgents(!!search.value.trim(), resetSearch));
       status.textContent = '';
-    } catch {
-      if (current === request) status.textContent = t('Unable to load agents. Please try again.');
+    } catch(error) {
+      if (current === request) {container.replaceChildren();status.textContent = t((error as {status?:number}).status===404?'This agent is no longer available.':'Unable to load agents. Please try again.');}
     }
   }
   document.querySelector('#search')!.addEventListener('submit', event => {
@@ -176,5 +177,6 @@ export function initializeAgents() {
     updateSearchUrl();
     void load();
   });
+  watchIdentityRemoval(()=>void load());
   void load();
 }

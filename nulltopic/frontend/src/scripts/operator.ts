@@ -1,3 +1,4 @@
+import {initializeIdentityDeletion} from './identity-deletion';
 import {initializeAgentUpdates} from './operator-agent-updates';
 import {setOnboardingOperator} from './onboarding';
 import {declarations} from '../../../shared/declarations';
@@ -89,7 +90,7 @@ export async function initializeOperator() {
   function clearSession() {
     approvalBusy=false;approvalHeader.hidden=true;approveButton.disabled=true;
     setOnboardingOperator(undefined);
-    unsaved.clear();settings.clear();
+    unsaved.clear();settings.clear();identityDeletion.clear();
     signedIn=false;operatorId=undefined;agentSnapshot='';moderationAgent=null;knownAgents=[];conversations.clear(); ++version;++queueVersion;queueData=null;openCases.clear();queueStatus='pending';updateQueueTabs({pending:0,processed:0});queuePanel.removeAttribute('aria-busy');document.getElementById('operator-queue-limit')!.hidden=true; dashboard.hidden=true; confirmationPanel.hidden=true; shell.hidden=false;
     password.value=''; toolbar(false);reviewModal.close(true); resetReview();
     for (const id of ['owned','notices','prepared']) document.getElementById(id)!.replaceChildren();
@@ -122,7 +123,8 @@ export async function initializeOperator() {
     if (focus&&!((view==='settings'||view==='conversations')&&agentId)) { document.getElementById(view==='overview'?'operator-heading':'operator-'+view+'-heading')!.focus({preventScroll:true}); win.scrollTo?.({top:0,behavior:'instant'}); }
   }
   const settings=initializeOperatorSettings({send,refresh,failure,leave:action=>unsaved.request(action),enter:id=>navigate('settings',id),viewAgent:(id,view)=>navigate(view,id),overview:()=>navigate('overview')});
-  const unsaved=initializeUnsavedSettings({dirty:settings.dirty,busy:settings.busy,save:settings.save,discard:settings.discard});
+  const unsaved=initializeUnsavedSettings({dirty:settings.dirty,busy:()=>settings.busy()||identityDeletion.busy(),save:settings.save,discard:settings.discard});
+  const identityDeletion=initializeIdentityDeletion({send,leave:action=>unsaved.request(action),selected:settings.selectedAgent,refresh,overview:()=>navigate('overview'),deleted:()=>{clearSession();win.location.assign('/account-deleted?lang='+currentLanguage());}});
   initializeAgentUpdates<{operatorId:string;agents:OwnedAgent[]}>({document,
     enabled:()=>signedIn&&!dashboard.hidden,
     generation:()=>version,
@@ -130,7 +132,7 @@ export async function initializeOperator() {
     apply:data=>{
       if(data.operatorId!==operatorId){clearSession();status.textContent=t('Your session has expired. Please sign in again.');return;}
       const snapshot=JSON.stringify(data.agents);if(snapshot===agentSnapshot)return;agentSnapshot=snapshot;
-      knownAgents=data.agents;settings.updateAgents(data.agents);conversations.setAgents(data.agents);
+      knownAgents=data.agents;identityDeletion.updateAgents(data.agents);settings.updateAgents(data.agents);conversations.setAgents(data.agents);
       document.getElementById('operator-agent-count')!.textContent=t(data.agents.length===1?'{count} linked agent':'{count} linked agents',{count:data.agents.length});
     },
     expired:()=>{clearSession();status.textContent=t('Your session has expired. Please sign in again.');}
@@ -180,7 +182,7 @@ export async function initializeOperator() {
   function render(data:OperatorData) {
     resetReview();
     agentSnapshot=JSON.stringify(data.agents);
-    knownAgents=data.agents;settings.setData(data);
+    knownAgents=data.agents;settings.setData(data);identityDeletion.setData(data);
     document.getElementById('operator-agent-count')!.textContent=t(data.agents.length===1?'{count} linked agent':'{count} linked agents',{count:data.agents.length});
     conversations.setAgents(data.agents);
     if(!moderationAgent){queueData=data;renderQueue(data);}

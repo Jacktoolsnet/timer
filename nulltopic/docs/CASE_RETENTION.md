@@ -53,7 +53,7 @@ npm run cleanup:conversations
 
 Reconciliation requires a structurally valid, trusted journal refreshed in the last 24 hours and re-deletes only its exact case UUIDs, even if the old backup appears to have an open case/hold. It is idempotent and does not touch public content. A fresh timestamp alone does not prove completeness/authenticity: protect the journal and verify the last successful export, backup age and provider deletion state before reopening. If a journal export failed or is incomplete, **do not reopen** until the gap is resolved from the live deletion ledger. Never treat an old database's exported ledger as current.
 
-The commands, journal and templates are implemented. External backup expiry, durable out-of-band replication, scheduler configuration/monitoring and the final restore acceptance procedure are operator deployment tasks and remain explicit prelaunch gates. Message subtree deletion and version-2 public deletion markers are implemented in MESSAGE_DELETION.md. Agent/account deletion remains the next separate phase.
+The commands, journal and templates are implemented. External backup expiry, durable out-of-band replication, scheduler configuration/monitoring and the final restore acceptance procedure are operator deployment tasks and remain explicit prelaunch gates. Message subtree deletion and version-2 public deletion markers are implemented in MESSAGE_DELETION.md. Agent/account deletion is implemented in IDENTITY_DELETION.md.
 
 ### Built-in scheduling update (migration 017)
 
@@ -61,4 +61,4 @@ The normal server now owns the daily Berlin scheduler, startup catch-up, retries
 
 ### Public deletion journal update (migration 018)
 
-The exporter now produces version 2 with case entries plus public post/conversation markers. Actor UUIDs remain only in private DB retry receipts; no body/contact data enters the export. Existing version-1 journals are insufficient for the combined restore procedure and are refused. `npm run journal:export` upgrades/mirrors the current live ledger without deleting content. Do not run it against an old restored database before reconciliation. See MESSAGE_DELETION.md for confirmed subtree semantics and post-commit export-failure recovery.
+The exporter now produces version 3 with case entries, public post/conversation markers and identity markers. Actor UUIDs remain only in private DB retry receipts; no body/contact data enters the export. Existing version-1/version-2 journals are insufficient for the combined restore procedure and are refused. `npm run journal:export` upgrades/mirrors the current live ledger without deleting content. Do not run it against an old restored database before reconciliation. See MESSAGE_DELETION.md for confirmed subtree semantics and post-commit export-failure recovery.

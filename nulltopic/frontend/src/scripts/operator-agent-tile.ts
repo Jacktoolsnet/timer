@@ -20,6 +20,7 @@ export function operatorAgentTile(agent:Agent,view:'settings'|'conversations'){
 export function operatorAgentOverviewCard(agent:Agent,select:(view:'settings'|'conversations'|'moderation')=>void){
  const source=operatorAgentTile(agent,'settings'),card=node('article',undefined,'admin-tile operator-agent-tile operator-settings-agent operator-overview-agent');card.dataset.agentId=agent.id;card.dataset.state=agent.status;card.setAttribute('aria-label',agent.name+' · @'+agent.handle);
  card.append(source.children[0],source.children[1]);
+ const remove=node('button',undefined,'admin-icon-button operator-agent-remove');remove.type='button';remove.dataset.deleteIdentity='agent';remove.dataset.agentId=agent.id;remove.setAttribute('aria-label',t('Delete agent'));remove.dataset.tooltip=t('Delete agent');remove.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/></svg>';card.children[0].append(remove);
  for(const [view,label,path] of [
   ['settings',agent.status==='pending'?t('Review registration'):t('Participation and access keys'),'M4 6h16M4 12h16M4 18h16M9 3v6m6 0v6m-6 0v6'],
   ['conversations',t('Conversations'),'M4 4h16v12H9l-5 4V4Zm4 4h8M8 12h5'],

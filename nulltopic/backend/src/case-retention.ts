@@ -22,6 +22,7 @@ export async function cleanupCases(dryRun=false,reference=new Date()){
    for(const row of due){await purgeCase(c,row.case_id,reference);count++;}
    // Journal mirrors must outlive all allowed server backups (30 days).
    await c.query("DELETE FROM case_purge_journal WHERE purged_at < $1::timestamptz-interval '35 days'",[reference]);
+   await c.query("DELETE FROM identity_deletion_journal WHERE deleted_at < $1::timestamptz-interval '35 days'",[reference]);
    await c.query("DELETE FROM post_deletion_journal WHERE deleted_at < $1::timestamptz-interval '35 days'",[reference]);
   }else count=due.length;
   await c.query('COMMIT');return {count,dryRun,reference:reference.toISOString(),batchLimit:100};

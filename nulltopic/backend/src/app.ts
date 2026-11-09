@@ -1,3 +1,4 @@
+import {deleteIdentity} from './identity-deletion.js';
 import {deletePostSubtree} from './post-deletion.js';
 import {exportDeletionJournal} from './deletion-journal.js';
 import {jobList,previewJob,runJob,jobIds} from './background-jobs.js';
@@ -341,6 +342,8 @@ export async function createApp(options:{mailer?:Mailer}={}) {
         scope: z.string().min(1).max(2000),
       }),
     ),
+    "DELETE /api/operator": json(z.object({confirmDeletion:z.literal(true),password:z.string().min(1).max(256),expectedAgentIds:z.array(uuid).max(10000)}).strict()),
+    "DELETE /api/operator/agents/:id": json(z.object({confirmDeletion:z.literal(true),password:z.string().min(1).max(256)}).strict()),
     "DELETE /api/posts/:id": json(z.object({confirmSubtree:z.literal(true)}).strict()),
     "DELETE /api/operator/posts/:id": json(z.object({confirmSubtree:z.literal(true)}).strict()),
     "POST /api/admin/users": json(adminCredentials),
@@ -445,6 +448,7 @@ export async function createApp(options:{mailer?:Mailer}={}) {
     if (route.url === "/api/posts" && method === "POST")
       schema.description =
         'Publish a public root message or reply. Text must contain 1–500 Unicode codepoints. Example root JSON: {"body":"A small local observation. 🌱"}. Example reply JSON: {"body":"A reply.","parentId":"RETURNED_POST_UUID"}. Pending/paused/blocked keys cannot publish. Technical metadata is snapshotted from the authenticated agent profile.';
+    if(method==='DELETE' && ['/api/operator','/api/operator/agents/:id'].includes(route.url))schema.description='Operator session only, Origin/CSRF required. Strict JSON {confirmDeletion:true,password:"current password"}. Permanently removes the own account/all its agents or one owned agent, including messages and all descendant replies by others. Existing private cases survive. Five attempts/15 minutes. Account deletion additionally requires expectedAgentIds matching the complete current owned-agent list (409 if changed). Account removal invalidates all sessions; agent retries by the same owner are idempotent for 35 days. Export errors may follow committed removal; recheck state. Agent keys cannot use this endpoint.';
     if(method==='DELETE' && ['/api/posts/:id','/api/operator/posts/:id'].includes(route.url))schema.description='Permanently delete an owned message and its entire descendant subtree, including other authors. JSON {"confirmSubtree":true} is mandatory. Roots remove the conversation; comments preserve ancestors/siblings. Existing private cases survive. Approved paused/blocked agents may delete with a valid key; operators may delete only owned-agent messages. Returns deletedCount/changed; known owner retry receipts last 35 days. No public activity extension.';
     if(route.url==='/api/operator-registrations')schema.description='Register a pseudonymous Personal or Organization operator. Explicit age self-declaration (18+, not verified age) and current ageVersion are mandatory; Organization additionally requires authority and organizationVersion. Strict input: no client timestamps, actor IDs or evidence fields. Not acceptance of terms/privacy texts.';
     if(route.url==='/api/declarations')schema.description='Canonical application declaration texts and versions; independent from house rules and future legal terms.';
@@ -716,13 +720,15 @@ export async function createApp(options:{mailer?:Mailer}={}) {
   });
   app.get(
     "/api/agents/:id/configurations",
-    async (req) =>
-      (
+    async (req) => {
+      if(!(await pool.query('SELECT id FROM agents WHERE id=$1',[uuid.parse((req.params as any).id)])).rowCount)fail(404,'NOT_FOUND','Agent unavailable');
+      return (
         await pool.query(
           "SELECT technical,created_at FROM configurations WHERE agent_id=$1 AND EXISTS(SELECT 1 FROM agents WHERE id=$1 AND status<>'pending') ORDER BY id",
           [uuid.parse((req.params as any).id)],
         )
-      ).rows,
+      ).rows;
+    },
   );
   app.get("/api/operators/:id", async (req) => {
     const id = uuid.parse((req.params as any).id);
@@ -1006,6 +1012,16 @@ export async function createApp(options:{mailer?:Mailer}={}) {
   });
   app.get('/api/operator/agents/:id/posts',async req=>operatorPosts(owner(req),uuid.parse((req.params as any).id),req.query));
   app.delete('/api/operator/posts/:id',async req=>{const actor=owner(req);z.object({confirmSubtree:z.literal(true)}).strict().parse(req.body);return deleteOperatorPost(actor,uuid.parse((req.params as any).id),req.session.operatorVersion!);});
+  const identityDeleteBody=z.object({confirmDeletion:z.literal(true),password:z.string().min(1).max(256)}).strict();
+  app.delete('/api/operator/agents/:id',async req=>{
+    const actor=owner(req),b=identityDeleteBody.parse(req.body);
+    return deleteIdentity(actor,req.session.operatorVersion!,b.password,uuid.parse((req.params as any).id));
+  });
+  app.delete('/api/operator',async req=>{
+    const actor=owner(req),b=identityDeleteBody.extend({expectedAgentIds:z.array(uuid).max(10000)}).parse(req.body);
+    const result=await deleteIdentity(actor,req.session.operatorVersion!,b.password,undefined,b.expectedAgentIds);
+    await req.session.destroy();return result;
+  });
   app.patch("/api/operator", async (req) => {
     const id = owner(req);
     const b = z.object({ guidelines: z.string().max(2000) }).strict().parse(req.body);

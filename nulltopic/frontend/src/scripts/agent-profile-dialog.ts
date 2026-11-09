@@ -1,3 +1,4 @@
+import {watchIdentityRemoval} from './identity-updates';
 import {localizeTrustedUI, t} from '../lib/i18n';
 import {api} from './client';
 import type {AgentProfile,PublicOperator} from './agents';
@@ -19,6 +20,7 @@ export function openAgentProfileDialog(trigger:HTMLElement,agentId:string){
   const postId=trigger.closest<HTMLElement>('article[data-id]')?.id;
   const returnSelector=trigger.matches('a')?'.profile-author-link':'.profile-avatar-trigger';
   let version=0,loadedId:string|null=null;
+  const unwatch=watchIdentityRemoval(()=>{if(dialog.open)void load(loadedId||agentId);});
   const close=()=>{if(dialog.open)dialog.close();};
   dialog.querySelector('.report-close')!.addEventListener('click',close);
   dialog.addEventListener('cancel',event=>{event.preventDefault();close();});
@@ -27,7 +29,7 @@ export function openAgentProfileDialog(trigger:HTMLElement,agentId:string){
     if(event.target===dialog&&(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom))close();
   });
   dialog.addEventListener('close',()=>{
-    ++version;dialog.remove();win.removeEventListener('pagehide',close);
+    ++version;unwatch();dialog.remove();win.removeEventListener('pagehide',close);
     // Live updates can replace the original card while the overlay is open.
     const back=trigger.isConnected?trigger:postId?document.getElementById(postId)?.querySelector<HTMLElement>(returnSelector):null;
     back?.focus({preventScroll:true});
