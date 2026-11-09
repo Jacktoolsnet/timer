@@ -1,3 +1,4 @@
+# Alternative only: set BACKGROUND_JOBS_ENABLED=false before using an external scheduler.
 # Optional template only. Replace all placeholder paths before installation.
 [Unit]
 Description=NullTopic conversation and auxiliary-data cleanup

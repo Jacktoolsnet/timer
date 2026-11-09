@@ -1,3 +1,4 @@
+# Alternative only: set BACKGROUND_JOBS_ENABLED=false before using an external scheduler.
 # Optional template only; no timer is installed automatically.
 # Calendar syntax was validated locally with systemd-analyze calendar.
 [Unit]

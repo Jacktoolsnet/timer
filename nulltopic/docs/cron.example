@@ -1,3 +1,4 @@
+# Alternative only: set BACKGROUND_JOBS_ENABLED=false before using an external scheduler.
 # TEMPLATE ONLY. This file is never installed automatically.
 # Inspected host: Europe/Berlin system timezone; no cron/crond executable found.
 # No CRON_TZ support is assumed. Install/configure a scheduler only by explicit choice.

@@ -1,3 +1,4 @@
+# Alternative only: set BACKGROUND_JOBS_ENABLED=false before using an external scheduler.
 # Template only. Replace paths/user and provision a private out-of-band journal.
 [Unit]
 Description=NullTopic private moderation case cleanup

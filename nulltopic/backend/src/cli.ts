@@ -1,6 +1,7 @@
-import {cleanupCases,reconcileCases} from './case-retention.js';
-import {readFile,writeFile,rename,mkdir} from 'node:fs/promises';
-import {dirname,resolve} from 'node:path';
+import {reconcileCases} from './case-retention.js';
+import {readFile} from 'node:fs/promises';
+import {runJob} from './background-jobs.js';
+import {maintainCases} from './case-maintenance.js';
 import {z} from 'zod';
 import {createMailer} from './mailer.js';
 import {operatorEmail} from './operator-email.js';
@@ -20,28 +21,12 @@ try {
         reference: reference.toISOString(),
       }),
     );
-    const result = await cleanup(process.argv.includes("--dry-run"), reference);
+    const result = process.argv.includes("--dry-run") ? await cleanup(true, reference) : await runJob("conversations","cli");
     console.log(JSON.stringify({ event: "cleanup_end", ...result }));
   } else if (command === 'cleanup-cases') {
-    const runner=await pool.connect();let count=0;
-    try{
-      if(!(await runner.query('SELECT pg_try_advisory_lock(481921) AS acquired')).rows[0].acquired)throw Error('Case cleanup already running; retry later');
-      const dryRun=process.argv.includes('--dry-run');
-      for(;;){
-        const result=await cleanupCases(dryRun);count+=result.count;
-        if('locked' in result)throw Error('Case maintenance busy; retry later');
-        if(!dryRun){
-          const destination=resolve(process.env.CASE_PURGE_JOURNAL_PATH||'../.local/case-purge-journal.json');
-          await mkdir(dirname(destination),{recursive:true,mode:0o700});
-          const rows=(await pool.query('SELECT case_id,purged_at FROM case_purge_journal ORDER BY purged_at,case_id')).rows;
-          const temporary=destination+'.'+randomUUID()+'.tmp';
-          await writeFile(temporary,JSON.stringify({version:1,exportedAt:new Date().toISOString(),entries:rows}),{mode:0o600,flag:'wx'});
-          await rename(temporary,destination);
-        }
-        if(dryRun||result.count<100)break;
-      }
-      console.log(JSON.stringify({event:'case_cleanup',count,dryRun,batchLimit:100}));
-    }finally{await runner.query('SELECT pg_advisory_unlock(481921)');runner.release();}
+    const dryRun=process.argv.includes('--dry-run');
+    const result=dryRun?await maintainCases(true):await runJob('cases','cli');
+    console.log(JSON.stringify({event:'case_cleanup',...result,dryRun}));
   } else if(command==='reconcile-cases'){
     const source=process.env.CASE_PURGE_JOURNAL_PATH;
     if(!source)throw Error('Provide a current, trusted out-of-band CASE_PURGE_JOURNAL_PATH; keep the restored service offline');

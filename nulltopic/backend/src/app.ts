@@ -1,3 +1,4 @@
+import {jobList,previewJob,runJob,jobIds} from './background-jobs.js';
 import {withCaseEvidence} from './case-evidence.js';
 import {AsyncLocalStorage} from 'node:async_hooks';
 import {createMailer,type Mailer} from './mailer.js';
@@ -131,7 +132,7 @@ export async function createApp(options:{mailer?:Mailer}={}) {
     trustProxy: false,
   });
   const requestMode=new AsyncLocalStorage<{passive:boolean}>();
-  app.addHook('onRequest',(req,_reply,done)=>requestMode.run({passive:req.method==='GET'&&req.url.split('?')[0]==='/api/operator/agent-updates'},done));
+  app.addHook('onRequest',(req,_reply,done)=>requestMode.run({passive:req.method==='GET'&&['/api/operator/agent-updates','/api/admin/jobs'].includes(req.url.split('?')[0])},done));
   const origin = process.env.PUBLIC_ORIGIN || "http://localhost:4321";
   const emailService=operatorEmail(options.mailer || createMailer(),origin);
   app.addHook('onClose',()=>emailService.drain());
@@ -1123,6 +1124,22 @@ export async function createApp(options:{mailer?:Mailer}={}) {
     if(!evidence)fail(404,'NOT_FOUND','Case unavailable');
     if(role==='admin')return {...evidence,retention:(await pool.query('SELECT * FROM case_retention WHERE case_id=$1',[id])).rows[0],audit:(await pool.query('SELECT action,reason,created_at FROM case_control_audit WHERE case_id=$1 ORDER BY id',[id])).rows};
     return evidence;
+  });
+  app.get('/api/admin/jobs',async req=>{admin(req);return {items:await jobList(),enabled:process.env.BACKGROUND_JOBS_ENABLED!=='false'};});
+  app.get('/api/admin/jobs/:job/history',async req=>{
+    admin(req);const id=z.enum(jobIds).parse((req.params as any).job);
+    return (await pool.query('SELECT source,started_at,finished_at,status,affected_count,error_code FROM background_job_runs WHERE job_id=$1 ORDER BY started_at DESC,id DESC LIMIT 20',[id])).rows;
+  });
+  app.post('/api/admin/jobs/:job/preview',async req=>{
+    const actor=admin(req),id=z.enum(jobIds).parse((req.params as any).job);
+    z.object({}).strict().parse(req.body);
+    await transaction(c=>limit(c,actor,'job_preview',30,3600));return previewJob(id,actor);
+  });
+  app.post('/api/admin/jobs/:job/run',async req=>{
+    const actor=admin(req),id=z.enum(jobIds).parse((req.params as any).job);
+    const {previewId}=z.object({previewId:z.string().uuid()}).strict().parse(req.body);
+    await transaction(c=>limit(c,actor,'job_run',10,3600));
+    return runJob(id,'manual',{adminId:actor,version:req.session.adminVersion!,previewId});
   });
   app.get('/api/admin/case-retention',async req=>{
     admin(req);

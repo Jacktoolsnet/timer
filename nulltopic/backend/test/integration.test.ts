@@ -32,7 +32,7 @@ async function emailTokenFor(email:string,purpose='verify'){
 await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
   await migrate();
   await pool.query(
-    "TRUNCATE moderation_cases,operators,admins,sessions,agents,configurations,conversations,posts,reports,moderation,appeals,limits,events RESTART IDENTITY CASCADE",
+    "TRUNCATE background_job_runs,background_job_previews,moderation_cases,operators,admins,sessions,agents,configurations,conversations,posts,reports,moderation,appeals,limits,events RESTART IDENTITY CASCADE",
   );
   let app = await testApp();
   await app.listen({ host: "127.0.0.1", port: 0 });
@@ -1011,12 +1011,14 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
         await login('test_admin', true);
         assert.equal((await call('GET', '/admin/users', undefined, undefined, true)).statusCode, 403);
         const rootAuth = await signIn('server_root', rootPassword);
-        for(const path of ['/admin','/admin/case-retention','/admin/cases/'+randomUUID()])assert.equal((await call('GET',path,undefined,undefined,true)).statusCode,403);
+        for(const path of ['/admin','/admin/jobs','/admin/jobs/cases/history','/admin/case-retention','/admin/cases/'+randomUUID()])assert.equal((await call('GET',path,undefined,undefined,true)).statusCode,403);
         assert.equal((await call('POST','/admin/cases/'+randomUUID()+'/retention',{action:'hold',reason:'Forbidden root access'},undefined,true)).statusCode,403);
         assert.equal((await call('POST','/admin/actions',{action:'dismiss',id:randomUUID(),reportId:randomUUID(),reason:'Forbidden root access'},undefined,true)).statusCode,403);
 
         assert.equal((await call('GET', '/session', undefined, undefined, true)).json().adminRole, 'root');
         assert.equal((await call('GET', '/session', undefined, undefined, true)).json().adminHandle, 'server_root');
+        assert.equal((await call('POST','/admin/jobs/cases/preview',{},undefined,true)).statusCode,403);
+        assert.equal((await call('POST','/admin/jobs/cases/run',{previewId:randomUUID()},undefined,true)).statusCode,403);
         const users = (await call('GET', '/admin/users', undefined, undefined, true)).json();
         assert.ok(users.some((u: any) => u.is_root && u.handle === 'server_root'));
         assert.ok(users.every((u: any) => u.password === undefined && u.auth_version === undefined));
@@ -1503,6 +1505,7 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
       }
     });
     await t.test('public stream search filters visible conversations before pagination, preserves precision and never matches hidden branches',async()=>{
+      await pool.query("DELETE FROM limits WHERE bucket LIKE 'anonymous_read:%'");
       const ids:string[]=[],writer=randomUUID(),suffix=writer.slice(0,8),needle='stream-search-'+suffix,handle='searchwriter_'+suffix;
       await pool.query("INSERT INTO agents(id,handle,name,about,interests,operating_context,technical,operator_id,status) VALUES($1,$2,$3,'Fixture','[]','Isolated','{}',$4,'active')",[writer,handle,'Café SearchWriter '+suffix,operator]);
       async function root(body:string,state='visible',fraction='123456',author=agentId){const id=randomUUID();ids.push(id);await pool.query('INSERT INTO conversations(id,last_activity_at) VALUES($1,now())',[id]);await pool.query("INSERT INTO posts(id,conversation_id,agent_id,body,technical,state,created_at) VALUES($1,$1,$2,$3,'{}',$4,$5)",[id,author,state==='deleted'?null:body,state,'2026-01-01T00:00:00.'+fraction+'Z']);return id;}
@@ -1789,6 +1792,55 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
         await writeFile(journalPath,JSON.stringify({...journal,exportedAt:'2000-01-01T00:00:00Z'}));assert.notEqual(await run('reconcile-cases'),0,'stale journals cannot reopen a restored service');
       }finally{await rm(directory,{recursive:true,force:true});}
 
+    });
+    await t.test('durable background jobs enforce preview ownership, locking, catch-up, failure retry and passive sessions',async()=>{
+      const {runJob,jobList,previewJob,jobSlots}=await import('../src/background-jobs.js');
+      await pool.query('DELETE FROM limits');await pool.query('TRUNCATE background_job_runs,background_job_previews');await pool.query('UPDATE background_jobs SET last_success_due=NULL,last_success_at=NULL,retry_at=NULL');
+      assert.equal((await call('GET','/admin/jobs')).statusCode,401);
+      await login('test_operator');assert.equal((await call('GET','/admin/jobs',undefined,undefined,true)).statusCode,401);
+      await login('test_admin',true);
+      assert.equal((await call('POST','/admin/jobs/arbitrary/preview',{},undefined,true)).statusCode,400);
+      const sessionBefore=(await pool.query("SELECT sid,data,expires_at FROM sessions WHERE data->>'adminId'=$1 ORDER BY expires_at DESC LIMIT 1",[admin])).rows[0];
+      assert.equal((await call('GET','/admin/jobs',undefined,undefined,true)).statusCode,200);
+      assert.deepEqual((await pool.query('SELECT * FROM sessions WHERE sid=$1',[sessionBefore.sid])).rows[0],sessionBefore,'passive status reads do not renew idle sessions');
+      const preview=(await call('POST','/admin/jobs/cases/preview',{},undefined,true)).json();assert.ok(preview.id);assert.ok(Number.isInteger(preview.count));
+      assert.equal((await app.inject({method:'POST',url:'/api/admin/jobs/cases/run',headers:{cookie},payload:{previewId:preview.id}})).statusCode,403);
+      const foreign=randomUUID();await pool.query('INSERT INTO admins(id,handle,password) VALUES($1,$2,$3)',[foreign,'job_admin_fixture',await argon2.hash(password)]);
+      await login('job_admin_fixture',true);assert.equal((await call('POST','/admin/jobs/cases/run',{previewId:preview.id},undefined,true)).statusCode,409);
+      await login('test_admin',true);await pool.query("UPDATE background_job_previews SET expires_at=now()-interval '1 second' WHERE id=$1",[preview.id]);
+      assert.equal((await call('POST','/admin/jobs/cases/run',{previewId:preview.id},undefined,true)).statusCode,409);
+      const fresh=await previewJob('cases',admin);let release!:()=>void,started!:()=>void;const begun=new Promise<void>(r=>started=r),gate=new Promise<void>(r=>release=r);
+      const version=(await pool.query('SELECT auth_version FROM admins WHERE id=$1',[admin])).rows[0].auth_version;
+      const running=runJob('cases','manual',{adminId:admin,version,previewId:fresh.id},async()=>{started();await gate;return {count:7};});await begun;
+      assert.equal((await jobList()).find(j=>j.id==='cases')!.state,'running');assert.equal((await runJob('cases','scheduled')).skipped,true);
+      release();assert.equal((await running).count,7);
+      assert.equal((await jobList()).find(j=>j.id==='cases')!.manual_required,false);assert.equal((await runJob('cases','scheduled')).skipped,true);
+      assert.equal((await call('POST','/admin/jobs/cases/run',{previewId:fresh.id},undefined,true)).statusCode,409);
+      const runCount=Number((await pool.query("SELECT count(*) FROM background_job_runs WHERE job_id='cases'")).rows[0].count);
+      await app.close();app=await testApp();assert.equal((await jobList()).find(j=>j.id==='cases')!.last_success_at!==null,true,'history survives restart');
+      await assert.rejects(runJob('conversations','scheduled',undefined,async()=>{throw Error('Secret content must not enter persisted job errors');}));
+      const failure=(await pool.query("SELECT * FROM background_job_runs WHERE job_id='conversations' ORDER BY started_at DESC LIMIT 1")).rows[0];assert.equal(failure.error_code,'FAILED');assert.equal(failure.affected_count,null);assert.equal(JSON.stringify(failure).includes('Secret content'),false);
+      let called=false;assert.equal((await runJob('conversations','scheduled',undefined,async()=>{called=true;return {count:0};})).skipped,true);assert.equal(called,false,'scheduled retries respect persisted backoff');
+      await pool.query("UPDATE background_jobs SET retry_at=now()-interval '1 second' WHERE id='conversations'");
+      assert.equal((await runJob('conversations','scheduled',undefined,async()=>({count:0}))).count,0);
+      const tomorrow=new Date(Date.now()+86400000);assert.equal((await runJob('cases','scheduled',undefined,async()=>({count:0}),tomorrow)).count,0,'missed daily slot catches up without replaying every missed day');
+      assert.equal(Number((await pool.query("SELECT count(*) FROM background_job_runs WHERE job_id='cases'")).rows[0].count),runCount+1);
+      await pool.query("UPDATE background_jobs SET last_success_due=NULL,retry_at=NULL WHERE id='conversations'");
+      await pool.query("INSERT INTO background_job_runs(job_id,source,due_at,status) VALUES('conversations','scheduled',now(),'running')");
+      await runJob('conversations','scheduled',undefined,async()=>({count:0}));assert.equal((await pool.query("SELECT count(*)::int AS n FROM background_job_runs WHERE error_code='INTERRUPTED'")).rows[0].n,1);
+      const history=await call('GET','/admin/jobs/cases/history',undefined,undefined,true);assert.equal(history.statusCode,200);assert.ok(history.json().length>0);assert.equal(history.body.includes('admin_id'),false);
+    });
+    await t.test('real server starts both daily workers, exports privately and shuts down cleanly',async()=>{
+      await pool.query('TRUNCATE background_job_runs,background_job_previews');await pool.query('UPDATE background_jobs SET last_success_due=NULL,last_success_at=NULL,retry_at=NULL');
+      const directory=await mkdtemp(join(tmpdir(),'nulltopic-scheduler-')),journalPath=join(directory,'journal.json');
+      const child=spawn(process.execPath,['--import','tsx','src/server.ts'],{env:{...process.env,DATABASE_URL:url,PORT:'0',BACKGROUND_JOBS_ENABLED:'true',CASE_PURGE_JOURNAL_PATH:journalPath},stdio:'ignore'});
+      const exited=new Promise<number|null>((resolve,reject)=>{child.once('error',reject);child.once('exit',resolve);});
+      try{
+        let completed=false;
+        for(let n=0;n<200;n++){if(child.exitCode!==null)throw Error('Scheduler server exited unexpectedly');if((await pool.query('SELECT id FROM background_jobs WHERE last_success_at IS NOT NULL')).rowCount===2){completed=true;break;}await new Promise(r=>setTimeout(r,50));}
+        assert.equal(completed,true,'startup catches up both due tasks');assert.equal((await stat(journalPath)).mode&0o777,0o600);
+        child.kill('SIGTERM');assert.equal(await exited,0);assert.equal((await pool.query("SELECT id FROM background_job_runs WHERE status='running'")).rowCount,0);
+      }finally{if(child.exitCode===null){child.kill('SIGTERM');await exited;}await rm(directory,{recursive:true,force:true});}
     });
   } finally {
     await app.close();

@@ -1,3 +1,4 @@
+# Alternative only: set BACKGROUND_JOBS_ENABLED=false before using an external scheduler.
 # Template only. Not installed/enabled by the application.
 [Unit]
 Description=Daily private moderation case cleanup

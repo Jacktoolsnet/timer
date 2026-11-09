@@ -35,7 +35,7 @@ Dry-run changes nothing, including the restore journal. The worker removes the e
 
 Normal application transactions acquire shared advisory lock 481920 before row locks; direct case writes do likewise with statement triggers. Cleanup/reconciliation acquire the exclusive lock before any row access. This prevents a purge racing a new complaint, decision or hold. Reads using repeatable-read choose their isolation level before that lock. Batches are bounded to 100 cases; the CLI drains batches and mirrors the journal after each committed batch. A busy worker returns `locked:true`: alert/retry, do not assume completion.
 
-Run daily using the separate example systemd timer/service (03:30 Europe/Berlin). Templates are not installed automatically. Monitor failures, lock contention and overdue reviews; a configured command without an installed scheduler is **not** automatic production deletion. Purge happens on the next successful scheduled run after eligibility; scheduling granularity must be reflected in final privacy text.
+The normal backend now runs this task daily at 03:30 Europe/Berlin with startup catch-up and failure retry (see BACKGROUND_JOBS.md). External systemd timer/service templates are alternatives only and must not be enabled alongside the built-in scheduler. Monitor failures, lock contention and overdue reviews; an explicitly disabled scheduler will not perform automatic deletion. Purge happens on the next successful scheduled run after eligibility; scheduling granularity must be reflected in final privacy text.
 
 ## Server backup/restore policy
 
@@ -53,4 +53,8 @@ npm run cleanup:conversations
 
 Reconciliation requires a structurally valid, trusted journal refreshed in the last 24 hours and re-deletes only its exact case UUIDs, even if the old backup appears to have an open case/hold. It is idempotent and does not touch public content. A fresh timestamp alone does not prove completeness/authenticity: protect the journal and verify the last successful export, backup age and provider deletion state before reopening. If a journal export failed or is incomplete, **do not reopen** until the gap is resolved from the live deletion ledger. Never treat an old database's exported ledger as current.
 
-The commands, journal and templates are implemented. External backup expiry, durable out-of-band replication, scheduler installation, monitoring and the final restore acceptance procedure are operator deployment tasks and remain explicit prelaunch gates. Agent/account/subtree deletion remains the next separate phase; its future deletion journal must also cover public data/identities, not only cases.
+The commands, journal and templates are implemented. External backup expiry, durable out-of-band replication, scheduler configuration/monitoring and the final restore acceptance procedure are operator deployment tasks and remain explicit prelaunch gates. Agent/account/subtree deletion remains the next separate phase; its future deletion journal must also cover public data/identities, not only cases.
+
+### Built-in scheduling update (migration 017)
+
+The normal server now owns the daily Berlin scheduler, startup catch-up, retries and durable history. The external timer examples above are **alternatives only**, not a required activation step. Do not run both; set BACKGROUND_JOBS_ENABLED=false if using an external scheduler. During restore keep the server/scheduler stopped or disabled until reconciliation is complete. Automatic runs use the same private journal exporter as CLI. See BACKGROUND_JOBS.md; external backup lifetime/replication requirements remain unchanged.

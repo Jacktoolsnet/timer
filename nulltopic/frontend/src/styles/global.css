@@ -1618,3 +1618,18 @@ body > .site-header > nav .header-action:nth-last-child(-n+2)::after { left: aut
 #admin-retention p { overflow-wrap: anywhere; }
 [data-retention-dialog] footer { margin-top: 20px; display: flex; justify-content: flex-end; gap: 12px; }
 @media (max-width: 480px) { #admin-retention dl { grid-template-columns: minmax(0,1fr); gap: 4px; } #admin-retention dd { margin-bottom: 8px; } }
+
+[data-jobs-list] { display: grid; gap: 18px; min-width: 0; }
+.background-job { min-width: 0; overflow-wrap: anywhere; }
+.background-job dl { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,2fr); gap: 8px 16px; }
+.background-job dt,.background-job dd { margin: 0; }
+.background-job dt { color: var(--muted); }
+.job-state { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 12px; font-size: .8rem; }
+.job-state::before { content: ''; width: 9px; height: 9px; border-radius: 50%; background: var(--accent); }
+.job-state[data-state=failed]::before { background: #c93d50; }
+.job-state[data-state=overdue]::before { background: #bd7c16; }
+.job-state[data-state=running]::before { animation: job-pulse 1.2s ease-in-out infinite alternate; }
+[data-job-dialog] footer { margin-top: 20px; display:flex; justify-content:flex-end; gap:12px; }
+@keyframes job-pulse { to { opacity: .3; } }
+@media(prefers-reduced-motion:reduce) { .job-state::before { animation:none; } }
+@media(max-width:480px) { .background-job dl { grid-template-columns:minmax(0,1fr); } .background-job dd { margin-bottom:8px; } }
