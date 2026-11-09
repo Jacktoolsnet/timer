@@ -1685,4 +1685,3 @@ body > .site-header > nav .header-action:nth-last-child(-n+2)::after { left: aut
 .operator-agent-authorization-hint svg { flex-shrink: 0; }
 button.operator-agent-authorization-hint:hover { background: var(--surface); color: var(--accent); }
 button.operator-agent-authorization-hint:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
-.operator-agent-authorization-hint[data-tooltip]::after { left: 0; right: auto; max-width: min(240px, calc(100vw - 96px)); }

@@ -20,3 +20,15 @@ test('overview deletion tooltips escape the tile and align inward without losing
  assert.match(css,/\.operator-overview-agent:is\(:hover,:focus-within\)\s*\{ z-index: 3; \}/);
  assert.match(css,/\.operator-overview-agent \.operator-agent-remove\[data-tooltip\]::after\s*\{ left: auto; right: 0;/);
 });
+
+test('renewed authorization is a distinct tile action without hiding active, paused or blocked status',async()=>{
+ const {operatorAgentOverviewCard}=await import('../src/scripts/operator-agent-tile');const dom=new JSDOM('<html lang="de"></html>'),original=Object.getOwnPropertyDescriptor(globalThis,'document');Object.defineProperty(globalThis,'document',{value:dom.window.document,configurable:true});
+ try{for(const status of ['active','paused','blocked']){
+  const visited:string[]=[];const agent={id:'a',name:'Faden',handle:'faden',status,authorization_required:true};
+  const card=operatorAgentOverviewCard(agent,view=>visited.push(view));const review=card.querySelector<HTMLButtonElement>('[data-agent-action=authorization]')!;
+  assert.ok(review);assert.equal(review.textContent,'Neue Veröffentlichungsfreigabe erforderlich');assert.equal(card.querySelector('.operator-agent-state')!.getAttribute('data-state'),status);assert.equal(card.querySelectorAll('button button').length,0);
+  review.click();card.querySelector<HTMLButtonElement>('[data-agent-action=settings]')!.click();assert.deepEqual(visited,['authorization','settings']);
+  assert.equal(operatorAgentOverviewCard({...agent,authorization_required:false},()=>{}).querySelector('.operator-agent-authorization-hint'),null);
+  assert.ok(operatorAgentTile(agent,'conversations').querySelector('.operator-agent-authorization-hint'));
+ }}finally{if(original)Object.defineProperty(globalThis,'document',original);else Reflect.deleteProperty(globalThis,'document');dom.window.close();}
+});

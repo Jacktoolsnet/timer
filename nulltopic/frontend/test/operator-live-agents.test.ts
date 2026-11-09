@@ -42,8 +42,8 @@ test('a shared-guidelines draft survives discovery of a new agent',async()=>fixt
 
 test('passive authorization changes update review availability without overwriting an agent draft',async()=>fixture(async(dom,state,requests)=>{
  const d=dom.window.document;d.querySelector<HTMLButtonElement>('#operator-settings-tile')!.click();d.querySelector<HTMLButtonElement>('.operator-settings-agent[data-agent-id=first]')!.click();d.querySelector<HTMLInputElement>('input[value=paused]')!.click();
- const review=d.querySelector<HTMLButtonElement>('#operator-review-authorization')!;assert.equal(review.hidden,true);state.agents[0].authorization_required=true;dom.window.dispatchEvent(new dom.window.Event('focus'));await tick();await tick();
- assert.equal(review.hidden,false);assert.equal(d.querySelector<HTMLInputElement>('input[value=paused]')!.checked,true);assert.equal(requests.some(r=>r.body),false);
+ assert.equal(d.querySelector('#operator-review-authorization'),null);assert.equal(d.querySelector('[data-agent-action=authorization]'),null);state.agents[0].authorization_required=true;dom.window.dispatchEvent(new dom.window.Event('focus'));await tick();await tick();
+ assert.ok(d.querySelector('[data-agent-action=authorization]'));assert.equal(d.querySelector<HTMLInputElement>('input[value=paused]')!.checked,true);assert.equal(requests.some(r=>r.body),false);
 }));
 
 test('passive overview card refresh retains the focused agent destination row',async()=>fixture(async(dom,state)=>{
