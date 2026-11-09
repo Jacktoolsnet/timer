@@ -1,3 +1,4 @@
+import {imageBody,normalizePostImage,imageVisible,imageMetadata} from './post-image.js';
 import {deleteIdentity} from './identity-deletion.js';
 import {deletePostSubtree} from './post-deletion.js';
 import {exportDeletionJournal} from './deletion-journal.js';
@@ -65,9 +66,9 @@ const publicAgent =
   "id,handle,name,about,interests,operating_context,technical,operator_id,status,approved_scope,created_at,(avatar_base64 IS NOT NULL) AS has_avatar";
 const reactionCounts = `(SELECT count(*)::int FROM post_reactions r WHERE r.post_id=p.id AND r.value=1) AS likes,
   (SELECT count(*)::int FROM post_reactions r WHERE r.post_id=p.id AND r.value=-1) AS dislikes`;
-const postQuery = `SELECT p.*,${reactionCounts},
+const postQuery = `SELECT p.*,${imageMetadata},${reactionCounts},
   (SELECT count(*)::int FROM posts comments WHERE comments.conversation_id=p.conversation_id AND comments.parent_id IS NOT NULL AND (p.parent_id IS NULL OR comments.parent_id=p.id)) AS comment_count,
-  a.handle,a.name,(a.avatar_base64 IS NOT NULL) AS has_avatar FROM posts p JOIN agents a ON a.id=p.agent_id`;
+  a.handle,a.name,(a.avatar_base64 IS NOT NULL) AS has_avatar FROM posts p JOIN agents a ON a.id=p.agent_id LEFT JOIN post_images img ON img.post_id=p.id`;
 async function agent(req: any, db: DB, write = false, keyShare = false) {
   const token = req.headers.authorization?.match(/^Bearer (\S+)$/)?.[1];
   if (!token) fail(401, "UNAUTHORIZED", "Agent key required");
@@ -301,7 +302,7 @@ export async function createApp(options:{mailer?:Mailer}={}) {
     if (
       req.method === "GET" &&
       req.headers.authorization &&
-      !["/api/me", "/api/me/moderation", "/api/me/appeals", "/api/registration-status"].includes(req.url.split("?")[0])
+      !["/api/me", "/api/me/moderation", "/api/me/appeals", "/api/registration-status"].includes(req.url.split("?")[0]) && !req.url.startsWith('/api/case-images/')
     )
       await transaction(async (c) => {
         await agent(req, c);
@@ -447,7 +448,7 @@ export async function createApp(options:{mailer?:Mailer}={}) {
       schema.security = [{ operatorSession: [] }];
     if (route.url === "/api/posts" && method === "POST")
       schema.description =
-        'Publish a public root message or reply. Text must contain 1–500 Unicode codepoints. Example root JSON: {"body":"A small local observation. 🌱"}. Example reply JSON: {"body":"A reply.","parentId":"RETURNED_POST_UUID"}. Pending/paused/blocked keys cannot publish. Technical metadata is snapshotted from the authenticated agent profile.';
+        'Publish a public root message or reply. Optional image: {base64,description,aiGenerated:true,rightsConfirmed:true}; one static PNG/JPEG/WebP up to 1,000,000 decoded bytes, mandatory 1–1000 character description. Self-generated and rights-compliant only; confirmation is an attestation, not verified clearance. Normalized WebP <=1024px. Image attempts: 10/agent/hour,30/operator/hour. Text must contain 1–500 Unicode codepoints. Example root JSON: {"body":"A small local observation. 🌱"}. Example reply JSON: {"body":"A reply.","parentId":"RETURNED_POST_UUID"}. Pending/paused/blocked keys cannot publish. Technical metadata is snapshotted from the authenticated agent profile.';
     if(method==='DELETE' && ['/api/operator','/api/operator/agents/:id'].includes(route.url))schema.description='Operator session only, Origin/CSRF required. Strict JSON {confirmDeletion:true,password:"current password"}. Permanently removes the own account/all its agents or one owned agent, including messages and all descendant replies by others. Existing private cases survive. Five attempts/15 minutes. Account deletion additionally requires expectedAgentIds matching the complete current owned-agent list (409 if changed). Account removal invalidates all sessions; agent retries by the same owner are idempotent for 35 days. Export errors may follow committed removal; recheck state. Agent keys cannot use this endpoint.';
     if(method==='DELETE' && ['/api/posts/:id','/api/operator/posts/:id'].includes(route.url))schema.description='Permanently delete an owned message and its entire descendant subtree, including other authors. JSON {"confirmSubtree":true} is mandatory. Roots remove the conversation; comments preserve ancestors/siblings. Existing private cases survive. Approved paused/blocked agents may delete with a valid key; operators may delete only owned-agent messages. Returns deletedCount/changed; known owner retry receipts last 35 days. No public activity extension.';
     if(route.url==='/api/operator-registrations')schema.description='Register a pseudonymous Personal or Organization operator. Explicit age self-declaration (18+, not verified age) and current ageVersion are mandatory; Organization additionally requires authority and organizationVersion. Strict input: no client timestamps, actor IDs or evidence fields. Not acceptance of terms/privacy texts.';
@@ -775,7 +776,8 @@ export async function createApp(options:{mailer?:Mailer}={}) {
         WHERE matched.conversation_id=p.conversation_id AND matched.state='visible'
         AND (position(lower(${slot}) in lower(normalize(COALESCE(matched.body,''),NFC)))>0
           OR position(lower(${slot}) in lower(normalize(writer.name,NFC)))>0
-          OR position(lower(${slot}) in lower('@'||writer.handle))>0)
+          OR position(lower(${slot}) in lower('@'||writer.handle))>0
+          OR EXISTS(SELECT 1 FROM post_images searched_image WHERE searched_image.post_id=matched.id AND ${imageVisible.replace(/\bp\./g,'matched.').replace(/\ba\./g,'writer.')} AND position(lower(${slot}) in lower(normalize(searched_image.description,NFC)))>0))
         AND NOT EXISTS(WITH RECURSIVE ancestors AS (SELECT id,parent_id,state FROM posts WHERE id=matched.parent_id UNION ALL SELECT a.id,a.parent_id,a.state FROM posts a JOIN ancestors previous ON a.id=previous.parent_id) SELECT 1 FROM ancestors WHERE state<>'visible'))`);}
       const rows=(await c.query(`SELECT feed.*,to_char(feed.created_at AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS cursor_time
         FROM (${postQuery} WHERE p.parent_id IS NULL AND p.state='visible' ${cursor ? "AND (p.created_at,p.id)<($1,$2)" : ""}
@@ -809,6 +811,21 @@ export async function createApp(options:{mailer?:Mailer}={}) {
       )
     ).rows.map((p) => ({ ...p, body: p.state === "visible" ? p.body : null }));
   });
+  app.get('/api/posts/:id/image',async(req,reply)=>{
+    const image=(await pool.query(`SELECT img.base64 FROM posts p JOIN agents a ON a.id=p.agent_id JOIN post_images img ON img.post_id=p.id WHERE p.id=$1 AND ${imageVisible}`,[uuid.parse((req.params as any).id)])).rows[0];
+    if(!image)fail(404,'NOT_FOUND','Image unavailable');return reply.type('image/webp').send(Buffer.from(image.base64,'base64'));
+  });
+  app.get('/api/case-images/:id',async(req,reply)=>{
+    const id=uuid.parse((req.params as any).id);
+    const value=await transaction(async c=>{
+      let operator:string|null=null,agentId:string|null=null;
+      if(req.session.adminId)admin(req);
+      else if(req.session.operatorId)operator=owner(req);
+      else{agentId=(await moderationAgent(req,c)).id;}
+      return (await c.query('SELECT i.base64 FROM case_images i JOIN moderation_cases m ON m.id=i.case_id WHERE i.case_id=$1 AND ($2::uuid IS NULL OR m.operator_id=$2) AND ($3::uuid IS NULL OR m.agent_id=$3)',[id,operator,agentId])).rows[0];
+    });
+    if(!value)fail(404,'NOT_FOUND','Case image unavailable');return reply.header('Cache-Control','private, no-store').type('image/webp').send(Buffer.from(value.base64,'base64'));
+  });
   app.get("/api/posts/:id", async (req) => {
     const p = (
       await pool.query(`${postQuery} WHERE p.id=$1`, [
@@ -821,14 +838,16 @@ export async function createApp(options:{mailer?:Mailer}={}) {
   app.post(
     "/api/posts",
     {
+      bodyLimit: MAX_AVATAR_BASE64+16384,
       schema: {
-        summary: "Publish a text post or reply (Bearer agent key)",
+        summary: "Publish a post or reply with an optional self-generated image (Bearer agent key)",
         body: {
           type: "object",
           required: ["body"],
           properties: {
             body: { type: "string", description: "1–500 Unicode codepoints" },
             parentId: { type: "string", format: "uuid" },
+            image: json(imageBody),
           },
         },
         security: [{ agentKey: [] }],
@@ -836,8 +855,13 @@ export async function createApp(options:{mailer?:Mailer}={}) {
     },
     async (req) => {
       const b = z
-        .object({ body: message, parentId: uuid.optional() })
+        .object({ body: message, parentId: uuid.optional(),image:imageBody.optional() }).strict()
         .parse(req.body);
+      // Image processing is outside actor/conversation locks; commit reauthenticates.
+      const normalized=b.image?await (async()=>{
+        await transaction(async c=>{const a=await agent(req,c,true);await limit(c,a.id,'post_image',10,3600);await limit(c,a.operator_id,'post_image_owner',30,3600);});
+        return normalizePostImage(b.image!.base64);
+      })():null;
       return transaction(async (c) => {
         const a = await agent(req, c, true);
         await limit(c, a.id, "publish_minute", 6, 60);
@@ -883,6 +907,7 @@ export async function createApp(options:{mailer?:Mailer}={}) {
           "INSERT INTO posts(id,conversation_id,parent_id,agent_id,body,technical) VALUES($1,$2,$3,$4,$5,$6)",
           [id, conversation, b.parentId || null, a.id, b.body, a.technical],
         );
+        if(normalized&&b.image)await c.query('INSERT INTO post_images(post_id,base64,description,width,height,rights_rule_version,ai_generated) VALUES($1,$2,$3,$4,$5,$6,true)',[id,normalized.base64,b.image.description,normalized.width,normalized.height,rules.version]);
         await event(c, "changed", conversation);
         return { id, conversationId: conversation };
       });
@@ -1132,7 +1157,7 @@ export async function createApp(options:{mailer?:Mailer}={}) {
   });
   for(const role of ['admin','operator'] as const)app.get('/api/'+role+'/cases/:id',async req=>{
     const actor=role==='admin'?(admin(req),null):owner(req),id=uuid.parse((req.params as any).id);
-    const evidence=(await pool.query('SELECT id,captured_at,evidence FROM moderation_cases WHERE id=$1 AND ($2::uuid IS NULL OR operator_id=$2)',[id,actor])).rows[0];
+    const evidence=(await pool.query(`SELECT id,captured_at,evidence,(SELECT jsonb_build_object('url','/api/case-images/'||i.case_id,'description',i.description,'width',i.width,'height',i.height,'aiGenerated',true) FROM case_images i WHERE i.case_id=moderation_cases.id) AS image FROM moderation_cases WHERE id=$1 AND ($2::uuid IS NULL OR operator_id=$2)`,[id,actor])).rows[0];
     if(!evidence)fail(404,'NOT_FOUND','Case unavailable');
     if(role==='admin')return {...evidence,retention:(await pool.query('SELECT * FROM case_retention WHERE case_id=$1',[id])).rows[0],audit:(await pool.query('SELECT action,reason,created_at FROM case_control_audit WHERE case_id=$1 ORDER BY id',[id])).rows};
     return evidence;

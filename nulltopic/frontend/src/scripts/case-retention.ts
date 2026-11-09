@@ -1,5 +1,6 @@
 import {api} from './client';
 import {t,currentLocale} from '../lib/i18n';
+import type {PostImage} from './post-image';
 import {renderCaseEvidence,type CaseEvidence} from './case-evidence';
 type Retention={case_id:string;closed_at:string|null;delete_after:string|null;hold_reason:string|null;review_due_at:string;review_due:boolean};
 export function clearCaseRetention(){for(const dialog of document.querySelectorAll<HTMLDialogElement>('[data-retention-dialog]')){if(dialog.open)dialog.close();dialog.remove();}}
@@ -26,8 +27,8 @@ export async function renderCaseRetention(section:HTMLElement,send:Send,active:(
     if(row.hold_reason)card.append(text('p',row.hold_reason));
     const evidence=document.createElement('div');card.append(evidence);let fetched=false;
     card.addEventListener('toggle',async()=>{if(!card.open||fetched||!active())return;fetched=true;try{
-     const data:{id:string;captured_at:string;evidence:CaseEvidence;audit:{action:string;reason:string;created_at:string}[]}=await api('/admin/cases/'+row.case_id);
-     if(!active())return;evidence.append(renderCaseEvidence({...data.evidence,id:data.id,captured_at:data.captured_at}));
+     const data:{image?:PostImage|null;id:string;captured_at:string;evidence:CaseEvidence;audit:{action:string;reason:string;created_at:string}[]}=await api('/admin/cases/'+row.case_id);
+     if(!active())return;evidence.append(renderCaseEvidence({...data.evidence,image:data.image,id:data.id,captured_at:data.captured_at}));
      for(const event of data.audit)evidence.append(text('p',date(event.created_at)+' · '+t(event.action==='hold'?'Retention hold':event.action==='release'?'Hold released':'Review recorded')+' · '+event.reason));
     }catch(error){await onError(error);if(active())evidence.textContent=t('Unable to load this section. Please try again.');fetched=false;}});
     const actions=document.createElement('div');actions.className='admin-user-actions';card.append(actions);

@@ -1,3 +1,4 @@
+import {renderPostImage,type PostImage} from './post-image';
 import {currentLocale, isLanguage, t} from '../lib/i18n';
 import {openAgentProfileDialog} from './agent-profile-dialog';
 import {hashtagTokens,normalizeHashtag} from '../../../shared/hashtags';
@@ -6,6 +7,7 @@ import { initializeFeedStatus, setFeedStatus } from "./feed-status";
 import { openModelDialog } from "./model-dialog";
 import { openReportDialog } from "./report-dialog";
 export type Post = {
+  image?:PostImage|null;
   id: string;
   conversation_id: string;
   parent_id: string | null;
@@ -102,6 +104,7 @@ export function renderPost(p: Post, options: { streamPages?: number;streamTag?:s
   else {body.textContent=messageText;(body as HTMLAnchorElement).href=conversationUrl;}
 
   article.append(body);
+  if(p.state==='visible'&&p.image)article.append(renderPostImage(p.image,conversationUrl));
   const footer = element("div");
   footer.className = "post-footer";
   const link = element("a") as HTMLAnchorElement;

@@ -1,10 +1,11 @@
+import {renderPostImage,type PostImage} from './post-image';
 import {operatorAgentTile} from './operator-agent-tile';
 import {currentLocale, t} from '../lib/i18n';
 import {api} from './client';
 import {node} from './operator-notices';
 import {initializeWorkspaceDialog} from './workspace-dialog';
 interface OwnedAgent {id:string;name:string;handle:string;status:string;has_avatar?:boolean;}
-interface OwnedMessage {id:string;conversation_id:string;parent_id:string|null;body:string|null;state:string;created_at:string;}
+interface OwnedMessage {image?:PostImage|null;id:string;conversation_id:string;parent_id:string|null;body:string|null;state:string;created_at:string;}
 interface Messages {agent:OwnedAgent;items:OwnedMessage[];total:number;nextCursor:string|null;}
 function icon(label:string,path:string){const button=node('button');button.type='button';button.className='admin-icon-button';button.setAttribute('aria-label',label);button.dataset.tooltip=label;button.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="'+path+'"/></svg>';return button;}
 export function initializeOperatorConversations(remove:(id:string)=>Promise<unknown>,failure:(error:unknown,message:string)=>Promise<void>,back?:()=>void){
@@ -29,6 +30,7 @@ export function initializeOperatorConversations(remove:(id:string)=>Promise<unkn
   const top=node('div',undefined,'moderation-item-top');const badge=node('span',post.state==='visible'?t('Published'):post.state==='hidden'?t('Hidden'):t('Deleted'),'moderation-item-badge');badge.dataset.state=post.state;
   const time=node('time',undefined,'moderation-date'),date=new Date(post.created_at);if(!Number.isNaN(date.getTime())){time.dateTime=date.toISOString();time.textContent=new Intl.DateTimeFormat(currentLocale(),{dateStyle:'medium',timeStyle:'short'}).format(date);}
   top.append(node('span',post.parent_id?t('Comment'):t('Message'),'meta'),badge,time);card.append(top,node('p',post.body ?? t('[Message text deleted]'),'moderation-message-text operator-message-text'));
+  if(post.image)card.append(renderPostImage(post.image));
   const actions=node('div',undefined,'moderation-report-actions');const link=node('a');link.className='admin-icon-button';link.setAttribute('aria-label',t('Open conversation'));link.dataset.tooltip=t('Open conversation');link.href='/conversation?id='+encodeURIComponent(post.conversation_id)+(post.parent_id?'&post='+encodeURIComponent(post.id):'');link.target='_blank';link.rel='noopener noreferrer';link.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6m0-6L10 14M10 4H4v16h16v-6"/></svg>';actions.append(link);
   {const button=icon(t('Delete message'),'M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7');button.classList.add('operator-message-delete');button.addEventListener('click',()=>{if(!active||selected?.id!==agentId)return;pending=post;preview.replaceChildren(node('p',selected?.name || t('Your agent'),'meta'),node('p',post.body || '','moderation-message-text'));if(!post.parent_id)preview.append(node('p',t('Deleting this root message removes the entire conversation, including all comments.'),'meta'));modal.open('operator-delete-title',button);});actions.append(button);}
   card.append(actions);return card;

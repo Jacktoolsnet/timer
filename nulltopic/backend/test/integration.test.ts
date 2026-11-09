@@ -1906,6 +1906,54 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
       await runJob('conversations','scheduled',undefined,async()=>({count:0}));assert.equal((await pool.query("SELECT count(*)::int AS n FROM background_job_runs WHERE error_code='INTERRUPTED'")).rows[0].n,1);
       const history=await call('GET','/admin/jobs/cases/history',undefined,undefined,true);assert.equal(history.statusCode,200);assert.ok(history.json().length>0);assert.equal(history.body.includes('admin_id'),false);
     });
+    await t.test('self-generated post images enforce rights, size, visibility, immutable case retention and physical deletion',async()=>{
+      await pool.query('DELETE FROM limits');
+      const approve=async(handle:string,operatorHandle:string)=>{
+        const r=await call('POST','/registrations',{...prepared(handle),operatorHandle});assert.equal(r.statusCode,200,r.body);const data=r.json(),tok=new URL(data.confirmationUrl).searchParams.get('confirmation');await login(operatorHandle);
+        const p=(await call('GET','/confirmation?token='+tok,undefined,undefined,true)).json();assert.equal((await call('POST','/confirmation',{token:tok,revision:p.scope_revision,scope:'Synthetic images and text only',ruleVersion:p.ruleVersion,authorizationVersion:p.authorizationVersion,publicParticipation:true,authorizePublication:true},undefined,true)).statusCode,200);return data;
+      };
+      const author=await approve('image_author','test_operator'),peer=await approve('image_peer','other_operator');
+      const raw=await sharp({create:{width:1600,height:1000,channels:3,background:'#9361af'}}).withMetadata({exif:{IFD0:{ImageDescription:'synthetic-private-metadata'}}}).png().toBuffer();
+      const image={base64:raw.toString('base64'),description:'A purple geometric study <script>literal</script>',aiGenerated:true,rightsConfirmed:true};
+      const post=(patch:any={},key=author.key)=>call('POST','/posts',{body:'Image fixture',image:{...image,...patch}},key);
+      const before=Number((await pool.query('SELECT count(*) FROM posts')).rows[0].count);
+      for(const patch of [{rightsConfirmed:false},{aiGenerated:false},{description:''},{description:'x'.repeat(1001)},{base64:'https://example.invalid/image.png'},{base64:'data:image/png;base64,'+image.base64},{base64:Buffer.from('<svg/>').toString('base64')},{base64:'a==='}])assert.equal((await post(patch)).statusCode,400);
+      const oversized=Buffer.concat([raw,Buffer.alloc(1_000_001-raw.length)]);assert.equal((await post({base64:oversized.toString('base64')})).statusCode,413);
+      assert.equal(Number((await pool.query('SELECT count(*) FROM posts')).rows[0].count),before);
+      assert.ok(Number((await pool.query("SELECT sum(count) AS n FROM limits WHERE bucket LIKE 'post_image:' || $1::text || ':%'",[author.id])).rows[0].n)>0);
+      await pool.query('DELETE FROM limits');
+      const created=await post();assert.equal(created.statusCode,200,created.body);const id=created.json().id;
+      const publicPost=await call('GET','/posts/'+id);assert.equal(publicPost.statusCode,200);assert.equal(publicPost.json().image.description,image.description);assert.equal(publicPost.body.includes('base64'),false);assert.equal(publicPost.json().image.width,1024);
+      const binary=await call('GET','/posts/'+id+'/image');assert.equal(binary.statusCode,200);assert.equal(binary.headers['content-type'],'image/webp');assert.equal(binary.headers['x-content-type-options'],'nosniff');assert.equal(binary.headers['cache-control'],'no-store');assert.ok(binary.rawPayload.length<=1_000_000);assert.equal(binary.rawPayload.includes(Buffer.from('synthetic-private-metadata')),false);
+      const meta=await sharp(binary.rawPayload).metadata();assert.equal(meta.format,'webp');assert.equal(meta.exif,undefined);
+      assert.equal((await call('GET','/feed?q='+encodeURIComponent('geometric study'))).json().items.some((p:any)=>p.id===id),true);
+      const reply=await call('POST','/posts',{body:'Image reply',parentId:id,image},peer.key);assert.equal(reply.statusCode,200,reply.body);const child=reply.json().id;
+      const report=await call('POST','/reports',{postId:child,reason:'Synthetic image evidence'});assert.equal(report.statusCode,200,report.body);
+      const caseRow=(await pool.query('SELECT case_id FROM reports WHERE post_id=$1',[child])).rows[0];const caseId=caseRow.case_id;
+      assert.equal((await pool.query('SELECT case_id FROM case_images WHERE case_id=$1',[caseId])).rowCount,1);
+      assert.equal((await call('GET','/case-images/'+caseId)).statusCode,401);
+      assert.equal((await call('GET','/case-images/'+caseId,undefined,author.key)).statusCode,404);
+      assert.equal((await call('GET','/case-images/'+caseId,undefined,peer.key)).statusCode,200);
+      await login('test_operator');assert.equal((await call('GET','/case-images/'+caseId,undefined,undefined,true)).statusCode,404);
+      await login('other_operator');assert.equal((await call('GET','/case-images/'+caseId,undefined,undefined,true)).statusCode,200);
+      await login('test_admin',true);assert.equal((await call('GET','/case-images/'+caseId,undefined,undefined,true)).statusCode,200);
+      const rootAccount=(await pool.query('SELECT id,handle FROM admins WHERE is_root')).rows[0];
+      if(rootAccount){await pool.query('UPDATE admins SET enabled=true,password=$2,auth_version=gen_random_uuid() WHERE id=$1',[rootAccount.id,await argon2.hash(password)]);await login(rootAccount.handle,true);assert.equal((await call('GET','/case-images/'+caseId,undefined,undefined,true)).statusCode,403);await login('test_admin',true);}
+      const saved=(await call('GET','/admin/cases/'+caseId,undefined,undefined,true)).json();assert.equal(saved.image.description,image.description);assert.equal(JSON.stringify(saved).includes('base64'),false);
+      await assert.rejects(pool.query("UPDATE case_images SET description='tampered' WHERE case_id=$1",[caseId]));
+      await pool.query("UPDATE posts SET state='hidden' WHERE id=$1",[id]);assert.equal((await call('GET','/posts/'+id+'/image')).statusCode,404);assert.equal((await call('GET','/posts/'+child+'/image')).statusCode,404);assert.equal((await call('GET','/posts/'+child)).json().image,null);
+      assert.equal((await call('GET','/feed?q=geometric')).json().items.some((p:any)=>p.id===id),false);
+      await pool.query("UPDATE posts SET state='visible' WHERE id=$1",[id]);await pool.query("UPDATE agents SET status='blocked' WHERE id=$1",[peer.id]);assert.equal((await call('GET','/posts/'+child+'/image')).statusCode,404);assert.equal((await post({},peer.key)).statusCode,403);assert.equal((await call('GET','/case-images/'+caseId,undefined,peer.key)).statusCode,200);
+      await pool.query("UPDATE agents SET status='active' WHERE id=$1",[peer.id]);
+      const removed=await call('DELETE','/posts/'+id,{confirmSubtree:true},author.key);assert.equal(removed.statusCode,200,removed.body);assert.equal((await pool.query('SELECT post_id FROM post_images WHERE post_id=ANY($1::uuid[])',[[id,child]])).rowCount,0);assert.equal((await call('GET','/posts/'+child+'/image')).statusCode,404);assert.equal((await call('GET','/case-images/'+caseId,undefined,peer.key)).statusCode,200);
+      // A case purge must remove the independent binary evidence too.
+      await pool.query('DELETE FROM reports WHERE case_id=$1',[caseId]);await pool.query('DELETE FROM moderation_cases WHERE id=$1',[caseId]);assert.equal((await pool.query('SELECT case_id FROM case_images WHERE case_id=$1',[caseId])).rowCount,0);
+      const imageLimit=process.env.LIMIT_POST_IMAGE,ownerLimit=process.env.LIMIT_POST_IMAGE_OWNER;
+      try{process.env.LIMIT_POST_IMAGE='1';assert.equal((await post()).statusCode,429);delete process.env.LIMIT_POST_IMAGE;process.env.LIMIT_POST_IMAGE_OWNER='1';assert.equal((await post()).statusCode,429);}
+      finally{if(imageLimit===undefined)delete process.env.LIMIT_POST_IMAGE;else process.env.LIMIT_POST_IMAGE=imageLimit;if(ownerLimit===undefined)delete process.env.LIMIT_POST_IMAGE_OWNER;else process.env.LIMIT_POST_IMAGE_OWNER=ownerLimit;}
+      // An invalid image cannot bypass missing or obsolete publication consent.
+      await pool.query('DELETE FROM agent_authorizations WHERE agent_id=$1',[author.id]);assert.equal((await post()).statusCode,403);
+    });
     await t.test('operator identity deletion reauthenticates, removes subtrees and sessions, preserves independent cases and restores safely',async()=>{
       await pool.query('DELETE FROM limits');
       const ownerId=await createOperator('erase_owner');
@@ -1929,6 +1977,8 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
       const root=await publish(a.key,'Identity root evidence'),child=await publish(peer.key,'Foreign child removed with parent',root),foreignRoot=await publish(peer.key,'Unaffected foreign root'),branch=await publish(a.key,'Owned branch',foreignRoot),descendant=await publish(peer.key,'Foreign descendant removed',branch),sibling=await publish(peer.key,'Foreign sibling remains',foreignRoot);
       const ownSecond=await publish(b.key,'Second agent survives first deletion');
       await pool.query('INSERT INTO post_reactions(post_id,agent_id,value) VALUES($1,$2,1)',[sibling,a.id]);
+      const imageBytes=(await sharp({create:{width:16,height:16,channels:3,background:'purple'}}).webp().toBuffer()).toString('base64');
+      await pool.query('INSERT INTO post_images(post_id,base64,description,width,height,rights_rule_version,ai_generated) VALUES($1,$2,$3,16,16,$4,true)',[root,imageBytes,'Synthetic identity media fixture',rules.version]);
       const report=randomUUID();await pool.query("INSERT INTO reports(id,post_id,reason) VALUES($1,$2,'Identity deletion report')",[report,root]);
       const decision=(await pool.query("INSERT INTO moderation(admin_id,agent_id,post_id,action,reason,report_id) VALUES($1,$2,$3,'hide','Evidence must survive',$4) RETURNING id,case_id",[admin,a.id,root,report])).rows[0];
       const appeal=randomUUID();await pool.query("INSERT INTO appeals(id,operator_id,subject_agent_id,moderation_id,reason) VALUES($1,$2,$3,$4,'Synthetic appeal')",[appeal,ownerId,a.id,decision.id]);
@@ -1958,6 +2008,7 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
       assert.equal((await pool.query('SELECT * FROM post_reactions WHERE agent_id=$1',[a.id])).rowCount,0);
       assert.deepEqual((await pool.query('SELECT evidence FROM moderation_cases WHERE id=$1',[decision.case_id])).rows[0].evidence,evidence);
       assert.equal((await pool.query('SELECT id FROM appeals WHERE id=$1',[appeal])).rowCount,1);
+      assert.equal((await pool.query('SELECT post_id FROM post_images WHERE post_id=$1',[root])).rowCount,0);assert.equal((await pool.query('SELECT case_id FROM case_images WHERE case_id=$1',[decision.case_id])).rowCount,1);
       assert.equal((await pool.query('SELECT id FROM operators WHERE id=$1',[ownerId])).rowCount,1);
       // Replay a genuinely restored public identity; only UUID markers authorize erasure.
       const ledger=JSON.parse(await readFile(process.env.CASE_PURGE_JOURNAL_PATH!,'utf8'));assert.equal(ledger.version,3);assert.ok(ledger.identityEntries.some((r:any)=>r.identity_id===a.id));assert.ok(ledger.identityEntries.every((r:any)=>Object.keys(r).sort().join(',')==='deleted_at,identity_id,kind'));

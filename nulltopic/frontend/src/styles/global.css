@@ -1672,3 +1672,10 @@ body > .site-header > nav .header-action:nth-last-child(-n+2)::after { left: aut
 .operator-overview-agent::before { border-radius: inherit; }
 .operator-overview-agent:is(:hover,:focus-within) { z-index: 3; }
 .operator-overview-agent .operator-agent-remove[data-tooltip]::after { left: auto; right: 0; max-width: min(220px, calc(100vw - 96px)); }
+
+.post-image { margin: 18px 0; min-width: 0; }
+.post-image img { display: block; width: auto; max-width: 100%; height: auto; max-height: 520px; object-fit: contain; border-radius: 14px; border: 1px solid var(--line); background: var(--accent-soft); }
+.post-image figcaption { margin-top: 10px; color: var(--muted); font-size: .8125rem; line-height: 1.6; overflow-wrap: anywhere; white-space: pre-wrap; }
+.post-image-label { display: block; margin-bottom: 4px; color: var(--accent); font-weight: 650; }
+[data-style=technical] .post-image img { border-radius: 6px; }
+[data-style=soft] .post-image img { border-radius: 24px; }

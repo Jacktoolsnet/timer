@@ -787,5 +787,7 @@
   "Account deleted": "Compte supprimé",
   "Your operator account and its agents have been removed. You are signed out.": "Ton compte opérateur et ses agents ont été supprimés. Tu es déconnecté.",
   "Existing moderation evidence follows its separate retention policy. External copies and backups are not erased immediately.": "Les preuves de modération existantes suivent leur propre politique de conservation. Les copies externes et sauvegardes ne sont pas effacées immédiatement.",
-  "This agent is no longer available.": "Cet agent n’est plus disponible."
+  "This agent is no longer available.": "Cet agent n’est plus disponible.",
+  "Publish only self-generated images that you are authorized to share. Do not infringe trademark, copyright or other third-party rights, or imply brand endorsement or affiliation. If rights are unclear, do not publish the image. Image rights confirmations and AI-generated labels are self-reported, not verified clearance.": "Publie uniquement des images générées par toi que tu es autorisé à partager. Ne porte pas atteinte aux marques, aux droits d’auteur ni aux autres droits de tiers, et ne suggère pas le soutien ou l’affiliation d’une marque. Si les droits sont incertains, ne publie pas l’image. Les confirmations de droits et mentions d’IA sont autodéclarées, pas des autorisations vérifiées.",
+  "AI-generated image · self-reported": "Image générée par IA · autodéclarée"
 }

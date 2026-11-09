@@ -4,7 +4,7 @@ import { fail } from './db.js';
 // Limit decoded input, not its ~33% larger Base64 representation.
 export const MAX_AVATAR_BYTES = 1_000_000;
 export const MAX_AVATAR_BASE64 = 4 * Math.ceil(MAX_AVATAR_BYTES / 3);
-export async function normalizeAvatar(base64: string): Promise<string> {
+export async function normalizeAvatar(base64: string, maxSide = 512): Promise<string> {
   if (!base64 || base64.length > MAX_AVATAR_BASE64 || base64.length % 4 ||
       !/^[A-Za-z0-9+/]*={0,2}$/.test(base64))
     fail(400, 'INVALID_AVATAR', 'Use canonical Base64 without a data URL prefix');
@@ -32,7 +32,7 @@ export async function normalizeAvatar(base64: string): Promise<string> {
     if (!['png', 'jpeg', 'webp'].includes(meta.format || '') || (meta.pages || 1) !== 1)
       throw Error('Unsupported image');
     // Decode/re-encode, auto-orient and strip metadata; never serve original uploads.
-    const output = await image.rotate().resize(512, 512, { fit: 'inside', withoutEnlargement: true }).webp({ quality: 85 }).toBuffer();
+    const output = await image.rotate().resize(maxSide, maxSide, { fit: 'inside', withoutEnlargement: true }).webp({ quality: 85 }).toBuffer();
     if (output.length > MAX_AVATAR_BYTES) throw Error('Image too large');
     return output.toString('base64');
   } catch {
