@@ -1,3 +1,4 @@
+import {renderCaseRetention,clearCaseRetention} from './case-retention';
 import {t} from '../lib/i18n';
 import {renderReviewParticipation} from './review-participation';
 import {initializeReviewDecisionPicker} from './review-decision-picker';
@@ -5,7 +6,7 @@ import {initializeWorkspaceDialog} from './workspace-dialog';
 import {initializeModerationActionPicker} from './moderation-action-picker';
 import {renderModerationInbox, type ModerationReport, type ReviewRequest, type ModerationInbox} from './moderation-inbox';
 import {api} from './client';
-type View = 'overview' | 'users' | 'moderation';
+type View = 'overview' | 'users' | 'moderation' | 'retention';
 type AdminUser = {id: string; handle: string; is_root: boolean; enabled: boolean};
 
 export async function initializeAdministration() {
@@ -18,6 +19,7 @@ export async function initializeAdministration() {
   const submit = login.querySelector<HTMLButtonElement>('button[type=submit]')!;
   const management = document.querySelector<HTMLElement>('#admin-user-management')!;
   const moderation = document.querySelector<HTMLElement>('#admin-moderation')!;
+  const retention = document.querySelector<HTMLElement>('#admin-retention');
   const overview = document.querySelector<HTMLElement>('#admin-overview')!;
   const usersStatus = document.querySelector<HTMLElement>('#admin-users-status')!;
   const usersTile = document.querySelector<HTMLButtonElement>('#admin-users-tile')!;
@@ -108,7 +110,7 @@ export async function initializeAdministration() {
         signedIn = isRoot = false; ++usersRequest; clearPasswords(); toolbar(false);
         modal.close(true);dashboard.hidden = true; shell.hidden = false;
         document.querySelector('#admin-users')!.replaceChildren();
-        document.querySelector('#reports')!.textContent = '';openCases.clear();
+        document.querySelector('#reports')!.textContent = '';openCases.clear();clearCaseRetention();retention?.querySelector('[data-retention-list]')?.replaceChildren();
         status.textContent = t('Your session could not be verified. Please sign in again.');
       } finally { checkingPermission = false; }
     }
@@ -178,25 +180,28 @@ export async function initializeAdministration() {
   }
   const requestedView = (): View => {
     const hash = win.location.hash.slice(1);
-    return hash === 'users' || hash === 'moderation' ? hash : 'overview';
+    return hash === 'users' || hash === 'moderation' || hash === 'retention' ? hash : 'overview';
   };
   async function showView(next: View, focus = false) {
     if (!signedIn) return;
-    if (next === 'users' && !isRoot) next = 'overview';
+    if ((next === 'users' && !isRoot) || (isRoot && (next === 'moderation'||next === 'retention'))) next = 'overview';
     if (view === 'users' && next !== 'users') clearPasswords();
+    if(view==='retention')clearCaseRetention();
     if (view === 'moderation' && next !== 'moderation') { modal.close(true); clearReview(); actionForm.reset(); selectedReport = null; selection.hidden = true; }
     view = next;
     const version = ++viewVersion;
     overview.hidden = next !== 'overview';
     management.hidden = next !== 'users';
     moderation.hidden = next !== 'moderation';
+    if(retention)retention.hidden=next!=='retention';
     status.textContent = '';
     if (focus) {
-      const heading = document.querySelector<HTMLElement>(next === 'overview' ? '#admin-heading' : next === 'users' ? '#admin-users-heading' : '#moderation-heading')!;
+      const heading = document.querySelector<HTMLElement>(next === 'overview' ? '#admin-heading' : next === 'users' ? '#admin-users-heading' : next==='retention'?'#retention-heading':'#moderation-heading')!;
       heading.tabIndex = -1; heading.focus({preventScroll: true});
       win.scrollTo({top: 0, behavior: 'instant'});
     }
     try {
+      if(next==='retention'&&retention){await renderCaseRetention(retention,send,()=>signedIn&&!isRoot&&view==='retention'&&viewVersion===version,checkExpired);}
       if (next === 'users') { usersStatus.textContent = t('Loading accounts…'); await loadUsers(); if (version === viewVersion) usersStatus.textContent = ''; }
       if (next === 'moderation') {
         reportsPanel.textContent = t('Loading requests…');reportsPanel.setAttribute('aria-busy','true');updateTabs();
@@ -224,7 +229,7 @@ export async function initializeAdministration() {
     }
   }
   function navigate(next: View) {
-    if (!signedIn || (next === 'users' && !isRoot)) return;
+    if (!signedIn || (next === 'users' && !isRoot) || (isRoot&&(next==='moderation'||next==='retention'))) return;
     win.history.pushState(null, '', '#' + next);
     void showView(next, true);
   }
@@ -235,7 +240,9 @@ export async function initializeAdministration() {
     const session = await api('/session');
     csrf = session.csrf; signedIn = !!session.adminId; isRoot = signedIn && session.adminRole === 'root';
     shell.hidden = signedIn; dashboard.hidden = !signedIn;
-    toolbar(signedIn, session.adminHandle); usersTile.disabled = !isRoot;
+    toolbar(signedIn, session.adminHandle); usersTile.disabled = !isRoot;usersTile.hidden=!isRoot;
+    for(const id of ['admin-moderation-tile','admin-retention-tile']){const tile=document.getElementById(id);if(tile)tile.hidden=isRoot;}
+    if(isRoot){reportsPanel.replaceChildren();openCases.clear();retention?.querySelector('[data-retention-list]')?.replaceChildren();}
     document.querySelector('#users-tile-access')!.textContent = isRoot ? t('Manage accounts') : t('Root access required');
     status.textContent = '';
     if (signedIn) {
@@ -248,6 +255,7 @@ export async function initializeAdministration() {
       document.querySelector('#admin-users')!.replaceChildren();
       document.querySelector('#reports')!.textContent = '';openCases.clear();
       management.hidden = moderation.hidden = true;
+      clearCaseRetention();if(retention){retention.hidden=true;retention.querySelector('[data-retention-list]')?.replaceChildren();}
     }
   }
   login.addEventListener('submit', async event => {

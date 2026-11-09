@@ -146,7 +146,7 @@ test('administration tiles, back navigation and toolbar lock follow the authenti
   doc.querySelector('#login')!.dispatchEvent(new dom.window.Event('submit', {cancelable: true}));
   await tick();
   assert.equal((doc.querySelector('#admin-overview') as HTMLElement).hidden, false);
-  assert.equal(doc.querySelectorAll('.admin-tile svg[aria-hidden=true]').length, 2);
+  assert.equal(doc.querySelectorAll('.admin-tile svg[aria-hidden=true]').length, 3);
   for (const link of doc.querySelectorAll('header nav a.header-action')) {
     assert.equal(link.getAttribute('aria-disabled'), 'true');
     assert.equal((link as HTMLElement).hidden, true);
@@ -160,15 +160,11 @@ test('administration tiles, back navigation and toolbar lock follow the authenti
   assert.equal(doc.querySelector('#admin-header-logout')?.getAttribute('aria-label'), 'Sign out · @server_root');
   assert.equal(doc.querySelector('[aria-label="Settings"]')?.getAttribute('aria-disabled'), null);
   assert.equal(requests.some(r => r.path.startsWith('/api/admin?')), false);
-  (doc.querySelector('#admin-moderation-tile') as HTMLButtonElement).click();
-  await tick();
-  assert.equal(dom.window.location.hash, '#moderation');
-  assert.equal((doc.querySelector('#admin-moderation') as HTMLElement).hidden, false);
-  assert.deepEqual([...doc.querySelectorAll('#dashboard h1')].filter(node=>!node.closest('[hidden]')).map(node=>node.id),['moderation-heading']);
-  assert.equal(requests.filter(r => r.path.startsWith('/api/admin?')).length, 1);
-  (doc.querySelector('#admin-moderation .admin-back') as HTMLButtonElement).click();
-  await tick();
-  assert.equal((doc.querySelector('#admin-overview') as HTMLElement).hidden, false);
+  assert.equal(doc.querySelector<HTMLElement>('#admin-moderation-tile')!.hidden,true);
+  assert.equal(doc.querySelector<HTMLElement>('#admin-retention-tile')!.hidden,true);
+  dom.window.location.hash='#moderation';await tick();
+  assert.equal(doc.querySelector<HTMLElement>('#admin-moderation')!.hidden,true);
+  assert.equal(requests.some(r=>r.path.startsWith('/api/admin?')),false);
   (doc.querySelector('#admin-users-tile') as HTMLButtonElement).click();
   await tick();
   const filter = doc.querySelector<HTMLInputElement>('#admin-user-filter')!;

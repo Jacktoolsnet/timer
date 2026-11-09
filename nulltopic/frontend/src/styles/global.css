@@ -1608,3 +1608,13 @@ body > .site-header > nav .header-action:nth-last-child(-n+2)::after { left: aut
 #operator-agent-keys [data-key-action] { display: flex; align-items: center; justify-content: flex-start; gap: 12px; width: 100%; min-width: 0; height: auto; min-height: 48px; padding: 12px 16px; border: 1px solid var(--line); border-radius: 12px; font-size: .875rem; line-height: 1.5; text-align: left; }
 #operator-agent-keys [data-key-action] svg { flex-shrink: 0; }
 #operator-agent-keys [data-key-action] span { min-width: 0; overflow-wrap: anywhere; }
+
+/* Private retention controls follow the workspace palette and avoid UUID overflow. */
+#admin-retention [data-retention-list] { display: grid; gap: 16px; min-width: 0; }
+#admin-retention details > summary { cursor: pointer; overflow-wrap: anywhere; font-weight: 600; }
+#admin-retention dl { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,2fr); gap: 8px 16px; }
+#admin-retention dt, #admin-retention dd { margin: 0; overflow-wrap: anywhere; }
+#admin-retention dt { color: var(--muted); }
+#admin-retention p { overflow-wrap: anywhere; }
+[data-retention-dialog] footer { margin-top: 20px; display: flex; justify-content: flex-end; gap: 12px; }
+@media (max-width: 480px) { #admin-retention dl { grid-template-columns: minmax(0,1fr); gap: 4px; } #admin-retention dd { margin-bottom: 8px; } }

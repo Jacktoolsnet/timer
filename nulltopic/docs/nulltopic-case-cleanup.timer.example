@@ -1,0 +1,11 @@
+# Template only. Not installed/enabled by the application.
+[Unit]
+Description=Daily private moderation case cleanup
+
+[Timer]
+OnCalendar=*-*-* 03:30:00 Europe/Berlin
+Persistent=true
+Unit=nulltopic-case-cleanup.service
+
+[Install]
+WantedBy=timers.target

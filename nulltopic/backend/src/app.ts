@@ -92,13 +92,14 @@ function owner(req: any) {
   );
 }
 function admin(req: any) {
+  if (req.adminAccount?.is_root) fail(403, "MODERATOR_REQUIRED", "Use a separate administrator account for moderation");
   return (
     req.session.adminId ||
     fail(401, "UNAUTHORIZED", "Administrator login required")
   );
 }
 function rootAdmin(req: any) {
-  admin(req);
+  if (!req.session.adminId) fail(401, "UNAUTHORIZED", "Administrator login required");
   if (!req.adminAccount?.is_root) fail(403, "ROOT_REQUIRED", "Root administrator required");
   return req.adminAccount;
 }
@@ -751,7 +752,6 @@ export async function createApp(options:{mailer?:Mailer}={}) {
     }
     if (cursor) z.tuple([z.string().datetime(), uuid]).parse(cursor);
     return transaction(async (c) => {
-      await c.query("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ");
       const watermark = (
         await c.query("SELECT COALESCE(max(id),0)::text AS id FROM events")
       ).rows[0].id;
@@ -781,7 +781,7 @@ export async function createApp(options:{mailer?:Mailer}={}) {
               ).toString("base64url")
             : null,
       };
-    });
+    }, "REPEATABLE READ");
   });
   app.get("/api/conversations/:id", async (req) => {
     const id = uuid.parse((req.params as any).id);
@@ -1120,7 +1120,34 @@ export async function createApp(options:{mailer?:Mailer}={}) {
   for(const role of ['admin','operator'] as const)app.get('/api/'+role+'/cases/:id',async req=>{
     const actor=role==='admin'?(admin(req),null):owner(req),id=uuid.parse((req.params as any).id);
     const evidence=(await pool.query('SELECT id,captured_at,evidence FROM moderation_cases WHERE id=$1 AND ($2::uuid IS NULL OR operator_id=$2)',[id,actor])).rows[0];
-    if(!evidence)fail(404,'NOT_FOUND','Case unavailable');return evidence;
+    if(!evidence)fail(404,'NOT_FOUND','Case unavailable');
+    if(role==='admin')return {...evidence,retention:(await pool.query('SELECT * FROM case_retention WHERE case_id=$1',[id])).rows[0],audit:(await pool.query('SELECT action,reason,created_at FROM case_control_audit WHERE case_id=$1 ORDER BY id',[id])).rows};
+    return evidence;
+  });
+  app.get('/api/admin/case-retention',async req=>{
+    admin(req);
+    const {cursor}=z.object({cursor:z.string().uuid().optional()}).parse(req.query);
+    const rows=(await pool.query(`SELECT *,review_due_at<=now() AS review_due FROM case_retention
+      WHERE ($1::uuid IS NULL OR case_id>$1) ORDER BY case_id LIMIT 101`,[cursor||null])).rows;
+    return {items:rows.slice(0,100),nextCursor:rows.length>100?rows[99].case_id:null};
+  });
+  app.post('/api/admin/cases/:id/retention',async req=>{
+    const actor=admin(req),id=uuid.parse((req.params as any).id);
+    const b=z.object({action:z.enum(['hold','release','review']),reason:z.string().trim().min(1).max(1000)}).strict().parse(req.body);
+    return transaction(async c=>{
+      // Recheck role and enabled state inside the write transaction.
+      if(!(await c.query('SELECT id FROM admins WHERE id=$1 AND NOT is_root AND enabled AND auth_version=$2 FOR SHARE',[actor,req.session.adminVersion])).rowCount)fail(403,'MODERATOR_REQUIRED','Administrator session expired');
+      await limit(c,actor,'case_controls',60,3600);
+      const row=(await c.query('SELECT * FROM case_controls WHERE case_id=$1 FOR UPDATE',[id])).rows[0];
+      if(!row)fail(404,'NOT_FOUND','Case unavailable');
+      if(b.action==='release'&&!row.hold_reason)fail(409,'NO_HOLD','No retention hold to release');
+      await c.query(`UPDATE case_controls SET
+        hold_reason=CASE WHEN $2='hold' THEN $3 WHEN $2='release' THEN NULL ELSE hold_reason END,
+        hold_since=CASE WHEN $2='hold' THEN COALESCE(hold_since,now()) WHEN $2='release' THEN NULL ELSE hold_since END,
+        reviewed_at=now(),review_due_at=now()+interval '30 days' WHERE case_id=$1`,[id,b.action,b.reason]);
+      await c.query('INSERT INTO case_control_audit(case_id,admin_id,action,reason) VALUES($1,$2,$3,$4)',[id,actor,b.action,b.reason]);
+      return {ok:true};
+    });
   });
   app.get("/api/admin/users", async (req) => {
     rootAdmin(req);

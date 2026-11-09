@@ -1,3 +1,6 @@
+import {mkdtemp,readFile,stat,rm,writeFile} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createHash, randomUUID } from "node:crypto";
@@ -1008,6 +1011,10 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
         await login('test_admin', true);
         assert.equal((await call('GET', '/admin/users', undefined, undefined, true)).statusCode, 403);
         const rootAuth = await signIn('server_root', rootPassword);
+        for(const path of ['/admin','/admin/case-retention','/admin/cases/'+randomUUID()])assert.equal((await call('GET',path,undefined,undefined,true)).statusCode,403);
+        assert.equal((await call('POST','/admin/cases/'+randomUUID()+'/retention',{action:'hold',reason:'Forbidden root access'},undefined,true)).statusCode,403);
+        assert.equal((await call('POST','/admin/actions',{action:'dismiss',id:randomUUID(),reportId:randomUUID(),reason:'Forbidden root access'},undefined,true)).statusCode,403);
+
         assert.equal((await call('GET', '/session', undefined, undefined, true)).json().adminRole, 'root');
         assert.equal((await call('GET', '/session', undefined, undefined, true)).json().adminHandle, 'server_root');
         const users = (await call('GET', '/admin/users', undefined, undefined, true)).json();
@@ -1715,6 +1722,72 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
       assert.equal(JSON.stringify((await call('GET','/feed')).json()).includes('Original reported content'),false);
       const replacement=randomUUID();await pool.query("INSERT INTO operators(id,handle,password,account_type,age_confirmed_at,age_declaration_version,email,email_verified_at) SELECT $1,$2,$3,'personal',now(),age_declaration_version,$4,now() FROM operators LIMIT 1",[replacement,handle,await argon2.hash(password),'replacement_'+handle+'@example.invalid']);
       await login(handle);assert.equal((await call('GET','/operator/cases/'+report.case_id,undefined,undefined,true)).statusCode,404);assert.equal((await call('GET','/operator?agentId='+subject,undefined,undefined,true)).statusCode,404);
+
+    });
+    await t.test('case retention protects open reviews and holds, purges complete families, and reconciles restores',async()=>{
+      const {cleanupCases,reconcileCases}=await import('../src/case-retention.js');
+      await pool.query('DELETE FROM limits');
+      const make=async(date='2026-01-31T12:00:00Z')=>{
+        const decision=(await pool.query("INSERT INTO moderation(admin_id,action,reason,created_at) VALUES($1,'dismiss','Retention fixture',$2) RETURNING id,case_id",[admin,date])).rows[0];
+        await pool.query('UPDATE case_controls SET retention_floor=$2 WHERE case_id=$1',[decision.case_id,date]);return decision;
+      };
+      const expired=await make(),pending=await make(),held=await make(),future=await make('2026-02-01T12:00:00Z'),monthEnd=await make('2026-08-31T12:00:00Z');
+      assert.equal((await pool.query('SELECT delete_after FROM case_retention WHERE case_id=$1',[monthEnd.case_id])).rows[0].delete_after.toISOString(),'2027-02-28T12:00:00.000Z');
+      const orphan=(await pool.query("SELECT capture_moderation_case(NULL,NULL,NULL,'retention-fixture') AS id")).rows[0].id;
+      const review=randomUUID();await pool.query("INSERT INTO appeals(id,operator_id,moderation_id,reason) VALUES($1,$2,$3,'Pending fixture')",[review,operator,pending.id]);
+      const ref=new Date('2026-07-31T12:00:00Z');
+      assert.equal((await pool.query('SELECT delete_after FROM case_retention WHERE case_id=$1',[expired.case_id])).rows[0].delete_after.toISOString(),ref.toISOString());
+      assert.equal((await pool.query('SELECT closed_at FROM case_retention WHERE case_id=$1',[pending.case_id])).rows[0].closed_at,null);
+      await login('test_operator');assert.equal((await call('GET','/admin/case-retention',undefined,undefined,true)).statusCode,401);
+      await login('test_admin',true);
+      assert.equal((await call('POST','/admin/cases/'+held.case_id+'/retention',{action:'hold',reason:'   '},undefined,true)).statusCode,400);
+      assert.equal((await call('POST','/admin/cases/'+held.case_id+'/retention',{action:'hold',reason:'Pending authority proceedings'},undefined,true)).statusCode,200);
+      const caseRows:any[]=[];let nextCase:string|null=null;
+      do{const ledger:{items:any[];nextCursor:string|null}=(await call('GET','/admin/case-retention'+(nextCase?'?cursor='+nextCase:''),undefined,undefined,true)).json();caseRows.push(...ledger.items);nextCase=ledger.nextCursor;}while(nextCase);
+      assert.ok(caseRows.some((r:any)=>r.case_id===held.case_id&&r.hold_reason));
+      const holdData=(await call('GET','/admin/cases/'+held.case_id,undefined,undefined,true)).json();assert.equal(holdData.audit[0].action,'hold');assert.equal(holdData.retention.delete_after,null);
+      const lock=await pool.connect();try{
+        await lock.query('BEGIN');await lock.query('SELECT pg_advisory_xact_lock_shared(481920)');assert.equal((await cleanupCases(false,ref) as any).locked,true);
+      }finally{await lock.query('ROLLBACK');lock.release();}
+      assert.equal((await cleanupCases(true,new Date(ref.getTime()-1))).count,0,'not one millisecond early');
+      assert.equal((await call('POST','/admin/cases/'+expired.case_id+'/retention',{action:'review',reason:'Still necessary until the scheduled deadline'},undefined,true)).statusCode,200);
+      assert.equal((await pool.query('SELECT delete_after FROM case_retention WHERE case_id=$1',[expired.case_id])).rows[0].delete_after.toISOString(),ref.toISOString(),'periodic review does not extend closure');
+      assert.equal((await app.inject({method:'POST',url:'/api/admin/cases/'+expired.case_id+'/retention',headers:{cookie},payload:{action:'hold',reason:'No CSRF'}})).statusCode,403);
+      assert.equal((await cleanupCases(true,ref)).count,1);assert.equal((await pool.query('SELECT id FROM moderation_cases WHERE id=$1',[expired.case_id])).rowCount,1);
+      assert.equal((await cleanupCases(false,ref)).count,1);
+      assert.equal((await pool.query('SELECT id FROM moderation_cases WHERE id=$1',[expired.case_id])).rowCount,0);
+      assert.equal((await pool.query('SELECT case_id FROM case_purge_journal WHERE case_id=$1',[expired.case_id])).rowCount,1);
+      for(const id of [pending.case_id,held.case_id,future.case_id,orphan])assert.equal((await pool.query('SELECT id FROM moderation_cases WHERE id=$1',[id])).rowCount,1);
+      // Deciding a complaint resets closure; the original decision date must not win.
+      await pool.query("UPDATE appeals SET status='accepted',response='Review completed',decided_at='2026-07-30T12:00:00Z',decided_by=$2 WHERE id=$1",[review,admin]);
+      assert.equal((await pool.query('SELECT delete_after FROM case_retention WHERE case_id=$1',[pending.case_id])).rows[0].delete_after.toISOString(),'2027-01-30T12:00:00.000Z');
+      assert.equal((await call('POST','/admin/cases/'+held.case_id+'/retention',{action:'release',reason:'Authority proceedings ended'},undefined,true)).statusCode,200);
+      assert.equal((await pool.query('SELECT delete_after FROM case_retention WHERE case_id=$1',[held.case_id])).rows[0].delete_after.toISOString(),ref.toISOString(),'release does not prolong retention');
+      assert.equal((await call('POST','/admin/cases/'+held.case_id+'/retention',{action:'release',reason:'Duplicate'},undefined,true)).statusCode,409);
+      assert.equal((await cleanupCases(false,ref)).count,1);
+      assert.equal((await pool.query('SELECT * FROM case_control_audit WHERE case_id=$1',[held.case_id])).rowCount,0,'case-owned audit is purged too');
+      // A restore ledger can remove restored evidence, never restore public content.
+      assert.equal((await reconcileCases([{case_id:future.case_id,purged_at:ref.toISOString()}])).count,1);
+      assert.equal((await reconcileCases([{case_id:future.case_id,purged_at:ref.toISOString()}])).count,0,'reconciliation is idempotent');
+      assert.equal((await pool.query('SELECT * FROM moderation WHERE case_id=$1',[future.case_id])).rowCount,0);
+      // Complete a family and verify additions/acknowledgements are removed with it.
+      await pool.query("INSERT INTO appeal_messages(appeal_id,author_role,operator_id,body) VALUES($1,'operator',$2,'Saved fixture addition')",[review,operator]);
+      await pool.query("INSERT INTO decision_acknowledgements(appeal_id,actor_role,operator_id) VALUES($1,'operator',$2)",[review,operator]);
+      await cleanupCases(false,new Date('2027-02-01T12:00:00Z'));
+      assert.equal((await pool.query('SELECT id FROM appeal_messages WHERE appeal_id=$1',[review])).rowCount,0);
+      assert.equal((await pool.query('SELECT id FROM decision_acknowledgements WHERE appeal_id=$1',[review])).rowCount,0);
+      assert.equal((await pool.query('SELECT id FROM moderation_cases WHERE id=$1',[orphan])).rowCount,1,'unresolved orphan evidence is not guessed closed');
+      const directory=await mkdtemp(join(tmpdir(),'nulltopic-case-journal-')),journalPath=join(directory,'journal.json');
+      const run=(command:string,...args:string[])=>new Promise<number|null>((resolve,reject)=>{const child=spawn(process.execPath,['--import','tsx','src/cli.ts',command,...args],{env:{...process.env,DATABASE_URL:url,CASE_PURGE_JOURNAL_PATH:journalPath},stdio:'ignore'});child.on('error',reject);child.on('exit',resolve);});
+      try{
+        const cliCase=await make('2025-01-01T12:00:00Z');
+        assert.equal(await run('cleanup-cases','--dry-run'),0);await assert.rejects(stat(journalPath));assert.equal((await pool.query('SELECT id FROM moderation_cases WHERE id=$1',[cliCase.case_id])).rowCount,1);
+        assert.equal(await run('cleanup-cases'),0);const journal=JSON.parse(await readFile(journalPath,'utf8'));assert.ok(journal.entries.some((e:any)=>e.case_id===cliCase.case_id));assert.equal((await stat(journalPath)).mode&0o777,0o600);
+        assert.ok(journal.entries.every((entry:any)=>Object.keys(entry).sort().join(',')==='case_id,purged_at'));
+        await pool.query("INSERT INTO moderation_cases(id,evidence) VALUES($1,'{}')",[cliCase.case_id]);
+        assert.equal(await run('reconcile-cases'),0);assert.equal((await pool.query('SELECT id FROM moderation_cases WHERE id=$1',[cliCase.case_id])).rowCount,0);
+        await writeFile(journalPath,JSON.stringify({...journal,exportedAt:'2000-01-01T00:00:00Z'}));assert.notEqual(await run('reconcile-cases'),0,'stale journals cannot reopen a restored service');
+      }finally{await rm(directory,{recursive:true,force:true});}
 
     });
   } finally {

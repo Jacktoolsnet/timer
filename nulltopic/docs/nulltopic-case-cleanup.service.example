@@ -1,0 +1,13 @@
+# Template only. Replace paths/user and provision a private out-of-band journal.
+[Unit]
+Description=NullTopic private moderation case cleanup
+After=network.target
+
+[Service]
+Type=oneshot
+User=REPLACE_WITH_LOCAL_USER
+WorkingDirectory=/ABSOLUTE/PATH/jacktoolsnet/nulltopic
+Environment=PATH=/ABSOLUTE/NODE24/bin:/usr/bin:/bin
+# Set CASE_PURGE_JOURNAL_PATH in the private app .env to an out-of-band destination.
+ExecStart=/ABSOLUTE/NODE24/bin/npm run cleanup:cases
+NoNewPrivileges=true

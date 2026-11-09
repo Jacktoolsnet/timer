@@ -45,7 +45,16 @@ import Layout from '../components/Layout.astro';
             <span class="admin-tile-copy">Review reports and keep the conversation welcoming.</span>
             <span class="admin-tile-foot"><span>Reports &amp; review requests</span><span aria-hidden="true">→</span></span>
           </button>
+          <button id="admin-retention-tile" class="admin-tile" type="button" data-admin-view="retention">
+            <svg class="admin-tile-illustration" viewBox="0 0 120 100" aria-hidden="true"><rect class="admin-art-halo" x="4" y="4" width="112" height="92" rx="28"/><g class="admin-art-line"><rect x="27" y="22" width="66" height="58" rx="9"/><path d="M27 39h66M43 16v14m34-14v14m-34 24h34m-34 12h20"/></g></svg>
+            <span class="admin-tile-title">Case retention</span>
+            <span class="admin-tile-copy">Review retention holds and scheduled case deletion.</span>
+          </button>
         </div>
+      </section>
+      <section id="admin-retention" aria-labelledby="retention-heading" hidden>
+        <div class="admin-subview-heading"><button class="admin-back" type="button" data-admin-view="overview" aria-label="Back to administration" data-tooltip="Back to administration"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 5-7 7 7 7M5 12h15"/></svg></button><h1 id="retention-heading">Case retention</h1></div>
+        <div data-retention-list></div>
       </section>
       <section id="admin-user-management" aria-labelledby="admin-users-heading" hidden>
         <div class="admin-subview-heading"><button class="admin-back" type="button" data-admin-view="overview" aria-label="Back to administration" data-tooltip="Back to administration"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 5-7 7 7 7M5 12h15"/></svg></button><div><span class="admin-eyebrow">ACCOUNTS &amp; ACCESS</span><h1 id="admin-users-heading" tabindex="-1">User management</h1></div><span class="admin-root-badge">Root</span></div>

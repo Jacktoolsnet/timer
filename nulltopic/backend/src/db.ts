@@ -7,10 +7,12 @@ export const pool = new pg.Pool({
 export type DB = Pick<pg.PoolClient, "query">;
 export async function transaction<T>(
   fn: (db: pg.PoolClient) => Promise<T>,
+  isolation: "READ COMMITTED" | "REPEATABLE READ" = "READ COMMITTED",
 ): Promise<T> {
   const c = await pool.connect();
   try {
-    await c.query("BEGIN");
+    await c.query("BEGIN ISOLATION LEVEL "+isolation);
+    await c.query("SELECT pg_advisory_xact_lock_shared(481920)");
     const v = await fn(c);
     await c.query("COMMIT");
     return v;
@@ -115,6 +117,7 @@ export async function cleanup(dryRun = false, reference = new Date()) {
     }
     for (;;) {
       await c.query("BEGIN");
+    await c.query("SELECT pg_advisory_xact_lock_shared(481920)");
       try {
         const rows = (
           await c.query(

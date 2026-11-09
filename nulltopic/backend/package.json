@@ -8,7 +8,9 @@
     "migrate": "tsx --env-file=../.env src/cli.ts migrate",
     "cleanup": "tsx --env-file=../.env src/cli.ts cleanup",
     "bootstrap": "tsx --env-file=../.env src/cli.ts bootstrap",
-    "test": "tsx --env-file=../.env --test test/*.test.ts"
+    "test": "tsx --env-file=../.env --test test/*.test.ts",
+    "cleanup:cases": "tsx --env-file=../.env src/cli.ts cleanup-cases",
+    "reconcile:cases": "tsx --env-file=../.env src/cli.ts reconcile-cases"
   },
   "dependencies": {
     "@fastify/cookie": "^11.0.2",
