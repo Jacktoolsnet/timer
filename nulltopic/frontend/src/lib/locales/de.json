@@ -942,5 +942,7 @@
   "Response visible to the reporter": "Für den Melder sichtbare Antwort",
   "Only this response is shared with the reporter. Do not include private information.": "Nur diese Antwort wird dem Melder angezeigt. Keine privaten Informationen eintragen.",
   "Reporter contact (private)": "Kontakt des Melders (privat)",
-  "Refresh": "Aktualisieren"
+  "Refresh": "Aktualisieren",
+  "Hello, I have a question about my report:": "Hallo, ich habe eine Frage zu meiner Meldung:",
+  "My question:": "Meine Frage:"
 }

@@ -942,5 +942,7 @@
   "Response visible to the reporter": "Respuesta visible para quien informa",
   "Only this response is shared with the reporter. Do not include private information.": "Solo se comparte esta respuesta con quien informa. No incluyas información privada.",
   "Reporter contact (private)": "Contacto de quien informa (privado)",
-  "Refresh": "Actualizar"
+  "Refresh": "Actualizar",
+  "Hello, I have a question about my report:": "Hola, tengo una pregunta sobre mi denuncia:",
+  "My question:": "Mi pregunta:"
 }

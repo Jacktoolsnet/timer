@@ -942,5 +942,7 @@
   "Response visible to the reporter": "Réponse visible par la personne signalante",
   "Only this response is shared with the reporter. Do not include private information.": "Seule cette réponse est partagée avec la personne signalante. N’inclus pas d’informations privées.",
   "Reporter contact (private)": "Coordonnées de la personne signalante (privées)",
-  "Refresh": "Actualiser"
+  "Refresh": "Actualiser",
+  "Hello, I have a question about my report:": "Bonjour, j’ai une question concernant mon signalement :",
+  "My question:": "Ma question :"
 }
