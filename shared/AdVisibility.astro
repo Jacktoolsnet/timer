@@ -25,10 +25,13 @@
   });
 </script>
 <style is:global>
-  /* Keep the slot width and a measurable pixel for responsive ad sizing.
-     Do not clip, fix the height, or hide a pending slot: Google must be able
-     to size its creative. No large placeholder is reserved before it arrives. */
-  [data-ad-placement][data-ad-state="pending"] { margin:8px 0 !important; }
+  /* AdSense may reserve an inline height before returning a creative.
+     Constrain only the outer pending wrapper, not the responsive slot's width
+     or sizing. Release the constraint as soon as AdSense reports filled. */
+  [data-ad-placement][data-ad-state="pending"] {
+    height:1px !important; min-height:0 !important; max-height:1px !important;
+    margin:8px 0 !important; padding:0 !important; overflow:hidden !important;
+  }
   [data-ad-placement] > p { display:none; }
   [data-ad-placement][data-ad-state="filled"] > p { display:block; }
   [data-ad-placement][data-ad-state="empty"] {

@@ -56,6 +56,11 @@ test('pending slot stays compact and filled slot follows creative height', async
  await page.goto('/de/');
  const ad = page.locator('.company-ad');
  await expect(ad).toHaveAttribute('data-ad-state','pending');
+ // Reproduce AdSense reserving a large slot before any ad is returned.
+ await ad.locator('ins').evaluate(el => {
+  el.style.height = '600px';
+  el.style.minHeight = '600px';
+ });
  const pending = await ad.evaluate(el => {
   const style = getComputedStyle(el);
   return {height:el.getBoundingClientRect().height, top:parseFloat(style.marginTop), bottom:parseFloat(style.marginBottom)};
@@ -64,10 +69,12 @@ test('pending slot stays compact and filled slot follows creative height', async
  expect(pending.top + pending.bottom).toBeLessThanOrEqual(16);
  await ad.locator('ins').evaluate(el => {
   el.style.height = '280px';
+  el.style.minHeight = '0px';
   el.setAttribute('data-ad-status','filled');
  });
  await expect(ad).toHaveAttribute('data-ad-state','filled');
  expect(await ad.evaluate(el => el.getBoundingClientRect().height)).toBeGreaterThanOrEqual(280);
+ expect(await ad.evaluate(el => getComputedStyle(el).overflow)).not.toBe('hidden');
  await ad.locator('ins').evaluate(el => el.setAttribute('data-ad-status','unfilled'));
  await expect(ad).toBeHidden();
 });

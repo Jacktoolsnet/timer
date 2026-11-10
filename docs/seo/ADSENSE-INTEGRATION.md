@@ -68,10 +68,15 @@ https://support.google.com/adsense/answer/10762946?hl=de
 
 ### Kompakte Ladephase
 
-Während `pending` reservieren die Banner nur 1 px messbare Slothöhe plus
-je 8 px Außenabstand, statt 90 bzw. 250 px Mindesthöhe. Es gibt keine feste
-Höhenbegrenzung und kein Abschneiden: Liefert Google eine Anzeige samt Höhe,
-wächst der Platz mit dem Inhalt. Bei `filled` erscheint die Beschriftung und
-der normale Abstand, bei `empty` entfallen auch die kleinen Abstände.
-Google kann während der Anforderung selbst eine Höhe setzen; diese wird nicht
-überschrieben. Die kompakte Ladephase ist daher kein erzwungenes Größenlimit.
+Während `pending` begrenzt der äußere Bannercontainer die sichtbare Höhe auf
+1 px plus je 8 px Außenabstand. Das gilt auch dann, wenn Google dem inneren
+Slot bereits 600 px Höhe zuweist. Die Slotbreite bleibt messbar und die von
+Google gesetzte innere Größe wird nicht überschrieben. Erst bei `filled`
+entfallen Höhenbegrenzung und Abschneiden vollständig, sodass die tatsächliche
+Anzeige inklusive Beschriftung Platz bekommt. Bei `empty` entfallen auch die
+kleinen Abstände. Die Fokusregel bleibt vorrangig.
+
+Regressionstests simulieren einen 600 px hohen Slot ohne Status und den Wechsel
+zu einer gefüllten Anzeige. Tatsächliche Google-Auslieferung und Sichtbarkeit
+auf den veröffentlichten Domains separat prüfen; lokale Tests fordern keine
+echten Anzeigen an.
