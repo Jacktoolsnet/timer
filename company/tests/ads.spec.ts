@@ -50,3 +50,24 @@ test('empty ad slot collapses and filled slot restores its label', async ({page}
  await expect(ad).toHaveAttribute('data-ad-state','empty');
  expect(await ad.evaluate(el => el.getBoundingClientRect().height)).toBe(0);
 });
+
+
+test('pending slot stays compact and filled slot follows creative height', async ({page}) => {
+ await page.goto('/de/');
+ const ad = page.locator('.company-ad');
+ await expect(ad).toHaveAttribute('data-ad-state','pending');
+ const pending = await ad.evaluate(el => {
+  const style = getComputedStyle(el);
+  return {height:el.getBoundingClientRect().height, top:parseFloat(style.marginTop), bottom:parseFloat(style.marginBottom)};
+ });
+ expect(pending.height).toBeLessThanOrEqual(2);
+ expect(pending.top + pending.bottom).toBeLessThanOrEqual(16);
+ await ad.locator('ins').evaluate(el => {
+  el.style.height = '280px';
+  el.setAttribute('data-ad-status','filled');
+ });
+ await expect(ad).toHaveAttribute('data-ad-state','filled');
+ expect(await ad.evaluate(el => el.getBoundingClientRect().height)).toBeGreaterThanOrEqual(280);
+ await ad.locator('ins').evaluate(el => el.setAttribute('data-ad-status','unfilled'));
+ await expect(ad).toBeHidden();
+});

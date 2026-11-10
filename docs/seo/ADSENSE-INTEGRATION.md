@@ -65,3 +65,13 @@ Während der anfänglichen Ladefrist bleibt der Platz messbar, damit AdSense die
 responsive Größe ermitteln kann; ein kurzer Leerraum ist deshalb möglich.
 Nicht bereits vor dem ersten Anzeigenaufruf mit display:none verstecken:
 https://support.google.com/adsense/answer/10762946?hl=de
+
+### Kompakte Ladephase
+
+Während `pending` reservieren die Banner nur 1 px messbare Slothöhe plus
+je 8 px Außenabstand, statt 90 bzw. 250 px Mindesthöhe. Es gibt keine feste
+Höhenbegrenzung und kein Abschneiden: Liefert Google eine Anzeige samt Höhe,
+wächst der Platz mit dem Inhalt. Bei `filled` erscheint die Beschriftung und
+der normale Abstand, bei `empty` entfallen auch die kleinen Abstände.
+Google kann während der Anforderung selbst eine Höhe setzen; diese wird nicht
+überschrieben. Die kompakte Ladephase ist daher kein erzwungenes Größenlimit.

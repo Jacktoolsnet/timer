@@ -1,0 +1,16 @@
+---
+interface Props {audience?:'visitor'|'operator';privacyHref?:string}
+const {audience='visitor',privacyHref='/datenschutz'}=Astro.props;
+---
+  <div class="visitor-document-links">
+   <a class="visitor-document-tile" data-visitor-privacy={audience==='visitor'?true:undefined} data-operator-legal={audience==='operator'?true:undefined} aria-label={audience==='operator'?'Operator privacy notice':undefined} href={privacyHref} target="_blank" rel="noopener noreferrer">
+    <span class="visitor-document-icon" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="m16 3 11 5v8c0 8-11 13-11 13S5 24 5 16V8l11-5Z"/><rect x="12" y="14" width="8" height="8" rx="2"/><path d="M13 14v-3a3 3 0 0 1 6 0v3m-3 3v2"/></svg></span>
+    <span class="visitor-document-copy"><strong>Privacy</strong><span>How we handle personal data.</span><span class="sr-only">Opens in a new tab.</span></span>
+    <svg class="visitor-document-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5h11v11M19 5 5 19"/></svg>
+   </a>
+   <a class="visitor-document-tile" data-visitor-imprint={audience==='visitor'?true:undefined} data-operator-imprint={audience==='operator'?true:undefined} href="/impressum" target="_blank" rel="noopener noreferrer">
+    <span class="visitor-document-icon" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M9 3h11l5 5v21H7V3h2Zm10 0v7h6M11 23h10"/><circle cx="16" cy="14" r="1"/><path d="M16 18v3"/></svg></span>
+    <span class="visitor-document-copy"><strong>Legal notice</strong><span>Who operates NullTopic and how to contact us.</span><span class="sr-only">Opens in a new tab.</span></span>
+    <svg class="visitor-document-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5h11v11M19 5 5 19"/></svg>
+   </a>
+  </div>

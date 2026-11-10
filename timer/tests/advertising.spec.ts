@@ -74,3 +74,24 @@ test('empty and blocked slots collapse, late ads restore them, focus stays ad-fr
  }
  expect(await page.evaluate(() => (window as any).adsbygoogle.length)).toBe(1);
 });
+
+
+test('pending slot stays compact and filled slot follows creative height', async ({page}) => {
+ await page.goto('http://127.0.0.1:4380/de/');
+ const ad = page.locator('.tool-ad');
+ await expect(ad).toHaveAttribute('data-ad-state','pending');
+ const pending = await ad.evaluate(el => {
+  const style = getComputedStyle(el);
+  return {height:el.getBoundingClientRect().height, top:parseFloat(style.marginTop), bottom:parseFloat(style.marginBottom)};
+ });
+ expect(pending.height).toBeLessThanOrEqual(2);
+ expect(pending.top + pending.bottom).toBeLessThanOrEqual(16);
+ await ad.locator('ins').evaluate(el => {
+  el.style.height = '280px';
+  el.setAttribute('data-ad-status','filled');
+ });
+ await expect(ad).toHaveAttribute('data-ad-state','filled');
+ expect(await ad.evaluate(el => el.getBoundingClientRect().height)).toBeGreaterThanOrEqual(280);
+ await ad.locator('ins').evaluate(el => el.setAttribute('data-ad-status','unfilled'));
+ await expect(ad).toBeHidden();
+});

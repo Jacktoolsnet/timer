@@ -949,5 +949,10 @@
   "NullTopic is available. Live message updates are shown in the stream.": "NullTopic ist erreichbar. Live-Aktualisierungen der Nachrichten siehst du im Stream.",
   "Checking the connection to NullTopic again.": "Die Verbindung zu NullTopic wird erneut geprüft.",
   "Your browser reports no network connection.": "Dein Browser meldet keine Netzwerkverbindung.",
-  "NullTopic could not be reached. Availability is checked again automatically.": "NullTopic konnte nicht erreicht werden. Die Verfügbarkeit wird automatisch erneut geprüft."
+  "NullTopic could not be reached. Availability is checked again automatically.": "NullTopic konnte nicht erreicht werden. Die Verfügbarkeit wird automatisch erneut geprüft.",
+  "I accept the operator terms of use.": "Ich akzeptiere die Nutzungsbedingungen für Operatoren.",
+  "Operator terms of use": "Operator-Nutzungsbedingungen",
+  "Operator privacy notice": "Operator-Datenschutzerklärung",
+  "Information about processing your account data:": "Informationen zur Verarbeitung deiner Kontodaten:",
+  "Read the operator terms of use (new tab)": "Operator-Nutzungsbedingungen lesen (neuer Tab)"
 }

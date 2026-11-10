@@ -8,6 +8,8 @@ import { spawn } from "node:child_process";
 import argon2 from "argon2";
 import sharp from "sharp";
 
+const {operatorLegal}=await import('../../shared/operator-legal.js');
+const legalRegistration={termsAccepted:true,termsVersion:operatorLegal.terms.version,privacyVersion:operatorLegal.privacy.version};
 const url = process.env.TEST_DATABASE_URL;
 if (!url || !new URL(url).pathname.endsWith("_test"))
   throw Error("TEST_DATABASE_URL must name an isolated _test database");
@@ -46,7 +48,7 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
   const password = "isolated-test-password";
   const verifyOperator=async(email:string)=>{const token=await emailTokenFor(email);const r=await app.inject({method:'POST',url:'/api/operator-email/verify',remoteAddress:'127.0.0.2',payload:{token}});assert.equal(r.statusCode,200,r.body);};
   const createOperator=async(handle:string,language='en')=>{
-    const r=await app.inject({method:'POST',url:'/api/operator-registrations',payload:{handle,password,email:handle+'@example.invalid',language,accountType:'personal',ageConfirmed:true,ageVersion:'age-18-v1'}});
+    const r=await app.inject({method:'POST',url:'/api/operator-registrations',payload:{handle,password,email:handle+'@example.invalid',language,accountType:'personal',ageConfirmed:true,ageVersion:'age-18-v1',...legalRegistration}});
     assert.equal(r.statusCode,200,r.body);await verifyOperator(handle+'@example.invalid');return (await pool.query('SELECT id FROM operators WHERE handle=$1',[handle])).rows[0].id as string;
   };
   const operator=await createOperator('test_operator'),other=await createOperator('other_operator'),admin=randomUUID();
@@ -1565,17 +1567,37 @@ delete process.env.ROOT_ADMIN_EMAIL;
         assert.equal((await pool.query('SELECT count(*)::int AS count FROM events')).rows[0].count,events,'searching emits no events');
       }finally{await pool.query('DELETE FROM conversations WHERE id=ANY($1::uuid[])',[ids]);await pool.query('DELETE FROM agents WHERE id=$1',[writer]);}
     });
+    await t.test('operator agreement is atomic, private, removable with account and never backfilled',async()=>{
+      const {registerOperator}=await import('../src/authorization.js');
+      const body={handle:'terms_atomic_fixture',password,email:'terms_atomic_fixture@example.invalid',accountType:'personal',ageConfirmed:true,ageVersion:'age-18-v1',language:'de',...legalRegistration};
+      await assert.rejects(transaction(async c=>{await registerOperator(c,body);throw Error('Synthetic rollback');}));
+      assert.equal((await pool.query('SELECT id FROM operators WHERE handle=$1',[body.handle])).rowCount,0);
+      const created=await registerOperator(pool,body);assert.ok(created);
+      const record=(await pool.query('SELECT * FROM operator_terms_acceptances WHERE operator_id=$1',[created.id])).rows[0];assert.equal(record.ui_language,'de');
+      const publicProfile=await call('GET','/operators/'+created.id);assert.equal(publicProfile.statusCode,200,publicProfile.body);assert.ok(!publicProfile.body.includes('terms_version'));assert.ok(!publicProfile.body.includes('accepted_at'));
+      assert.equal(await registerOperator(pool,{...body,handle:'terms_collision_fixture'}),null,'same address cannot create an agreement for a different account');
+      assert.equal((await pool.query('SELECT count(*)::int AS n FROM operator_terms_acceptances WHERE operator_id=$1',[created.id])).rows[0].n,1);
+      await pool.query('DELETE FROM operators WHERE id=$1',[created.id]);assert.equal((await pool.query('SELECT 1 FROM operator_terms_acceptances WHERE operator_id=$1',[created.id])).rowCount,0);
+      const legacy=randomUUID();await pool.query("INSERT INTO operators(id,handle,password,email,account_type,age_confirmed_at,age_declaration_version) VALUES($1,'terms_legacy_fixture',$2,'terms_legacy_fixture@example.invalid','personal',now(),'age-18-v1')",[legacy,await argon2.hash(password)]);
+      assert.equal((await pool.query('SELECT 1 FROM operator_terms_acceptances WHERE operator_id=$1',[legacy])).rowCount,0,'no trigger invents agreement on legacy operator data');await pool.query('DELETE FROM operators WHERE id=$1',[legacy]);
+    });
     await t.test('operator declarations and scope-bound publication authorization are explicit, private and race-safe',async()=>{
       await pool.query("DELETE FROM limits WHERE bucket LIKE 'anonymous_read:%' OR bucket LIKE 'login:%'");
       const decl=(await call('GET','/declarations')).json();
-      const personal={handle:'consent_personal',password,email:'consent_personal@example.invalid',accountType:'personal',ageConfirmed:true,ageVersion:decl.age.version};
-      for(const body of [{...personal,ageConfirmed:undefined},{...personal,ageConfirmed:false},{...personal,ageConfirmed:'true'},
+      const personal={handle:'consent_personal',password,email:'consent_personal@example.invalid',accountType:'personal',ageConfirmed:true,ageVersion:decl.age.version,...legalRegistration};
+      for(const body of [{...personal,termsAccepted:undefined},{...personal,termsAccepted:false},{...personal,termsAccepted:'true'},{...personal,termsVersion:'old'},{...personal,termsVersion:undefined},{...personal,privacyVersion:'old'},{...personal,privacyVersion:undefined},{...personal,accepted_at:'2000-01-01T00:00:00Z'},{...personal,ageConfirmed:undefined},{...personal,ageConfirmed:false},{...personal,ageConfirmed:'true'},
         {...personal,accountType:'organization'},{...personal,accountType:'organization',organizationAuthorized:false,organizationVersion:decl.organization.version},{...personal,age_confirmed_at:'2000-01-01T00:00:00Z'}, {...personal,ageVersion:'forged'}]){
         assert.equal((await call('POST','/operator-registrations',body)).statusCode,400);
       }
       const before=Date.now();const created=await call('POST','/operator-registrations',personal);assert.equal(created.statusCode,200,created.body);await verifyOperator(personal.email);const person=(await pool.query('SELECT id FROM operators WHERE handle=$1',[personal.handle])).rows[0].id;
       const org=await call('POST','/operator-registrations',{...personal,handle:'consent_org',email:'consent_org@example.invalid',accountType:'organization',organizationAuthorized:true,organizationVersion:decl.organization.version});assert.equal(org.statusCode,200,org.body);await verifyOperator('consent_org@example.invalid');const orgId=(await pool.query("SELECT id FROM operators WHERE handle='consent_org'")).rows[0].id;
       const evidence=(await pool.query('SELECT * FROM operators WHERE id=$1',[person])).rows[0];
+      const acceptance=(await pool.query('SELECT * FROM operator_terms_acceptances WHERE operator_id=$1',[person])).rows[0];
+      assert.equal(acceptance.terms_version,operatorLegal.terms.version);assert.equal(acceptance.privacy_version,operatorLegal.privacy.version);assert.equal(acceptance.ui_language,'en');assert.ok(acceptance.accepted_at.getTime()>=before);
+      await assert.rejects(pool.query('UPDATE operator_terms_acceptances SET accepted_at=now() WHERE operator_id=$1',[person]));
+      const firstAcceptanceTime=acceptance.accepted_at.getTime();
+      assert.equal((await app.inject({method:'POST',url:'/api/operator-registrations',remoteAddress:'127.0.0.44',payload:personal})).statusCode,200);
+      assert.equal((await pool.query('SELECT accepted_at FROM operator_terms_acceptances WHERE operator_id=$1',[person])).rows[0].accepted_at.getTime(),firstAcceptanceTime,'duplicate registration never rewrites agreement');
       assert.ok(evidence.age_confirmed_at.getTime()>=before);assert.equal(evidence.age_declaration_version,decl.age.version);assert.equal(evidence.organization_authorized_at,null);
       const orgEvidence=(await pool.query('SELECT * FROM operators WHERE id=$1',[orgId])).rows[0];assert.ok(orgEvidence.organization_authorized_at);assert.equal(orgEvidence.organization_declaration_version,decl.organization.version);
       await login('consent_personal');
@@ -1659,7 +1681,7 @@ delete process.env.ROOT_ADMIN_EMAIL;
     await t.test('operator email verification and recovery are private, single-use and revoke stale sessions',async()=>{
       await pool.query('DELETE FROM limits');
       const email='recovery_fixture@example.invalid',handle='recovery_fixture';
-      const register={handle,password,email:' RECOVERY_FIXTURE@example.invalid ',accountType:'personal',ageConfirmed:true,ageVersion:'age-18-v1'};
+      const register={handle,password,email:' RECOVERY_FIXTURE@example.invalid ',accountType:'personal',ageConfirmed:true,ageVersion:'age-18-v1',...legalRegistration};
       assert.equal((await call('POST','/operator-registrations',{...register,email:undefined})).statusCode,400);
       assert.equal((await call('POST','/operator-registrations',{...register,email:'bad'})).statusCode,400);
       assert.equal((await call('POST','/operator-registrations',{...register,email_verified_at:'2020-01-01'})).statusCode,400);

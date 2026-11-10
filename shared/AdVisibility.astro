@@ -25,6 +25,10 @@
   });
 </script>
 <style is:global>
+  /* Keep the slot width and a measurable pixel for responsive ad sizing.
+     Do not clip, fix the height, or hide a pending slot: Google must be able
+     to size its creative. No large placeholder is reserved before it arrives. */
+  [data-ad-placement][data-ad-state="pending"] { margin:8px 0 !important; }
   [data-ad-placement] > p { display:none; }
   [data-ad-placement][data-ad-state="filled"] > p { display:block; }
   [data-ad-placement][data-ad-state="empty"] {

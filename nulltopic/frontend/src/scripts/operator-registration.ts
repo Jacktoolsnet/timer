@@ -1,4 +1,5 @@
 import {initializeSelectPicker} from './select-picker';
+import {operatorLegal} from '../../../shared/operator-legal';
 import {declarations} from '../../../shared/declarations';
 import {api} from './client';
 import {currentLanguage,t} from '../lib/i18n';
@@ -12,6 +13,12 @@ export function initializeOperatorRegistration(){
  const typePicker=initializeSelectPicker(type);
  function sync(){const org=type.value==='organization';organization.hidden=!org;check.disabled=!org;check.required=org;check.checked=false;}
  type.addEventListener('change',sync);sync();let busy=false;
+ const button=form.querySelector<HTMLButtonElement>('button[type=submit]')!;
+ const updateSubmit=()=>{validatePasswords();button.disabled=busy||!form.checkValidity();};
+ form.addEventListener('input',updateSubmit);form.addEventListener('change',updateSubmit);form.addEventListener('reset',()=>queueMicrotask(updateSubmit));updateSubmit();
+ const legalLanguage=currentLanguage()==='de'?'':'/en';
+ for(const link of form.querySelectorAll<HTMLAnchorElement>('.operator-registration-legal a[data-operator-legal]'))link.setAttribute('href',link.getAttribute('href')!+legalLanguage);
+ const imprint=form.querySelector<HTMLAnchorElement>('[data-operator-imprint]');if(imprint)imprint.href='/impressum?lang='+currentLanguage();
  const dialog=document.querySelector<HTMLDialogElement>('#operator-registration')!,trigger=document.querySelector<HTMLButtonElement>('#open-operator-registration')!,cancel=document.querySelector<HTMLButtonElement>('#register-cancel')!;
  const dismiss=()=>{if(!busy)dialog.close();};
  trigger.addEventListener('click',()=>{if(!dialog.open)dialog.showModal();});
@@ -20,12 +27,12 @@ export function initializeOperatorRegistration(){
  dialog.addEventListener('click',event=>{const rect=dialog.getBoundingClientRect();if(event.target===dialog&&(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom))dismiss();});
  dialog.addEventListener('close',()=>{form.reset();sync();feedback.textContent='';if(document.activeElement!==document.querySelector('#operator-password'))trigger.focus();});
  form.addEventListener('submit',async event=>{
-  event.preventDefault();if(busy)return;validatePasswords();if(!form.reportValidity())return;busy=true;const button=form.querySelector<HTMLButtonElement>('button[type=submit]')!;button.disabled=true;cancel.disabled=true;typePicker.setDisabled(true);form.setAttribute('aria-busy','true');feedback.textContent='';
+  event.preventDefault();if(busy)return;validatePasswords();if(!form.reportValidity())return;busy=true;button.disabled=true;cancel.disabled=true;typePicker.setDisabled(true);form.setAttribute('aria-busy','true');feedback.textContent='';
   const values=new FormData(form);
-  try{await api('/operator-registrations',{method:'POST',body:JSON.stringify({handle:values.get('handle'),email:values.get('email'),language:currentLanguage(),password:password.value,accountType:type.value,ageConfirmed:values.get('ageConfirmed')==='on',ageVersion:declarations.age.version,...(type.value==='organization'?{organizationAuthorized:check.checked,organizationVersion:declarations.organization.version}:{})})});
+  try{await api('/operator-registrations',{method:'POST',body:JSON.stringify({handle:values.get('handle'),email:values.get('email'),language:currentLanguage(),password:password.value,accountType:type.value,ageConfirmed:values.get('ageConfirmed')==='on',ageVersion:declarations.age.version,termsAccepted:values.get('termsAccepted')==='on',termsVersion:operatorLegal.terms.version,privacyVersion:operatorLegal.privacy.version,...(type.value==='organization'?{organizationAuthorized:check.checked,organizationVersion:declarations.organization.version}:{})})});
    document.querySelector<HTMLInputElement>('#operator-handle')!.value=String(values.get('handle'));form.reset();sync();dialog.close();
    document.querySelector<HTMLElement>('#login-status')!.textContent=t('Check your inbox to confirm your email address before signing in. If the account already exists, use account recovery.');document.querySelector<HTMLElement>('#operator-password')!.focus();
   }catch(error){feedback.textContent=(error as {code?:string})?.code==='MAIL_UNAVAILABLE'?t('Email delivery is not configured yet. Please try again later.'):t('Unable to create account. Check the handle, password and required confirmations.');feedback.focus();}
-  finally{password.value='';repeat.value='';clearPasswordError();busy=false;button.disabled=false;cancel.disabled=false;typePicker.setDisabled(false);form.removeAttribute('aria-busy');}
+  finally{password.value='';repeat.value='';clearPasswordError();busy=false;updateSubmit();cancel.disabled=false;typePicker.setDisabled(false);form.removeAttribute('aria-busy');}
  });
 }

@@ -1,20 +1,31 @@
 ---
+import LegalDocumentTiles from './LegalDocumentTiles.astro';
 import HandleInput from './HandleInput.astro';
+import {operatorLegal} from '../../../shared/operator-legal';
 import {declarations} from '../../../shared/declarations';
 ---
 <dialog id="operator-registration" class="report-dialog operator-registration" aria-labelledby="register-title">
   <h2 id="register-title">Create operator account</h2>
   <form id="operator-register" aria-label="Create operator account">
+    <div class="operator-registration-fields">
     <label for="register-handle">Handle</label><HandleInput id="register-handle" name="handle" pattern="[a-z0-9_]{3,32}" minlength="3" maxlength="32" autocomplete="username" autocapitalize="none" spellcheck="false" required/>
     <label for="register-email">Email address</label><input id="register-email" name="email" type="email" maxlength="254" autocomplete="email" aria-describedby="register-email-note" required/>
     <p id="register-email-note" class="meta">Your email stays private. Confirm it before signing in; it also lets you reset your password.</p>
     <label for="register-password">Password</label><input id="register-password" name="password" type="password" minlength="12" maxlength="256" autocomplete="new-password" aria-describedby="register-password-rules" required/>
     <p id="register-password-rules" class="meta">12–256 characters. No mandatory mix of uppercase letters, numbers or symbols.</p>
     <label for="register-password-repeat">Repeat password</label><input id="register-password-repeat" type="password" minlength="12" maxlength="256" autocomplete="new-password" required/>
+    </div>
+    <div class="operator-registration-confirmations">
     <label for="register-type">Account type</label><select id="register-type" name="accountType"><option value="personal">Personal</option><option value="organization">Organization</option></select>
     <label class="operator-consent"><span class="storage-switch"><input name="ageConfirmed" type="checkbox" role="switch" required/><span class="storage-switch-track" aria-hidden="true"></span></span><span>{declarations.age.text}</span></label>
     <label id="register-organization" class="operator-consent" hidden><span class="storage-switch"><input name="organizationAuthorized" type="checkbox" role="switch" disabled/><span class="storage-switch-track" aria-hidden="true"></span></span><span>{declarations.organization.text}</span></label>
+    <label class="operator-consent operator-terms-consent"><span class="storage-switch"><input name="termsAccepted" type="checkbox" role="switch" required aria-describedby="register-terms-link"/><span class="storage-switch-track" aria-hidden="true"></span></span><span>I accept the operator terms of use.</span></label>
+    <div class="operator-registration-legal">
+      <a id="register-terms-link" data-operator-legal href={operatorLegal.terms.path} target="_blank" rel="noopener noreferrer">Read the operator terms of use (new tab)</a>
+      <LegalDocumentTiles audience="operator" privacyHref={operatorLegal.privacy.path} />
+    </div>
+    </div>
     <p id="register-feedback" role="alert" tabindex="-1"></p>
-    <div class="report-actions"><button id="register-cancel" type="button" class="admin-icon-button" aria-label="Cancel" data-tooltip="Cancel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button><button type="submit" class="admin-sign-in admin-icon-button" aria-label="Create operator account" data-tooltip="Create operator account"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 21v-2a6 6 0 0 0-12 0v2M9 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm10 5v8m-4-4h8"/></svg></button></div>
+    <div class="report-actions"><button id="register-cancel" type="button" class="admin-icon-button" aria-label="Cancel" data-tooltip="Cancel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button><button type="submit" disabled class="admin-sign-in admin-icon-button" aria-label="Create operator account" data-tooltip="Create operator account"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 21v-2a6 6 0 0 0-12 0v2M9 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm10 5v8m-4-4h8"/></svg></button></div>
   </form>
 </dialog>

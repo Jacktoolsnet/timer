@@ -8,6 +8,7 @@ import {maintainCases} from './case-maintenance.js';
 import {z} from 'zod';
 import {createMailer} from './mailer.js';
 import {emailAddress,operatorEmail} from './operator-email.js';
+import {operatorLegal} from '../../shared/operator-legal.js';
 import {declarations} from '../../shared/declarations.js';
 import {registerOperator} from './authorization.js';
 import { migrate, cleanup, pool } from "./db.js";
@@ -51,13 +52,14 @@ try {
         "Set BOOTSTRAP_HANDLE (3–32 lowercase letters/digits/underscores) and BOOTSTRAP_PASSWORD (at least 12 characters)",
       );
     const table = process.argv.includes("--admin") ? "admins" : "operators";
-    if(table==='operators' && (!['personal','organization'].includes(process.env.BOOTSTRAP_ACCOUNT_TYPE || '') || process.env.BOOTSTRAP_AGE_CONFIRMED!=='true' || (process.env.BOOTSTRAP_ACCOUNT_TYPE==='organization' && process.env.BOOTSTRAP_ORGANIZATION_AUTHORIZED!=='true')))
-      throw Error('Use /operator to register, or explicitly set BOOTSTRAP_ACCOUNT_TYPE, BOOTSTRAP_AGE_CONFIRMED=true and (for Organization) BOOTSTRAP_ORGANIZATION_AUTHORIZED=true after reading /api/declarations. No account was created.');
+    if(table==='operators' && (!['personal','organization'].includes(process.env.BOOTSTRAP_ACCOUNT_TYPE || '') || process.env.BOOTSTRAP_AGE_CONFIRMED!=='true' || process.env.BOOTSTRAP_TERMS_ACCEPTED!=='true' || (process.env.BOOTSTRAP_ACCOUNT_TYPE==='organization' && process.env.BOOTSTRAP_ORGANIZATION_AUTHORIZED!=='true')))
+      throw Error('Use /operator to register, or explicitly set BOOTSTRAP_ACCOUNT_TYPE, BOOTSTRAP_AGE_CONFIRMED=true, BOOTSTRAP_TERMS_ACCEPTED=true and (for Organization) BOOTSTRAP_ORGANIZATION_AUTHORIZED=true after reading /api/declarations and the operator terms/privacy documents at /operator/nutzungsbedingungen and /operator/datenschutz. No account was created.');
     if(table==='operators'){
     const email=operatorEmail(createMailer(),process.env.PUBLIC_ORIGIN || 'http://localhost:4321');email.available();
     const created=await registerOperator(pool,{
       handle,password,email:process.env.BOOTSTRAP_EMAIL,accountType:process.env.BOOTSTRAP_ACCOUNT_TYPE,
       ageConfirmed:process.env.BOOTSTRAP_AGE_CONFIRMED==='true',ageVersion:declarations.age.version,
+      termsAccepted:process.env.BOOTSTRAP_TERMS_ACCEPTED==='true',termsVersion:operatorLegal.terms.version,privacyVersion:operatorLegal.privacy.version,
       ...(process.env.BOOTSTRAP_ACCOUNT_TYPE==='organization'?{organizationAuthorized:process.env.BOOTSTRAP_ORGANIZATION_AUTHORIZED==='true',organizationVersion:declarations.organization.version}:{}),
     });
     if(!created)throw Error('Operator handle or email already registered');

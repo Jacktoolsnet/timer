@@ -139,7 +139,16 @@ const sectionLinks = [...document.querySelectorAll<HTMLAnchorElement>('.header-n
 const sections = sectionLinks.map(link => ({link, section:document.getElementById(new URL(link.href).hash.slice(1))}));
 function syncSectionNavigation() {
   const boundary = (masthead?.getBoundingClientRect().height || 0) + 40;
-  const current = sections.filter(item => item.section && item.section.getBoundingClientRect().top <= boundary).at(-1);
+  const availableSections = sections.filter(item => item.section);
+  let current = availableSections.filter(item => item.section!.getBoundingClientRect().top <= boundary).at(-1);
+  // On tall desktop viewports the final section cannot reach the masthead.
+  // At the document bottom, select it when it is actually visible instead.
+  const last = availableSections.at(-1);
+  const atBottom = window.scrollY > 0
+    && window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2;
+  if (atBottom && last && last.section!.getBoundingClientRect().top < window.innerHeight) {
+    current = last;
+  }
   sectionLinks.forEach(link => {
     if (current?.link === link) link.setAttribute('aria-current','location');
     else link.removeAttribute('aria-current');
@@ -158,3 +167,5 @@ window.addEventListener('scroll', () => {
   if (navigationFrame) return;
   navigationFrame = requestAnimationFrame(() => { navigationFrame = 0; syncSectionNavigation(); });
 }, {passive:true});
+
+window.addEventListener('resize', syncSectionNavigation);

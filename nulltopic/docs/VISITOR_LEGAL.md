@@ -48,3 +48,6 @@ The local visitor interface now remembers explicit confirmation in the independe
 ## Public-release terms copy review (2026-11-10)
 
 Visitor terms describe the intended advertising policy in present, conditional terms (may display AdSense; required consent separately; no corresponding ads without it). This does not activate ads or claim that a Google CMP/privacy-settings control is already integrated. The real integration, disclosures and withdrawal controls must match this text before launch. Anonymous flag reports already work without a name/email; private reporter-status access and optional-contact mail are now implemented; full formal DSA legal/operational review remains separate. See REPORTER_STATUS.md and DSA_REPORTER_STATUS_PLAN.md. The terms change does not alter conversation/case retention, moderation permissions or API behaviour.
+
+
+Operator registration now has separate German/English working documents and versioned new-account terms agreement. See OPERATOR_LEGAL.md. This addresses the account-document implementation item above, but provider/operational facts and substantive legal review remain launch blockers; no existing visitor text or acknowledgement is silently reclassified.

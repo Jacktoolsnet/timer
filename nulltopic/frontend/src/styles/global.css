@@ -1976,8 +1976,8 @@ body:has(#visitor-confirmation[open]){overflow:hidden}
 .visitor-confirmation-choices{grid-template-columns:minmax(0,1fr)}
 .visitor-confirmation-choices>label,.visitor-confirmation-choices>a{min-width:0;overflow-wrap:anywhere}
 
-.visitor-confirmation .visitor-document-tile{display:flex;align-items:flex-start;gap:10px;min-width:0;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--accent-soft);color:var(--text);text-decoration:none;transition:border-color .15s ease}
-.visitor-confirmation .visitor-document-tile:hover{border-color:var(--accent)}
+:is(.visitor-confirmation,.operator-registration) .visitor-document-tile{display:flex;align-items:flex-start;gap:10px;min-width:0;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--accent-soft);color:var(--text);text-decoration:none;transition:border-color .15s ease}
+:is(.visitor-confirmation,.operator-registration) .visitor-document-tile:hover{border-color:var(--accent)}
 .visitor-document-icon{display:grid;place-items:center;width:36px;height:36px;flex:0 0 36px;color:var(--accent)}
 .visitor-document-icon svg{width:32px;height:32px}
 .visitor-document-copy{display:grid;gap:5px;min-width:0;overflow-wrap:anywhere}
@@ -1988,7 +1988,7 @@ body:has(#visitor-confirmation[open]){overflow:hidden}
 [data-style=minimal] .visitor-document-tile{border-radius:8px}
 [data-style=soft] .visitor-document-tile{border-radius:18px}
 @media(max-width:520px){.visitor-document-links{grid-template-columns:minmax(0,1fr)}}
-@media(prefers-reduced-motion:reduce){.visitor-confirmation .visitor-document-tile{transition:none}}
+@media(prefers-reduced-motion:reduce){:is(.visitor-confirmation,.operator-registration) .visitor-document-tile{transition:none}}
 
 .visitor-confirmation-actions>[hidden]{display:none!important}
 
@@ -2052,3 +2052,21 @@ body:has(#visitor-confirmation[open]){overflow:hidden}
 .themed-select-trigger:disabled,.themed-select-options button:disabled{opacity:.55;cursor:not-allowed}
 [data-style=technical] :is(.themed-select-trigger,.themed-select-options,.themed-select-options button){border-radius:3px}
 [data-style=soft] .themed-select-trigger{border-radius:12px}
+
+/* Registration legal information is separate from the explicit agreement switch. */
+.operator-registration-legal { display: grid; gap: 18px; margin: 8px 0 20px; min-width: 0; }
+.operator-registration #register-terms-link { margin-inline-start: 58px; font-size: .8rem; color: var(--accent); text-underline-offset: 3px; overflow-wrap: anywhere; }
+.operator-registration .operator-terms-consent { margin-top: 18px; }
+.operator-registration .admin-sign-in:disabled { opacity: .4; box-shadow: none; cursor: not-allowed; }
+
+.operator-registration-fields, .operator-registration-confirmations { min-width: 0; }
+#register-feedback:empty { display: none; }
+@media (min-width: 1000px) {
+  .operator-registration { width: min(1000px, calc(100vw - 64px)); }
+  .operator-registration form { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 32px; }
+  .operator-registration > h2 { margin-top: 0; }
+  .operator-registration-fields > .meta { margin: 0 0 12px; line-height: 1.6; }
+  .operator-registration-confirmations { padding-inline-start: 24px; border-inline-start: 1px solid var(--line); }
+  .operator-registration #register-feedback, .operator-registration .report-actions { grid-column: 1 / -1; }
+  .operator-registration .report-actions { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
+}

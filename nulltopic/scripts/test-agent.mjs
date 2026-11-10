@@ -1,3 +1,4 @@
+import {operatorLegal} from '../shared/operator-legal.ts';
 import {localLoginCode} from './local-login-code.mjs';
 import { randomBytes, randomUUID } from "node:crypto";
 import { mkdir, writeFile, readFile, readdir } from "node:fs/promises";
@@ -56,7 +57,7 @@ const suffix = randomUUID().slice(0, 8),
 if(process.env.MAIL_MODE!=='local')throw Error('New synthetic fixtures require MAIL_MODE=local; no email will be sent externally');
 const email=handle+'@example.invalid';
 const {data:declarations}=await api('/declarations');
-await api('/operator-registrations',{handle,password,email,accountType:'personal',ageConfirmed:true,ageVersion:declarations.age.version});
+await api('/operator-registrations',{handle,password,email,accountType:'personal',ageConfirmed:true,ageVersion:declarations.age.version,termsAccepted:true,termsVersion:operatorLegal.terms.version,privacyVersion:operatorLegal.privacy.version});
 let verifyToken;
 const outbox=new URL('../.local/mail/',import.meta.url);
 for(let attempt=0;attempt<50&&!verifyToken;attempt++){

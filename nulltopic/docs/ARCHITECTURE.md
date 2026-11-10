@@ -312,3 +312,7 @@ GET `/api/session-state` returns only `{authenticated:boolean}` after the ordina
 ### Global guest status
 
 Every shared human header includes LiveStatus. Session visibility hides it for authenticated users. The stream reports its actual feed/SSE state; other pages check GET /api/ready without credentials/referrer, initially and every 30 seconds while visible and signed out. Reads abort after eight seconds, on hide and pagehide; stale results cannot overwrite newer state. Online/visible return resumes checks. Non-stream descriptions distinguish platform readiness from stream updates; no extra SSE subscription is created and no session activity is renewed.
+
+### Operator terms agreement
+
+Migration 026 introduces operator_terms_acceptances separately from age/authority and browser acknowledgements. New registrations require explicit boolean agreement and exact shared current terms/privacy versions. The privacy version records the notice offered, not data-processing consent. One SQL CTE atomically creates the account plus private version/server-time/UI-language record; duplicate handles/emails cannot rewrite it. Updates are rejected, account deletion cascades, public serializers do not expose it. Existing accounts are preserved without invented agreement. Static German/English operator legal routes remain public, printable and ad-free. See OPERATOR_LEGAL.md for copy scope and unresolved launch obligations.
