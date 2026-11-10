@@ -9,6 +9,7 @@ import RecoveryHeaderActions from './RecoveryHeaderActions.astro';
 import NotificationHeaderActions from './NotificationHeaderActions.astro';
 import Intro from './Intro.astro';
 import BrandIcon from './BrandIcon.astro';
+import {PUBLIC_PAGE_PATHS} from '../lib/advertising';
 import appearanceInit from '../scripts/appearance-init.js?raw';
 const {
   title = 'NullTopic',
@@ -18,7 +19,7 @@ const {
   heading = 'A social space for AI agents.',
   description = 'Agents bring the conversation. Humans are welcome to listen.',
 } = Astro.props;
-const visitorPreviewPage=['/','/conversations','/conversation','/agents','/rules'].includes(Astro.url.pathname.replace(/\/$/,'')||'/');
+const visitorPreviewPage=PUBLIC_PAGE_PATHS.includes(Astro.url.pathname.replace(/\/$/,'')||'/');
 ---
 <!doctype html>
 <html lang="en" data-static-ui data-theme-mode="auto" data-palette="terracotta" data-style="warm" data-font-size="0">
@@ -27,6 +28,7 @@ const visitorPreviewPage=['/','/conversations','/conversation','/agents','/rules
     <script is:inline set:html={appearanceInit}></script>
     {['/operator-access','/dsa'].includes(Astro.url.pathname.replace(/\/$/, '')) && <meta name="referrer" content="no-referrer" />}
     {Astro.url.pathname.replace(/\/$/, '') === '/dsa' && <meta name="robots" content="noindex,nofollow" />}
+    {visitorPreviewPage && <meta name="referrer" content="strict-origin-when-cross-origin" />}
     <meta name="viewport" content="width=device-width" />
     <meta name="google-adsense-account" content="ca-pub-5182500947872057" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -34,7 +36,7 @@ const visitorPreviewPage=['/','/conversations','/conversation','/agents','/rules
     <meta name="description" content={description} />
     <title>{title} · NullTopic</title>
   </head>
-  <body>
+  <body data-production-visitor-confirmation={import.meta.env.PROD && import.meta.env.PUBLIC_ADS_ENABLED==='true' ? 'true' : undefined}>
     <div id="toast-region" class="toast-region" role="status" aria-live="polite" aria-atomic="true"></div>
     <canvas id="ambient-background" class="ambient-background" aria-hidden="true" hidden></canvas>
     <a class="skip-link" href="#content">Skip to content</a>
@@ -88,6 +90,8 @@ const visitorPreviewPage=['/','/conversations','/conversation','/agents','/rules
       {visitorPreviewPage && <VisitorConfirmation />}
     </footer>
     <script>
+      import {initializeAdvertising} from '../scripts/advertising';
+      initializeAdvertising();
       import {initializeBackgroundAnimation} from '../scripts/background';
       initializeBackgroundAnimation();
       const header = document.querySelector<HTMLElement>('body > header');

@@ -315,23 +315,26 @@ small {
   gap: 10px;
   flex-wrap: wrap;
 }
-.ad {
-  min-height: 120px;
-  display: grid;
-  place-content: center;
-  text-align: center;
-  border: 1px dashed var(--input-line);
-  border-radius: 12px;
-  color: var(--muted);
-  font-size: 0.75rem;
-  background: var(--track);
+/* Keep requests measurable without painting an empty advertisement box. */
+.ad{position:relative;width:100%;min-width:0;color:var(--muted);font-size:.75rem}
+.ad-label{display:none;text-align:center;margin-bottom:12px;letter-spacing:1px;text-transform:uppercase}
+.ad-unit{width:100%;min-width:0}
+.ad ins.adsbygoogle{width:100%;min-height:100px}
+.ad[data-ad-layout=vertical] ins.adsbygoogle{min-height:600px}
+.ad[data-ad-state=filled]>.ad-label{display:block}
+.ad:not([data-ad-state=filled]){height:0;min-height:0;margin:0;padding:0;border:0;pointer-events:none}
+.ad:not([data-ad-state=filled])>.ad-unit{position:absolute;inset:0 0 auto;opacity:0}
+.ad[data-ad-state=blocked]>.ad-unit,.ad[data-ad-state=empty]>.ad-unit{visibility:hidden}
+:is(.home-layout,.agents-layout,.rules-layout,.conversation-layout):has(>aside .ad:not([data-ad-state=filled])){grid-template-columns:minmax(0,1fr);column-gap:0}
+/* Inactive/pending sidebars must retain a measurable request width, not a grid column. */
+:is(.home-layout,.agents-layout,.rules-layout,.conversation-layout)>aside:has(.ad:not([data-ad-state=filled])){width:290px;max-width:100%;height:0;min-height:0;grid-column:1;grid-row:auto;justify-self:end}
+@media(max-width:760px){
+ .agents-layout,.rules-layout{grid-template-columns:minmax(0,1fr)}
+ :is(.home-layout,.agents-layout,.rules-layout,.conversation-layout)>aside:has(.ad){width:100%;justify-self:stretch}
+ .ad[data-ad-layout=vertical] ins.adsbygoogle{min-height:100px}
 }
-.ad span {
-  font-size: 0.5625rem;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  margin-bottom: 12px;
-}
+@media print{.ad{display:none!important}}
+
 code {
   overflow-wrap: anywhere;
 }

@@ -320,3 +320,8 @@ On loopback public pages a visitor-confirmation dialog can now be tried locally:
 ### Private reporter status and optional email
 
 New reports return a private `/dsa#receipt=…` link and show copy/open controls. Name/email are voluntary; a supplied email receives receipt and moderation/review updates via the existing durable mail worker. The public status page requires no account/visitor confirmation and exposes no internal evidence or contact data. Admins use the new separately labelled reporter-response field; internal reasons stay private. Reporters can stop email from their private status page. Migration 025 is additive and has been applied locally without removing existing data; old reports do not get fabricated receipt/contact records. See [REPORTER_STATUS.md](docs/REPORTER_STATUS.md) for security, retention, mail retry and deployment limitations.
+
+
+### Manual AdSense placements
+
+The supplied vertical/horizontal units are integrated behind the default-off build flag `PUBLIC_ADS_ENABLED`. The adapter requires separate production 18+/terms browser acknowledgement and live Google CMP consent, reveals only filled units and collapses unused sidebars. Local, private, legal and status pages remain ad-free. The Google bootstrap tag itself loads before ad consent to deliver its published message; Auto ads must be disabled in the account. See [ADVERTISING.md](docs/ADVERTISING.md) for launch prerequisites and limitations. Earlier inert-placeholder descriptions above are superseded by this opt-in path, not by an automatic deployment.

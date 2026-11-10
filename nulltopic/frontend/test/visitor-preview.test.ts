@@ -2,10 +2,12 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {JSDOM} from 'jsdom';
+import {PRODUCTION_VISITOR_KEY} from '../src/lib/advertising';
 import {initializeVisitorPreview,isVisitorPreviewHost,VISITOR_PREVIEW_KEY,VISITOR_PREVIEW_VERSION} from '../src/scripts/visitor-preview';
-function fixture(host='localhost',stored?:string,language='de'){
- const dom=new JSDOM(readFileSync(new URL('../dist/index.html',import.meta.url),'utf8'),{url:'http://'+host+'/'}),w=dom.window,d=w.document;
+function fixture(host='localhost',stored?:string,language='de',production=false){
+ const dom=new JSDOM(readFileSync(new URL('../dist/index.html',import.meta.url),'utf8'),{url:(production?'https://':'http://')+host+'/'}),w=dom.window,d=w.document;
  const originals=new Map<string,PropertyDescriptor|undefined>();for(const [key,value] of Object.entries({document:d,window:w,localStorage:w.localStorage})){originals.set(key,Object.getOwnPropertyDescriptor(globalThis,key));Object.defineProperty(globalThis,key,{configurable:true,value});}
+ if(production)d.body.dataset.productionVisitorConfirmation='true';
  d.documentElement.lang=language;const dialog=d.querySelector<HTMLDialogElement>('#visitor-confirmation')!;let shows=0;
  Object.defineProperty(dialog,'showModal',{value:()=>{shows++;dialog.open=true;}});Object.defineProperty(dialog,'close',{value:()=>{dialog.open=false;}});
  if(stored)w.localStorage.setItem(VISITOR_PREVIEW_KEY,stored);
@@ -64,4 +66,18 @@ test('header review button follows House rules and is not in the footer',()=>{
 
 test('failed removal retains the stored choice and shows an error instead of pretending to withdraw',()=>{
  const f=fixture('localhost',VISITOR_PREVIEW_VERSION);try{initializeVisitorPreview();f.d.getElementById('visitor-preview-reopen')!.click();Object.defineProperty(globalThis,'localStorage',{configurable:true,get(){throw Error('blocked');}});f.d.getElementById('visitor-withdraw')!.click();assert.equal(f.w.localStorage.getItem(VISITOR_PREVIEW_KEY),VISITOR_PREVIEW_VERSION);assert.equal(f.d.getElementById('visitor-withdraw-error')!.hidden,false);assert.ok(f.dialog.open);}finally{f.close();}
+});
+
+
+test('production advertising acknowledgement uses a separate choice and never migrates local preview acceptance',()=>{
+ const f=fixture('nulltopic.com',VISITOR_PREVIEW_VERSION,'de',true);
+ try{
+  let events=0;f.w.addEventListener('nulltopic:visitor-confirmation',()=>events++);
+  initializeVisitorPreview();assert.equal(f.shows(),1);
+  toggle(f,'#visitor-age');toggle(f,'#visitor-terms');submit(f);
+  assert.equal(f.w.localStorage.getItem(PRODUCTION_VISITOR_KEY),VISITOR_PREVIEW_VERSION);assert.equal(events,1);
+  f.d.querySelector<HTMLButtonElement>('#visitor-preview-reopen')!.click();
+  f.d.querySelector<HTMLButtonElement>('#visitor-withdraw')!.click();
+  assert.equal(f.w.localStorage.getItem(PRODUCTION_VISITOR_KEY),null);assert.equal(events,2);
+ }finally{f.close();}
 });

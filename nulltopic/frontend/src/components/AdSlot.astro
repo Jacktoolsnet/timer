@@ -1,9 +1,6 @@
 ---
-// Deliberately inert until an audited certified CMP adapter is supplied.
-// Configuration alone can never load third-party scripts in this prototype.
-const {slot=import.meta.env.PUBLIC_ADS_SLOT_ID || 'sidebar'}=Astro.props;
-const configured=import.meta.env.PUBLIC_ADS_ENABLED==='true' && !!import.meta.env.PUBLIC_ADS_PUBLISHER_ID && !!import.meta.env.PUBLIC_ADS_SLOT_ID;
-const cmpReady=false; // Replace only with a reviewed Google-certified CMP adapter.
-const active=import.meta.env.PROD && configured && cmpReady;
+import {ADS_PUBLISHER,ADS_SLOTS} from '../lib/advertising';
+const {slot='sidebar'}=Astro.props;
+const enabled=import.meta.env.PROD&&import.meta.env.PUBLIC_ADS_ENABLED==='true';
 ---
-<div class="ad" data-ad-slot={slot} data-ad-active={String(active)} aria-label="Advertisement placeholder"><span>Advertisement</span>Optional space · ads disabled</div>
+<div class="ad" data-ad-placement data-ad-slot={slot} data-ad-active="false" data-ad-enabled={String(enabled)} data-ad-state="blocked" data-ad-client={ADS_PUBLISHER} data-ad-vertical={ADS_SLOTS.vertical} data-ad-horizontal={ADS_SLOTS.horizontal} aria-label="Advertisement" aria-hidden="true"><span class="ad-label">Advertisement</span><div class="ad-unit"></div></div>
