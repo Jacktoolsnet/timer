@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {JSDOM} from 'jsdom';
 import documents from '../src/lib/visitor-legal-copy.json';
+import {VISITOR_TERMS_VERSION,VISITOR_PRIVACY_VERSION} from '../src/lib/visitor-legal-versions';
 import {initializeHumanLanguage} from '../src/lib/i18n';
 
 for(const [route,kind] of [['datenschutz','privacy'],['nutzungsbedingungen','terms']] as const){
@@ -11,13 +12,13 @@ for(const [route,kind] of [['datenschutz','privacy'],['nutzungsbedingungen','ter
   const dom=new JSDOM(readFileSync(new URL('../dist/'+path,import.meta.url),'utf8'));
   try{
    const d=dom.window.document,section=d.querySelector<HTMLElement>('.visitor-legal')!,article=section.querySelector('article')!,copy=documents[kind][language];
-   assert.equal(section.lang,language);assert.equal(section.getAttribute('translate'),'no');assert.equal(section.dataset.legalKind,kind);assert.equal(section.dataset.legalVersion,'2026-11-10-visitor-draft-1');assert.equal(section.querySelector('h1')!.textContent,copy.title);
+   assert.equal(section.lang,language);assert.equal(section.getAttribute('translate'),'no');assert.equal(section.dataset.legalKind,kind);assert.equal(section.dataset.legalVersion,kind==='terms'?VISITOR_TERMS_VERSION:VISITOR_PRIVACY_VERSION);assert.equal(section.querySelector('h1')!.textContent,copy.title);
    assert.equal(article.getAttribute('aria-label'),copy.title);assert.equal(article.querySelectorAll('h2').length,copy.sections.length);
    for(const {heading,paragraphs} of copy.sections){assert.ok(article.textContent!.includes(heading));for(const paragraph of paragraphs)assert.ok(article.textContent!.includes(paragraph));}
    for(const link of section.querySelectorAll<HTMLAnchorElement>('.legal-contents a'))assert.ok(d.getElementById(link.hash.slice(1)));
-   assert.equal(section.querySelectorAll('.legal-translation-notice').length,language==='en'?2:1);
+   assert.equal(section.querySelectorAll('.legal-translation-notice').length,(kind==='privacy'?1:0)+(language==='en'?1:0));
    assert.ok(section.querySelector(`a[hreflang="de"][href="/${route}"]`));assert.ok(section.querySelector(`a[hreflang="en"][href="/${route}/en"]`));
-   assert.ok(section.querySelector('.legal-draft-notice'));assert.equal(section.querySelector('.legal-related'),null);assert.ok(article.textContent!.includes('jacktoolsnet@gmail.com'));assert.ok(d.querySelector('footer a[href="/datenschutz"]'));assert.ok(d.querySelector('footer a[href="/nutzungsbedingungen"]'));assert.ok(d.querySelector('footer a[href="/impressum"]'));
+   assert.equal(!!section.querySelector('.legal-draft-notice'),kind==='privacy');assert.equal(section.querySelector('.legal-related'),null);assert.ok(article.textContent!.includes('jacktoolsnet@gmail.com'));assert.ok(d.querySelector('footer a[href="/datenschutz"]'));assert.ok(d.querySelector('footer a[href="/nutzungsbedingungen"]'));assert.ok(d.querySelector('footer a[href="/impressum"]'));
    assert.equal(section.querySelector('form,iframe,input,dialog'),null);assert.equal(d.querySelector('script[src*="google"],script[src*="adsbygoogle"],.ad-slot'),null);
    assert.ok(article.textContent!.includes('JackTools.Net UG (haftungsbeschränkt)'));assert.ok(article.textContent!.includes('38304 Wolfenbüttel'));
   }finally{dom.window.close();}
@@ -37,4 +38,10 @@ test('German and service translation keep section parity and describe advertisin
  assert.match(de,/derzeit nicht aktiv/);assert.match(en,/not currently active/);assert.match(de,/sechs Kalendermonaten/);assert.match(en,/six calendar months/);
  assert.match(JSON.stringify(documents.terms.de),/keine pauschale Datenschutz- oder Werbeeinwilligung/);
  assert.match(JSON.stringify(documents.terms.en),/not blanket privacy or advertising consent/);
+});
+
+test('visitor terms use public-release wording, reader-only actions and no unsupported status-page promise',()=>{
+ for(const language of ['de','en'] as const){
+  const copy=documents.terms[language],text=JSON.stringify(copy);assert.doesNotMatch(text,/Prototyp|prototype|Arbeitsentwurf|working draft|30 Tagen|30 days|Werbeplatzhalter|placeholders/i);assert.match(text,/Google AdSense/);assert.equal(copy.sections[1].paragraphs.length,1);assert.match(text,language==='de'?/selbst keine Beiträge oder Kommentare/:/cannot publish posts or comments/);assert.match(text,language==='de'?/ohne Angabe deines Namens oder deiner E-Mail-Adresse/:/without providing your name or email address/);assert.doesNotMatch(text,/Statuslink|status link/);
+ }
 });

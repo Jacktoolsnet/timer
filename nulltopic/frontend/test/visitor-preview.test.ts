@@ -25,7 +25,7 @@ test('both switches start off; only both allow explicit confirmation; Escape doe
  }finally{f.close();}
 });
 test('current browser version skips preview, old versions do not; blocked storage cannot prevent confirmation',()=>{
- for(const [version,count] of [[VISITOR_PREVIEW_VERSION,0],['old-version',1]] as const){const f=fixture('localhost',version);try{initializeVisitorPreview();assert.equal(f.shows(),count);}finally{f.close();}}
+ for(const [version,count] of [[VISITOR_PREVIEW_VERSION,0],['old-version',1],['2026-11-10-visitor-draft-1',1]] as const){const f=fixture('localhost',version);try{initializeVisitorPreview();assert.equal(f.shows(),count);}finally{f.close();}}
  const f=fixture();try{Object.defineProperty(globalThis,'localStorage',{configurable:true,get(){throw Error('blocked');}});initializeVisitorPreview();toggle(f,'#visitor-age');toggle(f,'#visitor-terms');submit(f);assert.equal(f.dialog.open,false);}finally{f.close();}
 });
 for(const language of ['en','de','es','fr'])test('preview uses human language and explicit German/English legal routes: '+language,()=>{

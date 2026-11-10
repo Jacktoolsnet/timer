@@ -1,0 +1,24 @@
+# Reporter status access — proposed follow-up, not implemented
+
+## Product goal
+
+Provide an account-free reporting/status page with a private receipt link returned after a report. Allow anonymous concerns, with optional contact where appropriate. The page is publicly reachable, but **individual cases must never be a public directory**. A receipt link is a secret access capability, not proof of identity.
+
+## Legal distinction requiring final review
+
+DSA Article 16(2) requires a mechanism enabling sufficiently precise notices, including explanation, exact location, name/email and a good-faith statement, with a specific identity/contact exception for offences covered by Articles 3–7 of Directive 2011/93/EU. Under Article 16(4), contact data, when included, trigger receipt acknowledgement; decisions/remedy information also need to be communicated under Article 16(5). Anonymous tips can still be accepted and acted upon; do not claim every anonymous tip is necessarily a complete Article 16 notice or that a pull-only status link automatically satisfies notification duties. Determine applicability, the complete formal-notice path, optional-contact handling and the specific exception before calling the workflow legally complete.
+
+Primary reference checked 2026-11-10: https://eur-lex.europa.eu/legal-content/DE/TXT/?uri=CELEX%3A32022R2065
+
+## Proposed implementation sequence
+
+1. **Notice fields and policy:** distinguish ordinary concerns and suspected illegal content; add appropriate explanation, canonical target location and good-faith fields. Define voluntarily supplied contact/notice semantics, exception handling, delivery/decision obligations and safe reporter-facing response texts. Keep anonymous concerns available. Finalise the legal scope before implementing mandatory identity/contact rules.
+2. **Private per-report receipts:** additive schema with random 256-bit access tokens returned once, only digests retained, linked to the individual report/case and cascade-purged with it. A shared case can contain several reports: a receipt must never expose other reporters or their contacts/reasons. Preserve immutable evidence, existing case/decision/appeal linking, administrator-only moderation and root exclusion. Do not put bearer tokens in DB evidence, logs, events or outbox payloads.
+3. **Safe create/read API:** return the private receipt link after committed creation; verify the capability on every status read. Publish only an allowlisted minimal reporter view (own receipt, status/timestamps and suitably redacted response/remedy information), not archived post/image evidence, internal notes/holds, private appeals or identities. Unknown, invalid and expired/purged tokens need neutral responses and rate limits. No UUID-only access, sequential lookup or complete private-case serializer reuse.
+4. **Public page and reporting UI:** account-free `/dsa` information/access route; receipt token in a fragment rather than a query string, then explicit same-origin token exchange. No-referrer/no-store and no Google/analytics/third-party assets on receipt pages. Show confirmation plus a copy/save-link action after creation instead of silently closing the form. Explain that anyone holding the link can view its limited status; save it privately. Lost links without a verified contact route are not recoverable by guessing identities. Legal/help/status access must not depend on agreeing to advertising or the visitor age/terms overlay.
+5. **Lifecycle and communications:** updates follow committed admin decisions and linked complaints, but reporter views remain separate from author/operator complaint rights. Apply existing independent case retention and justified holds. Access ends when the case/receipt is purged; the status page cannot be an indefinite mirror of deleted evidence. If supplied contact invokes required acknowledgements/decision notices, add purpose-limited transactional delivery and corresponding disclosures; do not assume existing admin/operator notifications cover reporters.
+6. **Verification before documentation:** isolated test DB only; concurrent creation/decision/purge, cross-case/token isolation, replay/loss/expiry, contact redaction, link/referrer/log exposure, root/agent/operator boundaries, browser accessibility and en/de/es/fr report UI. German/English visitor terms/privacy should describe the feature only after real APIs/UI exist and are verified. Recheck MessageDrop locally for reusable decisions before implementation, without copying credentials or broadening access.
+
+## Current release boundary
+
+Current `/api/reports` accepts a target and reason without an account or contact fields and returns `{ok:true}`. Existing private moderation cases remain unchanged. No reporter receipt token, status endpoint/page, formal-contact collection, new outbound mail or public case access has been implemented in this copy revision.

@@ -1,7 +1,8 @@
 import {currentLanguage,localizeTrustedUI,t} from '../lib/i18n';
+import {VISITOR_TERMS_VERSION} from '../lib/visitor-legal-versions';
 /** UI-only loopback preview; never a server-side access control or certified CMP. */
 export const VISITOR_PREVIEW_KEY='nulltopic.visitor-confirmation.v1';
-export const VISITOR_PREVIEW_VERSION='2026-11-10-visitor-draft-1';
+export const VISITOR_PREVIEW_VERSION=VISITOR_TERMS_VERSION;
 export function isVisitorPreviewHost(hostname:string){return ['localhost','127.0.0.1','[::1]'].includes(hostname);}
 export function initializeVisitorPreview(){
  const dialog=document.querySelector<HTMLDialogElement>('#visitor-confirmation');

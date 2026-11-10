@@ -2,11 +2,12 @@
 import Layout from './Layout.astro';
 import LegalPrintButton from './LegalPrintButton.astro';
 import documents from '../lib/visitor-legal-copy.json';
+import {VISITOR_TERMS_VERSION,VISITOR_PRIVACY_VERSION} from '../lib/visitor-legal-versions';
 interface Props {kind:'privacy'|'terms';language:'de'|'en'}
 const {kind,language}=Astro.props;
 const copy=documents[kind][language];
 const route=kind==='privacy'?'/datenschutz':'/nutzungsbedingungen';
-const version='2026-11-10-visitor-draft-1';
+const version=kind==='terms'?VISITOR_TERMS_VERSION:VISITOR_PRIVACY_VERSION;
 ---
 <Layout title={kind==='privacy'?'Visitor privacy notice':'Visitor terms of use'} showIntro={false} description="Visitor legal documents: German originals and English service translations.">
  <section class="legal-notice visitor-legal" lang={language} translate="no" data-legal-kind={kind} data-legal-version={version}>
@@ -15,10 +16,10 @@ const version='2026-11-10-visitor-draft-1';
    <a href={route} lang="de" hreflang="de" aria-current={language==='de'?'page':undefined}>Deutsch · Original</a>
    <a href={route+'/en'} lang="en" hreflang="en" aria-current={language==='en'?'page':undefined}>English · Translation</a>
   </nav>
-  <aside class="legal-translation-notice legal-draft-notice" role="note">
+  {kind==='privacy' && <aside class="legal-translation-notice legal-draft-notice" role="note">
    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 10 18H2L12 3Z M12 9v5m0 3h.01"/></svg>
    <div><strong>{language==='de'?'Arbeitsentwurf · noch nicht veröffentlichungsreif':'Working draft · not ready for public launch'}</strong><p>{language==='de'?'Diese Fassung beschreibt den lokalen Prototyp für Besucher. Hosting, Protokoll- und Backupfristen sowie Angaben zu Kontofunktionen müssen vor dem öffentlichen Start ergänzt und rechtlich geprüft werden. Werbung und Besucher-Altersbestätigung sind noch nicht aktiviert.':'This edition describes the local prototype for visitors. Hosting, log and backup retention and information about account functions must be completed and legally reviewed before public launch. Advertising and visitor age confirmation are not yet enabled.'}</p></div>
-  </aside>
+  </aside>}
   {language==='en' && <aside class="legal-translation-notice" role="note"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10h.01"/></svg><div><p>This English translation is provided for information. The German original is authoritative. Mandatory statutory protections remain unaffected.</p><a href={route} lang="de" hreflang="de">Read the German original</a></div></aside>}
   <p class="legal-version">{language==='de'?'Stand: 10. November 2026':'Last updated: 10 November 2026'} · <span>{version}</span></p>
   <nav class="legal-contents" aria-label={language==='de'?'Inhaltsverzeichnis':'Contents'}><ol>{copy.sections.map(({heading},i)=><li><a href={'#section-'+(i+1)}>{heading.replace(/^\d+\. /,'')}</a></li>)}</ol></nav>

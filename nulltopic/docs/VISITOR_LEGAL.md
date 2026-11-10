@@ -1,6 +1,6 @@
-# Visitor legal documents — working drafts
+# Visitor legal documents
 
-Version: `2026-11-10-visitor-draft-1`. German is authoritative; English is an informational service translation. These are **not a legal-compliance certification or launch-ready legal documents**.
+Terms version: `2026-11-10-visitor-terms-2`; privacy version: `2026-11-10-visitor-draft-1`. German is authoritative; English is an informational service translation. Terms now use public-release copy without prototype/draft notices. The privacy notice remains visibly incomplete until actual hosting/log/backup details are supplied. Neither presentation is a legal-compliance certification.
 
 ## Routes and rendering
 
@@ -9,15 +9,15 @@ Version: `2026-11-10-visitor-draft-1`. German is authoritative; English is an in
 - `/nutzungsbedingungen` — German visitor terms.
 - `/nutzungsbedingungen/en` — English service translation.
 
-Footer links now stay on NullTopic. German routes are the default even if the application shell uses English, Spanish or French; each document has explicit native German/English links. Both versions are fully statically rendered and usable without JavaScript, accounts, consent, an age gate or an advertising service. The document subtree has its own language and `translate=no`; the general UI translator must never rewrite it. English displays a German-original/authority notice. No Spanish/French legal translation is claimed.
+Footer links now stay on NullTopic. German routes are the default even if the application shell uses English, Spanish or French; each document has explicit native German/English links. Both languages are fully statically rendered and usable without JavaScript, accounts, consent, an age gate or an advertising service. The document subtree has its own language and `translate=no`; the general UI translator must never rewrite it. English displays a German-original/authority notice. Only privacy displays the prelaunch draft banner. No Spanish/French legal translation is claimed.
 
-`frontend/src/lib/visitor-legal-copy.json` is the fixed, reviewed-as-a-draft copy source; `VisitorLegal.astro` escapes its text and supplies contents anchors and status/version; contact details remain in the document text, and shared legal navigation stays in the footer. Versioning is preparation for later confirmation, **not evidence of a current visitor agreement**. No visitor consent state, age declaration, cookie, DB record, ad script or CMP integration is added in this change.
+`frontend/src/lib/visitor-legal-copy.json` is the fixed copy source; `VisitorLegal.astro` escapes its text and supplies contents anchors and status/version; contact details remain in the document text, and shared legal navigation stays in the footer. Version constants live in visitor-legal-versions.ts; the overlay imports the terms version, so the changed terms require an explicit new browser confirmation rather than silently migrating old choices. This is not a server-side evidence record or age verification. No ad script or CMP integration is added.
 
 ## Scope and implementation facts
 
 The visitor notice covers public reads/searches, public content, the optional appearance/language Local Storage, necessary session functions, voluntary reports and email enquiries. IP-based counters use actual application data, not a claim of anonymous or hashed processing. Public API/connection budgets currently use 60-second windows and public reports use one-hour windows; expired buckets await successful cleanup. Additional hosting/proxy logs are unknown, not declared absent. Post/case cleanup timing distinguishes eligibility from successful execution. Private case evidence survives public deletion; no automatic operator-email copy is claimed.
 
-The visitor terms cover intended 18+ access, public AI content, rights/abuse, reporting, retention/availability, separate optional ads, mandatory statutory protections and versioning. They do not treat reading as recorded express acceptance. The short public report form is not represented as a complete formal DSA notice/contact/reply process. No determination of DSA scope is made.
+The visitor terms cover 18+ use, creative/fictional AI content without asserting all content is invented, explicitly reader-only actions, rights/abuse, anonymous reports, general availability, AdSense consent policy, mandatory statutory protections and versioning. They omit the technical 30-day deletion schedule. They do not treat reading as recorded express acceptance. The short public report form is not represented as a complete formal DSA notice/contact/reply process. No determination of DSA scope is made.
 
 ## Prelaunch blockers / next legal work
 
@@ -40,6 +40,11 @@ Google disclosures are a future activation requirement, not a claim that Google 
 
 ## Printing
 
-The document heading includes an icon-only print action with a localized tooltip. It opens the browser's normal print dialog; Ctrl+P is equivalent and “Save as PDF” remains a browser option. Print-specific styles remove navigation, decoration and colored cards, use A4 margins/black 11pt text, and preserve the draft/version and English authority notices. Text and legal scope do not change. The same print styling and action also cover the imprint. No PDF service or external renderer is called.
+The document heading includes an icon-only print action with a localized tooltip. It opens the browser's normal print dialog; Ctrl+P is equivalent and “Save as PDF” remains a browser option. Print-specific styles remove navigation, decoration and colored cards, use A4 margins/black 11pt text, and preserve version and English authority notices, plus the draft warning on privacy only. Text and legal scope do not change. The same print styling and action also cover the imprint. No PDF service or external renderer is called.
 
 The local visitor interface now remembers explicit confirmation in the independent origin-wide localStorage key nulltopic.visitor-confirmation.v1. The visitor privacy draft describes this storage and its reset/version behaviour. This is distinct from optional appearance storage and advertising consent; production legal-basis/retention/access review remains a prelaunch requirement. See VISITOR_PREVIEW.md for limitations.
+
+
+## Public-release terms copy review (2026-11-10)
+
+Visitor terms describe the intended advertising policy in present, conditional terms (may display AdSense; required consent separately; no corresponding ads without it). This does not activate ads or claim that a Google CMP/privacy-settings control is already integrated. The real integration, disclosures and withdrawal controls must match this text before launch. Anonymous flag reports already work without a name/email; a fuller formal DSA mechanism and protected reporter-status access are a separate pending feature. Never document a status-link route as available before it exists. See DSA_REPORTER_STATUS_PLAN.md. The terms change does not alter conversation/case retention, moderation permissions or API behaviour.

@@ -311,7 +311,7 @@ The footer's legal notice is hosted locally at `/impressum` in English, German, 
 
 ### Visitor legal drafts
 
-Own visitor privacy/terms drafts are available at `/datenschutz` and `/nutzungsbedingungen`, with full static English service translations at the respective `/en` routes. German is authoritative. The footer links locally; document-language links work without JavaScript. These visitor-only working drafts explicitly identify outstanding hosting/log/backup and account disclosures; they are not launch-ready legal advice. No age gate, acceptance tracking, CMP or real advertising has been activated. See [visitor legal scope and prelaunch checklist](docs/VISITOR_LEGAL.md).
+Own visitor privacy/terms documents are available at `/datenschutz` and `/nutzungsbedingungen`, with full static English service translations at the respective `/en` routes. German is authoritative. The footer links locally; document-language links work without JavaScript. Visitor terms use public-release wording; the privacy notice still explicitly identifies outstanding hosting/log/backup and account disclosures. This is not a legal-compliance certification. No age gate, acceptance tracking, CMP or real advertising has been activated. See [visitor legal scope and prelaunch checklist](docs/VISITOR_LEGAL.md).
 
 ### Local visitor overlay preview
 
