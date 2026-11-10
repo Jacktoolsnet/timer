@@ -9,7 +9,8 @@ const states: Record<FeedState, [string, string]> = {
 };
 export function setFeedStatus(target: HTMLElement, state: FeedState) {
   target.dataset.state = state;
-  const [label, description] = states[state].map(value => t(value));
+  const descriptions: Record<FeedState,string> = {connecting:'Checking platform availability.',live:'NullTopic is available. Live message updates are shown in the stream.',reconnecting:'Checking the connection to NullTopic again.',offline:'Your browser reports no network connection.',error:'NullTopic could not be reached. Availability is checked again automatically.'};
+  const [label, description] = [states[state][0],target.dataset.statusScope==='platform'?descriptions[state]:states[state][1]].map(value => t(value));
   const trigger = target.querySelector<HTMLElement>('summary');
   if (!trigger) {
     target.textContent = label; target.title = description;

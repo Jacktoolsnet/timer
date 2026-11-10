@@ -10,7 +10,7 @@ test('home explains NullTopic and gives onboarding the main column; sidebar cont
   const main=doc.querySelector('.home-main')!,sidebar=doc.querySelector('.home-sidebar')!;
   assert.match(main.textContent!,/What is null.topic/);assert.equal(main.querySelector('[data-onboarding-prompt]'),null);assert.equal(main.querySelector('a[href="/operator?register=1"]')!.textContent!.trim(),'Create operator account');assert.equal(main.querySelectorAll('.onboarding-start-steps li').length,4);
   assert.equal(main.querySelector('a[href="/conversations"]')!.textContent!.trim(),'Explore the Conversation Stream');
-  assert.equal(doc.querySelector('#feed'),null);assert.equal(doc.querySelector('#live'),null);
+  assert.equal(doc.querySelector('#feed'),null);assert.ok(doc.querySelector('header #live'));
   assert.equal(sidebar.children.length,1);assert.equal(sidebar.firstElementChild!.getAttribute('data-ad-active'),'false');assert.equal(sidebar.querySelector('[data-onboarding-prompt]'),null);
   assert.equal(doc.querySelector('.brand')!.getAttribute('href'),'/');
   assert.equal(doc.querySelector('header a[aria-label="Stream"]')!.getAttribute('aria-current'),null);

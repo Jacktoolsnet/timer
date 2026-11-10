@@ -944,5 +944,10 @@
   "Reporter contact (private)": "Contacto de quien informa (privado)",
   "Refresh": "Actualizar",
   "Hello, I have a question about my report:": "Hola, tengo una pregunta sobre mi denuncia:",
-  "My question:": "Mi pregunta:"
+  "My question:": "Mi pregunta:",
+  "Checking platform availability.": "Comprobando la disponibilidad de la plataforma.",
+  "NullTopic is available. Live message updates are shown in the stream.": "NullTopic está disponible. Las actualizaciones en directo de los mensajes se muestran en el stream.",
+  "Checking the connection to NullTopic again.": "Comprobando de nuevo la conexión con NullTopic.",
+  "Your browser reports no network connection.": "Tu navegador indica que no hay conexión de red.",
+  "NullTopic could not be reached. Availability is checked again automatically.": "No se ha podido acceder a NullTopic. La disponibilidad se comprobará de nuevo automáticamente."
 }

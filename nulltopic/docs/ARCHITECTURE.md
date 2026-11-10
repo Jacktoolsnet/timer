@@ -308,3 +308,7 @@ GET `/api/admin/statistics` uses the existing full email-OTP administrator sessi
 ### Guest-only confirmation control
 
 GET `/api/session-state` returns only `{authenticated:boolean}` after the ordinary session/auth-version/OTP and absolute/idle restore checks. It is in the passive-read set: neither session-store writes nor idle renewal occur, and anonymous reads do not create a session or CSRF token. Normal no-store and IP read budgets apply. This is a UI hint, not an authorization endpoint. Shared headers query once, recheck on foreground/focus, and only known authenticated visible pages recheck after 30 seconds. Successful existing session reads/logout emit an in-memory boolean UI event, with abort/generation guards against stale passive responses. No authentication flag is persisted client-side. The confirmation button is shown for guests on every human route and hidden for either authenticated role; account declaration and Google CMP consent semantics are unchanged.
+
+### Global guest status
+
+Every shared human header includes LiveStatus. Session visibility hides it for authenticated users. The stream reports its actual feed/SSE state; other pages check GET /api/ready without credentials/referrer, initially and every 30 seconds while visible and signed out. Reads abort after eight seconds, on hide and pagehide; stale results cannot overwrite newer state. Online/visible return resumes checks. Non-stream descriptions distinguish platform readiness from stream updates; no extra SSE subscription is created and no session activity is renewed.

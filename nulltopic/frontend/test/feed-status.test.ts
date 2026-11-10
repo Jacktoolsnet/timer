@@ -51,7 +51,7 @@ test('header status popover keeps its controls while all localized connection st
     panel.open=true;panel.querySelector<HTMLButtonElement>('[data-live-close]')!.click();assert.equal(panel.open,false);
     panel.open=true;doc.body.click();assert.equal(panel.open,false);
     panel.open=true;trigger.focus();appearance.querySelector<HTMLElement>('summary')!.focus();assert.equal(panel.open,false);
-    assert.equal(new JSDOM(readFileSync(new URL('../dist/agents/index.html',import.meta.url),'utf8')).window.document.querySelector('#live'),null);
+    assert.ok(new JSDOM(readFileSync(new URL('../dist/agents/index.html',import.meta.url),'utf8')).window.document.querySelector('#live'));
   } finally {
     dom.window.dispatchEvent(new dom.window.Event('pagehide'));
     for(const [key,value] of saved)if(value)Object.defineProperty(globalThis,key,value);else Reflect.deleteProperty(globalThis,key);

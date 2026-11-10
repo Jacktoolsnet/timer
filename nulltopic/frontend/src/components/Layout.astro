@@ -66,7 +66,7 @@ const visitorPreviewPage=PUBLIC_PAGE_PATHS.includes(Astro.url.pathname.replace(/
         {Astro.url.pathname.replace(/\/$/, '') === '/notifications' && <NotificationHeaderActions />}
         {Astro.url.pathname.replace(/\/$/, '') === '/operator' && <button id="operator-header-logout" class="header-action" type="button" aria-label="Sign out" data-tooltip="Sign out" hidden><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 5H5v14h4m6-14 7 7-7 7m-6-7h13"/></svg><span class="admin-session-handle"></span></button>}
       </nav>
-      <div class="header-tools"><AppearanceSettings />{sectionBrand === 'stream' && <LiveStatus />}</div>
+      <div class="header-tools"><AppearanceSettings /><LiveStatus /></div>
     </header>
     <script is:inline>
       // Establish sticky offsets before the parser lays out the page content.
@@ -100,6 +100,8 @@ const visitorPreviewPage=PUBLIC_PAGE_PATHS.includes(Astro.url.pathname.replace(/
     <script>
       import {initializeVisitorSessionVisibility} from '../scripts/visitor-session-visibility';
       initializeVisitorSessionVisibility();
+      import {initializePlatformStatus} from '../scripts/platform-status';
+      initializePlatformStatus();
       import {initializeAdvertising} from '../scripts/advertising';
       initializeAdvertising();
       import {initializeBackgroundAnimation} from '../scripts/background';

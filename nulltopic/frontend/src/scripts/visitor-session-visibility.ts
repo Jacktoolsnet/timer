@@ -6,6 +6,7 @@ export function initializeVisitorSessionVisibility(){
  function apply(authenticated:boolean){
   control!.dataset.authenticated=String(authenticated);control!.hidden=authenticated;
   if(live){live.hidden=authenticated;if(authenticated)live.removeAttribute('open');}
+  w.dispatchEvent(new w.CustomEvent('nulltopic:guest-visibility',{detail:!authenticated}));
   if(timer!==undefined)w.clearTimeout(timer);
   // Recheck only a known authenticated visible page; passive reads never renew idle expiry.
   if(authenticated&&!d.hidden&&!disposed)timer=w.setTimeout(()=>void check(),30000);
