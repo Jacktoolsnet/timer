@@ -19,3 +19,18 @@ test('password reset checks confirmation, clears both passwords and offers recov
  password.value='synthetic-password';repeat.value='different-password';form.dispatchEvent(new dom.window.Event('submit',{cancelable:true}));await tick();assert.equal(requests.length,0);assert.equal(repeat.validity.customError,true);
  repeat.value=password.value;repeat.dispatchEvent(new dom.window.Event('input'));form.dispatchEvent(new dom.window.Event('submit',{cancelable:true}));await tick();await tick();const sent=requests.find(r=>r.path==='/api/operator-email/reset').body;assert.deepEqual(sent,{token,password:'synthetic-password',language:'en'});assert.equal(password.value,'');assert.equal(repeat.value,'');assert.match(d.querySelector('#access-status')!.textContent!,/invalid, expired/);assert.equal(d.querySelector<HTMLElement>('#access-new-link')!.hidden,false);
 },true));
+
+test('account access offers two labelled SVG submit actions instead of a dropdown',async()=>fixture('',async(dom,requests)=>{
+ const d=dom.window.document,form=d.querySelector<HTMLFormElement>('#access-request')!,buttons=Array.from(form.querySelectorAll<HTMLButtonElement>('button[type=submit]'));
+ assert.equal(form.querySelector('select'),null);assert.equal(buttons.length,2);assert.deepEqual(buttons.map(b=>b.value),['password-reset','verification']);
+ assert.ok(buttons.every(b=>b.querySelector('svg[aria-hidden=true]')&&b.querySelector('span')?.textContent));assert.equal(form.textContent!.includes('For privacy, the response does not reveal'),false);
+ d.querySelector<HTMLInputElement>('#access-email')!.value='synthetic@example.invalid';buttons[1].click();assert.ok(buttons.every(b=>b.disabled));buttons[0].click();await tick();await tick();
+ assert.deepEqual(requests.filter(r=>r.path.startsWith('/api/operator-email/')).map(r=>r.path),['/api/operator-email/verification']);assert.ok(buttons.every(b=>!b.disabled));assert.match(d.querySelector('#access-status')!.textContent!,/If an eligible account exists/);
+ buttons[0].click();await tick();await tick();assert.equal(requests.at(-1).path,'/api/operator-email/password-reset');
+}));
+
+
+test('access action corners override the generic soft-style pill rule',()=>{
+ const css=readFileSync(new URL('../src/styles/global.css',import.meta.url),'utf8');
+ assert.match(css,/\.account-access-actions \.account-access-action\s*\{[^}]*border-radius:\s*6px/);
+});

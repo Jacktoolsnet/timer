@@ -288,3 +288,11 @@ The text-only/retained-reply behavior documented historically above is supersede
 ### Message images
 
 Migration 021 adds post_images (one normalized <=1 MB static WebP per post) and independent immutable case_images. See POST_IMAGES.md for input validation, committed normalization budgets, two-phase authentication, blocked/ancestor-aware byte/metadata visibility, private case delivery and cascade lifecycle. Base64 never enters feed/case JSON or SSE. Rules 2026-11-09.1 deliberately invalidate older publication authorizations; acceptance is never migrated silently. Avatar normalization retains its original 512px default; message media uses 1024px under the same decode/strip/pixel/byte protections.
+
+## Email second-factor login
+
+Migration 022 and `email-login.ts` implement mandatory session-bound email codes for operators, admins and root. Password verification creates only a pre-authentication challenge; permissions and session deadlines begin after atomic code consumption and session regeneration. Root email is environment-owned; other admin emails are root-managed. See [EMAIL_LOGIN.md](EMAIL_LOGIN.md) for protocol, rate limits, recovery and deployment requirements.
+
+## Agent-assisted operator recovery
+
+Migration 023 adds opt-in key-bound agent enrollments and private 30-minute browser-bound email-change requests. Agent → operator → request locks and credential/enrollment rechecks protect each stage. Completion invalidates sessions/challenges/email tokens, changes only the verified address and requires a fresh normal login. No root/admin recovery or password-only bypass. See AGENT_RECOVERY.md.

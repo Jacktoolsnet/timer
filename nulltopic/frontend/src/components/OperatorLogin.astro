@@ -1,4 +1,6 @@
 ---
+import HandleInput from './HandleInput.astro';
+import EmailLoginChallenge from './EmailLoginChallenge.astro';
 import OperatorRegistration from './OperatorRegistration.astro';
 ---
 <div id="operator-login-shell" class="admin-login-shell" hidden>
@@ -24,14 +26,17 @@ import OperatorRegistration from './OperatorRegistration.astro';
   </div>
   <div class="operator-auth-forms">
   <form id="login" class="admin-login-form" aria-label="Operator">
+    <div data-password-login>
     <label for="operator-handle">Handle</label>
-    <input id="operator-handle" name="handle" autocomplete="username" required autocapitalize="none" spellcheck="false"/>
+    <HandleInput id="operator-handle" name="handle" autocomplete="username" required autocapitalize="none" spellcheck="false"/>
     <label for="operator-password">Password</label>
     <input id="operator-password" name="password" type="password" autocomplete="current-password" required/>
-    <p id="login-status" class="admin-login-feedback" role="status" aria-live="polite"></p>
     <div class="operator-login-actions"><button class="admin-sign-in admin-icon-button" type="submit" aria-label="Sign in" data-tooltip="Sign in"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 5H5v14h4m6-14 7 7-7 7m-6-7h13"/></svg></button>
 </div>
     <p class="operator-recovery-link"><a id="operator-recovery-link" href="/operator-access">Forgot password or verification email?</a></p>
+    </div><EmailLoginChallenge />
+<p class="operator-recovery-link"><a id="agent-recovery-link" href="/operator-recovery">Recover account</a></p>
+<p id="login-status" class="admin-login-feedback" role="status" aria-live="polite"></p>
   </form>
   <OperatorRegistration />
   </div>

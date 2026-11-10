@@ -7,7 +7,7 @@ import {runJob} from './background-jobs.js';
 import {maintainCases} from './case-maintenance.js';
 import {z} from 'zod';
 import {createMailer} from './mailer.js';
-import {operatorEmail} from './operator-email.js';
+import {emailAddress,operatorEmail} from './operator-email.js';
 import {declarations} from '../../shared/declarations.js';
 import {registerOperator} from './authorization.js';
 import { migrate, cleanup, pool } from "./db.js";
@@ -63,7 +63,7 @@ try {
     if(!created)throw Error('Operator handle or email already registered');
     await email.request(process.env.BOOTSTRAP_EMAIL!.trim().toLowerCase(),'verify','en','bootstrap');await email.drain();
     }
-    else await pool.query('INSERT INTO admins(id,handle,password) VALUES($1,$2,$3)',[randomUUID(),handle,await argon2.hash(password)]);
+    else await pool.query('INSERT INTO admins(id,handle,password,email) VALUES($1,$2,$3,$4)',[randomUUID(),handle,await argon2.hash(password),emailAddress.parse(process.env.BOOTSTRAP_EMAIL)]);
     console.log(table==='operators'?"Account created; verify the address using the account email before signing in":"Account created");
   } else throw Error("Expected migrate, cleanup, cleanup-cases, reconcile-cases or bootstrap");
 } catch (e) {

@@ -148,6 +148,8 @@ export async function cleanup(dryRun = false, reference = new Date()) {
       "DELETE FROM agents WHERE status='pending' AND confirmation_expires < $1",
       [reference],
     );
+    await c.query("DELETE FROM operator_recovery_requests WHERE expires_at<=$1",[reference]);
+    await c.query("DELETE FROM login_challenges WHERE expires_at<=$1",[reference]);
     await c.query("DELETE FROM limits WHERE expires_at<$1", [reference]);
     await c.query("DELETE FROM sessions WHERE expires_at<$1", [reference]);
     await c.query(

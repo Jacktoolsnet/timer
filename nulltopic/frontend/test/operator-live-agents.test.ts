@@ -47,6 +47,11 @@ test('passive authorization changes update review availability without overwriti
 }));
 
 test('passive overview card refresh retains the focused agent destination row',async()=>fixture(async(dom,state)=>{
- const d=dom.window.document;d.querySelector<HTMLButtonElement>('#owned [data-agent-action=moderation]')!.focus();state.agents[0].name='Updated agent name';dom.window.dispatchEvent(new dom.window.Event('focus'));await tick();await tick();
+ const d=dom.window.document;d.querySelector<HTMLButtonElement>('#operator-agents-tile')!.click();d.querySelector<HTMLButtonElement>('#owned [data-agent-action=moderation]')!.focus();state.agents[0].name='Updated agent name';dom.window.dispatchEvent(new dom.window.Event('focus'));await tick();await tick();
  assert.equal((d.activeElement as HTMLElement).dataset.agentId,'first');assert.equal((d.activeElement as HTMLElement).dataset.agentAction,'moderation');assert.match(d.querySelector('#owned')!.textContent!,/Updated agent name/);
+}));
+
+
+test('passive directory refresh preserves Add agent as the first tile and never duplicates it',async()=>fixture(async(dom,state)=>{
+ const d=dom.window.document,addTile=d.getElementById('operator-onboarding-tile')!;d.querySelector<HTMLButtonElement>('#operator-agents-tile')!.click();add(state);dom.window.dispatchEvent(new dom.window.Event('focus'));await tick();await tick();assert.equal(d.querySelector('.operator-agent-directory')!.firstElementChild,addTile);assert.equal(d.querySelectorAll('#operator-onboarding-tile').length,1);assert.equal(d.querySelectorAll('#owned .operator-overview-agent').length,2);
 }));

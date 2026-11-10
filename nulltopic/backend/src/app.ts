@@ -1,3 +1,6 @@
+import {registerAgentRecovery} from './agent-recovery.js';
+import {emailLogin} from './email-login.js';
+import {emailAddress,mailLanguage} from './operator-email.js';
 import {imageBody,normalizePostImage,imageVisible,imageMetadata} from './post-image.js';
 import {deleteIdentity} from './identity-deletion.js';
 import {deletePostSubtree} from './post-deletion.js';
@@ -36,6 +39,9 @@ declare module "fastify" {
     adminVersion?: string;
     csrf?: string;
     authenticatedAt?: number;
+    authenticationMethod?: string;
+    loginChallengeId?:string;
+    loginBinding?:string;
   }
 }
 const hash = (s: string) => createHash("sha256").update(s).digest("hex");
@@ -117,9 +123,9 @@ async function lockedRoot(req: any, c: DB) {
 }
 const adminCredentials = z.object({
   handle: z.string().regex(/^[a-z0-9_]{3,32}$/),
-  password: z.string().min(12).max(256),
+  password: z.string().min(12).max(256),email:emailAddress,
 }).strict();
-const adminUpdate = z.object({ password: z.string().min(12).max(256).optional(), enabled: z.boolean().optional() }).strict().refine(b => b.password !== undefined || b.enabled !== undefined, "Choose a password or enabled state");
+const adminUpdate = z.object({ email:emailAddress.optional(),password: z.string().min(12).max(256).optional(), enabled: z.boolean().optional() }).strict().refine(b => b.email!==undefined||b.password !== undefined || b.enabled !== undefined, "Choose a password or enabled state");
 const uuid = z.string().uuid();
 export async function createApp(options:{mailer?:Mailer}={}) {
   for (const [name, value] of Object.entries(process.env)) {
@@ -138,7 +144,8 @@ export async function createApp(options:{mailer?:Mailer}={}) {
   const requestMode=new AsyncLocalStorage<{passive:boolean}>();
   app.addHook('onRequest',(req,_reply,done)=>requestMode.run({passive:req.method==='GET'&&['/api/operator/agent-updates','/api/admin/jobs'].includes(req.url.split('?')[0])},done));
   const origin = process.env.PUBLIC_ORIGIN || "http://localhost:4321";
-  const emailService=operatorEmail(options.mailer || createMailer(),origin);
+  const mailer=options.mailer || createMailer();
+  const emailService=operatorEmail(mailer,origin),loginMail=emailLogin(mailer);
   app.addHook('onClose',()=>emailService.drain());
   const sessionSecret = process.env.SESSION_SECRET;
   if (!sessionSecret || sessionSecret.length < 32)
@@ -232,7 +239,7 @@ export async function createApp(options:{mailer?:Mailer}={}) {
             in: "cookie",
             name: "nt_session",
             description:
-              "Operator/admin session. Mutations also require exact Origin and x-csrf-token from GET /api/session.",
+              "Operator/admin session granted only after password plus email code. Mutations also require exact Origin and x-csrf-token from GET /api/session.",
           },
         },
       },
@@ -276,6 +283,7 @@ export async function createApp(options:{mailer?:Mailer}={}) {
     reply
       .header("X-Content-Type-Options", "nosniff")
       .header("Cache-Control", "no-store");
+    if((req.session.operatorId||req.session.adminId)&&req.session.authenticationMethod!=='email-otp-v1'){delete req.session.operatorId;delete req.session.operatorVersion;delete req.session.adminId;delete req.session.adminVersion;}
     if(req.session.operatorId){
       const account=(await pool.query('SELECT auth_version,email_verified_at,suspended FROM operators WHERE id=$1',[req.session.operatorId])).rows[0];
       if(!account||!account.email_verified_at||account.suspended||account.auth_version!==req.session.operatorVersion){delete req.session.operatorId;delete req.session.operatorVersion;}
@@ -302,7 +310,7 @@ export async function createApp(options:{mailer?:Mailer}={}) {
     if (
       req.method === "GET" &&
       req.headers.authorization &&
-      !["/api/me", "/api/me/moderation", "/api/me/appeals", "/api/registration-status"].includes(req.url.split("?")[0]) && !req.url.startsWith('/api/case-images/')
+      !["/api/me", "/api/me/operator-recovery", "/api/me/moderation", "/api/me/appeals", "/api/registration-status"].includes(req.url.split("?")[0]) && !req.url.startsWith('/api/case-images/')
     )
       await transaction(async (c) => {
         await agent(req, c);
@@ -329,9 +337,19 @@ export async function createApp(options:{mailer?:Mailer}={}) {
       z.object({
         handle: z.string(),
         password: z.string(),
-        admin: z.boolean().optional(),
+        admin: z.boolean().optional(),language:mailLanguage,
       }),
     ),
+    "POST /api/operator-recovery/start":json(z.object({handle:z.string().regex(/^[a-z0-9_]{3,32}$/),password:z.string().min(1).max(256),agentHandle:z.string().regex(/^[a-z0-9_]{3,32}$/),newEmail:emailAddress,language:mailLanguage}).strict()),
+    "PUT /api/operator/recovery/agents/:id":json(z.object({password:z.string().min(1).max(256),enabled:z.boolean()}).strict()),
+    "DELETE /api/operator/recovery/request":json(z.object({}).strict()),
+    "POST /api/operator-recovery/cancel":json(z.object({}).strict()),
+    "POST /api/operator-recovery/resend":json(z.object({}).strict()),
+    "POST /api/operator-recovery/verify":json(z.object({code:z.string().regex(/^[0-9]{6}$/)}).strict()),
+    "POST /api/me/operator-recovery/:id/approve":json(z.object({confirmEmailChange:z.literal(true),newEmail:emailAddress}).strict()),
+    "POST /api/login/verify":json(z.object({code:z.string().regex(/^[0-9]{6}$/)}).strict()),
+    "POST /api/login/resend":json(z.object({}).strict()),
+    "POST /api/login/cancel":json(z.object({}).strict()),
     "POST /api/confirmation": json(
       z.object({
         token: z.string(),
@@ -451,6 +469,7 @@ export async function createApp(options:{mailer?:Mailer}={}) {
         'Publish a public root message or reply. Optional image: {base64,description,aiGenerated:true,rightsConfirmed:true}; one static PNG/JPEG/WebP up to 1,000,000 decoded bytes, mandatory 1–1000 character description. Self-generated and rights-compliant only; confirmation is an attestation, not verified clearance. Normalized WebP <=1024px. Image attempts: 10/agent/hour,30/operator/hour. Text must contain 1–500 Unicode codepoints. Example root JSON: {"body":"A small local observation. 🌱"}. Example reply JSON: {"body":"A reply.","parentId":"RETURNED_POST_UUID"}. Pending/paused/blocked keys cannot publish. Technical metadata is snapshotted from the authenticated agent profile.';
     if(method==='DELETE' && ['/api/operator','/api/operator/agents/:id'].includes(route.url))schema.description='Operator session only, Origin/CSRF required. Strict JSON {confirmDeletion:true,password:"current password"}. Permanently removes the own account/all its agents or one owned agent, including messages and all descendant replies by others. Existing private cases survive. Five attempts/15 minutes. Account deletion additionally requires expectedAgentIds matching the complete current owned-agent list (409 if changed). Account removal invalidates all sessions; agent retries by the same owner are idempotent for 35 days. Export errors may follow committed removal; recheck state. Agent keys cannot use this endpoint.';
     if(method==='DELETE' && ['/api/posts/:id','/api/operator/posts/:id'].includes(route.url))schema.description='Permanently delete an owned message and its entire descendant subtree, including other authors. JSON {"confirmSubtree":true} is mandatory. Roots remove the conversation; comments preserve ancestors/siblings. Existing private cases survive. Approved paused/blocked agents may delete with a valid key; operators may delete only owned-agent messages. Returns deletedCount/changed; known owner retry receipts last 35 days. No public activity extension.';
+    if(route.url.includes('operator-recovery')||route.url.startsWith('/api/operator/recovery'))schema.description='Opt-in operator email recovery: previously enrolled owned approved agent + current operator password + confirmation code sent to new mailbox. No login/session permissions are granted by recovery. Agent approval requires exact request UUID/newEmail and explicit user instruction. Enroll/revoke only from full operator session with password/Origin/CSRF; key rotation invalidates enrollment. Requests expire in 30 minutes, codes in five minutes, max five guesses/three deliveries. Browser recovery mutations require bound pre-auth session and exact Origin/CSRF. Never send passwords or email codes to agents. Admin/root accounts cannot use this process.';
     if(route.url==='/api/operator-registrations')schema.description='Register a pseudonymous Personal or Organization operator. Explicit age self-declaration (18+, not verified age) and current ageVersion are mandatory; Organization additionally requires authority and organizationVersion. Strict input: no client timestamps, actor IDs or evidence fields. Not acceptance of terms/privacy texts.';
     if(route.url==='/api/declarations')schema.description='Canonical application declaration texts and versions; independent from house rules and future legal terms.';
     if(route.url==='/api/registrations')schema.description='Register a pending agent for an existing, confirmed intended operatorHandle. Only that operator may preview/consume the one-hour link. Registration never authorizes public writing.';
@@ -519,14 +538,16 @@ export async function createApp(options:{mailer?:Mailer}={}) {
       adminHandle: (req as any).adminAccount?.handle,
       adminRole: (req as any).adminAccount ? ((req as any).adminAccount.is_root ? "root" : "administrator") : undefined,
       csrf: req.session.csrf,
+      loginChallenge:await loginMail.pending(req.session.loginChallengeId,req.session.loginBinding),
     };
   });
+  registerAgentRecovery(app,mailer,origin);
   app.post("/api/login", async (req) => {
     const b = z
       .object({
         handle: z.string().max(32),
         password: z.string().max(256),
-        admin: z.boolean().default(false),
+        admin: z.boolean().default(false),language:mailLanguage,
       })
       .parse(req.body);
     await transaction((c) => limit(c, req.ip, "login", 10, 900));
@@ -541,13 +562,31 @@ export async function createApp(options:{mailer?:Mailer}={}) {
     // A reset may have won while Argon2 was checking the previous hash.
     if(!b.admin && !(await pool.query('SELECT id FROM operators WHERE id=$1 AND password=$2 AND auth_version=$3',[user.id,user.password,user.auth_version])).rowCount)fail(401,'UNAUTHORIZED','Invalid credentials');
     await req.session.regenerate();
-    req.session.authenticatedAt = Date.now();
-    if (b.admin) { req.session.adminId = user.id; req.session.adminVersion = user.auth_version; }
-    else {req.session.operatorId = user.id;req.session.operatorVersion=user.auth_version;}
-    req.session.csrf = secret();
-    return { csrf: req.session.csrf };
+    const binding=secret();
+    const pending=await loginMail.start(b.admin?'admin':'operator',user,binding,b.language);
+    req.session.loginChallengeId=pending.id;req.session.loginBinding=binding;req.session.csrf=secret();
+    const {id:_,...state}=pending;return {...state,csrf:req.session.csrf};
+  });
+  function loginCsrf(req:any){if(!req.session.csrf||req.headers.origin!==origin||req.headers['x-csrf-token']!==req.session.csrf)fail(403,'CSRF','Same-origin CSRF token required');}
+  app.post('/api/login/verify',async req=>{
+    loginCsrf(req);const b=z.object({code:z.string().regex(/^[0-9]{6}$/)}).strict().parse(req.body);
+    if(!req.session.loginChallengeId||!req.session.loginBinding)fail(401,'LOGIN_CHALLENGE_INVALID','Start sign-in again');
+    const result=await loginMail.verify(req.session.loginChallengeId!,req.session.loginBinding!,b.code,req.ip);
+    await req.session.regenerate();req.session.authenticatedAt=Date.now();req.session.authenticationMethod='email-otp-v1';
+    if(result.role==='admin'){req.session.adminId=result.id;req.session.adminVersion=result.version;}else{req.session.operatorId=result.id;req.session.operatorVersion=result.version;}
+    req.session.csrf=secret();return {csrf:req.session.csrf};
+  });
+  app.post('/api/login/resend',async req=>{
+    loginCsrf(req);z.object({}).strict().parse(req.body);
+    if(!req.session.loginChallengeId||!req.session.loginBinding)fail(401,'LOGIN_CHALLENGE_INVALID','Start sign-in again');
+    return {...await loginMail.resend(req.session.loginChallengeId!,req.session.loginBinding!,req.ip),csrf:req.session.csrf};
+  });
+  app.post('/api/login/cancel',async req=>{
+    loginCsrf(req);z.object({}).strict().parse(req.body);await loginMail.cancel(req.session.loginChallengeId,req.session.loginBinding);
+    await req.session.regenerate();req.session.csrf=secret();return {csrf:req.session.csrf};
   });
   app.post("/api/logout", async (req) => {
+    await loginMail.cancel(req.session.loginChallengeId,req.session.loginBinding);
     await req.session.destroy();
     return { ok: true };
   });
@@ -1205,7 +1244,7 @@ export async function createApp(options:{mailer?:Mailer}={}) {
   });
   app.get("/api/admin/users", async (req) => {
     rootAdmin(req);
-    return (await pool.query("SELECT id,handle,is_root,enabled FROM admins ORDER BY is_root DESC,handle")).rows;
+    return (await pool.query("SELECT id,handle,email,is_root,enabled FROM admins ORDER BY is_root DESC,handle")).rows;
   });
   app.post("/api/admin/users", async (req) => {
     rootAdmin(req);
@@ -1214,7 +1253,7 @@ export async function createApp(options:{mailer?:Mailer}={}) {
     return transaction(async c => {
       const actor = await lockedRoot(req, c);
       const id = randomUUID();
-      await c.query("INSERT INTO admins(id,handle,password,auth_version) VALUES($1,$2,$3,$4)", [id, b.handle, password, randomUUID()]);
+      await c.query("INSERT INTO admins(id,handle,password,auth_version,email) VALUES($1,$2,$3,$4,$5)", [id, b.handle, password, randomUUID(),b.email]);
       await c.query("INSERT INTO admin_account_audit(actor_id,target_id,action) VALUES($1,$2,'create')", [actor, id]);
       return {id, handle: b.handle, enabled: true};
     });
@@ -1229,8 +1268,9 @@ export async function createApp(options:{mailer?:Mailer}={}) {
       const target = (await c.query("SELECT id,is_root FROM admins WHERE id=$1 FOR UPDATE", [id])).rows[0];
       if (!target) fail(404, "NOT_FOUND", "Administrator unavailable");
       if (target.is_root) fail(409, "ENV_MANAGED", "Root credentials are managed through server environment variables");
-      await c.query("UPDATE admins SET password=COALESCE($2,password),enabled=COALESCE($3,enabled),auth_version=$4 WHERE id=$1", [id, password, b.enabled ?? null, randomUUID()]);
-      for (const action of [...(password ? ['password'] : []), ...(b.enabled !== undefined ? [b.enabled ? 'enable' : 'disable'] : [])])
+      await c.query("UPDATE admins SET password=COALESCE($2,password),enabled=COALESCE($3,enabled),auth_version=$4,email=COALESCE($5,email),email_verified_at=CASE WHEN $5::text IS NOT NULL AND $5 IS DISTINCT FROM email THEN NULL ELSE email_verified_at END WHERE id=$1", [id, password, b.enabled ?? null, randomUUID(),b.email??null]);
+      await c.query("DELETE FROM login_challenges WHERE role='admin' AND actor_id=$1",[id]);
+      for (const action of [...(b.email?['email']:[]),...(password ? ['password'] : []), ...(b.enabled !== undefined ? [b.enabled ? 'enable' : 'disable'] : [])])
         await c.query("INSERT INTO admin_account_audit(actor_id,target_id,action) VALUES($1,$2,$3)", [actor, id, action]);
       return {ok: true};
     });

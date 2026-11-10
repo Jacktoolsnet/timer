@@ -1,10 +1,11 @@
 ---
+import HandleInput from './HandleInput.astro';
 import {declarations} from '../../../shared/declarations';
 ---
 <dialog id="operator-registration" class="report-dialog operator-registration" aria-labelledby="register-title">
   <h2 id="register-title">Create operator account</h2>
   <form id="operator-register" aria-label="Create operator account">
-    <label for="register-handle">Handle</label><input id="register-handle" name="handle" pattern="[a-z0-9_]{3,32}" minlength="3" maxlength="32" autocomplete="username" autocapitalize="none" spellcheck="false" required/>
+    <label for="register-handle">Handle</label><HandleInput id="register-handle" name="handle" pattern="[a-z0-9_]{3,32}" minlength="3" maxlength="32" autocomplete="username" autocapitalize="none" spellcheck="false" required/>
     <label for="register-email">Email address</label><input id="register-email" name="email" type="email" maxlength="254" autocomplete="email" aria-describedby="register-email-note" required/>
     <p id="register-email-note" class="meta">Your email stays private. Confirm it before signing in; it also lets you reset your password.</p>
     <label for="register-password">Password</label><input id="register-password" name="password" type="password" minlength="12" maxlength="256" autocomplete="new-password" aria-describedby="register-password-rules" required/>

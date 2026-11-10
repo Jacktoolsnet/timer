@@ -50,7 +50,7 @@ test('operator login uses its own palette-aware agent illustration without a gen
   const dom = new JSDOM(html), doc = dom.window.document;
   assert.equal(doc.querySelector('.hero'), null);
   assert.ok(doc.querySelector('#operator-login-shell .operator-art-solid'));
-  assert.equal(doc.querySelector('#operator-login-shell .admin-art-shield'), null);
+  assert.equal(doc.querySelector('#operator-login-shell .admin-login-art .admin-art-shield'), null);
   assert.ok(doc.querySelector('#operator-password[autocomplete="current-password"]'));
   assert.equal((doc.querySelector('#dashboard') as HTMLElement).hidden, true);
   dom.window.close();
@@ -267,7 +267,7 @@ for(const [state,ownPause,allowed] of [['paused',true,true],['paused',false,fals
 test('operator overview conversations tile leads to owned-agent tiles and a searchable message view',async()=>fixture(async(dom,requests)=>{
  await initializeOperator();const doc=dom.window.document;doc.querySelector<HTMLButtonElement>('[data-agent-action=conversations]')!.click();assert.equal(doc.querySelector<HTMLElement>('#operator-conversations')!.hidden,false);assert.equal(doc.querySelector<HTMLElement>('#operator-overview')!.hidden,true);assert.equal(dom.window.location.hash,'#conversations/agent/agent');
  doc.querySelector<HTMLButtonElement>('.operator-conversation-agent')!.click();await tick();assert.ok(requests.some(r=>r.path.startsWith('/api/operator/agents/agent/posts?')));assert.match(doc.querySelector('#operator-messages-heading')!.textContent!,/Example agent/);
- doc.querySelector<HTMLButtonElement>('#operator-messages-back')!.click();assert.equal(doc.querySelector<HTMLElement>('#operator-overview')!.hidden,false);
+ doc.querySelector<HTMLButtonElement>('#operator-messages-back')!.click();assert.equal(doc.querySelector<HTMLElement>('#operator-agents')!.hidden,false);
 },{signedIn:true,withData:true}));
 
 test('operator login keeps only the illustration and login controls below its section brand', () => {
@@ -301,7 +301,7 @@ test('signed-in operators can open agent onboarding and return to the overview w
  d.querySelector<HTMLButtonElement>('#operator-onboarding-tile')!.click();
  assert.equal(dom.window.location.hash,'#onboarding');assert.equal(d.querySelector<HTMLElement>('#operator-onboarding')!.hidden,false);assert.equal(d.querySelector<HTMLElement>('#operator-overview')!.hidden,true);assert.equal(d.activeElement?.id,'operator-onboarding-heading');
  assert.ok(d.querySelector('#operator-onboarding [data-prompt-text]'));
- d.querySelector<HTMLButtonElement>('#operator-onboarding [data-operator-view=overview]')!.click();assert.equal(d.querySelector<HTMLElement>('#operator-overview')!.hidden,false);
+ d.querySelector<HTMLButtonElement>('#operator-onboarding [data-operator-view=agents]')!.click();assert.equal(d.querySelector<HTMLElement>('#operator-agents')!.hidden,false);
  assert.equal(requests.some(r=>r.body),false);
 },{signedIn:true}));
 for(const signedIn of [false,true])test(`homepage registration shortcut opens only when signed out (signedIn=${signedIn})`,async()=>fixture(async(dom)=>{
@@ -348,7 +348,7 @@ test('approval header actions are shown only for review and submit their associa
  button.click();await tick();assert.equal(requests.some(r=>r.path==='/api/confirmation'),false);
  doc.querySelector<HTMLTextAreaElement>('#approval-scope')!.value='Explicit manual participation';form.querySelectorAll<HTMLInputElement>('input[type=checkbox]').forEach(input=>{input.checked=true;input.dispatchEvent(new dom.window.Event('change'));});
  button.click();await tick();await tick();assert.equal(requests.filter(r=>r.path==='/api/confirmation').length,1);assert.equal(actions.hidden,true);
- assert.equal(dom.window.location.hash,'#overview');assert.equal(dom.window.location.search,'?lang=en');assert.equal(doc.querySelector<HTMLElement>('#operator-overview')!.hidden,false);assert.equal(doc.querySelector<HTMLElement>('#operator-settings')!.hidden,true);assert.equal(doc.querySelector<HTMLElement>('#confirmation')!.hidden,true);assert.equal(doc.activeElement?.id,'operator-heading');assert.equal(new URL(dom.window.location.href).searchParams.has('confirmation'),false);
+ assert.equal(dom.window.location.hash,'#agents');assert.equal(dom.window.location.search,'?lang=en');assert.equal(doc.querySelector<HTMLElement>('#operator-agents')!.hidden,false);assert.equal(doc.querySelector<HTMLElement>('#operator-settings')!.hidden,true);assert.equal(doc.querySelector<HTMLElement>('#confirmation')!.hidden,true);assert.equal(doc.activeElement?.id,'operator-agents-heading');assert.equal(new URL(dom.window.location.href).searchParams.has('confirmation'),false);
 },{signedIn:true,confirmation:true}));
 
 test('approval header actions stay hidden outside registration review',async()=>fixture(async(dom)=>{
@@ -371,7 +371,7 @@ test('failed approval clears consent and leaves acceptance disabled until both s
 },{signedIn:true,confirmation:true,confirmationFail:true}));
 
 test('overview places full-width shared actions before agent-specific destinations and scopes moderation tabs',async()=>fixture(async(dom,requests)=>{
- await initializeOperator();const doc=dom.window.document;assert.deepEqual([...doc.querySelectorAll('.operator-overview-actions > button')].map(e=>e.id),['operator-settings-tile','operator-onboarding-tile']);assert.equal(doc.querySelector('#operator-settings #owned'),null);assert.ok(doc.querySelector('#operator-overview #owned'));assert.equal(doc.querySelectorAll('#owned [data-agent-action]').length,3);
+ await initializeOperator();const doc=dom.window.document;assert.deepEqual([...doc.querySelectorAll('.operator-overview-actions > button')].map(e=>e.id),['operator-settings-tile','operator-agents-tile']);assert.equal(doc.querySelector('#operator-settings #owned'),null);assert.ok(doc.querySelector('#operator-agents #owned'));assert.equal(doc.querySelectorAll('#owned [data-agent-action]').length,3);
  doc.querySelector<HTMLButtonElement>('#owned [data-agent-action=moderation]')!.click();await tick();await tick();assert.equal(dom.window.location.hash,'#moderation/agent/agent');assert.ok(requests.some(r=>r.path.includes('moderationStatus=pending&agentId=agent')));assert.match(doc.querySelector('#operator-moderation-heading')!.textContent!,/Example agent.*@example/);
  doc.querySelector<HTMLButtonElement>('#operator-processed-tab')!.click();await tick();assert.ok(requests.some(r=>r.path.includes('moderationStatus=processed&agentId=agent')));
 },{signedIn:true,withData:true}));
@@ -389,3 +389,24 @@ test('home settings tile omits its redundant guidelines footer and arrow',()=>{
 test('home Add agent tile omits its redundant onboarding footer and arrow',()=>{
  const dom=new JSDOM(html);const tile=dom.window.document.querySelector('#operator-onboarding-tile')!;assert.equal(tile.querySelector('.admin-tile-foot'),null);assert.equal(tile.querySelector('.admin-tile-title')!.textContent,'Add agent');assert.ok(tile.querySelector('svg'));assert.equal(tile.getAttribute('data-operator-view'),'onboarding');dom.window.close();
 });
+
+test('Account tile groups recovery, account access and deletion away from public guidelines',async()=>fixture(async(dom,requests)=>{
+ await initializeOperator();const d=dom.window.document,tile=d.querySelector<HTMLButtonElement>('#operator-account-tile')!;
+ assert.equal(tile.closest('#operator-overview')?.id,'operator-overview');assert.equal(d.querySelector('#operator-overview #operator-agent-recovery'),null);assert.equal(d.querySelector('#operator-settings [data-delete-identity=account]'),null);
+ tile.click();assert.equal(dom.window.location.hash,'#account');assert.equal(d.getElementById('operator-account')!.hidden,false);assert.equal(d.getElementById('operator-overview')!.hidden,true);assert.equal(d.activeElement?.id,'operator-account-heading');
+ assert.ok(d.querySelector('#operator-account #operator-agent-recovery'));assert.equal(d.querySelector<HTMLAnchorElement>('#operator-account-access')!.getAttribute('href'),'/operator-access?lang=en');assert.ok(d.querySelector('#operator-account .operator-account-danger [data-delete-identity=account]'));
+ assert.equal(requests.some(r=>r.path.startsWith('/api/operator-recovery')),false);d.querySelector<HTMLButtonElement>('#operator-account [data-operator-view=overview]')!.click();assert.equal(d.getElementById('operator-overview')!.hidden,false);
+},{signedIn:true,withData:true}));
+
+test('direct Account routes survive refresh and keep destructive actions explicitly confirmed',async()=>fixture(async(dom,requests)=>{
+ dom.window.history.replaceState({},'','#account');await initializeOperator();const d=dom.window.document;assert.equal(d.getElementById('operator-account')!.hidden,false);d.querySelector<HTMLButtonElement>('#operator-account [data-delete-identity=account]')!.click();assert.equal(d.querySelector<HTMLDialogElement>('#identity-delete-dialog')!.open,true);assert.equal(requests.some(r=>r.body?.confirmDeletion),false);
+},{signedIn:true,withData:true}));
+
+test('Agents tile opens a separate directory with Add agent permanently before the owned agent grid',async()=>fixture(async(dom)=>{
+ await initializeOperator();const d=dom.window.document;assert.equal(d.querySelector('#operator-overview #owned'),null);d.querySelector<HTMLButtonElement>('#operator-agents-tile')!.click();assert.equal(dom.window.location.hash,'#agents');assert.equal(d.getElementById('operator-agents')!.hidden,false);assert.equal(d.activeElement?.id,'operator-agents-heading');
+ const grid=d.querySelector('.operator-agent-directory')!;assert.equal(grid.firstElementChild?.id,'operator-onboarding-tile');assert.ok(grid.querySelector('#owned [data-agent-action=settings]'));d.querySelector<HTMLButtonElement>('#operator-onboarding-tile')!.click();assert.equal(d.getElementById('operator-onboarding')!.hidden,false);d.querySelector<HTMLButtonElement>('#operator-onboarding [data-operator-view=agents]')!.click();assert.equal(d.getElementById('operator-agents')!.hidden,false);assert.equal(grid.firstElementChild?.id,'operator-onboarding-tile');
+},{signedIn:true,withData:true}));
+
+test('empty and direct Agents routes retain the Add agent tile',async()=>fixture(async(dom)=>{
+ dom.window.history.replaceState({},'','#agents');await initializeOperator();const d=dom.window.document;assert.equal(d.getElementById('operator-agents')!.hidden,false);assert.equal(d.querySelector('.operator-agent-directory')!.firstElementChild?.id,'operator-onboarding-tile');assert.equal(d.getElementById('owned')!.hidden,true);
+},{signedIn:true}));

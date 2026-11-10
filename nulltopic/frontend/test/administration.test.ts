@@ -123,6 +123,7 @@ test('root can manage accounts while its own credentials remain environment-only
   }
   (doc.querySelector('#new-admin-handle') as HTMLInputElement).value = 'new_admin';
   (doc.querySelector('#new-admin-password') as HTMLInputElement).value = 'test-new-password';
+  (doc.querySelector('#new-admin-email') as HTMLInputElement).value='new-admin@example.invalid';
   doc.querySelector('#admin-create-user')!.dispatchEvent(new dom.window.Event('submit', {cancelable: true}));
   await tick();
   assert.equal(requests.find(r => r.path === '/api/admin/users' && r.body)?.body.handle, 'new_admin');

@@ -17,10 +17,12 @@ export function initializeOperatorAccess(){
  password.addEventListener('input',passwords);repeat.addEventListener('input',passwords);
  form.addEventListener('submit',async event=>{
   event.preventDefault();if(busy)return;if(form===reset)passwords();if(!form.reportValidity())return;
-  busy=true;const button=form.querySelector<HTMLButtonElement>('button[type=submit]')!;button.disabled=true;form.setAttribute('aria-busy','true');status.textContent='';
+  const submitter=(event as SubmitEvent).submitter as HTMLButtonElement|null;
+  const purpose=submitter?.value==='verification'?'verification':'password-reset';
+  busy=true;const buttons=Array.from(form.querySelectorAll<HTMLButtonElement>('button[type=submit]'));buttons.forEach(button=>button.disabled=true);form.setAttribute('aria-busy','true');status.textContent='';
   try{
    if(mode==='request'){
-    const values=new FormData(request);await api('/operator-email/'+values.get('purpose'),{method:'POST',body:JSON.stringify({email:values.get('email'),language:currentLanguage()})});
+    const values=new FormData(request);await api('/operator-email/'+purpose,{method:'POST',body:JSON.stringify({email:values.get('email'),language:currentLanguage()})});
     status.textContent=t('If an eligible account exists, an email will arrive shortly. Check your spam folder too.');
    }else{
     if(!token||!/^[A-Za-z0-9_-]{43}$/.test(token))throw Error('Invalid link');
@@ -30,7 +32,7 @@ export function initializeOperatorAccess(){
   }catch(error){
    if(mode!=='request')document.querySelector<HTMLElement>('#access-new-link')!.hidden=false;
    status.textContent=(error as {code?:string})?.code==='MAIL_UNAVAILABLE'?t('Email delivery is not configured yet. Please try again later.'):mode==='request'?t('Unable to send the request. Please try again later.'):t('This link is invalid, expired or already used. Request a new email through account recovery.');
-  }finally{if(mode==='reset'){password.value='';repeat.value='';passwords();}busy=false;button.disabled=false;form.removeAttribute('aria-busy');status.focus();}
+  }finally{if(mode==='reset'){password.value='';repeat.value='';passwords();}busy=false;buttons.forEach(button=>button.disabled=false);form.removeAttribute('aria-busy');status.focus();}
  });
  // Pasting a mail link while this page is already open may be a same-document navigation.
  win.addEventListener('hashchange',()=>{const next=new URLSearchParams(win.location.hash.slice(1));if(next.has('verify')||next.has('reset'))win.location.reload();});

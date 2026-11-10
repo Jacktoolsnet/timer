@@ -1,0 +1,65 @@
+---
+import HandleInput from '../components/HandleInput.astro';
+import Layout from '../components/Layout.astro';
+---
+<Layout title="Account recovery" showIntro={false} sectionBrand="operators">
+<section class="administration account-access">
+<div class="card account-access-card agent-recovery-card">
+ <div class="admin-subview-heading"><a id="recovery-back" class="admin-back" href="/operator" aria-label="Back to operator overview" data-tooltip="Back to operator overview"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 5-7 7 7 7M5 12h15"/></svg></a><h1 id="recovery-heading" tabindex="-1">Account recovery</h1></div>
+ <svg class="recovery-illustration" viewBox="0 0 120 100" aria-hidden="true"><rect class="admin-art-halo" x="4" y="4" width="112" height="92" rx="28"/><g class="admin-art-line"><rect x="15" y="26" width="55" height="45" rx="16"/><path d="M42 26V15m-14 32h1m27 0h1M32 59q10 8 20 0"/></g><path class="admin-art-shield" d="m86 38 22 9v18c0 15-22 27-22 27S64 80 64 65V47l22-9Z"/><path class="admin-art-check" d="m76 64 7 7 14-17"/></svg>
+ <p id="recovery-status" role="status" aria-live="polite" tabindex="-1"></p>
+ <section id="recovery-manage" hidden>
+  <div class="recovery-start-description">
+ <svg class="recovery-illustration" viewBox="0 0 120 100" aria-hidden="true"><rect class="admin-art-halo" x="4" y="4" width="112" height="92" rx="28"/><g class="admin-art-line"><rect x="15" y="26" width="55" height="45" rx="16"/><path d="M42 26V15m-14 32h1m27 0h1M32 59q10 8 20 0"/></g><path class="admin-art-shield" d="m86 38 22 9v18c0 15-22 27-22 27S64 80 64 65V47l22-9Z"/><path class="admin-art-check" d="m76 64 7 7 14-17"/></svg>
+  <p>Choose an agent you trust to help recover your account if you lose mailbox access. This permission does not allow the agent to sign in or change your password.</p>
+  <p class="meta">Recovery requires your password, the authorized agent and confirmation of a new email address. Keep the agent key separate from your password. Replacing its key requires a new recovery authorization.</p>
+  </div>
+  <div class="recovery-start-fields">
+   <h2>Settings</h2>
+  <form id="recovery-config">
+   <label id="recovery-agent-label" for="recovery-agent-trigger">Agent</label><select id="recovery-agent" name="agentId" required hidden aria-hidden="true" tabindex="-1"></select>
+   <div id="recovery-agent-picker" class="recovery-agent-picker">
+    <button id="recovery-agent-trigger" type="button" aria-labelledby="recovery-agent-label recovery-agent-value" aria-haspopup="listbox" aria-controls="recovery-agent-options" aria-expanded="false"><span id="recovery-agent-value"></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+    <div id="recovery-agent-options" role="listbox" aria-labelledby="recovery-agent-label" hidden></div>
+   </div>
+   <label class="operator-consent"><span class="storage-switch"><input id="recovery-enabled" type="checkbox" role="switch"/><span class="storage-switch-track" aria-hidden="true"></span></span><span>Allow this agent to confirm account recovery</span></label>
+   <label for="recovery-config-password">Current password</label><input id="recovery-config-password" name="password" type="password" autocomplete="current-password" maxlength="256" required/>
+  </form>
+  <p id="recovery-no-agents" hidden>No approved agent with a valid key is available.</p>
+  <div id="recovery-cancel-active" hidden><p>An email recovery request is pending.</p><button type="button" id="recovery-owner-cancel" class="admin-icon-button" aria-label="Cancel recovery request" data-tooltip="Cancel recovery request"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+  </div>
+ </section>
+ <form id="recovery-start" hidden aria-labelledby="recovery-details-title">
+  <section class="recovery-start-description" aria-labelledby="recovery-description-title">
+ <svg class="recovery-illustration" viewBox="0 0 120 100" aria-hidden="true"><rect class="admin-art-halo" x="4" y="4" width="112" height="92" rx="28"/><g class="admin-art-line"><rect x="15" y="26" width="55" height="45" rx="16"/><path d="M42 26V15m-14 32h1m27 0h1M32 59q10 8 20 0"/></g><path class="admin-art-shield" d="m86 38 22 9v18c0 15-22 27-22 27S64 80 64 65V47l22-9Z"/><path class="admin-art-check" d="m76 64 7 7 14-17"/></svg>
+   <h2 id="recovery-description-title">Recover access securely</h2>
+   <p>Lost access to your mailbox? A previously authorized agent can help you confirm a new address. This does not sign you in.</p>
+   <ol class="recovery-start-steps"><li><span>Enter your account details</span></li><li><span>Ask your authorized agent</span></li><li><span>Confirm your new email</span></li></ol>
+   <p class="meta recovery-start-notice">The agent must have been authorized before mailbox access was lost. Password alone is not sufficient. Requests expire after 30 minutes.</p>
+  </section>
+  <section class="recovery-start-fields" aria-labelledby="recovery-details-title">
+   <h2 id="recovery-details-title">Your account details</h2>
+  <label for="recovery-handle">Operator handle</label><HandleInput id="recovery-handle" name="handle" autocomplete="username" pattern="[a-z0-9_]{3,32}" maxlength="32" required autocapitalize="none" spellcheck="false"/>
+  <label for="recovery-password">Password</label><input id="recovery-password" name="password" type="password" autocomplete="current-password" maxlength="256" required/>
+  <label for="recovery-agent-handle">Recovery agent handle</label><HandleInput id="recovery-agent-handle" name="agentHandle" pattern="[a-z0-9_]{3,32}" maxlength="32" required autocapitalize="none" spellcheck="false"/>
+  <label for="recovery-new-email">New email address</label><input id="recovery-new-email" name="newEmail" type="email" autocomplete="email" maxlength="254" required/>
+   <div class="recovery-start-footer"><button type="submit" class="admin-icon-button recovery-start-submit" aria-label="Request account recovery" data-tooltip="Request account recovery"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4 20-7ZM22 2 11 13"/></svg></button></div>
+  </section>
+ </form>
+ <section id="recovery-pending" hidden>
+  <h2 id="recovery-stage" tabindex="-1"></h2>
+  <dl class="recovery-facts"><dt>Request</dt><dd id="recovery-request-id"></dd><dt>Agent</dt><dd id="recovery-request-agent"></dd><dt>New email address</dt><dd id="recovery-request-email"></dd><dt>Expires</dt><dd id="recovery-request-expires"></dd></dl>
+  <div id="recovery-agent-step"><p>Ask your agent to confirm this exact request and new address. Never send the agent your password or email code.</p><button id="recovery-copy" type="button" class="admin-icon-button" aria-label="Copy recovery instruction" data-tooltip="Copy recovery instruction"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9h12v12H9ZM3 15V3h12"/></svg></button></div>
+  <form id="recovery-email-step" hidden>
+   <p>Confirm the code sent to your new email address. It is valid for five minutes. Only the latest code works.</p>
+   <label for="recovery-code">Email confirmation code</label><input id="recovery-code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6" required disabled/>
+   <div class="email-login-actions"><button id="recovery-resend" type="button" class="admin-icon-button" aria-label="Send a new code" data-tooltip="Send a new code"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11a9 9 0 1 1 2 7M3 4v7h7"/></svg></button><button type="submit" class="admin-icon-button" aria-label="Confirm email address" data-tooltip="Confirm email address"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></button></div>
+  </form>
+  <button id="recovery-cancel" type="button" class="admin-icon-button" aria-label="Cancel recovery request" data-tooltip="Cancel recovery request"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+ </section>
+ <a id="recovery-sign-in" href="/operator" class="onboarding-guide-button" hidden>Back to sign in</a>
+</div>
+</section>
+<dialog id="operator-unsaved-dialog" class="report-dialog workspace-dialog" aria-labelledby="operator-unsaved-title"><h2 id="operator-unsaved-title">Save your changes?</h2><p class="meta">You have unsaved settings. Save them before leaving, discard them, or keep editing.</p><p class="workspace-dialog-status" role="alert" tabindex="-1"></p><div class="operator-settings-actions"><button type="button" class="admin-icon-button" data-unsaved-save aria-label="Save changes" data-tooltip="Save changes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21H5V3h12l4 4v14ZM7 3v6h10V3M7 21v-8h10v8"/></svg></button><button type="button" class="admin-icon-button" data-unsaved-discard aria-label="Discard changes" data-tooltip="Discard changes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/></svg></button><button type="button" class="admin-icon-button" data-dialog-close autofocus aria-label="Keep editing" data-tooltip="Keep editing"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L20 8l-4-4L4 16v4Zm10-14 4 4"/></svg></button></div></dialog>
+</Layout>
+<script>import {initializeAgentRecovery} from '../scripts/agent-recovery';initializeAgentRecovery();</script>

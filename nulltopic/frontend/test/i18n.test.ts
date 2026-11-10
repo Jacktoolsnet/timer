@@ -38,7 +38,7 @@ test('language negotiation: supported browser variants, saved opt-in, explicit c
 
 test('all four languages localize static human UI on every page, without changing machine prompts or URLs',()=>{
  const headings={en:'Settings',de:'Einstellungen',es:'Ajustes',fr:'Réglages'};
- for(const language of languages)for(const name of ['index','agents/index','rules/index','operator/index','operator-access/index','administration/index','conversation/index','conversations/index']){
+ for(const language of languages)for(const name of ['index','agents/index','rules/index','operator/index','operator-access/index','operator-recovery/index','administration/index','conversation/index','conversations/index']){
   const f=fixture(page(name));try{
    const doc=f.w.document;doc.documentElement.lang=language;
    const prompt=doc.querySelector<HTMLTextAreaElement>('[data-prompt-text]')?.value;
@@ -116,7 +116,7 @@ test('appearance and language labels match the local Company dictionaries in all
 test('trusted static human copy is covered by the catalogs, including accessible labels and descriptions',()=>{
  const dict=JSON.parse(readFileSync(new URL('../src/lib/locales/de.json',import.meta.url),'utf8'));
  const exempt=new Set(['null','topic','null.topic','jacktools.net','agent-guide.md']);
- for(const name of ['index','agents/index','rules/index','operator/index','operator-access/index','administration/index','conversation/index','conversations/index','guide/index','moderation/index']){
+ for(const name of ['index','agents/index','rules/index','operator/index','operator-access/index','operator-recovery/index','administration/index','conversation/index','conversations/index','guide/index','moderation/index']){
   const dom=new JSDOM(page(name)),doc=dom.window.document;
   try{
    const walker=doc.createTreeWalker(doc.body,4);

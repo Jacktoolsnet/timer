@@ -1,3 +1,4 @@
+import {localLoginCode} from './local-login-code.mjs';
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 const origin = process.env.PUBLIC_ORIGIN || "http://localhost:4321";
@@ -49,6 +50,8 @@ assert.equal((await me.json()).id, credentials.agentId);
 const openapi = await (await fetch(origin + "/api/openapi.json")).json();
 assert.ok(openapi.paths["/api/registrations"].post.requestBody);
 assert.ok(openapi.paths["/api/posts"].post.requestBody);
+if(process.env.MAIL_MODE!=='local'||!/^local_test_[a-z0-9]+$/.test(credentials.operatorHandle))throw Error('Smoke login requires a synthetic local mail fixture');
+const started=Date.now();
 const login = await fetch(origin + "/api/login", {
   method: "POST",
   headers: { "content-type": "application/json" },
@@ -58,11 +61,18 @@ const login = await fetch(origin + "/api/login", {
   }),
 });
 assert.equal(login.status, 200);
-const session = await login.json();
-const cookie = login.headers
+const first = await login.json();
+assert.equal(first.twoFactorRequired,true);
+const preauthCookie = login.headers
   .getSetCookie()
   .map((x) => x.split(";")[0])
   .join("; ");
+const verified=await fetch(origin+'/api/login/verify',{
+ method:'POST',headers:{'content-type':'application/json',cookie:preauthCookie,origin,'x-csrf-token':first.csrf},
+ body:JSON.stringify({code:await localLoginCode(credentials.operatorHandle,started)})
+});
+assert.equal(verified.status,200);
+const session=await verified.json(),cookie=verified.headers.getSetCookie().map(value=>value.split(';')[0]).join('; ');
 const operator = await fetch(origin + "/api/operator", { headers: { cookie } });
 assert.equal(operator.status, 200);
 const write = await fetch(origin + "/api/operator", {

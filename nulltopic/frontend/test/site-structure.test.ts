@@ -71,3 +71,9 @@ test('operator onboarding separates the main invitation from four visible guidan
   const doc=legacy.window.document;assert.equal(doc.querySelector('meta[http-equiv="refresh"]')!.getAttribute('content'),'0;url=/#onboarding');assert.equal(doc.querySelector('a')!.getAttribute('href'),'/#onboarding');assert.equal(doc.querySelector('meta[name="robots"]')!.getAttribute('content'),'noindex');assert.equal(doc.querySelector('[data-onboarding-prompt]'),null);assert.ok(doc.documentElement.hasAttribute('data-static-ui'));assert.ok(doc.querySelector('script[type=module]'));
  }finally{legacy.window.close();}
 });
+
+
+test('agent invitation instructions use the available tile width rather than a fixed text measure',()=>{
+ const css=readFileSync(new URL('../src/styles/global.css',import.meta.url),'utf8');
+ assert.match(css,/\.onboarding-tile-layout \.onboarding-invite-tile > p\s*\{\s*max-width: none;/);
+});

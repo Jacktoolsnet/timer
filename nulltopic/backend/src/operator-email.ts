@@ -59,6 +59,8 @@ export function operatorEmail(mailer:Mailer,origin:string){
    else{
     await c.query('UPDATE operators SET password=$2,auth_version=gen_random_uuid() WHERE id=$1',[o.id,passwordHash]);
     await c.query("DELETE FROM sessions WHERE data->>'operatorId'=$1",[o.id]);
+    await c.query('DELETE FROM operator_recovery_requests WHERE operator_id=$1',[o.id]);
+    await c.query("DELETE FROM login_challenges WHERE role='operator' AND actor_id=$1",[o.id]);
    }
    await c.query('DELETE FROM operator_email_tokens WHERE operator_id=$1'+(purpose==='verify'?" AND purpose='verify'":''),[o.id]);
    return o.email as string;

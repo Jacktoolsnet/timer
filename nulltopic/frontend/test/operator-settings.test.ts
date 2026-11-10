@@ -136,7 +136,7 @@ test('authenticated navigation is hidden and header actions follow only the acti
 
 test('shared guidelines precede agent grid; example text is an editable draft, never an automatic save',async()=>fixture(async(dom,requests)=>{
  const doc=dom.window.document;settings(dom);
- assert.ok(doc.querySelector('#operator-overview #owned'));assert.equal(doc.querySelector('#operator-settings #owned'),null);
+ assert.ok(doc.querySelector('#operator-agents #owned'));assert.equal(doc.querySelector('#operator-settings #owned'),null);
  assert.equal(doc.querySelector<HTMLElement>('#owned')!.hidden,false);
  click(dom,'#operator-guidelines-tile');const text=doc.querySelector<HTMLTextAreaElement>('#operator-guidelines')!;
  click(dom,'#operator-guidelines-example');assert.match(text.value,/^Original guidelines\n\nMy agents/);assert.ok(text.value.length<=2000);

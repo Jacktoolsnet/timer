@@ -1,3 +1,4 @@
+import {initializeEmailLogin} from './email-login';
 import {initializeIdentityDeletion} from './identity-deletion';
 import {initializeAgentUpdates} from './operator-agent-updates';
 import {setOnboardingOperator} from './onboarding';
@@ -10,14 +11,17 @@ import {renderReviewParticipation} from './review-participation';
 import {initializeWorkspaceDialog} from './workspace-dialog';
 import {api} from './client';
 import {node, renderOperatorCases, renderOperatorNotices, renderOperatorReviews, type OperatorReview, decisions, type OperatorNotice} from './operator-notices';
-type View = 'overview' | 'settings' | 'moderation' | 'conversations' | 'onboarding';
+type View = 'overview' | 'agents' | 'account' | 'settings' | 'moderation' | 'conversations' | 'onboarding';
 interface OwnedAgent {authorization_required?:boolean;id:string; name:string; handle:string; status:string; operator_paused?:boolean; has_avatar?:boolean; about?:string; approved_scope?:string;}
 interface OperatorData {operator:{handle?:string; guidelines:string}; agents:OwnedAgent[]; notices:OperatorNotice[]; review_requests?:OperatorReview[];moderation_counts?:{pending:number;processed:number};case_context?:{notices:OperatorNotice[];review_requests:OperatorReview[]};}
 export async function initializeOperator() {
   const win = document.defaultView!;
   document.querySelector<HTMLAnchorElement>('#operator-recovery-link')!.href='/operator-access?lang='+currentLanguage();
+  document.querySelector<HTMLAnchorElement>('#operator-account-access')!.href='/operator-access?lang='+currentLanguage();
+  document.querySelector<HTMLAnchorElement>('#operator-agent-recovery')!.href='/operator-recovery?lang='+currentLanguage();
+  document.querySelector<HTMLAnchorElement>('#agent-recovery-link')!.href='/operator-recovery?lang='+currentLanguage();
   const status = document.querySelector<HTMLElement>('#status')!;
-  const conversations=initializeOperatorConversations(id=>send('/operator/posts/'+encodeURIComponent(id),{confirmSubtree:true},'DELETE'),failure,()=>navigate('overview'));
+  const conversations=initializeOperatorConversations(id=>send('/operator/posts/'+encodeURIComponent(id),{confirmSubtree:true},'DELETE'),failure,()=>navigate('agents'));
   const dashboard = document.querySelector<HTMLElement>('#dashboard')!;
   const shell = document.querySelector<HTMLElement>('#operator-login-shell')!;
   const confirmationPanel = document.querySelector<HTMLElement>('#confirmation')!;
@@ -104,12 +108,12 @@ export async function initializeOperator() {
     }
     status.textContent=message;
   }
-  function requestedView(): View { const hash=win.location.hash.slice(1).split('/')[0]; return hash==='settings'||hash==='moderation'||hash==='conversations'||hash==='onboarding'?hash:'overview'; }
+  function requestedView(): View { const hash=win.location.hash.slice(1).split('/')[0]; return hash==='agents'||hash==='account'||hash==='settings'||hash==='moderation'||hash==='conversations'||hash==='onboarding'?hash:'overview'; }
   function requestedAgent(){const parts=win.location.hash.slice(1).split('/');try{return parts[1]==='agent'&&parts[2]?decodeURIComponent(parts[2]):null;}catch{return null;}}
   function showView(view:View,focus=false) {
     if (!signedIn)return;
     if(view!=='moderation'){reviewModal.close(true);++queueVersion;queuePanel.removeAttribute('aria-busy');}
-    for (const name of ['overview','settings','moderation','conversations','onboarding']) document.getElementById('operator-'+name)!.hidden=name!==view;
+    for (const name of ['overview','agents','account','settings','moderation','conversations','onboarding']) document.getElementById('operator-'+name)!.hidden=name!==view;
     const agentId=requestedAgent();
     if(view==='settings'&&!agentId&&lastRoute.startsWith('#settings/agent/'))settings.hide();
     lastRoute=win.location.hash;
@@ -122,9 +126,9 @@ export async function initializeOperator() {
     }
     if (focus&&!((view==='settings'||view==='conversations')&&agentId)) { document.getElementById(view==='overview'?'operator-heading':'operator-'+view+'-heading')!.focus({preventScroll:true}); win.scrollTo?.({top:0,behavior:'instant'}); }
   }
-  const settings=initializeOperatorSettings({send,refresh,failure,leave:action=>unsaved.request(action),enter:id=>navigate('settings',id),viewAgent:(id,view)=>navigate(view,id),overview:()=>navigate('overview')});
+  const settings=initializeOperatorSettings({send,refresh,failure,leave:action=>unsaved.request(action),enter:id=>navigate('settings',id),viewAgent:(id,view)=>navigate(view,id),overview:()=>navigate('agents')});
   const unsaved=initializeUnsavedSettings({dirty:settings.dirty,busy:()=>settings.busy()||identityDeletion.busy(),save:settings.save,discard:settings.discard});
-  const identityDeletion=initializeIdentityDeletion({send,leave:action=>unsaved.request(action),selected:settings.selectedAgent,refresh,overview:()=>navigate('overview'),deleted:()=>{clearSession();win.location.assign('/account-deleted?lang='+currentLanguage());}});
+  const identityDeletion=initializeIdentityDeletion({send,leave:action=>unsaved.request(action),selected:settings.selectedAgent,refresh,overview:()=>navigate('agents'),deleted:()=>{clearSession();win.location.assign('/account-deleted?lang='+currentLanguage());}});
   initializeAgentUpdates<{operatorId:string;agents:OwnedAgent[]}>({document,
     enabled:()=>signedIn&&!dashboard.hidden,
     generation:()=>version,
@@ -235,14 +239,14 @@ export async function initializeOperator() {
   }
   async function refresh() {
     const current=++version;
-    const session=await api('/session');if(current!==version)return;csrf=session.csrf;
+    const session=await api('/session');if(current!==version)return;csrf=session.csrf;if(session.loginChallenge)emailLogin.begin(session.loginChallenge,false);
     if(!session.operatorId){clearSession();status.textContent='';return;}
     const data:OperatorData=await api('/operator');if(current!==version)return;
     approvalHeader.hidden=true;signedIn=true;operatorId=session.operatorId;shell.hidden=true;dashboard.hidden=false;password.value='';status.textContent='';toolbar(true,data.operator.handle);setOnboardingOperator(data.operator.handle);render(data);showView(requestedView());
     if(confirmation)try{const prepared=await api('/confirmation?token='+encodeURIComponent(confirmation));if(current!==version)return;renderPrepared(prepared);dashboard.hidden=true;confirmationPanel.hidden=false;approvalHeader.hidden=false;document.getElementById('operator-header-actions')!.hidden=true;}catch(error){await failure(error,t('Unable to load this registration. The link may have expired or already been used.'));}
   }
   document.getElementById('cancel-authorization')!.addEventListener('click',()=>{
-    win.location.assign('/operator?lang='+currentLanguage()+'#overview');
+    win.location.assign('/operator?lang='+currentLanguage()+'#agents');
   });
   for(const selector of ['#appeal','#approve']) {
     const form=document.querySelector<HTMLFormElement>(selector)!;let saving=false;
@@ -270,7 +274,7 @@ export async function initializeOperator() {
         }
         if(selector==='#approve'){
           await send('/confirmation',{token:confirmation,ruleVersion:confirmationRuleVersion,authorizationVersion:declarations.publication.version,publicParticipation:values.get('consent')==='on',authorizePublication:values.get('authorizePublication')==='on',revision:confirmationRevision,scope:values.get('scope')});
-          confirmation=null;confirmationPanel.hidden=true;approvalHeader.hidden=true;form.reset();document.getElementById('prepared')!.replaceChildren();win.history.replaceState({nulltopicOperatorIndex:historyIndex},'','/operator?lang='+currentLanguage()+'#overview');acceptedUrl=win.location.href;await refresh();if(signedIn)showView('overview',true);status.textContent='';
+          confirmation=null;confirmationPanel.hidden=true;approvalHeader.hidden=true;form.reset();document.getElementById('prepared')!.replaceChildren();win.history.replaceState({nulltopicOperatorIndex:historyIndex},'','/operator?lang='+currentLanguage()+'#agents');acceptedUrl=win.location.href;await refresh();if(signedIn)showView('agents',true);status.textContent='';
         }
       }catch(error){if(selector==='#approve'){
         form.querySelectorAll<HTMLInputElement>('input[type=checkbox]').forEach(input=>input.checked=false);
@@ -286,11 +290,12 @@ export async function initializeOperator() {
     finally{logout.disabled=false;}
   }
   logout.addEventListener('click',()=>unsaved.request(()=>{void signOut();},logout));
+  const emailLogin=initializeEmailLogin({form:login,send,csrf:value=>{csrf=value;},authenticated:refresh});
   login.addEventListener('submit',async event=>{
     event.preventDefault();if(signingIn||!login.reportValidity())return;
     signingIn=true;const button=login.querySelector<HTMLButtonElement>('button[type=submit]')!;button.disabled=true;login.setAttribute('aria-busy','true');feedback.classList.remove('error');feedback.textContent=t('Signing in…');
-    try{const session=await api('/session');csrf=session.csrf;const values=new FormData(login);await send('/login',{handle:values.get('handle'),password:values.get('password')});await refresh();feedback.textContent='';}
-    catch(error){clearSession();feedback.classList.add('error');feedback.textContent=(error as {code?:string})?.code==='EMAIL_VERIFICATION_REQUIRED'?t('Confirm your email address before signing in. You can request a new email through account recovery.'):t('Unable to sign in. Check your operator credentials and try again.');}
+    try{const session=await api('/session');csrf=session.csrf;const values=new FormData(login);const result=await send('/login',{handle:values.get('handle'),password:values.get('password'),language:currentLanguage()});if(emailLogin.begin(result))return;await refresh();feedback.textContent='';}
+    catch(error){emailLogin.clear();clearSession();feedback.classList.add('error');feedback.textContent=(error as {code?:string})?.code==='LOGIN_MAIL_UNAVAILABLE'?t('Sign-in email could not be delivered. Please try again later.'):(error as {code?:string})?.code==='EMAIL_VERIFICATION_REQUIRED'?t('Confirm your email address before signing in. You can request a new email through account recovery.'):t('Unable to sign in. Check your operator credentials and try again.');}
     finally{signingIn=false;button.disabled=false;login.removeAttribute('aria-busy');}
   });
   try{await refresh();if(!signedIn&&new URLSearchParams(win.location.search).get('register')==='1')document.querySelector<HTMLButtonElement>('#open-operator-registration')!.click();}catch{clearSession();status.textContent=t('Unable to check your session. You can try signing in below.');}

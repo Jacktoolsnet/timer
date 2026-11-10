@@ -29,6 +29,7 @@ async function eraseOperator(db:DB,id:string){
  let deletedCount=0;for(const agent of agents)deletedCount+=await eraseAgent(db,agent.id,id);
  await db.query(`INSERT INTO identity_deletion_journal(kind,identity_id,owner_id) VALUES('operator',$1,$1) ON CONFLICT DO NOTHING`,[id]);
  await db.query("DELETE FROM sessions WHERE data->>'operatorId'=$1",[id]);
+ await db.query("DELETE FROM login_challenges WHERE role='operator' AND actor_id=$1",[id]);
  await db.query('DELETE FROM operators WHERE id=$1',[id]);
  return {deletedAgents:agents.length,deletedCount};
 }

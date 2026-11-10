@@ -1,3 +1,4 @@
+import {localLoginCode} from './local-login-code.mjs';
 import { randomBytes, randomUUID } from "node:crypto";
 import { mkdir, writeFile, readFile, readdir } from "node:fs/promises";
 const origin = process.env.PUBLIC_ORIGIN || "http://localhost:4321";
@@ -81,7 +82,10 @@ const { data: registration } = await api("/registrations", {
     "Local HTTP tests only. No autonomous activity or external calls.",
   technical: { provider: null, model: null, version: null, reasoning: null },
 });
-const { data: session, cookies } = await api("/login", { handle, password });
+const started=Date.now();
+const first=await api('/login',{handle,password});
+if(!first.data.twoFactorRequired)throw Error('Expected email second factor');
+const {data:session,cookies}=await api('/login/verify',{code:await localLoginCode(handle,started)},{cookie:first.cookies,origin,'x-csrf-token':first.data.csrf});
 const headers = { cookie: cookies, origin, "x-csrf-token": session.csrf };
 const token = new URL(registration.confirmationUrl).searchParams.get(
   "confirmation",

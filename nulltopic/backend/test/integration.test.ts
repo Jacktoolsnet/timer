@@ -16,6 +16,7 @@ const deletionTestDirectory=await mkdtemp(join(tmpdir(),'nulltopic-deletion-suit
 process.env.CASE_PURGE_JOURNAL_PATH=join(deletionTestDirectory,'journal.json');
 delete process.env.ROOT_ADMIN_HANDLE;
 delete process.env.ROOT_ADMIN_PASSWORD;
+delete process.env.ROOT_ADMIN_EMAIL;
 const { pool, migrate, cleanup, transaction, limit } =
   await import("../src/db.js");
 const { createApp } = await import("../src/app.js");
@@ -34,7 +35,7 @@ async function emailTokenFor(email:string,purpose='verify'){
 await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
   await migrate();
   await pool.query(
-    "TRUNCATE identity_deletion_journal,post_deletion_journal,background_job_runs,background_job_previews,moderation_cases,operators,admins,sessions,agents,configurations,conversations,posts,reports,moderation,appeals,limits,events RESTART IDENTITY CASCADE",
+    "TRUNCATE login_challenges,identity_deletion_journal,post_deletion_journal,background_job_runs,background_job_previews,moderation_cases,operators,admins,sessions,agents,configurations,conversations,posts,reports,moderation,appeals,limits,events RESTART IDENTITY CASCADE",
   );
   let app = await testApp();
   await app.listen({ host: "127.0.0.1", port: 0 });
@@ -47,13 +48,22 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
     assert.equal(r.statusCode,200,r.body);await verifyOperator(handle+'@example.invalid');return (await pool.query('SELECT id FROM operators WHERE handle=$1',[handle])).rows[0].id as string;
   };
   const operator=await createOperator('test_operator'),other=await createOperator('other_operator'),admin=randomUUID();
-  await pool.query("INSERT INTO admins(id,handle,password) VALUES($1,$2,$3)", [
+  await pool.query("INSERT INTO admins(id,handle,password,email) VALUES($1,$2,$3,$2||'@example.invalid')", [
     admin,
     "test_admin",
     await argon2.hash(password),
   ]);
   let cookie = "",
     csrf = "";
+  const rawLogin=async(payload:any)=>{
+    await pool.query("DELETE FROM limits WHERE bucket LIKE 'login_mail_%' OR bucket LIKE 'login_code_%'");
+    const started=await app.inject({method:'POST',url:'/api/login',payload});
+    if(started.statusCode!==200||!started.json().twoFactorRequired)return started;
+    const table=payload.admin?'admins':'operators',email=(await pool.query(`SELECT email FROM ${table} WHERE handle=$1`,[payload.handle])).rows[0].email;
+    const message=mailbox.filter(m=>m.to===email&&/^\d{6}$/m.test(m.text)).at(-1);assert.ok(message,'Synthetic OTP email delivered');
+    const code=message.text.match(/^\d{6}$/m)![0];
+    return app.inject({method:'POST',url:'/api/login/verify',remoteAddress:'127.0.0.3',headers:{cookie:started.cookies.map(c=>c.name+'='+c.value).join('; '),origin:process.env.PUBLIC_ORIGIN||'http://localhost:4321','x-csrf-token':started.json().csrf},payload:{code}});
+  };
   async function call(
     method: string,
     path: string,
@@ -68,6 +78,8 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
       headers.origin = process.env.PUBLIC_ORIGIN || "http://localhost:4321";
       headers["x-csrf-token"] = csrf;
     }
+    if(method==='POST'&&path==='/login')return rawLogin(body);
+    if(method==='POST'&&path==='/admin/users'&&body&&typeof body==='object'&&!('email' in body))body={...body,email:(body as any).handle+'@example.invalid'};
     return app.inject({
       method: method as any,
       url: "/api" + path,
@@ -969,7 +981,7 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
       const password = 'isolated-cli-' + randomUUID();
       const result = await new Promise<{code: number | null; output: string}>((resolve, reject) => {
         const child = spawn(process.execPath, [new URL('../../scripts/bootstrap-account.mjs', import.meta.url).pathname, '--admin'], {
-          env: { ...process.env, DATABASE_URL: url, BOOTSTRAP_HANDLE: handle, BOOTSTRAP_PASSWORD: password },
+          env: { ...process.env, DATABASE_URL: url, BOOTSTRAP_HANDLE: handle, BOOTSTRAP_PASSWORD: password,BOOTSTRAP_EMAIL:'bootstrap_admin@example.invalid' },
           stdio: ['ignore', 'pipe', 'pipe'],
         });
         let output = '';
@@ -988,6 +1000,7 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
     });
     await t.test("environment root manages administrators, enforces roles and revokes old sessions", async () => {
       await pool.query("DELETE FROM limits WHERE bucket LIKE 'login:%'");
+      process.env.ROOT_ADMIN_EMAIL='root@example.invalid';
       process.env.ROOT_ADMIN_HANDLE = 'server_root';
       await assert.rejects(testApp(), /both ROOT_ADMIN_HANDLE/);
       const rootPassword = 'root-test-' + randomUUID();
@@ -996,6 +1009,7 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
       process.env.ROOT_ADMIN_PASSWORD = rootPassword;
       process.env.ROOT_ADMIN_HANDLE = 'test_admin';
       await assert.rejects(testApp(), /conflicts with an existing administrator/);
+      process.env.ROOT_ADMIN_EMAIL='root@example.invalid';
       process.env.ROOT_ADMIN_HANDLE = 'server_root';
       const restart = async () => { await app.close(); app = await testApp(); };
       const auth = () => ({cookie, csrf});
@@ -1068,12 +1082,14 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
         assert.equal((await call('GET', '/admin/users', undefined, undefined, true)).statusCode, 200);
         delete process.env.ROOT_ADMIN_HANDLE;
         delete process.env.ROOT_ADMIN_PASSWORD;
+delete process.env.ROOT_ADMIN_EMAIL;
         await restart();
         use(newRootAuth);
         assert.equal((await call('GET', '/admin', undefined, undefined, true)).statusCode, 401);
       } finally {
         delete process.env.ROOT_ADMIN_HANDLE;
         delete process.env.ROOT_ADMIN_PASSWORD;
+delete process.env.ROOT_ADMIN_EMAIL;
       }
     });
     await t.test("operator and admin sessions enforce idle and absolute deadlines server-side", async () => {
@@ -1881,7 +1897,7 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
       assert.deepEqual((await pool.query('SELECT * FROM sessions WHERE sid=$1',[sessionBefore.sid])).rows[0],sessionBefore,'passive status reads do not renew idle sessions');
       const preview=(await call('POST','/admin/jobs/cases/preview',{},undefined,true)).json();assert.ok(preview.id);assert.ok(Number.isInteger(preview.count));
       assert.equal((await app.inject({method:'POST',url:'/api/admin/jobs/cases/run',headers:{cookie},payload:{previewId:preview.id}})).statusCode,403);
-      const foreign=randomUUID();await pool.query('INSERT INTO admins(id,handle,password) VALUES($1,$2,$3)',[foreign,'job_admin_fixture',await argon2.hash(password)]);
+      const foreign=randomUUID();await pool.query("INSERT INTO admins(id,handle,password,email) VALUES($1,$2,$3,$2||'@example.invalid')",[foreign,'job_admin_fixture',await argon2.hash(password)]);
       await login('job_admin_fixture',true);assert.equal((await call('POST','/admin/jobs/cases/run',{previewId:preview.id},undefined,true)).statusCode,409);
       await login('test_admin',true);await pool.query("UPDATE background_job_previews SET expires_at=now()-interval '1 second' WHERE id=$1",[preview.id]);
       assert.equal((await call('POST','/admin/jobs/cases/run',{previewId:preview.id},undefined,true)).statusCode,409);
@@ -2039,6 +2055,126 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
       assert.equal((await call('DELETE','/operator',{...body,expectedAgentIds:[]},undefined,true)).statusCode,429);assert.equal((await pool.query('SELECT id FROM operators WHERE id=$1',[replacement])).rowCount,1);
       await pool.query("UPDATE identity_deletion_journal SET deleted_at=now()-interval '36 days' WHERE owner_id=$1",[ownerId]);
     });
+    await t.test('email second factor is mandatory, session-bound, expiring, one-use and revocable for both roles',async()=>{
+      await pool.query('DELETE FROM limits');
+      const ownerId=await createOperator('otp_operator'),adminId=randomUUID();
+      await pool.query('INSERT INTO admins(id,handle,password,email) VALUES($1,$2,$3,$4)',[adminId,'otp_admin',await argon2.hash(password),'otp_admin@example.invalid']);
+      const otpCode=(email:string)=>{const m=mailbox.filter(m=>m.to===email&&/^\d{6}$/m.test(m.text)).at(-1);assert.ok(m);return m.text.match(/^\d{6}$/m)![0];};
+      const cookieFor=(r:any)=>r.cookies.map((c:any)=>c.name+'='+c.value).join('; ');
+      const start=async(admin=false)=>{const r=await app.inject({method:'POST',url:'/api/login',remoteAddress:'127.0.0.77',payload:{handle:admin?'otp_admin':'otp_operator',password,admin,language:'de'}});assert.equal(r.statusCode,200,r.body);assert.equal(r.json().twoFactorRequired,true);assert.equal(r.json().code,undefined);assert.equal(r.json().operatorId,undefined);return{cookie:cookieFor(r),csrf:r.json().csrf,expiresAt:r.json().expiresAt,code:otpCode(admin?'otp_admin@example.invalid':'otp_operator@example.invalid')};};
+      const send=(pending:any,path:string,payload:any={})=>app.inject({method:'POST',url:'/api/login/'+path,remoteAddress:'127.0.0.77',headers:{cookie:pending.cookie,origin:process.env.PUBLIC_ORIGIN||'http://localhost:4321','x-csrf-token':pending.csrf},payload});
+      const budgets=()=>pool.query('DELETE FROM limits');
+      let pending=await start();
+      const session=(await app.inject({method:'GET',url:'/api/session',headers:{cookie:pending.cookie}})).json();assert.equal(session.operatorId,undefined);assert.equal(session.adminId,undefined);assert.ok(session.loginChallenge);
+      assert.equal((await app.inject({method:'GET',url:'/api/operator',headers:{cookie:pending.cookie}})).statusCode,401);
+      let challenge=(await pool.query('SELECT * FROM login_challenges WHERE actor_id=$1',[ownerId])).rows[0];assert.equal(challenge.code_hash.length,64);assert.notEqual(challenge.code_hash,pending.code);assert.equal(challenge.attempts,0);assert.equal(challenge.delivered,true);
+      const stored=(await pool.query("SELECT data FROM sessions WHERE data->>'loginChallengeId'=$1",[challenge.id])).rows[0].data;assert.equal(stored.operatorId,undefined);assert.equal(stored.authenticatedAt,undefined);assert.ok(stored.loginBinding);assert.equal(stored.code,undefined);
+      const foreign=await app.inject({method:'GET',url:'/api/session'});
+      assert.equal((await send({cookie:cookieFor(foreign),csrf:foreign.json().csrf},'verify',{code:pending.code})).statusCode,401);
+      assert.equal((await app.inject({method:'POST',url:'/api/login/verify',headers:{cookie:pending.cookie,origin:process.env.PUBLIC_ORIGIN||'http://localhost:4321'},payload:{code:pending.code}})).statusCode,403);
+      assert.equal((await app.inject({method:'POST',url:'/api/login/verify',headers:{cookie:pending.cookie,origin:'https://untrusted.invalid','x-csrf-token':pending.csrf},payload:{code:pending.code}})).statusCode,403);
+      assert.equal((await send(pending,'verify',{code:pending.code,admin:true})).statusCode,400);
+      const wrong=pending.code==='000000'?'111111':'000000';assert.equal((await send(pending,'verify',{code:wrong})).statusCode,400);
+      assert.equal((await send(pending,'resend')).statusCode,429);
+      await pool.query("UPDATE login_challenges SET resend_at=now()-interval '1 second' WHERE actor_id=$1",[ownerId]);
+      const resent=await send(pending,'resend');assert.equal(resent.statusCode,200,resent.body);assert.equal(resent.json().expiresAt,pending.expiresAt);const latest=otpCode('otp_operator@example.invalid');assert.notEqual(latest,pending.code);
+      challenge=(await pool.query('SELECT * FROM login_challenges WHERE actor_id=$1',[ownerId])).rows[0];assert.equal(challenge.attempts,1);assert.equal(challenge.sends,2);
+      assert.equal((await send(pending,'verify',{code:pending.code})).statusCode,400);
+      const verified=await send(pending,'verify',{code:latest});assert.equal(verified.statusCode,200,verified.body);assert.notEqual(cookieFor(verified),pending.cookie);assert.equal((await pool.query('SELECT id FROM login_challenges WHERE actor_id=$1',[ownerId])).rowCount,0);
+      const full=(await app.inject({method:'GET',url:'/api/session',headers:{cookie:cookieFor(verified)}})).json();assert.equal(full.operatorId,ownerId);assert.equal(full.adminId,undefined);
+      const completed=(await pool.query("SELECT data FROM sessions WHERE data->>'operatorId'=$1",[ownerId])).rows[0].data;assert.equal(completed.authenticationMethod,'email-otp-v1');assert.equal(completed.loginBinding,undefined);assert.ok(Math.abs(Date.now()-completed.authenticatedAt)<10000);
+      assert.notEqual((await send(pending,'verify',{code:latest})).statusCode,200);
+      await budgets();pending=await start(true);await app.close();app=await testApp();assert.ok((await app.inject({method:'GET',url:'/api/session',headers:{cookie:pending.cookie}})).json().loginChallenge);
+      const adminAuth=await send(pending,'verify',{code:pending.code});assert.equal(adminAuth.statusCode,200,adminAuth.body);assert.equal((await app.inject({method:'GET',url:'/api/admin',headers:{cookie:cookieFor(adminAuth)}})).statusCode,200);assert.equal((await app.inject({method:'GET',url:'/api/admin/users',headers:{cookie:cookieFor(adminAuth)}})).statusCode,403);
+      await budgets();pending=await start();assert.equal((await send(pending,'cancel')).statusCode,200);assert.notEqual((await send(pending,'verify',{code:pending.code})).statusCode,200);
+      await budgets();pending=await start();await pool.query("UPDATE login_challenges SET expires_at=now()-interval '1 second' WHERE actor_id=$1",[ownerId]);assert.equal((await send(pending,'verify',{code:pending.code})).statusCode,401);
+      await budgets();pending=await start();for(let i=0;i<5;i++){const r=await send(pending,'verify',{code:pending.code==='000000'?'111111':'000000'});assert.equal(r.statusCode,i===4?401:400);}assert.equal((await send(pending,'verify',{code:pending.code})).statusCode,401);
+      await budgets();pending=await start();const race=await Promise.all([send(pending,'verify',{code:pending.code}),send(pending,'verify',{code:pending.code})]);assert.equal(race.filter(r=>r.statusCode===200).length,1);
+      await budgets();pending=await start();await pool.query('UPDATE operators SET auth_version=gen_random_uuid() WHERE id=$1',[ownerId]);assert.equal((await send(pending,'verify',{code:pending.code})).statusCode,401);
+      await budgets();pending=await start(true);await pool.query('UPDATE admins SET enabled=false WHERE id=$1',[adminId]);assert.equal((await send(pending,'verify',{code:pending.code})).statusCode,401);await pool.query('UPDATE admins SET enabled=true WHERE id=$1',[adminId]);
+      await budgets();pending=await start(true);await pool.query('UPDATE admins SET email=$2,auth_version=gen_random_uuid(),email_verified_at=NULL WHERE id=$1',[adminId,'changed_admin@example.invalid']);assert.equal((await send(pending,'verify',{code:pending.code})).statusCode,401);
+      await pool.query('UPDATE admins SET email=NULL WHERE id=$1',[adminId]);assert.equal((await app.inject({method:'POST',url:'/api/login',payload:{handle:'otp_admin',password,admin:true}})).json().error.code,'TWO_FACTOR_SETUP_REQUIRED');
+      await budgets();const failing=await createApp({mailer:{available:true,send:async()=>{throw Error('Synthetic mail failure');}}});try{const r=await failing.inject({method:'POST',url:'/api/login',payload:{handle:'otp_operator',password}});assert.equal(r.statusCode,503);assert.equal((await pool.query('SELECT id FROM login_challenges WHERE actor_id=$1',[ownerId])).rowCount,0);}finally{await failing.close();}
+      // Mail budgets apply across fresh password requests, not just one challenge.
+      await budgets();for(let i=0;i<5;i++)await start();const limited=await app.inject({method:'POST',url:'/api/login',remoteAddress:'127.0.0.77',payload:{handle:'otp_operator',password}});assert.equal(limited.statusCode,429);
+      await budgets();pending=await start();await pool.query('DELETE FROM operators WHERE id=$1',[ownerId]);assert.equal((await send(pending,'verify',{code:pending.code})).statusCode,401);
+    });
+    await t.test('agent-assisted recovery requires prior enrollment, password, scoped approval and bound new-mailbox confirmation',async()=>{
+      await pool.query('DELETE FROM limits');
+      const ownerId=await createOperator('recover_owner');
+      const register=async(agentHandle:string)=>{
+        const registration=await call('POST','/registrations',{...prepared(agentHandle),operatorHandle:'recover_owner'});assert.equal(registration.statusCode,200,registration.body);
+        await login('recover_owner');
+        const token=new URL(registration.json().confirmationUrl).searchParams.get('confirmation');
+        const approved=await call('POST','/confirmation',{token,ruleVersion:rules.version,publicParticipation:true,authorizePublication:true,authorizationVersion:'agent-publication-v1',revision:1,scope:'Synthetic recovery tests only'},undefined,true);assert.equal(approved.statusCode,200,approved.body);
+        return {id:registration.json().id as string,key:registration.json().key as string,handle:agentHandle};
+      };
+      const helper=await register('recovery_helper'),second=await register('recovery_second');
+      const origin=process.env.PUBLIC_ORIGIN||'http://localhost:4321';
+      const jar=(r:any)=>r.cookies.map((c:any)=>c.name+'='+c.value).join('; ');
+      const anon=async()=>{const r=await app.inject({method:'GET',url:'/api/session',remoteAddress:'127.0.0.88'});return{cookie:jar(r),csrf:r.json().csrf};};
+      const post=(session:any,path:string,body:any={})=>app.inject({method:'POST',url:'/api/operator-recovery/'+path,remoteAddress:'127.0.0.88',headers:{cookie:session.cookie,origin,'x-csrf-token':session.csrf},payload:body});
+      const enroll=async(agent=helper,enabled=true)=>{await login('recover_owner');return call('PUT','/operator/recovery/agents/'+agent.id,{password,enabled},undefined,true);};
+      const resetLimits=()=>pool.query('DELETE FROM limits');
+      let browser=await anon();
+      const input={handle:'recover_owner',password,newEmail:'recovered@example.invalid',agentHandle:helper.handle,language:'de'};
+      assert.equal((await post(browser,'start',input)).statusCode,409,'no implicit agent enrollment');
+      assert.equal((await app.inject({method:'PUT',url:'/api/operator/recovery/agents/'+helper.id,headers:{cookie:browser.cookie,origin,'x-csrf-token':browser.csrf},payload:{password,enabled:true}})).statusCode,401,'password-only sessions cannot enroll agents');
+      assert.equal((await enroll()).statusCode,200);
+      assert.equal((await call('PUT','/operator/recovery/agents/'+helper.id,{password:'wrong',enabled:false},undefined,true)).statusCode,401);
+      const config=await call('GET','/operator/recovery',undefined,undefined,true);assert.equal(config.json().agents.find((a:any)=>a.id===helper.id).enabled,true);
+      await login('other_operator');assert.equal((await call('PUT','/operator/recovery/agents/'+helper.id,{password,enabled:true},undefined,true)).statusCode,409);
+      await resetLimits();
+      const start=async()=>{browser=await anon();const r=await post(browser,'start',input);assert.equal(r.statusCode,200,r.body);browser={cookie:jar(r),csrf:r.json().csrf};assert.equal(r.json().state,'awaiting_agent');assert.equal(r.json().code,undefined);return r.json();};
+      let request=await start();
+      const oldSession={cookie,csrf};
+      assert.equal((await app.inject({method:'GET',url:'/api/operator',headers:{cookie:browser.cookie}})).statusCode,401);
+      assert.equal((await post(browser,'verify',{code:'123456'})).statusCode,401,'no code accepted before approval');
+      assert.equal((await call('GET','/me/operator-recovery',undefined,second.key)).json().length,0,'other agent cannot see recovery');
+      const listed=await call('GET','/me/operator-recovery',undefined,helper.key);assert.equal(listed.statusCode,200,listed.body);assert.equal(listed.json()[0].newEmail,input.newEmail);assert.equal(listed.json()[0].operatorHandle,'recover_owner');
+      const approve=(id=request.requestId,newEmail=input.newEmail,key=helper.key)=>call('POST','/me/operator-recovery/'+id+'/approve',{confirmEmailChange:true,newEmail},key);
+      assert.equal((await approve(request.requestId,input.newEmail,second.key)).statusCode,403);
+      assert.equal((await approve(request.requestId,'different@example.invalid')).statusCode,403);
+      assert.equal((await approve()).statusCode,200);
+      const codeFor=()=>{const message=mailbox.filter(m=>m.to===input.newEmail&&/^\d{6}$/m.test(m.text)).at(-1);assert.ok(message);return message.text.match(/^\d{6}$/m)![0];};
+      const code=codeFor(),count=mailbox.length;
+      assert.equal((await approve()).statusCode,200);assert.equal(mailbox.length,count,'approval replay does not send another email');
+      const row=(await pool.query('SELECT * FROM operator_recovery_requests WHERE operator_id=$1',[ownerId])).rows[0];assert.notEqual(row.code_hash,code);assert.equal(row.code_hash.length,64);
+      const stranger=await anon();assert.equal((await post(stranger,'verify',{code})).statusCode,401);
+      assert.equal((await app.inject({method:'POST',url:'/api/operator-recovery/verify',headers:{cookie:browser.cookie,origin:'https://invalid.example','x-csrf-token':browser.csrf},payload:{code}})).statusCode,403);
+      assert.equal((await post(browser,'verify',{code,operatorId:ownerId})).statusCode,400);
+      assert.equal((await post(browser,'verify',{code:code==='000000'?'111111':'000000'})).statusCode,400);
+      assert.equal((await post(browser,'resend')).statusCode,429);
+      // Pending sessions survive an application restart, but still grant no account access.
+      await app.close();app=await testApp();
+      assert.equal((await app.inject({method:'GET',url:'/api/operator-recovery/status',headers:{cookie:browser.cookie}})).json().state,'awaiting_email');
+      const fullLogin=await rawLogin({handle:'recover_owner',password});const prior=jar(fullLogin);
+      const race=await Promise.all([post(browser,'verify',{code}),post(browser,'verify',{code})]);assert.equal(race.filter(r=>r.statusCode===200).length,1,JSON.stringify(race.map(r=>({status:r.statusCode,...r.json()}))));
+      const changed=(await pool.query('SELECT email,email_verified_at FROM operators WHERE id=$1',[ownerId])).rows[0];assert.equal(changed.email,input.newEmail);assert.ok(changed.email_verified_at);
+      assert.equal((await app.inject({method:'GET',url:'/api/operator',headers:{cookie:prior}})).statusCode,401);
+      const result=race.find(r=>r.statusCode===200)!;assert.equal((await app.inject({method:'GET',url:'/api/session',headers:{cookie:jar(result)}})).json().operatorId,undefined,'completion never signs in');
+      assert.notEqual((await post(browser,'verify',{code})).statusCode,200);
+      assert.equal((await pool.query('SELECT token_hash FROM operator_email_tokens WHERE operator_id=$1',[ownerId])).rowCount,0);
+      assert.ok(mailbox.some(m=>m.to==='recover_owner@example.invalid'&&m.subject.includes('geändert')));
+      assert.equal((await pool.query('SELECT status,key_hash FROM agents WHERE id=$1',[helper.id])).rows[0].status,'active');
+      // Isolated fixture restores its own address to exercise independent revocations.
+      await pool.query('UPDATE operators SET email=$2 WHERE id=$1',[ownerId,'recover_owner@example.invalid']);await resetLimits();
+      request=await start();await enroll(helper,false);assert.equal((await approve()).statusCode,403);assert.equal((await post(browser,'verify',{code})).statusCode,401);
+      await resetLimits();await enroll();request=await start();await pool.query('UPDATE agents SET key_hash=$2 WHERE id=$1',[helper.id,'synthetic-rotated-key']);assert.equal((await approve()).statusCode,403);assert.equal((await post(browser,'verify',{code})).statusCode,401);await pool.query('UPDATE agents SET key_hash=$2 WHERE id=$1',[helper.id,createHash('sha256').update(helper.key).digest('hex')]);
+      await resetLimits();request=await start();await pool.query("UPDATE agents SET status='blocked' WHERE id=$1",[helper.id]);assert.equal((await approve()).statusCode,403);await pool.query("UPDATE agents SET status='active' WHERE id=$1",[helper.id]);
+      await resetLimits();request=await start();await approve();const wrong=codeFor()==='000000'?'111111':'000000';for(let i=0;i<5;i++)assert.equal((await post(browser,'verify',{code:wrong})).statusCode,i===4?401:400);assert.equal((await post(browser,'verify',{code:codeFor()})).statusCode,401);
+      await resetLimits();request=await start();await pool.query("UPDATE operator_recovery_requests SET expires_at=now()-interval '1 second' WHERE id=$1",[request.requestId]);assert.equal((await approve()).statusCode,403);
+      await resetLimits();request=await start();assert.equal((await post(browser,'cancel')).statusCode,200);assert.equal((await approve()).statusCode,403);
+      await resetLimits();request=await start();await pool.query('UPDATE operators SET auth_version=gen_random_uuid() WHERE id=$1',[ownerId]);assert.equal((await approve()).statusCode,403);
+      await resetLimits();request=await start();await approve();await pool.query("UPDATE operator_recovery_requests SET code_expires_at=now()-interval '1 second' WHERE id=$1",[request.requestId]);assert.equal((await post(browser,'verify',{code:codeFor()})).statusCode,400);
+      const previousCode=codeFor();await pool.query("UPDATE operator_recovery_requests SET sent_at=now()-interval '61 seconds' WHERE id=$1",[request.requestId]);assert.equal((await post(browser,'resend')).statusCode,200);assert.notEqual(codeFor(),previousCode);const resentRow=(await pool.query('SELECT * FROM operator_recovery_requests WHERE id=$1',[request.requestId])).rows[0];assert.equal(resentRow.sends,2);assert.equal(new Date(resentRow.expires_at).toISOString(),request.expiresAt);await pool.query("UPDATE operator_recovery_requests SET sent_at=now()-interval '61 seconds' WHERE id=$1",[request.requestId]);assert.equal((await post(browser,'resend')).statusCode,200);await pool.query("UPDATE operator_recovery_requests SET sent_at=now()-interval '61 seconds' WHERE id=$1",[request.requestId]);assert.equal((await post(browser,'resend')).statusCode,429);
+      await resetLimits();request=await start();const unavailable=await createApp({mailer:{available:true,send:async()=>{throw Error('Synthetic failure');}}});try{const r=await unavailable.inject({method:'POST',url:'/api/me/operator-recovery/'+request.requestId+'/approve',headers:{authorization:'Bearer '+helper.key},payload:{confirmEmailChange:true,newEmail:input.newEmail}});assert.equal(r.statusCode,503);assert.equal((await post(browser,'verify',{code:codeFor()})).statusCode,400);}finally{await unavailable.close();}
+      await resetLimits();request=await start();await login('recover_owner');assert.equal((await call('DELETE','/operator/recovery/request',{},undefined,true)).statusCode,200);assert.equal((await approve()).statusCode,403);
+      await resetLimits();for(let i=0;i<3;i++)await start();browser=await anon();assert.equal((await post(browser,'start',input)).statusCode,429);
+      await resetLimits();request=await start();await login('recover_owner');assert.equal((await call('DELETE','/operator/agents/'+helper.id,{confirmDeletion:true,password},undefined,true)).statusCode,200);assert.equal((await approve()).statusCode,403);assert.equal((await pool.query('SELECT id FROM operator_recovery_requests WHERE agent_id=$1',[helper.id])).rowCount,0);
+
+    });
+
     await t.test('real server starts both daily workers, exports privately and shuts down cleanly',async()=>{
       await pool.query('TRUNCATE background_job_runs,background_job_previews');await pool.query('UPDATE background_jobs SET last_success_due=NULL,last_success_at=NULL,retry_at=NULL');
       const directory=await mkdtemp(join(tmpdir(),'nulltopic-scheduler-')),journalPath=join(directory,'journal.json');

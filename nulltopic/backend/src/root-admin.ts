@@ -1,3 +1,4 @@
+import {emailAddress} from './operator-email.js';
 import argon2 from 'argon2';
 import {randomUUID} from 'node:crypto';
 import {transaction} from './db.js';
@@ -6,6 +7,7 @@ import {transaction} from './db.js';
 export async function syncRootAdministrator() {
   const handle = process.env.ROOT_ADMIN_HANDLE || '';
   const password = process.env.ROOT_ADMIN_PASSWORD || '';
+  const email=process.env.ROOT_ADMIN_EMAIL?emailAddress.parse(process.env.ROOT_ADMIN_EMAIL):null;
   if (!!handle !== !!password) throw Error('Set both ROOT_ADMIN_HANDLE and ROOT_ADMIN_PASSWORD, or leave both empty');
   if (handle && (!/^[a-z0-9_]{3,32}$/.test(handle) || password.length < 12 || password.length > 256))
     throw Error('Root configuration requires a 3–32 character lowercase handle and a 12–256 character password');
@@ -18,9 +20,9 @@ export async function syncRootAdministrator() {
     }
     const conflict = (await c.query('SELECT id FROM admins WHERE handle=$1 AND NOT is_root', [handle])).rows[0];
     if (conflict) throw Error('ROOT_ADMIN_HANDLE conflicts with an existing administrator; choose a distinct root handle');
-    if (root && root.handle === handle && root.enabled && await argon2.verify(root.password, password)) return;
+    if (root && root.handle === handle && root.email===email && root.enabled && await argon2.verify(root.password, password)) return;
     const hashed = await argon2.hash(password);
-    if (root) await c.query('UPDATE admins SET handle=$2,password=$3,enabled=true,auth_version=$4 WHERE id=$1', [root.id, handle, hashed, randomUUID()]);
-    else await c.query('INSERT INTO admins(id,handle,password,is_root,enabled,auth_version) VALUES($1,$2,$3,true,true,$4)', [randomUUID(), handle, hashed, randomUUID()]);
+    if (root) await c.query('UPDATE admins SET handle=$2,password=$3,enabled=true,auth_version=$4,email=$5,email_verified_at=CASE WHEN email IS DISTINCT FROM $5 THEN NULL ELSE email_verified_at END WHERE id=$1', [root.id, handle, hashed, randomUUID(),email]);
+    else await c.query('INSERT INTO admins(id,handle,password,is_root,enabled,auth_version,email) VALUES($1,$2,$3,true,true,$4,$5)', [randomUUID(), handle, hashed, randomUUID(),email]);
   });
 }

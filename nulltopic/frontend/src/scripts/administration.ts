@@ -1,6 +1,7 @@
+import {initializeEmailLogin} from './email-login';
 import {renderBackgroundJobs,clearJobDialogs} from './background-jobs';
 import {renderCaseRetention,clearCaseRetention} from './case-retention';
-import {t} from '../lib/i18n';
+import {t,currentLanguage} from '../lib/i18n';
 import {renderReviewParticipation} from './review-participation';
 import {initializeReviewDecisionPicker} from './review-decision-picker';
 import {initializeWorkspaceDialog} from './workspace-dialog';
@@ -8,7 +9,7 @@ import {initializeModerationActionPicker} from './moderation-action-picker';
 import {renderModerationInbox, type ModerationReport, type ReviewRequest, type ModerationInbox} from './moderation-inbox';
 import {api} from './client';
 type View = 'overview' | 'users' | 'moderation' | 'retention' | 'jobs';
-type AdminUser = {id: string; handle: string; is_root: boolean; enabled: boolean};
+type AdminUser = {email?:string|null;id: string; handle: string; is_root: boolean; enabled: boolean};
 
 export async function initializeAdministration() {
   const win = document.defaultView!;
@@ -133,7 +134,7 @@ export async function initializeAdministration() {
       identity.append(node('h3', '@' + user.handle), node('p', user.is_root ? t('Managed through server environment') : t('Administrator'), 'meta'));
       const badge = node('span', user.is_root ? t('Root') : user.enabled ? t('Active') : t('Disabled'), 'admin-account-state');
       badge.dataset.enabled = String(user.enabled);
-      heading.append(avatar, identity, badge); card.append(heading);
+      identity.append(node('p',user.email||t('Email not configured'),'meta'));heading.append(avatar, identity, badge); card.append(heading);
       if (!user.is_root) {
         const actions = node('div', undefined, 'admin-user-actions');
         const details = node('details', undefined, 'admin-user-security');
@@ -169,7 +170,10 @@ export async function initializeAdministration() {
         form.addEventListener('submit', event => { event.preventDefault(); if (form.reportValidity()) void update({password: input.value}); });
         toggle.addEventListener('click', () => void update({enabled: !user.enabled}));
         form.append(label, save); details.append(form);
-        actions.append(details, toggle); card.append(actions);
+        const emailForm=node('form',undefined,'admin-user-password'),emailLabel=node('label',t('Email')),emailInput=node('input');emailInput.type='email';emailInput.required=true;emailInput.maxLength=254;emailInput.value=user.email||'';emailLabel.append(emailInput);const emailSave=node('button',undefined,'admin-icon-button');emailSave.type='submit';emailSave.setAttribute('aria-label',t('Save email'));emailSave.dataset.tooltip=t('Save email');emailSave.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21H5V3h12l4 4v14ZM7 3v6h10V3M7 21v-8h10v8"/></svg>';emailForm.append(emailLabel,emailSave);emailForm.addEventListener('submit',event=>{event.preventDefault();if(emailForm.reportValidity())void update({email:emailInput.value});});
+        const emailDetails=node('details',undefined,'admin-user-security');emailDetails.append(node('summary',t('Change sign-in email')),emailForm);
+        actions.append(details,emailDetails,toggle);card.append(actions);
+
       }
       container.append(card);
     }
@@ -243,7 +247,7 @@ export async function initializeAdministration() {
   filter.addEventListener('input', renderUsers);
   async function refresh() {
     const session = await api('/session');
-    csrf = session.csrf; signedIn = !!session.adminId; isRoot = signedIn && session.adminRole === 'root';
+    csrf = session.csrf;if(session.loginChallenge)emailLogin.begin(session.loginChallenge,false); signedIn = !!session.adminId; isRoot = signedIn && session.adminRole === 'root';
     shell.hidden = signedIn; dashboard.hidden = !signedIn;
     toolbar(signedIn, session.adminHandle); usersTile.disabled = !isRoot;usersTile.hidden=!isRoot;
     for(const id of ['admin-moderation-tile','admin-retention-tile','admin-jobs-tile']){const tile=document.getElementById(id);if(tile)tile.hidden=isRoot;}
@@ -263,6 +267,7 @@ export async function initializeAdministration() {
       clearJobDialogs();if(jobs){jobs.hidden=true;jobs.querySelector('[data-jobs-list]')?.replaceChildren();}clearCaseRetention();if(retention){retention.hidden=true;retention.querySelector('[data-retention-list]')?.replaceChildren();}
     }
   }
+  const emailLogin=initializeEmailLogin({form:login,send,csrf:value=>{csrf=value;},authenticated:refresh});
   login.addEventListener('submit', async event => {
     event.preventDefault();
     if (signingIn || !login.reportValidity()) return;
@@ -271,7 +276,7 @@ export async function initializeAdministration() {
     const form = new FormData(login);
     try {
       const session = await api('/session'); csrf = session.csrf;
-      await send('/login', {admin: true, handle: form.get('handle'), password: form.get('password')});
+      const result=await send('/login', {admin: true, handle: form.get('handle'), password: form.get('password'),language:currentLanguage()});if(emailLogin.begin(result))return;
       await refresh(); feedback.textContent = '';
       if (signedIn) {
         const heading = document.querySelector<HTMLElement>(view === 'users' ? '#admin-users-heading' : view === 'moderation' ? '#moderation-heading' : view==='retention'?'#retention-heading':view==='jobs'?'#jobs-heading':'#admin-heading')!;
@@ -279,7 +284,7 @@ export async function initializeAdministration() {
       }
     } catch (error) {
       feedback.classList.add('error');
-      feedback.textContent = (error as {status?: number})?.status === 429
+      feedback.textContent = (error as {code?:string}).code==='TWO_FACTOR_SETUP_REQUIRED'?t('An email address must be configured for this account. Ask Root or check ROOT_ADMIN_EMAIL.'):(error as {code?:string}).code==='LOGIN_MAIL_UNAVAILABLE'?t('Sign-in email could not be delivered. Please try again later.'):(error as {status?: number})?.status === 429
         ? t('Too many sign-in attempts. Please wait before trying again.')
         : t('Unable to sign in. Check your root or administrator credentials and try again.');
     } finally { signingIn = false; submit.disabled = false; login.removeAttribute('aria-busy'); }
@@ -292,7 +297,7 @@ export async function initializeAdministration() {
     const button = create.querySelector<HTMLButtonElement>('button')!; button.disabled = true;
     try {
       const data = new FormData(create);
-      await send('/admin/users', {handle: data.get('handle'), password: data.get('password')});
+      await send('/admin/users', {handle: data.get('handle'), password: data.get('password'),email:data.get('email')});
       create.reset(); filter.value = '';
       usersStatus.textContent = t('Administrator created.');
       await loadUsers();

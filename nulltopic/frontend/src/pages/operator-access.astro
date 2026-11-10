@@ -8,9 +8,16 @@ import Layout from '../components/Layout.astro';
       <p id="access-status" role="status" aria-live="polite" tabindex="-1"></p>
       <form id="access-request">
         <label for="access-email">Email address</label><input id="access-email" name="email" type="email" maxlength="254" autocomplete="email" required/>
-        <label for="access-purpose">What do you need?</label><select id="access-purpose" name="purpose"><option value="password-reset">Reset password</option><option value="verification">Resend verification email</option></select>
-        <p class="meta">For privacy, the response does not reveal whether an address is registered.</p>
-        <div class="report-actions"><button type="submit" class="admin-icon-button" aria-label="Send email" data-tooltip="Send email"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4 20-7ZM22 2 11 13"/></svg></button></div>
+        <div class="account-access-actions" role="group" aria-label="What do you need?">
+          <button class="account-access-action" type="submit" name="purpose" value="password-reset">
+            <svg viewBox="0 0 64 64" aria-hidden="true"><rect class="access-action-halo" x="2" y="2" width="60" height="60" rx="20"/><g class="access-action-lines"><circle cx="24" cy="27" r="9"/><path d="m31 34 15 15h7v-7h-7v-7h-7m-18-9h.01M43 13a19 19 0 0 1 12 15m-1-12 1 12-12-1"/></g></svg>
+            <span>Reset password</span>
+          </button>
+          <button class="account-access-action" type="submit" name="purpose" value="verification">
+            <svg viewBox="0 0 64 64" aria-hidden="true"><rect class="access-action-halo" x="2" y="2" width="60" height="60" rx="20"/><g class="access-action-lines"><rect x="12" y="17" width="40" height="30" rx="6"/><path d="m14 20 18 15 18-15"/><circle class="access-action-badge" cx="47" cy="45" r="12"/><path d="m41 45 4 4 8-9"/></g></svg>
+            <span>Resend verification email</span>
+          </button>
+        </div>
       </form>
       <form id="access-verify" hidden>
         <p>Confirm your email address to finish setting up your operator account. This does not authorize any agent or publish anything.</p>
