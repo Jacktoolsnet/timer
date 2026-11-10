@@ -1,3 +1,4 @@
+import {initializeNotificationLanguagePicker} from './notification-language-picker';
 import {api} from './client';
 import {t,currentLanguage} from '../lib/i18n';
 import {initializeUnsavedSettings} from './unsaved-settings';
@@ -10,11 +11,12 @@ export async function initializeNotifications(options:{navigate?:(url:string)=>v
  const header=d.getElementById('notification-header-actions')!,save=d.querySelector<HTMLButtonElement>('#notification-header-save')!,cancel=d.querySelector<HTMLButtonElement>('#notification-header-cancel')!,back=d.querySelector<HTMLAnchorElement>('#notification-return')!;
  let csrf='',role:'operator'|'admin'=new URL(w.location.href).searchParams.get('role')==='admin'?'admin':'operator',baseline='',busy=false,ready=false,closed=false,returnUrl='/operator?lang='+currentLanguage()+'#account';
  const values=():Preferences=>{const result:Preferences={language:(form.elements.namedItem('language') as HTMLSelectElement).value};for(const key of role==='operator'?['registration','moderation','review']:['queue'])(result as any)[key]=(form.elements.namedItem(key) as HTMLInputElement).checked;return result;};
+ const picker=initializeNotificationLanguagePicker(form.elements.namedItem('language') as HTMLSelectElement);
  const dirty=()=>ready&&JSON.stringify(values())!==baseline;
- function controls(){save.hidden=!dirty();save.disabled=busy||!dirty();cancel.disabled=busy;form.querySelectorAll<HTMLInputElement|HTMLSelectElement>('input,select').forEach(i=>i.disabled=busy||i.closest<HTMLElement>('[data-notification-role]')?.dataset.notificationRole!==undefined&&i.closest<HTMLElement>('[data-notification-role]')!.dataset.notificationRole!==role);}
+ function controls(){picker.sync();picker.setBusy(busy||!ready||closed);save.hidden=!dirty();save.disabled=busy||!dirty();cancel.disabled=busy;form.querySelectorAll<HTMLInputElement|HTMLSelectElement>('input,select').forEach(i=>i.disabled=busy||i.closest<HTMLElement>('[data-notification-role]')?.dataset.notificationRole!==undefined&&i.closest<HTMLElement>('[data-notification-role]')!.dataset.notificationRole!==role);}
  function discard(){if(!baseline)return;const before:Preferences=JSON.parse(baseline);for(const [key,value] of Object.entries(before)){const field=form.elements.namedItem(key) as HTMLInputElement|HTMLSelectElement;if(typeof value==='boolean')(field as HTMLInputElement).checked=value;else field.value=value;}controls();}
  const unsaved=initializeUnsavedSettings({dirty,busy:()=>busy,save:saveChanges,discard});
- function expired(){for(const link of d.querySelectorAll<HTMLElement>('body > header nav a.header-action'))link.hidden=false;ready=false;baseline='';unsaved.clear();content.hidden=header.hidden=true;form.reset();status.textContent=t('Your session could not be verified. Please sign in again.');back.href=(role==='admin'?'/administration':'/operator')+'?lang='+currentLanguage();back.hidden=false;}
+ function expired(){picker.setBusy(true);for(const link of d.querySelectorAll<HTMLElement>('body > header nav a.header-action'))link.hidden=false;ready=false;baseline='';unsaved.clear();content.hidden=header.hidden=true;form.reset();status.textContent=t('Your session could not be verified. Please sign in again.');back.href=(role==='admin'?'/administration':'/operator')+'?lang='+currentLanguage();back.hidden=false;}
  async function saveChanges(){
   if(closed||busy||!dirty())return false;busy=true;controls();form.setAttribute('aria-busy','true');
   try{await api('/'+role+'/notifications',{method:'PUT',headers:{'x-csrf-token':csrf},body:JSON.stringify(values())});if(closed)return false;baseline=JSON.stringify(values());return true;}
@@ -24,7 +26,7 @@ export async function initializeNotifications(options:{navigate?:(url:string)=>v
  form.addEventListener('input',controls);form.addEventListener('change',controls);
  form.addEventListener('submit',async event=>{event.preventDefault();if(await saveChanges()&&!closed)navigate(returnUrl);});
  cancel.addEventListener('click',()=>{if(busy)return;discard();navigate(returnUrl);});
- w.addEventListener('pagehide',()=>{closed=true;ready=false;baseline='';form.reset();header.hidden=content.hidden=true;unsaved.clear();});
+ w.addEventListener('pagehide',()=>{closed=true;ready=false;baseline='';picker.setBusy(true);form.reset();picker.sync();header.hidden=content.hidden=true;unsaved.clear();});
  w.addEventListener('pageshow',event=>{if(event.persisted)w.location.reload();});
  try{
   const session=await api('/session');if(closed)return;

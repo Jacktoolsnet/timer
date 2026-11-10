@@ -68,13 +68,10 @@ import EmailLoginChallenge from '../components/EmailLoginChallenge.astro';
       </section>
       <section id="admin-statistics" aria-labelledby="statistics-heading" hidden>
        <div class="admin-subview-heading"><button class="admin-back" type="button" data-admin-view="overview" aria-label="Back to administration" data-tooltip="Back to administration"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 5-7 7 7 7M5 12h15"/></svg></button><h1 id="statistics-heading" tabindex="-1">Statistics</h1>
-        <button id="statistics-refresh" class="admin-icon-button" type="button" aria-label="Refresh statistics" data-tooltip="Refresh statistics"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5M6 7a7 7 0 0 1 12-1l2 3M4 15l2 3a7 7 0 0 0 12-1"/></svg></button>
        </div>
        <p id="statistics-status" role="status" aria-live="polite"></p>
        <div id="statistics-cards" class="statistics-grid"></div>
-       <p id="statistics-updated" class="meta"></p>
-       <p class="meta statistics-note">Current records only. Today means created today in Europe/Berlin. Deleted records are excluded; messages include comments and hidden messages.</p>
-       <p class="meta statistics-note">Last 7 days includes today and the six preceding calendar days.</p>
+       <div id="statistics-updated" class="statistics-updated"></div>
       </section>
       <section id="admin-jobs" aria-labelledby="jobs-heading" hidden>
         <div class="admin-subview-heading"><button class="admin-back" type="button" data-admin-view="overview" aria-label="Back to administration" data-tooltip="Back to administration"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 5-7 7 7 7M5 12h15"/></svg></button><h1 id="jobs-heading">Background tasks</h1></div>

@@ -889,5 +889,6 @@
   "Updated: {time}": "Aktualisiert: {time}",
   "Current records only. Today means created today in Europe/Berlin. Deleted records are excluded; messages include comments and hidden messages.": "Gezählt werden vorhandene Einträge. „Heute neu“ bezieht sich auf Europe/Berlin. Gelöschte Einträge zählen nicht; Nachrichten umfassen auch Kommentare und ausgeblendete Beiträge.",
   "Last 7 days": "Letzte 7 Tage",
-  "Last 7 days includes today and the six preceding calendar days.": "Die letzten 7 Tage umfassen heute und die sechs vorherigen Kalendertage."
+  "Last 7 days includes today and the six preceding calendar days.": "Die letzten 7 Tage umfassen heute und die sechs vorherigen Kalendertage.",
+  "Updated": "Aktualisiert"
 }

@@ -19,13 +19,18 @@ export function renderStatistics(container:HTMLElement,data:Statistics){
 export function initializeStatistics(options:{active:()=>boolean;onError:(error:unknown)=>Promise<void>}){
  const cards=document.getElementById('statistics-cards')!,feedback=document.getElementById('statistics-status')!,updated=document.getElementById('statistics-updated')!,button=document.querySelector<HTMLButtonElement>('#statistics-refresh')!;
  let generation=0,loading=false,request:AbortController|null=null;
- function clear(){++generation;request?.abort();request=null;loading=false;cards.replaceChildren();updated.textContent=feedback.textContent='';cards.removeAttribute('aria-busy');button.disabled=false;}
+ function clear(){button.hidden=true;++generation;request?.abort();request=null;loading=false;cards.replaceChildren();updated.textContent=feedback.textContent='';cards.removeAttribute('aria-busy');button.disabled=false;}
  async function load(){
-  if(loading||!options.active())return;loading=true;const version=++generation;request=new AbortController();button.disabled=true;cards.setAttribute('aria-busy','true');feedback.textContent=t('Loading statistics…');
+  if(loading||!options.active())return;button.hidden=false;loading=true;const version=++generation;request=new AbortController();button.disabled=true;cards.setAttribute('aria-busy','true');feedback.textContent=t('Loading statistics…');
   try{const data:Statistics=await api('/admin/statistics',{signal:request.signal});if(version!==generation||!options.active())return;
    if(data.timezone!=='Europe/Berlin'||!Number.isFinite(Date.parse(data.asOf)))throw Error('Invalid statistics');
-   renderStatistics(cards,data);updated.textContent=t('Updated: {time}',{time:new Intl.DateTimeFormat(currentLocale(),{dateStyle:'medium',timeStyle:'short',timeZone:'Europe/Berlin'}).format(new Date(data.asOf))})+' · Europe/Berlin';feedback.textContent='';
-  }catch(error){if(version!==generation||!options.active())return;clear();feedback.textContent=t('Unable to load statistics. Please try again.');await options.onError(error);}
+   renderStatistics(cards,data);
+   const date=new Date(data.asOf),icon=document.createElement('span');icon.className='statistics-updated-icon';icon.setAttribute('aria-hidden','true');icon.innerHTML='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+   const content=document.createElement('span');content.className='statistics-updated-content';
+   const label=document.createElement('span');label.className='statistics-updated-label';label.textContent=t('Updated');
+   const time=document.createElement('time');time.dateTime=date.toISOString();time.textContent=new Intl.DateTimeFormat(currentLocale(),{dateStyle:'medium',timeStyle:'short',timeZone:'Europe/Berlin'}).format(date);time.title=new Intl.DateTimeFormat(currentLocale(),{dateStyle:'full',timeStyle:'long',timeZone:'Europe/Berlin'}).format(date);
+   const zone=document.createElement('span');zone.className='statistics-updated-zone';zone.textContent='Europe/Berlin';content.append(label,time);updated.replaceChildren(icon,content,zone);feedback.textContent='';
+  }catch(error){if(version!==generation||!options.active())return;clear();button.hidden=!options.active();feedback.textContent=t('Unable to load statistics. Please try again.');await options.onError(error);}
   finally{if(version===generation){loading=false;request=null;button.disabled=false;cards.removeAttribute('aria-busy');}}
  }
  button.addEventListener('click',()=>void load());document.defaultView!.addEventListener('pagehide',clear);

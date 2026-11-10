@@ -76,6 +76,7 @@ export async function initializeAdministration() {
     method, headers: {'x-csrf-token': csrf}, body: JSON.stringify(body),
   });
   function toolbar(locked: boolean, handle?: string) {
+    if(!locked)statistics.clear();
     for (const link of document.querySelectorAll<HTMLAnchorElement>('body > header nav a.header-action, body > header a.brand')) {
       if (link.classList.contains('header-action')) link.hidden = locked;
       if (locked) {
