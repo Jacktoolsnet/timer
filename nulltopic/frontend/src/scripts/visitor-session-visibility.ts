@@ -1,10 +1,11 @@
-/** An optional header control, never an authentication or authorisation decision. */
+/** Guest-only header controls, never an authentication or authorisation decision. */
 export function initializeVisitorSessionVisibility(){
  const control=document.getElementById('visitor-preview-controls');if(!control)return;
- const d=control.ownerDocument,w=d.defaultView!;
+ const d=control.ownerDocument,w=d.defaultView!,live=d.getElementById('live');
  let disposed=false,version=0,controller:AbortController|undefined,timer:number|undefined,lastRead=0;
  function apply(authenticated:boolean){
   control!.dataset.authenticated=String(authenticated);control!.hidden=authenticated;
+  if(live){live.hidden=authenticated;if(authenticated)live.removeAttribute('open');}
   if(timer!==undefined)w.clearTimeout(timer);
   // Recheck only a known authenticated visible page; passive reads never renew idle expiry.
   if(authenticated&&!d.hidden&&!disposed)timer=w.setTimeout(()=>void check(),30000);
