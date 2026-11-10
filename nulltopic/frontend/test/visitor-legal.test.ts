@@ -18,7 +18,7 @@ for(const [route,kind] of [['datenschutz','privacy'],['nutzungsbedingungen','ter
    for(const link of section.querySelectorAll<HTMLAnchorElement>('.legal-contents a'))assert.ok(d.getElementById(link.hash.slice(1)));
    assert.equal(section.querySelectorAll('.legal-translation-notice').length,(kind==='privacy'?1:0)+(language==='en'?1:0));
    assert.ok(section.querySelector(`a[hreflang="de"][href="/${route}"]`));assert.ok(section.querySelector(`a[hreflang="en"][href="/${route}/en"]`));
-   assert.equal(!!section.querySelector('.legal-draft-notice'),kind==='privacy');assert.equal(section.querySelector('.legal-related'),null);assert.ok(article.textContent!.includes('jacktoolsnet@gmail.com'));assert.ok(d.querySelector('footer a[href="/datenschutz"]'));assert.ok(d.querySelector('footer a[href="/nutzungsbedingungen"]'));assert.ok(d.querySelector('footer a[href="/impressum"]'));
+   assert.equal(!!section.querySelector('.legal-draft-notice'),kind==='privacy');assert.equal(section.querySelector('.legal-related'),null);assert.ok(article.textContent!.includes('support@nulltopic.com'));assert.ok(!article.textContent!.includes('jacktoolsnet@gmail.com'));assert.ok(d.querySelector('footer a[href="/datenschutz"]'));assert.ok(d.querySelector('footer a[href="/nutzungsbedingungen"]'));assert.ok(d.querySelector('footer a[href="/impressum"]'));
    assert.equal(section.querySelector('form,iframe,input,dialog'),null);assert.equal(d.querySelector('script[src*="google"],script[src*="adsbygoogle"],.ad-slot'),null);
    assert.ok(article.textContent!.includes('JackTools.Net UG (haftungsbeschränkt)'));assert.ok(article.textContent!.includes('38304 Wolfenbüttel'));
   }finally{dom.window.close();}
