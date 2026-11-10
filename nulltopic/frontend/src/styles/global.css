@@ -1825,3 +1825,19 @@ button.operator-agent-authorization-hint:focus-visible { outline: 3px solid var(
 #notification-config > label[for=notification-language] { display:block; margin-top:24px; }
 @media(max-width:760px) { .notification-layout { grid-template-columns:minmax(0,1fr); } }
 .notification-option .storage-switch input { position:absolute; inset:0; width:100%; height:100%; min-height:0; margin:0; opacity:0; cursor:pointer; z-index:1; }
+
+/* Small, exact-count overview without charts or visitor tracking. */
+#admin-statistics { max-width:none; }
+#statistics-refresh { margin-inline-start:auto; flex-shrink:0; }
+.statistics-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; }
+.statistics-card { min-width:0; margin:0; padding:26px; }
+.statistics-icon { display:grid; place-items:center; width:56px; height:56px; border-radius:14px; color:var(--accent); background:var(--accent-soft); }
+.statistics-icon svg { width:28px; height:28px; fill:none; stroke:currentColor; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+.statistics-card h2 { font-family:inherit; font-size:1rem; font-weight:600; margin:20px 0; }
+.statistics-card dl { display:grid; grid-template-columns:minmax(0,1fr); gap:4px; margin:0; }
+.statistics-card dt { color:var(--muted); font-size:.8rem; }
+.statistics-card dd { margin:0 0 14px; font-variant-numeric:tabular-nums; font-size:clamp(1.35rem,3vw,2.3rem); font-weight:650; overflow-wrap:anywhere; }
+.statistics-card dd:not(:first-of-type) { color:var(--accent); font-size:1.3rem; }
+.statistics-card dd:last-child { margin-bottom:0; }
+.statistics-note { max-width:85ch; }
+@media(max-width:760px) { .statistics-grid { grid-template-columns:minmax(0,1fr); } }

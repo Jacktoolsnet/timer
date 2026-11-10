@@ -33,6 +33,7 @@ async function fixture(run: (dom: JSDOM, requests: {path: string; body?: any; he
       const status=new URL(path,'http://localhost').searchParams.get('status');
       return new Response(JSON.stringify({counts,reports:data.reports.filter(r=>status==='processed'?r.resolved:!r.resolved),appeals:data.appeals.filter(r=>status==='processed'?r.status!=='pending':r.status==='pending')}));
     }
+    if(path==='/api/admin/statistics')return Response.json({timezone:'Europe/Berlin',date:'2026-11-10',asOf:'2026-11-10T10:00:00Z',operators:{today:'2',total:'12',lastSevenDays:'7'},agents:{today:'3',total:'24',lastSevenDays:'7'},messages:{today:'15',total:'100',lastSevenDays:'7'}});
     if (path === '/api/admin/users') {
       if (options?.method === 'POST') {
         const body = JSON.parse(String(options.body));
@@ -147,7 +148,7 @@ test('administration tiles, back navigation and toolbar lock follow the authenti
   doc.querySelector('#login')!.dispatchEvent(new dom.window.Event('submit', {cancelable: true}));
   await tick();
   assert.equal((doc.querySelector('#admin-overview') as HTMLElement).hidden, false);
-  assert.equal(doc.querySelectorAll('.admin-tile svg[aria-hidden=true]').length, 5);
+  assert.equal(doc.querySelectorAll('.admin-tile svg[aria-hidden=true]').length, 6);
   for (const link of doc.querySelectorAll('header nav a.header-action')) {
     assert.equal(link.getAttribute('aria-disabled'), 'true');
     assert.equal((link as HTMLElement).hidden, true);
@@ -393,3 +394,11 @@ test('moderation status tabs filter queues, show counts, support keyboard naviga
   assert.equal(doc.querySelector('#moderation-pending-count')!.textContent,'1');assert.equal(doc.querySelector('#moderation-processed-count')!.textContent,'1');assert.equal(doc.querySelector('.moderation-review-card'),null);
   processed.click();await tick();assert.match(doc.querySelector('.moderation-review-card')!.textContent!,/Closed with explanation/);assert.equal(doc.querySelector('.moderation-review-card button'),null);
 },false,false,true));
+
+for(const root of [false,true])test('statistics tile is available to administrator and root with back navigation: '+root,async()=>fixture(async(dom,requests)=>{
+ await initializeAdministration();const d=dom.window.document;
+ d.querySelector<HTMLInputElement>('#admin-handle')!.value='fixture';d.querySelector<HTMLInputElement>('#admin-password')!.value='synthetic-password';d.querySelector<HTMLFormElement>('#login')!.dispatchEvent(new dom.window.Event('submit',{cancelable:true}));await tick();
+ d.querySelector<HTMLButtonElement>('#admin-statistics-tile')!.click();await tick();assert.equal(d.querySelector<HTMLElement>('#admin-statistics')!.hidden,false);assert.equal(d.querySelector<HTMLElement>('#admin-overview')!.hidden,true);assert.equal(d.querySelectorAll('.statistics-card').length,3);assert.ok(requests.some(r=>r.path==='/api/admin/statistics'));
+ d.querySelector<HTMLButtonElement>('#statistics-refresh')!.click();await tick();assert.equal(requests.filter(r=>r.path==='/api/admin/statistics').length,2);
+ d.querySelector<HTMLButtonElement>('#admin-statistics [data-admin-view=overview]')!.click();assert.equal(d.querySelector<HTMLElement>('#admin-statistics')!.hidden,true);assert.equal(d.querySelector('#statistics-cards')!.children.length,0);
+},false,root));

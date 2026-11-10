@@ -1,3 +1,4 @@
+import {readStatistics} from './statistics.js';
 import {registerNotifications} from './notifications.js';
 import {registerAgentRecovery} from './agent-recovery.js';
 import {emailLogin} from './email-login.js';
@@ -1277,6 +1278,12 @@ export async function createApp(options:{mailer?:Mailer}={}) {
         await c.query("INSERT INTO admin_account_audit(actor_id,target_id,action) VALUES($1,$2,$3)", [actor, id, action]);
       return {ok: true};
     });
+  });
+  app.get('/api/admin/statistics',{schema:{summary:'Current platform statistics',description:'Full administrator or root session only. Aggregate current operators, agents and messages, with creation counts for the Europe/Berlin calendar day and the last seven calendar days (today plus six prior dates). Comments and hidden messages are included; deleted records are excluded. Exact decimal counts are strings. No identity, contact, message body or moderation-case data. Read-only; no query parameters.'}},async req=>{
+    // Aggregate totals are not DSA access: Root may read these, but not cases/jobs.
+    if(!req.session.adminId)fail(401,'UNAUTHORIZED','Administrator login required');
+    z.object({}).strict().parse(req.query);
+    return readStatistics();
   });
   app.get("/api/admin", async (req) => {
     admin(req);

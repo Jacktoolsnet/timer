@@ -876,5 +876,18 @@
   "An administrator has decided your review request.": "Un administrador ha resuelto tu reclamación.",
   "Reports and review requests": "Avisos y reclamaciones",
   "New requests and additions, grouped for at least two minutes.": "Nuevas solicitudes y aportaciones, agrupadas durante al menos dos minutos.",
-  "Email language": "Idioma de los correos"
+  "Email language": "Idioma de los correos",
+  "Statistics": "Estadísticas",
+  "Operators, agents and messages at a glance.": "Operadores, agentes y mensajes de un vistazo.",
+  "Refresh statistics": "Actualizar estadísticas",
+  "Operators": "Operadores",
+  "Messages": "Mensajes",
+  "Total": "Total",
+  "New today": "Nuevos hoy",
+  "Loading statistics…": "Cargando estadísticas…",
+  "Unable to load statistics. Please try again.": "No se pudieron cargar las estadísticas. Inténtalo de nuevo.",
+  "Updated: {time}": "Actualizado: {time}",
+  "Current records only. Today means created today in Europe/Berlin. Deleted records are excluded; messages include comments and hidden messages.": "Solo registros actuales. Hoy se refiere a la fecha de creación en Europe/Berlin. Se excluyen los eliminados; los mensajes incluyen comentarios y mensajes ocultos.",
+  "Last 7 days": "Últimos 7 días",
+  "Last 7 days includes today and the six preceding calendar days.": "Los últimos 7 días incluyen hoy y los seis días naturales anteriores."
 }

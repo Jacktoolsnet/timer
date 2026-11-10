@@ -39,6 +39,10 @@ import EmailLoginChallenge from '../components/EmailLoginChallenge.astro';
         <div class="admin-tiles">
  <a id="admin-notifications-tile" class="admin-tile" href="/notifications?role=admin">
  <svg class="admin-tile-illustration" viewBox="0 0 120 100" aria-hidden="true"><rect class="admin-art-halo" x="4" y="4" width="112" height="92" rx="28"/><g class="admin-art-line"><path d="M36 61V42a24 24 0 0 1 48 0v19l9 13H27l9-13Zm15 22a10 10 0 0 0 18 0M60 13v5"/></g></svg><span class="admin-tile-title">Email notifications</span><span class="admin-tile-copy">Choose which important updates reach your inbox.</span></a>
+          <button id="admin-statistics-tile" class="admin-tile" type="button" data-admin-view="statistics">
+           <svg class="admin-tile-illustration" viewBox="0 0 120 100" aria-hidden="true"><rect class="admin-art-halo" x="4" y="4" width="112" height="92" rx="28"/><g class="admin-art-line"><path d="M24 20v61h76M37 68V49h12v19m11 0V35h12v33m11 0V21h12v47"/></g></svg>
+           <span class="admin-tile-title">Statistics</span><span class="admin-tile-copy">Operators, agents and messages at a glance.</span>
+          </button>
           <button id="admin-users-tile" class="admin-tile" type="button" data-admin-view="users" aria-labelledby="users-tile-title" disabled>
             <svg class="admin-tile-illustration" viewBox="0 0 120 100" aria-hidden="true" focusable="false"><rect class="admin-art-halo" x="4" y="4" width="112" height="92" rx="28"/><g class="admin-art-line"><circle cx="60" cy="35" r="13"/><path d="M35 79v-7a25 25 0 0 1 50 0v7M27 32a10 10 0 0 0 0 20M18 78v-6a17 17 0 0 1 12-16m63-24a10 10 0 0 1 0 20m9 26v-6a17 17 0 0 0-12-16"/></g><circle class="admin-art-shield" cx="90" cy="76" r="16"/><path class="admin-art-check" d="M83 76h14m-7-7v14"/></svg>
             <span class="admin-tile-title" id="users-tile-title">User management</span>
@@ -61,6 +65,16 @@ import EmailLoginChallenge from '../components/EmailLoginChallenge.astro';
             <span class="admin-tile-copy">Review retention holds and scheduled case deletion.</span>
           </button>
         </div>
+      </section>
+      <section id="admin-statistics" aria-labelledby="statistics-heading" hidden>
+       <div class="admin-subview-heading"><button class="admin-back" type="button" data-admin-view="overview" aria-label="Back to administration" data-tooltip="Back to administration"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 5-7 7 7 7M5 12h15"/></svg></button><h1 id="statistics-heading" tabindex="-1">Statistics</h1>
+        <button id="statistics-refresh" class="admin-icon-button" type="button" aria-label="Refresh statistics" data-tooltip="Refresh statistics"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5M6 7a7 7 0 0 1 12-1l2 3M4 15l2 3a7 7 0 0 0 12-1"/></svg></button>
+       </div>
+       <p id="statistics-status" role="status" aria-live="polite"></p>
+       <div id="statistics-cards" class="statistics-grid"></div>
+       <p id="statistics-updated" class="meta"></p>
+       <p class="meta statistics-note">Current records only. Today means created today in Europe/Berlin. Deleted records are excluded; messages include comments and hidden messages.</p>
+       <p class="meta statistics-note">Last 7 days includes today and the six preceding calendar days.</p>
       </section>
       <section id="admin-jobs" aria-labelledby="jobs-heading" hidden>
         <div class="admin-subview-heading"><button class="admin-back" type="button" data-admin-view="overview" aria-label="Back to administration" data-tooltip="Back to administration"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 5-7 7 7 7M5 12h15"/></svg></button><h1 id="jobs-heading">Background tasks</h1></div>

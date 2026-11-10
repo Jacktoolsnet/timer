@@ -37,6 +37,8 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
   await pool.query(
     "TRUNCATE login_challenges,identity_deletion_journal,post_deletion_journal,background_job_runs,background_job_previews,moderation_cases,operators,admins,sessions,agents,configurations,conversations,posts,reports,moderation,appeals,limits,events RESTART IDENTITY CASCADE",
   );
+  const initialStats=await (await import('../src/statistics.js')).readStatistics();
+  for(const key of ['operators','agents','messages'])assert.deepEqual(initialStats[key],{total:'0',today:'0',lastSevenDays:'0'});
   let app = await testApp();
   await app.listen({ host: "127.0.0.1", port: 0 });
   let address = app.server.address() as any;
@@ -1027,6 +1029,7 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
         await login('test_admin', true);
         assert.equal((await call('GET', '/admin/users', undefined, undefined, true)).statusCode, 403);
         const rootAuth = await signIn('server_root', rootPassword);
+        const rootStats=await call('GET','/admin/statistics',undefined,undefined,true);assert.equal(rootStats.statusCode,200);assert.deepEqual(Object.keys(rootStats.json()).sort(),['agents','asOf','date','messages','operators','timezone']);
         for(const path of ['/admin','/admin/jobs','/admin/jobs/cases/history','/admin/case-retention','/admin/cases/'+randomUUID()])assert.equal((await call('GET',path,undefined,undefined,true)).statusCode,403);
         assert.equal((await call('POST','/admin/cases/'+randomUUID()+'/retention',{action:'hold',reason:'Forbidden root access'},undefined,true)).statusCode,403);
         assert.equal((await call('POST','/admin/actions',{action:'dismiss',id:randomUUID(),reportId:randomUUID(),reason:'Forbidden root access'},undefined,true)).statusCode,403);
@@ -2237,6 +2240,43 @@ delete process.env.ROOT_ADMIN_EMAIL;
       // Case-linked mail belongs to the independent case, not the live public agent.
       assert.equal(await rowCount(),1);await pool.query('DELETE FROM operators WHERE id=$1',[ownerId]);assert.equal(await rowCount(),0,'account deletion removes pending addresses/identity envelopes');
       const cols=(await pool.query("SELECT column_name FROM information_schema.columns WHERE table_name='notification_outbox'")).rows.map(r=>r.column_name);for(const forbidden of ['email','body','reason','text','html'])assert.ok(!cols.includes(forbidden));
+      await pool.query('DELETE FROM limits');
+    });
+
+    await t.test('private aggregate statistics use Berlin calendar days, current records and one consistent read',async()=>{
+      const {readStatistics}=await import('../src/statistics.js');await pool.query('DELETE FROM limits');
+      assert.equal((await call('GET','/admin/statistics')).statusCode,401);
+      await login('test_operator');assert.equal((await call('GET','/admin/statistics',undefined,undefined,true)).statusCode,401);
+      await login('test_admin',true);
+      const response=await call('GET','/admin/statistics',undefined,undefined,true);assert.equal(response.statusCode,200,response.body);assert.equal(response.headers['cache-control'],'no-store');assert.equal(response.json().timezone,'Europe/Berlin');
+      assert.equal((await call('GET','/admin/statistics?reference=2026-01-01',undefined,undefined,true)).statusCode,400);
+      for(const [season,reference,start,end] of [
+        ['spring','2026-03-29T12:00:00Z','2026-03-28T23:00:00Z','2026-03-29T22:00:00Z'],
+        ['fall','2026-10-25T12:00:00Z','2026-10-24T22:00:00Z','2026-10-25T23:00:00Z']
+      ]){
+        await pool.query('DELETE FROM limits');const before=await readStatistics(pool,new Date(reference));
+        const times=[new Date(Date.parse(start)-1),new Date(start),new Date(Date.parse(end)-1),new Date(end)],agents:string[]=[],owners:string[]=[];
+        for(let i=0;i<4;i++){
+          const handle='stats_'+season+'_'+i,oid=await createOperator(handle),aid=randomUUID();owners.push(oid);agents.push(aid);
+          await pool.query('UPDATE operators SET created_at=$2 WHERE id=$1',[oid,times[i]]);
+          await pool.query("INSERT INTO agents(id,handle,name,about,interests,operating_context,technical,operator_id,status,created_at) VALUES($1,$2,'Statistics fixture','Isolated test','[]','Isolated','{}',$3,$4,$5)",[aid,handle,oid,['pending','active','blocked','paused'][i],times[i]]);
+        }
+        const conversation=randomUUID(),posts=[randomUUID(),randomUUID(),randomUUID(),randomUUID(),randomUUID(),randomUUID()];
+        await pool.query('INSERT INTO conversations(id,last_activity_at) VALUES($1,now())',[conversation]);
+        for(let i=0;i<6;i++)await pool.query("INSERT INTO posts(id,conversation_id,parent_id,agent_id,body,technical,state,created_at) VALUES($1,$2,$3,$4,'[Local test] Statistics fixture','{}',$5,$6)",[posts[i],conversation,i===2?posts[1]:null,agents[i%4],i===4?'hidden':i===5?'deleted':'visible',times[i>=4?1:i]]);
+        const snapshot=await readStatistics(pool,new Date(reference));assert.equal(snapshot.date,season==='spring'?'2026-03-29':'2026-10-25');
+        for(const key of ['operators','agents']){assert.equal(BigInt(snapshot[key].total)-BigInt(before[key].total),4n);assert.equal(BigInt(snapshot[key].today)-BigInt(before[key].today),2n);assert.equal(BigInt(snapshot[key].lastSevenDays)-BigInt(before[key].lastSevenDays),3n);}
+        assert.equal(BigInt(snapshot.messages.total)-BigInt(before.messages.total),5n);assert.equal(BigInt(snapshot.messages.lastSevenDays)-BigInt(before.messages.lastSevenDays),4n);assert.equal(BigInt(snapshot.messages.today)-BigInt(before.messages.today),3n,'includes the comment and hidden message, excludes before/next-day and deleted placeholder');
+        // The sixth prior date is still before the DST transition: construct its Berlin midnight explicitly.
+        const weekStart=new Date(season==='spring'?'2026-03-22T23:00:00Z':'2026-10-18T22:00:00Z');
+        await pool.query('UPDATE operators SET created_at=$2 WHERE id=$1',[owners[0],weekStart]);await pool.query('UPDATE agents SET created_at=$2 WHERE id=$1',[agents[0],weekStart]);await pool.query('UPDATE posts SET created_at=$2 WHERE id=$1',[posts[0],weekStart]);
+        const atBoundary=await readStatistics(pool,new Date(reference));
+        for(const [table,id] of [['operators',owners[0]],['agents',agents[0]],['posts',posts[0]]])await pool.query('UPDATE '+table+' SET created_at=$2 WHERE id=$1',[id,new Date(weekStart.getTime()-1)]);
+        const outside=await readStatistics(pool,new Date(reference));for(const key of ['operators','agents','messages'])assert.equal(BigInt(atBoundary[key].lastSevenDays)-BigInt(outside[key].lastSevenDays),1n,'seven calendar days includes its exact midnight but not one millisecond before');
+        const activity=(await pool.query('SELECT last_activity_at FROM conversations WHERE id=$1',[conversation])).rows[0].last_activity_at.toISOString();
+        await readStatistics(pool,new Date(reference));assert.equal((await pool.query('SELECT last_activity_at FROM conversations WHERE id=$1',[conversation])).rows[0].last_activity_at.toISOString(),activity,'statistics never changes retention activity');
+        await pool.query('DELETE FROM posts WHERE id=$1',[posts[4]]);const removed=await readStatistics(pool,new Date(reference));assert.equal(BigInt(snapshot.messages.total)-BigInt(removed.messages.total),1n);
+      }
       await pool.query('DELETE FROM limits');
     });
 

@@ -1,3 +1,4 @@
+import {initializeStatistics} from './statistics';
 import {initializeEmailLogin} from './email-login';
 import {renderBackgroundJobs,clearJobDialogs} from './background-jobs';
 import {renderCaseRetention,clearCaseRetention} from './case-retention';
@@ -8,7 +9,7 @@ import {initializeWorkspaceDialog} from './workspace-dialog';
 import {initializeModerationActionPicker} from './moderation-action-picker';
 import {renderModerationInbox, type ModerationReport, type ReviewRequest, type ModerationInbox} from './moderation-inbox';
 import {api} from './client';
-type View = 'overview' | 'users' | 'moderation' | 'retention' | 'jobs';
+type View = 'overview' | 'users' | 'moderation' | 'retention' | 'jobs' | 'statistics';
 type AdminUser = {email?:string|null;id: string; handle: string; is_root: boolean; enabled: boolean};
 
 export async function initializeAdministration() {
@@ -31,6 +32,7 @@ export async function initializeAdministration() {
   let csrf = '', signedIn = false, isRoot = false, signingIn = false, creatingUser = false;
   let view: View = 'overview', viewVersion = 0, usersRequest = 0, users: AdminUser[] = [];
   let checkingPermission = false;
+  const statistics=initializeStatistics({active:()=>signedIn&&view==='statistics'&&!dashboard.hidden,onError:checkExpired});
   const openCases=new Set<string>();
   let moderationStatus:'pending'|'processed'='pending';
   const tabs=Array.from(document.querySelectorAll<HTMLButtonElement>('[data-moderation-status]'));
@@ -110,6 +112,7 @@ export async function initializeAdministration() {
       checkingPermission = true;
       try { await refresh(); }
       catch {
+        statistics.clear();
         signedIn = isRoot = false; ++usersRequest; clearPasswords(); toolbar(false);
         modal.close(true);dashboard.hidden = true; shell.hidden = false;
         document.querySelector('#admin-users')!.replaceChildren();
@@ -186,7 +189,7 @@ export async function initializeAdministration() {
   }
   const requestedView = (): View => {
     const hash = win.location.hash.slice(1);
-    return hash === 'users' || hash === 'moderation' || hash === 'retention' || hash === 'jobs' ? hash : 'overview';
+    return hash === 'users' || hash === 'moderation' || hash === 'retention' || hash === 'jobs' || hash === 'statistics' ? hash : 'overview';
   };
   async function showView(next: View, focus = false) {
     if (!signedIn) return;
@@ -195,8 +198,10 @@ export async function initializeAdministration() {
     if(view==='retention')clearCaseRetention();
     if(view==='jobs')clearJobDialogs();
     if (view === 'moderation' && next !== 'moderation') { modal.close(true); clearReview(); actionForm.reset(); selectedReport = null; selection.hidden = true; }
+    statistics.clear();
     view = next;
     const version = ++viewVersion;
+    document.getElementById('admin-statistics')!.hidden=next!=='statistics';
     overview.hidden = next !== 'overview';
     management.hidden = next !== 'users';
     moderation.hidden = next !== 'moderation';
@@ -204,11 +209,12 @@ export async function initializeAdministration() {
     if(jobs)jobs.hidden=next!=='jobs';
     status.textContent = '';
     if (focus) {
-      const heading = document.querySelector<HTMLElement>(next === 'overview' ? '#admin-heading' : next === 'users' ? '#admin-users-heading' : next==='jobs'?'#jobs-heading':next==='retention'?'#retention-heading':'#moderation-heading')!;
+      const heading = document.querySelector<HTMLElement>(next === 'overview' ? '#admin-heading' : next === 'users' ? '#admin-users-heading' : next==='statistics'?'#statistics-heading':next==='jobs'?'#jobs-heading':next==='retention'?'#retention-heading':'#moderation-heading')!;
       heading.tabIndex = -1; heading.focus({preventScroll: true});
       win.scrollTo({top: 0, behavior: 'instant'});
     }
     try {
+      if(next==='statistics')await statistics.load();
       if(next==='jobs'&&jobs)await renderBackgroundJobs(jobs,send,()=>signedIn&&!isRoot&&view==='jobs'&&viewVersion===version,checkExpired);
       if(next==='retention'&&retention){await renderCaseRetention(retention,send,()=>signedIn&&!isRoot&&view==='retention'&&viewVersion===version,checkExpired);}
       if (next === 'users') { usersStatus.textContent = t('Loading accounts…'); await loadUsers(); if (version === viewVersion) usersStatus.textContent = ''; }
@@ -259,6 +265,7 @@ export async function initializeAdministration() {
       (login.elements.namedItem('password') as HTMLInputElement).value = '';
       await showView(requestedView());
     } else {
+      statistics.clear();document.getElementById('admin-statistics')!.hidden=true;
       ++viewVersion; ++usersRequest; clearPasswords(); users = [];moderationStatus='pending';updateTabs({pending:0,processed:0});document.getElementById('moderation-list-limit')!.hidden=true;
       filter.value = '';
       modal.close(true);clearReview(); actionForm.reset(); selectedReport = null; selection.hidden = true;
