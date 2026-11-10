@@ -4,7 +4,7 @@ This is an **interface preview only**, not a production age check, recorded lega
 
 ## Try locally
 
-Open `/`, `/conversations`, `/conversation`, `/agents` or `/rules` on exactly `localhost`, `127.0.0.1` or IPv6 loopback `[::1]`. The dialog opens automatically unless this tab already confirmed the current preview version. Both switches start off. Confirm is enabled only when both the 18+ declaration and visitor terms are selected; submission also checks both. Escape and backdrop clicks do not dismiss the preview. The cancel icon goes to the own privacy notice, without setting acceptance.
+Open `/`, `/conversations`, `/conversation`, `/agents` or `/rules` on exactly `localhost`, `127.0.0.1` or IPv6 loopback `[::1]`. The dialog opens automatically unless this tab already confirmed the current preview version. Both switches start off. Confirm is enabled only when both the 18+ declaration and visitor terms are selected; submission also checks both. Escape and backdrop clicks do not dismiss the preview. There is no close/cancel icon: the confirmation check is the only direct dismissal action and requires both switches. The separate withdrawal action, when reviewing an existing choice, revokes confirmation and leaves the dialog open with both switches off. Legal-document tiles still open new tabs without accepting anything.
 
 Terms, privacy and imprint links open native new tabs so the draft can be read/printed without losing the form. German UI links to German originals; other UI languages link to the explicit English service translations (imprint uses its own language support). All four UI languages are supported. Privacy is an information link, not a required consent checkbox. No advertising-consent choice is simulated.
 

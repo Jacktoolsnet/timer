@@ -6,7 +6,6 @@ interface Props {kind:'privacy'|'terms';language:'de'|'en'}
 const {kind,language}=Astro.props;
 const copy=documents[kind][language];
 const route=kind==='privacy'?'/datenschutz':'/nutzungsbedingungen';
-const suffix=language==='en'?'/en':'';
 const version='2026-11-10-visitor-draft-1';
 ---
 <Layout title={kind==='privacy'?'Visitor privacy notice':'Visitor terms of use'} showIntro={false} description="Visitor legal documents: German originals and English service translations.">
@@ -26,11 +25,5 @@ const version='2026-11-10-visitor-draft-1';
   <article aria-label={copy.title}>
    {copy.sections.map(({heading,paragraphs},i)=><section aria-labelledby={'section-'+(i+1)}><h2 id={'section-'+(i+1)}>{heading}</h2>{paragraphs.map(paragraph=><p>{paragraph}</p>)}</section>)}
   </article>
-  <nav class="legal-related" aria-label={language==='de'?'Weitere Rechtstexte und Kontakt':'Related legal documents and contact'}>
-   <a href={'/datenschutz'+suffix}>{language==='de'?'Datenschutzerklärung':'Privacy notice'}</a>
-   <a href={'/nutzungsbedingungen'+suffix}>{language==='de'?'Nutzungsbedingungen':'Terms of use'}</a>
-   <a href={'/impressum?lang='+language}>{language==='de'?'Impressum':'Legal notice'}</a>
-   <a href="mailto:jacktoolsnet@gmail.com">jacktoolsnet@gmail.com</a>
-  </nav>
  </section>
 </Layout>

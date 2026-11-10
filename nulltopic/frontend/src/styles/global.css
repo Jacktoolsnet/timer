@@ -1884,19 +1884,19 @@ body > main:has(#notification-language-trigger[aria-expanded=true]) { z-index:2;
 [data-style=technical] .legal-translation-notice { border-radius:3px; }
 
 /* Legal documents use explicit static German/English routes, independent of UI translation. */
-.legal-language-links,.legal-related{display:flex;flex-wrap:wrap;gap:.65rem 1.15rem;align-items:center;margin:1.2rem 0}
+.legal-language-links{display:flex;flex-wrap:wrap;gap:.65rem 1.15rem;align-items:center;margin:1.2rem 0}
 .legal-language-links a{padding:.45rem .75rem;border:1px solid var(--line);border-radius:.5rem;text-decoration:none}
 .legal-language-links a[aria-current=page]{color:var(--accent);background:var(--surface);font-weight:700}
 .legal-version{color:var(--muted);font-size:.85rem;overflow-wrap:anywhere}
 .legal-contents{border-block:1px solid var(--line);padding:.8rem 0;margin:1.4rem 0}
 .legal-contents ol{padding-left:1.5rem;display:grid;gap:.4rem}
 .visitor-legal article h2{scroll-margin-top:9rem}
-.legal-related{border-top:1px solid var(--line);padding-top:1rem}
 .legal-draft-notice strong{display:block;margin-bottom:.4rem}
 .visitor-legal article>section+section{margin-top:2rem}
 .visitor-legal .admin-subview-heading h1{min-width:0;overflow-wrap:anywhere}
 
-.legal-notice .legal-print-button{margin-inline-start:auto;flex-shrink:0}
+.legal-notice .legal-print-button{margin-inline-start:auto;flex:0 0 48px;width:48px;height:48px;min-width:48px;padding:0;color:var(--accent);background:var(--surface);border:1px solid var(--line)}
+.legal-notice .legal-print-button svg{width:26px;height:26px;flex-shrink:0;stroke-width:2}
 /* Scoped to legal pages: never turn a private workspace into a printable export. */
 @media print {
  @page { size:A4; margin:18mm 17mm 20mm; }
@@ -1905,7 +1905,7 @@ body > main:has(#notification-language-trigger[aria-expanded=true]) { z-index:2;
  body:has(.legal-notice)>main{display:block!important;width:auto!important;max-width:none!important;margin:0!important;padding:0!important;position:static!important}
  .legal-notice,.legal-notice *{color:#000!important;background:transparent!important;box-shadow:none!important;text-shadow:none!important;border-radius:0!important;animation:none!important;transition:none!important}
  .legal-notice{display:block!important;width:auto!important;max-width:none!important;margin:0!important;padding:0!important}
- .legal-notice .admin-back,.legal-notice .legal-print-button,.legal-language-links,.legal-related,.legal-notice [data-tooltip]::before,.legal-notice [data-tooltip]::after{display:none!important}
+ .legal-notice .admin-back,.legal-notice .legal-print-button,.legal-language-links,.legal-notice [data-tooltip]::before,.legal-notice [data-tooltip]::after{display:none!important}
  .legal-notice .admin-subview-heading{display:block!important;margin:0 0 5mm!important;padding:0!important}
  .legal-notice h1{font:700 19pt/1.2 Arial,Helvetica,sans-serif!important;margin:0 0 4mm!important}
  .legal-notice article{display:block!important;border:0!important;padding:0!important;overflow:visible!important}
@@ -1936,7 +1936,7 @@ body > main:has(#notification-language-trigger[aria-expanded=true]) { z-index:2;
 .visitor-document-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;font-size:.85rem}
 .visitor-confirmation-actions{display:flex;justify-content:space-between;gap:16px;margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
 .visitor-confirmation-actions .admin-icon-button{display:grid;place-items:center;width:48px;height:48px;padding:10px;text-decoration:none}
-.visitor-confirmation #visitor-confirm{background:var(--accent);color:var(--accent-contrast,#fff);border:1px solid var(--accent)}
+.visitor-confirmation #visitor-confirm{margin-inline-start:auto;background:var(--accent);color:var(--accent-contrast,#fff);border:1px solid var(--accent)}
 .visitor-confirmation #visitor-confirm:disabled{opacity:.35;cursor:not-allowed}
 #visitor-preview-controls:not([hidden]){display:inline-flex}
 @media print{#visitor-confirmation,#visitor-preview-controls{display:none!important}}

@@ -11,7 +11,7 @@ Version: `2026-11-10-visitor-draft-1`. German is authoritative; English is an in
 
 Footer links now stay on NullTopic. German routes are the default even if the application shell uses English, Spanish or French; each document has explicit native German/English links. Both versions are fully statically rendered and usable without JavaScript, accounts, consent, an age gate or an advertising service. The document subtree has its own language and `translate=no`; the general UI translator must never rewrite it. English displays a German-original/authority notice. No Spanish/French legal translation is claimed.
 
-`frontend/src/lib/visitor-legal-copy.json` is the fixed, reviewed-as-a-draft copy source; `VisitorLegal.astro` escapes its text and supplies contents anchors, status/version, contact and related-document links. Versioning is preparation for later confirmation, **not evidence of a current visitor agreement**. No visitor consent state, age declaration, cookie, DB record, ad script or CMP integration is added in this change.
+`frontend/src/lib/visitor-legal-copy.json` is the fixed, reviewed-as-a-draft copy source; `VisitorLegal.astro` escapes its text and supplies contents anchors and status/version; contact details remain in the document text, and shared legal navigation stays in the footer. Versioning is preparation for later confirmation, **not evidence of a current visitor agreement**. No visitor consent state, age declaration, cookie, DB record, ad script or CMP integration is added in this change.
 
 ## Scope and implementation facts
 

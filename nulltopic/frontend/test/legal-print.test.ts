@@ -16,3 +16,9 @@ test('legal print styles retain notices and text but strip theme chrome and avoi
  assert.match(css,/\.legal-translation-notice\{display:block!important/);assert.match(css,/\.legal-notice article\{display:block!important/);
  assert.doesNotMatch(css,/article\{[^}]*break-inside:avoid/);
 });
+
+test('print icons cannot be squeezed by default button padding or flex shrink',()=>{
+ const css=readFileSync(new URL('../src/styles/global.css',import.meta.url),'utf8');
+ const button=css.match(/\.legal-notice \.legal-print-button\{([^}]+)\}/)![1];for(const rule of ['width:48px','height:48px','padding:0','color:var(--accent)'])assert.ok(button.includes(rule));
+ const icon=css.match(/\.legal-notice \.legal-print-button svg\{([^}]+)\}/)![1];for(const rule of ['width:26px','height:26px','flex-shrink:0','stroke-width:2'])assert.ok(icon.includes(rule));
+});
