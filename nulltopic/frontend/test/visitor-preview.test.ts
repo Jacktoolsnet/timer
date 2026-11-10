@@ -21,7 +21,7 @@ test('both switches start off; only both allow explicit confirmation; Escape doe
  const f=fixture();try{initializeVisitorPreview();const button=f.d.querySelector<HTMLButtonElement>('#visitor-confirm')!;assert.equal(f.shows(),1);assert.ok(f.dialog.open);assert.equal(button.disabled,true);assert.equal(f.w.localStorage.length,0);
  submit(f);assert.ok(f.dialog.open);assert.equal(f.w.localStorage.length,0);toggle(f,'#visitor-age');assert.equal(button.disabled,true);toggle(f,'#visitor-terms');assert.equal(button.disabled,false);toggle(f,'#visitor-age',false);assert.equal(button.disabled,true);toggle(f,'#visitor-age');
  const escape=new f.w.KeyboardEvent('keydown',{key:'Escape',bubbles:true,cancelable:true});f.dialog.dispatchEvent(escape);assert.ok(escape.defaultPrevented);const cancel=new f.w.Event('cancel',{cancelable:true});f.dialog.dispatchEvent(cancel);assert.ok(cancel.defaultPrevented);assert.ok(f.dialog.open);submit(f);assert.equal(f.dialog.open,false);assert.equal(f.w.localStorage.getItem(VISITOR_PREVIEW_KEY),VISITOR_PREVIEW_VERSION);assert.equal(f.w.sessionStorage.length,0);
- f.d.getElementById('visitor-preview-reopen')!.click();assert.equal(f.shows(),2);assert.ok(f.dialog.open);assert.equal(button.disabled,true);assert.equal(f.w.localStorage.getItem(VISITOR_PREVIEW_KEY),null);for(const input of f.dialog.querySelectorAll<HTMLInputElement>('input'))assert.equal(input.checked,false);
+ f.d.getElementById('visitor-preview-reopen')!.click();assert.equal(f.w.localStorage.getItem(VISITOR_PREVIEW_KEY),VISITOR_PREVIEW_VERSION);assert.equal(button.disabled,false);assert.equal(f.d.getElementById('visitor-withdraw')!.hidden,false);f.d.getElementById('visitor-withdraw')!.click();assert.equal(f.shows(),2);assert.ok(f.dialog.open);assert.equal(button.disabled,true);assert.equal(f.w.localStorage.getItem(VISITOR_PREVIEW_KEY),null);for(const input of f.dialog.querySelectorAll<HTMLInputElement>('input'))assert.equal(input.checked,false);
  }finally{f.close();}
 });
 test('current browser version skips preview, old versions do not; blocked storage cannot prevent confirmation',()=>{
@@ -56,4 +56,8 @@ test('privacy and imprint are whole-link illustrated tiles with an informational
  for(const tile of tiles){assert.ok(tile.querySelector('.visitor-document-icon svg[viewBox]'));assert.ok(tile.querySelector('strong')!.textContent);assert.ok(tile.querySelector('.visitor-document-copy>span')!.textContent);assert.equal(tile.target,'_blank');assert.equal(tile.rel,'noopener noreferrer');assert.equal(tile.querySelector('input,button,a'),null);assert.ok(tile.querySelector('.sr-only')!.textContent);}
  assert.match(f.dialog.querySelector('.visitor-privacy-information')!.textContent!,/Bitte lies auch/);assert.equal(f.dialog.querySelectorAll('input').length,2);
  }finally{f.close();}
+});
+
+test('header review button follows House rules and is not in the footer',()=>{
+ const f=fixture();try{const rules=f.d.querySelector('header nav a[href="/rules"]')!;assert.equal(rules.nextElementSibling?.id,'visitor-preview-controls');assert.ok(rules.nextElementSibling?.querySelector('#visitor-preview-reopen'));assert.equal(f.d.querySelector('footer #visitor-preview-reopen'),null);initializeVisitorPreview();assert.equal(f.d.querySelector<HTMLButtonElement>('#visitor-withdraw')!.hidden,true);}finally{f.close();}
 });

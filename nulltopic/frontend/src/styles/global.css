@@ -1938,7 +1938,7 @@ body > main:has(#notification-language-trigger[aria-expanded=true]) { z-index:2;
 .visitor-confirmation-actions .admin-icon-button{display:grid;place-items:center;width:48px;height:48px;padding:10px;text-decoration:none}
 .visitor-confirmation #visitor-confirm{background:var(--accent);color:var(--accent-contrast,#fff);border:1px solid var(--accent)}
 .visitor-confirmation #visitor-confirm:disabled{opacity:.35;cursor:not-allowed}
-#visitor-preview-controls{justify-self:start}
+#visitor-preview-controls:not([hidden]){display:inline-flex}
 @media print{#visitor-confirmation,#visitor-preview-controls{display:none!important}}
 
 body:has(#visitor-confirmation[open]){overflow:hidden}
@@ -1960,3 +1960,5 @@ body:has(#visitor-confirmation[open]){overflow:hidden}
 [data-style=soft] .visitor-document-tile{border-radius:18px}
 @media(max-width:520px){.visitor-document-links{grid-template-columns:minmax(0,1fr)}}
 @media(prefers-reduced-motion:reduce){.visitor-confirmation .visitor-document-tile{transition:none}}
+
+.visitor-confirmation-actions>[hidden]{display:none!important}

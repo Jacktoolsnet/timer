@@ -905,10 +905,11 @@
   "Read the terms of use (new tab)": "Leer las condiciones de uso (pestaña nueva)",
   "Do not confirm; open the privacy notice": "No confirmar; abrir el aviso de privacidad",
   "Confirm and continue": "Confirmar y continuar",
-  "Open visitor confirmation": "Abrir la confirmación de visitante",
   "To continue, confirm your age and accept the terms of use.": "Para continuar, confirma tu edad y acepta las condiciones de uso.",
   "Please also read our privacy notice and legal notice.": "Lee también nuestro aviso de privacidad y nuestro aviso legal.",
   "How we handle personal data.": "Cómo tratamos los datos personales.",
   "Who operates NullTopic and how to contact us.": "Quién opera NullTopic y cómo contactarnos.",
-  "Opens in a new tab.": "Se abre en una pestaña nueva."
+  "Opens in a new tab.": "Se abre en una pestaña nueva.",
+  "Review or withdraw confirmation": "Revisar o retirar la confirmación",
+  "Withdraw confirmation": "Retirar la confirmación"
 }

@@ -14,9 +14,10 @@ export function initializeVisitorPreview(){
  dialog.querySelector<HTMLAnchorElement>('[data-visitor-imprint]')!.href='/impressum?lang='+language;
  controls.hidden=false;
  let returnFocus:HTMLElement|null=null;
+ const withdraw=dialog.querySelector<HTMLButtonElement>('#visitor-withdraw')!,leave=dialog.querySelector<HTMLAnchorElement>('#visitor-preview-leave')!;
  const sync=()=>{confirm.disabled=!(age.checked&&terms.checked);};
  const read=()=>{try{return localStorage.getItem(VISITOR_PREVIEW_KEY)===VISITOR_PREVIEW_VERSION;}catch{return false;}};
- const open=()=>{age.checked=false;terms.checked=false;sync();if(!dialog.open)dialog.showModal();dialog.querySelector<HTMLElement>('#visitor-confirmation-title')!.focus();};
+ const open=(review=false)=>{const accepted=read();age.checked=review&&accepted;terms.checked=review&&accepted;withdraw.hidden=!accepted;leave.hidden=accepted;sync();if(!dialog.open)dialog.showModal();dialog.querySelector<HTMLElement>('#visitor-confirmation-title')!.focus();};
  form.addEventListener('input',sync);form.addEventListener('change',sync);
  dialog.addEventListener('cancel',event=>event.preventDefault());
  // Chromium may emit a non-cancelable close-watcher event without recent activation.
@@ -26,7 +27,8 @@ export function initializeVisitorPreview(){
   try{localStorage.setItem(VISITOR_PREVIEW_KEY,VISITOR_PREVIEW_VERSION);}catch{/* Continue in memory only when browser storage is blocked. */}
   dialog.close();const target=returnFocus||document.querySelector<HTMLElement>('main h1, main');if(target){if(!target.hasAttribute('tabindex'))target.setAttribute('tabindex','-1');target.focus({preventScroll:true});}
  });
- reopen.addEventListener('click',()=>{returnFocus=reopen;try{localStorage.removeItem(VISITOR_PREVIEW_KEY);}catch{}open();});
+ reopen.addEventListener('click',()=>{returnFocus=reopen;open(true);});
+ withdraw.addEventListener('click',()=>{try{localStorage.removeItem(VISITOR_PREVIEW_KEY);}catch{}open();});
  const reconcile=()=>{if(read()){if(dialog.open)dialog.close();age.checked=false;terms.checked=false;sync();}else open();};
  // Read actual shared state, not the event payload (which may already be stale).
  window.addEventListener('storage',event=>{if(event.key===VISITOR_PREVIEW_KEY||event.key===null)reconcile();});
