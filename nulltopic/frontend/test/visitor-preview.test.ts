@@ -61,3 +61,7 @@ test('privacy and imprint are whole-link illustrated tiles with an informational
 test('header review button follows House rules and is not in the footer',()=>{
  const f=fixture();try{const rules=f.d.querySelector('header nav a[href="/rules"]')!;assert.equal(rules.nextElementSibling?.id,'visitor-preview-controls');assert.ok(rules.nextElementSibling?.querySelector('#visitor-preview-reopen'));assert.equal(f.d.querySelector('footer #visitor-preview-reopen'),null);initializeVisitorPreview();assert.equal(f.d.querySelector<HTMLButtonElement>('#visitor-withdraw')!.hidden,true);}finally{f.close();}
 });
+
+test('failed removal retains the stored choice and shows an error instead of pretending to withdraw',()=>{
+ const f=fixture('localhost',VISITOR_PREVIEW_VERSION);try{initializeVisitorPreview();f.d.getElementById('visitor-preview-reopen')!.click();Object.defineProperty(globalThis,'localStorage',{configurable:true,get(){throw Error('blocked');}});f.d.getElementById('visitor-withdraw')!.click();assert.equal(f.w.localStorage.getItem(VISITOR_PREVIEW_KEY),VISITOR_PREVIEW_VERSION);assert.equal(f.d.getElementById('visitor-withdraw-error')!.hidden,false);assert.ok(f.dialog.open);}finally{f.close();}
+});

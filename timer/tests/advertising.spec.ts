@@ -4,6 +4,7 @@ test.beforeEach(async ({page}) => {
  // No real ad requests, impressions or external tracking in tests.
  await page.route('**/*', route => {
   const url = new URL(route.request().url());
+  if (url.hostname === 'pagead2.googlesyndication.com' && url.pathname.endsWith('/adsbygoogle.js')) return route.fulfill({contentType:'application/javascript',body:''});
   return ['127.0.0.1','localhost'].includes(url.hostname) ? route.continue() : route.abort();
  });
 });
@@ -47,4 +48,29 @@ test('interval timer also places advertising before settings', async ({page}) =>
  await expect(page.locator('.tool-ad')).toHaveCount(1);
  await page.evaluate(() => document.body.classList.add('focus-view'));
  await expect(page.locator('.tool-ad')).toBeHidden();
+});
+
+test('empty and blocked slots collapse, late ads restore them, focus stays ad-free', async ({page}) => {
+ await page.clock.install();
+ await page.goto('http://127.0.0.1:4380/de/');
+ const ad = page.locator('.tool-ad');
+ const slot = ad.locator('ins');
+ // The pending slot is measurable, but not labelled as an actual advertisement.
+ await expect(ad.locator('p')).toBeHidden();
+ await page.clock.fastForward(11000);
+ await expect(ad).toHaveAttribute('data-ad-state','empty');
+ expect(await ad.evaluate(el => el.getBoundingClientRect().height)).toBe(0);
+ await slot.evaluate(el => el.setAttribute('data-ad-status','filled'));
+ await expect(ad).toHaveAttribute('data-ad-state','filled');
+ await expect(ad.locator('p')).toBeVisible();
+ expect(await ad.evaluate(el => el.getBoundingClientRect().height)).toBeGreaterThan(0);
+ await page.evaluate(() => document.body.classList.add('focus-view'));
+ await expect(ad).toBeHidden();
+ await page.evaluate(() => document.body.classList.remove('focus-view'));
+ for (const status of ['unfilled','unfill-optimized']) {
+  await slot.evaluate((el,value) => el.setAttribute('data-ad-status',value), status);
+  await expect(ad).toHaveAttribute('data-ad-state','empty');
+  expect(await ad.evaluate(el => el.getBoundingClientRect().height)).toBe(0);
+ }
+ expect(await page.evaluate(() => (window as any).adsbygoogle.length)).toBe(1);
 });

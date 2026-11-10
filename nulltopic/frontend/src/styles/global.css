@@ -1962,3 +1962,9 @@ body:has(#visitor-confirmation[open]){overflow:hidden}
 @media(prefers-reduced-motion:reduce){.visitor-confirmation .visitor-document-tile{transition:none}}
 
 .visitor-confirmation-actions>[hidden]{display:none!important}
+
+#visitor-withdraw-error{font-size:.85rem;line-height:1.5;color:var(--error)}
+@media(max-width:360px){.site-header nav:has(#visitor-preview-controls){gap:0}}
+@media(max-width:360px){.site-header nav:has(#visitor-preview-controls) .header-action{width:40px;min-width:40px}}
+#visitor-preview-reopen::after{left:auto;right:0;transform:none}
+#visitor-preview-reopen{padding:0}

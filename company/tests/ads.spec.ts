@@ -34,3 +34,19 @@ test('legal pages do not load the ad unit', async ({ page }) => {
   await expect(page.locator('script[src*="pagead/js/adsbygoogle.js"]')).toHaveCount(0);
   await expect(page.locator('main')).toContainText('Google AdSense');
 });
+
+test('empty ad slot collapses and filled slot restores its label', async ({page}) => {
+ await page.clock.install();
+ await page.goto('/de/');
+ const ad = page.locator('.company-ad');
+ await expect(ad.locator('p')).toBeHidden();
+ await page.clock.fastForward(11000);
+ await expect(ad).toHaveAttribute('data-ad-state','empty');
+ expect(await ad.evaluate(el => el.getBoundingClientRect().height)).toBe(0);
+ await ad.locator('ins').evaluate(el => el.setAttribute('data-ad-status','filled'));
+ await expect(ad).toHaveAttribute('data-ad-state','filled');
+ await expect(ad.locator('p')).toBeVisible();
+ await ad.locator('ins').evaluate(el => el.setAttribute('data-ad-status','unfilled'));
+ await expect(ad).toHaveAttribute('data-ad-state','empty');
+ expect(await ad.evaluate(el => el.getBoundingClientRect().height)).toBe(0);
+});

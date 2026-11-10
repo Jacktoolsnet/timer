@@ -1,9 +1,10 @@
 ---
+import AdVisibility from './AdVisibility.astro';
 interface Props { lang: string }
 const { lang } = Astro.props;
 const label = ({ de: 'Werbung', en: 'Advertisement', es: 'Publicidad', fr: 'Publicité' } as Record<string,string>)[lang] || 'Advertisement';
 ---
-<aside class="tool-ad" aria-label={label}>
+<aside data-ad-placement data-ad-state="pending" class="tool-ad" aria-label={label}>
   <p class="tool-ad-label">{label}</p>
   <script is:inline async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5182500947872057" crossorigin="anonymous"></script>
   <ins class="adsbygoogle" style="display:block"
@@ -15,6 +16,7 @@ const label = ({ de: 'Werbung', en: 'Advertisement', es: 'Publicidad', fr: 'Publ
     (window.adsbygoogle = window.adsbygoogle || []).push({});
   </script>
 </aside>
+<AdVisibility />
 <style>
   .tool-ad { grid-column:1 / -1; width:100%; min-width:0; margin:24px 0; align-self:start; }
   .tool-ad-label { margin:0 0 12px; color:var(--muted); text-align:center; font-size:12px; }

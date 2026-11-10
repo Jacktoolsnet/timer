@@ -50,3 +50,18 @@ Quellen:
 - https://support.google.com/adsense/answer/9183460?hl=de
 - https://support.google.com/adsense/answer/10960768?hl=de
 - https://support.google.com/adsense/answer/10960771?hl=de
+
+## Leere Werbeplätze (10. November 2026)
+
+Beide Bannerkomponenten verwenden `shared/AdVisibility.astro`. Die Beschriftung
+erscheint nur bei `data-ad-status="filled"`. `unfilled` und `unfill-optimized`
+blenden den gesamten Platz samt Abständen aus. Ohne Status wird nach zehn
+Sekunden ausgeblendet (z. B. blockiertes Skript oder ausstehende Einwilligung).
+Ein späterer Wechsel zu `filled` zeigt ihn wieder an, ohne einen neuen
+Anzeigenaufruf auszulösen. Der Status ersetzt keine Einwilligungsprüfung:
+Ablehnung bedeutet nicht zwingend, dass Google keinerlei Anzeige ausliefert.
+
+Während der anfänglichen Ladefrist bleibt der Platz messbar, damit AdSense die
+responsive Größe ermitteln kann; ein kurzer Leerraum ist deshalb möglich.
+Nicht bereits vor dem ersten Anzeigenaufruf mit display:none verstecken:
+https://support.google.com/adsense/answer/10762946?hl=de

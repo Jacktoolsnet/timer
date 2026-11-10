@@ -911,5 +911,6 @@
   "Who operates NullTopic and how to contact us.": "Qui exploite NullTopic et comment nous contacter.",
   "Opens in a new tab.": "S’ouvre dans un nouvel onglet.",
   "Review or withdraw confirmation": "Consulter ou retirer la confirmation",
-  "Withdraw confirmation": "Retirer la confirmation"
+  "Withdraw confirmation": "Retirer la confirmation",
+  "The saved confirmation could not be removed. Please check your browser storage settings.": "La confirmation enregistrée n’a pas pu être supprimée. Vérifie les paramètres de stockage de ton navigateur."
 }

@@ -1,0 +1,35 @@
+<!-- Keep pending slots measurable: AdSense may skip initially display:none units. -->
+<script>
+  document.querySelectorAll<HTMLElement>('[data-ad-placement]').forEach(placement => {
+    const slot = placement.querySelector<HTMLElement>('ins.adsbygoogle');
+    if (!slot) return;
+    let expired = false;
+    const update = () => {
+      const status = slot.getAttribute('data-ad-status');
+      // Optimized empty slots can contain Google replacement content, not an ad.
+      placement.dataset.adState = status === 'filled' ? 'filled'
+        : status === 'unfilled' || status === 'unfill-optimized' || expired ? 'empty' : 'pending';
+    };
+    const observer = new MutationObserver(update);
+    observer.observe(slot, { attributes:true, attributeFilter:['data-ad-status'] });
+    const timeout = window.setTimeout(() => { expired = true; update(); }, 10000);
+    placement.querySelector('script[src*="adsbygoogle.js"]')?.addEventListener('error', () => {
+      expired = true;
+      update();
+    });
+    update();
+    // Retain the observer after timeout: delayed consent/ad delivery can still fill.
+    window.addEventListener('pagehide', event => {
+      if (!event.persisted) { observer.disconnect(); window.clearTimeout(timeout); }
+    }, { once:true });
+  });
+</script>
+<style is:global>
+  [data-ad-placement] > p { display:none; }
+  [data-ad-placement][data-ad-state="filled"] > p { display:block; }
+  [data-ad-placement][data-ad-state="empty"] {
+    display:none !important;
+    height:0 !important; min-height:0 !important; max-height:0 !important;
+    margin:0 !important; padding:0 !important; overflow:hidden !important;
+  }
+</style>
