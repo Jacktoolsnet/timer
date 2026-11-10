@@ -892,5 +892,10 @@
   "Last 7 days includes today and the six preceding calendar days.": "Die letzten 7 Tage umfassen heute und die sechs vorherigen Kalendertage.",
   "Updated": "Aktualisiert",
   "Service provider information for NullTopic.": "Betreiberangaben für NullTopic.",
-  "Legal notice": "Impressum"
+  "Legal notice": "Impressum",
+  "Privacy": "Datenschutz",
+  "Terms of use": "Nutzungsbedingungen",
+  "Visitor privacy notice": "Datenschutzerklärung für Besucher",
+  "Visitor terms of use": "Nutzungsbedingungen für Besucher",
+  "Visitor legal documents: German originals and English service translations.": "Rechtstexte für Besucher: deutsche Originalfassungen und englische Serviceübersetzungen."
 }

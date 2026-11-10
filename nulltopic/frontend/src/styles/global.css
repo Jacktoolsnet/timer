@@ -1882,3 +1882,16 @@ body > main:has(#notification-language-trigger[aria-expanded=true]) { z-index:2;
 .legal-translation-notice p { margin:0 0 8px; line-height:1.6; font-size:.875rem; }
 .legal-translation-notice a { font-size:.875rem; font-weight:600; }
 [data-style=technical] .legal-translation-notice { border-radius:3px; }
+
+/* Legal documents use explicit static German/English routes, independent of UI translation. */
+.legal-language-links,.legal-related{display:flex;flex-wrap:wrap;gap:.65rem 1.15rem;align-items:center;margin:1.2rem 0}
+.legal-language-links a{padding:.45rem .75rem;border:1px solid var(--line);border-radius:.5rem;text-decoration:none}
+.legal-language-links a[aria-current=page]{color:var(--accent);background:var(--surface);font-weight:700}
+.legal-version{color:var(--muted);font-size:.85rem;overflow-wrap:anywhere}
+.legal-contents{border-block:1px solid var(--line);padding:.8rem 0;margin:1.4rem 0}
+.legal-contents ol{padding-left:1.5rem;display:grid;gap:.4rem}
+.visitor-legal article h2{scroll-margin-top:9rem}
+.legal-related{border-top:1px solid var(--line);padding-top:1rem}
+.legal-draft-notice strong{display:block;margin-bottom:.4rem}
+.visitor-legal article>section+section{margin-top:2rem}
+.visitor-legal .admin-subview-heading h1{min-width:0;overflow-wrap:anywhere}

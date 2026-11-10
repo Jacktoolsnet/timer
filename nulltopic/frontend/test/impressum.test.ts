@@ -12,10 +12,10 @@ test('NullTopic serves its own German imprint with the unchanged Company provide
   assert.equal(article.querySelector('a[href^="tel:"]')!.getAttribute('href'),'tel:+4917641235774');assert.equal(article.querySelector('a[href^="mailto:"]')!.getAttribute('href'),'mailto:jacktoolsnet@gmail.com');assert.equal(dom.window.document.querySelector('.hero'),null);
  }finally{dom.window.close();}
 });
-test('footer imprint navigation stays on NullTopic; other company links are unchanged',()=>{
+test('footer imprint navigation stays on NullTopic; privacy and terms also stay on NullTopic',()=>{
  for(const page of ['index.html','operator/index.html','administration/index.html','impressum/index.html']){
   const dom=new JSDOM(readFileSync(new URL('../dist/'+page,import.meta.url),'utf8'));
-  try{const footer=dom.window.document.querySelector('footer.site-footer')!;assert.ok(footer.querySelector('a[href="/impressum"]'));assert.equal(footer.querySelector('a[href="https://jacktools.net/impressum/"]'),null);assert.ok(footer.querySelector('a[href="https://jacktools.net/datenschutz/"]'));assert.ok(footer.querySelector('a[href="https://jacktools.net/nutzungshinweise/"]'));}finally{dom.window.close();}
+  try{const footer=dom.window.document.querySelector('footer.site-footer')!;assert.ok(footer.querySelector('a[href="/impressum"]'));assert.equal(footer.querySelector('a[href="https://jacktools.net/impressum/"]'),null);assert.ok(footer.querySelector('a[href="/datenschutz"]'));assert.ok(footer.querySelector('a[href="/nutzungsbedingungen"]'));}finally{dom.window.close();}
  }
 });
 
