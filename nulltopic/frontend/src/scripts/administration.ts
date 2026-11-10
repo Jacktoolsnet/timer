@@ -250,9 +250,10 @@ export async function initializeAdministration() {
     csrf = session.csrf;if(session.loginChallenge)emailLogin.begin(session.loginChallenge,false); signedIn = !!session.adminId; isRoot = signedIn && session.adminRole === 'root';
     shell.hidden = signedIn; dashboard.hidden = !signedIn;
     toolbar(signedIn, session.adminHandle); usersTile.disabled = !isRoot;usersTile.hidden=!isRoot;
-    for(const id of ['admin-moderation-tile','admin-retention-tile','admin-jobs-tile']){const tile=document.getElementById(id);if(tile)tile.hidden=isRoot;}
+    for(const id of ['admin-moderation-tile','admin-retention-tile','admin-jobs-tile','admin-notifications-tile']){const tile=document.getElementById(id);if(tile)tile.hidden=isRoot;}
     if(isRoot){clearJobDialogs();jobs?.querySelector('[data-jobs-list]')?.replaceChildren();reportsPanel.replaceChildren();openCases.clear();retention?.querySelector('[data-retention-list]')?.replaceChildren();}
     document.querySelector('#users-tile-access')!.textContent = isRoot ? t('Manage accounts') : t('Root access required');
+    const notificationsLink=document.querySelector<HTMLAnchorElement>('#admin-notifications-tile');if(notificationsLink)notificationsLink.href='/notifications?role=admin&lang='+currentLanguage();
     status.textContent = '';
     if (signedIn) {
       (login.elements.namedItem('password') as HTMLInputElement).value = '';

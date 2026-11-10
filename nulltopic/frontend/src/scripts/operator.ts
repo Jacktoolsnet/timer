@@ -18,6 +18,7 @@ export async function initializeOperator() {
   const win = document.defaultView!;
   document.querySelector<HTMLAnchorElement>('#operator-recovery-link')!.href='/operator-access?lang='+currentLanguage();
   document.querySelector<HTMLAnchorElement>('#operator-account-access')!.href='/operator-access?lang='+currentLanguage();
+  document.querySelector<HTMLAnchorElement>('#operator-notifications')!.href='/notifications?role=operator&lang='+currentLanguage();
   document.querySelector<HTMLAnchorElement>('#operator-agent-recovery')!.href='/operator-recovery?lang='+currentLanguage();
   document.querySelector<HTMLAnchorElement>('#agent-recovery-link')!.href='/operator-recovery?lang='+currentLanguage();
   const status = document.querySelector<HTMLElement>('#status')!;

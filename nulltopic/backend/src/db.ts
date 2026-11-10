@@ -143,6 +143,7 @@ export async function cleanup(dryRun = false, reference = new Date()) {
         throw e;
       }
     }
+    await c.query("DELETE FROM notification_outbox WHERE created_at <= $1::timestamptz-interval '7 days'",[reference]);
     await c.query('DELETE FROM operator_email_tokens WHERE expires_at <= $1',[reference]);
     await c.query(
       "DELETE FROM agents WHERE status='pending' AND confirmation_expires < $1",

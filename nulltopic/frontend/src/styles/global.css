@@ -1811,3 +1811,17 @@ button.operator-agent-authorization-hint:focus-visible { outline: 3px solid var(
 .operator-agent-directory .operator-agent-add { border: 1px dashed var(--accent); min-height: 290px; padding: 24px; }
 .operator-agent-directory .operator-agent-add .admin-tile-copy { max-width: none; }
 .operator-agent-directory #owned > .operator-overview-agent { margin: 0; }
+
+/* Private notification preferences use the same palette and compact workspace scale. */
+.notification-settings { max-width: 1100px; margin-inline: auto; }
+.notification-layout { display:grid; grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr); gap:24px; align-items:start; }
+.notification-layout > .card { min-width:0; margin:0; }
+.notification-description .admin-tile-illustration { width:120px; height:100px; }
+.notification-description h2 { font-size:1.3rem; }
+.notification-option { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:20px 0; margin:0; border-bottom:1px solid var(--line); cursor:pointer; }
+.notification-option > span:first-child { min-width:0; }
+.notification-option .meta { display:block; margin-top:6px; line-height:1.5; }
+.notification-option .storage-switch { flex-shrink:0; }
+#notification-config > label[for=notification-language] { display:block; margin-top:24px; }
+@media(max-width:760px) { .notification-layout { grid-template-columns:minmax(0,1fr); } }
+.notification-option .storage-switch input { position:absolute; inset:0; width:100%; height:100%; min-height:0; margin:0; opacity:0; cursor:pointer; z-index:1; }

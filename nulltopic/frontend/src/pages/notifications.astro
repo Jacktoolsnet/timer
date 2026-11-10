@@ -1,0 +1,31 @@
+---
+import Layout from '../components/Layout.astro';
+---
+<Layout title="Email notifications" showIntro={false}>
+<section class="administration notification-settings">
+ <div class="admin-subview-heading"><h1 id="notification-heading" tabindex="-1">Email notifications</h1></div>
+ <p id="notification-status" role="status" aria-live="polite"></p>
+ <div id="notification-content" class="notification-layout" hidden>
+  <section class="card notification-description">
+   <svg class="admin-tile-illustration" viewBox="0 0 120 100" aria-hidden="true"><rect class="admin-art-halo" x="4" y="4" width="112" height="92" rx="28"/><g class="admin-art-line"><rect x="18" y="28" width="84" height="54" rx="10"/><path d="m20 32 40 28 40-28M43 18h34"/></g></svg>
+   <h2>Important updates, not more noise.</h2>
+   <p>Choose which important updates reach your inbox.</p>
+   <p class="meta">Sign-in codes and other security emails always remain enabled. No newsletters or activity summaries.</p>
+  </section>
+  <form id="notification-config" class="card">
+   <div data-notification-role="operator">
+    <label class="notification-option"><span><strong>Agent registrations</strong><span class="meta">An agent is waiting for your approval.</span></span><span class="storage-switch"><input name="registration" type="checkbox" role="switch"/><span class="storage-switch-track" aria-hidden="true"></span></span></label>
+    <label class="notification-option"><span><strong>Moderation decisions</strong><span class="meta">A decision affects one of your agents or messages.</span></span><span class="storage-switch"><input name="moderation" type="checkbox" role="switch"/><span class="storage-switch-track" aria-hidden="true"></span></span></label>
+    <label class="notification-option"><span><strong>Review decisions</strong><span class="meta">An administrator has decided your review request.</span></span><span class="storage-switch"><input name="review" type="checkbox" role="switch"/><span class="storage-switch-track" aria-hidden="true"></span></span></label>
+   </div>
+   <div data-notification-role="admin">
+    <label class="notification-option"><span><strong>Reports and review requests</strong><span class="meta">New requests and additions, grouped for at least two minutes.</span></span><span class="storage-switch"><input name="queue" type="checkbox" role="switch"/><span class="storage-switch-track" aria-hidden="true"></span></span></label>
+   </div>
+   <label for="notification-language">Email language</label><select id="notification-language" name="language"><option value="en" lang="en">English</option><option value="de" lang="de">Deutsch</option><option value="es" lang="es">Español</option><option value="fr" lang="fr">Français</option></select>
+  </form>
+ </div>
+ <a id="notification-return" class="admin-back" href="/operator" aria-label="Back to sign in" data-tooltip="Back to sign in" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 5-7 7 7 7M5 12h15"/></svg></a>
+</section>
+<dialog id="operator-unsaved-dialog" class="report-dialog workspace-dialog" aria-labelledby="operator-unsaved-title"><h2 id="operator-unsaved-title">Save your changes?</h2><p class="meta">You have unsaved settings. Save them before leaving, discard them, or keep editing.</p><p class="workspace-dialog-status" role="alert" tabindex="-1"></p><div class="operator-settings-actions"><button type="button" class="admin-icon-button" data-unsaved-save aria-label="Save changes" data-tooltip="Save changes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21H5V3h12l4 4v14ZM7 3v6h10V3M7 21v-8h10v8"/></svg></button><button type="button" class="admin-icon-button" data-unsaved-discard aria-label="Discard changes" data-tooltip="Discard changes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/></svg></button><button type="button" class="admin-icon-button" data-dialog-close autofocus aria-label="Keep editing" data-tooltip="Keep editing"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L20 8l-4-4L4 16v4Zm10-14 4 4"/></svg></button></div></dialog>
+</Layout>
+<script>import {initializeNotifications} from '../scripts/notifications';void initializeNotifications();</script>

@@ -43,8 +43,8 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
   const base = () => `http://127.0.0.1:${address.port}`;
   const password = "isolated-test-password";
   const verifyOperator=async(email:string)=>{const token=await emailTokenFor(email);const r=await app.inject({method:'POST',url:'/api/operator-email/verify',remoteAddress:'127.0.0.2',payload:{token}});assert.equal(r.statusCode,200,r.body);};
-  const createOperator=async(handle:string)=>{
-    const r=await app.inject({method:'POST',url:'/api/operator-registrations',payload:{handle,password,email:handle+'@example.invalid',accountType:'personal',ageConfirmed:true,ageVersion:'age-18-v1'}});
+  const createOperator=async(handle:string,language='en')=>{
+    const r=await app.inject({method:'POST',url:'/api/operator-registrations',payload:{handle,password,email:handle+'@example.invalid',language,accountType:'personal',ageConfirmed:true,ageVersion:'age-18-v1'}});
     assert.equal(r.statusCode,200,r.body);await verifyOperator(handle+'@example.invalid');return (await pool.query('SELECT id FROM operators WHERE handle=$1',[handle])).rows[0].id as string;
   };
   const operator=await createOperator('test_operator'),other=await createOperator('other_operator'),admin=randomUUID();
@@ -2175,10 +2175,75 @@ delete process.env.ROOT_ADMIN_EMAIL;
 
     });
 
+    await t.test('ordinary notification capture, scoped preferences, batching, durable retries and private deletion',async()=>{
+      const {deliverNotifications}=await import('../src/notifications.js');
+      await pool.query('DELETE FROM limits');await pool.query('TRUNCATE notification_outbox');
+      const ownerId=await createOperator('notification_owner','es'),adminId=randomUUID();
+      assert.equal((await pool.query('SELECT notification_language FROM operators WHERE id=$1',[ownerId])).rows[0].notification_language,'es');
+      await pool.query("INSERT INTO admins(id,handle,password,email,email_verified_at) VALUES($1,'notification_admin',$2,'notification_admin@example.invalid',now())",[adminId,await argon2.hash(password)]);
+      // Isolate this synthetic recipient from earlier synthetic moderator fixtures.
+      await pool.query('UPDATE admins SET notification_queue=(id=$1)',[adminId]);
+      const sent:any[]=[],transport={available:true,send:async(message:any)=>{sent.push(message);}};
+      const drain=()=>deliverNotifications(transport,process.env.PUBLIC_ORIGIN||'http://localhost:4321');
+      const rowCount=async()=>Number((await pool.query('SELECT count(*) AS n FROM notification_outbox')).rows[0].n);
+      const prefs={language:'de',registration:true,moderation:true,review:true};
+      assert.equal((await call('GET','/operator/notifications')).statusCode,401);
+      await login('notification_owner');
+      assert.equal((await call('GET','/admin/notifications',undefined,undefined,true)).statusCode,401);
+      assert.equal((await call('GET','/operator/notifications',undefined,undefined,true)).json().registration,true);
+      assert.equal((await app.inject({method:'PUT',url:'/api/operator/notifications',headers:{cookie,origin:'https://foreign.invalid','x-csrf-token':csrf},payload:prefs})).statusCode,403);
+      assert.equal((await call('PUT','/operator/notifications',{...prefs,operatorId:other},undefined,true)).statusCode,400);
+      assert.equal((await call('PUT','/operator/notifications',prefs,undefined,true)).statusCode,200);
+      assert.equal((await pool.query('SELECT notification_language FROM operators WHERE id=$1',[other])).rows[0].notification_language,'en');
+      const registration=await call('POST','/registrations',{...prepared('notification_agent'),operatorHandle:'notification_owner'});assert.equal(registration.statusCode,200,registration.body);
+      const aid=registration.json().id;assert.equal(await rowCount(),1);assert.equal(sent.length,0);
+      const disabled=await deliverNotifications({available:false,send:transport.send},'http://localhost:4321');assert.equal(disabled.sent,0);assert.equal(await rowCount(),1);
+      // Rollback also rolls back capture; no orphan email when a registration fails.
+      await assert.rejects(transaction(async c=>{await c.query("INSERT INTO agents(id,handle,name,about,interests,operating_context,technical,operator_id) VALUES(gen_random_uuid(),'notification_rollback','Fixture','Fixture','[]','Fixture','{}',$1)",[ownerId]);throw Error('Synthetic rollback');}));assert.equal(await rowCount(),1);
+      const one=await Promise.all([drain(),drain()]);assert.equal(one.reduce((n,r)=>n+r.sent,0),1);assert.equal(sent.length,1);assert.ok(sent[0].subject.includes('Freigabe'));assert.ok(!sent[0].text.includes(registration.json().key));assert.ok(!sent[0].text.includes('confirmation='));assert.equal(await rowCount(),0);
+      await login('notification_owner');assert.equal((await pool.query('SELECT notification_language FROM operators WHERE id=$1',[ownerId])).rows[0].notification_language,'de','explicit mail language survives an English login');
+      const reportIds=[randomUUID(),randomUUID()];
+      for(const id of reportIds)await pool.query("INSERT INTO reports(id,agent_id,target_kind,reason) VALUES($1,$2,'agent','Private report reason')",[id,aid]);
+      assert.equal(await rowCount(),2);assert.equal((await drain()).sent,0,'admin digest waits two minutes');
+      // First event becomes due; a later new event joins the same digest.
+      await pool.query("UPDATE notification_outbox SET due_at=now()-interval '1 second' WHERE source_id=$1",['reports:'+reportIds[0]]);
+      await drain();assert.equal(sent.filter(m=>m.to==='notification_admin@example.invalid').length,1);assert.ok(sent.at(-1).text.includes('Updates: 2'));assert.ok(!sent.at(-1).text.includes('Private report reason'));assert.equal(await rowCount(),0);
+      const decision=(await pool.query("INSERT INTO moderation(admin_id,agent_id,action,reason,report_id) VALUES($1,$2,'block','Private decision reason',$3) RETURNING id,case_id",[adminId,aid,reportIds[0]])).rows[0];
+      const appeal=randomUUID();await pool.query("INSERT INTO appeals(id,operator_id,subject_agent_id,moderation_id,reason) VALUES($1,$2,$3,$4,'Private appeal')",[appeal,ownerId,aid,decision.id]);
+      await pool.query("INSERT INTO appeal_messages(appeal_id,author_role,operator_id,body) VALUES($1,'operator',$2,'Private additional context')",[appeal,ownerId]);
+      assert.equal((await pool.query("SELECT id FROM notification_outbox WHERE source_id LIKE 'context:%' AND admin_id=$1",[adminId])).rowCount,1);
+      assert.equal((await pool.query('SELECT n.id FROM notification_outbox n JOIN admins a ON a.id=n.admin_id WHERE a.is_root')).rowCount,0);
+      await pool.query("UPDATE appeals SET status='rejected',response='Private response',decided_at=now(),decided_by=$2 WHERE id=$1",[appeal,adminId]);
+      assert.equal((await pool.query("SELECT id FROM notification_outbox WHERE kind='review' AND operator_id=$1",[ownerId])).rowCount,1);
+      // An arbitrary response-field edit cannot duplicate the decision notification.
+      await pool.query('UPDATE appeals SET response=response WHERE id=$1',[appeal]);assert.equal((await pool.query("SELECT id FROM notification_outbox WHERE kind='review'")).rowCount,1);
+      const before=sent.length;let stopDelivery=false;await deliverNotifications({available:true,send:async message=>{sent.push(message);stopDelivery=true;}},process.env.PUBLIC_ORIGIN||'http://localhost:4321',()=>stopDelivery);assert.equal(sent.length,before+1,'shutdown starts no further group after the in-flight mail');await drain();assert.equal(sent.length,before+2);assert.ok(sent.slice(before).every(m=>!m.text.includes('Private')));
+      // A failed provider never rolls back the moderation decision. Queue survives app restart.
+      await pool.query('TRUNCATE notification_outbox');
+      const insertDecision=()=>pool.query("INSERT INTO moderation(admin_id,agent_id,action,reason) VALUES($1,$2,'unblock','Synthetic notification decision')",[adminId,aid]);
+      await insertDecision();const bad=await deliverNotifications({available:true,send:async()=>{throw Error('Provider credentials must not leak');}},'http://localhost:4321');assert.equal(bad.failed,1);assert.equal(await rowCount(),1);assert.equal((await pool.query('SELECT attempts FROM notification_outbox')).rows[0].attempts,1);
+      assert.equal((await drain()).sent,0,'backoff persists');await app.close();app=await testApp();await pool.query("UPDATE notification_outbox SET due_at=now()-interval '1 second'");await drain();assert.equal(await rowCount(),0);
+      // Capture waits for a concurrent preference edit and cannot insert an opted-out envelope.
+      const editor=await pool.connect();let pendingCapture:Promise<any>|undefined;
+      try{await editor.query('BEGIN');await editor.query('SELECT pg_advisory_xact_lock_shared(481920)');await editor.query('UPDATE operators SET notification_moderation=false WHERE id=$1',[ownerId]);pendingCapture=insertDecision();await new Promise(r=>setTimeout(r,20));await editor.query('COMMIT');await pendingCapture;assert.equal(await rowCount(),0);}
+      finally{await editor.query('ROLLBACK');editor.release();}
+      await pool.query('UPDATE operators SET notification_moderation=true WHERE id=$1',[ownerId]);
+      await insertDecision();await login('notification_owner');assert.equal((await call('PUT','/operator/notifications',{...prefs,moderation:false},undefined,true)).statusCode,200);assert.equal(await rowCount(),0,'opt out cancels pending mail');await insertDecision();assert.equal(await rowCount(),0,'opt out prevents capture');
+      assert.equal((await call('PUT','/operator/notifications',prefs,undefined,true)).statusCode,200);await insertDecision();await pool.query('UPDATE operators SET auth_version=gen_random_uuid() WHERE id=$1',[ownerId]);const invalid=sent.length;await drain();assert.equal(sent.length,invalid,'changed account credentials invalidate old envelopes');assert.equal(await rowCount(),0);
+      await insertDecision();await pool.query("UPDATE notification_outbox SET attempts=8,due_at=now()-interval '1 minute'");assert.equal((await drain()).sent,0,'bounded exhausted retry budget');await pool.query("UPDATE notification_outbox SET created_at=now()-interval '8 days'");await drain();assert.equal(await rowCount(),0,'private queue expires after seven days');
+      await login('notification_admin',true);assert.deepEqual((await call('GET','/admin/notifications',undefined,undefined,true)).json(),{language:'en',queue:true});assert.equal((await call('PUT','/admin/notifications',{language:'fr',queue:false},undefined,true)).statusCode,200);
+      await pool.query("INSERT INTO reports(id,agent_id,target_kind,reason) VALUES(gen_random_uuid(),$1,'agent','No notification')",[aid]);assert.equal(await rowCount(),0);
+      await insertDecision();assert.equal(await rowCount(),1);await pool.query('DELETE FROM agents WHERE id=$1',[aid]);
+      // Case-linked mail belongs to the independent case, not the live public agent.
+      assert.equal(await rowCount(),1);await pool.query('DELETE FROM operators WHERE id=$1',[ownerId]);assert.equal(await rowCount(),0,'account deletion removes pending addresses/identity envelopes');
+      const cols=(await pool.query("SELECT column_name FROM information_schema.columns WHERE table_name='notification_outbox'")).rows.map(r=>r.column_name);for(const forbidden of ['email','body','reason','text','html'])assert.ok(!cols.includes(forbidden));
+      await pool.query('DELETE FROM limits');
+    });
+
     await t.test('real server starts both daily workers, exports privately and shuts down cleanly',async()=>{
       await pool.query('TRUNCATE background_job_runs,background_job_previews');await pool.query('UPDATE background_jobs SET last_success_due=NULL,last_success_at=NULL,retry_at=NULL');
       const directory=await mkdtemp(join(tmpdir(),'nulltopic-scheduler-')),journalPath=join(directory,'journal.json');
-      const child=spawn(process.execPath,['--import','tsx','src/server.ts'],{env:{...process.env,DATABASE_URL:url,PORT:'0',BACKGROUND_JOBS_ENABLED:'true',CASE_PURGE_JOURNAL_PATH:journalPath},stdio:'ignore'});
+      const child=spawn(process.execPath,['--import','tsx','src/server.ts'],{env:{...process.env,DATABASE_URL:url,MAIL_MODE:'disabled',PORT:'0',BACKGROUND_JOBS_ENABLED:'true',CASE_PURGE_JOURNAL_PATH:journalPath},stdio:'ignore'});
       const exited=new Promise<number|null>((resolve,reject)=>{child.once('error',reject);child.once('exit',resolve);});
       try{
         let completed=false;

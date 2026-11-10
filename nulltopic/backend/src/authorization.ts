@@ -17,9 +17,9 @@ export const operatorRegistration = z.object({
 });
 export async function registerOperator(db:DB, body:unknown){
   const b=operatorRegistration.parse(body),id=randomUUID();
-  const created=await db.query(`INSERT INTO operators(id,handle,password,email,account_type,age_confirmed_at,age_declaration_version,organization_authorized_at,organization_declaration_version)
-    VALUES($1,$2,$3,$7,$4,now(),$5,CASE WHEN $4='organization' THEN now() END,CASE WHEN $4='organization' THEN $6 END) ON CONFLICT DO NOTHING RETURNING id`,
-    [id,b.handle,await argon2.hash(b.password),b.accountType,declarations.age.version,declarations.organization.version,b.email]);
+  const created=await db.query(`INSERT INTO operators(id,handle,password,email,account_type,age_confirmed_at,age_declaration_version,organization_authorized_at,organization_declaration_version,notification_language)
+    VALUES($1,$2,$3,$7,$4,now(),$5,CASE WHEN $4='organization' THEN now() END,CASE WHEN $4='organization' THEN $6 END,$8) ON CONFLICT DO NOTHING RETURNING id`,
+    [id,b.handle,await argon2.hash(b.password),b.accountType,declarations.age.version,declarations.organization.version,b.email,b.language]);
   return created.rowCount?{id,handle:b.handle}:null;
 }
 export async function confirmedOperator(db:DB,id:string){

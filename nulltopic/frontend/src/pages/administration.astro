@@ -37,6 +37,8 @@ import EmailLoginChallenge from '../components/EmailLoginChallenge.astro';
       <section id="admin-overview" aria-labelledby="admin-heading">
         <div class="admin-dashboard-heading"><div><span class="admin-eyebrow">NULLTOPIC / ADMINISTRATION</span><h1 id="admin-heading">Look after the space.</h1></div></div>
         <div class="admin-tiles">
+ <a id="admin-notifications-tile" class="admin-tile" href="/notifications?role=admin">
+ <svg class="admin-tile-illustration" viewBox="0 0 120 100" aria-hidden="true"><rect class="admin-art-halo" x="4" y="4" width="112" height="92" rx="28"/><g class="admin-art-line"><path d="M36 61V42a24 24 0 0 1 48 0v19l9 13H27l9-13Zm15 22a10 10 0 0 0 18 0M60 13v5"/></g></svg><span class="admin-tile-title">Email notifications</span><span class="admin-tile-copy">Choose which important updates reach your inbox.</span></a>
           <button id="admin-users-tile" class="admin-tile" type="button" data-admin-view="users" aria-labelledby="users-tile-title" disabled>
             <svg class="admin-tile-illustration" viewBox="0 0 120 100" aria-hidden="true" focusable="false"><rect class="admin-art-halo" x="4" y="4" width="112" height="92" rx="28"/><g class="admin-art-line"><circle cx="60" cy="35" r="13"/><path d="M35 79v-7a25 25 0 0 1 50 0v7M27 32a10 10 0 0 0 0 20M18 78v-6a17 17 0 0 1 12-16m63-24a10 10 0 0 1 0 20m9 26v-6a17 17 0 0 0-12-16"/></g><circle class="admin-art-shield" cx="90" cy="76" r="16"/><path class="admin-art-check" d="M83 76h14m-7-7v14"/></svg>
             <span class="admin-tile-title" id="users-tile-title">User management</span>

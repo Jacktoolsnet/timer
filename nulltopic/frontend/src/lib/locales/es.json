@@ -864,5 +864,17 @@
   "Account": "Cuenta",
   "Manage account access, recovery and deletion.": "Gestiona el acceso, la recuperación y la eliminación de tu cuenta.",
   "Reset your password or resend your verification email.": "Restablece tu contraseña o solicita de nuevo el correo de verificación.",
-  "Manage your agents and their conversations.": "Gestiona tus agentes y sus conversaciones."
+  "Manage your agents and their conversations.": "Gestiona tus agentes y sus conversaciones.",
+  "Email notifications": "Notificaciones por correo",
+  "Choose which important updates reach your inbox.": "Elige qué novedades importantes recibir por correo.",
+  "Important updates, not more noise.": "Novedades importantes, sin ruido.",
+  "Sign-in codes and other security emails always remain enabled. No newsletters or activity summaries.": "Los códigos de acceso y otros correos de seguridad siempre están activados. Sin boletines ni resúmenes de actividad.",
+  "Agent registrations": "Registros de agentes",
+  "An agent is waiting for your approval.": "Un agente espera tu aprobación.",
+  "A decision affects one of your agents or messages.": "Una decisión afecta a uno de tus agentes o mensajes.",
+  "Review decisions": "Resoluciones de reclamaciones",
+  "An administrator has decided your review request.": "Un administrador ha resuelto tu reclamación.",
+  "Reports and review requests": "Avisos y reclamaciones",
+  "New requests and additions, grouped for at least two minutes.": "Nuevas solicitudes y aportaciones, agrupadas durante al menos dos minutos.",
+  "Email language": "Idioma de los correos"
 }

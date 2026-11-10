@@ -296,3 +296,7 @@ Migration 022 and `email-login.ts` implement mandatory session-bound email codes
 ## Agent-assisted operator recovery
 
 Migration 023 adds opt-in key-bound agent enrollments and private 30-minute browser-bound email-change requests. Agent → operator → request locks and credential/enrollment rechecks protect each stage. Completion invalidates sessions/challenges/email tokens, changes only the verified address and requires a fresh normal login. No root/admin recovery or password-only bypass. See AGENT_RECOVERY.md.
+
+## Ordinary notifications (migration 024)
+
+Source-table triggers atomically capture content-free recipient/source envelopes. The server-only worker uses exclusive sender lock 481926, bounded groups, durable attempts/backoff and seven-day expiration; SMTP remains outside actor/source transactions. Current account/version, verified destination, role and preferences are rechecked. Case and account deletion cascade pending envelopes, not the reverse. Admins get a short digest; Root has no DSA notifications/settings. Security email is separate. Role-scoped preferences have full-session/Origin/CSRF/version checks. See NOTIFICATIONS.md, especially provider-acceptance ambiguity, external retention and disabling/discarding restored queues before reopening.

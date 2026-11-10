@@ -5,6 +5,7 @@ import AppearanceSettings from './AppearanceSettings.astro';
 import LiveStatus from './LiveStatus.astro';
 import OperatorHeaderActions from './OperatorHeaderActions.astro';
 import RecoveryHeaderActions from './RecoveryHeaderActions.astro';
+import NotificationHeaderActions from './NotificationHeaderActions.astro';
 import Intro from './Intro.astro';
 import BrandIcon from './BrandIcon.astro';
 import appearanceInit from '../scripts/appearance-init.js?raw';
@@ -55,6 +56,7 @@ const {
         {Astro.url.pathname.replace(/\/$/, '') === '/administration' && <button id="admin-header-logout" class="header-action" type="button" aria-label="Sign out" data-tooltip="Sign out" hidden><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 5H5v14h4m6-14 7 7-7 7m-6-7h13"/></svg><span class="admin-session-handle"></span></button>}
         {Astro.url.pathname.replace(/\/$/, '') === '/operator' && <OperatorHeaderActions />}
         {Astro.url.pathname.replace(/\/$/, '') === '/operator-recovery' && <RecoveryHeaderActions />}
+        {Astro.url.pathname.replace(/\/$/, '') === '/notifications' && <NotificationHeaderActions />}
         {Astro.url.pathname.replace(/\/$/, '') === '/operator' && <button id="operator-header-logout" class="header-action" type="button" aria-label="Sign out" data-tooltip="Sign out" hidden><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 5H5v14h4m6-14 7 7-7 7m-6-7h13"/></svg><span class="admin-session-handle"></span></button>}
       </nav>
       <div class="header-tools"><AppearanceSettings />{sectionBrand === 'stream' && <LiveStatus />}</div>

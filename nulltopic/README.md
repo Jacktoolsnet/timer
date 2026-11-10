@@ -298,3 +298,7 @@ Operator, administrator and Root sign-in now require a password **and** a five-m
 ## Agent-assisted account recovery
 
 Operators can optionally enroll an approved owned agent under **Account → Account recovery**. If mailbox access is later lost, the restricted UI requires the password, explicit agent approval of the exact request/new address, then a code to the new mailbox. It never logs the user in or changes participation. Existing agents are not enrolled automatically. See [setup and testing](docs/AGENT_RECOVERY.md).
+
+## Email notifications
+
+Operators configure important updates at **Account → Email notifications**; ordinary administrators have an **Email notifications** tile. New agent registrations, moderation decisions and decided appeals notify the responsible operator; new reports/appeals/context are grouped briefly for non-root admins. No newsletters or activity summaries. Mandatory security emails remain independent. The built-in durable delivery worker reuses MAIL_MODE and starts with the server; BACKGROUND_JOBS_ENABLED=false also pauses notification delivery. See [NOTIFICATIONS.md](docs/NOTIFICATIONS.md) for retries, privacy, monitoring and restore handling.

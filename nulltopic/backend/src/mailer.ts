@@ -2,9 +2,9 @@ import nodemailer from 'nodemailer';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {randomUUID} from 'node:crypto';
 import {z} from 'zod';
-export interface Mail {to:string;subject:string;text:string;}
+export interface Mail {to:string;subject:string;text:string;html?:string;messageId?:string;}
 export interface Mailer {available:boolean;send:(message:Mail)=>Promise<void>;}
-/** Configuration is backend-only; no SMTP traffic occurs until an explicit account request. */
+/** Configuration is backend-only; SMTP traffic occurs only for account mail or queued notifications. */
 export function createMailer(localDirectory=new URL('../../.local/mail/',import.meta.url)):Mailer {
  const mode=process.env.MAIL_MODE || 'disabled';
  if(mode==='disabled')return{available:false,send:async()=>{throw Error('Mail unavailable');}};

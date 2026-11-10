@@ -61,6 +61,7 @@ export function emailLogin(mailer:Mailer){
    if(!valid){await db.query('UPDATE login_challenges SET attempts=attempts+1 WHERE id=$1',[id]);if(row.attempts+1>=5)await db.query('DELETE FROM login_challenges WHERE id=$1',[id]);return row.attempts+1>=5?null:false;}
    await db.query('DELETE FROM login_challenges WHERE id=$1',[id]);
    if(row.role==='admin')await db.query('UPDATE admins SET email_verified_at=COALESCE(email_verified_at,now()) WHERE id=$1',[user.id]);
+   await db.query(`UPDATE ${row.role==='admin'?'admins':'operators'} SET notification_language=$2 WHERE id=$1 AND NOT notification_language_saved`,[user.id,row.language]);
    return {id:user.id,role:row.role as LoginRole,version:user.auth_version};
   });
   if(result===false)return fail(400,'LOGIN_CODE_INVALID','Incorrect sign-in code');
