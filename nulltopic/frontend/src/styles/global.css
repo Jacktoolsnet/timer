@@ -2033,3 +2033,22 @@ body:has(#visitor-confirmation[open]){overflow:hidden}
 .report-status-timeline p{margin:0;white-space:pre-wrap;line-height:1.6}
 #report-status-refresh,#report-stop-emails{width:44px;height:44px;padding:8px}
 #report-stop-emails[hidden]{display:none!important}
+
+/* Account-type select: the native control remains the form's source of truth. */
+.themed-select-picker{position:relative;min-width:0;margin:6px 0 20px}
+.themed-select-trigger{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:48px;padding:12px;border:1px solid var(--input-line);border-radius:8px;background:var(--surface);color:var(--text);text-align:start;font:inherit}
+.themed-select-trigger>span:first-child{min-width:0;overflow-wrap:anywhere}
+.themed-select-arrow,.themed-select-check{display:grid;place-items:center;flex-shrink:0;width:22px;height:22px;color:var(--accent)}
+.themed-select-picker svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.themed-select-trigger[aria-expanded=true]{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.themed-select-trigger[aria-expanded=true] .themed-select-arrow{transform:rotate(180deg)}
+.themed-select-options{position:absolute;z-index:10;inset:calc(100% + 8px) 0 auto;display:grid;gap:4px;max-height:var(--select-options-height,240px);overflow:auto;overscroll-behavior:contain;padding:6px;border:1px solid var(--line);border-radius:12px;background:var(--surface);box-shadow:0 12px 32px color-mix(in srgb,var(--text) 14%,transparent)}
+.themed-select-options[hidden]{display:none}
+.themed-select-picker[data-placement=above] .themed-select-options{top:auto;bottom:calc(100% + 8px)}
+.themed-select-options button{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:44px;padding:10px 12px;border:1px solid transparent;border-radius:7px;background:transparent;color:var(--text);text-align:start;font:inherit}
+.themed-select-options button[aria-selected=true]{background:var(--accent-soft);color:var(--accent);font-weight:650}
+.themed-select-options button:not([aria-selected=true]) .themed-select-check{visibility:hidden}
+.themed-select-options button:is(:hover,:focus-visible){background:var(--accent-soft);border-color:var(--accent);outline-offset:-2px}
+.themed-select-trigger:disabled,.themed-select-options button:disabled{opacity:.55;cursor:not-allowed}
+[data-style=technical] :is(.themed-select-trigger,.themed-select-options,.themed-select-options button){border-radius:3px}
+[data-style=soft] .themed-select-trigger{border-radius:12px}

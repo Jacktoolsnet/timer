@@ -15,9 +15,9 @@ function fixture(host='localhost',stored?:string,language='de',production=false)
 }
 function toggle(f:ReturnType<typeof fixture>,id:string,value=true){const input=f.d.querySelector<HTMLInputElement>(id)!;input.checked=value;input.dispatchEvent(new f.w.Event('change',{bubbles:true}));}
 function submit(f:ReturnType<typeof fixture>){f.dialog.querySelector('form')!.dispatchEvent(new f.w.Event('submit',{bubbles:true,cancelable:true}));}
-test('preview is restricted to exact loopback hosts, not arbitrary local-looking or production domains',()=>{
+test('automatic preview excludes arbitrary non-loopback hosts while manual review stays visible',()=>{
  for(const host of ['localhost','127.0.0.1','[::1]'])assert.ok(isVisitorPreviewHost(host));for(const host of ['nulltopic.com','localhost.example.com','192.168.1.1','example.org'])assert.ok(!isVisitorPreviewHost(host));
- const f=fixture('example.org');try{initializeVisitorPreview();assert.equal(f.shows(),0);assert.equal(f.d.getElementById('visitor-preview-controls')!.hidden,true);assert.equal(f.w.localStorage.length,0);}finally{f.close();}
+ const f=fixture('example.org');try{initializeVisitorPreview();assert.equal(f.shows(),0);assert.equal(f.d.getElementById('visitor-preview-controls')!.hidden,false);assert.equal(f.w.localStorage.length,0);}finally{f.close();}
 });
 test('both switches start off; only both allow explicit confirmation; Escape does not bypass it',()=>{
  const f=fixture();try{initializeVisitorPreview();const button=f.d.querySelector<HTMLButtonElement>('#visitor-confirm')!;assert.equal(f.shows(),1);assert.ok(f.dialog.open);assert.equal(button.disabled,true);assert.equal(f.w.localStorage.length,0);
@@ -33,8 +33,8 @@ test('current browser version skips preview, old versions do not; blocked storag
 for(const language of ['en','de','es','fr'])test('preview uses human language and explicit German/English legal routes: '+language,()=>{
  const f=fixture('localhost',undefined,language);try{initializeVisitorPreview();assert.equal(f.dialog.querySelector<HTMLAnchorElement>('[data-visitor-terms]')!.getAttribute('href'),'/nutzungsbedingungen'+(language==='de'?'':'/en'));assert.ok(f.dialog.querySelector('a[target="_blank"][rel="noopener noreferrer"]'));assert.equal(f.dialog.querySelectorAll('input[role=switch]').length,2);assert.equal(f.dialog.querySelector('input[type=email],input[name=privacy],input[name=ads]'),null);assert.equal(f.dialog.querySelector('#visitor-preview-leave'),null);assert.equal(f.dialog.querySelector('.visitor-confirmation-actions a'),null);assert.equal(f.dialog.querySelector('#visitor-preview-notice,.visitor-preview-explanation,#visitor-preview-status'),null);assert.equal(f.dialog.querySelector('.visitor-session-information'),null);assert.doesNotMatch(f.dialog.textContent!,/local preview|local interface test|testbestätigung|Oberflächentest|vista previa|aperçu local/i);assert.equal(f.d.getElementById('visitor-preview-controls')!.hidden,false);}finally{f.close();}
 });
-test('only public page shells have the local preview, not legal documents or authenticated/technical areas',()=>{
- for(const route of ['datenschutz','datenschutz/en','nutzungsbedingungen','nutzungsbedingungen/en','impressum','operator','administration','operator-access','operator-recovery','notifications']){const dom=new JSDOM(readFileSync(new URL('../dist/'+route+'/index.html',import.meta.url),'utf8'));try{assert.equal(dom.window.document.querySelector('#visitor-confirmation'),null,route);}finally{dom.window.close();}}
+test('all human pages have manual review controls; auto prompting is limited separately',()=>{
+ for(const route of ['datenschutz','datenschutz/en','nutzungsbedingungen','nutzungsbedingungen/en','impressum','operator','administration','operator-access','operator-recovery','notifications']){const dom=new JSDOM(readFileSync(new URL('../dist/'+route+'/index.html',import.meta.url),'utf8'));try{assert.ok(dom.window.document.querySelector('#visitor-confirmation:not([open])'),route);assert.equal(dom.window.document.querySelector<HTMLElement>('#visitor-preview-controls')!.hidden,false);}finally{dom.window.close();}}
  for(const route of ['conversations','conversation','agents','rules']){const dom=new JSDOM(readFileSync(new URL('../dist/'+route+'/index.html',import.meta.url),'utf8'));try{assert.ok(dom.window.document.querySelector('#visitor-confirmation'),route);}finally{dom.window.close();}}
 });
 test('shared confirmation and reset reconcile existing tabs using actual storage, including clear and history return',()=>{
@@ -80,4 +80,22 @@ test('production advertising acknowledgement uses a separate choice and never mi
   f.d.querySelector<HTMLButtonElement>('#visitor-withdraw')!.click();
   assert.equal(f.w.localStorage.getItem(PRODUCTION_VISITOR_KEY),null);assert.equal(events,2);
  }finally{f.close();}
+});
+
+
+test('private/legal pages expose manual review without automatically asking or changing the saved choice',()=>{
+ for(const path of ['/operator','/administration','/datenschutz','/dsa']){
+  const f=fixture('localhost',VISITOR_PREVIEW_VERSION);
+  try{
+   f.w.history.replaceState(null,'',path);initializeVisitorPreview();assert.equal(f.shows(),0);
+   f.d.querySelector<HTMLButtonElement>('#visitor-preview-reopen')!.click();assert.equal(f.shows(),1);assert.equal(f.w.localStorage.getItem(VISITOR_PREVIEW_KEY),VISITOR_PREVIEW_VERSION);
+   f.d.querySelector<HTMLButtonElement>('#visitor-withdraw')!.click();assert.equal(f.w.localStorage.getItem(VISITOR_PREVIEW_KEY),null);
+  }finally{f.close();}
+ }
+});
+
+
+test('late dialog initialization preserves a previously resolved authenticated header state',()=>{
+ const f=fixture('localhost',VISITOR_PREVIEW_VERSION);
+ try{const control=f.d.getElementById('visitor-preview-controls')!;control.dataset.authenticated='true';control.hidden=true;initializeVisitorPreview();assert.equal(control.hidden,true);}finally{f.close();}
 });

@@ -39,6 +39,10 @@ export async function api(path: string, options: RequestInit = {}) {
   const r = await fetch("/api" + path, { ...options, headers });
   const data = await r.json();
   if (!r.ok) throw Object.assign(Error(data.error?.message || t("Request failed")), { status: r.status, code: data.error?.code, retryAt: data.error?.retryAt });
+  if(typeof document!=='undefined'&&(path==='/session'||/(?:^|\/)logout$/.test(path))){
+    const win=document.defaultView;
+    win?.dispatchEvent(new win.CustomEvent('nulltopic:session-state',{detail:path==='/session'&&!!(data.operatorId||data.adminId)}));
+  }
   return data;
 }
 function element(tag: string, text?: string) {

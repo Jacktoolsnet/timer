@@ -29,3 +29,11 @@ Privacy and imprint links are now full-link, palette-aware SVG tiles, with a loc
 ## Production opt-in for the advertising integration (2026-11-10)
 
 The preceding loopback-only description remains accurate for ordinary/default builds. An explicit production advertising build now activates the same UI on allowlisted HTTPS nulltopic.com/www public pages, with the separate production key `nulltopic.visitor-confirmation.production.v1`. No preview choice is migrated. It is still only browser self-acknowledgement, not verified age, server-side enforcement or a legal evidence record. This is separate from the Google CMP decision. See [ADVERTISING.md](ADVERTISING.md); default/local builds still make no Google requests.
+
+## Always-visible manual review (2026-11-10)
+
+Every human page using Layout now renders the header review button and a closed confirmation dialog, including account/admin, legal and reporter-status pages. The control is visible in the initial HTML, avoiding a header-width jump when scripts start. Manual review is explicitly available on every origin; only loopback uses the local preview key, all other origins use the separate production key (origin storage remains isolated). Automatic prompting is still limited to public routes and the existing loopback/allowlisted production activation rules. Legal/private/status pages never auto-prompt, including after withdrawal in another tab, unless their review dialog is already open. Opening review alone preserves the stored choice; withdrawal remains explicit. This neither withdraws Google advertising consent nor logs out an account; those are independent controls. No advertising/CMP code is activated on legal/private/status pages by this extension. Earlier statements about those routes lacking the component are superseded by this manual-only access.
+
+### Guest-only visibility refinement
+
+The universal header control is now visible only while signed out. Both operator and admin/root authentication hide it, including on public/legal routes; logout or expiry makes it available again. The server-backed boolean check is passive and cannot extend session idle expiry or create an anonymous session. This supersedes “always visible” above only for authenticated visitors; all manual-vs-automatic prompting and separate declaration/CMP rules remain unchanged.

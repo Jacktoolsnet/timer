@@ -1,5 +1,5 @@
 import {currentLanguage,localizeTrustedUI,t} from '../lib/i18n';
-import {productionAdLocation,PRODUCTION_VISITOR_KEY} from '../lib/advertising';
+import {productionAdLocation,PRODUCTION_VISITOR_KEY,PUBLIC_PAGE_PATHS} from '../lib/advertising';
 import {VISITOR_TERMS_VERSION} from '../lib/visitor-legal-versions';
 /** Browser acknowledgement only: not verified age, a server gate or advertising consent. */
 export const VISITOR_PREVIEW_KEY='nulltopic.visitor-confirmation.v1';
@@ -7,9 +7,11 @@ export const VISITOR_PREVIEW_VERSION=VISITOR_TERMS_VERSION;
 export function isVisitorPreviewHost(hostname:string){return ['localhost','127.0.0.1','[::1]'].includes(hostname);}
 export function initializeVisitorPreview(){
  const dialog=document.querySelector<HTMLDialogElement>('#visitor-confirmation');
- const production=document.body.dataset.productionVisitorConfirmation==='true'&&productionAdLocation(window.location);
- if(!dialog||(!isVisitorPreviewHost(window.location.hostname)&&!production)||typeof dialog.showModal!=='function')return;
- const storageKey=production?PRODUCTION_VISITOR_KEY:VISITOR_PREVIEW_KEY;
+ const local=isVisitorPreviewHost(window.location.hostname);
+ const automatic=PUBLIC_PAGE_PATHS.includes(window.location.pathname.replace(/\/$/,'')||'/')&&(local||(document.body.dataset.productionVisitorConfirmation==='true'&&productionAdLocation(window.location)));
+ if(!dialog||typeof dialog.showModal!=='function')return;
+ // Manual review works on every page; automatic prompting stays restricted to public shells.
+ const storageKey=local?VISITOR_PREVIEW_KEY:PRODUCTION_VISITOR_KEY;
  const notify=()=>window.dispatchEvent(new window.Event('nulltopic:visitor-confirmation'));
 
  const form=dialog.querySelector<HTMLFormElement>('form')!,age=dialog.querySelector<HTMLInputElement>('#visitor-age')!,terms=dialog.querySelector<HTMLInputElement>('#visitor-terms')!,confirm=dialog.querySelector<HTMLButtonElement>('#visitor-confirm')!,reopen=document.querySelector<HTMLButtonElement>('#visitor-preview-reopen')!,controls=document.getElementById('visitor-preview-controls')!;
@@ -18,7 +20,7 @@ export function initializeVisitorPreview(){
  dialog.querySelector<HTMLAnchorElement>('[data-visitor-terms]')!.href='/nutzungsbedingungen'+suffix;
  dialog.querySelector<HTMLAnchorElement>('[data-visitor-privacy]')!.href='/datenschutz'+suffix;
  dialog.querySelector<HTMLAnchorElement>('[data-visitor-imprint]')!.href='/impressum?lang='+language;
- controls.hidden=false;
+ controls.hidden=controls.dataset.authenticated==='true';
  let returnFocus:HTMLElement|null=null;
  const withdraw=dialog.querySelector<HTMLButtonElement>('#visitor-withdraw')!;
  const sync=()=>{confirm.disabled=!(age.checked&&terms.checked);};
@@ -35,10 +37,10 @@ export function initializeVisitorPreview(){
  });
  reopen.addEventListener('click',()=>{returnFocus=reopen;open(true);});
  withdraw.addEventListener('click',()=>{try{localStorage.removeItem(storageKey);}catch{const error=dialog.querySelector<HTMLElement>('#visitor-withdraw-error')!;error.textContent=t('The saved confirmation could not be removed. Please check your browser storage settings.');error.hidden=false;return;}notify();open();});
- const reconcile=()=>{notify();if(read()){if(dialog.open)dialog.close();age.checked=false;terms.checked=false;sync();}else open();};
+ const reconcile=()=>{notify();if(read()){if(dialog.open)dialog.close();age.checked=false;terms.checked=false;sync();}else if(automatic||dialog.open)open();};
  // Read actual shared state, not the event payload (which may already be stale).
  window.addEventListener('storage',event=>{if(event.key===storageKey||event.key===null)reconcile();});
  window.addEventListener('pageshow',event=>{if(event.persisted)reconcile();});
  window.addEventListener('pagehide',()=>{age.checked=false;terms.checked=false;sync();});
- if(!read())open();
+ if(automatic&&!read())open();
 }

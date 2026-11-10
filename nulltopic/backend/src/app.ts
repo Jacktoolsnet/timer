@@ -145,7 +145,7 @@ export async function createApp(options:{mailer?:Mailer}={}) {
     trustProxy: false,
   });
   const requestMode=new AsyncLocalStorage<{passive:boolean}>();
-  app.addHook('onRequest',(req,_reply,done)=>requestMode.run({passive:req.method==='GET'&&['/api/operator/agent-updates','/api/admin/jobs'].includes(req.url.split('?')[0])},done));
+  app.addHook('onRequest',(req,_reply,done)=>requestMode.run({passive:req.method==='GET'&&['/api/operator/agent-updates','/api/admin/jobs','/api/session-state'].includes(req.url.split('?')[0])},done));
   const origin = process.env.PUBLIC_ORIGIN || "http://localhost:4321";
   const mailer=options.mailer || createMailer();
   const emailService=operatorEmail(mailer,origin),loginMail=emailLogin(mailer);
@@ -535,6 +535,11 @@ export async function createApp(options:{mailer?:Mailer}={}) {
     return result;
   });
   app.get("/api/openapi.json", async () => app.swagger());
+  // Read-only UI hint: no CSRF token, identity disclosure or idle-session renewal.
+  app.get('/api/session-state',async req=>{
+    z.object({}).strict().parse(req.query);
+    return {authenticated:!!(req.session.operatorId||req.session.adminId)};
+  });
   app.get("/api/session", async (req) => {
     req.session.csrf ||= secret();
     return {

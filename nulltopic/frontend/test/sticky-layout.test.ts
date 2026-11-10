@@ -3,6 +3,14 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {JSDOM} from 'jsdom';
 const css=readFileSync(new URL('../src/styles/global.css',import.meta.url),'utf8');
+test('account pages start with an empty live status instead of flashing session-check copy',()=>{
+ for(const route of ['operator','administration']){
+  const dom=new JSDOM(readFileSync(new URL(`../dist/${route}/index.html`,import.meta.url),'utf8'));
+  const status=dom.window.document.querySelector('#status')!;
+  assert.equal(status.textContent,'');assert.equal(status.getAttribute('role'),'status');
+  dom.window.close();
+ }
+});
 test('screen layout keeps loading/short-page footers at the viewport bottom without fixing them',()=>{
  assert.match(css,/@media screen \{\s*body \{ display: flex; flex-direction: column; min-height: 100vh; min-height: 100svh; \}/);
  assert.match(css,/body > main \{ flex: 1 0 auto; width: 100%; \}/);

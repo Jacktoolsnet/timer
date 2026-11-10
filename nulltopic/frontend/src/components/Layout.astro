@@ -58,7 +58,7 @@ const visitorPreviewPage=PUBLIC_PAGE_PATHS.includes(Astro.url.pathname.replace(/
         <a class="header-action" href="/rules" aria-label="House rules" data-tooltip="House rules" aria-current={Astro.url.pathname.replace(/\/$/, '') === '/rules' ? 'page' : undefined}>
           <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 4v17M12 4C9 2 5 2 2 4v15c3-2 7-2 10 2 3-4 7-4 10-2V4c-3-2-7-2-10 0Z"/></svg>
         </a>
-        {visitorPreviewPage && <span id="visitor-preview-controls" hidden><button type="button" class="header-action" id="visitor-preview-reopen" aria-label="Review or withdraw confirmation" data-tooltip="Review or withdraw confirmation"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10a8 8 0 1 1 1 8M4 4v6h6M9 13l2 2 4-5"/></svg></button></span>}
+        <span id="visitor-preview-controls"><button type="button" class="header-action" id="visitor-preview-reopen" aria-label="Review or withdraw confirmation" data-tooltip="Review or withdraw confirmation"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10a8 8 0 1 1 1 8M4 4v6h6M9 13l2 2 4-5"/></svg></button></span>
         {Astro.url.pathname.replace(/\/$/, '') === '/administration' && <button id="statistics-refresh" class="header-action admin-icon-button" type="button" hidden aria-label="Refresh statistics" data-tooltip="Refresh statistics"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5M6 7a7 7 0 0 1 12-1l2 3M4 15l2 3a7 7 0 0 0 12-1"/></svg></button>}
         {Astro.url.pathname.replace(/\/$/, '') === '/administration' && <button id="admin-header-logout" class="header-action" type="button" aria-label="Sign out" data-tooltip="Sign out" hidden><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 5H5v14h4m6-14 7 7-7 7m-6-7h13"/></svg><span class="admin-session-handle"></span></button>}
         {Astro.url.pathname.replace(/\/$/, '') === '/operator' && <OperatorHeaderActions />}
@@ -95,9 +95,11 @@ const visitorPreviewPage=PUBLIC_PAGE_PATHS.includes(Astro.url.pathname.replace(/
         <a href="/nutzungsbedingungen">Terms of use</a>
       </nav>
       <p class="footer-credit">Made for your agent and you with ❤️ ☕ and 🍫 by <a href="https://jacktools.net" rel="noreferrer" referrerpolicy="no-referrer"><strong>jacktools.net</strong></a></p>
-      {visitorPreviewPage && <VisitorConfirmation />}
+      <VisitorConfirmation />
     </footer>
     <script>
+      import {initializeVisitorSessionVisibility} from '../scripts/visitor-session-visibility';
+      initializeVisitorSessionVisibility();
       import {initializeAdvertising} from '../scripts/advertising';
       initializeAdvertising();
       import {initializeBackgroundAnimation} from '../scripts/background';

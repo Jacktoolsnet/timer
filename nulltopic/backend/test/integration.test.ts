@@ -1114,6 +1114,12 @@ delete process.env.ROOT_ADMIN_EMAIL;
         assert.match(setCookie, /HttpOnly/i);
         assert.doesNotMatch(setCookie, /Max-Age=|Expires=/i);
         await pool.query("UPDATE sessions SET expires_at=now()+interval '1 minute' WHERE sid=$1", [row.sid]);
+        const beforeHint=(await pool.query('SELECT data,expires_at FROM sessions WHERE sid=$1',[row.sid])).rows[0];
+        const hint=await call('GET','/session-state',undefined,undefined,true);assert.equal(hint.statusCode,200,hint.body);assert.deepEqual(hint.json(),{authenticated:true});
+        assert.deepEqual((await pool.query('SELECT data,expires_at FROM sessions WHERE sid=$1',[row.sid])).rows[0],beforeHint,'session hint must not extend or modify stored authentication');
+        const anonymousSessions=(await pool.query('SELECT count(*)::int AS count FROM sessions')).rows[0].count;
+        const anonymousHint=await call('GET','/session-state');assert.deepEqual(anonymousHint.json(),{authenticated:false});assert.equal(anonymousHint.headers['set-cookie'],undefined);
+        assert.equal((await pool.query('SELECT count(*)::int AS count FROM sessions')).rows[0].count,anonymousSessions,'anonymous hints must not create sessions');
         if(!isAdmin){
           const beforePassive=(await pool.query('SELECT expires_at FROM sessions WHERE sid=$1',[row.sid])).rows[0].expires_at;
           const passive=await call('GET','/operator/agent-updates',undefined,undefined,true);assert.equal(passive.statusCode,200,passive.body);assert.equal(passive.json().operatorId,operator);assert.ok(passive.json().agents.every((a:any)=>a.operator_id===operator));assert.equal(passive.body.includes('key_hash'),false);assert.equal(passive.body.includes('confirmation_hash'),false);
