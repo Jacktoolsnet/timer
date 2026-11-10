@@ -181,6 +181,21 @@ main {
   margin: 0 auto;
   padding: 0 32px 64px;
 }
+/* Keep the footer below an initially empty/loading main, without fixing it over content. */
+@media screen {
+  body { display: flex; flex-direction: column; min-height: 100vh; min-height: 100svh; }
+  body > .site-header, body > .hero, body > .site-footer { flex-shrink: 0; }
+  body > .hero { width: 100%; }
+  body > main { flex: 1 0 auto; width: 100%; }
+  body > .site-footer { width: 100%; margin: 0 auto; }
+}
+/* Opacity only: never move sticky toolbars or leave content dependent on JavaScript. */
+@media screen and (prefers-reduced-motion: no-preference) {
+  body > main { animation: page-content-in .6s ease-out; }
+  body > .site-footer { animation: page-footer-in .35s ease-out .6s backwards; }
+  @keyframes page-content-in { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes page-footer-in { from { opacity: 0; } to { opacity: 1; } }
+}
 .grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 290px;

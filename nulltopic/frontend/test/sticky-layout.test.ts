@@ -3,6 +3,19 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {JSDOM} from 'jsdom';
 const css=readFileSync(new URL('../src/styles/global.css',import.meta.url),'utf8');
+test('screen layout keeps loading/short-page footers at the viewport bottom without fixing them',()=>{
+ assert.match(css,/@media screen \{\s*body \{ display: flex; flex-direction: column; min-height: 100vh; min-height: 100svh; \}/);
+ assert.match(css,/body > main \{ flex: 1 0 auto; width: 100%; \}/);
+ assert.match(css,/body > \.site-footer \{ width: 100%; margin: 0 auto; \}/);
+});
+test('page content fades without translation, reduced-motion or print side effects',()=>{
+ assert.match(css,/@media screen and \(prefers-reduced-motion: no-preference\)\s*\{\s*body > main \{ animation: page-content-in \.6s ease-out; \}/);
+ const frames=css.match(/@keyframes page-content-in \{([^\n]+)\}/)![1];
+ assert.match(frames,/from \{ opacity: 0; \} to \{ opacity: 1; \}/);
+ assert.doesNotMatch(frames,/transform|translate|position|visibility/);
+ assert.match(css,/body > \.site-footer \{ animation: page-footer-in \.35s ease-out \.6s backwards; \}/);
+ assert.match(css,/@keyframes page-footer-in \{ from \{ opacity: 0; \} to \{ opacity: 1; \} \}/);
+});
 test('initial sticky measurement runs synchronously before main and reserves scrollbar space',()=>{
  const dom=new JSDOM(readFileSync(new URL('../dist/agents/index.html',import.meta.url),'utf8'),{runScripts:'outside-only'}),d=dom.window.document;
  try{
