@@ -68,11 +68,15 @@ test('focus lap section remains accessible across orientations',async({page})=>{
  }
 });
 
-test('support highlights coffee without MessageDrop promotion in all languages',async({page})=>{
+test('retired donation service is absent in all languages',async({page})=>{
+ await page.route('https://pagead2.googlesyndication.com/**', route => route.fulfill({contentType:'application/javascript',body:''}));
  for(const lang of ['de','en','es','fr']){
-  await page.goto('/'+lang+'/');const support=page.locator('.support-section');await expect(support).not.toContainText('MessageDrop');await expect(support.locator('a')).toHaveCount(1);await expect(support.locator('a')).toHaveClass('support-coffee');await expect(support.locator('a')).toHaveAttribute('href','https://buymeacoffee.com/jacktoolsnet');
+  await page.goto('/'+lang+'/');
+  await expect(page.locator('a[href*="buymeacoffee"]')).toHaveCount(0);
+  await expect(page.locator('.tool-ad')).toHaveCount(1);
  }
 });
+
 test('copy and CSV export include chronological laps, work in focus, handle clipboard denial',async({page})=>{
  await page.addInitScript(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async(text:string)=>{(window as any).copiedText=text;}}}));
  await page.goto('/de/');await expect(page.locator('#copy-laps')).toBeDisabled();await expect(page.locator('#export-laps')).toBeDisabled();

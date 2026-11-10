@@ -112,20 +112,14 @@ Tests in `test-results/` (nicht versioniert).
 4. Reale Geräte / Safari / Firefox testen und Barrierefreiheit prüfen.
 5. Sitemap bei Search Console einreichen und von jacktools.net verlinken.
 
-## Werbe- und trackingfrei
+## Werbung und Datenschutz
 
-Keine Werbeplätze, AdSense-Integration, Werbe-CMP, Analysewerkzeuge oder externen
-Widgets. Das öffentliche Tool bleibt kostenlos nutzbar. Im Footer führen normale
-Links ohne Trackingparameter zu:
-- https://buymeacoffee.com/jacktoolsnet (freiwillige Unterstützung)
-- https://app.messagedrop.de (unser anderes Projekt)
-- https://jacktools.net (Entwickler)
-
-Externe Ressourcen werden dadurch nicht eingebettet oder vorab geladen.
-Die verlinkten Dienste haben eigene Datenschutzbedingungen; der Timer behauptet
-nicht, dass Zahlungen oder die Nutzung anderer Dienste ohne Datenverarbeitung erfolgen.
-Der Datenschutz-/Speicherdialog dient der Information und dem Löschen lokaler
-Einstellungen, nicht der Einwilligung in Werbung.
+Das Tool bleibt kostenlos und ohne Benutzerkonto nutzbar. Ein responsiver
+Google-AdSense-Werbeplatz steht zwischen Timeransicht und Einstellungen;
+in der Fokusansicht wird er ausgeblendet. Die Google-Einwilligungsnachrichten
+sind getrennt vom optionalen Speichern lokaler Tool-Einstellungen.
+Datenschutzseiten erläutern AdSense, Cookies, Werbepartner und Widerruf.
+Deployment- und Testhinweise: `../docs/seo/ADSENSE-INTEGRATION.md`.
 
 ## Struktur
 

@@ -35,7 +35,7 @@ npm run dev
 Dies ist ein Entwurf, keine rechtliche Freigabe. Betreiberinformationen und
 Hostingannahmen stammen aus dem Timer-Projekt und müssen für die Homepage
 bestätigt werden. Insbesondere Logs und Löschfristen, Hosting-/E-Mail-Verträge,
-Empfänger/Drittlandverarbeitung, Datenflüsse bei Buy Me a Coffee sowie eine
+Empfänger/Drittlandverarbeitung, Datenflüsse bei Google AdSense sowie eine
 etwaige Wirtschafts-Identifikationsnummer prüfen. Rechtstexte abschließend prüfen.
 Lokale, nicht veröffentlichbare Timer-Prüfnotizen wurden nicht kopiert.
 

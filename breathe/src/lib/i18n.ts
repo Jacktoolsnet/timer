@@ -2,10 +2,10 @@ export const languages = ['en', 'de', 'es', 'fr'] as const;
 export type Language = typeof languages[number];
 export const languageNames = { en: 'English', de: 'Deutsch', es: 'Español', fr: 'Français' };
 const en = {
-  "privacyPromise": "Free to use. No account.", "supportTitle": "Small tools. Made possible together.", supportBody: 'If this breathing guide helps you, you can support our work with a coffee.', supportCoffee: 'Support us on Buy Me a Coffee', supportVisit: 'Discover MessageDrop', externalNote: 'External links: the linked services process data under their own privacy policies.', creditBefore: 'Made for you with', creditAnd: 'and', creditAfter: 'by',
+  "privacyPromise": "Free to use. No account.", "supportTitle": "Small tools. Made possible together.", "supportBody": "This website uses Google AdSense advertising. Details are in our privacy notice.",  supportVisit: 'Discover MessageDrop', externalNote: 'External links: the linked services process data under their own privacy policies.', creditBefore: 'Made for you with', creditAnd: 'and', creditAfter: 'by',
   menuSettings: 'Settings', appearance: 'Appearance', lightMode: 'Light', darkMode: 'Dark',
   autoSaved: 'Saved automatically. Apply duration changes when you are ready.',
-  fontSize: 'Font size', styleLabel: 'Style', warm: 'Warm', minimal: 'Minimal', technical: 'Technical', soft: 'Soft', 
+  fontSize: 'Font size', styleLabel: 'Style', warm: 'Warm', minimal: 'Minimal', technical: 'Technical', soft: 'Soft',
   colorScheme: 'Colour palette', colorHint: 'Preview instantly, without restarting the breathing guide.', terracotta: 'Terracotta', blue: 'Blue', green: 'Green', orange: 'Warm orange', red: 'Warm red', violet: 'Violet', teal: 'Teal', rose: 'Rose',
   tagline: 'A little space for focus.',
   eyebrow: 'LESS DISTRACTION. MORE INTENTION.',
@@ -22,7 +22,7 @@ const en = {
   settings: 'Make it yours', settingsIntro: 'A rhythm that works for you.',
   duration: 'Countdown duration', focusMinutes: 'Focus · minutes', shortMinutes: 'Short break · minutes', longMinutes: 'Long break · minutes',
   rounds: 'Rounds before a long break', sound: 'End-of-breathing guide sound', soundHint: 'A gentle signal when your time is up.',
-  
+
   apply: 'Apply settings', saved: 'Settings applied and saved in this browser.', applied: 'Settings applied for this visit.',
   storageError: 'Browser storage is unavailable. Settings will work for this visit.',
   invalid: 'Check your values. The countdown must be at least one second.',
@@ -53,10 +53,10 @@ const en = {
 };
 type Dictionary = { [K in keyof typeof en]: string };
 const de: Dictionary = {
-  "privacyPromise": "Kostenlos. Ohne Anmeldung.", "supportTitle": "Kleine Tools. Gemeinsam möglich.", supportBody: 'Wenn dir der Breathe hilft, kannst du unsere Arbeit mit einem Kaffee unterstützen.', supportCoffee: 'Auf Buy Me a Coffee unterstützen', supportVisit: 'MessageDrop entdecken', externalNote: 'Externe Links: Auf den verlinkten Seiten gelten die jeweiligen Datenschutzhinweise.', creditBefore: 'Für Dich mit', creditAnd: 'und', creditAfter: 'entwickelt von',
+  "privacyPromise": "Kostenlos. Ohne Anmeldung.", "supportTitle": "Kleine Tools. Gemeinsam möglich.", "supportBody": "Diese Website verwendet Google AdSense für Werbung. Details stehen in der Datenschutzerklärung.",  supportVisit: 'MessageDrop entdecken', externalNote: 'Externe Links: Auf den verlinkten Seiten gelten die jeweiligen Datenschutzhinweise.', creditBefore: 'Für Dich mit', creditAnd: 'und', creditAfter: 'entwickelt von',
   menuSettings: 'Einstellungen', appearance: 'Darstellung', lightMode: 'Hell', darkMode: 'Dunkel',
   autoSaved: 'Automatisch gespeichert. Geänderte Zeiten kannst du bei Bedarf übernehmen.',
-  fontSize: 'Schriftgröße', styleLabel: 'Stil', warm: 'Warm', minimal: 'Minimal', technical: 'Technisch', soft: 'Soft', 
+  fontSize: 'Schriftgröße', styleLabel: 'Stil', warm: 'Warm', minimal: 'Minimal', technical: 'Technisch', soft: 'Soft',
   colorScheme: 'Farbschema', colorHint: 'Sofort ansehen, ohne den Breathe neu zu starten.', terracotta: 'Terrakotta', blue: 'Blau', green: 'Grün', orange: 'Warmes Orange', red: 'Warmes Rot', violet: 'Violett', teal: 'Türkis', rose: 'Rosé',
   tagline: 'Ein bisschen Raum für Fokus.',
   eyebrow: 'WENIGER ABLENKUNG. MEHR BEWUSSTE ZEIT.',
@@ -73,7 +73,7 @@ const de: Dictionary = {
   settings: 'Dein eigener Rhythmus', settingsIntro: 'So, wie es zu deinem Tag passt.',
   duration: 'Countdown-Dauer', focusMinutes: 'Fokus · Minuten', shortMinutes: 'Kurze Pause · Minuten', longMinutes: 'Lange Pause · Minuten',
   rounds: 'Runden vor einer langen Pause', sound: 'Signalton am Ende', soundHint: 'Ein sanfter Klang, wenn deine Zeit um ist.',
-  
+
   apply: 'Einstellungen übernehmen', saved: 'Einstellungen übernommen und im Browser gespeichert.', applied: 'Einstellungen für diesen Besuch übernommen.',
   storageError: 'Browserspeicher ist nicht verfügbar. Die Einstellungen gelten für diesen Besuch.',
   invalid: 'Bitte prüfe die Werte. Der Countdown muss mindestens eine Sekunde dauern.',
@@ -103,10 +103,10 @@ const de: Dictionary = {
   js: 'Aktiviere JavaScript, um den Breathe zu nutzen. Die Anleitung ist auch ohne JavaScript verfügbar.',
 };
 const es: Dictionary = {
-  "privacyPromise": "Gratis. Sin cuenta.", "supportTitle": "Pequeñas herramientas. Posibles gracias a todos.", supportBody: 'Si este guía de respiración te resulta útil, puedes apoyar nuestro trabajo con un café.', supportCoffee: 'Apóyanos en Buy Me a Coffee', supportVisit: 'Descubre MessageDrop', externalNote: 'Enlaces externos: los servicios enlazados tratan datos según sus propias políticas de privacidad.', creditBefore: 'Desarrollado para ti con', creditAnd: 'y', creditAfter: 'por',
+  "privacyPromise": "Gratis. Sin cuenta.", "supportTitle": "Pequeñas herramientas. Posibles gracias a todos.", "supportBody": "Este sitio utiliza publicidad de Google AdSense. Consulta el aviso de privacidad.",  supportVisit: 'Descubre MessageDrop', externalNote: 'Enlaces externos: los servicios enlazados tratan datos según sus propias políticas de privacidad.', creditBefore: 'Desarrollado para ti con', creditAnd: 'y', creditAfter: 'por',
   menuSettings: 'Ajustes', appearance: 'Apariencia', lightMode: 'Claro', darkMode: 'Oscuro',
   autoSaved: 'Guardado automáticamente. Aplica los cambios de duración cuando quieras.',
-  fontSize: 'Tamaño de letra', styleLabel: 'Estilo', warm: 'Cálido', minimal: 'Minimalista', technical: 'Técnico', soft: 'Suave', 
+  fontSize: 'Tamaño de letra', styleLabel: 'Estilo', warm: 'Cálido', minimal: 'Minimalista', technical: 'Técnico', soft: 'Suave',
   colorScheme: 'Paleta de colores', colorHint: 'Vista previa instantánea sin reiniciar el guía de respiración.', terracotta: 'Terracota', blue: 'Azul', green: 'Verde', orange: 'Naranja cálido', red: 'Rojo cálido', violet: 'Violeta', teal: 'Turquesa', rose: 'Rosa',
   tagline: 'Un pequeño espacio para concentrarte.', eyebrow: 'MENOS DISTRACCIONES. MÁS INTENCIÓN.',
   heading: 'Tiempo para', headingAccent: 'lo que importa.',
@@ -121,7 +121,7 @@ const es: Dictionary = {
   settings: 'A tu manera', settingsIntro: 'Un ritmo que se adapta a tu día.', duration: 'Duración de la cuenta atrás',
   focusMinutes: 'Concentración · minutos', shortMinutes: 'Descanso corto · minutos', longMinutes: 'Descanso largo · minutos',
   rounds: 'Rondas antes del descanso largo', sound: 'Sonido al terminar', soundHint: 'Una señal suave cuando termina el tiempo.',
-  
+
   apply: 'Aplicar ajustes', saved: 'Ajustes aplicados y guardados en este navegador.', applied: 'Ajustes aplicados para esta visita.',
   storageError: 'El almacenamiento no está disponible. Los ajustes se usarán durante esta visita.',
   invalid: 'Comprueba los valores. La cuenta atrás debe durar al menos un segundo.',
@@ -146,10 +146,10 @@ const es: Dictionary = {
   js: 'Activa JavaScript para usar el guía de respiración. La guía está disponible sin JavaScript.',
 };
 const fr: Dictionary = {
-  "privacyPromise": "Gratuit. Sans compte.", "supportTitle": "Petits outils. Ensemble, c’est possible.", supportBody: 'Si ce guide respiratoire vous est utile, vous pouvez soutenir notre travail avec un café.', supportCoffee: 'Nous soutenir sur Buy Me a Coffee', supportVisit: 'Découvrir MessageDrop', externalNote: 'Liens externes : les services liés traitent les données selon leurs propres politiques de confidentialité.', creditBefore: 'Développé pour vous avec', creditAnd: 'et', creditAfter: 'par',
+  "privacyPromise": "Gratuit. Sans compte.", "supportTitle": "Petits outils. Ensemble, c’est possible.", "supportBody": "Ce site utilise des publicités Google AdSense. Consultez notre politique de confidentialité.",  supportVisit: 'Découvrir MessageDrop', externalNote: 'Liens externes : les services liés traitent les données selon leurs propres politiques de confidentialité.', creditBefore: 'Développé pour vous avec', creditAnd: 'et', creditAfter: 'par',
   menuSettings: 'Réglages', appearance: 'Apparence', lightMode: 'Clair', darkMode: 'Sombre',
   autoSaved: 'Enregistré automatiquement. Appliquez les nouvelles durées quand vous le souhaitez.',
-  fontSize: 'Taille du texte', styleLabel: 'Style', warm: 'Chaleureux', minimal: 'Minimaliste', technical: 'Technique', soft: 'Doux', 
+  fontSize: 'Taille du texte', styleLabel: 'Style', warm: 'Chaleureux', minimal: 'Minimaliste', technical: 'Technique', soft: 'Doux',
   colorScheme: 'Palette de couleurs', colorHint: 'Aperçu immédiat sans redémarrer le guide respiratoire.', terracotta: 'Terre cuite', blue: 'Bleu', green: 'Vert', orange: 'Orange chaud', red: 'Rouge chaud', violet: 'Violet', teal: 'Turquoise', rose: 'Rose',
   tagline: 'Un peu de place pour se concentrer.', eyebrow: 'MOINS DE DISTRACTIONS. PLUS DE SENS.',
   heading: 'Du temps pour', headingAccent: 'ce qui compte.',
@@ -164,7 +164,7 @@ const fr: Dictionary = {
   settings: 'À votre rythme', settingsIntro: 'Un rythme adapté à votre journée.', duration: 'Durée du compte à rebours',
   focusMinutes: 'Concentration · minutes', shortMinutes: 'Petite pause · minutes', longMinutes: 'Longue pause · minutes',
   rounds: 'Cycles avant une longue pause', sound: 'Son en fin de guide respiratoire', soundHint: 'Un signal doux lorsque le temps est écoulé.',
-  
+
   apply: 'Appliquer les réglages', saved: 'Réglages appliqués et enregistrés dans ce navigateur.', applied: 'Réglages appliqués pour cette visite.',
   storageError: 'Le stockage est indisponible. Les réglages restent actifs pour cette visite.',
   invalid: 'Vérifiez les valeurs. Le compte à rebours doit durer au moins une seconde.',

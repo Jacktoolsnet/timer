@@ -14,8 +14,8 @@ const en = {
   "rememberPreferences": "Remember settings on this device",
   "rememberHint": "Optional: save language, appearance, music and animation preferences in this browser for future visits. No transfer to us. Without this choice, settings last only on this page.",
   "supportTitle": "Small tools. Made possible together.",
-  "supportBody": "If this Sound helps you, you can support our work with a coffee.",
-  "supportCoffee": "Support us on Buy Me a Coffee",
+  "supportBody": "This website uses Google AdSense advertising. Details are in our privacy notice.",
+
   "footer": "Small tools. More space for life.",
   "legal": "Legal notice",
   "privacy": "Privacy",
@@ -56,8 +56,8 @@ const de = {
   "rememberPreferences": "Einstellungen auf diesem Gerät merken",
   "rememberHint": "Optional: Sprache, Darstellung, Musik- und Animationseinstellungen für spätere Besuche in diesem Browser speichern. Keine Übertragung an uns. Ohne diese Wahl gelten die Einstellungen nur auf dieser Seite.",
   "supportTitle": "Kleine Tools. Gemeinsam möglich.",
-  "supportBody": "Wenn dir JackTools Sound gefällt, kannst du unsere Arbeit mit einem Kaffee unterstützen.",
-  "supportCoffee": "Auf Buy Me a Coffee unterstützen",
+  "supportBody": "Diese Website verwendet Google AdSense für Werbung. Details stehen in der Datenschutzerklärung.",
+
   "footer": "Kleine Tools. Mehr Raum fürs Leben.",
   "legal": "Impressum",
   "privacy": "Datenschutz",
@@ -98,8 +98,8 @@ const es = {
   "rememberPreferences": "Recordar ajustes en este dispositivo",
   "rememberHint": "Opcional: guardar idioma, apariencia, música y animaciones en este navegador. No se envían a nosotros. Sin esta opción, solo duran en esta página.",
   "supportTitle": "Pequeñas herramientas. Posibles gracias a todos.",
-  "supportBody": "Si este Sound te ayuda, puedes apoyar nuestro trabajo con un café.",
-  "supportCoffee": "Apóyanos en Buy Me a Coffee",
+  "supportBody": "Este sitio utiliza publicidad de Google AdSense. Consulta el aviso de privacidad.",
+
   "footer": "Pequeñas herramientas. Más espacio para vivir.",
   "legal": "Aviso legal",
   "privacy": "Privacidad",
@@ -140,8 +140,8 @@ const fr = {
   "rememberPreferences": "Mémoriser les réglages sur cet appareil",
   "rememberHint": "Facultatif : conserver la langue, l’apparence, la musique et les animations dans ce navigateur. Aucun envoi vers nous. Sinon, elles ne durent que sur cette page.",
   "supportTitle": "Petits outils. Ensemble, c’est possible.",
-  "supportBody": "Si ce Sound vous aide, vous pouvez soutenir notre travail avec un café.",
-  "supportCoffee": "Nous soutenir sur Buy Me a Coffee",
+  "supportBody": "Ce site utilise des publicités Google AdSense. Consultez notre politique de confidentialité.",
+
   "footer": "De petits outils. Plus de place pour vivre.",
   "legal": "Mentions légales",
   "privacy": "Confidentialité",

@@ -13,7 +13,7 @@ export const usageTranslations:Record<UsageTool,Record<'es'|'fr',readonly UsageS
       {
         "title": "Gratis y sin cuenta",
         "paragraphs": [
-          "El temporizador es gratuito y no requiere una cuenta. Apoyarnos mediante Buy Me a Coffee es voluntario y no es necesario para usarlo."
+          "El temporizador es gratuito y no requiere una cuenta."
         ]
       },
       {
@@ -75,7 +75,7 @@ export const usageTranslations:Record<UsageTool,Record<'es'|'fr',readonly UsageS
       {
         "title": "Gratuit, sans compte",
         "paragraphs": [
-          "Le minuteur est gratuit et ne nécessite aucun compte. Le soutien via Buy Me a Coffee est facultatif et n’est pas une condition d’utilisation."
+          "Le minuteur est gratuit et ne nécessite aucun compte."
         ]
       },
       {
@@ -139,7 +139,7 @@ export const usageTranslations:Record<UsageTool,Record<'es'|'fr',readonly UsageS
       {
         "title": "Gratis y sin cuenta",
         "paragraphs": [
-          "Usa el cronómetro gratis y sin cuenta. El apoyo mediante Buy Me a Coffee es voluntario."
+          "Usa el cronómetro gratis y sin cuenta."
         ]
       },
       {
@@ -173,7 +173,7 @@ export const usageTranslations:Record<UsageTool,Record<'es'|'fr',readonly UsageS
       {
         "title": "Gratuit, sans compte",
         "paragraphs": [
-          "Utilisez le chronomètre gratuitement et sans compte. Le soutien via Buy Me a Coffee est facultatif."
+          "Utilisez le chronomètre gratuitement et sans compte."
         ]
       },
       {
@@ -209,7 +209,7 @@ export const usageTranslations:Record<UsageTool,Record<'es'|'fr',readonly UsageS
       {
         "title": "Gratis y para el día a día",
         "paragraphs": [
-          "El reloj es gratuito y no requiere una cuenta. El apoyo mediante Buy Me a Coffee es voluntario. Muestra hora y fecha en distintas vistas para orientarte en la vida cotidiana; no está destinado a medicina, emergencias ni mediciones críticas para la seguridad. Usa sistemas adecuados y fiables para esos fines."
+          "El reloj es gratuito y no requiere una cuenta. Muestra hora y fecha en distintas vistas para orientarte en la vida cotidiana; no está destinado a medicina, emergencias ni mediciones críticas para la seguridad. Usa sistemas adecuados y fiables para esos fines."
         ]
       },
       {
@@ -267,7 +267,7 @@ export const usageTranslations:Record<UsageTool,Record<'es'|'fr',readonly UsageS
       {
         "title": "Gratuit, pour le quotidien",
         "paragraphs": [
-          "L’horloge est gratuite et sans compte. Le soutien via Buy Me a Coffee est facultatif. Elle affiche heure et date dans plusieurs vues pour le quotidien, pas pour la médecine, les urgences ou les mesures critiques pour la sécurité. Utilisez alors des systèmes adaptés et fiables."
+          "L’horloge est gratuite et sans compte. Elle affiche heure et date dans plusieurs vues pour le quotidien, pas pour la médecine, les urgences ou les mesures critiques pour la sécurité. Utilisez alors des systèmes adaptés et fiables."
         ]
       },
       {
@@ -321,7 +321,7 @@ export const usageTranslations:Record<UsageTool,Record<'es'|'fr',readonly UsageS
       {
         "title": "Uso y límites",
         "paragraphs": [
-          "Breathe es una herramienta gratuita para pausas tranquilas y concentración, sin cuenta. El apoyo mediante Buy Me a Coffee es voluntario. Estas notas no eximen de responsabilidad ni restringen derechos legales.",
+          "Breathe es una herramienta gratuita para pausas tranquilas y concentración, sin cuenta. Estas notas no eximen de responsabilidad ni restringen derechos legales.",
           "Los patrones son guías generales, no recomendaciones personalizadas. No diagnostica, promete beneficios médicos ni sustituye consejo o tratamiento. No sirve para emergencias ni para vigilar tu respiración."
         ]
       },
@@ -389,7 +389,7 @@ export const usageTranslations:Record<UsageTool,Record<'es'|'fr',readonly UsageS
       {
         "title": "Utilisation et limites",
         "paragraphs": [
-          "Breathe est un outil gratuit pour les pauses calmes et la concentration, sans compte. Le soutien via Buy Me a Coffee est facultatif. Ces notes n’écartent pas la responsabilité et ne restreignent pas les droits légaux.",
+          "Breathe est un outil gratuit pour les pauses calmes et la concentration, sans compte. Ces notes n’écartent pas la responsabilité et ne restreignent pas les droits légaux.",
           "Les rythmes sont des repères généraux, pas des recommandations personnalisées. Breathe ne diagnostique rien, ne promet aucun bénéfice médical et ne remplace ni avis ni traitement. Il ne sert ni aux urgences ni à surveiller la respiration."
         ]
       },

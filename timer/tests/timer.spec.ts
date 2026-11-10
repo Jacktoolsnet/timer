@@ -417,26 +417,15 @@ test('focus remains usable when fullscreen is denied', async ({ page }) => {
   await expect(page.locator('body')).not.toHaveClass(/focus-view/);
 });
 
-test('privacy-first footer has ordinary support links and loads no external resources', async ({ page }) => {
-  const externalRequests: string[] = [];
-  page.on('request', request => {
-    if (new URL(request.url()).hostname !== '127.0.0.1') externalRequests.push(request.url());
-  });
+test('advertising is disclosed separately from local preferences', async ({ page }) => {
+  await page.route('https://pagead2.googlesyndication.com/**', route => route.fulfill({contentType:'application/javascript', body:''}));
   await page.goto('/de/timer/');
-  await expect(page.locator('.ad-slot')).toHaveCount(0);
-  await expect(page.locator('.privacy-promise')).toHaveText('Ohne Werbung. Ohne Tracking.');
-  await expect(page.locator('.footer-credit')).toContainText('Für Dich mit');
-  await expect(page.locator('.footer-credit')).toContainText('entwickelt von JackTools.Net');
-  for (const href of ['https://buymeacoffee.com/jacktoolsnet', 'https://app.messagedrop.de']) {
-    const link = page.locator('a[href="' + href + '"]');
-    await expect(link).toBeVisible();
-    await expect(link).toHaveAttribute('rel', 'noopener noreferrer');
-    await expect(link).toHaveAttribute('referrerpolicy', 'no-referrer');
-  }
+  await expect(page.locator('.tool-ad')).toHaveCount(1);
+  await expect(page.locator('a[href*="buymeacoffee"]')).toHaveCount(0);
+  await expect(page.locator('.footer-credit')).toContainText(/entwickelt von jacktools\.net/i);
   await page.locator('#privacy-open').click();
-  await expect(page.locator('#privacy-dialog')).toContainText('lokal gespeicherte Einstellungen löschen');
-  await expect(page.locator('#privacy-dialog')).not.toContainText('zertifizierte');
-  expect(externalRequests).toEqual([]);
+  await expect(page.locator('#privacy-dialog')).toContainText('Google AdSense');
+  await expect(page.locator('#privacy-dialog')).toContainText('ändert keine Werbeeinwilligung');
 });
 
 test('persistent settings require opt-in and deletion revokes it', async ({ page }) => {
