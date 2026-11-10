@@ -1,4 +1,5 @@
 :root {
+  scrollbar-gutter: stable;
   font-family: Inter, "Segoe UI", system-ui, sans-serif;
   color: var(--text);
   background: var(--bg);
@@ -629,6 +630,13 @@ body > header :is(a, button, input, summary) {
   margin: 0;
   max-width: none;
 }
+@media(min-width:1000px){
+ .home-layout:has(.ad:not([data-ad-state=filled])) .home-intro .lead{max-width:none}
+ .home-layout:has(.ad:not([data-ad-state=filled])) .home-intro h1{
+  max-width:none;
+  font-size:calc(clamp(2.375rem,4vw,3.25rem) * var(--font-scale));
+ }
+}
 @media (max-width: 760px) {
   .home-layout {
     grid-template-columns: minmax(0, 1fr);
@@ -908,6 +916,8 @@ body > header nav { gap: 8px; }
 @media (max-width: 760px) { .admin-create-user { grid-template-columns: 1fr; } }
 
 .agents-layout > section { min-width: 0; width: 100%; }
+.agents-layout:has(>aside .ad:not([data-ad-state=filled])) > section{max-width:none}
+.rules-layout:has(>aside .ad:not([data-ad-state=filled])) > section{max-width:none}
 .agent-profile-card { padding: 28px; border-top: 3px solid var(--accent); }
 .agent-profile-header { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
 .agent-profile-avatar { position: relative; display: grid; place-items: center; flex-shrink: 0; width: 88px; height: 88px; border-radius: 26px; border: 1px solid var(--line); background: var(--accent-soft); color: var(--accent); overflow: hidden; font-family: var(--display-font), serif; font-size: 2.25rem; }
@@ -1677,9 +1687,9 @@ body > .site-header > nav .header-action:nth-last-child(-n+2)::after { left: aut
 .operator-overview-agent:is(:hover,:focus-within) { z-index: 3; }
 .operator-overview-agent .operator-agent-remove[data-tooltip]::after { left: auto; right: 0; max-width: min(220px, calc(100vw - 96px)); }
 
-.post-image { margin: 18px 0; min-width: 0; }
-.post-image img { display: block; width: auto; max-width: 100%; height: auto; max-height: 520px; object-fit: contain; border-radius: 14px; border: 1px solid var(--line); background: var(--accent-soft); }
-.post-image figcaption { margin-top: 10px; color: var(--muted); font-size: .8125rem; line-height: 1.6; overflow-wrap: anywhere; white-space: pre-wrap; }
+.post-image { margin: 18px auto; min-width: 0; max-width: 100%; }
+.post-image img { display: block; width: auto; max-width: 100%; height: auto; max-height: 520px; margin-inline: auto; object-fit: contain; border-radius: 14px; border: 1px solid var(--line); background: var(--accent-soft); }
+.post-image figcaption { width: 100%; text-align: center; margin-top: 10px; color: var(--muted); font-size: .8125rem; line-height: 1.6; overflow-wrap: anywhere; white-space: pre-wrap; }
 .post-image-label { display: block; margin-bottom: 4px; color: var(--accent); font-weight: 650; }
 [data-style=technical] .post-image img { border-radius: 6px; }
 [data-style=soft] .post-image img { border-radius: 24px; }
@@ -1690,7 +1700,7 @@ body > .site-header > nav .header-action:nth-last-child(-n+2)::after { left: aut
 button.operator-agent-authorization-hint:hover { background: var(--surface); color: var(--accent); }
 button.operator-agent-authorization-hint:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
 
-.post-image-trigger { display: block; max-width: 100%; margin: 0; padding: 0; background: transparent; border: 0; border-radius: 14px; cursor: zoom-in; text-align: left; }
+.post-image-trigger { display: block; max-width: 100%; margin: 0 auto; padding: 0; background: transparent; border: 0; border-radius: 14px; cursor: zoom-in; text-align: left; }
 .post-image-trigger:hover { background: transparent; filter: none; }
 .post-image-trigger:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
 .report-dialog.image-viewer { width: min(1120px, calc(100vw - 24px)); max-width: none; height: min(900px, 90dvh); max-height: calc(100dvh - 24px); padding: 0; overflow: hidden; }

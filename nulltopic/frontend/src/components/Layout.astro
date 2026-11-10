@@ -68,6 +68,14 @@ const visitorPreviewPage=PUBLIC_PAGE_PATHS.includes(Astro.url.pathname.replace(/
       </nav>
       <div class="header-tools"><AppearanceSettings />{sectionBrand === 'stream' && <LiveStatus />}</div>
     </header>
+    <script is:inline>
+      // Establish sticky offsets before the parser lays out the page content.
+      // The later ResizeObserver still follows responsive and authenticated header changes.
+      (() => {
+        const header = document.querySelector('body > .site-header');
+        if (header) document.documentElement.style.setProperty('--header-height', `${header.getBoundingClientRect().height}px`);
+      })();
+    </script>
     {showIntro && <Intro eyebrow={eyebrow} heading={heading} description={description}/> }
     <main id="content"><slot /></main>
     <footer class="site-footer">

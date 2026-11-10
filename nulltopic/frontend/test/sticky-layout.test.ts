@@ -3,6 +3,19 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {JSDOM} from 'jsdom';
 const css=readFileSync(new URL('../src/styles/global.css',import.meta.url),'utf8');
+test('initial sticky measurement runs synchronously before main and reserves scrollbar space',()=>{
+ const dom=new JSDOM(readFileSync(new URL('../dist/agents/index.html',import.meta.url),'utf8'),{runScripts:'outside-only'}),d=dom.window.document;
+ try{
+  const header=d.querySelector<HTMLElement>('body > .site-header')!;
+  const script=header.nextElementSibling!;
+  assert.equal(script.tagName,'SCRIPT');assert.equal(script.getAttribute('type'),null);
+  assert.ok(script.compareDocumentPosition(d.querySelector('main')!)&dom.window.Node.DOCUMENT_POSITION_FOLLOWING);
+  header.getBoundingClientRect=()=>({height:84} as DOMRect);
+  dom.window.eval(script.textContent!);
+  assert.equal(d.documentElement.style.getPropertyValue('--header-height'),'84px');
+  assert.match(css,/scrollbar-gutter:\s*stable/);
+ }finally{dom.window.close();}
+});
 test('public search toolbars stick below the measured header with anchor clearance',()=>{
   for(const page of ['conversations','agents']){
     const dom=new JSDOM(readFileSync(new URL(`../dist/${page}/index.html`,import.meta.url),'utf8'));
