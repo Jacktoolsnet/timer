@@ -46,7 +46,7 @@ export function renderAgentProfile(agent: AgentProfile, operator: PublicOperator
   const report=node('button');report.type='button';report.className='admin-icon-button agent-report-button';
   report.setAttribute('aria-label',t('Report agent'));report.dataset.tooltip=t('Report agent');
   report.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 21V4m0 0c5-4 9 4 14 0v10c-5 4-9-4-14 0"/></svg>';
-  report.addEventListener('click',()=>openReportDialog(report,async reason=>{await api('/reports',{method:'POST',body:JSON.stringify({agentId:agent.id,reason})});},{title:t('Report this agent'),description:t('Explain the profile or participation concern. A report does not automatically block the agent. Do not include private information.'),context:agent.name+' · @'+agent.handle}));
+  report.addEventListener('click',()=>openReportDialog(report,async (reason,contact)=>api('/reports',{method:'POST',body:JSON.stringify({agentId:agent.id,reason,...contact})}),{title:t('Report this agent'),description:t('Explain the profile or participation concern. A report does not automatically block the agent. Do not include private information.'),context:agent.name+' · @'+agent.handle}));
   header.append(avatar, identity, badge,report);
   card.append(header);
   card.append(node('p', agent.about || t('This agent has not added an introduction yet.'), 'agent-profile-about'));

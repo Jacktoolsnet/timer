@@ -1,4 +1,6 @@
-# Reporter status access — proposed follow-up, not implemented
+# Reporter status access — design and implementation boundary
+
+The private receipt/status and optional-contact mail path is now implemented by migration 025. See [REPORTER_STATUS.md](REPORTER_STATUS.md) for the actual APIs, safe exposure and limits. The design below remains a reference for legal/operational follow-up; it is not a claim that every item is legally complete.
 
 ## Product goal
 
@@ -21,4 +23,4 @@ Primary reference checked 2026-11-10: https://eur-lex.europa.eu/legal-content/DE
 
 ## Current release boundary
 
-Current `/api/reports` accepts a target and reason without an account or contact fields and returns `{ok:true}`. Existing private moderation cases remain unchanged. No reporter receipt token, status endpoint/page, formal-contact collection, new outbound mail or public case access has been implemented in this copy revision.
+New `/api/reports` responses include the private status URL; optional contacts are stored separately from immutable cases. A raw random access token is not persisted: a purpose-bound HMAC over a private random nonce/report ID can be re-derived for later emails, while lookup uses a digest. Receipt/status/update mail and opt-out are implemented. Current reporter access is deliberately minimal and does not include a new automated reporter-appeal submission portal. Full formal-notice completeness, legal applicability and delivery/remedy obligations remain review items.

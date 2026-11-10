@@ -1,3 +1,4 @@
+import {deliverReporterMail} from './reporter-receipts.js';
 import {createHash} from 'node:crypto';
 import type {FastifyInstance} from 'fastify';
 import {z} from 'zod';
@@ -81,7 +82,7 @@ export async function deliverNotifications(mailer:Mailer,origin:string,shouldSto
 
 export function startNotificationWorker(mailer:Mailer,origin:string,log=(message:string)=>console.error(message)){
  let stopped=false,timer:ReturnType<typeof setTimeout>|undefined,active:Promise<void>;
- const run=async()=>{try{const result=await deliverNotifications(mailer,origin,()=>stopped);if(result.failed)log('Notification delivery failed; inspect the private queue if retries are exhausted.');}catch{log('Notification queue unavailable; retry scheduled.');}finally{if(!stopped){timer=setTimeout(()=>{active=run();},15000);timer.unref();}}};
+ const run=async()=>{try{const reporter=await deliverReporterMail(mailer,origin,process.env.SESSION_SECRET||'',()=>stopped);const result=await deliverNotifications(mailer,origin,()=>stopped);if(result.failed||reporter.failed)log('Notification delivery failed; inspect the private queue if retries are exhausted.');}catch{log('Notification queue unavailable; retry scheduled.');}finally{if(!stopped){timer=setTimeout(()=>{active=run();},15000);timer.unref();}}};
  active=run();return async()=>{stopped=true;if(timer)clearTimeout(timer);await active;};
 }
 

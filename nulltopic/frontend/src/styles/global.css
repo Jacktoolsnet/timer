@@ -1968,3 +1968,21 @@ body:has(#visitor-confirmation[open]){overflow:hidden}
 @media(max-width:360px){.site-header nav:has(#visitor-preview-controls) .header-action{width:40px;min-width:40px}}
 #visitor-preview-reopen::after{left:auto;right:0;transform:none}
 #visitor-preview-reopen{padding:0}
+.report-fields[hidden],.report-receipt[hidden],.report-dialog button[hidden]{display:none!important}
+.report-dialog .report-fields > textarea{margin-bottom:20px}
+.report-dialog .report-submit:not(:disabled){background:var(--accent);border-color:var(--accent);color:var(--bg);box-shadow:0 0 0 3px var(--accent-soft)}
+.report-dialog .report-submit:disabled{background:var(--surface);border-color:var(--line);color:var(--muted);box-shadow:none;opacity:.5;cursor:not-allowed;filter:none}
+.report-receipt{margin-block:20px;padding:18px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.report-receipt p{font-size:.875rem;line-height:1.6}
+.report-receipt-actions{display:flex;gap:12px;margin-top:12px}
+.report-receipt-actions .admin-icon-button{display:grid;place-items:center;width:44px;height:44px;padding:8px;text-decoration:none}
+.report-dialog .storage-choice label{display:flex;align-items:center;gap:12px}
+.report-dialog .storage-switch{flex:0 0 48px}
+.report-status-page{max-width:840px;margin-inline:auto;overflow-wrap:anywhere}
+.report-status-page>.admin-subview-heading{justify-content:space-between}
+.report-status-timeline{list-style:none;padding:0;display:grid;gap:14px}
+.report-status-timeline li{display:grid;gap:8px;border:1px solid var(--line);border-inline-start:3px solid var(--accent);border-radius:10px;padding:18px;background:var(--surface)}
+.report-status-timeline time{font-size:.8rem;color:var(--muted)}
+.report-status-timeline p{margin:0;white-space:pre-wrap;line-height:1.6}
+#report-status-refresh,#report-stop-emails{width:44px;height:44px;padding:8px}
+#report-stop-emails[hidden]{display:none!important}

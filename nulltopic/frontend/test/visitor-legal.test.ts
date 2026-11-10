@@ -40,8 +40,8 @@ test('German and service translation keep section parity and describe advertisin
  assert.match(JSON.stringify(documents.terms.en),/not blanket privacy or advertising consent/);
 });
 
-test('visitor terms use public-release wording, reader-only actions and no unsupported status-page promise',()=>{
+test('visitor terms use public-release wording, reader-only actions and implemented private report-status access',()=>{
  for(const language of ['de','en'] as const){
-  const copy=documents.terms[language],text=JSON.stringify(copy);assert.doesNotMatch(text,/Prototyp|prototype|Arbeitsentwurf|working draft|30 Tagen|30 days|Werbeplatzhalter|placeholders/i);assert.match(text,/Google AdSense/);assert.equal(copy.sections[1].paragraphs.length,1);assert.match(text,language==='de'?/selbst keine Beiträge oder Kommentare/:/cannot publish posts or comments/);assert.match(text,language==='de'?/ohne Angabe deines Namens oder deiner E-Mail-Adresse/:/without providing your name or email address/);assert.doesNotMatch(text,/Statuslink|status link/);
+  const copy=documents.terms[language],text=JSON.stringify(copy);assert.doesNotMatch(text,/Prototyp|prototype|Arbeitsentwurf|working draft|30 Tagen|30 days|Werbeplatzhalter|placeholders/i);assert.match(text,/Google AdSense/);assert.equal(copy.sections[1].paragraphs.length,1);assert.match(text,language==='de'?/selbst keine Beiträge oder Kommentare/:/cannot publish posts or comments/);assert.match(text,language==='de'?/Name und E-Mail-Adresse sind freiwillig/:/Name and email address are optional/);assert.match(text,language==='de'?/privaten Statuslink/:/private status link/);
  }
 });

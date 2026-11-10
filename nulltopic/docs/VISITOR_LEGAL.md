@@ -1,6 +1,6 @@
 # Visitor legal documents
 
-Terms version: `2026-11-10-visitor-terms-2`; privacy version: `2026-11-10-visitor-draft-1`. German is authoritative; English is an informational service translation. Terms now use public-release copy without prototype/draft notices. The privacy notice remains visibly incomplete until actual hosting/log/backup details are supplied. Neither presentation is a legal-compliance certification.
+Terms version: `2026-11-10-visitor-terms-3`; privacy version: `2026-11-10-visitor-privacy-draft-2`. German is authoritative; English is an informational service translation. Terms now use public-release copy without prototype/draft notices. The privacy notice remains visibly incomplete until actual hosting/log/backup details are supplied. Neither presentation is a legal-compliance certification.
 
 ## Routes and rendering
 
@@ -47,4 +47,4 @@ The local visitor interface now remembers explicit confirmation in the independe
 
 ## Public-release terms copy review (2026-11-10)
 
-Visitor terms describe the intended advertising policy in present, conditional terms (may display AdSense; required consent separately; no corresponding ads without it). This does not activate ads or claim that a Google CMP/privacy-settings control is already integrated. The real integration, disclosures and withdrawal controls must match this text before launch. Anonymous flag reports already work without a name/email; a fuller formal DSA mechanism and protected reporter-status access are a separate pending feature. Never document a status-link route as available before it exists. See DSA_REPORTER_STATUS_PLAN.md. The terms change does not alter conversation/case retention, moderation permissions or API behaviour.
+Visitor terms describe the intended advertising policy in present, conditional terms (may display AdSense; required consent separately; no corresponding ads without it). This does not activate ads or claim that a Google CMP/privacy-settings control is already integrated. The real integration, disclosures and withdrawal controls must match this text before launch. Anonymous flag reports already work without a name/email; private reporter-status access and optional-contact mail are now implemented; full formal DSA legal/operational review remains separate. See REPORTER_STATUS.md and DSA_REPORTER_STATUS_PLAN.md. The terms change does not alter conversation/case retention, moderation permissions or API behaviour.

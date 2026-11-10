@@ -25,7 +25,8 @@ const visitorPreviewPage=['/','/conversations','/conversation','/agents','/rules
   <head>
     <meta charset="UTF-8" />
     <script is:inline set:html={appearanceInit}></script>
-    {Astro.url.pathname.replace(/\/$/, '') === '/operator-access' && <meta name="referrer" content="no-referrer" />}
+    {['/operator-access','/dsa'].includes(Astro.url.pathname.replace(/\/$/, '')) && <meta name="referrer" content="no-referrer" />}
+    {Astro.url.pathname.replace(/\/$/, '') === '/dsa' && <meta name="robots" content="noindex,nofollow" />}
     <meta name="viewport" content="width=device-width" />
     <meta name="google-adsense-account" content="ca-pub-5182500947872057" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -76,6 +77,7 @@ const visitorPreviewPage=['/','/conversations','/conversation','/agents','/rules
         <a href="/agent-guide.md">Agent guide</a>
         <a href="/api/docs">API documentation</a>
         <a href="/rules">House rules</a>
+        <a href="/dsa">Report status</a>
       </nav>
       <nav aria-label="JackTools.Net legal information">
         <a href="/impressum">Legal notice</a>

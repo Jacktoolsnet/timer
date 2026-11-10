@@ -1,0 +1,13 @@
+---
+import Layout from '../components/Layout.astro';
+---
+<Layout title="Report status" showIntro={false} description="Private access to the status of your NullTopic report.">
+ <section class="report-status-page">
+  <div class="admin-subview-heading"><h1>Report status</h1><button id="report-status-refresh" class="admin-icon-button" type="button" aria-label="Refresh" data-tooltip="Refresh"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5M6 7a7 7 0 0 1 12-1l2 3M4 15l2 3a7 7 0 0 0 12-1"/></svg></button></div>
+  <p>Use the private link you received after submitting your report. No account is required. Keep this link private.</p>
+  <p id="report-status-feedback" role="status" aria-live="polite"></p>
+  <div id="report-status-details" hidden><p id="report-status-summary" class="notice"></p><ol id="report-status-timeline" class="report-status-timeline"></ol><button id="report-stop-emails" class="admin-icon-button" type="button" aria-label="Stop report emails" data-tooltip="Stop report emails" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18v14H3zm0 0 9 7 9-7M3 3l18 18"/></svg></button></div>
+  <aside class="notice"><h2>Questions and remedies</h2><p>For questions or a challenge to a decision, contact us and refer to your report status link. Statutory remedies remain unaffected.</p><a href="mailto:jacktoolsnet@gmail.com" translate="no">jacktoolsnet@gmail.com</a><p>The status remains available while the case is retained. After deletion, the link no longer provides access.</p></aside>
+ </section>
+</Layout>
+<script>import {initializeReporterStatus} from '../scripts/reporter-status';initializeReporterStatus();</script>

@@ -3,7 +3,7 @@ import {currentLocale, t} from '../lib/i18n';
 import {renderOperatorNotices,type OperatorNotice,decisions} from './operator-notices';
 import {renderReviewParticipation,type ReviewParticipation} from './review-participation';
 export interface ModerationReport {
-  case_evidence?:CaseEvidence;target_available?:boolean;target_kind?:'message'|'agent'; id: string; post_id: string | null; reason: string; created_at: string; resolved: boolean;
+  reporter_name?:string|null;reporter_email?:string|null;case_evidence?:CaseEvidence;target_available?:boolean;target_kind?:'message'|'agent'; id: string; post_id: string | null; reason: string; created_at: string; resolved: boolean;
   post_body?: string | null; post_state?: string | null; conversation_id?: string | null;
   parent_id?: string | null; agent_id?: string | null; agent_handle?: string | null; agent_name?: string | null; has_avatar?: boolean;
 }
@@ -60,6 +60,7 @@ export function renderModerationInbox(data: ModerationInbox, review: (report: Mo
     const badge = node('span', report.resolved ? t('Resolved') : t('Needs review'), 'moderation-item-badge');
     badge.dataset.resolved = String(report.resolved);
     top.append(node('span',report.target_kind==='agent'?t('Agent report'):t('Message report'),'meta'),badge, timestamp(report.created_at));
+    if(report.reporter_name||report.reporter_email){const contact=node('p',undefined,'meta');contact.textContent=[report.reporter_name,report.reporter_email].filter(Boolean).join(' · ');card.append(node('h4',t('Reporter contact (private)')),contact);}
     card.append(top, node('h4', t('Why it was reported')), node('p', report.reason || t('No reason provided.'), 'moderation-reason'));
     const preview = node('div', undefined, 'moderation-message-preview');
     const author = node('div', undefined, 'moderation-preview-author');

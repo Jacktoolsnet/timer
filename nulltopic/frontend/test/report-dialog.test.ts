@@ -40,7 +40,7 @@ test('report overlay trims valid input, prevents duplicate sends and stays open 
     if (calls === 1) throw Error('Private server details must not be rendered');
     await new Promise<void>(resolve => { finish = resolve; });
   });
-  const form = doc.querySelector('form')!;
+  const form = doc.querySelector('form')!;doc.querySelector<HTMLInputElement>('#report-good-faith')!.checked=true;
   const input = doc.querySelector('textarea')!;
   input.value = '   ';
   form.dispatchEvent(new dom.window.Event('submit', { cancelable: true }));
@@ -64,4 +64,36 @@ test('report overlay trims valid input, prevents duplicate sends and stays open 
   finish!();
   await tick();
   assert.equal(doc.querySelector('dialog'), null);
+}));
+
+test('optional reporter contacts produce an explicit saved-link receipt and never resubmit',async()=>fixture(async(doc,trigger,dom)=>{
+ dom.reconfigure({url:'http://localhost:4321/conversations'});let calls=0;const token='a'.repeat(43);
+ openReportDialog(trigger,async(reason,contact)=>{calls++;assert.equal(reason,'Concern');assert.deepEqual(contact,{reporterName:'Fixture name',reporterEmail:'fixture@example.invalid',language:'en',goodFaith:true});return {ok:true,statusUrl:'http://localhost:4321/dsa?lang=en#receipt='+token,emailQueued:true};});
+ const form=doc.querySelector('form')!;doc.querySelector('textarea')!.value='Concern';doc.querySelector<HTMLInputElement>('#reporter-name')!.value='Fixture name';doc.querySelector<HTMLInputElement>('#reporter-email')!.value='fixture@example.invalid';
+ form.dispatchEvent(new dom.window.Event('submit',{cancelable:true}));assert.equal(calls,0,'good faith is not silently asserted');doc.querySelector<HTMLInputElement>('#report-good-faith')!.checked=true;
+ form.dispatchEvent(new dom.window.Event('submit',{cancelable:true}));await tick();assert.equal(calls,1);assert.ok(doc.querySelector<HTMLDialogElement>('dialog')!.open);assert.equal(doc.querySelector<HTMLElement>('.report-receipt')!.hidden,false);assert.equal(doc.querySelector<HTMLElement>('.report-fields')!.hidden,true);assert.equal(doc.querySelector<HTMLInputElement>('#report-status-link')!.value,'http://localhost:4321/dsa?lang=en#receipt='+token);assert.equal(doc.querySelector<HTMLAnchorElement>('[data-open-receipt]')!.target,'_blank');
+ form.dispatchEvent(new dom.window.Event('submit',{cancelable:true}));await tick();assert.equal(calls,1);doc.querySelector<HTMLButtonElement>('.report-cancel')!.click();assert.equal(doc.querySelector('dialog'),null);
+}));
+
+test('send stays disabled until required fields and any supplied email are valid', async () => fixture(async (doc, trigger, dom) => {
+  openReportDialog(trigger, async () => {});
+  const submit = doc.querySelector<HTMLButtonElement>('.report-submit')!;
+  const reason = doc.querySelector<HTMLTextAreaElement>('#report-reason')!;
+  const consent = doc.querySelector<HTMLInputElement>('#report-good-faith')!;
+  const email = doc.querySelector<HTMLInputElement>('#reporter-email')!;
+  const input = (field: Element) => field.dispatchEvent(new dom.window.Event('input', { bubbles: true }));
+  assert.equal(submit.disabled, true);
+  reason.value = 'Concern'; input(reason);
+  assert.equal(submit.disabled, true);
+  consent.click();
+  assert.equal(submit.disabled, false, 'anonymous reports need no name or email');
+  email.value = 'invalid'; input(email);
+  assert.equal(submit.disabled, true);
+  email.value = 'reporter@example.invalid'; input(email);
+  assert.equal(submit.disabled, false);
+  reason.value = '   '; input(reason);
+  assert.equal(submit.disabled, true);
+  reason.value = 'Concern'; input(reason);
+  consent.click();
+  assert.equal(submit.disabled, true);
 }));

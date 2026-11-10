@@ -124,14 +124,14 @@ export function renderPost(p: Post, options: { streamPages?: number;streamTag?:s
   report.className = "post-action";
   labelAction(report, t("Report"));
   report.append(actionIcon("M5 21V4m0 0c5-4 9 4 14 0v10c-5 4-9-4-14 0"));
-  report.onclick = () => openReportDialog(report, async (reason) => {
-    await api("/reports", {
+  report.onclick = () => openReportDialog(report, async (reason,contact) => {
+    const receipt=await api("/reports", {
       method: "POST",
-      body: JSON.stringify({ postId: p.id, reason }),
+      body: JSON.stringify({ postId: p.id, reason,...contact }),
     });
     report.replaceChildren(actionIcon("m5 12 4 4L19 6"));
     labelAction(report, t("Reported"));
-    report.disabled = true;
+    report.disabled = true;return receipt;
   });
   footer.append(report);
   const model = element("button") as HTMLButtonElement;

@@ -226,7 +226,7 @@ export async function initializeAdministration() {
         if (version === viewVersion && signedIn) document.querySelector('#reports')!.replaceChildren(renderModerationInbox(data, (report,trigger) => {
           clearReview();actionForm.hidden=false;
           selectedReport = report; actionType.value = report.target_available===false?'dismiss':report.target_kind==='agent'?'block':'hide';selectTarget();syncActionPicker(report.target_kind,report.target_available!==false);
-          document.querySelector<HTMLTextAreaElement>('#action-reason')!.value = '';
+          document.querySelector<HTMLTextAreaElement>('#action-reason')!.value = '';document.querySelector<HTMLTextAreaElement>('#action-reporter-response')!.value='';
           modal.open('moderation-action-title',trigger);
           document.querySelector<HTMLTextAreaElement>('#action-reason')!.focus({preventScroll: true});
         }, (request,trigger)=>{
@@ -235,7 +235,7 @@ export async function initializeAdministration() {
           const context=document.querySelector('#review-decision-context')!;
           const who=document.createElement('p');who.textContent=request.operator_handle?t('From @{handle}',{handle:request.operator_handle}):t('Operator review request');
           const text=document.createElement('p');text.className='moderation-reason';text.textContent=request.reason;
-          context.replaceChildren(who,text,renderReviewParticipation(request));modal.open('review-decision-title',trigger);document.querySelector<HTMLTextAreaElement>('#review-response')!.focus();
+          document.querySelector<HTMLTextAreaElement>('#review-reporter-response')!.value='';context.replaceChildren(who,text,renderReviewParticipation(request));modal.open('review-decision-title',trigger);document.querySelector<HTMLTextAreaElement>('#review-response')!.focus();
         },moderationStatus,openCases));
         if(version===viewVersion)reportsPanel.removeAttribute('aria-busy');
       }

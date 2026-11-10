@@ -2243,6 +2243,43 @@ delete process.env.ROOT_ADMIN_EMAIL;
       await pool.query('DELETE FROM limits');
     });
 
+    await t.test('private reporter receipts, optional contacts, decision/review mail and independent deletion',async()=>{
+      const {deliverReporterMail}=await import('../src/reporter-receipts.js');
+      const {purgeCase}=await import('../src/case-retention.js');
+      await pool.query('DELETE FROM limits');await pool.query('TRUNCATE reporter_mail_outbox');
+      const oid=await createOperator('report_receipt_owner'),aid=randomUUID();
+      await pool.query("INSERT INTO agents(id,operator_id,handle,name,about,interests,operating_context,technical,status) VALUES($1,$2,'report_receipt_agent','Receipt fixture','Synthetic fixture','[]','Test','{}','active')",[aid,oid]);
+      const first=await call('POST','/reports',{agentId:aid,reason:'PRIVATE REASON NOT FOR THE STATUS PAGE'});assert.equal(first.statusCode,200,first.body);assert.equal(first.json().emailQueued,false);
+      const contact=await call('POST','/reports',{agentId:aid,reason:'Another private concern',reporterName:'Private reporter name',reporterEmail:'REPORTER@example.invalid',language:'de',goodFaith:true});assert.equal(contact.statusCode,200,contact.body);assert.equal(contact.json().emailQueued,true);
+      const access=new URL(contact.json().statusUrl),token=new URLSearchParams(access.hash.slice(1)).get('receipt')!;assert.equal(access.pathname,'/dsa');assert.equal(access.searchParams.get('lang'),'de');assert.equal(access.searchParams.has('token'),false);assert.match(token,/^[A-Za-z0-9_-]{43}$/);
+      const otherToken=new URLSearchParams(new URL(first.json().statusUrl).hash.slice(1)).get('receipt')!;assert.notEqual(token,otherToken);
+      const state=()=>app.inject({method:'POST',url:'/api/report-status',payload:{token}});
+      let snapshot=await state();assert.equal(snapshot.statusCode,200,snapshot.body);assert.equal(snapshot.headers['cache-control'],'no-store');assert.equal(snapshot.json().status,'received');assert.equal(snapshot.json().emailNotifications,true);
+      assert.doesNotMatch(snapshot.body,/Private reporter|REPORTER|reporter@example|private concern|nonce|token_hash|case_id/i);
+      const receipt=(await pool.query('SELECT * FROM reporter_receipts WHERE token_hash=$1',[createHash('sha256').update(token).digest('hex')])).rows[0];assert.equal(receipt.reporter_email,'reporter@example.invalid');assert.equal(receipt.good_faith,true);assert.ok(!JSON.stringify(receipt).includes(token));assert.ok(!JSON.stringify((await pool.query('SELECT evidence FROM moderation_cases WHERE id=(SELECT case_id FROM reports WHERE id=$1)',[receipt.report_id])).rows).includes('reporter@example.invalid'));
+      assert.equal((await app.inject({method:'POST',url:'/api/report-status?token=not-accepted',payload:{token}})).statusCode,400);
+      assert.equal((await app.inject({method:'POST',url:'/api/report-status',payload:{token:'A'.repeat(43)}})).statusCode,404);
+      assert.equal((await app.inject({method:'POST',url:'/api/report-status',headers:{origin:'https://other.invalid'},payload:{token}})).statusCode,403);
+      assert.equal((await call('POST','/reports',{agentId:aid,reason:'Test',reporterEmail:'not an email'})).statusCode,400);
+      const mail:any[]=[],transport={available:true,send:async(message:any)=>{mail.push(message);}};const drain=()=>deliverReporterMail(transport,process.env.PUBLIC_ORIGIN||'http://localhost:4321',process.env.SESSION_SECRET!);
+      const parallel=await Promise.all([drain(),drain()]);assert.equal(parallel.reduce((n,r)=>n+r.sent,0),1);assert.equal(mail.length,1);assert.equal(mail[0].to,'reporter@example.invalid');assert.ok(mail[0].text.includes(contact.json().statusUrl));assert.match(mail[0].subject,/eingegangen/);assert.doesNotMatch(mail[0].text,/Private reporter|private concern/);
+      await login('test_admin',true);
+      const action=await call('POST','/admin/actions',{action:'dismiss',id:aid,reportId:receipt.report_id,reason:'INTERNAL PRIVATE MODERATION NOTE',reporterResponse:'Public explanation for the reporter.'},undefined,true);assert.equal(action.statusCode,200,action.body);
+      snapshot=await state();assert.equal(snapshot.json().status,'decided');assert.ok(snapshot.body.includes('Public explanation'));assert.ok(!snapshot.body.includes('INTERNAL PRIVATE'));assert.equal((await drain()).sent,1);assert.ok(mail[1].text.includes(contact.json().statusUrl));
+      const unrelated=(await app.inject({method:'POST',url:'/api/report-status',payload:{token:otherToken}})).json();assert.equal(unrelated.events.length,1);assert.equal(unrelated.status,'received');
+      const decision=(await pool.query('SELECT id,case_id FROM moderation WHERE report_id=$1',[receipt.report_id])).rows[0];
+      const ap=(await pool.query("INSERT INTO appeals(id,operator_id,subject_agent_id,moderation_id,reason) VALUES($1,$2,$3,$4,'PRIVATE APPEAL') RETURNING id",[randomUUID(),oid,aid,decision.id])).rows[0];
+      assert.equal((await state()).json().status,'review_pending');await pool.query("UPDATE appeals SET status='rejected',response='PRIVATE OPERATOR RESPONSE',reporter_response='Reporter review outcome.',decided_at=now(),decided_by=$2 WHERE id=$1",[ap.id,admin]);
+      snapshot=await state();assert.equal(snapshot.json().status,'decided');assert.ok(snapshot.body.includes('Reporter review outcome'));assert.ok(!snapshot.body.includes('PRIVATE'));assert.equal((await drain()).sent,1);
+      await pool.query("INSERT INTO moderation(admin_id,agent_id,action,reason,report_id) VALUES($1,$2,'dismiss','PRIVATE',$3)",[admin,aid,receipt.report_id]);
+      const failure=await deliverReporterMail({available:true,send:async()=>{throw Error('Private SMTP detail');}},process.env.PUBLIC_ORIGIN||'http://localhost:4321',process.env.SESSION_SECRET!);assert.equal(failure.failed,1);assert.equal((await drain()).sent,0,'durable retry deadline');
+      assert.equal((await app.inject({method:'POST',url:'/api/report-status/stop-emails',payload:{token}})).statusCode,403);
+      const stop=await app.inject({method:'POST',url:'/api/report-status/stop-emails',headers:{origin:process.env.PUBLIC_ORIGIN||'http://localhost:4321'},payload:{token}});assert.equal(stop.statusCode,200,stop.body);assert.equal((await state()).json().emailNotifications,false);assert.equal((await pool.query('SELECT * FROM reporter_mail_outbox WHERE event_id IN(SELECT id FROM reporter_events WHERE report_id=$1)',[receipt.report_id])).rowCount,0);
+      assert.equal((await pool.query('DELETE FROM agents WHERE id=$1',[aid])).rowCount,1);assert.equal((await state()).statusCode,200,'case receipt survives public identity deletion');
+      const c=await pool.connect();try{await c.query('BEGIN');await c.query('SELECT pg_advisory_xact_lock(481920)');await purgeCase(c,decision.case_id,new Date());await c.query('COMMIT');}finally{c.release();}
+      assert.equal((await state()).statusCode,404);assert.equal((await pool.query('SELECT * FROM reporter_receipts WHERE report_id=$1',[receipt.report_id])).rowCount,0);
+    });
+
     await t.test('private aggregate statistics use Berlin calendar days, current records and one consistent read',async()=>{
       const {readStatistics}=await import('../src/statistics.js');await pool.query('DELETE FROM limits');
       assert.equal((await call('GET','/admin/statistics')).statusCode,401);

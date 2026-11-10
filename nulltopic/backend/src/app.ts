@@ -1,3 +1,4 @@
+import {reportBody,reporterToken,createReporterReceipt,readReporterStatus,stopReporterEmails,reporterEmailBudget} from './reporter-receipts.js';
 import {readStatistics} from './statistics.js';
 import {registerNotifications} from './notifications.js';
 import {registerAgentRecovery} from './agent-recovery.js';
@@ -374,9 +375,9 @@ export async function createApp(options:{mailer?:Mailer}={}) {
     "PATCH /api/me": json(
       profile.omit({ handle: true, operating_context: true }).partial().strict(),
     ),
-    "POST /api/reports": json(
-      z.object({postId:uuid.optional(),agentId:uuid.optional(),reason:z.string().trim().min(1).max(1000)}).refine(b=>!!b.postId!==!!b.agentId,"Choose exactly one report target"),
-    ),
+    "POST /api/reports": json(reportBody),
+    "POST /api/report-status":json(z.object({token:reporterToken}).strict()),
+    "POST /api/report-status/stop-emails":json(z.object({token:reporterToken}).strict()),
     "PATCH /api/operator": json(z.object({ guidelines: z.string().max(2000) })),
     "PATCH /api/operator/agents/:id/scope": json(z.object({revision:z.number().int().positive(),scope:z.string().trim().min(1).max(2000),operatingContext:z.string().trim().min(1).max(2000).optional()}).strict()),
     "POST /api/operator/agents/:id/authorization": json(z.object({}).strict()),
@@ -391,7 +392,7 @@ export async function createApp(options:{mailer?:Mailer}={}) {
     ),
     "POST /api/admin/appeals/:id/decision": json(z.object({
       outcome: z.enum(["accepted", "accepted_restore", "accepted_unblock", "rejected", "closed"]),
-      response: z.string().trim().min(1).max(2000),expectedRevision:z.number().int().min(0).default(0),
+      response: z.string().trim().min(1).max(2000),expectedRevision:z.number().int().min(0).default(0),reporterResponse:z.string().trim().max(2000).optional(),
     })),
     "POST /api/admin/actions": json(
       z.object({
@@ -399,6 +400,7 @@ export async function createApp(options:{mailer?:Mailer}={}) {
         id: uuid,
         reportId: uuid.optional(),
         reason: z.string().trim().min(1).max(1000),
+        reporterResponse:z.string().trim().max(2000).optional(),
       }),
     ),
   };
@@ -1003,25 +1005,30 @@ export async function createApp(options:{mailer?:Mailer}={}) {
     });
     await exportDeletionJournal();return result;
   });
-  app.post("/api/reports", async (req) => {
-    const b = z
-      .object({postId:uuid.optional(),agentId:uuid.optional(),reason:z.string().trim().min(1).max(1000)}).refine(b=>!!b.postId!==!!b.agentId,"Choose exactly one report target")
-      .parse(req.body);
-    return transaction(async (c) => {
-      if (req.headers.authorization) {
-        const a = await agent(req, c, true);
-        await limit(c, a.id, "agent_report", 10, 3600);
-      } else await limit(c, req.ip, "public_report", 5, 3600);
+  app.post('/api/reports',async req=>{
+    const b=reportBody.parse(req.body);
+    if(b.reporterEmail){if(!mailer.available)fail(503,'MAIL_UNAVAILABLE','Report email delivery is unavailable');await reporterEmailBudget(req.ip,b.reporterEmail,sessionSecret);}
+    // Committed attempts, including unavailable targets, cannot reset a reporter's budget.
+    await transaction(async c=>{if(req.headers.authorization){const a=await agent(req,c,true);await limit(c,a.id,'agent_report',10,3600);}else await limit(c,req.ip,'public_report',5,3600);});
+    return transaction(async c=>{
+      if(req.headers.authorization)await agent(req,c,true);
+      const id=randomUUID();
       if(b.agentId){
-        const saved=await c.query("INSERT INTO reports(id,agent_id,target_kind,reason) SELECT $1,id,'agent',$3 FROM agents WHERE id=$2 AND status IN ('active','paused','blocked') RETURNING id",[randomUUID(),b.agentId,b.reason]);
-        if(!saved.rowCount)fail(404,"NOT_FOUND","Public agent unavailable");
+        const saved=await c.query("INSERT INTO reports(id,agent_id,target_kind,reason) SELECT $1,id,'agent',$3 FROM agents WHERE id=$2 AND status IN ('active','paused','blocked') RETURNING id",[id,b.agentId,b.reason]);
+        if(!saved.rowCount)fail(404,'NOT_FOUND','Public agent unavailable');
       }else{
-        if(!(await c.query("SELECT id FROM posts WHERE id=$1 FOR SHARE",[b.postId])).rowCount)fail(404,"NOT_FOUND","Post unavailable");
-        const saved=await c.query("INSERT INTO reports(id,post_id,reason) SELECT $1,id,$3 FROM posts WHERE id=$2 RETURNING id",[randomUUID(),b.postId,b.reason]);
-        if(!saved.rowCount)fail(404,"NOT_FOUND","Post unavailable");
+        if(!(await c.query('SELECT id FROM posts WHERE id=$1 FOR SHARE',[b.postId])).rowCount)fail(404,'NOT_FOUND','Post unavailable');
+        await c.query('INSERT INTO reports(id,post_id,reason) VALUES($1,$2,$3)',[id,b.postId,b.reason]);
       }
-      return { ok: true };
+      return createReporterReceipt(c,id,b,sessionSecret,origin);
     });
+  });
+  for(const [path,stop] of [['/api/report-status',false],['/api/report-status/stop-emails',true]] as const)app.post(path,async req=>{
+    if((stop&&req.headers.origin!==origin)||(req.headers.origin&&req.headers.origin!==origin))fail(403,'ORIGIN','Same-origin request required');
+    if(Object.keys(req.query as object).length)fail(400,'BAD_QUERY','Query parameters are not accepted');
+    await transaction(c=>limit(c,req.ip,'report_status',120,3600));
+    const b=z.object({token:reporterToken}).strict().parse(req.body);
+    return stop?stopReporterEmails(b.token):readReporterStatus(b.token);
   });
   app.get("/api/operator", async (req) => {
     const id = owner(req);
@@ -1292,9 +1299,9 @@ export async function createApp(options:{mailer?:Mailer}={}) {
       counts:(await pool.query("SELECT ((SELECT count(*) FROM reports WHERE NOT resolved)+(SELECT count(*) FROM appeals WHERE status='pending'))::int AS pending,((SELECT count(*) FROM reports WHERE resolved)+(SELECT count(*) FROM appeals WHERE status<>'pending'))::int AS processed")).rows[0],
       reports: (
         await pool.query(
-          `SELECT r.*,p.body AS post_body,p.state AS post_state,p.conversation_id,p.parent_id,COALESCE(p.agent_id,r.agent_id) AS agent_id,
+          `SELECT r.*,rr.reporter_name,rr.reporter_email,p.body AS post_body,p.state AS post_state,p.conversation_id,p.parent_id,COALESCE(p.agent_id,r.agent_id) AS agent_id,
           a.handle AS agent_handle,a.name AS agent_name,(a.avatar_base64 IS NOT NULL) AS has_avatar
-          FROM reports r LEFT JOIN posts p ON p.id=r.post_id LEFT JOIN agents a ON a.id=COALESCE(p.agent_id,r.agent_id)
+          FROM reports r LEFT JOIN reporter_receipts rr ON rr.report_id=r.id LEFT JOIN posts p ON p.id=r.post_id LEFT JOIN agents a ON a.id=COALESCE(p.agent_id,r.agent_id)
           WHERE ($1::text IS NULL OR ($1='pending' AND NOT r.resolved) OR ($1='processed' AND r.resolved))
           ORDER BY r.created_at DESC,r.id DESC LIMIT 100`,[selected],
         )
@@ -1312,7 +1319,7 @@ export async function createApp(options:{mailer?:Mailer}={}) {
   app.post("/api/admin/appeals/:id/decision", async (req) => {
     const actor = admin(req);
     const id = uuid.parse((req.params as any).id);
-    const body = z.object({outcome:z.enum(["accepted","accepted_restore","accepted_unblock","rejected","closed"]),response:z.string().trim().min(1).max(2000),expectedRevision:z.number().int().min(0).default(0)}).parse(req.body);
+    const body = z.object({outcome:z.enum(["accepted","accepted_restore","accepted_unblock","rejected","closed"]),response:z.string().trim().min(1).max(2000),expectedRevision:z.number().int().min(0).default(0),reporterResponse:z.string().trim().max(2000).optional()}).parse(req.body);
     const correction=body.outcome==='accepted_restore'?'restore':body.outcome==='accepted_unblock'?'unblock':null;
     return transaction(async c => {
       // Acquire target locks before the appeal: cleanup locks conversation -> deletes
@@ -1341,7 +1348,7 @@ export async function createApp(options:{mailer?:Mailer}={}) {
         await c.query("INSERT INTO moderation(admin_id,agent_id,post_id,action,reason,report_id,related_decision_id) VALUES($1,$2,$3,$4,$5,$6,$7)",[actor,target.agent_id,correction==='restore'?target.post_id:null,correction,body.response,target.report_id,target.id]);
         if(correction==='restore')await event(c,"changed",target.conversation_id);
       }
-      await c.query("UPDATE appeals SET status=$2,response=$3,decided_at=now(),decided_by=$4,correction=$5 WHERE id=$1",[id,correction?'accepted':body.outcome,body.response,actor,correction]);
+      await c.query("UPDATE appeals SET status=$2,response=$3,decided_at=now(),decided_by=$4,correction=$5,reporter_response=$6 WHERE id=$1",[id,correction?'accepted':body.outcome,body.response,actor,correction,body.reporterResponse||null]);
       return {ok:true,correction};
     });
   });
@@ -1354,6 +1361,7 @@ export async function createApp(options:{mailer?:Mailer}={}) {
         id: uuid,
         reportId: uuid.optional(),
         reason: z.string().trim().min(1).max(1000),
+        reporterResponse:z.string().trim().max(2000).optional(),
       })
       .parse(req.body);
     if (b.action === "dismiss" && !b.reportId) fail(400, "REPORT_REQUIRED", "Select a report to close without action");
@@ -1366,7 +1374,7 @@ export async function createApp(options:{mailer?:Mailer}={}) {
         const resolved=await c.query('UPDATE reports SET resolved=true WHERE id=$1 AND NOT resolved RETURNING id',[b.reportId]);
         if(!resolved.rowCount)fail(409,'REPORT_UNAVAILABLE','Report already reviewed');
         const livePost=report.archived_post_id?(await c.query('SELECT id FROM posts WHERE id=$1',[report.archived_post_id])).rows[0]?.id:null;
-        await c.query("INSERT INTO moderation(admin_id,agent_id,post_id,action,reason,report_id) VALUES($1,$2,$3,'dismiss',$4,$5)",[administrator,report.archived_agent_id,livePost||null,b.reason,b.reportId]);return {ok:true};
+        await c.query("INSERT INTO moderation(admin_id,agent_id,post_id,action,reason,report_id,reporter_response) VALUES($1,$2,$3,'dismiss',$4,$5,$6)",[administrator,report.archived_agent_id,livePost||null,b.reason,b.reportId,b.reporterResponse||null]);return {ok:true};
       }
 
       if(agentReport && (report.agent_id!==b.id || !['block','dismiss'].includes(b.action)))fail(409,"REPORT_TARGET","Agent reports allow block or no action for the selected agent only");
@@ -1413,8 +1421,8 @@ export async function createApp(options:{mailer?:Mailer}={}) {
         if (!resolved.rowCount) fail(409, "REPORT_UNAVAILABLE", "Report already reviewed, unavailable or unrelated to this target");
       }
       await c.query(
-        "INSERT INTO moderation(admin_id,agent_id,post_id,action,reason,report_id) VALUES($1,$2,$3,$4,$5,$6)",
-        [administrator, agentId, postId, b.action, b.reason, b.reportId || null],
+        "INSERT INTO moderation(admin_id,agent_id,post_id,action,reason,report_id,reporter_response) VALUES($1,$2,$3,$4,$5,$6,$7)",
+        [administrator, agentId, postId, b.action, b.reason, b.reportId || null,b.reporterResponse||null],
       );
       return { ok: true };
     });
