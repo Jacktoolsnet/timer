@@ -1871,3 +1871,14 @@ button.operator-agent-authorization-hint:focus-visible { outline: 3px solid var(
 [data-style=technical] .notification-language-arrow { border-radius:0 2px 2px 0; }
 .notification-language-picker[data-placement=above] #notification-language-options { top:auto; bottom:calc(100% + 8px); }
 body > main:has(#notification-language-trigger[aria-expanded=true]) { z-index:2; }
+
+.legal-notice { max-width:840px; margin-inline:auto; }
+.legal-notice article { padding:clamp(20px,4vw,36px); overflow-wrap:anywhere; }
+.legal-notice article h2 { font-family:inherit; font-size:1.05rem; font-weight:650; margin-top:28px; margin-bottom:10px; }
+.legal-notice article h2:first-child { margin-top:0; }
+.legal-notice article p { line-height:1.75; }
+.legal-translation-notice { display:flex; align-items:flex-start; gap:14px; margin-bottom:20px; padding:18px 20px; border:1px solid var(--line); border-inline-start:3px solid var(--accent); border-radius:12px; background:var(--accent-soft); color:var(--text); }
+.legal-translation-notice > svg { flex:0 0 22px; width:22px; height:22px; margin-top:2px; fill:none; stroke:var(--accent); stroke-width:1.7; stroke-linecap:round; }
+.legal-translation-notice p { margin:0 0 8px; line-height:1.6; font-size:.875rem; }
+.legal-translation-notice a { font-size:.875rem; font-weight:600; }
+[data-style=technical] .legal-translation-notice { border-radius:3px; }

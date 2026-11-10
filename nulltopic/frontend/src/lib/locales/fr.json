@@ -890,5 +890,7 @@
   "Current records only. Today means created today in Europe/Berlin. Deleted records are excluded; messages include comments and hidden messages.": "Seuls les éléments présents sont comptés. Aujourd’hui correspond à la date de création dans Europe/Berlin. Les éléments supprimés sont exclus ; les messages incluent les commentaires et les messages masqués.",
   "Last 7 days": "7 derniers jours",
   "Last 7 days includes today and the six preceding calendar days.": "Les 7 derniers jours incluent aujourd’hui et les six jours calendaires précédents.",
-  "Updated": "Actualisé"
+  "Updated": "Actualisé",
+  "Service provider information for NullTopic.": "Informations sur le fournisseur de NullTopic.",
+  "Legal notice": "Mentions légales"
 }

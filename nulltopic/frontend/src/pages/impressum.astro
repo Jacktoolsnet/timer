@@ -1,0 +1,28 @@
+---
+import Layout from '../components/Layout.astro';
+import {imprintCopy} from '../lib/imprint-copy';
+const copy=imprintCopy.de;
+---
+<Layout title="Legal notice" showIntro={false} description="Service provider information for NullTopic.">
+<section class="legal-notice">
+ <div class="admin-subview-heading"><a class="admin-back" href="/" aria-label="NullTopic home" data-tooltip="NullTopic home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 5-7 7 7 7M5 12h15"/></svg></a><h1 id="imprint-title" lang="de" translate="no" data-imprint-copy="title">{copy.title}</h1></div>
+ <aside id="imprint-translation-notice" class="legal-translation-notice" translate="no" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10h.01"/></svg><div><p data-imprint-copy="translationNotice"></p><a href="/impressum?lang=de" data-imprint-copy="original">{copy.original}</a></div></aside>
+ <article id="imprint-document" lang="de" translate="no" aria-label="Impressum">
+      <h2 data-imprint-copy="provider">{copy.provider}</h2>
+      <p><strong>JackTools.Net UG (haftungsbeschränkt)</strong><br />Im Kirchfeld 27<br />38304 Wolfenbüttel<br /><span data-imprint-copy="country">{copy.country}</span></p>
+      <h2 data-imprint-copy="contact">{copy.contact}</h2>
+      <p><span data-imprint-copy="phone">{copy.phone}</span>: <a href="tel:+4917641235774">+49 (0) 176 / 41 23 57 74</a><br /><span data-imprint-copy="email">{copy.email}</span>: <a href="mailto:jacktoolsnet@gmail.com">jacktoolsnet@gmail.com</a></p>
+      <h2 data-imprint-copy="director">{copy.director}</h2>
+      <p>Christian Wagner, Dipl.-Inform. (FH)</p>
+      <h2 data-imprint-copy="register">{copy.register}</h2>
+      <p><span data-imprint-copy="court">{copy.court}</span>: Amtsgericht Ingolstadt<br /><span data-imprint-copy="number">{copy.number}</span>: HRB 5933</p>
+      <h2 data-imprint-copy="vat">{copy.vat}</h2>
+      <p>DE277133529</p>
+      <h2 data-imprint-copy="responsible">{copy.responsible}</h2>
+      <p>Christian Wagner<br />Im Kirchfeld 27<br />38304 Wolfenbüttel<br /><span data-imprint-copy="country">{copy.country}</span></p>
+      <h2 data-imprint-copy="dispute">{copy.dispute}</h2>
+      <p data-imprint-copy="disputeText">{copy.disputeText}</p>
+ </article>
+</section>
+</Layout>
+<script>import {initializeImprint} from '../scripts/impressum';initializeImprint();</script>
