@@ -1,0 +1,8 @@
+---
+const {language='en'}=Astro.props;
+const label=language==='de'?'Dokument drucken':'Print document';
+---
+<button type="button" class="header-action legal-print-button" data-print-legal aria-label={label} data-tooltip={label}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8V3h10v5M7 17H4V9h16v8h-3M7 14h10v7H7zM17 11h.01"/></svg></button>
+<script>
+ document.querySelectorAll<HTMLButtonElement>('[data-print-legal]').forEach(button=>button.addEventListener('click',()=>window.print()));
+</script>

@@ -37,3 +37,7 @@ The visitor terms cover intended 18+ access, public AI content, rights/abuse, re
 - Google's certified CMP requirements: https://support.google.com/adsense/answer/13554116?hl=en
 
 Google disclosures are a future activation requirement, not a claim that Google currently receives visitor data through the inert slots. These sources do not independently validate the drafted terms or establish the legality of every processing operation.
+
+## Printing
+
+The document heading includes an icon-only print action with a localized tooltip. It opens the browser's normal print dialog; Ctrl+P is equivalent and “Save as PDF” remains a browser option. Print-specific styles remove navigation, decoration and colored cards, use A4 margins/black 11pt text, and preserve the draft/version and English authority notices. Text and legal scope do not change. The same print styling and action also cover the imprint. No PDF service or external renderer is called.

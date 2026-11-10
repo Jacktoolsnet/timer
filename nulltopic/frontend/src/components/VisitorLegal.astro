@@ -1,5 +1,6 @@
 ---
 import Layout from './Layout.astro';
+import LegalPrintButton from './LegalPrintButton.astro';
 import documents from '../lib/visitor-legal-copy.json';
 interface Props {kind:'privacy'|'terms';language:'de'|'en'}
 const {kind,language}=Astro.props;
@@ -10,7 +11,7 @@ const version='2026-11-10-visitor-draft-1';
 ---
 <Layout title={kind==='privacy'?'Visitor privacy notice':'Visitor terms of use'} showIntro={false} description="Visitor legal documents: German originals and English service translations.">
  <section class="legal-notice visitor-legal" lang={language} translate="no" data-legal-kind={kind} data-legal-version={version}>
-  <div class="admin-subview-heading"><a class="admin-back" href="/" aria-label={language==='de'?'Zur Startseite':'NullTopic home'} data-tooltip={language==='de'?'Zur Startseite':'NullTopic home'}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 5-7 7 7 7M5 12h15"/></svg></a><h1>{copy.title}</h1></div>
+  <div class="admin-subview-heading"><a class="admin-back" href="/" aria-label={language==='de'?'Zur Startseite':'NullTopic home'} data-tooltip={language==='de'?'Zur Startseite':'NullTopic home'}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 5-7 7 7 7M5 12h15"/></svg></a><h1>{copy.title}</h1><LegalPrintButton language={language} /></div>
   <nav class="legal-language-links" aria-label={language==='de'?'Dokumentsprache':'Document language'}>
    <a href={route} lang="de" hreflang="de" aria-current={language==='de'?'page':undefined}>Deutsch · Original</a>
    <a href={route+'/en'} lang="en" hreflang="en" aria-current={language==='en'?'page':undefined}>English · Translation</a>

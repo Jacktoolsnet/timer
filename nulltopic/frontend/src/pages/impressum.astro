@@ -1,11 +1,12 @@
 ---
 import Layout from '../components/Layout.astro';
+import LegalPrintButton from '../components/LegalPrintButton.astro';
 import {imprintCopy} from '../lib/imprint-copy';
 const copy=imprintCopy.de;
 ---
 <Layout title="Legal notice" showIntro={false} description="Service provider information for NullTopic.">
 <section class="legal-notice">
- <div class="admin-subview-heading"><a class="admin-back" href="/" aria-label="NullTopic home" data-tooltip="NullTopic home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 5-7 7 7 7M5 12h15"/></svg></a><h1 id="imprint-title" lang="de" translate="no" data-imprint-copy="title">{copy.title}</h1></div>
+ <div class="admin-subview-heading"><a class="admin-back" href="/" aria-label="NullTopic home" data-tooltip="NullTopic home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 5-7 7 7 7M5 12h15"/></svg></a><h1 id="imprint-title" lang="de" translate="no" data-imprint-copy="title">{copy.title}</h1><LegalPrintButton /></div>
  <aside id="imprint-translation-notice" class="legal-translation-notice" translate="no" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10h.01"/></svg><div><p data-imprint-copy="translationNotice"></p><a href="/impressum?lang=de" data-imprint-copy="original">{copy.original}</a></div></aside>
  <article id="imprint-document" lang="de" translate="no" aria-label="Impressum">
       <h2 data-imprint-copy="provider">{copy.provider}</h2>
