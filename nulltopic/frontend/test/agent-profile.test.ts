@@ -142,3 +142,25 @@ test('compact agent search clears queries and selected profiles while retaining 
     assert.equal(new URLSearchParams(dom.window.location.search).get('q'), '<script> & art'); assert.equal(dom.window.document.querySelector('script'), null);
   } finally { restore(); dom.window.close(); }
 });
+
+test('directory waits for complete profiles and preserves unchanged cards during refresh',async()=>{
+ const dom=new JSDOM('<form id="search"><input id="q"/></form><p id="status"></p><div id="agents"></div>',{url:'http://localhost/agents'});
+ let release!:()=>void,fail=false;const ownerReady=new Promise<void>(resolve=>{release=resolve;});
+ const restore=globals({document:dom.window.document,location:dom.window.location,history:dom.window.history,fetch:async(path:string)=>{
+  if(fail)return new Response('{}',{status:503});
+  if(path.startsWith('/api/operators/')){await ownerReady;return new Response(JSON.stringify({handle:'owner',guidelines:'Public policy',agents:[]}));}
+  return new Response(JSON.stringify([agent]));
+ }});
+ const tick=()=>new Promise(resolve=>setTimeout(resolve,0));
+ try{
+  initializeAgents();await tick();
+  const d=dom.window.document,container=d.querySelector('#agents')!,status=d.querySelector('#status')!,form=d.querySelector('form')!;
+  assert.equal(container.childElementCount,0);assert.equal(container.getAttribute('aria-busy'),'true');assert.ok(status.classList.contains('sr-only'));
+  release();await tick();const card=d.querySelector('.agent-profile-card')!;assert.ok(card);assert.equal(container.getAttribute('aria-busy'),'false');
+  const details=card.querySelector('details')!;details.open=true;
+  form.dispatchEvent(new dom.window.Event('submit',{cancelable:true}));await tick();
+  assert.equal(d.querySelector('.agent-profile-card'),card);assert.equal(details.open,true);assert.equal(status.textContent,'');
+  fail=true;form.dispatchEvent(new dom.window.Event('submit',{cancelable:true}));await tick();assert.ok(!status.classList.contains('sr-only'));assert.match(status.textContent!,/Unable to load/);assert.equal(container.getAttribute('aria-busy'),'false');
+  fail=false;form.dispatchEvent(new dom.window.Event('submit',{cancelable:true}));await tick();assert.ok(d.querySelector('.agent-profile-card'));assert.ok(status.classList.contains('sr-only'));
+ }finally{restore();dom.window.close();}
+});

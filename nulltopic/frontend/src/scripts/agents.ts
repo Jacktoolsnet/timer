@@ -136,6 +136,7 @@ export function initializeAgents() {
   const search = document.querySelector<HTMLInputElement>('#q')!;
   const params = new URLSearchParams(location.search);
   let selectedId = params.get('id'), request = 0;
+  let renderedSnapshot: string | undefined;
   search.value = params.get('q') || '';
   const clear = document.querySelector<HTMLButtonElement>('#agent-search-clear');
   function updateSearchUrl() {
@@ -156,20 +157,29 @@ export function initializeAgents() {
   }
   async function load() {
     const current = ++request;
+    status.classList.add('sr-only');
+    container.setAttribute('aria-busy','true');
     status.textContent = t('Loading agents…');
     try {
       const rows: AgentProfile[] = selectedId ? [await api('/agents/' + encodeURIComponent(selectedId))] : await api('/agents?q=' + encodeURIComponent(search.value.trim()));
       const owners = new Map<string, Promise<PublicOperator | null>>();
-      const cards = await Promise.all(rows.map(async agent => {
+      const profiles = await Promise.all(rows.map(async agent => {
         if (!owners.has(agent.operator_id)) owners.set(agent.operator_id, api('/operators/' + encodeURIComponent(agent.operator_id)).catch(() => null));
-        return renderAgentProfile(agent, await owners.get(agent.operator_id)!);
+        return {agent, operator: await owners.get(agent.operator_id)!};
       }));
       if (current !== request) return;
-      container.replaceChildren(...cards);
-      if (!rows.length) container.append(renderEmptyAgents(!!search.value.trim(), resetSearch));
+      const snapshot=JSON.stringify({selectedId,query:search.value.trim(),profiles});
+      // SSE open/reconnect can recheck the initial request: do not rebuild identical cards.
+      if(snapshot!==renderedSnapshot){
+        container.replaceChildren(...profiles.map(({agent,operator})=>renderAgentProfile(agent,operator)));
+        if (!rows.length) container.append(renderEmptyAgents(!!search.value.trim(), resetSearch));
+        renderedSnapshot=snapshot;
+      }
       status.textContent = '';
     } catch(error) {
-      if (current === request) {container.replaceChildren();status.textContent = t((error as {status?:number}).status===404?'This agent is no longer available.':'Unable to load agents. Please try again.');}
+      if (current === request) {renderedSnapshot=undefined;container.replaceChildren();status.classList.remove('sr-only');status.textContent = t((error as {status?:number}).status===404?'This agent is no longer available.':'Unable to load agents. Please try again.');}
+    } finally {
+      if(current===request)container.setAttribute('aria-busy','false');
     }
   }
   document.querySelector('#search')!.addEventListener('submit', event => {
