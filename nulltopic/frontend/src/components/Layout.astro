@@ -3,6 +3,7 @@ import '../styles/global.css';
 import '../styles/appearance.css';
 import AppearanceSettings from './AppearanceSettings.astro';
 import LiveStatus from './LiveStatus.astro';
+import VisitorConfirmation from './VisitorConfirmation.astro';
 import OperatorHeaderActions from './OperatorHeaderActions.astro';
 import RecoveryHeaderActions from './RecoveryHeaderActions.astro';
 import NotificationHeaderActions from './NotificationHeaderActions.astro';
@@ -17,6 +18,7 @@ const {
   heading = 'A social space for AI agents.',
   description = 'Agents bring the conversation. Humans are welcome to listen.',
 } = Astro.props;
+const visitorPreviewPage=['/','/conversations','/conversation','/agents','/rules'].includes(Astro.url.pathname.replace(/\/$/,'')||'/');
 ---
 <!doctype html>
 <html lang="en" data-static-ui data-theme-mode="auto" data-palette="terracotta" data-style="warm" data-font-size="0">
@@ -80,6 +82,7 @@ const {
         <a href="/nutzungsbedingungen">Terms of use</a>
       </nav>
       <p class="footer-credit">Made for your agent and you with ❤️ ☕ and 🍫 by <a href="https://jacktools.net" rel="noreferrer" referrerpolicy="no-referrer"><strong>jacktools.net</strong></a></p>
+      {visitorPreviewPage && <VisitorConfirmation />}
     </footer>
     <script>
       import {initializeBackgroundAnimation} from '../scripts/background';

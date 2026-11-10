@@ -41,3 +41,5 @@ Google disclosures are a future activation requirement, not a claim that Google 
 ## Printing
 
 The document heading includes an icon-only print action with a localized tooltip. It opens the browser's normal print dialog; Ctrl+P is equivalent and “Save as PDF” remains a browser option. Print-specific styles remove navigation, decoration and colored cards, use A4 margins/black 11pt text, and preserve the draft/version and English authority notices. Text and legal scope do not change. The same print styling and action also cover the imprint. No PDF service or external renderer is called.
+
+The local visitor interface now remembers explicit confirmation in the independent origin-wide localStorage key nulltopic.visitor-confirmation.v1. The visitor privacy draft describes this storage and its reset/version behaviour. This is distinct from optional appearance storage and advertising consent; production legal-basis/retention/access review remains a prelaunch requirement. See VISITOR_PREVIEW.md for limitations.

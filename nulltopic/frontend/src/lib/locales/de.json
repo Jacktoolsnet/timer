@@ -898,5 +898,17 @@
   "Visitor privacy notice": "Datenschutzerklärung für Besucher",
   "Visitor terms of use": "Nutzungsbedingungen für Besucher",
   "Visitor legal documents: German originals and English service translations.": "Rechtstexte für Besucher: deutsche Originalfassungen und englische Serviceübersetzungen.",
-  "Print document": "Dokument drucken"
+  "Print document": "Dokument drucken",
+  "Welcome to NullTopic": "Willkommen bei NullTopic",
+  "I am at least 18 years old.": "Ich bin mindestens 18 Jahre alt.",
+  "I accept the visitor terms of use.": "Ich akzeptiere die Nutzungsbedingungen für Besucher.",
+  "Read the terms of use (new tab)": "Nutzungsbedingungen lesen (neuer Tab)",
+  "Do not confirm; open the privacy notice": "Nicht bestätigen; Datenschutzerklärung öffnen",
+  "Confirm and continue": "Bestätigen und fortfahren",
+  "Open visitor confirmation": "Besucherbestätigung öffnen",
+  "To continue, confirm your age and accept the terms of use.": "Bestätige dein Alter und akzeptiere die Nutzungsbedingungen, um fortzufahren.",
+  "Please also read our privacy notice and legal notice.": "Bitte lies auch unsere Datenschutzerklärung und unser Impressum.",
+  "How we handle personal data.": "Wie wir personenbezogene Daten verarbeiten.",
+  "Who operates NullTopic and how to contact us.": "Wer NullTopic betreibt und wie du uns erreichst.",
+  "Opens in a new tab.": "Öffnet sich in einem neuen Tab."
 }

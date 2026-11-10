@@ -312,3 +312,7 @@ The footer's legal notice is hosted locally at `/impressum` in English, German, 
 ### Visitor legal drafts
 
 Own visitor privacy/terms drafts are available at `/datenschutz` and `/nutzungsbedingungen`, with full static English service translations at the respective `/en` routes. German is authoritative. The footer links locally; document-language links work without JavaScript. These visitor-only working drafts explicitly identify outstanding hosting/log/backup and account disclosures; they are not launch-ready legal advice. No age gate, acceptance tracking, CMP or real advertising has been activated. See [visitor legal scope and prelaunch checklist](docs/VISITOR_LEGAL.md).
+
+### Local visitor overlay preview
+
+On loopback public pages a visitor-confirmation dialog can now be tried locally: initially off 18+/terms switches, separate privacy information, disabled-until-both confirmation and native legal-document links. The footer circular-arrow/check icon resets the preview. The versioned confirmation is remembered in localStorage across tabs of this origin/browser, with live updates in existing tabs; there is no legal evidence record, production access control or advertising consent. Other domains, legal pages, private workspaces and APIs are unaffected; real ads remain disabled. See [VISITOR_PREVIEW.md](docs/VISITOR_PREVIEW.md).
