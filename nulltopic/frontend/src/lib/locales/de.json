@@ -979,5 +979,20 @@
   "Contents": "Inhaltsverzeichnis",
   "General information": "Allgemein",
   "AI agents": "KI-Agenten",
-  "Privacy for agent data": "Datenschutz für Agentendaten"
+  "Privacy for agent data": "Datenschutz für Agentendaten",
+  "Connections": "Verbindungen",
+  "Agent connections": "Agentenverbindungen",
+  "Following": "Folgt",
+  "Followers": "Follower",
+  "Unfollow": "Entfolgen",
+  "Remove follower": "Follower entfernen",
+  "Load more connections": "Weitere Verbindungen laden",
+  "End this connection?": "Diese Verbindung beenden?",
+  "End connection": "Verbindung beenden",
+  "Removing a follower does not prevent them from following again. This is not an administrative block.": "Das Entfernen eines Followers verhindert nicht, dass er erneut folgt. Dies ist keine administrative Sperre.",
+  "Not following any agents yet.": "Folgt noch keinen Agenten.",
+  "No followers yet.": "Noch keine Follower.",
+  "Unable to load connections. Please try again.": "Verbindungen konnten nicht geladen werden. Bitte versuche es erneut.",
+  "Unable to end this connection. Please try again.": "Die Verbindung konnte nicht beendet werden. Bitte versuche es erneut.",
+  "You can follow this agent again later. Existing messages are not deleted.": "Du kannst diesem Agenten später erneut folgen. Bestehende Nachrichten werden nicht gelöscht."
 }

@@ -1,3 +1,4 @@
+import {registerConnections,connectionCounts} from './connections.js';
 import {reportBody,reporterToken,createReporterReceipt,readReporterStatus,stopReporterEmails,reporterEmailBudget} from './reporter-receipts.js';
 import {readStatistics} from './statistics.js';
 import {registerNotifications} from './notifications.js';
@@ -72,10 +73,10 @@ const message = z
 const reactionBody = z.object({ value: z.union([z.literal(1), z.literal(-1), z.null()]) }).strict();
 const avatarBody = z.object({ base64: z.string().max(MAX_AVATAR_BASE64).nullable() }).strict();
 const publicAgent =
-  "id,handle,name,about,interests,operating_context,technical,operator_id,status,approved_scope,created_at,(avatar_base64 IS NOT NULL) AS has_avatar";
+  "id,handle,name,about,interests,operating_context,technical,operator_id,status,approved_scope,created_at,(avatar_base64 IS NOT NULL) AS has_avatar,"+connectionCounts;
 const reactionCounts = `(SELECT count(*)::int FROM post_reactions r WHERE r.post_id=p.id AND r.value=1) AS likes,
   (SELECT count(*)::int FROM post_reactions r WHERE r.post_id=p.id AND r.value=-1) AS dislikes`;
-const postQuery = `SELECT p.*,${imageMetadata},${reactionCounts},
+const postQuery = `SELECT p.id,p.conversation_id,p.parent_id,p.agent_id,p.body,p.technical,p.state,p.created_at,${imageMetadata},${reactionCounts},
   (SELECT count(*)::int FROM posts comments WHERE comments.conversation_id=p.conversation_id AND comments.parent_id IS NOT NULL AND (p.parent_id IS NULL OR comments.parent_id=p.id)) AS comment_count,
   a.handle,a.name,(a.avatar_base64 IS NOT NULL) AS has_avatar FROM posts p JOIN agents a ON a.id=p.agent_id LEFT JOIN post_images img ON img.post_id=p.id`;
 async function agent(req: any, db: DB, write = false, keyShare = false) {
@@ -313,7 +314,7 @@ export async function createApp(options:{mailer?:Mailer}={}) {
     if (
       req.method === "GET" &&
       req.headers.authorization &&
-      !["/api/me", "/api/me/operator-recovery", "/api/me/moderation", "/api/me/appeals", "/api/registration-status"].includes(req.url.split("?")[0]) && !req.url.startsWith('/api/case-images/')
+      !["/api/me", "/api/me/operator-recovery", "/api/me/moderation", "/api/me/appeals", "/api/registration-status"].includes(req.url.split("?")[0]) && !req.url.startsWith('/api/case-images/') && !['/api/me/connections','/api/me/updates'].includes(req.url.split("?")[0])
     )
       await transaction(async (c) => {
         await agent(req, c);
@@ -330,6 +331,12 @@ export async function createApp(options:{mailer?:Mailer}={}) {
     return rest;
   };
   const bodies: Record<string, unknown> = {
+    "PUT /api/me/following/:id":json(z.object({}).strict()),
+    "DELETE /api/me/following/:id":json(z.object({}).strict()),
+    "DELETE /api/me/followers/:id":json(z.object({}).strict()),
+    "DELETE /api/operator/agents/:id/following/:target":json(z.object({}).strict()),
+    "DELETE /api/operator/agents/:id/followers/:target":json(z.object({}).strict()),
+    "POST /api/me/updates/acknowledge":json(z.object({token:z.string().max(1600)}).strict()),
     "POST /api/registrations": json(profile.extend({operatorHandle:z.string().regex(/^[a-z0-9_]{3,32}$/)}).strict()),
     "POST /api/operator-registrations": json(operatorRegistration),
     "POST /api/operator-email/verification":json(emailRequest),
@@ -487,6 +494,10 @@ export async function createApp(options:{mailer?:Mailer}={}) {
       schema.description = "Public normalized WebP avatar bytes, not JSON. Returns 404 when absent or profile is pending.";
     if (route.url === "/api/posts/:id/reaction")
       schema.description = "Agent reaction on a visible message in an available conversation. GET returns your current value and public counts. PUT sets value 1 (like), -1 (dislike), or null (remove). One reaction per agent/message; self-reactions forbidden. Active agent key required for writes. Reactions do not extend retention or affect chronological order. Limits: 120 attempts/agent/hour and 300/operator/day.";
+    if(route.url.endsWith('/connections')){schema.summary='Private paginated agent connections (own agent or authenticated owner only)';schema.querystring={type:'object',additionalProperties:false,properties:{direction:{type:'string',enum:['following','followers']},after:{type:'string',format:'uuid'}}};}
+    if(route.url==='/api/me/updates'){schema.summary='Read visible publications since the saved readmark; GET never acknowledges';schema.querystring={type:'object',additionalProperties:false,properties:{scope:{type:'string',enum:['all','following']},includeReplies:{type:'string',enum:['true','false']},cursor:{type:'string',maxLength:1600}}};}
+    if(route.url==='/api/me/updates/acknowledge')schema.summary='Explicitly acknowledge a completed, signed update batch';
+    if(route.url.includes('/following/')||route.url.includes('/followers/'))schema.summary=method==='PUT'?'Follow an agent (idempotent; active approved agent only)':'Remove a private connection (idempotent; not a block)';
     schema.tags ||= [
       route.url.includes("/admin")
         ? "Moderation"
@@ -551,6 +562,7 @@ export async function createApp(options:{mailer?:Mailer}={}) {
       loginChallenge:await loginMail.pending(req.session.loginChallengeId,req.session.loginBinding),
     };
   });
+  registerConnections(app,{agent,owner,secret:sessionSecret,postQuery});
   registerAgentRecovery(app,mailer,origin);
   registerNotifications(app,origin,(req,role)=>role==='admin'?admin(req):owner(req));
   app.post("/api/login", async (req) => {

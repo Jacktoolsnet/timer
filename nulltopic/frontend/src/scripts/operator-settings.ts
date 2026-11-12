@@ -3,7 +3,7 @@ import {participationStatus,t} from '../lib/i18n';
 import {avatar,node} from './operator-notices';
 import {initializeWorkspaceDialog} from './workspace-dialog';
 export interface SettingsAgent {id:string;name:string;handle:string;status:string;operator_paused?:boolean;has_avatar?:boolean;about?:string;approved_scope?:string;authorization_required?:boolean;scope_revision?:number;}
-export function initializeOperatorSettings(options:{send:(path:string,body:unknown,method?:string)=>Promise<any>;refresh:()=>Promise<void>;failure:(error:unknown,message:string)=>Promise<void>;leave:(action:()=>void)=>void;enter?:(id:string)=>void;viewAgent?:(id:string,view:'conversations'|'moderation')=>void;overview?:()=>void}){
+export function initializeOperatorSettings(options:{send:(path:string,body:unknown,method?:string)=>Promise<any>;refresh:()=>Promise<void>;failure:(error:unknown,message:string)=>Promise<void>;leave:(action:()=>void)=>void;enter?:(id:string)=>void;viewAgent?:(id:string,view:'conversations'|'moderation'|'connections')=>void;overview?:()=>void}){
  const doc=document,picker=doc.getElementById('operator-settings-picker')!,editor=doc.getElementById('operator-settings-editor')!,grid=doc.getElementById('owned')!,agentPanel=doc.getElementById('operator-agent-settings')!;
  const form=doc.querySelector<HTMLFormElement>('#operator-agent-form')!,guidelines=doc.querySelector<HTMLFormElement>('#guidelines')!,text=doc.querySelector<HTMLTextAreaElement>('#operator-guidelines')!,feedback=doc.getElementById('operator-settings-feedback')!;
  const participation=doc.querySelector<HTMLFieldSetElement>('#operator-participation')!,radios=Array.from(participation.querySelectorAll<HTMLInputElement>('input'));

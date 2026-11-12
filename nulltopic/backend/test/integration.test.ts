@@ -2345,6 +2345,96 @@ delete process.env.ROOT_ADMIN_EMAIL;
       await pool.query('DELETE FROM limits');
     });
 
+    await t.test('private follow graph, owner controls and durable explicitly acknowledged update views',async()=>{
+      await pool.query('DELETE FROM limits');
+      await createOperator('connections_owner');await login('connections_owner');
+      const enroll=async(handle:string)=>{
+        const r=await call('POST','/registrations',{...prepared(handle),operatorHandle:'connections_owner'});assert.equal(r.statusCode,200,r.body);const a=r.json();
+        const confirmation=new URL(a.confirmationUrl).searchParams.get('confirmation');
+        const preview=await call('GET','/confirmation?token='+confirmation,undefined,undefined,true);assert.equal(preview.statusCode,200,preview.body);
+        const ok=await call('POST','/confirmation',{token:confirmation,ruleVersion:rules.version,publicParticipation:true,authorizePublication:true,authorizationVersion:'agent-publication-v1',revision:preview.json().scope_revision,scope:'Synthetic connection testing only'},undefined,true);assert.equal(ok.statusCode,200,ok.body);return a;
+      };
+      const reader=await enroll('connection_reader'),writer=await enroll('connection_writer'),outsider=await enroll('connection_outsider');
+      const rpath='/operator/agents/'+reader.id;
+      const following=()=>call('GET','/me/updates?scope=following',undefined,reader.key);
+      const acknowledge=(token:string,k=reader.key)=>call('POST','/me/updates/acknowledge',{token},k);
+      assert.equal((await call('GET','/me/connections')).statusCode,401);
+      assert.equal((await call('PUT','/me/following/'+reader.id,{},reader.key)).statusCode,400);
+      assert.equal((await call('PUT','/me/following/'+randomUUID(),{},reader.key)).statusCode,404);
+      const pending=await call('POST','/registrations',{...prepared('connection_pending'),operatorHandle:'connections_owner'});
+      assert.equal((await call('GET','/me/connections',undefined,pending.json().key)).statusCode,403);
+      assert.equal((await call('GET','/me/updates',undefined,pending.json().key)).statusCode,403);
+      assert.equal((await call('PUT','/me/following/'+writer.id,{},pending.json().key)).statusCode,403);
+      assert.equal((await call('PUT','/me/following/'+writer.id,{},reader.key)).json().changed,true);
+      assert.equal((await call('PUT','/me/following/'+writer.id,{},reader.key)).json().changed,false);
+      const counts=(await call('GET','/agents/'+writer.id)).json();assert.equal(counts.follower_count,1);assert.equal(counts.following_count,0);assert.equal(counts.followers,undefined);
+      const list=await call('GET','/me/connections',undefined,reader.key);assert.equal(list.json().items[0].id,writer.id);assert.equal(list.json().items[0].key_hash,undefined);
+      assert.equal((await call('GET',rpath+'/connections',undefined,undefined,true)).json().following_count,1);
+      await login('other_operator');assert.equal((await call('GET',rpath+'/connections',undefined,undefined,true)).statusCode,404);assert.equal((await call('DELETE',rpath+'/following/'+writer.id,{},undefined,true)).statusCode,404);await login('connections_owner');
+      assert.equal((await app.inject({method:'DELETE',url:'/api'+rpath+'/following/'+writer.id,headers:{cookie},payload:{}})).statusCode,403);
+      let batch=(await following()).json();assert.equal(batch.items.length,0);assert.equal((await acknowledge(batch.acknowledgeToken)).statusCode,200);
+      const savedEnv={minute:process.env.LIMIT_PUBLISH_MINUTE,day:process.env.LIMIT_PUBLISH_DAY,owner:process.env.LIMIT_OPERATOR_DAY};
+      process.env.LIMIT_PUBLISH_MINUTE='1000';process.env.LIMIT_PUBLISH_DAY='1000';process.env.LIMIT_OPERATOR_DAY='5000';
+      try{
+        const posts:string[]=[];
+        for(let i=0;i<28;i++){const r=await call('POST','/posts',{body:'Synthetic followed publication '+i},writer.key);assert.equal(r.statusCode,200,r.body);posts.push(r.json().id);}
+        const reply=await call('POST','/posts',{body:'Synthetic reply',parentId:posts[0]},writer.key);assert.equal(reply.statusCode,200,reply.body);
+        const foreign=await call('POST','/posts',{body:'Synthetic outside follow set'},outsider.key);assert.equal(foreign.statusCode,200);
+        batch=(await following()).json();assert.equal(batch.items.length,25);assert.ok(batch.nextCursor);assert.equal(batch.acknowledgeToken,null);assert.equal(batch.items[0].publication_id,undefined);
+        assert.equal((await following()).json().items[0].id,batch.items[0].id,'GET never advances a readmark');
+        assert.equal((await call('GET','/me/updates?scope=all&cursor='+batch.nextCursor,undefined,reader.key)).statusCode,400,'view-bound cursor');
+        assert.equal((await call('GET','/me/updates?scope=following&cursor='+batch.nextCursor,undefined,outsider.key)).statusCode,400,'actor-bound cursor');
+        assert.equal((await acknowledge(batch.nextCursor)).statusCode,400,'page tokens cannot acknowledge');
+        const last=(await call('GET','/me/updates?scope=following&cursor='+batch.nextCursor,undefined,reader.key)).json();assert.equal(last.items.length,4);assert.ok(last.items.some((p:any)=>p.id===reply.json().id));assert.ok(last.acknowledgeToken);assert.equal(last.nextCursor,null);
+        assert.equal((await acknowledge(last.acknowledgeToken+'x')).statusCode,400);
+        assert.equal((await acknowledge(last.acknowledgeToken,outsider.key)).statusCode,400);
+        assert.equal((await acknowledge(last.acknowledgeToken)).statusCode,200);assert.equal((await following()).json().items.length,0);
+        const roots=(await call('GET','/me/updates?scope=following&includeReplies=false',undefined,reader.key)).json();assert.equal(roots.items.length,25,'separate root-only checkpoint');assert.ok(roots.items.every((p:any)=>p.parent_id===null));
+        // The general view is independent and includes the non-followed agent.
+        let cursor:string|null=null,found=false;for(let page=0;page<100;page++){
+          const all=await call('GET','/me/updates?scope=all'+(cursor?'&cursor='+cursor:''),undefined,reader.key);assert.equal(all.statusCode,200,all.body);const data=all.json();found ||= data.items.some((p:any)=>p.id===foreign.json().id);cursor=data.nextCursor;if(!cursor){assert.equal((await acknowledge(data.acknowledgeToken)).statusCode,200);break;}
+        }assert.equal(found,true);assert.equal((await call('GET','/me/updates',undefined,reader.key)).json().items.length,0);
+        // A concurrent commit cannot make a higher publication visible before an older one.
+        const firstDb=await pool.connect(),secondDb=await pool.connect(),one=randomUUID(),two=randomUUID();let completed=false;
+        try{
+          await firstDb.query('BEGIN');await firstDb.query('SELECT pg_advisory_xact_lock_shared(481920)');
+          await firstDb.query('INSERT INTO conversations(id,last_activity_at) VALUES($1,now())',[one]);
+          await firstDb.query("INSERT INTO posts(id,conversation_id,agent_id,body,technical) VALUES($1,$1,$2,'Synthetic pending publication','{}')",[one,writer.id]);
+          await secondDb.query('BEGIN');await secondDb.query('SELECT pg_advisory_xact_lock_shared(481920)');
+          await secondDb.query('INSERT INTO conversations(id,last_activity_at) VALUES($1,now())',[two]);
+          const pendingInsert=secondDb.query("INSERT INTO posts(id,conversation_id,agent_id,body,technical) VALUES($1,$1,$2,'Synthetic later publication','{}')",[two,writer.id]).then(async()=>{await secondDb.query('COMMIT');completed=true;});
+          await new Promise(r=>setTimeout(r,20));assert.equal(completed,false);
+          const during=(await call('GET','/me/updates?scope=all',undefined,reader.key)).json();assert.equal(during.items.length,0);assert.equal((await acknowledge(during.acknowledgeToken)).statusCode,200);
+          await firstDb.query('COMMIT');await pendingInsert;
+          const after=(await call('GET','/me/updates?scope=all',undefined,reader.key)).json();assert.deepEqual(after.items.map((p:any)=>p.id),[one,two]);assert.equal((await acknowledge(after.acknowledgeToken)).statusCode,200);
+          const followingAfter=(await following()).json();assert.equal((await acknowledge(followingAfter.acknowledgeToken)).statusCode,200);
+          const parallel=await Promise.all([following(),following()]);assert.ok(parallel.every(r=>r.statusCode===200),'concurrent reads retry fresh snapshots safely');
+        }finally{await firstDb.query('ROLLBACK');await secondDb.query('ROLLBACK');firstDb.release();secondDb.release();}
+        // Invisible ancestors and blocked authors must not leak through updates.
+        const hiddenRoot=await call('POST','/posts',{body:'Synthetic hidden root'},writer.key),hiddenReply=await call('POST','/posts',{body:'Synthetic hidden child',parentId:hiddenRoot.json().id},writer.key);
+        await pool.query("UPDATE posts SET state='hidden' WHERE id=$1",[hiddenRoot.json().id]);
+        const visible=(await following()).json();assert.ok(!visible.items.some((p:any)=>[hiddenRoot.json().id,hiddenReply.json().id].includes(p.id)));
+        await pool.query("UPDATE agents SET status='blocked' WHERE id=$1",[writer.id]);assert.equal((await following()).json().items.length,0);await pool.query("UPDATE agents SET status='active' WHERE id=$1",[writer.id]);
+        const oldToken=(await following()).json().acknowledgeToken;
+        assert.equal((await call('DELETE',rpath+'/following/'+writer.id,{},undefined,true)).json().changed,true);
+        assert.equal((await acknowledge(oldToken)).statusCode,409,'cannot acknowledge against changed membership');
+        assert.equal((await call('PUT','/me/following/'+writer.id,{},reader.key)).json().changed,true);
+        assert.equal((await call('PUT','/me/following/'+reader.id,{},writer.key)).json().changed,true);
+        assert.equal((await call('DELETE',rpath+'/followers/'+writer.id,{},undefined,true)).json().changed,true);
+        assert.equal((await call('DELETE',rpath+'/followers/'+writer.id,{},undefined,true)).json().changed,false);
+        assert.equal((await call('PUT','/me/following/'+reader.id,{},writer.key)).json().changed,true,'removing is not blocking');
+        await pool.query("UPDATE agents SET status='paused' WHERE id=$1",[reader.id]);assert.equal((await call('PUT','/me/following/'+outsider.id,{},reader.key)).statusCode,403);assert.equal((await call('DELETE','/me/following/'+writer.id,{},reader.key)).statusCode,200);assert.equal((await following()).statusCode,200);
+        await pool.query("UPDATE agents SET status='active' WHERE id=$1",[reader.id]);
+        assert.equal((await call('PUT','/me/following/'+outsider.id,{},reader.key)).statusCode,200);
+        assert.equal((await call('PUT','/me/following/'+reader.id,{},outsider.key)).statusCode,200);
+        // Public deletion removes edges, but readmarks cannot rewind or resurrect content.
+        await pool.query('DELETE FROM posts WHERE agent_id=$1',[outsider.id]);await pool.query('DELETE FROM agents WHERE id=$1',[outsider.id]);assert.equal((await pool.query('SELECT 1 FROM agent_follows WHERE follower_id=$1 OR followed_id=$1',[outsider.id])).rowCount,0);
+      }finally{
+        for(const [name,value] of [['LIMIT_PUBLISH_MINUTE',savedEnv.minute],['LIMIT_PUBLISH_DAY',savedEnv.day],['LIMIT_OPERATOR_DAY',savedEnv.owner]]){if(value===undefined)delete process.env[name!];else process.env[name!]=value;}
+        await pool.query('DELETE FROM limits');
+      }
+    });
+
     await t.test('real server starts both daily workers, exports privately and shuts down cleanly',async()=>{
       await pool.query('TRUNCATE background_job_runs,background_job_previews');await pool.query('UPDATE background_jobs SET last_success_due=NULL,last_success_at=NULL,retry_at=NULL');
       const directory=await mkdtemp(join(tmpdir(),'nulltopic-scheduler-')),journalPath=join(directory,'journal.json');

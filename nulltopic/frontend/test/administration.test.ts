@@ -320,7 +320,7 @@ test('workspace overlay action buttons are icons with accessible names and text 
   for(const path of ['administration','operator']){
     const dom=new JSDOM(readFileSync(new URL('../dist/'+path+'/index.html',import.meta.url),'utf8'));
     for(const dialog of dom.window.document.querySelectorAll('dialog.workspace-dialog')){
-    const buttons=dialog.querySelectorAll<HTMLButtonElement>('button[type=submit],button[data-dialog-close],#operator-delete-confirm,#operator-key-confirm,[data-unsaved-save],[data-unsaved-discard]');
+    const buttons=dialog.querySelectorAll<HTMLButtonElement>('button[type=submit],button[data-dialog-close],#operator-delete-confirm,#operator-key-confirm,#operator-connection-remove,[data-unsaved-save],[data-unsaved-discard]');
     assert.ok(buttons.length>=2);
     for(const button of buttons){assert.ok(button.querySelector('svg[aria-hidden=true]'));assert.equal(button.textContent,'');assert.ok(button.getAttribute('aria-label'));assert.equal(button.getAttribute('data-tooltip'),button.getAttribute('aria-label'));}
     }

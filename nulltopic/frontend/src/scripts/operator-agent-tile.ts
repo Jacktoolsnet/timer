@@ -1,6 +1,7 @@
+import {connectionCounts} from './connection-counts';
 import {participationStatus,t} from '../lib/i18n';
 import {avatar,node} from './operator-notices';
-interface Agent {id:string;name:string;handle:string;status:string;authorization_required?:boolean;has_avatar?:boolean;}
+interface Agent {id:string;name:string;handle:string;status:string;authorization_required?:boolean;has_avatar?:boolean;following_count?:number;follower_count?:number;}
 /** Shared, content-safe agent picker card. Callers retain navigation and draft guards. */
 export function operatorAgentTile(agent:Agent,view:'settings'|'conversations'){
  const tile=node('button');tile.type='button';tile.className='admin-tile operator-agent-tile '+(view==='settings'?'operator-settings-agent':'operator-conversation-agent');tile.dataset.agentId=agent.id;tile.dataset.state=agent.status;
@@ -19,9 +20,9 @@ export function operatorAgentTile(agent:Agent,view:'settings'|'conversations'){
 }
 
 /** Overview cards contain independent, keyboard-accessible destination rows. */
-export function operatorAgentOverviewCard(agent:Agent,select:(view:'settings'|'conversations'|'moderation'|'authorization')=>void){
+export function operatorAgentOverviewCard(agent:Agent,select:(view:'settings'|'conversations'|'moderation'|'authorization'|'connections')=>void){
  const source=operatorAgentTile(agent,'settings'),card=node('article',undefined,'admin-tile operator-agent-tile operator-settings-agent operator-overview-agent');card.dataset.agentId=agent.id;card.dataset.state=agent.status;card.setAttribute('aria-label',agent.name+' · @'+agent.handle);
- card.append(source.children[0],source.children[1]);
+ card.append(source.children[0],source.children[1],connectionCounts(agent));
  const hint=card.querySelector('.operator-agent-authorization-hint');
  if(hint){const review=node('button',undefined,'operator-agent-authorization-hint');review.type='button';review.dataset.agentId=agent.id;review.dataset.agentAction='authorization';review.setAttribute('aria-label',t('Review publication authorization'));review.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 4v5c0 5-8 9-8 9s-8-4-8-9V7l8-4Zm0 5v5m0 3h.01"/></svg>';review.append(node('span',t('New publication approval required')));review.addEventListener('click',()=>select('authorization'));hint.replaceWith(review);}
 
@@ -29,6 +30,7 @@ export function operatorAgentOverviewCard(agent:Agent,select:(view:'settings'|'c
  for(const [view,label,path] of [
   ['settings',agent.status==='pending'?t('Review registration'):t('Participation and access keys'),'M4 6h16M4 12h16M4 18h16M9 3v6m6 0v6m-6 0v6'],
   ['conversations',t('Conversations'),'M4 4h16v12H9l-5 4V4Zm4 4h8M8 12h5'],
+  ['connections',t('Connections'),'M8 12a4 4 0 1 1 0-8 4 4 0 0 1 0 8m8 0a4 4 0 1 0 0-8M2 21v-3c0-4 12-4 12 0v3m3-6c3 0 5 1 5 3v3'],
   ['moderation',t('Moderation'),'m12 3 8 4v5c0 5-8 9-8 9s-8-4-8-9V7l8-4Zm-3 9 2 2 4-4']
  ] as const){
   const button=node('button',undefined,'operator-agent-tile-footer operator-agent-destination');button.type='button';button.dataset.agentAction=view;button.dataset.agentId=agent.id;

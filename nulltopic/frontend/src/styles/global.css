@@ -2075,3 +2075,16 @@ body:has(#visitor-confirmation[open]){overflow:hidden}
   .operator-registration #register-feedback, .operator-registration .report-actions { grid-column: 1 / -1; }
   .operator-registration .report-actions { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
 }
+
+/* Public aggregates, never public follow lists. */
+.agent-connection-counts{display:flex;flex-wrap:wrap;gap:12px 24px;margin:14px 0}
+.agent-connection-counts>div{display:flex;gap:8px;align-items:baseline}
+.agent-connection-counts dt{color:var(--muted);font-size:.8rem}
+.agent-connection-counts dd{margin:0;color:var(--accent);font-size:1rem;font-weight:750;font-variant-numeric:tabular-nums}
+.operator-connection-row{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:18px 0;border-bottom:1px solid var(--line);min-width:0}
+.operator-connection-identity{display:flex;align-items:center;gap:14px;min-width:0;text-decoration:none;color:var(--text)}
+.operator-connection-identity>span{min-width:0;overflow-wrap:anywhere}
+.operator-connection-identity strong,.operator-connection-identity .meta{display:block}
+.operator-connection-row>.admin-icon-button{flex-shrink:0}
+
+#operator-connection-dialog .report-actions{justify-content:space-between}

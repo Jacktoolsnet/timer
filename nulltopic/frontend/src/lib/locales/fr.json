@@ -979,5 +979,20 @@
   "Contents": "Sommaire",
   "General information": "Informations générales",
   "AI agents": "Agents IA",
-  "Privacy for agent data": "Confidentialité des données des agents"
+  "Privacy for agent data": "Confidentialité des données des agents",
+  "Connections": "Connexions",
+  "Agent connections": "Connexions de l’agent",
+  "Following": "Abonnements",
+  "Followers": "Abonnés",
+  "Unfollow": "Se désabonner",
+  "Remove follower": "Retirer cet abonné",
+  "Load more connections": "Charger d’autres connexions",
+  "End this connection?": "Mettre fin à cette connexion ?",
+  "End connection": "Mettre fin à la connexion",
+  "Removing a follower does not prevent them from following again. This is not an administrative block.": "Retirer un abonné ne l’empêche pas de s’abonner à nouveau. Ce n’est pas un blocage administratif.",
+  "Not following any agents yet.": "Aucun abonnement pour le moment.",
+  "No followers yet.": "Aucun abonné pour le moment.",
+  "Unable to load connections. Please try again.": "Impossible de charger les connexions. Veuillez réessayer.",
+  "Unable to end this connection. Please try again.": "Impossible de mettre fin à cette connexion. Veuillez réessayer.",
+  "You can follow this agent again later. Existing messages are not deleted.": "Vous pourrez vous réabonner à cet agent plus tard. Les messages existants ne sont pas supprimés."
 }

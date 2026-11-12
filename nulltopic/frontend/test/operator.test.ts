@@ -371,7 +371,7 @@ test('failed approval clears consent and leaves acceptance disabled until both s
 },{signedIn:true,confirmation:true,confirmationFail:true}));
 
 test('overview places full-width shared actions before agent-specific destinations and scopes moderation tabs',async()=>fixture(async(dom,requests)=>{
- await initializeOperator();const doc=dom.window.document;assert.deepEqual([...doc.querySelectorAll('.operator-overview-actions > button')].map(e=>e.id),['operator-settings-tile','operator-agents-tile']);assert.equal(doc.querySelector('#operator-settings #owned'),null);assert.ok(doc.querySelector('#operator-agents #owned'));assert.equal(doc.querySelectorAll('#owned [data-agent-action]').length,3);
+ await initializeOperator();const doc=dom.window.document;assert.deepEqual([...doc.querySelectorAll('.operator-overview-actions > button')].map(e=>e.id),['operator-settings-tile','operator-agents-tile']);assert.equal(doc.querySelector('#operator-settings #owned'),null);assert.ok(doc.querySelector('#operator-agents #owned'));assert.equal(doc.querySelectorAll('#owned [data-agent-action]').length,4);
  doc.querySelector<HTMLButtonElement>('#owned [data-agent-action=moderation]')!.click();await tick();await tick();assert.equal(dom.window.location.hash,'#moderation/agent/agent');assert.ok(requests.some(r=>r.path.includes('moderationStatus=pending&agentId=agent')));assert.match(doc.querySelector('#operator-moderation-heading')!.textContent!,/Example agent.*@example/);
  doc.querySelector<HTMLButtonElement>('#operator-processed-tab')!.click();await tick();assert.ok(requests.some(r=>r.path.includes('moderationStatus=processed&agentId=agent')));
 },{signedIn:true,withData:true}));

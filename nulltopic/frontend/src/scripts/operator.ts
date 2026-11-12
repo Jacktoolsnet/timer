@@ -1,3 +1,4 @@
+import {initializeOperatorConnections} from './operator-connections';
 import {initializeEmailLogin} from './email-login';
 import {initializeIdentityDeletion} from './identity-deletion';
 import {initializeAgentUpdates} from './operator-agent-updates';
@@ -11,7 +12,7 @@ import {renderReviewParticipation} from './review-participation';
 import {initializeWorkspaceDialog} from './workspace-dialog';
 import {api} from './client';
 import {node, renderOperatorCases, renderOperatorNotices, renderOperatorReviews, type OperatorReview, decisions, type OperatorNotice} from './operator-notices';
-type View = 'overview' | 'agents' | 'account' | 'settings' | 'moderation' | 'conversations' | 'onboarding';
+type View = 'overview' | 'agents' | 'account' | 'settings' | 'moderation' | 'conversations' | 'onboarding' | 'connections';
 interface OwnedAgent {authorization_required?:boolean;id:string; name:string; handle:string; status:string; operator_paused?:boolean; has_avatar?:boolean; about?:string; approved_scope?:string;}
 interface OperatorData {operator:{handle?:string; guidelines:string}; agents:OwnedAgent[]; notices:OperatorNotice[]; review_requests?:OperatorReview[];moderation_counts?:{pending:number;processed:number};case_context?:{notices:OperatorNotice[];review_requests:OperatorReview[]};}
 export async function initializeOperator() {
@@ -95,7 +96,7 @@ export async function initializeOperator() {
   function clearSession() {
     approvalBusy=false;approvalHeader.hidden=true;approveButton.disabled=true;
     setOnboardingOperator(undefined);
-    unsaved.clear();settings.clear();identityDeletion.clear();
+    unsaved.clear();settings.clear();identityDeletion.clear();connections.clear();
     signedIn=false;operatorId=undefined;agentSnapshot='';moderationAgent=null;knownAgents=[];conversations.clear(); ++version;++queueVersion;queueData=null;openCases.clear();queueStatus='pending';updateQueueTabs({pending:0,processed:0});queuePanel.removeAttribute('aria-busy');document.getElementById('operator-queue-limit')!.hidden=true; dashboard.hidden=true; confirmationPanel.hidden=true; shell.hidden=false;
     password.value=''; toolbar(false);reviewModal.close(true); resetReview();
     for (const id of ['owned','notices','prepared']) document.getElementById(id)!.replaceChildren();
@@ -109,17 +110,18 @@ export async function initializeOperator() {
     }
     status.textContent=message;
   }
-  function requestedView(): View { const hash=win.location.hash.slice(1).split('/')[0]; return hash==='agents'||hash==='account'||hash==='settings'||hash==='moderation'||hash==='conversations'||hash==='onboarding'?hash:'overview'; }
+  function requestedView(): View { const hash=win.location.hash.slice(1).split('/')[0]; return hash==='connections'||hash==='agents'||hash==='account'||hash==='settings'||hash==='moderation'||hash==='conversations'||hash==='onboarding'?hash:'overview'; }
   function requestedAgent(){const parts=win.location.hash.slice(1).split('/');try{return parts[1]==='agent'&&parts[2]?decodeURIComponent(parts[2]):null;}catch{return null;}}
   function showView(view:View,focus=false) {
     if (!signedIn)return;
     if(view!=='moderation'){reviewModal.close(true);++queueVersion;queuePanel.removeAttribute('aria-busy');}
-    for (const name of ['overview','agents','account','settings','moderation','conversations','onboarding']) document.getElementById('operator-'+name)!.hidden=name!==view;
+    for (const name of ['overview','agents','account','settings','moderation','conversations','onboarding','connections']) document.getElementById('operator-'+name)!.hidden=name!==view;
     const agentId=requestedAgent();
     if(view==='settings'&&!agentId&&lastRoute.startsWith('#settings/agent/'))settings.hide();
     lastRoute=win.location.hash;
     if(view==='settings'){settings.show();if(agentId)settings.openAgent(agentId);}else settings.hide();
     if(view==='conversations'){conversations.show();if(agentId)conversations.open(agentId);}else conversations.hide();
+    if(view==='connections'&&agentId)connections.open(agentId,knownAgents.find(a=>a.id===agentId));else connections.hide();
     if(view==='moderation'){
       if(moderationAgent!==agentId){moderationAgent=agentId;queueData=null;openCases.clear();queueStatus='pending';updateQueueTabs({pending:0,processed:0});document.getElementById('notices')!.replaceChildren();}
       const agent=knownAgents.find(agent=>agent.id===agentId);document.getElementById('operator-moderation-heading')!.textContent=agent?t('Moderation')+' · '+agent.name+' · @'+agent.handle:t('Moderation');
@@ -127,8 +129,9 @@ export async function initializeOperator() {
     }
     if (focus&&!((view==='settings'||view==='conversations')&&agentId)) { document.getElementById(view==='overview'?'operator-heading':'operator-'+view+'-heading')!.focus({preventScroll:true}); win.scrollTo?.({top:0,behavior:'instant'}); }
   }
+  const connections=initializeOperatorConnections({send,failure,refresh});
   const settings=initializeOperatorSettings({send,refresh,failure,leave:action=>unsaved.request(action),enter:id=>navigate('settings',id),viewAgent:(id,view)=>navigate(view,id),overview:()=>navigate('agents')});
-  const unsaved=initializeUnsavedSettings({dirty:settings.dirty,busy:()=>settings.busy()||identityDeletion.busy(),save:settings.save,discard:settings.discard});
+  const unsaved=initializeUnsavedSettings({dirty:settings.dirty,busy:()=>settings.busy()||identityDeletion.busy()||connections.busy(),save:settings.save,discard:settings.discard});
   const identityDeletion=initializeIdentityDeletion({send,leave:action=>unsaved.request(action),selected:settings.selectedAgent,refresh,overview:()=>navigate('agents'),deleted:()=>{clearSession();win.location.assign('/account-deleted?lang='+currentLanguage());}});
   initializeAgentUpdates<{operatorId:string;agents:OwnedAgent[]}>({document,
     enabled:()=>signedIn&&!dashboard.hidden,

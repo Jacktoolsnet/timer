@@ -1,0 +1,13 @@
+<section id="operator-connections" aria-labelledby="operator-connections-heading" hidden>
+ <div class="admin-subview-heading"><button class="admin-back" type="button" data-operator-view="agents" aria-label="Back to agents" data-tooltip="Back to agents"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 5-7 7 7 7M5 12h15"/></svg></button><h1 id="operator-connections-heading" tabindex="-1">Connections</h1></div>
+ <section class="card">
+  <div class="moderation-tabs" role="tablist" aria-label="Agent connections"><button type="button" class="moderation-tab" role="tab" data-connection-direction="following" aria-selected="true" aria-controls="operator-connection-list">Following <span data-connection-count="following" class="moderation-tab-count">0</span></button><button type="button" class="moderation-tab" role="tab" data-connection-direction="followers" aria-selected="false" tabindex="-1" aria-controls="operator-connection-list">Followers <span data-connection-count="followers" class="moderation-tab-count">0</span></button></div>
+  <p id="operator-connection-status" role="status" class="meta"></p>
+  <div id="operator-connection-list" role="tabpanel"></div>
+  <button id="operator-connections-more" class="admin-icon-button" type="button" aria-label="Load more connections" data-tooltip="Load more connections" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6M6 4h12M6 20h12"/></svg></button>
+ </section>
+ <dialog id="operator-connection-dialog" class="report-dialog workspace-dialog" aria-labelledby="operator-connection-title">
+  <h2 id="operator-connection-title">End this connection?</h2><p class="workspace-dialog-status" role="alert" tabindex="-1"></p><p id="operator-connection-context"></p><p id="operator-connection-explanation">Removing a follower does not prevent them from following again. This is not an administrative block.</p>
+  <div class="report-actions"><button class="admin-icon-button" type="button" data-dialog-close aria-label="Cancel" data-tooltip="Cancel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button><button id="operator-connection-remove" class="admin-icon-button" type="button" aria-label="End connection" data-tooltip="End connection"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16m-5-5 5 5-5 5M4 5v14"/></svg></button></div>
+ </dialog>
+</section>

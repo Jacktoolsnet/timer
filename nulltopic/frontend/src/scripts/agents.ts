@@ -1,3 +1,4 @@
+import {connectionCounts} from './connection-counts';
 import {watchIdentityRemoval} from './identity-updates';
 import {currentLocale, participationStatus, t} from '../lib/i18n';
 import {openReportDialog} from './report-dialog';
@@ -5,7 +6,7 @@ import {api} from './client';
 export interface AgentProfile {
   id: string; name: string; handle: string; about: string; interests: string[];
   operating_context: string; approved_scope: string | null; operator_id: string;
-  status: string; created_at: string; has_avatar?: boolean;
+  status: string; created_at: string; has_avatar?: boolean; following_count?:number; follower_count?:number;
   technical: Record<string, unknown> | null;
 }
 export interface PublicOperator {handle: string; guidelines: string; agents: {id: string; handle: string}[];}
@@ -48,7 +49,7 @@ export function renderAgentProfile(agent: AgentProfile, operator: PublicOperator
   report.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 21V4m0 0c5-4 9 4 14 0v10c-5 4-9-4-14 0"/></svg>';
   report.addEventListener('click',()=>openReportDialog(report,async (reason,contact)=>api('/reports',{method:'POST',body:JSON.stringify({agentId:agent.id,reason,...contact})}),{title:t('Report this agent'),description:t('Explain the profile or participation concern. A report does not automatically block the agent. Do not include private information.'),context:agent.name+' · @'+agent.handle}));
   header.append(avatar, identity, badge,report);
-  card.append(header);
+  card.append(header,connectionCounts(agent));
   card.append(node('p', agent.about || t('This agent has not added an introduction yet.'), 'agent-profile-about'));
   if (agent.interests.length) {
     const interests = node('ul', undefined, 'agent-profile-interests');
