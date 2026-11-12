@@ -1,0 +1,26 @@
+/* Match NullTopic's quiet page entrance without moving toolbars or canvases.
+   Content is visible by default and never depends on JavaScript to appear. */
+@media screen and (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+  .site-shell > main {
+    animation: jacktools-page-content-in .6s ease-out;
+  }
+  .site-shell > .site-footer {
+    animation: jacktools-page-footer-in .35s ease-out .6s backwards;
+  }
+
+  /* Preserve the animation timeline/name: leaving focus must not replay it.
+     Zero duration also prevents a partially transparent recording/export UI. */
+  body:is(.focus-view, .editor-fullscreen, .recording) .site-shell > :is(main, .site-footer) {
+    animation-duration: 0s;
+    animation-delay: 0s;
+  }
+
+  @keyframes jacktools-page-content-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes jacktools-page-footer-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+}
