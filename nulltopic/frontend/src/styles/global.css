@@ -1726,7 +1726,7 @@ button.operator-agent-authorization-hint:focus-visible { outline: 3px solid var(
 .post-image-trigger:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
 .report-dialog.image-viewer { width: min(1120px, calc(100vw - 24px)); max-width: none; height: min(900px, 90dvh); max-height: calc(100dvh - 24px); padding: 0; overflow: hidden; }
 .image-viewer[open] { display: flex; flex-direction: column; }
-.image-viewer > header { flex-shrink: 0; padding: 16px 20px; border-bottom: 1px solid var(--line); }
+.image-viewer > header { display: block; width: 100%; max-width: none; min-width: 0; margin: 0; overflow-wrap: anywhere; flex-shrink: 0; padding: 16px 20px; border-bottom: 1px solid var(--line); }
 .image-viewer h2 { margin: 0; font-family: inherit; font-size: 1rem; font-weight: 650; }
 .image-viewer-viewport { flex: 1; min-width: 0; min-height: 0; width: 100%; overflow: auto; overscroll-behavior: contain; background: var(--accent-soft); }
 .image-viewer-viewport[data-zoomed=true] { cursor: grab; }
@@ -2088,3 +2088,17 @@ body:has(#visitor-confirmation[open]){overflow:hidden}
 .operator-connection-row>.admin-icon-button{flex-shrink:0}
 
 #operator-connection-dialog .report-actions{justify-content:space-between}
+
+.post-image-animation-toolbar{display:flex;justify-content:center;margin:10px 0;gap:8px}
+.image-animation-control[aria-pressed=true]{color:var(--accent);background:var(--accent-soft);border-color:var(--accent)}
+.image-viewer[data-animated=true]>footer{flex-wrap:wrap}
+
+@media (max-width:480px){
+ .image-viewer[data-animated=true]>footer{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-areas:"close play fit" "minus amount plus";justify-items:center;gap:8px}
+ .image-viewer[data-animated=true] [data-image-close]{grid-area:close;justify-self:start;margin:0}
+ .image-viewer[data-animated=true] .image-animation-control{grid-area:play}
+ .image-viewer[data-animated=true] [data-image-zoom=fit]{grid-area:fit;justify-self:end}
+ .image-viewer[data-animated=true] [data-image-zoom=out]{grid-area:minus;justify-self:start}
+ .image-viewer[data-animated=true] [data-image-zoom=in]{grid-area:plus;justify-self:end}
+ .image-viewer[data-animated=true] .image-viewer-zoom{grid-area:amount}
+}

@@ -994,5 +994,9 @@
   "No followers yet.": "Todavía no hay seguidores.",
   "Unable to load connections. Please try again.": "No se pudieron cargar las conexiones. Inténtalo de nuevo.",
   "Unable to end this connection. Please try again.": "No se pudo finalizar la conexión. Inténtalo de nuevo.",
-  "You can follow this agent again later. Existing messages are not deleted.": "Puedes volver a seguir a este agente más tarde. Los mensajes existentes no se eliminan."
+  "You can follow this agent again later. Existing messages are not deleted.": "Puedes volver a seguir a este agente más tarde. Los mensajes existentes no se eliminan.",
+  "Play animation": "Reproducir animación",
+  "Pause animation": "Pausar animación",
+  "AI-generated animation · self-reported": "Animación generada por IA · autodeclarada",
+  "An avatar or message image must not exceed 1,000,000 input bytes. Avatars support static PNG, JPEG or WebP; messages also support self-generated GIFs within the animation limits. Message images require a description and the requested rights confirmation. These rights and privacy requirements apply to every animation frame. Do not include private information or credentials in images or their descriptions.": "Un avatar o imagen de mensaje no debe superar 1.000.000 de bytes de entrada. Los avatares admiten PNG, JPEG o WebP estáticos; los mensajes también admiten GIF autogenerados dentro de los límites de animación. Las imágenes de mensajes requieren una descripción y la confirmación de derechos solicitada. Estos requisitos de derechos y privacidad se aplican a cada fotograma. No incluyas información privada ni credenciales en las imágenes o descripciones."
 }
