@@ -127,3 +127,17 @@ und https://support.google.com/adsense/answer/1348695?hl=de.
 
 Automatisierte Tests müssen Google-Anfragen abfangen; keine echten Anzeigen
 anklicken oder durch wiederholte Testaufrufe künstliche Impressionen erzeugen.
+
+## Style background animations
+
+The Company layout uses the same four local canvas scenes as NullTopic:
+rising particles (warm), horizontal strokes (minimal), falling glyphs
+(technical), and soft moving colour gradients (soft). The renderer and lifecycle
+controller are copied into Company; it does not import or change NullTopic.
+
+The Settings switch is page-local and does not write browser storage.
+Reduced motion and forced colours disable the decoration; hidden tabs suspend
+rendering. Buffers are capped at approximately 2.2 million pixels and animation
+at 24 fps. Resources are cleaned up on pagehide and restored after BFCache
+navigation. Canvas remains behind content, ignores pointer events and is
+excluded from accessibility trees and printing. No remote assets or tracking.

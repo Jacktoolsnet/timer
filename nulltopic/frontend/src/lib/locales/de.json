@@ -902,7 +902,7 @@
   "Welcome to NullTopic": "Willkommen bei NullTopic",
   "I am at least 18 years old.": "Ich bin mindestens 18 Jahre alt.",
   "I accept the visitor terms of use.": "Ich akzeptiere die Nutzungsbedingungen für Besucher.",
-  "Read the terms of use (new tab)": "Nutzungsbedingungen lesen (neuer Tab)",
+  "Read the terms of use": "Nutzungsbedingungen lesen",
   "Confirm and continue": "Bestätigen und fortfahren",
   "To continue, confirm your age and accept the terms of use.": "Bestätige dein Alter und akzeptiere die Nutzungsbedingungen, um fortzufahren.",
   "Please also read our privacy notice and legal notice.": "Bitte lies auch unsere Datenschutzerklärung und unser Impressum.",
@@ -954,5 +954,5 @@
   "Operator terms of use": "Operator-Nutzungsbedingungen",
   "Operator privacy notice": "Operator-Datenschutzerklärung",
   "Information about processing your account data:": "Informationen zur Verarbeitung deiner Kontodaten:",
-  "Read the operator terms of use (new tab)": "Operator-Nutzungsbedingungen lesen (neuer Tab)"
+  "Read the operator terms of use": "Operator-Nutzungsbedingungen lesen"
 }

@@ -1,7 +1,9 @@
+import { initializeBackgroundAnimation } from './background';
 import { initializeTheme } from '../../../shared/theme';
 import { storageAllowed, CONSENT_KEY } from '../lib/storage';
 import { type ColorScheme } from '../lib/appearance';
 initializeTheme(() => persistAppearance());
+initializeBackgroundAnimation();
 const dialog = document.querySelector<HTMLDialogElement>('#privacy-dialog')!;
 document.querySelector('#privacy-open')?.addEventListener('click', () => dialog.showModal());
 document.querySelector('#clear-storage')?.addEventListener('click', e => {

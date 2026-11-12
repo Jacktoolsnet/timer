@@ -1,4 +1,5 @@
 ---
+import { backgroundCopy } from '../lib/background-copy';
 import ThemeInit from '../../../shared/ThemeInit.astro';
 import AutoThemeButton from '../../../shared/AutoThemeButton.astro';
 import '../../../shared/theme.css';
@@ -13,6 +14,7 @@ import { getCompanyDictionary } from '../lib/company-ui';
 interface Props { lang: Language; title: string; description: string; route: string; noindex?: boolean; legal?: boolean }
 const { lang, title, description, noindex = false, legal = false } = Astro.props;
 const t = getCompanyDictionary(lang);
+const motion = backgroundCopy[lang];
 const home = '/' + lang + '/';
 const canonical = new URL(Astro.url.pathname === '/' ? '/en/' : Astro.url.pathname, Astro.site);
 
@@ -58,6 +60,7 @@ const canonical = new URL(Astro.url.pathname === '/' ? '/en/' : Astro.url.pathna
   </head>
   <body class:list={{ "legal-document": legal }}>
     <a class="skip-link" href="#main">{lang === 'de' ? 'Zum Inhalt' : lang === 'es' ? 'Ir al contenido' : lang === 'fr' ? 'Aller au contenu' : 'Skip to content'}</a>
+    <canvas id="ambient-background" class="ambient-background" aria-hidden="true" hidden></canvas>
     <div class="site-shell">
       <header class="site-header">
         <a class="brand" href={home} aria-label={t.home}>
@@ -111,6 +114,10 @@ const canonical = new URL(Astro.url.pathname === '/' ? '/en/' : Astro.url.pathna
               <label for="font-size">{t.fontSize}<output id="font-size-value" for="font-size">100 %</output></label>
               <input id="font-size" type="range" min="0" max="3" step="1" value="0" aria-valuetext="100 %" />
               <div class="font-size-steps" aria-hidden="true"><span>100 %</span><span>110 %</span><span>120 %</span><span>130 %</span></div>
+            </div>
+            <div class="storage-choice background-motion-choice">
+              <label><span class="storage-switch"><input id="background-motion" type="checkbox" role="switch" checked disabled aria-describedby="background-motion-status" /><span class="storage-switch-track" aria-hidden="true"></span></span><span>{motion.label}</span></label>
+              <p id="background-motion-status" role="status">{motion.requires}</p>
             </div>
             <div class="storage-choice"><label><span class="storage-switch"><input type="checkbox" role="switch" id="remember-preferences" /><span class="storage-switch-track" aria-hidden="true"></span></span> <span>{t.rememberPreferences}</span></label><p id="storage-status" role="status"></p></div>
             </div>

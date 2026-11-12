@@ -158,3 +158,11 @@ html { scroll-padding-top:calc(var(--masthead-height,150px) + 16px); }
 .metronome-preview{display:flex;flex-direction:column;align-items:center;gap:12px}
 .spotlight-metronome .company-metronome-scene{width:min(68%,260px)}
 .spotlight-metronome .art-footnote{padding-inline:12px}
+
+/* Local-only style scenes, adapted from NullTopic; never intercept interaction. */
+body { isolation:isolate; }
+.ambient-background { position:fixed; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; opacity:.85; }
+[data-theme=dark] .ambient-background { opacity:.9; }
+.site-shell { position:relative; z-index:1; }
+@media(prefers-reduced-motion:reduce),(forced-colors:active) { .ambient-background { display:none!important; } }
+@media print { .ambient-background,.background-motion-choice { display:none!important; } }

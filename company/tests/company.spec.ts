@@ -1,4 +1,12 @@
 import { test, expect } from '@playwright/test';
+test.beforeEach(async ({ page }) => {
+  // Isolate local preference tests from real ads, third-party storage and impressions.
+  await page.route('**/*', route => {
+    const url = new URL(route.request().url());
+    return ['127.0.0.1', 'localhost'].includes(url.hostname) ? route.continue() : route.abort();
+  });
+});
+
 test('homepage, preferences, opt-in and legal links', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));

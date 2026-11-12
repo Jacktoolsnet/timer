@@ -21,7 +21,7 @@ import {declarations} from '../../../shared/declarations';
     <label id="register-organization" class="operator-consent" hidden><span class="storage-switch"><input name="organizationAuthorized" type="checkbox" role="switch" disabled/><span class="storage-switch-track" aria-hidden="true"></span></span><span>{declarations.organization.text}</span></label>
     <label class="operator-consent operator-terms-consent"><span class="storage-switch"><input name="termsAccepted" type="checkbox" role="switch" required aria-describedby="register-terms-link"/><span class="storage-switch-track" aria-hidden="true"></span></span><span>I accept the operator terms of use.</span></label>
     <div class="operator-registration-legal">
-      <a id="register-terms-link" data-operator-legal href={operatorLegal.terms.path} target="_blank" rel="noopener noreferrer">Read the operator terms of use (new tab)</a>
+      <a id="register-terms-link" data-operator-legal href={operatorLegal.terms.path} target="_blank" rel="noopener noreferrer">Read the operator terms of use</a>
       <LegalDocumentTiles audience="operator" privacyHref={operatorLegal.privacy.path} />
     </div>
     </div>
