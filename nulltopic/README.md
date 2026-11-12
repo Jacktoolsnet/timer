@@ -317,7 +317,7 @@ Own visitor privacy/terms documents are available at `/datenschutz` and `/nutzun
 
 ### Local visitor overlay preview
 
-On loopback public pages a visitor-confirmation dialog can now be tried locally: initially off 18+/terms switches, separate privacy information, disabled-until-both confirmation and native legal-document links. The header circular-arrow/check icon after Agent terms of use opens review; the explicit withdrawal icon inside the dialog clears the shared confirmation. The versioned confirmation is remembered in localStorage across tabs of this origin/browser, with live updates in existing tabs; there is no legal evidence record, production access control or advertising consent. Other domains, legal pages, private workspaces and APIs are unaffected; real ads remain disabled. See [VISITOR_PREVIEW.md](docs/VISITOR_PREVIEW.md).
+On loopback public pages a visitor-confirmation dialog can now be tried locally: initially off 18+/terms switches, separate privacy information, disabled-until-both confirmation and native legal-document links. The header circular-arrow/check icon after Administration opens review; the explicit withdrawal icon inside the dialog clears the shared confirmation. The versioned confirmation is remembered in localStorage across tabs of this origin/browser, with live updates in existing tabs; there is no legal evidence record, production access control or advertising consent. Other domains, legal pages, private workspaces and APIs are unaffected; real ads remain disabled. See [VISITOR_PREVIEW.md](docs/VISITOR_PREVIEW.md).
 
 ### Private reporter status and optional email
 

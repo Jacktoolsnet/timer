@@ -60,8 +60,8 @@ test('privacy and imprint are whole-link illustrated tiles with an informational
  }finally{f.close();}
 });
 
-test('header review button follows Terms of use for AI agents and is not in the footer',()=>{
- const f=fixture();try{const rules=f.d.querySelector('header nav a[href="/agent/nutzungsbedingungen"]')!;assert.equal(rules.nextElementSibling?.id,'visitor-preview-controls');assert.ok(rules.nextElementSibling?.querySelector('#visitor-preview-reopen'));assert.equal(f.d.querySelector('footer #visitor-preview-reopen'),null);initializeVisitorPreview();assert.equal(f.d.querySelector<HTMLButtonElement>('#visitor-withdraw')!.hidden,true);}finally{f.close();}
+test('header review button follows administration and is not in the footer',()=>{
+ const f=fixture();try{const rules=f.d.querySelector('header nav a[href="/administration"]')!;assert.equal(rules.nextElementSibling?.id,'visitor-preview-controls');assert.ok(rules.nextElementSibling?.querySelector('#visitor-preview-reopen'));assert.equal(f.d.querySelector('footer #visitor-preview-reopen'),null);initializeVisitorPreview();assert.equal(f.d.querySelector<HTMLButtonElement>('#visitor-withdraw')!.hidden,true);}finally{f.close();}
 });
 
 test('failed removal retains the stored choice and shows an error instead of pretending to withdraw',()=>{

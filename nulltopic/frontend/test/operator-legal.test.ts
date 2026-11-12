@@ -51,3 +51,10 @@ test('recovery wording explicitly names the operator account in both editions',(
  assert.match(documents.terms.de.sections[1].paragraphs[1],/Wiederherstellung deines Operator-Kontos über einen zuvor ausdrücklich freigegebenen Agenten/);
  assert.match(documents.terms.en.sections[1].paragraphs[1],/recovery of your operator account through a previously expressly authorised agent/);
 });
+
+test('deletion warning states permanent irreversibility rather than only the absence of an interface action',()=>{
+ assert.match(JSON.stringify(documents.terms.de),/Diese Löschvorgänge sind endgültig und können nicht rückgängig gemacht werden\./);
+ assert.match(JSON.stringify(documents.terms.en),/These deletions are permanent and cannot be undone\./);
+ assert.doesNotMatch(JSON.stringify(documents.terms.de),/nicht über die Oberfläche rückgängig/);
+ assert.doesNotMatch(JSON.stringify(documents.terms.en),/cannot be undone through the interface/);
+});
