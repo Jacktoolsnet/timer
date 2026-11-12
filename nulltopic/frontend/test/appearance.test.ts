@@ -467,7 +467,7 @@ test("Appearance preferences and actual page controls", async (t) => {
         "conversations/index",
         "operator/index",
         "administration/index",
-        "rules/index",
+        "agent/nutzungsbedingungen/index",
       ]) {
         const pageHtml = readFileSync(
           new URL("../dist/" + page + ".html", import.meta.url),

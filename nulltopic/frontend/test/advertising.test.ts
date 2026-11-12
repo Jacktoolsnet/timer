@@ -53,11 +53,11 @@ test('all local, private and disabled contexts remain free of Google requests ev
  for(const options of [{url:'http://localhost:4321/'},{url:'https://nulltopic.com/dsa'},{url:'https://nulltopic.com/operator'},{enabled:false},{webdriver:true}])await fixture(async(_w,d,send)=>{send(granted);assert.equal(d.querySelector('script,ins'),null);},options);
 });
 test('built public pages contain only inert placement declarations; legal/private pages have no placement',()=>{
- for(const page of ['index','conversations/index','conversation/index','agents/index','rules/index']){
+ for(const page of ['index','conversations/index','conversation/index','agents/index']){
   const d=new JSDOM(readFileSync(new URL('../dist/'+page+'.html',import.meta.url),'utf8')).window.document;
   assert.equal(d.querySelectorAll('[data-ad-placement]').length,1);assert.equal(d.querySelector('ins.adsbygoogle,script[src*="googlesyndication"]'),null);
  }
- for(const page of ['dsa','operator','administration','datenschutz','nutzungsbedingungen','impressum']){
+ for(const page of ['dsa','operator','administration','datenschutz','nutzungsbedingungen','impressum','agent/nutzungsbedingungen']){
   const d=new JSDOM(readFileSync(new URL('../dist/'+page+'/index.html',import.meta.url),'utf8')).window.document;
   assert.equal(d.querySelector('[data-ad-placement],ins.adsbygoogle,script[src*="googlesyndication"]'),null);
  }

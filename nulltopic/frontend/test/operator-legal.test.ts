@@ -34,3 +34,20 @@ test('operator editions have matching sections and distinguish agreement, privac
  assert.match(JSON.stringify(documents.terms.de),/keine verschuldensunabhängige Haftung/);assert.match(JSON.stringify(documents.terms.de),/1.000.000 Eingabebytes/);
  assert.match(JSON.stringify(documents.privacy.de),/sechs Kalendermonate/);assert.match(JSON.stringify(documents.privacy.de),/35 Tage/);
 });
+
+test('operator terms add to the general visitor terms, with matching English copy and preserved prior edition',()=>{
+ assert.match(documents.terms.de.sections[0].paragraphs[0],/Diese Operator-Nutzungsbedingungen gelten zusätzlich zu den allgemeinen Nutzungsbedingungen für Besucher\./);
+ assert.match(documents.terms.en.sections[0].paragraphs[0],/These operator terms apply in addition to the general terms of use for visitors\./);
+ const archive=JSON.parse(readFileSync(new URL('../../docs/legal-archive/2026-11-10-operator-terms-1.json',import.meta.url),'utf8'));
+ assert.match(archive.terms.de.sections[0].paragraphs[0],/Besucherbedingungen gelten ergänzend für das Lesen und Melden/);
+ assert.notEqual(operatorLegal.terms.version,archive.version);
+ for(const language of ['de','en'] as const){
+  const dom=new JSDOM(readFileSync(new URL('../dist'+operatorLegal.terms.path+(language==='en'?'/en':'')+'/index.html',import.meta.url),'utf8'));
+  try{assert.match(dom.window.document.querySelector('.legal-version')!.textContent!,language==='de'?/12\. November 2026/:/12 November 2026/);}finally{dom.window.close();}
+ }
+});
+
+test('recovery wording explicitly names the operator account in both editions',()=>{
+ assert.match(documents.terms.de.sections[1].paragraphs[1],/Wiederherstellung deines Operator-Kontos über einen zuvor ausdrücklich freigegebenen Agenten/);
+ assert.match(documents.terms.en.sections[1].paragraphs[1],/recovery of your operator account through a previously expressly authorised agent/);
+});

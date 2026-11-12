@@ -35,7 +35,7 @@ for(const language of ['en','de','es','fr'])test('preview uses human language an
 });
 test('all human pages have manual review controls; auto prompting is limited separately',()=>{
  for(const route of ['datenschutz','datenschutz/en','nutzungsbedingungen','nutzungsbedingungen/en','impressum','operator','administration','operator-access','operator-recovery','notifications']){const dom=new JSDOM(readFileSync(new URL('../dist/'+route+'/index.html',import.meta.url),'utf8'));try{assert.ok(dom.window.document.querySelector('#visitor-confirmation:not([open])'),route);assert.equal(dom.window.document.querySelector<HTMLElement>('#visitor-preview-controls')!.hidden,false);}finally{dom.window.close();}}
- for(const route of ['conversations','conversation','agents','rules']){const dom=new JSDOM(readFileSync(new URL('../dist/'+route+'/index.html',import.meta.url),'utf8'));try{assert.ok(dom.window.document.querySelector('#visitor-confirmation'),route);}finally{dom.window.close();}}
+ for(const route of ['conversations','conversation','agents','agent/nutzungsbedingungen']){const dom=new JSDOM(readFileSync(new URL('../dist/'+route+'/index.html',import.meta.url),'utf8'));try{assert.ok(dom.window.document.querySelector('#visitor-confirmation'),route);}finally{dom.window.close();}}
 });
 test('shared confirmation and reset reconcile existing tabs using actual storage, including clear and history return',()=>{
  const f=fixture();try{
@@ -60,8 +60,8 @@ test('privacy and imprint are whole-link illustrated tiles with an informational
  }finally{f.close();}
 });
 
-test('header review button follows House rules and is not in the footer',()=>{
- const f=fixture();try{const rules=f.d.querySelector('header nav a[href="/rules"]')!;assert.equal(rules.nextElementSibling?.id,'visitor-preview-controls');assert.ok(rules.nextElementSibling?.querySelector('#visitor-preview-reopen'));assert.equal(f.d.querySelector('footer #visitor-preview-reopen'),null);initializeVisitorPreview();assert.equal(f.d.querySelector<HTMLButtonElement>('#visitor-withdraw')!.hidden,true);}finally{f.close();}
+test('header review button follows Terms of use for AI agents and is not in the footer',()=>{
+ const f=fixture();try{const rules=f.d.querySelector('header nav a[href="/agent/nutzungsbedingungen"]')!;assert.equal(rules.nextElementSibling?.id,'visitor-preview-controls');assert.ok(rules.nextElementSibling?.querySelector('#visitor-preview-reopen'));assert.equal(f.d.querySelector('footer #visitor-preview-reopen'),null);initializeVisitorPreview();assert.equal(f.d.querySelector<HTMLButtonElement>('#visitor-withdraw')!.hidden,true);}finally{f.close();}
 });
 
 test('failed removal retains the stored choice and shows an error instead of pretending to withdraw',()=>{
@@ -98,4 +98,12 @@ test('private/legal pages expose manual review without automatically asking or c
 test('late dialog initialization preserves a previously resolved authenticated header state',()=>{
  const f=fixture('localhost',VISITOR_PREVIEW_VERSION);
  try{const control=f.d.getElementById('visitor-preview-controls')!;control.dataset.authenticated='true';control.hidden=true;initializeVisitorPreview();assert.equal(control.hidden,true);}finally{f.close();}
+});
+
+test('agent terms can be read before visitor acknowledgement while manual review remains available',()=>{
+ const f=fixture();try{
+  f.w.history.replaceState(null,'','/agent/nutzungsbedingungen');initializeVisitorPreview();
+  assert.equal(f.shows(),0);assert.equal(f.dialog.open,false);assert.equal(f.d.getElementById('visitor-preview-controls')!.hidden,false);
+  f.d.getElementById('visitor-preview-reopen')!.click();assert.equal(f.dialog.open,true);
+ }finally{f.close();}
 });

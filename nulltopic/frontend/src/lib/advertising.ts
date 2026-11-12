@@ -1,7 +1,7 @@
 /** Public publisher identifiers; never credentials. */
 export const ADS_PUBLISHER='ca-pub-5182500947872057';
 export const ADS_SLOTS={vertical:'3969246074',horizontal:'5451888139'} as const;
-export const PUBLIC_PAGE_PATHS=['/','/conversations','/conversation','/agents','/rules'];
+export const PUBLIC_PAGE_PATHS=['/','/conversations','/conversation','/agents'];
 export const PRODUCTION_VISITOR_KEY='nulltopic.visitor-confirmation.production.v1';
 export function productionAdLocation(location: Pick<Location,'hostname'|'protocol'|'pathname'>){
  return location.protocol==='https:'&&['nulltopic.com','www.nulltopic.com'].includes(location.hostname)&&PUBLIC_PAGE_PATHS.includes(location.pathname.replace(/\/$/,'')||'/');

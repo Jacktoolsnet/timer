@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {JSDOM} from 'jsdom';
 
 test('legal documents expose a labelled native print action without changing document content',()=>{
- for(const route of ['datenschutz','datenschutz/en','nutzungsbedingungen','nutzungsbedingungen/en','impressum','operator/datenschutz','operator/datenschutz/en','operator/nutzungsbedingungen','operator/nutzungsbedingungen/en']){
+ for(const route of ['datenschutz','datenschutz/en','nutzungsbedingungen','nutzungsbedingungen/en','impressum','operator/datenschutz','operator/datenschutz/en','operator/nutzungsbedingungen','operator/nutzungsbedingungen/en','agent/nutzungsbedingungen']){
   const dom=new JSDOM(readFileSync(new URL('../dist/'+route+'/index.html',import.meta.url),'utf8'));
   try{const d=dom.window.document,button=d.querySelector<HTMLButtonElement>('.legal-notice [data-print-legal]')!;assert.ok(button);assert.equal(button.type,'button');assert.ok(button.getAttribute('aria-label'));assert.equal(button.dataset.tooltip,button.getAttribute('aria-label'));assert.ok(button.querySelector('svg[aria-hidden=true]'));assert.ok(d.querySelector('.legal-notice article'));}finally{dom.window.close();}
  }

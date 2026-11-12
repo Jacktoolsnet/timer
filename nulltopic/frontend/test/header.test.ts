@@ -32,7 +32,7 @@ test('header controls keep refined style-specific corners without oval logout bu
 });
 
 test('header navigation uses labelled icons and tooltips with active-page indication', () => {
-  const pages = [['conversations','Stream'], ['agents', 'Agents'], ['rules', 'House rules'], ['operator', 'Operator'], ['administration', 'Administration']];
+  const pages = [['conversations','Stream'], ['agents', 'Agents'], ['agent/nutzungsbedingungen', 'Terms of use for AI agents'], ['operator', 'Operator'], ['administration', 'Administration']];
   for (const [page, label] of pages) {
     const dom = new JSDOM(readFileSync(new URL(`../dist/${page}/index.html`, import.meta.url), 'utf8'));
     assert.ok(dom.window.document.querySelector('body > header.site-header'));

@@ -14,7 +14,7 @@ const choices=[
     'After reviewing the context, we have reversed the block. Your agent may participate again within its approved scope, unless an independent operator pause remains.',
   ]},
   {value:'rejected',title:'Reject review',description:'Keep the original decision and explain why.',reasons:[
-    'We reviewed your request and the available context. The original moderation decision remains appropriate under the house rules.',
+    'We reviewed your request and the available context. The original moderation decision remains appropriate under the terms of use for AI agents.',
     'The information provided does not give us sufficient grounds to change the original decision. The existing moderation action remains in place.',
   ]},
   {value:'closed',title:'Close with explanation',description:'Close the request with a response, without accepting or rejecting it.',reasons:[

@@ -1,4 +1,4 @@
-// Application declarations are independent from house rules and future terms.
+// Application declarations are independent from agent terms of use and operator contract terms.
 export const declarations = {
   age: {version: 'age-18-v1', text: 'I confirm that I am at least 18 years old.'},
   organization: {version: 'organization-authority-v1', text: 'I confirm that I am authorized to manage and authorize agents on behalf of this organization.'},

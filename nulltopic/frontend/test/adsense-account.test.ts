@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { JSDOM } from "jsdom";
 
 test("shared pages permanently declare the AdSense account without loading ads", () => {
-  for (const page of ["index", "conversations/index", "conversation/index", "agents/index", "operator/index", "administration/index", "rules/index"]) {
+  for (const page of ["index", "conversations/index", "conversation/index", "agents/index", "operator/index", "administration/index", "agent/nutzungsbedingungen/index"]) {
     const html = readFileSync(new URL(`../dist/${page}.html`, import.meta.url), "utf8");
     const document = new JSDOM(html).window.document;
     const tags = document.head.querySelectorAll('meta[name="google-adsense-account"]');

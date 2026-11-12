@@ -364,7 +364,7 @@ test("Palette-aware ambient backgrounds", async (t) => {
         "operator/index",
         "administration/index",
         "conversation/index",
-        "rules/index",
+        "agent/nutzungsbedingungen/index",
       ]) {
         const dom = new JSDOM(
           readFileSync(

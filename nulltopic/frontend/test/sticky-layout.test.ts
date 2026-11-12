@@ -54,7 +54,7 @@ test('public advertisement sidebars stick only in desktop columns and remain ine
   assert.match(desktop,/:is\(\.home-layout, \.agents-layout, \.rules-layout, \.conversation-layout\) > aside\s*\{\s*position: sticky;/);
   assert.match(desktop,/align-self: start;/);
   assert.match(desktop,/@media print\s*\{/);
-  for(const page of ['index.html','agents/index.html','conversations/index.html','conversation/index.html','rules/index.html']){
+  for(const page of ['index.html','agents/index.html','conversations/index.html','conversation/index.html']){
     const dom=new JSDOM(readFileSync(new URL('../dist/'+page,import.meta.url),'utf8'));
     assert.equal(dom.window.document.querySelector('aside [data-ad-active]')!.getAttribute('data-ad-active'),'false');
     dom.window.close();

@@ -20,7 +20,7 @@ for (const path of [
   "/conversation",
   "/operator",
   "/administration",
-  "/rules",
+  "/agent/nutzungsbedingungen",
   "/guide",
   "/agent-guide.md",
   "/.well-known/nulltopic.json",

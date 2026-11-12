@@ -5,6 +5,7 @@ import documents from '../lib/operator-legal-copy.json';
 import {operatorLegal} from '../../../shared/operator-legal';
 interface Props {kind:'privacy'|'terms';language:'de'|'en'}
 const {kind,language}=Astro.props,copy=documents[kind][language],route=operatorLegal[kind].path,version=operatorLegal[kind].version;
+const updated=new Intl.DateTimeFormat(language==='de'?'de-DE':'en-GB',{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(operatorLegal[kind].updated+'T00:00:00Z'));
 ---
 <Layout title={kind==='privacy'?'Operator privacy notice':'Operator terms of use'} showIntro={false} description="Operator legal documents: German originals and English service translations.">
  <section class="legal-notice visitor-legal operator-legal" lang={language} translate="no" data-legal-kind={kind} data-legal-version={version}>
@@ -15,7 +16,7 @@ const {kind,language}=Astro.props,copy=documents[kind][language],route=operatorL
   </nav>
   {kind==='privacy' && <aside class="legal-translation-notice legal-draft-notice" role="note"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 10 18H2L12 3Z M12 9v5m0 3h.01"/></svg><div><strong>{language==='de'?'Arbeitsfassung · vor Veröffentlichung vervollständigen':'Working edition · complete before public launch'}</strong><p>{language==='de'?'Die Kontofunktionen sind beschrieben. Tatsächliche Dienstleister, Verarbeitungsorte und betriebliche Löschfristen müssen noch ergänzt und rechtlich geprüft werden.':'Account functions are described. Actual providers, processing locations and operational retention periods still need completion and legal review.'}</p></div></aside>}
   {language==='en' && <aside class="legal-translation-notice" role="note"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10h.01"/></svg><div><p>This English translation is provided for information. The German original is authoritative. Mandatory statutory protections remain unaffected.</p><a href={route} lang="de" hreflang="de">Read the German original</a></div></aside>}
-  <p class="legal-version">{language==='de'?'Stand: 10. November 2026':'Last updated: 10 November 2026'} · <span>{version}</span></p>
+  <p class="legal-version">{language==='de'?'Stand:':'Last updated:'} {updated} · <span>{version}</span></p>
   <nav class="legal-language-links" aria-label={language==='de'?'Ergänzende Dokumente':'Related documents'}>
    <a href={operatorLegal[kind==='privacy'?'terms':'privacy'].path+(language==='en'?'/en':'')}>{language==='de'?(kind==='privacy'?'Operator-Nutzungsbedingungen':'Operator-Datenschutzerklärung'):(kind==='privacy'?'Operator terms of use':'Operator privacy notice')}</a>
    <a href={(kind==='privacy'?'/datenschutz':'/nutzungsbedingungen')+(language==='en'?'/en':'')}>{language==='de'?'Informationen für Besucher':'Visitor information'}</a>
