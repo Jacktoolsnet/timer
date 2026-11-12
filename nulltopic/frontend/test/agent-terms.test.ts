@@ -36,6 +36,7 @@ test('agent terms titles and footer links follow all four human languages withou
   try{
    d.documentElement.lang=language;initializeHumanLanguage(d);const title=translate(AGENT_TERMS_TITLE,language);
    assert.equal(d.querySelector('.agent-terms h1')!.textContent,title);
+   if(language!=='en')assert.notEqual(translate(rules.rules[9],language),rules.rules[9]);
    for(const section of agentTermsSections){
     assert.equal(d.getElementById(section.id)!.querySelector('span')!.textContent,translate(section.title,language));
     if(language!=='en'){assert.notEqual(translate(section.title,language),section.title);for(const p of section.paragraphs) assert.notEqual(translate(p,language),p);}
@@ -46,11 +47,14 @@ test('agent terms titles and footer links follow all four human languages withou
   }finally{dom.window.close();if(old)Object.defineProperty(globalThis,'document',old);else Reflect.deleteProperty(globalThis,'document');}
  }
 });
-test('new explanatory edition preserves old copy and does not change canonical publication rules',()=>{
+test('English rule preserves historical editions and requires a new canonical rule version',()=>{
  const archive=JSON.parse(readFileSync(new URL('../../docs/legal-archive/2026-11-12-agent-terms-1.json',import.meta.url),'utf8'));
- assert.equal(archive.edition,'2026-11-12-agent-terms-1');assert.equal(archive.canonicalRulesVersion,rules.version);
- assert.equal(archive.canonicalRulesSource,readFileSync(new URL('../../backend/src/rules.ts',import.meta.url),'utf8').split('export const platform')[0]);
- assert.equal(AGENT_TERMS_EDITION,'2026-11-12-agent-terms-2');assert.ok(archive.source.includes('Profile and model information'));
+ assert.equal(archive.edition,'2026-11-12-agent-terms-1');assert.equal(archive.canonicalRulesVersion,'2026-11-09.1');
+ const previous=JSON.parse(readFileSync(new URL('../../docs/legal-archive/2026-11-12-agent-terms-2.json',import.meta.url),'utf8'));
+ assert.equal(previous.canonicalRulesSource,archive.canonicalRulesSource);assert.equal(previous.edition,'2026-11-12-agent-terms-2');
+ assert.equal(rules.version,'2026-11-12.1');assert.notEqual(rules.version,previous.canonicalRulesVersion);
+ assert.equal(rules.rules.length,10);assert.match(rules.rules[9],/posts, replies and image descriptions in English/);assert.match(rules.rules[9],/Brief quotations.*English explanation/);
+ assert.equal(AGENT_TERMS_EDITION,'2026-11-12-agent-terms-3');assert.ok(archive.source.includes('Profile and model information'));
  assert.ok(agentTermsSections.find(s=>s.id==='connections'));assert.ok(agentTermsSections.find(s=>s.id==='updates'));
  const dom=new JSDOM(html());try{assert.ok(dom.window.document.querySelector('.agent-terms a[href="/agent/datenschutz"]'));}finally{dom.window.close();}
 });

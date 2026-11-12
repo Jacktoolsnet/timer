@@ -1637,10 +1637,18 @@ delete process.env.ROOT_ADMIN_EMAIL;
       const token2=await issue();const p2=(await call('GET','/confirmation?token='+token2,undefined,undefined,true)).json();
       assert.equal(p2.scope_revision,2);assert.equal(p2.operating_context,'Reviewed context');
       assert.equal((await call('POST','/confirmation',{...approved,token:token2},undefined,true)).json().error.code,'SCOPE_CHANGED');
+      // An approval for the previous language-rule edition must not authorize new writes.
+      await pool.query(`INSERT INTO agent_authorizations(agent_id,operator_id,scope_revision,operating_context,approved_scope,declaration_version,rule_version)
+        SELECT id,operator_id,scope_revision,operating_context,approved_scope,$2,'2026-11-09.1' FROM agents WHERE id=$1`,[id,decl.publication.version]);
+      await pool.query("UPDATE agents SET status='active' WHERE id=$1",[id]);
+      assert.equal((await publish()).json().error.code,'AGENT_AUTHORIZATION_REQUIRED');
+      assert.equal((await call('GET','/registration-status',undefined,credential)).json().authorizationRequired,true);
+      assert.equal((await call('POST','/confirmation',{...approved,token:token2,revision:2,ruleVersion:'2026-11-09.1'},undefined,true)).statusCode,400);
       const a2={...approved,token:token2,revision:2};const authorizeRace=await Promise.all([call('POST','/confirmation',a2,undefined,true),publish()]);
       assert.equal(authorizeRace[0].statusCode,200);assert.ok([200,403].includes(authorizeRace[1].statusCode));
       assert.equal((await call('POST','/confirmation',a2,undefined,true)).statusCode,409);
-      assert.equal((await pool.query('SELECT * FROM agent_authorizations WHERE agent_id=$1',[id])).rows.length,1);
+      assert.equal((await pool.query('SELECT * FROM agent_authorizations WHERE agent_id=$1',[id])).rows.length,2);
+      assert.equal((await pool.query("SELECT rule_version FROM agent_authorizations WHERE agent_id=$1 AND rule_version='2026-11-09.1'",[id])).rows.length,1,'historical approval survives unchanged');
       assert.equal((await call('GET','/registration-status',undefined,credential)).json().authorizationRequired,false);
       assert.equal((await call('GET','/registration-status',undefined,credential)).json().publicationAllowed,true);
       const posted=await publish();assert.equal(posted.statusCode,200,posted.body);
@@ -1671,7 +1679,7 @@ delete process.env.ROOT_ADMIN_EMAIL;
       await pool.query('UPDATE operators SET age_declaration_version=$2,suspended=true WHERE id=$1',[person,decl.age.version]);assert.equal((await publish()).json().error.code,'OPERATOR_SUSPENDED');
       await pool.query('UPDATE operators SET suspended=false WHERE id=$1',[person]);
       // UTC timestamptz/snapshots are server-owned; repeated approvals never duplicate evidence.
-      const audit=(await pool.query('SELECT * FROM agent_authorizations WHERE agent_id=$1 ORDER BY scope_revision',[id])).rows;
+      const audit=(await pool.query('SELECT * FROM agent_authorizations WHERE agent_id=$1 AND rule_version=$2 ORDER BY scope_revision',[id,rules.version])).rows;
       assert.equal(audit.length,2);assert.equal(audit[0].operating_context,'Reviewed context');assert.equal(audit[0].approved_scope,'First scope');assert.equal(audit[1].approved_scope,'Second scope');
       await login('consent_org');
       const orgRegistration=await call('POST','/registrations',{...prepared('consent_org_agent'),operatorHandle:'consent_org'});assert.equal(orgRegistration.statusCode,200,orgRegistration.body);

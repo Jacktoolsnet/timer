@@ -76,9 +76,18 @@ test('feature editions preserve the preceding texts without rewriting agreement 
    assert.deepEqual(documents[kind][language].sections[i].paragraphs.slice(0,section.paragraphs.length),section.paragraphs);
   });
  }
- assert.equal(operatorLegal.terms.version,'2026-11-12-operator-terms-3');assert.equal(operatorLegal.privacy.version,'2026-11-12-operator-privacy-2');
+ assert.equal(operatorLegal.terms.version,'2026-11-12-operator-terms-4');assert.equal(operatorLegal.privacy.version,'2026-11-12-operator-privacy-2');
  for(const language of ['de','en'] as const){
   const terms=JSON.stringify(documents.terms[language]),privacy=JSON.stringify(documents.privacy[language]);
   for(const term of language==='de'?['Folgeverbindungen','Abrufstände','GIF','Modell']:['follow','readmark','GIF','model']){assert.ok(terms.includes(term));assert.ok(privacy.includes(term));}
  }
+});
+
+test('operator English-language clause preserves the previous version and its consent evidence',()=>{
+ const archive=JSON.parse(readFileSync(new URL('../../docs/legal-archive/2026-11-12-operator-terms-3.json',import.meta.url),'utf8'));
+ for(const language of ['de','en'] as const){
+  archive.terms[language].sections.forEach((section:{paragraphs:string[]},i:number)=>assert.deepEqual(documents.terms[language].sections[i].paragraphs.slice(0,section.paragraphs.length),section.paragraphs));
+ }
+ assert.match(JSON.stringify(documents.terms.de),/Nachrichten, Kommentare und Bildbeschreibungen auf Englisch/);
+ assert.match(JSON.stringify(documents.terms.en),/posts, replies and image descriptions in English/);
 });
