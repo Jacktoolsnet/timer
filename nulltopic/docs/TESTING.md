@@ -710,3 +710,17 @@ Deletion-warning copy clarification: frontend build and nine operator-legal test
 Agent terms header cleanup — 2026-11-12: removed the dedicated agent-terms navigation icon; the footer link and document remain available. Frontend build and all 389 frontend tests passed. Mocked Chromium checked 12 width/language combinations (320/390/1280px, en/de/es/fr): no agent-terms header link, translated footer/title preserved, printable content intact, no overflow, automatic gate, ads or external requests. Backend behavior is unchanged.
 
 Legal-link label cleanup — 2026-11-12: visitor and operator terms links no longer display parenthetical new-tab notices in en/de/es/fr. Separate-tab targets and safe rel attributes remain unchanged, as do screen-reader-only notices on document tiles. Frontend build and 389 existing frontend tests passed; the added label regression test checks all four languages and preserved link behavior. No browser visual check was performed for this text-only change.
+
+Operator terms naming consistency — 2026-11-12: German footer, reading links, related-document navigation and current document references now consistently say “Nutzungsbedingungen für Operatoren”. Route, meaning, agreement version and historical editions are unchanged. Frontend build and 11 targeted legal-document/link tests passed; diff whitespace checks passed. No real-browser visual check was performed for this wording-only change.
+
+## Chaptered agent terms — 2026-11-12
+
+The human agent terms use an edition, linked contents and nine numbered chapters in the existing legal/print layout. All nine canonical API rules remain present exactly once and unchanged, grouped by subject; the human document edition is independent of rule acceptance. Tests check chapter anchors, full four-language copy coverage, preserved canonical rules/version, footer-only access, no ads/automatic gate and removal of the old prototype disclaimer. Backend/API/agreements and stored user data are unchanged.
+
+Frontend build, Astro check (zero diagnostics) and all 391 frontend tests passed. Mocked Chromium checked 12 width/language combinations (320/390/1280px, en/de/es/fr): nine chapters and contents links, nine canonical rules, translated title/footer, no horizontal overflow, gate or ads, and print visibility. Desktop/mobile screenshots were visually inspected. Old /rules still returns 404; zero external requests, account/mail writes or Google calls. Backend tests were not rerun because backend code and protocol are unchanged.
+
+## Audience-grouped footer — 2026-11-12
+
+The footer places identity/resources beside three labelled legal groups: General information (imprint, visitor terms, visitor privacy), Operators (terms/privacy), and AI agents (terms plus the existing agent-data privacy section at /operator/datenschutz#section-4). No separate agent privacy document or new legal processing claim is invented. Desktop has four columns, tablet two, phone one; group links stay vertically readable. Labels use all four UI languages. Full frontend build and 391 tests passed; after refining the tablet breakpoint, build and 12 focused footer/localization tests passed again. No backend, legal edition or consent behavior changed.
+
+Mocked Chromium checked the footer in en/de/es/fr at 320/768/1280px (12 combinations): labelled groups and 3/2/2 legal links, four/two/one responsive columns and no horizontal overflow. German desktop/mobile screenshots were visually inspected. All APIs were synthetic; zero external requests or data/mail actions.

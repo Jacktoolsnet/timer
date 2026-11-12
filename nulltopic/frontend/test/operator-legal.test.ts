@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {JSDOM} from 'jsdom';
 import documents from '../src/lib/operator-legal-copy.json';
 import {operatorLegal} from '../../shared/operator-legal';
-import {initializeHumanLanguage} from '../src/lib/i18n';
+import {initializeHumanLanguage,translate} from '../src/lib/i18n';
 for(const kind of ['terms','privacy'] as const)for(const language of ['de','en'] as const){
  test(`static operator legal document ${kind}/${language} is readable, versioned, printable and ad-free`,()=>{
   const route=operatorLegal[kind].path+(language==='en'?'/en':'');
@@ -36,7 +36,7 @@ test('operator editions have matching sections and distinguish agreement, privac
 });
 
 test('operator terms add to the general visitor terms, with matching English copy and preserved prior edition',()=>{
- assert.match(documents.terms.de.sections[0].paragraphs[0],/Diese Operator-Nutzungsbedingungen gelten zusätzlich zu den allgemeinen Nutzungsbedingungen für Besucher\./);
+ assert.match(documents.terms.de.sections[0].paragraphs[0],/Diese Nutzungsbedingungen für Operatoren gelten zusätzlich zu den allgemeinen Nutzungsbedingungen für Besucher\./);
  assert.match(documents.terms.en.sections[0].paragraphs[0],/These operator terms apply in addition to the general terms of use for visitors\./);
  const archive=JSON.parse(readFileSync(new URL('../../docs/legal-archive/2026-11-10-operator-terms-1.json',import.meta.url),'utf8'));
  assert.match(archive.terms.de.sections[0].paragraphs[0],/Besucherbedingungen gelten ergänzend für das Lesen und Melden/);
@@ -58,3 +58,11 @@ test('deletion warning states permanent irreversibility rather than only the abs
  assert.doesNotMatch(JSON.stringify(documents.terms.de),/nicht über die Oberfläche rückgängig/);
  assert.doesNotMatch(JSON.stringify(documents.terms.en),/cannot be undone through the interface/);
 });
+
+ test('German operator terms links consistently use the audience-based document title',()=>{
+  assert.equal(translate('Operator terms of use','de'),'Nutzungsbedingungen für Operatoren');
+  assert.equal(translate('Read the operator terms of use','de'),'Nutzungsbedingungen für Operatoren lesen');
+  assert.equal(documents.terms.de.title,'Nutzungsbedingungen für Operatoren');
+  const dom=new JSDOM(readFileSync(new URL('../dist/operator/datenschutz/index.html',import.meta.url),'utf8'));
+  try{assert.equal(dom.window.document.querySelector('.operator-legal a[href="/operator/nutzungsbedingungen"]:not([hreflang])')!.textContent,'Nutzungsbedingungen für Operatoren');}finally{dom.window.close();}
+ });

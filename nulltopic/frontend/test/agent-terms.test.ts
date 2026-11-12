@@ -5,6 +5,7 @@ import {JSDOM} from 'jsdom';
 import {AGENT_TERMS_PATH,AGENT_TERMS_TITLE} from '../src/lib/agent-terms';
 import {PUBLIC_PAGE_PATHS,productionAdLocation} from '../src/lib/advertising';
 import {rules} from '../../backend/src/rules';
+import {agentTermsSections,AGENT_TERMS_EDITION} from '../src/lib/agent-terms-sections';
 import {initializeHumanLanguage,translate} from '../src/lib/i18n';
 const html=()=>readFileSync(new URL('../dist'+AGENT_TERMS_PATH+'/index.html',import.meta.url),'utf8');
 test('agent terms have their own readable, printable route without ads or automatic visitor acknowledgement',()=>{
@@ -12,7 +13,11 @@ test('agent terms have their own readable, printable route without ads or automa
  try{
   assert.equal(d.querySelector('.agent-terms h1')!.textContent,AGENT_TERMS_TITLE);
   assert.equal(d.querySelector('.agent-terms')!.getAttribute('data-agent-terms-version'),rules.version);
-  assert.deepEqual([...d.querySelectorAll('.agent-terms article ol li p')].map(p=>p.textContent),rules.rules);
+  assert.deepEqual([...d.querySelectorAll<HTMLElement>('[data-platform-rule]')].sort((a,b)=>Number(a.dataset.platformRule)-Number(b.dataset.platformRule)).map(p=>p.textContent),rules.rules);
+  assert.equal(d.querySelector('.agent-terms')!.getAttribute('data-document-edition'),AGENT_TERMS_EDITION);
+  assert.equal(d.querySelectorAll('.agent-terms article>section').length,agentTermsSections.length);
+  for(const link of d.querySelectorAll<HTMLAnchorElement>('.agent-terms .legal-contents a')) assert.ok(d.getElementById(link.hash.slice(1)));
+  assert.doesNotMatch(d.querySelector('.agent-terms article')!.textContent!,/prototype|production safety/i);
   assert.ok(d.querySelector('.agent-terms [data-print-legal]'));assert.ok(d.querySelector('.agent-terms article'));
   assert.equal(d.querySelector('[data-ad-placement],ins.adsbygoogle,script[src*="googlesyndication"]'),null);
   assert.equal(d.querySelector('dialog[open]'),null);assert.equal(PUBLIC_PAGE_PATHS.includes(AGENT_TERMS_PATH),false);
@@ -31,6 +36,10 @@ test('agent terms titles and footer links follow all four human languages withou
   try{
    d.documentElement.lang=language;initializeHumanLanguage(d);const title=translate(AGENT_TERMS_TITLE,language);
    assert.equal(d.querySelector('.agent-terms h1')!.textContent,title);
+   for(const section of agentTermsSections){
+    assert.equal(d.getElementById(section.id)!.querySelector('span')!.textContent,translate(section.title,language));
+    if(language!=='en'){assert.notEqual(translate(section.title,language),section.title);for(const p of section.paragraphs) assert.notEqual(translate(p,language),p);}
+   }
    assert.equal(d.querySelector('header a[href="'+AGENT_TERMS_PATH+'"]'),null);
    assert.equal(d.querySelector('footer .footer-main a[href="'+AGENT_TERMS_PATH+'"]')!.textContent,title);
    assert.doesNotMatch(d.querySelector('.footer-main')!.textContent!,/Hausregeln|House rules|Normas de convivencia|Règles de la communauté/);
