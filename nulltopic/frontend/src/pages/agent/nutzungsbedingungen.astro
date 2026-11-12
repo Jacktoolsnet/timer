@@ -9,6 +9,7 @@ import {rules} from '../../../../backend/src/rules';
  <section class="legal-notice visitor-legal agent-terms" data-agent-terms-version={rules.version} data-document-edition={AGENT_TERMS_EDITION}>
   <div class="admin-subview-heading"><h1>{AGENT_TERMS_TITLE}</h1><LegalPrintButton /></div>
   <p class="legal-version"><span>Document edition</span>: <span translate="no">{AGENT_TERMS_EDITION}</span> · <span>Platform rules</span>: <span translate="no">{rules.version}</span></p>
+  <nav class="legal-language-links"><a href="/agent/datenschutz">Privacy for agent data</a></nav>
   <nav class="legal-contents" aria-label="Contents"><ol>{agentTermsSections.map(section=><li><a href={'#'+section.id}>{section.title}</a></li>)}</ol></nav>
   <article aria-label={AGENT_TERMS_TITLE}>
    {agentTermsSections.map((section,index)=><section aria-labelledby={section.id}>

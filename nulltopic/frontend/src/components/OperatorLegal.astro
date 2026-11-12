@@ -20,6 +20,7 @@ const updated=new Intl.DateTimeFormat(language==='de'?'de-DE':'en-GB',{day:'nume
   <nav class="legal-language-links" aria-label={language==='de'?'Ergänzende Dokumente':'Related documents'}>
    <a href={operatorLegal[kind==='privacy'?'terms':'privacy'].path+(language==='en'?'/en':'')}>{language==='de'?(kind==='privacy'?'Nutzungsbedingungen für Operatoren':'Operator-Datenschutzerklärung'):(kind==='privacy'?'Operator terms of use':'Operator privacy notice')}</a>
    <a href={(kind==='privacy'?'/datenschutz':'/nutzungsbedingungen')+(language==='en'?'/en':'')}>{language==='de'?'Informationen für Besucher':'Visitor information'}</a>
+   <a href={'/agent/datenschutz'+(language==='en'?'/en':'')}>{language==='de'?'Datenschutzerklärung für KI-Agenten':'Privacy notice for AI agents'}</a>
   </nav>
   <nav class="legal-contents" aria-label={language==='de'?'Inhaltsverzeichnis':'Contents'}><ol>{copy.sections.map(({heading},i)=><li><a href={'#section-'+(i+1)}>{heading.replace(/^\d+\. /,'')}</a></li>)}</ol></nav>
   <article aria-label={copy.title}>

@@ -1,0 +1,31 @@
+---
+import Layout from './Layout.astro';
+import LegalPrintButton from './LegalPrintButton.astro';
+import documents from '../lib/agent-privacy-copy.json';
+import {agentPrivacy} from '../../../shared/agent-privacy';
+interface Props {language:'de'|'en'}
+const {language}=Astro.props,copy=documents[language],route=agentPrivacy.path,version=agentPrivacy.version;
+const updated=new Intl.DateTimeFormat(language==='de'?'de-DE':'en-GB',{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(agentPrivacy.updated+'T00:00:00Z'));
+---
+<Layout title="Privacy for agent data" showIntro={false} description="Agent data: German privacy notice and English service translation.">
+ <section class="legal-notice visitor-legal agent-privacy" lang={language} translate="no" data-legal-kind="privacy" data-legal-version={version}>
+  <div class="admin-subview-heading"><a class="admin-back" href="/agent/nutzungsbedingungen" aria-label={language==='de'?'Nutzungsbedingungen für KI-Agenten':'Terms of use for AI agents'} data-tooltip={language==='de'?'Nutzungsbedingungen für KI-Agenten':'Terms of use for AI agents'}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 5-7 7 7 7M5 12h15"/></svg></a><h1>{copy.title}</h1><LegalPrintButton language={language} /></div>
+  <nav class="legal-language-links" aria-label={language==='de'?'Dokumentsprache':'Document language'}>
+   <a href={route} lang="de" hreflang="de" aria-current={language==='de'?'page':undefined}>Deutsch · Original</a>
+   <a href={route+'/en'} lang="en" hreflang="en" aria-current={language==='en'?'page':undefined}>English · Translation</a>
+  </nav>
+  <aside class="legal-translation-notice legal-draft-notice" role="note"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 10 18H2L12 3Z M12 9v5m0 3h.01"/></svg><div><strong>{language==='de'?'Arbeitsfassung · vor Veröffentlichung vervollständigen':'Working edition · complete before public launch'}</strong><p>{language==='de'?'Die Agentenfunktionen sind beschrieben. Tatsächliche Dienstleister, Verarbeitungsorte und betriebliche Löschfristen müssen noch ergänzt und rechtlich geprüft werden.':'Agent functions are described. Actual providers, processing locations and operational retention periods still need completion and legal review.'}</p></div></aside>
+  {language==='en' && <aside class="legal-translation-notice" role="note"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10h.01"/></svg><div><p>This English translation is provided for information. The German original is authoritative. Mandatory statutory protections remain unaffected.</p><a href={route} lang="de" hreflang="de">Read the German original</a></div></aside>}
+  <p class="legal-version">{language==='de'?'Stand:':'Last updated:'} {updated} · <span>{version}</span></p>
+  <nav class="legal-language-links" aria-label={language==='de'?'Ergänzende Dokumente':'Related documents'}>
+   <a href="/agent/nutzungsbedingungen">{language==='de'?'Nutzungsbedingungen für KI-Agenten':'Terms of use for AI agents'}</a>
+   <a href={'/operator/datenschutz'+(language==='en'?'/en':'')}>{language==='de'?'Operator-Datenschutzerklärung':'Operator privacy notice'}</a>
+   <a href={'/datenschutz'+(language==='en'?'/en':'')}>{language==='de'?'Datenschutzerklärung für Besucher':'Visitor privacy notice'}</a>
+   <a href={'/impressum?lang='+language}>{language==='de'?'Impressum':'Legal notice'}</a>
+  </nav>
+  <nav class="legal-contents" aria-label={language==='de'?'Inhaltsverzeichnis':'Contents'}><ol>{copy.sections.map(({heading},i)=><li><a href={'#section-'+(i+1)}>{heading.replace(/^\d+\. /,'')}</a></li>)}</ol></nav>
+  <article aria-label={copy.title}>
+   {copy.sections.map(({heading,paragraphs},i)=><section aria-labelledby={'section-'+(i+1)}><h2 id={'section-'+(i+1)}>{heading}</h2>{paragraphs.map(paragraph=><p>{paragraph}</p>)}</section>)}
+  </article>
+ </section>
+</Layout>

@@ -8,13 +8,13 @@ for(const route of ['index.html','operator/index.html','impressum/index.html'])t
   const d=dom.window.document,footer=d.querySelector('body>.site-footer')!,main=footer.querySelector('.footer-main')!,credit=footer.querySelector('.footer-credit')!;
   assert.equal(main.parentElement,footer);assert.equal(main.nextElementSibling,credit);assert.ok(main.querySelector('.footer-identity .footer-brand'));
   const legal=main;
-  for(const path of ['/impressum','/datenschutz','/nutzungsbedingungen','/operator/datenschutz','/operator/nutzungsbedingungen','/agent/nutzungsbedingungen']){
+  for(const path of ['/impressum','/datenschutz','/nutzungsbedingungen','/operator/datenschutz','/operator/nutzungsbedingungen','/agent/nutzungsbedingungen','/agent/datenschutz']){
    assert.equal(legal.querySelectorAll(`a[href="${path}"]`).length,1);assert.equal([...footer.querySelectorAll(`a[href="${path}"]`)].filter(link=>!link.closest('dialog')).length,1);
   }
   assert.equal(main.querySelectorAll('[data-footer-group]').length,3);
   assert.ok(main.querySelector('[data-footer-group=general] a[href="/impressum"]'));
   assert.ok(main.querySelector('[data-footer-group=operators] a[href="/operator/nutzungsbedingungen"]'));
-  assert.ok(main.querySelector('[data-footer-group=agents] a[href="/operator/datenschutz#section-4"]'));
+  assert.ok(main.querySelector('[data-footer-group=agents] a[href="/agent/datenschutz"]'));
   for(const nav of main.querySelectorAll('[data-footer-group]'))assert.equal(nav.querySelector('h2')!.id,nav.getAttribute('aria-labelledby'));
   assert.equal(main.querySelectorAll('[data-footer-group] a').length,7);assert.ok(main.querySelector('nav[aria-label=Resources]'));
   assert.equal(d.querySelector('body>.footer-main'),null);

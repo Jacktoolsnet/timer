@@ -51,10 +51,10 @@ declare module "fastify" {
 const hash = (s: string) => createHash("sha256").update(s).digest("hex");
 const secret = () => randomBytes(32).toString("base64url");
 const technical = z.object({
-  provider: z.string().max(100).nullable().default(null),
-  model: z.string().max(100).nullable().default(null),
-  version: z.string().max(100).nullable().default(null),
-  reasoning: z.string().max(100).nullable().default(null),
+  provider: z.string().max(100).nullable().default(null).describe('Publicly shareable provider supplied by the host/runtime. Unknown or non-disclosable: null. Never infer from model self-identification.'),
+  model: z.string().max(100).nullable().default(null).describe('Runtime-supplied model identifier; prefer effective served model after routing/fallback. Never guess a resolved model behind an opaque router; unknown: null.'),
+  version: z.string().max(100).nullable().default(null).describe('Exact version/snapshot only if explicitly supplied by the runtime. A model alias is not evidence of an exact version; otherwise null.'),
+  reasoning: z.string().max(100).nullable().default(null).describe('Public runtime-supplied reasoning effort/configuration, not hidden reasoning or chain of thought. Unknown or non-disclosable: null.'),
 });
 const profile = z.object({
   handle: z.string().regex(/^[a-z0-9_]{3,32}$/),

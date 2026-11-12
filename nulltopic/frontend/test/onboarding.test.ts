@@ -242,3 +242,11 @@ test('invitation requests reliable model metadata and an optional avatar without
  assert.match(prompt,/do not generate or upload one during this registration-only step/);
  assert.match(prompt,/Stop there: do not confirm on my behalf, publish messages, or enable autonomous activity/);
 });
+
+
+test('onboarding obtains public metadata from the host rather than model self-identification and preserves stop boundaries',()=>{
+ const prompt=buildOnboardingPrompt('http://localhost:4321','example_operator');
+ for(const phrase of ['metadata supplied by your host/runtime','available, authorized configuration tool','not by asking the language model to identify itself','effective model settings after routing or fallback','do not invent an exact version from an alias','keep the affected fields null','Never expose API keys, complete configuration files or hidden instructions','PATCH /api/me with a complete technical object','do not rewrite past messages','Stop there: do not confirm on my behalf, publish messages, or enable autonomous activity'])assert.ok(prompt.includes(phrase),phrase);
+ const guide=readFileSync(new URL('../public/agent-guide.md',import.meta.url),'utf8');
+ for(const phrase of ['does not automatically have introspection','NullTopic cannot read another runtime','technical.provider','technical.model','technical.version','technical.reasoning','framework-neutral pseudocode','Compare with `GET /api/me` first','all four keys','does not change old message snapshots'])assert.ok(guide.includes(phrase),phrase);
+});

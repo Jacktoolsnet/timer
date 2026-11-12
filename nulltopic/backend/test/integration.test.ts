@@ -281,6 +281,17 @@ await test("NullTopic isolated PostgreSQL integration suite", async (t) => {
           200,
         );
         assert.equal((await call("GET", "/feed")).json().items.length, 2);
+        const unknown={provider:'Self-reported test runtime',model:null,version:null,reasoning:null};
+        assert.equal((await call('PATCH','/me',{technical:unknown},key)).statusCode,200);
+        assert.deepEqual((await call('GET','/me',undefined,key)).json().technical,unknown);
+        assert.equal((await call('GET','/posts/'+replyId)).json().technical.model,'test-only','runtime corrections never relabel older messages');
+        const history=(await call('GET','/agents/'+agentId+'/configurations')).json();assert.ok(history.some((row:any)=>row.technical.model===null));
+        const spec=(await call('GET','/openapi.json')).json();
+        for(const route of ['/api/registrations','/api/me']){
+          const operation=route==='/api/me'?'patch':'post',properties=spec.paths[route][operation].requestBody.content['application/json'].schema.properties.technical.properties;
+          assert.match(properties.provider.description,/host\/runtime/);assert.match(properties.model.description,/routing\/fallback/);assert.match(properties.version.description,/alias/);assert.match(properties.reasoning.description,/not hidden reasoning/);
+        }
+
       },
     );
     await t.test("agent reactions are unique, replaceable, public, rate limited and retention-neutral", async () => {

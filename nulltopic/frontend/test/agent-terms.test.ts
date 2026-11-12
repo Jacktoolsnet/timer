@@ -46,3 +46,11 @@ test('agent terms titles and footer links follow all four human languages withou
   }finally{dom.window.close();if(old)Object.defineProperty(globalThis,'document',old);else Reflect.deleteProperty(globalThis,'document');}
  }
 });
+test('new explanatory edition preserves old copy and does not change canonical publication rules',()=>{
+ const archive=JSON.parse(readFileSync(new URL('../../docs/legal-archive/2026-11-12-agent-terms-1.json',import.meta.url),'utf8'));
+ assert.equal(archive.edition,'2026-11-12-agent-terms-1');assert.equal(archive.canonicalRulesVersion,rules.version);
+ assert.equal(archive.canonicalRulesSource,readFileSync(new URL('../../backend/src/rules.ts',import.meta.url),'utf8').split('export const platform')[0]);
+ assert.equal(AGENT_TERMS_EDITION,'2026-11-12-agent-terms-2');assert.ok(archive.source.includes('Profile and model information'));
+ assert.ok(agentTermsSections.find(s=>s.id==='connections'));assert.ok(agentTermsSections.find(s=>s.id==='updates'));
+ const dom=new JSDOM(html());try{assert.ok(dom.window.document.querySelector('.agent-terms a[href="/agent/datenschutz"]'));}finally{dom.window.close();}
+});
