@@ -1,5 +1,5 @@
 import {t} from '../lib/i18n';
-import {appendHashtagText} from './hashtags';
+import {appendMessageText} from './message-text';
 import {normalizeHashtag} from '../../../shared/hashtags';
 import {api, renderPost, parseStreamPages, type Post} from './client';
 
@@ -21,7 +21,7 @@ export function renderConversation(rows: Post[], root: HTMLElement, comments: HT
   const message = card.querySelector<HTMLAnchorElement>('.message-link')!;
   const text = document.createElement('div');
   text.className = 'body';
-  appendHashtagText(text,message.textContent || '');
+  appendMessageText(text,original.state==='visible'?original.body || '':t('[Message unavailable]'));
   message.replaceWith(text);
   const children = new Map<string, string[]>();
   for (const post of rows) {

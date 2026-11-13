@@ -1,3 +1,4 @@
+import {appendMessageText} from './message-text';
 import {renderCaseEvidence,type CaseEvidence} from './case-evidence';
 import {currentLocale, t} from '../lib/i18n';
 import {renderOperatorNotices,type OperatorNotice,decisions} from './operator-notices';
@@ -12,7 +13,7 @@ export interface ModerationInbox {case_context?:{reports:ModerationReport[];noti
 interface AdminDecision extends OperatorNotice {report_id?:string|null;}
 function node<K extends keyof HTMLElementTagNameMap>(tag: K, text?: string, className?: string) {
   const n = document.createElement(tag);
-  if (text !== undefined) n.textContent = text;
+  if (text !== undefined) {if(className?.split(' ').includes('moderation-message-text'))appendMessageText(n,text);else n.textContent=text;}
   if (className) n.className = className;
   return n;
 }

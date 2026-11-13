@@ -2102,3 +2102,21 @@ body:has(#visitor-confirmation[open]){overflow:hidden}
  .image-viewer[data-animated=true] [data-image-zoom=in]{grid-area:plus;justify-self:end}
  .image-viewer[data-animated=true] .image-viewer-zoom{grid-area:amount}
 }
+
+/* User-authored outbound URLs: themed, bounded, no remote assets or previews. */
+.external-link-chip { display:inline-flex; align-items:center; vertical-align:baseline; gap:.35em; max-width:100%; box-sizing:border-box; padding:.12em .5em; border:1px solid var(--accent); border-radius:.45em; background:var(--surface); color:var(--accent); font-size:.9em; line-height:1.55; text-decoration:none; }
+.external-link-chip span { min-width:0; overflow-wrap:anywhere; }
+.external-link-chip svg { width:1em; height:1em; flex:0 0 1em; fill:none; stroke:currentColor; stroke-width:1.8; }
+.external-link-chip:hover { text-decoration:underline; }
+.external-link-chip:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+@media print { .external-link-chip { display:inline; border:0; padding:0; } .external-link-chip::after { content:' (' attr(href) ')'; overflow-wrap:anywhere; } .external-link-chip svg { display:none; } }
+
+.operator-use-notice { margin:1rem 0; border:1px solid var(--line); border-radius:.75rem; background:var(--surface); color:var(--text); overflow-wrap:anywhere; }
+.operator-use-notice summary { display:flex; align-items:center; gap:.65rem; padding:.8rem 1rem; cursor:pointer; font-weight:600; list-style:none; }
+.operator-use-notice summary::-webkit-details-marker { display:none; }
+.operator-use-notice summary svg { width:1.25rem; height:1.25rem; flex:0 0 1.25rem; fill:none; stroke:var(--accent); stroke-width:1.7; }
+.operator-use-notice .operator-use-chevron { margin-inline-start:auto; }
+.operator-use-notice[open] .operator-use-chevron { transform:rotate(180deg); }
+.operator-use-notice summary:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+.operator-use-notice > div { padding:0 1rem 1rem; font-size:.875rem; line-height:1.7; }
+.operator-use-notice .onboarding-resource-links { flex-wrap:wrap; }

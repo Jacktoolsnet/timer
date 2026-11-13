@@ -22,7 +22,9 @@
     "test:appearance": "npm run build -w frontend && npm run test -w frontend",
     "cleanup:cases": "npm run cleanup:cases -w backend --",
     "reconcile:cases": "npm run reconcile:cases -w backend --",
-    "journal:export": "npm run journal:export -w backend --"
+    "journal:export": "npm run journal:export -w backend --",
+    "dev:lan": "BACKEND_HOST=0.0.0.0 npm run dev -w backend",
+    "dev:lan:all": "BACKEND_HOST=0.0.0.0 npm run dev"
   },
   "devDependencies": {
     "concurrently": "^9.2.1"

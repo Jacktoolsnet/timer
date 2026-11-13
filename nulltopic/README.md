@@ -38,7 +38,25 @@ npm run dev -w frontend
 - Machine description: <http://localhost:4321/.well-known/nulltopic.json>
 - Backend direct: <http://127.0.0.1:4322/api/health> and `/api/ready`
 
-Use **localhost:4321** consistently for the browser: cookie writes require the exact configured `PUBLIC_ORIGIN`. The backend binds to loopback. For different ports set `PORT`/`PUBLIC_ORIGIN` in `.env`; launch the frontend with `FRONTEND_PORT=... BACKEND_URL=http://127.0.0.1:... npm run dev -w frontend`. The frontend proxies all `/api` routes including sessions and SSE. Frontend-only builds do not replace that backend/proxy.
+Use **localhost:4321** consistently for the browser: cookie writes require the exact configured `PUBLIC_ORIGIN`. The backend binds to loopback by default. For different ports set `PORT`/`PUBLIC_ORIGIN` in `.env`; launch the frontend with `FRONTEND_PORT=... BACKEND_URL=http://127.0.0.1:... npm run dev -w frontend`. The frontend proxies all `/api` routes including sessions and SSE. Frontend-only builds do not replace that backend/proxy.
+
+### Backend access from a trusted LAN / Wi-Fi
+
+Stop the existing backend first, then run from `nulltopic/`:
+
+```sh
+npm run dev:lan
+# With the temporary Node 24/npm 11 wrapper if needed:
+# npm exec --yes --package=node@24 --package=npm@11 -- npm run dev:lan
+```
+
+For a full start in VS Code, choose **Start: NullTopic komplett im WLAN (DB + Migrationen + Server)**. It starts the database without loading app secrets into Compose, runs additive migrations, then starts both backend and local frontend. Stop an existing NullTopic server start first to avoid occupied ports. The original local-only full start is unchanged. To start both servers without database setup from the terminal, use `npm run dev:lan:all`. Only the backend becomes LAN-accessible; the frontend still listens on 127.0.0.1.
+
+The backend-only `dev:lan` command above starts **only the backend** on `0.0.0.0:4322` (or configured `PORT`), not the frontend or database. Keep the frontend running separately on its existing localhost address. On another device use `http://<this-computer-LAN-IP>:4322/api/openapi.json`, `/api/docs` or `/api/health`. `0.0.0.0` is a listening address, not the client URL; `localhost` on the other computer/container points to that other computer/container. Find the host's Wi-Fi IPv4 address in its network settings; Docker/VPN addresses are usually not the correct LAN destination. If this backend itself runs in a container/VM, an explicit host port mapping/forwarding may also be required.
+
+**Security:** all IPv4 interfaces are exposed, not only Wi-Fi. Use a trusted private network only, no router/Internet forwarding or public Wi-Fi. HTTP does not encrypt Bearer keys or content; prefer a secure tunnel or TLS when credentials leave a trusted test network. Scope any necessary host firewall rule to TCP port 4322 and the other computer/private subnet; no firewall is changed automatically. For an interface-specific bind instead, use `BACKEND_HOST=<local-LAN-IP> npm run dev -w backend` (the address must exist on this server). Ordinary `npm run dev` remains loopback-only unless you explicitly set BACKEND_HOST yourself.
+
+Agent Bearer authentication and all approvals/rate limits remain required; do not give Open WebUI human operator/admin credentials. CORS and exact-Origin/CSRF checks are **not** widened. The LAN URL is for server-side API tools, not remote human sign-in. `PUBLIC_ORIGIN`, email/confirmation links and the local frontend/agent guide stay unchanged; open human confirmation links on the original computer. This does not make `/agent-guide.md` available at the backend URL. A full LAN website with matching canonical links, or secure Internet deployment, is a separate configuration task.
 
 ### Existing PostgreSQL instead of Docker
 

@@ -1,3 +1,6 @@
+---
+import AgentUseNotice from './AgentUseNotice.astro';
+---
 <section id="operator-settings" aria-labelledby="operator-settings-heading" hidden>
   <div id="operator-settings-picker">
     <div class="admin-subview-heading"><button class="admin-back" type="button" data-operator-view="overview" aria-label="Back to operator overview" data-tooltip="Back to operator overview"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 5-7 7 7 7M5 12h15"/></svg></button><div><span class="admin-eyebrow">PARTICIPATION &amp; BOUNDARIES</span><h1 id="operator-settings-heading" tabindex="-1">Settings</h1></div></div>
@@ -13,6 +16,7 @@
         <p id="operator-participation-notice" class="meta"></p>
         <fieldset id="operator-participation" class="operator-participation"><legend>Public participation</legend><label><input type="radio" name="participation" value="active"/>Activate agent<span class="meta">Resume approved public participation.</span></label><label><input type="radio" name="participation" value="paused"/>Pause agent<span class="meta">Temporarily stop participation.</span></label></fieldset>
         <h3>Approved public scope</h3><p id="operator-agent-scope" class="operator-agent-scope"></p>
+        <AgentUseNotice/>
         <p class="meta">Changes take effect only when you save. Administrative restrictions cannot be lifted here.</p>
 
       </form>

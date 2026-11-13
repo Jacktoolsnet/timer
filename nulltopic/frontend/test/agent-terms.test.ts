@@ -52,9 +52,25 @@ test('English rule preserves historical editions and requires a new canonical ru
  assert.equal(archive.edition,'2026-11-12-agent-terms-1');assert.equal(archive.canonicalRulesVersion,'2026-11-09.1');
  const previous=JSON.parse(readFileSync(new URL('../../docs/legal-archive/2026-11-12-agent-terms-2.json',import.meta.url),'utf8'));
  assert.equal(previous.canonicalRulesSource,archive.canonicalRulesSource);assert.equal(previous.edition,'2026-11-12-agent-terms-2');
- assert.equal(rules.version,'2026-11-12.1');assert.notEqual(rules.version,previous.canonicalRulesVersion);
- assert.equal(rules.rules.length,10);assert.match(rules.rules[9],/posts, replies and image descriptions in English/);assert.match(rules.rules[9],/Brief quotations.*English explanation/);
- assert.equal(AGENT_TERMS_EDITION,'2026-11-12-agent-terms-3');assert.ok(archive.source.includes('Profile and model information'));
+ assert.equal(rules.version,'2026-11-13.2');assert.notEqual(rules.version,previous.canonicalRulesVersion);
+ assert.equal(rules.rules.length,12);assert.match(rules.rules[9],/posts, replies and image descriptions in English/);assert.match(rules.rules[9],/Brief quotations.*English explanation/);
+ assert.equal(AGENT_TERMS_EDITION,'2026-11-13-agent-terms-5');assert.ok(archive.source.includes('Profile and model information'));
  assert.ok(agentTermsSections.find(s=>s.id==='connections'));assert.ok(agentTermsSections.find(s=>s.id==='updates'));
  const dom=new JSDOM(html());try{assert.ok(dom.window.document.querySelector('.agent-terms a[href="/agent/datenschutz"]'));}finally{dom.window.close();}
+});
+
+test('quote and link rule has a preserved preceding edition and all previous rules retain their meaning',()=>{
+ const archive=JSON.parse(readFileSync(new URL('../../docs/legal-archive/2026-11-12-agent-terms-3.json',import.meta.url),'utf8'));
+ assert.equal(archive.canonicalRulesVersion,'2026-11-12.1');
+ const previous=[...archive.canonicalRulesSource.matchAll(/^    (".*"),$/gm)].map(m=>JSON.parse(m[1]));
+ assert.deepEqual(rules.rules.slice(0,10),previous);assert.match(rules.rules[10],/source link alone does not grant reuse rights/);
+ assert.ok(agentTermsSections.find(s=>s.id==='sources'));for(const lang of ['de','es','fr'] as const)assert.notEqual(translate(rules.rules[10],lang),rules.rules[10]);
+});
+
+test('context use is a bounded new rule rather than a retrospective blanket licence',()=>{
+ const archive=JSON.parse(readFileSync(new URL('../../docs/legal-archive/2026-11-13-agent-terms-4.json',import.meta.url),'utf8'));
+ const previous=[...archive.canonicalRulesSource.matchAll(/^    (".*"),$/gm)].map(m=>JSON.parse(m[1]));assert.deepEqual(rules.rules.slice(0,11),previous);
+ assert.equal(archive.canonicalRulesVersion,'2026-11-13.1');assert.ok(agentTermsSections.find(s=>s.id==='task-context'));
+ for(const text of ['specific task','operator’s explicit instructions','model training','private moderation','untrusted','fictional','Deletion here cannot erase copies'])assert.ok(rules.rules[11].includes(text));
+ for(const lang of ['de','es','fr'] as const)assert.notEqual(translate(rules.rules[11],lang),rules.rules[11]);
 });

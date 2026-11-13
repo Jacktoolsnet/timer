@@ -43,7 +43,7 @@ test('operator terms add to the general visitor terms, with matching English cop
  assert.notEqual(operatorLegal.terms.version,archive.version);
  for(const language of ['de','en'] as const){
   const dom=new JSDOM(readFileSync(new URL('../dist'+operatorLegal.terms.path+(language==='en'?'/en':'')+'/index.html',import.meta.url),'utf8'));
-  try{assert.match(dom.window.document.querySelector('.legal-version')!.textContent!,language==='de'?/12\. November 2026/:/12 November 2026/);}finally{dom.window.close();}
+  try{assert.match(dom.window.document.querySelector('.legal-version')!.textContent!,language==='de'?/13\. November 2026/:/13 November 2026/);}finally{dom.window.close();}
  }
 });
 
@@ -71,12 +71,12 @@ test('feature editions preserve the preceding texts without rewriting agreement 
  for(const [kind,version] of [['terms','2026-11-12-operator-terms-2'],['privacy','2026-11-10-operator-privacy-1']] as const){
   const archive=JSON.parse(readFileSync(new URL('../../docs/legal-archive/'+version+'.json',import.meta.url),'utf8'));
   assert.equal(archive.version,version);assert.notEqual(operatorLegal[kind].version,version);
-  assert.equal(archive[kind].de.sections.length,documents[kind].de.sections.length);
+  assert.ok(archive[kind].de.sections.length<=documents[kind].de.sections.length);
   for(const language of ['de','en'] as const)archive[kind][language].sections.forEach((section:{paragraphs:string[]},i:number)=>{
    assert.deepEqual(documents[kind][language].sections[i].paragraphs.slice(0,section.paragraphs.length),section.paragraphs);
   });
  }
- assert.equal(operatorLegal.terms.version,'2026-11-12-operator-terms-4');assert.equal(operatorLegal.privacy.version,'2026-11-12-operator-privacy-2');
+ assert.equal(operatorLegal.terms.version,'2026-11-13-operator-terms-6');assert.equal(operatorLegal.privacy.version,'2026-11-13-operator-privacy-4');
  for(const language of ['de','en'] as const){
   const terms=JSON.stringify(documents.terms[language]),privacy=JSON.stringify(documents.privacy[language]);
   for(const term of language==='de'?['Folgeverbindungen','Abrufstände','GIF','Modell']:['follow','readmark','GIF','model']){assert.ok(terms.includes(term));assert.ok(privacy.includes(term));}

@@ -2,7 +2,7 @@ import {renderPostImage,type PostImage} from './post-image';
 import {currentLocale, isLanguage, t} from '../lib/i18n';
 import {openAgentProfileDialog} from './agent-profile-dialog';
 import {hashtagTokens,normalizeHashtag} from '../../../shared/hashtags';
-import {appendHashtagText} from './hashtags';
+import {appendMessageText,externalLinkTokens} from './message-text';
 import { initializeFeedStatus, setFeedStatus } from "./feed-status";
 import { openModelDialog } from "./model-dialog";
 import { openReportDialog } from "./report-dialog";
@@ -102,9 +102,9 @@ export function renderPost(p: Post, options: { streamPages?: number;streamTag?:s
   head.append(identity);
   article.append(head);
   const messageText=p.state === 'visible' ? p.body || '' : t('[Message unavailable]');
-  const tagged=p.state==='visible'&&hashtagTokens(messageText).length>0;
+  const tagged=p.state==='visible'&&(hashtagTokens(messageText).length>0||externalLinkTokens(messageText).length>0);
   const body=element(tagged?'div':'a');body.className='body message-link';
-  if(tagged)appendHashtagText(body,messageText,conversationUrl);
+  if(tagged)appendMessageText(body,messageText,conversationUrl);
   else {body.textContent=messageText;(body as HTMLAnchorElement).href=conversationUrl;}
 
   article.append(body);

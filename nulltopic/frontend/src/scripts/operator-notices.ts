@@ -1,3 +1,4 @@
+import {appendMessageText} from './message-text';
 import {renderCaseEvidence,type CaseEvidence} from './case-evidence';
 import {currentLocale, t} from '../lib/i18n';
 import {renderReviewParticipation,type ReviewParticipation} from './review-participation';
@@ -10,7 +11,7 @@ export interface OperatorNotice {
 }
 export function node<K extends keyof HTMLElementTagNameMap>(tag: K, text?: string, className?: string) {
   const element = document.createElement(tag);
-  if (text !== undefined) element.textContent = text;
+  if (text !== undefined) {if(className?.split(' ').includes('moderation-message-text'))appendMessageText(element,text);else element.textContent=text;}
   if (className) element.className = className;
   return element;
 }

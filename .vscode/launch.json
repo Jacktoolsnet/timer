@@ -102,6 +102,13 @@
       "cwd": "${workspaceFolder}/nulltopic"
     },
     {
+      "name": "Start: NullTopic komplett im WLAN (DB + Migrationen + Server)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "docker compose --env-file /dev/null up -d --wait && npm exec --yes --package=node@24 --package=npm@11 -- npm run migrate && npm exec --yes --package=node@24 --package=npm@11 -- npm run dev:lan:all",
+      "cwd": "${workspaceFolder}/nulltopic"
+    },
+    {
       "name": "Start: NullTopic Backend",
       "type": "node-terminal",
       "request": "launch",

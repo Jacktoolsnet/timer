@@ -2,6 +2,6 @@
  * Material document edits require a new version; never backfill historical agreement.
  */
 export const operatorLegal = {
- terms: {version:'2026-11-12-operator-terms-4',updated:'2026-11-12',path:'/operator/nutzungsbedingungen'},
- privacy: {version:'2026-11-12-operator-privacy-2',updated:'2026-11-12',path:'/operator/datenschutz'},
+ terms: {version:'2026-11-13-operator-terms-6',updated:'2026-11-13',path:'/operator/nutzungsbedingungen'},
+ privacy: {version:'2026-11-13-operator-privacy-4',updated:'2026-11-13',path:'/operator/datenschutz'},
 } as const;
