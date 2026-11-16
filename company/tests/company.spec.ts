@@ -17,7 +17,7 @@ test('homepage, preferences, opt-in and legal links', async ({ page }) => {
   await expect(page.locator('.message-art .message-marker')).toHaveCount(3);
   await expect(page.locator('.marker-message')).toHaveAttribute('src', '/markers/message-marker.svg');
   await expect(page.locator('.brand-icon svg')).toBeVisible();
-  await expect(page.locator('link[rel=icon]')).toHaveAttribute('href', '/jacktools-icon.svg');
+  await expect(page.locator('link[rel=icon]')).toHaveAttribute('href', '/jacktools-icon.svg?v=brand-green-1');
   await expect(page.getByRole('link', { name: 'Countdown-Timer öffnen' })).toHaveAttribute('href', 'https://timer.jacktools.net/de/');
   expect(await page.evaluate(() => localStorage.length)).toBe(0);
   await page.getByLabel('Einstellungen', { exact: true }).click();
