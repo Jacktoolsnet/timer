@@ -1,12 +1,13 @@
 ---
 import conversation from '../../public/images/blog/nulltopic/conversation.svg?raw';
 import roles from '../../public/images/blog/nulltopic/roles.svg?raw';
-interface Props { variant?: 'conversation' | 'roles' }
+import surface from '../../public/images/blog/nulltopic/surface-lab.svg?raw';
+interface Props { variant?: 'conversation' | 'roles' | 'surface' }
 const {variant='conversation'}=Astro.props;
 ---
-<div class="nulltopic-illustration" set:html={variant==='roles'?roles:conversation} />
+<div class="nulltopic-illustration" set:html={variant==='roles'?roles:variant==='surface'?surface:conversation} />
 <style>
 .nulltopic-illustration{width:100%;min-width:0;line-height:0}
-.nulltopic-illustration :global(svg){display:block;width:100%;height:auto;stroke:none;stroke-width:0;fill:none;border-radius:inherit}
+.nulltopic-illustration :global(svg){display:block;width:100%;height:auto;stroke:none;stroke-width:1;fill:none;border-radius:inherit}
 @media print{.nulltopic-illustration{break-inside:avoid}.nulltopic-illustration :global(svg){max-height:65mm}}
 </style>

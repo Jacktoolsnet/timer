@@ -1,0 +1,64 @@
+---
+interface Props { title:string; code:string }
+const {title,code}=Astro.props;
+---
+<div class="blog-code">
+ <div class="blog-code-header">
+  <p>{title}</p>
+  <button type="button" class="code-copy" hidden title="Code kopieren" aria-label={`Code kopieren: ${title}`}>
+   <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h3"/></svg>
+  </button>
+ </div>
+ <pre tabindex="0" aria-label={title}><code>{code}</code></pre>
+ <span class="code-copy-status" role="status" aria-live="polite" aria-atomic="true"></span>
+</div>
+<script>
+ document.querySelectorAll<HTMLElement>('.blog-code').forEach(block=>{
+  const button=block.querySelector<HTMLButtonElement>('.code-copy');
+  const code=block.querySelector('pre code');
+  const status=block.querySelector<HTMLElement>('.code-copy-status');
+  if(!button||!code||!status)return;
+  button.hidden=false;
+  let reset:ReturnType<typeof setTimeout>|undefined;
+  button.addEventListener('click',async()=>{
+   clearTimeout(reset);
+   status.textContent='';
+   button.disabled=true;
+   try{
+    await navigator.clipboard.writeText(code.textContent??'');
+    status.textContent='Code kopiert.';
+    button.title='Code kopiert';
+    button.dataset.copied='true';
+   }catch{
+    status.textContent='Kopieren nicht möglich. Bitte den Code markieren und manuell kopieren.';
+    button.title='Kopieren nicht möglich – erneut versuchen';
+    delete button.dataset.copied;
+   }finally{
+    button.disabled=false;
+    reset=setTimeout(()=>{
+     button.title='Code kopieren';
+     delete button.dataset.copied;
+     status.textContent='';
+    },5000);
+   }
+  });
+ });
+</script>
+<style>
+.blog-code{min-width:0;margin:1.5rem 0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.blog-code-header{display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding:.45rem .6rem .45rem 1rem;border-bottom:1px solid var(--line);background:var(--accent-soft);color:var(--accent)}
+.blog-code-header>p{font-size:.8em!important;font-weight:650;line-height:1.6;margin:0!important;min-width:0;overflow-wrap:anywhere}
+.code-copy{display:inline-flex;align-items:center;justify-content:center;flex:0 0 44px;width:44px;height:44px;padding:0;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--accent);cursor:pointer}
+.code-copy[hidden]{display:none}
+.code-copy:hover,.code-copy[data-copied=true]{background:var(--accent);color:var(--surface)}
+.code-copy:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.code-copy:disabled{cursor:wait;opacity:.65}
+.code-copy svg{display:block;width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8}
+.code-copy-status{display:block;padding:0 1rem .75rem;font-size:.8em;line-height:1.6;color:var(--text)}
+.code-copy-status:empty{display:none}
+.blog-code pre{max-width:100%;margin:0;padding:1.2rem;overflow-x:auto;font-size:.85em;line-height:1.8;color:var(--text);tab-size:2;white-space:pre;overscroll-behavior-inline:contain}
+.blog-code code{font:inherit;font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+.blog-code pre:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+:global([data-style=technical]) .blog-code{border-radius:3px}
+@media print{.code-copy,.code-copy-status{display:none!important}.blog-code{break-inside:avoid-page;border:1pt solid #aaa;background:#fff}.blog-code pre{white-space:pre-wrap;overflow:visible;overflow-wrap:anywhere;font-size:9pt;color:#000;padding:3mm}.blog-code-header{color:#000;background:#eee;padding:2mm 3mm}}
+</style>

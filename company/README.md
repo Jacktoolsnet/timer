@@ -332,3 +332,32 @@ Die Sitemap umfasst jetzt 38 indexierbare Seiten: vier Startseiten, 32 Anleitung
 und die beiden deutschen Blogseiten. Test: `npx playwright test tests/blog.spec.ts`.
 Auch dieser Stand wird durch Build/Tests nicht veröffentlicht und nicht an Medium
 übertragen.
+
+### NullTopic, Teil 2: Surface Book, Arch Linux und Open WebUI
+
+Der zweite deutsche Beitrag liegt unter
+`/de/blog/surface-book-arch-linux-open-webui/`. Die persönlichen Angaben beschränken
+sich auf den berichteten Stand: Surface Book der ersten Generation, Windows 11
+praktisch nicht nutzbar, Arch Linux mit GNOME, UEFI-/USB-Vorbereitung und ein
+WLAN-Abbruch mit Wiederherstellung über eine zweite Shell. Open WebUI und ein
+Terminal sind eingerichtet, ein OpenAI-API-Key liegt bereit. Agenten sind noch
+nicht eingerichtet; ihr Aufbau ist das geplante Thema für Teil 3. Es werden weder
+Hardware-Spezifikationen, Testergebnisse noch ein erfolgreicher API-Aufruf erfunden.
+
+`BlogArticle.astro` enthält das gemeinsame zweispaltige Artikellayout, Kopf,
+Inhaltsverzeichnis, SEO/JSON-LD und Druckansicht beider Beiträge. Inhalte liegen
+weiter in den jeweiligen Astro-Seiten; `src/lib/blog.ts` liefert den Katalog.
+Die Übersicht listet beide Beiträge, die Startseite stellt den neuesten vor.
+Die beiden Artikel sind als Serie gegenseitig verlinkt.
+
+`BlogCode.astro` zeigt native, auswählbare, per Tastatur horizontal scrollbare
+Codeblöcke. Im Druck umbrechen lange Zeilen. Die fünf Befehlsblöcke sind als
+Beispiele für das offizielle Arch-Live-System gekennzeichnet, nicht als historisches
+Installationsprotokoll. Keine Formatierungs-/USB-Schreibbefehle und keine echten
+Schlüssel oder WLAN-Passwörter. Partitionierungsrisiken, Secure-Boot-Auswirkungen
+und Cloud-Modellzugriff werden eingeordnet; offizielle Quellen stehen im Artikel.
+
+Das neue themenfähige SVG `public/images/blog/nulltopic/surface-lab.svg` zeigt eine
+schematische Arbeitsumgebung, keinen echten Desktop-Screenshot. API-Zugang ist
+als vorbereitet, Agenten als geplant gekennzeichnet. Die Sitemap umfasst nun
+39 Seiten. Zusätzlicher Test: `tests/surface-blog.spec.ts`.

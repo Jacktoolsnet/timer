@@ -1,5 +1,5 @@
 import {test,expect} from '@playwright/test';
-import {nullTopicPost as post} from '../src/lib/blog';
+import {nullTopicPost as post, surfaceBookPost, blogPosts} from '../src/lib/blog';
 test.beforeEach(async({page})=>{
  await page.route(/googlesyndication\.com|doubleclick\.net|googleadservices\.com/,r=>r.fulfill({body:''}));
 });
@@ -8,11 +8,11 @@ test('German blog is discoverable from the homepage and index',async({page})=>{
  await expect(page.locator('.header-nav a[href="/de/blog/"]')).toHaveText('Blog');
  await expect(page.locator('.blog-home h2')).toHaveText('Ideen, Projekte und ihre Geschichten.');
  await page.locator('.blog-home .blog-post-card').click();
- await expect(page).toHaveURL(new RegExp(post.path+'$'));
+ await expect(page).toHaveURL(new RegExp(surfaceBookPost.path+'$'));
  await page.getByRole('link',{name:'Zum Blog',exact:true}).click();
  await expect(page).toHaveURL(/\/de\/blog\/$/);
- await expect(page.locator('.blog-post-card')).toHaveCount(1);
- await expect(page.locator('.blog-post-card h3')).toHaveText(post.title);
+ await expect(page.locator('.blog-post-card')).toHaveCount(2);
+ await expect(page.locator('.blog-post-card h3')).toHaveText(blogPosts.map(p=>p.title));
  for(const lang of ['en','es','fr']){
   await page.goto(`/${lang}/`);
   await expect(page.locator('.blog-home')).toHaveCount(0);
@@ -82,6 +82,19 @@ test('contents navigation starts alongside the article header on desktop',async(
   expect(cover!.y+cover!.height).toBeLessThanOrEqual(nav!.y+1);
  }
 });
+test('both articles use the full content column beneath the cover',async({page})=>{
+ for(const article of blogPosts){
+  await page.goto(article.path);
+  const cover=await page.locator('.article-cover').boundingBox();
+  const body=await page.locator('.article-body').boundingBox();
+  const paragraph=await page.locator('.article-body section p').first().boundingBox();
+  const caption=await page.locator('.article-cover figcaption').boundingBox();
+  expect(Math.abs(body!.width-cover!.width)).toBeLessThan(2);
+  expect(Math.abs(body!.x-cover!.x)).toBeLessThan(2);
+  expect(Math.abs(paragraph!.width-body!.width)).toBeLessThan(2);
+  expect(Math.abs(caption!.width-cover!.width)).toBeLessThan(2);
+ }
+});
 test('article fits all styles in light/dark and largest font size',async({page})=>{
  await page.goto(post.path);
  for(const style of ['technical','warm','soft','minimal'])for(const theme of ['light','dark']){
@@ -114,7 +127,7 @@ test('browser print keeps article and diagrams but removes site chrome, navigati
 test.describe('without JavaScript',()=>{
  test.use({javaScriptEnabled:false});
  test('article, illustrations and links are server-rendered',async({page})=>{
-  await page.goto('/de/blog/');await page.locator('.blog-post-card').click();
+  await page.goto('/de/blog/');await page.locator(`.blog-post-card[href="${post.path}"]`).click();
   await expect(page.locator('h1')).toHaveText(post.title);
   await expect(page.locator('.article-body section')).toHaveCount(8);
   await expect(page.locator('.nulltopic-illustration svg')).toHaveCount(2);

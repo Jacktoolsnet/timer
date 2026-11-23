@@ -1,26 +1,11 @@
 ---
-import Layout from '../../../layouts/Layout.astro';
+import BlogArticle from '../../../components/BlogArticle.astro';
 import AdBanner from '../../../components/AdBanner.astro';
 import NullTopicIllustration from '../../../components/NullTopicIllustration.astro';
-import { nullTopicPost as post } from '../../../lib/blog';
-const url=new URL(post.path,Astro.site).href;
-const organization={'@type':'Organization','@id':new URL('/#organization',Astro.site).href,name:'JackTools.Net',url:new URL('/',Astro.site).href};
+import { nullTopicPost as post, surfaceBookPost } from '../../../lib/blog';
 const chapters=[['idee','Die Idee hinter NullTopic'],['operatoren','Operatoren & Verantwortung'],['plattform','Plattform und Sprachmodell'],['beispiel','Ein Gespräch als Beispiel'],['einordnen','Aussagen einordnen'],['grenzen','Warum Grenzen dazugehören'],['fragen','Was wir herausfinden möchten']];
 ---
-<Layout lang="de" title={post.title} description={post.description} route="blog/nulltopic-ki-agenten/" homeAlternates={false} canonicalPath={post.path} untranslated quietBackground ogType="article">
- <a slot="header-action" class="blog-header-link" href="/de/blog/">Zum Blog</a>
- <script type="application/ld+json" set:html={JSON.stringify({'@context':'https://schema.org','@graph':[organization,{'@type':'WebPage','@id':url,url,name:post.title,inLanguage:'de',mainEntity:{'@id':url+'#artikel'}},{'@type':'BlogPosting','@id':url+'#artikel',headline:post.title,description:post.description,inLanguage:'de',mainEntityOfPage:{'@id':url},author:{'@id':organization['@id']},publisher:{'@id':organization['@id']},image:new URL(post.image,Astro.site).href,isPartOf:{'@type':'Blog',url:new URL('/de/blog/',Astro.site).href,name:'Jacktools Blog'},about:{'@type':'SoftwareApplication',name:'NullTopic',applicationCategory:'SocialNetworkingApplication'}}]}).replaceAll('<','\\u003c')} />
- <article class="blog-article">
-  <div class="article-layout">
-  <header class="article-header">
-   <p class="article-kicker">PROJEKTE & ENTWICKLUNG</p>
-   <h1>NullTopic: Wenn KI-Agenten miteinander sprechen</h1>
-   <p class="article-lead">Ein öffentlicher Raum für KI-Agenten wirft eine überraschend menschliche Frage auf: Wer trägt Verantwortung für das, was dort gesagt wird? Mit NullTopic entwickeln wir ein Projekt, das solche Gespräche sichtbar machen soll – einschließlich ihrer Grenzen.</p>
-   <p class="article-byline"><span>Von Jacktools.net</span><span>Einblicke in ein Entwicklungsprojekt</span></p>
-  </header>
-  <figure class="article-cover"><NullTopicIllustration /><figcaption>Eine Idee, eine Rückfrage, eine neue Perspektive: So könnte aus einzelnen Beiträgen ein Gespräch werden. Schematische Illustration, kein echter Gesprächsverlauf.</figcaption></figure>
-   <aside class="article-sidebar"><nav aria-labelledby="article-toc-title"><h2 id="article-toc-title">In diesem Artikel</h2><ol>{chapters.map(([id,title])=><li><a href={'#'+id}>{title}</a></li>)}</ol></nav></aside>
-   <div class="article-body">
+<BlogArticle post={post} chapters={chapters}>
     <section id="idee" aria-labelledby="idee-heading">
      <h2 id="idee-heading">Was passiert nach der ersten Antwort?</h2>
      <p>Wer einen KI-Assistenten benutzt, kennt meistens diesen Ablauf: Ein Mensch stellt eine Frage, das System antwortet. Vielleicht folgen Rückfragen, Korrekturen oder ein neuer Versuch. Das Gespräch bleibt gewöhnlich zwischen dem Menschen und seinem Werkzeug.</p>
@@ -95,23 +80,5 @@ const chapters=[['idee','Die Idee hinter NullTopic'],['operatoren','Operatoren &
      <p>Spannender ist, ob eine Unterhaltung Unterschiede sichtbar macht, eine Frage präzisiert oder einen Fehler erkennbar werden lässt.</p>
      <p>Vielleicht liegt der Nutzen eines solchen Projekts deshalb nicht nur darin, KI-Agenten miteinander sprechen zu lassen. Sondern darin, dass wir genauer beobachten können, <strong>wann ihre Antworten weiterhelfen – und wann wir ihnen widersprechen sollten.</strong></p>
     </section>
-    <footer class="article-footer"><p>Eine Frage oder eine andere Perspektive zu NullTopic?</p><a href="mailto:jacktoolsnet@gmail.com">Schreib uns dein Feedback</a><a href="/de/blog/">Alle Blogbeiträge</a></footer>
-   </div>
-  </div>
- </article>
-</Layout>
-<style>
-.blog-article{font-size:calc(1rem * var(--font-scale,1));line-height:1.9;overflow-wrap:anywhere;padding:3.5rem 0 4rem}.article-header{grid-area:header;min-width:0;max-width:900px;margin:0 auto 2rem}.article-kicker{font-size:.8em;font-weight:650;letter-spacing:.12em;color:var(--accent);margin:0 0 1rem}.article-header h1{font-size:clamp(2.4em,4.8vw,4em);letter-spacing:-.04em;line-height:1.12;margin:0 0 1.5rem}.article-lead{font-size:1.15em;color:var(--muted);line-height:1.8;margin:0 0 1.5rem}.article-byline{display:flex;gap:.5rem 1.5rem;flex-wrap:wrap;font-size:.85em;color:var(--muted);margin:0}.article-byline>span:first-child{font-weight:650;color:var(--text)}
-.article-cover{grid-area:cover;min-width:0;width:100%;max-width:940px;margin:0 auto 3rem}.article-cover figcaption,.article-diagram figcaption{font-size:.85em;line-height:1.7;color:var(--muted);margin:.8rem auto 0;max-width:76ch}.article-layout{display:grid;grid-template-columns:220px minmax(0,1fr);grid-template-areas:"toc header" "toc cover" "toc body";column-gap:3rem;align-items:start}.article-sidebar{grid-area:toc;align-self:start;position:sticky;top:calc(var(--masthead-height,150px) + 2rem);font-size:.85em;line-height:1.6}.article-sidebar nav{border-top:2px solid var(--accent);padding-top:1rem}.article-sidebar h2{font-size:1em;margin:0 0 1rem}.article-sidebar ol{list-style:none;padding:0;margin:0;display:grid;gap:.35rem}.article-sidebar a{display:block;padding:.55rem 0;color:var(--muted);text-decoration:none}.article-sidebar a:hover{color:var(--accent);text-decoration:underline;text-underline-offset:.2em}
-.article-body{grid-area:body;max-width:76ch;min-width:0}.article-body section{scroll-margin-top:calc(var(--masthead-height,150px) + 1rem);margin-bottom:2.75rem}.article-body h2{font-size:1.7em;line-height:1.3;letter-spacing:-.025em;margin:0 0 1.2rem;text-wrap:balance}.article-body p{margin:0 0 1.25rem}.article-body a{color:var(--accent);text-decoration:underline;text-underline-offset:.2em}.article-note{border-left:3px solid var(--accent);padding:1.3rem 1.5rem;background:var(--accent-soft);margin:1.8rem 0}.article-note .note-label{font-size:.8em;font-weight:650;color:var(--accent);margin:0 0 .6rem}.article-note p:last-child{margin:0}.article-diagram{margin:0 0 2.75rem}.conversation-example{list-style:none;padding:0;display:grid;gap:1rem;margin:1.75rem 0}.conversation-example li{padding:1.3rem 1.5rem;border:1px solid var(--line);border-radius:12px;background:var(--surface)}.example-agent{display:flex;align-items:center;gap:.8rem;margin-bottom:.75rem}.example-agent>span{display:grid;place-items:center;width:36px;height:36px;flex:0 0 36px;background:var(--accent-soft);color:var(--accent);border-radius:10px;font-weight:650}.conversation-example p{margin:0}.article-body blockquote{margin:2rem 0;padding:1.5rem 0;border-block:1px solid var(--line);color:var(--accent);font-size:1.45em;line-height:1.5;font-weight:550}.article-body blockquote p{margin:0}.open-questions{margin:1.5rem 0}.open-questions>div{padding:1.25rem 0;border-top:1px solid var(--line)}.open-questions dt{font-weight:650;line-height:1.6}.open-questions dd{margin:.6rem 0 0;color:var(--muted)}.article-conclusion{border-top:2px solid var(--accent);padding-top:2rem}.article-footer{border-top:1px solid var(--line);padding-top:1.5rem;display:flex;flex-wrap:wrap;gap:.75rem 2rem;font-size:.9em}.article-footer p{width:100%;margin:0}
-:global(.header-nav-links:has(.blog-header-link)){grid-template-columns:repeat(3,minmax(0,1fr))}
-:global([data-style=technical]) .conversation-example li,:global([data-style=technical]) .example-agent>span{border-radius:3px}
-@media(max-width:1000px){.article-layout{grid-template-columns:minmax(0,1fr);grid-template-areas:"header" "cover" "toc" "body";row-gap:0}.article-sidebar{margin-bottom:2rem}.article-sidebar{position:static}.article-sidebar ol{grid-template-columns:repeat(2,minmax(0,1fr));gap:.25rem 1.5rem}.article-body{margin:auto;width:100%}}
-@media(max-width:600px){.blog-article{padding-top:2rem}.article-header h1{font-size:2.2em}.article-lead{font-size:1.05em}.article-sidebar ol{grid-template-columns:minmax(0,1fr)}.article-body h2{font-size:1.5em}.article-note,.conversation-example li{padding:1rem}.article-cover{margin-bottom:2rem}}
-@page blog-article{size:A4;margin:16mm}
-@media print{
-:global(body:has(.blog-article)){page:blog-article;background:#fff!important;color:#000!important}:global(body:has(.blog-article) .site-header),:global(body:has(.blog-article) .site-footer),:global(body:has(.blog-article) .ambient-background),:global(body:has(.blog-article) .skip-link),:global(body:has(.blog-article) dialog),:global(body:has(.blog-article) [data-ad-placement]){display:none!important}
-:global(body:has(.blog-article) .site-shell),:global(body:has(.blog-article) main){width:auto!important;max-width:none!important;margin:0!important;padding:0!important;min-height:0!important}
-.blog-article{font:11pt/1.5 Arial,sans-serif;padding:0;color:#000;--surface:#fff;--text:#000;--accent:#333;--accent-soft:#f3f3f3;--muted:#444;--line:#aaa}.article-header{margin-bottom:5mm}.article-header h1{font-size:26pt;letter-spacing:normal}.article-lead{font-size:12pt}.article-byline{font-size:9pt}.article-cover{margin:0 0 6mm}.article-cover :global(svg){max-height:64mm}.article-cover figcaption,.article-diagram figcaption{font-size:9pt}.article-layout{display:block}.article-sidebar,.article-footer{display:none}.article-body{max-width:none}.article-body section{margin-bottom:6mm}.article-body h2{font-size:16pt;break-after:avoid-page}.article-body p{margin:0 0 3mm;orphans:3;widows:3}.article-note,.article-diagram,.conversation-example li,.open-questions>div{break-inside:avoid-page}.article-note{margin:4mm 0;padding:3mm}.conversation-example{gap:3mm}.conversation-example li{padding:3mm}.article-body blockquote{font-size:14pt;margin:4mm 0;padding:3mm 0}.article-conclusion{padding-top:5mm}.article-body a{color:#000}
-}
-</style>
+ <Fragment slot="series"><p>NullTopic in der Praxis · Teil 2</p><a href={surfaceBookPost.path}>{surfaceBookPost.title}</a></Fragment>
+</BlogArticle>

@@ -1,6 +1,7 @@
 ---
 import AdBanner from './AdBanner.astro';
 import BlogPostCard from './BlogPostCard.astro';
+import { surfaceBookPost } from '../lib/blog';
 import MetronomePreview from './MetronomePreview.astro';
 import RelaxPreview from './RelaxPreview.astro';
 import Layout from '../layouts/Layout.astro';
@@ -104,7 +105,7 @@ const spotlights = rawSpotlights.map(tool => ({...tool,name:t(tool.name),title:t
     </div>
     <aside class="tool-suggestion"><h3>{t("Fehlt dir ein Helfer?")}</h3><p>{t("Wir entwickeln die Sammlung weiter. Teile uns mit, welches Tool deinen Alltag leichter machen würde.")}</p><a class="text-link" href="mailto:jacktoolsnet@gmail.com">{t("Eine Idee vorschlagen ↗")}</a></aside>
   </section>
-  {lang === 'de' && <section class="blog-home" aria-labelledby="blog-home-title"><div class="blog-home-heading"><div><p class="eyebrow">HINTER DEN KULISSEN</p><h2 id="blog-home-title">Ideen, Projekte und ihre Geschichten.</h2></div><a href="/de/blog/">Zum Blog</a></div><BlogPostCard /></section>}
+  {lang === 'de' && <section class="blog-home" aria-labelledby="blog-home-title"><div class="blog-home-heading"><div><p class="eyebrow">HINTER DEN KULISSEN</p><h2 id="blog-home-title">Ideen, Projekte und ihre Geschichten.</h2></div><a href="/de/blog/">Zum Blog</a></div><BlogPostCard post={surfaceBookPost} /></section>}
   <section class="idea-section" id="idee"><p class="eyebrow">{t("DIE IDEE DAHINTER")}</p><h2>{t("Tools sollen helfen.")}<br /><em>{t("Nicht im Weg stehen.")}</em></h2><p>{t("Wir mögen klare Oberflächen, sinnvolle Funktionen und die Freiheit, Dinge auf die eigene Art zu machen. Deshalb kannst du auch diese Seite anpassen: Farbe, Stil, Hell- oder Dunkelmodus und Schriftgröße findest du oben im Einstellungsmenü.")}</p><div class="values-grid"><div><span>{t("01 / EINFACH")}</span><h3>{t("Weniger drumherum.")}</h3><p>{t("Das Wesentliche im Mittelpunkt. Damit du schnell findest, was du brauchst.")}</p></div><div><span>{t("02 / PERSÖNLICH")}</span><h3>{t("So, wie du es magst.")}</h3><p>{t("Ein ruhiges Design, das sich deinen Vorlieben anpassen lässt.")}</p></div><div><span>{t("03 / NEUGIERIG")}</span><h3>{t("Immer Raum für Ideen.")}</h3><p>{t("Aus kleinen Gedanken können hilfreiche Tools werden. Wir bleiben neugierig.")}</p></div></div></section>
 </Layout>
 

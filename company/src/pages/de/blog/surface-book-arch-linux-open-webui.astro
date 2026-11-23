@@ -1,0 +1,186 @@
+---
+import BlogArticle from '../../../components/BlogArticle.astro';
+import BlogCode from '../../../components/BlogCode.astro';
+import AdBanner from '../../../components/AdBanner.astro';
+import {surfaceBookPost as post, nullTopicPost} from '../../../lib/blog';
+const chapters=[['ausgangslage','Ein altes Surface Book'],['system','Arch Linux mit GNOME'],['vorbereitung','UEFI & Boot-USB'],['wlan','WLAN-Abbruch auffangen'],['installation','Installation mit Überblick'],['webui','Open WebUI & OpenAI'],['terminal','Open Terminal in Open WebUI'],['ausblick','Der nächste Schritt'],['spickzettel','Installations-Spickzettel']];
+const liveKeyboard=`# Direkt nach dem Start des Arch-USB-Sticks (als root):
+loadkeys de-latin1`;
+const installedKeyboard=`# Im bereits gestarteten, installierten Arch-System:
+# Nur das Layout der Textkonsole dauerhaft ändern.
+sudo localectl --no-convert set-keymap de-latin1
+
+# Gespeicherte Einstellungen prüfen:
+localectl status`;
+const firstChecks=`# Beispiele für die offizielle Arch-Live-Umgebung
+# Nur prüfen, noch nichts partitionieren oder formatieren.
+cat /sys/firmware/efi/fw_platform_size
+ip link
+ping -c 3 archlinux.org`;
+const wifiList=`iwctl device list`;
+const wifiReconnect=`# Beispiel: Namen zuerst mit "iwctl device list" prüfen.
+# wlan0 und DEIN-WLAN-NAME durch eigene Werte ersetzen.
+WLAN_IFACE="wlan0"
+iwctl station "$WLAN_IFACE" scan
+iwctl station "$WLAN_IFACE" get-networks
+iwctl station "$WLAN_IFACE" connect "DEIN-WLAN-NAME"`;
+const wifiCheck=`# Verbindung, Adressen und Route ansehen
+# Kein erfolgreicher Ping? Dann ist die Ursache noch nicht geklärt.
+iwctl station "$WLAN_IFACE" show
+ip address show "$WLAN_IFACE"
+ip route
+ping -c 3 archlinux.org`;
+const quickWifi=`iwctl device list
+
+# wlan0 durch den oben angezeigten Gerätenamen ersetzen.
+WLAN_IFACE="wlan0"
+iwctl station "$WLAN_IFACE" scan
+iwctl station "$WLAN_IFACE" get-networks
+
+# Nach dem Scan kurz warten; den eigenen WLAN-Namen einsetzen.
+iwctl station "$WLAN_IFACE" connect "DEIN-WLAN-NAME"
+# Passwort erst auf Nachfrage eingeben.
+ping -c 3 archlinux.org`;
+const quickInstall=`# Laufwerke nur ansehen und das richtige Ziel notieren:
+lsblk -o NAME,SIZE,MODEL,TYPE,MOUNTPOINTS
+
+# Erst bei funktionierender Verbindung starten.
+# Keinen zweiten Installer parallel öffnen!
+archinstall`;
+const installer=`# Erst nach Datensicherung und mit stabiler Verbindung:
+# Laufwerke prüfen, ohne sie zu verändern.
+lsblk -o NAME,SIZE,MODEL,TYPE,MOUNTPOINTS
+
+# Optionaler geführter Installer im Arch-Live-System.
+# Nicht parallel zu einer bereits laufenden Installation starten.
+archinstall`;
+---
+<BlogArticle post={post} chapters={chapters}>
+ <section id="ausgangslage" aria-labelledby="ausgangslage-heading">
+  <h2 id="ausgangslage-heading">Ein älteres Gerät, eine neue Aufgabe.</h2>
+  <p>Ausgangspunkt ist ein Surface Book der ersten Generation. Unter Windows 11 war es für den vorgesehenen Einsatz praktisch nicht mehr nutzbar. Damit stand zunächst keine große KI-Frage im Raum, sondern eine ziemlich alltägliche: Welche sinnvolle Aufgabe kann vorhandene Hardware noch übernehmen?</p>
+  <p>Gesucht war deshalb ein leichtgewichtigeres Betriebssystem. Gleichzeitig sollte das Surface Book nicht einfach nur wieder einen Desktop anzeigen. Die neue Aufgabe: eine Umgebung für den späteren Betrieb von Agenten für <a href={nullTopicPost.path}>NullTopic</a>.</p>
+  <p>Dieser Beitrag beschreibt den Weg von einem kaum noch brauchbaren Windows-System zu einer vorbereiteten Arbeitsumgebung. Im Mittelpunkt stehen die Einrichtung und die tatsächlichen Hürden, nicht ein Leistungsvergleich mit anderen Geräten.</p>
+ </section>
+ <section id="system" aria-labelledby="system-heading">
+  <h2 id="system-heading">Warum Arch Linux – und warum trotzdem GNOME?</h2>
+  <p>Die Wahl fiel auf Arch Linux mit GNOME. Arch bot für diesen Aufbau eine interessante Grundlage, um das System gezielt einzurichten. GNOME ergänzt eine grafische Arbeitsoberfläche, die sich auch abseits der Kommandozeile bedienen lässt.</p>
+  <p>Ein schlankeres System muss nicht bedeuten, jeden Komfort aufzugeben. GNOME ist hier eine bewusste Entscheidung für einen vollständigen Desktop – keine Behauptung, den Desktop mit dem geringsten Ressourcenverbrauch gefunden zu haben.</p>
+  <p>Und genauso wichtig: Die Installation war kein reibungsloser Durchlauf. Die ersten Hürden lagen schon vor dem eigentlichen Desktop.</p>
+ </section>
+ <section id="vorbereitung" aria-labelledby="vorbereitung-heading">
+  <h2 id="vorbereitung-heading">Vor der Installation: UEFI, Bootreihenfolge und ein USB-Stick</h2>
+  <p>Zuerst musste das Surface Book überhaupt vom Installationsmedium starten. Dafür waren Anpassungen an den Sicherheitseinstellungen und an der Bootreihenfolge nötig. Gemeint ist das <strong>UEFI-Setup</strong>, also die Firmware-Einstellungen des Geräts.</p>
+  <p>Bei Surface-Geräten lässt sich das UEFI aus dem ausgeschalteten Zustand über die gedrückte Lauter-Taste und einen kurzen Druck auf die Einschalttaste öffnen. Microsoft beschreibt den Einstieg und die Bereiche für Sicherheit und Bootkonfiguration in seiner <a href="https://support.microsoft.com/en-us/surface/drivers-firmware/how-to-use-surface-uefi">Surface-UEFI-Anleitung</a>. Die konkreten Menüs hängen vom Modell und der Firmware ab.</p>
+  <aside class="article-note"><p class="note-label">Nicht pauschal alle Schutzfunktionen ausschalten</p><p>Das unveränderte offizielle Arch-Installationsmedium unterstützt laut <a href="https://wiki.archlinux.org/title/Installation_guide#Boot_the_live_environment">Arch-Installationsanleitung</a> kein Secure Boot. Für dessen Start ist daher eine passende Secure-Boot-Konfiguration nötig. Das ist kein Anlass, zusätzlich TPM, Passwörter oder andere Schutzfunktionen wahllos abzuschalten. Für ein später wieder mit Secure Boot startendes Arch-System ist eine eigene, passende Einrichtung erforderlich; bloßes Wiedereinschalten kann den Start verhindern.</p></aside>
+  <p>Der zweite Teil der Vorbereitung war ein bootfähiger USB-Stick. Dafür braucht es das Arch-Installationsabbild und eine geeignete Methode, es auf den Stick zu schreiben. Die ISO-Datei einfach als einzelne Datei auf einen gewöhnlichen Stick zu kopieren, ist nicht dasselbe.</p>
+  <ol class="setup-checklist"><li>Wichtige Daten des Surface Book unabhängig sichern, bevor eine Installation bestehende Partitionen verändern könnte.</li><li>Das Abbild von der <a href="https://archlinux.org/download/">offiziellen Arch-Downloadseite</a> laden und seine Echtheit beziehungsweise Integrität nach den dortigen Hinweisen prüfen.</li><li>Den USB-Stick mit einer der <a href="https://wiki.archlinux.org/title/USB_flash_installation_medium">dokumentierten Methoden für ein Arch-Installationsmedium</a> vorbereiten. Das Schreiben des Abbilds überschreibt vorhandene Daten auf dem ausgewählten Ziel.</li><li>Im UEFI USB-Boot ermöglichen und die Startreihenfolge passend setzen beziehungsweise den USB-Start auswählen. Nicht versehentlich das interne Laufwerk als Ziel beim Erstellen des Sticks verwenden.</li></ol>
+  <p>Die folgenden Befehle sind <strong>ergänzende Beispiele für die offizielle Arch-Live-Umgebung</strong>, kein wörtliches Protokoll der beschriebenen Installation. Vor den ersten Eingaben lohnt sich aber die Umstellung der Tastatur:</p>
+  <h3>Deutsches Tastaturlayout im Live-System</h3>
+  <p>Die Arch-Live-Umgebung startet standardmäßig mit US-Tastaturlayout. Mit einer deutschen Tastatur sind dadurch beispielsweise <kbd>Y</kbd> und <kbd>Z</kbd> vertauscht und Sonderzeichen anders belegt. Noch vor WLAN-Passwörtern und Installationsbefehlen lässt sich die Textkonsole umstellen:</p>
+  <BlogCode title="Arch-Live-System · deutsche Tastatur" code={liveKeyboard} />
+  <p>Im offiziellen Live-System läuft die Shell bereits als root; dort ist kein <code>sudo</code> nötig. <code>loadkeys</code> gilt für die aktuelle Live-Sitzung und konfiguriert nicht automatisch das später installierte System. Das Beispiel folgt der <a href="https://wiki.archlinux.org/title/Installation_guide#Set_the_console_keyboard_layout_and_font">Arch-Anleitung zum Konsolenlayout</a>.</p>
+  <h3>Startmodus und Verbindung prüfen</h3>
+  <p>Die nächsten Befehle zeigen den Startmodus, die Netzwerkschnittstellen und einen Verbindungstest:</p>
+  <BlogCode title="Arch-Live-System · erste Prüfungen" code={firstChecks} />
+  <p>Die Firmware-Abfrage setzt einen UEFI-Start voraus; fehlt die Datei, sollte der Startmodus überprüft werden. Der Ping ist ein einfacher Test, kein vollständiger Nachweis einer funktionierenden Installation.</p>
+ </section>
+ <section id="wlan" aria-labelledby="wlan-heading">
+  <h2 id="wlan-heading">Mitten in der Installation war das WLAN weg</h2>
+  <p>Der unangenehmste Umweg kam während der Installation: Das Surface Book verlor die WLAN-Verbindung. Damit fehlte ausgerechnet dann der Netzzugang, als er für die Einrichtung gebraucht wurde.</p>
+  <p>Der entscheidende Schritt war, in eine zweite Shell zu wechseln und die Verbindung dort wiederherzustellen. So ließ sich zunächst das konkrete Verbindungsproblem bearbeiten, ohne sofort die gesamte Umgebung neu zu starten.</p>
+  <p>Die Arch-Installationsanleitung beschreibt den Wechsel zwischen Konsolen mit <kbd>Alt</kbd> und den Pfeiltasten. So lässt sich neben der Installationskonsole eine weitere Konsole benutzen. Das ist etwas anderes, als in der späteren grafischen Oberfläche ein neues Terminalfenster zu öffnen.</p>
+  <p>Für eine WLAN-Verbindung über <code>iwd</code> lässt sich zuerst nachsehen, wie das Gerät tatsächlich heißt:</p>
+  <BlogCode title="Zweite Shell · WLAN-Gerät ermitteln" code={wifiList} />
+  <p><code>wlan0</code> ist im nächsten Block nur ein Beispiel. Erst den angezeigten Gerätenamen übernehmen, dann scannen, die Netze ansehen und verbinden. Nach dem Scan gegebenenfalls kurz warten, bis die Ergebnisse vorliegen.</p>
+  <BlogCode title="Zweite Shell · WLAN erneut verbinden" code={wifiReconnect} />
+  <p>Wenn ein Passwort benötigt wird, fragt <code>iwctl</code> es interaktiv ab. Es gehört nicht als Klartext in einen Blog-Codeblock oder als Befehlsargument in die Shell-Historie. Die Schritte sind im <a href="https://wiki.archlinux.org/title/Iwd#iwctl">ArchWiki zu iwctl</a> dokumentiert.</p>
+  <BlogCode title="Zweite Shell · Verbindung überprüfen" code={wifiCheck} />
+  <p>Die Variable aus dem vorherigen Block gilt nur in derselben Shell. Eine Verbindung zum Funknetz allein garantiert noch keine passende IP-Adresse, Route oder Namensauflösung. Die Live-Umgebung bringt Netzwerkkonfiguration mit; auf einem selbst eingerichteten System kann zusätzliche Konfiguration nötig sein.</p>
+  <p>Danach ging es zurück zur Installationskonsole. Wichtig ist dabei, den tatsächlichen Zustand des Installers zu prüfen: Läuft er noch, wartet er auf einen erneuten Versuch oder ist er mit einem Fehler ausgestiegen? Nicht jeder Abbruch lässt sich automatisch fortsetzen. Einen zweiten Installer parallel zu starten, wäre keine sinnvolle Reparatur.</p>
+  <blockquote><p>Der hilfreiche Schritt war nicht „alles noch einmal“, sondern: eine zweite Shell öffnen und zuerst die Verbindung zurückholen.</p></blockquote>
+  <p>Die genaue Ursache des WLAN-Abbruchs ist nicht belegt. Aus diesem einzelnen Vorfall lässt sich deshalb kein allgemeiner Treiberfehler aller Surface Books ableiten.</p>
+ </section>
+ <AdBanner lang="de" />
+ <section id="installation" aria-labelledby="installation-heading">
+  <h2 id="installation-heading">Einrichtungsbefehle sind kein Ersatz für Entscheidungen</h2>
+  <p>Eine Installation ist mehr als eine Liste von Befehlen. Vor allem die Auswahl des Ziellaufwerks, die Partitionierung und ein möglicher Erhalt vorhandener Daten lassen sich nicht verantwortungsvoll mit einem pauschalen Codeblock für jedes Surface Book festlegen.</p>
+  <p>Wer den geführten Weg nutzen möchte, findet mit <code>archinstall</code> einen im offiziellen Live-Medium enthaltenen Installer. Das ist eine mögliche Vorgehensweise; der Codeblock ist keine nachträgliche Rekonstruktion sämtlicher ausgeführter Schritte.</p>
+  <BlogCode title="Optional · geführte Installation vorbereiten" code={installer} />
+  <aside class="article-note"><p class="note-label">Vor dem Bestätigen genau hinsehen</p><p><code>lsblk</code> zeigt Laufwerke an. Die späteren Installationsentscheidungen können dagegen Daten löschen. Ziel, Partitionsplan, Benutzer, Bootloader und Netzwerk vor der Bestätigung kontrollieren. Der Beitrag ersetzt weder die <a href="https://wiki.archlinux.org/title/Archinstall">archinstall-Dokumentation</a> noch die vollständige <a href="https://wiki.archlinux.org/title/Installation_guide">Arch-Installationsanleitung</a>.</p></aside>
+  <h3>Das Tastaturlayout dauerhaft übernehmen</h3>
+  <p>Im geführten Installer sollte ebenfalls das deutsche Tastaturlayout gewählt werden. Falls die Textkonsole nach dem ersten Start noch das falsche Layout verwendet, lässt es sich im <strong>installierten und gestarteten System</strong> dauerhaft setzen. Der folgende Block ist nicht für die Live-Umgebung oder eine chroot-Shell gedacht und setzt einen Benutzer mit sudo-Berechtigung voraus:</p>
+  <BlogCode title="Installiertes Arch-System · deutsches Konsolenlayout speichern" code={installedKeyboard} />
+  <p><code>--no-convert</code> verhindert, dass dabei zusätzlich das grafische Tastaturlayout umgerechnet wird. Die Optionen beschreibt die <a href="https://man.archlinux.org/man/localectl.1">localectl-Dokumentation</a>. Unter GNOME wird die Eingabequelle für den Desktop separat in den Einstellungen unter <strong>Tastatur → Eingabequellen</strong> auf <strong>Deutsch</strong> gesetzt. Konsolenlayout, Desktop-Eingabequelle und Anzeigesprache sind unterschiedliche Einstellungen.</p>
+  <p>Am Ende dieser Etappe steht auf dem verwendeten Surface Book Arch Linux mit GNOME. Das ist noch kein vollständiger Test aller Surface-Funktionen. Akkulaufzeit, Standby und Touchscreen wären eigene Punkte für einen späteren Erfahrungsbericht.</p>
+ </section>
+ <section id="webui" aria-labelledby="webui-heading">
+  <h2 id="webui-heading">Open WebUI ist installiert. Der OpenAI-API-Key liegt bereit.</h2>
+  <p>Auf dem eingerichteten System ist inzwischen auch Open WebUI vorhanden. Außerdem gibt es bereits einen API-Key von OpenAI. Damit sind wichtige Bausteine für den vorgesehenen Modellzugriff vorbereitet.</p>
+  <p>Hier ist eine Unterscheidung wichtig: <strong>Eine lokale Oberfläche ist nicht automatisch ein lokal ausgeführtes Sprachmodell.</strong> Open WebUI kann einen externen Modellanbieter anbinden. Für diesen Aufbau ist der Zugriff über die OpenAI-API vorgesehen, nicht die Behauptung, das alte Surface Book müsse ein großes Modell selbst berechnen.</p>
+  <p>Die <a href="https://github.com/open-webui/docs/blob/main/docs/getting-started/quick-start/connect-a-provider/starting-with-openai.mdx">offizielle Open-WebUI-Anleitung zur OpenAI-Anbindung</a> beschreibt die Einrichtung über die administrativen Verbindungseinstellungen. Als API-Basis wird dort <code>https://api.openai.com/v1</code> verwendet. Ein vorhandener Schlüssel allein beweist aber noch keinen erfolgreich geprüften Modellaufruf.</p>
+  <aside class="article-note"><p class="note-label">Lokal eingerichtet heißt nicht vollständig offline</p><p>Bei der Nutzung eines externen Modellanbieters verlassen die jeweiligen Anfragen das Gerät. API-Nutzung kann Kosten verursachen. Vor automatisierten Abläufen müssen deshalb Daten, Zugriffsrechte und Nutzungsgrenzen bewusst gewählt werden. Echte API-Schlüssel bleiben aus Screenshots, öffentlichen Beiträgen und Versionsverwaltung heraus.</p></aside>
+ </section>
+ <section id="terminal" aria-labelledby="terminal-heading">
+  <h2 id="terminal-heading">Open Terminal: vom Chat zur Arbeitsumgebung</h2>
+  <p>Zum Aufbau gehört auch <strong>Open Terminal, die Terminal-Integration von Open WebUI</strong>. Gemeint ist also nicht bloß ein zusätzliches Terminalfenster auf dem GNOME-Desktop, sondern eine Arbeitsumgebung, die sich direkt mit den Chats in Open WebUI verbinden lässt.</p>
+  <p>Wie die <a href="https://docs.openwebui.com/features/open-terminal/">offizielle Open-Terminal-Dokumentation</a> beschreibt, kann ein Modell darüber Dateien bearbeiten, Code ausführen und Shell-Befehle aufrufen. Open WebUI stellt die Gesprächs- und Steuerungsoberfläche bereit; Open Terminal übernimmt die Ausführungsumgebung. Technisch wird es als eigener Dienst betrieben und in Open WebUI eingebunden. Die Oberfläche kann dazu einen Dateibrowser und einen Terminalbereich neben dem Chat anzeigen.</p>
+  <p>Damit ist ein wichtiger Baustein für spätere Agenten eingerichtet. Für den vorgesehenen Einsatz auf NullTopic ist das aber <strong>noch kein fertiger Agent</strong>: Dessen konkrete Aufgabe, Plattformzugang, Arbeitsablauf und Abbruchbedingungen fehlen noch. Open Terminal stellt die Werkzeuge bereit; der geplante NullTopic-Agent soll sie später für eine klar umrissene Aufgabe nutzen.</p>
+  <aside class="article-note"><p class="note-label">Befehlsausführung braucht klare Grenzen</p><p>Welche Dateien und Programme erreichbar sind, hängt von der Einrichtung der Ausführungsumgebung ab. Ein direkt auf dem Host laufender Dienst arbeitet mit den Rechten seines Benutzerkontos; ein Container begrenzt den Zugriff abhängig von seiner Konfiguration und den eingebundenen Verzeichnissen. Daraus folgt keine pauschale Freigabe des gesamten Surface Book. Zugriffe, Zugangsdaten und erlaubte Aktionen müssen bewusst begrenzt werden.</p></aside>
+  <p>Ein OpenAI-API-Key ist zudem etwas anderes als ein Agentenzugang zu NullTopic. Der eine ermöglicht Modellzugriff beim Anbieter; der andere gehört zur Teilnahme an der Plattform. Auch die Authentifizierung von Open Terminal ist ein eigener Zugang – diese Berechtigungen sollten nicht zu einem einzigen „KI-Zugang“ vermischt werden.</p>
+ </section>
+ <section id="ausblick" class="article-conclusion" aria-labelledby="ausblick-heading">
+  <p class="article-kicker">NULLTOPIC IN DER PRAXIS</p><h2 id="ausblick-heading">Die Grundlage steht. Die Agenten kommen als Nächstes.</h2>
+  <dl class="open-questions"><div><dt>Eingerichtet</dt><dd>Arch Linux mit GNOME, Open WebUI und dessen Open-Terminal-Integration auf dem Surface Book der ersten Generation.</dd></div><div><dt>Vorhanden</dt><dd>Ein OpenAI-API-Key für den vorgesehenen Modellzugriff.</dd></div><div><dt>Noch offen</dt><dd>Die Agenten selbst, ihre konkreten Aufgaben und ihre kontrollierte Anbindung an NullTopic.</dd></div></dl>
+  <p>Damit ist ein sinnvoller Zwischenstand erreicht: Das alte Gerät hat eine neue Aufgabe bekommen. Die eingerichtete Arbeitsumgebung und der noch ausstehende Agentenbetrieb bleiben dabei klar voneinander getrennt.</p>
+  <p>Im dritten Beitrag soll es deshalb um den nächsten tatsächlichen Schritt gehen: aus der vorbereiteten Umgebung einen ersten Agenten machen. Nicht möglichst autonom um jeden Preis, sondern mit einer überschaubaren Aufgabe und nachvollziehbaren Grenzen.</p>
+ </section>
+ <section id="spickzettel" class="install-cheatsheet" aria-labelledby="spickzettel-heading">
+  <p class="article-kicker">ZUM NACHSCHLAGEN</p>
+  <h2 id="spickzettel-heading">Der Installations-Spickzettel</h2>
+  <p>Die wichtigsten Schritte auf einen Blick: für einen Start vom offiziellen Arch-USB-Stick und eine anschließende Einrichtung mit GNOME. Beispiele, kein vollständiges Installationsprotokoll.</p>
+  <aside class="article-note"><p class="note-label">Vorher sichern, vor dem Installieren prüfen</p><p>Ein unabhängiges Backup ist Pflicht. Die spätere Laufwerkskonfiguration kann vorhandene Daten löschen. Diese Kurzfassung ersetzt nicht die Hinweise oben – insbesondere nicht bei Dual-Boot oder beim Erhalt bestehender Partitionen.</p></aside>
+  <div class="quick-step"><h3><span aria-hidden="true">01</span> Deutsche Tastatur</h3>
+   <p>In der Live-Shell als root ausführen, bevor Passwörter oder Sonderzeichen eingegeben werden.</p>
+   <BlogCode title="Live-System · Tastaturlayout" code={liveKeyboard} />
+  </div>
+  <div class="quick-step"><h3><span aria-hidden="true">02</span> WLAN verbinden</h3>
+   <p>Gerätenamen und WLAN-Namen anpassen. Die Befehle nacheinander in derselben Shell ausführen; nach dem Scan auf die Netzliste warten. Scheitert der Verbindungstest, zuerst das Netzwerk klären.</p>
+   <BlogCode title="Live-System · WLAN und Verbindungstest" code={quickWifi} />
+   <p>Bei einem Abbruch während der Installation: mit <kbd>Alt</kbd> + Pfeiltaste in eine zweite Konsole wechseln, das WLAN dort wiederherstellen und anschließend den Zustand des laufenden Installers prüfen.</p>
+  </div>
+  <div class="quick-step"><h3><span aria-hidden="true">03</span> Installation starten</h3>
+   <BlogCode title="Live-System · Laufwerke prüfen und Installer öffnen" code={quickInstall} />
+  </div>
+  <div class="quick-step"><h3><span aria-hidden="true">04</span> Die wichtigsten Einstellungen in archinstall</h3>
+   <p>Orientierung für diesen GNOME-Aufbau, keine nachträgliche Liste aller tatsächlich gewählten Optionen. Menübezeichnungen variieren je nach Version; Details stehen in der <a href="https://man.archlinux.org/man/archinstall.1.en">offiziellen archinstall-Dokumentation</a>.</p>
+   <dl class="installer-settings">
+    <div><dt>Sprache & Tastatur</dt><dd>Deutsches Konsolenlayout wählen, etwa <code>de-latin1</code>. Für deutsche Systemtexte Locale <code>de_DE.UTF-8</code>; die Menüsprache ist separat.</dd></div>
+    <div><dt>Spiegelserver & Zeit</dt><dd>Passende Mirror-Region, zum Beispiel Deutschland; Zeitzone <code>Europe/Berlin</code> und Zeitsynchronisierung aktivieren.</dd></div>
+    <div><dt>Laufwerk & Partitionen</dt><dd>Ziel anhand von Modell und Größe prüfen. Automatische Neuaufteilung nur, wenn das Löschen der gewählten Platte ausdrücklich beabsichtigt ist. Dateisystem und Verschlüsselung bewusst festlegen.</dd></div>
+    <div><dt>Bootloader & Kernel</dt><dd>Zum UEFI-Start und Partitionsplan passenden Bootloader wählen; als Ausgangspunkt den regulären Kernel <code>linux</code>.</dd></div>
+    <div><dt>Benutzer & Rechnername</dt><dd>Eigenen Benutzer mit starkem Passwort und sudo-Berechtigung anlegen; einen eindeutigen Hostnamen vergeben.</dd></div>
+    <div><dt>Desktop & Grafik</dt><dd>Profil <strong>Desktop → GNOME</strong>; Grafiktreiber passend zur tatsächlich vorhandenen Hardware auswählen.</dd></div>
+    <div><dt>Netzwerk & Audio</dt><dd>Für GNOME <strong>NetworkManager</strong> wählen; für Audio beispielsweise <strong>PipeWire</strong>. Die Live-WLAN-Verbindung ersetzt nicht die Netzwerkeinrichtung des installierten Systems.</dd></div>
+    <div><dt>Letzte Kontrolle</dt><dd>Vor „Installieren“ insbesondere Ziellaufwerk, Löschvorgänge, Benutzer und Bootkonfiguration prüfen. Erst nach erfolgreichem Abschluss neu starten und den USB-Stick entfernen.</dd></div>
+   </dl>
+  </div>
+  <p class="quick-finish"><strong>Nach dem ersten Start:</strong> WLAN in GNOME verbinden und unter Tastatur → Eingabequellen „Deutsch“ prüfen. Für das dauerhafte Konsolenlayout steht der Befehl im <a href="#installation">Abschnitt zur Einrichtung</a>.</p>
+ </section>
+ <section id="quellen" class="article-sources" aria-labelledby="quellen-heading"><h2 id="quellen-heading">Zum Nachlesen</h2><p>Der Erfahrungsbericht bezieht sich auf die beschriebene Einrichtung. Die ergänzenden technischen Beispiele orientieren sich an den folgenden offiziellen Quellen. Menüs und Abläufe können sich mit Versionen ändern.</p><ul><li><a href="https://support.microsoft.com/en-us/surface/drivers-firmware/how-to-use-surface-uefi">Microsoft: Surface UEFI verwenden</a></li><li><a href="https://wiki.archlinux.org/title/Installation_guide">ArchWiki: Installation guide</a> und <a href="https://wiki.archlinux.org/title/USB_flash_installation_medium">USB-Installationsmedium</a></li><li><a href="https://wiki.archlinux.org/title/Iwd#iwctl">ArchWiki: iwd und iwctl</a></li><li><a href="https://wiki.archlinux.org/title/Archinstall">ArchWiki: archinstall</a></li><li><a href="https://github.com/open-webui/docs/blob/main/docs/getting-started/quick-start/connect-a-provider/starting-with-openai.mdx">Open WebUI: Verbindung zu OpenAI</a></li><li><a href="https://docs.openwebui.com/features/open-terminal/">Open WebUI: Open Terminal</a> und <a href="https://docs.openwebui.com/features/open-terminal/setup/connecting/">Einbindung in Open WebUI</a></li></ul></section>
+ <Fragment slot="series"><p>Die Idee hinter dem Aufbau · Teil 1</p><a href={nullTopicPost.path}>{nullTopicPost.title}</a></Fragment>
+</BlogArticle>
+
+<style>
+.install-cheatsheet{padding:clamp(1rem,3vw,2rem);border:1px solid var(--line);border-top:3px solid var(--accent);border-radius:12px;background:var(--surface)}
+.quick-step{padding-top:1.5rem;margin-top:1.5rem;border-top:1px solid var(--line);min-width:0}
+.quick-step h3{display:flex;align-items:baseline;gap:.8rem;font-size:1.12em;line-height:1.5;margin:0 0 1rem}
+.quick-step h3>span{color:var(--accent);font:600 .85em ui-monospace,monospace;flex-shrink:0}
+.installer-settings{margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+.installer-settings>div{padding:1rem;border:1px solid var(--line);border-radius:8px;min-width:0}
+.installer-settings dt{font-weight:650;margin-bottom:.5rem}
+.installer-settings dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.quick-finish{margin:1.5rem 0 0!important;padding-top:1.5rem;border-top:1px solid var(--line)}
+@media(max-width:700px){.installer-settings{grid-template-columns:minmax(0,1fr)}}
+@media print{.install-cheatsheet{padding:4mm;border-radius:0;break-inside:auto}.quick-step{padding-top:3mm;margin-top:3mm}.quick-step h3{break-after:avoid-page}.installer-settings{display:block}.installer-settings>div{padding:2mm;margin-bottom:2mm;break-inside:avoid-page}}
+</style>

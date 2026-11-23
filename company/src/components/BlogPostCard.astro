@@ -1,9 +1,11 @@
 ---
-import { nullTopicPost as post } from '../lib/blog';
+import { nullTopicPost, type BlogPost } from '../lib/blog';
 import NullTopicIllustration from './NullTopicIllustration.astro';
+interface Props { post?:BlogPost }
+const {post=nullTopicPost}=Astro.props;
 ---
 <a class="blog-post-card" href={post.path}>
-  <div class="post-art"><NullTopicIllustration /></div>
+  <div class="post-art"><NullTopicIllustration variant={post.art} /></div>
   <div class="post-copy"><p class="post-category">{post.category}</p><h3>{post.title}</h3><p class="post-excerpt">{post.excerpt}</p><span class="post-action">Artikel lesen</span></div>
 </a>
 <style>
