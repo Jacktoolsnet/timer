@@ -1,4 +1,6 @@
 ---
+import Sundial from './Sundial.astro';
+import { sundialText } from '../lib/sundial-text';
 import AdBanner from '../../../shared/AdBanner.astro';
 import ToolInformation from '../../../shared/ToolInformation.astro';
 import {toolSeo} from '../../../shared/seo';
@@ -17,6 +19,7 @@ interface Props { lang: Language }
 const {lang}=Astro.props; const t=getDictionary(lang);const c=clockText[lang];const guide=clockGuide[lang];
 const groups={de:{display:'Uhr & Datum',behavior:'Zeit & Verhalten'},en:{display:'Clock & date',behavior:'Time & behavior'},es:{display:'Reloj y fecha',behavior:'Hora y comportamiento'},fr:{display:'Horloge et date',behavior:'Heure et comportement'}}[lang];
 const alarm=alarmText[lang];
+const sun=sundialText[lang];
 const designs=analogDesignText[lang];
 const backgrounds=backgroundText[lang];const location=locationText[lang];
 const seo=toolSeo.clock[lang];
@@ -51,14 +54,21 @@ const seo=toolSeo.clock[lang];
 <circle class="orbit-sun-core" cx="160" cy="160" r="8"/>
 </g>
 </svg>
-<div class="clock-readout"><div id="flip-clock" aria-hidden="true"></div><p id="flip-context" aria-hidden="true"></p><time id="digital-clock" aria-live="off">--:--</time><div id="alarm-readout-indicator" class="alarm-readout-indicator" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="7"/><path d="m5 3-3 3m17-3 3 3M12 9v4l3 2M7 19l-2 3m12-3 2 3"/></svg><span id="alarm-readout-time"></span><span id="alarm-mini-flips" aria-hidden="true"></span></div><p id="clock-date"></p><div id="styled-date" hidden></div><p id="clock-zone"></p></div>
+<Sundial lang={lang}/><div class="clock-readout"><div id="flip-clock" aria-hidden="true"></div><p id="flip-context" aria-hidden="true"></p><time id="digital-clock" aria-live="off">--:--</time><div id="alarm-readout-indicator" class="alarm-readout-indicator" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="7"/><path d="m5 3-3 3m17-3 3 3M12 9v4l3 2M7 19l-2 3m12-3 2 3"/></svg><span id="alarm-readout-time"></span><span id="alarm-mini-flips" aria-hidden="true"></span></div><p id="clock-date"></p><div id="styled-date" hidden></div><p id="clock-zone"></p></div>
 </div>
 <p id="wake-status" class="timer-status" role="status"></p><noscript>{t.js}</noscript>
 </section>
 <AdBanner lang={lang} />
 <aside class="settings-card"><h2>{t.settings}</h2><form id="clock-settings" class="clock-settings">
 <fieldset class="clock-settings-group"><legend>{groups.display}</legend>
-<label>{t.appearance}<select name="view">{(['analog','orbit','digital','combined','flip','analogFlip'] as const).map(v=><option value={v} selected={v==='analog'}>{c[v]}</option>)}</select></label>
+<label>{t.appearance}<select name="view">{(['analog','orbit','sundial','digital','combined','flip','analogFlip'] as const).map(v=><option value={v} selected={v==='analog'}>{v==='sundial'?sun.sundial:c[v]}</option>)}</select></label>
+<div id="sundial-settings" hidden>
+<p class="form-hint">{sun.intro}</p>
+<button id="sundial-location" type="button" class="secondary">{sun.enable}</button>
+<button id="sundial-clear" type="button" class="secondary" hidden>{sun.clear}</button>
+<p id="sundial-location-status" class="form-hint" role="status"></p>
+<p class="form-hint">{sun.note}</p>
+</div>
 <label>{designs.label}<select name="analogDesign">{analogDesigns.map((id,index)=><option value={id} data-preview={analogPreview(id)}>{designs.names[index]}</option>)}</select></label>
 <label>{c.dateAppearance}<select name="dateView">{(['textDate','calendarDate','elegantDate','flipDate'] as const).map(v=><option value={v} selected={v==='calendarDate'}>{c[v]}</option>)}</select></label>
 <label>{c.date}<select name="date">{(['off','short','medium','long'] as const).map(v=><option value={v} selected={v==='long'}>{c[v]}</option>)}</select></label>

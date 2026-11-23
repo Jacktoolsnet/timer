@@ -1,0 +1,18 @@
+---
+import type { Language } from '../lib/i18n';
+import { sundialText } from '../lib/sundial-text';
+const {lang}=Astro.props as {lang:Language};
+const t=sundialText[lang];
+---
+<div id="sundial-view" data-text={JSON.stringify(t)} hidden>
+<svg id="sundial-face" viewBox="0 0 360 360" role="img" aria-label={t.sundial}>
+<circle class="sundial-surface" cx="180" cy="180" r="151"/>
+<path class="sundial-compass" d="M180 42v276M42 180h276"/>
+<text x="180" y="20" class="sundial-north">N</text>
+<g id="sundial-hours"/>
+<line id="sundial-shadow" x1="180" y1="180" x2="180" y2="180" visibility="hidden"/>
+<circle class="sundial-pin" cx="180" cy="180" r="5"/>
+</svg>
+<p id="sundial-status" role="status">{t.missing}</p>
+<p id="sundial-time"></p>
+</div>

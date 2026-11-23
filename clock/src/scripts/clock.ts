@@ -1,3 +1,4 @@
+import {createSundial} from './sundial';
 import {dialMarkup, squareRadius, type AnalogDesign} from '../lib/analog-designs';
 import {createClockDate} from './clock-date';
 import {createAlarm} from './alarm';
@@ -28,6 +29,7 @@ function applyTransparency(){
  card.dataset.transparentFlaps=String(enabled&&settings.transparency>0);
  $('clock-transparency-value').textContent=`${settings.transparency} %`;
 }
+const sundial=createSundial();
 const seasonal=createSeasonalBackground($('seasonal-background') as unknown as SVGSVGElement);
 const geolocation=createSeasonalLocation($('seasonal-settings'),()=>configure());
 const alarm=createAlarm($('clock-alarm'),$('alarm-dialog') as HTMLDialogElement,$('clock-alarm-badge'));
@@ -37,6 +39,7 @@ const updateFlip = createFlipClock($('flip-clock'));
 let lastFlipTick = 0;
 let digits:Intl.DateTimeFormat,dateFormat:Intl.DateTimeFormat,parts:Intl.DateTimeFormat;
 function configure(){
+ sundial.configure(settings.view==='sundial');
  applyTransparency();
  const card=document.querySelector<HTMLElement>('.clock-card')!;
  const background=clockBackgroundOptions.find(id=>id===settings.background);
@@ -90,7 +93,7 @@ function orbitPoint(degrees:number,radius:number){
  const distance=settings.analogDesign.startsWith('square-')?squareRadius(angle,radius,radius*28/148):radius;
  return {x:160+distance*Math.sin(angle),y:160-distance*Math.cos(angle)};
 }
-function render(){const now=new Date();if(settings.background==='seasonal')seasonal.render(now);const p=Object.fromEntries(parts.formatToParts(now).map(v=>[v.type,v.value]));const second=Number(p.second)+(settings.smooth&&!matchMedia('(prefers-reduced-motion: reduce)').matches?now.getMilliseconds()/1000:0);const minute=Number(p.minute)+second/60,hour=Number(p.hour)%12+minute/60;
+function render(){const now=new Date();sundial.render(now);if(settings.background==='seasonal')seasonal.render(now);const p=Object.fromEntries(parts.formatToParts(now).map(v=>[v.type,v.value]));const second=Number(p.second)+(settings.smooth&&!matchMedia('(prefers-reduced-motion: reduce)').matches?now.getMilliseconds()/1000:0);const minute=Number(p.minute)+second/60,hour=Number(p.hour)%12+minute/60;
  for(const [id,angle] of [['hour-hand',hour*30],['minute-hand',minute*6],['second-hand',second*6]] as const)$(id).setAttribute('transform',`rotate(${angle} 160 160)`);
  for(const [unit,angle] of [['hour',hour*30],['minute',minute*6],['second',second*6]] as const){
   const radius=unit==='hour'?50:unit==='minute'?80:108;
