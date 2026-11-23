@@ -500,3 +500,26 @@ test('rise/set dots sit on the frame with labels outside and no overlaps',async(
   }
  }
 });
+
+test('São Paulo uses a south-up dial with readable hour labels and clear inset readouts',async({page,context})=>{
+ await context.grantPermissions(['geolocation']);
+ await context.setGeolocation({latitude:-23.55052,longitude:-46.633309});
+ await page.clock.install({time:new Date('2026-11-23T14:46:00Z')});
+ await page.goto('/de/');await page.locator('#trigger-view').click();
+ await page.getByRole('option',{name:'Sonnenuhr',exact:true}).click();await page.locator('#seasonal-location').click();
+ await expect(page.locator('#sundial-face')).toHaveAttribute('data-orientation','south');
+ await expect(page.locator('.sundial-north')).toHaveText('S');
+ for(const square of [false,true]){
+  if(square){await page.locator('#trigger-analogDesign').click();await page.getByRole('option',{name:'Römisch · Eckig',exact:true}).click();}
+  const labels=await page.locator('#sundial-hours .dial-numerals text').evaluateAll(nodes=>nodes.map(node=>{
+   const r=node.getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom};
+  }));
+  expect(labels.length).toBeGreaterThan(2);
+  for(let i=0;i<labels.length;i++)for(let j=i+1;j<labels.length;j++){
+   const a=labels[i],b=labels[j];
+   expect(a.right<=b.x||b.right<=a.x||a.bottom<=b.y||b.bottom<=a.y).toBe(true);
+  }
+  const info=await page.locator('#sundial-info-area').boundingBox();
+  for(const label of labels)expect(label.bottom).toBeLessThan(info!.y);
+ }
+});
