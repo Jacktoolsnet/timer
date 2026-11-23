@@ -1,0 +1,700 @@
+[
+  {
+    "slug": "clock",
+    "name": "Uhr",
+    "tag": "UHRZEIT & DATUM",
+    "title": "Deine Uhr. Dein Blick auf die Zeit.",
+    "description": "Die Jacktools Online-Uhr erklärt: analoge, digitale und Klappzahlen-Anzeige, Datum, Zeitzonen und Browser-Wecker. Mit Beispielen und Grenzen.",
+    "lead": "Eine große Uhr auf dem Schreibtisch, ein Datum im Unterricht oder die Zeit in einer anderen Stadt: Die Jacktools Uhr zeigt die aktuelle Gerätezeit in einer wählbaren Zeitzone. Du entscheidest, wie sie aussieht und welche Informationen du sehen möchtest.",
+    "url": "https://clock.jacktools.net/de/",
+    "features": [
+      {
+        "title": "Analog & digital",
+        "text": "Wähle ein Zifferblatt, digitale Ziffern oder eine Kombination. Auch Klappzahlen stehen zur Verfügung."
+      },
+      {
+        "title": "Datum & Zeitzone",
+        "text": "Blende das Datum ein und wähle die Zeitzone für deine Anzeige – unabhängig vom Aufenthaltsort."
+      },
+      {
+        "title": "Fokus & Wecker",
+        "text": "Rücke die Uhr in den Mittelpunkt oder stelle einen einmaligen Browser-Wecker. Die Seite muss dafür geöffnet bleiben."
+      }
+    ],
+    "sections": [
+      {
+        "id": "anzeige",
+        "title": "Die passende Uhrenansicht wählen",
+        "paragraphs": [
+          "Die analoge Ansicht macht die Stellung der Zeiger sichtbar. Die digitale Ansicht ist praktisch, wenn du die Uhrzeit schnell und eindeutig lesen möchtest. Kombinierte Ansichten verbinden beide Darstellungen; Klappzahlen bieten eine weitere Gestaltungsmöglichkeit.",
+          "Für Datum und Zifferblatt gibt es eigene Einstellungen. Sekunden, Ziffern und weiche Zeigerbewegung lassen sich anpassen. Prüfe die Lesbarkeit aus der Entfernung, aus der du die Uhr später tatsächlich verwendest."
+        ],
+        "steps": [
+          "Öffne die Uhr und wähle im Einstellungsbereich die gewünschte Darstellung.",
+          "Passe Zifferblatt und Datumsdarstellung an. Blende Informationen aus, die du nicht brauchst.",
+          "Wähle für größere Abstände eine gut lesbare Ansicht und nutze bei Bedarf die Fokusansicht."
+        ],
+        "example": {
+          "title": "Beispiel: Uhr für einen Workshop",
+          "text": "Für eine Gruppe eignet sich eine große digitale Anzeige mit Datum. Zeige die Uhr auf einem separaten Bildschirm. Soll eine festgelegte Arbeitsphase heruntergezählt werden, ist dagegen der Timer das passende Tool: Die Uhr zeigt einen Zeitpunkt, keine Restzeit."
+        },
+        "summary": "Zifferblatt, Ziffern und Datum"
+      },
+      {
+        "id": "zeitzonen",
+        "title": "Zeit in einer anderen Region anzeigen",
+        "paragraphs": [
+          "Die Uhr verwendet benannte Zeitzonen. Dadurch kann dieselbe Gerätezeit beispielsweise für Berlin oder New York dargestellt werden. Die Sommerzeit richtet sich nach den Zeitzonenregeln des Browsers; ein fester Stundenabstand ist nicht immer ganzjährig richtig.",
+          "Die Zeitzonenwahl korrigiert keine falsch eingestellte Systemuhr. Es gibt keinen Abgleich mit einem externen Zeitserver. Wenn die Anzeige nicht stimmt, prüfe zuerst Datum und Uhrzeit deines Geräts."
+        ],
+        "steps": [
+          "Wähle im Tool die gewünschte Zeitzone.",
+          "Prüfe Uhrzeit und Datum gemeinsam – in der anderen Zone kann bereits ein anderer Kalendertag gelten.",
+          "Kontrolliere bei wichtigen Absprachen die ausgeschriebene Zone statt nur einer gemerkten Stundendifferenz."
+        ],
+        "example": null,
+        "summary": "Zeitzonen statt fester Zeitabstände"
+      },
+      {
+        "id": "wecker",
+        "title": "Den Browser-Wecker bewusst einsetzen",
+        "paragraphs": [
+          "Der Wecker ist für eine einmalige Erinnerung auf der geöffneten Seite gedacht. Die gewählte Uhrzeit bezieht sich auf die eingestellte Zeitzone. Ein Test hilft dir, Ton und Lautstärke vorab zu prüfen. Nach einem Alarm gibt es eine Schlummerfunktion für fünf Minuten.",
+          "Verlasse dich bei wichtigen Terminen oder zum zuverlässigen Aufwachen nicht auf den Browser-Wecker. Hintergrundbetrieb, Gerätesperre, Energiesparmodus und unterbrochene Audioausgabe können den Alarm verhindern oder verzögern. Die Aktivierung eines Weckers wird beim Neuladen nicht wiederhergestellt."
+        ],
+        "steps": [],
+        "example": null,
+        "summary": "Erinnern auf der geöffneten Seite"
+      },
+      {
+        "id": "gestaltung",
+        "title": "Hintergründe, Fokus und lokale Einstellungen",
+        "paragraphs": [
+          "Statische Motive und animierte Hintergründe gestalten die Uhr als eigenständige Anzeige. Die Jahressimulation verbindet Tages- und Jahreszeiten mit einer illustrierten Landschaft. Ohne Standortmodus sind die Tagesphasen schematisch; die Darstellung ist keine verlässliche Sonnenaufgangstabelle.",
+          "Der optionale Standortmodus fragt die Browser-Position ab. Er muss ausdrücklich eingeschaltet werden. Die Koordinaten bleiben nur für den aktuellen Besuch im Speicher und werden beim Neuladen verworfen. Für eine einfache Uhranzeige brauchst du diese Funktion nicht.",
+          "Design-Einstellungen lassen sich mit deiner Zustimmung lokal merken. Das optionale Wachhalten des Bildschirms hängt von Browser und Gerät ab und ist keine Garantie gegen manuelle Sperre oder Standby."
+        ],
+        "steps": [],
+        "example": null,
+        "summary": "Die Uhr persönlich einrichten"
+      }
+    ],
+    "faq": [
+      {
+        "question": "Woher stammt die Uhrzeit?",
+        "answer": "Von der Systemuhr deines Geräts. Eine andere Zeitzone ändert die Darstellung, nicht die zugrunde liegende Zeitquelle."
+      },
+      {
+        "question": "Was passiert nach dem Neuladen mit einem Wecker?",
+        "answer": "Ein aktivierter Alarm wird nicht fortgesetzt. Prüfe und aktiviere ihn nach dem Neuladen erneut."
+      },
+      {
+        "question": "Muss ich meinen Standort freigeben?",
+        "answer": "Nein. Uhr und Zeitzonen funktionieren ohne Standortzugriff. Nur der ausdrücklich eingeschaltete Standortmodus der Jahressimulation verwendet die Browser-Position."
+      },
+      {
+        "question": "Warum bleibt der Bildschirm nicht immer an?",
+        "answer": "Die Wachhaltefunktion benötigt Browser-Unterstützung und eine sichere Verbindung. Geräteeinstellungen und Energiesparregeln können sie ablehnen oder beenden."
+      }
+    ],
+    "end": "Wähle zuerst eine gut lesbare Ansicht und die richtige Zeitzone. Datum, Hintergründe und Wecker kannst du danach nach Bedarf ergänzen."
+  },
+  {
+    "slug": "stopwatch",
+    "name": "Stoppuhr",
+    "tag": "ZEITMESSUNG & RUNDEN",
+    "title": "Jeder Moment zählt. Jede Runde bleibt sichtbar.",
+    "description": "Anleitung zur Jacktools Stoppuhr: starten, pausieren, Runden erfassen und als CSV exportieren. Mit Rechenbeispiel und Hinweisen zur Datensicherung.",
+    "lead": "Wie lange dauert ein Ablauf wirklich? Die Jacktools Stoppuhr misst verstrichene Zeit und hält einzelne Runden fest. Anders als beim Countdown musst du die Dauer nicht vorher kennen – du beginnst bei null und wertest anschließend aus.",
+    "url": "https://stopwatch.jacktools.net/de/",
+    "features": [
+      {
+        "title": "Zeit messen",
+        "text": "Starte, pausiere und setze die Messung fort. Pausen werden nicht zur gemessenen Laufzeit gezählt."
+      },
+      {
+        "title": "Runden vergleichen",
+        "text": "Erfasse Zwischenpunkte, ohne die laufende Messung zu unterbrechen. Runde und Gesamtzeit bleiben unterscheidbar."
+      },
+      {
+        "title": "Ergebnisse sichern",
+        "text": "Kopiere die Runden oder lade sie als CSV-Datei herunter, bevor du die Seite verlässt."
+      }
+    ],
+    "sections": [
+      {
+        "id": "start",
+        "title": "Eine Zeitmessung starten und pausieren",
+        "paragraphs": [
+          "Die Stoppuhr eignet sich für Übungsaufgaben, Probedurchläufe oder wiederkehrende Arbeitsschritte. Entscheide vor dem Start, welcher Moment den Beginn und welcher das Ende markiert. So werden spätere Vergleiche aussagekräftiger.",
+          "Mit Pause hältst du die Messung an, ohne den bisherigen Stand zu verlieren. Beim Fortsetzen wird nur die weitere aktive Zeit addiert. Das ist sinnvoll, wenn du eine bewusste Unterbrechung aus der Messung herausnehmen möchtest."
+        ],
+        "steps": [
+          "Öffne die Stoppuhr und wähle eine analoge, digitale oder kombinierte Ansicht.",
+          "Starte genau am festgelegten Beginn deiner Aufgabe.",
+          "Pausiere am Ende oder bei einer Unterbrechung. Setze die Messung bei Bedarf fort.",
+          "Sichere die Ergebnisse, bevor du zurücksetzt oder die Seite schließt."
+        ],
+        "example": null,
+        "summary": "Beginn und Ende bewusst festlegen"
+      },
+      {
+        "id": "runden",
+        "title": "Rundenzeit und Gesamtzeit richtig lesen",
+        "paragraphs": [
+          "Eine Runde markiert einen Abschnitt innerhalb einer fortlaufenden Messung. Die einzelne Rundenzeit beschreibt den Abstand zum vorherigen Zwischenpunkt; die Gesamtzeit beschreibt die seit dem Start erfasste aktive Zeit.",
+          "Lege bei Vergleichen ähnliche Bedingungen fest: derselbe Startpunkt, derselbe Umfang und derselbe Endpunkt. Die Stoppuhr liefert Messwerte, bewertet aber nicht, ob unterschiedliche Aufgaben miteinander vergleichbar sind."
+        ],
+        "steps": [
+          "Starte die Messung und erfasse am Ende des ersten Abschnitts eine Runde.",
+          "Erfasse weitere Runden an denselben fachlichen Übergängen, ohne die Stoppuhr anzuhalten.",
+          "Pausiere nach dem letzten Abschnitt und vergleiche die Einzelzeiten mit der kumulierten Zeit."
+        ],
+        "example": {
+          "title": "Beispiel: drei Abschnitte eines Probedurchlaufs",
+          "text": "Du erfasst eine Runde nach 40 Sekunden und die nächste bei insgesamt 1 Minute 35 Sekunden. Die zweite Runde dauerte damit 55 Sekunden, nicht 95 Sekunden. Die Gesamtzeit enthält beide Abschnitte; die Rundenzeit nur den jüngsten."
+        },
+        "summary": "Einzelzeiten von Summen unterscheiden"
+      },
+      {
+        "id": "export",
+        "title": "Messwerte kopieren oder als CSV sichern",
+        "paragraphs": [
+          "Die erfassten Runden lassen sich als Text in die Zwischenablage kopieren oder als CSV herunterladen. Der Text enthält tabellarische Werte; die CSV-Datei eignet sich zum Öffnen in einer Tabellenkalkulation. Die Überschriften folgen der gewählten Sprache.",
+          "Speichere für spätere Vergleiche zusätzlich, was du gemessen hast und unter welchen Bedingungen. Ein Dateiname wie „Vortrag-Probe-1“ ist hilfreicher als eine Sammlung nicht zuordenbarer Zahlen.",
+          "Messung und Runden werden nicht automatisch dauerhaft gespeichert. Ein Neuladen oder Seitenwechsel verwirft sie. Exportiere wichtige Ergebnisse rechtzeitig – lokal gemerkte Design-Einstellungen sind keine Sicherung deiner Messwerte."
+        ],
+        "steps": [],
+        "example": null,
+        "summary": "Ergebnisse vor dem Neuladen sichern"
+      },
+      {
+        "id": "praxis",
+        "title": "Anzeige und technische Grenzen",
+        "paragraphs": [
+          "Die analoge Darstellung besitzt ein Sekunden-Zifferblatt und eine zusätzliche Minutenanzeige. Für die genaue Gesamtzeit hilft die digitale Anzeige, insbesondere bei längeren Messungen. Die Fokusansicht reduziert den übrigen Seiteninhalt.",
+          "Die Zeitmessung basiert auf Zeitstempeln und nicht darauf, wie oft der Bildschirm aktualisiert wird. Eine Änderung der Systemuhr kann die Messung trotzdem beeinflussen. Verzögerte Browser-Darstellung ist nicht dasselbe wie eine amtlich geprüfte Messung.",
+          "Die optionale Bildschirm-Wachhaltefunktion kann das Ablesen erleichtern, wird aber nicht von jedem Browser und Gerät zuverlässig unterstützt. Verwende für sicherheitskritische oder offiziell zu wertende Messungen ein dafür vorgesehenes Messgerät."
+        ],
+        "steps": [],
+        "example": null,
+        "summary": "Fokusansicht und Messgenauigkeit"
+      }
+    ],
+    "faq": [
+      {
+        "question": "Bleibt die Zeit beim Pausieren erhalten?",
+        "answer": "Ja, innerhalb der geöffneten Seite bleibt der bisherige Messstand erhalten. Fortsetzen addiert die weitere Laufzeit, ohne die Pause mitzuzählen."
+      },
+      {
+        "question": "Sind Runden nach einem Neuladen noch vorhanden?",
+        "answer": "Nein. Sichere sie vorher über Kopieren oder CSV-Download."
+      },
+      {
+        "question": "Kann ich eine feste Dauer herunterzählen?",
+        "answer": "Dafür gibt es den Timer. Die Stoppuhr misst vorwärts, ohne dass du vorher eine Zielzeit festlegst."
+      },
+      {
+        "question": "Warum brauche ich eine Bestätigung beim Zurücksetzen?",
+        "answer": "Beim Zurücksetzen einer pausierten Messung werden der bisherige Stand und die erfassten Runden verworfen. Sichere wichtige Werte zuvor."
+      }
+    ],
+    "end": "Lege Start- und Endpunkt deiner Messung fest. Wenn mehrere Abschnitte wichtig sind, nutze von Beginn an Runden und exportiere sie nach dem Durchlauf."
+  },
+  {
+    "slug": "calculator",
+    "name": "Taschenrechner",
+    "tag": "RECHNEN & NACHVOLLZIEHEN",
+    "title": "Nicht nur das Ergebnis. Auch der Rechenweg.",
+    "description": "Jacktools Taschenrechner mit Rechenstreifen: Rechenschritte bearbeiten, Prozente und Steuern berechnen, Rundung verstehen und Berechnungen exportieren.",
+    "lead": "Ein Betrag ändert sich, ein Aufschlag kommt hinzu oder ein Rechenschritt war falsch: Der Jacktools Taschenrechner hält den Rechenweg als bearbeitbaren Streifen fest. Du kannst Werte korrigieren und sehen, wie sich die nachfolgenden Ergebnisse ändern.",
+    "url": "https://calculator.jacktools.net/de/",
+    "features": [
+      {
+        "title": "Schrittweise rechnen",
+        "text": "Jede aktive Operation verarbeitet das vorherige Ergebnis. Das entspricht einem Tischrechner, nicht der algebraischen Punkt-vor-Strich-Regel."
+      },
+      {
+        "title": "Rechenweg bearbeiten",
+        "text": "Benenne, ändere, verschiebe oder deaktiviere einzelne Schritte. Rückgängig und Wiederholen helfen bei Korrekturen."
+      },
+      {
+        "title": "Dateien & Rundung",
+        "text": "Wähle die gewünschte Rundung und sichere wichtige Berechnungen als JSON. CSV und Druck/PDF dienen der Weitergabe."
+      }
+    ],
+    "sections": [
+      {
+        "id": "grundlagen",
+        "title": "Mit einem nachvollziehbaren Rechenstreifen beginnen",
+        "paragraphs": [
+          "Beginne mit einem Startwert. Danach ergänzt du Operationen, die jeweils auf das zuletzt berechnete Ergebnis wirken. Namen und Notizen machen sichtbar, wofür ein Betrag steht. Zwischensummen und reine Notizen verändern den Rechenwert nicht.",
+          "Wichtig ist die Reihenfolge: Bei 100 + 20 × 2 wird zunächst 120 und anschließend 240 berechnet. Dieser Rechner wertet keine vollständige Formel mit Punkt vor Strich aus. Wenn du eine solche Formel nachbildest, musst du die passende Reihenfolge selbst planen."
+        ],
+        "steps": [
+          "Gib einen Startwert ein, ergänze bei Bedarf einen Namen und bestätige den Schritt.",
+          "Wähle die nächste Rechenoperation, trage ihren Wert ein und bestätige erneut.",
+          "Kontrolliere den entstandenen Streifen. Ergänze aussagekräftige Namen statt unkommentierter Zahlen.",
+          "Bearbeite fehlerhafte Schritte direkt, statt die gesamte Berechnung neu einzutippen."
+        ],
+        "example": null,
+        "summary": "Schritt für Schritt statt Punkt vor Strich"
+      },
+      {
+        "id": "prozent",
+        "title": "Prozente, Aufschläge und enthaltene Steuern",
+        "paragraphs": [
+          "Prozentuale Erhöhungen und Rabatte beziehen sich immer auf das aktuelle Ergebnis. Zwei aufeinanderfolgende Änderungen werden daher nicht einfach addiert. Mit den Spezialtasten kannst du auch einen Steuerbetrag aufschlagen oder eine bereits enthaltene Steuer herausrechnen.",
+          "Der Steuersatz wird von dir eingegeben. Das Tool bestimmt nicht, welcher Satz für einen Vorgang gilt. Es ist keine Steuerberatung und erstellt nicht automatisch eine vollständige Rechnung."
+        ],
+        "steps": [],
+        "example": {
+          "title": "Beispiel: erst erhöhen, dann rabattieren",
+          "text": "Aus 100 werden mit 20 % Aufschlag 120. Ein anschließender Rabatt von 20 % bezieht sich auf 120 und ergibt 96 – nicht wieder 100. Enthält ein Betrag von 119 rechnerisch 19 % Steuer, ergibt Herausrechnen durch 1,19 einen Nettowert von 100."
+        },
+        "summary": "Änderungen auf den aktuellen Betrag"
+      },
+      {
+        "id": "bearbeiten",
+        "title": "Varianten vergleichen, ohne den Ursprung zu verlieren",
+        "paragraphs": [
+          "Einzelne Schritte lassen sich bearbeiten, einfügen, verschieben und löschen. Mit dem Schalter am Schritt kannst du ihn vorübergehend deaktivieren. Folgende aktive Schritte rechnen dann ohne diesen Wert weiter; der eingegebene Wert bleibt für einen späteren Vergleich erhalten.",
+          "Rückgängig und Wiederholen beziehen sich auf Änderungen an der Berechnung. Eine Änderung am Berechnungstitel lässt sich ebenfalls zurücknehmen. Die eingebauten Beispielrechnungen enthalten ausdrücklich fiktive Werte und können als editierbarer Einstieg dienen.",
+          "Wenn ein Schritt einen Fehler erzeugt, sind auch die nachfolgenden Ergebnisse ungültig. Korrigiere, deaktiviere oder entferne die betreffende Operation. Ein späterer neuer Startwert umgeht den Fehler nicht."
+        ],
+        "steps": [],
+        "example": null,
+        "summary": "Schritte ändern oder deaktivieren"
+      },
+      {
+        "id": "rundung",
+        "title": "Rundung und Sicherung bewusst wählen",
+        "paragraphs": [
+          "Standardmäßig wird nur die Anzeige gerundet; intern rechnet das Tool mit exakten Brüchen. Optional kann jeder Rechenschritt auf die eingestellte Zahl von Nachkommastellen gerundet werden. Dadurch können sich unterschiedliche Ergebnisse ergeben: 1 ÷ 3 × 3 ergibt ohne Zwischenrundung 1,00, mit Rundung jedes Schritts auf zwei Stellen dagegen 0,99.",
+          "Die Speicherung der aktuellen Berechnung ist eine eigene Option und standardmäßig ausgeschaltet. Sie ist von der Speicherung des Designs unabhängig. Ohne Sicherung gehen Berechnungen beim Neuladen oder Sprachwechsel verloren. Lokal gespeicherte Daten sind an diesen Browser gebunden und kein Backup.",
+          "Exportiere wichtige Arbeiten als JSON, wenn du sie später wieder bearbeiten möchtest. CSV eignet sich für tabellarische Weiterverarbeitung, Druck/PDF für einen lesbaren Rechenstreifen. Prüfe vor der Weitergabe die Rundungsregeln und beachte, dass der Ausdruck nur aktive Schritte enthält."
+        ],
+        "steps": [],
+        "example": null,
+        "summary": "Nachkommastellen und Dateiexport"
+      }
+    ],
+    "faq": [
+      {
+        "question": "Gilt Punkt vor Strich?",
+        "answer": "Nein. Jeder Schritt verarbeitet das bisherige Ergebnis in der angegebenen Reihenfolge."
+      },
+      {
+        "question": "Warum unterscheiden sich zwei scheinbar gleiche Ergebnisse?",
+        "answer": "Prüfe die Reihenfolge und die Rundungsoption. Reine Anzeigerundung und Rundung nach jedem Schritt können unterschiedliche Endwerte liefern."
+      },
+      {
+        "question": "Welches Dateiformat eignet sich zum Weiterbearbeiten?",
+        "answer": "JSON ist für Export und späteren Import der Berechnung vorgesehen. CSV und PDF sind für Weiterverarbeitung beziehungsweise Darstellung gedacht."
+      },
+      {
+        "question": "Sind meine Zahlen automatisch gesichert?",
+        "answer": "Nein. Die Speicherung der Berechnung muss gesondert eingeschaltet werden. Lade wichtige Berechnungen zusätzlich als JSON herunter."
+      }
+    ],
+    "end": "Beginne mit einem benannten Startwert und zwei oder drei Schritten. Prüfe anschließend Reihenfolge und Rundung, bevor du weitere Beträge ergänzt."
+  },
+  {
+    "slug": "breathe",
+    "name": "Breathe",
+    "tag": "ATEM & RUHE",
+    "title": "Ein ruhiger Moment. In deinem eigenen Rhythmus.",
+    "description": "Breathe erklärt: Atemmuster, eigene Phasen, Pausen und sanfte Animationen. Anleitung zu Bedienung, Sitzungen, Ton und Grenzen des Browser-Tools.",
+    "lead": "Breathe begleitet eine bewusste Atempause mit einer Kreisanimation und einer Phasenanzeige. Du kannst ein vorhandenes Muster wählen oder eigene Zeiten einstellen. Dabei geht es um eine angenehme Orientierung, nicht darum, Vorgaben um jeden Preis einzuhalten.",
+    "url": "https://breathe.jacktools.net/de/",
+    "features": [
+      {
+        "title": "Muster wählen",
+        "text": "Quadratatmen, gleichmäßige und sanfte Rhythmen sowie eigene Phasen sind auswählbar."
+      },
+      {
+        "title": "In Ruhe anpassen",
+        "text": "Haltephasen können null Sekunden lang sein. Pausieren, Überspringen und Beenden bleiben bewusst erreichbar."
+      },
+      {
+        "title": "Sehen & hören",
+        "text": "Kombiniere die visuelle Orientierung bei Bedarf mit Atemgeräuschen oder Phasentönen – auch unabhängig voneinander."
+      }
+    ],
+    "sections": [
+      {
+        "id": "vorbereiten",
+        "title": "Vor dem ersten Start",
+        "paragraphs": [
+          "Lies die Hinweise im Tool und wähle eine Situation, in der du deine Aufmerksamkeit gefahrlos auf die Anzeige richten kannst. Breathe ist kein medizinisches Angebot und verspricht keine therapeutische Wirkung.",
+          "Der Takt ist eine Einladung zur Orientierung, keine Leistungsaufgabe. Atme nicht absichtlich stärker, als es angenehm ist, und halte nicht gegen dein Bedürfnis an. Bei Unwohlsein oder Schwindel beende die Übung und atme normal weiter."
+        ],
+        "steps": [
+          "Öffne Breathe und lies die eingeblendeten Nutzungshinweise.",
+          "Wähle ein Muster und eine Sitzungsdauer. Prüfe die vier Phasen vor dem Start.",
+          "Stelle Töne zunächst leise ein oder schalte sie aus.",
+          "Starte erst, wenn du den Ablauf verstanden hast. Du kannst die Sitzung jederzeit beenden."
+        ],
+        "example": null,
+        "summary": "Hinweise lesen und angenehm beginnen"
+      },
+      {
+        "id": "muster",
+        "title": "Die vier Phasen eines Atemmusters verstehen",
+        "paragraphs": [
+          "Ein Muster besteht aus Einatmen, Halten nach dem Einatmen, Ausatmen und Halten nach dem Ausatmen. Die vorgegebenen Rhythmen unterscheiden sich in der Länge dieser Phasen. Eigene Werte sind möglich; Haltephasen können auf null gesetzt werden.",
+          "Die gleichmäßige 5–5-Vorlage verwendet fünf Sekunden Einatmen und fünf Sekunden Ausatmen ohne Haltephasen. „Sanft · 4–6“ verwendet vier und sechs Sekunden. Diese Angaben erklären die Software-Vorlagen und sind keine persönliche Empfehlung für deine Atmung."
+        ],
+        "steps": [],
+        "example": {
+          "title": "Beispiel: ein Muster ohne Haltephasen lesen",
+          "text": "Bei 5–0–5–0 dauert ein vollständiger Durchlauf zehn Sekunden: fünf Sekunden ein und fünf Sekunden aus. Die beiden Nullwerte überspringen die Haltephasen. Im Tool kannst du kontrollieren, welche Phase gerade angezeigt wird, ohne zusätzliche Schritte mitzuzählen."
+        },
+        "summary": "Einatmen, Halten und Ausatmen"
+      },
+      {
+        "id": "steuern",
+        "title": "Pausieren, Haltephase überspringen und beenden",
+        "paragraphs": [
+          "Pause hält die aktuelle Position an. Fortsetzen führt die Sitzung weiter. Beenden stoppt dagegen Animation, Zählung und Audio unmittelbar. Eine aktive Haltephase kann übersprungen werden, wenn du nicht auf ihr Ende warten möchtest.",
+          "Beim Öffnen der ausführlichen Hinweise wird die Sitzung pausiert. Auch danach läuft sie nicht von selbst weiter. Wenn du den Browser-Tab verlässt, wird die Sitzung ebenfalls angehalten. Ein Neuladen stellt keine laufende Sitzung wieder her.",
+          "Diese bewussten Unterbrechungen sind Teil der Bedienung. Prüfe nach einem Wechsel zurück zur Seite, ob du tatsächlich fortsetzen möchtest, statt von einer im Hintergrund weitergelaufenen Übung auszugehen."
+        ],
+        "steps": [],
+        "example": null,
+        "summary": "Die Sitzung bewusst unterbrechen"
+      },
+      {
+        "id": "darstellung",
+        "title": "Animation, Ton und Einstellungen",
+        "paragraphs": [
+          "Die Kreisanimation und der Phasentext bieten zwei Arten der Orientierung. Bewegung kann reduziert werden; die Fokusansicht rückt die Sitzung in den Mittelpunkt. Die Hinweise und die Möglichkeit zum sofortigen Beenden bleiben auch dort erreichbar.",
+          "Atemgeräusche und Phasentöne lassen sich unabhängig einstellen. Sie werden lokal erzeugt und benötigen eine Benutzerinteraktion, bevor Audio starten kann. Bei fehlendem Ton kontrolliere Lautstärke und Browser-Stummschaltung.",
+          "Mit deiner Zustimmung kann das Tool Einstellungen lokal speichern. Eine gespeicherte Vorlage ist keine fortgesetzte Sitzung und wird nicht zwischen Geräten synchronisiert. Das optionale Wachhalten des Bildschirms hängt von Browser und Gerät ab."
+        ],
+        "steps": [],
+        "example": null,
+        "summary": "Visuelle und hörbare Orientierung"
+      }
+    ],
+    "faq": [
+      {
+        "question": "Muss ich die Haltephasen mitmachen?",
+        "answer": "Nein. Du kannst Haltephasen auf null Sekunden stellen und eine aktive Haltephase überspringen. Erzwinge keinen vorgegebenen Takt."
+      },
+      {
+        "question": "Was passiert beim Wechsel in einen anderen Tab?",
+        "answer": "Breathe pausiert die Sitzung. Beim Zurückkehren kannst du bewusst entscheiden, ob du fortsetzen möchtest."
+      },
+      {
+        "question": "Kann ich ohne Ton üben?",
+        "answer": "Ja. Die visuelle Orientierung ist auch ohne Atemgeräusche und Phasentöne nutzbar."
+      },
+      {
+        "question": "Ersetzt Breathe eine Behandlung?",
+        "answer": "Nein. Das Tool ist eine optionale Begleitung für eine Atempause, kein medizinisches Angebot und keine Diagnose oder Therapie."
+      }
+    ],
+    "end": "Sieh dir zuerst das gewählte Muster an und lies die Hinweise. Wähle nur einen Ablauf, der sich für dich angenehm anfühlt; Beenden ist jederzeit möglich."
+  },
+  {
+    "slug": "relax",
+    "name": "Relax",
+    "tag": "KLÄNGE & ATMOSPHÄRE",
+    "title": "Deine Klanglandschaft. Schicht für Schicht.",
+    "description": "Relax-Anleitung: Instrumente und Naturklänge mischen, eigene Lautstärken einstellen, Vorlagen nutzen und Sitzungen mit Ausblenden planen.",
+    "lead": "Mit Relax kombinierst du sanfte Instrumentklänge, Regen, Wind, Lagerfeuer oder Meeresrauschen zu einer eigenen Klanglandschaft. Du bestimmst, welche Schichten zu hören sind und ob Animationen dazugehören. Die Klänge werden synthetisch erzeugt – es sind keine Naturaufnahmen.",
+    "url": "https://relax.jacktools.net/de/",
+    "features": [
+      {
+        "title": "Instrumente",
+        "text": "Windspiel, Klangschalen, Kalimba, Handpan, Glocken, Gong und Harfe bilden unterschiedliche Klangfarben."
+      },
+      {
+        "title": "Natur & Rauschen",
+        "text": "Mische Regen, Wind, Lagerfeuer, Meeresrauschen und weißes, rosa oder braunes Rauschen mit eigenen Pegeln."
+      },
+      {
+        "title": "Vorlagen & Dauer",
+        "text": "Beginne mit einer Vorlage und passe sie an. Begrenzte Sitzungen blenden sanft aus; null Minuten bedeutet unbegrenzt."
+      }
+    ],
+    "sections": [
+      {
+        "id": "mischen",
+        "title": "Eine übersichtliche Klangmischung aufbauen",
+        "paragraphs": [
+          "Beginne mit einer einzelnen Klangschicht. So hörst du, wie sie wirkt, bevor weitere Instrumente oder Hintergrundgeräusche hinzukommen. Die Instrumentwiedergabe kann unabhängig von den Hintergrundschichten ausgeschaltet werden.",
+          "Jede zusätzliche Schicht verändert die Gesamtlautstärke. Leise Einzelwerte ergeben zusammen nicht automatisch eine leise Mischung. Prüfe den Gesamtklang bei angenehmer Lautstärke, bevor du länger zuhörst."
+        ],
+        "steps": [
+          "Öffne Relax und lies die Nutzungshinweise.",
+          "Wähle eine Vorlage oder aktiviere zuerst nur eine Klangschicht.",
+          "Starte die Wiedergabe und stelle die Gesamtlautstärke niedrig ein.",
+          "Ergänze weitere Schichten einzeln und passe ihre Lautstärke an.",
+          "Beende die Sitzung über die Steuerung, wenn du nicht mehr zuhören möchtest."
+        ],
+        "example": null,
+        "summary": "Eine Schicht nach der anderen"
+      },
+      {
+        "id": "vorlagen",
+        "title": "Mit einer Vorlage beginnen und gezielt verändern",
+        "paragraphs": [
+          "Vorlagen wie Sommergarten, Abendruhe, Natur pur, Am Feuer oder Am Meer setzen mehrere Klangwerte gemeinsam. Danach kannst du die Mischung verändern. Die gewählte Sitzungsdauer und allgemeine Einstellungen bleiben beim Vorlagenwechsel erhalten.",
+          "Beim Lagerfeuer lässt sich die Knisterdichte verändern, beim Meeresrauschen die Wellenintensität. Beide haben eigene optionale Animationen. Instrumentformen und Bewegungen dienen der Atmosphäre, sind aber kein notwendiger Bestandteil der Audiowiedergabe."
+        ],
+        "steps": [],
+        "example": {
+          "title": "Beispiel: eine zurückhaltende Geräuschkulisse",
+          "text": "Wähle eine Natur-Vorlage und höre zunächst nur dem Hintergrund zu. Schalte die Instrumente aus, wenn du keine einzelnen Tonereignisse möchtest. Ergänze erst danach bei Bedarf eine zweite leise Schicht. So bleibt nachvollziehbar, welche Einstellung den Gesamtklang verändert."
+        },
+        "summary": "Klangfarben gezielt kombinieren"
+      },
+      {
+        "id": "dauer",
+        "title": "Sitzungsdauer und Hintergrundwiedergabe",
+        "paragraphs": [
+          "Eine begrenzte Sitzungsdauer endet mit einem sanften Ausblenden. Mit null Minuten läuft die Sitzung ohne festgelegtes Ende. Nach dem Neuladen startet keine zuvor laufende Sitzung automatisch erneut.",
+          "Hintergrundwiedergabe ist eine eigene Einstellung. Ist sie ausgeschaltet, pausiert die Wiedergabe beim Verlassen des Tabs und muss bewusst fortgesetzt werden. Auch mit eingeschalteter Hintergrundwiedergabe können Browser oder Betriebssystem das Audio unterbrechen. Animationen werden im Hintergrund angehalten.",
+          "Verwende Relax nicht als verlässlichen Wecker. Eine geplante Dauer garantiert weder eine ununterbrochene Wiedergabe bei gesperrtem Gerät noch eine hörbare Benachrichtigung zu einem bestimmten Zeitpunkt."
+        ],
+        "steps": [],
+        "example": null,
+        "summary": "Ausblenden und Tabwechsel verstehen"
+      },
+      {
+        "id": "darstellung",
+        "title": "Bewegung, Fokusansicht und gespeicherte Werte",
+        "paragraphs": [
+          "Du kannst die Animationen reduzieren oder ausschalten und nur zuhören. Die Fokusansicht schafft mehr Platz für die Klanglandschaft. Ein ruhigeres Bild kann auch sinnvoll sein, wenn der Bildschirm neben einer anderen Aufgabe sichtbar bleibt.",
+          "Einstellungen und der Status der Einführung werden nur mit deiner Zustimmung lokal gespeichert. Sie stehen nicht automatisch auf einem anderen Gerät zur Verfügung. Die Wiedergabe selbst bleibt eine bewusste Aktion und wird nach einem Neuladen nicht wiederhergestellt.",
+          "Relax ist ein gestalterisches Klangwerkzeug, kein medizinisches Angebot. Du musst weder Kopfhörer tragen noch mehrere Schichten verwenden. Nutze eine angenehme Lautstärke und beende die Wiedergabe, wenn sie stört."
+        ],
+        "steps": [],
+        "example": null,
+        "summary": "Mit oder ohne Animation zuhören"
+      }
+    ],
+    "faq": [
+      {
+        "question": "Sind das echte Naturaufnahmen?",
+        "answer": "Nein. Instrumente und Umgebungsgeräusche werden lokal synthetisiert und nähern sich den jeweiligen Klangfarben an."
+      },
+      {
+        "question": "Kann ich nur Regen oder Meer hören?",
+        "answer": "Ja. Instrumente und Hintergrundschichten lassen sich getrennt steuern. Aktiviere nur die gewünschte Schicht."
+      },
+      {
+        "question": "Was bedeutet eine Dauer von null Minuten?",
+        "answer": "Die Sitzung ist dann zeitlich unbegrenzt und endet nicht aufgrund eines eingestellten Zeitlimits."
+      },
+      {
+        "question": "Funktioniert Audio bei gesperrtem Bildschirm?",
+        "answer": "Das hängt von Browser, Gerät und Hintergrund-Einstellung ab. Verlasse dich nicht auf eine unterbrechungsfreie Wiedergabe."
+      }
+    ],
+    "end": "Starte mit einer Vorlage, höre bei geringer Lautstärke hinein und ändere nur eine Schicht auf einmal. So findest du eine Mischung, die zu deinem Moment passt."
+  },
+  {
+    "slug": "metronome",
+    "name": "Metronom",
+    "tag": "MUSIK & RHYTHMUS",
+    "title": "Höre den Puls. Sieh den ganzen Takt.",
+    "description": "Metronom-Anleitung: BPM, Tap Tempo, Akzente, Unterteilungen und Lückenmodus. Mit konkreten Rhythmusbeispielen und Hinweisen zum Browser-Audio.",
+    "lead": "Das Jacktools Metronom verbindet hörbare Schläge mit vier visuellen Ansichten. Du stellst Tempo, Taktakzente und Unterteilungen ein und kannst mit stummen Takten üben. Dafür braucht das Tool weder ein Mikrofon noch eine Aufnahme deines Spiels.",
+    "url": "https://metronome.jacktools.net/de/",
+    "features": [
+      {
+        "title": "Tempo finden",
+        "text": "20 bis 300 BPM, direkte Eingabe, Schieberegler und Tap Tempo helfen beim Einstellen."
+      },
+      {
+        "title": "Takt gestalten",
+        "text": "Wähle ein bis zwölf Schläge pro Takt, eigene Akzente und eine bis vier gleichmäßige Unterteilungen."
+      },
+      {
+        "title": "Timing erproben",
+        "text": "Der Lückenmodus wechselt hörbare und stumme Takte. Optional verschwinden dabei auch die visuellen Timing-Hinweise."
+      }
+    ],
+    "sections": [
+      {
+        "id": "tempo",
+        "title": "BPM verstehen und ein Tempo einstellen",
+        "paragraphs": [
+          "BPM bedeutet Schläge pro Minute. Bei 60 BPM liegt zwischen zwei Grundschlägen eine Sekunde; bei 120 BPM eine halbe Sekunde. Der BPM-Wert sagt zunächst nichts darüber aus, wie viele Schläge ein Takt hat.",
+          "Tap Tempo schätzt das Tempo aus mehreren getippten Impulsen. Es ist ein praktischer Einstieg, aber kein automatisches Erkennen eines Liedes. Wenn der Wert passt, kannst du ihn über Eingabe, Regler oder die Einzelschritte weiter anpassen."
+        ],
+        "steps": [
+          "Öffne das Metronom und wähle einen BPM-Wert. Alternativ tippe mehrmals mit Tap Tempo im gewünschten Puls.",
+          "Stelle die Zahl der Schläge pro Takt ein.",
+          "Prüfe Akzente, Klang und eine angenehme Lautstärke.",
+          "Starte die Wiedergabe und ändere nur eine Rhythmus-Einstellung auf einmal."
+        ],
+        "example": null,
+        "summary": "Grundpuls und Tap Tempo"
+      },
+      {
+        "id": "takt",
+        "title": "Akzente und Unterteilungen einsetzen",
+        "paragraphs": [
+          "Jeder Schlag kann betont, normal oder stumm sein. Ein betonter erster Schlag kann helfen, den Taktanfang wiederzufinden. Stumme Schläge unterdrücken auch ihre Unterteilungen; sie sind daher mehr als nur ein leiserer Akzent.",
+          "Unterteilungen teilen einen Grundschlag in gleichmäßige Abschnitte. Die Auswahl reicht von einer bis zu vier Einheiten pro Schlag. Das Grundtempo bleibt dabei gleich – die zusätzlichen Klicks machen kleinere Abstände hörbar."
+        ],
+        "steps": [],
+        "example": {
+          "title": "Beispiel: vier Schläge bei 60 BPM",
+          "text": "Ein Takt mit vier Grundschlägen dauert vier Sekunden. Bei zwei Unterteilungen pro Schlag hörst du acht gleichmäßig verteilte Impulse in diesem Takt, also jeweils einen im Abstand von einer halben Sekunde. Die Grundschläge bleiben trotzdem bei 60 BPM."
+        },
+        "summary": "Den Rhythmus hörbar unterteilen"
+      },
+      {
+        "id": "luecken",
+        "title": "Mit stummen Takten den eigenen Puls prüfen",
+        "paragraphs": [
+          "Im Lückenmodus folgen auf ein bis sechzehn hörbare Takte ein bis acht stumme Takte. Während der stillen Phase hältst du den Puls selbst weiter. Beim Wiedereinsetzen lässt sich hören, ob du beschleunigt oder verlangsamt hast.",
+          "Wenn du ausschließlich dein inneres Timing prüfen möchtest, kannst du auch die visuellen Timing-Hinweise für die stummen Takte ausblenden. Beginne mit einem übersichtlichen Verhältnis, bevor du längere stumme Abschnitte wählst.",
+          "Änderungen am Rhythmus beginnen wieder beim ersten Schlag eines neuen Taktes. Ein Wechsel der Ansicht oder der Bewegungsoptionen unterbricht die Wiedergabe dagegen nicht."
+        ],
+        "steps": [],
+        "example": null,
+        "summary": "Den inneren Puls weiterhalten"
+      },
+      {
+        "id": "ansichten",
+        "title": "Ansichten, Tastatur und Audio-Grenzen",
+        "paragraphs": [
+          "Orbit, Pendel, Beat-Leiste und springender Ball stellen denselben Puls unterschiedlich dar. Wähle die Ansicht, die du beim Üben gut nebenbei erfassen kannst. Reduzierte Bewegung und eine reine visuelle Wiedergabe ohne Ton sind möglich.",
+          "Außerhalb von Eingaben startet oder stoppt die Leertaste die Wiedergabe, T dient als Tap-Taste und Escape verlässt die Fokusansicht. Wenn ein Eingabefeld fokussiert ist, haben dessen normale Tastaturfunktionen Vorrang.",
+          "Beim Tabwechsel, einer Gerätesperre oder einer längeren Audio-Unterbrechung stoppt das Metronom, statt verspätete Klicks nachzuholen. Starte danach bewusst neu. Bluetooth und andere Audio-Ausgänge können eine spürbare Verzögerung verursachen. Einstellungen werden nur mit Zustimmung lokal gespeichert; Wiedergabe startet nach dem Neuladen nicht automatisch."
+        ],
+        "steps": [],
+        "example": null,
+        "summary": "Ansicht wählen und bewusst neu starten"
+      }
+    ],
+    "faq": [
+      {
+        "question": "Ist 120 BPM gleichbedeutend mit einem bestimmten Takt?",
+        "answer": "Nein. BPM beschreibt den Puls pro Minute. Die Anzahl der Schläge pro Takt stellst du getrennt ein."
+      },
+      {
+        "question": "Hört Tap Tempo meinem Instrument zu?",
+        "answer": "Nein. Du gibst das Tempo durch wiederholtes Tippen vor. Das Tool verwendet kein Mikrofon."
+      },
+      {
+        "question": "Warum stoppt das Metronom im Hintergrund?",
+        "answer": "Beim Tabwechsel und bei Audio-Unterbrechungen wird bewusst gestoppt. So entsteht keine Folge verspäteter Klicks. Starte auf der sichtbaren Seite erneut."
+      },
+      {
+        "question": "Was ändert sich durch Unterteilungen?",
+        "answer": "Zwischen den Grundschlägen kommen gleichmäßig verteilte Impulse hinzu. Der eingestellte BPM-Grundpuls wird dadurch nicht schneller."
+      }
+    ],
+    "end": "Wähle zuerst Tempo und Takt, bevor du Unterteilungen oder Lücken hinzunimmst. Eine klare, einfache Einstellung ist zum Einstieg oft leichter zu kontrollieren."
+  },
+  {
+    "slug": "messagedrop",
+    "name": "MessageDrop",
+    "tag": "ORTE & NACHRICHTEN",
+    "title": "Ein Ort. Eine Nachricht. Eine neue Perspektive.",
+    "description": "MessageDrop erklärt: Nachrichten auf einer Karte entdecken, eigene Beiträge vorbereiten, Orte speichern und öffentliche von privaten Inhalten unterscheiden.",
+    "lead": "MessageDrop verbindet eine Karte mit Nachrichten und Informationen zu Orten. Du kannst Inhalte im sichtbaren Kartenausschnitt entdecken, eigene öffentliche Beiträge vorbereiten und Orte für später speichern. Anders als die reinen Browser-Helfer nutzt MessageDrop auch serverbasierte Funktionen und einen eigenen lokalen Benutzer.",
+    "url": "https://app.messagedrop.de/",
+    "features": [
+      {
+        "title": "Auf der Karte entdecken",
+        "text": "Verschiebe und zoome die Karte. Die angezeigten Pins richten sich nach Ausschnitt, Zoom und Sucheinstellungen."
+      },
+      {
+        "title": "Beiträge mit Ort",
+        "text": "Verknüpfe Text oder Medien mit einer gewählten Position. Ein lokaler Entwurf ist noch kein veröffentlichter Beitrag."
+      },
+      {
+        "title": "Orte & Kontakte",
+        "text": "Verwalte gespeicherte Orte und nutze getrennte Bereiche für öffentliche Beiträge, private Notizen und Kontakt-Chats."
+      }
+    ],
+    "sections": [
+      {
+        "id": "entdecken",
+        "title": "Die Karte als Ausgangspunkt nutzen",
+        "paragraphs": [
+          "Die zentrale Karte macht den Ortsbezug sichtbar. Inhalte werden passend zum Kartenausschnitt, zur Zoomstufe und zu den Sucheinstellungen geladen. Wenn du nichts findest, ändere zuerst den Ausschnitt oder prüfe die Suche, statt sofort von fehlenden Inhalten auszugehen.",
+          "Ein Pin öffnet den zugehörigen Inhalt beziehungsweise seine Details. Öffentliche Nachrichten und lokale Ortsinformationen sind unterschiedliche Inhaltstypen. Nicht jeder sichtbare Eintrag ist eine persönliche Empfehlung oder ein dauerhaft aktueller Hinweis."
+        ],
+        "steps": [
+          "Öffne MessageDrop und verschiebe die Karte in die Region, die dich interessiert.",
+          "Passe die Zoomstufe und bei Bedarf die Sucheinstellungen an.",
+          "Öffne einen Eintrag und lies die Details im jeweiligen Kontext.",
+          "Prüfe zeitabhängige Angaben zusätzlich, bevor du deine Planung darauf stützt."
+        ],
+        "example": null,
+        "summary": "Pins im Kartenausschnitt erkunden"
+      },
+      {
+        "id": "beitrag",
+        "title": "Einen öffentlichen Beitrag vorbereiten",
+        "paragraphs": [
+          "Im Editor lassen sich Text, Medien und bei öffentlichen Nachrichten die Position bearbeiten. Den Ort wählst du über die Suche oder direkt auf der Karte. Die eigene Browser-Position ist nur eine optionale Hilfe; eine Suche nach Ortsname oder Adresse ist ebenfalls möglich.",
+          "Einige Funktionen stehen erst nach Anmeldung beziehungsweise mit einer Backend-Verbindung zur Verfügung. Wenn Aktionen gesperrt oder ausgeblendet sind, prüfe deshalb zunächst den Benutzer- und Verbindungsstatus."
+        ],
+        "steps": [
+          "Öffne die Funktion für einen neuen öffentlichen Beitrag.",
+          "Wähle die beabsichtigte Position und kontrolliere sie auf der Karte.",
+          "Schreibe einen verständlichen Text und füge nur Medien hinzu, die du teilen darfst.",
+          "Speichere bei Bedarf zunächst einen lokalen Entwurf. Veröffentliche ihn später über „Meine öffentlichen Nachrichten“."
+        ],
+        "example": {
+          "title": "Beispiel: ein Hinweis zu einem öffentlichen Ort",
+          "text": "Du möchtest einen gut auffindbaren Treffpunkt beschreiben. Wähle die genaue Position, beschreibe den sichtbaren Orientierungspunkt und prüfe, ob dein Foto fremde Personen oder private Angaben zeigt. Ein Ortsbezug allein macht einen Beitrag noch nicht für die Öffentlichkeit geeignet."
+        },
+        "summary": "Ort, Text und Medien kontrollieren"
+      },
+      {
+        "id": "verwalten",
+        "title": "Beiträge, Entwürfe und gespeicherte Orte unterscheiden",
+        "paragraphs": [
+          "Unter „Meine öffentlichen Nachrichten“ kannst du eigene Beiträge bearbeiten, löschen oder eine Veröffentlichung zurücknehmen. Ein zurückgenommener Beitrag ist nicht dasselbe wie ein gelöschter Beitrag. Moderationsinformationen zeigen gegebenenfalls, ob ein Inhalt veröffentlicht, in Prüfung oder ausgeblendet ist.",
+          "„Meine Orte“ ist eine eigene Liste für gespeicherte Positionen. Du kannst einen Ort auf der App-Karte anspringen, seine Einstellungen öffnen und weitere angebotene Aktionen nutzen. Ein gespeicherter Ort veröffentlicht nicht automatisch eine Nachricht.",
+          "Lokale Entwürfe und Benutzerdaten sind nicht mit einer unabhängigen Sicherung gleichzusetzen. Im Bereich „Mein Benutzer“ gibt es eine Funktion für ein verschlüsseltes Backup mit eigener Backup-PIN. Bewahre Sicherungsdatei und Zugang dazu sorgfältig auf."
+        ],
+        "steps": [],
+        "example": null,
+        "summary": "Sichtbarkeit und Sicherung im Blick"
+      },
+      {
+        "id": "privat",
+        "title": "Öffentlichkeit und Datenflüsse bewusst prüfen",
+        "paragraphs": [
+          "Öffentliche Beiträge sind für andere sichtbar. Private Notizen und Kontakt-Chats haben einen anderen Zweck und eigene Verarbeitungsregeln. Übertrage Vertraulichkeitsannahmen aus einem privaten Chat nicht auf die öffentliche Karte.",
+          "Standortsuche, Karteninhalte und externe Navigation sind mit Datenverarbeitung verbunden. Eine externe Kartenaktion öffnet einen anderen Dienst und übermittelt das gewählte Ziel. Lies die Datenschutz- und Nutzungshinweise der App, bevor du sensible Orts- oder Kontaktdaten verwendest.",
+          "Veröffentliche keine privaten Aufenthaltsorte anderer Personen und prüfe die Rechte an Bildern und Texten. Bei problematischen öffentlichen Inhalten stehen Meldefunktionen mit einem eigenen Verfahren zur Verfügung. Diese Anleitung ersetzt die aktuellen Regeln und Statusanzeigen in der App nicht."
+        ],
+        "steps": [],
+        "example": null,
+        "summary": "Öffentlich ist nicht privat"
+      }
+    ],
+    "faq": [
+      {
+        "question": "Ist ein Entwurf schon öffentlich?",
+        "answer": "Nein. Ein lokaler Entwurf wird erst durch die entsprechende Veröffentlichungsaktion zu einem öffentlichen Beitrag."
+      },
+      {
+        "question": "Warum kann ich manche Aktionen nicht benutzen?",
+        "answer": "Bestimmte Funktionen benötigen eine Anmeldung und gegebenenfalls eine Backend-Verbindung. Prüfe die Statusanzeigen und die Hilfe der jeweiligen Ansicht."
+      },
+      {
+        "question": "Muss ich meinen aktuellen Standort freigeben?",
+        "answer": "Nicht für jede Ortsauswahl. Im Location-Picker kannst du auch nach einem Ort suchen oder eine Position auf der Karte wählen."
+      },
+      {
+        "question": "Sind gespeicherte Orte dasselbe wie öffentliche Nachrichten?",
+        "answer": "Nein. Orte, öffentliche Beiträge, private Notizen und Kontakt-Chats werden in getrennten Bereichen verwaltet und haben unterschiedliche Zwecke."
+      }
+    ],
+    "end": "Erkunde zuerst einen bekannten Kartenausschnitt. Wenn du selbst etwas veröffentlichen möchtest, prüfe Position, Inhalt und Sichtbarkeit vor dem Absenden."
+  }
+]

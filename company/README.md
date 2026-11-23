@@ -159,3 +159,30 @@ Viewport 1280 × 1000, jeweils die `.timer-card` vor dem Start). Keine externen
 Bilder oder echten Anzeigen wurden dafür geladen. Bei Bedienungsänderungen die
 Screenshots aktualisieren. Die Bilder werden verzögert geladen, lassen sich in
 Originalgröße öffnen und bleiben in der Druckansicht ausgeblendet.
+
+## Weitere deutsche Tool-Anleitungen
+
+Für alle sieben weiteren Tools der öffentlichen Startseite gibt es deutsche
+Detailseiten unter `/de/tools/{clock,stopwatch,calculator,breathe,relax,metronome,messagedrop}/`.
+Die Startseite verlinkt sie als sekundäre Buttons; bestehende Kurzadressen bleiben
+unverändert Weiterleitungen zu den Anwendungen. Übersetzungen sind noch nicht
+angelegt, daher keine fremdsprachigen Links oder hreflang-Verweise auf diese Texte.
+Lava und SceneScript sind weiterhin nicht Teil der öffentlichen Toolliste.
+
+- Redaktionelle Inhalte: `src/lib/tool-guides.json`
+- Metadaten/Bilder: `src/lib/tool-guides.ts`
+- Gemeinsame Darstellung: `src/components/ToolGuidePage.astro`
+- Galerie und Druck-FAQ-Verhalten: `src/components/GuideGallery.astro`
+- Prüfungen: `npx playwright test tests/tool-guides.spec.ts`
+
+Inhalte wurden anhand der lokalen Tool-Komponenten, Engines und READMEs erstellt.
+MessageDrop wurde mit der deutschen Hilfe im lokalen Nachbarprojekt abgeglichen;
+seine Backend-/Benutzerfunktionen werden nicht als rein lokales Browser-Tool dargestellt.
+Die PNGs unter `public/images/guides/` wurden am 23.11.2026 aus den lokalen Tools
+aufgenommen (deutsch, hell, 1280 CSS-Pixel Viewport, ohne echte Werbeanfragen).
+Der Taschenrechner zeigt fiktive Werte 100, +20 %, −20 % als Beispiel.
+MessageDrop nutzt stattdessen ein eigenes ausdrücklich schematisches SVG ohne echte
+Karten-/Nutzerdaten. Bilder werden verzögert geladen, in der Galerie vergrößert und
+beim Drucken ausgeblendet. FAQs werden für den Browser-Druck geöffnet und danach
+in ihren vorherigen Zustand zurückversetzt. Werbeeinheiten werden nur bei
+AdSense-Status `filled` sichtbar. Keine Veröffentlichung durch den Build.

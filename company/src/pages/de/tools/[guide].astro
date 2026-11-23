@@ -1,0 +1,11 @@
+---
+import ToolGuidePage from '../../../components/ToolGuidePage.astro';
+import { toolGuides } from '../../../lib/tool-guides';
+export function getStaticPaths() {
+  return toolGuides.map(guide => ({params:{guide:guide.slug},props:{guide}}));
+}
+import type { ToolGuide } from '../../../lib/tool-guides';
+interface Props { guide: ToolGuide }
+const {guide} = Astro.props;
+---
+<ToolGuidePage guide={guide} />

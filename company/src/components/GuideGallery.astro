@@ -1,0 +1,62 @@
+  <dialog class="screenshot-gallery" id="screenshot-gallery" aria-labelledby="gallery-title">
+    <div class="gallery-toolbar"><h2 id="gallery-title">Bildergalerie</h2><button type="button" class="gallery-close" aria-label="Galerie schließen" autofocus>Schließen <span aria-hidden="true">×</span></button></div>
+    <figure class="gallery-figure"><img id="gallery-image" alt="" width="1000" height="656" /><figcaption id="gallery-caption"></figcaption></figure>
+    <div class="gallery-navigation"><button type="button" id="gallery-previous" aria-label="Vorheriges Bild">Zurück</button><span id="gallery-position" role="status" aria-live="polite"></span><button type="button" id="gallery-next" aria-label="Nächstes Bild">Weiter</button></div>
+  </dialog>
+<script>
+  const gallery = document.getElementById('screenshot-gallery') as HTMLDialogElement;
+  const pictures = Array.from(document.querySelectorAll<HTMLAnchorElement>('.tool-screenshot a'));
+  const galleryImage = document.getElementById('gallery-image') as HTMLImageElement;
+  let selected = 0;
+  const showPicture = (index: number) => {
+    selected = (index + pictures.length) % pictures.length;
+    const source = pictures[selected].querySelector('img')!;
+    galleryImage.src = pictures[selected].href;
+    galleryImage.alt = source.alt;
+    galleryImage.width = source.width;
+    galleryImage.height = source.height;
+    document.getElementById('gallery-caption')!.textContent = pictures[selected].closest('figure')!.querySelector('figcaption')!.textContent!.replace('Screenshot zum Vergrößern anklicken.', '').trim();
+    document.getElementById('gallery-position')!.textContent = `${selected + 1} / ${pictures.length}`;
+  };
+  pictures.forEach((link, index) => link.addEventListener('click', event => {
+    if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    showPicture(index);
+    gallery.showModal();
+    document.documentElement.classList.add('gallery-open');
+  }));
+  gallery.querySelector('.gallery-close')!.addEventListener('click', () => gallery.close());
+  document.getElementById('gallery-previous')!.addEventListener('click', () => showPicture(selected - 1));
+  document.getElementById('gallery-next')!.addEventListener('click', () => showPicture(selected + 1));
+  gallery.addEventListener('keydown', event => {
+    if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+      event.preventDefault();
+      showPicture(selected + (event.key === 'ArrowRight' ? 1 : -1));
+    }
+  });
+  gallery.addEventListener('click', event => {
+    if (event.target !== gallery) return;
+    const rect = gallery.getBoundingClientRect();
+    if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) gallery.close();
+  });
+  gallery.addEventListener('close', () => document.documentElement.classList.remove('gallery-open'));
+  let closedAnswers: HTMLDetailsElement[] = [];
+  window.addEventListener('beforeprint', () => {
+    closedAnswers = Array.from(document.querySelectorAll<HTMLDetailsElement>('.tool-guide details:not([open])'));
+    closedAnswers.forEach(answer => { answer.open = true; });
+  });
+  window.addEventListener('afterprint', () => {
+    closedAnswers.forEach(answer => { answer.open = false; });
+    closedAnswers = [];
+  });
+</script>
+<style>
+  :global(html.gallery-open){overflow:hidden}
+  .screenshot-gallery{position:fixed;inset:0;width:min(1040px,calc(100vw - 2rem));max-width:none;max-height:calc(100dvh - 2rem);margin:auto;padding:1.25rem;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--text);box-shadow:0 24px 80px #0005;overflow:auto}
+  .screenshot-gallery::backdrop{background:#071019bd;backdrop-filter:blur(6px)}
+  .gallery-toolbar,.gallery-navigation{display:flex;align-items:center;justify-content:space-between;gap:1rem}.gallery-toolbar h2{font-size:1.1rem;margin:0}.screenshot-gallery button{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:44px;padding:.6rem 1rem;border:1px solid var(--line);border-radius:8px;background:var(--accent-soft);color:var(--accent);font:inherit;cursor:pointer}.screenshot-gallery button:hover{border-color:var(--accent)}.screenshot-gallery button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}.gallery-close span{font-size:1.5rem;line-height:1}
+  .gallery-figure{margin:1rem 0}.gallery-figure img{display:block;width:100%;height:auto;max-height:65dvh;object-fit:contain}.gallery-figure figcaption{font-size:.9rem;line-height:1.6;color:var(--muted);margin-top:.75rem}.gallery-navigation{font-size:.9rem}
+  @media(max-width:480px){.screenshot-gallery{padding:.8rem;width:calc(100vw - 1rem);max-height:calc(100dvh - 1rem)}.gallery-toolbar{gap:.5rem}.gallery-toolbar h2{font-size:1rem}}
+
+@media print{.screenshot-gallery,.screenshot-gallery::backdrop{display:none!important}:global(html.gallery-open){overflow:visible!important}}
+</style>

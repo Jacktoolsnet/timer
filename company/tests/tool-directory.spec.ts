@@ -20,7 +20,7 @@ test('all published tools have permanent descriptive cards and matching structur
   await expect(card.getByRole('heading',{level:3})).toHaveText(title);
   await expect(card.locator('.tool-open')).toHaveAttribute('href',url);
   expect(items[index]).toMatchObject({position:index+1,name:title,url});
-  await expect(page.locator(`.tool-shortcuts a[href="#${id}"]`)).toHaveCount(1);
+  await expect(page.locator(`.tool-shortcuts a[href="#${id}"]`)).toHaveCount(0);
  }
  await expect(page.locator('.time-tools-grid')).not.toContainText('Trainingstimer');
  await expect(page.locator('#online-timer a[href="https://timer.jacktools.net/de/pomodoro/"]')).toBeVisible();
@@ -36,8 +36,9 @@ test.describe('without JavaScript',()=>{
   await page.goto('/de/');
   await expect(page.locator('.time-tools-grid > article')).toHaveCount(8);
   await expect(page.locator('#online-stoppuhr .tool-open')).toHaveAttribute('href','https://stopwatch.jacktools.net/de/');
-  await page.locator('.tool-shortcuts a[href="#online-stoppuhr"]').click();
-  await expect(page).toHaveURL(/#online-stoppuhr$/);
+  await page.getByRole('link', {name:'Stoppuhr kennenlernen: Anleitung & Beispiele',exact:true}).click();
+  await expect(page).toHaveURL(/\/de\/tools\/stopwatch\/$/);
+  await expect(page.locator('h1')).toContainText('Jeder Moment');
  });
 });
 

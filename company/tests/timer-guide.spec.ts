@@ -161,7 +161,7 @@ test('screenshot gallery supports navigation, Escape and focus restoration', asy
 test('homepage timer action buttons have equal widths', async ({ page }) => {
   await page.route(/googlesyndication\.com|doubleclick\.net|googleadservices\.com/, route => route.fulfill({contentType:'application/javascript', body:''}));
   await page.goto('/de/');
-  const buttons = page.locator('.timer-card-actions > a');
+  const buttons = page.locator('#online-timer .timer-card-actions > a');
   await expect(buttons).toHaveCount(2);
   const widths = await buttons.evaluateAll(elements => elements.map(el => el.getBoundingClientRect().width));
   expect(Math.abs(widths[0] - widths[1])).toBeLessThan(1);
