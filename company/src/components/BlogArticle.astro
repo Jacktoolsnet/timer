@@ -12,7 +12,7 @@ const organization={'@type':'Organization','@id':new URL('/#organization',Astro.
 ---
 <Layout lang={lang} title={post.title} description={post.description} route={post.path.slice(4)} homeAlternates={false} canonicalPath={post.path} blogKey={post.key} quietBackground ogType="article">
  <a slot="header-action" class="blog-header-link" href={`/${lang}/blog/`}>{ui.back}</a>
- <script type="application/ld+json" set:html={JSON.stringify({'@context':'https://schema.org','@graph':[organization,{'@type':'WebPage','@id':url,url,name:post.title,inLanguage:lang,mainEntity:{'@id':url+'#artikel'}},{'@type':'BlogPosting','@id':url+'#artikel',headline:post.title,description:post.description,inLanguage:lang,mainEntityOfPage:{'@id':url},author:{'@id':organization['@id']},publisher:{'@id':organization['@id']},image:new URL(post.image,Astro.site).href,isPartOf:{'@type':'Blog',url:new URL(`/${lang}/blog/`,Astro.site).href,name:'Jacktools Blog'},about:{'@type':'Thing',name:'NullTopic'}}]}).replaceAll('<','\\u003c')} />
+ <script type="application/ld+json" set:html={JSON.stringify({'@context':'https://schema.org','@graph':[organization,{'@type':'WebPage','@id':url,url,name:post.title,inLanguage:lang,mainEntity:{'@id':url+'#artikel'}},{'@type':'BlogPosting','@id':url+'#artikel',headline:post.title,description:post.description,inLanguage:lang,mainEntityOfPage:{'@id':url},author:{'@id':organization['@id']},publisher:{'@id':organization['@id']},image:new URL(post.image,Astro.site).href,isPartOf:{'@type':'Blog',url:new URL(`/${lang}/blog/`,Astro.site).href,name:'Jacktools Blog'},about:{'@type':'Thing',name:post.key==='clock'?'Jacktools Clock':'NullTopic'}}]}).replaceAll('<','\\u003c')} />
  <article class="blog-article">
   <div class="article-layout">
    <header class="article-header">
@@ -21,7 +21,7 @@ const organization={'@type':'Organization','@id':new URL('/#organization',Astro.
     <p class="article-lead">{post.lead}</p>
     <p class="article-byline"><span>{ui.by}</span><span>{post.byline}</span></p>
    </header>
-   <figure class="article-cover"><NullTopicIllustration variant={post.art} lang={lang} /><figcaption>{post.coverCaption}</figcaption></figure>
+   <figure class="article-cover">{post.art==='clock'?<img src={post.image} alt={post.coverCaption} width="1000" height="714" style="display:block;width:100%;height:auto" />:<NullTopicIllustration variant={post.art} lang={lang} />}<figcaption>{post.coverCaption}</figcaption></figure>
    <aside class="article-sidebar"><nav aria-labelledby="article-toc-title"><h2 id="article-toc-title">{ui.toc}</h2><ol>{chapters.map(([id,title])=><li><a href={'#'+id}>{title}</a></li>)}</ol></nav></aside>
    <div class="article-body">
     <slot />

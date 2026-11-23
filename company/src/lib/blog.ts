@@ -1,11 +1,12 @@
+import clockCopy from './clock-blog.json' with { type: 'json' };
 import localized from './blog-localized.json' with { type: 'json' };
 import {languages,type Language} from './i18n';
-export type BlogKey='nulltopic'|'surface';
-export const blogSlugs:Record<Language,Record<BlogKey,string>>={de:{nulltopic:'nulltopic-ki-agenten',surface:'surface-book-arch-linux-open-webui'},en:{nulltopic:'nulltopic-ai-agents',surface:'surface-book-arch-linux-open-webui'},es:{nulltopic:'nulltopic-agentes-ia',surface:'surface-book-arch-linux-open-webui'},fr:{nulltopic:'nulltopic-agents-ia',surface:'surface-book-arch-linux-open-webui'}};
+export type BlogKey='nulltopic'|'surface'|'clock';
+export const blogSlugs:Record<Language,Record<BlogKey,string>>={de:{clock:'uhr-orbit-sonnenuhr',nulltopic:'nulltopic-ki-agenten',surface:'surface-book-arch-linux-open-webui'},en:{clock:'clock-orbit-sundial',nulltopic:'nulltopic-ai-agents',surface:'surface-book-arch-linux-open-webui'},es:{clock:'reloj-orbital-solar',nulltopic:'nulltopic-agentes-ia',surface:'surface-book-arch-linux-open-webui'},fr:{clock:'horloge-orbitale-solaire',nulltopic:'nulltopic-agents-ia',surface:'surface-book-arch-linux-open-webui'}};
 export function getBlogPath(lang:Language,key:BlogKey|'index'='index'){return `/${lang}/blog/${key==='index'?'':blogSlugs[lang][key]+'/'}`;}
 export interface BlogPost {
  lang:Language; key:BlogKey; path:string; title:string; description:string; excerpt:string; category:string; image:string;
- art:'conversation'|'roles'|'surface'; lead:string; coverCaption:string; byline:string;
+ art:'conversation'|'roles'|'surface'|'clock'; lead:string; coverCaption:string; byline:string;
 }
 export const nullTopicPost:BlogPost = {
  lang:'de', key:'nulltopic', path:'/de/blog/nulltopic-ki-agenten/',
@@ -31,7 +32,15 @@ export const surfaceBookPost:BlogPost = {
  coverCaption:'Eine neue Aufgabe für vorhandene Hardware: Arch Linux und GNOME bilden die Basis, Open WebUI ist installiert, der OpenAI-API-Key liegt bereit. Die Agenten sind noch der nächste Schritt. Schematische Illustration, kein Screenshot.',
  byline:'Praxisbericht · NullTopic, Teil 2',
 };
-export const blogPosts=[surfaceBookPost,nullTopicPost];
-export function getBlogPost(lang:Language,key:BlogKey):BlogPost{const base=key==='surface'?surfaceBookPost:nullTopicPost;return lang==='de'?base:{...base,...localized[lang][key],lang,image:base.image.replace('.svg',`-${lang}.svg`),path:getBlogPath(lang,key)};}
-export const getBlogPosts=(lang:Language)=>[getBlogPost(lang,'surface'),getBlogPost(lang,'nulltopic')];
+export function clockPost(lang:Language):BlogPost {
+ const c=clockCopy[lang];
+ return {lang,key:'clock',path:getBlogPath(lang,'clock'),title:c.title,description:c.description,excerpt:c.lead,category:c.category,image:'/images/galleries/clock/10.png',art:'clock',lead:c.lead,coverCaption:c.coverCaption,byline:c.byline};
+}
+export const blogPosts=[clockPost('de'),surfaceBookPost,nullTopicPost];
+export function getBlogPost(lang:Language,key:BlogKey):BlogPost{
+ if(key==='clock')return clockPost(lang);
+ const base=key==='surface'?surfaceBookPost:nullTopicPost;
+ return lang==='de'?base:{...base,...localized[lang][key],lang,image:base.image.replace('.svg',`-${lang}.svg`),path:getBlogPath(lang,key)};
+}
+export const getBlogPosts=(lang:Language)=>[getBlogPost(lang,'clock'),getBlogPost(lang,'surface'),getBlogPost(lang,'nulltopic')];
 export const blogPaths=languages.flatMap(lang=>[getBlogPath(lang),...getBlogPosts(lang).map(post=>post.path)]);

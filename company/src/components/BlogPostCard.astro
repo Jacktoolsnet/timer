@@ -6,7 +6,7 @@ interface Props { post?:BlogPost }
 const {post=nullTopicPost}=Astro.props;
 ---
 <a class="blog-post-card" href={post.path}>
-  <div class="post-art"><NullTopicIllustration variant={post.art} lang={post.lang} /></div>
+  <div class="post-art">{post.art==='clock'?<img src={post.image} alt="" width="1000" height="714" loading="lazy" style="display:block;width:100%;height:auto" />:<NullTopicIllustration variant={post.art} lang={post.lang} />}</div>
   <div class="post-copy"><p class="post-category">{post.category}</p><h3>{post.title}</h3><p class="post-excerpt">{post.excerpt}</p><span class="post-action">{blogUi[post.lang].read}</span></div>
 </a>
 <style>

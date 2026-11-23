@@ -4,8 +4,8 @@ test.beforeEach(async({page})=>{
  await page.route('**/*',route=>['127.0.0.1','localhost'].includes(new URL(route.request().url()).hostname)?route.continue():route.fulfill({body:''}));
 });
 test('second article is discoverable and both series links work',async({page})=>{
- await page.goto('/de/');
- await page.locator('.blog-home .blog-post-card').click();
+ await page.goto('/de/blog/');
+ await page.locator(`.blog-post-card[href="${post.path}"]`).click();
  await expect(page).toHaveURL(new RegExp(post.path+'$'));
  await expect(page.locator('h1')).toHaveText(post.title);
  await page.locator('.article-series a').click();
@@ -13,8 +13,8 @@ test('second article is discoverable and both series links work',async({page})=>
  await page.locator('.article-series a').click();
  await expect(page).toHaveURL(new RegExp(post.path+'$'));
  await page.goto('/de/blog/');
- await expect(page.locator('.blog-post-card')).toHaveCount(2);
- await expect(page.locator('.blog-post-card').first()).toHaveAttribute('href',post.path);
+ await expect(page.locator('.blog-post-card')).toHaveCount(3);
+ await expect(page.locator('.blog-post-card').nth(1)).toHaveAttribute('href',post.path);
 });
 test('personal facts, missing agents, bounded examples and accessible code blocks are present',async({page})=>{
  const errors:string[]=[];page.on('pageerror',err=>errors.push(err.message));
