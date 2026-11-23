@@ -3,7 +3,7 @@ test('the randomly selected spotlight retains a descriptive main heading',async(
  await page.goto('/de/');
  await expect(page).toHaveTitle('Online-Tools: Timer, Uhr & Entspannung · Jacktools.net');
  await expect(page.locator('h1')).toHaveCount(1);
- await expect(page.locator('h1')).toContainText('Online-Tools');
+ await expect(page.locator('h1')).toContainText('Tools');
  await expect(page.locator('.hero-slogan')).toBeVisible();
  for(const id of ['timer','clock','stopwatch','breathe','relax','message','calculator','metronome']){
   await page.evaluate(id=>{
@@ -11,7 +11,7 @@ test('the randomly selected spotlight retains a descriptive main heading',async(
    document.getElementById('company-spotlight')!.replaceChildren(template.content.cloneNode(true));
   },id);
   await expect(page.locator('h1')).toHaveCount(1);
-  await expect(page.locator('h1')).toContainText('Online-Tools');
+  await expect(page.locator('h1')).toContainText('Tools');
  }
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();
  await page.screenshot({path:`/tmp/jacktools-company-seo-${info.project.name}.png`,fullPage:true});

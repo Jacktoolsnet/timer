@@ -1,5 +1,5 @@
 import {test,expect} from '@playwright/test';
-const titles={de:'Online-Tools',en:'Online tools',es:'Herramientas online',fr:'Outils en ligne'};
+const titles={de:'Tools',en:'Tools',es:'Herramientas',fr:'Outils'};
 test('company language tiles translate content, tool links and metadata',async({page})=>{
  await page.setViewportSize({width:320,height:740});
  for(const [lang,heading] of Object.entries(titles)) {
@@ -26,7 +26,7 @@ test('switching languages preserves appearance after opt-in and keeps the sectio
  await page.locator('.language-menu a[lang=fr]').click();
  await expect(page).toHaveURL(/\/fr\/#tools$/);
  await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
- await expect(page.locator('#tools-heading')).toContainText('Outils en ligne');
+ await expect(page.locator('#tools-heading')).toContainText('Outils pour le temps');
 });
 test('browser-language entry uses English when the browser language is unsupported',async({browser,baseURL})=>{
  for(const [locale,target] of [['de-CH','de'],['en-US','en'],['es-MX','es'],['fr-CA','fr'],['it-IT','en']]) {

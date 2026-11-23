@@ -11,7 +11,7 @@ test('homepage, preferences, opt-in and legal links', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.goto('/de/');
-  await expect(page.locator('h1')).toContainText('Online-Tools');
+  await expect(page.locator('h1')).toContainText('Tools');
   await expect(page.locator('html')).toHaveAttribute('data-palette', 'green');
   await expect(page.locator('html')).toHaveAttribute('data-style', 'technical');
   await expect(page.locator('.message-art .message-marker')).toHaveCount(3);

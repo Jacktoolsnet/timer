@@ -4,7 +4,7 @@
     "name": "Uhr",
     "tag": "UHRZEIT & DATUM",
     "title": "Deine Uhr. Dein Blick auf die Zeit.",
-    "description": "Die Jacktools Online-Uhr erklärt: analoge, digitale und Klappzahlen-Anzeige, Datum, Zeitzonen und Browser-Wecker. Mit Beispielen und Grenzen.",
+    "description": "Online-Uhr entdecken: analog, digital, Klappzahlen, Orbit-Uhr und standortbasierte Sonnenuhr. Mit Screenshots, Zeitzonen und Tipps zur Einrichtung.",
     "lead": "Eine große Uhr auf dem Schreibtisch, ein Datum im Unterricht oder die Zeit in einer anderen Stadt: Die Jacktools Uhr zeigt die aktuelle Gerätezeit in einer wählbaren Zeitzone. Du entscheidest, wie sie aussieht und welche Informationen du sehen möchtest.",
     "url": "https://clock.jacktools.net/de/",
     "features": [
@@ -19,6 +19,10 @@
       {
         "title": "Fokus & Wecker",
         "text": "Rücke die Uhr in den Mittelpunkt oder stelle einen einmaligen Browser-Wecker. Die Seite muss dafür geöffnet bleiben."
+      },
+      {
+        "title": "Orbit & Sonnenzeit",
+        "text": "Drei Umlaufbahnen zeigen die Zeit. Die Sonnenuhr ergänzt echten Sonnenstand, Schatten sowie Sonnenaufgang und Sonnenuntergang."
       }
     ],
     "sections": [
@@ -39,6 +43,18 @@
           "text": "Für eine Gruppe eignet sich eine große digitale Anzeige mit Datum. Zeige die Uhr auf einem separaten Bildschirm. Soll eine festgelegte Arbeitsphase heruntergezählt werden, ist dagegen der Timer das passende Tool: Die Uhr zeigt einen Zeitpunkt, keine Restzeit."
         },
         "summary": "Zifferblatt, Ziffern und Datum"
+      },
+      {
+        "id": "orbit-sonnenuhr",
+        "title": "Orbit-Uhr und Sonnenuhr entdecken",
+        "paragraphs": [
+          "Bei der Orbit-Uhr stehen der innere Kreis für Stunden, der mittlere für Minuten und der äußere für Sekunden. Die Sekunden können springen oder fließen. Zifferblatt, runde oder eckige Form und römische Zahlen lassen sich ebenso wie das Farbschema anpassen.",
+          "Die Sonnenuhr berechnet den Sonnenstand aus Datum, Gerätezeit und deinem freigegebenen Standort. Sie zeigt wahre Sonnenzeit, Sonnenhöhe und die Zeiten für Sonnenaufgang und Sonnenuntergang. Die Klappzahlen im Ziffernblatt zeigen dagegen die Uhrzeit der gewählten Zeitzone. Diese muss nicht mit der Sonnenzeit übereinstimmen.",
+          "Aktiviere für die Sonnenuhr „Standortbasierte Simulation“ und erlaube den Zugriff im Browser. Die Uhr speichert oder überträgt die Koordinaten nicht. Bei Nacht gibt es keinen Sonnenschatten; nahe dem Zenit ist er sehr kurz. Sehr kurze Schatten werden für die Lesbarkeit vergrößert, lange begrenzt. Die Screenshots zeigen simulierte Beispieldaten für Berlin, keine Live-Werte."
+        ],
+        "steps": [],
+        "example": null,
+        "summary": "Umlaufbahnen und echter Sonnenstand"
       },
       {
         "id": "zeitzonen",
@@ -90,7 +106,7 @@
       },
       {
         "question": "Muss ich meinen Standort freigeben?",
-        "answer": "Nein. Uhr und Zeitzonen funktionieren ohne Standortzugriff. Nur der ausdrücklich eingeschaltete Standortmodus der Jahressimulation verwendet die Browser-Position."
+        "answer": "Nein. Die normale Uhr und die Zeitzonen funktionieren ohne Standortzugriff. Die standortbasierte Sonnenuhr und der Standortmodus der Jahressimulation benötigen deine ausdrücklich freigegebene Browser-Position."
       },
       {
         "question": "Warum bleibt der Bildschirm nicht immer an?",

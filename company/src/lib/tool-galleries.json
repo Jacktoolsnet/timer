@@ -79,6 +79,26 @@
       "thumb": "/images/galleries/clock/8-thumb.webp",
       "width": 1000,
       "height": 411
+    },
+    {
+      "id": "clock-9",
+      "title": "Orbit-Uhr",
+      "caption": "Orbit-Uhr mit drei Umlaufbahnen für Stunden, Minuten und Sekunden in der Farbwelt Violett.",
+      "alt": "Rundes Zifferblatt der Orbit-Uhr mit drei konzentrischen Bahnen und leuchtendem Zentrum.",
+      "src": "/images/galleries/clock/9.png",
+      "thumb": "/images/galleries/clock/9-thumb.webp",
+      "width": 1000,
+      "height": 719
+    },
+    {
+      "id": "clock-10",
+      "title": "Sonnenuhr · Berlin",
+      "caption": "Sonnenuhr mit Sonnenstand, Schatten und Klappzahlen. Simulierter Standort Berlin am 21. Juni 2026; die angezeigten Zeiten sind Beispielwerte.",
+      "alt": "Grüne Sonnenuhr für Berlin mit Sonne am Rand, Schatten, Sonnenzeiten und digitaler Uhrzeit im Ziffernblatt.",
+      "src": "/images/galleries/clock/10.png",
+      "thumb": "/images/galleries/clock/10-thumb.webp",
+      "width": 1000,
+      "height": 714
     }
   ],
   "stopwatch": [

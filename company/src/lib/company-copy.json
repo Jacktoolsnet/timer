@@ -943,5 +943,55 @@
     "en": "Free online tools with no sign-up: timer, clock, stopwatch, metronome with tap tempo and calculator, plus breathing exercises with Breathe and nature sounds with Relax.",
     "es": "Herramientas online gratis sin registro: temporizador, reloj, cronómetro, metrónomo con tap tempo y calculadora, además de respiración con Breathe y sonidos naturales con Relax.",
     "fr": "Outils en ligne gratuits sans inscription : minuteur, horloge, chronomètre, métronome avec tap tempo et calculatrice, respiration avec Breathe et sons naturels avec Relax."
+  },
+  "Analog, digital, mit Klappzahlen, als Orbit-Uhr oder Sonnenuhr: Entdecke deine Zeit mit Datum, Zeitzonen und persönlichem Design.": {
+    "en": "Analog, digital, flip, orbit or sundial: discover your time with dates, time zones and your own design.",
+    "es": "Analógico, digital, de láminas, orbital o solar: descubre tu hora con fecha, zonas horarias y diseño personal.",
+    "fr": "Analogique, numérique, à palettes, orbitale ou solaire : découvrez votre heure avec date, fuseaux horaires et style personnel."
+  },
+  "Countdown, Pomodoro oder automatische Intervalle: Plane konzentrierte Arbeit, Pausen und eigene Routinen mit einem anpassbaren Timer.": {
+    "en": "Countdown, Pomodoro or automatic intervals: plan focused work, breaks and your own routines with a customizable timer.",
+    "es": "Cuenta atrás, Pomodoro o intervalos automáticos: organiza el trabajo, las pausas y tus rutinas con un temporizador personalizable.",
+    "fr": "Compte à rebours, Pomodoro ou intervalles automatiques : organisez le travail concentré, les pauses et vos routines avec un minuteur personnalisable."
+  },
+  "Tools für Zeit, Fokus und Entspannung": {
+    "en": "Tools for time, focus and relaxation",
+    "es": "Herramientas para el tiempo, la concentración y la relajación",
+    "fr": "Outils pour le temps, la concentration et la détente"
+  },
+  "Taschenrechner mit Rechenstreifen": {
+    "en": "Calculator with calculation tape",
+    "es": "Calculadora con cinta de cálculo",
+    "fr": "Calculatrice avec bande de calcul"
+  },
+  "Stoppuhr mit Rundenzeiten": {
+    "en": "Stopwatch with lap times",
+    "es": "Cronómetro con tiempos por vuelta",
+    "fr": "Chronomètre avec temps au tour"
+  },
+  "Metronom mit Tap Tempo": {
+    "en": "Metronome with tap tempo",
+    "es": "Metrónomo con Tap Tempo",
+    "fr": "Métronome avec Tap Tempo"
+  },
+  "Breathe – Atemübungen": {
+    "en": "Breathe – breathing exercises",
+    "es": "Breathe – ejercicios de respiración",
+    "fr": "Breathe – exercices de respiration"
+  },
+  "Uhr mit Datum": {
+    "en": "Clock with date",
+    "es": "Reloj con fecha",
+    "fr": "Horloge avec date"
+  },
+  "Uhr öffnen": {
+    "en": "Open clock",
+    "es": "Abrir reloj",
+    "fr": "Ouvrir l’horloge"
+  },
+  "Tools": {
+    "en": "Tools",
+    "es": "Herramientas",
+    "fr": "Outils"
   }
 }

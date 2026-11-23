@@ -1,12 +1,12 @@
 import {test,expect} from '@playwright/test';
 const cards=[
- ['online-timer','Online-Timer','https://timer.jacktools.net/de/'],
- ['online-uhr','Online-Uhr mit Datum','https://clock.jacktools.net/de/'],
- ['online-stoppuhr','Online-Stoppuhr mit Rundenzeiten','https://stopwatch.jacktools.net/de/'],
- ['taschenrechner','Online-Taschenrechner mit Rechenstreifen','https://calculator.jacktools.net/de/'],
- ['atemuebungen','Breathe – Atemübungen online','https://breathe.jacktools.net/de/'],
+ ['online-timer','Timer','https://timer.jacktools.net/de/'],
+ ['online-uhr','Uhr mit Datum','https://clock.jacktools.net/de/'],
+ ['online-stoppuhr','Stoppuhr mit Rundenzeiten','https://stopwatch.jacktools.net/de/'],
+ ['taschenrechner','Taschenrechner mit Rechenstreifen','https://calculator.jacktools.net/de/'],
+ ['atemuebungen','Breathe – Atemübungen','https://breathe.jacktools.net/de/'],
  ['naturgeraeusche','Relax – Naturgeräusche und Klänge','https://relax.jacktools.net/de/'],
- ['online-metronom','Online-Metronom mit Tap Tempo','https://metronome.jacktools.net/de/'],
+ ['online-metronom','Metronom mit Tap Tempo','https://metronome.jacktools.net/de/'],
  ['messagedrop','MessageDrop – Nachrichten auf der Karte','https://app.messagedrop.de'],
 ] as const;
 test('all published tools have permanent descriptive cards and matching structured data',async({page},info)=>{

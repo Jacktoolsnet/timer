@@ -55,7 +55,7 @@ for(const lang of ['en','es','fr'] as const){
     }
    }
    const thumbs=page.locator('.timer-gallery-thumb');
-   await expect(thumbs).toHaveCount(slug==='timer'?14:8);
+   await expect(thumbs).toHaveCount(slug==='timer'?14:slug==='clock'?10:8);
    await thumbs.last().click();
    await page.locator('.showcase-open').click();
    await expect(page.locator('#screenshot-gallery')).toBeVisible();
