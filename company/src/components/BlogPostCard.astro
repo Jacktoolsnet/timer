@@ -1,0 +1,16 @@
+---
+import { nullTopicPost as post } from '../lib/blog';
+import NullTopicIllustration from './NullTopicIllustration.astro';
+---
+<a class="blog-post-card" href={post.path}>
+  <div class="post-art"><NullTopicIllustration /></div>
+  <div class="post-copy"><p class="post-category">{post.category}</p><h3>{post.title}</h3><p class="post-excerpt">{post.excerpt}</p><span class="post-action">Artikel lesen</span></div>
+</a>
+<style>
+.blog-post-card{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:2rem;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden;color:var(--text);text-decoration:none;transition:border-color .2s}
+.blog-post-card:hover{border-color:var(--accent);filter:none}.blog-post-card:focus-visible{outline:3px solid var(--accent);outline-offset:5px}
+.post-art{padding:1.25rem;background:var(--accent-soft);align-self:stretch;display:flex;align-items:center}.post-copy{padding:2rem 2rem 2rem 0}.post-category{color:var(--accent);font-size:.85em;margin:0 0 .75rem;font-weight:650}.post-copy h3{font-size:clamp(1.5em,2.6vw,2em);line-height:1.25;margin:0 0 1rem;letter-spacing:-.025em}.post-excerpt{color:var(--muted);line-height:1.8;margin:0 0 1.5rem}.post-action{display:inline-flex;align-items:center;min-height:44px;padding:.65rem 1.1rem;background:var(--accent-soft);border:1px solid var(--line);border-radius:7px;font-weight:650;color:var(--accent)}
+:global([data-style=technical]) .blog-post-card,:global([data-style=technical]) .post-action{border-radius:3px}
+@media(max-width:760px){.blog-post-card{grid-template-columns:minmax(0,1fr);gap:0}.post-copy{padding:1.4rem}.post-art{padding:.75rem}}
+@media(prefers-reduced-motion:reduce){.blog-post-card{transition:none}}
+</style>

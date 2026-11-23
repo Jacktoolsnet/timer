@@ -13,7 +13,7 @@ import '../../../shared/page-entry.css';
 import { colorSchemes } from '../lib/appearance';
 import { languages, languageNames, type Language } from '../lib/i18n';
 import { getCompanyDictionary } from '../lib/company-ui';
-interface Props { lang: Language; title: string; description: string; route: string; noindex?: boolean; legal?: boolean; homeAlternates?: boolean; canonicalPath?:string; socialImageProject?:SocialProject; guideSlug?:string }
+interface Props { lang: Language; title: string; description: string; route: string; noindex?: boolean; legal?: boolean; homeAlternates?: boolean; canonicalPath?:string; socialImageProject?:SocialProject; guideSlug?:string; untranslated?:boolean; quietBackground?:boolean; ogType?:'website'|'article' }
 const { lang, title, description, noindex = false, legal = false, homeAlternates = true } = Astro.props;
 const t = getCompanyDictionary(lang);
 const motion = backgroundCopy[lang];
@@ -47,7 +47,7 @@ const canonical = new URL(Astro.props.canonicalPath ?? (Astro.url.pathname === '
       {languages.map(language => <link rel="alternate" hreflang={language} href={new URL('/'+language+'/tools/'+Astro.props.guideSlug+'/',Astro.site)} />)}
       <link rel="alternate" hreflang="x-default" href={new URL('/en/tools/'+Astro.props.guideSlug+'/',Astro.site)} />
     </>}
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={Astro.props.ogType ?? "website"} />
     <meta property="og:title" content={title + ' · JackTools.Net'} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
@@ -64,7 +64,7 @@ const canonical = new URL(Astro.props.canonicalPath ?? (Astro.url.pathname === '
     </script>
     <ThemeInit namespace="jacktools.company" />
   </head>
-  <body class:list={{ "legal-document": legal }}>
+  <body class:list={{ "legal-document": legal }} data-quiet-background={Astro.props.quietBackground ? "true" : undefined}>
     <a class="skip-link" href="#main">{lang === 'de' ? 'Zum Inhalt' : lang === 'es' ? 'Ir al contenido' : lang === 'fr' ? 'Aller au contenu' : 'Skip to content'}</a>
     <canvas id="ambient-background" class="ambient-background" aria-hidden="true" hidden></canvas>
     <div class="site-shell">
@@ -82,6 +82,7 @@ const canonical = new URL(Astro.props.canonicalPath ?? (Astro.url.pathname === '
               <div class="preferences-heading"><h2>{t.menuSettings}</h2><button id="preferences-close" type="button" aria-label={t.close}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
               <section class="preferences-language" aria-labelledby="language-heading">
                 <h3 id="language-heading">{t.language}</h3>
+                {Astro.props.untranslated && <p class="language-page-note">Dieser Blog ist derzeit auf Deutsch verfügbar. Die Sprachwahl führt zur jeweiligen Startseite.</p>}
                 <nav class="language-menu" aria-label={t.language}>
                   {languages.map(language => <a href={'/'+language+'/'+(Astro.props.guideSlug ? 'tools/'+Astro.props.guideSlug+'/' : '')} lang={language} hreflang={language} aria-current={language===lang?'page':undefined}>
                     <span>{languageNames[language]}</span>
@@ -135,7 +136,7 @@ const canonical = new URL(Astro.props.canonicalPath ?? (Astro.url.pathname === '
       <main id="main"><slot /></main>
       <footer class="site-footer">
         <div><a class="footer-brand" href={home}>jacktools.net</a><p>{t.footer}</p></div>
-        <nav aria-label={t.legal}><a href="/impressum/">{t.legal}{lang !== 'de' && ' (DE)'}</a><a href="/datenschutz/">{t.privacy}{lang !== 'de' && ' (DE)'}</a><a href="/nutzungshinweise/">{t.usage}{lang !== 'de' && ' (DE)'}</a><button id="privacy-open">{t.preferences}</button></nav>
+        <nav aria-label={t.legal}>{lang === 'de' && <a href="/de/blog/">Blog</a>}<a href="/impressum/">{t.legal}{lang !== 'de' && ' (DE)'}</a><a href="/datenschutz/">{t.privacy}{lang !== 'de' && ' (DE)'}</a><a href="/nutzungshinweise/">{t.usage}{lang !== 'de' && ' (DE)'}</a><button id="privacy-open">{t.preferences}</button></nav>
         <p class="footer-credit">{t.creditBefore} ❤️ ☕ {t.creditAnd} 🍫 {t.creditAfter} <a href="https://jacktools.net" rel="noreferrer" referrerpolicy="no-referrer"><strong>jacktools.net</strong></a></p>
       </footer>
     </div>

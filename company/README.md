@@ -302,3 +302,33 @@ oder erneute AdSense-Einreichung wird durch die lokalen Änderungen ausgelöst.
 Zusätzliche Tests: `npx playwright test tests/guide-translations.spec.ts`.
 Diese prüfen alle 24 übersetzten Seiten auf Vollständigkeit, Sprachverknüpfungen,
 Metadaten, Galerien, Druckansicht und Nutzbarkeit ohne JavaScript.
+
+## Deutscher Blog: erster NullTopic-Artikel
+
+`/de/blog/` listet den ersten Beitrag unter `/de/blog/nulltopic-ki-agenten/`.
+Die deutsche Startseite zeigt eine redaktionelle Vorschau; der deutsche Footer
+verlinkt die Übersicht. Es gibt noch keine übersetzten Blogseiten und daher
+keine hreflang-Alternativen. Die Sprachwahl ist als Wechsel zur Startseite erklärt.
+
+Der Artikel beschreibt die aktive Rolle der Operatoren (Freigaben, Pausieren,
+Zugänge widerrufen), nicht eine angebliche Beschränkung aller Menschen auf Mitlesen.
+Das Gesprächsbeispiel ist ausdrücklich erfunden; die Grafiken sind Schaubilder.
+Es werden keine Nutzerzahlen, Launch-Termine oder Veröffentlichungstermine erfunden.
+
+Eigene, themenfähige SVGs liegen unter `public/images/blog/nulltopic/`.
+`NullTopicIllustration.astro` bindet sie inline mit zugänglichen Titeln und
+Beschreibungen ein. `BlogPostCard.astro` teilt die Vorschau zwischen Startseite
+und Blogübersicht; Metadaten stehen in `src/lib/blog.ts`. Bilder nutzen lokale
+CSS-Farbvariablen mit Standalone-Fallbacks, ohne externe Medien oder Bibliotheken.
+
+Die Artikelseite hat ein responsives Inhaltsverzeichnis, eine A4-Druckansicht,
+BlogPosting-JSON-LD und einen festen Canonical. Autor/Herausgeber ist Jacktools.net.
+Die eine AdSense-Einheit verwendet unverändert die bestehende Filled-only-Logik.
+Auf den Leseseiten startet die dekorative Hintergrundanimation für ruhiges Lesen
+pausiert (ohne Render-Schleife). In den Einstellungen kann sie für diesen Besuch
+wieder eingeschaltet werden. Farbpalette und Typografie folgen weiterhin den Einstellungen.
+
+Die Sitemap umfasst jetzt 38 indexierbare Seiten: vier Startseiten, 32 Anleitungen
+und die beiden deutschen Blogseiten. Test: `npx playwright test tests/blog.spec.ts`.
+Auch dieser Stand wird durch Build/Tests nicht veröffentlicht und nicht an Medium
+übertragen.

@@ -1,5 +1,6 @@
 import { sitemapResponse } from '../lib/sitemap';
 import { languages } from '../lib/i18n';
+import { blogPaths } from '../lib/blog';
 import { toolGuides } from '../lib/tool-guides';
 export function GET({ site }: { site: URL | undefined }) {
   if (!site) throw new Error('Configure astro.config.mjs site for the sitemap.');
@@ -11,5 +12,5 @@ export function GET({ site }: { site: URL | undefined }) {
     url:new URL('/'+lang+'/tools/'+slug+'/',site),
     alternatives:[...languages.map(language=>({language,url:new URL('/'+language+'/tools/'+slug+'/',site)})),{language:'x-default',url:new URL('/en/tools/'+slug+'/',site)}],
   })));
-  return sitemapResponse([...entries,...guideEntries]);
+  return sitemapResponse([...entries,...guideEntries,...blogPaths.map(path=>({url:new URL(path,site)}))]);
 }

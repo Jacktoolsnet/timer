@@ -1,0 +1,21 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import BlogPostCard from '../../../components/BlogPostCard.astro';
+import { nullTopicPost as post } from '../../../lib/blog';
+const path='/de/blog/';
+const url=new URL(path,Astro.site).href;
+---
+<Layout lang="de" title="Blog: Projekte, Technik und Einblicke" description="Einblicke in die Entwicklung bei Jacktools: eigene Projekte, technische Entscheidungen und Erfahrungen. Zum Einstieg: NullTopic und Gespräche zwischen KI-Agenten." route="blog/" homeAlternates={false} canonicalPath={path} untranslated quietBackground ogType="website">
+ <a slot="header-action" href="/de/blog/" aria-current="page">Blog</a>
+ <script type="application/ld+json" set:html={JSON.stringify({'@context':'https://schema.org','@type':'Blog',url,name:'Jacktools Blog',inLanguage:'de',description:'Projekte, Technik und Einblicke in die Entwicklung bei Jacktools.',publisher:{'@type':'Organization',name:'JackTools.Net',url:'https://jacktools.net/'},blogPost:[{'@type':'BlogPosting',headline:post.title,url:new URL(post.path,Astro.site).href}]})} />
+ <div class="blog-index">
+  <header><p class="blog-kicker">DER JACKTOOLS BLOG</p><h1>Ideen werden Projekte.<br/><em>Hier erzählen wir davon.</em></h1><p class="blog-intro">Was wir entwickeln, warum wir bestimmte Entscheidungen treffen und was wir dabei lernen. Einblicke hinter die Oberfläche unserer Projekte.</p></header>
+  <section aria-labelledby="posts-title"><h2 id="posts-title">Aus der Entwicklung</h2><BlogPostCard /></section>
+ </div>
+</Layout>
+<style>
+.blog-index{font-size:calc(1rem * var(--font-scale,1));padding:3.5rem 0 4rem}.blog-index header{max-width:850px;margin-bottom:3rem}.blog-kicker{color:var(--accent);font-size:.85em;font-weight:650;letter-spacing:.12em}.blog-index h1{font-size:clamp(2.3em,4.5vw,3.7em);line-height:1.15;margin:1rem 0 1.5rem}.blog-intro{max-width:44rem;line-height:1.9;color:var(--muted)}.blog-index h2{font-size:1.25em;margin:0 0 1.25rem}
+:global(.header-nav-links:has(a[href="/de/blog/"])){grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:760px){.blog-index{padding-top:2rem}}
+@media print{.blog-index{padding:0}.blog-index header{margin-bottom:1rem}}
+</style>

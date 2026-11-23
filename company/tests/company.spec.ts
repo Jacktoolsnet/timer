@@ -98,7 +98,7 @@ test('Relax card and random spotlight link to the new tool',async({page})=>{
 
 test('company masthead is sticky and section links remain visible on mobile', async ({page}) => {
   await page.goto('/de/');
-  await expect(page.locator('.header-nav a')).toHaveCount(2);
+  await expect(page.locator('.header-nav a')).toHaveCount(3);
   await expect(page.locator('.header-nav')).toBeVisible();
   await page.locator('.header-nav a[href="/de/#tools"]').click();
   await expect(page.locator('.header-nav a[href="/de/#tools"]')).toHaveAttribute('aria-current','location');

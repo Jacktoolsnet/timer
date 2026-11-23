@@ -11,7 +11,7 @@ import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
 PROJECTS = ['metronome', 'company', 'timer', 'clock', 'stopwatch', 'breathe', 'relax', 'lava']
-EXPECTED_PAGES = {'metronome':8,'company':36,'timer':16,'clock':8,'stopwatch':8,'breathe':8,'relax':8,'lava':8}
+EXPECTED_PAGES = {'metronome':8,'company':38,'timer':16,'clock':8,'stopwatch':8,'breathe':8,'relax':8,'lava':8}
 if sys.argv[1:]:
     assert all(project in PROJECTS for project in sys.argv[1:]), 'Unknown project'
     PROJECTS = list(dict.fromkeys(sys.argv[1:]))
@@ -20,6 +20,7 @@ class Metadata(HTMLParser):
     def __init__(self, html):
         super().__init__()
         self.visible = ''
+        self.in_head = False
         self.in_script = False
         self.title = ''
         self.h1 = []
@@ -41,8 +42,10 @@ class Metadata(HTMLParser):
             self.template += 1
         if self.template:
             return
+        if tag == 'head': self.in_head = True
         if tag == 'html': self.lang = a.get('lang')
-        if tag == 'title': self.in_title = True
+        # SVG titles describe illustrations, not the HTML document title.
+        if tag == 'title' and self.in_head: self.in_title = True
         if tag == 'h1': self.in_h1 = True; self.h1.append('')
         if tag == 'meta':
             if a.get('name') == 'description': self.description = a.get('content', '')
@@ -58,6 +61,7 @@ class Metadata(HTMLParser):
     def handle_endtag(self, tag):
         if tag == 'template': self.template -= 1; return
         if self.template: return
+        if tag == 'head': self.in_head = False
         if tag == 'script': self.in_script = False
         if tag == 'title': self.in_title = False
         if tag == 'h1': self.in_h1 = False
@@ -88,7 +92,7 @@ for project in PROJECTS:
         assert 70 <= len(meta.description) <= 220, (url, 'description length')
         assert meta.og.get('og:title') and meta.og.get('og:description') == meta.description, (url, 'Open Graph')
         assert meta.lang == path.split('/')[1], (url, 'language')
-        assert set(meta.alternates) == {'de', 'en', 'es', 'fr', 'x-default'}, (url, 'hreflang')
+        assert set(meta.alternates) == (set() if project == 'company' and path.startswith('/de/blog/') else {'de', 'en', 'es', 'fr', 'x-default'}), (url, 'hreflang')
         for schema in meta.schemas:
             if schema.get('@type') == 'WebApplication':
                 assert schema['description'] in meta.visible, (url, 'schema description must be visible')
