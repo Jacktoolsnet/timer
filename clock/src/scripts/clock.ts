@@ -36,10 +36,10 @@ const alarm=createAlarm($('clock-alarm'),$('alarm-dialog') as HTMLDialogElement,
 const wake=screenWakeLock($('wake-status'),'',t.unavailable);
 const styledDate = createClockDate($('styled-date'));
 const updateFlip = createFlipClock($('flip-clock'));
+const updateSundialFlip = createFlipClock($('sundial-flip'));
 let lastFlipTick = 0;
 let digits:Intl.DateTimeFormat,dateFormat:Intl.DateTimeFormat,parts:Intl.DateTimeFormat;
 function configure(){
- sundial.configure(settings.view==='sundial');
  applyTransparency();
  const card=document.querySelector<HTMLElement>('.clock-card')!;
  const background=clockBackgroundOptions.find(id=>id===settings.background);
@@ -56,8 +56,10 @@ function configure(){
  else card.style.removeProperty('--clock-background');
  const zone=settings.zone==='local'?Intl.DateTimeFormat().resolvedOptions().timeZone:settings.zone;
  $('seasonal-background').dataset.active=String(background==='seasonal');
- $('seasonal-settings').hidden=background!=='seasonal';
- geolocation.setActive(background==='seasonal');
+ const usesLocation=background==='seasonal'||settings.view==='sundial';
+ $('seasonal-settings').hidden=!usesLocation;
+ geolocation.setActive(usesLocation);
+ sundial.configure(settings.view==='sundial',geolocation.location,geolocation.status,geolocation.pending,settings.analogDesign as AnalogDesign,settings.numbers,zone);
  seasonal.configure(zone,settings.hemisphere,geolocation.location);
  alarm.configure(zone);
  const locale=document.documentElement.lang;
@@ -101,7 +103,13 @@ function render(){const now=new Date();sundial.render(now);if(settings.backgroun
   const planet=$('orbit-'+unit).querySelector('circle')!;
   planet.setAttribute('cx',String(point.x));planet.setAttribute('cy',String(point.y));
  }
- if(settings.view==='flip'||settings.view==='analogFlip'){const formatted=digits.formatToParts(now);updateFlip(formatted,lastFlipTick>0 && now.getTime()-lastFlipTick<1500);lastFlipTick=now.getTime();$('flip-context').textContent=formatted.filter(p=>p.type==='dayPeriod'||p.type==='timeZoneName').map(p=>p.value).join(' · ');}
+ if(settings.view==='flip'||settings.view==='analogFlip'||settings.view==='sundial'){
+  const formatted=digits.formatToParts(now);
+  const animate=lastFlipTick>0&&now.getTime()-lastFlipTick<1500;
+  if(settings.view==='sundial')updateSundialFlip(formatted,animate);else updateFlip(formatted,animate);
+  lastFlipTick=now.getTime();
+  $(settings.view==='sundial'?'sundial-flip-context':'flip-context').textContent=formatted.filter(p=>p.type==='dayPeriod'||p.type==='timeZoneName').map(p=>p.value).join(' · ');
+ }
  const text=digits.format(now);$('orbit-clock').setAttribute('aria-label',text);$('digital-clock').textContent=text;$('digital-clock').setAttribute('datetime',now.toISOString());$('analog-clock').setAttribute('aria-label',text);$('clock-date').textContent=dateFormat.format(now);styledDate.render(now);
 }
 function save(){if(!storageAllowed())return;try{localStorage.setItem('jacktools.clock.settings.v1',JSON.stringify(settings));}catch{$('clock-settings-status').textContent=t.storageError;}}

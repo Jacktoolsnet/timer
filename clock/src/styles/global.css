@@ -1138,20 +1138,20 @@ body.focus-view .clock-display[data-view=orbit] #orbit-clock { width:auto; max-w
 #sundial-view { width:min(400px,100%); text-align:center; }
 #sundial-view[hidden], #sundial-settings[hidden], #sundial-clear[hidden] { display:none; }
 #sundial-face { --sundial-paper:color-mix(in srgb,#fff 85%,var(--accent,#a64d35)); --sundial-ink:color-mix(in srgb,#000 70%,var(--accent,#a64d35)); width:100%; height:auto; fill:none; }
-#sundial-face .sundial-surface { fill:#fff8ec; fill:var(--sundial-paper); stroke:var(--accent); stroke-width:2; }
-.sundial-compass { stroke:var(--sundial-ink); stroke-opacity:.2; stroke-dasharray:3 6; }
-#sundial-face text { fill:var(--sundial-ink); stroke:var(--sundial-paper); stroke-width:3; paint-order:stroke; text-anchor:middle; dominant-baseline:middle; font:13px system-ui; }
-#sundial-face .sundial-north { fill:var(--sundial-ink); font-weight:700; stroke:none; }
-#sundial-shadow { stroke:var(--sundial-ink); stroke-opacity:.9; stroke-width:7; stroke-linecap:round; }
-.sundial-pin { fill:var(--accent); stroke:var(--sundial-ink); }
+#sundial-face .sundial-surface { fill:#fff8ec; fill:var(--sundial-paper); stroke:color-mix(in srgb,var(--accent) 35%,var(--sundial-paper)); }
+.sundial-compass { stroke:var(--sundial-ink); stroke-opacity:.12; stroke-dasharray:1 7; }
+#sundial-face text { fill:var(--sundial-ink); stroke:var(--sundial-paper); stroke-width:3; paint-order:stroke; text-anchor:middle; dominant-baseline:middle; }
+#sundial-face .sundial-north { fill:var(--sundial-ink); font:11px system-ui; letter-spacing:2px; opacity:.75; stroke:none; }
+#sundial-shadow { stroke:var(--sundial-ink); stroke-opacity:.76; stroke-width:6; stroke-linecap:round; filter:url(#sundial-soft-shadow); }
+.sundial-pin { fill:var(--accent); stroke:var(--sundial-paper); stroke-width:1.5; }
 #sundial-status, #sundial-time { font-size:14px; line-height:1.6; }
 #sundial-status:empty { display:none; }
 #sundial-settings .secondary { margin-top:10px; font-size:12px; }
 body.focus-view #sundial-view { width:min(50dvh,400px); }
 [data-view=sundial] #digital-clock { font-size:20px; }
 
-.sundial-hour-line { stroke:var(--sundial-ink); stroke-width:1; stroke-opacity:.3; }
-.sundial-hour-dot { fill:var(--sundial-ink); fill-opacity:.7; stroke:none; }
+.sundial-hour-line { stroke:var(--sundial-ink); stroke-width:.75; stroke-opacity:.19; }
+.sundial-hour-dot { fill:var(--sundial-ink); fill-opacity:.5; stroke:none; }
 
 #sundial-status, #sundial-location-status:not(:empty) {
  padding:10px 14px; border:1px solid var(--accent); border-radius:10px;
@@ -1161,3 +1161,66 @@ body.focus-view #sundial-view { width:min(50dvh,400px); }
 #sundial-view[data-location-state=ready] #sundial-status { background:var(--accent-soft); color:var(--text); }
 #sundial-status:empty, #sundial-location-status:empty { display:none; }
 #sundial-location[aria-pressed=true] { border-color:var(--accent); background:var(--accent-soft); color:var(--text); }
+/* Coordinates belong below the dial, not in a second settings/status box. */
+#sundial-view[data-location-state=ready] #sundial-status {
+ padding:0; border:0; border-radius:0; background:transparent;
+ box-shadow:none; color:var(--text); font-variant-numeric:tabular-nums;
+}
+
+/* A quiet, sun-washed surface rather than a hard technical diagram. */
+.sundial-light { stroke:none; pointer-events:none; }
+.sundial-light-start { stop-color:#fff; stop-opacity:.65; }
+.sundial-light-end { stop-color:var(--accent); stop-opacity:.04; }
+.sundial-inner-rim { fill:none; stroke:var(--accent); stroke-opacity:.09; stroke-width:.75; }
+.sundial-pin-halo { fill:var(--accent); fill-opacity:.09; stroke:none; }
+#sundial-view[data-location-state=ready] #sundial-status { font-size:12px; color:var(--muted); letter-spacing:.025em; }
+#sundial-time { font-size:13px; color:var(--muted); }
+
+/* Reuse clock typography and tick weights without replacing solar hour geometry. */
+#sundial-face { --text:var(--sundial-ink); --muted:color-mix(in srgb,var(--sundial-ink) 65%,var(--sundial-paper)); stroke-width:2; }
+#sundial-face .dial-numerals text { stroke:var(--sundial-paper); stroke-width:3px; paint-order:stroke; }
+
+/* Civil time sits within the lower half; the external time remains accessible. */
+[data-view=sundial] #digital-clock { position:absolute; width:1px; height:1px; padding:0; margin:-1px; clip-path:inset(50%); overflow:hidden; white-space:nowrap; }
+.sundial-flip-readout { display:flex; flex-direction:column; align-items:center; padding:4px 0; color:var(--sundial-ink); }
+#sundial-flip { display:flex; justify-content:center; gap:.07em; font:700 30px/1.35 ui-monospace,SFMono-Regular,Consolas,monospace; font-variant-numeric:tabular-nums; }
+.clock-card #sundial-flip .flip-half { background:color-mix(in srgb,var(--sundial-paper) 80%,var(--accent)); color:var(--sundial-ink); }
+#sundial-flip .flip-digit::before { display:none; }
+#sundial-flip .flip-digit::after { border-color:color-mix(in srgb,var(--sundial-ink) 20%,transparent); }
+#sundial-flip-context { margin:5px 0 0; max-width:210px; color:var(--sundial-ink); font:10px/1.3 system-ui; text-align:center; overflow-wrap:anywhere; }
+#sundial-flip-context:empty { display:none; }
+
+/* Keep the no-location notice inside the dial and remove redundant vertical gaps. */
+#sundial-notice { height:68px; display:flex; align-items:center; justify-content:center; }
+#sundial-notice #sundial-status {
+ margin:0; padding:6px 9px; font:12px/1.4 system-ui;
+ color:var(--sundial-ink); background:color-mix(in srgb,var(--sundial-paper) 90%,var(--accent));
+ border:1px solid color-mix(in srgb,var(--accent) 35%,var(--sundial-paper));
+ box-shadow:none; border-radius:8px; text-align:center;
+}
+#sundial-view > #sundial-status { margin:0 0 3px; }
+#sundial-time { margin:0; }
+#sundial-time:empty { display:none; }
+.clock-display[data-view=sundial] { gap:6px; }
+.clock-display[data-view=sundial] .clock-readout > #styled-date { margin-top:0; }
+
+/* Solar information stays on the opaque dial, never on a background photograph. */
+.sundial-info { display:flex; align-items:center; justify-content:center; height:41px; }
+#sundial-info-area #sundial-time {
+ display:flex; flex-direction:column; gap:1px; margin:0; padding:3px 9px;
+ border-radius:7px; background:var(--sundial-paper); color:var(--sundial-ink);
+ font:12px/1.35 system-ui; text-align:center; font-variant-numeric:tabular-nums;
+}
+#sundial-info-area #sundial-time:empty { display:none; }
+
+/* A quiet dawn-to-dusk band follows the lower dial edge, behind the readouts. */
+#sundial-daylight-arc { fill:none; stroke-width:7; stroke-opacity:.6; stroke-linecap:round; }
+#sundial-daylight circle { fill:#edac69; stroke:var(--sundial-paper); stroke-width:1.5; }
+#sundial-face #sundial-daylight text { font:9px system-ui; fill:var(--sundial-ink); stroke:var(--sundial-paper); stroke-width:3px; paint-order:stroke; }
+
+/* Dawn is east (right), dusk west (left); daylight washes inward to the pin. */
+#sundial-daylight-fill { stroke:none; opacity:.36; }
+#sundial-sun { color:color-mix(in srgb,#f3ae55 65%,var(--accent)); pointer-events:none; }
+#sundial-sun .sundial-sun-halo { fill:currentColor; fill-opacity:.18; stroke:none; }
+#sundial-sun .sundial-sun-core { fill:color-mix(in srgb,currentColor 75%,#fff); stroke:currentColor; stroke-width:1; }
+#sundial-sun .sundial-sun-ray { stroke:currentColor; stroke-width:1.5; stroke-linecap:round; }

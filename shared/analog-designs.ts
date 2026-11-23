@@ -7,7 +7,7 @@ export const analogDesignText = {
  es: {label:'Diseño del reloj analógico', names:['Estándar', 'Romano', 'Minimalista', 'Ferroviario', 'Estándar · Cuadrado', 'Romano · Cuadrado', 'Minimalista · Cuadrado', 'Ferroviario · Cuadrado']},
  fr: {label:'Style de l’horloge analogique', names:['Standard', 'Romain', 'Minimaliste', 'Gare', 'Standard · Carré', 'Romain · Carré', 'Minimaliste · Carré', 'Gare · Carré']},
 };
-function romanNumeral(value: number) {
+export function romanNumeral(value: number) {
  let result='';
  for(const [number,symbol] of [[100,'C'],[90,'XC'],[50,'L'],[40,'XL'],[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']] as const)
   while(value>=number){result+=symbol;value-=number;}

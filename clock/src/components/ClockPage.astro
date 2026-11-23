@@ -62,13 +62,7 @@ const seo=toolSeo.clock[lang];
 <aside class="settings-card"><h2>{t.settings}</h2><form id="clock-settings" class="clock-settings">
 <fieldset class="clock-settings-group"><legend>{groups.display}</legend>
 <label>{t.appearance}<select name="view">{(['analog','orbit','sundial','digital','combined','flip','analogFlip'] as const).map(v=><option value={v} selected={v==='analog'}>{v==='sundial'?sun.sundial:c[v]}</option>)}</select></label>
-<div id="sundial-settings" hidden>
-<p class="form-hint">{sun.intro}</p>
-<button id="sundial-location" type="button" class="secondary">{sun.enable}</button>
-<button id="sundial-clear" type="button" class="secondary" hidden>{sun.clear}</button>
-<p id="sundial-location-status" class="form-hint" role="status"></p>
-<p class="form-hint">{sun.note}</p>
-</div>
+
 <label>{designs.label}<select name="analogDesign">{analogDesigns.map((id,index)=><option value={id} data-preview={analogPreview(id)}>{designs.names[index]}</option>)}</select></label>
 <label>{c.dateAppearance}<select name="dateView">{(['textDate','calendarDate','elegantDate','flipDate'] as const).map(v=><option value={v} selected={v==='calendarDate'}>{c[v]}</option>)}</select></label>
 <label>{c.date}<select name="date">{(['off','short','medium','long'] as const).map(v=><option value={v} selected={v==='long'}>{c[v]}</option>)}</select></label>

@@ -14,9 +14,10 @@ export function sundialState(date:Date,location:SeasonalLocation) {
   y:visible?Math.cos(a)*Math.min(132,Math.max(0,length)):0};
 }
 /** Date-specific hour dots for the vertical pin (not a polar-style gnomon). */
-export function sundialHours(date:Date,location:SeasonalLocation) {
+export function sundialHours(date:Date,location:SeasonalLocation,interval=1) {
  const noon=getTimes(date,location.latitude,location.longitude).solarNoon;
- return Array.from({length:24},(_,hour)=>{
+ return Array.from({length:24/interval},(_,index)=>{
+  const hour=index*interval;
   let time=noon.getTime()+(hour-12)*3600000;
   for(let i=0;i<3;i++){
    const state=sundialState(new Date(time),location);

@@ -1,118 +1,162 @@
-import { storageAllowed } from '../lib/storage';
+import { getTimes } from 'suncalc';
+import { squareRadius, romanNumeral, type AnalogDesign } from '../lib/analog-designs';
 import { sundialState, sundialHours } from '../lib/sundial';
 import type { SeasonalLocation } from '../lib/seasonal-location';
 
 export function createSundial(){
  const root=document.getElementById('sundial-view')!;
- const controls=document.getElementById('sundial-settings')!;
- const button=document.getElementById('sundial-location') as HTMLButtonElement;
- const clearButton=document.getElementById('sundial-clear') as HTMLButtonElement;
  const status=document.getElementById('sundial-status')!;
- const controlStatus=document.getElementById('sundial-location-status')!;
  const shadow=document.getElementById('sundial-shadow')!;
+ const sun=document.getElementById('sundial-sun')!;
  const time=document.getElementById('sundial-time')!;
+ const notice=document.getElementById('sundial-notice')!;
+ const noticeArea=document.getElementById('sundial-notice-area')!;
+ const infoArea=document.getElementById('sundial-info-area')!;
  const text=JSON.parse(root.dataset.text!);
- const preferenceKey='jacktools.clock.sundial-enabled.v1';
- let wanted=false;
- try {wanted=storageAllowed()&&localStorage.getItem(preferenceKey)==='yes';}catch{}
- let location:SeasonalLocation|undefined,request=0,last='',active=false,requesting=false;
- let permission:PermissionStatus|undefined;
- function saveMode(){
-  try{if(storageAllowed())localStorage.setItem(preferenceKey,wanted?'yes':'no');else localStorage.removeItem(preferenceKey);}catch{}
- }
+ const face=document.getElementById('sundial-face')!;
+ let design:AnalogDesign='standard',numbers=true,zone='UTC',daylightKey='';
+ let location:SeasonalLocation|undefined,last='',active=false,message='',pending=false;
  function coordinates(){
   if(!location)return '';
   const format=new Intl.NumberFormat(document.documentElement.lang,{minimumFractionDigits:4,maximumFractionDigits:4});
   return `${format.format(Math.abs(location.latitude))}° ${location.latitude<0?'S':'N'} · ${format.format(Math.abs(location.longitude))}° ${location.longitude<0?'W':'E'}`;
  }
- function sync(){
-  button.setAttribute('aria-pressed',String(wanted));
-  root.dataset.locationState=requesting?'pending':location?'ready':'missing';
+ function daylight(now:Date){
+  const group=document.getElementById('sundial-daylight')!;
+  group.setAttribute('visibility',location?'visible':'hidden');
+  group.style.display=location?'':'none';
+  if(!location){daylightKey='';return;}
+  const key=[Math.floor(now.getTime()/60000),location.latitude,location.longitude,design,zone].join(':');
+  if(key===daylightKey)return;daylightKey=key;
+  const times=getTimes(now,location.latitude,location.longitude);
+  // Use the same north-up solar azimuth as the sun marker and shadow, not
+  // evenly spaced civil hours. Values outside 0..1 lie above the lower half.
+  const fraction=(date:Date)=>(sundialState(date,location!).sun.azimuth-90)/180;
+  const point=(t:number,extra=0)=>{
+   const angle=Math.PI*(1-t);
+   const radius=(design.startsWith('square-')?squareRadius(angle-Math.PI/2,137,27):137)+extra;
+   return {x:180-Math.cos(angle)*radius,y:180+Math.sin(angle)*radius};
+  };
+  const path=Array.from({length:121},(_,i)=>{
+   const p=point(i/120);return `${i?'L':'M'}${p.x},${p.y}`;
+  }).join(' ');
+  const arc=document.getElementById('sundial-daylight-arc')!;
+  arc.setAttribute('d',path);
+  const fill=document.getElementById('sundial-daylight-fill')!;
+  const rise=times.sunrise instanceof Date?fraction(times.sunrise):0;
+  const set=times.sunset instanceof Date?fraction(times.sunset):1;
+  const smooth=(v:number)=>{const t=Math.max(0,Math.min(1,v));return t*t*(3-2*t);};
+  const sectors=document.createDocumentFragment();
+  for(let i=0;i<180;i++){
+   const t=(i+.5)/180;
+   const warmth=times.alwaysUp?1:times.alwaysDown?0:Math.min(smooth((t-rise+.04)/.08),smooth((set-t+.04)/.08));
+   const color=[112,149,195].map((blue,j)=>Math.round(blue+([237,172,105][j]-blue)*warmth));
+   const a=point(Math.max(0,(i-.03)/180)),b=point(Math.min(1,(i+1.03)/180));
+   const sector=document.createElementNS('http://www.w3.org/2000/svg','path');
+   sector.setAttribute('d',`M180,180 L${a.x},${a.y} L${b.x},${b.y} Z`);
+   sector.setAttribute('fill',`rgb(${color.join(',')})`);sectors.append(sector);
+  }
+  fill.replaceChildren(sectors);
+  arc.setAttribute('stroke',times.alwaysUp?'#edac69':times.alwaysDown?'#7095c3':'url(#sundial-daylight-colors)');
+  const format=new Intl.DateTimeFormat(document.documentElement.lang,{timeZone:zone,hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
+  for(const [event,date] of [['sunrise',times.sunrise],['sunset',times.sunset]] as const){
+   const dot=document.getElementById('sundial-'+event+'-dot')!;
+   const label=document.getElementById('sundial-'+event+'-label')!;
+   const valid=date instanceof Date&&Number.isFinite(date.getTime());
+   dot.setAttribute('visibility',valid?'visible':'hidden');label.setAttribute('visibility',valid?'visible':'hidden');
+   if(!valid)continue;
+   const t=fraction(date),p=point(t),l=point(t,12);
+   dot.setAttribute('cx',String(p.x));dot.setAttribute('cy',String(p.y));
+   label.setAttribute('x',String(l.x));label.setAttribute('y',String(l.y));
+   label.textContent=format.format(date);
+   label.setAttribute('aria-label',`${text[event]}: ${format.format(date)}`);
+   const offset=(1-Math.cos(Math.PI*Math.max(0,Math.min(1,t))))/2;
+   document.getElementById(event==='sunrise'?'sundial-dawn-orange':'sundial-dusk-orange')!.setAttribute('offset',String(offset));
+   document.getElementById(event==='sunrise'?'sundial-dawn-blue':'sundial-dusk-blue')!.setAttribute('offset',String(Math.max(0,Math.min(1,offset+(event==='sunrise'?-.06:.06)))));
+  }
+  group.setAttribute('aria-label',times.alwaysUp?text.polarDay:times.alwaysDown?text.polarNight:`${text.sunrise} – ${text.sunset}`);
  }
-
  function render(now:Date){
-  sync();
+  root.dataset.locationState=pending?'pending':location?'ready':'missing';
   if(!active)return;
-  if(!location){shadow.setAttribute('visibility','hidden');time.textContent='';status.textContent=requesting?text.pending:controlStatus.textContent||text.missing;return;}
+  daylight(now);
+  noticeArea.setAttribute('visibility',location?'hidden':'visible');
+  infoArea.setAttribute('visibility',location?'visible':'hidden');
+  if(location){if(status.parentElement!==root)root.append(status);}
+  else if(status.parentElement!==notice)notice.append(status);
+  if(!location){sun.style.display='none';sun.setAttribute('visibility','hidden');shadow.setAttribute('visibility','hidden');time.textContent='';status.textContent=pending?text.pending:message||text.missing;return;}
   const tick=String(Math.floor(now.getTime()/1000));
   if(tick===last)return;last=tick;
   const state=sundialState(now,location);
   shadow.setAttribute('visibility',state.visible?'visible':'hidden');
-  shadow.setAttribute('x2',String(180+state.x));shadow.setAttribute('y2',String(180+state.y));
+  sun.style.display=state.visible?'':'none';sun.setAttribute('visibility',state.visible?'visible':'hidden');
+  const azimuth=state.sun.azimuth*Math.PI/180;
+  const sunRadius=design.startsWith('square-')?squareRadius(azimuth,140,28):140;
+  sun.setAttribute('transform',`translate(${180+Math.sin(azimuth)*sunRadius} ${180-Math.cos(azimuth)*sunRadius})`);
+  // Keep the rendered tip inside the numeral ring; physical length remains in the model.
+  const distance=Math.hypot(state.x,state.y);
+  const scale=distance>110?110/distance:1;
+  const tipX=String(180+state.x*scale),tipY=String(180+state.y*scale);
+  shadow.setAttribute('x2',tipX);shadow.setAttribute('y2',tipY);
+  const fade=document.getElementById('sundial-shadow-fade')!;
+  fade.setAttribute('x2',tipX);fade.setAttribute('y2',tipY);
   root.dataset.daylight=String(state.visible);
   status.textContent=coordinates()+(state.visible?'':` · ${text.night}`);
   const minutes=Math.floor(state.solarHour*60)%1440;
-  time.textContent=`${text.solar}: ${String(Math.floor(minutes/60)).padStart(2,'0')}:${String(minutes%60).padStart(2,'0')} · ${text.altitude}: ${state.sun.altitude.toFixed(1)}°`;
+  const solar=document.createElement('span'),altitude=document.createElement('span');
+  solar.textContent=`${text.solar}: ${String(Math.floor(minutes/60)).padStart(2,'0')}:${String(minutes%60).padStart(2,'0')}`;
+  altitude.textContent=`${text.altitude}: ${state.sun.altitude.toFixed(1)}°`;
+  time.replaceChildren(solar,altitude);
   // Rebuild date-specific markers once per minute, including a local date change.
-  const key=String(Math.floor(now.getTime()/60000));
+  const key=String(Math.floor(now.getTime()/60000))+design+numbers;
   const hours=document.getElementById('sundial-hours')!;
   if(hours.dataset.tick!==key){
    hours.dataset.tick=key;hours.replaceChildren();
-   for(const point of sundialHours(now,location)){
-    const label=document.createElementNS('http://www.w3.org/2000/svg','text');
+   const minimal=design.endsWith('minimal');
+   const numerals=document.createElementNS('http://www.w3.org/2000/svg','g');
+   numerals.setAttribute('class','dial-numerals');numerals.style.display=numbers?'':'none';
+   for(const point of sundialHours(now,location,minimal?1:.25)){
     const distance=Math.hypot(point.x,point.y);
     if(distance<.01)continue;
     const x=point.x/distance,y=point.y/distance;
+    const angle=Math.atan2(x,-y);
+    const radius=(half:number)=>design.startsWith('square-')?squareRadius(angle,half,half*30/151):half;
+    const major=Number.isInteger(point.hour);
     const guide=document.createElementNS('http://www.w3.org/2000/svg','line');
-    guide.setAttribute('x1',String(180+x*12));guide.setAttribute('y1',String(180+y*12));
-    guide.setAttribute('x2',String(180+x*125));guide.setAttribute('y2',String(180+y*125));
-    guide.setAttribute('class','sundial-hour-line');
-    const dot=document.createElementNS('http://www.w3.org/2000/svg','circle');
-    dot.setAttribute('cx',String(180+point.x));dot.setAttribute('cy',String(180+point.y));
-    dot.setAttribute('r','2');dot.setAttribute('class','sundial-hour-dot');
-    label.setAttribute('x',String(180+x*139));label.setAttribute('y',String(180+y*139));
-    label.textContent=String(point.hour);hours.append(guide,dot,label);
+    const outer=radius(148),inner=outer-(major?10:5);
+    guide.setAttribute('x1',String(180+x*inner));guide.setAttribute('y1',String(180+y*inner));
+    guide.setAttribute('x2',String(180+x*outer));guide.setAttribute('y2',String(180+y*outer));
+    guide.setAttribute('class',major?'hour-mark':'minute-mark');hours.append(guide);
+    if(!major||(minimal&&point.hour%3!==0))continue;
+    const label=document.createElementNS('http://www.w3.org/2000/svg','text');
+    label.setAttribute('x',String(180+x*radius(126)));label.setAttribute('y',String(180+y*radius(126)));
+    // Match the other dials' twelve-hour numerals; solar-time readout stays 24-hour.
+    const value=point.hour%12||12;
+    label.textContent=design.endsWith('roman')?romanNumeral(value):String(value);
+    numerals.append(label);
    }
+   hours.append(numerals);
   }
  }
- function clear(){
-  request++;location=undefined;requesting=false;last='';button.disabled=false;clearButton.hidden=true;
-  controlStatus.textContent='';document.getElementById('sundial-hours')!.replaceChildren();
-  delete document.getElementById('sundial-hours')!.dataset.tick;delete root.dataset.daylight;
-  sync();render(new Date());
- }
- function acquire(){
-  if(requesting||!active)return;
-  wanted=true;saveMode();
-  const token=++request;requesting=true;button.disabled=true;clearButton.hidden=false;controlStatus.textContent=text.pending;render(new Date());
-  const failed=(error?:GeolocationPositionError)=>{
-   if(token!==request)return;
-   requesting=false;button.disabled=false;
-   controlStatus.textContent=error?.code===1?text.denied:error?.code===3?text.timeout:text.failed;
-   render(new Date());
-  };
-  if(!window.isSecureContext||!navigator.geolocation){failed();return;}
-  navigator.geolocation.getCurrentPosition(position=>{
-   if(token!==request)return;
-   const {latitude,longitude}=position.coords;
-   if(!Number.isFinite(latitude)||!Number.isFinite(longitude)||Math.abs(latitude)>90||Math.abs(longitude)>180){failed();return;}
-   location={latitude,longitude};requesting=false;last='';button.disabled=false;clearButton.hidden=false;controlStatus.textContent=coordinates();render(new Date());
-  },failed,{enableHighAccuracy:false,timeout:15000,maximumAge:60000});
- }
- button.addEventListener('click',acquire);
- function forget(){wanted=false;saveMode();clear();}
- clearButton.addEventListener('click',forget);
- document.addEventListener('preferences-cleared',forget);
- document.addEventListener('storage-enabled',saveMode);
- // Permission changes may arrive before or after the position callback.
- // Never cancel a pending request just because a browser permission prompt loses focus.
- if(navigator.permissions){
-  void navigator.permissions.query({name:'geolocation'}).then(value=>{
-   permission=value;
-   permission.addEventListener('change',()=>{
-    if(permission?.state==='prompt'&&location){
-     clear();controlStatus.textContent=text.missing;render(new Date());
-    }else if(permission?.state==='denied'){
-     clear();controlStatus.textContent=text.denied;render(new Date());
-    }else if(permission?.state==='granted'&&active&&wanted&&!location&&!requesting)acquire();
-   });
-  }).catch(()=>{});
- }
- return {render,configure(enabled:boolean){
-  const entering=enabled&&!active;
-  active=enabled;root.hidden=!enabled;controls.hidden=!enabled;
-  if(!enabled){clear();return;}
-  last='';render(new Date());
-  if(entering&&wanted&&!location&&!requesting)acquire();
+ return {render,configure(enabled:boolean,position:SeasonalLocation|undefined,statusMessage='',isPending=false,selectedDesign:AnalogDesign='standard',showNumbers=true,timeZone='UTC'){
+  active=enabled;root.hidden=!enabled;
+  design=selectedDesign;numbers=showNumbers;zone=timeZone;
+  if(face.dataset.design!==design){
+   const square=design.startsWith('square-');
+   const shape=(className:string,inset:number)=>square
+    ?`<rect class="${className}" x="${29+inset}" y="${29+inset}" width="${302-inset*2}" height="${302-inset*2}" rx="${30-inset}"/>`
+    :`<circle class="${className}" cx="180" cy="180" r="${151-inset}"/>`;
+   document.getElementById('sundial-frame')!.innerHTML=shape('dial sundial-surface',0)
+    +shape('sundial-light',1).replace('/>',' fill="url(#sundial-light)" aria-hidden="true"/>')
+    +shape('sundial-inner-rim',5);
+   face.dataset.design=design;
+  }
+  const changed=position?.latitude!==location?.latitude||position?.longitude!==location?.longitude;
+  location=position;message=statusMessage;pending=isPending;last='';
+  if(changed||!position){
+   const hours=document.getElementById('sundial-hours')!;
+   hours.replaceChildren();delete hours.dataset.tick;delete root.dataset.daylight;
+  }
+  render(new Date());
  }};
 }

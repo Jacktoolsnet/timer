@@ -5,14 +5,71 @@ const {lang}=Astro.props as {lang:Language};
 const t=sundialText[lang];
 ---
 <div id="sundial-view" data-text={JSON.stringify(t)} hidden>
-<svg id="sundial-face" viewBox="0 0 360 360" role="img" aria-label={t.sundial}>
-<circle class="sundial-surface" cx="180" cy="180" r="151"/>
+<svg class="analog-face" data-design="standard" id="sundial-face" viewBox="0 0 360 360" role="img" aria-label={t.sundial}>
+<defs>
+<radialGradient id="sundial-light" cx="32%" cy="24%" r="85%">
+<stop class="sundial-light-start" offset="0"/>
+<stop class="sundial-light-end" offset="1"/>
+</radialGradient>
+<linearGradient id="sundial-shadow-fade" gradientUnits="userSpaceOnUse" x1="180" y1="180" x2="180" y2="70">
+<stop offset="0" stop-color="white"/>
+<stop offset=".45" stop-color="white" stop-opacity=".85"/>
+<stop offset="1" stop-color="white" stop-opacity=".2"/>
+</linearGradient>
+<mask id="sundial-shadow-mask" maskUnits="userSpaceOnUse" x="29" y="29" width="302" height="302">
+<rect x="29" y="29" width="302" height="302" fill="url(#sundial-shadow-fade)"/>
+</mask>
+<linearGradient id="sundial-daylight-colors" gradientUnits="userSpaceOnUse" x1="317" y1="180" x2="43" y2="180">
+<stop offset="0" stop-color="#7095c3"/>
+<stop id="sundial-dawn-blue" offset=".2" stop-color="#7095c3"/>
+<stop id="sundial-dawn-orange" offset=".3" stop-color="#edac69"/>
+<stop id="sundial-dusk-orange" offset=".7" stop-color="#edac69"/>
+<stop id="sundial-dusk-blue" offset=".8" stop-color="#7095c3"/>
+<stop offset="1" stop-color="#7095c3"/>
+</linearGradient>
+<radialGradient id="sundial-radial-opacity" gradientUnits="userSpaceOnUse" cx="180" cy="180" r="170">
+<stop offset="0" stop-color="white" stop-opacity=".2"/>
+<stop offset="1" stop-color="white" stop-opacity="1"/>
+</radialGradient>
+<mask id="sundial-radial-mask" maskUnits="userSpaceOnUse" x="29" y="180" width="302" height="151">
+<rect x="29" y="180" width="302" height="151" fill="url(#sundial-radial-opacity)"/>
+</mask>
+<filter id="sundial-soft-shadow" x="35" y="35" width="290" height="290" filterUnits="userSpaceOnUse">
+<feGaussianBlur stdDeviation=".65"/>
+</filter>
+</defs>
+<g id="sundial-frame">
+<circle class="dial sundial-surface" cx="180" cy="180" r="151"/>
+<circle class="sundial-light" cx="180" cy="180" r="150" fill="url(#sundial-light)" aria-hidden="true"/>
+<circle class="sundial-inner-rim" cx="180" cy="180" r="146" aria-hidden="true"/>
+</g>
+<g id="sundial-daylight" visibility="hidden">
+<g id="sundial-daylight-fill" mask="url(#sundial-radial-mask)"/>
+<path id="sundial-daylight-arc"/>
+<circle id="sundial-sunrise-dot" r="3"/>
+<circle id="sundial-sunset-dot" r="3"/>
+<text id="sundial-sunrise-label"/>
+<text id="sundial-sunset-label"/>
+</g>
 <path class="sundial-compass" d="M180 42v276M42 180h276"/>
 <text x="180" y="20" class="sundial-north">N</text>
 <g id="sundial-hours"/>
-<line id="sundial-shadow" x1="180" y1="180" x2="180" y2="180" visibility="hidden"/>
+<line id="sundial-shadow" mask="url(#sundial-shadow-mask)" x1="180" y1="180" x2="180" y2="180" visibility="hidden"/>
+<g id="sundial-sun" visibility="hidden" aria-hidden="true">
+<circle class="sundial-sun-halo" r="12"/>
+{Array.from({length:8},(_,i)=><line class="sundial-sun-ray" x1="0" y1="-8" x2="0" y2="-10" transform={`rotate(${i*45})`}/>)}
+<circle class="sundial-sun-core" r="5"/>
+</g>
+<circle class="sundial-pin-halo" cx="180" cy="180" r="10" aria-hidden="true"/>
 <circle class="sundial-pin" cx="180" cy="180" r="5"/>
+<foreignObject id="sundial-notice-area" x="72" y="95" width="216" height="68">
+<div id="sundial-notice"><p id="sundial-status" role="status">{t.missing}</p></div>
+</foreignObject>
+<foreignObject id="sundial-info-area" x="72" y="195" width="216" height="41" visibility="hidden">
+<div class="sundial-info"><p id="sundial-time"></p></div>
+</foreignObject>
+<foreignObject id="sundial-flip-area" x="72" y="236" width="216" height="72" aria-hidden="true">
+<div class="sundial-flip-readout"><div id="sundial-flip"></div><p id="sundial-flip-context"></p></div>
+</foreignObject>
 </svg>
-<p id="sundial-status" role="status">{t.missing}</p>
-<p id="sundial-time"></p>
 </div>

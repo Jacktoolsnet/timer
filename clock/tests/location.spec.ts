@@ -25,15 +25,15 @@ test('location requires user action, uses hemisphere and is never persisted',asy
  await expect(page.locator('#seasonal-north')).not.toBeChecked();await expect(page.locator('#seasonal-south')).not.toBeChecked();
  await page.locator('#palette-dropdown summary').click();await page.locator('#remember-preferences').check();
  expect(await page.evaluate(()=>localStorage.getItem('jacktools.clock.settings.v1'))).not.toMatch(/latitude|longitude|33\.8688|151\.2093|location/i);
- await page.reload();await expect(toggle).not.toBeChecked();await expect(scene).toHaveAttribute('data-location-based','false');
- expect(await page.evaluate(()=>(window as unknown as {locationRequests:number}).locationRequests)).toBe(0);
+ await page.reload();await expect(toggle).toBeChecked();await expect(scene).toHaveAttribute('data-location-based','true');
+ expect(await page.evaluate(()=>(window as unknown as {locationRequests:number}).locationRequests)).toBe(1);
  await toggle.check();await expect(scene).toHaveAttribute('data-location-based','true');await page.locator('#seasonal-north').check();
  await expect(scene).toHaveAttribute('data-location-based','false');await expect(page.locator('#seasonal-hemisphere')).toBeVisible();
  await toggle.check();await expect(scene).toHaveAttribute('data-location-based','true');
  await page.locator('#trigger-background').click();await page.locator('#options-background [role=option]').first().click();
- await expect(toggle).not.toBeChecked();
+ await expect(page.locator('#seasonal-settings')).toBeHidden();
  await page.locator('#trigger-background').click();await page.locator('#options-background [role=option]').last().click();
- await expect(scene).toHaveAttribute('data-location-based','false');
+ await expect(scene).toHaveAttribute('data-location-based','true');
 });
 for(const code of [1,2,3])test(`error ${code} returns to simplified simulation`,async({page})=>{
  await page.addInitScript(code=>{navigator.geolocation.getCurrentPosition=(_success,error)=>{setTimeout(()=>error?.({code,message:'',PERMISSION_DENIED:1,POSITION_UNAVAILABLE:2,TIMEOUT:3}),0);};},code);
