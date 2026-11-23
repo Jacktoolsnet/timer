@@ -55,7 +55,7 @@ const t=sundialText[lang];
 <path class="sundial-compass" d="M180 42v276M42 180h276"/>
 <text x="180" y="20" class="sundial-north">N</text>
 <g id="sundial-hours"/>
-<line id="sundial-shadow" mask="url(#sundial-shadow-mask)" x1="180" y1="180" x2="180" y2="180" visibility="hidden"/>
+<line id="sundial-shadow" mask="url(#sundial-shadow-mask)" x1="180" y1="180" x2="180" y2="180" visibility="hidden"><title>{t.note}</title></line>
 <g id="sundial-sun" visibility="hidden" aria-hidden="true">
 <circle class="sundial-sun-halo" r="12"/>
 {Array.from({length:8},(_,i)=><line class="sundial-sun-ray" x1="0" y1="-8" x2="0" y2="-10" transform={`rotate(${i*45})`}/>)}

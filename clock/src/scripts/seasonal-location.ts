@@ -1,7 +1,7 @@
 import type { SeasonalLocation } from '../lib/seasonal-location';
 import { storageAllowed } from '../lib/storage';
 
-/** One location request and one mode shared by the seasonal sky and sundial. */
+/** One location source and mode shared by the seasonal sky and sundial. */
 export function createSeasonalLocation(root: HTMLElement, changed: () => void) {
  const toggle=root.querySelector<HTMLInputElement>('#seasonal-location')!;
  const hemisphere=root.querySelector<HTMLSelectElement>('select[name=hemisphere]')!;
@@ -11,6 +11,7 @@ export function createSeasonalLocation(root: HTMLElement, changed: () => void) {
  const key='jacktools.clock.location-enabled.v1';
  let location:SeasonalLocation|undefined,request=0,pending=false,active=false,wanted=false;
  let permission:PermissionStatus|undefined;
+ let watch:number|undefined;
  try{wanted=storageAllowed()&&(localStorage.getItem(key)==='yes'||localStorage.getItem('jacktools.clock.sundial-enabled.v1')==='yes');}catch{}
  function save(){
   try{
@@ -18,7 +19,11 @@ export function createSeasonalLocation(root: HTMLElement, changed: () => void) {
    if(storageAllowed())localStorage.setItem(key,wanted?'yes':'no');else localStorage.removeItem(key);
   }catch{}
  }
+ function stopWatching(){
+  if(watch!==undefined){navigator.geolocation?.clearWatch(watch);watch=undefined;}
+ }
  function reset(){
+  stopWatching();
   request++;location=undefined;pending=false;status.textContent='';
   toggle.checked=wanted;
   manual.forEach(radio=>radio.checked=!wanted&&radio.value===hemisphere.value);
@@ -41,6 +46,20 @@ export function createSeasonalLocation(root: HTMLElement, changed: () => void) {
    const {latitude,longitude}=position.coords;
    if(!Number.isFinite(latitude)||!Number.isFinite(longitude)||Math.abs(latitude)>90||Math.abs(longitude)>180){failed(text.failed);return;}
    location={latitude,longitude};pending=false;status.textContent='';changed();
+   if(token!==request||!active||!wanted)return;
+   watch=navigator.geolocation.watchPosition(update=>{
+    if(token!==request||!active||!wanted)return;
+    const {latitude,longitude}=update.coords;
+    if(!Number.isFinite(latitude)||!Number.isFinite(longitude)||Math.abs(latitude)>90||Math.abs(longitude)>180)return;
+    if(location?.latitude===latitude&&location?.longitude===longitude)return;
+    location={latitude,longitude};status.textContent='';changed();
+   },error=>{
+    // A transient watch timeout must not discard the last valid position.
+    // Permission revocation is also handled by the Permissions API listener.
+    if(token===request&&error.code===1&&permission?.state==='denied'){
+     reset();toggle.checked=false;status.textContent=text.denied;changed();
+    }
+   },{enableHighAccuracy:false,timeout:15000,maximumAge:0});
   },error=>failed(error.code===1?text.denied:error.code===3?text.timeout:text.failed),
   {enableHighAccuracy:false,timeout:15000,maximumAge:0});
   changed();

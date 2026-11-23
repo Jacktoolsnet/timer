@@ -123,7 +123,8 @@ export function createSundial(){
   sun.setAttribute('transform',`translate(${180+facing*Math.sin(azimuth)*sunRadius} ${180-facing*Math.cos(azimuth)*sunRadius})`);
   // Keep the rendered tip inside the numeral ring; physical length remains in the model.
   const distance=Math.hypot(state.x,state.y);
-  const scale=distance>110?110/distance:1;
+  // Tiny real shadows otherwise disappear underneath the pin and its halo.
+  const scale=distance>.001?Math.max(14,Math.min(110,distance))/distance:1;
   const tipX=String(180+facing*state.x*scale),tipY=String(180+facing*state.y*scale);
   shadow.setAttribute('x2',tipX);shadow.setAttribute('y2',tipY);
   const fade=document.getElementById('sundial-shadow-fade')!;

@@ -523,3 +523,38 @@ test('São Paulo uses a south-up dial with readable hour labels and clear inset 
   for(const label of labels)expect(label.bottom).toBeLessThan(info!.y);
  }
 });
+
+test('changing simulated location updates the dial without re-enabling location',async({page,context})=>{
+ await context.grantPermissions(['geolocation']);
+ await context.setGeolocation({latitude:52.52,longitude:13.405});
+ await page.clock.install({time:new Date('2026-11-23T14:46:00Z')});
+ await page.goto('/de/');await page.locator('#trigger-view').click();
+ await page.getByRole('option',{name:'Sonnenuhr',exact:true}).click();await page.locator('#seasonal-location').click();
+ await expect(page.locator('#sundial-status')).toContainText('52,5200° N');
+ await expect(page.locator('#sundial-face')).toHaveAttribute('data-orientation','north');
+ await context.setGeolocation({latitude:-23.55052,longitude:-46.633309});
+ await expect(page.locator('#sundial-status')).toContainText('23,5505° S');
+ await expect(page.locator('#sundial-face')).toHaveAttribute('data-orientation','south');
+ await page.locator('#seasonal-north').check();
+ await context.setGeolocation({latitude:51.5,longitude:0});
+ await expect(page.locator('#sundial-view')).toHaveAttribute('data-location-state','missing');
+ await expect(page.locator('#sundial-status')).not.toContainText('51,5000');
+});
+
+test('near-zenith São Paulo shadow remains visible beyond the centre pin',async({page,context})=>{
+ const location={latitude:-23.55052,longitude:-46.633309};
+ const date=new Date('2026-11-23T14:46:00Z');
+ const physical=sundialState(date,location);
+ expect(physical.sun.altitude).toBeGreaterThan(85);
+ expect(physical.length).toBeLessThan(5);
+ await context.grantPermissions(['geolocation']);await context.setGeolocation(location);
+ await page.clock.install({time:date});
+ await page.goto('/de/');await page.locator('#trigger-view').click();
+ await page.getByRole('option',{name:'Sonnenuhr',exact:true}).click();await page.locator('#seasonal-location').click();
+ const shadow=page.locator('#sundial-shadow');
+ await expect(shadow).toHaveAttribute('visibility','visible');
+ const x=Number(await shadow.getAttribute('x2'))-180,y=Number(await shadow.getAttribute('y2'))-180;
+ expect(Math.hypot(x,y)).toBeCloseTo(14,4);
+ expect(x*physical.x+y*physical.y).toBeLessThan(0); // South-up projection
+ await expect(shadow.locator('title')).toContainText('sehr kurze');
+});
