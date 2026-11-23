@@ -6,9 +6,10 @@ import {languages,type Language} from '../../lib/i18n';
 export function getStaticPaths(){return languages.map(lang=>({params:{lang},props:{lang}}));}
 const {lang}=Astro.props as {lang:Language};
 const title=lang==='es'?'Instrucciones de uso':'Guide d’utilisation';
+const description=lang==='es'?'Aprende a configurar el reloj online: vistas, fecha, zonas horarias, modo de enfoque y ajustes locales. Consulta sus funciones y limitaciones.':'Découvrez comment configurer l’horloge en ligne : affichages, date, fuseaux horaires, vue concentration et réglages locaux, avec leurs limites.';
 
 ---
 {lang==='de'||lang==='en'?<Original lang={lang}/>:
- <Layout lang={lang} title={title} description={title+' · Jacktools Clock'} route="usage" legal>
+ <Layout lang={lang} title={title} description={description} route="usage" legal>
   <UsageTranslation tool="clock" lang={lang}/>
  </Layout>}
