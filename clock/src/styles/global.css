@@ -1137,18 +1137,27 @@ body.focus-view .clock-display[data-view=orbit] #orbit-clock { width:auto; max-w
 [data-view=sundial] #analog-clock { display:none; }
 #sundial-view { width:min(400px,100%); text-align:center; }
 #sundial-view[hidden], #sundial-settings[hidden], #sundial-clear[hidden] { display:none; }
-#sundial-face { width:100%; height:auto; fill:none; }
-.sundial-surface { fill:var(--surface); stroke:var(--accent); stroke-width:2; }
-.sundial-compass { stroke:var(--accent); stroke-opacity:.18; stroke-dasharray:3 6; }
-#sundial-face text { fill:var(--text); stroke:var(--surface); stroke-width:3; paint-order:stroke; text-anchor:middle; dominant-baseline:middle; font:13px system-ui; }
-#sundial-face .sundial-north { fill:var(--accent); font-weight:700; stroke:none; }
-#sundial-shadow { stroke:var(--text); stroke-opacity:.65; stroke-width:7; stroke-linecap:round; }
-.sundial-pin { fill:var(--accent); stroke:var(--surface); }
+#sundial-face { --sundial-paper:color-mix(in srgb,#fff 85%,var(--accent,#a64d35)); --sundial-ink:color-mix(in srgb,#000 70%,var(--accent,#a64d35)); width:100%; height:auto; fill:none; }
+#sundial-face .sundial-surface { fill:#fff8ec; fill:var(--sundial-paper); stroke:var(--accent); stroke-width:2; }
+.sundial-compass { stroke:var(--sundial-ink); stroke-opacity:.2; stroke-dasharray:3 6; }
+#sundial-face text { fill:var(--sundial-ink); stroke:var(--sundial-paper); stroke-width:3; paint-order:stroke; text-anchor:middle; dominant-baseline:middle; font:13px system-ui; }
+#sundial-face .sundial-north { fill:var(--sundial-ink); font-weight:700; stroke:none; }
+#sundial-shadow { stroke:var(--sundial-ink); stroke-opacity:.9; stroke-width:7; stroke-linecap:round; }
+.sundial-pin { fill:var(--accent); stroke:var(--sundial-ink); }
 #sundial-status, #sundial-time { font-size:14px; line-height:1.6; }
 #sundial-status:empty { display:none; }
 #sundial-settings .secondary { margin-top:10px; font-size:12px; }
 body.focus-view #sundial-view { width:min(50dvh,400px); }
 [data-view=sundial] #digital-clock { font-size:20px; }
 
-.sundial-hour-line { stroke:var(--accent); stroke-width:1; stroke-opacity:.2; }
-.sundial-hour-dot { fill:var(--accent); fill-opacity:.6; stroke:none; }
+.sundial-hour-line { stroke:var(--sundial-ink); stroke-width:1; stroke-opacity:.3; }
+.sundial-hour-dot { fill:var(--sundial-ink); fill-opacity:.7; stroke:none; }
+
+#sundial-status, #sundial-location-status:not(:empty) {
+ padding:10px 14px; border:1px solid var(--accent); border-radius:10px;
+ background:var(--surface); color:var(--text); box-shadow:0 3px 12px #0001;
+ font-size:14px; line-height:1.6;
+}
+#sundial-view[data-location-state=ready] #sundial-status { background:var(--accent-soft); color:var(--text); }
+#sundial-status:empty, #sundial-location-status:empty { display:none; }
+#sundial-location[aria-pressed=true] { border-color:var(--accent); background:var(--accent-soft); color:var(--text); }

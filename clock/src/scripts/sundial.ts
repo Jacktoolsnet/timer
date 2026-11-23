@@ -1,3 +1,4 @@
+import { storageAllowed } from '../lib/storage';
 import { sundialState, sundialHours } from '../lib/sundial';
 import type { SeasonalLocation } from '../lib/seasonal-location';
 
@@ -11,8 +12,26 @@ export function createSundial(){
  const shadow=document.getElementById('sundial-shadow')!;
  const time=document.getElementById('sundial-time')!;
  const text=JSON.parse(root.dataset.text!);
+ const preferenceKey='jacktools.clock.sundial-enabled.v1';
+ let wanted=false;
+ try {wanted=storageAllowed()&&localStorage.getItem(preferenceKey)==='yes';}catch{}
  let location:SeasonalLocation|undefined,request=0,last='',active=false,requesting=false;
+ let permission:PermissionStatus|undefined;
+ function saveMode(){
+  try{if(storageAllowed())localStorage.setItem(preferenceKey,wanted?'yes':'no');else localStorage.removeItem(preferenceKey);}catch{}
+ }
+ function coordinates(){
+  if(!location)return '';
+  const format=new Intl.NumberFormat(document.documentElement.lang,{minimumFractionDigits:4,maximumFractionDigits:4});
+  return `${format.format(Math.abs(location.latitude))}° ${location.latitude<0?'S':'N'} · ${format.format(Math.abs(location.longitude))}° ${location.longitude<0?'W':'E'}`;
+ }
+ function sync(){
+  button.setAttribute('aria-pressed',String(wanted));
+  root.dataset.locationState=requesting?'pending':location?'ready':'missing';
+ }
+
  function render(now:Date){
+  sync();
   if(!active)return;
   if(!location){shadow.setAttribute('visibility','hidden');time.textContent='';status.textContent=requesting?text.pending:controlStatus.textContent||text.missing;return;}
   const tick=String(Math.floor(now.getTime()/1000));
@@ -21,7 +40,7 @@ export function createSundial(){
   shadow.setAttribute('visibility',state.visible?'visible':'hidden');
   shadow.setAttribute('x2',String(180+state.x));shadow.setAttribute('y2',String(180+state.y));
   root.dataset.daylight=String(state.visible);
-  status.textContent=state.visible?'':text.night;
+  status.textContent=coordinates()+(state.visible?'':` · ${text.night}`);
   const minutes=Math.floor(state.solarHour*60)%1440;
   time.textContent=`${text.solar}: ${String(Math.floor(minutes/60)).padStart(2,'0')}:${String(minutes%60).padStart(2,'0')} · ${text.altitude}: ${state.sun.altitude.toFixed(1)}°`;
   // Rebuild date-specific markers once per minute, including a local date change.
@@ -50,20 +69,50 @@ export function createSundial(){
   request++;location=undefined;requesting=false;last='';button.disabled=false;clearButton.hidden=true;
   controlStatus.textContent='';document.getElementById('sundial-hours')!.replaceChildren();
   delete document.getElementById('sundial-hours')!.dataset.tick;delete root.dataset.daylight;
-  render(new Date());
+  sync();render(new Date());
  }
- button.addEventListener('click',()=>{
-  const token=++request;requesting=true;button.disabled=true;controlStatus.textContent=text.pending;render(new Date());
-  const failed=()=>{if(token!==request)return;requesting=false;button.disabled=false;controlStatus.textContent=text.failed;render(new Date());};
+ function acquire(){
+  if(requesting||!active)return;
+  wanted=true;saveMode();
+  const token=++request;requesting=true;button.disabled=true;clearButton.hidden=false;controlStatus.textContent=text.pending;render(new Date());
+  const failed=(error?:GeolocationPositionError)=>{
+   if(token!==request)return;
+   requesting=false;button.disabled=false;
+   controlStatus.textContent=error?.code===1?text.denied:error?.code===3?text.timeout:text.failed;
+   render(new Date());
+  };
   if(!window.isSecureContext||!navigator.geolocation){failed();return;}
   navigator.geolocation.getCurrentPosition(position=>{
    if(token!==request)return;
    const {latitude,longitude}=position.coords;
    if(!Number.isFinite(latitude)||!Number.isFinite(longitude)||Math.abs(latitude)>90||Math.abs(longitude)>180){failed();return;}
-   location={latitude,longitude};requesting=false;last='';button.disabled=false;clearButton.hidden=false;controlStatus.textContent='';render(new Date());
+   location={latitude,longitude};requesting=false;last='';button.disabled=false;clearButton.hidden=false;controlStatus.textContent=coordinates();render(new Date());
   },failed,{enableHighAccuracy:false,timeout:15000,maximumAge:60000});
- });
- clearButton.addEventListener('click',clear);
- document.addEventListener('preferences-cleared',clear);
- return {render,configure(enabled:boolean){active=enabled;root.hidden=!enabled;controls.hidden=!enabled;if(!enabled)clear();else{last='';render(new Date());}}};
+ }
+ button.addEventListener('click',acquire);
+ function forget(){wanted=false;saveMode();clear();}
+ clearButton.addEventListener('click',forget);
+ document.addEventListener('preferences-cleared',forget);
+ document.addEventListener('storage-enabled',saveMode);
+ // Permission changes may arrive before or after the position callback.
+ // Never cancel a pending request just because a browser permission prompt loses focus.
+ if(navigator.permissions){
+  void navigator.permissions.query({name:'geolocation'}).then(value=>{
+   permission=value;
+   permission.addEventListener('change',()=>{
+    if(permission?.state==='prompt'&&location){
+     clear();controlStatus.textContent=text.missing;render(new Date());
+    }else if(permission?.state==='denied'){
+     clear();controlStatus.textContent=text.denied;render(new Date());
+    }else if(permission?.state==='granted'&&active&&wanted&&!location&&!requesting)acquire();
+   });
+  }).catch(()=>{});
+ }
+ return {render,configure(enabled:boolean){
+  const entering=enabled&&!active;
+  active=enabled;root.hidden=!enabled;controls.hidden=!enabled;
+  if(!enabled){clear();return;}
+  last='';render(new Date());
+  if(entering&&wanted&&!location&&!requesting)acquire();
+ }};
 }
