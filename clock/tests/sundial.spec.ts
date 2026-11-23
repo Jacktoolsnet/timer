@@ -314,6 +314,7 @@ test('missing-location notice sits in the upper half without moving the flip clo
  await expect(page.locator('#sundial-coordinates #sundial-status')).toContainText('52,5200');
  await expect(page.locator('#sundial-view > #sundial-status')).toHaveCount(0);
  await expect(page.locator('#sundial-coordinates-area')).toHaveAttribute('visibility','visible');
+ await expect(page.locator('#sundial-coordinates-area')).toHaveAttribute('y','294');
  await expect(page.locator('#sundial-notice-area')).toHaveAttribute('visibility','hidden');
  await expect(page.locator('#sundial-flip-area')).toHaveAttribute('y','236');
  await page.locator('#seasonal-north').check();
@@ -338,6 +339,7 @@ test('solar information remains inside the opaque dial with a photograph backgro
  await expect(page.locator('#sundial-coordinates #sundial-status')).toContainText('52,5200');
  await expect(page.locator('#sundial-view > #sundial-status')).toHaveCount(0);
  await expect(page.locator('#sundial-coordinates-area')).toHaveAttribute('visibility','visible');
+ await expect(page.locator('#sundial-coordinates-area')).toHaveAttribute('y','294');
  await page.locator('#seasonal-north').check();
  await expect(page.locator('#sundial-info-area')).toHaveAttribute('visibility','hidden');
  await expect(page.locator('#sundial-face #sundial-status')).toBeVisible();
@@ -352,7 +354,7 @@ test('daylight band shows actual rise/set times and hides without a location',as
  await page.getByRole('option',{name:'Sonnenuhr',exact:true}).click();
  await expect(page.locator('#sundial-daylight')).toBeHidden();
  await page.locator('#seasonal-location').click();
- await expect(page.locator('#sundial-daylight-arc')).toBeVisible();
+ await expect(page.locator('#sundial-daylight-fill')).toBeVisible();
  await expect(page.locator('#sundial-sunrise-label')).toHaveText(/\d{2}:\d{2}/);
  await expect(page.locator('#sundial-sunset-label')).toHaveText(/\d{2}:\d{2}/);
  const rise=Number(await page.locator('#sundial-dawn-orange').getAttribute('offset'));
@@ -383,12 +385,12 @@ test('daylight band shows actual rise/set times and hides without a location',as
  expect(Math.abs((sunX-180)*shadowY-(sunY-180)*shadowX)).toBeLessThan(.01);
  await page.locator('#trigger-analogDesign').click();
  await page.getByRole('option',{name:'Römisch · Eckig',exact:true}).click();
- await expect(page.locator('#sundial-daylight-arc')).toBeVisible();
+ await expect(page.locator('#sundial-daylight-fill')).toBeVisible();
  const squareTransform=(await page.locator('#sundial-sun').getAttribute('transform'))!;
  const [sx,sy]=squareTransform.match(/-?[\d.]+/g)!.map(Number);
  expect(Math.hypot(sx-180,sy-180)).toBeCloseTo(squareRadius(Math.atan2(sx-180,180-sy),137,27),5);
  await page.locator('#seasonal-north').check();
- await expect(page.locator('#sundial-daylight-arc')).toBeHidden();
+ await expect(page.locator('#sundial-daylight-fill')).toBeHidden();
  await expect(page.locator('#sundial-sunrise-label')).toBeHidden();
 });
 
@@ -403,7 +405,7 @@ test('polar daylight band has no invented sunrise or sunset times',async({page,c
  await expect(page.locator('#sundial-daylight')).toHaveAttribute('aria-label','Polartag');
  await expect(page.locator('#sundial-sunrise-label')).toBeHidden();
  await expect(page.locator('#sundial-sunset-label')).toBeHidden();
- await expect(page.locator('#sundial-daylight-arc')).toHaveAttribute('stroke','var(--sundial-day)');
+ await expect(page.locator('#sundial-daylight-arc')).toHaveCount(0);
 });
 
 
@@ -459,20 +461,42 @@ test('day and night colours follow palette changes immediately',async({page,cont
  await page.locator('#seasonal-location').click();
  await expect(page.locator('#sundial-view')).toHaveAttribute('data-location-state','ready');
  for(const theme of ['light','dark']){
-  const day=new Set<string>(),night=new Set<string>(),bands=new Set<string>(),suns=new Set<string>();
+  const day=new Set<string>(),night=new Set<string>(),suns=new Set<string>();
   for(const palette of ['terracotta','blue','green','orange','red','violet','teal','rose']){
    await page.evaluate(({theme,palette})=>{document.documentElement.dataset.theme=theme;document.documentElement.dataset.palette=palette;},{theme,palette});
    const colours=await page.evaluate(()=>({
     day:getComputedStyle(document.querySelector('#sundial-dawn-orange')!).stopColor,
     night:getComputedStyle(document.querySelector('#sundial-dawn-blue')!).stopColor,
-    band:getComputedStyle(document.querySelector('#sundial-daylight-arc')!).stroke,
     sun:getComputedStyle(document.querySelector('#sundial-sun')!).color
    }));
    expect(colours.day).not.toBe(colours.night);
    expect(colours.day).not.toBe('rgb(0, 0, 0)');
-   day.add(colours.day);night.add(colours.night);bands.add(colours.band);suns.add(colours.sun);
-   expect(colours.band).not.toBe(colours.day);
+   day.add(colours.day);night.add(colours.night);suns.add(colours.sun);
   }
-  expect(day.size).toBe(8);expect(night.size).toBe(8);expect(bands.size).toBe(8);expect(suns.size).toBe(8);
+  expect(day.size).toBe(8);expect(night.size).toBe(8);expect(suns.size).toBe(8);
+ }
+});
+
+test('rise/set dots sit on the frame with labels outside and no overlaps',async({page,context})=>{
+ await context.grantPermissions(['geolocation']);await context.setGeolocation({latitude:52.52,longitude:13.405});
+ await page.clock.install({time:new Date('2026-11-23T12:00:00Z')});
+ await page.goto('/de/');await page.locator('#trigger-view').click();
+ await page.getByRole('option',{name:'Sonnenuhr',exact:true}).click();
+ await page.locator('#seasonal-location').click();
+ await expect(page.locator('#sundial-view')).toHaveAttribute('data-location-state','ready');
+ for(const square of [false,true]){
+  if(square){await page.locator('#trigger-analogDesign').click();await page.getByRole('option',{name:'Römisch · Eckig',exact:true}).click();}
+  for(const event of ['sunrise','sunset']){
+   const dot=page.locator('#sundial-'+event+'-dot');
+   const x=Number(await dot.getAttribute('cx'))-180,y=Number(await dot.getAttribute('cy'))-180;
+   const radius=square?squareRadius(Math.atan2(x,-y),151,30):151;
+   expect(Math.hypot(x,y)).toBeCloseTo(radius,4);
+   const label=await page.locator('#sundial-'+event+'-label').boundingBox();
+   const bounds=await page.locator('#sundial-face').boundingBox();
+   expect(label!.x).toBeGreaterThanOrEqual(bounds!.x);
+   expect(label!.x+label!.width).toBeLessThanOrEqual(bounds!.x+bounds!.width);
+   const flip=await page.locator('#sundial-flip').boundingBox();
+   expect(label!.x+label!.width<flip!.x||label!.x>flip!.x+flip!.width||label!.y+label!.height<flip!.y||label!.y>flip!.y+flip!.height).toBe(true);
+  }
  }
 });

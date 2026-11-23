@@ -43,11 +43,6 @@ export function createSundial(){
    const radius=(surface?(design.startsWith('square-')?squareRadius(angle-Math.PI/2,150,29):150):rimRadius(angle-Math.PI/2))+extra;
    return {x:180-Math.cos(angle)*radius,y:180+Math.sin(angle)*radius};
   };
-  const path=Array.from({length:121},(_,i)=>{
-   const p=point(i/120);return `${i?'L':'M'}${p.x},${p.y}`;
-  }).join(' ');
-  const arc=document.getElementById('sundial-daylight-arc')!;
-  arc.setAttribute('d',path);
   const fill=document.getElementById('sundial-daylight-fill')!;
   const rise=times.sunrise instanceof Date?fraction(times.sunrise):0;
   const set=times.sunset instanceof Date?fraction(times.sunset):1;
@@ -70,15 +65,29 @@ export function createSundial(){
    sector.setAttribute('fill',`color-mix(in srgb,var(--sundial-day) ${(warmth*100).toFixed(3)}%,var(--sundial-night))`);sectors.append(sector);
   }
   fill.replaceChildren(sectors);
-  arc.setAttribute('stroke',times.alwaysUp?'var(--sundial-day)':times.alwaysDown?'var(--sundial-night)':'url(#sundial-daylight-colors)');
   const format=new Intl.DateTimeFormat(document.documentElement.lang,{timeZone:zone,hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
   for(const [event,date] of [['sunrise',times.sunrise],['sunset',times.sunset]] as const){
    const dot=document.getElementById('sundial-'+event+'-dot')!;
    const label=document.getElementById('sundial-'+event+'-label')!;
+   const leader=document.getElementById('sundial-'+event+'-leader')!;
    const valid=date instanceof Date&&Number.isFinite(date.getTime());
-   dot.setAttribute('visibility',valid?'visible':'hidden');label.setAttribute('visibility',valid?'visible':'hidden');
+   dot.setAttribute('visibility',valid?'visible':'hidden');label.setAttribute('visibility',valid?'visible':'hidden');leader.setAttribute('visibility',valid?'visible':'hidden');
    if(!valid)continue;
-   const t=fraction(date),p=point(t),l=point(t,12);
+   const t=fraction(date);
+   // The outer frame has half-size/radius 151 and corner radius 30.
+   const az=fraction(date)*Math.PI+Math.PI/2;
+   const radius=design.startsWith('square-')?squareRadius(az,151,30):151;
+   const p={x:180+Math.sin(az)*radius,y:180-Math.cos(az)*radius};
+   const l={x:180+Math.sin(az)*(radius+10),y:180-Math.cos(az)*(radius+10)};
+   const right=event==='sunrise';
+   // Keep north's label clear, and separate the two event labels near polar limits.
+   if(Math.abs(l.x-180)<30){
+    l.x=right?204:156;
+    if(l.y<35)l.y=5;
+   }
+   label.style.textAnchor=right?'start':'end';
+   leader.setAttribute('x1',String(p.x));leader.setAttribute('y1',String(p.y));
+   leader.setAttribute('x2',String(l.x));leader.setAttribute('y2',String(l.y));
    dot.setAttribute('cx',String(p.x));dot.setAttribute('cy',String(p.y));
    label.setAttribute('x',String(l.x));label.setAttribute('y',String(l.y));
    label.textContent=format.format(date);

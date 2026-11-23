@@ -5,7 +5,7 @@ const {lang}=Astro.props as {lang:Language};
 const t=sundialText[lang];
 ---
 <div id="sundial-view" data-text={JSON.stringify(t)} hidden>
-<svg class="analog-face" data-design="standard" id="sundial-face" viewBox="0 0 360 360" role="img" aria-label={t.sundial}>
+<svg class="analog-face" data-design="standard" id="sundial-face" viewBox="-20 -12 400 384" role="img" aria-label={t.sundial}>
 <defs>
 <radialGradient id="sundial-light" cx="32%" cy="24%" r="85%">
 <stop class="sundial-light-start" offset="0"/>
@@ -45,10 +45,11 @@ const t=sundialText[lang];
 </g>
 <g id="sundial-daylight" visibility="hidden">
 <g id="sundial-daylight-fill" mask="url(#sundial-radial-mask)"/>
-<path id="sundial-daylight-arc"/>
 <circle id="sundial-sunrise-dot" r="3"/>
 <circle id="sundial-sunset-dot" r="3"/>
+<line id="sundial-sunrise-leader" class="sundial-event-leader"/>
 <text id="sundial-sunrise-label"/>
+<line id="sundial-sunset-leader" class="sundial-event-leader"/>
 <text id="sundial-sunset-label"/>
 </g>
 <path class="sundial-compass" d="M180 42v276M42 180h276"/>
@@ -71,7 +72,7 @@ const t=sundialText[lang];
 <foreignObject id="sundial-flip-area" x="72" y="236" width="216" height="72" aria-hidden="true">
 <div class="sundial-flip-readout"><div id="sundial-flip"></div><p id="sundial-flip-context"></p></div>
 </foreignObject>
-<foreignObject id="sundial-coordinates-area" x="72" y="302" width="216" height="22" visibility="hidden">
+<foreignObject id="sundial-coordinates-area" x="72" y="294" width="216" height="18" visibility="hidden">
 <div id="sundial-coordinates"></div>
 </foreignObject>
 </svg>

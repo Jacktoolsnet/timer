@@ -1187,7 +1187,7 @@ body.focus-view #sundial-view { width:min(50dvh,400px); }
 .clock-card #sundial-flip .flip-half { background:color-mix(in srgb,var(--sundial-paper) 80%,var(--accent)); color:var(--sundial-ink); }
 #sundial-flip .flip-digit::before { display:none; }
 #sundial-flip .flip-digit::after { border-color:color-mix(in srgb,var(--sundial-ink) 20%,transparent); }
-#sundial-flip-context { margin:5px 0 0; max-width:210px; color:var(--sundial-ink); font:10px/1.3 system-ui; text-align:center; overflow-wrap:anywhere; }
+#sundial-flip-context { margin:3px 0 0; max-width:210px; color:var(--sundial-ink); font:10px/1.3 system-ui; text-align:center; overflow-wrap:anywhere; }
 #sundial-flip-context:empty { display:none; }
 
 /* Keep the no-location notice inside the dial and remove redundant vertical gaps. */
@@ -1214,7 +1214,6 @@ body.focus-view #sundial-view { width:min(50dvh,400px); }
 #sundial-info-area #sundial-time:empty { display:none; }
 
 /* A quiet dawn-to-dusk band follows the lower dial edge, behind the readouts. */
-#sundial-daylight-arc { fill:none; stroke-width:7; stroke-opacity:.6; stroke-linecap:round; }
 #sundial-daylight circle { fill:#edac69; stroke:var(--sundial-paper); stroke-width:1.5; }
 #sundial-face #sundial-daylight text { font:9px system-ui; fill:var(--sundial-ink); stroke:var(--sundial-paper); stroke-width:3px; paint-order:stroke; }
 
@@ -1272,10 +1271,6 @@ body.focus-view .clock-display[data-view=sundial] #sundial-status {
 #sundial-face {
  --sundial-orbit-accent:color-mix(in srgb,var(--accent) 70%,var(--sundial-ink));
 }
-#sundial-daylight-arc {
- stroke:var(--sundial-orbit-accent); stroke-width:8; stroke-opacity:.95;
- filter:drop-shadow(0 1px 2px color-mix(in srgb,var(--accent) 20%,transparent));
-}
 #sundial-sun {
  color:var(--sundial-orbit-accent);
  filter:drop-shadow(0 0 3px color-mix(in srgb,var(--accent) 55%,transparent));
@@ -1288,7 +1283,7 @@ body.focus-view .clock-display[data-view=sundial] #sundial-status {
 #sundial-sun .sundial-sun-ray { stroke-width:2; }
 
 /* Coordinates finish the inset readout rather than adding height below the dial. */
-#sundial-coordinates { display:flex; justify-content:center; align-items:center; height:22px; }
+#sundial-coordinates { display:flex; justify-content:center; align-items:center; height:18px; }
 #sundial-view #sundial-coordinates #sundial-status {
  margin:0; padding:0; border:0; border-radius:0; box-shadow:none; background:transparent;
  color:var(--sundial-ink); font:9.5px/1.3 system-ui; letter-spacing:0;
@@ -1299,3 +1294,7 @@ body.focus-view .clock-display[data-view=sundial] #sundial-status {
  background:var(--sundial-paper); font:12px/1.4 system-ui; text-align:center;
 }
 #sundial-night-hint[hidden] { display:none; }
+
+/* Event dots sit on the frame; labels have their own reserved space outside it. */
+#sundial-face #sundial-daylight text { font-size:10px; stroke-width:4px; }
+.sundial-event-leader { stroke:var(--sundial-orbit-accent); stroke-width:.8; stroke-opacity:.65; }
