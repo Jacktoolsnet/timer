@@ -13,7 +13,7 @@ import '../../../shared/page-entry.css';
 import { colorSchemes } from '../lib/appearance';
 import { languages, languageNames, type Language } from '../lib/i18n';
 import { getCompanyDictionary } from '../lib/company-ui';
-interface Props { lang: Language; title: string; description: string; route: string; noindex?: boolean; legal?: boolean; homeAlternates?: boolean; canonicalPath?:string; socialImageProject?:SocialProject }
+interface Props { lang: Language; title: string; description: string; route: string; noindex?: boolean; legal?: boolean; homeAlternates?: boolean; canonicalPath?:string; socialImageProject?:SocialProject; guideSlug?:string }
 const { lang, title, description, noindex = false, legal = false, homeAlternates = true } = Astro.props;
 const t = getCompanyDictionary(lang);
 const motion = backgroundCopy[lang];
@@ -42,6 +42,10 @@ const canonical = new URL(Astro.props.canonicalPath ?? (Astro.url.pathname === '
     {!legal && homeAlternates && <>
       {languages.map(language => <link rel="alternate" hreflang={language} href={new URL('/'+language+'/',Astro.site)} />)}
       <link rel="alternate" hreflang="x-default" href={new URL('/en/',Astro.site)} />
+    </>}
+    {Astro.props.guideSlug && <>
+      {languages.map(language => <link rel="alternate" hreflang={language} href={new URL('/'+language+'/tools/'+Astro.props.guideSlug+'/',Astro.site)} />)}
+      <link rel="alternate" hreflang="x-default" href={new URL('/en/tools/'+Astro.props.guideSlug+'/',Astro.site)} />
     </>}
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title + ' · JackTools.Net'} />
@@ -79,7 +83,7 @@ const canonical = new URL(Astro.props.canonicalPath ?? (Astro.url.pathname === '
               <section class="preferences-language" aria-labelledby="language-heading">
                 <h3 id="language-heading">{t.language}</h3>
                 <nav class="language-menu" aria-label={t.language}>
-                  {languages.map(language => <a href={'/'+language+'/'} lang={language} hreflang={language} aria-current={language===lang?'page':undefined}>
+                  {languages.map(language => <a href={'/'+language+'/'+(Astro.props.guideSlug ? 'tools/'+Astro.props.guideSlug+'/' : '')} lang={language} hreflang={language} aria-current={language===lang?'page':undefined}>
                     <span>{languageNames[language]}</span>
                     {language===lang && <svg class="language-check" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4 10-10"/></svg>}
                   </a>)}

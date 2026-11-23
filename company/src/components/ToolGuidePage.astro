@@ -8,31 +8,34 @@ import type { SocialProject } from '../../../shared/social';
 import BrandIcon from '../../../shared/BrandIcon.astro';
 import RelatedTools from './RelatedTools.astro';
 import { guideCards, type ToolGuide } from '../lib/tool-guides';
-interface Props { guide: ToolGuide }
-const {guide:g} = Astro.props;
+import { guideTranslator } from '../lib/guide-copy';
+import type { Language } from '../lib/i18n';
+interface Props { guide: ToolGuide; lang?: Language }
+const {guide:g, lang='de'} = Astro.props;
+const t = guideTranslator(lang);
 const pictures = (galleries as Record<string,{id:string;title:string;caption:string;alt:string;src:string;thumb:string;width:number;height:number}[]>)[g.slug];
 ---
-<Layout lang="de" title={g.seoTitle} description={g.description} route={'tools/'+g.slug+'/'} homeAlternates={false} canonicalPath={'/de/tools/'+g.slug+'/'} socialImageProject={(g.slug === 'messagedrop' ? 'company' : g.slug) as SocialProject}>
-  <GuideSeo name={g.name} headline={g.title} description={g.lead} path={'/de/tools/'+g.slug+'/'} toolUrl={g.url} image={pictures[0].src} />
-  <a slot="header-action" class="guide-header-action" href={g.url}>{g.name} öffnen</a>
+<Layout lang={lang} guideSlug={g.slug} title={g.seoTitle} description={g.description} route={'tools/'+g.slug+'/'} homeAlternates={false} canonicalPath={'/'+lang+'/tools/'+g.slug+'/'} socialImageProject={(g.slug === 'messagedrop' ? 'company' : g.slug) as SocialProject}>
+  <GuideSeo lang={lang} name={g.name} headline={g.title} description={g.lead} path={'/'+lang+'/tools/'+g.slug+'/'} toolUrl={g.url} image={pictures[0].src} />
+  <a slot="header-action" class="guide-header-action" href={g.url}>{t("{name} öffnen").replace("{name}",g.name)}</a>
   <article class="tool-guide">
-    <header class="tool-guide-hero">
-      <div><p class="eyebrow">{g.tag} · ANLEITUNG</p><h1>{g.title}</h1><p class="guide-lead">{g.lead}</p><a class="guide-primary" href={g.url}>{g.name} öffnen</a></div>
+    <header class="tool-guide-hero" data-print-title={"Jacktools.net · "+t("ANLEITUNG")}>
+      <div><p class="eyebrow">{g.tag} · {t("ANLEITUNG")}</p><h1>{g.title}</h1><p class="guide-lead">{g.lead}</p><a class="guide-primary" href={g.url}>{t("{name} öffnen").replace("{name}",g.name)}</a></div>
       <div class="tool-identity" aria-hidden="true"><span class="identity-icon">{g.slug === 'messagedrop' ? <img src="/markers/message-marker.svg" width="96" height="120" alt=""/> : <BrandIcon tool={g.slug as 'clock'|'stopwatch'|'calculator'|'breathe'|'relax'|'metronome'} />}</span><strong>{g.name}</strong><span>{g.tag}</span></div>
     </header>
-    <ToolShowcase pictures={pictures} name={g.name} intro={g.slug === 'messagedrop' ? 'Einblicke in die öffentliche Einrichtung und ergänzende Schaubilder zu Karte, Beiträgen und Sichtbarkeit. Keine privaten Nutzerinhalte. Zum Vergrößern ein Bild anklicken.' : 'Entdecke verschiedene Ansichten und Farbstile von '+g.name+'. Die Screenshots stammen aus der Online-Anwendung. Jedes Bild lässt sich vergrößern.'} />
-    <nav class="guide-toc" aria-labelledby="toc-heading"><strong id="toc-heading">In dieser Anleitung</strong><div class="toc-grid"><a href="#ueberblick"><span>Funktionen im Überblick</span><small>Was das Tool für dich bereithält</small></a>{g.sections.map(section=><a href={'#'+section.id}><span>{section.title}</span><small>{section.summary}</small></a>)}<a href="#fragen"><span>Fragen & Grenzen</span><small>Wichtige Antworten vor dem Start</small></a></div></nav>
-    <section id="ueberblick"><p class="eyebrow">DAS TOOL KENNENLERNEN</p><h2>{g.name}: die wichtigsten Funktionen</h2><div class="feature-grid">{g.features.map(feature=><div><h3>{feature.title}</h3><p>{feature.text}</p></div>)}</div></section>
-    <AdBanner lang="de" />
+    <ToolShowcase pictures={pictures} name={g.name} lang={lang} intro={g.slug === 'messagedrop' ? t("Einblicke in die öffentliche Einrichtung und ergänzende Schaubilder zu Karte, Beiträgen und Sichtbarkeit. Keine privaten Nutzerinhalte. Zum Vergrößern ein Bild anklicken.") : t("Entdecke verschiedene Ansichten und Farbstile von {name}. Die Screenshots stammen aus der Online-Anwendung. Jedes Bild lässt sich vergrößern.").replace("{name}",g.name)} />
+    <nav class="guide-toc" aria-labelledby="toc-heading"><strong id="toc-heading">{t("In dieser Anleitung")}</strong><div class="toc-grid"><a href="#ueberblick"><span>{t("Funktionen im Überblick")}</span><small>{t("Was das Tool für dich bereithält")}</small></a>{g.sections.map(section=><a href={'#'+section.id}><span>{section.title}</span><small>{section.summary}</small></a>)}<a href="#fragen"><span>{t("Fragen & Grenzen")}</span><small>{t("Wichtige Antworten vor dem Start")}</small></a></div></nav>
+    <section id="ueberblick"><p class="eyebrow">{t("DAS TOOL KENNENLERNEN")}</p><h2>{t("{name}: die wichtigsten Funktionen").replace("{name}",g.name)}</h2><div class="feature-grid">{g.features.map(feature=><div><h3>{feature.title}</h3><p>{feature.text}</p></div>)}</div></section>
+    <AdBanner lang={lang} />
     {g.sections.map(section=><section id={section.id}>
       <h2>{section.title}</h2>
       {section.paragraphs.map(paragraph=><p>{paragraph}</p>)}
       {section.steps.length > 0 && <ol>{section.steps.map(step=><li>{step}</li>)}</ol>}
       {section.example && <aside class="guide-example"><h3>{section.example.title}</h3><p>{section.example.text}</p></aside>}
     </section>)}
-    <section id="fragen"><h2>Häufige Fragen und wichtige Grenzen</h2>{g.faq.map((faq,index)=><details open={index === 0}><summary>{faq.question}</summary><p>{faq.answer}</p></details>)}</section>
-    <footer class="guide-end"><p class="eyebrow">AUSPROBIEREN STATT NUR LESEN</p><h2>Dein Einstieg mit {g.name}</h2><p>{g.end}</p><a class="guide-primary" href={g.url}>{g.name} öffnen</a><div class="end-links"><a href={'/de/#'+guideCards[g.slug]}>Zur Toolübersicht</a><a href="mailto:jacktoolsnet@gmail.com">Feedback zur Anleitung</a></div></footer>
-    <RelatedTools current={g.slug} />
+    <section id="fragen"><h2>{t("Häufige Fragen und wichtige Grenzen")}</h2>{g.faq.map((faq,index)=><details open={index === 0}><summary>{faq.question}</summary><p>{faq.answer}</p></details>)}</section>
+    <footer class="guide-end"><p class="eyebrow">{t("AUSPROBIEREN STATT NUR LESEN")}</p><h2>{t("Dein Einstieg mit {name}").replace("{name}",g.name)}</h2><p>{g.end}</p><a class="guide-primary" href={g.url}>{t("{name} öffnen").replace("{name}",g.name)}</a><div class="end-links"><a href={'/'+lang+'/#'+guideCards[g.slug]}>{t("Zur Toolübersicht")}</a><a href="mailto:jacktoolsnet@gmail.com">{t("Feedback zur Anleitung")}</a></div></footer>
+    <RelatedTools current={g.slug} lang={lang} />
   </article>
 </Layout>
 <style>
@@ -57,6 +60,6 @@ const pictures = (galleries as Record<string,{id:string;title:string;caption:str
 :global(body:has(.tool-guide) .site-header),:global(body:has(.tool-guide) .site-footer),:global(body:has(.tool-guide) .ambient-background),:global(body:has(.tool-guide) .skip-link),:global(body:has(.tool-guide) dialog),:global(body:has(.tool-guide) [data-ad-placement]){display:none!important}
 :global(body:has(.tool-guide) .site-shell),:global(body:has(.tool-guide) main){display:block!important;width:auto!important;max-width:none!important;min-height:0!important;margin:0!important;padding:0!important;overflow:visible!important}
 .tool-guide,.tool-guide *{background:transparent!important;color:#000!important;box-shadow:none!important;text-shadow:none!important;letter-spacing:normal!important;font-family:Arial,Helvetica,sans-serif!important}.tool-guide{font-size:11pt;line-height:1.45;padding:0}.tool-identity,.guide-toc,.tool-screenshot,.end-links,.related-guides,.eyebrow{display:none!important}
-.tool-guide-hero{display:block;padding:0 0 4mm;border-bottom:1pt solid #999}.tool-guide-hero::before{content:'Jacktools.net · Anleitung';font-size:10pt}.tool-guide h1{font-size:24pt;line-height:1.15;margin:4mm 0}.tool-guide h2{font-size:15pt;margin:0 0 3mm}.tool-guide h3{font-size:12pt;margin:0 0 2mm}.tool-guide h1,.tool-guide h2,.tool-guide h3,.tool-guide summary{break-after:avoid-page}.tool-guide section{padding:5mm 0;border-bottom:1pt solid #ccc}.tool-guide p,.tool-guide li{orphans:3;widows:3}.tool-guide p{margin:0 0 3mm}.feature-grid{display:block}.feature-grid>div{border:0;padding:3mm 0;break-inside:avoid-page}.guide-example{padding:3mm 4mm;border:1pt solid #999;margin:4mm 0;break-inside:avoid-page}.tool-guide details{padding:3mm 0;break-inside:avoid-page}.tool-guide summary{list-style:none;min-height:0;margin-bottom:2mm}.tool-guide summary::marker{content:''}.tool-guide details::details-content{content-visibility:visible;display:block}.tool-guide details>p{display:block!important}.tool-guide a[href^="https://"]::after{content:' (' attr(href) ')';font-size:9pt;font-weight:normal;overflow-wrap:anywhere}.guide-primary{display:inline;border:0;padding:0;margin:0;font-size:10pt;text-decoration:underline}.guide-end{border:0;padding:5mm 0 0;margin:0}
+.tool-guide-hero{display:block;padding:0 0 4mm;border-bottom:1pt solid #999}.tool-guide-hero::before{content:attr(data-print-title);font-size:10pt}.tool-guide h1{font-size:24pt;line-height:1.15;margin:4mm 0}.tool-guide h2{font-size:15pt;margin:0 0 3mm}.tool-guide h3{font-size:12pt;margin:0 0 2mm}.tool-guide h1,.tool-guide h2,.tool-guide h3,.tool-guide summary{break-after:avoid-page}.tool-guide section{padding:5mm 0;border-bottom:1pt solid #ccc}.tool-guide p,.tool-guide li{orphans:3;widows:3}.tool-guide p{margin:0 0 3mm}.feature-grid{display:block}.feature-grid>div{border:0;padding:3mm 0;break-inside:avoid-page}.guide-example{padding:3mm 4mm;border:1pt solid #999;margin:4mm 0;break-inside:avoid-page}.tool-guide details{padding:3mm 0;break-inside:avoid-page}.tool-guide summary{list-style:none;min-height:0;margin-bottom:2mm}.tool-guide summary::marker{content:''}.tool-guide details::details-content{content-visibility:visible;display:block}.tool-guide details>p{display:block!important}.tool-guide a[href^="https://"]::after{content:' (' attr(href) ')';font-size:9pt;font-weight:normal;overflow-wrap:anywhere}.guide-primary{display:inline;border:0;padding:0;margin:0;font-size:10pt;text-decoration:underline}.guide-end{border:0;padding:5mm 0 0;margin:0}
 }
 </style>

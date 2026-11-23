@@ -1,0 +1,16 @@
+---
+import ToolGuidePage from '../../../components/ToolGuidePage.astro';
+import TimerGuidePage from '../../../components/TimerGuidePage.astro';
+import { localizedGuides } from '../../../lib/guide-copy';
+import { languages, type Language } from '../../../lib/i18n';
+import type { ToolGuide } from '../../../lib/tool-guides';
+export function getStaticPaths() {
+ return languages.filter(lang=>lang!=='de').flatMap(lang=>[
+  {params:{lang,guide:'timer'},props:{lang,guide:null}},
+  ...localizedGuides(lang).map(guide=>({params:{lang,guide:guide.slug},props:{lang,guide}})),
+ ]);
+}
+interface Props { lang:Language; guide:ToolGuide|null }
+const {lang,guide}=Astro.props;
+---
+{guide ? <ToolGuidePage lang={lang} guide={guide} /> : <TimerGuidePage lang={lang} />}

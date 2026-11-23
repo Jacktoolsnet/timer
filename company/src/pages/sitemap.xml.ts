@@ -6,5 +6,10 @@ export function GET({ site }: { site: URL | undefined }) {
   // Root negotiates browser language; legal originals remain noindex.
   const url=(lang:string)=>new URL('/'+lang+'/',site);
   const entries = languages.map(lang=>({url:url(lang),alternatives:[...languages.map(language=>({language,url:url(language)})),{language:'x-default',url:url('en')}]}));
-  return sitemapResponse([...entries, {url:new URL('/de/tools/timer/',site)}, ...toolGuides.map(guide=>({url:new URL('/de/tools/'+guide.slug+'/',site)}))]);
+  const guides=['timer',...toolGuides.map(guide=>guide.slug)];
+  const guideEntries=guides.flatMap(slug=>languages.map(lang=>({
+    url:new URL('/'+lang+'/tools/'+slug+'/',site),
+    alternatives:[...languages.map(language=>({language,url:new URL('/'+language+'/tools/'+slug+'/',site)})),{language:'x-default',url:new URL('/en/tools/'+slug+'/',site)}],
+  })));
+  return sitemapResponse([...entries,...guideEntries]);
 }

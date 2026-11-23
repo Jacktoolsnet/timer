@@ -1,4 +1,4 @@
-import copy from './company-copy.json';
+import copy from './company-copy.json' with { type: 'json' };
 import type { Language } from './i18n';
 export function companyTranslator(lang: Language) {
  return (text: string): string => {

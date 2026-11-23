@@ -148,8 +148,8 @@ Die deutsche Anleitung liegt unter `/de/tools/timer/` und ist auf der deutschen
 Startseite in der Timer-Karte verlinkt. Sie erklärt Countdown, Pomodoro und
 Intervalltimer mit Beispielen, lokalen Einstellungen und Browser-Grenzen.
 Die bestehenden Kurzadressen (insbesondere `/timer/`) bleiben Weiterleitungen.
-Die Anleitung besitzt einen eigenen Canonical und Sitemap-Eintrag; solange keine
-Übersetzungen existieren, werden keine hreflang-Verweise auf fremde Inhalte gesetzt.
+Die Anleitung besitzt eigene Canonicals, Sitemap-Einträge und wechselseitige
+hreflang-Verweise für Deutsch, Englisch, Spanisch und Französisch.
 
 Gezielter Browser-Test: `npx playwright test tests/timer-guide.spec.ts`.
 
@@ -165,14 +165,14 @@ Originalgröße öffnen und bleiben in der Druckansicht ausgeblendet.
 Für alle sieben weiteren Tools der öffentlichen Startseite gibt es deutsche
 Detailseiten unter `/de/tools/{clock,stopwatch,calculator,breathe,relax,metronome,messagedrop}/`.
 Die Startseite verlinkt sie als sekundäre Buttons; bestehende Kurzadressen bleiben
-unverändert Weiterleitungen zu den Anwendungen. Übersetzungen sind noch nicht
-angelegt, daher keine fremdsprachigen Links oder hreflang-Verweise auf diese Texte.
+unverändert Weiterleitungen zu den Anwendungen. Auch Englisch, Spanisch und
+Französisch sind unter den entsprechenden Sprachpräfixen verfügbar.
 Lava und SceneScript sind weiterhin nicht Teil der öffentlichen Toolliste.
 
 - Redaktionelle Inhalte: `src/lib/tool-guides.json`
 - Metadaten/Bilder: `src/lib/tool-guides.ts`
 - Gemeinsame Darstellung: `src/components/ToolGuidePage.astro`
-- Galerie und Druck-FAQ-Verhalten: `src/components/GuideGallery.astro`
+- Galerie und Druck-FAQ-Verhalten: `src/components/ToolShowcase.astro`
 - Prüfungen: `npx playwright test tests/tool-guides.spec.ts`
 
 Inhalte wurden anhand der lokalen Tool-Komponenten, Engines und READMEs erstellt.
@@ -193,9 +193,9 @@ Alle acht Detailseiten (einschließlich Timer) besitzen individuelle Titel und
 Beschreibungen, feste selbstreferenzierende Canonicals mit abschließendem Slash,
 Open-Graph-/Twitter-Metadaten sowie ein `WebPage`-/`Article`-JSON-LD aus sichtbaren
 Inhalten. Keine erfundenen Bewertungen, Veröffentlichungsdaten oder FAQ-Rich-Result-
-Versprechen. Ohne veröffentlichte Übersetzungen werden weiterhin keine
-hreflang-Alternativen angegeben. Die Anleitungen sind untereinander und von der
-Startseite aus mit normalen HTML-Links erreichbar und in der Sitemap enthalten.
+Versprechen. Alle vier Sprachversionen verweisen wechselseitig per hreflang
+aufeinander (x-default: Englisch). Die Anleitungen sind untereinander und von der
+jeweiligen Startseite aus mit normalen HTML-Links erreichbar und in der Sitemap enthalten.
 
 Die bereits vorhandenen Tool-Social-PNGs werden lokal unter `public/social/`
 mitgeliefert. MessageDrop verwendet weiterhin das allgemeine Company-Vorschaubild.
@@ -204,7 +204,7 @@ veröffentlichenden Website zu ändern. Der Standard anderer Projekte bleibt gle
 
 Prüfungen: `npm run build`, `python3 ../scripts/check-seo.py company` und
 `npx playwright test tests/guide-seo.spec.ts`. Der Sitemap-Checker berücksichtigt
-jetzt die zwölf Company-URLs (vier Startseiten plus acht deutsche Anleitungen).
+jetzt die 36 Company-URLs (vier Startseiten plus acht Anleitungen in vier Sprachen).
 Nach tatsächlicher Veröffentlichung müssen Erreichbarkeit, Weiterleitungen und
 Indexierung auf dem Live-Host separat geprüft und die Sitemap in Search Console
 eingereicht werden. Lokale Prüfungen sind keine Ranking- oder AdSense-Zusage.
@@ -276,3 +276,29 @@ speichert optimierte Thumbnails. Beim isolierten Zuschneiden von Tool-Karten wir
 der feste Seitenheader für die Aufnahme ausgeblendet, damit er den oberen Kartenrand
 nicht überdeckt. Die Basis- und Schaubild-Skripte erhalten vorhandene Zusatzbilder.
 Alle Beispielrechnungen und kurzen Messungen sind eigens für die Aufnahmen erzeugt.
+
+### Anleitungen in vier Sprachen
+
+Alle acht Anleitungen stehen unter `/{de,en,es,fr}/tools/{slug}/` zur Verfügung.
+Die deutsche Timer-Route verwendet jetzt `TimerGuidePage.astro`; Layout, Galerie,
+Druckansicht und Inhalte bleiben damit für alle Sprachen gemeinsam wartbar.
+Die weiteren Sprachen erzeugt `[lang]/tools/[guide].astro` statisch.
+
+`src/lib/guide-copy.json` enthält die englischen, spanischen und französischen
+Texte mit deutschen Ausgangstexten als Schlüsseln. Bei Änderungen an den
+Ausgangstexten müssen alle drei Übersetzungen ergänzt werden. `guideTranslator`
+bricht bei fehlenden Einträgen ab, statt gemischte Sprachen zu veröffentlichen.
+Struktur, Abschnitts-IDs, Screenshots und ihre URLs werden nicht übersetzt.
+Bildtitel, Bildbeschreibungen, Alternativtexte, Dialog-Buttons und Tooltips sind
+lokalisiert; ein Hinweis erklärt, dass die Screenshots die deutsche Oberfläche zeigen.
+
+Sprachmenü und wechselseitige hreflang-Verweise führen zur gleichen Anleitung.
+Jede Sprachversion hat eigene Titel, Beschreibungen, Canonicals und JSON-LD mit
+passendem `inLanguage`. Jede Startseite verlinkt ihre acht lokalen Anleitungen;
+die gemeinsame Komponente `RelatedTools.astro` bleibt ebenfalls in dieser Sprache.
+Werbung ist weiterhin nur bei gefülltem AdSense-Slot sichtbar. Keine Veröffentlichung
+oder erneute AdSense-Einreichung wird durch die lokalen Änderungen ausgelöst.
+
+Zusätzliche Tests: `npx playwright test tests/guide-translations.spec.ts`.
+Diese prüfen alle 24 übersetzten Seiten auf Vollständigkeit, Sprachverknüpfungen,
+Metadaten, Galerien, Druckansicht und Nutzbarkeit ohne JavaScript.

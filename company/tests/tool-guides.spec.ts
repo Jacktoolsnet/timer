@@ -19,7 +19,7 @@ for (const guide of toolGuides) {
     await expect(page.locator('h1')).toHaveCount(1);
     await expect(page.locator('h1')).toHaveText(guide.title);
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href',`https://jacktools.net/de/tools/${guide.slug}/`);
-    await expect(page.locator('link[hreflang]')).toHaveCount(0);
+    await expect(page.locator('link[hreflang]')).toHaveCount(5);
     await expect(page.locator('.site-header .guide-header-action')).toHaveAttribute('href',guide.url);
     for (const anchor of await page.locator('.guide-toc a').all()) {
       await expect(page.locator((await anchor.getAttribute('href'))!)).toHaveCount(1);
@@ -64,7 +64,7 @@ for (const guide of toolGuides) {
 
 test.describe('static content without JavaScript',()=>{
   test.use({javaScriptEnabled:false});
-  test('guides are complete and main-page links are German-only',async({page})=>{
+  test('guides are complete and homepages link to their own language',async({page})=>{
     for (const guide of toolGuides) {
       await page.goto(`/de/tools/${guide.slug}/`);
       await expect(page.locator('h1')).toHaveText(guide.title);
@@ -73,6 +73,7 @@ test.describe('static content without JavaScript',()=>{
     }
     await page.goto('/en/');
     await expect(page.locator('a[href^="/de/tools/"]')).toHaveCount(0);
+    await expect(page.locator('.timer-guide-link[href^="/en/tools/"]')).toHaveCount(8);
   });
 });
 

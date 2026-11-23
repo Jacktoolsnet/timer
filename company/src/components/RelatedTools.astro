@@ -2,39 +2,42 @@
 import BrandIcon from '../../../shared/BrandIcon.astro';
 import type { BrandTool } from '../../../shared/BrandIcon.astro';
 
-interface Props { current: string }
-const { current } = Astro.props;
+import { guideTranslator } from '../lib/guide-copy';
+import type { Language } from '../lib/i18n';
+interface Props { current: string; lang?: Language }
+const { current, lang='de' } = Astro.props;
+const t = guideTranslator(lang);
 const tools = [
-  { slug: 'timer', name: 'Timer', text: 'Countdown, Pomodoro und Intervalle für deinen Alltag.' },
-  { slug: 'clock', name: 'Uhr', text: 'Die Zeit im Blick – analog, digital und in deiner Zeitzone.' },
-  { slug: 'stopwatch', name: 'Stoppuhr', text: 'Zeiten messen, Runden erfassen und Ergebnisse vergleichen.' },
-  { slug: 'calculator', name: 'Taschenrechner', text: 'Rechnen mit Überblick und einem bearbeitbaren Rechenstreifen.' },
-  { slug: 'breathe', name: 'Breathe', text: 'Geführte Atemrhythmen für eine bewusste Pause.' },
-  { slug: 'relax', name: 'Relax', text: 'Naturgeräusche und Klänge zu deiner eigenen Mischung verbinden.' },
-  { slug: 'metronome', name: 'Metronom', text: 'Tempo, Takt und Unterteilungen für dein nächstes Üben.' },
-  { slug: 'messagedrop', name: 'MessageDrop', text: 'Ortsbezogene Nachrichten auf der Karte entdecken.' },
+  { slug: 'timer', name: t("Timer"), text: t("Countdown, Pomodoro und Intervalle für deinen Alltag.") },
+  { slug: 'clock', name: t("Uhr"), text: t("Die Zeit im Blick – analog, digital und in deiner Zeitzone.") },
+  { slug: 'stopwatch', name: t("Stoppuhr"), text: t("Zeiten messen, Runden erfassen und Ergebnisse vergleichen.") },
+  { slug: 'calculator', name: t("Taschenrechner"), text: t("Rechnen mit Überblick und einem bearbeitbaren Rechenstreifen.") },
+  { slug: 'breathe', name: t("Breathe"), text: t("Geführte Atemrhythmen für eine bewusste Pause.") },
+  { slug: 'relax', name: t("Relax"), text: t("Naturgeräusche und Klänge zu deiner eigenen Mischung verbinden.") },
+  { slug: 'metronome', name: t("Metronom"), text: t("Tempo, Takt und Unterteilungen für dein nächstes Üben.") },
+  { slug: 'messagedrop', name: t("MessageDrop"), text: t("Ortsbezogene Nachrichten auf der Karte entdecken.") },
 ].filter(tool => tool.slug !== current);
 ---
 <nav class="related-guides" aria-labelledby="related-tools-heading">
   <header class="related-heading">
-    <p class="related-kicker">MEHR AUS JACKTOOLS</p>
-    <h2 id="related-tools-heading">Weitere Tools kennenlernen</h2>
-    <p>Was möchtest du als Nächstes ausprobieren? Hier findest du die passende Anleitung.</p>
+    <p class="related-kicker">{t("MEHR AUS JACKTOOLS")}</p>
+    <h2 id="related-tools-heading">{t("Weitere Tools kennenlernen")}</h2>
+    <p>{t("Was möchtest du als Nächstes ausprobieren? Hier findest du die passende Anleitung.")}</p>
   </header>
   <div class="related-grid">
     {tools.map(tool => (
-      <a class="related-card" href={'/de/tools/' + tool.slug + '/'}>
+      <a class="related-card" href={'/' + lang + '/tools/' + tool.slug + '/'}>
         <span class="related-icon" aria-hidden="true">
           {tool.slug === 'messagedrop'
             ? <img src="/markers/message-marker.svg" width="40" height="50" alt="" loading="lazy" />
             : <BrandIcon tool={tool.slug as BrandTool} />}
         </span>
-        <span class="related-copy"><strong>{tool.name}</strong><span class="related-description">{tool.text}</span><span class="related-action">Anleitung ansehen</span></span>
+        <span class="related-copy"><strong>{tool.name}</strong><span class="related-description">{tool.text}</span><span class="related-action">{t("Anleitung ansehen")}</span></span>
       </a>
     ))}
-    <a class="related-card related-overview" href="/de/">
+    <a class="related-card related-overview" href={"/"+lang+"/"}>
       <span class="related-icon" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="4" width="9" height="9" rx="2"/><rect x="19" y="4" width="9" height="9" rx="2"/><rect x="4" y="19" width="9" height="9" rx="2"/><rect x="19" y="19" width="9" height="9" rx="2"/></svg></span>
-      <span class="related-copy"><strong>Alles auf einen Blick</strong><span class="related-description">Noch nicht entschieden? Entdecke die gesamte Tool-Sammlung.</span><span class="related-action">Zur Toolübersicht</span></span>
+      <span class="related-copy"><strong>{t("Alles auf einen Blick")}</strong><span class="related-description">{t("Noch nicht entschieden? Entdecke die gesamte Tool-Sammlung.")}</span><span class="related-action">{t("Zur Toolübersicht")}</span></span>
     </a>
   </div>
 </nav>

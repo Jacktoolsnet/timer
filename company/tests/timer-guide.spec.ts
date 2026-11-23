@@ -8,7 +8,7 @@ test('timer guide is discoverable, readable and has correct SEO', async ({ page 
   await expect(page.locator('h1')).toHaveCount(1);
   await expect(page.locator('h1')).toContainText('Drei Arten');
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://jacktools.net/de/tools/timer/');
-  await expect(page.locator('link[hreflang]')).toHaveCount(0);
+  await expect(page.locator('link[hreflang]')).toHaveCount(5);
   await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
   for (const link of await page.locator('.guide-toc a').all()) {
     const id = await link.getAttribute('href');

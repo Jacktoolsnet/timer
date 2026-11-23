@@ -13,7 +13,7 @@ for(const guide of guides){
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href',url);
   await expect(page.locator('meta[property="og:url"]')).toHaveAttribute('content',url);
   await expect(page.locator('html')).toHaveAttribute('lang','de');
-  await expect(page.locator('link[hreflang]')).toHaveCount(0);
+  await expect(page.locator('link[hreflang]')).toHaveCount(5);
   await expect(page.locator('h1')).toHaveCount(1);
   await expect(page.locator('meta[name="robots"][content*="noindex"]')).toHaveCount(0);
   const description=await page.locator('meta[name="description"]').getAttribute('content');

@@ -11,7 +11,7 @@ import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
 PROJECTS = ['metronome', 'company', 'timer', 'clock', 'stopwatch', 'breathe', 'relax', 'lava']
-EXPECTED_PAGES = {'metronome':8,'company':12,'timer':16,'clock':8,'stopwatch':8,'breathe':8,'relax':8,'lava':8}
+EXPECTED_PAGES = {'metronome':8,'company':36,'timer':16,'clock':8,'stopwatch':8,'breathe':8,'relax':8,'lava':8}
 if sys.argv[1:]:
     assert all(project in PROJECTS for project in sys.argv[1:]), 'Unknown project'
     PROJECTS = list(dict.fromkeys(sys.argv[1:]))
@@ -87,9 +87,8 @@ for project in PROJECTS:
         assert 15 <= len(meta.title) <= 110, (url, 'title length')
         assert 70 <= len(meta.description) <= 220, (url, 'description length')
         assert meta.og.get('og:title') and meta.og.get('og:description') == meta.description, (url, 'Open Graph')
-        if project != 'company':
-            assert meta.lang == path.split('/')[1], (url, 'language')
-            assert set(meta.alternates) == {'de', 'en', 'es', 'fr', 'x-default'}, (url, 'hreflang')
+        assert meta.lang == path.split('/')[1], (url, 'language')
+        assert set(meta.alternates) == {'de', 'en', 'es', 'fr', 'x-default'}, (url, 'hreflang')
         for schema in meta.schemas:
             if schema.get('@type') == 'WebApplication':
                 assert schema['description'] in meta.visible, (url, 'schema description must be visible')
