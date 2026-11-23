@@ -208,3 +208,25 @@ jetzt die zwölf Company-URLs (vier Startseiten plus acht deutsche Anleitungen).
 Nach tatsächlicher Veröffentlichung müssen Erreichbarkeit, Weiterleitungen und
 Indexierung auf dem Live-Host separat geprüft und die Sitemap in Search Console
 eingereicht werden. Lokale Prüfungen sind keine Ranking- oder AdSense-Zusage.
+
+### Timer-Galerie mit Live-Aufnahmen
+
+Die Timer-Anleitung bündelt ihre Screenshots im `TimerShowcase.astro`: großes Bild,
+kleine horizontal scrollbare Vorschaubilder, Vor/Zurück, Pfeiltasten, Touch-Wischen
+und das Galerie-Overlay. Kein automatischer Bildwechsel; im Druck ausgeblendet.
+Ohne JavaScript öffnen die Bildlinks weiterhin die Originaldateien.
+
+13 Aufnahmen vom 23.11.2026 stammen direkt von `https://timer.jacktools.net`:
+Digital, alle acht analogen Designs (Standard, Römisch, Minimalistisch und
+Bahnhofsuhr jeweils rund/eckig), kombinierte Ansichten, Pomodoro-Fokus/-Pause,
+Intervall-Aktivphase sowie Fokusansicht mit Hintergrund. Alle acht Farbwelten,
+helle/dunkle Darstellung und mehrere Oberflächenstile sind vertreten.
+
+Reproduzieren mit `node scripts/capture-timer-gallery.mjs` (Node aus `.nvmrc`).
+Das Skript steuert nur die öffentlichen Anzeige-Einstellungen in frischen
+Browser-Kontexten, blockiert echte Werbeanfragen und speichert Screenshots lokal.
+Es veröffentlicht oder verändert keine Inhalte auf dem Server. Originale und
+optimierte WebP-Thumbnails liegen unter `public/images/timer/gallery/`, Bilddaten
+und Beschreibungen in `src/lib/timer-gallery.json`. Die früheren drei PNGs bleiben
+für bestehende Verweise erhalten, werden aber nicht erneut im Fließtext angezeigt.
+Tests: `npx playwright test tests/timer-showcase.spec.ts tests/timer-guide.spec.ts`.

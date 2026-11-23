@@ -61,7 +61,8 @@ test('print view hides chrome and ads, expands FAQs and restores their state', a
 test('real tool screenshots load and fit the guide on desktop and mobile', async ({ page }) => {
   await page.route(/googlesyndication\.com|doubleclick\.net|googleadservices\.com/, route => route.fulfill({contentType:'application/javascript', body:''}));
   await page.goto('/de/tools/timer/');
-  await expect(page.locator('.tool-screenshot')).toHaveCount(3);
+  await expect(page.locator('.tool-screenshot')).toHaveCount(1);
+  await expect(page.locator('.timer-gallery-thumb')).toHaveCount(13);
   for (const image of await page.locator('.tool-screenshot img').all()) {
     await image.scrollIntoViewIfNeeded();
     await expect(image).toBeVisible();
@@ -142,14 +143,14 @@ test('screenshot gallery supports navigation, Escape and focus restoration', asy
   await opener.click();
   const gallery = page.getByRole('dialog', { name: 'Timer-Galerie' });
   await expect(gallery).toBeVisible();
-  await expect(gallery.locator('img')).toHaveAttribute('src', /\/timer\.png$/);
-  await expect(gallery.getByRole('status')).toHaveText('1 / 3');
+  await expect(gallery.locator('img')).toHaveAttribute('src', /\/digital-green\.png$/);
+  await expect(gallery.getByRole('status')).toHaveText('1 / 13');
   await gallery.getByRole('button', { name: 'Nächstes Bild' }).click();
-  await expect(gallery.locator('img')).toHaveAttribute('src', /\/pomodoro\.png$/);
+  await expect(gallery.locator('img')).toHaveAttribute('src', /\/round-standard\.png$/);
   await page.keyboard.press('ArrowLeft');
-  await expect(gallery.getByRole('status')).toHaveText('1 / 3');
+  await expect(gallery.getByRole('status')).toHaveText('1 / 13');
   await page.keyboard.press('ArrowLeft');
-  await expect(gallery.getByRole('status')).toHaveText('3 / 3');
+  await expect(gallery.getByRole('status')).toHaveText('13 / 13');
   await page.keyboard.press('Escape');
   await expect(gallery).toBeHidden();
   await expect(opener).toBeFocused();

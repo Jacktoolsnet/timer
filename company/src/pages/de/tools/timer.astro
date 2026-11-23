@@ -3,9 +3,10 @@ import Layout from '../../../layouts/Layout.astro';
 import AdBanner from '../../../components/AdBanner.astro';
 import GuideSeo from '../../../components/GuideSeo.astro';
 import { toolGuides } from '../../../lib/tool-guides';
+import TimerShowcase from '../../../components/TimerShowcase.astro';
 ---
 <Layout lang="de" title="Online-Timer: Countdown, Pomodoro und Intervalle erklärt" description="Anleitung zum Jacktools Timer: Countdown einstellen, Pomodoro-Pausen planen und Intervalle nutzen. Mit praktischen Beispielen und Hinweisen zu Signaltönen und Speicherung." route="tools/timer/" homeAlternates={false} canonicalPath="/de/tools/timer/" socialImageProject="timer">
-  <GuideSeo name="Timer" headline="Ein Timer. Drei Arten, Zeit zu planen." description="Einmal herunterzählen, konzentriert arbeiten oder Aktivphasen und Pausen wiederholen: Der Jacktools Timer verbindet Countdown, Pomodoro und Intervalltimer in einer Browser-Anwendung." path="/de/tools/timer/" toolUrl="https://timer.jacktools.net/de/timer/" image="/images/timer/timer.png" />
+  <GuideSeo name="Timer" headline="Ein Timer. Drei Arten, Zeit zu planen." description="Einmal herunterzählen, konzentriert arbeiten oder Aktivphasen und Pausen wiederholen: Der Jacktools Timer verbindet Countdown, Pomodoro und Intervalltimer in einer Browser-Anwendung." path="/de/tools/timer/" toolUrl="https://timer.jacktools.net/de/timer/" image="/images/timer/gallery/digital-green.png" />
   <a slot="header-action" class="timer-header-action" href="https://timer.jacktools.net/de/timer/">Timer öffnen</a>
   <article class="timer-guide">
     <header class="guide-hero">
@@ -21,6 +22,7 @@ import { toolGuides } from '../../../lib/tool-guides';
       </div>
       <figure class="guide-preview"><div class="guide-dial"><span>FOKUSZEIT</span><strong>25:00</strong><span>Eine Aufgabe. Ein Zeitfenster.</span></div></figure>
     </header>
+    <TimerShowcase />
     <nav class="guide-toc" aria-labelledby="guide-toc-title">
       <div class="toc-heading"><strong id="guide-toc-title">In dieser Anleitung</strong></div>
       <div class="toc-grid">
@@ -43,20 +45,17 @@ import { toolGuides } from '../../../lib/tool-guides';
     </section>
     <AdBanner lang="de" />
     <section id="countdown"><h2>So stellst du einen Countdown ein</h2>
-      <figure class="tool-screenshot"><a href="/images/timer/timer.png" aria-label="Countdown-Screenshot in Originalgröße öffnen"><img src="/images/timer/timer.png" width="1000" height="656" loading="lazy" decoding="async" alt="Countdown mit fünf Minuten Restzeit, Start- und Zurücksetzen-Taste sowie Schnellwahl für eine bis dreißig Minuten." /></a><figcaption><strong>Countdown im Überblick.</strong> In der Mitte steht die Restzeit, darunter findest du die Steuerung und die Schnellwahl. Screenshot zum Vergrößern anklicken.</figcaption></figure>
       <ol><li>Öffne den <a href="https://timer.jacktools.net/de/timer/">Countdown-Timer</a> und trage Stunden, Minuten und Sekunden ein. Alternativ kannst du eine Schnellwahl verwenden.</li><li>Bestätige eigene Zeitangaben mit „Einstellungen übernehmen“. Das setzt den aktuellen Countdown auf die gewählte Dauer zurück.</li><li>Prüfe, ob der Signalton eingeschaltet und die Geräte-Lautstärke passend eingestellt ist. Starte den Countdown über die Start-Taste.</li><li>Bei einer Unterbrechung kannst du pausieren und anschließend fortsetzen. Zurücksetzen beginnt wieder bei der eingestellten Dauer.</li></ol>
       <aside class="guide-example"><h3>Beispiel: zehn Minuten Ordnung schaffen</h3><p>Stelle 00 Stunden, 10 Minuten und 00 Sekunden ein. Nimm dir nur eine Fläche vor, etwa den Schreibtisch. Wenn die Zeit abgelaufen ist, entscheide bewusst, ob du fertig bist oder einen neuen Durchgang starten möchtest. Der Countdown wiederholt sich nicht automatisch.</p></aside>
       <p><strong>Wichtig bei Änderungen:</strong> Eine Schnellwahl oder das Übernehmen neuer Einstellungen setzt den aktuellen Timer zurück. Pausiere nicht nur, wenn du die bisherige Restzeit behalten möchtest – ändere die Dauer in diesem Fall erst nach dem Durchgang.</p>
     </section>
     <section id="pomodoro"><h2>Fokus und Pausen mit Pomodoro planen</h2>
-      <figure class="tool-screenshot"><a href="/images/timer/pomodoro.png" aria-label="Pomodoro-Screenshot in Originalgröße öffnen"><img src="/images/timer/pomodoro.png" width="1000" height="639" loading="lazy" decoding="async" alt="Pomodoro in der Fokusphase: 25 Minuten, Runde eins von vier, mit Start, Zurücksetzen und Nächste Phase. Darunter Fokuszeit 25, kurze Pause 5 und lange Pause 15." /></a><figcaption><strong>Fokuszeit und Runden auf einen Blick.</strong> Die Punkte zeigen deinen Fortschritt im Rundenzyklus. Die Taste rechts neben Start überspringt die aktuelle Phase.</figcaption></figure>
       <p>Im Pomodoro-Modus legst du Fokuszeit, kurze Pause, lange Pause und die Anzahl der Fokusrunden bis zur langen Pause fest. Voreingestellt sind 25 Minuten Fokus, 5 Minuten kurze Pause und 15 Minuten lange Pause nach vier Fokusrunden. Das ist ein Ausgangspunkt, keine feste Vorgabe für deinen Arbeitstag.</p>
       <ol><li>Formuliere vor dem Start eine überschaubare Aufgabe, zum Beispiel: „Den ersten Abschnitt überarbeiten“ statt „Das ganze Projekt fertigstellen“.</li><li>Öffne <a href="https://timer.jacktools.net/de/pomodoro/">Pomodoro</a>, passe bei Bedarf Zeiten und Rundenzahl an und übernimm die Einstellungen.</li><li>Starte die Fokusphase. Notiere auftauchende Nebenaufgaben, statt sofort zu ihnen zu wechseln.</li><li>Nach Ablauf startet die Pause nicht von selbst. Starte die nächste Phase, wenn du bereit bist. „Nächste Phase“ überspringt die aktuelle Phase, wartet aber ebenfalls auf deinen Start.</li></ol>
       <aside class="guide-example"><h3>Beispiel: vier Arbeitsblöcke</h3><p>Mit den Standardwerten ergeben vier Fokusphasen 100 Minuten Arbeitszeit. Dazwischen liegen drei kurze Pausen mit zusammen 15 Minuten; anschließend folgt die lange Pause mit 15 Minuten. Mit allen Pausen sind das 130 Minuten – zuzüglich deiner manuellen Übergänge.</p></aside>
       <p>Die Pomodoro-Anzeige zeigt standardmäßig aufgerundete Minuten und in der letzten Minute Sekunden. Wenn du die genaue Restzeit durchgehend sehen möchtest, kannst du die Sekundenanzeige einschalten.</p>
     </section>
     <section id="intervalle"><h2>Wiederkehrende Abläufe mit dem Intervalltimer</h2>
-      <figure class="tool-screenshot"><a href="/images/timer/training.png" aria-label="Intervalltimer-Screenshot in Originalgröße öffnen"><img src="/images/timer/training.png" width="1000" height="601" loading="lazy" decoding="async" alt="Intervalltimer vor dem Start mit zehn Sekunden Vorbereitung, Rundenzähler und Tasten zum Zurücksetzen, Starten und Wechseln der Phase." /></a><figcaption><strong>Vorbereitung vor der ersten Runde.</strong> Dieser Screenshot zeigt die voreingestellte Vorbereitung von zehn Sekunden. Aktivzeit, Pausen und Runden stellst du im Tool separat ein.</figcaption></figure>
       <p>Im Intervallmodus stellst du eine optionale Vorbereitung, die Dauer der Aktivphase, die Pause und die Rundenzahl ein. Die Zeitangaben erfolgen in Sekunden. Anders als bei Pomodoro laufen die Phasen nach dem Start automatisch nacheinander ab. Nach der letzten Aktivphase entfällt die Pause.</p>
       <aside class="guide-example"><h3>Beispiel: eine kurze Übungsroutine</h3><p>Wähle 10 Sekunden Vorbereitung, 60 Sekunden Aktivphase, 20 Sekunden Pause und 4 Runden. Der Ablauf dauert insgesamt 5 Minuten und 10 Sekunden: 10 Sekunden Vorbereitung + 4 × 60 Sekunden Aktivität + 3 × 20 Sekunden Pause.</p></aside>
       <p>Optional helfen Signale für die letzten Sekunden und ein Halbzeit-Signal während der Aktivphase bei der Orientierung. Teste die Töne einmal, bevor du dich auf einen Ablauf verlässt. Mit „Bildschirm wach halten“ kann der Timer auf unterstützten Geräten das Abschalten des Displays während des Laufens verhindern. Das ersetzt keine Prüfung der Geräte- und Browser-Einstellungen.</p>
@@ -99,49 +98,9 @@ import { toolGuides } from '../../../lib/tool-guides';
     </footer>
     <nav class="related-guides" aria-label="Weitere Anleitungen"><h2>Weitere Tools kennenlernen</h2>{toolGuides.map(tool=><a href={'/de/tools/'+tool.slug+'/'}>{tool.name}: Anleitung & Beispiele</a>)}</nav>
   </article>
-  <dialog class="screenshot-gallery" id="screenshot-gallery" aria-labelledby="gallery-title">
-    <div class="gallery-toolbar"><h2 id="gallery-title">Timer-Galerie</h2><button type="button" class="gallery-close" aria-label="Galerie schließen" autofocus>Schließen <span aria-hidden="true">×</span></button></div>
-    <figure class="gallery-figure"><img id="gallery-image" alt="" width="1000" height="656" /><figcaption id="gallery-caption"></figcaption></figure>
-    <div class="gallery-navigation"><button type="button" id="gallery-previous" aria-label="Vorheriges Bild">Zurück</button><span id="gallery-position" role="status" aria-live="polite"></span><button type="button" id="gallery-next" aria-label="Nächstes Bild">Weiter</button></div>
-  </dialog>
+
 </Layout>
 <script>
-  const gallery = document.getElementById('screenshot-gallery') as HTMLDialogElement;
-  const pictures = Array.from(document.querySelectorAll<HTMLAnchorElement>('.tool-screenshot a'));
-  const galleryImage = document.getElementById('gallery-image') as HTMLImageElement;
-  let selected = 0;
-  const showPicture = (index: number) => {
-    selected = (index + pictures.length) % pictures.length;
-    const source = pictures[selected].querySelector('img')!;
-    galleryImage.src = pictures[selected].href;
-    galleryImage.alt = source.alt;
-    galleryImage.width = source.width;
-    galleryImage.height = source.height;
-    document.getElementById('gallery-caption')!.textContent = pictures[selected].closest('figure')!.querySelector('figcaption')!.textContent!.replace('Screenshot zum Vergrößern anklicken.', '').trim();
-    document.getElementById('gallery-position')!.textContent = `${selected + 1} / ${pictures.length}`;
-  };
-  pictures.forEach((link, index) => link.addEventListener('click', event => {
-    if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
-    event.preventDefault();
-    showPicture(index);
-    gallery.showModal();
-    document.documentElement.classList.add('gallery-open');
-  }));
-  gallery.querySelector('.gallery-close')!.addEventListener('click', () => gallery.close());
-  document.getElementById('gallery-previous')!.addEventListener('click', () => showPicture(selected - 1));
-  document.getElementById('gallery-next')!.addEventListener('click', () => showPicture(selected + 1));
-  gallery.addEventListener('keydown', event => {
-    if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
-      event.preventDefault();
-      showPicture(selected + (event.key === 'ArrowRight' ? 1 : -1));
-    }
-  });
-  gallery.addEventListener('click', event => {
-    if (event.target !== gallery) return;
-    const rect = gallery.getBoundingClientRect();
-    if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) gallery.close();
-  });
-  gallery.addEventListener('close', () => document.documentElement.classList.remove('gallery-open'));
   let closedAnswers: HTMLDetailsElement[] = [];
   window.addEventListener('beforeprint', () => {
     closedAnswers = Array.from(document.querySelectorAll<HTMLDetailsElement>('.timer-guide details:not([open])'));
@@ -195,13 +154,6 @@ import { toolGuides } from '../../../lib/tool-guides';
   .start-bottom{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;flex-wrap:wrap;margin-top:1.5rem;font-size:.875em}.start-bottom p{margin:0;color:var(--muted)}
   [data-style=technical] .guide-end,[data-style=technical] .start-card,[data-style=technical] .start-icon{border-radius:3px}
   @media(max-width:1000px){.start-grid{grid-template-columns:minmax(0,1fr)}.guide-end{padding:1.25rem}.start-card{padding:1.25rem}}
-  :global(html.gallery-open){overflow:hidden}
-  .screenshot-gallery{position:fixed;inset:0;width:min(1040px,calc(100vw - 2rem));max-width:none;max-height:calc(100dvh - 2rem);margin:auto;padding:1.25rem;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--text);box-shadow:0 24px 80px #0005;overflow:auto}
-  .screenshot-gallery::backdrop{background:#071019bd;backdrop-filter:blur(6px)}
-  .gallery-toolbar,.gallery-navigation{display:flex;align-items:center;justify-content:space-between;gap:1rem}.gallery-toolbar h2{font-size:1.1rem;margin:0}.screenshot-gallery button{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:44px;padding:.6rem 1rem;border:1px solid var(--line);border-radius:8px;background:var(--accent-soft);color:var(--accent);font:inherit;cursor:pointer}.screenshot-gallery button:hover{border-color:var(--accent)}.screenshot-gallery button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}.gallery-close span{font-size:1.5rem;line-height:1}
-  .gallery-figure{margin:1rem 0}.gallery-figure img{display:block;width:100%;height:auto;max-height:65dvh;object-fit:contain}.gallery-figure figcaption{font-size:.9rem;line-height:1.6;color:var(--muted);margin-top:.75rem}.gallery-navigation{font-size:.9rem}
-  @media(max-width:480px){.screenshot-gallery{padding:.8rem;width:calc(100vw - 1rem);max-height:calc(100dvh - 1rem)}.gallery-toolbar{gap:.5rem}.gallery-toolbar h2{font-size:1rem}}
-  .related-guides{display:flex;flex-wrap:wrap;gap:.75rem;padding-top:2.5rem}.related-guides h2{width:100%;font-size:1.25em}.related-guides a{padding:.75rem 1rem;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
   @page timer-guide { size: A4; margin: 16mm; }
   @media print {
     :global(html:has(.timer-guide)), :global(body:has(.timer-guide)){background:#fff!important;color:#000!important;margin:0!important}
