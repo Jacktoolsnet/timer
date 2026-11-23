@@ -24,13 +24,14 @@ for (const guide of toolGuides) {
     for (const anchor of await page.locator('.guide-toc a').all()) {
       await expect(page.locator((await anchor.getAttribute('href'))!)).toHaveCount(1);
     }
+    await expect(page.locator('.timer-gallery-thumb')).toHaveCount(4);
     const image = page.locator('.tool-screenshot img');
     await image.scrollIntoViewIfNeeded();
     await expect.poll(() => image.evaluate((el:HTMLImageElement) => el.complete && el.naturalWidth > 0)).toBe(true);
     await image.click();
     const gallery = page.getByRole('dialog',{name:'Bildergalerie'});
     await expect(gallery).toBeVisible();
-    await expect(gallery.locator('img')).toHaveAttribute('alt',(await image.getAttribute('alt'))!);
+    await expect(gallery.locator('#gallery-image')).toHaveAttribute('alt',(await image.getAttribute('alt'))!);
     await page.keyboard.press('Escape');
     await expect(gallery).toBeHidden();
     const ad = page.locator('.company-ad');
@@ -67,7 +68,7 @@ test.describe('static content without JavaScript',()=>{
     for (const guide of toolGuides) {
       await page.goto(`/de/tools/${guide.slug}/`);
       await expect(page.locator('h1')).toHaveText(guide.title);
-      await expect(page.locator('.tool-guide section')).toHaveCount(guide.sections.length+2);
+      await expect(page.locator('.tool-guide section')).toHaveCount(guide.sections.length+3);
       await expect(page.locator('.tool-screenshot a')).toHaveAttribute('href',/\.(png|svg)$/);
     }
     await page.goto('/en/');

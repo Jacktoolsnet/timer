@@ -1,0 +1,296 @@
+{
+  "clock": [
+    {
+      "id": "clock-1",
+      "title": "Runde Uhr",
+      "caption": "Runde Uhr: Ansicht der Online-Uhr in heller Darstellung mit der Farbwelt green. Datum und Zeitzone bleiben separat einstellbar.",
+      "alt": "Runde Uhr. Runde Uhr: Ansicht der Online-Uhr in heller Darstellung mit der Farbwelt green. Datum und Zeitzone bleiben separat einstellbar.",
+      "src": "/images/galleries/clock/1.png",
+      "thumb": "/images/galleries/clock/1-thumb.webp",
+      "width": 1000,
+      "height": 679
+    },
+    {
+      "id": "clock-2",
+      "title": "Römisch · Dunkel",
+      "caption": "Römisch · Dunkel: Ansicht der Online-Uhr in dunkler Darstellung mit der Farbwelt violet. Datum und Zeitzone bleiben separat einstellbar.",
+      "alt": "Römisch · Dunkel. Römisch · Dunkel: Ansicht der Online-Uhr in dunkler Darstellung mit der Farbwelt violet. Datum und Zeitzone bleiben separat einstellbar.",
+      "src": "/images/galleries/clock/2.png",
+      "thumb": "/images/galleries/clock/2-thumb.webp",
+      "width": 1000,
+      "height": 679
+    },
+    {
+      "id": "clock-3",
+      "title": "Eckig · Kombiniert",
+      "caption": "Eckig · Kombiniert: Ansicht der Online-Uhr in heller Darstellung mit der Farbwelt blue. Datum und Zeitzone bleiben separat einstellbar.",
+      "alt": "Eckig · Kombiniert. Eckig · Kombiniert: Ansicht der Online-Uhr in heller Darstellung mit der Farbwelt blue. Datum und Zeitzone bleiben separat einstellbar.",
+      "src": "/images/galleries/clock/3.png",
+      "thumb": "/images/galleries/clock/3-thumb.webp",
+      "width": 1000,
+      "height": 751
+    },
+    {
+      "id": "clock-4",
+      "title": "Klappzahlen",
+      "caption": "Klappzahlen: Ansicht der Online-Uhr in dunkler Darstellung mit der Farbwelt teal. Datum und Zeitzone bleiben separat einstellbar.",
+      "alt": "Klappzahlen. Klappzahlen: Ansicht der Online-Uhr in dunkler Darstellung mit der Farbwelt teal. Datum und Zeitzone bleiben separat einstellbar.",
+      "src": "/images/galleries/clock/4.png",
+      "thumb": "/images/galleries/clock/4-thumb.webp",
+      "width": 1000,
+      "height": 423
+    }
+  ],
+  "stopwatch": [
+    {
+      "id": "stopwatch-1",
+      "title": "Analog",
+      "caption": "Analog: Die analoge Zeitdarstellung der Stoppuhr vor dem Start. Die Anzeige lässt sich unabhängig von der Farbwelt wählen.",
+      "alt": "Analog. Analog: Die analoge Zeitdarstellung der Stoppuhr vor dem Start. Die Anzeige lässt sich unabhängig von der Farbwelt wählen.",
+      "src": "/images/galleries/stopwatch/1.png",
+      "thumb": "/images/galleries/stopwatch/1-thumb.webp",
+      "width": 1000,
+      "height": 531
+    },
+    {
+      "id": "stopwatch-2",
+      "title": "Digital · Dunkel",
+      "caption": "Digital · Dunkel: Die digitale Zeitdarstellung der Stoppuhr vor dem Start. Die Anzeige lässt sich unabhängig von der Farbwelt wählen.",
+      "alt": "Digital · Dunkel. Digital · Dunkel: Die digitale Zeitdarstellung der Stoppuhr vor dem Start. Die Anzeige lässt sich unabhängig von der Farbwelt wählen.",
+      "src": "/images/galleries/stopwatch/2.png",
+      "thumb": "/images/galleries/stopwatch/2-thumb.webp",
+      "width": 1000,
+      "height": 387
+    },
+    {
+      "id": "stopwatch-3",
+      "title": "Kombiniert",
+      "caption": "Kombiniert: Analoge und digitale Zeitdarstellung der Stoppuhr vor dem Start. Die Anzeige lässt sich unabhängig von der Farbwelt wählen.",
+      "alt": "Kombiniert. Kombiniert: Analoge und digitale Zeitdarstellung der Stoppuhr vor dem Start. Die Anzeige lässt sich unabhängig von der Farbwelt wählen.",
+      "src": "/images/galleries/stopwatch/3.png",
+      "thumb": "/images/galleries/stopwatch/3-thumb.webp",
+      "width": 1000,
+      "height": 599
+    },
+    {
+      "id": "stopwatch-4",
+      "title": "Digital · Warm",
+      "caption": "Digital · Warm: Die digitale Zeitdarstellung der Stoppuhr vor dem Start. Die Anzeige lässt sich unabhängig von der Farbwelt wählen.",
+      "alt": "Digital · Warm. Digital · Warm: Die digitale Zeitdarstellung der Stoppuhr vor dem Start. Die Anzeige lässt sich unabhängig von der Farbwelt wählen.",
+      "src": "/images/galleries/stopwatch/4.png",
+      "thumb": "/images/galleries/stopwatch/4-thumb.webp",
+      "width": 1000,
+      "height": 387
+    }
+  ],
+  "calculator": [
+    {
+      "id": "calculator-1",
+      "title": "Rechenstreifen · Hell",
+      "caption": "Rechenstreifen · Hell: Fiktive Beispielrechnung mit 100 und 20 Prozent Aufschlag. Eingabe und Rechenstreifen mit dem Rechner links.",
+      "alt": "Rechenstreifen · Hell. Rechenstreifen · Hell: Fiktive Beispielrechnung mit 100 und 20 Prozent Aufschlag. Eingabe und Rechenstreifen mit dem Rechner links.",
+      "src": "/images/galleries/calculator/1.png",
+      "thumb": "/images/galleries/calculator/1-thumb.webp",
+      "width": 1000,
+      "height": 971
+    },
+    {
+      "id": "calculator-2",
+      "title": "Rechner rechts",
+      "caption": "Rechner rechts: Fiktive Beispielrechnung mit 100 und 20 Prozent Aufschlag. Eingabe und Rechenstreifen mit dem Rechner rechts.",
+      "alt": "Rechner rechts. Rechner rechts: Fiktive Beispielrechnung mit 100 und 20 Prozent Aufschlag. Eingabe und Rechenstreifen mit dem Rechner rechts.",
+      "src": "/images/galleries/calculator/2.png",
+      "thumb": "/images/galleries/calculator/2-thumb.webp",
+      "width": 1000,
+      "height": 1007
+    },
+    {
+      "id": "calculator-3",
+      "title": "Rechenstreifen · Dunkel",
+      "caption": "Rechenstreifen · Dunkel: Fiktive Beispielrechnung mit 100 und 20 Prozent Aufschlag. Eingabe und Rechenstreifen mit dem Rechner links.",
+      "alt": "Rechenstreifen · Dunkel. Rechenstreifen · Dunkel: Fiktive Beispielrechnung mit 100 und 20 Prozent Aufschlag. Eingabe und Rechenstreifen mit dem Rechner links.",
+      "src": "/images/galleries/calculator/3.png",
+      "thumb": "/images/galleries/calculator/3-thumb.webp",
+      "width": 1000,
+      "height": 971
+    },
+    {
+      "id": "calculator-4",
+      "title": "Warme Farbwelt",
+      "caption": "Warme Farbwelt: Fiktive Beispielrechnung mit 100 und 20 Prozent Aufschlag. Eingabe und Rechenstreifen mit dem Rechner rechts.",
+      "alt": "Warme Farbwelt. Warme Farbwelt: Fiktive Beispielrechnung mit 100 und 20 Prozent Aufschlag. Eingabe und Rechenstreifen mit dem Rechner rechts.",
+      "src": "/images/galleries/calculator/4.png",
+      "thumb": "/images/galleries/calculator/4-thumb.webp",
+      "width": 1000,
+      "height": 1007
+    }
+  ],
+  "breathe": [
+    {
+      "id": "breathe-1",
+      "title": "Quadratatmen",
+      "caption": "Quadratatmen mit neutralem Hintergrund. Die Aufnahme zeigt die ausgewählte Vorlage vor dem Start, keine persönliche Atemempfehlung.",
+      "alt": "Quadratatmen. Quadratatmen mit neutralem Hintergrund. Die Aufnahme zeigt die ausgewählte Vorlage vor dem Start, keine persönliche Atemempfehlung.",
+      "src": "/images/galleries/breathe/1.png",
+      "thumb": "/images/galleries/breathe/1-thumb.webp",
+      "width": 1152,
+      "height": 823
+    },
+    {
+      "id": "breathe-2",
+      "title": "Gleichmäßig · 5–5",
+      "caption": "Gleichmäßig · 5–5 mit dem Hintergrundmotiv beach. Die Aufnahme zeigt die ausgewählte Vorlage vor dem Start, keine persönliche Atemempfehlung.",
+      "alt": "Gleichmäßig · 5–5. Gleichmäßig · 5–5 mit dem Hintergrundmotiv beach. Die Aufnahme zeigt die ausgewählte Vorlage vor dem Start, keine persönliche Atemempfehlung.",
+      "src": "/images/galleries/breathe/2.png",
+      "thumb": "/images/galleries/breathe/2-thumb.webp",
+      "width": 1152,
+      "height": 822
+    },
+    {
+      "id": "breathe-3",
+      "title": "Sanft · 4–6",
+      "caption": "Sanft · 4–6 mit dem Hintergrundmotiv forest. Die Aufnahme zeigt die ausgewählte Vorlage vor dem Start, keine persönliche Atemempfehlung.",
+      "alt": "Sanft · 4–6. Sanft · 4–6 mit dem Hintergrundmotiv forest. Die Aufnahme zeigt die ausgewählte Vorlage vor dem Start, keine persönliche Atemempfehlung.",
+      "src": "/images/galleries/breathe/3.png",
+      "thumb": "/images/galleries/breathe/3-thumb.webp",
+      "width": 1152,
+      "height": 822
+    },
+    {
+      "id": "breathe-4",
+      "title": "4–7–8-Vorlage",
+      "caption": "4–7–8-Vorlage mit dem Hintergrundmotiv candle. Die Aufnahme zeigt die ausgewählte Vorlage vor dem Start, keine persönliche Atemempfehlung.",
+      "alt": "4–7–8-Vorlage. 4–7–8-Vorlage mit dem Hintergrundmotiv candle. Die Aufnahme zeigt die ausgewählte Vorlage vor dem Start, keine persönliche Atemempfehlung.",
+      "src": "/images/galleries/breathe/4.png",
+      "thumb": "/images/galleries/breathe/4-thumb.webp",
+      "width": 1152,
+      "height": 865
+    }
+  ],
+  "relax": [
+    {
+      "id": "relax-1",
+      "title": "Ruhige Klangfläche",
+      "caption": "Ruhige Klangfläche: Die Klangfläche mit dem im Tool angebotenen Hintergrund „none“ vor dem Start. Klänge und Animationen lassen sich getrennt anpassen.",
+      "alt": "Ruhige Klangfläche. Ruhige Klangfläche: Die Klangfläche mit dem im Tool angebotenen Hintergrund „none“ vor dem Start. Klänge und Animationen lassen sich getrennt anpassen.",
+      "src": "/images/galleries/relax/1.png",
+      "thumb": "/images/galleries/relax/1-thumb.webp",
+      "width": 1000,
+      "height": 887
+    },
+    {
+      "id": "relax-2",
+      "title": "Naturmotiv · Wald",
+      "caption": "Naturmotiv · Wald: Die Klangfläche mit dem im Tool angebotenen Hintergrund „forest“ vor dem Start. Klänge und Animationen lassen sich getrennt anpassen.",
+      "alt": "Naturmotiv · Wald. Naturmotiv · Wald: Die Klangfläche mit dem im Tool angebotenen Hintergrund „forest“ vor dem Start. Klänge und Animationen lassen sich getrennt anpassen.",
+      "src": "/images/galleries/relax/2.png",
+      "thumb": "/images/galleries/relax/2-thumb.webp",
+      "width": 1000,
+      "height": 887
+    },
+    {
+      "id": "relax-3",
+      "title": "Abendmotiv",
+      "caption": "Abendmotiv: Die Klangfläche mit dem im Tool angebotenen Hintergrund „lake“ vor dem Start. Klänge und Animationen lassen sich getrennt anpassen.",
+      "alt": "Abendmotiv. Abendmotiv: Die Klangfläche mit dem im Tool angebotenen Hintergrund „lake“ vor dem Start. Klänge und Animationen lassen sich getrennt anpassen.",
+      "src": "/images/galleries/relax/3.png",
+      "thumb": "/images/galleries/relax/3-thumb.webp",
+      "width": 1000,
+      "height": 887
+    },
+    {
+      "id": "relax-4",
+      "title": "Sanfte Landschaft",
+      "caption": "Sanfte Landschaft: Die Klangfläche mit dem im Tool angebotenen Hintergrund „forest“ vor dem Start. Klänge und Animationen lassen sich getrennt anpassen.",
+      "alt": "Sanfte Landschaft. Sanfte Landschaft: Die Klangfläche mit dem im Tool angebotenen Hintergrund „forest“ vor dem Start. Klänge und Animationen lassen sich getrennt anpassen.",
+      "src": "/images/galleries/relax/4.png",
+      "thumb": "/images/galleries/relax/4-thumb.webp",
+      "width": 1000,
+      "height": 887
+    }
+  ],
+  "metronome": [
+    {
+      "id": "metronome-1",
+      "title": "Orbit",
+      "caption": "Orbit: Eine von vier Visualisierungen für denselben Grundpuls. Die Aufnahme zeigt 90 BPM; Tempo, Takt und Unterteilungen bleiben einstellbar.",
+      "alt": "Orbit. Orbit: Eine von vier Visualisierungen für denselben Grundpuls. Die Aufnahme zeigt 90 BPM; Tempo, Takt und Unterteilungen bleiben einstellbar.",
+      "src": "/images/galleries/metronome/1.png",
+      "thumb": "/images/galleries/metronome/1-thumb.webp",
+      "width": 1000,
+      "height": 592
+    },
+    {
+      "id": "metronome-2",
+      "title": "Pendel",
+      "caption": "Pendel: Eine von vier Visualisierungen für denselben Grundpuls. Die Aufnahme zeigt 90 BPM; Tempo, Takt und Unterteilungen bleiben einstellbar.",
+      "alt": "Pendel. Pendel: Eine von vier Visualisierungen für denselben Grundpuls. Die Aufnahme zeigt 90 BPM; Tempo, Takt und Unterteilungen bleiben einstellbar.",
+      "src": "/images/galleries/metronome/2.png",
+      "thumb": "/images/galleries/metronome/2-thumb.webp",
+      "width": 1000,
+      "height": 587
+    },
+    {
+      "id": "metronome-3",
+      "title": "Beat-Leiste",
+      "caption": "Beat-Leiste: Eine von vier Visualisierungen für denselben Grundpuls. Die Aufnahme zeigt 90 BPM; Tempo, Takt und Unterteilungen bleiben einstellbar.",
+      "alt": "Beat-Leiste. Beat-Leiste: Eine von vier Visualisierungen für denselben Grundpuls. Die Aufnahme zeigt 90 BPM; Tempo, Takt und Unterteilungen bleiben einstellbar.",
+      "src": "/images/galleries/metronome/3.png",
+      "thumb": "/images/galleries/metronome/3-thumb.webp",
+      "width": 1000,
+      "height": 587
+    },
+    {
+      "id": "metronome-4",
+      "title": "Springender Ball",
+      "caption": "Springender Ball: Eine von vier Visualisierungen für denselben Grundpuls. Die Aufnahme zeigt 90 BPM; Tempo, Takt und Unterteilungen bleiben einstellbar.",
+      "alt": "Springender Ball. Springender Ball: Eine von vier Visualisierungen für denselben Grundpuls. Die Aufnahme zeigt 90 BPM; Tempo, Takt und Unterteilungen bleiben einstellbar.",
+      "src": "/images/galleries/metronome/4.png",
+      "thumb": "/images/galleries/metronome/4-thumb.webp",
+      "width": 1000,
+      "height": 587
+    }
+  ],
+  "messagedrop": [
+    {
+      "id": "messagedrop-1",
+      "title": "Karte erkunden",
+      "caption": "Pins richten sich nach Ausschnitt, Zoom und Suche. Das Schaubild enthält keine echte Karte oder realen Beiträge.",
+      "alt": "Karte erkunden. Pins richten sich nach Ausschnitt, Zoom und Suche. Das Schaubild enthält keine echte Karte oder realen Beiträge.",
+      "src": "/images/galleries/messagedrop/1.svg",
+      "thumb": "/images/galleries/messagedrop/1-thumb.webp",
+      "width": 1000,
+      "height": 600
+    },
+    {
+      "id": "messagedrop-2",
+      "title": "Beitrag vorbereiten",
+      "caption": "Ort, Inhalt und Sichtbarkeit gehören zusammen. Schematische Darstellung, keine echte App-Ansicht.",
+      "alt": "Beitrag vorbereiten. Ort, Inhalt und Sichtbarkeit gehören zusammen. Schematische Darstellung, keine echte App-Ansicht.",
+      "src": "/images/galleries/messagedrop/2.svg",
+      "thumb": "/images/galleries/messagedrop/2-thumb.webp",
+      "width": 1000,
+      "height": 600
+    },
+    {
+      "id": "messagedrop-3",
+      "title": "Öffentlich und privat",
+      "caption": "Öffentliche Beiträge, private Notizen und Kontakt-Chats haben unterschiedliche Zwecke. Keine echten Nutzerinhalte.",
+      "alt": "Öffentlich und privat. Öffentliche Beiträge, private Notizen und Kontakt-Chats haben unterschiedliche Zwecke. Keine echten Nutzerinhalte.",
+      "src": "/images/galleries/messagedrop/3.svg",
+      "thumb": "/images/galleries/messagedrop/3-thumb.webp",
+      "width": 1000,
+      "height": 600
+    },
+    {
+      "id": "messagedrop-4",
+      "title": "Orte wiederfinden",
+      "caption": "Gespeicherte Orte helfen beim Wiederfinden. Das Speichern eines Ortes veröffentlicht nicht automatisch eine Nachricht.",
+      "alt": "Orte wiederfinden. Gespeicherte Orte helfen beim Wiederfinden. Das Speichern eines Ortes veröffentlicht nicht automatisch eine Nachricht.",
+      "src": "/images/galleries/messagedrop/4.svg",
+      "thumb": "/images/galleries/messagedrop/4-thumb.webp",
+      "width": 1000,
+      "height": 600
+    }
+  ]
+}

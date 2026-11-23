@@ -1,31 +1,31 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import AdBanner from './AdBanner.astro';
-import GuideGallery from './GuideGallery.astro';
+import ToolShowcase from './ToolShowcase.astro';
+import galleries from '../lib/tool-galleries.json';
 import GuideSeo from './GuideSeo.astro';
 import type { SocialProject } from '../../../shared/social';
 import BrandIcon from '../../../shared/BrandIcon.astro';
-import { guideCards, guideImages, toolGuides, type ToolGuide } from '../lib/tool-guides';
+import { guideCards, toolGuides, type ToolGuide } from '../lib/tool-guides';
 interface Props { guide: ToolGuide }
 const {guide:g} = Astro.props;
-const image = guideImages[g.slug];
+const pictures = (galleries as Record<string,{id:string;title:string;caption:string;alt:string;src:string;thumb:string;width:number;height:number}[]>)[g.slug];
 const related = toolGuides.filter(tool => tool.slug !== g.slug);
 ---
 <Layout lang="de" title={g.seoTitle} description={g.description} route={'tools/'+g.slug+'/'} homeAlternates={false} canonicalPath={'/de/tools/'+g.slug+'/'} socialImageProject={(g.slug === 'messagedrop' ? 'company' : g.slug) as SocialProject}>
-  <GuideSeo name={g.name} headline={g.title} description={g.lead} path={'/de/tools/'+g.slug+'/'} toolUrl={g.url} image={'/images/guides/'+g.slug+(g.slug === 'messagedrop' ? '.svg' : '.png')} />
+  <GuideSeo name={g.name} headline={g.title} description={g.lead} path={'/de/tools/'+g.slug+'/'} toolUrl={g.url} image={pictures[0].src} />
   <a slot="header-action" class="guide-header-action" href={g.url}>{g.name} öffnen</a>
   <article class="tool-guide">
     <header class="tool-guide-hero">
       <div><p class="eyebrow">{g.tag} · ANLEITUNG</p><h1>{g.title}</h1><p class="guide-lead">{g.lead}</p><a class="guide-primary" href={g.url}>{g.name} öffnen</a></div>
       <div class="tool-identity" aria-hidden="true"><span class="identity-icon">{g.slug === 'messagedrop' ? <img src="/markers/message-marker.svg" width="96" height="120" alt=""/> : <BrandIcon tool={g.slug as 'clock'|'stopwatch'|'calculator'|'breathe'|'relax'|'metronome'} />}</span><strong>{g.name}</strong><span>{g.tag}</span></div>
     </header>
+    <ToolShowcase pictures={pictures} name={g.name} intro={g.slug === 'messagedrop' ? 'Vier schematische Einblicke in Karte, Beiträge, Orte und Sichtbarkeit. Keine echten Nachrichten oder Nutzerdaten. Zum Vergrößern ein Bild anklicken.' : 'Entdecke verschiedene Ansichten und Farbstile von '+g.name+'. Die Screenshots stammen aus der Online-Anwendung. Jedes Bild lässt sich vergrößern.'} />
     <nav class="guide-toc" aria-labelledby="toc-heading"><strong id="toc-heading">In dieser Anleitung</strong><div class="toc-grid"><a href="#ueberblick"><span>Funktionen im Überblick</span><small>Was das Tool für dich bereithält</small></a>{g.sections.map(section=><a href={'#'+section.id}><span>{section.title}</span><small>{section.summary}</small></a>)}<a href="#fragen"><span>Fragen & Grenzen</span><small>Wichtige Antworten vor dem Start</small></a></div></nav>
     <section id="ueberblick"><p class="eyebrow">DAS TOOL KENNENLERNEN</p><h2>{g.name}: die wichtigsten Funktionen</h2><div class="feature-grid">{g.features.map(feature=><div><h3>{feature.title}</h3><p>{feature.text}</p></div>)}</div></section>
     <AdBanner lang="de" />
-    {g.sections.map((section,index)=><section id={section.id}>
+    {g.sections.map(section=><section id={section.id}>
       <h2>{section.title}</h2>
-      {index === 0 && image && <figure class="tool-screenshot"><a href={'/images/guides/'+g.slug+'.png'} aria-label={g.name+'-Screenshot vergrößern'}><img src={'/images/guides/'+g.slug+'.png'} alt={image.alt} width={image.width} height={image.height} loading="lazy" decoding="async"/></a><figcaption>{image.caption} Zum Vergrößern anklicken.</figcaption></figure>}
-      {index === 0 && g.slug === 'messagedrop' && <figure class="tool-screenshot"><a href="/images/guides/messagedrop.svg" aria-label="MessageDrop-Schaubild vergrößern"><img src="/images/guides/messagedrop.svg" width="1000" height="460" loading="lazy" alt="Schaubild: Auf der Karte einen Ort finden, einen Beitrag vorbereiten und seine Sichtbarkeit vor der Veröffentlichung prüfen."/></a><figcaption>Schematischer Ablauf, keine echte App-Ansicht und keine realen Nutzerdaten. Zum Vergrößern anklicken.</figcaption></figure>}
       {section.paragraphs.map(paragraph=><p>{paragraph}</p>)}
       {section.steps.length > 0 && <ol>{section.steps.map(step=><li>{step}</li>)}</ol>}
       {section.example && <aside class="guide-example"><h3>{section.example.title}</h3><p>{section.example.text}</p></aside>}
@@ -34,7 +34,6 @@ const related = toolGuides.filter(tool => tool.slug !== g.slug);
     <footer class="guide-end"><p class="eyebrow">AUSPROBIEREN STATT NUR LESEN</p><h2>Dein Einstieg mit {g.name}</h2><p>{g.end}</p><a class="guide-primary" href={g.url}>{g.name} öffnen</a><div class="end-links"><a href={'/de/#'+guideCards[g.slug]}>Zur Toolübersicht</a><a href="mailto:jacktoolsnet@gmail.com">Feedback zur Anleitung</a></div></footer>
     <nav class="related-guides" aria-label="Weitere Anleitungen"><h2>Weitere Tools kennenlernen</h2><a href="/de/tools/timer/">Timer: Countdown, Pomodoro und Intervalle</a>{related.map(tool=><a href={'/de/tools/'+tool.slug+'/'}>{tool.name}: Anleitung & Beispiele</a>)}</nav>
   </article>
-  <GuideGallery />
 </Layout>
 <style>
 .tool-guide{font-size:calc(1rem * var(--font-scale,1));line-height:1.85;padding-bottom:3rem;overflow-wrap:anywhere}

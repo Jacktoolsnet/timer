@@ -143,10 +143,10 @@ test('screenshot gallery supports navigation, Escape and focus restoration', asy
   await opener.click();
   const gallery = page.getByRole('dialog', { name: 'Timer-Galerie' });
   await expect(gallery).toBeVisible();
-  await expect(gallery.locator('img')).toHaveAttribute('src', /\/digital-green\.png$/);
+  await expect(gallery.locator('#gallery-image')).toHaveAttribute('src', /\/digital-green\.png$/);
   await expect(gallery.getByRole('status')).toHaveText('1 / 14');
   await gallery.getByRole('button', { name: 'Nächstes Bild' }).click();
-  await expect(gallery.locator('img')).toHaveAttribute('src', /\/round-standard\.png$/);
+  await expect(gallery.locator('#gallery-image')).toHaveAttribute('src', /\/round-standard\.png$/);
   await page.keyboard.press('ArrowLeft');
   await expect(gallery.getByRole('status')).toHaveText('1 / 14');
   await page.keyboard.press('ArrowLeft');

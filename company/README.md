@@ -230,3 +230,28 @@ optimierte WebP-Thumbnails liegen unter `public/images/timer/gallery/`, Bilddate
 und Beschreibungen in `src/lib/timer-gallery.json`. Die früheren drei PNGs bleiben
 für bestehende Verweise erhalten, werden aber nicht erneut im Fließtext angezeigt.
 Tests: `npx playwright test tests/timer-showcase.spec.ts tests/timer-guide.spec.ts`.
+
+
+### Einheitliche Galerien aller Tool-Anleitungen
+
+`ToolShowcase.astro` enthält die gemeinsame kompakte Galerie mit Icon-Buttons,
+Tooltips und Vorschaubildern. `TimerShowcase.astro` ist nur noch der Timer-Wrapper.
+Die seitlichen Buttons sind 5 px nach oben versetzt und dadurch zur Bildfläche der
+Thumbnails statt zum zusätzlichen unteren Scroll-Abstand zentriert.
+
+Die sieben weiteren Anleitungen verwenden je vier Bilder aus
+`src/lib/tool-galleries.json`. Sechs Tools zeigen echte Aufnahmen ihrer öffentlichen
+Online-Versionen in verschiedenen Ansichten/Farben; die Rechenbeispiele sind
+fiktiv. MessageDrop zeigt vier ausdrücklich schematische Illustrationen ohne
+private Nachrichten oder echte Karten-/Nutzerdaten. Die alten Einzelbilder bleiben
+als Dateien erhalten, werden aber nicht zusätzlich in den Text eingebettet.
+
+Reproduktion aus `company/`:
+- `node scripts/capture-tool-galleries.mjs`: öffentliche Anwendungen, frische
+  Browser-Kontexte, keine echten Werbeanfragen oder Veröffentlichungen.
+- `node scripts/create-messagedrop-gallery.mjs`: lokale SVG-Schaubilder und Thumbnails.
+
+Vorhandene MessageDrop-Bilddaten bleiben beim erneuten Screenshot-Lauf erhalten.
+Galerien sind im Ausdruck unsichtbar; FAQ-Antworten werden zum Drucken weiterhin
+geöffnet und danach wiederhergestellt. Tests: `tests/all-galleries.spec.ts` und
+`tests/tool-guides.spec.ts`, zusätzlich die bestehenden Timer-Galerietests.

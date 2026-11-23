@@ -20,7 +20,7 @@ test('all live screenshots can be selected and opened in the gallery',async({pag
  await section.locator('.showcase-open').click();
  const gallery=page.getByRole('dialog',{name:'Timer-Galerie'});
  await expect(gallery).toBeVisible();
- await expect(gallery.locator('img')).toHaveAttribute('src',/tea-digital\.png$/);
+ await expect(gallery.locator('#gallery-image')).toHaveAttribute('src',/tea-digital\.png$/);
  await page.keyboard.press('Escape');
  await expect(gallery).toBeHidden();
  await section.getByRole('button',{name:'Nächste Timer-Ansicht'}).click();
@@ -97,4 +97,28 @@ test('icon navigation flanks thumbnails and overlay controls have tooltips',asyn
  }
  await overlay.getByRole('button',{name:'Nächstes Bild'}).click();
  await expect(overlay.getByRole('status')).toHaveText('2 / 14');
+});
+
+test('overlay previews select images and stay synchronized with navigation',async({page})=>{
+ await page.goto('/de/tools/timer/');
+ await page.locator('.showcase-open').click();
+ const overlay=page.getByRole('dialog',{name:'Timer-Galerie'});
+ const previews=overlay.locator('.gallery-thumb');
+ await expect(previews).toHaveCount(14);
+ await previews.nth(6).click();
+ await expect(overlay.getByRole('status')).toHaveText('7 / 14');
+ await expect(previews.nth(6)).toHaveAttribute('aria-current','true');
+ await expect(overlay.locator('#gallery-image')).toHaveAttribute('src',/square-roman\.png$/);
+ await overlay.getByRole('button',{name:'Nächstes Bild'}).click();
+ await expect(previews.nth(7)).toHaveAttribute('aria-current','true');
+ await expect(previews.nth(6)).toHaveAttribute('aria-current','false');
+ const centered=await overlay.locator('.gallery-navigation').evaluate(el=>{
+  const a=el.querySelector('#gallery-previous')!.getBoundingClientRect();
+  const b=el.querySelector('.gallery-thumbnails')!.getBoundingClientRect();
+  const c=el.querySelector('#gallery-next')!.getBoundingClientRect();
+  return a.right<=b.left&&b.right<=c.left;
+ });
+ expect(centered).toBe(true);
+ await page.keyboard.press('Escape');
+ await expect(page.locator('.timer-gallery-thumb').nth(7)).toHaveAttribute('aria-current','true');
 });
