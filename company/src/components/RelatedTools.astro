@@ -1,0 +1,65 @@
+---
+import BrandIcon from '../../../shared/BrandIcon.astro';
+import type { BrandTool } from '../../../shared/BrandIcon.astro';
+
+interface Props { current: string }
+const { current } = Astro.props;
+const tools = [
+  { slug: 'timer', name: 'Timer', text: 'Countdown, Pomodoro und Intervalle für deinen Alltag.' },
+  { slug: 'clock', name: 'Uhr', text: 'Die Zeit im Blick – analog, digital und in deiner Zeitzone.' },
+  { slug: 'stopwatch', name: 'Stoppuhr', text: 'Zeiten messen, Runden erfassen und Ergebnisse vergleichen.' },
+  { slug: 'calculator', name: 'Taschenrechner', text: 'Rechnen mit Überblick und einem bearbeitbaren Rechenstreifen.' },
+  { slug: 'breathe', name: 'Breathe', text: 'Geführte Atemrhythmen für eine bewusste Pause.' },
+  { slug: 'relax', name: 'Relax', text: 'Naturgeräusche und Klänge zu deiner eigenen Mischung verbinden.' },
+  { slug: 'metronome', name: 'Metronom', text: 'Tempo, Takt und Unterteilungen für dein nächstes Üben.' },
+  { slug: 'messagedrop', name: 'MessageDrop', text: 'Ortsbezogene Nachrichten auf der Karte entdecken.' },
+].filter(tool => tool.slug !== current);
+---
+<nav class="related-guides" aria-labelledby="related-tools-heading">
+  <header class="related-heading">
+    <p class="related-kicker">MEHR AUS JACKTOOLS</p>
+    <h2 id="related-tools-heading">Weitere Tools kennenlernen</h2>
+    <p>Was möchtest du als Nächstes ausprobieren? Hier findest du die passende Anleitung.</p>
+  </header>
+  <div class="related-grid">
+    {tools.map(tool => (
+      <a class="related-card" href={'/de/tools/' + tool.slug + '/'}>
+        <span class="related-icon" aria-hidden="true">
+          {tool.slug === 'messagedrop'
+            ? <img src="/markers/message-marker.svg" width="40" height="50" alt="" loading="lazy" />
+            : <BrandIcon tool={tool.slug as BrandTool} />}
+        </span>
+        <span class="related-copy"><strong>{tool.name}</strong><span class="related-description">{tool.text}</span><span class="related-action">Anleitung ansehen</span></span>
+      </a>
+    ))}
+    <a class="related-card related-overview" href="/de/">
+      <span class="related-icon" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="4" width="9" height="9" rx="2"/><rect x="19" y="4" width="9" height="9" rx="2"/><rect x="4" y="19" width="9" height="9" rx="2"/><rect x="19" y="19" width="9" height="9" rx="2"/></svg></span>
+      <span class="related-copy"><strong>Alles auf einen Blick</strong><span class="related-description">Noch nicht entschieden? Entdecke die gesamte Tool-Sammlung.</span><span class="related-action">Zur Toolübersicht</span></span>
+    </a>
+  </div>
+</nav>
+<style>
+.related-guides{margin-top:3rem;padding-top:2.5rem;border-top:1px solid var(--line);line-height:1.5}
+.related-heading{margin-bottom:1.5rem;max-width:46rem}
+.related-kicker{color:var(--accent);font-size:.8em;font-weight:700;letter-spacing:.12em;margin:0 0 .65rem}
+.related-heading h2{font-size:1.8em;line-height:1.25;letter-spacing:-.025em;margin:0 0 .75rem}
+.related-heading>p:last-child{color:var(--muted);margin:0}
+.related-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+.related-grid a.related-card{display:flex;align-items:flex-start;gap:1.1rem;padding:1.4rem;min-width:0;border:1px solid var(--line);border-radius:16px;background:var(--surface);color:var(--text);text-decoration:none;transition:border-color .18s,background .18s}
+.related-grid a.related-card:hover{border-color:var(--accent);background:var(--accent-soft)}
+.related-grid a.related-card:focus-visible{outline:3px solid var(--accent);outline-offset:4px}
+.related-icon{display:flex;align-items:center;justify-content:center;width:48px;height:48px;flex:0 0 48px;color:var(--accent)}
+.related-icon :global(svg){display:block;width:48px;height:48px}
+.related-icon img{display:block;width:36px;height:45px;object-fit:contain}
+.related-copy{display:flex;flex-direction:column;align-items:flex-start;min-width:0;height:100%}
+.related-copy strong{font-size:1.1em;font-weight:650;line-height:1.4}
+.related-description{color:var(--muted);font-size:.9em;margin:.4rem 0 1rem}
+.related-action{display:inline-flex;align-items:center;justify-content:center;margin-top:auto;padding:.4rem .75rem;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--accent);font-size:.85em;font-weight:650;line-height:1.5}
+.related-card:hover .related-action{border-color:var(--accent)}
+.related-grid a.related-overview{background:var(--accent-soft)}
+.related-overview .related-icon{padding:8px;box-sizing:border-box;border:1px solid var(--line);border-radius:12px}
+:global([data-style=technical]) .related-card,:global([data-style=technical]) .related-action,:global([data-style=technical]) .related-overview .related-icon{border-radius:3px}
+@media(max-width:640px){.related-grid{grid-template-columns:minmax(0,1fr)}.related-grid a.related-card{padding:1.1rem;gap:.9rem}.related-heading h2{font-size:1.5em}}
+@media(prefers-reduced-motion:reduce){.related-grid a.related-card{transition:none}}
+@media print{.related-guides{display:none!important}}
+</style>

@@ -2,7 +2,7 @@
 import Layout from '../../../layouts/Layout.astro';
 import AdBanner from '../../../components/AdBanner.astro';
 import GuideSeo from '../../../components/GuideSeo.astro';
-import { toolGuides } from '../../../lib/tool-guides';
+import RelatedTools from '../../../components/RelatedTools.astro';
 import TimerShowcase from '../../../components/TimerShowcase.astro';
 ---
 <Layout lang="de" title="Online-Timer: Countdown, Pomodoro und Intervalle erklärt" description="Anleitung zum Jacktools Timer: Countdown einstellen, Pomodoro-Pausen planen und Intervalle nutzen. Mit praktischen Beispielen und Hinweisen zu Signaltönen und Speicherung." route="tools/timer/" homeAlternates={false} canonicalPath="/de/tools/timer/" socialImageProject="timer">
@@ -96,7 +96,7 @@ import TimerShowcase from '../../../components/TimerShowcase.astro';
       </div>
       <div class="start-bottom"><a href="/de/#online-timer">Zur Toolübersicht</a><p>Eine Funktion fehlt oder etwas ist unklar? <a href="mailto:jacktoolsnet@gmail.com">Schreib uns dein Feedback.</a></p></div>
     </footer>
-    <nav class="related-guides" aria-label="Weitere Anleitungen"><h2>Weitere Tools kennenlernen</h2>{toolGuides.map(tool=><a href={'/de/tools/'+tool.slug+'/'}>{tool.name}: Anleitung & Beispiele</a>)}</nav>
+    <RelatedTools current="timer" />
   </article>
 
 </Layout>
