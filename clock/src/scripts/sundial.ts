@@ -12,6 +12,9 @@ export function createSundial(){
  const notice=document.getElementById('sundial-notice')!;
  const noticeArea=document.getElementById('sundial-notice-area')!;
  const infoArea=document.getElementById('sundial-info-area')!;
+ const coordinateArea=document.getElementById('sundial-coordinates-area')!;
+ const coordinateContainer=document.getElementById('sundial-coordinates')!;
+ const nightHint=document.getElementById('sundial-night-hint')!;
  const text=JSON.parse(root.dataset.text!);
  const face=document.getElementById('sundial-face')!;
  let design:AnalogDesign='standard',numbers=true,zone='UTC',daylightKey='';
@@ -20,6 +23,9 @@ export function createSundial(){
   if(!location)return '';
   const format=new Intl.NumberFormat(document.documentElement.lang,{minimumFractionDigits:4,maximumFractionDigits:4});
   return `${format.format(Math.abs(location.latitude))}° ${location.latitude<0?'S':'N'} · ${format.format(Math.abs(location.longitude))}° ${location.longitude<0?'W':'E'}`;
+ }
+ function rimRadius(angle:number){
+  return design.startsWith('square-')?squareRadius(angle,137,27):137;
  }
  function daylight(now:Date){
   const group=document.getElementById('sundial-daylight')!;
@@ -32,9 +38,9 @@ export function createSundial(){
   // Use the same north-up solar azimuth as the sun marker and shadow, not
   // evenly spaced civil hours. Values outside 0..1 lie above the lower half.
   const fraction=(date:Date)=>(sundialState(date,location!).sun.azimuth-90)/180;
-  const point=(t:number,extra=0)=>{
+  const point=(t:number,extra=0,surface=false)=>{
    const angle=Math.PI*(1-t);
-   const radius=(design.startsWith('square-')?squareRadius(angle-Math.PI/2,137,27):137)+extra;
+   const radius=(surface?(design.startsWith('square-')?squareRadius(angle-Math.PI/2,150,29):150):rimRadius(angle-Math.PI/2))+extra;
    return {x:180-Math.cos(angle)*radius,y:180+Math.sin(angle)*radius};
   };
   const path=Array.from({length:121},(_,i)=>{
@@ -46,18 +52,25 @@ export function createSundial(){
   const rise=times.sunrise instanceof Date?fraction(times.sunrise):0;
   const set=times.sunset instanceof Date?fraction(times.sunset):1;
   const smooth=(v:number)=>{const t=Math.max(0,Math.min(1,v));return t*t*(3-2*t);};
+  const noon=fraction(times.solarNoon);
+  const dayThroughSouth=noon>=rise&&noon<=set;
+  const daylightAt=(t:number)=>{
+   const between=Math.min(smooth((t-rise+.04)/.08),smooth((set-t+.04)/.08));
+   return dayThroughSouth?between:1-between;
+  };
   const sectors=document.createDocumentFragment();
-  for(let i=0;i<180;i++){
-   const t=(i+.5)/180;
-   const warmth=times.alwaysUp?1:times.alwaysDown?0:Math.min(smooth((t-rise+.04)/.08),smooth((set-t+.04)/.08));
-   const color=[112,149,195].map((blue,j)=>Math.round(blue+([237,172,105][j]-blue)*warmth));
-   const a=point(Math.max(0,(i-.03)/180)),b=point(Math.min(1,(i+1.03)/180));
+  for(let i=0;i<360;i++){
+   const t=(i+.5)/180-.5;
+   const opposite=t<.5?t+1:t-1;
+   // Both the Sun and the opposite shadow/hour scale share the warm daylight sector.
+   const warmth=times.alwaysUp?1:times.alwaysDown?0:Math.max(daylightAt(t),daylightAt(opposite));
+   const a=point(Math.max(-.5,(i-.03)/180-.5),0,true),b=point(Math.min(1.5,(i+1.03)/180-.5),0,true);
    const sector=document.createElementNS('http://www.w3.org/2000/svg','path');
    sector.setAttribute('d',`M180,180 L${a.x},${a.y} L${b.x},${b.y} Z`);
-   sector.setAttribute('fill',`rgb(${color.join(',')})`);sectors.append(sector);
+   sector.setAttribute('fill',`color-mix(in srgb,var(--sundial-day) ${(warmth*100).toFixed(3)}%,var(--sundial-night))`);sectors.append(sector);
   }
   fill.replaceChildren(sectors);
-  arc.setAttribute('stroke',times.alwaysUp?'#edac69':times.alwaysDown?'#7095c3':'url(#sundial-daylight-colors)');
+  arc.setAttribute('stroke',times.alwaysUp?'var(--sundial-day)':times.alwaysDown?'var(--sundial-night)':'url(#sundial-daylight-colors)');
   const format=new Intl.DateTimeFormat(document.documentElement.lang,{timeZone:zone,hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
   for(const [event,date] of [['sunrise',times.sunrise],['sunset',times.sunset]] as const){
    const dot=document.getElementById('sundial-'+event+'-dot')!;
@@ -80,18 +93,19 @@ export function createSundial(){
   root.dataset.locationState=pending?'pending':location?'ready':'missing';
   if(!active)return;
   daylight(now);
-  noticeArea.setAttribute('visibility',location?'hidden':'visible');
+  if(!location)noticeArea.setAttribute('visibility','visible');
   infoArea.setAttribute('visibility',location?'visible':'hidden');
-  if(location){if(status.parentElement!==root)root.append(status);}
+  coordinateArea.setAttribute('visibility',location?'visible':'hidden');
+  if(location){if(status.parentElement!==coordinateContainer)coordinateContainer.append(status);}
   else if(status.parentElement!==notice)notice.append(status);
-  if(!location){sun.style.display='none';sun.setAttribute('visibility','hidden');shadow.setAttribute('visibility','hidden');time.textContent='';status.textContent=pending?text.pending:message||text.missing;return;}
+  if(!location){nightHint.hidden=true;sun.style.display='none';sun.setAttribute('visibility','hidden');shadow.setAttribute('visibility','hidden');time.textContent='';status.textContent=pending?text.pending:message||text.missing;return;}
   const tick=String(Math.floor(now.getTime()/1000));
   if(tick===last)return;last=tick;
   const state=sundialState(now,location);
   shadow.setAttribute('visibility',state.visible?'visible':'hidden');
   sun.style.display=state.visible?'':'none';sun.setAttribute('visibility',state.visible?'visible':'hidden');
   const azimuth=state.sun.azimuth*Math.PI/180;
-  const sunRadius=design.startsWith('square-')?squareRadius(azimuth,140,28):140;
+  const sunRadius=rimRadius(azimuth);
   sun.setAttribute('transform',`translate(${180+Math.sin(azimuth)*sunRadius} ${180-Math.cos(azimuth)*sunRadius})`);
   // Keep the rendered tip inside the numeral ring; physical length remains in the model.
   const distance=Math.hypot(state.x,state.y);
@@ -101,7 +115,9 @@ export function createSundial(){
   const fade=document.getElementById('sundial-shadow-fade')!;
   fade.setAttribute('x2',tipX);fade.setAttribute('y2',tipY);
   root.dataset.daylight=String(state.visible);
-  status.textContent=coordinates()+(state.visible?'':` · ${text.night}`);
+  status.textContent=coordinates();
+  nightHint.textContent=state.visible?'':text.night;nightHint.hidden=state.visible;
+  noticeArea.setAttribute('visibility',state.visible?'hidden':'visible');
   const minutes=Math.floor(state.solarHour*60)%1440;
   const solar=document.createElement('span'),altitude=document.createElement('span');
   solar.textContent=`${text.solar}: ${String(Math.floor(minutes/60)).padStart(2,'0')}:${String(minutes%60).padStart(2,'0')}`;

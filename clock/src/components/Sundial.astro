@@ -20,19 +20,19 @@ const t=sundialText[lang];
 <rect x="29" y="29" width="302" height="302" fill="url(#sundial-shadow-fade)"/>
 </mask>
 <linearGradient id="sundial-daylight-colors" gradientUnits="userSpaceOnUse" x1="317" y1="180" x2="43" y2="180">
-<stop offset="0" stop-color="#7095c3"/>
-<stop id="sundial-dawn-blue" offset=".2" stop-color="#7095c3"/>
-<stop id="sundial-dawn-orange" offset=".3" stop-color="#edac69"/>
-<stop id="sundial-dusk-orange" offset=".7" stop-color="#edac69"/>
-<stop id="sundial-dusk-blue" offset=".8" stop-color="#7095c3"/>
-<stop offset="1" stop-color="#7095c3"/>
+<stop offset="0" stop-color="var(--sundial-night)"/>
+<stop id="sundial-dawn-blue" offset=".2" stop-color="var(--sundial-night)"/>
+<stop id="sundial-dawn-orange" offset=".3" stop-color="var(--sundial-day)"/>
+<stop id="sundial-dusk-orange" offset=".7" stop-color="var(--sundial-day)"/>
+<stop id="sundial-dusk-blue" offset=".8" stop-color="var(--sundial-night)"/>
+<stop offset="1" stop-color="var(--sundial-night)"/>
 </linearGradient>
 <radialGradient id="sundial-radial-opacity" gradientUnits="userSpaceOnUse" cx="180" cy="180" r="170">
-<stop offset="0" stop-color="white" stop-opacity=".2"/>
+<stop offset="0" stop-color="white" stop-opacity=".65"/>
 <stop offset="1" stop-color="white" stop-opacity="1"/>
 </radialGradient>
-<mask id="sundial-radial-mask" maskUnits="userSpaceOnUse" x="29" y="180" width="302" height="151">
-<rect x="29" y="180" width="302" height="151" fill="url(#sundial-radial-opacity)"/>
+<mask id="sundial-radial-mask" maskUnits="userSpaceOnUse" x="29" y="29" width="302" height="302">
+<rect x="29" y="29" width="302" height="302" fill="url(#sundial-radial-opacity)"/>
 </mask>
 <filter id="sundial-soft-shadow" x="35" y="35" width="290" height="290" filterUnits="userSpaceOnUse">
 <feGaussianBlur stdDeviation=".65"/>
@@ -63,13 +63,16 @@ const t=sundialText[lang];
 <circle class="sundial-pin-halo" cx="180" cy="180" r="10" aria-hidden="true"/>
 <circle class="sundial-pin" cx="180" cy="180" r="5"/>
 <foreignObject id="sundial-notice-area" x="72" y="95" width="216" height="68">
-<div id="sundial-notice"><p id="sundial-status" role="status">{t.missing}</p></div>
+<div id="sundial-notice"><p id="sundial-status" role="status">{t.missing}</p><p id="sundial-night-hint" hidden></p></div>
 </foreignObject>
 <foreignObject id="sundial-info-area" x="72" y="195" width="216" height="41" visibility="hidden">
 <div class="sundial-info"><p id="sundial-time"></p></div>
 </foreignObject>
 <foreignObject id="sundial-flip-area" x="72" y="236" width="216" height="72" aria-hidden="true">
 <div class="sundial-flip-readout"><div id="sundial-flip"></div><p id="sundial-flip-context"></p></div>
+</foreignObject>
+<foreignObject id="sundial-coordinates-area" x="72" y="302" width="216" height="22" visibility="hidden">
+<div id="sundial-coordinates"></div>
 </foreignObject>
 </svg>
 </div>
