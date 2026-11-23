@@ -78,3 +78,26 @@ test('pending slot stays compact and filled slot follows creative height', async
  await ad.locator('ins').evaluate(el => el.setAttribute('data-ad-status','unfilled'));
  await expect(ad).toBeHidden();
 });
+
+
+test('timer guide ad appears only when filled and sits after mode comparison', async ({ page }) => {
+  await page.clock.install();
+  await page.goto('/de/tools/timer/');
+  const ad = page.locator('.company-ad');
+  await expect(ad).toHaveCount(1);
+  expect(await ad.evaluate(el => Boolean(document.querySelector('#modi')!.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING) && Boolean(el.compareDocumentPosition(document.querySelector('#countdown')!) & Node.DOCUMENT_POSITION_FOLLOWING))).toBe(true);
+  await expect(ad.locator('p')).toBeHidden();
+  await page.clock.fastForward(11000);
+  await expect(ad).toHaveAttribute('data-ad-state', 'empty');
+  await expect(ad).toBeHidden();
+  expect(await ad.evaluate(el => el.getBoundingClientRect().height)).toBe(0);
+  await ad.locator('ins').evaluate(el => {
+    el.style.height = '100px';
+    el.setAttribute('data-ad-status', 'filled');
+  });
+  await expect(ad).toHaveAttribute('data-ad-state', 'filled');
+  await expect(ad.locator('p')).toBeVisible();
+  await ad.locator('ins').evaluate(el => el.setAttribute('data-ad-status', 'unfilled'));
+  await expect(ad).toBeHidden();
+  expect(await ad.evaluate(el => el.getBoundingClientRect().height)).toBe(0);
+});

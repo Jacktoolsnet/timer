@@ -12,8 +12,8 @@ import '../../../shared/page-entry.css';
 import { colorSchemes } from '../lib/appearance';
 import { languages, languageNames, type Language } from '../lib/i18n';
 import { getCompanyDictionary } from '../lib/company-ui';
-interface Props { lang: Language; title: string; description: string; route: string; noindex?: boolean; legal?: boolean }
-const { lang, title, description, noindex = false, legal = false } = Astro.props;
+interface Props { lang: Language; title: string; description: string; route: string; noindex?: boolean; legal?: boolean; homeAlternates?: boolean }
+const { lang, title, description, noindex = false, legal = false, homeAlternates = true } = Astro.props;
 const t = getCompanyDictionary(lang);
 const motion = backgroundCopy[lang];
 const home = '/' + lang + '/';
@@ -38,7 +38,7 @@ const canonical = new URL(Astro.url.pathname === '/' ? '/en/' : Astro.url.pathna
     <title>{title} · Jacktools.net</title>
     <link rel="icon" type="image/svg+xml" href="/jacktools-icon.svg?v=brand-green-1" />
     <link rel="canonical" href={canonical} />
-    {!legal && <>
+    {!legal && homeAlternates && <>
       {languages.map(language => <link rel="alternate" hreflang={language} href={new URL('/'+language+'/',Astro.site)} />)}
       <link rel="alternate" hreflang="x-default" href={new URL('/en/',Astro.site)} />
     </>}
@@ -125,7 +125,7 @@ const canonical = new URL(Astro.url.pathname === '/' ? '/en/' : Astro.url.pathna
           </details>
 
         </div>
-        <nav class="header-nav" aria-label={t.navigation}><div class="header-nav-links"><a href={home+'#tools'}>{t.tools}</a><a href={home+'#idee'}>{t.idea}</a></div></nav>
+        <nav class="header-nav" aria-label={t.navigation}><div class="header-nav-links"><a href={home+'#tools'}>{t.tools}</a><a href={home+'#idee'}>{t.idea}</a><slot name="header-action" /></div></nav>
       </header>
       <main id="main"><slot /></main>
       <footer class="site-footer">

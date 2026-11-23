@@ -166,3 +166,13 @@ body { isolation:isolate; }
 .site-shell { position:relative; z-index:1; }
 @media(prefers-reduced-motion:reduce),(forced-colors:active) { .ambient-background { display:none!important; } }
 @media print { .ambient-background,.background-motion-choice { display:none!important; } }
+
+/* Secondary entry to the explanatory timer page, below the direct tool action. */
+.product-copy .timer-guide-link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;max-width:100%;padding:12px 18px;border:1px solid var(--accent);border-radius:8px;background:transparent;color:var(--accent);font-size:calc(14px * var(--font-scale,1));font-weight:600;line-height:1.5;text-align:center;text-decoration:none;white-space:normal}
+.product-copy .timer-guide-link:hover{background:var(--accent-soft)}
+.product-copy .timer-guide-link:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+[data-style=technical] .product-copy .timer-guide-link{border-radius:3px}
+
+.timer-card-actions{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;width:100%;max-width:360px;margin:24px auto 0}
+.product-copy .timer-card-actions>a{max-width:none;display:flex;align-items:center;justify-content:center;gap:8px;box-sizing:border-box;width:100%;min-height:52px;margin:0;padding:12px 18px;border-radius:8px;font-size:calc(14px * var(--font-scale,1));line-height:1.5;text-align:center;white-space:normal}
+[data-style=technical] .product-copy .timer-card-actions>a{border-radius:3px}

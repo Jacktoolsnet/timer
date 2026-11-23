@@ -141,3 +141,21 @@ rendering. Buffers are capped at approximately 2.2 million pixels and animation
 at 24 fps. Resources are cleaned up on pagehide and restored after BFCache
 navigation. Canvas remains behind content, ignores pointer events and is
 excluded from accessibility trees and printing. No remote assets or tracking.
+
+## Timer-Detailseite
+
+Die deutsche Anleitung liegt unter `/de/tools/timer/` und ist auf der deutschen
+Startseite in der Timer-Karte verlinkt. Sie erklärt Countdown, Pomodoro und
+Intervalltimer mit Beispielen, lokalen Einstellungen und Browser-Grenzen.
+Die bestehenden Kurzadressen (insbesondere `/timer/`) bleiben Weiterleitungen.
+Die Anleitung besitzt einen eigenen Canonical und Sitemap-Eintrag; solange keine
+Übersetzungen existieren, werden keine hreflang-Verweise auf fremde Inhalte gesetzt.
+
+Gezielter Browser-Test: `npx playwright test tests/timer-guide.spec.ts`.
+
+Die Timer-Anleitung nutzt eigene PNG-Screenshots unter `public/images/timer/`,
+aufgenommen am 23.11.2026 aus dem lokalen Timer-Projekt (deutsch, helle Darstellung,
+Viewport 1280 × 1000, jeweils die `.timer-card` vor dem Start). Keine externen
+Bilder oder echten Anzeigen wurden dafür geladen. Bei Bedienungsänderungen die
+Screenshots aktualisieren. Die Bilder werden verzögert geladen, lassen sich in
+Originalgröße öffnen und bleiben in der Druckansicht ausgeblendet.
