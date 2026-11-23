@@ -24,7 +24,7 @@ for (const guide of toolGuides) {
     for (const anchor of await page.locator('.guide-toc a').all()) {
       await expect(page.locator((await anchor.getAttribute('href'))!)).toHaveCount(1);
     }
-    await expect(page.locator('.timer-gallery-thumb')).toHaveCount(4);
+    await expect(page.locator('.timer-gallery-thumb')).toHaveCount(8);
     const image = page.locator('.tool-screenshot img');
     await image.scrollIntoViewIfNeeded();
     await expect.poll(() => image.evaluate((el:HTMLImageElement) => el.complete && el.naturalWidth > 0)).toBe(true);

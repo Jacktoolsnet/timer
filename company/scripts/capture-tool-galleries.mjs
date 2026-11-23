@@ -13,6 +13,7 @@ let result={};
 try{result=JSON.parse(await readFile(new URL('../src/lib/tool-galleries.json',import.meta.url),'utf8'));}catch{}
 const browser=await chromium.launch();
 try{for(const [tool,variants] of Object.entries(specs)){
+ const extraPictures=(result[tool]||[]).slice(4);
  result[tool]=[];const dir=new URL(`../public/images/galleries/${tool}/`,import.meta.url);await mkdir(dir,{recursive:true});
  for(const [i,[title,value,design,palette,theme]] of variants.entries()){
   const page=await browser.newPage({viewport:{width:1280,height:1000},colorScheme:theme,reducedMotion:'reduce'});
@@ -47,6 +48,7 @@ try{for(const [tool,variants] of Object.entries(specs)){
   result[tool].push({id:`${tool}-${i+1}`,title,caption,alt:`${title}. ${caption}`,src,thumb,width:png.readUInt32BE(16),height:png.readUInt32BE(20)});
   console.log(tool,i+1,title);await page.close();
  }
+ result[tool].push(...extraPictures);
  // Persist completed tools so a failed later capture does not discard the set.
  await writeFile(new URL('../src/lib/tool-galleries.json',import.meta.url),JSON.stringify(result,null,2)+'\n');
 }}finally{await browser.close();}

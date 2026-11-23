@@ -255,3 +255,24 @@ Vorhandene MessageDrop-Bilddaten bleiben beim erneuten Screenshot-Lauf erhalten.
 Galerien sind im Ausdruck unsichtbar; FAQ-Antworten werden zum Drucken weiterhin
 geöffnet und danach wiederhergestellt. Tests: `tests/all-galleries.spec.ts` und
 `tests/tool-guides.spec.ts`, zusätzlich die bestehenden Timer-Galerietests.
+
+### Erweiterte Tool-Galerien (acht Bilder)
+
+Alle sieben weiteren Tool-Galerien enthalten jetzt acht Bilder; die Timer-Galerie
+bleibt bei vierzehn. Zusätzlich zu den bisherigen Ansichten zeigen die neuen
+öffentlichen Live-Aufnahmen unter anderem weitere Uhrendesigns/Zeitzonen,
+Stoppuhr-Runden, Rechenbeispiele und deaktivierte Schritte, weitere Atem- und
+Klang-Hintergründe sowie Metronom-Tempi, Taktgrößen und Unterteilungen.
+
+MessageDrop ergänzt seine vier ausdrücklich schematischen Illustrationen durch
+vier echte öffentliche Einrichtungsansichten. Hierfür wurden weder ein Benutzer
+angelegt noch Altersangaben bestätigt, Rechtstexte akzeptiert oder externe Anbieter
+freigeschaltet. Es wurden keine privaten Inhalte oder Nachrichten aufgenommen.
+
+Zusatzaufnahmen: `node scripts/capture-more-tool-galleries.mjs`. Optional können
+Toolnamen angegeben werden; `--skip-messagedrop` überspringt die Einrichtungsbilder.
+Das Skript ersetzt die Zusatzaufnahmen 5–8, erhält die ersten vier Bilder und
+speichert optimierte Thumbnails. Beim isolierten Zuschneiden von Tool-Karten wird
+der feste Seitenheader für die Aufnahme ausgeblendet, damit er den oberen Kartenrand
+nicht überdeckt. Die Basis- und Schaubild-Skripte erhalten vorhandene Zusatzbilder.
+Alle Beispielrechnungen und kurzen Messungen sind eigens für die Aufnahmen erzeugt.

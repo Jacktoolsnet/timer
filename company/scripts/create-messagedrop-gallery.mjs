@@ -21,4 +21,4 @@ for(const [i,[title,headline,labels,caption]] of variants.entries()){
  await writeFile(base+'/public'+src,svg);await sharp(Buffer.from(svg)).resize({width:240,height:170,fit:'cover'}).webp({quality:75}).toFile(base+'/public'+thumb);
  data.push({id:`messagedrop-${i+1}`,title,caption,alt:title+'. '+caption,src,thumb,width:1000,height:600});
 }
-const file=base+'/src/lib/tool-galleries.json';const galleries=JSON.parse(await readFile(file,'utf8'));galleries.messagedrop=data;await writeFile(file,JSON.stringify(galleries,null,2)+'\n');
+const file=base+'/src/lib/tool-galleries.json';const galleries=JSON.parse(await readFile(file,'utf8'));galleries.messagedrop=[...data,...(galleries.messagedrop||[]).slice(4)];await writeFile(file,JSON.stringify(galleries,null,2)+'\n');

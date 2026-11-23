@@ -39,6 +39,46 @@
       "thumb": "/images/galleries/clock/4-thumb.webp",
       "width": 1000,
       "height": 423
+    },
+    {
+      "id": "clock-5",
+      "title": "Eckig · Römische Zahlen",
+      "caption": "Eckig · Römische Zahlen: eine weitere Kombination aus Zifferblatt, Darstellung und Farbwelt der Online-Uhr.",
+      "alt": "Eckig · Römische Zahlen. Eckig · Römische Zahlen: eine weitere Kombination aus Zifferblatt, Darstellung und Farbwelt der Online-Uhr.",
+      "src": "/images/galleries/clock/5.png",
+      "thumb": "/images/galleries/clock/5-thumb.webp",
+      "width": 1000,
+      "height": 679
+    },
+    {
+      "id": "clock-6",
+      "title": "Bahnhofsuhr · Dunkel",
+      "caption": "Bahnhofsuhr · Dunkel: eine weitere Kombination aus Zifferblatt, Darstellung und Farbwelt der Online-Uhr.",
+      "alt": "Bahnhofsuhr · Dunkel. Bahnhofsuhr · Dunkel: eine weitere Kombination aus Zifferblatt, Darstellung und Farbwelt der Online-Uhr.",
+      "src": "/images/galleries/clock/6.png",
+      "thumb": "/images/galleries/clock/6-thumb.webp",
+      "width": 1000,
+      "height": 679
+    },
+    {
+      "id": "clock-7",
+      "title": "Analog und Klappzahlen",
+      "caption": "Analog und Klappzahlen: eine weitere Kombination aus Zifferblatt, Darstellung und Farbwelt der Online-Uhr.",
+      "alt": "Analog und Klappzahlen. Analog und Klappzahlen: eine weitere Kombination aus Zifferblatt, Darstellung und Farbwelt der Online-Uhr.",
+      "src": "/images/galleries/clock/7.png",
+      "thumb": "/images/galleries/clock/7-thumb.webp",
+      "width": 1000,
+      "height": 763
+    },
+    {
+      "id": "clock-8",
+      "title": "Zeitzone Tokio",
+      "caption": "Digitale Uhr mit der Zeitzone Asia/Tokyo. Die dargestellte Uhrzeit stammt vom Zeitpunkt der Aufnahme.",
+      "alt": "Zeitzone Tokio. Digitale Uhr mit der Zeitzone Asia/Tokyo. Die dargestellte Uhrzeit stammt vom Zeitpunkt der Aufnahme.",
+      "src": "/images/galleries/clock/8.png",
+      "thumb": "/images/galleries/clock/8-thumb.webp",
+      "width": 1000,
+      "height": 411
     }
   ],
   "stopwatch": [
@@ -81,6 +121,46 @@
       "thumb": "/images/galleries/stopwatch/4-thumb.webp",
       "width": 1000,
       "height": 387
+    },
+    {
+      "id": "stopwatch-5",
+      "title": "Messung mit Runden",
+      "caption": "Kurze Demonstrationsmessung mit zwei erfassten Runden. Die Werte wurden nur für diese Aufnahme erzeugt.",
+      "alt": "Messung mit Runden. Kurze Demonstrationsmessung mit zwei erfassten Runden. Die Werte wurden nur für diese Aufnahme erzeugt.",
+      "src": "/images/galleries/stopwatch/5.png",
+      "thumb": "/images/galleries/stopwatch/5-thumb.webp",
+      "width": 1000,
+      "height": 693
+    },
+    {
+      "id": "stopwatch-6",
+      "title": "Runden · Kombinierte Anzeige",
+      "caption": "Kurze Demonstrationsmessung mit zwei erfassten Runden. Die Werte wurden nur für diese Aufnahme erzeugt.",
+      "alt": "Runden · Kombinierte Anzeige. Kurze Demonstrationsmessung mit zwei erfassten Runden. Die Werte wurden nur für diese Aufnahme erzeugt.",
+      "src": "/images/galleries/stopwatch/6.png",
+      "thumb": "/images/galleries/stopwatch/6-thumb.webp",
+      "width": 1000,
+      "height": 693
+    },
+    {
+      "id": "stopwatch-7",
+      "title": "Analoge Messung · Rosé",
+      "caption": "Kurze Demonstrationsmessung mit zwei erfassten Runden. Die Werte wurden nur für diese Aufnahme erzeugt.",
+      "alt": "Analoge Messung · Rosé. Kurze Demonstrationsmessung mit zwei erfassten Runden. Die Werte wurden nur für diese Aufnahme erzeugt.",
+      "src": "/images/galleries/stopwatch/7.png",
+      "thumb": "/images/galleries/stopwatch/7-thumb.webp",
+      "width": 1000,
+      "height": 693
+    },
+    {
+      "id": "stopwatch-8",
+      "title": "Fokusansicht · Digital",
+      "caption": "Die digitale Stoppuhr in der Fokusansicht. Gestaltung und Farbschema lassen sich unabhängig von der Messung ändern.",
+      "alt": "Fokusansicht · Digital. Die digitale Stoppuhr in der Fokusansicht. Gestaltung und Farbschema lassen sich unabhängig von der Messung ändern.",
+      "src": "/images/galleries/stopwatch/8.png",
+      "thumb": "/images/galleries/stopwatch/8-thumb.webp",
+      "width": 1280,
+      "height": 1000
     }
   ],
   "calculator": [
@@ -123,6 +203,46 @@
       "thumb": "/images/galleries/calculator/4-thumb.webp",
       "width": 1000,
       "height": 1007
+    },
+    {
+      "id": "calculator-5",
+      "title": "Aufschlag und Rabatt",
+      "caption": "Fiktives Beispiel mit einem Startwert von 100, 20 Prozent Aufschlag und anschließend 10 Prozent Rabatt.",
+      "alt": "Aufschlag und Rabatt. Fiktives Beispiel mit einem Startwert von 100, 20 Prozent Aufschlag und anschließend 10 Prozent Rabatt.",
+      "src": "/images/galleries/calculator/5.png",
+      "thumb": "/images/galleries/calculator/5-thumb.webp",
+      "width": 1000,
+      "height": 971
+    },
+    {
+      "id": "calculator-6",
+      "title": "Rechnung mit Währungsangabe",
+      "caption": "Fiktive Beispielrechnung mit der Währungsangabe EUR. Das Tool führt dabei keine Währungsumrechnung durch.",
+      "alt": "Rechnung mit Währungsangabe. Fiktive Beispielrechnung mit der Währungsangabe EUR. Das Tool führt dabei keine Währungsumrechnung durch.",
+      "src": "/images/galleries/calculator/6.png",
+      "thumb": "/images/galleries/calculator/6-thumb.webp",
+      "width": 1000,
+      "height": 971
+    },
+    {
+      "id": "calculator-7",
+      "title": "Geteilte Beträge",
+      "caption": "Fiktives Beispiel: Ein Betrag von 240 wird in drei gleiche Teile aufgeteilt. Der Rechenstreifen hält die Schritte fest.",
+      "alt": "Geteilte Beträge. Fiktives Beispiel: Ein Betrag von 240 wird in drei gleiche Teile aufgeteilt. Der Rechenstreifen hält die Schritte fest.",
+      "src": "/images/galleries/calculator/7.png",
+      "thumb": "/images/galleries/calculator/7-thumb.webp",
+      "width": 1000,
+      "height": 971
+    },
+    {
+      "id": "calculator-8",
+      "title": "Rechenschritte deaktivieren",
+      "caption": "Fiktive Beispielrechnung mit einem vorübergehend deaktivierten Rechenschritt. Nachfolgende Ergebnisse berücksichtigen nur aktive Schritte.",
+      "alt": "Rechenschritte deaktivieren. Fiktive Beispielrechnung mit einem vorübergehend deaktivierten Rechenschritt. Nachfolgende Ergebnisse berücksichtigen nur aktive Schritte.",
+      "src": "/images/galleries/calculator/8.png",
+      "thumb": "/images/galleries/calculator/8-thumb.webp",
+      "width": 1000,
+      "height": 971
     }
   ],
   "breathe": [
@@ -165,6 +285,46 @@
       "thumb": "/images/galleries/breathe/4-thumb.webp",
       "width": 1152,
       "height": 865
+    },
+    {
+      "id": "breathe-5",
+      "title": "Gleichmäßiger Rhythmus · Polarlicht",
+      "caption": "Gleichmäßiger Rhythmus · Polarlicht: die ausgewählte Atemvorlage mit einem weiteren Hintergrundmotiv vor dem Start. Dies ist eine Darstellung der Einstellungen, keine persönliche Atemempfehlung.",
+      "alt": "Gleichmäßiger Rhythmus · Polarlicht. Gleichmäßiger Rhythmus · Polarlicht: die ausgewählte Atemvorlage mit einem weiteren Hintergrundmotiv vor dem Start. Dies ist eine Darstellung der Einstellungen, keine persönliche Atemempfehlung.",
+      "src": "/images/galleries/breathe/5.png",
+      "thumb": "/images/galleries/breathe/5-thumb.webp",
+      "width": 1152,
+      "height": 822
+    },
+    {
+      "id": "breathe-6",
+      "title": "Quadratatmen · Wiese",
+      "caption": "Quadratatmen · Wiese: die ausgewählte Atemvorlage mit einem weiteren Hintergrundmotiv vor dem Start. Dies ist eine Darstellung der Einstellungen, keine persönliche Atemempfehlung.",
+      "alt": "Quadratatmen · Wiese. Quadratatmen · Wiese: die ausgewählte Atemvorlage mit einem weiteren Hintergrundmotiv vor dem Start. Dies ist eine Darstellung der Einstellungen, keine persönliche Atemempfehlung.",
+      "src": "/images/galleries/breathe/6.png",
+      "thumb": "/images/galleries/breathe/6-thumb.webp",
+      "width": 1152,
+      "height": 843
+    },
+    {
+      "id": "breathe-7",
+      "title": "Sanfte Vorlage · See",
+      "caption": "Sanfte Vorlage · See: die ausgewählte Atemvorlage mit einem weiteren Hintergrundmotiv vor dem Start. Dies ist eine Darstellung der Einstellungen, keine persönliche Atemempfehlung.",
+      "alt": "Sanfte Vorlage · See. Sanfte Vorlage · See: die ausgewählte Atemvorlage mit einem weiteren Hintergrundmotiv vor dem Start. Dies ist eine Darstellung der Einstellungen, keine persönliche Atemempfehlung.",
+      "src": "/images/galleries/breathe/7.png",
+      "thumb": "/images/galleries/breathe/7-thumb.webp",
+      "width": 1152,
+      "height": 822
+    },
+    {
+      "id": "breathe-8",
+      "title": "Eigener Rhythmus · Dünen",
+      "caption": "Eigener Rhythmus · Dünen: die ausgewählte Atemvorlage mit einem weiteren Hintergrundmotiv vor dem Start. Dies ist eine Darstellung der Einstellungen, keine persönliche Atemempfehlung.",
+      "alt": "Eigener Rhythmus · Dünen. Eigener Rhythmus · Dünen: die ausgewählte Atemvorlage mit einem weiteren Hintergrundmotiv vor dem Start. Dies ist eine Darstellung der Einstellungen, keine persönliche Atemempfehlung.",
+      "src": "/images/galleries/breathe/8.png",
+      "thumb": "/images/galleries/breathe/8-thumb.webp",
+      "width": 1152,
+      "height": 843
     }
   ],
   "relax": [
@@ -205,6 +365,46 @@
       "alt": "Sanfte Landschaft. Sanfte Landschaft: Die Klangfläche mit dem im Tool angebotenen Hintergrund „forest“ vor dem Start. Klänge und Animationen lassen sich getrennt anpassen.",
       "src": "/images/galleries/relax/4.png",
       "thumb": "/images/galleries/relax/4-thumb.webp",
+      "width": 1000,
+      "height": 887
+    },
+    {
+      "id": "relax-5",
+      "title": "Sommergarten",
+      "caption": "Sommergarten: ausgewählte Klangvorlage und Hintergrundmotiv vor der Wiedergabe. Instrumente, Naturgeräusche und Animationen bleiben einzeln anpassbar.",
+      "alt": "Sommergarten. Sommergarten: ausgewählte Klangvorlage und Hintergrundmotiv vor der Wiedergabe. Instrumente, Naturgeräusche und Animationen bleiben einzeln anpassbar.",
+      "src": "/images/galleries/relax/5.png",
+      "thumb": "/images/galleries/relax/5-thumb.webp",
+      "width": 1000,
+      "height": 887
+    },
+    {
+      "id": "relax-6",
+      "title": "Abendruhe",
+      "caption": "Abendruhe: ausgewählte Klangvorlage und Hintergrundmotiv vor der Wiedergabe. Instrumente, Naturgeräusche und Animationen bleiben einzeln anpassbar.",
+      "alt": "Abendruhe. Abendruhe: ausgewählte Klangvorlage und Hintergrundmotiv vor der Wiedergabe. Instrumente, Naturgeräusche und Animationen bleiben einzeln anpassbar.",
+      "src": "/images/galleries/relax/6.png",
+      "thumb": "/images/galleries/relax/6-thumb.webp",
+      "width": 1000,
+      "height": 887
+    },
+    {
+      "id": "relax-7",
+      "title": "Lagerplatz am See",
+      "caption": "Lagerplatz am See: ausgewählte Klangvorlage und Hintergrundmotiv vor der Wiedergabe. Instrumente, Naturgeräusche und Animationen bleiben einzeln anpassbar.",
+      "alt": "Lagerplatz am See. Lagerplatz am See: ausgewählte Klangvorlage und Hintergrundmotiv vor der Wiedergabe. Instrumente, Naturgeräusche und Animationen bleiben einzeln anpassbar.",
+      "src": "/images/galleries/relax/7.png",
+      "thumb": "/images/galleries/relax/7-thumb.webp",
+      "width": 1000,
+      "height": 887
+    },
+    {
+      "id": "relax-8",
+      "title": "Ruhige Küste",
+      "caption": "Ruhige Küste: ausgewählte Klangvorlage und Hintergrundmotiv vor der Wiedergabe. Instrumente, Naturgeräusche und Animationen bleiben einzeln anpassbar.",
+      "alt": "Ruhige Küste. Ruhige Küste: ausgewählte Klangvorlage und Hintergrundmotiv vor der Wiedergabe. Instrumente, Naturgeräusche und Animationen bleiben einzeln anpassbar.",
+      "src": "/images/galleries/relax/8.png",
+      "thumb": "/images/galleries/relax/8-thumb.webp",
       "width": 1000,
       "height": 887
     }
@@ -249,6 +449,46 @@
       "thumb": "/images/galleries/metronome/4-thumb.webp",
       "width": 1000,
       "height": 587
+    },
+    {
+      "id": "metronome-5",
+      "title": "120 BPM · Unterteilungen",
+      "caption": "120 BPM · Unterteilungen: Das Metronom ist auf 120 BPM und 2 gleichmäßige Unterteilungen pro Schlag eingestellt.",
+      "alt": "120 BPM · Unterteilungen. 120 BPM · Unterteilungen: Das Metronom ist auf 120 BPM und 2 gleichmäßige Unterteilungen pro Schlag eingestellt.",
+      "src": "/images/galleries/metronome/5.png",
+      "thumb": "/images/galleries/metronome/5-thumb.webp",
+      "width": 1000,
+      "height": 592
+    },
+    {
+      "id": "metronome-6",
+      "title": "Drei Schläge pro Takt",
+      "caption": "Drei Schläge pro Takt: Das Metronom ist auf 75 BPM, 3 Schläge pro Takt eingestellt.",
+      "alt": "Drei Schläge pro Takt. Drei Schläge pro Takt: Das Metronom ist auf 75 BPM, 3 Schläge pro Takt eingestellt.",
+      "src": "/images/galleries/metronome/6.png",
+      "thumb": "/images/galleries/metronome/6-thumb.webp",
+      "width": 1000,
+      "height": 587
+    },
+    {
+      "id": "metronome-7",
+      "title": "Beat-Leiste · Triolen",
+      "caption": "Beat-Leiste · Triolen: Das Metronom ist auf 80 BPM und 3 gleichmäßige Unterteilungen pro Schlag eingestellt.",
+      "alt": "Beat-Leiste · Triolen. Beat-Leiste · Triolen: Das Metronom ist auf 80 BPM und 3 gleichmäßige Unterteilungen pro Schlag eingestellt.",
+      "src": "/images/galleries/metronome/7.png",
+      "thumb": "/images/galleries/metronome/7-thumb.webp",
+      "width": 1000,
+      "height": 587
+    },
+    {
+      "id": "metronome-8",
+      "title": "Ballansicht · Sechs Schläge",
+      "caption": "Ballansicht · Sechs Schläge: Das Metronom ist auf 100 BPM, 6 Schläge pro Takt eingestellt.",
+      "alt": "Ballansicht · Sechs Schläge. Ballansicht · Sechs Schläge: Das Metronom ist auf 100 BPM, 6 Schläge pro Takt eingestellt.",
+      "src": "/images/galleries/metronome/8.png",
+      "thumb": "/images/galleries/metronome/8-thumb.webp",
+      "width": 1000,
+      "height": 587
     }
   ],
   "messagedrop": [
@@ -291,6 +531,46 @@
       "thumb": "/images/galleries/messagedrop/4-thumb.webp",
       "width": 1000,
       "height": 600
+    },
+    {
+      "id": "messagedrop-5",
+      "title": "Willkommen und Einrichtung",
+      "caption": "Öffentlicher Einrichtungsbildschirm vor der ersten Nutzung. Keine Zustimmung, Altersangabe oder Anmeldung wurde vorgenommen.",
+      "alt": "Willkommen und Einrichtung. Öffentlicher Einrichtungsbildschirm vor der ersten Nutzung. Keine Zustimmung, Altersangabe oder Anmeldung wurde vorgenommen.",
+      "src": "/images/galleries/messagedrop/5.png",
+      "thumb": "/images/galleries/messagedrop/5-thumb.webp",
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "id": "messagedrop-6",
+      "title": "Einstellungen für externe Inhalte",
+      "caption": "Ansicht der Einstellungen für externe Anbieter. Für die Aufnahme wurde kein Anbieter aktiviert und keine Zustimmung erteilt.",
+      "alt": "Einstellungen für externe Inhalte. Ansicht der Einstellungen für externe Anbieter. Für die Aufnahme wurde kein Anbieter aktiviert und keine Zustimmung erteilt.",
+      "src": "/images/galleries/messagedrop/6.png",
+      "thumb": "/images/galleries/messagedrop/6-thumb.webp",
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "id": "messagedrop-7",
+      "title": "Nutzungszeit konfigurieren",
+      "caption": "Die öffentliche Einrichtungsansicht für Nutzungszeit und Schutzfunktionen. Es wurden keine persönlichen Daten eingegeben oder Einstellungen gespeichert.",
+      "alt": "Nutzungszeit konfigurieren. Die öffentliche Einrichtungsansicht für Nutzungszeit und Schutzfunktionen. Es wurden keine persönlichen Daten eingegeben oder Einstellungen gespeichert.",
+      "src": "/images/galleries/messagedrop/7.png",
+      "thumb": "/images/galleries/messagedrop/7-thumb.webp",
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "id": "messagedrop-8",
+      "title": "Datenschutzhinweise lesen",
+      "caption": "Geöffnete Datenschutzhinweise während der Einrichtung. Die Aufnahme zeigt die Leseansicht; es wurde nichts akzeptiert.",
+      "alt": "Datenschutzhinweise lesen. Geöffnete Datenschutzhinweise während der Einrichtung. Die Aufnahme zeigt die Leseansicht; es wurde nichts akzeptiert.",
+      "src": "/images/galleries/messagedrop/8.png",
+      "thumb": "/images/galleries/messagedrop/8-thumb.webp",
+      "width": 1280,
+      "height": 900
     }
   ]
 }
