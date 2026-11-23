@@ -17,6 +17,7 @@ const variants = [
  {id:'interval',title:'Intervalle · Aktivphase',mode:'training',view:'combined',design:'square-standard',palette:'orange',theme:'dark',style:'technical',phase:'active',caption:'Aktivphase eines Intervallablaufs mit 45 Sekunden Aktivität, 15 Sekunden Pause und sechs Runden.'},
  {id:'focus-background',title:'Fokusansicht · Hintergrund',mode:'timer',view:'combined',design:'square-roman',palette:'violet',theme:'dark',style:'warm',background:'desk',focus:true,caption:'Fokusansicht mit eckigem römischem Zifferblatt und dem Hintergrund „Fokus-Schreibtisch“.'},
 ];
+variants.push({id:'tea-digital',title:'Teepause · Digital',mode:'timer',view:'digital',design:'standard',palette:'rose',theme:'light',style:'soft',background:'tea',caption:'Digitale Countdown-Anzeige in hellem Rosé mit dem Hintergrund „Teepause“ und weichen Oberflächenformen.'});
 const output = new URL('../public/images/timer/gallery/',import.meta.url);
 await mkdir(output,{recursive:true});
 const browser=await chromium.launch();
@@ -46,7 +47,7 @@ try {
   const {readFile}=await import('node:fs/promises');const png=await readFile(path);
   v.width=png.readUInt32BE(16);v.height=png.readUInt32BE(20);v.src='/images/timer/gallery/'+v.id+'.png';v.alt=v.title+'. '+v.caption;
   v.thumb='/images/timer/gallery/'+v.id+'-thumb.webp';
-  await sharp(path).resize({width:240,height:170,fit:'contain',background:'#eef1f5'}).webp({quality:75}).toFile(new URL(v.id+'-thumb.webp',output).pathname);
+  await sharp(path).resize({width:240,height:170,fit:'cover'}).webp({quality:75}).toFile(new URL(v.id+'-thumb.webp',output).pathname);
   console.log(v.id,v.width,v.height);await page.close();
  }
  await writeFile(new URL('../src/lib/timer-gallery.json',import.meta.url),JSON.stringify(variants,null,2)+'\n');

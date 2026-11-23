@@ -210,5 +210,22 @@
     "src": "/images/timer/gallery/focus-background.png",
     "alt": "Fokusansicht · Hintergrund. Fokusansicht mit eckigem römischem Zifferblatt und dem Hintergrund „Fokus-Schreibtisch“.",
     "thumb": "/images/timer/gallery/focus-background-thumb.webp"
+  },
+  {
+    "id": "tea-digital",
+    "title": "Teepause · Digital",
+    "mode": "timer",
+    "view": "digital",
+    "design": "standard",
+    "palette": "rose",
+    "theme": "light",
+    "style": "soft",
+    "background": "tea",
+    "caption": "Digitale Countdown-Anzeige in hellem Rosé mit dem Hintergrund „Teepause“ und weichen Oberflächenformen.",
+    "width": 1000,
+    "height": 615,
+    "src": "/images/timer/gallery/tea-digital.png",
+    "alt": "Teepause · Digital. Digitale Countdown-Anzeige in hellem Rosé mit dem Hintergrund „Teepause“ und weichen Oberflächenformen.",
+    "thumb": "/images/timer/gallery/tea-digital-thumb.webp"
   }
 ]

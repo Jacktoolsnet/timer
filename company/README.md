@@ -216,10 +216,10 @@ kleine horizontal scrollbare Vorschaubilder, Vor/Zurück, Pfeiltasten, Touch-Wis
 und das Galerie-Overlay. Kein automatischer Bildwechsel; im Druck ausgeblendet.
 Ohne JavaScript öffnen die Bildlinks weiterhin die Originaldateien.
 
-13 Aufnahmen vom 23.11.2026 stammen direkt von `https://timer.jacktools.net`:
+14 Aufnahmen vom 23.11.2026 stammen direkt von `https://timer.jacktools.net`:
 Digital, alle acht analogen Designs (Standard, Römisch, Minimalistisch und
 Bahnhofsuhr jeweils rund/eckig), kombinierte Ansichten, Pomodoro-Fokus/-Pause,
-Intervall-Aktivphase sowie Fokusansicht mit Hintergrund. Alle acht Farbwelten,
+Intervall-Aktivphase, Fokusansicht mit Hintergrund sowie die digitale Teepause. Alle acht Farbwelten,
 helle/dunkle Darstellung und mehrere Oberflächenstile sind vertreten.
 
 Reproduzieren mit `node scripts/capture-timer-gallery.mjs` (Node aus `.nvmrc`).
