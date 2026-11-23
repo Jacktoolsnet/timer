@@ -14,7 +14,7 @@ function romanNumeral(value: number) {
  return result;
 }
 /** Distance from the centre to a rounded-square edge along a clock-hand ray. */
-function squareRadius(angle: number, half: number, corner: number) {
+export function squareRadius(angle: number, half: number, corner: number) {
  const x=Math.abs(Math.sin(angle)), y=Math.abs(Math.cos(angle));
  let low=0, high=half*Math.SQRT2;
  for(let i=0;i<24;i++) {
@@ -24,7 +24,7 @@ function squareRadius(angle: number, half: number, corner: number) {
  }
  return (low+high)/2;
 }
-export function dialMarkup(design: AnalogDesign, hourOffset = 0, minuteScale = false) {
+export function dialMarkup(design: AnalogDesign, hourOffset = 0, minuteScale = false, numeralRadius = 116) {
  const square=design.startsWith('square-');
  const style=square?design.slice(7):design;
  const ticks = Array.from({length:60},(_,i) => {
@@ -35,7 +35,7 @@ export function dialMarkup(design: AnalogDesign, hourOffset = 0, minuteScale = f
  const numbers = Array.from({length:12},(_,i)=>{
   const n=i+1,a=n*Math.PI/6;
   if(style==='minimal' && n%3!==0)return '';
-  const radius=square?squareRadius(a,116,20):116;
+  const radius=square?squareRadius(a,numeralRadius,20):numeralRadius;
   const value=minuteScale?n*5:n+hourOffset;
   return `<text x="${160+radius*Math.sin(a)}" y="${160-radius*Math.cos(a)}">${style==='roman'?romanNumeral(value):value}</text>`;
  }).join('');

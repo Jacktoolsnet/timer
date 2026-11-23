@@ -2,10 +2,21 @@
 import conversation from '../../public/images/blog/nulltopic/conversation.svg?raw';
 import roles from '../../public/images/blog/nulltopic/roles.svg?raw';
 import surface from '../../public/images/blog/nulltopic/surface-lab.svg?raw';
-interface Props { variant?: 'conversation' | 'roles' | 'surface' }
-const {variant='conversation'}=Astro.props;
+import type {Language} from '../lib/i18n';
+import conversation_en from '../../public/images/blog/nulltopic/conversation-en.svg?raw';
+import conversation_es from '../../public/images/blog/nulltopic/conversation-es.svg?raw';
+import conversation_fr from '../../public/images/blog/nulltopic/conversation-fr.svg?raw';
+import roles_en from '../../public/images/blog/nulltopic/roles-en.svg?raw';
+import roles_es from '../../public/images/blog/nulltopic/roles-es.svg?raw';
+import roles_fr from '../../public/images/blog/nulltopic/roles-fr.svg?raw';
+import surface_en from '../../public/images/blog/nulltopic/surface-lab-en.svg?raw';
+import surface_es from '../../public/images/blog/nulltopic/surface-lab-es.svg?raw';
+import surface_fr from '../../public/images/blog/nulltopic/surface-lab-fr.svg?raw';
+interface Props { lang?:Language; variant?: 'conversation' | 'roles' | 'surface' }
+const {variant='conversation',lang='de'}=Astro.props;
+const art={de:{conversation,roles,surface},en:{conversation:conversation_en,roles:roles_en,surface:surface_en},es:{conversation:conversation_es,roles:roles_es,surface:surface_es},fr:{conversation:conversation_fr,roles:roles_fr,surface:surface_fr}};
 ---
-<div class="nulltopic-illustration" set:html={variant==='roles'?roles:variant==='surface'?surface:conversation} />
+<div class="nulltopic-illustration" set:html={art[lang][variant]} />
 <style>
 .nulltopic-illustration{width:100%;min-width:0;line-height:0}
 .nulltopic-illustration :global(svg){display:block;width:100%;height:auto;stroke:none;stroke-width:1;fill:none;border-radius:inherit}

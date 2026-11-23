@@ -303,12 +303,15 @@ Zusätzliche Tests: `npx playwright test tests/guide-translations.spec.ts`.
 Diese prüfen alle 24 übersetzten Seiten auf Vollständigkeit, Sprachverknüpfungen,
 Metadaten, Galerien, Druckansicht und Nutzbarkeit ohne JavaScript.
 
-## Deutscher Blog: erster NullTopic-Artikel
+## Mehrsprachiger Blog: NullTopic
 
 `/de/blog/` listet den ersten Beitrag unter `/de/blog/nulltopic-ki-agenten/`.
-Die deutsche Startseite zeigt eine redaktionelle Vorschau; der deutsche Footer
-verlinkt die Übersicht. Es gibt noch keine übersetzten Blogseiten und daher
-keine hreflang-Alternativen. Die Sprachwahl ist als Wechsel zur Startseite erklärt.
+Alle vier Startseiten zeigen eine redaktionelle Vorschau; Header und Footer
+verlinken die jeweilige Blogübersicht. Die Übersicht und beide Artikel sind in
+Deutsch, Englisch, Spanisch und Französisch vorhanden. Die Sprachwahl wechselt
+direkt zur jeweiligen Übersetzung, nicht zur Startseite. Canonicals bleiben
+sprachspezifisch; hreflang und Sitemap verweisen gegenseitig auf alle vier
+Sprachen sowie Englisch als x-default.
 
 Der Artikel beschreibt die aktive Rolle der Operatoren (Freigaben, Pausieren,
 Zugänge widerrufen), nicht eine angebliche Beschränkung aller Menschen auf Mitlesen.
@@ -328,8 +331,8 @@ Auf den Leseseiten startet die dekorative Hintergrundanimation für ruhiges Lese
 pausiert (ohne Render-Schleife). In den Einstellungen kann sie für diesen Besuch
 wieder eingeschaltet werden. Farbpalette und Typografie folgen weiterhin den Einstellungen.
 
-Die Sitemap umfasst jetzt 38 indexierbare Seiten: vier Startseiten, 32 Anleitungen
-und die beiden deutschen Blogseiten. Test: `npx playwright test tests/blog.spec.ts`.
+Die Sitemap umfasst 48 indexierbare Seiten: vier Startseiten, 32 Anleitungen
+und zwölf Blogseiten (Übersicht und zwei Beiträge pro Sprache). Test: `npx playwright test tests/blog.spec.ts`.
 Auch dieser Stand wird durch Build/Tests nicht veröffentlicht und nicht an Medium
 übertragen.
 
@@ -340,7 +343,7 @@ Der zweite deutsche Beitrag liegt unter
 sich auf den berichteten Stand: Surface Book der ersten Generation, Windows 11
 praktisch nicht nutzbar, Arch Linux mit GNOME, UEFI-/USB-Vorbereitung und ein
 WLAN-Abbruch mit Wiederherstellung über eine zweite Shell. Open WebUI und ein
-Terminal sind eingerichtet, ein OpenAI-API-Key liegt bereit. Agenten sind noch
+Open Terminal als Open-WebUI-Integration sind eingerichtet, ein OpenAI-API-Key liegt bereit. Agenten sind noch
 nicht eingerichtet; ihr Aufbau ist das geplante Thema für Teil 3. Es werden weder
 Hardware-Spezifikationen, Testergebnisse noch ein erfolgreicher API-Aufruf erfunden.
 
@@ -351,7 +354,8 @@ Die Übersicht listet beide Beiträge, die Startseite stellt den neuesten vor.
 Die beiden Artikel sind als Serie gegenseitig verlinkt.
 
 `BlogCode.astro` zeigt native, auswählbare, per Tastatur horizontal scrollbare
-Codeblöcke. Im Druck umbrechen lange Zeilen. Die fünf Befehlsblöcke sind als
+Codeblöcke mit einem zugänglich beschrifteten Kopier-Icon, lokalisiertem Feedback
+und Fehlerhinweis. Ohne JavaScript sowie im Druck wird der Button ausgeblendet. Im Druck umbrechen lange Zeilen. Die zehn Befehlsblöcke inklusive Installations-Spickzettel sind als
 Beispiele für das offizielle Arch-Live-System gekennzeichnet, nicht als historisches
 Installationsprotokoll. Keine Formatierungs-/USB-Schreibbefehle und keine echten
 Schlüssel oder WLAN-Passwörter. Partitionierungsrisiken, Secure-Boot-Auswirkungen
@@ -360,4 +364,21 @@ und Cloud-Modellzugriff werden eingeordnet; offizielle Quellen stehen im Artikel
 Das neue themenfähige SVG `public/images/blog/nulltopic/surface-lab.svg` zeigt eine
 schematische Arbeitsumgebung, keinen echten Desktop-Screenshot. API-Zugang ist
 als vorbereitet, Agenten als geplant gekennzeichnet. Die Sitemap umfasst nun
-39 Seiten. Zusätzlicher Test: `tests/surface-blog.spec.ts`.
+48 Seiten. Zusätzlicher Test: `tests/surface-blog.spec.ts`.
+
+### Übersetzungen pflegen
+
+- Deutsche Originale und übersetzte Artikeltexte liegen als statische Astro-Seiten
+  unter `src/pages/{de,en,es,fr}/blog/`. Keine externe Übersetzungs-API zur Laufzeit.
+- `src/lib/blog.ts` definiert Artikelkennungen, sprachspezifische Pfade und Katalog;
+  Metadaten/Teaser der Übersetzungen stehen in `blog-localized.json`.
+- `blog-ui.ts` enthält die gemeinsame Oberfläche; `BlogIndex.astro` rendert alle
+  vier Übersichten. `SurfaceBlogStyles.astro` teilt den Spickzettel-Stil.
+- `blog-code-examples.ts` teilt die ausführbaren Befehle der Übersetzungen, mit
+  übersetzten Kommentaren und WLAN-Platzhaltern. Das deutsche Tastaturlayout
+  und die deutsche Zeitzone bleiben als Fakten dieses Aufbaus erhalten; die
+  Übersetzungen erklären ausdrücklich die Anpassung an eigene Hardware/Standort.
+- SVG-Varianten `*-{en,es,fr}.svg` enthalten übersetzte sichtbare Beschriftungen,
+  Titel und Beschreibungen; keine deutschen Texte als Bild in fremden Sprachen.
+- Bei redaktionellen Änderungen alle vier Sprachfassungen aktualisieren.
+- Tests: `npx playwright test tests/blog.spec.ts tests/surface-blog.spec.ts tests/blog-locales.spec.ts`.

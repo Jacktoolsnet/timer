@@ -1,4 +1,4 @@
-import {dialMarkup, type AnalogDesign} from '../lib/analog-designs';
+import {dialMarkup, squareRadius, type AnalogDesign} from '../lib/analog-designs';
 import {createClockDate} from './clock-date';
 import {createAlarm} from './alarm';
 import {createFlipClock} from './flip-clock';
@@ -66,15 +66,40 @@ function configure(){
  $('clock-date').hidden=settings.date==='off'||settings.dateView!=='textDate';
  $('styled-date').hidden=settings.date==='off'||settings.dateView==='textDate';
  styledDate.configure(locale,zone,settings.dateView);
+ const orbit=$('orbit-clock');
+ if(orbit.dataset.design!==settings.analogDesign){
+  $('orbit-dial-face').innerHTML=dialMarkup(settings.analogDesign as AnalogDesign,0,false,126);
+  orbit.dataset.design=settings.analogDesign;
+ }
+ orbit.querySelector<SVGElement>('.dial-numerals')!.style.display=settings.numbers?'':'none';
+ for(const [unit,radius] of [['second',108],['minute',80],['hour',50]] as const){
+  const points=Array.from({length:241},(_,i)=>{
+   const point=orbitPoint(i*360/240,radius);
+   return `${i?'L':'M'}${point.x},${point.y}`;
+  }).join(' ');
+  orbit.querySelector('.orbit-'+unit+' .orbit-track')!.setAttribute('d',points+'Z');
+ }
  const face=$('analog-clock');
  if(face.dataset.design!==settings.analogDesign){$('dial-face').innerHTML=dialMarkup(settings.analogDesign as AnalogDesign);face.dataset.design=settings.analogDesign;}
  face.querySelector<SVGElement>('.dial-numerals')!.style.display=settings.numbers?'':'none';$('second-hand').style.display=settings.seconds?'':'none';
+ $('orbit-clock').querySelector<SVGElement>('.orbit-second')!.style.display=settings.seconds?'':'none';
  lastFlipTick = 0; wake(settings.awake);render();
+}
+function orbitPoint(degrees:number,radius:number){
+ const angle=degrees*Math.PI/180;
+ const distance=settings.analogDesign.startsWith('square-')?squareRadius(angle,radius,radius*28/148):radius;
+ return {x:160+distance*Math.sin(angle),y:160-distance*Math.cos(angle)};
 }
 function render(){const now=new Date();if(settings.background==='seasonal')seasonal.render(now);const p=Object.fromEntries(parts.formatToParts(now).map(v=>[v.type,v.value]));const second=Number(p.second)+(settings.smooth&&!matchMedia('(prefers-reduced-motion: reduce)').matches?now.getMilliseconds()/1000:0);const minute=Number(p.minute)+second/60,hour=Number(p.hour)%12+minute/60;
  for(const [id,angle] of [['hour-hand',hour*30],['minute-hand',minute*6],['second-hand',second*6]] as const)$(id).setAttribute('transform',`rotate(${angle} 160 160)`);
+ for(const [unit,angle] of [['hour',hour*30],['minute',minute*6],['second',second*6]] as const){
+  const radius=unit==='hour'?50:unit==='minute'?80:108;
+  const point=orbitPoint(angle,radius);
+  const planet=$('orbit-'+unit).querySelector('circle')!;
+  planet.setAttribute('cx',String(point.x));planet.setAttribute('cy',String(point.y));
+ }
  if(settings.view==='flip'||settings.view==='analogFlip'){const formatted=digits.formatToParts(now);updateFlip(formatted,lastFlipTick>0 && now.getTime()-lastFlipTick<1500);lastFlipTick=now.getTime();$('flip-context').textContent=formatted.filter(p=>p.type==='dayPeriod'||p.type==='timeZoneName').map(p=>p.value).join(' · ');}
- const text=digits.format(now);$('digital-clock').textContent=text;$('digital-clock').setAttribute('datetime',now.toISOString());$('analog-clock').setAttribute('aria-label',text);$('clock-date').textContent=dateFormat.format(now);styledDate.render(now);
+ const text=digits.format(now);$('orbit-clock').setAttribute('aria-label',text);$('digital-clock').textContent=text;$('digital-clock').setAttribute('datetime',now.toISOString());$('analog-clock').setAttribute('aria-label',text);$('clock-date').textContent=dateFormat.format(now);styledDate.render(now);
 }
 function save(){if(!storageAllowed())return;try{localStorage.setItem('jacktools.clock.settings.v1',JSON.stringify(settings));}catch{$('clock-settings-status').textContent=t.storageError;}}
 form.addEventListener('submit',e=>e.preventDefault());form.addEventListener('change',()=>{for(const key of Object.keys(defaults)){const input=field(key);Object.assign(settings,{[key]:input.type==='checkbox'?(input as HTMLInputElement).checked:input.type==='range'?Number(input.value):input.value});}configure();save();});

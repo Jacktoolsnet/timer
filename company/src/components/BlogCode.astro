@@ -1,11 +1,14 @@
 ---
-interface Props { title:string; code:string }
-const {title,code}=Astro.props;
+import {blogUi} from '../lib/blog-ui';
+import type {Language} from '../lib/i18n';
+interface Props { title:string; code:string; lang?:Language }
+const {title,code,lang='de'}=Astro.props;
+const ui=blogUi[lang];
 ---
-<div class="blog-code">
+<div class="blog-code" data-copy-label={ui.copy} data-copy-success={ui.copied} data-copy-failed={ui.failed} data-copy-retry={ui.retry}>
  <div class="blog-code-header">
   <p>{title}</p>
-  <button type="button" class="code-copy" hidden title="Code kopieren" aria-label={`Code kopieren: ${title}`}>
+  <button type="button" class="code-copy" hidden title={ui.copy} aria-label={`${ui.copy}: ${title}`}>
    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h3"/></svg>
   </button>
  </div>
@@ -26,17 +29,17 @@ const {title,code}=Astro.props;
    button.disabled=true;
    try{
     await navigator.clipboard.writeText(code.textContent??'');
-    status.textContent='Code kopiert.';
-    button.title='Code kopiert';
+    status.textContent=block.dataset.copySuccess??'';
+    button.title=block.dataset.copySuccess??'';
     button.dataset.copied='true';
    }catch{
-    status.textContent='Kopieren nicht möglich. Bitte den Code markieren und manuell kopieren.';
-    button.title='Kopieren nicht möglich – erneut versuchen';
+    status.textContent=block.dataset.copyFailed??'';
+    button.title=block.dataset.copyRetry??'';
     delete button.dataset.copied;
    }finally{
     button.disabled=false;
     reset=setTimeout(()=>{
-     button.title='Code kopieren';
+     button.title=block.dataset.copyLabel??'';
      delete button.dataset.copied;
      status.textContent='';
     },5000);

@@ -71,13 +71,13 @@ test('code copy buttons copy exactly their own block and report success or failu
  await page.emulateMedia({media:'print'});
  for(const button of await page.locator('.code-copy').all())await expect(button).toBeHidden();
 });
-test('German-only SEO, public sources, image and sitemap are correct',async({page,request})=>{
+test('German SEO with translated alternatives, public sources, image and sitemap are correct',async({page,request})=>{
  await page.goto(post.path.replace(/\/$/,''));
  const url='https://jacktools.net'+post.path;
  await expect(page.locator('html')).toHaveAttribute('lang','de');
  await expect(page).toHaveTitle(post.title+' · Jacktools.net');
  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href',url);
- await expect(page.locator('link[hreflang]')).toHaveCount(0);
+ await expect(page.locator('link[hreflang]')).toHaveCount(5);
  await expect(page.locator('meta[property="og:type"]')).toHaveAttribute('content','article');
  const graph=await page.locator('script[type="application/ld+json"]').evaluate(el=>JSON.parse(el.textContent!)['@graph']);
  const article=graph.find((x:any)=>x['@type']==='BlogPosting');

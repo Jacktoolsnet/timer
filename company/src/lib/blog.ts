@@ -1,10 +1,14 @@
-/** German originals. Add language alternatives only when the articles actually exist. */
+import localized from './blog-localized.json' with { type: 'json' };
+import {languages,type Language} from './i18n';
+export type BlogKey='nulltopic'|'surface';
+export const blogSlugs:Record<Language,Record<BlogKey,string>>={de:{nulltopic:'nulltopic-ki-agenten',surface:'surface-book-arch-linux-open-webui'},en:{nulltopic:'nulltopic-ai-agents',surface:'surface-book-arch-linux-open-webui'},es:{nulltopic:'nulltopic-agentes-ia',surface:'surface-book-arch-linux-open-webui'},fr:{nulltopic:'nulltopic-agents-ia',surface:'surface-book-arch-linux-open-webui'}};
+export function getBlogPath(lang:Language,key:BlogKey|'index'='index'){return `/${lang}/blog/${key==='index'?'':blogSlugs[lang][key]+'/'}`;}
 export interface BlogPost {
- path:string; title:string; description:string; excerpt:string; category:string; image:string;
+ lang:Language; key:BlogKey; path:string; title:string; description:string; excerpt:string; category:string; image:string;
  art:'conversation'|'roles'|'surface'; lead:string; coverCaption:string; byline:string;
 }
 export const nullTopicPost:BlogPost = {
- path:'/de/blog/nulltopic-ki-agenten/',
+ lang:'de', key:'nulltopic', path:'/de/blog/nulltopic-ki-agenten/',
  title:'NullTopic: Wenn KI-Agenten miteinander sprechen',
  description:'Ein Blick hinter NullTopic: Wie KI-Agenten öffentlich Beiträge austauschen, welche Rolle Operatoren übernehmen und warum Verantwortung und Grenzen dazugehören.',
  excerpt:'Ein öffentlicher Gesprächsraum für KI-Agenten. Über die Idee hinter NullTopic, die Verantwortung der Operatoren und die Frage, wann aus Antworten ein hilfreiches Gespräch wird.',
@@ -16,7 +20,7 @@ export const nullTopicPost:BlogPost = {
  byline:'Einblicke in ein Entwicklungsprojekt',
 };
 export const surfaceBookPost:BlogPost = {
- path:'/de/blog/surface-book-arch-linux-open-webui/',
+ lang:'de', key:'surface', path:'/de/blog/surface-book-arch-linux-open-webui/',
  title:'Ein altes Surface Book als Agenten-Labor',
  description:'Ein Surface Book der ersten Generation mit Arch Linux, GNOME und Open WebUI: Praxisbericht zu UEFI, Boot-USB, WLAN-Abbruch und hilfreichen Befehlen.',
  excerpt:'Ein Surface Book der ersten Generation bekommt mit Arch Linux, GNOME und Open WebUI eine neue Aufgabe. Ein Praxisbericht mit Umwegen bei Boot und WLAN. Die Agenten kommen als Nächstes.',
@@ -28,4 +32,6 @@ export const surfaceBookPost:BlogPost = {
  byline:'Praxisbericht · NullTopic, Teil 2',
 };
 export const blogPosts=[surfaceBookPost,nullTopicPost];
-export const blogPaths=['/de/blog/',...blogPosts.map(post=>post.path)];
+export function getBlogPost(lang:Language,key:BlogKey):BlogPost{const base=key==='surface'?surfaceBookPost:nullTopicPost;return lang==='de'?base:{...base,...localized[lang][key],lang,image:base.image.replace('.svg',`-${lang}.svg`),path:getBlogPath(lang,key)};}
+export const getBlogPosts=(lang:Language)=>[getBlogPost(lang,'surface'),getBlogPost(lang,'nulltopic')];
+export const blogPaths=languages.flatMap(lang=>[getBlogPath(lang),...getBlogPosts(lang).map(post=>post.path)]);

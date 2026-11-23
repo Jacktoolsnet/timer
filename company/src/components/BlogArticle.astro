@@ -1,29 +1,32 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import NullTopicIllustration from './NullTopicIllustration.astro';
+import {blogUi} from '../lib/blog-ui';
 import type { BlogPost } from '../lib/blog';
 interface Props { post:BlogPost; chapters:string[][] }
 const {post,chapters}=Astro.props;
+const lang=post.lang;
+const ui=blogUi[lang];
 const url=new URL(post.path,Astro.site).href;
 const organization={'@type':'Organization','@id':new URL('/#organization',Astro.site).href,name:'JackTools.Net',url:new URL('/',Astro.site).href};
 ---
-<Layout lang="de" title={post.title} description={post.description} route={post.path.slice(4)} homeAlternates={false} canonicalPath={post.path} untranslated quietBackground ogType="article">
- <a slot="header-action" class="blog-header-link" href="/de/blog/">Zum Blog</a>
- <script type="application/ld+json" set:html={JSON.stringify({'@context':'https://schema.org','@graph':[organization,{'@type':'WebPage','@id':url,url,name:post.title,inLanguage:'de',mainEntity:{'@id':url+'#artikel'}},{'@type':'BlogPosting','@id':url+'#artikel',headline:post.title,description:post.description,inLanguage:'de',mainEntityOfPage:{'@id':url},author:{'@id':organization['@id']},publisher:{'@id':organization['@id']},image:new URL(post.image,Astro.site).href,isPartOf:{'@type':'Blog',url:new URL('/de/blog/',Astro.site).href,name:'Jacktools Blog'},about:{'@type':'Thing',name:'NullTopic'}}]}).replaceAll('<','\\u003c')} />
+<Layout lang={lang} title={post.title} description={post.description} route={post.path.slice(4)} homeAlternates={false} canonicalPath={post.path} blogKey={post.key} quietBackground ogType="article">
+ <a slot="header-action" class="blog-header-link" href={`/${lang}/blog/`}>{ui.back}</a>
+ <script type="application/ld+json" set:html={JSON.stringify({'@context':'https://schema.org','@graph':[organization,{'@type':'WebPage','@id':url,url,name:post.title,inLanguage:lang,mainEntity:{'@id':url+'#artikel'}},{'@type':'BlogPosting','@id':url+'#artikel',headline:post.title,description:post.description,inLanguage:lang,mainEntityOfPage:{'@id':url},author:{'@id':organization['@id']},publisher:{'@id':organization['@id']},image:new URL(post.image,Astro.site).href,isPartOf:{'@type':'Blog',url:new URL(`/${lang}/blog/`,Astro.site).href,name:'Jacktools Blog'},about:{'@type':'Thing',name:'NullTopic'}}]}).replaceAll('<','\\u003c')} />
  <article class="blog-article">
   <div class="article-layout">
    <header class="article-header">
-    <p class="article-kicker">{post.category.toLocaleUpperCase('de-DE')}</p>
+    <p class="article-kicker">{post.category.toLocaleUpperCase(lang)}</p>
     <h1>{post.title}</h1>
     <p class="article-lead">{post.lead}</p>
-    <p class="article-byline"><span>Von Jacktools.net</span><span>{post.byline}</span></p>
+    <p class="article-byline"><span>{ui.by}</span><span>{post.byline}</span></p>
    </header>
-   <figure class="article-cover"><NullTopicIllustration variant={post.art} /><figcaption>{post.coverCaption}</figcaption></figure>
-   <aside class="article-sidebar"><nav aria-labelledby="article-toc-title"><h2 id="article-toc-title">In diesem Artikel</h2><ol>{chapters.map(([id,title])=><li><a href={'#'+id}>{title}</a></li>)}</ol></nav></aside>
+   <figure class="article-cover"><NullTopicIllustration variant={post.art} lang={lang} /><figcaption>{post.coverCaption}</figcaption></figure>
+   <aside class="article-sidebar"><nav aria-labelledby="article-toc-title"><h2 id="article-toc-title">{ui.toc}</h2><ol>{chapters.map(([id,title])=><li><a href={'#'+id}>{title}</a></li>)}</ol></nav></aside>
    <div class="article-body">
     <slot />
-    {Astro.slots.has('series') && <nav class="article-series" aria-label="Mehr aus der NullTopic-Reihe"><slot name="series" /></nav>}
-    <footer class="article-footer"><p>Eine Frage oder eine andere Perspektive zu diesem Beitrag?</p><a href="mailto:jacktoolsnet@gmail.com">Schreib uns dein Feedback</a><a href="/de/blog/">Alle Blogbeiträge</a></footer>
+    {Astro.slots.has('series') && <nav class="article-series" aria-label={ui.series}><slot name="series" /></nav>}
+    <footer class="article-footer"><p>{ui.question}</p><a href="mailto:jacktoolsnet@gmail.com">{ui.feedback}</a><a href={`/${lang}/blog/`}>{ui.all}</a></footer>
    </div>
   </div>
  </article>

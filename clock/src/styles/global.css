@@ -1113,3 +1113,23 @@ body.focus-view .clock-alarm-badge { max-width:calc(100% - 175px); }
 
 .clock-design-thumbnail { width:48px; height:48px; flex:0 0 48px; object-fit:contain; border-radius:8px; }
 .clock-design-thumbnail[hidden] { display:none; }
+
+/* Orbit clock: seconds outside, minutes in the middle, hours inside. */
+#orbit-clock { display:none; width:min(360px,100%); height:auto; overflow:visible; fill:none; }
+[data-view=orbit] #orbit-clock { display:block; }
+[data-view=orbit] #analog-clock { display:none; }
+[data-view=orbit] #digital-clock { position:absolute; width:1px; height:1px; padding:0; margin:-1px; clip-path:inset(50%); overflow:hidden; white-space:nowrap; }
+#orbit-clock .orbit-track { stroke:var(--accent); stroke-opacity:.25; stroke-width:1.5; }
+#orbit-clock .orbit-planet { fill:var(--accent); stroke:var(--surface); stroke-width:2; }
+#orbit-clock .orbit-hour .orbit-planet { fill:var(--text); }
+#orbit-clock .orbit-minute .orbit-planet { fill:var(--green); }
+#orbit-clock .orbit-sun { color:var(--accent); filter:drop-shadow(0 0 4px color-mix(in srgb,var(--accent) 65%,transparent)); }
+#orbit-clock .orbit-sun-glow { fill:currentColor; fill-opacity:.18; stroke:none; }
+#orbit-clock .orbit-sun-core { fill:color-mix(in srgb,var(--accent) 65%,#fff); stroke:var(--accent); stroke-width:1; }
+#orbit-clock .orbit-sun-ray { stroke:currentColor; stroke-width:2; stroke-linecap:round; }
+body.focus-view .clock-display[data-view=orbit] #orbit-clock { width:auto; max-width:100%; height:min(65dvh,650px); flex-shrink:1; }
+.clock-display[data-view=orbit] .alarm-readout-indicator:not([hidden]) { display:flex; }
+
+/* Use the selected analog face as a readable backing for the orbit tracks. */
+#orbit-clock .dial { fill:color-mix(in srgb,var(--surface) var(--clock-surface-opacity,100%),transparent); }
+#orbit-clock .dial-numerals text { paint-order:stroke; stroke:var(--surface); stroke-width:3px; stroke-linejoin:round; }

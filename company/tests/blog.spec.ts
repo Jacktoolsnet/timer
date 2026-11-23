@@ -1,5 +1,5 @@
 import {test,expect} from '@playwright/test';
-import {nullTopicPost as post, surfaceBookPost, blogPosts} from '../src/lib/blog';
+import {nullTopicPost as post, surfaceBookPost, blogPosts,getBlogPath} from '../src/lib/blog';
 test.beforeEach(async({page})=>{
  await page.route(/googlesyndication\.com|doubleclick\.net|googleadservices\.com/,r=>r.fulfill({body:''}));
 });
@@ -15,7 +15,8 @@ test('German blog is discoverable from the homepage and index',async({page})=>{
  await expect(page.locator('.blog-post-card h3')).toHaveText(blogPosts.map(p=>p.title));
  for(const lang of ['en','es','fr']){
   await page.goto(`/${lang}/`);
-  await expect(page.locator('.blog-home')).toHaveCount(0);
+  await expect(page.locator('.blog-home')).toHaveCount(1);
+  await expect(page.locator('.blog-home .blog-post-card')).toHaveAttribute('href',getBlogPath(lang as 'en'|'es'|'fr','surface'));
  }
 });
 test('article has complete content, truthful roles, accessible illustrations and working chapters',async({page},info)=>{
@@ -44,13 +45,13 @@ test('article has complete content, truthful roles, accessible illustrations and
  expect(errors).toEqual([]);
 });
 for(const path of ['/de/blog/',post.path]){
- test(`${path}: canonical, German-only metadata and indexable sitemap entry`,async({page,request})=>{
+ test(`${path}: canonical, translated metadata and indexable sitemap entry`,async({page,request})=>{
   await page.goto(path.replace(/\/$/,''));
   const canonical=`https://jacktools.net${path}`;
   await expect(page.locator('html')).toHaveAttribute('lang','de');
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href',canonical);
   await expect(page.locator('meta[property="og:url"]')).toHaveAttribute('content',canonical);
-  await expect(page.locator('link[hreflang]')).toHaveCount(0);
+  await expect(page.locator('link[hreflang]')).toHaveCount(5);
   await expect(page.locator('meta[name="robots"][content*="noindex"]')).toHaveCount(0);
   await expect(page.locator('h1')).toHaveCount(1);
   const graph=await page.locator('script[type="application/ld+json"]').evaluateAll(els=>els.flatMap(el=>{const s=JSON.parse(el.textContent!);return s['@graph']||[s]}));
@@ -63,8 +64,8 @@ for(const path of ['/de/blog/',post.path]){
   }else expect(graph.some(x=>x['@type']==='Blog')).toBe(true);
   expect(await (await request.get('/sitemap.xml')).text()).toContain(`<loc>${canonical}</loc>`);
   await page.locator('#palette-dropdown summary').click();
-  await expect(page.locator('.language-page-note')).toContainText('Startseite');
-  for(const lang of ['en','es','fr']) await expect(page.locator(`.language-menu a[lang="${lang}"]`)).toHaveAttribute('href',new RegExp(`/${lang}/$`));
+  await expect(page.locator('.language-page-note')).toHaveCount(0);
+  for(const lang of ['en','es','fr']) await expect(page.locator(`.language-menu a[lang="${lang}"]`)).toHaveAttribute('href',new RegExp(getBlogPath(lang as 'en'|'es'|'fr',path===post.path?'nulltopic':'index')+'$'));
  });
 }
 test('contents navigation starts alongside the article header on desktop',async({page})=>{
