@@ -2,14 +2,17 @@
 import Layout from '../layouts/Layout.astro';
 import AdBanner from './AdBanner.astro';
 import GuideGallery from './GuideGallery.astro';
+import GuideSeo from './GuideSeo.astro';
+import type { SocialProject } from '../../../shared/social';
 import BrandIcon from '../../../shared/BrandIcon.astro';
 import { guideCards, guideImages, toolGuides, type ToolGuide } from '../lib/tool-guides';
 interface Props { guide: ToolGuide }
 const {guide:g} = Astro.props;
 const image = guideImages[g.slug];
-const related = toolGuides.filter(tool => tool.slug !== g.slug).slice(0, 2);
+const related = toolGuides.filter(tool => tool.slug !== g.slug);
 ---
-<Layout lang="de" title={g.name + ': Anleitung, Beispiele und Funktionen'} description={g.description} route={'tools/'+g.slug+'/'} homeAlternates={false}>
+<Layout lang="de" title={g.seoTitle} description={g.description} route={'tools/'+g.slug+'/'} homeAlternates={false} canonicalPath={'/de/tools/'+g.slug+'/'} socialImageProject={(g.slug === 'messagedrop' ? 'company' : g.slug) as SocialProject}>
+  <GuideSeo name={g.name} headline={g.title} description={g.lead} path={'/de/tools/'+g.slug+'/'} toolUrl={g.url} image={'/images/guides/'+g.slug+(g.slug === 'messagedrop' ? '.svg' : '.png')} />
   <a slot="header-action" class="guide-header-action" href={g.url}>{g.name} öffnen</a>
   <article class="tool-guide">
     <header class="tool-guide-hero">

@@ -1,0 +1,16 @@
+---
+interface Props { name:string; headline:string; description:string; path:string; toolUrl:string; image:string }
+const {name,headline,description,path,toolUrl,image} = Astro.props;
+const url = new URL(path,Astro.site).href;
+const organization = {'@type':'Organization','@id':new URL('/#organization',Astro.site).href,name:'JackTools.Net',url:new URL('/',Astro.site).href};
+const articleId = url+'#anleitung';
+const graph = {
+  '@context':'https://schema.org',
+  '@graph':[
+    organization,
+    {'@type':'WebPage','@id':url,url,name:headline,inLanguage:'de',isPartOf:{'@type':'WebSite',name:'JackTools.Net',url:new URL('/',Astro.site).href},mainEntity:{'@id':articleId}},
+    {'@type':'Article','@id':articleId,headline,description,inLanguage:'de',mainEntityOfPage:{'@id':url},author:{'@id':organization['@id']},publisher:{'@id':organization['@id']},image:new URL(image,Astro.site).href,about:{'@type':'Thing',name,url:toolUrl}},
+  ],
+};
+---
+<script type="application/ld+json" set:html={JSON.stringify(graph).replaceAll('<','\\u003c')} />

@@ -97,7 +97,8 @@
         "answer": "Die Wachhaltefunktion benötigt Browser-Unterstützung und eine sichere Verbindung. Geräteeinstellungen und Energiesparregeln können sie ablehnen oder beenden."
       }
     ],
-    "end": "Wähle zuerst eine gut lesbare Ansicht und die richtige Zeitzone. Datum, Hintergründe und Wecker kannst du danach nach Bedarf ergänzen."
+    "end": "Wähle zuerst eine gut lesbare Ansicht und die richtige Zeitzone. Datum, Hintergründe und Wecker kannst du danach nach Bedarf ergänzen.",
+    "seoTitle": "Online-Uhr: Ansichten, Zeitzonen & Wecker erklärt"
   },
   {
     "slug": "stopwatch",
@@ -199,7 +200,8 @@
         "answer": "Beim Zurücksetzen einer pausierten Messung werden der bisherige Stand und die erfassten Runden verworfen. Sichere wichtige Werte zuvor."
       }
     ],
-    "end": "Lege Start- und Endpunkt deiner Messung fest. Wenn mehrere Abschnitte wichtig sind, nutze von Beginn an Runden und exportiere sie nach dem Durchlauf."
+    "end": "Lege Start- und Endpunkt deiner Messung fest. Wenn mehrere Abschnitte wichtig sind, nutze von Beginn an Runden und exportiere sie nach dem Durchlauf.",
+    "seoTitle": "Stoppuhr: Rundenzeiten messen & CSV exportieren"
   },
   {
     "slug": "calculator",
@@ -297,7 +299,8 @@
         "answer": "Nein. Die Speicherung der Berechnung muss gesondert eingeschaltet werden. Lade wichtige Berechnungen zusätzlich als JSON herunter."
       }
     ],
-    "end": "Beginne mit einem benannten Startwert und zwei oder drei Schritten. Prüfe anschließend Reihenfolge und Rundung, bevor du weitere Beträge ergänzt."
+    "end": "Beginne mit einem benannten Startwert und zwei oder drei Schritten. Prüfe anschließend Reihenfolge und Rundung, bevor du weitere Beträge ergänzt.",
+    "seoTitle": "Taschenrechner mit Rechenstreifen: Anleitung"
   },
   {
     "slug": "breathe",
@@ -395,7 +398,8 @@
         "answer": "Nein. Das Tool ist eine optionale Begleitung für eine Atempause, kein medizinisches Angebot und keine Diagnose oder Therapie."
       }
     ],
-    "end": "Sieh dir zuerst das gewählte Muster an und lies die Hinweise. Wähle nur einen Ablauf, der sich für dich angenehm anfühlt; Beenden ist jederzeit möglich."
+    "end": "Sieh dir zuerst das gewählte Muster an und lies die Hinweise. Wähle nur einen Ablauf, der sich für dich angenehm anfühlt; Beenden ist jederzeit möglich.",
+    "seoTitle": "Breathe: Atemmuster und Bedienung erklärt"
   },
   {
     "slug": "relax",
@@ -494,7 +498,8 @@
         "answer": "Das hängt von Browser, Gerät und Hintergrund-Einstellung ab. Verlasse dich nicht auf eine unterbrechungsfreie Wiedergabe."
       }
     ],
-    "end": "Starte mit einer Vorlage, höre bei geringer Lautstärke hinein und ändere nur eine Schicht auf einmal. So findest du eine Mischung, die zu deinem Moment passt."
+    "end": "Starte mit einer Vorlage, höre bei geringer Lautstärke hinein und ändere nur eine Schicht auf einmal. So findest du eine Mischung, die zu deinem Moment passt.",
+    "seoTitle": "Relax: Naturklänge und Instrumente mischen"
   },
   {
     "slug": "metronome",
@@ -592,7 +597,8 @@
         "answer": "Zwischen den Grundschlägen kommen gleichmäßig verteilte Impulse hinzu. Der eingestellte BPM-Grundpuls wird dadurch nicht schneller."
       }
     ],
-    "end": "Wähle zuerst Tempo und Takt, bevor du Unterteilungen oder Lücken hinzunimmst. Eine klare, einfache Einstellung ist zum Einstieg oft leichter zu kontrollieren."
+    "end": "Wähle zuerst Tempo und Takt, bevor du Unterteilungen oder Lücken hinzunimmst. Eine klare, einfache Einstellung ist zum Einstieg oft leichter zu kontrollieren.",
+    "seoTitle": "Metronom: BPM, Tap Tempo und Takt einstellen"
   },
   {
     "slug": "messagedrop",
@@ -695,6 +701,7 @@
         "answer": "Nein. Orte, öffentliche Beiträge, private Notizen und Kontakt-Chats werden in getrennten Bereichen verwaltet und haben unterschiedliche Zwecke."
       }
     ],
-    "end": "Erkunde zuerst einen bekannten Kartenausschnitt. Wenn du selbst etwas veröffentlichen möchtest, prüfe Position, Inhalt und Sichtbarkeit vor dem Absenden."
+    "end": "Erkunde zuerst einen bekannten Kartenausschnitt. Wenn du selbst etwas veröffentlichen möchtest, prüfe Position, Inhalt und Sichtbarkeit vor dem Absenden.",
+    "seoTitle": "MessageDrop: Orte und Nachrichten entdecken"
   }
 ]

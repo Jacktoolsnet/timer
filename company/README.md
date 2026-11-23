@@ -186,3 +186,25 @@ Karten-/Nutzerdaten. Bilder werden verzögert geladen, in der Galerie vergröße
 beim Drucken ausgeblendet. FAQs werden für den Browser-Druck geöffnet und danach
 in ihren vorherigen Zustand zurückversetzt. Werbeeinheiten werden nur bei
 AdSense-Status `filled` sichtbar. Keine Veröffentlichung durch den Build.
+
+### SEO der deutschen Anleitungen
+
+Alle acht Detailseiten (einschließlich Timer) besitzen individuelle Titel und
+Beschreibungen, feste selbstreferenzierende Canonicals mit abschließendem Slash,
+Open-Graph-/Twitter-Metadaten sowie ein `WebPage`-/`Article`-JSON-LD aus sichtbaren
+Inhalten. Keine erfundenen Bewertungen, Veröffentlichungsdaten oder FAQ-Rich-Result-
+Versprechen. Ohne veröffentlichte Übersetzungen werden weiterhin keine
+hreflang-Alternativen angegeben. Die Anleitungen sind untereinander und von der
+Startseite aus mit normalen HTML-Links erreichbar und in der Sitemap enthalten.
+
+Die bereits vorhandenen Tool-Social-PNGs werden lokal unter `public/social/`
+mitgeliefert. MessageDrop verwendet weiterhin das allgemeine Company-Vorschaubild.
+`SocialMeta` unterstützt hierfür optional `imageProject`, ohne den Namen der
+veröffentlichenden Website zu ändern. Der Standard anderer Projekte bleibt gleich.
+
+Prüfungen: `npm run build`, `python3 ../scripts/check-seo.py company` und
+`npx playwright test tests/guide-seo.spec.ts`. Der Sitemap-Checker berücksichtigt
+jetzt die zwölf Company-URLs (vier Startseiten plus acht deutsche Anleitungen).
+Nach tatsächlicher Veröffentlichung müssen Erreichbarkeit, Weiterleitungen und
+Indexierung auf dem Live-Host separat geprüft und die Sitemap in Search Console
+eingereicht werden. Lokale Prüfungen sind keine Ranking- oder AdSense-Zusage.

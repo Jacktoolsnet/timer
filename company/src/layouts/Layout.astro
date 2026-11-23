@@ -4,6 +4,7 @@ import ThemeInit from '../../../shared/ThemeInit.astro';
 import AutoThemeButton from '../../../shared/AutoThemeButton.astro';
 import '../../../shared/theme.css';
 import SocialMeta from '../../../shared/SocialMeta.astro';
+import type { SocialProject } from '../../../shared/social';
 import BrandIcon from '../../../shared/BrandIcon.astro';
 import '../styles/global.css';
 import '../styles/company.css';
@@ -12,12 +13,12 @@ import '../../../shared/page-entry.css';
 import { colorSchemes } from '../lib/appearance';
 import { languages, languageNames, type Language } from '../lib/i18n';
 import { getCompanyDictionary } from '../lib/company-ui';
-interface Props { lang: Language; title: string; description: string; route: string; noindex?: boolean; legal?: boolean; homeAlternates?: boolean }
+interface Props { lang: Language; title: string; description: string; route: string; noindex?: boolean; legal?: boolean; homeAlternates?: boolean; canonicalPath?:string; socialImageProject?:SocialProject }
 const { lang, title, description, noindex = false, legal = false, homeAlternates = true } = Astro.props;
 const t = getCompanyDictionary(lang);
 const motion = backgroundCopy[lang];
 const home = '/' + lang + '/';
-const canonical = new URL(Astro.url.pathname === '/' ? '/en/' : Astro.url.pathname, Astro.site);
+const canonical = new URL(Astro.props.canonicalPath ?? (Astro.url.pathname === '/' ? '/en/' : Astro.url.pathname), Astro.site);
 
 ---
 <!doctype html>
@@ -46,7 +47,7 @@ const canonical = new URL(Astro.url.pathname === '/' ? '/en/' : Astro.url.pathna
     <meta property="og:title" content={title + ' · JackTools.Net'} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    <SocialMeta project="company" title={title + ' · JackTools.Net'} description={description} lang={lang} />
+    <SocialMeta project="company" imageProject={Astro.props.socialImageProject} title={title + ' · JackTools.Net'} description={description} lang={lang} />
     <script is:inline>
       try {
         const saved = JSON.parse(localStorage.getItem('jacktools.company.storage-consent.v1') === 'yes' ? localStorage.getItem('jacktools.company.appearance.v1') || 'null' : 'null');

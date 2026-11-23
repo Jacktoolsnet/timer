@@ -1,8 +1,11 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
 import AdBanner from '../../../components/AdBanner.astro';
+import GuideSeo from '../../../components/GuideSeo.astro';
+import { toolGuides } from '../../../lib/tool-guides';
 ---
-<Layout lang="de" title="Online-Timer: Countdown, Pomodoro und Intervalle erklärt" description="Anleitung zum Jacktools Timer: Countdown einstellen, Pomodoro-Pausen planen und Intervalle nutzen. Mit praktischen Beispielen und Hinweisen zu Signaltönen und Speicherung." route="tools/timer/" homeAlternates={false}>
+<Layout lang="de" title="Online-Timer: Countdown, Pomodoro und Intervalle erklärt" description="Anleitung zum Jacktools Timer: Countdown einstellen, Pomodoro-Pausen planen und Intervalle nutzen. Mit praktischen Beispielen und Hinweisen zu Signaltönen und Speicherung." route="tools/timer/" homeAlternates={false} canonicalPath="/de/tools/timer/" socialImageProject="timer">
+  <GuideSeo name="Timer" headline="Ein Timer. Drei Arten, Zeit zu planen." description="Einmal herunterzählen, konzentriert arbeiten oder Aktivphasen und Pausen wiederholen: Der Jacktools Timer verbindet Countdown, Pomodoro und Intervalltimer in einer Browser-Anwendung." path="/de/tools/timer/" toolUrl="https://timer.jacktools.net/de/timer/" image="/images/timer/timer.png" />
   <a slot="header-action" class="timer-header-action" href="https://timer.jacktools.net/de/timer/">Timer öffnen</a>
   <article class="timer-guide">
     <header class="guide-hero">
@@ -94,6 +97,7 @@ import AdBanner from '../../../components/AdBanner.astro';
       </div>
       <div class="start-bottom"><a href="/de/#online-timer">Zur Toolübersicht</a><p>Eine Funktion fehlt oder etwas ist unklar? <a href="mailto:jacktoolsnet@gmail.com">Schreib uns dein Feedback.</a></p></div>
     </footer>
+    <nav class="related-guides" aria-label="Weitere Anleitungen"><h2>Weitere Tools kennenlernen</h2>{toolGuides.map(tool=><a href={'/de/tools/'+tool.slug+'/'}>{tool.name}: Anleitung & Beispiele</a>)}</nav>
   </article>
   <dialog class="screenshot-gallery" id="screenshot-gallery" aria-labelledby="gallery-title">
     <div class="gallery-toolbar"><h2 id="gallery-title">Timer-Galerie</h2><button type="button" class="gallery-close" aria-label="Galerie schließen" autofocus>Schließen <span aria-hidden="true">×</span></button></div>
@@ -197,6 +201,7 @@ import AdBanner from '../../../components/AdBanner.astro';
   .gallery-toolbar,.gallery-navigation{display:flex;align-items:center;justify-content:space-between;gap:1rem}.gallery-toolbar h2{font-size:1.1rem;margin:0}.screenshot-gallery button{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:44px;padding:.6rem 1rem;border:1px solid var(--line);border-radius:8px;background:var(--accent-soft);color:var(--accent);font:inherit;cursor:pointer}.screenshot-gallery button:hover{border-color:var(--accent)}.screenshot-gallery button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}.gallery-close span{font-size:1.5rem;line-height:1}
   .gallery-figure{margin:1rem 0}.gallery-figure img{display:block;width:100%;height:auto;max-height:65dvh;object-fit:contain}.gallery-figure figcaption{font-size:.9rem;line-height:1.6;color:var(--muted);margin-top:.75rem}.gallery-navigation{font-size:.9rem}
   @media(max-width:480px){.screenshot-gallery{padding:.8rem;width:calc(100vw - 1rem);max-height:calc(100dvh - 1rem)}.gallery-toolbar{gap:.5rem}.gallery-toolbar h2{font-size:1rem}}
+  .related-guides{display:flex;flex-wrap:wrap;gap:.75rem;padding-top:2.5rem}.related-guides h2{width:100%;font-size:1.25em}.related-guides a{padding:.75rem 1rem;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
   @page timer-guide { size: A4; margin: 16mm; }
   @media print {
     :global(html:has(.timer-guide)), :global(body:has(.timer-guide)){background:#fff!important;color:#000!important;margin:0!important}
@@ -205,7 +210,7 @@ import AdBanner from '../../../components/AdBanner.astro';
     :global(body:has(.timer-guide) .site-shell), :global(body:has(.timer-guide) main){display:block!important;width:auto!important;max-width:none!important;min-height:0!important;margin:0!important;padding:0!important;overflow:visible!important}
     .timer-guide,.timer-guide *{color:#000!important;background:transparent!important;box-shadow:none!important;text-shadow:none!important;letter-spacing:normal!important;font-family:Arial,Helvetica,sans-serif!important}
     .timer-guide{font-size:11pt;line-height:1.45;padding:0}
-    .breadcrumbs,.guide-toc,.guide-preview,.guide-actions,.guide-meta,.guide-hero .eyebrow,.tool-screenshot,.hero-mode-actions{display:none!important}
+    .breadcrumbs,.guide-toc,.guide-preview,.guide-actions,.guide-meta,.guide-hero .eyebrow,.tool-screenshot,.hero-mode-actions,.related-guides{display:none!important}
     .guide-hero{display:block;padding:0 0 4mm;border-bottom:1pt solid #999}
     .guide-hero::before{content:'Jacktools.net · Timer-Anleitung';font-size:10pt}
     .guide-hero::after{content:'Online: https://jacktools.net/de/tools/timer/';font-size:9pt}
