@@ -1,3 +1,4 @@
+import {selectDialDesign} from './helpers/dial-design';
 import { test, expect } from '@playwright/test';
 
 test('orbit view uses zoned time, supports smooth seconds and preserves preferences', async ({ page }) => {
@@ -54,16 +55,14 @@ test('orbit inherits all dial designs, numerals and square trajectories', async 
   const x=Number(await point.getAttribute('cx')), y=Number(await point.getAttribute('cy'));
   expect(Math.hypot(x-160,y-160)).toBeCloseTo(108,5);
   const roundX=Number(await face.locator('#orbit-second circle').getAttribute('cx'));
-  await page.locator('#trigger-analogDesign').click();
-  await page.getByRole('option', { name:'Römisch · Eckig', exact:true }).click();
+  await selectDialDesign(page,'square-roman');
   await expect(face).toHaveAttribute('data-design','square-roman');
   await expect(face.locator('rect.dial')).toBeVisible();
   await expect(face.locator('.dial-numerals text').last()).toHaveText('XII');
   expect(Number(await face.locator('#orbit-second circle').getAttribute('cx'))).toBeGreaterThan(roundX);
   await page.locator('input[name=numbers]').uncheck();
   await expect(face.locator('.dial-numerals')).toBeHidden();
-  await page.locator('#trigger-analogDesign').click();
-  await page.getByRole('option', { name:'Minimalistisch', exact:true }).click();
+  await selectDialDesign(page,'minimal');
   await expect(face.locator('.dial-numerals text')).toHaveCount(4);
   await expect(face.locator('.dial-numerals')).toBeHidden();
   await page.locator('input[name=numbers]').check();

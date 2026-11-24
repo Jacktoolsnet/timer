@@ -17,9 +17,10 @@ export function enhanceClockSelects(form: HTMLFormElement) {
     trigger.setAttribute('aria-haspopup', 'listbox');
     trigger.setAttribute('aria-expanded', 'false');
     trigger.setAttribute('aria-labelledby', `${caption.id} ${trigger.id}`);
+    const thumbnailClass=select.dataset.previewClass||(select.name==='analogDesign'?'clock-design-thumbnail':'clock-background-thumbnail');
     const value = document.createElement('span');
     const preview = document.createElement('img');
-    preview.className = select.name==='analogDesign'?'clock-design-thumbnail':'clock-background-thumbnail'; preview.alt = ''; preview.hidden = true;
+    preview.className = thumbnailClass; preview.alt = ''; preview.hidden = true;
     const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     arrow.setAttribute('viewBox', '0 0 24 24');
     arrow.setAttribute('class', 'clock-select-chevron');
@@ -39,7 +40,7 @@ export function enhanceClockSelects(form: HTMLFormElement) {
       const text = document.createElement('span'); text.textContent = option.text;
       if(option.dataset.preview) {
         const thumbnail = document.createElement('img');
-        thumbnail.className = select.name==='analogDesign'?'clock-design-thumbnail':'clock-background-thumbnail'; thumbnail.alt = '';
+        thumbnail.className = thumbnailClass; thumbnail.alt = '';
         thumbnail.src = option.dataset.preview; thumbnail.loading = 'lazy';
         button.append(thumbnail);
       }
@@ -54,7 +55,11 @@ export function enhanceClockSelects(form: HTMLFormElement) {
       preview.hidden = !selected?.dataset.preview;
       if(selected?.dataset.preview) preview.src = selected.dataset.preview;
       else preview.removeAttribute('src');
-      options.forEach((b,i)=>b.setAttribute('aria-selected',String(i===select.selectedIndex)));
+      options.forEach((b,i)=>{
+        b.setAttribute('aria-selected',String(i===select.selectedIndex));
+        const thumbnail=b.querySelector('img'),src=select.options[i]?.dataset.preview;
+        if(thumbnail&&src&&thumbnail.getAttribute('src')!==src)thumbnail.src=src;
+      });
     }
     function close() { list.hidden = true; trigger.setAttribute('aria-expanded','false'); }
     function open() { closers.forEach(fn=>fn()); list.hidden = false; trigger.setAttribute('aria-expanded','true'); options[select.selectedIndex]?.focus(); }

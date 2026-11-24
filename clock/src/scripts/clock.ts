@@ -1,3 +1,5 @@
+import {createDialControls} from './dial-controls';
+import {createBinaryClock} from './binary-clock';
 import {createSundial} from './sundial';
 import {dialMarkup, squareRadius, type AnalogDesign} from '../lib/analog-designs';
 import {createClockDate} from './clock-date';
@@ -12,8 +14,9 @@ import {clockBackgrounds,clockBackgroundOptions} from '../lib/clock-backgrounds'
 const $=(id:string)=>document.getElementById(id)!;
 const t=JSON.parse($('clock-app').dataset.text!);
 const form=$('clock-settings') as HTMLFormElement;
+const syncDialControls=createDialControls(form);
 const field=(key:string)=>form.elements.namedItem(key) as HTMLInputElement | HTMLSelectElement;
-const defaults={view:'analog',analogDesign:'standard',background:'none',animateBackground:false,hemisphere:'north',transparency:0,date:'long',dateView:'calendarDate',format:'medium',hourCycle:'auto',zone:'local',seconds:true,numbers:true,smooth:false,awake:false};
+const defaults={view:'analog',orbitReadout:'off',sundialReadout:'flip',analogDesign:'standard',background:'none',animateBackground:false,hemisphere:'north',transparency:0,date:'long',dateView:'calendarDate',format:'medium',hourCycle:'auto',zone:'local',seconds:true,numbers:true,smooth:false,awake:false};
 let settings={...defaults};
 const backgroundMotion=matchMedia('(prefers-reduced-motion: reduce)');
 try {if(storageAllowed()) {const saved=JSON.parse(localStorage.getItem('jacktools.clock.settings.v1')||'null');for(const key of Object.keys(defaults) as (keyof typeof defaults)[]){const value=saved?.[key];if(typeof defaults[key]==='boolean'){if(typeof value==='boolean')Object.assign(settings,{[key]:value});}else if(typeof defaults[key]==='number'){if(typeof value==='number'&&Number.isInteger(value)&&value>=0&&value<=100)Object.assign(settings,{[key]:value});}else if([...((field(key) as HTMLSelectElement).options)].some(o=>o.value===value))Object.assign(settings,{[key]:value});}}}catch{}
@@ -29,6 +32,7 @@ function applyTransparency(){
  card.dataset.transparentFlaps=String(enabled&&settings.transparency>0);
  $('clock-transparency-value').textContent=`${settings.transparency} %`;
 }
+const updateBinary=createBinaryClock($('binary-clock'));
 const sundial=createSundial();
 const seasonal=createSeasonalBackground($('seasonal-background') as unknown as SVGSVGElement);
 const geolocation=createSeasonalLocation($('seasonal-settings'),()=>configure());
@@ -36,10 +40,16 @@ const alarm=createAlarm($('clock-alarm'),$('alarm-dialog') as HTMLDialogElement,
 const wake=screenWakeLock($('wake-status'),'',t.unavailable);
 const styledDate = createClockDate($('styled-date'));
 const updateFlip = createFlipClock($('flip-clock'));
+const updateOrbitFlip=createFlipClock($('orbit-flip'));
 const updateSundialFlip = createFlipClock($('sundial-flip'));
 let lastFlipTick = 0;
 let digits:Intl.DateTimeFormat,dateFormat:Intl.DateTimeFormat,parts:Intl.DateTimeFormat;
 function configure(){
+ syncDialControls(settings.analogDesign,settings.view);
+ $('orbit-readout-options').hidden=settings.view!=='orbit';
+ $('sundial-readout-options').hidden=settings.view!=='sundial';
+ $('orbit-view').dataset.readout=settings.orbitReadout;
+ $('sundial-view').dataset.readout=settings.sundialReadout;
  applyTransparency();
  const card=document.querySelector<HTMLElement>('.clock-card')!;
  const background=clockBackgroundOptions.find(id=>id===settings.background);
@@ -103,13 +113,21 @@ function render(){const now=new Date();sundial.render(now);if(settings.backgroun
   const planet=$('orbit-'+unit).querySelector('circle')!;
   planet.setAttribute('cx',String(point.x));planet.setAttribute('cy',String(point.y));
  }
- if(settings.view==='flip'||settings.view==='analogFlip'||settings.view==='sundial'){
+ if(settings.view==='flip'||settings.view==='analogFlip'||(settings.view==='sundial'&&settings.sundialReadout==='flip')||(settings.view==='orbit'&&settings.orbitReadout==='flip')){
   const formatted=digits.formatToParts(now);
   const animate=lastFlipTick>0&&now.getTime()-lastFlipTick<1500;
-  if(settings.view==='sundial')updateSundialFlip(formatted,animate);else updateFlip(formatted,animate);
+  if(settings.view==='sundial')updateSundialFlip(formatted,animate);else if(settings.view==='orbit')updateOrbitFlip(formatted,animate);else updateFlip(formatted,animate);
   lastFlipTick=now.getTime();
-  $(settings.view==='sundial'?'sundial-flip-context':'flip-context').textContent=formatted.filter(p=>p.type==='dayPeriod'||p.type==='timeZoneName').map(p=>p.value).join(' · ');
+  $(settings.view==='sundial'?'sundial-flip-context':settings.view==='orbit'?'orbit-context':'flip-context').textContent=formatted.filter(p=>p.type==='dayPeriod'||p.type==='timeZoneName').map(p=>p.value).join(' · ');
  }
+ const companion=settings.view==='orbit'||settings.view==='sundial'?digits.formatToParts(now):[];
+ for(const view of ['orbit','sundial'] as const)if(settings.view===view&&settings[`${view}Readout`]==='digital'){
+  const display=$(view+'-digital');
+  display.textContent=companion.filter(p=>p.type!=='dayPeriod'&&p.type!=='timeZoneName').map(p=>p.value).join('').trim();
+  display.setAttribute('datetime',now.toISOString());
+  $(view==='orbit'?'orbit-context':'sundial-flip-context').textContent=companion.filter(p=>p.type==='dayPeriod'||p.type==='timeZoneName').map(p=>p.value).join(' · ');
+ }
+ updateBinary(now,settings.view.startsWith('binary')?digits.formatToParts(now):[],settings.view,settings.numbers,t.binary);
  const text=digits.format(now);$('orbit-clock').setAttribute('aria-label',text);$('digital-clock').textContent=text;$('digital-clock').setAttribute('datetime',now.toISOString());$('analog-clock').setAttribute('aria-label',text);$('clock-date').textContent=dateFormat.format(now);styledDate.render(now);
 }
 function save(){if(!storageAllowed())return;try{localStorage.setItem('jacktools.clock.settings.v1',JSON.stringify(settings));}catch{$('clock-settings-status').textContent=t.storageError;}}

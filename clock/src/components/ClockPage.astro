@@ -5,7 +5,10 @@ import AdBanner from '../../../shared/AdBanner.astro';
 import ToolInformation from '../../../shared/ToolInformation.astro';
 import {toolSeo} from '../../../shared/seo';
 import { analogDesigns, analogDesignText, dialMarkup, analogPreview, analogDesignStyles } from '../lib/analog-designs';
+import {dialText} from '../lib/dial-text';
 import { clockGuide } from '../lib/clock-guide';
+import {clockViews,viewPreview} from '../lib/view-previews';
+import BinaryClock from './BinaryClock.astro';
 import Layout from '../layouts/Layout.astro';
 import { getDictionary, type Language } from '../lib/i18n';
 import ClockAlarm from './ClockAlarm.astro';
@@ -20,7 +23,7 @@ const {lang}=Astro.props; const t=getDictionary(lang);const c=clockText[lang];co
 const groups={de:{display:'Uhr & Datum',behavior:'Zeit & Verhalten'},en:{display:'Clock & date',behavior:'Time & behavior'},es:{display:'Reloj y fecha',behavior:'Hora y comportamiento'},fr:{display:'Horloge et date',behavior:'Heure et comportement'}}[lang];
 const alarm=alarmText[lang];
 const sun=sundialText[lang];
-const designs=analogDesignText[lang];
+const designs=analogDesignText[lang];const dial=dialText[lang];
 const backgrounds=backgroundText[lang];const location=locationText[lang];
 const seo=toolSeo.clock[lang];
 ---
@@ -42,7 +45,7 @@ const seo=toolSeo.clock[lang];
 <foreignObject id="alarm-analog-indicator" x="99" y="207" width="122" height="44" style="display:none" aria-hidden="true"><div class="alarm-dial-badge"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="7"/><path d="m5 3-3 3m17-3 3 3M12 9v4l3 2M7 19l-2 3m12-3 2 3"/></svg><span id="alarm-analog-time">07:00</span><span id="alarm-analog-flips" hidden aria-hidden="true"></span></div></foreignObject>
 <line id="hour-hand" x1="160" y1="170" x2="160" y2="83"/><line id="minute-hand" x1="160" y1="176" x2="160" y2="48"/><line id="second-hand" x1="160" y1="187" x2="160" y2="32"/><circle cx="160" cy="160" r="5" class="hub"/>
 </svg>
-<svg class="analog-face" data-design="standard" id="orbit-clock" viewBox="0 0 320 320" role="img" aria-label={c.orbit}>
+<div id="orbit-view" data-readout="off"><svg class="analog-face" data-design="standard" id="orbit-clock" viewBox="0 0 320 320" role="img" aria-label={c.orbit}>
 <g id="orbit-dial-face" set:html={dialMarkup('standard',0,false,126)} />
 {[['second',108,5],['minute',80,7],['hour',50,9]].map(([unit,radius,size])=><g class={`orbit-${unit}`}>
 <path class="orbit-track"/>
@@ -54,16 +57,22 @@ const seo=toolSeo.clock[lang];
 <circle class="orbit-sun-core" cx="160" cy="160" r="8"/>
 </g>
 </svg>
-<Sundial lang={lang}/><div class="clock-readout"><div id="flip-clock" aria-hidden="true"></div><p id="flip-context" aria-hidden="true"></p><time id="digital-clock" aria-live="off">--:--</time><div id="alarm-readout-indicator" class="alarm-readout-indicator" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="7"/><path d="m5 3-3 3m17-3 3 3M12 9v4l3 2M7 19l-2 3m12-3 2 3"/></svg><span id="alarm-readout-time"></span><span id="alarm-mini-flips" aria-hidden="true"></span></div><p id="clock-date"></p><div id="styled-date" hidden></div><p id="clock-zone"></p></div>
+<time id="orbit-digital"></time><div id="orbit-flip" aria-hidden="true"></div><p id="orbit-context" aria-hidden="true"></p></div>
+<BinaryClock label={c.binary}/><Sundial lang={lang}/><div class="clock-readout"><div id="flip-clock" aria-hidden="true"></div><p id="flip-context" aria-hidden="true"></p><time id="digital-clock" aria-live="off">--:--</time><div id="alarm-readout-indicator" class="alarm-readout-indicator" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="7"/><path d="m5 3-3 3m17-3 3 3M12 9v4l3 2M7 19l-2 3m12-3 2 3"/></svg><span id="alarm-readout-time"></span><span id="alarm-mini-flips" aria-hidden="true"></span></div><p id="clock-date"></p><div id="styled-date" hidden></div><p id="clock-zone"></p></div>
 </div>
 <p id="wake-status" class="timer-status" role="status"></p><noscript>{t.js}</noscript>
 </section>
 <AdBanner lang={lang} />
 <aside class="settings-card"><h2>{t.settings}</h2><form id="clock-settings" class="clock-settings">
 <fieldset class="clock-settings-group"><legend>{groups.display}</legend>
-<label>{t.appearance}<select name="view">{(['analog','orbit','sundial','digital','combined','flip','analogFlip'] as const).map(v=><option value={v} selected={v==='analog'}>{v==='sundial'?sun.sundial:c[v]}</option>)}</select></label>
+<label>{t.appearance}<select name="view" data-preview-class="clock-view-thumbnail">{clockViews.map(v=><option value={v} data-preview={viewPreview(v)} selected={v==='analog'}>{v==='sundial'?sun.sundial:c[v]}</option>)}</select></label>
 
-<label>{designs.label}<select name="analogDesign">{analogDesigns.map((id,index)=><option value={id} data-preview={analogPreview(id)}>{designs.names[index]}</option>)}</select></label>
+{(['orbit','sundial'] as const).map(view=><div id={`${view}-readout-options`} hidden><label>{c.readoutLabel}<select name={`${view}Readout`}><option value="off" selected={view==='orbit'}>{c.readoutNone}</option><option value="digital">{c.readoutDigital}</option><option value="flip" selected={view==='sundial'}>{c.readoutFlip}</option></select></label></div>)}
+<select name="analogDesign" hidden aria-hidden="true">{analogDesigns.map((id,index)=><option value={id}>{designs.names[index]}</option>)}</select>
+<div id="clock-dial-options">
+<label>{dial.shape}<select name="dialShape" data-preview-class="clock-design-thumbnail"><option value="round" data-preview={analogPreview('standard')}>{dial.round}</option><option value="square" data-preview={analogPreview('square-standard')}>{dial.square}</option></select></label>
+<label>{dial.style}<select name="dialStyle" data-preview-class="clock-design-thumbnail">{analogDesigns.slice(0,4).map((id,index)=><option value={id} data-preview={analogPreview(id)}>{designs.names[index]}</option>)}</select></label>
+</div>
 <label>{c.dateAppearance}<select name="dateView">{(['textDate','calendarDate','elegantDate','flipDate'] as const).map(v=><option value={v} selected={v==='calendarDate'}>{c[v]}</option>)}</select></label>
 <label>{c.date}<select name="date">{(['off','short','medium','long'] as const).map(v=><option value={v} selected={v==='long'}>{c[v]}</option>)}</select></label>
 {(['seconds','numbers','smooth'] as const).map(k=><label class="toggle-row"><span><strong>{c[k]}</strong></span><input type="checkbox" role="switch" name={k} checked={k==='seconds'||k==='numbers'} /><span class="toggle" aria-hidden="true"></span></label>)}

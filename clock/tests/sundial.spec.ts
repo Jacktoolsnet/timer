@@ -1,3 +1,4 @@
+import {selectDialDesign} from './helpers/dial-design';
 import { squareRadius } from '../src/lib/analog-designs';
 import { getTimes } from 'suncalc';
 import { test, expect } from '@playwright/test';
@@ -234,13 +235,12 @@ test('sundial inherits rounded, square, Roman and numeral settings',async({page,
  const face=page.locator('#sundial-face');
  await expect(face.locator('.hour-mark').first()).toBeVisible();
  await expect(face.locator('.minute-mark').first()).toBeVisible();
- for(const [design,name] of [
+ for(const [design] of [
   ['roman','Römisch'],['square-roman','Römisch · Eckig'],
   ['square-railway','Bahnhofsuhr · Eckig'],['minimal','Minimalistisch'],
   ['standard','Standard'],
  ]){
-  await page.locator('#trigger-analogDesign').click();
-  await page.getByRole('option',{name,exact:true}).click();
+  await selectDialDesign(page,design);
   await expect(face).toHaveAttribute('data-design',design);
   await expect(face.locator(design.startsWith('square-')?'rect.sundial-surface':'circle.sundial-surface')).toBeVisible();
   if(design.endsWith('roman')){
@@ -383,8 +383,7 @@ test('daylight band shows actual rise/set times and hides without a location',as
  expect(Math.hypot(sunX-180,sunY-180)).toBeCloseTo(137,5);
  expect((sunX-180)*shadowX+(sunY-180)*shadowY).toBeLessThan(0);
  expect(Math.abs((sunX-180)*shadowY-(sunY-180)*shadowX)).toBeLessThan(.01);
- await page.locator('#trigger-analogDesign').click();
- await page.getByRole('option',{name:'Römisch · Eckig',exact:true}).click();
+ await selectDialDesign(page,'square-roman');
  await expect(page.locator('#sundial-daylight-fill')).toBeVisible();
  const squareTransform=(await page.locator('#sundial-sun').getAttribute('transform'))!;
  const [sx,sy]=squareTransform.match(/-?[\d.]+/g)!.map(Number);
@@ -486,7 +485,7 @@ test('rise/set dots sit on the frame with labels outside and no overlaps',async(
  await page.locator('#seasonal-location').click();
  await expect(page.locator('#sundial-view')).toHaveAttribute('data-location-state','ready');
  for(const square of [false,true]){
-  if(square){await page.locator('#trigger-analogDesign').click();await page.getByRole('option',{name:'Römisch · Eckig',exact:true}).click();}
+  if(square){await selectDialDesign(page,'square-roman');}
   for(const event of ['sunrise','sunset']){
    const dot=page.locator('#sundial-'+event+'-dot');
    const x=Number(await dot.getAttribute('cx'))-180,y=Number(await dot.getAttribute('cy'))-180;
@@ -511,7 +510,7 @@ test('São Paulo uses a south-up dial with readable hour labels and clear inset 
  await expect(page.locator('#sundial-face')).toHaveAttribute('data-orientation','south');
  await expect(page.locator('.sundial-north')).toHaveText('S');
  for(const square of [false,true]){
-  if(square){await page.locator('#trigger-analogDesign').click();await page.getByRole('option',{name:'Römisch · Eckig',exact:true}).click();}
+  if(square){await selectDialDesign(page,'square-roman');}
   const labels=await page.locator('#sundial-hours .dial-numerals text').evaluateAll(nodes=>nodes.map(node=>{
    const r=node.getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom};
   }));

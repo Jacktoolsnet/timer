@@ -730,25 +730,25 @@ body.focus-view .card-top { position: absolute; top: 12px; right: 12px; z-index:
 }
 
 @media screen and (orientation: landscape) and (max-height: 600px) {
-  body.focus-view .clock-display:is([data-view=analog],[data-view=orbit],[data-view=sundial]) #styled-date[data-style=calendarDate] .date-calendar {
+  body.focus-view .clock-display:is([data-view=analog],[data-view=orbit],[data-view=sundial],[data-view=binary],[data-view=binaryDigital],[data-view=binaryFlip]) #styled-date[data-style=calendarDate] .date-calendar {
     width: min(100%, 260px, 65dvh);
   }
-  body.focus-view .clock-display:is([data-view=analog],[data-view=orbit],[data-view=sundial]) .date-month {
+  body.focus-view .clock-display:is([data-view=analog],[data-view=orbit],[data-view=sundial],[data-view=binary],[data-view=binaryDigital],[data-view=binaryFlip]) .date-month {
     font-size: clamp(12px, 3.8dvh, 19px);
     padding: 2dvh 14px;
   }
-  body.focus-view .clock-display:is([data-view=analog],[data-view=orbit],[data-view=sundial]) .date-day {
+  body.focus-view .clock-display:is([data-view=analog],[data-view=orbit],[data-view=sundial],[data-view=binary],[data-view=binaryDigital],[data-view=binaryFlip]) .date-day {
     font-size: clamp(44px, 21dvh, 100px);
     padding: 1dvh 14px;
   }
-  body.focus-view .clock-display:is([data-view=analog],[data-view=orbit],[data-view=sundial]) .date-footer {
+  body.focus-view .clock-display:is([data-view=analog],[data-view=orbit],[data-view=sundial],[data-view=binary],[data-view=binaryDigital],[data-view=binaryFlip]) .date-footer {
     font-size: clamp(12px, 3.8dvh, 18px);
     padding: 0 14px 2dvh;
   }
-  body.focus-view .clock-display:not(:is([data-view=analog],[data-view=orbit],[data-view=sundial])) #styled-date[data-style=calendarDate] .date-calendar {
+  body.focus-view .clock-display:not(:is([data-view=analog],[data-view=orbit],[data-view=sundial],[data-view=binary],[data-view=binaryDigital],[data-view=binaryFlip])) #styled-date[data-style=calendarDate] .date-calendar {
     width: min(100%, 220px, 55dvh);
   }
-  body.focus-view .clock-display:not(:is([data-view=analog],[data-view=orbit],[data-view=sundial])) .date-day { font-size: clamp(32px, 12dvh, 60px); }
+  body.focus-view .clock-display:not(:is([data-view=analog],[data-view=orbit],[data-view=sundial],[data-view=binary],[data-view=binaryDigital],[data-view=binaryFlip])) .date-day { font-size: clamp(32px, 12dvh, 60px); }
 }
 
 /* Equal landscape columns keep the dial and date equally inset from the edges. */
@@ -763,7 +763,7 @@ body.focus-view .card-top { position: absolute; top: 12px; right: 12px; z-index:
   body.focus-view .clock-display:is([data-view=analog],[data-view=orbit],[data-view=sundial],[data-view=combined],[data-view=analogFlip]) #analog-clock {
     width: min(100%, calc(100dvh - 88px));
   }
-  body.focus-view .clock-display:is([data-view=analog],[data-view=orbit],[data-view=sundial]) #styled-date[data-style=calendarDate] .date-calendar {
+  body.focus-view .clock-display:is([data-view=analog],[data-view=orbit],[data-view=sundial],[data-view=binary],[data-view=binaryDigital],[data-view=binaryFlip]) #styled-date[data-style=calendarDate] .date-calendar {
     width: min(100%, calc(100dvh - 88px));
   }
 }
@@ -771,10 +771,10 @@ body.focus-view .card-top { position: absolute; top: 12px; right: 12px; z-index:
 @media screen and (orientation: landscape) and (max-height: 600px) {
   /* Reserve equal space above/below; the exit control remains independently positioned. */
   body.focus-view .clock-card { padding-block: 32px; }
-  body.focus-view .clock-display:is([data-view=analog],[data-view=orbit],[data-view=sundial]) .clock-readout { position: relative; }
-  body.focus-view .clock-display:is([data-view=analog],[data-view=orbit],[data-view=sundial]) #styled-date { margin-top: 0; }
-  body.focus-view .clock-display:is([data-view=analog],[data-view=orbit],[data-view=sundial]) #clock-date { margin-block: 0; }
-  body.focus-view .clock-display:is([data-view=analog],[data-view=orbit],[data-view=sundial]) #clock-zone {
+  body.focus-view .clock-display:is([data-view=analog],[data-view=orbit],[data-view=sundial],[data-view=binary],[data-view=binaryDigital],[data-view=binaryFlip]) .clock-readout { position: relative; }
+  body.focus-view .clock-display:is([data-view=analog],[data-view=orbit],[data-view=sundial],[data-view=binary],[data-view=binaryDigital],[data-view=binaryFlip]) #styled-date { margin-top: 0; }
+  body.focus-view .clock-display:is([data-view=analog],[data-view=orbit],[data-view=sundial],[data-view=binary],[data-view=binaryDigital],[data-view=binaryFlip]) #clock-date { margin-block: 0; }
+  body.focus-view .clock-display:is([data-view=analog],[data-view=orbit],[data-view=sundial],[data-view=binary],[data-view=binaryDigital],[data-view=binaryFlip]) #clock-zone {
     position: absolute;
     top: 100%;
     left: 0;
@@ -1303,15 +1303,15 @@ body.focus-view .clock-display[data-view=sundial] #sundial-status {
 /* All dial-only views share the same phone-landscape focus layout.
    Keep this after the individual orbit/sundial sizing rules. */
 @media screen and (orientation:landscape) and (max-height:600px) {
- body.focus-view .clock-display:is([data-view=analog],[data-view=orbit],[data-view=sundial]) {
+ body.focus-view .clock-display:is([data-view=analog],[data-view=orbit],[data-view=sundial],[data-view=binary],[data-view=binaryDigital],[data-view=binaryFlip]) {
   display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr);
   align-items:center; justify-items:center; gap:clamp(12px,3vw,28px);
  }
- body.focus-view .clock-display:is([data-view=analog],[data-view=orbit],[data-view=sundial]) > :is(#analog-clock,#orbit-clock,#sundial-view) {
+ body.focus-view .clock-display:is([data-view=analog],[data-view=orbit],[data-view=sundial],[data-view=binary],[data-view=binaryDigital],[data-view=binaryFlip]) > :is(#analog-clock,#orbit-view,#sundial-view) {
   width:min(100%,calc(100dvh - 88px)); height:auto;
   max-height:calc(100dvh - 88px); min-width:0; margin:0;
  }
- body.focus-view .clock-display:is([data-view=analog],[data-view=orbit],[data-view=sundial]) .clock-readout {
+ body.focus-view .clock-display:is([data-view=analog],[data-view=orbit],[data-view=sundial],[data-view=binary],[data-view=binaryDigital],[data-view=binaryFlip]) .clock-readout {
   width:100%; min-width:0;
  }
 }
@@ -1334,4 +1334,56 @@ body.focus-view .clock-display[data-view=sundial] #sundial-status {
 #sundial-enable-location:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
 #sundial-notice #sundial-enable-location #sundial-status {
  display:block; padding:0; border:0; border-radius:0; background:transparent; box-shadow:none; font:inherit;
+}
+
+/* BCD clock: one column per decimal digit; weights increase from bottom to top. */
+#binary-clock { display:none; width:min(420px,100%); min-width:0; padding:16px; border:1px solid var(--line); border-radius:16px; background:color-mix(in srgb,var(--surface) var(--clock-surface-opacity,100%),transparent); container-type:inline-size; text-align:center; }
+.clock-display:is([data-view=binary],[data-view=binaryDigital],[data-view=binaryFlip]) #binary-clock { display:block; }
+.clock-display:is([data-view=binary],[data-view=binaryDigital],[data-view=binaryFlip]) :is(#analog-clock,#digital-clock) { display:none; }
+#binary-face { display:block; width:100%; height:auto; overflow:visible; }
+#binary-face text { fill:var(--muted); stroke:none; font:12px system-ui; text-anchor:middle; dominant-baseline:middle; }
+#binary-face circle { fill:var(--accent); fill-opacity:.12; stroke:var(--accent); stroke-opacity:.3; stroke-width:1; transition:fill-opacity .15s,stroke-opacity .15s; }
+#binary-face circle[data-on=true] { fill-opacity:1; stroke-opacity:1; filter:drop-shadow(0 0 4px var(--accent)); }
+#binary-clock[data-seconds=false] [data-binary-seconds=true] { display:none; }
+#binary-digital { display:none; font-size:min(calc(36px * var(--font-scale,1)),10cqw); font-variant-numeric:tabular-nums; }
+[data-view=binaryDigital] #binary-digital { display:block; }
+#binary-flip { display:none; --flip-size:min(calc(48px * var(--font-scale,1)),11cqw); font:700 var(--flip-size)/1.35 ui-monospace,monospace; }
+[data-view=binaryFlip] #binary-flip { display:flex; justify-content:center; align-items:center; gap:.07em; }
+#binary-context { font-size:12px; color:var(--muted); margin:6px 0 0; }
+#binary-context:empty,[data-view=binaryDigital] #binary-context { display:none; }
+body.focus-view #binary-clock { width:min(90vw,calc(100dvh - 300px),560px); padding:12px; }
+@media screen and (orientation:landscape) and (max-height:600px) {
+ body.focus-view .clock-display:is([data-view=binary],[data-view=binaryDigital],[data-view=binaryFlip]) #binary-clock {
+  width:min(100%,calc((100dvh - 100px) * 1.05)); padding:10px;
+ }
+}
+@media(prefers-reduced-motion:reduce) { #binary-face circle { transition:none; } }
+
+.clock-view-thumbnail { width:68px; height:44px; flex:0 0 68px; object-fit:contain; border-radius:6px; }
+.clock-view-thumbnail[hidden] { display:none; }
+
+#clock-dial-options { display:grid; gap:16px; }
+#clock-dial-options[hidden] { display:none; }
+#clock-dial-options > label { display:flex; flex-direction:column; gap:8px; }
+
+/* Independent companion displays for orbit and sundial; date settings stay separate. */
+#orbit-readout-options[hidden],#sundial-readout-options[hidden] { display:none; }
+:is(#orbit-readout-options,#sundial-readout-options) > label { display:flex; flex-direction:column; gap:8px; }
+#orbit-view { display:none; width:min(360px,100%); min-width:0; text-align:center; container-type:inline-size; }
+[data-view=orbit] #orbit-view { display:block; }
+.clock-display[data-view=orbit] #orbit-view #orbit-clock { display:block; width:100%; height:auto; max-width:100%; }
+#orbit-digital,#sundial-digital,#orbit-flip { display:none; }
+#orbit-view[data-readout=digital] #orbit-digital,#sundial-view[data-readout=digital] #sundial-digital { display:block; }
+#orbit-digital { font-size:min(calc(38px * var(--font-scale,1)),11cqw); font-variant-numeric:tabular-nums; text-shadow:0 1px 4px var(--surface); }
+#orbit-flip { --flip-size:min(calc(48px * var(--font-scale,1)),11cqw); font:700 var(--flip-size)/1.35 ui-monospace,monospace; }
+#orbit-view[data-readout=flip] #orbit-flip { display:flex; justify-content:center; align-items:center; gap:.07em; }
+#orbit-context { margin:5px 0 0; font-size:12px; color:var(--text); text-shadow:0 1px 4px var(--surface); }
+#orbit-context:empty,#orbit-view[data-readout=off] #orbit-context { display:none; }
+#sundial-view:not([data-readout=flip]) #sundial-flip { display:none; }
+#sundial-view[data-readout=off] #sundial-flip-area { display:none; }
+#sundial-digital { color:var(--sundial-ink); font:700 28px/1.4 ui-monospace,monospace; font-variant-numeric:tabular-nums; text-align:center; }
+body.focus-view #orbit-view { width:min(90vw,calc(100dvh - 300px),600px); }
+@media screen and (orientation:landscape) and (max-height:600px) {
+ body.focus-view .clock-display[data-view=orbit] #orbit-view { width:min(100%,calc((100dvh - 100px) * .85)); max-height:calc(100dvh - 64px); }
+ body.focus-view .clock-display[data-view=orbit] #orbit-view[data-readout=off] { width:min(100%,calc(100dvh - 88px)); }
 }

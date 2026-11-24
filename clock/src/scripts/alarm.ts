@@ -101,7 +101,7 @@ export function createAlarm(root: HTMLElement, dialog: HTMLDialogElement, badge:
   document.querySelector<HTMLElement>('#alarm-analog-flips')!.hidden=view!=='analogFlip';
   readoutIndicator.hidden=!active||analog;
   readoutIndicator.setAttribute('aria-label',label);
-  const flip=view==='flip'||view==='analogFlip';
+  const flip=view==='flip'||view==='analogFlip'||view==='binaryFlip';
   document.querySelector<HTMLElement>('#alarm-readout-time')!.hidden=flip;
   document.querySelector('#alarm-readout-time')!.textContent=alarmTime;
   document.querySelector<HTMLElement>('#alarm-mini-flips')!.hidden=!flip;
