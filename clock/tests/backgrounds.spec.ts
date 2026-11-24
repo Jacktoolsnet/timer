@@ -142,6 +142,7 @@ test('animated flip leaves do not stack translucent backgrounds', async ({ page 
 });
 
 test('backgrounds fit all readouts in portrait and landscape', async ({ page }) => {
+ await page.route(/googlesyndication\.com|doubleclick\.net|googleadservices\.com/,r=>r.fulfill({body:''}));
   await page.goto('/de/');
   await choose(page, 'aurora');
   // Exercise focus layout without changing the browser window's fullscreen state.

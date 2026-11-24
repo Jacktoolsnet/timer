@@ -430,6 +430,7 @@ test('rise and set markers use actual sun directions opposite the shadow scale',
 });
 
 test('focus backdrop fills the viewport and keeps sundial and calendar inside it',async({page,context})=>{
+ await page.route(/googlesyndication\.com|doubleclick\.net|googleadservices\.com/,r=>r.fulfill({body:''}));
  await context.grantPermissions(['geolocation']);
  await context.setGeolocation({latitude:52.52,longitude:13.405});
  await page.goto('/de/');

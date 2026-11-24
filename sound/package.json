@@ -15,10 +15,10 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
-    "astro": "^7.4.0"
+    "astro": "^7.4.13"
   },
   "devDependencies": {
-    "@astrojs/check": "^0.9.10",
+    "@astrojs/check": "^0.9.12",
     "@playwright/test": "^1.63.0",
     "@types/node": "^24.19.1",
     "typescript": "^5.9.3"
