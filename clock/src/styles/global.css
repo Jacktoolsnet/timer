@@ -1320,3 +1320,18 @@ body.focus-view .clock-display[data-view=sundial] #sundial-status {
 #seasonal-background [data-seasonal=stars] circle {
  filter:drop-shadow(0 0 2px #ffffffb3);
 }
+
+/* One location control, exposed both in settings and directly on the dial. */
+#sundial-enable-location {
+ display:block; width:100%; min-height:44px; margin:0; padding:6px 9px;
+ font:12px/1.4 system-ui; text-align:center; cursor:pointer;
+ color:var(--sundial-ink); background:color-mix(in srgb,var(--sundial-paper) 90%,var(--accent));
+ border:1px solid color-mix(in srgb,var(--accent) 55%,var(--sundial-paper)); border-radius:8px;
+}
+#sundial-enable-location[hidden] { display:none; }
+#sundial-enable-location:disabled { cursor:wait; opacity:.75; }
+#sundial-enable-location:hover:not(:disabled) { background:color-mix(in srgb,var(--sundial-paper) 75%,var(--accent)); }
+#sundial-enable-location:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+#sundial-notice #sundial-enable-location #sundial-status {
+ display:block; padding:0; border:0; border-radius:0; background:transparent; box-shadow:none; font:inherit;
+}

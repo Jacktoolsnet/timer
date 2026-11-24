@@ -5,7 +5,7 @@ const {lang}=Astro.props as {lang:Language};
 const t=sundialText[lang];
 ---
 <div id="sundial-view" data-text={JSON.stringify(t)} hidden>
-<svg class="analog-face" data-design="standard" id="sundial-face" viewBox="-20 -12 400 384" role="img" aria-label={t.sundial}>
+<svg class="analog-face" data-design="standard" id="sundial-face" viewBox="-20 -12 400 384" role="group" aria-label={t.sundial}>
 <defs>
 <radialGradient id="sundial-light" cx="32%" cy="24%" r="85%">
 <stop class="sundial-light-start" offset="0"/>
@@ -64,7 +64,7 @@ const t=sundialText[lang];
 <circle class="sundial-pin-halo" cx="180" cy="180" r="10" aria-hidden="true"/>
 <circle class="sundial-pin" cx="180" cy="180" r="5"/>
 <foreignObject id="sundial-notice-area" x="72" y="95" width="216" height="68">
-<div id="sundial-notice"><p id="sundial-status" role="status">{t.missing}</p><p id="sundial-night-hint" hidden></p></div>
+<div id="sundial-notice"><button id="sundial-enable-location" type="button" aria-label={t.missing}><span id="sundial-status" role="status">{t.missing}</span></button><p id="sundial-night-hint" hidden></p></div>
 </foreignObject>
 <foreignObject id="sundial-info-area" x="72" y="195" width="216" height="41" visibility="hidden">
 <div class="sundial-info"><p id="sundial-time"></p></div>

@@ -35,7 +35,7 @@ test('sundial requests location only on click, renders day and night and clears 
  await page.getByRole('option',{name:'Sonnenuhr',exact:true}).click();
  await expect(page.locator('#sundial-view')).toBeVisible();
  await expect(page.locator('#analog-clock')).toBeHidden();
- await expect(page.locator('#sundial-status')).toContainText('Standort freigeben');
+ await expect(page.locator('#sundial-status')).toContainText('Standort aktivieren');
  await expect(page.locator('#sundial-shadow')).toHaveAttribute('visibility','hidden');
  expect(await page.evaluate(()=>(window as unknown as {sundialRequests:number}).sundialRequests)).toBe(0);
  await page.locator('#seasonal-location').click();
@@ -55,10 +55,10 @@ test('sundial requests location only on click, renders day and night and clears 
  await page.locator('#seasonal-north').check();
  await expect(page.locator('#sundial-time')).toBeEmpty();
  await expect(page.locator('#sundial-hours text')).toHaveCount(0);
- await expect(page.locator('#sundial-status')).toContainText('Standort freigeben');
+ await expect(page.locator('#sundial-status')).toContainText('Standort aktivieren');
  await page.reload();
  await expect(page.locator('#sundial-view')).toBeVisible();
- await expect(page.locator('#sundial-status')).toContainText('Standort freigeben');
+ await expect(page.locator('#sundial-status')).toContainText('Standort aktivieren');
  expect(await page.evaluate(()=>(window as unknown as {sundialRequests:number}).sundialRequests)).toBe(0);
 });
 
@@ -104,7 +104,7 @@ test('remembers enabled mode with consent but never coordinates',async({page,con
  await page.getByRole('option',{name:'Sonnenuhr',exact:true}).click();
  await page.locator('#seasonal-location').click();
  await expect(page.locator('#sundial-view')).toHaveAttribute('data-location-state','ready');
- await expect(page.locator('#sundial-status')).not.toContainText('bitte den Standort freigeben');
+ await expect(page.locator('#sundial-status')).not.toContainText('bitte den Standort aktivieren');
  await page.locator('#palette-dropdown summary').click();
  await page.locator('#remember-preferences').check();
  expect(await page.evaluate(()=>localStorage.getItem('jacktools.clock.location-enabled.v1'))).toBe('yes');
@@ -120,7 +120,7 @@ test('remembers enabled mode with consent but never coordinates',async({page,con
  await page.locator('#seasonal-north').check();
  await page.reload();
  await expect(page.locator('#sundial-view')).toHaveAttribute('data-location-state','missing');
- await expect(page.locator('#sundial-status')).toContainText('Standort freigeben');
+ await expect(page.locator('#sundial-status')).toContainText('Standort aktivieren');
 });
 
 test('pending location survives reconfiguration while browser asks for permission',async({page})=>{
@@ -135,7 +135,7 @@ test('pending location survives reconfiguration while browser asks for permissio
  await page.locator('#seasonal-location').click();
  await page.evaluate(()=>document.dispatchEvent(new Event('visibilitychange')));
  await expect(page.locator('#sundial-view')).toHaveAttribute('data-location-state','ready');
- await expect(page.locator('#sundial-status')).not.toContainText('Standort freigeben');
+ await expect(page.locator('#sundial-status')).not.toContainText('Standort aktivieren');
  await expect(page.locator('#sundial-time')).not.toBeEmpty();
 });
 

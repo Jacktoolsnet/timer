@@ -9,7 +9,10 @@ export function createSundial(){
  const shadow=document.getElementById('sundial-shadow')!;
  const sun=document.getElementById('sundial-sun')!;
  const time=document.getElementById('sundial-time')!;
- const notice=document.getElementById('sundial-notice')!;
+ const enableLocation=document.getElementById('sundial-enable-location') as HTMLButtonElement;
+ enableLocation.addEventListener('click',()=>{
+  if(!pending&&!location)(document.getElementById('seasonal-location') as HTMLInputElement).click();
+ });
  const noticeArea=document.getElementById('sundial-notice-area')!;
  const infoArea=document.getElementById('sundial-info-area')!;
  const coordinateArea=document.getElementById('sundial-coordinates-area')!;
@@ -111,7 +114,10 @@ export function createSundial(){
   infoArea.setAttribute('visibility',location?'visible':'hidden');
   coordinateArea.setAttribute('visibility',location?'visible':'hidden');
   if(location){if(status.parentElement!==coordinateContainer)coordinateContainer.append(status);}
-  else if(status.parentElement!==notice)notice.append(status);
+  else if(status.parentElement!==enableLocation)enableLocation.append(status);
+  enableLocation.hidden=!!location;
+  enableLocation.disabled=pending;
+  enableLocation.setAttribute('aria-busy',String(pending));
   if(!location){nightHint.hidden=true;sun.style.display='none';sun.setAttribute('visibility','hidden');shadow.setAttribute('visibility','hidden');time.textContent='';status.textContent=pending?text.pending:message||text.missing;return;}
   const tick=String(Math.floor(now.getTime()/1000));
   if(tick===last)return;last=tick;
