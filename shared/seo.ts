@@ -35,10 +35,10 @@ export const toolSeo: Record<Tool, Record<Language, Copy>> = {
   fr:{title:'Minuteur par intervalles en ligne',heading:'Minuteur pour activités et pauses par intervalles',description:'Réglez la préparation, les phases actives, les pauses et les tours. Les phases changent automatiquement, avec signaux sonores et vue concentration. Gratuit.'},
  },
  clock: {
-  de:{title:'Online-Uhr – Sonnenuhr, Orbit & Klappzahlen',heading:'Online-Uhr mit Datum und Zeitzonen',description:'Kostenlose Online-Uhr mit analoger Uhr, Klappzahlen, Orbit-Uhr und standortbasierter Sonnenuhr. Mit Datum, Zeitzonen und Fokusansicht. Ohne Anmeldung.'},
-  en:{title:'Online clock – sundial, orbit & flip clock',heading:'Online clock with date and time zones',description:'Free online clock with analog, flip, orbit and location-based sundial views. Customize dates, time zones and colours, or use focus view. No sign-up.'},
-  es:{title:'Reloj online – solar, orbital y de láminas',heading:'Reloj online con fecha y zonas horarias',description:'Reloj online gratis: analógico, de láminas, orbital y solar según tu ubicación. Personaliza fecha, zona horaria y colores. Modo de enfoque y sin registro.'},
-  fr:{title:'Horloge en ligne – solaire, orbitale et à palettes',heading:'Horloge en ligne avec date et fuseaux horaires',description:'Horloge gratuite : analogique, à palettes, orbitale ou solaire selon votre position. Date, fuseaux horaires et vue concentration. Sans inscription.'},
+  de:{title:'Online-Uhr – Binär, Orbit & Sonnenuhr',heading:'Online-Uhr mit Datum und Zeitzonen',description:'Kostenlose Online-Uhr: analog, digital, binär, Orbit oder Sonnenuhr. Mit Klappzahlen, Datum, Zeitzonen und Fokusansicht. Individuell gestalten, ohne Anmeldung.'},
+  en:{title:'Online clock – binary, orbit & sundial',heading:'Online clock with date and time zones',description:'Free online clock: analog, digital, binary, orbit or sundial. Add flip digits, dates and time zones, customize the design and use focus view. No sign-up.'},
+  es:{title:'Reloj online – binario, orbital y solar',heading:'Reloj online con fecha y zonas horarias',description:'Reloj online gratis: analógico, digital, binario, orbital o solar. Con láminas, fecha, zonas horarias y modo de enfoque. Diseño personalizable y sin registro.'},
+  fr:{title:'Horloge en ligne – binaire, orbitale et solaire',heading:'Horloge en ligne avec date et fuseaux horaires',description:'Horloge gratuite : analogique, numérique, binaire, orbitale ou solaire. Palettes, date, fuseaux horaires et vue concentration. Personnalisable, sans inscription.'},
  },
  stopwatch: {
   de:{title:'Online-Stoppuhr mit Rundenzeiten & CSV-Export',heading:'Online-Stoppuhr mit Rundenzeiten',description:'Miss deine Zeit, halte Runden- und Gesamtzeiten fest und exportiere sie als CSV. Analoge oder digitale Ansicht und Fokusmodus. Kostenlos ohne Anmeldung.'},

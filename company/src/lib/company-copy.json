@@ -993,5 +993,15 @@
     "en": "Tools",
     "es": "Herramientas",
     "fr": "Outils"
+  },
+  "Analog, digital, binär, mit Klappzahlen, als Orbit-Uhr oder Sonnenuhr: Gestalte deine Zeit mit Datum, Zeitzonen und persönlichem Design.": {
+    "en": "Analog, digital, binary, flip, orbit or sundial: make time your own with dates, time zones and personal design.",
+    "es": "Analógico, digital, binario, de láminas, orbital o solar: personaliza tu hora con fecha, zonas horarias y diseño propio.",
+    "fr": "Analogique, numérique, binaire, à palettes, orbitale ou solaire : personnalisez votre heure avec date, fuseaux horaires et style personnel."
+  },
+  "Binär-, Orbit- und Sonnenuhr mit wählbarer Zusatzanzeige": {
+    "en": "Binary, orbit and sundial with optional time readout",
+    "es": "Reloj binario, orbital y solar con hora adicional opcional",
+    "fr": "Horloge binaire, orbitale et solaire avec affichage horaire facultatif"
   }
 }

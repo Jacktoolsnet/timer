@@ -3478,5 +3478,70 @@
     "en": "Green sundial for Berlin with the Sun at the edge, shadow, solar times and digital time inside the dial.",
     "es": "Reloj solar verde de Berlín con Sol en el borde, sombra, horas solares y hora digital dentro de la esfera.",
     "fr": "Cadran solaire vert pour Berlin avec Soleil au bord, ombre, heures solaires et heure numérique dans le cadran."
+  },
+  "Uhr entdecken: analog, digital, binär, Orbit oder Sonnenuhr. Mit Klappzahlen, wählbaren Zifferblättern, Zeitzonen, Screenshots und Einrichtungstipps.": {
+    "en": "Explore the clock: analog, digital, binary, orbit or sundial. With flip digits, dial designs, time zones, screenshots and setup tips.",
+    "es": "Descubre el reloj: analógico, digital, binario, orbital o solar. Con láminas, diseños de esfera, zonas horarias, capturas y consejos.",
+    "fr": "Découvrez l’horloge : analogique, numérique, binaire, orbitale ou solaire. Palettes, cadrans, fuseaux horaires, captures et conseils."
+  },
+  "Uhr erklärt: Binär, Orbit, Sonnenuhr & Zeitzonen": {
+    "en": "Clock guide: binary, orbit, sundial & time zones",
+    "es": "Guía del reloj: binario, orbital, solar y zonas horarias",
+    "fr": "Guide de l’horloge : binaire, orbitale, solaire et fuseaux"
+  },
+  "Analog, digital, mit Klappzahlen oder binär: Die Jacktools Uhr zeigt die Gerätezeit in deiner gewählten Zeitzone. Orbit- und Sonnenuhr lassen sich ohne zusätzliche Uhrzeit, mit Digitalanzeige oder mit Klappzahlen nutzen. Datum, Form und Stil stellst du passend zur Ansicht ein.": {
+    "en": "Analog, digital, flip or binary: the Jacktools clock shows device time in your chosen time zone. Use orbit and sundial views alone, with a digital readout or with flip digits. Set the date, shape and style to suit the view.",
+    "es": "Analógico, digital, de láminas o binario: el reloj Jacktools muestra la hora del dispositivo en la zona elegida. Usa el reloj orbital y solar solos, con hora digital o con láminas. Ajusta fecha, forma y estilo según la vista.",
+    "fr": "Analogique, numérique, à palettes ou binaire : l’horloge Jacktools affiche l’heure de l’appareil dans le fuseau choisi. Utilisez les vues orbitale et solaire seules, avec affichage numérique ou palettes. Réglez date, forme et style selon la vue."
+  },
+  "Wie lese ich die Binäruhr?": {
+    "en": "How do I read the binary clock?",
+    "es": "¿Cómo se lee el reloj binario?",
+    "fr": "Comment lire l’horloge binaire ?"
+  },
+  "Die Binäruhr verwendet BCD: Jede Spalte steht für eine einzelne Dezimalziffer von Stunden, Minuten oder Sekunden. Die Punkte haben von unten nach oben die Werte 1, 2, 4 und 8. Addiere die leuchtenden Punkte: 1 + 4 ergibt beispielsweise die Ziffer 5. Wähle Binär allein, Binär + Digital oder Binär + Klappzahlen. Ohne Sekunden bleiben vier statt sechs Spalten.": {
+    "en": "The binary clock uses BCD: each column represents one decimal digit of hours, minutes or seconds. Dots have values 1, 2, 4 and 8 from bottom to top. Add the lit dots: 1 + 4 gives the digit 5. Choose Binary alone, Binary + Digital or Binary + Flip clock. Without seconds there are four columns instead of six.",
+    "es": "El reloj binario usa BCD: cada columna representa un dígito decimal de horas, minutos o segundos. De abajo arriba, los puntos valen 1, 2, 4 y 8. Suma los puntos iluminados: 1 + 4 representa el dígito 5. Elige binario solo, con digital o con láminas. Sin segundos quedan cuatro columnas en lugar de seis.",
+    "fr": "L’horloge binaire utilise le BCD : chaque colonne représente un chiffre décimal des heures, minutes ou secondes. De bas en haut, les points valent 1, 2, 4 et 8. Additionnez les points allumés : 1 + 4 donne le chiffre 5. Choisissez binaire seul, avec affichage numérique ou palettes. Sans secondes, il reste quatre colonnes au lieu de six."
+  },
+  "Kann ich Orbit- und Sonnenuhr ohne Klappzahlen nutzen?": {
+    "en": "Can I use orbit and sundial views without flip digits?",
+    "es": "¿Puedo usar el reloj orbital y solar sin láminas?",
+    "fr": "Puis-je utiliser les vues orbitale et solaire sans palettes ?"
+  },
+  "Ja. Unter „Zusätzliche Uhrzeit“ wählst du für Orbit- und Sonnenuhr unabhängig zwischen keiner zusätzlichen Uhrzeit, Digitalanzeige und Klappzahlen. Datum und Kalender bleiben separat einstellbar. Bei der Sonnenuhr zeigt die Zusatzanzeige die Gerätezeit in der gewählten Zeitzone, nicht die wahre Sonnenzeit.": {
+    "en": "Yes. Under Additional time display, choose no extra time, a digital readout or flip digits independently for orbit and sundial views. Date and calendar settings stay separate. On the sundial, the extra display shows device time in the selected time zone, not apparent solar time.",
+    "es": "Sí. En Hora adicional, elige sin hora adicional, digital o láminas de forma independiente para el reloj orbital y solar. La fecha y el calendario se ajustan por separado. En el reloj solar, la hora adicional es la del dispositivo en la zona elegida, no la hora solar aparente.",
+    "fr": "Oui. Dans Affichage horaire supplémentaire, choisissez aucune heure supplémentaire, numérique ou palettes indépendamment pour les vues orbitale et solaire. Date et calendrier restent séparés. Sur le cadran solaire, l’affichage supplémentaire suit l’heure de l’appareil dans le fuseau choisi, pas l’heure solaire vraie."
+  },
+  "Bei Analog-, Orbit- und Sonnenuhr wählst du die Form Rund oder Eckig getrennt vom Stil Standard, Römisch, Minimalistisch oder Bahnhofsuhr. Diese Auswahlen erscheinen nur bei unterstützten Ansichten; bei Binär-, Digital- und reinen Klappzahlenansichten sind sie ausgeblendet.": {
+    "en": "For analog, orbit and sundial views, choose Round or Square separately from Standard, Roman, Minimal or Railway style. These controls only appear for supported views; they are hidden for binary, digital and standalone flip displays.",
+    "es": "En las vistas analógica, orbital y solar, elige la forma redonda o cuadrada por separado del estilo estándar, romano, minimalista o ferroviario. Estos controles solo aparecen en vistas compatibles; se ocultan en las vistas binaria, digital y de láminas solas.",
+    "fr": "Pour les vues analogique, orbitale et solaire, choisissez la forme ronde ou carrée séparément du style standard, romain, minimaliste ou gare. Ces commandes apparaissent uniquement pour les vues compatibles ; elles sont masquées pour les vues binaire, numérique et palettes seules."
+  },
+  "Die Jahressimulation ergänzt die berechnete Mondphase und helle Katalogsterne als weiße Leuchtpunkte ohne Verbindungslinien. Mit Standort richten sich sichtbare Sterne sowie Sonnen- und Mondposition nach Datum, Uhrzeit und Ort. Ohne Standort ist der Sternenhimmel ein beispielhafter Abendhimmel der gewählten Halbkugel. Das Panorama bleibt stilisiert: kein exakter Sternatlas, keine Wetter- oder Geländesimulation.": {
+    "en": "The seasonal simulation adds the calculated lunar phase and bright catalog stars as glowing white points without connecting lines. With location enabled, visible stars and Sun and Moon positions follow the date, time and place. Without location, the stars illustrate an evening sky for the selected hemisphere. The panorama remains stylized: not a precise star atlas or a weather or terrain simulation.",
+    "es": "La simulación anual añade la fase lunar calculada y estrellas brillantes del catálogo como puntos blancos luminosos sin líneas. Con ubicación, las estrellas visibles y las posiciones del Sol y la Luna siguen la fecha, la hora y el lugar. Sin ubicación, las estrellas ilustran un cielo del atardecer del hemisferio elegido. Es un panorama estilizado, no un atlas preciso ni una simulación del clima o del terreno.",
+    "fr": "La simulation annuelle ajoute la phase lunaire calculée et des étoiles brillantes du catalogue sous forme de points blancs lumineux sans lignes. Avec la localisation, les étoiles visibles et les positions du Soleil et de la Lune suivent la date, l’heure et le lieu. Sans localisation, les étoiles illustrent un ciel du soir de l’hémisphère choisi. Ce panorama reste stylisé : ni atlas précis ni simulation météo ou du relief."
+  },
+  "Die Binäruhr lesen und kombinieren": {
+    "en": "Read and combine the binary clock",
+    "es": "Leer y combinar el reloj binario",
+    "fr": "Lire et combiner l’horloge binaire"
+  },
+  "Leuchtende Punkte statt Ziffern": {
+    "en": "Glowing dots instead of digits",
+    "es": "Puntos luminosos en vez de dígitos",
+    "fr": "Des points lumineux plutôt que des chiffres"
+  },
+  "Binär mit Lesehilfe": {
+    "en": "Binary with a reading aid",
+    "es": "Binario con ayuda de lectura",
+    "fr": "Binaire avec aide à la lecture"
+  },
+  "Leuchtende BCD-Punkte zeigen jede Ziffer einzeln. Ergänze nach Wunsch Digitalzeit oder Klappzahlen.": {
+    "en": "Glowing BCD dots show each digit separately. Add digital time or flip digits if you wish.",
+    "es": "Los puntos BCD luminosos representan cada dígito. Añade hora digital o láminas si lo deseas.",
+    "fr": "Des points BCD lumineux représentent chaque chiffre. Ajoutez l’heure numérique ou des palettes au choix."
   }
 }

@@ -1,10 +1,10 @@
 import { test, expect } from '@playwright/test';
 
-for (const [lang, orbit, sundial] of [
- ['de', 'Orbit-Uhr', 'Sonnenuhr'],
- ['en', 'orbit', 'sundial'],
- ['es', 'orbital', 'solar'],
- ['fr', 'orbitale', 'solaire'],
+for (const [lang, orbit, sundial, binary] of [
+ ['de', 'Orbit-Uhr', 'Sonnenuhr', 'binär'],
+ ['en', 'orbit', 'sundial', 'binary'],
+ ['es', 'orbital', 'solar', 'binario'],
+ ['fr', 'orbitale', 'solaire', 'binaire'],
 ]) {
  test(`clock SEO includes new views in server-rendered ${lang} content`, async ({ request }) => {
   const response = await request.get(`/${lang}/`);
@@ -22,6 +22,9 @@ for (const [lang, orbit, sundial] of [
   expect(app.featureList.join(' ').toLowerCase()).toContain(orbit.toLowerCase());
   expect(html).toContain(`hreflang="${lang}"`);
   expect(html).toContain(`https://clock.jacktools.net/${lang}/`);
+  expect(description?.toLowerCase()).toContain(binary);
+  expect(app.featureList.join(' ').toLowerCase()).toContain(binary);
+  expect(html).toContain('BCD');
   expect(html).toContain('class="faq"');
  });
 }

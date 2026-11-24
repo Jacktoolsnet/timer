@@ -4,8 +4,8 @@
     "name": "Uhr",
     "tag": "UHRZEIT & DATUM",
     "title": "Deine Uhr. Dein Blick auf die Zeit.",
-    "description": "Online-Uhr entdecken: analog, digital, Klappzahlen, Orbit-Uhr und standortbasierte Sonnenuhr. Mit Screenshots, Zeitzonen und Tipps zur Einrichtung.",
-    "lead": "Eine große Uhr auf dem Schreibtisch, ein Datum im Unterricht oder die Zeit in einer anderen Stadt: Die Jacktools Uhr zeigt die aktuelle Gerätezeit in einer wählbaren Zeitzone. Du entscheidest, wie sie aussieht und welche Informationen du sehen möchtest.",
+    "description": "Uhr entdecken: analog, digital, binär, Orbit oder Sonnenuhr. Mit Klappzahlen, wählbaren Zifferblättern, Zeitzonen, Screenshots und Einrichtungstipps.",
+    "lead": "Analog, digital, mit Klappzahlen oder binär: Die Jacktools Uhr zeigt die Gerätezeit in deiner gewählten Zeitzone. Orbit- und Sonnenuhr lassen sich ohne zusätzliche Uhrzeit, mit Digitalanzeige oder mit Klappzahlen nutzen. Datum, Form und Stil stellst du passend zur Ansicht ein.",
     "url": "https://clock.jacktools.net/de/",
     "features": [
       {
@@ -23,6 +23,10 @@
       {
         "title": "Orbit & Sonnenzeit",
         "text": "Drei Umlaufbahnen zeigen die Zeit. Die Sonnenuhr ergänzt echten Sonnenstand, Schatten sowie Sonnenaufgang und Sonnenuntergang."
+      },
+      {
+        "title": "Binär mit Lesehilfe",
+        "text": "Leuchtende BCD-Punkte zeigen jede Ziffer einzeln. Ergänze nach Wunsch Digitalzeit oder Klappzahlen."
       }
     ],
     "sections": [
@@ -31,7 +35,7 @@
         "title": "Die passende Uhrenansicht wählen",
         "paragraphs": [
           "Die analoge Ansicht macht die Stellung der Zeiger sichtbar. Die digitale Ansicht ist praktisch, wenn du die Uhrzeit schnell und eindeutig lesen möchtest. Kombinierte Ansichten verbinden beide Darstellungen; Klappzahlen bieten eine weitere Gestaltungsmöglichkeit.",
-          "Für Datum und Zifferblatt gibt es eigene Einstellungen. Sekunden, Ziffern und weiche Zeigerbewegung lassen sich anpassen. Prüfe die Lesbarkeit aus der Entfernung, aus der du die Uhr später tatsächlich verwendest."
+          "Bei Analog-, Orbit- und Sonnenuhr wählst du die Form Rund oder Eckig getrennt vom Stil Standard, Römisch, Minimalistisch oder Bahnhofsuhr. Diese Auswahlen erscheinen nur bei unterstützten Ansichten; bei Binär-, Digital- und reinen Klappzahlenansichten sind sie ausgeblendet."
         ],
         "steps": [
           "Öffne die Uhr und wähle im Einstellungsbereich die gewünschte Darstellung.",
@@ -45,12 +49,23 @@
         "summary": "Zifferblatt, Ziffern und Datum"
       },
       {
+        "id": "binaeruhr",
+        "title": "Die Binäruhr lesen und kombinieren",
+        "paragraphs": [
+          "Die Binäruhr verwendet BCD: Jede Spalte steht für eine einzelne Dezimalziffer von Stunden, Minuten oder Sekunden. Die Punkte haben von unten nach oben die Werte 1, 2, 4 und 8. Addiere die leuchtenden Punkte: 1 + 4 ergibt beispielsweise die Ziffer 5. Wähle Binär allein, Binär + Digital oder Binär + Klappzahlen. Ohne Sekunden bleiben vier statt sechs Spalten."
+        ],
+        "steps": [],
+        "example": null,
+        "summary": "Leuchtende Punkte statt Ziffern"
+      },
+      {
         "id": "orbit-sonnenuhr",
         "title": "Orbit-Uhr und Sonnenuhr entdecken",
         "paragraphs": [
           "Bei der Orbit-Uhr stehen der innere Kreis für Stunden, der mittlere für Minuten und der äußere für Sekunden. Die Sekunden können springen oder fließen. Zifferblatt, runde oder eckige Form und römische Zahlen lassen sich ebenso wie das Farbschema anpassen.",
           "Die Sonnenuhr berechnet den Sonnenstand aus Datum, Gerätezeit und deinem freigegebenen Standort. Sie zeigt wahre Sonnenzeit, Sonnenhöhe und die Zeiten für Sonnenaufgang und Sonnenuntergang. Die Klappzahlen im Ziffernblatt zeigen dagegen die Uhrzeit der gewählten Zeitzone. Diese muss nicht mit der Sonnenzeit übereinstimmen.",
-          "Aktiviere für die Sonnenuhr „Standortbasierte Simulation“ und erlaube den Zugriff im Browser. Die Uhr speichert oder überträgt die Koordinaten nicht. Bei Nacht gibt es keinen Sonnenschatten; nahe dem Zenit ist er sehr kurz. Sehr kurze Schatten werden für die Lesbarkeit vergrößert, lange begrenzt. Die Screenshots zeigen simulierte Beispieldaten für Berlin, keine Live-Werte."
+          "Aktiviere für die Sonnenuhr „Standortbasierte Simulation“ und erlaube den Zugriff im Browser. Die Uhr speichert oder überträgt die Koordinaten nicht. Bei Nacht gibt es keinen Sonnenschatten; nahe dem Zenit ist er sehr kurz. Sehr kurze Schatten werden für die Lesbarkeit vergrößert, lange begrenzt. Die Screenshots zeigen simulierte Beispieldaten für Berlin, keine Live-Werte.",
+          "Ja. Unter „Zusätzliche Uhrzeit“ wählst du für Orbit- und Sonnenuhr unabhängig zwischen keiner zusätzlichen Uhrzeit, Digitalanzeige und Klappzahlen. Datum und Kalender bleiben separat einstellbar. Bei der Sonnenuhr zeigt die Zusatzanzeige die Gerätezeit in der gewählten Zeitzone, nicht die wahre Sonnenzeit."
         ],
         "steps": [],
         "example": null,
@@ -88,7 +103,8 @@
         "paragraphs": [
           "Statische Motive und animierte Hintergründe gestalten die Uhr als eigenständige Anzeige. Die Jahressimulation verbindet Tages- und Jahreszeiten mit einer illustrierten Landschaft. Ohne Standortmodus sind die Tagesphasen schematisch; die Darstellung ist keine verlässliche Sonnenaufgangstabelle.",
           "Der optionale Standortmodus fragt die Browser-Position ab. Er muss ausdrücklich eingeschaltet werden. Die Koordinaten bleiben nur für den aktuellen Besuch im Speicher und werden beim Neuladen verworfen. Für eine einfache Uhranzeige brauchst du diese Funktion nicht.",
-          "Design-Einstellungen lassen sich mit deiner Zustimmung lokal merken. Das optionale Wachhalten des Bildschirms hängt von Browser und Gerät ab und ist keine Garantie gegen manuelle Sperre oder Standby."
+          "Design-Einstellungen lassen sich mit deiner Zustimmung lokal merken. Das optionale Wachhalten des Bildschirms hängt von Browser und Gerät ab und ist keine Garantie gegen manuelle Sperre oder Standby.",
+          "Die Jahressimulation ergänzt die berechnete Mondphase und helle Katalogsterne als weiße Leuchtpunkte ohne Verbindungslinien. Mit Standort richten sich sichtbare Sterne sowie Sonnen- und Mondposition nach Datum, Uhrzeit und Ort. Ohne Standort ist der Sternenhimmel ein beispielhafter Abendhimmel der gewählten Halbkugel. Das Panorama bleibt stilisiert: kein exakter Sternatlas, keine Wetter- oder Geländesimulation."
         ],
         "steps": [],
         "example": null,
@@ -111,10 +127,18 @@
       {
         "question": "Warum bleibt der Bildschirm nicht immer an?",
         "answer": "Die Wachhaltefunktion benötigt Browser-Unterstützung und eine sichere Verbindung. Geräteeinstellungen und Energiesparregeln können sie ablehnen oder beenden."
+      },
+      {
+        "question": "Wie lese ich die Binäruhr?",
+        "answer": "Die Binäruhr verwendet BCD: Jede Spalte steht für eine einzelne Dezimalziffer von Stunden, Minuten oder Sekunden. Die Punkte haben von unten nach oben die Werte 1, 2, 4 und 8. Addiere die leuchtenden Punkte: 1 + 4 ergibt beispielsweise die Ziffer 5. Wähle Binär allein, Binär + Digital oder Binär + Klappzahlen. Ohne Sekunden bleiben vier statt sechs Spalten."
+      },
+      {
+        "question": "Kann ich Orbit- und Sonnenuhr ohne Klappzahlen nutzen?",
+        "answer": "Ja. Unter „Zusätzliche Uhrzeit“ wählst du für Orbit- und Sonnenuhr unabhängig zwischen keiner zusätzlichen Uhrzeit, Digitalanzeige und Klappzahlen. Datum und Kalender bleiben separat einstellbar. Bei der Sonnenuhr zeigt die Zusatzanzeige die Gerätezeit in der gewählten Zeitzone, nicht die wahre Sonnenzeit."
       }
     ],
     "end": "Wähle zuerst eine gut lesbare Ansicht und die richtige Zeitzone. Datum, Hintergründe und Wecker kannst du danach nach Bedarf ergänzen.",
-    "seoTitle": "Online-Uhr: Ansichten, Zeitzonen & Wecker erklärt"
+    "seoTitle": "Uhr erklärt: Binär, Orbit, Sonnenuhr & Zeitzonen"
   },
   {
     "slug": "stopwatch",
