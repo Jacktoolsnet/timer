@@ -14,6 +14,7 @@ export function locationSky(now: Date, location: SeasonalLocation) {
     x: 800 - Math.sin(body.azimuth * Math.PI / 180) * 600,
     y: 620 - Math.sin(Math.max(0, body.altitude) * Math.PI / 180) * 430,
   });
-  return { phase, hour, sun: point(sun), moon: point(moon), sunVisible: sun.altitude > -.833,
-    moonVisible: sun.altitude < 0 && moon.altitude > 0 };
+  return { phase, hour, sun: point(sun), // Reserve sky above the decorative hills; this is not a terrain horizon model.
+    moon: {...point(moon),y:500-Math.sin(Math.max(0,moon.altitude)*Math.PI/180)*350}, sunVisible: sun.altitude > -.833,
+    moonVisible: moon.altitude > 0 };
 }

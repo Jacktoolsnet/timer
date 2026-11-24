@@ -1,3 +1,4 @@
+import {moonLight,moonPhasePath} from '../lib/moon';
 import { seasonalState, mixColor } from '../lib/seasonal-background';
 import { locationSky, type SeasonalLocation } from '../lib/seasonal-location';
 
@@ -49,6 +50,11 @@ export function createSeasonalBackground(root: SVGSVGElement) {
       const p = sky[body]; find(body).setAttribute('transform', `translate(${p.x.toFixed(2)} ${p.y.toFixed(2)})`);
       find(body).style.opacity = String(body === 'sun' ? Number(sky.sunVisible) : Number('moonVisible' in sky ? sky.moonVisible : !sky.sunVisible));
     }
+    const lunar=moonLight(date,location);
+    find('moon-light').setAttribute('d',moonPhasePath(lunar.fraction));
+    find('moon-light').setAttribute('transform',`rotate(${lunar.rotation.toFixed(2)})`);
+    root.dataset.moonFraction=String(lunar.fraction);
+    root.dataset.moonPhase=String(lunar.phase);
     root.dataset.phase = sky.phase;
     root.dataset.locationBased = String(!!location);
     root.dataset.season = ['winter', 'spring', 'summer', 'autumn'][Math.floor((s.cycle + .5) % 4)];
