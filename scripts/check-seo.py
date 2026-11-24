@@ -11,7 +11,7 @@ import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
 PROJECTS = ['metronome', 'company', 'timer', 'clock', 'stopwatch', 'breathe', 'relax', 'lava']
-EXPECTED_PAGES = {'metronome':8,'company':52,'timer':16,'clock':8,'stopwatch':8,'breathe':8,'relax':8,'lava':8}
+EXPECTED_PAGES = {'metronome':8,'company':56,'timer':16,'clock':8,'stopwatch':8,'breathe':8,'relax':8,'lava':8}
 if sys.argv[1:]:
     assert all(project in PROJECTS for project in sys.argv[1:]), 'Unknown project'
     PROJECTS = list(dict.fromkeys(sys.argv[1:]))

@@ -5,7 +5,7 @@
     "lead": "Aus einer kleinen Sonne im Zentrum der Orbit-Uhr wurde eine neue Idee: Warum nicht auch den echten Sonnenstand zeigen? Unsere Uhr hat jetzt zwei weitere Ansichten – eine spielerische Orbit-Uhr und eine standortbasierte Sonnenuhr.",
     "category": "Tools & Entwicklung",
     "byline": "Ein Blick hinter die Uhr",
-    "coverCaption": "Die Sonnenuhr mit simuliertem Standort Berlin am 21. Juni 2026. Aufnahme mit Beispielzeit, keine Live-Anzeige.",
+    "coverCaption": "Schematische Draufsicht einer Sonnenuhr: Sonne und Schatten liegen vom senkrechten Stab aus in entgegengesetzten Richtungen. Eigene SVG-Grafik, nicht maßstäblich und keine Live-Anzeige.",
     "sections": [
       [
         "sun",
@@ -34,9 +34,19 @@
         "Die Inspiration für diese Ansicht kommt aus unserem Sound-Tool, das wir gerade entwickeln. Die Idee der kreisenden Elemente haben wir auf die Zeit übertragen: Statt Zeigern bewegen sich kleine Punkte auf ihren Bahnen. So lässt sich der Verlauf der Zeit als Bewegung rund um ein gemeinsames Zentrum beobachten. Anders als bei der Sonnenuhr sind diese Umlaufbahnen eine gestalterische Darstellung der Uhrzeit, keine Berechnung astronomischer Planetenbahnen."
       ]
     ],
-    "orbitCaption": "Die Orbit-Uhr in Violett: drei Umlaufbahnen und eine leuchtende Mitte.",
+    "orbitCaption": "Drei Umlaufbahnen für Stunden, Minuten und Sekunden mit einer leuchtenden Mitte. Eigene schematische SVG-Grafik der Orbit-Uhr, keine Live-Anzeige.",
     "action": "Uhr ausprobieren",
-    "guide": "Anleitung und weitere Screenshots"
+    "guide": "Anleitung und weitere Screenshots",
+    "sunDiagramLabels": [
+      "Sonne",
+      "Schatten",
+      "Senkrechter Stab"
+    ],
+    "orbitDiagramLabels": [
+      "Stunden",
+      "Minuten",
+      "Sekunden"
+    ]
   },
   "en": {
     "title": "The clock gains orbits – and a real Sun position",
@@ -44,7 +54,7 @@
     "lead": "A small Sun at the centre of the orbit clock sparked another idea: why not show the real Sun position too? Our clock now has two more views: a playful orbit clock and a location-based sundial.",
     "category": "Tools & development",
     "byline": "Behind the clock",
-    "coverCaption": "The sundial with a simulated Berlin location on 21 June 2026. Recorded with an example time, not a live display.",
+    "coverCaption": "Schematic top view of a sundial: the Sun and shadow lie in opposite directions from the vertical pin. Original SVG, not to scale or a live display.",
     "sections": [
       [
         "sun",
@@ -73,9 +83,19 @@
         "This view was inspired by our sound tool, which is currently in development. We brought the idea of orbiting elements to the clock: instead of hands, small dots move along their rings. This makes the passage of time visible as motion around a shared centre. Unlike the sundial, these orbits are a visual representation of clock time, not a calculation of astronomical planetary orbits."
       ]
     ],
-    "orbitCaption": "The orbit clock in violet: three orbital rings and a glowing centre.",
+    "orbitCaption": "Three orbital rings for hours, minutes and seconds around a glowing centre. Original schematic SVG of the orbit clock, not a live display.",
     "action": "Try the clock",
-    "guide": "Instructions and more screenshots"
+    "guide": "Instructions and more screenshots",
+    "sunDiagramLabels": [
+      "Sun",
+      "Shadow",
+      "Vertical pin"
+    ],
+    "orbitDiagramLabels": [
+      "Hours",
+      "Minutes",
+      "Seconds"
+    ]
   },
   "es": {
     "title": "El reloj estrena órbitas y la posición real del Sol",
@@ -83,7 +103,7 @@
     "lead": "Una pequeña estrella en el centro del reloj orbital inspiró otra idea: ¿por qué no mostrar también la posición real del Sol? El reloj incorpora dos vistas: un reloj orbital y un reloj solar según tu ubicación.",
     "category": "Herramientas y desarrollo",
     "byline": "Dentro del reloj",
-    "coverCaption": "Reloj solar con ubicación simulada en Berlín el 21 de junio de 2026. Hora de ejemplo, no una vista en directo.",
+    "coverCaption": "Vista superior esquemática de un reloj solar: el Sol y la sombra están en direcciones opuestas desde la varilla vertical. SVG original, sin escala ni datos en directo.",
     "sections": [
       [
         "sun",
@@ -112,9 +132,19 @@
         "Esta vista se inspira en nuestra herramienta de sonido, que estamos desarrollando. Trasladamos la idea de elementos en órbita al reloj: en lugar de agujas, pequeños puntos recorren sus círculos. Así, el paso del tiempo se observa como movimiento alrededor de un centro común. A diferencia del reloj solar, estas órbitas son una representación visual de la hora, no un cálculo de órbitas planetarias astronómicas."
       ]
     ],
-    "orbitCaption": "Reloj orbital violeta: tres órbitas y un centro luminoso.",
+    "orbitCaption": "Tres órbitas para horas, minutos y segundos alrededor de un centro luminoso. SVG esquemático original del reloj orbital, no una vista en directo.",
     "action": "Probar el reloj",
-    "guide": "Instrucciones y más capturas"
+    "guide": "Instrucciones y más capturas",
+    "sunDiagramLabels": [
+      "Sol",
+      "Sombra",
+      "Varilla vertical"
+    ],
+    "orbitDiagramLabels": [
+      "Horas",
+      "Minutos",
+      "Segundos"
+    ]
   },
   "fr": {
     "title": "L’horloge gagne des orbites et la position réelle du Soleil",
@@ -122,7 +152,7 @@
     "lead": "Un petit Soleil au centre de l’horloge orbitale a inspiré une autre idée : pourquoi ne pas afficher la position réelle du Soleil ? Notre horloge propose deux vues supplémentaires : une horloge orbitale et un cadran solaire selon votre position.",
     "category": "Outils et développement",
     "byline": "Dans les coulisses de l’horloge",
-    "coverCaption": "Cadran solaire avec position simulée à Berlin le 21 juin 2026. Heure d’exemple, pas un affichage en direct.",
+    "coverCaption": "Vue de dessus schématique d’un cadran solaire : le Soleil et l’ombre sont dans des directions opposées depuis la tige verticale. SVG original, ni à l’échelle ni en direct.",
     "sections": [
       [
         "sun",
@@ -151,8 +181,18 @@
         "Cette vue s’inspire de notre outil sonore, actuellement en développement. Nous avons transposé l’idée des éléments en orbite à l’horloge : de petits points parcourent leurs cercles à la place des aiguilles. Le passage du temps devient ainsi un mouvement autour d’un centre commun. Contrairement au cadran solaire, ces orbites sont une représentation graphique de l’heure, pas un calcul d’orbites planétaires astronomiques."
       ]
     ],
-    "orbitCaption": "L’horloge orbitale violette : trois orbites et un centre lumineux.",
+    "orbitCaption": "Trois orbites pour les heures, minutes et secondes autour d’un centre lumineux. SVG schématique original de l’horloge orbitale, pas un affichage en direct.",
     "action": "Essayer l’horloge",
-    "guide": "Guide et autres captures"
+    "guide": "Guide et autres captures",
+    "sunDiagramLabels": [
+      "Soleil",
+      "Ombre",
+      "Tige verticale"
+    ],
+    "orbitDiagramLabels": [
+      "Heures",
+      "Minutes",
+      "Secondes"
+    ]
   }
 }

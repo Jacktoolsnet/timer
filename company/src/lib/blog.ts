@@ -1,12 +1,13 @@
+import binaryCopy from './binary-blog.json' with { type: 'json' };
 import clockCopy from './clock-blog.json' with { type: 'json' };
 import localized from './blog-localized.json' with { type: 'json' };
 import {languages,type Language} from './i18n';
-export type BlogKey='nulltopic'|'surface'|'clock';
-export const blogSlugs:Record<Language,Record<BlogKey,string>>={de:{clock:'uhr-orbit-sonnenuhr',nulltopic:'nulltopic-ki-agenten',surface:'surface-book-arch-linux-open-webui'},en:{clock:'clock-orbit-sundial',nulltopic:'nulltopic-ai-agents',surface:'surface-book-arch-linux-open-webui'},es:{clock:'reloj-orbital-solar',nulltopic:'nulltopic-agentes-ia',surface:'surface-book-arch-linux-open-webui'},fr:{clock:'horloge-orbitale-solaire',nulltopic:'nulltopic-agents-ia',surface:'surface-book-arch-linux-open-webui'}};
+export type BlogKey='nulltopic'|'surface'|'clock'|'binary';
+export const blogSlugs:Record<Language,Record<BlogKey,string>>={de:{binary:'binaeruhr-zeit-in-punkten',clock:'uhr-orbit-sonnenuhr',nulltopic:'nulltopic-ki-agenten',surface:'surface-book-arch-linux-open-webui'},en:{binary:'binary-clock-time-in-dots',clock:'clock-orbit-sundial',nulltopic:'nulltopic-ai-agents',surface:'surface-book-arch-linux-open-webui'},es:{binary:'reloj-binario-hora-en-puntos',clock:'reloj-orbital-solar',nulltopic:'nulltopic-agentes-ia',surface:'surface-book-arch-linux-open-webui'},fr:{binary:'horloge-binaire-heure-en-points',clock:'horloge-orbitale-solaire',nulltopic:'nulltopic-agents-ia',surface:'surface-book-arch-linux-open-webui'}};
 export function getBlogPath(lang:Language,key:BlogKey|'index'='index'){return `/${lang}/blog/${key==='index'?'':blogSlugs[lang][key]+'/'}`;}
 export interface BlogPost {
  lang:Language; key:BlogKey; path:string; title:string; description:string; excerpt:string; category:string; image:string;
- art:'conversation'|'roles'|'surface'|'clock'; lead:string; coverCaption:string; byline:string;
+ art:'conversation'|'roles'|'surface'|'clock'|'binary'; lead:string; coverCaption:string; byline:string;
 }
 export const nullTopicPost:BlogPost = {
  lang:'de', key:'nulltopic', path:'/de/blog/nulltopic-ki-agenten/',
@@ -34,13 +35,18 @@ export const surfaceBookPost:BlogPost = {
 };
 export function clockPost(lang:Language):BlogPost {
  const c=clockCopy[lang];
- return {lang,key:'clock',path:getBlogPath(lang,'clock'),title:c.title,description:c.description,excerpt:c.lead,category:c.category,image:'/images/galleries/clock/10.png',art:'clock',lead:c.lead,coverCaption:c.coverCaption,byline:c.byline};
+ return {lang,key:'clock',path:getBlogPath(lang,'clock'),title:c.title,description:c.description,excerpt:c.lead,category:c.category,image:`/images/blog/clock/sundial-${lang}.svg`,art:'clock',lead:c.lead,coverCaption:c.coverCaption,byline:c.byline};
 }
-export const blogPosts=[clockPost('de'),surfaceBookPost,nullTopicPost];
+export function binaryPost(lang:Language):BlogPost {
+ const c=binaryCopy[lang];
+ return {lang,key:'binary',path:getBlogPath(lang,'binary'),title:c.title,description:c.description,excerpt:c.lead,category:c.category,image:`/images/blog/binary/read-${lang}.svg`,art:'binary',lead:c.lead,coverCaption:c.coverCaption,byline:c.byline};
+}
+export const blogPosts=[binaryPost('de'),clockPost('de'),surfaceBookPost,nullTopicPost];
 export function getBlogPost(lang:Language,key:BlogKey):BlogPost{
+ if(key==='binary')return binaryPost(lang);
  if(key==='clock')return clockPost(lang);
  const base=key==='surface'?surfaceBookPost:nullTopicPost;
  return lang==='de'?base:{...base,...localized[lang][key],lang,image:base.image.replace('.svg',`-${lang}.svg`),path:getBlogPath(lang,key)};
 }
-export const getBlogPosts=(lang:Language)=>[getBlogPost(lang,'clock'),getBlogPost(lang,'surface'),getBlogPost(lang,'nulltopic')];
+export const getBlogPosts=(lang:Language)=>[getBlogPost(lang,'binary'),getBlogPost(lang,'clock'),getBlogPost(lang,'surface'),getBlogPost(lang,'nulltopic')];
 export const blogPaths=languages.flatMap(lang=>[getBlogPath(lang),...getBlogPosts(lang).map(post=>post.path)]);

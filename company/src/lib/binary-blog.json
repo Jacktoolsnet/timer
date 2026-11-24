@@ -1,0 +1,178 @@
+{
+  "de": {
+    "title": "Zeit in Punkten – die neue Binäruhr",
+    "description": "Die Jacktools Binäruhr erklärt: So liest du leuchtende BCD-Punkte als Uhrzeit. Mit eigenen SVG-Grafiken und drei Ansichten: pur, digital oder mit Klappzahlen.",
+    "lead": "Eine Uhr muss nicht immer Zeiger oder Ziffern haben. Unsere neue Binäruhr zeigt die Zeit als leuchtende Punkte – und lässt sich mit Digitalzeit oder Klappzahlen kombinieren. Ein kleines Zahlenspiel für den Alltag.",
+    "category": "Tools & Entwicklung",
+    "byline": "Neues aus der Jacktools Uhr",
+    "coverCaption": "So sieht 14:25:36 als BCD-Muster aus. Eigene schematische SVG-Grafik mit fester Beispielzeit, keine Live-Uhr und kein Screenshot.",
+    "sections": [
+      [
+        "digits",
+        "Jede Ziffer bekommt ihre eigene Spalte",
+        "Unsere Binäruhr nutzt BCD, kurz für Binary Coded Decimal. Dabei wird nicht die gesamte Stundenzahl in eine Binärzahl verwandelt: Jede einzelne Dezimalziffer erhält eine eigene Spalte. Zwei Spalten gehören zu den Stunden, zwei zu den Minuten und zwei zu den Sekunden."
+      ],
+      [
+        "read",
+        "Einfach die leuchtenden Punkte addieren",
+        "Von unten nach oben haben die vier Punkte die Werte 1, 2, 4 und 8. Nur die leuchtenden Punkte zählen. Leuchten 4 und 1, ergibt das die Ziffer 5; 4 und 2 ergeben 6. In der Grafik lassen sich so die sechs Ziffern 1, 4, 2, 5, 3 und 6 ablesen: 14:25:36. Eine dunkle Spalte steht für 0."
+      ],
+      [
+        "views",
+        "Pur oder mit kleiner Lesehilfe",
+        "Unter „Darstellung“ kannst du Binär, Binär + Digital oder Binär + Klappzahlen wählen. Die zusätzliche Uhrzeit erscheint direkt unter den Punkten. Das ist zum Kennenlernen praktisch: Erst das Muster entschlüsseln, dann mit den Ziffern vergleichen. Später kannst du die Lesehilfe einfach weglassen."
+      ],
+      [
+        "style",
+        "Deine Zeit, dein Farbschema",
+        "Die aktiven Punkte leuchten im gewählten Farbschema. Ohne Sekunden bleiben vier statt sechs Spalten; die Werte am Rand lassen sich über „Ziffern anzeigen“ ausblenden. Die gewählte Zeitzone und das 12-/24-Stundenformat gelten auch hier. In der Fokusansicht im Smartphone-Querformat steht die Binäruhr links und der Kalender rechts. Wie die anderen Zeitansichten nutzt sie die Gerätezeit."
+      ]
+    ],
+    "diagramLabels": [
+      "Stunden",
+      "Minuten",
+      "Sekunden"
+    ],
+    "modeLabels": [
+      "Binär",
+      "Binär + Digital",
+      "Binär + Klappzahlen"
+    ],
+    "variantsCaption": "Drei Ansichten, dasselbe BCD-Muster: pur, mit Digitalzeit oder mit Klappzahlen. Eigene schematische SVG-Grafik.",
+    "action": "Binäruhr ausprobieren",
+    "guide": "Zur Anleitung",
+    "related": "Mehr zur Orbit- und Sonnenuhr"
+  },
+  "en": {
+    "title": "Time in dots – the new binary clock",
+    "description": "The Jacktools binary clock explained: read glowing BCD dots as time. With original SVG diagrams and three views: binary only, digital or flip digits.",
+    "lead": "A clock does not always need hands or digits. Our new binary clock shows time as glowing dots, with an optional digital or flip display. A little number puzzle for everyday life.",
+    "category": "Tools & development",
+    "byline": "New in the Jacktools clock",
+    "coverCaption": "14:25:36 as a BCD pattern. Original schematic SVG with a fixed example time, not a live clock or screenshot.",
+    "sections": [
+      [
+        "digits",
+        "A column for each digit",
+        "Our binary clock uses BCD, short for Binary Coded Decimal. Rather than converting the entire hour value into one binary number, each decimal digit gets its own column. Two columns belong to hours, two to minutes and two to seconds."
+      ],
+      [
+        "read",
+        "Just add the glowing dots",
+        "From bottom to top, the four dots have values 1, 2, 4 and 8. Only glowing dots count. If 4 and 1 light up, the digit is 5; 4 and 2 make 6. The diagram therefore reads 1, 4, 2, 5, 3 and 6: 14:25:36. An unlit column means 0."
+      ],
+      [
+        "views",
+        "On its own or with a reading aid",
+        "Under Appearance, choose Binary, Binary + Digital or Binary + Flip clock. The extra time display sits directly below the dots. It is a useful way to learn: decode the pattern first, then compare it with the digits. Later, simply leave out the reading aid."
+      ],
+      [
+        "style",
+        "Your time, your colour scheme",
+        "Active dots glow in your selected colour scheme. Without seconds there are four columns instead of six; hide the weights at the side with Show numerals. Your selected time zone and 12-/24-hour format apply here too. In phone landscape focus view, the binary clock sits on the left and the calendar on the right. Like the other time views, it uses your device time."
+      ]
+    ],
+    "diagramLabels": [
+      "Hours",
+      "Minutes",
+      "Seconds"
+    ],
+    "modeLabels": [
+      "Binary",
+      "Binary + Digital",
+      "Binary + Flip clock"
+    ],
+    "variantsCaption": "Three views, the same BCD pattern: on its own, with digital time or with flip digits. Original schematic SVG.",
+    "action": "Try the binary clock",
+    "guide": "Read the guide",
+    "related": "More about the orbit clock and sundial"
+  },
+  "es": {
+    "title": "La hora en puntos: el nuevo reloj binario",
+    "description": "Aprende a leer los puntos BCD del reloj binario Jacktools. Con gráficos SVG originales y tres vistas: binario solo, con hora digital o con láminas.",
+    "lead": "Un reloj no siempre necesita agujas o dígitos. Nuestro nuevo reloj binario muestra la hora con puntos luminosos y puede combinarse con hora digital o láminas. Un pequeño juego de números para el día a día.",
+    "category": "Herramientas y desarrollo",
+    "byline": "Novedades del reloj Jacktools",
+    "coverCaption": "14:25:36 como patrón BCD. Gráfico SVG esquemático original con una hora fija de ejemplo; no es un reloj en directo ni una captura.",
+    "sections": [
+      [
+        "digits",
+        "Una columna para cada dígito",
+        "El reloj utiliza BCD, abreviatura de Binary Coded Decimal. No convierte el valor completo de las horas en un solo número binario: cada dígito decimal tiene su propia columna. Dos columnas corresponden a las horas, dos a los minutos y dos a los segundos."
+      ],
+      [
+        "read",
+        "Suma los puntos luminosos",
+        "De abajo arriba, los cuatro puntos valen 1, 2, 4 y 8. Solo cuentan los iluminados. Si se encienden 4 y 1, el dígito es 5; 4 y 2 forman 6. Así se leen los seis dígitos del gráfico: 1, 4, 2, 5, 3 y 6, es decir, 14:25:36. Una columna apagada representa 0."
+      ],
+      [
+        "views",
+        "Solo o con ayuda de lectura",
+        "En Apariencia puedes elegir Binario, Binario + Digital o Binario + Láminas. La hora adicional aparece justo debajo de los puntos. Resulta práctico para aprender: descifra primero el patrón y compáralo después con los dígitos. Más adelante puedes prescindir de la ayuda."
+      ],
+      [
+        "style",
+        "Tu hora y tus colores",
+        "Los puntos activos brillan con el esquema de colores elegido. Sin segundos quedan cuatro columnas en lugar de seis; Mostrar números permite ocultar los valores laterales. También se aplican la zona horaria y el formato de 12 o 24 horas elegidos. En el modo de enfoque horizontal del móvil, el reloj binario queda a la izquierda y el calendario a la derecha. Como las demás vistas horarias, utiliza la hora del dispositivo."
+      ]
+    ],
+    "diagramLabels": [
+      "Horas",
+      "Minutos",
+      "Segundos"
+    ],
+    "modeLabels": [
+      "Binario",
+      "Binario + Digital",
+      "Binario + Láminas"
+    ],
+    "variantsCaption": "Tres vistas con el mismo patrón BCD: solo, con hora digital o con láminas. Gráfico SVG esquemático original.",
+    "action": "Probar el reloj binario",
+    "guide": "Leer la guía",
+    "related": "Más sobre el reloj orbital y solar"
+  },
+  "fr": {
+    "title": "L’heure en points : la nouvelle horloge binaire",
+    "description": "Apprenez à lire les points BCD de l’horloge binaire Jacktools. Schémas SVG originaux et trois vues : binaire seul, avec heure numérique ou palettes.",
+    "lead": "Une horloge n’a pas toujours besoin d’aiguilles ou de chiffres. Notre nouvelle horloge binaire affiche l’heure avec des points lumineux et peut ajouter un affichage numérique ou à palettes. Un petit jeu de nombres au quotidien.",
+    "category": "Outils et développement",
+    "byline": "Nouveautés de l’horloge Jacktools",
+    "coverCaption": "14:25:36 sous forme de motif BCD. Schéma SVG original avec une heure fixe d’exemple, ni horloge en direct ni capture d’écran.",
+    "sections": [
+      [
+        "digits",
+        "Une colonne pour chaque chiffre",
+        "L’horloge utilise le BCD, abréviation de Binary Coded Decimal. Au lieu de convertir la valeur entière des heures en un nombre binaire, chaque chiffre décimal possède sa propre colonne. Deux colonnes représentent les heures, deux les minutes et deux les secondes."
+      ],
+      [
+        "read",
+        "Additionnez les points lumineux",
+        "De bas en haut, les quatre points valent 1, 2, 4 et 8. Seuls les points allumés comptent. Si 4 et 1 sont allumés, le chiffre est 5 ; 4 et 2 donnent 6. Le schéma se lit donc 1, 4, 2, 5, 3 et 6, soit 14:25:36. Une colonne éteinte représente 0."
+      ],
+      [
+        "views",
+        "Seule ou avec une aide à la lecture",
+        "Dans Apparence, choisissez Binaire, Binaire + Numérique ou Binaire + Palettes. L’heure supplémentaire apparaît juste sous les points. Pour apprendre, déchiffrez d’abord le motif, puis comparez avec les chiffres. Vous pourrez ensuite retirer cette aide."
+      ],
+      [
+        "style",
+        "Votre heure et vos couleurs",
+        "Les points actifs brillent dans la palette choisie. Sans secondes, il reste quatre colonnes au lieu de six ; Afficher les chiffres permet de masquer les valeurs sur le côté. Le fuseau choisi et le format de 12 ou 24 heures s’appliquent aussi. Dans la vue concentration horizontale du téléphone, l’horloge binaire est à gauche et le calendrier à droite. Comme les autres vues horaires, elle utilise l’heure de l’appareil."
+      ]
+    ],
+    "diagramLabels": [
+      "Heures",
+      "Minutes",
+      "Secondes"
+    ],
+    "modeLabels": [
+      "Binaire",
+      "Binaire + Numérique",
+      "Binaire + Palettes"
+    ],
+    "variantsCaption": "Trois vues, le même motif BCD : seul, avec heure numérique ou palettes. Schéma SVG original.",
+    "action": "Essayer l’horloge binaire",
+    "guide": "Lire le guide",
+    "related": "En savoir plus sur l’horloge orbitale et solaire"
+  }
+}

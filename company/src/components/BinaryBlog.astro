@@ -1,0 +1,16 @@
+---
+import BlogArticle from './BlogArticle.astro';
+import {getBlogPost,getBlogPath} from '../lib/blog';
+import copy from '../lib/binary-blog.json';
+import type {Language} from '../lib/i18n';
+const {lang}=Astro.props as {lang:Language};
+const c=copy[lang],post=getBlogPost(lang,'binary');
+---
+<BlogArticle post={post} chapters={c.sections.map(([id,title])=>[id,title])}>
+ {c.sections.map(([id,title,text])=><section id={id}>
+  <h2>{title}</h2><p>{text}</p>
+  {id==='views'&&<figure class="article-diagram"><img src={`/images/blog/binary/views-${lang}.svg`} alt={c.variantsCaption} width="1000" height="440" loading="lazy" style="display:block;width:100%;height:auto"/><figcaption>{c.variantsCaption}</figcaption></figure>}
+ </section>)}
+ <p><a href={`https://clock.jacktools.net/${lang}/`}>{c.action} ↗</a> · <a href={`/${lang}/tools/clock/`}>{c.guide}</a></p>
+ <p><a href={getBlogPath(lang,'clock')}>{c.related}</a></p>
+</BlogArticle>

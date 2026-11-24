@@ -24,7 +24,7 @@ class Metadata(HTMLParser):
         if tag == 'meta' and a.get('name') == 'robots':
             self.noindex = 'noindex' in a.get('content', '')
 
-projects = [('metronome', 'metronome.jacktools.net', 8), ('timer', 'timer.jacktools.net', 16), ('clock', 'clock.jacktools.net', 8), ('stopwatch', 'stopwatch.jacktools.net', 8), ('calculator', 'calculator.jacktools.net', 8), ('company', 'jacktools.net', 52), ('breathe', 'breathe.jacktools.net', 8), ('relax', 'relax.jacktools.net', 8), ('lava', 'lava.jacktools.net', 8), ('scenescript', 'scenescript.jacktools.net', 12)]
+projects = [('metronome', 'metronome.jacktools.net', 8), ('timer', 'timer.jacktools.net', 16), ('clock', 'clock.jacktools.net', 8), ('stopwatch', 'stopwatch.jacktools.net', 8), ('calculator', 'calculator.jacktools.net', 8), ('company', 'jacktools.net', 56), ('breathe', 'breathe.jacktools.net', 8), ('relax', 'relax.jacktools.net', 8), ('lava', 'lava.jacktools.net', 8), ('scenescript', 'scenescript.jacktools.net', 12)]
 if sys.argv[1:]:
     assert set(sys.argv[1:]) <= {project for project, _, _ in projects}, 'Unknown project'
     projects = [entry for entry in projects if entry[0] in sys.argv[1:]]

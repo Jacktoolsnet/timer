@@ -23,7 +23,7 @@ const rawSpotlights = [
  {id:'calculator',name:'Taschenrechner',title:'Jeder Rechenschritt bleibt nachvollziehbar.',lead:'Rechne mit einem editierbaren Rechenstreifen: Prozentwerte, Aufschläge und Steuern lassen sich Schritt für Schritt verfolgen, ändern und als Datei sichern.',url:'https://calculator.jacktools.net/de/',action:'Direkt zum Taschenrechner',caption:'Rechnen mit Überblick',value:'144,00',note:'Deine Zahlen. Dein Rechenweg.'},
  {id:'metronome',name:'Metronom',title:'Finde deinen Rhythmus.',lead:'Übe mit 20–300 BPM, Tap Tempo und eigenen Akzenten. Vier klare Animationen und ein Lückenmodus helfen dir, deinen Rhythmus zu finden und zu halten.',url:'https://metronome.jacktools.net/de/',action:'Direkt zum Metronom',caption:'Dein Rhythmus. Dein Tempo.',value:'90',note:'Höre den Schlag. Sieh den ganzen Takt.'},
 ];
-const blogPost=getBlogPost(lang,'clock');
+const blogPost=getBlogPost(lang,'binary');
 const blogText=blogUi[lang];
 const spotlights = rawSpotlights.map(tool => ({...tool,name:t(tool.name),title:t(tool.title),lead:t(tool.lead),action:t(tool.action),caption:t(tool.caption),note:t(tool.note),url:localizedToolUrl(tool.url,lang)}));
 ---

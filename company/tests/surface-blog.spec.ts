@@ -13,8 +13,8 @@ test('second article is discoverable and both series links work',async({page})=>
  await page.locator('.article-series a').click();
  await expect(page).toHaveURL(new RegExp(post.path+'$'));
  await page.goto('/de/blog/');
- await expect(page.locator('.blog-post-card')).toHaveCount(3);
- await expect(page.locator('.blog-post-card').nth(1)).toHaveAttribute('href',post.path);
+ await expect(page.locator('.blog-post-card')).toHaveCount(4);
+ await expect(page.locator('.blog-post-card').nth(2)).toHaveAttribute('href',post.path);
 });
 test('personal facts, missing agents, bounded examples and accessible code blocks are present',async({page})=>{
  const errors:string[]=[];page.on('pageerror',err=>errors.push(err.message));

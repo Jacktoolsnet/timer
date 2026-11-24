@@ -10,7 +10,7 @@ const post=getBlogPost(lang,'clock');
 <BlogArticle post={post} chapters={c.sections.map(([id,title])=>[id,title])}>
  {c.sections.map(([id,title,...paragraphs])=><section id={id}>
   <h2>{title}</h2>{paragraphs.map(text=><p>{text}</p>)}
-  {id==='orbit'&&<figure class="article-diagram"><img src="/images/galleries/clock/9.png" alt={c.orbitCaption} width="1000" height="720" loading="lazy" style="display:block;width:100%;height:auto"/><figcaption>{c.orbitCaption}</figcaption></figure>}
+  {id==='orbit'&&<figure class="article-diagram"><img src={`/images/blog/clock/orbit-${lang}.svg`} alt={c.orbitCaption} width="1000" height="620" loading="lazy" style="display:block;width:100%;height:auto"/><figcaption>{c.orbitCaption}</figcaption></figure>}
  </section>)}
  <p><a href={`https://clock.jacktools.net/${lang}/`}>{c.action} ↗</a> · <a href={`/${lang}/tools/clock/`}>{c.guide}</a></p>
 </BlogArticle>

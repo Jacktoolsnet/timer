@@ -8,15 +8,15 @@ test('German blog is discoverable from the homepage and index',async({page})=>{
  await expect(page.locator('.header-nav a[href="/de/blog/"]')).toHaveText('Blog');
  await expect(page.locator('.blog-home h2')).toHaveText('Ideen, Projekte und ihre Geschichten.');
  await page.locator('.blog-home .blog-post-card').click();
- await expect(page).toHaveURL(new RegExp(getBlogPath('de','clock')+'$'));
+ await expect(page).toHaveURL(new RegExp(getBlogPath('de','binary')+'$'));
  await page.getByRole('link',{name:'Zum Blog',exact:true}).click();
  await expect(page).toHaveURL(/\/de\/blog\/$/);
- await expect(page.locator('.blog-post-card')).toHaveCount(3);
+ await expect(page.locator('.blog-post-card')).toHaveCount(4);
  await expect(page.locator('.blog-post-card h3')).toHaveText(blogPosts.map(p=>p.title));
  for(const lang of ['en','es','fr']){
   await page.goto(`/${lang}/`);
   await expect(page.locator('.blog-home')).toHaveCount(1);
-  await expect(page.locator('.blog-home .blog-post-card')).toHaveAttribute('href',getBlogPath(lang as 'en'|'es'|'fr','clock'));
+  await expect(page.locator('.blog-home .blog-post-card')).toHaveAttribute('href',getBlogPath(lang as 'en'|'es'|'fr','binary'));
  }
 });
 test('article has complete content, truthful roles, accessible illustrations and working chapters',async({page},info)=>{
