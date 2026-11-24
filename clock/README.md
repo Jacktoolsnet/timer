@@ -41,3 +41,12 @@ Audio/vibration stop after two minutes; triggers over five minutes late are
 reported as missed. DST gaps are skipped and folds use the next future instant.
 Five locally synthesised tones are selectable and testable. Only time, tone, volume and vibration preference persist with storage consent under
 `jacktools.clock.alarm.v1`; activation/due times/snooze are memory-only.
+
+## Clock type and additional readout
+
+The appearance selector contains six types: analog, orbit, sundial, binary, digital
+and flip. Analog, binary, orbit and sundial expose a contextual additional-time
+selector (off / digital / flip), remembered independently for each type when
+storage consent is enabled. Digital and flip hide these controls. Rendering and
+saved `view` values retain the legacy combined variants for compatibility;
+`createViewControls` maps them to the compact UI, including older saved settings.

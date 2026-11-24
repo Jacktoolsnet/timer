@@ -1,7 +1,7 @@
 import {test,expect,type Page} from '@playwright/test';
 import {bcdDigits} from '../src/scripts/binary-clock';
 const labels={binary:'Binär',binaryDigital:'Binär + Digital',binaryFlip:'Binär + Klappzahlen'};
-async function choose(page:Page,view:keyof typeof labels){await page.locator('#trigger-view').click();await page.getByRole('option',{name:labels[view],exact:true}).click();}
+async function choose(page:Page,view:keyof typeof labels){await page.locator('#trigger-view').click();await page.getByRole('option',{name:'Binär',exact:true}).click();await set(page,'binaryReadout',view==='binaryDigital'?'digital':view==='binaryFlip'?'flip':'off');}
 async function set(page:Page,name:string,value:string){await page.locator(`[name="${name}"]`).evaluate((el,value)=>{(el as HTMLSelectElement).value=value;el.dispatchEvent(new Event('change',{bubbles:true}));},value);}
 async function decoded(page:Page){return page.locator('[data-binary-column]').evaluateAll(columns=>columns.map(column=>[...column.querySelectorAll<SVGCircleElement>('[data-on=true]')].reduce((sum,dot)=>sum+Number(dot.dataset.bit),0)));}
 test.beforeEach(async({page})=>{
@@ -55,8 +55,8 @@ test('binary choice is saved with consent and restores on reload',async({page})=
  await page.locator('#palette-dropdown summary').click();await page.locator('#remember-preferences').check();
  await page.reload();await expect(page.locator('.clock-display')).toHaveAttribute('data-view','binaryFlip');await expect(page.locator('#binary-flip')).toBeVisible();
 });
-for(const [lang,label] of [['en','Binary + Digital'],['es','Binario + Digital'],['fr','Binaire + Numérique']])test(`${lang} offers translated binary variants`,async({page})=>{
- await page.goto(`/${lang}/`);await page.locator('#trigger-view').click();await page.getByRole('option',{name:label,exact:true}).click();await expect(page.locator('#binary-digital')).toBeVisible();
+for(const [lang,label] of [['en','Binary'],['es','Binario'],['fr','Binaire']])test(`${lang} offers translated binary variants`,async({page})=>{
+ await page.goto(`/${lang}/`);await page.locator('#trigger-view').click();await page.getByRole('option',{name:label,exact:true}).click();await set(page,'binaryReadout','digital');await expect(page.locator('#binary-digital')).toBeVisible();
 });
 
 test('flip companion animates minute changes when seconds are disabled',async({page})=>{

@@ -70,12 +70,14 @@ test('rounded square variants use matching previews and preserve numeral control
 
 test('dial selectors only appear for supported views, without resetting the design',async({page})=>{
  await page.goto('/de/');await selectDialDesign(page,'square-roman');
- for(const [view,label,visible] of [
+ for(const [view,_label,visible] of [
   ['binary','Binär',false],['binaryDigital','Binär + Digital',false],['binaryFlip','Binär + Klappzahlen',false],
   ['digital','Digital',false],['flip','Klappzahlen',false],['orbit','Orbit-Uhr',true],['sundial','Sonnenuhr',true],
   ['combined','Analog + Digital',true],['analogFlip','Analog + Klappzahlen',true],['analog','Analog',true],
  ] as const){
-  await page.locator('#trigger-view').click();await page.getByRole('option',{name:label,exact:true}).click();
+  const base=view==='combined'||view==='analogFlip'?'analog':view.startsWith('binary')?'binary':view;
+  await page.locator('[name=view]').evaluate((el,base)=>{(el as HTMLSelectElement).value=base;el.dispatchEvent(new Event('change',{bubbles:true}));},base);
+  if(base==='analog'||base==='binary')await page.locator(`[name=${base}Readout]`).evaluate((el,value)=>{(el as HTMLSelectElement).value=value;el.dispatchEvent(new Event('change',{bubbles:true}));},view==='combined'||view==='binaryDigital'?'digital':view==='analogFlip'||view==='binaryFlip'?'flip':'off');
   await expect(page.locator('#clock-dial-options')).toBeVisible({visible});
   await expect(page.locator('select[name=analogDesign]')).toHaveValue('square-roman');
   if(visible){

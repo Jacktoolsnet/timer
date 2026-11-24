@@ -7,7 +7,7 @@ import {toolSeo} from '../../../shared/seo';
 import { analogDesigns, analogDesignText, dialMarkup, analogPreview, analogDesignStyles } from '../lib/analog-designs';
 import {dialText} from '../lib/dial-text';
 import { clockGuide } from '../lib/clock-guide';
-import {clockViews,viewPreview} from '../lib/view-previews';
+import {clockTypes,viewPreview} from '../lib/view-previews';
 import BinaryClock from './BinaryClock.astro';
 import Layout from '../layouts/Layout.astro';
 import { getDictionary, type Language } from '../lib/i18n';
@@ -65,9 +65,9 @@ const seo=toolSeo.clock[lang];
 <AdBanner lang={lang} />
 <aside class="settings-card"><h2>{t.settings}</h2><form id="clock-settings" class="clock-settings">
 <fieldset class="clock-settings-group"><legend>{groups.display}</legend>
-<label>{t.appearance}<select name="view" data-preview-class="clock-view-thumbnail">{clockViews.map(v=><option value={v} data-preview={viewPreview(v)} selected={v==='analog'}>{v==='sundial'?sun.sundial:c[v]}</option>)}</select></label>
+<label>{t.appearance}<select name="view" data-preview-class="clock-view-thumbnail">{clockTypes.map(v=><option value={v} data-preview={viewPreview(v)} selected={v==='analog'}>{v==='sundial'?sun.sundial:c[v]}</option>)}</select></label>
 
-{(['orbit','sundial'] as const).map(view=><div id={`${view}-readout-options`} hidden><label>{c.readoutLabel}<select name={`${view}Readout`}><option value="off" selected={view==='orbit'}>{c.readoutNone}</option><option value="digital">{c.readoutDigital}</option><option value="flip" selected={view==='sundial'}>{c.readoutFlip}</option></select></label></div>)}
+{(['analog','binary','orbit','sundial'] as const).map(view=><div id={`${view}-readout-options`} hidden><label>{c.readoutLabel}<select name={`${view}Readout`}><option value="off" selected={view!=='sundial'}>{c.readoutNone}</option><option value="digital">{c.readoutDigital}</option><option value="flip" selected={view==='sundial'}>{c.readoutFlip}</option></select></label></div>)}
 <select name="analogDesign" hidden aria-hidden="true">{analogDesigns.map((id,index)=><option value={id}>{designs.names[index]}</option>)}</select>
 <div id="clock-dial-options">
 <label>{dial.shape}<select name="dialShape" data-preview-class="clock-design-thumbnail"><option value="round" data-preview={analogPreview('standard')}>{dial.round}</option><option value="square" data-preview={analogPreview('square-standard')}>{dial.square}</option></select></label>

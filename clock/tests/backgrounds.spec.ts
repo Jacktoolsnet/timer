@@ -152,7 +152,7 @@ test('backgrounds fit all readouts in portrait and landscape', async ({ page }) 
       await page.evaluate(view => {
         document.body.classList.add('focus-view');
         const select = document.querySelector<HTMLSelectElement>('select[name=view]')!;
-        select.value = view; select.dispatchEvent(new Event('change', { bubbles: true }));
+        const base=view==='combined'||view==='analogFlip'?'analog':view;select.value=base;select.dispatchEvent(new Event('change',{bubbles:true}));if(base==='analog'){const readout=document.querySelector<HTMLSelectElement>('[name=analogReadout]')!;readout.value=view==='combined'?'digital':view==='analogFlip'?'flip':'off';readout.dispatchEvent(new Event('change',{bubbles:true}));}
       }, view);
       expect(await page.locator('.clock-display').evaluate(el => el.scrollWidth <= el.clientWidth && el.scrollHeight <= el.clientHeight + 1)).toBeTruthy();
       await expect(page.locator('.clock-readout')).toBeVisible();

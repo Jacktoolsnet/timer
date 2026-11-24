@@ -81,7 +81,7 @@ test('alarm time follows each clock view and remains compact in focus mode',asyn
  for(const [width,height]of [[1440,900],[412,915],[915,412]]){
   await page.setViewportSize({width,height});
   for(const view of ['analog','digital','combined','flip','analogFlip','binary','binaryDigital','binaryFlip']){
-   await page.evaluate(view=>{document.body.classList.add('focus-view');const s=document.querySelector<HTMLSelectElement>('select[name=view]')!;s.value=view;s.dispatchEvent(new Event('change',{bubbles:true}));},view);
+   await page.evaluate(view=>{document.body.classList.add('focus-view');const s=document.querySelector<HTMLSelectElement>('select[name=view]')!;const base=view==='combined'||view==='analogFlip'?'analog':view.startsWith('binary')?'binary':view;s.value=base;s.dispatchEvent(new Event('change',{bubbles:true}));if(base==='analog'||base==='binary'){const readout=document.querySelector<HTMLSelectElement>(`[name=${base}Readout]`)!;readout.value=view==='combined'||view==='binaryDigital'?'digital':view==='analogFlip'||view==='binaryFlip'?'flip':'off';readout.dispatchEvent(new Event('change',{bubbles:true}));}},view);
    if(view==='analog'||view==='combined'||view==='analogFlip'){
     await expect(page.locator('#alarm-analog-indicator')).toBeVisible();await expect(page.locator('#alarm-readout-indicator')).toBeHidden();
     if(view==='analogFlip'){await expect(page.locator('#alarm-analog-flips')).toBeVisible();await expect(page.locator('#alarm-analog-flips .flip-digit')).toHaveCount(4);await expect(page.locator('#alarm-analog-time')).toBeHidden();}

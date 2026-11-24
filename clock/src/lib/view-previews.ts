@@ -1,5 +1,6 @@
 /** Small static examples, not a second live clock. Local SVGs need no network assets. */
 export const clockViews=['analog','orbit','sundial','binary','binaryDigital','binaryFlip','digital','combined','flip','analogFlip'] as const;
+export const clockTypes=['analog','orbit','sundial','binary','digital','flip'] as const;
 export type ClockView=typeof clockViews[number];
 export function viewPreview(view:ClockView) {
  const dial='<circle cx="0" cy="0" r="22" fill="#f6f9f1" stroke="#567d3e" stroke-width="1.5"/><g stroke="#567d3e">'+Array.from({length:12},(_,i)=>`<path d="M0 -19v2" transform="rotate(${i*30})"/>`).join('')+'</g>';

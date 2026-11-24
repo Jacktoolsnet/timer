@@ -1,3 +1,4 @@
+import {createViewControls} from './view-controls';
 import {createDialControls} from './dial-controls';
 import {createBinaryClock} from './binary-clock';
 import {createSundial} from './sundial';
@@ -15,11 +16,12 @@ const $=(id:string)=>document.getElementById(id)!;
 const t=JSON.parse($('clock-app').dataset.text!);
 const form=$('clock-settings') as HTMLFormElement;
 const syncDialControls=createDialControls(form);
+const viewControls=createViewControls(form);
 const field=(key:string)=>form.elements.namedItem(key) as HTMLInputElement | HTMLSelectElement;
-const defaults={view:'analog',orbitReadout:'off',sundialReadout:'flip',analogDesign:'standard',background:'none',animateBackground:false,hemisphere:'north',transparency:0,date:'long',dateView:'calendarDate',format:'medium',hourCycle:'auto',zone:'local',seconds:true,numbers:true,smooth:false,awake:false};
+const defaults={view:'analog',analogReadout:'off',binaryReadout:'off',orbitReadout:'off',sundialReadout:'flip',analogDesign:'standard',background:'none',animateBackground:false,hemisphere:'north',transparency:0,date:'long',dateView:'calendarDate',format:'medium',hourCycle:'auto',zone:'local',seconds:true,numbers:true,smooth:false,awake:false};
 let settings={...defaults};
 const backgroundMotion=matchMedia('(prefers-reduced-motion: reduce)');
-try {if(storageAllowed()) {const saved=JSON.parse(localStorage.getItem('jacktools.clock.settings.v1')||'null');for(const key of Object.keys(defaults) as (keyof typeof defaults)[]){const value=saved?.[key];if(typeof defaults[key]==='boolean'){if(typeof value==='boolean')Object.assign(settings,{[key]:value});}else if(typeof defaults[key]==='number'){if(typeof value==='number'&&Number.isInteger(value)&&value>=0&&value<=100)Object.assign(settings,{[key]:value});}else if([...((field(key) as HTMLSelectElement).options)].some(o=>o.value===value))Object.assign(settings,{[key]:value});}}}catch{}
+try {if(storageAllowed()) {const saved=JSON.parse(localStorage.getItem('jacktools.clock.settings.v1')||'null');for(const key of Object.keys(defaults) as (keyof typeof defaults)[]){const value=saved?.[key];if(typeof defaults[key]==='boolean'){if(typeof value==='boolean')Object.assign(settings,{[key]:value});}else if(typeof defaults[key]==='number'){if(typeof value==='number'&&Number.isInteger(value)&&value>=0&&value<=100)Object.assign(settings,{[key]:value});}else if((key==='view'&&['combined','analogFlip','binaryDigital','binaryFlip'].includes(value))||[...((field(key) as HTMLSelectElement).options)].some(o=>o.value===value))Object.assign(settings,{[key]:value});}}}catch{}
 for(const [key,value] of Object.entries(settings)){if(typeof value==='boolean')(field(key) as HTMLInputElement).checked=value;else field(key).value=String(value);}
 function applyTransparency(){
  const enabled=clockBackgroundOptions.some(id=>id===settings.background);
@@ -45,9 +47,8 @@ const updateSundialFlip = createFlipClock($('sundial-flip'));
 let lastFlipTick = 0;
 let digits:Intl.DateTimeFormat,dateFormat:Intl.DateTimeFormat,parts:Intl.DateTimeFormat;
 function configure(){
+ viewControls.sync(settings.view);
  syncDialControls(settings.analogDesign,settings.view);
- $('orbit-readout-options').hidden=settings.view!=='orbit';
- $('sundial-readout-options').hidden=settings.view!=='sundial';
  $('orbit-view').dataset.readout=settings.orbitReadout;
  $('sundial-view').dataset.readout=settings.sundialReadout;
  applyTransparency();
@@ -131,7 +132,7 @@ function render(){const now=new Date();sundial.render(now);if(settings.backgroun
  const text=digits.format(now);$('orbit-clock').setAttribute('aria-label',text);$('digital-clock').textContent=text;$('digital-clock').setAttribute('datetime',now.toISOString());$('analog-clock').setAttribute('aria-label',text);$('clock-date').textContent=dateFormat.format(now);styledDate.render(now);
 }
 function save(){if(!storageAllowed())return;try{localStorage.setItem('jacktools.clock.settings.v1',JSON.stringify(settings));}catch{$('clock-settings-status').textContent=t.storageError;}}
-form.addEventListener('submit',e=>e.preventDefault());form.addEventListener('change',()=>{for(const key of Object.keys(defaults)){const input=field(key);Object.assign(settings,{[key]:input.type==='checkbox'?(input as HTMLInputElement).checked:input.type==='range'?Number(input.value):input.value});}configure();save();});
+form.addEventListener('submit',e=>e.preventDefault());form.addEventListener('change',()=>{for(const key of Object.keys(defaults)){const input=field(key);Object.assign(settings,{[key]:key==='view'?viewControls.selectedView():input.type==='checkbox'?(input as HTMLInputElement).checked:input.type==='range'?Number(input.value):input.value});}configure();save();});
 field('transparency').addEventListener('input',()=>{
  settings.transparency=Number(field('transparency').value);
  applyTransparency();save();
