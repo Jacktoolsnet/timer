@@ -50,3 +50,13 @@ selector (off / digital / flip), remembered independently for each type when
 storage consent is enabled. Digital and flip hide these controls. Rendering and
 saved `view` values retain the legacy combined variants for compatibility;
 `createViewControls` maps them to the compact UI, including older saved settings.
+
+## Experimenteller Chromecast-Modus
+
+Über **Auf TV anzeigen** kann die Fokusansicht als eigene Google-Cast-Web-Receiver-App
+auf einem registrierten Testgerät laufen. Google-App-ID und Testgerät müssen zuerst
+in der Cast Developer Console eingerichtet werden. Anleitung, Grenzen und Testablauf:
+[docs/chromecast.md](docs/chromecast.md). Optionaler Build-Wert: `PUBLIC_CAST_APP_ID`.
+Der Empfänger liegt unter `/cast/` (noindex, ohne Werbung), nicht in der Sitemap.
+Das Google Sender SDK wird nur beim Öffnen des Cast-Dialogs geladen. Standortübertragung
+ist separat zustimmungspflichtig; Wecker werden nicht übertragen.

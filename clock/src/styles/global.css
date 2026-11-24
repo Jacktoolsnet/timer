@@ -1387,3 +1387,16 @@ body.focus-view #orbit-view { width:min(90vw,calc(100dvh - 300px),600px); }
  body.focus-view .clock-display[data-view=orbit] #orbit-view { width:min(100%,calc((100dvh - 100px) * .85)); max-height:calc(100dvh - 64px); }
  body.focus-view .clock-display[data-view=orbit] #orbit-view[data-readout=off] { width:min(100%,calc(100dvh - 88px)); }
 }
+
+/* Cast is opt-in: the SDK is loaded only after opening this dialog. */
+#clock-cast-dialog { width:min(640px,calc(100vw - 32px)); max-height:calc(100dvh - 32px); overflow:auto; }
+#clock-cast-dialog p { line-height:1.55; }
+#cast-app-id { display:block; width:100%; margin:8px 0; padding:12px; background:var(--surface); color:var(--text); border:1px solid var(--line); border-radius:10px; font:inherit; }
+.cast-location-choice { display:flex; gap:10px; align-items:start; margin-top:18px; }
+.cast-location-choice input { margin-top:4px; flex-shrink:0; }
+#clock-cast-dialog .dialog-actions { flex-wrap:wrap; }
+body.cast-receiver .site-header,body.cast-receiver .site-footer,body.cast-receiver .skip-link { display:none!important; }
+body.cast-receiver { cursor:none; }
+#cast-receiver-status { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); z-index:20; width:min(90vw,600px); padding:16px 24px; border:1px solid var(--line); border-radius:16px; color:var(--text); background:var(--surface); text-align:center; }
+#cast-receiver-status[hidden] { display:none; }
+#clock-cast-dialog button[hidden] { display:none!important; }
