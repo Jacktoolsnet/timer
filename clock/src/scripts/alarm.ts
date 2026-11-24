@@ -12,7 +12,7 @@ export function createAlarm(root: HTMLElement, dialog: HTMLDialogElement, badge:
  const engine=new Alarm(); let zone='UTC', context:AudioContext|undefined, master:GainNode|undefined;
  const analogIndicator=document.querySelector<SVGElement>('#alarm-analog-indicator')!;
  const readoutIndicator=document.querySelector<HTMLElement>('#alarm-readout-indicator')!;
- let lastAlarmTime=time.value;
+ let lastAlarmTime=time.value, view='analog';
  const dialFlips=createFlipClock(document.querySelector<HTMLElement>('#alarm-analog-flips')!);
  const miniFlips=createFlipClock(document.querySelector<HTMLElement>('#alarm-mini-flips')!);
  const oscillators=new Set<OscillatorNode>();
@@ -87,7 +87,6 @@ export function createAlarm(root: HTMLElement, dialog: HTMLDialogElement, badge:
   status.textContent=testing?t.testing:message;
   badge.textContent=message;badge.hidden=!message;
   const active=engine.due!==null||engine.ringing;
-  const view=(document.querySelector<HTMLSelectElement>('select[name=view]')!).value;
   if(engine.due!==null)lastAlarmTime=new Intl.DateTimeFormat('en-GB',{timeZone:zone,hourCycle:'h23',hour:'2-digit',minute:'2-digit'}).format(engine.due);
   else if(!engine.ringing)lastAlarmTime=time.value;
   const alarmTime=lastAlarmTime;
@@ -131,5 +130,5 @@ export function createAlarm(root: HTMLElement, dialog: HTMLDialogElement, badge:
  document.addEventListener('visibilitychange',()=>{tick();});
  window.addEventListener('pagehide',()=>{stop();});
  window.setInterval(tick,1000);volumeUpdate();sync();
- return { configure(nextZone:string){root.querySelector('#alarm-zone')!.textContent=`${t.zone} ${nextZone}`;if(zone===nextZone){sync();return;}zone=nextZone;if(enabled.checked&&!engine.ringing&&!engine.snoozed)arm();else sync();} };
+ return { configure(nextZone:string,nextView:string){view=nextView;root.querySelector('#alarm-zone')!.textContent=`${t.zone} ${nextZone}`;if(zone===nextZone){sync();return;}zone=nextZone;if(enabled.checked&&!engine.ringing&&!engine.snoozed)arm();else sync();} };
 }

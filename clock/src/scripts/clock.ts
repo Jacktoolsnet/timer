@@ -72,7 +72,7 @@ function configure(){
  geolocation.setActive(usesLocation);
  sundial.configure(settings.view==='sundial',geolocation.location,geolocation.status,geolocation.pending,settings.analogDesign as AnalogDesign,settings.numbers,zone);
  seasonal.configure(zone,settings.hemisphere,geolocation.location);
- alarm.configure(zone);
+ alarm.configure(zone,settings.view);
  const locale=document.documentElement.lang;
  digits=new Intl.DateTimeFormat(locale,{timeZone:zone,hour:'2-digit',minute:'2-digit',...(settings.seconds&&settings.format!=='short'?{second:'2-digit' as const}:{}),...(settings.format==='long'?{timeZoneName:'short' as const}:{}),...(settings.hourCycle==='auto'?{}:{hour12:settings.hourCycle==='12'})});
  dateFormat=new Intl.DateTimeFormat(locale,{timeZone:zone,...(settings.date==='short'?{dateStyle:'short' as const}:settings.date==='medium'?{dateStyle:'medium' as const}:{dateStyle:'full' as const})});
