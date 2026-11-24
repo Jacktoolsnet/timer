@@ -46,7 +46,7 @@ for(const lang of languages){
    if(key!=='index'){
     expect(schema.headline).toBe(getBlogPost(lang,key).title);
     expect((await request.get(new URL(schema.image).pathname)).ok()).toBe(true);
-    await expect(page.locator('.article-body section')).toHaveCount(key==='surface'?10:key==='clock'?5:key==='binary'?4:8);
+    await expect(page.locator('.article-body section')).toHaveCount(key==='surface'?10:key==='clock'?4:key==='binary'?4:8);
     if(lang!=='de'){
      await expect(page.locator('.blog-article')).not.toContainText(/In diesem Artikel|Ein altes Surface|Noch keine Agenten|Zum Nachlesen|Schreib uns dein Feedback|DEIN-WLAN-NAME|Die Grundlage steht/);
     }
@@ -102,7 +102,7 @@ test.describe('translated content without JavaScript',()=>{
   for(const post of getBlogPosts(lang)){
    await page.goto(post.path);
    await expect(page.locator('h1')).toHaveText(post.title);
-   await expect(page.locator('.article-body section')).toHaveCount(post.key==='surface'?10:post.key==='clock'?5:post.key==='binary'?4:8);
+   await expect(page.locator('.article-body section')).toHaveCount(post.key==='surface'?10:post.key==='clock'?4:post.key==='binary'?4:8);
    if(post.key==='surface'){
     await expect(page.locator('.blog-code')).toHaveCount(10);
     for(const button of await page.locator('.code-copy').all())await expect(button).toBeHidden();

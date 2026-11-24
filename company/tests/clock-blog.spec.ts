@@ -7,11 +7,13 @@ for(const lang of ['de','en','es','fr'] as const) {
   await page.locator(`.blog-post-card[href="${getBlogPath(lang,'clock')}"]`).click();
   await expect(page).toHaveURL(new RegExp(getBlogPath(lang,'clock')+'$'));
   await expect(page.locator('h1')).toHaveText(getBlogPost(lang,'clock').title);
-  await expect(page.locator('.article-body section').last()).toHaveAttribute('id','orbit');
-  await expect(page.locator('#orbit p')).toHaveCount(2);
+  await expect(page.locator('.article-body section').last()).toHaveAttribute('id','try');
+  await expect(page.locator('#orbit')).toHaveCount(0);
+  await expect(page.locator('.article-cover img')).toHaveCount(1);
+  await expect(page.locator('.article-diagram')).toHaveCount(0);
   await expect(page.locator('#sun')).toContainText('SunCalc');
   await expect(page.locator('#shadow')).toContainText('L = H / tan(α)');
-  await expect(page.locator('.article-body section')).toHaveCount(5);
+  await expect(page.locator('.article-body section')).toHaveCount(4);
   for(const img of await page.locator('.article-cover img, .article-diagram img').all()) {
    await img.scrollIntoViewIfNeeded();
    await expect(img).toHaveAttribute('src',new RegExp(`-${lang}\\.svg$`));
@@ -26,8 +28,8 @@ for(const lang of ['de','en','es','fr'] as const) {
 test('clock article no longer references screenshots while the tool gallery keeps them',async({request})=>{
  for(const lang of ['de','en','es','fr']){
   const response=await request.get(getBlogPath(lang as 'de'|'en'|'es'|'fr','clock'));
-  const html=await response.text();expect(html).not.toContain('/images/galleries/clock/');
-  for(const kind of ['sundial','orbit']){
+  const html=await response.text();expect(html).not.toContain('/images/galleries/clock/');expect(html).not.toContain('/images/blog/clock/orbit-');
+  for(const kind of ['sundial']){
    const graphic=await request.get(`/images/blog/clock/${kind}-${lang}.svg`);
    expect(graphic.ok()).toBe(true);const svg=await graphic.text();
    expect(svg).toContain('<title');expect(svg).toContain('<desc');expect(svg).not.toMatch(/<script|<image/);

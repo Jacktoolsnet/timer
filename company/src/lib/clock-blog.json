@@ -1,8 +1,8 @@
 {
   "de": {
-    "title": "Die Uhr bekommt Umlaufbahnen – und einen Sonnenstand",
-    "description": "Neu bei der Jacktools Uhr: Orbit-Ansicht und standortbasierte Sonnenuhr. Ein kurzer Blick auf Sonnenzeit, Schattenberechnung und die Grenzen der Darstellung.",
-    "lead": "Aus einer kleinen Sonne im Zentrum der Orbit-Uhr wurde eine neue Idee: Warum nicht auch den echten Sonnenstand zeigen? Unsere Uhr hat jetzt zwei weitere Ansichten – eine spielerische Orbit-Uhr und eine standortbasierte Sonnenuhr.",
+    "title": "Sonnenuhr im Browser: Wie Sonnenstand zu Zeit wird",
+    "description": "Wie die Jacktools Sonnenuhr Sonnenstand, Schatten und wahre Sonnenzeit berechnet. Mit einer SVG-Erklärung und Hinweisen zu Standort, Zeitzone und Darstellung.",
+    "lead": "Unsere Uhr kann die Zeit auch nach dem örtlichen Sonnenlauf zeigen. Die standortbasierte Sonnenuhr macht Sonnenstand und Schatten sichtbar. Ein kurzer Blick darauf, wie die Berechnung funktioniert – und warum Sonnenzeit und die Uhrzeit auf deinem Gerät voneinander abweichen können.",
     "category": "Tools & Entwicklung",
     "byline": "Ein Blick hinter die Uhr",
     "coverCaption": "Schematische Draufsicht einer Sonnenuhr: Sonne und Schatten liegen vom senkrechten Stab aus in entgegengesetzten Richtungen. Eigene SVG-Grafik, nicht maßstäblich und keine Live-Anzeige.",
@@ -26,32 +26,20 @@
         "try",
         "Ausprobieren – mit bewusstem Standortzugriff",
         "Wähle „Sonnenuhr“, aktiviere „Standortbasierte Simulation“ und erlaube den Standortzugriff im Browser. Die Uhr verarbeitet die Koordinaten lokal, speichert und überträgt sie nicht. Solange der Standortmodus aktiv genutzt wird, werden Positionsänderungen verfolgt. Die Gerätezeit muss stimmen; die Zeitzone bleibt separat wählbar. Die Sonnenuhr ist eine Visualisierung, kein Präzisionsinstrument."
-      ],
-      [
-        "orbit",
-        "Drei Bahnen statt drei Zeiger",
-        "Die Orbit-Uhr verteilt Stunden, Minuten und Sekunden auf drei konzentrische Bahnen: Stunden innen, Minuten in der Mitte, Sekunden außen. Die Sekunden können springen oder fließen. Eine kleine leuchtende Sonne bildet das Zentrum. Zifferblatt, runde oder eckige Form, römische Zahlen und Farben folgen den gewählten Einstellungen.",
-        "Die Inspiration für diese Ansicht kommt aus unserem Sound-Tool, das wir gerade entwickeln. Die Idee der kreisenden Elemente haben wir auf die Zeit übertragen: Statt Zeigern bewegen sich kleine Punkte auf ihren Bahnen. So lässt sich der Verlauf der Zeit als Bewegung rund um ein gemeinsames Zentrum beobachten. Anders als bei der Sonnenuhr sind diese Umlaufbahnen eine gestalterische Darstellung der Uhrzeit, keine Berechnung astronomischer Planetenbahnen."
       ]
     ],
-    "orbitCaption": "Drei Umlaufbahnen für Stunden, Minuten und Sekunden mit einer leuchtenden Mitte. Eigene schematische SVG-Grafik der Orbit-Uhr, keine Live-Anzeige.",
     "action": "Uhr ausprobieren",
     "guide": "Anleitung und weitere Screenshots",
     "sunDiagramLabels": [
       "Sonne",
       "Schatten",
       "Senkrechter Stab"
-    ],
-    "orbitDiagramLabels": [
-      "Stunden",
-      "Minuten",
-      "Sekunden"
     ]
   },
   "en": {
-    "title": "The clock gains orbits – and a real Sun position",
-    "description": "New in the Jacktools clock: an orbit view and a location-based sundial. A short look at solar time, shadow calculations and the limits of the display.",
-    "lead": "A small Sun at the centre of the orbit clock sparked another idea: why not show the real Sun position too? Our clock now has two more views: a playful orbit clock and a location-based sundial.",
+    "title": "A sundial in your browser: turning Sun position into time",
+    "description": "How the Jacktools sundial calculates Sun position, shadows and apparent solar time. With an SVG explanation and notes on location, time zones and display limits.",
+    "lead": "Our clock can also show time by the local Sun. The location-based sundial visualizes Sun position and shadow. A short look at how the calculation works, and why solar time can differ from the time on your device.",
     "category": "Tools & development",
     "byline": "Behind the clock",
     "coverCaption": "Schematic top view of a sundial: the Sun and shadow lie in opposite directions from the vertical pin. Original SVG, not to scale or a live display.",
@@ -75,32 +63,20 @@
         "try",
         "Try it with deliberate location permission",
         "Choose Sundial, enable Location-based simulation and allow location access in your browser. The clock processes coordinates locally and neither stores nor transmits them. Position changes are tracked while the location mode is actively used. Your device time must be correct; the time zone remains a separate setting. This sundial is a visualization, not a precision instrument."
-      ],
-      [
-        "orbit",
-        "Three rings instead of three hands",
-        "The orbit clock puts hours on the inner ring, minutes in the middle and seconds outside. Seconds can tick or flow smoothly. A small glowing Sun sits at the centre. Dial style, round or square shape, Roman numerals and colours follow your settings.",
-        "This view was inspired by our sound tool, which is currently in development. We brought the idea of orbiting elements to the clock: instead of hands, small dots move along their rings. This makes the passage of time visible as motion around a shared centre. Unlike the sundial, these orbits are a visual representation of clock time, not a calculation of astronomical planetary orbits."
       ]
     ],
-    "orbitCaption": "Three orbital rings for hours, minutes and seconds around a glowing centre. Original schematic SVG of the orbit clock, not a live display.",
     "action": "Try the clock",
     "guide": "Instructions and more screenshots",
     "sunDiagramLabels": [
       "Sun",
       "Shadow",
       "Vertical pin"
-    ],
-    "orbitDiagramLabels": [
-      "Hours",
-      "Minutes",
-      "Seconds"
     ]
   },
   "es": {
-    "title": "El reloj estrena órbitas y la posición real del Sol",
-    "description": "Novedades del reloj Jacktools: vista orbital y reloj solar según tu ubicación. Un vistazo a la hora solar, el cálculo de sombras y sus límites.",
-    "lead": "Una pequeña estrella en el centro del reloj orbital inspiró otra idea: ¿por qué no mostrar también la posición real del Sol? El reloj incorpora dos vistas: un reloj orbital y un reloj solar según tu ubicación.",
+    "title": "Un reloj solar en el navegador: del Sol a la hora",
+    "description": "Cómo calcula el reloj solar Jacktools la posición del Sol, la sombra y la hora solar aparente. Con una explicación SVG y notas sobre ubicación y zonas horarias.",
+    "lead": "Nuestro reloj también puede mostrar la hora según el Sol local. El reloj solar basado en la ubicación visualiza la posición del Sol y la sombra. Un breve vistazo al cálculo y a por qué la hora solar puede diferir de la hora del dispositivo.",
     "category": "Herramientas y desarrollo",
     "byline": "Dentro del reloj",
     "coverCaption": "Vista superior esquemática de un reloj solar: el Sol y la sombra están en direcciones opuestas desde la varilla vertical. SVG original, sin escala ni datos en directo.",
@@ -124,32 +100,20 @@
         "try",
         "Probar con permiso de ubicación",
         "Elige el reloj solar, activa la simulación según ubicación y permite el acceso en el navegador. El reloj procesa las coordenadas localmente sin guardarlas ni transmitirlas. Sigue los cambios de posición mientras se utiliza el modo de ubicación. La hora del dispositivo debe ser correcta; la zona horaria se elige por separado. Es una visualización, no un instrumento de precisión."
-      ],
-      [
-        "orbit",
-        "Tres órbitas en vez de tres agujas",
-        "Las horas recorren el círculo interior, los minutos el central y los segundos el exterior. Los segundos avanzan por pasos o continuamente. Un pequeño Sol luminoso ocupa el centro. La esfera, la forma redonda o cuadrada, los números romanos y los colores siguen tus ajustes.",
-        "Esta vista se inspira en nuestra herramienta de sonido, que estamos desarrollando. Trasladamos la idea de elementos en órbita al reloj: en lugar de agujas, pequeños puntos recorren sus círculos. Así, el paso del tiempo se observa como movimiento alrededor de un centro común. A diferencia del reloj solar, estas órbitas son una representación visual de la hora, no un cálculo de órbitas planetarias astronómicas."
       ]
     ],
-    "orbitCaption": "Tres órbitas para horas, minutos y segundos alrededor de un centro luminoso. SVG esquemático original del reloj orbital, no una vista en directo.",
     "action": "Probar el reloj",
     "guide": "Instrucciones y más capturas",
     "sunDiagramLabels": [
       "Sol",
       "Sombra",
       "Varilla vertical"
-    ],
-    "orbitDiagramLabels": [
-      "Horas",
-      "Minutos",
-      "Segundos"
     ]
   },
   "fr": {
-    "title": "L’horloge gagne des orbites et la position réelle du Soleil",
-    "description": "Nouveautés Jacktools : horloge orbitale et cadran solaire selon votre position. Un aperçu de l’heure solaire, du calcul des ombres et de ses limites.",
-    "lead": "Un petit Soleil au centre de l’horloge orbitale a inspiré une autre idée : pourquoi ne pas afficher la position réelle du Soleil ? Notre horloge propose deux vues supplémentaires : une horloge orbitale et un cadran solaire selon votre position.",
+    "title": "Un cadran solaire dans le navigateur : du Soleil à l’heure",
+    "description": "Comment le cadran solaire Jacktools calcule position du Soleil, ombre et heure solaire vraie. Schéma SVG et précisions sur la position, les fuseaux et les limites.",
+    "lead": "Notre horloge peut aussi indiquer l’heure selon le Soleil local. Le cadran solaire géolocalisé montre la position du Soleil et l’ombre. Un bref aperçu du calcul et des raisons pour lesquelles l’heure solaire peut différer de celle de votre appareil.",
     "category": "Outils et développement",
     "byline": "Dans les coulisses de l’horloge",
     "coverCaption": "Vue de dessus schématique d’un cadran solaire : le Soleil et l’ombre sont dans des directions opposées depuis la tige verticale. SVG original, ni à l’échelle ni en direct.",
@@ -173,26 +137,14 @@
         "try",
         "Essayer avec une autorisation explicite",
         "Choisissez le cadran solaire, activez la simulation selon la position et autorisez la géolocalisation du navigateur. L’horloge traite les coordonnées localement, sans les stocker ni les transmettre. Les changements de position sont suivis pendant l’utilisation active de ce mode. L’heure de l’appareil doit être correcte ; le fuseau reste un réglage distinct. C’est une visualisation, pas un instrument de précision."
-      ],
-      [
-        "orbit",
-        "Trois orbites plutôt que trois aiguilles",
-        "Les heures suivent le cercle intérieur, les minutes celui du milieu et les secondes celui de l’extérieur. Les secondes avancent par sauts ou en continu. Un petit Soleil lumineux occupe le centre. Le cadran, la forme ronde ou carrée, les chiffres romains et les couleurs suivent vos réglages.",
-        "Cette vue s’inspire de notre outil sonore, actuellement en développement. Nous avons transposé l’idée des éléments en orbite à l’horloge : de petits points parcourent leurs cercles à la place des aiguilles. Le passage du temps devient ainsi un mouvement autour d’un centre commun. Contrairement au cadran solaire, ces orbites sont une représentation graphique de l’heure, pas un calcul d’orbites planétaires astronomiques."
       ]
     ],
-    "orbitCaption": "Trois orbites pour les heures, minutes et secondes autour d’un centre lumineux. SVG schématique original de l’horloge orbitale, pas un affichage en direct.",
     "action": "Essayer l’horloge",
     "guide": "Guide et autres captures",
     "sunDiagramLabels": [
       "Soleil",
       "Ombre",
       "Tige verticale"
-    ],
-    "orbitDiagramLabels": [
-      "Heures",
-      "Minutes",
-      "Secondes"
     ]
   }
 }

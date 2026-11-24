@@ -41,7 +41,7 @@
     "variantsCaption": "Drei Ansichten, dasselbe BCD-Muster: pur, mit Digitalzeit oder mit Klappzahlen. Eigene schematische SVG-Grafik.",
     "action": "Binäruhr ausprobieren",
     "guide": "Zur Anleitung",
-    "related": "Mehr zur Orbit- und Sonnenuhr"
+    "related": "Mehr zur Sonnenuhr"
   },
   "en": {
     "title": "Time in dots – the new binary clock",
@@ -85,7 +85,7 @@
     "variantsCaption": "Three views, the same BCD pattern: on its own, with digital time or with flip digits. Original schematic SVG.",
     "action": "Try the binary clock",
     "guide": "Read the guide",
-    "related": "More about the orbit clock and sundial"
+    "related": "More about the sundial"
   },
   "es": {
     "title": "La hora en puntos: el nuevo reloj binario",
@@ -129,7 +129,7 @@
     "variantsCaption": "Tres vistas con el mismo patrón BCD: solo, con hora digital o con láminas. Gráfico SVG esquemático original.",
     "action": "Probar el reloj binario",
     "guide": "Leer la guía",
-    "related": "Más sobre el reloj orbital y solar"
+    "related": "Más sobre el reloj solar"
   },
   "fr": {
     "title": "L’heure en points : la nouvelle horloge binaire",
@@ -173,6 +173,6 @@
     "variantsCaption": "Trois vues, le même motif BCD : seul, avec heure numérique ou palettes. Schéma SVG original.",
     "action": "Essayer l’horloge binaire",
     "guide": "Lire le guide",
-    "related": "En savoir plus sur l’horloge orbitale et solaire"
+    "related": "En savoir plus sur le cadran solaire"
   }
 }
