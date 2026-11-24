@@ -1,7 +1,7 @@
 <svg id="seasonal-background" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false" data-active="false">
  <defs><linearGradient id="seasonal-sky" x2="0" y2="1"><stop data-seasonal="sky-top" stop-color="#80b3c9"/><stop data-seasonal="sky-bottom" offset="1" stop-color="#e4dfb8"/></linearGradient></defs>
  <rect width="1600" height="1000" fill="url(#seasonal-sky)"/>
- <g data-seasonal="stars" fill="#e6e9dd">{Array.from({length:55},(_,i)=><circle cx={30+(i*293)%1540} cy={30+(i*137)%550} r={i%4===0?2:1} opacity={.3+(i%5)*.12}/>)}</g>
+ <g data-seasonal="stars" fill="#fff" pointer-events="none"></g>
  <g data-seasonal="sun"><circle r="64" fill="#f4dfae"/><circle r="88" fill="#f4dfae" opacity=".12"/></g>
  <g data-seasonal="moon"><circle r="50" fill="#b8c8cf" opacity=".12"/><path data-seasonal="moon-light" d="" fill="#e2e8da"/></g>
  <path data-seasonal="far" d="M0 710Q230 460 480 630T970 615T1600 555V1000H0Z" fill="#8aad79"/>

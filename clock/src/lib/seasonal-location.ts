@@ -1,3 +1,4 @@
+import {skyPoint} from './sky-coordinates';
 import { getPosition, getMoonPosition } from 'suncalc';
 export interface SeasonalLocation { latitude: number; longitude: number }
 
@@ -10,11 +11,7 @@ export function locationSky(now: Date, location: SeasonalLocation) {
   const rising = next.altitude > sun.altitude;
   const phase = sun.altitude < -6 ? 'night' : sun.altitude < 6 ? rising ? 'morning' : 'evening' : 'day';
   const hour = sun.altitude <= -6 ? 0 : sun.altitude >= 6 ? 12 : rising ? 5 + (sun.altitude + 6) / 3 : 21 - (sun.altitude + 6) / 3;
-  const point = (body: { altitude: number; azimuth: number }) => ({
-    x: 800 - Math.sin(body.azimuth * Math.PI / 180) * 600,
-    y: 620 - Math.sin(Math.max(0, body.altitude) * Math.PI / 180) * 430,
-  });
-  return { phase, hour, sun: point(sun), // Reserve sky above the decorative hills; this is not a terrain horizon model.
-    moon: {...point(moon),y:500-Math.sin(Math.max(0,moon.altitude)*Math.PI/180)*350}, sunVisible: sun.altitude > -.833,
+  return { phase, hour, sun: skyPoint(sun.altitude,sun.azimuth,620,430), // Reserve sky above the decorative hills; this is not a terrain horizon model.
+    moon: skyPoint(moon.altitude,moon.azimuth), sunVisible: sun.altitude > -.833,
     moonVisible: moon.altitude > 0 };
 }

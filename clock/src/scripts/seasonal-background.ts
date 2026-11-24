@@ -1,3 +1,4 @@
+import {visibleStars,illustrativeStars} from '../lib/stars';
 import {moonLight,moonPhasePath} from '../lib/moon';
 import { seasonalState, mixColor } from '../lib/seasonal-background';
 import { locationSky, type SeasonalLocation } from '../lib/seasonal-location';
@@ -5,6 +6,7 @@ import { locationSky, type SeasonalLocation } from '../lib/seasonal-location';
 export function createSeasonalBackground(root: SVGSVGElement) {
   let zone = 'UTC', hemisphere = 'north', last = -1;
   let location: SeasonalLocation | undefined;
+  let starTick=-1;
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   const colors = [
     ['#aebcc9', '#eef0e4', '#748e97', '#435c68'],
@@ -46,6 +48,20 @@ export function createSeasonalBackground(root: SVGSVGElement) {
     find('leaves').setAttribute('fill', mixColor('#263b39', mixColor(foliage[s.season], foliage[(s.season + 1) % 4], s.blend), light));
     find('flowers').style.opacity = String((s.season === 0 ? s.blend : s.season === 1 ? 1 - s.blend : 0) * light);
     find('stars').style.opacity = String(1 - light);
+    // Update positions once per minute (hourly with reduced motion), not every frame.
+    const currentStarTick=Math.floor(date.getTime()/60000);
+    if(currentStarTick!==starTick) {
+      starTick=currentStarTick;
+      const stars=location?visibleStars(date,location):illustrativeStars(date,zone,hemisphere);
+      find('stars').replaceChildren(...stars.map(star=>{
+        const point=document.createElementNS('http://www.w3.org/2000/svg','circle');
+        point.setAttribute('cx',star.x.toFixed(2));point.setAttribute('cy',star.y.toFixed(2));
+        point.setAttribute('r',String(star.radius));point.setAttribute('opacity',String(star.brightness));
+        point.dataset.star=String(star.id);
+        return point;
+      }));
+      root.dataset.starMode=location?'location':'illustrative';
+    }
     for (const body of ['sun', 'moon'] as const) {
       const p = sky[body]; find(body).setAttribute('transform', `translate(${p.x.toFixed(2)} ${p.y.toFixed(2)})`);
       find(body).style.opacity = String(body === 'sun' ? Number(sky.sunVisible) : Number('moonVisible' in sky ? sky.moonVisible : !sky.sunVisible));
@@ -59,5 +75,5 @@ export function createSeasonalBackground(root: SVGSVGElement) {
     root.dataset.locationBased = String(!!location);
     root.dataset.season = ['winter', 'spring', 'summer', 'autumn'][Math.floor((s.cycle + .5) % 4)];
   }
-  return { configure(nextZone: string, nextHemisphere: string, nextLocation?: SeasonalLocation) { zone = nextZone; hemisphere = nextHemisphere; location = nextLocation; last = -1; }, render };
+  return { configure(nextZone: string, nextHemisphere: string, nextLocation?: SeasonalLocation) { zone = nextZone; hemisphere = nextHemisphere; location = nextLocation; last = -1; starTick=-1; }, render };
 }

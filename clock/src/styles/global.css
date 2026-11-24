@@ -1315,3 +1315,8 @@ body.focus-view .clock-display[data-view=sundial] #sundial-status {
   width:100%; min-width:0;
  }
 }
+
+/* Subtle, steady stellar glow: no blinking or extra animation loop. */
+#seasonal-background [data-seasonal=stars] circle {
+ filter:drop-shadow(0 0 2px #ffffffb3);
+}
