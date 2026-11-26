@@ -3,10 +3,11 @@ import Layout from '../layouts/Layout.astro';
 import {adminText} from '../lib/admin-text';
 import type {Language} from '../lib/i18n';
 import '../styles/admin.css';
-const {lang}=Astro.props as {lang:Language};const t=adminText[lang];
+const {lang,view='overview'}=Astro.props as {lang:Language;view?:'overview'|'profile'|'users'};const t=adminText[lang];
+const adminHome=`/${lang}/admin/`;
 const api=import.meta.env.DEV?'':(import.meta.env.PUBLIC_BACKEND_URL||'https://backend.jacktools.net');
 ---
-<Layout lang={lang} title={t.title} description={t.intro} route="admin" noindex homeAlternates={false} canonicalPath={`/${lang}/admin/`} quietBackground>
+<Layout lang={lang} title={t.title} description={t.intro} route="admin" noindex homeAlternates={false} canonicalPath={adminHome+(view==='overview'?'':view+'/')} quietBackground adminView={view}>
  <div slot="admin-header" class="admin-header-controls">
   <span class="admin-header-label"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 3v6c0 4-3 7-8 9-5-2-8-5-8-9V6l8-3Z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>{t.title}</span>
   <div id="admin-header-session" class="admin-header-session" hidden>
@@ -14,7 +15,7 @@ const api=import.meta.env.DEV?'':(import.meta.env.PUBLIC_BACKEND_URL||'https://b
    <button id="admin-logout" type="button" class="secondary"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4H5v16h5m4-13 5 5-5 5m-5-5h10"/></svg><span>{t.logout}</span></button>
   </div>
  </div>
- <section class="jt-admin" id="jt-admin" data-state="signed-out" data-api={api} data-text={JSON.stringify(t)}>
+ <section class="jt-admin" id="jt-admin" data-state="signed-out" data-view={view} data-api={api} data-text={JSON.stringify(t)}>
   <div id="admin-toast" class="admin-toast" role="status" aria-live="polite" aria-atomic="true" hidden>
    <span class="admin-toast-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path class="admin-toast-check" d="m8 12 3 3 5-6"/><path class="admin-toast-error" d="M12 7v6m0 3v.1"/></svg></span>
    <p id="admin-status"></p>
@@ -44,15 +45,29 @@ const api=import.meta.env.DEV?'':(import.meta.env.PUBLIC_BACKEND_URL||'https://b
   <div id="admin-workspace" hidden>
   <h1 class="sr-only">{t.title}</h1>
    <p id="admin-password-required" class="admin-warning" hidden>{t.required}</p>
-   <div class="admin-grid">
+   <nav id="admin-overview" class="admin-tiles" aria-label={t.title} hidden>
+    <a class="admin-tile" id="admin-profile-tile" href={adminHome+'profile/'}>
+     <span class="admin-tile-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/></svg></span>
+     <strong>{t.profile}</strong><span class="admin-tile-description">{t.profileDescription}</span><span class="admin-tile-arrow" aria-hidden="true">↗</span>
+    </a>
+    <a class="admin-tile" id="admin-users-tile" href={adminHome+'users/'} hidden>
+     <span class="admin-tile-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M2 21v-3a7 7 0 0 1 14 0v3M16 5a3 3 0 0 1 0 6m3 10v-3a7 7 0 0 0-3-5"/></svg></span>
+     <strong>{t.userManagement}</strong><span class="admin-tile-description">{t.usersDescription}</span><span class="admin-tile-arrow" aria-hidden="true">↗</span>
+    </a>
+   </nav>
+   <a id="admin-back" class="admin-back" href={adminHome} hidden><span aria-hidden="true">←</span> {t.overview}</a>
+   <div class="admin-grid" id="admin-profile-page" hidden>
     <section class="admin-card" id="admin-profile-panel"><h2>{t.profile}</h2><form id="admin-profile-form"><label>{t.displayName}<input name="displayName" maxlength="100" autocomplete="nickname" /></label><label>{t.email}<input name="email" type="email" maxlength="254" autocomplete="email" /></label><button class="primary" type="submit">{t.save}</button></form></section>
     <section class="admin-card"><h2>{t.security}</h2><form id="admin-password-form"><label>{t.currentPassword}<input name="currentPassword" type="password" required maxlength="128" autocomplete="current-password" /></label><label>{t.newPassword}<input name="newPassword" type="password" required minlength="12" maxlength="128" autocomplete="new-password" /></label><p class="admin-hint">{t.passwordHint}</p><button class="primary" type="submit">{t.changePassword}</button></form></section>
    </div>
    <section id="admin-users-panel" hidden>
-    <section class="admin-card"><h2>{t.users}</h2><div id="admin-users" class="admin-user-list"></div></section>
-    <section class="admin-card"><h2>{t.create}</h2><form id="admin-create-form" class="admin-create-grid"><label>{t.username}<input name="username" required minlength="3" maxlength="64" pattern="[a-zA-Z0-9][a-zA-Z0-9_.\-]{2,63}" autocomplete="off" /></label><label>{t.displayName}<input name="displayName" maxlength="100" autocomplete="off" /></label><label>{t.email}<input name="email" type="email" maxlength="254" autocomplete="off" /></label><label>{t.temporaryPassword}<input name="password" type="password" required minlength="12" maxlength="128" autocomplete="new-password" /></label><p class="admin-hint">{t.passwordHint}</p><button class="primary" type="submit">{t.create}</button></form></section>
+    <section class="admin-card"><div class="admin-list-heading"><h2>{t.userManagement}</h2><button id="admin-create-open" class="primary admin-icon-button" type="button" aria-label={t.create} data-tooltip={t.create}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button></div><div id="admin-users" class="admin-user-list"></div></section>
+
    </section>
   </div>
+  <dialog id="admin-create-dialog" aria-labelledby="admin-create-title"><div class="dialog-inner"><h2 id="admin-create-title">{t.create}</h2><form id="admin-create-form" class="admin-create-grid"><label>{t.username}<input name="username" required minlength="3" maxlength="64" pattern="[a-zA-Z0-9][a-zA-Z0-9_.\-]{2,63}" autocomplete="off" /></label><label>{t.displayName}<input name="displayName" maxlength="100" autocomplete="off" /></label><label>{t.email}<input name="email" type="email" maxlength="254" autocomplete="off" /></label><label>{t.temporaryPassword}<input name="password" type="password" required minlength="12" maxlength="128" autocomplete="new-password" /></label><p class="admin-hint">{t.passwordHint}</p><div class="dialog-actions"><button class="primary" type="submit">{t.create}</button><button type="button" class="secondary" id="admin-create-cancel">{t.close}</button></div></form></div></dialog>
+  <dialog id="admin-block-dialog" aria-labelledby="admin-block-title"><div class="dialog-inner"><h2 id="admin-block-title">{t.disable}</h2><p id="admin-block-username" class="admin-dialog-username"></p><p>{t.confirmDisable}</p><div class="dialog-actions"><button type="button" class="secondary" id="admin-block-cancel" autofocus>{t.close}</button><button type="button" class="admin-danger-button" id="admin-block-confirm">{t.disable}</button></div></div></dialog>
+  <dialog id="admin-delete-dialog" aria-labelledby="admin-delete-title"><div class="dialog-inner"><span class="admin-delete-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/></svg></span><h2 id="admin-delete-title">{t.deleteTitle}</h2><p id="admin-delete-username" class="admin-delete-username"></p><p>{t.deleteHint}</p><div class="dialog-actions"><button type="button" class="secondary" id="admin-delete-cancel" autofocus>{t.close}</button><button type="button" class="admin-danger-button" id="admin-delete-confirm">{t.deleteAccount}</button></div></div></dialog>
   <dialog id="admin-reset-dialog" aria-labelledby="admin-reset-title"><div class="dialog-inner"><h2 id="admin-reset-title">{t.resetTitle}</h2><p id="admin-reset-username"></p><p>{t.resetHint}</p><form id="admin-reset-form"><label>{t.temporaryPassword}<input name="password" type="password" required minlength="12" maxlength="128" autocomplete="new-password" /></label><div class="dialog-actions"><button type="submit" class="primary">{t.submitReset}</button><button type="button" class="secondary" id="admin-reset-cancel">{t.close}</button></div></form></div></dialog>
  </section>
 </Layout>

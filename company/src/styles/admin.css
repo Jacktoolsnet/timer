@@ -80,3 +80,32 @@
  .admin-header-session p { justify-content:flex-end; }
 }
 @media(max-width:420px) { .admin-header-session { flex-basis:100%; justify-content:space-between; } .admin-header-session p { justify-content:flex-start; } }
+
+.admin-tiles { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; }
+.admin-tile { position:relative; display:flex; flex-direction:column; align-items:flex-start; gap:14px; min-width:0; padding:30px; border:1px solid var(--line); border-radius:22px; background:var(--surface); color:var(--text); transition:transform .18s,border-color .18s,box-shadow .18s; }
+.admin-tile:hover { transform:translateY(-4px); border-color:var(--accent); box-shadow:0 12px 30px color-mix(in srgb,var(--accent) 10%,transparent); }
+.admin-tile:focus-visible { outline:2px solid var(--accent); outline-offset:4px; }
+.admin-tile-icon { display:grid; place-items:center; width:56px; height:56px; border-radius:17px; background:var(--accent-soft); color:var(--accent); }
+.admin-tile-icon svg { width:28px; height:28px; fill:none; stroke:currentColor; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+.admin-tile strong { font-size:1.25rem; }
+.admin-tile-description { color:var(--muted); line-height:1.6; }
+.admin-tile-arrow { position:absolute; top:30px; right:30px; font-size:1.4rem; color:var(--accent); }
+.admin-back { display:inline-flex; align-items:center; gap:10px; min-height:44px; margin-bottom:18px; color:var(--accent); }
+@media(max-width:680px) { .admin-tiles { grid-template-columns:minmax(0,1fr); gap:18px; } }
+@media(prefers-reduced-motion:reduce) { .admin-tile { transition:none; } .admin-tile:hover { transform:none; } }
+
+.admin-list-heading { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:12px; }
+.admin-list-heading h2 { margin:0; }
+.jt-admin .admin-icon-button { position:relative; display:inline-grid; place-items:center; width:44px; height:44px; padding:10px; border-radius:12px; }
+.admin-icon-button svg,.admin-delete-symbol svg { width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.admin-icon-button::after { content:attr(data-tooltip); position:absolute; z-index:2; right:0; bottom:calc(100% + 8px); width:max-content; max-width:min(240px,70vw); padding:8px 11px; border:1px solid var(--line); border-radius:9px; background:var(--text); color:var(--bg); font-size:.78rem; font-weight:500; line-height:1.4; box-shadow:0 4px 16px #0002; opacity:0; visibility:hidden; pointer-events:none; transition:opacity .15s; }
+.admin-icon-button:hover::after,.admin-icon-button:focus-visible::after { opacity:1; visibility:visible; }
+.admin-delete-action,.admin-danger-button,.admin-delete-symbol { --admin-danger:light-dark(#a62c39,#ff9fa9); color:var(--admin-danger); }
+.admin-delete-action:hover { background:color-mix(in srgb,var(--admin-danger) 12%,var(--surface)); }
+.admin-danger-button { background:color-mix(in srgb,var(--admin-danger) 12%,var(--surface)); border:1px solid color-mix(in srgb,var(--admin-danger) 45%,var(--line)); border-radius:10px; }
+.admin-delete-symbol { display:grid; place-items:center; width:52px; height:52px; border-radius:16px; background:color-mix(in srgb,var(--admin-danger) 12%,var(--surface)); }
+#admin-delete-dialog .admin-delete-username,.admin-dialog-username { font-weight:700; color:var(--text); overflow-wrap:anywhere; }
+#admin-create-dialog { max-width:min(640px,calc(100vw - 32px)); }
+#admin-create-dialog,#admin-delete-dialog,#admin-block-dialog { max-height:calc(100dvh - 32px); overflow:auto; }
+#admin-create-form>.dialog-actions { grid-column:1/-1; }
+@media(prefers-reduced-motion:reduce) { .admin-icon-button::after { transition:none; } }

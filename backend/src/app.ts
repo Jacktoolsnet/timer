@@ -22,7 +22,7 @@ export async function createApp(config:Config,db:Database){
   if(origin){res.set('Access-Control-Allow-Origin',origin);res.set('Access-Control-Allow-Credentials','true');res.vary('Origin');}
   if(req.method==='OPTIONS'){
    if(!origin)throw new ApiError(403,'origin_forbidden');
-   res.set('Access-Control-Allow-Methods','GET,POST,PATCH,PUT,OPTIONS');
+   res.set('Access-Control-Allow-Methods','GET,POST,PATCH,PUT,DELETE,OPTIONS');
    res.set('Access-Control-Allow-Headers','Content-Type,X-CSRF-Token');res.status(204).end();return;
   }
   if(!['GET','HEAD'].includes(req.method)&&(!origin||!config.origins.includes(origin)))throw new ApiError(403,'origin_forbidden');
@@ -88,7 +88,7 @@ export async function createApp(config:Config,db:Database){
   await rateLimit('password:'+a.user.id,config.loginLimit);
   await db.transaction(async client=>{
    const user=(await client.query<UserRow>('SELECT * FROM jt_users WHERE id=$1 FOR UPDATE',[a.user.id])).rows[0];
-   if(!user.active||!(await client.query('SELECT 1 FROM jt_admin_sessions WHERE token_hash=$1',[a.tokenHash])).rowCount)throw new ApiError(401,'unauthenticated');
+   if(!user?.active||!(await client.query('SELECT 1 FROM jt_admin_sessions WHERE token_hash=$1',[a.tokenHash])).rowCount)throw new ApiError(401,'unauthenticated');
    if(!await verifyPassword(current,user.password_hash))throw new ApiError(401,'invalid_credentials');
    await client.query('UPDATE jt_users SET password_hash=$1,must_change_password=false,updated_at=now() WHERE id=$2',[await hashPassword(next),user.id]);
    await client.query('DELETE FROM jt_admin_sessions WHERE user_id=$1',[user.id]);await audit(client,user.id,user.id,'password_changed');
@@ -99,7 +99,7 @@ export async function createApp(config:Config,db:Database){
   const a=auth(res);if(a.user.must_change_password)throw new ApiError(403,'password_change_required');
   const body=object(req.body,['displayName','email']);const display=text(body.displayName,0,100).trim();const mail=email(body.email);
   const user=await db.transaction(async client=>{
-   const result=await client.query<UserRow>('UPDATE jt_users SET display_name=$1,email=$2,updated_at=now() WHERE id=$3 RETURNING *',[display,mail,a.user.id]);await audit(client,a.user.id,a.user.id,'profile_updated');return result.rows[0];
+   const result=await client.query<UserRow>('UPDATE jt_users SET display_name=$1,email=$2,updated_at=now() WHERE id=$3 RETURNING *',[display,mail,a.user.id]);if(!result.rowCount)throw new ApiError(401,'unauthenticated');await audit(client,a.user.id,a.user.id,'profile_updated');return result.rows[0];
   });res.json({user:publicUser(user)});
  });
  app.get('/api/v1/admin/users',requireAuth,root,async(_req,res)=>{
@@ -122,6 +122,16 @@ export async function createApp(config:Config,db:Database){
    if(!body.active)await client.query('DELETE FROM jt_admin_sessions WHERE user_id=$1',[target]);
    await audit(client,auth(res).user.id,target,body.active?'admin_enabled':'admin_disabled');return result.rows[0];
   });res.json({user:publicUser(user)});
+ });
+ app.delete('/api/v1/admin/users/:id',requireAuth,csrf,root,async(req,res)=>{
+  const target=id(req);object(req.body,[]);
+  await db.transaction(async client=>{
+   const user=(await client.query<UserRow>('SELECT * FROM jt_users WHERE id=$1 FOR UPDATE',[target])).rows[0];
+   if(!user)throw new ApiError(404,'not_found');if(user.role==='root')throw new ApiError(403,'root_protected');
+   // Sessions cascade; audit entries remain, with the removed target anonymized by the FK.
+   await audit(client,auth(res).user.id,target,'admin_deleted');
+   await client.query('DELETE FROM jt_users WHERE id=$1',[target]);
+  });res.status(204).end();
  });
  app.post('/api/v1/admin/users/:id/password',requireAuth,csrf,root,async(req,res)=>{
   const target=id(req);const body=object(req.body,['password']);const hash=await hashPassword(password(body.password));

@@ -208,7 +208,7 @@ mit einem isolierten Test-HTTP-Backend, ohne Betreiberzugangsdaten.
 - `GET /health/live`, `GET /health/ready`.
 - `POST /api/v1/auth/login`, `GET /api/v1/auth/me`, `POST /api/v1/auth/logout`.
 - `PATCH /api/v1/auth/profile`, `PUT /api/v1/auth/password`.
-- Nur Root: `GET/POST /api/v1/admin/users`, `PATCH /api/v1/admin/users/:id`,
+- Nur Root: `GET/POST /api/v1/admin/users`, `PATCH/DELETE /api/v1/admin/users/:id`,
   `POST /api/v1/admin/users/:id/password`.
 - Schreibzugriffe benötigen einen erlaubten `Origin`, JSON und nach Anmeldung
   zusätzlich `X-CSRF-Token`. Die Sessionantwort enthält den CSRF-Token, nicht den Cookieinhalt.
@@ -217,6 +217,9 @@ mit einem isolierten Test-HTTP-Backend, ohne Betreiberzugangsdaten.
 - Cookies mit `credentials: include`; keine Tokens oder Passwörter im Local Storage.
 - `ADMIN_ALLOWED_ORIGINS` ist eine exakte, kommaseparierte Liste, ohne Sternchen und
   ohne abschließenden Slash. Nur Company-Adressen, keine pauschale Freigabe aller Tools.
+- Kontolöschung ist nur für Root und nur für Nicht-Root-Konten möglich. Sitzungen
+  werden kaskadierend gelöscht; Auditereignisse bleiben ohne Verweis auf das
+  entfernte Zielkonto erhalten. Keine Migration für diese Funktion erforderlich.
 - Getrennte Inaktivitäts- und absolute Sessiongrenze; Passwortänderung, Reset und
   Sperrung widerrufen Sessions. Logout verwirft die konkrete Session.
 - Login-/Passwortversuche werden pro Benutzer/IP über PostgreSQL begrenzt, nicht

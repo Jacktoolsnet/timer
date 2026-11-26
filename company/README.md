@@ -389,6 +389,17 @@ Die bestehende Company-Seite enthält jetzt `/de/admin/` sowie die drei anderen
 Sprachvarianten und `/admin/`. API, Root-Zugang und PostgreSQL laufen ausschließlich
 im eigenständigen Projekt `../backend/`. Die Company-Seite bleibt statisch.
 
+Nach Anmeldung zeigt die Admin-Startseite eine Kachelübersicht. `/{lang}/admin/profile/`
+enthält Profil und Passwortänderung, `/{lang}/admin/users/` die Benutzerverwaltung
+(nur Root). Jede Unterseite prüft die Sitzung erneut; Backend-Rollenprüfungen bleiben
+maßgeblich. Ein erforderlicher Passwortwechsel hat Vorrang vor der Übersicht.
+In der Benutzerverwaltung öffnet der Plus-Button die Anlegemaske als modales Overlay.
+Iconbuttons bieten Sperren/Entsperren, Passwortreset und Löschen mit beschrifteten
+Tooltips. Löschen erfordert eine ausdrückliche Bestätigung; Root ist geschützt.
+
+Weitere Module wie die spätere Zertifikatsprüfung können als zusätzliche Kacheln
+und Unterseiten ergänzt werden; sie sind noch nicht implementiert.
+
 Lokales Proxy-Ziel: `PUBLIC_BACKEND_URL=http://127.0.0.1:4340` (öffentlicher Wert).
 Im Entwicklungsmodus laufen Browseranfragen relativ über `/api/v1`; deshalb bleiben
 Sitzungscookies sowohl bei `localhost` als auch `127.0.0.1` erhalten. Origin- und

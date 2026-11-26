@@ -69,6 +69,31 @@ test('admin lifecycle, forced password change, suspension and password reset',as
  assert.equal((await request('auth/me','GET',undefined,alice)).status,401);
  const audit=await db.query('SELECT action FROM jt_audit_events');assert.ok(audit.rows.some(row=>row.action==='admin_password_reset'));
 });
+test('only root can delete an admin, with CSRF; root stays protected and sessions are revoked',async()=>{
+ const root=await login();
+ const created=await request('admin/users','POST',{username:'delete-test',password:'delete-test-password!'},root);
+ assert.equal(created.status,201);const target=(await created.json()).user.id;
+ let admin=await login('delete-test','delete-test-password!');
+ await request('auth/password','PUT',{currentPassword:'delete-test-password!',newPassword:'delete-test-updated!'},admin);
+ admin=await login('delete-test','delete-test-updated!');
+ const path='admin/users/'+target;
+ assert.equal((await request(path,'DELETE',{})).status,401);
+ assert.equal((await request(path,'DELETE',{},admin)).status,403);
+ assert.equal((await request(path,'DELETE',{},root,{'X-CSRF-Token':''})).status,403);
+ assert.equal((await request(path,'DELETE',{},root,{Origin:'https://clock.jacktools.net'})).status,403);
+ assert.equal((await request('admin/users/'+root.data.user.id,'DELETE',{},root)).status,403);
+ assert.equal((await request('admin/users/invalid','DELETE',{},root)).status,400);
+ assert.equal((await request(path,'DELETE',{unexpected:true},root)).status,400);
+ assert.equal((await request('auth/me','GET',undefined,admin)).status,200);
+ assert.equal((await request(path,'DELETE',{},root)).status,204);
+ assert.equal((await request('auth/me','GET',undefined,admin)).status,401);
+ assert.equal((await request('auth/login','POST',{username:'delete-test',password:'delete-test-updated!'})).status,401);
+ assert.equal((await request(path,'DELETE',{},root)).status,404);
+ assert.equal((await db.query('SELECT 1 FROM jt_users WHERE id=$1',[target])).rowCount,0);
+ assert.equal((await db.query('SELECT 1 FROM jt_admin_sessions WHERE user_id=$1',[target])).rowCount,0);
+ const audit=await db.query("SELECT target_id FROM jt_audit_events WHERE action='admin_deleted' AND actor_id=$1",[root.data.user.id]);
+ assert.equal(audit.rowCount,1);assert.equal(audit.rows[0].target_id,null);
+});
 test('CORS preflight, payload validation and production session flags',async()=>{
  const pre=await fetch(base+'/api/v1/auth/me',{method:'OPTIONS',headers:{Origin:origin,'Access-Control-Request-Method':'GET'}});
  assert.equal(pre.status,204);assert.equal(pre.headers.get('access-control-allow-origin'),origin);assert.equal(pre.headers.get('access-control-allow-credentials'),'true');
@@ -86,7 +111,7 @@ test('CORS preflight, payload validation and production session flags',async()=>
   const address=secured.address() as {port:number};const endpoint=`http://127.0.0.1:${address.port}/api/v1/`;
   const headers={Origin:productionOrigin,'Content-Type':'application/json'};
   const preflight=await fetch(endpoint+'auth/login',{method:'OPTIONS',headers:{Origin:productionOrigin,'Access-Control-Request-Method':'POST','Access-Control-Request-Headers':'content-type,x-csrf-token'}});
-  assert.equal(preflight.status,204);assert.equal(preflight.headers.get('access-control-allow-origin'),productionOrigin);
+  assert.equal(preflight.status,204);assert.match(preflight.headers.get('access-control-allow-methods')!,/DELETE/);assert.equal(preflight.headers.get('access-control-allow-origin'),productionOrigin);
   assert.equal(preflight.headers.get('access-control-allow-credentials'),'true');
   const result=await fetch(endpoint+'auth/login',{method:'POST',headers,body:JSON.stringify({username:'root',password:config.rootPassword})});
   assert.equal(result.status,200);assert.equal(result.headers.get('access-control-allow-origin'),productionOrigin);

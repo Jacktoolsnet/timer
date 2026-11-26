@@ -47,7 +47,7 @@ for(const host of ['localhost','127.0.0.1'])test(`login and reload retain HttpOn
  page.on('request',request=>{if(new URL(request.url()).pathname.startsWith('/api/v1/'))requests.push(request.url());});
  await page.goto(origin+'/de/admin/');await expect(page.locator('#admin-toast')).toBeHidden();
  await page.locator('#admin-login-form [name=username]').fill('root');await page.locator('#admin-login-form [name=password]').fill('test-password-123!');await page.locator('#admin-login-form button').click();
- await expect(page.locator('#admin-workspace')).toBeVisible();await expect(page.locator('#admin-users-panel')).toBeVisible();
+ await expect(page.locator('#admin-workspace')).toBeVisible();await expect(page.locator('#admin-overview')).toBeVisible();
  const cookie=(await context.cookies(origin)).find(cookie=>cookie.name==='jt_admin_dev');
  expect(cookie?.httpOnly).toBe(true);expect(cookie?.sameSite).toBe('Lax');
  await page.reload();await expect(page.locator('#admin-workspace')).toBeVisible();
