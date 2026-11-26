@@ -135,7 +135,7 @@ const canonical = new URL(Astro.props.canonicalPath ?? (Astro.url.pathname === '
           </details>
 
         </div>
-        <nav class="header-nav" aria-label={t.navigation}><div class="header-nav-links"><a href={home+'#tools'}>{t.tools}</a><a href={home+'#idee'}>{t.idea}</a><slot name="header-action" /></div></nav>
+        {Astro.props.route === 'admin' ? <slot name="admin-header" /> : <nav class="header-nav" aria-label={t.navigation}><div class="header-nav-links"><a href={home+'#tools'}>{t.tools}</a><a href={home+'#idee'}>{t.idea}</a><slot name="header-action" /></div></nav>}
       </header>
       <main id="main"><slot /></main>
       <footer class="site-footer">

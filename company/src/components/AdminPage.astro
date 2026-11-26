@@ -7,6 +7,13 @@ const {lang}=Astro.props as {lang:Language};const t=adminText[lang];
 const api=import.meta.env.DEV?'':(import.meta.env.PUBLIC_BACKEND_URL||'https://backend.jacktools.net');
 ---
 <Layout lang={lang} title={t.title} description={t.intro} route="admin" noindex homeAlternates={false} canonicalPath={`/${lang}/admin/`} quietBackground>
+ <div slot="admin-header" class="admin-header-controls">
+  <span class="admin-header-label"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 3v6c0 4-3 7-8 9-5-2-8-5-8-9V6l8-3Z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>{t.title}</span>
+  <div id="admin-header-session" class="admin-header-session" hidden>
+   <p><span class="admin-header-welcome">{t.welcome}</span><strong id="admin-identity"></strong><span id="admin-role" class="admin-badge"></span></p>
+   <button id="admin-logout" type="button" class="secondary"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4H5v16h5m4-13 5 5-5 5m-5-5h10"/></svg><span>{t.logout}</span></button>
+  </div>
+ </div>
  <section class="jt-admin" id="jt-admin" data-state="signed-out" data-api={api} data-text={JSON.stringify(t)}>
   <div id="admin-toast" class="admin-toast" role="status" aria-live="polite" aria-atomic="true" hidden>
    <span class="admin-toast-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path class="admin-toast-check" d="m8 12 3 3 5-6"/><path class="admin-toast-error" d="M12 7v6m0 3v.1"/></svg></span>
@@ -35,8 +42,7 @@ const api=import.meta.env.DEV?'':(import.meta.env.PUBLIC_BACKEND_URL||'https://b
    <form id="admin-login-form"><label>{t.username}<input name="username" autocomplete="username" required minlength="3" maxlength="64" /></label><label>{t.password}<input name="password" type="password" autocomplete="current-password" required maxlength="128" /></label><button class="primary" type="submit">{t.login}</button></form>
   </section>
   <div id="admin-workspace" hidden>
-  <header class="admin-heading"><p class="eyebrow">JACKTOOLS / ADMIN</p><h1>{t.title}</h1><p>{t.intro}</p></header>
-   <div class="admin-session-bar"><p>{t.welcome} <strong id="admin-identity"></strong> <span id="admin-role" class="admin-badge"></span></p><button id="admin-logout" type="button" class="secondary">{t.logout}</button></div>
+  <h1 class="sr-only">{t.title}</h1>
    <p id="admin-password-required" class="admin-warning" hidden>{t.required}</p>
    <div class="admin-grid">
     <section class="admin-card" id="admin-profile-panel"><h2>{t.profile}</h2><form id="admin-profile-form"><label>{t.displayName}<input name="displayName" maxlength="100" autocomplete="nickname" /></label><label>{t.email}<input name="email" type="email" maxlength="254" autocomplete="email" /></label><button class="primary" type="submit">{t.save}</button></form></section>

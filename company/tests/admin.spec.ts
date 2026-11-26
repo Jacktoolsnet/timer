@@ -33,7 +33,9 @@ async function signIn(page:Page){
 for(const lang of ['de','en','es','fr'])test(`admin page is integrated, translated and noindex in ${lang}`,async({page,request})=>{
  const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));await mockBackend(page);await page.goto('/'+lang+'/admin/');
  await expect(page.locator('#admin-login-panel')).toBeVisible();await expect(page.locator('#admin-workspace')).toBeHidden();
- await expect(page.locator('.admin-heading')).toBeHidden();
+ await expect(page.locator('.admin-heading')).toHaveCount(0);
+ await expect(page.locator('.site-header .header-nav')).toHaveCount(0);
+ await expect(page.locator('#admin-header-session')).toBeHidden();
  await expect(page.locator('#admin-login-panel>p')).toHaveCount(0);
  await expect(page.locator('#admin-status')).toBeEmpty();
  await expect(page.locator('#admin-login-title')).toHaveClass('sr-only');
@@ -63,7 +65,8 @@ test('root manages admins without storing credentials and logout clears protecte
  await page.locator('#admin-reset-form [name=password]').fill('new-temporary-password!');await page.locator('#admin-reset-form button[type=submit]').click();await expect(page.locator('#admin-reset-dialog')).toBeHidden();
  expect(await page.evaluate(()=>localStorage.length)).toBe(0);expect(await page.evaluate(()=>sessionStorage.length)).toBe(0);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
- await page.locator('#admin-logout').click();await expect(page.locator('#admin-workspace')).toBeHidden();await expect(page.locator('#jt-admin')).toHaveAttribute('data-state','signed-out');await expect(page.locator('#admin-users')).toBeEmpty();
+ await expect(page.locator('.site-header #admin-identity')).toHaveText('Test root');await expect(page.locator('.site-header #admin-logout')).toBeVisible();
+ await page.locator('#admin-logout').click();await expect(page.locator('#admin-header-session')).toBeHidden();await expect(page.locator('#admin-identity')).toBeEmpty();await expect(page.locator('#admin-workspace')).toBeHidden();await expect(page.locator('#jt-admin')).toHaveAttribute('data-state','signed-out');await expect(page.locator('#admin-users')).toBeEmpty();
 });
 test('ordinary admins cannot see account management and must change temporary password',async({page})=>{
  await mockBackend(page,'admin',true);await page.goto('/en/admin/');await signIn(page);

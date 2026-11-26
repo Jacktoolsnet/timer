@@ -13,7 +13,7 @@ const toast=createAdminToast($('admin-toast'),$('admin-status'),$('admin-toast-c
 class RequestError extends Error{constructor(public code:string){super(code);}}
 function message(error:unknown){return error instanceof RequestError?(error.code==='backend_unavailable'?t.unavailable:t.errors[error.code as keyof typeof t.errors]||t.errors.internal_error):t.unavailable;}
 function status(text:string,error=false){toast.show(text,error);}
-function signedOut(){root.dataset.state='signed-out';csrf='';user=null;$('admin-login-panel').hidden=false;$('admin-workspace').hidden=true;$('admin-users').replaceChildren();dialog.close();root.querySelectorAll<HTMLInputElement>('input[type=password]').forEach(input=>input.value='');}
+function signedOut(){$('admin-header-session').hidden=true;$('admin-identity').textContent='';$('admin-role').textContent='';root.dataset.state='signed-out';csrf='';user=null;$('admin-login-panel').hidden=false;$('admin-workspace').hidden=true;$('admin-users').replaceChildren();dialog.close();root.querySelectorAll<HTMLInputElement>('input[type=password]').forEach(input=>input.value='');}
 async function api<T=Record<string,never>>(path:string,method='GET',body?:unknown,establishingSession=false):Promise<T>{
  const response=await fetch(base+'/api/v1/'+path,{method,credentials:'include',cache:'no-store',signal:AbortSignal.timeout(15000),headers:{...(method==='GET'?{}:{'Content-Type':'application/json','X-CSRF-Token':csrf})},...(body===undefined?{}:{body:JSON.stringify(body)})});
  if(!response.ok){
@@ -27,7 +27,7 @@ async function api<T=Record<string,never>>(path:string,method='GET',body?:unknow
  return response.status===204?undefined as T:await response.json() as T;
 }
 function showUser(next:User){
- root.dataset.state='signed-in';user=next;$('admin-login-panel').hidden=true;$('admin-workspace').hidden=false;
+ $('admin-header-session').hidden=false;root.dataset.state='signed-in';user=next;$('admin-login-panel').hidden=true;$('admin-workspace').hidden=false;
  $('admin-identity').textContent=next.displayName||next.username;$('admin-role').textContent=next.role==='root'?t.root:t.admin;
  $('admin-password-required').hidden=!next.mustChangePassword;$('admin-profile-panel').hidden=next.mustChangePassword;
  $('admin-users-panel').hidden=next.role!=='root'||next.mustChangePassword;
@@ -57,10 +57,10 @@ async function users(){
  }
 }
 async function perform(work:()=>Promise<void>){
- if(busy)return;busy=true;root.setAttribute('aria-busy','true');
+ if(busy)return;busy=true;root.setAttribute('aria-busy','true');($('admin-logout') as HTMLButtonElement).disabled=true;
  root.querySelectorAll<HTMLButtonElement>('button').forEach(b=>{if(b.id!=='admin-toast-close')b.disabled=true;});
  try{await work();}catch(error){status(message(error),true);}
- finally{busy=false;root.removeAttribute('aria-busy');root.querySelectorAll<HTMLButtonElement>('button').forEach(b=>b.disabled=false);}
+ finally{busy=false;($('admin-logout') as HTMLButtonElement).disabled=false;root.removeAttribute('aria-busy');root.querySelectorAll<HTMLButtonElement>('button').forEach(b=>b.disabled=false);}
 }
 form('admin-login-form').addEventListener('submit',event=>{event.preventDefault();void perform(async()=>{
  const value=await api<{user:User;csrfToken:string}>('auth/login','POST',{username:field('admin-login-form','username').value,password:field('admin-login-form','password').value});
@@ -69,7 +69,7 @@ form('admin-login-form').addEventListener('submit',event=>{event.preventDefault(
  const verified=await api<{user:User;csrfToken:string}>('auth/me','GET',undefined,true);
  csrf=verified.csrfToken;showUser(verified.user);await users();status(verified.user.mustChangePassword?t.required:t.signedIn);
 });});
-$('admin-logout').addEventListener('click',()=>void perform(async()=>{await api('auth/logout','POST',{});signedOut();status(t.signedOut);}));
+$('admin-logout').addEventListener('click',()=>void perform(async()=>{await api('auth/logout','POST',{});signedOut();field('admin-login-form','username').focus();status(t.signedOut);}));
 form('admin-profile-form').addEventListener('submit',event=>{event.preventDefault();void perform(async()=>{
  const value=await api<{user:User}>('auth/profile','PATCH',{displayName:field('admin-profile-form','displayName').value,email:field('admin-profile-form','email').value});showUser(value.user);status(t.saved);await users();
 });});
