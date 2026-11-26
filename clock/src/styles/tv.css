@@ -61,3 +61,13 @@
 /* The shared focus header must never leak into receiver pairing or preview.
    Active streams use their own auto-hiding controls instead. */
 body.tv-receiver.focus-view .site-shell>.site-header:has(.header-focus-actions){display:none!important}
+
+
+/* Only a connected, non-preview receiver exposes stream controls. */
+.tv-receiver:not(.tv-ready) #tv-controls,.tv-preview #tv-controls{display:none!important}
+.tv-controls>button{width:44px;height:44px;padding:9px}
+
+
+/* Keep the clock's regular focus/fullscreen header compact on every screen size. */
+body.focus-view .header-focus-actions>button>span{display:none}
+body.focus-view .header-focus-actions>button{width:44px;height:44px;padding:9px}

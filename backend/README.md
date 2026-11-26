@@ -294,10 +294,11 @@ Uhrvorschau. Die Bezeichnung ist nur ein Hinweis, kein verifizierter Gerätename
 Die Vorschau erstellt keine Verbindung und fordert weder Standort noch Wake-Lock an.
 Beim Bestätigen fordert der Empfänger direkt im Benutzerereignis Vollbild an.
 Browser ohne Fullscreen-Unterstützung oder mit Sperre bleiben in der bildfüllenden
-Fokusansicht. Die beiden Steuerbuttons verschwinden nach fünf Sekunden Inaktivität.
+Fokusansicht. Der symbolische Button „Stream beenden“ verschwindet nach fünf Sekunden Inaktivität.
 Fernbedienungstasten, Maus und Touch blenden sie wieder ein; die erste Taste nach
 dem Ausblenden weckt nur die Bedienung (kein versehentliches Beenden).
-Pfeiltasten wechseln zwischen Vollbild und Stream beenden; Enter aktiviert.
+Pfeiltasten fokussieren „Stream beenden“; Enter aktiviert. Beim Beenden wird
+Vollbild verlassen und ein neuer QR-Code zum Koppeln angezeigt.
 
 ### Lokal testen
 

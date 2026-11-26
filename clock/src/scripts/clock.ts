@@ -142,7 +142,7 @@ field('transparency').addEventListener('input',()=>{
 document.addEventListener('storage-enabled',save);
 document.addEventListener('preferences-cleared',()=>{geolocation.clear();configure();});
 let ownsFullscreen=false;
-function focus(on:boolean){if(isReceiver)on=true;document.body.classList.toggle('focus-view',on);const b=$('clock-focus');b.setAttribute('aria-pressed',String(on));b.setAttribute('aria-label',on?t.exitFocus:t.focusMode);b.querySelector('span')!.textContent=on?t.exitFocus:t.focusMode;}
+function focus(on:boolean){if(isReceiver)on=true;document.body.classList.toggle('focus-view',on);const b=$('clock-focus');b.setAttribute('aria-pressed',String(on));b.setAttribute('aria-label',on?t.exitFocus:t.focusMode);b.title=on?t.exitFocus:t.focusMode;b.querySelector('span')!.textContent=on?t.exitFocus:t.focusMode;}
 async function leave(){focus(false);if(ownsFullscreen&&document.fullscreenElement){ownsFullscreen=false;await document.exitFullscreen().catch(()=>{});}}
 $('clock-focus').addEventListener('click',async()=>{if(document.body.classList.contains('focus-view'))return leave();focus(true);if(!document.fullscreenElement)try{await document.documentElement.requestFullscreen();ownsFullscreen=true;if(!document.body.classList.contains('focus-view'))await leave();}catch{}});
 document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement){ownsFullscreen=false;focus(false);}});document.addEventListener('keydown',e=>{if(e.key==='Escape')void leave();});

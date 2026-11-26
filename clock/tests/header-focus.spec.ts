@@ -10,6 +10,10 @@ test('focus action belongs to the header and stays reachable',async({page})=>{
  await page.locator('#tv-open').click();await expect(page.locator('#tv-dialog')).toBeVisible();await page.locator('#tv-close').click();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  await button.click();await expect(page.locator('body')).toHaveClass(/focus-view/);
+ await expect(button.locator('span')).toBeHidden();
+ await expect(page.locator('#tv-open span')).toBeHidden();
+ await expect(button).toHaveAttribute('title',await button.getAttribute('aria-label') as string);
+ await expect(page.locator('#tv-open')).toHaveAttribute('title','Uhr streamen');
  await expect(button).toBeVisible();await button.click();
  await expect(page.locator('body')).not.toHaveClass(/focus-view/);
  await expect(button).toBeVisible();

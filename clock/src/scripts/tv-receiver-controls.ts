@@ -35,7 +35,6 @@ export function createReceiverControls(controls:HTMLElement){
  document.addEventListener('pointerdown',reveal,{passive:true});
  controls.addEventListener('focusin',reveal);
  document.addEventListener('fullscreenchange',reveal);
- buttons[0]?.addEventListener('click',requestFullscreen);
  window.addEventListener('pagehide',()=>window.clearTimeout(idleTimer));
  return {
   requestFullscreen,

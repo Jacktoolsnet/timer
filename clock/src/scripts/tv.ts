@@ -122,7 +122,12 @@ export function createClockTv(options:{snapshot:()=>TvSnapshot;apply:(snapshot:T
    receiverControls?.requestFullscreen();
    await api(session!.id+'/approve','POST',{});schedule(10);
   }));
-  async function stop(){if(session)await api(session.id+'/stop','POST',{});forget();running=false;document.body.classList.remove('tv-ready');await start();}
+  async function stop(){
+   if(session)await api(session.id+'/stop','POST',{});
+   forget();running=false;receiverControls?.setActive(false);
+   if(document.fullscreenElement&&document.exitFullscreen)try{await document.exitFullscreen();}catch{/* The QR page remains usable if browser fullscreen cannot be closed. */}
+   document.body.classList.remove('tv-ready');await start();
+  }
   $('tv-reject').addEventListener('click',event=>void action(event.currentTarget as HTMLButtonElement,stop));
   $('tv-stop').addEventListener('click',event=>void action(event.currentTarget as HTMLButtonElement,stop));
   $('tv-retry').addEventListener('click',event=>void action(event.currentTarget as HTMLButtonElement,async()=>{if(session)await api(session.id+'/stop','POST',{});await start();}));
