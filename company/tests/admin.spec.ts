@@ -39,6 +39,7 @@ for(const lang of ['de','en','es','fr'])test(`admin page is integrated, translat
  await expect(page.locator('#admin-header-session')).toBeHidden();
  await expect(page.locator('#admin-login-panel>p')).toHaveCount(0);
  await expect(page.locator('#admin-status')).toBeEmpty();
+ for(const kind of ['create','block','reset','delete'])await expect(page.locator(`#admin-${kind}-dialog .admin-dialog-symbol[aria-hidden=true] svg`)).toHaveCount(1);
  await expect(page.locator('#admin-login-title')).toHaveClass('sr-only');
  await expect(page.locator('.admin-login-art svg')).toBeVisible();
  const art=await page.locator('.admin-login-art').boundingBox();const form=await page.locator('#admin-login-form').boundingBox();

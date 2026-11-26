@@ -97,13 +97,14 @@
 .admin-list-heading { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:12px; }
 .admin-list-heading h2 { margin:0; }
 .jt-admin .admin-icon-button { position:relative; display:inline-grid; place-items:center; width:44px; height:44px; padding:10px; border-radius:12px; }
-.admin-icon-button svg,.admin-delete-symbol svg { width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.admin-icon-button svg,.admin-dialog-symbol svg { width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
 .admin-icon-button::after { content:attr(data-tooltip); position:absolute; z-index:2; right:0; bottom:calc(100% + 8px); width:max-content; max-width:min(240px,70vw); padding:8px 11px; border:1px solid var(--line); border-radius:9px; background:var(--text); color:var(--bg); font-size:.78rem; font-weight:500; line-height:1.4; box-shadow:0 4px 16px #0002; opacity:0; visibility:hidden; pointer-events:none; transition:opacity .15s; }
 .admin-icon-button:hover::after,.admin-icon-button:focus-visible::after { opacity:1; visibility:visible; }
 .admin-delete-action,.admin-danger-button,.admin-delete-symbol { --admin-danger:light-dark(#a62c39,#ff9fa9); color:var(--admin-danger); }
 .admin-delete-action:hover { background:color-mix(in srgb,var(--admin-danger) 12%,var(--surface)); }
 .admin-danger-button { background:color-mix(in srgb,var(--admin-danger) 12%,var(--surface)); border:1px solid color-mix(in srgb,var(--admin-danger) 45%,var(--line)); border-radius:10px; }
-.admin-delete-symbol { display:grid; place-items:center; width:52px; height:52px; border-radius:16px; background:color-mix(in srgb,var(--admin-danger) 12%,var(--surface)); }
+.admin-dialog-symbol { display:grid; place-items:center; width:52px; height:52px; border-radius:16px; background:var(--accent-soft); color:var(--accent); }
+.admin-dialog-symbol.admin-delete-symbol { color:var(--admin-danger); background:color-mix(in srgb,var(--admin-danger) 12%,var(--surface)); }
 #admin-delete-dialog .admin-delete-username,.admin-dialog-username { font-weight:700; color:var(--text); overflow-wrap:anywhere; }
 #admin-create-dialog { max-width:min(640px,calc(100vw - 32px)); }
 #admin-create-dialog,#admin-delete-dialog,#admin-block-dialog { max-height:calc(100dvh - 32px); overflow:auto; }
