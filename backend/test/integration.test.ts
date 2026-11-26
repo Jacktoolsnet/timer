@@ -173,6 +173,11 @@ test('TV pairing is receiver-approved, scoped, encrypted, revisioned, expiring a
  const current=await (await tvRequest(receiver.id+'/receiver','GET',undefined,receiver.receiverToken)).json();assert.equal(current.revision,2);assert.equal(current.snapshot.settings.view,'binary');
  assert.equal((await tvRequest(receiver.id+'/settings','PUT',{revision:2,snapshot:{...tvSnapshot,coordinates:{latitude:52}}},sender.senderToken)).status,400);
  assert.equal((await tvRequest(receiver.id+'/settings','PUT',{revision:2,snapshot:{...tvSnapshot,settings:{...tvSnapshot.settings,background:'https://evil.test/pixel'}}},sender.senderToken)).status,400);
+ assert.equal((await tvRequest(receiver.id+'/settings','PUT',{revision:2,snapshot:{...tvSnapshot,coordinates:{latitude:52.520007,longitude:13.404954}}},sender.senderToken)).status,200);
+ const located=await (await tvRequest(receiver.id+'/receiver','GET',undefined,receiver.receiverToken)).json();assert.deepEqual(located.snapshot.coordinates,{latitude:52.52,longitude:13.405});
+ const encrypted=await db.query('SELECT snapshot FROM jt_tv_sessions WHERE id=$1',[receiver.id]);assert.ok(!encrypted.rows[0].snapshot.includes('52.52'));
+ assert.equal((await tvRequest(receiver.id+'/settings','PUT',{revision:3,snapshot:tvSnapshot},sender.senderToken)).status,200);
+ const revoked=await (await tvRequest(receiver.id+'/receiver','GET',undefined,receiver.receiverToken)).json();assert.equal(revoked.snapshot.coordinates,undefined);
  assert.equal((await tvRequest(receiver.id+'/detach','POST',{},sender.senderToken)).status,204);
  assert.equal((await tvRequest(receiver.id+'/sender','GET',undefined,sender.senderToken)).status,401);
  assert.equal((await (await tvRequest(receiver.id+'/receiver','GET',undefined,receiver.receiverToken)).json()).state,'detached');

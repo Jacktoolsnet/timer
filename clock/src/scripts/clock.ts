@@ -1,3 +1,5 @@
+import type {SeasonalLocation} from '../lib/seasonal-location';
+import {tvText} from '../lib/tv-text';
 import {createClockTv,senderDeviceName,type TvSnapshot} from './tv';
 import {createViewControls} from './view-controls';
 import {createDialControls} from './dial-controls';
@@ -39,7 +41,8 @@ function applyTransparency(){
 const updateBinary=createBinaryClock($('binary-clock'));
 const sundial=createSundial();
 const seasonal=createSeasonalBackground($('seasonal-background') as unknown as SVGSVGElement);
-const geolocation=createSeasonalLocation($('seasonal-settings'),()=>configure());
+let receiverLocation:SeasonalLocation|undefined;
+const geolocation=createSeasonalLocation($('seasonal-settings'),()=>{configure();document.dispatchEvent(new Event('clock-location-changed'));});
 const alarm=createAlarm($('clock-alarm'),$('alarm-dialog') as HTMLDialogElement,$('clock-alarm-badge'));
 const wake=screenWakeLock($('wake-status'),'',t.unavailable);
 const styledDate = createClockDate($('styled-date'));
@@ -72,8 +75,10 @@ function configure(){
  const usesLocation=background==='seasonal'||settings.view==='sundial';
  $('seasonal-settings').hidden=!usesLocation;
  geolocation.setActive(usesLocation);
- sundial.configure(settings.view==='sundial',geolocation.location,geolocation.status,geolocation.pending,settings.analogDesign as AnalogDesign,settings.numbers,zone);
- seasonal.configure(zone,settings.hemisphere,geolocation.location);
+ const position=isReceiver?receiverLocation:geolocation.location;
+ const locationMessage=isReceiver&&!position?tvText[document.documentElement.lang as keyof typeof tvText].receiverLocationMissing:geolocation.status;
+ sundial.configure(settings.view==='sundial',position,locationMessage,geolocation.pending,settings.analogDesign as AnalogDesign,settings.numbers,zone);
+ seasonal.configure(zone,settings.hemisphere,position);
  alarm.configure(zone,settings.view);
  const locale=document.documentElement.lang;
  digits=new Intl.DateTimeFormat(locale,{timeZone:zone,hour:'2-digit',minute:'2-digit',...(settings.seconds&&settings.format!=='short'?{second:'2-digit' as const}:{}),...(settings.format==='long'?{timeZoneName:'short' as const}:{}),...(settings.hourCycle==='auto'?{}:{hour12:settings.hourCycle==='12'})});
@@ -155,11 +160,14 @@ configure();setInterval(()=>{if(!document.hidden)render();},50);document.addEven
 
 enhanceClockSelects(form);
 
-createClockTv({snapshot(){
+createClockTv({snapshot(includeLocation=false){
  const {awake,...display}=settings;const root=document.documentElement;
- return {version:1,settings:{...display,zone:settings.zone==='local'?Intl.DateTimeFormat().resolvedOptions().timeZone:settings.zone},appearance:{palette:root.dataset.palette||'green',style:root.dataset.style||'technical',theme:root.dataset.theme||'light',fontSize:root.dataset.fontSize||'0'},language:root.lang,senderName:senderDeviceName()};
+ const position=includeLocation?geolocation.location:undefined;
+ const coordinates=position?{latitude:Math.round(position.latitude*1000)/1000,longitude:Math.round(position.longitude*1000)/1000}:undefined;
+ return {version:1,settings:{...display,zone:settings.zone==='local'?Intl.DateTimeFormat().resolvedOptions().timeZone:settings.zone},appearance:{palette:root.dataset.palette||'green',style:root.dataset.style||'technical',theme:root.dataset.theme||'light',fontSize:root.dataset.fontSize||'0'},language:root.lang,senderName:senderDeviceName(),...(coordinates?{coordinates}:{})};
 },apply(snapshot:TvSnapshot){
  if(!isReceiver)return;
+ receiverLocation=snapshot.coordinates;
  const root=document.documentElement;root.lang=snapshot.language;
  root.dataset.palette=snapshot.appearance.palette;root.dataset.style=snapshot.appearance.style;root.dataset.themeMode=snapshot.appearance.theme;root.dataset.theme=snapshot.appearance.theme;root.dataset.fontSize=snapshot.appearance.fontSize;
  for(const key of Object.keys(defaults))if(key!=='awake'&&key in snapshot.settings){Object.assign(settings,{[key]:snapshot.settings[key]});const input=field(key);if(input.type==='checkbox')(input as HTMLInputElement).checked=Boolean(snapshot.settings[key]);else{const value=String(snapshot.settings[key]);if(key==='zone'&&input instanceof HTMLSelectElement&&![...input.options].some(option=>option.value===value))input.add(new Option(value,value));input.value=value;}}

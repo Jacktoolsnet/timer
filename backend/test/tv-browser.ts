@@ -20,6 +20,7 @@ export async function tvBrowserTest(base:string,config:Config){
   await tvContext.addInitScript(()=>{Object.defineProperty(navigator,'geolocation',{value:{getCurrentPosition(){throw new Error('TV must not request location');},watchPosition(){throw new Error('TV must not watch location');},clearWatch(){}}});});
   const tv=await tvContext.newPage(),phone=await phoneContext.newPage();const errors:string[]=[];
   tv.on('response',async(r:any)=>{if(r.url().includes('/api/v1/tv/')&&r.status()>=400){let code='';try{code=(await r.json()).error;}catch{}console.log('TV test API failure',new URL(r.url()).pathname,r.status(),r.headers()['content-type'],code);}});
+  await tv.clock.install({time:new Date('2026-06-21T12:00:00Z')});await phone.clock.install({time:new Date('2026-06-21T12:00:00Z')});
   tv.on('pageerror',(e:Error)=>errors.push(e.message));phone.on('pageerror',(e:Error)=>errors.push(e.message));
   await tv.goto(origin+'/de/stream/');await expect(tv.locator('#tv-code')).toHaveText(/\d{4} \d{4}/);await expect(tv.locator('#tv-qr')).toBeVisible();await expect(tv.locator('meta[name=robots]')).toHaveAttribute('content','noindex, follow');
   const code=await tv.locator('#tv-code').textContent();
@@ -35,7 +36,15 @@ export async function tvBrowserTest(base:string,config:Config){
   await tv.screenshot({path:'/tmp/jacktools-stream-approval.png'});await expect(tv.locator('body')).not.toHaveClass(/tv-ready/);
   await tv.locator('#tv-approve').click();await expect(tv.locator('.clock-display')).toHaveAttribute('data-view','binaryFlip',{timeout:15000});await expect(tv.locator('html')).toHaveAttribute('data-palette','blue');await expect(tv.locator('.clock-card')).toHaveAttribute('data-background','mountains');await expect(tv.locator('body')).toHaveClass(/tv-ready/);await expect(tv.locator('#tv-preview')).not.toHaveAttribute('src',/.+/);
   await phone.locator('[name=view]').selectOption('orbit',{force:true});await phone.locator('[name=orbitReadout]').selectOption('digital',{force:true});await expect(tv.locator('.clock-display')).toHaveAttribute('data-view','orbit',{timeout:15000});
-  await phone.close();const before=await tv.locator('#digital-clock').textContent();await expect.poll(()=>tv.locator('#digital-clock').textContent(),{timeout:4000}).not.toBe(before);
+  await phoneContext.grantPermissions(['geolocation']);await phoneContext.setGeolocation({latitude:51.500444,longitude:.000444});
+  await phone.locator('[name=view]').selectOption('sundial',{force:true});await phone.locator('[name=background]').selectOption('seasonal',{force:true});
+  await phone.locator('#seasonal-location').check();await expect(phone.locator('#sundial-view')).toHaveAttribute('data-location-state','ready');
+  await expect(tv.locator('#sundial-view')).toHaveAttribute('data-location-state','missing',{timeout:15000});
+  await phone.locator('#tv-open').click();await expect(phone.locator('#tv-share-location')).not.toBeChecked();await phone.locator('#tv-share-location').check();
+  await expect(tv.locator('#sundial-shadow')).toHaveAttribute('visibility','visible',{timeout:15000});await expect(tv.locator('#seasonal-background')).toHaveAttribute('data-location-based','true');
+  await phone.locator('#tv-share-location').uncheck();await expect(tv.locator('#sundial-view')).toHaveAttribute('data-location-state','missing',{timeout:15000});
+  await phone.locator('#tv-share-location').check();await expect(tv.locator('#sundial-view')).toHaveAttribute('data-location-state','ready',{timeout:15000});
+  await phone.close();await expect(tv.locator('#sundial-view')).toHaveAttribute('data-location-state','ready');const before=await tv.locator('#digital-clock').textContent();await expect.poll(()=>tv.locator('#digital-clock').textContent(),{timeout:4000}).not.toBe(before);
   await tvContext.setOffline(true);const offline=await tv.locator('#digital-clock').textContent();await expect.poll(()=>tv.locator('#digital-clock').textContent(),{timeout:4000}).not.toBe(offline);await tvContext.setOffline(false);
   await tv.screenshot({path:'/tmp/jacktools-tv-running.png'});
   const createdPromise=tv.waitForResponse((r:any)=>r.url().endsWith('/api/v1/tv/receivers/')&&r.status()===201);await tv.keyboard.press('ArrowUp');await tv.locator('#tv-stop').click();const created=await (await createdPromise).json();await expect(tv.locator('#tv-code')).toHaveText(/\d{4} \d{4}/);

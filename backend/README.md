@@ -359,14 +359,23 @@ oder andere Tool-Subdomains. Admin-Cookies werden bei TV-Anfragen nicht gesendet
   bewussten Senden wird es bereits aus der Adresszeile entfernt. Diese neue Seite
   übernimmt nicht heimlich ungespeicherte Einstellungen eines anderen Tabs.
 - Nur erlaubte Darstellungsfelder und eigene Hintergrundkennungen; keine beliebigen
-  URLs, HTML, CSS, Alarmdaten oder Koordinaten. Lokale Zeitzone wird konkret aufgelöst.
+  URLs, HTML, CSS oder Alarmdaten. Optionale Koordinaten sind strikt numerisch,
+  geografisch begrenzt und auf drei Nachkommastellen gerundet. Lokale Zeitzone wird konkret aufgelöst.
   Snapshot AES-256-GCM-verschlüsselt in PostgreSQL, nur jeweils letzter Stand.
 - Persistente Ratenlimits pro IP, getrennt für Erstellen, Einlösen, Lesen und Ändern,
   zusätzlich Gesamtlimit; Polling mit Backoff. Abgelaufene Daten werden beim
   Anlegen und jede Minute entfernt. Keine öffentliche Geräteliste.
-- Keine Standortübertragung in dieser Version: Sonnenuhr erhält auf dem TV deshalb
-  keinen echten Schatten. Standortfreigabe am Sender bleibt ausschließlich lokal.
-  TV fragt auch keine eigene Geolocation an. Wecker/Audio werden nicht übernommen.
+- Standortübertragung ist optional: zuerst am Sender den Standort aktivieren und
+  zusätzlich im Stream-Dialog „Standort mitsenden“ einschalten (standardmäßig aus,
+  nicht dauerhaft gespeichert). Dann rechnen Sonnenuhr und Jahressimulation auf
+  dem Empfänger sowie in der Vorschau mit den gerundeten Senderkoordinaten. Der
+  Empfänger fragt keine eigene Geolocation an. Wecker/Audio bleiben ausgeschlossen.
+- Ausschalten der Weitergabe bzw. Entzug des Senderstandorts entfernt Koordinaten
+  aus dem nächsten Snapshot und nach der Synchronisierung aus der Empfängeranzeige.
+  Ohne Verbindung bleibt die letzte Anzeige einschließlich Standort weiter aktiv.
+  Die Sitzung speichert nur den letzten verschlüsselten Snapshot (maximal 24h);
+  „Stream beenden“ am Empfänger löscht ihn, Sender-Trennen lässt ihn weiterlaufen.
+  Frontend und Backend gemeinsam aktualisieren; keine neue Migration erforderlich.
 - Vollbild und Screen Wake Lock sind Best-Effort; Stickbrowser und Betriebssystem
   können Schlafmodus oder App-Beendigung erzwingen. Das muss am Zielgerät getestet werden.
 

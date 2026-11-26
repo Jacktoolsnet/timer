@@ -3,7 +3,7 @@ import {createTvScanner} from './tv-scanner';
 import {createTvKeypad} from './tv-keypad';
 import QRCode from 'qrcode';
 import type {tvText} from '../lib/tv-text';
-export type TvSnapshot={version:1;settings:Record<string,string|number|boolean>;appearance:{palette:string;style:string;theme:string;fontSize:string};language:string;senderName?:string};
+export type TvSnapshot={version:1;settings:Record<string,string|number|boolean>;appearance:{palette:string;style:string;theme:string;fontSize:string};language:string;senderName?:string;coordinates?:{latitude:number;longitude:number}};
 type State={state:'waiting'|'pending'|'active'|'detached';revision:number;acknowledged:number;snapshot?:TvSnapshot};
 // Browsers do not expose a reliable device hostname. Send only a coarse, advisory label.
 export function senderDeviceName(){
@@ -13,7 +13,7 @@ export function senderDeviceName(){
  return [browser,os].filter(Boolean).join(' · ');
 }
 class TvError extends Error{constructor(public status:number,public code:string){super(code);}}
-export function createClockTv(options:{snapshot:()=>TvSnapshot;apply:(snapshot:TvSnapshot)=>void}){
+export function createClockTv(options:{snapshot:(includeLocation?:boolean)=>TvSnapshot;apply:(snapshot:TvSnapshot)=>void}){
  const root=document.getElementById('clock-tv');if(!root)return;
  const t=JSON.parse(root.dataset.text!) as typeof tvText.en,receiver=root.dataset.receiver==='true';
  const $=(id:string)=>document.getElementById(id)!;
@@ -33,6 +33,7 @@ export function createClockTv(options:{snapshot:()=>TvSnapshot;apply:(snapshot:T
  const base=root.dataset.api!.replace(/\/$/,'');
  let session:{id:string;token:string}|undefined,revision=0,lastSent='',timer:number|undefined,busy=false,backoff=2000,running=false,qrSecret='';
  let pendingSnapshot:TvSnapshot|undefined,lastPreview='';
+ const shareLocation=()=>!receiver&&($('tv-share-location') as HTMLInputElement).checked;
  let validityTimer:number|undefined,refreshCountdown:(()=>void)|undefined;
  let keypad:ReturnType<typeof createTvKeypad>|undefined;
  let scanner:ReturnType<typeof createTvScanner>|undefined;
@@ -95,14 +96,14 @@ export function createClockTv(options:{snapshot:()=>TvSnapshot;apply:(snapshot:T
     revision=state.revision;
     if(state.state==='active'){
      running=true;
-     const snapshot=options.snapshot(),serialized=JSON.stringify(snapshot);
+     const snapshot=options.snapshot(shareLocation()),serialized=JSON.stringify(snapshot);
      if(serialized!==lastSent){const updated=await api<{revision:number}>(session.id+'/settings','PUT',{revision,snapshot});revision=updated.revision;lastSent=serialized;status(t.connected);}
      else status(state.acknowledged===revision?t.applied:t.connected);
     }else status(t.pending);
    }
    schedule(receiver||!running?2000:4000);
   }catch(error){
-   if(error instanceof TvError&&[401,404,410].includes(error.status)){forget();status(t.expired);if(receiver){clearPreview();$('tv-validity').hidden=true;$('tv-proposal').hidden=true;$('tv-retry').hidden=false;if(!running){$('tv-qr').hidden=true;$('tv-code').hidden=true;$('tv-approve').hidden=true;$('tv-reject').hidden=true;}}else{setSenderConnected(false);}return;}
+   if(error instanceof TvError&&[401,404,410].includes(error.status)){forget();status(t.expired);if(receiver){clearPreview();$('tv-validity').hidden=true;$('tv-proposal').hidden=true;$('tv-retry').hidden=false;if(!running){$('tv-qr').hidden=true;$('tv-code').hidden=true;$('tv-approve').hidden=true;$('tv-reject').hidden=true;}}else{($('tv-share-location') as HTMLInputElement).checked=false;setSenderConnected(false);}return;}
    if(error instanceof TvError&&error.status===409){schedule();return;}
    status(t.offline);backoff=Math.min(backoff*2,30000);schedule(backoff);
   }finally{busy=false;}
@@ -157,6 +158,15 @@ export function createClockTv(options:{snapshot:()=>TvSnapshot;apply:(snapshot:T
  }else{
   const dialog=$('tv-dialog') as HTMLDialogElement;
   let autoCode='';
+  const locationChoice=$('tv-share-location') as HTMLInputElement;
+  function syncLocationChoice(){
+   const available=!!options.snapshot(true).coordinates;
+   locationChoice.disabled=!available&&!locationChoice.checked;
+   $('tv-share-location-hint').textContent=available?t.shareLocationHint:t.shareLocationUnavailable;
+  }
+  locationChoice.addEventListener('change',()=>{if(session)schedule(10);syncLocationChoice();});
+  document.addEventListener('clock-location-changed',()=>{syncLocationChoice();if(session)schedule(10);});
+  syncLocationChoice();
   const startPairing=()=>{if(!busy&&!session)($('tv-pair-form') as HTMLFormElement).requestSubmit();};
   keypad=createTvKeypad($('tv-pair-code') as HTMLInputElement,$('tv-keypad'),$('tv-send') as HTMLButtonElement,()=>busy);
   scanner=createTvScanner(t,secret=>{
@@ -164,10 +174,10 @@ export function createClockTv(options:{snapshot:()=>TvSnapshot;apply:(snapshot:T
   });
   const fragment=new URLSearchParams(location.hash.slice(1));const secret=fragment.get('tv');
   if(secret){history.replaceState(null,'',location.pathname+location.search);if(/^[a-f0-9]{64}$/.test(secret)){qrSecret=secret;($('tv-pair-code') as HTMLInputElement).required=false;$('tv-code-entry').hidden=true;keypad.sync();dialog.showModal();}}
-  $('tv-open').addEventListener('click',()=>{dialog.showModal();if(!session&&!qrSecret)($('tv-pair-code') as HTMLInputElement).focus();});$('tv-close').addEventListener('click',()=>dialog.close());
+  $('tv-open').addEventListener('click',()=>{syncLocationChoice();dialog.showModal();if(!session&&!qrSecret)($('tv-pair-code') as HTMLInputElement).focus();});$('tv-close').addEventListener('click',()=>dialog.close());
   $('tv-pair-form').addEventListener('submit',event=>{
    event.preventDefault();void action($('tv-send') as HTMLButtonElement,async()=>{
-    const snapshot=options.snapshot();
+    const snapshot=options.snapshot(shareLocation());
     const created=await api<{id:string;senderToken:string;revision:number}>('claim','POST',{...(qrSecret?{pairToken:qrSecret}:{code:($('tv-pair-code') as HTMLInputElement).value.replace(/\s/g,'')}),snapshot},'');
     qrSecret='';($('tv-pair-code') as HTMLInputElement).value='';session={id:created.id,token:created.senderToken};revision=created.revision;lastSent=JSON.stringify(snapshot);setSenderConnected(true);status(t.pending);dialog.close();$('tv-open').focus();
    });
@@ -177,7 +187,7 @@ export function createClockTv(options:{snapshot:()=>TvSnapshot;apply:(snapshot:T
    if(code.length<8){autoCode='';return;}
    if(/^\d{8}$/.test(code)&&code!==autoCode){autoCode=code;startPairing();}
   });
-  $('tv-detach').addEventListener('click',event=>void action(event.currentTarget as HTMLButtonElement,async()=>{await api(session!.id+'/detach','POST',{});forget();setSenderConnected(false);status(t.expired);}));
+  $('tv-detach').addEventListener('click',event=>void action(event.currentTarget as HTMLButtonElement,async()=>{await api(session!.id+'/detach','POST',{});forget();locationChoice.checked=false;syncLocationChoice();setSenderConnected(false);status(t.expired);}));
   const changed=()=>{if(session)schedule(600);};document.getElementById('clock-settings')!.addEventListener('change',changed);document.getElementById('clock-settings')!.addEventListener('input',changed);
   new MutationObserver(changed).observe(document.documentElement,{attributes:true,attributeFilter:['data-palette','data-style','data-font-size','data-theme']});
  }

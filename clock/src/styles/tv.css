@@ -80,3 +80,10 @@ body.focus-view .header-focus-actions>button{width:44px;height:44px;padding:9px}
 #tv-validity-progress::-webkit-progress-bar{background:var(--line);border-radius:99px}
 #tv-validity-progress::-webkit-progress-value{background:var(--accent);border-radius:99px}
 #tv-validity-progress::-moz-progress-bar{background:var(--accent);border-radius:99px}
+
+
+.tv-location-share{display:flex;align-items:center;gap:10px;padding:12px;margin:0 0 16px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:.85rem;text-align:left}
+.tv-location-share:has(input:disabled){cursor:not-allowed}
+.tv-location-share input:disabled+.toggle{opacity:.45}
+.tv-location-share .tv-location-copy{display:grid;gap:5px}
+.tv-location-share small{font-size:.75rem;line-height:1.5;color:var(--muted)}

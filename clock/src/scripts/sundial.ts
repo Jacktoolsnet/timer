@@ -115,7 +115,7 @@ export function createSundial(){
   coordinateArea.setAttribute('visibility',location?'visible':'hidden');
   if(location){if(status.parentElement!==coordinateContainer)coordinateContainer.append(status);}
   else if(status.parentElement!==enableLocation)enableLocation.append(status);
-  enableLocation.hidden=!!location;
+  enableLocation.hidden=!!location||document.getElementById('clock-app')?.dataset.receiver==='true';
   enableLocation.disabled=pending;
   enableLocation.setAttribute('aria-busy',String(pending));
   if(!location){nightHint.hidden=true;sun.style.display='none';sun.setAttribute('visibility','hidden');shadow.setAttribute('visibility','hidden');time.textContent='';status.textContent=pending?text.pending:message||text.missing;return;}

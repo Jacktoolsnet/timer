@@ -77,3 +77,11 @@ test('stream device label is optional, short and cannot contain control or bidi 
   assert.throws(()=>validateSnapshot({...tvSnapshot,senderName}));
  }
 });
+
+test('optional stream coordinates are bounded, rounded and reject extra fields',()=>{
+ assert.equal(validateSnapshot(tvSnapshot).coordinates,undefined);
+ assert.deepEqual(validateSnapshot({...tvSnapshot,coordinates:{latitude:52.520007,longitude:13.404954}}).coordinates,{latitude:52.52,longitude:13.405});
+ for(const coordinates of [null,{},[],{latitude:52},{latitude:'52',longitude:13},{latitude:91,longitude:0},{latitude:0,longitude:-181},{latitude:NaN,longitude:0},{latitude:Infinity,longitude:0},{latitude:0,longitude:0,accuracy:10}]){
+  assert.throws(()=>validateSnapshot({...tvSnapshot,coordinates}));
+ }
+});
