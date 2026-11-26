@@ -13,16 +13,16 @@ async function fakeCamera(page:Page,image:string){
  },image);
 }
 
-test('camera scanner decodes a real pairing QR locally, releases camera and waits for Start stream',async({page,baseURL})=>{
+test('camera scanner decodes a real pairing QR locally, releases camera and starts pairing automatically',async({page,baseURL})=>{
  const secret='b'.repeat(64),qr=await QRCode.toDataURL(baseURL+'/de/pair/#tv='+secret,{width:512,margin:4});await fakeCamera(page,qr);
  let claim:Record<string,unknown>|undefined;
  await page.route('**/api/v1/tv/**',route=>{if(route.request().url().endsWith('/claim/')){claim=route.request().postDataJSON();return route.fulfill({contentType:'application/json',body:JSON.stringify({id:'test',senderToken:'a'.repeat(64),revision:1})});}return route.fulfill({contentType:'application/json',body:JSON.stringify({state:'pending',revision:1,acknowledged:0})});});
  await page.goto('/de/');await page.locator('#tv-open').click();await expect(page.locator('#tv-send')).toHaveText('Stream starten');expect(await page.evaluate(()=>(window as any).__camera.calls)).toBe(0);
- await page.locator('#tv-scan').click();await expect(page.locator('#tv-status')).toContainText('QR-Code erkannt',{timeout:15000});
- await expect(page.locator('#tv-scanner-dialog')).not.toBeVisible();await expect(page.locator('#tv-code-entry')).toBeHidden();await expect(page.locator('#tv-send')).toBeEnabled();await expect(page.locator('#tv-send')).toBeFocused();expect(claim).toBeUndefined();
+ await page.locator('#tv-scan').click();await expect.poll(()=>claim?.pairToken,{timeout:15000}).toBe(secret);
+ await expect(page.locator('#tv-scanner-dialog')).not.toBeVisible();await expect(page.locator('#tv-code-entry')).toBeHidden();await expect(page.locator('#tv-dialog')).not.toBeVisible();
  expect(await page.evaluate(()=>(window as any).__camera.audio)).toBe(false);await expect.poll(()=>page.evaluate(()=>(window as any).__camera.stops)).toBeGreaterThan(0);
  expect(await page.locator('#tv-scanner-video').evaluate((video:HTMLVideoElement)=>video.srcObject)).toBeNull();
- await page.locator('#tv-send').click();await expect.poll(()=>claim?.pairToken).toBe(secret);
+ await expect.poll(()=>claim?.pairToken).toBe(secret);
 });
 
 test('foreign QR links are rejected without navigating and Escape releases the camera',async({page})=>{
@@ -36,7 +36,7 @@ test('foreign QR links are rejected without navigating and Escape releases the c
 test('camera denial leaves manual code entry available',async({page})=>{
  await page.addInitScript(()=>Object.defineProperty(navigator,'mediaDevices',{value:{getUserMedia:()=>Promise.reject(new DOMException('Denied','NotAllowedError'))}}));
  await page.goto('/de/');await page.locator('#tv-open').click();await page.locator('#tv-pair-code').fill('1234');await page.locator('#tv-scan').click();await expect(page.locator('#tv-scanner-status')).toContainText('Kamerazugriff nicht erlaubt');
- await page.locator('#tv-scanner-close').click();await expect(page.locator('#tv-pair-code')).toHaveValue('1234');await page.locator('#tv-pair-code').fill('12345678');await expect(page.locator('#tv-send')).toBeEnabled();
+ await page.locator('#tv-scanner-close').click();await expect(page.locator('#tv-pair-code')).toHaveValue('1234');await page.locator('#tv-pair-code').fill('1234567');await expect(page.locator('#tv-send')).toBeDisabled();
 });
 
 test('a permission response arriving after close does not leak a camera stream',async({page})=>{

@@ -295,7 +295,8 @@ Die TV-Uhr rendert selbst, die API überträgt lediglich Darstellungseinstellung
 2. Clock separat auf Port 4322 starten: `cd ../clock && npm run dev -- --port 4322`.
 3. Empfänger in einem Fenster: `http://127.0.0.1:4322/de/stream/`.
 4. Sender im zweiten Fenster: `http://127.0.0.1:4322/de/`. Einstellungen wählen,
-   „Uhr streamen“, Code eingeben und bewusst senden. Am Empfänger bestätigen.
+   „Uhr streamen“, Code vollständig eingeben; die Kopplung startet automatisch
+   und das Overlay schließt bei Erfolg. Am Empfänger bestätigen.
 5. Darstellung ändern, Sendertab schließen, Netzwerkunterbrechung ausprobieren.
    Der Empfänger muss mit der letzten Konfiguration weiterlaufen.
 

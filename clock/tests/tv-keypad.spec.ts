@@ -17,13 +17,11 @@ test('stream dialog is compact and its keypad supports remote navigation, editin
  await page.keyboard.press('ArrowRight');await page.keyboard.press('Enter');await expect(input).toHaveValue('2');
  await page.keyboard.press('ArrowDown');await page.keyboard.press('Enter');await expect(input).toHaveValue('25');
  await page.keyboard.press('Backspace');await expect(input).toHaveValue('2');await page.keyboard.press('Delete');await expect(input).toHaveValue('');
- for(const key of '12345678')await page.locator(`[data-key="${key}"]`).click();await expect(input).toHaveValue('12345678');await expect(send).toBeEnabled();
- await page.locator('[data-key="9"]').click();await expect(input).toHaveValue('12345678');
- await page.getByRole('button',{name:'Letzte Ziffer löschen',exact:true}).click();await expect(input).toHaveValue('1234567');await expect(send).toBeDisabled();
+ for(const key of '1234567')await page.locator(`[data-key="${key}"]`).click();await expect(input).toHaveValue('1234567');await expect(send).toBeDisabled();
+ await page.getByRole('button',{name:'Letzte Ziffer löschen',exact:true}).click();await expect(input).toHaveValue('123456');
  await page.getByRole('button',{name:'Code komplett löschen',exact:true}).click();await expect(input).toHaveValue('');
- await input.fill('12a34 5678');await expect(input).toHaveValue('12345678');
- await page.locator('[data-key="0"]').focus();await page.keyboard.press('ArrowDown');await expect(send).toBeFocused();
- await page.keyboard.press('Enter');await expect.poll(()=>submitted).toBe('12345678');await expect(page.locator('#tv-pair-form')).toBeHidden();
+ await input.fill('12a34 5678');await expect.poll(()=>submitted).toBe('12345678');await expect(page.locator('#tv-dialog')).not.toBeVisible();
+ await expect(page.locator('#tv-open')).toBeFocused();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });
 
@@ -32,4 +30,11 @@ test('QR pairing hides the entire numeric pad but still requires explicit sendin
  await page.route('**/api/v1/tv/**',route=>{claims++;return route.fulfill({status:404,contentType:'application/json',body:JSON.stringify({error:'invalid_pairing'})});});
  await page.goto('/de/pair/#tv='+'a'.repeat(64));await expect(page.locator('#tv-dialog')).toBeVisible();await expect(page.locator('#tv-code-entry')).toBeHidden();await expect(page.locator('#tv-send')).toBeEnabled();expect(claims).toBe(0);
  await page.locator('#tv-send').click();await expect(page.locator('#tv-code-entry')).toBeVisible();await expect(page.locator('#tv-send')).toBeDisabled();
+});
+
+test('a complete code pairs automatically; an invalid code keeps the dialog open',async({page})=>{
+ let claims=0;await page.route('**/api/v1/tv/**',route=>{claims++;return route.fulfill({status:404,contentType:'application/json',body:JSON.stringify({error:'invalid_pairing'})});});
+ await page.goto('/de/');await page.locator('#tv-open').click();await page.locator('#tv-pair-code').fill('1234567');expect(claims).toBe(0);
+ await page.locator('[data-key="8"]').click();await expect.poll(()=>claims).toBe(1);await expect(page.locator('#tv-status')).toContainText('Code ungültig');await expect(page.locator('#tv-dialog')).toBeVisible();
+ await page.locator('[data-key="9"]').click();expect(claims).toBe(1);
 });

@@ -79,9 +79,11 @@ export function createClockTv(options:{snapshot:()=>TvSnapshot;apply:(snapshot:T
   void start();
  }else{
   const dialog=$('tv-dialog') as HTMLDialogElement;
+  let autoCode='';
+  const startPairing=()=>{if(!busy&&!session)($('tv-pair-form') as HTMLFormElement).requestSubmit();};
   keypad=createTvKeypad($('tv-pair-code') as HTMLInputElement,$('tv-keypad'),$('tv-send') as HTMLButtonElement,()=>busy);
   scanner=createTvScanner(t,secret=>{
-   qrSecret=secret;($('tv-pair-code') as HTMLInputElement).required=false;$('tv-code-entry').hidden=true;keypad!.sync();status(t.scanReady);$('tv-send').focus();
+   qrSecret=secret;($('tv-pair-code') as HTMLInputElement).required=false;$('tv-code-entry').hidden=true;keypad!.sync();status(t.scanReady);startPairing();
   });
   const fragment=new URLSearchParams(location.hash.slice(1));const secret=fragment.get('tv');
   if(secret){history.replaceState(null,'',location.pathname+location.search);if(/^[a-f0-9]{64}$/.test(secret)){qrSecret=secret;($('tv-pair-code') as HTMLInputElement).required=false;$('tv-code-entry').hidden=true;keypad.sync();dialog.showModal();}}
@@ -90,8 +92,13 @@ export function createClockTv(options:{snapshot:()=>TvSnapshot;apply:(snapshot:T
    event.preventDefault();void action($('tv-send') as HTMLButtonElement,async()=>{
     const snapshot=options.snapshot();
     const created=await api<{id:string;senderToken:string;revision:number}>('claim','POST',{...(qrSecret?{pairToken:qrSecret}:{code:($('tv-pair-code') as HTMLInputElement).value.replace(/\s/g,'')}),snapshot},'');
-    qrSecret='';($('tv-pair-code') as HTMLInputElement).value='';session={id:created.id,token:created.senderToken};revision=created.revision;lastSent=JSON.stringify(snapshot);setSenderConnected(true);status(t.pending);
+    qrSecret='';($('tv-pair-code') as HTMLInputElement).value='';session={id:created.id,token:created.senderToken};revision=created.revision;lastSent=JSON.stringify(snapshot);setSenderConnected(true);status(t.pending);dialog.close();$('tv-open').focus();
    });
+  });
+  $('tv-pair-code').addEventListener('input',()=>{
+   const code=($('tv-pair-code') as HTMLInputElement).value;
+   if(code.length<8){autoCode='';return;}
+   if(/^\d{8}$/.test(code)&&code!==autoCode){autoCode=code;startPairing();}
   });
   $('tv-detach').addEventListener('click',event=>void action(event.currentTarget as HTMLButtonElement,async()=>{await api(session!.id+'/detach','POST',{});forget();setSenderConnected(false);status(t.expired);}));
   const changed=()=>{if(session)schedule(600);};document.getElementById('clock-settings')!.addEventListener('change',changed);document.getElementById('clock-settings')!.addEventListener('input',changed);

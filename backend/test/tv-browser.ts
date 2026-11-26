@@ -25,9 +25,9 @@ export async function tvBrowserTest(base:string,config:Config){
   const code=await tv.locator('#tv-code').textContent();
   await phone.goto(origin+'/de/');await phone.locator('[name=view]').selectOption('binary',{force:true});await phone.locator('[name=binaryReadout]').selectOption('flip',{force:true});await phone.locator('[name=background]').selectOption('mountains',{force:true});
   await phone.evaluate(()=>{document.documentElement.dataset.palette='blue';});
-  await phone.locator('#tv-open').click();await phone.locator('#tv-pair-code').fill(code);await phone.locator('#tv-send').click();await expect(tv.locator('#tv-approve')).toBeVisible({timeout:15000});await expect(tv.locator('#tv-preview')).toContainText('binaryFlip');await expect(tv.locator('body')).not.toHaveClass(/tv-ready/);
+  await phone.locator('#tv-open').click();await phone.locator('#tv-pair-code').fill(code);await expect(phone.locator('#tv-dialog')).not.toBeVisible();await expect(tv.locator('#tv-approve')).toBeVisible({timeout:15000});await expect(tv.locator('#tv-preview')).toContainText('binaryFlip');await expect(tv.locator('body')).not.toHaveClass(/tv-ready/);
   await tv.locator('#tv-approve').click();await expect(tv.locator('.clock-display')).toHaveAttribute('data-view','binaryFlip',{timeout:15000});await expect(tv.locator('html')).toHaveAttribute('data-palette','blue');await expect(tv.locator('.clock-card')).toHaveAttribute('data-background','mountains');await expect(tv.locator('body')).toHaveClass(/tv-ready/);
-  await phone.locator('#tv-close').click();await phone.locator('[name=view]').selectOption('orbit',{force:true});await phone.locator('[name=orbitReadout]').selectOption('digital',{force:true});await expect(tv.locator('.clock-display')).toHaveAttribute('data-view','orbit',{timeout:15000});
+  await phone.locator('[name=view]').selectOption('orbit',{force:true});await phone.locator('[name=orbitReadout]').selectOption('digital',{force:true});await expect(tv.locator('.clock-display')).toHaveAttribute('data-view','orbit',{timeout:15000});
   await phone.close();const before=await tv.locator('#digital-clock').textContent();await expect.poll(()=>tv.locator('#digital-clock').textContent(),{timeout:4000}).not.toBe(before);
   await tvContext.setOffline(true);const offline=await tv.locator('#digital-clock').textContent();await expect.poll(()=>tv.locator('#digital-clock').textContent(),{timeout:4000}).not.toBe(offline);await tvContext.setOffline(false);
   await tv.screenshot({path:'/tmp/jacktools-tv-running.png'});
@@ -35,7 +35,7 @@ export async function tvBrowserTest(base:string,config:Config){
   const qr=await phoneContext.newPage();let claims=0;qr.on('request',(r:any)=>{if(r.url().endsWith('/tv/claim/'))claims++;});
   await qr.goto(origin+'/de/pair/#tv='+created.pairToken);await expect(qr.locator('#tv-dialog')).toBeVisible();assert.equal(new URL(qr.url()).hash,'');assert.equal(claims,0);
   await qr.locator('#tv-send').click();await expect(tv.locator('#tv-approve')).toBeVisible({timeout:15000});await tv.locator('#tv-approve').click();await expect(tv.locator('body')).toHaveClass(/tv-ready/,{timeout:15000});
-  await qr.locator('#tv-detach').click();await expect(qr.locator('#tv-pair-form')).toBeVisible();await expect(tv.locator('#tv-live-status')).toContainText('beendet',{timeout:15000});await expect(tv.locator('body')).toHaveClass(/tv-ready/);
+  await qr.locator('#tv-open').click();await qr.locator('#tv-detach').click();await expect(qr.locator('#tv-pair-form')).toBeVisible();await expect(tv.locator('#tv-live-status')).toContainText('beendet',{timeout:15000});await expect(tv.locator('body')).toHaveClass(/tv-ready/);
   assert.equal(await qr.evaluate(()=>localStorage.length),0);assert.equal(await qr.evaluate(()=>sessionStorage.length),0);assert.deepEqual(errors,[]);
  }finally{await browser?.close();if(app.pid)try{process.kill(-app.pid,'SIGTERM');}catch{}}
 }
