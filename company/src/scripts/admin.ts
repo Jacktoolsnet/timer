@@ -19,7 +19,7 @@ const toast=createAdminToast($('admin-toast'),$('admin-status'),$('admin-toast-c
 class RequestError extends Error{constructor(public code:string){super(code);}}
 function message(error:unknown){if(error instanceof RequestError&&error.code in certText.errors)return certText.errors[error.code as keyof typeof certText.errors];return error instanceof RequestError?(error.code==='backend_unavailable'?t.unavailable:t.errors[error.code as keyof typeof t.errors]||t.errors.internal_error):t.unavailable;}
 function status(text:string,error=false){toast.show(text,error);}
-function signedOut(){certificates.reset();$('admin-header-session').hidden=true;$('admin-identity').textContent='';$('admin-role').textContent='';root.dataset.state='signed-out';csrf='';user=null;$('admin-login-panel').hidden=false;$('admin-workspace').hidden=true;$('admin-users').replaceChildren();dialog.close();createDialog.close();deleteDialog.close();blockDialog.close();root.querySelectorAll<HTMLInputElement>('input[type=password]').forEach(input=>input.value='');}
+function signedOut(){certificates.reset();$('admin-back').hidden=true;$('admin-header-session').hidden=true;$('admin-header-actions').hidden=true;$('admin-identity').textContent='';$('admin-identity').removeAttribute('title');$('admin-role').textContent='';root.dataset.state='signed-out';csrf='';user=null;$('admin-login-panel').hidden=false;$('admin-workspace').hidden=true;$('admin-users').replaceChildren();dialog.close();createDialog.close();deleteDialog.close();blockDialog.close();root.querySelectorAll<HTMLInputElement>('input[type=password]').forEach(input=>input.value='');}
 async function api<T=Record<string,never>>(path:string,method='GET',body?:unknown,establishingSession=false):Promise<T>{
  const response=await fetch(base+'/api/v1/'+path,{method,credentials:'include',cache:'no-store',signal:AbortSignal.timeout(path==='admin/certificates/test-email'?60000:15000),headers:{...(method==='GET'?{}:{'Content-Type':'application/json','X-CSRF-Token':csrf})},...(body===undefined?{}:{body:JSON.stringify(body)})});
  if(!response.ok){
@@ -33,8 +33,8 @@ async function api<T=Record<string,never>>(path:string,method='GET',body?:unknow
  return response.status===204?undefined as T:await response.json() as T;
 }
 function showUser(next:User){
- $('admin-header-session').hidden=false;root.dataset.state='signed-in';user=next;$('admin-login-panel').hidden=true;$('admin-workspace').hidden=false;
- $('admin-identity').textContent=next.displayName||next.username;$('admin-role').textContent=next.role==='root'?t.root:t.admin;
+ $('admin-header-session').hidden=false;$('admin-header-actions').hidden=false;root.dataset.state='signed-in';user=next;$('admin-login-panel').hidden=true;$('admin-workspace').hidden=false;
+ $('admin-identity').textContent=next.displayName||next.username;$('admin-identity').title=next.displayName||next.username;$('admin-role').textContent=next.role==='root'?t.root:t.admin;
  $('admin-password-required').hidden=!next.mustChangePassword;$('admin-profile-panel').hidden=next.mustChangePassword;
  const view=next.mustChangePassword?'profile':root.dataset.view;
  const canManage=next.role==='root'&&!next.mustChangePassword;
@@ -99,7 +99,7 @@ form('admin-login-form').addEventListener('submit',event=>{event.preventDefault(
  const verified=await api<{user:User;csrfToken:string}>('auth/me','GET',undefined,true);
  csrf=verified.csrfToken;showUser(verified.user);await users();await certificates.load();status(verified.user.mustChangePassword?t.required:t.signedIn);
 });});
-$('admin-logout').addEventListener('click',()=>void perform(async()=>{await api('auth/logout','POST',{});signedOut();field('admin-login-form','username').focus();status(t.signedOut);}));
+$('admin-logout').addEventListener('click',()=>void perform(async()=>{await api('auth/logout','POST',{});signedOut();window.location.assign('/'+document.documentElement.lang+'/');}));
 form('admin-profile-form').addEventListener('submit',event=>{event.preventDefault();void perform(async()=>{
  const value=await api<{user:User}>('auth/profile','PATCH',{displayName:field('admin-profile-form','displayName').value,email:field('admin-profile-form','email').value});showUser(value.user);status(t.saved);await users();await certificates.load();
 });});

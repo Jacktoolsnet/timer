@@ -24,7 +24,20 @@ for (const [lang, orbit, sundial, binary] of [
   expect(html).toContain(`https://clock.jacktools.net/${lang}/`);
   expect(description?.toLowerCase()).toContain(binary);
   expect(app.featureList.join(' ').toLowerCase()).toContain(binary);
+  const streaming={de:'streamen',en:'stream',es:'transmite',fr:'diffusez'}[lang]!;
+  expect(description?.toLowerCase()).toContain(streaming);
+  expect(app.featureList.join(' ')).toContain('QR');
+  expect(html).toContain('clock.jacktools.net/stream');
+  expect(html).not.toContain('The clock neither stores nor transmits coordinates.');
   expect(html).toContain('BCD');
   expect(html).toContain('class="faq"');
  });
 }
+
+test('stream pairing pages remain outside the search index in all languages',async({request})=>{
+ for(const lang of ['de','en','es','fr']){
+  const response=await request.get('/'+lang+'/stream/');
+  expect(response.ok()).toBe(true);
+  expect(await response.text()).toMatch(/<meta name="robots" content="noindex/);
+ }
+});

@@ -36,7 +36,7 @@ for(const lang of ['de','en','es','fr'])test(`admin page is integrated, translat
  await expect(page.locator('#admin-login-panel')).toBeVisible();await expect(page.locator('#admin-workspace')).toBeHidden();
  await expect(page.locator('.admin-heading')).toHaveCount(0);
  await expect(page.locator('.site-header .header-nav')).toHaveCount(0);
- await expect(page.locator('#admin-header-session')).toBeHidden();
+ await expect(page.locator('#admin-header-session')).toBeHidden();await expect(page.locator('#admin-back')).toBeHidden();
  await expect(page.locator('#admin-login-panel>p')).toHaveCount(0);
  await expect(page.locator('#admin-status')).toBeEmpty();
  for(const kind of ['create','block','reset','delete'])await expect(page.locator(`#admin-${kind}-dialog .admin-dialog-symbol[aria-hidden=true] svg`)).toHaveCount(1);
@@ -73,7 +73,8 @@ test('root manages admins without storing credentials and logout clears protecte
  expect(await page.evaluate(()=>localStorage.length)).toBe(0);expect(await page.evaluate(()=>sessionStorage.length)).toBe(0);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  await expect(page.locator('.site-header #admin-identity')).toHaveText('Test root');await expect(page.locator('.site-header #admin-logout')).toBeVisible();
- await page.locator('#admin-logout').click();await expect(page.locator('#admin-header-session')).toBeHidden();await expect(page.locator('#admin-identity')).toBeEmpty();await expect(page.locator('#admin-workspace')).toBeHidden();await expect(page.locator('#jt-admin')).toHaveAttribute('data-state','signed-out');await expect(page.locator('#admin-users')).toBeEmpty();
+ await expect(page.locator('#admin-logout')).toHaveText('');await expect(page.locator('#admin-logout')).toHaveAccessibleName('Abmelden');await expect(page.locator('#admin-logout')).toHaveAttribute('title','Abmelden');await expect(page.locator('#admin-logout svg')).toHaveCount(1);
+ await page.locator('#admin-logout').click();await expect(page).toHaveURL(/\/de\/$/);await expect(page.locator('.site-header .brand-wordmark')).toHaveText('jacktools.net');await expect(page.locator('#jt-admin')).toHaveCount(0);
 });
 test('ordinary admins cannot see account management and must change temporary password',async({page})=>{
  await mockBackend(page,'admin',true);await page.goto('/en/admin/');await signIn(page);
@@ -129,10 +130,13 @@ test('dashboard tiles lead to separate pages, survive reload and return to overv
  await expect(page.locator('#admin-overview')).toBeVisible();await expect(page.locator('#admin-profile-page')).toBeHidden();await expect(page.locator('#admin-users-panel')).toBeHidden();
  await page.locator('#admin-profile-tile').click();await expect(page).toHaveURL(/\/de\/admin\/profile\//);
  await expect(page.locator('#admin-profile-form')).toBeVisible();await expect(page.locator('#admin-users-panel')).toBeHidden();
+ await expect(page.locator('.site-header #admin-back')).toBeVisible();await expect(page.locator('#main #admin-back')).toHaveCount(0);
  await page.reload();await expect(page.locator('#admin-profile-form')).toBeVisible();
  await expect(page.locator('.language-menu a[lang=en]')).toHaveAttribute('href',/\/en\/admin\/profile\/$/);
  await page.locator('#admin-back').click();await expect(page.locator('#admin-overview')).toBeVisible();
  await page.locator('#admin-users-tile').click();await expect(page).toHaveURL(/\/de\/admin\/users\//);await expect(page.locator('#admin-users-panel')).toBeVisible();await expect(page.locator('#admin-profile-page')).toBeHidden();
+ await expect(page.locator('.site-header #admin-back')).toBeVisible();
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });
 test('ordinary admins cannot access user management via a direct page URL',async({page})=>{
  await mockBackend(page,'admin');await page.goto('/en/admin/users/');await signIn(page);
@@ -160,4 +164,33 @@ test('account deletion can be cancelled and removes the account only on confirma
  await remove.click();await page.route('**/api/v1/admin/users/*',route=>route.request().method()==='DELETE'?route.fulfill({status:500,contentType:'application/json',body:JSON.stringify({error:'internal_error'})}):route.fallback());
  await page.locator('#admin-delete-confirm').click();await expect(page.locator('#admin-delete-dialog #admin-toast')).toBeVisible();await expect(row).toBeAttached();
  await page.unroute('**/api/v1/admin/users/*');await page.locator('#admin-delete-confirm').click();await expect(page.locator('#admin-delete-dialog')).not.toBeVisible();await expect(row).toHaveCount(0);await expect(page.locator('#admin-status')).toHaveText('Account deleted.');
+});
+
+for(const role of ['root','admin'] as const)test('admin logout stays beside settings on all screen sizes ('+role+')',async({page})=>{
+ await mockBackend(page,role);await page.goto('/de/admin/profile/');await signIn(page);
+ for(const width of [300,320,390,480,600,760,800,1000,1280]){
+  await page.setViewportSize({width,height:1000});
+  const session=await page.locator('#admin-header-session').boundingBox(),identity=await page.locator('.admin-header-identity').boundingBox();
+  expect(session).not.toBeNull();expect(identity).not.toBeNull();
+  const back=await page.locator('#admin-back').boundingBox();expect(back).not.toBeNull();
+  expect(back!.x+back!.width).toBeLessThanOrEqual(session!.x);
+  expect(Math.abs(back!.y+back!.height/2-(session!.y+session!.height/2))).toBeLessThan(2);
+  await expect(page.locator('.site-header .admin-brand')).toHaveAttribute('href','/de/admin/');
+  await expect(page.locator('.site-header .brand-wordmark')).toHaveText('Administration');
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  const actions=await page.locator('#admin-header-actions').boundingBox();
+  expect(actions).not.toBeNull();
+  const settings=await page.locator('#palette-dropdown > summary').boundingBox();expect(settings).not.toBeNull();
+  expect(Math.abs(actions!.y+actions!.height/2-(settings!.y+settings!.height/2))).toBeLessThan(2);
+  expect(actions!.x).toBeGreaterThanOrEqual(settings!.x+settings!.width);
+  await expect(page.locator('.header-tools #admin-logout')).toBeVisible();
+  const brand=await page.locator('.site-header .brand').boundingBox();expect(brand).not.toBeNull();
+  if(width>=760)expect(Math.abs(identity!.y+identity!.height/2-(brand!.y+brand!.height/2))).toBeLessThan(2);
+  if(width<=390)expect(identity!.y).toBeGreaterThanOrEqual(brand!.y+brand!.height);
+ }
+ await page.setViewportSize({width:280,height:1000});
+ expect(await page.locator('body').evaluate(body=>body.getBoundingClientRect().width)).toBeGreaterThanOrEqual(300);
+ await page.setViewportSize({width:390,height:1000});
+ await page.locator('.site-header .admin-brand').click();await expect(page).toHaveURL(/\/de\/admin\/$/);await expect(page.locator('#admin-overview')).toBeVisible();
+ await page.locator('#admin-logout').click();await expect(page).toHaveURL(/\/de\/$/);await expect(page.locator('.site-header .brand-wordmark')).toHaveText('jacktools.net');
 });

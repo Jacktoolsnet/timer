@@ -1,0 +1,178 @@
+{
+  "de": {
+    "title": "Deine Uhr, ein größerer Bildschirm",
+    "description": "Die JackTools Uhr auf Fernseher oder Tablet: per QR-Code koppeln, das Design live ändern und die Uhr unabhängig vom Smartphone weiterlaufen lassen.",
+    "lead": "Eine schöne Uhr muss nicht auf dem kleinen Bildschirm bleiben. Mit „Uhr streamen“ bringst du dein Lieblingsdesign auf einen Fernseher, ein Tablet oder ein anderes Gerät mit Browser. Das Smartphone wird zur Fernbedienung – nicht zum dauerhaften Videolieferanten.",
+    "category": "Tools & Entwicklung",
+    "byline": "Neues aus der JackTools Uhr",
+    "coverCaption": "Zwei Browser teilen Einstellungen, kein laufendes Video. Eigene schematische SVG-Grafik mit fester Beispielzeit, kein Screenshot und kein scannbarer QR-Code.",
+    "sections": [
+      [
+        "screen",
+        "Mehr Platz für deine Zeit",
+        "Analoges Zifferblatt, leuchtende Binärpunkte oder Sonnenuhr: Deine gewählte Darstellung, das Farbschema, der Hintergrund und das Datum reisen mit. Der Empfänger zeigt die Uhr ohne die Einstellungsoberfläche. So wird auch ein vorhandenes Tablet zur ruhigen Zeitanzeige. Voraussetzung ist ein geeigneter Browser auf dem Empfängergerät – eine bestimmte Streaming-Hardware ist nicht nötig."
+      ],
+      [
+        "pair",
+        "Einmal koppeln, dann gestalten",
+        "Öffne clock.jacktools.net/stream im Browser des Empfängers. Dort erscheinen ein zeitlich begrenzter Kopplungscode und ein QR-Code. Wähle auf deinem Smartphone oder Computer „Uhr streamen“ und gib den Code ein oder scanne den QR-Code. Bestätige die Verbindung am Empfänger: Gerätebezeichnung und Uhrvorschau helfen bei der Zuordnung. Danach werden Änderungen der Darstellung live übernommen."
+      ],
+      [
+        "engine",
+        "Kein Video – eine eigenständige Uhr",
+        "Technisch ist „Streamen“ hier eine Fernsteuerung zweier Browser. Über ein separates Node.js-Backend werden Darstellungseinstellungen ausgetauscht. Der Empfänger fragt den Verbindungsstand regelmäßig ab und zeichnet die Uhr selbst mit seiner eigenen Gerätezeit. Dein Smartphone muss also kein Video berechnen oder dauerhaft senden. Schaltest du es aus, läuft die Uhr mit den letzten Einstellungen weiter, solange Empfänger und Browser aktiv bleiben. Für neue Änderungen brauchst du wieder die Verbindung."
+      ],
+      [
+        "location",
+        "Sonne und Jahreszeiten dürfen mitkommen",
+        "Für die standortbasierte Sonnenuhr und Jahressimulation gibt es „Standort mitsenden“. Der Standort muss zuerst am Sender freigegeben sein. Nur mit diesem zusätzlichen Schalter werden auf drei Nachkommastellen gerundete Koordinaten über das Backend an den gekoppelten Empfänger übertragen. Dieser muss dann nicht selbst nach einer Standortberechtigung fragen. Ohne Freigabe werden keine Koordinaten mitgesendet. Wecker und Audio werden nicht übertragen."
+      ],
+      [
+        "try",
+        "Ein Browser genügt – mit seinen Grenzen",
+        "Du brauchst weder ein Konto noch eine Chromecast-Registrierung. Auf einem TV-Stick funktioniert die Idee nur, wenn dort ein geeigneter Browser verfügbar ist; nicht jeder Stick ist automatisch kompatibel. Vollbild wird nach dem Bestätigen nach Möglichkeit geöffnet. Standby, Bildschirmsperre und Browserbeschränkungen können die Anzeige unterbrechen. Nach Neuladen kann erneutes Koppeln nötig sein. Zum Beenden reicht das Trennen-Symbol am Empfänger."
+      ]
+    ],
+    "action": "Uhr gestalten",
+    "guide": "Streaming-Anleitung",
+    "receiver": "Empfängeransicht öffnen",
+    "labels": [
+      "Dein Design",
+      "Dein Bildschirm",
+      "Einstellungen statt Video",
+      "Koppeln. Anpassen. Weiterlaufen lassen."
+    ]
+  },
+  "en": {
+    "title": "Your clock, a bigger screen",
+    "description": "Put the JackTools clock on a TV or tablet: pair with a QR code, change the design live and let the clock run independently of your smartphone.",
+    "lead": "A beautiful clock does not have to stay on a small screen. “Stream clock” brings your favourite design to a TV, tablet or another device with a browser. Your smartphone becomes the remote control, not a permanent video source.",
+    "category": "Tools & development",
+    "byline": "New in the JackTools clock",
+    "coverCaption": "Two browsers share settings, not a live video feed. Original schematic SVG with a fixed example time, not a screenshot or a scannable QR code.",
+    "sections": [
+      [
+        "screen",
+        "More room for your time",
+        "An analog dial, glowing binary dots or a sundial: your selected display, colour scheme, background and date come along. The receiver shows the clock without the settings interface. Even an existing tablet can become a calm time display. You need a suitable browser on the receiving device, not a particular brand of streaming hardware."
+      ],
+      [
+        "pair",
+        "Pair once, then make it yours",
+        "Open clock.jacktools.net/stream in the receiving browser. It shows a time-limited pairing code and QR code. Choose “Stream clock” on your smartphone or computer and enter the code or scan the QR code. Confirm on the receiver, using the device label and clock preview to recognize the request. Later display changes are applied live."
+      ],
+      [
+        "engine",
+        "Not a video stream: a clock of its own",
+        "Technically, streaming here means remote control between two browsers. Display settings pass through a separate Node.js backend. The receiver checks the connection state regularly and renders the clock itself using its own device time. Your smartphone does not have to encode or continuously send video. Switch it off and the clock continues with its last settings while the receiver and browser remain active. New changes require a connection again."
+      ],
+      [
+        "location",
+        "Bring the Sun and seasons along",
+        "“Share sender location” supports the location-based sundial and year simulation. Location must first be allowed on the sender. Only this separate switch sends coordinates rounded to three decimal places through the backend to the paired receiver. The receiver then does not need to request its own location permission. No coordinates are sent without that opt-in. Alarms and audio are not transmitted."
+      ],
+      [
+        "try",
+        "A browser is enough, with browser limits",
+        "No account or Chromecast registration is required. On a TV stick, this works only if a suitable browser is available; it does not automatically make every stick compatible. After approval, fullscreen is opened where possible. Standby, screen locking and browser restrictions can interrupt the display. Reloading may require pairing again. Use the disconnect icon on the receiver to end the stream."
+      ]
+    ],
+    "action": "Design your clock",
+    "guide": "Streaming guide",
+    "receiver": "Open receiver view",
+    "labels": [
+      "Your design",
+      "Your screen",
+      "Settings, not video",
+      "Pair. Customize. Keep time."
+    ]
+  },
+  "es": {
+    "title": "Tu reloj, una pantalla más grande",
+    "description": "Lleva el reloj JackTools a un televisor o tableta: vincula con QR, cambia el diseño en directo y deja que funcione sin depender del smartphone.",
+    "lead": "Un reloj bonito no tiene por qué quedarse en una pantalla pequeña. Ahora puedes llevar tu diseño favorito a un televisor, una tableta u otro dispositivo con navegador. El smartphone se convierte en un mando a distancia, no en una fuente continua de vídeo.",
+    "category": "Herramientas y desarrollo",
+    "byline": "Novedades del reloj JackTools",
+    "coverCaption": "Dos navegadores comparten ajustes, no vídeo en directo. SVG esquemático propio con una hora fija de ejemplo; no es una captura ni un QR escaneable.",
+    "sections": [
+      [
+        "screen",
+        "Más espacio para tu tiempo",
+        "Una esfera analógica, puntos binarios o un reloj solar: la vista elegida, los colores, el fondo y la fecha se trasladan contigo. El receptor muestra el reloj sin la interfaz de ajustes. Incluso una tableta que ya tengas puede convertirse en una tranquila pantalla horaria. Necesitas un navegador compatible en el receptor, no una marca concreta de hardware de transmisión."
+      ],
+      [
+        "pair",
+        "Vincula una vez y personaliza",
+        "Abre clock.jacktools.net/stream en el navegador receptor. Verás un código de vinculación temporal y un código QR. En tu smartphone u ordenador, elige transmitir el reloj e introduce el código o escanea el QR. Confirma la conexión en el receptor: el nombre del dispositivo y la vista previa ayudan a reconocer la solicitud. Los cambios posteriores se aplican en directo."
+      ],
+      [
+        "engine",
+        "No es vídeo: es un reloj independiente",
+        "Técnicamente, la transmisión es un control remoto entre dos navegadores. Los ajustes pasan por un backend independiente basado en Node.js. El receptor consulta periódicamente el estado de la conexión y dibuja el reloj usando su propia hora. El smartphone no tiene que generar ni enviar vídeo continuamente. Si lo apagas, el reloj conserva los últimos ajustes mientras el receptor y su navegador sigan activos. Los nuevos cambios necesitan conexión de nuevo."
+      ],
+      [
+        "location",
+        "También el Sol y las estaciones",
+        "La opción de compartir la ubicación del emisor permite usar el reloj solar y la simulación anual según la ubicación. Primero debes permitir la geolocalización en el emisor. Solo este interruptor adicional envía coordenadas redondeadas a tres decimales mediante el backend al receptor vinculado. Así, el receptor no necesita solicitar su propio permiso de ubicación. Sin esa autorización no se envían coordenadas. Tampoco se transmiten alarmas ni audio."
+      ],
+      [
+        "try",
+        "Basta un navegador, con sus límites",
+        "No necesitas cuenta ni registro de Chromecast. En un dispositivo de televisión solo funciona si hay un navegador compatible; no convierte automáticamente cualquier dispositivo en un receptor compatible. Tras confirmar se intenta abrir la pantalla completa. El reposo, el bloqueo y las restricciones del navegador pueden interrumpir la visualización. Al recargar puede ser necesario vincular de nuevo. Para terminar, usa el icono de desconexión del receptor."
+      ]
+    ],
+    "action": "Diseña tu reloj",
+    "guide": "Guía de transmisión",
+    "receiver": "Abrir vista del receptor",
+    "labels": [
+      "Tu diseño",
+      "Tu pantalla",
+      "Ajustes, no vídeo",
+      "Vincula. Personaliza. Sigue la hora."
+    ]
+  },
+  "fr": {
+    "title": "Votre horloge, un écran plus grand",
+    "description": "L’horloge JackTools sur téléviseur ou tablette : associez par QR code, changez le style en direct et laissez l’horloge fonctionner sans smartphone.",
+    "lead": "Une belle horloge ne doit pas rester sur un petit écran. La diffusion apporte votre style préféré sur un téléviseur, une tablette ou un autre appareil avec navigateur. Votre smartphone devient une télécommande, pas une source vidéo permanente.",
+    "category": "Outils et développement",
+    "byline": "Nouveautés de l’horloge JackTools",
+    "coverCaption": "Deux navigateurs partagent des réglages, pas une vidéo en direct. SVG schématique original avec heure fixe d’exemple, sans capture d’écran ni QR code scannable.",
+    "sections": [
+      [
+        "screen",
+        "Plus de place pour votre temps",
+        "Un cadran analogique, des points binaires lumineux ou un cadran solaire : affichage, couleurs, fond et date vous accompagnent. Le récepteur montre l’horloge sans l’interface de réglage. Même une tablette déjà disponible peut devenir un affichage horaire apaisant. Il faut un navigateur adapté sur le récepteur, pas une marque particulière de matériel de diffusion."
+      ],
+      [
+        "pair",
+        "Associez, puis personnalisez",
+        "Ouvrez clock.jacktools.net/stream dans le navigateur récepteur. Un code d’association temporaire et un QR code apparaissent. Sur votre smartphone ou ordinateur, choisissez la diffusion de l’horloge et saisissez le code ou scannez le QR code. Confirmez sur le récepteur : le nom de l’appareil et l’aperçu permettent de reconnaître la demande. Les changements suivants sont appliqués en direct."
+      ],
+      [
+        "engine",
+        "Pas une vidéo : une horloge autonome",
+        "Techniquement, la diffusion est ici une télécommande entre deux navigateurs. Les réglages passent par un backend Node.js distinct. Le récepteur consulte régulièrement l’état de la connexion et affiche lui-même l’horloge avec l’heure de son appareil. Le smartphone n’a pas à calculer ni à envoyer continuellement de vidéo. Éteignez-le : l’horloge conserve les derniers réglages tant que le récepteur et son navigateur restent actifs. Les nouveaux changements nécessitent à nouveau une connexion."
+      ],
+      [
+        "location",
+        "Le Soleil et les saisons vous suivent",
+        "Le partage de la position de l’émetteur permet d’utiliser le cadran solaire et la simulation annuelle géolocalisés. Il faut d’abord autoriser la géolocalisation sur l’émetteur. Seul cet interrupteur supplémentaire transmet des coordonnées arrondies à trois décimales via le backend au récepteur associé. Celui-ci n’a alors pas besoin de demander sa propre autorisation de localisation. Sans cet accord, aucune coordonnée n’est transmise. Réveils et audio ne sont pas transmis non plus."
+      ],
+      [
+        "try",
+        "Un navigateur suffit, avec ses limites",
+        "Aucun compte ni inscription Chromecast n’est nécessaire. Sur une clé TV, cela fonctionne seulement si un navigateur adapté est disponible ; toutes les clés ne deviennent donc pas automatiquement compatibles. Après confirmation, le plein écran est ouvert si possible. La veille, le verrouillage et les limites du navigateur peuvent interrompre l’affichage. Un rechargement peut nécessiter une nouvelle association. Pour terminer, utilisez l’icône de déconnexion du récepteur."
+      ]
+    ],
+    "action": "Personnaliser l’horloge",
+    "guide": "Guide de diffusion",
+    "receiver": "Ouvrir la vue du récepteur",
+    "labels": [
+      "Votre style",
+      "Votre écran",
+      "Des réglages, pas de vidéo",
+      "Associez. Personnalisez. Gardez l’heure."
+    ]
+  }
+}

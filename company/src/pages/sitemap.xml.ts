@@ -12,7 +12,7 @@ export function GET({ site }: { site: URL | undefined }) {
     url:new URL('/'+lang+'/tools/'+slug+'/',site),
     alternatives:[...languages.map(language=>({language,url:new URL('/'+language+'/tools/'+slug+'/',site)})),{language:'x-default',url:new URL('/en/tools/'+slug+'/',site)}],
   })));
-  const blogEntries=languages.flatMap(lang=>(['index','nulltopic','surface','clock','binary'] as const).map(key=>({
+  const blogEntries=languages.flatMap(lang=>(['index','nulltopic','surface','clock','binary','stream'] as const).map(key=>({
     url:new URL(getBlogPath(lang,key),site),
     alternatives:[...languages.map(language=>({language,url:new URL(getBlogPath(language,key),site)})),{language:'x-default',url:new URL(getBlogPath('en',key),site)}],
   })));

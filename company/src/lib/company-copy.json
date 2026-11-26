@@ -1003,5 +1003,10 @@
     "en": "Binary, orbit and sundial with optional time readout",
     "es": "Reloj binario, orbital y solar con hora adicional opcional",
     "fr": "Horloge binaire, orbitale et solaire avec affichage horaire facultatif"
+  },
+  "Uhr auf andere Bildschirme streamen – mit QR-Code koppeln": {
+    "en": "Stream your clock to other screens – pair with a QR code",
+    "es": "Transmite tu reloj a otras pantallas: vincula con un código QR",
+    "fr": "Diffusez votre horloge vers d’autres écrans – association par QR code"
   }
 }

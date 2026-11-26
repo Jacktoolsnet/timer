@@ -4,8 +4,8 @@
     "name": "Uhr",
     "tag": "UHRZEIT & DATUM",
     "title": "Deine Uhr. Dein Blick auf die Zeit.",
-    "description": "Uhr entdecken: analog, digital, binär, Orbit oder Sonnenuhr. Mit Klappzahlen, wählbaren Zifferblättern, Zeitzonen, Screenshots und Einrichtungstipps.",
-    "lead": "Analog, digital, mit Klappzahlen oder binär: Die Jacktools Uhr zeigt die Gerätezeit in deiner gewählten Zeitzone. Orbit- und Sonnenuhr lassen sich ohne zusätzliche Uhrzeit, mit Digitalanzeige oder mit Klappzahlen nutzen. Datum, Form und Stil stellst du passend zur Ansicht ein.",
+    "description": "Kostenlose Online-Uhr: analog, digital, binär, Orbit oder Sonnenuhr. Mit Klappzahlen, Zeitzonen und Fokusansicht. Auf andere Bildschirme streamen, ohne Konto.",
+    "lead": "Analog, digital, mit Klappzahlen oder binär: Die Jacktools Uhr zeigt die Gerätezeit in deiner gewählten Zeitzone. Orbit- und Sonnenuhr lassen sich ohne zusätzliche Uhrzeit, mit Digitalanzeige oder mit Klappzahlen nutzen. Datum, Form und Stil stellst du passend zur Ansicht ein. Kopple einen zweiten Browser per QR-Code oder Code, um deine Uhr auf einem anderen Bildschirm anzuzeigen und live anzupassen.",
     "url": "https://clock.jacktools.net/de/",
     "features": [
       {
@@ -27,6 +27,10 @@
       {
         "title": "Binär mit Lesehilfe",
         "text": "Leuchtende BCD-Punkte zeigen jede Ziffer einzeln. Ergänze nach Wunsch Digitalzeit oder Klappzahlen."
+      },
+      {
+        "title": "Uhr auf andere Bildschirme streamen",
+        "text": "Uhr im Browser auf andere Bildschirme streamen – mit QR-Code oder Kopplungscode"
       }
     ],
     "sections": [
@@ -64,7 +68,7 @@
         "paragraphs": [
           "Bei der Orbit-Uhr stehen der innere Kreis für Stunden, der mittlere für Minuten und der äußere für Sekunden. Die Sekunden können springen oder fließen. Zifferblatt, runde oder eckige Form und römische Zahlen lassen sich ebenso wie das Farbschema anpassen.",
           "Die Sonnenuhr berechnet den Sonnenstand aus Datum, Gerätezeit und deinem freigegebenen Standort. Sie zeigt wahre Sonnenzeit, Sonnenhöhe und die Zeiten für Sonnenaufgang und Sonnenuntergang. Die Klappzahlen im Ziffernblatt zeigen dagegen die Uhrzeit der gewählten Zeitzone. Diese muss nicht mit der Sonnenzeit übereinstimmen.",
-          "Aktiviere für die Sonnenuhr „Standortbasierte Simulation“ und erlaube den Zugriff im Browser. Die Uhr speichert oder überträgt die Koordinaten nicht. Bei Nacht gibt es keinen Sonnenschatten; nahe dem Zenit ist er sehr kurz. Sehr kurze Schatten werden für die Lesbarkeit vergrößert, lange begrenzt. Die Screenshots zeigen simulierte Beispieldaten für Berlin, keine Live-Werte.",
+          "Aktiviere für die Sonnenuhr „Standortbasierte Simulation“ und erlaube den Zugriff im Browser. Ohne „Standort mitsenden“ werden keine Koordinaten an den Empfänger übertragen. Nur mit dieser separaten Freigabe werden auf drei Nachkommastellen gerundete Koordinaten über das JackTools-Backend an das gekoppelte Gerät gesendet. Bei Nacht gibt es keinen Sonnenschatten; nahe dem Zenit ist er sehr kurz. Sehr kurze Schatten werden für die Lesbarkeit vergrößert, lange begrenzt. Die Screenshots zeigen simulierte Beispieldaten für Berlin, keine Live-Werte.",
           "Ja. Unter „Zusätzliche Uhrzeit“ wählst du für Orbit- und Sonnenuhr unabhängig zwischen keiner zusätzlichen Uhrzeit, Digitalanzeige und Klappzahlen. Datum und Kalender bleiben separat einstellbar. Bei der Sonnenuhr zeigt die Zusatzanzeige die Gerätezeit in der gewählten Zeitzone, nicht die wahre Sonnenzeit."
         ],
         "steps": [],
@@ -109,6 +113,23 @@
         "steps": [],
         "example": null,
         "summary": "Die Uhr persönlich einrichten"
+      },
+      {
+        "id": "streamen",
+        "title": "Uhr auf andere Bildschirme streamen",
+        "paragraphs": [
+          "Zeige deine gestaltete Uhr auf einem Fernseher, Tablet oder anderen Gerät mit geeignetem Browser. „Uhr streamen“ koppelt zwei Browser über das JackTools-Backend. Du brauchst weder ein Konto noch Chromecast; es wird kein Video übertragen.",
+          "Der Empfänger zeichnet die Uhr selbst und nutzt seine eigene Gerätezeit. Nach dem Ausschalten des Smartphones läuft die Uhr mit den zuletzt übernommenen Einstellungen weiter, solange Empfänger und Browser aktiv bleiben. Neue Änderungen benötigen eine Verbindung. Wecker und Audio werden nicht übertragen. Vollbild und Bildschirm-Wachhalten hängen vom Empfängerbrowser ab; Standby kann die Anzeige unterbrechen. Nach Neuladen kann erneutes Koppeln nötig sein.",
+          "Ohne „Standort mitsenden“ werden keine Koordinaten an den Empfänger übertragen. Nur mit dieser separaten Freigabe werden auf drei Nachkommastellen gerundete Koordinaten über das JackTools-Backend an das gekoppelte Gerät gesendet."
+        ],
+        "steps": [
+          "Öffne clock.jacktools.net/stream im Browser des Empfängergeräts. Dort erscheinen ein zeitlich begrenzter Kopplungscode und ein QR-Code.",
+          "Wähle auf deinem Smartphone oder Computer „Uhr streamen“. Gib den Code ein oder scanne den QR-Code; erlaube dafür bei Bedarf den Kamerazugriff.",
+          "Bestätige die Verbindung am Empfänger anhand der Uhrvorschau und Gerätebezeichnung. Spätere Änderungen der Darstellung werden live übernommen.",
+          "Für die standortbasierte Sonnenuhr und Jahressimulation am Empfänger aktiviere bei Bedarf „Standort mitsenden“ auf dem Sender. Dafür muss dort der Standort freigegeben sein."
+        ],
+        "example": null,
+        "summary": "Uhr im Browser auf andere Bildschirme streamen – mit QR-Code oder Kopplungscode"
       }
     ],
     "faq": [
@@ -135,10 +156,18 @@
       {
         "question": "Kann ich Orbit- und Sonnenuhr ohne Klappzahlen nutzen?",
         "answer": "Ja. Unter „Zusätzliche Uhrzeit“ wählst du für Orbit- und Sonnenuhr unabhängig zwischen keiner zusätzlichen Uhrzeit, Digitalanzeige und Klappzahlen. Datum und Kalender bleiben separat einstellbar. Bei der Sonnenuhr zeigt die Zusatzanzeige die Gerätezeit in der gewählten Zeitzone, nicht die wahre Sonnenzeit."
+      },
+      {
+        "question": "Uhr auf andere Bildschirme streamen",
+        "answer": "Öffne clock.jacktools.net/stream am Empfänger. Wähle auf dem Sender „Uhr streamen“, gib den Kopplungscode ein oder scanne den QR-Code und bestätige am Empfänger. Die Darstellung wird live übernommen."
+      },
+      {
+        "question": "Läuft die Uhr weiter, wenn mein Smartphone aus ist?",
+        "answer": "Der Empfänger zeichnet die Uhr selbst und nutzt seine eigene Gerätezeit. Nach dem Ausschalten des Smartphones läuft die Uhr mit den zuletzt übernommenen Einstellungen weiter, solange Empfänger und Browser aktiv bleiben. Neue Änderungen benötigen eine Verbindung. Wecker und Audio werden nicht übertragen. Vollbild und Bildschirm-Wachhalten hängen vom Empfängerbrowser ab; Standby kann die Anzeige unterbrechen. Nach Neuladen kann erneutes Koppeln nötig sein."
       }
     ],
     "end": "Wähle zuerst eine gut lesbare Ansicht und die richtige Zeitzone. Datum, Hintergründe und Wecker kannst du danach nach Bedarf ergänzen.",
-    "seoTitle": "Uhr erklärt: Binär, Orbit, Sonnenuhr & Zeitzonen"
+    "seoTitle": "Uhr: Binär, Orbit, Sonnenuhr & Streaming – Anleitung"
   },
   {
     "slug": "stopwatch",

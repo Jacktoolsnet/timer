@@ -26,6 +26,8 @@ for(const lang of ['de','en','es','fr'])test('certificate dashboard matches Comp
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));const state=await backend(page);
  await page.goto('/'+lang+'/admin/');
  await page.locator('#admin-certificates-tile').click();
+ await expect(page.locator('.site-header #admin-back')).toBeVisible();
+ await expect(page.locator('#main #admin-back')).toHaveCount(0);
  await expect(page.locator('#admin-certificates-panel')).toBeVisible();await expect(page.locator('#admin-overview')).toBeHidden();
  await expect(page.locator('meta[name=robots]')).toHaveAttribute('content','noindex, follow');
  await expect(page.locator('.language-menu a[lang=en]')).toHaveAttribute('href',/\/en\/admin\/certificates\/$/);

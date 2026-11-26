@@ -12,12 +12,17 @@ const api=import.meta.env.DEV?'':(import.meta.env.PUBLIC_BACKEND_URL||'https://b
 ---
 <Layout lang={lang} title={t.title} description={t.intro} route="admin" noindex homeAlternates={false} canonicalPath={adminHome+(view==='overview'?'':view+'/')} quietBackground adminView={view}>
  <div slot="admin-header" class="admin-header-controls">
-  <span class="admin-header-label"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 3v6c0 4-3 7-8 9-5-2-8-5-8-9V6l8-3Z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>{t.title}</span>
-  <div id="admin-header-session" class="admin-header-session" hidden>
-   <p><span class="admin-header-welcome">{t.welcome}</span><strong id="admin-identity"></strong><span id="admin-role" class="admin-badge"></span></p>
-   <button id="admin-logout" type="button" class="secondary"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4H5v16h5m4-13 5 5-5 5m-5-5h10"/></svg><span>{t.logout}</span></button>
+  <div class="admin-header-identity">
+   <a id="admin-back" class="admin-back" href={adminHome} aria-label={t.overview} title={t.overview} hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 5-7 7 7 7M3 12h18"/></svg><span>{t.overview}</span></a>
+   <div id="admin-header-session" class="admin-header-session" hidden>
+    <p><span class="admin-header-welcome">{t.welcome}</span><strong id="admin-identity"></strong><span id="admin-role" class="admin-badge"></span></p>
+   </div>
   </div>
+
  </div>
+  <div slot="admin-tools" id="admin-header-actions" class="admin-header-actions" hidden>
+   <button id="admin-logout" type="button" class="secondary" aria-label={t.logout} title={t.logout}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4H5v16h5m4-13 5 5-5 5m-5-5h10"/></svg></button>
+  </div>
  <section class="jt-admin" id="jt-admin" data-state="signed-out" data-view={view} data-api={api} data-text={JSON.stringify(t)}>
   <div id="admin-toast" class="admin-toast" role="status" aria-live="polite" aria-atomic="true" hidden>
    <span class="admin-toast-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path class="admin-toast-check" d="m8 12 3 3 5-6"/><path class="admin-toast-error" d="M12 7v6m0 3v.1"/></svg></span>
@@ -62,7 +67,6 @@ const api=import.meta.env.DEV?'':(import.meta.env.PUBLIC_BACKEND_URL||'https://b
      <strong>{cert.title}</strong><span class="admin-tile-description">{cert.description}</span><span class="admin-tile-arrow" aria-hidden="true">↗</span>
     </a>
    </nav>
-   <a id="admin-back" class="admin-back" href={adminHome} hidden><span aria-hidden="true">←</span> {t.overview}</a>
    <div class="admin-grid" id="admin-profile-page" hidden>
     <section class="admin-card" id="admin-profile-panel"><h2>{t.profile}</h2><form id="admin-profile-form"><label>{t.displayName}<input name="displayName" maxlength="100" autocomplete="nickname" /></label><label>{t.email}<input name="email" type="email" maxlength="254" autocomplete="email" /></label><button class="primary" type="submit">{t.save}</button></form></section>
     <section class="admin-card"><h2>{t.security}</h2><form id="admin-password-form"><label>{t.currentPassword}<input name="currentPassword" type="password" required maxlength="128" autocomplete="current-password" /></label><label>{t.newPassword}<input name="newPassword" type="password" required minlength="12" maxlength="128" autocomplete="new-password" /></label><p class="admin-hint">{t.passwordHint}</p><button class="primary" type="submit">{t.changePassword}</button></form></section>

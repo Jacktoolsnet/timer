@@ -25,7 +25,7 @@
       [
         "try",
         "Ausprobieren – mit bewusstem Standortzugriff",
-        "Wähle „Sonnenuhr“, aktiviere „Standortbasierte Simulation“ und erlaube den Standortzugriff im Browser. Die Uhr verarbeitet die Koordinaten lokal, speichert und überträgt sie nicht. Solange der Standortmodus aktiv genutzt wird, werden Positionsänderungen verfolgt. Die Gerätezeit muss stimmen; die Zeitzone bleibt separat wählbar. Die Sonnenuhr ist eine Visualisierung, kein Präzisionsinstrument."
+        "Wähle „Sonnenuhr“, aktiviere „Standortbasierte Simulation“ und erlaube den Standortzugriff im Browser. Die Uhr berechnet den Sonnenstand lokal und hält den Standort nur für den aktuellen Besuch im Speicher. Nur mit der separaten Freigabe „Standort mitsenden“ werden gerundete Koordinaten über das Backend an einen gekoppelten Streaming-Empfänger übertragen. Solange der Standortmodus aktiv genutzt wird, werden Positionsänderungen verfolgt. Die Gerätezeit muss stimmen; die Zeitzone bleibt separat wählbar. Die Sonnenuhr ist eine Visualisierung, kein Präzisionsinstrument."
       ]
     ],
     "action": "Uhr ausprobieren",
@@ -62,7 +62,7 @@
       [
         "try",
         "Try it with deliberate location permission",
-        "Choose Sundial, enable Location-based simulation and allow location access in your browser. The clock processes coordinates locally and neither stores nor transmits them. Position changes are tracked while the location mode is actively used. Your device time must be correct; the time zone remains a separate setting. This sundial is a visualization, not a precision instrument."
+        "Choose Sundial, enable Location-based simulation and allow location access in your browser. The clock calculates the solar position locally and keeps location in memory for this visit only. Rounded coordinates are sent through the backend to a paired streaming receiver only with the separate “Share sender location” opt-in. Position changes are tracked while the location mode is actively used. Your device time must be correct; the time zone remains a separate setting. This sundial is a visualization, not a precision instrument."
       ]
     ],
     "action": "Try the clock",
@@ -99,7 +99,7 @@
       [
         "try",
         "Probar con permiso de ubicación",
-        "Elige el reloj solar, activa la simulación según ubicación y permite el acceso en el navegador. El reloj procesa las coordenadas localmente sin guardarlas ni transmitirlas. Sigue los cambios de posición mientras se utiliza el modo de ubicación. La hora del dispositivo debe ser correcta; la zona horaria se elige por separado. Es una visualización, no un instrumento de precisión."
+        "Elige el reloj solar, activa la simulación según ubicación y permite el acceso en el navegador. El reloj calcula la posición solar localmente y mantiene la ubicación en memoria solo durante esta visita. Las coordenadas redondeadas solo se envían mediante el backend a un receptor vinculado si autorizas por separado compartir la ubicación del emisor. Sigue los cambios de posición mientras se utiliza el modo de ubicación. La hora del dispositivo debe ser correcta; la zona horaria se elige por separado. Es una visualización, no un instrumento de precisión."
       ]
     ],
     "action": "Probar el reloj",
@@ -136,7 +136,7 @@
       [
         "try",
         "Essayer avec une autorisation explicite",
-        "Choisissez le cadran solaire, activez la simulation selon la position et autorisez la géolocalisation du navigateur. L’horloge traite les coordonnées localement, sans les stocker ni les transmettre. Les changements de position sont suivis pendant l’utilisation active de ce mode. L’heure de l’appareil doit être correcte ; le fuseau reste un réglage distinct. C’est une visualisation, pas un instrument de précision."
+        "Choisissez le cadran solaire, activez la simulation selon la position et autorisez la géolocalisation du navigateur. L’horloge calcule la position solaire localement et garde la position en mémoire uniquement pendant cette visite. Les coordonnées arrondies ne sont transmises via le backend à un récepteur associé qu’avec l’autorisation distincte de partager la position de l’émetteur. Les changements de position sont suivis pendant l’utilisation active de ce mode. L’heure de l’appareil doit être correcte ; le fuseau reste un réglage distinct. C’est une visualisation, pas un instrument de précision."
       ]
     ],
     "action": "Essayer l’horloge",

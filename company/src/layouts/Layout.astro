@@ -14,11 +14,13 @@ import { colorSchemes } from '../lib/appearance';
 import { languages, languageNames, type Language } from '../lib/i18n';
 import { getCompanyDictionary } from '../lib/company-ui';
 import {getBlogPath,type BlogKey} from '../lib/blog';
+import {adminText} from '../lib/admin-text';
 interface Props { adminView?:'overview'|'profile'|'users'|'certificates'; blogKey?:BlogKey|'index'; lang: Language; title: string; description: string; route: string; noindex?: boolean; legal?: boolean; homeAlternates?: boolean; canonicalPath?:string; socialImageProject?:SocialProject; guideSlug?:string; quietBackground?:boolean; ogType?:'website'|'article' }
 const { lang, title, description, noindex = false, legal = false, homeAlternates = true } = Astro.props;
 const t = getCompanyDictionary(lang);
 const motion = backgroundCopy[lang];
 const home = '/' + lang + '/';
+const isAdmin = Astro.props.route === 'admin';
 const canonical = new URL(Astro.props.canonicalPath ?? (Astro.url.pathname === '/' ? '/en/' : Astro.url.pathname), Astro.site);
 
 ---
@@ -74,9 +76,8 @@ const canonical = new URL(Astro.props.canonicalPath ?? (Astro.url.pathname === '
     <canvas id="ambient-background" class="ambient-background" aria-hidden="true" hidden></canvas>
     <div class="site-shell">
       <header class="site-header">
-        <a class="brand" href={home} aria-label={t.home}>
-          <span class="brand-icon"><BrandIcon tool="company"/></span>
-          <span class="brand-wordmark">jacktools<span class="brand-dot">.</span>net</span>
+        <a class:list={['brand',{'admin-brand':isAdmin}]} href={isAdmin?home+'admin/':home} aria-label={isAdmin?adminText[lang].overview:t.home}>
+          {isAdmin ? <><span class="brand-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 3v6c0 4-3 7-8 9-5-2-8-5-8-9V6l8-3Z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg></span><span class="brand-wordmark">{adminText[lang].title}</span></> : <><span class="brand-icon"><BrandIcon tool="company"/></span><span class="brand-wordmark">jacktools<span class="brand-dot">.</span>net</span></>}
         </a>
         <div class="header-tools">
           <details class="palette-dropdown" id="palette-dropdown">
@@ -133,7 +134,7 @@ const canonical = new URL(Astro.props.canonicalPath ?? (Astro.url.pathname === '
             <div class="storage-choice"><label><span class="storage-switch"><input type="checkbox" role="switch" id="remember-preferences" /><span class="storage-switch-track" aria-hidden="true"></span></span> <span>{t.rememberPreferences}</span></label><p id="storage-status" role="status"></p></div>
             </div>
           </details>
-
+          <slot name="admin-tools" />
         </div>
         {Astro.props.route === 'admin' ? <slot name="admin-header" /> : <nav class="header-nav" aria-label={t.navigation}><div class="header-nav-links"><a href={home+'#tools'}>{t.tools}</a><a href={home+'#idee'}>{t.idea}</a><slot name="header-action" /></div></nav>}
       </header>

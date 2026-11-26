@@ -52,6 +52,6 @@ for(const host of ['localhost','127.0.0.1'])test(`login and reload retain HttpOn
  expect(cookie?.httpOnly).toBe(true);expect(cookie?.sameSite).toBe('Lax');
  await page.reload();await expect(page.locator('#admin-workspace')).toBeVisible();
  expect(requests.length).toBeGreaterThan(3);expect(requests.every(url=>new URL(url).origin===origin)).toBe(true);
- await page.locator('#admin-logout').click();await expect(page.locator('#admin-login-panel')).toBeVisible();
+ await page.locator('#admin-logout').click();await expect(page).toHaveURL(origin+'/de/');await expect(page.locator('.site-header .brand-wordmark')).toHaveText('jacktools.net');
  expect((await context.cookies(origin)).some(cookie=>cookie.name==='jt_admin_dev')).toBe(false);
 });

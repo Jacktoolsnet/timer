@@ -30,6 +30,7 @@ const pictures = (galleries as Record<string,{id:string;title:string;caption:str
     {g.sections.map(section=><section id={section.id}>
       <h2>{section.title}</h2>
       {section.paragraphs.map(paragraph=><p>{paragraph}</p>)}
+      {g.slug === 'clock' && section.id === 'streamen' && <p><a href={'https://clock.jacktools.net/'+lang+'/stream/'}>{t('Empfängeransicht öffnen')} ↗</a></p>}
       {section.steps.length > 0 && <ol>{section.steps.map(step=><li>{step}</li>)}</ol>}
       {section.example && <aside class="guide-example"><h3>{section.example.title}</h3><p>{section.example.text}</p></aside>}
     </section>)}

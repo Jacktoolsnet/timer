@@ -112,3 +112,7 @@ const seo=toolSeo.clock[lang];
 <dialog id="alarm-dialog" aria-labelledby="alarm-dialog-title"><div class="dialog-inner"><h2 id="alarm-dialog-title">{alarm.ringing}</h2><p id="alarm-dialog-time"></p><p id="alarm-dialog-audio" role="status"></p><div class="dialog-actions"><button id="alarm-stop" type="button" class="primary" autofocus>{alarm.stop}</button><button id="alarm-snooze" type="button" class="secondary">{alarm.snooze}</button></div></div></dialog>
 <script src="../scripts/clock.ts"></script>
 </Layout>
+<style>
+.guide-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+@media(max-width:680px) { .guide-grid { grid-template-columns:1fr; } }
+</style>

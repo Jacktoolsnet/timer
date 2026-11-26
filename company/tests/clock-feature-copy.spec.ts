@@ -9,6 +9,10 @@ for(const [lang,binary] of [['de','binär'],['en','binary'],['es','binario'],['f
   await page.goto(`/${lang}/tools/clock/`);
   await expect(page.locator('meta[name=description]')).toHaveAttribute('content',guide.description);
   expect(guide.description.toLowerCase()).toContain(binary);
+  await expect(page.locator('#streamen')).toContainText('clock.jacktools.net/stream');
+  await expect(page.locator('#streamen ol li')).toHaveCount(4);
+  await expect(page.locator('#streamen a')).toHaveAttribute('href', 'https://clock.jacktools.net/'+lang+'/stream/');
+  await expect(page.locator('.guide-toc a[href="#streamen"]')).toBeVisible();
   await expect(page.locator('#binaeruhr')).toContainText('BCD');
   await expect(page.locator('#binaeruhr')).toContainText('1 + 4');
   for(const section of guide.sections)for(const paragraph of section.paragraphs)await expect(page.locator('#'+section.id)).toContainText(paragraph);

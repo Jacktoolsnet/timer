@@ -77,7 +77,7 @@ test.describe('translated articles without JavaScript',()=>{
   for(const lang of ['en','es','fr'] as const) for(const slug of slugs){
    await page.goto(`/${lang}/tools/${slug}/`);
    await expect(page.locator('h1')).toBeVisible();
-   await expect(page.locator('article details')).toHaveCount(slug==='timer'?5:4);
+   await expect(page.locator('article details')).toHaveCount(slug==='timer'?5:localizedGuides(lang).find(g=>g.slug===slug)!.faq.length);
    await expect(page.locator('.related-guides a')).toHaveCount(8);
    await expect(page.locator('.showcase-open')).toHaveAttribute('href',/\.(png|svg)$/);
   }
