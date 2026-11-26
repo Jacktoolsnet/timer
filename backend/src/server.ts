@@ -12,6 +12,7 @@ try{
  const server=app.listen(config.port,config.host,()=>console.log(JSON.stringify({event:'listening',host:config.host,port:config.port})));
  server.on('error',()=>{console.error('HTTP listener failed');void db?.close().finally(()=>process.exit(1));});
  const cleanup=setInterval(()=>{
+  void db!.query("DELETE FROM jt_tv_sessions WHERE expires_at<=now() OR (state IN ('waiting','pending') AND pair_expires_at<=now())").catch(()=>{});
   void db!.query('DELETE FROM jt_admin_sessions WHERE expires_at<=now() OR last_seen_at<now()-($1*interval \'1 second\')',[config.sessionIdle]).catch(()=>{});
   void db!.query('DELETE FROM jt_rate_limits WHERE expires_at<=now()').catch(()=>{});
   void db!.query("DELETE FROM jt_audit_events WHERE created_at<now()-interval '90 days'").catch(()=>{});

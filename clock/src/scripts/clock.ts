@@ -1,3 +1,4 @@
+import {createClockTv,type TvSnapshot} from './tv';
 import {createViewControls} from './view-controls';
 import {createDialControls} from './dial-controls';
 import {createBinaryClock} from './binary-clock';
@@ -13,6 +14,7 @@ import {createSeasonalBackground} from './seasonal-background';
 import {createSeasonalLocation} from './seasonal-location';
 import {clockBackgrounds,clockBackgroundOptions} from '../lib/clock-backgrounds';
 const $=(id:string)=>document.getElementById(id)!;
+const isReceiver=$('clock-app').dataset.receiver==='true';
 const t=JSON.parse($('clock-app').dataset.text!);
 const form=$('clock-settings') as HTMLFormElement;
 const syncDialControls=createDialControls(form);
@@ -21,7 +23,7 @@ const field=(key:string)=>form.elements.namedItem(key) as HTMLInputElement | HTM
 const defaults={view:'analog',analogReadout:'off',binaryReadout:'off',orbitReadout:'off',sundialReadout:'flip',analogDesign:'standard',background:'none',animateBackground:false,hemisphere:'north',transparency:0,date:'long',dateView:'calendarDate',format:'medium',hourCycle:'auto',zone:'local',seconds:true,numbers:true,smooth:false,awake:false};
 let settings={...defaults};
 const backgroundMotion=matchMedia('(prefers-reduced-motion: reduce)');
-try {if(storageAllowed()) {const saved=JSON.parse(localStorage.getItem('jacktools.clock.settings.v1')||'null');for(const key of Object.keys(defaults) as (keyof typeof defaults)[]){const value=saved?.[key];if(typeof defaults[key]==='boolean'){if(typeof value==='boolean')Object.assign(settings,{[key]:value});}else if(typeof defaults[key]==='number'){if(typeof value==='number'&&Number.isInteger(value)&&value>=0&&value<=100)Object.assign(settings,{[key]:value});}else if((key==='view'&&['combined','analogFlip','binaryDigital','binaryFlip'].includes(value))||[...((field(key) as HTMLSelectElement).options)].some(o=>o.value===value))Object.assign(settings,{[key]:value});}}}catch{}
+try {if(!isReceiver&&storageAllowed()) {const saved=JSON.parse(localStorage.getItem('jacktools.clock.settings.v1')||'null');for(const key of Object.keys(defaults) as (keyof typeof defaults)[]){const value=saved?.[key];if(typeof defaults[key]==='boolean'){if(typeof value==='boolean')Object.assign(settings,{[key]:value});}else if(typeof defaults[key]==='number'){if(typeof value==='number'&&Number.isInteger(value)&&value>=0&&value<=100)Object.assign(settings,{[key]:value});}else if((key==='view'&&['combined','analogFlip','binaryDigital','binaryFlip'].includes(value))||[...((field(key) as HTMLSelectElement).options)].some(o=>o.value===value))Object.assign(settings,{[key]:value});}}}catch{}
 for(const [key,value] of Object.entries(settings)){if(typeof value==='boolean')(field(key) as HTMLInputElement).checked=value;else field(key).value=String(value);}
 function applyTransparency(){
  const enabled=clockBackgroundOptions.some(id=>id===settings.background);
@@ -131,7 +133,7 @@ function render(){const now=new Date();sundial.render(now);if(settings.backgroun
  updateBinary(now,settings.view.startsWith('binary')?digits.formatToParts(now):[],settings.view,settings.numbers,t.binary);
  const text=digits.format(now);$('orbit-clock').setAttribute('aria-label',text);$('digital-clock').textContent=text;$('digital-clock').setAttribute('datetime',now.toISOString());$('analog-clock').setAttribute('aria-label',text);$('clock-date').textContent=dateFormat.format(now);styledDate.render(now);
 }
-function save(){if(!storageAllowed())return;try{localStorage.setItem('jacktools.clock.settings.v1',JSON.stringify(settings));}catch{$('clock-settings-status').textContent=t.storageError;}}
+function save(){if(isReceiver||!storageAllowed())return;try{localStorage.setItem('jacktools.clock.settings.v1',JSON.stringify(settings));}catch{$('clock-settings-status').textContent=t.storageError;}}
 form.addEventListener('submit',e=>e.preventDefault());form.addEventListener('change',()=>{for(const key of Object.keys(defaults)){const input=field(key);Object.assign(settings,{[key]:key==='view'?viewControls.selectedView():input.type==='checkbox'?(input as HTMLInputElement).checked:input.type==='range'?Number(input.value):input.value});}configure();save();});
 field('transparency').addEventListener('input',()=>{
  settings.transparency=Number(field('transparency').value);
@@ -140,7 +142,7 @@ field('transparency').addEventListener('input',()=>{
 document.addEventListener('storage-enabled',save);
 document.addEventListener('preferences-cleared',()=>{geolocation.clear();configure();});
 let ownsFullscreen=false;
-function focus(on:boolean){document.body.classList.toggle('focus-view',on);const b=$('clock-focus');b.setAttribute('aria-pressed',String(on));b.setAttribute('aria-label',on?t.exitFocus:t.focusMode);b.querySelector('span')!.textContent=on?t.exitFocus:t.focusMode;}
+function focus(on:boolean){if(isReceiver)on=true;document.body.classList.toggle('focus-view',on);const b=$('clock-focus');b.setAttribute('aria-pressed',String(on));b.setAttribute('aria-label',on?t.exitFocus:t.focusMode);b.querySelector('span')!.textContent=on?t.exitFocus:t.focusMode;}
 async function leave(){focus(false);if(ownsFullscreen&&document.fullscreenElement){ownsFullscreen=false;await document.exitFullscreen().catch(()=>{});}}
 $('clock-focus').addEventListener('click',async()=>{if(document.body.classList.contains('focus-view'))return leave();focus(true);if(!document.fullscreenElement)try{await document.documentElement.requestFullscreen();ownsFullscreen=true;if(!document.body.classList.contains('focus-view'))await leave();}catch{}});
 document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement){ownsFullscreen=false;focus(false);}});document.addEventListener('keydown',e=>{if(e.key==='Escape')void leave();});
@@ -152,3 +154,14 @@ document.addEventListener('visibilitychange',()=>{
 configure();setInterval(()=>{if(!document.hidden)render();},50);document.addEventListener('visibilitychange',()=>{if(!document.hidden){configure();}});
 
 enhanceClockSelects(form);
+
+createClockTv({snapshot(){
+ const {awake,...display}=settings;const root=document.documentElement;
+ return {version:1,settings:{...display,zone:settings.zone==='local'?Intl.DateTimeFormat().resolvedOptions().timeZone:settings.zone},appearance:{palette:root.dataset.palette||'green',style:root.dataset.style||'technical',theme:root.dataset.theme||'light',fontSize:root.dataset.fontSize||'0'},language:root.lang};
+},apply(snapshot:TvSnapshot){
+ if(!isReceiver)return;
+ const root=document.documentElement;root.lang=snapshot.language;
+ root.dataset.palette=snapshot.appearance.palette;root.dataset.style=snapshot.appearance.style;root.dataset.themeMode=snapshot.appearance.theme;root.dataset.theme=snapshot.appearance.theme;root.dataset.fontSize=snapshot.appearance.fontSize;
+ for(const key of Object.keys(defaults))if(key!=='awake'&&key in snapshot.settings){Object.assign(settings,{[key]:snapshot.settings[key]});const input=field(key);if(input.type==='checkbox')(input as HTMLInputElement).checked=Boolean(snapshot.settings[key]);else{const value=String(snapshot.settings[key]);if(key==='zone'&&input instanceof HTMLSelectElement&&![...input.options].some(option=>option.value===value))input.add(new Option(value,value));input.value=value;}}
+ settings.awake=true;configure();focus(true);
+}});

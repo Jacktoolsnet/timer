@@ -1,0 +1,36 @@
+---
+import {tvText} from '../lib/tv-text';
+import type {Language} from '../lib/i18n';
+import '../styles/tv.css';
+const api=import.meta.env.DEV?'':import.meta.env.PUBLIC_BACKEND_URL||'https://backend.jacktools.net';
+if(!import.meta.env.DEV){const url=new URL(api);if(url.protocol!=='https:'||url.username||url.password||url.search||url.hash||url.pathname!=='/')throw new Error('Invalid TV backend URL: production requires an HTTPS origin');}
+const {lang,receiver=false}=Astro.props as {lang:Language;receiver?:boolean};const t=tvText[lang];
+---
+<div id="clock-tv" data-receiver={String(receiver)} data-text={JSON.stringify(t)} data-api={api}>
+{receiver?<>
+ <section id="tv-receiver-panel" class="tv-panel" aria-labelledby="tv-title">
+  <span class="tv-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="3"/><path d="M8 21h8m-4-4v4"/></svg></span>
+  <h1 id="tv-title">{t.title}</h1><p>{t.waiting}</p>
+  <canvas id="tv-qr" aria-label="QR" role="img" hidden></canvas><output id="tv-code"></output>
+  <p id="tv-proposal" hidden>{t.proposal} <strong id="tv-preview"></strong></p>
+  <div class="tv-actions"><button id="tv-approve" class="primary" hidden>{t.approve}</button><button id="tv-reject" class="secondary" hidden>{t.reject}</button><button id="tv-retry" class="secondary" hidden>{t.retry}</button></div>
+  <p id="tv-status" role="status" aria-live="polite"></p><p class="tv-note">{t.remaining}</p><p class="tv-note">{t.privacy}</p>
+ </section>
+ <div id="tv-controls" class="tv-controls" hidden><button id="tv-fullscreen" class="secondary">{t.fullscreen}</button><button id="tv-stop" class="secondary">{t.stop}</button><span id="tv-live-status" role="status"></span></div>
+</>:<>
+
+ <dialog id="tv-dialog" aria-labelledby="tv-title" aria-describedby="tv-pair-hint"><div class="dialog-inner"><h2 id="tv-title">{t.title}</h2><p id="tv-pair-hint">{t.open}</p>
+ <form id="tv-pair-form">
+  <div id="tv-code-entry"><label>{t.code}<input id="tv-pair-code" inputmode="numeric" pattern="[0-9]{8}" maxlength="12" autocomplete="off" required /></label>
+   <div id="tv-keypad" class="tv-keypad" role="group" aria-label={t.keypad}>
+    {[1,2,3,4,5,6,7,8,9].map(digit=><button type="button" data-key={String(digit)}>{digit}</button>)}
+    <button type="button" data-key="clear" aria-label={t.clear} title={t.clear}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/></svg></button>
+    <button type="button" data-key="0">0</button>
+    <button type="button" data-key="backspace" aria-label={t.backspace} title={t.backspace}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5-7 7 7 7h12V5ZM12 9l6 6m0-6-6 6"/></svg></button>
+   </div>
+  </div>
+  <button id="tv-send" class="primary" type="submit">{t.send}</button>
+ </form>
+ <p id="tv-status" role="status" aria-live="polite"></p><div class="dialog-actions"><button id="tv-detach" class="secondary" hidden>{t.detach}</button><button id="tv-close" class="secondary">{t.close}</button></div></div></dialog>
+</>}
+</div>

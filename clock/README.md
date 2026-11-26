@@ -50,3 +50,30 @@ selector (off / digital / flip), remembered independently for each type when
 storage consent is enabled. Digital and flip hide these controls. Rendering and
 saved `view` values retain the legacy combined variants for compatibility;
 `createViewControls` maps them to the compact UI, including older saved settings.
+
+## TV-Browser (erster Stand)
+
+`/stream/` (Englisch) bzw. `/{lang}/stream/` zeigt den Empfänger mit QR-/Zahlencode.
+Im Header neben der Fokusansicht öffnet „Uhr streamen“ den Senderdialog. Am TV muss
+bestätigt werden. Die echte Uhrdarstellung wird wiederverwendet, kein separater
+Animationsnachbau. Weitere Änderungen werden übertragen; ohne Handy läuft die
+TV-Uhr selbständig mit der letzten Konfiguration weiter.
+
+Lokal Clock auf Port 4322 plus Backend auf 4340 starten. Die Datenbank benötigt
+`backend/migrations/002_tv.sql`; `npm --prefix backend run migrate:local` vom
+Repositoryroot aus anwenden. Danach ggf. den Backend-Devserver neu starten.
+Für andere Ports `TV_ALLOWED_ORIGINS` am Backend anpassen. Browser-API-Anfragen
+laufen lokal über den Same-Origin-Vite-Proxy. Produktion nutzt direkt HTTPS auf
+`backend.jacktools.net`; `PUBLIC_BACKEND_URL` ist ein öffentlicher Buildwert,
+keine Servergeheimnisse in diese Variable eintragen. Der Produktionsbuild lehnt
+HTTP-API-Adressen ab. Lokale Overrides gehören
+in `.env.development.local`, nicht in die Produktionsbuild-Umgebung.
+
+Kein Standort, Wecker, Audio oder persönliche Alarmkonfiguration im Snapshot.
+QR-Links öffnen eine werbefreie, nicht indexierbare `/{lang}/pair/`-Seite und
+benötigen bewusstes Senden; Einstellungen dieses neuen Tabs vorher prüfen.
+Kopplungsdaten bleiben nur im Arbeitsspeicher. Neuladen erfordert erneute Kopplung.
+„Steuerung trennen“ lässt die Anzeige weiterlaufen; „Stream beenden“ am
+Empfänger widerruft die Verbindung und öffnet die Kopplung neu. Fullscreen und
+Wachhalten sind abhängig vom Stickbrowser und müssen am echten Gerät getestet werden.
+Details, Produktions-ENV und Sicherheit: `../backend/README.md`, Abschnitt TV.

@@ -2,7 +2,7 @@
 
 Eigenständige Express-5-/TypeScript-API für Company und Tools. Keine Verbindung zu
 MessageDrop, dessen Adminbackend oder Datenbank. Zieladresse: `https://backend.jacktools.net`.
-TV-Kopplung und Zertifikatsüberwachung sind noch nicht implementiert.
+Browserbasierte TV-Kopplung ist als erster Stand implementiert. Zertifikatsüberwachung ist noch geplant.
 
 ## Voraussetzungen und erster Start
 
@@ -282,3 +282,86 @@ Cookieattribute und CSRF, ersetzen aber keinen Browser-Smoke-Test über echtes H
 Dies ist ein erster Verwaltungsstand, keine abgeschlossene Betriebshärtung. Vor
 öffentlicher Nutzung Datenschutz-/Cookieinformationen, Mail-/Recovery-Prozess und
 gegebenenfalls Mehrfaktoranmeldung für Root prüfen. Es wurde nichts deployed.
+
+## Browserbasierte TV-Anbindung der Uhr
+
+Erster TV-Stand implementiert, ohne Cast SDK und ohne Admin-Konto. Die Company-
+Administration und TV-Capabilities sind vollständig getrennt. Kein Videostream:
+Die TV-Uhr rendert selbst, die API überträgt lediglich Darstellungseinstellungen.
+
+### Lokal testen
+
+1. `npm run migrate:local` anwenden und Backend starten, z. B. `npm run dev:local`.
+2. Clock separat auf Port 4322 starten: `cd ../clock && npm run dev -- --port 4322`.
+3. Empfänger in einem Fenster: `http://127.0.0.1:4322/de/stream/`.
+4. Sender im zweiten Fenster: `http://127.0.0.1:4322/de/`. Einstellungen wählen,
+   „Uhr streamen“, Code eingeben und bewusst senden. Am Empfänger bestätigen.
+5. Darstellung ändern, Sendertab schließen, Netzwerkunterbrechung ausprobieren.
+   Der Empfänger muss mit der letzten Konfiguration weiterlaufen.
+
+Clock verwendet lokal einen eigenen Same-Origin-Proxy. Seiten funktionieren mit
+und ohne abschließenden Slash (`trailingSlash: ignore`). Für andere lokale Ports
+`TV_ALLOWED_ORIGINS` exakt ergänzen. `ADMIN_ALLOWED_ORIGINS` bleibt unverändert.
+`localhost`/`127.0.0.1` sind auf einem echten Handy/Stick **nicht** der Entwickler-PC;
+für geräteübergreifende Tests Deployment oder korrekt konfigurierte LAN-Adressen
+verwenden (Hostfreigabe und exakte Origin). Die QR-URL nutzt die aufgerufene Origin.
+
+### Produktion
+
+Zusätzlich zur bestehenden Produktionskonfiguration:
+
+```dotenv
+TV_ENABLED=true
+TV_ALLOWED_ORIGINS=https://clock.jacktools.net
+TV_STATE_SECRET=<eigener kryptografisch zufälliger Schlüssel mit mindestens 32 Zeichen>
+```
+
+`TV_STATE_SECRET` muss von `SESSION_SECRET` verschieden sein. Lokal wird ohne
+expliziten Schlüssel ein separater Entwicklungsschlüssel abgeleitet; produktiv
+ist diese Vereinfachung nicht erlaubt. TV ist in Produktion standardmäßig **aus**.
+Migration `002_tv.sql` vor dem Serverstart ausführen und Clock neu bauen/deployen.
+Kein Vite-Proxy im Produktionshosting nötig. HTTPS auf beiden Domains, keine
+Caches für API-Antworten; Reverse-Proxy muss `Authorization` und `Origin` erhalten.
+TV darf ausschließlich seine eigene Origin verwenden, nicht automatisch Company
+oder andere Tool-Subdomains. Admin-Cookies werden bei TV-Anfragen nicht gesendet.
+
+### Ablauf und Sicherheitsgrenzen
+
+- `POST /api/v1/tv/receivers`: Empfänger erzeugt achtstelligen Code plus QR-Geheimnis.
+  Code/QR gelten zehn Minuten und sind atomar nur einmal einlösbar.
+- `POST /api/v1/tv/claim`: Sender schlägt Snapshot vor. Noch keine Steuerberechtigung.
+- `GET /api/v1/tv/:id/receiver|sender`: rollengetrennter Zustand über Bearer-Capability.
+- `POST .../approve`: nur der Empfänger darf bestätigen. Ablehnen nutzt `.../stop`.
+- `PUT .../settings`: nur bestätigter Sender, mit erwarteter Revision. Veraltete
+  Schreibzugriffe werden mit 409 abgewiesen. `POST .../ack` bestätigt die Anwendung.
+- `POST .../detach`: Sender widerruft seine Steuerung; eine laufende Anzeige bleibt.
+  Ein noch unbestätigter Vorschlag wird dabei vollständig verworfen.
+- `POST .../stop`: nur Empfänger, löscht Sitzung und Snapshot. Oberfläche erzeugt
+  danach einen neuen Kopplungscode für die nächste Verbindung.
+- Steuerverbindung maximal 24 Stunden; Ablauf wird bei **jedem** Zugriff geprüft.
+  Danach läuft eine bereits initialisierte Anzeige lokal weiter. Browserneustart
+  bzw. Neuladen erfordert erneutes Koppeln; derzeit kein dauerhaftes Gerätespeichern.
+- Capabilities mit 256 Bit Zufall, rollen- und sitzungsgebunden, nur HMACs in der DB.
+  Keine Secrets in Querystrings, Logs, Local Storage oder Session Storage.
+  QR-Geheimnis im Fragment auf einer werbefreien `/{lang}/pair/`-Seite; vor dem
+  bewussten Senden wird es bereits aus der Adresszeile entfernt. Diese neue Seite
+  übernimmt nicht heimlich ungespeicherte Einstellungen eines anderen Tabs.
+- Nur erlaubte Darstellungsfelder und eigene Hintergrundkennungen; keine beliebigen
+  URLs, HTML, CSS, Alarmdaten oder Koordinaten. Lokale Zeitzone wird konkret aufgelöst.
+  Snapshot AES-256-GCM-verschlüsselt in PostgreSQL, nur jeweils letzter Stand.
+- Persistente Ratenlimits pro IP, getrennt für Erstellen, Einlösen, Lesen und Ändern,
+  zusätzlich Gesamtlimit; Polling mit Backoff. Abgelaufene Daten werden beim
+  Anlegen und jede Minute entfernt. Keine öffentliche Geräteliste.
+- Keine Standortübertragung in dieser Version: Sonnenuhr erhält auf dem TV deshalb
+  keinen echten Schatten. Standortfreigabe am Sender bleibt ausschließlich lokal.
+  TV fragt auch keine eigene Geolocation an. Wecker/Audio werden nicht übernommen.
+- Vollbild und Screen Wake Lock sind Best-Effort; Stickbrowser und Betriebssystem
+  können Schlafmodus oder App-Beendigung erzwingen. Das muss am Zielgerät getestet werden.
+
+Bei Rotation des TV-Schlüssels bestehende TV-Sitzungen bewusst beenden/löschen;
+mit dem alten Schlüssel gespeicherte Snapshots sind danach nicht mehr lesbar.
+
+Regressionen: `npm test`, `npm run test:local`. Vollständiger Browserablauf mit
+echtem Express, isolierter Astro-Instanz und wegwerfbarer PostgreSQL-Datenbank:
+`TV_BROWSER_TESTS=1 npm run test:local` (benötigt installierte Clock-Abhängigkeiten
+und Playwright Chromium). Keine produktiven Zugangsdaten oder Tabellen werden benutzt.

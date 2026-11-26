@@ -1,3 +1,5 @@
+import {createHmac} from 'node:crypto';
+const digestTvSecret=(secret:string)=>createHmac('sha256',secret).update('tv-state-development').digest('hex');
 import type {PoolConfig} from 'pg';
 import {config as dotenv} from 'dotenv';
 import {fileURLToPath} from 'node:url';
@@ -46,7 +48,14 @@ export function loadConfig(env:Env){
  if(rootPassword.length<12||rootPassword.length>128||/replace|changeme/i.test(rootPassword))throw new Error('Set a unique ROOT_PASSWORD (12–128 characters)');
  const rootEmail=env.ROOT_EMAIL?.trim()||'';
  if(rootEmail&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rootEmail))throw new Error('Invalid ROOT_EMAIL');
- return {production,host:env.HOST||(production?'0.0.0.0':'127.0.0.1'),port:number(env.PORT,4340,'PORT',1,65535),baseUrl:base.origin,
+ if(env.TV_ENABLED!==undefined&&!['true','false'].includes(env.TV_ENABLED))throw new Error('Invalid TV_ENABLED');
+ const tvEnabled=env.TV_ENABLED===undefined?!production:env.TV_ENABLED==='true';
+ const tvOrigins=(env.TV_ALLOWED_ORIGINS||(production?'https://clock.jacktools.net':'http://127.0.0.1:4321,http://localhost:4321,http://127.0.0.1:4322,http://localhost:4322')).split(',').map(value=>value.trim());
+ if(tvOrigins.some(value=>{try{const url=new URL(value);return url.origin!==value||!['https:','http:'].includes(url.protocol)||(production&&url.protocol!=='https:');}catch{return true;}}))throw new Error('Invalid TV_ALLOWED_ORIGINS');
+ const tvSecret=env.TV_STATE_SECRET||(production?'':digestTvSecret(secret));
+ if(production&&tvEnabled&&tvSecret===secret)throw new Error('Invalid TV_STATE_SECRET: use a separate key');
+ if(tvEnabled&&(tvSecret.length<32||/replace|example|changeme/i.test(tvSecret)))throw new Error('Set a unique TV_STATE_SECRET (at least 32 characters)');
+ return {tv:{enabled:tvEnabled,origins:tvOrigins,secret:tvSecret},production,host:env.HOST||(production?'0.0.0.0':'127.0.0.1'),port:number(env.PORT,4340,'PORT',1,65535),baseUrl:base.origin,
   origins,secret,rootUsername,rootPassword,rootEmail,db:createDbConfigFromEnv(env),limits:databaseLimits(env),
   trustProxy:number(env.TRUST_PROXY,0,'TRUST_PROXY',0,10),
   sessionIdle:number(env.SESSION_IDLE_SECONDS,3600,'SESSION_IDLE_SECONDS',60,86400),

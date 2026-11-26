@@ -1,6 +1,6 @@
 # Umsetzungsplan für das eigenständige JackTools Backend
 
-Stand: 26. November 2026. Status: Erster Backend- und Company-Adminstand lokal implementiert; TV-Kopplung und Zertifikatsüberwachung noch geplant.
+Stand: 26. November 2026. Status: Erster Backend- und Company-Adminstand lokal implementiert; Browserbasierte TV-Kopplung als erster Stand implementiert; Standortübertragung, dauerhaftes Gerätespeichern und Zertifikatsüberwachung noch geplant.
 
 ## Ziel und Abgrenzung
 
@@ -50,7 +50,7 @@ ist ausschließlich eine Funktionsvorlage. An MessageDrop wird nichts geändert.
 | `backend.jacktools.net/api/v1/` | Versionierte API über HTTPS |
 | Neues `backend/` | Node.js, TypeScript, Express 5, PostgreSQL über `pg` |
 | `company/` unter `/{sprache}/admin/` | Statische Adminoberfläche mit API-Zugriff, keine Secrets im Browser |
-| `clock.jacktools.net/tv` | Vollbildfähige Receiver-Seite im installierten TV-Browser |
+| `clock.jacktools.net/stream` | Vollbildfähige Receiver-Seite im installierten TV-Browser |
 | Uhr auf Handy oder Desktop | Bestehende Einstellungen auswählen und TV koppeln |
 
 Das Backend wird als modularer Monolith aufgebaut: ein kleiner Dienst mit getrennten
@@ -127,9 +127,9 @@ Tool-Kopplungsendpunkte nutzen eigene Capability-Tokens und keine Admin-Cookies.
 
 ### Bedienablauf
 
-1. Am TV einmal `clock.jacktools.net/tv` im installierten Browser öffnen.
+1. Am TV einmal `clock.jacktools.net/stream` im installierten Browser öffnen.
 2. Die Seite zeigt QR-Code und kurzen, zeitlich begrenzten Kopplungscode.
-3. Am Handy oder Desktop in der Uhr „TV verbinden“ öffnen und den Code eingeben.
+3. Am Handy oder Desktop in der Uhr „Uhr streamen“ öffnen und den Code eingeben.
    Alternativ den QR-Code mit dem Handy scannen.
 4. Die aktuelle Darstellung wird zur Vorschau angezeigt. Auch nicht dauerhaft
    gespeicherte Einstellungen müssen bewusst übernommen werden können; ein neuer
@@ -140,7 +140,7 @@ Tool-Kopplungsendpunkte nutzen eigene Capability-Tokens und keine Admin-Cookies.
 7. Bei bestehender Kopplung werden weitere Einstellungsänderungen synchronisiert.
 8. Das Handy kann getrennt oder ausgeschaltet werden. Die TV-Uhr rendert mit der
    eigenen Gerätezeit und der zuletzt empfangenen Konfiguration weiter.
-9. „Verbindung trennen“ und „TV-Anzeige beenden“ sind unterschiedliche Aktionen.
+9. „Verbindung trennen“ und „Stream beenden“ sind unterschiedliche Aktionen.
 
 Die Uhr berechnet die Zeit selbst; Backend und Handy liefern keine laufenden
 Zeitsignale. „Lokale Zeitzone“ wird am Sender in eine konkrete IANA-Zeitzone

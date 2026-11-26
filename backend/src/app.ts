@@ -1,3 +1,4 @@
+import {tvRouter} from './tv.js';
 import express,{type ErrorRequestHandler,type RequestHandler} from 'express';
 import helmet from 'helmet';
 import {randomUUID} from 'node:crypto';
@@ -17,21 +18,23 @@ export async function createApp(config:Config,db:Database){
  app.use((req,res,next)=>{
   res.locals.requestId=randomUUID();res.set('X-Request-ID',res.locals.requestId);
   res.set('Cache-Control','no-store');res.set('X-Robots-Tag','noindex');
+  const allowed=req.path.startsWith('/api/v1/tv/')?config.tv.origins:config.origins;
   const origin=req.get('Origin');
-  if(origin&&!config.origins.includes(origin))throw new ApiError(403,'origin_forbidden');
+  if(origin&&!allowed.includes(origin))throw new ApiError(403,'origin_forbidden');
   if(origin){res.set('Access-Control-Allow-Origin',origin);res.set('Access-Control-Allow-Credentials','true');res.vary('Origin');}
   if(req.method==='OPTIONS'){
    if(!origin)throw new ApiError(403,'origin_forbidden');
    res.set('Access-Control-Allow-Methods','GET,POST,PATCH,PUT,DELETE,OPTIONS');
-   res.set('Access-Control-Allow-Headers','Content-Type,X-CSRF-Token');res.status(204).end();return;
+   res.set('Access-Control-Allow-Headers','Content-Type,X-CSRF-Token,Authorization');res.status(204).end();return;
   }
-  if(!['GET','HEAD'].includes(req.method)&&(!origin||!config.origins.includes(origin)))throw new ApiError(403,'origin_forbidden');
+  if(!['GET','HEAD'].includes(req.method)&&(!origin||!allowed.includes(origin)))throw new ApiError(403,'origin_forbidden');
   next();
  });
  app.use('/api',(req,res,next)=>{
   if(!['GET','HEAD'].includes(req.method)&&!req.is('application/json'))throw new ApiError(415,'json_required');next();
  });
  app.use(express.json({limit:'16kb',strict:true}));
+ app.use('/api/v1/tv',tvRouter(config,db));
  app.get('/health/live',(_req,res)=>res.json({status:'ok'}));
  app.get('/health/ready',async(_req,res)=>{try{await db.query('SELECT 1');}catch(error){if(error instanceof BusyError)throw error;throw new ApiError(503,'database_unavailable');}res.json({status:'ready'});});
  const audit=async(client:PoolClient,actor:string|null,target:string|null,action:string)=>{await client.query('INSERT INTO jt_audit_events(actor_id,target_id,action) VALUES($1,$2,$3)',[actor,target,action]);};

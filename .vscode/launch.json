@@ -16,6 +16,16 @@
       "cwd": "${workspaceFolder}/backend"
     },
     {
+      "name": "Start: Clock (TV-Test, Port 4322)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm exec --yes --package=node@24.17.0 --package=npm@11 -- npm run dev -- --port 4322",
+      "cwd": "${workspaceFolder}/clock",
+      "env": {
+        "PUBLIC_BACKEND_URL": "http://127.0.0.1:4340"
+      }
+    },
+    {
       "name": "Database: JackTools lokal stoppen (Daten bleiben erhalten)",
       "type": "node-terminal",
       "request": "launch",
@@ -403,6 +413,14 @@
       "configurations": [
         "Start: JackTools Backend lokal komplett (DB + Migrationen + Server)",
         "Start: Company (JackTools Admin)"
+      ],
+      "stopAll": true
+    },
+    {
+      "name": "Start: TV-Test (Backend + Clock)",
+      "configurations": [
+        "Start: JackTools Backend lokal komplett (DB + Migrationen + Server)",
+        "Start: Clock (TV-Test, Port 4322)"
       ],
       "stopAll": true
     }

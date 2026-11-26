@@ -12,7 +12,7 @@ export function createSeasonalLocation(root: HTMLElement, changed: () => void) {
  let location:SeasonalLocation|undefined,request=0,pending=false,active=false,wanted=false;
  let permission:PermissionStatus|undefined;
  let watch:number|undefined;
- try{wanted=storageAllowed()&&(localStorage.getItem(key)==='yes'||localStorage.getItem('jacktools.clock.sundial-enabled.v1')==='yes');}catch{}
+ try{wanted=document.getElementById('clock-app')?.dataset.receiver!=='true'&&storageAllowed()&&(localStorage.getItem(key)==='yes'||localStorage.getItem('jacktools.clock.sundial-enabled.v1')==='yes');}catch{}
  function save(){
   try{
    localStorage.removeItem('jacktools.clock.sundial-enabled.v1');
@@ -30,7 +30,7 @@ export function createSeasonalLocation(root: HTMLElement, changed: () => void) {
  }
  function clear(){wanted=false;save();reset();}
  function acquire(){
-  if(!active||pending)return;
+  if(document.getElementById('clock-app')?.dataset.receiver==='true'||!active||pending)return;
   wanted=true;save();reset();toggle.checked=true;
   const token=request;
   pending=true;status.textContent=text.pending;

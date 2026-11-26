@@ -1,0 +1,23 @@
+#clock-tv [hidden]{display:none!important}
+.tv-icon svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+#tv-pair-form{display:grid;gap:16px}#tv-pair-form label{display:grid;gap:8px}#tv-pair-code{width:100%;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--text);font:inherit;font-size:1.4rem;letter-spacing:.15em}
+#tv-status{color:var(--accent);line-height:1.6}#tv-dialog{max-height:calc(100dvh - 32px);overflow:auto}.tv-note{font-size:.8rem!important;color:var(--muted);line-height:1.6}
+.tv-receiver .site-header,.tv-receiver .site-footer,.tv-receiver .intro,.tv-receiver .settings-card,.tv-receiver .guide,.tv-receiver .faq,.tv-receiver .local-note,.tv-receiver .ad-banner{display:none!important}
+.tv-receiver:not(.tv-ready) .workspace{visibility:hidden}
+.tv-panel{position:fixed;z-index:60;inset:24px;margin:auto;width:min(620px,calc(100vw - 48px));height:max-content;max-height:calc(100dvh - 48px);overflow:auto;padding:28px;border:1px solid var(--line);border-radius:24px;background:var(--surface);box-shadow:0 20px 80px #0002;text-align:center}
+.tv-icon{display:inline-grid;place-items:center;background:var(--accent-soft);color:var(--accent);border-radius:15px;padding:14px}.tv-panel h1{font-size:clamp(1.5rem,4vw,2rem)}.tv-panel p{line-height:1.6}.tv-panel canvas{display:block;margin:16px auto;max-width:100%;height:auto}#tv-code{display:block;font-size:clamp(1.8rem,7vw,3rem);letter-spacing:.16em;font-variant-numeric:tabular-nums;color:var(--accent);font-weight:700}.tv-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:12px}
+.tv-controls{position:fixed;right:12px;top:12px;z-index:65;display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:calc(100vw - 24px);font-size:.8rem}.tv-controls button{min-height:44px;background:var(--surface)}.tv-controls span:not(:empty){background:var(--surface);padding:10px;border-radius:10px;max-width:360px}.tv-receiver .site-shell{padding-bottom:0}.tv-receiver .workspace{margin:0 auto}
+/* A compact pairing pad: generous targets for touch and directional remotes. */
+#tv-dialog{max-width:420px}
+#tv-dialog .dialog-inner{padding:26px}
+#tv-dialog h2{margin-top:0;font-size:1.7rem}
+#tv-pair-hint{font-size:.88rem;line-height:1.6}
+#tv-pair-code{text-align:center;font-variant-numeric:tabular-nums;font-size:1.7rem;letter-spacing:.22em;min-height:56px}
+.tv-keypad{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:14px}
+.tv-keypad button{display:grid;place-items:center;min-height:52px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--text);font:inherit;font-size:1.35rem;font-weight:600;cursor:pointer}
+.tv-keypad button:hover{background:var(--accent-soft);border-color:var(--accent)}
+.tv-keypad button:focus-visible,#tv-pair-code:focus-visible,#tv-send:focus-visible{outline:3px solid var(--accent);outline-offset:3px;background:var(--accent-soft)}
+.tv-keypad svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+#tv-send{min-height:48px}#tv-send:disabled{opacity:.5;cursor:not-allowed}
+#tv-dialog #tv-status:empty{display:none}
+#tv-dialog .dialog-actions{margin-top:16px;justify-content:flex-end}

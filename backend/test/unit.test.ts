@@ -59,3 +59,11 @@ test('database diagnostics show only known codes and never raw server details',a
  assert.ok(!databaseErrorHint({code:'28P01',message:'password=secret'})!.includes('password=secret'));
  assert.equal(databaseErrorHint({code:'UNKNOWN',message:'secret connection string'}),undefined);
 });
+
+test('TV is opt-in in production, separate from admin origins and requires an encryption secret',()=>{
+ const production=loadConfig({...env,NODE_ENV:'production'});assert.equal(production.tv.enabled,false);assert.deepEqual(production.tv.origins,['https://clock.jacktools.net']);assert.deepEqual(production.origins,['https://jacktools.net']);
+ assert.throws(()=>loadConfig({...env,NODE_ENV:'production',TV_ENABLED:'true'}),/TV_STATE_SECRET/);
+ assert.throws(()=>loadConfig({...env,TV_ALLOWED_ORIGINS:'*'}),/TV_ALLOWED_ORIGINS/);
+ assert.throws(()=>loadConfig({...env,NODE_ENV:'production',TV_ALLOWED_ORIGINS:'http://clock.jacktools.net'}),/TV_ALLOWED_ORIGINS/);
+ assert.equal(loadConfig({...env,NODE_ENV:'production',TV_ENABLED:'true',TV_STATE_SECRET:'test-tv-state-encryption-secret-long-enough'}).tv.enabled,true);
+});

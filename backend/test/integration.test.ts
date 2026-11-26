@@ -144,3 +144,50 @@ test('database queue is bounded and releases a failed transaction connection',as
   assert.equal((await limited.query('SELECT 1 AS ok')).rows[0].ok,1);
  }finally{await limited.close();}
 });
+
+const tvSnapshot={version:1,language:'de',settings:{view:'orbit',analogReadout:'off',binaryReadout:'off',orbitReadout:'flip',sundialReadout:'flip',analogDesign:'square-roman',background:'mountains',animateBackground:true,hemisphere:'north',transparency:35,date:'long',dateView:'calendarDate',format:'medium',hourCycle:'24',zone:'Europe/Berlin',seconds:true,numbers:true,smooth:true},appearance:{palette:'blue',style:'technical',theme:'dark',fontSize:'1'}};
+test('TV pairing is receiver-approved, scoped, encrypted, revisioned, expiring and independent of admin cookies',async()=>{
+ const tvOrigin='http://127.0.0.1:4322';
+ const tvRequest=(path:string,method='GET',body?:unknown,bearer?:string,from=tvOrigin)=>fetch(base+'/api/v1/tv/'+path,{method,headers:{Origin:from,...(method==='GET'?{}:{'Content-Type':'application/json'}),...(bearer?{Authorization:'Bearer '+bearer}:{})},...(body===undefined?{}:{body:JSON.stringify(body)})});
+ const create=async()=>{const response=await tvRequest('receivers','POST',{});assert.equal(response.status,201);assert.equal(response.headers.get('set-cookie'),null);return response.json() as Promise<{id:string;receiverToken:string;pairToken:string;code:string}>;};
+ const pre=await tvRequest('claim','OPTIONS');assert.equal(pre.status,204);assert.match(pre.headers.get('access-control-allow-headers')!,/Authorization/);
+ assert.equal((await fetch(base+'/api/v1/admin/users',{headers:{Origin:tvOrigin}})).status,403);
+ assert.equal((await tvRequest('receivers','POST',{},undefined,'https://evil.test')).status,403);
+ const receiver=await create();const other=await create();
+ assert.match(receiver.code,/^\d{8}$/);assert.match(receiver.receiverToken,/^[a-f0-9]{64}$/);
+ const claim=await tvRequest('claim','POST',{code:receiver.code,snapshot:tvSnapshot});assert.equal(claim.status,200);const sender=await claim.json() as {id:string;senderToken:string};
+ assert.equal((await tvRequest('claim','POST',{code:receiver.code,snapshot:tvSnapshot})).status,404);
+ assert.equal((await tvRequest('claim','POST',{pairToken:receiver.pairToken,snapshot:tvSnapshot})).status,404);
+ assert.equal((await tvRequest(receiver.id+'/receiver','GET',undefined,sender.senderToken)).status,401);
+ assert.equal((await tvRequest(receiver.id+'/sender','GET',undefined,receiver.receiverToken)).status,401);
+ assert.equal((await tvRequest(other.id+'/receiver','GET',undefined,receiver.receiverToken)).status,401);
+ assert.equal((await tvRequest(receiver.id+'/settings','PUT',{revision:1,snapshot:tvSnapshot},sender.senderToken)).status,409);
+ assert.equal((await tvRequest(receiver.id+'/approve','POST',{},sender.senderToken)).status,401);
+ const pending=await tvRequest(receiver.id+'/receiver','GET',undefined,receiver.receiverToken);assert.equal((await pending.json()).state,'pending');
+ const stored=await db.query('SELECT * FROM jt_tv_sessions WHERE id=$1',[receiver.id]);assert.notEqual(stored.rows[0].receiver_hash,receiver.receiverToken);assert.equal(stored.rows[0].code_hash,null);assert.ok(!stored.rows[0].snapshot.includes('Europe/Berlin'));
+ assert.equal((await tvRequest(receiver.id+'/approve','POST',{},receiver.receiverToken)).status,204);
+ assert.equal((await tvRequest(receiver.id+'/ack','POST',{revision:1},receiver.receiverToken)).status,204);
+ const updated={...tvSnapshot,settings:{...tvSnapshot.settings,view:'binary'}};
+ assert.equal((await tvRequest(receiver.id+'/settings','PUT',{revision:1,snapshot:updated},sender.senderToken)).status,200);
+ assert.equal((await tvRequest(receiver.id+'/settings','PUT',{revision:1,snapshot:tvSnapshot},sender.senderToken)).status,409);
+ const current=await (await tvRequest(receiver.id+'/receiver','GET',undefined,receiver.receiverToken)).json();assert.equal(current.revision,2);assert.equal(current.snapshot.settings.view,'binary');
+ assert.equal((await tvRequest(receiver.id+'/settings','PUT',{revision:2,snapshot:{...tvSnapshot,coordinates:{latitude:52}}},sender.senderToken)).status,400);
+ assert.equal((await tvRequest(receiver.id+'/settings','PUT',{revision:2,snapshot:{...tvSnapshot,settings:{...tvSnapshot.settings,background:'https://evil.test/pixel'}}},sender.senderToken)).status,400);
+ assert.equal((await tvRequest(receiver.id+'/detach','POST',{},sender.senderToken)).status,204);
+ assert.equal((await tvRequest(receiver.id+'/sender','GET',undefined,sender.senderToken)).status,401);
+ assert.equal((await (await tvRequest(receiver.id+'/receiver','GET',undefined,receiver.receiverToken)).json()).state,'detached');
+ assert.equal((await tvRequest(receiver.id+'/stop','POST',{},receiver.receiverToken)).status,204);
+ assert.equal((await tvRequest(receiver.id+'/receiver','GET',undefined,receiver.receiverToken)).status,401);
+ // A cancelled pending controller must never bypass receiver approval.
+ const qr=await tvRequest('claim','POST',{pairToken:other.pairToken,snapshot:tvSnapshot});assert.equal(qr.status,200);const qrSender=await qr.json();
+ await tvRequest(other.id+'/detach','POST',{},qrSender.senderToken);assert.equal((await tvRequest(other.id+'/receiver','GET',undefined,other.receiverToken)).status,401);
+ const expired=await create();await db.query("UPDATE jt_tv_sessions SET pair_expires_at=now()-interval '1 second' WHERE id=$1",[expired.id]);
+ assert.equal((await tvRequest('claim','POST',{code:expired.code,snapshot:tvSnapshot})).status,404);
+ const active=await create();const activeSender=await (await tvRequest('claim','POST',{code:active.code,snapshot:tvSnapshot})).json();await tvRequest(active.id+'/approve','POST',{},active.receiverToken);
+ await db.query("UPDATE jt_tv_sessions SET expires_at=now()-interval '1 second' WHERE id=$1",[active.id]);
+ assert.equal((await tvRequest(active.id+'/sender','GET',undefined,activeSender.senderToken)).status,401);
+});
+
+test('real TV browsers pair, confirm, synchronize and keep ticking without the phone', {skip:process.env.TV_BROWSER_TESTS!=='1',timeout:120000},async()=>{
+ const {tvBrowserTest}=await import('./tv-browser.js');await tvBrowserTest(base,config);
+});
