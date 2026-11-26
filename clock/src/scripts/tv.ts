@@ -87,7 +87,7 @@ export function createClockTv(options:{snapshot:()=>TvSnapshot;apply:(snapshot:T
   });
   const fragment=new URLSearchParams(location.hash.slice(1));const secret=fragment.get('tv');
   if(secret){history.replaceState(null,'',location.pathname+location.search);if(/^[a-f0-9]{64}$/.test(secret)){qrSecret=secret;($('tv-pair-code') as HTMLInputElement).required=false;$('tv-code-entry').hidden=true;keypad.sync();dialog.showModal();}}
-  $('tv-open').addEventListener('click',()=>dialog.showModal());$('tv-close').addEventListener('click',()=>dialog.close());
+  $('tv-open').addEventListener('click',()=>{dialog.showModal();if(!session&&!qrSecret)($('tv-pair-code') as HTMLInputElement).focus();});$('tv-close').addEventListener('click',()=>dialog.close());
   $('tv-pair-form').addEventListener('submit',event=>{
    event.preventDefault();void action($('tv-send') as HTMLButtonElement,async()=>{
     const snapshot=options.snapshot();
