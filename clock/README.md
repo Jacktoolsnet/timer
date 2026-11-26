@@ -77,3 +77,13 @@ Kopplungsdaten bleiben nur im Arbeitsspeicher. Neuladen erfordert erneute Kopplu
 Empfänger widerruft die Verbindung und öffnet die Kopplung neu. Fullscreen und
 Wachhalten sind abhängig vom Stickbrowser und müssen am echten Gerät getestet werden.
 Details, Produktions-ENV und Sicherheit: `../backend/README.md`, Abschnitt TV.
+
+„Stream starten“ sendet die ausgewählten Einstellungen erst nach bewusster
+Bestätigung. „QR-Code scannen“ öffnet optional eine lokale Kameravorschau:
+Kamerafreigabe nur beim Antippen, keine Audioanforderung, kein Bild-Upload und
+keine Aufzeichnung. QR-Erkennung über das lokal gebündelte `jsqr`, ohne externen
+Scandienst. Kamera stoppt bei Erkennung, Schließen, Escape, Seitenwechsel und
+Hintergrundwechsel. Erkannt werden ausschließlich die eigenen Pairing-URLs der
+aktuellen Origin; fremde QR-Links werden nicht geöffnet. Nach dem Scannen ist
+weiterhin „Stream starten“ nötig. HTTPS (oder localhost) und eine Kamera sind
+Voraussetzung; die manuelle Codeeingabe bleibt als Alternative verfügbar.

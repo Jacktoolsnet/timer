@@ -8,8 +8,11 @@ test('stream dialog is compact and its keypad supports remote navigation, editin
  });
  await page.goto('/de/');await page.locator('#tv-open').click();
  await expect(page.locator('#tv-title')).toHaveText('Deine Uhr streamen');
+ await expect(page.locator('#tv-pair-hint .tv-receiver-url')).toHaveText('clock.jacktools.net/stream');
+ await expect(page.locator('#tv-pair-hint .tv-receiver-url')).toHaveAttribute('href','/stream/');
+ await expect(page.locator('#tv-pair-hint .tv-receiver-url')).toHaveAttribute('target','_blank');
  await expect(page.locator('#tv-dialog .dialog-inner>p:not(#tv-status)')).toHaveCount(1);
- const input=page.locator('#tv-pair-code'),send=page.locator('#tv-send');await expect(send).toBeDisabled();
+ const input=page.locator('#tv-pair-code'),send=page.locator('#tv-send');await expect(send).toBeDisabled();await expect(input).toHaveAttribute('placeholder','Kopplungscode');await expect(input).toHaveAccessibleName('Kopplungscode');
  await input.focus();await page.keyboard.press('ArrowDown');await expect(page.locator('[data-key="1"]')).toBeFocused();
  await page.keyboard.press('ArrowRight');await page.keyboard.press('Enter');await expect(input).toHaveValue('2');
  await page.keyboard.press('ArrowDown');await page.keyboard.press('Enter');await expect(input).toHaveValue('25');

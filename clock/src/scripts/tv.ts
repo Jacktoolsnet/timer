@@ -1,3 +1,4 @@
+import {createTvScanner} from './tv-scanner';
 import {createTvKeypad} from './tv-keypad';
 import QRCode from 'qrcode';
 import type {tvText} from '../lib/tv-text';
@@ -11,6 +12,7 @@ export function createClockTv(options:{snapshot:()=>TvSnapshot;apply:(snapshot:T
  const base=root.dataset.api!.replace(/\/$/,'');
  let session:{id:string;token:string}|undefined,revision=0,lastSent='',timer:number|undefined,busy=false,backoff=2000,running=false,qrSecret='';
  let keypad:ReturnType<typeof createTvKeypad>|undefined;
+ let scanner:ReturnType<typeof createTvScanner>|undefined;
  const status=(value:string)=>{ $('tv-status').textContent=value;const live=document.getElementById('tv-live-status');if(live)live.textContent=value;};
  async function api<T=Record<string,never>>(path:string,method='GET',body?:unknown,credential=session?.token):Promise<T>{
   const controller=new AbortController(),abortTimer=window.setTimeout(()=>controller.abort(),10000);
@@ -52,7 +54,7 @@ export function createClockTv(options:{snapshot:()=>TvSnapshot;apply:(snapshot:T
    status(t.offline);backoff=Math.min(backoff*2,30000);schedule(backoff);
   }finally{busy=false;}
  }
- function setSenderConnected(connected:boolean){$('tv-pair-form').hidden=connected;$('tv-detach').hidden=!connected;if(!connected){qrSecret='';const input=$('tv-pair-code') as HTMLInputElement;input.required=true;input.parentElement!.hidden=false;$('tv-code-entry').hidden=false;keypad?.sync();}}
+ function setSenderConnected(connected:boolean){if(connected)scanner?.close();$('tv-pair-form').hidden=connected;$('tv-detach').hidden=!connected;if(!connected){qrSecret='';const input=$('tv-pair-code') as HTMLInputElement;input.required=true;input.parentElement!.hidden=false;$('tv-code-entry').hidden=false;keypad?.sync();}}
  async function action(button:HTMLButtonElement,work:()=>Promise<void>){if(busy)return;busy=true;button.disabled=true;try{await work();}catch(error){if(error instanceof TvError&&error.code==='invalid_pairing'&&!receiver)setSenderConnected(false);status(error instanceof TvError&&error.code==='invalid_pairing'?t.invalid:t.failed);}finally{busy=false;button.disabled=false;keypad?.sync();schedule();}}
  if(receiver){
   async function start(){
@@ -78,6 +80,9 @@ export function createClockTv(options:{snapshot:()=>TvSnapshot;apply:(snapshot:T
  }else{
   const dialog=$('tv-dialog') as HTMLDialogElement;
   keypad=createTvKeypad($('tv-pair-code') as HTMLInputElement,$('tv-keypad'),$('tv-send') as HTMLButtonElement,()=>busy);
+  scanner=createTvScanner(t,secret=>{
+   qrSecret=secret;($('tv-pair-code') as HTMLInputElement).required=false;$('tv-code-entry').hidden=true;keypad!.sync();status(t.scanReady);$('tv-send').focus();
+  });
   const fragment=new URLSearchParams(location.hash.slice(1));const secret=fragment.get('tv');
   if(secret){history.replaceState(null,'',location.pathname+location.search);if(/^[a-f0-9]{64}$/.test(secret)){qrSecret=secret;($('tv-pair-code') as HTMLInputElement).required=false;$('tv-code-entry').hidden=true;keypad.sync();dialog.showModal();}}
   $('tv-open').addEventListener('click',()=>dialog.showModal());$('tv-close').addEventListener('click',()=>dialog.close());
