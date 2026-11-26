@@ -2,19 +2,19 @@
 .jt-admin [hidden] { display:none!important; }
 .admin-heading h1 { margin:12px 0; font-size:clamp(2rem,5vw,3.4rem); }
 .admin-heading>p:not(.eyebrow),.admin-card>p,.admin-hint { color:var(--muted); line-height:1.6; }
-#admin-status { padding:12px 0; min-height:48px; overflow-wrap:anywhere; }
-#admin-status[data-error=true],#admin-reset-error { color:var(--accent); }
 .admin-card { padding:26px; margin:0 0 24px; border:1px solid var(--line); border-radius:20px; background:var(--surface); min-width:0; }
 .admin-page .site-shell { min-height:100svh; display:flex; flex-direction:column; }
 .admin-page #main { display:flex; flex:1; align-items:center; min-width:0; }
 .jt-admin { width:100%; }
 .jt-admin[data-state=signed-out] { display:flex; flex-direction:column; align-items:center; margin:0 auto; padding:32px 0; }
-.admin-login { width:100%; max-width:420px; }
+.admin-login { width:100%; max-width:740px; display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.15fr); align-items:center; gap:32px; }
+.admin-login-art { min-width:0; }
+.admin-login-art svg { display:block; width:100%; height:auto; }
 .jt-admin[data-state=signed-out] .admin-login { margin:0; }
-.admin-login h1 { margin:0 0 24px; font-size:1.6rem; letter-spacing:-.02em; }
-.jt-admin[data-state=signed-out] #admin-status { order:1; width:100%; max-width:420px; margin:12px 0 0; }
-#admin-status:empty { min-height:0; padding:0; margin:0; }
-.jt-admin[data-state=signed-out] #admin-status:empty { margin:0; }
+@media(max-width:580px) {
+ .admin-login { max-width:420px; grid-template-columns:minmax(0,1fr); gap:12px; }
+ .admin-login-art { width:140px; justify-self:center; }
+}
 .admin-card h2 { margin:0 0 18px; font-size:1.35rem; }
 .jt-admin form { display:grid; gap:18px; min-width:0; }
 .jt-admin label { display:grid; gap:8px; font-size:.9rem; min-width:0; }
@@ -37,3 +37,30 @@
 #admin-reset-dialog { max-width:min(560px,calc(100vw - 32px)); max-height:calc(100dvh - 32px); overflow:auto; }
 #admin-reset-dialog .dialog-actions { flex-wrap:wrap; }
 @media(max-width:680px){ .admin-grid,.admin-create-grid { grid-template-columns:minmax(0,1fr); }.admin-card { padding:20px; }.admin-user { align-items:flex-start; flex-direction:column; }.admin-user-actions { justify-content:flex-start; }.jt-admin { margin-top:24px; } }
+
+/* Outside normal flow: toasts never move the centered login or dashboard. */
+.admin-toast {
+ --toast-tone:var(--accent);
+ position:fixed; right:max(20px,env(safe-area-inset-right)); bottom:max(20px,env(safe-area-inset-bottom));
+ z-index:10000; display:flex; gap:12px; align-items:center; width:min(360px,calc(100vw - 40px));
+ padding:16px 18px; overflow:hidden; border:1px solid color-mix(in srgb,var(--toast-tone) 28%,var(--line)); border-radius:18px;
+ color:var(--text); background:color-mix(in srgb,var(--surface) 94%,var(--toast-tone)); box-shadow:0 16px 48px #0002,0 2px 8px #0001;
+ animation:admin-toast-in .2s ease-out;
+}
+.admin-toast[hidden] { display:none!important; }
+.admin-toast[data-kind=error] { --toast-tone:light-dark(#b23c3c,#ff9797); }
+.admin-toast-symbol { display:grid; place-items:center; flex-shrink:0; padding:10px; color:var(--toast-tone); border-radius:13px; background:color-mix(in srgb,var(--toast-tone) 12%,var(--surface)); }
+.admin-toast svg { width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.admin-toast .admin-toast-error { display:none; }
+.admin-toast[data-kind=error] .admin-toast-error { display:block; }
+.admin-toast[data-kind=error] .admin-toast-check { display:none; }
+.admin-toast #admin-status { flex:1; min-width:0; margin:2px 0; padding:0; font-size:.94rem; font-weight:600; line-height:1.5; overflow-wrap:anywhere; }
+#admin-toast-close { display:grid; place-items:center; flex-shrink:0; width:44px; height:44px; margin:-10px -10px -10px 0; border:0; border-radius:9px; background:transparent; color:var(--muted); cursor:pointer; }
+#admin-toast-close:hover { background:var(--accent-soft); color:var(--text); }
+@keyframes admin-toast-in { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+@media(prefers-reduced-motion:reduce) { .admin-toast { animation:none; } }
+
+.admin-toast::after { content:""; position:absolute; left:0; right:0; bottom:0; height:3px; background:var(--toast-tone); opacity:.65; transform-origin:left; animation:admin-toast-countdown 3s linear forwards; }
+.admin-toast:hover::after,.admin-toast:focus-within::after { animation:none; transform:scaleX(1); }
+@keyframes admin-toast-countdown { to { transform:scaleX(0); } }
+@media(prefers-reduced-motion:reduce) { .admin-toast::after { animation:none; } }

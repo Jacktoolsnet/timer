@@ -36,7 +36,12 @@ for(const lang of ['de','en','es','fr'])test(`admin page is integrated, translat
  await expect(page.locator('.admin-heading')).toBeHidden();
  await expect(page.locator('#admin-login-panel>p')).toHaveCount(0);
  await expect(page.locator('#admin-status')).toBeEmpty();
- await expect(page.locator('h1:visible')).toHaveCount(1);
+ await expect(page.locator('#admin-login-title')).toHaveClass('sr-only');
+ await expect(page.locator('.admin-login-art svg')).toBeVisible();
+ const art=await page.locator('.admin-login-art').boundingBox();const form=await page.locator('#admin-login-form').boundingBox();
+ expect(art).not.toBeNull();expect(form).not.toBeNull();
+ if(page.viewportSize()!.width>580)expect(art!.x+art!.width).toBeLessThan(form!.x);
+ else expect(art!.y+art!.height).toBeLessThan(form!.y);
  await expect.poll(async()=>{
   const card=await page.locator('#admin-login-panel').boundingBox();const main=await page.locator('#main').boundingBox();
   if(!card||!main)return Infinity;
@@ -66,6 +71,44 @@ test('ordinary admins cannot see account management and must change temporary pa
  await page.locator('#admin-password-form [name=currentPassword]').fill('test-password-123!');await page.locator('#admin-password-form [name=newPassword]').fill('new-password-123!');await page.locator('#admin-password-form button').click();await expect(page.locator('#admin-login-panel')).toBeVisible();await expect(page.locator('#admin-status')).toContainText('Please sign in again');
 });
 test('wrong password and backend outage show readable errors',async({page})=>{
- await mockBackend(page);await page.goto('/en/admin/');await page.locator('#admin-login-form [name=username]').fill('root');await page.locator('#admin-login-form [name=password]').fill('wrong');await page.locator('#admin-login-form button').click();await expect(page.locator('#admin-status')).toContainText('incorrect');
+ await mockBackend(page);await page.goto('/en/admin/');await page.locator('#admin-login-form [name=username]').fill('root');await page.locator('#admin-login-form [name=password]').fill('wrong');await page.locator('#admin-login-form button').click();await expect(page.locator('#admin-status')).toHaveText('Access denied');
  await page.unroute('**/api/v1/**');await page.route('**/api/v1/**',route=>route.abort());await page.reload();await expect(page.locator('#admin-status')).toContainText('Backend unavailable');await expect(page.locator('#admin-login-form button')).toBeEnabled();
+});
+
+test('login errors appear in a dismissible toast without moving the form',async({page})=>{
+ await mockBackend(page);await page.goto('/en/admin/');
+ await expect(page.locator('#admin-toast')).toBeHidden();const before=await page.locator('#admin-login-panel').boundingBox();
+ await page.locator('#admin-login-form [name=username]').fill('root');await page.locator('#admin-login-form [name=password]').fill('wrong');await page.locator('#admin-login-form button').click();
+ await expect(page.locator('#admin-toast')).toBeVisible();await expect(page.locator('#admin-toast')).toHaveAttribute('role','alert');await expect(page.locator('#admin-status')).toHaveText('Access denied');
+ const after=await page.locator('#admin-login-panel').boundingBox();expect(Math.abs(after!.y-before!.y)).toBeLessThan(2);
+ await page.locator('#admin-toast-close').click();await expect(page.locator('#admin-toast')).toBeHidden();await expect(page.locator('#admin-login-form [name=username]')).toBeFocused();
+});
+test('a cookie rejected after successful login is not reported as session expiration',async({page})=>{
+ await mockBackend(page);await page.goto('/en/admin/');await expect(page.locator('#jt-admin')).not.toHaveAttribute('aria-busy','true');
+ await page.route('**/api/v1/auth/me',route=>route.fulfill({status:401,contentType:'application/json',body:JSON.stringify({error:'unauthenticated'})}));
+ await page.locator('#admin-login-form [name=username]').fill('root');await page.locator('#admin-login-form [name=password]').fill('test-password-123!');await page.locator('#admin-login-form button').click();
+ await expect(page.locator('#admin-toast')).toBeVisible();await expect(page.locator('#admin-status')).toContainText('could not be established');await expect(page.locator('#admin-status')).not.toContainText('expired');await expect(page.locator('#admin-workspace')).toBeHidden();
+});
+test('a previously active session that expires does receive an expiration toast',async({page})=>{
+ await mockBackend(page);await page.goto('/en/admin/');await signIn(page);
+ await page.route('**/api/v1/auth/profile',route=>route.fulfill({status:401,contentType:'application/json',body:JSON.stringify({error:'unauthenticated'})}));
+ await page.locator('#admin-profile-form button').click();await expect(page.locator('#admin-login-panel')).toBeVisible();await expect(page.locator('#admin-status')).toContainText('Session expired');await expect(page.locator('#admin-toast')).toHaveAttribute('role','alert');
+});
+test('toast errors remain visible above the password reset dialog',async({page})=>{
+ await mockBackend(page);await page.goto('/en/admin/');await signIn(page);
+ await page.locator('#admin-create-form [name=username]').fill('alice');await page.locator('#admin-create-form [name=password]').fill('temporary-password!');await page.locator('#admin-create-form button').click();
+ await page.locator('.admin-user').filter({hasText:'alice'}).getByRole('button',{name:'Reset password',exact:true}).click();
+ await page.route('**/api/v1/admin/users/*/password',route=>route.fulfill({status:400,contentType:'application/json',body:JSON.stringify({error:'invalid_input'})}));
+ await page.locator('#admin-reset-form [name=password]').fill('temporary-reset-password!');await page.locator('#admin-reset-form button[type=submit]').click();
+ await expect(page.locator('#admin-reset-dialog #admin-toast')).toBeVisible();await expect(page.locator('#admin-status')).toContainText('check');
+ await page.locator('#admin-toast-close').click();await expect(page.locator('#admin-reset-form [name=password]')).toBeFocused();
+ await page.locator('#admin-reset-cancel').click();await expect(page.locator('#admin-toast')).toBeHidden();
+});
+
+test('access denied toast dismisses automatically after three seconds',async({page})=>{
+ await mockBackend(page);await page.goto('/de/admin/');
+ await page.locator('#admin-login-form [name=username]').fill('root');await page.locator('#admin-login-form [name=password]').fill('wrong');await page.locator('#admin-login-form button').click();
+ await expect(page.locator('#admin-status')).toHaveText('Zugriff verweigert');
+ await expect(page.locator('#admin-toast')).toBeVisible();
+ await expect(page.locator('#admin-toast')).toBeHidden({timeout:4500});
 });

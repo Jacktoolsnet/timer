@@ -1,3 +1,4 @@
+import {createAdminToast} from './admin-toast';
 import type {adminText} from '../lib/admin-text';
 type User={id:string;username:string;displayName:string;email:string;role:'root'|'admin';active:boolean;mustChangePassword:boolean};
 const root=document.getElementById('jt-admin')!;
@@ -8,13 +9,21 @@ const field=(id:string,name:string)=>form(id).elements.namedItem(name) as HTMLIn
 const base=root.dataset.api!.replace(/\/$/,'');
 let csrf='',user:User|null=null,busy=false,resetId='';
 const dialog=$('admin-reset-dialog') as HTMLDialogElement;
+const toast=createAdminToast($('admin-toast'),$('admin-status'),$('admin-toast-close') as HTMLButtonElement);
 class RequestError extends Error{constructor(public code:string){super(code);}}
-function message(error:unknown){return error instanceof RequestError?t.errors[error.code as keyof typeof t.errors]||t.errors.internal_error:t.unavailable;}
-function status(text:string,error=false){$('admin-status').textContent=text;$('admin-status').dataset.error=String(error);}
+function message(error:unknown){return error instanceof RequestError?(error.code==='backend_unavailable'?t.unavailable:t.errors[error.code as keyof typeof t.errors]||t.errors.internal_error):t.unavailable;}
+function status(text:string,error=false){toast.show(text,error);}
 function signedOut(){root.dataset.state='signed-out';csrf='';user=null;$('admin-login-panel').hidden=false;$('admin-workspace').hidden=true;$('admin-users').replaceChildren();dialog.close();root.querySelectorAll<HTMLInputElement>('input[type=password]').forEach(input=>input.value='');}
-async function api<T=Record<string,never>>(path:string,method='GET',body?:unknown):Promise<T>{
+async function api<T=Record<string,never>>(path:string,method='GET',body?:unknown,establishingSession=false):Promise<T>{
  const response=await fetch(base+'/api/v1/'+path,{method,credentials:'include',cache:'no-store',signal:AbortSignal.timeout(15000),headers:{...(method==='GET'?{}:{'Content-Type':'application/json','X-CSRF-Token':csrf})},...(body===undefined?{}:{body:JSON.stringify(body)})});
- if(!response.ok){const value=await response.json().catch(()=>({error:'internal_error'}));if(value.error==='unauthenticated')signedOut();throw new RequestError(value.error||'internal_error');}
+ if(!response.ok){
+  const value=await response.json().catch(()=>({error:response.status>=500?'backend_unavailable':'internal_error'}));
+  let code=value.error||'internal_error';
+  if(code==='unauthenticated'){
+   code=establishingSession?'session_not_established':user?'unauthenticated':'sign_in_required';signedOut();
+  }
+  throw new RequestError(code);
+ }
  return response.status===204?undefined as T:await response.json() as T;
 }
 function showUser(next:User){
@@ -41,7 +50,7 @@ async function users(){
     if(account.active&&!confirm(t.confirmDisable))return;
     await api('admin/users/'+account.id,'PATCH',{active:!account.active});await users();status(t.saved);
    })),button(t.reset,()=>{
-    resetId=account.id;form('admin-reset-form').reset();$('admin-reset-error').textContent='';$('admin-reset-username').textContent=account.username;dialog.showModal();
+    resetId=account.id;toast.hide();form('admin-reset-form').reset();$('admin-reset-username').textContent=account.username;dialog.showModal();
    }));row.append(actions);
   }
   list.append(row);
@@ -49,13 +58,16 @@ async function users(){
 }
 async function perform(work:()=>Promise<void>){
  if(busy)return;busy=true;root.setAttribute('aria-busy','true');
- root.querySelectorAll<HTMLButtonElement>('button').forEach(b=>b.disabled=true);
- try{await work();}catch(error){const text=message(error);if(dialog.open)$('admin-reset-error').textContent=text;else status(text,true);}
+ root.querySelectorAll<HTMLButtonElement>('button').forEach(b=>{if(b.id!=='admin-toast-close')b.disabled=true;});
+ try{await work();}catch(error){status(message(error),true);}
  finally{busy=false;root.removeAttribute('aria-busy');root.querySelectorAll<HTMLButtonElement>('button').forEach(b=>b.disabled=false);}
 }
 form('admin-login-form').addEventListener('submit',event=>{event.preventDefault();void perform(async()=>{
  const value=await api<{user:User;csrfToken:string}>('auth/login','POST',{username:field('admin-login-form','username').value,password:field('admin-login-form','password').value});
- field('admin-login-form','password').value='';csrf=value.csrfToken;showUser(value.user);status(value.user.mustChangePassword?t.required:'');await users();
+ field('admin-login-form','password').value='';csrf=value.csrfToken;
+ // A successful password check is not enough: verify that the browser retained its cookie.
+ const verified=await api<{user:User;csrfToken:string}>('auth/me','GET',undefined,true);
+ csrf=verified.csrfToken;showUser(verified.user);await users();status(verified.user.mustChangePassword?t.required:t.signedIn);
 });});
 $('admin-logout').addEventListener('click',()=>void perform(async()=>{await api('auth/logout','POST',{});signedOut();status(t.signedOut);}));
 form('admin-profile-form').addEventListener('submit',event=>{event.preventDefault();void perform(async()=>{
@@ -74,5 +86,5 @@ $('admin-reset-cancel').addEventListener('click',()=>dialog.close());
 dialog.addEventListener('close',()=>form('admin-reset-form').reset());
 void perform(async()=>{
  try{const value=await api<{user:User;csrfToken:string}>('auth/me');csrf=value.csrfToken;showUser(value.user);status('');await users();}
- catch(error){if(error instanceof RequestError&&error.code==='unauthenticated'){signedOut();status('');}else throw error;}
+ catch(error){if(error instanceof RequestError&&error.code==='sign_in_required'){signedOut();status('');}else throw error;}
 });

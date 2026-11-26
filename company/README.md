@@ -389,7 +389,10 @@ Die bestehende Company-Seite enthält jetzt `/de/admin/` sowie die drei anderen
 Sprachvarianten und `/admin/`. API, Root-Zugang und PostgreSQL laufen ausschließlich
 im eigenständigen Projekt `../backend/`. Die Company-Seite bleibt statisch.
 
-Lokale API-Adresse: `PUBLIC_BACKEND_URL=http://127.0.0.1:4340` (öffentlicher Wert).
+Lokales Proxy-Ziel: `PUBLIC_BACKEND_URL=http://127.0.0.1:4340` (öffentlicher Wert).
+Im Entwicklungsmodus laufen Browseranfragen relativ über `/api/v1`; deshalb bleiben
+Sitzungscookies sowohl bei `localhost` als auch `127.0.0.1` erhalten. Origin- und
+CSRF-Prüfungen bleiben aktiv.
 Produktionsstandard: `https://backend.jacktools.net`. Keine Root- oder DB-Geheimnisse
 im Frontend. Start, ENV-Namen, VS-Code-Einträge und Sicherheitsgrenzen stehen in
 [`../backend/README.md`](../backend/README.md).

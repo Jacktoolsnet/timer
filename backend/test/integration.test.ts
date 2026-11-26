@@ -75,9 +75,32 @@ test('CORS preflight, payload validation and production session flags',async()=>
  const root=await login();assert.equal((await request('admin/users/invalid','PATCH',{active:false},root)).status,400);
  assert.equal((await request('auth/logout','POST',{},root,{Origin:''})).status,403);
  const response=await fetch(base+'/api/v1/auth/login',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:'invalid json'});assert.equal(response.status,400);
- const production=await createApp({...config,production:true},db);const secured=production.listen(0,'127.0.0.1');await new Promise<void>(r=>secured.once('listening',r));
- try{const address=secured.address() as {port:number};const result=await fetch(`http://127.0.0.1:${address.port}/api/v1/auth/login`,{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:JSON.stringify({username:'root',password:config.rootPassword})});
-  const cookie=result.headers.get('set-cookie')!;assert.match(cookie,/__Host-jt_admin=/);assert.match(cookie,/HttpOnly/);assert.match(cookie,/Secure/);assert.match(cookie,/SameSite=Lax/);assert.doesNotMatch(cookie,/Domain=/);
+ // Exercise the real production configuration and exact Company origin. HTTP is
+ // only the private test transport; the deployment terminates TLS at its proxy.
+ const productionConfig=loadConfig({NODE_ENV:'production',ADMIN_DATABASE_URL:url,
+  ROOT_USERNAME:config.rootUsername,ROOT_PASSWORD:config.rootPassword,SESSION_SECRET:config.secret,LOGIN_LIMIT:'100'});
+ const productionOrigin='https://jacktools.net';
+ assert.equal(productionConfig.baseUrl,'https://backend.jacktools.net');
+ const production=await createApp(productionConfig,db);const secured=production.listen(0,'127.0.0.1');await new Promise<void>(r=>secured.once('listening',r));
+ try{
+  const address=secured.address() as {port:number};const endpoint=`http://127.0.0.1:${address.port}/api/v1/`;
+  const headers={Origin:productionOrigin,'Content-Type':'application/json'};
+  const preflight=await fetch(endpoint+'auth/login',{method:'OPTIONS',headers:{Origin:productionOrigin,'Access-Control-Request-Method':'POST','Access-Control-Request-Headers':'content-type,x-csrf-token'}});
+  assert.equal(preflight.status,204);assert.equal(preflight.headers.get('access-control-allow-origin'),productionOrigin);
+  assert.equal(preflight.headers.get('access-control-allow-credentials'),'true');
+  const result=await fetch(endpoint+'auth/login',{method:'POST',headers,body:JSON.stringify({username:'root',password:config.rootPassword})});
+  assert.equal(result.status,200);assert.equal(result.headers.get('access-control-allow-origin'),productionOrigin);
+  const cookie=result.headers.get('set-cookie')!;assert.match(cookie,/__Host-jt_admin=/);assert.match(cookie,/HttpOnly/);assert.match(cookie,/Secure/);assert.match(cookie,/SameSite=Lax/);assert.match(cookie,/Path=\//);assert.doesNotMatch(cookie,/Domain=/);
+  const identity=await result.json() as Identity;
+  const sessionHeaders={...headers,Cookie:cookie.split(';')[0]};
+  assert.equal((await fetch(endpoint+'auth/me',{headers:sessionHeaders})).status,200);
+  for(const deniedOrigin of ['http://localhost:4321','https://clock.jacktools.net','https://jacktools.net.evil.test']){
+   const denied=await fetch(endpoint+'auth/me',{headers:{...sessionHeaders,Origin:deniedOrigin}});
+   assert.equal(denied.status,403);assert.equal(denied.headers.get('access-control-allow-origin'),null);
+  }
+  assert.equal((await fetch(endpoint+'auth/logout',{method:'POST',headers:sessionHeaders,body:'{}'})).status,403);
+  assert.equal((await fetch(endpoint+'auth/logout',{method:'POST',headers:{...sessionHeaders,'X-CSRF-Token':identity.csrfToken},body:'{}'})).status,204);
+  assert.equal((await fetch(endpoint+'auth/me',{headers:sessionHeaders})).status,401);
  }finally{await new Promise<void>(r=>secured.close(()=>r()));}
 });
 test('rate limit shared in PostgreSQL and returns retry guidance',async()=>{

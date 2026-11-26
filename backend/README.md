@@ -141,17 +141,22 @@ Die Oberfläche ist Teil der bestehenden statischen Company-Seite:
 - Root kann durch die Benutzerverwaltung weder gesperrt noch herabgestuft werden.
 - Seiten sind `noindex` und stehen nicht in der Sitemap. Das Backend erzwingt die Rechte.
 
-Lokal Company auf `http://127.0.0.1:4321` öffnen, Backend auf
-`http://127.0.0.1:4340`. Nicht wahllos `localhost` und `127.0.0.1` mischen: Für Cookies
-müssen beide Frontend-/Backendadressen derselben Site angehören.
+Lokal die Company auf `http://localhost:4321` oder `http://127.0.0.1:4321` öffnen,
+Backend auf `http://127.0.0.1:4340`. Im Entwicklungsmodus verwendet der Browser
+relative `/api/v1`-Adressen. Der Astro-Entwicklungsserver leitet sie an das Backend
+weiter. So gehören die HttpOnly-Sitzungscookies stets zur aufgerufenen Company-Adresse,
+auch wenn die Company über `localhost` und die API intern über `127.0.0.1` läuft.
+Origin- und CSRF-Prüfungen bleiben aktiv. Nach Änderungen an `astro.config.mjs`
+den Company-Entwicklungsserver bei Bedarf neu starten.
 
 ```bash
 cd company
 PUBLIC_BACKEND_URL=http://127.0.0.1:4340 npm run dev -- --port 4321
 ```
 
-`PUBLIC_BACKEND_URL` ist die **einzige öffentliche Backendkonfiguration** der
-Company-Seite und wird beim Build eingebaut. Standard im Produktionsbuild:
+`PUBLIC_BACKEND_URL` legt lokal das Ziel des Entwicklungs-Proxys fest; die API-Adresse
+wird im Entwicklungsbrowser nicht direkt aufgerufen. Im Produktionsbuild wird der
+Wert als öffentliche API-Adresse eingebaut, ohne Entwicklungsproxy. Standard:
 `https://backend.jacktools.net`. `ROOT_*`, DB-Daten und `SESSION_SECRET` niemals als
 `PUBLIC_*` setzen oder in Company-Dateien hinterlegen.
 
@@ -194,7 +199,9 @@ bestehenden Datenbanken angesprochen. Voraussetzung: `initdb`, `pg_ctl` und `cre
 Alternativ `TEST_DATABASE_URL` auf eine **leere, eigene `_test`-Datenbank** setzen und
 `npm run test:integration` ausführen. Dieser Test verweigert bestehende JackTools-Tabellen;
 angelegte Testtabellen werden nicht automatisch gelöscht.
-Company-Browsertests: `cd company && npx playwright test tests/admin.spec.ts`.
+Company-Browsertests: `cd company && npx playwright test tests/admin.spec.ts tests/admin-proxy.spec.ts`.
+Der Proxytest prüft echte Browsercookies und Neuladen für `localhost` und `127.0.0.1`
+mit einem isolierten Test-HTTP-Backend, ohne Betreiberzugangsdaten.
 
 ## API und Sicherheit
 
@@ -236,6 +243,38 @@ Company-Browsertests: `cd company && npx playwright test tests/admin.spec.ts`.
    auf den echten HTTPS-Domains prüfen. Browser sieht keine Datenbank-Zugangsdaten.
 7. Datenbankbackup und Restore testen; Sessionsecretrotation macht Sessions ungültig.
    API und Migrationen gemeinsam versionieren, kein automatisches Zurückrollen von Datenverlust.
+
+### Konkrete Domainkonfiguration
+
+Produktionswerte (zusätzlich zu den eigenen DB-, Root- und Sessionsecret-Werten):
+
+```dotenv
+NODE_ENV=production
+PUBLIC_BASE_URL=https://backend.jacktools.net
+ADMIN_ALLOWED_ORIGINS=https://jacktools.net
+# Nur bei genau einem vorgeschalteten, vertrauenswürdigen Reverse-Proxy:
+# TRUST_PROXY=1
+```
+
+Company beim **Build** mit `PUBLIC_BACKEND_URL=https://backend.jacktools.net`
+konfigurieren (entspricht dem Produktionsstandard). Keine lokalen ENV-Dateien
+mit API-Overrides auf den Produktionsbuild übertragen. Der lokale Vite-Proxy
+ist keine Voraussetzung für das statische Produktionsdeployment.
+
+Beide Domains müssen über HTTPS erreichbar sein. Sie sind unterschiedliche
+Origins, aber dieselbe Site: `SameSite=Lax` bleibt deshalb verwendbar;
+`SameSite=None` oder ein domainweit geteiltes Cookie sind nicht nötig.
+Der `__Host-`-Cookie bleibt ausschließlich an `backend.jacktools.net` gebunden.
+Die Company sendet Requests mit `credentials: include`; das Backend erlaubt
+nur die exakte Company-Origin und prüft bei authentifizierten Änderungen zusätzlich
+CSRF-Tokens. Andere Tool-Subdomains erhalten keine pauschale Freigabe.
+
+Nach Deployment im Browser prüfen: Anmeldung, Neuladen mit bestehender Sitzung,
+Logout und anschließend verweigerter Zugriff. Cookie muss `Secure`, `HttpOnly`,
+`SameSite=Lax`, `Path=/` und **kein** `Domain`-Attribut haben. Reverse-Proxy darf
+`Origin`, `Set-Cookie` und CORS-Header nicht entfernen und API-Antworten nicht cachen.
+Die lokalen Integrationstests prüfen Produktionskonfiguration, Origin-Abweisung,
+Cookieattribute und CSRF, ersetzen aber keinen Browser-Smoke-Test über echtes HTTPS.
 
 Dies ist ein erster Verwaltungsstand, keine abgeschlossene Betriebshärtung. Vor
 öffentlicher Nutzung Datenschutz-/Cookieinformationen, Mail-/Recovery-Prozess und
